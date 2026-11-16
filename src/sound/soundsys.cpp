@@ -32,8 +32,8 @@ struct sSndBsVt7 {
 
 extern char D_00483A48[];
 extern char cBankMonitor_vtbl[];
-extern const char D_004A3668[];
-extern const char D_004A3670[];
+extern const char str_mBank[];
+extern const char str_mPath[];
 extern const sSndBsVt4 D_00483A60_bs __asm__("D_00483A60");
 extern const sSndBsVt7 D_00483A80_bs __asm__("D_00483A80");
 
@@ -78,8 +78,8 @@ extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int 
     }
     self->mVtbl = (void**)D_00483A48;
     gBankSys = (cBankSys*)((int)self);
-    self->mBank = (int*)(new (D_004A3668, 0, 0) char[0x10]);
-    self->mPatch = (int*)(new (D_004A3670, 0, 0) char[0x10]);
+    self->mBank = (int*)(new (str_mBank, 0, 0) char[0x10]);
+    self->mPatch = (int*)(new (str_mPath, 0, 0) char[0x10]);
     return ((char*)self);
 }
 #endif
@@ -7909,11 +7909,11 @@ extern "C" void func_002B0DA0(void* self);
 extern "C" void func_002B0E60(void* self, int a, int b, char* name, int c, int d, int e);
 extern "C" void func_003DED50(const char* name, int a, int b, void** h);
 extern "C" void func_003DEDC0(void* h, int a);
-extern char D_00482DF8[];
-extern char D_00482E10[];
-extern char D_00482E28[];
-extern char D_00482E40[];
-extern char D_004A3568[];
+extern char str_data_audio_french_big[];
+extern char str_data_audio_german_big[];
+extern char str_data_audio_spanish_big[];
+extern char str_data_audio_english_big[];
+extern char str_CHAR[];
 
 static inline void sndStreamLoad(const char* name, void** h)
 {
@@ -7936,18 +7936,18 @@ extern "C" void func_0029ED90(char* self, int restart)
         func_003DEDC0(*h, 100);
     }
     if (mode == 2) {
-        sndStreamLoad(D_00482DF8, h);
+        sndStreamLoad(str_data_audio_french_big, h);
     } else if (mode == 4) {
-        sndStreamLoad(D_00482E10, h);
+        sndStreamLoad(str_data_audio_german_big, h);
     } else if (mode == 8) {
-        sndStreamLoad(D_00482E28, h);
+        sndStreamLoad(str_data_audio_spanish_big, h);
     } else {
-        sndStreamLoad(D_00482E40, h);
+        sndStreamLoad(str_data_audio_english_big, h);
     }
     *(int*)(self + 0x572C) = mode;
     if (restart) {
         SPCH_Init(self + 0x5560);
-        func_002B0E60(self + 0x5560, 0, 0, D_004A3568, (int)func_00287968(self, 4, 0), 1, -1);
+        func_002B0E60(self + 0x5560, 0, 0, str_CHAR, (int)func_00287968(self, 4, 0), 1, -1);
     }
 }
 #endif
@@ -8168,39 +8168,39 @@ INCLUDE_ASM("sound/soundsys", func_0029F3F8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_0028BC58(void* bank, int slot, char* name, int a3);
-extern char D_004A36E0[];
-extern char D_00482E88[];
-extern char D_00482E98[];
-extern char D_00482EA8[];
-extern char D_00482EB8[];
-extern char D_00482EC8[];
-extern char D_00482ED8[];
-extern char D_00482EE8[];
-extern char D_00482EF8[];
-extern char D_00482F08[];
-extern char D_00482F18[];
-extern char D_00482F28[];
-extern char D_00482F38[];
-extern char D_00482F48[];
+extern char str_pct_spct_s_c[];
+extern char str_data_audio[];
+extern char str_GRNT_eli_bnk[];
+extern char str_GRNT_mac_bnk[];
+extern char str_GRNT_mob_bnk[];
+extern char str_GRNT_psy_bnk[];
+extern char str_GRNT_kao_bnk[];
+extern char str_GRNT_zoe_bnk[];
+extern char str_GRNT_vig_bnk[];
+extern char str_GRNT_nat_bnk[];
+extern char str_GRNT_grf_bnk[];
+extern char str_GRNT_ari_bnk[];
+extern char str_GRNT_none_bnk[];
+extern char str_GRNT_AI_bnk[];
 
 extern "C" void func_0029F3F8(cSSXAudio* self)
 {
     char buf[64];
     switch (func_0029F378(((char*)self), *(void**)((char*)func_0028B1D8() + 0x28))) {
-    case 6: sprintf(buf, D_004A36E0, D_00482E88, D_00482E98); break;
-    case 3: sprintf(buf, D_004A36E0, D_00482E88, D_00482EA8); break;
-    case 0: sprintf(buf, D_004A36E0, D_00482E88, D_00482EB8); break;
-    case 8: sprintf(buf, D_004A36E0, D_00482E88, D_00482EC8); break;
-    case 1: sprintf(buf, D_004A36E0, D_00482E88, D_00482ED8); break;
-    case 4: sprintf(buf, D_004A36E0, D_00482E88, D_00482EE8); break;
-    case 9: sprintf(buf, D_004A36E0, D_00482E88, D_00482EF8); break;
-    case 7: sprintf(buf, D_004A36E0, D_00482E88, D_00482F08); break;
-    case 5: sprintf(buf, D_004A36E0, D_00482E88, D_00482F18); break;
-    case 2: sprintf(buf, D_004A36E0, D_00482E88, D_00482F28); break;
-    default: sprintf(buf, D_004A36E0, D_00482E88, D_00482F38); break;
+    case 6: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_eli_bnk); break;
+    case 3: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mac_bnk); break;
+    case 0: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mob_bnk); break;
+    case 8: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_psy_bnk); break;
+    case 1: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_kao_bnk); break;
+    case 4: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_zoe_bnk); break;
+    case 9: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_vig_bnk); break;
+    case 7: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_nat_bnk); break;
+    case 5: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_grf_bnk); break;
+    case 2: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_ari_bnk); break;
+    default: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_none_bnk); break;
     }
     func_0028BC58(*(void**)self->MusicSys.mpVStreamSys, 0xE, buf, 0);
-    sprintf(buf, D_004A36E0, D_00482E88, D_00482F48);
+    sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_AI_bnk);
     func_0028BC58(*(void**)self->MusicSys.mpVStreamSys, 0xF, buf, 0);
 }
 #endif
@@ -12445,8 +12445,8 @@ extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name
 extern "C" int FileParser_FindSection(FileParser* self, const char* name);
 extern "C" void func_002A7040(cCrowdSys* self, void* parser);
 extern "C" void FileParser__FileParser(FileParser* self, int flags);
-extern const char D_00483108[];
-extern const char D_004A3570[];
+extern const char str_CrowdInstances[];
+extern const char str_GLOBAL[];
 
 struct sSnd6D78Voice : public func_002A4D68_sObj {
     void operator delete[](void* p, unsigned int size);
@@ -12479,7 +12479,7 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
 {
     self->count = n;
     sSnd6D78Voice*& slot = self->voices;
-    slot = new (D_00483108, 0, 0) sSnd6D78Voice[n];
+    slot = new (str_CrowdInstances, 0, 0) sSnd6D78Voice[n];
     for (int i = 0; i < 3; i++) {
         self->ent[i].f48 = 0.0f;
         self->ent[i].f4C = 0.0f;
@@ -12494,7 +12494,7 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
     sSnd6D78Parser p;
     FileParser_FileParser((FileParser*)((sSndFileBuf*)&p), name, 0x100);
     p.cur = p.data;
-    if (FileParser_FindSection((FileParser*)(&p), D_004A3570)) func_002A7040((cCrowdSys*)self, &p);
+    if (FileParser_FindSection((FileParser*)(&p), str_GLOBAL)) func_002A7040((cCrowdSys*)self, &p);
     p.cur = p.data;
     if (FileParser_FindSection((FileParser*)(&p), key)) func_002A7040((cCrowdSys*)self, &p);
     FileParser__FileParser((FileParser*)(&p), 2);
@@ -12558,12 +12558,12 @@ extern "C" int FileParser_AssignString(FileParser* self, const char* name, char*
 extern "C" int FileParser_AssignFloat(FileParser* self, const char* name, float* out);
 // FileParser_GetName returns the token buffer (the unit declares it void elsewhere).
 extern "C" const char* FileParser_GetName_s(void* self) __asm__("FileParser_GetName");
-extern const char D_004A3708[];
-extern const char D_004A3710[];
-extern const char D_00483118[];
-extern const char D_00483128[];
-extern const char D_004A3718[];
-extern const char D_00483138[];
+extern const char str_TRICKpct_d[];
+extern const char str_FALLpct_d[];
+extern const char str_ANTICIPATEpct_d[];
+extern const char str_ATTACKpct_d[];
+extern const char str_DECAYpct_d[];
+extern const char str_MAXBENDpct_d[];
 
 extern "C" void func_002A7040(cCrowdSys* self, void* parser)
 {
@@ -12573,35 +12573,35 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
     while (!FileParser_IsEOF((FileParser*)parser)) {
         const char* name = FileParser_GetName_s(parser);
         for (int i = 0; i < 3; i++) {
-            sprintf(key, D_004A3708, i + 1);
+            sprintf(key, str_TRICKpct_d, i + 1);
             if (func_0041AA88(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
                 func_002A4C28((sSndHandleList5*)&s->ent[i].a, (int)val, 0);
                 break;
             }
-            sprintf(key, D_004A3710, i + 1);
+            sprintf(key, str_FALLpct_d, i + 1);
             if (func_0041AA88(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
                 func_002A4C28((sSndHandleList5*)&s->ent[i].b, (int)val, 0);
                 break;
             }
-            sprintf(key, D_00483118, i + 1);
+            sprintf(key, str_ANTICIPATEpct_d, i + 1);
             if (func_0041AA88(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
                 func_002A4C28((sSndHandleList5*)&s->ent[i].c, (int)val, 0);
                 break;
             }
-            sprintf(key, D_00483128, i + 1);
+            sprintf(key, str_ATTACKpct_d, i + 1);
             if (func_0041AA88(name, key) == 0) {
                 FileParser_AssignFloat((FileParser*)parser, name, &s->ent[i].f48);
                 break;
             }
-            sprintf(key, D_004A3718, i + 1);
+            sprintf(key, str_DECAYpct_d, i + 1);
             if (func_0041AA88(name, key) == 0) {
                 FileParser_AssignFloat((FileParser*)parser, name, &s->ent[i].f4C);
                 break;
             }
-            sprintf(key, D_00483138, i + 1);
+            sprintf(key, str_MAXBENDpct_d, i + 1);
             if (func_0041AA88(name, key) == 0) {
                 FileParser_AssignFloat((FileParser*)parser, name, (float*)&s->ent[i].f50);
                 break;
@@ -13137,14 +13137,14 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetFloat);
 extern "C" void FileParser_SkipSpace(void*);
 extern "C" void FileParser_GetName(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
-extern char D_004A3730[];
+extern char str_pct_f[];
 
 extern "C" float FileParser_GetFloat(FileParser* self)
 {
     float f;
     FileParser_SkipSpace(self);
     FileParser_GetName(self);
-    func_004178B0((char*)self + 0xC, D_004A3730, &f);
+    func_004178B0((char*)self + 0xC, str_pct_f, &f);
     return f;
 }
 #endif
@@ -13155,14 +13155,14 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetInt);
 extern "C" void FileParser_SkipSpace(void*);
 extern "C" void FileParser_GetName(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
-extern char D_004A3738[];
+extern char str_pct_d_h[];
 
 extern "C" int FileParser_GetInt(FileParser* self)
 {
     int v;
     FileParser_SkipSpace(self);
     FileParser_GetName(self);
-    func_004178B0((char*)self + 0xC, D_004A3738, &v);
+    func_004178B0((char*)self + 0xC, str_pct_d_h, &v);
     return v;
 }
 #endif
@@ -13301,7 +13301,7 @@ struct sSndCtVt7 {
 
 extern char D_00483A48[];
 extern char cBankMonitor_vtbl[];
-extern const char D_00483148[];
+extern const char str_MIDIBANKS[];
 extern const sSndCtVt4 D_004839F0_ct __asm__("D_004839F0");
 extern const sSndCtVt7 D_00483A10_ct __asm__("D_00483A10");
 
@@ -13344,7 +13344,7 @@ extern "C" char* cController_cController(cMidiSys* self, int embedded, int count
     }
     self->mVtbl = (void**)D_00483A48;
     func_003B97D8();
-    self->mMidiBanks = (tMidiBank*)(new (D_00483148, 0, 0) char[0x20]) ;
+    self->mMidiBanks = (tMidiBank*)(new (str_MIDIBANKS, 0, 0) char[0x20]) ;
     D_004A3744 = (cMidiSys*)((int)self);
     return ((char*)self);
 }
@@ -13702,7 +13702,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void func_003B5478();
 extern "C" void func_003B5158(void* buf, int size, int flags);
 extern "C" int func_003B5B68(int* out);
-extern const char D_00483158[];
+extern const char str_mSoundHeap[];
 
 struct sSndVtE8CB0 {
     short delta;
@@ -13725,7 +13725,7 @@ struct sSndSys8CB0 {
 
 extern "C" void func_002A8CB0(sSndSys8CB0* self, int a1)
 {
-    self->buf = operator_new_tag(0x32000, D_00483158, 0, 0);
+    self->buf = operator_new_tag(0x32000, str_mSoundHeap, 0, 0);
     func_003B5478();
     sSndVtE8CB0* vt = self->vt;
     vt[2].fn((char*)self + vt[2].delta, a1);
@@ -13868,11 +13868,11 @@ INCLUDE_ASM("sound/soundsys", func_002A8FA0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002A8C20(cPS2SoundManager* self);
-extern const char D_00483168[];
+extern const char str_PS2SoundManager[];
 
 extern "C" void* func_002A8FA0()
 {
-    return func_002A8C20((cPS2SoundManager*)cMemMan_alloc(0x320, D_00483168, 0, 0));
+    return func_002A8C20((cPS2SoundManager*)cMemMan_alloc(0x320, str_PS2SoundManager, 0, 0));
 }
 #endif
 

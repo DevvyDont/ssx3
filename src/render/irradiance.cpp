@@ -6,9 +6,9 @@ INCLUDE_ASM("render/irradiance", cIrradianceDataBase_Load);
 void cMemMan_free(void*);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
-extern const char D_00492E68[];
-extern const char D_00492E80[];
-extern const char D_00492E90[];
+extern const char str_data_worlds_irr_dat[];
+extern const char str_IrradianceNames[];
+extern const char str_IrradianceArray[];
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
@@ -28,16 +28,16 @@ struct cIrradianceDataBase_ACD0 {
  */
 extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase_ACD0* self)
 {
-    int* file = (int*)FILE_load(D_00492E68, 0x100);
+    int* file = (int*)FILE_load(str_data_worlds_irr_dat, 0x100);
     self->file = file;
     int n = file[0];
     char* src = (char*)(file + 1);
     int indexSize = n * 8;
     int sampleSize = n * 0xA0;
     self->count = n;
-    self->index = operator_new_tag(indexSize, D_00492E80, 0, 0);
+    self->index = operator_new_tag(indexSize, str_IrradianceNames, 0, 0);
     char* src2 = src + indexSize;
-    self->samples = operator_new_tag(sampleSize, D_00492E90, 0x2000000, 0);
+    self->samples = operator_new_tag(sampleSize, str_IrradianceArray, 0x2000000, 0);
     func_0041605C(self->index, src, indexSize);
     func_0041605C(self->samples, src2, sampleSize);
     if (self->file != 0) {

@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_0014F418(void* self);
-extern const char D_0045A6B0[];
+extern const char str_BEOptionInt[];
 extern void* D_0045ADC8[16];
 extern void* D_004A120C;
 
@@ -27,7 +27,7 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
 void* cBEOptionInterface_getThis()
 {
     if (D_004A120C == 0) {
-        cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, D_0045A6B0, 0, 0);
+        cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, str_BEOptionInt, 0, 0);
         mem->vtable = D_0045ADC8;
         D_004A120C = mem;
         mem->field_0x8 = 0;
@@ -222,7 +222,7 @@ extern "C" void func_0014F648(void* self)
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
-extern const char D_0045A6C0[];
+extern const char str_kT_206QuickMessagepct_d[];
 
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_getDefaultQuickKeyMessageHashValue__FPvi);
@@ -236,7 +236,7 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_getDefaultQuickKeyMessageHashVa
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value)
 {
     char buf[24];
-    sprintf(buf, D_0045A6C0, value);
+    sprintf(buf, str_kT_206QuickMessagepct_d, value);
     return GetHashValue32(buf);
 }
 #endif

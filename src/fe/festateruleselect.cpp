@@ -19,28 +19,28 @@ extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" int func_00192240(void* self, int rule);
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
-extern char D_004A16A8[];
-extern char D_004A16B0[];
-extern char D_004A1398[];
-extern char D_0045E270[];
-extern char D_0045E280[];
-extern char D_0045DF40[];
-extern char D_0045E028[];
-extern char D_0045FA80[];
-extern char D_0045DCC8[];
-extern char D_0045FA90[];
-extern char D_0045FAA8[];
-extern char D_0045FAC0[];
-extern char D_004A16B8[];
-extern char D_004A16C0[];
-extern char D_004A16C8[];
-extern char D_004A16D0[];
-extern char D_004A16D8[];
-extern char D_004A16E0[];
-extern char D_004A16E8[];
-extern char D_004A16F0[];
-extern char D_004A16F8[];
-extern char D_004A1700[];
+extern char str_0b[];
+extern char str_0t[];
+extern char str_Menu[];
+extern char str_arrw_left[];
+extern char str_arrw_right[];
+extern char str_kT_CMNOff[];
+extern char str_kT_CMNOn[];
+extern char str_kT_CMNONo[];
+extern char str_kT_CMNYes[];
+extern char str_kT_CMNSkillLevel1[];
+extern char str_kT_CMNSkillLevel2[];
+extern char str_kT_CMNSkillLevel3[];
+extern char str_90pct[];
+extern char str_80pct[];
+extern char str_70pct[];
+extern char str_60pct[];
+extern char str_10s[];
+extern char str_5s[];
+extern char str_3s[];
+extern char str_3s_b[];
+extern char str_5s_b[];
+extern char str_10s_b[];
 extern char D_004A13A0[];
 extern char D_004A14F8[];
 extern char D_004A1500[];
@@ -102,8 +102,8 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
     sStr3_1388 name;
     sStr3_1388 label;
     char* lp = label.c;
-    name = *(sStr3_1388*)D_004A16A8;
-    label = *(sStr3_1388*)D_004A16B0;
+    name = *(sStr3_1388*)str_0b;
+    label = *(sStr3_1388*)str_0t;
     for (; i < 11; i++) {
         char* lb = (char*)find_1388(self, name.c);
         cUIText* txt = (cUIText*)find_1388(self, lp);
@@ -120,28 +120,28 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
             case 0:
                 break;
             case 1:
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045E028), 1);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNOff), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNOn), 1);
                 break;
             case 2:
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FA80), 0);
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DCC8), 1);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNONo), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNYes), 1);
                 break;
             case 3:
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16B8, 90);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16C0, 80);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16C8, 70);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16D0, 60);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNOff), 0);
+                cUIListBox_addEntryByAsciiString(lb, str_90pct, 90);
+                cUIListBox_addEntryByAsciiString(lb, str_80pct, 80);
+                cUIListBox_addEntryByAsciiString(lb, str_70pct, 70);
+                cUIListBox_addEntryByAsciiString(lb, str_60pct, 60);
                 break;
             case 4:
-                cUIListBox_addEntryByAsciiString(lb, D_004A16D8, 10);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16E0, 5);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16E8, 3);
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045DF40), 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16F0, -3);
-                cUIListBox_addEntryByAsciiString(lb, D_004A16F8, -5);
-                cUIListBox_addEntryByAsciiString(lb, D_004A1700, -10);
+                cUIListBox_addEntryByAsciiString(lb, str_10s, 10);
+                cUIListBox_addEntryByAsciiString(lb, str_5s, 5);
+                cUIListBox_addEntryByAsciiString(lb, str_3s, 3);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNOff), 0);
+                cUIListBox_addEntryByAsciiString(lb, str_3s_b, -3);
+                cUIListBox_addEntryByAsciiString(lb, str_5s_b, -5);
+                cUIListBox_addEntryByAsciiString(lb, str_10s_b, -10);
                 break;
             case 5:
                 cUIListBox_addEntryByAsciiString(lb, D_004A13A0, 0);
@@ -152,9 +152,9 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
                 cUIListBox_addEntryByAsciiString(lb, D_004A1518, 0);
                 break;
             case 6:
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FA90), 0);
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FAA8), 0);
-                cUIListBox_addEntryByStringID(lb, GetHashValue32(D_0045FAC0), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNSkillLevel1), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNSkillLevel2), 0);
+                cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNSkillLevel3), 0);
                 break;
             }
             if (rule != 0) {
@@ -173,13 +173,13 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
         }
     }
     unsigned int sel = 0xFF;
-    char* menu = (char*)find_1388(self, D_004A1398);
+    char* menu = (char*)find_1388(self, str_Menu);
     if (menu != 0)
         sel = *(unsigned char*)(menu + 0x95);
     char frame[32];
     if (self->rules[sel] == 0) {
-        char* a = (char*)find_1388(self, D_0045E270);
-        char* b = (char*)find_1388(self, D_0045E280);
+        char* a = (char*)find_1388(self, str_arrw_left);
+        char* b = (char*)find_1388(self, str_arrw_right);
         if (a) SetVisible_1388(a, 0);
         if (b) SetVisible_1388(b, 0);
         __builtin_memcpy(frame, D_004A1708, 7);
@@ -209,9 +209,9 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char a1);
 extern "C" void cUIMenu_setScrollableMenu(void* menu, int count);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern char D_0045FB10[];
-extern char D_0045FB20[];
-extern char D_004A1398[];
+extern char str_11my_rules[];
+extern char str_rule_help[];
+extern char str_Menu[];
 extern char D_005308B8[];
 extern signed char D_00535C12[];
 extern signed char D_00441098[11];
@@ -224,7 +224,7 @@ extern char* D_00441058[];
 struct sStr3_19188 { char c[3]; };
 struct sStr2_19188 { char c[2]; };
 // PORT: the local name templates "0b" and "0" are splat-named sdata literals; copied from the symbols.
-extern char D_004A16A8[];
+extern char str_0b[];
 extern char D_004A13A0[];
 
 struct sVE_19188 {
@@ -269,7 +269,7 @@ static inline void* find_19188(sRuleSel_19188* self, char* name)
 extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
 {
     void* engine = self->engine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FB10), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_11my_rules), 0);
     self->screen = screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
@@ -312,17 +312,17 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     self->count = count;
     MEM_fill(D_005308B8, 0, 0x20);
     cFEStateRuleSelect_setupMenu(self, 0);
-    sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, D_004A1398);
+    sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, str_Menu);
     if (menu != 0) {
         menu->flags |= 0x80;
         cUIMenu_setScrollableMenu(menu, count);
         cUIMenu_setSelectedByIndex(menu, 0);
-        cUIText* help = (cUIText*)find_19188(self, D_0045FB20);
+        cUIText* help = (cUIText*)find_19188(self, str_rule_help);
         int rule = self->rules[0];
         if (help != 0)
             cUIText_setUnicodeStringByID(help, GetHashValue32(D_00441058[rule]));
     }
-    name = *(sStr3_19188*)D_004A16A8;
+    name = *(sStr3_19188*)str_0b;
     label = *(sStr2_19188*)D_004A13A0;
     for (signed char i = 0; i < 11; i++) {
         sUIObj_19188* o = (sUIObj_19188*)find_19188(self, name.c);
@@ -370,7 +370,7 @@ extern "C" void func_00192380(sRuleSel_2380* self, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern char D_0045D698[];
+extern char str_FEOptions[];
 extern char D_005308B8[];
 
 struct sVE_1C68 {
@@ -432,7 +432,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
         break;
     }
     case 7: {
-        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
         break;
@@ -471,9 +471,9 @@ int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_0045E270[];
-extern char D_0045E280[];
-extern char D_0045FB20[];
+extern char str_arrw_left[];
+extern char str_arrw_right[];
+extern char str_rule_help[];
 extern char* D_00441058[];
 
 // PORT: the frame labels are copied with the builtin block move (the original likely used
@@ -512,10 +512,10 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned
     case 1: {
         int sel = (*(signed char**)(self + 0x48))[idx];
         int play = 0;
-        char* arrowLeft = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E270));
-        char* arrowRight = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E280));
+        char* arrowLeft = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_arrw_left));
+        char* arrowRight = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_arrw_right));
         int locked = *(signed char*)(self + sel + 0x51) < 1;
-        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045FB20));
+        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_rule_help));
         if (locked && textHelp) {
             cUIText_setUnicodeStringByID(textHelp, GetHashValue32(D_00441058[sel]));
         }
@@ -722,8 +722,8 @@ struct sObj_2488 {
 
 // PORT: the names are built with the builtin block move (the original likely used
 // strcpy on string literals); the two strings live at these symbols.
-extern char D_004A16A8[];
-extern char D_004A16B0[];
+extern char str_0b[];
+extern char str_0t[];
 
 /**
  * Greys out the visible rule rows whose rule is disabled by another rule's setting and restores the others.
@@ -735,8 +735,8 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
     char* self = (char*)selfp;
     char name0[16];
     char name1[16];
-    __builtin_memcpy(name0, D_004A16A8, 3);
-    __builtin_memcpy(name1, D_004A16B0, 3);
+    __builtin_memcpy(name0, str_0b, 3);
+    __builtin_memcpy(name1, str_0t, 3);
     signed char n = *(signed char*)(self + 0x50) < 12 ? *(signed char*)(self + 0x50) : 11;
     for (signed char i = 0; i < n; i++) {
         sObj_2488* listBox = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name0));
@@ -905,14 +905,14 @@ struct sName4_00192970 { char c[4]; };
 struct sName2_00192970 { char c[2]; };
 struct sName5_00192970 { char c[5]; };
 
-extern char D_0045FC88[];
-extern char D_0045FC98[];
-extern char D_0045FCA8[];
-extern char D_0045FCB8[];
-extern char D_004A1740[];
-extern char D_004A1748[];
+extern char str_0arrw_left[];
+extern char str_0arrw_right[];
+extern char str_0arrw_left1[];
+extern char str_0arrw_right1[];
+extern char str_w11[];
+extern char str_w21[];
 extern char D_004A14F8[];
-extern char D_004A1750[];
+extern char str_box1[];
 
 class cFEVObj_00192970 {
 public:
@@ -946,14 +946,14 @@ struct sOwner_00192970 {
 
 extern "C" void func_00192970(sOwner_00192970* self, void* screen)
 {
-    sName11_00192970 n0 = *(sName11_00192970*)D_0045FC88;
-    sName12_00192970 n1 = *(sName12_00192970*)D_0045FC98;
-    sName12_00192970 n2 = *(sName12_00192970*)D_0045FCA8;
-    sName13_00192970 n3 = *(sName13_00192970*)D_0045FCB8;
-    sName4_00192970 n4 = *(sName4_00192970*)D_004A1740;
-    sName4_00192970 n5 = *(sName4_00192970*)D_004A1748;
+    sName11_00192970 n0 = *(sName11_00192970*)str_0arrw_left;
+    sName12_00192970 n1 = *(sName12_00192970*)str_0arrw_right;
+    sName12_00192970 n2 = *(sName12_00192970*)str_0arrw_left1;
+    sName13_00192970 n3 = *(sName13_00192970*)str_0arrw_right1;
+    sName4_00192970 n4 = *(sName4_00192970*)str_w11;
+    sName4_00192970 n5 = *(sName4_00192970*)str_w21;
     sName2_00192970 n6 = *(sName2_00192970*)D_004A14F8;
-    sName5_00192970 n7 = *(sName5_00192970*)D_004A1750;
+    sName5_00192970 n7 = *(sName5_00192970*)str_box1;
     for (int i = 0; i < 8; i++) {
         if (((self->mask >> i) & 1) == 0) {
             if (self->items[i] != 0) {

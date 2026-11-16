@@ -11,8 +11,8 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* cStaticEmitter_cStaticEmitter(void* p);
 extern "C" void cStaticEmitter_setupEmitter(void* sys, void* data, int n);
-extern char D_004A4030[];
-extern char D_004A4038[];
+extern char str_InstIds[];
+extern char str_Emitter[];
 extern char t4mat_Identity[];
 
 // PORT: array new bound to the tagged allocator
@@ -41,8 +41,8 @@ struct sMultiParticle {
 extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
 {
     sMPRef** slot = &self->refs;
-    *slot = new (D_004A4030, 0x20000000, 0) sMPRef[self->count];
-    self->sys = cStaticEmitter_cStaticEmitter(cMemMan_alloc(0x190, D_004A4038, 0x20000000, 0));
+    *slot = new (str_InstIds, 0x20000000, 0) sMPRef[self->count];
+    self->sys = cStaticEmitter_cStaticEmitter(cMemMan_alloc(0x190, str_Emitter, 0x20000000, 0));
     for (int i = 0; i < self->count; i++) {
         self->refs[i].id = 0xFFFFFFFF;
     }
@@ -731,7 +731,7 @@ struct sMPMgr8B28 {
 
 extern void* D_004A4040;
 extern sMPMgr8B28* D_004A4040_mgr8B28 __asm__("D_004A4040");
-extern char D_004A4048[];
+extern char str_RailMan_b[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* func_003584F0(void* self, void* a1);
 extern "C" void func_00358780(void* self, int idx);
@@ -740,7 +740,7 @@ extern "C" void func_00358998(void* self, int idx);
 extern "C" void func_00358B28(sMPRef8B28 key, int add)
 {
     if (D_004A4040 == 0) {
-        func_003584F0(cMemMan_alloc(0x218, D_004A4048, 0x20000000, 0), (void*)1);
+        func_003584F0(cMemMan_alloc(0x218, str_RailMan_b, 0x20000000, 0), (void*)1);
     }
     sMPRef8B28 kFree;
     int idx = -1;
@@ -809,7 +809,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 // PORT: same symbol as the unit's func_00341AA0(void*, int, int, int, int); pointer-typed view.
 extern "C" void func_00341AA0_8C80(void* self, int a, int type, void* b, const void* c) __asm__("func_00341AA0");
 extern char D_0048EC28[];
-extern char D_0048EA20[];
+extern char str_ComboXform[];
 extern char* D_004A5B64;
 
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -876,7 +876,7 @@ extern "C" void* func_00358C80(sMP8C80* self, int bucket, sMPOwner8C80* pInstanc
     self->b17 = adata->f34 < 0;
     int n = self->n74;
     sMPElem8C80** slot = &self->elems84;
-    *slot = new (operator_new_tag(n << 6, D_0048EA20, 0x20000000, 0)) sMPElem8C80[n];
+    *slot = new (operator_new_tag(n << 6, str_ComboXform, 0x20000000, 0)) sMPElem8C80[n];
     self->b14 = 0;
     self->b15 = 0;
     self->f4 = 0;
@@ -890,7 +890,7 @@ INCLUDE_ASM("object/multiparticle", cAnimComboNode_cAnimComboNode);
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern "C" void func_00359030(void* self);
 extern char D_0048EC28[];
-extern char D_0048EA20[];
+extern char str_ComboXform[];
 
 struct sStreamVE_8DB0 {
     short delta;
@@ -924,7 +924,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* bucket, void* s
     *(void**)(selfBytes + 0x54) = D_0048EC28;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
-    *pp = new (D_0048EA20, 0x20000000, 0) sParticle_8DB0[*(int*)(selfBytes + 0x74)];
+    *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[*(int*)(selfBytes + 0x74)];
     func_00359030(self);
     return self;
 }

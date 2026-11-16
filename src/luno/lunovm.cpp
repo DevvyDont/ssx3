@@ -500,8 +500,8 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 // PORT: the table handle constructor with a size (luno_cLunoTable_cLunoTable) is bound by asm label.
 extern "C++" cLunoTab* lunoNewTable(cLunoTab* self, int size) __asm__("luno_cLunoTable_cLunoTable");
 extern "C" int func_002224A0(void);
-extern char D_00479790[];
-extern char D_004797A0[];
+extern char str_LunoVMCallParam[];
+extern char str_cLunoTable[];
 
 typedef cLunoVar (*tLunoCFunc)(int numArgs, cLunoArg* args);
 extern tLunoCFunc gLunoCFunctions[] __asm__("D_00441F38");
@@ -577,7 +577,7 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
     int argDepthMax = entry->NumArgs;
 
     if (argDepthMax > 0) {
-        args = new (D_00479790, 0xA0000000, 0) cLunoArg[argDepthMax];
+        args = new (str_LunoVMCallParam, 0xA0000000, 0) cLunoArg[argDepthMax];
     }
     int pc = entry->Start;
     while (pc < numOps) {
@@ -725,7 +725,7 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B].castTable().get(m_Regs[op.ABC.C]);
             break;
         case 25:
-            m_Regs[op.ABC.A] = *lunoNewTable((cLunoTab*)operator new(sizeof(cLunoTab), D_004797A0, 0x20000000, 0), 0x20);
+            m_Regs[op.ABC.A] = *lunoNewTable((cLunoTab*)operator new(sizeof(cLunoTab), str_cLunoTable, 0x20000000, 0), 0x20);
             break;
         case 30:
             m_Regs[op.ABC.A] = gLunoNil;
@@ -902,8 +902,8 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable_constructTable);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_00479860[];
-extern char D_00479870[];
+extern char str_LunoTable[];
+extern char str_TableData[];
 extern char D_00479890[];
 
 struct cLunoNode_ct {
@@ -935,13 +935,13 @@ extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n) __as
  */
 extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n)
 {
-    cLunoTable* t = (cLunoTable*)new (D_00479860, 0xA0000000, 0) cLunoTable;
+    cLunoTable* t = (cLunoTable*)new (str_LunoTable, 0xA0000000, 0) cLunoTable;
     cLunoTableEntry** slot = &t->nodes;
     t->nodes = 0;
     t->refCount = 0;
     t->modulus = 0;
     ref->table = t;
-    *slot = (cLunoTableEntry*)new (D_00479870, 0xA0000000, 0) cLunoNode_ct[n];
+    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[n];
     ref->table->modulus = n - 1;
     ref->table->refCount = 1;
 }
@@ -967,7 +967,7 @@ INCLUDE_ASM("luno/lunovm", func_00224F68);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_00479870[];
+extern char str_TableData[];
 extern char D_00479890[];
 
 struct cLunoNode_224F68 {
@@ -998,7 +998,7 @@ extern "C" void func_00224F68(cLunoTableRef* ref)
         cMemMan_free((char*)ref->table->nodes - 0x10);
     }
     cLunoTableEntry** slot = &ref->table->nodes;
-    *slot = (cLunoTableEntry*)new (D_00479870, 0xA0000000, 0) cLunoNode_224F68[ref->table->modulus + 1];
+    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_224F68[ref->table->modulus + 1];
 }
 #endif
 
@@ -1122,7 +1122,7 @@ extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_set);
 #ifdef SKIP_ASM
-extern char D_00479880[];
+extern char str_cLunoTableEntry[];
 extern char D_00479890[];
 
 struct sLunoPair_set {
@@ -1237,7 +1237,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
         prev = n;
     }
     if (val->type != 0) {
-        cLunoNode_set* node = (cLunoNode_set*)operator new(0x20, D_00479880, 0x20000000, 0);
+        cLunoNode_set* node = (cLunoNode_set*)operator new(0x20, str_cLunoTableEntry, 0x20000000, 0);
         node->value.type = 0;
         node->value.word0 = 0;
         node->vtable = (cLunoVtEntry*)D_00479890;
@@ -1347,7 +1347,7 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry
     }
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self->table, 8);
     cLunoTableEntry** slot = &self->table->nodes;
-    *slot = (cLunoTableEntry*)new (D_00479870, 0xA0000000, 0) cLunoNode_9A8[self->table->modulus + 1];
+    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->modulus + 1];
     int i;
     int cnt;
     cLunoValue key;

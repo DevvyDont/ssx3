@@ -7,7 +7,7 @@ INCLUDE_ASM("input/inputmap", cInputMap_init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
-extern char D_0048DD00[];
+extern char str_InputMapTable[];
 
 /**
  * Initialises an input map with room for a number of compiled statements.
@@ -20,7 +20,7 @@ extern char D_0048DD00[];
 extern "C" void cInputMap_init(void* self, int count)
 {
     *(int*)((char*)self + 0x0) = count;
-    *(void**)((char*)self + 0x4) = operator_new_tag(count * 4, D_0048DD00, 0, 0);
+    *(void**)((char*)self + 0x4) = operator_new_tag(count * 4, str_InputMapTable, 0, 0);
     MEM_fill(*(void**)((char*)self + 0x4), 0xFFFFFFFF, *(int*)((char*)self + 0x0) * 4);
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0xC) = 0;
@@ -69,7 +69,7 @@ INCLUDE_ASM("input/inputmap", cInputMap_loadMapFile);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* self, void* a1, void* a2);
-extern char D_0048DD10[];
+extern char str_InputParser[];
 
 /**
  * Creates the parser for an input-map script that is already in memory.
@@ -82,7 +82,7 @@ extern char D_0048DD10[];
  */
 extern "C" void cInputMap_loadMapFile(void* self, void* mem, void* len)
 {
-    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), mem, len);
+    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, str_InputParser, 0x100, 0), mem, len);
 }
 #endif
 
@@ -94,7 +94,7 @@ extern "C" void MEM_copy(void* dst, void* src, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int cInputMapParser_compileStatement(void* parser, char* src, int* dst, int room, int a4);
-extern char D_0048DD20[];
+extern char str_TempOpCodes[];
 
 struct sInputMap_0E18 {
     int f0;
@@ -119,7 +119,7 @@ extern "C" void cInputMap_compileMap(sInputMap_0E18* self, int idx, char* src)
 {
     if (self->cap - self->used < 0x100) {
         int newCap = self->cap + 0x400;
-        int* buf = (int*)operator_new_tag(newCap * 4, D_0048DD20, 0x100, 0);
+        int* buf = (int*)operator_new_tag(newCap * 4, str_TempOpCodes, 0x100, 0);
         if (self->code != 0) {
             MEM_copy(buf, self->code, self->cap * 4);
             if (self->code != 0) {
@@ -142,7 +142,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void operator_delete(int* p);
 void cMemMan_free(void* p);
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern char D_0048DD30[];
+extern char str_InputOpCodes[];
 
 /**
  * Frees the map file's parser and trims the op-code buffer to the code actually compiled.
@@ -156,7 +156,7 @@ extern "C" void cInputMap_purgeMapFile(void* self)
         operator_delete(*(int**)((char*)self + 0x8));
     }
     *(int**)((char*)self + 0x8) = 0;
-    void* copy = operator_new_tag(*(int*)((char*)self + 0x10) << 2, D_0048DD30, 0, 0);
+    void* copy = operator_new_tag(*(int*)((char*)self + 0x10) << 2, str_InputOpCodes, 0, 0);
     MEM_copy(copy, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
     if (*(void**)((char*)self + 0x14) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x14));
@@ -420,7 +420,7 @@ typedef char* cInputMapParser_error_va_list;
 
 extern "C" int sprintf(char* dst, const char* fmt, ...);
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
-extern char D_0048DD40[];
+extern char str_pct_s_pct_d[];
 
 /**
  * Reports a syntax error in the input-map script and sets the parser's error flag.
@@ -435,7 +435,7 @@ extern "C" void cInputMapParser_error(cInputMapParser* self, const char* fmt, ..
     char buf[0x400];
     cInputMapParser_error_va_list ap;
     cInputMapParser_error_va_start(ap);
-    func_004186C8(buf + sprintf(buf, D_0048DD40, (char*)self + 0xC, self->LineNumber), fmt, ap);
+    func_004186C8(buf + sprintf(buf, str_pct_s_pct_d, (char*)self + 0xC, self->LineNumber), fmt, ap);
     self->ErrorFlag = 1;
 }
 #endif
@@ -530,7 +530,7 @@ extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, sMapNode_16
 INCLUDE_ASM("input/inputmap", cInputMapParser_lookupButtonName);
 #ifdef SKIP_ASM
 extern "C" int func_0041AB78(const char* a, const char* b, int n);
-extern char D_004A3EF0[];
+extern char str_button[];
 
 /**
  * Parses a button name of the form "buttonN" and returns its number.
@@ -543,7 +543,7 @@ extern char D_004A3EF0[];
  */
 extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* name)
 {
-    if (func_0041AB78(name, D_004A3EF0, 6) != 0) {
+    if (func_0041AB78(name, str_button, 6) != 0) {
         return -1;
     }
     int firstDigit = name[6] - '0';

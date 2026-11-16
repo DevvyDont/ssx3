@@ -743,8 +743,8 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FC2C0);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_003506D8(void*, void*);
 extern "C" void func_00350F60(void*, void*);
-extern char D_004896B8[];
-extern char D_004896C8[];
+extern char str_DeadNode[];
+extern char str_RestoreNode[];
 
 typedef void (*DtorFn)(void*, int);
 
@@ -774,7 +774,7 @@ extern "C" void func_002FC2C0(char* self, char* ev) {
                 break;
             del_obj(o);
         }
-        func_003506D8(cMemMan_alloc(0x1C, D_004896B8, 0x20000000, 0), self);
+        func_003506D8(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), self);
         break;
     }
     case 3: {
@@ -785,7 +785,7 @@ extern "C" void func_002FC2C0(char* self, char* ev) {
                 break;
             del_obj(o);
         }
-        func_00350F60(cMemMan_alloc(0x1C, D_004896C8, 0x20000000, 0), self);
+        func_00350F60(cMemMan_alloc(0x1C, str_RestoreNode, 0x20000000, 0), self);
         break;
     }
     }

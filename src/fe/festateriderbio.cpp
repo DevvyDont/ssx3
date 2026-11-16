@@ -17,7 +17,7 @@ extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 extern "C" int func_001577A0(void* self, int a1, int a2);
-extern char D_0045D870[];
+extern char str_154rider_details[];
 
 struct sVE_32A8 {
     short delta;
@@ -35,7 +35,7 @@ struct sVE_32A8 {
 extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D870), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_154rider_details), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -61,11 +61,11 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onGainFocus);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
-extern char D_0045D888[];
-extern char D_0045D898[];
-extern char D_0045D8A8[];
-extern char D_0045D8B8[];
-extern char D_0045D8C8[];
+extern char str_Option_1[];
+extern char str_Option_2[];
+extern char str_Option_3[];
+extern char str_Option_4[];
+extern char str_Option_5[];
 
 struct sVtEnt_001833D0 { short delta; short index; void (*fn)(void*, int); };
 
@@ -90,11 +90,11 @@ static inline void showObj_001833D0(void* self, char* name, int id)
  */
 extern "C" void cFEStateRiderDetail_onGainFocus(void* self, int pPrevState)
 {
-    showObj_001833D0(self, D_0045D888, 5);
-    showObj_001833D0(self, D_0045D898, 6);
-    showObj_001833D0(self, D_0045D8A8, 7);
-    showObj_001833D0(self, D_0045D8B8, 8);
-    showObj_001833D0(self, D_0045D8C8, 9);
+    showObj_001833D0(self, str_Option_1, 5);
+    showObj_001833D0(self, str_Option_2, 6);
+    showObj_001833D0(self, str_Option_3, 7);
+    showObj_001833D0(self, str_Option_4, 8);
+    showObj_001833D0(self, str_Option_5, 9);
     cFEState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -105,7 +105,7 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onPreRender2D);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
-extern char D_0045D898[];
+extern char str_Option_2[];
 
 /**
  * Greys out "Option_2" (the cheat characters) when the character has none unlocked (+0x50 is 0).
@@ -115,7 +115,7 @@ extern char D_0045D898[];
 extern "C" void cFEStateRiderDetail_onPreRender2D(void* self)
 {
     if (*(int*)((char*)self + 0x50) == 0) {
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D898));
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Option_2));
         if (obj != 0) {
             func_00194498(obj);
         }
@@ -170,7 +170,7 @@ extern "C" void func_00147138(void* self, int a1, const char* name);
 extern "C" void func_001474A8(void* self, int a1, int a2);
 extern "C" void func_001831D0(void* self, int a1);
 extern "C" unsigned int strlen(const char* s);
-extern char D_0045D780[];
+extern char str_131cheat_char[];
 
 struct sVE_35F8 {
     short delta;
@@ -194,7 +194,7 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 0x16) {
-        if (Is_001835F8(*(int*)((char*)item + 0xC), D_0045D780)) {
+        if (Is_001835F8(*(int*)((char*)item + 0xC), str_131cheat_char)) {
             int cheatCharId = *(int*)((char*)item + 0x70);
             if (*(int*)((char*)item + 0x74) != 0) {
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -237,9 +237,9 @@ extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode)
 extern "C" void func_001CE408(void* self, int v);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern "C" void cUIStateStack_push(void* stack, void* state);
-extern const char D_0045D8D8[];
-extern const char D_0045D8E8[];
-extern const char D_0045D698[];
+extern const char str_cKeyboardPopup[];
+extern const char str_cFEStateCheatCharSelect[];
+extern const char str_FEOptions[];
 
 struct sVE_3710 {
     short delta;
@@ -269,7 +269,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
     case 5: {
         int sub = *(int*)(item + 0x18);
         if (sub == 8) {
-            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
+            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_cKeyboardPopup, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
             *(int*)(w + 0x140) = 0x37;
             cKeyboardPopup_setMaxCharacters(w, 8);
             cKeyboardPopup_setIncludeKey(w, 0x4B, 1, 2);
@@ -291,7 +291,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
         } else if (sub == 6) {
             int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
             if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), cid) > 0) {
-                char* w = (char*)func_00182220(cMemMan_alloc(0x1E4, D_0045D8E8, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
+                char* w = (char*)func_00182220(cMemMan_alloc(0x1E4, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
                 *(unsigned char*)(w + 0x15) = func_001A1CD0(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
                 func_001831D0(self, 0);
@@ -318,7 +318,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
         break;
     }
     case 7: {
-        char* w = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* w = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
         ((sBits_3710*)(w + 0x1C))->mode = 1;
         cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, w, 0, 0);
         break;
@@ -354,10 +354,10 @@ INCLUDE_ASM("fe/festateriderbio", func_00183B08);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0045D900[];
-extern char D_0045D910[];
-extern char D_0045D920[];
-extern char D_0045D930[];
+extern char str_hilite_right[];
+extern char str_hilite_left[];
+extern char str_helptext_choose[];
+extern char str_helptext_custom[];
 
 class cUIObj_183B08 {
 public:
@@ -375,19 +375,19 @@ public:
 
 extern "C" void func_00183B08(void* self)
 {
-    cUIObj_183B08* a = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D900));
+    cUIObj_183B08* a = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
     if (a != 0) {
         a->setVisible(0);
     }
-    cUIObj_183B08* b = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D910));
+    cUIObj_183B08* b = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
     if (b != 0) {
         b->setVisible(1);
     }
-    cUIObj_183B08* c = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D920));
+    cUIObj_183B08* c = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
     if (c != 0) {
         c->setVisible(1);
     }
-    cUIObj_183B08* d = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D930));
+    cUIObj_183B08* d = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
     if (d != 0) {
         d->setVisible(0);
     }
@@ -399,10 +399,10 @@ INCLUDE_ASM("fe/festateriderbio", func_00183C08);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0045D900[];
-extern char D_0045D910[];
-extern char D_0045D920[];
-extern char D_0045D930[];
+extern char str_hilite_right[];
+extern char str_hilite_left[];
+extern char str_helptext_choose[];
+extern char str_helptext_custom[];
 
 class cUIObj_183C08 {
 public:
@@ -420,19 +420,19 @@ public:
 
 extern "C" void func_00183C08(void* self)
 {
-    cUIObj_183C08* a = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D900));
+    cUIObj_183C08* a = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
     if (a != 0) {
         a->setVisible(1);
     }
-    cUIObj_183C08* b = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D910));
+    cUIObj_183C08* b = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
     if (b != 0) {
         b->setVisible(0);
     }
-    cUIObj_183C08* c = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D920));
+    cUIObj_183C08* c = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
     if (c != 0) {
         c->setVisible(0);
     }
-    cUIObj_183C08* d = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D930));
+    cUIObj_183C08* d = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
     if (d != 0) {
         d->setVisible(1);
     }

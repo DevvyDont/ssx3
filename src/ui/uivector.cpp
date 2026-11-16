@@ -32,10 +32,10 @@ struct sUIVectorFlags {
 INCLUDE_ASM("ui/uivector", cUIVector_setUIData);
 #ifdef SKIP_ASM
 extern "C" void cUIThing_setUIData(void* self, void* data);
-extern char D_004940C8[];
-extern char D_004940D8[];
-extern char D_004940E8[];
-extern char D_004940F8[];
+extern char str_UIVectorClr[];
+extern char str_UIVectorVtx[];
+extern char str_UIVectorVtxRdr[];
+extern char str_UIVectorLine[];
 
 // On Tour: tAttrVector.
 struct sUIVecFlags_34C0 {
@@ -107,18 +107,18 @@ extern "C" void cUIVector_setUIData(cUIVector* p, void* pUIBase)
     if (pIYFVector->mNumVertices)
     {
         sUIVec16_34C0** pa = &(*(sUIVec16_34C0**)&self->mpVertexColour);
-        *pa = new (D_004940C8, 0x100, 0) sUIVec16_34C0[pIYFVector->mNumVertices];
+        *pa = new (str_UIVectorClr, 0x100, 0) sUIVec16_34C0[pIYFVector->mNumVertices];
         sUIVec3_34C0** pb = &(*(sUIVec3_34C0**)&self->mpVertexPosition);
-        *pb = new (D_004940D8, 0x100, 0) sUIVec3_34C0[pIYFVector->mNumVertices];
+        *pb = new (str_UIVectorVtx, 0x100, 0) sUIVec3_34C0[pIYFVector->mNumVertices];
         sUIVec3b_34C0** pc = &(*(sUIVec3b_34C0**)&self->mpVertexPositionRender);
-        *pc = new (D_004940E8, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
+        *pc = new (str_UIVectorVtxRdr, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
         for (int i = 0; i < pIYFVector->mNumVertices; i++)
             ((sUIVec3_34C0*)self->mpVertexPosition)[i] = D_004FF0D8_34C0;
     }
     if (!(*(sUIVecFlags_34C0*)&self->mAttrVector).mFill)
     {
         sUIVec48_34C0** pd = &(*(sUIVec48_34C0**)&self->mpVertices);
-        *pd = new (D_004940F8, 0x100, 0) sUIVec48_34C0[(*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices];
+        *pd = new (str_UIVectorLine, 0x100, 0) sUIVec48_34C0[(*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices];
     }
 }
 #endif

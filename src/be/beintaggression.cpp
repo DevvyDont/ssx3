@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A898[];
+extern const char str_BEAggressionInt[];
 extern void* D_0045AC48[16];
 extern void* D_004A124C;
 
@@ -24,7 +24,7 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getThis__Fv);
 void* cBEAggressionInterface_getThis()
 {
     if (D_004A124C == 0) {
-        cBEAggressionInterface* mem = (cBEAggressionInterface*)cMemMan_alloc(0x10, D_0045A898, 0, 0);
+        cBEAggressionInterface* mem = (cBEAggressionInterface*)cMemMan_alloc(0x10, str_BEAggressionInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AC48;
         D_004A124C = mem;

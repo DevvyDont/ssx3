@@ -30,11 +30,11 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern signed char D_00535C10[];
-extern char D_0046E9D8[];
-extern char D_0046E9E8[];
-extern char D_0046E9F8[];
-extern char D_0046EA08[];
-extern char D_0046EA18[];
+extern char str_hiscorelist[];
+extern char str_helptext02[];
+extern char str_helptext01[];
+extern char str_helptxt01[];
+extern char str_helptxt02[];
 
 static inline int HasScores1E8FF0(char* hs)
 {
@@ -52,7 +52,7 @@ static inline int HasScores1E8FF0(char* hs)
 extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E9D8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_hiscorelist), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -61,17 +61,17 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (D_00535C10[0]) {
     case 0: case 5:
-        cUIState_showObjSafe(self, D_0046E9E8);
+        cUIState_showObjSafe(self, str_helptext02);
         break;
     case 1: case 2: case 3: case 4: case 6:
     default:
-        cUIState_hideObjSafe(self, D_0046E9F8);
+        cUIState_hideObjSafe(self, str_helptext01);
         break;
     }
     char* hs = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     if (!HasScores1E8FF0(hs)) {
-        cUIState_hideObjSafe(self, D_0046EA08);
-        cUIState_hideObjSafe(self, D_0046EA18);
+        cUIState_hideObjSafe(self, str_helptxt01);
+        cUIState_hideObjSafe(self, str_helptxt02);
     }
     func_00294F78(func_0028B180(), 0xE);
 }
@@ -575,28 +575,28 @@ extern "C" void func_003DCA40(unsigned short* dst, const char* src);
 extern "C" void func_003DC9F8(unsigned short* dst, const unsigned short* fmt, ...);
 unsigned int BXrand();
 extern char D_004A2108[];
-extern char D_004A21F0[];
-extern char D_004A20D0[];
-extern char D_004A21F8[];
-extern char D_004A2200[];
-extern char D_004A2208[];
-extern char D_004A2210[];
-extern char D_004A2218[];
-extern char D_004A2220[];
-extern char D_004A2228[];
-extern char D_004A2230[];
-extern char D_004A2238[];
-extern char D_004A2240[];
-extern char D_004A2248[];
-extern char D_004A2250[];
-extern char D_004A2258[];
-extern char D_004A2260[];
-extern char D_004A2268[];
-extern char D_004A2270[];
-extern char D_004A2278[];
-extern char D_0046EAB8[];
-extern char D_0046EAC8[];
-extern char D_0046EAD8[];
+extern char str_fefont[];
+extern char str_hud_b[];
+extern char str_hudfont[];
+extern char str_nm3w[];
+extern char str_nm2w[];
+extern char str_nm1w[];
+extern char str_go[];
+extern char str_switch[];
+extern char str_nm4w[];
+extern char str_nm5w[];
+extern char str_nm6w[];
+extern char str_st_w[];
+extern char str_nd_w[];
+extern char str_rd_w[];
+extern char str_th_w[];
+extern char str_slash_b[];
+extern char str_Sphere[];
+extern char str_00[];
+extern char str_11_b[];
+extern char str_pct_s_at_skip_pct_s[];
+extern char str_kT_OVRCMNPress[];
+extern char str_kT_OVRCMNToSkip[];
 extern int D_004C88D8[26];
 extern int D_004C8940[5][3];
 extern char* D_004A21E4;
@@ -842,7 +842,7 @@ static inline unsigned short* getLocString_9AD0(char* id)
 extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
 {
     sHUD1P* self = (sHUD1P*)vself;
-    self->hash = GetHashValue32(D_004A20D0);
+    self->hash = GetHashValue32(str_hud_b);
     sTok_9AD0* entry = D_004C8980_9AD0;
     while (entry->hash != 0) {
         sUIItem_9AD0* it = (sUIItem_9AD0*)func_00398380(self->engine + 0x58, entry->name);
@@ -957,13 +957,13 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
         func_0020EB50(self->panels[1].trophy, &scr, &r1);
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    self->bank428 = findFont_9AD0(*(void**)(self->engine + 8), D_004A21F0);
-    self->font = (void*)findFont_9AD0(*(void**)(self->engine + 8), D_004A21F8);
-    self->w440 = findElem_9AD0(self->engine, D_004A2200);
-    self->w43C = findElem_9AD0(self->engine, D_004A2208);
-    self->w438 = findElem_9AD0(self->engine, D_004A2210);
-    self->w434 = findElem_9AD0(self->engine, D_004A2218);
-    self->w470 = findElem_9AD0(self->engine, D_004A2220);
+    self->bank428 = findFont_9AD0(*(void**)(self->engine + 8), str_fefont);
+    self->font = (void*)findFont_9AD0(*(void**)(self->engine + 8), str_hudfont);
+    self->w440 = findElem_9AD0(self->engine, str_nm3w);
+    self->w43C = findElem_9AD0(self->engine, str_nm2w);
+    self->w438 = findElem_9AD0(self->engine, str_nm1w);
+    self->w434 = findElem_9AD0(self->engine, str_go);
+    self->w470 = findElem_9AD0(self->engine, str_switch);
     for (int i = 0; i < 26; i++) {
         self->icons[i] = func_00398380(self->engine + 0x58, D_004C88D8[i]);
     }
@@ -978,23 +978,23 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
         sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
         self->scrH.set(vt[57].fn((char*)GrMan + vt[57].delta, self->mode));
     }
-    self->w444[0] = findElem_9AD0(self->engine, D_004A2210);
-    self->w444[1] = findElem_9AD0(self->engine, D_004A2208);
-    self->w444[2] = findElem_9AD0(self->engine, D_004A2200);
-    self->w444[3] = findElem_9AD0(self->engine, D_004A2228);
-    self->w444[4] = findElem_9AD0(self->engine, D_004A2230);
-    self->w444[5] = findElem_9AD0(self->engine, D_004A2238);
-    self->w444[6] = findElem_9AD0(self->engine, D_004A2240);
-    self->w444[7] = findElem_9AD0(self->engine, D_004A2248);
-    self->w444[8] = findElem_9AD0(self->engine, D_004A2250);
-    self->w444[9] = findElem_9AD0(self->engine, D_004A2258);
-    self->w444[10] = findElem_9AD0(self->engine, D_004A2260);
+    self->w444[0] = findElem_9AD0(self->engine, str_nm1w);
+    self->w444[1] = findElem_9AD0(self->engine, str_nm2w);
+    self->w444[2] = findElem_9AD0(self->engine, str_nm3w);
+    self->w444[3] = findElem_9AD0(self->engine, str_nm4w);
+    self->w444[4] = findElem_9AD0(self->engine, str_nm5w);
+    self->w444[5] = findElem_9AD0(self->engine, str_nm6w);
+    self->w444[6] = findElem_9AD0(self->engine, str_st_w);
+    self->w444[7] = findElem_9AD0(self->engine, str_nd_w);
+    self->w444[8] = findElem_9AD0(self->engine, str_rd_w);
+    self->w444[9] = findElem_9AD0(self->engine, str_th_w);
+    self->w444[10] = findElem_9AD0(self->engine, str_slash_b);
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 3; j++) {
             self->boost[i][j] = func_00398380(self->engine + 0x58, D_004C8940[i][j]);
         }
     }
-    self->w538 = findElem_9AD0(self->engine, D_004A2268);
+    self->w538 = findElem_9AD0(self->engine, str_Sphere);
     {
     t2Vector a;
     getElemSize_9AD0(&D_00476940, &a, 0);
@@ -1032,9 +1032,9 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     }
     }
     self->w16C = cFont_textExtent(self->font, self->fontName, 0, 0, 1.0f, 1.0f);
-    self->w170 = cFont_textExtent(self->font, D_004A2270, 0, 0, 1.0f, 1.0f);
+    self->w170 = cFont_textExtent(self->font, str_00, 0, 0, 1.0f, 1.0f);
     self->w174 = cFont_textExtent(self->font, D_004A2108, 0, 0, 1.0f, 1.0f);
-    self->w178 = (self->w170 - cFont_textExtent(self->font, D_004A2278, 0, 0, 1.0f, 1.0f)) * 0.25f;
+    self->w178 = (self->w170 - cFont_textExtent(self->font, str_11_b, 0, 0, 1.0f, 1.0f)) * 0.25f;
     self->f17C = 0;
     self->f180 = 0;
     self->f184 = 0;
@@ -1045,9 +1045,9 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     func_001E94E0_reen(self->box6AC, D_004A21D8, self->bank428, &D_004A4F50);
     func_001E94E0_reen(self->box7F8, D_004A21D8, self->bank428, &D_004A4F50);
     unsigned short fmt[32];
-    func_003DCA40(fmt, D_0046EAB8);
-    unsigned short* name = getLocString_9AD0(D_0046EAC8);
-    unsigned short* skip = getLocString_9AD0(D_0046EAD8);
+    func_003DCA40(fmt, str_pct_s_at_skip_pct_s);
+    unsigned short* name = getLocString_9AD0(str_kT_OVRCMNPress);
+    unsigned short* skip = getLocString_9AD0(str_kT_OVRCMNToSkip);
     unsigned short buf[32];
     func_003DC9F8(buf, fmt, name, skip);
     func_001E9540_reen(self->boxB48, buf, self->bank428, &D_004A4F58);
@@ -1444,8 +1444,8 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001DC990(void* font, float x, float y, const char* fmt, ...);
 extern char D_004A2100[];
 extern char D_004A2108[];
-extern char D_004A22F0[];
-extern char D_004A22F8[];
+extern char str_pct_02d[];
+extern char str_pct_02d_b[];
 
 struct sFont_001F1840 {
     char pad0[0x14];
@@ -1525,9 +1525,9 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
             cFont_text(self->font, out[0], out[1], D_004A2100);
         out[0] += self->f174;
     }
-    sprintf(bufs[0], D_004A22F0, hour);
-    sprintf(bufs[1], D_004A22F0, minute);
-    sprintf(bufs[2], D_004A22F0, sec);
+    sprintf(bufs[0], str_pct_02d, hour);
+    sprintf(bufs[1], str_pct_02d, minute);
+    sprintf(bufs[2], str_pct_02d, sec);
     cFont_text(self->font, out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
     out[0] += sepW;
     for (int i = 1; i < 3; i++) {
@@ -1538,7 +1538,7 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
         out[0] += sepW;
     }
     if (timeRenderFlags & 1)
-        func_001DC990(self->font, out[0], out[1], D_004A22F8, secFrac);
+        func_001DC990(self->font, out[0], out[1], str_pct_02d_b, secFrac);
 }
 #endif
 
@@ -2256,8 +2256,8 @@ struct sHudIds001F30D8 {
 
 int GetHashValue32(char* str);
 extern "C" int func_003983F0(void* self, int key);
-extern char D_0046ED78[];
-extern char D_004A21F0[];
+extern char str_kT_ovrcmnloading_b[];
+extern char str_fefont[];
 
 extern "C" void func_001F30D8(void* p)
 {
@@ -2265,10 +2265,10 @@ extern "C" void func_001F30D8(void* p)
     char* o = (char*)SSXApp->FELocale;
     sVEntry001F30D8* vt = *(sVEntry001F30D8**)(o + 4);
     char* adj = o + vt[4].delta;
-    int h = GetHashValue32(D_0046ED78);
+    int h = GetHashValue32(str_kT_ovrcmnloading_b);
     self->a = vt[4].fn(adj, h);
     void* tbl = *(void**)((char*)SSXApp->Game->UI + 8);
-    self->d = func_003983F0(tbl, GetHashValue32(D_004A21F0));
+    self->d = func_003983F0(tbl, GetHashValue32(str_fefont));
     self->b = 0;
     self->c = 0;
 }

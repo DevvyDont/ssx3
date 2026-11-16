@@ -10,7 +10,7 @@ extern "C" void* func_002533C8(void* mem);
 extern "C" void func_00253390(void* self);
 extern "C" int func_002534A8(void* p, void* q);
 extern "C" void func_00253418(void* p, int a1);
-extern const char D_00481FC8[];
+extern const char str_VidEnginePlayer[];
 
 struct sVidParams38E8 {
     int file;       // 0x0
@@ -37,7 +37,7 @@ struct sVidParams38E8 {
 extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return 0;
-    *self = func_002533C8(cMemMan_alloc(0x44, D_00481FC8, 0x100, 0));
+    *self = func_002533C8(cMemMan_alloc(0x44, str_VidEnginePlayer, 0x100, 0));
     sVidParams38E8 params;
     func_00253390(&params);
     //S

@@ -33,29 +33,29 @@ extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
 extern void* D_004A33F4;
-extern char D_0046F8D8[];
-extern char D_0046F8E8[];
-extern char D_0046F8F8[];
-extern char D_0046F910[];
-extern char D_0046F920[];
-extern char D_0046F930[];
-extern char D_0046F940[];
-extern char D_0046F950[];
-extern char D_0046F960[];
-extern char D_0046F970[];
-extern char D_0046F980[];
-extern char D_0046F990[];
-extern char D_0046F9A0[];
-extern char D_0046F9B0[];
-extern char D_004A2498[];
-extern char D_004A24A0[];
-extern char D_004A24A8[];
-extern char D_004A24B0[];
-extern char D_004A24B8[];
-extern char D_004A24C0[];
-extern char D_004A24C8[];
-extern char D_004A24D0[];
-extern char D_004A24D8[];
+extern char str_37beoptions[];
+extern char str_kT_CMNHUDFull[];
+extern char str_kT_CMNHUDMinimal[];
+extern char str_kT_CMNHUDNone_b[];
+extern char str_kT_OVRCMNNear[];
+extern char str_kT_OVRCMNMid[];
+extern char str_kT_OVRCMNFar[];
+extern char str_camera_select[];
+extern char str_kT_CMNCameraVar[];
+extern char str_camera_2_select[];
+extern char str_kT_CMNOff_b[];
+extern char str_kT_CMNOn_b[];
+extern char str_EATalkPair[];
+extern char str_EATalksl[];
+extern char str_0lb[];
+extern char str_1lb_b[];
+extern char str_2lb_b[];
+extern char str_4sl_b[];
+extern char str_5sl[];
+extern char str_6sl[];
+extern char str_7lb_b[];
+extern char str_8lb[];
+extern char str_EATalk[];
 
 // The pause-options settings word (same layout as cOVState_PAUSE_OPTIONS_onWidgetEvent's view).
 struct sOptions_PO {
@@ -194,7 +194,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
 {
     unsigned char sel;
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F8D8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_37beoptions), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -202,50 +202,50 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
     cOVState_onCreateScreen(self);
     cBEOptionInterface_PO* iface = (cBEOptionInterface_PO*)cBE_getInterface_Fv(cBE_getBE(), 4);
     {
-        void* w = find_PO(self, D_004A2498);
+        void* w = find_PO(self, str_0lb);
         if (w != 0) {
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F8E8), 0);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F8F8), 1);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F910), 2);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNHUDFull), 0);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNHUDMinimal), 1);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNHUDNone_b), 2);
             if (cUIListBox_getEntryByData(w, iface->getOptions().f30, &sel))
                 cUIListBox_setCurrentEntryByIndex(w, sel);
         }
     }
     {
-        void* w = find_PO(self, D_004A24A0);
+        void* w = find_PO(self, str_1lb_b);
         if (w != 0) {
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F920), 0x3C);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F930), 0x3D);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F940), 0x3E);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNNear), 0x3C);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNMid), 0x3D);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNFar), 0x3E);
             char* r = *(char**)(riders_PO() + 4);
             if (cUIListBox_getEntryByData(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
                 cUIListBox_setCurrentEntryByIndex(w, sel);
-            void* t = find_PO(self, D_0046F950);
+            void* t = find_PO(self, str_camera_select);
             if (t != 0) {
-                setFormatted_PO(t, D_0046F960, 1);
+                setFormatted_PO(t, str_kT_CMNCameraVar, 1);
             }
         }
     }
     {
-        void* w = find_PO(self, D_004A24A8);
+        void* w = find_PO(self, str_2lb_b);
         if (w != 0) {
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F920), 0x3C);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F930), 0x3D);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F940), 0x3E);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNNear), 0x3C);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNMid), 0x3D);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNFar), 0x3E);
             char* rs = riders_PO();
             if (*(unsigned int*)(rs + 0x10) >= 2) {
                 char* r = *(char**)(rs + 8);
                 if (cUIListBox_getEntryByData(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
                     cUIListBox_setCurrentEntryByIndex(w, sel);
             }
-            void* t = find_PO(self, D_0046F970);
+            void* t = find_PO(self, str_camera_2_select);
             if (t != 0) {
-                setFormatted_PO(t, D_0046F960, 2);
+                setFormatted_PO(t, str_kT_CMNCameraVar, 2);
             }
         }
     }
     {
-        sSlider_PO* w = (sSlider_PO*)find_PO(self, D_004A24B0);
+        sSlider_PO* w = (sSlider_PO*)find_PO(self, str_4sl_b);
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f0;
@@ -253,7 +253,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         }
     }
     {
-        sSlider_PO* w = (sSlider_PO*)find_PO(self, D_004A24B8);
+        sSlider_PO* w = (sSlider_PO*)find_PO(self, str_5sl);
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f8;
@@ -261,7 +261,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         }
     }
     {
-        sSlider_PO* w = (sSlider_PO*)find_PO(self, D_004A24C0);
+        sSlider_PO* w = (sSlider_PO*)find_PO(self, str_6sl);
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f4;
@@ -269,10 +269,10 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         }
     }
     {
-        void* w = find_PO(self, D_004A24C8);
+        void* w = find_PO(self, str_7lb_b);
         if (w != 0) {
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F980), 0);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F990), 1);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOff_b), 0);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOn_b), 1);
             unsigned char sel2;
             if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel2))
                 cUIListBox_setCurrentEntryByIndex(w, sel2);
@@ -280,26 +280,26 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         }
     }
     {
-        void* w = find_PO(self, D_004A24D0);
+        void* w = find_PO(self, str_8lb);
         if (w != 0) {
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F980), 0);
-            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F990), 1);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOff_b), 0);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOn_b), 1);
             unsigned char sel3;
             if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel3))
                 cUIListBox_setCurrentEntryByIndex(w, sel3);
             func_002875D0(func_0028B180(), Cfg_PO().f16 != 0);
         }
     }
-    cUIObj_PO* o = (cUIObj_PO*)find_PO(self, D_0046F9A0);
+    cUIObj_PO* o = (cUIObj_PO*)find_PO(self, str_EATalkPair);
     if (o != 0) {
         o->setVisible(0);
         o->setEnabled(1);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-        cUIObj_PO* a = (cUIObj_PO*)find_PO(self, D_0046F9A0);
-        cUIObj_PO* b = (cUIObj_PO*)find_PO(self, D_004A24D8);
-        cUIObj_PO* c = (cUIObj_PO*)find_PO(self, D_0046F9B0);
+        cUIObj_PO* a = (cUIObj_PO*)find_PO(self, str_EATalkPair);
+        cUIObj_PO* b = (cUIObj_PO*)find_PO(self, str_EATalk);
+        cUIObj_PO* c = (cUIObj_PO*)find_PO(self, str_EATalksl);
         if (a != 0 && b != 0 && c != 0) {
             a->setVisible(1);
             a->setEnabled(0);
@@ -319,7 +319,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             }
         }
     } else {
-        cUIObj_PO* d = (cUIObj_PO*)find_PO(self, D_004A24D8);
+        cUIObj_PO* d = (cUIObj_PO*)find_PO(self, str_EATalk);
         if (d != 0) {
             d->setHighlight(1);
             *(sColor_PO*)((char*)d + 0x88) = D_004C66C8_PO;
@@ -341,9 +341,9 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern char cBENewRaceInterface_newRace[];
 extern char D_004A24E0[];
-extern char D_0046F970[];
-extern char D_004A24A8[];
-extern char D_004A24E8[];
+extern char str_camera_2_select[];
+extern char str_2lb_b[];
+extern char str_save[];
 
 class cUIObj_FA100 {
 public:
@@ -380,17 +380,17 @@ extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
         if (pair2 != 0) {
             pair2->setEnabled(1);
         }
-        void* camSelect2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046F970));
+        void* camSelect2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_camera_2_select));
         if (camSelect2 != 0) {
             func_00194498(camSelect2);
         }
-        void* label2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24A8));
+        void* label2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb_b));
         if (label2 != 0) {
             func_00194498(label2);
         }
     }
     if (!isField_FA100((signed char*)cBENewRaceInterface_newRace, 0x48, 4)) {
-        void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E8));
+        void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_save));
         if (d != 0) {
             func_00194498(d);
         }
@@ -422,17 +422,17 @@ extern "C" void func_00266F58(void* self, int a, int b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
 extern void* D_004A33F4;
-extern char D_0046F9B0[];
-extern char D_0046F9C0[];
-extern char D_004A2498[];
-extern char D_004A24A0[];
-extern char D_004A24A8[];
-extern char D_004A24B0[];
-extern char D_004A24B8[];
-extern char D_004A24C0[];
-extern char D_004A24C8[];
-extern char D_004A24D0[];
-extern char D_004A24E8[];
+extern char str_EATalksl[];
+extern char str_Save_Profile[];
+extern char str_0lb[];
+extern char str_1lb_b[];
+extern char str_2lb_b[];
+extern char str_4sl_b[];
+extern char str_5sl[];
+extern char str_6sl[];
+extern char str_7lb_b[];
+extern char str_8lb[];
+extern char str_save[];
 
 struct sOptions_A238 {
     unsigned int f0 : 4;
@@ -500,9 +500,9 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
     cBEOptionInterface_A238* iface = (cBEOptionInterface_A238*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (msg) {
     case 5:
-        if (IsId_A238(obj, D_004A24E8)) {
+        if (IsId_A238(obj, str_save)) {
             char* stack = (char*)SSXApp->Game->UI;
-            char* st = (char*)func_00211088(cMemMan_alloc(0x27C, D_0046F9C0, 0x100, 0), *(void**)((char*)self + 0x10),
+            char* st = (char*)func_00211088(cMemMan_alloc(0x27C, str_Save_Profile, 0x100, 0), *(void**)((char*)self + 0x10),
                                             *(unsigned char*)((char*)self + 0x14), 0x2A);
             *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(stack + 0x18, st, 0, 0);
@@ -512,34 +512,34 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
         func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
         break;
     case 9:
-        if (IsId_A238(obj, D_004A2498)) {
+        if (IsId_A238(obj, str_0lb)) {
             D_00535610_A238.f30 = *(unsigned char*)(obj + 0x319);
-        } else if (IsId_A238(obj, D_004A24A0)) {
+        } else if (IsId_A238(obj, str_1lb_b)) {
             int on = cUIListBox_getCurrentEntryData(obj);
             char* p = (char*)Sound_A238(4);
             cChaseCameraController_switchCamera_UserChange(*(void**)(p + 0xA8), on, p);
-        } else if (IsId_A238(obj, D_004A24A8)) {
+        } else if (IsId_A238(obj, str_2lb_b)) {
             int on = cUIListBox_getCurrentEntryData(obj);
             char* p = (char*)Sound_A238(8);
             cChaseCameraController_switchCamera_UserChange(*(void**)(p + 0xA8), on, p);
-        } else if (IsId_A238(obj, D_004A24B0)) {
+        } else if (IsId_A238(obj, str_4sl_b)) {
             SetF0_A238(*(int*)(obj + 0x74));
             func_00287410(func_0028B180(), iface->getOptions().f0);
-        } else if (IsId_A238(obj, D_004A24B8)) {
+        } else if (IsId_A238(obj, str_5sl)) {
             SetF8_A238(*(int*)(obj + 0x74));
             func_00287488(func_0028B180(), iface->getOptions().f8);
-        } else if (IsId_A238(obj, D_004A24C0)) {
+        } else if (IsId_A238(obj, str_6sl)) {
             SetF4_A238(*(int*)(obj + 0x74));
             func_00287520(func_0028B180(), iface->getOptions().f4);
-        } else if (IsId_A238(obj, D_004A24C8)) {
+        } else if (IsId_A238(obj, str_7lb_b)) {
             D_00535610_A238.f17 = cUIListBox_getCurrentEntryData(obj) != 0;
             func_00287558(func_0028B180(), iface->getOptions().f17 != 0);
-        } else if (IsId_A238(obj, D_004A24D0)) {
+        } else if (IsId_A238(obj, str_8lb)) {
             D_00535610_A238.f16 = cUIListBox_getCurrentEntryData(obj) != 0;
             func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, D_0046F9B0)) {
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, str_EATalksl)) {
             int level;
             int max;
             func_00266F90(D_004A33F4, &level, &max);
@@ -566,7 +566,7 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
-extern char D_0046E050[];
+extern char str_TransitionOut_b[];
 
 /**
  * Closes the in-game options when an online pause or overlay timeout runs out.
@@ -581,7 +581,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0046E050));
+            int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(*(void**)((char*)self + 0x40), (unsigned short)frame, 1);
             }
@@ -596,7 +596,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_00397870(void* list, int index);
-extern char D_004A24E8[];
+extern char str_save[];
 
 /**
  * Tells the options menu how to react to a button: the press animation alone, or with the item's sound.
@@ -610,13 +610,13 @@ extern char D_004A24E8[];
  * @return 0x100 (animation only) for Square, Circle and Cross on any item but "save", else 0x101 (animation
  *         and sound)
  */
-// Pause-menu key filter: returns 0x100 for keys 8/9 and for key 6 unless the item is D_004A24E8, else 0x101.
+// Pause-menu key filter: returns 0x100 for keys 8/9 and for key 6 unless the item is str_save, else 0x101.
 extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
 {
     switch (key) {
     case 6: {
         int id = *(int*)((char*)func_00397870((char*)menu + 0x74, index) + 0x38);
-        if (id == GetHashValue32(D_004A24E8)) {
+        if (id == GetHashValue32(str_save)) {
             break;
         }
     }
@@ -674,23 +674,23 @@ extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
 extern void* D_004A5B64;
-extern char D_0046F9D0[];
-extern char D_0046F9E0[];
-extern char D_0046F9F0[];
-extern char D_0046FA08[];
-extern char D_0046FA18[];
-extern char D_0046FA38[];
-extern char D_0046FA58[];
-extern char D_0046FA78[];
-extern char D_0046FA90[];
-extern char D_0046FAA0[];
-extern char D_0046FAB0[];
-extern char D_0046FAC8[];
-extern char D_0046FAD8[];
-extern char D_0046FAE8[];
-extern char D_0046FB00[];
-extern char D_0046FB18[];
-extern char D_0046FB28[];
+extern char str_265InGameError[];
+extern char str_SubTitle[];
+extern char str_kT_OVROnlineError[];
+extern char str_TextError[];
+extern char str_kT_POPUPCMNExcessiveDelay[];
+extern char str_kT_POPUPCMNCheatDetected[];
+extern char str_kT_POPUPCMNConnectionLost_b[];
+extern char str_kT_POPUPCMNOpponentQuit[];
+extern char str_Text_CancelGame[];
+extern char str_kT_BTNOK_b[];
+extern char str_kT_OVRCancelEvent[];
+extern char str_Cancelps2X[];
+extern char str_Continueps2X[];
+extern char str_CancelButtonBack[];
+extern char str_ContinueButtonBack[];
+extern char str_TextInfo[];
+extern char str_kT_PauseErrorCheckingServer[];
 
 class cUIObj_1FAB18 {
 public:
@@ -724,17 +724,17 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
 {
     char* state = (char*)self;
     void* eng = *(void**)(state + 0x10);
-    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046F9D0), 0);
+    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_265InGameError), 0);
     *(void**)(state + 0x40) = scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cUIText* subTitle = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046F9E0));
+    cUIText* subTitle = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_SubTitle));
     if (subTitle != 0) {
-        cUIText_setUnicodeStringByID(subTitle, GetHashValue32(D_0046F9F0));
+        cUIText_setUnicodeStringByID(subTitle, GetHashValue32(str_kT_OVROnlineError));
     }
-    cUIObj_1FAB18* errorText = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FA08));
+    cUIObj_1FAB18* errorText = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_TextError));
     if (errorText != 0) {
         errorText->setVisible(1);
         cGameComm* gameComm = cGameComm_mGameComm;
@@ -743,59 +743,59 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
         int one = 1;
         if (e != 0) {
             if (e == one) {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA18));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNExcessiveDelay));
             } else if (e == 2) {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA18));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNExcessiveDelay));
             } else if (e == 3) {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA18));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNExcessiveDelay));
             } else {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA38));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNCheatDetected));
             }
         } else if (gameComm->mCheating[1] != 0) {
             *(int*)(state + 0xA0) = 0;
             int e2 = gameComm->mCheating[1];
             if (e2 == one) {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA58));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
             } else if (e2 == 2) {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA58));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
             } else if (e2 == 3) {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA58));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
             } else {
-                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA58));
+                cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
             }
         } else if (gameComm->mRemoteEndGame != 0) {
-            cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA78));
+            cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNOpponentQuit));
             *(int*)(state + 0xA0) = 0;
         } else if (gameComm->mRemoteDisconnected != 0) {
             *(int*)(state + 0xA0) = 0;
-            cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA78));
+            cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNOpponentQuit));
         } else {
             *(int*)(state + 0xA0) = 0;
-            cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(D_0046FA58));
+            cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
         }
-        cUIObj_1FAB18* o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FA90));
+        cUIObj_1FAB18* o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_Text_CancelGame));
         if (o2 != 0) {
             if (cGameComm_mGameComm->mLocalFinishedRace != 0) {
-                cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(D_0046FAA0));
+                cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(str_kT_BTNOK_b));
             } else {
-                cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(D_0046FAB0));
+                cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(str_kT_OVRCancelEvent));
             }
             o2->setVisible(0);
             *(int*)((char*)o2 + 0x18) = 0;
         }
-        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FAC8));
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_Cancelps2X));
         if (o2 != 0) {
             o2->setVisible(0);
         }
-        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FAD8));
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_Continueps2X));
         if (o2 != 0) {
             o2->setVisible(0);
         }
-        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FAE8));
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_CancelButtonBack));
         if (o2 != 0) {
             o2->setVisible(0);
         }
-        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FB00));
+        o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_ContinueButtonBack));
         if (o2 != 0) {
             o2->setVisible(0);
         }
@@ -805,9 +805,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
         func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
         *(int*)(state + 0x9C) = *(int*)((char*)D_004A5B64 + 0x18);
         func_001FAFF8(self, 0);
-        cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(D_0046FB18));
+        cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_TextInfo));
         if (t2 != 0) {
-            cUIText_setUnicodeStringByID(t2, GetHashValue32(D_0046FB28));
+            cUIText_setUnicodeStringByID(t2, GetHashValue32(str_kT_PauseErrorCheckingServer));
         }
     } else {
         func_001FAFF8(self, 1);
@@ -840,7 +840,7 @@ extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self);
-extern char D_0046FB18[];
+extern char str_TextInfo[];
 
 class cUIObj_1FAF10 {
 public:
@@ -873,7 +873,7 @@ extern "C" void func_001FAF10(void* self)
             if (received) {
                 cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(self);
             } else {
-                ((cUIObj_1FAF10*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB18)))->setVisible(0);
+                ((cUIObj_1FAF10*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo)))->setVisible(0);
             }
         }
         func_001FAFF8(self, 1);
@@ -887,8 +887,8 @@ INCLUDE_ASM("fe/ovstatepause", func_001FAFF8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0046FA90[];
-extern char D_004A2470[];
+extern char str_Text_CancelGame[];
+extern char str_Menu_b[];
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
 
 class cUIObj_1FAFF8 {
@@ -907,11 +907,11 @@ public:
 
 extern "C" void func_001FAFF8(void* self, bool on)
 {
-    cUIObj_1FAFF8* o = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FA90));
+    cUIObj_1FAFF8* o = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
     o->setVisible(on);
     o->setEnabled(!on);
     if (on) {
-        cUIObj_1FAFF8* m = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2470));
+        cUIObj_1FAFF8* m = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu_b));
         m->v07(1);
         cUIMenu_setSelectedByIndex(m, 1);
     }
@@ -925,8 +925,8 @@ int GetHashValue32(char* str);
 extern "C" void func_001FB2B8(void* self, void* item, int msg);
 extern "C" void func_001FB458(void* self, int on);
 extern "C" void func_001FB588(void* self, int on);
-extern char D_0046FA90[];
-extern char D_0046FB48[];
+extern char str_Text_CancelGame[];
+extern char str_Text_ContinueGame[];
 
 extern "C" void func_001FB0C0(void* self, void* item, int msg)
 {
@@ -939,12 +939,12 @@ extern "C" void func_001FB0C0(void* self, void* item, int msg)
         break;
     case 1: {
         int id = *(int*)((char*)item + 0x38);
-        if (id == GetHashValue32(D_0046FA90)) {
+        if (id == GetHashValue32(str_Text_CancelGame)) {
             func_001FB588(self, 1);
             func_001FB458(self, 0);
         } else {
             int id2 = *(int*)((char*)item + 0x38);
-            if (id2 == GetHashValue32(D_0046FB48)) {
+            if (id2 == GetHashValue32(str_Text_ContinueGame)) {
                 func_001FB458(self, 1);
                 func_001FB588(self, 0);
             }
@@ -967,8 +967,8 @@ struct sVE_FB180 {
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_0046FB18[];
-extern char D_0046FB60[];
+extern char str_TextInfo[];
+extern char str_kT_PauseErrorServerCheckTimedOut[];
 
 /**
  * Reports that the server check timed out: TextInfo gets kT_PauseErrorServerCheckTimedOut.
@@ -979,9 +979,9 @@ extern char D_0046FB60[];
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self)
 {
     if (*(void**)((char*)self + 0x40) != 0) {
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB18));
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo));
         if (infoText != 0 && *(int*)((char*)self + 0xA0) != 0) {
-            cUIText_setUnicodeStringByID(infoText, GetHashValue32(D_0046FB60));
+            cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorServerCheckTimedOut));
         }
         sVE_FB180* vt = *(sVE_FB180**)((char*)infoText + 0x8);
         vt[9].fn((char*)infoText + vt[9].delta, *(int*)((char*)self + 0xA0));
@@ -1002,8 +1002,8 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
-extern char D_0046FB18[];
-extern char D_0046FB88[];
+extern char str_TextInfo[];
+extern char str_kT_PauseErrorOpponentDisconnected[];
 
 /**
  * Reports that the server answered, so the opponent dropped: shows kT_PauseErrorOpponentDisconnected and the
@@ -1016,9 +1016,9 @@ extern char D_0046FB88[];
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
 {
     if (*(void**)((char*)self + 0x40) != 0) {
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB18));
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo));
         if (infoText != 0 && *(int*)((char*)self + 0xA0) != 0) {
-            cUIText_setUnicodeStringByID(infoText, GetHashValue32(D_0046FB88));
+            cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorOpponentDisconnected));
         }
         sVE_FB218* vt = *(sVE_FB218**)((char*)infoText + 0x8);
         vt[9].fn((char*)infoText + vt[9].delta, *(int*)((char*)self + 0xA0));
@@ -1060,9 +1060,9 @@ extern "C" void func_001FB2B8(void* self, void* item, int msg)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible);
 #ifdef SKIP_ASM
-extern char D_0046FB48[];
-extern char D_0046FBB0[];
-extern char D_004A2470[];
+extern char str_Text_ContinueGame[];
+extern char str_kT_OVRContinueRacing[];
+extern char str_Menu_b[];
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
 
 class cUIObj_1FB378 {
@@ -1090,14 +1090,14 @@ public:
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible)
 {
-    cUIObj_1FB378* continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB48));
+    cUIObj_1FB378* continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
     if (continueText != 0) {
-        cUIText_setUnicodeStringByID((cUIText*)continueText, GetHashValue32(D_0046FBB0));
+        cUIText_setUnicodeStringByID((cUIText*)continueText, GetHashValue32(str_kT_OVRContinueRacing));
         continueText->setEnabled(visible ^ 1);
         continueText->setVisible(visible);
         *(int*)((char*)continueText + 0x18) = 4;
     }
-    continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2470));
+    continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu_b));
     if (continueText != 0 && visible) {
         cUIMenu_setSelectedByIndex(continueText, 0);
     }
@@ -1109,9 +1109,9 @@ INCLUDE_ASM("fe/ovstatepause", func_001FB458);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0046FB48[];
-extern char D_0046FAD8[];
-extern char D_0046FB00[];
+extern char str_Text_ContinueGame[];
+extern char str_Continueps2X[];
+extern char str_ContinueButtonBack[];
 
 struct sColor_FB458 {
     float r, g, b, a;
@@ -1136,9 +1136,9 @@ public:
 
 extern "C" void func_001FB458(void* self, int on)
 {
-    cUIObj_FB458* t = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB48));
-    cUIObj_FB458* a = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FAD8));
-    cUIObj_FB458* b = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB00));
+    cUIObj_FB458* t = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
+    cUIObj_FB458* a = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Continueps2X));
+    cUIObj_FB458* b = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ContinueButtonBack));
     if (on) {
         t->setColor(sColor_FB458(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
@@ -1154,9 +1154,9 @@ INCLUDE_ASM("fe/ovstatepause", func_001FB588);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0046FA90[];
-extern char D_0046FAC8[];
-extern char D_0046FAE8[];
+extern char str_Text_CancelGame[];
+extern char str_Cancelps2X[];
+extern char str_CancelButtonBack[];
 
 struct sColor_FB588 {
     float r, g, b, a;
@@ -1181,9 +1181,9 @@ public:
 
 extern "C" void func_001FB588(void* self, int on)
 {
-    cUIObj_FB588* t = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FA90));
-    cUIObj_FB588* a = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FAC8));
-    cUIObj_FB588* b = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FAE8));
+    cUIObj_FB588* t = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
+    cUIObj_FB588* a = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Cancelps2X));
+    cUIObj_FB588* b = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_CancelButtonBack));
     if (on) {
         t->setColor(sColor_FB588(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
@@ -1206,8 +1206,8 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
 extern "C" void cUIState_onGainFocus(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004A2170[];
-extern char D_0046E4E8[];
+extern char str_riderpct_d[];
+extern char str_at_TextPulseWhiteOrange[];
 extern signed char D_00535C11[];
 
 extern "C" void func_001FBBD8(void* self)
@@ -1216,11 +1216,11 @@ extern "C" void func_001FBBD8(void* self)
     cUIState_onGainFocus(self);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 0) + 1);
-    cOVState_triggerTextFade(self, buf, D_0046E4E8);
+    sprintf(buf, str_riderpct_d, cBENewPlayerInterface_getHumanRider(iface, 0) + 1);
+    cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     if (D_00535C11[0] == 2) {
-        sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
-        cOVState_triggerTextFade(self, buf, D_0046E4E8);
+        sprintf(buf, str_riderpct_d, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
+        cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     }
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
@@ -1330,7 +1330,7 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name);
 
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 
-extern char D_0046E378[];
+extern char str_OV_darkblue[];
 
 extern char D_004A2138[];
 
@@ -1349,43 +1349,43 @@ extern int D_00536708[];
 // The "%d" format D_004A2138, reached gp-relative here: a sized declaration of the same string.
 extern char D_004A2138_n[3] __asm__("D_004A2138");
 extern unsigned short D_004A2140[];
-extern char D_0046FC90[];
-extern char D_0046E388[];
-extern char D_0046E398[];
-extern char D_0046E3A8[];
-extern char D_0046E3C0[];
-extern char D_0046FCA0[];
-extern char D_0046FCB0[];
-extern char D_0046FCC0[];
-extern char D_0046FCD8[];
-extern char D_0046FCF0[];
-extern char D_0046E468[];
-extern char D_004A2500[];
-extern char D_0046FD08[];
-extern char D_0046FD20[];
-extern char D_0046FD38[];
-extern char D_0046FD58[];
-extern char D_0046FD70[];
-extern char D_0046FD80[];
-extern char D_0046FD90[];
-extern char D_004A2148[];
-extern char D_0046FC08[];
-extern char D_0046FC20[];
-extern char D_004A2158[];
-extern char D_0046FDA0[];
-extern char D_0046E400[];
-extern char D_0046FDB0[];
-extern char D_0046FDC8[];
-extern char D_0046E418[];
-extern char D_0046E428[];
-extern char D_0046E438[];
-extern char D_0046E448[];
+extern char str_41freestyle_pre[];
+extern char str_track_event[];
+extern char str_kT_cmnSlopeCaps[];
+extern char str_kT_cmnBigAirCaps[];
+extern char str_kT_cmnPipeCaps[];
+extern char str_objText1[];
+extern char str_objText2[];
+extern char str_kT_FSOBJ2HeatsQF[];
+extern char str_kT_FSOBJHeatsGrandTtl[];
+extern char str_kT_FSOBJEarnXpts[];
+extern char str_kT_CMNHELPEarnedEnoughPoints[];
+extern char str_bullet1[];
+extern char str_kT_FSOBJFinalSolo[];
+extern char str_kT_OVRCMNPlaceTop3Medal[];
+extern char str_kT_OVRCMNCollPointAndMulti[];
+extern char str_kT_OVRCMNCollPointIcons[];
+extern char str_heat1_tab[];
+extern char str_heat2_tab[];
+extern char str_finalheat_tab[];
+extern char str_title_b[];
+extern char str_kT_CMNStateMultiPlay[];
+extern char str_kT_CMNStateQuickPlay[];
+extern char str_heat1[];
+extern char str_kT_OVRCMNHeat1[];
+extern char str_kT_OVRCMNScoreColon[];
+extern char str_column_secondrun[];
+extern char str_column_total[];
+extern char str_rider_pct_d[];
+extern char str_run_1_pct_d[];
+extern char str_run_2_pct_d[];
+extern char str_total_pct_d[];
 extern char D_004A2168[];
-extern char D_004A2508[];
-extern char D_004A2510[];
-extern char D_004A2518[];
-extern char D_0046FDD8[];
-extern char D_0046FDE8[];
+extern char str_p0rider[];
+extern char str_p0run1[];
+extern char str_p1rider[];
+extern char str_p1dashes[];
+extern char str_topScore[];
 
 
 static inline unsigned short* lookupString_1FBD20(char* name)
@@ -1407,12 +1407,12 @@ extern "C" void func_001FBD20(void* self)
     unsigned short line[0x68];
     char* s = (char*)self;
     void* eng = *(void**)(s + 0x10);
-    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046FC90), 0);
+    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_41freestyle_pre), 0);
     *(void**)(s + 0x40) = scr;
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
     eng = *(void**)(s + 0x10);
-    scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046E378), 0);
+    scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
     func_0020D1D8(self);
@@ -1422,92 +1422,92 @@ extern "C" void func_001FBD20(void* self)
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
     cGameModeMan* stats = SSXApp->GameModeMan;
     int mode = stats->iHeatNum;
-    void* o = getObj_1FBD20(self, D_0046E388);
+    void* o = getObj_1FBD20(self, str_track_event);
     func_002C2540_BD20(title, func_00144BF0(iface0));
     unsigned short* str = 0;
     switch (cBENewRaceInterface_newRace[0x48]) {
     case 1:
-        str = lookupString_1FBD20(D_0046E398);
+        str = lookupString_1FBD20(str_kT_cmnSlopeCaps);
         break;
     case 2:
-        str = lookupString_1FBD20(D_0046E3A8);
+        str = lookupString_1FBD20(str_kT_cmnBigAirCaps);
         break;
     case 3:
-        str = lookupString_1FBD20(D_0046E3C0);
+        str = lookupString_1FBD20(str_kT_cmnPipeCaps);
         break;
     }
     sprintf2(line, D_004A2140, title, str);
     cUIText_setUnicodeString(o, line);
-    void* text = getObj_1FBD20(self, D_0046FCA0);
-    cUIThing* sub = (cUIThing*)getObj_1FBD20(self, D_0046FCB0);
+    void* text = getObj_1FBD20(self, str_objText1);
+    cUIThing* sub = (cUIThing*)getObj_1FBD20(self, str_objText2);
     if (cBENewRaceInterface_newRace[0x49] == 0) {
         if (mode == 1) {
-            cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(D_0046FCC0));
-            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(D_0046FCD8));
+            cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_FSOBJ2HeatsQF));
+            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_FSOBJHeatsGrandTtl));
         } else if (mode == 2) {
             int total = cGameModeMan_getHeatScore(stats, D_00536708[2], 0) + cGameModeMan_getHeatScore(stats, D_00536708[2], 1);
             int n = total - cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
             if (n > 0) {
                 unsigned short buf[0x320];
-                unsigned short* fmt = lookupString_1FBD20(D_0046FCF0);
+                unsigned short* fmt = lookupString_1FBD20(str_kT_FSOBJEarnXpts);
                 sprintf1(buf, fmt, n);
                 cUIText_setUnicodeString(text, buf);
             } else {
-                cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(D_0046E468));
+                cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
             }
             sub->setVisible(0);
-            cUIState_hideObjSafe(self, D_004A2500);
+            cUIState_hideObjSafe(self, str_bullet1);
         } else {
-            cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(D_0046FD08));
-            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(D_0046FD20));
+            cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_FSOBJFinalSolo));
+            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNPlaceTop3Medal));
         }
     } else {
-        cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(D_0046FD20));
+        cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_OVRCMNPlaceTop3Medal));
         if (cBENewRaceInterface_newRace[0x49] == 2)
             sub->setVisible(0);
         else if (cBENewRaceInterface_newRace[0x48] == 1)
-            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(D_0046FD38));
+            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNCollPointAndMulti));
         else
-            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(D_0046FD58));
+            cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNCollPointIcons));
     }
-    cUIState_hideObjSafe(self, D_0046FD70);
-    cUIState_hideObjSafe(self, D_0046FD80);
-    cUIState_hideObjSafe(self, D_0046FD90);
+    cUIState_hideObjSafe(self, str_heat1_tab);
+    cUIState_hideObjSafe(self, str_heat2_tab);
+    cUIState_hideObjSafe(self, str_finalheat_tab);
     if (cBENewRaceInterface_newRace[0x49] == 0) {
         switch (mode) {
         case 0:
         case 1:
-            cUIState_showObjSafe(self, D_0046FD70);
+            cUIState_showObjSafe(self, str_heat1_tab);
             break;
         case 2:
-            cUIState_showObjSafe(self, D_0046FD80);
+            cUIState_showObjSafe(self, str_heat2_tab);
             break;
         case 3:
-            cUIState_showObjSafe(self, D_0046FD90);
+            cUIState_showObjSafe(self, str_finalheat_tab);
             break;
         }
-        cUIState_hideObjSafe(self, D_004A2148);
+        cUIState_hideObjSafe(self, str_title_b);
     } else {
-        o = getObj_1FBD20(self, D_004A2148);
+        o = getObj_1FBD20(self, str_title_b);
         if (cBENewRaceInterface_newRace[0x49] == 2)
-            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FC08));
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_CMNStateMultiPlay));
         else
-            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FC20));
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_CMNStateQuickPlay));
     }
-    o = getObj_1FBD20(self, D_004A2158);
+    o = getObj_1FBD20(self, str_heat1);
     if (cBENewRaceInterface_newRace[0x49] == 0) {
         if (mode >= 3)
-            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E400));
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNScoreColon));
         else
-            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FDA0));
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNHeat1));
         if (mode == 1 || mode == 3) {
-            cUIState_hideObjSafe(self, D_0046FDB0);
-            cUIState_hideObjSafe(self, D_0046FDC8);
+            cUIState_hideObjSafe(self, str_column_secondrun);
+            cUIState_hideObjSafe(self, str_column_total);
         }
     } else {
-        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E400));
-        cUIState_hideObjSafe(self, D_0046FDB0);
-        cUIState_hideObjSafe(self, D_0046FDC8);
+        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNScoreColon));
+        cUIState_hideObjSafe(self, str_column_secondrun);
+        cUIState_hideObjSafe(self, str_column_total);
     }
     {
         int k = 0;
@@ -1519,24 +1519,24 @@ extern "C" void func_001FBD20(void* self)
                 k++;
                 id = D_00536708[k];
             }
-            sprintf(name, D_0046E418, i);
+            sprintf(name, str_rider_pct_d, i);
             void* t = getObj_1FBD20(self, name);
             if (t != 0)
                 cUIText_setAsciiString((cUIText*)t, func_0014EEC8(iface2, stats->iCharacters[id], stats->iCheatCharacters[id]));
-            sprintf(name, D_0046E428, i);
+            sprintf(name, str_run_1_pct_d, i);
             t = getObj_1FBD20(self, name);
             if (t != 0) {
                 sprintf(num, D_004A2138, cGameModeMan_getHeatScore(stats, id, mode == 3 ? 2 : 0));
                 cUIText_setAsciiString((cUIText*)t, num);
             }
-            sprintf(name, D_0046E438, i);
+            sprintf(name, str_run_2_pct_d, i);
             t = getObj_1FBD20(self, name);
             if (cBENewRaceInterface_newRace[0x49] == 0 && mode == 2) {
                 char name2[0x20];
                 char total[0x10];
                 sprintf(num, D_004A2138_n, cGameModeMan_getHeatScore(stats, id, 1));
                 cUIText_setAsciiString((cUIText*)t, num);
-                sprintf(name2, D_0046E448, i);
+                sprintf(name2, str_total_pct_d, i);
                 t = getObj_1FBD20(self, name2);
                 int a = cGameModeMan_getHeatScore(stats, id, 0);
                 int b = cGameModeMan_getHeatScore(stats, id, 1);
@@ -1548,9 +1548,9 @@ extern "C" void func_001FBD20(void* self)
         }
     }
     int idx = cBENewPlayerInterface_getHumanRider(iface1, 0);
-    o = getObj_1FBD20(self, D_004A2508);
+    o = getObj_1FBD20(self, str_p0rider);
     cUIText_setAsciiString((cUIText*)o, func_0014EEC8(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), func_00147410(iface1, idx)));
-    o = getObj_1FBD20(self, D_004A2510);
+    o = getObj_1FBD20(self, str_p0run1);
     if (cBENewRaceInterface_newRace[0x49] == 0 && mode == 2) {
         char buf[0x10];
         int score = cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
@@ -1559,15 +1559,15 @@ extern "C" void func_001FBD20(void* self)
     } else {
         cUIText_setAsciiString((cUIText*)o, D_004A2168);
     }
-    o = getObj_1FBD20(self, D_004A2518);
+    o = getObj_1FBD20(self, str_p1rider);
     if (cBENewRaceInterface_newRace[0x49] == 2) {
         idx = cBENewPlayerInterface_getHumanRider(iface1, 1);
         cUIText_setAsciiString((cUIText*)o, func_0014EEC8(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), func_00147410(iface1, idx)));
     } else {
         ((cUIThing*)o)->setVisible(0);
-        cUIState_hideObjSafe(self, D_0046FDD8);
+        cUIState_hideObjSafe(self, str_p1dashes);
     }
-    o = getObj_1FBD20(self, D_0046FDE8);
+    o = getObj_1FBD20(self, str_topScore);
     {
         char buf[0x10];
         void* p = func_00155130(iface8, 0);
@@ -1589,27 +1589,27 @@ extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern "C" void func_002A31C0(void* self);
 extern signed char D_00535C11[];
-extern char D_0046E4E8[];
-extern char D_004A2508[];
-extern char D_004A2510[];
-extern char D_004A2518[];
-extern char D_0046FDF8[];
-extern char D_0046FDD8[];
+extern char str_at_TextPulseWhiteOrange[];
+extern char str_p0rider[];
+extern char str_p0run1[];
+extern char str_p1rider[];
+extern char str_p0dashes[];
+extern char str_p1dashes[];
 
 extern "C" void func_001FC768(void* self)
 {
     cUIState_onGainFocus(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int* mode = (int*)SSXApp->GameModeMan;
-    cOVState_triggerTextFade(self, D_004A2508, D_0046E4E8);
+    cOVState_triggerTextFade(self, str_p0rider, str_at_TextPulseWhiteOrange);
     if (*mode == 2) {
-        cOVState_triggerTextFade(self, D_0046FDF8, D_0046E4E8);
+        cOVState_triggerTextFade(self, str_p0dashes, str_at_TextPulseWhiteOrange);
     } else {
-        cOVState_triggerTextFade(self, D_004A2510, D_0046E4E8);
+        cOVState_triggerTextFade(self, str_p0run1, str_at_TextPulseWhiteOrange);
     }
     if (D_00535C11[0] == 2) {
-        cOVState_triggerTextFade(self, D_004A2518, D_0046E4E8);
-        cOVState_triggerTextFade(self, D_0046FDD8, D_0046E4E8);
+        cOVState_triggerTextFade(self, str_p1rider, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(self, str_p1dashes, str_at_TextPulseWhiteOrange);
     }
     func_00294F78(func_0028B180(), 0xE);
     func_002A31C0(func_0028B180());
@@ -1646,33 +1646,33 @@ extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char cBENewRaceInterface_newRace[];
-extern char D_0046FE08[];
-extern char D_0046E378[];
-extern char D_004A21B0[];
-extern char D_0046FC08[];
-extern char D_004A21B8[];
-extern char D_0046E398[];
-extern char D_0046E3A8[];
-extern char D_0046E3C0[];
-extern char D_0046E548[];
+extern char str_50multifs_pre[];
+extern char str_OV_darkblue[];
+extern char str_title1[];
+extern char str_kT_CMNStateMultiPlay[];
+extern char str_title2[];
+extern char str_kT_cmnSlopeCaps[];
+extern char str_kT_cmnBigAirCaps[];
+extern char str_kT_cmnPipeCaps[];
+extern char str_kT_cmnRaceCaps_b[];
 extern unsigned short D_0046E558[];
 extern unsigned short D_004A2140[];
-extern char D_004A2520[];
-extern char D_004A2528[];
-extern char D_004A2530[];
-extern char D_004A2538[];
-extern char D_0046FD38[];
-extern char D_0046FD58[];
-extern char D_0046FE18[];
-extern char D_004A2540[];
-extern char D_0046FE28[];
-extern char D_0046E888[];
-extern char D_0046FE38[];
-extern char D_0046FE50[];
-extern char D_0046FE70[];
-extern char D_0046FE80[];
-extern char D_0046FE98[];
-extern char D_0046FDE8[];
+extern char str_name[];
+extern char str_obj1[];
+extern char str_obj2[];
+extern char str_bullet2[];
+extern char str_kT_OVRCMNCollPointAndMulti[];
+extern char str_kT_OVRCMNCollPointIcons[];
+extern char str_kT_OVRCMNVs[];
+extern char str_vs[];
+extern char str_screendata1[];
+extern char str_screendata[];
+extern char str_kT_HELPFirstToBottom[];
+extern char str_kT_OVRCMNBeatOppMaxTrick[];
+extern char str_topScoreLabel[];
+extern char str_kT_OVRCMNRecordTime[];
+extern char str_kT_OVRCMNRecordScore[];
+extern char str_topScore[];
 extern char D_004A2138[];
 
 struct sVE_1FC878 { short delta; short index; unsigned short* (*fn)(void*, int); };
@@ -1709,12 +1709,12 @@ extern "C" void func_001FC878(void* self)
     char num[0x20];
     char* s = (char*)self;
     void* eng = *(void**)(s + 0x10);
-    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046FE08), 0);
+    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_50multifs_pre), 0);
     *(void**)(s + 0x40) = scr;
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
     eng = *(void**)(s + 0x10);
-    scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046E378), 0);
+    scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
     cOVState_onCreateScreen(self);
@@ -1725,24 +1725,24 @@ extern "C" void func_001FC878(void* self)
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
     int mode4A = getField_1FC878(gs, 0x4A);
     int mode48 = getField_1FC878(gs, 0x48);
-    void* o = getObj_1FC878(self, D_004A21B0);
-    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FC08));
-    o = getObj_1FC878(self, D_004A21B8);
+    void* o = getObj_1FC878(self, str_title1);
+    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_CMNStateMultiPlay));
+    o = getObj_1FC878(self, str_title2);
     func_002C2540(title, func_00144BF0(iface0));
     unsigned short* str = 0;
     switch (getField_1FC878(gs, 0x48))
     {
     case 5:
-        str = lookupString_1FC878(D_0046E548);
+        str = lookupString_1FC878(str_kT_cmnRaceCaps_b);
         break;
     case 1:
-        str = lookupString_1FC878(D_0046E398);
+        str = lookupString_1FC878(str_kT_cmnSlopeCaps);
         break;
     case 2:
-        str = lookupString_1FC878(D_0046E3A8);
+        str = lookupString_1FC878(str_kT_cmnBigAirCaps);
         break;
     case 3:
-        str = lookupString_1FC878(D_0046E3C0);
+        str = lookupString_1FC878(str_kT_cmnPipeCaps);
         break;
     }
     unsigned short* lineFmt = D_004A2140;
@@ -1751,62 +1751,62 @@ extern "C" void func_001FC878(void* self)
     else
         sprintf2(line, lineFmt, title);
     cUIText_setUnicodeString(o, line);
-    o = getObj_1FC878(self, D_004A2520);
+    o = getObj_1FC878(self, str_name);
     if (getField_1FC878((signed char*)cBENewRaceInterface_newRace, 0x49) == 2)
         cUIText_setAsciiString((cUIText*)o, func_00146F88(iface1, 0));
     else
         cUIText_setAsciiString((cUIText*)o, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
-    cUIText* status = (cUIText*)getObj_1FC878(self, D_004A2528);
+    cUIText* status = (cUIText*)getObj_1FC878(self, str_obj1);
     if (mode48 >= 1 && mode48 <= 3)
     {
-        cUIState_showObjSafe(self, D_004A2530);
-        cUIState_showObjSafe(self, D_004A2538);
-        o = getObj_1FC878(self, D_004A2530);
+        cUIState_showObjSafe(self, str_obj2);
+        cUIState_showObjSafe(self, str_bullet2);
+        o = getObj_1FC878(self, str_obj2);
         if (mode48 == 1)
-            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FD38));
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNCollPointAndMulti));
         else
-            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FD58));
+            cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNCollPointIcons));
     }
     else
     {
-        cUIState_hideObjSafe(self, D_004A2530);
-        cUIState_hideObjSafe(self, D_004A2538);
+        cUIState_hideObjSafe(self, str_obj2);
+        cUIState_hideObjSafe(self, str_bullet2);
     }
-    o = getObj_1FC878(self, D_004A21B0);
-    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FC08));
+    o = getObj_1FC878(self, str_title1);
+    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_CMNStateMultiPlay));
     if (getField_1FC878((signed char*)cBENewRaceInterface_newRace, 0x49) == 2)
         strcpy(rider, func_00146F88(iface1, 1));
     else
         strcpy(rider, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 1)));
-    unsigned short* fmt = lookupString_1FC878(D_0046FE18);
+    unsigned short* fmt = lookupString_1FC878(str_kT_OVRCMNVs);
     sprintf1(label, fmt, rider);
-    cUIText_setUnicodeString(getObj_1FC878(self, D_004A2540), label);
+    cUIText_setUnicodeString(getObj_1FC878(self, str_vs), label);
     if (mode48 >= 2 && mode48 <= 3)
     {
-        cUIState_hideObjSafe(self, D_0046FE28);
+        cUIState_hideObjSafe(self, str_screendata1);
     }
     else if (mode48 >= 5 && mode48 <= 6)
     {
-        cUIState_hideObjSafe(self, D_0046E888);
-        cUIState_hideObjSafe(self, D_0046FE28);
+        cUIState_hideObjSafe(self, str_screendata);
+        cUIState_hideObjSafe(self, str_screendata1);
     }
     if (mode4A == 4)
-        cUIText_setUnicodeStringByID(status, GetHashValue32(D_0046FE38));
+        cUIText_setUnicodeStringByID(status, GetHashValue32(str_kT_HELPFirstToBottom));
     else
-        cUIText_setUnicodeStringByID(status, GetHashValue32(D_0046FE50));
-    o = getObj_1FC878(self, D_0046FE70);
+        cUIText_setUnicodeStringByID(status, GetHashValue32(str_kT_OVRCMNBeatOppMaxTrick));
+    o = getObj_1FC878(self, str_topScoreLabel);
     if (mode4A == 4 || mode4A == 0)
     {
-        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FE80));
+        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNRecordTime));
         void* p = func_00155130(iface8, 0);
-        o = getObj_1FC878(self, D_0046FDE8);
+        o = getObj_1FC878(self, str_topScore);
         cUIText_setAsciiString((cUIText*)o, func_0020A1A8(p));
     }
     else
     {
-        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FE98));
+        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNRecordScore));
         void* p = func_00155130(iface8, 0);
-        o = getObj_1FC878(self, D_0046FDE8);
+        o = getObj_1FC878(self, str_topScore);
         sprintf(num, D_004A2138, p);
         cUIText_setAsciiString((cUIText*)o, num);
     }
@@ -1822,10 +1822,10 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern signed char D_00535C10[];
-extern char D_0046E888[];
-extern char D_004A2548[];
-extern char D_0046FEB0[];
-extern char D_0046FEC0[];
+extern char str_screendata[];
+extern char str_vsGroup[];
+extern char str_objectives[];
+extern char str_topScoreGroup[];
 
 struct sVec3_1FCEC0
 {
@@ -1842,19 +1842,19 @@ extern "C" int func_001FCEC0(void* self, void* msg)
     int mode = D_00535C10[0];
     if (mode == 2 || mode == 3)
     {
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E888));
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_screendata));
         sVec3_1FCEC0 p = *(sVec3_1FCEC0*)(o + 0x44);
         *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x + 130.0f, p.y, p.z);
     }
     else if (mode == 5 || mode == 6)
     {
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2548));
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_vsGroup));
         sVec3_1FCEC0 p = *(sVec3_1FCEC0*)(o + 0x44);
         *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x, p.y + 40.0f, p.z);
-        o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FEB0));
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_objectives));
         p = *(sVec3_1FCEC0*)(o + 0x44);
         *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x, p.y + 67.0f, p.z);
-        o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FEC0));
+        o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_topScoreGroup));
         p = *(sVec3_1FCEC0*)(o + 0x44);
         *(sVec3_1FCEC0*)(o + 0x44) = sVec3_1FCEC0(p.x, p.y - 48.0f, p.z);
     }
@@ -1918,12 +1918,12 @@ extern "C" void func_001FD150(void* self)
 INCLUDE_ASM("fe/ovstatepause", func_001FD190);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_0046FED0[];
-extern char D_0046FEE0[];
-extern char D_0046FEF0[];
-extern char D_0046FF08[];
-extern char D_0046FF18[];
-extern char D_0046FF28[];
+extern char str_kT_EventPk1Race_b[];
+extern char str_kT_EventPk2Race_b[];
+extern char str_kT_EventAllPeakRace_b[];
+extern char str_kT_EventPk1Jam_b[];
+extern char str_kT_EventPk2Jam_b[];
+extern char str_kT_EventAllPeakJam_b[];
 struct sVEnt_1FD190 { short delta; short index; int (*fn)(void*, int); };
 
 // Sends the hash of the named pause-menu item to the front end's screen object.
@@ -1936,12 +1936,12 @@ static inline int sendHash_1FD190(char* name)
 extern "C" int func_001FD190(int id)
 {
     switch (id) {
-    case 6: return sendHash_1FD190(D_0046FED0);
-    case 7: return sendHash_1FD190(D_0046FEE0);
-    case 8: return sendHash_1FD190(D_0046FEF0);
-    case 9: return sendHash_1FD190(D_0046FF08);
-    case 10: return sendHash_1FD190(D_0046FF18);
-    case 11: return sendHash_1FD190(D_0046FF28);
+    case 6: return sendHash_1FD190(str_kT_EventPk1Race_b);
+    case 7: return sendHash_1FD190(str_kT_EventPk2Race_b);
+    case 8: return sendHash_1FD190(str_kT_EventAllPeakRace_b);
+    case 9: return sendHash_1FD190(str_kT_EventPk1Jam_b);
+    case 10: return sendHash_1FD190(str_kT_EventPk2Jam_b);
+    case 11: return sendHash_1FD190(str_kT_EventAllPeakJam_b);
     }
     return 0;
 }
@@ -1956,19 +1956,19 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
-extern char D_0046FF58[];
-extern char D_0046E378[];
+extern char str_68rival_pre[];
+extern char str_OV_darkblue[];
 
 extern "C" void func_001FD268(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046FF58), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_68rival_pre), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     engine = *(void**)((char*)self + 0x10);
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E378), 0);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -1991,24 +1991,24 @@ extern "C" void* func_004139F8(float x);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 // func_002C2540 returns dst (the unit declares it void)
 unsigned short* func_002C2540_r(unsigned short* dst, char* src) __asm__("func_002C2540");
-extern char D_0046E5F0[];
-extern char D_0046FF68[];
-extern char D_0046FF80[];
-extern char D_0046FF98[];
-extern char D_0046FFB0[];
-extern char D_0046FFD0[];
-extern char D_0046FFE0[];
-extern char D_00470000[];
-extern char D_0046E918[];
+extern char str_kT_TITLERivalChallenge[];
+extern char str_kT_OVRCMNChallengeBy[];
+extern char str_kT_HELPChalPeakRace[];
+extern char str_kT_HELPChalPeakJam[];
+extern char str_kT_HELPBeatChallengePeakRace[];
+extern char str_timescoretobeat[];
+extern char str_kT_HELPGetToBottomPoints[];
+extern char str_kT_HELPBeatChallPeakJam[];
+extern char str_kT_OVRCMNTimeToBeatColon[];
 extern char D_004A2550[];
-extern char D_00470018[];
-extern char D_00470030[];
-extern char D_00470048[];
-extern char D_0046E950[];
-extern char D_004A2558[];
-extern char D_00470068[];
-extern char D_00470080[];
-extern char D_00470098[];
+extern char str_kT_HELPRaceToBottom[];
+extern char str_kT_HELPBeatPostedTime[];
+extern char str_kT_HELPBeatPostedTimePass[];
+extern char str_kT_OVRCMNScoreToBeatColon[];
+extern char str_pct_s_pct_d_c[];
+extern char str_kT_HELPMakeWayDnSlope[];
+extern char str_kT_HELPBeatPostedScore[];
+extern char str_kT_HELPBeatPostedScorePass[];
 
 struct sVE_1FD320 { short delta; short index; unsigned short* (*fn)(void*, int); };
 
@@ -2046,14 +2046,14 @@ extern "C" int func_001FD320(void* self, void* msg)
         void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 0xD);
         char* stats = (char*)SSXApp->GameModeMan;
         int mode = getField_1FD320((signed char*)cBENewRaceInterface_newRace, 0x4A);
-        void* o = getObj_1FD320(self, D_004A2520);
+        void* o = getObj_1FD320(self, str_name);
         cUIText_setAsciiString((cUIText*)o, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
-        o = getObj_1FD320(self, D_004A21B8);
+        o = getObj_1FD320(self, str_title2);
         switch (mode) {
         case 4:
             func_002C2540_r(title, func_00144BF0(iface0));
             func_002C2540_r(fmt, (char*)D_004A2140);
-            sprintf1(out, fmt, title, lookupString_1FD320(D_0046E548));
+            sprintf1(out, fmt, title, lookupString_1FD320(str_kT_cmnRaceCaps_b));
             cUIText_setUnicodeString(o, out);
             break;
         case 5:
@@ -2071,76 +2071,76 @@ extern "C" int func_001FD320(void* self, void* msg)
             cUIText_setUnicodeString(o, (unsigned short*)func_001FD190(mode));
             break;
         }
-        cUIText* statusA = (cUIText*)getObj_1FD320(self, D_004A2528);
-        cUIText* statusB = (cUIText*)getObj_1FD320(self, D_004A2530);
-        o = getObj_1FD320(self, D_004A21B0);
-        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E5F0));
+        cUIText* statusA = (cUIText*)getObj_1FD320(self, str_obj1);
+        cUIText* statusB = (cUIText*)getObj_1FD320(self, str_obj2);
+        o = getObj_1FD320(self, str_title1);
+        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_TITLERivalChallenge));
         func_002C2540_r(name, func_0014EEC8(iface2, func_00145750(iface0), 0));
         unsigned short* lineFmt;
         if (mode >= 4 && mode <= 5)
-            lineFmt = lookupString_1FD320(D_0046FF68);
+            lineFmt = lookupString_1FD320(str_kT_OVRCMNChallengeBy);
         else if (mode >= 6 && mode <= 8)
-            lineFmt = lookupString_1FD320(D_0046FF80);
+            lineFmt = lookupString_1FD320(str_kT_HELPChalPeakRace);
         else
-            lineFmt = lookupString_1FD320(D_0046FF98);
+            lineFmt = lookupString_1FD320(str_kT_HELPChalPeakJam);
         sprintf1(line, lineFmt, name);
-        cUIText_setUnicodeStringWrap(getObj_1FD320(self, D_004A2520), line);
+        cUIText_setUnicodeStringWrap(getObj_1FD320(self, str_name), line);
         switch (mode) {
         case 4:
-            cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_0046FE38));
-            cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_0046FFB0));
+            cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPFirstToBottom));
+            cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatChallengePeakRace));
             if (getField_1FD320((signed char*)cBENewRaceInterface_newRace, 0x49) == 1
                 || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 6))
                 || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 7))
                 || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
-                cUIState_hideObjSafe(self, D_004A2530);
-                cUIState_hideObjSafe(self, D_004A2538);
+                cUIState_hideObjSafe(self, str_obj2);
+                cUIState_hideObjSafe(self, str_bullet2);
             }
-            cUIState_hideObjSafe(self, D_0046FFD0);
+            cUIState_hideObjSafe(self, str_timescoretobeat);
             break;
         case 5:
-            cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_0046FFE0));
-            cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470000));
+            cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPGetToBottomPoints));
+            cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatChallPeakJam));
             if (getField_1FD320((signed char*)cBENewRaceInterface_newRace, 0x49) == 1
                 || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 9))
                 || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 10))
                 || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
-                cUIState_hideObjSafe(self, D_004A2530);
-                cUIState_hideObjSafe(self, D_004A2538);
+                cUIState_hideObjSafe(self, str_obj2);
+                cUIState_hideObjSafe(self, str_bullet2);
             }
-            cUIState_hideObjSafe(self, D_0046FFD0);
+            cUIState_hideObjSafe(self, str_timescoretobeat);
             break;
         case 6:
         case 7:
         case 8: {
-            o = getObj_1FD320(self, D_0046FFD0);
+            o = getObj_1FD320(self, str_timescoretobeat);
             float mins = (float)*(unsigned int*)(stats + 0x78) * 0.01666666753590107f;
             void* r = func_004139F8(mins);
             func_002C2540_r(num, func_0020A1A8(r));
-            unsigned short* f = lookupString_1FD320(D_0046E918);
+            unsigned short* f = lookupString_1FD320(str_kT_OVRCMNTimeToBeatColon);
             func_002C2540_r(title, D_004A2550);
             sprintf1(text, title, f, num);
             cUIText_setUnicodeStringWrap(o, text);
-            cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_00470018));
+            cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPRaceToBottom));
             if (mode == 8 || (mode == 7 && !func_00157B08(iface13, 0, 2)) || (mode == 6 && !func_00157B08(iface13, 0, 1)))
-                cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470030));
+                cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedTime));
             else
-                cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470048));
+                cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedTimePass));
             break;
         }
         case 9:
         case 10:
         case 11: {
             int n = *(int*)(stats + 0x7C);
-            unsigned short* f = lookupString_1FD320(D_0046E950);
-            func_002C2540_r(title, D_004A2558);
+            unsigned short* f = lookupString_1FD320(str_kT_OVRCMNScoreToBeatColon);
+            func_002C2540_r(title, str_pct_s_pct_d_c);
             sprintf1(num, title, f, n);
-            cUIText_setUnicodeStringWrap(getObj_1FD320(self, D_0046FFD0), num);
-            cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_00470068));
+            cUIText_setUnicodeStringWrap(getObj_1FD320(self, str_timescoretobeat), num);
+            cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPMakeWayDnSlope));
             if (mode == 11 || (mode == 10 && !func_00157B08(iface13, 0, 2)) || (mode == 9 && !func_00157B08(iface13, 0, 1)))
-                cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470080));
+                cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedScore));
             else
-                cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470098));
+                cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedScorePass));
             break;
         }
         }
@@ -2211,14 +2211,14 @@ extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
 extern char D_004A2560[];
-extern char D_004700E0[];
-extern char D_004700F0[];
-extern char D_00470100[];
-extern char D_00470118[];
-extern char D_0046E9F8[];
-extern char D_00470130[];
-extern char D_00470148[];
-extern char D_0046E378[];
+extern char str_119Save_Replay[];
+extern char str_1percentage_b[];
+extern char str_title_Save_Replay[];
+extern char str_title_Save_Records[];
+extern char str_helptext01[];
+extern char str_Memory_card_info[];
+extern char str_pct_dmemory_card_b[];
+extern char str_OV_darkblue[];
 
 struct cUIObj_DC30 {
     int pad[2];
@@ -2242,30 +2242,30 @@ static inline cUIObj_DC30* getObj_DC30(char* self, char* name)
 extern "C" void func_001FDC30(char* self)
 {
     void* engine = *(void**)(self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(D_004700E0), 0);
+    void* screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(str_119Save_Replay), 0);
     *(void**)(self + 0x40) = screen;
     if (screen != 0) {
         cUIObj_DC30* o;
         cUIScreen_playFrame_DC30(screen, 0, 0);
-        o = getObj_DC30(self, D_004700F0);
+        o = getObj_DC30(self, str_1percentage_b);
         cUIText_setAsciiString((cUIText*)o, D_004A2560);
-        o = getObj_DC30(self, D_00470100);
+        o = getObj_DC30(self, str_title_Save_Replay);
         o->setVisible(1);
-        o = getObj_DC30(self, D_00470118);
+        o = getObj_DC30(self, str_title_Save_Records);
         o->setVisible(0);
-        o = getObj_DC30(self, D_0046E9F8);
+        o = getObj_DC30(self, str_helptext01);
         o->setVisible(0);
-        o = getObj_DC30(self, D_00470130);
+        o = getObj_DC30(self, str_Memory_card_info);
         cUIText_setAsciiString((cUIText*)o, D_004A2560);
         char name[0x20];
         for (int i = 1; i < 5; i++) {
-            sprintf(name, D_00470148, i);
+            sprintf(name, str_pct_dmemory_card_b, i);
             o = getObj_DC30(self, name);
             *(int*)((char*)o + 0x18) = i - 1;
         }
     }
     engine = *(void**)(self + 0x10);
-    screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(D_0046E378), 0);
+    screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame_DC30(screen, 0, 0);
     }
@@ -2485,12 +2485,12 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsi
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern char D_004700F0[];
-extern char D_00470130[];
-extern char D_00470148[];
-extern char D_00470158[];
-extern char D_00470168[];
-extern char D_00470178[];
+extern char str_1percentage_b[];
+extern char str_Memory_card_info[];
+extern char str_pct_dmemory_card_b[];
+extern char str_kT_MEMEmpty_b[];
+extern char str_arrw_left_b[];
+extern char str_arrw_right_b[];
 
 static inline cUIObj_DF40* getObj_DF40(cState_DF40* self, char* name)
 {
@@ -2513,17 +2513,17 @@ extern "C" void func_001FDF40(cState_DF40* self)
         int sel = 0;
         self->v43();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
-        cUIText_setUnicodeStringWrap(getObj_DF40(self, D_00470130), buf);
-        cUIObj_DF40* o = getObj_DF40(self, D_004700F0);
+        cUIText_setUnicodeStringWrap(getObj_DF40(self, str_Memory_card_info), buf);
+        cUIObj_DF40* o = getObj_DF40(self, str_1percentage_b);
         (*(cMCSub_DF40**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(o, buf);
         o->v09(0);
         char* g = (char*)SSXApp->FELocale;
         sVE_DF40* vt = *(sVE_DF40**)(g + 4);
         char* t = g + vt[4].delta;
-        vt[4].fn(t, GetHashValue32(D_00470158));
+        vt[4].fn(t, GetHashValue32(str_kT_MEMEmpty_b));
         for (int i = 1; i < 5; i++) {
-            sprintf(name, D_00470148, i);
+            sprintf(name, str_pct_dmemory_card_b, i);
             o = getObj_DF40(self, name);
             (*(cMCSub_DF40**)(mp + 0x434))->v14(i - 1, (char*)self + 0x230);
             cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x230));
@@ -2551,17 +2551,17 @@ extern "C" void func_001FDF40(cState_DF40* self)
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_DF40(self, D_00470168)->v09(0);
+            getObj_DF40(self, str_arrw_left_b)->v09(0);
         else
-            getObj_DF40(self, D_00470168)->v09(1);
+            getObj_DF40(self, str_arrw_left_b)->v09(1);
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_DF40(self, D_00470178)->v09(0);
+            getObj_DF40(self, str_arrw_right_b)->v09(0);
         else
-            getObj_DF40(self, D_00470178)->v09(1);
+            getObj_DF40(self, str_arrw_right_b)->v09(1);
     }
     if (*(int*)((char*)self + 0x214) != 3) {
         for (int i = 1; i < 5; i++) {
-            sprintf(name, D_00470148, i);
+            sprintf(name, str_pct_dmemory_card_b, i);
             cUIObj_DF40* o = getObj_DF40(self, name);
             o->v25(0);
             o->v08(1);
@@ -2588,19 +2588,19 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A2090[];
-extern char D_004A2568[];
-extern char D_00470188[];
-extern char D_004A20A0[];
+extern char str_ps2x_b[];
+extern char str_x_save[];
+extern char str_o_delete[];
+extern char str_ps2sq_b[];
 
 extern "C" void func_001FE4A8(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != on) {
         int off = !on;
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(off);
         *(int*)((char*)self + 0x22C) = on;
     }
 }
@@ -2624,13 +2624,13 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_00470188[];
-extern char D_004A20A0[];
+extern char str_o_delete[];
+extern char str_ps2sq_b[];
 
 extern "C" void func_001FE5B0(void* self, bool on)
 {
-    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(!on);
-    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
+    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
+    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
     *(int*)((char*)self + 0x220) = !on;
 }
 #endif
@@ -2653,13 +2653,13 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A2090[];
-extern char D_004A2568[];
+extern char str_ps2x_b[];
+extern char str_x_save[];
 
 extern "C" void func_001FE648(void* self, int a1, bool on)
 {
-    cUIObj_1FE648* a = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
-    ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(!on);
+    cUIObj_1FE648* a = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+    ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
     *(int*)((char*)self + 0x224) = !on;
     a->setVisible(!on);
 }
@@ -2867,14 +2867,14 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0046E378[];
-extern char D_0046E9F8[];
-extern char D_004700E0[];
-extern char D_004700F0[];
-extern char D_00470100[];
-extern char D_00470118[];
-extern char D_00470130[];
-extern char D_00470148[];
+extern char str_OV_darkblue[];
+extern char str_helptext01[];
+extern char str_119Save_Replay[];
+extern char str_1percentage_b[];
+extern char str_title_Save_Replay[];
+extern char str_title_Save_Records[];
+extern char str_Memory_card_info[];
+extern char str_pct_dmemory_card_b[];
 extern char D_004A2138[];
 extern char D_004A2560[];
 
@@ -2899,21 +2899,21 @@ static inline void* engine_1FE9A8(char* self)
 
 extern "C" void func_001FE9A8(char* self)
 {
-    void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(D_004700E0), 0);
+    void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_119Save_Replay), 0);
     *(void**)(self + 0x40) = scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004700F0)), D_004A2560);
-        cUIObj_1FE9A8* o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470100));
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_1percentage_b)), D_004A2560);
+        cUIObj_1FE9A8* o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_Save_Replay));
         o->v09(0);
-        o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470118));
+        o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_Save_Records));
         o->v09(1);
-        o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E9F8));
+        o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext01));
         o->v09(1);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470130)), D_004A2560);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_Memory_card_info)), D_004A2560);
         for (int i = 1; i < 5; i++) {
             char buf[0x20];
-            sprintf(buf, D_00470148, i);
+            sprintf(buf, str_pct_dmemory_card_b, i);
             o = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
             if (i == 1) {
                 *(int*)((char*)o + 0x18) = 0;
@@ -2927,7 +2927,7 @@ extern "C" void func_001FE9A8(char* self)
                 o->v09(0);
         }
     }
-    void* s2 = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(D_0046E378), 0);
+    void* s2 = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_OV_darkblue), 0);
     if (s2 != 0)
         cUIScreen_playFrame(s2, 0, 0);
     cOVState_onCreateScreen(self);
@@ -3132,12 +3132,12 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsi
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern char D_004700F0[];
-extern char D_00470130[];
-extern char D_00470148[];
-extern char D_00470158[];
-extern char D_00470168[];
-extern char D_00470178[];
+extern char str_1percentage_b[];
+extern char str_Memory_card_info[];
+extern char str_pct_dmemory_card_b[];
+extern char str_kT_MEMEmpty_b[];
+extern char str_arrw_left_b[];
+extern char str_arrw_right_b[];
 
 static inline cUIObj_ECA0* getObj_ECA0(cState_ECA0* self, char* name)
 {
@@ -3159,16 +3159,16 @@ extern "C" void func_001FECA0(cState_ECA0* self)
     if (self->v42()) {
         self->v43();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
-        cUIText_setUnicodeStringWrap(getObj_ECA0(self, D_00470130), buf);
-        cUIObj_ECA0* o = getObj_ECA0(self, D_004700F0);
+        cUIText_setUnicodeStringWrap(getObj_ECA0(self, str_Memory_card_info), buf);
+        cUIObj_ECA0* o = getObj_ECA0(self, str_1percentage_b);
         (*(cMCSub_ECA0**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(o, buf);
         o->v09(0);
         char* g = (char*)SSXApp->FELocale;
         sVE_ECA0* vt = *(sVE_ECA0**)(g + 4);
         char* t = g + vt[4].delta;
-        vt[4].fn(t, GetHashValue32(D_00470158));
-        sprintf(name, D_00470148, 1);
+        vt[4].fn(t, GetHashValue32(str_kT_MEMEmpty_b));
+        sprintf(name, str_pct_dmemory_card_b, 1);
         o = getObj_ECA0(self, name);
         (*(cMCSub_ECA0**)(mp + 0x434))->v14(0, (char*)self + 0x230);
         cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x230));
@@ -3189,16 +3189,16 @@ extern "C" void func_001FECA0(cState_ECA0* self)
             o->v08(1);
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_ECA0(self, D_00470168)->v09(0);
+            getObj_ECA0(self, str_arrw_left_b)->v09(0);
         else
-            getObj_ECA0(self, D_00470168)->v09(1);
+            getObj_ECA0(self, str_arrw_left_b)->v09(1);
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_ECA0(self, D_00470178)->v09(0);
+            getObj_ECA0(self, str_arrw_right_b)->v09(0);
         else
-            getObj_ECA0(self, D_00470178)->v09(1);
+            getObj_ECA0(self, str_arrw_right_b)->v09(1);
     }
     if (*(int*)((char*)self + 0x214) != 3) {
-        sprintf(name, D_00470148, 1);
+        sprintf(name, str_pct_dmemory_card_b, 1);
         cUIObj_ECA0* o = getObj_ECA0(self, name);
         o->v25(0);
         o->v08(1);
@@ -3224,19 +3224,19 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A2090[];
-extern char D_004A2568[];
-extern char D_00470188[];
-extern char D_004A20A0[];
+extern char str_ps2x_b[];
+extern char str_x_save[];
+extern char str_o_delete[];
+extern char str_ps2sq_b[];
 
 extern "C" void func_001FF170(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != on) {
         int off = !on;
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(off);
         *(int*)((char*)self + 0x22C) = on;
     }
 }
@@ -3260,13 +3260,13 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_00470188[];
-extern char D_004A20A0[];
+extern char str_o_delete[];
+extern char str_ps2sq_b[];
 
 extern "C" void func_001FF278(void* self, bool on)
 {
-    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470188)))->setVisible(!on);
-    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
+    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
+    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
     *(int*)((char*)self + 0x220) = !on;
 }
 #endif
@@ -3289,13 +3289,13 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A2090[];
-extern char D_004A2568[];
+extern char str_ps2x_b[];
+extern char str_x_save[];
 
 extern "C" void func_001FF310(void* self, int a1, bool on)
 {
-    cUIObj_1FF310* a = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
-    ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(!on);
+    cUIObj_1FF310* a = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+    ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
     *(int*)((char*)self + 0x224) = !on;
     a->setVisible(!on);
 }
@@ -3464,11 +3464,11 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_REWARDS_checkRewardList(void* self, int a1, int a2);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern char D_004703C8[];
-extern char D_0046E378[];
-extern char D_0046E818[];
-extern char D_004A2570[];
-extern char D_004A2578[];
+extern char str_62reward_list[];
+extern char str_OV_darkblue[];
+extern char str_Menu0000_b[];
+extern char str_up[];
+extern char str_down[];
 
 /**
  * Builds the rewards list overlay ("62reward_list" over "OV_darkblue") and sizes its menu to the rewards.
@@ -3480,20 +3480,20 @@ extern char D_004A2578[];
 extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004703C8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_62reward_list), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     void* engine2 = *(void**)((char*)self + 0x10);
-    void* bg = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(D_0046E378), 0);
+    void* bg = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_OV_darkblue), 0);
     if (bg != 0) {
         cUIScreen_playFrame(bg, 0, 0);
     }
     cOVState_onCreateScreen(self);
     *(int*)((char*)self + 0x9C) = 0;
     cOVState_REWARDS_checkRewardList(self, 0, -1);
-    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E818));
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000_b));
     if (menu != 0) {
         *(int*)(menu + 0x14) &= ~0x80;
         if (*(unsigned char*)(menu + 0x96) < *(int*)((char*)self + 0x9C)) {
@@ -3502,8 +3502,8 @@ extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
             *(int*)(menu + 0x90) |= 8;
         }
     }
-    cUIState_hideObjSafe(self, D_004A2570);
-    cUIState_hideObjSafe(self, D_004A2578);
+    cUIState_hideObjSafe(self, str_up);
+    cUIState_hideObjSafe(self, str_down);
 }
 #endif
 
@@ -3676,23 +3676,23 @@ extern "C" void cOVState_REWARDS_updateMenu(void* vself, int base)
         }
     }
     if (base == 0) {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2570));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_up));
         if (textObj != 0) {
             textObj->v09(0);
         }
     } else {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2570));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_up));
         if (textObj != 0) {
             textObj->v09(1);
         }
     }
     if (*(int*)(self + 0x9C) <= base + 9) {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2578));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_down));
         if (textObj != 0) {
             textObj->v09(0);
         }
     } else {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2578));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_down));
         if (textObj != 0) {
             textObj->v09(1);
         }
@@ -3720,16 +3720,16 @@ void sprintf2_void(unsigned short* buf, unsigned short* fmt, ...) __asm__("sprin
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern char cBENewRaceInterface_newRace[];
-extern char D_0046F520[];
-extern char D_004A2400[];
-extern char D_00470468[];
-extern char D_004A2588[];
+extern char str_pct_S_Jam[];
+extern char str_pct_S_pct_s[];
+extern char str_title_rewardlisting[];
+extern char str_1text[];
 extern unsigned short D_004A2590[];
-extern char D_00470480[];
-extern char D_0046E398[];
-extern char D_0046E3A8[];
-extern char D_0046E3C0[];
-extern char D_0046E548[];
+extern char str_kT_OVRCMNCongratUser[];
+extern char str_kT_cmnSlopeCaps[];
+extern char str_kT_cmnBigAirCaps[];
+extern char str_kT_cmnPipeCaps[];
+extern char str_kT_cmnRaceCaps_b[];
 
 struct sVE_1FFF78 { short delta; short index; unsigned short* (*fn)(void*, int); };
 
@@ -3770,7 +3770,7 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
             strcpy1(result, (unsigned short*)func_001FD190(kind));
             break;
         case 5:
-            func_002C2540(fmt, D_0046F520);
+            func_002C2540(fmt, str_pct_S_Jam);
             sprintf1(result, fmt, func_00144BF0(race));
             break;
         default: {
@@ -3778,28 +3778,28 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
             switch (mode) {
             case 0:
             case 5:
-                label = lookupString_1FFF78(D_0046E548);
+                label = lookupString_1FFF78(str_kT_cmnRaceCaps_b);
                 break;
             case 1:
-                label = lookupString_1FFF78(D_0046E398);
+                label = lookupString_1FFF78(str_kT_cmnSlopeCaps);
                 break;
             case 2:
-                label = lookupString_1FFF78(D_0046E3A8);
+                label = lookupString_1FFF78(str_kT_cmnBigAirCaps);
                 break;
             case 3:
-                label = lookupString_1FFF78(D_0046E3C0);
+                label = lookupString_1FFF78(str_kT_cmnPipeCaps);
                 break;
             }
-            func_002C2540(fmt, D_004A2400);
+            func_002C2540(fmt, str_pct_S_pct_s);
             sprintf1(result, fmt, func_00144BF0(race), label);
             break;
         }
         }
-        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470468)), result);
+        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title_rewardlisting)), result);
         int id = cBENewPlayerInterface_getHumanRider(player, 0);
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2588));
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1text));
         sprintf2_void(name, D_004A2590, cBECharacterInterface_getShortName(board, id));
-        unsigned short* text = lookupString_1FFF78(D_00470480);
+        unsigned short* text = lookupString_1FFF78(str_kT_OVRCMNCongratUser);
         sprintf1(reward, text, name);
         cUIText_setUnicodeString(obj, reward);
     }

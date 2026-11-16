@@ -976,19 +976,19 @@ extern "C" void* cRailModifier_cRailModifier1(void* self, sMbStream36D8* s);
 extern "C" void func_00345720(void* pool, void* item);
 extern "C" void cRailLink_append(void* list, void* item);
 
-extern const char D_0048E8D0[];
-extern const char D_0048E8E0[];
-extern const char D_0048E8F0[];
-extern const char D_0048E908[];
-extern const char D_0048E918[];
-extern const char D_0048E928[];
-extern const char D_0048E940[];
-extern const char D_0048E958[];
-extern const char D_0048E968[];
-extern const char D_0048E978[];
-extern const char D_0048E990[];
-extern const char D_0048E9A8[];
-extern const char D_0048E9B8[];
+extern const char str_SplineModifier[];
+extern const char str_ParentModifier[];
+extern const char str_PositionModifier[];
+extern const char str_RollerModifier[];
+extern const char str_MagnetModifier[];
+extern const char str_AvaSplineModifier[];
+extern const char str_UVScrollModifier[];
+extern const char str_TexFlipModifier[];
+extern const char str_BoostModifier[];
+extern const char str_ParticleModifier[];
+extern const char str_DynamicParticleModifier[];
+extern const char str_HaloModifier[];
+extern const char str_RailModifier[];
 
 /**
  * Rebuilds a modifier block from a replay frame: reads the header and re-creates every modifier it lists.
@@ -1013,45 +1013,45 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {
-            *(void**)&self->node = cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), stream);
+            *(void**)&self->node = cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 2) {
-            *(void**)&self->node = cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(0x58, D_0048E8D0, 0x20000000, 0), stream);
+            *(void**)&self->node = cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(0x58, str_SplineModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 4) {
-            *(void**)&self->node = cParentModifier_cParentModifier(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), stream);
+            *(void**)&self->node = cParentModifier_cParentModifier(cMemMan_alloc(0xB0, str_ParentModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 3) {
-            *(void**)&self->node = func_00356F68(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), stream);
+            *(void**)&self->node = func_00356F68(cMemMan_alloc(0x90, str_PositionModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 5) {
-            *(void**)&self->node = func_0035DF70(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), stream);
+            *(void**)&self->node = func_0035DF70(cMemMan_alloc(0x2D0, str_RollerModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 6) {
-            *(void**)&self->node = func_00357358(cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0), stream);
+            *(void**)&self->node = func_00357358(cMemMan_alloc(0xB0, str_MagnetModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 7) {
-            *(void**)&self->node = func_00357798(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), stream);
+            *(void**)&self->node = func_00357798(cMemMan_alloc(0x90, str_AvaSplineModifier, 0x20000000, 0), stream);
         }
     }
     if (hdr.flags & 2) {
-        self->field_0x4 = (int)func_0035F788(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), stream);
+        self->field_0x4 = (int)func_0035F788(cMemMan_alloc(0x50, str_UVScrollModifier, 0x20000000, 0), stream);
     }
     if (hdr.flags & 4) {
-        self->field_0x8 = (int)func_0035F1A8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), stream);
+        self->field_0x8 = (int)func_0035F1A8(cMemMan_alloc(0xE8, str_TexFlipModifier, 0x20000000, 0), stream);
     }
     if ((hdr.flags & 8) && hdr.kind == 1) {
-        self->field_0xC = (int)func_00342808(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), stream);
+        self->field_0xC = (int)func_00342808(cMemMan_alloc(0x50, str_BoostModifier, 0x20000000, 0), stream);
     }
     for (i = 0; i < hdr.numA; i++) {
         void* p;
         if (hdr.typesA[i] == 1) {
-            p = func_003459A8(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), stream);
+            p = func_003459A8(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 2) {
-            p = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), stream);
+            p = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(0x270, str_DynamicParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 3) {
-            p = func_003461C0(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), stream);
+            p = func_003461C0(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
         } else {
             p = 0;
         }
         func_00345720((char*)self + 0x10, p);
     }
     for (i = 0; i < hdr.numB; i++) {
-        cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), stream));
+        cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(0x90, str_RailModifier, 0x20000000, 0), stream));
     }
 }
 #endif

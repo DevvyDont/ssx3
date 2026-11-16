@@ -4,7 +4,7 @@
 #include "render/ps2graphicsman.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00492EE0[];
+extern const char str_LightMan[];
 extern void* D_00493650[16];
 
 struct cPSPLightMan;
@@ -23,7 +23,7 @@ INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
  */
 void* cLightMan_construct()
 {
-    void* mem = cMemMan_alloc(0x14, D_00492EE0, 0, 0);
+    void* mem = cMemMan_alloc(0x14, str_LightMan, 0, 0);
     cPSPLightMan_cPSPLightMan((cPSPLightMan*)mem);
     *(void**)mem = D_00493650;
     return mem;
@@ -2103,7 +2103,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void cFont_linkFont(void* self, void* data, int flags);
 void cMemMan_free(void*);
-extern const char D_00492F30[];
+extern const char str_font_pct_24s[];
 
 /**
  * Loads a font file and builds the font's glyph table and texture from it.
@@ -2120,7 +2120,7 @@ extern "C" void cFont_loadFont(cFont* self, const char* name, int flags)
 {
     void* data;
 
-    sprintf((char*)self + 0x64, D_00492F30, name);
+    sprintf((char*)self + 0x64, str_font_pct_24s, name);
     data = FILE_load(name, flags ^ 0x100);
     cFont_linkFont(self, data, flags);
     if (data != 0) {

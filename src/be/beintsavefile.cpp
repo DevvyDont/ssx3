@@ -2,7 +2,7 @@
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A7E0[];
+extern const char str_BESaveInt[];
 extern void* D_0045AD08[16];
 extern void* D_004A121C;
 extern int D_004A1228;
@@ -28,7 +28,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getThis__Fv);
 void* cBESaveInterface_getThis()
 {
     if (D_004A121C == 0) {
-        cBESaveInterface* mem = (cBESaveInterface*)cMemMan_alloc(0x10, D_0045A7E0, 0, 0);
+        cBESaveInterface* mem = (cBESaveInterface*)cMemMan_alloc(0x10, str_BESaveInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AD08;
         D_004A121C = mem;
@@ -43,14 +43,14 @@ INCLUDE_ASM("be/beintsavefile", func_00152688);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_0045A7F0[];
+extern const char str_save_file_buffer[];
 extern char* D_004A1224;
 
 extern "C" char* func_00152688(void)
 {
     D_004A1228 = 1;
     if (D_004A1224 == 0)
-        D_004A1224 = (char*)operator_new_tag(0x80000, D_0045A7F0, 0x100, 0);
+        D_004A1224 = (char*)operator_new_tag(0x80000, str_save_file_buffer, 0x100, 0);
     return D_004A1224;
 }
 #endif
@@ -118,7 +118,7 @@ extern "C" void* func_00152758(void* self)
 {
     int size = func_00152948(self);
     func_00152700_s(self);
-    D_004A1220 = operator_new_tag(size, D_0045A7F0, 0x100, 0);
+    D_004A1220 = operator_new_tag(size, str_save_file_buffer, 0x100, 0);
     char* p = (char*)D_004A1220;
     *(sSaveHdr_2758*)p = D_00535898;
     p += sizeof(sSaveHdr_2758);
@@ -150,7 +150,7 @@ int func_00152948(void* self)
 INCLUDE_ASM("be/beintsavefile", func_00152950);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern const char D_0045A7F0[];
+extern const char str_save_file_buffer[];
 
 // PORT: the unit defines func_00152700_2950(void); this caller passes self in $a0.
 void func_00152700_2950(void* self) __asm__("func_00152700");
@@ -187,7 +187,7 @@ extern "C" void* func_00152950(void* self, int idx)
     cBEIface_2950* o;
     int size = func_00152BA8_2950();
     func_00152700_2950(self);
-    D_004A1220 = new (D_0045A7F0, 0x100, 0) char[size];
+    D_004A1220 = new (str_save_file_buffer, 0x100, 0) char[size];
     char* p = (char*)D_004A1220;
     strncpy(p, (char*)&cBELibrary_playerDB[idx], 0xC);
     p += 0xC;

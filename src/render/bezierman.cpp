@@ -4,7 +4,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPSPBezierMan_cPSPBezierMan(void* self);
-extern const char D_00492EA0[];
+extern const char str_PS2BezierMan[];
 
 //99.23%
 INCLUDE_ASM("render/bezierman", cBezierMan_construct__Fv);
@@ -18,7 +18,7 @@ INCLUDE_ASM("render/bezierman", cBezierMan_construct__Fv);
  */
 void* cBezierMan_construct()
 {
-    void* mem = cMemMan_alloc(0x9C90, D_00492EA0, 0, 0);
+    void* mem = cMemMan_alloc(0x9C90, str_PS2BezierMan, 0, 0);
     return cPSPBezierMan_cPSPBezierMan(mem);
 }
 #endif
@@ -32,9 +32,9 @@ void* operator_new_tag_AF30(unsigned int size, const char* tag, int flags, int d
 extern "C" void func_00372B78(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 struct cBezierVirt;
 extern "C" void func_0038D638(cBezierVirt* self);
-extern const char D_00492EB0[];
-extern const char D_00492EC0[];
-extern const char D_00492ED0[];
+extern const char str_4x4VifCache[];
+extern const char str_6x6VifCache[];
+extern const char str_8x8VifCache[];
 
 struct sUV_AF30 {
     float u, v;
@@ -51,9 +51,9 @@ extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
 extern "C" void cPSPBezierMan_Init(cPSPBezierMan* self)
 {
     func_00372B78(((char*)self) + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
-    self->mVifCache[0] = operator_new_tag_AF30(0x38400, D_00492EB0, 0, 0);
-    self->mVifCache[1] = operator_new_tag_AF30(0xDC00, D_00492EC0, 0, 0);
-    self->mVifCache[2] = operator_new_tag_AF30(0x8C00, D_00492ED0, 0, 0);
+    self->mVifCache[0] = operator_new_tag_AF30(0x38400, str_4x4VifCache, 0, 0);
+    self->mVifCache[1] = operator_new_tag_AF30(0xDC00, str_6x6VifCache, 0, 0);
+    self->mVifCache[2] = operator_new_tag_AF30(0x8C00, str_8x8VifCache, 0, 0);
     self->mVifCachePos[0] = self->mVifCache[0];
     self->mVifCachePos[1] = self->mVifCache[1];
     self->mVifCachePos[2] = self->mVifCache[2];
@@ -587,7 +587,7 @@ extern float t4vect_YAxis[4];
 extern float D_004FF160[4];
 extern sM4_B370 D_004FF1A0_B370 __asm__("t4mat_Identity");
 extern sM4_B370 D_005049C0;
-extern char* D_0044B9D0[];
+extern char* str_at_HP[];
 extern "C" void func_0037D968_B370(void* gm) __asm__("func_0037D968");
 extern "C" void func_00374A88(void* cache, int n, void* list, int lod, int view);
 extern "C" void func_00374AE0(void* cache, int n, void* list, int lod, int view);
@@ -797,7 +797,7 @@ static inline void Render_B370(sBezMan_B370* self)
             p[1] = 0;
             p[2] = 0x10000001;
             p[3] = 0;
-            char* tbl = D_0044B9D0[d->kind];
+            char* tbl = str_at_HP[d->kind];
             int extra = d->patch->extra;
             p[4] = 0;
             p[5] = (unsigned long)(*(int*)(tbl + extra * 8 + 0x10) | 0x14000000) << 32;
@@ -1049,7 +1049,7 @@ struct sBezMan_CA70 {
 extern sGfx_CA70* D_004A5B80_CA70 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A44D8;
 extern int D_004A44DC;
-extern char* D_0044B9D0[];
+extern char* str_at_HP[];
 extern "C" int func_0038CA08_i(void* self, void* obj) __asm__("func_0038CA08");
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D168(void* self, int a1, void* obj, int kind, void* tbl, void* patch, unsigned int* handle);
@@ -1109,7 +1109,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         p[2] = 0x10000001;
         p[1] = 0;
         p[3] = 0;
-        char* tbl = D_0044B9D0[kind];
+        char* tbl = str_at_HP[kind];
         int extra = patch->extra;
         p[4] = 0;
         p[5] = (long)(*(int*)(tbl + extra * 8 + 0x10) | 0x14000000) << 32;

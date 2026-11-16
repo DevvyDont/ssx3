@@ -14,34 +14,34 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern int D_004A11B8;
 extern int D_00535C04[];
-extern char D_004A12C0[];
-extern char D_004A12C8[];
-extern char D_004A12D0[];
-extern char D_004A12D8[];
+extern char str_pct_d_b[];
+extern char str_pct_s_pct_s_b[];
+extern char str_Track[];
+extern char str_Board[];
 extern char* D_004A12E0[2];
-extern char D_004A12E8[];
-extern char D_004A12F0[];
-extern char D_004A1318[];
-extern char D_0045CEC0[];
-extern char D_0045CED0[];
-extern char D_0045CEE0[];
-extern char D_0045CEF0[];
-extern char D_0045CF08[];
-extern char D_0045CF18[];
-extern char D_0045CF28[];
-extern char D_0045CF38[];
-extern char D_0045CF50[];
-extern char D_0045CF68[];
-extern char D_0045CF78[];
-extern char D_0045CF88[];
-extern char D_0045CF98[];
+extern char str_HDTV[];
+extern char str_pct_s[];
+extern char str_Lobby[];
+extern char str_Game_Path[];
+extern char str_Game_Mode[];
+extern char str_Game_Event[];
+extern char str_1st_Time_WC_Flag[];
+extern char str_pct_s_pct_s_pct_s[];
+extern char str_Character[];
+extern char str_Control_Map[];
+extern char str_Number_of_AI_riders[];
+extern char str_Screen_Calibration[];
+extern char str_On_480p[];
+extern char str_Off_NTSC[];
+extern char str_Playlist[];
+extern char str_pct_d_pct_d_pct_d_pct_d[];
 // The local mode-name table's initializer (five string pointers).
 struct sModeNamesDbg { char* name[5]; };
 extern sModeNamesDbg D_0045CFB8;
-extern char D_0045CFD0[];
-extern char D_0045CFE0[];
-extern char D_0045CFF0[];
-extern char D_0045D008[];
+extern char str_Network_pct_s[];
+extern char str_Real_Front_End[];
+extern char str_press_start_to_play[];
+extern char str_Anims_pct_d[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -141,79 +141,79 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
 
     __SIZE_TYPE__ hi = (__SIZE_TYPE__)self + 0x8000;
     font->setColor(*(int*)(hi + 0xc1c) == 0 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CEC0);
+    cFont_text(font, 60.0f, y, str_Game_Path);
     func_00392A60(font, func_00145378(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 1 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CED0);
+    cFont_text(font, 60.0f, y, str_Game_Mode);
     func_00392A60(font, func_00145398(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 2 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CEE0);
+    cFont_text(font, 60.0f, y, str_Game_Event);
     func_00392A60(font, func_00145340(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 3 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CEF0);
-    func_001DCA80(font, 580.0f, y, D_004A12C0, func_00145C38(intPlayer, 0));
+    cFont_text(font, 60.0f, y, str_1st_Time_WC_Flag);
+    func_001DCA80(font, 580.0f, y, str_pct_d_b, func_00145C38(intPlayer, 0));
     y += lineheight;
     if (D_004A11B8 != 0)
-        sprintf(buf, D_0045CF08, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
+        sprintf(buf, str_pct_s_pct_s_pct_s, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
     else
-        sprintf(buf, D_004A12C8, cBENewRaceInterface_getLocation(newRace) + 0x34, cBENewRaceInterface_getLocation(newRace) + 0x34);
+        sprintf(buf, str_pct_s_pct_s_b, cBENewRaceInterface_getLocation(newRace) + 0x34, cBENewRaceInterface_getLocation(newRace) + 0x34);
     font->setColor(self->cursor == 4 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_004A12D0);
+    cFont_text(font, 60.0f, y, str_Track);
     func_00392A60(font, buf, 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 5 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CF18);
+    cFont_text(font, 60.0f, y, str_Character);
     func_00392A60(font, func_0014EE28(character, 0), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 6 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CF28);
-    func_001DCA80(font, 580.0f, y, D_004A12C0, func_00147618(intPlayer, 0));
+    cFont_text(font, 60.0f, y, str_Control_Map);
+    func_001DCA80(font, 580.0f, y, str_pct_d_b, func_00147618(intPlayer, 0));
     y += lineheight;
     font->setColor(self->cursor == 7 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_004A12D8);
+    cFont_text(font, 60.0f, y, str_Board);
     func_00392A60(font, D_004A12E0[self->optFlag], 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 8 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CF38);
-    func_001DCA80(font, 580.0f, y, D_004A12C0, D_00535C04[0]);
+    cFont_text(font, 60.0f, y, str_Number_of_AI_riders);
+    func_001DCA80(font, 580.0f, y, str_pct_d_b, D_00535C04[0]);
     y += lineheight;
     font->setColor(self->cursor == 9 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CF50);
-    func_001DCA80(font, 580.0f, y, D_004A12C0, self->optVal);
+    cFont_text(font, 60.0f, y, str_Screen_Calibration);
+    func_001DCA80(font, 580.0f, y, str_pct_d_b, self->optVal);
     y += lineheight;
     font->setColor(self->cursor == 10 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_004A12E8);
+    cFont_text(font, 60.0f, y, str_HDTV);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sDbgVEntry* vt = (sDbgVEntry*)ps2GraphicsMan->mVtbl;
-        func_001DCA80(font, 580.0f, y, D_004A12F0, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? D_0045CF68 : D_0045CF78);
+        func_001DCA80(font, 580.0f, y, str_pct_s, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? str_On_480p : str_Off_NTSC);
     }
     y += lineheight;
     font->setColor(self->cursor == 11 ? selectColor : normalColor);
-    cFont_text(font, 60.0f, y, D_0045CF88);
-    func_001DCA80(font, 580.0f, y, D_004A12F0, func_0028B180() + (self->optTrack * 0x14 + 0x60A4));
+    cFont_text(font, 60.0f, y, str_Playlist);
+    func_001DCA80(font, 580.0f, y, str_pct_s, func_0028B180() + (self->optTrack * 0x14 + 0x60A4));
     y += lineheight;
     unsigned int ip = 0;
     if (cCommSystem_mCommSystem != 0)
         func_00256038(cCommSystem_mCommSystem, (int*)&ip);
     char ipbuf[0x20];
-    sprintf(ipbuf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+    sprintf(ipbuf, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     sModeNamesDbg modes = D_0045CFB8;
     if (cCommSystem_mCommSystem != 0)
         font->setColor(self->cursor == 12 ? selectColor : normalColor);
     else
         font->setColor(self->cursor == 12 ? selectColor : disabledColor);
-    func_001DC990(font, 60.0f, y, D_0045CFD0, ipbuf);
-    func_001DCA80(font, 580.0f, y, D_004A12F0, modes.name[self->optMode]);
+    func_001DC990(font, 60.0f, y, str_Network_pct_s, ipbuf);
+    func_001DCA80(font, 580.0f, y, str_pct_s, modes.name[self->optMode]);
     y += lineheight;
     y += 5.0f;
     font->setColor(self->cursor == 13 ? selectColor : disabledColor);
-    func_001DCA40(font, 320.0f, y, D_004A1318);
+    func_001DCA40(font, 320.0f, y, str_Lobby);
     font->setColor(self->cursor == 14 ? selectColor : normalColor);
-    func_001DCA40(font, 320.0f, y + lineheight, D_0045CFE0);
+    func_001DCA40(font, 320.0f, y + lineheight, str_Real_Front_End);
     if (*(int*)((char*)SSXApp + 0x4) == 0) {
         tARGB t;
         t.A = 1.0f;
@@ -221,7 +221,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         t.G = 0.9f;
         t.B = 0.0f;
         font->setColor(t);
-        func_00392908(font, 320.0f, 420.0f, D_0045CFF0);
+        func_00392908(font, 320.0f, 420.0f, str_press_start_to_play);
     }
     tARGB t2;
     t2.A = 1.0f;
@@ -229,7 +229,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     t2.G = 0.5f;
     t2.B = 0.5f;
     font->setColor(t2);
-    func_001DC9D0(font, 60.0f, 420.0f, 0.5f, 0.5f, D_0045D008, 7);
+    func_001DC9D0(font, 60.0f, 420.0f, 0.5f, 0.5f, str_Anims_pct_d, 7);
 }
 #endif
 
@@ -346,7 +346,7 @@ extern "C" int func_0017D1B8(void* self, int a, int b)
 INCLUDE_ASM("fe/debugfe", func_0017D200);
 #ifdef SKIP_ASM
 extern void* D_0046D740[];
-extern char D_0045D060[];
+extern char str_Continue[];
 void* cMenu_cMenu(void* self);
 extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
@@ -355,7 +355,7 @@ extern "C" void* func_0017D200(void* self)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D740;
-    func_002CCDF0((char*)self + 0x130, D_0045D060);
+    func_002CCDF0((char*)self + 0x130, str_Continue);
     cMenu_addItem(self, (char*)self + 0x130, -1);
     return self;
 }
@@ -585,7 +585,7 @@ extern "C" void func_0017D688(sDebugFE17D688* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 #ifdef SKIP_ASM
-extern char D_004A1320[];
+extern char str_A_West[];
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void func_002CC3B8(void* menu, void* items);
@@ -685,7 +685,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         if (SSXApp->unk_74 != 0) {
             int i;
             for (i = 0; i < func_0025F120(LobbyMan_mLobbyMan); i++) {
-                if (func_004165A8(func_0025F150(LobbyMan_mLobbyMan, i), D_004A1320) == 0) {
+                if (func_004165A8(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
                     func_0025D800(LobbyMan_mLobbyMan, i, 0);
                     self->state = 0xB;
                 }
@@ -798,7 +798,7 @@ extern "C" void func_0017DA30(void* self, int a1)
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 #ifdef SKIP_ASM
 extern void* D_004A33F4;
-extern char D_0045CE60[];
+extern char str_cPreGameLoadScreen[];
 struct cAppMan;
 extern "C" void func_002CC3B8(void* menu, void* items);
 extern "C" int func_002CC098(void* menu);
@@ -951,7 +951,7 @@ extern "C" void func_0017DB18(void* vself)
             if (func_00255D50(cCommSystem_mCommSystem, self->channel) != 0) {
                 int info[4];
                 cGameComm_construct(self->channel, LobbyMan_mLobbyMan->mIsHost);
-                cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+                cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
                 func_00256038(cCommSystem_mCommSystem, info);
                 func_00266D58(D_004A33F4, info[0]);
                 func_00266E30(D_004A33F4);
@@ -978,7 +978,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
 extern int D_004A11B8;
 extern int D_00535C08[];
-extern char D_0045CF98[];
+extern char str_pct_d_pct_d_pct_d_pct_d[];
 
 struct sNetCfg_17DE70 {
     int active;
@@ -1025,7 +1025,7 @@ extern "C" void func_0017DE70(char* self)
         ip = (unsigned int)LobbyMan_mLobbyMan->mHostAddr;
     }
     char buf[256];
-    sprintf(buf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+    sprintf(buf, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     *(int*)(self + 0x1C10) = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
     *(int*)(self + 4) = 0x10;
 }
@@ -1037,7 +1037,7 @@ INCLUDE_ASM("fe/debugfe", func_0017E030);
 extern "C" void func_002CC460(void* list);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_0025B9C8(void* mgr, void* req);
-extern char D_0045D248[];
+extern char str_pleaseat_get_lost[];
 
 struct sDebugFEState17E030 {
     int f0;
@@ -1073,7 +1073,7 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const ch
     cBXString_cBXString4(&lobbyMan->mNewAccount.mName, a);
     cBXString_cBXString4(&lobbyMan->mNewAccount.mPassword, b);
     cBXString_cBXString4(&lobbyMan->mNewAccount.unk_08, b);
-    cBXString_cBXString4(&lobbyMan->mNewAccount.mMail, D_0045D248);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.mMail, str_pleaseat_get_lost);
     lobbyMan->mNewAccount.mBornYear = 0x79E;
     lobbyMan->mNewAccount.mGender = 1;
     lobbyMan->mNewAccount.mBornMonth = 1;
@@ -1334,34 +1334,34 @@ INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char D_0045D258[];
-extern char D_0045D270[];
-extern char D_0045D288[];
-extern char D_0045D2A0[];
-extern char D_0045D2B8[];
-extern char D_0045D2D0[];
-extern char D_0045D2E8[];
-extern char D_0045D300[];
-extern char D_0045D310[];
-extern char D_0045D328[];
-extern char D_0045D340[];
-extern char D_0045D358[];
-extern char D_0045D378[];
-extern char D_0045D390[];
-extern char D_0045D3A0[];
-extern char D_0045D3C0[];
-extern char D_0045D3D8[];
-extern char D_0045D3F8[];
-extern char D_0045D408[];
-extern char D_0045D418[];
-extern char D_0045D428[];
-extern char D_0045D438[];
-extern char D_0045CF98[];
-extern char D_004A1328[];
+extern char str_Connecting_to_network[];
+extern char str_Connecting_to_lobby[];
+extern char str_Creating_account[];
+extern char str_Authenticating_account[];
+extern char str_Creating_Persona[];
+extern char str_Deleting_Persona[];
+extern char str_Selecting_Persona[];
+extern char str_Selecting_Room[];
+extern char str_Waiting_for_reponse[];
+extern char str_Challenge_Declined[];
+extern char str_Error_Connecting[];
+extern char str_Disconnected_from_server[];
+extern char str_Error_Creating_Account[];
+extern char str_Persona_Error[];
+extern char str_Error_Authenticating_Account[];
+extern char str_Error_Entering_room[];
+extern char str_Error_Issueing_Challenge[];
+extern char str_Play_Game[];
+extern char str_Opponent[];
+extern char str_Host_Client[];
+extern char str_Host_Address[];
+extern char str_Client_Address[];
+extern char str_pct_d_pct_d_pct_d_pct_d[];
+extern char str_Game[];
 extern char D_004A12F8[];
 extern char D_004A1330[];
-extern char D_004A1338[];
-extern char D_004A12C0[];
+extern char str_Seed[];
+extern char str_pct_d_b[];
 extern "C" void func_00392908(void* self, float x, float y, const char* str);
 extern "C" void func_00392A60(void* self, const char* str, float x, float y);
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
@@ -1430,57 +1430,57 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 1:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D258);
+        func_00392908(font, 320.0f, 200.0f, str_Connecting_to_network);
         break;
     case 2:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D270);
+        func_00392908(font, 320.0f, 200.0f, str_Connecting_to_lobby);
         break;
     case 4:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D288);
+        func_00392908(font, 320.0f, 200.0f, str_Creating_account);
         break;
     case 5:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D2A0);
+        func_00392908(font, 320.0f, 200.0f, str_Authenticating_account);
         break;
     case 8:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D2B8);
+        func_00392908(font, 320.0f, 200.0f, str_Creating_Persona);
         break;
     case 9:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D2D0);
+        func_00392908(font, 320.0f, 200.0f, str_Deleting_Persona);
         break;
     case 7:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D2E8);
+        func_00392908(font, 320.0f, 200.0f, str_Selecting_Persona);
         break;
     case 11:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, D_0045D300);
+        func_00392908(font, 320.0f, 200.0f, str_Selecting_Room);
         break;
     case 13:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D310);
+        func_00392908(font, 320.0f, 100.0f, str_Waiting_for_reponse);
         break;
     case 17:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D328);
+        func_00392908(font, 320.0f, 100.0f, str_Challenge_Declined);
         break;
     case 18: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D340);
+        func_00392908(font, 320.0f, 100.0f, str_Error_Connecting);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1489,7 +1489,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 19: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D358);
+        func_00392908(font, 320.0f, 100.0f, str_Disconnected_from_server);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1498,7 +1498,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 20: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D378);
+        func_00392908(font, 320.0f, 100.0f, str_Error_Creating_Account);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1507,7 +1507,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 22: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D390);
+        func_00392908(font, 320.0f, 100.0f, str_Persona_Error);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1516,7 +1516,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 21: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D3A0);
+        func_00392908(font, 320.0f, 100.0f, str_Error_Authenticating_Account);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1525,7 +1525,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 23: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D3C0);
+        func_00392908(font, 320.0f, 100.0f, str_Error_Entering_room);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1534,7 +1534,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 24: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D3D8);
+        func_00392908(font, 320.0f, 100.0f, str_Error_Issueing_Challenge);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
@@ -1543,29 +1543,29 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 16: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, D_0045D3F8);
+        func_00392908(font, 320.0f, 100.0f, str_Play_Game);
         scale17E5C8(font, 0.7f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
         float y = 200.0f;
-        cFont_text(font, 110.0f, y, D_004A1328);
+        cFont_text(font, 110.0f, y, str_Game);
         func_00392A60(font, LobbyMan_mLobbyMan->mGameName, 530.0f, y);
         y += 20.0f;
-        cFont_text(font, 110.0f, y, D_0045D408);
+        cFont_text(font, 110.0f, y, str_Opponent);
         func_00392A60(font, LobbyMan_mLobbyMan->mOpponent, 530.0f, y);
         y += 20.0f;
-        cFont_text(font, 110.0f, y, D_0045D418);
+        cFont_text(font, 110.0f, y, str_Host_Client);
         onOff17E5C8(font, LobbyMan_mLobbyMan->mIsHost, 530.0f, y);
         y += 20.0f;
-        cFont_text(font, 110.0f, y, D_0045D428);
+        cFont_text(font, 110.0f, y, str_Host_Address);
         unsigned int ip = (unsigned int)LobbyMan_mLobbyMan->mHostAddr;
-        func_001DCA80(font, 530.0f, y, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+        func_001DCA80(font, 530.0f, y, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
         y += 20.0f;
-        cFont_text(font, 110.0f, y, D_0045D438);
+        cFont_text(font, 110.0f, y, str_Client_Address);
         unsigned int ip2 = (unsigned int)LobbyMan_mLobbyMan->mOppoAddr;
-        func_001DCA80(font, 530.0f, y, D_0045CF98, ip2 >> 24, (ip2 >> 16) & 0xFF, (ip2 >> 8) & 0xFF, ip2 & 0xFF);
+        func_001DCA80(font, 530.0f, y, str_pct_d_pct_d_pct_d_pct_d, ip2 >> 24, (ip2 >> 16) & 0xFF, (ip2 >> 8) & 0xFF, ip2 & 0xFF);
         y += 20.0f;
-        cFont_text(font, 110.0f, y, D_004A1338);
-        func_001DCA80(font, 530.0f, y, D_004A12C0, LobbyMan_mLobbyMan->mSeed);
+        cFont_text(font, 110.0f, y, str_Seed);
+        func_001DCA80(font, 530.0f, y, str_pct_d_b, LobbyMan_mLobbyMan->mSeed);
         break;
     }
     }
@@ -1578,7 +1578,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
         unsigned int v = ip;
-        func_001DCA40(font, 320.0f, 420.0f, D_0045CF98, v >> 24, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+        func_001DCA40(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, v >> 24, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
     }
 }
 #endif
@@ -1785,14 +1785,14 @@ extern "C" void cDebugFE__cDebugFE(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_load);
 #ifdef SKIP_ASM
-extern char D_0045D4B8[];
-extern char D_0045D4C8[];
-extern char D_0045D4E0[];
-extern char D_0045D4F8[];
-extern char D_0045D510[];
-extern char D_0045D520[];
-extern char D_004A1340[];
-extern char D_004A1348[];
+extern char str_DebugFont[];
+extern char str_data_fonts_debugfnt_sfn[];
+extern char str_data_textures_dot_ssh[];
+extern char str_data_fonts_menu_ssh[];
+extern char str_DebugMenu[];
+extern char str_LobbyMenu[];
+extern char str_part[];
+extern char str_menu[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cMemMan_free(void* ptr);
 extern "C" void* cFont_cFont(void* self, const char* name, int a2);
@@ -1829,33 +1829,33 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEnt_17F868* vt = (sVEnt_17F868*)ps2GraphicsMan->mVtbl;
     ((Fn1_17F868)vt[44].fn)((char*)ps2GraphicsMan + vt[44].delta, 0);
-    self->font = (char*)cFont_cFont(cMemMan_alloc(0x84, D_0045D4B8, 0, 0), D_0045D4C8, 0);
+    self->font = (char*)cFont_cFont(cMemMan_alloc(0x84, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
     *(sVec2_17F868*)(self->font + 0x30) = sc;
     *(sVec2_17F868*)(self->font + 0x38) = *(sVec2_17F868*)(self->font + 0x30);
     self->snd1C = -1;
-    int* data = FILE_loadz(D_0045D4E0, 0x100);
+    int* data = FILE_loadz(str_data_textures_dot_ssh, 0x100);
     if (data) {
         char* payload = (char*)data + data[5];
         if (payload) {
             cPS2GraphicsMan* theGraphicsMan = cGraphicsMan_TheGraphicsMan;
             sVEnt_17F868* gvt = (sVEnt_17F868*)theGraphicsMan->mVtbl;
-            self->snd1C = ((Load_17F868)gvt[46].fn)((char*)theGraphicsMan + gvt[46].delta, payload, D_004A1340, 0, 1, -1);
+            self->snd1C = ((Load_17F868)gvt[46].fn)((char*)theGraphicsMan + gvt[46].delta, payload, str_part, 0, 1, -1);
         }
         cMemMan_free(data);
     }
-    data = FILE_load(D_0045D4F8, 0x100);
+    data = FILE_load(str_data_fonts_menu_ssh, 0x100);
     cPS2GraphicsMan* m2 = GrMan;
     sVEnt_17F868* vt2 = (sVEnt_17F868*)m2->mVtbl;
-    self->snd20 = ((Load_17F868)vt2[46].fn)((char*)m2 + vt2[46].delta, (char*)data + data[5], D_004A1348, 0, 1, -1);
+    self->snd20 = ((Load_17F868)vt2[46].fn)((char*)m2 + vt2[46].delta, (char*)data + data[5], str_menu, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
     }
     for (int i = 0; i < 2; i++) {
         self->objs[i] = 0;
     }
-    self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(0x8C48, D_0045D510, 0, 0));
-    self->objs[1] = func_0017D298((char*)cMemMan_alloc(0x1C18, D_0045D520, 0, 0));
+    self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(0x8C48, str_DebugMenu, 0, 0));
+    self->objs[1] = func_0017D298((char*)cMemMan_alloc(0x1C18, str_LobbyMenu, 0, 0));
     if (SSXApp->unk_74) {
         self->cur = self->objs[1];
     } else {
@@ -2947,10 +2947,10 @@ INCLUDE_ASM("fe/debugfe", func_001809B0);
 #ifdef SKIP_ASM
 struct sStr10 { char c[10]; };
 extern sStr10 D_0045D550;
-extern char D_004A1350[];
-extern char D_0045D560[];
-extern char D_004A1358[];
-extern char D_004A1360[];
+extern char str_arrLeft[];
+extern char str_arrRight[];
+extern char str_spc[];
+extern char str_end[];
 extern "C" char* func_004162D0(char*, const char*);
 
 extern "C" void func_001809B0(void* self, int c, char* dst)
@@ -2966,13 +2966,13 @@ extern "C" void func_001809B0(void* self, int c, char* dst)
         buf[1] = 0;
         func_004162D0(dst, buf);
     } else if (c == 36) {
-        func_004162D0(dst, D_004A1350);
+        func_004162D0(dst, str_arrLeft);
     } else if (c == 37) {
-        func_004162D0(dst, D_0045D560);
+        func_004162D0(dst, str_arrRight);
     } else if (c == 38) {
-        func_004162D0(dst, D_004A1358);
+        func_004162D0(dst, str_spc);
     } else if (c == 39) {
-        func_004162D0(dst, D_004A1360);
+        func_004162D0(dst, str_end);
     }
 }
 #endif
@@ -2981,17 +2981,17 @@ extern "C" void func_001809B0(void* self, int c, char* dst)
 INCLUDE_ASM("fe/debugfe", func_00180A90);
 #ifdef SKIP_ASM
 struct sStr8 { char c[8]; };
-extern char D_004A1368[];
-extern char D_004A1350[];
-extern char D_0045D560[];
-extern char D_004A1358[];
-extern char D_004A1360[];
+extern char str_cursor[];
+extern char str_arrLeft[];
+extern char str_arrRight[];
+extern char str_spc[];
+extern char str_end[];
 extern "C" char* func_004162D0(char*, const char*);
 
 extern "C" void func_00180A90(void* self, int c, char* dst)
 {
     char buf[2];
-    *(sStr8*)dst = *(sStr8*)D_004A1368;
+    *(sStr8*)dst = *(sStr8*)str_cursor;
     if (c < 10) {
         buf[0] = c + '0';
         buf[1] = 0;
@@ -3001,13 +3001,13 @@ extern "C" void func_00180A90(void* self, int c, char* dst)
         buf[1] = 0;
         func_004162D0(dst, buf);
     } else if (c == 36) {
-        func_004162D0(dst, D_004A1350);
+        func_004162D0(dst, str_arrLeft);
     } else if (c == 37) {
-        func_004162D0(dst, D_0045D560);
+        func_004162D0(dst, str_arrRight);
     } else if (c == 38) {
-        func_004162D0(dst, D_004A1358);
+        func_004162D0(dst, str_spc);
     } else if (c == 39) {
-        func_004162D0(dst, D_004A1360);
+        func_004162D0(dst, str_end);
     }
 }
 #endif

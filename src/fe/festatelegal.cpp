@@ -4,7 +4,7 @@
 INCLUDE_ASM("fe/festatelegal", cFEStateLegal_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045DD10[];
+extern char str_122bAutosave[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -14,7 +14,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateLegal_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DD10), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_122bAutosave), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -27,7 +27,7 @@ extern "C" void cFEStateLegal_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festatelegal", cFEStateLegal_onUpdate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045DC60[];
+extern char str_TransitionOut[];
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -41,7 +41,7 @@ extern "C" void cFEStateLegal_onUpdate(void* self)
 {
     func_0039E510(self);
     if (++*(int*)((char*)self + 0x48) == 0xF0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0045DC60));
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }

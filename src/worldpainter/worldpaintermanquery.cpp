@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWorldPainterQuery_cWorldPainterQuery(void* self, void* arg);
-extern const char D_00483DE8[];
+extern const char str_WorldPainterQuery[];
 
 struct cWorldPainterManArg {
     void* field_0x0;
@@ -23,7 +23,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", cWorldPainterMan_getQuery__FPvP
  */
 void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 {
-    void* mem = cMemMan_alloc(0x18, D_00483DE8, 0, 0);
+    void* mem = cMemMan_alloc(0x18, str_WorldPainterQuery, 0, 0);
     void* queryArg = x->field_0x0;
     return cWorldPainterQuery_cWorldPainterQuery(mem, queryArg);
 }

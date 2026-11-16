@@ -7,7 +7,7 @@
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045DD30[];
+extern char str_18options[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -20,7 +20,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateOptions_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DD30), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_18options), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -91,8 +91,8 @@ extern "C" int func_00187D38(void* self);
 extern "C" void func_00188E58(void* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern char D_0045D8D8[];
-extern char D_0045DC60[];
+extern char str_cKeyboardPopup[];
+extern char str_TransitionOut[];
 extern char D_004A1408[];
 extern char D_004A1520[];
 extern char D_004A1530[];
@@ -154,7 +154,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
     switch (event) {
     case 5:
         if (Is_00188980(*(int*)(widget + 0x38), D_004A1520)) {
-            void* mem = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
+            void* mem = cMemMan_alloc(0x444, str_cKeyboardPopup, 0x100, 0);
             void* pop = cKeyboardPopup_cKeyboardPopup(mem, self->engine, self, 0, self->port);
             self->popup = pop;
             cKeyboardPopup_setInputText(pop, D_004A1408);
@@ -169,7 +169,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
             }
             D_004A14E0 = 0;
             self->flags |= 0x80;
-            int f = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(D_0045DC60));
+            int f = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(str_TransitionOut));
             if (f != 0xFFFF)
                 cUIScreen_playFrame(self->screen, f, 1);
             if (self->f48 == 0)
@@ -193,7 +193,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
         }
         D_004A14E0 = 0;
         self->flags |= 0x80;
-        int f = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(D_0045DC60));
+        int f = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(str_TransitionOut));
         if (f != 0xFFFF)
             cUIScreen_playFrame(self->screen, f, 1);
         break;
@@ -288,9 +288,9 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_0045DD40[];
-extern char D_0045DD50[];
-extern char D_0045DD20[];
+extern char str_reset_text[];
+extern char str_kT_FESaveOptionsQuesPS2[];
+extern char str_111resetopts[];
 extern char D_004A1530[];
 
 struct sVEK188D08a {
@@ -324,14 +324,14 @@ extern "C" void cFEStateOptions_onPopupEvent(void* self, char* popup, int event)
     switch (event) {
     case 0x15: {
         void* scr = *(void**)(popup + 0x40);
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(scr, GetHashValue32(D_0045DD40));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(scr, GetHashValue32(str_reset_text));
         if (text != 0) {
-            cUIText_setUnicodeStringByID(text, GetHashValue32(D_0045DD50));
+            cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_FESaveOptionsQuesPS2));
         }
         break;
     }
     case 0x16:
-        if (IsK188D08(*(int*)(popup + 0xC), D_0045DD20)) {
+        if (IsK188D08(*(int*)(popup + 0xC), str_111resetopts)) {
             void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1530));
             sVEK188D08a* vt = *(sVEK188D08a**)(popup + 8);
             if (vt[23].fn(popup + vt[23].delta, 0)) {
@@ -362,7 +362,7 @@ INCLUDE_ASM("fe/festateoptions", func_00188E58);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern char D_0045DD68[];
+extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
 extern int D_004A14D0;
 extern int D_004A14D4;
@@ -372,7 +372,7 @@ extern int D_004A14E0;
 
 extern "C" void func_00188E58(void* self)
 {
-    char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+    char* p = (char*)operator new(0x4C, str_cFEPopupOptionReset, 0x100, 0);
     func_0039E318(p, *(void**)((char*)self + 0x10), self);
     *(void***)(p + 8) = D_0046B3D0;
     *(char*)(p + 0x48) = 0;
@@ -416,19 +416,19 @@ extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_0045DED0[];
-extern char D_0045DEE0[];
-extern char D_0045DEF0[];
-extern char D_0045DF00[];
-extern char D_0045DF10[];
-extern char D_0045DF20[];
-extern char D_0045DF30[];
-extern char D_0045DF40[];
-extern char D_0045DF50[];
-extern char D_0045DF68[];
+extern char str_19game_opt[];
+extern char str_kT_LANGAmerican[];
+extern char str_kT_LANGFrench[];
+extern char str_kT_LANGGerman[];
+extern char str_kT_LANGSpanish[];
+extern char str_kT_CMNMPH[];
+extern char str_kT_CMNKPH[];
+extern char str_kT_CMNOff[];
+extern char str_kT_19Widescreen169[];
+extern char str_kT_19WidescreenAnimorphic[];
 extern char D_004A14F8[];
 extern char D_004A1500[];
-extern char D_004A1398[];
+extern char str_Menu[];
 extern char* D_00440FB8[];
 extern char* D_00440FC8[];
 extern char* D_00440FD8[];
@@ -499,7 +499,7 @@ static inline void setText_188F28(sOptGame_188F28* self, char** names, int i, ch
 extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
 {
     void* engine = self->engine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DED0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_19game_opt), 0);
     self->screen = (char*)screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
@@ -511,16 +511,16 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
     cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1500));
     uiObj->setVisible(0);
     uiObj->setEnabled(1);
-    void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1398));
+    void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu));
     if (menu != 0)
         cUIMenu_setSelectedByIndex(menu, 1);
     if (self->item[0] >= 0) {
         void* w = find_188F28(self, D_00440FD8, 0);
         if (w != 0) {
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DEE0), 0);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DEF0), 1);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF00), 2);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF10), 3);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGAmerican), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGFrench), 1);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGGerman), 2);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGSpanish), 3);
             unsigned char sel;
             if (cUIListBox_getEntryByData(w, iface->getOptions().mode, &sel))
                 cUIListBox_setCurrentEntryByIndex(w, sel);
@@ -539,8 +539,8 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
     if (self->item[1] >= 0) {
         void* w = find_188F28(self, D_00440FD8, 1);
         if (w != 0) {
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF20), 0);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF30), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNMPH), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNKPH), 0);
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().showHud);
         }
         {
@@ -557,9 +557,9 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
     if (self->item[2] >= 0) {
         void* w = find_188F28(self, D_00440FD8, 2);
         if (w != 0) {
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF50), 0);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF68), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19Widescreen169), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19WidescreenAnimorphic), 0);
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().f20);
         }
         {
@@ -602,8 +602,8 @@ extern "C" void func_0014F4F8(void* iface);
 extern "C" void func_00189D60(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0029ED90(void* p, int a);
-extern char D_0045DD20[];
-extern char D_0045DDD8[];
+extern char str_111resetopts[];
+extern char str_24screen_position[];
 extern int D_004A14D0;
 
 struct sGameCfg_189610 {
@@ -655,14 +655,14 @@ extern "C" void func_00189610(void* self, char* popup, int event)
     case 0x15:
         break;
     case 0x16:
-        if (Is_189610(*(int*)(popup + 0xC), D_0045DD20)) {
+        if (Is_189610(*(int*)(popup + 0xC), str_111resetopts)) {
             if (GetOpt_189610(popup, 2)) {
                 func_0014F4F8(iface);
                 D_004A14D0 = 1;
                 func_00189D60(self);
                 func_0029ED90(func_0028B180(), 1);
             }
-        } else if (Is_189610(*(int*)(popup + 0xC), D_0045DDD8)) {
+        } else if (Is_189610(*(int*)(popup + 0xC), str_24screen_position)) {
             if (GetOpt_189610(popup, 2)) {
                 int a = GetOpt_189610(popup, 0);
                 int b = GetOpt_189610(popup, 1);
@@ -726,9 +726,9 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern char D_0045DD68[];
-extern char D_0045DF88[];
-extern char D_0045DFA0[];
+extern char str_cFEPopupOptionReset[];
+extern char str_cFEPopupScreenPos[];
+extern char str_cFEPopupVideoCalibration[];
 extern void* cFEPopupScreenPos_vtbl[];
 extern void* cFEPopupVideoCalibration_vtbl[];
 extern void* D_0046B3D0[];
@@ -809,7 +809,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 7: {
-        char* popup = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        char* popup = (char*)operator new(0x4C, str_cFEPopupOptionReset, 0x100, 0);
         func_0039E318(popup, self->engine, self);
         *(void***)(popup + 8) = D_0046B3D0;
         popup[0x48] = 0;
@@ -818,7 +818,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
     }
     case 5:
         if (Is_189980(*(int*)(widget + 0x38), D_004A1520)) {
-            char* popup = (char*)operator new(0x54, D_0045DF88, 0x100, 0);
+            char* popup = (char*)operator new(0x54, str_cFEPopupScreenPos, 0x100, 0);
             func_0039E318(popup, self->engine, self);
             *(void***)(popup + 8) = cFEPopupScreenPos_vtbl;
             *(int*)(popup + 0x4C) = 0;
@@ -826,7 +826,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
             popup[0x50] = 0;
             cUIStateStack_pushPopup(self->engine + 0x18, popup);
         } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
-            char* popup = (char*)operator new(0x4C, D_0045DFA0, 0x100, 0);
+            char* popup = (char*)operator new(0x4C, str_cFEPopupVideoCalibration, 0x100, 0);
             func_0039E318(popup, self->engine, self);
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
             *(int*)(popup + 0xC) = 0x1B;
@@ -997,9 +997,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFEStateOptionsSound_updateWidget(void* self);
-extern char D_0045DFC0[];
-extern char D_004A1580[];
-extern char D_004A1588[];
+extern char str_141advsettings[];
+extern char str_ongroup[];
+extern char str_fegroup[];
 extern char D_004A1528[];
 extern int D_004A1A70;
 
@@ -1026,18 +1026,18 @@ public:
 extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DFC0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_141advsettings), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateOptionsSound_updateWidget(self);
     int on = D_004A1A70 == 1;
-    cUIObj_18A298* onObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1580));
+    cUIObj_18A298* onObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ongroup));
     if (onObj != 0) {
         onObj->setVisible(on);
     }
-    cUIObj_18A298* offObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1588));
+    cUIObj_18A298* offObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_fegroup));
     if (offObj != 0) {
         offObj->setVisible(on ^ 1);
     }
@@ -1064,7 +1064,7 @@ extern "C" void func_00287520(void* snd, int v);
 extern "C" void func_00287558(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern "C" void cFEStateOptionsSound_updateWidget(void* self);
-extern char D_0045DD20[];
+extern char str_111resetopts[];
 extern int D_004A14D4;
 
 struct sSndCfg_18A3D8 {
@@ -1110,7 +1110,7 @@ extern "C" void func_0018A3D8(void* self, char* popup, int event)
     case 0x15:
         break;
     case 0x16:
-        if (Is_18A3D8(*(int*)(popup + 0xC), D_0045DD20)) {
+        if (Is_18A3D8(*(int*)(popup + 0xC), str_111resetopts)) {
             if (GetOpt_18A3D8(popup, 2)) {
                 func_0014F458(iface);
                 func_0018BEF8(self, D_00535610_18A3D8.output);
@@ -1185,15 +1185,15 @@ extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void func_00287558(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
-extern char D_0045DD68[];
+extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
-extern char D_004A1568[];
-extern char D_004A1590[];
-extern char D_004A1598[];
-extern char D_004A15A0[];
-extern char D_004A15A8[];
-extern char D_004A15B0[];
-extern char D_004A15B8[];
+extern char str_1lb[];
+extern char str_2sl[];
+extern char str_3sl[];
+extern char str_4sl[];
+extern char str_5lb[];
+extern char str_6lb[];
+extern char str_7lb[];
 extern int D_004A1A70;
 extern int D_004A14D4;
 
@@ -1249,7 +1249,7 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
     case 5: // empty case; needed for the original compare-tree shape
         break;
     case 7: {
-        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        char* p = (char*)operator new(0x4C, str_cFEPopupOptionReset, 0x100, 0);
         func_0039E318(p, self->engine, self);
         *(void***)(p + 8) = D_0046B3D0;
         p[0x48] = 0;
@@ -1274,35 +1274,35 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
         break;
     }
     case 9:
-        if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1568)) {
+        if (Is_18A8D0(*(int*)(widget + 0x38), str_1lb)) {
             D_00535610_18A8D0.output = cUIListBox_getCurrentEntryData(widget);
             func_0018BEF8(self, cUIListBox_getCurrentEntryData(widget));
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1590)) {
+        else if (Is_18A8D0(*(int*)(widget + 0x38), str_2sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.sfxVol = vol;
             func_00287410(func_0028B180(), Cfg_18A8D0().sfxVol);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1598)) {
+        else if (Is_18A8D0(*(int*)(widget + 0x38), str_3sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.speechVol = vol;
             func_00287488(func_0028B180(), Cfg_18A8D0().speechVol);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15A0)) {
+        else if (Is_18A8D0(*(int*)(widget + 0x38), str_4sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.musicVol = vol;
             func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15A8)) {
+        else if (Is_18A8D0(*(int*)(widget + 0x38), str_5lb)) {
             D_00535610_18A8D0.f17 = cUIListBox_getCurrentEntryData(widget) != 0;
             func_00287558(func_0028B180(), Cfg_18A8D0().f17 != 0);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15B0)) {
+        else if (Is_18A8D0(*(int*)(widget + 0x38), str_6lb)) {
             D_00535610_18A8D0.f16 = cUIListBox_getCurrentEntryData(widget) != 0;
             func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
         }
         bool on = D_004A1A70 == 1;
-        if (on && Is_18A8D0(*(int*)(widget + 0x38), D_004A15B8))
+        if (on && Is_18A8D0(*(int*)(widget + 0x38), str_7lb))
             D_00535610_18A8D0.f18 = cUIListBox_getCurrentEntryData(widget) != 0;
         D_004A14D4 = 1;
         break;
@@ -1328,19 +1328,19 @@ extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void func_00287558(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
-extern char D_0045DF40[];
-extern char D_0045DFD0[];
-extern char D_0045DFE8[];
-extern char D_0045E000[];
-extern char D_0045E018[];
-extern char D_0045E028[];
-extern char D_004A1568[];
-extern char D_004A1590[];
-extern char D_004A1598[];
-extern char D_004A15A0[];
-extern char D_004A15A8[];
-extern char D_004A15B0[];
-extern char D_004A15B8[];
+extern char str_kT_CMNOff[];
+extern char str_kT_20SpeakerStereo[];
+extern char str_kT_20SpeakerSurround[];
+extern char str_kT_20SpeakerMono[];
+extern char str_kT_20SpeakerDTS[];
+extern char str_kT_CMNOn[];
+extern char str_1lb[];
+extern char str_2sl[];
+extern char str_3sl[];
+extern char str_4sl[];
+extern char str_5lb[];
+extern char str_6lb[];
+extern char str_7lb[];
 extern int D_004A1A70;
 
 struct sSndCfg_18B380 {
@@ -1408,20 +1408,20 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     sOptSound_18B380* self = (sOptSound_18B380*)vself;
     sOptionIface_18B380* iface = (sOptionIface_18B380*)cBE_getInterface_Fv(cBE_getBE(), 4);
     {
-    char* w = (char*)Find_18B380(self, D_004A1568);
+    char* w = (char*)Find_18B380(self, str_1lb);
     if (w != 0) {
         func_0039A670(w);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DFD0), 0);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DFE8), 1);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E000), 2);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E018), 3);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerStereo), 0);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerSurround), 1);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerMono), 2);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerDTS), 3);
         unsigned char sel;
         if (cUIListBox_getEntryByData(w, func_00289DC0(func_0028B180()), &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
     }
     }
     {
-    char* w = (char*)Find_18B380(self, D_004A1590);
+    char* w = (char*)Find_18B380(self, str_2sl);
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().sfxVol;
@@ -1429,7 +1429,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     }
     }
     {
-    char* w = (char*)Find_18B380(self, D_004A1598);
+    char* w = (char*)Find_18B380(self, str_3sl);
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().speechVol;
@@ -1437,7 +1437,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     }
     }
     {
-    char* w = (char*)Find_18B380(self, D_004A15A0);
+    char* w = (char*)Find_18B380(self, str_4sl);
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().musicVol;
@@ -1445,11 +1445,11 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     }
     }
     {
-    char* w = (char*)Find_18B380(self, D_004A15A8);
+    char* w = (char*)Find_18B380(self, str_5lb);
     if (w != 0) {
         func_0039A670(w);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOn), 1);
         unsigned char sel;
         if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
@@ -1457,11 +1457,11 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     }
     }
     {
-    char* w = (char*)Find_18B380(self, D_004A15B0);
+    char* w = (char*)Find_18B380(self, str_6lb);
     if (w != 0) {
         func_0039A670(w);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
-        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOn), 1);
         unsigned char sel;
         if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
@@ -1470,11 +1470,11 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     }
     bool on = D_004A1A70 == 1;
     if (on) {
-        char* w = (char*)Find_18B380(self, D_004A15B8);
+        char* w = (char*)Find_18B380(self, str_7lb);
         if (w != 0) {
             func_0039A670(w);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
-            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOn), 1);
             unsigned char sel;
             if (cUIListBox_getEntryByData(w, iface->getOptions().f18, &sel))
                 cUIListBox_setCurrentEntryByIndex(w, sel);
@@ -1577,7 +1577,7 @@ extern "C" void* func_0018C0E8(void* self)
 INCLUDE_ASM("fe/festateoptions", func_0018C128);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045E038[];
+extern char str_21hud_opt[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0018C478(void* self);
@@ -1585,7 +1585,7 @@ extern "C" void func_0018C478(void* self);
 extern "C" void func_0018C128(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E038), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_21hud_opt), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -1612,7 +1612,7 @@ struct sVE_18C1B8 {
     int (*fn)(void*, int);
 };
 int GetHashValue32(char* str);
-extern char D_0045DD20[];
+extern char str_111resetopts[];
 extern int D_004A14D8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1628,7 +1628,7 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
         break;
     case 0x16: {
         int h = *(int*)((char*)widget + 0xC);
-        if (h == GetHashValue32(D_0045DD20)) {
+        if (h == GetHashValue32(str_111resetopts)) {
             sVE_18C1B8* e = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
             if (e->fn((char*)widget + e->delta, 2) != 0) {
                 func_0014F600(iface);
@@ -1667,7 +1667,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern char D_0045DD68[];
+extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
 extern int D_004A14D8;
 
@@ -1706,7 +1706,7 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 7: {
-        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        char* p = (char*)operator new(0x4C, str_cFEPopupOptionReset, 0x100, 0);
         func_0039E318(p, *(void**)(self + 0x10), self);
         *(void***)(p + 8) = D_0046B3D0;
         *(char*)(p + 0x48) = 0;
@@ -1749,7 +1749,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018C478);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern char D_004A1398[];
+extern char str_Menu[];
 
 struct sName_C478 {
     char s[2];
@@ -1785,7 +1785,7 @@ extern "C" void func_0018C478(void* vself)
     char* self = (char*)vself;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sName_C478 name = *(sName_C478*)D_004A14F8;
-    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1398));
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_Menu));
     if (menu != 0) {
         int i;
         for (i = 0; i < 3; i++) {
@@ -1833,15 +1833,15 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
 extern "C" void cUIListBox_addEntryByStringID(void* box, int id, int idx);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 extern "C" void func_0018CDC0(void* self);
-extern char D_0045E068[];
-extern char D_004A1568[];
-extern char D_004A1570[];
-extern char D_004A15C8[];
-extern char D_004A1578[];
-extern char D_0045DF40[];
-extern char D_0045E028[];
-extern char D_0045E078[];
-extern char D_0045E090[];
+extern char str_22control[];
+extern char str_1lb[];
+extern char str_2lb[];
+extern char str_3lb[];
+extern char str_4lb[];
+extern char str_kT_CMNOff[];
+extern char str_kT_CMNOn[];
+extern char str_kT_20PresetDefault[];
+extern char str_kT_OVRCMNPro[];
 
 /**
  * Creates the controller options screen ("22control") and fills its lists.
@@ -1853,32 +1853,32 @@ extern char D_0045E090[];
 extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E068), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_22control), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x48) = 0;
-    void* listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1568));
+    void* listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
     if (listBox != 0) {
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045DF40), 0);
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045E028), 1);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOff), 0);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOn), 1);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1570));
+    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
     if (listBox != 0) {
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045DF40), 0);
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045E028), 1);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOff), 0);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOn), 1);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C8));
+    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
     if (listBox != 0) {
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045E078), 0);
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045E090), 1);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_20PresetDefault), 0);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_OVRCMNPro), 1);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1578));
+    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
     if (listBox != 0) {
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045E078), 0);
-        cUIListBox_addEntryByStringID(listBox, GetHashValue32(D_0045E090), 1);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_20PresetDefault), 0);
+        cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_OVRCMNPro), 1);
     }
     float zero = 0.0f;
     func_0018D108(self, 0, zero, zero);
@@ -1920,7 +1920,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
 extern "C" void func_0018CDC0(void* self);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
-extern char D_0045DD20[];
+extern char str_111resetopts[];
 extern int D_004A14DC;
 
 static inline int Is_0018C910(int id, char* s) { return id == GetHashValue32(s); }
@@ -1964,7 +1964,7 @@ extern "C" void func_0018C910(void* self, cUIObj_18C910* obj, int msg)
         break;
     }
     case 0x16:
-        if (Is_0018C910(*(int*)((char*)obj + 0xC), D_0045DD20)) {
+        if (Is_0018C910(*(int*)((char*)obj + 0xC), str_111resetopts)) {
             if (obj->v23(2) != 0) {
                 cBENewPlayerInterface_defaultCtrl(pi);
                 func_0018CDC0(self);
@@ -1994,12 +1994,12 @@ extern "C" void func_00147658(void* self, int index, int value);
 extern "C" int func_001474E8(void* iface, int a1);
 extern "C" void func_0018CF50(void* self, int on);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
-extern char D_0045DD68[];
+extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
-extern char D_004A1568[];
-extern char D_004A1570[];
-extern char D_004A15C8[];
-extern char D_004A1578[];
+extern char str_1lb[];
+extern char str_2lb[];
+extern char str_3lb[];
+extern char str_4lb[];
 extern int D_004A14DC;
 
 struct sVE_18CA10n {
@@ -2024,7 +2024,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (event) {
     case 7: {
-        char* p = (char*)operator new(0x4C, D_0045DD68, 0x100, 0);
+        char* p = (char*)operator new(0x4C, str_cFEPopupOptionReset, 0x100, 0);
         func_0039E318(p, *(void**)(self + 0x10), self);
         *(void***)(p + 8) = D_0046B3D0;
         *(char*)(p + 0x48) = 0;
@@ -2043,7 +2043,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
         break;
     }
     case 9:
-        if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1568)) {
+        if (Is_0018CA10(*(int*)(widget + 0x38), str_1lb)) {
             func_00147528(iface, 0, cUIListBox_getCurrentEntryData(widget) != 0);
             if (func_001474E8(iface, 0)) {
                 func_0018D108(self, 0, 10.0f, 10.0f);
@@ -2052,7 +2052,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
             } else {
                 func_0018D108(self, 0, 0.0f, 0.0f);
             }
-        } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1570)) {
+        } else if (Is_0018CA10(*(int*)(widget + 0x38), str_2lb)) {
             func_00147528(iface, 1, cUIListBox_getCurrentEntryData(widget) != 0);
             if (func_001474E8(iface, 1)) {
                 func_0018D108(self, 1, 10.0f, 10.0f);
@@ -2061,10 +2061,10 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
             } else {
                 func_0018D108(self, 1, 0.0f, 0.0f);
             }
-        } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A15C8)) {
+        } else if (Is_0018CA10(*(int*)(widget + 0x38), str_3lb)) {
             func_00147658(iface, 0, cUIListBox_getCurrentEntryData(widget));
             func_0018CF50(self, cUIListBox_getCurrentEntryData(widget) == 0);
-        } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1578)) {
+        } else if (Is_0018CA10(*(int*)(widget + 0x38), str_4lb)) {
             func_00147658(iface, 1, cUIListBox_getCurrentEntryData(widget));
             func_0018CF50(self, cUIListBox_getCurrentEntryData(widget) == 0);
         }
@@ -2135,32 +2135,32 @@ extern "C" int func_00147618(void* iface, int a1);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_0018CF50(void* self, int on);
-extern char D_004A1568[];
-extern char D_004A1570[];
-extern char D_004A15C8[];
-extern char D_004A1578[];
+extern char str_1lb[];
+extern char str_2lb[];
+extern char str_3lb[];
+extern char str_4lb[];
 
 extern "C" void func_0018CDC0(void* self)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     unsigned char vals[4];
-    void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1568));
+    void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
     if (o != 0) {
         cUIListBox_getEntryByData(o, func_001474E8(np, 0), &vals[0]);
         cUIListBox_setCurrentEntryByIndex(o, vals[0]);
     }
-    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1570));
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
     if (o != 0) {
         cUIListBox_getEntryByData(o, func_001474E8(np, 1), &vals[1]);
         cUIListBox_setCurrentEntryByIndex(o, vals[1]);
     }
-    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C8));
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
     if (o != 0) {
         cUIListBox_getEntryByData(o, func_00147618(np, 0), &vals[2]);
         cUIListBox_setCurrentEntryByIndex(o, vals[2]);
         func_0018CF50(self, func_00147618(np, 0) == 0);
     }
-    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1578));
+    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
     if (o != 0) {
         cUIListBox_getEntryByData(o, func_00147618(np, 1), &vals[3]);
         cUIListBox_setCurrentEntryByIndex(o, vals[3]);
@@ -2175,8 +2175,8 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char* D_004A15BC;
 extern char* D_004A15C0;
-extern char D_0045E0A0[];
-extern char D_0045E0B0[];
+extern char str_default_text[];
+extern char str_pro_text[];
 
 class cUIObj_18CF50 {
 public:
@@ -2202,11 +2202,11 @@ extern "C" void func_0018CF50(void* self, int on)
     if (b != 0) {
         b->setVisible(on ^ 1);
     }
-    cUIObj_18CF50* c = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E0A0));
+    cUIObj_18CF50* c = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_default_text));
     if (c != 0) {
         c->setVisible(on);
     }
-    cUIObj_18CF50* d = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E0B0));
+    cUIObj_18CF50* d = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pro_text));
     if (d != 0) {
         d->setVisible(on ^ 1);
     }
@@ -2297,7 +2297,7 @@ extern "C" void* func_0018D240(void* self)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045E0C0[];
+extern char str_25saveload[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -2307,7 +2307,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E0C0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_25saveload), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -2319,10 +2319,10 @@ extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045E0D0[];
-extern char D_0045E0E0[];
-extern char D_0045E0F0[];
-extern char D_0045E100[];
+extern char str_1saveoptions[];
+extern char str_2loadoptions[];
+extern char str_3loadreplay[];
+extern char str_4new_game[];
 extern char D_004A1508[];
 extern char D_004A1500[];
 
@@ -2338,13 +2338,13 @@ static inline int IsHash_D2E8(int id, char* s) { return id == GetHashValue32(s);
  */
 extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
 {
-    if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0D0)) {
+    if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_1saveoptions)) {
         *(int*)((char*)widget + 0x18) = 0;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0E0)) {
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_2loadoptions)) {
         *(int*)((char*)widget + 0x18) = 2;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0F0)) {
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_3loadreplay)) {
         *(int*)((char*)widget + 0x18) = 1;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E100)) {
+    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_4new_game)) {
         *(int*)((char*)widget + 0x18) = 3;
     } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_004A1508)) {
         *(int*)((char*)widget + 0x18) = 0x300;
@@ -2361,8 +2361,8 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern int D_004A19D8;
-extern char D_0045E0F0[];
-extern char D_0045E100[];
+extern char str_3loadreplay[];
+extern char str_4new_game[];
 
 /**
  * Applies func_00194498 to the load-replay and new-game entries while D_004A19D8 is set.
@@ -2372,11 +2372,11 @@ extern char D_0045E100[];
 extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(void* self)
 {
     if (D_004A19D8 != 0) {
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E0F0));
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3loadreplay));
         if (obj != 0) {
             func_00194498(obj);
         }
-        obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E100));
+        obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4new_game));
         if (obj != 0) {
             func_00194498(obj);
         }
@@ -2427,7 +2427,7 @@ extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern char D_004A1408[];
-extern char D_0045DC60[];
+extern char str_TransitionOut[];
 
 struct sVE_18D460n {
     short delta;
@@ -2491,7 +2491,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, u
         if (x != 0) {
             cUIStateStack_push(*(char**)(self + 0x10) + 0x18, x);
         }
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0045DC60));
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(*(void**)(self + 0x40), frame, 1);
         }
@@ -2509,8 +2509,8 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
-extern char D_0045E110[];
-extern char D_0045E130[];
+extern char str_kT_HELPCreateNewFilePrompt[];
+extern char str_cFEPopupConfirm[];
 
 struct sVE_18D648s {
     short delta;
@@ -2556,8 +2556,8 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
             *(signed char*)(self + 0x48) = *(signed char*)(self + 0x14);
             char* mgr = (char*)SSXApp->FELocale;
             sVE_18D648s* vt = *(sVE_18D648s**)(mgr + 4);
-            unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0045E110));
-            char* mem = (char*)operator new(0xBFC, D_0045E130, 0x100, 0);
+            unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_HELPCreateNewFilePrompt));
+            char* mem = (char*)operator new(0xBFC, str_cFEPopupConfirm, 0x100, 0);
             char* confirmPopup = (char*)cFEPopupConfirm_cFEPopupConfirm(mem, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
             sVE_18D648v* vt2 = *(sVE_18D648v**)(confirmPopup + 8);
             vt2[25].fn(confirmPopup + vt2[25].delta, 1);
@@ -2623,23 +2623,23 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" void cUIText_setUnicodeString(void* text, char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0045E140[];
-extern char D_004A15D0[];
-extern char D_004A15D8[];
-extern char D_0045E150[];
-extern char D_0045E168[];
-extern char D_004A1460[];
-extern char D_004A1458[];
-extern char D_0045E178[];
-extern char D_0045E190[];
-extern char D_0045E1A0[];
-extern char D_0045E1B8[];
-extern char D_0045E1C8[];
-extern char D_0045E1D8[];
-extern char D_0045E1E8[];
-extern char D_0045E200[];
-extern char D_0045E210[];
-extern char D_004A12C0[];
+extern char str_120MCselect[];
+extern char str_btext3[];
+extern char str_btext3a[];
+extern char str_kT_TITLELoadReplay[];
+extern char str_helprelay_ps2[];
+extern char str_ps2sq[];
+extern char str_btext5[];
+extern char str_kT_TITLESaveOptions[];
+extern char str_helpsave_ps2[];
+extern char str_kT_TITLELoadOptions[];
+extern char str_helpload_ps2[];
+extern char str_title_Save_Load[];
+extern char str_1percentage[];
+extern char str_Memory_card_text[];
+extern char str_kT_MEMEmpty[];
+extern char str_pct_dmemory_card[];
+extern char str_pct_d_b[];
 extern char D_004A1408[];
 
 struct sColor_DD60 {
@@ -2707,50 +2707,50 @@ static inline char* getString_DD60(char* name)
 extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E140), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_120MCselect), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen == 0) {
         return;
     }
     cUIScreen_playFrame(screen, 0, 0);
     cUIObj_DD60* uiObj;
-    uiObj = getObj_DD60(self, D_004A15D0);
+    uiObj = getObj_DD60(self, str_btext3);
     uiObj->setVisible(0);
-    uiObj = getObj_DD60(self, D_004A15D8);
+    uiObj = getObj_DD60(self, str_btext3a);
     uiObj->setVisible(0);
     char* title;
     if (*(int*)((char*)self + 0x1BC) == 1) {
-        title = getString_DD60(D_0045E150);
-        uiObj = getObj_DD60(self, D_004A15D8);
+        title = getString_DD60(str_kT_TITLELoadReplay);
+        uiObj = getObj_DD60(self, str_btext3a);
         uiObj->setVisible(1);
-        uiObj = getObj_DD60(self, D_0045E168);
-        getObj_DD60(self, D_004A1460)->setVisible(0);
+        uiObj = getObj_DD60(self, str_helprelay_ps2);
+        getObj_DD60(self, str_ps2sq)->setVisible(0);
         uiObj->setVisible(1);
-        uiObj = getObj_DD60(self, D_004A1458);
+        uiObj = getObj_DD60(self, str_btext5);
         uiObj->setVisible(0);
     } else if (*(int*)((char*)self + 0x22C) != 0) {
-        title = getString_DD60(D_0045E178);
-        uiObj = getObj_DD60(self, D_004A15D0);
+        title = getString_DD60(str_kT_TITLESaveOptions);
+        uiObj = getObj_DD60(self, str_btext3);
         uiObj->setVisible(1);
-        uiObj = getObj_DD60(self, D_0045E190);
+        uiObj = getObj_DD60(self, str_helpsave_ps2);
         uiObj->setVisible(1);
     } else {
-        title = getString_DD60(D_0045E1A0);
-        uiObj = getObj_DD60(self, D_004A15D8);
+        title = getString_DD60(str_kT_TITLELoadOptions);
+        uiObj = getObj_DD60(self, str_btext3a);
         uiObj->setVisible(1);
-        uiObj = getObj_DD60(self, D_0045E1B8);
-        getObj_DD60(self, D_004A1460)->setVisible(0);
+        uiObj = getObj_DD60(self, str_helpload_ps2);
+        getObj_DD60(self, str_ps2sq)->setVisible(0);
         uiObj->setVisible(1);
-        uiObj = getObj_DD60(self, D_004A1458);
+        uiObj = getObj_DD60(self, str_btext5);
         uiObj->setVisible(0);
     }
-    cUIText_setUnicodeString(getObj_DD60(self, D_0045E1C8), title);
-    cUIText_setAsciiString((cUIText*)getObj_DD60(self, D_0045E1D8), D_004A1408);
-    cUIText_setAsciiString((cUIText*)getObj_DD60(self, D_0045E1E8), D_004A1408);
-    char* slot = getString_DD60(D_0045E200);
+    cUIText_setUnicodeString(getObj_DD60(self, str_title_Save_Load), title);
+    cUIText_setAsciiString((cUIText*)getObj_DD60(self, str_1percentage), D_004A1408);
+    cUIText_setAsciiString((cUIText*)getObj_DD60(self, str_Memory_card_text), D_004A1408);
+    char* slot = getString_DD60(str_kT_MEMEmpty);
     char buf[32];
     for (int i = 1; i < 5; i++) {
-        sprintf(buf, D_0045E210, i);
+        sprintf(buf, str_pct_dmemory_card, i);
         uiObj = getObj_DD60(self, buf);
         *(int*)((char*)uiObj + 0x18) = i - 1;
         cUIText_setUnicodeString(uiObj, slot);
@@ -2759,7 +2759,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         if (*(int*)((char*)self + 0x1BC) != 1 && i >= 2) {
             uiObj->setEnabled(1);
             uiObj->setVisible(0);
-            sprintf(buf, D_004A12C0, i);
+            sprintf(buf, str_pct_d_b, i);
             uiObj = getObj_DD60(self, buf);
             uiObj->setVisible(0);
             cUIText_setAsciiString((cUIText*)uiObj, buf);
@@ -3060,24 +3060,24 @@ INCLUDE_ASM("fe/festateoptions", func_0018E178);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A15E0[];
-extern char D_004A15D0[];
-extern char D_004A15D8[];
-extern char D_004A1458[];
-extern char D_004A1460[];
+extern char str_ps2x[];
+extern char str_btext3[];
+extern char str_btext3a[];
+extern char str_btext5[];
+extern char str_ps2sq[];
 
 extern "C" void func_0018E178(void* self, int on)
 {
     if (*(int*)((char*)self + 0x234) == on)
         return;
     int off = on ^ 1;
-    ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15E0)))->setVisible(off);
+    ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x)))->setVisible(off);
     if (*(int*)((char*)self + 0x22C) != 0) {
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D0)))->setVisible(off);
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setVisible(off);
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1460)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(off);
     } else {
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D8)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(off);
     }
     *(int*)((char*)self + 0x234) = on;
 }
@@ -3088,8 +3088,8 @@ INCLUDE_ASM("fe/festateoptions", func_0018E2C0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A1458[];
-extern char D_004A1460[];
+extern char str_btext5[];
+extern char str_ps2sq[];
 struct cUIObj_E2C0 {
     int f0;
     int f4;
@@ -3108,8 +3108,8 @@ extern "C" void func_0018E2C0(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != 0) {
         int off = !on;
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setActive(off);
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1460)))->setActive(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setActive(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setActive(off);
     }
     *(int*)((char*)self + 0x220) = !on;
 }
@@ -3120,9 +3120,9 @@ INCLUDE_ASM("fe/festateoptions", func_0018E368);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A15D0[];
-extern char D_004A15D8[];
-extern char D_004A15E0[];
+extern char str_btext3[];
+extern char str_btext3a[];
+extern char str_ps2x[];
 
 struct cUIObj_E368 {
     int f0;
@@ -3140,15 +3140,15 @@ struct cUIObj_E368 {
 
 extern "C" void func_0018E368(void* self, bool a, bool b)
 {
-    cUIObj_E368* o = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15E0));
+    cUIObj_E368* o = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
     if (*(int*)((char*)self + 0x22C) != 0) {
         int v = !b;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D0)))->setVisible(v);
+        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(v);
         *(int*)((char*)self + 0x224) = v;
         o->setVisible(v);
     } else {
         int v = !a;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D8)))->setVisible(v);
+        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(v);
         *(int*)((char*)self + 0x224) = v;
         o->setVisible(v);
     }
@@ -3202,11 +3202,11 @@ extern "C" void cUIText_setUnicodeString(void* text, char* str);
 extern "C" void func_001D8240();
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* app, int dev, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0045E1D8[];
-extern char D_0045E1E8[];
-extern char D_0045E210[];
-extern char D_0045E220[];
-extern char D_0045E230[];
+extern char str_1percentage[];
+extern char str_Memory_card_text[];
+extern char str_pct_dmemory_card[];
+extern char str_arrow_left[];
+extern char str_arrow_right[];
 
 // UI widget: data before the vptr (vtable at +8).
 class cUIObj_18E510 {
@@ -3342,14 +3342,14 @@ extern "C" void func_0018E510(cState_18E510* self)
         int bIsNewSet;
         self->v43();
         cMCOverlayManager_GetDeviceDisplayString(pMC, *(int*)(pMC + 0x428), ustrDisplay, 0x320);
-        cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E1E8)), ustrDisplay);
+        cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Memory_card_text)), ustrDisplay);
         self->dev = *(int*)(pMC + 0x428);
-        pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E1D8));
+        pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_1percentage));
         pText->v09(0);
         bIsNewSet = 0;
         for (int i = 1; i < 5 && (self->mode == 1 || i < 2); i++) {
             char strObj[60];
-            sprintf(strObj, D_0045E210, i);
+            sprintf(strObj, str_pct_dmemory_card, i);
             pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
             DEVS_18E510(pMC, 14, i - 1, text);
             cUIText_setUnicodeString(pText, text);
@@ -3380,20 +3380,20 @@ extern "C" void func_0018E510(cState_18E510* self)
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 1) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E220)))->v09(0);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->v09(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E220)))->v09(1);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->v09(1);
         }
         if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 0) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E230)))->v09(0);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->v09(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E230)))->v09(1);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->v09(1);
         }
     }
     if (self->f214 != 3) {
         for (int i = 1; i < 5 && (self->mode == 1 || i < 2); ) {
             char strObj[0x50];
-            sprintf(strObj, D_0045E210, i);
+            sprintf(strObj, str_pct_dmemory_card, i);
             i++;
             cUIObj_18E510* pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
             pText->v25(0);

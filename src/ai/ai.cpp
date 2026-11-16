@@ -24,8 +24,8 @@ extern char cAI_vtbl[];
 extern char cAIStateHandler_vtbl[];
 extern char D_00458500[];
 extern char cShutdownHandler_vtbl[];
-extern char D_00457F00[];
-extern char D_00457F10[];
+extern char str_FocusMan[];
+extern char str_DangerMan[];
 
 struct sAIEntry_1286A0 {
     char pad[0x20];
@@ -69,8 +69,8 @@ extern "C" void* cAI_cAI(cAI* self)
     *(void**)&self->mEndRaceHandler = D_00458500;
     *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
     sAIState_1286A0** slot = (sAIState_1286A0**)((char*)self + 0xA4);
-    *slot = new (D_00457F00, 0, 0) sAIState_1286A0;
-    self->DangerMan = (cDangerMan*)(new (D_00457F10, 0, 0) sAIObj_1286A0(self));
+    *slot = new (str_FocusMan, 0, 0) sAIState_1286A0;
+    self->DangerMan = (cDangerMan*)(new (str_DangerMan, 0, 0) sAIObj_1286A0(self));
     self->RaceRankType = 0;
     return ((void*)self);
 }
@@ -740,7 +740,7 @@ INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* PadCache;
-extern char D_004A1108[];
+extern char str_Player[];
 extern "C" int func_00147290(void* iface, int i);
 extern "C" int func_00147618(void* iface, int i);
 extern "C" int func_00237140(void* a, void* b);
@@ -816,7 +816,7 @@ extern "C" void cAI_InitPlayers(cAI* p)
     int n = *(int*)(Cfg_IP() + 0x34);
     for (; i < n; i++) {
         int ch = func_00147290(iface, i);
-        char* obj = cPlayer_cPlayer_IP(cMemMan_alloc_IP(0x1950, D_004A1108, 0x80000000, 0), 1);
+        char* obj = cPlayer_cPlayer_IP(cMemMan_alloc_IP(0x1950, str_Player, 0x80000000, 0), 1);
         self->mRiders[i] = obj ? *(sRiderIP**)(obj + 0x18) : 0;
         self->mRiders[i]->mIndex = idx;
         self->mRiders[i]->mCtrl = idx;
@@ -887,7 +887,7 @@ extern "C" void cRider_initOnce(void* self, int immediate);
 struct cRider;
 void cRider_addRiderMetrix(cRider* rider);
 void cBENewRaceInterface_assignPlayer(void*, int, int);
-extern char D_00457F20[];
+extern char str_MissionRider[];
 
 struct sVEntry_MR { short delta; short index; void* fn; };
 struct sVtbl9_MR { sVEntry_MR e[9]; } __attribute__((aligned(8)));
@@ -987,7 +987,7 @@ extern "C" void cAI_initMissionRiders(cAI* p)
     char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     char* playbackMan = (char*)SSXApp->Game->PlaybackMan;
     int idx = self->mCount;
-    char* obj = cMissionRider_ctor((char*)cMemMan_alloc(0x1950, D_00457F20, 0x80000000, 0), 1);
+    char* obj = cMissionRider_ctor((char*)cMemMan_alloc(0x1950, str_MissionRider, 0x80000000, 0), 1);
     *(int*)(obj + 0xDF0) = *(int*)(playbackMan + 0x6C);
     *(int*)(obj + 0xDF4) = 0;
     cAnimModel_setScale(*(void**)(*(char**)(obj + 0x18) + 0x780), 0.5f, 0.5f);
@@ -1019,7 +1019,7 @@ extern "C" void func_0010C9A8(void*);
 extern "C" void cComputer_updateRiderDifficulty(void*);
 extern "C" void cAI_applyComputerRulesCustom(cAI* self, void* rider);
 void cBENewRaceInterface_assignPlayer(void*, int, int);
-extern char D_00457F30[];
+extern char str_ComputerRider[];
 extern int D_00535C04[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -1063,7 +1063,7 @@ extern "C" void cAI_initComputerRiders(cAI* p)
     for (int i = 0; i < n; i++)
     {
         int ch = cBENewPlayerInterface_getRiderCharID(iface, idx);
-        char* obj = (char*)cComputer_cComputer(cMemMan_alloc(0x1A90, D_00457F30, 0x80000000, 0), 1, 0);
+        char* obj = (char*)cComputer_cComputer(cMemMan_alloc(0x1A90, str_ComputerRider, 0x80000000, 0), 1, 0);
         sRiderCR** slot = &self->mRiders[idx];
         sRiderCR* rider = obj ? *(sRiderCR**)(obj + 0x18) : 0;
         *slot = rider;
@@ -1101,7 +1101,7 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int
 extern "C" void func_001473D0(void* iface, int rider, int v);
 struct cRider;
 void cRider_addRiderMetrix(cRider* rider);
-extern char D_00457F40[];
+extern char str_ComputerActorRider[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 struct sRiderCA { char pad[0x86C]; int mIndex; int mCtrl; };
@@ -1139,7 +1139,7 @@ extern "C" void cAI_initComputerActors(cAI* p)
     for (int i = 0; i < n; i++)
     {
         int ch = self->mCharIds[self->mNumActors];
-        char* obj = (char*)cComputer_cComputer(cMemMan_alloc(0x1A90, D_00457F40, 0x80000000, 0), 1, 1);
+        char* obj = (char*)cComputer_cComputer(cMemMan_alloc(0x1A90, str_ComputerActorRider, 0x80000000, 0), 1, 1);
         sRiderCA* rider = obj ? *(sRiderCA**)(obj + 0x18) : 0;
         self->mRiders[idx] = rider;
         rider->mIndex = idx;
@@ -2138,8 +2138,8 @@ extern "C" void func_00314F30(void* map, int i, void* anim);
 // PORT: the original passes the map to cGameAnimMap_testResolve(), whose symbol is declared with no params.
 void cGameAnimMap_testResolve_impl(void* map) __asm__("cGameAnimMap_testResolve__Fv");
 struct sAnimTable { void* anims[1]; };
-extern char D_00457F58[];
-extern char D_00457F70[];
+extern char str_data_char_anm_big[];
+extern char str_AdfDataSource[];
 extern char* D_004A1100[1];
 
 /**
@@ -2153,10 +2153,10 @@ extern "C" void cAI_loadAnims(void)
 {
     void* handle;
     int i;
-    func_003DED50(D_00457F58, 0, 0x64, &handle);
+    func_003DED50(str_data_char_anm_big, 0, 0x64, &handle);
     for (i = 0; i < 1; i++)
     {
-        void* bank = func_00311250(cMemMan_alloc(0x18, D_00457F70, 0, 0), D_004A1100[i]);
+        void* bank = func_00311250(cMemMan_alloc(0x18, str_AdfDataSource, 0, 0), D_004A1100[i]);
         ((sAnimTable*)D_004A3DF8)->anims[(unsigned char)i] = bank;
         func_00314F30(D_004A3E7C, i, bank);
     }

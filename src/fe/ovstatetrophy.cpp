@@ -10,7 +10,7 @@ INCLUDE_ASM("fe/ovstatetrophy", cOVStateTrophy_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_00471CD8[];
+extern char str_34trophy[];
 
 /**
  * Builds the trophy screen ("34trophy") and plays its first frame.
@@ -18,7 +18,7 @@ extern char D_00471CD8[];
 extern "C" void cOVStateTrophy_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471CD8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_34trophy), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -154,7 +154,7 @@ extern "C" int func_00398380(void* bank, int name);
 extern "C" int func_003983F0(void* bank, int hash);
 extern int D_004A2764;
 extern int D_004A2768;
-extern char D_004A21F0[];
+extern char str_fefont[];
 struct sTex_20EB50 {
     int name;
     int f4;
@@ -172,7 +172,7 @@ extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
             D_004C8C58[i].handle = func_00398380(res + 0x58, D_004C8C58[i].name);
         }
         void* bank = *(void**)(res + 8);
-        D_004A2764 = func_003983F0(bank, GetHashValue32(D_004A21F0));
+        D_004A2764 = func_003983F0(bank, GetHashValue32(str_fefont));
         D_004A2768 = 1;
     }
     func_0020EC18(self, a, r);
@@ -414,7 +414,7 @@ extern int D_004A4EC8;
 extern sColour_EDA0 D_004C6868;
 extern sColour_EDA0 D_004C6878;
 extern sV2_EDA0 D_004A4EC0;
-extern char D_004A2690[];
+extern char str_pct_dpct_pct[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_00392908(void* font, float x, float y, const char* str);
 
@@ -513,7 +513,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         D_004A4EC8 = 1;
     }
     char buf[16];
-    sprintf(buf, D_004A2690, (int)(frac * 100.0f + 0.5f));
+    sprintf(buf, str_pct_dpct_pct, (int)(frac * 100.0f + 0.5f));
     D_004A2764_EDA0->color = D_004C6868;
     D_004A2764_EDA0->SetScale(0.666700005531311f, 0.666700005531311f);
     D_004A2764_EDA0->color2 = D_004C6878;
@@ -1491,41 +1491,41 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cUITextScroll_setInputMap(void* self, int a1);
-extern char D_00471CE8[];
-extern char D_00471D00[];
-extern char D_00471D10[];
-extern char D_00471D20[];
-extern char D_00471D30[];
-extern char D_00471D40[];
-extern char D_0046E808[];
+extern char str_282ReadPrivateMessage_b[];
+extern char str_TextFromX_b[];
+extern char str_AgreementSlider_b[];
+extern char str_ChatUpArrow_b[];
+extern char str_ChatDownArrow_b[];
+extern char str_slideroutline2_b[];
+extern char str_textScrollChat_b[];
 extern char D_00534FC8[];
 extern sRect_210940 D_004C8D08;
 
 extern "C" void func_00210940(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471CE8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_282ReadPrivateMessage_b), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen == 0)
         return;
     cUIScreen_playFrame(screen, 0, 0);
-    cUIObj_210940* t = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D00));
+    cUIObj_210940* t = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextFromX_b));
     if (t != 0)
     {
         t->setVisible(1);
         cBE_getInterface_Fv(SSXApp->BE, 7);
         cUIText_setAsciiString((cUIText*)t, D_00534FC8);
     }
-    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D10));
+    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_AgreementSlider_b));
     *(int*)(a + 0x14) |= 1;
-    void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D20));
-    void* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D30));
-    void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D40));
+    void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatUpArrow_b));
+    void* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatDownArrow_b));
+    void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_slideroutline2_b));
     *(void**)(a + 0x7C) = b;
     *(void**)(a + 0x80) = c;
     *(void**)(a + 0x84) = d;
     *(int*)(a + 0x88) = 2;
-    cUIObj_210940* e = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E808));
+    cUIObj_210940* e = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
     if (e != 0)
     {
         *(int*)((char*)e + 0x74) |= 1;
@@ -1575,7 +1575,7 @@ extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-extern char D_0046E808[];
+extern char str_textScrollChat_b[];
 extern char D_00534FB8[];
 extern char D_00534FC8[];
 extern char D_004A2710[];
@@ -1588,7 +1588,7 @@ struct sBXString_00210BD8 {
 
 extern "C" void func_00210BD8(void* self, char* name, int a)
 {
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E808));
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
     if (obj == 0) {
         return;
     }
@@ -1730,11 +1730,11 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int v);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
-extern char D_0046EFD0[];
+extern char str_cKeyboardPopup_b[];
 
 extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4)
 {
-    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, D_0046EFD0, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
+    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
     *(void**)((char*)self + 0xE0) = w;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = a3;

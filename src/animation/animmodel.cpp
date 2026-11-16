@@ -8,7 +8,7 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_addModelPartLOD);
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 // as operator new[] so the new-expressions below compute their destination before the call.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00489C80[];
+extern char str_ModelVariant[];
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 /**
@@ -35,7 +35,7 @@ extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part
         }
     }
     for (int k = 0; k < 4; k++) {
-        self->parts[self->numParts].lods[k].refs = new (D_00489C80, 0, 0) sAnimModelLodRef[self->numLodRefs];
+        self->parts[self->numParts].lods[k].refs = new (str_ModelVariant, 0, 0) sAnimModelLodRef[self->numLodRefs];
         MEM_fill(self->parts[self->numParts].lods[k].refs, 0, self->numLodRefs << 4);
     }
     self->parts[self->numParts].id = *(signed char*)(part + 0x52);
@@ -979,7 +979,7 @@ extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char
 INCLUDE_ASM("animation/animmodel", cAnimModel_getGraftMask);
 #ifdef SKIP_ASM
 extern "C" int func_00416B18(const char* a, const char* b, int n);
-extern char D_004A3DF0[];
+extern char str_morph[];
 
 /**
  * Builds the 64-bit bone mask for a comma-separated list of bone names in one part.
@@ -1011,7 +1011,7 @@ extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
             while (*tokenEnd != 0 && *tokenEnd != ',');
         }
         int len = tokenEnd - token;
-        if (part->unk_0C >= 0 && func_00416B18(token, D_004A3DF0, len) == 0) {
+        if (part->unk_0C >= 0 && func_00416B18(token, str_morph, len) == 0) {
             mask |= (ulong)1 << (part->unk_0C + self->numBones);
         } else {
             char* list = part->boneNames;
@@ -1076,7 +1076,7 @@ INCLUDE_ASM("animation/animmodel", gGenCacheBucket);
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 // as operator new[] so the new-expressions below compute their destination before the call.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00489D50[];
+extern char str_AnimChanCache[];
 
 struct sAnimElem_310F18
 {
@@ -1108,13 +1108,13 @@ extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("D_004FE860");
  */
 extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 {
-    D_004FE7A0_310F18[bank] = new (D_00489D50, 0x20000000, 0) sAnimNode_310F18[20];
+    D_004FE7A0_310F18[bank] = new (str_AnimChanCache, 0x20000000, 0) sAnimNode_310F18[20];
     for (int i = 0; i < 20; i++)
     {
         D_004FE7A0_310F18[bank][i].next = &D_004FE7A0_310F18[bank][i] + 1;
         D_004FE7A0_310F18[bank][i].prev = &D_004FE7A0_310F18[bank][i] - 1;
         D_004FE7A0_310F18[bank][i].used = 0;
-        D_004FE7A0_310F18[bank][i].data = new (D_00489D50, 0x20000000, 0) sAnimElem_310F18[n];
+        D_004FE7A0_310F18[bank][i].data = new (str_AnimChanCache, 0x20000000, 0) sAnimElem_310F18[n];
     }
     D_004FE7A0_310F18[bank][0].prev = &D_004FE7A0_310F18[bank][19];
     D_004FE7A0_310F18[bank][19].next = D_004FE7A0_310F18[bank];

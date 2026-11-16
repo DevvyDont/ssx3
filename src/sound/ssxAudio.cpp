@@ -9,7 +9,7 @@ INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_Init);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" char* cSSXAudio_cSSXAudio(void* mem, int a1, int a2, int a3, int a4);
 void func_002ADBF0(void*);
-extern const char D_004828B0[];
+extern const char str_SSXAudioSystem[];
 
 /**
  * Creates the game's audio system (gSSXAudio) on first use, then calls func_002ADBF0 (unknown) on its bank
@@ -22,7 +22,7 @@ extern const char D_004828B0[];
 extern "C" void SSXAUDIO_Init(int mode)
 {
     if (gSSXAudio == 0) {
-        gSSXAudio = (cSSXAudio*)(cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, mode));
+        gSSXAudio = (cSSXAudio*)(cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, str_SSXAudioSystem, 0x80000400, 0), 1, 0x1C, 3, mode));
     }
     func_002ADBF0(*((char**)gSSXAudio->MusicSys.mpVStreamSys) + 0x1D8);
 }
@@ -78,8 +78,8 @@ extern "C" void SPCH_Init(void* self);
 extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void func_002B0E60(void* self, int a, int b, char* name, int c, int d, int e);
 extern "C" void func_0028F700(void* self);
-extern char D_00482820[];
-extern char D_004A3568[];
+extern char str_CircFIFOBuff[];
+extern char str_CHAR[];
 extern void* D_00483688[];
 extern void* cSSXAudio_vtbl[];
 extern void* D_004836D8[];
@@ -220,7 +220,7 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int maxBanks, int m
     *(int*)(S_4C68 + 0x597C) = 200;
     *(int*)(S_4C68 + 0x5984) = 0;
     *(int*)(S_4C68 + 0x5988) = 0;
-    *(void**)(S_4C68 + 0x5980) = operator_new__FUi(800, D_00482820, 0, 0);
+    *(void**)(S_4C68 + 0x5980) = operator_new__FUi(800, str_CircFIFOBuff, 0, 0);
     new (S_4C68 + 0x5990) sEmpty34_4C68[30];
     *(unsigned int*)(S_4C68 + 0x5FC0) = 0xFFFFFFFF;
     *(int*)(S_4C68 + 0x5FC8) = -1;
@@ -285,7 +285,7 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int maxBanks, int m
     func_002A4590(self, 1);
     func_0029ED90(S_4C68, 0);
     SPCH_Init(A_4C68->m5560);
-    func_002B0E60(A_4C68->m5560, 0, 0, D_004A3568, (int)func_00287968(self, 4, 0), 1, -1);
+    func_002B0E60(A_4C68->m5560, 0, 0, str_CHAR, (int)func_00287968(self, 4, 0), 1, -1);
     func_0028F700(self);
     return S_4C68;
 }
@@ -844,14 +844,14 @@ extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void func_002B49C0(void* mon, int id);
 extern "C" void func_00289BB8(void* self);
 extern "C" void FileParser__FileParser(void* self, int flags);
-extern char* D_004A3554;
-extern char D_004A3570[];
-extern char D_004A3578[];
-extern char D_004A3580[];
-extern char D_004A3588[];
-extern char D_004A3590[];
-extern char D_004A3598[];
-extern char D_004828C0[];
+extern char* str_H_H;
+extern char str_GLOBAL[];
+extern char str_FE[];
+extern char str_MAIN[];
+extern char str_pct_spct_spct_s_b[];
+extern char str_data_b[];
+extern char str_charsel[];
+extern char str_BASEPATH[];
 
 struct sIniParser5FB0 {
     int f0;
@@ -871,23 +871,23 @@ extern "C" void func_00285FB0(char* self)
     char msg[0x40];
     cSSXAudio_InitSoundLevels((cSSXAudio*)self, 0);
     cSSXAudio_SetAudioUpdateState((cSSXAudio*)self, 1);
-    FileParser_FileParser_r(&parser, D_004A3554, 0x100);
+    FileParser_FileParser_r(&parser, str_H_H, 0x100);
     parser.cur = parser.start;
-    if (FileParser_FindSection(&parser, D_004A3570)) {
+    if (FileParser_FindSection(&parser, str_GLOBAL)) {
         while (FileParser_IsEOF(&parser) == 0) {
             FileParser_GetName(&parser);
-            FileParser_AssignString_r(&parser, D_004828C0, key);
+            FileParser_AssignString_r(&parser, str_BASEPATH, key);
         }
     }
     parser.cur = parser.start;
-    if (FileParser_FindSection(&parser, D_004A3578)) {
+    if (FileParser_FindSection(&parser, str_FE)) {
         strcpy(name, key);
         while (FileParser_IsEOF(&parser) == 0) {
             char* k = FileParser_GetName(&parser);
-            FileParser_AssignString_r(&parser, D_004828C0, name);
-            if (func_0041AA88(k, D_004A3580) == 0) {
-                FileParser_AssignString_r(&parser, D_004A3580, val);
-                sprintf(msg, D_004A3588, D_004A3590, name, val);
+            FileParser_AssignString_r(&parser, str_BASEPATH, name);
+            if (func_0041AA88(k, str_MAIN) == 0) {
+                FileParser_AssignString_r(&parser, str_MAIN, val);
+                sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                 func_0028BC58(**(void***)(self + 0x118), 0, msg, 0);
             }
         }
@@ -896,7 +896,7 @@ extern "C" void func_00285FB0(char* self)
     char* mon = self + 0x118;
     sSaVt5FB0* vt = *(sSaVt5FB0**)(self + 0x5558);
     char* thisp = mon + vt[2].delta;
-    vt[2].fn(thisp, D_004A3598, 0xC, func_00287968(self, 1, 0), 1);
+    vt[2].fn(thisp, str_charsel, 0xC, func_00287968(self, 1, 0), 1);
     func_002B49C0(mon, 0x12D);
     *(int*)(self + 0x6290) = 10;
     *(int*)(self + 0x6090) = *(int*)(self + 0x608C);
@@ -962,18 +962,18 @@ extern "C" char* FileParser_FindNextSection(void* self);
 extern "C" void func_0028BDA8(void* p, int pool, int size, int a3, int a4);
 extern "C" void func_002A6D78(void* self, char* name, char* ext, int mode, int a4);
 extern "C" void func_0029F3F8(void* self, int a1);
-extern char* D_004A3558;
+extern char* str_H;
 // Default stream-group extension string (gcc inlines strcpy of the literal as an aligned block copy).
 extern char D_004A35A0[] __attribute__((aligned(8)));
 extern char D_004A35A8[];
-extern char D_004A35B0[];
-extern char D_004A35B8[];
-extern char D_004A35C0[];
-extern char D_004A35C8[];
-extern char D_004A35D0[];
-extern char D_004828D0[];
-extern char D_004828E0[];
-extern char D_004828F0[];
+extern char str_BOARD[];
+extern char str_CROWD[];
+extern char str_AUX[];
+extern char str_TRICKY[];
+extern char str_LAND[];
+extern char str_SPUBOARD[];
+extern char str_MOUNTAIN[];
+extern char str_TRANSPORT[];
 extern char cBENewRaceInterface_newRace[];
 
 /**
@@ -1001,12 +1001,12 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
     cAsyncSys_Init3(**(cAsyncSys***)(self + 0x118), 0, 0);
     *(char*)(self + 0x5838) = D_004A35A8[0];
     *(int*)(self + 0x5878) = 0;
-    FileParser_FileParser_r(&parser, D_004A3554, 0x100);
+    FileParser_FileParser_r(&parser, str_H_H, 0x100);
     parser.cur = parser.start;
-    if (FileParser_FindSection(&parser, D_004A3570)) {
+    if (FileParser_FindSection(&parser, str_GLOBAL)) {
         while (FileParser_IsEOF(&parser) == 0) {
-            if (func_0041AA88(FileParser_GetName(&parser), D_004828C0) == 0) {
-                FileParser_AssignString_r(&parser, D_004828C0, key);
+            if (func_0041AA88(FileParser_GetName(&parser), str_BASEPATH) == 0) {
+                FileParser_AssignString_r(&parser, str_BASEPATH, key);
             }
         }
     }
@@ -1018,42 +1018,42 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
             strcpy(self + 0x587C, name);
             while (FileParser_IsEOF(&parser) == 0) {
                 char* k = FileParser_GetName(&parser);
-                FileParser_AssignString_r(&parser, D_004828C0, name);
-                if (func_0041AA88(k, D_004A3580) == 0) {
-                    FileParser_AssignString_r(&parser, D_004A3580, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                FileParser_AssignString_r(&parser, str_BASEPATH, name);
+                if (func_0041AA88(k, str_MAIN) == 0) {
+                    FileParser_AssignString_r(&parser, str_MAIN, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 0, msg, 0);
-                } else if (func_0041AA88(k, D_004A35B0) == 0) {
-                    FileParser_AssignString_r(&parser, D_004A35B0, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_BOARD) == 0) {
+                    FileParser_AssignString_r(&parser, str_BOARD, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 1, msg, 0);
-                } else if (func_0041AA88(k, D_004828D0) == 0) {
-                    FileParser_AssignString_r(&parser, D_004828D0, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_SPUBOARD) == 0) {
+                    FileParser_AssignString_r(&parser, str_SPUBOARD, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 0x10, msg, 0);
-                } else if (func_0041AA88(k, D_004A35B8) == 0) {
-                    FileParser_AssignString_r(&parser, D_004A35B8, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_CROWD) == 0) {
+                    FileParser_AssignString_r(&parser, str_CROWD, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 5, msg, 0);
-                } else if (func_0041AA88(k, D_004A35C0) == 0) {
-                    FileParser_AssignString_r(&parser, D_004A35C0, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_AUX) == 0) {
+                    FileParser_AssignString_r(&parser, str_AUX, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 6, msg, 0);
-                } else if (func_0041AA88(k, D_004A35C8) == 0) {
-                    FileParser_AssignString_r(&parser, D_004A35C8, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_TRICKY) == 0) {
+                    FileParser_AssignString_r(&parser, str_TRICKY, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 7, msg, 0);
-                } else if (func_0041AA88(k, D_004828E0) == 0) {
-                    FileParser_AssignString_r(&parser, D_004828E0, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_MOUNTAIN) == 0) {
+                    FileParser_AssignString_r(&parser, str_MOUNTAIN, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 2, msg, 0);
-                } else if (func_0041AA88(k, D_004828F0) == 0) {
-                    FileParser_AssignString_r(&parser, D_004828F0, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_TRANSPORT) == 0) {
+                    FileParser_AssignString_r(&parser, str_TRANSPORT, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 4, msg, 0);
-                } else if (func_0041AA88(k, D_004A35D0) == 0) {
-                    FileParser_AssignString_r(&parser, D_004A35D0, val);
-                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                } else if (func_0041AA88(k, str_LAND) == 0) {
+                    FileParser_AssignString_r(&parser, str_LAND, val);
+                    sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
                     func_0028BC58(**(void***)(self + 0x118), 10, msg, 0);
                 }
             }
@@ -1063,9 +1063,9 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
     func_0028BDA8(**(void***)(self + 0x118), 12, 0x6A400, 0, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if ((signed char)cBENewRaceInterface_newRace[0x49] == 2) {
-        func_002A6D78(self, D_004A3558, ext, 2, 5);
+        func_002A6D78(self, str_H, ext, 2, 5);
     } else {
-        func_002A6D78(self, D_004A3558, ext, 1, 5);
+        func_002A6D78(self, str_H, ext, 1, 5);
     }
     func_0029F3F8(self, 0);
     *(int*)(self + 0x627C) = 1;
@@ -2164,16 +2164,16 @@ extern "C" int FileParser_IsEOF(void* self);
 extern "C" int FileParser_AssignInt(void* self, const char* key, int* out);
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern char* D_004A3560;
-extern char D_004A35D8[];
-extern char D_004A35E0[];
-extern char D_004A35E8[];
-extern char D_00482930[];
-extern char D_004A35B0[];
-extern char D_00482940[];
-extern char D_004A35F0[];
-extern char D_00482950[];
-extern char D_00482960[];
-extern char D_004A35F8[];
+extern char str_MUSIC[];
+extern char str_DJ[];
+extern char str_PA[];
+extern char str_CHARACTER[];
+extern char str_BOARD[];
+extern char str_COLLISION[];
+extern char str_AMBIENT[];
+extern char str_ARCADESFX[];
+extern char str_ARCADESPEECH[];
+extern char str_TIME_b[];
 
 struct sIniParser7FC8 {
     int f0;
@@ -2230,35 +2230,35 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
     while (self->count < 25 && FileParser_FindNextSection(&parser) != 0) {
         while (FileParser_IsEOF(&parser) == 0) {
             char* key = FileParser_GetName(&parser);
-            if (func_0041AA88(key, D_004A35D8) == 0) {
-                FileParser_AssignInt(&parser, D_004A35D8, &val);
+            if (func_0041AA88(key, str_MUSIC) == 0) {
+                FileParser_AssignInt(&parser, str_MUSIC, &val);
                 self->entries[self->count].f0 = val;
-            } else if (func_0041AA88(key, D_004A35E0) == 0) {
-                FileParser_AssignInt(&parser, D_004A35E0, &val);
+            } else if (func_0041AA88(key, str_DJ) == 0) {
+                FileParser_AssignInt(&parser, str_DJ, &val);
                 self->entries[self->count].f4 = val;
-            } else if (func_0041AA88(key, D_004A35E8) == 0) {
-                FileParser_AssignInt(&parser, D_004A35E8, &val);
+            } else if (func_0041AA88(key, str_PA) == 0) {
+                FileParser_AssignInt(&parser, str_PA, &val);
                 self->entries[self->count].f8 = val;
-            } else if (func_0041AA88(key, D_00482930) == 0) {
-                FileParser_AssignInt(&parser, D_00482930, &val);
+            } else if (func_0041AA88(key, str_CHARACTER) == 0) {
+                FileParser_AssignInt(&parser, str_CHARACTER, &val);
                 self->entries[self->count].fC = val;
-            } else if (func_0041AA88(key, D_004A35B0) == 0) {
-                FileParser_AssignInt(&parser, D_004A35B0, &val);
+            } else if (func_0041AA88(key, str_BOARD) == 0) {
+                FileParser_AssignInt(&parser, str_BOARD, &val);
                 self->entries[self->count].f10 = val;
-            } else if (func_0041AA88(key, D_00482940) == 0) {
-                FileParser_AssignInt(&parser, D_00482940, &val);
+            } else if (func_0041AA88(key, str_COLLISION) == 0) {
+                FileParser_AssignInt(&parser, str_COLLISION, &val);
                 self->entries[self->count].f14 = val;
-            } else if (func_0041AA88(key, D_004A35F0) == 0) {
-                FileParser_AssignInt(&parser, D_004A35F0, &val);
+            } else if (func_0041AA88(key, str_AMBIENT) == 0) {
+                FileParser_AssignInt(&parser, str_AMBIENT, &val);
                 self->entries[self->count].f18 = val;
-            } else if (func_0041AA88(key, D_00482950) == 0) {
-                FileParser_AssignInt(&parser, D_00482950, &val);
+            } else if (func_0041AA88(key, str_ARCADESFX) == 0) {
+                FileParser_AssignInt(&parser, str_ARCADESFX, &val);
                 self->entries[self->count].f1C = val;
-            } else if (func_0041AA88(key, D_00482960) == 0) {
-                FileParser_AssignInt(&parser, D_00482960, &val);
+            } else if (func_0041AA88(key, str_ARCADESPEECH) == 0) {
+                FileParser_AssignInt(&parser, str_ARCADESPEECH, &val);
                 self->entries[self->count].f20 = val;
-            } else if (func_0041AA88(key, D_004A35F8) == 0) {
-                FileParser_AssignInt(&parser, D_004A35F8, &val);
+            } else if (func_0041AA88(key, str_TIME_b) == 0) {
+                FileParser_AssignInt(&parser, str_TIME_b, &val);
                 self->entries[self->count].f24 = (float)val * 0.0010000000474974513f;
             }
         }
@@ -2978,14 +2978,14 @@ extern "C" void FileParser_FileParser(void* self, char* name, int size);
 extern "C" char* FileParser_FindNextSection(void* self);
 extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" char* strcpy(char* dst, const char* src);
-extern char* D_004A355C;
+extern char* str_x_H;
 struct sAudio_9470 { char pad[0x60A4]; char names[20][0x14]; };
 
 extern "C" void func_00289470(void* self)
 {
-    if (BXFILE_exists(D_004A355C) != 0) {
+    if (BXFILE_exists(str_x_H) != 0) {
         char parser[0x810];
-        FileParser_FileParser(parser, D_004A355C, 0x100);
+        FileParser_FileParser(parser, str_x_H, 0x100);
         *(int*)((char*)self + 0x6234) = 0;
         while (*(int*)((char*)self + 0x6234) < 0x14) {
             char* s = FileParser_FindNextSection(parser);
@@ -3017,8 +3017,8 @@ extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" void func_002B3EB0(void* self);
 extern "C" void func_002B3EE8(void* self, const char* name);
 void func_002B4060(void* self);
-extern char* D_004A355C;
-extern char D_004A3608[];
+extern char* str_x_H;
+extern char str_SONG[];
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern "C" void func_00289520(cSSXAudio* self, const char* name)
@@ -3026,13 +3026,13 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
     char parser[0x810];
     char buf[0x40];
     func_002B3EB0((char*)self + 0x118);
-    FileParser_FileParser(parser, D_004A355C, 0x100);
+    FileParser_FileParser(parser, str_x_H, 0x100);
     if (FileParser_FindPartialSection(parser, name) != 0) {
         FileParser_SkipSectionNames(parser);
         while (FileParser_IsEOF(parser) == 0) {
             char* key = FileParser_GetName(parser);
-            if (func_0041AA88(D_004A3608, key) == 0) {
-                FileParser_AssignString(parser, D_004A3608, buf);
+            if (func_0041AA88(str_SONG, key) == 0) {
+                FileParser_AssignString(parser, str_SONG, buf);
                 func_002B3EE8((char*)self + 0x118, buf);
             }
         }
@@ -3632,7 +3632,7 @@ INCLUDE_ASM("sound/ssxAudio", func_0028A058);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00483B10[];
-extern char D_00482820[];
+extern char str_CircFIFOBuff[];
 extern void* D_004A3610;
 
 extern "C" void* func_0028A058(void* self)
@@ -3643,19 +3643,19 @@ extern "C" void* func_0028A058(void* self)
     *(int*)((char*)self + 0x194) = 0;
     *(int*)((char*)self + 0x198) = 0;
     *(void**)((char*)self + 0x1D4) = D_00483B10;
-    *(void**)((char*)self + 0x190) = operator_new_tag(0x18, D_00482820, 0, 0);
+    *(void**)((char*)self + 0x190) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
     *(int*)((char*)self + 0x19C) = 6;
     *(int*)((char*)self + 0x1A4) = 0;
     *(int*)((char*)self + 0x1A8) = 0;
-    *(void**)((char*)self + 0x1A0) = operator_new_tag(0x18, D_00482820, 0, 0);
+    *(void**)((char*)self + 0x1A0) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
     *(int*)((char*)self + 0x1AC) = 6;
     *(int*)((char*)self + 0x1B4) = 0;
     *(int*)((char*)self + 0x1B8) = 0;
-    *(void**)((char*)self + 0x1B0) = operator_new_tag(0x18, D_00482820, 0, 0);
+    *(void**)((char*)self + 0x1B0) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
     *(int*)((char*)self + 0x1BC) = 6;
     *(int*)((char*)self + 0x1C4) = 0;
     *(int*)((char*)self + 0x1C8) = 0;
-    *(void**)((char*)self + 0x1C0) = operator_new_tag(0x18, D_00482820, 0, 0);
+    *(void**)((char*)self + 0x1C0) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
     *(int*)((char*)self + 0x1CC) = 0;
     *(int*)((char*)self + 0x1D0) = 0;
     D_004A3610 = self;

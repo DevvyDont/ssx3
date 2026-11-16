@@ -20,7 +20,7 @@ extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00494078[];
+extern char str_UITEXTTEMP_b[];
 extern unsigned short D_004A47B0[];
 extern unsigned short D_00508750[];
 
@@ -162,7 +162,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
             str = D_00508750;
         }
         if (((self->flags >> 6) & 1) && self->numLines >= 2) {
-            unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, D_00494078, 0x100, 0);
+            unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, str_UITEXTTEMP_b, 0x100, 0);
             func_002C2718(buf, D_004A47B0, str);
             sRect_05E8 r;
             func_003921F0_s(font, buf, &r, 0, textScale.x, textScale.y);
@@ -375,7 +375,7 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned sh
 void cMemMan_free(void*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00494078[];
+extern char str_UITEXTTEMP_b[];
 extern unsigned short gUSTRBackSlash;
 
 /**
@@ -397,7 +397,7 @@ extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
     int last = -1;
     float w = 0.0f;
     int len = USTR_length(str);
-    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494078, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITEXTTEMP_b, 0x100, 0);
     int i = 0;
     USTR_copy(buf, str);
     while (i < len) {
@@ -454,8 +454,8 @@ extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_deleteText(cUIText* self);
 extern "C" int cUIText_getNumTextLines(void* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00494088[];
-extern char D_00494098[];
+extern char str_UITextUStr[];
+extern char str_UITextLine[];
 extern unsigned short gUSTRBackSlash;
 
 /**
@@ -477,12 +477,12 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned s
     int len = USTR_length((unsigned short*)str);
     if (len < 0x321) {
         *(short*)&self_->mStringSize = len + 1;
-        self_->mpString = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494088, 0x100, 0);
+        self_->mpString = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITextUStr, 0x100, 0);
         USTR_copy(self_->mpString, (unsigned short*)str);
         int n = cUIText_getNumTextLines(((char*)self_));
         self_->mNumLines = n;
         if (n >= 2) {
-            unsigned short** lines = (unsigned short**)operator_new_tag(n * 4, D_00494098, 0x100, 0);
+            unsigned short** lines = (unsigned short**)operator_new_tag(n * 4, str_UITextLine, 0x100, 0);
             unsigned short* text = self_->mpString;
             self_->mpLineOffset = lines;
             *(short*)&self_->mLineSize = *(unsigned short*)&self_->mNumLines;
@@ -1031,7 +1031,7 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_allocLine);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004940A8[];
+extern char str_UITEXTSCBUF[];
 
 /**
  * Adds one slot to a scrolling text's line table and returns its index.
@@ -1045,7 +1045,7 @@ extern "C" int cUITextScroll_allocLine(cUITextScroll* self)
 {
     unsigned short old = self->mLineSize;
     self->mLineSize = old + 1;
-    void** arr = (void**)operator_new_tag(self->mLineSize * 4, D_004940A8, 0x100, 0);
+    void** arr = (void**)operator_new_tag(self->mLineSize * 4, str_UITEXTSCBUF, 0x100, 0);
     if ((void**)self->mpLineOffset != 0) {
         func_0041605C(arr, (void**)self->mpLineOffset, old * 4);
         void** prev = (void**)self->mpLineOffset;
@@ -1075,7 +1075,7 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
     int last = -1;
     int len = strlen(str);
     int i = 0;
-    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494078, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITEXTTEMP_b, 0x100, 0);
     float w = 0.0f;
     int start = 0;
     func_002C2540(buf, str);
@@ -1132,7 +1132,7 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004940B8[];
+extern char str_UITXTSCRSTR[];
 
 /**
  * Appends a copy of a UCS-2 string to a scrolling text as a new line.
@@ -1142,7 +1142,7 @@ extern char D_004940B8[];
 extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str)
 {
     int idx = cUITextScroll_allocLine(self);
-    unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_004940B8, 0x100, 0);
+    unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UITXTSCRSTR, 0x100, 0);
     USTR_copy(copy, str);
     ((unsigned short**)self->mpLineOffset)[idx] = copy;
 }
@@ -1199,7 +1199,7 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vs
     int last = -1;
     int len = USTR_length(str);
     int i = 0;
-    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494078, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITEXTTEMP_b, 0x100, 0);
     float w = 0.0f;
     int start = 0;
     USTR_copy(buf, str);
@@ -1289,7 +1289,7 @@ extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
     if ((void**)self->mpLineOffset != 0) {
         unsigned short n = self->mLineSize;
         if (idx < n) {
-            void** arr = (void**)operator_new_tag((n - 1) * 4, D_004940A8, 0x100, 0);
+            void** arr = (void**)operator_new_tag((n - 1) * 4, str_UITEXTSCBUF, 0x100, 0);
             if (idx > 0) {
                 func_0041605C(arr, (void**)self->mpLineOffset, idx * 4);
             }

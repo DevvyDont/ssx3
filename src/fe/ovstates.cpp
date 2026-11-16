@@ -10,7 +10,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
-extern char D_004A17C8[];
+extern char str_06title[];
 
 /**
  * Builds the title screen ("06title"), plays its first frame, clears its idle timer and sets the front-end
@@ -22,7 +22,7 @@ extern "C" void cFEStateTitle_onCreateScreen(void* self)
     void* screen;
     *(int*)((char*)self + 0x48) = 0;
     engine = *(void**)((char*)self + 0x10);
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A17C8), 0);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_06title), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -36,8 +36,8 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0045DB90[];
-extern char D_004A17D0[];
+extern char str_Menu0000[];
+extern char str_tReal[];
 extern int D_004A17C0;
 
 class cUIObj_1947F8 {
@@ -65,11 +65,11 @@ public:
 extern "C" int cFEStateTitle_onGainTransition(void* self)
 {
     if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
-        cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
+        cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000));
         if (uiObj != 0) {
             uiObj->v07(1);
         }
-        uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D0));
+        uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_tReal));
         if (uiObj != 0) {
             uiObj->setVisible(1);
         }
@@ -165,7 +165,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_003A0330(void* self, int a1, int a2);
-extern char D_004A17D0[];
+extern char str_tReal[];
 
 /**
  * Gives the title's "tReal" item choice id 0 and silences its error sound (mSound[0] = 0).
@@ -175,7 +175,7 @@ extern char D_004A17D0[];
 extern "C" void cFEStateTitle_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_004A17D0)) {
+    if (id == GetHashValue32(str_tReal)) {
         *(int*)((char*)item + 0x18) = 0;
         func_003A0330(item, 0, 0);
     }
@@ -258,7 +258,7 @@ extern "C" void func_00261008();
 extern "C" void func_0025B688();
 extern "C" void func_00256C50();
 extern "C" void func_00255898();
-extern char D_00460030[];
+extern char str_07main_men[];
 extern char D_005308B8[];
 
 struct sVEnt0_00194AA8 { short delta; short index; void (*fn)(void*); };
@@ -276,7 +276,7 @@ struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
 extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00460030), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_07main_men), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -314,8 +314,8 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern int D_004A29EC;
-extern char D_00460040[];
-extern char D_004A17D8[];
+extern char str_3multi_play[];
+extern char str_5online[];
 
 struct sColor_194BF0 {
     float r, g, b, a;
@@ -360,7 +360,7 @@ public:
  */
 extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
 {
-    cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00460040));
+    cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3multi_play));
     if (obj != 0) {
         if (*(signed char*)((char*)self + 0x55) < 2) {
             func_00194498(obj);
@@ -373,7 +373,7 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
         }
     }
     if (D_004A29EC == 0) {
-        void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D8));
+        void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_5online));
         if (uiObj != 0) {
             func_00194498(uiObj);
         }
@@ -385,11 +385,11 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00460050[];
-extern char D_00460060[];
-extern char D_00460040[];
-extern char D_00460070[];
-extern char D_004A17D8[];
+extern char str_1conquer[];
+extern char str_2quick_play[];
+extern char str_3multi_play[];
+extern char str_4bonus_material[];
+extern char str_5online[];
 
 /**
  * Tags the main-menu items with the choice ids that the event handler and the front end switch on.
@@ -402,27 +402,27 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
 {
     int id;
     id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_00460050)) {
+    if (id == GetHashValue32(str_1conquer)) {
         *(int*)((char*)item + 0x18) = 0xB;
         return;
     }
     id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_00460060)) {
+    if (id == GetHashValue32(str_2quick_play)) {
         *(int*)((char*)item + 0x18) = 9;
         return;
     }
     id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_00460040)) {
+    if (id == GetHashValue32(str_3multi_play)) {
         *(int*)((char*)item + 0x18) = 0x16;
         return;
     }
     id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_00460070)) {
+    if (id == GetHashValue32(str_4bonus_material)) {
         *(int*)((char*)item + 0x18) = 5;
         return;
     }
     id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_004A17D8)) {
+    if (id == GetHashValue32(str_5online)) {
         *(int*)((char*)item + 0x18) = 0x31;
     }
 }
@@ -434,7 +434,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onUpdate);
 extern "C" void func_0039E510(void* self);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
-extern char D_004A1398[];
+extern char str_Menu[];
 
 class cProfileMan_194DD0 {
 public:
@@ -506,7 +506,7 @@ extern "C" void cFEStateMainMenu_onUpdate(void* self)
             (*(signed char*)((char*)self + 0x55))++;
         }
     }
-    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1398));
+    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu));
     if (menu != 0) {
         if (*(unsigned char*)((char*)menu + 0x95) == 2) {
             if (*(signed char*)((char*)self + 0x55) < 2) {
@@ -537,15 +537,15 @@ extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern void* cFEPopupSelectMultiplayerMode_vtbl[];
-extern char D_00460080[];
-extern char D_0045D698[];
-extern char D_004A17E8[];
-extern char D_00460040[];
-extern char D_00460060[];
-extern char D_004600A0[];
-extern char D_004A1458[];
-extern char D_004A1460[];
-extern char D_004A17E0[];
+extern char str_cFEPopupSelectMultiplayerMode[];
+extern char str_FEOptions[];
+extern char str_4online[];
+extern char str_3multi_play[];
+extern char str_2quick_play[];
+extern char str_3_help_multi[];
+extern char str_btext5[];
+extern char str_ps2sq[];
+extern char str_hl[];
 
 struct sVE_194EB0 {
     short delta;
@@ -632,7 +632,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         ((void (*)(void*))ivt[1].fn)(iface + ivt[1].delta);
         if (*(int*)(item + 0x18) == 0x16 && *(int*)(self + 0x48) == 0) {
             *(int*)(self + 0x50) = *(signed char*)(self + 0x14);
-            char* popup = (char*)operator new(0x4C, D_00460080, 0, 0);
+            char* popup = (char*)operator new(0x4C, str_cFEPopupSelectMultiplayerMode, 0, 0);
             func_0039E318(popup, *(void**)(self + 0x10), self);
             *(void***)(popup + 0x8) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
@@ -641,10 +641,10 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
             *(char*)(popup + 0x48) = 0;
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
             *(char**)(self + 0x4C) = item;
-            setWidgetHidden_194EB0(self, D_004A17E0);
-            setWidgetHidden_194EB0(self, D_004600A0);
-            setWidgetHidden_194EB0(self, D_004A1458);
-            setWidgetHidden_194EB0(self, D_004A1460);
+            setWidgetHidden_194EB0(self, str_hl);
+            setWidgetHidden_194EB0(self, str_3_help_multi);
+            setWidgetHidden_194EB0(self, str_btext5);
+            setWidgetHidden_194EB0(self, str_ps2sq);
             return;
         }
         sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
@@ -661,16 +661,16 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         break;
     }
     case 7: {
-        char* o = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* o = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
         *(int*)(o + 0x1C) = (*(int*)(o + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, o, 0, 0);
         break;
     }
     case 8:
         if (++*(signed char*)(self + 0x54) >= 7) {
-            setWidgetVisible_194EB0(self, D_00460060);
-            setWidgetVisible_194EB0(self, D_00460040);
-            setWidgetVisible_194EB0(self, D_004A17E8);
+            setWidgetVisible_194EB0(self, str_2quick_play);
+            setWidgetVisible_194EB0(self, str_3multi_play);
+            setWidgetVisible_194EB0(self, str_4online);
         }
         break;
     }
@@ -707,10 +707,10 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPopupEvent);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int cUIThing_playKeyframerEvent(void* self, int x);
-extern char D_004A17E0[];
-extern char D_004600A0[];
-extern char D_004A1458[];
-extern char D_004A1460[];
+extern char str_hl[];
+extern char str_3_help_multi[];
+extern char str_btext5[];
+extern char str_ps2sq[];
 
 struct sVEi_195328 {
     short delta;
@@ -762,10 +762,10 @@ extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
         sVEv_195328* svt = *(sVEv_195328**)((char*)self + 8);
         svt[19].fn((char*)self + svt[19].delta, *(void**)((char*)self + 0x4C), 5);
     }
-    Show195328(self, D_004A17E0);
-    Show195328(self, D_004600A0);
-    Show195328(self, D_004A1458);
-    Show195328(self, D_004A1460);
+    Show195328(self, str_hl);
+    Show195328(self, str_3_help_multi);
+    Show195328(self, str_btext5);
+    Show195328(self, str_ps2sq);
 }
 #endif
 

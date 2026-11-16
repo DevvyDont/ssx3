@@ -1411,7 +1411,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5158);
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 extern struct sA8E8 D_0050A8E8;
-extern char D_0044E180;
+extern char str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug;
 extern void func_00416210_5158(void *, int, int) __asm__("func_00416210");
 void func_003B5BD0_5158(struct sA8E8Heap *a0, int a1) __asm__("func_003B5BD0");
 int func_003B4DD8_5158(struct sA8E8Setup *out) __asm__("func_003B4DD8");
@@ -1431,7 +1431,7 @@ int func_003B5158_impl(void *buf, int size, int arg2) __asm__("func_003B5158");
 /* arg2 is passed by the caller (func_003C5B80 forwards its own argument) but not used here. */
 int func_003B5158_impl(void *buf, int size, int arg2) {
     int r;
-    D_0044E180 = 'S';
+    str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug = 'S';
     if (D_0050A8E8.f174 != 0) return 0;
     func_00416210_5158(buf, 0, size);
     func_003B5BD0_5158(buf, size);
@@ -12690,44 +12690,44 @@ int func_003C54C0(unsigned int kind, int *out) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5538);
 #ifdef SKIP_ASM
-extern char D_004958C8[];
-extern char D_004958D0[];
-extern char D_004958D8[];
-extern char D_004958E0[];
-extern char D_004958E8[];
-extern char D_004958F0[];
-extern char D_004958F8[];
-extern char D_00495910[];
-extern char D_00495920[];
+extern char str_Mono[];
+extern char str_Stereo[];
+extern char str_4_0[];
+extern char str_5_1[];
+extern char str_DTS_4_0[];
+extern char str_DTS_5_1[];
+extern char str_Dolby_Digital_5_1[];
+extern char str_Dolby_ProLogic[];
+extern char str_Dolby_ProLogic_II[];
 
 int func_003C5538(unsigned int kind, char **out) {
     switch (kind) {
     case 0:
-        *out = D_004958C8;
+        *out = str_Mono;
         break;
     case 1:
-        *out = D_004958D0;
+        *out = str_Stereo;
         break;
     case 2:
-        *out = D_004958D8;
+        *out = str_4_0;
         break;
     case 3:
-        *out = D_004958E0;
+        *out = str_5_1;
         break;
     case 4:
-        *out = D_004958E8;
+        *out = str_DTS_4_0;
         break;
     case 5:
-        *out = D_004958F0;
+        *out = str_DTS_5_1;
         break;
     case 6:
-        *out = D_004958F8;
+        *out = str_Dolby_Digital_5_1;
         break;
     case 7:
-        *out = D_00495910;
+        *out = str_Dolby_ProLogic;
         break;
     case 8:
-        *out = D_00495920;
+        *out = str_Dolby_ProLogic_II;
         break;
     default:
         return -5;

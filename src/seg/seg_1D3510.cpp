@@ -157,7 +157,7 @@ void* operator_new_tag_27B0(unsigned int size, const char* tag, int flags, int d
 extern "C" int func_002D2790_27B0(unsigned char **, unsigned char *) __asm__("func_002D2790");
 extern "C" char *strcpy(char *, const char *);
 extern char D_004D49B8[];
-extern char D_00486768[];
+extern char str_Comm_String[];
 /**
  * Reads a null-terminated string from a byte stream into a newly allocated copy.
  *
@@ -176,7 +176,7 @@ extern "C" int get_string(unsigned char **src, char **out) {
         D_004D49B8[n - 1] = curChar;
     } while (curChar != 0 && n < 1000);
     if (n == 1000) D_004D49B8[999] = 0;
-    char *copy = (char*)operator_new_tag_27B0(n, D_00486768, 0x100, 0);
+    char *copy = (char*)operator_new_tag_27B0(n, str_Comm_String, 0x100, 0);
     *out = copy;
     strcpy(copy, D_004D49B8);
     return n;
@@ -191,8 +191,8 @@ void* operator_new_tag_2868(unsigned int size, const char* tag, int flags, int d
 extern "C" void* cMemMan_alloc_2868(int, const char*, int, int) __asm__("cMemMan_alloc");
 extern "C" int func_002D2790_2868(unsigned char **, unsigned char *) __asm__("func_002D2790");
 extern "C" int get_uint_2868(unsigned char **, void *) __asm__("get_uint");
-extern char D_00486778[];
-extern char D_00486788[];
+extern char str_Comm_Data_Block[];
+extern char str_Comm_Data[];
 struct Data_2868 { unsigned int n; unsigned char *data; };
 /**
  * Reads a length-prefixed byte block from a comms data stream into a new "Comm Data Block".
@@ -203,13 +203,13 @@ struct Data_2868 { unsigned int n; unsigned char *data; };
  */
 extern "C" int get_data(unsigned char **src, Data_2868 **out) {
     unsigned int i = 0;
-    Data_2868 *newData = (Data_2868*)cMemMan_alloc_2868(8, D_00486778, 0x100, 0);
+    Data_2868 *newData = (Data_2868*)cMemMan_alloc_2868(8, str_Comm_Data_Block, 0x100, 0);
     newData->n = 0;
     newData->data = 0;
     *out = newData;
     int total = get_uint_2868(src, newData);
     Data_2868 *reloaded = *out;
-    reloaded->data = (unsigned char*)operator_new_tag_2868(reloaded->n, D_00486788, 0x100, 0);
+    reloaded->data = (unsigned char*)operator_new_tag_2868(reloaded->n, str_Comm_Data, 0x100, 0);
     Data_2868 *current = *out;
     for (i = 0; i < current->n; i++) {
         total += func_002D2790_2868(src, current->data + i);

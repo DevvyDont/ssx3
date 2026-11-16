@@ -6,20 +6,20 @@
 INCLUDE_ASM("fe/feridermanager", cFERider_initBoneMap);
 #ifdef SKIP_ASM
 extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name);
-extern char D_004A1970[];
-extern char D_004A1978[];
-extern char D_00460A00[];
-extern char D_00460A10[];
-extern char D_00460A20[];
-extern char D_00460A30[];
-extern char D_00460A40[];
-extern char D_00460A50[];
-extern char D_00460A60[];
-extern char D_00460A70[];
-extern char D_00460A80[];
-extern char D_00460A90[];
-extern char D_00460AA0[];
-extern char D_00460AB0[];
+extern char str_head[];
+extern char str_hips[];
+extern char str_handleft[];
+extern char str_forearmleft[];
+extern char str_thighleft[];
+extern char str_shinleft[];
+extern char str_footleft[];
+extern char str_handright[];
+extern char str_forearmright[];
+extern char str_thighright[];
+extern char str_shinright[];
+extern char str_footright[];
+extern char str_board_rootg[];
+extern char str_board_childg[];
 
 /**
  * Looks up the front-end rider model's bone indices by name: head, hips, the limbs, and the board root and
@@ -27,20 +27,20 @@ extern char D_00460AB0[];
  */
 extern "C" void cFERider_initBoneMap(void* self)
 {
-    *(int*)((char*)self + 0xC7C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_004A1970);
-    *(int*)((char*)self + 0xC80) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_004A1978);
-    *(int*)((char*)self + 0xC84) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A00);
-    *(int*)((char*)self + 0xC88) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A10);
-    *(int*)((char*)self + 0xC8C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A20);
-    *(int*)((char*)self + 0xC90) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A30);
-    *(int*)((char*)self + 0xC94) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A40);
-    *(int*)((char*)self + 0xC98) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A50);
-    *(int*)((char*)self + 0xC9C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A60);
-    *(int*)((char*)self + 0xCA0) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A70);
-    *(int*)((char*)self + 0xCA4) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A80);
-    *(int*)((char*)self + 0xCA8) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A90);
-    *(int*)((char*)self + 0xCAC) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 1, D_00460AA0);
-    *(int*)((char*)self + 0xCB0) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 1, D_00460AB0);
+    *(int*)((char*)self + 0xC7C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_head);
+    *(int*)((char*)self + 0xC80) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_hips);
+    *(int*)((char*)self + 0xC84) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_handleft);
+    *(int*)((char*)self + 0xC88) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_forearmleft);
+    *(int*)((char*)self + 0xC8C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_thighleft);
+    *(int*)((char*)self + 0xC90) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_shinleft);
+    *(int*)((char*)self + 0xC94) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_footleft);
+    *(int*)((char*)self + 0xC98) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_handright);
+    *(int*)((char*)self + 0xC9C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_forearmright);
+    *(int*)((char*)self + 0xCA0) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_thighright);
+    *(int*)((char*)self + 0xCA4) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_shinright);
+    *(int*)((char*)self + 0xCA8) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, str_footright);
+    *(int*)((char*)self + 0xCAC) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 1, str_board_rootg);
+    *(int*)((char*)self + 0xCB0) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 1, str_board_childg);
 }
 #endif
 
@@ -132,9 +132,9 @@ extern "C" void func_002F19F0(void* a, void* b);
 extern "C" void func_0019FF00_E980(int* self, void* list, void* prev, int force, int a4) __asm__("func_0019FF00");
 extern "C" void func_0019FBE0_E980(int* self, void* list, int a2, int a3) __asm__("func_0019FBE0");
 extern "C" void func_0019F138_E980(void* self) __asm__("func_0019F138");
-extern char D_00460AC0[];
-extern char D_00460AD8[];
-extern char D_00460AF0[];
+extern char str_AttachedEmitterFX_b[];
+extern char str_cBoltOnFXInterface_b[];
+extern char str_AnimModel[];
 
 // PORT: callers declare cFERider_init as returning void; the body returns 1
 extern "C" int cFERider_init_impl(int* self, int profile, int character, int slot) __asm__("cFERider_init");
@@ -173,9 +173,9 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     self[0xCC0 / 4] = 0;
     self[0xC24 / 4] = -1;
     self[0xCC4 / 4] = dirty;
-    *(void**)&self[0xC70 / 4] = func_002F1890(cMemMan_alloc(0xA8, D_00460AC0, 0, 0), self);
-    *(void**)&self[0xC74 / 4] = func_002ECA68(cMemMan_alloc(0xC8, D_00460AD8, 0, 0), self, *(void**)&self[0xC70 / 4]);
-    *(void**)&self[2] = func_0030D4B8(cMemMan_alloc(0x160, D_00460AF0, 0, 0));
+    *(void**)&self[0xC70 / 4] = func_002F1890(cMemMan_alloc(0xA8, str_AttachedEmitterFX_b, 0, 0), self);
+    *(void**)&self[0xC74 / 4] = func_002ECA68(cMemMan_alloc(0xC8, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[0xC70 / 4]);
+    *(void**)&self[2] = func_0030D4B8(cMemMan_alloc(0x160, str_AnimModel, 0, 0));
     func_0030D840(*(void**)&self[2], 100, 15);
     func_002F19F0(*(void**)&self[0xC70 / 4], *(void**)&self[2]);
     void* list = func_0014AD28(iface, profile, character);
@@ -311,7 +311,7 @@ extern "C" void func_00104D50(void* anim, void* rider);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void func_00312598(void* self, int a1);
 extern "C" void cFERider_initBoneMap(void* self);
-extern char D_00460B28[];
+extern char str_RiderAnim[];
 extern void* cRiderAnim_vtbl[];
 
 struct sQuadED80 { int x[4]; } __attribute__((aligned(16)));
@@ -338,7 +338,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     func_00369890(GrMan, 0, 0);
     func_00369690(GrMan, self->count, self->bones);
     cAnimModel_compile(self->model, 1);
-    char* anim = (char*)new (D_00460B28, 0, 0) sAnimMemED80;
+    char* anim = (char*)new (str_RiderAnim, 0, 0) sAnimMemED80;
     cRiderAnimBase_cRiderAnimBase(anim);
     *(void***)(anim + 0x58) = cRiderAnim_vtbl;
     *(int*)(anim + 0x60) = 0;
@@ -360,17 +360,17 @@ INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 #ifdef SKIP_ASM
 extern char D_005047F8[];
 extern char D_00504810[];
-extern char D_004A1620[];
-extern char D_004A1628[];
-extern char D_004A1980[];
-extern char D_004A1638[];
-extern char D_004A1640[];
-extern char D_004A1988[];
-extern char D_004A1650[];
-extern char D_004A1990[];
-extern char D_004A1660[];
-extern char D_004A1998[];
-extern char D_004A19A0[];
+extern char str_moby[];
+extern char str_kaori[];
+extern char str_allegra[];
+extern char str_mac[];
+extern char str_zoe[];
+extern char str_griff[];
+extern char str_elise[];
+extern char str_nate[];
+extern char str_psymon[];
+extern char str_viggo[];
+extern char str_fe_map[];
 
 struct sVec4_EE88 {
     float x, y, z, w;
@@ -443,40 +443,40 @@ extern "C" void func_0019EE88(void* selfp)
     }
     switch (type) {
     case 0:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1620), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_moby), D_00504810, 1.0f);
         break;
     case 1:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1628), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_kaori), D_00504810, 1.0f);
         break;
     case 2:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1980), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_allegra), D_00504810, 1.0f);
         break;
     case 3:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1638), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_mac), D_00504810, 1.0f);
         break;
     case 4:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1640), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_zoe), D_00504810, 1.0f);
         break;
     case 5:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1988), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_griff), D_00504810, 1.0f);
         break;
     case 6:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1650), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_elise), D_00504810, 1.0f);
         break;
     case 7:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1990), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_nate), D_00504810, 1.0f);
         break;
     case 8:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1660), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_psymon), D_00504810, 1.0f);
         break;
     case 9:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A1998), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_viggo), D_00504810, 1.0f);
         break;
     default:
-        func_00389590(&m, func_0038AC20(D_005047F8, D_004A19A0), D_00504810, 1.0f);
+        func_00389590(&m, func_0038AC20(D_005047F8, str_fe_map), D_00504810, 1.0f);
         break;
     }
-    int idx = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A1978);
+    int idx = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips);
     pos = self->model->bones[idx * 2];
     func_00389CB8(&m, &pos, 1.0f);
     {
@@ -1028,7 +1028,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char D_004A19A8[];
-extern char D_004A19B0[];
+extern char str_charshp[];
 
 struct sPkgEnt_F908 {
     int off;
@@ -1076,7 +1076,7 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
             strcpy(self->entries[self->count].name, name);
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVE_F908a* vt = (sVE_F908a*)ps2GraphicsMan->mVtbl;
-            self->entries[self->count].id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, D_004A19B0, 0, 1, -1);
+            self->entries[self->count].id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_charshp, 0, 1, -1);
             self->count++;
         }
     }

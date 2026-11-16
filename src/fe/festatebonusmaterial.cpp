@@ -4,7 +4,7 @@
 INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00460168[];
+extern char str_146Bonusmat[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -14,7 +14,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateBonusMaterial_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00460168), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_146Bonusmat), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -101,7 +101,7 @@ extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed cha
 extern "C" void func_001D2598(void* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern char D_004601D8[];
+extern char str_cFEStateVideoPlayer[];
 extern const char* D_00441128[];
 
 struct sVEntryK195600 {
@@ -124,7 +124,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsi
     case 4:
         break;
     case 5: {
-        void* popup = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
+        void* popup = func_001D22F0(cMemMan_alloc(0x280, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
                                 *(signed char*)((char*)self + 0x44));
         func_001D2598(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
         cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, popup);

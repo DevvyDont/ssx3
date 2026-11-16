@@ -8,10 +8,10 @@ struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0045D9B8[];
-extern char D_0045D9C8[];
-extern char D_0045D9D8[];
-extern char D_0045D9E8[];
+extern char str_cost_num[];
+extern char str_have_num[];
+extern char str_cost_text[];
+extern char str_have_text[];
 
 class cWidget_00184668 {
 public:
@@ -38,19 +38,19 @@ public:
 extern "C" void cFEStateUberTrick_costVisible(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
-    cWidget_00184668* costNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9B8));
+    cWidget_00184668* costNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costNum) {
         costNum->setVisible(on);
     }
-    cWidget_00184668* costText = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9D8));
+    cWidget_00184668* costText = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_text));
     if (costText) {
         costText->setVisible(on);
     }
-    cWidget_00184668* haveNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9C8));
+    cWidget_00184668* haveNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (haveNum) {
         haveNum->setVisible(on);
     }
-    cWidget_00184668* d = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9E8));
+    cWidget_00184668* d = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_text));
     if (d) {
         d->setVisible(on);
     }
@@ -63,8 +63,8 @@ INCLUDE_ASM("fe/festatestore", func_00184780);
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
-extern char D_004A1458[];
-extern char D_004A1460[];
+extern char str_btext5[];
+extern char str_ps2sq[];
 
 class cWidget_00184780 {
 public:
@@ -86,11 +86,11 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00184780(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
-    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1458));
+    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
     if (w) {
         w->v09(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1460));
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_ps2sq));
     if (w) {
         w->v09(on);
     }
@@ -100,12 +100,12 @@ extern "C" void func_00184780(void* self, int on)
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_trickVisible);
 #ifdef SKIP_ASM
-extern char D_0045D9F8[];
-extern char D_0045DA08[];
-extern char D_0045DA18[];
-extern char D_0045D960[];
-extern char D_0045D970[];
-extern char D_0045D980[];
+extern char str_To_Execute_info[];
+extern char str_Checkboxes[];
+extern char str_MenuTrick[];
+extern char str_InstBtn0[];
+extern char str_InstBtn1[];
+extern char str_InstBtn2[];
 
 /**
  * Shows or hides the uber-trick store's trick menu: its info text, checkboxes, menu and the three "InstBtn"
@@ -120,27 +120,27 @@ extern char D_0045D980[];
 extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
-    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9F8));
+    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
     if (w) {
         w->v09(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045DA08));
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Checkboxes));
     if (w) {
         w->v09(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045DA18));
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_MenuTrick));
     if (w) {
         w->v09(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D960));
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn0));
     if (w) {
         w->v09(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D970));
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn1));
     if (w) {
         w->v09(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D980));
+    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn2));
     if (w) {
         w->v09(on);
     }
@@ -165,10 +165,10 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* p, int a);
 extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
 extern "C" void func_00184780(void* self, int on);
-extern char D_0045DA28[];
-extern char D_0045DA38[];
-extern char D_0045DA48[];
-extern char D_0045DA58[];
+extern char str_66ut_btnmap[];
+extern char str_empty_box[];
+extern char str_checkbox[];
+extern char str_yell_dollar_sign[];
 
 struct sVec4_1849B0 {
     float x, y, z, w;
@@ -183,7 +183,7 @@ struct sVE_1849B0 {
 extern "C" void func_001849B0(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DA28), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_66ut_btnmap), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
@@ -213,17 +213,17 @@ extern "C" void func_001849B0(void* self)
     *(float*)(m + 0x10) = 0.4363323450088501f;
     {
         char* e = *(char**)((char*)self + 0x10);
-        int h = GetHashValue32(D_0045DA38);
+        int h = GetHashValue32(str_empty_box);
         *(void**)((char*)self + 0x58) = func_00398380(e + 0x58, h);
     }
     {
         char* e = *(char**)((char*)self + 0x10);
-        int h = GetHashValue32(D_0045DA48);
+        int h = GetHashValue32(str_checkbox);
         *(void**)((char*)self + 0x54) = func_00398380(e + 0x58, h);
     }
     {
         char* e = *(char**)((char*)self + 0x10);
-        int h = GetHashValue32(D_0045DA58);
+        int h = GetHashValue32(str_yell_dollar_sign);
         *(void**)((char*)self + 0x5C) = func_00398380(e + 0x58, h);
     }
     func_0028F140(func_0028B180(), 5);
@@ -409,8 +409,8 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" int func_0014FE08(void* self, int rider, int idx, int bit);
 extern "C" void func_00184520(void* self);
 extern "C" void cWScriptMan_checkGate(void* self);
-extern char D_0045D930[];
-extern char D_0045DA70[];
+extern char str_helptext_custom[];
+extern char str_kT_66HELPCustomUber[];
 
 struct sVE_4F40 {
     short delta;
@@ -433,9 +433,9 @@ extern "C" void func_00184F40(void* self, void* item, int msg)
             func_0014FE08(pi, *(signed char*)((char*)self + 0x44), a, b);
             sVE_4F40* vt = *(sVE_4F40**)((char*)pi + 0xC);
             vt[1].fn((char*)pi + vt[1].delta);
-            void* t = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D930));
+            void* t = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
             if (t != 0) {
-                cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_0045DA70));
+                cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(str_kT_66HELPCustomUber));
             }
             func_00184520(self);
         }
@@ -451,21 +451,21 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetCreate);
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern char D_004A1468[];
-extern char D_004A1470[];
-extern char D_004A1478[];
-extern char D_004A1480[];
-extern char D_0045DA88[];
-extern char D_0045DA98[];
-extern char D_004A1488[];
-extern char D_004A1490[];
-extern char D_004A1498[];
-extern char D_0045DAA8[];
-extern char D_004A14A0[];
-extern char D_0045DAB8[];
-extern char D_004A14A8[];
-extern char D_0045DAC8[];
-extern char D_0045DA18[];
+extern char str_mute[];
+extern char str_Mute[];
+extern char str_indy[];
+extern char str_Indy[];
+extern char str_stalefish[];
+extern char str_Stalefish[];
+extern char str_method[];
+extern char str_Method[];
+extern char str_nose[];
+extern char str_Nose_Grab[];
+extern char str_tail[];
+extern char str_Tail_Grab[];
+extern char str_done[];
+extern char str_MenuMain[];
+extern char str_MenuTrick[];
 
 static inline int Is_185080(int id, char* s)
 {
@@ -487,42 +487,42 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
 {
     cUIText* text = (cUIText*)widget;
     for (int i = 0; i < 6; i++) {
-        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1468)) {
-            cUIText_setAsciiString(text, D_004A1470);
+        if (Is_185080(*(int*)((char*)widget + 0x38), str_mute)) {
+            cUIText_setAsciiString(text, str_Mute);
             *(int*)((char*)widget + 0x18) = 1;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1478)) {
-            cUIText_setAsciiString(text, D_004A1480);
+        if (Is_185080(*(int*)((char*)widget + 0x38), str_indy)) {
+            cUIText_setAsciiString(text, str_Indy);
             *(int*)((char*)widget + 0x18) = 3;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), D_0045DA88)) {
-            cUIText_setAsciiString(text, D_0045DA98);
+        if (Is_185080(*(int*)((char*)widget + 0x38), str_stalefish)) {
+            cUIText_setAsciiString(text, str_Stalefish);
             *(int*)((char*)widget + 0x18) = 2;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1488)) {
-            cUIText_setAsciiString(text, D_004A1490);
+        if (Is_185080(*(int*)((char*)widget + 0x38), str_method)) {
+            cUIText_setAsciiString(text, str_Method);
             *(int*)((char*)widget + 0x18) = 0;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A1498)) {
-            cUIText_setAsciiString(text, D_0045DAA8);
+        if (Is_185080(*(int*)((char*)widget + 0x38), str_nose)) {
+            cUIText_setAsciiString(text, str_Nose_Grab);
             *(int*)((char*)widget + 0x18) = 4;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), D_004A14A0)) {
-            cUIText_setAsciiString(text, D_0045DAB8);
+        if (Is_185080(*(int*)((char*)widget + 0x38), str_tail)) {
+            cUIText_setAsciiString(text, str_Tail_Grab);
             *(int*)((char*)widget + 0x18) = 9;
             return;
         }
     }
-    if (Is_185080(*(int*)((char*)widget + 0x38), D_004A14A8)) {
+    if (Is_185080(*(int*)((char*)widget + 0x38), str_done)) {
         *(int*)((char*)widget + 0x18) = -1;
-    } else if (Is_185080(*(int*)((char*)widget + 0x38), D_0045DAC8)) {
+    } else if (Is_185080(*(int*)((char*)widget + 0x38), str_MenuMain)) {
         *(void**)((char*)self + 0x4C) = widget;
-    } else if (Is_185080(*(int*)((char*)widget + 0x38), D_0045DA18)) {
+    } else if (Is_185080(*(int*)((char*)widget + 0x38), str_MenuTrick)) {
         *(void**)((char*)self + 0x50) = widget;
     }
 }
@@ -562,16 +562,16 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void*
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern signed char D_00535C11[];
-extern char D_004A14A8[];
-extern char D_0045D920[];
-extern char D_0045D930[];
-extern char D_0045DA70[];
-extern char D_0045DAD8[];
-extern char D_0045DAE8[];
-extern char D_0045DB00[];
-extern char D_0045DB18[];
-extern char D_0045DB30[];
-extern char D_0045DB48[];
+extern char str_done[];
+extern char str_helptext_choose[];
+extern char str_helptext_custom[];
+extern char str_kT_66HELPCustomUber[];
+extern char str_UITRICKBUY[];
+extern char str_kT_66HELPChooseCat[];
+extern char str_kT_FEHELPAcceptTrick[];
+extern char str_kT_FEHELPTrickAvailBuy[];
+extern char str_kT_OVRCMNSaveCashUber[];
+extern char str_kT_FEHELPTrickBuyCTM[];
 
 struct sVE_185268 {
     short delta;
@@ -644,7 +644,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
     switch (msg) {
     case 5:
         if (*(char**)(item + 0x40) == *(char**)(self + 0x4C)) {
-            if (Is_185268(*(int*)(item + 0x38), D_004A14A8)) {
+            if (Is_185268(*(int*)(item + 0x38), str_done)) {
                 Back_185268(self);
             } else {
                 SetActive_185268(*(char**)(self + 0x4C), 0);
@@ -681,7 +681,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                     sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                     int trick = func_00116938(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
-                        void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_0045DAD8, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
+                        void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
                         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
                     } else {
@@ -731,17 +731,17 @@ extern "C" void func_00185268(char* self, char* item, int msg)
             if (*(void**)(self + 0x50) != 0 && *(int*)(item + 0x18) != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
                 cWScriptMan_checkGate(self);
-                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045D920));
+                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
                 if (t != 0)
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DAE8));
+                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_66HELPChooseCat));
             } else {
                 cFEStateUberTrick_trickVisible(self, 0);
-                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045D920));
+                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
                 if (t != 0)
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB00));
+                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_FEHELPAcceptTrick));
             }
         } else if (*(char**)(self + 0x50) != 0 && *(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045D930));
+            cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_custom));
             char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
             char* b = *(char**)(*(char**)(self + 0x50) + 0xA0);
             if (a != 0 && b != 0 && t != 0) {
@@ -750,7 +750,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, *(signed char*)(self + 0x44), ai, bi) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DA70));
+                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_66HELPCustomUber));
                 } else if (D_00535C11[0] == 0) {
                     if (func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
                         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -763,12 +763,12 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                         int n;
                         sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                         if (points >= tbl[bi].cost)
-                            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB18));
+                            cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_FEHELPTrickAvailBuy));
                         else
-                            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB30));
+                            cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_OVRCMNSaveCashUber));
                     }
                 } else {
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DB48));
+                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_FEHELPTrickBuyCTM));
                 }
                 func_00184520(self);
             }

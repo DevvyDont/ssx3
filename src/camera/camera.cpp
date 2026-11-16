@@ -49,9 +49,9 @@ extern "C" void* cManualCameraController_cManualCameraController(void* self, voi
 extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int a);
 extern "C" void* cScriptCameraController_cScriptCameraController(void* self, int idx, void* cam);
 extern void* cCamera_vtbl[];
-extern const char D_0045B748[];
-extern const char D_0045B760[];
-extern const char D_0045B778[];
+extern const char str_Manual_Cam_Controller[];
+extern const char str_Chase_Cam_Controller[];
+extern const char str_Script_Cam_Controller[];
 // PORT: cQuad128 (the unit's 128-bit TImode typedef) is a 16-byte register copy.
 extern cQuad128 D_004FF160;
 extern cQuad128 D_004FF130;
@@ -71,9 +71,9 @@ extern "C" void* cCamera_cCamera(cCamera* self, int idx)
     func_0015D698(self);
     self->mVtbl = cCamera_vtbl;
     cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm((char*)self + 0xC0);
-    self->ManualController = (cManualCameraController*)cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, D_0045B748, 0, 0), self);
-    self->ChaseController = (cChaseCameraController*)cChaseCameraController_cChaseCameraController((cChaseCameraController*)cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
-    self->ScriptController = (cScriptCameraController*)cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, D_0045B778, 0, 0), idx, self);
+    self->ManualController = (cManualCameraController*)cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, str_Manual_Cam_Controller, 0, 0), self);
+    self->ChaseController = (cChaseCameraController*)cChaseCameraController_cChaseCameraController((cChaseCameraController*)cMemMan_alloc(0x44, str_Chase_Cam_Controller, 0, 0), idx, (int)self);
+    self->ScriptController = (cScriptCameraController*)cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, str_Script_Cam_Controller, 0, 0), idx, self);
     self->StreamFocusID = -1;
     self->bStreamIsReady = 0;
     *(int*)&self->MaxShakeVariance = 0;
@@ -143,7 +143,7 @@ struct sCam162060;
 extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int arg, float blend);
 void func_00162310(void* self, int val);
 void* func_0015E030(void* self);
-extern const char D_0045B790[];
+extern const char str_RiderCameraTarget[];
 extern void* D_0045B7A8[];
 
 struct sCamCtrl_15DE60
@@ -219,7 +219,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float nearPlane, flo
     self->manual->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
     cManualCameraController_setCurrentAlgorithmType(self->manual, 0x51);
     self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[idx];
-    sRiderRef_15DE60* riderRef = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
+    sRiderRef_15DE60* riderRef = (sRiderRef_15DE60*)operator new(8, str_RiderCameraTarget, 0, 0);
     riderRef->vt = D_0045B7A8;
     riderRef->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (idx << 2) + 0x28);
     cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);

@@ -4,7 +4,7 @@
 INCLUDE_ASM("camera/cameraalgolist", cCameraAlgoList_insert);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern char D_0045B1F0[];
+extern char str_Algorithm_List_Node[];
 
 class cCamAlgoK2 {
 public:
@@ -46,7 +46,7 @@ struct sAlgoListK2 {
 extern "C" void cCameraAlgoList_insert(sAlgoListK2* list, cCamAlgoK2* algo, int owned, float w)
 {
     algo->v04();
-    sAlgoNodeK2* n = (sAlgoNodeK2*)cMemMan_alloc(0x1C, D_0045B1F0, 0x20000000, 0);
+    sAlgoNodeK2* n = (sAlgoNodeK2*)cMemMan_alloc(0x1C, str_Algorithm_List_Node, 0x20000000, 0);
     n->owned = owned;
     n->algo = algo;
     n->prev = 0;

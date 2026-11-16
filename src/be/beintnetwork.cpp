@@ -2,7 +2,7 @@
 #include "be/beintnetwork.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A648[];
+extern const char str_BENetworkInt[];
 extern void* D_0045AD98[16];
 
 //99.58%
@@ -18,7 +18,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getThis__Fv);
 void* cBENetworkInterface_getThis()
 {
     if (cBENetworkInterface_instance == 0) {
-        cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, D_0045A648, 0, 0);
+        cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, str_BENetworkInt, 0, 0);
         mem->bIsActive = 0;
         mem->mVtbl = D_0045AD98;
         cBENetworkInterface_instance = mem;
@@ -443,7 +443,7 @@ extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self
 //100%
 INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getThis);
 #ifdef SKIP_ASM
-extern const char D_0045A280[];
+extern const char str_BECharInt[];
 extern void* D_0045AD38[16];
 extern void* D_004A1208;
 
@@ -465,7 +465,7 @@ struct cBECharacterInterface {
 extern "C" void* cBECharacterInterface_getThis(void)
 {
     if (D_004A1208 == 0) {
-        cBECharacterInterface* mem = (cBECharacterInterface*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
+        cBECharacterInterface* mem = (cBECharacterInterface*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         mem->bIsActive = 0;
         mem->mVtbl = D_0045AD38;
         D_004A1208 = mem;

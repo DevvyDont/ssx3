@@ -25,7 +25,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cObjectInterface_getNash();
 extern "C" void func_00328F28(sHashKey_8B90* out, void* box);
 extern "C" void func_00328C20(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
-extern const char D_0048E808[];
+extern const char str_FlexRailSpaceNode[];
 
 /**
  * Registers a flex rail in the Nash rail-space octree through a new space node.
@@ -35,7 +35,7 @@ extern const char D_0048E808[];
  */
 extern "C" void cFlexRailNode_addSpaceHash(void* self)
 {
-    sHashNode_8B90* n = (sHashNode_8B90*)cMemMan_alloc(0x10, D_0048E808, 0x20000000, 0);
+    sHashNode_8B90* n = (sHashNode_8B90*)cMemMan_alloc(0x10, str_FlexRailSpaceNode, 0x20000000, 0);
     n->owner = self;
     n->type = 3;
     *(sHashNode_8B90**)((char*)self + 0x54) = n;
@@ -114,7 +114,7 @@ extern "C" void func_00349220(void* self, sFrNode9220* node);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_0048FF30[];
-extern char D_0048E820[];
+extern char str_FloatRailNodes[];
 
 struct sFrV_8D98 { float x, y, z, w; } __attribute__((aligned(16)));
 extern sFrV_8D98 t4vect_Zero;
@@ -155,7 +155,7 @@ extern "C" void* func_00348D98(char* self, void* a1, char* desc)
         }
     }
     sFlexRailElem_348D98*& elems = *(sFlexRailElem_348D98**)(self + 0x70);
-    elems = new (D_0048E820, 0x20000000, 0) sFlexRailElem_348D98[*(int*)(self + 0x20)];
+    elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348D98[*(int*)(self + 0x20)];
     for (int j = 0; j < *(int*)(self + 0x20); j++) {
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].link.id = refs[j].id;
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].bone = bones[j];
@@ -182,7 +182,7 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_0048FF30[];
-extern char D_0048E820[];
+extern char str_FloatRailNodes[];
 
 struct sFlexRailRef_348FA0 {
     unsigned int id;
@@ -208,7 +208,7 @@ extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
     sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
     sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(self + 0x70);
-    *elems = new (D_0048E820, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
+    *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
     sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x50);
     func_003492A8(self);
@@ -706,7 +706,7 @@ extern "C" void func_00349F18(sFrBoxRail60* self);
 struct sFrNodeA028;
 extern "C" void func_0034A028(void* self, sFrNodeA028* node);
 extern char D_0048FD90[];
-extern char D_0048E830[];
+extern char str_SpringRailNodes[];
 
 struct sFrV_9B48 { float x, y, z, w; } __attribute__((aligned(16)));
 extern sFrV_9B48 D_004FF120_9B48 __asm__("t4vect_Zero");
@@ -762,7 +762,7 @@ extern "C" void* func_00349B48(char* self, void* a1, char* desc)
         }
     }
     sFlexElem_9B48*& elems = *(sFlexElem_9B48**)(self + 0x70);
-    elems = new (D_0048E830, 0x20000000, 0) sFlexElem_9B48[*(int*)(self + 0x20)];
+    elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexElem_9B48[*(int*)(self + 0x20)];
     for (int j = 0; j < *(int*)(self + 0x20); j++) {
         (*(sFlexElem_9B48**)(self + 0x70))[j].link.id = refs[j].id;
         (*(sFlexElem_9B48**)(self + 0x70))[j].bone = bones[j];
@@ -792,7 +792,7 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_0048FD90[];
-extern char D_0048E830[];
+extern char str_SpringRailNodes[];
 
 struct sFlexRailElem_349DB0 {
     char pad[0x50];
@@ -814,7 +814,7 @@ extern "C" void* func_00349DB0(char* self, void* a1, void* stream)
     sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
     sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(self + 0x70);
-    *elems = new (D_0048E830, 0x20000000, 0) sFlexRailElem_349DB0[*(int*)(self + 0x20)];
+    *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[*(int*)(self + 0x20)];
     sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x60);
     func_0034A0B0(self);

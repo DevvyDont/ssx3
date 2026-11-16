@@ -169,47 +169,47 @@ INCLUDE_ASM("replay/replay", cReplay_restoreObject);
 class cStreamRB;
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" int cReplayFramePtr_peekObjNodeType(void* stream);
-extern char D_004815F0[];
+extern char str_Debounce[];
 extern "C" void* cDebounceNode_cDebounceNode_RO(void* self, void* bucket, void* stream) __asm__("cDebounceNode_cDebounceNode");
-extern char D_00481600[];
+extern char str_AnimObject[];
 extern "C" void* cAnimObjectNode_cAnimObjectNode_RO(void* self, void* bucket, void* stream) __asm__("cAnimObjectNode_cAnimObjectNode");
-extern char D_00481610[];
+extern char str_AnimDelta[];
 extern "C" void* cAnimDeltaNode_cAnimDeltaNode_RO(void* self, void* bucket, void* stream) __asm__("cAnimDeltaNode_cAnimDeltaNode");
-extern char D_00481620[];
+extern char str_AnimCombo[];
 extern "C" void* cAnimComboNode_cAnimComboNode_RO(void* self, void* bucket, void* stream) __asm__("cAnimComboNode_cAnimComboNode");
-extern char D_00481630[];
+extern char str_AnimTeeter[];
 extern "C" void* cAnimTeeterNode_cAnimTeeterNode_RO(void* self, void* bucket, void* stream) __asm__("cAnimTeeterNode_cAnimTeeterNode");
-extern char D_00481640[];
+extern char str_FlexBridge[];
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode1_RO(void* self, void* bucket, void* stream) __asm__("cFlexBridgeNode_cFlexBridgeNode1");
-extern char D_004A3440[];
+extern char str_Counter[];
 extern "C" void* cCounterNode_cCounterNode_RO(void* self, void* bucket, void* stream) __asm__("cCounterNode_cCounterNode");
-extern char D_004A3448[];
+extern char str_Boost[];
 extern "C" void* cBoostNode_cBoostNode_RO(void* self, void* bucket, void* stream) __asm__("cBoostNode_cBoostNode");
-extern char D_004A3450[];
+extern char str_Fence[];
 extern "C" void* cFenceNode_cFenceNode_RO(void* self, void* bucket, void* stream) __asm__("cFenceNode_cFenceNode");
-extern char D_004A3458[];
+extern char str_Flag[];
 extern "C" void* cFlagNode_cFlagNode_RO(void* self, void* bucket, void* stream) __asm__("cFlagNode_cFlagNode");
-extern char D_00481650[];
+extern char str_MeshAnim[];
 extern "C" void* cMeshAnimNode_cMeshAnimNode_RO(void* self, void* bucket, void* stream) __asm__("cMeshAnimNode_cMeshAnimNode");
-extern char D_00481660[];
+extern char str_Particle[];
 extern "C" void* cParticleNode_cParticleNode_RO(void* self, void* bucket, void* stream) __asm__("cParticleNode_cParticleNode");
-extern char D_004A3460[];
+extern char str_RailMan[];
 extern "C" void* cRailManNode_cRailManNode_RO(void* self, void* bucket, void* stream) __asm__("cRailManNode_cRailManNode");
-extern char D_004A3468[];
+extern char str_Restore[];
 extern "C" void* func_00350FD8_RO(void* self, void* bucket, void* stream) __asm__("func_00350FD8");
-extern char D_00481670[];
+extern char str_Floating[];
 extern "C" void* func_0034ED88_RO(void* self, void* bucket, void* stream) __asm__("func_0034ED88");
-extern char D_00481680[];
+extern char str_Conveyor[];
 extern "C" void* func_003430D0_RO(void* self, void* bucket, void* stream) __asm__("func_003430D0");
-extern char D_004A3470[];
+extern char str_Hide[];
 extern "C" void* func_00350F08_RO(void* self, void* bucket, void* stream) __asm__("func_00350F08");
-extern char D_004A3478[];
+extern char str_Object[];
 extern "C" void* func_00356E60_RO(void* self, void* bucket, void* stream) __asm__("func_00356E60");
-extern char D_00481690[];
+extern char str_FloatRail[];
 extern "C" void* func_00348FA0_RO(void* self, void* bucket, void* stream) __asm__("func_00348FA0");
-extern char D_004816A0[];
+extern char str_SpringRail[];
 extern "C" void* func_00349DB0_RO(void* self, void* bucket, void* stream) __asm__("func_00349DB0");
-extern char D_004816B0[];
+extern char str_DeadFade[];
 struct sVE_RO { short delta; short index; void (*fn)(void*, int); };
 struct sObj_RO { int pad[3]; sVE_RO* vt; };
 extern "C" sObj_RO* func_00350B98_RO(void* self, void* bucket, void* stream) __asm__("func_00350B98");
@@ -229,67 +229,67 @@ extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* st
 {
     switch (cReplayFramePtr_peekObjNodeType(stream)) {
     case 0:
-        cDebounceNode_cDebounceNode_RO(cMemMan_alloc(0x34, D_004815F0, 0x20000000, 0), bucket, stream);
+        cDebounceNode_cDebounceNode_RO(cMemMan_alloc(0x34, str_Debounce, 0x20000000, 0), bucket, stream);
         break;
     case 1:
-        cAnimObjectNode_cAnimObjectNode_RO(cMemMan_alloc(0x6C, D_00481600, 0x20000000, 0), bucket, stream);
+        cAnimObjectNode_cAnimObjectNode_RO(cMemMan_alloc(0x6C, str_AnimObject, 0x20000000, 0), bucket, stream);
         break;
     case 2:
-        cAnimDeltaNode_cAnimDeltaNode_RO(cMemMan_alloc(0x70, D_00481610, 0x20000000, 0), bucket, stream);
+        cAnimDeltaNode_cAnimDeltaNode_RO(cMemMan_alloc(0x70, str_AnimDelta, 0x20000000, 0), bucket, stream);
         break;
     case 3:
-        cAnimComboNode_cAnimComboNode_RO(cMemMan_alloc(0x88, D_00481620, 0x20000000, 0), bucket, stream);
+        cAnimComboNode_cAnimComboNode_RO(cMemMan_alloc(0x88, str_AnimCombo, 0x20000000, 0), bucket, stream);
         break;
     case 4:
-        cAnimTeeterNode_cAnimTeeterNode_RO(cMemMan_alloc(0x80, D_00481630, 0x20000000, 0), bucket, stream);
+        cAnimTeeterNode_cAnimTeeterNode_RO(cMemMan_alloc(0x80, str_AnimTeeter, 0x20000000, 0), bucket, stream);
         break;
     case 5:
-        cFlexBridgeNode_cFlexBridgeNode1_RO(cMemMan_alloc(0xB0, D_00481640, 0x20000000, 0), bucket, stream);
+        cFlexBridgeNode_cFlexBridgeNode1_RO(cMemMan_alloc(0xB0, str_FlexBridge, 0x20000000, 0), bucket, stream);
         break;
     case 7:
-        cCounterNode_cCounterNode_RO(cMemMan_alloc(0x24, D_004A3440, 0x20000000, 0), bucket, stream);
+        cCounterNode_cCounterNode_RO(cMemMan_alloc(0x24, str_Counter, 0x20000000, 0), bucket, stream);
         break;
     case 8:
-        cBoostNode_cBoostNode_RO(cMemMan_alloc(0x50, D_004A3448, 0x20000000, 0), bucket, stream);
+        cBoostNode_cBoostNode_RO(cMemMan_alloc(0x50, str_Boost, 0x20000000, 0), bucket, stream);
         break;
     case 9:
-        cFenceNode_cFenceNode_RO(cMemMan_alloc(0x10C, D_004A3450, 0x20000000, 0), bucket, stream);
+        cFenceNode_cFenceNode_RO(cMemMan_alloc(0x10C, str_Fence, 0x20000000, 0), bucket, stream);
         break;
     case 10:
-        cFlagNode_cFlagNode_RO(cMemMan_alloc(0x1C, D_004A3458, 0x20000000, 0), bucket, stream);
+        cFlagNode_cFlagNode_RO(cMemMan_alloc(0x1C, str_Flag, 0x20000000, 0), bucket, stream);
         break;
     case 11:
-        cMeshAnimNode_cMeshAnimNode_RO(cMemMan_alloc(0x6C0, D_00481650, 0x20000000, 0), bucket, stream);
+        cMeshAnimNode_cMeshAnimNode_RO(cMemMan_alloc(0x6C0, str_MeshAnim, 0x20000000, 0), bucket, stream);
         break;
     case 13:
-        cParticleNode_cParticleNode_RO(cMemMan_alloc(0x2C, D_00481660, 0x20000000, 0), bucket, stream);
+        cParticleNode_cParticleNode_RO(cMemMan_alloc(0x2C, str_Particle, 0x20000000, 0), bucket, stream);
         break;
     case 18:
-        cRailManNode_cRailManNode_RO(cMemMan_alloc(0x218, D_004A3460, 0x20000000, 0), bucket, stream);
+        cRailManNode_cRailManNode_RO(cMemMan_alloc(0x218, str_RailMan, 0x20000000, 0), bucket, stream);
         break;
     case 19:
-        func_00350FD8_RO(cMemMan_alloc(0x1C, D_004A3468, 0x20000000, 0), bucket, stream);
+        func_00350FD8_RO(cMemMan_alloc(0x1C, str_Restore, 0x20000000, 0), bucket, stream);
         break;
     case 14:
-        func_0034ED88_RO(cMemMan_alloc(0x7C, D_00481670, 0x20000000, 0), bucket, stream);
+        func_0034ED88_RO(cMemMan_alloc(0x7C, str_Floating, 0x20000000, 0), bucket, stream);
         break;
     case 15:
-        func_003430D0_RO(cMemMan_alloc(0x48, D_00481680, 0x20000000, 0), bucket, stream);
+        func_003430D0_RO(cMemMan_alloc(0x48, str_Conveyor, 0x20000000, 0), bucket, stream);
         break;
     case 16:
-        func_00350F08_RO(cMemMan_alloc(0x1C, D_004A3470, 0x20000000, 0), bucket, stream);
+        func_00350F08_RO(cMemMan_alloc(0x1C, str_Hide, 0x20000000, 0), bucket, stream);
         break;
     case 17:
-        func_00356E60_RO(cMemMan_alloc(0x2C, D_004A3478, 0x20000000, 0), bucket, stream);
+        func_00356E60_RO(cMemMan_alloc(0x2C, str_Object, 0x20000000, 0), bucket, stream);
         break;
     case 20:
-        func_00348FA0_RO(cMemMan_alloc(0x80, D_00481690, 0x20000000, 0), bucket, stream);
+        func_00348FA0_RO(cMemMan_alloc(0x80, str_FloatRail, 0x20000000, 0), bucket, stream);
         break;
     case 21:
-        func_00349DB0_RO(cMemMan_alloc(0x80, D_004816A0, 0x20000000, 0), bucket, stream);
+        func_00349DB0_RO(cMemMan_alloc(0x80, str_SpringRail, 0x20000000, 0), bucket, stream);
         break;
     case 22: {
-        sObj_RO* o = func_00350B98_RO(cMemMan_alloc(0x3C, D_004816B0, 0x20000000, 0), bucket, stream);
+        sObj_RO* o = func_00350B98_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
         if (o != 0) {
             o->vt[1].fn((char*)o + o->vt[1].delta, 3);
         }
@@ -319,7 +319,7 @@ struct sRdbWorld {
     sRdbModelSet** sets;    // 0x8
 };
 
-extern char D_00481720[];
+extern char str_Dead_Object[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* func_003506D8(void* self, void* model);
 
@@ -365,7 +365,7 @@ extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
     stream->v02(&hdr, 8);
     for (int i = 0; i < hdr.count; i++) {
         stream->v02(&ref, 4);
-        void* mem = cMemMan_alloc(0x1C, D_00481720, 0x20000000, 0);
+        void* mem = cMemMan_alloc(0x1C, str_Dead_Object, 0x20000000, 0);
         func_003506D8(mem, ref.get());
     }
 }

@@ -639,7 +639,7 @@ extern void *func_0039E2A0_CEB8(void*) __asm__("func_0039E2A0");
 int GetHashValue32(char*);
 extern char D_00473E00[];
 extern char D_00474E08[];
-extern char D_0046E340[];
+extern char str_finishov[];
 extern unsigned short D_004A2088[];
 
 extern "C" void *func_0021CEB8(void *arg0, int arg1, int arg2) {
@@ -653,7 +653,7 @@ extern "C" void *func_0021CEB8(void *arg0, int arg1, int arg2) {
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     (*(int *)((char*)(arg0) + (0xA0))) = 1;
     (*(char **)((char*)(arg0) + (8))) = D_00473E00;
-    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(D_0046E340);
+    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(str_finishov);
     return arg0;
 }
 #endif
@@ -679,7 +679,7 @@ extern void *func_0039E2A0_CF60(void*) __asm__("func_0039E2A0");
 int GetHashValue32(char*);
 extern char D_00473D28[];
 extern char D_00474E08[];
-extern char D_0046E340[];
+extern char str_finishov[];
 extern unsigned short D_004A2088[];
 
 extern "C" void *func_0021CF60(void *arg0, int arg1, int arg2) {
@@ -693,7 +693,7 @@ extern "C" void *func_0021CF60(void *arg0, int arg1, int arg2) {
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     (*(int *)((char*)(arg0) + (0xA0))) = 1;
     (*(char **)((char*)(arg0) + (8))) = D_00473D28;
-    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(D_0046E340);
+    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(str_finishov);
     return arg0;
 }
 #endif
@@ -1780,7 +1780,7 @@ struct Obj_F660 {
 };
 extern signed char D_00535C10[];
 extern int D_00536640[];
-extern char D_0046ED68[];
+extern char str_pct_02d_pct_02d_pct_02d_b[];
 extern char D_004A2138[];
 extern V4_F660 D_004C8808;
 extern "C" void* cBE_getBE();
@@ -1832,7 +1832,7 @@ extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag
         if (mode == 0 || mode == 5) {
             int t = (int)((float)val * 0.01666666753590107f);
             int rem = t % 3600;
-            sprintf(buf, D_0046ED68, t / 3600, rem / 60, rem % 60);
+            sprintf(buf, str_pct_02d_pct_02d_pct_02d_b, t / 3600, rem / 60, rem % 60);
         } else {
             sprintf(buf, D_004A2138, val + rider[0x7C / 4]);
         }
@@ -1870,7 +1870,7 @@ struct Obj_F9B0 {
 };
 extern float D_00504FB8[];
 extern V4_F9B0 D_004C8648;
-extern char D_004A2300[];
+extern char str_pct_d_pct_d_b[];
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001E91F8(void*, void*);
@@ -1932,7 +1932,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
         *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
         *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
         Obj_F9B0* o = (Obj_F9B0*)(rider + 0x6C0);
-        sprintf(buf, D_004A2300, func_00153520(iface, o->v07(), id), func_00153350(iface, id));
+        sprintf(buf, str_pct_d_pct_d_b, func_00153520(iface, o->v07(), id), func_00153350(iface, id));
         cFont_text(*(char**)(self + 0x42C), p.x, p.y, buf);
         tx = *(char**)(self + 0x42C);
         *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;
@@ -2036,7 +2036,7 @@ extern "C" void func_0021FD38(char* self, char* obj) {
 INCLUDE_ASM("fe/all_in_one_fe", func_002200C0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: both unit labels copied into locals `kmh` / `mph` up front (keeps "MPH" in $30 across the getVelocity call); plain form (`units = D_004A2310` in the branch) 91.11%. Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: both unit labels copied into locals `kmh` / `mph` up front (keeps "MPH" in $30 across the getVelocity call); plain form (`units = str_MPH` in the branch) 91.11%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;
@@ -2089,8 +2089,8 @@ struct sV2_00C0 {
     sV2_00C0(const float& ax, const float& ay) : x(ax), y(ay) {}
 };
 extern sSettings_00C0 D_00535610_00C0 __asm__("D_00535610");
-extern char D_004A2308[];
-extern char D_004A2310[];
+extern char str_KM_H[];
+extern char str_MPH[];
 extern char D_004A2138[];
 extern "C" void cFont_textExtent(void* self, const char* str, float* rect, int n, float sx, float sy);
 extern "C" void cFont_text(void*, float, float, char*);
@@ -2167,8 +2167,8 @@ extern "C" void func_002200C0(char* self, char* obj, char* rider, int x)
     settings = D_00535610_00C0;
     // Both unit labels are taken up front: the target computes "MPH" before the velocity call and keeps it in
     // $30 across that call (a literal in the branch would be materialised inside it).
-    char* kmh = D_004A2308;
-    char* mph = D_004A2310;
+    char* kmh = str_KM_H;
+    char* mph = str_MPH;
     char* units = kmh;
     cBeing* being = (cBeing*)(rider + 0x6C0);
     float speed = vu0Length_00C0(*(const sVec4_00C0*)being->getVelocity()) * 0.035999998450279236f;
@@ -3836,7 +3836,7 @@ struct LV_24B8;
 extern "C" void luno_cLunoTable__cLunoTable_24B8(LV_24B8*, int) __asm__("luno_cLunoTable__cLunoTable");
 extern "C" void func_00225068_24B8(LV_24B8*, const LV_24B8*) __asm__("func_00225068");
 extern "C" void luno_cLunoVM_execute_24B8(LV_24B8**, char**, int) __asm__("luno_cLunoVM_execute");
-extern char D_00479780[];
+extern char str_LunoVMRegister[];
 
 struct LVPair_24B8 { int a, b; };
 struct LV_24B8 {
@@ -3871,7 +3871,7 @@ extern LV_24B8 D_004C9098;
 extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* a, int c) {
     char* s = *state;
     int n = *(int*)(s + *(int*)(s + 4) + 8);
-    LV_24B8* arr = new (D_00479780, 0x20000000, 0) LV_24B8[n];
+    LV_24B8* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_24B8[n];
     *out = arr;
     arr[0].SetTable(a);
     LV_24B8* b = &D_004C9098;
@@ -3901,7 +3901,7 @@ struct LV_2648;
 extern "C" void luno_cLunoTable__cLunoTable_2648(LV_2648*, int) __asm__("luno_cLunoTable__cLunoTable");
 extern "C" void func_00225068_2648(LV_2648*, const LV_2648*) __asm__("func_00225068");
 extern "C" void luno_cLunoVM_execute_2648(LV_2648**, char**, int) __asm__("luno_cLunoVM_execute");
-extern char D_00479780[];
+extern char str_LunoVMRegister[];
 
 struct LVPair_2648 { int a, b; };
 struct LV_2648 {
@@ -3934,7 +3934,7 @@ struct LV_2648 {
 extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* a, LV_2648* b, int c) {
     char* s = *state;
     int n = *(int*)(s + *(int*)(s + 4) + 8);
-    LV_2648* arr = new (D_00479780, 0x20000000, 0) LV_2648[n];
+    LV_2648* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_2648[n];
     *out = arr;
     arr[0].SetTable(a);
     LV_2648* p = *out;

@@ -20,15 +20,15 @@ extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* snd, int a);
 extern signed char D_00535C11[];
-extern char D_0045D7C0[];
-extern char D_004A1410[];
-extern char D_0045D7D0[];
-extern char D_0045D7F0[];
-extern char D_0045D810[];
-extern char D_0045D820[];
-extern char D_0045D830[];
-extern char D_0045D840[];
-extern char D_0045D850[];
+extern char str_09set_char[];
+extern char str_title[];
+extern char str_kT_TITLEPlayer1SetupCharacter[];
+extern char str_kT_TITLEPlayer2SetupCharacter[];
+extern char str_Option_Continue[];
+extern char str_Option_Equip[];
+extern char str_Option_Rider[];
+extern char str_Option_Radio[];
+extern char str_Option_GBA[];
 
 struct sVEntry_182928 {
     short delta;
@@ -81,7 +81,7 @@ static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
 extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
 {
     void* engine = self->engine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D7C0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_09set_char), 0);
     self->screen = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -94,25 +94,25 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
     func_001A0570((char*)SSXApp->RealFE + 0xB0, self->player, 0);
     func_001A0508((char*)SSXApp->RealFE + 0xB0, self->player, charId, 0);
     func_0028F140(func_0028B180(), 1);
-    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1410));
+    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_title));
     if (txt != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C11[0] == 2) {
             switch (self->player) {
             case 0:
-                cUIText_setUnicodeStringByID(txt, GetHashValue32(D_0045D7D0));
+                cUIText_setUnicodeStringByID(txt, GetHashValue32(str_kT_TITLEPlayer1SetupCharacter));
                 break;
             case 1:
-                cUIText_setUnicodeStringByID(txt, GetHashValue32(D_0045D7F0));
+                cUIText_setUnicodeStringByID(txt, GetHashValue32(str_kT_TITLEPlayer2SetupCharacter));
                 break;
             }
         }
     }
-    showIdx_182928(self, D_0045D810, 0);
-    showIdx_182928(self, D_0045D820, 1);
-    showIdx_182928(self, D_0045D830, 2);
-    showIdx_182928(self, D_0045D840, 3);
-    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045D850));
+    showIdx_182928(self, str_Option_Continue, 0);
+    showIdx_182928(self, str_Option_Equip, 1);
+    showIdx_182928(self, str_Option_Rider, 2);
+    showIdx_182928(self, str_Option_Radio, 3);
+    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Option_GBA));
     if (o != 0) {
         o->show(0);
         o->enable(1);
@@ -169,7 +169,7 @@ extern "C" void* func_001887A0(void* self, void* engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_001831D0(void* self, int a1);
-extern char D_0045D698[];
+extern char str_FEOptions[];
 
 struct sVEntryK182C80 {
     short delta;
@@ -220,7 +220,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned
         break;
     }
     case 7: {
-        sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0),
+        sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0),
                                                           *(void**)((char*)self + 0x10), 1);
         st->mode = 1;
         cUIStateStack_pushSpecial(*(char**)((char*)self + 0x10) + 0x18, st, 0, 0);
@@ -247,11 +247,11 @@ extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern "C" void func_0015E050(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
 extern "C" void func_001831D0(void* self, int a1);
 extern "C" void func_00182EC0(void* self);
-extern char D_0045D860[];
+extern char str_rider_name[];
 
 extern "C" void func_00182DB8(void* self)
 {
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D860));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_rider_name));
     signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     cUIText_setAsciiString(text, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     sCam_182DB8* cam = (sCam_182DB8*)SSXApp->RealFE;

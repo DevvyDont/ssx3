@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A718[];
+extern const char str_BEEconInt[];
 extern void* D_0045AC78[16];
 extern void* D_004A1214;
 
@@ -24,7 +24,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getThis__Fv);
 void* cBEEconInterface_getThis()
 {
     if (D_004A1214 == 0) {
-        cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, D_0045A718, 0, 0);
+        cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, str_BEEconInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AC78;
         D_004A1214 = mem;
@@ -891,7 +891,7 @@ extern "C" void func_001513B8(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern int D_004A11E8;
-extern const char D_0045A7A8[];
+extern const char str_Profile_Bolts_Map[];
 extern char D_004A6750[];
 
 struct sEconDef_151A88
@@ -925,7 +925,7 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
     self->kind = k;
     self->count = n;
     if (self->lookup == 0)
-        self->lookup = (short*)operator_new_tag(D_004A11E8 * 2, D_0045A7A8, 0, 0);
+        self->lookup = (short*)operator_new_tag(D_004A11E8 * 2, str_Profile_Bolts_Map, 0, 0);
     int i;
     for (i = 0; i < D_004A11E8; i++)
         self->lookup[i] = -1;

@@ -26,7 +26,7 @@ extern void func_003FB858(int, int*, int*);
 extern int func_003FB898(int, int);
 extern char* func_00266728(int, int, int);
 extern void func_00416210(char*, int, int);
-extern char D_00497550[];
+extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 int func_003FCE10(char** out, int a, int b, int c) {
     int v[2];
     int n;
@@ -40,7 +40,7 @@ int func_003FCE10(char** out, int a, int b, int c) {
     *out = func_00266728(a, n, v[0]);
     if (*out != 0) {
         func_00416210(*out, 0, n);
-        __builtin_memcpy(*out, D_00497550, 12);
+        __builtin_memcpy(*out, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 12);
         *out += 12;
         return 0;
     }
@@ -94,10 +94,10 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FCFD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00497598[];
-extern char D_004975A8[];
-extern char D_004975C0[];
-extern char D_004975D8[];
+extern char str_reloctable[];
+extern char str_DirtyDnasRelInit[];
+extern char str_DirtyDnasRelUpdt[];
+extern char str_DirtyDnasRelExit[];
 extern int D_0045152C_i[] __asm__("D_0045152C");
 extern int D_00451530_i[] __asm__("D_00451530");
 extern int D_00451534_i[] __asm__("D_00451534");
@@ -115,7 +115,7 @@ int func_003FCFD8(int a, int b) {
     if (func_003FD558(obj, a, b) == 0) {
         return -1;
     }
-    r = func_003FD758(obj, D_00497598);
+    r = func_003FD758(obj, str_reloctable);
     if (r == 0) {
         return -2;
     }
@@ -124,17 +124,17 @@ int func_003FCFD8(int a, int b) {
     hdr[2] = (int)func_003FD810;
     func_003FD660((int)obj, (int)hdr);
     p = D_0045152C_i;
-    *p = func_003FD758(obj, D_004975A8);
+    *p = func_003FD758(obj, str_DirtyDnasRelInit);
     if (*p == 0) {
         return -3;
     }
     p = D_00451530_i;
-    *p = func_003FD758(obj, D_004975C0);
+    *p = func_003FD758(obj, str_DirtyDnasRelUpdt);
     if (*p == 0) {
         return -4;
     }
     p = D_00451534_i;
-    *p = func_003FD758(obj, D_004975D8);
+    *p = func_003FD758(obj, str_DirtyDnasRelExit);
     if (*p == 0) {
         return -5;
     }
@@ -324,9 +324,9 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FD558);
 // (prototype from their definition at line 207)
 struct sShdr* func_003FD210_D558(int* p, char* name) __asm__("func_003FD210");
 
-extern char D_004975F0[];
-extern char D_004975F8[];
-extern char D_00497600[];
+extern char str_text[];
+extern char str_symtab[];
+extern char str_strtab[];
 extern int func_003FD1D8_D558(int*) __asm__("func_003FD1D8");
 int func_003FD558(int* o, int imgi, int x) {
     int* img = (int*)imgi;
@@ -339,9 +339,9 @@ int func_003FD558(int* o, int imgi, int x) {
             o[1] = x;
             o[0] = (int)img;
             ok = 1;
-            s1 = func_003FD210_D558(o, D_004975F0);
-            s2 = func_003FD210_D558(o, D_004975F8);
-            s3 = func_003FD210_D558(o, D_00497600);
+            s1 = func_003FD210_D558(o, str_text);
+            s2 = func_003FD210_D558(o, str_symtab);
+            s3 = func_003FD210_D558(o, str_strtab);
             if (s1) {
                 o[2] = (int)img + s1->offset;
                 o[3] = s1->size;
@@ -363,17 +363,17 @@ int func_003FD558(int* o, int imgi, int x) {
 INCLUDE_ASM("seg/seg_2FDDC8", func_003FD660);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004975F0[];
-extern char D_00497608[];
-extern char D_00497618[];
-extern char D_00497620[];
-extern char D_00497630[];
-extern char D_00497638[];
+extern char str_text[];
+extern char str_rel_text[];
+extern char str_data[];
+extern char str_rel_data[];
+extern char str_rodata[];
+extern char str_rel_rodata[];
 extern void func_003FD2F8(int, char*, char*, int);
 void func_003FD660(int a, int b) {
-    func_003FD2F8(a, D_004975F0, D_00497608, b);
-    func_003FD2F8(a, D_00497618, D_00497620, b);
-    func_003FD2F8(a, D_00497630, D_00497638, b);
+    func_003FD2F8(a, str_text, str_rel_text, b);
+    func_003FD2F8(a, str_data, str_rel_data, b);
+    func_003FD2F8(a, str_rodata, str_rel_rodata, b);
 }
 #endif
 

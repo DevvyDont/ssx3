@@ -283,7 +283,7 @@ extern "C" int cBELibrary_getScoreType(int locationId, int gameEvent)
 INCLUDE_ASM("be/belibrary", func_0014ABE0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A408[];
+extern const char str_BEBoltInt[];
 extern void* D_0045AE88[16];
 extern void* D_004A11C8;
 
@@ -296,7 +296,7 @@ struct cBELibraryInterface_0014ABE0 {
 extern "C" void* func_0014ABE0(void)
 {
     if (D_004A11C8 == 0) {
-        cBELibraryInterface_0014ABE0* mem = (cBELibraryInterface_0014ABE0*)cMemMan_alloc(0x10, D_0045A408, 0, 0);
+        cBELibraryInterface_0014ABE0* mem = (cBELibraryInterface_0014ABE0*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AE88;
         D_004A11C8 = mem;
@@ -808,29 +808,29 @@ extern "C" void func_0014B560(void* self, int a1, int a2, int key, int flag)
 INCLUDE_ASM("be/belibrary", func_0014B700);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_0045A418[];
-extern char D_0045A440[];
-extern char D_0045A468[];
-extern char D_0045A498[];
-extern char D_0045A4C0[];
-extern char D_0045A4E8[];
-extern char D_0045A518[];
-extern char D_0045A540[];
-extern char D_0045A568[];
-extern char D_0045A590[];
+extern char str_data_char_mobytxp_big_moby_icons_ssh[];
+extern char str_data_char_kaoritxp_big_kaori_icons_ssh[];
+extern char str_data_char_allegtxp_big_arielle_icons_ssh[];
+extern char str_data_char_mactxp_big_mac_icons_ssh[];
+extern char str_data_char_zoetxp_big_zoe_icons_ssh[];
+extern char str_data_char_grifftxp_big_grommet_icons_ssh[];
+extern char str_data_char_elisetxp_big_elise_icons_ssh[];
+extern char str_data_char_natetxp_big_rocco_icons_ssh[];
+extern char str_data_char_psymotxp_big_psymon_icons_ssh[];
+extern char str_data_char_viggotxp_big_deiter_icons_ssh[];
 extern "C" char* func_0014B700(void* self, unsigned int x)
 {
     switch (x) {
-    case 0: return D_0045A418;
-    case 1: return D_0045A440;
-    case 2: return D_0045A468;
-    case 3: return D_0045A498;
-    case 4: return D_0045A4C0;
-    case 5: return D_0045A4E8;
-    case 6: return D_0045A518;
-    case 7: return D_0045A540;
-    case 8: return D_0045A568;
-    case 9: return D_0045A590;
+    case 0: return str_data_char_mobytxp_big_moby_icons_ssh;
+    case 1: return str_data_char_kaoritxp_big_kaori_icons_ssh;
+    case 2: return str_data_char_allegtxp_big_arielle_icons_ssh;
+    case 3: return str_data_char_mactxp_big_mac_icons_ssh;
+    case 4: return str_data_char_zoetxp_big_zoe_icons_ssh;
+    case 5: return str_data_char_grifftxp_big_grommet_icons_ssh;
+    case 6: return str_data_char_elisetxp_big_elise_icons_ssh;
+    case 7: return str_data_char_natetxp_big_rocco_icons_ssh;
+    case 8: return str_data_char_psymotxp_big_psymon_icons_ssh;
+    case 9: return str_data_char_viggotxp_big_deiter_icons_ssh;
     }
     return 0;
 }
@@ -1066,7 +1066,7 @@ extern "C" int func_003E1BB8(const char* name, void* buf, int size);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char* D_004A11CC;
 extern int D_004A11E8;
-extern const char D_0045A600[];
+extern const char str_BoltsFile[];
 
 struct sBEEnt_14BE70 {
     char pad0[0x14];
@@ -1096,7 +1096,7 @@ extern "C" void func_0014BE70(void* vself)
 {
     sBELib_14BE70* self = (sBELib_14BE70*)vself;
     int size = BXFILE_sizez(D_004A11CC);
-    char* buf = new (D_0045A600, 0, 0) char[size];
+    char* buf = new (str_BoltsFile, 0, 0) char[size];
     self->buf = buf;
     func_003E1BB8(D_004A11CC, buf, size);
     char* d = self->buf;
@@ -1139,7 +1139,7 @@ extern "C" void func_0014BE70(void* vself)
 INCLUDE_ASM("be/belibrary", func_0014C068);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern char D_0045A610[];
+extern char str_child_bolts_data[];
 
 struct sBEEnt_14C068 {
     signed char type;       // 0x0
@@ -1167,7 +1167,7 @@ extern "C" void func_0014C068(sBELib_14C068* self)
     int last = D_004A11E8;
     unsigned short* p;
 
-    self->table = new (D_0045A610, 0, 0) unsigned short[last * 90];
+    self->table = new (str_child_bolts_data, 0, 0) unsigned short[last * 90];
     p = self->table;
     for (int i = 0; i < 30; i++) {
         self->count[i] = p;

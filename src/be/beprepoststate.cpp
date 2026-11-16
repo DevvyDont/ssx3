@@ -9,7 +9,7 @@ struct sStateSingleton {
     void* vtable;
 };
 
-extern const char D_0045A8A8[];
+extern const char str_BEPreRace[];
 extern void* cBEPostRaceState_vtbl[16];
 extern void* D_004A1254;
 
@@ -28,7 +28,7 @@ INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getState__FPv);
 void* cBEPostRaceState_getState(void* self)
 {
     if (D_004A1254 == 0) {
-        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, D_0045A8A8, 0, 0);
+        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
         mem->field_0x0 = self;
         mem->vtable = cBEPostRaceState_vtbl;
         D_004A1254 = mem;
@@ -201,7 +201,7 @@ INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getState__FPv);
 void* cBEPreRaceState_getState(void* self)
 {
     if (D_004A1258 == 0) {
-        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, D_0045A8A8, 0, 0);
+        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
         mem->field_0x0 = self;
         mem->vtable = cBEPreRaceState_vtbl;
         D_004A1258 = mem;

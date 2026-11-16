@@ -6,7 +6,7 @@ INCLUDE_ASM("fe/festatetransition", cFEStateBackground_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_0045FFD8[];
+extern char str_snowanim[];
 
 /**
  * Creates the front end's background screen ("snowanim") and plays its first frame.
@@ -14,7 +14,7 @@ extern char D_0045FFD8[];
 extern "C" void cFEStateBackground_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FFD8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_snowanim), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -26,8 +26,8 @@ INCLUDE_ASM("fe/festatetransition", cFEStateTransition_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern char D_0045FFE8[];
-extern char D_0045FFF8[];
+extern char str_transition[];
+extern char str_whitefade[];
 
 /**
  * Creates the transition state's two screens, "transition" and "whitefade".
@@ -36,9 +36,9 @@ extern "C" void cFEStateTransition_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
     void* engine2;
-    *(void**)((char*)self + 0x48) = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045FFE8), 0);
+    *(void**)((char*)self + 0x48) = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_transition), 0);
     engine2 = *(void**)((char*)self + 0x10);
-    *(void**)((char*)self + 0x4C) = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(D_0045FFF8), 0);
+    *(void**)((char*)self + 0x4C) = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_whitefade), 0);
 }
 #endif
 
@@ -46,8 +46,8 @@ extern "C" void cFEStateTransition_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festatetransition", cFEStateTransition_onScreenEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A1360[];
-extern char D_004A17B8[];
+extern char str_end[];
+extern char str_start[];
 
 /**
  * Tracks a transition animation: "start" sets the state's busy flag (8) and the screen's 0x40 flag, "end"
@@ -59,8 +59,8 @@ extern char D_004A17B8[];
  */
 extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id)
 {
-    int eventHash1 = GetHashValue32(D_004A1360);
-    int eventHash2 = GetHashValue32(D_004A17B8);
+    int eventHash1 = GetHashValue32(str_end);
+    int eventHash2 = GetHashValue32(str_start);
     if (id == eventHash1) {
         *(int*)((char*)self + 0x1C) &= ~8;
         *(int*)((char*)screen + 0x54) &= ~0x40;

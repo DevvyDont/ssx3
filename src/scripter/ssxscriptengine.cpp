@@ -17,9 +17,9 @@ extern "C" void cSSXScriptEngine_SyncLoadScriptBank_7(void* self, int i, const c
     __asm__("cSSXScriptEngine_SyncLoadScriptBank");
 extern "C" void func_00283298(void* rig);
 extern const char* D_004A349C;
-extern char D_00481BD8[];
-extern char D_00481BE8[];
-extern char D_00481BF8[];
+extern char str_SetupInfoHeap[];
+extern char str_NISLists[];
+extern char str_IdleLists[];
 
 struct sLink_278358
 {
@@ -67,7 +67,7 @@ struct sSse278358
  */
 extern "C" void cSSXScriptEngine_Load(sSse278358* self)
 {
-    self->links = (sLink_278358*)operator_new_tag(0xC8, D_00481BD8, 0, 0);
+    self->links = (sLink_278358*)operator_new_tag(0xC8, str_SetupInfoHeap, 0, 0);
     for (int i = 0; i < 10; i++)
     {
         self->links[i].a = -1;
@@ -84,12 +84,12 @@ extern "C" void cSSXScriptEngine_Load(sSse278358* self)
     func_00283298(self->rigC);
     func_00283298(self->rigD);
     sRider_278358** pa = &self->objsA;
-    *pa = new (D_00481BE8, 0, 0) sRider_278358[2];
+    *pa = new (str_NISLists, 0, 0) sRider_278358[2];
     int i;
     for (i = 0; i < 2; i++)
         self->objsA[i].owner = self;
     sRider_278358** pb = &self->objsB;
-    *pb = new (D_00481BF8, 0, 0) sRider_278358[2];
+    *pb = new (str_IdleLists, 0, 0) sRider_278358[2];
     for (i = 0; i < 2; i++)
     {
         self->objsB[i].owner = self;
@@ -208,7 +208,7 @@ void func_00278718(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_004A34A0[];
+extern char str_hud_e[];
 struct sSsxScriptRider;
 struct sScrObj05B8;
 extern "C" void func_00276CC8(void* r);
@@ -293,7 +293,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
     done:
         if (func_00276B98_i(nisList) != 3)
             cSSXScriptEngine_ClearNISPlayListState((cSSXScriptEngine*)self);
-        if (cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_004A34A0)))
+        if (cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_hud_e)))
         {
             if (func_00277298(nisList))
                 func_001F36C0(SSXApp->Game->LoadIndicator, 1);
@@ -494,10 +494,10 @@ sBXStr_8B98 operator+(const char* a, const sBXStr_8B98& b) __asm__("func_003186D
 sBXStr_8B98 operator+(const sBXStr_8B98& a, const char* b) __asm__("func_00318630");
 extern "C" void* func_003DF690_8B98(const char* name, int flags) __asm__("func_003DF690");
 extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int slot, const char* name, int flags, int key, int a, int b);
-extern const char D_00481C08[];
-extern const char D_004A34B8[];
-extern const char D_00481C38[];
-extern const char D_004A34C0[];
+extern const char str_data_scripts_scdat_big_data_scripts_scfi[];
+extern const char str_dat[];
+extern const char str_data_scripts_scdat_big_data_scripts_scda[];
+extern const char str_big_c[];
 
 /**
  * Starts loading the current track's script data: its filter table and its script bank (bank 1).
@@ -509,13 +509,13 @@ extern const char D_004A34C0[];
 extern "C" void cSSXScriptEngine_AsyncLoadTrack(cSSXScriptEngine* self)
 {
     sBXStr_8B98 name((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x34);
-    sBXStr_8B98 path = D_00481C08 + name + D_004A34B8;
+    sBXStr_8B98 path = str_data_scripts_scdat_big_data_scripts_scfi + name + str_dat;
     void* handle = func_003DF690_8B98(path.p, 0);
     self->mFilterTableAsyncHandle = handle;
     if (handle != 0) {
         self->mNumAsyncs += 1;
     }
-    path = D_00481C38 + name + D_004A34C0;
+    path = str_data_scripts_scdat_big_data_scripts_scda + name + str_big_c;
     cSSXScriptEngine_AsyncLoadScriptBank((cSSXScriptEngine*)(((char*)self)), 1, path.p, 0, -1, 0, 0);
 }
 #endif
@@ -1307,8 +1307,8 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct sScriptEng0628;
 extern "C" int cSSXScriptEngine_GetNextAvailableAsyncBankID(cSSXScriptEngine* self);
 extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int slot, const char* name, int flags, int key, int a, int b);
-extern const char D_00481C68[];
-extern const char D_00481C78[];
+extern const char str_pct_spct_08d_big[];
+extern const char str_data_scripts_scdat_big_data_scripts[];
 
 /**
  * Starts an asynchronous load of the script data bank file that holds a missing data identifier.
@@ -1323,7 +1323,7 @@ extern const char D_00481C78[];
 extern "C" int cSSXScriptEngine_OnDataUnavailable(cSSXScriptEngine* self, int key)
 {
     char buf[128];
-    sprintf(buf, D_00481C68, D_00481C78, key);
+    sprintf(buf, str_pct_spct_08d_big, str_data_scripts_scdat_big_data_scripts, key);
     cSSXScriptEngine_AsyncLoadScriptBank(self, cSSXScriptEngine_GetNextAvailableAsyncBankID(self), buf, 0x100, key, 0, 0);
     return 1;
 }
@@ -1381,9 +1381,9 @@ void* func_0027C078(void* self);
 extern "C" void func_00282150(void* self, void* data, int a2);
 extern "C" void cScriptAnimBankManager_LinkBank(void* mgr, int bank, void* data);
 extern "C" void cScriptSoundBankManager_LinkBank(void* mgr, int bank, void* data, int a3);
-extern char D_004A34C8[];
-extern char D_004A34D0[];
-extern char D_004A34D8[];
+extern char str_scr[];
+extern char str_anm[];
+extern char str_snd[];
 
 /**
  * Handles data attached from a script bank, by file extension: scripts, animation banks or sound banks.
@@ -1399,16 +1399,16 @@ extern char D_004A34D8[];
  */
 extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char* ext, void* data, int dataSize, int* kind, int* bank)
 {
-    if (func_00416B18(D_004A34C8, ext, 3) == 0) {
+    if (func_00416B18(str_scr, ext, 3) == 0) {
         char* bankHeader = (char*)func_0027C078(data);
         *(int*)(bankHeader + 0x1C) = self->mCurrAttachingBankNum;
         *kind = 0;
         func_00282150(((char*)self), data, *(int*)(bankHeader + 0x18));
-    } else if (func_00416B18(D_004A34D0, ext, 3) == 0) {
+    } else if (func_00416B18(str_anm, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
         cScriptAnimBankManager_LinkBank(((char*)self) + 0xA28, self->mCurrAttachingBankNum, data);
-    } else if (func_00416B18(D_004A34D8, ext, 3) == 0) {
+    } else if (func_00416B18(str_snd, ext, 3) == 0) {
         *kind = 2;
         *bank = self->mCurrAttachingBankNum;
         cScriptSoundBankManager_LinkBank(((char*)self) + 0xA38, self->mCurrAttachingBankNum, data, dataSize);
@@ -2522,7 +2522,7 @@ unsigned int BXrand();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label as the tagged operator new[].
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_0027BDB8(void* self, int* flags);
-extern char D_00481EA0[];
+extern char str_ScriptChoice[];
 
 struct sScript_27B0C0
 {
@@ -2564,7 +2564,7 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine,
     func_0027BDB8(self, flags);
     int best = 0xFFFF;
     int n = 0;
-    sScript_27B0C0** list = new (D_00481EA0, 0x100, 0) sScript_27B0C0*[100];
+    sScript_27B0C0** list = new (str_ScriptChoice, 0x100, 0) sScript_27B0C0*[100];
     int count = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count;
     sScript_27B0C0* scripts = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].scripts;
     for (int i = 0; i < count; i++)
@@ -2828,7 +2828,7 @@ extern "C" int ASYNCFILE_release_out(void* file, int** data, int* size) __asm__(
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 void tSSXScriptBankInfo_Clear(void* slot);
 extern "C" int func_00275920(void* self, const char* name, int* data, int size);
-extern const char D_00481EB0[];
+extern const char str_asyncpct_08d[];
 
 /**
  * Attaches the data of a finished bank load, under the name "async<data identifier>".
@@ -2853,7 +2853,7 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
                 tSSXScriptBankInfo_Clear(ssxScriptBankInfo);
                 return;
             }
-            sprintf(buf, D_00481EB0, ssxScriptBankInfo->dataIdentifier);
+            sprintf(buf, str_asyncpct_08d, ssxScriptBankInfo->dataIdentifier);
             (*(int*)&ssxScriptBankInfo->asyncHandle) = 0;
             self->mCurrAttachingBankNum = i;
             (*(int*)&ssxScriptBankInfo->dataBankHandle) = func_00275920((char*)self + 0x51C, buf, loaded.data, loaded.size);
@@ -5478,7 +5478,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_004A3DD8;
 extern int D_004A3B60;
 // The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
-extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (= GetHashValue32(D_004825F8))
+extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (= GetHashValue32(str_NoScript))
 
 struct sWtEnt_08E8 {
     signed char b0;

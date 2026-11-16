@@ -8,8 +8,8 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00494DC0[];
-extern char D_00494DD8[];
+extern char str_WORLD_BLOCK_ARRAY[];
+extern char str_WORLD_MEMBLOCK[];
 
 struct sWBABlock {
     void* data;
@@ -45,14 +45,14 @@ extern "C" void cWorldBlockAllocator_init(void* selfp, int count, int blockSize)
     self->blockSize = blockSize;
     self->count = count;
     self->numFree = count;
-    self->blocks = new (D_00494DC0, 0x20000000, 0) sWBABlock[count];
+    self->blocks = new (str_WORLD_BLOCK_ARRAY, 0x20000000, 0) sWBABlock[count];
     unsigned int i;
     for (i = 0; i < self->count; i++) {
         self->blocks[i].used = 0;
         self->blocks[i].size = self->blockSize;
         self->blocks[i].f08 = 0;
         self->blocks[i].f0C = 0;
-        self->blocks[i].data = new (D_00494DD8, 0x25000000, 0) char[self->blockSize];
+        self->blocks[i].data = new (str_WORLD_MEMBLOCK, 0x25000000, 0) char[self->blockSize];
         self->blocks[i].next = (i < self->count - 1) ? &self->blocks[i + 1] : 0;
     }
     self->freeList = self->blocks;
@@ -315,7 +315,7 @@ INCLUDE_ASM("world/worldcache", cWorldMemoryMan_activateSectionMem);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* func_003A77B0(void* self, int section, int index);
-extern char D_00494DE8[];
+extern char str_Section_Allocator[];
 
 struct cWorldMemoryMan_sSection {
     char pad[0x14];
@@ -334,7 +334,7 @@ extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int in
 {
     void** mem = (void**)((char*)self + 0x3C);
     void** slot = &mem[index];
-    *slot = func_003A77B0(cMemMan_alloc(0x14, D_00494DE8, 0x20000000, 0),
+    *slot = func_003A77B0(cMemMan_alloc(0x14, str_Section_Allocator, 0x20000000, 0),
                           (int)((cWorldMemoryMan_sSection*)self + section), index);
 }
 #endif
@@ -360,7 +360,7 @@ INCLUDE_ASM("world/worldcache", cHullPage_cHullPage);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00494E00[];
+extern char str_cHullPage_Entries[];
 
 /**
  * Constructs a hull page for a BSP hull's data, with an empty entry table sized by the hull's first word
@@ -375,7 +375,7 @@ extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data)
     unsigned short n = *data;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x4) = n;
-    *(void**)((char*)self + 0xC) = operator_new_tag(n * 4, D_00494E00, 0x20000000, 0);
+    *(void**)((char*)self + 0xC) = operator_new_tag(n * 4, str_cHullPage_Entries, 0x20000000, 0);
     return self;
 }
 #endif
@@ -404,7 +404,7 @@ INCLUDE_ASM("world/worldcache", cWorldCacheTable_cWorldCacheTable);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern char D_00494E18[];
+extern char str_WorldCacheTableMem[];
 
 struct sWCTEntry {
     int* ptr;
@@ -438,7 +438,7 @@ extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void
         self->entries[i].count = n;
         total += n;
     }
-    self->pool = new (D_00494E18, 0, 0) int[total];
+    self->pool = new (str_WorldCacheTableMem, 0, 0) int[total];
     func_00416210(self->pool, 0, total * 4);
     int off = 0;
     int* pool = self->pool;
@@ -621,11 +621,11 @@ extern "C" int cStreamMan_init(void* self, const char* name, void* owner);
 extern "C" int cWorldView_init_p(void* self, void* data, void* owner) __asm__("cWorldView_init");
 struct cWorldCache_initPageMap_sCache;
 extern "C" void cWorldCache_initPageMap(cWorldCache_initPageMap_sCache* self);
-extern char D_00494E30[];
-extern char D_00494E40[];
-extern char D_00494E50[];
+extern char str_WORLD_MEMMAN[];
+extern char str_SharedTable[];
+extern char str_SectionTables[];
 extern char D_004A47C0[];
-extern char D_004A47C8[];
+extern char str_sdb[];
 
 struct sBXStr_7FC0
 {
@@ -651,20 +651,20 @@ struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
  */
 extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
 {
-    self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(0x13C, D_00494E30, 0, 0));
+    self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(0x13C, str_WORLD_MEMMAN, 0, 0));
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
     func_003186D0(&full, D_004A47C0, (cBXString_cBXString2(&base, name), &base));
-    func_00318630(&path, &full, D_004A47C8);
+    func_00318630(&path, &full, str_sdb);
     *(void**)self = FILE_load(path.p, 0x2000000);
     cBXString__cBXString(&path, 2);
     cBXString__cBXString(&full, 2);
     cBXString__cBXString(&base, 2);
     char* hdr = (char*)self->mp_DataHeader;
     *(char**)(hdr + 0x14) = hdr + 0x50;
-    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, D_00494E40, 0, 0), (char*)self->mp_DataHeader + 0x18);
-    self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag(*(int*)((char*)self->mp_DataHeader + 0x8) * 4, D_00494E50, 0, 0));
+    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, str_SharedTable, 0, 0), (char*)self->mp_DataHeader + 0x18);
+    self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag(*(int*)((char*)self->mp_DataHeader + 0x8) * 4, str_SectionTables, 0, 0));
     for (unsigned int i = 0; i < *(unsigned int*)((char*)self->mp_DataHeader + 0x8); i++)
         ((void**)self->m_pSectionCacheTable)[i] = 0;
     char* x = (char*)cChunkResolve_construct();
@@ -684,7 +684,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
 #ifdef SKIP_ASM
-extern char D_00494E60[];
+extern char str_SectionTable[];
 extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* self, void* data);
 
 /**
@@ -699,7 +699,7 @@ extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int sec
     cWorldMemoryMan_activateSectionMem(self->m_pWorldMemMan, i, section);
     // PORT: pointer held in int (index-first address arithmetic)
     void** slot = (void**)(i * 4 + (int)self->m_pSectionCacheTable);
-    *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, D_00494E60, 0, 0),
+    *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, str_SectionTable, 0, 0),
         *(char**)((char*)self->mp_DataHeader + 0x14) + i * 0x58 + 0x20);
 }
 #endif
@@ -1029,7 +1029,7 @@ extern "C" void* cWorldView_getHull(void* self, int i);
 extern "C" void cStreamMan_addStreamRequest(void* self, int i, int a, int b);
 extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
 extern char* D_004A5B64;
-extern char D_00494E88[];
+extern char str_cHullPage[];
 
 // PORT: g++ 2.95 new-expression; the ctor and the tagged allocator are bound to their symbols by asm label.
 struct sHullPage_8668 {
@@ -1125,7 +1125,7 @@ extern "C" void cWorldCache_updatePages(cWorldCache* p)
     if (self->busy != 0)
         return;
     unsigned short* data = (unsigned short*)cWorldView_getHull((char*)self + 0x10, best);
-    self->slot[best].page = new (D_00494E88, 0x20000000, 0) sHullPage_8668(data);
+    self->slot[best].page = new (str_cHullPage, 0x20000000, 0) sHullPage_8668(data);
     cStreamMan_addStreamRequest(mgr, best, data[0], *(int*)(data + 2));
     self->slot[best].state = 2;
 }
@@ -1229,7 +1229,7 @@ extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_bx(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494D40[];
-extern char D_00494E98[];
+extern char str_BxStream_AIPATH[];
 
 struct sBxRef_8AA8 {
     unsigned char refs;
@@ -1343,7 +1343,7 @@ extern "C" unsigned int cWorldCache_addBxStreamDataTest(sWorldCache_8AA8* self, 
         data = bxAlloc_8AA8(self->pools, bank, size, 0x22000000);
         break;
     case 14:
-        data = operator_new_bx(size, D_00494E98, 0, 0);
+        data = operator_new_bx(size, str_BxStream_AIPATH, 0, 0);
         break;
     default:
         data = bxAlloc_8AA8(self->pools, bank, size, 0);
@@ -1748,11 +1748,11 @@ extern "C" void func_003A9558(void** self, func_003A9558_sNode* node);
 extern "C" void func_003A95C0(void** self, void* node, int* ok);
 extern "C" void func_003AD1A8();
 extern "C" void func_003A9D60(void* self, int i);
-extern char D_004A47E8[];
-extern char D_004A47F0[];
-extern char D_004A47F8[];
-extern char D_004A4800[];
-extern char D_004A4808[];
+extern char str_ASKY[];
+extern char str_BSKY[];
+extern char str_CSKY[];
+extern char str_DSKY[];
+extern char str_ESKY[];
 
 struct sWCSection_9258 {
     char name[0x18];
@@ -1813,11 +1813,11 @@ extern "C" void cWorldView_update(cWorldView* p)
         case 0:
             break;
         case 1:
-            if (func_00416B18(self->sections[i].name, D_004A47E8, 4) == 0
-                || func_00416B18(self->sections[i].name, D_004A47F0, 4) == 0
-                || func_00416B18(self->sections[i].name, D_004A47F8, 4) == 0
-                || func_00416B18(self->sections[i].name, D_004A4800, 4) == 0
-                || func_00416B18(self->sections[i].name, D_004A4808, 4) == 0)
+            if (func_00416B18(self->sections[i].name, str_ASKY, 4) == 0
+                || func_00416B18(self->sections[i].name, str_BSKY, 4) == 0
+                || func_00416B18(self->sections[i].name, str_CSKY, 4) == 0
+                || func_00416B18(self->sections[i].name, str_DSKY, 4) == 0
+                || func_00416B18(self->sections[i].name, str_ESKY, 4) == 0)
                 cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 0);
             else
                 cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 2);

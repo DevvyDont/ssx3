@@ -14,26 +14,26 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 // getDollarString formats a money amount; the unit declares its parameter as void*.
 extern "C" const char* getDollarString_amount(int amount) __asm__("getDollarString");
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00460470[];
-extern char D_00460488[];
-extern char D_00460588[];
-extern char D_00460598[];
-extern char D_004605A8[];
-extern char D_004605B8[];
-extern char D_004605C8[];
-extern char D_004605D8[];
-extern char D_004605F0[];
-extern char D_00460600[];
-extern char D_00460610[];
-extern char D_00460620[];
-extern char D_00460630[];
-extern char D_00460640[];
-extern char D_0045DB90[];
+extern char str_cFEStateRequestLine[];
+extern char str_helptext[];
+extern char str_CurrentSong[];
+extern char str_CurrentArtist[];
+extern char str_arr_down[];
+extern char str_num_songs[];
+extern char str_song_list[];
+extern char str_kT_OVRCMNSongsInList[];
+extern char str_cost_answer[];
+extern char str_you_have[];
+extern char str_you_have_answer[];
+extern char str_free_songs[];
+extern char str_btext_select[];
+extern char str_btext_preview[];
+extern char str_Menu0000[];
 extern char D_004A1408[];
-extern char D_004A18B8[];
-extern char D_004A18C0[];
-extern char D_004A18C8[];
-extern char D_004A18D0[];
+extern char str_arr_up[];
+extern char str_singer[];
+extern char str_song_by[];
+extern char str_cost[];
 extern char* D_004A18A0;
 extern char* D_004A18A4;
 extern char* D_004411A0[];
@@ -113,68 +113,68 @@ static inline int countBits_6F98(ulong v)
 extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_6F98* w)
 {
     int hash = w->hash;
-    if (hash == GetHashValue32(D_00460588)) {
+    if (hash == GetHashValue32(str_CurrentSong)) {
         self->title = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
-    } else if (hash == GetHashValue32(D_00460598)) {
+    } else if (hash == GetHashValue32(str_CurrentArtist)) {
         self->artist = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
-    } else if (hash == GetHashValue32(D_00460488)) {
+    } else if (hash == GetHashValue32(str_helptext)) {
         self->text = w;
-    } else if (hash == GetHashValue32(D_004A18B8)) {
+    } else if (hash == GetHashValue32(str_arr_up)) {
         self->w1EC = w;
-    } else if (hash == GetHashValue32(D_004605A8)) {
+    } else if (hash == GetHashValue32(str_arr_down)) {
         self->w1F0 = w;
-    } else if (hash == GetHashValue32(D_004605B8)) {
+    } else if (hash == GetHashValue32(str_num_songs)) {
         show_6F98(w, 0);
-    } else if (hash == GetHashValue32(D_004605C8)) {
+    } else if (hash == GetHashValue32(str_song_list)) {
         char* db = (char*)SSXApp->FELocale;
         sVEs_6F98* vt = *(sVEs_6F98**)(db + 4);
-        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
+        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongsInList));
         int len = USTR_length(fmt) + 5;
-        unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
+        unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
         sprintf1(buf, fmt, countBits_6F98(self->done));
         self->w1E4 = w;
         cUIText_setUnicodeString(w, buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
-    } else if (hash == GetHashValue32(D_004A18C0)) {
+    } else if (hash == GetHashValue32(str_singer)) {
         show_6F98(w, 0);
-    } else if (hash == GetHashValue32(D_004A18C8)) {
+    } else if (hash == GetHashValue32(str_song_by)) {
         self->w1D4 = w;
         show_6F98(w, 0);
-    } else if (hash == GetHashValue32(D_004A18D0)) {
+    } else if (hash == GetHashValue32(str_cost)) {
         if (self->f16C == 0) {
             show_6F98(w, 0);
         }
         self->w1DC = w;
-    } else if (hash == GetHashValue32(D_004605F0)) {
+    } else if (hash == GetHashValue32(str_cost_answer)) {
         self->w1D8 = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
         if (self->f16C == 0) {
             show_6F98(w, 0);
         }
-    } else if (hash == GetHashValue32(D_00460600)) {
+    } else if (hash == GetHashValue32(str_you_have)) {
         if (self->f16C == 0) {
             show_6F98(w, 0);
         }
-    } else if (hash == GetHashValue32(D_00460610)) {
+    } else if (hash == GetHashValue32(str_you_have_answer)) {
         self->w1E0 = w;
         cUIText_setAsciiString((cUIText*)self->w1E0, getDollarString_amount(self->count));
         if (self->f16C == 0) {
             show_6F98(w, 0);
         }
-    } else if (hash == GetHashValue32(D_00460620)) {
+    } else if (hash == GetHashValue32(str_free_songs)) {
         if (self->f16C == 0 || countBits_6F98(self->sel) >= 6) {
             show_6F98(w, 0);
         }
-    } else if (hash == GetHashValue32(D_0045DB90)) {
+    } else if (hash == GetHashValue32(str_Menu0000)) {
         self->w170 = w;
-    } else if (hash == GetHashValue32(D_00460630)) {
+    } else if (hash == GetHashValue32(str_btext_select)) {
         self->w1F4 = w;
         show_6F98(w, 0);
-    } else if (hash == GetHashValue32(D_00460640)) {
+    } else if (hash == GetHashValue32(str_btext_preview)) {
         self->w1FC = w;
         show_6F98(w, 1);
     } else if (hash == GetHashValue32(D_004A18A0)) {
@@ -237,7 +237,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* engine, int a, int b);
 extern "C" void cUIStateStack_push(void* list, void* item);
 int func_00198AE8(void* self, int idx) __asm__("func_00198AE8__FPv");
-extern const char D_00460650[];
+extern const char str_cFEStateAudioOptions[];
 
 struct sReqLine_7500 {
     char pad_0x0[0x10];
@@ -347,7 +347,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* p, void* item, unsigned 
         if ((int)SSXApp->Game != 0) {
             func_0039F190(self->engine + 0x18, 1);
         } else {
-            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_00460650, 0, 0), self->engine, self->player, self->f16C);
+            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), self->engine, self->player, self->f16C);
             if (nextState != 0) {
                 cUIStateStack_push(self->engine + 0x18, nextState);
             }
@@ -745,9 +745,9 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void* func_0028B180();
 extern "C" void* func_002B40F0(void* self, int i);
 extern "C" void* func_002B4120(void* self, int i);
-extern char D_00460470[];
-extern char D_00460668[];
-extern char D_00460678[];
+extern char str_cFEStateRequestLine[];
+extern char str_kT_16NowPlaying[];
+extern char str_kT_16Artist[];
 
 struct sVtEntry_197E70 {
     short delta;
@@ -789,9 +789,9 @@ extern "C" void func_00197E70(void* vself)
             self->title->show(1);
             char* db = (char*)SSXApp->FELocale;
             sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
-            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460668));
+            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_16NowPlaying));
             int len = USTR_length(fmt) + strlen(name) + 1;
-            unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
+            unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
             sprintf1(buf, fmt, (int)name);
             cUIText_setUnicodeString(self->title, buf);
@@ -805,9 +805,9 @@ extern "C" void func_00197E70(void* vself)
             self->artist->show(1);
             char* db = (char*)SSXApp->FELocale;
             sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
-            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460678));
+            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_16Artist));
             int len = USTR_length(fmt) + strlen(artist) + 1;
-            unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
+            unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
             sprintf1(buf, fmt, (int)artist);
             cUIText_setUnicodeString(self->artist, buf);
@@ -833,8 +833,8 @@ void cMemMan_free(void* p);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004605D8[];
-extern char D_00460688[];
+extern char str_kT_OVRCMNSongsInList[];
+extern char str_disconnected_from_serverErrorString[];
 
 struct sVtEntry_00198118 {
     short delta;
@@ -862,8 +862,8 @@ extern "C" void cFEStateRequestLine_updatePlayListCounter(void* p)
     sMsgCenter_00198118* self = (sMsgCenter_00198118*)p;
     char* db = (char*)SSXApp->FELocale;
     sVtEntry_00198118* vt = *(sVtEntry_00198118**)(db + 4);
-    unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
-    unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, D_00460688, 0x100, 0);
+    unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongsInList));
+    unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
     int n = 0;
     int j;
     for (j = 0; j < 64; j++) {
@@ -887,12 +887,12 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 int func_00198AE8(void* self);
-extern char D_004606B0[];
-extern char D_004606C8[];
-extern char D_004606E0[];
-extern char D_004606F8[];
-extern char D_00460710[];
-extern char D_00460720[];
+extern char str_kT_HELPAudio1SongMin[];
+extern char str_kT_HELPAUDIOAddRem[];
+extern char str_kT_HELPAUDIOAvailBuy[];
+extern char str_kT_16SaveMoreCarsh[];
+extern char str_kT_FAQRADIOBA[];
+extern char str_kT_CMNHELPBuySongCTM[];
 extern signed char D_00535C11[];
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
@@ -936,22 +936,22 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* p, int idx)
         ulong bit = (ulong)1 << idx;
         int only = (self->done & ~bit) == 0;
         if (only) {
-            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606B0));
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_HELPAudio1SongMin));
         } else {
-            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606C8));
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_HELPAUDIOAddRem));
         }
     } else if (self->f16C != 0) {
         if (self->count >= func_00198AE8(self) || countSel_001981F8(self) < 6) {
-            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606E0));
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_HELPAUDIOAvailBuy));
         } else {
-            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_004606F8));
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_16SaveMoreCarsh));
         }
     } else {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C11[0] == 0) {
-            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_00460710));
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_FAQRADIOBA));
         } else {
-            cUIText_setUnicodeStringByID(self->text, GetHashValue32(D_00460720));
+            cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_CMNHELPBuySongCTM));
         }
     }
 }
@@ -968,9 +968,9 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 int func_00198AE8_UBT(void* self, int idx) __asm__("func_00198AE8__FPv");
 extern char D_004A1390[];
-extern char D_00460738[];
-extern char D_00460748[];
-extern char D_00460758[];
+extern char str_kT_BTNRemSong[];
+extern char str_kT_BTNAddSong[];
+extern char str_kT_16BuyMusicTracks[];
 
 class cUIObj_UBT {
 public:
@@ -1041,19 +1041,19 @@ extern "C" void cFEStateRequestLine_updateButtonsText(void* p, int idx)
             if (!only) {
                 if (isSet_UBT(self->done, idx)) {
                     shown = 1;
-                    cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(D_00460738));
+                    cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(str_kT_BTNRemSong));
                 } else {
                     shown = 1;
-                    cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(D_00460748));
+                    cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(str_kT_BTNAddSong));
                 }
             } else if (!isSet_UBT(self->done, idx)) {
                 shown = 1;
-                cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(D_00460748));
+                cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(str_kT_BTNAddSong));
             }
         } else if (self->f16C != 0) {
             if (self->count >= func_00198AE8_UBT(self, idx) || countSel_UBT(self) < 6) {
                 shown = 1;
-                cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(D_00460758));
+                cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(str_kT_16BuyMusicTracks));
             }
         }
         if (shown) {
@@ -1159,9 +1159,9 @@ extern "C" const char* getDollarString(void* a0);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_00460770[];
-extern char D_00460780[];
-extern char D_00460688[];
+extern char str_kT_OVRCMNSongBy[];
+extern char str_kT_OVRCMNFree[];
+extern char str_disconnected_from_serverErrorString[];
 extern char D_004A1408[];
 
 struct sVtEntry_001986D0 {
@@ -1212,10 +1212,10 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
     if (self->title != 0) {
         char* db = (char*)SSXApp->FELocale;
         sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
-        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460770));
+        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongBy));
         char* name = (char*)func_00198AB8(self, idx);
         int len = USTR_length(fmt) + strlen(name) + 1;
-        unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460688, 0x100, 0);
+        unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_disconnected_from_serverErrorString, 0x100, 0);
         // PORT: the format argument is a string pointer passed through an int parameter
         sprintf1(buf, fmt, (int)name);
         self->title->show(1);
@@ -1238,7 +1238,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
         n += (int)((mask >> j) & 1);
     }
     if (n < 6) {
-        cUIText_setUnicodeStringByID(self->info, GetHashValue32(D_00460780));
+        cUIText_setUnicodeStringByID(self->info, GetHashValue32(str_kT_OVRCMNFree));
         if (self->enabled) {
             self->icon->show(1);
         }
@@ -1298,7 +1298,7 @@ int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3);
 extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int credit);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
-extern char D_00460790[];
+extern char str_cUIStateBuyPopup[];
 
 // PORT: 64-bit `long` mask (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
 struct sMsgCenter_98988 {
@@ -1321,7 +1321,7 @@ struct sMsgCenter_98988 {
  */
 extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx)
 {
-    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_00460790, 0, 0), self->engine, self, self->rider);
+    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), self->engine, self, self->rider);
     int n = 0;
     for (int i = 0; i < 64; i++) {
         n += (int)((self->mask >> i) & 1);
@@ -1385,7 +1385,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
 extern char D_004C6310[];
-extern char D_004A12C0[];
+extern char str_pct_d_b[];
 
 struct sOptions_8AF0 {
     unsigned int pad0 : 22;
@@ -1441,7 +1441,7 @@ extern "C" const char* getDollarString(void* amount_)
         amount = -amount;
     }
     char valueStr[32];
-    sprintf(valueStr, D_004A12C0, amount);
+    sprintf(valueStr, str_pct_d_b, amount);
     char len = strlen(valueStr);
     char i;
     for (i = 0; i != len; i++) {

@@ -114,7 +114,7 @@ extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A1C40[];
+extern char str_popup[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -127,7 +127,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cScreenPopup_onCreateScreen(cScreenPopup* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A1C40), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_popup), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         self->mbShowing = 1;
@@ -206,7 +206,7 @@ int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
 extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* p);
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
-extern char D_004A1C48[];
+extern char str_Start[];
 
 /**
  * Runs the popup's opening transition: lays the popup out, then grows the blue background frame by frame.
@@ -232,7 +232,7 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         if (self->meBackgroundType == 1)
             cScreenPopup_SetTextObjectsAlpha(self, 0.0f);
-        int startFrame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(D_004A1C48));
+        int startFrame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_Start));
         if (startFrame != 0xFFFF)
             self->miStartFrame = startFrame;
         else
@@ -348,9 +348,9 @@ struct sVEntry_5F20 {
     short index;
     void (*fn)(void*, sColor_5F20*);
 };
-extern char D_004A1C50[];
-extern char D_004A1C58[];
-extern char D_004A15E0[];
+extern char str_ngca[];
+extern char str_xba[];
+extern char str_ps2x[];
 
 static inline void SetAlpha_5F20(char* o, float t)
 {
@@ -378,9 +378,9 @@ extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float fAlph
     SetAlpha_5F20((char*)self->mpPostText, fAlpha);
     SetAlpha_5F20((char*)self->mpTitleText, fAlpha);
     SetAlpha_5F20((char*)self->mpTextBoxPair, fAlpha);
-    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1C50)), fAlpha);
-    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1C58)), fAlpha);
-    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15E0)), fAlpha);
+    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ngca)), fAlpha);
+    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_xba)), fAlpha);
+    SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)), fAlpha);
     for (int i = 0; i < 5; i++) {
         SetAlpha_5F20(((char**)(((char*)self) + 0x90))[i], fAlpha);
     }
@@ -393,25 +393,25 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_FillObjectPointers);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0045DB90[];
-extern char D_00465FA8[];
-extern char D_00465FB8[];
-extern char D_00465FC8[];
-extern char D_00465FD8[];
-extern char D_00465FE8[];
-extern char D_00465FF8[];
-extern char D_00466008[];
-extern char D_00466018[];
-extern char D_00466028[];
-extern char D_00466038[];
-extern char D_00466048[];
-extern char D_00466058[];
-extern char D_00466070[];
-extern char D_004A1C60[];
-extern char D_004A1C68[];
-extern char D_004A1C70[];
-extern char D_004A1C78[];
-extern char D_00466080[];
+extern char str_Menu0000[];
+extern char str_grey_background[];
+extern char str_Big_outline[];
+extern char str_Big_shape[];
+extern char str_Small_outline[];
+extern char str_Small_shape[];
+extern char str_black_bg[];
+extern char str_popupText[];
+extern char str_popupTitle[];
+extern char str_popupPost[];
+extern char str_EnterTextBox[];
+extern char str_TextBoxPair[];
+extern char str_StaticTextBoxLabel[];
+extern char str_EnterBackground[];
+extern char str_whitefg[];
+extern char str_redbg[];
+extern char str_Shadow[];
+extern char str_buttons[];
+extern char str_Optionpct_d[];
 
 struct sV3_6260 {
     float x, y, z;
@@ -451,78 +451,78 @@ static inline sObj_6260* find_6260(void* self, char* name)
 // Looks up the popup's widgets by name and caches them (and their positions) in the screen object.
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 {
-    if (sObj_6260* uiObj = find_6260(self, D_004A1C60)) {
+    if (sObj_6260* uiObj = find_6260(self, str_whitefg)) {
         POS_6260(0x188) = uiObj->pos;
         uiObj->GetRect((char*)self + 0x1F4);
         OBJ_6260(0x48) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_004A1C68)) {
+    if (sObj_6260* uiObj = find_6260(self, str_redbg)) {
         POS_6260(0x194) = uiObj->pos;
         OBJ_6260(0x4C) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00465FA8))
+    if (sObj_6260* uiObj = find_6260(self, str_grey_background))
         OBJ_6260(0x64) = uiObj;
-    if (sObj_6260* uiObj = find_6260(self, D_00465FB8)) {
+    if (sObj_6260* uiObj = find_6260(self, str_Big_outline)) {
         POS_6260(0x230) = uiObj->pos;
         OBJ_6260(0x54) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00465FC8)) {
+    if (sObj_6260* uiObj = find_6260(self, str_Big_shape)) {
         POS_6260(0x224) = uiObj->pos;
         OBJ_6260(0x50) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00465FD8)) {
+    if (sObj_6260* uiObj = find_6260(self, str_Small_outline)) {
         POS_6260(0x248) = uiObj->pos;
         OBJ_6260(0x5C) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00465FE8)) {
+    if (sObj_6260* uiObj = find_6260(self, str_Small_shape)) {
         POS_6260(0x23C) = uiObj->pos;
         uiObj->GetRect((char*)self + 0x218);
         OBJ_6260(0x58) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_004A1C70)) {
+    if (sObj_6260* uiObj = find_6260(self, str_Shadow)) {
         POS_6260(0x254) = uiObj->pos;
         OBJ_6260(0x60) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00465FF8))
+    if (sObj_6260* uiObj = find_6260(self, str_black_bg))
         OBJ_6260(0x68) = uiObj;
-    if (sObj_6260* uiObj = find_6260(self, D_0045DB90)) {
+    if (sObj_6260* uiObj = find_6260(self, str_Menu0000)) {
         POS_6260(0x1A0) = uiObj->pos;
         OBJ_6260(0x6C) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_004A1C78)) {
+    if (sObj_6260* uiObj = find_6260(self, str_buttons)) {
         POS_6260(0x1AC) = uiObj->pos;
         OBJ_6260(0x70) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00466008)) {
+    if (sObj_6260* uiObj = find_6260(self, str_popupText)) {
         POS_6260(0x1C4) = uiObj->pos;
         OBJ_6260(0x74) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00466018)) {
+    if (sObj_6260* uiObj = find_6260(self, str_popupTitle)) {
         POS_6260(0x1B8) = uiObj->pos;
         OBJ_6260(0x7C) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00466028)) {
+    if (sObj_6260* uiObj = find_6260(self, str_popupPost)) {
         POS_6260(0x1D0) = uiObj->pos;
         OBJ_6260(0x78) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00466038)) {
+    if (sObj_6260* uiObj = find_6260(self, str_EnterTextBox)) {
         POS_6260(0x1DC) = uiObj->pos;
         OBJ_6260(0x80) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00466048)) {
+    if (sObj_6260* uiObj = find_6260(self, str_TextBoxPair)) {
         POS_6260(0x1E8) = uiObj->pos;
         OBJ_6260(0x88) = uiObj;
     }
-    if (sObj_6260* uiObj = find_6260(self, D_00466058))
+    if (sObj_6260* uiObj = find_6260(self, str_StaticTextBoxLabel))
         OBJ_6260(0x84) = uiObj;
-    if (sObj_6260* uiObj = find_6260(self, D_00466070)) {
+    if (sObj_6260* uiObj = find_6260(self, str_EnterBackground)) {
         POS_6260(0x200) = uiObj->pos;
         uiObj->GetRect((char*)self + 0x20C);
         OBJ_6260(0x8C) = uiObj;
     }
     for (int i = 0; i < 5; i++) {
         char name[32];
-        sprintf(name, D_00466080, i);
+        sprintf(name, str_Optionpct_d, i);
         sObj_6260* uiObj = find_6260(self, name);
         if (uiObj != 0)
             ((sObj_6260**)((char*)self + 0x90))[i] = uiObj;
@@ -1477,8 +1477,8 @@ void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_00466098[];
-extern char D_004660A8[];
+extern char str_setTextString[];
+extern char str_String_pct_08x[];
 extern char D_004A1408[];
 
 struct sVEntry_80E8 {
@@ -1502,7 +1502,7 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
     switch (info[0]) {
     case 1: {
         unsigned short* unicode = (unsigned short*)info[1];
-        char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, D_00466098, 0x100, 0);
+        char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, str_setTextString, 0x100, 0);
         strcpy2(buf, (unsigned short*)info[1]);
         cBXString_cBXString4(dst, buf);
         if (buf != 0) {
@@ -1518,7 +1518,7 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         sVEntry_80E8* vt = *(sVEntry_80E8**)(locale + 4);
         unsigned short* str = vt[4].fn(locale + vt[4].delta, info[1]);
         if (str) {
-            char* buf = (char*)operator_new_tag(USTR_length(str) + 1, D_00466098, 0x100, 0);
+            char* buf = (char*)operator_new_tag(USTR_length(str) + 1, str_setTextString, 0x100, 0);
             strcpy2(buf, str);
             cBXString_cBXString4(dst, buf);
             if (buf != 0) {
@@ -1526,7 +1526,7 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
             }
         } else {
             char idText[0x40];
-            sprintf(idText, D_004660A8, info[1]);
+            sprintf(idText, str_String_pct_08x, info[1]);
             cBXString_cBXString4(dst, idText);
         }
         break;
@@ -1550,7 +1550,7 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004660B8[];
+extern char str_ScreenPopuponWidgetEvent[];
 extern char D_004A1408[];
 
 /**
@@ -1571,7 +1571,7 @@ extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUITex
     }
     unsigned short* unicode = cUIText_getUnicodeString(text);
     if (unicode != 0) {
-        char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, D_004660B8, 0x100, 0);
+        char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, str_ScreenPopuponWidgetEvent, 0x100, 0);
         strcpy2(buf, unicode);
         cBXString_cBXString4(dst, buf);
         if (buf != 0) {
@@ -1592,7 +1592,7 @@ extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" float func_003921F0(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004660A8[];
+extern char str_String_pct_08x[];
 
 struct sVEntry_8320 {
     short delta;
@@ -1627,7 +1627,7 @@ extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
             func_003921F0(f, str, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         } else {
             char buf[0x40];
-            sprintf(buf, D_004660A8, info[1]);
+            sprintf(buf, str_String_pct_08x, info[1]);
             f = (char*)cUIText_getFont(text);
             cFont_textExtent(f, buf, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         }
@@ -1978,7 +1978,7 @@ INCLUDE_ASM("fe/fepopup", func_001C8EF0);
 extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
 extern "C" void func_001C9210_s(void* self, void* text, const char* str, float* size) __asm__("func_001C9210");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004660A8[];
+extern char str_String_pct_08x[];
 
 struct sVEntry_8EF0 {
     short delta;
@@ -2014,7 +2014,7 @@ extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, flo
             goto add;
         } else {
             char buf[0x40];
-            sprintf(buf, D_004660A8, item[1]);
+            sprintf(buf, str_String_pct_08x, item[1]);
             func_001C9210_s(self, text, buf, size);
         }
         break;
@@ -2036,7 +2036,7 @@ void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_001C8568(void* self, void* text, const char* str, void* out);
 extern "C" void func_001C9B68(void* self, float* size, float* item);
-extern char D_004660D8[];
+extern char str_getTextBoxSize[];
 extern char D_004A1C38;
 
 extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size)
@@ -2044,7 +2044,7 @@ extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float
     int j = 0;
     int i = 0;
     float item[4];
-    unsigned short* buf = new (D_004660D8, 0x100, 0) unsigned short[USTR_length(str) + 1];
+    unsigned short* buf = new (str_getTextBoxSize, 0x100, 0) unsigned short[USTR_length(str) + 1];
     buf[0] = 0;
     int n = USTR_length(str);
     while (i < n) {
@@ -2090,7 +2090,7 @@ void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out);
 extern "C" void func_001C9B68(void* self, float* size, float* item);
-extern char D_004660D8[];
+extern char str_getTextBoxSize[];
 
 // PORT: a3 is the float* size out pointer (the unit declares it int)
 extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3)
@@ -2099,7 +2099,7 @@ extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3
     int j = 0;
     int i = 0;
     float item[4];
-    char* buf = new (D_004660D8, 0x100, 0) char[strlen(str) + 1];
+    char* buf = new (str_getTextBoxSize, 0x100, 0) char[strlen(str) + 1];
     buf[0] = 0;
     int n = strlen(str);
     while (i < n) {
@@ -2141,7 +2141,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* text, const char* str, void* out);
 extern "C" void func_001C94B0(void* self, void* text, void* str, void* out);
-extern char D_004660A8[];
+extern char str_String_pct_08x[];
 
 struct sVEntryK93B0 {
     short delta;
@@ -2180,7 +2180,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
             func_001C94B0(self, self->mpMessageText, str, out);
         } else {
             char buf[0x40];
-            sprintf(buf, D_004660A8, msg[1]);
+            sprintf(buf, str_String_pct_08x, msg[1]);
             cScreenPopup_getMessageLineWrapSize(self, self->mpMessageText, buf, out);
         }
         break;
@@ -2206,7 +2206,7 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004660E8[];
+extern char str_UITEXTTEMP[];
 extern char D_004A1C38;
 
 extern "C" void func_001C94B0(void* self, void* text, void* strp, void* outp)
@@ -2221,7 +2221,7 @@ extern "C" void func_001C94B0(void* self, void* text, void* strp, void* outp)
     int n = USTR_length(str);
     float w = 0.0f;
     int done = 0;
-    unsigned short* buf = new (D_004660E8, 0x100, 0) unsigned short[n + 1];
+    unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
     sVec3_94B0 v;
     sVec2_94B0 size;
@@ -2267,7 +2267,7 @@ extern "C" int strlen(const char* s);
 extern "C" char* strcpy(char* dst, const char* src);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004660F8[];
+extern char str_getMessageLineWrapSize[];
 
 /**
  * Measures the width of an ASCII string up to the point where it would wrap in a text object.
@@ -2289,7 +2289,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pT
     if (pFont == 0)
         return;
     int length = strlen(pString);
-    char* pTempString = new (D_004660F8, 0x100, 0) char[length + 1];
+    char* pTempString = new (str_getMessageLineWrapSize, 0x100, 0) char[length + 1];
     strcpy(pTempString, pString);
     int j = 0;
     float Pixels = 0.0f;
@@ -2335,7 +2335,7 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* str, float* out);
 // PORT: func_001C9B28's 4th parameter is the out pointer (declared int in the unit)
 extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004660A8[];
+extern char str_String_pct_08x[];
 
 struct sVEntry_97E0 {
     short delta;
@@ -2382,7 +2382,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
             func_001C9938(self, text, str, out);
         } else {
             char buf[0x40];
-            sprintf(buf, D_004660A8, info[1]);
+            sprintf(buf, str_String_pct_08x, info[1]);
             func_001C9B28(self, text, buf, (int)out);
             return;
         }
@@ -2416,7 +2416,7 @@ extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
 extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004660E8[];
+extern char str_UITEXTTEMP[];
 extern char D_004A1C38;
 
 extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
@@ -2430,7 +2430,7 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
     int n = USTR_length(str);
     float w = 0.0f;
     int i = 0;
-    unsigned short* buf = new (D_004660E8, 0x100, 0) unsigned short[n + 1];
+    unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
     sVec3_9938 v;
     sVec2_9938 size;
@@ -2503,9 +2503,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* mem, void* engine, void* owner);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern char D_00466110[];
-extern char D_0045DCC8[];
-extern char D_0045FCD8[];
+extern char str_Confirmation_Popup[];
+extern char str_kT_CMNYes[];
+extern char str_kT_CMNNo[];
 
 struct sVec3K1C9B98 {
     float x, y, z;
@@ -2527,12 +2527,12 @@ struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
  */
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx)
 {
-    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(0x360, D_00466110, 0x100, 0), self->mpEngine, self);
+    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(0x360, str_Confirmation_Popup, 0x100, 0), self->mpEngine, self);
     self->mpConfirmPopup = (cScreenPopup*)popup;
     char* slots = popup + 0xBC;
     *(int*)(popup + 0xBC) = 2;
-    func_001C57C0(slots, 0, GetHashValue32(D_0045DCC8));
-    func_001C57C0(slots, 1, GetHashValue32(D_0045FCD8));
+    func_001C57C0(slots, 0, GetHashValue32(str_kT_CMNYes));
+    func_001C57C0(slots, 1, GetHashValue32(str_kT_CMNNo));
     sVec3K1C9B98 v(30.0f, 40.0f, 0.0f);
     *(sVec3K1C9B98*)(popup + 0x158) = v;
     *(int*)(popup + 0x14C) = self->miLayerOffset + 3;
@@ -2547,9 +2547,9 @@ extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C9CD0);
 #ifdef SKIP_ASM
-extern char D_004A1C50[];
-extern char D_004A1C58[];
-extern char D_004A15E0[];
+extern char str_ngca[];
+extern char str_xba[];
+extern char str_ps2x[];
 
 struct sUIObj_C9CD0 {
     char pad_0x0[0x14];
@@ -2581,9 +2581,9 @@ extern "C" void func_001C9CD0(void* self, int v)
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x80));
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x84));
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x8C));
-    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A1C50)));
-    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A1C58)));
-    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A15E0)));
+    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(str_ngca)));
+    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(str_xba)));
+    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(str_ps2x)));
     for (int i = 0; i < 5; i++) {
         ADD_LAYER(((sUIObj_C9CD0**)(s + 0x90))[i]);
     }
@@ -2713,7 +2713,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void cKeyboardPopup_setMaxCharacters(cKeyboardPopup* popup, int a1);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* item);
-extern char D_0045D8D8[];
+extern char str_cKeyboardPopup[];
 
 struct sPopupVE_1CA298 {
     short delta;
@@ -2774,7 +2774,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             if (id != (int)self->mpTextBoxPair) {
                 break;
             }
-            void* mem = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
+            void* mem = cMemMan_alloc(0x444, str_cKeyboardPopup, 0x100, 0);
             self->mpKeyboard = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup((cKeyboardPopup*)mem, self->mpEngine, ((char*)self), 0, 0xF);
             cKeyboardPopup_setMaxCharacters(self->mpKeyboard, self->miMaxChars);
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, self->mpKeyboard);
@@ -3020,7 +3020,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004661A0[];
+extern char str_checkAndFixTextEntry[];
 extern char D_004A1BD0[];
 
 static inline void measure_A6A0(cUIText* text, const char* s, float* out)
@@ -3053,7 +3053,7 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
     float sy = *(float*)(font + 0x34) * scale.y;
     *(float*)(font + 0x38) = sx;
     *(float*)(font + 0x3C) = sy;
-    char* buf = new (D_004661A0, 0x100, 0) char[self->miMaxChars + 4];
+    char* buf = new (str_checkAndFixTextEntry, 0x100, 0) char[self->miMaxChars + 4];
     int len = strlen(str) - 1;
     strcpy(buf, str);
     const char* dotstr = D_004A1BD0;
@@ -3099,8 +3099,8 @@ extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self)
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuySongByCredit);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004661B8[];
-extern char D_004661C8[];
+extern char str_kT_OVRSong[];
+extern char str_kT_OVRCMNBuySongCredit[];
 
 /**
  * Fills a buy popup's info for getting a song with a credit.
@@ -3114,12 +3114,12 @@ extern char D_004661C8[];
 extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song, int credit)
 {
     int three = 3;
-    int hash = GetHashValue32(D_004661B8);
+    int hash = GetHashValue32(str_kT_OVRSong);
     *(int*)((char*)self + 0x10) = song;
     self->mItemType.eType = three;
     self->mItemName.eType = 2;
     *(int*)((char*)self + 0x18) = hash;
-    hash = GetHashValue32(D_004661C8);
+    hash = GetHashValue32(str_kT_OVRCMNBuySongCredit);
     self->mCreditsLeft = credit;
     self->mQuestion.eType = three;
     *(int*)((char*)self + 0x20) = hash;
@@ -3130,8 +3130,8 @@ extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song,
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuySong);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004661B8[];
-extern char D_004661E0[];
+extern char str_kT_OVRSong[];
+extern char str_kT_16BuyMusicTrack[];
 
 /**
  * Fills a buy popup's info for buying a song with cash.
@@ -3147,12 +3147,12 @@ extern char D_004661E0[];
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int songName, int cost, int money)
 {
     int three = 3;
-    int hash = GetHashValue32(D_004661B8);
+    int hash = GetHashValue32(str_kT_OVRSong);
     self[4] = songName;
     self[5] = three;
     self[3] = 2;
     self[6] = hash;
-    hash = GetHashValue32(D_004661E0);
+    hash = GetHashValue32(str_kT_16BuyMusicTrack);
     self[1] = money;
     self[7] = three;
     self[0] = cost;
@@ -3166,47 +3166,47 @@ INCLUDE_ASM("fe/fepopup", func_001CAA18);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
-extern char D_004661F8[];
-extern char D_00466210[];
-extern char D_00466228[];
-extern char D_00466240[];
-extern char D_00466258[];
-extern char D_00466270[];
-extern char D_00466288[];
+extern char str_kT_OVRCMNBuyItem[];
+extern char str_kT_OVRCMNPosterColon[];
+extern char str_kT_OVRCMNCardColon[];
+extern char str_kT_OVRCMNArtColon[];
+extern char str_kT_OVRCMNVideoColon[];
+extern char str_kT_OVRCMNToyColon[];
+extern char str_kT_OVRCMNCheatCharColon[];
 
 // Fills in a popup description: title, OK button and the message text for the given kind.
 extern "C" void func_001CAA18(int* desc, int kind, int a2, int a3, int a4)
 {
     desc[4] = a2;
     desc[3] = 2;
-    desc[8] = GetHashValue32(D_004661F8);
+    desc[8] = GetHashValue32(str_kT_OVRCMNBuyItem);
     desc[7] = 3;
     desc[2] = -1;
     desc[0] = a3;
     desc[1] = a4;
     switch (kind) {
     case 3:
-        desc[6] = GetHashValue32(D_00466210);
+        desc[6] = GetHashValue32(str_kT_OVRCMNPosterColon);
         desc[5] = 3;
         break;
     case 4:
-        desc[6] = GetHashValue32(D_00466228);
+        desc[6] = GetHashValue32(str_kT_OVRCMNCardColon);
         desc[5] = 3;
         break;
     case 5:
-        desc[6] = GetHashValue32(D_00466240);
+        desc[6] = GetHashValue32(str_kT_OVRCMNArtColon);
         desc[5] = 3;
         break;
     case 6:
-        desc[6] = GetHashValue32(D_00466258);
+        desc[6] = GetHashValue32(str_kT_OVRCMNVideoColon);
         desc[5] = 3;
         break;
     case 7:
-        desc[6] = GetHashValue32(D_00466270);
+        desc[6] = GetHashValue32(str_kT_OVRCMNToyColon);
         desc[5] = 3;
         break;
     case 8:
-        desc[6] = GetHashValue32(D_00466288);
+        desc[6] = GetHashValue32(str_kT_OVRCMNCheatCharColon);
         desc[5] = 3;
         break;
     }
@@ -3217,8 +3217,8 @@ extern "C" void func_001CAA18(int* desc, int kind, int a2, int a3, int a4)
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuyBolt);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004662B8[];
-extern char D_004661F8[];
+extern char str_kT_CMNItemColon[];
+extern char str_kT_OVRCMNBuyItem[];
 
 /**
  * Fills a buy popup's info for buying an equipment item.
@@ -3233,12 +3233,12 @@ extern char D_004661F8[];
 extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int money)
 {
     int three = 3;
-    int hash = GetHashValue32(D_004662B8);
+    int hash = GetHashValue32(str_kT_CMNItemColon);
     self[4] = boltName;
     self[5] = three;
     self[3] = 2;
     self[6] = hash;
-    hash = GetHashValue32(D_004661F8);
+    hash = GetHashValue32(str_kT_OVRCMNBuyItem);
     self[1] = money;
     self[7] = three;
     self[0] = cost;
@@ -3287,7 +3287,7 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void*
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004662C8[];
+extern char str_139buy_popup[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -3297,7 +3297,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cUIStateBuyPopup_onCreateScreen(cUIStateBuyPopup* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004662C8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_139buy_popup), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -3328,15 +3328,15 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
 extern "C" char* getDollarString(void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004662D8[];
-extern char D_004662E8[];
-extern char D_004662F8[];
-extern char D_004605F0[];
-extern char D_00460610[];
-extern char D_00466308[];
-extern char D_00466318[];
-extern char D_00466328[];
-extern char D_004A12C0[];
+extern char str_item_type[];
+extern char str_item_name[];
+extern char str_question[];
+extern char str_cost_answer[];
+extern char str_you_have_answer[];
+extern char str_credits_remain[];
+extern char str_group_credit[];
+extern char str_group_cash[];
+extern char str_pct_d_b[];
 
 /**
  * Fills the buy popup's widgets from its cBuyPopupInfo as they are created.
@@ -3351,7 +3351,7 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
 {
     cUIText* text = (cUIText*)widget;
     int id = *(int*)((char*)widget + 0x38);
-    if (id == GetHashValue32(D_004662D8)) {
+    if (id == GetHashValue32(str_item_type)) {
         int type = *(int*)((char*)self + 0x5C);
         if (type == 2)
             cUIText_setAsciiString(text, *(const char**)((char*)self + 0x60));
@@ -3359,7 +3359,7 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
             cUIText_setUnicodeString(text, *(void**)((char*)self + 0x60));
         else if (type == 3)
             cUIText_setUnicodeStringByID(text, *(int*)((char*)self + 0x60));
-    } else if (id == GetHashValue32(D_004662E8)) {
+    } else if (id == GetHashValue32(str_item_name)) {
         int type = *(int*)((char*)self + 0x54);
         if (type == 2)
             cUIText_setAsciiString(text, *(const char**)((char*)self + 0x58));
@@ -3367,7 +3367,7 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
             cUIText_setUnicodeString(text, *(void**)((char*)self + 0x58));
         else if (type == 3)
             cUIText_setUnicodeStringByID(text, *(int*)((char*)self + 0x58));
-    } else if (id == GetHashValue32(D_004662F8)) {
+    } else if (id == GetHashValue32(str_question)) {
         int type = *(int*)((char*)self + 0x64);
         if (type == 2)
             cUIText_setAsciiString(text, *(const char**)((char*)self + 0x68));
@@ -3375,23 +3375,23 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
             cUIText_setUnicodeString(text, *(void**)((char*)self + 0x68));
         else if (type == 3)
             cUIText_setUnicodeStringByID(text, *(int*)((char*)self + 0x68));
-    } else if (id == GetHashValue32(D_004605F0)) {
+    } else if (id == GetHashValue32(str_cost_answer)) {
         if (*(int*)((char*)self + 0x50) <= 0)
             cUIText_setAsciiString(text, getDollarString(*(void**)((char*)self + 0x48)));
-    } else if (id == GetHashValue32(D_00460610)) {
+    } else if (id == GetHashValue32(str_you_have_answer)) {
         if (*(int*)((char*)self + 0x50) <= 0)
             cUIText_setAsciiString(text, getDollarString(*(void**)((char*)self + 0x4C)));
-    } else if (id == GetHashValue32(D_00466308)) {
+    } else if (id == GetHashValue32(str_credits_remain)) {
         int n = *(int*)((char*)self + 0x50);
         if (n > 0) {
             char buf[16];
-            sprintf(buf, D_004A12C0, n);
+            sprintf(buf, str_pct_d_b, n);
             cUIText_setAsciiString(text, buf);
         }
-    } else if (id == GetHashValue32(D_00466318)) {
+    } else if (id == GetHashValue32(str_group_credit)) {
         if (*(int*)((char*)self + 0x50) <= 0)
             ((cUIObj_AC98*)widget)->setVisible(0);
-    } else if (id == GetHashValue32(D_00466328)) {
+    } else if (id == GetHashValue32(str_group_cash)) {
         if (*(int*)((char*)self + 0x50) > 0)
             ((cUIObj_AC98*)widget)->setVisible(0);
     }
@@ -3427,7 +3427,7 @@ extern "C" int cUIStateBuyPopup_onWidgetMenu(cUIStateBuyPopup* self, int pMenu, 
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A14E8[];
+extern char str_yes[];
 
 /**
  * Records the buy popup's answer: on event 5 mAccept (+0x6C) becomes 1 for the "yes" widget, 0 otherwise.
@@ -3440,7 +3440,7 @@ extern "C" void cUIStateBuyPopup_onWidgetEvent(cUIStateBuyPopup* self, void* ite
     if (item != 0) {
         if (event == 5) {
             int widgetHash = *(int*)((char*)item + 0x38);
-            if (widgetHash == GetHashValue32(D_004A14E8)) {
+            if (widgetHash == GetHashValue32(str_yes)) {
                 self->mbAccept = 1;
             } else {
                 self->mbAccept = 0;
@@ -3454,8 +3454,8 @@ extern "C" void cUIStateBuyPopup_onWidgetEvent(cUIStateBuyPopup* self, void* ite
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_initBuyTrick);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00466338[];
-extern char D_00466350[];
+extern char str_kT_OVRCMNUbertrick[];
+extern char str_kT_OVRCMNBuyThisUber[];
 
 /**
  * Fills the buy popup's info for buying an uber trick.
@@ -3474,10 +3474,10 @@ extern "C" void cUIStateBuyPopup_initBuyTrick(cUIStateBuyPopup* self, int trick,
     self->mInfo.mMoney = money;
     *(int*)((char*)self + 0x58) = trick;
     self->mInfo.mItemName.eType = 2;
-    int hash = GetHashValue32(D_00466338);
+    int hash = GetHashValue32(str_kT_OVRCMNUbertrick);
     self->mInfo.mItemType.eType = three;
     *(int*)((char*)self + 0x60) = hash;
-    hash = GetHashValue32(D_00466350);
+    hash = GetHashValue32(str_kT_OVRCMNBuyThisUber);
     self->mInfo.mQuestion.eType = three;
     *(int*)((char*)self + 0x68) = hash;
 }
@@ -3487,7 +3487,7 @@ extern "C" void cUIStateBuyPopup_initBuyTrick(cUIStateBuyPopup* self, int trick,
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_initBuyAttributes);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00466368[];
+extern char str_kT_OVRCMNBuyAttributesColon[];
 extern char D_004A1408[];
 
 /**
@@ -3508,7 +3508,7 @@ extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int p
     self->mInfo.mItemName.eType = two;
     self->mInfo.mCost = cost;
     self->mInfo.mMoney = money;
-    int hash = GetHashValue32(D_00466368);
+    int hash = GetHashValue32(str_kT_OVRCMNBuyAttributesColon);
     self->mInfo.mQuestion.eType = two;
     *(char**)((char*)self + 0x68) = defaultStr;
     self->mInfo.mItemType.eType = 3;
@@ -3617,7 +3617,7 @@ extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00466388[];
+extern char str_Fullkeyboard[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -3629,7 +3629,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cKeyboardPopup_onCreateScreen(cKeyboardPopup* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00466388), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Fullkeyboard), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -3699,10 +3699,10 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern int D_004A1A70;
-extern char D_00466398[];
-extern char D_004663A8[];
-extern char D_004663B8[];
-extern char D_004663C8[];
+extern char str_HelpGroup[];
+extern char str_back_com[];
+extern char str_back_exp[];
+extern char str_back_reg[];
 
 struct sVEntryK1CB2C8 {
     short delta;
@@ -3730,7 +3730,7 @@ static inline int IsK1CB2C8(int id, char* s)
  */
 extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget)
 {
-    if (IsK1CB2C8(*(int*)((char*)widget + 0x38), D_00466398)) {
+    if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_HelpGroup)) {
         sVEntryK1CB2C8* vt = *(sVEntryK1CB2C8**)((char*)widget + 8);
         vt[9].fn((char*)widget + vt[9].delta, 0);
         if (isOnK1CB2C8()) {
@@ -3741,11 +3741,11 @@ extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget
             sVEntryK1CB2C8* vt3 = *(sVEntryK1CB2C8**)((char*)widget + 8);
             vt3[9].fn((char*)widget + vt3[9].delta, 0);
         }
-    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), D_004663A8)) {
+    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_com)) {
         self->mpBackCompact = (cUIVector*)widget;
-    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), D_004663B8)) {
+    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_exp)) {
         self->mpBackExpand = (cUIVector*)widget;
-    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), D_004663C8)) {
+    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_reg)) {
         self->mpBackRegular = (cUIVector*)widget;
     }
 }
@@ -4864,7 +4864,7 @@ struct sPwd_CCE98;
 extern "C" void cKeyboardPopup_setPasswordText(sPwd_CCE98* self, char* str);
 extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
-extern char D_00466530[];
+extern char str_EnterValue[];
 
 /**
  * Refreshes the keyboard's edit field: the visible part of the text, stars for passwords, and the cursor.
@@ -4874,7 +4874,7 @@ extern char D_00466530[];
 extern "C" void cKeyboardPopup_updateEdit(cKeyboardPopup* self, int bDropFromRight)
 {
     cKeyboardPopup_updateViewable(self, bDropFromRight);
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (text != 0) {
         if (self->mbPassword != 0) {
             cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, (char*)self + 0xB4);
@@ -4893,9 +4893,9 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateViewable);
 // cKeyboardPopup::updateViewable(bool bDropFromRight) (On Tour signature and locals).
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj);
-extern char D_00466530[];  // "EnterValue"
-extern char D_00466540[];  // "ExtendCursorLeft"
-extern char D_00466558[];  // "ExtendCursorRight"
+extern char str_EnterValue[];  // "EnterValue"
+extern char str_ExtendCursorLeft[];  // "ExtendCursorLeft"
+extern char str_ExtendCursorRight[];  // "ExtendCursorRight"
 
 struct tRect_CC8D8 { float x, y, w, h; };
 
@@ -4949,7 +4949,7 @@ extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int bDropFro
     cUIThing_CC8D8* pCursor;
     if (strlen((self)->mszEditString) != 0) {
         float fAllowableLength;
-        void* pText = cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(D_00466530));
+        void* pText = cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(str_EnterValue));
         tRect_CC8D8 rectString;
         int iCutLength = (self)->miViewableEndIndex - (self)->miViewableStartIndex;
         strncpy((self)->mszViewableString, (self)->mszEditString + (self)->miViewableStartIndex, iCutLength);
@@ -4989,9 +4989,9 @@ extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int bDropFro
     } else {
         (self)->mszViewableString[0] = 0;
     }
-    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(D_00466540));
+    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(str_ExtendCursorLeft));
     pCursor->setVisible((self)->miViewableStartIndex != 0);
-    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(D_00466558));
+    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(str_ExtendCursorRight));
     if (strlen((self)->mszEditString) != 0) {
         sVEntry_CC8D8* vt = *(sVEntry_CC8D8**)((char*)pCursor + 8);
         char* thisp = (char*)pCursor + vt[9].delta;
@@ -5020,7 +5020,7 @@ struct sVEntry_CC30 {
 };
 extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj);
 extern "C" char* strncpy(char* dst, const char* src, int n);
-extern char D_00466570[];
+extern char str_CharacterCursor[];
 
 /**
  * Places and sizes the keyboard's "CharacterCursor" at the cursor position in the edit field.
@@ -5033,8 +5033,8 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
 {
     sVec3_CC30 pos;
 
-    void* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
-    char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
+    void* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
+    char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (uiObj != 0) {
         sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
         vt[20].fn(uiObj + vt[20].delta, ((char*)self) + 0x3F4);
@@ -5058,7 +5058,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
         size.Measure(font, ch, ch[0] == ' ');
         pos.x = size.w;
     }
-    uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466570));
+    uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
     sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
     vt[21].fn(uiObj + vt[21].delta, &pos);
     char buf[0x40];
@@ -5111,7 +5111,7 @@ extern "C" void cKeyboardPopup_setPasswordText(sPwd_CCE98* self, char* str)
 INCLUDE_ASM("fe/fepopup", func_001CCF00);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00466580[];
+extern char str_StaticValue[];
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -5123,7 +5123,7 @@ extern "C" void func_001CCF00(cKeyboardPopup* self, const char* str)
         cBXString_cBXString4((char*)self + 0x424, str);
         return;
     }
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466580));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_StaticValue));
     if (text != 0) {
         cUIText_setAsciiString(text, str);
     }
@@ -5142,8 +5142,8 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00466580[];
-extern char D_00466590[];
+extern char str_StaticValue[];
+extern char str_cKeyboardPopup_setStatic[];
 
 /**
  * Sets the keyboard's static label ("StaticValue") from a unicode string.
@@ -5161,11 +5161,11 @@ extern "C" void cKeyboardPopup_setStatic(cKeyboardPopup* self, unsigned short* s
             cMemMan_free(oldStatic);
             self->mpustrStatic = 0;
         }
-        unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00466590, 0x100, 0);
+        unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_cKeyboardPopup_setStatic, 0x100, 0);
         self->mpustrStatic = copy;
         USTR_copy(copy, str);
     } else {
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466580));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_StaticValue));
         if (text != 0) {
             cUIText_setUnicodeString(text, str);
         }
@@ -5180,7 +5180,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_00466580[];
+extern char str_StaticValue[];
 
 /**
  * Sets the keyboard's static label ("StaticValue") from a localised string id.
@@ -5194,7 +5194,7 @@ extern "C" void cKeyboardPopup_setStatic1(cKeyboardPopup* self, int id)
     if (self->mpScreen == 0) {
         self->muiStatic = (unsigned int)id;
     } else {
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466580));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_StaticValue));
         if (text != 0) {
             cUIText_setUnicodeStringByID(text, id);
         }
@@ -5253,21 +5253,21 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_getObjName);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sName8_1CD0E8 { char s[8]; };
 struct sName10_1CD0E8 { char s[10]; };
-extern char D_004A1368[];
+extern char str_cursor[];
 extern sName10_1CD0E8 D_0045D550_1CD0E8 __asm__("D_0045D550");
-extern char D_004A12A8[];
-extern char D_004A1C80[];
-extern char D_004A1C88[];
-extern char D_004A1C90[];
-extern char D_004A1350[];
-extern char D_0045D560[];
-extern char D_004A1C98[];
-extern char D_004A1CA0[];
-extern char D_004A1CA8[];
-extern char D_004A1CB0[];
-extern char D_004A1CB8[];
-extern char D_004A1CC0[];
-extern char D_004A1CC8[];
+extern char str_back[];
+extern char str_caps[];
+extern char str_Lshift[];
+extern char str_clear[];
+extern char str_arrLeft[];
+extern char str_arrRight[];
+extern char str_tab[];
+extern char str_enter[];
+extern char str_arrUp[];
+extern char str_arrDown[];
+extern char str_space[];
+extern char str_ESC[];
+extern char str_Qpct_d_b[];
 
 /**
  * Builds the UI object name of a keyboard key or of its cursor highlight.
@@ -5286,26 +5286,26 @@ extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* ou
     char num[16];
     char ch[2];
     if (shifted != 0) {
-        *(sName8_1CD0E8*)out = *(sName8_1CD0E8*)D_004A1368;
+        *(sName8_1CD0E8*)out = *(sName8_1CD0E8*)str_cursor;
     } else {
         *(sName10_1CD0E8*)out = D_0045D550_1CD0E8;
     }
     switch (key) {
-    case 27: func_004162D0(out, D_004A12A8); break;
-    case 42: func_004162D0(out, D_004A1C80); break;
-    case 56: func_004162D0(out, D_004A1C88); break;
-    case 70: func_004162D0(out, D_004A1C90); break;
-    case 76: func_004162D0(out, D_004A1350); break;
-    case 83: func_004162D0(out, D_0045D560); break;
-    case 28: func_004162D0(out, D_004A1C98); break;
-    case 55: func_004162D0(out, D_004A1CA0); break;
-    case 69: func_004162D0(out, D_004A1CA8); break;
-    case 79: func_004162D0(out, D_004A1CB0); break;
-    case 75: func_004162D0(out, D_004A1CB8); break;
-    case 0: func_004162D0(out, D_004A1CC0); break;
+    case 27: func_004162D0(out, str_back); break;
+    case 42: func_004162D0(out, str_caps); break;
+    case 56: func_004162D0(out, str_Lshift); break;
+    case 70: func_004162D0(out, str_clear); break;
+    case 76: func_004162D0(out, str_arrLeft); break;
+    case 83: func_004162D0(out, str_arrRight); break;
+    case 28: func_004162D0(out, str_tab); break;
+    case 55: func_004162D0(out, str_enter); break;
+    case 69: func_004162D0(out, str_arrUp); break;
+    case 79: func_004162D0(out, str_arrDown); break;
+    case 75: func_004162D0(out, str_space); break;
+    case 0: func_004162D0(out, str_ESC); break;
     case 4: case 5: case 6: case 7: case 8:
     case 9: case 10: case 11: case 12: case 13:
-        sprintf(num, D_004A1CC8, key - 3);
+        sprintf(num, str_Qpct_d_b, key - 3);
         func_004162D0(out, num);
         break;
     default:
@@ -5363,14 +5363,14 @@ extern "C" void cBXString_Reset(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 void cMemMan_free(void* ptr);
 extern void* D_004A33F0;
-extern char D_004A1CD0[];
-extern char D_004A1CD8[];
-extern char D_00466700[];
-extern char D_00466570[];
-extern char D_00466530[];
-extern char D_00466710[];
-extern char D_00466540[];
-extern char D_00466558[];
+extern char str_regular[];
+extern char str_compact[];
+extern char str_expanded[];
+extern char str_CharacterCursor[];
+extern char str_EnterValue[];
+extern char str_Name_bar[];
+extern char str_ExtendCursorLeft[];
+extern char str_ExtendCursorRight[];
 extern char D_004A1408[];
 
 struct sVec3_D348 { float x, y, z; };
@@ -5429,16 +5429,16 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         switch (self->meType) {
         case 0:
             showRegular = 1;
-            sprintf(buf, D_004A1CD0);
+            sprintf(buf, str_regular);
             break;
         case 2:
             showExpand = 1;
-            sprintf(buf, D_00466700);
+            sprintf(buf, str_expanded);
             break;
         case 1:
         default:
             showCompact = 1;
-            sprintf(buf, D_004A1CD8);
+            sprintf(buf, str_compact);
             break;
         }
         char* oa = (char*)self->mpBackCompact;
@@ -5457,31 +5457,31 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         if (f != 0xFFFF) {
             cUIScreen_playFrame(self->mpScreen, f, 1);
         }
-        char* o1 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466570));
+        char* o1 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
         if (o1 != 0) {
             sVEp_D348* vt = *(sVEp_D348**)(o1 + 8);
             vt[20].fn(o1 + vt[20].delta, ((char*)self) + 0x400);
             *(sVec3_D348*)&self->mvPosCursor[0] = *(sVec3_D348*)(o1 + 0x44);
         }
-        char* o2 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
+        char* o2 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
         if (o2 != 0) {
             sVEp_D348* vt = *(sVEp_D348**)(o2 + 8);
             vt[20].fn(o2 + vt[20].delta, ((char*)self) + 0x3F4);
             *(sVec3_D348*)&self->mvPosEnter[0] = *(sVec3_D348*)(o2 + 0x44);
             self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1];
         }
-        char* o3 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466710));
+        char* o3 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Name_bar));
         if (o3 != 0) {
             sVec3_D348 p = *(sVec3_D348*)(o3 + 0x44);
             self->mvPosEnter[0] += p.x;
             self->mvPosEnter[1] += p.y;
             self->mvPosEnter[2] += p.z;
         }
-        char* o4 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466540));
+        char* o4 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorLeft));
         if (o4 != 0) {
             SetVis_D348(o4, 0);
         }
-        char* o5 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466558));
+        char* o5 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorRight));
         if (o5 != 0) {
             SetVis_D348(o5, 0);
         }
@@ -5623,15 +5623,15 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_SetNameForKey);
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int key, int a2);
 extern char D_004C67B8[];
 extern char D_004C67C8[];
-extern char D_004A1CC8[];
-extern char D_00466720[];
-extern char D_00466740[];
-extern char D_00466760[];
-extern char D_00466778[];
-extern char D_00466790[];
-extern char D_004667A8[];
-extern char D_004667C0[];
-extern char D_004667D8[];
+extern char str_Qpct_d_b[];
+extern char str_kT_POPUPKeyboardBackspace[];
+extern char str_kT_POPUPKeyboardCapsLock[];
+extern char str_kT_POPUPKeyboardShift[];
+extern char str_kT_POPUPKeyboardClear[];
+extern char str_kT_POPUPKeyboardTab[];
+extern char str_kT_POPUPKeyboardEnter[];
+extern char str_kT_POPUPKeyboardSpace[];
+extern char str_kT_POPUPKeyboardESC[];
 
 struct sTextVE_1CD9B8 {
     short delta;
@@ -5676,27 +5676,27 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* tex
     }
     switch (key) {
     case 27:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466720));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardBackspace));
         break;
     case 42:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466740));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardCapsLock));
         SetColor_1CD9B8(text, D_004C67C8);
         break;
     case 56:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466760));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardShift));
         SetColor_1CD9B8(text, D_004C67C8);
         break;
     case 70:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466778));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardClear));
         break;
     case 28:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466790));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardTab));
         break;
     case 55:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667A8));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardEnter));
         break;
     case 75:
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667C0));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardSpace));
         break;
     case 0:
         if (vself->meType == 1) {
@@ -5704,7 +5704,7 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* tex
         } else {
             SetVisible_1CD9B8(text, 1);
         }
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_004667D8));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardESC));
         break;
     case 4: case 5: case 6: case 7: case 8:
     case 9: case 10: case 11: case 12: case 13:
@@ -5713,7 +5713,7 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* tex
         } else {
             SetVisible_1CD9B8(text, 1);
         }
-        sprintf(buf, D_004A1CC8, key - 3);
+        sprintf(buf, str_Qpct_d_b, key - 3);
         cUIText_setAsciiString(text, buf);
         break;
     case 83:
@@ -5746,14 +5746,14 @@ void func_001DA530(void* self, int i, int value);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern int D_004A1A70;
-extern char D_00461A70[];
-extern char D_00466940[];
-extern char D_00466950[];
-extern char D_00466968[];
-extern char D_00466988[];
-extern char D_004669A0[];
-extern char D_004669B8[];
-extern char D_004669D8[];
+extern char str_cFEStateNetHelpPopup[];
+extern char str_kT_HELPKeyboard[];
+extern char str_kT_HELPKeyboardMessage[];
+extern char str_kT_HELPKeyboardNavigateKeyboard[];
+extern char str_kT_HELPKeyboardCapsLock[];
+extern char str_kT_HELPKeyboardShift[];
+extern char str_kT_HELPKeyboardSelectCharacter[];
+extern char str_kT_HELPKeyboardCancel[];
 
 struct sVEntryK1CDB98 {
     short delta;
@@ -5843,16 +5843,16 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
             if (isOnK1CDB98()) {
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
-                    void* popup = func_001D9D48(cMemMan_alloc(0x140, D_00461A70, 0x100, 0), self->mpEngine, self);
+                    void* popup = func_001D9D48(cMemMan_alloc(0x140, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
                     func_001DA528(popup, 6);
-                    *(int*)((char*)popup + 0x54) = GetHashValue32(D_00466940);
-                    func_001DA530(popup, 0, GetHashValue32(D_00466950));
-                    func_001DA510(popup, 0, GetHashValue32(D_00466968), 4);
-                    func_001DA510(popup, 1, GetHashValue32(D_00466968), 3);
-                    func_001DA510(popup, 2, GetHashValue32(D_00466988), 5);
-                    func_001DA510(popup, 3, GetHashValue32(D_004669A0), 6);
-                    func_001DA510(popup, 4, GetHashValue32(D_004669B8), 0);
-                    func_001DA510(popup, 5, GetHashValue32(D_004669D8), 1);
+                    *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELPKeyboard);
+                    func_001DA530(popup, 0, GetHashValue32(str_kT_HELPKeyboardMessage));
+                    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPKeyboardNavigateKeyboard), 4);
+                    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPKeyboardNavigateKeyboard), 3);
+                    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPKeyboardCapsLock), 5);
+                    func_001DA510(popup, 3, GetHashValue32(str_kT_HELPKeyboardShift), 6);
+                    func_001DA510(popup, 4, GetHashValue32(str_kT_HELPKeyboardSelectCharacter), 0);
+                    func_001DA510(popup, 5, GetHashValue32(str_kT_HELPKeyboardCancel), 1);
                     cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
                 }
                 sound = 5;

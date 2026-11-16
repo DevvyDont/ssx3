@@ -5,8 +5,8 @@
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A14B0[];
-extern char D_0045DC50[];
+extern char str_Map[];
+extern char str_femap_template[];
 extern unsigned int D_004A2594;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -21,13 +21,13 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
 extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A14B0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Map), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     engine = *(void**)((char*)self + 0x10);
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DC50), 0);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_femap_template), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -112,7 +112,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern int D_004A1A70;
 
 static inline int IsQuick1867A8() { return D_004A1A70 == 1; }
-extern char D_0045DC60[];
+extern char str_TransitionOut[];
 
 class cMgr1867A8 {
 public:
@@ -157,7 +157,7 @@ public:
 
 static inline void PlayIntro1867A8(void* self)
 {
-    int f = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0045DC60));
+    int f = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut));
     if (f != 0xFFFF) {
         cUIScreen_playFrame(*(void**)((char*)self + 0x40), f, 1);
     }

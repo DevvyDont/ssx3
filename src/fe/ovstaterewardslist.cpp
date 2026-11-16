@@ -7,7 +7,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern char D_004704B8[];
+extern char str_rewardslist[];
 
 /**
  * Creates the overlay rewards-list screen "rewardslist", then runs cOVState_onCreateScreen().
@@ -15,7 +15,7 @@ extern char D_004704B8[];
 extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004704B8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_rewardslist), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);

@@ -9,7 +9,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_resolvePaths);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_0026BA68(void* dst, void* src);
 extern "C" int func_0026A180(void* path, char* data);
-extern char D_00481438[];
+extern char str_TrackPaths[];
 extern void* D_00481448[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -42,7 +42,7 @@ extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* data)
     func_0026BA68(&count, data);
     data += 4;
     self->count = count;
-    *slot = new (operator_new_tag(count * sizeof(sPathB310), D_00481438, 0, 0)) sPathB310[count];
+    *slot = new (operator_new_tag(count * sizeof(sPathB310), str_TrackPaths, 0, 0)) sPathB310[count];
     for (int i = 0; i < self->count; i++) {
         data += func_0026A180(&self->paths[i], data);
     }
@@ -57,7 +57,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_loadAIPaths);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_0026BA68(void* dst, void* src);
 extern "C" int func_0026A180(void* path, char* data);
-extern char D_004A3408[];
+extern char str_AIPaths[];
 extern void* D_00481478[];
 
 struct sPathB410 {
@@ -89,7 +89,7 @@ extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* data)
     func_0026BA68(&count, data);
     data += 4;
     self->count = count;
-    *slot = new (operator_new_tag(count * sizeof(sPathB410), D_004A3408, 0, 0)) sPathB410[count];
+    *slot = new (operator_new_tag(count * sizeof(sPathB410), str_AIPaths, 0, 0)) sPathB410[count];
     for (int i = 0; i < self->count; i++) {
         data += func_0026A180(&self->paths[i], data);
     }

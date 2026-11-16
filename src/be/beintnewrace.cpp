@@ -2,7 +2,7 @@
 #include "be/beintnewrace.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A0F0[];
+extern const char str_BENewRaceInt[];
 extern void* D_0045AE58[16];
 extern void* D_004A11B4;
 
@@ -60,7 +60,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
 void* cBENewRaceInterface_getThis()
 {
     if (D_004A11B4 == 0) {
-        cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, D_0045A0F0, 0, 0);
+        cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, str_BENewRaceInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AE58;
         D_004A11B4 = mem;
@@ -142,7 +142,7 @@ void cBENewRaceInterface_setNumberMission(void* self, int mission)
 INCLUDE_ASM("be/beintnewrace", func_00144B20);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char*, const char*);
-extern char D_0043E6EC[];
+extern char str_dbg[];
 
 extern "C" void func_00144B20(void* self, const char* name)
 {
@@ -153,7 +153,7 @@ extern "C" void func_00144B20(void* self, const char* name)
     strcpy(p1 + *(int*)(g + 0x40) * 0x64, name);
     char* p2 = base - 0x30;
     strcpy(p2 + *(int*)(g + 0x40) * 0x64, name);
-    strcpy(D_0043E6EC, name);
+    strcpy(str_dbg, name);
 }
 #endif
 
@@ -200,21 +200,21 @@ extern "C" void* func_00144BF0()
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144C10);
 #ifdef SKIP_ASM
-extern char D_0043D974[];
+extern char str_Snow_Jam[];
 
 extern "C" void* func_00144C10(void* self)
 {
-    return D_0043D974 + D_00535C08.value * 0x64;
+    return str_Snow_Jam + D_00535C08.value * 0x64;
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144C30);
 #ifdef SKIP_ASM
-extern char D_0043D994[];
+extern char str_BAM[];
 
 extern "C" void* func_00144C30(void* self, int i)
 {
-    return D_0043D994 + i * 0x64;
+    return str_BAM + i * 0x64;
 }
 #endif
 
@@ -559,11 +559,11 @@ extern "C" void* func_00145360(void* self, int i)
 INCLUDE_ASM("be/beintnewrace", func_00145378);
 #ifdef SKIP_ASM
 extern signed char D_00535C11[];
-extern char D_0043E707[]; // 0x43-byte records at an odd address
+extern char str_World_Circuit[]; // 0x43-byte records at an odd address
 
 extern "C" void* func_00145378()
 {
-    return D_0043E707 + D_00535C11[0] * 0x43;
+    return str_World_Circuit + D_00535C11[0] * 0x43;
 }
 #endif
 

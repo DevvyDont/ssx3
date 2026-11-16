@@ -1557,7 +1557,7 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_002BB370(void *arg0);
 int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
-extern char D_00483C68[];
+extern char str_cWorldPainterMan[];
 struct sArr_B1D0 { int n; S12_B140 *arr; };
 
 /**
@@ -1583,7 +1583,7 @@ extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
     }
     self->m_uiNumSections = (unsigned int)n;
     S12_B140 **dst = (S12_B140**)&self->m_pCache;
-    int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, D_00483C68, 0x20000000, 0);
+    int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, str_cWorldPainterMan, 0x20000000, 0);
     blk[0] = n;
     S12_B140 *sections = (S12_B140*)(blk + 4);
     S12_B140 *newSection = sections;
@@ -1676,7 +1676,7 @@ extern "C" int func_003B4818_B3F0(int) __asm__("func_003B4818");
 extern "C" int ASYNCFILE_getstatus_B3F0(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void MEM_copy_B3F0(int, int, int) __asm__("MEM_copy");
 int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
-extern char D_004A3868[];
+extern char str_WPFile[];
 extern "C" void func_002BB3F0(cWorldPainterSection* self_) {
     short st = *(short*)self_;
     if (st == 1 && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
@@ -1687,11 +1687,11 @@ extern "C" void func_002BB3F0(cWorldPainterSection* self_) {
             if (sp4 > 0) {
                 int t = func_003B4818_B3F0(sp0);
                 if (t > 0) {
-                    int r = operator_new_B3F0(t, D_004A3868, 0x20000000, 0);
+                    int r = operator_new_B3F0(t, str_WPFile, 0x20000000, 0);
                     self_->m_pWPHeader = (tWPHeader*)r;
                     func_003B47F8_B3F0(sp0, r);
                 } else {
-                    int r = operator_new_B3F0(sp4, D_004A3868, 0x20000000, 0);
+                    int r = operator_new_B3F0(sp4, str_WPFile, 0x20000000, 0);
                     self_->m_pWPHeader = (tWPHeader*)r;
                     MEM_copy_B3F0(r, sp0, sp4);
                 }
@@ -1713,14 +1713,14 @@ extern "C" void func_00318630_B4D8(sBXStr_B4D8*, sBXStr_B4D8*, const char*) __as
 extern "C" int func_003DF690_B4D8(const char*, int) __asm__("func_003DF690");
 extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
 extern char D_004A3870[];
-extern char D_004A3878[];
+extern char str_swp[];
 extern "C" void func_002BB4D8_B4D8(void *self, int arg) __asm__("func_002BB4D8");
 extern "C" void func_002BB4D8_B4D8(void *self, int arg) {
     sBXStr_B4D8 a;
     sBXStr_B4D8 b;
     *(short*)((char*)self + 2) = 0;
     func_003186D0_B4D8(&b, D_004A3870, arg);
-    func_00318630_B4D8(&a, &b, D_004A3878);
+    func_00318630_B4D8(&a, &b, str_swp);
     *(int*)((char*)self + 4) = func_003DF690_B4D8(a.p, 0);
     cBXString_dt_B4D8(&a, 2);
     cBXString_dt_B4D8(&b, 2);

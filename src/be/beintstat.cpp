@@ -466,7 +466,7 @@ extern "C" void* cBEStatInterface_getThis(void);
 int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
 void* cBEBAGTInterface_getThis();
-extern char D_0045A268[];
+extern char str_kT_MEMPlayerName[];
 extern char cBELibrary_playerDB[];
 extern char cBELibrary_profileLib[];
 
@@ -501,7 +501,7 @@ extern "C" void func_00149A88(void* self, signed char idx)
     e->c11 = 4;
     char* o = (char*)SSXApp->FELocale;
     sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
-    strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045A268)));
+    strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)));
     sprintf((char*)e, buf, idx + 1);
     func_001567B8(cBELibrary_profileLib + idx * 0x9B50, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
@@ -553,7 +553,7 @@ extern char D_004A6750[];
 extern char D_004C3E98[];
 extern sCharSlot_149BB8 D_005305B0;
 extern sRiderEntry_149BB8 D_00535B20_149BB8[6] __asm__("cBELibrary_playerDB");
-extern const char D_0045A2E0[];
+extern const char str_data_be_charDB_dbl[];
 extern char D_00530970[];
 extern sCharStat_149BB8 D_005308D8[10];
 extern sCharSrc_149BB8 D_00440F00[10];
@@ -580,7 +580,7 @@ extern "C" void func_00149BB8(void)
         D_00535B20_149BB8[i].f1 = 1;
         D_00535B20_149BB8[i].c11 = 4;
     }
-    buf = FILE_load(D_0045A2E0, 0x100);
+    buf = FILE_load(str_data_be_charDB_dbl, 0x100);
     func_0041605C(D_00530970, buf, 0x550);
     if (buf != 0) {
         cMemMan_free(buf);

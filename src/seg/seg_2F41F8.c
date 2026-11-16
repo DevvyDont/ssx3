@@ -65,7 +65,7 @@ extern unsigned D_00496C08[];
 extern char D_0051EEF8[];
 
 extern int D_004A4B9C;
-extern char D_00497008[];
+extern char str_hello_world[];
 void func_003F33B0(unsigned char *s, unsigned char *key, int klen, int rounds) {
     int i;
     int lim;
@@ -73,7 +73,7 @@ void func_003F33B0(unsigned char *s, unsigned char *key, int klen, int rounds) {
 
     if (D_004A4B9C == 0) {
         D_004A4B9C = 1;
-        func_003F33B0((unsigned char *)D_0051EEF8, (unsigned char *)D_00497008, -1, 10);
+        func_003F33B0((unsigned char *)D_0051EEF8, (unsigned char *)str_hello_world, -1, 10);
     }
     i = 0xFF;
     if (rounds < 0) {
@@ -145,7 +145,7 @@ extern char D_0051EEF8[];
 
 extern void f33B0w(void *, int, int, int) __asm__("func_003F33B0");
 extern void f3530w(void *, unsigned char *, int) __asm__("func_003F3530");
-extern char D_00497018[];
+extern char str_ru_paranoid[];
 int func_003F35D0(char *out, int n, unsigned char *in, int a, int b, int c) {
     unsigned char ctx[0x110];
     unsigned char ch;
@@ -153,7 +153,7 @@ int func_003F35D0(char *out, int n, unsigned char *in, int a, int b, int c) {
     k = 0;
     f33B0w(ctx, a, b, c);
     f33B0w(D_0051EEF8, a, b, -c);
-    f33B0w(D_0051EEF8, (int)D_00497018, -1, -1);
+    f33B0w(D_0051EEF8, (int)str_ru_paranoid, -1, -1);
     for (; n > 1; n--) {
         if (in == 0) {
             f3530w(D_0051EEF8, &ch, 1);
@@ -431,24 +431,24 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3F78);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004512E8[];
-extern const char D_00497028[];
+extern const char str_0123456789abcdefUSBD_IRX[];
 extern void f3CC0(int, unsigned char *, int) __asm__("func_003F3CC0");
 char *func_003F3F78(void) {
     unsigned char b[16];
     if (D_004512E8[0] == 0) {
         f3CC0(0x6d616378, b, 0x10);
-        D_004512E8[1] = D_00497028[b[0] >> 4];
-        D_004512E8[2] = D_00497028[b[0] & 0xF];
-        D_004512E8[3] = D_00497028[b[1] >> 4];
-        D_004512E8[4] = D_00497028[b[1] & 0xF];
-        D_004512E8[5] = D_00497028[b[2] >> 4];
-        D_004512E8[6] = D_00497028[b[2] & 0xF];
-        D_004512E8[7] = D_00497028[b[3] >> 4];
-        D_004512E8[8] = D_00497028[b[3] & 0xF];
-        D_004512E8[9] = D_00497028[b[4] >> 4];
-        D_004512E8[10] = D_00497028[b[4] & 0xF];
-        D_004512E8[11] = D_00497028[b[5] >> 4];
-        D_004512E8[12] = D_00497028[b[5] & 0xF];
+        D_004512E8[1] = str_0123456789abcdefUSBD_IRX[b[0] >> 4];
+        D_004512E8[2] = str_0123456789abcdefUSBD_IRX[b[0] & 0xF];
+        D_004512E8[3] = str_0123456789abcdefUSBD_IRX[b[1] >> 4];
+        D_004512E8[4] = str_0123456789abcdefUSBD_IRX[b[1] & 0xF];
+        D_004512E8[5] = str_0123456789abcdefUSBD_IRX[b[2] >> 4];
+        D_004512E8[6] = str_0123456789abcdefUSBD_IRX[b[2] & 0xF];
+        D_004512E8[7] = str_0123456789abcdefUSBD_IRX[b[3] >> 4];
+        D_004512E8[8] = str_0123456789abcdefUSBD_IRX[b[3] & 0xF];
+        D_004512E8[9] = str_0123456789abcdefUSBD_IRX[b[4] >> 4];
+        D_004512E8[10] = str_0123456789abcdefUSBD_IRX[b[4] & 0xF];
+        D_004512E8[11] = str_0123456789abcdefUSBD_IRX[b[5] >> 4];
+        D_004512E8[12] = str_0123456789abcdefUSBD_IRX[b[5] & 0xF];
         D_004512E8[0] = '$';
         D_004512E8[13] = 0;
     }
@@ -1596,7 +1596,7 @@ extern struct sKb D_00525F80;
 extern char *strcpy(char *, const char *);
 extern char* func_004162D0(char *, const char *);
 extern int fBA68(char *, int, const char *) __asm__("func_0042BA68");
-extern char D_00497038[], D_00497048[];
+extern char D_00497038[], str_USBKB_IRX_b[];
 int func_003F5DA8(char *name, char *str) {
     char path[0x100];
     if (name == 0) {
@@ -1610,7 +1610,7 @@ int func_003F5DA8(char *name, char *str) {
     D_00525F80.fd[0] = fBA68(path, 0, 0);
     if (D_00525F80.fd[0] < 0) goto fail;
     strcpy(path, name);
-    func_004162D0(path, D_00497048);
+    func_004162D0(path, str_USBKB_IRX_b);
     D_00525F80.fd[1] = fBA68(path, strlen(str) + 1, str); if (D_00525F80.fd[1] < 0) return -1; return 0;
 fail:
     return -1;
@@ -2604,7 +2604,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F73A8);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
-extern char D_004A4BC8[];
+extern char str_slogin[];
 
 extern int func_003F77F8(void);
 extern int func_003FC390(char *, int, int);
@@ -2613,7 +2613,7 @@ int func_003F73A8(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = func_003F77F8;
     p->cur.f100 = 0;
-    return func_003F8178_73A8(func_003FC390(D_004A4BC8, -1, 0));
+    return func_003F8178_73A8(func_003FC390(str_slogin, -1, 0));
 }
 #endif
 
@@ -2626,7 +2626,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F73F0);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
-extern char D_004A4BC8[];
+extern char str_slogin[];
 
 extern int func_003F7820_73F0(void) __asm__("func_003F7820");
 extern int func_003FC4C8_73F0(int, int, int) __asm__("func_003FC4C8");
@@ -2635,7 +2635,7 @@ int func_003F73F0(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = func_003F7820_73F0;
     p->cur.f100 = 0;
-    return func_003F8178_73F0(func_003FC4C8_73F0((int)D_004A4BC8, -1, 0));
+    return func_003F8178_73F0(func_003FC4C8_73F0((int)str_slogin, -1, 0));
 }
 #endif
 
@@ -2648,7 +2648,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7438);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
-extern char D_004A4BC8[];
+extern char str_slogin[];
 
 extern int func_003FC3C0(char *, int, int);
 extern int func_003F8178_7438(int) __asm__("func_003F8178");
@@ -2656,7 +2656,7 @@ int func_003F7438(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = 0;
     p->cur.f100 = 0;
-    return func_003F8178_7438(func_003FC3C0(D_004A4BC8, -1, 0));
+    return func_003F8178_7438(func_003FC3C0(str_slogin, -1, 0));
 }
 #endif
 
@@ -3486,8 +3486,8 @@ extern sIconVec3_8258 D_00497320; /* light directions */
 extern sIconVec3_8258 D_00497350; /* light colours */
 extern sIconVec1_8258 D_00497380; /* ambient */
 extern char D_004A4BD0[] __attribute__((aligned(8))); /* "PS2D" (.sdata) */
-extern char D_00497390[];         /* "EA Login" */
-extern char D_004973A0[];         /* "view.ico" */
+extern char str_EA_Login[];         /* "EA Login" */
+extern char str_view_ico[];         /* "view.ico" */
 extern void func_003FA380(char *src, unsigned short *dst);
 extern int func_003FCDC8(sMcSaveParam_8258 *);
 
@@ -3510,16 +3510,16 @@ int func_003F8258(int port) {
     if (err == 0) {
         f8258_memset(&p.icon, 0, sizeof(p.icon));
         __builtin_memcpy(p.icon.Head, D_004A4BD0, 5);
-        func_003FA380(D_00497390, p.icon.TitleName);
+        func_003FA380(str_EA_Login, p.icon.TitleName);
         p.icon.OffsLF = 16;
         p.icon.TransRate = 0x60;
         __builtin_memcpy(p.icon.BgColor, bgcolor, sizeof(bgcolor));
         __builtin_memcpy(p.icon.LightDir, &lightdir, sizeof(lightdir));
         __builtin_memcpy(p.icon.LightColor, &lightcol, sizeof(lightcol));
         __builtin_memcpy(p.icon.Ambient, &ambient, sizeof(ambient));
-        __builtin_memcpy(p.icon.FnameView, D_004973A0, 9);
-        __builtin_memcpy(p.icon.FnameCopy, D_004973A0, 9);
-        __builtin_memcpy(p.icon.FnameDel, D_004973A0, 9);
+        __builtin_memcpy(p.icon.FnameView, str_view_ico, 9);
+        __builtin_memcpy(p.icon.FnameCopy, str_view_ico, 9);
+        __builtin_memcpy(p.icon.FnameDel, str_view_ico, 9);
         p.port = port;
         p.id = 0x296E;
         p.f3CC = 0x22;
@@ -4921,8 +4921,8 @@ extern struct sMcReq *D_004A4BD8;
 /* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
 extern struct sMcDrv *D_004A4BDC;
 
-extern char D_00497410[];   /* "view.ico" */
-extern char D_00497420[];   /* "icon.sys" */
+extern char str_view_ico_b[];   /* "view.ico" */
+extern char str_icon_sys_b[];   /* "icon.sys" */
 extern void fA8F8_86F0(int) __asm__("func_003F86F0");
 extern char *fA8F8_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
 
@@ -5053,7 +5053,7 @@ int func_003FA8F8(int a, int *st, int *res) {
     case 0x11:
         if (a == 0) {
             D_004A4BD8->st = 6;
-            ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, D_00497410,
+            ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, str_view_ico_b,
                                                                   D_004A4BD8->body.slot, 0x203);
             break;
         }
@@ -5088,7 +5088,7 @@ int func_003FA8F8(int a, int *st, int *res) {
     case 9:
         if (a == 0) {
             D_004A4BD8->st = 0xA;
-            ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, D_00497420,
+            ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, str_icon_sys_b,
                                                                   D_004A4BD8->body.slot, 0x203);
             break;
         }
@@ -5167,8 +5167,8 @@ extern struct sMcReq *D_004A4BD8;
 /* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
 extern struct sMcDrv *D_004A4BDC;
 
-extern char D_00497410[];   /* "view.ico" */
-extern char D_00497420[];   /* "icon.sys" */
+extern char str_view_ico_b[];   /* "view.ico" */
+extern char str_icon_sys_b[];   /* "icon.sys" */
 extern void fAE50_86F0(int) __asm__("func_003F86F0");
 extern char *fAE50_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
 
@@ -5210,7 +5210,7 @@ int func_003FAE50(int a, int *st, int *res) {
             if (*res == 1) {
                 ((void (*)(char *))D_004A4BDC->f44)((char *)D_004A4BD8->body.pad08);
                 D_004A4BD8->st = 0x13;
-                ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, D_00497420,
+                ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, str_icon_sys_b,
                                                                 D_004A4BD8->body.slot);
                 break;
             }
@@ -5232,7 +5232,7 @@ int func_003FAE50(int a, int *st, int *res) {
             if (func_003F8710() == 0) fAE50_86F0(a);
         }
         D_004A4BD8->st = 0x14;
-        ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, D_00497410,
+        ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, str_view_ico_b,
                                                         D_004A4BD8->body.slot);
         break;
     case 0x14:
@@ -5739,13 +5739,13 @@ int func_003FB898(int a, int b) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB910);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00497550[];
+extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 
 extern int func_00415FC8(int, char *, int);
 int func_003FB910(int a, int b) {
     int r = a - 0xC;
     if (b & 0xFF) {
-        if (func_00415FC8(r, D_00497550, 0xC) != 0) r = 0;
+        if (func_00415FC8(r, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 0xC) != 0) r = 0;
     }
     return r;
 }
@@ -5771,10 +5771,10 @@ void func_003FB958(W3FB958 *dst, int a, int b, W3FB958 *c) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB9A0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00497550[];
+extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 
 void func_003FB9A0(char *dst) {
-    __builtin_memcpy(dst, D_00497550, 12);
+    __builtin_memcpy(dst, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 12);
 }
 #endif
 

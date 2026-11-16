@@ -1274,7 +1274,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_003AA2F0(void* self);
-extern char D_00494F70[];
+extern char str_cPS2ChunkResolve[];
 extern void* cPS2ChunkResolve_vtbl[];
 
 /**
@@ -1285,7 +1285,7 @@ extern void* cPS2ChunkResolve_vtbl[];
  */
 extern "C" void* cChunkResolve_construct()
 {
-    void* chunkResolve = cMemMan_alloc(0x14, D_00494F70, 0, 0);
+    void* chunkResolve = cMemMan_alloc(0x14, str_cPS2ChunkResolve, 0, 0);
     func_003AA2F0(chunkResolve);
     *(void***)((char*)chunkResolve + 0x8) = cPS2ChunkResolve_vtbl;
     return chunkResolve;
@@ -1370,8 +1370,8 @@ struct sBox_AE68 {
 // func_00328F28 is declared again further down with the removal helper's types; bind this one by symbol.
 void func_00328F28_AE68(sHashKey_AE68* out, sBox_AE68* box) __asm__("func_00328F28");
 extern "C" void func_00328C20(sHashCell_AE68* cell, int type, void* node, sHashKey_AE68* key);
-extern char D_00494F88[];
-extern char D_00494F98[];
+extern char str_strm_tex[];
+extern char str_strm_lpg[];
 extern "C" void* func_003AD198();
 extern "C" void func_00242540(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
@@ -1443,13 +1443,13 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, D_00494F88, 0, 0, RID >> 8);
+        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, D_00494F98, 0, 0, (RID >> 8) + *(int*)((char*)self + 0x10));
+        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, str_strm_lpg, 0, 0, (RID >> 8) + *(int*)((char*)self + 0x10));
         break;
     }
     case 3:

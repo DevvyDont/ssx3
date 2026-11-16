@@ -13,8 +13,8 @@ extern "C" void func_00283298(void* p);
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern void* cScriptCameraController_vtbl[];
-extern char D_0045BE88[];
-extern char D_0045BEA0[];
+extern char str_ScriptObjCamArray[];
+extern char str_ScriptObjCam[];
 
 /**
  * Constructs the script camera controller with its two ScriptObjCam objects.
@@ -33,10 +33,10 @@ extern "C" void* cScriptCameraController_cScriptCameraController(void* self, voi
     cCameraController_cCameraController(self, camera);
     *(void***)((char*)self + 0x14) = cScriptCameraController_vtbl;
     *(int*)self = 3;
-    *(void***)((char*)self + 0x1C) = (void**)operator_new_K2(8, D_0045BE88, 0, 0);
+    *(void***)((char*)self + 0x1C) = (void**)operator_new_K2(8, str_ScriptObjCamArray, 0, 0);
     for (i = 0; i < 2; i++) {
         void** slot = (void**)((i << 2) + *(int*)((char*)self + 0x1C));
-        *slot = func_0027D5E8(cMemMan_alloc(0x80, D_0045BEA0, 0, 0), script);
+        *slot = func_0027D5E8(cMemMan_alloc(0x80, str_ScriptObjCam, 0, 0), script);
         func_00283298((*(void***)((char*)self + 0x1C))[i]);
     }
     *(int*)((char*)self + 0x18) = 0;
@@ -93,10 +93,10 @@ extern "C" void* func_0016A458(void* self);
 extern "C" void* func_0016AD38(void* self);
 // PORT: func_00169340 is defined with (self, algo); this caller passes a third int argument.
 extern "C" void func_00169340_3(void* self, void* algo, int a) __asm__("func_00169340");
-extern char D_0045BEB0[];
-extern char D_0045BED0[];
-extern char D_0045BEF0[];
-extern char D_0045BF10[];
+extern char str_Manual_Script_Camera_Algo[];
+extern char str_Target_Script_Camera_Algo[];
+extern char str_Subject_Script_Camera_Algo[];
+extern char str_Algorithmic_Script_Camera_Algo[];
 
 /**
  * Creates the camera algorithm for a script camera object and adds it to the controller.
@@ -113,16 +113,16 @@ extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
     switch (func_002743C8(*(void**)(*(char**)(cam + 0x14) + 8)))
     {
     case 0:
-        ctl = func_001694B8(cMemMan_alloc(0xB0, D_0045BEB0, 0x20000000, 0));
+        ctl = func_001694B8(cMemMan_alloc(0xB0, str_Manual_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 1:
-        ctl = func_00169CF8(cMemMan_alloc(0xB0, D_0045BED0, 0x20000000, 0));
+        ctl = func_00169CF8(cMemMan_alloc(0xB0, str_Target_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 2:
-        ctl = func_0016A458(cMemMan_alloc(0xA0, D_0045BEF0, 0x20000000, 0));
+        ctl = func_0016A458(cMemMan_alloc(0xA0, str_Subject_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 3:
-        ctl = func_0016AD38(cMemMan_alloc(0xA0, D_0045BF10, 0x20000000, 0));
+        ctl = func_0016AD38(cMemMan_alloc(0xA0, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
         break;
     default:
         return;

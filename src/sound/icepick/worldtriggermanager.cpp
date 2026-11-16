@@ -2,7 +2,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self);
-extern const char D_00483588[];
+extern const char str_WorldTriggerManager[];
 extern void* gWorldTriggerManager;
 
 //99.88%
@@ -15,7 +15,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_Init__Fv);
 void WORLDTRIGGERMANAGER_Init()
 {
     if (gWorldTriggerManager == 0) {
-        void* mem = cMemMan_alloc(0x344, D_00483588, 0, 0);
+        void* mem = cMemMan_alloc(0x344, str_WorldTriggerManager, 0, 0);
         gWorldTriggerManager = cWorldTriggerManager_cWorldTriggerManager(mem);
     }
 }
@@ -426,7 +426,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_cWorldTrig
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_002B4B70(void* self);
 extern "C" void cWorldTriggerManager_LoadTriggerInfo(void* self);
-extern const char D_004835A0[];
+extern const char str_m_aWorldTriggerInstances[];
 
 struct sWorldTrigger58D0 {
     char pad[0x70];
@@ -447,7 +447,7 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
     *(int*)((char*)self + 0x328) = -1;
     *(int*)((char*)self + 0x32C) = -1;
     *(int*)((char*)self + 0x334) = 1;
-    int* mem = (int*)operator_new_tag(0x1190, D_004835A0, 0, 0);
+    int* mem = (int*)operator_new_tag(0x1190, str_m_aWorldTriggerInstances, 0, 0);
     mem[0] = 40;
     sWorldTrigger58D0* arr = (sWorldTrigger58D0*)((char*)mem + 0x10);
     sWorldTrigger58D0* trigger = arr;
@@ -497,8 +497,8 @@ extern "C" int BXFILE_exists(const char* name);
 extern "C" char* func_003E22F0(const char* name, int a1);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char* D_004A3858;
-extern char D_004835C0[];
+extern char* str_p5H;
+extern char str_m_aTriggerInfoInstances[];
 
 struct sTrigInfoEnt { int type; int* data; };
 
@@ -516,14 +516,14 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self) __asm__("cWorldTrigger
  */
 int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
 {
-    if (BXFILE_exists(D_004A3858) != 0) {
-        char* data = func_003E22F0(D_004A3858, 0);
+    if (BXFILE_exists(str_p5H) != 0) {
+        char* data = func_003E22F0(str_p5H, 0);
         *(char**)((char*)self + 0x338) = data;
         if (*data != 0) {
             return 0;
         }
         *(int*)((char*)self + 0x340) = *(int*)(data + 8) + 2;
-        *(sTrigInfoEnt**)((char*)self + 0x33C) = (sTrigInfoEnt*)operator_new_tag(*(int*)((char*)self + 0x340) * 8, D_004835C0, 0, 0);
+        *(sTrigInfoEnt**)((char*)self + 0x33C) = (sTrigInfoEnt*)operator_new_tag(*(int*)((char*)self + 0x340) * 8, str_m_aTriggerInfoInstances, 0, 0);
         int* p = (int*)(data + 0xC);
         for (int i = 2; i < *(int*)((char*)self + 0x340); i++) {
             (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].type = *p;

@@ -11,8 +11,8 @@ INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_00536668[];
-extern char D_0047C0A8[];
-extern char D_0047C0B8[];
+extern char str_GameModeMan[];
+extern char str_GM_Handler[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00416210(void* dst, int c, int n);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -73,64 +73,64 @@ struct sGMMode_D0 {
 extern "C" int* cGameModeMan_getGM(void)
 {
     if (cGameModeMan_instance == 0) {
-        cGameModeMan_instance = (cGameModeMan*)((int*)cMemMan_alloc(0xA0, D_0047C0A8, 0, 0));
+        cGameModeMan_instance = (cGameModeMan*)((int*)cMemMan_alloc(0xA0, str_GameModeMan, 0, 0));
         func_00416210(D_00536668, 0, 0x28);
         if (D_00536668[0] == 0) {
-            D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
+            D_00536668[0] = new (str_GM_Handler, 0, 0) sGMMode_7C(D_0047CFA0);
             if (D_00536668[0] == 0) {
-                D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
+                D_00536668[0] = new (str_GM_Handler, 0, 0) sGMMode_7C(D_0047CFA0);
                 if (D_00536668[0] == 0) {
-                    D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
+                    D_00536668[0] = new (str_GM_Handler, 0, 0) sGMMode_7C(D_0047CFA0);
                 }
             }
         }
         if (D_00536668[1] == 0) {
-            D_00536668[1] = new (D_0047C0B8, 0, 0) sGMMode_D0(D_0047CF38);
+            D_00536668[1] = new (str_GM_Handler, 0, 0) sGMMode_D0(D_0047CF38);
         }
         if (D_00536668[2] == 0) {
-            D_00536668[2] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CE00);
+            D_00536668[2] = new (str_GM_Handler, 0, 0) sGMMode_4(D_0047CE00);
         }
         if (D_00536668[5] == 0) {
-            D_00536668[5] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CD30);
+            D_00536668[5] = new (str_GM_Handler, 0, 0) sGMMode_4(D_0047CD30);
         }
         if (D_00536668[4] == 0) {
-            D_00536668[4] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CD98);
+            D_00536668[4] = new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CD98);
             if (D_00536668[4] == 0) {
-                D_00536668[4] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CD98);
+                D_00536668[4] = new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CD98);
                 if (D_00536668[4] == 0) {
-                    D_00536668[4] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CD98);
+                    D_00536668[4] = new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CD98);
                 }
             }
         }
         if (D_00536668[6] == 0) {
-            D_00536668[6] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CCC8);
+            D_00536668[6] = new (str_GM_Handler, 0, 0) sGMMode_4(D_0047CCC8);
         }
         if (D_00536668[7] == 0) {
-            D_00536668[7] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CC60);
+            D_00536668[7] = new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CC60);
             if (D_00536668[7] == 0) {
-                D_00536668[7] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CC60);
+                D_00536668[7] = new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CC60);
                 if (D_00536668[7] == 0) {
-                    D_00536668[7] = new (D_0047C0B8, 0, 0) sGMMode_C(D_0047CC60);
+                    D_00536668[7] = new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CC60);
                 }
             }
         }
         if (D_00536668[8] == 0) {
-            D_00536668[8] = new (D_0047C0B8, 0, 0) sGMMode_2C(D_0047CED0);
+            D_00536668[8] = new (str_GM_Handler, 0, 0) sGMMode_2C(D_0047CED0);
         }
         if (D_00536668[9] == 0) {
-            D_00536668[9] = new (D_0047C0B8, 0, 0) sGMMode_8(D_0047CE68);
+            D_00536668[9] = new (str_GM_Handler, 0, 0) sGMMode_8(D_0047CE68);
             if (D_00536668[9] == 0) {
-                D_00536668[9] = new (D_0047C0B8, 0, 0) sGMMode_8(D_0047CE68);
+                D_00536668[9] = new (str_GM_Handler, 0, 0) sGMMode_8(D_0047CE68);
                 if (D_00536668[9] == 0) {
-                    D_00536668[9] = new (D_0047C0B8, 0, 0) sGMMode_8(D_0047CE68);
+                    D_00536668[9] = new (str_GM_Handler, 0, 0) sGMMode_8(D_0047CE68);
                 }
             }
         }
         if (D_00536668[5] == 0) {
-            D_00536668[5] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CD30);
+            D_00536668[5] = new (str_GM_Handler, 0, 0) sGMMode_4(D_0047CD30);
         }
         if (D_00536668[6] == 0) {
-            D_00536668[6] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CCC8);
+            D_00536668[6] = new (str_GM_Handler, 0, 0) sGMMode_4(D_0047CCC8);
         }
         cGameModeMan* gm = cGameModeMan_instance;
         cGameModeHandler_pManager = (cGameModeMan*)((char*)gm);

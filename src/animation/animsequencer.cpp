@@ -44,7 +44,7 @@ extern "C" void func_00313A20(void* self, float v)
 INCLUDE_ASM("animation/animsequencer", func_00313A70);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0048A5B0[];
+extern const char str_AnimTrigger[];
 
 struct sSeqNode313A70
 {
@@ -56,7 +56,7 @@ struct sSeqNode313A70
 
 extern "C" void func_00313A70(void* self, int key, float weight)
 {
-    sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, D_0048A5B0, 0x20000000, 0);
+    sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
     sSeqNode313A70* old = *(sSeqNode313A70**)((char*)self + 0xAC);
     *(sSeqNode313A70**)((char*)self + 0xAC) = n;
     n->key = key;
@@ -70,7 +70,7 @@ extern "C" void func_00313A70(void* self, int key, float weight)
 INCLUDE_ASM("animation/animsequencer", func_00313AD8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0048A5B0[];
+extern const char str_AnimTrigger[];
 
 struct sSeqNode313AD8
 {
@@ -82,7 +82,7 @@ struct sSeqNode313AD8
 
 extern "C" void func_00313AD8(void* self, int key)
 {
-    sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, D_0048A5B0, 0x20000000, 0);
+    sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
     sSeqNode313AD8* old = *(sSeqNode313AD8**)((char*)self + 0xAC);
     *(sSeqNode313AD8**)((char*)self + 0xAC) = n;
     n->key = key;
@@ -353,7 +353,7 @@ extern "C" void func_00313DD0(void* node, cAsStream* stream)
 INCLUDE_ASM("animation/animsequencer", func_00314050);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0048A5B0[];
+extern const char str_AnimTrigger[];
 
 struct sVEntry_314050 {
     short delta;
@@ -391,7 +391,7 @@ extern "C" void func_00314050(void* node, void* stream)
     Read_314050(s, &n, 4);
     char* tail = *(char**)(self + 0xAC);
     for (int i = 0; i < n; i++) {
-        char* p = (char*)cMemMan_alloc(0x10, D_0048A5B0, 0x20000000, 0);
+        char* p = (char*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
         Read_314050(s, p, 0x10);
         if (*(char**)(self + 0xAC) != 0) {
             *(char**)(tail + 0xC) = p;
@@ -421,7 +421,7 @@ void cAnimSequencer_init(void* self)
 INCLUDE_ASM("animation/animsequencer", func_003142F8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0048A5C0[];
+extern const char str_AnimSequence[];
 
 struct sSeqNode_003142F8 {
     char pad_0x00[0xC8];
@@ -438,7 +438,7 @@ extern "C" void* func_00313508(void* mem, int arg);
 extern "C" void* func_003142F8(void* seq, int arg)
 {
     sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
-    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, D_0048A5C0, 0x20000000, 0), arg);
+    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, str_AnimSequence, 0x20000000, 0), arg);
     node->next = self->mFirstSequence;
     self->mFirstSequence = node;
     self->mCount++;
@@ -825,7 +825,7 @@ INCLUDE_ASM("animation/animsequencer", func_00314880);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_00314050(void* node, void* stream);
-extern const char D_0048A5C0[];
+extern const char str_AnimSequence[];
 
 struct sStreamVE_314880 { short delta; short index; void (*fn)(void*, void*, int); };
 
@@ -850,7 +850,7 @@ extern "C" void func_00314880(void* self, void* stream)
     *(int*)self = 0;
     for (int i = 0; i < n; i++)
     {
-        sSeqNode_314880* node = new (D_0048A5C0, 0x20000000, 0) sSeqNode_314880;
+        sSeqNode_314880* node = new (str_AnimSequence, 0x20000000, 0) sSeqNode_314880;
         MEM_fill(node, 0, 0xD0);
         func_00314050(node, stream);
         func_00314368((sSequencer_00314368*)self, (sSeqNode_00314368*)node);

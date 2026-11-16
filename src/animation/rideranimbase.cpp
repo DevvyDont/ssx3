@@ -9,7 +9,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void cAnimSequencer_init(void* self);
 extern "C" void cRiderAnimBase_reset(cRiderAnimBase* self);
 extern char cRiderAnimBase_vtbl[];
-extern const char D_0048A4E0[];
+extern const char str_Sequencers[];
 
 /**
  * Constructs a rider animation player with six empty sequencers, in its reset state.
@@ -23,7 +23,7 @@ extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
 {
     self->AnimModel = (cAnimModel*)0;
     self->mVtbl = (void**)cRiderAnimBase_vtbl;
-    self->Sequencer = (cAnimSequencer*)operator_new_tag(0x30, D_0048A4E0, 0, 0);
+    self->Sequencer = (cAnimSequencer*)operator_new_tag(0x30, str_Sequencers, 0, 0);
     for (int i = 0; i < 6; i++)
     {
         cAnimSequencer_init((char*)self->Sequencer + (i << 3));

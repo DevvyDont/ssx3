@@ -14,8 +14,8 @@ extern "C" void* func_0019CDF0(void* self);
 void func_0015D700_i(void* self, int a1, float x, float y, float z) __asm__("func_0015D700");
 extern void* D_0046D878[];
 extern void* D_0046D8D8[];
-extern char D_004601F0[];
-extern char D_00460200[];
+extern char str_UIEngine[];
+extern char str_FXLoader_FE[];
 
 // Constructors bound to their unmangled symbols (g++ 2.95 ctors return this).
 class cFEObjK1956F8_70 {
@@ -46,9 +46,9 @@ extern "C" void* cFE_cFE(void* self)
     *(void***)((char*)self + 0xA0) = D_0046D8D8;
     func_001A03C0((char*)self + 0xB0);
     func_0019CDF0((char*)self + 0x1A70);
-    *(cFEObjK1956F8_70**)((char*)self + 0xC) = new (D_004601F0, 0, 0) cFEObjK1956F8_70;
+    *(cFEObjK1956F8_70**)((char*)self + 0xC) = new (str_UIEngine, 0, 0) cFEObjK1956F8_70;
     func_0015D700_i((char*)self + 0x10, 0, 0.7853981852531433f, 5.0f, 5000.0f);
-    *(cFEObjK1956F8_1**)((char*)self + 0xB5AA0) = new (D_00460200, 0, 0) cFEObjK1956F8_1(1);
+    *(cFEObjK1956F8_1**)((char*)self + 0xB5AA0) = new (str_FXLoader_FE, 0, 0) cFEObjK1956F8_1(1);
     return self;
 }
 #endif

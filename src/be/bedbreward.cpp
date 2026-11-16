@@ -12,7 +12,7 @@ extern "C" void func_003E1BB8(int file, void* data, int size);
 extern void func_0015A818_s(void* self, void* data) __asm__("func_0015A818");
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 extern int D_004A1270;
-extern char D_0045AB78[];
+extern char str_Rewards_File[];
 
 /**
  * Loads the reward database "data/be/rwrdps2.dat", at once or through the front end's asynchronous loader.
@@ -27,7 +27,7 @@ extern "C" void cBERewardDB_init(int* self, int async)
     if (async == 0)
     {
         int size = BXFILE_sizez(D_004A1270);
-        void* data = operator_new_tag(size, D_0045AB78, 0, 0);
+        void* data = operator_new_tag(size, str_Rewards_File, 0, 0);
         func_003E1BB8(D_004A1270, data, size);
         func_0015A818_s(self, data);
         *self = -1;

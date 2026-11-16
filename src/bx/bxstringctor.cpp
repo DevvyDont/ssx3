@@ -575,8 +575,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_00264CF0(void* self, int a1);
-extern const char D_00480488[];
-extern const char D_004804A8[];
+extern const char str_NetEvent[];
+extern const char str_StlBlock_b[];
 extern void* D_004812B0[];
 
 struct sMsgListNode_00269008 {
@@ -593,7 +593,7 @@ struct sMsgListIter_00269008 {
 
 static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_00269008 pos, void* const& x)
 {
-    sMsgListNode_00269008* tmp = (sMsgListNode_00269008*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269008* tmp = (sMsgListNode_00269008*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -610,7 +610,7 @@ extern "C" void func_00269008(void* self, int a1, int a2)
     *(int*)self = a2;
     func_00264CF0(self, a1);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
+    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
@@ -626,8 +626,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_00264CF0(void* self, int a1);
-extern const char D_00480488[];
-extern const char D_004804A8[];
+extern const char str_NetEvent[];
+extern const char str_StlBlock_b[];
 extern void* D_004812B0[];
 
 struct sMsgListNode_002690C8 {
@@ -644,7 +644,7 @@ struct sMsgListIter_002690C8 {
 
 static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690C8 pos, void* const& x)
 {
-    sMsgListNode_002690C8* tmp = (sMsgListNode_002690C8*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_002690C8* tmp = (sMsgListNode_002690C8*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -661,7 +661,7 @@ extern "C" void func_002690C8(void* self, int a1, int a2)
     *(int*)self = a2;
     func_00264CF0(self, a1);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
+    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
@@ -677,8 +677,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
-extern const char D_00480488[];
-extern const char D_004804A8[];
+extern const char str_NetEvent[];
+extern const char str_StlBlock_b[];
 extern void* D_004812B0[];
 
 struct sMsgListNode_00269188 {
@@ -695,7 +695,7 @@ struct sMsgListIter_00269188 {
 
 static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_00269188 pos, void* const& x)
 {
-    sMsgListNode_00269188* tmp = (sMsgListNode_00269188*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269188* tmp = (sMsgListNode_00269188*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -715,7 +715,7 @@ extern "C" void func_00269188(void* self, int a1)
     int kind = 0xF7;
     ((sMsgSelf_00269188*)self)->f0 = a1;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
+    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
@@ -731,8 +731,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_00264D80(void* self, int a1, void* a2);
-extern const char D_00480488[];
-extern const char D_004804A8[];
+extern const char str_NetEvent[];
+extern const char str_StlBlock_b[];
 extern void* D_004812B0[];
 
 struct sMsgListNode_00269240 {
@@ -749,7 +749,7 @@ struct sMsgListIter_00269240 {
 
 static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_00269240 pos, void* const& x)
 {
-    sMsgListNode_00269240* tmp = (sMsgListNode_00269240*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269240* tmp = (sMsgListNode_00269240*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -766,7 +766,7 @@ extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
     *(int*)self = a2;
     func_00264D80(self, a1, a3);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
+    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
@@ -782,8 +782,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_00264D80(void* self, int a1, void* a2);
-extern const char D_00480488[];
-extern const char D_004804A8[];
+extern const char str_NetEvent[];
+extern const char str_StlBlock_b[];
 extern void* D_004812B0[];
 
 struct sMsgListNode_00269300 {
@@ -800,7 +800,7 @@ struct sMsgListIter_00269300 {
 
 static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_00269300 pos, void* const& x)
 {
-    sMsgListNode_00269300* tmp = (sMsgListNode_00269300*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269300* tmp = (sMsgListNode_00269300*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -817,7 +817,7 @@ extern "C" void func_00269300(void* self, int a1, int a2)
     *(int*)self = a2;
     func_00264D80(self, a1, 0);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
+    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
@@ -833,8 +833,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
-extern const char D_00480488[];
-extern const char D_004804A8[];
+extern const char str_NetEvent[];
+extern const char str_StlBlock_b[];
 extern void* D_004812B0[];
 
 struct sMsgListNode_002693C0 {
@@ -851,7 +851,7 @@ struct sMsgListIter_002693C0 {
 
 static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693C0 pos, void* const& x)
 {
-    sMsgListNode_002693C0* tmp = (sMsgListNode_002693C0*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_002693C0* tmp = (sMsgListNode_002693C0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -871,7 +871,7 @@ extern "C" void func_002693C0(void* self, int a1)
     int kind = 0xF7;
     ((sMsgSelf_002693C0*)self)->f0 = a1;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
+    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
@@ -886,8 +886,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern void* D_00481150[];
 
 struct sMsgListNode_00269478 {
@@ -904,7 +904,7 @@ struct sMsgListIter_00269478 {
 
 static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_00269478 pos, void* const& x)
 {
-    sMsgListNode_00269478* tmp = (sMsgListNode_00269478*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269478* tmp = (sMsgListNode_00269478*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -924,7 +924,7 @@ struct sMsg_00269478 {
 
 extern "C" void func_00269478(void* self, int a1)
 {
-    sMsg_00269478* m = (sMsg_00269478*)cMemMan_alloc(0x10, D_00480F18, 0x20000000, 0);
+    sMsg_00269478* m = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFB;
     m->vt = D_00481150;
     m->f8 = 1;
@@ -941,8 +941,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern void* D_00481130[];
 
 struct sMsgListNode_00269538 {
@@ -959,7 +959,7 @@ struct sMsgListIter_00269538 {
 
 static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_00269538 pos, void* const& x)
 {
-    sMsgListNode_00269538* tmp = (sMsgListNode_00269538*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269538* tmp = (sMsgListNode_00269538*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -980,7 +980,7 @@ struct sMsg_00269538 {
 
 extern "C" void func_00269538(void* self, int a1, int a2)
 {
-    sMsg_00269538* m = (sMsg_00269538*)cMemMan_alloc(0x14, D_00480F18, 0x20000000, 0);
+    sMsg_00269538* m = (sMsg_00269538*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFC;
     m->vt = D_00481130;
     m->f8 = 1;
@@ -998,9 +998,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
+extern const char str_cSetupMan_Update[];
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
-extern const char D_004804A8[];
+extern const char str_StlBlock_b[];
 extern char D_004813E0[];
 
 struct sMsgListNode_00269608 {
@@ -1017,7 +1017,7 @@ struct sMsgListIter_00269608 {
 
 static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_00269608 pos, void* const& x)
 {
-    sMsgListNode_00269608* tmp = (sMsgListNode_00269608*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269608* tmp = (sMsgListNode_00269608*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1047,7 +1047,7 @@ extern "C" void func_00269608(void* self)
         break;
     }
     func_00264E50(self, 0xB, *(int*)self, 0);
-    sMsg_00269608* m = (sMsg_00269608*)cMemMan_alloc(0xC, D_00480F18, 0x20000000, 0);
+    sMsg_00269608* m = (sMsg_00269608*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFD;
     m->vt = D_004813E0;
     m->f8 = 1;
@@ -1063,9 +1063,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
+extern const char str_cSetupMan_Update[];
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
-extern const char D_004804A8[];
+extern const char str_StlBlock_b[];
 extern char D_004813C0[];
 
 struct sMsgListNode_002696F8 {
@@ -1082,7 +1082,7 @@ struct sMsgListIter_002696F8 {
 
 static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696F8 pos, void* const& x)
 {
-    sMsgListNode_002696F8* tmp = (sMsgListNode_002696F8*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_002696F8* tmp = (sMsgListNode_002696F8*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1104,7 +1104,7 @@ extern "C" void func_002696F8(void* self)
     if (*(int*)self == 8)
         *(int*)self = 7;
     func_00264E50(self, 0xC, *(int*)self, 0);
-    sMsg_002696F8* m = (sMsg_002696F8*)cMemMan_alloc(0xC, D_00480F18, 0x20000000, 0);
+    sMsg_002696F8* m = (sMsg_002696F8*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFE;
     m->vt = D_004813C0;
     m->f8 = 1;
@@ -1120,8 +1120,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern void* D_00481150[];
 
 struct sMsgListNode_002697D0 {
@@ -1138,7 +1138,7 @@ struct sMsgListIter_002697D0 {
 
 static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697D0 pos, void* const& x)
 {
-    sMsgListNode_002697D0* tmp = (sMsgListNode_002697D0*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_002697D0* tmp = (sMsgListNode_002697D0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1158,7 +1158,7 @@ struct sMsg_002697D0 {
 
 extern "C" void func_002697D0(void* self, int a1)
 {
-    sMsg_002697D0* m = (sMsg_002697D0*)cMemMan_alloc(0x10, D_00480F18, 0x20000000, 0);
+    sMsg_002697D0* m = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFB;
     m->vt = D_00481150;
     m->f8 = 1;
@@ -1175,8 +1175,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern void* D_00481150[];
 
 struct sMsgListNode_00269890 {
@@ -1193,7 +1193,7 @@ struct sMsgListIter_00269890 {
 
 static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_00269890 pos, void* const& x)
 {
-    sMsgListNode_00269890* tmp = (sMsgListNode_00269890*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269890* tmp = (sMsgListNode_00269890*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1213,7 +1213,7 @@ struct sMsg_00269890 {
 
 extern "C" void func_00269890(void* self, int a1)
 {
-    sMsg_00269890* m = (sMsg_00269890*)cMemMan_alloc(0x10, D_00480F18, 0x20000000, 0);
+    sMsg_00269890* m = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFB;
     m->vt = D_00481150;
     m->f8 = 0;
@@ -1230,8 +1230,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern void* D_00481130[];
 
 struct sMsgListNode_00269948 {
@@ -1248,7 +1248,7 @@ struct sMsgListIter_00269948 {
 
 static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_00269948 pos, void* const& x)
 {
-    sMsgListNode_00269948* tmp = (sMsgListNode_00269948*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269948* tmp = (sMsgListNode_00269948*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1269,7 +1269,7 @@ struct sMsg_00269948 {
 
 extern "C" void func_00269948(void* self, int a1, int a2)
 {
-    sMsg_00269948* m = (sMsg_00269948*)cMemMan_alloc(0x14, D_00480F18, 0x20000000, 0);
+    sMsg_00269948* m = (sMsg_00269948*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFC;
     m->vt = D_00481130;
     m->f8 = 1;
@@ -1287,8 +1287,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern void* D_00481130[];
 
 struct sMsgListNode_00269A18 {
@@ -1305,7 +1305,7 @@ struct sMsgListIter_00269A18 {
 
 static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A18 pos, void* const& x)
 {
-    sMsgListNode_00269A18* tmp = (sMsgListNode_00269A18*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269A18* tmp = (sMsgListNode_00269A18*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1326,7 +1326,7 @@ struct sMsg_00269A18 {
 
 extern "C" void func_00269A18(void* self, int a1, int a2)
 {
-    sMsg_00269A18* m = (sMsg_00269A18*)cMemMan_alloc(0x14, D_00480F18, 0x20000000, 0);
+    sMsg_00269A18* m = (sMsg_00269A18*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFC;
     m->vt = D_00481130;
     m->f8 = 0;
@@ -1344,8 +1344,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern char D_004813E0[];
 
 struct sMsgListNode_00269AE0 {
@@ -1362,7 +1362,7 @@ struct sMsgListIter_00269AE0 {
 
 static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269AE0 pos, void* const& x)
 {
-    sMsgListNode_00269AE0* tmp = (sMsgListNode_00269AE0*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269AE0* tmp = (sMsgListNode_00269AE0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1382,7 +1382,7 @@ struct sMsg_00269AE0 {
 extern "C" void func_00269AE0(void* self, int a1)
 {
     *(int*)self = a1;
-    sMsg_00269AE0* m = (sMsg_00269AE0*)cMemMan_alloc(0xC, D_00480F18, 0x20000000, 0);
+    sMsg_00269AE0* m = (sMsg_00269AE0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFD;
     m->vt = D_004813E0;
     m->f8 = 1;
@@ -1398,8 +1398,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern char D_004813E0[];
 
 struct sMsgListNode_00269B90 {
@@ -1416,7 +1416,7 @@ struct sMsgListIter_00269B90 {
 
 static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B90 pos, void* const& x)
 {
-    sMsgListNode_00269B90* tmp = (sMsgListNode_00269B90*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269B90* tmp = (sMsgListNode_00269B90*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1436,7 +1436,7 @@ struct sMsg_00269B90 {
 extern "C" void func_00269B90(void* self, int a1)
 {
     *(int*)self = a1;
-    sMsg_00269B90* m = (sMsg_00269B90*)cMemMan_alloc(0xC, D_00480F18, 0x20000000, 0);
+    sMsg_00269B90* m = (sMsg_00269B90*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFD;
     m->vt = D_004813E0;
     m->f8 = 0;
@@ -1452,8 +1452,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern char D_004813C0[];
 
 struct sMsgListNode_00269C40 {
@@ -1470,7 +1470,7 @@ struct sMsgListIter_00269C40 {
 
 static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C40 pos, void* const& x)
 {
-    sMsgListNode_00269C40* tmp = (sMsgListNode_00269C40*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269C40* tmp = (sMsgListNode_00269C40*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1490,7 +1490,7 @@ struct sMsg_00269C40 {
 extern "C" void func_00269C40(void* self, int a1)
 {
     *(int*)self = a1;
-    sMsg_00269C40* m = (sMsg_00269C40*)cMemMan_alloc(0xC, D_00480F18, 0x20000000, 0);
+    sMsg_00269C40* m = (sMsg_00269C40*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFE;
     m->vt = D_004813C0;
     m->f8 = 1;
@@ -1506,8 +1506,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern const char D_00480F18[];
-extern const char D_004804A8[];
+extern const char str_cSetupMan_Update[];
+extern const char str_StlBlock_b[];
 extern char D_004813C0[];
 
 struct sMsgListNode_00269CF0 {
@@ -1524,7 +1524,7 @@ struct sMsgListIter_00269CF0 {
 
 static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269CF0 pos, void* const& x)
 {
-    sMsgListNode_00269CF0* tmp = (sMsgListNode_00269CF0*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    sMsgListNode_00269CF0* tmp = (sMsgListNode_00269CF0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     void** data = &tmp->data;
     if (data != 0)
         *data = x;
@@ -1544,7 +1544,7 @@ struct sMsg_00269CF0 {
 extern "C" void func_00269CF0(void* self, int a1)
 {
     *(int*)self = a1;
-    sMsg_00269CF0* m = (sMsg_00269CF0*)cMemMan_alloc(0xC, D_00480F18, 0x20000000, 0);
+    sMsg_00269CF0* m = (sMsg_00269CF0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFE;
     m->vt = D_004813C0;
     m->f8 = 0;
@@ -1568,7 +1568,7 @@ void* func_00269DA0(void* self)
 INCLUDE_ASM("bx/bxstringctor", func_00269DC0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00480488[];
+extern const char str_NetEvent[];
 extern char D_004813E0[];
 
 struct sNode00269DC0 {
@@ -1579,7 +1579,7 @@ struct sNode00269DC0 {
 
 extern "C" sNode00269DC0* func_00269DC0(void* self)
 {
-    sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, D_00480488, 0x20000000, 0);
+    sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 8);
     n->kind = 0xFD;
     n->vtbl = D_004813E0;
@@ -1601,7 +1601,7 @@ void* func_00269E20(void* self)
 INCLUDE_ASM("bx/bxstringctor", func_00269E40);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00480488[];
+extern const char str_NetEvent[];
 extern char D_004813C0[];
 
 struct sNode00269E40 {
@@ -1612,7 +1612,7 @@ struct sNode00269E40 {
 
 extern "C" sNode00269E40* func_00269E40(void* self)
 {
-    sNode00269E40* n = (sNode00269E40*)cMemMan_alloc(0xC, D_00480488, 0x20000000, 0);
+    sNode00269E40* n = (sNode00269E40*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 8);
     n->kind = 0xFE;
     n->vtbl = D_004813C0;

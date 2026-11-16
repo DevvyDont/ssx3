@@ -20,7 +20,7 @@ struct sSlot_3E60 {
 int GetHashValue32(char* str);
 
 extern char D_004D3798[], D_004D37A8[], D_004D37B8[], D_004D37C8[], D_004D37D8[], D_004D37E8[], D_004D37F8[], D_004D3808[], D_004D3818[], D_004D3828[], D_004D3838[], D_004D3848[], D_004D3858[], D_004D3868[], D_004D3878[], D_004D3888[], D_004D3898[], D_004D38A8[], D_004D38B8[], D_004D38C8[], D_004D38D8[], D_004D38E8[], D_004D38F8[], D_004D3908[], D_004D3918[], D_004D3928[], D_004D3938[], D_004D3948[], D_004D3958[], D_004D3968[], D_004D3978[], D_004D3988[], D_004D3998[], D_004D39A8[], D_004D39B8[], D_004D39C8[], D_004D39D8[], D_004D39E8[], D_004D39F8[], D_004D3A08[], D_004D3A18[], D_004D3A28[], D_004D3A38[], D_004D3A48[], D_004D3A58[], D_004D3A68[], D_004D3A78[], D_004D3A88[], D_004D3A98[], D_004D3AA8[], D_004D3AB8[], D_004D3AC8[], D_004D3AD8[], D_004D3AE8[], D_004D3AF8[], D_004D3B08[];
-extern char D_004825F8[];
+extern char str_NoScript[];
 extern int D_004A51E8;
 extern int D_004A51EC;
 extern int D_004A525C;
@@ -111,7 +111,7 @@ extern "C" void __sti__all_in_one_scripter_cpp(int init, int prio)
         new (&D_004A5248) sSlot_3E60(11);
         new (&D_004A5250) sSlot_3E60(12);
         new (&D_004A5258) sSlot_3E60(13);
-        D_004A525C = GetHashValue32(D_004825F8);
+        D_004A525C = GetHashValue32(str_NoScript);
     }
 }
 #endif

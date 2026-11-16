@@ -12,19 +12,19 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(void*);
 extern "C" void* func_00372AA0(void*);
 void* func_003759E8(void*);
 extern char D_00487D28[];
-extern char D_00487BB8[];
-extern char D_00487BC8[];
-extern char D_00487BE0[];
-extern char D_00487BF0[];
-extern char D_00487C00[];
-extern char D_00487C10[];
-extern char D_00487C20[];
-extern char D_00487C30[];
-extern char D_00487C40[];
-extern char D_00487C50[];
-extern char D_00487C68[];
-extern char D_00487C78[];
-extern char D_00487C88[];
+extern char str_RenderToggles[];
+extern char str_VisualEffectsTest[];
+extern char str_LightGlow[];
+extern char str_DepthFog[];
+extern char str_HeightFog[];
+extern char str_DetailSystem[];
+extern char str_ScreenTint[];
+extern char str_SnowSurface[];
+extern char str_BoardTrail[];
+extern char str_PowerUpFXToggles[];
+extern char str_SnowfallToggles[];
+extern char str_SplashToggles[];
+extern char str_PathArrow[];
 extern char D_00487DC8[];
 extern char D_00487DF8[];
 extern char D_00487E28[];
@@ -40,10 +40,10 @@ extern char D_00492FD0[];
 extern char D_004930A0[];
 extern char D_00493178[];
 extern char D_004931A8[];
-extern char D_004A3B88[];
-extern char D_004A3B90[];
-extern char D_004A3B98[];
-extern char D_004A3BA0[];
+extern char str_Plants_b[];
+extern char str_Shadow_c[];
+extern char str_Flags_b[];
+extern char str_Tube[];
 
 struct sMgr_0548 {
     void* objs[17];
@@ -65,23 +65,23 @@ extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
     self->vptr = D_00487D28;
-    { void* effect = cMemMan_alloc(4, D_00487BB8, 0, 0); *(char**)effect = D_004931A8; self->objs[0] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487BC8, 0, 0); *(char**)effect = D_00492FD0; self->objs[1] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487BE0, 0, 0); *(char**)effect = D_00487EB8; self->objs[2] = effect; }
-    { void* effect = cMemMan_alloc(4, D_004A3B88, 0, 0); *(char**)effect = D_00493178; self->objs[3] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487BF0, 0, 0); *(char**)effect = D_00487E88; self->objs[4] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487C00, 0, 0); *(char**)effect = D_00487E58; self->objs[5] = effect; }
-    self->objs[6] = func_003759E8(cMemMan_alloc(4, D_00487C10, 0, 0));
-    { void* effect = cMemMan_alloc(4, D_00487C20, 0, 0); *(char**)effect = D_00492FA0; self->objs[7] = effect; }
-    { void* effect = cMemMan_alloc(4, D_004A3B90, 0, 0); *(char**)effect = D_00487E28; self->objs[8] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487C30, 0, 0); *(char**)effect = D_00487DF8; self->objs[9] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487C40, 0, 0); *(char**)effect = D_00487FA8; self->objs[10] = effect; }
-    { void* effect = cMemMan_alloc(4, D_004A3B98, 0, 0); *(char**)effect = D_00487DC8; self->objs[11] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487C50, 0, 0); *(char**)effect = D_00488330; self->objs[12] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487C68, 0, 0); *(char**)effect = D_00488050; self->objs[13] = effect; }
-    { void* effect = cMemMan_alloc(4, D_00487C78, 0, 0); *(char**)effect = D_004882B0; self->objs[14] = effect; }
-    { void* effect = cMemMan_alloc(4, D_004A3BA0, 0, 0); *(char**)effect = D_004930A0; self->objs[15] = effect; }
-    self->objs[16] = func_00372AA0(cMemMan_alloc(4, D_00487C88, 0, 0));
+    { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = D_004931A8; self->objs[0] = effect; }
+    { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = D_00492FD0; self->objs[1] = effect; }
+    { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; self->objs[2] = effect; }
+    { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = D_00493178; self->objs[3] = effect; }
+    { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; self->objs[4] = effect; }
+    { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = D_00487E58; self->objs[5] = effect; }
+    self->objs[6] = func_003759E8(cMemMan_alloc(4, str_DetailSystem, 0, 0));
+    { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = D_00492FA0; self->objs[7] = effect; }
+    { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = D_00487E28; self->objs[8] = effect; }
+    { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = D_00487DF8; self->objs[9] = effect; }
+    { void* effect = cMemMan_alloc(4, str_BoardTrail, 0, 0); *(char**)effect = D_00487FA8; self->objs[10] = effect; }
+    { void* effect = cMemMan_alloc(4, str_Flags_b, 0, 0); *(char**)effect = D_00487DC8; self->objs[11] = effect; }
+    { void* effect = cMemMan_alloc(4, str_PowerUpFXToggles, 0, 0); *(char**)effect = D_00488330; self->objs[12] = effect; }
+    { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = D_00488050; self->objs[13] = effect; }
+    { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; self->objs[14] = effect; }
+    { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = D_004930A0; self->objs[15] = effect; }
+    self->objs[16] = func_00372AA0(cMemMan_alloc(4, str_PathArrow, 0, 0));
     return self;
 }
 #endif
@@ -698,11 +698,11 @@ extern "C" void func_002F83B0();
 extern "C" void func_002F9838();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 extern "C" void* operator_new__FUi_17D0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00487C98[];
+extern char str_AttachedEmitterTypeData[];
 extern int D_004A3BB0;
 
 extern "C" void func_002F17D0(void) {
-    D_004A3BB0 = (int)operator_new__FUi_17D0(0x1540, D_00487C98, 0, 0);
+    D_004A3BB0 = (int)operator_new__FUi_17D0(0x1540, str_AttachedEmitterTypeData, 0, 0);
     func_002F83B0();
     func_002F9838();
 }
@@ -1129,7 +1129,7 @@ struct Obj2130 : Base2130 {
 };
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void *func_002F1768(void *);
-extern char D_00487CB0[];
+extern char str_cAttachedDynamicEmitter[];
 extern int D_004A3BB0;
 
 extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
@@ -1137,7 +1137,7 @@ extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
     int i;
     for (i = 0; i < 10; i++, p++) {
         if (*p == 0) {
-            Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(0x210, D_00487CB0, 0, 0));
+            Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(0x210, str_cAttachedDynamicEmitter, 0, 0));
             int t = D_004A3BB0 + arg1 * 0x110;
             *p = n;
             *(int *)((char*)*p + 0x200) = arg2;
@@ -1212,29 +1212,29 @@ extern "C" void func_002F22B0(void *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F22C8);
 #ifdef SKIP_ASM
 extern "C" int cAnimModel_getBoneSkelIndex(void*, int, const char*);
-extern char D_004879D8[];
-extern char D_004879E8[];
-extern char D_004879F8[];
-extern char D_00487A08[];
-extern char D_00487A18[];
-extern char D_00487A28[];
-extern char D_00487A38[];
-extern char D_00487A48[];
-extern char D_00487A58[];
-extern char D_00487A68[];
-extern char D_00487A78[];
-extern char D_00487A88[];
-extern char D_00487A98[];
-extern char D_00487AA8[];
-extern char D_00487AB8[];
-extern char D_00487AC8[];
-extern char D_00487AD8[];
-extern char D_00487AE8[];
-extern char D_00487AF8[];
-extern char D_004A3B00[];
-extern char D_004A3B08[];
-extern char D_004A3BB8[];
-extern char D_00487CC8[];
+extern char str_shinleft_b[];
+extern char str_footleft_b[];
+extern char str_shinright_b[];
+extern char str_footright_b[];
+extern char str_thighleft_b[];
+extern char str_thighright_b[];
+extern char str_lowerspine[];
+extern char str_middlespine[];
+extern char str_upperspine[];
+extern char str_clavicleleft[];
+extern char str_handright_b[];
+extern char str_bicepleft[];
+extern char str_biceptwistleft[];
+extern char str_forearmleft_b[];
+extern char str_handleft_b[];
+extern char str_clavicleright[];
+extern char str_bicepright[];
+extern char str_biceptwistright[];
+extern char str_forearmright_b[];
+extern char str_hips_b[];
+extern char str_neck[];
+extern char str_head_b[];
+extern char str_board_childg_b[];
 
 
 struct sObj_22C8 {
@@ -1246,32 +1246,32 @@ struct sObj_22C8 {
 
 extern "C" void func_002F22C8(sObj_22C8* self)
 {
-    self->h[0] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A3BB8);
-    self->h[1] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A3B08);
-    self->h[2] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A58);
-    self->h[3] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A48);
-    self->h[4] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A38);
-    self->h[5] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A3B00);
-    self->h[6] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A68);
-    self->h[7] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A88);
-    self->h[8] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A98);
-    self->h[9] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AA8);
-    self->h[10] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AB8);
-    self->h[11] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AC8);
-    self->h[12] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AD8);
-    self->h[13] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AE8);
-    self->h[14] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AF8);
-    self->h[15] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A78);
-    self->h[16] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A18);
-    self->h[17] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004879D8);
-    self->h[18] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004879E8);
-    self->h[19] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A28);
-    self->h[20] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004879F8);
-    self->h[21] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A08);
-    self->h[22] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
-    self->h[23] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
-    self->h[24] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
-    self->h[25] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
+    self->h[0] = cAnimModel_getBoneSkelIndex(self->model, 0, str_head_b);
+    self->h[1] = cAnimModel_getBoneSkelIndex(self->model, 0, str_neck);
+    self->h[2] = cAnimModel_getBoneSkelIndex(self->model, 0, str_upperspine);
+    self->h[3] = cAnimModel_getBoneSkelIndex(self->model, 0, str_middlespine);
+    self->h[4] = cAnimModel_getBoneSkelIndex(self->model, 0, str_lowerspine);
+    self->h[5] = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips_b);
+    self->h[6] = cAnimModel_getBoneSkelIndex(self->model, 0, str_clavicleleft);
+    self->h[7] = cAnimModel_getBoneSkelIndex(self->model, 0, str_bicepleft);
+    self->h[8] = cAnimModel_getBoneSkelIndex(self->model, 0, str_biceptwistleft);
+    self->h[9] = cAnimModel_getBoneSkelIndex(self->model, 0, str_forearmleft_b);
+    self->h[10] = cAnimModel_getBoneSkelIndex(self->model, 0, str_handleft_b);
+    self->h[11] = cAnimModel_getBoneSkelIndex(self->model, 0, str_clavicleright);
+    self->h[12] = cAnimModel_getBoneSkelIndex(self->model, 0, str_bicepright);
+    self->h[13] = cAnimModel_getBoneSkelIndex(self->model, 0, str_biceptwistright);
+    self->h[14] = cAnimModel_getBoneSkelIndex(self->model, 0, str_forearmright_b);
+    self->h[15] = cAnimModel_getBoneSkelIndex(self->model, 0, str_handright_b);
+    self->h[16] = cAnimModel_getBoneSkelIndex(self->model, 0, str_thighleft_b);
+    self->h[17] = cAnimModel_getBoneSkelIndex(self->model, 0, str_shinleft_b);
+    self->h[18] = cAnimModel_getBoneSkelIndex(self->model, 0, str_footleft_b);
+    self->h[19] = cAnimModel_getBoneSkelIndex(self->model, 0, str_thighright_b);
+    self->h[20] = cAnimModel_getBoneSkelIndex(self->model, 0, str_shinright_b);
+    self->h[21] = cAnimModel_getBoneSkelIndex(self->model, 0, str_footright_b);
+    self->h[22] = cAnimModel_getBoneSkelIndex(self->model, 1, str_board_childg_b);
+    self->h[23] = cAnimModel_getBoneSkelIndex(self->model, 1, str_board_childg_b);
+    self->h[24] = cAnimModel_getBoneSkelIndex(self->model, 1, str_board_childg_b);
+    self->h[25] = cAnimModel_getBoneSkelIndex(self->model, 1, str_board_childg_b);
     for (int i = 0; i < 26; i++) {
         // NOTE: empty in retail (likely a compiled-out per-handle assert)
     }

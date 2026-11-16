@@ -7,7 +7,7 @@ INCLUDE_ASM("seg/seg_1C9348", HUFF_about);
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, int flags, int align) __asm__("cMemMan_alloc");
 extern "C" void* func_00416210(void* dst, int c, unsigned int n);
-extern char D_004865C8[];
+extern char str_CODEXABOUT[];
 extern char D_004865D8[] __attribute__((aligned(8)));
 extern char D_004A3980[] __attribute__((aligned(8)));
 extern char D_004A3988[] __attribute__((aligned(8)));
@@ -47,7 +47,7 @@ struct sCodexAbout_HUFF {
  */
 extern "C" void* HUFF_about(void)
 {
-    sCodexAbout_HUFF* about = (sCodexAbout_HUFF*)operator new(0x84, D_004865C8, 0x20000000, 0);
+    sCodexAbout_HUFF* about = (sCodexAbout_HUFF*)operator new(0x84, str_CODEXABOUT, 0x20000000, 0);
     if (about != 0) {
         func_00416210(about, 0, 0x84);
         about->signature = 'HUFF';
@@ -747,8 +747,8 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void HUFF_deltabytes(unsigned char *src, unsigned char *dst, int n);
 extern "C" int HUFF_packfile_A100(void* s, void* in, void* out, int len, int mode) __asm__("HUFF_packfile");
-extern char D_00486600[];
-extern char D_00486618[];
+extern char str_HuffEncodeContext[];
+extern char str_huffdeltadata[];
 
 struct HuffBuf_A100 {
     void* buf;
@@ -774,18 +774,18 @@ extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
     int result = 0;
     void* encodeCtx;
     if (opts) mode = *opts;
-    encodeCtx = cMemMan_alloc(0x31EC, D_00486600, 0x20000000, 0);
+    encodeCtx = cMemMan_alloc(0x31EC, str_HuffEncodeContext, 0x20000000, 0);
     if (encodeCtx) {
         HuffBuf_A100 in;
         HuffBuf_A100 out;
         switch (mode) {
         case 1:
-            deltaBuf = operator_new_tag(len, D_00486618, 0x20000000, 0);
+            deltaBuf = operator_new_tag(len, str_huffdeltadata, 0x20000000, 0);
             HUFF_deltabytes((unsigned char*)src, (unsigned char*)deltaBuf, len);
             in.buf = deltaBuf;
             break;
         case 2:
-            deltaBuf = operator_new_tag(len, D_00486618, 0x20000000, 0);
+            deltaBuf = operator_new_tag(len, str_huffdeltadata, 0x20000000, 0);
             HUFF_deltabytes((unsigned char*)src, (unsigned char*)deltaBuf, len);
             HUFF_deltabytes((unsigned char*)deltaBuf, (unsigned char*)deltaBuf, len);
             in.buf = deltaBuf;

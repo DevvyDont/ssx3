@@ -6,7 +6,7 @@
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00466D88[];
+extern char str_129_rewardgallery[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001D0180(void* self);
@@ -30,7 +30,7 @@ struct sRewardGallery_F0B0 {
 extern "C" void cFEStateRewardGalleryBase_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00466D88), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_129_rewardgallery), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -114,7 +114,7 @@ INCLUDE_ASM("fe/festaterewards", func_001CF270);
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIStateStack_push(void* self, void* a1);
-extern char D_0045DC60[];
+extern char str_TransitionOut[];
 
 // g++ 2.95 vtable entries: this-adjust, index, function.
 struct sVEi_F270 {
@@ -191,7 +191,7 @@ extern "C" int func_001CF270(char* self, char* in)
                 }
             }
         }
-        cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0045DC60)), 1);
+        cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut)), 1);
         char* mgr = **(char***)(self + 0x10);
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
         void* r = vt[5].fn(mgr + vt[5].delta, self, *(int*)(self + 0x8F0) >= 0);
@@ -296,40 +296,40 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void* func_00398380(void* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_00460488[];
-extern char D_00466DA0[];
-extern char D_00466DB0[];
-extern char D_00466DC0[];
-extern char D_00466DD8[];
-extern char D_00466DE8[];
-extern char D_004A1EE8[];
+extern char str_helptext[];
+extern char str_arrow_up[];
+extern char str_arrow_down[];
+extern char str_orange_select_bar[];
+extern char str_max_rewards[];
+extern char str_num_rewards[];
+extern char str_slash[];
 extern char D_004A1EF0[];
-extern char D_0045DB90[];
-extern char D_00466DF8[];
-extern char D_00466E08[];
-extern char D_00466E18[];
-extern char D_00466E30[];
-extern char D_00466E40[];
-extern char D_00466E50[];
-extern char D_00466E60[];
-extern char D_00466E70[];
-extern char D_00466E88[];
-extern char D_00466EA0[];
-extern char D_00466EB0[];
-extern char D_00466EC0[];
-extern char D_00466ED0[];
-extern char D_00466EE8[];
-extern char D_00466EF8[];
-extern char D_00466210[];
-extern char D_00466228[];
-extern char D_00466240[];
-extern char D_00466258[];
-extern char D_00466270[];
-extern char D_00466288[];
-extern char D_00466F10[];
-extern char D_00466F20[];
-extern char D_00466F30[];
-extern char D_004A12C0[];
+extern char str_Menu0000[];
+extern char str_Poster_icon[];
+extern char str_poster_icon[];
+extern char str_trading_card_icon[];
+extern char str_art_icon[];
+extern char str_video_icon[];
+extern char str_toys_icon[];
+extern char str_screentitle[];
+extern char str_kT_OVRCMNPosters[];
+extern char str_kT_OVRCMNTradeCard[];
+extern char str_kT_OVRCMNArt[];
+extern char str_kT_OVRCMNVideos[];
+extern char str_kT_OVRCMNToys[];
+extern char str_kT_TITLECheatCharacter[];
+extern char str_Page_of_text[];
+extern char str_reward_name_colon[];
+extern char str_kT_OVRCMNPosterColon[];
+extern char str_kT_OVRCMNCardColon[];
+extern char str_kT_OVRCMNArtColon[];
+extern char str_kT_OVRCMNVideoColon[];
+extern char str_kT_OVRCMNToyColon[];
+extern char str_kT_OVRCMNCheatCharColon[];
+extern char str_reward_name[];
+extern char str_reward_cost[];
+extern char str_you_have_amount[];
+extern char str_pct_d_b[];
 extern char D_004A1408[];
 extern char* D_00441440[][8];
 extern char* D_004414C0[][8];
@@ -408,34 +408,34 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
     char buf[16];
     int hash = w->hash;
 
-    if (hash == GetHashValue32(D_00460488)) {
+    if (hash == GetHashValue32(str_helptext)) {
         self->w900 = w;
         show_F820(w, 0);
-    } else if (hash == GetHashValue32(D_00466DA0)) {
+    } else if (hash == GetHashValue32(str_arrow_up)) {
         self->w91C = w;
-    } else if (hash == GetHashValue32(D_00466DB0)) {
+    } else if (hash == GetHashValue32(str_arrow_down)) {
         self->w920 = w;
-    } else if (hash == GetHashValue32(D_00466DC0)) {
+    } else if (hash == GetHashValue32(str_orange_select_bar)) {
         self->w8F8 = w;
         show_F820(w, 0);
-    } else if (hash == GetHashValue32(D_00466DD8)) {
+    } else if (hash == GetHashValue32(str_max_rewards)) {
         self->w918 = w;
-        sprintf(buf, D_004A12C0, self->count68);
+        sprintf(buf, str_pct_d_b, self->count68);
         cUIText_setAsciiString((cUIText*)self->w918, buf);
-    } else if (hash == GetHashValue32(D_00466DE8)) {
+    } else if (hash == GetHashValue32(str_num_rewards)) {
         self->w914 = w;
-        sprintf(buf, D_004A12C0, self->count6C);
+        sprintf(buf, str_pct_d_b, self->count6C);
         cUIText_setAsciiString((cUIText*)self->w914, buf);
-    } else if (hash == GetHashValue32(D_004A1EE8)) {
+    } else if (hash == GetHashValue32(str_slash)) {
         cUIText_setAsciiString((cUIText*)w, D_004A1EF0);
-    } else if (hash == GetHashValue32(D_0045DB90)) {
+    } else if (hash == GetHashValue32(str_Menu0000)) {
         self->w8F4 = w;
-    } else if (hash == GetHashValue32(D_00466DF8)) {
+    } else if (hash == GetHashValue32(str_Poster_icon)) {
         switch (self->type) {
         case 3:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E08);
+                int h = GetHashValue32(str_poster_icon);
                 w->tex = func_00398380(ui + 0x58, h);
             }
             w->reward = -1;
@@ -443,7 +443,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         case 4:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E18);
+                int h = GetHashValue32(str_trading_card_icon);
                 w->tex = func_00398380(ui + 0x58, h);
             }
             w->reward = -1;
@@ -451,7 +451,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         case 5:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E30);
+                int h = GetHashValue32(str_art_icon);
                 w->tex = func_00398380(ui + 0x58, h);
             }
             w->reward = -1;
@@ -459,7 +459,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         case 6:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E40);
+                int h = GetHashValue32(str_video_icon);
                 w->tex = func_00398380(ui + 0x58, h);
             }
             w->reward = -1;
@@ -467,57 +467,57 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         case 7:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E50);
+                int h = GetHashValue32(str_toys_icon);
                 w->tex = func_00398380(ui + 0x58, h);
             }
             w->reward = -1;
             break;
         }
-    } else if (hash == GetHashValue32(D_00466E60)) {
+    } else if (hash == GetHashValue32(str_screentitle)) {
         switch (self->type) {
         case 3:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466E70));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNPosters));
             break;
         case 4:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466E88));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNTradeCard));
             break;
         case 5:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EA0));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNArt));
             break;
         case 6:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EB0));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNVideos));
             break;
         case 7:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EC0));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNToys));
             break;
         case 8:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466ED0));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLECheatCharacter));
             break;
         }
-    } else if (hash == GetHashValue32(D_00466EE8)) {
+    } else if (hash == GetHashValue32(str_Page_of_text)) {
         self->w904 = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
-    } else if (hash == GetHashValue32(D_00466EF8)) {
+    } else if (hash == GetHashValue32(str_reward_name_colon)) {
         int type = self->type;
         if (type == 3)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466210));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNPosterColon));
         else if (type == 4)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466228));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNCardColon));
         else if (type == 5)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466240));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNArtColon));
         else if (type == 6)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466258));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNVideoColon));
         else if (type == 7)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466270));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNToyColon));
         else if (type == 8)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466288));
-    } else if (hash == GetHashValue32(D_00466F10)) {
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNCheatCharColon));
+    } else if (hash == GetHashValue32(str_reward_name)) {
         self->w908 = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
-    } else if (hash == GetHashValue32(D_00466F20)) {
+    } else if (hash == GetHashValue32(str_reward_cost)) {
         self->w90C = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
-    } else if (hash == GetHashValue32(D_00466F30)) {
+    } else if (hash == GetHashValue32(str_you_have_amount)) {
         self->w910 = w;
         self->vt[43].fn((char*)self + self->vt[43].delta);
     } else {
@@ -960,8 +960,8 @@ extern "C" void func_001D20D8(void* self, int kind, void* data);
 extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001D2598(void* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
-extern char D_00466F78[];
-extern char D_004601D8[];
+extern char str_cFEStatePreviewReward[];
+extern char str_cFEStateVideoPlayer[];
 
 struct sVE_03F8 {
     short delta;
@@ -987,12 +987,12 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
     case 4:
     case 5:
     case 7:
-        nextState = func_001D1AA0(cMemMan_alloc(0x78, D_00466F78, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = func_001D1AA0(cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
         func_001D20D8(nextState, *(int*)((char*)self + 0x4C), data);
         break;
     case 6:
-        nextState = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = func_001D22F0(cMemMan_alloc(0x280, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
         func_001D2598(nextState, *(const char**)((char*)data + 4), 0);
         break;
@@ -1010,7 +1010,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001CAA18(void* self, int a1, int a2, int a3, int a4);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
-extern char D_00460790[];
+extern char str_cUIStateBuyPopup[];
 struct sVE_0510a {
     short delta;
     short index;
@@ -1026,7 +1026,7 @@ extern "C" void func_001D0510(void* self)
 {
     sVE_0510a* vt = *(sVE_0510a**)((char*)self + 8);
     int sel = vt[34].fn((char*)self + vt[34].delta);
-    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self,
+    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), *(void**)((char*)self + 0x10), self,
                                        *(signed char*)((char*)self + 0x44));
     sVE_0510b* vt2 = *(sVE_0510b**)((char*)self + 8);
     int a = vt2[37].fn((char*)self + vt2[37].delta, sel);
@@ -1058,14 +1058,14 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateHelpText);
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern char D_00466F90[];
-extern char D_00466FB0[];
-extern char D_00466FC8[];
-extern char D_00466FE0[];
-extern char D_00466FF8[];
-extern char D_00467010[];
-extern char D_00467028[];
-extern char D_00460958[];
+extern char str_kT_129HELPSelectCheatChar[];
+extern char str_kT_129HELPBuyInPeak1[];
+extern char str_kT_129HELPBuyInPeak2[];
+extern char str_kT_129HELPBuyInPeak3[];
+extern char str_kT_129HELPBuyItem[];
+extern char str_kT_129HELPBuyInCTM[];
+extern char str_kT_129HELPViewItem[];
+extern char str_kT_129HELPSaveCashItem[];
 
 struct sVE_0648v {
     short delta;
@@ -1123,7 +1123,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
     if (*(int*)(self + 0x4C) == 8) {
         sVE_0648i* vt = *(sVE_0648i**)(self + 8);
         if (vt[38].fn(self + vt[38].delta, idx)) {
-            setHelp_0648(self, D_00466F90);
+            setHelp_0648(self, str_kT_129HELPSelectCheatChar);
         } else if (state < 0) {
             setHelp_0648(self, *(char**)(item + 8));
         } else {
@@ -1131,45 +1131,45 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
             if (selected >= 0) {
                 if (state != selected) {
                     if (state == 1)
-                        setHelp_0648(self, D_00466FB0);
+                        setHelp_0648(self, str_kT_129HELPBuyInPeak1);
                     else if (state == 2)
-                        setHelp_0648(self, D_00466FC8);
+                        setHelp_0648(self, str_kT_129HELPBuyInPeak2);
                     else
-                        setHelp_0648(self, D_00466FE0);
+                        setHelp_0648(self, str_kT_129HELPBuyInPeak3);
                 } else {
                     sVE_0648i* vtbl = *(sVE_0648i**)(self + 8);
                     if (*(int*)(self + 0x54) < vtbl[35].fn(self + vtbl[35].delta, (int)item))
-                        setHelp_0648(self, D_00460958);
+                        setHelp_0648(self, str_kT_129HELPSaveCashItem);
                     else
-                        setHelp_0648(self, D_00466FF8);
+                        setHelp_0648(self, str_kT_129HELPBuyItem);
                 }
             } else {
-                setHelp_0648(self, D_00467010);
+                setHelp_0648(self, str_kT_129HELPBuyInCTM);
             }
         }
     } else {
         sVE_0648i* vt = *(sVE_0648i**)(self + 8);
         if (vt[38].fn(self + vt[38].delta, idx)) {
-            setHelp_0648(self, D_00467028);
+            setHelp_0648(self, str_kT_129HELPViewItem);
         } else {
             int selected = *(int*)(self + 0x8F0);
             if (selected >= 0) {
                 if (state != selected) {
                     if (state == 1)
-                        setHelp_0648(self, D_00466FB0);
+                        setHelp_0648(self, str_kT_129HELPBuyInPeak1);
                     else if (state == 2)
-                        setHelp_0648(self, D_00466FC8);
+                        setHelp_0648(self, str_kT_129HELPBuyInPeak2);
                     else
-                        setHelp_0648(self, D_00466FE0);
+                        setHelp_0648(self, str_kT_129HELPBuyInPeak3);
                 } else {
                     sVE_0648i* vtbl = *(sVE_0648i**)(self + 8);
                     if (*(int*)(self + 0x54) < vtbl[35].fn(self + vtbl[35].delta, (int)item))
-                        setHelp_0648(self, D_00460958);
+                        setHelp_0648(self, str_kT_129HELPSaveCashItem);
                     else
-                        setHelp_0648(self, D_00466FF8);
+                        setHelp_0648(self, str_kT_129HELPBuyItem);
                 }
             } else {
-                setHelp_0648(self, D_00467010);
+                setHelp_0648(self, str_kT_129HELPBuyInCTM);
             }
         }
     }
@@ -1181,8 +1181,8 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRow);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_00398380(void* self, int id);
-extern char D_00467040[];
-extern char D_00467050[];
+extern char str_dollar_sign[];
+extern char str_questmark[];
 extern char D_004C6818[];
 
 struct sVEv_08A0 {
@@ -1266,11 +1266,11 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
                 void* icon;
                 if (self->selected >= 0 && self->vt[36].fn((char*)self + self->vt[36].delta, rewardItem) == self->selected) {
                     char* ui = self->ui;
-                    int iconHash = GetHashValue32(D_00467040);
+                    int iconHash = GetHashValue32(str_dollar_sign);
                     icon = func_00398380(ui + 0x58, iconHash);
                 } else {
                     char* ui = self->ui;
-                    int iconHash = GetHashValue32(D_00467050);
+                    int iconHash = GetHashValue32(str_questmark);
                     icon = func_00398380(ui + 0x58, iconHash);
                 }
                 sGalCell_08A0* cell = self->cells[row][col];
@@ -1331,9 +1331,9 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
-extern char D_00467060[];
-extern char D_004A1EF8[];
-extern char D_004A1F00[];
+extern char str_kT_OVRCMNPageOf[];
+extern char str_R1_ps2[];
+extern char str_L1_ps2[];
 extern char D_004A1408[];
 
 struct sVEK1D0BC8a {
@@ -1360,19 +1360,19 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(void* self)
     if (obj != 0) {
         sVEK1D0BC8a* vt = *(sVEK1D0BC8a**)(obj + 4);
         char* thisp = obj + vt[4].delta;
-        unsigned short* fmt = vt[4].fn(thisp, GetHashValue32(D_00467060));
+        unsigned short* fmt = vt[4].fn(thisp, GetHashValue32(str_kT_OVRCMNPageOf));
         if (fmt != 0) {
             unsigned short buf[100];
             int per = *(int*)((char*)self + 0x58);
             int pages = (*(int*)((char*)self + 0x60) + per - 1) / per;
             sprintf1(buf, fmt, (*(int*)((char*)self + 0x64) + per - 1) / per + 1, pages);
             cUIText_setUnicodeString(*(void**)((char*)self + 0x904), buf);
-            char* buttonPrompt = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1EF8));
+            char* buttonPrompt = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_R1_ps2));
             if (buttonPrompt != 0) {
                 sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(buttonPrompt + 8);
                 vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
             }
-            buttonPrompt = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F00));
+            buttonPrompt = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_L1_ps2));
             if (buttonPrompt != 0) {
                 sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(buttonPrompt + 8);
                 vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
@@ -1468,17 +1468,17 @@ INCLUDE_ASM("fe/festaterewards", func_001D0EB8);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004A12C0[];
+extern char str_pct_d_b[];
 
 extern "C" void func_001D0EB8(void* self)
 {
     char buf[32];
     if (*(cUIText**)((char*)self + 0x918) != 0) {
-        sprintf(buf, D_004A12C0, *(int*)((char*)self + 0x6C));
+        sprintf(buf, str_pct_d_b, *(int*)((char*)self + 0x6C));
         cUIText_setAsciiString(*(cUIText**)((char*)self + 0x918), buf);
     }
     if (*(cUIText**)((char*)self + 0x914) != 0) {
-        sprintf(buf, D_004A12C0, *(int*)((char*)self + 0x68));
+        sprintf(buf, str_pct_d_b, *(int*)((char*)self + 0x68));
         cUIText_setAsciiString(*(cUIText**)((char*)self + 0x914), buf);
     }
 }
@@ -2171,8 +2171,8 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int fla
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00467140[];
-extern char D_004A1398[];
+extern char str_130rewardposter[];
+extern char str_Menu[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -2183,12 +2183,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStatePreviewReward_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467140), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_130rewardposter), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1398));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu));
     if (obj != 0) {
         *(int*)((char*)obj + 0x90) |= 8;
     }
@@ -2198,24 +2198,24 @@ extern "C" void cFEStatePreviewReward_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetCreate);
 #ifdef SKIP_ASM
-extern char D_00466DF8[];
-extern char D_00466E08[];
-extern char D_00466E18[];
-extern char D_00466E30[];
-extern char D_00466E50[];
-extern char D_00466E60[];
-extern char D_00466E70[];
-extern char D_00466E88[];
-extern char D_00466EA0[];
-extern char D_00467150[];
-extern char D_00466EC0[];
-extern char D_00466F10[];
-extern char D_00467160[];
-extern char D_00467170[];
-extern char D_00467188[];
-extern char D_00467198[];
-extern char D_004671A8[];
-extern char D_004671C0[];
+extern char str_Poster_icon[];
+extern char str_poster_icon[];
+extern char str_trading_card_icon[];
+extern char str_art_icon[];
+extern char str_toys_icon[];
+extern char str_screentitle[];
+extern char str_kT_OVRCMNPosters[];
+extern char str_kT_OVRCMNTradeCard[];
+extern char str_kT_OVRCMNArt[];
+extern char str_kT_OVRCMNVideo[];
+extern char str_kT_OVRCMNToys[];
+extern char str_reward_name[];
+extern char str_Square_shape[];
+extern char str_Horizontal_shape[];
+extern char str_Vertical_shape[];
+extern char str_Square_bitmap[];
+extern char str_Horizontal_bitmap[];
+extern char str_Vertical_bitmap[];
 
 struct sVE_1C98 {
     short delta;
@@ -2263,12 +2263,12 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         return;
 
     int hash = w->hash;
-    if (hash == GetHashValue32(D_00466DF8)) {
+    if (hash == GetHashValue32(str_Poster_icon)) {
         switch (self->type) {
         case 3:
             {
                 char* ui = self->ui;
-                int iconHash = GetHashValue32(D_00466E08);
+                int iconHash = GetHashValue32(str_poster_icon);
                 w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
@@ -2276,7 +2276,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         case 4:
             {
                 char* ui = self->ui;
-                int iconHash = GetHashValue32(D_00466E18);
+                int iconHash = GetHashValue32(str_trading_card_icon);
                 w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
@@ -2284,7 +2284,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         case 5:
             {
                 char* ui = self->ui;
-                int iconHash = GetHashValue32(D_00466E30);
+                int iconHash = GetHashValue32(str_art_icon);
                 w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
@@ -2292,31 +2292,31 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         case 7:
             {
                 char* ui = self->ui;
-                int iconHash = GetHashValue32(D_00466E50);
+                int iconHash = GetHashValue32(str_toys_icon);
                 w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
         }
-    } else if (hash == GetHashValue32(D_00466E60)) {
+    } else if (hash == GetHashValue32(str_screentitle)) {
         switch (self->type) {
         case 3:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466E70));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNPosters));
             break;
         case 4:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466E88));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNTradeCard));
             break;
         case 5:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EA0));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNArt));
             break;
         case 6:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467150));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNVideo));
             break;
         case 7:
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00466EC0));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNToys));
             break;
         }
-    } else if (hash == GetHashValue32(D_00466F10)) {
+    } else if (hash == GetHashValue32(str_reward_name)) {
         switch (self->type) {
         case 4:
             w->vt[9].fn((char*)w + w->vt[9].delta, 0);
@@ -2329,20 +2329,20 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         case 6:
             break;
         }
-    } else if (hash == GetHashValue32(D_00467160)) {
+    } else if (hash == GetHashValue32(str_Square_shape)) {
         self->frames[0] = w;
         w->vt[9].fn((char*)w + w->vt[9].delta, 0);
-    } else if (hash == GetHashValue32(D_00467170)) {
+    } else if (hash == GetHashValue32(str_Horizontal_shape)) {
         self->frames[1] = w;
         w->vt[9].fn((char*)w + w->vt[9].delta, 0);
-    } else if (hash == GetHashValue32(D_00467188)) {
+    } else if (hash == GetHashValue32(str_Vertical_shape)) {
         self->frames[2] = w;
         w->vt[9].fn((char*)w + w->vt[9].delta, 0);
-    } else if (hash == GetHashValue32(D_00467198)) {
+    } else if (hash == GetHashValue32(str_Square_bitmap)) {
         self->items[0] = w;
-    } else if (hash == GetHashValue32(D_004671A8)) {
+    } else if (hash == GetHashValue32(str_Horizontal_bitmap)) {
         self->items[1] = w;
-    } else if (hash == GetHashValue32(D_004671C0)) {
+    } else if (hash == GetHashValue32(str_Vertical_bitmap)) {
         self->items[2] = w;
     }
     int sel = self->sel;
@@ -2410,7 +2410,7 @@ int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0039F190(void* self, int a1);
-extern char D_0045DC60[];
+extern char str_TransitionOut[];
 struct sVE_1FF0a {
     short delta;
     short index;
@@ -2453,7 +2453,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
             vt2[9].fn(bitmap + vt2[9].delta, 0);
         }
     }
-    cUIScreen_playFrame(*(void**)((char*)self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0045DC60)), 1);
+    cUIScreen_playFrame(*(void**)((char*)self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut)), 1);
     func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
     return 1;
     }
@@ -2610,11 +2610,11 @@ INCLUDE_ASM("fe/festaterewards", func_001D23E0);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002533C8(void* mem);
 extern "C" void func_001D25E8(void* self);
-extern char D_00461320[];
+extern char str_MoviePlayer[];
 
 extern "C" void func_001D23E0(void* self)
 {
-    *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(0x44, D_00461320, 0, 0));
+    *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(0x44, str_MoviePlayer, 0, 0));
     func_001D25E8(self);
 }
 #endif

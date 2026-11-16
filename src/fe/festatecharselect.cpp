@@ -7,7 +7,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
 struct sVec4_181148 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sCam_181148 { char pad[0x10]; float fov; };
 int GetHashValue32(char* str);
-extern char D_0045D600[];
+extern char str_08sel_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
@@ -24,7 +24,7 @@ extern "C" void func_0019E538(void* self, int a1);
 extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D600), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_08sel_char), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -121,7 +121,7 @@ extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_00181EF0(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
-extern char D_004A1398[];
+extern char str_Menu[];
 
 /**
  * Gives the character-select screen the focus: selects the player's character in "Menu" and shows the rider.
@@ -138,7 +138,7 @@ extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
     int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     for (; i < 10; i++) {
         if (D_00440F68[i] == id) {
-            void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1398));
+            void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu));
             if (menu != 0)
                 cUIMenu_setSelectedByIndex(menu, i);
             break;
@@ -285,11 +285,11 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern signed char D_00535C11[];
 extern signed char D_00440F68[];
-extern char D_0045D610[];
-extern char D_0045D620[];
-extern char D_0045D638[];
-extern char D_0045D658[];
-extern char D_0045D678[];
+extern char str_names_menu[];
+extern char str_titlesel_character[];
+extern char str_titlesel_character_multi[];
+extern char str_kT_TITLEPlayer1SelectCharacter[];
+extern char str_kT_TITLEPlayer2SelectCharacter[];
 struct sCharKey_1620 { char c[2]; };
 extern sCharKey_1620 D_004A13A0[];
 
@@ -326,24 +326,24 @@ static inline void refresh_1620(sWidget_1620* w)
 extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
 {
     int hashName = w->hash;
-    if (hashName == GetHashValue32(D_0045D610)) {
+    if (hashName == GetHashValue32(str_names_menu)) {
         w->b0 = 0;
         w->b7 = 1;
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (hashName == GetHashValue32(D_0045D620) && D_00535C11[0] == 2) {
+    if (hashName == GetHashValue32(str_titlesel_character) && D_00535C11[0] == 2) {
         refresh_1620(w);
         return;
     }
-    if (hashName == GetHashValue32(D_0045D638)) {
+    if (hashName == GetHashValue32(str_titlesel_character_multi)) {
         if (D_00535C11[0] == 2) {
             switch (*(signed char*)(self + 0x44)) {
             case 0:
-                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0045D658));
+                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLEPlayer1SelectCharacter));
                 break;
             case 1:
-                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0045D678));
+                cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLEPlayer2SelectCharacter));
                 break;
             }
             return;
@@ -384,8 +384,8 @@ extern "C" void func_00147448(void* iface, int rider, int id);
 extern "C" void func_001474A8(void* iface, int rider, int id);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern signed char D_00440F68[];
-extern char D_0045D698[];
-extern char D_0045D6A8[];
+extern char str_FEOptions[];
+extern char str_cFEStateProfileLoad[];
 
 class cWidgetBase_17E8 {
 public:
@@ -521,7 +521,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         func_001472C8(iface, self->rider, self->player);
         refresh_17E8(iface);
-        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), self->engine, 1);
+        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), self->engine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(self->engine + 0x18, st, 0, 0);
         func_0019E538(riderSlot_17E8(self), 0);
@@ -532,7 +532,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         func_001472C8(iface, self->rider, self->player);
         refresh_17E8(iface);
-        void* st = func_0018ECA0(cMemMan_alloc(0x280, D_0045D6A8, 0x100, 0), self->engine, 2, 1 << self->player);
+        void* st = func_0018ECA0(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0x100, 0), self->engine, 2, 1 << self->player);
         cUIStateStack_push(self->engine + 0x18, st);
         char* top = *(char**)self->engine;
         if (top != 0)
@@ -567,13 +567,13 @@ extern "C" void cUIProgress_setValue(void* bar, int v);
 extern "C" double fptodp(float f);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004A13B0;
-extern char D_0045D6F0[];
-extern char D_004A13B8[];
+extern char str_pct_1f;
+extern char str_NumAttrOver[];
+extern char str_overall[];
 struct sStr9_181BD0 { char c[9]; };
 struct sStr4_181BD0 { char c[4]; };
 extern sStr9_181BD0 D_0045D6E0;
-extern char D_004A13A8[];
+extern char str_0pb[];
 
 class cFEVObj_181BD0 {
 public:
@@ -596,7 +596,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
 {
     sStr9_181BD0 name = D_0045D6E0;
     char bar[8];
-    *(sStr4_181BD0*)bar = *(sStr4_181BD0*)D_004A13A8;
+    *(sStr4_181BD0*)bar = *(sStr4_181BD0*)str_0pb;
     func_00416210(bar + 4, 0, 4);
     char buf[100];
     int stats[7];
@@ -620,7 +620,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
             // PORT: g++ minimum/maximum operator
             int c = v >? 0;
             total += v;
-            sprintf(buf, &D_004A13B0, fptodp((float)v * k));
+            sprintf(buf, &str_pct_1f, fptodp((float)v * k));
             t->v09(1);
             cUIText_setAsciiString((cUIText*)t, buf);
             *(int*)(b + 0x80) = 0x37;
@@ -628,9 +628,9 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
         }
     }
     total -= total % 5;
-    char* ovr = D_004A13B8;
-    cUIText* avg = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D6F0));
-    sprintf(buf, &D_004A13B0, fptodp((float)total * 0.02857142873108387f));
+    char* ovr = str_overall;
+    cUIText* avg = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_NumAttrOver));
+    sprintf(buf, &str_pct_1f, fptodp((float)total * 0.02857142873108387f));
     cUIText_setAsciiString(avg, buf);
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 0x37;
@@ -828,7 +828,7 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045D780[];
+extern char str_131cheat_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -838,7 +838,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateCheatCharSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D780), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_131cheat_char), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -850,10 +850,10 @@ extern "C" void cFEStateCheatCharSelect_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetCreate);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char D_004A1400[];
-extern char D_0045D790[];
-extern char D_0045D7A0[];
-extern char D_0045D7B0[];
+extern char str_6pics[];
+extern char str_arrowleft[];
+extern char str_arrowright[];
+extern char str_nametext[];
 extern char D_004A1408[];
 extern char* D_00440FA0[];
 extern char D_004C66B8[];
@@ -906,24 +906,24 @@ static inline void vcall_2460(sCW_2460* w, int k, int v)
 extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_2460* w)
 {
     int hashName = w->hash;
-    if (hashName == GetHashValue32(D_004A1400)) {
+    if (hashName == GetHashValue32(str_6pics)) {
         self->f6C = w;
         w->id18 = 0;
         self->f6C->b0 = 0;
         if (self->count >= 6) cUIMenu_setScrollableMenu(self->f6C, self->count);
         return;
     }
-    if (hashName == GetHashValue32(D_0045D790)) {
+    if (hashName == GetHashValue32(str_arrowleft)) {
         self->f48 = w;
         vcall_2460(w, 9, self->count >= 7);
         return;
     }
-    if (hashName == GetHashValue32(D_0045D7A0)) {
+    if (hashName == GetHashValue32(str_arrowright)) {
         self->f4C = w;
         vcall_2460(w, 9, self->count >= 7);
         return;
     }
-    if (hashName == GetHashValue32(D_0045D7B0)) {
+    if (hashName == GetHashValue32(str_nametext)) {
         self->f50 = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
         return;

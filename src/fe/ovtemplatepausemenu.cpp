@@ -43,7 +43,7 @@ extern "C" int func_00231AB8(void* game);
 extern "C" void* func_0028B180();
 
 
-extern char D_004A2470[];
+extern char str_Menu_b[];
 
 extern unsigned char D_004A2468;
 
@@ -55,9 +55,9 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
 extern "C" void cSSXAudio_PauseAudio(void* audio);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern char D_0046F818[];
-extern char D_0046F830[];
-extern char* D_00441BC0[];
+extern char str_cOVTemplate_PauseMenu[];
+extern char str_31paus_freeride[];
+extern char* str_H_J[];
 
 struct sPauseMenu_PM {
     char pad0[0xC];
@@ -92,9 +92,9 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
 {
     sPauseMenu_PM* self = (sPauseMenu_PM*)state;
     char name[2];
-    self->f0C = GetHashValue32(D_0046F818);
+    self->f0C = GetHashValue32(str_cOVTemplate_PauseMenu);
     void* engine = self->engine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F830), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_31paus_freeride), 0);
     self->screen = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -107,13 +107,13 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
         char* textObj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
         if (textObj != 0) {
             if (i < self->fBC) {
-                int nameHash = GetHashValue32(D_00441BC0[self->a9C[i]]);
+                int nameHash = GetHashValue32(str_H_J[self->a9C[i]]);
                 char* mgr = *(char**)((char*)self->engine + 0x10);
                 sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(mgr + 4);
                 if (vt[4].fn(mgr + vt[4].delta, nameHash) != 0) {
                     cUIText_setUnicodeStringByID((cUIText*)textObj, nameHash);
                 } else {
-                    cUIText_setAsciiString((cUIText*)textObj, D_00441BC0[self->a9C[i]]);
+                    cUIText_setAsciiString((cUIText*)textObj, str_H_J[self->a9C[i]]);
                 }
                 *(int*)(textObj + 0x18) = self->a9C[i];
             } else {
@@ -145,7 +145,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
             }
         }
     }
-    void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2470));
+    void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu_b));
     if (menu != 0) {
         cUIMenu_setSelectedByIndex(menu, D_004A2468);
     }
@@ -160,7 +160,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_00441C30[];
-extern char D_0046F840[];
+extern char str_pct_s_group[];
 
 struct sVec3_001F8448 {
     float x, y, z;
@@ -179,7 +179,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(void* self)
     if (*(int*)((char*)self + 0xD4) != 0) {
         *(int*)((char*)self + 0xD4) = 0;
         for (int i = 0; i < 14; i++) {
-            sprintf(buf, D_0046F840, D_00441C30[i]);
+            sprintf(buf, str_pct_s_group, D_00441C30[i]);
             char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf));
             if (obj != 0) {
                 sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
@@ -188,7 +188,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(void* self)
         }
         for (int i = 0; i < 8; i++) {
             if (i < *(int*)((char*)self + 0xBC)) {
-                sprintf(buf, D_0046F840, D_00441C30[((int*)((char*)self + 0x9C))[i]]);
+                sprintf(buf, str_pct_s_group, D_00441C30[((int*)((char*)self + 0x9C))[i]]);
                 char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf));
                 if (obj != 0) {
                     sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
@@ -295,8 +295,8 @@ extern int D_004A2A50;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
-extern char D_004A2478[];
-extern char D_0046F850[];
+extern char str_NewMail[];
+extern char str_trans_out[];
 
 struct sColor_1F8728 { float r, g, b, a; };
 struct sVEnt_1F8728 { short delta; short index; void (*fn)(void*, void*); };
@@ -326,7 +326,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
             *(float*)((char*)self + 0xC8) = 0.0f;
             *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
         }
-        char* uiObj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(D_004A2478));
+        char* uiObj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(str_NewMail));
         if (uiObj != 0)
         {
             sColor_1F8728 color = *(sColor_1F8728*)(uiObj + 0x1C);
@@ -348,7 +348,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
     cGameComm* comm = cGameComm_mGameComm;
     comm->mPauseTimeout = -1;
     comm->mOverlayTimeout = -1;
-    int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(D_0046F850));
+    int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(str_trans_out));
     cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
     *(int*)((char*)self + 0xD0) = 1;
     cOVStateManager_removePDATemplate();
@@ -430,11 +430,11 @@ extern int D_004428F0[];
 extern unsigned char D_004A2468;
 extern int D_004A2594;
 extern int D_004A2708;
-extern char D_004A2470[];
-extern char D_004A2480[];
-extern char D_0046F850[];
-extern char D_0046F860[];
-extern char* D_00441BF8[];
+extern char str_Menu_b[];
+extern char str_help0[];
+extern char str_trans_out[];
+extern char str_cFEStateAudioOptions_b[];
+extern char* str_H_J_b[];
 extern char D_004C8AE8[];
 extern char D_004C8AF8[];
 extern char D_004C8B08[];
@@ -506,14 +506,14 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         sSnd_PMWE* snd = &D_004A5A58;
         if (*(sSnd_PMWE**)(self->owner + 0x14) != 0)
             snd = *(sSnd_PMWE**)(self->owner + 0x14);
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2470));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu_b));
         if (self->enabled[w->idx] == 0) {
             snd->vt[2].fn((char*)snd + snd->vt[2].delta, 4);
             return;
         }
         snd->vt[2].fn((char*)snd + snd->vt[2].delta, 6);
         D_004A2468 = *((unsigned char*)text + 0x95);
-        int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(D_0046F850));
+        int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(str_trans_out));
         cUIScreen_playFrame(self->screen, frame, 1);
         self->busy = 1;
         switch (w->idx) {
@@ -533,7 +533,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             break;
         case 4: {
             char* owner = (char*)SSXApp->Game->UI;
-            char* popup = (char*)cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_0046F860, 0, 0), owner, 0, 0);
+            char* popup = (char*)cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions_b, 0, 0), owner, 0, 0);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(owner + 0x18, popup, 0, 0);
             break;
@@ -583,9 +583,9 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             if (self->busy == 0)
                 cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 1);
         }
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2480));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_help0));
         if (text != 0)
-            cUIText_setUnicodeStringByID(text, GetHashValue32(D_00441BF8[w->idx]));
+            cUIText_setUnicodeStringByID(text, GetHashValue32(str_H_J_b[w->idx]));
         break;
     }
     case 2:
@@ -630,8 +630,8 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_00441C30[];
-extern char D_004A2488[];
-extern char D_004A2490[];
+extern char str_pct_s_S[];
+extern char str_pct_s_R[];
 
 /**
  * Plays an option's PDA icon animation: "<icon>_S" when it gains focus, "<icon>_R" (release) when it loses
@@ -644,13 +644,13 @@ extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int o
 {
     char buf[64];
     if (on) {
-        sprintf(buf, D_004A2488, D_00441C30[idx]);
+        sprintf(buf, str_pct_s_S, D_00441C30[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(buf));
         if (frame != 0xFFFF && *(void**)((char*)self + 0xC4) == 0) {
             *(void**)((char*)self + 0xC4) = cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
         }
     } else {
-        sprintf(buf, D_004A2490, D_00441C30[idx]);
+        sprintf(buf, str_pct_s_R, D_00441C30[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(buf));
         if (frame != 0xFFFF) {
             *(unsigned short*)((char*)*(void**)((char*)self + 0xC4) + 0xC) = frame;

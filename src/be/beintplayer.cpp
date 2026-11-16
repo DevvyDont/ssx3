@@ -46,7 +46,7 @@ cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPla
 #endif
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A1D8[];
+extern const char str_BENewPlayerInt[];
 extern void* D_004A11C0;
 
 //99.24%
@@ -62,7 +62,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getThis__Fv);
 void* cBENewPlayerInterface_getThis()
 {
     if (D_004A11C0 == 0) {
-        void* mem = cMemMan_alloc(0x10, D_0045A1D8, 0, 0);
+        void* mem = cMemMan_alloc(0x10, str_BENewPlayerInt, 0, 0);
         D_004A11C0 = cBENewPlayerInterface_cBENewPlayerInterface((cBENewPlayerInterfaceCtor*)mem);
     }
     return D_004A11C0;
@@ -852,10 +852,10 @@ extern "C" void* cBE_getBE();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern unsigned int D_00535610[];
-extern char D_0045A228[];
-extern char D_0045A238[];
-extern char D_0045A248[];
-extern char D_0045A258[];
+extern char str_PLAYER_pct_d[];
+extern char str_JOUEUR_pct_d[];
+extern char str_SPIELER_pct_d[];
+extern char str_JUGADOR_pct_d[];
 
 // Returns the display name for player idx (network names in a net game, else a default "Player N").
 extern "C" char* func_00146F88(void* self, int idx)
@@ -876,16 +876,16 @@ extern "C" char* func_00146F88(void* self, int idx)
         cBE_getInterface_Fv(cBE_getBE(), 4);
         switch ((int)((D_00535610[0] >> 22) & 7)) {
         case 0:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, D_0045A228, idx + 1);
+            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_PLAYER_pct_d, idx + 1);
             break;
         case 1:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, D_0045A238, idx + 1);
+            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_JOUEUR_pct_d, idx + 1);
             break;
         case 2:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, D_0045A248, idx + 1);
+            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_SPIELER_pct_d, idx + 1);
             break;
         case 3:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, D_0045A258, idx + 1);
+            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_JUGADOR_pct_d, idx + 1);
             break;
         }
     }
@@ -911,7 +911,7 @@ extern "C" unsigned int strlen(const char* s);
 int GetHashValue32(char* str);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" char* strcpy2(char* dst, unsigned short* src);
-extern char D_0045A268[];
+extern char str_kT_MEMPlayerName[];
 
 struct sVtEntry_00147170 {
     short delta;
@@ -934,7 +934,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
         unsigned short buf[0x68];
         char* db = (char*)SSXApp->FELocale;
         sVtEntry_00147170* vt = *(sVtEntry_00147170**)(db + 4);
-        sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(D_0045A268)), idx + 1);
+        sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
         strcpy2(name, buf);
     }
     return name;
@@ -1679,7 +1679,7 @@ struct cBEIface_00147F78
     void* vtable;
 };
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A280[];
+extern const char str_BECharInt[];
 extern sVTablePlayer_00147F78 cBEStatInterface_vtbl;
 extern void* D_004A11C4;
 
@@ -1694,7 +1694,7 @@ extern void* D_004A11C4;
 extern "C" void* cBEStatInterface_getThis(void)
 {
     if (D_004A11C4 == 0) {
-        cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
+        cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         D_004A11C4 = mem;
         sVTablePlayer_00147F78* vt = &cBEStatInterface_vtbl;
         short thisAdjust = vt->delta;

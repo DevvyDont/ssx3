@@ -8,7 +8,7 @@
 // Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
 // (movie/movieplayer.cpp).
 //
-// Size 0x1500 [R]: func_002C22C8 cMemMan_alloc(0x1500, D_00485FF0, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
+// Size 0x1500 [R]: func_002C22C8 cMemMan_alloc(0x1500, str_cPS2MemCard, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
 // Base: cMemCard (On Tour DWARF: size 0x4, no data, so only its vptr; the dtor cPS2MemCard__cPS2MemCard stores cMemCard's
 // vtable D_004871E8 back before the base dtor runs). cPS2MemCard's vtable cPS2MemCard_vtbl (76 slots; 59 slot
 // functions in this unit, 17 inline accessors emitted in seg_1D3510 at 0x002D37B8-0x002D39B0). EA's source:
@@ -174,7 +174,7 @@ struct cPS2MemCard {
                                     //       sceMcDelete of the icon files)
     char unk_0B9[0x40];             // 0x00B9 [R] Reset clears it; [U] the file name (slots 34-37, func_002C4788)
     char unk_0F9[0x40];             // 0x00F9 [R] Reset clears it; [U] the file path "<name>/<name>" (sprintf
-                                    //       D_004A3948) for sceMcOpen/Mkdir/Delete
+                                    //       str_pct_s_pct_s_h) for sceMcOpen/Mkdir/Delete
     char unk_139[0x40];             // 0x0139 [R] Reset clears it; [U] the sceMcGetDir pattern (slot 6 func_002C41D8)
     char pad_179[0x3];              // 0x0179
     tPS2MemCardDevice unk_17C[2];   // 0x017C [R] Reset clears both; [P] kMCMaxDevices (GetMaxDevices returns 2);

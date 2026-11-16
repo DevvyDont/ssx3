@@ -28,8 +28,8 @@ int cBELibrary_getRiderIndex(int rider) __asm__("cBELibrary_getRiderIndex__Fi");
 extern "C" int func_00148950(void* iface, int rider);
 extern "C" char* func_00156B28(void* self, int a1, int a2);
 extern "C" void func_001D3160_Room(void* self) __asm__("func_001D3160");
-extern char D_00467208[];
-extern char D_00467218[];
+extern char str_dot_loc_arrow[];
+extern char str_dot_visit_arrow[];
 
 struct sMountainRoomK2678 {
     char pad_0x00[0x44];
@@ -114,8 +114,8 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     room->fBC = -1;
     room->fC4 = -1;
     room->fC0 = item;
-    room->fAC = func_00398380((char*)ui + 0x58, GetHashValue32(D_00467208));
-    room->fA8 = func_00398380((char*)ui + 0x58, GetHashValue32(D_00467218));
+    room->fAC = func_00398380((char*)ui + 0x58, GetHashValue32(str_dot_loc_arrow));
+    room->fA8 = func_00398380((char*)ui + 0x58, GetHashValue32(str_dot_visit_arrow));
     func_001D3160_Room(self);
     return self;
 }
@@ -171,10 +171,10 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
-extern char D_00467228[];
-extern char D_004A1F08[];
-extern char D_004A1F10[];
-extern char D_004A1F18[];
+extern char str_125mountainroom[];
+extern char str_Numb_1[];
+extern char str_Numb_2[];
+extern char str_Numb_3[];
 extern char D_004A14F8[];
 extern char D_004A1500[];
 extern char D_004A1508[];
@@ -186,20 +186,20 @@ extern char D_004A1508[];
 extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467228), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_125mountainroom), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F08));
+    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_1));
     if (textObj1 != 0) {
         cUIText_setAsciiString(textObj1, D_004A14F8);
     }
-    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F10));
+    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_2));
     if (textObj2 != 0) {
         cUIText_setAsciiString(textObj2, D_004A1500);
     }
-    cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F18));
+    cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_3));
     if (c != 0) {
         cUIText_setAsciiString(c, D_004A1508);
     }
@@ -240,38 +240,38 @@ extern "C" void func_00416210(void* dst, int c, int n);
 
 struct sName5_2AD0 { char c[5]; };
 extern sName5_2AD0 D_00467298[];
-extern char D_00466E60[];
-extern char D_00467238[];
-extern char D_00467250[];
-extern char D_004A1F20[];
-extern char D_00467260[];
-extern char D_00467270[];
-extern char D_00467280[];
-extern char D_004672A0[];
-extern char D_004672B0[];
-extern char D_004672C0[];
-extern char D_004672D0[];
-extern char D_004672E0[];
-extern char D_004672F0[];
-extern char D_00467308[];
-extern char D_00467320[];
-extern char D_00467338[];
-extern char D_00467348[];
-extern char D_00467358[];
-extern char D_00467368[];
-extern char D_00467380[];
-extern char D_00467398[];
-extern char D_004673B0[];
-extern char D_004673D0[];
-extern char D_004673F0[];
-extern char D_00467410[];
-extern char D_00467420[];
-extern char D_00467430[];
-extern char D_00467440[];
-extern char D_004A1F28[];
-extern char D_004A1F30[];
-extern char D_004A1F38[];
-extern char D_00460488[];
+extern char str_screentitle[];
+extern char str_kT_TITLETrophyRoom[];
+extern char str_Group_peak_pass[];
+extern char str_Front[];
+extern char str_peak_pass[];
+extern char str_level_numb_back[];
+extern char str_level_numb_front[];
+extern char str_mrk_race_0[];
+extern char str_mrk_race_1[];
+extern char str_mrk_race_2[];
+extern char str_mrk_race_3[];
+extern char str_mrk_race_4[];
+extern char str_mrk_slopestyle_0[];
+extern char str_mrk_slopestyle_1[];
+extern char str_mrk_slopestyle_2[];
+extern char str_mrk_superpipe_0[];
+extern char str_mrk_superpipe_1[];
+extern char str_mrk_superpipe_2[];
+extern char str_mrk_racebackcountry_0[];
+extern char str_mrk_racebackcountry_1[];
+extern char str_mrk_racebackcountry_2[];
+extern char str_mrk_freestylebackcountry_0[];
+extern char str_mrk_freestylebackcountry_1[];
+extern char str_mrk_freestylebackcountry_2[];
+extern char str_mrk_bigair_0[];
+extern char str_mrk_bigair_1[];
+extern char str_mrk_bigair_2[];
+extern char str_Peak_pass_text[];
+extern char str_peak1[];
+extern char str_peak2[];
+extern char str_peak3[];
+extern char str_helptext[];
 
 struct sWVEnt_2AD0 { short delta; short index; void (*fn)(void*, int); };
 
@@ -313,23 +313,23 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
 {
     char* state = (char*)self;
     int widgetHash = w->hash;
-    if (widgetHash == GetHashValue32(D_00466E60)) {
-        cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467238));
+    if (widgetHash == GetHashValue32(str_screentitle)) {
+        cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLETrophyRoom));
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467250)) {
+    if (widgetHash == GetHashValue32(str_Group_peak_pass)) {
         setW_2AD0(state, 0x48, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004A1F20)) {
+    if (widgetHash == GetHashValue32(str_Front)) {
         setW_2AD0(state, 0x4C, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467260)) {
+    if (widgetHash == GetHashValue32(str_peak_pass)) {
         *(sWidget_2AD0**)(state + 0x50) = w;
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467270) || widgetHash == GetHashValue32(D_00467280)) {
+    if (widgetHash == GetHashValue32(str_level_numb_back) || widgetHash == GetHashValue32(str_level_numb_front)) {
         char buf[20];
         *(sName5_2AD0*)buf = D_00467298[0];
         func_00416210(buf + 5, 0, 15);
@@ -341,103 +341,103 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         w->f7C = r;
         return;
     }
-    if (widgetHash == GetHashValue32(D_004672A0)) {
+    if (widgetHash == GetHashValue32(str_mrk_race_0)) {
         setW_2AD0(state, 0x58, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004672B0)) {
+    if (widgetHash == GetHashValue32(str_mrk_race_1)) {
         setW_2AD0(state, 0x5C, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004672C0)) {
+    if (widgetHash == GetHashValue32(str_mrk_race_2)) {
         setW_2AD0(state, 0x60, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004672D0)) {
+    if (widgetHash == GetHashValue32(str_mrk_race_3)) {
         setW_2AD0(state, 0x64, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004672E0)) {
+    if (widgetHash == GetHashValue32(str_mrk_race_4)) {
         setW_2AD0(state, 0x68, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004672F0)) {
+    if (widgetHash == GetHashValue32(str_mrk_slopestyle_0)) {
         setW_2AD0(state, 0x6C, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467308)) {
+    if (widgetHash == GetHashValue32(str_mrk_slopestyle_1)) {
         setW_2AD0(state, 0x70, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467320)) {
+    if (widgetHash == GetHashValue32(str_mrk_slopestyle_2)) {
         setW_2AD0(state, 0x74, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467338)) {
+    if (widgetHash == GetHashValue32(str_mrk_superpipe_0)) {
         setW_2AD0(state, 0x90, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467348)) {
+    if (widgetHash == GetHashValue32(str_mrk_superpipe_1)) {
         setW_2AD0(state, 0x94, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467358)) {
+    if (widgetHash == GetHashValue32(str_mrk_superpipe_2)) {
         setW_2AD0(state, 0x98, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467368)) {
+    if (widgetHash == GetHashValue32(str_mrk_racebackcountry_0)) {
         setW_2AD0(state, 0x78, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467380)) {
+    if (widgetHash == GetHashValue32(str_mrk_racebackcountry_1)) {
         setW_2AD0(state, 0x7C, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467398)) {
+    if (widgetHash == GetHashValue32(str_mrk_racebackcountry_2)) {
         setW_2AD0(state, 0x80, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004673B0)) {
+    if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_0)) {
         setW_2AD0(state, 0x84, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004673D0)) {
+    if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_1)) {
         setW_2AD0(state, 0x88, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_004673F0)) {
+    if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_2)) {
         setW_2AD0(state, 0x8C, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467410)) {
+    if (widgetHash == GetHashValue32(str_mrk_bigair_0)) {
         setW_2AD0(state, 0x9C, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467420)) {
+    if (widgetHash == GetHashValue32(str_mrk_bigair_1)) {
         setW_2AD0(state, 0xA0, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467430)) {
+    if (widgetHash == GetHashValue32(str_mrk_bigair_2)) {
         setW_2AD0(state, 0xA4, w);
         return;
     }
-    if (widgetHash == GetHashValue32(D_00467440)) {
+    if (widgetHash == GetHashValue32(str_Peak_pass_text)) {
         w->index = 0;
         return;
     }
-    if (widgetHash == GetHashValue32(D_004A1F28)) {
+    if (widgetHash == GetHashValue32(str_peak1)) {
         w->index = 1;
         return;
     }
-    if (widgetHash == GetHashValue32(D_004A1F30)) {
+    if (widgetHash == GetHashValue32(str_peak2)) {
         w->index = 2;
         return;
     }
-    if (widgetHash == GetHashValue32(D_004A1F38)) {
+    if (widgetHash == GetHashValue32(str_peak3)) {
         w->index = 3;
         return;
     }
-    if (widgetHash == GetHashValue32(D_00460488)) {
+    if (widgetHash == GetHashValue32(str_helptext)) {
         setW_2AD0(state, 0x54, w);
         return;
     }
@@ -520,10 +520,10 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" void func_001D32E0_MR(void* self) __asm__("func_001D32E0");
 extern "C" void cUIStateStack_push_MR(void* list, void* item) __asm__("cUIStateStack_push");
-extern char D_00467450[];
-extern char D_00467460[];
-extern char D_00467478[];
-extern char D_00467490[];
+extern char str_kT_HELPViewPass[];
+extern char str_kT_HELPViewTrophies[];
+extern char str_kT_MAPHELPLockedPeak2[];
+extern char str_kT_MAPHELPLockedPeak3[];
 
 struct sVE_MR {
     short delta;
@@ -591,23 +591,23 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
         int stringId = 0;
         switch (*(int*)(w + 0x18)) {
         case 0:
-            stringId = GetHashValue32(D_00467450);
+            stringId = GetHashValue32(str_kT_HELPViewPass);
             break;
         case 1:
-            stringId = GetHashValue32(D_00467460);
+            stringId = GetHashValue32(str_kT_HELPViewTrophies);
             break;
         case 2:
             if (*(int*)(self + 0xB4) > 0) {
-                stringId = GetHashValue32(D_00467460);
+                stringId = GetHashValue32(str_kT_HELPViewTrophies);
             } else {
-                stringId = GetHashValue32(D_00467478);
+                stringId = GetHashValue32(str_kT_MAPHELPLockedPeak2);
             }
             break;
         case 3:
             if (*(int*)(self + 0xB4) >= 2) {
-                stringId = GetHashValue32(D_00467460);
+                stringId = GetHashValue32(str_kT_HELPViewTrophies);
             } else {
-                stringId = GetHashValue32(D_00467490);
+                stringId = GetHashValue32(str_kT_MAPHELPLockedPeak3);
             }
             break;
         }
@@ -664,7 +664,7 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D31C0);
 extern "C" int func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
 extern "C" void func_001D32E0(void* self);
-extern char D_004A1F40[];
+extern char str_pass[];
 
 struct sVE_31C0 {
     short delta;
@@ -696,7 +696,7 @@ extern "C" void func_001D31C0(void* p)
     char* e = (char*)func_0019E2B0(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_31C0* vt = (sVE_31C0*)ps2GraphicsMan->mVtbl;
-    int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), D_004A1F40, 0, 1, -1);
+    int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), str_pass, 0, 1, -1);
     char* snd = *(char**)(self + 0x50);
     *(int*)(self + 0xC4) = id;
     *(int*)(snd + 0x78) = id;
@@ -890,7 +890,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_00467648[];
+extern char str_126peakroom[];
 
 /**
  * Creates the peak (trophy) room screen ("126peakroom") and plays its first frame.
@@ -898,7 +898,7 @@ extern char D_00467648[];
 extern "C" void cFEStatePeakRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467648), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_126peakroom), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -918,19 +918,19 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* func_00156A90(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int func_00398380(void* self, int id);
-extern char D_00466E60[];
-extern char D_00467658[];
-extern char D_00467668[];
-extern char D_00467678[];
-extern char D_004A1FA8[];
-extern char D_004A1FB0[];
-extern char D_00460488[];
+extern char str_screentitle[];
+extern char str_kT_Peak3name[];
+extern char str_kT_Peak2name[];
+extern char str_kT_Peak1name[];
+extern char str_check[];
+extern char str_nocheck[];
+extern char str_helptext[];
 extern char* D_004415E0[];
 extern char* D_004415F0[];
 extern char* D_00441540[];
 extern char* D_00441558[];
 extern char* D_00441570[];
-extern char* D_00441588[];
+extern char* str_HuF[];
 extern char* D_004415A0[];
 extern char* D_004415B8[];
 
@@ -979,24 +979,24 @@ static inline void wShow_38F8(sWidget_38F8* w, int on)
 extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* w)
 {
     int widgetHash = w->hash;
-    if (widgetHash == GetHashValue32(D_00466E60)) {
+    if (widgetHash == GetHashValue32(str_screentitle)) {
         int roomMode = self->mode;
         if (roomMode == 2)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467658));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_Peak3name));
         else if (roomMode == 1)
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467668));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_Peak2name));
         else
-            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467678));
+            cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_Peak1name));
     }
-    if (widgetHash == GetHashValue32(D_004A1FA8)) {
+    if (widgetHash == GetHashValue32(str_check)) {
         self->fD4 = w->f7C;
         return;
     }
-    if (widgetHash == GetHashValue32(D_004A1FB0)) {
+    if (widgetHash == GetHashValue32(str_nocheck)) {
         self->fD8 = w->f7C;
         return;
     }
-    if (widgetHash == GetHashValue32(D_00460488)) {
+    if (widgetHash == GetHashValue32(str_helptext)) {
         self->fD0 = w;
         wShow_38F8(w, 0);
         return;
@@ -1024,7 +1024,7 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
         }
     }
     for (int j = 0; j < 5; j++) {
-        if (widgetHash == GetHashValue32(D_00441588[j])) {
+        if (widgetHash == GetHashValue32(str_HuF[j])) {
             self->grid[1][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
@@ -1194,8 +1194,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern char D_00467688[];
-extern char D_004676A0[];
+extern char str_kT_HELPSelectGoal[];
+extern char str_kT_HELP_LockedGoal[];
 
 class cPeakWidget_3EC8 {
 public:
@@ -1221,9 +1221,9 @@ extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
     if (*(void**)((char*)self + 0xD0) != 0) {
         if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
                           *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), index) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(D_00467688));
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(str_kT_HELPSelectGoal));
         } else {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(D_004676A0));
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(str_kT_HELP_LockedGoal));
         }
         (*(cPeakWidget_3EC8**)((char*)self + 0xD0))->show(1);
     }

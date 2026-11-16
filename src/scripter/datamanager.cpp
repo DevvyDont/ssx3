@@ -10,7 +10,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_cDataManager);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cDataManager_AddToEmptyInstanceList(void* self, void* node);
 extern char cDataManager_vtbl[];
-extern const char D_00481AB8[];
+extern const char str_tDataInstanceInfo[];
 
 struct sDataNode5828 {
     char pad[0x18];
@@ -34,7 +34,7 @@ extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, i
 {
     self->vtable = cDataManager_vtbl;
     self->count = count;
-    self->nodes = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), D_00481AB8, flags, 0);
+    self->nodes = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), str_tDataInstanceInfo, flags, 0);
     self->field_0x8 = 0;
     for (int i = 0; i < count; i++) {
         cDataManager_AddToEmptyInstanceList(self, &self->nodes[i]);
@@ -618,7 +618,7 @@ extern "C" int func_00276270(char* self, int a1)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276388);
 #ifdef SKIP_ASM
-extern char D_004A34A0[];
+extern char str_hud_e[];
 int GetHashValue32(char* s);
 void* func_00230698(void* self, int a1);
 char* func_0027C070(void* obj);
@@ -697,7 +697,7 @@ int func_00276388_impl(char* self, int fade, int notify)
     sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
     dm->state = 3;
     char* table = (char*)SSXApp->Game->UI + 0x18;
-    char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
+    char* o = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
     if (o != 0) {
         sDmVEntry_6388* e = &(*(sDmVEntry_6388**)(o + 0x8))[24];
         e->fn(o + e->delta, 0, 0);
@@ -869,7 +869,7 @@ reset:
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276868);
 #ifdef SKIP_ASM
-extern char D_004A34A0[];
+extern char str_hud_e[];
 int GetHashValue32(char* s);
 void* func_00230698(void* self, int a1);
 extern "C" void func_002E4578(void* p);
@@ -903,7 +903,7 @@ extern "C" void func_00276868(void* p, int a1)
             }
         }
         char* table = (char*)SSXApp->Game->UI + 0x18;
-        char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
+        char* o = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
         if (o != 0) {
             sDmVEntry6868* e = &(*(sDmVEntry6868**)(o + 0x8))[24];
             e->fn(o + e->delta, 1, 0);
@@ -1336,7 +1336,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptPlay);
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" void func_002EF378(int a0);
-extern char D_004A34A8[];
+extern char str_TRANSP[];
 
 /**
  * Reacts to a script starting to play: for a script this NIS list owns, switches the custom irradiance.
@@ -1352,7 +1352,7 @@ extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
         char* name = func_0027C070(obj);
-        char* msg = D_004A34A8;
+        char* msg = str_TRANSP;
         if (*name != 0) {
             func_002EF378((int)msg); // PORT: string pointer passed as int (unit declares func_002EF378(int))
         }

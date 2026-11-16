@@ -28,7 +28,7 @@ extern "C" int func_003B7818(void* desc, int n, int m, void* mem, int size);
 extern "C" int func_003B7B00(int n, int m);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_004A3770[];
+extern const char str_Stream[];
 
 static inline int curVol_99D8(sSsPlayer_99D8* p) { return p->vols[p->cur]; }
 
@@ -60,7 +60,7 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* s
         p->ents[p->cur].vol = MAX_99D8(MIN_99D8(p->vols[p->cur], 127), 0);
     }
     int n = func_003B7B00(8, 300) + extra;
-    self->mem = new (D_004A3770, heap, 0) char[n];
+    self->mem = new (str_Stream, heap, 0) char[n];
     self->f4 = 0;
     self->handle = func_003B7818(&p->ents[p->cur], 8, 300, self->mem, n);
     return self;
@@ -520,7 +520,7 @@ extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, 
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_00483218[];
+extern const char str_StreamArray[];
 extern void* cBankMonitor_vtbl[];
 
 struct sSsVEntryA490 {
@@ -582,7 +582,7 @@ extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchr
         vtCopyB.e[1].delta = D_004839B8.e[1].delta + d2;
     }
     self->count = count;
-    self->items = new (D_00483218, 0, 0) void*[count];
+    self->items = new (str_StreamArray, 0, 0) void*[count];
     for (int i = 0; i < self->count; i++)
         self->items[i] = 0;
     return self;
@@ -656,12 +656,12 @@ extern "C" void func_002AA648(void* p, int flags)
 INCLUDE_ASM("sound/streamsys", func_002AA7F0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern char D_00483228[];
+extern char str_StreamBuffer[];
 
 extern "C" void func_002AA7F0(void* self, int idx, int heap, int extra)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
-    void* mem = cMemMan_alloc(0x84, D_00483228, heap, 0);
+    void* mem = cMemMan_alloc(0x84, str_StreamBuffer, heap, 0);
     *slot = cStreamInstance_cStreamInstance((sStreamInst_99D8*)mem, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), heap, extra);
 }
 #endif
@@ -670,13 +670,13 @@ extern "C" void func_002AA7F0(void* self, int idx, int heap, int extra)
 INCLUDE_ASM("sound/streamsys", func_002AA870);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern char D_00483228[];
+extern char str_StreamBuffer[];
 extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int m);
 
 extern "C" void func_002AA870(void* self, int idx, int heap, char* mem, int size, int n, int m)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
-    void* obj = cMemMan_alloc(0x84, D_00483228, heap, 0);
+    void* obj = cMemMan_alloc(0x84, str_StreamBuffer, heap, 0);
     *slot = func_002A9C00((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, m);
 }
 #endif

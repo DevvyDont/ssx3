@@ -9,8 +9,8 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" int func_003E06B0(int a, int b, int c);
 extern "C" void* func_003E06D8(int a, int b, int c, void* buf, int size);
 extern "C" void cStreamMan_reset(cStreamMan* self);
-extern char D_00494D90[];
-extern char D_00494DA8[];
+extern char str_cStreamMan_CDBUFFER[];
+extern char str_cStreamMan_DECOMPRESS[];
 
 static inline int cStreamMan_min(int a, int b)
 {
@@ -33,11 +33,11 @@ extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
     size += 0x18000;
     size += 0x50000;
     size = cStreamMan_min(0x80000, size);
-    void* buf = operator_new_tag(size, D_00494D90, 0, 0);
+    void* buf = operator_new_tag(size, str_cStreamMan_CDBUFFER, 0, 0);
     self->m_streamBuffer = (char*)buf;
     self->m_streamHandle = (int)func_003E06D8(2, 1, 1, buf, size);
     self->m_streamRequest = 0;
-    self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, D_00494DA8, 0, 0);
+    self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, str_cStreamMan_DECOMPRESS, 0, 0);
     cStreamMan_reset(self);
     return ((void*)self);
 }
@@ -79,8 +79,8 @@ extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
 INCLUDE_ASM("world/streamman", cStreamMan_init);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern const char D_004A47D8[];
-extern const char D_004A47E0[];
+extern const char str_pct_spct_s_e[];
+extern const char str_ssb[];
 
 /**
  * Sets the streamer up for a track: stores the world cache to feed and builds the stream file name
@@ -95,7 +95,7 @@ extern const char D_004A47E0[];
 extern "C" int cStreamMan_init(cStreamMan* self, const char* name, int id)
 {
     *(int*)self = id;
-    sprintf((char*)self + 4, D_004A47D8, name, D_004A47E0);
+    sprintf((char*)self + 4, str_pct_spct_s_e, name, str_ssb);
     return 1;
 }
 #endif

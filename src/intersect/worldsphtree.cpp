@@ -6,7 +6,7 @@
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
 #ifdef SKIP_ASM
 extern void* cWorldSphTree_vtbl[];
-extern char D_0048E550[];
+extern char str_SphereTree[];
 extern "C" void* func_0032C508(void* p);
 extern "C" float func_0032C590(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -51,7 +51,7 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     corner.z = center.z - radius;
     corner.w = 1.0f;
     *(sSphV4*)((char*)self + 0x30) = corner;
-    void* p = cMemMan_alloc(0x140, D_0048E550, 0, 0);
+    void* p = cMemMan_alloc(0x140, str_SphereTree, 0, 0);
     func_0032C508(p);
     *(void**)((char*)self + 0x68) = p;
     return self;
@@ -1493,7 +1493,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBXNash_initTheAIFwdDiffCache);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cAIFwdDiffCache_cAIFwdDiffCache(void* self);
 extern "C" void cAIFwdDiffCache_Init(void* cache, int n);
-extern char D_0048E4F8[];
+extern char str_AIFwdDiffCache[];
 
 /**
  * Creates the nash's AI forward-difference cache: a 40-entry cAIFwdDiffCache stored at +0xA4.
@@ -1503,7 +1503,7 @@ extern char D_0048E4F8[];
  */
 extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
 {
-    void* cache = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, D_0048E4F8, 0, 0));
+    void* cache = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, str_AIFwdDiffCache, 0, 0));
     *(void**)((char*)self + 0xA4) = cache;
     cAIFwdDiffCache_Init(cache, 0x28);
 }

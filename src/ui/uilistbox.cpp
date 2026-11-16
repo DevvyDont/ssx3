@@ -9,7 +9,7 @@ extern "C" int strlen(const char*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
-extern char D_00493DD0[];
+extern char str_UILBAscii[];
 
 /**
  * Appends a list-box entry showing an ASCII string, converted to a new Unicode copy ("UILBAscii").
@@ -22,7 +22,7 @@ extern char D_00493DD0[];
  */
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(cUIListBox* self, const char* text, int data)
 {
-    unsigned short* wide = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, D_00493DD0, 0x100, 0);
+    unsigned short* wide = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, str_UILBAscii, 0x100, 0);
     UIAsciiToUnicode(wide, text);
     *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = text;
     *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = wide;
@@ -38,11 +38,11 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByUnicodeString);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
-extern char D_00493DC0[];
+extern char str_UILISTBOXSTR[];
 
 extern "C" unsigned char cUIListBox_addEntryByUnicodeString(cUIListBox* self, unsigned short* str, int data)
 {
-    unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DC0, 0x100, 0);
+    unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
     USTR_copy(u, str);
     *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
     *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
@@ -58,7 +58,7 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByStringID);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
-extern char D_00493DE0[];
+extern char str_UILBStrID[];
 
 struct sUIStrVtA568 { short delta; short index; unsigned short* (*fn)(void*, int); };
 
@@ -78,7 +78,7 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id,
         sUIStrVtA568* vt = *(sUIStrVtA568**)(tbl + 4);
         unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
         if (str != 0) {
-            unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DE0, 0x100, 0);
+            unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILBStrID, 0x100, 0);
             USTR_copy(wide, str);
             *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
             *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = wide;
@@ -190,7 +190,7 @@ extern "C" int strlen(const char*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
-extern char D_00493DF0[];
+extern char str_UIListBoxEntry[];
 
 struct cUIListBox_sEntry {
     int id;
@@ -229,7 +229,7 @@ extern "C" void cUIListBox_setEntryByAsciiString(cUIListBox_sObj* self, unsigned
         }
     }
     if (wide == 0) {
-        wide = (unsigned short*)operator_new_tag(len * 2, D_00493DF0, 0x100, 0);
+        wide = (unsigned short*)operator_new_tag(len * 2, str_UIListBoxEntry, 0x100, 0);
     }
     UIAsciiToUnicode(wide, text);
     self->entries[idx].str = wide;

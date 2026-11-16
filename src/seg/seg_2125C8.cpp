@@ -105,10 +105,10 @@ extern "C" int func_00311710(RangeTable_15E0* t, int idx, int mask)
 //100%
 INCLUDE_ASM("seg/seg_2125C8", func_00311860);
 #ifdef SKIP_ASM
-extern char D_0048A4C0[];
+extern char str_error[];
 
 extern "C" void *func_00311860(void) {
-    return D_0048A4C0;
+    return str_error;
 }
 #endif
 
@@ -117,7 +117,7 @@ INCLUDE_ASM("seg/seg_2125C8", cRiderAnimBase_initAIAnimEventMap);
 #ifdef SKIP_ASM
 extern "C" int cMemMan_alloc(int, char *, int, int);
 extern "C" void cAIAnimEventMap_initMaps(int);
-extern char D_0048A4D0[];
+extern char str_AIAnimEventMap[];
 extern int D_004A3DFC;
 
 /**
@@ -129,7 +129,7 @@ extern int D_004A3DFC;
 extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
     int temp_2;
 
-    temp_2 = cMemMan_alloc(0x6D4, D_0048A4D0, 0, 0);
+    temp_2 = cMemMan_alloc(0x6D4, str_AIAnimEventMap, 0, 0);
     D_004A3DFC = temp_2;
     cAIAnimEventMap_initMaps(temp_2);
 }

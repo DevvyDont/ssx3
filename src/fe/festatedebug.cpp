@@ -10,18 +10,18 @@ void cUIText_setAsciiString(cUIText* self, const char* s);
 extern "C" void func_001805D8(void* self, char* s);
 extern "C" void func_001809B0(void* self, int id, char* buf);
 extern "C" void func_00180A90(void* self, int id, char* buf);
-extern char D_0045D570[];
-extern char D_0045D588[];
-extern char D_0045D5A0[];
-extern char D_0045D5B0[];
-extern char D_0045D5C0[];
-extern char D_0045D5D0[];
-extern char D_0045D5E0[];
-extern char D_0045D5F0[];
+extern char str_keyboard_arrLeft[];
+extern char str_keyboard_arrRight[];
+extern char str_keyboard_end[];
+extern char str_cursor_arrLeft[];
+extern char str_cursor_arrRight[];
+extern char str_cursor_end[];
+extern char str_cursor_A[];
+extern char str_profilename[];
 extern char D_004A1370[];
 extern char D_004A1378[];
-extern char D_004A1380[];
-extern char D_004A1388[];
+extern char str_END[];
+extern char str_mypro1[];
 
 class cUIObjK180B60 {
 public:
@@ -49,31 +49,31 @@ public:
 extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
 {
     cUIObjK180B60* textObj;
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D570));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrLeft));
     if (textObj != 0)
     {
         textObj->setVisible(1);
         cUIText_setAsciiString((cUIText*)textObj, D_004A1370);
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D588));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrRight));
     if (textObj != 0)
     {
         textObj->setVisible(1);
         cUIText_setAsciiString((cUIText*)textObj, D_004A1378);
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D5A0));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_end));
     if (textObj != 0)
     {
         textObj->setVisible(1);
-        cUIText_setAsciiString((cUIText*)textObj, D_004A1380);
+        cUIText_setAsciiString((cUIText*)textObj, str_END);
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D5B0));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_arrLeft));
     if (textObj != 0)
         textObj->setVisible(0);
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D5C0));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_arrRight));
     if (textObj != 0)
         textObj->setVisible(0);
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D5D0));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_end));
     if (textObj != 0)
         textObj->setVisible(0);
     char name[0x20];
@@ -105,11 +105,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
             textObj->setVisible(0);
         ch[0]++;
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D5E0));
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_A));
     if (textObj != 0)
         textObj->setVisible(1);
-    func_001805D8(self, D_004A1388);
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D5F0));
+    func_001805D8(self, str_mypro1);
+    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
     if (textObj != 0)
         cUIText_setAsciiString((cUIText*)textObj, self + 0xEC);
 }

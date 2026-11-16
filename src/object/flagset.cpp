@@ -5,7 +5,7 @@
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
-extern char D_0048E850[];
+extern char str_Flag_Verts[];
 unsigned int BXrand();
 extern "C" void func_0034BCA0(void* self, void* verts);
 
@@ -125,7 +125,7 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     }
     int n = self->cols * self->rows;
     sFsV3_CM** pv = &self->verts;
-    *pv = new (D_0048E850, 0x20000000, 0) sFsV3_CM[n];
+    *pv = new (str_Flag_Verts, 0x20000000, 0) sFsV3_CM[n];
     sFsV2_CM uv[50];
     sFsCol_CM col[50];
     int idx = 0;
@@ -1211,7 +1211,7 @@ public:
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_0034CAB8(void* self, int a1, void* obj, void* pos, int flag, float force);
 extern "C" void func_0034CDE8(void* self, int flag, float force);
-extern char D_004A4018[];
+extern char str_Fence_b[];
 
 // PORT: SN abs.s asm helper (PS2 FPU).
 static inline float fabs_34CC80(float x)
@@ -1265,7 +1265,7 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag)
             func_0034CDE8(q, 0, force);
         }
     } else if (0.25f <= fabs_34CC80(force)) {
-        void* m = cMemMan_alloc(0x10C, D_004A4018, 0x20000000, 0);
+        void* m = cMemMan_alloc(0x10C, str_Fence_b, 0x20000000, 0);
         func_0034CAB8(m, 1, obj, self + 0x1C, flag, force);
     }
 }
@@ -1742,7 +1742,7 @@ extern "C" void func_0034E348(sFlagOwner_E348* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern void* D_00490CC8[];
-extern char D_0048E758[];
+extern char str_AnimMats[];
 
 struct sFlagSlot_34D9B0 {
     int v[16];
@@ -1755,7 +1755,7 @@ extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force
     func_00355280(node, a1, a2, a3);
     *(void***)(self + 0x20) = D_00490CC8;
     sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(self + 0x44);
-    *slot = new (D_0048E758, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
+    *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(self);
     float f = 0.0f;
     if (*(void**)(self + 0x48) != 0) {
@@ -1801,7 +1801,7 @@ extern "C" void* func_0034DAC8(char* self, void* a1, void* stream)
     sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(self + 0x44);
     cMoveNode_cMoveNode_3(node, a1, stream);
     *(void***)(self + 0x20) = D_00490CC8;
-    *slot = new (D_0048E758, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
+    *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(self);
     sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x14);

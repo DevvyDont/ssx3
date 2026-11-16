@@ -5,15 +5,15 @@
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A1830[];
-extern char D_004A1838[];
-extern char D_004A1840[];
-extern char D_004A1848[];
-extern char D_00460420[];
-extern char D_00460430[];
-extern char D_00460440[];
-extern char D_00460450[];
-extern char D_00460460[];
+extern char str_0box[];
+extern char str_1box[];
+extern char str_2box[];
+extern char str_3box[];
+extern char str_radio_big[];
+extern char str_big_mountain[];
+extern char str_request_line[];
+extern char str_edit_req[];
+extern char str_playlist[];
 
 static inline void SetText_6540(void* w, int text)
 {
@@ -34,7 +34,7 @@ static inline void SetText_6540(void* w, int text)
 extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
-    if (id == GetHashValue32(D_004A1830))
+    if (id == GetHashValue32(str_0box))
     {
         *(void**)((char*)self + 0x4C) = w;
         if (*(int*)((char*)self + 0x78) == 0)
@@ -42,7 +42,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
         else
             SetText_6540(w, *(int*)((char*)self + 0x60));
     }
-    else if (id == GetHashValue32(D_004A1838))
+    else if (id == GetHashValue32(str_1box))
     {
         *(void**)((char*)self + 0x54) = w;
         if (*(int*)((char*)self + 0x78) == 2)
@@ -50,7 +50,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
         else
             SetText_6540(w, *(int*)((char*)self + 0x60));
     }
-    else if (id == GetHashValue32(D_004A1840))
+    else if (id == GetHashValue32(str_2box))
     {
         *(void**)((char*)self + 0x50) = w;
         if (*(int*)((char*)self + 0x78) == 1)
@@ -58,7 +58,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
         else
             SetText_6540(w, *(int*)((char*)self + 0x60));
     }
-    else if (id == GetHashValue32(D_004A1840))
+    else if (id == GetHashValue32(str_2box))
     {
         *(void**)((char*)self + 0x50) = w;
         if (*(int*)((char*)self + 0x78) == 1)
@@ -66,7 +66,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
         else
             SetText_6540(w, *(int*)((char*)self + 0x60));
     }
-    else if (id == GetHashValue32(D_004A1848))
+    else if (id == GetHashValue32(str_3box))
     {
         *(void**)((char*)self + 0x58) = w;
         if (*(int*)((char*)self + 0x78) == 3)
@@ -74,25 +74,25 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
         else
             SetText_6540(w, *(int*)((char*)self + 0x60));
     }
-    else if (id == GetHashValue32(D_00460420))
+    else if (id == GetHashValue32(str_radio_big))
     {
         *(int*)((char*)w + 0x18) = 0;
     }
-    else if (id == GetHashValue32(D_00460430))
+    else if (id == GetHashValue32(str_big_mountain))
     {
         *(int*)((char*)w + 0x18) = 2;
     }
-    else if (id == GetHashValue32(D_00460440))
+    else if (id == GetHashValue32(str_request_line))
     {
         *(void**)((char*)self + 0x68) = w;
         *(int*)((char*)w + 0x18) = 1;
     }
-    else if (id == GetHashValue32(D_00460450))
+    else if (id == GetHashValue32(str_edit_req))
     {
         *(void**)((char*)self + 0x64) = w;
         *(int*)((char*)w + 0x18) = 4;
     }
-    else if (id == GetHashValue32(D_00460460))
+    else if (id == GetHashValue32(str_playlist))
     {
         *(void**)((char*)self + 0x6C) = w;
         *(int*)((char*)w + 0x18) = 3;
@@ -119,16 +119,16 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* stack, int a1);
 extern "C" void cUIStateStack_push(void* stack, void* state);
-extern char D_00460470[];
-extern char D_00460488[];
-extern char D_00460498[];
-extern char D_004604B0[];
-extern char D_004604C0[];
-extern char D_004604E0[];
-extern char D_004604F8[];
-extern char D_00460510[];
-extern char D_00460528[];
-extern char D_00460540[];
+extern char str_cFEStateRequestLine[];
+extern char str_helptext[];
+extern char str_kT_HELPAUDIORadioBig[];
+extern char str_kT_HELPAUDIOBMA[];
+extern char str_kT_HELPAUDIOCreateInLodge[];
+extern char str_kT_HELPAUDIOCreate[];
+extern char str_kT_HELPAUDIOCreateInCTM[];
+extern char str_kT_FEHELPCustPlayDJ[];
+extern char str_kT_FEHELPCustPlayNoDJ[];
+extern char str_kT_HELPAUDIOEditReq[];
 
 struct sVE_AOWE {
     short delta;
@@ -240,7 +240,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
-        char* popup = (char*)func_00196B90(cMemMan_alloc(0x210, D_00460470, 0, 0), (int)self->owner, self->player, self->f74);
+        char* popup = (char*)func_00196B90(cMemMan_alloc(0x210, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
         if (online_AOWE()) {
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
@@ -260,7 +260,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         }
         break;
     case 1: {
-        cUIText* text = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00460488));
+        cUIText* text = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_helptext));
         if (text == 0)
             return;
         bool isOnline = false;
@@ -268,44 +268,44 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         bool b = false;
         switch (w->idx) {
         case 0:
-            setText_AOWE(text, D_00460498);
+            setText_AOWE(text, str_kT_HELPAUDIORadioBig);
             break;
         case 2:
-            setText_AOWE(text, D_004604B0);
+            setText_AOWE(text, str_kT_HELPAUDIOBMA);
             break;
         case 1:
             if (self->f7C == 0) {
                 b = online_AOWE();
                 if (online_AOWE())
-                    setText_AOWE(text, D_004604C0);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreateInLodge);
                 else if (self->f74 == 0)
-                    setText_AOWE(text, D_004604F8);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreateInCTM);
                 else
-                    setText_AOWE(text, D_004604E0);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreate);
             } else
-                setText_AOWE(text, D_00460510);
+                setText_AOWE(text, str_kT_FEHELPCustPlayDJ);
             break;
         case 3:
             if (self->f7C == 0) {
                 c = online_AOWE();
                 if (online_AOWE())
-                    setText_AOWE(text, D_004604C0);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreateInLodge);
                 else if (self->f74 == 0)
-                    setText_AOWE(text, D_004604F8);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreateInCTM);
                 else
-                    setText_AOWE(text, D_004604E0);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreate);
             } else
-                setText_AOWE(text, D_00460528);
+                setText_AOWE(text, str_kT_FEHELPCustPlayNoDJ);
             break;
         case 4:
             if (self->f74 == 0 && self->f7C == 0) {
                 isOnline = online_AOWE();
                 if (online_AOWE())
-                    setText_AOWE(text, D_004604C0);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreateInLodge);
                 else
-                    setText_AOWE(text, D_004604F8);
+                    setText_AOWE(text, str_kT_HELPAUDIOCreateInCTM);
             } else
-                setText_AOWE(text, D_00460540);
+                setText_AOWE(text, str_kT_HELPAUDIOEditReq);
             break;
         }
         if (online_AOWE()) {
@@ -370,9 +370,9 @@ extern "C" long func_00158750(void* iface, int idx, int ch);
 extern "C" void* func_0028B180();
 extern "C" void func_00197AD8(void* self);
 extern void* cFEStateRequestLine_vtbl[];
-extern char D_0045DA48[];
-extern char D_0045DA38[];
-extern char D_0045DA58[];
+extern char str_checkbox[];
+extern char str_empty_box[];
+extern char str_yell_dollar_sign[];
 
 struct sAudioState_196B90
 {
@@ -451,15 +451,15 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
     self->f158 = 0;
     {
         char* mgr = *(char**)((char*)self + 0x10);
-        self->f204 = Find_196B90(mgr, GetHashValue32(D_0045DA48));
+        self->f204 = Find_196B90(mgr, GetHashValue32(str_checkbox));
     }
     {
         char* mgr = *(char**)((char*)self + 0x10);
-        self->f208 = Find_196B90(mgr, GetHashValue32(D_0045DA38));
+        self->f208 = Find_196B90(mgr, GetHashValue32(str_empty_box));
     }
     {
         char* mgr = *(char**)((char*)self + 0x10);
-        self->f20C = Find_196B90(mgr, GetHashValue32(D_0045DA58));
+        self->f20C = Find_196B90(mgr, GetHashValue32(str_yell_dollar_sign));
     }
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     self->f168 = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
@@ -480,9 +480,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUIMenu_setScrollableMenu(void* self, int a1);
 extern "C" void* cUIStateStack_findState(void* self, int id);
-extern char D_004A18A8[];
-extern char D_004A18B0[];
-extern char D_00460578[];
+extern char str_hud[];
+extern char str_16radio[];
+extern char str_143radio_pda[];
 
 struct sVEntry00196DB0 {
     short delta;
@@ -498,11 +498,11 @@ struct sVEntry00196DB0 {
  */
 extern "C" void cFEStateRequestLine_onCreateScreen(void* self)
 {
-    char* name = D_004A18B0;
+    char* name = str_16radio;
     if ((void*)SSXApp->Game != 0) {
-        name = D_00460578;
+        name = str_143radio_pda;
         void* list = *(char**)((char*)self + 0x10) + 0x18;
-        char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(D_004A18A8));
+        char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry00196DB0* vt = *(sVEntry00196DB0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 3, 0);
@@ -529,7 +529,7 @@ struct sVEntry00196E80 {
 int GetHashValue32(char* str);
 void* cUIState_onDestroyScreen(void* self);
 extern "C" void* cUIStateStack_findState(void* self, int id);
-extern char D_004A18A8[];
+extern char str_hud[];
 
 /**
  * Destroys the request-line screen, first telling the in-game HUD to come back (4) when a game is running.
@@ -537,7 +537,7 @@ extern char D_004A18A8[];
 extern "C" void cFEStateRequestLine_onDestroyScreen(void* self)
 {
     if ((int)SSXApp->Game != 0) {
-        void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry00196E80* vtEntry = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
             vtEntry->fn((char*)obj + vtEntry->delta, 4, 0);

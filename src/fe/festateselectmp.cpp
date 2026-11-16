@@ -6,7 +6,7 @@ INCLUDE_ASM("fe/festateselectmp", cFEStateSelectMultiplayerMode_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_004613B8[];
+extern char str_86sel_multi[];
 
 /**
  * Builds the select-multiplayer-mode screen: adds "86sel_multi" to the state and plays its frame 0.
@@ -16,7 +16,7 @@ extern char D_004613B8[];
 extern "C" void cFEStateSelectMultiplayerMode_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004613B8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_86sel_multi), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);

@@ -4,7 +4,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* out);
-extern const char D_0048E890[];
+extern const char str_FloatingBoundBox[];
 
 
 //100%
@@ -19,7 +19,7 @@ void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("
  */
 void cFloatingNode_initInfo(cFloatingNode* self)
 {
-    void* mem = cMemMan_alloc(0x30, D_0048E890, 0x20000000, 0);
+    void* mem = cMemMan_alloc(0x30, str_FloatingBoundBox, 0x20000000, 0);
     (*(void**)&self->Info) = mem;
     cInstanceNode_getBoundBoxInfo_3(self, mem, (char*)mem + 0x20);
 }

@@ -10,20 +10,20 @@ INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_cWorldPaint
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char cWorldPainterQuery_vtbl[];
-extern char D_00483CB8[];
-extern char D_00483CD0[];
-extern char D_00483CE0[];
-extern char D_00483CF0[];
-extern char D_00483D00[];
-extern char D_00483D10[];
-extern char D_00483D20[];
-extern char D_00483D38[];
-extern char D_00483D50[];
-extern char D_00483D60[];
-extern char D_00483D70[];
-extern char D_00483D80[];
-extern char D_00483D90[];
-extern char D_00483DA0[];
+extern char str_tWPIGD_MusicTrigger[];
+extern char str_tWPIGD_Mix[];
+extern char str_tWPIGD_Ambience[];
+extern char str_tWPIGD_Speech[];
+extern char str_tWPIGD_Camera[];
+extern char str_tWPIGD_Fog[];
+extern char str_tWPIGD_LightGlow[];
+extern char str_tWPIGD_ScreenTint[];
+extern char str_tWPIGD_SkyBox[];
+extern char str_tWPIGD_Sun[];
+extern char str_tWPIGD_Surface[];
+extern char str_tWPIGD_Lighting[];
+extern char str_tWPIGD_Weather[];
+extern char str_tWPIGD_Danger[];
 extern "C" void* func_002BC6F8(void* p);
 extern "C" void* func_002BC728(void* p);
 extern "C" void* func_002BC750(void* p);
@@ -77,46 +77,46 @@ extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQue
     self->m_y = 4286578688.0f;
     switch ((*(sWPQueryType*)&self->m_regionType).kind) {
     case 0:
-        self->m_data = (tWPInGameData*)func_002BC6F8(cMemMan_alloc(0x18, D_00483CB8, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC6F8(cMemMan_alloc(0x18, str_tWPIGD_MusicTrigger, 0, 0));
         break;
     case 1:
-        self->m_data = (tWPInGameData*)func_002BC728(cMemMan_alloc(0x10, D_00483CD0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC728(cMemMan_alloc(0x10, str_tWPIGD_Mix, 0, 0));
         break;
     case 2:
-        self->m_data = (tWPInGameData*)func_002BC750(cMemMan_alloc(0x10, D_00483CE0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC750(cMemMan_alloc(0x10, str_tWPIGD_Ambience, 0, 0));
         break;
     case 3:
-        self->m_data = (tWPInGameData*)func_002BC778(cMemMan_alloc(0x10, D_00483CF0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC778(cMemMan_alloc(0x10, str_tWPIGD_Speech, 0, 0));
         break;
     case 4:
-        self->m_data = (tWPInGameData*)func_002BC7A0(cMemMan_alloc(0x10, D_00483D00, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC7A0(cMemMan_alloc(0x10, str_tWPIGD_Camera, 0, 0));
         break;
     case 5:
-        self->m_data = (tWPInGameData*)func_002BC7C8(cMemMan_alloc(0x38, D_00483D10, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC7C8(cMemMan_alloc(0x38, str_tWPIGD_Fog, 0, 0));
         break;
     case 6:
-        self->m_data = (tWPInGameData*)tWPInGameData_LightGlow_tWPInGameData_LightGlow(cMemMan_alloc(0x40, D_00483D20, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_LightGlow_tWPInGameData_LightGlow(cMemMan_alloc(0x40, str_tWPIGD_LightGlow, 0, 0));
         break;
     case 7:
-        self->m_data = (tWPInGameData*)tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(cMemMan_alloc(0x38, D_00483D38, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(cMemMan_alloc(0x38, str_tWPIGD_ScreenTint, 0, 0));
         break;
     case 8:
-        self->m_data = (tWPInGameData*)func_002BC8E8(cMemMan_alloc(0x10, D_00483D50, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC8E8(cMemMan_alloc(0x10, str_tWPIGD_SkyBox, 0, 0));
         break;
     case 9:
-        self->m_data = (tWPInGameData*)tWPInGameData_Sun_tWPInGameData_Sun(cMemMan_alloc(0x50, D_00483D60, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_Sun_tWPInGameData_Sun(cMemMan_alloc(0x50, str_tWPIGD_Sun, 0, 0));
         break;
     case 10:
-        self->m_data = (tWPInGameData*)func_002BC980(cMemMan_alloc(0x10, D_00483D70, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC980(cMemMan_alloc(0x10, str_tWPIGD_Surface, 0, 0));
         break;
     case 11:
-        self->m_data = (tWPInGameData*)func_002BC9B0(cMemMan_alloc(0x58, D_00483D80, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC9B0(cMemMan_alloc(0x58, str_tWPIGD_Lighting, 0, 0));
         break;
     case 12:
-        self->m_data = (tWPInGameData*)func_002BCAF8(cMemMan_alloc(0xA0, D_00483D90, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BCAF8(cMemMan_alloc(0xA0, str_tWPIGD_Weather, 0, 0));
         break;
     case 13:
-        self->m_data = (tWPInGameData*)func_002BCBD0(cMemMan_alloc(0x18, D_00483DA0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BCBD0(cMemMan_alloc(0x18, str_tWPIGD_Danger, 0, 0));
         break;
     }
     self->m_next = (cWorldPainterQuery*)D_004A3880_0410;

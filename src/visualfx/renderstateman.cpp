@@ -793,7 +793,7 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_cAirStreamerFX);
 cRsm_2EF3B0::cRsm_2EF3B0()
 {
     cRsmItem_2EF3B0** slot = &items;
-    *slot = new (D_00487B78, 0, 0) cRsmItem_2EF3B0[25];
+    *slot = new (str_cAirStreamerFX, 0, 0) cRsmItem_2EF3B0[25];
     cAirStreamerFX_readFromReplayFrame_F3B0(this);
 }
 
@@ -1506,11 +1506,11 @@ INCLUDE_ASM("visualfx/renderstateman", func_002F0390);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002F03C8(void* self);
-extern char D_00487B88[];
+extern char str_PS2AIVisualEffectsMan[];
 
 extern "C" void* func_002F0390(void)
 {
-    return func_002F03C8(cMemMan_alloc(8, D_00487B88, 0, 0));
+    return func_002F03C8(cMemMan_alloc(8, str_PS2AIVisualEffectsMan, 0, 0));
 }
 #endif
 
@@ -1520,7 +1520,7 @@ INCLUDE_ASM("visualfx/renderstateman", func_002F03C8);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002F0368(void* self);
 extern "C" void cAvalanche_init(void* self);
-extern char D_00487568[];
+extern char str_Avalanche[];
 extern void* D_00487D50[];
 extern void* cAvalanche_vtbl[];
 
@@ -1528,7 +1528,7 @@ extern "C" void* func_002F03C8(void* self)
 {
     func_002F0368(self);
     *(void***)((char*)self + 0x4) = D_00487D50;
-    void** p = (void**)cMemMan_alloc(4, D_00487568, 0, 0);
+    void** p = (void**)cMemMan_alloc(4, str_Avalanche, 0, 0);
     *p = cAvalanche_vtbl;
     cAvalanche_init(p);
     *(void***)self = p;
@@ -1594,7 +1594,7 @@ INCLUDE_ASM("visualfx/renderstateman", cVisualEffectsMan_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cPSPVisualEffectsMan_cPSPVisualEffectsMan(void* self);
-extern char D_00487BA0[];
+extern char str_PS2VisualEffectsMan[];
 
 /**
  * Creates the visual-effects manager: allocates 0x48 bytes tagged "PS2VisualEffectsMan" and constructs a
@@ -1606,7 +1606,7 @@ extern char D_00487BA0[];
  */
 extern "C" void* cVisualEffectsMan_construct(void)
 {
-    return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(0x48, D_00487BA0, 0, 0));
+    return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(0x48, str_PS2VisualEffectsMan, 0, 0));
 }
 #endif
 

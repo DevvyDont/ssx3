@@ -34,13 +34,13 @@ extern "C" void cAI_setAIState(cAI* self, int state) {
 INCLUDE_ASM("seg/seg_14B10", cAI_forceAIState);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00456C58[];
-extern char D_00456C68[];
-extern char D_004A0E90[];
-extern char D_00456C78[];
-extern char D_004A0E98[];
-extern char D_004A0EA0[];
-extern char D_00456C88[];
+extern char str_GameInit[];
+extern char str_Freeride[];
+extern char str_PreRace[];
+extern char str_Countdown[];
+extern char str_Race[];
+extern char str_EndRace[];
+extern char str_Shutdown[];
 
 // PORT: the unit declares cAI_forceAIState(void*); defined under an asm label with its real type.
 extern "C" void cAI_forceAIState_impl(char* self, int state) __asm__("cAI_forceAIState");
@@ -59,37 +59,37 @@ extern "C" void cAI_forceAIState_impl(char* self, int state)
     switch (state) {
     case 1:
         *(int*)(self + 0x0) = 1;
-        *(const char**)(self + 0xA0) = D_00456C58;
+        *(const char**)(self + 0xA0) = str_GameInit;
         *(void**)(self + 0x98) = self + 0xAC;
         break;
     case 2:
         *(int*)(self + 0x0) = 2;
-        *(const char**)(self + 0xA0) = D_00456C68;
+        *(const char**)(self + 0xA0) = str_Freeride;
         *(void**)(self + 0x98) = self + 0xB0;
         break;
     case 3:
         *(int*)(self + 0x0) = 3;
-        *(const char**)(self + 0xA0) = D_004A0E90;
+        *(const char**)(self + 0xA0) = str_PreRace;
         *(void**)(self + 0x98) = self + 0xB4;
         break;
     case 4:
         *(int*)(self + 0x0) = 4;
-        *(const char**)(self + 0xA0) = D_00456C78;
+        *(const char**)(self + 0xA0) = str_Countdown;
         *(void**)(self + 0x98) = self + 0xBC;
         break;
     case 5:
         *(int*)(self + 0x0) = 5;
-        *(const char**)(self + 0xA0) = D_004A0E98;
+        *(const char**)(self + 0xA0) = str_Race;
         *(void**)(self + 0x98) = self + 0xC0;
         break;
     case 6:
         *(int*)(self + 0x0) = 6;
-        *(const char**)(self + 0xA0) = D_004A0EA0;
+        *(const char**)(self + 0xA0) = str_EndRace;
         *(void**)(self + 0x98) = self + 0xC4;
         break;
     case 7:
         *(int*)(self + 0x0) = 7;
-        *(const char**)(self + 0xA0) = D_00456C88;
+        *(const char**)(self + 0xA0) = str_Shutdown;
         *(void**)(self + 0x98) = self + 0xC8;
         break;
     default:
@@ -2145,7 +2145,7 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_set1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 extern signed char D_004A5E20[];
-extern char D_004A1070[];
+extern char str_pct_d[];
 
 /**
  * Starts a HUD effect showing a number, formatted with "%d" into a shared buffer.
@@ -2157,7 +2157,7 @@ extern char D_004A1070[];
  */
 // Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
 extern "C" void cHUDFX_set1(char *self, int id, int displayInt, float fparg0, int data) {
-    sprintf((char*)D_004A5E20, D_004A1070, displayInt);
+    sprintf((char*)D_004A5E20, str_pct_d, displayInt);
     cHUDFX_copyDispStr(self, D_004A5E20);
     *(int *)(self + 0x14) = displayInt;
     *(int *)(self + 0) = id;
@@ -2188,11 +2188,11 @@ INCLUDE_ASM("seg/seg_14B10", func_001171A8);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 extern signed char D_004A5E20[];
-extern char D_004A1070[];
+extern char str_pct_d[];
 
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
 extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
-    sprintf((char*)D_004A5E20, D_004A1070, arg2);
+    sprintf((char*)D_004A5E20, str_pct_d, arg2);
     cHUDFX_copyDispStr(arg0, D_004A5E20);
     *(int *)(arg0 + 0x14) = arg2;
     *(int *)(arg0 + 0) = arg1;

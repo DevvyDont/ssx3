@@ -9,8 +9,8 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 // PORT: func_001A34A0__FPv is called with (self, obj) here; bind the 2-arg form to that symbol.
 void func_001A34A0_2(void* self, void* obj) __asm__("func_001A34A0__FPv");
-extern char D_004613C8[];
-extern char D_004A19E8[];
+extern char str_108cct_select[];
+extern char str_ListBox[];
 
 /**
  * Creates the multiplayer circuit select screen ("108cct_select") and sets up its "ListBox".
@@ -20,12 +20,12 @@ extern char D_004A19E8[];
 extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004613C8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_108cct_select), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ListBox));
     if (obj != 0) {
         *(int*)((char*)obj + 0x14) = (*(int*)((char*)obj + 0x14) & ~1) | 0x80;
         func_001A34A0_2(self, obj);
@@ -55,7 +55,7 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 void func_001A34A8(void* self);
-extern char D_004A19E8[];
+extern char str_ListBox[];
 
 /**
  * Plays the screen frame named after the list box's current entry, then gives the state focus.
@@ -66,7 +66,7 @@ extern char D_004A19E8[];
  */
 extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int pPreSt)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ListBox));
     if (obj != 0) {
         int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
         if (frame != 0xFFFF) {
@@ -195,7 +195,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager_cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
-extern char D_00461418[];
+extern char str_data_ui_mapgfx_big[];
 
 /**
  * Constructs the front end's async manager, opening data/ui/mapgfx.big when it exists (handle at +0x58C).
@@ -204,8 +204,8 @@ extern char D_00461418[];
  */
 extern "C" void* cFEAsyncManager_cFEAsyncManager(void* self)
 {
-    if (BXFILE_exists(D_00461418) != 0) {
-        func_003DED50(D_00461418, 0, 0x64, (char*)self + 0x58C);
+    if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
+        func_003DED50(str_data_ui_mapgfx_big, 0, 0x64, (char*)self + 0x58C);
     }
     return self;
 }
@@ -217,7 +217,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager__cFEAsyncManager);
 extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DEDC0(void* handle, int arg);
 void operator_delete(int* p);
-extern char D_00461418[];
+extern char str_data_ui_mapgfx_big[];
 
 /**
  * Destroys the async manager: closes data/ui/mapgfx.big if it exists, then frees the object when asked to.
@@ -226,7 +226,7 @@ extern char D_00461418[];
  */
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* self, int flags)
 {
-    if (BXFILE_exists(D_00461418) != 0) {
+    if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
         func_003DEDC0(*(void**)((char*)self + 0x58C), 0x64);
     }
     if (flags & 1) {

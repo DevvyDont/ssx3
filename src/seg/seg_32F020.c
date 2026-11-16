@@ -113,16 +113,16 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E200);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_0053EA00;
 extern int D_004A5BA0;
-extern char D_00495410[];
-extern char D_00495420[];
+extern char str_Q24RCMP5CODEC[];
+extern char str_23PS2_SONY_CODEC_INTERNAL[];
 extern void func_00414C20(void *a0, void *a1);
 extern void func_00414C00(void *a0, void *a1, void *a2);
 int *func_0042E200(void) {
     if (D_0053EA00 == 0) {
         if (D_004A5BA0 == 0) {
-            func_00414C20(&D_004A5BA0, D_00495410);
+            func_00414C20(&D_004A5BA0, str_Q24RCMP5CODEC);
         }
-        func_00414C00(&D_0053EA00, D_00495420, &D_004A5BA0);
+        func_00414C00(&D_0053EA00, str_23PS2_SONY_CODEC_INTERNAL, &D_004A5BA0);
     }
     return &D_0053EA00;
 }
@@ -147,11 +147,11 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E2B0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5BA0;
-extern char D_00495410[];
+extern char str_Q24RCMP5CODEC[];
 extern void func_00414C20(void *a0, void *a1);
 int *func_0042E2B0(void) {
     if (D_004A5BA0 == 0) {
-        func_00414C20(&D_004A5BA0, D_00495410);
+        func_00414C20(&D_004A5BA0, str_Q24RCMP5CODEC);
     }
     return &D_004A5BA0;
 }
@@ -268,11 +268,11 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E458);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5B90;
-extern char D_004953D8[];
+extern char str_Q24RCMP7DECODER[];
 extern void func_00414C20(void *a0, void *a1);
 int *func_0042E458(void) {
     if (D_004A5B90 == 0) {
-        func_00414C20(&D_004A5B90, D_004953D8);
+        func_00414C20(&D_004A5B90, str_Q24RCMP7DECODER);
     }
     return &D_004A5B90;
 }
@@ -297,11 +297,11 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E4C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5B98;
-extern char D_004953C0[];
+extern char str_Q24RCMP11RCMP_SYSTEM[];
 extern void func_00414C20(void *a0, void *a1);
 int *func_0042E4C8(void) {
     if (D_004A5B98 == 0) {
-        func_00414C20(&D_004A5B98, D_004953C0);
+        func_00414C20(&D_004A5B98, str_Q24RCMP11RCMP_SYSTEM);
     }
     return &D_004A5B98;
 }

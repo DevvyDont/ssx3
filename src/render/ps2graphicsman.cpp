@@ -5,7 +5,7 @@
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewNonBindTexID);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00492068[];
+extern const char str_NBTexInfo[];
 
 struct cTexSlots367150 {
     int unk_0x0;
@@ -32,7 +32,7 @@ extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTexSlots367150* self)
     self->count++;
     char* tex = (char*)self + 8;
     void** slot = (void**)(tex + (id << 2));
-    *slot = cMemMan_alloc(0x58, D_00492068, 0x21000000, 0);
+    *slot = cMemMan_alloc(0x58, str_NBTexInfo, 0x21000000, 0);
     return id;
 }
 #endif
@@ -72,7 +72,7 @@ extern "C" void func_00367230(void)
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewBindTexID);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00492078[];
+extern const char str_BTexInfo[];
 
 /**
  * Allocates the texture info for a texture id the caller chose.
@@ -86,7 +86,7 @@ extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id)
 {
     char* tex = (char*)self + 8;
     void** slot = (void**)(tex + (id << 2));
-    *slot = cMemMan_alloc(0x58, D_00492078, 0x21000000, 0);
+    *slot = cMemMan_alloc(0x58, str_BTexInfo, 0x21000000, 0);
     *(int*)self += 1;
 }
 #endif
@@ -511,11 +511,11 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);
 #ifdef SKIP_ASM
 extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
-extern char D_004A4068[];
+extern char str_LockTex[];
 
 extern "C" int func_00367CD0(void* self, int a, int b, int c)
 {
-    return func_00367440(self, 0, D_004A4068, a, b, 0, c, 0, 0, 3, 0, -1);
+    return func_00367440(self, 0, str_LockTex, a, b, 0, c, 0, 0, 3, 0, -1);
 }
 #endif
 
@@ -1402,7 +1402,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_003696C8);
 extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" void* SHAPE_locatez(void* src, const char* name);
 extern "C" char* strcpy(char* dst, const char* src);
-extern char D_004A41A0[];
+extern char str_charshp_b[];
 
 struct sTexEnt_96C8 {
     int handle;     // 0x0
@@ -1445,7 +1445,7 @@ extern "C" int func_003696C8(cPS2GraphicsMan* self_, const char* name)
         void* r = SHAPE_locatez(self->src[j], self->ents[self->count].name);
         if (r != 0) {
             sVE_96C8* vt = *(sVE_96C8**)((char*)self + 0x10D8);
-            self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, r, D_004A41A0, 0, 1, -1);
+            self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, r, str_charshp_b, 0, 1, -1);
             return self->ents[self->count++].handle;
         }
     }

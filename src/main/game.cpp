@@ -1203,9 +1203,9 @@ extern "C" void cWorldView_activateSection(cWorldView* view, int section);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_00442150[];
 extern float D_0044C208[];
-extern char D_0047B470[];
-extern char D_0047B480[];
-extern char D_004A2A18[];
+extern char str_data_worlds_b[];
+extern char str_data_worlds_c[];
+extern char str_pct_spct_s_b[];
 
 static inline cWorldView* gameWorldView_22D8D8(void* self)
 {
@@ -1308,11 +1308,11 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     }
     if (!busy && pending) {
         int* n = cSectionMan_getNextActiveEvent(self, 0);
-        char* fmt = cWorldView_getNumSections_u(gameWorldView_22D8D8(self)) >= 2 ? D_0047B470 : D_0047B480;
+        char* fmt = cWorldView_getNumSections_u(gameWorldView_22D8D8(self)) >= 2 ? str_data_worlds_b : str_data_worlds_c;
         for (; n != 0; n = cSectionMan_getNextActiveEvent(self, n)) {
             int idx = *n;
             int section = D_00442168[idx].field_0x4;
-            sprintf(buf, D_004A2A18, fmt, func_00144D38(iface, idx));
+            sprintf(buf, str_pct_spct_s_b, fmt, func_00144D38(iface, idx));
             int* state = &D_00442168[idx].field_0x8;
             if (*state == 3) {
                 if (func_003A98C8(gameWorldView_22D8D8(self), section, D_0044C208[D_00442168[idx].field_0xc])) {

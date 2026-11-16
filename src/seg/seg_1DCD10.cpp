@@ -68,8 +68,8 @@ extern Mgr_BD10 *D_BD10 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" int FILE_load(char*, int);
 extern "C" long SHAPE_locatez(int, char*);
 extern "C" void MEM_free(int);
-extern char D_00487918[];
-extern char D_00487938[];
+extern char str_data_textures_particle_ssh[];
+extern char str_data_textures_effects_ssh[];
 struct sFXShape_BD10 { char name[8]; int tex; };
 extern sFXShape_BD10 gFXShape_BD10[] __asm__("D_004891B0");
 extern "C" int func_002DBD10(int a0, long a1) {
@@ -82,10 +82,10 @@ extern "C" int func_002DBD10(int a0, long a1) {
     for (int i = 0; i < n; i++) {
         switch (i) {
         case 0:
-            files[i] = FILE_load(D_00487918, 0x100);
+            files[i] = FILE_load(str_data_textures_particle_ssh, 0x100);
             break;
         case 1:
-            files[i] = FILE_load(D_00487938, 0x100);
+            files[i] = FILE_load(str_data_textures_effects_ssh, 0x100);
             break;
         }
     }

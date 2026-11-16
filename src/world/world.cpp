@@ -11,9 +11,9 @@ extern "C" void* cWorldCache_cWorldCache(void* mem);
 extern "C" void* cWScriptCache_cWScriptCache(void* mem, void* world);
 extern "C" void* cWorldPainterMan_cWorldPainterMan(void* mem);
 extern "C" void SphereTree_initCache(int a, int b, int c, int d);
-extern char D_00494D58[];
-extern char D_00494D68[];
-extern char D_00494D78[];
+extern char str_cWorldCache[];
+extern char str_cWScriptCache[];
+extern char str_cWorldPainterMan_b[];
 // The unit declares cWorld_m_pTheWorld as int (later); this view stores the world pointer.
 
 /**
@@ -27,9 +27,9 @@ extern char D_00494D78[];
 extern "C" void* cWorld_cWorld(void** self)
 {
     cWorld_m_pTheWorld = (cWorld*)(self);
-    self[0] = cWorldCache_cWorldCache(cMemMan_alloc(0x1C00, D_00494D58, 0, 0));
-    self[1] = cWScriptCache_cWScriptCache(cMemMan_alloc(0x10, D_00494D68, 0, 0), self);
-    self[2] = cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8, D_00494D78, 0, 0));
+    self[0] = cWorldCache_cWorldCache(cMemMan_alloc(0x1C00, str_cWorldCache, 0, 0));
+    self[1] = cWScriptCache_cWScriptCache(cMemMan_alloc(0x10, str_cWScriptCache, 0, 0), self);
+    self[2] = cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8, str_cWorldPainterMan_b, 0, 0));
     self[4] = 0;
     self[5] = 0;
     SphereTree_initCache(0xA, 4, 2, 5);
@@ -214,7 +214,7 @@ extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" int func_004165A8(const void* a, const void* b);
 void cMemMan_free(void*);
 extern char D_004A47C0[];
-extern char D_004A47C8[];
+extern char str_sdb[];
 
 struct sName_3A6948 {
     char* name;
@@ -251,7 +251,7 @@ extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
         cBXString* t = (cBXString*)&tmp;
         cBXString_cBXString2(&str, path);
         func_003186D0(t, pre, (cBXString*)&str);
-        func_00318630((cBXString*)&full, t, D_004A47C8);
+        func_00318630((cBXString*)&full, t, str_sdb);
         data = (sFile_3A6948*)FILE_loadz(full.s, 0x3000000);
         cBXString__cBXString(&full, 2);
         cBXString__cBXString(t, 2);

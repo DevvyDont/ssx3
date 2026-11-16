@@ -42,7 +42,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_Realloc);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label.
 // Declared as an operator new so gcc treats the result as fresh (malloc-like) memory.
 void* operator new(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_0048D850[];
+extern const char str_cStringData[];
 extern char* D_004A3E90;
 
 /**
@@ -60,7 +60,7 @@ extern "C" void cBXString_Realloc(cBXString* self, int size)
         self->Str = D_004A3E90;
         return;
     }
-    int* hdr = (int*)operator new(size + 0xD, D_0048D850, 0x20000000, 0);
+    int* hdr = (int*)operator new(size + 0xD, str_cStringData, 0x20000000, 0);
     char* buffer = (char*)(hdr + 3);
     hdr[0] = 1;
     self->Str = buffer;

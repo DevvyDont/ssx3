@@ -25,9 +25,9 @@ struct sVt22_BS {
 extern const sVt9_BS D_00488CB0;
 extern const sVt22_BS D_00488CF8;
 extern char D_00459B90[];
-extern char D_00487588[];
-extern char D_00487598[];
-extern char D_004875A8[];
+extern char str_mEmitter[];
+extern char str_mEmitterData[];
+extern char str_Board_Spark_Emitter[];
 
 extern "C" void cRider_cRider(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -179,9 +179,9 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     new (&self->slotA) sBsSlot;
     new (&self->slotB) sBsSlot;
     float zeroF = 0.0f;
-    self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(0x210, D_00487588, 0, 0));
-    self->params = (sBsParams*)cMemMan_alloc(0xD8, D_00487598, 0, 0);
-    self->gfx = func_002F7A68(cMemMan_alloc(0x150, D_004875A8, 0, 0));
+    self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(0x210, str_mEmitter, 0, 0));
+    self->params = (sBsParams*)cMemMan_alloc(0xD8, str_mEmitterData, 0, 0);
+    self->gfx = func_002F7A68(cMemMan_alloc(0x150, str_Board_Spark_Emitter, 0, 0));
     func_0036CCB8(self->gfx);
     sBsVec4 v;
     v.x = zeroF;

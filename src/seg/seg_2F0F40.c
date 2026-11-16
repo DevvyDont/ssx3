@@ -67,7 +67,7 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F00D8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4AD8[];
+extern char str_send[];
 extern int func_003F5910(int, int, int, int, int);
 extern void func_003EFF40(int*, char*, int*);
 void func_003F00D8(int* p, int a, int b) {
@@ -78,7 +78,7 @@ void func_003F00D8(int* p, int a, int b) {
         t[3] = b;
         t[2] = 0;
         t[0] = 0;
-        func_003EFF40(p, D_004A4AD8, t);
+        func_003EFF40(p, str_send, t);
     }
 }
 #endif
@@ -100,10 +100,10 @@ void func_003F0150(char* s) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0198);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4AE0[];
+extern char str_USER_b[];
 extern int D_004A4AE8[];
-extern char D_004A4AF0[];
-extern char D_004A4AF8[];
+extern char str_DOMN[];
+extern char str_RSRC[];
 extern char* strchr(const char* s, int c);
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
@@ -117,19 +117,19 @@ void func_003F0198(char* self, int* ev) {
     char* p;
     char* q;
     cDirtysock_tag_TagFieldDupl(tag, 0x800, (char*)ev[3]);
-    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, D_004A4AE0), (char*)name, 0x100, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_USER_b), (char*)name, 0x100, (char*)D_004A4AE8);
     nm = (char*)name;
-    cDirtysock_tag_TagFieldDelete(tag, D_004A4AE0);
+    cDirtysock_tag_TagFieldDelete(tag, str_USER_b);
     p = strchr(nm, '@');
     if (p) *p = 0;
-    cDirtysock_tag_TagFieldSetString(tag, 0x800, D_004A4AE0, nm);
+    cDirtysock_tag_TagFieldSetString(tag, 0x800, str_USER_b, nm);
     if (p) {
         nm = p + 1;
         q = strchr(nm, '/');
         if (q) *q = 0;
-        cDirtysock_tag_TagFieldSetString(tag, 0x800, D_004A4AF0, nm);
+        cDirtysock_tag_TagFieldSetString(tag, 0x800, str_DOMN, nm);
         if (q) {
-            cDirtysock_tag_TagFieldSetString(tag, 0x800, D_004A4AF8, q + 1);
+            cDirtysock_tag_TagFieldSetString(tag, 0x800, str_RSRC, q + 1);
         }
     }
     ev[3] = (int)tag;
@@ -145,9 +145,9 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F02D0);
 // Fills the output record from the event tag fields.
 extern int D_004512C0[];
 extern int D_004A4AE8[];
-extern char D_004A4B00[];
-extern char D_004A4B08[];
-extern char D_004A4B10[];
+extern char str_SHOW[];
+extern char str_PROD_b[];
+extern char str_STAT_b[];
 extern char D_004A4B18[];
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
@@ -167,7 +167,7 @@ void func_003F02D0(char* self, char* ev, char* out) {
     out[0xA4] = 0;
     out[0x54] = 0;
     out[0x40] = 0;
-    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), D_004A4B00), buf, 0x100, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_SHOW), buf, 0x100, (char*)D_004A4AE8);
     while (i < 6) {
         if (func_004165A8((const char*)D_004512C0[i], buf) == 0) {
             out[0xA7] = i;
@@ -175,7 +175,7 @@ void func_003F02D0(char* self, char* ev, char* out) {
         }
         i++;
     }
-    f = cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), D_004A4B08);
+    f = cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_PROD_b);
     if (f) {
         *(int*)(out + 0xA8) |= 0x2000;
     }
@@ -188,7 +188,7 @@ void func_003F02D0(char* self, char* ev, char* out) {
         out[0xA5] = w;
     } else {
         i = 0;
-        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), D_004A4B10), buf, 0x100, (char*)D_004A4AE8);
+        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_STAT_b), buf, 0x100, (char*)D_004A4AE8);
         fourcc = cDirtysock_tag_TagFieldGetFourCC(cDirtysock_tag_TagFieldFind(buf, D_004A4B18), 0);
         if (*(int*)(self + 0x308) > 0) {
             p = self + 0x30C;
@@ -229,8 +229,8 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0568);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004A4B18[];
-extern char D_004A4B10[];
-extern char D_004A4B08[];
+extern char str_STAT_b[];
+extern char str_PROD_b[];
 extern int cDirtysock_tag_TagFieldSetFourCC(char* dst, int len, const char* key, int val);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 void func_003F0568(char* p) {
@@ -240,10 +240,10 @@ void func_003F0568(char* p) {
     }
     cDirtysock_tag_TagFieldDupl(buf, 0x200, p + 0x240);
     if (p[0x140]) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A4B10, p + 0x140);
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_STAT_b, p + 0x140);
     }
     if (p[0x40]) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A4B08, p + 0x40);
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PROD_b, p + 0x40);
     }
     func_003F00D8((int*)p, 0x50534554, (int)buf);
     *(int*)(p + 0x2C0) = 0;
@@ -389,12 +389,12 @@ int func_003F0818(char* p, const char* src, int key, char* s, int x) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F08E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4AA0[];
-extern char D_004A4AE0[];
-extern char D_004A4B08[];
-extern char D_004A4B20[];
-extern char D_004A4B28[];
-extern char D_004A4B30[];
+extern char str_PASS_c[];
+extern char str_USER_b[];
+extern char str_PROD_b[];
+extern char str_VERS_b[];
+extern char str_PRES[];
+extern char str_LKEY[];
 extern char* strchr(const char* s, int c);
 extern char* strncpy(char* d, const char* s, int n);
 extern char* strcpy(char* d, const char* s);
@@ -415,12 +415,12 @@ int func_003F08E8(char* self, int a1, int a2, int ms, char* host, char* nick, in
     *(int*)(self + 0x4C4) = cb;
     *(int*)(self + 0x10) = a2;
     *buf = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B08, self + 0x314);
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B20, self + 0x354);
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B28, self + 0x2C8);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PROD_b, self + 0x314);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_VERS_b, self + 0x354);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, self + 0x2C8);
     if (strchr(host, ':') == 0) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, nick);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B30, host);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, nick);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LKEY, host);
     } else {
         strncpy(tmp, host, 0xFF);
         tmp[0xFF] = 0;
@@ -432,11 +432,11 @@ int func_003F08E8(char* self, int a1, int a2, int ms, char* host, char* nick, in
             if ((unsigned int)(strlen(tag) + strlen(nick)) < 0x100) {
                 func_004162D0(tag, nick);
             }
-            cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, tag);
+            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, tag);
             if (*q == '$') {
-                cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B30, q + 1);
+                cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LKEY, q + 1);
             } else {
-                cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AA0, q);
+                cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS_c, q);
             }
         }
     }
@@ -523,12 +523,12 @@ void func_003F0BE0(struct S07A0* sp) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0C90);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4B28[];
-extern char D_004A4B38[];
-extern char D_004A4B40[];
+extern char str_PRES[];
+extern char str_LRSC[];
+extern char str_LIST[];
 extern char D_004A4B48[];
 extern char D_004A4B50[];
-extern char D_004A4B58[];
+extern char str_ID[];
 extern char D_004A4B60[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
@@ -544,16 +544,16 @@ void* func_003F0C90(char* self, int a, int b) {
         *(int*)(self + 0x4A4) = func_003EE778(0x3E8, 0x7D0);
         *(int*)(self + 0x4A8) = func_003EE1E8(0x64, 0x64, 0);
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, s);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B40, D_004A4B48);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B28, D_004A4B50);
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A4B58, 1);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, s);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 1);
         func_003F00D8((int*)self, 0x52474554, (int)buf);
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, s);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B40, D_004A4B60);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B28, D_004A4B50);
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A4B58, 2);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, s);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 2);
         func_003F00D8((int*)self, 0x52474554, (int)buf);
         func_003EE600(*(int*)(self + 0x4A8), 1);
     }
@@ -580,15 +580,15 @@ extern int func_003EEC88(int, int);
 extern int func_003EE468(int, int);
 extern int func_003EE320(int, int);
 extern int func_003EEB30(int, int, int);
-extern char D_004A4AE0[];
-extern char D_004A4B28[];
-extern char D_004A4B38[];
-extern char D_004A4B40[];
+extern char str_USER_b[];
+extern char str_PRES[];
+extern char str_LRSC[];
+extern char str_LIST[];
 extern char D_004A4B48[];
 extern char D_004A4B50[];
-extern char D_004A4B58[];
+extern char str_ID[];
 extern char D_004A4B60[];
-extern char D_004A4B68[];
+extern char str_GROUP[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
 typedef struct { char b[0xB8]; } Ent_0E38;
@@ -619,29 +619,29 @@ int func_003F0E38(char* self, char* e, int a, int b, int c) {
     *(int*)(ent + 0xAC) = 0;
     if (*(int*)(e + 0xA8) & 4) {
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, self + 0x494);
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A4B58, *(int*)(self + 0x4CC));
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B40, D_004A4B48);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B28, D_004A4B50);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, e);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B68, e + 0x20);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4CC));
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, e);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, e + 0x20);
         func_003F00D8((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
         *(int*)(ent + 0xAC) = *(int*)(self + 0x14);
     }
     if (*(int*)(e + 0xA8) & 0x200) {
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, self + 0x494);
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A4B58, *(int*)(self + 0x4CC));
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B40, D_004A4B60);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, e);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4CC));
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, e);
         func_003F00D8((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
         *(int*)(ent + 0xAC) = *(int*)(self + 0x14);
     }
     if (*(int*)(e + 0xA8) & 0x800000) {
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, e);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, e);
         func_003F00D8((int*)self, 0x50414444, (int)buf);
     }
     return 0;
@@ -652,15 +652,15 @@ int func_003F0E38(char* self, char* e, int a, int b, int c) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F11F8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4AE0[];
-extern char D_004A4B28[];
-extern char D_004A4B38[];
-extern char D_004A4B40[];
+extern char str_USER_b[];
+extern char str_PRES[];
+extern char str_LRSC[];
+extern char str_LIST[];
 extern char D_004A4B48[];
 extern char D_004A4B50[];
-extern char D_004A4B58[];
+extern char str_ID[];
 extern char D_004A4B60[];
-extern char D_004A4B68[];
+extern char str_GROUP[];
 extern char* strchr(const char* s, int c);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
@@ -689,26 +689,26 @@ int func_003F11F8(char* self, char* name, int a, int b, int ms) {
                 *(int*)(ent + 0xA8) ^= t;
                 if (t & 4) {
                     buf[0] = 0;
-                    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A4B58, *(int*)(self + 0x4E0));
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, self + 0x494);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B40, D_004A4B48);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B28, D_004A4B50);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, name);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B68, name + 0x20);
+                    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4E0));
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, name + 0x20);
                     func_003F00D8((int*)self, 0x5244454C, (int)buf);
                 }
                 if (t & 0x200) {
                     buf[0] = 0;
-                    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, D_004A4B58, *(int*)(self + 0x4E0));
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, self + 0x494);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B40, D_004A4B60);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, name);
+                    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4E0));
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
                     func_003F00D8((int*)self, 0x5244454C, (int)buf);
                 }
                 if (t & 0x800000) {
                     buf[0] = 0;
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4B38, self + 0x494);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, D_004A4AE0, name);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
                     func_003F00D8((int*)self, 0x5044454C, (int)buf);
                 }
                 if ((*(int*)(ent + 0xA8) & 0x100204) == 0) {
@@ -780,8 +780,8 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F15C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004512C0[];
-extern char D_004A4AF8[];
-extern char D_004A4B00[];
+extern char str_RSRC[];
+extern char str_SHOW[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int func_003F5D88(int);
 extern void func_003F0568(char*);
@@ -796,8 +796,8 @@ int func_003F15C8(char* p, char* s, int st, int d) {
     }
     buf = p + 0x240;
     *buf = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x80, D_004A4AF8, s);
-    cDirtysock_tag_TagFieldSetString(buf, 0x80, D_004A4B00, (char*)v);
+    cDirtysock_tag_TagFieldSetString(buf, 0x80, str_RSRC, s);
+    cDirtysock_tag_TagFieldSetString(buf, 0x80, str_SHOW, (char*)v);
     if (*(unsigned int*)(p + 0x2C0) == 0) {
         *(unsigned int*)(p + 0x2C0) = now + d;
     }
@@ -816,14 +816,14 @@ int func_003F15C8(char* p, char* s, int st, int d) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F16D8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4B70[];
-extern char D_004A4B78[];
+extern char str_BODY_b[];
+extern char str_SUBJ_b[];
 extern int D_004A4AE8[];
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 int func_003F16D8(int* p, char* tag, int a, int b, int c) {
-    if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, D_004A4B70), 0, 0, (char*)D_004A4AE8) < 0x40) {
-        if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, D_004A4B78), 0, 0, (char*)D_004A4AE8) <= 0) {
+    if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_BODY_b), 0, 0, (char*)D_004A4AE8) < 0x40) {
+        if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_SUBJ_b), 0, 0, (char*)D_004A4AE8) <= 0) {
             func_003F0658(p, 2, a, b, c);
             func_003F00D8(p, 0x53454E44, (int)tag);
             return 0;
@@ -850,13 +850,13 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F17D8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00496BA0[];
 extern char D_00496BB8[];
-extern char D_004A4B80[];
-extern char D_004A4B58[];
-extern char D_004A4B88[];
-extern char D_004A4AE0[];
+extern char str_recv[];
+extern char str_ID[];
+extern char str_SIZE[];
+extern char str_USER_b[];
 extern int D_004A4AE8[];
-extern char D_004A4B68[];
-extern char D_004A4B90[];
+extern char str_GROUP[];
+extern char str_FUSR[];
 extern int func_003F5D88(int);
 extern void f17_5908(int) __asm__("func_003F5908");
 extern int func_003F5638(int, int, int);
@@ -982,7 +982,7 @@ void func_003F17D8(struct Conn_17D8* self) {
         done = 0;
         ev.data = data;
         if (self->f508 != 0) {
-            func_003EFF40((int*)self, D_004A4B80, (int*)&ev);
+            func_003EFF40((int*)self, str_recv, (int*)&ev);
         }
         if (ev.type == -1) {
             if (ev.arg == -1) {
@@ -1016,20 +1016,20 @@ void func_003F17D8(struct Conn_17D8* self) {
             self->admnCb(self, &ev, self->admnCtx);
         }
         if (ev.type == 0x52474554) {
-            if (cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B58), 0) == 2) {
-                self->rostCount = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B88), 0);
+            if (cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_ID), 0) == 2) {
+                self->rostCount = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_SIZE), 0);
                 done = self->rostCount == 0;
             }
         }
         if (ev.type == 0x524F5354 && self->roster != 0) {
             flags = 4;
-            id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B58), 0);
+            id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_ID), 0);
             if (id != 1) flags = 0;
             if (id == 2) flags = 0x200;
             if (flags == 0x200) {
                 if (--self->rostCount == 0) done = 1;
             }
-            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, D_004A4AE0), name, 0x20, (char*)D_004A4AE8);
+            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)D_004A4AE8);
             func_003F0150(name);
             if (self->f18 != 0 || strchr(name, '.') == 0) {
                 id = func_003EEC88(self->names, (int)name);
@@ -1045,7 +1045,7 @@ void func_003F17D8(struct Conn_17D8* self) {
                 if (id != 0) {
                     ent = (char*)func_003EE468(self->roster, id);
                     if (ent != 0) {
-                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B68), ent + 0x20, 0x20, (char*)D_004A4AE8);
+                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_GROUP), ent + 0x20, 0x20, (char*)D_004A4AE8);
                         if (flags != 0) {
                             *(int*)(ent + 0xA8) = (*(int*)(ent + 0xA8) | flags) & ~0x100000;
                         }
@@ -1054,7 +1054,7 @@ void func_003F17D8(struct Conn_17D8* self) {
             }
         }
         if (ev.type == 0x50474554 && self->roster != 0) {
-            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, D_004A4AE0), name, 0x20, (char*)D_004A4AE8);
+            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)D_004A4AE8);
             func_003F0150(name);
             id = func_003EEC88(self->names, (int)name);
             if (id != 0) {
@@ -1069,7 +1069,7 @@ void func_003F17D8(struct Conn_17D8* self) {
         }
         if (ev.type == 0x52414444 && self->roster != 0) {
             ev.kind = 0x61646475;
-            id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B58), 0);
+            id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_ID), 0);
             for (i = 0; (ent = (char*)func_003EE560(self->roster, i)) != 0; i++) {
                 if ((*(int*)(ent + 0xA8) & 0x10000) && *(int*)(ent + 0xAC) == id) {
                     if (ev.arg != 0) {
@@ -1081,7 +1081,7 @@ void func_003F17D8(struct Conn_17D8* self) {
                         func_003EE480(self->roster, f17_EED08(self->names, ent));
                         func_00259210(ent);
                     } else {
-                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B90), name, 0x20, (char*)D_004A4AE8);
+                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_FUSR), name, 0x20, (char*)D_004A4AE8);
                         func_003F0150(name);
                         if (name[0] != 0 && (unsigned int)strlen(name) < 0x20) {
                             int k = f17_EED08(self->names, ent);
@@ -1102,7 +1102,7 @@ void func_003F17D8(struct Conn_17D8* self) {
             func_003EE600(self->roster, 1);
         }
         if (ev.type == 0x5244454C && self->req[1].cb != 0) {
-            if (cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, D_004A4B58), 0) == self->req[1].seq) {
+            if (cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_ID), 0) == self->req[1].seq) {
                 ev.kind = 0x64656C75;
                 self->req[1].cb(self, &ev, self->req[1].ctx);
                 self->req[1].cb = 0;

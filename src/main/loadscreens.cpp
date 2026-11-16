@@ -13,9 +13,9 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void cMemMan_free(void* ptr);
 extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void* SHAPE_unpack(void* shape);
-extern char D_0045CE30[];
-extern char D_004A12A0[];
-extern char D_004A12A8[];
+extern char str_data_textures_backs_ssh[];
+extern char str_BackTID[];
+extern char str_back[];
 
 struct sRVEntry_17ACC8 {
     short delta;
@@ -55,17 +55,17 @@ struct sBgMan_17ACC8 {
  */
 extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
 {
-    sBgFile_17ACC8* file = (sBgFile_17ACC8*)FILE_loadz(D_0045CE30, 0x100);
+    sBgFile_17ACC8* file = (sBgFile_17ACC8*)FILE_loadz(str_data_textures_backs_ssh, 0x100);
     if (file == 0) {
         return 0;
     }
     int n = file->count;
     self->count = n;
-    self->images = (int*)operator_new_tag(n * 4, D_004A12A0, 0, 0);
+    self->images = (int*)operator_new_tag(n * 4, str_BackTID, 0, 0);
     for (int i = 0; i < self->count; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->images[i] = ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].delta, img, D_004A12A8, 0, 1, -1);
+        self->images[i] = ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].delta, img, str_back, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }
@@ -238,7 +238,7 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_cDebugMenuScreen);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char cDebugMenuScreen_vtbl[];
-extern char D_004A12B0[];
+extern char str_mc0[];
 extern int D_004A29EC;
 extern int D_004A11B8;
 extern float D_0049D5D0;
@@ -367,7 +367,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
         func_0025B688();
         func_00255898();
         cCommSystem_construct();
-        func_00255F20_ls((int)cCommSystem_mCommSystem, D_004A12B0);
+        func_00255F20_ls((int)cCommSystem_mCommSystem, str_mc0);
         func_0025B650();
         func_00260F80();
         func_00266CA0();
@@ -466,8 +466,8 @@ extern "C" void func_00255A20(void* comm);
 extern "C" int SYNCTASK_run(int);
 extern "C" void THREAD_yieldticks(int);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern char D_0045CE48[];
-extern char D_0045CE60[];
+extern char str_cPreFELoadScreen[];
+extern char str_cPreGameLoadScreen[];
 extern signed char D_00535C11[];
 extern int cCommSystem_mNumNetConn;
 
@@ -565,9 +565,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         func_0017D0A8(self);
         if (self->f8C1C == 14) {
             D_004A28A8_b4->f60 = 1;
-            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)func_00232738(cMemMan_alloc(8, D_0045CE48, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)func_00232738(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
         } else {
-            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         }
     }
     int dir = (int)cInput_getValue(D_004A28A8_b4->input, 0x3D);

@@ -5,7 +5,7 @@
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004679A0[];
+extern char str_help_popup[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -15,7 +15,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateNetHelpPopup_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004679A0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_help_popup), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -93,19 +93,19 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004679B0[];
-extern char D_004A2040[];
-extern char D_004679C0[];
-extern char D_004A2048[];
-extern char D_004679D0[];
-extern char D_004679E0[];
-extern char D_004679F0[];
-extern char D_00467A00[];
-extern char D_004A2050[];
-extern char D_004A2058[];
-extern char D_004A2060[];
-extern char D_004A2068[];
-extern char D_00467A10[];
+extern char str_OnlineAccSetup[];
+extern char str_TopText[];
+extern char str_BottomNote[];
+extern char str_xselect[];
+extern char str_ps2triangle[];
+extern char str_ps2circle[];
+extern char str_updownarrows[];
+extern char str_leftrightarrows[];
+extern char str_ps2l1[];
+extern char str_ps2r1[];
+extern char str_actrl[];
+extern char str_ps2sel[];
+extern char str_TextOptionpct_d[];
 
 struct sWidget_1D9F38 {
     char pad00[0x14];
@@ -142,37 +142,37 @@ static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s
 extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidget_1D9F38* w)
 {
     int hashName = w->hash;
-    if (hashName == GetHashValue32(D_004679B0)) {
+    if (hashName == GetHashValue32(str_OnlineAccSetup)) {
         self->wA8 = w;
         w->flags |= 0x80;
-    } else if (hashName == GetHashValue32(D_004A2040)) {
+    } else if (hashName == GetHashValue32(str_TopText)) {
         self->wAC = w;
         w->flags |= 0x80;
-    } else if (hashName == GetHashValue32(D_004679C0)) {
+    } else if (hashName == GetHashValue32(str_BottomNote)) {
         self->wB0 = w;
         w->flags |= 0x80;
-    } else if (IsHash_1D9F38(w->hash, D_004A2048)) {
+    } else if (IsHash_1D9F38(w->hash, str_xselect)) {
         self->wD0 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004679D0)) {
+    } else if (IsHash_1D9F38(w->hash, str_ps2triangle)) {
         self->wD4 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004679E0)) {
+    } else if (IsHash_1D9F38(w->hash, str_ps2circle)) {
         self->wD8 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004679F0)) {
+    } else if (IsHash_1D9F38(w->hash, str_updownarrows)) {
         self->wDC = w;
-    } else if (IsHash_1D9F38(w->hash, D_00467A00)) {
+    } else if (IsHash_1D9F38(w->hash, str_leftrightarrows)) {
         self->wE0 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004A2050)) {
+    } else if (IsHash_1D9F38(w->hash, str_ps2l1)) {
         self->wE8 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004A2058)) {
+    } else if (IsHash_1D9F38(w->hash, str_ps2r1)) {
         self->wE4 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004A2060)) {
+    } else if (IsHash_1D9F38(w->hash, str_actrl)) {
         self->wF0 = w;
-    } else if (IsHash_1D9F38(w->hash, D_004A2068)) {
+    } else if (IsHash_1D9F38(w->hash, str_ps2sel)) {
         self->wEC = w;
     } else {
         char buf[16];
         for (int i = 0; i < 7; i++) {
-            sprintf(buf, D_00467A10, i);
+            sprintf(buf, str_TextOptionpct_d, i);
             if (hashName == GetHashValue32(buf)) {
                 self->rows[i] = w;
                 break;
@@ -191,7 +191,7 @@ extern "C" void cMemMan_free__FPv(void* p);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void func_002C2688(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
-extern char D_00461A70[];
+extern char str_cFEStateNetHelpPopup[];
 
 struct sVE_A110 {
     short delta;
@@ -225,7 +225,7 @@ extern "C" void func_001DA110(void* p)
         i++;
     } while (i < 3);
     if (total > 0) {
-        buf = new (D_00461A70, 0x100, 0) unsigned short[total];
+        buf = new (str_cFEStateNetHelpPopup, 0x100, 0) unsigned short[total];
         buf[0] = 0;
         for (int i = 0; i < count; i++) {
             func_002C2688(buf, strs[i]);
@@ -465,10 +465,10 @@ extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" char* func_00416958(char* dst, const char* src, int n);
 extern void* D_0046D690[];
-extern char D_00467A20[];
-extern char D_00467A30[];
-extern char D_00467A40[];
-extern char D_00467A50[];
+extern char str_Create_Account[];
+extern char str_Login_Name[];
+extern char str_Password[];
+extern char str_Cancel[];
 extern char D_004A1408[];
 
 static inline void copyName_1DA648(char* dst, const char* src)
@@ -482,12 +482,12 @@ extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D690;
     *(int*)((char*)self + 0x130) = *(int*)vinfo;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A20);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Create_Account);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xA);
-    func_002CE418((char*)self + 0x168, D_00467A30, D_004A1408);
-    func_002CE418((char*)self + 0x194, D_00467A40, D_004A1408);
+    func_002CE418((char*)self + 0x168, str_Login_Name, D_004A1408);
+    func_002CE418((char*)self + 0x194, str_Password, D_004A1408);
     func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
-    func_002CCDF0((char*)self + 0x1E4, D_00467A50);
+    func_002CCDF0((char*)self + 0x1E4, str_Cancel);
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
     cMenu_addItem(self, (char*)self + 0x168, -1);
@@ -514,10 +514,10 @@ extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" char* func_00416958(char* dst, const char* src, int n);
 extern void* D_0046D6E8[];
-extern char D_00467A20[];
-extern char D_00467A30[];
-extern char D_00467A40[];
-extern char D_00467A50[];
+extern char str_Create_Account[];
+extern char str_Login_Name[];
+extern char str_Password[];
+extern char str_Cancel[];
 extern char D_004A1408[];
 
 static inline void copyName_1DA7E8(char* dst, const char* src)
@@ -531,12 +531,12 @@ extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D6E8;
     *(int*)((char*)self + 0x130) = *(int*)vinfo;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A20);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Create_Account);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xA);
-    func_002CE418((char*)self + 0x168, D_00467A30, D_004A1408);
-    func_002CE418((char*)self + 0x194, D_00467A40, D_004A1408);
+    func_002CE418((char*)self + 0x168, str_Login_Name, D_004A1408);
+    func_002CE418((char*)self + 0x194, str_Password, D_004A1408);
     func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
-    func_002CCDF0((char*)self + 0x1E4, D_00467A50);
+    func_002CCDF0((char*)self + 0x1E4, str_Cancel);
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
     cMenu_addItem(self, (char*)self + 0x168, -1);
@@ -562,20 +562,20 @@ extern "C" void* func_001DA648(void* self, void* a1, void* a2);
 extern "C" void* func_001DA7E8(void* self, void* a1, void* a2);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D638[];
-extern char D_00467A20[];
-extern char D_00467A58[];
-extern char D_00467A60[];
+extern char str_Create_Account[];
+extern char str_Login[];
+extern char str_Login_Method[];
 
 extern "C" void* func_001DA988(void* self, void* a1, void* a2)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D638;
-    func_001DA648((char*)self + 0x130, a1, D_00467A20);
-    func_001DA7E8((char*)self + 0x32C, a2, D_00467A58);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x528), D_00467A60);
+    func_001DA648((char*)self + 0x130, a1, str_Create_Account);
+    func_001DA7E8((char*)self + 0x32C, a2, str_Login);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x528), str_Login_Method);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x544), (void*)0xA);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x55C, (char*)self + 0x130, D_00467A20);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x578, (char*)self + 0x32C, D_00467A58);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x55C, (char*)self + 0x130, str_Create_Account);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x578, (char*)self + 0x32C, str_Login);
     cMenu_addItem(self, (char*)self + 0x528, -1);
     cMenu_addItem(self, (char*)self + 0x544, -1);
     cMenu_addItem(self, (char*)self + 0x55C, -1);
@@ -596,20 +596,20 @@ extern "C" void* func_002CE418(void* self, void* a1, const char* name);
 extern "C" void* func_002CCF98(void* self, int a1, void* a2, int a3);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D588[];
-extern char D_00467A70[];
-extern char D_00467A80[];
+extern char str_Create_Persona[];
+extern char str_Persona_Name[];
 extern char D_004A1408[];
-extern char D_00467A90[];
+extern char str_Create[];
 
 extern "C" void* func_001DAAC8(void* self, int* info)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D588;
     *(int*)((char*)self + 0x130) = *info;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A70);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Create_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
-    func_002CE418((char*)self + 0x168, D_00467A80, D_004A1408);
-    func_002CCF98((char*)self + 0x194, 0, D_00467A90, 0);
+    func_002CE418((char*)self + 0x168, str_Persona_Name, D_004A1408);
+    func_002CCF98((char*)self + 0x194, 0, str_Create, 0);
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
     cMenu_addItem(self, (char*)self + 0x168, -1);
@@ -629,7 +629,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* func_002CCF08(void* self);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D5E0[];
-extern char D_00467A98[];
+extern char str_Delete_Persona[];
 
 extern "C" void* func_001DABD0(void* self, int* info)
 {
@@ -638,7 +638,7 @@ extern "C" void* func_001DABD0(void* self, int* info)
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D5E0;
     *(int*)((char*)self + 0x130) = *info;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467A98);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Delete_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
     for (; i != -1; i--) {
         func_002CCF08(p);
@@ -669,9 +669,9 @@ void func_001DABD0_v(void* self, int* info) __asm__("func_001DABD0");
 extern "C" void* func_002CCF08(void* self);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D530[];
-extern char D_00467AA8[];
-extern char D_00467A70[];
-extern char D_00467A98[];
+extern char str_Select_Persona[];
+extern char str_Create_Persona[];
+extern char str_Delete_Persona[];
 
 
 extern "C" void* func_001DACB8(void* self, int* info, int* a2, int* a3)
@@ -681,15 +681,15 @@ extern "C" void* func_001DACB8(void* self, int* info, int* a2, int* a3)
     func_001DAAC8_v((char*)self + 0x130, a2);
     func_001DABD0_v((char*)self + 0x2E8, a3);
     *(int*)((char*)self + 0x4E0) = *info;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x4E4), D_00467AA8);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x4E4), str_Select_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x500), (void*)0xE);
     char* p = (char*)self + 0x518;
     for (int i = 3; i != -1; i--) {
         func_002CCF08(p);
         p += 0x24;
     }
-    cSubMenuItem_cSubMenuItem((char*)self + 0x5A8, (char*)self + 0x130, D_00467A70);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x5C4, (char*)self + 0x2E8, D_00467A98);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x5A8, (char*)self + 0x130, str_Create_Persona);
+    cSubMenuItem_cSubMenuItem((char*)self + 0x5C4, (char*)self + 0x2E8, str_Delete_Persona);
     cMenu_addItem(self, (char*)self + 0x4E4, -1);
     cMenu_addItem(self, (char*)self + 0x500, -1);
     int j;
@@ -713,7 +713,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* func_002CCF08(void* self);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D4D8[];
-extern char D_00467AB8[];
+extern char str_Select_Room[];
 
 extern "C" void* func_001DAE20(void* self, int* info)
 {
@@ -722,7 +722,7 @@ extern "C" void* func_001DAE20(void* self, int* info)
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D4D8;
     *(int*)((char*)self + 0x130) = *info;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467AB8);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Select_Room);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
     for (; i != -1; i--) {
         func_002CCF08(p);
@@ -750,8 +750,8 @@ extern "C" void* func_002CCF08(void* self);
 extern "C" void* func_002CCF98(void* self, int a1, void* a2, int a3);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D480[];
-extern char D_00467AC8[];
-extern char D_00467AD8[];
+extern char str_Room_Occupants[];
+extern char str_Chat[];
 
 extern "C" void* func_001DAF08(void* self, int* a, int* b)
 {
@@ -761,13 +761,13 @@ extern "C" void* func_001DAF08(void* self, int* a, int* b)
     *(void***)((char*)self + 0x12C) = D_0046D480;
     *(int*)((char*)self + 0x130) = *a;
     *(int*)((char*)self + 0x134) = *b;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x138), D_00467AC8);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x138), str_Room_Occupants);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x154), (void*)0xE);
     for (; i != -1; i--) {
         func_002CCF08(p);
         p += 0x24;
     }
-    func_002CCF98((char*)self + 0x4CC, -2, D_00467AD8, 0);
+    func_002CCF98((char*)self + 0x4CC, -2, str_Chat, 0);
     cMenu_addItem(self, (char*)self + 0x138, -1);
     cMenu_addItem(self, (char*)self + 0x154, -1);
     int j;
@@ -791,8 +791,8 @@ extern "C" void* func_002CCF08(void* self);
 extern "C" void* func_002CE418(void* self, void* a1, const char* name);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D428[];
-extern char D_00467AE0[];
-extern char D_00467AF0[];
+extern char str_Chat_Menu[];
+extern char str_Enter_Chat[];
 extern char D_004A1408[];
 extern int D_00467D70[];
 
@@ -803,9 +803,9 @@ extern "C" void* func_001DB028(void* self, int* info)
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D428;
     *(int*)((char*)self + 0x130) = *info;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), D_00467AE0);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Chat_Menu);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
-    func_002CE418((char*)self + 0x168, D_00467AF0, D_004A1408);
+    func_002CE418((char*)self + 0x168, str_Enter_Chat, D_004A1408);
     for (; i != -1; i--) {
         func_002CCF08(p);
         p += 0x24;

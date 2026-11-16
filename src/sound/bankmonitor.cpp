@@ -15,7 +15,7 @@ extern "C" void* cSoundSys_cSoundSys(cSoundSys* self, int a);
 extern "C" void* func_002AB9E0(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_00483238[];
+extern const char str_mBankMonitorInstance[];
 extern void* cBankMonitor_vtbl[];
 
 struct sBmVEntryCD08 {
@@ -77,7 +77,7 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
     self->f8E0 = 1;
     self->f8E4 = 1;
     sBmVoiceCD08** slot = &self->voices;
-    *slot = new (D_00483238, 0, 0) sBmVoiceCD08[64];
+    *slot = new (str_mBankMonitorInstance, 0, 0) sBmVoiceCD08[64];
     return self;
 }
 #endif
@@ -1250,13 +1250,13 @@ extern "C" void* MEM_free(void* self);
 INCLUDE_ASM("sound/bankmonitor", func_002ADFC8);
 #ifdef SKIP_ASM
 extern void* (*D_004A378C)(void*, int, int);
-extern char D_00483288[];
+extern char str_pathxSND[];
 
 extern "C" void* func_002ADFC8(int a)
 {
     void* r = 0;
     if (D_004A378C != 0) {
-        r = D_004A378C(D_00483288, a, 0);
+        r = D_004A378C(str_pathxSND, a, 0);
     }
     return r;
 }
@@ -1585,7 +1585,7 @@ extern "C" int func_002AE1B8(void);
 extern "C" void func_002AE138(void* self);
 extern "C" int func_003B7818(void* desc, int n, int m, void* mem, int size);
 extern "C" int func_003BA020(void* desc);
-extern char D_004A37A8[];
+extern char str_pct_s_c[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int m, char* mem, int size)
@@ -1610,7 +1610,7 @@ extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int 
     else
         func_003BA020(b + 0x30);
     *(char*)(b + 0x35) = 0;
-    sprintf(b + 0x1C, D_004A37A8, 11, name);
+    sprintf(b + 0x1C, str_pct_s_c, 11, name);
     if (m > 0)
         *(int*)(b + 0x0) = func_003B7818(b + 0x30, count, m, mem, size);
     else
@@ -2499,8 +2499,8 @@ extern "C" int func_003D69F0(void* data);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* func_0041ACC0(const char* s, int c);
 void* func_002AF8E0(void* self);
-extern char D_004A37C0[];
-extern char D_004832B0[];
+extern char str_pct_s_hdr[];
+extern char str_SpeechBank[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -2511,14 +2511,14 @@ void* func_002AF960_impl(const char* name, int unused, void* data)
 {
     char buf[0x50];
     int owned = data == 0;
-    sprintf(buf, D_004A37C0, name);
+    sprintf(buf, str_pct_s_hdr, name);
     if (data == 0) {
         if (BXFILE_exists(buf) == 0) {
             return 0;
         }
         data = FILE_load(buf, 0);
     }
-    char* obj = (char*)func_002AF8E0(cMemMan_alloc(0x4C, D_004832B0, 0, 0));
+    char* obj = (char*)func_002AF8E0(cMemMan_alloc(0x4C, str_SpeechBank, 0, 0));
     *(int*)(obj + 0x48) = owned;
     *(void**)(obj + 0x44) = data;
     *(int*)obj = func_003D69F0(data);
@@ -2747,14 +2747,14 @@ struct sBankList {
     int f8FC;                   // 0x8FC
     int f900;                   // 0x900
 };
-extern char D_004A36E0[];
+extern char str_pct_spct_s_c[];
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void* func_003E2DF0(void* big, char* name);
 extern "C" int func_003E2EE0(void* big);
 extern "C" void func_003D66C0(void* h, int a);
 char* BIG_locateentryz_2AFD40(void* big, char* name, int index, int* offset, int* size) __asm__("BIG_locateentryz");
-extern char D_004832C0[];
+extern char str_pct_seventdat_events_evt[];
 extern "C" void func_002B0348_l(sBankList* self, int a, int b, int c) __asm__("func_002B0348");
 
 extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, int c)
@@ -2770,7 +2770,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, i
     if (self->pairs[self->voiceCount].p[sel] != 0) {
         buf[0] = 0;
         if (a != 0) {
-            sprintf(name, D_004832C0, (char*)self + 0x6C);
+            sprintf(name, str_pct_seventdat_events_evt, (char*)self + 0x6C);
             char* p = name;
             int len = strlen(name);
             int i;
@@ -2800,7 +2800,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, i
             char* nm = BIG_locateentryz_2AFD40(self->pairs[self->voiceCount].p[sel], 0, i, &off, 0);
             char* e = (char*)self->pairs[self->voiceCount].p[sel] + off;
             if (e != self->voices[self->voiceCount].handle) {
-                sprintf(path, D_004A36E0, buf, nm);
+                sprintf(path, str_pct_spct_s_c, buf, nm);
                 int len = strlen(path);
                 path[len - 4] = 0;
                 int j = len - 4;
@@ -2810,7 +2810,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, i
             }
         }
     } else {
-        sprintf(name, D_004832C0, (char*)self + 0x6C);
+        sprintf(name, str_pct_seventdat_events_evt, (char*)self + 0x6C);
         self->voices[self->voiceCount].handle = FILE_loadz(name, 0);
         if (self->voices[self->voiceCount].handle == 0)
             return 0;
@@ -2837,12 +2837,12 @@ void func_002AAB98_2B0088(void* self, int i, char* val) __asm__("func_002AAB98")
 extern "C" int func_002AFD40(cSpeechInstance* self, int a, char* name, int b, int c);
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern void* D_004A37B0;
-extern char D_004A37C8[];
-extern char D_004828C0[];
-extern char D_004A37D0[];
-extern char D_004832D8[];
-extern char D_004832E8[];
-extern char D_004A36E0[];
+extern char str_BIGFILE[];
+extern char str_BASEPATH[];
+extern char str_BANK[];
+extern char str_pct_sheaders_big[];
+extern char str_pct_slanghead_big[];
+extern char str_pct_spct_s_c[];
 struct sBankList_0348;
 extern "C" void func_002B0348(sBankList_0348* self, int a, int b, int c);
 
@@ -2860,28 +2860,28 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, i
         while (FileParser_IsEOF(parser) == 0)
         {
             char* key = FileParser_GetName(parser);
-            if (func_0041AA88(D_004A37C8, key) == 0)
+            if (func_0041AA88(str_BIGFILE, key) == 0)
             {
-                FileParser_AssignString(parser, D_004A37C8, v40);
+                FileParser_AssignString(parser, str_BIGFILE, v40);
                 func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, speechInstance->unk_004, v40);
             }
-            if (func_0041AA88(D_004828C0, key) == 0)
+            if (func_0041AA88(str_BASEPATH, key) == 0)
             {
-                FileParser_AssignString(parser, D_004828C0, ((char*)speechInstance) + 0x6C);
-                sprintf(value, D_004832D8, ((char*)speechInstance) + 0x6C);
+                FileParser_AssignString(parser, str_BASEPATH, ((char*)speechInstance) + 0x6C);
+                sprintf(value, str_pct_sheaders_big, ((char*)speechInstance) + 0x6C);
                 if (func_002AFD40(speechInstance, 1, value, a1, a2) == 0)
                     break;
                 if (a3)
                 {
-                    sprintf(value, D_004832E8, ((char*)speechInstance) + 0x6C);
+                    sprintf(value, str_pct_slanghead_big, ((char*)speechInstance) + 0x6C);
                     func_002AFD40(speechInstance, 0, value, a1, a2);
                 }
                 speechInstance->unk_0EC += 1;
             }
-            if (func_0041AA88(D_004A37D0, key) == 0)
+            if (func_0041AA88(str_BANK, key) == 0)
             {
-                FileParser_AssignString(parser, D_004A37D0, value);
-                sprintf(path, D_004A36E0, ((char*)speechInstance) + 0x6C, name);
+                FileParser_AssignString(parser, str_BANK, value);
+                sprintf(path, str_pct_spct_s_c, ((char*)speechInstance) + 0x6C, name);
                 func_002B0348((sBankList_0348*)speechInstance, (int)path, (int)name, 0);
             }
         }
@@ -2981,9 +2981,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // A bank list (func_002AFA68 ctor / func_002AFB38 dtor): its voices and up to 500 loaded streams.
-extern char D_004A36E0[];
-extern char D_004A3590[];
-extern char D_004832F8[];
+extern char str_pct_spct_s_c[];
+extern char str_data_b[];
+extern char str_pct_spct_spct_s_dat[];
 extern "C" int func_002AFA58(cSpeechBank* self, int a1);
 extern "C" int func_002B1520_c(void* sys, int a, int b) __asm__("func_002B1520");
 extern "C" int func_002B03B8(const char* name);
@@ -3023,7 +3023,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* a)
         sBmObj** slot = at_04D8(self->streams, idx);
         int lang = func_002B03B8((char*)*slot + 4);
         char buf[0x100];
-        sprintf(buf, D_004832F8, D_004A3590, (char*)D_004A37B4 + 0x158 + lang * 0x14, (char*)*slot + 4);
+        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)D_004A37B4 + 0x158 + lang * 0x14, (char*)*slot + 4);
         cSpeechSys* speechSys = D_004A37B4;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
         int h = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
@@ -3094,7 +3094,7 @@ struct sBankSlots;
 extern "C" void func_002B1428(cSpeechSys* self);
 extern void* D_00483870[];
 extern void* cBankMonitor_vtbl[];
-extern const char D_00483308[];
+extern const char str_mSpeechInstance[];
 
 struct sName17_07F8 { char s[17]; };
 struct sName18_07F8 { char s[18]; } __attribute__((aligned(2)));
@@ -3152,7 +3152,7 @@ extern "C" char* func_002B07F8(cSpeechSys* self, int inchrg, int a2, int a3, int
     self->unk_008 = 0;
     self->mCallback = 0;
     D_004A37B4 = (cSpeechSys*)(self);
-    self->mSpeechInstance = new (D_00483308, 0, 0) void*[2];
+    self->mSpeechInstance = new (str_mSpeechInstance, 0, 0) void*[2];
     for (int i = 0; i < 2; i++)
         (self->mSpeechInstance)[i] = 0;
     func_002B1428(self);
@@ -3258,7 +3258,7 @@ extern "C" void* func_003D6768();
 extern "C" void func_002AF8A8();
 extern "C" int func_003E4E98();
 extern char D_00483390[];
-extern char D_004833A8[];
+extern char str_bank_mem[];
 
 /**
  * Sets up the speech system's memory and callbacks.
@@ -3274,7 +3274,7 @@ extern "C" void SPCH_Init(cSpeechSys* self)
     bxLogPrint(D_00483390, seed);
     func_003D6840((void*)func_002AF8A8, seed, buf);
     int n = func_003D6C58(500);
-    void* workMem = func_00252FA0(D_004833A8, n, 0);
+    void* workMem = func_00252FA0(str_bank_mem, n, 0);
     self->unk_008 = workMem;
     func_003D6C60(500, workMem);
     *(void**)((char*)func_003D6768() + 0x8) = (void*)func_003E4E98;
@@ -3322,13 +3322,13 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0E60);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002AFA68(cSpeechInstance* mem, int i, int a, int b, int c, int d, int e);
-extern const char D_004833B8[];
+extern const char str_SpeechInstance[];
 
 extern "C" void func_002B0E60(cSpeechSys* self, int i, int a, int b, int c, int d, int e)
 {
     // PORT: pointer arithmetic through int
     void** slot = (void**)(i * 4 + (int)self->mSpeechInstance);
-    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(0x904, D_004833B8, 0, 0), i, a, b, c, d, e);
+    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(0x904, str_SpeechInstance, 0, 0), i, a, b, c, d, e);
 }
 #endif
 
@@ -3898,11 +3898,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1B98);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002B1C50(void* mem, int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7);
-extern const char D_004833E0[];
+extern const char str_SongInstance[];
 
 extern "C" void* func_002B1B98(int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7)
 {
-    return func_002B1C50(cMemMan_alloc(0xC4, D_004833E0, 0, 0), a0, a1, a2, a3, a4, a5, a6, a7);
+    return func_002B1C50(cMemMan_alloc(0xC4, str_SongInstance, 0, 0), a0, a1, a2, a3, a4, a5, a6, a7);
 }
 #endif
 
@@ -3915,13 +3915,13 @@ extern "C" int func_003D3058(int a, int b);
 extern "C" void func_002B4A20(void* self, void* name, int sync);
 extern "C" void func_002B21E0(cSongInstance*, int);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004833F0[];
-extern char D_00483408[];
-extern char D_00483420[];
-extern char D_00483430[];
-extern char D_004A3588[];
-extern char D_004A3590[];
-extern char D_004A36E0[];
+extern char str_PathfinderStream[];
+extern char str_PathfinderOverlay[];
+extern char str_audio_music_big[];
+extern char str_audio_music2_big[];
+extern char str_pct_spct_spct_s_b[];
+extern char str_data_b[];
+extern char str_pct_spct_s_c[];
 
 struct sBankEntry_1C50 {
     unsigned char vol;      // 0x0
@@ -3992,20 +3992,20 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2,
     self->f58 = -1;
     self->f5C = 0;
     self->f44 = bankCur_1C50(def)->f14;
-    self->buf24 = bmNew_1C50(0x37000, D_004833F0, 0, 0);
-    self->buf28 = bmNew_1C50(func_003D3058(1, 0), D_00483408, 0, 0);
+    self->buf24 = bmNew_1C50(0x37000, str_PathfinderStream, 0, 0);
+    self->buf28 = bmNew_1C50(func_003D3058(1, 0), str_PathfinderOverlay, 0, 0);
     float scale = (float)*(int*)(snd + 0x88) * 0.01f;
     def->vols[def->cur] = (int)BM_MAX_1C50(BM_MIN_1C50((float)def->vols[def->cur] * scale, 127.0f), 0.0f);
     def->entries[def->cur].vol = BM_MAX_1C50(BM_MIN_1C50(def->vols[def->cur], 127), 0);
     if (*(int*)(snd + 0xA4) == 1) {
-        sprintf(self->name, D_004A3588, D_004A3590, D_00483420, a0);
+        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music_big, a0);
     } else {
-        sprintf(self->name, D_004A3588, D_004A3590, D_00483430, a0);
+        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music2_big, a0);
     }
     self->snd = snd;
     self->entry = *bankCur_1C50(def);
     char buf[0x100];
-    sprintf(buf, D_004A36E0, self->name, snd);
+    sprintf(buf, str_pct_spct_s_c, self->name, snd);
     func_002B4A20((void***)gMusicSys, buf, a7);
     if (a7 != 0) {
         func_002B21E0((cSongInstance*)self, 1);
@@ -4164,7 +4164,7 @@ extern "C" void func_003B58D8(void);
 extern "C" void func_003B7E70(int h, int v);
 extern "C" void func_003D2350(int a);
 extern "C" int func_003D25F0(int id, char* name, int a2, void* a3, int a4, int a5, void* buf, int size);
-extern char D_004A36E0[];
+extern char str_pct_spct_s_c[];
 extern float D_004A3508;
 
 
@@ -4178,11 +4178,11 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
         (mon)->unk_2C = 1;
         func_003D2350(func_002B4AE8((void***)gMusicSys));
         char buf[256];
-        sprintf(buf, D_004A36E0, ((char*)mon) + 0x60, *(char**)mon + 0x20);
+        sprintf(buf, str_pct_spct_s_c, ((char*)mon) + 0x60, *(char**)mon + 0x20);
         mon->unk_1C = func_003D25F0(0x11000001, buf, 500, ((char*)mon) + 4, 2, 150, mon->unk_24, 0x37000);
         if (*(int*)(*(char**)mon + 0x40) > 0)
         {
-            sprintf(buf, D_004A36E0, ((char*)mon) + 0x60, *(char**)mon + 0x44);
+            sprintf(buf, str_pct_spct_s_c, ((char*)mon) + 0x60, *(char**)mon + 0x44);
             mon->unk_20 = func_003D25F0(0x11000002, buf, 10, ((char*)mon) + 4, 1, 0, mon->unk_28, 0x6A400);
         }
         if (mon->unk_30 != -1)
@@ -4554,34 +4554,34 @@ struct sSpeechMon {
 extern "C" void func_003B58D8(void);
 extern "C" void func_003B58A0(void);
 extern void* D_004A37E8;
-extern char D_004A3570[];
-extern char D_004A37F0[];
-extern char D_004A37F8[];
-extern char D_004A3800[];
-extern char D_004A3808[];
-extern char D_00483470[];
-extern char D_00483480[];
-extern char D_004A3810[];
-extern char D_00483490[];
-extern char D_004834A0[];
-extern char D_004834B0[];
-extern char D_004834C0[];
-extern char D_004834D0[];
-extern char D_004834E0[];
-extern char D_004834F0[];
-extern char D_00483500[];
-extern char D_00483510[];
-extern char D_00483520[];
-extern char D_00483530[];
-extern char D_00483540[];
-extern char D_004A3818[];
-extern char D_00483550[];
-extern char D_004A3820[];
-extern char D_00483560[];
-extern char D_004A3828[];
-extern char D_004A3830[];
-extern const char D_00483448[];
-extern const char D_00483458[];
+extern char str_GLOBAL[];
+extern char str_TITLE[];
+extern char str_ARTIST[];
+extern char str_ALBUM[];
+extern char str_ADDTOFE[];
+extern char str_CATEGORY[];
+extern char str_PATHDATA[];
+extern char str_MUSDATA[];
+extern char str_LOOPDATA[];
+extern char str_BeatsPerMeasure[];
+extern char str_MeasuresPerBar[];
+extern char str_PhrasesPerBank[];
+extern char str_BeatsPerPhrase[];
+extern char str_PhraseAlign[];
+extern char str_DelayCount[];
+extern char str_DelayFeedback[];
+extern char str_DelayTime[];
+extern char str_DelayLevel[];
+extern char str_Pathlevel[];
+extern char str_Asynclevel[];
+extern char str_BPM[];
+extern char str_SEDVALUE[];
+extern char str_LOWPASS[];
+extern char str_DUCKTOLOOPS[];
+extern char str_PREVIEW[];
+extern char str_SONGBIG[];
+extern const char str_MPF_data_file[];
+extern const char str_cSongConfiguration[];
 extern "C" void* FileParser_FileParser_p(void* parser, void* src, int n) __asm__("FileParser_FileParser");
 extern "C" int FileParser_FindSection(void* parser, const char* name);
 extern "C" char* FileParser_FindNextSection(void* parser);
@@ -4655,7 +4655,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
     *(int*)(self + 0x5438) = 0;
     *(int*)(self + 0x543C) = 0;
     gMusicSys = (cMusicSys*)((void***)self);
-    *(char**)(self + 0x5434) = new (D_00483448, 0, 0) char[0x6400];
+    *(char**)(self + 0x5434) = new (str_MPF_data_file, 0, 0) char[0x6400];
     sBank28C0* sv = (sBank28C0*)self;
     int i = 0;
     do {
@@ -4677,10 +4677,10 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
     sLoc28C0 L;
     FileParser_FileParser_p(L.parser, D_004A37E8, 0x100);
     *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
-    if (FileParser_FindSection(L.parser, D_004A3570) != 0) {
+    if (FileParser_FindSection(L.parser, str_GLOBAL) != 0) {
         while (FileParser_IsEOF(L.parser) == 0) {
             FileParser_GetName(L.parser);
-            FileParser_AssignString(L.parser, D_004828C0, self + 0x104);
+            FileParser_AssignString(L.parser, str_BASEPATH, self + 0x104);
         }
     }
     *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
@@ -4690,7 +4690,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         char* tok = FileParser_FindNextSection(L.parser);
         if (tok == 0)
             break;
-        if (func_0041AA88(tok, D_004A3570) == 0)
+        if (func_0041AA88(tok, str_GLOBAL) == 0)
             continue;
         // The song's bit is built in a variable: the target keeps its li 1 in the loop while the
         // other constants (100) are hoisted.
@@ -4698,83 +4698,83 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         bit <<= *(int*)(self + 0x3E4);
         *(long*)(self + 0x3F8) |= bit;
         strcpy(self + (*(int*)(self + 0x3E4) * 0xB + 0x124), tok);
-        sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(0xAC, D_00483458, 0, 0));
+        sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(0xAC, str_cSongConfiguration, 0, 0));
         while (FileParser_IsEOF(L.parser) == 0) {
             char* key = FileParser_GetName(L.parser);
-            if (func_0041AA88(key, D_004A37F0) == 0) {
-                FileParser_AssignString(L.parser, D_004A37F0, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
-            } else if (func_0041AA88(key, D_004A37F8) == 0) {
-                FileParser_AssignString(L.parser, D_004A37F8, self + (*(int*)(self + 0x3E4) * 100 + 0x2234));
-            } else if (func_0041AA88(key, D_004A3800) == 0) {
-                FileParser_AssignString(L.parser, D_004A3800, self + (*(int*)(self + 0x3E4) * 100 + 0x3B34));
-            } else if (func_0041AA88(key, D_004A3808) == 0) {
-                FileParser_AssignInt(L.parser, D_004A3808, &L.iA);
+            if (func_0041AA88(key, str_TITLE) == 0) {
+                FileParser_AssignString(L.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
+            } else if (func_0041AA88(key, str_ARTIST) == 0) {
+                FileParser_AssignString(L.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 0x2234));
+            } else if (func_0041AA88(key, str_ALBUM) == 0) {
+                FileParser_AssignString(L.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 0x3B34));
+            } else if (func_0041AA88(key, str_ADDTOFE) == 0) {
+                FileParser_AssignInt(L.parser, str_ADDTOFE, &L.iA);
                 if (L.iA == 1)
                     *(int*)(self + 0x3EC) += 1;
-            } else if (func_0041AA88(key, D_00483470) == 0) {
-                FileParser_AssignInt(L.parser, D_00483470, &L.iB);
+            } else if (func_0041AA88(key, str_CATEGORY) == 0) {
+                FileParser_AssignInt(L.parser, str_CATEGORY, &L.iB);
                 if (L.iB < 5)
                     ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][L.iB] = 1;
-            } else if (func_0041AA88(key, D_00483480) == 0) {
-                FileParser_AssignString(L.parser, D_00483480, L.buf);
+            } else if (func_0041AA88(key, str_PATHDATA) == 0) {
+                FileParser_AssignString(L.parser, str_PATHDATA, L.buf);
                 strcpy(sv->ents[*(int*)(self + 0x3E4)], L.buf);
-            } else if (func_0041AA88(key, D_004A3810) == 0) {
-                FileParser_AssignString(L.parser, D_004A3810, L.buf);
+            } else if (func_0041AA88(key, str_MUSDATA) == 0) {
+                FileParser_AssignString(L.parser, str_MUSDATA, L.buf);
                 strcpy(sv->ents[*(int*)(self + 0x3E4)] + 0x20, L.buf);
-            } else if (func_0041AA88(key, D_00483490) == 0) {
-                FileParser_AssignString(L.parser, D_00483490, L.buf);
+            } else if (func_0041AA88(key, str_LOOPDATA) == 0) {
+                FileParser_AssignString(L.parser, str_LOOPDATA, L.buf);
                 strcpy(((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->bankData[((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData], L.buf);
                 ((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData++;
-            } else if (func_0041AA88(key, D_004834A0) == 0) {
-                FileParser_AssignInt(L.parser, D_004834A0, &L.iC);
+            } else if (func_0041AA88(key, str_BeatsPerMeasure) == 0) {
+                FileParser_AssignInt(L.parser, str_BeatsPerMeasure, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x64) = L.iC;
-            } else if (func_0041AA88(key, D_004834B0) == 0) {
-                FileParser_AssignInt(L.parser, D_004834B0, &L.iC);
+            } else if (func_0041AA88(key, str_MeasuresPerBar) == 0) {
+                FileParser_AssignInt(L.parser, str_MeasuresPerBar, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x68) = L.iC;
-            } else if (func_0041AA88(key, D_004834C0) == 0) {
-                FileParser_AssignInt(L.parser, D_004834C0, &L.iC);
+            } else if (func_0041AA88(key, str_PhrasesPerBank) == 0) {
+                FileParser_AssignInt(L.parser, str_PhrasesPerBank, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x6C) = L.iC;
-            } else if (func_0041AA88(key, D_004834D0) == 0) {
-                FileParser_AssignInt(L.parser, D_004834D0, &L.iC);
+            } else if (func_0041AA88(key, str_BeatsPerPhrase) == 0) {
+                FileParser_AssignInt(L.parser, str_BeatsPerPhrase, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x70) = L.iC;
-            } else if (func_0041AA88(key, D_004834E0) == 0) {
-                FileParser_AssignInt(L.parser, D_004834E0, &L.iC);
+            } else if (func_0041AA88(key, str_PhraseAlign) == 0) {
+                FileParser_AssignInt(L.parser, str_PhraseAlign, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x74) = L.iC;
-            } else if (func_0041AA88(key, D_004834F0) == 0) {
-                FileParser_AssignInt(L.parser, D_004834F0, &L.iC);
+            } else if (func_0041AA88(key, str_DelayCount) == 0) {
+                FileParser_AssignInt(L.parser, str_DelayCount, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x78) = L.iC;
-            } else if (func_0041AA88(key, D_00483500) == 0) {
-                FileParser_AssignInt(L.parser, D_00483500, &L.iC);
+            } else if (func_0041AA88(key, str_DelayFeedback) == 0) {
+                FileParser_AssignInt(L.parser, str_DelayFeedback, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x7C) = L.iC;
-            } else if (func_0041AA88(key, D_00483510) == 0) {
-                FileParser_AssignInt(L.parser, D_00483510, &L.iC);
+            } else if (func_0041AA88(key, str_DelayTime) == 0) {
+                FileParser_AssignInt(L.parser, str_DelayTime, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x80) = L.iC;
-            } else if (func_0041AA88(key, D_00483520) == 0) {
-                FileParser_AssignInt(L.parser, D_00483520, &L.iC);
+            } else if (func_0041AA88(key, str_DelayLevel) == 0) {
+                FileParser_AssignInt(L.parser, str_DelayLevel, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x84) = L.iC;
-            } else if (func_0041AA88(key, D_00483530) == 0) {
-                FileParser_AssignInt(L.parser, D_00483530, &L.iC);
+            } else if (func_0041AA88(key, str_Pathlevel) == 0) {
+                FileParser_AssignInt(L.parser, str_Pathlevel, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x88) = L.iC;
-            } else if (func_0041AA88(key, D_00483540) == 0) {
-                FileParser_AssignInt(L.parser, D_00483540, &L.iC);
+            } else if (func_0041AA88(key, str_Asynclevel) == 0) {
+                FileParser_AssignInt(L.parser, str_Asynclevel, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x8C) = L.iC;
-            } else if (func_0041AA88(key, D_004A3818) == 0) {
-                FileParser_AssignFloat(L.parser, D_004A3818, &L.fD);
+            } else if (func_0041AA88(key, str_BPM) == 0) {
+                FileParser_AssignFloat(L.parser, str_BPM, &L.fD);
                 *(float*)(sv->ents[*(int*)(self + 0x3E4)] + 0x90) = L.fD;
-            } else if (func_0041AA88(key, D_00483550) == 0) {
-                FileParser_AssignInt(L.parser, D_00483550, &L.iC);
+            } else if (func_0041AA88(key, str_SEDVALUE) == 0) {
+                FileParser_AssignInt(L.parser, str_SEDVALUE, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x98) = L.iC;
-            } else if (func_0041AA88(key, D_004A3820) == 0) {
-                FileParser_AssignInt(L.parser, D_004A3820, &L.iC);
+            } else if (func_0041AA88(key, str_LOWPASS) == 0) {
+                FileParser_AssignInt(L.parser, str_LOWPASS, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x9C) = L.iC;
-            } else if (func_0041AA88(key, D_00483560) == 0) {
-                FileParser_AssignInt(L.parser, D_00483560, &L.iC);
+            } else if (func_0041AA88(key, str_DUCKTOLOOPS) == 0) {
+                FileParser_AssignInt(L.parser, str_DUCKTOLOOPS, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x94) = L.iC;
-            } else if (func_0041AA88(key, D_004A3828) == 0) {
-                FileParser_AssignInt(L.parser, D_004A3828, &L.iC);
+            } else if (func_0041AA88(key, str_PREVIEW) == 0) {
+                FileParser_AssignInt(L.parser, str_PREVIEW, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA0) = L.iC;
-            } else if (func_0041AA88(key, D_004A3830) == 0) {
-                FileParser_AssignInt(L.parser, D_004A3830, &L.iC);
+            } else if (func_0041AA88(key, str_SONGBIG) == 0) {
+                FileParser_AssignInt(L.parser, str_SONGBIG, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA4) = L.iC;
             }
         }
@@ -5564,7 +5564,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B43D8);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_002B24C0(cSongInstance* p);
 extern "C" void func_0028BD10(void* self, int i, void* id, int a3);
-extern char D_004A36E0[];
+extern char str_pct_spct_s_c[];
 
 struct sBankMonHdr { char pad[0x40]; int f40; char names[1][0x20]; };
 
@@ -5577,7 +5577,7 @@ extern "C" void func_002B43D8(void* self)
         if ((*(sBankMonHdr**)p)->f40 != 0) {
             int n = func_002B24C0((cSongInstance*)p);
             void* q = *(void**)((char*)self + 0x408);
-            sprintf(buf, D_004A36E0, (char*)q + 0x60, (*(sBankMonHdr**)q)->names[n]);
+            sprintf(buf, str_pct_spct_s_c, (char*)q + 0x60, (*(sBankMonHdr**)q)->names[n]);
             func_0028BD10(**(void***)self, bank, buf, 0x100);
             *(int*)((char*)*(void**)((char*)self + 0x408) + 0x38) = 1;
         }

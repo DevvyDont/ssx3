@@ -24,10 +24,10 @@ extern sCTActVec3A D_004FF0D8_act __asm__("t3vect_Zero");     // zero vector
 extern void* D_0045C2E8[];      // cCTAction vtable
 extern void* D_0045C1D0[];      // bounded cam
 extern void* D_0045C1B8[];      // spline
-extern char D_0045C0B0[];
-extern char D_0045C0C8[];
-extern char D_0045C0E0[];
-extern char D_0045C0F8[];
+extern char str_Camera_Switch_Action[];
+extern char str_Camera_Bound_Action[];
+extern char str_Camera_Spline_Action[];
+extern char str_Camera_Action_None[];
 
 // PORT: raw vtable stores stand in for the real virtual classes (vptr at 0x4, after `type`).
 // Classes with their own vtable set `type` in their own ctor, after the derived vptr store.
@@ -122,28 +122,28 @@ extern "C" int get_camaction(void* reader, void** out)
     int n = get_uint(reader, &type);
     switch (type) {
     case 0: {
-        sCTActSwitchA* action = new (D_0045C0B0, 0, 0) sCTActSwitchA;
+        sCTActSwitchA* action = new (str_Camera_Switch_Action, 0, 0) sCTActSwitchA;
         int bytesRead = get_cCTActionSwitchCam(reader, action);
         *out = action;
         n += bytesRead;
         break;
     }
     case 1: {
-        sCTActBoundedA* action = new (D_0045C0C8, 0, 0) sCTActBoundedA;
+        sCTActBoundedA* action = new (str_Camera_Bound_Action, 0, 0) sCTActBoundedA;
         int bytesRead = get_cCTActionBoundedCam(reader, (char*)action);
         *out = action;
         n += bytesRead;
         break;
     }
     case 2: {
-        sCTActSplineA* action = new (D_0045C0E0, 0, 0) sCTActSplineA;
+        sCTActSplineA* action = new (str_Camera_Spline_Action, 0, 0) sCTActSplineA;
         int bytesRead = get_cCTActionSpline(reader, action);
         *out = action;
         n += bytesRead;
         break;
     }
     case 3: {
-        sCTActNoneA* action = new (D_0045C0F8, 0, 0) sCTActNoneA;
+        sCTActNoneA* action = new (str_Camera_Action_None, 0, 0) sCTActNoneA;
         // PORT: get_cCTActionNone returns the byte count as void*.
         int bytesRead = (int)get_cCTActionNone(reader, (int*)action);
         *out = action;
@@ -274,10 +274,10 @@ extern void* D_0045C2A8[];      // ellipse
 extern void* D_0045C268[];      // box
 extern void* D_0045C228[];      // line
 extern void* cCTBoundObjPoint_vtbl[];      // point
-extern char D_0045C110[];
-extern char D_0045C128[];
-extern char D_0045C140[];
-extern char D_0045C158[];
+extern char str_Camera_Ellipse_BoundObj[];
+extern char str_Camera_Box_BoundObj[];
+extern char str_Camera_Line_BoundObj[];
+extern char str_Camera_Point_BoundObj[];
 
 // PORT: raw vtable stores stand in for the real virtual classes: the base ctor stores the
 // cCTBoundObj vtable first and the derived class's vtable last, where g++ 2.95 sets the
@@ -353,28 +353,28 @@ extern "C" int get_camboundobj(void* reader, void** out)
     int n = get_uint(reader, &type);
     switch (type) {
     case 0: {
-        sCTBoundEllG* boundObj = new (D_0045C110, 0, 0) sCTBoundEllG;
+        sCTBoundEllG* boundObj = new (str_Camera_Ellipse_BoundObj, 0, 0) sCTBoundEllG;
         int bytesRead = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
     case 1: {
-        sCTBoundBoxG* boundObj = new (D_0045C128, 0, 0) sCTBoundBoxG;
+        sCTBoundBoxG* boundObj = new (str_Camera_Box_BoundObj, 0, 0) sCTBoundBoxG;
         int bytesRead = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
     case 2: {
-        sCTBoundLineG* boundObj = new (D_0045C140, 0, 0) sCTBoundLineG;
+        sCTBoundLineG* boundObj = new (str_Camera_Line_BoundObj, 0, 0) sCTBoundLineG;
         int bytesRead = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
     case 3: {
-        sCTBoundPointG* boundObj = new (D_0045C158, 0, 0) sCTBoundPointG;
+        sCTBoundPointG* boundObj = new (str_Camera_Point_BoundObj, 0, 0) sCTBoundPointG;
         // PORT: get_cCTBoundObjPoint returns the byte count as void*.
         int bytesRead = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)boundObj);
         *out = boundObj;
@@ -554,7 +554,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camspline);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
-extern char D_0045C170[];
+extern char str_Camera_Trigger_Spline[];
 
 struct sCTSplineG : sCTBoundObjG {
     sCTVec3G pts[4];    // 0x28
@@ -592,7 +592,7 @@ public:
 extern "C" int get_camspline(void* reader, cCTSplineK2** out)
 {
     int n;
-    *out = (cCTSplineK2*)new (D_0045C170, 0, 0) sCTSplineG;
+    *out = (cCTSplineK2*)new (str_Camera_Trigger_Spline, 0, 0) sCTSplineG;
     n = get_t3Vector_n(reader, (*out)->center());
     n += get_t3Vector_n(reader, (*out)->axis());
     n += get_float(reader, (*out)->sizeX());
@@ -1339,8 +1339,8 @@ extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj);
 extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj);
 extern void* D_0045C350[];      // volume ellipse vtable
 extern void* D_0045C300[];      // volume box vtable
-extern char D_0045C188[];
-extern char D_0045C1A0[];
+extern char str_Camera_Sphere_Trigger[];
+extern char str_Camera_Box_Trigger[];
 
 struct sCTVolEllG : sCTBoundObjG {
     int type;           // 0x28
@@ -1368,14 +1368,14 @@ extern "C" int get_camvolume(void* reader, void** out)
     int n = get_uint(reader, &type);
     switch (type) {
     case 0: {
-        sCTVolEllG* volume = new (D_0045C188, 0, 0) sCTVolEllG;
+        sCTVolEllG* volume = new (str_Camera_Sphere_Trigger, 0, 0) sCTVolEllG;
         int bytesRead = get_cCTVolumeEllipse(reader, (cCTVolumeEllK2*)volume);
         *out = volume;
         n += bytesRead;
         break;
     }
     case 1: {
-        sCTVolBoxG* volume = new (D_0045C1A0, 0, 0) sCTVolBoxG;
+        sCTVolBoxG* volume = new (str_Camera_Box_Trigger, 0, 0) sCTVolBoxG;
         int bytesRead = get_cCTVolumeBox(reader, (cCTVolumeBoxK2*)volume);
         *out = volume;
         n += bytesRead;
@@ -6102,7 +6102,7 @@ extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int id);
 extern "C" int func_0017A978_A638(void* self, int n, void* names, char* tag) __asm__("func_0017A978");
 extern "C" int func_00179FC8_A638(void* self, int id) __asm__("func_00179FC8");
 extern "C" char* strcpy(char* d, const char* s);
-extern char* D_004A1290[];
+extern char* str_BAM_b[];
 
 extern "C" void func_0017A638(sCamMgr* self)
 {
@@ -6115,14 +6115,14 @@ extern "C" void func_0017A638(sCamMgr* self)
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
     for (i = 0; i < 0x16; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
-    if (func_0017A978_A638(self, 0x16, names, (char*)D_004A1290)) {
+    if (func_0017A978_A638(self, 0x16, names, (char*)str_BAM_b)) {
         int j;
         for (j = 0; j < 0x16 && self->count < 0x100; j++) {
             if (names[j].ok) {
                 int* ip = &self->entries[0].idx;
                 int* ap = &self->entries[0].active;
                 strcpy(self->entries[self->count].name, cBENewRaceInterface_getLocationFile(iface, j));
-                *(char**)((char*)self + 0x44 + self->count * 0x8C) = D_004A1290[0];
+                *(char**)((char*)self + 0x44 + self->count * 0x8C) = str_BAM_b[0];
                 ip[self->count * 35] = j;
                 ap[self->count * 35] = 1;
                 self->numActive++;
@@ -6151,8 +6151,8 @@ cBigFile* cBigFile_cBigFile1_A830(cBigFile* self, const char* path, int flags) _
 void cBigFile__cBigFile(cBigFile* self, int flags);
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" int func_003A6948(const char* path, int n, void* names);
-extern char D_0045CE20[];
-extern char D_004A1298[];
+extern char str_data_worlds[];
+extern char str_big[];
 
 struct sCamEntry_A830 {
     char name[0x40];    // 0x00
@@ -6198,12 +6198,12 @@ extern "C" int func_0017A830(sCamMgr_A830* self, char* name, char* tag)
     sStr_A830 s;
     sBigFile_A830 bf;
     sCamName_A830 nm;
-    char* pre = D_0045CE20;
+    char* pre = str_data_worlds;
     cBXString_cBXString2(&s, tag);
     func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
     cBXString__cBXString(&s, 2);
     cBigFile* pbf = (cBigFile*)&bf;
-    func_00318630((cBXString*)&s, (cBXString*)&base, D_004A1298);
+    func_00318630((cBXString*)&s, (cBXString*)&base, str_big);
     cBigFile_cBigFile1_A830(pbf, s.s, 0x100);
     cBXString__cBXString(&s, 2);
     nm.name = name;
@@ -6229,8 +6229,8 @@ cBigFile* cBigFile_cBigFile1_17A978(cBigFile* self, const char* path, int flags)
 void cBigFile__cBigFile(cBigFile* self, int flags);
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" int func_003A6948(const char* path, int n, void* names);
-extern char D_0045CE20[];
-extern char D_004A1298[];
+extern char str_data_worlds[];
+extern char str_big[];
 
 struct sCamEntry_17A978 {
     char name[0x40];    // 0x00
@@ -6289,12 +6289,12 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
     sStr_17A978 base;
     sStr_17A978 s;
     sBigFile_17A978 bf;
-    char* pre = D_0045CE20;
+    char* pre = str_data_worlds;
     cBXString_cBXString2(&s, tag);
     func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
     cBXString__cBXString(&s, 2);
     cBigFile* pbf = (cBigFile*)&bf;
-    func_00318630((cBXString*)&s, (cBXString*)&base, D_004A1298);
+    func_00318630((cBXString*)&s, (cBXString*)&base, str_big);
     cBigFile_cBigFile1_17A978(pbf, s.s, 0x100);
     cBXString__cBXString(&s, 2);
     int r = func_003A6948(base.s, n, names);

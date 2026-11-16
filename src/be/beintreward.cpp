@@ -2,7 +2,7 @@
 #include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A938[];
+extern const char str_BERewardInt[];
 extern void* D_0045AE88[16];
 
 
@@ -20,7 +20,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getThis__Fv);
 void* cBERewardInterface_getThis()
 {
     if (cBERewardInterface_instance == 0) {
-        cBERewardInterface* mem = (cBERewardInterface*)cMemMan_alloc(0x18, D_0045A938, 0, 0);
+        cBERewardInterface* mem = (cBERewardInterface*)cMemMan_alloc(0x18, str_BERewardInt, 0, 0);
         mem->bIsActive = 0;
         mem->mVtbl = D_0045AE88;
         cBERewardInterface_instance = mem;

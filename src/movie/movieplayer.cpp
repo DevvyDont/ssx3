@@ -5,7 +5,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self);
-extern const char D_0047C128[];
+extern const char str_MCManager[];
 extern void* D_004A2C74;
 
 //99.53%
@@ -21,7 +21,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getManager__Fv);
 void* cMCOverlayManager_getManager()
 {
     if (D_004A2C74 == 0) {
-        void* mem = cMemMan_alloc(0x74C, D_0047C128, 0, 0);
+        void* mem = cMemMan_alloc(0x74C, str_MCManager, 0, 0);
         D_004A2C74 = cMCOverlayManager_cMCOverlayManager((cMCOverlayManager*)mem);
     }
     return D_004A2C74;
@@ -114,7 +114,7 @@ extern "C" void func_002C2540(void*, void*);
 extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
 extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
-extern char D_004A2C80[];
+extern char str_pct_s_pct_s_e[];
 
 struct sMovieVEntry_23C8F0 {
     short delta;
@@ -153,7 +153,7 @@ extern "C" void func_0023C8F0(void* self, int mode)
         sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
         vt[19].fn(o + vt[19].delta, v);
     }
-    func_002C2540(fmt, D_004A2C80);
+    func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
     func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
     sprintf1_v(s + 0x1B4, fmt, desc, name);
@@ -232,7 +232,7 @@ extern "C" void func_002C2540(void*, void*);
 extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
 extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
-extern char D_004A2C80[];
+extern char str_pct_s_pct_s_e[];
 
 struct sMovieVEntry_23CAE8 {
     short delta;
@@ -271,7 +271,7 @@ extern "C" void func_0023CAE8(void* self, int mode, int a2)
         sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
         vt[19].fn(o + vt[19].delta, v);
     }
-    func_002C2540(fmt, D_004A2C80);
+    func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
     func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
     sprintf1_v(s + 0x1B4, fmt, desc, name);
@@ -311,8 +311,8 @@ extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void* strcpy1(void* dst, void* src);
 int GetHashValue32(char* s);
-extern char D_004A2C88[];
-extern char D_0047C138[];
+extern char str_pct_spct_d_b[];
+extern char str_kT_OVGameOptions[];
 
 struct sLocVEntry_23CC78 {
     short delta;
@@ -326,7 +326,7 @@ extern "C" void func_0023CC78(void* self, int n, char* dst)
     char fmt[0x200];
     switch (*(int*)((char*)self + 0xB4)) {
     case 0:
-        func_002C2540(fmt, D_004A2C88);
+        func_002C2540(fmt, str_pct_spct_d_b);
         func_00241D40_r(self, *(int*)((char*)self + 0xB4), name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
@@ -334,11 +334,11 @@ extern "C" void func_0023CC78(void* self, int n, char* dst)
         char* loc = (char*)SSXApp->FELocale;
         sLocVEntry_23CC78* vt = *(sLocVEntry_23CC78**)(loc + 4);
         char* thisp = loc + vt[4].delta;
-        strcpy1(dst, vt[4].fn(thisp, GetHashValue32(D_0047C138)));
+        strcpy1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_OVGameOptions)));
         break;
     }
     case 1:
-        func_002C2540(fmt, D_004A2C88);
+        func_002C2540(fmt, str_pct_spct_d_b);
         func_00241D40_r(self, *(int*)((char*)self + 0xB4), name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
@@ -358,9 +358,9 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void func_0023CC78(void* self, int n, char* dst);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* iface, int id);
 int GetHashValue32(char* s);
-extern char D_0047C138[];
-extern char D_0047C150[];
-extern char D_0047C160[];
+extern char str_kT_OVGameOptions[];
+extern char str_SSX_3_pct_s[];
+extern char str_kT_MEMFileNameReplay[];
 
 struct sLocVEntry_23CDB0 {
     short delta;
@@ -392,13 +392,13 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
     char fmt[0x200];
     char name[0x200];
     func_0023CC78(self, n, title);
-    func_002C2540(fmt, D_0047C150);
+    func_002C2540(fmt, str_SSX_3_pct_s);
     switch (self->mFileType) {
     case 0: {
         char* loc = (char*)SSXApp->FELocale;
         sLocVEntry_23CDB0* vt = *(sLocVEntry_23CDB0**)(loc + 4);
         char* thisp = loc + vt[4].delta;
-        sprintf1_v(title, fmt, vt[4].fn(thisp, GetHashValue32(D_0047C160)));
+        sprintf1_v(title, fmt, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFileNameReplay)));
         sprintf1_v(out, title, n);
         break;
     }
@@ -412,7 +412,7 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
         char* loc = (char*)SSXApp->FELocale;
         sLocVEntry_23CDB0* vt = *(sLocVEntry_23CDB0**)(loc + 4);
         char* thisp = loc + vt[4].delta;
-        strcpy1(title, vt[4].fn(thisp, GetHashValue32(D_0047C138)));
+        strcpy1(title, vt[4].fn(thisp, GetHashValue32(str_kT_OVGameOptions)));
         sprintf1_v(out, fmt, title);
         break;
     }
@@ -3900,7 +3900,7 @@ extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void func_00241000_r(void* self, char* text, int a, int b) __asm__("func_00241000");
 extern int cMCOverlayManager_mSaveInProgress;
-extern char D_0047C178[];
+extern char str_pct_s_pct_spct_04d_b[];
 
 extern "C" void func_002412A0(void* self)
 {
@@ -3911,7 +3911,7 @@ extern "C" void func_002412A0(void* self)
     cMCOverlayManager_mSaveInProgress = 1;
     int a = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
     int b = func_00152948_r();
-    func_002C2540(fmt, D_0047C178);
+    func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
     func_00241D40_r(self, 2, name, 0x82);
     func_00241AA0_r(desc, 0x200);
     sprintf1_v(text, fmt, desc, name, *(int*)((char*)self + 0xF8) + 1);
@@ -4201,9 +4201,9 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" int strlen1(void* s);
 extern "C" void func_00241DC8(void* self, void* dst, int n);
 int GetHashValue32(char* s);
-extern char D_0047C360[];
-extern char D_0047C378[];
-extern char D_0047C390[];
+extern char str_kT_MEMOVNotDetectedPS2_b[];
+extern char str_kT_MEMOVNotFormattedPS2_b[];
+extern char str_kT_MEMMemDevicePS2[];
 
 class cMovieSub434_1710 {
 public:
@@ -4305,19 +4305,19 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self
         if (((cMovieSub434_1710*)self->mpMemCard)->v48(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v50(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v60(idx))
         {
             func_00241DC8(self, buf, idx);
-            sprintf1_v(dst, Loc_241710(D_0047C360), buf);
+            sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
         }
         else if (!((cMovieSub434_1710*)self->mpMemCard)->v56(idx))
         {
             func_00241DC8(self, buf, idx);
-            sprintf1_v(dst, Loc_241710(D_0047C378), buf);
+            sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotFormattedPS2_b), buf);
         }
         else if (((cMovieSub434_1710*)self->mpMemCard)->v57(idx))
         {
             func_00241DC8(self, buf, idx);
             char* name = ((char*)&((&(self)->mDevices[0]))[idx].szName[0]);
             if (strlen1(name) == 0)
-                sprintf1_v(dst, Loc_241710(D_0047C390), buf);
+                sprintf1_v(dst, Loc_241710(str_kT_MEMMemDevicePS2), buf);
             else
                 strcpy1(dst, name);
         }
@@ -4325,7 +4325,7 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self
     else
     {
         func_00241DC8(self, buf, idx);
-        sprintf1_v(dst, Loc_241710(D_0047C360), buf);
+        sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
     }
 }
 #endif
@@ -4337,8 +4337,8 @@ INCLUDE_ASM("movie/movieplayer", func_00241928);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
-extern char D_004A2C90[];
-extern char D_004A2C98[];
+extern char str_Free[];
+extern char str_pct_d_pct_s[];
 
 struct sMPSlot1928 {
     int a;      // 0x344
@@ -4359,8 +4359,8 @@ extern "C" void func_00241928(sMP1928* self, int i, void* out)
     if (self->slots[i].d != 0 && self->slots[i].a != 0 && self->slots[i].b != 0 && self->slots[i].c != 0) {
         char name[0x200];
         char path[0x200];
-        func_002C2540_r(name, D_004A2C90);
-        func_002C2540_r(path, D_004A2C98);
+        func_002C2540_r(name, str_Free);
+        func_002C2540_r(path, str_pct_d_pct_s);
         sprintf1_v(out, path, self->slots[i].id, name);
     }
 }
@@ -4382,8 +4382,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceTotalString);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
-extern char D_004A2CA0[];
-extern char D_004A2C98[];
+extern char str_Total[];
+extern char str_pct_d_pct_s[];
 
 struct sMCDev {
     int f0;
@@ -4414,8 +4414,8 @@ extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int 
     unsigned short fmt[256];
     if (self->dev[idx].fC == 0) return;
     if (self->dev[idx].f0 && self->dev[idx].f4 && self->dev[idx].f8) {
-        func_002C2540_r(str, D_004A2CA0);
-        func_002C2540_r(fmt, D_004A2C98);
+        func_002C2540_r(str, str_Total);
+        func_002C2540_r(fmt, str_pct_d_pct_s);
         sprintf1_v(dst, fmt, self->dev[idx].f14, str);
     }
 }
@@ -4606,21 +4606,21 @@ extern "C" int cMCOverlayManager_updateDeviceStateMonitor(cMCOverlayManager* sel
 INCLUDE_ASM("movie/movieplayer", func_00241D40);
 #ifdef SKIP_ASM
 extern "C" void func_002C2540(void*, void*);
-extern char D_004A2CA8[];
-extern char D_004A2CB0[];
-extern char D_004A2CB8[];
+extern char str_REP[];
+extern char str_GAM[];
+extern char str_SET[];
 
 extern "C" void func_00241D40(void* self, int mode, void* buf)
 {
     switch (mode) {
     case 0:
-        func_002C2540(buf, D_004A2CA8);
+        func_002C2540(buf, str_REP);
         break;
     case 1:
-        func_002C2540(buf, D_004A2CB0);
+        func_002C2540(buf, str_GAM);
         break;
     case 2:
-        func_002C2540(buf, D_004A2CB8);
+        func_002C2540(buf, str_SET);
         break;
     }
 }
@@ -4638,12 +4638,12 @@ extern "C" int func_00241DC0(void) {
 INCLUDE_ASM("movie/movieplayer", func_00241DC8);
 #ifdef SKIP_ASM
 extern "C" void sprintf1(void* dst, void* src, int n);
-extern char D_004A2C28[];
+extern char str_pct_d_g[];
 
 extern "C" void func_00241DC8(void* self, void* dst, int n)
 {
     unsigned short buf[256];
-    func_002C2540(buf, D_004A2C28);
+    func_002C2540(buf, str_pct_d_g);
     sprintf1(dst, buf, n + 1);
 }
 #endif
@@ -4656,12 +4656,12 @@ int GetHashValue32(char* str);
 extern "C" void func_00241DC8(void* self, void* dst, int n);
 extern "C" void* strcpy1(void* dst, void* src);
 extern char D_004A29E8[];
-extern char D_0047C3B8[];
-extern char D_0047C360[];
-extern char D_0047C3D0[];
-extern char D_0047C3E8[];
-extern char D_0047C408[];
-extern char D_0047C420[];
+extern char str_kT_MEMFECheckingCardPS2_b[];
+extern char str_kT_MEMOVNotDetectedPS2_b[];
+extern char str_kT_MEMFormattingPS2_b[];
+extern char str_kT_MEMOVSaveSavingPS2NGC_b[];
+extern char str_kT_MEMOVLoadingPS2NGC[];
+extern char str_kT_MEMDeletingPS2_b[];
 
 struct sVEntry_00241E18 {
     short delta;
@@ -4691,23 +4691,23 @@ extern "C" void func_00241E18(char* self, void* out)
     switch (*(int*)(self + 0x130)) {
     case 0: case 2: case 3: case 6: case 7: case 13: case 29:
     case 49: case 50: case 51: case 52: case 53: case 54:
-        SetText_00241E18(out, D_0047C3B8, num);
+        SetText_00241E18(out, str_kT_MEMFECheckingCardPS2_b, num);
         break;
     case 4:
         func_00241DC8(self, num2, *(int*)(self + 0x428));
-        SetText_00241E18(out, D_0047C360, num2);
+        SetText_00241E18(out, str_kT_MEMOVNotDetectedPS2_b, num2);
         break;
     case 10: case 11: case 39: case 40:
-        SetText_00241E18(out, D_0047C3D0, num);
+        SetText_00241E18(out, str_kT_MEMFormattingPS2_b, num);
         break;
     case 15: case 16: case 17: case 18:
-        SetText_00241E18(out, D_0047C3E8, num);
+        SetText_00241E18(out, str_kT_MEMOVSaveSavingPS2NGC_b, num);
         break;
     case 31: case 32: case 33: case 34:
-        SetText_00241E18(out, D_0047C408, num);
+        SetText_00241E18(out, str_kT_MEMOVLoadingPS2NGC, num);
         break;
     case 25: case 26: case 44:
-        strcpy1(out, (void*)Loc_00241E18(D_0047C420));
+        strcpy1(out, (void*)Loc_00241E18(str_kT_MEMDeletingPS2_b));
         break;
     case 55:
         break;

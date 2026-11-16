@@ -9,7 +9,7 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getFreeNode);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void*);
 extern "C" void func_0041605C(void* dst, void* src, int n);
-extern char D_00485F98[];
+extern char str_QuadTreeNodeList[];
 
 
 
@@ -32,7 +32,7 @@ extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
 {
     unsigned short ret;
     if ((self->m_freeNodes) == (self->m_nodes)) {
-        tQuadTreeNode* newnodelist = new (D_00485F98, 0, 0) tQuadTreeNode[self->m_numNodes + 1024];
+        tQuadTreeNode* newnodelist = new (str_QuadTreeNodeList, 0, 0) tQuadTreeNode[self->m_numNodes + 1024];
         if ((self->m_nodes) != 0) {
             func_0041605C(newnodelist, (self->m_nodes), self->m_numNodes * sizeof(tQuadTreeNode));
         }
@@ -146,8 +146,8 @@ extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned shor
 struct cQuadTree_exportNode_sOut;
 struct cQuadTree_exportNode_sNode;
 extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node);
-extern char D_00485FB0[];
-extern char D_00485FC8[];
+extern char str_QuadTreeRemapTable[];
+extern char str_QuadTreeOutputBuffer[];
 
 struct sQTHeader_1DA8 {
     float f0;           // 0x00
@@ -183,10 +183,10 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
 {
     int i;
     *size = self->m_numUsedNodes * 8 + 0x28;
-    int* map = new (D_00485FB0, 0, 0) int[self->m_numNodes];
+    int* map = new (str_QuadTreeRemapTable, 0, 0) int[self->m_numNodes];
     for (i = 0; i < self->m_numNodes; i++)
         map[i] = -1;
-    *out = new (D_00485FC8, 0, 0) char[*size];
+    *out = new (str_QuadTreeOutputBuffer, 0, 0) char[*size];
     func_00416210(*out, 0xDEADBEEF, *size);
     sQTHeader_1DA8* header = (sQTHeader_1DA8*)*out;
     *header = *((sQTHeader_1DA8*)self);
@@ -332,11 +332,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C22C8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cPS2MemCard_cPS2MemCard(cPS2MemCard*);
-extern const char D_00485FF0[];
+extern const char str_cPS2MemCard[];
 
 extern "C" void* func_002C22C8(void)
 {
-    return cPS2MemCard_cPS2MemCard((cPS2MemCard*)cMemMan_alloc(0x1500, D_00485FF0, 0x100, 0));
+    return cPS2MemCard_cPS2MemCard((cPS2MemCard*)cMemMan_alloc(0x1500, str_cPS2MemCard, 0x100, 0));
 }
 #endif
 
@@ -677,11 +677,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C28C0);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00486030[];
+extern char str_GAMELINK_data[];
 
 extern "C" int func_002C28C0(int unused, int size, int zeroFlag)
 {
-    return (int)new (D_00486030, zeroFlag ? 0x100 : 0, 0) char[size];
+    return (int)new (str_GAMELINK_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
 #endif
 //100%
@@ -742,7 +742,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C29D0);
 extern "C" int func_002C28C0_29D0(int, int, int) __asm__("func_002C28C0");
 extern "C" int func_002C28F8_29D0(int) __asm__("func_002C28F8");
 extern "C" int func_003E50C8(int* self, int a1, int a2, int a3, int a4, int a5);
-extern char D_00486088[];
+extern char str_threadstack[];
 
 // Predicate helper; keeps p[0] in one register for both tests.
 inline int func_002C29D0_valid(int arg0)
@@ -757,7 +757,7 @@ int* func_002C29D0_impl(int a0, int a1, int size)
 {
     int* p = (int*)func_002C28C0_29D0(0, 0xC, 0);
     p[0] = 0;
-    p[0] = func_002C28C0_29D0((int)D_00486088, size, 0);
+    p[0] = func_002C28C0_29D0((int)str_threadstack, size, 0);
     if (p[0] != 0) {
         if (func_003E50C8(p + 1, a0, a1, p[0], size, 0x63) == 0) {
             func_002C28F8_29D0(p[0]);
@@ -809,14 +809,14 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2B28);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002C28C0(int, int, int);
 extern "C" void MUTEX_create(int);
-extern char D_004A3898[];
+extern char str_mutex[];
 
 // The unit declares func_002C2B28 later as void(); keep the real signature under an asm label.
 extern "C" int func_002C2B28_impl(void) __asm__("func_002C2B28");
 
 extern "C" int func_002C2B28_impl(void)
 {
-    int p = func_002C28C0((int)D_004A3898, 0x10, 0);
+    int p = func_002C28C0((int)str_mutex, 0x10, 0);
     MUTEX_create(p);
     return p;
 }
@@ -900,11 +900,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2D30);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00486098[];
+extern char str_ISTR_data[];
 
 extern "C" int func_002C2D30(int unused, int size, int zeroFlag)
 {
-    return (int)new (D_00486098, zeroFlag ? 0x100 : 0, 0) char[size];
+    return (int)new (str_ISTR_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
 #endif
 //100%
@@ -1253,7 +1253,7 @@ extern "C" int func_0040A688(int h, int a1, char* name, int a3, int a4, void* bu
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_004A3940;
-extern char D_004A3948[];
+extern char str_pct_s_pct_s_h[];
 
 extern "C" void func_002C42B0(cPS2MemCard* self)
 {
@@ -1261,7 +1261,7 @@ extern "C" void func_002C42B0(cPS2MemCard* self)
     self->unk_03C = 0;
     char* path = (char*)self + 0xF9;
     strcpy(name, (char*)self + self->unk_01C * 0x78 + 0x1B0);
-    sprintf(path, D_004A3948, name, name);
+    sprintf(path, str_pct_s_pct_s_h, name, name);
     int r = func_0040A688(self->mDevice, 0, path, 0, 1, (char*)self + 0x480);
     D_004A3940 = r;
     if (r < 0) {
@@ -1333,14 +1333,14 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4410);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_002C48C0(cPS2MemCard*, int);
-extern char D_004A3948[];
+extern char str_pct_s_pct_s_h[];
 
 extern "C" void func_002C4410(cPS2MemCard* self)
 {
     char* name = (char*)self + 0xB9;
     self->unk_03C = 0;
     strcpy(name, (char*)self + self->unk_01C * 0x78 + 0x1B0);
-    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
     func_002C48C0(self, 0x36);
 }
 #endif
@@ -1391,13 +1391,13 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4520);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004A3950[];
+extern char str_pct_s_d[];
 
 extern "C" void func_002C4520(cPS2MemCard* self, const char* name)
 {
     char* p = (char*)self + 0xB9;
     strcpy(p, name);
-    sprintf((char*)self + 0xF9, D_004A3950, p);
+    sprintf((char*)self + 0xF9, str_pct_s_d, p);
     func_002C48C0(self, 0x14);
 }
 #endif
@@ -1406,7 +1406,7 @@ extern "C" void func_002C4520(cPS2MemCard* self, const char* name)
 INCLUDE_ASM("worldpainter/quadtree", func_002C4578);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004A3950[];
+extern char str_pct_s_d[];
 // PORT: strcpy2 takes (dst, src); the unit declares it with one arg
 char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 
@@ -1414,7 +1414,7 @@ extern "C" void func_002C4578(cPS2MemCard* self, unsigned short* name)
 {
     char* p = (char*)self + 0xB9;
     strcpy2_impl(p, name);
-    sprintf((char*)self + 0xF9, D_004A3950, p);
+    sprintf((char*)self + 0xF9, str_pct_s_d, p);
     func_002C48C0(self, 0x14);
 }
 #endif
@@ -1426,13 +1426,13 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C45D0);
 char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_002C48C0(cPS2MemCard*, int);
-extern char D_004A3948[];
+extern char str_pct_s_pct_s_h[];
 
 extern "C" void func_002C45D0(cPS2MemCard* self, unsigned short* wname, int a2, int a3)
 {
     char* name = (char*)self + 0xB9;
     strcpy2_impl(name, wname);
-    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
     self->unk_02C = a2;
     self->unk_020 = a3;
     func_002C48C0(self, 0x15);
@@ -1445,13 +1445,13 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4648);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_002C48C0(cPS2MemCard*, int);
-extern char D_004A3948[];
+extern char str_pct_s_pct_s_h[];
 
 extern "C" void func_002C4648(cPS2MemCard* self, const char* src, int a2, int a3)
 {
     char* name = (char*)self + 0xB9;
     strcpy(name, src);
-    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
     self->unk_02C = a2;
     self->unk_020 = a3;
     func_002C48C0(self, 0x15);
@@ -1556,13 +1556,13 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4788);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_002C48C0(cPS2MemCard*, int);
-extern char D_004A3948[];
+extern char str_pct_s_pct_s_h[];
 
 extern "C" void func_002C4788(cPS2MemCard* self, char* src, int a2, int a3)
 {
     char* name = (char*)self + 0xB9;
     strcpy(name, src);
-    sprintf((char*)self + 0xF9, D_004A3948, name, name);
+    sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
     self->unk_02C = a2;
     self->unk_020 = a3;
     func_002C48C0(self, 0x1B);
@@ -1644,10 +1644,10 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" void* memcpy(void* dst, const void* src, unsigned int n);
 extern int D_004A3940;
-extern char D_004A3948[];
-extern char D_004A3958[];
+extern char str_pct_s_pct_s_h[];
+extern char str_pct_s_pct_s_i[];
 extern char D_004A3960[] __attribute__((aligned(4)));
-extern char D_00487460[];
+extern char str_icon_sys[];
 extern char* D_004459F0[];
 extern char D_00445A00[];
 extern char D_00445A40[];
@@ -1737,7 +1737,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
     }
     case 0x25: {
         char* path = S_48C0(0x79);
-        sprintf(path, D_004A3958, S_48C0(0xF9), D_00487460);
+        sprintf(path, str_pct_s_pct_s_i, S_48C0(0xF9), str_icon_sys);
         int r = func_00409D10(I_48C0(0xC), 0, path, 0x203);
         D_004A3940 = r;
         I_48C0(0x18) = -1;
@@ -1786,14 +1786,14 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
             I_48C0(0x30) = 0;
         }
         int slot = slotOf_48C0(I_48C0(0x4), 0x2C, 0x30);
-        sprintf(path, D_004A3958, S_48C0(0x14C0), D_004459F0[slot]);
+        sprintf(path, str_pct_s_pct_s_i, S_48C0(0x14C0), D_004459F0[slot]);
         I_48C0(0x38) = func_003DF690(path, 0x100);
         break;
     }
     case 0x29: case 0x2D: case 0x31: {
         int slot = slotOf_48C0(I_48C0(0x4), 0x2D, 0x31);
         char* path = S_48C0(0x79);
-        sprintf(path, D_004A3948, S_48C0(0xB9), D_004459F0[slot]);
+        sprintf(path, str_pct_s_pct_s_h, S_48C0(0xB9), D_004459F0[slot]);
         int r = func_00409D10(I_48C0(0xC), 0, path, 0x203);
         D_004A3940 = r;
         if (r < 0) {
@@ -1901,7 +1901,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
     case 0x37: case 0x38: case 0x39: {
         int slot = slotOf_48C0(I_48C0(0x4), 0x38, 0x39);
         char* path = S_48C0(0x79);
-        sprintf(path, D_004A3948, S_48C0(0xB9), D_004459F0[slot]);
+        sprintf(path, str_pct_s_pct_s_h, S_48C0(0xB9), D_004459F0[slot]);
         int r = func_0040AA68(I_48C0(0xC), 0, path);
         D_004A3940 = r;
         if (r < 0)
@@ -1910,7 +1910,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
     }
     case 0x3A: {
         char* path = S_48C0(0x79);
-        sprintf(path, D_004A3948, S_48C0(0xB9), D_00487460);
+        sprintf(path, str_pct_s_pct_s_h, S_48C0(0xB9), str_icon_sys);
         int r = func_0040AA68(I_48C0(0xC), 0, path);
         D_004A3940 = r;
         if (r < 0)
@@ -1927,7 +1927,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
     case 7:
         for (I_48C0(0x28) = 0; I_48C0(0x28) < I_48C0(0x14); I_48C0(0x28)++) {
             if (self->v67(I_48C0(0x28))) {
-                sprintf(S_48C0(0x79), D_004A3948, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, D_00487460);
+                sprintf(S_48C0(0x79), str_pct_s_pct_s_h, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, str_icon_sys);
                 func_002C48C0((cPS2MemCard*)self, 8);
                 break;
             }
@@ -1969,7 +1969,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         I_48C0(0x3C) = 0;
         char* buf = S_48C0(0x480);
         char* name = (char*)self + I_48C0(0x28) * 0x78 + 0x1B0;
-        sprintf(path, D_004A3948, name, name);
+        sprintf(path, str_pct_s_pct_s_h, name, name);
         MEM_fill(buf, 0, 0x40);
         int r = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
         D_004A3940 = r;
@@ -1981,7 +1981,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         int slot = slotOf_48C0(I_48C0(0x4), 0xD, 0xE);
         char* path = S_48C0(0x79);
         char* buf = S_48C0(0x480);
-        sprintf(path, D_004A3948, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, D_004459F0[slot]);
+        sprintf(path, str_pct_s_pct_s_h, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, D_004459F0[slot]);
         MEM_fill(buf, 0, 0x40);
         int r = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
         D_004A3940 = r;
@@ -2221,7 +2221,7 @@ extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // PORT: the unit defines func_002C5320 as returning void*; it returns an int count here.
 extern "C" int func_002C5320_i(void* self, int idx) __asm__("func_002C5320");
 extern char D_004A3968[];
-extern char D_004861F8[];
+extern char str_kT_MEMFreePS2[];
 
 struct sQTEntry_53E0 {
     int count;
@@ -2258,7 +2258,7 @@ extern "C" void func_002C53E0(sQT_53E0* self, int idx, unsigned short* dst)
         char* obj = (char*)SSXApp->FELocale;
         func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
         char* thisp = obj + vt[4].delta;
-        sprintf1(dst, vt[4].fn(thisp, GetHashValue32(D_004861F8)), v);
+        sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFreePS2)), v);
         break;
     }
     default:
@@ -2802,7 +2802,7 @@ extern "C" void func_002C55D8(sMC_55D8* self)
         self->x18 = -1;
         break;
     found:
-        sprintf(self->path, D_004A3948, self->entries[self->index].name, D_00487460);
+        sprintf(self->path, str_pct_s_pct_s_h, self->entries[self->index].name, str_icon_sys);
         func_002C48C0((cPS2MemCard*)self, 8);
         return;
     case 52:
@@ -2856,10 +2856,10 @@ struct sQT6128 {
     sQTEnt6128 ents[1];         // 0x1A4
 };
 
-extern char D_00486490[];
-extern char D_004864A0[];
-extern char D_004864B8[];
-extern char D_004864D0[];
+extern char str_kT_MEMEmpty_c[];
+extern char str_kT_MEMUnavailable[];
+extern char str_kT_MEMFileCorruptPS2[];
+extern char str_kT_MEMNoFreeSpace[];
 
 static inline unsigned short* qtLoc6128(char* key)
 {
@@ -2873,15 +2873,15 @@ extern "C" void func_002C6128(sQT6128* self, int i, unsigned short* dst)
 {
     unsigned short buf[64];
     if (self->vt[53].fn((char*)self + self->vt[53].delta) == 0) {
-        strcpy1(buf, qtLoc6128(D_00486490));
+        strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else if (self->vt[55].fn((char*)self + self->vt[55].delta) == 0) {
-        strcpy1(buf, qtLoc6128(D_004864A0));
+        strcpy1(buf, qtLoc6128(str_kT_MEMUnavailable));
     } else if (self->ents[i].f0 != 0 || self->ents[i].f4 != 0) {
-        strcpy1(buf, qtLoc6128(D_004864B8));
+        strcpy1(buf, qtLoc6128(str_kT_MEMFileCorruptPS2));
     } else if (self->ents[i].f8 != 0) {
-        strcpy1(buf, qtLoc6128(D_004864D0));
+        strcpy1(buf, qtLoc6128(str_kT_MEMNoFreeSpace));
     } else if (((sQTVtI6128*)self->vt)[67].fn((char*)self + self->vt[67].delta, i) == 0) {
-        strcpy1(buf, qtLoc6128(D_00486490));
+        strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else {
         func_002C2540(buf, self->ents[i].name);
     }
@@ -3038,8 +3038,8 @@ extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // PORT: void view of sprintf1 (defined returning int); this caller treats it as void.
 extern "C" void sprintf1_v(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf1");
-extern char D_004A3970[];
-extern char D_004864E8[];
+extern char str_pct_d_i[];
+extern char str_kT_MEMMemDevicePS2_b[];
 
 struct func_002C63F8_sVEntry {
     short delta;
@@ -3051,14 +3051,14 @@ extern "C" void func_002C63F8(cPS2MemCard* self, int n, unsigned short* dst)
 {
     unsigned short fmt[8];
     unsigned short num[8];
-    func_002C2540(fmt, D_004A3970);
+    func_002C2540(fmt, str_pct_d_i);
     sprintf1_v(num, fmt, n + 1);
     if (n < 2) {
         if (n >= 0) {
             char* obj = (char*)SSXApp->FELocale;
             func_002C63F8_sVEntry* vt = *(func_002C63F8_sVEntry**)(obj + 4);
             char* thisp = obj + vt[4].delta;
-            sprintf1(dst, vt[4].fn(thisp, GetHashValue32(D_004864E8)), num);
+            sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMMemDevicePS2_b)), num);
         }
     }
 }
@@ -3753,7 +3753,7 @@ extern "C" unsigned int func_003DB9D8(void* p, int a);
 extern "C" int func_00416B18(const void* a, const void* b, int n);
 // PORT: func_002C6DC0 is declared (void*) but called with a second argument; bound by asm label
 void* func_002C6DC0_2(void* self, int v) __asm__("func_002C6DC0__FPv");
-extern char D_004A3978[];
+extern char str_LOCT[];
 
 struct func_002C6E98_sEnt {
     int f0;
@@ -3780,7 +3780,7 @@ extern "C" void func_002C6E98(func_002C6E98_sFile* self, const char* name, char 
     self->count = func_003DB9D8(self->data, 2);
     size = self->data->size;
     self->hdr = (func_002C6E98_sChunk*)((char*)self->data + size);
-    if (func_00416B18(self->hdr, D_004A3978, 4) != 0) {
+    if (func_00416B18(self->hdr, str_LOCT, 4) != 0) {
         self->hdr = 0;
         return;
     }

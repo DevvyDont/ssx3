@@ -34,7 +34,7 @@ struct sSpring_53EF0 {
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_0048E9C8[];
+extern const char str_SpringNodes[];
 extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("t4vect_Zero");
 /**
  * Allocates the spring's chain of nodes ("SpringNodes") with zero position, velocity, force, angle and
@@ -44,7 +44,7 @@ extern "C" void cSpring_setupNodes(sSpring_53EF0* self)
 {
     int i;
     sSpNode_53EF0** dst = &self->nodes;
-    *dst = new (D_0048E9C8, 0x20000000, 0) sSpNode_53EF0[self->n];
+    *dst = new (str_SpringNodes, 0x20000000, 0) sSpNode_53EF0[self->n];
     sSpNode_53EF0* nd = self->nodes;
     for (i = 0; i < self->n; i++, nd++) {
         nd->p = D_004FF120_53EF0;

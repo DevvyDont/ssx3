@@ -11,7 +11,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_004676C8[];
+extern char str_127trophyroom[];
 
 /**
  * Opens the trophy-room screen ("127trophyroom"), keeps it at 0x40 and plays its frame 0.
@@ -19,7 +19,7 @@ extern char D_004676C8[];
 extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004676C8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_127trophyroom), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -57,13 +57,13 @@ extern "C" char* func_00156A90(void* self, int a1, int a2);
 extern "C" int func_001CE6F0(int a, int b);
 extern "C" void func_001D47A0(void* self, int index);
 extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
-extern char D_004A1FE8[];
-extern char D_004A1FF0[];
-extern char D_00466E60[];
-extern char D_004676D8[];
-extern char D_004676F0[];
-extern char D_00467708[];
-extern char D_00467720[];
+extern char str_bitmap[];
+extern char str_stats[];
+extern char str_screentitle[];
+extern char str_kT_TITLEEarningsTrophy[];
+extern char str_kT_TITLEExploreTrophy[];
+extern char str_kT_TITLERaceTrophy[];
+extern char str_kT_TITLEFSTrophy[];
 extern char* D_00441600[];
 extern char* D_00441618[];
 
@@ -104,30 +104,30 @@ static inline void vcall_43F0(void* o, int slot, int arg)
 extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
 {
     int hashName = *(int*)((char*)w + 0x38);
-    if (hashName == GetHashValue32(D_004A1FE8)) {
+    if (hashName == GetHashValue32(str_bitmap)) {
         self->f48 = w;
         func_001D47A0(self, self->f9C);
         return;
     }
-    if (hashName == GetHashValue32(D_004A1FF0)) {
+    if (hashName == GetHashValue32(str_stats)) {
         self->f4C = w;
         vcall_43F0(w, 9, 0);
         return;
     }
-    if (hashName == GetHashValue32(D_00466E60)) {
+    if (hashName == GetHashValue32(str_screentitle)) {
         int id = 0;
         switch (self->f58) {
         case 3:
-            id = GetHashValue32(D_004676D8);
+            id = GetHashValue32(str_kT_TITLEEarningsTrophy);
             break;
         case 2:
-            id = GetHashValue32(D_004676F0);
+            id = GetHashValue32(str_kT_TITLEExploreTrophy);
             break;
         case 0:
-            id = GetHashValue32(D_00467708);
+            id = GetHashValue32(str_kT_TITLERaceTrophy);
             break;
         case 1:
-            id = GetHashValue32(D_00467720);
+            id = GetHashValue32(str_kT_TITLEFSTrophy);
             break;
         }
         cUIText_setUnicodeStringByID((cUIText*)w, id);
@@ -404,7 +404,7 @@ extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_001D47A0(void* self, int index);
-extern char D_004A1FF8[];
+extern char str_trph[];
 
 struct cGame_4A20 {
     char pad[0x10D8];
@@ -475,7 +475,7 @@ extern "C" void func_001D4A20(void* p)
     for (i = 0; i < 5; i++) {
         if (self->tex[i] >= 0 && func_0019E238(mgr, self->bank, self->tex[i]) != 0) {
             char* d = func_0019E2B0(mgr, self->bank, self->tex[i]);
-            self->snd[i] = ((cGame_4A20*)GrMan)->playSound(d + *(int*)(d + 0x14), D_004A1FF8, 0, 1, -1);
+            self->snd[i] = ((cGame_4A20*)GrMan)->playSound(d + *(int*)(d + 0x14), str_trph, 0, 1, -1);
             func_0019DC20(mgr, self->bank, self->tex[i]);
             self->tex[i] = -1;
             self->count--;
@@ -600,7 +600,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
-extern char D_00467738[];
+extern char str_128rewardsroom[];
 
 /**
  * Opens the rewards-room screen ("128rewardsroom") and switches the front-end sound-bank mode to 6.
@@ -608,7 +608,7 @@ extern char D_00467738[];
 extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467738), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_128rewardsroom), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -622,18 +622,18 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetCreate);
 #ifdef SKIP_ASM
 struct cUIText;
 extern "C" void func_001D4F90(void* self, int index, cUIText* text);
-extern char D_004A2000[];
-extern char D_004A2008[];
-extern char D_004A2010[];
-extern char D_004A2018[];
-extern char D_00467748[];
-extern char D_00467758[];
-extern char D_004674A8[];
-extern char D_004674B8[];
-extern char D_004674C8[];
-extern char D_004674D8[];
-extern char D_004674E8[];
-extern char D_00467768[];
+extern char str_art[];
+extern char str_video[];
+extern char str_poster[];
+extern char str_toys[];
+extern char str_trading_cards[];
+extern char str_cheat_character[];
+extern char str_txtmdl_0[];
+extern char str_txtmdl_1[];
+extern char str_txtmdl_2[];
+extern char str_txtmdl_3[];
+extern char str_txtmdl_4[];
+extern char str_txtmdl_5[];
 
 /**
  * Tags the rewards room's category buttons with their reward type and fills their text blocks.
@@ -647,29 +647,29 @@ extern char D_00467768[];
 extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
-    if (id == GetHashValue32(D_004A2000)) {
+    if (id == GetHashValue32(str_art)) {
         *(int*)((char*)w + 0x18) = 5;
-    } else if (id == GetHashValue32(D_004A2008)) {
+    } else if (id == GetHashValue32(str_video)) {
         *(int*)((char*)w + 0x18) = 6;
-    } else if (id == GetHashValue32(D_004A2010)) {
+    } else if (id == GetHashValue32(str_poster)) {
         *(int*)((char*)w + 0x18) = 3;
-    } else if (id == GetHashValue32(D_004A2018)) {
+    } else if (id == GetHashValue32(str_toys)) {
         *(int*)((char*)w + 0x18) = 7;
-    } else if (id == GetHashValue32(D_00467748)) {
+    } else if (id == GetHashValue32(str_trading_cards)) {
         *(int*)((char*)w + 0x18) = 4;
-    } else if (id == GetHashValue32(D_00467758)) {
+    } else if (id == GetHashValue32(str_cheat_character)) {
         *(int*)((char*)w + 0x18) = 8;
-    } else if (id == GetHashValue32(D_004674A8)) {
+    } else if (id == GetHashValue32(str_txtmdl_0)) {
         func_001D4F90(self, 5, (cUIText*)w);
-    } else if (id == GetHashValue32(D_004674B8)) {
+    } else if (id == GetHashValue32(str_txtmdl_1)) {
         func_001D4F90(self, 3, (cUIText*)w);
-    } else if (id == GetHashValue32(D_004674C8)) {
+    } else if (id == GetHashValue32(str_txtmdl_2)) {
         func_001D4F90(self, 7, (cUIText*)w);
-    } else if (id == GetHashValue32(D_004674D8)) {
+    } else if (id == GetHashValue32(str_txtmdl_3)) {
         func_001D4F90(self, 4, (cUIText*)w);
-    } else if (id == GetHashValue32(D_004674E8)) {
+    } else if (id == GetHashValue32(str_txtmdl_4)) {
         func_001D4F90(self, 8, (cUIText*)w);
-    } else if (id == GetHashValue32(D_00467768)) {
+    } else if (id == GetHashValue32(str_txtmdl_5)) {
         func_001D4F90(self, 6, (cUIText*)w);
     }
 }
@@ -762,7 +762,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_00157210(void* iface, int index);
 extern "C" int func_00157518(void* iface, int rider, int a, int index);
-extern char D_004A2020[];
+extern char str_pct_d_pct_d[];
 
 extern "C" void func_001D4F90(void* self, int index, cUIText* text)
 {
@@ -770,7 +770,7 @@ extern "C" void func_001D4F90(void* self, int index, cUIText* text)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
     int total = func_00157210(iface, index);
     int got = func_00157518(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48), index);
-    sprintf(buf, D_004A2020, got, total);
+    sprintf(buf, str_pct_d_pct_d, got, total);
     cUIText_setAsciiString(text, buf);
 }
 #endif
@@ -796,12 +796,12 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5078);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_00467778[];
+extern char str_248lobby_reconnect[];
 
 extern "C" void func_001D5078(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00467778), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_248lobby_reconnect), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -815,14 +815,14 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D50E0);
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern char D_00467790[];
-extern char D_00461CC0[];
+extern char str_TextReconnecting[];
+extern char str_kT_POPUPCMNReconnecting[];
 
 extern "C" void func_001D50E0(void* self, cUIText* item)
 {
     int id = *(int*)((char*)item + 0x38);
-    if (id == GetHashValue32(D_00467790)) {
-        cUIText_setUnicodeStringByID(item, GetHashValue32(D_00461CC0));
+    if (id == GetHashValue32(str_TextReconnecting)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_POPUPCMNReconnecting));
     }
 }
 #endif
@@ -839,7 +839,7 @@ extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, int a1
 extern "C" void func_0025C610(void* mgr);
 extern "C" void* func_0025CD50(void*, int);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
-extern char D_0045FF28[];
+extern char str_cFEStateOnlineMainMenu[];
 
 extern "C" int func_001D5138(void* self, int msg)
 {
@@ -851,7 +851,7 @@ extern "C" int func_001D5138(void* self, int msg)
         func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
         break;
     case 0x101:
-        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, str_cFEStateOnlineMainMenu, 0, 0), *(int*)((char*)self + 0x10)));
         break;
     case 0x111: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -895,7 +895,7 @@ extern "C" void func_002636F0(void* p, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* mem, void* owner);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern char D_00460BF0[];
+extern char str_cFEStateNetConfig[];
 
 extern "C" void func_001D5280(void* self, void* item, int msg)
 {
@@ -905,7 +905,7 @@ extern "C" void func_001D5280(void* self, void* item, int msg)
         void* state = cUIStateStack_getCurrentState((char*)*(void**)((char*)self + 0x10) + 0x18);
         *(int*)((char*)state + 0x1C) |= 0x80;
         func_002636F0(func_002591B8(), 0);
-        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *(void**)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(0x91C, str_cFEStateNetConfig, 0, 0), *(void**)((char*)self + 0x10)));
     } else {
         func_001A97B8(self, item, msg);
     }
@@ -1014,7 +1014,7 @@ extern "C" void func_00241AA0(char* buf, int n);
 extern "C" void func_002C2540(char* buf, char* s);
 extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
 extern void* D_004A2028;
-extern char D_004A14C8[];
+extern char str_pct_s_pct_s_c[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
 extern char func_001D59A0_a5488[] __asm__("func_001D59A0");
 extern char func_001D5D78_a5488[] __asm__("func_001D5D78");
@@ -1166,7 +1166,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     char b1[0x200];
     char b2[0x200];
     func_00241D40(app, *(int*)(app + 0xB4), b0, 0x100);
-    func_002C2540(b2, D_004A14C8);
+    func_002C2540(b2, str_pct_s_pct_s_c);
     func_00241AA0(b1, 0x100);
     sprintf1(self + 0x11C, b2, b1, b0);
 }
@@ -1238,8 +1238,8 @@ extern "C" void func_00241E18(void* app, char* buf, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
 extern void* D_004A2028;
-extern char D_004677A8[];
-extern char D_0045E2A0[];
+extern char str_pct_s_pct_spct_04d[];
+extern char str_Temp_String[];
 
 struct sVE_59A0 {
     short delta;
@@ -1267,7 +1267,7 @@ extern "C" void func_001D59A0(void)
         cFEMemCard_createReadBuffer_59A0(D_004A2028, size);
         func_0014E050(cBE_getBE(), *(int*)((char*)D_004A2028 + 0x1D4));
         func_00241D40(app, 0, name, 0x41);
-        func_002C2540_59A0(fmt1, D_004677A8);
+        func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
         func_00241000(app, title, *(int*)((char*)D_004A2028 + 0x1D4), size);
@@ -1277,7 +1277,7 @@ extern "C" void func_001D59A0(void)
         int a = func_00152950(iface, *(int*)((char*)D_004A2028 + 0x1CC));
         int b = func_00152BA8();
         func_00241D40(app2, 1, name, 0x41);
-        func_002C2540_59A0(fmt2, D_004677A8);
+        func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
         func_00241000(app2, title, a, b);
@@ -1285,7 +1285,7 @@ extern "C" void func_001D59A0(void)
     char* fe = (char*)D_004A2028;
     if (*(int*)(fe + 0x210) == 0 && *(int*)(fe + 0x208) == 0) {
         *(int*)(fe + 0x19C) = 0x16;
-        char* buf = (char*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+        char* buf = (char*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
         func_00241E18(app, buf, 0x320);
         sVE_59A0* vt = *(sVE_59A0**)((char*)D_004A2028 + 8);
         vt[36].fn((char*)D_004A2028 + vt[36].delta, buf, 1, 1, 0, 0, 1);

@@ -11,7 +11,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 struct cRiderSphereTree;
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
-extern char D_00458210[];
+extern char str_BoardSphereTree[];
 
 struct sVec4WG {
     float x, y, z, w;
@@ -79,7 +79,7 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
 {
     if (self->BoardSphereTree == 0)
     {
-        self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(0x2B0, D_00458210, 0, 0));
+        self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(0x2B0, str_BoardSphereTree, 0, 0));
     }
     char* rider = (char*)self->mRider;
     sVec4WG* pos = (sVec4WG*)(rider + 0x110);

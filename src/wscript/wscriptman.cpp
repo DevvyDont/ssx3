@@ -8,7 +8,7 @@
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
 #ifdef SKIP_ASM
-extern char D_00489908[];
+extern char str_WScriptProcess[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
 int func_0030B260(void* self, void* a1);
@@ -26,7 +26,7 @@ int func_0030B260(void* self, void* a1);
  */
 extern "C" void* cWScriptMan_addProcess(void* self, int sectionId, int data, int front)
 {
-    void* process = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, D_00489908, 0x20000000, 0), self, sectionId, data);
+    void* process = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, str_WScriptProcess, 0x20000000, 0), self, sectionId, data);
     if (front != 0) {
         func_0030B260((char*)self + 0x2BC, process);
     } else {
@@ -39,7 +39,7 @@ extern "C" void* cWScriptMan_addProcess(void* self, int sectionId, int data, int
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess1);
 #ifdef SKIP_ASM
-extern char D_00489918[];
+extern char str_WScriptMission[];
 extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, int a2, int a3);
 int func_0030B2C0(void* self, void* a1);
 
@@ -57,7 +57,7 @@ int func_0030B2C0(void* self, void* a1);
  */
 extern "C" void* cWScriptMan_addProcess1(void* self, int sectionId, int data, int key, int front)
 {
-    void* mission = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, sectionId, data, key);
+    void* mission = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, str_WScriptMission, 0x20000000, 0), self, sectionId, data, key);
     if (front != 0) {
         func_0030B2C0((char*)self + 0x2BC, mission);
     } else {
@@ -657,7 +657,7 @@ extern "C" void func_00309C88(void* self, int* idx);
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" int cWorld_getWScriptScript(void*, int*);
 extern "C" void func_003097E0(void* self, int v);
-extern char D_004898D8[];
+extern char str_SetupLocalTable[];
 
 static inline bool valid_30A060(int* id) { return *id != -1; }
 
@@ -708,7 +708,7 @@ extern "C" void func_0030A060(void* self, void* a1, void* a2, void* obj)
                 if (table != 0) {
                     func_002224B8(&call, &arg, table, &ret);
                 } else {
-                    table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+                    table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
                     func_002224B8(&call, &arg, table, &ret);
                     if (table != 0)
                         luno_cLunoTable__cLunoTable(table, 3);
@@ -1317,7 +1317,7 @@ extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
-extern char D_004898D8[];
+extern char str_SetupLocalTable[];
 
 // cLunoValue: { word0, word1, type }
 struct cWScriptMan_runScriptCode_sValue {
@@ -1355,7 +1355,7 @@ extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
     if (table != 0) {
         func_002224B8(&call, &scriptFunc, table, &ret);
     } else {
-        table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+        table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
         func_002224B8(&call, &scriptFunc, table, &ret);
         if (table != 0) {
             luno_cLunoTable__cLunoTable(table, 3);
@@ -1377,7 +1377,7 @@ extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
-extern char D_004898D8[];
+extern char str_SetupLocalTable[];
 
 // cLunoValue: { word0, word1, type }
 struct func_0030ADA8_sValue {
@@ -1406,7 +1406,7 @@ extern "C" void func_0030ADA8(void* self, void* obj, int a2)
     if (table != 0) {
         func_002224B8(&call, &arg, table, &ret);
     } else {
-        table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+        table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
         func_002224B8(&call, &arg, table, &ret);
         if (table != 0) {
             luno_cLunoTable__cLunoTable(table, 3);
@@ -2630,7 +2630,7 @@ extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int func_001538E8(void* iface, int a, int b, int c);
 extern "C" void* func_003506D8(void* mem, void* obj);
-extern char D_004896B8[];
+extern char str_DeadNode[];
 
 struct sRefSet_C4A8 {
     char pad_0x0[0x1C];
@@ -2684,7 +2684,7 @@ static inline void respawn_C4A8(unsigned int id)
         sVE_C4A8* vt = *(sVE_C4A8**)(o + 0xC);
         vt[1].fn(o + vt[1].delta, 3);
     }
-    func_003506D8(cMemMan_alloc(0x1C, D_004896B8, 0x20000000, 0), obj);
+    func_003506D8(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), obj);
 }
 
 // PORT: a1 is really an unsigned int* id list and a2 its count (the unit declares both int).
@@ -3833,7 +3833,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D840);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern char D_00489C70[];
+extern char str_ModelRefs[];
 
 struct func_0030D840_sPool {
     int count;      // 0x0
@@ -3848,7 +3848,7 @@ extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int a2)
 {
     self->field_0x4 = a2;
     self->count = count;
-    self->items = operator_new_tag(count * 0x58, D_00489C70, 0, 0);
+    self->items = operator_new_tag(count * 0x58, str_ModelRefs, 0, 0);
     MEM_fill(self->items, 0, self->count * 0x58);
     self->field_0x8 = 0;
     self->field_0x60 = 0;

@@ -20,7 +20,7 @@ INCLUDE_ASM("visualfx/angerfx", cAngerFX_cAngerFX);
 cAngerFX_ang::cAngerFX_ang()
 {
     cAngerPart_ang** slot = &parts;
-    *slot = new (D_00487518, 0, 0) cAngerPart_ang[2];
+    *slot = new (str_cAngerFX, 0, 0) cAngerPart_ang[2];
     func_002D4BE0_erFX(this);
 }
 

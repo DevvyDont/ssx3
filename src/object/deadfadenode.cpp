@@ -10,7 +10,7 @@ extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
 extern "C" float func_002D1C70();
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern char cDeadFadeNode_vtbl[];
-extern char D_0048E8A8[];
+extern char str_DeadFadeAnimMats[];
 
 // PORT: array new bound to the tagged allocator
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -201,7 +201,7 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
     self->f30 = 0.0f;
     self->f28 = 1.0f;
     sDfModel_0750* model = self->inst->model;
-    *pm = new (D_0048E8A8, 0x20000000, 0) sDfMatElem_0750[model->count];
+    *pm = new (str_DeadFadeAnimMats, 0x20000000, 0) sDfMatElem_0750[model->count];
     if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)((char*)other + other->vt[26].delta)) {
         sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)((char*)other + other->vt[27].delta);
         MEM_copy(self->mats, src, model->count << 6);

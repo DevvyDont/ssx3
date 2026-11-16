@@ -6,11 +6,11 @@ INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_005047F8[];
-extern char D_004A2A20[]; // "APBR1"
-extern char D_004A2A28[]; // "BPBR1"
-extern char D_004A2A30[]; // "CPBR1"
-extern char D_004A2A38[]; // "DPBR1"
-extern char D_004A2A40[]; // "EPBR1"
+extern char str_APBR1[]; // "APBR1"
+extern char str_BPBR1[]; // "BPBR1"
+extern char str_CPBR1[]; // "CPBR1"
+extern char str_DPBR1[]; // "DPBR1"
+extern char str_EPBR1[]; // "EPBR1"
 extern int D_004A43C4;
 extern "C" int func_0038AC50(void* self, const char* name);
 
@@ -30,19 +30,19 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
     case 1:
     case 11:
     case 18:
-        D_004A43C4 = func_0038AC50(D_005047F8, D_004A2A28);
+        D_004A43C4 = func_0038AC50(D_005047F8, str_BPBR1);
         break;
     case 2:
     case 9:
     case 12:
     case 19:
-        D_004A43C4 = func_0038AC50(D_005047F8, D_004A2A30);
+        D_004A43C4 = func_0038AC50(D_005047F8, str_CPBR1);
         break;
     case 3:
     case 6:
     case 15:
     case 20:
-        D_004A43C4 = func_0038AC50(D_005047F8, D_004A2A38);
+        D_004A43C4 = func_0038AC50(D_005047F8, str_DPBR1);
         break;
     case 4:
     case 7:
@@ -50,7 +50,7 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
     case 13:
     case 16:
     case 21:
-        D_004A43C4 = func_0038AC50(D_005047F8, D_004A2A40);
+        D_004A43C4 = func_0038AC50(D_005047F8, str_EPBR1);
         break;
     case 0:
     case 5:
@@ -58,7 +58,7 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
     case 14:
     case 17:
     default:
-        D_004A43C4 = func_0038AC50(D_005047F8, D_004A2A20);
+        D_004A43C4 = func_0038AC50(D_005047F8, str_APBR1);
         break;
     }
 }

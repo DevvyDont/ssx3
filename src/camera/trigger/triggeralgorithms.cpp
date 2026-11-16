@@ -91,7 +91,7 @@ extern "C" void* func_0016C6E0(cActiveTriggerList* self, void* key)
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_add);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern char D_0045BF68[];
+extern char str_Active_Camera_Trigger[];
 
 /**
  * Adds a camera trigger to the front of the active trigger list.
@@ -103,7 +103,7 @@ extern char D_0045BF68[];
  */
 extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
 {
-    sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, D_0045BF68, 0x20000000, 0);
+    sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, str_Active_Camera_Trigger, 0x20000000, 0);
     sTriggerNode* old = self->head;
     self->head = n;
     n->pad = item;

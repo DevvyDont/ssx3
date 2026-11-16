@@ -167,7 +167,7 @@ extern "C" void FILE_loadpackat(const char* name, void* buf, int size);
 extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_0045BF30[];
+extern char str_Read_Buffer[];
 
 /**
  * Replaces the list's camera triggers with those loaded from a file.
@@ -187,7 +187,7 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
         return 1;
     cCameraTriggerList_reset(self);
     int size = BXFILE_size(name);
-    void* buf = operator_new_K2(size, D_0045BF30, 0x100, 0);
+    void* buf = operator_new_K2(size, str_Read_Buffer, 0x100, 0);
     FILE_loadpackat(name, buf, size);
     if (buf != 0) {
         int status = cCameraTriggerList_loadFromBuffer(self, buf);
@@ -210,8 +210,8 @@ extern "C" int readTrigger(void* buffer, void* trigger, int version);
 void* operator new(unsigned int size, const char* tag, int flags, int d) __asm__("cMemMan_alloc");
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K3(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_0045BF40[];
-extern char D_0045BF58[];
+extern char str_Camera_Trigger_Array[];
+extern char str_Camera_Trigger[];
 
 struct tCameraTrigger_K3 {
     int f0;
@@ -249,9 +249,9 @@ extern "C" int cCameraTriggerList_loadFromBuffer(void* self_, void* buf)
     int status = cCameraTriggerList_readHeader_K3(self, &cur, 7);
     if (status != 0)
         return status;
-    self->field_0x0 = (int)operator_new_K3(self->field_0x4 * 4, D_0045BF40, 0, 0);
+    self->field_0x0 = (int)operator_new_K3(self->field_0x4 * 4, str_Camera_Trigger_Array, 0, 0);
     for (int i = 0; i < self->field_0x4; i++) {
-        tCameraTrigger_K3* newTrig = new (D_0045BF58, 0, 0) tCameraTrigger_K3;
+        tCameraTrigger_K3* newTrig = new (str_Camera_Trigger, 0, 0) tCameraTrigger_K3;
         status = readTrigger(&cur, &newTrig, self->field_0xC);
         if (status != 0) {
             if (newTrig != 0)

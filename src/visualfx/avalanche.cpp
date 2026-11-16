@@ -764,7 +764,7 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_buildArray);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00487548[];
+extern char str_ActiveNodeArray[];
 
 struct tActiveAvalanche_node {
     char pad[0x2E4];
@@ -790,7 +790,7 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
     for (node = self->head; node != 0; node = node->next) {
         n++;
     }
-    self->array = (tActiveAvalanche_node**)operator_new_tag(n * 4, D_00487548, 0, 0);
+    self->array = (tActiveAvalanche_node**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
     int i = 0;
     for (node = self->head; node != 0; node = node->next) {
         self->array[i++] = node;
@@ -873,7 +873,7 @@ struct sAvFloatDef_7EF8 {
 inline void* operator new(unsigned int, void* p) { return p; }
 
 extern sAvFloatDef_7EF8 D_004D5770;
-extern char D_00487558[];
+extern char str_AnimObject_b[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00341AA0(void* self, int a, int type, void* b, void* c);
 extern "C" bool func_002D7CA8_7EF8(void* node, float t) __asm__("func_002D7CA8");
@@ -919,7 +919,7 @@ extern "C" void func_002D7EF8_7EF8(sAvActive_7EF8* self)
                 new (&D_004D5770) sAvFloatDef_7EF8();
                 D_004A54C8 = 1;
             }
-            func_00341AA0(cMemMan_alloc(0x6C, D_00487558, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
+            func_00341AA0(cMemMan_alloc(0x6C, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
         }
         func_0029E560_7EF8(func_0028B180(), pos_7EF8(self->data->events[self->nextEvent].obj));
         self->nextEvent++;
@@ -969,9 +969,9 @@ extern "C" void func_002D81B0(void* self)
 //100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_SaveData);
 #ifdef SKIP_ASM
-extern char D_004A3AD0[];
-extern char D_004A3AD8[];
-extern char D_004A3AE0[];
+extern char str_xav[];
+extern char str_sav[];
+extern char str_gav[];
 extern "C" void cAvalanche_SaveData1(int, char*);
 
 /**
@@ -982,9 +982,9 @@ extern "C" void cAvalanche_SaveData1(int, char*);
  */
 extern "C" void cAvalanche_SaveData(void)
 {
-    cAvalanche_SaveData1(1, D_004A3AD0);
-    cAvalanche_SaveData1(1, D_004A3AD8);
-    cAvalanche_SaveData1(0, D_004A3AE0);
+    cAvalanche_SaveData1(1, str_xav);
+    cAvalanche_SaveData1(1, str_sav);
+    cAvalanche_SaveData1(0, str_gav);
 }
 #endif
 
@@ -995,14 +995,14 @@ void cMemMan_free(void*);
 extern "C" void func_003DEC80(void* a, void* b, void* data, int size, int prio);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004A3AE8[];
+extern char str_buffer[];
 
 extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows)
 {
     if (direct) {
         func_003DEC80(a, b, src, stride * rows, 100);
     } else {
-        char* buf = (char*)operator_new_tag(stride * rows, D_004A3AE8, 0, 0);
+        char* buf = (char*)operator_new_tag(stride * rows, str_buffer, 0, 0);
         char* d = buf;
         for (int i = 0; i < rows; i++) {
             char* end = src + stride;
@@ -1026,7 +1026,7 @@ INCLUDE_ASM("visualfx/avalanche", cAvalanche_SaveData1);
 #ifdef SKIP_ASM
 extern void* cAvalanche_m_avalancheList;
 extern int D_004A3A48;
-extern char D_004A3AF0[];
+extern char str_pct_s_pct_s_j[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1088,7 +1088,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
     int off = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     char buf[0x100];
-    sprintf(buf, D_004A3AF0, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
+    sprintf(buf, str_pct_s_pct_s_j, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
     int fd;
     if (func_003DEBF0(buf, 0x26, 0x64, &fd)) {
         sAvGroup_83B8* avalanche;
@@ -1147,7 +1147,7 @@ extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_resolved;
 extern int D_004A3AC4;
 extern int D_004A3A4C;
-extern char D_004A3AD8[];
+extern char str_sav[];
 // PORT: the read call returns func_003DEB50's result (bytes read); the ealib unit declares it void.
 extern "C" int func_003DEC60_i(int fd, int off, void* data, int size, int prio) __asm__("func_003DEC60");
 extern "C" void cAvalanche_end(void);
@@ -1165,7 +1165,7 @@ extern "C" void cAvalanche_LoadData(void)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     char buf[0x100];
-    sprintf(buf, D_004A3AF0, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), D_004A3AD8);
+    sprintf(buf, str_pct_s_pct_s_j, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), str_sav);
     cAvalanche_m_resolved = 0;
     D_004A3AC4 = 1;
     int fd;
@@ -1807,8 +1807,8 @@ extern "C" void cAvalanche_render(void)
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_addAvalancheNode);
 #ifdef SKIP_ASM
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern char D_00487568[];
-extern char D_00487578[];
+extern char str_Avalanche[];
+extern char str_AvalancheNode[];
 extern void* cAvalanche_m_avalancheList;
 extern char D_00538450[];
 extern int D_004A3AC0;
@@ -1880,12 +1880,12 @@ extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float l
     while (avalanche != 0 && avalanche->id != id)
         avalanche = avalanche->next;
     if (avalanche == 0) {
-        avalanche = new (D_00487568, 0, 0) sAvGroupD92D0;
+        avalanche = new (str_Avalanche, 0, 0) sAvGroupD92D0;
         avalanche->init(id);
         avalanche->next = (sAvGroupD92D0*)cAvalanche_m_avalancheList;
         cAvalanche_m_avalancheList = avalanche;
     }
-    sAvNodeD92D0* n = new (D_00487578, 0, 0) sAvNodeD92D0;
+    sAvNodeD92D0* n = new (str_AvalancheNode, 0, 0) sAvNodeD92D0;
     n->next = avalanche->nodes;
     avalanche->nodes = n;
     n->rate = nodeSpeed;

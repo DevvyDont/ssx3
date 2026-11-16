@@ -223,13 +223,13 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319660);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0048D9D8[];
-extern char D_0048D9C8[];
+extern char str_pct_sDATA_MODULES[];
+extern char str_cdrom0_b[];
 
 // Builds the IOP module directory ("cdrom0:\DATA\MODULES\").
 extern "C" void func_00319660(void* self, char* out)
 {
-    sprintf(out, D_0048D9D8, D_0048D9C8);
+    sprintf(out, str_pct_sDATA_MODULES, str_cdrom0_b);
 }
 #endif
 
@@ -241,8 +241,8 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* strchr(const char* s, int c);
 extern "C" char* strcpy(char* d, const char* s);
 extern "C" void func_00319660(void* self, char* out);
-extern char D_004A3E98[];
-extern char D_004A3EA0[];
+extern char str_pct_spct_spct_s_c[];
+extern char str_1_b[];
 
 // Full path of an IOP module: names with a device prefix are used as is, others get
 // the module directory and the ";1" ISO version suffix.
@@ -253,7 +253,7 @@ extern "C" void func_00319690(void* self, char* out, const char* name)
     } else {
         char dir[256];
         func_00319660(self, dir);
-        sprintf(out, D_004A3E98, dir, name, D_004A3EA0);
+        sprintf(out, str_pct_spct_spct_s_c, dir, name, str_1_b);
     }
 }
 #endif
@@ -299,12 +299,12 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003197D0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_00319718(void* self, const char* name, int retry, int argLen, const char* args);
 extern void* D_004A3E94;
-extern char D_0048D9E8[];
+extern char str_MSIFRPC_IRX[];
 
 // Loads MSIFRPC.IRX.
 extern "C" void func_003197D0(void* self)
 {
-    func_00319718(D_004A3E94, D_0048D9E8, 1, 0, 0);
+    func_00319718(D_004A3E94, str_MSIFRPC_IRX, 1, 0, 0);
 }
 #endif
 
@@ -331,7 +331,7 @@ extern "C" void func_00319690(void* self, char* out, const char* name);
 extern "C" int func_0042BF68(const char* path);
 extern "C" int func_0042BF30(void);
 extern "C" void func_0042AB18(void);
-extern char D_0048D9F8[];
+extern char str_DNAS271_IMG[];
 
 // Loads the DNAS image (DNAS271.IMG) and waits for it to finish.
 extern "C" void func_00319820(void* self)
@@ -340,7 +340,7 @@ extern "C" void func_00319820(void* self)
     func_00426408(0);
     func_00401718(0);
     func_00402450(2);
-    func_00319690(self, path, D_0048D9F8);
+    func_00319690(self, path, str_DNAS271_IMG);
     while (func_0042BF68(path) == 0)
         ;
     while (func_0042BF30() == 0)
@@ -357,14 +357,14 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003198A0);
 extern "C" void func_00423DE0(int sema);
 extern "C" int func_0042A538(void* client, int cmd, int a, int b, int c, int d);
 extern "C" int func_00402398(int* status);
-extern char D_004A3EA8[];
+extern char str_dev9x[];
 
 // IOP poll thread: waits for its semaphore, then issues RPC 0x4402 and waits for completion.
 extern "C" void func_003198A0(int sema)
 {
     for (;;) {
         func_00423DE0(sema);
-        while (func_0042A538(D_004A3EA8, 0x4402, 0, 0, 0, 0) < 0)
+        while (func_0042A538(str_dev9x, 0x4402, 0, 0, 0, 0) < 0)
             ;
         int status = 0;
         while (func_00402398(&status) == 0 || status != 0)
@@ -421,7 +421,7 @@ extern "C" void func_00400D58(void (*fn)(void), int arg);
 extern "C" void func_003198A0(int sema);
 extern "C" void func_00319910(void);
 extern int _gp;
-extern char D_004A3EB0[];
+extern char str_dev9[];
 extern char D_00538B10[];
 extern int D_004A5B54;
 extern int D_004A5B70;
@@ -430,7 +430,7 @@ extern "C" void func_00319930(void)
 {
     sThreadParam_9930 tp;
     sSemaParam_9930 sema;
-    if (func_0042B6D0(D_004A3EB0) >= 0) {
+    if (func_0042B6D0(str_dev9) >= 0) {
         sema.initCount = 0;
         sema.maxCount = 1;
         sema.option = 0;

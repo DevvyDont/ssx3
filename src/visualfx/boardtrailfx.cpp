@@ -10,7 +10,7 @@ extern "C" void MEM_fill(void* p, int c, int n);
 struct cBoardTrailFX_reset_sTrail;
 extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self);
 extern char D_00459B90[];
-extern char D_00487B20[];
+extern char str_BoardTrailVertices[];
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -87,7 +87,7 @@ extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
         self->ids[i] = neg;
     }
     sBTTrailVtx** s = self->strip;
-    s[0] = new (D_00487B20, 0, 0) sBTTrailVtx[324];
+    s[0] = new (str_BoardTrailVertices, 0, 0) sBTTrailVtx[324];
     for (i = 1; i < 6; i++) {
         s[i] = self->strip[0] + i * 54;
     }

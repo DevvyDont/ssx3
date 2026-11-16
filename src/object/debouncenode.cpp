@@ -74,7 +74,7 @@ INCLUDE_ASM("object/debouncenode", cDebounceNode_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_003506D8(void* self, void* parent);
-extern const char D_0048E738[];
+extern const char str_DeadNode_b[];
 
 struct sDebounceVEntry2DD8 {
     short delta;
@@ -96,7 +96,7 @@ extern "C" void cDebounceNode_loseFocus(void* self)
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
-            func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), parent);
+            func_003506D8(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
             if (self != 0) {
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
@@ -131,7 +131,7 @@ INCLUDE_ASM("object/debouncenode", cDebounceNode_expire);
 #ifdef SKIP_ASM
 int func_0034FCC0(void* self);
 extern "C" void* func_00350F60(void* self, void* parent);
-extern const char D_0048E748[];
+extern const char str_RestoreNode_b[];
 
 /**
  * Ends a debounce node and replaces it according to its expire mode.
@@ -155,14 +155,14 @@ extern "C" void cDebounceNode_expire(void* self, int check)
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
-            func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), parent);
+            func_003506D8(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == 3) {
             void* parent = *(void**)((char*)self + 0x18);
             if (self != 0) {
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
-            func_00350F60(cMemMan_alloc(0x1C, D_0048E748, 0x20000000, 0), parent);
+            func_00350F60(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
             if (self != 0) {
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
@@ -1341,8 +1341,8 @@ extern "C" void func_003513D0(void* self);
 extern "C" void func_003612C0(void* self);
 extern "C" void func_00351398(void* self, void* src);
 extern "C" void MEM_fill(void* p, int v, int n);
-extern char D_0048E758[];
-extern char D_0048E768[];
+extern char str_AnimMats[];
+extern char str_CrowdAnimMesh[];
 extern void* cMeshAnimFrame_vtbl[];
 extern void* cAnimFrame_vtbl[];
 
@@ -1478,7 +1478,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     self->def = m->def;
     self->period = self->def->period;
     sDbPad_43A8*& buf = self->buf;
-    buf = new (D_0048E758, 0x20000000, 0) sDbPad_43A8[self->def->count];
+    buf = new (str_AnimMats, 0x20000000, 0) sDbPad_43A8[self->def->count];
     sDbEntry_43A8* e = self->def->entries;
     self->nActive = 0;
     for (i = 0; i < self->def->count; i++, e++) {
@@ -1487,7 +1487,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     }
     if (self->nActive != 0) {
         sDbMesh_43A8*& meshes = self->meshes;
-        meshes = new (D_0048E768, 0x20000000, 0) sDbMesh_43A8[self->nActive];
+        meshes = new (str_CrowdAnimMesh, 0x20000000, 0) sDbMesh_43A8[self->nActive];
     } else {
         self->meshes = 0;
     }

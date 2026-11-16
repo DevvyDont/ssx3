@@ -8,7 +8,7 @@ struct sStateSingleton {
     void* vtable;
 };
 
-extern const char D_004A1230[];
+extern const char str_BERace[];
 extern void* cBERaceState_vtbl[16];
 extern void* D_004A122C;
 
@@ -26,7 +26,7 @@ INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
 void* cBERaceState_getState(void* self)
 {
     if (D_004A122C == 0) {
-        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, D_004A1230, 0, 0);
+        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BERace, 0, 0);
         mem->field_0x0 = self;
         mem->vtable = cBERaceState_vtbl;
         D_004A122C = mem;

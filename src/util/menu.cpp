@@ -2233,7 +2233,7 @@ done:
 INCLUDE_ASM("util/menu", func_002CCB18);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
-extern char D_004866B8[];
+extern char str_Invalid_b[];
 
 struct sMenuRectCB18 { float x, y, z, w; };
 struct sMenuEntCB18 { void* name; int data; };
@@ -2242,7 +2242,7 @@ extern "C" sMenuRectCB18* func_002CCB18(sMenuRectCB18* ret, char* item)
 {
     sMenuRectCB18 best;
     sMenuRectCB18 tmp;
-    func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, D_004866B8);
+    func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, str_Invalid_b);
     best = tmp;
     for (int i = 0; i < *(int*)(item + 0x18); i++) {
         func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, (*(sMenuEntCB18**)(item + 0x1C))[i].name);
@@ -2258,7 +2258,7 @@ extern "C" sMenuRectCB18* func_002CCB18(sMenuRectCB18* ret, char* item)
 //100%
 INCLUDE_ASM("util/menu", func_002CCC38);
 #ifdef SKIP_ASM
-extern char D_004866B8[];
+extern char str_Invalid_b[];
 
 struct func_002CCC38_sEntry {
     char* name;  // 0x0
@@ -2270,7 +2270,7 @@ extern "C" void func_002CCC38(void* self, int a1)
     int i = 0;
     for (;;) {
         if (i == *(int*)((char*)self + 0x18)) {
-            func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, D_004866B8);
+            func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, str_Invalid_b);
             break;
         }
         // PORT: pointer held in int (index-first address arithmetic)
@@ -3044,12 +3044,12 @@ INCLUDE_ASM("util/menu", func_002CD7F0);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
-extern char D_004A3970[];
+extern char str_pct_d_i[];
 
 extern "C" void func_002CD7F0(void* self, int a1)
 {
     char buf[0x70];
-    sprintf(buf, D_004A3970, **(signed char**)((char*)self + 0x18));
+    sprintf(buf, str_pct_d_i, **(signed char**)((char*)self + 0x18));
     func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
@@ -3310,7 +3310,7 @@ INCLUDE_ASM("util/menu", cIntMenuItem_render);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
-extern char D_004A3970[];
+extern char str_pct_d_i[];
 
 /**
  * Draws an int item: its label on the left and the variable's value ("%d") on the right.
@@ -3323,7 +3323,7 @@ extern char D_004A3970[];
 extern "C" void cIntMenuItem_render(void* self, int rect)
 {
     char buf[0x70];
-    sprintf(buf, D_004A3970, **(int**)((char*)self + 0x18));
+    sprintf(buf, str_pct_d_i, **(int**)((char*)self + 0x18));
     func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
@@ -3540,12 +3540,12 @@ extern "C" void cBXString_cBXString1(void* self, void* src);
 extern "C" int func_003194A8(void* str, const char* fmt, ...);
 extern "C" float func_0040DA10(float x);
 extern "C" int fptodp(float f);
-extern char D_004A3998[];
-extern char D_004A39A0[];
-extern char D_004A39A8[];
-extern char D_004A39B0[];
-extern char D_004A39B8[];
-extern char D_004A39C0[];
+extern char str_pct_4f[];
+extern char str_pct_3f[];
+extern char str_pct_2f[];
+extern char str_pct_1f_b[];
+extern char str_pct_0f[];
+extern char str_pct_3g[];
 
 struct sBXStrDFD8 { char* p; };
 
@@ -3572,17 +3572,17 @@ void* prettyFloat_impl(void* out, float v)
     int n = (int)t;
     const char* fmt;
     if (n < 0) {
-        fmt = D_004A3998;
+        fmt = str_pct_4f;
     } else if (n < 1) {
-        fmt = D_004A39A0;
+        fmt = str_pct_3f;
     } else if (n < 2) {
-        fmt = D_004A39A8;
+        fmt = str_pct_2f;
     } else if (n < 3) {
-        fmt = D_004A39B0;
+        fmt = str_pct_1f_b;
     } else if (n < 7) {
-        fmt = D_004A39B8;
+        fmt = str_pct_0f;
     } else {
-        fmt = D_004A39C0;
+        fmt = str_pct_3g;
     }
     sBXStrDFD8 s;
     s.p = (char*)D_004A3E90;
@@ -3743,7 +3743,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
-extern char D_004A39C8[];
+extern char str_pct_3_2f[];
 
 /**
  * Draws an angle item: its label on the left and the angle in degrees ("%3.2f") on the right.
@@ -3757,7 +3757,7 @@ extern char D_004A39C8[];
 extern "C" void cAngleMenuItem_render(void* self, int rect)
 {
     char buf[0x70];
-    sprintf(buf, D_004A39C8, fptodp(**(float**)((char*)self + 0x18) * 57.2957763671875f));
+    sprintf(buf, str_pct_3_2f, fptodp(**(float**)((char*)self + 0x18) * 57.2957763671875f));
     func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
@@ -4213,7 +4213,7 @@ INCLUDE_ASM("util/menu", cColorMenuItem_preRender);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
-extern char D_00486700[];
+extern char str_pct_3f_999[];
 extern char* D_00487470[];
 
 struct sRect_2CEEE8 { float x, y, w, h; };
@@ -4265,7 +4265,7 @@ extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueI
 {
     sRect_2CEEE8 rect;
     char buf[64];
-    sprintf(buf, D_00486700, fptodp(*(float*)((char*)item->values + (item->index << 2))));
+    sprintf(buf, str_pct_3f_999, fptodp(*(float*)((char*)item->values + (item->index << 2))));
     float z = 0.0f;
     rect.y = z;
     rect.x = z;
@@ -4288,7 +4288,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 extern "C" int fptodp(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_00487470[];
-extern char D_00486710[];
+extern char str_pct_3f_pct_03d[];
 
 struct sVEntry_2CF1C8 {
     short delta;
@@ -4439,7 +4439,7 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
                   D_00487470[*(int*)((char*)self + 0x18)]);
     char buf[0x10];
-    sprintf(buf, D_00486710,
+    sprintf(buf, str_pct_3f_pct_03d,
             fptodp(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2))),
             (int)(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2)) * 255.99000549316406f));
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
@@ -5349,12 +5349,12 @@ INCLUDE_ASM("util/menu", func_002D0450);
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
-extern char D_00486720[];
+extern char str_pct_2f_pct_2f_pct_2f[];
 
 extern "C" void* func_002D0450(void* ret, void* item)
 {
     char buf[0x80];
-    const char* fmt = D_00486720;
+    const char* fmt = str_pct_2f_pct_2f_pct_2f;
     int x = fptodp((*(float**)((char*)item + 0x14))[0]);
     int y = fptodp((*(float**)((char*)item + 0x14))[1]);
     int z = fptodp((*(float**)((char*)item + 0x14))[2]);
@@ -5369,14 +5369,14 @@ INCLUDE_ASM("util/menu", func_002D0500);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
-extern char D_00486720[];
+extern char str_pct_2f_pct_2f_pct_2f[];
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
 extern "C" void func_002D0500(void* self, int a1)
 {
     char buf[0x80];
-    const char* fmt = D_00486720;
+    const char* fmt = str_pct_2f_pct_2f_pct_2f;
     int x = fptodp((*(float**)((char*)self + 0x14))[0]);
     int y = fptodp((*(float**)((char*)self + 0x14))[1]);
     int z = fptodp((*(float**)((char*)self + 0x14))[2]);
@@ -5658,7 +5658,7 @@ INCLUDE_ASM("util/menu", func_002D0D48);
 #ifdef SKIP_ASM
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
-extern char D_00486748[];
+extern char str_9_999_9_999[];
 
 struct sMenuRect_2D0D48 { float x, y, z, w; };
 
@@ -5679,7 +5679,7 @@ extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
     float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
     float w = cFont_textExtent(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     char* font2 = font_2D0D48(item);
-    float w2 = cFont_textExtent(font2, D_00486748, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
+    float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
     if (w < w2) w = w2;
     sMenuRect_2D0D48 r;
     float zero = 0.0f;

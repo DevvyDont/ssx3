@@ -8,7 +8,7 @@ extern "C" void MEM_copy(void*, void*, int);
 extern "C" void func_003B47F8(void* src, void* dst);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_0048A5D0[];
+extern const char str_MdfModel_pct_s[];
 
 struct sMdfPart_00314CB0
 {
@@ -39,7 +39,7 @@ struct sMdfArchive_00314CB0
 extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int i)
 {
     char name[0x40];
-    sprintf(name, D_0048A5D0, &self->parts[i]);
+    sprintf(name, str_MdfModel_pct_s, &self->parts[i]);
     char* model = (char*)operator_new_tag(self->parts[i].dataSize + 0x60, name, 0x3000000, 0);
     MEM_copy(model, &self->parts[i], 0x60);
     if (self->parts[i].dataSize)
@@ -229,7 +229,7 @@ extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
 //100%
 INCLUDE_ASM("animation/mdfarchive", func_00315070);
 #ifdef SKIP_ASM
-extern char D_0048A4C0[];
+extern char str_error[];
 
 extern "C" char* func_00315070(char* self, void* value)
 {
@@ -240,6 +240,6 @@ extern "C" char* func_00315070(char* self, void* value)
             return D_0048CFC0[i];
         }
     }
-    return D_0048A4C0;
+    return str_error;
 }
 #endif

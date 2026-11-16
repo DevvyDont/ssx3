@@ -61,8 +61,8 @@ struct sAlloc_ADEC8 {
 };
 // PORT: the unit declares D_00509430 as char[] later; view bound by asm label
 extern sAlloc_ADEC8 D_00509430_ADEC8 __asm__("D_00509430");
-extern char D_00495218[];
-extern char D_00495230[];
+extern char str_AV_VideoStreamBuffer[];
+extern char str_AV_AudioStreamBuffer[];
 extern "C" signed char func_003B5440();
 extern "C" void func_003E62B0();
 extern "C" void MEM_fill(void* dst, int value, int size);
@@ -106,8 +106,8 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
     }
     if (a4 != 0) {
         *(int*)(self + 0x14) = 1;
-        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(D_00495218, a3, 0, 0, D_00509430_ADEC8.flags);
-        *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(D_00495230, a6, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, a3, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, a6, 0, 0, D_00509430_ADEC8.flags);
         *(int*)(self + 0x30) = func_003E06D8(2, 2, 1, *(void**)(self + 0x4), a3);
         *(int*)(self + 0x34) = func_003E06D8(2, 2, 1, *(void**)(self + 0x8), a6);
         func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
@@ -133,7 +133,7 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         }
     } else {
         *(int*)(self + 0x14) = 0;
-        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(D_00495218, a3, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, a3, 0, 0, D_00509430_ADEC8.flags);
         *(void**)(self + 0x8) = 0;
         *(int*)(self + 0x30) = func_003E06D8(2, 3, 2, *(void**)(self + 0x4), a3);
         *(int*)(self + 0x34) = func_003E0BF8(*(int*)(self + 0x30), 2);
@@ -688,7 +688,7 @@ struct func_003AED40_sAlloc {
 };
 // PORT: the unit declares D_00509430 as char[] later; view bound by asm label
 extern func_003AED40_sAlloc D_00509430_v __asm__("D_00509430");
-extern char D_00495250[];
+extern char str_AV_audiobuff[];
 
 extern "C" signed char func_003B5440();
 extern "C" void func_003E62B0();
@@ -708,7 +708,7 @@ extern "C" void* func_003AED40(void* self, int a1, int a2)
         *(int*)((char*)self + 0xC) = -1;
         func_003BA020(desc);
         int size = func_003B7AC8(1, 0x1E);
-        void* mem = D_00509430_v.alloc(D_00495250, size, 0, 0, D_00509430_v.flags);
+        void* mem = D_00509430_v.alloc(str_AV_audiobuff, size, 0, 0, D_00509430_v.flags);
         *(void**)((char*)self + 0x4) = mem;
         int h = func_003B7E38(a1, desc, 1, 0x1E, mem, size);
         *(int*)((char*)self + 0xC) = h;
@@ -1785,8 +1785,8 @@ extern int D_005094D8_s __asm__("D_005094D8") BSS_B0C58;
 extern int D_005094DC_s __asm__("D_005094DC") BSS_B0C58;
 extern int D_005094E0_s __asm__("D_005094E0") BSS_B0C58;
 extern char D_004953E8[];
-extern char D_004953F0[];
-extern char D_00495400[];
+extern char str_RCMP_mpegbuff[];
+extern char str_RCMP_chunkbuff[];
 extern "C" void func_003B1228(void* data);
 extern "C" int func_003B13D8(void);
 extern "C" void* func_003B07F8(void* self, unsigned int w, int h);
@@ -1875,8 +1875,8 @@ extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B
         node->next = old;
         node->prev = head;
     }
-    self->work = D_00509430_B0C58.alloc(D_004953F0, self->w * self->h * 9 / 2 + 0x176C, 0, 0, D_00509430_B0C58.flags | 0x400);
-    self->ipuBuf = D_00509430_B0C58.alloc(D_00495400, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->work = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->w * self->h * 9 / 2 + 0x176C, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->ipuBuf = D_00509430_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
     self->ipuBufUc = (void*)(((unsigned int)self->ipuBuf & 0x0FFFFFFF) | 0x30000000);
     func_00402708();
     func_004027B8(self->mpeg, self->work, self->w * self->h * 9 / 2 + 0x176C);
@@ -2265,7 +2265,7 @@ extern int D_00509518[];
 extern void* D_0050951C[];
 extern unsigned char D_0044C218[];
 extern unsigned char D_0044C298[];
-extern char D_00495450[];
+extern char str_sequence_header[];
 void* func_003B2360(void* self);
 extern "C" void func_003B1988(void);
 
@@ -2297,7 +2297,7 @@ extern "C" void func_003B14F0(void)
     D_0050950C[0] = func_003B1300(4);
     D_00509510[0] = (int)func_003B1300(4);
     D_00509514[0] = (int)func_003B1300(0x12);
-    func_003B2360(D_00495450);
+    func_003B2360(str_sequence_header);
     D_00509518[0] = (int)func_003B1300(0xA);
     D_0050951C[0] = func_003B1300(1);
     if ((ld->load_intra_quantizer_matrix = func_003B1300(1)) != 0) {
@@ -2336,7 +2336,7 @@ extern void* D_00509634[];
 extern void* D_00509638[];
 extern void* D_0050963C[];
 extern void* D_00509640[];
-extern char D_00495468[];
+extern char str_group_of_pictures_header[];
 void* func_003B2360(void* self);
 extern "C" void func_003B1988(void);
 
@@ -2356,7 +2356,7 @@ extern "C" void group_of_pictures_header(void)
     D_00509628[0] = func_003B1300(1);
     D_0050962C[0] = func_003B1300(5);
     D_00509630[0] = func_003B1300(6);
-    func_003B2360(D_00495468);
+    func_003B2360(str_group_of_pictures_header);
     D_00509634[0] = func_003B1300(6);
     D_00509638[0] = func_003B1300(6);
     D_0050963C[0] = func_003B1300(1);
@@ -2512,7 +2512,7 @@ extern int D_005094F8[];
 extern float D_00509504[];
 struct sD_00509508;
 extern float D_0044C388[];
-extern char D_004954B8[];
+extern char str_sequence_extension[];
 void* func_003B2360(void* self);
 
 struct sMpegCtx1AB0 {
@@ -2534,7 +2534,7 @@ extern "C" void func_003B1AB0(void)
     int hext = (int)func_003B1300(2);
     int vext = (int)func_003B1300(2);
     int brext = (int)func_003B1300(0xC);
-    func_003B2360(D_004954B8);
+    func_003B2360(str_sequence_extension);
     int vbvext = (int)func_003B1300(8);
     D_0050952C[0] = (int)func_003B1300(1);
     D_00509530[0] = (int)func_003B1300(2);
@@ -2567,7 +2567,7 @@ extern void* D_00509544[];
 extern void* D_00509548[];
 extern void* D_0050954C[];
 extern void* D_00509550[];
-extern char D_004954D0[];
+extern char str_sequence_display_extension[];
 void* func_003B2360(void* self);
 
 extern "C" void func_003B1CC0(void)
@@ -2580,7 +2580,7 @@ extern "C" void func_003B1CC0(void)
         D_00509548[0] = func_003B1300(8);
     }
     D_0050954C[0] = func_003B1300(0xE);
-    func_003B2360(D_004954D0);
+    func_003B2360(str_sequence_display_extension);
     D_00509550[0] = func_003B1300(0xE);
 }
 #endif
@@ -2675,7 +2675,7 @@ extern int horizontal_subsampling_factor_m __asm__("D_005095E8");
 extern int horizontal_subsampling_factor_n __asm__("D_005095EC");
 extern int vertical_subsampling_factor_m __asm__("D_005095F0");
 extern int vertical_subsampling_factor_n __asm__("D_005095F4");
-extern char D_004954F0[];
+extern char str_sequence_scalable_extension[];
 extern char D_00495510[];
 void* func_003B2360(void* self);
 // Get_Bits returning int: with the unit's void* (or mpeg2decode's unsigned int) declaration GCC keeps the
@@ -2705,7 +2705,7 @@ extern "C" void sequence_scalable_extension(void)
 
     if (ld->scalable_mode == 2) { /* SC_SPAT */
         lower_layer_prediction_horizontal_size = Get_Bits(14);
-        func_003B2360(D_004954F0);
+        func_003B2360(str_sequence_scalable_extension);
         lower_layer_prediction_vertical_size = Get_Bits(14);
         horizontal_subsampling_factor_m = Get_Bits(5);
         horizontal_subsampling_factor_n = Get_Bits(5);
@@ -2727,8 +2727,8 @@ extern int D_00509588[];
 extern int D_00509598[];
 extern void* D_005095C0[];
 extern void* D_005095D0[];
-extern char D_00495538[];
-extern char D_00495568[];
+extern char str_picture_display_extension_first_marker_b[];
+extern char str_picture_display_extension_second_marker[];
 void* func_003B2360(void* self);
 
 extern "C" void func_003B1FC8(void)
@@ -2748,9 +2748,9 @@ extern "C" void func_003B1FC8(void)
     }
     for (i = 0; i < n; i++) {
         D_005095C0[i] = func_003B1300(0x10);
-        func_003B2360(D_00495538);
+        func_003B2360(str_picture_display_extension_first_marker_b);
         D_005095D0[i] = func_003B1300(0x10);
-        func_003B2360(D_00495568);
+        func_003B2360(str_picture_display_extension_second_marker);
     }
 }
 #endif
@@ -2812,8 +2812,8 @@ extern int D_00509600[];
 extern void* D_00509604[];
 extern void* D_00509608[];
 extern void* D_0050960C[];
-extern char D_00495598[];
-extern char D_004955D0[];
+extern char str_picture_spatial_scalable_extension_first[];
+extern char str_picture_spatial_scalable_extension_secon[];
 void* func_003B2360(void* self);
 
 /**
@@ -2828,12 +2828,12 @@ extern "C" void picture_spatial_scalable_extension(void)
 {
     *(int*)((char*)ld + 0x430) = 1;
     D_005095F8[0] = func_003B1300(0xA);
-    func_003B2360(D_00495598);
+    func_003B2360(str_picture_spatial_scalable_extension_first);
     D_005095FC[0] = (int)func_003B1300(0xF);
     if (D_005095FC[0] >= 0x4000) {
         D_005095FC[0] -= 0x8000;
     }
-    func_003B2360(D_004955D0);
+    func_003B2360(str_picture_spatial_scalable_extension_secon);
     D_00509600[0] = (int)func_003B1300(0xF);
     if (D_00509600[0] >= 0x4000) {
         D_00509600[0] -= 0x8000;
@@ -2902,9 +2902,9 @@ extern void* D_00509618[];
 extern void* D_0050961C[];
 extern void* D_00509620[];
 extern void* D_00509624[];
-extern char D_00495630[];
-extern char D_00495658[];
-extern char D_00495688[];
+extern char str_copyright_extension_first_marker_bit[];
+extern char str_copyright_extension_second_marker_bit[];
+extern char str_copyright_extension_third_marker_bit[];
 void* func_003B2360(void* self);
 
 /**
@@ -2919,11 +2919,11 @@ extern "C" void copyright_extension(void)
     D_00509614[0] = func_003B1300(8);
     D_00509618[0] = func_003B1300(1);
     func_003B1300(7);
-    func_003B2360(D_00495630);
+    func_003B2360(str_copyright_extension_first_marker_bit);
     D_0050961C[0] = func_003B1300(0x14);
-    func_003B2360(D_00495658);
+    func_003B2360(str_copyright_extension_second_marker_bit);
     D_00509620[0] = func_003B1300(0x16);
-    func_003B2360(D_00495688);
+    func_003B2360(str_copyright_extension_third_marker_bit);
     D_00509624[0] = func_003B1300(0x16);
 }
 #endif
@@ -3221,7 +3221,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int SHAPE_createsize(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
 extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
 extern void* (*SHAPE_memallocalign[])(char* name, int size, int a2, int align, int heap);
-extern char D_004956B0[];
+extern char str_SHPpct_dxpct_dxpct_d[];
 
 /**
  * Allocates and initialises a SHAPE texture.
@@ -3245,7 +3245,7 @@ extern "C" void* SHAPE_create(unsigned int w, int height, int fmt, int clut, int
     void* tex = 0;
     int size = SHAPE_createsize(w, height, fmt, clut, maxLevel, extra1, extra2);
     if (size != 0) {
-        sprintf(name, D_004956B0, w, height, fmt);
+        sprintf(name, str_SHPpct_dxpct_dxpct_d, w, height, fmt);
         tex = SHAPE_memallocalign[0](name, size, 0, 0x10, heap);
         if (tex != 0) {
             SHAPE_createat(tex, w, height, fmt, clut, maxLevel, extra1, extra2);

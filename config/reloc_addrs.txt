@@ -23,24 +23,24 @@ rom:0x2DF24C reloc:MIPS_LO16 symbol:D_00519AB0
 rom:0x12EA04 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA48 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA98 reloc:MIPS_LO16 symbol:D_00442168
-// fe/festateloadhint func_002464E8: `lui $16, %hi(D_0047BB70)` hoisted ahead of a loop (the relocated copy is at rom 0x147594),
+// fe/festateloadhint func_002464E8: `lui $16, %hi(str_Location)` hoisted ahead of a loop (the relocated copy is at rom 0x147594),
 // and six `addiu $2, $17, %lo(cBENewRaceInterface_newRace)` (the relocated sibling at rom 0x1478C0 has the same bytes).
-rom:0x147530 reloc:MIPS_HI16 symbol:D_0047BB70
+rom:0x147530 reloc:MIPS_HI16 symbol:str_Location
 rom:0x1477FC reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14781C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14783C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14785C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14787C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14789C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
-// fe/ovstatepause func_001FD320: the bnel delay slot holds reorg's copy of the target's `lui $4, %hi(D_00470048)` (its %lo is at rom 0xFEA14).
-rom:0xFEA00 reloc:MIPS_HI16 symbol:D_00470048
+// fe/ovstatepause func_001FD320: the bnel delay slot holds reorg's copy of the target's `lui $4, %hi(str_kT_HELPBeatPostedTimePass)` (its %lo is at rom 0xFEA14).
+rom:0xFEA00 reloc:MIPS_HI16 symbol:str_kT_HELPBeatPostedTimePass
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // main/game cSectionMan_unloadSection (tools/gen/reloc_from_diff.py)
 rom:0x12E608 reloc:MIPS_LO16 symbol:D_00442168
 // fe/messagecenter getDollarString (tools/gen/reloc_from_diff.py)
 rom:0x99B40 reloc:MIPS_HI16 symbol:D_004C6310
-rom:0x99B44 reloc:MIPS_HI16 symbol:D_004A12C0
+rom:0x99B44 reloc:MIPS_HI16 symbol:str_pct_d_b
 // object/splinemodifier cRailModifier__cRailModifier (tools/gen/reloc_from_diff.py)
 rom:0x25CE9C reloc:MIPS_HI16 symbol:cRailLink_vtbl
 // object/flexbridgenode func_003480C8 (tools/gen/reloc_from_diff.py)
@@ -291,10 +291,10 @@ rom:0x2A567C reloc:MIPS_HI16 symbol:D_00508720
 rom:0x2A56EC reloc:MIPS_LO16 symbol:D_00508720
 rom:0x2A56F8 reloc:MIPS_LO16 symbol:D_00508730
 // fe/festatebuyattrib cFEStateCareerStats_setupRidersBest (tools/gen/reloc_from_diff.py)
-rom:0xF791C reloc:MIPS_HI16 symbol:D_0046F3C8
-rom:0xF7920 reloc:MIPS_HI16 symbol:D_0046F3D8
-rom:0xF7924 reloc:MIPS_HI16 symbol:D_004A23D0
-rom:0xF7928 reloc:MIPS_HI16 symbol:D_0046F3F0
+rom:0xF791C reloc:MIPS_HI16 symbol:str_handplants
+rom:0xF7920 reloc:MIPS_HI16 symbol:str_handplants_event
+rom:0xF7924 reloc:MIPS_HI16 symbol:str_ubers
+rom:0xF7928 reloc:MIPS_HI16 symbol:str_ubers_event
 // path/pathsys func_0026BAE8 (tools/gen/reloc_from_diff.py)
 rom:0x16CCE4 reloc:MIPS_HI16 symbol:D_004D3218
 rom:0x16CCEC reloc:MIPS_LO16 symbol:D_004D3218
@@ -401,12 +401,12 @@ rom:0x28C010 reloc:MIPS_LO16 symbol:D_005049C0 addend:0x40
 rom:0x28C078 reloc:MIPS_HI16 symbol:D_005049C0 addend:0x1C0
 rom:0x28C080 reloc:MIPS_LO16 symbol:D_005049C0 addend:0x1C0
 // fe/ovstatepause cOVState_REWARDS_updateMenu (tools/gen/reloc_from_diff.py)
-rom:0x100D38 reloc:MIPS_HI16 symbol:D_004A2570
-rom:0x100D40 reloc:MIPS_HI16 symbol:D_004A2578
-rom:0x100E4C reloc:MIPS_LO16 symbol:D_004A2570
-rom:0x100E88 reloc:MIPS_LO16 symbol:D_004A2570
-rom:0x100ED0 reloc:MIPS_LO16 symbol:D_004A2578
-rom:0x100F0C reloc:MIPS_LO16 symbol:D_004A2578
+rom:0x100D38 reloc:MIPS_HI16 symbol:str_up
+rom:0x100D40 reloc:MIPS_HI16 symbol:str_down
+rom:0x100E4C reloc:MIPS_LO16 symbol:str_up
+rom:0x100E88 reloc:MIPS_LO16 symbol:str_up
+rom:0x100ED0 reloc:MIPS_LO16 symbol:str_down
+rom:0x100F0C reloc:MIPS_LO16 symbol:str_down
 // main/debugmenu __sti__visualeffectsmenu_cpp (tools/gen/reloc_from_diff.py)
 rom:0x14FAD4 reloc:MIPS_HI16 symbol:D_004C9630
 rom:0x14FB1C reloc:MIPS_LO16 symbol:D_004C9630

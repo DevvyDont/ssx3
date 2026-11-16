@@ -33,14 +33,14 @@ extern void* D_00459C18[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
 extern void* cBeing_vtbl[];
-extern const char D_004578A8[];
-extern const char D_004578C8[];
-extern const char D_004578E0[];
-extern const char D_004578F0[];
-extern const char D_00457908[];
-extern const char D_00457920[];
-extern const char D_00457938[];
-extern const char D_00457950[];
+extern const char str_Track_path_intersect_info[];
+extern const char str_AI_path_intersect_info[];
+extern const char str_OverlapList[];
+extern const char str_AttachedEmitterFX[];
+extern const char str_cBoltOnFXInterface[];
+extern const char str_Line_Intersect_Hint[];
+extern const char str_Wall_Intersect_Hint[];
+extern const char str_BoaderShadow[];
 
 struct sKey8_B698 {
     int a, b;
@@ -100,9 +100,9 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->unk_3FC = 0;
     self->mGroundPolyId = none;
     *(sKey8_B698*)&self->unk_AAC = D_004A5960[0];
-    self->mTrackPathHint = (int*)cMemMan_alloc(0x20, D_004578A8, 0, 0);
-    self->mAIPathHint = (int*)cMemMan_alloc(0x20, D_004578C8, 0, 0);
-    sRiderAux_B698* aux = new (D_004578E0, 0, 0) sRiderAux_B698;
+    self->mTrackPathHint = (int*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
+    self->mAIPathHint = (int*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
+    sRiderAux_B698* aux = new (str_OverlapList, 0, 0) sRiderAux_B698;
     int nash = (int)SSXApp->Game->BXNash;  // the overlap list queries the game's Nash collision grid
     aux->f0 = nash;
     aux->f4 = 0;
@@ -110,10 +110,10 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     aux->f10C = none;
     aux->f210 = none;
     self->mOverlapList = aux;
-    self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(0xA8, D_004578F0, 0, 0), self);
-    self->mBoltOnFX = func_002EC9E0(cMemMan_alloc(0xC8, D_00457908, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
-    self->mLineHint = cMemMan_alloc(0x10, D_00457920, 0, 0);
-    self->mWallHint = cMemMan_alloc(0x10, D_00457938, 0, 0);
+    self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(0xA8, str_AttachedEmitterFX, 0, 0), self);
+    self->mBoltOnFX = func_002EC9E0(cMemMan_alloc(0xC8, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
+    self->mLineHint = cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
+    self->mWallHint = cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
     MEM_fill_v(self->unk_794, 0, 0x20);
     self->mFocusBox = 0;
     self->unk_5B0 = 0;
@@ -132,7 +132,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
         self->unk_B08[i] = -1;
     }
     int m1 = -1;
-    self->mShadow = func_003758F8(cMemMan_alloc(0x1A0, D_00457950, 0, 0));
+    self->mShadow = func_003758F8(cMemMan_alloc(0x1A0, str_BoaderShadow, 0, 0));
     self->unk_450 = m1;
     self->unk_AA4 = 0;
     self->mIsOnScreen = 0;
@@ -253,7 +253,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
 INCLUDE_ASM("ai/rider", cRider_addFocusBox);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00457960[];
+extern const char str_FocusBox[];
 extern "C" void func_001033B0(void* self, void* box);
 
 /**
@@ -265,7 +265,7 @@ extern "C" void func_001033B0(void* self, void* box);
  */
 extern "C" void cRider_addFocusBox(cRider* self)
 {
-    void* box = cMemMan_alloc(0x10, D_00457960, 0, 0);
+    void* box = cMemMan_alloc(0x10, str_FocusBox, 0, 0);
     self->mFocusBox = box;
     func_001033B0(*(void**)((char*)SSXApp->Game->AI + 0xA4), box);
 }
@@ -274,7 +274,7 @@ extern "C" void cRider_addFocusBox(cRider* self)
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cRiderMetrix_cRiderMetrix(void* mem);
 extern "C" void cRiderMetrix_linkToRider(void* metrix);
-extern const char D_00457970[];
+extern const char str_RiderMetrix[];
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_addRiderMetrix__FP6cRider);
@@ -290,7 +290,7 @@ extern "C" void cRiderMetrix_linkToRider_impl(void* metrix, cRider* rider) __asm
  */
 void cRider_addRiderMetrix(cRider* self)
 {
-    void* mem = cMemMan_alloc(0x1CC, D_00457970, 0, 0);
+    void* mem = cMemMan_alloc(0x1CC, str_RiderMetrix, 0, 0);
     void* metrix = cRiderMetrix_cRiderMetrix(mem);
     self->mMetrix = (cRiderMetrix*)metrix;
     cRiderMetrix_linkToRider_impl(metrix, self);

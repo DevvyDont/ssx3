@@ -164,7 +164,7 @@ struct cRailModifier_C0E8 {
     t4Matrix mat;          // 0x50
 };
 
-extern char D_0048EA60[];
+extern char str_RailNode[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 
 static inline sVecK_C0E8 mulVec_C0E8(const t4Vector& a, const t4Vector& b)
@@ -276,7 +276,7 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
     v = vu0MtxMul_C0E8(xform, v);
     v.w = 1.0f;
     self->mat.row[3] = v;
-    void* n = cMemMan_alloc(0x10, D_0048EA60, 0x20000000, 0);
+    void* n = cMemMan_alloc(0x10, str_RailNode, 0x20000000, 0);
     ((void**)n)[3] = self;
     ((int*)n)[2] = 2;
     self->node = n;
@@ -9783,7 +9783,7 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 void cMemMan_free(void* p);
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_00390198(void* self, int w, int h, void* buf, char* src);
-extern char D_004A4060[];
+extern char str_TempTex[];
 
 struct sRmTex_366E90 {
     char pad_0x0[0xC];
@@ -9801,7 +9801,7 @@ struct sRmTex_366E90 {
 extern "C" void func_00366E90(char* self, sRmTex_366E90* tex)
 {
     int n = 0;
-    char* buf = new (D_004A4060, *(int*)(self + 0x1F58) ^ 0x100, 0) char[tex->size];
+    char* buf = new (str_TempTex, *(int*)(self + 0x1F58) ^ 0x100, 0) char[tex->size];
     int tw = (tex->tex0 >> 26) & 0xF;
     int th = (tex->tex0 >> 30) & 0xF;
     int bpp = tex->bpp;

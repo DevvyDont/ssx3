@@ -8,9 +8,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cInSeq_cInSeq(void* obj, void* buf, int size, int a3, void* out);
-extern char D_00481F48[];
-extern char D_00481F58[];
-extern char D_004A34F0[];
+extern char str_InSeqHeap[];
+extern char str_BXScriptDatabase[];
+extern char str_InSeq[];
 
 struct sBXSlot {
     int a;
@@ -30,11 +30,11 @@ struct sBXSlot {
  */
 extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int maxUniqueAnimPlayers, int size)
 {
-    *(void**)((char*)self + 0x2BC) = operator_new_tag(size, D_00481F48, 0, 0);
-    *(void**)((char*)self + 0x2B8) = cInSeq_cInSeq(cMemMan_alloc(0x20, D_004A34F0, 0, 0),
+    *(void**)((char*)self + 0x2BC) = operator_new_tag(size, str_InSeqHeap, 0, 0);
+    *(void**)((char*)self + 0x2B8) = cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
         *(void**)((char*)self + 0x2BC), size, maxUniqueAnimPlayers, (char*)self + 0x2AC);
     *(int*)((char*)self + 0x2B4) = count;
-    *(sBXSlot**)((char*)self + 0x2B0) = (sBXSlot*)operator_new_tag(count * 8, D_00481F58, 0, 0);
+    *(sBXSlot**)((char*)self + 0x2B0) = (sBXSlot*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0);
     for (int i = 0; i < *(int*)((char*)self + 0x2B4); i++) {
         (*(sBXSlot**)((char*)self + 0x2B0))[i].a = 0;
         (*(sBXSlot**)((char*)self + 0x2B0))[i].b = 0;

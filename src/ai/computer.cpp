@@ -2892,7 +2892,7 @@ extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int cmd)
 INCLUDE_ASM("ai/computer", cRiderHandler__getMotionStateName);
 #ifdef SKIP_ASM
 extern const char* D_00459D70[];
-extern char D_00456C48[];
+extern char str_Invalid[];
 
 /**
  * Returns the name of the current motion state, "Ground" to "Handplant", for debug display.
@@ -2906,7 +2906,7 @@ extern "C" const char* cRiderHandler__getMotionStateName(cRiderHandler* self)
 {
     unsigned int state = (unsigned int)self->MotionState;
     if (state >= 7U) {
-        return D_00456C48;
+        return str_Invalid;
     }
     return D_00459D70[state];
 }
@@ -2915,7 +2915,7 @@ extern "C" const char* cRiderHandler__getMotionStateName(cRiderHandler* self)
 INCLUDE_ASM("ai/computer", cRiderHandler__getControlStateName);
 #ifdef SKIP_ASM
 extern const char* D_00459DC8[];
-extern char D_00456C48[];
+extern char str_Invalid[];
 
 /**
  * Returns the name of the current control state, "Cruise" to "Void", for debug display.
@@ -2929,7 +2929,7 @@ extern "C" const char* cRiderHandler__getControlStateName(cRiderHandler* self)
 {
     unsigned int state = (unsigned int)self->ControlState;
     if (state >= 15U) {
-        return D_00456C48;
+        return str_Invalid;
     }
     return D_00459DC8[state];
 }

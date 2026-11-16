@@ -126,7 +126,7 @@ extern "C" int cMoveNode_shouldRebound(cMoveNode* self)
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 struct tModifierBlock;
 tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self);
-extern const char D_0048E9D8[];
+extern const char str_ModifierBlock[];
 
 
 //100%
@@ -137,7 +137,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
  */
 void cMoveNode_addModifierBlock(cMoveNode* self)
 {
-    void* mem = cMemMan_alloc(0x28, D_0048E9D8, 0x20000000, 0);
+    void* mem = cMemMan_alloc(0x28, str_ModifierBlock, 0x20000000, 0);
     (*(void**)&self->ModifierBlock) = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
 }
 #endif
@@ -440,26 +440,26 @@ extern "C" void cMoveNode_addDebounce(cMoveNode* self, void* data)
 INCLUDE_ASM("object/movenode", func_003558B8);
 #ifdef SKIP_ASM
 struct sMoveQuad;
-extern char D_0048E8F0[];
+extern char str_PositionModifier[];
 extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), pos));
+    cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(0x90, str_PositionModifier, 0x20000000, 0), pos));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", func_00355918);
 #ifdef SKIP_ASM
-extern char D_0048E8F0[];
+extern char str_PositionModifier[];
 extern "C" void* func_00356F10(cPositionModifier* mem, void* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355918(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(0x90, str_PositionModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -467,7 +467,7 @@ extern "C" void func_00355918(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addParent);
 #ifdef SKIP_ASM
 struct sMoveQuad;
-extern char D_0048E8E0[];
+extern char str_ParentModifier[];
 extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
@@ -481,14 +481,14 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mesh, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), parentinst, mesh, pos));
+    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addMagnet);
 #ifdef SKIP_ASM
-extern char D_0048E918[];
+extern char str_MagnetModifier[];
 extern "C" void* func_003572E0(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
@@ -502,7 +502,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, float magnetSpeed)
 {
-    cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
+    cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(0xB0, str_MagnetModifier, 0x20000000, 0),
                                       self->Instance, mat, radius, magnetSpeed));
 }
 #endif
@@ -511,14 +511,14 @@ extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, fl
 INCLUDE_ASM("object/movenode", func_00355A78);
 #ifdef SKIP_ASM
 extern int D_004A3AC4;
-extern char D_0048E928[];
+extern char str_AvaSplineModifier[];
 extern "C" void* func_00357750(cAvaSplineModifier* self, void* src);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355A78(cMoveNode* self)
 {
     if (D_004A3AC4 == 0) {
-        cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), self->Instance));
+        cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(0x90, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
     }
 }
 #endif
@@ -526,7 +526,7 @@ extern "C" void func_00355A78(cMoveNode* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addSpline1);
 #ifdef SKIP_ASM
-extern char D_0048E8D0[];
+extern char str_SplineModifier[];
 extern "C" void* cSplineModifier_cSplineModifier1(void* mem, void* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
@@ -540,14 +540,14 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addSpline1(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, cSplineModifier_cSplineModifier1(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, cSplineModifier_cSplineModifier1(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), desc));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addSpline);
 #ifdef SKIP_ASM
-extern char D_0048E9E8[];
+extern char str_MultiSplineModifier[];
 extern "C" void* cMultiSplineModifier_cMultiSplineModifier(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
@@ -558,7 +558,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(0x58, D_0048E9E8, 0x20000000, 0), desc,
+    cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(0x58, str_MultiSplineModifier, 0x20000000, 0), desc,
                                       self->Instance));
 }
 #endif
@@ -566,7 +566,7 @@ extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addUVScroll);
 #ifdef SKIP_ASM
-extern char D_0048E940[];
+extern char str_UVScrollModifier[];
 extern "C" void* func_0035F6E8(void* mem, void* desc);
 extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
 
@@ -577,14 +577,14 @@ extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 {
-    cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), desc));
+    cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(0x50, str_UVScrollModifier, 0x20000000, 0), desc));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addTexFlip);
 #ifdef SKIP_ASM
-extern char D_0048E958[];
+extern char str_TexFlipModifier[];
 extern "C" void* func_0035F0B8(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
 
@@ -596,14 +596,14 @@ extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(0xE8, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addBoost);
 #ifdef SKIP_ASM
-extern char D_0048E968[];
+extern char str_BoostModifier[];
 extern "C" void* func_00342768(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
 
@@ -615,14 +615,14 @@ extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 {
-    cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(0x50, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addParticle);
 #ifdef SKIP_ASM
-extern char D_0048E978[];
+extern char str_ParticleModifier[];
 extern "C" void* cParticleModifier_cParticleModifier(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 
@@ -633,7 +633,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
 {
-    cMoveNode_addEffectModifier(self, cParticleModifier_cParticleModifier(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), desc,
+    cMoveNode_addEffectModifier(self, cParticleModifier_cParticleModifier(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), desc,
                                                     self->Instance));
 }
 #endif
@@ -643,7 +643,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addDynamicParticle);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void* func_00345C90(void* mem, void* desc, void* inst, int index, void* a4);
-extern const char D_0048E990[];
+extern const char str_DynamicParticleModifier[];
 
 /**
  * Adds a particle effect tied to one of the node's meshes ("DynamicParticleModifier"); a bad mesh index frees
@@ -659,14 +659,14 @@ extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int in
         operator_delete((int*)desc);
         return;
     }
-    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, self->Instance, index, offset));
+    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, str_DynamicParticleModifier, 0x20000000, 0), desc, self->Instance, index, offset));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addRoller);
 #ifdef SKIP_ASM
-extern char D_0048E908[];
+extern char str_RollerModifier[];
 extern "C" void* cRollerModifier_cRollerModifier(void* mem, void* a1, void* a2, void* a3);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
@@ -679,14 +679,14 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addRoller(cMoveNode* self, void* rdata, void* ii, void* ci)
 {
-    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), rdata, ii, ci));
+    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, str_RollerModifier, 0x20000000, 0), rdata, ii, ci));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addRail);
 #ifdef SKIP_ASM
-extern char D_0048E9B8[];
+extern char str_RailModifier[];
 extern "C" int tModifierBlock_findRail(void* self, int id);
 extern "C" void* cRailModifier_cRailModifier(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item);
@@ -703,7 +703,7 @@ extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
     if (block != 0 && tModifierBlock_findRail(block, *(int*)((char*)desc + 0x4)) != 0) {
         return;
     }
-    cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), desc,
+    cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(0x90, str_RailModifier, 0x20000000, 0), desc,
                                       self->Instance));
 }
 #endif
@@ -711,7 +711,7 @@ extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMoveNode_addHalo);
 #ifdef SKIP_ASM
-extern char D_0048E9A8[];
+extern char str_HaloModifier[];
 extern "C" void* func_00346120(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 
@@ -722,7 +722,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
 {
-    cMoveNode_addEffectModifier(self, func_00346120(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), desc,
+    cMoveNode_addEffectModifier(self, func_00346120(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), desc,
                                                     self->Instance));
 }
 #endif
@@ -2790,14 +2790,14 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
 //100%
 INCLUDE_ASM("object/movenode", cMultiParticleMan_addParticle);
 #ifdef SKIP_ASM
-extern char D_0048EA00[];
+extern char str_MultiParticle[];
 extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2);
 
 extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, void* a2, void* a3)
 {
     void** slot = (void**)((char*)self + (i << 2));
     if (*slot == 0) {
-        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), a2, a3);
+        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(0x50, str_MultiParticle, 0x20000000, 0), a2, a3);
     }
 }
 #endif
@@ -2942,7 +2942,7 @@ extern "C" void func_00357D28(void** self, void* stream)
         sMnVEntrySer7D28* e = &(*(sMnVEntrySer7D28**)stream)[2];
         e->fn((char*)stream + e->delta, &has, 4);
         if (has) {
-            self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), stream);
+            self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(0x50, str_MultiParticle, 0x20000000, 0), stream);
         } else {
             self[i] = 0;
         }
@@ -2986,7 +2986,7 @@ struct sMultiPart_7DD8 {
     sQuad_7DD8 pos;         // 0x40
 };
 
-extern char D_0048EA10[];
+extern char str_Particle_b[];
 extern "C" void MEM_copy(void* dst, const void* src, int n);
 extern "C" void cMultiParticle_setupMultiParticle(void* self);
 
@@ -2995,7 +2995,7 @@ extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
     sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
     self->owner = a2;
     self->field_0x4 = 0;
-    void* buf = cMemMan_alloc(0xD8, D_0048EA10, 0x20000000, 0);
+    void* buf = cMemMan_alloc(0xD8, str_Particle_b, 0x20000000, 0);
     self->data = buf;
     MEM_copy(buf, a1, 0xD8);
     cMultiParticle_setupMultiParticle(self);
@@ -3030,7 +3030,7 @@ extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
     sQuad_7DD8* ab = &self->a;
     read_357E80(stream, self, 4);
     read_357E80(stream, &self->field_0x4, 4);
-    void* buf = cMemMan_alloc(0xD8, D_0048EA10, 0x20000000, 0);
+    void* buf = cMemMan_alloc(0xD8, str_Particle_b, 0x20000000, 0);
     self->data = buf;
     read_357E80(stream, buf, 0xD8);
     cMultiParticle_setupMultiParticle(self);

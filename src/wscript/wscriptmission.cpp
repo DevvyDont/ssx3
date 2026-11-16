@@ -23,19 +23,19 @@ extern "C" void func_00183D08(void* obj, int colour, float a);
 extern "C" void func_003A1030(void* obj, void* out);
 extern "C" void func_003A0290(void* obj, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0045D940[];
-extern char D_004A1418[];
-extern char D_004A1420[];
-extern char D_004A1428[];
-extern char D_004A1430[];
-extern char D_004A1438[];
-extern char D_0045D950[];
-extern char D_0045D960[];
-extern char D_0045D970[];
-extern char D_0045D980[];
-extern char D_004A1440[];
-extern char D_004A1448[];
-extern char D_004A1450[];
+extern char str_Trickpct_02d[];
+extern char str_ckpct_02d[];
+extern char str_bsl2[];
+extern char str_bsl1[];
+extern char str_bsr1[];
+extern char str_bsr2[];
+extern char str_square_NML[];
+extern char str_InstBtn0[];
+extern char str_InstBtn1[];
+extern char str_InstBtn2[];
+extern char str_inst0[];
+extern char str_inst1[];
+extern char str_inst2[];
 
 struct sGateVec_3DE0 {
     float x, y, z;
@@ -102,7 +102,7 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     char* marks[9];
     for (int i = 0; i < 9; i++) {
         char name[0x10];
-        sprintf(name, D_0045D940, i);
+        sprintf(name, str_Trickpct_02d, i);
         char* uiObj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         char** lp = &labels[i];
         if (uiObj != 0) {
@@ -113,7 +113,7 @@ extern "C" void cWScriptMan_checkGate(void* vself)
         } else {
             *lp = 0;
         }
-        sprintf(name, D_004A1418, i);
+        sprintf(name, str_ckpct_02d, i);
         uiObj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         char** mp = &marks[i];
         if (uiObj != 0) {
@@ -159,11 +159,11 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     }
     int ca = 0;
     int cb = 0;
-    int c0 = lookup_3DE0(self, D_004A1420);
-    int c1 = lookup_3DE0(self, D_004A1428);
-    int c2 = lookup_3DE0(self, D_004A1430);
-    int c3 = lookup_3DE0(self, D_004A1438);
-    int c4 = lookup_3DE0(self, D_0045D950);
+    int c0 = lookup_3DE0(self, str_bsl2);
+    int c1 = lookup_3DE0(self, str_bsl1);
+    int c2 = lookup_3DE0(self, str_bsr1);
+    int c3 = lookup_3DE0(self, str_bsr2);
+    int c4 = lookup_3DE0(self, str_square_NML);
     switch (slot) {
     case 1:
         ca = c1;
@@ -187,15 +187,15 @@ extern "C" void cWScriptMan_checkGate(void* vself)
         break;
     }
     float gap = 10.0f;
-    char* t0 = getObj_3DE0(screen, D_0045D960);
+    char* t0 = getObj_3DE0(screen, str_InstBtn0);
     setTab_3DE0(t0, ca);
-    char* t1 = getObj_3DE0(screen, D_0045D970);
+    char* t1 = getObj_3DE0(screen, str_InstBtn1);
     setTab_3DE0(t1, cb);
-    char* t2 = getObj_3DE0(screen, D_0045D980);
+    char* t2 = getObj_3DE0(screen, str_InstBtn2);
     setTab_3DE0(t2, c4);
-    char* w0 = getObj_3DE0(screen, D_004A1440);
-    char* w1 = getObj_3DE0(screen, D_004A1448);
-    char* w2 = getObj_3DE0(screen, D_004A1450);
+    char* w0 = getObj_3DE0(screen, str_inst0);
+    char* w1 = getObj_3DE0(screen, str_inst1);
+    char* w2 = getObj_3DE0(screen, str_inst2);
     func_003A1030(w0, &textSize0);
     textSize0.x += gap;
     func_003A1030(w1, &textSize1);
@@ -263,8 +263,8 @@ struct sWSMission4520 {
     sWSMPlayer4520* p50;        // 0x50
 };
 
-extern char D_0045D9B8[];
-extern char D_0045D9C8[];
+extern char str_cost_num[];
+extern char str_have_num[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -284,11 +284,11 @@ extern "C" void func_00184520(sWSMission4520* self)
     char buf[16];
     sWSMEntry4520* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->player, b, buf);
     void* screen = cList_first((cList*)self->list);
-    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9B8));
+    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (t != 0) {
         cUIText_setAsciiString(t, getDollarString(tbl[a].id));
     }
-    cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9C8));
+    cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (t2 != 0) {
         signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->player);
         cUIText_setAsciiString(t2, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), self->player, cid)));

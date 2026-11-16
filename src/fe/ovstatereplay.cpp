@@ -7,9 +7,9 @@
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_00471BF0[];
-extern char D_00471C08[];
-extern char D_00471C20[];
+extern char str_option_savereplay[];
+extern char str_option_exitreplay[];
+extern char str_option_continue[];
 
 class cUIObj_20DE30 {
 public:
@@ -36,7 +36,7 @@ public:
 extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
 {
     int id = *(int*)((char*)w + 0x38);
-    if (id == GetHashValue32(D_00471BF0)) {
+    if (id == GetHashValue32(str_option_savereplay)) {
         *(int*)((char*)w + 0x18) = 0;
         if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
             w->v06(0);
@@ -45,11 +45,11 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
         }
     } else {
         int id2 = *(int*)((char*)w + 0x38);
-        if (id2 == GetHashValue32(D_00471C08)) {
+        if (id2 == GetHashValue32(str_option_exitreplay)) {
             *(int*)((char*)w + 0x18) = 1;
         } else {
             int id3 = *(int*)((char*)w + 0x38);
-            if (id3 == GetHashValue32(D_00471C20)) {
+            if (id3 == GetHashValue32(str_option_continue)) {
                 *(int*)((char*)w + 0x18) = 2;
             }
         }
@@ -108,11 +108,11 @@ extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
 extern int D_004428F8[];
-extern char D_004A2720[];
-extern char D_00471BC0[];
-extern char D_00471BD0[];
-extern char D_00471BE0[];
-extern char D_0046E050[];
+extern char str_top[];
+extern char str_hidetimeline[];
+extern char str_showtimeline[];
+extern char str_ReplayMenu[];
+extern char str_TransitionOut_b[];
 
 class cSnd_20DF38 {
 public:
@@ -216,13 +216,13 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         D_004A2A50 = D_004428F8[0];
         D_004A2A54 = n;
         self->paused = 1;
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) &= ~8;
         return 1;
     }
     if (self->paused != 0 && pInput->v05()) {
         snd->play(6);
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
         switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
         case 0:
             cReplay_stopReplay(replay_20DF38());
@@ -231,7 +231,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
             break;
         case 1: {
             func_0039F190(self->owner + 0x18, 1);
-            unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(D_0046E050));
+            unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(self->screen, frame, 1);
             }
@@ -256,7 +256,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         snd->play(3);
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
         self->paused = 0;
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) |= 8;
         return 1;
     }
@@ -264,23 +264,23 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         snd->play(6);
         self->hudHidden ^= 1;
         if (self->hudHidden != 0) {
-            cUIState_hideObjSafe(self, D_004A2720);
-            cUIState_hideObjSafe(self, D_00471BC0);
-            cUIState_showObjSafe(self, D_00471BD0);
+            cUIState_hideObjSafe(self, str_top);
+            cUIState_hideObjSafe(self, str_hidetimeline);
+            cUIState_showObjSafe(self, str_showtimeline);
         } else {
-            cUIState_showObjSafe(self, D_004A2720);
-            cUIState_showObjSafe(self, D_00471BC0);
-            cUIState_hideObjSafe(self, D_00471BD0);
+            cUIState_showObjSafe(self, str_top);
+            cUIState_showObjSafe(self, str_hidetimeline);
+            cUIState_hideObjSafe(self, str_showtimeline);
         }
         return 1;
     }
     if (pInput->v17()) {
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
         if (obj != 0 && self->fB4 != 0 && *(unsigned char*)(obj + 0x95) == 1) {
             return 1;
         }
     } else if (pInput->v18()) {
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
         if (obj != 0 && self->fB4 != 0 && *(unsigned char*)(obj + 0x95) == 2) {
             return 1;
         }
@@ -303,10 +303,10 @@ extern "C" void cOVState_onUpdate(cOVState* self);
 extern "C" void func_0026FA78(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
-extern char D_00471C30[];
-extern char D_00471BB0[];
-extern char D_00471BA0[];
-extern char D_004A2728[];
+extern char str_hidehelp[];
+extern char str_showhelp[];
+extern char str_ReplayMenuPopup[];
+extern char str_bottom[];
 
 struct sVec3_0020E530 {
     float x, y, z;
@@ -347,23 +347,23 @@ extern "C" void cOVState_REPLAY_onUpdate(void* vself)
         self->speed = 0;
     }
     if (self->pos == self->start) {
-        cUIState_showObjSafe(self, D_00471C30);
-        cUIState_hideObjSafe(self, D_00471BB0);
+        cUIState_showObjSafe(self, str_hidehelp);
+        cUIState_hideObjSafe(self, str_showhelp);
     } else if (self->pos == self->end) {
-        cUIState_hideObjSafe(self, D_00471C30);
-        cUIState_showObjSafe(self, D_00471BB0);
+        cUIState_hideObjSafe(self, str_hidehelp);
+        cUIState_showObjSafe(self, str_showhelp);
     } else {
-        cUIState_hideObjSafe(self, D_00471C30);
-        cUIState_hideObjSafe(self, D_00471BB0);
+        cUIState_hideObjSafe(self, str_hidehelp);
+        cUIState_hideObjSafe(self, str_showhelp);
     }
-    char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2728));
+    char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_bottom));
     sVec3_0020E530 bottomPos = *(sVec3_0020E530*)(obj + 0x44);
     bottomPos.y = (float)self->pos;
     *(sVec3_0020E530*)(obj + 0x44) = bottomPos;
     if (self->paused != 0) {
-        cUIState_showObjSafe(self, D_00471BA0);
+        cUIState_showObjSafe(self, str_ReplayMenuPopup);
     } else {
-        cUIState_hideObjSafe(self, D_00471BA0);
+        cUIState_hideObjSafe(self, str_ReplayMenuPopup);
     }
     if (self->paused == 0) {
         func_0026FA78(SSXApp->Game->Replay);
@@ -386,12 +386,12 @@ extern "C" void cOVState_onUpdate(cOVState* self);
 extern "C" void func_0026FA78(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
-extern char D_00471C30[];
-extern char D_00471BB0[];
-extern char D_00471BA0[];
-extern char D_004A2728[];
+extern char str_hidehelp[];
+extern char str_showhelp[];
+extern char str_ReplayMenuPopup[];
+extern char str_bottom[];
 
-extern char D_004A2730[];
+extern char str_camera[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -417,7 +417,7 @@ extern char D_004A2138[];
 extern "C" void cOVState_REPLAY_setupCameraName(void* self)
 {
     long buf[2];
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2730));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_camera));
     if (text == 0)
         return;
     unsigned int cam = *(unsigned int*)((char*)SSXApp->Game->Replay + 0x630);
@@ -444,7 +444,7 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupTicker);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_00471CC8[];
+extern char str_percentcomplete[];
 struct sVec3_20E818 {
     float x, y, z;
 };
@@ -456,7 +456,7 @@ struct sVec3_20E818 {
  */
 extern "C" void cOVState_REPLAY_setupTicker(void* self)
 {
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471CC8));
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_percentcomplete));
     if (obj != 0) {
         sVec3_20E818 pos = *(sVec3_20E818*)(obj + 0x44);
         char* replay = (char*)SSXApp->Game->Replay;

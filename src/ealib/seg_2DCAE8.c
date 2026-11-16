@@ -6120,7 +6120,7 @@ extern struct CdCfg_4040 D_00450C58_4040 __asm__("D_00450C58");
 extern struct IsoEntry_4040 *D_00450C68;
 extern unsigned int D_00450C6C;
 extern int D_00450C70;
-extern char D_00495DE0[];
+extern char str_Named_Dir[];
 extern char D_00495DF0[];
 extern char D_00519C80[];
 extern char D_0051A480[];
@@ -6164,7 +6164,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00519C40_4040.mode[0] = 0;
     D_00519C40_4040.mode[2] = 0;
     func_00424020_4040(0);
-    D_00450C68 = D_00450C10_4040.alloc(D_00495DE0, n * 0x108, 0);
+    D_00450C68 = D_00450C10_4040.alloc(str_Named_Dir, n * 0x108, 0);
     func_003E6220_4040(D_00450C68, n * 0x108);
     if (D_00450C10_4040.files != 0) {
         e = D_00450C10_4040.files;
@@ -7662,7 +7662,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYSTEM_abortmessage);
 extern void REAL_exit(void);
 extern void PRINT_string_60E8(int, char *, ...) __asm__("PRINT_string");
 extern int func_004186C8_60E8(char *, char *, char *) __asm__("func_004186C8");
-extern char D_00495EF0[];
+extern char str_ERROR_pct_s[];
 extern char D_00495F00[];
 extern char *D_0045100C_100C[] __asm__("REALabortfilename");
 extern int D_00451010_1010[] __asm__("REALabortlinenum");
@@ -7681,7 +7681,7 @@ void SYSTEM_abortmessage(char *fmt, ...) {
     } else {
         buf[0] = 0;
     }
-    PRINT_string_60E8(2, D_00495EF0, buf);
+    PRINT_string_60E8(2, str_ERROR_pct_s, buf);
     if (D_0045100C_100C[0] != 0) {
         PRINT_string_60E8(2, D_00495F00, D_0045100C_100C[0], D_00451010_1010[0]);
     }
@@ -8798,12 +8798,12 @@ extern int func_003F5D88_7C40(int) __asm__("func_003F5D88");
 extern int func_0041AA88_7C40(char *, char *) __asm__("func_0041AA88");
 extern void sprintf_7C40(char *, char *, int) __asm__("sprintf");
 
-extern char D_004A4878[];
-extern char D_004A4880[];
+extern char str_ORIG[];
+extern char str_NAME_b[];
 extern char D_004A4888[];
-extern char D_004A4890[];
-extern char D_004A4898[];
-extern char D_004A48A0[];
+extern char str_ADDR_b[];
+extern char str_PING_b[];
+extern char str_pct_dms[];
 
 struct Ev_7C40 { int f0; int type; int f8; char *data; };
 struct Rec_7C40 {
@@ -8837,17 +8837,17 @@ void func_003E7C40(char *self) {
         if (func_003E7500_7C40(*(int *)(self + 4), buf, &len, info) == 0) {
             break;
         }
-        addr = cDirtysock_tag_TagFieldGetAddr_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, D_004A4878), info[1]);
-        cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, D_004A4880), name, 0x20, D_004A4888);
+        addr = cDirtysock_tag_TagFieldGetAddr_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_ORIG), info[1]);
+        cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_NAME_b), name, 0x20, D_004A4888);
         if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
             ev.f0 = 0;
             ev.type = 0x70696E67;
             ev.f8 = 0;
             ev.data = evbuf;
             evbuf[0] = 0;
-            cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, D_004A4880, name);
-            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, D_004A4890, rec.id);
-            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, D_004A4898, info[0]);
+            cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, str_NAME_b, name);
+            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_ADDR_b, rec.id);
+            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_PING_b, info[0]);
             rec.fn(self, &ev, rec.ctx);
         }
         if (*(int *)(self + 0x310) != 0) {
@@ -8855,7 +8855,7 @@ void func_003E7C40(char *self) {
 
             for (len = 0; (e = func_003EE560_7C40(*(int *)(self + 0x314), len)) != 0; len++) {
                 if (*(unsigned int *)(e + 0x64) == addr) {
-                    sprintf_7C40(e + 0x5C, D_004A48A0, info[0]);
+                    sprintf_7C40(e + 0x5C, str_pct_dms, info[0]);
                     if (len < func_003EE558_7C40(*(int *)(self + 0x314))) {
                         func_003EE600_7C40(*(int *)(self + 0x314), 1);
                     }
@@ -8867,7 +8867,7 @@ void func_003E7C40(char *self) {
 
             for (len = 0; (e = func_003EE560_7C40(*(int *)(self + 0x328), len)) != 0; len++) {
                 if (func_0041AA88_7C40(e + 8, name) == 0) {
-                    sprintf_7C40(e + 0x28, D_004A48A0, info[0]);
+                    sprintf_7C40(e + 0x28, str_pct_dms, info[0]);
                     func_003EE600_7C40(*(int *)(self + 0x328), 1);
                 }
             }
@@ -8881,9 +8881,9 @@ void func_003E7C40(char *self) {
             ev.f8 = -1;
             ev.data = evbuf;
             evbuf[0] = 0;
-            cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, D_004A4880, rec.name);
-            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, D_004A4890, rec.id);
-            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, D_004A4898, 0);
+            cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, str_NAME_b, rec.name);
+            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_ADDR_b, rec.id);
+            cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_PING_b, 0);
             rec.fn(self, &ev, rec.ctx);
         }
     }
@@ -9373,9 +9373,9 @@ extern void func_003F35D0_8B10(char *, int, char *, char *, int, int) __asm__("f
 extern void func_003F5910_8B10(int, int, int, char *, int) __asm__("func_003F5910");
 
 extern char D_004A4888[];
-extern char D_004A48D8[];
-extern char D_004A48E0[];
-extern char D_004A48E8[];
+extern char str_PASS_b[];
+extern char str_MASK[];
+extern char str_CHAN_b[];
 
 struct S_8B10 { int h; int f4; int a; int b; int pad; };
 struct O_8B10 {
@@ -9410,19 +9410,19 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int a3, int a4) {
     if (cmd == 0x61757468 || cmd == 0x61636374 || cmd == 0x70617373) {
         cDirtysock_tag_TagFieldDupl_8B10(buf, 0x200, tags);
         func_003ECB00_8B10(buf, 0x200, self->f34);
-        cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, D_004A48D8), str + 1, 0x1F, D_004A4888);
+        cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, str_PASS_b), str + 1, 0x1F, D_004A4888);
         if (self->f24[0] == 0) {
-            cDirtysock_tag_TagFieldSetCrypt_8B10(buf, 0x200, D_004A48D8, self->f4BC, str + 1);
-            cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, D_004A48E0, self->f4B8);
+            cDirtysock_tag_TagFieldSetCrypt_8B10(buf, 0x200, str_PASS_b, self->f4BC, str + 1);
+            cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, str_MASK, self->f4B8);
         } else {
             str[0] = '~';
             func_003F35D0_8B10(str + 1, 0x1F, str + 1, self->f24, 0x10, 0x10);
-            cDirtysock_tag_TagFieldSetString_8B10(buf, 0x200, D_004A48D8, str);
+            cDirtysock_tag_TagFieldSetString_8B10(buf, 0x200, str_PASS_b, str);
         }
         tags = buf;
     }
     if (cmd == 0x736E6170) {
-        k = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(tags, D_004A48E8), 0);
+        k = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(tags, str_CHAN_b), 0);
         if (k >= 4 && k < 8 && self->s[k].h != 0) {
             while ((t = func_003EE9A0_8B10(self->s[k].h)) != 0) {
                 func_00259210_8B10(func_003EE480_8B10(self->s[k].f4, t));
@@ -9475,8 +9475,8 @@ extern char *strncpy_8DC0(char *, char *, int) __asm__("strncpy");
 extern int TagFieldSetString_8DC0(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern int TagFieldSetAddress_8DC0(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetAddress");
 extern int func_003E7450_8DC0(int, int, char *, int) __asm__("func_003E7450");
-extern char D_004A4880_8DC0[] __asm__("D_004A4880");
-extern char D_004A4890_8DC0[] __asm__("D_004A4890");
+extern char D_004A4880_8DC0[] __asm__("str_NAME_b");
+extern char D_004A4890_8DC0[] __asm__("str_ADDR_b");
 
 int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int a4, int a5) {
     char buf[0x100];
@@ -9730,7 +9730,7 @@ extern int cDirtysock_tag_TagFieldGetNumber_94F0(int, int) __asm__("cDirtysock_t
 extern void func_003E76A8_94F0(void *, char *) __asm__("func_003E76A8");
 extern int func_003F4330_94F0(void) __asm__("func_003F4330");
 extern char D_00495F98_94F0[] __asm__("D_00495F98");
-extern char D_004A4898_94F0[] __asm__("D_004A4898");
+extern char D_004A4898_94F0[] __asm__("str_PING_b");
 
 void func_003E94F0(void *arg0, void *arg1) {
     int n;
@@ -9905,11 +9905,11 @@ extern unsigned int func_003F5D88_95C8(int) __asm__("func_003F5D88");
 extern char D_00495F30_95C8[] __asm__("D_00495F30");
 extern char D_00495FB0_95C8[] __asm__("D_00495FB0");
 extern char D_004A4870_95C8[] __asm__("D_004A4870");
-extern char D_004A4880_95C8[] __asm__("D_004A4880");
+extern char D_004A4880_95C8[] __asm__("str_NAME_b");
 extern char D_004A4888_95C8[] __asm__("D_004A4888");
-extern char D_004A4890_95C8[] __asm__("D_004A4890");
-extern char D_004A48E0_95C8[] __asm__("D_004A48E0");
-extern char D_004A48E8_95C8[] __asm__("D_004A48E8");
+extern char D_004A4890_95C8[] __asm__("str_ADDR_b");
+extern char D_004A48E0_95C8[] __asm__("str_MASK");
+extern char D_004A48E8_95C8[] __asm__("str_CHAN_b");
 extern char D_004A4908_95C8[] __asm__("D_004A4908");
 extern char D_004A4910_95C8[] __asm__("D_004A4910");
 extern char D_004A4918_95C8[] __asm__("D_004A4918");

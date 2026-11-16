@@ -21,9 +21,9 @@ extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
 extern int D_004A19C4;
 extern signed char D_00535C11[];
-extern char D_0047B698[];
-extern char D_0047BFB0[];
-extern char D_0047BFC0[];
+extern char str_UIEngine_b[];
+extern char str_data_ui_fl[];
+extern char str_FLUIInput[];
 extern char D_0047BFD0[];
 extern char D_0047BFE8[];
 extern char D_0047C000[];
@@ -98,13 +98,13 @@ extern "C" void cFELoadScreen_load(void* self)
         sVE_233438* vt = (sVE_233438*)ps2GraphicsMan->mVtbl;
         vt[44].fn((char*)ps2GraphicsMan + vt[44].delta, 0x100);
     }
-    void* eng = func_00397B08(cMemMan_alloc(0x70, D_0047B698, 0x100, 0));
+    void* eng = func_00397B08(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
     *(void**)((char*)self + 0xC) = eng;
-    cUIEngine_loadFile(eng, D_0047BFB0);
+    cUIEngine_loadFile(eng, str_data_ui_fl);
     (*(sEngine_233438**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
     (*(sEngine_233438**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
     {
-        sObj_233438* feInput = new (D_0047BFC0, 0x100, 0) sObj_233438;
+        sObj_233438* feInput = new (str_FLUIInput, 0x100, 0) sObj_233438;
         feInput->f4 = 0;
         feInput->vt = cFEInput_vtbl;
         feInput->f18 = 0;
@@ -148,9 +148,9 @@ void cBigFile__cBigFile(cBigFile* self, int flags);
 void cMemMan_free(void*);
 extern "C" char* func_003E2190(const char* name, int flags);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0047BD78[];
-extern char D_0047BD90[];
-extern char D_0047BDA0[];
+extern char str_data_ui_charpic_big[];
+extern char str_pct_spct_s_ssh[];
+extern char str_CharaPics[];
 extern char* D_00442928[];
 extern int D_004A2B38;
 extern int D_004A2B3C;
@@ -175,9 +175,9 @@ extern "C" void func_00233640(void* self, int type)
     cBigFile bf;
     void* plr = cBE_getInterface_3438(cBE_getBE(), 1);
     cBE_getInterface_3438(cBE_getBE(), 0);
-    cBigFile_cBigFile1_3640(&bf, D_0047BD78, 0x100);
+    cBigFile_cBigFile1_3640(&bf, str_data_ui_charpic_big, 0x100);
     if (type == 1) {
-        const char* fmt = D_0047BD90;
+        const char* fmt = str_pct_spct_s_ssh;
         cBE_getInterface_3438(SSXApp->BE, 7);
         tBENetworkDB* opt = ((&cBENetworkInterface_networkOpt));
         if (opt->bIsNetworkGame != 0) {
@@ -190,15 +190,15 @@ extern "C" void func_00233640(void* self, int type)
             sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, cBENewPlayerInterface_getHumanRider(plr, 0))], D_004A2B38);
         }
         char* data = func_003E2190(name, 0x3000100);
-        *(int*)((char*)self + 0x10) = loadTex_3640(data, D_0047BDA0);
+        *(int*)((char*)self + 0x10) = loadTex_3640(data, str_CharaPics);
         if (data != 0)
             cMemMan_free(data);
     } else if (type == 2 && D_00535C11[0] == 2) {
         int* slot = (int*)((char*)self + 0x10);
         for (int i = 0; i < 2; i++) {
-            sprintf(name, D_0047BD90, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
+            sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
             char* data = func_003E2190(name, 0x3000100);
-            *slot = loadTex_3640(data, D_0047BDA0);
+            *slot = loadTex_3640(data, str_CharaPics);
             if (data != 0)
                 cMemMan_free(data);
             slot++;
@@ -571,7 +571,7 @@ extern int D_005366A8[];
 // spelled with splat's globals; the const object's loads are loop-invariant (RTX_UNCHANGING).
 extern const float D_004A4F60;
 extern int D_004A4F64;
-extern char D_0047C010[];
+extern char str_finishov_b[];
 
 struct sRace_233CD8 {
     char pad0[0x48];
@@ -664,7 +664,7 @@ extern "C" void func_00233CD8(void* self)
             if (!ok) {
                 func_0020CC60();
                 if (*(int*)(s + 0x10) != 2) {
-                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_0047C010));
+                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
                     if (o != 0) {
                         o->v24(0, 0);
                     }
@@ -712,7 +712,7 @@ extern "C" void func_00233CD8(void* self)
         if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1) {
             break;
         }
-        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_0047C010));
+        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
         if (o != 0) {
             o->v24(1, 0);
         }

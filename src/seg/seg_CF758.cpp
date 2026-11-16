@@ -23,22 +23,22 @@ struct sReq_CE758
 };
 extern sReq_CE758 D_0045AAD8_CE758[][4][5] __asm__("D_0045AAD8");
 
-extern char D_00466BB8[];
-extern char D_00466BD0[];
-extern char D_00466BE8[];
-extern char D_00466C00[];
-extern char D_00466C10[];
-extern char D_00466C20[];
-extern char D_00466C30[];
-extern char D_00466C40[];
-extern char D_00466C50[];
-extern char D_00466C60[];
-extern char D_00466C70[];
-extern char D_00466C80[];
-extern char D_00466C90[];
-extern char D_00466CA8[];
-extern char D_00466CB8[];
-extern char D_00466CC8[];
+extern char str_kT_OVRCMNEarnings[];
+extern char str_kT_OVRCMNCollectibles[];
+extern char str_kT_TITLEBigChallenges[];
+extern char str_Happiness_pct_s[];
+extern char str_Ruthless_pct_s[];
+extern char str_Throne_pct_s[];
+extern char str_kT_cmnRaceCaps[];
+extern char str_Happiness_Jam[];
+extern char str_Ruthless_Jam[];
+extern char str_Throne_Jam[];
+extern char str_kT_EventPk1Race[];
+extern char str_kT_EventPk2Race[];
+extern char str_kT_EventAllPeakRace[];
+extern char str_kT_EventPk1Jam[];
+extern char str_kT_EventPk2Jam[];
+extern char str_kT_EventAllPeakJam[];
 
 struct sVEntry_CE758 {
     short delta;
@@ -69,14 +69,14 @@ static inline int Loc_CE758(char* key)
 extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
 {
     if (kind == 3) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466BB8));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNEarnings));
         return;
     }
     if (kind == 2) {
         if (idx == 0) {
-            cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466BD0));
+            cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNCollectibles));
         } else {
-            cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466BE8));
+            cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_TITLEBigChallenges));
         }
         return;
     }
@@ -87,34 +87,34 @@ extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
         unsigned short buf[200];
         unsigned short fmt[32];
         if (peak == 0) {
-            func_002C2540(fmt, D_00466C00);
+            func_002C2540(fmt, str_Happiness_pct_s);
         } else if (peak == 1) {
-            func_002C2540(fmt, D_00466C10);
+            func_002C2540(fmt, str_Ruthless_pct_s);
         } else if (peak == 2) {
-            func_002C2540(fmt, D_00466C20);
+            func_002C2540(fmt, str_Throne_pct_s);
         }
-        sprintf1_CE758(buf, fmt, Loc_CE758(D_00466C30));
+        sprintf1_CE758(buf, fmt, Loc_CE758(str_kT_cmnRaceCaps));
         cUIText_setUnicodeString(text, buf);
     } else if (type == 5) {
         if (peak == 0) {
-            cUIText_setAsciiString(text, D_00466C40);
+            cUIText_setAsciiString(text, str_Happiness_Jam);
         } else if (peak == 1) {
-            cUIText_setAsciiString(text, D_00466C50);
+            cUIText_setAsciiString(text, str_Ruthless_Jam);
         } else if (peak == 2) {
-            cUIText_setAsciiString(text, D_00466C60);
+            cUIText_setAsciiString(text, str_Throne_Jam);
         }
     } else if (type == 6) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466C70));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_EventPk1Race));
     } else if (type == 7) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466C80));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_EventPk2Race));
     } else if (type == 8) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466C90));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_EventAllPeakRace));
     } else if (type == 9) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CA8));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_EventPk1Jam));
     } else if (type == 10) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CB8));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_EventPk2Jam));
     } else if (type == 11) {
-        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CC8));
+        cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_EventAllPeakJam));
     } else {
         cUIText_setAsciiString(text, cBENewRaceInterface_getLocationName(iface, track));
     }
@@ -136,13 +136,13 @@ extern "C" int func_00153688(void* iface, int a, int b, int peak);
 extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* iface, int peak);
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* iface, int a, int b, int peak);
 extern "C" unsigned int func_00158960(void* self, int b, int c, int d, int e);
-extern char D_004A1EE0[];
-extern char D_00466CE0[];
-extern char D_00466CF8[];
-extern char D_00466D10[];
-extern char D_00466D28[];
-extern char D_00466D38[];
-extern char D_00466D50[];
+extern char str_pct_S[];
+extern char str_kT_CMNYouEarnedNum[];
+extern char str_kT_CMNColllectNum[];
+extern char str_kT_CMNChalCompNum[];
+extern char str_pct_02_0f_pct_02_0f[];
+extern char str_kT_OVRCMNYourBestTime[];
+extern char str_kT_OVRCMNYourBestScore[];
 
 static inline unsigned int udiv_CE758(unsigned int a, unsigned int b)
 {
@@ -175,8 +175,8 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
     void* reward = cBE_getInterface_CE758(cBE_getBE(), 0xD);
     if (kind == 3) {
         int money = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_CE758(cBE_getBE(), 0xB), profileIndex, characterID);
-        int fmt = Loc_CE758(D_00466CE0);
-        sprintf2(num, D_004A1EE0, getDollarString_price(money));
+        int fmt = Loc_CE758(str_kT_CMNYouEarnedNum);
+        sprintf2(num, str_pct_S, getDollarString_price(money));
         if (fmt != 0) {
             sprintf1_CE758(buf, (void*)fmt, num);
             cUIText_setUnicodeString(text, buf);
@@ -186,7 +186,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
         if (idx == 0) {
             int total = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
             int current = func_00153688(iface, profileIndex, characterID, peak);
-            int fmt = Loc_CE758(D_00466CF8);
+            int fmt = Loc_CE758(str_kT_CMNColllectNum);
             if (fmt != 0) {
                 sprintf1_CE758(buf, (void*)fmt, current, total);
                 cUIText_setUnicodeString(text, buf);
@@ -194,7 +194,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
         } else {
             int total = cBEMissionInterface_getNumberMissionsOnPeak(iface, peak);
             int current = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(iface, profileIndex, characterID, peak);
-            int fmt = Loc_CE758(D_00466D10);
+            int fmt = Loc_CE758(str_kT_CMNChalCompNum);
             if (fmt != 0) {
                 sprintf1_CE758(buf, (void*)fmt, current, total);
                 cUIText_setUnicodeString(text, buf);
@@ -206,8 +206,8 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
         unsigned int time = func_00158960(reward, profileIndex, characterID, type, track);
         unsigned int min = udiv_CE758(time, 60);
         unsigned int sec = umod_CE758(time, 60);
-        sprintf(num, D_00466D28, fptodp((float)(int)min), fptodp((float)(int)sec));
-        int fmt = Loc_CE758(D_00466D38);
+        sprintf(num, str_pct_02_0f_pct_02_0f, fptodp((float)(int)min), fptodp((float)(int)sec));
+        int fmt = Loc_CE758(str_kT_OVRCMNYourBestTime);
         if (fmt != 0) {
             sprintf1_CE758(buf, (void*)fmt, num);
             cUIText_setUnicodeString(text, buf);
@@ -216,7 +216,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
         int type = D_0045AAD8_CE758[peak][kind][idx].type;
         int current = func_00158960(reward, profileIndex, characterID, type, track);
-        int fmt = Loc_CE758(D_00466D50);
+        int fmt = Loc_CE758(str_kT_OVRCMNYourBestScore);
         if (fmt != 0) {
             sprintf1_CE758(buf, (void*)fmt, current);
             cUIText_setUnicodeString(text, buf);

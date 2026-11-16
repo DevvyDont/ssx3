@@ -11,8 +11,8 @@ extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, 
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int MUTEX_create(void* sema);
-extern char D_004A2E38[];
-extern char D_004A2E40[];
+extern char str_pct_s_LOW[];
+extern char str_pct_s_HIGH[];
 extern void* D_004D2438[];
 
 struct sMemNode_251718 {
@@ -73,12 +73,12 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     data = (char*)((int)data & -align);
     char* end = mem + size;
     end -= hdr + 0x30;
-    sprintf(buf, D_004A2E38, name);
+    sprintf(buf, str_pct_s_LOW, name);
     sMemNode_251718* blk = (sMemNode_251718*)(data - 0x10);
     sMemClass_251718* cls = (sMemClass_251718*)(mem + 0x10);
     MEM_initblock(mem, buf, 0x50, hdr, flags | 0x8000, 0, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
-    sprintf(buf, D_004A2E40, name);
+    sprintf(buf, str_pct_s_HIGH, name);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
     D_004D2438[id & 0x3F] = cls;
     MEM_fill(cls, 0, 0x50);
@@ -351,7 +351,7 @@ extern "C" void func_00251D00(void) {
 //100%
 INCLUDE_ASM("mem/memstd", MEM_initadr);
 #ifdef SKIP_ASM
-extern char D_004A2E48[];
+extern char str_RAM[];
 
 /**
  * Creates the main "RAM" memory class over a block of memory.
@@ -365,7 +365,7 @@ extern char D_004A2E48[];
  */
 extern "C" int MEM_initadr(char* mem, int size)
 {
-    return MEMCLASS_create(0, D_004A2E48, mem, size, 0x40, 0x80, 0, 0, 0, 1);
+    return MEMCLASS_create(0, str_RAM, mem, size, 0x40, 0x80, 0, 0, 0, 1);
 }
 #endif
 
@@ -375,8 +375,8 @@ INCLUDE_ASM("mem/memstd", MEMCLASS_link);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: debugmenu defines MEM_initblock with a short flags parameter; this caller passes the int unconverted.
 extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
-extern char D_004A2E50[];
-extern char D_004A2E40[];
+extern char str_pct_s_LINK[];
+extern char str_pct_s_HIGH[];
 
 struct sMemNode_251D50 {
     unsigned short tag;
@@ -427,11 +427,11 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     int flags = cls->flags;
     sMemNode_251D50* blk = (sMemNode_251D50*)(data - 0x10);
     char* last = cls->last;
-    sprintf(buf, D_004A2E50, cls);
+    sprintf(buf, str_pct_s_LINK, cls);
     MEM_initblock(last, buf, 0, hdr, flags | 0x8000, *(void**)(last + 0xC), mem);
     MEM_initblock(mem, buf, 0, hdr, flags | 0x8000, last, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
-    sprintf(buf, D_004A2E40, cls);
+    sprintf(buf, str_pct_s_HIGH, cls);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
     cls->last = end;
     sMemNode_251D50* nextNode = &cls->head;
@@ -481,7 +481,7 @@ extern "C" void func_00251F68(const char* fmt, ...)
 }
 #endif
 
-extern const char D_004800A8[];
+extern const char str_pct_12s_pct_24_24s_pct_08lx_pct_11lu_pct[];
 extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const char*, ...));
 
 //100%
@@ -497,7 +497,7 @@ INCLUDE_ASM("mem/memstd", MEM_printclass__FPv);
  */
 void MEM_printclass(void* thing)
 {
-    MEM_printclassf(thing, D_004800A8, func_00251F68);
+    MEM_printclassf(thing, str_pct_12s_pct_24_24s_pct_08lx_pct_11lu_pct, func_00251F68);
 }
 #endif
 
@@ -526,12 +526,12 @@ extern "C" int func_003E62D0(void* p, int size, int seed);
 extern char D_004800E0[];
 extern char D_00480140[];
 extern char D_00480198[];
-extern char D_004801B0[];
+extern char str_SPACE[];
 extern char D_004801C0[];
 extern char* D_004801E8[];
 extern char D_004A2E58[];
-extern char D_004A2E60[];
-extern char D_004A2E68[];
+extern char str_FREE[];
+extern char str_unknown[];
 extern char D_004A2E70[];
 
 struct sMemNode_252010 {
@@ -587,14 +587,14 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
                 crc = func_003E62D0((char*)blk + 0x18, sz - 0x18, 0xFBEA);
             total += sz;
             int st = func_002522B0((sMemBlock002522B0*)blk);
-            cb(fmt, D_004A2E60, D_004801B0, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
+            cb(fmt, str_FREE, str_SPACE, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
         } else {
             int sz = blk->size;
             crc = 0;
             if (sz != 0 && !(blk->flags & 0x8000))
                 crc = func_003E62D0(data, sz, 0xFBEA);
             int st = func_002522B0((sMemBlock002522B0*)blk);
-            cb(fmt, D_004A2E68, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], n2);
+            cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], n2);
         }
         cb(D_004A2E70);
     }
@@ -2117,7 +2117,7 @@ struct sMemAlloc_4410 {
 };
 extern sMemAlloc_4410 D_00509430_4410 __asm__("D_00509430");
 extern void* D_00480270[];
-extern char D_00480258[];
+extern char str_VD_VD_TEXTURE_POINTER[];
 extern char D_004A2EA0[];
 extern char D_004A2EA8[];
 extern float D_004A2EB0[];
@@ -2217,7 +2217,7 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
         rem -= self->heights[self->rows++];
     }
     self->count = self->cols * self->rows;
-    self->tiles = (sTile_4410**)D_00509430_4410.alloc(D_00480258, self->count * 12, 0, 0, D_00509430_4410.flags);
+    self->tiles = (sTile_4410**)D_00509430_4410.alloc(str_VD_VD_TEXTURE_POINTER, self->count * 12, 0, 0, D_00509430_4410.flags);
     float fh = (float)h;
     float fw = (float)w;
     int k = 0;

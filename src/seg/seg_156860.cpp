@@ -15,7 +15,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_construct);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cCommSystem_cCommSystem_5860(int) __asm__("cCommSystem_cCommSystem");
 extern "C" int cMemMan_alloc_5860(unsigned int, void *, unsigned int, int) __asm__("cMemMan_alloc");
-extern char D_00480300[];
+extern char str_cCommSystem[];
 
 /**
  * Creates the comm system singleton: allocates 0x34 bytes tagged "cCommSystem" and constructs it.
@@ -24,7 +24,7 @@ extern char D_00480300[];
  * it.
  */
 extern "C" void cCommSystem_construct(void) {
-    cCommSystem_mCommSystem = (cCommSystem*)(cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(0x34, D_00480300, 0x20000000, 0)));
+    cCommSystem_mCommSystem = (cCommSystem*)(cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(0x34, str_cCommSystem, 0x20000000, 0)));
 }
 #endif
 
@@ -50,8 +50,8 @@ extern "C" void ccs_5698(void *) __asm__("MUTEX_create");
 extern "C" void ccs_6448(void *, int, int) __asm__("MEM_fill");
 extern "C" void *ccs_new(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
 extern "C" void ccs_3B18(void *) __asm__("func_003F3B18");
-extern char D_00480310[];
-extern char D_00480320[];
+extern char str_Comm_pool[];
+extern char str_www_ea_com[];
 extern int cCommSystem_mNumNetConn;
 extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSystem");
 /**
@@ -69,7 +69,7 @@ extern "C" int *cCommSystem_cCommSystem_(int *self) {
     int i;
     ccs_5698(self + 1);
     ccs_6448(self, 0, 4);
-    self[5] = (int)ccs_new(0xFC00, D_00480310, 0x20000000, 0);
+    self[5] = (int)ccs_new(0xFC00, str_Comm_pool, 0x20000000, 0);
     ccs_6448((void *)self[5], 0, 0xFC00);
     self[6] = self[5];
     a = 0xFC;
@@ -91,7 +91,7 @@ extern "C" int *cCommSystem_cCommSystem_(int *self) {
     self[11] = 0;
     self[12] = 1;
     self[8] = 1;
-    ccs_3B18(D_00480320);
+    ccs_3B18(str_www_ea_com);
     return self;
 }
 #endif
@@ -129,17 +129,17 @@ extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cCommSystem_getSignature);
 #ifdef SKIP_ASM
-extern char D_00481370[];
+extern char str_NA_R_F004_b[];
 
 /**
  * Returns the build signature that online peers compare.
  *
  * The lobby code rejects another player whose message carries a different signature.
  *
- * @return the string "NA_R_F004" (D_00481370)
+ * @return the string "NA_R_F004" (str_NA_R_F004_b)
  */
 extern "C" char *cCommSystem_getSignature(void) {
-    return D_00481370;
+    return str_NA_R_F004_b;
 }
 #endif
 
@@ -246,7 +246,7 @@ extern "C" void *cMemMan_alloc_5BF8(int, char *, int, int) __asm__("cMemMan_allo
 extern "C" void *func_00256698_5BF8(void *) __asm__("func_00256698");
 extern "C" void cDSockChannel_listen_5BF8(void *, int, int) __asm__("cDSockChannel_listen");
 extern "C" void cDSockChannel_connect_5BF8(void *, int, int) __asm__("cDSockChannel_connect");
-extern char D_00480350[];
+extern char str_cDSockChannel[];
 
 /**
  * Creates and opens a DirtySock channel in the comm system's single channel slot.
@@ -265,7 +265,7 @@ extern "C" int cCommSystem_openDSockChannel(void **slots, int addr, int port, in
     int n = port & 0xFFFF;
     for (i = 0; i < 1; i++) {
         if (slots[i] == 0) {
-            void *obj = func_00256698_5BF8(cMemMan_alloc_5BF8(0x20, D_00480350, 0x20000000, 0));
+            void *obj = func_00256698_5BF8(cMemMan_alloc_5BF8(0x20, str_cDSockChannel, 0x20000000, 0));
             if (isListener != 0) {
                 cDSockChannel_connect_5BF8(obj, addr, n);
             } else {
@@ -477,11 +477,11 @@ INCLUDE_ASM("seg/seg_156860", func_00256088);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0031B008_6088(void *, int, void *) __asm__("func_0031B008");
-extern char D_00480378[];
+extern char str_cdrom0_NETGUI_NTGUI_ELF_1[];
 extern int D_004A2EC0;
 
 extern "C" void func_00256088(void) {
-    func_0031B008_6088(D_00480378, 1, &D_004A2EC0);
+    func_0031B008_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
 }
 #endif
 
@@ -498,12 +498,12 @@ extern "C" void func_002563A8_60B0(int *) __asm__("func_002563A8");
 extern "C" void func_002563F8_60B0(int *) __asm__("func_002563F8");
 extern "C" void SYNCTASK_run_60B0(int) __asm__("SYNCTASK_run");
 extern "C" void THREAD_yieldticks_60B0(int) __asm__("THREAD_yieldticks");
-extern char D_004A2EC8[];
+extern char str_DNASMAN[];
 
 static inline int ge3_60B0(int *o) { return *o >= 3; }
 
 extern "C" void func_002560B0(void) {
-    int *o = func_002561B8_60B0(cMemMan_alloc_60B0(0xA50, D_004A2EC8, 0x20000000, 0));
+    int *o = func_002561B8_60B0(cMemMan_alloc_60B0(0xA50, str_DNASMAN, 0x20000000, 0));
     func_00256258_60B0(o, 0);
     while (!ge3_60B0(o)) {
         func_002563F8_60B0(o);
@@ -528,11 +528,11 @@ INCLUDE_ASM("seg/seg_156860", func_00256188);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_003DED50_6188(void *, int, int, void *) __asm__("func_003DED50");
-extern char D_004803D0[];
+extern char str_data_config_slusovf_big[];
 extern int D_004A2ED4;
 
 extern "C" void func_00256188(void) {
-    func_003DED50_6188(D_004803D0, 0, 0x64, &D_004A2ED4);
+    func_003DED50_6188(str_data_config_slusovf_big, 0, 0x64, &D_004A2ED4);
 }
 #endif
 
@@ -691,8 +691,8 @@ extern "C" void ASYNCFILE_release_6460(int, int, void *) __asm__("ASYNCFILE_rele
 extern "C" int func_003FCFD8_6460(int, int) __asm__("func_003FCFD8");
 extern "C" void *operator_new__FUi_6460(unsigned int, char *, int, int) __asm__("operator_new__FUi");
 extern "C" int func_003DF748_6460(char *, void *, int) __asm__("func_003DF748");
-extern char D_00480428[];
-extern char D_00480438[];
+extern char str_AuthData[];
+extern char str_CONFIG_DAT[];
 
 extern "C" void func_00256460(char *self) {
     if (ASYNCFILE_getstatus_6460(*(int *)(self + 0x18)) == 1) {
@@ -702,9 +702,9 @@ extern "C" void func_00256460(char *self) {
         if (a != 0) {
             int b = *(int *)(self + 8);
             if (b > 0 && func_003FCFD8_6460(a, b) >= 0) {
-                void *m = operator_new__FUi_6460(0x10000, D_00480428, 0x04000100, 0);
+                void *m = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
                 *(void **)(self + 0xC) = m;
-                *(int *)(self + 0x18) = func_003DF748_6460(D_00480438, m, 0x10000);
+                *(int *)(self + 0x18) = func_003DF748_6460(str_CONFIG_DAT, m, 0x10000);
                 *(int *)(self + 0) = 2;
             }
         }
@@ -885,7 +885,7 @@ extern "C" void func_00255830__FPv_6860(void *) __asm__("func_00255830__FPv");
 extern "C" int func_003E6E08_6860() __asm__("func_003E6E08");
 extern "C" int func_003E6F40_6860(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_6860(char *, const char *, ...) __asm__("sprintf");
-extern char D_00480448[];
+extern char str_pct_s_pct_d_pct_d[];
 
 /**
  * Starts listening for the peer's game connection on "addr:port:port".
@@ -906,7 +906,7 @@ extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
     int gameUtil = func_003E6E08_6860();
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
     if (gameUtil != 0) {
-        sprintf_6860(buf, D_00480448, addr, n, n);
+        sprintf_6860(buf, str_pct_s_pct_d_pct_d, addr, n, n);
         func_003E6F40_6860((int)self->mGameUtil, 0x101, buf);
         self->mState = 1;
     }
@@ -921,7 +921,7 @@ extern "C" void func_00255830__FPv_68F8(void *) __asm__("func_00255830__FPv");
 extern "C" int func_003E6E08_68F8() __asm__("func_003E6E08");
 extern "C" int func_003E6F40_68F8(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_68F8(char *, const char *, ...) __asm__("sprintf");
-extern char D_00480448[];
+extern char str_pct_s_pct_d_pct_d[];
 
 /**
  * Starts connecting to the peer's game link at "addr:port:port".
@@ -943,7 +943,7 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
     int gameUtil = func_003E6E08_68F8();
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
     if (gameUtil != 0) {
-        sprintf_68F8(buf, D_00480448, addr, n, n);
+        sprintf_68F8(buf, str_pct_s_pct_d_pct_d, addr, n, n);
         func_003E6F40_68F8((int)self->mGameUtil, 0x102, buf);
         self->mState = 1;
     }
@@ -1089,7 +1089,7 @@ INCLUDE_ASM("seg/seg_156860", RpcAlloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *operator_new_6BB0(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
-extern char D_00480478[];
+extern char str_RpcAlloc[];
 
 /**
  * Allocates a buffer for the SIF RPC layer.
@@ -1100,7 +1100,7 @@ extern char D_00480478[];
  * @return the new buffer
  */
 extern "C" void *RpcAlloc(unsigned int size) {
-    return operator_new_6BB0(size, D_00480478, 0x20000000, 0);
+    return operator_new_6BB0(size, str_RpcAlloc, 0x20000000, 0);
 }
 #endif
 
@@ -1460,7 +1460,7 @@ extern "C" void cGameComm_updateMessageDisplay_70D8(void* s) __asm__("cGameComm_
 extern "C" int func_003E7450_70D8(int sock, int a1, char* tag, int n) __asm__("func_003E7450");
 extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __asm__("func_003E7500");
 extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
-extern char D_00481380[];
+extern char str_SSXPingServer[];
 
 // PORT: the unit declares func_002570D8 as (void*)
 extern "C" void func_002570D8(cGameComm* vs)
@@ -1475,7 +1475,7 @@ extern "C" void func_002570D8(cGameComm* vs)
             if (func_003E7500_70D8((int)vs->unk_140, msg, &len, info) == 0) {
                 break;
             }
-            if (func_00416B18_70D8(msg, D_00481380, 0xD) != 0) {
+            if (func_00416B18_70D8(msg, str_SSXPingServer, 0xD) != 0) {
                 continue;
             }
             for (int i = 0; i < vs->unk_0B8; i++) {
@@ -1493,7 +1493,7 @@ extern "C" void func_002570D8(cGameComm* vs)
             if (vs->unk_0BC > 0) {
                 vs->unk_0BC = vs->unk_0BC - 1;
             } else {
-                int sock = func_003E7450_70D8((int)vs->unk_140, vs->unk_0C0, D_00481380, 0xE);
+                int sock = func_003E7450_70D8((int)vs->unk_140, vs->unk_0C0, str_SSXPingServer, 0xE);
                 int k = vs->unk_0B8;
                 *(int*)(((char*)vs) + (k << 2) + 0xC4) = sock;
                 vs->unk_0B8 = k + 1;
@@ -2223,10 +2223,10 @@ INCLUDE_ASM("seg/seg_156860", func_00258188);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cMemMan_alloc_8188(unsigned int, void *, unsigned int, int) __asm__("cMemMan_alloc");
-extern char D_004805A8[];
+extern char str_tGameCommPacket[];
 
 extern "C" void *func_00258188(void) {
-    return cMemMan_alloc_8188(0xF0, D_004805A8, 0x20000000, 0);
+    return cMemMan_alloc_8188(0xF0, str_tGameCommPacket, 0x20000000, 0);
 }
 #endif
 
@@ -2353,7 +2353,7 @@ INCLUDE_ASM("seg/seg_156860", func_002583A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003E7450_83A8(int, int, char *, int) __asm__("func_003E7450");
-extern char D_00481380[];
+extern char str_SSXPingServer[];
 
 struct S83A8 {
     char pad0[0xB8];
@@ -2370,7 +2370,7 @@ extern "C" void func_002583A8(cGameComm* self, int arg1, int arg2) {
     if (self->unk_138 <= 0) {
         self->unk_0B8 = 0;
         self->unk_0C0 = arg1;
-        self->unk_0C4[self->unk_0B8++] = func_003E7450_83A8((int)self->unk_140, arg1, D_00481380, 0xE);
+        self->unk_0C4[self->unk_0B8++] = func_003E7450_83A8((int)self->unk_140, arg1, str_SSXPingServer, 0xE);
         self->unk_0BC = 4;
         self->unk_138 = arg2 * 0x3C;
         self->unk_13C = 0;
@@ -2409,8 +2409,8 @@ struct sVEnt_8448 {
     void (*fn)(void*);
 };
 
-extern char D_004805B8[];
-extern char D_004805C8[];
+extern char str_bebuffer[];
+extern char str_NA_R_F004[];
 
 static inline int ggHost_8448(char* g) { return *(int*)(g + 8); }
 static inline void ggSetTime_8448(char* g, float t) { *(float*)(g + 0x10) = t; }
@@ -2431,18 +2431,18 @@ static inline int ggDropped_8448(char* s) { return *(int*)(s + 4); }
 extern "C" void cGameComm_syncGame(cGameComm* self)
 {
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
-    self->mBEBuffer = (char*)operator_new_8448((unsigned int)self->mBEBufferSize, D_004805B8, 0x100, 0);
+    self->mBEBuffer = (char*)operator_new_8448((unsigned int)self->mBEBufferSize, str_bebuffer, 0x100, 0);
     cBENetworkInterface_preInitBE(iface);
     if (ggHost_8448(((char*)&cBENetworkInterface_networkOpt)) != 0) {
         MEM_fill_8448(((char*)self) + 0xF0, 0, 0x10);
-        strncpy(((char*)self) + 0xF0, D_004805C8, 0xF);
+        strncpy(((char*)self) + 0xF0, str_NA_R_F004, 0xF);
         self->mServerSettings.unk_18 = cCommSystem_mCommSystem->mBroadBand;
         cBENetworkInterface_getSyncData_8448(iface, 0, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 0, self->mBEBuffer);
     } else {
         func_0014F898();
         MEM_fill_8448(((char*)self) + 0x104, 0, 0x10);
-        strncpy(((char*)self) + 0x104, D_004805C8, 0xF);
+        strncpy(((char*)self) + 0x104, str_NA_R_F004, 0xF);
         self->unk_100 = cCommSystem_mCommSystem->mBroadBand;
         cBENetworkInterface_getSyncData_8448(iface, 1, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 1, self->mBEBuffer);
@@ -2781,9 +2781,9 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_updateMessageDisplay);
 int GetHashValue32(char* s);
 extern "C" void* cUIStateStack_findState(void* mgr, int hash);
 extern "C" void strcpy1(char* dst, const char* src);
-extern char D_004A2EF0[];
-extern char D_004805D8[];
-extern char D_004805F8[];
+extern char str_hud_d[];
+extern char str_kT_POPUPCMNOtherPauseMenu[];
+extern char str_kT_OVRCMNWaitPlayer_b[];
 
 struct sVEntS_8CB0 {
     short delta;
@@ -2839,14 +2839,14 @@ extern "C" void cGameComm_updateMessageDisplay(cGameComm* self)
     if (ui == 0) {
         return;
     }
-    char* item = (char*)cUIStateStack_findState(ui + 0x18, GetHashValue32(D_004A2EF0));
+    char* item = (char*)cUIStateStack_findState(ui + 0x18, GetHashValue32(str_hud_d));
     if (item == 0) {
         return;
     }
     if (self->mPauseMenu[1] != 0) {
-        strcpy1(buf, gcString_8CB0(D_004805D8));
+        strcpy1(buf, gcString_8CB0(str_kT_POPUPCMNOtherPauseMenu));
     } else {
-        strcpy1(buf, gcString_8CB0(D_004805F8));
+        strcpy1(buf, gcString_8CB0(str_kT_OVRCMNWaitPlayer_b));
     }
     switch (self->mMessageDisplay) {
     case 0:
@@ -2994,20 +2994,20 @@ extern "C" void func_00259098(int a0, int a1, int a2)
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00259198);
 #ifdef SKIP_ASM
-extern char D_004A2F18[];
+extern char str_en[];
 
 extern "C" char *func_00259198(void) {
-    return D_004A2F18;
+    return str_en;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002591A8);
 #ifdef SKIP_ASM
-extern char D_004A2F20[];
+extern char str_US[];
 
 extern "C" char *func_002591A8(void) {
-    return D_004A2F20;
+    return str_US;
 }
 #endif
 
@@ -3034,10 +3034,10 @@ INCLUDE_ASM("seg/seg_156860", func_002591E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *operator_new_91E8(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
-extern char D_004A2F28[];
+extern char str_Lobby_b[];
 
 extern "C" void *func_002591E8(unsigned int size) {
-    return operator_new_91E8(size, D_004A2F28, 0x20000000, 0);
+    return operator_new_91E8(size, str_Lobby_b, 0x20000000, 0);
 }
 #endif
 

@@ -585,7 +585,7 @@ extern "C" int cDirtysock_tag_TagFieldSetNumber(char* record, int len, char* nam
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFlags);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
-extern char D_004965C0[];
+extern char str_at_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123[];
 
 /**
  * Stores a bit set in a tag record as a string of flag letters.
@@ -603,7 +603,7 @@ extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name
 {
     char fieldBuf[256 + 32];
     char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
-    const char* flags = D_004965C0;
+    const char* flags = str_at_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123;
     for (; (value != 0) && (*flags != 0); value >>= 1, flags++) {
         if (value & 1) {
             *data++ = *flags;
@@ -942,7 +942,7 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetCrypt);
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 extern const unsigned char kHexHi[] __asm__("D_00495FC0");
 extern const unsigned char kHexLo[] __asm__("D_004960C0");
-extern char D_004A4A88[];
+extern char str_GS[];
 
 /**
  * Stores a string in a tag record lightly obfuscated with a key, as '$' followed by hex digits.
@@ -968,7 +968,7 @@ extern "C" int cDirtysock_tag_TagFieldSetCrypt(char* record, int len, char* name
     unsigned int plainByte;
     char* out;
     if (kbase == 0 || *kbase == 0) {
-        kbase = (const unsigned char*)D_004A4A88;
+        kbase = (const unsigned char*)str_GS;
     }
     out = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
     cipherByte = 0;
@@ -997,7 +997,7 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetEpoch);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_00496A40[];
+extern char str_pct_d_pct_d_pct_d_pct_d_pct_02d_pct_02d[];
 
 struct sDsTmK2 {
     int tm_sec;   // 0x0
@@ -1038,7 +1038,7 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
     if (timeParts == 0)
         return -1;
     char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
-    sprintf(data, D_00496A40, timeParts->tm_year + 1900, timeParts->tm_mon + 1, timeParts->tm_mday, timeParts->tm_hour, timeParts->tm_min, timeParts->tm_sec);
+    sprintf(data, str_pct_d_pct_d_pct_d_pct_d_pct_02d_pct_02d, timeParts->tm_year + 1900, timeParts->tm_mon + 1, timeParts->tm_mday, timeParts->tm_hour, timeParts->tm_min, timeParts->tm_sec);
     return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
@@ -1698,7 +1698,7 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetCrypt);
 #ifdef SKIP_ASM
 extern unsigned char D_004961C0[];
 extern unsigned char D_004962C0[];
-extern char D_004A4A88[];
+extern char str_GS[];
 extern "C" int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 
 /**
@@ -1729,7 +1729,7 @@ extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int 
         return cDirtysock_tag_TagFieldGetString(data, buf, len, defval);
     }
     if (kbase == 0 || *kbase == 0) {
-        kbase = (const unsigned char*)D_004A4A88;
+        kbase = (const unsigned char*)str_GS;
     }
     if (buf == 0) {
         for (count = 0, cursor = data + 1; (unsigned char)cursor[0] >= '0' && (unsigned char)cursor[1] >= '0'; count++) {

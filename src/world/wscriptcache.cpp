@@ -11,7 +11,7 @@ void* func_003ACA50(void* self);
 extern "C" void func_003ACA70(int* self, int flags);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00495070[];
+extern char str_tWScriptCache[];
 
 /**
  * Sizes the world-script cache for a number of sections by replacing its section array with empty entries.
@@ -36,7 +36,7 @@ extern "C" void cWScriptCache_init(void* self, int count)
     }
     *(int*)((char*)self + 0x8) = count;
     char** slot = (char**)((char*)self + 0x4);
-    char* mem = (char*)operator_new_tag(count * 0xC + 0x10, D_00495070, 0x20000000, 0);
+    char* mem = (char*)operator_new_tag(count * 0xC + 0x10, str_tWScriptCache, 0x20000000, 0);
     char* arr = mem + 0x10;
     *(int*)mem = count;
     char* newEntry = arr;
@@ -173,7 +173,7 @@ extern "C" int func_003B4818_CAD0(int) __asm__("func_003B4818");
 extern "C" int ASYNCFILE_getstatus_CAD0(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void MEM_copy_CAD0(int, int, int) __asm__("MEM_copy");
 int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
-extern char D_00495080[];
+extern char str_WScriptFile[];
 extern "C" void func_003ACAD0_impl(void *self_) __asm__("func_003ACAD0");
 extern "C" void func_003ACAD0_impl(void *self_) {
     char *self = (char*)self_;
@@ -186,11 +186,11 @@ extern "C" void func_003ACAD0_impl(void *self_) {
             if (sp4 > 0) {
                 int t = func_003B4818_CAD0(sp0);
                 if (t > 0) {
-                    int r = operator_new_CAD0(t, D_00495080, 0x20000000, 0);
+                    int r = operator_new_CAD0(t, str_WScriptFile, 0x20000000, 0);
                     *(int*)(self + 8) = r;
                     func_003B47F8_CAD0(sp0, r);
                 } else {
-                    int r = operator_new_CAD0(sp4, D_00495080, 0x20000000, 0);
+                    int r = operator_new_CAD0(sp4, str_WScriptFile, 0x20000000, 0);
                     *(int*)(self + 8) = r;
                     MEM_copy_CAD0(r, sp0, sp4);
                 }
@@ -211,14 +211,14 @@ extern "C" void func_00318630_CBB8(sBXStr_CBB8*, sBXStr_CBB8*, const char*) __as
 extern "C" int func_003DF690_CBB8(const char*, int) __asm__("func_003DF690");
 extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
 extern char D_004A47C0[];
-extern char D_004A4818[];
+extern char str_ssf[];
 extern "C" void func_003ACBB8_impl(void *self, int arg) __asm__("func_003ACBB8");
 extern "C" void func_003ACBB8_impl(void *self, int arg) {
     sBXStr_CBB8 a;
     sBXStr_CBB8 b;
     *(short*)((char*)self + 2) = 0;
     func_003186D0_CBB8(&b, D_004A47C0, arg);
-    func_00318630_CBB8(&a, &b, D_004A4818);
+    func_00318630_CBB8(&a, &b, str_ssf);
     *(int*)((char*)self + 4) = func_003DF690_CBB8(a.p, 0x100);
     cBXString_dt_CBB8(&a, 2);
     cBXString_dt_CBB8(&b, 2);

@@ -25,10 +25,10 @@ extern "C" void func_0019B180(void* self, int id);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
 extern const int D_004A11D0_c __asm__("D_004A11D0");
 extern void* cFEStateCharEquip_vtbl[];
-extern char D_004607A8[];
-extern char D_004607B8[];
-extern char D_0045DA48[];
-extern char D_0045DA38[];
+extern char str_dollargreen[];
+extern char str_dollarred[];
+extern char str_checkbox[];
+extern char str_empty_box[];
 
 struct sVec4_8DB8 {
     float x, y, z, w;
@@ -186,19 +186,19 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
     self->f88 = 0;
     {
         char* mgr = *(char**)&self->mgr;
-        self->fA90 = Find_8DB8(mgr, GetHashValue32(D_004607A8));
+        self->fA90 = Find_8DB8(mgr, GetHashValue32(str_dollargreen));
     }
     {
         char* mgr = *(char**)&self->mgr;
-        self->fA94 = Find_8DB8(mgr, GetHashValue32(D_004607B8));
+        self->fA94 = Find_8DB8(mgr, GetHashValue32(str_dollarred));
     }
     {
         char* mgr = *(char**)&self->mgr;
-        self->fA98 = Find_8DB8(mgr, GetHashValue32(D_0045DA48));
+        self->fA98 = Find_8DB8(mgr, GetHashValue32(str_checkbox));
     }
     {
         char* mgr = *(char**)&self->mgr;
-        self->fA9C = Find_8DB8(mgr, GetHashValue32(D_0045DA38));
+        self->fA9C = Find_8DB8(mgr, GetHashValue32(str_empty_box));
     }
     self->fAA0 = 0;
     func_001A0508((char*)SSXApp->RealFE + 0xB0, self->team, self->slot, 1);
@@ -304,7 +304,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void func_0019BFE8(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
-extern char D_004607E8[];
+extern char str_12equ_char[];
 
 /**
  * Opens the equip-gear screen ("12equ_char") and poses the user's FE rider for it.
@@ -317,7 +317,7 @@ extern char D_004607E8[];
 extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004607E8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_12equ_char), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -434,35 +434,35 @@ extern "C" void func_0019BA60_eate(void* self, int idx) __asm__("func_0019BA60")
 
 extern "C" void func_0019BBA0_eate(void* self) __asm__("func_0019BBA0");
 
-extern char D_00460810[];
+extern char str_kT_CMNBuyGear[];
 
-extern char D_00460820[];
+extern char str_kT_CMNEquipGear[];
 
 extern "C" void cUIText_setAsciiString_eate(void* t, const char* s) __asm__("cUIText_setAsciiString__FP7cUITextPCc");
 extern "C" void cUIText_setUnicodeStringByID_eate(void* t, int id) __asm__("cUIText_setUnicodeStringByID__FP7cUITexti");
 extern "C" void cUIMenu_setScrollableMenu_FE(void* w, unsigned char v) __asm__("cUIMenu_setScrollableMenu");
 extern char* D_00441218[];
 extern char* D_00441230[];
-extern char D_00460488[];
-extern char D_004607F8[];
-extern char D_00460830[];
-extern char D_00460840[];
-extern char D_00460850[];
-extern char D_00460860[];
-extern char D_00460870[];
-extern char D_00460880[];
-extern char D_00460890[];
+extern char str_helptext[];
+extern char str_title_equip_character[];
+extern char str_MnuGroups[];
+extern char str_buytotals[];
+extern char str_barandpoints[];
+extern char str_overbar2[];
+extern char str_equip_points[];
+extern char str_equip_btm_left[];
+extern char str_largeshape[];
 extern char D_004A1408[];
-extern char D_004A1458[];
-extern char D_004A1460[];
-extern char D_004A1910[];
-extern char D_004A1918[];
-extern char D_004A1920[];
-extern char D_004A1928[];
-extern char D_004A1930[];
-extern char D_004A1938[];
-extern char D_004A1940[];
-extern char D_004A1948[];
+extern char str_btext5[];
+extern char str_ps2sq[];
+extern char str_xby[];
+extern char str_ngcy[];
+extern char str_heading[];
+extern char str_1right[];
+extern char str_2right[];
+extern char str_bolt01[];
+extern char str_overbar[];
+extern char str_points[];
 
 static inline void hide_FE(void* w)
 {
@@ -519,69 +519,69 @@ static inline bool isC8_FE(sCharEquip_FE* s)
 extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
-    if (id == GetHashValue32(D_004607F8)) {
+    if (id == GetHashValue32(str_title_equip_character)) {
         self->f48 = w;
         if (isC8_FE(self)) {
-            cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(D_00460810));
+            cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(str_kT_CMNBuyGear));
         } else {
-            cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(D_00460820));
+            cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(str_kT_CMNEquipGear));
         }
-    } else if (id == GetHashValue32(D_00460488)) {
+    } else if (id == GetHashValue32(str_helptext)) {
         self->f4C = w;
         hide_FE(self->f4C);
-    } else if (id == GetHashValue32(D_004A1458)) {
+    } else if (id == GetHashValue32(str_btext5)) {
         self->f50 = w;
         if (self->fAE4 == 0) {
             hide_FE(self->f50);
         } else {
             if (isC8_FE(self)) {
-                cUIText_setUnicodeStringByID_eate(self->f50, GetHashValue32(D_00460820));
+                cUIText_setUnicodeStringByID_eate(self->f50, GetHashValue32(str_kT_CMNEquipGear));
             } else {
-                cUIText_setUnicodeStringByID_eate(self->f50, GetHashValue32(D_00460810));
+                cUIText_setUnicodeStringByID_eate(self->f50, GetHashValue32(str_kT_CMNBuyGear));
             }
         }
-    } else if (id == GetHashValue32(D_004A1460) || id == GetHashValue32(D_004A1910) || id == GetHashValue32(D_004A1918)) {
+    } else if (id == GetHashValue32(str_ps2sq) || id == GetHashValue32(str_xby) || id == GetHashValue32(str_ngcy)) {
         self->f54 = w;
         if (self->fAE4 == 0) {
             hide_FE(self->f54);
         }
-    } else if (id == GetHashValue32(D_004A1920)) {
+    } else if (id == GetHashValue32(str_heading)) {
         self->f58 = w;
         cFEStateCharEquip_updateHeading_eate(self, D_004A11D0_eate);
-    } else if (id == GetHashValue32(D_00460830)) {
+    } else if (id == GetHashValue32(str_MnuGroups)) {
         self->f5C = w;
         cUIMenu_setScrollableMenu_FE(self->f5C, self->f958);
-    } else if (id == GetHashValue32(D_00460840)) {
+    } else if (id == GetHashValue32(str_buytotals)) {
         self->f60 = w;
         if (!isC8_FE(self)) {
             hide_FE(self->f60);
         }
-    } else if (id == GetHashValue32(D_004A1928)) {
+    } else if (id == GetHashValue32(str_1right)) {
         self->f64 = w;
         func_0019BBA0_eate(self);
-    } else if (id == GetHashValue32(D_004A1930)) {
+    } else if (id == GetHashValue32(str_2right)) {
         self->f68 = w;
         cUIText_setAsciiString_eate(self->f68, D_004A1408);
-    } else if (id == GetHashValue32(D_004A1938)) {
+    } else if (id == GetHashValue32(str_bolt01)) {
         self->f84 = w;
-    } else if (id == GetHashValue32(D_00460850)) {
+    } else if (id == GetHashValue32(str_barandpoints)) {
         self->f6C = w;
         hide_FE(self->f6C);
-    } else if (id == GetHashValue32(D_004A1940)) {
+    } else if (id == GetHashValue32(str_overbar)) {
         self->f70 = w;
         hide_FE(self->f70);
-    } else if (id == GetHashValue32(D_00460860)) {
+    } else if (id == GetHashValue32(str_overbar2)) {
         self->f74 = w;
         hide_FE(self->f74);
-    } else if (id == GetHashValue32(D_00460870)) {
+    } else if (id == GetHashValue32(str_equip_points)) {
         self->f78 = w;
-    } else if (id == GetHashValue32(D_00460880)) {
+    } else if (id == GetHashValue32(str_equip_btm_left)) {
         self->f80 = w;
         hide_FE(self->f80);
-    } else if (id == GetHashValue32(D_004A1948)) {
+    } else if (id == GetHashValue32(str_points)) {
         self->f7C = w;
         cUIText_setAsciiString_eate(self->f7C, D_004A1408);
-    } else if (id == GetHashValue32(D_00460890)) {
+    } else if (id == GetHashValue32(str_largeshape)) {
         self->f88 = w;
         hide_FE(self->f88);
     } else {
@@ -676,7 +676,7 @@ extern "C" void func_0019A9B8(void* self);
 extern "C" void func_0019A638(void* self);
 extern "C" void func_0019BFE8(void* self);
 extern "C" void* func_001A0548(void* self, int a1);
-extern char D_004608A0[];
+extern char str_loading_text[];
 
 struct sVEntryK199938 {
     short delta;
@@ -702,7 +702,7 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
         func_0019A9B8(self);
     }
     void* screen = cList_first((cList*)((char*)self + 0x24));
-    char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004608A0));
+    char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
         char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
         int on = 0;
@@ -1096,7 +1096,7 @@ struct sEquipTable;
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" int func_004165A8(const void* a, const void* b);
-extern char D_004A1950[];
+extern char str_icon[];
 
 struct sPkgEntK19A098 {
     int off;
@@ -1142,7 +1142,7 @@ extern "C" int func_0019A098(void* self, const char* name)
             if (id == -1) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEK19A098a* vt = (sVEK19A098a*)ps2GraphicsMan->mVtbl;
-                *(int*)((char*)self + 0xA68) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, D_004A1950, 0, 1, -1);
+                *(int*)((char*)self + 0xA68) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_icon, 0, 1, -1);
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEK19A098b* vt = (sVEK19A098b*)ps2GraphicsMan->mVtbl;
@@ -1179,7 +1179,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A238);
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_00460820[];
+extern char str_kT_CMNEquipGear[];
 
 struct sVEntry0019A238 {
     short delta;
@@ -1190,7 +1190,7 @@ struct sVEntry0019A238 {
 extern "C" void func_0019A238(void* self)
 {
     if (*(cUIText**)((char*)self + 0x48) != 0) {
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(D_00460820));
+        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNEquipGear));
     }
     char* o = *(char**)((char*)self + 0x60);
     if (o != 0) {
@@ -1218,7 +1218,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A308);
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_00460810[];
+extern char str_kT_CMNBuyGear[];
 
 struct sVEntry0019A308 {
     short delta;
@@ -1229,7 +1229,7 @@ struct sVEntry0019A308 {
 extern "C" void func_0019A308(void* self)
 {
     if (*(cUIText**)((char*)self + 0x48) != 0) {
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(D_00460810));
+        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNBuyGear));
     }
     char* o = *(char**)((char*)self + 0x80);
     if (o != 0) {
@@ -1260,8 +1260,8 @@ extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern "C" void cFEStateCharEquip_updateHeading(void* self, int id);
 extern "C" void func_0019B180(void* self, int id);
 extern int D_004A11D0;
-extern char D_00460810[];
-extern char D_00460820[];
+extern char str_kT_CMNBuyGear[];
+extern char str_kT_CMNEquipGear[];
 
 struct sEquipDetailK19A3D0 {
     char pad_0x000[0x120];
@@ -1279,13 +1279,13 @@ extern "C" void func_0019A3D0(void* self)
         *(int*)((char*)self + 0xC8) = 0;
         func_0019A238(self);
         if (*(cUIText**)((char*)self + 0x50) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(D_00460810));
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(str_kT_CMNBuyGear));
         }
     } else {
         *(int*)((char*)self + 0xC8) = 1;
         func_0019A308(self);
         if (*(cUIText**)((char*)self + 0x50) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(D_00460820));
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(str_kT_CMNEquipGear));
         }
     }
     ((sEquipDetailK19A3D0*)self)->f120 = 0;
@@ -1325,7 +1325,7 @@ extern "C" char* func_0041ACC0(const char* s, int c);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_0019A498(void* self);
-extern char D_004A1958[];
+extern char str_pct_s_pct_spct_s[];
 
 static inline int isDigitK19A4E8(unsigned char c)
 {
@@ -1363,7 +1363,7 @@ extern "C" void func_0019A4E8(void* self, int flag)
             break;
         p++;
     }
-    sprintf((char*)self + 0x960, D_004A1958, (char*)self + 0x960, p, dot);
+    sprintf((char*)self + 0x960, str_pct_s_pct_spct_s, (char*)self + 0x960, p, dot);
 }
 #endif
 
@@ -1378,7 +1378,7 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
 extern "C" void func_0019A9B8(void* self);
-extern char D_004A1960[];
+extern char str_preview[];
 
 struct sVEntryK19A638 {
     short delta;
@@ -1404,7 +1404,7 @@ extern "C" void func_0019A638(void* self)
             if (e != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEntryK19A638* vt = (sVEntryK19A638*)ps2GraphicsMan->mVtbl;
-                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), D_004A1960, 0, 1, -1);
+                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), str_preview, 0, 1, -1);
             } else {
                 *(int*)((char*)self + 0xA70) = -1;
             }
@@ -1481,14 +1481,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern int D_004A18D8;
-extern char D_004608D8[];
-extern char D_004608F0[];
-extern char D_00460908[];
-extern char D_00460920[];
-extern char D_00460940[];
-extern char D_00460958[];
-extern char D_00460970[];
-extern char D_00460988[];
+extern char str_kT_HELPNoItemsCTM[];
+extern char str_kT_HELPBuyItemInCTM[];
+extern char str_kT_HELPBoughtMaxItems[];
+extern char str_kT_FEHELPChooseCatContinue[];
+extern char str_kT_FEHELPItemAvailBuy[];
+extern char str_kT_129HELPSaveCashItem[];
+extern char str_kT_FEYourCurrentOutfit[];
+extern char str_kT_FEHELPRemoveItems[];
 
 static inline int isMode1_A798(void* self)
 {
@@ -1519,36 +1519,36 @@ extern "C" void func_0019A798(void* self)
         (*(cUIObj_A798**)((char*)self + 0x4C))->setVisible(1);
         if (!isMode1_A798(self)) {
             if (*(int*)((char*)self + 0xAE4) != 0)
-                setText_A798(self, D_004608D8);
+                setText_A798(self, str_kT_HELPNoItemsCTM);
             else
-                setText_A798(self, D_004608F0);
+                setText_A798(self, str_kT_HELPBuyItemInCTM);
         } else {
-            setText_A798(self, D_00460908);
+            setText_A798(self, str_kT_HELPBoughtMaxItems);
         }
         return;
     }
     sEquipItem_A798* item = *(sEquipItem_A798**)((char*)self + (sel << 2) + 0x124);
     if (item->flags & 0x20) {
-        setText_A798(self, D_00460920);
+        setText_A798(self, str_kT_FEHELPChooseCatContinue);
     } else if (isMode1_A798(self)) {
         int cost = item->cost;
         if (cost > 0)
             cost *= 10;
         if (*(int*)((char*)self + 0xC0) >= cost)
-            setText_A798(self, D_00460940);
+            setText_A798(self, str_kT_FEHELPItemAvailBuy);
         else
-            setText_A798(self, D_00460958);
+            setText_A798(self, str_kT_129HELPSaveCashItem);
     } else {
         sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC));
         sEquipEntry_A798* e = getEntry_A798(db, item->id);
         int idx = sel - (*(sList_A798**)((char*)self + 0x5C))->top;
         if (D_004A18D8 >= *(int*)((char*)self + 0xC4) + *(int*)((char*)self + (idx << 2) + 0xA78)) {
             if (e->flags & 4)
-                setText_A798(self, D_00460970);
+                setText_A798(self, str_kT_FEYourCurrentOutfit);
             else
-                setText_A798(self, D_00460970);
+                setText_A798(self, str_kT_FEYourCurrentOutfit);
         } else {
-            setText_A798(self, D_00460988);
+            setText_A798(self, str_kT_FEHELPRemoveItems);
         }
     }
     (*(cUIObj_A798**)((char*)self + 0x4C))->setVisible(1);
@@ -2131,7 +2131,7 @@ extern "C" int func_0019B518(void* self);
 extern "C" int func_0019B598(void* self);
 extern "C" void cUIMenu_setScrollableMenu(void* menu, int n);
 extern char D_004C6708[];
-extern char D_004609A0[];
+extern char str_kT_FEEmpty[];
 
 static inline int isMode1_B618(void* self)
 {
@@ -2163,7 +2163,7 @@ extern "C" void func_0019B618(void* self, int reset, int select)
     if (n == 0) {
         (*(cUIObj_B618**)((char*)self + 0x8C))->setVisible(1);
         (*(cUIObj_B618**)((char*)self + 0x8C))->setColor(D_004C6708);
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x8C), GetHashValue32(D_004609A0));
+        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x8C), GetHashValue32(str_kT_FEEmpty));
         (*(sList_B618**)((char*)self + 0x5C))->count = 1;
         (*(sList_B618**)((char*)self + 0x5C))->top = 0;
         v = 0;
@@ -2392,7 +2392,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" int func_0014D448(void* self, int g, int key);
 extern int D_004A11D0;
-extern char D_004609B0[];
+extern char str_kT_FECategories[];
 
 struct sBEEntry38K19BBE0 {
     char pad_0x00[0x14];
@@ -2426,7 +2426,7 @@ extern "C" void cFEStateCharEquip_updateHeading(void* self, int id)
 {
     if (*(cUIText**)((char*)self + 0x58) != 0) {
         if (id == D_004A11D0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(D_004609B0));
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(str_kT_FECategories));
         } else {
             sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), *(int*)((char*)self + 0xBC), id);
             cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(entry->name));
@@ -2842,11 +2842,11 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
 extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int a1, int a2, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern char D_00460790[];
+extern char str_cUIStateBuyPopup[];
 
 extern "C" void func_0019C7E8(void* self, void* item)
 {
-    void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
+    void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
     int price = *(short*)((char*)item + 0xE);
     int id = *(int*)((char*)item + 0x14);
     if (price > 0) {
@@ -3187,7 +3187,7 @@ extern "C" void func_0019CE20(void* self, int flags)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019CE68);
 #ifdef SKIP_ASM
 extern void* D_004A1968;
-extern char D_004609C0[];
+extern char str_BoltFileIndexManager[];
 
 struct sEquipEntryK19CE68 {
     int f0;                // 0x0
@@ -3232,7 +3232,7 @@ extern "C" void func_0019CE68(void* self)
     t->fB4004 = 0;
     t->fB4000 = 0;
     if (D_004A1968 == 0) {
-        D_004A1968 = func_0019CB38(cMemMan_alloc(0x1F44, D_004609C0, 0, 0));
+        D_004A1968 = func_0019CB38(cMemMan_alloc(0x1F44, str_BoltFileIndexManager, 0, 0));
     } else {
         func_0019CB60(D_004A1968);
     }
@@ -3284,7 +3284,7 @@ extern "C" void func_0019D578(sEquipTable_DC20* self, int bank, int size);
 extern "C" void func_0019D738(sEquipTable_DC20* self, int bank, int size);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
-extern char D_004609D8[];
+extern char str_UncompressedData[];
 extern char cMemMan_m_mutex[];
 
 struct sSlotK19D000 {
@@ -3309,12 +3309,12 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
     if (size <= 0)
         return;
     func_0019D578(self, bank, size);
-    void* buf = operator_new_tag(size, D_004609D8, 0x60000000, 0);
+    void* buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     while (buf == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
         func_0019D738(self, bank, size);
-        buf = operator_new_tag(size, D_004609D8, 0x60000000, 0);
+        buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     }
     func_003B47F8(slot->data, buf);
     if (slot->data != 0)
@@ -3685,7 +3685,7 @@ extern "C" void func_0019D578(sEquipTable_DC20* self, int bank, int size);
 extern "C" void func_0019D738(sEquipTable_DC20* self, int bank, int size);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
-extern char D_004609F0[];
+extern char str_Bolt_FileData[];
 extern char cMemMan_m_mutex[];
 
 struct sSlotK19D8B8 {
@@ -3705,12 +3705,12 @@ extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i)
     sSlotK19D8B8* s = &((sSlotK19D8B8*)((char*)self + bank * 0x12000))[i];
     int size = BXFILE_sizez(s->name);
     func_0019D578(self, bank, size);
-    s->data = operator_new_tag(size, D_004609F0, 0x60000000, 0);
+    s->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     while (s->data == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
         func_0019D738(self, bank, size);
-        s->data = operator_new_tag(size, D_004609F0, 0x60000000, 0);
+        s->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     }
     *(int*)((char*)self + 0xB4000) += size;
     if (s->pending != 0) {

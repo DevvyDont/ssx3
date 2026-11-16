@@ -15,7 +15,7 @@ extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* ow
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char cWScriptProcess_vtbl[];
-extern char D_00489850[];
+extern char str_WScriptTasks[];
 
 struct sElem_307598 {
     char pad[0x44];
@@ -64,7 +64,7 @@ extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int sect
     int n = def->count;
     *(int*)((char*)self + 0x4) = n;
     sElem_307598** pv = (sElem_307598**)((char*)self + 0x14);
-    *pv = new (D_00489850, 0x20000000, 0) sElem_307598[n];
+    *pv = new (str_WScriptTasks, 0x20000000, 0) sElem_307598[n];
     char* ed = def->elemDefs;
     for (int k = 0; k < *(int*)((char*)self + 0x4); k++, ed += 0x38)
         cWScriptTask_initTask((cWScriptTask_initTask_sObj*)&(*(sElem_307598**)((char*)self + 0x14))[k], self, (cWScriptTask_initTask_sDef*)ed);
@@ -451,7 +451,7 @@ extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 extern "C" void cWScriptMan_processStart(void* man, void* proc);
-extern char D_00489888[];
+extern char str_ProcessLocalTable[];
 
 /**
  * Starts a world-script process: gives it a fresh local table, runs its start script and starts its first task.
@@ -466,7 +466,7 @@ extern "C" void cWScriptProcess_processStart(cWScriptProcess_processStart_sProc*
     if (self->luno != 0) {
         luno_cLunoTable__cLunoTable(self->luno, 3);
     }
-    self->luno = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
+    self->luno = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
     self->state = 1;
     self->cur = 0;
     if (self->script != 0) {
@@ -739,7 +739,7 @@ public:
     virtual void v02(void* data, int size);
 };
 
-extern char D_00489888[];
+extern char str_ProcessLocalTable[];
 extern "C" int func_003ACA38(void* map, int id);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
@@ -758,7 +758,7 @@ extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
     int has;
     stream->v02(&has, 4);
     if (has) {
-        void* t = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
+        void* t = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
         *(void**)((char*)self + 0x1C) = t;
         luno_cLunoTable_readFromReplayFrame(t, stream, x);
     }
@@ -1389,7 +1389,7 @@ INCLUDE_ASM("wscript/wscriptprocess", func_00308B78);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
-extern const char D_004898C8[];
+extern const char str_cLunoTable_b[];
 
 // PORT: the unit declares func_00308B78 as (void* self); the body also takes the slot index
 void* func_00308B78_impl(void* self, int i) __asm__("func_00308B78");
@@ -1400,7 +1400,7 @@ void* func_00308B78_impl(void* self, int i)
     if (*slot != 0) {
         luno_cLunoTable__cLunoTable(*slot, 3);
     }
-    return *slot = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898C8, 0x20000000, 0), 0x40);
+    return *slot = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_cLunoTable_b, 0x20000000, 0), 0x40);
 }
 #endif
 
@@ -1513,7 +1513,7 @@ struct sWSPDef8DB8 {
 };
 
 struct func_00309DD0_sValue;
-extern const char D_004898D8[];
+extern const char str_SetupLocalTable[];
 extern "C" int cWorld_getNumMissionScripts(void* world, int i);
 extern "C" void* cWorld_getMissionScripts(void* world, int i);
 // PORT: the unit declares cWScriptMan_getScriptCode as (int); its body takes (self, id) and returns an int.
@@ -1533,7 +1533,7 @@ extern "C" void func_00308DB8(void* self)
         int j;
         for (j = 0; j < cnt; j++) {
             if (defs[j].f0 != *(int*)((char*)self + 0x2A0)) {
-                void* table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+                void* table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
                 int h = cWScriptMan_getScriptCode_2(self, defs[j].f4C);
                 if (h != 0) {
                     sWSPValue8DB8 arg;

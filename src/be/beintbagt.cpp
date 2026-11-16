@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A6D8[];
+extern const char str_BEBAGTInt[];
 
 struct sVTableBAGT {
     char pad_0x00[0x10];
@@ -32,7 +32,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
 void* cBEBAGTInterface_getThis()
 {
     if (D_004A1210 == 0) {
-        cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, D_0045A6D8, 0, 0);
+        cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, str_BEBAGTInt, 0, 0);
         D_004A1210 = mem;
         sVTableBAGT* vt = &D_0045ACD8;
         short delta = vt->field_0x10;

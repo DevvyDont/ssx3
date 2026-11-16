@@ -10,7 +10,7 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVStateManager_addPDATemplate();
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_PROFILE_initGeneral(void* self);
-extern char D_00471D50[];
+extern char str_121Profilesave_pda[];
 
 /**
  * Creates the in-game profile save overlay screen ("121Profilesave_pda").
@@ -20,7 +20,7 @@ extern char D_00471D50[];
 extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471D50), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_121Profilesave_pda), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -58,7 +58,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00211380(void* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_00471D68[];
+extern char str_playerpct_d_b[];
 
 struct cSelf_11270 {
     int f0;
@@ -203,7 +203,7 @@ extern "C" void func_00211270(void* p)
     }
     for (int i = 1; i < 7; i++) {
         char buf[64];
-        sprintf(buf, D_00471D68, i);
+        sprintf(buf, str_playerpct_d_b, i);
         cUIObj_11270* o = (cUIObj_11270*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
         o->setSelected(0);
         o->setEnabled(1);
@@ -389,11 +389,11 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsi
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern char D_004700F0[];
-extern char D_00471D68[];
-extern char D_00471D78[];
-extern char D_00471D90[];
-extern char D_00471DA0[];
+extern char str_1percentage_b[];
+extern char str_playerpct_d_b[];
+extern char str_Memory_card_text_b[];
+extern char str_arrowleft_b[];
+extern char str_arrowright_b[];
 
 struct sCol_1380 {
     float r, g, b, a;
@@ -425,16 +425,16 @@ extern "C" void func_00211380(void* p)
     if (self->v42()) {
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
         int first = 0;
-        cUIText_setUnicodeStringWrap(getObj_1380(self, D_00471D78), buf);
+        cUIText_setUnicodeStringWrap(getObj_1380(self, str_Memory_card_text_b), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
         self->v43();
-        cUIObj_1380* o = getObj_1380(self, D_004700F0);
+        cUIObj_1380* o = getObj_1380(self, str_1percentage_b);
         *(sCol_1380*)((char*)o + 0x88) = D_004C66C8_1380;
         (*(cMCSub_1380**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(o, buf);
         o->v09(0);
         for (int i = 1; i < 7; i++) {
-            sprintf(name, D_00471D68, i);
+            sprintf(name, str_playerpct_d_b, i);
             o = getObj_1380(self, name);
             (*(cMCSub_1380**)(mp + 0x434))->v14(i - 1, (char*)self + 0x234);
             cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x234));
@@ -461,13 +461,13 @@ extern "C" void func_00211380(void* p)
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_1380(self, D_00471D90)->v09(0);
+            getObj_1380(self, str_arrowleft_b)->v09(0);
         else
-            getObj_1380(self, D_00471D90)->v09(1);
+            getObj_1380(self, str_arrowleft_b)->v09(1);
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_1380(self, D_00471DA0)->v09(0);
+            getObj_1380(self, str_arrowright_b)->v09(0);
         else
-            getObj_1380(self, D_00471DA0)->v09(1);
+            getObj_1380(self, str_arrowright_b)->v09(1);
     }
 }
 #endif
@@ -490,10 +490,10 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A2090[];
-extern char D_004A2568[];
-extern char D_00471DB0[];
-extern char D_004A20A0[];
+extern char str_ps2x_b[];
+extern char str_x_save[];
+extern char str_delete_text[];
+extern char str_ps2sq_b[];
 
 extern "C" void func_00211850(void* self, bool show)
 {
@@ -503,13 +503,13 @@ extern "C" void func_00211850(void* self, bool show)
     }
     if (*(int*)((char*)self + 0x230) != on) {
         int off = !on;
-        cUIObj_211850* a = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
+        cUIObj_211850* a = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
         if (a != 0) {
             a->setVisible(off);
         }
-        ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(off);
-        ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471DB0)))->setVisible(off);
-        cUIObj_211850* d = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0));
+        ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
+        ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(off);
+        cUIObj_211850* d = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b));
         if (d != 0) {
             d->setVisible(off);
         }
@@ -536,13 +536,13 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_00471DB0[];
-extern char D_004A20A0[];
+extern char str_delete_text[];
+extern char str_ps2sq_b[];
 
 extern "C" void func_00211970(void* self, bool on)
 {
-    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471DB0)))->setVisible(!on);
-    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A20A0)))->setVisible(!on);
+    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(!on);
+    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
     *(int*)((char*)self + 0x220) = !on;
 }
 #endif
@@ -565,13 +565,13 @@ public:
 };
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A2090[];
-extern char D_004A2568[];
+extern char str_ps2x_b[];
+extern char str_x_save[];
 
 extern "C" void func_00211A08(void* self, int a1, bool on)
 {
-    cUIObj_211A08* a = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2090));
-    ((cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2568)))->setVisible(!on);
+    cUIObj_211A08* a = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+    ((cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
     *(int*)((char*)self + 0x224) = !on;
     a->setVisible(!on);
 }
@@ -718,9 +718,9 @@ extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern char D_00471DC0[];
-extern char D_00471DD8[];
-extern char D_00471DE8[];
+extern char str_kT_MEMPlayerName_c[];
+extern char str_Keyboard_b[];
+extern char str_kT_KEYUserName_b[];
 
 struct sVEntryK211BC8 {
     short delta;
@@ -796,7 +796,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
         if (strlen(name) != 0) {
             func_00147138(player, self->slot, name);
         } else {
-            strcpy2(fmt, GetText_K211BC8(D_00471DC0));
+            strcpy2(fmt, GetText_K211BC8(str_kT_MEMPlayerName_c));
             sprintf(buf, fmt, self->slot + 1);
             func_00147138(player, self->slot, buf);
         }
@@ -815,7 +815,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
         ((sMgrK211BC8*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
         if (self->state == 1) {
             if (self->keyboard == 0) {
-                char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, D_00471DD8, 0x100, 0), self->engine, vself, 0, self->f15);
+                char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_Keyboard_b, 0x100, 0), self->engine, vself, 0, self->f15);
                 self->keyboard = kb;
                 *(int*)(kb + 0x140) = 0x37;
                 cKeyboardPopup_setMaxCharacters(self->keyboard, 8);
@@ -834,7 +834,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0x42, 0, 2);
                 cKeyboardPopup_setMinCharacters(self->keyboard, 1);
             }
-            cKeyboardPopup_setStatic(self->keyboard, GetText_K211BC8(D_00471DE8));
+            cKeyboardPopup_setStatic(self->keyboard, GetText_K211BC8(str_kT_KEYUserName_b));
             *(int*)(self->keyboard + 0x54) = 1;
             cKeyboardPopup_setInputText(self->keyboard, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->slot));
             cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, self->keyboard);
@@ -886,7 +886,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004A2138[];
-extern char D_00471D68[];
+extern char str_playerpct_d_b[];
 
 /**
  * Numbers the six profile slot rows of the profile overlay.
@@ -901,7 +901,7 @@ extern "C" void cOVState_PROFILE_initGeneral(void* self)
     for (i = 1; i < 7; i++) {
         sprintf(buf, D_004A2138, i);
         cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)), buf);
-        sprintf(buf, D_00471D68, i);
+        sprintf(buf, str_playerpct_d_b, i);
         *(int*)((char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)) + 0x18) = i - 1;
     }
 }
@@ -933,7 +933,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern char D_00471E28[];
+extern char str_122Autosave[];
 
 /**
  * Creates the autosave overlay screen ("122Autosave") and runs the common overlay set-up.
@@ -941,7 +941,7 @@ extern char D_00471E28[];
 extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00471E28), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_122Autosave), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -1031,7 +1031,7 @@ struct sObj002122E8 {
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self);
-extern char D_00471E38[];
+extern char str_autosave_text[];
 
 /**
  * Shows the autosave indicator while a memory card operation is running.
@@ -1045,7 +1045,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
     if (status != 0 && status != 6) {
         cOVState_AUTOSAVE_displayOn(self);
     } else {
-        sObj002122E8* autosaveText = (sObj002122E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
+        sObj002122E8* autosaveText = (sObj002122E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_autosave_text));
         autosaveText->vt[9].fn((char*)autosaveText + autosaveText->vt[9].delta, 0);
     }
 }
@@ -1061,9 +1061,9 @@ extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a2, int a3, in
 extern "C" void cUIThing_deleteAnimation(void* obj);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern char D_004A2770[];
-extern char D_00471E48[];
-extern char D_00471E58[];
+extern char str_exclam_b[];
+extern char str_at_pulsingicon[];
+extern char str_kT_MEMAutosaving[];
 
 class cUIObj_2360 {
 public:
@@ -1094,22 +1094,22 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
         return;
     }
     *(int*)((char*)self + 0x230) = processState;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2770));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_exclam_b));
     if (obj == 0) {
         return;
     }
     if (*(int*)((char*)self + 0x1A8) != 0 && func_0023C898(mp) == 0 && *(int*)((char*)self + 0x1C0) != 6) {
         void* bank = *(char**)((char*)self + 0x10) + 0x50;
-        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_00471E48));
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_pulsingicon));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
         }
-        cUIObj_2360* autosaveText = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
+        cUIObj_2360* autosaveText = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_autosave_text));
         autosaveText->setVisible(1);
-        cUIText_setUnicodeStringByID((cUIText*)autosaveText, GetHashValue32(D_00471E58));
+        cUIText_setUnicodeStringByID((cUIText*)autosaveText, GetHashValue32(str_kT_MEMAutosaving));
     } else {
         cUIThing_deleteAnimation(obj);
-        ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38)))->setVisible(0);
+        ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_autosave_text)))->setVisible(0);
     }
 }
 #endif
@@ -1133,9 +1133,9 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onDestroyScreen);
 #ifdef SKIP_ASM
 extern int D_004A11B8;
 extern int D_00535C08[];
-extern char D_00471E70[];
-extern char D_00471E80[];
-extern char D_00471E90[];
+extern char str_cFEStateTitle_b[];
+extern char str_cFEStateLodge_b[];
+extern char str_cPreGameLoadScreen_b[];
 struct cAppMan;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1167,10 +1167,10 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
     if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);
     } else if (parentScreen == 6) {
-        void* nextState = func_00194738(cMemMan_alloc(0x4C, D_00471E70, 0, 0), *(void**)((char*)self + 0x10));
+        void* nextState = func_00194738(cMemMan_alloc(0x4C, str_cFEStateTitle_b, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
     } else if (parentScreen == 7) {
-        void* nextState = func_001F3700(cMemMan_alloc(0x58, D_00471E80, 0, 0), *(void**)((char*)self + 0x10));
+        void* nextState = func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge_b, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
     } else if (parentScreen == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1181,7 +1181,7 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
         D_004A11B8 = 1;
         sVEnt_00212508* vt = *(sVEnt_00212508**)((char*)race + 0xC);
         vt[1].fn((char*)race + vt[1].delta);
-        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_00471E90, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_b, 0x100, 0)));
     }
 }
 #endif

@@ -8,7 +8,7 @@ INCLUDE_ASM("util/locale", cFELocale_addFile);
 // operator new gives gcc's malloc-like (REG_NOALIAS) aliasing that the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_002C6E98(void* file, const char* name, signed char lang);
-extern char D_004603F0[];
+extern char str_LocaleFile[];
 extern const char* D_00441138[];
 extern signed char D_00441188[];
 
@@ -39,7 +39,7 @@ extern "C" void cFELocale_addFile(void* self, int lang)
     if (i >= 0) {
         cFELocale_sFiles* arr = (cFELocale_sFiles*)((char*)self + 8);
         if (arr->items[i] == 0) {
-            cFELocale_sFile* file = (cFELocale_sFile*)operator new(0x14, D_004603F0, 0, 0);
+            cFELocale_sFile* file = (cFELocale_sFile*)operator new(0x14, str_LocaleFile, 0, 0);
             arr->items[i] = file;
             file->lang = -1;
             file->f4 = 0;
@@ -342,8 +342,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int GetHashValue32(char*);
 extern void* cFEStateAudioOptions_vtbl[];
-extern char D_0045DA48[];
-extern char D_0045DA38[];
+extern char str_checkbox[];
+extern char str_empty_box[];
 
 /**
  * Constructs the audio options state for one player.
@@ -378,10 +378,10 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     }
     *(int*)(selfBytes + 0x74) = inStore;
     char* engineObj = *(char**)(selfBytes + 0x10);
-    int hash = GetHashValue32(D_0045DA48);
+    int hash = GetHashValue32(str_checkbox);
     *(void**)(selfBytes + 0x5C) = func_00398380(engineObj + 0x58, hash);
     char* engineObj2 = *(char**)(selfBytes + 0x10);
-    int h2 = GetHashValue32(D_0045DA38);
+    int h2 = GetHashValue32(str_empty_box);
     *(void**)(selfBytes + 0x60) = func_00398380(engineObj2 + 0x58, h2);
     *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
@@ -395,9 +395,9 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
 INCLUDE_ASM("util/locale", cFEStateAudioOptions_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
-extern char D_004A18A8[];
-extern char D_00460400[];
-extern char D_00460410[];
+extern char str_hud[];
+extern char str_142audio_pda[];
+extern char str_140audio[];
 class cFEStateAudioOptions_onDestroyScreen_cObj;
 extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(void* list, int hash);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -445,13 +445,13 @@ extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
 {
     char* name;
     if ((void*)SSXApp->Game != 0) {
-        name = D_00460400;
-        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        name = str_142audio_pda;
+        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->v24(3, 0);
         }
     } else {
-        name = D_00460410;
+        name = str_140audio;
         func_0028F140(func_0028B180(), 4);
     }
     void* engine = *(void**)((char*)self + 0x10);
@@ -468,7 +468,7 @@ INCLUDE_ASM("util/locale", cFEStateAudioOptions_onDestroyScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
 void* cUIState_onDestroyScreen(void* self);
-extern char D_004A18A8[];
+extern char str_hud[];
 
 class cFEStateAudioOptions_onDestroyScreen_cObj {
 public:
@@ -508,7 +508,7 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 extern "C" void cFEStateAudioOptions_onDestroyScreen(void* self)
 {
     if ((void*)SSXApp->Game != 0) {
-        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->v24(4, 0);
         }

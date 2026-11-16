@@ -8,7 +8,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
 extern "C" void func_00116FA8(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004A1078[];
+extern char str_cHUDFX[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -36,7 +36,7 @@ extern "C" void cRiderMetrix_linkToRider(char* self, char* rider)
     {
         sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(self + 0x1B0);
         *(int*)(self + 0x1B4) = 0x2C;
-        *slot = new (operator_new_tag(0x2C * sizeof(sMetrixEntry_001172E0), D_004A1078, 0, 0)) sMetrixEntry_001172E0[0x2C];
+        *slot = new (operator_new_tag(0x2C * sizeof(sMetrixEntry_001172E0), str_cHUDFX, 0, 0)) sMetrixEntry_001172E0[0x2C];
         for (int i = 0; i < *(int*)(self + 0x1B4); i++)
         {
             ((sMetrixEntry_001172E0*)(i * 0x9C + *(int*)(self + 0x1B0)))->index = i;
@@ -798,11 +798,11 @@ extern "C" void cSSXAudio_StartUberSpin(void* audio, void* rider);
 extern "C" void cSSXAudio_EndUberSpin(void* audio, void* rider);
 extern "C" void func_00299638(void* audio, void* rider);
 extern "C" void cSSXAudio_LoseMaxPowerEvent(void* audio, void* rider);
-extern char D_00457820[];
-extern char D_00457830[];
-extern char D_00457840[];
-extern char D_00457850[];
-extern char D_00457860[];
+extern char str_STALLED[];
+extern char str_OFF_AXIS[];
+extern char str_INVERTED[];
+extern char str_LATE_SPIN[];
+extern char str_LATE_FLIP[];
 
 struct sSlot_117FE0 {
     int type;               // 0x0
@@ -1038,7 +1038,7 @@ extern "C" void func_00117FE0(void* vself)
                     float m = 0.0f;
                     float ad = abs_117FE0(diff);
                     if (ad > 2.7488937377929688f) {
-                        cRiderMetrix_addHUDfx(self, 0xE, D_00457820, -1.0f, 1);
+                        cRiderMetrix_addHUDfx(self, 0xE, str_STALLED, -1.0f, 1);
                         kind = 1;
                         if (abs_117FE0(yaw) > 2.7488937377929688f || abs_117FE0(yaw) < 0.39269912242889404f) {
                             m = 1.0f;
@@ -1051,24 +1051,24 @@ extern "C" void func_00117FE0(void* vself)
                         float p = diff * yaw;
                         if ((p > 0.0f && abs_117FE0(yaw) > 1.5707964897155762f) || (p < 0.0f && abs_117FE0(yaw) < 1.5707964897155762f)) {
                             if (w2 > 0.10000000149011612f) {
-                                cRiderMetrix_addHUDfx(self, 0xE, D_00457830, -1.0f, 2);
+                                cRiderMetrix_addHUDfx(self, 0xE, str_OFF_AXIS, -1.0f, 2);
                                 m = 3.0f;
                                 kind = 2;
                             }
                         } else if (w1 > 0.10000000149011612f) {
-                            cRiderMetrix_addHUDfx(self, 0xE, D_00457840, -1.0f, 3);
+                            cRiderMetrix_addHUDfx(self, 0xE, str_INVERTED, -1.0f, 3);
                             m = 2.0f;
                             kind = 3;
                         }
                     } else if (ad > 0.39269912242889404f) {
                         float aa = abs_117FE0(angle);
                         if (aa < 0.7853982448577881f || aa > 2.3561947345733643f) {
-                            cRiderMetrix_addHUDfx(self, 0xE, D_00457850, -1.0f, 4);
+                            cRiderMetrix_addHUDfx(self, 0xE, str_LATE_SPIN, -1.0f, 4);
                             m = 1.0f;
                             kind = 4;
                         } else {
                             m = 2.0f;
-                            cRiderMetrix_addHUDfx(self, 0xE, D_00457860, -1.0f, 5);
+                            cRiderMetrix_addHUDfx(self, 0xE, str_LATE_FLIP, -1.0f, 5);
                             kind = 5;
                         }
                     }
@@ -1989,7 +1989,7 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount)
 #endif
 
 extern "C" void cRiderMetrix_addHUDfx(void* self, int a, const char* b, float c, int d);
-extern const char D_00457888[];
+extern const char str_Wrong_Way[];
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAutoResetSurface__FPv);
@@ -2001,7 +2001,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAutoResetSurface__FPv);
  */
 float cRiderMetrix_evAutoResetSurface(void* self)
 {
-    cRiderMetrix_addHUDfx(self, 0x33, D_00457888, 1.5f, 0);
+    cRiderMetrix_addHUDfx(self, 0x33, str_Wrong_Way, 1.5f, 0);
     return 0.0f;
 }
 #endif

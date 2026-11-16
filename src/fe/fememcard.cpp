@@ -5,8 +5,8 @@
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_0045DC70[];
-extern char D_0045DC80[];
+extern char str_06cAutoload[];
+extern char str_mc_messages[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -35,20 +35,20 @@ public:
 extern "C" void cFEStateMemCard_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DC70), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_06cAutoload), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cSSXApp_getMCManager(SSXApp);
-    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DC80)))->v09(0);
+    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->v09(0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_00186BF0);
 #ifdef SKIP_ASM
-extern char D_004A14C0[];
+extern char str_exclam[];
 extern "C" void func_001D8DE0(void* self);
 extern "C" int func_0023C898(void* mp);
 extern "C" void cUIThing_deleteAnimation(void* obj);
@@ -71,11 +71,11 @@ extern "C" void func_00186BF0(void* self)
 {
     func_001D8DE0(self);
     if (func_0023C898(cSSXApp_getMCManager(SSXApp)) != 0 || *(int*)((char*)self + 0x1C0) == 6) {
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A14C0));
+        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_exclam));
         if (obj != 0) {
             cUIThing_deleteAnimation(obj);
         }
-        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DC80)))->v09(0);
+        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->v09(0);
     }
 }
 #endif
@@ -84,7 +84,7 @@ extern "C" void func_00186BF0(void* self)
 INCLUDE_ASM("fe/fememcard", func_00186C98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_0045DC90[];
+extern char str_kT_MEMOVNotFormattedPS2[];
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
@@ -157,7 +157,7 @@ extern "C" void func_00186C98(void)
     func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVtEntK186C98* vt = *(sVtEntK186C98**)(o + 4);
-    unsigned short* r = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045DC90));
+    unsigned short* r = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMOVNotFormattedPS2));
     sprintf1(buf, r, &loc);
     cFEMemCardStateK186C98* st = D_004A14B8_K186C98;
     *(int*)((char*)st + 0x19C) = 4;
@@ -172,9 +172,9 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00152BA8();
-extern char D_0045DCA8[];
-extern char D_0045DCC8[];
-extern char D_0045DCD8[];
+extern char str_kT_MEMFENotDetectedStartUpPS2[];
+extern char str_kT_CMNYes[];
+extern char str_kT_MEMOVRetry[];
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // Typed view of D_004A14B8 (other functions in this unit declare it as void*).
@@ -202,7 +202,7 @@ extern "C" void func_00186D60(void)
     char* lo = (char*)SSXApp->FELocale;
     sVtS_86D60* lvt = *(sVtS_86D60**)(lo + 4);
     lo += lvt[4].delta;
-    unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(D_0045DCA8));
+    unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(str_kT_MEMFENotDetectedStartUpPS2));
     sprintf1(b, fmt, &loc, need);
     char* st = D_004A14B8_86D60;
     *(int*)(st + 0x19C) = 9;
@@ -216,7 +216,7 @@ extern "C" void func_00186D60(void)
         sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
         w += wvt[26].delta;
         lo2 += lvt2[4].delta;
-        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(D_0045DCC8)), 0);
+        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(str_kT_CMNYes)), 0);
     }
     {
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
@@ -225,7 +225,7 @@ extern "C" void func_00186D60(void)
         sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
         w += wvt[26].delta;
         lo2 += lvt2[4].delta;
-        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(D_0045DCD8)), 1);
+        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(str_kT_MEMOVRetry)), 1);
     }
     char* w2 = *(char**)(D_004A14B8_86D60 + 0x218);
     sVtV_86D60* vvt = *(sVtV_86D60**)(w2 + 8);
@@ -506,8 +506,8 @@ extern "C" void func_00187318(void* self)
 INCLUDE_ASM("fe/fememcard", func_00187360);
 #ifdef SKIP_ASM
 extern void* D_004A14B8;
-extern char D_0045DCE8[];
-extern char D_0045DCD8[];
+extern char str_kT_MEMNoSpaceStartPS2[];
+extern char str_kT_MEMOVRetry[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -557,7 +557,7 @@ extern "C" void func_00187360(void)
     func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVtS_00187360* vt = *(sVtS_00187360**)(o + 4);
-    unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045DCE8));
+    unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
     sprintf1(buf, fmt, &loc, size);
     D_004A14B8_K186C98->v36(buf, 0, 0, 0, 0, 0);
     char* box = *(char**)((char*)D_004A14B8 + 0x218);
@@ -566,7 +566,7 @@ extern "C" void func_00187360(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVtI_00187360* vt2 = *(sVtI_00187360**)(o2 + 4);
     char* o2this = o2 + vt2[4].delta;
-    int id = vt2[4].fn(o2this, GetHashValue32(D_0045DCD8));
+    int id = vt2[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     bvt[26].fn(bthis, id, 1);
     char* box2 = *(char**)((char*)D_004A14B8 + 0x218);
     sVtV_00187360* bvt2 = *(sVtV_00187360**)(box2 + 8);
@@ -695,7 +695,7 @@ struct sVtEntK1876A8 {
 extern "C" void func_001876A8(void)
 {
     void* st = D_004A14B8;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(D_0045DC80));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
     void* mp = cSSXApp_getMCManager(SSXApp);
     int e = *(int*)((char*)mp + 0x130);
     if (e == 0x1F || e == 0x21 || e == 0x20 || e == 0x22 || e == 0x31 || e == 0x32 || e == 0x33
@@ -718,9 +718,9 @@ INCLUDE_ASM("fe/fememcard", func_001877B0);
 extern void* D_004A14B8;
 extern int D_004A14BC;
 extern int D_004A14B4;
-extern char D_004A14C0[];
-extern char D_004A14C8[];
-extern char D_0045DD00[];
+extern char str_exclam[];
+extern char str_pct_s_pct_s_c[];
+extern char str_at_loadanim[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -766,16 +766,16 @@ extern "C" void func_001877B0(void)
     sVtEnt_001877B0* vt = *(sVtEnt_001877B0**)((char*)mp + 0x748);
     vt[1].fn((char*)mp + vt[1].delta, 0x35);
     func_00241D40_r(mp, 1, name, 0x14);
-    func_002C2540(fmt, D_004A14C8);
+    func_002C2540(fmt, str_pct_s_pct_s_c);
     func_00241AA0_r(desc, 0x10);
     sprintf1((unsigned short*)((char*)D_004A14B8 + 0x11C), fmt, desc, name);
     func_001D9308(D_004A14B8, 1);
     void* st = D_004A14B8;
     *(int*)((char*)st + 0x1A8) = 1;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(D_004A14C0));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
     if (obj) {
         void* bank = (char*)*(void**)((char*)D_004A14B8 + 0x10) + 0x50;
-        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_0045DD00));
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
         if (anim)
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
     }
@@ -785,7 +785,7 @@ extern "C" void func_001877B0(void)
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187920);
 #ifdef SKIP_ASM
-extern char D_0045DD00[];
+extern char str_at_loadanim[];
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: func_00152948__FPv ignores its argument; this caller passes none.
@@ -817,10 +817,10 @@ extern "C" void func_00187920(void)
     vt[1].fn((char*)mp + vt[1].delta, 0x35);
     void* st = D_004A14B8;
     *(int*)((char*)st + 0x1BC) = two;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(D_004A14C0));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
     if (obj) {
         void* bank = (char*)*(void**)((char*)D_004A14B8 + 0x10) + 0x50;
-        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_0045DD00));
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
         if (anim)
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
     }

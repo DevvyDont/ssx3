@@ -8,10 +8,10 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_0045DB80[];
-extern char D_0045DB90[];
-extern char D_0045DBA0[];
-extern char D_0045DBB0[];
+extern char str_26credits[];
+extern char str_Menu0000[];
+extern char str_Bitmap0000[];
+extern char str_Bitmap0001[];
 
 struct sVEntryK185A98 {
     short delta;
@@ -28,21 +28,21 @@ struct sVEntryK185A98 {
 extern "C" void cFEStateCredits_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045DB80), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_26credits), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000));
     if (menu != 0)
         *(int*)(menu + 0x90) |= 8;
-    char* bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBA0));
+    char* bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0000));
     *(void**)((char*)self + 0x58) = bitmap;
     if (bitmap != 0) {
         sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
         vt[9].fn(bitmap + vt[9].delta, 0);
     }
-    bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBB0));
+    bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0001));
     *(void**)((char*)self + 0x58) = bitmap;
     if (bitmap != 0) {
         sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
@@ -59,15 +59,15 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
 extern "C" void cFEState_onGainFocus(void* self, void* a1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0045DBC0[];
-extern char D_0045DBD0[];
-extern char D_0045DBE0[];
-extern char D_0045DBF0[];
-extern char D_0045DC00[];
-extern char D_0045DC10[];
-extern char D_0045DC20[];
-extern char D_0045DC30[];
-extern char D_0045DC40[];
+extern char str_TextScroll[];
+extern char str_kT_CREDITSpct_03d[];
+extern char str_kT_CREDITS006a[];
+extern char str_kT_CREDITS006b[];
+extern char str_kT_CREDITS074a[];
+extern char str_kT_CREDITS087[];
+extern char str_kT_CREDITS088[];
+extern char str_kT_CREDITS147[];
+extern char str_kT_CREDITS148[];
 
 class cUIObjK185BA0 {
 public:
@@ -106,7 +106,7 @@ public:
  */
 extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
 {
-    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBC0));
+    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextScroll));
     *(cUIObjK185BA0**)((char*)self + 0x5C) = textScroll;
     if (textScroll != 0)
     {
@@ -119,47 +119,47 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
         (*(cUIObjK185BA0**)((char*)self + 0x5C))->v09(0);
         for (i = 0; i < 7; i++)
         {
-            sprintf(buf, D_0045DBD0, i);
+            sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DBE0));
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DBF0));
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS006a));
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS006b));
         for (i = 7; i < 0x2F; i++)
         {
-            sprintf(buf, D_0045DBD0, i);
+            sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
         for (i = 0x31; i < 0x4B; i++)
         {
-            sprintf(buf, D_0045DBD0, i);
+            sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DC00));
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS074a));
         for (i = 0x4B; i < 0x51; i++)
         {
-            sprintf(buf, D_0045DBD0, i);
+            sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DC10));
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DC20));
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS087));
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS088));
         for (i = 0x5A; i < 0x92; i++)
         {
-            sprintf(buf, D_0045DBD0, i);
+            sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DC30));
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(D_0045DC40));
-        sprintf(buf, D_0045DBD0, 0x96);
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS147));
+        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS148));
+        sprintf(buf, str_kT_CREDITSpct_03d, 0x96);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        sprintf(buf, D_0045DBD0, 0x97);
+        sprintf(buf, str_kT_CREDITSpct_03d, 0x97);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        sprintf(buf, D_0045DBD0, 0x98);
+        sprintf(buf, str_kT_CREDITSpct_03d, 0x98);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        sprintf(buf, D_0045DBD0, 0x99);
+        sprintf(buf, str_kT_CREDITSpct_03d, 0x99);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         for (i = 0x9A; i < 0xA8; i++)
         {
-            sprintf(buf, D_0045DBD0, i);
+            sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
     }
@@ -451,7 +451,7 @@ INCLUDE_ASM("fe/festatecredits", cFEState_onGainFocus);
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
-extern char D_004A1398[];
+extern char str_Menu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" signed char func_001A06F0(void* self, int a1);
@@ -475,7 +475,7 @@ extern "C" void cFEState_onGainFocus(void* self, void* pPrevState)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {
-        void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1398));
+        void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (menu != 0) {
             cUIMenu_setSelectedByIndex(menu, func_001A06F0(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
         }
@@ -490,7 +490,7 @@ INCLUDE_ASM("fe/festatecredits", func_001865A8);
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
-extern char D_004A1398[];
+extern char str_Menu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_001A0708(void* self, int a1, int a2);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
@@ -500,7 +500,7 @@ extern "C" void func_001865A8(void* self)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {
-        void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004A1398));
+        void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (obj != 0) {
             func_001A0708(&D_004A4E80, *(signed char*)((char*)self + 0xC), *(signed char*)((char*)obj + 0x95));
         }

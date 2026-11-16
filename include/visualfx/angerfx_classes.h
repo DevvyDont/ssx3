@@ -46,7 +46,7 @@ public:
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
-extern char D_00487518[];
+extern char str_cAngerFX[];
 
 extern "C" void func_002D4BE0_erFX(void* self) __asm__("func_002D4BE0");
 

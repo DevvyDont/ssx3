@@ -2,7 +2,7 @@
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_0045A848[];
+extern const char str_BEMissionInt[];
 extern void* D_0045ADF8[16];
 extern void* D_004A1238;
 
@@ -23,7 +23,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getThis__Fv);
 void* cBEMissionInterface_getThis()
 {
     if (D_004A1238 == 0) {
-        cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(0x14, D_0045A848, 0, 0);
+        cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(0x14, str_BEMissionInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045ADF8;
         D_004A1238 = mem;

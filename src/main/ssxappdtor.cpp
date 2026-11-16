@@ -2005,7 +2005,7 @@ extern unsigned int D_004A20CC_4B48 __asm__("D_004A20CC");
 extern int D_004428F8[];
 extern int D_004428FC[];
 extern int D_00442920[];
-extern char D_0047B798[];
+extern char str_90bc_fail_b[];
 
 // A script message (cWScriptQueueEntry).
 struct sMsg_4B48 {
@@ -2104,7 +2104,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
             }
             if (msg->type == 9) {
                 cWScriptMan_doMissionCmd(self->script, msg->a, 5, msg->c);
-                if (cUIStateStack_findState(&self->ui->states, GetHashValue32(D_0047B798)) == 0) {
+                if (cUIStateStack_findState(&self->ui->states, GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     D_005366E8[++D_004A2A54] = 3;
                     D_004A2A50 = D_004428FC[0];
@@ -2335,21 +2335,21 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern char D_004A2AD8[];
-extern char D_004A2AC0[];
-extern char D_0047B988[];
+extern char str_supopup[];
+extern char str_Title_b[];
+extern char str_Do_you_want_to_display_the_game_in_Progr[];
 
 extern "C" void func_00245248(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004A2AD8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_supopup), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2AC0));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_b));
     if (text != 0) {
-        cUIText_setAsciiString(text, D_0047B988);
+        cUIText_setAsciiString(text, str_Do_you_want_to_display_the_game_in_Progr);
     }
 }
 #endif
@@ -2362,7 +2362,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_0039E2A0(void* self, void* owner);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0047B9C0[];
-extern char D_004A2AC8[];
+extern char str_yes_c[];
 extern void* D_0047DA58[];
 
 struct sUIObj_2452D8 {
@@ -2406,7 +2406,7 @@ extern "C" void func_002452D8(void* self, char* msg, int type)
     if (type != 5) {
         return;
     }
-    if (isHash_2452D8(*(int*)(msg + 0x38), D_004A2AC8)) {
+    if (isHash_2452D8(*(int*)(msg + 0x38), str_yes_c)) {
         sUIObj_2452D8* o = newUIObj_2452D8(self, 0);
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, o);
         ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].delta, 1);
@@ -2450,22 +2450,22 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void func_00246CF8(void* self, int a1);
 extern signed char D_00535C11[];
-extern char D_0047BA28[];
-extern char D_0047BA38[];
+extern char str_102MPMatch[];
+extern char str_99QPEvent[];
 
 extern "C" void func_00245418(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
         void* engine = *(void**)((char*)self + 0x10);
-        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BA28), 0);
+        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_102MPMatch), 0);
         *(void**)((char*)self + 0x40) = screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
     } else {
         void* engine = *(void**)((char*)self + 0x10);
-        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BA38), 0);
+        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_99QPEvent), 0);
         *(void**)((char*)self + 0x40) = screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
@@ -2480,7 +2480,7 @@ extern "C" void func_00245418(void* self)
 INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 #ifdef SKIP_ASM
 extern char D_004A2BC8[];
-extern char D_004A2BD0[];
+extern char str_pct_3dpct_pct[];
 extern char* D_004A5B64;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
@@ -2490,7 +2490,7 @@ extern "C" int func_002454F8(void* self, int refresh)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        sprintf2(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(D_004A5B64 + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     if (refresh != 0) {
@@ -2542,12 +2542,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00245628);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern char D_0047BCC8[];
+extern char str_118loadoutlodge[];
 
 extern "C" void func_00245628(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BCC8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_118loadoutlodge), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -2567,7 +2567,7 @@ void func_00245690(void* self)
 INCLUDE_ASM("main/ssxappdtor", func_00245698);
 #ifdef SKIP_ASM
 extern char D_004A2BC8[];
-extern char D_004A2BD0[];
+extern char str_pct_3dpct_pct[];
 extern char* D_004A5B64;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
@@ -2577,7 +2577,7 @@ extern "C" int func_00245698(void* self)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        sprintf2(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(D_004A5B64 + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -2604,11 +2604,11 @@ INCLUDE_ASM("main/ssxappdtor", func_00245730);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int func_00147618(void* iface, int a1);
-extern char D_0047BCD8[];
-extern char D_0047BCE8[];
-extern char D_0047BCF8[];
-extern char D_0047BD08[];
-extern char D_0047BD18[];
+extern char str_110ctrl_load[];
+extern char str_CtrlPS2_default[];
+extern char str_CtrlPS2_pro[];
+extern char str_default_text_b[];
+extern char str_pro_text_b[];
 
 class cUIObj_245730 {
 public:
@@ -2628,20 +2628,20 @@ public:
 extern "C" void func_00245730(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* scr = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0047BCD8), 0);
+    void* scr = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_110ctrl_load), 0);
     *(void**)((char*)self + 0x40) = scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
-    char* ctrlDefault = D_0047BCE8;
-    char* ctrlPro = D_0047BCF8;
+    char* ctrlDefault = str_CtrlPS2_default;
+    char* ctrlPro = str_CtrlPS2_pro;
     int r = func_00147618(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     cUIObj_245730* o;
     o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ctrlDefault));
     if (o != 0) {
         o->setVisible(r == 0);
     }
-    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BD08));
+    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_default_text_b));
     if (o != 0) {
         o->setVisible(r == 0);
     }
@@ -2649,7 +2649,7 @@ extern "C" void func_00245730(void* self)
     if (o != 0) {
         o->setVisible(r != 0);
     }
-    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0047BD18));
+    o = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pro_text_b));
     if (o != 0) {
         o->setVisible(r != 0);
     }
@@ -2668,7 +2668,7 @@ void func_002458B0(void* self)
 INCLUDE_ASM("main/ssxappdtor", func_002458B8);
 #ifdef SKIP_ASM
 extern char D_004A2BC8[];
-extern char D_004A2BD0[];
+extern char str_pct_3dpct_pct[];
 extern char* D_004A5B64;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
@@ -2678,7 +2678,7 @@ extern "C" int func_002458B8(void* self)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        sprintf2(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(D_004A5B64 + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;

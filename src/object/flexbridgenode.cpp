@@ -11,11 +11,11 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* 
 void cMemMan_free(void*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_0048E778[];
-extern char D_0048E788[];
-extern char D_0048E798[];
-extern char D_0048E7A8[];
-extern char D_0048E7B8[];
+extern char str_BridgeVerts[];
+extern char str_BridgeNorms[];
+extern char str_BridgeFaces[];
+extern char str_TempBridgeUVs[];
+extern char str_TempBridgeRGBs[];
 
 struct sGridV3 {
     float x, y, z;
@@ -139,15 +139,15 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridVEntry* vtEntry = &(((sGridVEntry*)world->mVtbl))[76];
     self->mesh = (sGridMesh*)vtEntry->fn((char*)world + vtEntry->delta, n, 2, 0x20000000);
     sGridV4*& pts0 = self->pts[0];
-    pts0 = new (D_0048E778, 0x20000000, 0) sGridV4[nverts];
+    pts0 = new (str_BridgeVerts, 0x20000000, 0) sGridV4[nverts];
     sGridV4*& pts1 = self->pts[1];
-    pts1 = new (D_0048E788, 0x20000000, 0) sGridV4[nverts];
-    self->idx = new (D_0048E798, 0x20000000, 0) unsigned char[ntris * 3];
+    pts1 = new (str_BridgeNorms, 0x20000000, 0) sGridV4[nverts];
+    self->idx = new (str_BridgeFaces, 0x20000000, 0) unsigned char[ntris * 3];
     sGridV3 pos[4];
     sGridV2 uvs[4];
     sGridCol cols[4];
-    sGridV2* uv = new (D_0048E7A8, 0x100, 0) sGridV2[nverts];
-    sGridCol* col = new (D_0048E7B8, 0x100, 0) sGridCol[nverts];
+    sGridV2* uv = new (str_TempBridgeUVs, 0x100, 0) sGridV2[nverts];
+    sGridCol* col = new (str_TempBridgeRGBs, 0x100, 0) sGridCol[nverts];
     sGridVEntryV* e2 = &(((sGridVEntryV*)world->mVtbl))[97];
     e2->fn((char*)world + e2->delta, self->def, 0, pos, uvs, cols);
     for (int i = 0; i < n; i++) {
@@ -1329,8 +1329,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_004900D0[];
-extern char D_0048E7C8[];
-extern char D_004A4008[];
+extern char str_FlexNodeMats[];
+extern char str_Tube_b[];
 
 struct sFlexSeg_347D90 {
     int v[16];
@@ -1357,8 +1357,8 @@ extern "C" void* func_00347D90(char* self, void* a2, void* a3, sFlexDef_347D90* 
         }
     }
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
-    *segs = new (D_0048E7C8, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, D_004A4008, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
+    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
     return self;
 }
 #endif
@@ -1381,8 +1381,8 @@ extern "C" void* func_00347EA8(char* self, void* a, void* stream)
     *(char**)(self + 0xC) = D_004900D0;
     sSerVEntry_00347EA8* e = &(*(sSerVEntry_00347EA8**)stream)[2];
     e->fn((char*)stream + e->delta, self + 0x20, 0x30);
-    *segs = new (D_0048E7C8, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, D_004A4008, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
+    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
     return self;
 }
 #endif

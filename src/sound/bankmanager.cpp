@@ -5,7 +5,7 @@
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 #ifdef SKIP_ASM
 extern char* gpBankManager;
-extern char D_00482998[];
+extern char str_StaticSoundMem[];
 extern "C" void* func_00252FA0(void* a0, int a1, int a2);
 
 class cSndStream_B588 {
@@ -45,7 +45,7 @@ extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag
             }
         }
         *(int*)((char*)self + 0x14) = size;
-        *(void**)((char*)self + 0x10) = func_00252FA0(D_00482998, size, tag);
+        *(void**)((char*)self + 0x10) = func_00252FA0(str_StaticSoundMem, size, tag);
     }
 }
 #endif
@@ -227,7 +227,7 @@ extern "C" void func_0028B878(void* self)
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemAlloc);
 #ifdef SKIP_ASM
 extern "C" void* func_00252FA0(void* a0, int a1, int a2);
-extern char D_004829A8[];
+extern char str_DynamicSoundMem[];
 
 // PORT: real body returns the buffer; a later caller in this unit declares it void(void*, int, int)
 void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __asm__("cBankInstance_OnAsyncMainMemAlloc");
@@ -243,7 +243,7 @@ void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __
 void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
-        *(void**)((char*)self + 0x10) = func_00252FA0(D_004829A8, size, flags);
+        *(void**)((char*)self + 0x10) = func_00252FA0(str_DynamicSoundMem, size, flags);
         *(int*)((char*)self + 0x14) = size;
     }
     return *(void**)((char*)self + 0x10);
@@ -300,7 +300,7 @@ extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char* gpBankManager;
-extern const char D_004829B8[];
+extern const char str_BankInstances[];
 extern void* cBankMonitor_vtbl[];
 extern void* cBankManager_vtbl[];
 
@@ -365,7 +365,7 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
     self->vtbl2 = cBankMonitor_vtbl;
     self->vtbl = cBankManager_vtbl;
     sBmBank** slot = &self->banks;
-    *slot = new (D_004829B8, 0, 0) sBmBank[count];
+    *slot = new (str_BankInstances, 0, 0) sBmBank[count];
     gpBankManager = (char*)self;
     return self;
 }
@@ -1054,7 +1054,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028CD48);
 extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void func_002B49C0(void* self, int a1);
 extern "C" void func_002B3C28(void* self, int a1);
-extern char D_004A3628[];
+extern char str_pktrans[];
 
 struct sBmVtCD48 {
     short delta;
@@ -1069,7 +1069,7 @@ extern "C" void func_0028CD48(void* self)
 {
     char* mon = (char*)self + 0x118;
     sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
-    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, D_004A3628, 0xC, func_00287968(self, 1, 0), 1);
+    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, str_pktrans, 0xC, func_00287968(self, 1, 0), 1);
     func_002B49C0(mon, 0x191);
     sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 1);
@@ -1084,7 +1084,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028CDF8);
 extern "C" void func_002B4A08(void* self, int a1);
 extern int D_00536730[];
 extern int D_00536708[];
-extern char D_00482A00[];
+extern char str_chartune[];
 
 struct sRace_28CDF8 {
     int mode;
@@ -1126,7 +1126,7 @@ extern "C" void func_0028CDF8(char* self)
     char* mon = self + 0x118;
     *(int*)(self + 0x62AC) = *(int*)(self + 0x508);
     sBmVtCD48* vt = *(sBmVtCD48**)(self + 0x5558);
-    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, D_00482A00, 0xC, func_00287968(self, 1, 0), 0);
+    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, str_chartune, 0xC, func_00287968(self, 1, 0), 0);
     func_002B49C0(mon, 0xC9);
     sBmVtCD48* vt2 = *(sBmVtCD48**)(self + 0x5558);
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, track);
@@ -1149,12 +1149,12 @@ extern "C" int func_002A42C8(void* self);
 extern "C" void func_002B3CC0(void* mon, int a1);
 extern "C" void func_002B46D0(void* mon);
 int func_002B4908(void* self);
-extern char D_00482A38[];
-extern char D_00482A48[];
-extern char D_00482A58[];
-extern char D_004A3630[];
-extern char D_004A3638[];
-extern char D_004A3640[];
+extern char str_Peak1Amb[];
+extern char str_Peak2Amb[];
+extern char str_Peak3Amb[];
+extern char str_Peak1_b[];
+extern char str_Peak2_b[];
+extern char str_Peak3_b[];
 
 struct sBmInfo_CF98 {
     int f0;                 // 0x0
@@ -1183,11 +1183,11 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     if (*(int*)((char*)self + 0x608C) == 2) {
         int t = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0))) : type;
         if (t == 1) {
-            bmLoad_CF98(self, D_00482A38, 8, 0x65);
+            bmLoad_CF98(self, str_Peak1Amb, 8, 0x65);
         } else if (t == 2) {
-            bmLoad_CF98(self, D_00482A48, 8, 0x66);
+            bmLoad_CF98(self, str_Peak2Amb, 8, 0x66);
         } else {
-            bmLoad_CF98(self, D_00482A58, 8, 0x67);
+            bmLoad_CF98(self, str_Peak3Amb, 8, 0x67);
         }
         char* mon = (char*)self + 0x118;
         func_002B46D0(mon);
@@ -1201,11 +1201,11 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     if (info.f0 >= 0x11 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
         int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (t == 1) {
-            bmLoad_CF98(self, D_004A3630, 1, 1);
+            bmLoad_CF98(self, str_Peak1_b, 1, 1);
         } else if (t == 2) {
-            bmLoad_CF98(self, D_004A3638, 1, 2);
+            bmLoad_CF98(self, str_Peak2_b, 1, 2);
         } else {
-            bmLoad_CF98(self, D_004A3640, 1, 3);
+            bmLoad_CF98(self, str_Peak3_b, 1, 3);
         }
         func_002B3CC0(mon, 1);
         sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
@@ -1578,9 +1578,9 @@ extern "C" int func_002A1E20(void* self, int id);
 extern "C" int func_002A4030(void* self);
 extern "C" void func_002B3C28(void* self, int a1);
 extern "C" void func_002B49C0(void* self, int a1);
-extern char D_004A3630[];
-extern char D_004A3638[];
-extern char D_004A3640[];
+extern char str_Peak1_b[];
+extern char str_Peak2_b[];
+extern char str_Peak3_b[];
 
 struct sBmVtE100 {
     short delta;
@@ -1602,11 +1602,11 @@ static inline void bmLoad_E100(char* self, char* bank, int n)
 static inline void bmLoadBank_E100(char* self, int t)
 {
     if (t == 1) {
-        bmLoad_E100(self, D_004A3630, 1);
+        bmLoad_E100(self, str_Peak1_b, 1);
     } else if (t == 2) {
-        bmLoad_E100(self, D_004A3638, 2);
+        bmLoad_E100(self, str_Peak2_b, 2);
     } else {
-        bmLoad_E100(self, D_004A3640, 3);
+        bmLoad_E100(self, str_Peak3_b, 3);
     }
     char* mon = self + 0x118;
     sBmVtE100* vt2 = *(sBmVtE100**)(self + 0x5558);
@@ -1786,7 +1786,7 @@ struct sSndKey8_E8C0 {
 extern const sSndKey8_E8C0 D_004A3648_E8C0[] __asm__("D_004A3648");
 extern const sSndKey8_E8C0 D_004A3650_E8C0[] __asm__("D_004A3650");
 extern const sSndKey8_E8C0 D_004A3658_E8C0[] __asm__("D_004A3658");
-extern char D_004A3628[];
+extern char str_pktrans[];
 extern signed char D_00535C10[];
 extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
 extern "C" void func_002ADDE0(void* mon, long key);
@@ -1918,7 +1918,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
                         func_002B11B0(self + 0x5560, 0);
                     }
                     sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
-                    ((tBmLoadE8C0)vt[2].fn)(mon2 + vt[2].delta, D_004A3628, 0xC, func_00287968(self, 1, 0), 1);
+                    ((tBmLoadE8C0)vt[2].fn)(mon2 + vt[2].delta, str_pktrans, 0xC, func_00287968(self, 1, 0), 1);
                     func_002B49C0(mon2, 0x191);
                     if (func_002A1E20(self, *(int*)(self + 0x6284)) == 2) {
                         sBmVtE8C0* vt2 = *(sBmVtE8C0**)(self + 0x5558);
@@ -2198,7 +2198,7 @@ public:
 };
 
 int GetHashValue32(char*);
-extern char D_004A3660[];
+extern char str_hud_f[];
 extern "C" void func_002B35A0(void* monitor);
 extern "C" float func_00287930(void* self, int a, int b);
 extern "C" cUiObj_F478* cUIStateStack_findState(void* list, int hash);
@@ -2213,7 +2213,7 @@ extern "C" void func_0028F478(void* self)
             if (owner != 0) {
                 void* list = owner + 0x18;
                 if (list != 0) {
-                    cUiObj_F478* obj = cUIStateStack_findState(list, GetHashValue32(D_004A3660));
+                    cUiObj_F478* obj = cUIStateStack_findState(list, GetHashValue32(str_hud_f));
                     if (obj != 0) {
                         obj->v24(5, 0);
                     }
@@ -2507,7 +2507,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028FC58);
 #ifdef SKIP_ASM
 extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void func_002B49C0(void* self, int a1);
-extern char D_004A3598[];
+extern char str_charsel[];
 
 struct sBmVtFC58 {
     short delta;
@@ -2522,7 +2522,7 @@ extern "C" void func_0028FC58(void* self)
 {
     char* mon = (char*)self + 0x118;
     sBmVtFC58* vt = *(sBmVtFC58**)((char*)self + 0x5558);
-    ((tBmLoadFC58)vt[2].fn)(mon + vt[2].delta, D_004A3598, 0xC, func_00287968(self, 1, 0), 1);
+    ((tBmLoadFC58)vt[2].fn)(mon + vt[2].delta, str_charsel, 0xC, func_00287968(self, 1, 0), 1);
     func_002B49C0(mon, 0x12D);
     sBmVtFC58* vt2 = *(sBmVtFC58**)((char*)self + 0x5558);
     ((tBmSetFC58)vt2[4].fn)(mon + vt2[4].delta, *(int*)((char*)self + 0x6290));

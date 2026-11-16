@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
-extern const char D_0045A858[];
+extern const char str_BEScoreInt[];
 extern void* D_004A1248;
 
 struct cBEScoreInterface {
@@ -33,7 +33,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 void* cBEScoreInterface_getThis()
 {
     if (D_004A1248 == 0) {
-        void* mem = cMemMan_alloc(0x230, D_0045A858, 0, 0);
+        void* mem = cMemMan_alloc(0x230, str_BEScoreInt, 0, 0);
         cBEScoreInterface* scoreIface = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
         D_004A1248 = scoreIface;
         scoreIface->field_0x8 = 0;

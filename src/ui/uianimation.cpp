@@ -5,7 +5,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationBank_getAnimationByHashName);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data);
-extern const char D_004A4768[];
+extern const char str_UIAnim[];
 
 struct sUIAnimEntry {
     int f0;
@@ -29,7 +29,7 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, in
     sUIAnimEntry* entry = (sUIAnimEntry*)(*self + 1);
     for (unsigned int i = 0; i < **self; i++) {
         if (entry->hash == hash) {
-            return cUIAnimation_cUIAnimation(cMemMan_alloc(0x14, D_004A4768, 0x100, 0), entry);
+            return cUIAnimation_cUIAnimation(cMemMan_alloc(0x14, str_UIAnim, 0x100, 0), entry);
         }
         entry = (sUIAnimEntry*)((char*)entry + entry->size);
     }
@@ -123,7 +123,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void func_00397298(void* self, int val);
-extern char D_00493D60[];
+extern char str_UIAnimChan[];
 extern void* cUIAnimation_vtbl[];
 
 /**
@@ -148,7 +148,7 @@ extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
     int** slot = (int**)((char*)self + 0x4);
     unsigned int n = *(unsigned int*)((char*)data + 4);
     if (n != 0) {
-        int* block = (int*)operator_new_tag(n * 4 + 0x10, D_00493D60, 0x100, 0);
+        int* block = (int*)operator_new_tag(n * 4 + 0x10, str_UIAnimChan, 0x100, 0);
         block[0] = n;
         int* arr = block + 4;
         int* elem = arr;

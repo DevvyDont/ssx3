@@ -7,10 +7,10 @@ INCLUDE_ASM("camera/cameraalgorithms", cChaseCameraController_createChaseAlgorit
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern char D_0045B250[], D_0045B278[], D_0045B298[], D_0045B2B0[], D_0045B2D8[], D_0045B300[];
-extern char D_0045B328[], D_0045B348[], D_0045B370[], D_0045B390[], D_0045B3B0[];
-extern char D_0045B3D0[], D_0045B3F8[], D_0045B420[], D_0045B448[], D_0045B470[], D_0045B498[], D_0045B4C0[], D_0045B4E8[];
-extern char D_0045B510[], D_0045B538[], D_0045B558[], D_0045B578[], D_0045B598[];
+extern char D_0045B250[], D_0045B278[], D_0045B298[], D_0045B2B0[], D_0045B2D8[], str_DEFAULT_4_Chase_Camera_Algorithm[];
+extern char D_0045B328[], D_0045B348[], D_0045B370[], D_0045B390[], str_Lazy_Chase_Camera_Algorithm[];
+extern char D_0045B3D0[], D_0045B3F8[], D_0045B420[], D_0045B448[], D_0045B470[], D_0045B498[], D_0045B4C0[], str_Direction_NE_Chase_Camera_Algorithm[];
+extern char D_0045B510[], D_0045B538[], D_0045B558[], D_0045B578[], str_POST_RACE_1_Chase_Camera_Algorithm[];
 
 struct sCamTmp_D0A0 { float x, y, z, w; } __attribute__((aligned(16)));
 
@@ -115,7 +115,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         algo = cManualChaseAlgorithm_cManualChaseAlgorithm(cMemMan_alloc(0x390, D_0045B390, 0x20000000, 0));
         break;
     case 13:
-        algo = cLazyChaseAlgorithm_cLazyChaseAlgorithm(cMemMan_alloc(0x390, D_0045B3B0, 0x20000000, 0));
+        algo = cLazyChaseAlgorithm_cLazyChaseAlgorithm(cMemMan_alloc(0x390, str_Lazy_Chase_Camera_Algorithm, 0x20000000, 0));
         break;
     case 18:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3D0, 0x20000000, 0), 0);
@@ -139,7 +139,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4C0, 0x20000000, 0), 6);
         break;
     case 25:
-        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4E8, 0x20000000, 0), 7);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, str_Direction_NE_Chase_Camera_Algorithm, 0x20000000, 0), 7);
         break;
     case 32:
         algo = cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
@@ -157,7 +157,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         algo = cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2D8, 0x20000000, 0));
         break;
     case 1: case 62:
-        algo = cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B300, 0x20000000, 0));
+        algo = cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cMemMan_alloc(0x390, str_DEFAULT_4_Chase_Camera_Algorithm, 0x20000000, 0));
         break;
     case 0: case 3: case 4: case 5: case 6: case 8: case 12: case 14: case 15: case 16: case 17:
     case 26: case 27: case 28: case 29: case 30: case 31:
@@ -173,7 +173,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         algo = 0;
         break;
     case 68:
-        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(void**)(self + 0x20));
+        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(0x3B0, str_POST_RACE_1_Chase_Camera_Algorithm, 0x20000000, 0), *(void**)(self + 0x20));
         break;
     case 94:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);

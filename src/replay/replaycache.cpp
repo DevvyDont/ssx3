@@ -14,7 +14,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_addCache);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0026D0A0(void* self);
-extern const char D_004817B0[];
+extern const char str_ReplayCache[];
 
 /**
  * Adds a recorded-input cache to the replay: builds a new cReplayCache in the first free InputCache slot.
@@ -30,7 +30,7 @@ extern "C" void* cReplay_addCache(cReplay* self)
     void** slot = (void**)((char*)self + 0x48C);
     for (int i = 0; i < 2; i++, slot++) {
         if (*slot == 0) {
-            return *slot = func_0026D0A0(cMemMan_alloc(0x10, D_004817B0, 0, 0));
+            return *slot = func_0026D0A0(cMemMan_alloc(0x10, str_ReplayCache, 0, 0));
         }
     }
     return 0;
@@ -937,13 +937,13 @@ INCLUDE_ASM("replay/replaycache", cReplay_allocSaveSpace);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_00481800[];
-extern const char D_00481810[];
+extern const char str_WriteBlock[];
+extern const char str_WriteTmp[];
 
 extern "C" void cReplay_allocSaveSpace(cReplay* self)
 {
-    self->WriteBlock = (tReplayMemCardBlock*)cMemMan_alloc(0x4000, D_00481800, 0x20000000, 0);
-    self->WriteTmp = (char*)operator_new_tag(0xC800, D_00481810, 0x20000000, 0);
+    self->WriteBlock = (tReplayMemCardBlock*)cMemMan_alloc(0x4000, str_WriteBlock, 0x20000000, 0);
+    self->WriteTmp = (char*)operator_new_tag(0xC800, str_WriteTmp, 0x20000000, 0);
 }
 #endif
 

@@ -13,7 +13,7 @@ extern "C" void func_00231F80(void* fade);
 extern "C" int func_00326CA0(void* pads, int port);
 extern "C" char* func_00326CC8(void* pads, int port);
 extern char* PadCache;
-extern char D_0047B8C8[];
+extern char str_InitLoadScreen[];
 extern void* cInitLoadScreen_vtbl[];
 
 struct sModule_232348 {
@@ -48,7 +48,7 @@ extern "C" void cPreStartScreen_update(sPreStart_232348* self)
         *fade = 1.0f;
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
-        sModule_232348* loadScreen = (sModule_232348*)cMemMan_alloc(0xC, D_0047B8C8, 0x100, 0);
+        sModule_232348* loadScreen = (sModule_232348*)cMemMan_alloc(0xC, str_InitLoadScreen, 0x100, 0);
         cAppMan* app = (cAppMan*)SSXApp;
         loadScreen->vt = cInitLoadScreen_vtbl;
         loadScreen->f4 = 0;
@@ -163,7 +163,7 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00231F80(void* fade);
 extern "C" void* func_00232AE0(void* self, int arg);
-extern char D_0047B8D8[];
+extern char str_StartScreen[];
 
 extern "C" void func_00232588(void* self)
 {
@@ -183,7 +183,7 @@ extern "C" void func_00232588(void* self)
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp,
-            (unsigned int)func_00232AE0(cMemMan_alloc(0x1C, D_0047B8D8, 0x100, 0), *(int*)((char*)self + 4) ? 2 : 0));
+            (unsigned int)func_00232AE0(cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), *(int*)((char*)self + 4) ? 2 : 0));
     }
 }
 #endif
@@ -456,7 +456,7 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00231F80(void* fade);
 extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
-extern char D_0047B8E8[];
+extern char str_cGameLoadScreen[];
 extern void* D_0047D788[];
 
 struct sModule_232930 {
@@ -490,7 +490,7 @@ extern "C" void func_00232930(void* self)
         }
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
-        sModule_232930* m = (sModule_232930*)cMemMan_alloc(0x18, D_0047B8E8, 0x100, 0);
+        sModule_232930* m = (sModule_232930*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
         func_00231CD0_r(m);
         tmp = (unsigned int)m;
         m->vt = D_0047D788;
@@ -516,7 +516,7 @@ extern "C" void func_00231F80(void* fade);
 extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
 
 
-extern char D_004A2AB8[];
+extern char str_FELoad[];
 extern void* cFELoadScreen_vtbl[];
 
 struct sModule_232A00 {
@@ -556,7 +556,7 @@ extern "C" void cPreFELoadScreen_update(void* self)
         }
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
-        sModule_232A00* loadScreen = (sModule_232A00*)cMemMan_alloc(0x1C, D_004A2AB8, 0x100, 0);
+        sModule_232A00* loadScreen = (sModule_232A00*)cMemMan_alloc(0x1C, str_FELoad, 0x100, 0);
         func_00231CD0_r(loadScreen);
         tmp = (unsigned int)loadScreen;
         loadScreen->vt = cFELoadScreen_vtbl;
@@ -645,11 +645,11 @@ extern "C" int cUIEngine_loadFile(void* ui, const char* name);
 extern "C" void* func_00186A08(void* p, void* ui);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern char D_0047B698[];
-extern char D_0047B9E0[];
-extern char D_0047B9F0[];
-extern char D_0047B978[];
-extern char D_0047BA00[];
+extern char str_UIEngine_b[];
+extern char str_data_ui_su[];
+extern char str_GLUIInput[];
+extern char str_cFEStateMemCard[];
+extern char str_cFEStateProgressive[];
 extern char cFEInput_vtbl[];
 extern char D_0047CA18[];
 
@@ -676,11 +676,11 @@ struct sUI_232B28 {
 extern "C" void func_00232B28(void* self)
 {
     ((cWorld_232B28*)GrMan)->v44(0x100);
-    void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
+    void* ui = func_00397B08(operator new(0x70, str_UIEngine_b, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
-    cUIEngine_loadFile(ui, D_0047B9E0);
+    cUIEngine_loadFile(ui, str_data_ui_su);
     (*(sUI_232B28**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
-    sNode_232B28* n = (sNode_232B28*)operator new(0x1C, D_0047B9F0, 0x100, 0);
+    sNode_232B28* n = (sNode_232B28*)operator new(0x1C, str_GLUIInput, 0x100, 0);
     n->f4 = 0;
     n->f8 = cFEInput_vtbl;
     n->f18 = 0;
@@ -691,10 +691,10 @@ extern "C" void func_00232B28(void* self)
     (*(sUI_232B28**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
     int mode = *(int*)((char*)self + 0x18);
     if (mode == 0) {
-        void* item = func_00186A08(operator new(0x248, D_0047B978, 0, 0), *(void**)((char*)self + 0xC));
+        void* item = func_00186A08(operator new(0x248, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0xC));
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
     } else if (mode == 2) {
-        void* p = operator new(0x48, D_0047BA00, 0, 0);
+        void* p = operator new(0x48, str_cFEStateProgressive, 0, 0);
         func_0039E2A0(p, *(void**)((char*)self + 0xC));
         *(void**)((char*)p + 8) = D_0047CA18;
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, p);
@@ -866,12 +866,12 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
 extern int D_004A19D8;
 extern int D_004A19DC;
-extern char D_0047B698[];
-extern char D_0047BD28[];
-extern char D_0047B9F0[];
-extern char D_0047BD38[];
-extern char D_0047BD50[];
-extern char D_0047BD68[];
+extern char str_UIEngine_b[];
+extern char str_data_ui_gl[];
+extern char str_GLUIInput[];
+extern char str_cGameLoadStateOutLodge[];
+extern char str_cGameLoadStateConquer[];
+extern char str_cGameLoadState[];
 extern char cFEInput_vtbl[];
 extern char D_0047C878[];
 extern char D_0047C7A8[];
@@ -940,12 +940,12 @@ extern "C" void func_00232E20(void* self)
     sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
     vt[44].fn((char*)w + vt[44].delta, 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
+    void* ui = func_00397B08(operator new(0x70, str_UIEngine_b, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
-    cUIEngine_loadFile(ui, D_0047BD28);
+    cUIEngine_loadFile(ui, str_data_ui_gl);
     (*(sUI_2E20**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
     (*(sUI_2E20**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
-    sNode_2E20* n = (sNode_2E20*)operator new(0x1C, D_0047B9F0, 0x100, 0);
+    sNode_2E20* n = (sNode_2E20*)operator new(0x1C, str_GLUIInput, 0x100, 0);
     n->f4 = 0;
     n->f8 = cFEInput_vtbl;
     n->f18 = 0;
@@ -964,7 +964,7 @@ extern "C" void func_00232E20(void* self)
             goto other;
     }
 makeA:
-    item = new (D_0047BD38, 0, 0) cLoadItemA_2E20(*(void**)((char*)self + 0xC));
+    item = new (str_cGameLoadStateOutLodge, 0, 0) cLoadItemA_2E20(*(void**)((char*)self + 0xC));
     goto done;
 other:
     {
@@ -976,9 +976,9 @@ other:
                 x = g2[0x48] != 6;
         }
         if (x) {
-            item = new (D_0047BD50, 0, 0) cLoadItemB_2E20(*(void**)((char*)self + 0xC));
+            item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(*(void**)((char*)self + 0xC));
         } else {
-            cLoadItemC_2E20* c = new (D_0047BD68, 0, 0) cLoadItemC_2E20(*(void**)((char*)self + 0xC));
+            cLoadItemC_2E20* c = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(*(void**)((char*)self + 0xC));
             item = c;
             c->owner = self;
             cGameLoadScreen_loadTexture_2E20(self, 0);
@@ -1008,14 +1008,14 @@ extern "C" int cBENewRaceInterface_getLocationID(void* self);
 extern "C" char* func_003E2190(const char* name, int flags);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern signed char D_00535C11[];
-extern char D_0047BD78[];
-extern char D_0047BD90[];
-extern char D_0047BDA0[];
-extern char D_0047BDB0[];
-extern char D_0047BDC8[];
-extern char D_004A2C30[];
+extern char str_data_ui_charpic_big[];
+extern char str_pct_spct_s_ssh[];
+extern char str_CharaPics[];
+extern char str_data_ui_courspic_big[];
+extern char str_coursePics[];
+extern char str_pct_s_ssh[];
 extern char* D_00442928[];
-extern char* D_00442950[];
+extern char* str_at_plus_J[];
 extern int D_004A2B3C;
 
 struct sVE_3048 {
@@ -1049,25 +1049,25 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
     void* plr = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
-        cBigFile_cBigFile1_3048(&bf, D_0047BD78, 0x100);
+        cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
         int* slot = (int*)(self + 0x10);
         for (int i = 0; i < 2; i++) {
-            sprintf(name, D_0047BD90, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
+            sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
             char* data = func_003E2190(name, 0x3000100);
-            *slot = loadTex_3048(data, D_0047BDA0);
+            *slot = loadTex_3048(data, str_CharaPics);
             if (data != 0)
                 cMemMan_free(data);
             slot++;
         }
         cBigFile__cBigFile(&bf, 2);
     } else {
-        cBigFile_cBigFile1_3048(&bf, D_0047BDB0, 0x100);
+        cBigFile_cBigFile1_3048(&bf, str_data_ui_courspic_big, 0x100);
         signed char n = cBENewRaceInterface_getLocationID(fe);
         if (n > 16)
             n = 0;
-        sprintf(name, D_004A2C30, D_00442950[n]);
+        sprintf(name, str_pct_s_ssh, str_at_plus_J[n]);
         char* data = func_003E2190(name, 0x3000100);
-        *(int*)(self + 0x10) = loadTex_3048(data, D_0047BDC8);
+        *(int*)(self + 0x10) = loadTex_3048(data, str_coursePics);
         if (data != 0)
             cMemMan_free(data);
         cBigFile__cBigFile(&bf, 2);

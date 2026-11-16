@@ -9,8 +9,8 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_Allocate);
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 // as operator new[] so the array new-expressions below match.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00492650[];
-extern char D_00492670[];
+extern char str_DynEmitterData_Positions[];
+extern char str_DynEmitterData_Velocities[];
 
 struct sEmitParticle_0C60 {
     float v[4];
@@ -31,9 +31,9 @@ struct sEmitState_0C60 {
 extern "C" void cBaseClass_DynamicEmitter_Allocate(cBaseClass_DynamicEmitter* self)
 {
     sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(((char*)self) + 0x1A0);
-    *pp = new (D_00492650, 0, 0) sEmitParticle_0C60[self->m_numSubEmitters];
+    *pp = new (str_DynEmitterData_Positions, 0, 0) sEmitParticle_0C60[self->m_numSubEmitters];
     sEmitState_0C60** ps = (sEmitState_0C60**)(((char*)self) + 0x1A4);
-    *ps = new (D_00492670, 0, 0) sEmitState_0C60[self->m_numSubEmitters];
+    *ps = new (str_DynEmitterData_Velocities, 0, 0) sEmitState_0C60[self->m_numSubEmitters];
 }
 #endif
 
@@ -482,7 +482,7 @@ extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(cDynamicColourEmitt
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_Allocate);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00492690[];
+extern char str_DynEmitterData_Colours[];
 
 struct sEmitColour_1548 {
     unsigned char rgba[4];
@@ -498,7 +498,7 @@ extern "C" void cDynamicColourEmitter_Allocate(cDynamicColourEmitter* self)
 {
     sEmitColour_1548** pc = (sEmitColour_1548**)(((char*)self) + 0x204);
     cBaseClass_DynamicEmitter_Allocate((cBaseClass_DynamicEmitter*)self);
-    *pc = new (D_00492690, 0, 0) sEmitColour_1548[self->m_numSubEmitters];
+    *pc = new (str_DynEmitterData_Colours, 0, 0) sEmitColour_1548[self->m_numSubEmitters];
 }
 #endif
 
@@ -1549,27 +1549,27 @@ struct sBzCache_2B78 {
     t4Vector* dbasis[3];            // 0x310
 };
 
-extern char D_00492728[];
-extern char D_00492738[];
-extern char D_00492748[];
-extern char D_00492758[];
-extern char D_00492768[];
-extern char D_00492778[];
-extern char D_00492788[];
-extern char D_00492798[];
-extern char D_004927A8[];
-extern char D_004927B8[];
-extern char D_004927C8[];
-extern char D_004927D8[];
-extern char D_004927E8[];
-extern char D_004927F8[];
-extern char D_00492808[];
-extern char D_00492818[];
-extern char D_00492828[];
-extern char D_00492838[];
-extern char D_00492848[];
-extern char D_00492858[];
-extern char D_00492868[];
+extern char str_4x4CacheRecord[];
+extern char str_6x6CacheRecord[];
+extern char str_8x8CacheRecord[];
+extern char str_4x4FreeList[];
+extern char str_6x6FreeList[];
+extern char str_8x8FreeList[];
+extern char str_4x4PosCache[];
+extern char str_6x6PosCache[];
+extern char str_8x8PosCache[];
+extern char str_4x4UVCache[];
+extern char str_6x6UVCache[];
+extern char str_8x8UVCache[];
+extern char str_4x4LMUVCache[];
+extern char str_6x6LMUVCache[];
+extern char str_8x8LMUVCache[];
+extern char str_4x4NrmCache[];
+extern char str_6x6NrmCache[];
+extern char str_8x8NrmCache[];
+extern char str_4x4FreeNrmList[];
+extern char str_6x6FreeNrmList[];
+extern char str_8x8FreeNrmList[];
 
 extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int nn4, int nn6, int nn8)
 {
@@ -1579,9 +1579,9 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int n
     self->cacheSize[0] = n4;
     self->cacheSize[1] = n6;
     self->cacheSize[2] = n8;
-    self->m4x4CacheRecord = new (D_00492728, 0, 0) sBzRec_2B78[n4];
-    self->m6x6CacheRecord = new (D_00492738, 0, 0) sBzRec_2B78[n6];
-    self->m8x8CacheRecord = new (D_00492748, 0, 0) sBzRec_2B78[n8];
+    self->m4x4CacheRecord = new (str_4x4CacheRecord, 0, 0) sBzRec_2B78[n4];
+    self->m6x6CacheRecord = new (str_6x6CacheRecord, 0, 0) sBzRec_2B78[n6];
+    self->m8x8CacheRecord = new (str_8x8CacheRecord, 0, 0) sBzRec_2B78[n8];
     self->records[0] = self->m4x4CacheRecord;
     self->records[1] = self->m6x6CacheRecord;
     self->records[2] = self->m8x8CacheRecord;
@@ -1589,9 +1589,9 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int n
     MEM_fill(self->m6x6CacheRecord, 0, n6 * sizeof(sBzRec_2B78));
     MEM_fill(self->m8x8CacheRecord, 0, n8 * sizeof(sBzRec_2B78));
 
-    self->freeBuf4 = new (D_00492758, 0, 0) int[n4];
-    self->freeBuf6 = new (D_00492768, 0, 0) int[n6];
-    self->freeBuf8 = new (D_00492778, 0, 0) int[n8];
+    self->freeBuf4 = new (str_4x4FreeList, 0, 0) int[n4];
+    self->freeBuf6 = new (str_6x6FreeList, 0, 0) int[n6];
+    self->freeBuf8 = new (str_8x8FreeList, 0, 0) int[n8];
     self->freeList[0] = self->freeBuf4;
     self->freeList[1] = self->freeBuf6;
     self->freeList[2] = self->freeBuf8;
@@ -1607,39 +1607,39 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int n
 
     {
         sBzPts4_2B78*& r = self->pts4;
-        r = new (D_00492788, 0, 0) sBzPts4_2B78[n4];
+        r = new (str_4x4PosCache, 0, 0) sBzPts4_2B78[n4];
     }
     {
         sBzPts6_2B78*& r = self->pts6;
-        r = new (D_00492798, 0, 0) sBzPts6_2B78[n6];
+        r = new (str_6x6PosCache, 0, 0) sBzPts6_2B78[n6];
     }
     {
         sBzPts8_2B78*& r = self->pts8;
-        r = new (D_004927A8, 0, 0) sBzPts8_2B78[n8];
+        r = new (str_8x8PosCache, 0, 0) sBzPts8_2B78[n8];
     }
     {
         sBzUV4_2B78*& r = self->uvA4;
-        r = new (D_004927B8, 0, 0) sBzUV4_2B78[n4];
+        r = new (str_4x4UVCache, 0, 0) sBzUV4_2B78[n4];
     }
     {
         sBzUV6_2B78*& r = self->uvA6;
-        r = new (D_004927C8, 0, 0) sBzUV6_2B78[n6];
+        r = new (str_6x6UVCache, 0, 0) sBzUV6_2B78[n6];
     }
     {
         sBzUV8_2B78*& r = self->uvA8;
-        r = new (D_004927D8, 0, 0) sBzUV8_2B78[n8];
+        r = new (str_8x8UVCache, 0, 0) sBzUV8_2B78[n8];
     }
     {
         sBzUV4_2B78*& r = self->uvB4;
-        r = new (D_004927E8, 0, 0) sBzUV4_2B78[n4];
+        r = new (str_4x4LMUVCache, 0, 0) sBzUV4_2B78[n4];
     }
     {
         sBzUV6_2B78*& r = self->uvB6;
-        r = new (D_004927F8, 0, 0) sBzUV6_2B78[n6];
+        r = new (str_6x6LMUVCache, 0, 0) sBzUV6_2B78[n6];
     }
     {
         sBzUV8_2B78*& r = self->uvB8;
-        r = new (D_00492808, 0, 0) sBzUV8_2B78[n8];
+        r = new (str_8x8LMUVCache, 0, 0) sBzUV8_2B78[n8];
     }
 
     for (i = 0; i < 4; i++) {
@@ -1688,24 +1688,24 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int n
     if (nn4 > 0)
         {
         sBzPts4_2B78*& r = self->nrm4;
-        r = new (D_00492818, 0, 0) sBzPts4_2B78[nn4];
+        r = new (str_4x4NrmCache, 0, 0) sBzPts4_2B78[nn4];
     }
     if (nn6 > 0)
         {
         sBzPts6_2B78*& r = self->nrm6;
-        r = new (D_00492828, 0, 0) sBzPts6_2B78[nn6];
+        r = new (str_6x6NrmCache, 0, 0) sBzPts6_2B78[nn6];
     }
     if (nn8 > 0)
         {
         sBzPts8_2B78*& r = self->nrm8;
-        r = new (D_00492838, 0, 0) sBzPts8_2B78[nn8];
+        r = new (str_8x8NrmCache, 0, 0) sBzPts8_2B78[nn8];
     }
     if (nn4 > 0)
-        self->nrmFreeBuf4 = new (D_00492848, 0, 0) int[nn4];
+        self->nrmFreeBuf4 = new (str_4x4FreeNrmList, 0, 0) int[nn4];
     if (nn6 > 0)
-        self->nrmFreeBuf6 = new (D_00492858, 0, 0) int[nn6];
+        self->nrmFreeBuf6 = new (str_6x6FreeNrmList, 0, 0) int[nn6];
     if (nn8 > 0)
-        self->nrmFreeBuf8 = new (D_00492868, 0, 0) int[nn8];
+        self->nrmFreeBuf8 = new (str_8x8FreeNrmList, 0, 0) int[nn8];
     self->nrmFreeList[0] = self->nrmFreeBuf4;
     self->nrmFreeList[1] = self->nrmFreeBuf6;
     self->nrmFreeList[2] = self->nrmFreeBuf8;
@@ -2697,12 +2697,12 @@ void func_00375A00(void* self)
 INCLUDE_ASM("render/particle", func_00375A08);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern const char D_00492878[];
+extern const char str_PS2GraphicsMan[];
 extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(void* self);
 
 extern "C" void* func_00375A08(void)
 {
-    return cPS2GraphicsMan_cPS2GraphicsMan(cMemMan_alloc(0x75E0, D_00492878, 0, 0));
+    return cPS2GraphicsMan_cPS2GraphicsMan(cMemMan_alloc(0x75E0, str_PS2GraphicsMan, 0, 0));
 }
 #endif
 
@@ -5198,11 +5198,11 @@ struct sPartEmitter_A540 {
 };
 
 extern "C" sPartEmitter_A540* func_00385138(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
-extern const char D_004928D8[];
+extern const char str_cPS2GridMesh[];
 
 extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* pS2GraphicsMan, void* a1, void* a2, unsigned int flags)
 {
-    sPartEmitter_A540* e = func_00385138(cMemMan_alloc(0x1CC, D_004928D8, flags, 0), a1, a2, pS2GraphicsMan, flags);
+    sPartEmitter_A540* e = func_00385138(cMemMan_alloc(0x1CC, str_cPS2GridMesh, flags, 0), a1, a2, pS2GraphicsMan, flags);
     if (flags & 0x40000000) {
         if (e == 0) {
             return 0;
@@ -6670,7 +6670,7 @@ struct sVE_D0B0 {
 };
 
 
-extern char D_004A4390[];
+extern char str_unpack[];
 void* operator_new_D0B0(unsigned int, char*, unsigned int, int) __asm__("operator_new__FUi");
 extern "C" int MEM_move(void* dst, void* src, int n);
 extern "C" unsigned int func_003B47F8(void* src, void* dst);
@@ -6727,7 +6727,7 @@ extern "C" void func_0037D0B0(cPS2GraphicsMan* selfp, int a1, void* objp, int a3
     if (ob[0x10] == 0x10 && ob[0x11] == 0xFB) {
         unsigned int size = (ob[0x12] << 16 | ob[0x13] << 8 | ob[0x14]) + 0x10;
         allocated = 1;
-        tmp = (char*)operator_new_D0B0(size, D_004A4390, 0x80000100, 0);
+        tmp = (char*)operator_new_D0B0(size, str_unpack, 0x80000100, 0);
         MEM_move(tmp, obj, 0x10);
         char* payload = tmp + 0x10;
         func_003B47F8(p10, payload);
@@ -10001,7 +10001,7 @@ INCLUDE_ASM("render/particle", func_00385138);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern void* D_00493208[];
-extern char D_00492E18[];
+extern char str_GridMeshMem[];
 extern "C" int func_00385EB0(void* self, int rows, int pitch);
 extern "C" void func_00386128(void* self, int rows, int pitch, char* dst, char* src);
 
@@ -10042,7 +10042,7 @@ extern "C" sPtSurf5138* func_00385138_impl(sPtSurf5138* self, int w, int h, int 
     self->w = w;
     self->h = h;
     int size = func_00385EB0(self, rows, pitch);
-    char* buf = (char*)operator_new_tag(size * 2 + (self->rows << 5), D_00492E18, allocFlags, 0);
+    char* buf = (char*)operator_new_tag(size * 2 + (self->rows << 5), str_GridMeshMem, allocFlags, 0);
     self->buf = buf;
     if (buf == 0) {
         self->valid = 0;
@@ -10755,7 +10755,7 @@ extern "C" int func_003696C8(void* self, const char* name);
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 extern "C" void cGraphicsMan_AddBlendedMatrix(void* gfx, void* m);
 extern "C" int func_00369A78(void* m, void* slot, int a, int b, int c);
-extern char D_004A4398[];
+extern char str_alph[];
 
 struct sKey_66F0 {
     int v;
@@ -10834,7 +10834,7 @@ extern "C" void func_003866F0(cPS2GraphicsMan* gfx, sMdl_66F0* m, char* base, in
             bones[i].alpha = (int)(*(float*)(s + 0x14) * 128.0f);
         else
             bones[i].alpha = 0;
-        if (func_00416B18(s, D_004A4398, 4) == 0 || (s[0] == 'e' && s[1] == 'a'))
+        if (func_00416B18(s, str_alph, 4) == 0 || (s[0] == 'e' && s[1] == 'a'))
             bones[i].flags |= 0x8000;
         int env = 0;
         if (t[0] != 0) {

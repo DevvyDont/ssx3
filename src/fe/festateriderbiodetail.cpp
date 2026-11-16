@@ -14,12 +14,12 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" void func_00190A08(void* self);
 extern "C" void func_00190CD8(void* self);
-extern char D_0045E398[];
-extern char D_0045E3A8[];
-extern char D_0045E3B8[];
-extern char D_0045E3C8[];
-extern char D_0045E3D8[];
-extern char D_0045E3E8[];
+extern char str_14rid_prof[];
+extern char str_ListBox0000[];
+extern char str_kT_14Heading1[];
+extern char str_kT_14Heading2[];
+extern char str_kT_14Heading3[];
+extern char str_kT_14Heading4[];
 
 struct sVEnt_001908C0 { short delta; short index; void (*fn)(void*); };
 
@@ -33,17 +33,17 @@ struct sVEnt_001908C0 { short delta; short index; void (*fn)(void*); };
 extern "C" void cFEStateRiderBio_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E398), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_14rid_prof), 0);
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* box = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E3A8));
+    void* box = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ListBox0000));
     if (box != 0) {
-        cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045E3B8), 0);
-        cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045E3C8), 0);
-        cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045E3D8), 0);
-        cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045E3E8), 0);
+        cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading1), 0);
+        cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading2), 0);
+        cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading3), 0);
+        cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading4), 0);
     }
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(iface, *(signed char*)((char*)self + 0x44));
@@ -64,65 +64,65 @@ extern "C" void cFEStateRiderBio_fillDNAInfo(void* self);
 extern "C" void cFEStateRiderBio_fillFavesInfo(void* self);
 extern "C" void cFEStateRiderBio_fillQnAInfo(void* self);
 extern "C" void cFEStateRiderBio_fillBioInfo(void* self);
-extern char D_0045E3F8[];
-extern char D_004A1610[];
-extern char D_0045E408[];
-extern char D_0045E418[];
-extern char D_0045E428[];
-extern char D_004A1618[];
-extern char D_0045E438[];
-extern char D_0045E450[];
-extern char D_0045E460[];
+extern char str_DNALabels[];
+extern char str_DNAText[];
+extern char str_FavesLabels[];
+extern char str_FavesText[];
+extern char str_QNALabels[];
+extern char str_QNAText[];
+extern char str_BIOAutoScrollText[];
+extern char str_vertical_dash[];
+extern char str_horizontal_dash[];
 
 extern "C" void func_00190A08(void* self)
 {
     switch (*(int*)((char*)self + 0x4C)) {
     case 0:
-        cUIState_showObjSafe(self, D_0045E3F8);
-        cUIState_showObjSafe(self, D_004A1610);
-        cUIState_hideObjSafe(self, D_0045E408);
-        cUIState_hideObjSafe(self, D_0045E418);
-        cUIState_hideObjSafe(self, D_0045E428);
-        cUIState_hideObjSafe(self, D_004A1618);
-        cUIState_hideObjSafe(self, D_0045E438);
-        cUIState_showObjSafe(self, D_0045E450);
-        cUIState_showObjSafe(self, D_0045E460);
+        cUIState_showObjSafe(self, str_DNALabels);
+        cUIState_showObjSafe(self, str_DNAText);
+        cUIState_hideObjSafe(self, str_FavesLabels);
+        cUIState_hideObjSafe(self, str_FavesText);
+        cUIState_hideObjSafe(self, str_QNALabels);
+        cUIState_hideObjSafe(self, str_QNAText);
+        cUIState_hideObjSafe(self, str_BIOAutoScrollText);
+        cUIState_showObjSafe(self, str_vertical_dash);
+        cUIState_showObjSafe(self, str_horizontal_dash);
         cFEStateRiderBio_fillDNAInfo(self);
         break;
     case 1:
-        cUIState_hideObjSafe(self, D_0045E3F8);
-        cUIState_hideObjSafe(self, D_004A1610);
-        cUIState_showObjSafe(self, D_0045E408);
-        cUIState_showObjSafe(self, D_0045E418);
-        cUIState_hideObjSafe(self, D_0045E428);
-        cUIState_hideObjSafe(self, D_004A1618);
-        cUIState_hideObjSafe(self, D_0045E438);
-        cUIState_showObjSafe(self, D_0045E450);
-        cUIState_showObjSafe(self, D_0045E460);
+        cUIState_hideObjSafe(self, str_DNALabels);
+        cUIState_hideObjSafe(self, str_DNAText);
+        cUIState_showObjSafe(self, str_FavesLabels);
+        cUIState_showObjSafe(self, str_FavesText);
+        cUIState_hideObjSafe(self, str_QNALabels);
+        cUIState_hideObjSafe(self, str_QNAText);
+        cUIState_hideObjSafe(self, str_BIOAutoScrollText);
+        cUIState_showObjSafe(self, str_vertical_dash);
+        cUIState_showObjSafe(self, str_horizontal_dash);
         cFEStateRiderBio_fillFavesInfo(self);
         break;
     case 2:
-        cUIState_hideObjSafe(self, D_0045E3F8);
-        cUIState_hideObjSafe(self, D_004A1610);
-        cUIState_hideObjSafe(self, D_0045E408);
-        cUIState_hideObjSafe(self, D_0045E418);
-        cUIState_showObjSafe(self, D_0045E428);
-        cUIState_showObjSafe(self, D_004A1618);
-        cUIState_hideObjSafe(self, D_0045E438);
-        cUIState_hideObjSafe(self, D_0045E450);
-        cUIState_hideObjSafe(self, D_0045E460);
+        cUIState_hideObjSafe(self, str_DNALabels);
+        cUIState_hideObjSafe(self, str_DNAText);
+        cUIState_hideObjSafe(self, str_FavesLabels);
+        cUIState_hideObjSafe(self, str_FavesText);
+        cUIState_showObjSafe(self, str_QNALabels);
+        cUIState_showObjSafe(self, str_QNAText);
+        cUIState_hideObjSafe(self, str_BIOAutoScrollText);
+        cUIState_hideObjSafe(self, str_vertical_dash);
+        cUIState_hideObjSafe(self, str_horizontal_dash);
         cFEStateRiderBio_fillQnAInfo(self);
         break;
     case 3:
-        cUIState_hideObjSafe(self, D_0045E3F8);
-        cUIState_hideObjSafe(self, D_004A1610);
-        cUIState_hideObjSafe(self, D_0045E408);
-        cUIState_hideObjSafe(self, D_0045E418);
-        cUIState_hideObjSafe(self, D_0045E428);
-        cUIState_hideObjSafe(self, D_004A1618);
-        cUIState_showObjSafe(self, D_0045E438);
-        cUIState_hideObjSafe(self, D_0045E450);
-        cUIState_hideObjSafe(self, D_0045E460);
+        cUIState_hideObjSafe(self, str_DNALabels);
+        cUIState_hideObjSafe(self, str_DNAText);
+        cUIState_hideObjSafe(self, str_FavesLabels);
+        cUIState_hideObjSafe(self, str_FavesText);
+        cUIState_hideObjSafe(self, str_QNALabels);
+        cUIState_hideObjSafe(self, str_QNAText);
+        cUIState_showObjSafe(self, str_BIOAutoScrollText);
+        cUIState_hideObjSafe(self, str_vertical_dash);
+        cUIState_hideObjSafe(self, str_horizontal_dash);
         cFEStateRiderBio_fillBioInfo(self);
         break;
     }
@@ -140,14 +140,14 @@ struct sNames_0CD8 {
     char* name[10];
 };
 extern sNames_0CD8 D_0045E470;
-extern char D_004A1670[];
+extern char str_pct_s_s[];
 
 extern "C" void func_00190CD8(void* self)
 {
     sNames_0CD8 names = D_0045E470;
     char buf[32];
     for (int i = 0; i < 10; i++) {
-        sprintf(buf, D_004A1670, names.name[i]);
+        sprintf(buf, str_pct_s_s, names.name[i]);
         if (i == *(int*)((char*)self + 0x48)) {
             cUIState_showObjSafe(self, names.name[i]);
             cUIState_showObjSafe(self, buf);
@@ -172,7 +172,7 @@ struct sDNANames {
     char* name[10][8];
 };
 extern sDNANames D_0045E998;
-extern char D_004A1678[];
+extern char str_DNApct_d[];
 
 /**
  * Fills the bio screen's DNA page: sets the texts "DNA1" to "DNA8" to this rider's DNA lines.
@@ -185,7 +185,7 @@ extern "C" void cFEStateRiderBio_fillDNAInfo(void* self)
     sDNANames names = D_0045E998;
     char buf[16];
     for (int i = 0; i < 8; i++) {
-        sprintf(buf, D_004A1678, i + 1);
+        sprintf(buf, str_DNApct_d, i + 1);
         cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
         if (obj != 0) {
             cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[*(int*)((char*)self + 0x48)][i]));
@@ -207,7 +207,7 @@ struct sFavesNames {
     char* name[10][12];
 };
 extern sFavesNames D_0045F2D0;
-extern char D_004A1680[];
+extern char str_FAVESpct_d[];
 
 /**
  * Fills the bio screen's favourites page: sets the texts "FAVES1" to "FAVES12" to this rider's favourites.
@@ -220,7 +220,7 @@ extern "C" void cFEStateRiderBio_fillFavesInfo(void* self)
     sFavesNames names = D_0045F2D0;
     char buf[16];
     for (int i = 0; i < 12; i++) {
-        sprintf(buf, D_004A1680, i + 1);
+        sprintf(buf, str_FAVESpct_d, i + 1);
         cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
         if (obj != 0) {
             cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[*(int*)((char*)self + 0x48)][i]));
@@ -242,7 +242,7 @@ struct sQnANames {
     char* name[10][4];
 };
 extern sQnANames D_0045F730;
-extern char D_004A1688[];
+extern char str_QNApct_d[];
 
 /**
  * Fills the bio screen's Q&A page: sets the texts "QNA1" to "QNA4" to this rider's answers.
@@ -255,7 +255,7 @@ extern "C" void cFEStateRiderBio_fillQnAInfo(void* self)
     sQnANames names = D_0045F730;
     char buf[16];
     for (int i = 0; i < 4; i++) {
-        sprintf(buf, D_004A1688, i + 1);
+        sprintf(buf, str_QNApct_d, i + 1);
         cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
         if (obj != 0) {
             cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[*(int*)((char*)self + 0x48)][i]));
@@ -276,8 +276,8 @@ extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern "C" void cUITextScroll_clearBuffer(void* self);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_0045E438[];
-extern char D_0045F7D0[];
+extern char str_BIOAutoScrollText[];
+extern char str_kT_FULLBIO1pct_s[];
 
 /**
  * Fills the biography page: puts "kT_FULLBIO1" + the rider's name into the "BIOAutoScrollText" scroller.
@@ -288,11 +288,11 @@ extern char D_0045F7D0[];
  */
 extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E438));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_BIOAutoScrollText));
     if (obj) {
         char buf[64];
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 2);
-        sprintf(buf, D_0045F7D0, func_0014EEC8(iface, *(int*)((char*)self + 0x48), 0));
+        sprintf(buf, str_kT_FULLBIO1pct_s, func_0014EEC8(iface, *(int*)((char*)self + 0x48), 0));
         cUITextScroll_clearBuffer(obj);
         cUITextScroll_addUnicodeStringByID(obj, GetHashValue32(buf));
     }

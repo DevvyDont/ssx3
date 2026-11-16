@@ -9,7 +9,7 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_cScriptSoundBankManager
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char cScriptSoundBankManager_vtbl[];
-extern const char D_00481FB0[];
+extern const char str_tScriptSoundBankInfo[];
 
 struct sScSndBank3450 {
     int id;         // 0x0
@@ -41,7 +41,7 @@ extern "C" cScriptSoundBankManager3450* cScriptSoundBankManager_cScriptSoundBank
     self->vtable = cScriptSoundBankManager_vtbl;
     self->flags = flags;
     self->count = count;
-    self->banks = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), D_00481FB0, flags, 0);
+    self->banks = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), str_tScriptSoundBankInfo, flags, 0);
     int idx = base;
     for (int i = 0; i < self->count; i++) {
         self->banks[i].id = -1;

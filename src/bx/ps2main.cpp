@@ -4,13 +4,13 @@
 INCLUDE_ASM("bx/ps2main", systemInit);
 #ifdef SKIP_ASM
 extern void* D_004A3E94;
-extern char D_0048DA88[];
-extern char D_0048DA98[];
-extern char D_0048DAA8[];
-extern char D_0048DAB8[];
-extern char D_0048DAC8[];
-extern char D_0048DAD8[];
-extern char D_004A3ED8[];
+extern char str_SIO2MAN_IRX[];
+extern char str_PADMAN_IRX[];
+extern char str_LIBSD_IRX[];
+extern char str_SNDDRV_IRX[];
+extern char str_MCMAN_IRX[];
+extern char str_MCSERV_IRX[];
+extern char str_cd[];
 extern "C" void func_00319610(void* io);
 extern "C" void func_00319718(void* io, const char* module, int a, int b, int c);
 extern "C" void func_00409940(void);
@@ -57,12 +57,12 @@ struct sIoCfg_SysInit {
 extern "C" void systemInit(void)
 {
     func_00319610(D_004A3E94);
-    func_00319718(D_004A3E94, D_0048DA88, 1, 0, 0);
-    func_00319718(D_004A3E94, D_0048DA98, 1, 0, 0);
-    func_00319718(D_004A3E94, D_0048DAA8, 1, 0, 0);
-    func_00319718(D_004A3E94, D_0048DAB8, 1, 0, 0);
-    func_00319718(D_004A3E94, D_0048DAC8, 1, 0, 0);
-    func_00319718(D_004A3E94, D_0048DAD8, 1, 0, 0);
+    func_00319718(D_004A3E94, str_SIO2MAN_IRX, 1, 0, 0);
+    func_00319718(D_004A3E94, str_PADMAN_IRX, 1, 0, 0);
+    func_00319718(D_004A3E94, str_LIBSD_IRX, 1, 0, 0);
+    func_00319718(D_004A3E94, str_SNDDRV_IRX, 1, 0, 0);
+    func_00319718(D_004A3E94, str_MCMAN_IRX, 1, 0, 0);
+    func_00319718(D_004A3E94, str_MCSERV_IRX, 1, 0, 0);
     func_00409940();
     func_003FF4A8(0);
     int clock[2];
@@ -86,7 +86,7 @@ extern "C" void systemInit(void)
     ASYNCFILE_init(0x10, 0);
     SYNCTASK_del(func_003E4000);
     SYNCTASK_add(func_0031AD20, 0, 0);
-    func_003DDE78(D_004A3ED8);
+    func_003DDE78(str_cd);
 }
 #endif
 
@@ -105,7 +105,7 @@ extern "C" void func_0040FC90(void); // __main
 extern "C" void systemInit(void);
 extern "C" int cAppMan_run(void* self, cExecutionMan* exec, int argc, char** argv);
 extern void* D_004A5B64;
-extern const char D_0048DAE8[];
+extern const char str_PS2ExecutionMan[];
 extern void* D_0048DB68[];
 
 // PORT: bound to "main" by asm label so gcc doesn't emit its own __main call;
@@ -127,7 +127,7 @@ int main_impl(int argc, char** argv)
 {
     func_0040FC90();
     systemInit();
-    cExecutionManMainK* exec = (cExecutionManMainK*)cMemMan_alloc(0x142C0, D_0048DAE8, 0, 0);
+    cExecutionManMainK* exec = (cExecutionManMainK*)cMemMan_alloc(0x142C0, str_PS2ExecutionMan, 0, 0);
     cExecutionMan_halt((cExecutionMan*)exec);
     exec->field_0x8 = D_0048DB68;
     return cAppMan_run(D_004A5B64, (cExecutionMan*)exec, argc, argv);

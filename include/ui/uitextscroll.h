@@ -2,7 +2,7 @@
 #define UI_UITEXTSCROLL_H
 
 // cUITextScroll: a scrolling multi-line text box (record type 0x20), word-wrapped into lines and optionally driven by
-// a cUIScrollBar. Size 0xD0: cUIScreen_createObjectByStruct does operator new(0xD0, D_00493F50) + the ctor
+// a cUIScrollBar. Size 0xD0: cUIScreen_createObjectByStruct does operator new(0xD0, str_cUITextScroll) + the ctor
 // cUITextScroll_cUITextScroll (cUIThing ctor func_0039FB30, vtable cUITextScroll_vtbl, mList ctor func_003977E8, zeroes 0xB8..0xCC,
 // cUITextScroll_setInputMap fills mInputMap), then moves the record's children into mList. Default ctor func_003A6250
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:

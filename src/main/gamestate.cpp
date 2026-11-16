@@ -28,7 +28,7 @@ extern "C" void func_00234BE8(void* self, int a1);
 int GetHashValue32(char* s);
 extern char* cGameState_mpGame;
 extern signed char D_00535C10[];
-extern char D_0047C038[];
+extern char str_StartlightBegin[];
 
 struct sRace_234AD0 {
     char pad[0x8C];
@@ -63,7 +63,7 @@ extern "C" void cGFGateState_gainFocus(void* self)
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 4);
     func_0029C418(func_0028B180());
     func_0029C420(func_0028B180(), 3);
-    func_00234BE8(self, GetHashValue32(D_0047C038));
+    func_00234BE8(self, GetHashValue32(str_StartlightBegin));
     func_0039F840(*(char**)(cGameState_mpGame + 0x48) + 0x18);
 }
 #endif
@@ -108,8 +108,8 @@ extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void func_0029C420(void* p, int secs);
 extern char* cGameState_mpGame;
 extern signed char D_00535C10[];
-extern char D_0047C048[];
-extern char D_004A2AB0[];
+extern char str_StartgateOpen[];
+extern char str_hud_c[];
 
 struct sVEntry00234C68 {
     short delta;
@@ -146,8 +146,8 @@ extern "C" void cGFGateState_update(void* self)
         return;
     }
     if (*(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x1C) <= 0) {
-        func_00234BE8(self, GetHashValue32(D_0047C048));
-        char* obj = (char*)cUIStateStack_findState(*(char**)(cGameState_mpGame + 0x48) + 0x18, GetHashValue32(D_004A2AB0));
+        func_00234BE8(self, GetHashValue32(str_StartgateOpen));
+        char* obj = (char*)cUIStateStack_findState(*(char**)(cGameState_mpGame + 0x48) + 0x18, GetHashValue32(str_hud_c));
         if (obj != 0) {
             sVEntry00234C68* vtEntry = &(*(sVEntry00234C68**)(obj + 8))[24];
             vtEntry->fn(obj + vtEntry->delta, 6, 0);
@@ -2087,9 +2087,9 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 // PORT: func_00244400__FPvi takes the 0x2A4-byte block as an int (pointer in int)
 void func_00244400(void* self, int a1);
 void func_00244408(void* self, int a1);
-extern char D_0047C078[];
-extern char D_0047C088[];
-extern char D_0047C098[];
+extern char str_InputSamples[];
+extern char str_SyncedPad[];
+extern char str_SyncedInput[];
 
 struct sRec_237140 {
     int type;
@@ -2123,7 +2123,7 @@ static inline void* initObj_237140(void* o, int a, int b)
 extern "C" void* func_00237140(sOwner_237140* self, int* a1)
 {
     sEntry_237140* e = &self->entries[self->n++];
-    e->recs = (sRec_237140*)operator_new_tag(self->count * 100, D_0047C078, 0, 0);
+    e->recs = (sRec_237140*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
     MEM_fill(e->recs, 0, self->count * 100);
     for (int i = 0; i < self->count; i++) {
         e->recs[i].type = 0x18;
@@ -2131,9 +2131,9 @@ extern "C" void* func_00237140(sOwner_237140* self, int* a1)
     e->f4 = 0;
     e->f8 = self->f0;
     e->fC = a1[0];
-    e->f10 = (int*)cMemMan_alloc(0x2A4, D_0047C088, 0, 0);
+    e->f10 = (int*)cMemMan_alloc(0x2A4, str_SyncedPad, 0, 0);
     *e->f10 = 0;
-    void* o = initObj_237140(cMemMan_alloc(8, D_0047C098, 0, 0), (int)e->f10, a1[1]);
+    void* o = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, a1[1]);
     e->f14 = o;
     return o;
 }
@@ -2149,9 +2149,9 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 // PORT: func_00244400__FPvi takes the 0x2A4-byte block as an int (pointer in int)
 void func_00244400(void* self, int a1);
 void func_00244408(void* self, int a1);
-extern char D_0047C078[];
-extern char D_0047C088[];
-extern char D_0047C098[];
+extern char str_InputSamples[];
+extern char str_SyncedPad[];
+extern char str_SyncedInput[];
 
 struct sRec_237280 {
     int type;
@@ -2185,7 +2185,7 @@ static inline void* initObj_237280(void* o, int a, int b)
 extern "C" void* func_00237280(sOwner_237280* self, int a1)
 {
     sEntry_237280* e = &self->entries[self->n++];
-    e->recs = (sRec_237280*)operator_new_tag(self->count * 100, D_0047C078, 0, 0);
+    e->recs = (sRec_237280*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
     MEM_fill(e->recs, 0, self->count * 100);
     for (int i = 0; i < self->count; i++) {
         e->recs[i].type = 0x18;
@@ -2193,9 +2193,9 @@ extern "C" void* func_00237280(sOwner_237280* self, int a1)
     e->f4 = 0;
     e->f8 = self->f0;
     e->fC = 0;
-    e->f10 = (int*)cMemMan_alloc(0x2A4, D_0047C088, 0, 0);
+    e->f10 = (int*)cMemMan_alloc(0x2A4, str_SyncedPad, 0, 0);
     *e->f10 = 0;
-    void* o = initObj_237280(cMemMan_alloc(8, D_0047C098, 0, 0), (int)e->f10, a1);
+    void* o = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, a1);
     e->f14 = o;
     return o;
 }

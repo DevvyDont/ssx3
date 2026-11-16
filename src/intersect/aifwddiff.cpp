@@ -7,8 +7,8 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_00340970(void* self);
-extern char D_0048E4F8[];
-extern char D_0048E508[];
+extern char str_AIFwdDiffCache[];
+extern char str_AIFwdDiffHash[];
 
 struct sCacheEntry_7890 {
     unsigned int key;
@@ -31,7 +31,7 @@ struct sCache_7890 {
  */
 extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
 {
-    sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), D_0048E4F8, 0, 0);
+    sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), str_AIFwdDiffCache, 0, 0);
     sCacheEntry_7890* entry = mem;
     for (int k = n - 1; k != -1; k--, entry++) {
         func_00340970(entry);
@@ -46,7 +46,7 @@ extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
     self->entries[n - 1].next = self->entries;
     self->count = n * 2 + 13;
     self->lru = self->entries;
-    self->buckets = (sCacheEntry_7890**)operator_new_tag(self->count * 4, D_0048E508, 0x80000000, 0);
+    self->buckets = (sCacheEntry_7890**)operator_new_tag(self->count * 4, str_AIFwdDiffHash, 0x80000000, 0);
 }
 #endif
 
@@ -694,7 +694,7 @@ INCLUDE_ASM("intersect/aifwddiff", func_00328660);
 // PORT: cMemMan_alloc is the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void MEM_fill(void* p, int v, int n);
-extern char D_004A3FC0[];
+extern char str_Cell[];
 
 struct sItem_00328660 {
     sItem_00328660* next;   // 0x0
@@ -735,7 +735,7 @@ extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* ite
         cur.z = cur.z * 2 + dz;
         sNode_00328660** c = &node->child[dx][dy][dz];
         if (*c == 0) {
-            *c = new (D_004A3FC0, 0x20000000, 0) sNode_00328660;
+            *c = new (str_Cell, 0x20000000, 0) sNode_00328660;
         }
         node = *c;
     }
@@ -795,7 +795,7 @@ extern "C" void func_00328808(sNode_003284B8* node, int type, sItem_00328660* it
     newchildkey.z = mykey->z * 2 + newcz;
     sNode_003284B8*& newchild = node->child[newcx][newcy][newcz];
     if (newchild == 0) {
-        newchild = (sNode_003284B8*)new (D_004A3FC0, 0x20000000, 0) sNode_00328660;
+        newchild = (sNode_003284B8*)new (str_Cell, 0x20000000, 0) sNode_00328660;
     }
     func_00328660((sNode_00328660*)newchild, type, item, newkey, &newchildkey);
 }
@@ -850,7 +850,7 @@ extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, s
     sNode_8C20** pn = &root->node;
     if (root->node == 0) {
         root->cell = *cell;
-        sNode_8C20* n = new (D_004A3FC0, 0x20000000, 0) sNode_8C20;
+        sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20;
         MEM_fill(n->child, 0, sizeof(n->child));
         *pn = n;
         root->node->lists[idx].push(item);
@@ -858,7 +858,7 @@ extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, s
     }
     while (!Contains_8C20(root->cell, *cell)) {
         sCell_00328660 nc = Parent_8C20(root->cell);
-        sNode_8C20* n = new (D_004A3FC0, 0x20000000, 0) sNode_8C20(root->node, root->cell, nc);
+        sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20(root->node, root->cell, nc);
         root->cell = nc;
         root->node = n;
     }

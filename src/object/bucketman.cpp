@@ -10,7 +10,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_004A4020[];
+extern char str_Buckets[];
 extern char cObjNode_vtbl[];
 
 struct sBucketList_3549E0 {
@@ -56,7 +56,7 @@ struct sBucket_3549E0 {
 extern "C" void cBucketMan_init(cBucketMan* self, int n)
 {
     char** slot = &self->mBuckets;
-    *slot = (char*)new (D_004A4020, 0, 0) sBucket_3549E0[n];
+    *slot = (char*)new (str_Buckets, 0, 0) sBucket_3549E0[n];
     *(int*)self = n;
     for (int i = 0; i < *(int*)self; i++) {
         ((sBucket_3549E0*)self->mBuckets)[i].l0.prev = &((sBucket_3549E0*)self->mBuckets)[i].l1;

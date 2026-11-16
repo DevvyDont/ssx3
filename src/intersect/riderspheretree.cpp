@@ -2714,7 +2714,7 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_initCache);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label as a placement operator new[].
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_0048E540[];
+extern char str_SphereTreeCache[];
 extern void** D_004A3FC8;
 extern void* D_004A3FCC;
 extern int D_004A3FD0;
@@ -2760,19 +2760,19 @@ extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int t
     D_004A3FD8 = 0;
     D_004A3FDC = 0;
     if (nSmall != 0) {
-        D_004A3FC8 = new (D_0048E540, 0, 0) void*[nSmall];
-        D_004A3FCC = new (D_0048E540, 0, 0) int[nSmall];
+        D_004A3FC8 = new (str_SphereTreeCache, 0, 0) void*[nSmall];
+        D_004A3FCC = new (str_SphereTreeCache, 0, 0) int[nSmall];
     }
     if (nBig != 0) {
-        D_004A3FD8 = new (D_0048E540, 0, 0) void*[nBig];
-        D_004A3FDC = new (D_0048E540, 0, 0) int[nBig];
+        D_004A3FD8 = new (str_SphereTreeCache, 0, 0) void*[nBig];
+        D_004A3FDC = new (str_SphereTreeCache, 0, 0) int[nBig];
     }
     for (i = 0; i < nSmall; i++) {
-        D_004A3FC8[i] = new (D_0048E540, 0, 0) char[smallSize];
+        D_004A3FC8[i] = new (str_SphereTreeCache, 0, 0) char[smallSize];
         ((int*)D_004A3FCC)[i] = -1;
     }
     for (i = 0; i < nBig; i++) {
-        D_004A3FD8[i] = new (D_0048E540, 0, 0) char[bigSize];
+        D_004A3FD8[i] = new (str_SphereTreeCache, 0, 0) char[bigSize];
         ((int*)D_004A3FDC)[i] = -1;
     }
     D_004A3FD0 = nSmall;

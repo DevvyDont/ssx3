@@ -214,7 +214,7 @@ struct sInstNodeDtorVEntry {
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern char D_0048E738[];
+extern char str_DeadNode_b[];
 extern "C" void* func_003506D8(void* mem, int v);
 
 /**
@@ -231,7 +231,7 @@ extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
         sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
-    func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), instance);
+    func_003506D8(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
 #endif
 

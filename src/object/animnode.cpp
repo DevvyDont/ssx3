@@ -9,8 +9,8 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern "C" void func_003513D0(void* self);
 extern "C" void func_003612C0(void* self);
 extern "C" void func_00351398(void* self, void* src);
-extern char D_0048E860[];
-extern char D_0048E870[];
+extern char str_IntersectInfo[];
+extern char str_MeshVelocity[];
 extern void* cMeshAnimFrame_vtbl[];
 extern void* cAnimFrame_vtbl[];
 
@@ -76,12 +76,12 @@ extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
     }
     if (self->numMeshes != 0) {
         sMeshInst_E448*& meshes = self->meshes;
-        meshes = new (D_0048E860, 0x20000000, 0) sMeshInst_E448[self->numMeshes];
+        meshes = new (str_IntersectInfo, 0x20000000, 0) sMeshInst_E448[self->numMeshes];
     } else {
         self->meshes = 0;
     }
     sMeshRef_E448*& refs = self->refs;
-    refs = new (D_0048E870, 0x20000000, 0) sMeshRef_E448[def->count];
+    refs = new (str_MeshVelocity, 0x20000000, 0) sMeshRef_E448[def->count];
     entry = def->entries;
     int k = 0;
     for (i = 0; i < def->count; i++, entry++) {
@@ -526,7 +526,7 @@ INCLUDE_ASM("object/animnode", func_0034EC58);
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a2);
 struct cFloatingNode;
 void cFloatingNode_initInfo(cFloatingNode* self);
-extern char D_0048E880[];
+extern char str_FloatingMats[];
 extern void* cFloatingNode_vtbl[];
 
 struct sAnimFrame_EC58 {
@@ -567,7 +567,7 @@ extern "C" void* func_0034EC58(cFloatingNode* self, void* a1, void* a2, sAnimInf
     self->Z = p.z;
     cFloatingNode_initInfo((cFloatingNode*)self);
     sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(((char*)self) + 0x74);
-    *pf = new (D_0048E880, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
+    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;
     char* m = (char*)self->Instance;
     *(unsigned int*)(m + 8) = (*(unsigned int*)(m + 8) & 0xFFFFFFFD) | 4;
@@ -582,7 +582,7 @@ extern "C" void* cMoveNode_cMoveNode(void* self, void* a1, void* stream);
 struct cFloatingNode;
 void cFloatingNode_initInfo(cFloatingNode* self);
 extern void* cFloatingNode_vtbl[];
-extern char D_0048E880[];
+extern char str_FloatingMats[];
 
 struct sStreamVE_ED88 {
     short delta;
@@ -610,7 +610,7 @@ extern "C" void* func_0034ED88(cFloatingNode* self, void* a1, void* stream)
     sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, ((char*)self) + 0x2C, 0x48);
     sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(((char*)self) + 0x74);
-    *pf = new (D_0048E880, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
+    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;
     return ((void*)self);
 }

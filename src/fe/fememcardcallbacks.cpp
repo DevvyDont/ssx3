@@ -6,8 +6,8 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A2028;
-extern char D_004677B8[];
-extern char D_0045F7E0[];
+extern char str_kT_MEMOVSaveDone[];
+extern char str_kT_CMNContinue[];
 void func_001D8C38(void* self);
 
 struct sVEntryS1D66B0 {
@@ -41,14 +41,14 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
     if (*(int*)(fe + 0x208) == 0) {
         char* locale = (char*)SSXApp->FELocale;
         sVEntryS1D66B0* ovt = *(sVEntryS1D66B0**)(locale + 4);
-        void* str = ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_004677B8));
+        void* str = ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVSaveDone));
         char* fe2 = (char*)D_004A2028;
         *(int*)(fe2 + 0x19C) = 5;
         sVEntryVS1D66B0* vt = *(sVEntryVS1D66B0**)(fe2 + 8);
         vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntryS1D66B0* o2vt = *(sVEntryS1D66B0**)(locale2 + 4);
-        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
         char* popup = *(char**)((char*)D_004A2028 + 0x218);
         sVEntryVS1D66B0* mvt = *(sVEntryVS1D66B0**)(popup + 8);
         mvt[26].fn(popup + mvt[26].delta, str2, 0);
@@ -64,8 +64,8 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackReadSuccess);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A2028;
-extern char D_004677D0[];
-extern char D_0045F7E0[];
+extern char str_kT_MEMOVLoadDone[];
+extern char str_kT_CMNContinue[];
 extern "C" void func_001D9308(void*, int);
 
 struct sVEntryR1D67C8 {
@@ -100,14 +100,14 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
     if (*(int*)(fe + 0x204) == 0) {
         char* locale = (char*)SSXApp->FELocale;
         sVEntryR1D67C8* ovt = *(sVEntryR1D67C8**)(locale + 4);
-        void* str = ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_004677D0));
+        void* str = ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVLoadDone));
         char* fe2 = (char*)D_004A2028;
         *(int*)(fe2 + 0x19C) = 6;
         sVEntryVR1D67C8* vt = *(sVEntryVR1D67C8**)(fe2 + 8);
         vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntryR1D67C8* o2vt = *(sVEntryR1D67C8**)(locale2 + 4);
-        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
         char* popup = *(char**)((char*)D_004A2028 + 0x218);
         sVEntryVR1D67C8* mvt = *(sVEntryVR1D67C8**)(popup + 8);
         mvt[26].fn(popup + mvt[26].delta, str2, 0);
@@ -128,8 +128,8 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_004642F8[];
+extern char str_Temp_String[];
+extern char str_kT_MEMOVOverWriteFile[];
 
 struct sVEntryK1D68E8 {
     short delta;
@@ -146,14 +146,14 @@ struct sVEntryVK1D68E8 {
 extern "C" void func_001D68E8(void)
 {
     unsigned short name[0x28];
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     char* s = *(char**)(mp + 0x434);
     sVEntryVK1D68E8* svt = *(sVEntryVK1D68E8**)s;
     svt[14].fn(s + svt[14].delta, *(int*)(mp + 0xF8), name);
     char* o = (char*)SSXApp->FELocale;
     sVEntryK1D68E8* ovt = *(sVEntryK1D68E8**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004642F8)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 1;
     sVEntryVK1D68E8* vt = *(sVEntryVK1D68E8**)(fe + 8);
@@ -173,8 +173,8 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* strcpy1(void* dst, void* src);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_004641F0[];
+extern char str_Temp_String[];
+extern char str_kT_POPUP200CreateEdit[];
 
 struct sVEntry001D69E0 {
     short delta;
@@ -190,10 +190,10 @@ struct sVEntryV001D69E0 {
 
 extern "C" void func_001D69E0(void)
 {
-    void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    void* buf = operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
-    strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_004641F0)));
+    strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_POPUP200CreateEdit)));
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 2;
     sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
@@ -218,19 +218,19 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_00464608[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMOVLoadFailedPS2NGC[];
+extern char str_kT_CMNContinue[];
 
 extern "C" void func_001D6AD0(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464608)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVLoadFailedPS2NGC)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0xA;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
@@ -241,7 +241,7 @@ extern "C" void func_001D6AD0(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
@@ -260,20 +260,20 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_00464628[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMOVSaveFailed[];
+extern char str_kT_CMNContinue[];
 
 extern "C" void func_001D6C28(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     *(int*)((char*)D_004A2028 + 0x19C) = 0xB;
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464628)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVSaveFailed)), name);
     char* fe = (char*)D_004A2028;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
@@ -283,7 +283,7 @@ extern "C" void func_001D6C28(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
@@ -302,11 +302,11 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_004644D8[];
-extern char D_0045DCD8[];
-extern char D_00462C88[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMOVNotDetectedPS2[];
+extern char str_kT_MEMOVRetry[];
+extern char str_kT_BTNCancel[];
+extern char str_kT_CMNContinue[];
 
 static inline void* Str_1D6D88(char* key)
 {
@@ -329,26 +329,26 @@ extern "C" void func_001D6D88(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644D8)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
     *(int*)((char*)D_004A2028 + 0x19C) = 9;
     if (!(*(int*)(mp + 0xBC) || *(int*)(mp + 0xC0) || (*(int (**)())(mp + 0x78))())) {
         char* fe = (char*)D_004A2028;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
-        SetLine_1D6D88(D_0045DCD8, 1);
+        SetLine_1D6D88(str_kT_MEMOVRetry, 1);
         char* m = *(char**)((char*)D_004A2028 + 0x218);
         sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
         mvt[25].fn(m + mvt[25].delta, 1);
-        SetLine_1D6D88(D_00462C88, 0);
+        SetLine_1D6D88(str_kT_BTNCancel, 0);
     } else {
         char* fe = (char*)D_004A2028;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-        SetLine_1D6D88(D_0045F7E0, 0);
+        SetLine_1D6D88(str_kT_CMNContinue, 0);
     }
     if (buf != 0) {
         cMemMan_free(buf);
@@ -367,9 +367,9 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_004677E8[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMOVGameCorruptPS2[];
+extern char str_kT_CMNContinue[];
 
 struct sFEMC_001D7010 {
     char pad[0x19C];
@@ -381,7 +381,7 @@ extern "C" void func_001D7010(void)
     unsigned short name[0x100];
     unsigned short name2[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* sf = *(char**)(mp + 0x434);
     sVEntryV001D69E0* sfvt = *(sVEntryV001D69E0**)sf;
@@ -389,7 +389,7 @@ extern "C" void func_001D7010(void)
     ((sFEMC_001D7010*)D_004A2028)->f19C = 0xC;
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677E8)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVGameCorruptPS2)), name);
     char* fe = (char*)D_004A2028;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 1, 0);
@@ -399,7 +399,7 @@ extern "C" void func_001D7010(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
@@ -413,19 +413,19 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D7190);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern char D_00467800[];
+extern char str_kT_MEMCorruptSavePS2[];
 
 extern "C" void func_001D7190(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     void* app = SSXApp;
     *(int*)((char*)D_004A2028 + 0x19C) = 0xD;
     char* o = *(char**)((char*)app + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467800)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
     char* fe = (char*)D_004A2028;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
@@ -470,17 +470,17 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D7318);
 #ifdef SKIP_ASM
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern char D_00464330[];
+extern char str_kT_MEMFormatCardPS2[];
 
 extern "C" void func_001D7318(void)
 {
     unsigned short name[0x100];
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464330)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFormatCardPS2)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0xE;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
@@ -497,8 +497,8 @@ extern "C" void func_001D7318(void)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmFormatDone);
 #ifdef SKIP_ASM
-extern char D_00467818[];
-extern char D_0045F7E0[];
+extern char str_kT_MEMOVFormatComplete[];
+extern char str_kT_CMNContinue[];
 
 /**
  * Memory-card callback for a finished format: shows "kT_MEMOVFormatComplete" as popup 0x10 (+0x19C).
@@ -511,18 +511,18 @@ extern char D_0045F7E0[];
  */
 extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
 {
-    void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    void* buf = operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     cSSXApp_getMCManager(SSXApp);
     char* locale = (char*)SSXApp->FELocale;
     sVEntry001D69E0* vt = *(sVEntry001D69E0**)(locale + 4);
-    strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(D_00467818)));
+    strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMOVFormatComplete)));
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x10;
     sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
     vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(locale2 + 4);
-    void* str = vt4[4].fn(locale2 + vt4[4].delta, GetHashValue32(D_0045F7E0));
+    void* str = vt4[4].fn(locale2 + vt4[4].delta, GetHashValue32(str_kT_CMNContinue));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(m + 8);
     vt3[26].fn(m + vt3[26].delta, str, 0);
@@ -537,25 +537,25 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D7548);
 #ifdef SKIP_ASM
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern char D_004644F0[];
-extern char D_0045F7E0[];
+extern char str_kT_MEMFEFormatFailed[];
+extern char str_kT_CMNContinue[];
 
 extern "C" void func_001D7548(void)
 {
     unsigned short name[0x100];
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644F0)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFEFormatFailed)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x11;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     mvt[26].fn(m + mvt[26].delta, str2, 0);
@@ -575,8 +575,8 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_00467830[];
+extern char str_Temp_String[];
+extern char str_kT_MEMConfirmDeletePS2[];
 
 struct sVEntryI_001D7688 {
     short delta;
@@ -601,14 +601,14 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
     char* sf = *(char**)(mp + 0x434);
     sVEntryI_001D7688* sfvt = *(sVEntryI_001D7688**)sf;
     if (sfvt[13].fn(sf + sfvt[13].delta) > 0) {
-        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
         *(int*)((char*)D_004A2028 + 0x19C) = 3;
         char* sf2 = *(char**)(mp + 0x434);
         sVEntryV001D69E0* sfvt2 = *(sVEntryV001D69E0**)sf2;
         sfvt2[14].fn(sf2 + sfvt2[14].delta, *(int*)(mp + 0xF8), name);
         char* locale = (char*)SSXApp->FELocale;
         sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
-        sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_00467830)), name);
+        sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMConfirmDeletePS2)), name);
         char* fe = (char*)D_004A2028;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
@@ -631,19 +631,19 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D77E8);
 #ifdef SKIP_ASM
-extern char D_004644D8[];
-extern char D_0045DCD8[];
-extern char D_00462C88[];
+extern char str_kT_MEMOVNotDetectedPS2[];
+extern char str_kT_MEMOVRetry[];
+extern char str_kT_BTNCancel[];
 
 extern "C" void func_001D77E8(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644D8)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x12;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
@@ -654,7 +654,7 @@ extern "C" void func_001D77E8(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045DCD8));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     mvt[26].fn(mthis, str2, 0);
     char* m3 = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* m3vt = *(sVEntryV001D69E0**)(m3 + 8);
@@ -662,7 +662,7 @@ extern "C" void func_001D77E8(void)
     char* o3 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o3vt = *(sVEntry001D69E0**)(o3 + 4);
     char* o3this = o3 + o3vt[4].delta;
-    void* str3 = o3vt[4].fn(o3this, GetHashValue32(D_00462C88));
+    void* str3 = o3vt[4].fn(o3this, GetHashValue32(str_kT_BTNCancel));
     m3vt[26].fn(m3this, str3, 1);
     if (buf != 0) {
         cMemMan_free(buf);
@@ -681,9 +681,9 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_00467848[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMFETooBigPS2[];
+extern char str_kT_CMNContinue[];
 
 struct sVEntryI_001D7998 {
     short delta;
@@ -695,12 +695,12 @@ extern "C" void func_001D7998(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     *(int*)((char*)D_004A2028 + 0x19C) = 0x13;
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467848));
+    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
     char* sf = *(char**)(mp + 0x434);
     sVEntryI_001D7998* sfvt = *(sVEntryI_001D7998**)sf;
     int n = sfvt[23].fn(sf + sfvt[23].delta);
@@ -714,7 +714,7 @@ extern "C" void func_001D7998(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
@@ -730,8 +730,8 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_00467848[];
-extern char D_0045F7E0[];
+extern char str_kT_MEMFETooBigPS2[];
+extern char str_kT_CMNContinue[];
 
 struct sVEntryI_001D7B18 {
     short delta;
@@ -752,7 +752,7 @@ extern "C" void func_001D7B18(void)
     func_00241DC8(mp, &name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467848));
+    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
     char* sf = *(char**)(mp + 0x434);
     sVEntryI_001D7B18* sfvt = *(sVEntryI_001D7B18**)sf;
     int n = sfvt[23].fn(sf + sfvt[23].delta);
@@ -766,7 +766,7 @@ extern "C" void func_001D7B18(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
 }
 #endif
@@ -774,8 +774,8 @@ extern "C" void func_001D7B18(void)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileExists);
 #ifdef SKIP_ASM
-extern char D_00467860[];
-extern char D_0045F7E0[];
+extern char str_kT_FENameAlreadyExists[];
+extern char str_kT_CMNContinue[];
 
 /**
  * Memory-card callback for a name clash: shows popup 0x17, "kT_FENameAlreadyExists", with a Continue button.
@@ -793,12 +793,12 @@ extern "C" void cFEMemCard_callbackFileExists(void)
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     char* locale = *(char**)((char*)app + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
-    vt[36].fn(fe + vt[36].delta, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_00467860)), 1, 0, 0, 0, 0);
+    vt[36].fn(fe + vt[36].delta, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_FENameAlreadyExists)), 1, 0, 0, 0, 0);
     char* popup = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
-    mvt[26].fn(popup + mvt[26].delta, o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0)), 0);
+    mvt[26].fn(popup + mvt[26].delta, o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue)), 0);
     *(int*)((char*)D_004A2028 + 0x1C0) = 1;
 }
 #endif
@@ -814,19 +814,19 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_00467878[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMDifferentMemcardPS2[];
+extern char str_kT_CMNContinue[];
 
 extern "C" void func_001D7D70(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467878)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMDifferentMemcardPS2)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x18;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
@@ -837,7 +837,7 @@ extern "C" void func_001D7D70(void)
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
-    void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     *(int*)((char*)D_004A2028 + 0x1C0) = 1;
     if (buf != 0) {
@@ -855,9 +855,9 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* strcpy1(void* dst, void* src);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_00467898[];
-extern char D_0045F7E0[];
+extern char str_Temp_String[];
+extern char str_kT_MEMDeleteSuccess[];
+extern char str_kT_CMNContinue[];
 
 /**
  * Memory-card callback for a finished delete: reports the success and resets the screen state.
@@ -874,17 +874,17 @@ extern char D_0045F7E0[];
 extern "C" int cFEMemCard_callbackDeleteDone(void)
 {
     if (*(int*)((char*)D_004A2028 + 0x204) == 0) {
-        void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        void* buf = operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
         char* locale = (char*)SSXApp->FELocale;
         sVEntry001D69E0* vt = *(sVEntry001D69E0**)(locale + 4);
-        strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(D_00467898)));
+        strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMDeleteSuccess)));
         char* fe = (char*)D_004A2028;
         *(int*)(fe + 0x19C) = 7;
         sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
         vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
-        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
         char* m = *(char**)((char*)D_004A2028 + 0x218);
         sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
         mvt[26].fn(m + mvt[26].delta, str2, 0);
@@ -905,25 +905,25 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D8020);
 #ifdef SKIP_ASM
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern char D_00464640[];
-extern char D_0045F7E0[];
+extern char str_kT_MEMOVDeleteFailedError[];
+extern char str_kT_CMNContinue[];
 
 extern "C" int func_001D8020(void)
 {
     unsigned short name[0x100];
-    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+    unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* o = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464640)), name);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVDeleteFailedError)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x8;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
     char* o2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     mvt[26].fn(m + mvt[26].delta, str2, 0);
@@ -994,8 +994,8 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D8240);
 #ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
-extern char D_004678B0[];
-extern char D_004678C8[];
+extern char str_text_box_message[];
+extern char str_kT_MEMNoCardsPS2[];
 
 struct sVEntryK1D8240 {
     short delta;
@@ -1013,12 +1013,12 @@ extern "C" void func_001D8240(void)
         vt[35].fn(fe + vt[35].delta, 1);
     }
     char* st = (char*)D_004A2028;
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(D_004678B0));
+    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
     if (obj) {
-        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
         char* o = (char*)SSXApp->FELocale;
         sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-        strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004678C8)));
+        strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
         cUIText_setUnicodeStringWrap(obj, buf);
         sVEntryK1D8240* vt = *(sVEntryK1D8240**)(obj + 8);
         vt[9].fn(obj + vt[9].delta, 1);
@@ -1063,9 +1063,9 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_004678B0[];
-extern char D_004678C8[];
+extern char str_Temp_String[];
+extern char str_text_box_message[];
+extern char str_kT_MEMNoCardsPS2[];
 
 struct sVEntryI_001D83A8 {
     short delta;
@@ -1096,12 +1096,12 @@ extern "C" void func_001D83A8(void)
     } else {
         SetMode_001D83A8((char*)D_004A2028, 1);
         char* st = (char*)D_004A2028;
-        void* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(D_004678B0));
+        void* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
         if (obj) {
-            unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+            unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
             char* o = (char*)SSXApp->FELocale;
             sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-            strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004678C8)));
+            strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
             cUIText_setUnicodeStringWrap(obj, buf);
             sVEntryV001D69E0* bvt = *(sVEntryV001D69E0**)((char*)obj + 8);
             bvt[9].fn((char*)obj + bvt[9].delta, 1);
@@ -1118,7 +1118,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D8530);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A2028;
-extern char D_0045E130[];
+extern char str_cFEPopupConfirm[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm_8530(void* self, void* engine, void* owner, int a3, int a4, int a5, int a6, int a7, int a8) __asm__("cFEPopupConfirm_cFEPopupConfirm");
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
@@ -1167,7 +1167,7 @@ extern "C" void func_001D8530(void* self_, int a1, int a2, int a3, int a4, int a
     if (p != 0) {
         p->v28(a1, a2, a3, a4, a5, a6);
     } else {
-        void* mem = cMemMan_alloc(0xBFC, D_0045E130, 0x100, 0);
+        void* mem = cMemMan_alloc(0xBFC, str_cFEPopupConfirm, 0x100, 0);
         void* engine = *(void**)((char*)D_004A2028 + 0x10);
         cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, D_004A2028, a1, a2, a3, a4, a5, a6);
         *(cPopup_8530**)(self + 0x218) = n;
@@ -1453,8 +1453,8 @@ struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 int GetHashValue32(char* str);
-extern char D_00467940[];
-extern char D_00467950[];
+extern char str_left_arr[];
+extern char str_right_arr[];
 
 struct sVEntryK1D8C50 {
     short delta;
@@ -1483,7 +1483,7 @@ extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
         handled = 1;
         *(int*)((char*)self + 0x1FC) = handled;
         if (*(void**)((char*)self + 0x40)) {
-            unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_00467940));
+            unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_left_arr));
             if (frame != 0xFFFF)
                 cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }
@@ -1493,7 +1493,7 @@ extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
             handled = 1;
             *(int*)((char*)self + 0x1F8) = handled;
             if (*(void**)((char*)self + 0x40)) {
-                unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_00467950));
+                unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_right_arr));
                 if (frame != 0xFFFF)
                     cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
             }
@@ -1543,8 +1543,8 @@ extern "C" void func_00241380(void*);
 extern "C" int func_0023C898(void*);
 extern "C" void cMCOverlayManager_update(void*);
 extern void* D_004A2028;
-extern char D_0045E2A0[];
-extern char D_004A1600[];
+extern char str_Temp_String[];
+extern char str_onmenu[];
 
 class cStreamK1D8DE0 {
 public:
@@ -1677,7 +1677,7 @@ extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
         }
     }
     if (*(int*)((char*)D_004A2028 + 0x210) != 0) {
-        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
+        unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
         func_00241E18(mp, buf, 0x320);
         (*(cPopupK1D8DE0**)(self + 0x218))->v27(buf);
         if (buf != 0) {
@@ -1686,7 +1686,7 @@ extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
     }
     VCALL_K1D8DE0(self, 8, 26));
     if (*(void**)(self + 0x218) == 0 && (*(cStreamK1D8DE0**)(mp + 0x434))->v75() != 0) {
-        void* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        void* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
         int sel = *(int*)(self + 0x1C4);
         if (menu != 0) {
             sel = *(unsigned char*)((char*)menu + 0x95);
@@ -1706,13 +1706,13 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D9258);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004A1600[];
+extern char str_onmenu[];
 extern "C" unsigned char cUIMenu_findFirstHighlightable(void* menu, unsigned char start);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
 extern "C" void func_001D9258(void* self)
 {
-    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1600));
+    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_onmenu));
     if (menu != 0) {
         void* item = *(void**)((char*)menu + 0xA0);
         int idx = *(unsigned char*)((char*)menu + 0x95);
@@ -1860,14 +1860,14 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
-extern char D_0045E2A0[];
-extern char D_004A1600[];
-extern char D_004A1608[];
-extern char D_004A2030[];
-extern char D_004A2038[];
-extern char D_004678B0[];
-extern char D_00467980[];
-extern char D_00463F58[];
+extern char str_Temp_String[];
+extern char str_onmenu[];
+extern char str_offmenu[];
+extern char str_off[];
+extern char str_on[];
+extern char str_text_box_message[];
+extern char str_file_display[];
+extern char str_kT_MEMFECheckingCardPS2[];
 
 struct sVEntryT1D9470 {
     short delta;
@@ -1897,25 +1897,25 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
     *(int*)(self + 0x214) = state;
     switch (state) {
     case 1: {
-        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 0);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_offmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 1);
         }
-        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_004A2030));
-        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
+        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_off));
+        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_text_box_message));
         if (text) {
-            unsigned short* str = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+            unsigned short* str = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             func_00241DC8(mp, buf, *(int*)(mp + 0x428));
             char* m = (char*)SSXApp->FELocale;
             sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
-            sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(D_00463F58)), buf);
+            sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
             sVEntryT1D9470* tvt = *(sVEntryT1D9470**)(text + 8);
             tvt[9].fn(text + tvt[9].delta, 1);
@@ -1926,24 +1926,24 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
     }
     case 2: {
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 0);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_offmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 1);
         }
-        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_00467980));
-        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
+        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_file_display));
+        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_text_box_message));
         if (text) {
-            unsigned short* str = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
+            unsigned short* str = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
             func_00241DC8(mp, buf, *(int*)(mp + 0x428));
             char* m = (char*)SSXApp->FELocale;
             sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
-            sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(D_00463F58)), buf);
+            sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
             sVEntryT1D9470* tvt = *(sVEntryT1D9470**)(text + 8);
             tvt[9].fn(text + tvt[9].delta, 1);
@@ -1953,17 +1953,17 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         break;
     }
     case 3: {
-        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 1);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_offmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 0);
         }
-        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_004A2038));
+        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_on));
         break;
     }
     }
@@ -2010,12 +2010,12 @@ struct sVEntry001D9818 {
 extern "C" void* cUIState_onGainFocus(void* self);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern char D_004678B0[];
+extern char str_text_box_message[];
 
 extern "C" void func_001D9818(void* self)
 {
     cUIState_onGainFocus(self);
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004678B0));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_text_box_message));
     if (obj != 0) {
         sVEntry001D9818* vt = *(sVEntry001D9818**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, 0);
@@ -2085,7 +2085,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_createReadBuffer);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
-extern char D_00467990[];
+extern char str_read_buffer[];
 
 /**
  * Allocates the memory-card screen's read buffer, freeing the one it owns first.
@@ -2105,7 +2105,7 @@ extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
         *(void**)((char*)self + 0x1D4) = 0;
         *(int*)((char*)self + 0x228) = 0;
     }
-    void* readBuffer = operator_new_tag(size, D_00467990, 0x100, 0);
+    void* readBuffer = operator_new_tag(size, str_read_buffer, 0x100, 0);
     *(void**)((char*)self + 0x1D0) = readBuffer;
     *(void**)((char*)self + 0x1D4) = readBuffer;
     *(int*)((char*)self + 0x228) = 1;
@@ -2170,8 +2170,8 @@ void func_001C57C0(void* self, int a1, int a2);
 void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup");
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void func_002C2540(void*, void*);
-extern char D_0045DCC8[];
-extern char D_0045FCD8[];
+extern char str_kT_CMNYes[];
+extern char str_kT_CMNNo[];
 extern char D_004A1408[];
 
 /**
@@ -2198,8 +2198,8 @@ extern "C" void cFEPopupConfirm_initPopup(void* self, int ustrDisplay, int bYesO
     void* str = (void*)ustrDisplay;
     char* popup = (char*)self;
     char* sub = popup + 0xBC;
-    func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
-    func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+    func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
+    func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
     *(int*)(popup + 0xBC) = 2;
     *(int*)(popup + 0x14C) = layerOffset;
     *(int*)(popup + 0x168) = 0;

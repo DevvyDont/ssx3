@@ -9,7 +9,7 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_initLightCache);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern char D_00487CD8[];
+extern char str_RTLOverlapList[];
 
 struct sWLCVec4 {
     float x, y, z, w;
@@ -71,7 +71,7 @@ extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
         sWLCLightHdr* light = &self->hdr[i];
         light->id = 0xFFFFFFFF;
         light->f14 = 0;
-        sWLCBuf* buf = (sWLCBuf*)operator new(0xA14, D_00487CD8, 0x20000000, 0);
+        sWLCBuf* buf = (sWLCBuf*)operator new(0xA14, str_RTLOverlapList, 0x20000000, 0);
         buf->owner = self->f00;
         buf->count = 0;
         buf->lists[0].head = 0xFFFFFFFF;

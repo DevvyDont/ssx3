@@ -15,8 +15,8 @@ void cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* label);
 void cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* height);
 
 extern char D_0046D3D0[];
-extern char D_00467DA8[];
-extern char D_00467DC0[];
+extern char str_You_ve_been_Challenged[];
+extern char str_by[];
 extern char D_00467DC8[];
 extern int D_00467DD0[];
 extern int D_00467DD8[];
@@ -44,8 +44,8 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* acceptOwner, int* d
     *(char**)(self + 0x12C) = D_0046D3D0;
     *(int*)(self + 0x130) = *acceptOwner;
     *(int*)(self + 0x134) = *declineOwner;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, D_00467DA8);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, D_00467DC0);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, str_You_ve_been_Challenged);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, str_by);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)item3, (void*)0xE);
     func_002CCF98(item4, 0, D_00467DD0, 0);
@@ -173,7 +173,7 @@ struct Menu_B528 {
 extern "C" int func_0025F120(void* src);
 extern "C" void* func_0025F150(void* src, int i);
 extern "C" void func_002CA388(void* item, int enable);
-extern char D_00467DE8[];
+extern char str_Receiving_Room_List[];
 
 extern "C" void func_001DB528(Menu_B528* self, void* src)
 {
@@ -186,7 +186,7 @@ extern "C" void func_001DB528(Menu_B528* self, void* src)
         it->index = i;
     }
     if (i == 0) {
-        self->items[0].data = D_00467DE8;
+        self->items[0].data = str_Receiving_Room_List;
         i = 1;
         func_002CA388(&self->items[0], 1);
         self->items[0].index = -1;
@@ -216,7 +216,7 @@ struct Menu_B620 {
 extern "C" int func_0025F1B0(void* src);
 extern "C" void* func_0025F1E0(void* src, int i, int flags);
 extern "C" void func_002CA388(void* item, int enable);
-extern char D_00467E00[];
+extern char str_No_users_in_room[];
 
 extern "C" void func_001DB620(Menu_B620* self, void* src)
 {
@@ -229,7 +229,7 @@ extern "C" void func_001DB620(Menu_B620* self, void* src)
         it->index = i;
     }
     if (i == 0) {
-        self->items[0].data = D_00467E00;
+        self->items[0].data = str_No_users_in_room;
         i = 1;
         func_002CA388(&self->items[0], 1);
         self->items[0].index = -1;
@@ -268,7 +268,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 void* cMemMan_free(void* ptr);
 void operator_delete(int*);
-extern char D_0045CDE8[];
+extern char str_StlBlock[];
 
 struct sPtrVecDB778 {
     void* alloc;
@@ -280,8 +280,8 @@ struct sPtrVecDB778 {
 static inline void** sPtrVecDB778_allocate(unsigned int n)
 {
     if (n == 1)
-        return (void**)cMemMan_alloc(4, D_0045CDE8, 0x20000000, 0);
-    return (void**)operator_new_tagDB778(n * 4, D_0045CDE8, 0x20000000, 0);
+        return (void**)cMemMan_alloc(4, str_StlBlock, 0x20000000, 0);
+    return (void**)operator_new_tagDB778(n * 4, str_StlBlock, 0x20000000, 0);
 }
 
 static inline void sPtrVecDB778_deallocate(void** p, unsigned int n)
@@ -353,7 +353,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 void* cMemMan_free(void* ptr);
 void operator_delete(int*);
-extern char D_0045CDE8[];
+extern char str_StlBlock[];
 
 struct sPtrVecDB918 {
     void* alloc;
@@ -365,8 +365,8 @@ struct sPtrVecDB918 {
 static inline void** sPtrVecDB918_allocate(unsigned int n)
 {
     if (n == 1)
-        return (void**)cMemMan_alloc(4, D_0045CDE8, 0x20000000, 0);
-    return (void**)operator_new_tagDB918(n * 4, D_0045CDE8, 0x20000000, 0);
+        return (void**)cMemMan_alloc(4, str_StlBlock, 0x20000000, 0);
+    return (void**)operator_new_tagDB918(n * 4, str_StlBlock, 0x20000000, 0);
 }
 
 static inline void sPtrVecDB918_deallocate(void** p, unsigned int n)
@@ -3772,7 +3772,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern void* D_0046B808[];
 extern char D_004A1390_E7B0[] __asm__("D_004A1390");
-extern char D_0045CDE8[];
+extern char str_StlBlock[];
 
 struct sListNode_E7B0 {
     sListNode_E7B0* next;   // 0x0
@@ -3802,7 +3802,7 @@ extern "C" void* func_001DE7B0(cFEStateNet* self)
     self->unk_6BC = 2;
     self->mVtbl = D_0046B808;
     cBXString_cBXString2(((char*)self) + 0x6C0, D_004A1390_E7B0);
-    self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, D_0045CDE8, 0x20000000, 0));
+    self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
     l->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
     l->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
     return ((void*)self);
@@ -4007,10 +4007,10 @@ INCLUDE_ASM("main/all_in_one_main", func_001DEA20);
 extern "C" int GetHashValue32_EA20(char *) __asm__("GetHashValue32__FPc");
 extern "C" int cUIEngine_addScreenByHashName_EA20(int, void *, int, int) __asm__("cUIEngine_addScreenByHashName");
 extern "C" void cUIScreen_playFrame_EA20(int, int, int) __asm__("cUIScreen_playFrame");
-extern char D_0045DD20[];
+extern char str_111resetopts[];
 
 extern "C" void func_001DEA20(void *self) {
-    int h = GetHashValue32_EA20(D_0045DD20);
+    int h = GetHashValue32_EA20(str_111resetopts);
     *(int *)((char *)self + 0xC) = h;
     int s = cUIEngine_addScreenByHashName_EA20(*(int *)((char *)self + 0x10), self, h, 0);
     *(int *)((char *)self + 0x40) = s;
@@ -4043,19 +4043,19 @@ INCLUDE_ASM("main/all_in_one_main", func_001DEAA8);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
 extern "C" void func_0039F190(int, int);
-extern char D_004A14E8[];
-extern char D_004A14F0[];
+extern char str_yes[];
+extern char str_no[];
 
 extern "C" void func_001DEAA8(char *self, char *arg1, int arg2) {
     if (arg1 != 0) {
         if (arg2 == 5) {
             int a = *(int*)(arg1 + 0x38);
-            if (a == GetHashValue32(D_004A14E8)) {
+            if (a == GetHashValue32(str_yes)) {
                 *(char*)(self + 0x48) = 1;
                 func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
             } else {
                 int b = *(int*)(arg1 + 0x38);
-                if (b == GetHashValue32(D_004A14F0)) {
+                if (b == GetHashValue32(str_no)) {
                     *(char*)(self + 0x48) = 0;
                     func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
                 }

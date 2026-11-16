@@ -5,7 +5,7 @@ INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initCommon);
 #ifdef SKIP_ASM
 void func_0031D790(void* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_0048DB38[];
+extern char str_cCSICubicSpline[];
 
 struct sCubicSplineFlags {
     unsigned int b0 : 1;
@@ -37,7 +37,7 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
         func_0031D790(self);
     }
     self->flags.count = n - 1;
-    self->data = operator_new_tag(self->flags.count * 0x14, D_0048DB38, 0, 0);
+    self->data = operator_new_tag(self->flags.count * 0x14, str_cCSICubicSpline, 0, 0);
     self->flags.b1 = 1;
     self->flags.f3 = 0;
 }

@@ -109,7 +109,7 @@ extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 extern void* cMemMan_m_mutex[16];
-extern char D_0048DA08[];
+extern char str_resizeBlock[];
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 // PORT: func_00319B98 returns the block size; the unit declares it void.
@@ -143,7 +143,7 @@ static inline void cMemMan_freeBlockK2(void* p)
  */
 extern "C" void* cMemMan_internalResizeBlock(void* old, unsigned int size)
 {
-    void* newBlock = operator_new_K2(size, D_0048DA08, 0x100, 0);
+    void* newBlock = operator_new_K2(size, str_resizeBlock, 0x100, 0);
     func_0041605C(newBlock, old, size < cMemMan_blockSizeK2(old) ? size : cMemMan_blockSizeK2(old));
     cMemMan_freeBlockK2(old);
     return newBlock;
@@ -202,13 +202,13 @@ void* func_00320190(void* p);
 void* func_003201D8(void* p);
 void* func_00320220(void* p);
 void* func_00320270(void* p);
-extern const char D_0048DA18[];
-extern const char D_0048DA28[];
-extern const char D_0048DA38[];
-extern const char D_0048DA48[];
-extern const char D_0048DA58[];
-extern const char D_0048DA68[];
-extern const char D_0048DA78[];
+extern const char str_m_container8[];
+extern const char str_m_container16[];
+extern const char str_m_container32[];
+extern const char str_m_container64[];
+extern const char str_m_container128[];
+extern const char str_m_container256[];
+extern const char str_m_container512[];
 extern void* D_004A5B60;
 extern void* D_004A5B50;
 extern void* D_004A5B5C;
@@ -224,13 +224,13 @@ extern int D_004A3EC8;
  */
 extern "C" void cMemBlockMan_initialize(void)
 {
-    D_004A5B60 = func_003200E8(cMemMan_alloc(0x804, D_0048DA18, 0x1000000, 0));
-    D_004A5B50 = func_00320120(cMemMan_alloc(0x2004, D_0048DA28, 0x2000000, 0));
-    D_004A5B5C = func_00320158(cMemMan_alloc(0x6004, D_0048DA38, 0x3000000, 0));
-    D_004A5B6C = func_00320190(cMemMan_alloc(0x32004, D_0048DA48, 0x4000000, 0));
-    D_004A5B74 = func_003201D8(cMemMan_alloc(0x25804, D_0048DA58, 0x5000000, 0));
-    D_004A5B68 = func_00320220(cMemMan_alloc(0x20004, D_0048DA68, 0x6000000, 0));
-    D_004A5B58 = func_00320270(cMemMan_alloc(0x20004, D_0048DA78, 0x7000000, 0));
+    D_004A5B60 = func_003200E8(cMemMan_alloc(0x804, str_m_container8, 0x1000000, 0));
+    D_004A5B50 = func_00320120(cMemMan_alloc(0x2004, str_m_container16, 0x2000000, 0));
+    D_004A5B5C = func_00320158(cMemMan_alloc(0x6004, str_m_container32, 0x3000000, 0));
+    D_004A5B6C = func_00320190(cMemMan_alloc(0x32004, str_m_container64, 0x4000000, 0));
+    D_004A5B74 = func_003201D8(cMemMan_alloc(0x25804, str_m_container128, 0x5000000, 0));
+    D_004A5B68 = func_00320220(cMemMan_alloc(0x20004, str_m_container256, 0x6000000, 0));
+    D_004A5B58 = func_00320270(cMemMan_alloc(0x20004, str_m_container512, 0x7000000, 0));
     D_004A3EC8 = 1;
 }
 #endif

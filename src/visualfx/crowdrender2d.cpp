@@ -62,7 +62,7 @@ typedef int (*tRegister_B6D0)(void*, char*, char*, int, int, int);
 typedef void (*tRelease_B6D0)(void*, int);
 
 extern sCrowdAnimDef_B6D0 D_00445D38_B6D0[] __asm__("D_00445D38");
-extern char D_004875C0[];
+extern char str_data_textures_crwd_ssh[];
 extern "C" int FILE_load(const char* name, int flags);
 extern "C" char* SHAPE_locate(int file, const char* name);
 extern "C" int MEM_free(int file);
@@ -80,7 +80,7 @@ extern "C" void cCrowdRender2D_init_impl(int* self) __asm__("cCrowdRender2D_init
 extern "C" void cCrowdRender2D_init_impl(int* self)
 {
     int i;
-    self[0] = FILE_load(D_004875C0, 0x5000000);
+    self[0] = FILE_load(str_data_textures_crwd_ssh, 0x5000000);
     for (i = 0; i < 1; i++) {
         int j;
         for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
@@ -145,7 +145,7 @@ extern "C" void* cMemMan_alloc(int a, const char* b, uint32_t c, int d);
  * @return the new animation
  */
 void* cCrowdRender2D_constructCrowdAnim2D(void* self) {
-	void* memory = cMemMan_alloc(0x20, D_004875D8, 0x20000000, 0);
+	void* memory = cMemMan_alloc(0x20, str_cCrowdAnim2D, 0x20000000, 0);
 	return cCrowdAnim2D_cCrowdAnim2D(memory, self);
 }
 #endif

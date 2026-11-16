@@ -16,7 +16,7 @@ INCLUDE_ASM("render/font", cFont_linkFont);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct sFontTexHdr;
 extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img);
-extern char D_004A46F8[];
+extern char str_Glyphs[];
 
 struct sGlyph_1788 {
     unsigned short code;    // 0x0
@@ -56,7 +56,7 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
     offset.y = (float)data[0x11];
     (*(sPad_1788*)&self->Offset[0]) = offset;
     self->NumGlyphs = *(short*)(data + 0xA);
-    (*(sGlyph_1788**)&self->Glyphs) = (sGlyph_1788*)operator_new_tag(self->NumGlyphs * 12, D_004A46F8, flags, 0);
+    (*(sGlyph_1788**)&self->Glyphs) = (sGlyph_1788*)operator_new_tag(self->NumGlyphs * 12, str_Glyphs, flags, 0);
     int space = 0;
     self->MaxCharHeight = 0;
     self->LastLinearCode = self->FirstCode = src->code;
@@ -189,8 +189,8 @@ INCLUDE_ASM("render/font", cFont_downloadTexture);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void MEM_copy(void* dst, const void* src, int n);
-extern char D_00492F40[];
-extern char D_00492F50[];
+extern char str_FontTemp[];
+extern char str_FontPalTemp[];
 void cMemMan_free(void*);
 
 struct sFontVEntryDL {
@@ -238,8 +238,8 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
     uv.v = 1.0f / newHeight;
     uv.u = 1.0f / img->w;
     *(sFontUV*)&self->UVScale[0] = uv;
-    unsigned char* pix = (unsigned char*)operator_new_tag((img->w * newHeight) >> 1, D_00492F40, 0x100, 0);
-    unsigned char* pal = (unsigned char*)operator_new_tag(0x40, D_00492F50, 0x100, 0);
+    unsigned char* pix = (unsigned char*)operator_new_tag((img->w * newHeight) >> 1, str_FontTemp, 0x100, 0);
+    unsigned char* pal = (unsigned char*)operator_new_tag(0x40, str_FontPalTemp, 0x100, 0);
     MEM_fill(pix, 0, (img->w * newHeight) >> 1);
     MEM_fill(pal, 0, 0x40);
     char* src;
@@ -2394,14 +2394,14 @@ INCLUDE_ASM("render/font", func_00394C98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char D_00491FA0[];
+extern const char str_LightInst[];
 
 extern "C" void func_00394C98(cPS2LightMan* self, int n)
 {
     self->m_iStartDynLight = n;
     self->m_iDynLight = 0;
     self->m_iMaxLights = n + 0x32;
-    self->m_pLights = (cLightInst**)operator_new_tag((n + 0x32) * 4, D_00491FA0, 0, 0);
+    self->m_pLights = (cLightInst**)operator_new_tag((n + 0x32) * 4, str_LightInst, 0, 0);
 }
 #endif
 
