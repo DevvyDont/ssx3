@@ -119,4 +119,9 @@ CHECK_OFFSET(cBENetworkInterface, bIsActive, 0x08);
 CHECK_OFFSET(cBENetworkInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBENetworkInterface, 0x10);
 
+// The one network interface (On Tour: cBENetworkInterface::instance), created by cBENetworkInterface_getThis,
+// and its static network options (cBENetworkInterface::networkOpt).
+extern cBENetworkInterface* cBENetworkInterface_instance;
+extern tBENetworkDB cBENetworkInterface_networkOpt;
+
 #endif /* BE_BEINTNETWORK_H */

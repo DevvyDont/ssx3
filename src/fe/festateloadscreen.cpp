@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -149,7 +151,6 @@ struct sLsOpt_3640 {
     int f4;
     int alt;        // 0x8
 };
-extern sLsOpt_3640 D_00534B30_3640[] __asm__("cBENetworkInterface_networkOpt");
 
 struct sVE_3640 {
     short delta;
@@ -174,7 +175,7 @@ extern "C" void func_00233640(void* self, int type)
     if (type == 1) {
         const char* fmt = D_0047BD90;
         cBE_getInterface_3438(SSXApp->BE, 7);
-        sLsOpt_3640* opt = D_00534B30_3640;
+        sLsOpt_3640* opt = ((sLsOpt_3640*)&cBENetworkInterface_networkOpt);
         if (opt->on != 0) {
             if (opt->alt != 0) {
                 sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 0)], D_004A2B38);
@@ -521,7 +522,6 @@ extern "C" void* func_00233C10(void* self)
 INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
-extern void* cGameComm_mGameComm;
 extern "C" void func_0026FA50(void* self);
 extern "C" void func_0039F840(void* list);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
@@ -536,10 +536,10 @@ extern "C" void func_00233C50(void* self)
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
     func_001F36C0(SSXApp->Game->LoadIndicator, 4);
-    void* p = cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
         func_00244880(p);
-        *(int*)((char*)p + 0x90) = 1;
+        p->unk_090 = 1;
     }
 }
 #endif

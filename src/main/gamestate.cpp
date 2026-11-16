@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -23,8 +25,6 @@ extern "C" void func_0029C420(void* p, int a1);
 extern "C" void func_00234BE8(void* self, int a1);
 int GetHashValue32(char* s);
 extern char* cGameState_mpGame;
-extern char* cGameComm_mGameComm;
-extern int cBENetworkInterface_networkOpt[];
 extern signed char D_00535C10[];
 extern char D_0047C038[];
 
@@ -37,11 +37,11 @@ extern "C" void cGFGateState_gainFocus(void* self)
 {
     (*(sRace_234AD0**)(cGameState_mpGame + 0xC))->f8C = 0;
     if (cGameComm_mGameComm != 0) {
-        func_00258968(cGameComm_mGameComm);
+        func_00258968((char*)cGameComm_mGameComm);
     }
     cBE_setState(0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         cGame_resetWorld(cGameState_mpGame);
     }
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
@@ -1672,7 +1672,6 @@ INCLUDE_ASM("main/gamestate", func_00236BB0);
 extern "C" void cBE_setState(int state);
 extern "C" void func_002EA820(void* p);
 extern "C" void func_0020A8F8(int mode);
-extern char* cGameComm_mGameComm;
 struct sMgr_6BB0 {
     char pad0[0x64];
     void* world;    // 0x64
@@ -1696,7 +1695,7 @@ struct sGameState_6BB0 {
 extern "C" void func_00236BB0(sGameState_6BB0* self)
 {
     self->done = 0;
-    if (cGameComm_mGameComm != 0 && *(int*)(cGameComm_mGameComm + 4) != 0) {
+    if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mError != 0) {
         func_002EA820(D_004A28A8_s->mgr->world);
         cBE_setState(0);
         return;
@@ -1713,11 +1712,10 @@ extern "C" void func_00236BB0(sGameState_6BB0* self)
 INCLUDE_ASM("main/gamestate", func_00236C48);
 #ifdef SKIP_ASM
 extern "C" void cGameState_gotoNextState(void* self);
-extern char* cGameComm_mGameComm;
 
 extern "C" void func_00236C48(void* self)
 {
-    if (cGameComm_mGameComm == 0 || *(int*)(cGameComm_mGameComm + 4) == 0) {
+    if (cGameComm_mGameComm == 0 || cGameComm_mGameComm->mError == 0) {
         if (*(int*)((char*)self + 8) == 1) {
             cGameState_gotoNextState(self);
         }
@@ -2160,11 +2158,10 @@ extern "C" void func_00237A98(void* self, sPackSrc_7B28* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int func_00257BD8(void* self, int ch, void* dst, int size);
 extern "C" float func_00258360(void* self);
-extern char* cGameComm_mGameComm;
 
 // cInputSync::preupdate (On Tour name and member names; the SSX 3 version differs in structure).
 // cGameComm::mGameComm through On Tour's GameComm() accessor.
-static inline char* GameComm() { return cGameComm_mGameComm; }
+static inline char* GameComm() { return (char*)cGameComm_mGameComm; }
 
 // cInputSync::PadSample (On Tour, size 0x64).
 struct PadSample_2373B8 {
@@ -2293,15 +2290,14 @@ struct sOwner237950 {
     int count;
     sSlot237950 slots[1];
 };
-extern char* cGameComm_mGameComm;
 
 extern "C" int func_00237950(sOwner237950* self)
 {
-    char* p = cGameComm_mGameComm;
-    if (*(int*)(p + 0x70) < 14) {
+    cGameComm* p = cGameComm_mGameComm;
+    if (p->mState < 14) {
         return 0;
     }
-    int busy = *(int*)(p + 0x3F8) != 0 || *(int*)(p + 0x3FC) > 0;
+    int busy = p->mUnPauseFlag != 0 || p->mUnPauseTimer > 0;
     if (busy) {
         return 0;
     }
@@ -2344,7 +2340,7 @@ struct sPlayer002379C8 {
 
 extern "C" int func_002379C8(sPlayer002379C8* self)
 {
-    if (*(int*)(cGameComm_mGameComm + 0x70) < 14) {
+    if (cGameComm_mGameComm->mState < 14) {
         return 0;
     }
     if (func_00237950((sOwner237950*)self) == 0) {
@@ -2369,17 +2365,16 @@ struct sPackDst_7B28;
 extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
 extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
 extern "C" void func_00257E98(void* mgr, int a, char* buf, int len);
-extern char* cGameComm_mGameComm;
 
 extern "C" void func_00237A98(void* self, sPackSrc_7B28* src)
 {
     char buf[32];
     int len = func_00237B28(self, src, (sPackDst_7B28*)buf);
     func_00237BE8(self, src, buf);
-    char* p = cGameComm_mGameComm;
-    int ok = *(int*)(p + 0x40) != 0 && *(int*)(p + 4) == 0 && *(int*)(p + 0) != 0;
+    cGameComm* p = cGameComm_mGameComm;
+    int ok = p->mSyncInput != 0 && p->mError == 0 && p->mConnected != 0;
     if (ok) {
-        func_00257E98(cGameComm_mGameComm, 0, buf, len);
+        func_00257E98((char*)cGameComm_mGameComm, 0, buf, len);
     }
 }
 #endif

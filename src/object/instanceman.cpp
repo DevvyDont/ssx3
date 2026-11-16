@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
@@ -1155,7 +1156,6 @@ struct cWorldCache_352810 {
 struct cWorld_352810 {
     cWorldCache_352810* cache;          // 0x0
 };
-extern cWorld_352810* D_004A47B8_352810 __asm__("cWorld_m_pTheWorld");
 
 static inline bool tableValid_352810(cWorldCacheTable_352810* t, int type, unsigned int uid)
 {
@@ -1255,7 +1255,7 @@ extern "C" void cMeshAnimNode_render(sDebris_352810* self)
         short* pMaterialRecord = ((short**)(*(char**)(self->model + 0x94) + 4))[i];
         tResourceID_352810 resourceId;
         initRID_352810(&resourceId, 0xFF, *pMaterialRecord);
-        if (!cacheValid_352810(D_004A47B8_352810->cache, 9, resourceId)) {
+        if (!cacheValid_352810((cWorldCache_352810*)cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
             return;
         }
     }

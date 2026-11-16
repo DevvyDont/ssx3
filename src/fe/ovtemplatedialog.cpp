@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -84,8 +86,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 int func_00158F30(void* self);
 extern "C" void func_002706B8(void* p);
-extern char* cGameComm_mGameComm;
-extern int cBENetworkInterface_networkOpt[];
 extern char cBENewRaceInterface_newRace[];
 extern int D_004A26FC;
 extern int D_004A2704;
@@ -140,7 +140,7 @@ extern "C" void func_0020A8F8(int mode)
         int any = 0;
         if (*(int*)(a + 0x18) >= 0 || *(int*)(a + 0x1C) >= 0) any = 1;
         if (any) {
-            if (cBENetworkInterface_networkOpt[0] != 0) {
+            if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                 state = func_0020A8B0(kind, type);
             } else {
                 D_004A2700 = 0;
@@ -156,7 +156,7 @@ extern "C" void func_0020A8F8(int mode)
         int z = !isKind_A8F8(kind, 6) && !isKind_A8F8(kind, 7) && !isKind_A8F8(kind, 8) && !isKind_A8F8(kind, 9) &&
                 !isKind_A8F8(kind, 10) && !isKind_A8F8(kind, 11);
         if (z) func_002706B8(SSXApp->Game->Replay);
-        if (cBENetworkInterface_networkOpt[0] != 0) *(int*)(cGameComm_mGameComm + 0x64) = 0x8CA0;
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) cGameComm_mGameComm->mOverlayTimeout = 0x8CA0;
         break;
     }
     if (state == 0) {
@@ -1173,9 +1173,7 @@ extern "C" void func_00258C00(void* net);
 extern "C" void func_00258790(void* net, int a1);
 extern "C" int func_0030B8C0(void* self);
 extern void* D_004A3DD8;
-extern char* cGameComm_mGameComm;
 extern char D_004A2468;
-extern int cBENetworkInterface_networkOpt[];
 extern char cBENewRaceInterface_newRace[];
 
 static inline bool notMode4_0020CA10(signed char* g)
@@ -1187,17 +1185,17 @@ extern "C" void func_0020CA10(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0) {
-        char* net = cGameComm_mGameComm;
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
+        cGameComm* net = cGameComm_mGameComm;
         if (net != 0) {
             char* game = (char*)SSXApp->Game;
             if (game != 0 && *(int*)(game + 0x224) != 0) {
-                func_00258C00(net);
+                func_00258C00((char*)net);
             }
-            func_00258790(cGameComm_mGameComm, 1);
-            char* n = cGameComm_mGameComm;
-            *(int*)(n + 0x68) = 0xE10;
-            *(int*)(n + 0x64) = 0x708;
+            func_00258790((char*)cGameComm_mGameComm, 1);
+            cGameComm* n = cGameComm_mGameComm;
+            n->mPauseTimeout = 0xE10;
+            n->mOverlayTimeout = 0x708;
         }
         cOVStateManager_triggerOverlay(6);
     } else if (func_0030B8C0(D_004A3DD8) != 0) {
@@ -1395,9 +1393,9 @@ extern "C" void func_0020CCF8(void)
             break;
         case 8:
             cBE_getInterface_Fv(SSXApp->BE, 7);
-            if (cBENetworkInterface_networkOpt[0] != 0) {
+            if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                 if (cGameComm_mGameComm != 0) {
-                    func_00257610(cGameComm_mGameComm, 0);
+                    func_00257610((char*)cGameComm_mGameComm, 0);
                 }
                 cGame_exit(SSXApp->Game, 0);
             } else {
@@ -1498,7 +1496,7 @@ extern "C" void func_0020CFD0(void)
         if (st != 0 && ((sGlobals_CFD0 *)SSXApp)->game->f214 == 2) {
             if (*(int *)(st + 0x98) == 8) {
                 cBE_getInterface_Fv(((sGlobals_CFD0 *)SSXApp)->be, 7);
-                if (cBENetworkInterface_networkOpt[0] != 0) {
+                if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     func_0039F840(mgr + 0x18);
                 }
             }
@@ -1871,7 +1869,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 *(int*)(self + 0x54) = 0;
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (cGameComm_mGameComm) {
-                    func_00257610(cGameComm_mGameComm, 0);
+                    func_00257610((char*)cGameComm_mGameComm, 0);
                 }
                 int any = 0;
                 int z = 0;
@@ -1965,15 +1963,14 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
-extern char* cGameComm_mGameComm;
 extern char D_0046E050[];
 
 extern "C" void func_0020DBD0(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
+        int ok = p->mPauseTimeout == 0 || p->mOverlayTimeout == 0;
         if (ok) {
             int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0046E050));
             if (frame != 0xFFFF) {

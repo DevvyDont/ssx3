@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "world/world.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -1873,7 +1875,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C11[];
 extern int* D_00445488[];
-extern int cBENetworkInterface_networkOpt[];
 extern int D_00481E80[];
 
 extern "C" void func_0027AAF8(cSSXScriptEngine* self, int state)
@@ -1883,7 +1884,7 @@ extern "C" void func_0027AAF8(cSSXScriptEngine* self, int state)
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int* tbl = D_00445488[D_00535C11[0]];
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (cBENetworkInterface_networkOpt[0] != 0) {
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
             tbl = D_00481E80;
         }
         if (tbl != 0 && tbl[0] >= 0) {
@@ -2553,7 +2554,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027BB08);
 extern "C" float func_0031C128(float x);
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern int D_00482660[];
-extern char** cWorld_m_pTheWorld;
 
 struct sVec_27BB08 {
     float x, y, z, w;
@@ -2668,7 +2668,7 @@ extern "C" void func_0027BB08(cSSXScriptEngine* self, int slot, sVec_27BB08* pos
     unsigned int code = tbl[slot];
     if (~code == 0)
         return;
-    char* model = ((char**)*(char**)(*cWorld_m_pTheWorld + 8))[code & 0xFF];
+    char* model = ((char**)*(char**)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[code & 0xFF];
     char* m = Bone_27BB08(model, code);
     *pos = sVec_27BB08(*(float*)(m + 0x40), *(float*)(m + 0x44), *(float*)(m + 0x48), 1.0f);
     *yaw = Atan2_27BB08(*(float*)(m + 0x14), *(float*)(m + 0x10));

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/commsystem.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -9,7 +10,6 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 // load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern char* D_004A289C;
-extern void* cCommSystem_mCommSystem;
 extern int D_004A11B8;
 extern int D_00535C04[];
 extern char D_004A12C0[];
@@ -271,7 +271,6 @@ extern "C" void THREAD_yieldticks(int n);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A33F4;
 extern char D_0045D018[] __attribute__((aligned(8)));
 extern char D_0045D028[] __attribute__((aligned(8)));
@@ -543,7 +542,6 @@ extern "C" void func_0017D3B0(char* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D688);
 #ifdef SKIP_ASM
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A3028;
 extern "C" void func_00255A20(void*);
 extern "C" void func_0025AC50(void*);
@@ -794,7 +792,6 @@ extern "C" void func_0017DA30(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 #ifdef SKIP_ASM
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A3028;
 extern void* D_004A33F4;
 extern char D_0045CE60[];
@@ -838,16 +835,16 @@ extern "C" void func_0017DB18(void* vself)
         state = self->state;
         switch (state) {
         case 0: {
-            char* comm = (char*)cCommSystem_mCommSystem;
-            bool busy = *(int*)(comm + 0x20) != 1;
+            cCommSystem* comm = cCommSystem_mCommSystem;
+            bool busy = comm->mNetConnState != 1;
             if (!busy) {
-                func_00255F50(comm, 0);
+                func_00255F50((char*)comm, 0);
             }
             self->state = 1;
             break;
         }
         case 1:
-            if (*(int*)((char*)cCommSystem_mCommSystem + 0x20) != 3 && *(int*)((char*)cCommSystem_mCommSystem + 0x20) != 4) {
+            if (cCommSystem_mCommSystem->mNetConnState != 3 && cCommSystem_mCommSystem->mNetConnState != 4) {
                 func_0025B6D8(D_004A3028, 0);
                 self->state = 2;
             }
@@ -975,7 +972,6 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int
 extern "C" void func_001472C8(void* iface, int a1, int a2);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A3028;
 extern int D_004A11B8;
 extern int D_00535C08[];
@@ -1346,7 +1342,6 @@ INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* D_004A3028;
-extern void* cCommSystem_mCommSystem;
 extern char D_0045D258[];
 extern char D_0045D270[];
 extern char D_0045D288[];
@@ -1585,7 +1580,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     scale17E5C8(font, 0.9f);
     if (top17E5C8(self) != 0)
         func_002CC350(&self->count);
-    if (isEq17E5C8(*(int*)((char*)cCommSystem_mCommSystem + 0x20), 5)) {
+    if (isEq17E5C8(cCommSystem_mCommSystem->mNetConnState, 5)) {
         unsigned int ip;
         func_00256038(cCommSystem_mCommSystem, (int*)&ip);
         scale17E5C8(font, 0.8f);

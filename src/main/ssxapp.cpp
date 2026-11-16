@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/world.h"
+#include "online/commsystem.h"
 #include "scripter/ssxscriptengine.h"
 #include "bx/bxstring.h"
 #include "main/ssxapp.h"
@@ -737,7 +739,6 @@ extern "C" int func_00326CA0(void* self, int i);
 extern "C" void* func_00326CC8(void* self, int i);
 extern "C" void func_00321298(void* target, int a, void* data);
 extern void* PadCache;
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A33F0;
 
 extern "C" int cSSXApp_preUpdate(cSSXApp* self)
@@ -1882,7 +1883,6 @@ struct sHMgr_229910 {
     sHTable_229910** tables;    // 0x8
 };
 
-extern sHMgr_229910** D_004A47B8_229910 __asm__("cWorld_m_pTheWorld");
 
 struct sModel_229910 {
     char pad[0x10];
@@ -1925,7 +1925,7 @@ struct tResourceID_229910 {
 
 static inline sModel_229910* HandleToModel_229910(tResourceID_229910 RID)
 {
-    sHTable_229910* t = (*D_004A47B8_229910)->tables[RID.m_bfRID.m_uiSectionID];
+    sHTable_229910* t = ((sHMgr_229910*)cWorld_m_pTheWorld->m_pWorldCache)->tables[RID.m_bfRID.m_uiSectionID];
     if (t == 0) {
         return 0;
     }

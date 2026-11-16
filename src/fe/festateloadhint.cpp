@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/commsystem.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -811,7 +813,6 @@ extern "C" signed char func_00148750(void* self, int rider);
 extern "C" signed char func_00148820(void* self, int rider);
 extern "C" signed char func_001488F0(void* self, int rider);
 extern "C" void func_0039C428(void* self, int pos);
-extern void* cCommSystem_mCommSystem;
 extern char D_004A2C10[];
 extern char D_004A2C18[];
 extern char D_004A2C20[];
@@ -826,7 +827,6 @@ struct sNetState_6CF8 {
     char pad_0x008[0x4A8 - 0x8];
     unsigned char stats[7];         // 0x4A8 (D_00534FD8)
 };
-extern sNetState_6CF8 D_00534B30_6CF8 __asm__("cBENetworkInterface_networkOpt");
 extern unsigned char D_00534FD8[];
 // Inline copy of the BE stat-block getter (func_0015C600).
 static inline unsigned char* GetStats_6CF8() { return D_00534FD8; }
@@ -859,8 +859,8 @@ extern "C" void func_00246CF8(void* self, char player)
             rank = 1;
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (cCommSystem_mCommSystem != 0 && (player == 1 || D_00534B30_6CF8.f4 != 0)) {
-            if (D_00534B30_6CF8.f4 != 0) {
+        if (cCommSystem_mCommSystem != 0 && (player == 1 || cBENetworkInterface_networkOpt.bIsRankedGame != 0)) {
+            if (cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
                 rank = 8;
                 for (int i = 0; i < 7; i++) {
                     stats[i] = 40;
@@ -872,7 +872,7 @@ extern "C" void func_00246CF8(void* self, char player)
             } else {
                 int sum = 0;
                 for (int i = 0; i < 7; i++) {
-                    sum += D_00534B30_6CF8.stats[i];
+                    sum += cBENetworkInterface_networkOpt.oppCharacterAttributes[i];
                 }
                 rank = sum / 35;
                 unsigned char* s = GetStats_6CF8();
@@ -1000,7 +1000,6 @@ extern char D_004A2C18[];
 extern char D_004A2C28[] __attribute__((aligned(8)));
 extern char D_004A2C58[];
 extern char D_004A2C60[];
-extern int cBENetworkInterface_networkOpt[];
 extern int D_00536730[];
 extern "C" void* cGameModeMan_getGM();
 extern "C" char* func_00155270(void* iface, int a1);
@@ -1037,7 +1036,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     char fmt[0x20];
     char side = player;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[2] == 0 && cBENetworkInterface_networkOpt[0] != 0) {
+    if (cBENetworkInterface_networkOpt.bIsHost == 0 && cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         player = !player;
     }
     if (side == 1) {
@@ -1067,7 +1066,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     if (obj != 0) {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         int rank;
-        if (cBENetworkInterface_networkOpt[0] != 0 && cBENetworkInterface_networkOpt[1] != 0) {
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
             rank = 8;
         } else {
             rank = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));

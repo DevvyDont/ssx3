@@ -1,4 +1,6 @@
 #include "common.h"
+#include "online/commsystem.h"
+#include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 
@@ -2194,11 +2196,10 @@ extern "C" void func_00244E60(void* self)
 INCLUDE_ASM("main/ssxappdtor", func_00245118);
 #ifdef SKIP_ASM
 extern "C" void func_002570D8(int);
-extern int cGameComm_mGameComm;
 
 extern "C" void func_00245118(void) {
     if (cGameComm_mGameComm != 0) {
-        func_002570D8(cGameComm_mGameComm);
+        func_002570D8((int)cGameComm_mGameComm);
     }
 }
 #endif
@@ -2206,7 +2207,6 @@ extern "C" void func_00245118(void) {
 INCLUDE_ASM("main/ssxappdtor", func_00245140);
 #ifdef SKIP_ASM
 extern "C" void func_003F42A0();
-extern int cCommSystem_mCommSystem;
 
 extern "C" void func_00245140(void) {
     if (cCommSystem_mCommSystem != 0) {

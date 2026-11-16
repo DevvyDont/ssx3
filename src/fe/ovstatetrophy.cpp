@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -1529,7 +1530,6 @@ extern "C" void func_00210940(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
 #ifdef SKIP_ASM
-extern int cGameComm_mGameComm;
 extern char D_004A2560[];
 extern "C" int func_00258160(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
@@ -1539,7 +1539,7 @@ extern "C" int func_00210B58(void* self, int ok)
 {
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160(cGameComm_mGameComm, name, 0x41) != 0) {
+        if (func_00258160((int)cGameComm_mGameComm, name, 0x41) != 0) {
             func_00210BD8(self, name, 0);
         } else {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
@@ -1606,8 +1606,6 @@ extern "C" void func_00210BD8(void* self, char* name, int a)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int cGameComm_mGameComm;
-extern char* D_net210D20 __asm__("cGameComm_mGameComm");
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* func_0039F698(void* list);
 extern "C" int func_00258160(int a, char* name, int len);
@@ -1616,9 +1614,9 @@ extern "C" void func_00210BD8(void* self, char* name, int a);
 extern "C" void func_00210D20(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = D_net210D20;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
+        int ok = p->mPauseTimeout == 0 || p->mOverlayTimeout == 0;
         if (ok) {
             func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
             *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
@@ -1626,7 +1624,7 @@ extern "C" void func_00210D20(void* self)
     }
     if (*(int*)((char*)self + 0x40) != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160(cGameComm_mGameComm, name, 0x41) != 0) {
+        if (func_00258160((int)cGameComm_mGameComm, name, 0x41) != 0) {
             func_00210BD8(self, name, 0);
         }
     }
@@ -1649,7 +1647,6 @@ extern "C" void func_00210DD0(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
 #ifdef SKIP_ASM
-extern int cGameComm_mGameComm;
 extern char D_004A2560[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cOVState_onWidgetEvent(void* self);
@@ -1679,12 +1676,12 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         break;
     case 0xD: {
         char* name = (char*)self + 0x9C;
-        if (func_00258160(cGameComm_mGameComm, name, 0x41) != 0) {
+        if (func_00258160((int)cGameComm_mGameComm, name, 0x41) != 0) {
             func_00210BD8(self, name, 0);
         }
         char* p = *(char**)((char*)self + 0xE0) + 0x74;
         if (strlen(p) != 0) {
-            func_00258C50(cGameComm_mGameComm, p);
+            func_00258C50((int)cGameComm_mGameComm, p);
             func_00210BD8(self, p, 1);
         }
         break;

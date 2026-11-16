@@ -1,4 +1,8 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "world/world.h"
+#include "online/commsystem.h"
+#include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -87,13 +91,11 @@ extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
 extern void* D_004A289C;
-extern void* cGameComm_mGameComm;
 extern void* gSSXAudio;
 extern int D_004A1228;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
 extern char D_004A5988_gl __asm__("gBucketMan");
-extern int cBENetworkInterface_networkOpt[];
 extern char cBENewRaceInterface_newRace[];
 extern int D_00535BFC[];
 extern char D_004C5830[];
@@ -295,10 +297,10 @@ extern "C" void cGame_load(cGame* self)
     self->Replay = (cReplay*)func_0026EFB8(operator new(0x688, D_004A2A70, 0, 0));
     self->FXLoader = (cFXLoader*)func_002DBD10(operator new(1, D_0047B5E8, 0, 0), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         float dt = *(float*)((char*)SSXApp + 0x14);
-        int n = (int)((*(float*)&cBENetworkInterface_networkOpt[4] + (float)*(int*)((char*)cGameComm_mGameComm + 0x120) * dt) / dt) + 2;
-        self->InputSync = (cInputSync*)func_00237060(operator new(0x44, D_0047B5F8, 0, 0), n, *(int*)((char*)cGameComm_mGameComm + 0x120));
+        int n = (int)((cBENetworkInterface_networkOpt.fLatency + (float)cGameComm_mGameComm->mNumSamples * dt) / dt) + 2;
+        self->InputSync = (cInputSync*)func_00237060(operator new(0x44, D_0047B5F8, 0, 0), n, cGameComm_mGameComm->mNumSamples);
     } else {
         func_00237CB0(BXrand());
     }
@@ -342,11 +344,11 @@ extern "C" void cGame_load(cGame* self)
         func_00270F18(self->Replay);
         func_00152728(race);
     }
-    if (cBENetworkInterface_networkOpt[0] != 0)
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, D_0047B618, 0x20000000, 0), 1);
     else
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, D_0047B618, 0x20000000, 0), D_00535BFC[0]);
-    if (cBENetworkInterface_networkOpt[0] != 0 && cBENetworkInterface_networkOpt[2] == 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsHost == 0) {
         char* a = *(char**)((char*)self->AI + 0x44);
         void* cam = a != 0 ? *(void**)(a + 0x18) : 0;
         func_0015EDC8(*(void**)((char*)self->ViewMan + 0x4), cam);
@@ -688,7 +690,6 @@ struct sGameRes_FA98 {
     char pad[0x330 - 0xC];
     sRec_FA98 rec[2];
 };
-extern sGameRes_FA98 D_00534B30_s __asm__("cBENetworkInterface_networkOpt");
 extern sRec_FA98 D_00534F0C_FA98 __asm__("D_00534F0C");
 
 // Pointer array member with an inline indexer.
@@ -715,10 +716,10 @@ extern "C" void func_0022FA98(char* self)
 {
     cBE_setState(0);
     char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30_s.active != 0 && D_00534B30_s.ready != 0) {
-        int which = D_00534B30_s.which;
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
+        int which = cBENetworkInterface_networkOpt.bIsHost;
         int other = which != 0;
-        D_00534B30_s.rec[0] = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
+        *(sRec_FA98*)((char*)&cBENetworkInterface_networkOpt + 0x330) = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
         D_00534F0C_FA98 = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
         sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
         e->fn(iface + e->delta);
@@ -1054,7 +1055,6 @@ struct sWorldCache_0430 {
     sScriptCache_0430* scripts;
 };
 
-extern sWorldCache_0430* D_004A47B8_0430 __asm__("cWorld_m_pTheWorld");
 
 static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
 {
@@ -1063,7 +1063,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
 
 extern "C" void func_00230430(void* self, int sectionId)
 {
-    if (isSectionLoaded_0430(D_004A47B8_0430->scripts, sectionId)) {
+    if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
         func_00308B58_2(D_004A3DD8, sectionId);
     }
 }
@@ -1080,7 +1080,6 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void* func_00232738(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern void* cGameComm_mGameComm;
 extern void* D_004A33F4;
 extern char D_0047B770[];
 extern char D_0047B788[];
@@ -1238,7 +1237,6 @@ extern "C" void func_001E1458(void);
 extern "C" void func_001F3188(void* p);
 
 extern char* D_004A5B64;
-extern void* cCommSystem_mCommSystem;
 extern void* PadCache;
 extern unsigned int D_004A20CC;
 extern char D_0047B798[];
@@ -1653,7 +1651,6 @@ INCLUDE_ASM("main/gameload", func_00230F40);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0022E550(void* self);
 extern int D_004A2A50;
-extern int cBENetworkInterface_networkOpt[];
 
 class cGameState_0F40 {
 public:
@@ -1689,7 +1686,7 @@ extern "C" void func_00230F40(void* self_)
 {
     sGameLoad_0F40* self = (sGameLoad_0F40*)self_;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] == 0 && self->hold != 0)
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0 && self->hold != 0)
         return;
     if (D_004A2A50 & 0x20)
         return;
@@ -2189,9 +2186,7 @@ extern "C" void func_002314D0(cGame* self_, cStream_14D0* stream)
 //100%
 INCLUDE_ASM("main/gameload", func_00231840);
 #ifdef SKIP_ASM
-extern void* cGameComm_mGameComm;
 extern int D_004A2E9C;
-extern int cBENetworkInterface_networkOpt[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2221,7 +2216,7 @@ static inline char* At_1840(char* self, int i)
 
 extern "C" int func_00231840(char* self)
 {
-    if (cGameComm_mGameComm != 0 && *(int*)((char*)cGameComm_mGameComm + 0x8) > 0) {
+    if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mDisplayError > 0) {
         return 0;
     }
     int mask = 0;
@@ -2276,7 +2271,7 @@ extern "C" int func_00231840(char* self)
     }
     if (sel >= 0) {
         cBE_getInterface_Fv(cBE_getBE(), 7);
-        if (cBENetworkInterface_networkOpt[0] != 0 || func_00231AB8(self)) {
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || func_00231AB8(self)) {
             *(int*)(self + 0x228) = sel;
             return 1;
         }

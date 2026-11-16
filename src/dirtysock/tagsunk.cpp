@@ -1,4 +1,8 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/commsystem.h"
+#include "online/gamecomm.h"
+#include "online/dsockchannel.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -458,7 +462,6 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern void* D_004A3328;
 extern void* D_004A3028;
-extern void* cCommSystem_mCommSystem;
 extern char D_004A2F38[];
 extern char D_004A2F40[];
 extern char D_004A2F48[];
@@ -1099,7 +1102,6 @@ extern int D_004A3018;
 extern float D_004A5154;
 extern void* D_004A3328;
 extern void* D_004A3028;
-extern void* cCommSystem_mCommSystem;
 extern "C" void func_003E95C8(void* p);
 extern "C" int func_003E8FB8(void* p);
 extern "C" void func_0025A650(char* self);
@@ -1406,7 +1408,6 @@ extern "C" void func_0025B650(void)
 INCLUDE_ASM("dirtysock/tagsunk", func_0025B688);
 #ifdef SKIP_ASM
 extern void* D_004A3028;
-extern void* cGameComm_mGameComm;
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00259628(void* self, int flags);
 extern "C" void func_00256C50(void);
@@ -2122,7 +2123,6 @@ extern char D_004A30C8[];
 extern char D_004A30D0[];
 extern char D_004A30D8[];
 extern char D_004A30E0[];
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A33F0;
 extern void* D_004A33F4;
 extern "C" void func_00268C70();
@@ -2177,7 +2177,7 @@ extern "C" void func_0025C610(char* self)
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, D_004A30C0, 1);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A30C8, func_003F3F78());
     cDirtysock_tag_TagFieldSetString(buf, 0x200, D_004A30D0, D_004813A0);
-    int v = *(int*)((char*)cCommSystem_mCommSystem + 0x30);
+    int v = cCommSystem_mCommSystem->mInterfaceType;
     if (v != 1) {
         flags = v & 4;
         caps = 0x10024;
@@ -4332,7 +4332,6 @@ extern "C" void* func_0025FB80(void*, int, void*);
 // func_0025FB80 is used as void here (its v0 is only a pass-through of its last call).
 void func_0025FB80_v(void*, int, void*) __asm__("func_0025FB80");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* cCommSystem_mCommSystem;
 extern int D_005308D0[];
 extern int D_00534B34[];
 extern char cBENewRaceInterface_newRace[];
@@ -4783,7 +4782,6 @@ struct sNetState {
     sName7 name;                    // 0x4A8
 };
 
-extern sNetState cBENetworkInterface_networkOpt;
 
 extern void* D_004812B0[];
 
@@ -4800,7 +4798,6 @@ extern "C" void func_0025B608(void* self, int a1, int tag, void* cb, int a4, flo
 
 extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char* key, const char* value);
 
-extern void* cGameComm_mGameComm;
 
 // Queue a simple tag message {type, D_004812B0 vtable} on the session's list.
 static inline void postMsg(char* self, int type)
@@ -5049,7 +5046,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     int oppDone;
     sRaceStats* opp;
     int oppScore;
-    if (cBENetworkInterface_networkOpt.chan != 0) {
+    if (cBENetworkInterface_networkOpt.bIsHost != 0) {
         myIdx = idxA;
         myName = *(char**)(self + 0x90);
         myTime = finA ? RaceTime(Race()->f38) : 0;
@@ -5063,7 +5060,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
         mine = statsA;
         myScore = Race()->f24;
         oppIdx = idxB;
-        oppChar = cBENetworkInterface_networkOpt.charID;
+        oppChar = cBENetworkInterface_networkOpt.OpponentCharacterID;
         oppTime = finB ? RaceTime(Race()->f3C) : 0;
         oppQuitTime = quitB ? RaceTime(Race()->f3C) : 0;
         oppDone = 0;
@@ -5088,7 +5085,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
         mine = statsB;
         myScore = Race()->f28;
         oppIdx = idxA;
-        oppChar = cBENetworkInterface_networkOpt.charID0;
+        oppChar = cBENetworkInterface_networkOpt.MyCharacterID;
         oppTime = finA ? RaceTime(Race()->f38) : 0;
         oppQuitTime = quitA ? RaceTime(Race()->f38) : 0;
         oppDone = 0;
@@ -5133,7 +5130,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32C0, myTime);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32C8, myScore);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32D0, myQuitTime);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004809B0, cBENetworkInterface_networkOpt.charID0);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004809B0, cBENetworkInterface_networkOpt.MyCharacterID);
     if (ranked == 0)
         cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004809C0, D_00536640[myIdx]);
     else
@@ -7313,7 +7310,6 @@ extern "C" void func_00263678(void* self, int flags)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002636A8);
 #ifdef SKIP_ASM
-extern void* cCommSystem_mCommSystem;
 extern float D_004A2F0C;
 extern float D_004A2F10;
 extern "C" void func_00255F50(void* p);
@@ -7322,7 +7318,7 @@ extern "C" void func_002636A8(void* self)
 {
     func_00255F50(cCommSystem_mCommSystem);
     float v;
-    if (*(int*)((char*)cCommSystem_mCommSystem + 0x2C) != 0) {
+    if (cCommSystem_mCommSystem->mBroadBand != 0) {
         v = D_004A2F0C;
     } else {
         v = D_004A2F10;
@@ -7340,7 +7336,6 @@ extern char D_00480ED0[];
 extern void* D_00481250[];
 extern void* D_004A3328;
 extern void* D_004A3028;
-extern void* cCommSystem_mCommSystem;
 extern "C" void func_00260F80(void);
 extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(void* p);
@@ -7374,7 +7369,7 @@ static inline sMsgListIter36F0 sMsgList36F0_insert(sMsgListIter36F0 pos, void* c
 
 static inline bool isState_36F0(int st)
 {
-    return *(int*)((char*)cCommSystem_mCommSystem + 0x20) == st;
+    return cCommSystem_mCommSystem->mNetConnState == st;
 }
 
 extern "C" void func_002636F0(int* out, int val)
@@ -7413,12 +7408,11 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char D_00480488[];
 extern char D_004804A8[];
 extern void* D_004A3028;
-extern void* cCommSystem_mCommSystem;
 extern "C" void func_002636F0(int* out, int val);
 
 static inline bool isState_3828(int st)
 {
-    return *(int*)((char*)cCommSystem_mCommSystem + 0x20) == st;
+    return cCommSystem_mCommSystem->mNetConnState == st;
 }
 extern void* D_004812B0[];
 extern void* D_00481290[];
@@ -7475,7 +7469,7 @@ extern "C" void func_00263828(int* self)
             m[0] = 0x105;
             post_3828(g, m);
         } else if (isState_3828(6)) {
-            func_002636F0(self, *(int*)((char*)cCommSystem_mCommSystem + 0x28));
+            func_002636F0(self, cCommSystem_mCommSystem->mNetConnError);
         } else {
             int expired = t->timer < 0.0f;
             if (expired)
@@ -7486,7 +7480,7 @@ extern "C" void func_00263828(int* self)
         break;
     case 2:
         if (isState_3828(6))
-            func_002636F0(self, *(int*)((char*)cCommSystem_mCommSystem + 0x28));
+            func_002636F0(self, cCommSystem_mCommSystem->mNetConnError);
         break;
     }
 }
@@ -7532,7 +7526,6 @@ extern "C" void func_001472C8(void* self, int a1, int a2);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsigned short port, int a3);
 extern "C" void func_00266D58(void* self, void* ip);
 extern "C" void func_00266E30(void* self);
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A33F4;
 extern float D_004A2F14;
 extern int D_00535610[];
@@ -7557,7 +7550,6 @@ struct sNetCfg_002639E0 {
     float rate;     // 0x10
 };
 
-extern sNetCfg_002639E0 D_00534B30_002639E0[] __asm__("cBENetworkInterface_networkOpt");
 
 extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int a4)
 {
@@ -7572,15 +7564,15 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int 
     func_001472C8(p, 1, 0);
     p->vt[1].fn((char*)p + p->vt[1].delta);
     sIf_002639E0* r = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
-    D_00534B30_002639E0[0].active = one;
-    D_00534B30_002639E0[0].rate = 0.01666666753590107f;
-    D_00534B30_002639E0[0].port = 0xE4A;
-    D_00534B30_002639E0[0].chan = chan;
+    cBENetworkInterface_networkOpt.bIsNetworkGame = one;
+    cBENetworkInterface_networkOpt.fLatency = 0.01666666753590107f;
+    cBENetworkInterface_networkOpt.iPort = 0xE4A;
+    cBENetworkInterface_networkOpt.bIsHost = chan;
     r->vt[1].fn((char*)r + r->vt[1].delta);
     r->vt[1].fn((char*)r + r->vt[1].delta);
     self[2] = chan;
     sprintf(buf, D_00480EE0, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-    self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, D_00534B30_002639E0[0].port, chan);
+    self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, chan);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if ((D_00535610[0] >> 18) & 1) {
         func_00266D58(D_004A33F4, (void*)ip);
@@ -7601,7 +7593,6 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char D_00480488[];
 extern char D_004804A8[];
 extern void* D_004A3028;
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A33CC;
 extern void* D_004A33F4;
 extern "C" int func_00255D38(void* comm, int chan);
@@ -7698,8 +7689,6 @@ extern "C" void func_002642B8(void* self);
 // PORT: func_00264CB8 is defined with one parameter; this caller passes a second in $a1.
 extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern void* cCommSystem_mCommSystem;
-extern void* cGameComm_mGameComm;
 extern void* D_004A3028;
 extern void* D_004A3328;
 extern void* D_004A33CC;
@@ -8207,7 +8196,6 @@ extern "C" int func_002649B0(sDsPacketQueueK2* self, void* dst)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264A58);
 #ifdef SKIP_ASM
-extern void* cCommSystem_mCommSystem;
 extern "C" int func_00255DC0(void* mgr, int idx, void* buf, int len);
 // PORT: func_00264960 is defined as f(void); this caller passes self in $a0.
 void* func_00264960_self(void* self) __asm__("func_00264960");
@@ -8245,7 +8233,6 @@ extern "C" void func_00264A58(void* p)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264B20);
 #ifdef SKIP_ASM
-extern void* cCommSystem_mCommSystem;
 extern "C" int func_00255E00(void* mgr, int idx, void* buf, int len);
 
 struct sDsPacket_00264B20 {
@@ -8285,7 +8272,6 @@ extern "C" void func_00264B20(void* p)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264BE8);
 #ifdef SKIP_ASM
-extern void* cCommSystem_mCommSystem;
 extern "C" int func_00255E00(void* mgr, int idx, void* buf, int len);
 extern "C" void func_00264B20(void* p);
 // PORT: func_00264960 is defined as f(void); this caller passes self in $a0.
@@ -8414,7 +8400,6 @@ struct sNetState_00264D80 {
     sName7_00264D80 name;           // 0x4A8
 };
 
-extern sNetState_00264D80 D_00534B30_00264D80[] __asm__("cBENetworkInterface_networkOpt");
 
 extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name)
 {
@@ -8422,9 +8407,9 @@ extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name)
     func_00147448(p, 1, charID);
     p->vt[1].fn((char*)p + p->vt[1].delta);
     sIf_00264D80* q = (sIf_00264D80*)cBE_getInterface_Fv(SSXApp->BE, 7);
-    D_00534B30_00264D80[0].charID = charID;
+    cBENetworkInterface_networkOpt.OpponentCharacterID = charID;
     if (name != 0)
-        D_00534B30_00264D80[0].name = *name;
+        *(sName7_00264D80*)((char*)&cBENetworkInterface_networkOpt + 0x4A8) = *name;
     q->vt[1].fn((char*)q + q->vt[1].delta);
 }
 #endif
@@ -11196,9 +11181,9 @@ int cCommChannel_writePacket(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cDSockChannel_isConnected);
 #ifdef SKIP_ASM
-extern "C" int cDSockChannel_isConnected(void* self)
+extern "C" int cDSockChannel_isConnected(cDSockChannel* self)
 {
-    return *(int*)((char*)self + 0xc) == 2;
+    return self->mState == 2;
 }
 #endif
 

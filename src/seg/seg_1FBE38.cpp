@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "world/world.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 
@@ -54,7 +56,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FB060);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B060 __asm__("D_004A3DD8");
-extern char **D_004A47B8_B060 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_B060(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B060(unsigned i) { if (i == 0) return 0; return refToPtr_B060(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -104,7 +105,7 @@ extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B060 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_B060 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -131,7 +132,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FB270);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B270 __asm__("D_004A3DD8");
-extern char **D_004A47B8_B270 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_B270(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B270(unsigned i) { if (i == 0) return 0; return refToPtr_B270(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -185,7 +185,7 @@ extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B270 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_B270 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -212,7 +212,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FB498);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B498 __asm__("D_004A3DD8");
-extern char **D_004A47B8_B498 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_B498(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B498(unsigned i) { if (i == 0) return 0; return refToPtr_B498(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -262,7 +261,7 @@ extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B498 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_B498 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -289,7 +288,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FB6B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B6B8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_B6B8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_B6B8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B6B8(unsigned i) { if (i == 0) return 0; return refToPtr_B6B8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -342,7 +340,7 @@ extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B6B8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_B6B8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -369,7 +367,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FB8D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B8D0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_B8D0 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_B8D0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B8D0(unsigned i) { if (i == 0) return 0; return refToPtr_B8D0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -411,7 +408,7 @@ extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B8D0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_B8D0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -438,7 +435,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FBAB0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_BAB0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_BAB0 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_BAB0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_BAB0(unsigned i) { if (i == 0) return 0; return refToPtr_BAB0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -485,7 +481,7 @@ extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_BAB0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_BAB0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -512,7 +508,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FBCB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_BCB8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_BCB8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_BCB8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_BCB8(unsigned i) { if (i == 0) return 0; return refToPtr_BCB8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -562,7 +557,7 @@ extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_BCB8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_BCB8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -589,7 +584,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FBEC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_BEC8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_BEC8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_BEC8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_BEC8(unsigned i) { if (i == 0) return 0; return refToPtr_BEC8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -638,7 +632,7 @@ extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_BEC8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_BEC8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -665,7 +659,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FC0D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C0D0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_C0D0 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_C0D0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C0D0(unsigned i) { if (i == 0) return 0; return refToPtr_C0D0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -708,7 +701,7 @@ extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C0D0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_C0D0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -790,7 +783,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FC420);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C420 __asm__("D_004A3DD8");
-extern char **D_004A47B8_C420 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_C420 __asm__("SSXApp");
 static inline char *refToPtr_C420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C420(unsigned i) { if (i == 0) return 0; return refToPtr_C420(i); }
@@ -830,7 +822,7 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C420 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_C420 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -856,7 +848,6 @@ INCLUDE_ASM("seg/seg_1FBE38", MakeDeadFadeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C5D8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_C5D8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_C5D8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C5D8(unsigned i) { if (i == 0) return 0; return refToPtr_C5D8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -900,7 +891,7 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C5D8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_C5D8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -927,7 +918,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FC7D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C7D0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_C7D0 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_C7D0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C7D0(unsigned i) { if (i == 0) return 0; return refToPtr_C7D0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -971,7 +961,7 @@ extern "C" V3_C7D0 func_002FC7D0(int n, Ent_C7D0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C7D0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_C7D0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -998,7 +988,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FC9C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C9C8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_C9C8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_C9C8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C9C8(unsigned i) { if (i == 0) return 0; return refToPtr_C9C8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1065,7 +1054,7 @@ extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C9C8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_C9C8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1092,7 +1081,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FCC20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_CC20 __asm__("D_004A3DD8");
-extern char **D_004A47B8_CC20 __asm__("cWorld_m_pTheWorld");
 struct V3_CC20 { float x, y, z; };
 extern V3_CC20 D_004C9098_CC20 __asm__("D_004C9098");
 struct Tag_CC20 { char c; Tag_CC20() {} Tag_CC20(const Tag_CC20 &o) : c(o.c) {} };
@@ -1132,7 +1120,7 @@ extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_CC20 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_CC20 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -1158,7 +1146,6 @@ INCLUDE_ASM("seg/seg_1FBE38", MakeFlexBridgeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_CDC8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_CDC8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_CDC8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_CDC8(unsigned i) { if (i == 0) return 0; return refToPtr_CDC8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1207,7 +1194,7 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_CDC8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_CDC8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1234,7 +1221,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FCFF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_CFF0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_CFF0 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_CFF0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_CFF0(unsigned i) { if (i == 0) return 0; return refToPtr_CFF0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1291,7 +1277,7 @@ extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_CFF0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_CFF0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1318,7 +1304,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRollerFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D250 __asm__("D_004A3DD8");
-extern char **D_004A47B8_D250 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_D250 __asm__("SSXApp");
 extern "C" void cMoveNode_addRoller_D250(void*, void*, int, int) __asm__("cMoveNode_addRoller");
 struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -1359,7 +1344,7 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D250 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_D250 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -1380,7 +1365,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FD420);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D420 __asm__("D_004A3DD8");
-extern char **D_004A47B8_D420 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_D420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_D420(unsigned i) { if (i == 0) return 0; return refToPtr_D420(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1477,7 +1461,7 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D420 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_D420 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1514,7 +1498,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FD758);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D758 __asm__("D_004A3DD8");
-extern char **D_004A47B8_D758 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_D758 __asm__("SSXApp");
 struct V4_D758 { float x, y, z, w; V4_D758() {} V4_D758(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} } __attribute__((aligned(16)));
 struct M4_D758 { V4_D758 r[4]; };
@@ -1602,7 +1585,7 @@ extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D758 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_D758 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -1630,7 +1613,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D9F8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_D9F8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_D9F8 __asm__("SSXApp");
 struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void func_00355978_D9F8(void*, int, int, V4_D9F8*) __asm__("func_00355978");
@@ -1678,7 +1660,7 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D9F8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_D9F8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1692,7 +1674,7 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
     }
     unsigned id2 = buf[1];
     if (~id2 != 0) {
-        char *s2 = (*(char***)((char*)*D_004A47B8_D9F8 + 8))[id2 & 0xFF];
+        char *s2 = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
         unsigned i2;
         char *o2;
         if (!s2 || (i2 = ((unsigned*)*(char**)(s2 + 0x1C))[id2 >> 8] >> 8) == 0)
@@ -1718,7 +1700,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_DC60 __asm__("D_004A3DD8");
-extern char **D_004A47B8_DC60 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_DC60 __asm__("SSXApp");
 struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void func_00355978_DC60(void*, int, int, V4_DC60*) __asm__("func_00355978");
@@ -1766,7 +1747,7 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_DC60 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_DC60 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1782,7 +1763,7 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
         O_DC60 *q = *(O_DC60**)(obj + 0xC);
         if (q && !q->v10(6)) {
             unsigned id2 = buf[1];
-            char *s2 = (*(char***)((char*)*D_004A47B8_DC60 + 8))[id2 & 0xFF];
+            char *s2 = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
             unsigned i2;
             char *o2;
             if (!s2 || (i2 = ((unsigned*)*(char**)(s2 + 0x1C))[id2 >> 8] >> 8) == 0)
@@ -1806,7 +1787,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_DED0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_DED0 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_DED0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSpline1");
 struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -1858,7 +1838,7 @@ extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_DED0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_DED0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1886,7 +1866,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddMultiSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E0C0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_E0C0 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_E0C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpline");
 struct O_E0C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -1939,7 +1918,7 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E0C0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_E0C0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -1967,7 +1946,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E2C0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_E2C0 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_E2C0 __asm__("SSXApp");
 extern "C" void func_00355B90_E2C0(void*, void*) __asm__("func_00355B90");
 struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -2017,7 +1995,7 @@ extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E2C0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_E2C0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -2038,7 +2016,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E4A8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_E4A8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_E4A8 __asm__("SSXApp");
 extern "C" void func_00355BF0_E4A8(void*, void*) __asm__("func_00355BF0");
 struct O_E4A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -2079,7 +2056,7 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E4A8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_E4A8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -2100,7 +2077,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E668 __asm__("D_004A3DD8");
-extern char **D_004A47B8_E668 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_E668 __asm__("SSXApp");
 extern "C" void func_00355C50_E668(void*, void*) __asm__("func_00355C50");
 struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -2146,7 +2122,7 @@ extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E668 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_E668 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -2167,7 +2143,6 @@ INCLUDE_ASM("seg/seg_1FBE38", cViewer_addParticle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E840 __asm__("D_004A3DD8");
-extern char **D_004A47B8_E840 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_E840(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_E840(unsigned i) { if (i == 0) return 0; return refToPtr_E840(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2324,7 +2299,7 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E840 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_E840 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -2362,7 +2337,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FEE98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_EE98 __asm__("D_004A3DD8");
-extern char **D_004A47B8_EE98 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_EE98(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_EE98(unsigned i) { if (i == 0) return 0; return refToPtr_EE98(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2466,7 +2440,7 @@ extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_EE98 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_EE98 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -2490,7 +2464,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F1C8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_F1C8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_F1C8 __asm__("SSXApp");
 extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
 struct O_F1C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -2530,7 +2503,7 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_F1C8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_F1C8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -2555,7 +2528,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FF390);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F390 __asm__("D_004A3DD8");
-extern char **D_004A47B8_F390 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_F390(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_F390(unsigned i) { if (i == 0) return 0; return refToPtr_F390(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2624,7 +2596,7 @@ extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_F390 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_F390 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -2651,7 +2623,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FF5E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F5E8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_F5E8 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_F5E8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_F5E8(unsigned i) { if (i == 0) return 0; return refToPtr_F5E8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2720,7 +2691,7 @@ extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_F5E8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_F5E8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -2796,12 +2767,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FF9A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F9A8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_F9A8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_F9A8 __asm__("SSXApp");
 static inline char *look_F9A8(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_F9A8 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_F9A8 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -2857,7 +2827,6 @@ extern Flag_FB50 D_004A564C_FB50 __asm__("D_004A564C");
 extern int D_004A5650_FB50 __asm__("D_004A5650");
 extern int D_004A3C10_FB50[2] __asm__("D_004A3C10");
 extern char *D_004A3DD8_FB50 __asm__("D_004A3DD8");
-extern char **D_004A47B8_FB50 __asm__("cWorld_m_pTheWorld");
 static inline char *refToPtr_FB50(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FB50(unsigned i) { if (i == 0) return 0; return refToPtr_FB50(i); }
 extern "C" void* cMemMan_alloc(int, void*, int, int);
@@ -2894,7 +2863,7 @@ extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_FB50 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_FB50 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -2924,12 +2893,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FFD58);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_FD58 __asm__("D_004A3DD8");
-extern char **D_004A47B8_FD58 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_FD58 __asm__("SSXApp");
 static inline char *look_FD58(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_FD58 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_FD58 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -2983,7 +2951,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FFF00);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_FF00 __asm__("D_004A3DD8");
-extern char **D_004A47B8_FF00 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_FF00 __asm__("SSXApp");
 static inline char *refToPtr_FF00(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FF00(unsigned i) { if (i == 0) return 0; return refToPtr_FF00(i); }
@@ -3023,7 +2990,7 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_FF00 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_FF00 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -3048,7 +3015,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003000A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_00A8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_00A8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_00A8 __asm__("SSXApp");
 static inline char *refToPtr_00A8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_00A8(unsigned i) { if (i == 0) return 0; return refToPtr_00A8(i); }
@@ -3089,7 +3055,7 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_00A8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_00A8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -3115,7 +3081,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00300260);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0260 __asm__("D_004A3DD8");
-extern char **D_004A47B8_0260 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_0260 __asm__("SSXApp");
 static inline char *refToPtr_0260(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0260(unsigned i) { if (i == 0) return 0; return refToPtr_0260(i); }
@@ -3156,7 +3121,7 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_0260 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_0260 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -3182,7 +3147,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00300418);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0418 __asm__("D_004A3DD8");
-extern char **D_004A47B8_0418 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_0418 __asm__("SSXApp");
 struct O_0418 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(int); };
 struct V3_0418 { float x, y, z; };
@@ -3219,7 +3183,7 @@ extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_0418 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_0418 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -3243,7 +3207,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003005E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3DD8_05E8 __asm__("D_004A3DD8");
-extern char *D_004A47B8_05E8 __asm__("cWorld_m_pTheWorld");
 struct O_05E8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); };
 struct V3_05E8 { float x, y, z; };
 extern V3_05E8 D_004C9098_05E8 __asm__("D_004C9098");
@@ -3279,7 +3242,7 @@ extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
     if (~id == 0) {
         obj = *(char**)(*(char**)&D_004A3DD8_05E8 + 0x290);
     } else {
-        char *tb = *(char**)(*(char**)D_004A47B8_05E8 + 8);
+        char *tb = *(char**)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8);
         char *s = *(char**)(tb + (id & 0xFF) * 4);
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -3304,7 +3267,6 @@ extern Flag_0770 D_004A568C_0770 __asm__("D_004A568C");
 extern int D_004A5690_0770 __asm__("D_004A5690");
 extern int D_004A3C40_0770[2] __asm__("D_004A3C40");
 extern int *D_004A3DD8_0770 __asm__("D_004A3DD8");
-extern char **D_004A47B8_0770 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_0770 __asm__("SSXApp");
 struct O_0770 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
@@ -3341,7 +3303,7 @@ extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
     if (~id == 0) {
         obj = *(char**)((char*)D_004A3DD8_0770 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_0770 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -3376,7 +3338,6 @@ extern Flag_0948 D_004A569C_0948 __asm__("D_004A569C");
 extern int D_004A56A0_0948 __asm__("D_004A56A0");
 extern int D_004A3C48_0948[2] __asm__("D_004A3C48");
 extern int *D_004A3DD8_0948 __asm__("D_004A3DD8");
-extern char **D_004A47B8_0948 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_0948 __asm__("SSXApp");
 struct O_0948 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_0948 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(void*); };
@@ -3413,7 +3374,7 @@ extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
     if (~id == 0) {
         obj = *(char**)((char*)D_004A3DD8_0948 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_0948 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -3802,7 +3763,6 @@ struct sRefWorld_1440 {
     char pad_0x0[0x8];
     sRefSet_1440** sets;         // 0x8
 };
-extern sRefWorld_1440** D_004A47B8_1440 __asm__("cWorld_m_pTheWorld");
 // The script manager (cWScriptMan_1440 in the prototype, whose setBeing stores at 0x0); D_004A3DD8_1440 points at the instance.
 struct cWScriptMan_1440 {
     int being;              // 0x0: index of the current being (rider)
@@ -3852,7 +3812,7 @@ extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* e) {
     if (~id == 0) {
         obj = D_004A3DD8_1440->f290;
     } else {
-        sRefSet_1440 *s = (*D_004A47B8_1440)->sets[id & 0xFF];
+        sRefSet_1440 *s = ((sRefWorld_1440*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
         unsigned i;
         if (!s || (i = s->refs[id >> 8] >> 8) == 0)
             obj = 0;
@@ -3917,12 +3877,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00301680);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_1680 __asm__("D_004A3DD8");
-extern char **D_004A47B8_1680 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_1680 __asm__("SSXApp");
 static inline char *look_1680(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_1680 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_1680 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -3983,12 +3942,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00301830);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_1830 __asm__("D_004A3DD8");
-extern char **D_004A47B8_1830 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_1830 __asm__("SSXApp");
 static inline char *look_1830(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_1830 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_1830 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -4030,7 +3988,7 @@ extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_1830 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_1830 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -4061,7 +4019,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003019C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_19C8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_19C8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_19C8 __asm__("SSXApp");
 int *func_00226610(void*);
 struct O_19C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual int v32(float); };
@@ -4098,7 +4055,7 @@ extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_19C8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_19C8 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -4217,7 +4174,6 @@ extern Flag_1D78 D_004A5714_1D78 __asm__("D_004A5714");
 extern int D_004A5718_1D78 __asm__("D_004A5718");
 extern int D_004A3CB0_1D78[2] __asm__("D_004A3CB0");
 extern int *D_004A3DD8_1D78 __asm__("D_004A3DD8");
-extern char **D_004A47B8_1D78 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_1D78 __asm__("SSXApp");
 struct O_1D78 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_1D78 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
@@ -4256,7 +4212,7 @@ extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *e) {
     if (~id == 0) {
         obj = *(char**)((char*)D_004A3DD8_1D78 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_1D78 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -4504,7 +4460,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00302490);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_2490 __asm__("D_004A3DD8");
-extern char **D_004A47B8_2490 __asm__("cWorld_m_pTheWorld");
 struct O_2490 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_2490 { float x, y, z; };
 extern V3_2490 D_004C9098_2490 __asm__("D_004C9098");
@@ -4544,7 +4499,7 @@ extern "C" V3_2490 func_00302490(int n, Ent_2490 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_2490 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_2490 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -4745,7 +4700,6 @@ struct R12_2968 { int a; int b; int c; };
 extern R12_2968 D_004C9098_2968 __asm__("D_004C9098");
 
 extern int D_004A3CE8_2968[2] __asm__("D_004A3CE8");
-extern char** D_004A47B8_2968 __asm__("cWorld_m_pTheWorld");
 extern char* D_004A3DD8_2968 __asm__("D_004A3DD8");
 extern int D_004A5770_2968 __asm__("D_004A5770");
 extern unsigned D_004A5768_2968 __asm__("D_004A5768");
@@ -4772,7 +4726,7 @@ extern "C" R12_2968 func_00302968(int n, Ent_2968* e) {
     }
     char* g = D_004A3DD8_2968;
     unsigned x = vp[0];
-    char** tbl = *(char***)(*D_004A47B8_2968 + 8);
+    char** tbl = *(char***)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8);
     char* e0 = tbl[x & 0xFF];
     unsigned w;
     int r;
@@ -5027,12 +4981,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303130);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3130 __asm__("D_004A3DD8");
-extern char **D_004A47B8_3130 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_3130 __asm__("SSXApp");
 static inline char *look_3130(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_3130 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_3130 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -5406,7 +5359,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003039F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_39F0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_39F0 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_39F0 __asm__("SSXApp");
 extern int D_004A3FF0_39F0 __asm__("D_004A3FF0");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
@@ -5445,7 +5397,7 @@ extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_39F0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_39F0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -5469,7 +5421,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303BA0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3BA0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_3BA0 __asm__("cWorld_m_pTheWorld");
 extern int D_004A2A00_3BA0 __asm__("D_004A2A00");
 struct V3_3BA0 { float x, y, z; };
 extern V3_3BA0 D_004C9098_3BA0 __asm__("D_004C9098");
@@ -5512,7 +5463,7 @@ extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_3BA0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_3BA0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -5787,7 +5738,6 @@ struct sRefWorld {
     char pad_0x0[0x8];
     sRefSet** sets;         // 0x8
 };
-extern sRefWorld** cWorld_m_pTheWorld;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
@@ -5850,7 +5800,7 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     if (~id == 0) {
         obj = curProcess_4320()->f290;
     } else {
-        sRefSet *s = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
+        sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -6002,7 +5952,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304980);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4980 __asm__("D_004A3DD8");
-extern char **D_004A47B8_4980 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_4980 __asm__("SSXApp");
 void func_00355878(void*, void*);
 struct O_4980 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -6040,7 +5989,7 @@ extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_4980 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_4980 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -6107,7 +6056,6 @@ extern "C" void MEM_copy(void*, void*, int);
 struct Tag_4C50 { char c; Tag_4C50() {} Tag_4C50(const Tag_4C50 &o) : c(o.c) {} };
 struct Ent_4C50 { int idx; int val; int pad; int type; };
 extern char *D_004A3DD8_4C50 __asm__("D_004A3DD8");
-extern char **D_004A47B8_4C50 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_4C50 __asm__("SSXApp");
 extern unsigned D_5828_4C50 __asm__("D_004A5828");
 extern Tag_4C50 D_582C_4C50 __asm__("D_004A582C");
@@ -6146,7 +6094,7 @@ extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_4C50 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_4C50 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -6181,7 +6129,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304E38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4E38 __asm__("D_004A3DD8");
-extern char **D_004A47B8_4E38 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_4E38 __asm__("SSXApp");
 extern "C" void func_00355888_4E38(void*, void*) __asm__("func_00355888");
 struct O_4E38 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -6219,7 +6166,7 @@ extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_4E38 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_4E38 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -6282,7 +6229,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003050F0);
 extern cLunoValue D_004C9098;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-extern sRefWorld** cWorld_m_pTheWorld;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 struct tInstanceRecord;
@@ -6496,7 +6442,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
         if (~id == 0) {
             obj = D_004A3DD8->f290;
         } else {
-            sRefSet *s = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
+            sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
             char *r;
             if (!s)
                 r = 0;
@@ -6544,7 +6490,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00305478);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_5478 __asm__("D_004A3DD8");
-extern char **D_004A47B8_5478 __asm__("cWorld_m_pTheWorld");
 struct O_5478 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct V3_5478 { float x, y, z; };
 extern V3_5478 D_004C9098_5478 __asm__("D_004C9098");
@@ -6584,7 +6529,7 @@ extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_5478 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_5478 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -6657,7 +6602,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003057C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_57C0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_57C0 __asm__("cWorld_m_pTheWorld");
 struct O_57C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct V3_57C0 { float x, y, z; };
 extern V3_57C0 D_004C9098_57C0 __asm__("D_004C9098");
@@ -6703,7 +6647,7 @@ extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_57C0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_57C0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -6729,7 +6673,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003059A0);
 extern cLunoValue D_004C9098;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-extern sRefWorld** cWorld_m_pTheWorld;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
@@ -6795,7 +6738,7 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
     for (int i = 0; i < 8; i++) {
         unsigned id = vp->id[i];
         if (id != 0xFFFFFFFF) {
-            sRefSet *s = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
+            sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
             char *r;
             if (!s)
                 r = 0;
@@ -6859,7 +6802,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00305D90);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_5D90 __asm__("D_004A3DD8");
-extern char **D_004A47B8_5D90 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_5D90 __asm__("SSXApp");
 static inline char *refToPtr_5D90(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5D90(unsigned i) { if (i == 0) return 0; return refToPtr_5D90(i); }
@@ -6899,7 +6841,7 @@ extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_5D90 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_5D90 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s)
@@ -6926,7 +6868,6 @@ extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00305F40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char **D_004A47B8_5F40 __asm__("cWorld_m_pTheWorld");
 struct V3_5F40 { float x, y, z; };
 extern V3_5F40 D_004C9098_5F40 __asm__("D_004C9098");
 struct Tag_5F40 { char c; Tag_5F40() {} Tag_5F40(const Tag_5F40 &o) : c(o.c) {} };
@@ -7025,7 +6966,7 @@ extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
     }
     unsigned id = buf->id;
     if (~id != 0) {
-        char *s = (*(char***)((char*)*D_004A47B8_5F40 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         char *obj;
         if (!s)
             obj = 0;
@@ -7044,7 +6985,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003061B0);
 extern cLunoValue D_004C9098;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-extern sRefWorld** cWorld_m_pTheWorld;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
@@ -7131,7 +7071,6 @@ extern R12_6300 D_004C9098_6300 __asm__("D_004C9098");
 
 extern int D_004A3DB0_6300[2] __asm__("D_004A3DB0");
 extern "C" void func_001E3510(int, int);
-extern int D_00534B30_6300[] __asm__("cBENetworkInterface_networkOpt");
 extern "C" void* cBE_getInterface_6300(int, int) __asm__("cBE_getInterface__Fv");
 extern char* D_004A28A8_6300 __asm__("SSXApp");
 extern int D_004A588C_6300 __asm__("D_004A588C");
@@ -7160,7 +7099,7 @@ extern "C" R12_6300 func_00306300(int n, Ent_6300* e) {
     int x = vp[0];
     int y = vp[1];
     cBE_getInterface_6300(*(int*)(D_004A28A8_6300 + 0x78), 7);
-    if (D_00534B30_6300[0] == 0)
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0)
         func_001E3510(x, y);
     return D_004C9098_6300;
 }
@@ -7171,7 +7110,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306438);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6438 __asm__("D_004A3DD8");
-extern char **D_004A47B8_6438 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_6438 __asm__("SSXApp");
 extern "C" void func_00101728_6438(void*, void*, float, float) __asm__("func_00101728");
 struct V3_6438 { float x, y, z; };
@@ -7209,7 +7147,7 @@ extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6438 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_6438 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
@@ -7232,12 +7170,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003065E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_65E8 __asm__("D_004A3DD8");
-extern char **D_004A47B8_65E8 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_65E8 __asm__("SSXApp");
 static inline char *look_65E8(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_65E8 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_65E8 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -7288,12 +7225,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306770);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6770 __asm__("D_004A3DD8");
-extern char **D_004A47B8_6770 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_6770 __asm__("SSXApp");
 static inline char *look_6770(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_6770 + 0x290);
-    char *s = (*(char***)((char*)*D_004A47B8_6770 + 8))[id & 0xFF];
+    char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
     unsigned i;
     if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
         return 0;
@@ -7335,7 +7271,7 @@ extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6770 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_6770 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -7358,7 +7294,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306908);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6908 __asm__("D_004A3DD8");
-extern char **D_004A47B8_6908 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_6908 __asm__("SSXApp");
 extern "C" void func_00101970_6908(void*, void*) __asm__("func_00101970");
 struct V3_6908 { float x, y, z; };
@@ -7395,7 +7330,7 @@ extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6908 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_6908 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -7519,7 +7454,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306CB0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6CB0 __asm__("D_004A3DD8");
-extern char **D_004A47B8_6CB0 __asm__("cWorld_m_pTheWorld");
 extern char *D_004A28A8_6CB0 __asm__("SSXApp");
 extern void *D_004A4028_6CB0 __asm__("D_004A4028");
 void func_00357AE8(void*, int, int);
@@ -7559,7 +7493,7 @@ extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6CB0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)*D_004A47B8_6CB0 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
         if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
@@ -7583,7 +7517,6 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306E68);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3DD8_6E68 __asm__("D_004A3DD8");
-extern char **D_004A47B8_6E68 __asm__("cWorld_m_pTheWorld");
 extern "C" int func_0030BFC0_6E68(int, int, int, int) __asm__("func_0030BFC0");
 extern "C" void *func_0028B180_6E68() __asm__("func_0028B180");
 extern "C" void func_002974A0_6E68(void*, void*, int) __asm__("func_002974A0");
@@ -7627,7 +7560,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
     if (r == 1) {
         unsigned id = buf[1];
         char *obj;
-        char *s = (*(char***)((char*)*D_004A47B8_6E68 + 8))[id & 0xFF];
+        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         if (!s) {
             obj = 0;
         } else {

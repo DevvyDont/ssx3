@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/commchannel.h"
 
 //100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_create);
@@ -2773,9 +2774,9 @@ INCLUDE_ASM("mem/memstd", func_00255800);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
-extern "C" void func_00255800(void* self, int flags)
+extern "C" void func_00255800(cCommChannel* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cCommChannel_vtbl;
+    self->mVtbl = cCommChannel_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2797,11 +2798,11 @@ int func_00255830(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00255840);
 #ifdef SKIP_ASM
-extern "C" void func_00255840(void* self)
+extern "C" void func_00255840(cCommChannel* self)
 {
     if (*(int*)self != 0) {
         *(int*)self = 0;
-        *(int*)((char*)self + 0x4) = 0;
+        self->mError = 0;
     }
 }
 #endif

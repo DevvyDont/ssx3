@@ -48,4 +48,7 @@ CHECK_OFFSET(cWorld, m_pSphTrees, 0x10);
 CHECK_OFFSET(cWorld, m_pPolyModels, 0x14);
 CHECK_SIZE(cWorld, 0x18);
 
+// The one world (On Tour: cWorld::m_pTheWorld): cWorld_cWorld stores this, the destructor clears it.
+extern cWorld* cWorld_m_pTheWorld;
+
 #endif /* WORLD_WORLD_H */

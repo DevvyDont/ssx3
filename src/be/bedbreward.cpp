@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -798,7 +799,6 @@ extern "C" void func_0015C228()
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C250);
 #ifdef SKIP_ASM
-extern void* cBENetworkInterface_instance;
 void operator_delete(int* ptr);
 
 extern "C" void func_0015C250(void)
@@ -810,19 +810,17 @@ extern "C" void func_0015C250(void)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C278);
 #ifdef SKIP_ASM
-extern char cBENetworkInterface_networkOpt[];
 
 extern "C" void func_0015C278(void* self, int v) {
-    *(int*)cBENetworkInterface_networkOpt = v;
+    cBENetworkInterface_networkOpt.bIsNetworkGame = v;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C288);
 #ifdef SKIP_ASM
-extern char cBENetworkInterface_networkOpt[];
 
 extern "C" int func_0015C288(void) {
-    return *(int*)cBENetworkInterface_networkOpt;
+    return cBENetworkInterface_networkOpt.bIsNetworkGame;
 }
 #endif
 //100%
@@ -981,10 +979,9 @@ extern "C" void* func_0015C3B8(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C3C8);
 #ifdef SKIP_ASM
-extern void *cBENetworkInterface_instance;
 
 extern "C" void func_0015C3C8(int arg0) {
-    (*(int *)((char*)(cBENetworkInterface_instance) + (8))) = arg0;
+    (cBENetworkInterface_instance->bIsActive) = arg0;
 }
 #endif
 //100%

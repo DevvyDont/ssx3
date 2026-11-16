@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -1859,7 +1860,6 @@ extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
 extern "C" int func_001474C8(void* iface, int player);
 extern "C" void func_0023B0A8(void* self);
-extern int cBENetworkInterface_networkOpt[];
 extern int D_00535C04[];
 
 struct sGM_23AC88 {
@@ -1911,7 +1911,7 @@ extern "C" void func_0023AC88(void* self)
     gm->f6C = -1;
     gm->f10 = 4;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         ((sGM_23AC88*)cGameModeHandler_pManager)->f10 = D_00535C04[0];
     }

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/commsystem.h"
+#include "online/gamecomm.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -4784,7 +4787,6 @@ extern "C" void func_00261408(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* cCommSystem_mCommSystem;
 extern void* D_004A3328;
 extern void* D_004A3028;
 extern char D_00461618[];
@@ -7564,7 +7566,6 @@ extern "C" void func_001A87D0(void* self, int a1);
 extern "C" void func_0039A7A8(void* self, int a1);
 extern "C" void func_001AF098(void* self, int a1);
 extern "C" void func_001AEC60(void* self, int a1);
-extern int D_00534B30_1ADFE8[] __asm__("cBENetworkInterface_networkOpt");
 extern signed char D_00535C12[];
 extern char D_00441268[];
 extern char D_00441278[];
@@ -7578,7 +7579,7 @@ extern "C" void func_001ADFE8(void* self, int a1)
 {
     func_001A87D0(self, a1);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    func_0039A7A8(*(void**)((char*)self + 0x6DC), D_00534B30_1ADFE8[1] ^ 1);
+    func_0039A7A8(*(void**)((char*)self + 0x6DC), cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (D_00535C12[0]) {
     case 3:
@@ -7601,7 +7602,7 @@ extern "C" void func_001ADFE8(void* self, int a1)
         *(char**)((char*)self + 0x6D8) = D_00441268;
         break;
     }
-    func_001AF098(self, D_00534B30_1ADFE8[1]);
+    func_001AF098(self, cBENetworkInterface_networkOpt.bIsRankedGame);
     func_001AEC60(self, *(int*)((char*)self + 0x6D0));
 }
 #endif
@@ -9588,14 +9589,13 @@ extern "C" int func_0039A738(void* a);
 extern "C" void func_001B1B10(void* self, int sel, int flag);
 extern "C" void func_001B1760(void* self, int index);
 extern "C" void func_001B1808(void* self);
-extern char cBENetworkInterface_networkOpt[];
 
 extern "C" int func_001B1068(void* self, int a1)
 {
     if (a1 != 0) {
         func_001B1B10(self, func_0039A738(*(void**)((char*)self + 0x6D0)), 0);
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        char* net = cBENetworkInterface_networkOpt;
+        char* net = ((char*)&cBENetworkInterface_networkOpt);
         if (*(int*)(net + 0x32C) >= 0) {
             func_001B1760(self, *(int*)(net + 0x32C));
             func_001B1B10(self, *(int*)(net + 0x32C), 1);
@@ -9861,7 +9861,6 @@ extern "C" void func_001B1A08(void* self, int on, int a2);
 extern "C" void func_001AB288(void* self, int err);
 extern void* D_004A3028;
 extern int D_004A4E88;
-extern int D_00534B30_1B15D8[] __asm__("cBENetworkInterface_networkOpt");
 extern const char D_0045FF10[];
 extern const char D_0045FF28[];
 extern const char D_00460CC8[];
@@ -9873,9 +9872,9 @@ extern "C" void* func_001B15D8(void* self, int a1, int a2)
     switch (a1) {
     case 0xF3:
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (D_00534B30_1B15D8[0xCB] >= 0) {
-            func_001B1760(self, D_00534B30_1B15D8[0xCB]);
-            func_001B1B10(self, D_00534B30_1B15D8[0xCB], 1);
+        if (cBENetworkInterface_networkOpt.OpponentCharacterID >= 0) {
+            func_001B1760(self, cBENetworkInterface_networkOpt.OpponentCharacterID);
+            func_001B1B10(self, cBENetworkInterface_networkOpt.OpponentCharacterID, 1);
         }
         break;
     case 0xF5:
@@ -11682,7 +11681,6 @@ extern "C" void func_001B5268(void* self, int a1);
 extern "C" void* func_0028B180();
 void func_0028FC38(void* self);
 extern char D_00463ED0[];
-extern int cGameComm_mGameComm;
 
 extern "C" void func_001B40D0(void* self)
 {
@@ -12284,7 +12282,6 @@ extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" int func_004165A8(const char* a, const char* b);
 extern int D_004A1B80;
 extern int D_004A1B90[2];
-extern void* cCommSystem_mCommSystem;
 extern int cCommSystem_mNumNetConn;
 extern char* D_004A1B7C;
 extern char D_00463F88[];
@@ -20304,7 +20301,6 @@ extern "C" void func_001A9930(void* self);
 extern "C" void func_00256C50();
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* p, int a1);
-extern int cGameComm_mGameComm;
 extern void* D_004A3028;
 extern char D_004653F0[];
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -4416,7 +4417,6 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E3AF8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int cBENetworkInterface_networkOpt[];
 extern signed char D_00535C12[];
 
 struct sVtx_3AF8 {
@@ -4608,7 +4608,7 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
             }
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (cBENetworkInterface_networkOpt[0] != 0) {
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
             vis = self->rider->mIsLocal == 0;
         }
     } else if (!IsHuman_3AF8(self->rider)) {

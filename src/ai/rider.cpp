@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -5801,7 +5802,6 @@ extern "C" void func_001250A8(cRider* self, sRiderVec4_001250A8* v)
 //100%
 INCLUDE_ASM("ai/rider", func_00125108);
 #ifdef SKIP_ASM
-extern char* cGameComm_mGameComm;
 extern "C" float func_001193E0(void* self);
 extern "C" void func_00162258(void* self);
 extern "C" void func_00238358(void* self, int a1, int a2);
@@ -5817,13 +5817,13 @@ static inline void* getC0_125108()
 
 extern "C" void func_00125108(cRider* self)
 {
-    char* g = cGameComm_mGameComm;
+    cGameComm* g = cGameComm_mGameComm;
     if (g != 0 && self->mDidNotFinish == 0 && self->mIsHuman != 0)
     {
         if (self->mIsLocal != 0)
-            *(int*)(g + 0xA0) = 1;
+            g->mLocalFinishedRace = 1;
         else
-            *(int*)(g + 0xA4) = 1;
+            g->mRemoteFinishedRace = 1;
     }
     func_001193E0(self->mMetrix);
     self->mFinishTick = *(int*)((char*)SSXApp->Game->AI + 0xC) + self->mPenaltyTicks;

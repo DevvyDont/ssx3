@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
@@ -1535,7 +1536,6 @@ typedef int (*Tris_4888)(void*, void*, void*, sWsHit_4888*, int);
 typedef int (*Hit_4888)(void*, void*, void*);
 typedef int (*Mesh_4888)(void*, void*, sWsHit_4888*, int);
 
-extern void* cWorld_m_pTheWorld;
 void* func_003A6CC8_4888(void* self, void* a1) __asm__("func_003A6CC8__FPvT0");
 void* func_003A6CD8_4888(void* self, void* a1) __asm__("func_003A6CD8__FPvT0");
 extern "C" void* func_003A6CE8(void* self, int a1);

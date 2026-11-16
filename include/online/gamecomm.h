@@ -290,4 +290,7 @@ CHECK_OFFSET(cGameComm, mAITick, 0x408);
 CHECK_OFFSET(cGameComm, mCheckSumBuffer, 0x410);
 CHECK_SIZE(cGameComm, 0x5F0);
 
+// The one game comm (On Tour: cGameComm::mGameComm), created by cGameComm_construct.
+extern cGameComm* cGameComm_mGameComm;
+
 #endif /* ONLINE_GAMECOMM_H */

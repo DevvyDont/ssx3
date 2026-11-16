@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -2328,7 +2329,6 @@ struct sRefWorld_BFC0 {
     char pad_0x0[0x8];
     sRefSet_BFC0** sets;    // 0x8
 };
-extern sRefWorld_BFC0** D_004A47B8_BFC0 __asm__("cWorld_m_pTheWorld");
 
 static inline void* refToPtr_BFC0(unsigned int p)
 {
@@ -2344,7 +2344,7 @@ static inline void* toObj_BFC0(unsigned int p)
 
 static inline void* lookup_BFC0(unsigned int id)
 {
-    sRefSet_BFC0* set = (*D_004A47B8_BFC0)->sets[id & 0xFF];
+    sRefSet_BFC0* set = ((sRefWorld_BFC0*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
     if (set == 0) {
         return 0;
     }
@@ -2545,7 +2545,6 @@ struct sRefWorld_C4A8 {
     char pad_0x0[0x8];
     sRefSet_C4A8** sets;    // 0x8
 };
-extern sRefWorld_C4A8** D_004A47B8_C4A8 __asm__("cWorld_m_pTheWorld");
 
 struct sRace_C4A8 {
     char pad0[0x48];
@@ -2581,7 +2580,7 @@ static inline void* toObj_C4A8(unsigned int p)
 
 static inline void* lookup_C4A8(unsigned int id)
 {
-    sRefSet_C4A8* set = (*D_004A47B8_C4A8)->sets[id & 0xFF];
+    sRefSet_C4A8* set = ((sRefWorld_C4A8*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
     if (set == 0) {
         return 0;
     }

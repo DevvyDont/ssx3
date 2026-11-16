@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -216,7 +217,6 @@ extern "C" void func_00256C50();
 extern "C" void func_00255898();
 extern char D_00460030[];
 extern char D_005308B8[];
-extern int cBENetworkInterface_networkOpt[];
 
 struct sVEnt0_00194AA8 { short delta; short index; void (*fn)(void*); };
 struct sVEnt1_00194AA8 { short delta; short index; void (*fn)(void*, unsigned char); };
@@ -239,7 +239,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
     func_00256C50();
     func_00255898();
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
-    cBENetworkInterface_networkOpt[0] = 0;
+    cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
     vt0[1].fn((char*)iface + vt0[1].delta);
     func_0028F140(func_0028B180(), 1);

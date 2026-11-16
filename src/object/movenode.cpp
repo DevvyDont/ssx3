@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_cMoveNode);
@@ -901,7 +902,6 @@ public:
     virtual sMnVec_6298* v45();
 };
 
-extern sMnCam_6298** D_004A47B8_6298 __asm__("cWorld_m_pTheWorld");
 struct sMnGfxVt_6298 {
     short delta;
     short index;
@@ -993,7 +993,7 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
 
 extern "C" void cMoveNode_render(cMnNode_6298* self)
 {
-    sMnCam_6298* cam = *D_004A47B8_6298;
+    sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
     sMnObj_6298* obj = OBJ_6298(self);
     if (!Visible_6298(cam, obj)) {
         return;
@@ -1075,7 +1075,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
 // Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in cMoveNode_render).
 extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
 {
-    sMnCam_6298* cam = *D_004A47B8_6298;
+    sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
     sMnObj_6298* obj = OBJ_6298(self);
     if (!Visible_6298(cam, obj)) {
         return;

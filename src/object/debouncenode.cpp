@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
@@ -592,7 +593,6 @@ typedef sDfMat_343588 (*DfViewFn_343588)(void*);
 typedef int (*DfCullFn_343588)(void*, sDfVec_343588*, sDfVec_343588*, const sDfMat_343588&);
 typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
-extern sDfCam_343588** D_004A47B8_343588 __asm__("cWorld_m_pTheWorld");
 extern cDfGfx_343588* D_004A5B80_343588 __asm__("D_004A5B80");
 extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
 
@@ -634,7 +634,7 @@ static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
 // Draws the debounce node's object: culls its box, then draws it offset in x/y by the values at 0x40.
 extern "C" void func_00343588(char* self)
 {
-    sDfCam_343588* cam = *D_004A47B8_343588;
+    sDfCam_343588* cam = (sDfCam_343588*)cWorld_m_pTheWorld->m_pWorldCache;
     if (!Visible_343588(cam, OBJ_343588(self))) {
         return;
     }
@@ -1848,7 +1848,6 @@ INCLUDE_ASM("object/debouncenode", func_00344E18);
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** func_002D1BD8();
 extern "C" void func_00344730(sDebounce4730* self, int index);
-extern char* cWorld_m_pTheWorld;
 extern char* D_004A5B80;
 
 struct sModel_44E18 {
@@ -1874,7 +1873,7 @@ static inline sModel_44E18* GetModel_44E18(unsigned int* ref)
 
 static inline int IsLoaded_44E18(sModel_44E18* m)
 {
-    char* wc = *(char**)cWorld_m_pTheWorld;
+    char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
     if (m->page == 0xFF)
         return 1;
     int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode);
@@ -341,7 +342,6 @@ typedef sDfMat_350CB8 (*DfViewFn_350CB8)(void*);
 typedef int (*DfCullFn_350CB8)(void*, sDfVec_350CB8*, sDfVec_350CB8*, const sDfMat_350CB8&);
 typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*, int);
 
-extern sDfCam_350CB8** D_004A47B8_350CB8 __asm__("cWorld_m_pTheWorld");
 extern cDfGfx_350CB8* D_004A5B80_350CB8 __asm__("D_004A5B80");
 extern sDfMat_350CB8 D_004FF1A0_350CB8 __asm__("t4mat_Identity");
 
@@ -383,7 +383,7 @@ static inline int Visible_350CB8(sDfCam_350CB8* cam, sDfObj_350CB8* obj)
 // Draws the fading corpse: culls its box, then draws it lowered by the fade depth at 0x30.
 extern "C" void cDeadFadeNode_render(char* self)
 {
-    sDfCam_350CB8* cam = *D_004A47B8_350CB8;
+    sDfCam_350CB8* cam = (sDfCam_350CB8*)cWorld_m_pTheWorld->m_pWorldCache;
     if (!Visible_350CB8(cam, OBJ_350CB8(self))) {
         return;
     }

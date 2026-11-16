@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
@@ -255,7 +256,6 @@ extern "C" void func_0034B818(void* elem)
 INCLUDE_ASM("object/flagset", func_0034B9B0);
 #ifdef SKIP_ASM
 extern char* D_004A5B80;
-extern char* cWorld_m_pTheWorld;
 extern int D_004A4244;
 // PORT: 128-bit integer mode for VU0 asm memory operands
 typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
@@ -296,7 +296,7 @@ struct sModel_34B9B0 {
 
 static inline int IsLoaded_34B9B0(sModel_34B9B0* m)
 {
-    char* wc = *(char**)cWorld_m_pTheWorld;
+    char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
     if (m->page == 0xFF)
         return 1;
     int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;

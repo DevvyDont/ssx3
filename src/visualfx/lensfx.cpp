@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -552,12 +553,11 @@ struct sLensSrc_DB20 {
 };
 
 extern char* D_004A289C;
-extern char** cWorld_m_pTheWorld;
 extern sV4_DB20 D_004FAB00;
 
 static inline int IsLoaded_DB20(sLensSrc_DB20* s)
 {
-    char* wc = *cWorld_m_pTheWorld;
+    char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
     if (s->slot < 0)
         return 0;
     int ok = *(int*)(wc + (s->page << 3) + 0x24) == 6;

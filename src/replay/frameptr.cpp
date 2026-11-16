@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -164,7 +165,6 @@ struct sRefWorld_EB48 {
     sRefSet_EB48** sets;    // 0x8
 };
 
-extern sRefWorld_EB48** cWorld_m_pTheWorld;
 
 extern "C" void* func_003512C0(void* table, unsigned int id);
 
@@ -182,7 +182,7 @@ static inline void* refToPtr_EB48(unsigned int p)
 
 static inline void* lookup_EB48(unsigned int id)
 {
-    sRefSet_EB48* set = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
+    sRefSet_EB48* set = ((sRefWorld_EB48*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
     if (set == 0) {
         return 0;
     }
@@ -229,7 +229,6 @@ struct sRefWorld_EC08 {
 };
 
 // asm-label view: func_0026EB48 declares cWorld_m_pTheWorld with its own struct type in this unit
-extern sRefWorld_EC08** D_004A47B8_EC08 __asm__("cWorld_m_pTheWorld");
 
 class cStream_EC08 {
 public:
@@ -257,7 +256,7 @@ static inline void* refToPtr_EC08(unsigned int p)
 
 static inline void* lookup_EC08(unsigned int id)
 {
-    sRefSet_EC08* set = (*D_004A47B8_EC08)->sets[id & 0xFF];
+    sRefSet_EC08* set = ((sRefWorld_EC08*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
     if (set == 0) {
         return 0;
     }

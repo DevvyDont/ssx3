@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -959,7 +960,6 @@ struct sWorld_15EC98
     char pad[0x250];
     sCacheSlot_15EC98 slots[2];
 };
-extern char** cWorld_m_pTheWorld;
 
 // PORT: g++ min operator (<?), removed in GCC 4.3.
 static inline float clamp_15EC98(float v, float lo, float hi)
@@ -981,13 +981,13 @@ extern "C" void func_0015EC98(char* self)
         r = clamp_15EC98(*(float*)(self + 0x8), 0.0f, 15000.0f);
     float r15 = r * 1.5f;
     float far = clamp_15EC98(r * 0.6666666865348816f, 15000.0f, 30000.0f);
-    char** sys = cWorld_m_pTheWorld;
-    ((sWorld_15EC98*)*sys)->slots[*(int*)(self + 0xB0)].active = 1;
-    func_003A9658(*sys + 0x10, *(int*)(self + 0xB0), (sVec4_15EC98*)(self + 0x20), r15);
+    cWorld* sys = cWorld_m_pTheWorld;
+    ((sWorld_15EC98*)(char*)sys->m_pWorldCache)->slots[*(int*)(self + 0xB0)].active = 1;
+    func_003A9658((char*)sys->m_pWorldCache + 0x10, *(int*)(self + 0xB0), (sVec4_15EC98*)(self + 0x20), r15);
     *(int*)(self + 0xB4) = 0;
     sVec4_15EC98 pos;
     float t;
-    if (func_003A96E0(*sys + 0x10, *(int*)(self + 0xB0), &pos, &t)) {
+    if (func_003A96E0((char*)sys->m_pWorldCache + 0x10, *(int*)(self + 0xB0), &pos, &t)) {
         if (far <= t || r <= t)
             *(int*)(self + 0xB4) = 1;
     }

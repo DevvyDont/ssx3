@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -2978,7 +2979,6 @@ struct sRefWorld_00111D98 {
     sRefSet_00111D98** sets;    // 0x8
 };
 
-extern sRefWorld_00111D98** cWorld_m_pTheWorld;
 extern char D_004D33A0[];
 extern "C" void func_00104DE0(void* self, void* s);
 extern "C" void func_00310EE0(void* self, void* s);
@@ -3035,7 +3035,7 @@ struct sRef_00111D98 {
 
     void* get()
     {
-        sRefSet_00111D98* set = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
+        sRefSet_00111D98* set = ((sRefWorld_00111D98*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }

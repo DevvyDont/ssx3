@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -90,7 +91,6 @@ extern void* D_004A1208;
 extern void* D_004A11C4;
 extern void* D_004A120C;
 extern void* D_004A121C;
-extern void* cBENetworkInterface_instance;
 extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
@@ -109,7 +109,7 @@ extern "C" void func_001564B0(void)
     ((sBEIface_001564B0*)D_004A11C4)->active = 0;
     ((sBEIface_001564B0*)D_004A120C)->active = 0;
     ((sBEIface_001564B0*)D_004A121C)->active = 0;
-    ((sBEIface_001564B0*)cBENetworkInterface_instance)->active = 0;
+    cBENetworkInterface_instance->bIsActive = 0;
     ((sBEIface_001564B0*)D_004A11C8)->active = 0;
     ((sBEIface_001564B0*)D_004A1210)->active = 0;
     ((sBEIface_001564B0*)D_004A1214)->active = 0;
@@ -126,7 +126,6 @@ extern void* D_004A1208;
 extern void* D_004A11C4;
 extern void* D_004A120C;
 extern void* D_004A121C;
-extern void* cBENetworkInterface_instance;
 extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
@@ -145,7 +144,7 @@ extern "C" void func_00156510(void)
     ((sBEIface_00156510*)D_004A11C4)->active = 1;
     ((sBEIface_00156510*)D_004A120C)->active = 1;
     ((sBEIface_00156510*)D_004A121C)->active = 1;
-    ((sBEIface_00156510*)cBENetworkInterface_instance)->active = 1;
+    cBENetworkInterface_instance->bIsActive = 1;
     ((sBEIface_00156510*)D_004A11C8)->active = 1;
     ((sBEIface_00156510*)D_004A1210)->active = 1;
     ((sBEIface_00156510*)D_004A1214)->active = 1;
@@ -236,7 +235,6 @@ extern void* D_004A1208;
 extern void* D_004A11C4;
 extern void* D_004A120C;
 extern void* D_004A121C;
-extern void* cBENetworkInterface_instance;
 extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
@@ -256,7 +254,7 @@ extern "C" void func_001566E8(void)
     ((sBEIface_001566E8*)D_004A11C4)->active = 0;
     ((sBEIface_001566E8*)D_004A120C)->active = 0;
     ((sBEIface_001566E8*)D_004A121C)->active = 0;
-    ((sBEIface_001566E8*)cBENetworkInterface_instance)->active = 0;
+    cBENetworkInterface_instance->bIsActive = 0;
     ((sBEIface_001566E8*)D_004A11C8)->active = 0;
     ((sBEIface_001566E8*)D_004A1210)->active = 0;
     ((sBEIface_001566E8*)D_004A1214)->active = 0;
@@ -274,7 +272,6 @@ extern void* D_004A1208;
 extern void* D_004A11C4;
 extern void* D_004A120C;
 extern void* D_004A121C;
-extern void* cBENetworkInterface_instance;
 extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
@@ -294,7 +291,7 @@ extern "C" void func_00156750(void)
     ((sBEIface_00156750*)D_004A11C4)->active = 1;
     ((sBEIface_00156750*)D_004A120C)->active = 1;
     ((sBEIface_00156750*)D_004A121C)->active = 1;
-    ((sBEIface_00156750*)cBENetworkInterface_instance)->active = 1;
+    cBENetworkInterface_instance->bIsActive = 1;
     ((sBEIface_00156750*)D_004A11C8)->active = 1;
     ((sBEIface_00156750*)D_004A1210)->active = 1;
     ((sBEIface_00156750*)D_004A1214)->active = 1;

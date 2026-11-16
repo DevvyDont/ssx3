@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -1258,14 +1259,13 @@ extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
 //100%
 INCLUDE_ASM("world/worldview", func_003AAE40);
 #ifdef SKIP_ASM
-extern char*** cWorld_m_pTheWorld;
 
 extern "C" void func_003AAE40(void* self, int a1)
 {
-    char*** w = cWorld_m_pTheWorld;
+    cWorld* w = cWorld_m_pTheWorld;
     *(int*)((char*)self + 0xC) = a1;
-    *(char****)self = w;
-    *(int*)((char*)self + 0x10) = *(short*)(**w + 0x2A);
+    *(char****)self = (char***)w;
+    *(int*)((char*)self + 0x10) = *(short*)(*(char**)w->m_pWorldCache + 0x2A);
 }
 #endif
 
@@ -1316,7 +1316,6 @@ extern "C" void func_00242540(void* self, void* obj);
 char* func_0028B1C8_AE68() __asm__("func_0028B1C8");
 extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
 extern char* D_004A28A8_AE68 __asm__("SSXApp");
-extern char*** cWorld_m_pTheWorld;
 extern "C" int func_0012A340(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
 extern "C" void func_002BB348(void* self, int a, void* obj);
@@ -1428,13 +1427,13 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg,
         break;
     case 15:
         if (cWorld_m_pTheWorld) {
-            func_002BB348(cWorld_m_pTheWorld[2], arg & 0xFF, obj);
+            func_002BB348((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, arg & 0xFF, obj);
         }
         break;
     case 16:
         if (cWorld_m_pTheWorld) {
             int a = arg & 0xFF;
-            func_003ACA10(cWorld_m_pTheWorld[1], a, obj);
+            func_003ACA10((char**)cWorld_m_pTheWorld->m_pWScriptCache, a, obj);
             func_00230430(func_003AD188(), a);
         }
         break;
@@ -1491,7 +1490,6 @@ extern "C" void cAvalanche_reset();
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void* func_003AD198();
-extern char*** cWorld_m_pTheWorld;
 extern char* D_004A5B80;
 
 struct sWVVec4_B498 {
@@ -1639,7 +1637,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     case 15:
         if (cWorld_m_pTheWorld != 0) {
-            func_002BB5A8(((char**)cWorld_m_pTheWorld[2])[1] + (unsigned char)param * 12);
+            func_002BB5A8(((char**)(char**)cWorld_m_pTheWorld->m_pWorldPainterMan)[1] + (unsigned char)param * 12);
         }
         break;
     case 18:

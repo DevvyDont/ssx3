@@ -1,4 +1,6 @@
 #include "common.h"
+#include "online/commsystem.h"
+#include "online/gamecomm.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1393,8 +1395,6 @@ extern char D_00461370[];
 extern void* cFEStateBackground_vtbl[];
 extern int D_004A19C4;
 extern int D_004A19D8;
-extern void* cCommSystem_mCommSystem;
-extern char* cGameComm_mGameComm;
 extern void* D_004A33F4;
 extern void* D_004A3028;
 
@@ -1441,7 +1441,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         D_004A19D8 = 0;
         void* st = func_001D5038(cMemMan_alloc(0x6D4, D_00461370, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
-        func_00255CC8(cCommSystem_mCommSystem, *(int*)(cGameComm_mGameComm + 0x6C));
+        func_00255CC8(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
         func_0025B6D8(D_004A3028, 1);

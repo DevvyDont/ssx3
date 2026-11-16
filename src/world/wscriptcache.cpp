@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -228,7 +229,6 @@ struct sWSCItemFields {
 };
 
 extern "C" void func_003ACCD8(sWScriptCacheItem* e, void* world, int index);
-extern void* cWorld_m_pTheWorld;
 
 extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value)
 {

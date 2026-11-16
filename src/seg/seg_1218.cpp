@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -1070,7 +1071,6 @@ struct sWorld_13A8 {
     sBank_13A8** banks;
 };
 
-extern sWorld_13A8** D_004A47B8_13A8 __asm__("cWorld_m_pTheWorld");
 
 // Entry of cRider's primary vtable (_vt$6cRider, at self->mVtbl): g++ 2.95 {delta, index, pfn}.
 struct sVEi_13A8 { short delta; short index; int (*fn)(void*, sObj_13A8*); };
@@ -1126,7 +1126,7 @@ static inline sObj_13A8* toPtr_13A8(unsigned int v)
 
 static inline sObj_13A8* lookup_13A8(unsigned int id)
 {
-    sBank_13A8* b = (*D_004A47B8_13A8)->banks[id & 0xFF];
+    sBank_13A8* b = ((sWorld_13A8*)cWorld_m_pTheWorld->m_pWorldCache)->banks[id & 0xFF];
     if (b) {
         unsigned int v = b->handles[id >> 8] >> 8;
         if (v)
@@ -1335,12 +1335,11 @@ struct sMgr_1728 {
     int count;
 };
 
-extern sWorld_1728** cWorld_m_pTheWorld;
 extern "C" void func_00101888(sMgr_1728*, unsigned int*);
 
 static inline sObj_1728* lookup_1728(unsigned int id)
 {
-    sBank_1728* b = (*cWorld_m_pTheWorld)->banks[id & 0xFF];
+    sBank_1728* b = ((sWorld_1728*)cWorld_m_pTheWorld->m_pWorldCache)->banks[id & 0xFF];
     if (b) {
         unsigned int v = b->handles[id >> 8] >> 8;
         if (v)

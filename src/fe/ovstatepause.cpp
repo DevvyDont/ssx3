@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -28,7 +30,6 @@ extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
-extern int cBENetworkInterface_networkOpt[];
 extern void* D_004A33F4;
 extern char D_0046F8D8[];
 extern char D_0046F8E8[];
@@ -279,7 +280,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         o->setEnabled(1);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         cUIObj_PO* a = (cUIObj_PO*)find_PO(self, D_0046F9A0);
         cUIObj_PO* b = (cUIObj_PO*)find_PO(self, D_004A24D8);
         cUIObj_PO* c = (cUIObj_PO*)find_PO(self, D_0046F9B0);
@@ -322,7 +323,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
-extern int cBENetworkInterface_networkOpt[];
 extern char cBENewRaceInterface_newRace[];
 extern char D_004A24E0[];
 extern char D_0046F970[];
@@ -352,7 +352,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0 || !isField_FA100((signed char*)cBENewRaceInterface_newRace, 0x49, 2)) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || !isField_FA100((signed char*)cBENewRaceInterface_newRace, 0x49, 2)) {
         cUIObj_FA100* a = (cUIObj_FA100*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E0));
         if (a != 0) {
             a->setEnabled(1);
@@ -398,7 +398,6 @@ extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266F58(void* self, int a, int b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
-extern int cBENetworkInterface_networkOpt[];
 extern void* D_004A33F4;
 extern char D_0046F9B0[];
 extern char D_0046F9C0[];
@@ -503,7 +502,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (cBENetworkInterface_networkOpt[0] != 0 && IsId_A238(obj, D_0046F9B0)) {
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, D_0046F9B0)) {
             int level;
             int max;
             func_00266F90(D_004A33F4, &level, &max);
@@ -530,15 +529,14 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
-extern void* cGameComm_mGameComm;
 extern char D_0046E050[];
 
 extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = (char*)cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
+        int ok = p->mPauseTimeout == 0 || p->mOverlayTimeout == 0;
         if (ok) {
             int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0046E050));
             if (frame != 0xFFFF) {
@@ -606,7 +604,6 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
-extern void* cGameComm_mGameComm;
 extern void* D_004A3028;
 extern void* D_004A5B64;
 extern char D_0046F9D0[];
@@ -658,9 +655,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
     cUIObj_1FAB18* o = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FA08));
     if (o != 0) {
         o->setVisible(1);
-        char* p = (char*)cGameComm_mGameComm;
+        cGameComm* p = cGameComm_mGameComm;
         *(int*)((char*)o + 0x14) |= 0x80;
-        int e = *(int*)(p + 0x24);
+        int e = p->mCheating[0];
         int one = 1;
         if (e != 0) {
             if (e == one) {
@@ -672,9 +669,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
             } else {
                 cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA38));
             }
-        } else if (*(int*)(p + 0x28) != 0) {
+        } else if (p->mCheating[1] != 0) {
             *(int*)(s + 0xA0) = 0;
-            int e2 = *(int*)(p + 0x28);
+            int e2 = p->mCheating[1];
             if (e2 == one) {
                 cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
             } else if (e2 == 2) {
@@ -684,10 +681,10 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
             } else {
                 cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
             }
-        } else if (*(int*)(p + 0x8C) != 0) {
+        } else if (p->mRemoteEndGame != 0) {
             cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA78));
             *(int*)(s + 0xA0) = 0;
-        } else if (*(int*)(p + 0x14) != 0) {
+        } else if (p->mRemoteDisconnected != 0) {
             *(int*)(s + 0xA0) = 0;
             cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA78));
         } else {
@@ -696,7 +693,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
         }
         cUIObj_1FAB18* o2 = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FA90));
         if (o2 != 0) {
-            if (*(int*)((char*)cGameComm_mGameComm + 0xA0) != 0) {
+            if (cGameComm_mGameComm->mLocalFinishedRace != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(D_0046FAA0));
             } else {
                 cUIText_setUnicodeStringByID((cUIText*)o2, GetHashValue32(D_0046FAB0));
@@ -754,7 +751,6 @@ extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self);
-extern void* cGameComm_mGameComm;
 extern char D_0046FB18[];
 
 class cUIObj_1FAF10 {
@@ -774,17 +770,17 @@ public:
 extern "C" void func_001FAF10(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = (char*)cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0 && *(int*)((char*)self + 0x9C) != 0) {
-        int timedOut = *(int*)(p + 0x138) <= 0 && *(int*)(p + 0x13C) == 0;
+        int timedOut = p->unk_138 <= 0 && p->unk_13C == 0;
         if (timedOut) {
-            *(int*)(p + 0x9C) = 0;
+            p->unk_09C = 0;
             cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(self);
         } else {
-            if (*(int*)(p + 0x13C) == 0) {
+            if (p->unk_13C == 0) {
                 return;
             }
-            int received = *(int*)(p + 0x80) != 0 && *(int*)(p + 0xA0) == 0 && *(int*)(p + 0x24) == 0;
+            int received = p->mRaceInProgress != 0 && p->mLocalFinishedRace == 0 && p->mCheating[0] == 0;
             if (received) {
                 cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(self);
             } else {
@@ -1101,7 +1097,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004A2170[];
 extern char D_0046E4E8[];
 extern signed char D_00535C11[];
-extern void* cGameComm_mGameComm;
 
 extern "C" void func_001FBBD8(void* self)
 {
@@ -1115,9 +1110,9 @@ extern "C" void func_001FBBD8(void* self)
         sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
     }
-    char* p = (char*)cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        *(int*)(p + 0x64) = 0x4B0;
+        p->mOverlayTimeout = 0x4B0;
     }
 }
 #endif
@@ -1125,13 +1120,12 @@ extern "C" void func_001FBBD8(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FBCC8);
 #ifdef SKIP_ASM
-extern void* cGameComm_mGameComm;
 
 extern "C" void func_001FBCC8(void)
 {
-    char* p = (char*)cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        *(int*)(p + 0x64) = -1;
+        p->mOverlayTimeout = -1;
     }
 }
 #endif
@@ -1139,16 +1133,15 @@ extern "C" void func_001FBCC8(void)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FBCE0);
 #ifdef SKIP_ASM
-extern void* cGameComm_mGameComm;
 extern int D_004A26FC;
 extern "C" void* cOVState_onUpdate(void* self);
 
 extern "C" void func_001FBCE0(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = (char*)cGameComm_mGameComm;
-    if (p != 0 && *(int*)(p + 0x64) == 0) {
-        *(int*)(p + 0x64) = -1;
+    cGameComm* p = cGameComm_mGameComm;
+    if (p != 0 && p->mOverlayTimeout == 0) {
+        p->mOverlayTimeout = -1;
         D_004A26FC = 1;
     }
 }
@@ -1772,7 +1765,6 @@ extern "C" int func_001FCEC0(void* self, void* msg)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
 #ifdef SKIP_ASM
-extern void* cGameComm_mGameComm;
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern "C" void cUIState_onGainFocus(void* self);
@@ -1780,9 +1772,9 @@ extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void func_001FD0D8(void* self)
 {
     cUIState_onGainFocus(self);
-    char* p = (char*)cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        *(int*)(p + 0x64) = 0x4B0;
+        p->mOverlayTimeout = 0x4B0;
     }
     func_00294F78(func_0028B180(), 0xE);
 }
@@ -1791,15 +1783,14 @@ extern "C" void func_001FD0D8(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD118);
 #ifdef SKIP_ASM
-extern void* cGameComm_mGameComm;
 extern "C" void* func_0028B180();
 extern "C" void func_002872A8(void* self);
 
 extern "C" void func_001FD118(void)
 {
-    char* p = (char*)cGameComm_mGameComm;
+    cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
-        *(int*)(p + 0x64) = -1;
+        p->mOverlayTimeout = -1;
     }
     func_002872A8(func_0028B180());
 }
@@ -1808,16 +1799,15 @@ extern "C" void func_001FD118(void)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD150);
 #ifdef SKIP_ASM
-extern void* cGameComm_mGameComm;
 extern int D_004A26FC;
 extern "C" void* cOVState_onUpdate(void* self);
 
 extern "C" void func_001FD150(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = (char*)cGameComm_mGameComm;
-    if (p != 0 && *(int*)(p + 0x64) == 0) {
-        *(int*)(p + 0x64) = -1;
+    cGameComm* p = cGameComm_mGameComm;
+    if (p != 0 && p->mOverlayTimeout == 0) {
+        p->mOverlayTimeout = -1;
         D_004A26FC = 1;
     }
 }

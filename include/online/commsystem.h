@@ -78,4 +78,8 @@ CHECK_OFFSET(cCommSystem, mBroadBand, 0x2C);
 CHECK_OFFSET(cCommSystem, mInterfaceType, 0x30);
 CHECK_SIZE(cCommSystem, 0x34);
 
+// The one comm system (On Tour: cCommSystem::mCommSystem), created by cCommSystem_construct, and the netconn count.
+extern cCommSystem* cCommSystem_mCommSystem;
+extern int cCommSystem_mNumNetConn;
+
 #endif /* ONLINE_COMMSYSTEM_H */

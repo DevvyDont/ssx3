@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "be/beintreward.h"
 #include "main/ssxapp.h"
 
@@ -383,7 +384,6 @@ extern int* D_004A11B4;
 extern int* D_004A11C0;
 extern int* D_004A11C4;
 extern int* D_004A11C8;
-extern int* cBENetworkInterface_instance;
 extern int* D_004A1208;
 extern int* D_004A120C;
 extern int* D_004A1210;
@@ -407,7 +407,7 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     func_00153050();
     operator_delete(D_004A1210);
     D_004A1210 = 0;
-    operator_delete(cBENetworkInterface_instance);
+    operator_delete((int*)cBENetworkInterface_instance);
     cBENetworkInterface_instance = 0;
     operator_delete(D_004A1248);
     D_004A1248 = 0;

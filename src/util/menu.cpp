@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "util/menu.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -5825,7 +5826,6 @@ extern "C" int func_002D1BA0()
 //100%
 INCLUDE_ASM("util/menu", func_002D1BD8);
 #ifdef SKIP_ASM
-extern void* cWorld_m_pTheWorld;
 
 extern "C" void* func_002D1BD8()
 {

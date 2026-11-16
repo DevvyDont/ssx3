@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnetwork.h"
+#include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -7006,7 +7008,6 @@ extern char D_004A2138[];
 
 extern int D_00536730[];
 
-extern int cBENetworkInterface_networkOpt[];
 
 extern char D_0046E660[];
 
@@ -7345,7 +7346,7 @@ extern "C" int func_001E6718(void* self)
             cUIThing* button = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(text));
             if (button != 0) {
                 cBE_getInterface_Fv(SSXApp->BE, 7);
-                if (cBENetworkInterface_networkOpt[0] != 0) {
+                if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     if (i < 1) {
                         cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[netIds[i]]));
                         *(int*)((char*)button + 0x18) = netIds[i];
@@ -7411,8 +7412,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void func_003A1310(void* self, int a1);
-extern int* cGameComm_mGameComm;
-extern int cBENetworkInterface_networkOpt[];
 extern int D_00536730[];
 extern signed char cBENewRaceInterface_newRace[];
 extern char D_004A2170[];
@@ -7459,7 +7458,7 @@ extern "C" void func_001E75D0(void* self)
         func_0020A6F0(self, buf, D_0046E4E8);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0 && cGameComm_mGameComm != 0 && *cGameComm_mGameComm != 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
         cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E7C8));
         if (o != 0) {
             o->v09(1);
@@ -7493,7 +7492,6 @@ void func_001E7920(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E7928);
 #ifdef SKIP_ASM
-extern int* cGameComm_mGameComm;
 extern void* D_004A5B64;
 extern int D_004A26FC;
 extern int D_004A2700;
@@ -7508,7 +7506,7 @@ extern "C" void func_001E7928(void* self)
 {
     cOVState_onUpdate(self);
     if (cGameComm_mGameComm != 0) {
-        if (*cGameComm_mGameComm != 0) {
+        if (cGameComm_mGameComm->mConnected != 0) {
             if (func_0020A4E0(self) != 0) {
                 cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E660));
                 if (o != 0) {
@@ -7520,7 +7518,7 @@ extern "C" void func_001E7928(void* self)
                 }
             }
         }
-        if (*(int*)((char*)D_004A5B64 + 0x18) % 30 == 0 && *cGameComm_mGameComm == 0) {
+        if (*(int*)((char*)D_004A5B64 + 0x18) % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
             cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E7C8));
             if (o != 0) {
                 o->v09(0);
@@ -7530,8 +7528,8 @@ extern "C" void func_001E7928(void* self)
                 cUIText_setUnicodeStringByID(text, GetHashValue32(D_0046E7E8));
             }
         }
-        if (cGameComm_mGameComm[0x19] == 0) {
-            cGameComm_mGameComm[0x19] = -1;
+        if (cGameComm_mGameComm->mOverlayTimeout == 0) {
+            cGameComm_mGameComm->mOverlayTimeout = -1;
             D_004A2700 = 8;
             D_004A26FC = 1;
         }
@@ -7543,8 +7541,6 @@ extern "C" void func_001E7928(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E7AA8);
 #ifdef SKIP_ASM
 extern "C" void cOVStateManager_triggerOverlay(int state);
-extern int cBENetworkInterface_networkOpt[];
-extern int* cGameComm_mGameComm;
 
 struct sVEntry001E7AA8 {
     short delta;
@@ -7561,7 +7557,7 @@ extern "C" int func_001E7AA8(void* self, void* a1)
         }
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt[0] != 0 && cGameComm_mGameComm != 0 && *cGameComm_mGameComm != 0) {
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
         sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)a1 + 8);
         if (vt[27].fn((char*)a1 + vt[27].delta) != 0) {
             cOVStateManager_triggerOverlay(0x28);

@@ -14,11 +14,10 @@ extern char D_00494D58[];
 extern char D_00494D68[];
 extern char D_00494D78[];
 // The unit declares cWorld_m_pTheWorld as int (later); this view stores the world pointer.
-extern void* D_world_4A47B8 __asm__("cWorld_m_pTheWorld");
 
 extern "C" void* cWorld_cWorld(void** self)
 {
-    D_world_4A47B8 = self;
+    cWorld_m_pTheWorld = (cWorld*)(self);
     self[0] = cWorldCache_cWorldCache(cMemMan_alloc(0x1C00, D_00494D58, 0, 0));
     self[1] = cWScriptCache_cWScriptCache(cMemMan_alloc(0x10, D_00494D68, 0, 0), self);
     self[2] = cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8, D_00494D78, 0, 0));
@@ -39,7 +38,6 @@ struct sWorldVEntry0 {
 };
 
 extern char* D_004A5B80;
-extern int cWorld_m_pTheWorld;
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
 extern "C" void func_003AC8F0(void* self, int flags);
 extern "C" void func_002BB140(void* self, int flags);
