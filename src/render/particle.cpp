@@ -432,7 +432,7 @@ extern int D_0044B420[];
  * _EffectTexMap[base (+0x4) + (int)frame (+0x10)] is valid. Sets bits 2-6 of the emitter's draw state
  * (+0x1E4) word 1 from its kind (+0x8) through D_0044B420 {7, 5, 9, 0}, bits 5-9 of word 2 from @p blend, and
  * the texture id; pushes that state on the graphics manager's draw-state stack, draws through its virtual
- * slot 83 (func_003807A0) and pops the state.
+ * slot 83 (cPS2GraphicsMan_RenderDynamicParticleEmitter) and pops the state.
  *
  * @param blend  value for bits 5-9 of the draw state's word 2 (On Tour: drawLayer, an eGMDrawLayer)
  */
@@ -2902,7 +2902,7 @@ extern "C" void* func_00376468(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003764C0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDisplayMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2929,7 +2929,7 @@ int func_0037BD98_3764C0(void* self, unsigned int a1, unsigned int a2, unsigned 
                          unsigned int psm, unsigned int psm2, unsigned int zpsm, short s0, short s1, short s2,
                          int flag) __asm__("func_0037BD98");
 
-extern "C" int func_003764C0(sPartTexCache_3764C0* self, int idx)
+extern "C" int cPS2GraphicsMan_SetDisplayMode(sPartTexCache_3764C0* self, int idx)
 {
     if (self->cur == idx) {
         return 1;
@@ -4534,7 +4534,7 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(sGfx_81A0* self, sV_81A0* pos,
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00378808);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawString3D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -4688,7 +4688,7 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
 }
 
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
-extern "C" void func_00378808(sGfx8808* self, sFontRes8808* font, char* s, float* color,
+extern "C" void cPS2GraphicsMan_DrawString3D(sGfx8808* self, sFontRes8808* font, char* s, float* color,
                               float x, float y, float sx, float sy, float su, float sv, float z)
 {
     if (self->texReady == 0) {
@@ -6933,7 +6933,7 @@ void* func_0037D090(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D0B0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetNewTextureData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -6958,7 +6958,7 @@ extern "C" int MEM_move(void* dst, void* src, int n);
 extern "C" unsigned int unpack(void* src, void* dst);
 extern "C" void* MEM_free(void* p);
 
-extern "C" void func_0037D0B0(cPS2GraphicsMan* selfp, int a1, void* objp, int a3)
+extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int a1, void* objp, int a3)
 {
     cPS2GraphicsMan* self = selfp;
     sTexSrc_D0B0* obj = (sTexSrc_D0B0*)objp;
@@ -7940,7 +7940,7 @@ extern "C" void func_0037E120(void* self, sPartPktQuad* mat, sPartPktQuad* hdr, 
 }
 #endif
 
-INCLUDE_ASM("render/particle", func_0037E238);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderModel);
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetMeshQuad);
@@ -8132,7 +8132,7 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003807A0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderDynamicParticleEmitter);
 #ifdef SKIP_ASM
 struct sPtRS_07A0 {
     int f0;
@@ -8216,7 +8216,7 @@ static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
 }
 
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void func_003807A0(sPtGfx_07A0* self, sTrail_07A0* obj)
+extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(sPtGfx_07A0* self, sTrail_07A0* obj)
 {
     if (D_004A44FC != 0)
         return;
@@ -8303,7 +8303,7 @@ extern "C" void func_003807A0(sPtGfx_07A0* self, sTrail_07A0* obj)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00380CE0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderDynamicParticleEmitter1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -8356,7 +8356,7 @@ extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern int D_004A4474;
 extern int D_004A44FC;
-struct sPS2GfxView_0CE0 {  // PORT: a view of cPS2GraphicsMan (render/ps2graphicsman.h); the typed members schedule func_00380CE0 differently
+struct sPS2GfxView_0CE0 {  // PORT: a view of cPS2GraphicsMan (render/ps2graphicsman.h); the typed members schedule cPS2GraphicsMan_RenderDynamicParticleEmitter1 differently
     char pad_0x0[0xE84];
     sPtRenderState* top;            // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
@@ -8441,7 +8441,7 @@ extern char D_A00[];
 extern char D_F10[];
 
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void func_00380CE0(sPS2GfxView_0CE0* self, sTrail_0CE0* obj)
+extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* self, sTrail_0CE0* obj)
 {
     if (D_004A44FC != 0)
         return;

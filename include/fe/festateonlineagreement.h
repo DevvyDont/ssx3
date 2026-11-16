@@ -9,8 +9,8 @@
 // Size 0x6DC: cMemMan_alloc(0x6DC, "cFEStateOnlineAgreement") + cFEStateOnlineAgreement_cFEStateOnlineAgreement(mem, pEngine) at all 4 sites
 // (cFEStateCreateStep1/2's onWidgetEvent, cFEStateLogin_onWidgetEvent, cFEStateNetSSXWorld_onWidgetEvent). Constructors cFEStateOnlineAgreement_cFEStateOnlineAgreement
 // (cFEStateNet(pEngine,
-// 0), vtable cFEStateOnlineAgreement_vtbl, mHashName 0x43), func_001C03D0 (cFEStateNet(pEngine, pParent), the same stores; no caller
-// found) and the default func_001C0460 (cFEStateNet(0, 0), no mHashName); destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement (slot 1: frees
+// 0), vtable cFEStateOnlineAgreement_vtbl, mHashName 0x43), cFEStateOnlineAgreement_cFEStateOnlineAgreement1 (cFEStateNet(pEngine, pParent), the same stores; no caller
+// found) and the default cFEStateOnlineAgreement_cFEStateOnlineAgreement2 (cFEStateNet(0, 0), no mHashName); destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement (slot 1: frees
 // mpTOSLines). Retail vtable cFEStateOnlineAgreement_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineAgreement_onCreateScreen, 7 cFEStateOnlineAgreement_onGainTransition, 10 cFEStateOnlineAgreement_onLoseTransition
 // (onLoseTransition), 12 onUpdate cFEStateOnlineAgreement_onUpdate, 18 onWidgetCreate cFEStateOnlineAgreement_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineAgreement_onWidgetEvent, 20
 // cFEStateOnlineAgreement_onWidgetMenu, 25 func_001C0EA8 (help), 31 func_001C0E88). Methods: fe/feasyncfile 0x1C03D0-0x1C0EA8.
@@ -35,11 +35,11 @@ struct cFEStateOnlineAgreement {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateOnlineAgreement_vtbl (vtables.tsv; 32 slots), stored by cFEStateOnlineAgreement_cFEStateOnlineAgreement /
-                                    //       func_001C03D0 / func_001C0460 after the cFEStateNet ctor and by the
+                                    //       cFEStateOnlineAgreement_cFEStateOnlineAgreement1 / cFEStateOnlineAgreement_cFEStateOnlineAgreement2 after the cFEStateNet ctor and by the
                                     //       destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateOnlineAgreement_cFEStateOnlineAgreement /
-                                    //       func_001C03D0 store 0x43
+                                    //       cFEStateOnlineAgreement_cFEStateOnlineAgreement1 store 0x43
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1

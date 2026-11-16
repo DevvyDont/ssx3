@@ -10,7 +10,7 @@
 //     -> cParticleModifier (0x1F0: cMemMan_alloc(0x1F0, "ParticleModifier") in cMoveNode_addParticle; ctors
 //        cParticleModifier_cParticleModifier(pdata, inst) / func_003459A8(replay); vtable cParticleModifier_vtbl; ParticleCount D_004A3FF8)
 //     -> cDynamicParticleModifier (0x270: cMemMan_alloc(0x270, "DynamicParticleModifier") in
-//        cMoveNode_addDynamicParticle; ctors func_00345C90(pdata, inst, mesh, offset) / cDynamicParticleModifier_cDynamicParticleModifier(replay); vtable
+//        cMoveNode_addDynamicParticle; ctors cDynamicParticleModifier_cDynamicParticleModifier1(pdata, inst, mesh, offset) / cDynamicParticleModifier_cDynamicParticleModifier(replay); vtable
 //        cDynamicParticleModifier_vtbl; DynamicParticleCount D_004A3FFC). Its second base cDynamicParticleModifierState
 //        (On Tour, 0x50) occupies 0x10-0x60: the replay record writes/reads it as one 0x50 block at +0x10.
 //     (cHaloModifier, 0x40, is EA's fourth class here; not laid out yet.)

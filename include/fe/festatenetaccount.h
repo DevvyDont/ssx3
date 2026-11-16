@@ -10,7 +10,7 @@
 // (cFEStateNetAccountMem) and cFEStateSelectPersona. EA's name: the preview's __21cFEUseExistingAccount and
 // _vt$21cFEUseExistingAccount. Size 0x6E4: cMemMan_alloc(0x6E4, "cFEUseExistingAccount") + cFEUseExistingAccount_cFEUseExistingAccount(mem,
 // pEngine) (cFEStateLogin_onWidgetEvent, the only site). Constructors cFEUseExistingAccount_cFEUseExistingAccount (cFEStateNet(pEngine, 0), vtable cFEUseExistingAccount_vtbl,
-// mHashName 0x35) and the default func_001E0880 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
+// mHashName 0x35) and the default cFEUseExistingAccount_cFEUseExistingAccount1 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
 // mszEmail, then cFEStateNet's func_001A85D0). Retail vtable cFEUseExistingAccount_vtbl (32 slots: 1 dtor, 4 onCreateScreen
 // cFEUseExistingAccount_onCreateScreen, 12 onUpdate cFEUseExistingAccount_onUpdate, 17 onPopupEvent cFEUseExistingAccount_onPopupEvent, 18 onWidgetCreate cFEUseExistingAccount_onWidgetCreate,
 // 19 onWidgetEvent cFEUseExistingAccount_onWidgetEvent, 20 cFEUseExistingAccount_onWidgetMenu, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
@@ -19,7 +19,7 @@
 // cFEStateSelectPersona: screen "220select_persona": the account's persona list ("PersonaMenu"), create / delete
 // persona. EA's name: the preview's __21cFEStateSelectPersona / _$_21cFEStateSelectPersona. Size 0x6D8:
 // cMemMan_alloc(0x6D8, "cFEStateSelectPersona") + cFEStateSelectPersona_cFEStateSelectPersona(mem, pEngine) at all 10 sites (fe/feasyncfile).
-// Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable cFEStateSelectPersona_vtbl, mHashName 0x38) and the default func_001E08D8 (fe/fepopupmisc);
+// Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable cFEStateSelectPersona_vtbl, mHashName 0x38) and the default cFEStateSelectPersona_cFEStateSelectPersona1 (fe/fepopupmisc);
 // destructor cFEStateSelectPersona__cFEStateSelectPersona (fe/fepopupmisc; slot 1; the preview's _$_21cFEStateSelectPersona). Retail vtable
 // cFEStateSelectPersona_vtbl (33 slots: 4 onCreateScreen cFEStateSelectPersona_onCreateScreen, 12 onUpdate cFEStateSelectPersona_onUpdate, 17 onPopupEvent cFEStateSelectPersona_onPopupEvent,
 // 18 onWidgetCreate cFEStateSelectPersona_onWidgetCreate, 19 onWidgetEvent cFEStateSelectPersona_onWidgetEvent, 25 func_001AD4F0 (help), 29 func_001E0940,
@@ -47,7 +47,7 @@ struct cFEUseExistingAccount {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEUseExistingAccount_vtbl (vtables.tsv; 32 slots), stored by cFEUseExistingAccount_cFEUseExistingAccount /
-                                    //       func_001E0880 after the cFEStateNet ctor and by the destructor
+                                    //       cFEUseExistingAccount_cFEUseExistingAccount1 after the cFEStateNet ctor and by the destructor
                                     //       cFEUseExistingAccount__cFEUseExistingAccount
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEUseExistingAccount_cFEUseExistingAccount stores
@@ -120,7 +120,7 @@ struct cFEUseExistingAccount {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEUseExistingAccount
-    int unk_6D0;                    // 0x6D0 [R] 0 (cFEUseExistingAccount_cFEUseExistingAccount, func_001E0880); no other access seen
+    int unk_6D0;                    // 0x6D0 [R] 0 (cFEUseExistingAccount_cFEUseExistingAccount, cFEUseExistingAccount_cFEUseExistingAccount1); no other access seen
     int mbAskSave;                  // 0x6D4 [U] func_001ACB48 (popup 0x82C, the cFEStateNetAccountMem result): 1 on
                                     //       0x11 (option 2), 0 on 0xF/0x10 (then pushes cFEStateSelectPersona); on
                                     //       0x16 it opens the "kT_POPUP204SaveAccount" yes/no popup (0x81E) when set,
@@ -189,7 +189,7 @@ struct cFEStateSelectPersona {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateSelectPersona_vtbl (vtables.tsv; 33 slots), stored by cFEStateSelectPersona_cFEStateSelectPersona /
-                                    //       func_001E08D8 after the cFEStateNet ctor and by the destructor
+                                    //       cFEStateSelectPersona_cFEStateSelectPersona1 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateSelectPersona__cFEStateSelectPersona
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateSelectPersona_cFEStateSelectPersona stores

@@ -238,13 +238,13 @@ INCLUDE_ASM("fe/fepopup3", cFEStateNetNews__cFEStateNetNews);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetNews_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0F30);
+INCLUDE_ASM("fe/fepopup3", cFEStateRelogin__cFEStateRelogin);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0F58);
+INCLUDE_ASM("fe/fepopup3", cFEStateRelogin_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0FB8);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetMessenger_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0FC0);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetMessenger_onGainTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateReadMessagePopup_onLoseTransition);
 

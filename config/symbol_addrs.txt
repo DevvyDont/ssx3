@@ -4810,6 +4810,76 @@ cPS2GraphicsMan_IsRenderIdle__FPv = 0x00395F80; //type:func
 cPS2GraphicsMan_SetLightMats__FPv = 0x00395FA0; //type:func
 cPS2GraphicsMan_InitCharMatrices = 0x00396B40; //type:func
 
+// fn_overloads1: names by evidence (docs/function_names.tsv)
+cFEBlankPopup_cFEBlankPopup = 0x001ABF70; //type:func
+cFEBlankPopup_onCreateScreen = 0x001ABFA8; //type:func
+cFEStateOnlineAgreement_cFEStateOnlineAgreement1 = 0x001C03D0; //type:func
+cFEStateOnlineAgreement_cFEStateOnlineAgreement2 = 0x001C0460; //type:func
+cFEStateStats_cFEStateStats1 = 0x001C2D90; //type:func
+cFEStateNetNews_cFEStateNetNews1 = 0x001C5058; //type:func
+cFEStateRelogin_cFEStateRelogin = 0x001D5038; //type:func
+cFEBlankPopup__cFEBlankPopup = 0x001DE918; //type:func
+cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1 = 0x001DF5C8; //type:func
+cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1 = 0x001DF638; //type:func
+cFEStateNetSSXWorld_cFEStateNetSSXWorld1 = 0x001DF6A8; //type:func
+cFEStateNetQuickMessages_cFEStateNetQuickMessages1 = 0x001DF710; //type:func
+cFEStateLobbyMenu_cFEStateLobbyMenu1 = 0x001DF780; //type:func
+cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1 = 0x001DF828; //type:func
+cFEStateNetCreateRoomPopup_getRoomName = 0x001DF8E8; //type:func
+cFEStateNetCreateRoomPopup_getChannelName = 0x001DF8F0; //type:func
+cFEStateNetCreateRoomPopup_getPassword = 0x001DF8F8; //type:func
+cFEUseExistingAccount_cFEUseExistingAccount1 = 0x001E0880; //type:func
+cFEStateSelectPersona_cFEStateSelectPersona1 = 0x001E08D8; //type:func
+cFEStateChallengePopup_cFEStateChallengePopup1 = 0x001E0950; //type:func
+cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1 = 0x001E0A08; //type:func
+cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1 = 0x001E0AC0; //type:func
+cFEStateNetConfig_cFEStateNetConfig1 = 0x001E0B28; //type:func
+cFEStateAuthDNAS_cFEStateAuthDNAS1 = 0x001E0BB0; //type:func
+cFEStateAuthDNASError_cFEStateAuthDNASError1 = 0x001E0C30; //type:func
+cFEStateCreateDuplicate_cFEStateCreateDuplicate1 = 0x001E0DD8; //type:func
+cFEStateLogin_cFEStateLogin1 = 0x001E0E48; //type:func
+cFEStateRelogin_cFEStateRelogin1 = 0x001E0EF8; //type:func
+cFEStateRelogin__cFEStateRelogin__FPv = 0x001E0F30; //type:func
+cFEStateNetMessenger_cFEStateNetMessenger1 = 0x001E0F60; //type:func
+luno_cLunoTable_get = 0x002250E0; //type:func
+cPS2MemCard_GetDir1 = 0x002C4198; //type:func
+cPS2MemCard_GetDir = 0x002C41D8; //type:func
+cPS2MemCard_CreateFileSlot = 0x002C4520; //type:func
+cPS2MemCard_CreateFileSlot1 = 0x002C4578; //type:func
+cPS2MemCard_StartFileSlotWrite1 = 0x002C45D0; //type:func
+cPS2MemCard_StartFileSlotWrite = 0x002C4648; //type:func
+cPS2MemCard_StartFileSlotWrite2 = 0x002C46C0; //type:func
+cPS2MemCard_IsInvalid = 0x002C5300; //type:func
+cPS2MemCard_GetFreeSpace1 = 0x002C5320; //type:func
+cPS2MemCard_IsAvailable = 0x002C5358; //type:func
+cPS2MemCard_IsFormatted = 0x002C53B0; //type:func
+cPS2MemCard_CardChanged = 0x002C53C8; //type:func
+cPS2MemCard_IsRemovable = 0x002C6718; //type:func
+cPS2MemCard_SpaceRequired = 0x002C6758; //type:func
+cPS2MemCard_SpaceRequired1 = 0x002C6778; //type:func
+cPS2MemCard_IsDamaged = 0x002C67B0; //type:func
+cDynamicParticleModifier_cDynamicParticleModifier1 = 0x00345C90; //type:func
+cTransformModifier_getRootTransform1__FPv = 0x00360BB8; //type:func
+cAvaSplineModifier_getRootTransform__FPv = 0x00361B10; //type:func
+tParticleEmitter_setVelocity = 0x0036D020; //type:func
+tParticleEmitter_setVelocity1 = 0x0036D1F0; //type:func
+cPS2GraphicsMan_SetDisplayMode = 0x003764C0; //type:func
+cPS2GraphicsMan_DrawString3D = 0x00378808; //type:func
+cPS2GraphicsMan_SetNewTextureData = 0x0037D0B0; //type:func
+cPS2GraphicsMan_RenderModel = 0x0037E238; //type:func
+cPS2GraphicsMan_RenderDynamicParticleEmitter = 0x003807A0; //type:func
+cPS2GraphicsMan_RenderDynamicParticleEmitter1 = 0x00380CE0; //type:func
+cPS2GraphicsMan_GetDisplayMode__FPv = 0x00395328; //type:func
+
+// fn_slots9: names by evidence (docs/function_names.tsv)
+cFEStateRelogin_onCreateScreen = 0x001D5078; //type:func
+cFEStateRelogin_onWidgetCreate = 0x001D50E0; //type:func
+cFEStateRelogin_onPopupEvent = 0x001D5240; //type:func
+cFEStateRelogin_onLoseTransition__FPv = 0x001E0F58; //type:func
+cFEStateNetMessenger_onLoseTransition__FPv = 0x001E0FB8; //type:func
+cFEStateNetMessenger_onGainTransition = 0x001E0FC0; //type:func
+cPS2GraphicsMan_GetDTV__FPv = 0x00395320; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func
@@ -5526,7 +5596,7 @@ D_004A50E0 = 0x004A50E0; // size:0x8
 D_00440FC8 = 0x00440FC8; // size:0x10
 D_00440FE8 = 0x00440FE8; // size:0x10
 // PS2GraphicsMan field offsets (gm+0x78A0, gm+0x7CAC) that splat symbolised from `addiu reg, base, 0x78A0`: never
-// addresses (no %hi pair; func_00362DE8, func_00363490, func_0037E238, cPS2BezierMan_DrawPatches).
+// addresses (no %hi pair; func_00362DE8, func_00363490, cPS2GraphicsMan_RenderModel, cPS2BezierMan_DrawPatches).
 D_678A0 = 0x000678A0; // ignore:true
 D_67CAC = 0x00067CAC; // ignore:true
 // libgcc2 __fixunssfdi (float -> unsigned 64-bit): calls exactly __extendsfdf2, __cmpdf2, __muldf3, __fixunsdfsi,
@@ -10360,3 +10430,7 @@ cWScriptMan_vtbl = 0x00489C00;
 cVisualEffectsTest_vtbl = 0x00492FD0;
 cStaticEmitter_vtbl = 0x00493160;
 cLightMan_vtbl = 0x004936D8;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_relogin_blank (docs/ontour_globals.tsv)
+cFEStateRelogin_vtbl = 0x00468050;
+cFEBlankPopup_vtbl = 0x0046B6F8;

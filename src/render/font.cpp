@@ -1111,7 +1111,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetDTV__FPv);
 /**
  * Base-class default: reports that no DTV (digital TV) output is in use.
  *
- * Returns 0. cPS2GraphicsMan replaces this slot (9) with its own func_00395320__FPv.
+ * Returns 0. cPS2GraphicsMan replaces this slot (9) with its own cPS2GraphicsMan_GetDTV__FPv.
  *
  * @return 0 (false)
  */
@@ -3022,18 +3022,18 @@ int cPS2GraphicsMan_GetNumDisplayModes(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395320__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDTV__FPv);
 #ifdef SKIP_ASM
-int func_00395320(void* self)
+int cPS2GraphicsMan_GetDTV(void* self)
 {
     return *(int*)((char*)self + 0x5A4C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395328__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayMode__FPv);
 #ifdef SKIP_ASM
-int func_00395328(void* self)
+int cPS2GraphicsMan_GetDisplayMode(void* self)
 {
     return *(int*)((char*)self + 0x59C8);
 }

@@ -9,7 +9,7 @@
 // ~cTransformModifier cTransformModifier__cTransformModifier, update cTransformModifier_update, updateRootTransform func_00360B38, postUpdate, signal,
 // isComplete, clearComplete, shouldRebound, runCollide, collide, render, getBoundBox cTransformModifier_getBoundBox, setBoundBox
 // cTransformModifier_setBoundBox, getRadius cTransformModifier_getRadius, setRadius cTransformModifier_setRadius, getMesh, isRootTransformDirty, getRootTransform()
-// func_00360BB8, getRootTransform(inst), hasIntersect, intersect, updateIntersectInfo, getAnimMats, updateOverlapSystem,
+// cTransformModifier_getRootTransform1, getRootTransform(inst), hasIntersect, intersect, updateIntersectInfo, getAnimMats, updateOverlapSystem,
 // getParent, getTransformType cTransformModifier_getTransformType, writeToReplayFrame cTransformModifier_writeToReplayFrame (all one-line defaults, src/object/
 // railmodifier.cpp 0x360B00..0x360C08; slot order = On Tour's declaration order).
 

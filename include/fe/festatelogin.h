@@ -11,7 +11,7 @@
 // Size 0x6D4: cMemMan_alloc(0x6D4, "cFEStateLogin" / "cFEStateNetLogin" / "cFEStateLogin MemoryCard") +
 // cFEStateLogin_cFEStateLogin(mem, pEngine) at 4 sites (feasyncfile 4248, 4398, 12745, 20767); mpustrDisconnect ends at 0x6D4.
 // Constructors cFEStateLogin_cFEStateLogin (cFEStateNet(pEngine, 0), vtable cFEStateLogin_vtbl, mHashName 0x33, unk_6A8 = 0) and the
-// default func_001E0E48 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
+// default cFEStateLogin_cFEStateLogin1 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
 // cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateLogin_onCreateScreen, 12 onUpdate func_001BEF40, 17
 // onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent cFEStateLogin_onWidgetEvent, 25 func_001BFAE0
 // (help), 29 func_001E0E90, 31 func_001BF228 (net events), 32 func_001E0E88, 33 func_001BF378). Methods:
@@ -36,7 +36,7 @@ struct cFEStateLogin {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateLogin_vtbl (33 slots), stored by cFEStateLogin_cFEStateLogin / func_001E0E48 after
+    void** mVtbl;                   // 0x008 [R] cFEStateLogin_vtbl (33 slots), stored by cFEStateLogin_cFEStateLogin / cFEStateLogin_cFEStateLogin1 after
                                     //       the cFEStateNet ctor and by the destructor cFEStateLogin__cFEStateLogin
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLogin_cFEStateLogin stores

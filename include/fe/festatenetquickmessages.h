@@ -9,7 +9,7 @@
 // Size 0x6FC: cMemMan_alloc(0x6FC, "cFEStateNetQuickMessages") + cFEStateNetQuickMessages_cFEStateNetQuickMessages(mem, pEngine) (cFEStateNetSSXWorld_onWidgetEvent, the only
 // site); mpMessage[9] ends at 0x6FC. Constructors cFEStateNetQuickMessages_cFEStateNetQuickMessages (cFEStateNet(pEngine, 0), vtable cFEStateNetQuickMessages_vtbl,
 // mHashName
-// 0x4B) and the default func_001DF710 (fe/fepopupmisc); destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages (fe/fepopupmisc; slot 1). Retail
+// 0x4B) and the default cFEStateNetQuickMessages_cFEStateNetQuickMessages1 (fe/fepopupmisc); destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages (fe/fepopupmisc; slot 1). Retail
 // vtable cFEStateNetQuickMessages_vtbl (32 slots: 4 onCreateScreen cFEStateNetQuickMessages_onCreateScreen, 7 cFEStateNetQuickMessages_onGainTransition, 12 onUpdate cFEStateNetQuickMessages_onUpdate, 17
 // onPopupEvent cFEStateNetQuickMessages_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate, 19 onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent, 25 func_001C21C0
 // (help), 31 cFEStateNet's func_001A8E40). Methods: fe/feasyncfile 0x1C20F8-0x1C2C50.
@@ -34,7 +34,7 @@ struct cFEStateNetQuickMessages {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateNetQuickMessages_vtbl (vtables.tsv; 32 slots), stored by cFEStateNetQuickMessages_cFEStateNetQuickMessages /
-                                    //       func_001DF710 after the cFEStateNet ctor and by the destructor
+                                    //       cFEStateNetQuickMessages_cFEStateNetQuickMessages1 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateNetQuickMessages__cFEStateNetQuickMessages
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetQuickMessages_cFEStateNetQuickMessages stores

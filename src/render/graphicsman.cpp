@@ -1656,7 +1656,7 @@ extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D020);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setVelocity);
 #ifdef SKIP_ASM
 struct sGmVec4_D020 {
     float x, y, z, w;
@@ -1806,7 +1806,7 @@ static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
     return r;
 }
 
-extern "C" void func_0036D020(tParticleEmitter* self, const sGmVec4_D020* dir, float spread)
+extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const sGmVec4_D020* dir, float spread)
 {
     (*(sGmVec4_D020*)&self->V0) = gmDivD020(*dir, self->Damp);
     float len = gmLengthD020((*(sGmVec4_D020*)&self->V0));
@@ -1820,7 +1820,7 @@ extern "C" void func_0036D020(tParticleEmitter* self, const sGmVec4_D020* dir, f
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D1F0);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setVelocity1);
 #ifdef SKIP_ASM
 struct sGmVec4 {
     float x, y, z, w;
@@ -1899,7 +1899,7 @@ static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036D1F0(tParticleEmitter* self, const sGmVec4* baseVel, const sGmVec4* randVel0,
+extern "C" void tParticleEmitter_setVelocity1(tParticleEmitter* self, const sGmVec4* baseVel, const sGmVec4* randVel0,
                               const sGmVec4* randVel1, const sGmVec4* randVel2)
 {
     (*(sGmVec4*)&self->Vr0) = gmDivD1F0(*randVel0, self->Damp);

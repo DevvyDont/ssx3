@@ -34,15 +34,15 @@ INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onWidgetMenu);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D4F90);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5038);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_cFEStateRelogin);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5078);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onCreateScreen);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D50E0);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onWidgetCreate);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5138);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5240);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onPopupEvent);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5280);
 

@@ -12,7 +12,7 @@
 // EA's name: the preview's __16cFEStateAuthDNAS, onGainTransition__16cFEStateAuthDNASb, onLoseTransition__16...
 // Size 0x700: cMemMan_alloc(0x700, "NetConfigAuthPopup") + cFEStateAuthDNAS_cFEStateAuthDNAS(mem, pEngine, pParent) (func_001B55B0, the
 // only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable cFEStateAuthDNAS_vtbl, mHashName 0x44, unk_6A8 =
-// 0) and the default func_001E0BB0 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
+// 0) and the default cFEStateAuthDNAS_cFEStateAuthDNAS1 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
 // mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNAS_onCreateScreen, 7
 // cFEStateAuthDNAS_onGainTransition
 // (onGainTransition), 8 cFEStateAuthDNAS_onInputBegin, 10 cFEStateAuthDNAS_onLoseTransition (onLoseTransition), 12 onUpdate cFEStateAuthDNAS_onUpdate, 18
@@ -25,7 +25,7 @@
 // mpustrAuthError[1],
 // [2], [0]) (cFEStateNetConfig's func_001B5830, the only site). Constructors cFEStateAuthDNASError_cFEStateAuthDNASError (vtable cFEStateAuthDNASError_vtbl,
 // mHashName
-// 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable cFEStateAuthDNASError_vtbl
+// 0x45) and the default cFEStateAuthDNASError_cFEStateAuthDNASError1 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable cFEStateAuthDNASError_vtbl
 // (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNASError_onCreateScreen, 7 cFEStateAuthDNASError_onGainTransition, 10 cFEStateAuthDNASError_onLoseTransition, 12 onUpdate
 // cFEStateNet's cFEStateNet_onUpdate, 18 onWidgetCreate cFEStateAuthDNASError_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNASError_onWidgetEvent, 20 cFEStateAuthDNASError_onWidgetMenu, 24
 // handleEvent cFEStateAuthDNASError_handleEvent, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
@@ -51,7 +51,7 @@ struct cFEStateAuthDNAS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNAS_vtbl (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS / func_001E0BB0
+    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNAS_vtbl (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS / cFEStateAuthDNAS_cFEStateAuthDNAS1
                                     //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNAS__cFEStateAuthDNAS
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNAS_cFEStateAuthDNAS stores
@@ -201,7 +201,7 @@ struct cFEStateAuthDNASError {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNASError_vtbl (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError / func_001E0C30
+    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNASError_vtbl (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError / cFEStateAuthDNASError_cFEStateAuthDNASError1
                                     //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNASError__cFEStateAuthDNASError
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNASError_cFEStateAuthDNASError stores

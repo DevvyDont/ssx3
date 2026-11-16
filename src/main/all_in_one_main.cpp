@@ -3921,7 +3921,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE8C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_001A8500_E8C8(void *, int, int) __asm__("func_001A8500");
-extern int D_0046B6F8_E8C8[] __asm__("D_0046B6F8");
+extern int D_0046B6F8_E8C8[] __asm__("cFEBlankPopup_vtbl");
 
 extern "C" void *func_001DE8C8(void *self) {
     func_001A8500_E8C8(self, 0, 0);
@@ -3942,14 +3942,14 @@ extern "C" void func_001DE910(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE918);
+INCLUDE_ASM("main/all_in_one_main", cFEBlankPopup__cFEBlankPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001A85D0_E918(void*) __asm__("func_001A85D0");
-extern void* D_0046B6F8[];
+extern void* cFEBlankPopup_vtbl[];
 
-extern "C" void* func_001DE918(void *self) {
-    *(void***)((char*)self + 8) = D_0046B6F8;
+extern "C" void* cFEBlankPopup__cFEBlankPopup(void *self) {
+    *(void***)((char*)self + 8) = cFEBlankPopup_vtbl;
     return func_001A85D0_E918(self);
 }
 #endif

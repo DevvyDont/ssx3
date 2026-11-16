@@ -9,7 +9,7 @@
 //
 // Size 0xB84: cMemMan_alloc(0xB84, "cFEStateLobbyMenu") + cFEStateLobbyMenu_cFEStateLobbyMenu(mem, pEngine) (func_001A8E40,
 // func_001B2378, func_001B3A30, cFEStateOnlineMainMenu_onWidgetEvent); its last member, the cBXString at 0xB80, ends there. Constructors
-// cFEStateLobbyMenu_cFEStateLobbyMenu and the default func_001DF780 (fe/fepopupmisc), destructor cFEStateLobbyMenu__cFEStateLobbyMenu (fe/fepopupmisc; the
+// cFEStateLobbyMenu_cFEStateLobbyMenu and the default cFEStateLobbyMenu_cFEStateLobbyMenu1 (fe/fepopupmisc), destructor cFEStateLobbyMenu__cFEStateLobbyMenu (fe/fepopupmisc; the
 // preview's _$_17cFEStateLobbyMenu). Retail vtable cFEStateLobbyMenu_vtbl (32 slots: 1 dtor, 4 onCreateScreen cFEStateLobbyMenu_onCreateScreen,
 // 7 onGainTransition cFEStateLobbyMenu_onGainTransition, 12 onUpdate cFEStateLobbyMenu_onUpdate, 17 onPopupEvent cFEStateLobbyMenu_onPopupEvent, 18 onWidgetCreate
 // cFEStateLobbyMenu_onWidgetCreate, 19 onWidgetEvent cFEStateLobbyMenu_onWidgetEvent, 20 onWidgetMenu cFEStateLobbyMenu_onWidgetMenu, 21 cFEStateLobbyMenu_onWidgetPair, 25
@@ -22,7 +22,7 @@
 // this class and the preview keeps no accessors for it: widget pointers are named after the UI object
 // onWidgetCreate (cFEStateLobbyMenu_onWidgetCreate) binds to them, the rest from retail use. Channel arrays are indexed by the
 // channel (0 beginner, 1 voice, 2 advanced, 3 expert/elite: the RoomMenus row). Evidence tags:
-//   [R] retail's constructors cFEStateLobbyMenu_cFEStateLobbyMenu / func_001DF780 and destructor cFEStateLobbyMenu__cFEStateLobbyMenu (and cFEStateNet's);
+//   [R] retail's constructors cFEStateLobbyMenu_cFEStateLobbyMenu / cFEStateLobbyMenu_cFEStateLobbyMenu1 and destructor cFEStateLobbyMenu__cFEStateLobbyMenu (and cFEStateNet's);
 //   [P] the July 2003 preview (see fe/festatenet.h);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
@@ -38,7 +38,7 @@ struct cFEStateLobbyMenu {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateLobbyMenu_vtbl (32 slots), stored by cFEStateLobbyMenu_cFEStateLobbyMenu / func_001DF780 after the cFEStateNet ctor and
+    void** mVtbl;                   // 0x008 [R] cFEStateLobbyMenu_vtbl (32 slots), stored by cFEStateLobbyMenu_cFEStateLobbyMenu / cFEStateLobbyMenu_cFEStateLobbyMenu1 after the cFEStateNet ctor and
                                     //       by the destructor cFEStateLobbyMenu__cFEStateLobbyMenu
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLobbyMenu_cFEStateLobbyMenu stores 0x3C

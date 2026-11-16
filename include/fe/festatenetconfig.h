@@ -9,7 +9,7 @@
 // cFEStateNetConfig: screen "200net_config": picks a network adapter and a saved network configuration, connects
 // (a state machine over the network object D_004A1B78 = func_002C22C8()) and runs DNAS authentication. Size 0x91C:
 // cMemMan_alloc(0x91C, "cFEStateNetConfig") + cFEStateNetConfig_cFEStateNetConfig(mem, pEngine) (func_001A9710, func_001BF5A8); its
-// unicode popup buffer at 0x71C runs to the end. Constructors cFEStateNetConfig_cFEStateNetConfig and func_001E0B28 (fe/fepopupmisc, the
+// unicode popup buffer at 0x71C runs to the end. Constructors cFEStateNetConfig_cFEStateNetConfig and cFEStateNetConfig_cFEStateNetConfig1 (fe/fepopupmisc, the
 // default one: zeroes the same fields), destructor cFEStateNetConfig__cFEStateNetConfig (frees the heap texts). Retail vtable cFEStateNetConfig_vtbl
 // (32 slots: 1 dtor, 4 onCreateScreen cFEStateNetConfig_onCreateScreen, 5 onDestroyScreen cFEStateNetConfig_onDestroyScreen, 12 onUpdate cFEStateNetConfig_onUpdate,
 // 17 onPopupEvent cFEStateNetConfig_onPopupEvent, 18 onWidgetCreate cFEStateNetConfig_onWidgetCreate, 19 onWidgetEvent cFEStateNetConfig_onWidgetEvent, 21 cFEStateNetConfig_onWidgetPair,
@@ -19,7 +19,7 @@
 //
 // cFEStateNetAccountMem: the memory-card popup that loads / saves / deletes the online account (name and password)
 // on the card (EA's names: the preview's onGainTransition__21cFEStateNetAccountMemb, onLoseTransition__21...).
-// Base: cFEBlankPopup (constructor func_001ABF70 = cFEStateNet's + vtable D_0046B6F8; it adds no members), so its
+// Base: cFEBlankPopup (constructor cFEBlankPopup_cFEBlankPopup = cFEStateNet's + vtable cFEBlankPopup_vtbl; it adds no members), so its
 // own fields start at 0x6D0. Size 0xB10: every allocation is cMemMan_alloc(0xB10, "cFEStateNetAccountMem") +
 // cFEStateNetAccountMem_cFEStateNetAccountMem(mem, pEngine, pParent, mode, szName, szPassword) (14 sites); the constructor stores 0xB0C last.
 // Destructor cFEStateNetAccountMem__cFEStateNetAccountMem. Retail vtable cFEStateNetAccountMem_vtbl (24 slots: 1 dtor, 4 onCreateScreen cFEStateNetAccountMem_onCreateScreen, 7
@@ -47,7 +47,7 @@ struct cFEStateNetConfig {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetConfig_vtbl (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig / func_001E0B28 after the cFEStateNet ctor and
+    void** mVtbl;                   // 0x008 [R] cFEStateNetConfig_vtbl (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig / cFEStateNetConfig_cFEStateNetConfig1 after the cFEStateNet ctor and
                                     //       by the destructor cFEStateNetConfig__cFEStateNetConfig
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetConfig_cFEStateNetConfig stores 0x31
@@ -133,7 +133,7 @@ struct cFEStateNetConfig {
                                     //       the numbered configuration names
     cUIThing* mpPairSettings;       // 0x6EC [U] widget "PairSettings"; enabled / disabled (its slot 8) by func_001B5068 and the popup
                                     //       handlers
-    int unk_6F0;                    // 0x6F0 [R] 0 in the default constructor func_001E0B28 only; no other access seen
+    int unk_6F0;                    // 0x6F0 [R] 0 in the default constructor cFEStateNetConfig_cFEStateNetConfig1 only; no other access seen
     cUIMenu* mpMenuConfig;          // 0x6F4 [R] 0; [U] widget "MenuConfig"; func_001B5068 cUIMenu_setSelectedByIndex(.., 0 / 1)
     cUIThing* mpConfigRectangle;    // 0x6F8 [R] 0; [U] widget "configrectangle1"; func_001B5068 shows / hides it (slot 9)
     cUIThing* mpNoConfiguration;    // 0x6FC [R] 0; [U] widget "NoConfiguration"; func_001B5068 shows it when there is no
@@ -214,8 +214,8 @@ struct cFEStateNetAccountMem {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetAccountMem_vtbl (24 slots), stored by cFEStateNetAccountMem_cFEStateNetAccountMem after cFEBlankPopup's ctor (func_001ABF70, vtable
-                                    //       D_0046B6F8) and by the destructor cFEStateNetAccountMem__cFEStateNetAccountMem (which restores D_0046B6F8 before cFEStateNet's)
+    void** mVtbl;                   // 0x008 [R] cFEStateNetAccountMem_vtbl (24 slots), stored by cFEStateNetAccountMem_cFEStateNetAccountMem after cFEBlankPopup's ctor (cFEBlankPopup_cFEBlankPopup, vtable
+                                    //       cFEBlankPopup_vtbl) and by the destructor cFEStateNetAccountMem__cFEStateNetAccountMem (which restores cFEBlankPopup_vtbl before cFEStateNet's)
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] 0 (not set by cFEStateNetAccountMem_cFEStateNetAccountMem)
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor

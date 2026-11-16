@@ -10,7 +10,7 @@
 //
 // Size 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateDuplicate") + cFEStateCreateDuplicate_cFEStateCreateDuplicate(mem, pEngine, bAccount) at both sites
 // (func_001ADC30 with 0, func_001BAC90). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable cFEStateCreateDuplicate_vtbl,
-// mHashName 0x4F, unk_6A8 = 0) and the default func_001E0DD8 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
+// mHashName 0x4F, unk_6A8 = 0) and the default cFEStateCreateDuplicate_cFEStateCreateDuplicate1 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
 // (fe/fepopupmisc;
 // slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable cFEStateCreateDuplicate_vtbl (32 slots: 4 onCreateScreen
 // cFEStateCreateDuplicate_onCreateScreen, 12 onUpdate cFEStateCreateDuplicate_onUpdate, 17 onPopupEvent cFEStateCreateDuplicate_onPopupEvent, 18 onWidgetCreate cFEStateCreateDuplicate_onWidgetCreate,
@@ -39,7 +39,7 @@ struct cFEStateCreateDuplicate {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateCreateDuplicate_vtbl (vtables.tsv; 32 slots), stored by cFEStateCreateDuplicate_cFEStateCreateDuplicate /
-                                    //       func_001E0DD8 after the cFEStateNet ctor and by the destructor
+                                    //       cFEStateCreateDuplicate_cFEStateCreateDuplicate1 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateCreateDuplicate__cFEStateCreateDuplicate
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateDuplicate_cFEStateCreateDuplicate stores

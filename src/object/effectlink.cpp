@@ -407,7 +407,7 @@ extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, vo
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345C90);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_cDynamicParticleModifier1);
 #ifdef SKIP_ASM
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 extern "C" void* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(void* self);
@@ -431,7 +431,7 @@ struct sTarget00345C90 {
 };
 
 
-extern "C" cDynamicParticleModifier* func_00345C90(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     self->mVtbl = cDynamicParticleModifier_vtbl;

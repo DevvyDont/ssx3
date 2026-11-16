@@ -11,7 +11,7 @@
 // Size 0x734: cMemMan_alloc(0x734, "cFEStateNetQuickPlayPopup") + cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(mem, pEngine, pParent)
 // (cFEStateOnlineMainMenu_onWidgetEvent,
 // cFEStateOnlineMainMenu's onWidgetEvent; the only site); the constructor zeroes up to 0x730. Constructors
-// cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup (cFEStateNet(pEngine, pParent), vtable cFEStateNetQuickPlayPopup_vtbl, mHashName 0x48) and the default func_001DF638
+// cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup (cFEStateNet(pEngine, pParent), vtable cFEStateNetQuickPlayPopup_vtbl, mHashName 0x48) and the default cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1
 // (fe/fepopupmisc); destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup (fe/fepopupmisc; slot 1; the preview's _$_25cFEStateNetQuickPlayPopup).
 // Retail vtable cFEStateNetQuickPlayPopup_vtbl (32 slots: 4 onCreateScreen cFEStateNetQuickPlayPopup_onCreateScreen, 10 cFEStateNetQuickPlayPopup_onLoseTransition (onLoseTransition), 12
 // onUpdate cFEStateNetQuickPlayPopup_onUpdate, 17 onPopupEvent cFEStateNetQuickPlayPopup_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickPlayPopup_onWidgetCreate, 19 onWidgetEvent
@@ -42,7 +42,7 @@ struct cFEStateNetQuickPlayPopup {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateNetQuickPlayPopup_vtbl (vtables.tsv; 32 slots), stored by cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup /
-                                    //       func_001DF638 after the cFEStateNet ctor and by the destructor
+                                    //       cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup stores

@@ -6193,28 +6193,28 @@ extern "C" void func_001ABED8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABF70);
+INCLUDE_ASM("fe/feasyncfile", cFEBlankPopup_cFEBlankPopup);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void* self);
-extern void* D_0046B6F8[];
+extern void* cFEBlankPopup_vtbl[];
 
-extern "C" void* func_001ABF70(cFEStateNet* self)
+extern "C" void* cFEBlankPopup_cFEBlankPopup(cFEStateNet* self)
 {
     func_001A8500(self);
-    self->mVtbl = D_0046B6F8;
+    self->mVtbl = cFEBlankPopup_vtbl;
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ABFA8);
+INCLUDE_ASM("fe/feasyncfile", cFEBlankPopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_Blank[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-extern "C" void* func_001ABFA8(cFEStateNet* self)
+extern "C" void* cFEBlankPopup_onCreateScreen(cFEStateNet* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Blank), 0);
@@ -14620,7 +14620,7 @@ extern "C" int cFEStateAuthDNASError_onWidgetMenu(cFEStateAuthDNASError* self, i
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_cFEStateNetAccountMem);
 #ifdef SKIP_ASM
-extern "C" void* func_001ABF70(cFEStateNet* self);
+extern "C" void* cFEBlankPopup_cFEBlankPopup(cFEStateNet* self);
 extern "C" void* func_001B70D0(void*, int);
 // PORT: the unit declares func_001B70D0 as returning void*; it returns nothing useful
 extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
@@ -14642,7 +14642,7 @@ static inline void SetNames_001B6ED0(char* buf1, char* buf2, const char* a, cons
 /**
  * Constructs the online-account memory-card popup state and picks its first card step from the mode.
  *
- * Runs the cFEBlankPopup constructor (func_001ABF70; the C call passes only self, so @p pEngine and @p owner reach it
+ * Runs the cFEBlankPopup constructor (cFEBlankPopup_cFEBlankPopup; the C call passes only self, so @p pEngine and @p owner reach it
  * untouched in $a1/$a2 and a port must pass them), stores cFEStateNetAccountMem_vtbl, clears the name, password,
  * errors and flags, copies @p name and @p name2 into mszUserName / mszPassword, and starts func_001B70D0 at the
  * mode's step: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (mode 3 copies the names from D_00536760 instead), stored in
@@ -14659,7 +14659,7 @@ static inline void SetNames_001B6ED0(char* buf1, char* buf2, const char* a, cons
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* self, int pEngine, void* owner, int mode, int name, int name2)
 {
     char* buf1 = (char*)self + 0x6E0;
-    func_001ABF70((cFEStateNet*)self);
+    cFEBlankPopup_cFEBlankPopup((cFEStateNet*)self);
     char* buf2 = (char*)self + 0x6F1;
     self->mVtbl = cFEStateNetAccountMem_vtbl;
     *((char*)self + 0x6E0) = 0;
@@ -14697,7 +14697,7 @@ extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountM
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem__cFEStateNetAccountMem);
 #ifdef SKIP_ASM
 extern void* cFEStateNetAccountMem_vtbl[];
-extern void* D_0046B6F8[];
+extern void* cFEBlankPopup_vtbl[];
 extern "C" void func_002658B8();
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
@@ -14705,7 +14705,7 @@ extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0
 /**
  * Destroys the online-account memory-card popup: deletes the card object, then runs the base destructors.
  *
- * Restores cFEStateNetAccountMem_vtbl, deletes D_004A33D0 (func_002658B8), stores cFEBlankPopup's vtable D_0046B6F8
+ * Restores cFEStateNetAccountMem_vtbl, deletes D_004A33D0 (func_002658B8), stores cFEBlankPopup's vtable cFEBlankPopup_vtbl
  * and runs the cFEStateNet destructor (func_001A85D0) with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
@@ -14714,24 +14714,24 @@ extern "C" void cFEStateNetAccountMem__cFEStateNetAccountMem(cFEStateNetAccountM
 {
     self->mVtbl = cFEStateNetAccountMem_vtbl;
     func_002658B8();
-    self->mVtbl = D_0046B6F8;
+    self->mVtbl = cFEBlankPopup_vtbl;
     func_001A85D0_dtor(((cFEStateNet*)self), flags);
 }
 #endif
 
-extern "C" void* func_001ABFA8(cFEStateNet* self);
+extern "C" void* cFEBlankPopup_onCreateScreen(cFEStateNet* self);
 
 //99.29%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onCreateScreen__FPv);
 #ifdef SKIP_ASM
 /**
- * Creates the account popup's screen: the cFEBlankPopup handler (func_001ABFA8) adds and plays its blank screen.
+ * Creates the account popup's screen: the cFEBlankPopup handler (cFEBlankPopup_onCreateScreen) adds and plays its blank screen.
  *
- * @return func_001ABFA8()'s result (its value is not meaningful; declared void* by the unit)
+ * @return cFEBlankPopup_onCreateScreen()'s result (its value is not meaningful; declared void* by the unit)
  */
 void* cFEStateNetAccountMem_onCreateScreen(void* self)
 {
-    return func_001ABFA8((cFEStateNet*)self);
+    return cFEBlankPopup_onCreateScreen((cFEStateNet*)self);
 }
 #endif
 
@@ -21222,7 +21222,7 @@ static inline int Loc1BF758(char* name)
  * "kT_POPUPCMNDisconnecting" + "kT_POPUPCMNDisconnect" ("%s%s"), then asks it with yes / no (id 0x848, default
  * no); when the allocation fails the popup shows "kT_POPUPCMNDisconnect" by id instead. Event 8 switches to a new
  * cFEStateOnlineAgreement (miMiscData 18); the rest go to the cFEStateNet handler cFEStateNet_onWidgetEvent. The subclass vtable
- * D_00468050 uses this handler too.
+ * cFEStateRelogin_vtbl uses this handler too.
  *
  * @param popup  the widget (On Tour pWidget; not a popup despite the name); null is ignored
  * @param kind  the widget event (On Tour Event)
@@ -21717,12 +21717,12 @@ extern "C" void* func_001C0358(cFEStateNet* self, int msgId, int data)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C03D0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_cFEStateOnlineAgreement1);
 #ifdef SKIP_ASM
 extern void* cFEStateOnlineAgreement_vtbl[];
 extern "C" void* func_001A8500(void* self);
 
-extern "C" void* func_001C03D0(cFEStateOnlineAgreement* self)
+extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement1(cFEStateOnlineAgreement* self)
 {
     func_001A8500(self);
     self->mHashName = 67;
@@ -21760,13 +21760,13 @@ extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineA
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0460);
+INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_cFEStateOnlineAgreement2);
 #ifdef SKIP_ASM
 extern void* cFEStateOnlineAgreement_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C0460(cFEStateOnlineAgreement* self)
+extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement2(cFEStateOnlineAgreement* self)
 {
     func_001A8500_3(self, 0, 0);
     self->mpTOSLines = 0;
@@ -23687,11 +23687,11 @@ extern "C" void* cFEStateStats_cFEStateStats(cFEStateStats* self, int pEngine)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2D90);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_cFEStateStats1);
 #ifdef SKIP_ASM
 extern void* cFEStateStats_vtbl[];
 
-extern "C" void* func_001C2D90(cFEStateStats* self)
+extern "C" void* cFEStateStats_cFEStateStats1(cFEStateStats* self)
 {
     func_001A8500_3(self, 0, 0);
     self->miMode = 0;
@@ -24959,13 +24959,13 @@ extern "C" void* cFEStateNetNews_cFEStateNetNews(cFEStateNet* self, int pEngine)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5058);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetNews_cFEStateNetNews1);
 #ifdef SKIP_ASM
 extern void* cFEStateNetNews_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C5058(cFEStateNet* self)
+extern "C" void* cFEStateNetNews_cFEStateNetNews1(cFEStateNet* self)
 {
     func_001A8500_3(self, 0, 0);
     self->mVtbl = cFEStateNetNews_vtbl;

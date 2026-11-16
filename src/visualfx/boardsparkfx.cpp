@@ -416,7 +416,7 @@ extern "C" void func_0036D428(void* self, float val);
 int func_0011FE98(void* self);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern "C" void tParticleEmitter_setColour(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
-extern "C" void func_0036D1F0(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d);
+extern "C" void tParticleEmitter_setVelocity1(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d);
 extern "C" void tParticleEmitter_setPlane(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -620,7 +620,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
             b.x = 600.0f; b.y = 0.0f; b.z = 0.0f; b.w = 0.0f;
             c.x = 0.0f; c.y = 600.0f; c.z = 0.0f; c.w = 0.0f;
             d.x = 0.0f; d.y = 0.0f; d.z = 600.0f; d.w = 0.0f;
-            func_0036D1F0(self->gfx, &a, &b, &c, &d);
+            tParticleEmitter_setVelocity1(self->gfx, &a, &b, &c, &d);
         }
         if (isRailSlide) {
             sV4_ABC8 a = Scale_ABC8(side, 10.0f);

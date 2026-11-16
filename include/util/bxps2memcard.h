@@ -39,12 +39,12 @@
 struct tPS2MemCardDevice {
     int unk_00;                     // 0x00 [U] Update stores sceMcGetInfo's type (D_004A3938)
     int unk_04;                     // 0x04 [U] Update stores sceMcGetInfo's free clusters (D_004A393C);
-                                    //       func_002C5320 returns it (slot 20 for the current device)
+                                    //       cPS2MemCard_GetFreeSpace1 returns it (slot 20 for the current device)
     int unk_08;                     // 0x08 [U] last sceMcSync result (D_004A3940); SetState(1) stores it;
                                     //       GetLastError func_002C51D0 ([P] preview GetLastError reads the same
                                     //       word) and slots 9, 48, 52, 74 classify it; slot 47 resets -1 to 0
     int unk_0C;                     // 0x0C [U] sceMcGetInfo's format word (D_004A3944); slot 56 tests > 0
-    int unk_10;                     // 0x10 [U] card-changed flag: Update sets it, func_002C53C8 tests it ([P] preview
+    int unk_10;                     // 0x10 [U] card-changed flag: Update sets it, cPS2MemCard_CardChanged tests it ([P] preview
                                     //       CardChanged reads the same word), slot 47 clears it
 };
 
@@ -175,7 +175,7 @@ struct cPS2MemCard {
     char unk_0B9[0x40];             // 0x00B9 [R] Reset clears it; [U] the file name (slots 34-37, func_002C4788)
     char unk_0F9[0x40];             // 0x00F9 [R] Reset clears it; [U] the file path "<name>/<name>" (sprintf
                                     //       str_pct_s_pct_s_h) for sceMcOpen/Mkdir/Delete
-    char unk_139[0x40];             // 0x0139 [R] Reset clears it; [U] the sceMcGetDir pattern (slot 6 func_002C41D8)
+    char unk_139[0x40];             // 0x0139 [R] Reset clears it; [U] the sceMcGetDir pattern (slot 6 cPS2MemCard_GetDir)
     char pad_179[0x3];              // 0x0179
     tPS2MemCardDevice unk_17C[2];   // 0x017C [R] Reset clears both; [P] kMCMaxDevices (GetMaxDevices returns 2);
                                     //       [U] indexed by mDevice

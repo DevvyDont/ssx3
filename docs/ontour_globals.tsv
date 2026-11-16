@@ -4749,3 +4749,5 @@ ps2_addr	name	previous	source	evidence
 004936D8	cLightMan_vtbl	D_004936D8	vtables.py	retail vtable [D] slot 1 cLightMan__cLightMan; also stored by cPSPLightMan_cPSPLightMan__FP12cPSPLightMan
 00493760	cPS2BezierMan_vtbl	cPSPBezierMan_vtbl	retail	the class is cPS2BezierMan (alloc tag "PS2BezierMan"); renamed with its methods
 00487D28	cPS2VisualEffectsMan_vtbl	cPSPVisualEffectsMan_vtbl	retail	the class is cPS2VisualEffectsMan (alloc tag "PS2VisualEffectsMan"); renamed with its methods
+0046B6F8	cFEBlankPopup_vtbl	D_0046B6F8	retail	[C] stored by cFEBlankPopup_cFEBlankPopup (func_001ABF70), [D] restored by its destructor (slot 1 = func_001DE918); slot 4 builds the "Blank" screen; preview _vt$13cFEBlankPopup
+00468050	cFEStateRelogin_vtbl	D_00468050	retail	[C] stored by the constructor fereal calls on memory tagged "cFEStateRelogin" (func_001D5038), [D] restored by its destructor (slot 1 = func_001E0F30); derives from cFEStateLogin; preview _vt$15cFEStateRelogin

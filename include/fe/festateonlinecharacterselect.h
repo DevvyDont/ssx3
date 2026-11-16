@@ -10,7 +10,7 @@
 // Size 0x6E4: cMemMan_alloc(0x6E4, "cFEStateOnlineCharacterSelect") + cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(mem, pEngine) at all 7 sites
 // (func_001A9268, func_001AF470, func_001B0708, func_001B3760, func_001B37D8, func_001C0358, func_001C19C8).
 // Constructors cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect (cFEStateNet(pEngine, 0), vtable cFEStateOnlineCharacterSelect_vtbl, mHashName 0x41) and the default
-// func_001E0AC0 (fe/fepopupmisc); destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect (fe/fepopupmisc; slot 1; the preview's
+// cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1 (fe/fepopupmisc); destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect (fe/fepopupmisc; slot 1; the preview's
 // _$_29cFEStateOnlineCharacterSelect). Retail vtable cFEStateOnlineCharacterSelect_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen, 7
 // cFEStateOnlineCharacterSelect_onGainTransition, 8 cFEStateOnlineCharacterSelect_onInputBegin (input filter), 12 onUpdate cFEStateOnlineCharacterSelect_onUpdate, 17 onPopupEvent cFEStateOnlineCharacterSelect_onPopupEvent,
 // 18 onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent, 25 func_001B14D8 (help), 31 func_001B15D8 (net
@@ -39,7 +39,7 @@ struct cFEStateOnlineCharacterSelect {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateOnlineCharacterSelect_vtbl (vtables.tsv; 32 slots), stored by cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect /
-                                    //       func_001E0AC0 after the cFEStateNet ctor and by the destructor
+                                    //       cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect stores
@@ -119,7 +119,7 @@ struct cFEStateOnlineCharacterSelect {
     int unk_6D4;                    // 0x6D4 no access seen
     int miConfirmCtrl;              // 0x6D8 [R] 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect); [U] onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent stores
                                     //       mCurrentCtrl (lb 0x14) when the pick is confirmed; no read seen
-    int mbConfirmed;                // 0x6DC [R] 1 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect), 0 (func_001E0AC0); [U] cFEStateOnlineCharacterSelect_onGainTransition (slot 7)
+    int mbConfirmed;                // 0x6DC [R] 1 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect), 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1); [U] cFEStateOnlineCharacterSelect_onGainTransition (slot 7)
                                     //       clears it; onWidgetEvent sets 1 when the pick is sent (func_00265018) and
                                     //       clears it on "back" (func_00265140), or asks "kT_POPUPCMNCancelChallenge"
                                     //       when clear; the input filter cFEStateOnlineCharacterSelect_onInputBegin blocks input while it is set

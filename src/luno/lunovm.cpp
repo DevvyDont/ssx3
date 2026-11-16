@@ -1021,7 +1021,7 @@ extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* othe
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_002250E0);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_get);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 extern cLunoValue luno_gLunoNil;
@@ -1051,7 +1051,7 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
     return 0;
 }
 
-extern "C" cLunoValue* func_002250E0(cLunoTableRef* self, unsigned int intKey)
+extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int intKey)
 {
     cLunoTable* hashTable = self->table;
     cLunoNode_50E0* n = (cLunoNode_50E0*)hashTable->nodes + intKey % (unsigned int)hashTable->modulus;

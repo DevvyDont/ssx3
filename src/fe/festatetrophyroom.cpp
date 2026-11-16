@@ -776,29 +776,29 @@ extern "C" void func_001D4F90(void* self, int index, cUIText* text)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5038);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_cFEStateRelogin);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateLogin_cFEStateLogin(void* self);
-extern void* D_00468050[];
+extern void* cFEStateRelogin_vtbl[];
 
-extern "C" void* func_001D5038(void* self)
+extern "C" void* cFEStateRelogin_cFEStateRelogin(void* self)
 {
     cFEStateLogin_cFEStateLogin(self);
-    *(void***)((char*)self + 0x8) = D_00468050;
+    *(void***)((char*)self + 0x8) = cFEStateRelogin_vtbl;
     *(int*)((char*)self + 0xC) = 52;
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5078);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char str_248lobby_reconnect[];
 
-extern "C" void func_001D5078(void* self)
+extern "C" void cFEStateRelogin_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_248lobby_reconnect), 0);
@@ -810,7 +810,7 @@ extern "C" void func_001D5078(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D50E0);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -818,7 +818,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern char str_TextReconnecting[];
 extern char str_kT_POPUPCMNReconnecting[];
 
-extern "C" void func_001D50E0(void* self, cUIText* item)
+extern "C" void cFEStateRelogin_onWidgetCreate(void* self, cUIText* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_TextReconnecting)) {
@@ -867,12 +867,12 @@ extern "C" int func_001D5138(void* self, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5240);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int func_001A9668(void* self, void* a1, int a2);
 extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
 
-extern "C" int func_001D5240(void* self, void* popup, int event)
+extern "C" int cFEStateRelogin_onPopupEvent(void* self, void* popup, int event)
 {
     int result;
     if (*(int*)((char*)popup + 0x18) == 258) {

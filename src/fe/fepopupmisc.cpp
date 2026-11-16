@@ -590,11 +590,11 @@ extern void* cFEStateOnlineMainMenu_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF5C8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001DF5C8(cFEStateNet* self) {
+extern "C" void *cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1(cFEStateNet* self) {
     func_001A8500(self, 0, 0);
     (self->mVtbl) = cFEStateOnlineMainMenu_vtbl;
     return ((void*)self);
@@ -637,11 +637,11 @@ extern void* cFEStateNetQuickPlayPopup_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF638);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001DF638(cFEStateNetQuickPlayPopup* self) {
+extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNetQuickPlayPopup* self) {
     func_001A8500(self, 0, 0);
     (self->mbSearching) = 0;
     (self->mVtbl) = cFEStateNetQuickPlayPopup_vtbl;
@@ -685,11 +685,11 @@ extern void* cFEStateNetSSXWorld_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF6A8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld_cFEStateNetSSXWorld1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001DF6A8(cFEStateNet* self) {
+extern "C" void *cFEStateNetSSXWorld_cFEStateNetSSXWorld1(cFEStateNet* self) {
     func_001A8500(self, 0, 0);
     (self->mVtbl) = cFEStateNetSSXWorld_vtbl;
     return ((void*)self);
@@ -718,11 +718,11 @@ extern void* cFEStateNetQuickMessages_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF710);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages_cFEStateNetQuickMessages1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001DF710(cFEStateNetQuickMessages* self) {
+extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQuickMessages* self) {
     func_001A8500(self, 0, 0);
     (self->mVtbl) = cFEStateNetQuickMessages_vtbl;
     return ((void*)self);
@@ -755,13 +755,13 @@ extern "C" int func_001DF778(void *arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF780);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateLobbyMenu_cFEStateLobbyMenu1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateLobbyMenu_vtbl[];
 extern int cBXString_EmptyString;
 
-extern "C" void* func_001DF780(cFEStateLobbyMenu* self)
+extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu1(cFEStateLobbyMenu* self)
 {
     func_001A8500(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
@@ -798,13 +798,13 @@ extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF828);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern int cBXString_EmptyString;
 
-extern "C" void* func_001DF828(cFEStateNetCreateRoomPopup* self)
+extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1(cFEStateNetCreateRoomPopup* self)
 {
     func_001A8500(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
@@ -858,23 +858,23 @@ extern void* cFEStateNetHelpPopup_vtbl[];
 extern "C" void* func_0039E390(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8E8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
 #ifdef SKIP_ASM
-extern "C" int func_001DF8E8(void *roomPopup) {
+extern "C" int cFEStateNetCreateRoomPopup_getRoomName(void *roomPopup) {
     return (*(int *)((char*)(roomPopup) + (0x6DC)));
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8F0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getChannelName);
 #ifdef SKIP_ASM
-extern "C" int func_001DF8F0(void *roomPopup) {
+extern "C" int cFEStateNetCreateRoomPopup_getChannelName(void *roomPopup) {
     return (*(int *)((char*)(roomPopup) + (0x6E0)));
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8F8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getPassword);
 #ifdef SKIP_ASM
-extern "C" int func_001DF8F8(void *roomPopup) {
+extern "C" int cFEStateNetCreateRoomPopup_getPassword(void *roomPopup) {
     return (*(int *)((char*)(roomPopup) + (0x6E4)));
 }
 #endif
@@ -2397,13 +2397,13 @@ void* cFEStateMPCircuit__cFEStateMPCircuit(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0880);
+INCLUDE_ASM("fe/fepopupmisc", cFEUseExistingAccount_cFEUseExistingAccount1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEUseExistingAccount_vtbl[];
 extern int cBXString_EmptyString;
 
-extern "C" void* func_001E0880(cFEUseExistingAccount* self)
+extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAccount* self)
 {
     func_001A8500(self, 0, 0);
     int g = cBXString_EmptyString;
@@ -2428,11 +2428,11 @@ extern void* cFEStateSelectPersona_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E08D8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_cFEStateSelectPersona1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001E08D8(cFEStateSelectPersona* self) {
+extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPersona* self) {
     func_001A8500(self, 0, 0);
     (self->mVtbl) = cFEStateSelectPersona_vtbl;
     return ((void*)self);
@@ -2475,13 +2475,13 @@ void func_001E0948(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0950);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_cFEStateChallengePopup1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateChallengePopup_vtbl[];
 extern int D_00441268[];
 
-extern "C" void* func_001E0950(cFEStateChallengePopup* self)
+extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup1(cFEStateChallengePopup* self)
 {
     func_001A8500(self, 0, 0);
     self->mVtbl = cFEStateChallengePopup_vtbl;
@@ -2537,13 +2537,13 @@ int cFEStateChallengePopup_onLoseTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0A08);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern int cBXString_EmptyString;
 
-extern "C" void* func_001E0A08(cFEStateChallengeReceivedPopup* self)
+extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1(cFEStateChallengeReceivedPopup* self)
 {
     func_001A8500(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
@@ -2601,11 +2601,11 @@ extern void* cFEStateOnlineCharacterSelect_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0AC0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001E0AC0(cFEStateOnlineCharacterSelect* self) {
+extern "C" void *cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1(cFEStateOnlineCharacterSelect* self) {
     func_001A8500(self, 0, 0);
     (self->mbConfirmed) = 0;
     (self->mVtbl) = cFEStateOnlineCharacterSelect_vtbl;
@@ -2633,12 +2633,12 @@ void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0B28);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetConfig_cFEStateNetConfig1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateNetConfig_vtbl[];
 
-extern "C" void* func_001E0B28(cFEStateNetConfig* self)
+extern "C" void* cFEStateNetConfig_cFEStateNetConfig1(cFEStateNetConfig* self)
 {
     func_001A8500(self, 0, 0);
     self->miSelectedSetting = 0;
@@ -2679,12 +2679,12 @@ int func_001E0BA8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0BB0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_cFEStateAuthDNAS1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateAuthDNAS_vtbl[];
 
-extern "C" void* func_001E0BB0(cFEStateAuthDNAS* self)
+extern "C" void* cFEStateAuthDNAS_cFEStateAuthDNAS1(cFEStateAuthDNAS* self)
 {
     func_001A8500(self, 0, 0);
     self->mVtbl = cFEStateAuthDNAS_vtbl;
@@ -2744,12 +2744,12 @@ int func_001E0C28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C30);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_cFEStateAuthDNASError1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateAuthDNASError_vtbl[];
 
-extern "C" void* func_001E0C30(cFEStateAuthDNASError* self)
+extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError1(cFEStateAuthDNASError* self)
 {
     func_001A8500(self, 0, 0);
     self->mpustrBody = 0;
@@ -2922,11 +2922,11 @@ extern void* cFEStateCreateDuplicate_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0DD8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate_cFEStateCreateDuplicate1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001E0DD8(cFEStateCreateDuplicate* self) {
+extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreateDuplicate* self) {
     func_001A8500(self, 0, 0);
     (self->mVtbl) = cFEStateCreateDuplicate_vtbl;
     return ((void*)self);
@@ -2961,12 +2961,12 @@ int func_001E0E40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0E48);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateLogin_cFEStateLogin1);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 extern void* cFEStateLogin_vtbl[];
 
-extern "C" void* func_001E0E48(cFEStateLogin* self)
+extern "C" void* cFEStateLogin_cFEStateLogin1(cFEStateLogin* self)
 {
     func_001A8500(self, 0, 0);
     self->mpustrDisconnect = 0;
@@ -3056,44 +3056,44 @@ int cFEStateNetNews_onLoseTransition(void* self)
 }
 #endif
 
-extern void* D_00468050[];
+extern void* cFEStateRelogin_vtbl[];
 extern "C" void* cFEStateLogin__cFEStateLogin(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0EF8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin_cFEStateRelogin1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateLogin_cFEStateLogin(void* self, int);
-extern void* D_00468050[];
+extern void* cFEStateRelogin_vtbl[];
 
-extern "C" void* func_001E0EF8(void* self)
+extern "C" void* cFEStateRelogin_cFEStateRelogin1(void* self)
 {
     cFEStateLogin_cFEStateLogin(self, 0);
-    *(void***)((char*)self + 0x8) = D_00468050;
+    *(void***)((char*)self + 0x8) = cFEStateRelogin_vtbl;
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0F30__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin__cFEStateRelogin__FPv);
 #ifdef SKIP_ASM
-void* func_001E0F30(void* self)
+void* cFEStateRelogin__cFEStateRelogin(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)D_00468050;
+    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateRelogin_vtbl;
     return cFEStateLogin__cFEStateLogin(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0F58__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0F58(void* self)
+int cFEStateRelogin_onLoseTransition(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0F60);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_cFEStateNetMessenger1);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* func_001A8500(void* self, int a1, int a2);
@@ -3114,7 +3114,7 @@ static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F6
     *(int*)((char*)self + 0x6F0) = 0;
 }
 
-extern "C" void* func_001E0F60(cFEStateNetMessenger* self)
+extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger* self)
 {
     func_001A8500(self, 0, 0);
     int d = cBXString_EmptyString;
@@ -3128,18 +3128,18 @@ extern "C" void* func_001E0F60(cFEStateNetMessenger* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0FB8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0FB8(void* self)
+int cFEStateNetMessenger_onLoseTransition(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0FC0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onGainTransition);
 #ifdef SKIP_ASM
-class func_001E0FC0_cObj {
+class cFEStateNetMessenger_onGainTransition_cObj {
 public:
     char pad[0x8];
     virtual void v01();
@@ -3176,9 +3176,9 @@ public:
     virtual void v32();
 };
 
-extern "C" int func_001E0FC0(cFEStateNetMessenger* self)
+extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
 {
-    ((func_001E0FC0_cObj*)self)->v32();
+    ((cFEStateNetMessenger_onGainTransition_cObj*)self)->v32();
     return 1;
 }
 #endif

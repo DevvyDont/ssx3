@@ -397,9 +397,9 @@ extern "C" int func_002D3928(void) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3930);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002C53C8_3930(void*, int) __asm__("func_002C53C8");
+extern "C" void cPS2MemCard_CardChanged_3930(void*, int) __asm__("cPS2MemCard_CardChanged");
 extern "C" void func_002D3930(cPS2MemCard* pS2MemCard) {
-    func_002C53C8_3930(pS2MemCard, (pS2MemCard->mDevice));
+    cPS2MemCard_CardChanged_3930(pS2MemCard, (pS2MemCard->mDevice));
 }
 #endif
 

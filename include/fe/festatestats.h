@@ -8,7 +8,7 @@
 // in festatenetmainmenu.cpp), so the header is named after the class.
 //
 // Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + cFEStateStats_cFEStateStats(mem, pEngine) (cFEStateOnlineMainMenu_onWidgetEvent); the
-// constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and func_001C2D90 (the default one), destructor
+// constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and cFEStateStats_cFEStateStats1 (the default one), destructor
 // cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable cFEStateStats_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen cFEStateStats_onCreateScreen, 7 onGainTransition cFEStateStats_onGainTransition, 9 onInputAlways cFEStateStats_onInputAlways, 12 onUpdate
 // cFEStateStats_onUpdate, 13 cFEStateStats_onMenuGainFocus, 18 onWidgetCreate cFEStateStats_onWidgetCreate, 19 onWidgetEvent cFEStateStats_onWidgetEvent, 20
@@ -18,7 +18,7 @@
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). No On Tour DWARF and no
 // preview accessors exist for this class, so the own fields are named from their retail use. Evidence tags:
-//   [R] retail's constructors cFEStateStats_cFEStateStats / func_001C2D90 and destructor cFEStateStats__cFEStateStats (and cFEStateNet's);
+//   [R] retail's constructors cFEStateStats_cFEStateStats / cFEStateStats_cFEStateStats1 and destructor cFEStateStats__cFEStateStats (and cFEStateNet's);
 //   [P] the July 2003 preview (see fe/festatenet.h);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
@@ -32,7 +32,7 @@ struct cFEStateStats {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateStats_vtbl (32 slots), stored by cFEStateStats_cFEStateStats / func_001C2D90 after the cFEStateNet ctor and by
+    void** mVtbl;                   // 0x008 [R] cFEStateStats_vtbl (32 slots), stored by cFEStateStats_cFEStateStats / cFEStateStats_cFEStateStats1 after the cFEStateNet ctor and by
                                     //       the destructor cFEStateStats__cFEStateStats
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateStats_cFEStateStats stores 0x42

@@ -179,7 +179,7 @@ struct cPS2GraphicsMan {
     unsigned short unk_59B0[2][4];  // 0x59B0 [R] ctor's fourth array loop (2); [U] per-view scissor, func_0036B158/func_0036C790
     int unk_59C0;                   // 0x59C0 [U] accessor func_003956D8; func_00363490 loop count; [X] numViews (split screen)
     int NumDisplayModes;            // 0x59C4 [O] cPSPGraphicsMan; [P] GetNumDisplayModes (cPS2GraphicsMan_GetNumDisplayModes)
-    int CurrentDisplayMode;         // 0x59C8 [O]; [P] GetDisplayMode (func_00395328); [R] Init stores -1
+    int CurrentDisplayMode;         // 0x59C8 [O]; [P] GetDisplayMode (cPS2GraphicsMan_GetDisplayMode); [R] Init stores -1
     tDisplayMode* DisplayModes;     // 0x59CC [O]; [P] GetScreenWidth/Height read [CurrentDisplayMode] (0xA4 each)
     int unk_59D0;                   // 0x59D0 [R] Init; [U] func_0037BD98; [X] dither (DTHE)
     char unk_59D4[0xC];             // 0x59D4
@@ -209,7 +209,7 @@ struct cPS2GraphicsMan {
     short unk_5A46;                 // 0x5A46 [X] ffmd
     short unk_5A48;                 // 0x5A48 [X] omode
     char unk_5A4A[0x2];             // 0x5A4A padding
-    int unk_5A4C;                   // 0x5A4C [U] accessor func_00395320; [X] progressive
+    int unk_5A4C;                   // 0x5A4C [U] accessor cPS2GraphicsMan_GetDTV; [X] progressive
     int mFrameBufferWidth;          // 0x5A50 [P] GetFrameBufferWidth (func_00395558, by position; shift +0xC30); [X] fbw
     int unk_5A54;                   // 0x5A54 [X] dispWidth
     int unk_5A58;                   // 0x5A58 [X] dispHeight

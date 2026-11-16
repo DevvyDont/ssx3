@@ -15,7 +15,7 @@
 //                             (7 slots: 1 purge, 2 reset, 3 setupEmitter, 4 dtor, 5 Allocate, 6 writeToReplayFrame,
 //                             7 readFromReplayFrame).
 //   cDynamicEmitter           : cBaseClass_DynamicEmitter, no members (size 0x200, On Tour too); vtable
-//                             cDynamicEmitter_vtbl (own dtor in slot 4); constructed inline by func_00345C90.
+//                             cDynamicEmitter_vtbl (own dtor in slot 4); constructed inline by cDynamicParticleModifier_cDynamicParticleModifier1.
 //   cDynamicColourEmitter     : cBaseClass_DynamicEmitter + a colour per sub-emitter. Size 0x210: cMemMan_alloc(0x210,
 //                             "mEmitter") + ctor cDynamicColourEmitter_cDynamicColourEmitter in cBoardSparkFX's ctor. Vtable
 //                             cDynamicColourEmitter_vtbl.
@@ -26,8 +26,8 @@
 // starts there: the preview pairs cStaticEmitter::render with particle.cpp line 410), the dynamic emitters in
 // src/render/graphicsman.cpp (ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter, dtor) and src/render/particle.cpp (0x370C60-0x3717C0); see each
 // class's methods.txt. The draw calls are cPS2GraphicsMan virtuals: slot 82 RenderParticleEmitter(const
-// tParticleEmitter&) cPS2GraphicsMan_RenderParticleEmitter, slot 83 (cDynamicEmitter*) func_003807A0, slot 84 (cDynamicColourEmitter*)
-// func_00380CE0.
+// tParticleEmitter&) cPS2GraphicsMan_RenderParticleEmitter, slot 83 (cDynamicEmitter*) cPS2GraphicsMan_RenderDynamicParticleEmitter, slot 84 (cDynamicColourEmitter*)
+// cPS2GraphicsMan_RenderDynamicParticleEmitter1.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet; the base's fields are
 // written out inline in each subclass (keep them in step). Evidence tags:
@@ -372,7 +372,7 @@ struct cDynamicColourEmitter {
     // --- cDynamicColourEmitter
     char unk_1FC[0x4];              // 0x1FC the base's tail padding (cBaseClass_DynamicEmitter is 0x200)
     int m_IsAvalanche;              // 0x200 [O] bool (retail 4 bytes); [R] ctor cDynamicColourEmitter_cDynamicColourEmitter zeroes it; [U]
-                                    //       cPS2GraphicsMan slot 84 (func_00380CE0) reads it
+                                    //       cPS2GraphicsMan slot 84 (cPS2GraphicsMan_RenderDynamicParticleEmitter1) reads it
     tPackedRGBA* m_colours;         // 0x204 [O] (On Tour t4Vector*; retail 4 bytes per entry: Allocate "DynEmitterData
                                     //       Colours", the preview's getSubEmitterPositionVelocityColour(int, ...,
                                     //       tPackedRGBA&)); [R] ctor 0; [U] Allocate, purge, reset (0, 0, 0, 0), update

@@ -642,7 +642,7 @@ extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addDynamicParticle);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void* func_00345C90(void* mem, void* desc, void* inst, int index, void* a4);
+extern "C" void* cDynamicParticleModifier_cDynamicParticleModifier1(void* mem, void* desc, void* inst, int index, void* a4);
 extern const char str_DynamicParticleModifier[];
 
 /**
@@ -659,7 +659,7 @@ extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int in
         operator_delete((int*)desc);
         return;
     }
-    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), desc, self->Instance, index, offset));
+    cMoveNode_addEffectModifier(self, cDynamicParticleModifier_cDynamicParticleModifier1(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), desc, self->Instance, index, offset));
 }
 #endif
 

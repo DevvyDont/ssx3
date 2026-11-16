@@ -4402,9 +4402,9 @@ int cTransformModifier_isRootTransformDirty(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360BB8__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform1__FPv);
 #ifdef SKIP_ASM
-int func_00360BB8(void* self)
+int cTransformModifier_getRootTransform1(void* self)
 {
     return 0;
 }
@@ -6488,9 +6488,9 @@ int cAvaSplineModifier_getTransformType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361B10__FPv);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRootTransform__FPv);
 #ifdef SKIP_ASM
-void* func_00361B10(void* self)
+void* cAvaSplineModifier_getRootTransform(void* self)
 {
     return (char*)self + 0x40;
 }
