@@ -2699,11 +2699,11 @@ INCLUDE_ASM("render/particle", func_00375A08);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00492878[];
-extern "C" void* func_00395288(void* self);
+extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(void* self);
 
 extern "C" void* func_00375A08(void)
 {
-    return func_00395288(cMemMan_alloc(0x75E0, D_00492878, 0, 0));
+    return cPS2GraphicsMan_cPS2GraphicsMan(cMemMan_alloc(0x75E0, D_00492878, 0, 0));
 }
 #endif
 

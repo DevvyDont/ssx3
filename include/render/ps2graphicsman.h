@@ -3,16 +3,16 @@
 
 // cPS2GraphicsMan: the PS2 renderer (one instance). It owns the matrix/viewport stacks, the projective textures,
 // the deferred draw list (cPS2DeferManager), the texture manager, the VIF/GIF double buffers and the DMA kick thread
-// that flips the frame. Size 0x75E0: cMemMan_alloc(0x75E0, "PS2GraphicsMan") + cPS2GraphicsMan ctor func_00395288 in
-// its create function func_00375A08. Base class cGraphicsMan (ctor func_003691F8, dtor cGraphicsMan__cGraphicsMan, vtable
+// that flips the frame. Size 0x75E0: cMemMan_alloc(0x75E0, "PS2GraphicsMan") + cPS2GraphicsMan ctor cPS2GraphicsMan_cPS2GraphicsMan in
+// its create function func_00375A08. Base class cGraphicsMan (ctor cGraphicsMan_cGraphicsMan, dtor cGraphicsMan__cGraphicsMan, vtable
 // D_00493950): its data is 0x0-0x10D8 and it declares the virtuals, so the vptr is at +0x10D8 (cPS2GraphicsMan's
-// vtable D_00493260, 124 slots, stored by func_00395288). EA paths (preview asserts): source/render/graphicsman.cpp,
+// vtable D_00493260, 124 slots, stored by cPS2GraphicsMan_cPS2GraphicsMan). EA paths (preview asserts): source/render/graphicsman.cpp,
 // source/render/graphicsman.h, source/render/ps2graphicsman.cpp/.h.
-// Instance: cGraphicsMan::TheGraphicsMan = cGraphicsMan_TheGraphicsMan (gp+0x2A90), stored by the cGraphicsMan ctor (func_003691F8)
+// Instance: cGraphicsMan::TheGraphicsMan = cGraphicsMan_TheGraphicsMan (gp+0x2A90), stored by the cGraphicsMan ctor (cGraphicsMan_cGraphicsMan)
 // and cleared by its dtor (cGraphicsMan__cGraphicsMan); every holder points at this cPS2GraphicsMan.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
-//   [R] retail's constructors (func_003691F8, func_00395288), Init (vtable slot 2, func_00375A40) and the allocation;
+//   [R] retail's constructors (cGraphicsMan_cGraphicsMan, cPS2GraphicsMan_cPS2GraphicsMan), Init (vtable slot 2, func_00375A40) and the allocation;
 //   [P] the July 2003 preview's out-of-line accessors (GetView, GetDeferMan, GetTextureMan, GetNumProjTextures,
 //       GetGuardBandMatrix, GetNetMatrix, GetTVDisplayFormat, GetIrradiance, Get/SetSpecID, SkipNextPageFlip,
 //       ActiveDrawState, CurrentDrawState, GetCurrentFBFormat ...), matched to retail's own accessors in render/font

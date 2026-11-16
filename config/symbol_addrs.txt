@@ -3392,6 +3392,11 @@ cPS2GraphicsMan_IdentityView = 0x00395CF0; //type:func
 cPS2GraphicsMan_TranslateView = 0x00395D28; //type:func
 cPS2GraphicsMan_RotateView = 0x00395D60; //type:func
 
+// fn_gfx_ctors: names by evidence (docs/function_names.tsv)
+cGraphicsMan_cGraphicsMan = 0x003691F8; //type:func
+cPS2GraphicsMan__cPS2GraphicsMan__FPv = 0x00395268; //type:func
+cPS2GraphicsMan_cPS2GraphicsMan = 0x00395288; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

@@ -1229,7 +1229,7 @@ extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_cGraphicsMan);
 #ifdef SKIP_ASM
 extern "C" void func_00416210(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
@@ -1301,7 +1301,7 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
     r->tex = t;
 }
 
-extern "C" void* func_003691F8(char* self)
+extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
 {
     *(void***)(self + 0x10D8) = D_00493950;
     new (self + 0xE84) sGfxState_691F8;

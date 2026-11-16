@@ -2695,18 +2695,18 @@ extern "C" sFontState50C0* func_003950C0(sFontState50C0* self, const sFontState5
 extern "C" void* cGraphicsMan__cGraphicsMan(void* self);
 
 //100%
-INCLUDE_ASM("render/font", func_00395268__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan__cPS2GraphicsMan__FPv);
 #ifdef SKIP_ASM
-void* func_00395268(void* self)
+void* cPS2GraphicsMan__cPS2GraphicsMan(void* self)
 {
     return cGraphicsMan__cGraphicsMan(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395288);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_cPS2GraphicsMan);
 #ifdef SKIP_ASM
-extern "C" void* func_003691F8(void* self);
+extern "C" void* cGraphicsMan_cGraphicsMan(void* self);
 extern void* D_00493260[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -2716,9 +2716,9 @@ struct sRenderSlot5288 {
     sRenderSlot5288() {}
 };
 
-extern "C" void* func_00395288(cPS2GraphicsMan* self)
+extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 {
-    func_003691F8(self);
+    cGraphicsMan_cGraphicsMan(self);
     self->mVtbl = D_00493260;
     new ((char*)self + 0x10E0) sRenderSlot5288[12];
     new ((char*)self + 0x11A0) sRenderSlot5288[8];
