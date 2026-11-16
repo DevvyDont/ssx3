@@ -8,8 +8,8 @@
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:
 // d:/ssx/code/source/ui/uitextscroll.cpp (preview assert path); retail keeps its methods in ui/uitext
 // (0x3A1148-0x3A2068) and its inline accessors in ui/uivector (0x3A6250-0x3A64F8).
-// Methods: vtable cUITextScroll_vtbl slots 0 ~cUITextScroll (cUITextScroll__cUITextScroll), 9 setUIData (func_003A11B8), 14 onInput
-// (func_003A13E0), 15 updateLocale (func_003A1360), 16 render2D (func_003A1588), 21 getType (func_003A6330); line
+// Methods: vtable cUITextScroll_vtbl slots 0 ~cUITextScroll (cUITextScroll__cUITextScroll), 9 setUIData (cUITextScroll_setUIData), 14 onInput
+// (cUITextScroll_onInput), 15 updateLocale (cUITextScroll_updateLocale), 16 render2D (cUITextScroll_render2D), 21 getType (func_003A6330); line
 // buffer helpers func_003A12D0, func_003A18C0 (free lines), cUITextScroll_allocLine, func_003A1F90; text setters
 // func_003A19F8 / func_003A1C80 (ASCII), cUITextScroll_addUnicodeString, func_003A1CF0 / func_003A1D30 (Unicode),
 // func_003A1F18 (string id).
@@ -65,24 +65,24 @@ struct cUITextScroll {
     // --- cUITextScroll
     tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor cUITextScroll_cUITextScroll clears mMode/mShadow/mUnicode/mStaticColour
                                      //       (lbu/andi 0xC6/sb 0x74), func_003A6250 calls its ctor func_003A6600; [U] setUIData
-                                     //       func_003A11B8 (lw/sw), accessors func_003A6338..func_003A6398, func_003A6480/90
-    tARGB mShadowColour;             // 0x078 [O]; [U] setUIData func_003A11B8 copies it (ldl/ldr); func_003A63B8 (set)
+                                     //       cUITextScroll_setUIData (lw/sw), accessors func_003A6338..func_003A6398, func_003A6480/90
+    tARGB mShadowColour;             // 0x078 [O]; [U] setUIData cUITextScroll_setUIData copies it (ldl/ldr); func_003A63B8 (set)
     char mInputMap[4];               // 0x088 [O]; [R] func_003A1310 (called by the ctor) fills the four bytes; [U] onInput
-                                     //       func_003A13E0 (lb 0x88 / 0x89)
+                                     //       cUITextScroll_onInput (lb 0x88 / 0x89)
     cList mList;                     // 0x08C [O] the text lines' child objects (util/list.h); [R] ctor func_003977E8 on
                                      //       this + 0x8C, dtor cUITextScroll__cUITextScroll (cList_destroyList, vptrs 0xA4 / 0xA0 / 0x94);
                                      //       createObjectByStruct adds the record's children (cList_addToEnd on o + 0x8C);
                                      //       [U] func_003A63E0..func_003A6460 (first/last/getByIndex/addToFront/addToEnd)
-    tARGB mSelectedColour;           // 0x0A8 [O]; [U] func_003A64A0 (set, ldl/ldr), render2D func_003A1588
+    tARGB mSelectedColour;           // 0x0A8 [O]; [U] func_003A64A0 (set, ldl/ldr), render2D cUITextScroll_render2D
     cUIThing* mpScrollBar;           // 0x0B8 [O] cUIScrollBar*; [R] = 0; [U] func_003A64C8 setScrollBar (sw); render2D
     unsigned short* mpLineOffset;    // 0x0BC [O] line start offsets (allocated); [R] = 0; [U] cUITextScroll_allocLine,
                                      //       func_003A18C0 (free), func_003A1F90, cUITextScroll_addUnicodeString, render2D
-    unsigned int mStringID;          // 0x0C0 [O]; [R] = 0; [U] func_003A1C80 / func_003A1F18 (sw), func_003A1360 (lw)
+    unsigned int mStringID;          // 0x0C0 [O]; [R] = 0; [U] func_003A1C80 / func_003A1F18 (sw), cUITextScroll_updateLocale (lw)
     unsigned short mSelectedIndex;   // 0x0C4 [O]; [R] = 0 (sh); [U] func_003A64E8 (sh), func_003A64F0 (lhu), onInput
     unsigned short mLinesOffset;     // 0x0C6 [O]; [R] = 0; [U] func_003A64D0 (sh), func_003A64D8 (lhu), onInput, render2D
     unsigned short mLineSize;        // 0x0C8 [O] line count; [R] = 0; [U] func_003A64E0 (lhu), allocLine / func_003A18C0
     char unk_0CA[0x2];               // 0x0CA padding
-    float mPixelOffset;              // 0x0CC [O] float; [R] = 0 (sw zero); [U] render2D func_003A1588 (lwc1 $f13 = y offset)
+    float mPixelOffset;              // 0x0CC [O] float; [R] = 0 (sw zero); [U] render2D cUITextScroll_render2D (lwc1 $f13 = y offset)
 };
 
 CHECK_OFFSET(cUITextScroll, mpPrev, 0x000);

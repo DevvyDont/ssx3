@@ -1264,9 +1264,9 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiengine", func_00399730);
+INCLUDE_ASM("ui/uiengine", cUIIcon_setTextureByHashValue);
 #ifdef SKIP_ASM
-extern "C" void func_00399730(cUIIcon* self, int id)
+extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 {
     void* a = self->mpScreen;
     void* b = *(void**)((char*)a + 0xD0);
@@ -1327,7 +1327,7 @@ extern "C" cUIListBox_cUIListBox_sObj* cUIListBox_cUIListBox(cUIListBox* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399820);
+INCLUDE_ASM("ui/uiengine", cUIListBox_setUIData);
 #ifdef SKIP_ASM
 // PORT: cUIThing_setUIData really takes (self, data); the unit declares it with one argument.
 void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
@@ -1357,7 +1357,7 @@ struct sUIData9820 {
     unsigned char r, g, b, a;   // 0x24
 };
 
-extern "C" void func_00399820(sUIObj9820* self, sUIData9820* data)
+extern "C" void cUIListBox_setUIData(sUIObj9820* self, sUIData9820* data)
 {
     cUIThing_setUIData_2(self, data);
     self->mode = data->mode & 3;
@@ -1394,7 +1394,7 @@ extern "C" int func_00399920(cUIListBox* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399970);
+INCLUDE_ASM("ui/uiengine", cUIListBox_onInput);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cUIThing;
@@ -1434,7 +1434,7 @@ static inline int isClear_9970(int flags)
 
 // List input: up/down move the current item (wrapping when flag 0x80 is set; flag 1 swaps the directions),
 // accept notifies; the listener gets the result.
-extern "C" int func_00399970(cUIListBox* self, void* in)
+extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
 {
     if (self->mNumEntries == 0)
         return 0;
@@ -1569,29 +1569,29 @@ extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned shor
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiengine", func_00399E28);
+INCLUDE_ASM("ui/uiengine", cUIListBox_updateLocale);
 #ifdef SKIP_ASM
 extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned short* str);
 
-struct func_00399E28_sEntry {
+struct cUIListBox_updateLocale_sEntry {
     int id;
     unsigned short* str;
     int pad[3];
 };
 
-struct func_00399E28_sObj {
+struct cUIListBox_updateLocale_sObj {
     char pad[0x98];
-    func_00399E28_sEntry entries[32];
+    cUIListBox_updateLocale_sEntry entries[32];
     unsigned char count;
 };
 
-struct func_00399E28_sVEntry {
+struct cUIListBox_updateLocale_sVEntry {
     short delta;
     short index;
     void* fn;
 };
 
-extern "C" void func_00399E28(func_00399E28_sObj* self)
+extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
 {
     void* a = *(void**)((char*)self + 0x5C);
     void* b = *(void**)((char*)a + 0xD0);
@@ -1601,21 +1601,21 @@ extern "C" void func_00399E28(func_00399E28_sObj* self)
         for (unsigned char i = 0; i < self->count; i++) {
             int id = self->entries[i].id;
             if (id != 0) {
-                func_00399E28_sVEntry* vt = *(func_00399E28_sVEntry**)(loc + 4);
+                cUIListBox_updateLocale_sVEntry* vt = *(cUIListBox_updateLocale_sVEntry**)(loc + 4);
                 unsigned short* s = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
                 if (s != 0) {
                     func_00399D80((cUIListBox*)self, i, s);
                 }
             }
         }
-        func_00399E28_sVEntry* vt2 = *(func_00399E28_sVEntry**)((char*)self + 8);
+        cUIListBox_updateLocale_sVEntry* vt2 = *(cUIListBox_updateLocale_sVEntry**)((char*)self + 8);
         ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399F00);
+INCLUDE_ASM("ui/uiengine", cUIListBox_render2D);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
@@ -1702,7 +1702,7 @@ static inline void setLayer_9F00(sText_9F00* self)
     *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->flags14)->layer + 9) << 5) & 0x3E0);
 }
 
-extern "C" void func_00399F00(cUIListBox* self, float x, float y)
+extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
 {
     sFont_9F00* font = (sFont_9F00*)func_00399920(self);
     if (font == 0 || *((unsigned char*)self + 0x318) == 0) {

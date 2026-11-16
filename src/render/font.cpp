@@ -964,7 +964,7 @@ extern "C" float func_00392C60(cFont* font, unsigned short c)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392D18);
+INCLUDE_ASM("render/font", cPlayerLights_Clear);
 #ifdef SKIP_ASM
 struct sFontVec3 {
     float x, y, z;
@@ -975,7 +975,7 @@ struct sFontQuad {
 } __attribute__((aligned(16)));
 
 
-extern "C" void func_00392D18(cPlayerLights* self)
+extern "C" void cPlayerLights_Clear(cPlayerLights* self)
 {
     sFontVec3 t;
     t.x = 0.0f;

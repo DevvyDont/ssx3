@@ -298,13 +298,13 @@ struct func_001694B8_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 extern void* D_0045C850[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
-extern "C" void* func_0015FFF0(void* self);
+extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 extern "C" void* func_001694B8(void* self)
 {
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C850;
-    func_0015FFF0((char*)self + 0x74);
+    cCameraJitterer_cCameraJitterer((char*)self + 0x74);
     *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
     *(int*)((char*)self + 0xC) = 0x56;
     *(int*)((char*)self + 0x44) = 0;
@@ -662,13 +662,13 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169CF8);
 extern void* D_0045C7E8[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
-extern "C" void* func_0015FFF0(void* self);
+extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 extern "C" void* func_00169CF8(void* self)
 {
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C7E8;
-    func_0015FFF0((char*)self + 0x74);
+    cCameraJitterer_cCameraJitterer((char*)self + 0x74);
     *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
     *(int*)((char*)self + 0xC) = 0x57;
     *(int*)((char*)self + 0x40) = 0;
@@ -990,13 +990,13 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016A458);
 extern void* D_0045C780[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
-extern "C" void* func_0015FFF0(void* self);
+extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 extern "C" void* func_0016A458(void* self)
 {
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C780;
-    func_0015FFF0((char*)self + 0x70);
+    cCameraJitterer_cCameraJitterer((char*)self + 0x70);
     *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
     *(int*)((char*)self + 0xC) = 0x58;
     *(int*)((char*)self + 0x40) = 0;
@@ -1383,13 +1383,13 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD38);
 extern void* D_0045C718[];
 extern func_001694B8_sVec4 D_004FF130;
 extern "C" void* func_00169418(void* self);
-extern "C" void* func_0015FFF0(void* self);
+extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 extern "C" void* func_0016AD38(void* self)
 {
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C718;
-    func_0015FFF0((char*)self + 0x70);
+    cCameraJitterer_cCameraJitterer((char*)self + 0x70);
     *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
     *(int*)((char*)self + 0xC) = 0x59;
     *(int*)((char*)self + 0x40) = 0;

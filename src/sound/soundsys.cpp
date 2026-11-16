@@ -12460,10 +12460,10 @@ INCLUDE_ASM("sound/soundsys", func_002A6D78);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_002A4CF8(tCrowdEventData*);
 struct sSndFileBuf;
-extern "C" sSndFileBuf* func_002A77F8(FileParser* self, const char* name, int flags);
+extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name, int flags);
 extern "C" int func_002A7BF8(FileParser* self, const char* name);
 extern "C" void func_002A7040(cCrowdSys* self, void* parser);
-extern "C" void func_002A7890(FileParser* self, int flags);
+extern "C" void FileParser__FileParser(FileParser* self, int flags);
 extern const char D_00483108[];
 extern const char D_004A3570[];
 
@@ -12511,12 +12511,12 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
         self->voices[i].fD8 = v;
     }
     sSnd6D78Parser p;
-    func_002A77F8((FileParser*)((sSndFileBuf*)&p), name, 0x100);
+    FileParser_FileParser((FileParser*)((sSndFileBuf*)&p), name, 0x100);
     p.cur = p.data;
     if (func_002A7BF8((FileParser*)(&p), D_004A3570)) func_002A7040((cCrowdSys*)self, &p);
     p.cur = p.data;
     if (func_002A7BF8((FileParser*)(&p), key)) func_002A7040((cCrowdSys*)self, &p);
-    func_002A7890((FileParser*)(&p), 2);
+    FileParser__FileParser((FileParser*)(&p), 2);
 }
 #endif
 
@@ -12882,7 +12882,7 @@ extern "C" int func_002A77C8(cCrowdSys* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A77F8);
+INCLUDE_ASM("sound/soundsys", FileParser_FileParser);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_size(const char* name);
 extern "C" int func_003E1B68(const char* name, void* buf, int size);
@@ -12895,7 +12895,7 @@ struct sSndFileBuf {
     char* cur;
 };
 
-extern "C" sSndFileBuf* func_002A77F8(FileParser* self, const char* name, int flags)
+extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name, int flags)
 {
     self->mBasePtr = 0;
     self->mPtr = 0;
@@ -12911,12 +12911,12 @@ extern "C" sSndFileBuf* func_002A77F8(FileParser* self, const char* name, int fl
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7890);
+INCLUDE_ASM("sound/soundsys", FileParser__FileParser);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
-extern "C" void func_002A7890(FileParser* self, int flags)
+extern "C" void FileParser__FileParser(FileParser* self, int flags)
 {
     void* p = self->mBasePtr;
     if (p != 0) {

@@ -3309,7 +3309,7 @@ INCLUDE_ASM("ai/rider", cRider_updateSplit11);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
 extern "C" void func_002ED490(void* obj, float a, float b, float c);
-extern "C" void func_00392D18(void* p);
+extern "C" void cPlayerLights_Clear(void* p);
 
 struct sRiderVE_001218D0
 {
@@ -3323,7 +3323,7 @@ struct sRiderVE_001218D0
  *
  * When mGroundPolyId is valid, the BE section id of its world section (its low byte) is stored in
  * mGroundMaterial, so that field holds a section id here. Then calls func_002ED490(AI index, contact x,
- * contact y, -99999) (lens FX, unknown) and clears the handler's cPlayerLights (func_00392D18).
+ * contact y, -99999) (lens FX, unknown) and clears the handler's cPlayerLights (cPlayerLights_Clear).
  */
 extern "C" void cRider_updateSplit11(cRider* self)
 {
@@ -3333,7 +3333,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
     sRiderVE_001218D0* vt = *(sRiderVE_001218D0**)obj;
     func_002ED490(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
     char* p = (char*)self->mRiderHandler;
-    func_00392D18(p ? p + 0xD30 : 0);
+    cPlayerLights_Clear(p ? p + 0xD30 : 0);
 }
 #endif
 

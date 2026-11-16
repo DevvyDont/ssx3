@@ -1697,3 +1697,33 @@ fn_cfu_ctors	0x003A47D8	cListNode_cListNode	func_003A47D8	constructor: stores vt
 fn_cfu_ctors	0x003A47F8	cListNode__cListNode	func_003A47F8	destructor: slot 1 of vtable 00494CC0 (D_00494CC0); stored by the constructor func_003A47D8; header agent: ~cListNode
 fn_cfu_ctors	0x003A5658	cUIListBox__cUIListBox	func_003A5658	destructor: slot 1 of vtable 00494798 (D_00494798); stored by the constructor func_00399768; header agent: ~cUIListBox
 fn_cfu_ctors	0x003A62A0	cUITextScroll__cUITextScroll	func_003A62A0	destructor: slot 1 of vtable 00494278 (D_00494278); stored by the constructor func_003A1148; header agent: ~cUITextScroll
+fn_cascade3	0x0015F6B0	cRiderCameraTarget_getRemainingAirTime	func_0015F6B0	On Tour cRiderCameraTarget::getRemainingAirTime(void) const (address-order pair, held); retail typed self cRiderCameraTarget*, 1 params
+fn_cascade3	0x0015F6C8	cRiderCameraTarget_getApexTime	func_0015F6C8	On Tour cRiderCameraTarget::getApexTime(void) const (address-order pair, held); retail typed self cRiderCameraTarget*, 1 params
+fn_cascade3	0x0015F720	cRiderCameraTarget_isAirPredictorDone	func_0015F720	On Tour cRiderCameraTarget::isAirPredictorDone(void) const (address-order pair, held); retail typed self cRiderCameraTarget*, 1 params
+fn_cascade3	0x0015F780	cRiderCameraTarget_getLandingAngle	func_0015F780	On Tour cRiderCameraTarget::getLandingAngle(void) const (address-order pair, held); retail typed self cRiderCameraTarget*, 1 params
+fn_cascade3	0x0015FFF0	cCameraJitterer_cCameraJitterer	func_0015FFF0	On Tour cCameraJitterer::cCameraJitterer(void) (address-order pair, held); retail typed self cCameraJitterer*, 1 params
+fn_cascade3	0x00161370	cSplineCamAlgorithm__cSplineCamAlgorithm	func_00161370	On Tour cSplineCamAlgorithm::~cSplineCamAlgorithm(void) (address-order pair, held); retail typed self cSplineCamAlgorithm*, 2 params
+fn_cascade3	0x001613F0	cSplineCamAlgorithm_update	func_001613F0	On Tour cSplineCamAlgorithm::update(void) (address-order pair, held); retail typed self cSplineCamAlgorithm*, 1 params
+fn_cascade3	0x00161630	cSplineCamAlgorithm_snap	func_00161630	On Tour cSplineCamAlgorithm::snap(int) (address-order pair, held); retail typed self cSplineCamAlgorithm*, 2 params
+fn_cascade3	0x001624E8	cLookAtChaseAlgorithm_updateAlgorithm	func_001624E8	On Tour cLookAtChaseAlgorithm::updateAlgorithm(bool) (address-order pair, held); retail typed self cLookAtChaseAlgorithm*, 2 params
+fn_cascade3	0x00166C60	cLookAtChaseAlgorithm_snap	func_00166C60	vtable cLookAtChaseAlgorithm_vtbl (0045BBC0) slot 3; follows cManualCameraAlgorithm_snap__FPv, cSPOKEChaseAlgorithm_snap
+fn_cascade3	0x00166F28	cLookAtChaseAlgorithm_snapCurrent	func_00166F28	On Tour cLookAtChaseAlgorithm::snapCurrent(void) (address-order pair, held); retail typed self cLookAtChaseAlgorithm*, 1 params
+fn_cascade3	0x00177E90	cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm__FPv	func_00177E90__FPv	vtable cSPOKEChaseAlgorithm_vtbl (0045CCC8) slot 1; follows cBasicCameraAlgorithm__cBasicCameraAlgorithm, cChaseAlgorithm__cChaseAlgorithm, cEditorCameraAlgorithm__cEditorCameraAlgorithm, cLookAtChaseAlgorithm__cLookAtChaseAlgorithm (+1)
+fn_cascade3	0x002A77F8	FileParser_FileParser	func_002A77F8	On Tour FileParser::FileParser(const char *, int) (address-order pair, held); retail typed self FileParser*, 3 params
+fn_cascade3	0x002A7890	FileParser__FileParser	func_002A7890	On Tour FileParser::~FileParser(void) (address-order pair, held); retail typed self FileParser*, 2 params
+fn_cascade3	0x00392D18	cPlayerLights_Clear	func_00392D18	On Tour cPlayerLights::Clear(void) (address-order pair, held); retail typed self cPlayerLights*, 1 params
+fn_cascade3	0x00399730	cUIIcon_setTextureByHashValue	func_00399730	On Tour cUIIcon::setTextureByHashValue(int) (address-order pair, held); retail typed self cUIIcon*, 2 params
+fn_cascade3	0x00399820	cUIListBox_setUIData	func_00399820	vtable cUIListBox_vtbl (00494798) slot 10; follows cUIGroup_setUIData__FPv, cUIIcon_setUIData, cUIMenu_setUIData, cUIPair_setUIData__FPv (+4)
+fn_cascade3	0x00399970	cUIListBox_onInput	func_00399970	vtable cUIListBox_vtbl (00494798) slot 15; follows cUIGroup_onInput, cUIMenu_onInput, cUIPair_onInput, cUIThing_onInput__FPv
+fn_cascade3	0x00399E28	cUIListBox_updateLocale	func_00399E28	vtable cUIListBox_vtbl (00494798) slot 16; follows cUIGroup_updateLocale, cUIPair_updateLocale, cUIText_updateLocale, cUIThing_updateLocale__FPv
+fn_cascade3	0x00399F00	cUIListBox_render2D	func_00399F00	vtable cUIListBox_vtbl (00494798) slot 17; follows cUIGroup_render2D, cUIIcon_render2D, cUIMenu_render2D, cUIPair_render2D (+4)
+fn_cascade3	0x0039D948	cUIScrollBar_setUIData__FPv	func_0039D948__FPv	vtable cUIScrollBar_vtbl (004944C8) slot 10; follows cUIGroup_setUIData__FPv, cUIIcon_setUIData, cUIMenu_setUIData, cUIPair_setUIData__FPv (+4)
+fn_cascade3	0x0039D968	cUIScrollBar_render2D	func_0039D968	vtable cUIScrollBar_vtbl (004944C8) slot 17; follows cUIGroup_render2D, cUIIcon_render2D, cUIMenu_render2D, cUIPair_render2D (+4)
+fn_cascade3	0x0039DE68	cUIScrollBar_setScrollVisibile	func_0039DE68	On Tour cUIScrollBar::setScrollVisibile(bool) (address-order pair, held); retail typed self cUIScrollBar*, 2 params
+fn_cascade3	0x0039DFB0	cUISlider_setUIData	func_0039DFB0	vtable cUISlider_vtbl (00494348) slot 10; follows cUIGroup_setUIData__FPv, cUIIcon_setUIData, cUIMenu_setUIData, cUIPair_setUIData__FPv (+4)
+fn_cascade3	0x0039DFE8	cUISlider_onInput	func_0039DFE8	vtable cUISlider_vtbl (00494348) slot 15; follows cUIGroup_onInput, cUIMenu_onInput, cUIPair_onInput, cUIThing_onInput__FPv
+fn_cascade3	0x0039E130	cUISlider_render2D	func_0039E130	vtable cUISlider_vtbl (00494348) slot 17; follows cUIGroup_render2D, cUIIcon_render2D, cUIMenu_render2D, cUIPair_render2D (+4)
+fn_cascade3	0x003A11B8	cUITextScroll_setUIData	func_003A11B8	vtable cUITextScroll_vtbl (00494278) slot 10; follows cUIGroup_setUIData__FPv, cUIIcon_setUIData, cUIMenu_setUIData, cUIPair_setUIData__FPv (+4)
+fn_cascade3	0x003A1360	cUITextScroll_updateLocale	func_003A1360	vtable cUITextScroll_vtbl (00494278) slot 16; follows cUIGroup_updateLocale, cUIPair_updateLocale, cUIText_updateLocale, cUIThing_updateLocale__FPv
+fn_cascade3	0x003A13E0	cUITextScroll_onInput	func_003A13E0	vtable cUITextScroll_vtbl (00494278) slot 15; follows cUIGroup_onInput, cUIMenu_onInput, cUIPair_onInput, cUIThing_onInput__FPv
+fn_cascade3	0x003A1588	cUITextScroll_render2D	func_003A1588	vtable cUITextScroll_vtbl (00494278) slot 17; follows cUIGroup_render2D, cUIIcon_render2D, cUIMenu_render2D, cUIPair_render2D (+4)

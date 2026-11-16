@@ -11,7 +11,7 @@
 // tables of cSSXAudio) and reserves 0x810 (the next local starts 0x810 after it, e.g. func_002B0088). No vtable.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructor func_002A77F8 (FileParser(const char* Filename, int MemType)) and destructor func_002A7890;
+//   [R] the constructor FileParser_FileParser (FileParser(const char* Filename, int MemType)) and destructor FileParser__FileParser;
 //   [O] On Tour's FileParser (same three members + mTempStr[2048], same offsets);
 //   [U] how the retail methods use the field.
 

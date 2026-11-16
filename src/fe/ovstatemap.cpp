@@ -946,7 +946,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_00154678(sBounds_96A8* out, void* iface, int id);
 extern "C" void* func_0039FB30(void* self, void* parent, int a2);
 extern "C" void func_0021CCC8(void* p);
-extern "C" void func_00399730(void* obj, int hash);
+extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern char D_004718F0[];
 extern char D_00471908[];
 extern void* cUIIcon_vtbl[];
@@ -994,7 +994,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
         ((sFEObjData_96A8*)self->ind)->pos = p;
     }
     self->ind->SetScale(sV3_96A8(17.0f, 17.0f));
-    func_00399730(self->ind, GetHashValue32(D_00471908));
+    cUIIcon_setTextureByHashValue(self->ind, GetHashValue32(D_00471908));
     self->ind->SetVisible(0);
     sFEObjData_96A8* d = (sFEObjData_96A8*)self->ind;
     d->flags = (d->flags & ~0x1F00) | 0xD00;
@@ -1085,7 +1085,7 @@ extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
         self->markA[i] = (cFEObj_96A8*)new (D_00471918, 0x20000000, 0) cUIIcon_9970(self->screen);
         ((sIconPos_9970*)self->markA[i])->setPosition(sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 0x61) - 5.0f, mapPos.z));
         self->markA[i]->SetScale(sV3_96A8(18.0f, 18.0f));
-        func_00399730(self->markA[i], GetHashValue32(D_00471930));
+        cUIIcon_setTextureByHashValue(self->markA[i], GetHashValue32(D_00471930));
         self->markA[i]->SetVisible(0);
         sFEObjData_96A8* da = (sFEObjData_96A8*)self->markA[i];
         da->flags = (da->flags & ~0x1F00) | 0xB00;
@@ -1095,7 +1095,7 @@ extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
         self->posB[i] = sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 0x61) - 5.0f, mapPos.z);
         ((sIconPos_9970*)self->markB[i])->setPosition(self->posB[i]);
         self->markB[i]->SetScale(sV3_96A8(18.0f, 18.0f));
-        func_00399730(self->markB[i], GetHashValue32(D_00471958));
+        cUIIcon_setTextureByHashValue(self->markB[i], GetHashValue32(D_00471958));
         self->markB[i]->SetVisible(0);
         sFEObjData_96A8* db = (sFEObjData_96A8*)self->markB[i];
         db->flags = (db->flags & ~0x1F00) | 0xC00;

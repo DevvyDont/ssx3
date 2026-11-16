@@ -7578,7 +7578,7 @@ extern "C" const char* func_00144BF0(void* iface);
 extern "C" char* func_00146F88(void* iface, int idx);
 extern "C" char* func_0014EEC8(void* iface, int id, int a2);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
-extern "C" void func_00399730(void* obj, int hash);
+extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern int D_00536708[];
 extern int D_005366A8[];
 extern char* D_00441D10[];
@@ -7878,7 +7878,7 @@ extern "C" int func_001E6718(void* self)
                 }
                 if (cBENewRaceInterface_newRace.cGamePath == 0 && D_004A213C != 0) {
                     void* m = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2180));
-                    func_00399730(m, GetHashValue32(D_0046E7A0));
+                    cUIIcon_setTextureByHashValue(m, GetHashValue32(D_0046E7A0));
                 }
             }
             if (show2) {

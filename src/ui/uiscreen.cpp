@@ -1113,36 +1113,36 @@ extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 extern "C" void* cUIThing_setUIData(void* self);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D948__FPv);
+INCLUDE_ASM("ui/uiscreen", cUIScrollBar_setUIData__FPv);
 #ifdef SKIP_ASM
-void* func_0039D948(void* self)
+void* cUIScrollBar_setUIData(void* self)
 {
     return cUIThing_setUIData(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D968);
+INCLUDE_ASM("ui/uiscreen", cUIScrollBar_render2D);
 #ifdef SKIP_ASM
-struct func_0039D968_sVEntry {
+struct cUIScrollBar_render2D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, float, float);
 };
 
-extern "C" void func_0039D968(cUIScrollBar* self, float x, float y)
+extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
 {
     char* a = (char*)self->mpObjBackground;
     if (a != 0 && self->mpObjKnob != 0) {
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
         if ((*(int*)(a + 0x14) >> 6) & 1) {
-            func_0039D968_sVEntry* vt = *(func_0039D968_sVEntry**)(a + 8);
+            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(a + 8);
             vt[0x11].fn(a + vt[0x11].delta, px, py);
         }
         char* b = (char*)self->mpObjKnob;
         if ((*(int*)(b + 0x14) >> 6) & 1) {
-            func_0039D968_sVEntry* vt = *(func_0039D968_sVEntry**)(b + 8);
+            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(b + 8);
             vt[0x11].fn(b + vt[0x11].delta, px, py);
         }
     }
@@ -1156,7 +1156,7 @@ extern "C" int strlen(const char*);
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0039DE68(cUIScrollBar* self, int a);
+extern "C" void cUIScrollBar_setScrollVisibile(cUIScrollBar* self, int a);
 
 struct sV3_DA20 {
     float x, y, z;
@@ -1247,7 +1247,7 @@ extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int tota
         sWidget_DA20* w = self->thumb;
         ((tGet_DA20)w->vt[20].fn)((char*)w + w->vt[20].delta, &nsize);
     }
-    func_0039DE68((cUIScrollBar*)self, 1);
+    cUIScrollBar_setScrollVisibile((cUIScrollBar*)self, 1);
     if (self->total != 0) {
         if (self->flags & 1) {
             float fp = (float)self->pos / (float)self->total;
@@ -1280,7 +1280,7 @@ extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int tota
     if (nsize.y == tsize.y) {
         switch (self->mode) {
         case 0:
-            func_0039DE68((cUIScrollBar*)self, 0);
+            cUIScrollBar_setScrollVisibile((cUIScrollBar*)self, 0);
             break;
         case 1:
             if (self->up != 0)
@@ -1312,36 +1312,36 @@ extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int tota
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DE68);
+INCLUDE_ASM("ui/uiscreen", cUIScrollBar_setScrollVisibile);
 #ifdef SKIP_ASM
-struct func_0039DE68_sVEntry {
+struct cUIScrollBar_setScrollVisibile_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-static inline void func_0039DE68_call(char* o, int a)
+static inline void cUIScrollBar_setScrollVisibile_call(char* o, int a)
 {
-    func_0039DE68_sVEntry* vt = *(func_0039DE68_sVEntry**)(o + 8);
+    cUIScrollBar_setScrollVisibile_sVEntry* vt = *(cUIScrollBar_setScrollVisibile_sVEntry**)(o + 8);
     vt[9].fn(o + vt[9].delta, a);
 }
 
-extern "C" void func_0039DE68(cUIScrollBar* self, int a)
+extern "C" void cUIScrollBar_setScrollVisibile(cUIScrollBar* self, int a)
 {
     char* o = (char*)self->mpUpArrow;
     if (o != 0) {
-        func_0039DE68_call(o, a);
+        cUIScrollBar_setScrollVisibile_call(o, a);
     }
     o = (char*)self->mpDownArrow;
     if (o != 0) {
-        func_0039DE68_call(o, a);
+        cUIScrollBar_setScrollVisibile_call(o, a);
     }
     o = (char*)self->mpHideOnEmpty;
     if (o != 0) {
-        func_0039DE68_call(o, a);
+        cUIScrollBar_setScrollVisibile_call(o, a);
     }
-    func_0039DE68_call((char*)self->mpObjKnob, a);
-    func_0039DE68_call((char*)self->mpObjBackground, a);
+    cUIScrollBar_setScrollVisibile_call((char*)self->mpObjKnob, a);
+    cUIScrollBar_setScrollVisibile_call((char*)self->mpObjBackground, a);
 }
 #endif
 
@@ -1369,9 +1369,9 @@ extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DFB0);
+INCLUDE_ASM("ui/uiscreen", cUISlider_setUIData);
 #ifdef SKIP_ASM
-extern "C" void func_0039DFB0(cUISlider* self)
+extern "C" void cUISlider_setUIData(cUISlider* self)
 {
     cUIThing_setUIData(self);
     self->mNumValues = 10;
@@ -1380,7 +1380,7 @@ extern "C" void func_0039DFB0(cUISlider* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DFE8);
+INCLUDE_ASM("ui/uiscreen", cUISlider_onInput);
 #ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
@@ -1388,28 +1388,28 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* func_0039FF50(void* self);
 extern char D_004A5A58;
 
-struct func_0039DFE8_sVEntryI {
+struct cUISlider_onInput_sVEntryI {
     short delta;
     short index;
     int (*fn)(void*);
 };
-struct func_0039DFE8_sVEntryM {
+struct cUISlider_onInput_sVEntryM {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
-struct func_0039DFE8_sVEntryS {
+struct cUISlider_onInput_sVEntryS {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-extern "C" int func_0039DFE8(cUISlider* self, char* input)
+extern "C" int cUISlider_onInput(cUISlider* self, char* input)
 {
     char* t = *(char**)((char*)func_0039FF50(((char*)self)) + 0x14);
     char* snd = &D_004A5A58;
     if (t) snd = t;
-    func_0039DFE8_sVEntryI* vi = *(func_0039DFE8_sVEntryI**)(input + 8);
+    cUISlider_onInput_sVEntryI* vi = *(cUISlider_onInput_sVEntryI**)(input + 8);
     if (vi[19].fn(input + vi[19].delta)) {
         if (self->mValue > 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
@@ -1418,14 +1418,14 @@ extern "C" int func_0039DFE8(cUISlider* self, char* input)
             }
             self->mValue = self->mValue - 1;
             char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
-            func_0039DFE8_sVEntryM* vm = *(func_0039DFE8_sVEntryM**)(mgr + 8);
+            cUISlider_onInput_sVEntryM* vm = *(cUISlider_onInput_sVEntryM**)(mgr + 8);
             vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
-            func_0039DFE8_sVEntryS* vs = *(func_0039DFE8_sVEntryS**)snd;
+            cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(snd + vs[2].delta, 1);
         }
         return 1;
     }
-    func_0039DFE8_sVEntryI* vi2 = *(func_0039DFE8_sVEntryI**)(input + 8);
+    cUISlider_onInput_sVEntryI* vi2 = *(cUISlider_onInput_sVEntryI**)(input + 8);
     if (vi2[20].fn(input + vi2[20].delta)) {
         if (self->mValue + 1 < self->mNumValues) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
@@ -1434,9 +1434,9 @@ extern "C" int func_0039DFE8(cUISlider* self, char* input)
             }
             self->mValue = self->mValue + 1;
             char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
-            func_0039DFE8_sVEntryM* vm = *(func_0039DFE8_sVEntryM**)(mgr + 8);
+            cUISlider_onInput_sVEntryM* vm = *(cUISlider_onInput_sVEntryM**)(mgr + 8);
             vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
-            func_0039DFE8_sVEntryS* vs = *(func_0039DFE8_sVEntryS**)snd;
+            cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(snd + vs[2].delta, 1);
         }
         return 1;
@@ -1446,23 +1446,23 @@ extern "C" int func_0039DFE8(cUISlider* self, char* input)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E130);
+INCLUDE_ASM("ui/uiscreen", cUISlider_render2D);
 #ifdef SKIP_ASM
-struct func_0039E130_sVec3 {
+struct cUISlider_render2D_sVec3 {
     float x, y, z;
 };
-struct func_0039E130_sVEntryF {
+struct cUISlider_render2D_sVEntryF {
     short delta;
     short index;
     void (*fn)(void*, float, float);
 };
-struct func_0039E130_sVEntryV {
+struct cUISlider_render2D_sVEntryV {
     short delta;
     short index;
-    void (*fn)(void*, func_0039E130_sVec3*);
+    void (*fn)(void*, cUISlider_render2D_sVec3*);
 };
 
-extern "C" void func_0039E130(cUISlider* self, float dx, float dy)
+extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
 {
     char* a = (char*)self->mpObjBackground;
     if (a == 0 || (char*)self->mpObjKnob == 0) {
@@ -1470,24 +1470,24 @@ extern "C" void func_0039E130(cUISlider* self, float dx, float dy)
     }
     float x = dx + self->mPosition.x;
     float y = dy + self->mPosition.y;
-    func_0039E130_sVEntryF* va = *(func_0039E130_sVEntryF**)(a + 8);
+    cUISlider_render2D_sVEntryF* va = *(cUISlider_render2D_sVEntryF**)(a + 8);
     va[17].fn(a + va[17].delta, x, y);
     char* o = (char*)self->mpObjBackground;
-    func_0039E130_sVec3 pos = *(func_0039E130_sVec3*)(o + 0x44);
-    func_0039E130_sVec3 s1;
-    func_0039E130_sVEntryV* vo = *(func_0039E130_sVEntryV**)(o + 8);
+    cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)(o + 0x44);
+    cUISlider_render2D_sVec3 s1;
+    cUISlider_render2D_sVEntryV* vo = *(cUISlider_render2D_sVEntryV**)(o + 8);
     vo[20].fn(o + vo[20].delta, &s1);
     char* b = (char*)self->mpObjKnob;
-    func_0039E130_sVec3 s2;
-    func_0039E130_sVEntryV* vb = *(func_0039E130_sVEntryV**)(b + 8);
+    cUISlider_render2D_sVec3 s2;
+    cUISlider_render2D_sVEntryV* vb = *(cUISlider_render2D_sVEntryV**)(b + 8);
     vb[20].fn(b + vb[20].delta, &s2);
     float w = s1.x - s2.x;
     char* b2 = (char*)self->mpObjKnob;
-    func_0039E130_sVec3 p = *(func_0039E130_sVec3*)(b2 + 0x44);
+    cUISlider_render2D_sVec3 p = *(cUISlider_render2D_sVec3*)(b2 + 0x44);
     p.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
-    *(func_0039E130_sVec3*)(b2 + 0x44) = p;
+    *(cUISlider_render2D_sVec3*)(b2 + 0x44) = p;
     char* b3 = (char*)self->mpObjKnob;
-    func_0039E130_sVEntryF* vb3 = *(func_0039E130_sVEntryF**)(b3 + 8);
+    cUISlider_render2D_sVEntryF* vb3 = *(cUISlider_render2D_sVEntryF**)(b3 + 8);
     vb3[17].fn(b3 + vb3[17].delta, x, y);
 }
 #endif

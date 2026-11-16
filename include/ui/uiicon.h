@@ -7,7 +7,7 @@
 // (ui/uivector) do the same. Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below.
 // Methods: vtable slots 0 ~cUIIcon (cUIIcon__cUIIcon__FPv), 9 setUIData (cUIIcon_setUIData, ui/uiengine), 16 render2D
 // (cUIIcon_render2D = func_00398A78, ui/uiengine), 21 getType; out-of-line inline accessors in ui/uivector
-// 0x3A4EC8-0x3A4FB8; func_00399730 (ui/uiengine) looks a texture element up by id.
+// 0x3A4EC8-0x3A4FB8; cUIIcon_setTextureByHashValue (ui/uiengine) looks a texture element up by id.
 // EA's source file is not known (no uiicon.cpp in the preview's assert paths; On Tour: ui/all_in_one_ui.cpp).
 //
 // A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUIIcon 0xA0: its cUIThing is 0x80, so each
@@ -64,7 +64,7 @@ struct cUIIcon {
     int mTextureID;                  // 0x078 [O]; [R] = -1; [U] func_003A4F70 getTextureID (lw), func_003A4F78 setTextureID
                                      //       (sw, clears mpTextureElem), func_003A4F60 stores -1; render2D
     const cTextureElement* mpTextureElem; // 0x07C [O]; [R] = 0; [U] func_003A4F58 getElement (lw), func_003A4F60
-                                     //       setElement (sw); func_00399730 / cUIIcon_setUIData look it up by id; render2D
+                                     //       setElement (sw); cUIIcon_setTextureByHashValue / cUIIcon_setUIData look it up by id; render2D
     float mTileUV[2];                // 0x080 [O] t2Vector (x, y); [U] func_003A4F88 getTileUV, func_003A4FA0 / func_003A4FB8
                                      //       setTileUV (8-byte ldl/ldr copies); cUIIcon_setUIData; render2D
 };

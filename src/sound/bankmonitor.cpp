@@ -2805,8 +2805,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0088);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_002A77F8(void* parser, void* src, int n);
-extern "C" void func_002A7890(void* parser, int flags);
+extern "C" void FileParser_FileParser(void* parser, void* src, int n);
+extern "C" void FileParser__FileParser(void* parser, int flags);
 extern "C" void func_002A7A20(void* parser);
 extern "C" int func_002A7C68(void* parser, int file);
 extern "C" char* func_002A7DA0(void* parser);
@@ -2832,7 +2832,7 @@ extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
     char v40[0x40];
     char path[0x80];
     char name[0x60];
-    func_002A77F8(parser, D_004A37B0, 0x100);
+    FileParser_FileParser(parser, D_004A37B0, 0x100);
     if (func_002A7C68(parser, a2) != 0)
     {
         func_002A7A20(parser);
@@ -2865,7 +2865,7 @@ extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
             }
         }
     }
-    func_002A7890(parser, 2);
+    FileParser__FileParser(parser, 2);
 }
 #endif
 
@@ -4567,7 +4567,7 @@ extern char D_004A3828[];
 extern char D_004A3830[];
 extern const char D_00483448[];
 extern const char D_00483458[];
-extern "C" void* func_002A77F8_p(void* parser, void* src, int n) __asm__("func_002A77F8");
+extern "C" void* FileParser_FileParser_p(void* parser, void* src, int n) __asm__("FileParser_FileParser");
 extern "C" int func_002A7BF8(void* parser, const char* name);
 extern "C" char* func_002A7B08(void* parser);
 extern "C" int func_002A80D8(void* parser, const char* key, int* out);
@@ -4660,7 +4660,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         self[p + 0x3B34] = D_004A35A8[0];
     }
     sLoc28C0 L;
-    func_002A77F8_p(L.parser, D_004A37E8, 0x100);
+    FileParser_FileParser_p(L.parser, D_004A37E8, 0x100);
     *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
     if (func_002A7BF8(L.parser, D_004A3570) != 0) {
         while (func_002A7F90(L.parser) == 0) {
@@ -4765,7 +4765,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         }
         *(int*)(self + 0x3E4) += 1;
     }
-    func_002A7890(L.parser, 2);
+    FileParser__FileParser(L.parser, 2);
     return self;
 }
 #endif

@@ -135,7 +135,7 @@ struct cLookAtChaseAlgorithm {
     float Near;                     // 0x004 [O]; [R] 10.0f
     float Far;                      // 0x008 [O]; [R] 30000.0f
     int AlgorithmType;              // 0x00C [O]; [R] 0x54; subclass ctors store their own
-    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm func_001624E8 ...)
+    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm ...)
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
@@ -155,7 +155,7 @@ struct cLookAtChaseAlgorithm {
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
-    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] func_00166C60 (snap) clears it
+    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
@@ -242,7 +242,7 @@ struct cLookAtChaseAlgorithm {
     int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
     int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
-    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm func_001624E8
+    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)

@@ -8,8 +8,8 @@
 // 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/uilistbox.cpp (preview assert path);
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
-// Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (func_00399820), 14 onInput
-// (func_00399970), 15 updateLocale (func_00399E28), 16 render2D (func_00399F00), 21 getType (func_003A56A0),
+// Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (cUIListBox_setUIData), 14 onInput
+// (cUIListBox_onInput), 15 updateLocale (cUIListBox_updateLocale), 16 render2D (cUIListBox_render2D), 21 getType (func_003A56A0),
 // 22 setShadow (func_003A56D8), 23 setUseStaticColour (func_003A5708); cUIListBox_addEntryByAsciiString,
 // func_0039A4B0 (addEntryByUnicodeString), cUIListBox_addEntryByStringID, func_0039A670 (clear; the dtor calls it),
 // func_0039A708 / func_0039A738 (current entry's ASCII text / data), func_0039A768 (find by data), func_0039A7A8
@@ -38,7 +38,7 @@ CHECK_SIZE(tAttrListBox, 0x4);
 
 // EA's tListBoxEntry (On Tour: 0x14, same in retail: the ctor's clear loop steps 20 bytes, 32 times).
 struct tListBoxEntry {
-    unsigned int mStringID;          // 0x00 [O]; [U] cUIListBox_addEntryByStringID; updateLocale func_00399E28 (lw 0x98 + i*0x14)
+    unsigned int mStringID;          // 0x00 [O]; [U] cUIListBox_addEntryByStringID; updateLocale cUIListBox_updateLocale (lw 0x98 + i*0x14)
     const unsigned short* mpString;  // 0x04 [O]; [U] func_00399D80 / setEntryByAsciiString free and replace it (lw/sw 0x9C + i*0x14)
     const char* mpAsciiString;       // 0x08 [O]; [U] cUIListBox_addEntryBy* (sw 0xA0 + i*0x14), func_0039A708 (lw)
     void* mpData;                    // 0x0C [O]; [U] cUIListBox_addEntryBy* (sw 0xA4 + i*0x14), func_0039A738 / func_0039A768 (lw),
@@ -85,15 +85,15 @@ struct cUIListBox {
     // --- cUIListBox
     tAttrListBox mAttrListBox;       // 0x074 [O] tAttrListBox; [R] the ctor cUIListBox_cUIListBox sets mShadow, clears mUnicode /
                                      //       mCallback (lbu/sb 0x74), func_003A55D8 calls its ctor func_003A65A0; [U] setUIData
-                                     //       func_00399820 (lw/sw), accessors func_003A56A8..func_003A5708 (lw/sw)
-    tARGB mShadowColour;             // 0x078 [O]; [U] setUIData func_00399820 copies it from the record; func_003A5758
+                                     //       cUIListBox_setUIData (lw/sw), accessors func_003A56A8..func_003A5708 (lw/sw)
+    tARGB mShadowColour;             // 0x078 [O]; [U] setUIData cUIListBox_setUIData copies it from the record; func_003A5758
                                      //       setShadowColour (ldl/ldr); render2D
     tARGB mStaticColour;             // 0x088 [O]; [R] = D_004C66C8 (the ctor); [U] setUIData; func_003A5780 setStaticColour
     tListBoxEntry mpEntries[32];     // 0x098 [O]; [R] the ctor clears all 32 (sw/sb loop + memset(this + 0x98, 0, 640));
                                      //       [U] cUIListBox_addEntryBy*, cUIListBox_setEntryByAsciiString, func_0039A670 (clear),
-                                     //       func_0039A708..func_0039A7C8, updateLocale func_00399E28, render2D
+                                     //       func_0039A708..func_0039A7C8, updateLocale cUIListBox_updateLocale, render2D
     unsigned char mNumEntries;       // 0x318 [O]; [R] = 0; [U] lbu/sb in the add/clear functions; func_003A57B0 (lbu)
-    unsigned char mCurrentEntry;     // 0x319 [O]; [R] = 0; [U] onInput func_00399970 (lbu/sb), func_0039A7A8 setCurrent;
+    unsigned char mCurrentEntry;     // 0x319 [O]; [R] = 0; [U] onInput cUIListBox_onInput (lbu/sb), func_0039A7A8 setCurrent;
                                      //       func_003A57A8 getCurrentEntryIndex (lbu)
     char unk_31A[0x2];               // 0x31A padding
 };

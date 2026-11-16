@@ -3152,6 +3152,38 @@ cListNode__cListNode = 0x003A47F8; //type:func
 cUIListBox__cUIListBox = 0x003A5658; //type:func
 cUITextScroll__cUITextScroll = 0x003A62A0; //type:func
 
+// fn_cascade3: names by evidence (docs/function_names.tsv)
+cRiderCameraTarget_getRemainingAirTime = 0x0015F6B0; //type:func
+cRiderCameraTarget_getApexTime = 0x0015F6C8; //type:func
+cRiderCameraTarget_isAirPredictorDone = 0x0015F720; //type:func
+cRiderCameraTarget_getLandingAngle = 0x0015F780; //type:func
+cCameraJitterer_cCameraJitterer = 0x0015FFF0; //type:func
+cSplineCamAlgorithm__cSplineCamAlgorithm = 0x00161370; //type:func
+cSplineCamAlgorithm_update = 0x001613F0; //type:func
+cSplineCamAlgorithm_snap = 0x00161630; //type:func
+cLookAtChaseAlgorithm_updateAlgorithm = 0x001624E8; //type:func
+cLookAtChaseAlgorithm_snap = 0x00166C60; //type:func
+cLookAtChaseAlgorithm_snapCurrent = 0x00166F28; //type:func
+cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm__FPv = 0x00177E90; //type:func
+FileParser_FileParser = 0x002A77F8; //type:func
+FileParser__FileParser = 0x002A7890; //type:func
+cPlayerLights_Clear = 0x00392D18; //type:func
+cUIIcon_setTextureByHashValue = 0x00399730; //type:func
+cUIListBox_setUIData = 0x00399820; //type:func
+cUIListBox_onInput = 0x00399970; //type:func
+cUIListBox_updateLocale = 0x00399E28; //type:func
+cUIListBox_render2D = 0x00399F00; //type:func
+cUIScrollBar_setUIData__FPv = 0x0039D948; //type:func
+cUIScrollBar_render2D = 0x0039D968; //type:func
+cUIScrollBar_setScrollVisibile = 0x0039DE68; //type:func
+cUISlider_setUIData = 0x0039DFB0; //type:func
+cUISlider_onInput = 0x0039DFE8; //type:func
+cUISlider_render2D = 0x0039E130; //type:func
+cUITextScroll_setUIData = 0x003A11B8; //type:func
+cUITextScroll_updateLocale = 0x003A1360; //type:func
+cUITextScroll_onInput = 0x003A13E0; //type:func
+cUITextScroll_render2D = 0x003A1588; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

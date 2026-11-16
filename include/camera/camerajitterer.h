@@ -2,11 +2,11 @@
 #define CAMERA_CAMERAJITTERER_H
 
 // cCameraJitterer: random positional and roll jitter for the script cameras (hand-held look). Size 0x30: SSX On Tour's
-// DWARF (class cCameraJitterer, 0x30, no base, no virtuals) and retail's constructor func_0015FFF0, which stores every
+// DWARF (class cCameraJitterer, 0x30, no base, no virtuals) and retail's constructor cCameraJitterer_cCameraJitterer, which stores every
 // word of 0x0..0x2C. Embedded by value at +0x74 of the script camera algorithms in camera/script/scriptcontroller.cpp
-// (func_0015FFF0 / func_00160028 / func_00160130 / func_00160228 / func_001603F0 are called on `p + 0x74`).
+// (cCameraJitterer_cCameraJitterer / func_00160028 / func_00160130 / func_00160228 / func_001603F0 are called on `p + 0x74`).
 // Methods (camera/camera.cpp, between cEditorCameraAlgorithm and the race chase algorithms, 0x15FFF0-0x160438):
-//   func_0015FFF0 cCameraJitterer(), func_00160028 updatePositionalJitter(float posJitter),
+//   cCameraJitterer_cCameraJitterer cCameraJitterer(), func_00160028 updatePositionalJitter(float posJitter),
 //   func_00160130 updateRollJitter(float rollJitter), func_00160228 getPositionalJitter(float heading, float pitch)
 //   (returns a t4Vector: the hidden return slot is a0, `this` a1), func_001603F0 getRollJitter().
 // EA's source file is not known (On Tour: all_in_one_camera.cpp); camera/camerajitterer.h is our name.

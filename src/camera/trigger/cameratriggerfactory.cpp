@@ -3611,7 +3611,7 @@ extern "C" void func_00176B10(char* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176CE0);
 #ifdef SKIP_ASM
-extern "C" void func_00166C60(void* self, int id);
+extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(void* self, float a, float b);
 class cCamTargetK8940 {
 public:
@@ -3637,7 +3637,7 @@ extern "C" void func_00176CE0(cCamCtrlK8940* self, int id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
-        func_00166C60(self, id);
+        cLookAtChaseAlgorithm_snap(self, id);
         func_00166550(self, 559.7440185546875f, 300.0f);
         self->v05();
     }
@@ -3752,13 +3752,13 @@ extern "C" void func_00176E10(char* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176FE0);
 #ifdef SKIP_ASM
-extern "C" void func_00166C60(void* self, int id);
+extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(void* self, float a, float b);
 extern "C" void func_00176FE0(cCamCtrlK8940* self, int id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
-        func_00166C60(self, id);
+        cLookAtChaseAlgorithm_snap(self, id);
         func_00166550(self, 559.7440185546875f, 300.0f);
         self->v05();
     }
@@ -3873,13 +3873,13 @@ extern "C" void func_00177110(char* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001772E0);
 #ifdef SKIP_ASM
-extern "C" void func_00166C60(void* self, int id);
+extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(void* self, float a, float b);
 extern "C" void func_001772E0(cCamCtrlK8940* self, int id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
-        func_00166C60(self, id);
+        cLookAtChaseAlgorithm_snap(self, id);
         func_00166550(self, 559.7440185546875f, 300.0f);
         self->v05();
     }
@@ -3987,13 +3987,13 @@ extern "C" void func_00177558(void* self, void* out)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177588);
 #ifdef SKIP_ASM
-extern "C" void func_00166C60(void* self, int id);
+extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(void* self, float a, float b);
 extern "C" void func_00177588(cCamCtrlK8940* self, int id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
-        func_00166C60(self, id);
+        cLookAtChaseAlgorithm_snap(self, id);
         func_00166550(self, 559.7440185546875f, 300.0f);
         self->v05();
     }
@@ -4179,9 +4179,9 @@ extern void* cSPOKEChaseAlgorithm_vtbl[];
 extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E90__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm__FPv);
 #ifdef SKIP_ASM
-void* func_00177E90(void* self)
+void* cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm(void* self)
 {
     *(int*)((char*)self + 0x10) = (int)(void*)cSPOKEChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
@@ -4656,7 +4656,7 @@ public:
 
 extern "C" void func_00166550(void* self, float a, float b);
 
-extern "C" void f_166C60_1783E0(void* self, long id) __asm__("func_00166C60");
+extern "C" void f_166C60_1783E0(void* self, long id) __asm__("cLookAtChaseAlgorithm_snap");
 extern "C" t4Vector f_177FC0_1783E0(void* self, const t4Vector& v) __asm__("func_00177FC0");
 extern "C" t4Vector f_177EF8_1783E0(void* self) __asm__("func_00177EF8");
 
@@ -4698,7 +4698,7 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
  *
  * Takes the target's (+0x30) slot-4 vector into +0x390 and the desired position for its slot-3 vector
  * (func_00177FC0, probably getDesiredPosition) into +0x40, and sets +0x20 to the rider position
- * (func_00177EF8) plus 37 along the Z axis (D_004FF160). Then runs the look-at chase snap (func_00166C60),
+ * (func_00177EF8) plus 37 along the Z axis (D_004FF160). Then runs the look-at chase snap (cLookAtChaseAlgorithm_snap),
  * setupInitialCamDir (func_00166550, 559.744 and 300) and the algorithm's virtual slot 5.
  *
  * @param id  the subject's AI index (On Tour subjectID); any other rider is ignored
@@ -5057,7 +5057,7 @@ extern "C" void func_001787E0(char* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178938);
 #ifdef SKIP_ASM
-extern "C" void func_00166C60(void* self, int id);
+extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(void* self, float a, float b);
 
 struct sVec4_00178938 {
@@ -5093,7 +5093,7 @@ extern "C" void func_00178938(cCamCtrl_00178938* self, int id)
     if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->v07()) {
         *(sVec4_00178938*)((char*)self + 0x40) = func_001785F0(self);
         *(sVec4_00178938*)((char*)self + 0x20) = func_00178758(self);
-        func_00166C60(self, id);
+        cLookAtChaseAlgorithm_snap(self, id);
         func_00166550(self, 559.7440185546875f, 300.0f);
         self->v05();
     }
@@ -5465,7 +5465,7 @@ extern "C" void func_00178BB0(char* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178E90);
 #ifdef SKIP_ASM
-extern "C" void func_00166C60(void* self, int id);
+extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(void* self, float a, float b);
 
 struct sCamVEntryIntA {
@@ -5485,7 +5485,7 @@ extern "C" void func_00178E90(void* self, int id)
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
     if (id == vt[7].fn(obj + vt[7].delta))
     {
-        func_00166C60(self, id);
+        cLookAtChaseAlgorithm_snap(self, id);
         func_00166550(self, 100.0f, 100.0f);
         sCamVEntryVoidA* vt2 = *(sCamVEntryVoidA**)((char*)self + 0x10);
         vt2[5].fn((char*)self + vt2[5].delta);

@@ -652,7 +652,7 @@ struct cRiderHandler {
     cPunchFX PunchFX;                       // 0xC70
     cCheatFX CheatFX;                       // 0xD20
     cPlayerLights PlayerLights;             // 0xD30 [O] class cPlayerLights (render/playerlights.h); [U] ai/rider.cpp
-                                            //       clears it (func_00392D18, handler + 0xD30); cTrickBoostFX update
+                                            //       clears it (cPlayerLights_Clear, handler + 0xD30); cTrickBoostFX update
                                             //       (cTrickBoostFX_update) calls AddDirectional / BoardIsAdditive on it
     int MotionState;                        // 0xDE0 [P] _getMotionState (preview 0xDA0); [R] cRiderHandler__getMotionState;
                                             //       ctor = MS_Num; [O] eMotionState

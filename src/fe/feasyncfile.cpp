@@ -10972,15 +10972,15 @@ struct sFEObj_001B3490 {
     cFEVObj_001B3490* items[2];    // 0x6FC
 };
 
-extern "C" void func_0039DE68(void* a, int b);
+extern "C" void cUIScrollBar_setScrollVisibile(void* a, int b);
 extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
 
 extern "C" int cFEStateChatRoom_onGainTransition(cFEStateChatRoom* self, int a1)
 {
     if (a1 != 0) {
         int i;
-        func_0039DE68(self->mpSlider1, 0);
-        func_0039DE68(self->mpSlider2, 0);
+        cUIScrollBar_setScrollVisibile(self->mpSlider1, 0);
+        cUIScrollBar_setScrollVisibile(self->mpSlider2, 0);
         for (i = 0; i < 2; i++) {
             if (((cFEVObj_001B3490**)&self->mpMenu[0])[i] != 0) {
                 ((cFEVObj_001B3490**)&self->mpMenu[0])[i]->v07(1);

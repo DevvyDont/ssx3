@@ -9,7 +9,7 @@
 // cMemMan_alloc(size, tag) and calls their constructors (func_00160760, func_00160B70(mem, angle),
 // func_00161060(mem, p1..p4, time, leadDistance, heightOffset, fov)).
 // Class names: the July 2003 preview's vtable slots (builds/x/v2/name_map_v2.tsv: cSplineCamAlgorithm::<virtual slot 1>
-// = func_00161370 ...) and SSX On Tour's DWARF, whose functions.tsv lists ctor, dtor, snap(int), update(),
+// = cSplineCamAlgorithm__cSplineCamAlgorithm ...) and SSX On Tour's DWARF, whose functions.tsv lists ctor, dtor, snap(int), update(),
 // getRestDrop(), getRaceCamFinalPhaseData(cRaceCamFinalPhaseData*) for each (z:/main/game/source/camera/
 // all_in_one_camera.cpp). EA's PS2 source file is not known: the preview names camera/race/racealgorithms.cpp,
 // allspinchasealgo.cpp and directionchasealgo.cpp; these classes sit in retail between camera/cameraalgorithms' free
@@ -43,7 +43,7 @@ struct cMatrixChaseAlgorithm {
     float Near;                     // 0x004 [O]; [R] 10.0f
     float Far;                      // 0x008 [O]; [R] 30000.0f
     int AlgorithmType;              // 0x00C [O]; [R] 0x54; subclass ctors store their own
-    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm func_001624E8 ...)
+    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm ...)
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
@@ -63,7 +63,7 @@ struct cMatrixChaseAlgorithm {
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
-    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] func_00166C60 (snap) clears it
+    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
@@ -150,7 +150,7 @@ struct cMatrixChaseAlgorithm {
     int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
     int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
-    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm func_001624E8
+    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
@@ -305,7 +305,7 @@ struct cRelativeChaseAlgorithm {
     float Near;                     // 0x004 [O]; [R] 10.0f
     float Far;                      // 0x008 [O]; [R] 30000.0f
     int AlgorithmType;              // 0x00C [O]; [R] 0x54; subclass ctors store their own
-    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm func_001624E8 ...)
+    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm ...)
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
@@ -325,7 +325,7 @@ struct cRelativeChaseAlgorithm {
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
-    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] func_00166C60 (snap) clears it
+    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
@@ -412,7 +412,7 @@ struct cRelativeChaseAlgorithm {
     int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
     int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
-    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm func_001624E8
+    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
@@ -564,8 +564,8 @@ CHECK_SIZE(cRelativeChaseAlgorithm, 0x3C0);
 
 // cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor func_00161060(this, point1..point4, time, leadDistance,
 // heightOffset, fov) (vtable D_0045B968; builds the three interpolants with func_0031D5E8 / func_0031D700 /
-// func_0031D7E0 / func_0031DEE0), dtor func_00161370 (func_0031D618 on each interpolant), snap func_00161630,
-// update func_001613F0, getRaceCamFinalPhaseData func_001613E8, getRestDrop func_001613D8.
+// func_0031D7E0 / func_0031DEE0), dtor cSplineCamAlgorithm__cSplineCamAlgorithm (func_0031D618 on each interpolant), snap cSplineCamAlgorithm_snap,
+// update cSplineCamAlgorithm_update, getRaceCamFinalPhaseData func_001613E8, getRestDrop func_001613D8.
 struct cSplineCamAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
     //     inline), copied field for field
@@ -574,7 +574,7 @@ struct cSplineCamAlgorithm {
     float Near;                     // 0x004 [O]; [R] 10.0f
     float Far;                      // 0x008 [O]; [R] 30000.0f
     int AlgorithmType;              // 0x00C [O]; [R] 0x54; subclass ctors store their own
-    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm func_001624E8 ...)
+    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm ...)
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
@@ -594,7 +594,7 @@ struct cSplineCamAlgorithm {
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
-    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] func_00166C60 (snap) clears it
+    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
@@ -681,7 +681,7 @@ struct cSplineCamAlgorithm {
     int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
     int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
-    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm func_001624E8
+    int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
@@ -701,11 +701,11 @@ struct cSplineCamAlgorithm {
                                     //       to func_0031D5E8/func_0031DEE0, dtor to func_0031D618
     char YOfT[0xC];                 // 0x39C [O] cCubicSplineInterpolant; [R] ditto (this+0x39C)
     char ZOfT[0xC];                 // 0x3A8 [O] cCubicSplineInterpolant; [R] ditto (this+0x3A8)
-    float TotalTime;                // 0x3B4 [O]; [R] swc1; [U] func_001613F0 (lwc1)
-    float LastEvaluatedTime;        // 0x3B8 [O]; [R] swc1; [U] func_001613F0 (lwc1/swc1)
-    float Speed;                    // 0x3BC [O]; [R] swc1; [U] func_001613F0
-    float LeadDistance;             // 0x3C0 [O]; [R] = leadDistance; [U] func_001613F0
-    float HeightOffset;             // 0x3C4 [O]; [R] = heightOffset; [U] func_001613F0
+    float TotalTime;                // 0x3B4 [O]; [R] swc1; [U] cSplineCamAlgorithm_update (lwc1)
+    float LastEvaluatedTime;        // 0x3B8 [O]; [R] swc1; [U] cSplineCamAlgorithm_update (lwc1/swc1)
+    float Speed;                    // 0x3BC [O]; [R] swc1; [U] cSplineCamAlgorithm_update
+    float LeadDistance;             // 0x3C0 [O]; [R] = leadDistance; [U] cSplineCamAlgorithm_update
+    float HeightOffset;             // 0x3C4 [O]; [R] = heightOffset; [U] cSplineCamAlgorithm_update
     char unk_3C8[0x8];              // 0x3C8 padding to the 16-byte class alignment (alloc 0x3D0)
 };
 

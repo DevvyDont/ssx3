@@ -3004,7 +3004,7 @@ extern "C" void cBoardTrailFX_update(void*);
 extern "C" void cTrickBoostFX_update(void*);
 extern "C" void cAirStreamerFX_update(void*);
 extern "C" void cPunchFX_update(void*);
-extern "C" void func_00392D18(void*);
+extern "C" void cPlayerLights_Clear(void*);
 extern "C" void cCheatFX_update(void*);
 extern int D_004A4534;
 
@@ -3014,7 +3014,7 @@ struct sVE_00111948 { short delta; short index; int (*fn)(void*); };
  * Updates the rider's player lights and all 11 visual FX parts for this frame.
  *
  * Skipped for computer riders while the "Disable AI Visual FX" debug option (D_004A4534) is on. The lights
- * (PlayerLights, +0xD30) are reset first by func_00392D18. On Tour's version takes an a_bIsLocalHuman flag
+ * (PlayerLights, +0xD30) are reset first by cPlayerLights_Clear. On Tour's version takes an a_bIsLocalHuman flag
  * that this one lacks.
  */
 extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
@@ -3026,7 +3026,7 @@ extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
         if (e->fn(o + e->delta) != 0)
             return;
     }
-    func_00392D18((char*)self + 0xD30);
+    cPlayerLights_Clear((char*)self + 0xD30);
     cBoardWakeFX_update((char*)self + 0x3B0);
     cBoardSparkFX_update((char*)self + 0x470);
     cBoardTrailFX_update((char*)self + 0x520);

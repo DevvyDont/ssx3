@@ -7,8 +7,8 @@
 // rec+0x24 (mpObjBackground) and rec+0x28 (mpObjKnob). Default ctors func_003A6190 / func_003A61D0 (ui/uivector).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source: ../source/ui/uislider.h
 // (preview assert path); retail keeps its methods in ui/uiscreen (0x39DF28-0x39E288).
-// Methods: vtable cUISlider_vtbl slots 0 ~cUISlider (cUISlider__cUISlider), 9 setUIData (func_0039DFB0), 14 onInput
-// (func_0039DFE8), 16 render2D (func_0039E130), 21 getType (func_003A6220); accessors func_003A6228..func_003A6248.
+// Methods: vtable cUISlider_vtbl slots 0 ~cUISlider (cUISlider__cUISlider), 9 setUIData (cUISlider_setUIData), 14 onInput
+// (cUISlider_onInput), 16 render2D (cUISlider_render2D), 21 getType (func_003A6220); accessors func_003A6228..func_003A6248.
 // Class name: the preview's cUISlider::getType (builds/x/v2/name_map_v2.tsv, func_003A6220) and On Tour.
 //
 // A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUISlider 0xA0; each member 0xC later there).
@@ -46,11 +46,11 @@ struct cUISlider {
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUISlider
     int mValue;                      // 0x074 [O]; [R] = 0; [U] func_003A6228 getValue (lw), func_003A6230 setValue (sw);
-                                     //       onInput func_0039DFE8 steps it; render2D func_0039E130 (lwc1 + cvt.s.w)
-    int mNumValues;                  // 0x078 [O]; [R] = 0; [U] setUIData func_0039DFB0 (sw), func_003A6238 setNumValues;
+                                     //       onInput cUISlider_onInput steps it; render2D cUISlider_render2D (lwc1 + cvt.s.w)
+    int mNumValues;                  // 0x078 [O]; [R] = 0; [U] setUIData cUISlider_setUIData (sw), func_003A6238 setNumValues;
                                      //       onInput, render2D (lwc1 + cvt.s.w)
     int mStartPixel;                 // 0x07C [O]; [R] = 0 (no other retail access found)
-    int mBackWidth;                  // 0x080 [O]; [R] = 0; [U] setUIData func_0039DFB0 (sw)
+    int mBackWidth;                  // 0x080 [O]; [R] = 0; [U] setUIData cUISlider_setUIData (sw)
     cUIThing* mSliderObj;            // 0x084 [O] (not stored by the retail ctors; no retail access found)
     cUIThing* mpObjBackground;       // 0x088 [O]; [R] = 0, then the record's child (hash rec+0x24); [U] func_003A6240
                                      //       setBackground (sw); the dtor cUISlider__cUISlider deletes it; render2D

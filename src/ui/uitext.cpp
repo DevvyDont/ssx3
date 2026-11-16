@@ -618,7 +618,7 @@ extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int a1, int a2
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A11B8);
+INCLUDE_ASM("ui/uitext", cUITextScroll_setUIData);
 #ifdef SKIP_ASM
 // PORT: cUIThing_setUIData really takes (self, data); other units declare it with one argument.
 void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
@@ -650,7 +650,7 @@ struct sUIData11B8 {
     unsigned char r, g, b, a;   // 0x28
 };
 
-extern "C" void func_003A11B8(sUIText11B8* self, sUIData11B8* data)
+extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
 {
     cUIThing_setUIData_2(self, data);
     self->mode = data->mode & 3;
@@ -700,11 +700,11 @@ extern "C" void func_003A1310(cUITextScroll* self, char a1)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1360);
+INCLUDE_ASM("ui/uitext", cUITextScroll_updateLocale);
 #ifdef SKIP_ASM
 extern "C" void func_003A1CF0(cUITextScroll* self, void* a1);
 
-class func_003A1360_cVirtA {
+class cUITextScroll_updateLocale_cVirtA {
 public:
     char pad[0x4];
     // vptr at 0x4; slot N at vtable offset N*8
@@ -714,7 +714,7 @@ public:
     virtual void* v04(int);
 };
 
-class func_003A1360_cVirtB {
+class cUITextScroll_updateLocale_cVirtB {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -725,24 +725,24 @@ public:
     virtual void v05(int);
 };
 
-extern "C" void func_003A1360(cUITextScroll* self)
+extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
 {
     int id = (int)self->mStringID;
     if (id != 0) {
-        func_003A1360_cVirtA* a = *(func_003A1360_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+        cUITextScroll_updateLocale_cVirtA* a = *(cUITextScroll_updateLocale_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
         if (a != 0) {
             void* r = a->v04(id);
             if (r != 0) {
                 func_003A1CF0(self, r);
             }
-            ((func_003A1360_cVirtB*)self)->v05(1);
+            ((cUITextScroll_updateLocale_cVirtB*)self)->v05(1);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A13E0);
+INCLUDE_ASM("ui/uitext", cUITextScroll_onInput);
 #ifdef SKIP_ASM
 struct sUIInputVE13E0 {
     short delta;
@@ -779,7 +779,7 @@ static inline int pressed13E0(char* input, int key)
     return e->fn(input + e->delta, key);
 }
 
-extern "C" int func_003A13E0(sUIText13E0* self, char* input)
+extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
 {
     sUIFont13E0* font = (sUIFont13E0*)func_003A12D0((cUITextScroll*)self);
     if (font == 0) {
@@ -825,7 +825,7 @@ extern "C" int func_003A13E0(sUIText13E0* self, char* input)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1588);
+INCLUDE_ASM("ui/uitext", cUITextScroll_render2D);
 #ifdef SKIP_ASM
 extern "C" int func_003A12D0(cUITextScroll* self);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
@@ -902,7 +902,7 @@ struct sText_1588 {
     float yofs;             // 0xCC
 };
 
-extern "C" void func_003A1588(sText_1588* self, float x, float y)
+extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
 {
     if (((self->flags14 >> 2) & 1) == 0) {
         self->vt[16].fn((char*)self + self->vt[16].delta);

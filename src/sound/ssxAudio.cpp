@@ -829,8 +829,8 @@ INCLUDE_ASM("sound/ssxAudio", func_00285FB0);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_InitSoundLevels(cSSXAudio* self, int a1);
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int a1);
-// PORT: func_002A77F8/func_002A7FF8 return values (the unit declares them void); bound by asm label.
-extern "C" void* func_002A77F8_r(void* self, char* name, int size) __asm__("func_002A77F8");
+// PORT: FileParser_FileParser/func_002A7FF8 return values (the unit declares them void); bound by asm label.
+extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("FileParser_FileParser");
 extern "C" int func_002A7BF8(void* self, const char* section);
 extern "C" int func_002A7F90(void* self);
 extern "C" char* func_002A7DA0(void* self);
@@ -843,7 +843,7 @@ extern "C" void func_00287F00(void* self, int a1, float f0, float f1);
 extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void func_002B49C0(void* mon, int id);
 extern "C" void func_00289BB8(void* self);
-extern "C" void func_002A7890(void* self, int flags);
+extern "C" void FileParser__FileParser(void* self, int flags);
 extern char* D_004A3554;
 extern char D_004A3570[];
 extern char D_004A3578[];
@@ -871,7 +871,7 @@ extern "C" void func_00285FB0(char* self)
     char msg[0x40];
     cSSXAudio_InitSoundLevels((cSSXAudio*)self, 0);
     cSSXAudio_SetAudioUpdateState((cSSXAudio*)self, 1);
-    func_002A77F8_r(&parser, D_004A3554, 0x100);
+    FileParser_FileParser_r(&parser, D_004A3554, 0x100);
     parser.cur = parser.start;
     if (func_002A7BF8(&parser, D_004A3570)) {
         while (func_002A7F90(&parser) == 0) {
@@ -901,7 +901,7 @@ extern "C" void func_00285FB0(char* self)
     *(int*)(self + 0x6290) = 10;
     *(int*)(self + 0x6090) = *(int*)(self + 0x608C);
     func_00289BB8(self);
-    func_002A7890(&parser, 2);
+    FileParser__FileParser(&parser, 2);
 }
 #endif
 
@@ -1001,7 +1001,7 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
     cAsyncSys_Init3(**(cAsyncSys***)(self + 0x118), 0, 0);
     *(char*)(self + 0x5838) = D_004A35A8[0];
     *(int*)(self + 0x5878) = 0;
-    func_002A77F8_r(&parser, D_004A3554, 0x100);
+    FileParser_FileParser_r(&parser, D_004A3554, 0x100);
     parser.cur = parser.start;
     if (func_002A7BF8(&parser, D_004A3570)) {
         while (func_002A7F90(&parser) == 0) {
@@ -1069,7 +1069,7 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
     }
     func_0029F3F8(self, 0);
     *(int*)(self + 0x627C) = 1;
-    func_002A7890(&parser, 2);
+    FileParser__FileParser(&parser, 2);
 }
 #endif
 
@@ -2155,9 +2155,9 @@ extern "C" void func_00287F00(void* self, int a1, float f0, float f1)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_LoadMixes);
 #ifdef SKIP_ASM
-// PORT: func_002A77F8 returns a value (the unit declares it void); bound by asm label.
-extern "C" void* func_002A77F8_r(void* self, char* name, int size) __asm__("func_002A77F8");
-extern "C" void func_002A7890(void* self, int flags);
+// PORT: FileParser_FileParser returns a value (the unit declares it void); bound by asm label.
+extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("FileParser_FileParser");
+extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" char* func_002A7B08(void* self);
 extern "C" char* func_002A7DA0(void* self);
 extern "C" int func_002A7F90(void* self);
@@ -2213,7 +2213,7 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
     sIniParser7FC8 parser;
     int val;
     self->count = 0;
-    func_002A77F8_r(&parser, D_004A3560, 0x100);
+    FileParser_FileParser_r(&parser, D_004A3560, 0x100);
     parser.cur = parser.start;
     for (int i = 0; i < 25; i++) {
         self->entries[i].f0 = 100;
@@ -2264,7 +2264,7 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
         }
         self->count++;
     }
-    func_002A7890(&parser, 2);
+    FileParser__FileParser(&parser, 2);
 }
 #endif
 
@@ -2974,9 +2974,9 @@ extern "C" int func_00289448(void) {
 INCLUDE_ASM("sound/ssxAudio", func_00289470);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
-extern "C" void func_002A77F8(void* self, char* name, int size);
+extern "C" void FileParser_FileParser(void* self, char* name, int size);
 extern "C" char* func_002A7B08(void* self);
-extern "C" void func_002A7890(void* self, int flags);
+extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char* D_004A355C;
 struct sAudio_9470 { char pad[0x60A4]; char names[20][0x14]; };
@@ -2985,7 +2985,7 @@ extern "C" void func_00289470(void* self)
 {
     if (BXFILE_exists(D_004A355C) != 0) {
         char parser[0x810];
-        func_002A77F8(parser, D_004A355C, 0x100);
+        FileParser_FileParser(parser, D_004A355C, 0x100);
         *(int*)((char*)self + 0x6234) = 0;
         while (*(int*)((char*)self + 0x6234) < 0x14) {
             char* s = func_002A7B08(parser);
@@ -2995,7 +2995,7 @@ extern "C" void func_00289470(void* self)
             strcpy(((sAudio_9470*)self)->names[*(int*)((char*)self + 0x6234)], s);
             *(int*)((char*)self + 0x6234) = *(int*)((char*)self + 0x6234) + 1;
         }
-        func_002A7890(parser, 2);
+        FileParser__FileParser(parser, 2);
         return;
     }
     *(int*)((char*)self + 0x6234) = 0;
@@ -3005,8 +3005,8 @@ extern "C" void func_00289470(void* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289520);
 #ifdef SKIP_ASM
-extern "C" void func_002A77F8(void* self, char* name, int size);
-extern "C" void func_002A7890(void* self, int flags);
+extern "C" void FileParser_FileParser(void* self, char* name, int size);
+extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" int func_002A7C68(void* self, const char* section);
 extern "C" void func_002A7A20(void* self);
 extern "C" int func_002A7F90(void* self);
@@ -3026,7 +3026,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
     char parser[0x810];
     char buf[0x40];
     func_002B3EB0((char*)self + 0x118);
-    func_002A77F8(parser, D_004A355C, 0x100);
+    FileParser_FileParser(parser, D_004A355C, 0x100);
     if (func_002A7C68(parser, name) != 0) {
         func_002A7A20(parser);
         while (func_002A7F90(parser) == 0) {
@@ -3046,7 +3046,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
     }
     func_002B4060((char*)self + 0x118);
     *(long*)((char*)self + 0x518) = (long)self->MusicSys.mActiveMap;
-    func_002A7890(parser, 2);
+    FileParser__FileParser(parser, 2);
 }
 #endif
 
