@@ -4747,3 +4747,5 @@ ps2_addr	name	previous	source	evidence
 00492FD0	cVisualEffectsTest_vtbl	D_00492FD0	vtables.py	retail vtable [D] slot 1 cVisualEffectsTest__cVisualEffectsTest
 00493160	cStaticEmitter_vtbl	D_00493160	vtables.py	retail vtable [D] slot 1 cStaticEmitter__cStaticEmitter
 004936D8	cLightMan_vtbl	D_004936D8	vtables.py	retail vtable [D] slot 1 cLightMan__cLightMan; also stored by cPSPLightMan_cPSPLightMan__FP12cPSPLightMan
+00493760	cPS2BezierMan_vtbl	cPSPBezierMan_vtbl	retail	the class is cPS2BezierMan (alloc tag "PS2BezierMan"); renamed with its methods
+00487D28	cPS2VisualEffectsMan_vtbl	cPSPVisualEffectsMan_vtbl	retail	the class is cPS2VisualEffectsMan (alloc tag "PS2VisualEffectsMan"); renamed with its methods

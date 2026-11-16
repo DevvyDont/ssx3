@@ -2022,7 +2022,7 @@ struct sQueue_4B48 {
 };
 
 extern "C" sMsg_4B48* tMissionMenuQueue_getEntry(sQueue_4B48* self);
-extern "C" sMsg_4B48* func_0030C820(sQueue_4B48* self);
+extern "C" sMsg_4B48* tMissionMenuQueue_getNextEntry(sQueue_4B48* self);
 
 // The script manager (cWScriptMan_TheWScriptMan); hasMessage / popMessage are inline here
 // (out-of-line copies: func_0030D330, func_0030D348).
@@ -2030,7 +2030,7 @@ struct sScript_4B48 {
     char pad0[0x1C4];
     sQueue_4B48 queue;              // 0x1C4
     bool hasMessage() { return queue.head != queue.tail; }
-    sMsg_4B48* popMessage() { return func_0030C820(&queue); }
+    sMsg_4B48* popMessage() { return tMissionMenuQueue_getNextEntry(&queue); }
 };
 
 struct sVSlot_4B48 {

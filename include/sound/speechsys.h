@@ -6,14 +6,14 @@
 // d:/ssx/code/source/sound/speechsys.cpp (preview assert strings); retail methods are in the sound/bankmonitor unit
 // (0x2B07F8..0x2B1780) plus out-of-line inline functions in bx/seg_1BA100 (0x2BACF0..0x2BAD14).
 // One instance: the cSpeechSys base of cController, i.e. gSSXAudio + 0x5560 (sound/ssxaudio.h), built by the
-// cController ctor func_002B07F8(this + 0x5560, 0, ...); D_004A37B4 points at it.
+// cController ctor cSpeechSys_cSpeechSys(this + 0x5560, 0, ...); D_004A37B4 points at it.
 //   cSpeechSys : virtual cStreamSys (: virtual cBankManager : cAsyncSys, cBankMonitor, virtual cSoundSys)
 // Non-virtual part 0x1C0 [R]: in a complete cSpeechSys the ctor (inchrg != 0) puts cSoundSys at +0x1C0, cBankManager
 // at +0x1C8 and cStreamSys at +0xC98; in cSSXAudio the cController data starts at 0x5560 + 0x1C0 = 0x5720. Vtable
 // D_00483870 (cSpeechSys / cController), D_004836D8 (cSSXAudio). The struct below is the NON-VIRTUAL part.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:
-//   [R] retail constructor func_002B07F8 and destructor func_002B0AE8;
+//   [R] retail constructor cSpeechSys_cSpeechSys and destructor cSpeechSys__cSpeechSys;
 //   [U] how retail code uses the field.
 // The preview's cSpeechSys accessors (UpdateSpeechVolume, GetSpeechVolumeIdentifier) touch no field; layout_xlate.py
 // pairs only the vptr (preview 0x158 -> retail 0x1BC: retail added 0x64 bytes, the .big-file name table fits that).

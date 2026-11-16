@@ -3,7 +3,7 @@
 #include "render/ps2graphicsman.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* cPSPBezierMan_cPSPBezierMan(void* self);
+void* cPS2BezierMan_cPS2BezierMan(void* self);
 extern const char str_PS2BezierMan[];
 
 //99.23%
@@ -12,19 +12,19 @@ INCLUDE_ASM("render/bezierman", cBezierMan_construct__Fv);
 /**
  * Creates the Bezier patch manager: allocates 0x9C90 bytes ("PS2BezierMan") and constructs it.
  *
- * The constructor is cPSPBezierMan_cPSPBezierMan() (the class keeps On Tour's PSP name).
+ * The constructor is cPS2BezierMan_cPS2BezierMan() (the class keeps On Tour's PSP name).
  *
  * @return the new manager (the constructor's result)
  */
 void* cBezierMan_construct()
 {
     void* mem = cMemMan_alloc(40080, str_PS2BezierMan, 0, 0);
-    return cPSPBezierMan_cPSPBezierMan(mem);
+    return cPS2BezierMan_cPS2BezierMan(mem);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", cPSPBezierMan_Init);
+INCLUDE_ASM("render/bezierman", cPS2BezierMan_Init);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -57,7 +57,7 @@ extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
  * 15000, calls virtual slot 17 (func_0038D638) and fills the UV grids in D_005049C0: 6 x 6 at step 0.2 and 8 x 8 at
  * step 1/7.
  */
-extern "C" void cPSPBezierMan_Init(cPSPBezierMan* self)
+extern "C" void cPS2BezierMan_Init(cPS2BezierMan* self)
 {
     func_00372B78(((char*)self) + 0x10, 900, 220, 140, 0, 146, 93);
     self->mVifCache[0] = operator_new_tag_AF30(0x38400, str_4x4VifCache, 0, 0);
@@ -95,7 +95,7 @@ extern "C" void cPSPBezierMan_Init(cPSPBezierMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", cPSPBezierMan_Purge);
+INCLUDE_ASM("render/bezierman", cPS2BezierMan_Purge);
 #ifdef SKIP_ASM
 void func_0038D660(void*);
 void cMemMan_free(void*);
@@ -104,7 +104,7 @@ void cMemMan_free(void*);
  * Releases the Bezier patch manager's resources: runs the base purge (func_0038D660, empty) and frees the three VIF
  * packet caches allocated by Init.
  */
-extern "C" void cPSPBezierMan_Purge(cPSPBezierMan* self)
+extern "C" void cPS2BezierMan_Purge(cPS2BezierMan* self)
 {
     func_0038D660(self);
     if (self->mVifCache[0] != 0) {
@@ -166,13 +166,13 @@ struct sBezObj_B190 {
     unsigned short tex8;    // 0x1AA
 };
 
-extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsigned char* t, int unused, int extra)
+extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* o, unsigned char* t, int unused, int extra)
 {
     if (t[0] == t[2] && t[1] == t[3] && t[0] == t[1]) {
         switch (t[0]) {
         case 4:
-            if (pspBezierMan->mNum4x4Patches < 900) {
-                tBezierPatchEntry* e = &((&pspBezierMan->m4x4Patches[0]))[pspBezierMan->mNum4x4Patches++];
+            if (bezierMan->mNum4x4Patches < 900) {
+                tBezierPatchEntry* e = &((&bezierMan->m4x4Patches[0]))[bezierMan->mNum4x4Patches++];
                 (*(int*)&e->unk_04) = extra;
                 e->mpPatch = o;
                 e->mLod = 0;
@@ -180,8 +180,8 @@ extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsi
             }
             break;
         case 6:
-            if (pspBezierMan->mNum6x6Patches < 220) {
-                tBezierPatchEntry* e = &((&pspBezierMan->m6x6Patches[0]))[pspBezierMan->mNum6x6Patches++];
+            if (bezierMan->mNum6x6Patches < 220) {
+                tBezierPatchEntry* e = &((&bezierMan->m6x6Patches[0]))[bezierMan->mNum6x6Patches++];
                 (*(int*)&e->unk_04) = extra;
                 e->mLod = 1;
                 e->mpPatch = o;
@@ -189,8 +189,8 @@ extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsi
             }
             break;
         case 8:
-            if (pspBezierMan->mNum8x8Patches < 50) {
-                tBezierPatchEntry* e = &((&pspBezierMan->m8x8Patches[0]))[pspBezierMan->mNum8x8Patches++];
+            if (bezierMan->mNum8x8Patches < 50) {
+                tBezierPatchEntry* e = &((&bezierMan->m8x8Patches[0]))[bezierMan->mNum8x8Patches++];
                 (*(int*)&e->unk_04) = extra;
                 e->mLod = 2;
                 e->mpPatch = o;
@@ -200,8 +200,8 @@ extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsi
         }
         return;
     }
-    if (pspBezierMan->mNumMixedPatches < 75) {
-        tBezierMixedPatchEntry* e = &((&pspBezierMan->mMixedPatches[0]))[pspBezierMan->mNumMixedPatches++];
+    if (bezierMan->mNumMixedPatches < 75) {
+        tBezierMixedPatchEntry* e = &((&bezierMan->mMixedPatches[0]))[bezierMan->mNumMixedPatches++];
         (*(int*)&e->unk_04) = extra;
         e->mpPatch = o;
         int* pk = &e->mLod;
@@ -215,7 +215,7 @@ extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsi
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", cPSPBezierMan_AddPatch);
+INCLUDE_ASM("render/bezierman", cPS2BezierMan_AddPatch);
 #ifdef SKIP_ASM
 extern int D_004A44D4;
 
@@ -235,7 +235,7 @@ struct sBezVEntry_B338 {
  * @param texid  the patch's texture id (passed through as a pointer-sized value)
  * @param clip  the patch's clip data
  */
-extern "C" void cPSPBezierMan_AddPatch(cPSPBezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
+extern "C" void cPS2BezierMan_AddPatch(cPS2BezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
 {
     if (D_004A44D4 == 0) {
         sBezVEntry_B338* vt = (sBezVEntry_B338*)self->mVtbl;
@@ -245,7 +245,7 @@ extern "C" void cPSPBezierMan_AddPatch(cPSPBezierMan* self, void* pPatch, void* 
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", cPSPBezierMan_DrawPatches);
+INCLUDE_ASM("render/bezierman", cPS2BezierMan_DrawPatches);
 #ifdef SKIP_ASM
 // REF refs/ssx3-rust crates/ssx3-game/src/packetless/bezier.rs (end_pass): field meanings.
 extern "C" void func_0031BE50(float angle, float* s, float* c);
@@ -833,7 +833,7 @@ static inline void Render_B370(sBezMan_B370* self)
  * (func_0038C788, func_0038CA70, func_0038CE20 for the mixed list). Deferred patches are flushed into DeferMan
  * buckets grouped by texture. Finally pops the draw state and calls func_0038D968.
  */
-extern "C" void cPSPBezierMan_DrawPatches(cPSPBezierMan* self)
+extern "C" void cPS2BezierMan_DrawPatches(cPS2BezierMan* self)
 {
     Render_B370(((sBezMan_B370*)self));
 }

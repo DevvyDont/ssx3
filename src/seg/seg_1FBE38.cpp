@@ -5320,12 +5320,12 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303490);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* func_00226620_3490(void*) __asm__("func_00226620__FPv");
 extern char *D_004A3DD8_3490 __asm__("cWScriptMan_TheWScriptMan");
-extern "C" unsigned func_003079D8_3490(char*) __asm__("func_003079D8");
+extern "C" unsigned cWScriptProcess_getRunningTaskId_3490(char*) __asm__("cWScriptProcess_getRunningTaskId");
 extern "C" void* func_00303490(void* self) {
     char *p = *(char**)(D_004A3DD8_3490 + 0x2A4);
     unsigned v;
     if (p)
-        v = func_003079D8_3490(p);
+        v = cWScriptProcess_getRunningTaskId_3490(p);
     else
         v = 0xFFFFFFFF;
     *(int*)((char*)self + 8) = 3;

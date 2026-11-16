@@ -30,7 +30,7 @@ struct cSongConfiguration;
 
 struct cMusicSys {
     cStreamSys* mpVStreamSys;                 // 0x0000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0x5F20 in a complete object; cSSXAudio + 0x7768); [U] every method reaches cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
-    cSongConfiguration* mSongConfig[64];      // 0x0004 [R] one cMemMan_alloc(0xAC, "cSongConfiguration") + ctor func_002B1A98 per song (PATHDATA/MUSDATA/LOOPDATA/BeatsPerMeasure.. go into it); dtor deletes each through its vtable (+0xA8); [U] func_002B3838, func_002B4908__FPv, func_002B4978
+    cSongConfiguration* mSongConfig[64];      // 0x0004 [R] one cMemMan_alloc(0xAC, "cSongConfiguration") + ctor cSongConfiguration_cSongConfiguration per song (PATHDATA/MUSDATA/LOOPDATA/BeatsPerMeasure.. go into it); dtor deletes each through its vtable (+0xA8); [U] func_002B3838, func_002B4908__FPv, func_002B4978
     char mBasePath[0x20];                     // 0x0104 [R] ini GLOBAL/BASEPATH; [U] func_002B3838 passes it to the song instance ctor
     char mSongName[64][11];                   // 0x0124 [P] MUSIC_SongName returns this + 0x124 + 11 * mCurrentSongNum; [R] ctor copies each song's section name; [U] func_002B3838/func_002B3EE8 search it
     int mNumSongs;                            // 0x03E4 [P] MUSIC_GetNumSongs (retail 0x2BAC60); [R] ctor counts the songs

@@ -624,7 +624,7 @@ extern "C" int func_00290C40(void* self, void* src)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_00290CC0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SFX_Play2D);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
@@ -666,7 +666,19 @@ struct sSnd0CC0Mgr {
     sSnd0CC0Sub sub;         // 0x1D8
 };
 
-extern "C" int func_00290CC0(cSSXAudio* vself, int a, int b)
+/**
+ * Plays a 2D (non-positional) sound effect from a bank at the sound-effects volume.
+ *
+ * Pushes a play-option level on the bank manager (mpVBankManager) with default options (the inlined
+ * cBankSys::SFX_Begin(Bank, Patch)) and records @p bank in mBank and @p patch in mPatch for that level; sets the level's
+ * volume-control pointer to func_00287968(this, 5, 0) (On Tour GetCurrAppliedVolumePtr(5, 0)); then plays it with
+ * cBankSys_SFX_End. Virtual slot 1 of cSSXAudio_vtbl, overriding cBankSys's func_002BA6B0.
+ *
+ * @param bank  the sound bank (On Tour Bank)
+ * @param patch  the patch in the bank (On Tour Patch)
+ * @return cBankSys_SFX_End's result (the voice handle)
+ */
+extern "C" int cSSXAudio_SFX_Play2D(cSSXAudio* vself, int bank, int patch)
 {
     cSSXAudio* self = vself;
     sSnd0CC0Mgr* m = ((sSnd0CC0Mgr*)self->mpVBankManager);
@@ -691,8 +703,8 @@ extern "C" int func_00290CC0(cSSXAudio* vself, int a, int b)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->mBank[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = a;
-    self->mPatch[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = b;
+    self->mBank[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = bank;
+    self->mPatch[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = patch;
     sSnd0CC0Mgr** pp = ((sSnd0CC0Mgr**)self->MusicSys.mpVStreamSys);
     int r = (int)func_00287968(self, 5, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
@@ -12354,11 +12366,11 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A69A0);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_cCrowdSys);
 #ifdef SKIP_ASM
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
-extern "C" char* cController_cController(cMidiSys* self, int embedded, int count, int heap);
+extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int heap);
 extern "C" void* func_002A4BA8(tCrowdEventData* self);
 
 struct sSnd69VtEnt {
@@ -12393,8 +12405,22 @@ extern const sSnd69Vt4 D_00483818_69 __asm__("D_00483818");
 extern const sSnd69Vt7 D_00483838_69 __asm__("D_00483838");
 
 
+/**
+ * Constructs the crowd sound system.
+ *
+ * When @p embedded is set (a complete object) it builds the virtual bases first: cSoundSys at +0x118 and cBankManager
+ * at +0x120. Then constructs the cMidiSys base (cMidiSys_cMidiSys), installs the cCrowdSys vtables (D_004837F8 at
+ * mVtbl, D_00483818 / D_00483838 in the virtual bases, adjusted on the stack when not in charge), clears mNumInstances
+ * and mpCrowdInstances, constructs the three tCrowdData sample lists (mCrowdData) and stores itself in D_004A36F8.
+ *
+ * @param embedded  g++ in-charge flag: nonzero when the virtual bases are built here (the complete object)
+ * @param count  maximum number of banks (On Tour MaxBanks of the base constructors)
+ * @param unused  not used
+ * @param heap  audio mode (On Tour eSOUNDDEF_MODE audioMode), passed to the base constructors
+ * @return @p self
+ */
 // PORT: hand-expanded g++ 2.95 virtual-base ctor (vtable upcast-offset fixup on stack copies).
-extern "C" char* func_002A69A0(cCrowdSys* self, int embedded, int count, int unused, int heap)
+extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, int unused, int heap)
 {
     if (embedded) {
         char* mon = ((char*)self) + 0x118;
@@ -12403,7 +12429,7 @@ extern "C" char* func_002A69A0(cCrowdSys* self, int embedded, int count, int unu
         cSoundSys_cSoundSys(mon, heap);
         cBankManager_cBankManager(*(void**)self, 0, count, heap);
     }
-    cController_cController((cMidiSys*)self, 0, count, heap);
+    cMidiSys_cMidiSys((cMidiSys*)self, 0, count, heap);
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483818_69;
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_69;
@@ -12429,7 +12455,7 @@ extern "C" char* func_002A69A0(cCrowdSys* self, int embedded, int count, int unu
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A6B50);
+INCLUDE_ASM("sound/soundsys", cCrowdSys__cCrowdSys);
 #ifdef SKIP_ASM
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
@@ -12437,7 +12463,7 @@ void operator_delete(int*);
 extern "C" void func_002A4BE0(tCrowdEventData* self, int flags);
 struct sSsMgr6F38;
 extern "C" void func_002A6F38(sSsMgr6F38* self);
-extern "C" void func_002A82D8(cMidiSys* self, int flags);
+extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags);
 
 struct sSnd6BVtEnt {
     short delta;
@@ -12456,8 +12482,18 @@ extern char cBankMonitor_vtbl[];
 extern const sSnd6BVt4 D_00483818_6B __asm__("D_00483818");
 extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
 
+/**
+ * Destroys the crowd sound system.
+ *
+ * Re-installs the cCrowdSys vtables, releases the crowd instances and sample banks (func_002A6F38), clears D_004A36F8,
+ * destroys the three tCrowdData sample lists in reverse order (func_002A4BE0), runs the cMidiSys base destructor
+ * cMidiSys__cMidiSys, destroys the virtual bases (cBankManager, cSoundSys) when bit 1 of @p flags is set and frees the
+ * object when bit 0 is set.
+ *
+ * @param flags  destructor flags: bit 1 destroys the virtual bases, bit 0 frees the object
+ */
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
-extern "C" void func_002A6B50(cCrowdSys* self, int flags)
+extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
 {
     self->mVtbl = (void**)D_004837F8;
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483818_6B;
@@ -12486,7 +12522,7 @@ extern "C" void func_002A6B50(cCrowdSys* self, int flags)
             func_002A4BE0((tCrowdEventData*)p, 2);
         }
     }
-    func_002A82D8((cMidiSys*)self, 0);
+    cMidiSys__cMidiSys((cMidiSys*)self, 0);
     if (flags & 2) {
         cBankManager__cBankManager(*(void**)self, 0);
         cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
@@ -13459,7 +13495,7 @@ extern "C" int FileParser_AssignInt(FileParser* self, const char* name, int* out
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", cController_cController);
+INCLUDE_ASM("sound/soundsys", cMidiSys_cMidiSys);
 #ifdef SKIP_ASM
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
@@ -13487,7 +13523,7 @@ extern const sSndCtVt4 D_004839F0_ct __asm__("D_004839F0");
 extern const sSndCtVt7 D_00483A10_ct __asm__("D_00483A10");
 
 /**
- * Constructs the MIDI part of the audio system (the ssxaudio.h notes: really cMidiSys's constructor).
+ * Constructs a cMidiSys, the MIDI part of the audio system.
  *
  * Builds cBankSys first (and, with @p embedded, the shared virtual bases), fixes up the base vtables, then
  * allocates the 0x20-byte "MIDIBANKS" table and records the instance in D_004A3744.
@@ -13498,7 +13534,7 @@ extern const sSndCtVt7 D_00483A10_ct __asm__("D_00483A10");
  * @return @p self
  */
 // PORT: hand-expanded g++ 2.95 virtual-base ctor (vtable upcast-offset fixup on stack copies).
-extern "C" char* cController_cController(cMidiSys* self, int embedded, int count, int heap)
+extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int heap)
 {
     if (embedded) {
         char* mon = ((char*)self) + 0x14;
@@ -13532,7 +13568,7 @@ extern "C" char* cController_cController(cMidiSys* self, int embedded, int count
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A82D8);
+INCLUDE_ASM("sound/soundsys", cMidiSys__cMidiSys);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -13558,8 +13594,18 @@ extern const sSndDtBVt4 D_004839F0;
 extern const sSndDtBVt7 D_00483A10;
 extern char cBankMonitor_vtbl[];
 
+/**
+ * Destroys the MIDI sound system.
+ *
+ * Re-installs the cMidiSys vtables (D_00483A48 at mVtbl, D_004839F0 / D_00483A10 in the virtual bases, adjusted on the
+ * stack when not in charge), frees mMidiBanks, clears D_004A3744 (the instance the ctor stored), calls func_003B9880,
+ * runs the cBankSys base destructor, destroys the virtual bases when bit 1 of @p flags is set and frees the object when
+ * bit 0 is set. The matching constructor is cMidiSys_cMidiSys.
+ *
+ * @param flags  destructor flags: bit 1 destroys the virtual bases, bit 0 frees the object
+ */
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
-extern "C" void func_002A82D8(cMidiSys* self, int flags)
+extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
 {
     self->mVtbl = (void**)D_00483A48;
     *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_004839F0;
@@ -13839,11 +13885,20 @@ extern "C" int func_002A8B28(cMidiSys* midiSys, char* obj)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A8C20);
+INCLUDE_ASM("sound/soundsys", cPS2SoundManager_cPS2SoundManager);
 #ifdef SKIP_ASM
 extern char D_004835F8[];
 
-extern "C" void* func_002A8C20(cPS2SoundManager* self)
+/**
+ * Constructs the PS2 sound manager.
+ *
+ * Stores the vtable D_004835F8 and resets the state: no mSoundHeap, driver mode unk_008 0, mMainMemHighAddr -1, empty
+ * unused-node and free-block lists (unk_310 / unk_318 -1) and load limits off (unk_31C 0). The nodes are set up later
+ * by cPS2SoundManager_Init.
+ *
+ * @return @p self
+ */
+extern "C" void* cPS2SoundManager_cPS2SoundManager(cPS2SoundManager* self)
 {
     *(void**)self = D_004835F8;
     self->mSoundHeap = 0;
@@ -13936,7 +13991,7 @@ extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A8D90);
+INCLUDE_ASM("sound/soundsys", cPS2SoundManager_SetMode);
 #ifdef SKIP_ASM
 extern "C" void func_003B4DD8(void* cfg);
 extern "C" void func_003B4FC0(void* cfg);
@@ -13970,7 +14025,19 @@ struct sSnd8D90Cfg {
     char pad5A[0xE0 - 0x5A];
 };
 
-extern "C" int func_002A8D90(cPS2SoundManager* self, int mode)
+/**
+ * Switches the sound driver configuration for an audio mode.
+ *
+ * Fills a driver configuration (func_003B4DD8 defaults, then rates 36000/24000 and fixed levels) with per-mode voice
+ * and buffer counts: mode 3 (calls func_003BC930, records unk_008 = 2), mode 2 and modes 0/1 (record unk_008 = 1), and
+ * applies it with func_003B4FC0; any other mode applies the defaults. Likely bug: the early return tests the other
+ * group's value (mode 3 returns 1 when unk_008 is 1, modes 0-2 when it is 2), so re-applying the current setting goes
+ * through and switching between the two groups never does.
+ *
+ * @param mode  the audio mode (On Tour eSOUNDDEF_MODE mode)
+ * @return 1 when the call was refused, 2 when the configuration was applied (On Tour eSOUNDMANAGER_SETMODE)
+ */
+extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
 {
     sSnd8D90Cfg cfg;
     func_003B4DD8(&cfg);
@@ -14061,17 +14128,17 @@ extern "C" void cPS2SoundManager_Shutdown(cPS2SoundManager* self)
 INCLUDE_ASM("sound/soundsys", func_002A8FA0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002A8C20(cPS2SoundManager* self);
+extern "C" void* cPS2SoundManager_cPS2SoundManager(cPS2SoundManager* self);
 extern const char str_PS2SoundManager[];
 
 extern "C" void* func_002A8FA0()
 {
-    return func_002A8C20((cPS2SoundManager*)cMemMan_alloc(800, str_PS2SoundManager, 0, 0));
+    return cPS2SoundManager_cPS2SoundManager((cPS2SoundManager*)cMemMan_alloc(800, str_PS2SoundManager, 0, 0));
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A8FD8);
+INCLUDE_ASM("sound/soundsys", cPS2SoundManager_AllocSoundMem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_003B5B20(int a, int b);
@@ -14079,7 +14146,21 @@ extern "C" int func_003B5B68(int* out);
 // The unit defines func_002A92B8 with its own entry/pool view types; bind this unit's struct view.
 tPS2SoundMemNode* func_002A92B8_v(cPS2SoundManager* self) __asm__("func_002A92B8");
 
-extern "C" int func_002A8FD8(cPS2SoundManager* self, int size)
+/**
+ * Allocates a block of sound memory and returns its handle.
+ *
+ * First walks the free-block list (unk_318, sorted by address): a block of exactly @p size is marked used and unlinked,
+ * a bigger one is split (a new node from func_002A92B8 takes its top @p size bytes). Otherwise carves the block off the
+ * top of main sound memory: fails with -1 when func_003B5B68 reports less free memory than @p size, with -2 while load
+ * limits are on (unk_31C), else lowers mMainMemHighAddr by @p size and tells the driver (func_003B5B20). No check that
+ * func_002A92B8 found a node. Likely bug: an exact fit at the head of the free list is never unlinked (unk_318 keeps
+ * pointing at the now-used node, whose next is cleared), so the rest of the free list is lost and the next request of
+ * that size gets the same block again.
+ *
+ * @param size  bytes wanted
+ * @return the node index (the memory handle), -1 when out of memory, -2 while load limits are set
+ */
+extern "C" int cPS2SoundManager_AllocSoundMem(cPS2SoundManager* self, int size)
 {
     int i = self->unk_318;
     if (i >= 0) {
@@ -14131,14 +14212,22 @@ extern "C" int func_002A8FD8(cPS2SoundManager* self, int size)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A9128);
+INCLUDE_ASM("sound/soundsys", cPS2SoundManager_DeallocSoundMem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_002A92F8_v(cPS2SoundManager* self, tPS2SoundMemNode* e) __asm__("func_002A92F8");
-extern "C" void func_002A9128(cPS2SoundManager* self, int i)
+/**
+ * Frees a block of sound memory allocated by cPS2SoundManager_AllocSoundMem (cPS2SoundManager_AllocSoundMem).
+ *
+ * Marks node @p memHandle free. A block at mMainMemHighAddr goes back to main memory (func_002A92F8), followed by every free
+ * block that now sits at the new top; any other block is inserted into the free-block list (unk_318) in address order.
+ *
+ * @param memHandle  the memory handle (node index) AllocSoundMem returned (On Tour memHandle)
+ */
+extern "C" void cPS2SoundManager_DeallocSoundMem(cPS2SoundManager* self, int memHandle)
 {
-    tPS2SoundMemNode* n = &((&self->mNodes[0]))[i];
+    tPS2SoundMemNode* n = &((&self->mNodes[0]))[memHandle];
     n->state = 1;
     if (n->lowAddr == self->mMainMemHighAddr) {
         func_002A92F8_v((self), n);
@@ -14197,12 +14286,12 @@ struct sSndPool2A9250 {
  *
  * Sets +0x31C to 1 and calls func_003B5B20 with the node's lowAddr and highAddr.
  *
- * @param i  index of the sound-memory node (On Tour memHandle)
+ * @param memHandle  index of the sound-memory node
  */
-extern "C" void cPS2SoundManager_SetSoundMemLoadLimits(cPS2SoundManager* self, int i)
+extern "C" void cPS2SoundManager_SetSoundMemLoadLimits(cPS2SoundManager* self, int memHandle)
 {
     self->unk_31C = 1;
-    tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[i];
+    tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[memHandle];
     func_003B5B20(ps2SoundMemNode->lowAddr, ps2SoundMemNode->highAddr);
 }
 #endif

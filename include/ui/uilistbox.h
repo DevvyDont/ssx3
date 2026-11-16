@@ -9,13 +9,13 @@
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
 // Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (cUIListBox_setUIData), 14 onInput
-// (cUIListBox_onInput), 15 updateLocale (cUIListBox_updateLocale), 16 render2D (cUIListBox_render2D), 21 getType (func_003A56A0),
+// (cUIListBox_onInput), 15 updateLocale (cUIListBox_updateLocale), 16 render2D (cUIListBox_render2D), 21 getType (cUIListBox_getType),
 // 22 setShadow (cUIListBox_setShadow), 23 setUseStaticColour (cUIListBox_setUseStaticColour); cUIListBox_addEntryByAsciiString,
 // cUIListBox_addEntryByUnicodeString (addEntryByUnicodeString), cUIListBox_addEntryByStringID, func_0039A670 (clear; the dtor calls it),
 // cUIListBox_getCurrentAsciiText / cUIListBox_getCurrentEntryData (current entry's ASCII text / data), cUIListBox_getEntryByData (find by data), cUIListBox_setCurrentEntryByIndex
 // (setCurrentEntry), cUIListBox_setEntryDataByIndex (setEntryData), cUIListBox_setEntryByAsciiString, cUIListBox_setCallbackListBox, cUIListBox_getFont,
 // cUIListBox_setUnicodePrivate (setEntryUnicode).
-// Class name: the preview's cUIListBox::getType (builds/x/v2/name_map_v2.tsv, func_003A56A0) and On Tour.
+// Class name: the preview's cUIListBox::getType (builds/x/v2/name_map_v2.tsv, cUIListBox_getType) and On Tour.
 //
 // A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUIListBox 0x340: its cUIThing is 0x80 and it
 // aligns tARGB to 16, so mAttrListBox / the colours / the entries sit 0xC / 0x18 later there; the entry array is

@@ -9,7 +9,7 @@
 // written out flat below. Class name: SSX On Tour's DWARF (class cUIScrollBar 0xE0, the only On Tour widget with these
 // members); the preview keeps no name for it. EA's source file is not known; ui/uiscrollbar.h is our name.
 // Methods: vtable cUIScrollBar_vtbl slots 0 ~cUIScrollBar (cUIScrollBar__cUIScrollBar), 9 setUIData (cUIScrollBar_setUIData), 16 render2D
-// (cUIScrollBar_render2D), 21 getType (func_003A6000); cUIScrollBar_setValues (update position: pos, visible, total), cUIScrollBar_setScrollVisibile
+// (cUIScrollBar_render2D), 21 getType (cUIScrollBar_getType); cUIScrollBar_setValues (update position: pos, visible, total), cUIScrollBar_setScrollVisibile
 // (show/hide arrows); accessors func_003A6008..func_003A60D8 (ui/uivector). Retail methods: ui/uiscreen 0x39D8C0-0x39DF28.
 //
 // A FLAT layout, like main/game.h. Members: On Tour's (each 0xC later there), placed by [R] the ctors and [U] the

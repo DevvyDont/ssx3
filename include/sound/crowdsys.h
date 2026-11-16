@@ -9,7 +9,7 @@
 // Retail methods: sound/soundsys unit 0x2A4BA8..0x2A77F8, plus the out-of-line inline CROWD_GetData (func_002BAD18,
 // bx/seg_1BA100).
 //   cCrowdSys : cMidiSys (0x0) : cBankSys, virtual cBankManager
-// cCrowdSys non-virtual part 0x118 [R]: its ctor func_002A69A0 (inchrg != 0) puts cSoundSys at this + 0x118 and
+// cCrowdSys non-virtual part 0x118 [R]: its ctor cCrowdSys_cCrowdSys (inchrg != 0) puts cSoundSys at this + 0x118 and
 // cBankManager at this + 0x120 (vtables D_00483818 / D_00483838 have deltas -0x118 / -0x120), stores vtable
 // D_004837F8 at 0xC (_vt$9cCrowdSys: slot 1 cBankSys's func_002BA6B0, slot 2 pure virtual) and itself in
 // D_004A36F8 (EA name gpCrowdSys). In cSSXAudio the next base, cMusicSys, starts at 0x118 (sound/ssxaudio.h). The struct
@@ -17,7 +17,7 @@
 // at preview 0x275AF8..0x278E0C).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline. Evidence tags:
-//   [R] retail constructors / destructors (func_002A69A0 / func_002A6B50, cCrowdInstance func_002A4D68 /
+//   [R] retail constructors / destructors (cCrowdSys_cCrowdSys / cCrowdSys__cCrowdSys, cCrowdInstance func_002A4D68 /
 //       func_002A4E38), allocation tags, the crowd.inf keys func_002A7040 parses;
 //   [P] the July 2003 preview: assert strings next to the field they test, CROWD_GetData's linkonce;
 //   [U] how the retail methods use the field.
@@ -152,8 +152,8 @@ CHECK_OFFSET(cCrowdSys, mpCrowdInstances, 0x018);
 CHECK_OFFSET(cCrowdSys, mCrowdData, 0x01C);
 CHECK_SIZE(cCrowdSys, 0x118);
 
-// The crowd system: func_002A69A0 stores itself here, func_002A6B50 clears it. EA name gpCrowdSys (preview assert
+// The crowd system: cCrowdSys_cCrowdSys stores itself here, cCrowdSys__cCrowdSys clears it. EA name gpCrowdSys (preview assert
 // "gpCrowdSys" on the same gp-relative global; candidate for a symbol_addrs rename D_004A36F8 -> gpCrowdSys).
-extern cCrowdSys* D_004A36F8;       // [R] the cCrowdSys ctor func_002A69A0 stores self, its dtor clears it
+extern cCrowdSys* D_004A36F8;       // [R] the cCrowdSys ctor cCrowdSys_cCrowdSys stores self, its dtor clears it
 
 #endif /* SOUND_CROWDSYS_H */

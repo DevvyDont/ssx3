@@ -1246,7 +1246,7 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void cSSXAudio_PlayIconSound(void* p, int a, int b, float c);
 extern "C" void cWScriptMan_doMissionCmd(void* p, int a, int b, int c);
 extern "C" void func_00398038(void* p);
-extern "C" void func_0030C820(void* p);
+extern "C" void tMissionMenuQueue_getNextEntry(void* p);
 extern "C" void func_0029ED18(void* p);
 // PORT: the unit defines cGame_activatePauseMenu(char* self); this caller passes a second argument (a1 = 0).
 extern "C" int cGame_activatePauseMenu_pi(void* self, int a) __asm__("cGame_activatePauseMenu");
@@ -1418,7 +1418,7 @@ static inline int updateState_2306B8(cGame* self)
                     pushState_2306B8(3);
                     func_00398038(((char*)self->UI));
                 } else {
-                    func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+                    tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
                 }
                 return 0;
             }

@@ -263,9 +263,16 @@ extern "C" int func_002D37D0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D37D8);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetDevice);
 #ifdef SKIP_ASM
-extern "C" int func_002D37D8(cPS2MemCard* pS2MemCard) {
+/**
+ * Returns the memory-card port the card object works on.
+ *
+ * An out-of-line inline (virtual slot 4): the whole body is `return mDevice;`.
+ *
+ * @return mDevice (0 or 1)
+ */
+extern "C" int cPS2MemCard_GetDevice(cPS2MemCard* pS2MemCard) {
     return (pS2MemCard->mDevice);
 }
 #endif
@@ -1005,11 +1012,15 @@ extern "C" int func_002D3D48(char *menuItem, int text) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D70);
+INCLUDE_ASM("seg/seg_1D3510", cColorMenuItem__cColorMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3D70(void) {
+/**
+ * Destroys a colour-channel menu item through the base cMenuItem destructor (a tail call that passes its arguments
+ * through).
+ */
+extern "C" void cColorMenuItem__cColorMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -1188,11 +1199,19 @@ extern "C" void func_002D3F78(int menu, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3FD8);
+INCLUDE_ASM("seg/seg_1D3510", cPS2ConsoleConfig__cPS2ConsoleConfig);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 extern void* D_00487480[];
-extern "C" void func_002D3FD8(char *self, int flags) {
+/**
+ * Destroys the PS2 console configuration object.
+ *
+ * Nothing of its own to release: stores the cConsoleConfig vtable D_00487480 back at +0x34 (where the vptr sits) and
+ * frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cPS2ConsoleConfig__cPS2ConsoleConfig(char *self, int flags) {
     *(void***)(self + 0x34) = D_00487480;
     if (flags & 1) operator_delete((int*)self);
 }

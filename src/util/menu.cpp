@@ -3212,9 +3212,14 @@ extern "C" void func_002CD978(void *item, int minValue, int maxValue) {
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CD9B8);
+INCLUDE_ASM("util/menu", cIntMenuItem_zeroValue);
 #ifdef SKIP_ASM
-extern "C" void func_002CD9B8(void* self)
+/**
+ * Resets the edited integer to its zero point: 0, or the minimum when the range starts above 0.
+ *
+ * Writes through the value pointer at +0x18: 0 when the minimum (+0x1C) is 0 or less, else the minimum. Virtual slot 8.
+ */
+extern "C" void cIntMenuItem_zeroValue(void* self)
 {
     int* valuePtr = *(int**)((char*)self + 0x18);
     int minValue = *(int*)((char*)self + 0x1c);
@@ -3540,9 +3545,15 @@ extern "C" int cFloatMenuItem_input(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CDF78);
+INCLUDE_ASM("util/menu", cFloatMenuItem_zeroValue);
 #ifdef SKIP_ASM
-extern "C" void func_002CDF78(void* self)
+/**
+ * Resets the edited float to its zero point: 0.0, or the minimum when the range starts above 0.
+ *
+ * Writes through the value pointer at +0x18: 0.0 when the minimum (+0x1C) is 0 or less, else the minimum. Virtual slot
+ * 8.
+ */
+extern "C" void cFloatMenuItem_zeroValue(void* self)
 {
     float* valuePtr = *(float**)((char*)self + 0x18);
     float minValue = *(float*)((char*)self + 0x1c);
@@ -4150,14 +4161,14 @@ extern "C" void func_002CE910(void* self, float* rect)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", cColorMenuItem__cColorMenuItem);
+INCLUDE_ASM("util/menu", cColorMenuItem_cColorMenuItem);
 #ifdef SKIP_ASM
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
 extern void* cColorMenuItem_vtbl[];
 
-struct cColorMenuItem__cColorMenuItem_sItem {
+struct sColorMenuItem {
     char pad_0x00[0x10];
     void* vtable;    // 0x10
     void* field_0x14;
@@ -4167,15 +4178,14 @@ struct cColorMenuItem__cColorMenuItem_sItem {
 /**
  * Constructs a menu item that edits one channel of a colour.
  *
- * Despite the destructor-style name, this is a constructor: it runs the base constructor with ID -1, stores the
- * colour at +0x14 and the channel at +0x18, then cColorMenuItem's vtable. cARGBMenuItem_cARGBMenuItem() makes
- * four, for channels 0 to 3.
+ * Runs the base constructor with ID -1, stores the colour at +0x14 and the channel at +0x18, then cColorMenuItem's
+ * vtable. cARGBMenuItem_cARGBMenuItem() makes four, for channels 0 to 3.
  *
  * @param color  the colour being edited, stored at +0x14
  * @param adjust  channel index 0 to 3, stored at +0x18
  * @return @p self
  */
-extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(cColorMenuItem__cColorMenuItem_sItem* self, void* color, void* adjust)
+extern "C" sColorMenuItem* cColorMenuItem_cColorMenuItem(sColorMenuItem* self, void* color, void* adjust)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = color;
@@ -5385,10 +5395,10 @@ extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title
     *(void**)(menuItem + 0x5AC) = color;
     *(void***)(menuItem + 0x10) = cARGBMenuItem_vtbl;
     // PORT: the channel index is passed in the unit's void* parameter
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x5B0), color, (void*)0);
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x5D4), color, (void*)1);
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x5F8), color, (void*)2);
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x61C), color, (void*)3);
+    cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x5B0), color, (void*)0);
+    cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x5D4), color, (void*)1);
+    cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x5F8), color, (void*)2);
+    cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x61C), color, (void*)3);
     cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem_sItem*)(menuItem + 0x640), title, color);
     cExpandMenuItem_addItem3(self, menuItem + 0x5B0, -1);
     cExpandMenuItem_addItem3(self, menuItem + 0x5D4, -1);

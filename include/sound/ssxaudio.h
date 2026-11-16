@@ -10,13 +10,13 @@
 // Hierarchy (retail; class names from the July 2003 preview's vtable/mangled names, see builds/x/v2/name_map_v2.tsv):
 //   cSSXAudio : cController
 //   cController : cCrowdSys (0x0), cMusicSys (0x118), cSpeechSys (0x5560)     (ctor func_002AB200, dtor cController__cController)
-//   cCrowdSys : cMidiSys : cBankSys : virtual cBankManager                    (ctors func_002A69A0 / 0x2A8140 / 0x28FD00)
+//   cCrowdSys : cMidiSys : cBankSys : virtual cBankManager                    (ctors cCrowdSys_cCrowdSys / 0x2A8140 / 0x28FD00)
 //   cMusicSys, cSpeechSys : virtual cStreamSys : virtual cBankManager
 //   cBankManager : cAsyncSys (0x0), cBankMonitor (0x1D8), virtual cSoundSys; cBankMonitor : cMonitor : virtual cSoundSys
 // g++ 2.95 places the shared virtual bases at the end: cSoundSys 0x6C90, cBankManager 0x6C98, cStreamSys 0x7768, and
 // gives each class with virtual bases a pointer to them (the mpV* fields; *(this + 0x118) is the usual way to cBankManager:
-// **(char***)(self + 0x118) + 0x1D8 is the cBankMonitor). Note: our symbol cController_cController (0x2A8140) is the
-// cMidiSys constructor; the real cController constructor is func_002AB200.
+// **(char***)(self + 0x118) + 0x1D8 is the cBankMonitor). The cMidiSys constructor is cMidiSys_cMidiSys (0x2A8140,
+// formerly misnamed cController_cController); the real cController constructor is func_002AB200.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
 // Evidence tags:
@@ -104,15 +104,15 @@ struct cSSXAudio {
     int* mBank;                         // 0x004 [O] cBankSys::mBank; [R] cBankSys ctor: operator new(0x10, "mBank")
     int* mPatch;                        // 0x008 [O] cBankSys::mPatch; [R] operator new(0x10, "mPath") (EA's tag spelling)
     void** mVtbl;                       // 0x00C [R] primary vptr: cSSXAudio_vtbl (cSSXAudio ctor/dtor), D_004837F8 (cController/cCrowdSys), D_00483A48 (cBankSys/cMidiSys)
-    // --- cMidiSys (EA name from the preview: func_002A82D8 = cMidiSys's virtual slot 1, the dtor; its ctor is the one our symbols call cController_cController 0x2A8140)
+    // --- cMidiSys (EA name from the preview: cMidiSys__cMidiSys = cMidiSys's virtual slot 1, the dtor; its ctor is cMidiSys_cMidiSys 0x2A8140)
     void* mMidiBanks;                   // 0x010 [R] operator new(0x20, "MIDIBANKS") in the cMidiSys ctor (named after the tag); [U] func_002A8450/func_002A86B8
-    // --- cCrowdSys (preview: func_002A6B50 = cCrowdSys's dtor; ctor func_002A69A0 stores the instance in D_004A36F8)
+    // --- cCrowdSys (preview: cCrowdSys__cCrowdSys = cCrowdSys's dtor; ctor cCrowdSys_cCrowdSys stores the instance in D_004A36F8)
     int mNumCrowdInstances;             // 0x014 [R] cCrowdSys ctor 0; [U] func_002A6D78 stores n and allocates n mCrowdInstances; func_002A6D18/func_002A7718/func_002A77C8 loop to it
     void* mCrowdInstances;              // 0x018 [R] cCrowdSys ctor 0; func_002A6D78: operator new[](n, "CrowdInstances"); [U] func_002A72D8..func_002A77C8
     tCrowdData mCrowdData[3];           // 0x01C [R] ctor constructs 3 (func_002A4BA8 x3 each); [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54
     // --- cMusicSys (preview: func_002B3398 = cMusicSys's dtor; ctor func_002B28C0(this + 0x118); non-virtual part 0x5448, its methods in sound/bankmonitor.cpp take this + 0x118)
     cMusicSys MusicSys;                 // 0x118 cMusicSys base (sound/musicsys.h; non-virtual part 0x5448)
-    // --- cSpeechSys (preview: func_002B0AE8 = cSpeechSys's dtor; ctor func_002B07F8(this + 0x5560) stores the instance in D_004A37B4; non-virtual part 0x1C0)
+    // --- cSpeechSys (preview: cSpeechSys__cSpeechSys = cSpeechSys's dtor; ctor cSpeechSys_cSpeechSys(this + 0x5560) stores the instance in D_004A37B4; non-virtual part 0x1C0)
     cSpeechSys SpeechSys;               // 0x5560 cSpeechSys base (sound/speechsys.h; non-virtual part 0x1C0)
     // --- cController (preview: cController__cController = cController's virtual slot 1; ctor func_002AB200 = cCrowdSys + cMusicSys + cSpeechSys)
     int unk_5720;                       // 0x5720 [R] cController ctor 0

@@ -258,11 +258,11 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(void* self, void* ite
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
 #ifdef SKIP_ASM
 extern void* cWScriptMan_TheWScriptMan;
-extern "C" int* func_0030C820(void* list);
+extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
 
 extern "C" void func_001F7548(void* self)
 {
-    int* queueEntry = func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+    int* queueEntry = tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
     if (queueEntry != 0) {
         *(int*)((char*)self + 0x9C) = *queueEntry;
     } else {
@@ -379,11 +379,11 @@ extern "C" void func_001F76B8(void* self)
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
 #ifdef SKIP_ASM
 extern void* cWScriptMan_TheWScriptMan;
-extern "C" int* func_0030C820(void* list);
+extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
 
 extern "C" void func_001F7738(void* self)
 {
-    *(int*)((char*)self + 0x9C) = *func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+    *(int*)((char*)self + 0x9C) = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
 }
 #endif
 

@@ -219,7 +219,7 @@ extern "C" void *func_002DBF80(int *self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBF98);
+INCLUDE_ASM("seg/seg_1DCD10", cFogParticleMan_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00418EF8_BF98(void* base, int n, int size, int (*cmp)(void*, void*)) __asm__("func_00418EF8");
@@ -266,7 +266,15 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
     ctx->top->d = d;
 }
 
-extern "C" void func_002DBF98(cFogParticleMan* self) {
+/**
+ * Renders the frame's fog particles and empties the list.
+ *
+ * Does nothing while miNumSphere is 0. Otherwise sorts the first miNumSphere 8-byte sort keys at D_00537AC0 (On Tour
+ * cFogParticleMan::mSortKey) with func_00418EF8 and the comparator func_002DC168, pushes a copy of the graphics
+ * manager's top render-state record (GrMan +0xE84) and sets several of its fields, calls virtual slot 3
+ * (platformrender, func_002DC7B0 in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
+ */
+extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
     if (self->miNumSphere) {
         func_00418EF8_BF98(D_00537AC0, self->miNumSphere, 8, func_002DC168);
         Push_BF98();

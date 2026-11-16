@@ -63,7 +63,7 @@ struct cComputer {
                                //       as in cPlayer: 0x024, 0x070, 0x0A0, 0x100 ... 0xC70, 0xD20)
     int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState; [R] cRiderHandler__getMotionState; [O]
     int ControlState;          // 0xDE4 [P] cRiderHandler::_getControlState; [R] cRiderHandler__getControlState; [O]
-    void** mVtbl;              // 0xDE8 [R] _vt$9cComputer (D_004585F0: cComputer_getControlCmd, func_0010A898)
+    void** mVtbl;              // 0xDE8 [R] _vt$9cComputer (D_004585F0: cComputer_getControlCmd, cComputer_writeToReplayFrame)
     char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned
     // ---- base cComputerState (0xDF0-0xF40) ----
     float mDesiredSpeed;       // 0xDF0 [O]; [R] Init = 0; [U] float (cComputer_getPrewindCmd, cComputer_getGateCmd)
@@ -115,7 +115,7 @@ struct cComputer {
 // cPlayer and cComputer each provide one.
 enum {
     kComputerVt_getControlCmd = 1,  // cComputer_getControlCmd ([O] getControlCmd; writes mGrabEndTime)
-    kComputerVt_slot2 = 2           // func_0010A898
+    kComputerVt_slot2 = 2           // cComputer_writeToReplayFrame
 };
 
 CHECK_OFFSET(cComputer, unk_000, 0x000);

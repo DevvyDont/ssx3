@@ -6,15 +6,15 @@
 // as a MONITOR_MIDI instance). EA source d:/ssx/code/source/sound/midisys.cpp (preview assert strings "MIDIBANKS",
 // "mpSettings", "pData[ 0 ] == 'M' && ... == 'x'"); retail methods in the sound/soundsys unit 0x2A8140..0x2A8C20.
 //   cMidiSys : cBankSys (0x0), virtual cBankManager
-// Non-virtual part 0x14 [R]: the ctor (our symbol cController_cController, 0x2A8140; it IS the cMidiSys ctor: the
-// preview names its dtor func_002A82D8 cMidiSys::<virtual slot 1>) puts cSoundSys at this + 0x14 and cBankManager at
+// Non-virtual part 0x14 [R]: the ctor (cMidiSys_cMidiSys, 0x2A8140; the
+// preview names its dtor cMidiSys__cMidiSys cMidiSys::<virtual slot 1>) puts cSoundSys at this + 0x14 and cBankManager at
 // this + 0x1C in a complete cMidiSys, calls cBankSys_cBankSys(this, 0, ...) and stores D_00483A48 at 0xC (cBankSys's
 // vtable; cMidiSys's own dtor sits in its virtual-base tables D_004839F0 / D_00483A10). The struct below is the
 // NON-VIRTUAL part: cCrowdSys (sound/crowdsys.h) and so cSSXAudio start with it. The ctor stores the instance in
 // D_004A3744 (EA name unknown).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline. Evidence tags:
-//   [R] the constructor (0x2A8140) and destructor func_002A82D8; [O] SSX On Tour's DWARF (cBankSys members; On Tour has
+//   [R] the constructor (0x2A8140) and destructor cMidiSys__cMidiSys; [O] SSX On Tour's DWARF (cBankSys members; On Tour has
 //   no cMidiSys); [U] how the retail methods use the field.
 
 #include "layout.h"
@@ -50,6 +50,6 @@ CHECK_OFFSET(cMidiSys, mMidiBanks, 0x010);
 CHECK_SIZE(cMidiSys, 0x14);
 
 // The MIDI system: its constructor stores itself here (the cMidiSys base of the one cSSXAudio). EA name unknown.
-extern cMidiSys* D_004A3744;        // [R] the cMidiSys ctor stores self, its dtor func_002A82D8 clears it
+extern cMidiSys* D_004A3744;        // [R] the cMidiSys ctor stores self, its dtor cMidiSys__cMidiSys clears it
 
 #endif /* SOUND_MIDISYS_H */

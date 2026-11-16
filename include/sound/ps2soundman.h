@@ -9,13 +9,13 @@
 // _vt$16cPS2SoundManager. Retail methods: sound/soundsys unit 0x2A8C20..0x2A9350.
 //   cPS2SoundManager : cSoundManager (On Tour: an interface with only a vptr, size 0x4; On Tour's PSP version is
 //   cPSPSoundManager, 0x8)
-// Size 0x320 [R]: cSoundManager::Construct (func_002A8FA0) = ctor func_002A8C20(cMemMan_alloc(0x320,
+// Size 0x320 [R]: cSoundManager::Construct (func_002A8FA0) = ctor cPS2SoundManager_cPS2SoundManager(cMemMan_alloc(0x320,
 // "PS2SoundManager")). Vtable D_004835F8: Init, SetMode, Shutdown, AllocSoundMem, DeallocSoundMem,
 // SetSoundMemLoadLimits, RestoreSoundMemLoadLimits, dtor (preview cPS2SoundManager::<virtual slot 1..8>, On Tour's
 // cSoundManager method order). The preview's offsets agree with retail (asserts at preview 0x27A37C..0x27AD4C).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructor func_002A8C20, Init cPS2SoundManager_Init (allocation tag), the destructor cPS2SoundManager__cPS2SoundManager;
+//   [R] the constructor cPS2SoundManager_cPS2SoundManager, Init cPS2SoundManager_Init (allocation tag), the destructor cPS2SoundManager__cPS2SoundManager;
 //   [P] the preview's assert strings next to the field they test;
 //   [O] SSX On Tour's DWARF (cSoundManager / cPSPSoundManager: method names only);
 //   [U] how the retail methods use the field.
@@ -36,7 +36,7 @@ struct tPS2SoundMemNode {
 struct cPS2SoundManager {
     void** mVtbl;                     // 0x000 [R] D_004835F8 (_vt$16cPS2SoundManager), stored by the ctor and dtor (cSoundManager has no data: the vptr is first)
     void* mSoundHeap;                 // 0x004 [P] "mSoundHeap == NULL" (preview dtor lw 4); [R] Init: operator new(0x32000, "mSoundHeap"), passed to the sound driver; Shutdown / dtor cMemMan_free() it
-    int unk_008;                      // 0x008 [R] ctor 0; [U] SetMode (func_002A8D90) records the driver mode set (1 / 2) and returns early when unchanged
+    int unk_008;                      // 0x008 [R] ctor 0; [U] SetMode (cPS2SoundManager_SetMode) records the driver mode set (1 / 2) and returns early when unchanged
     tPS2SoundMemNode mNodes[32];      // 0x00C [P] kPS2SOUNDMANAGER_MAX_SOUNDMEM_ALLOCS (preview sltiu 32, stride 24, base 12); [R] Init chains them
     int mMainMemHighAddr;             // 0x30C [P] "(mainMemLowAddr + mainMemSize) == mMainMemHighAddr", "pNode->lowAddr == mMainMemHighAddr" (preview lw 780); [R] ctor -1, Init = sound RAM top; [U] AllocSoundMem moves it down
     int unk_310;                      // 0x310 [R] ctor -1, Init 31; [U] head of the unused-node chain (func_002A92B8 pops, func_002A92F8 pushes)

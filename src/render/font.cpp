@@ -2266,7 +2266,7 @@ public:
     virtual void v22(int, int, int, int, int);
 };
 
-extern "C" void func_00394B98(cPSPBezierMan* self, int a, int b, int c, int d, int e)
+extern "C" void func_00394B98(cPS2BezierMan* self, int a, int b, int c, int d, int e)
 {
     ((cFontVirt*)self)->v22(a, b, c, d, e);
 }
@@ -2374,22 +2374,22 @@ int func_00394C10(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394C18);
 #ifdef SKIP_ASM
-extern "C" int func_00394C18(cPSPBezierMan* base, int shift, int idx) {
+extern "C" int func_00394C18(cPS2BezierMan* base, int shift, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x44C) + (shift << 8);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394C30);
 #ifdef SKIP_ASM
-extern "C" int func_00394C30(cPSPBezierMan* pspBezierMan) {
-    return (*(int *)((char*)(pspBezierMan) + (0x1A0)));
+extern "C" int func_00394C30(cPS2BezierMan* bezierMan) {
+    return (*(int *)((char*)(bezierMan) + (0x1A0)));
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394C38);
 #ifdef SKIP_ASM
-extern "C" int func_00394C38(cPSPBezierMan* pspBezierMan) {
-    return (*(int *)((char*)(pspBezierMan) + (0x320)));
+extern "C" int func_00394C38(cPS2BezierMan* bezierMan) {
+    return (*(int *)((char*)(bezierMan) + (0x320)));
 }
 #endif
 //100%

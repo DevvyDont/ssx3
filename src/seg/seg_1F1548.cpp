@@ -5,13 +5,13 @@
 #include "main/ssxapp.h"
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_cPSPVisualEffectsMan);
+INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan_cPS2VisualEffectsMan);
 #ifdef SKIP_ASM
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void* cVisualEffectsMan_cVisualEffectsMan(void*);
 extern "C" void* func_00372AA0(void*);
 void* func_003759E8(void*);
-extern char cPSPVisualEffectsMan_vtbl[];
+extern char cPS2VisualEffectsMan_vtbl[];
 extern char str_RenderToggles[];
 extern char str_VisualEffectsTest[];
 extern char str_LightGlow[];
@@ -61,10 +61,10 @@ struct sMgr_0548 {
  *
  * @return self
  */
-extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
+extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(sMgr_0548* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
-    self->vptr = cPSPVisualEffectsMan_vtbl;
+    self->vptr = cPS2VisualEffectsMan_vtbl;
     { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = D_004931A8; self->objs[0] = effect; }
     { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = cVisualEffectsTest_vtbl; self->objs[1] = effect; }
     { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; self->objs[2] = effect; }
@@ -87,13 +87,13 @@ extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan__cPSPVisualEffectsMan);
+INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan__cPS2VisualEffectsMan);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 struct Obj0820 {
     virtual ~Obj0820();
 };
-extern char cPSPVisualEffectsMan_vtbl[];
+extern char cPS2VisualEffectsMan_vtbl[];
 extern char cVisualEffectsMan_vtbl[];
 
 struct sMgr_0820 {
@@ -104,15 +104,15 @@ struct sMgr_0820 {
 /**
  * Destroys the visual effects manager: deletes its 17 effect components, then the base part.
  *
- * Stores its vtable cPSPVisualEffectsMan_vtbl (+0x44), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
+ * Stores its vtable cPS2VisualEffectsMan_vtbl (+0x44), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
  * m_RenderToggles .. m_PathArrow) through their virtual destructors (null ones skipped), stores cVisualEffectsMan_vtbl
  * and frees the object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int flags)
+extern "C" void cPS2VisualEffectsMan__cPS2VisualEffectsMan(sMgr_0820* self, int flags)
 {
-    self->vptr = cPSPVisualEffectsMan_vtbl;
+    self->vptr = cPS2VisualEffectsMan_vtbl;
     delete self->objs[0];
     delete self->objs[1];
     delete self->objs[2];
@@ -138,7 +138,7 @@ extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_update);
+INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan_update);
 #ifdef SKIP_ASM
 class cObj_0A98 {
 public:
@@ -281,7 +281,7 @@ extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
  * from D_004A3BA8 and a virtual of GrMan (the cPS2GraphicsMan) with the view index. On Tour passes the query ID as view
  * + 6.
  */
-extern "C" void cPSPVisualEffectsMan_update(sMgr_0A98* self)
+extern "C" void cPS2VisualEffectsMan_update(sMgr_0A98* self)
 {
     self->objs[0]->Reset();
     self->objs[1]->Reset();
@@ -308,7 +308,7 @@ extern "C" void cPSPVisualEffectsMan_update(sMgr_0A98* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_render);
+INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan_render);
 #ifdef SKIP_ASM
 class cObj_0CD0 {
 public:
@@ -327,7 +327,7 @@ struct sMgr_0CD0 {
  * Calls vtable slot +0x18 of each of the 17 components in member order (+0x00..+0x40); per On Tour that slot is the
  * component's render (the retail view names it Update).
  */
-extern "C" void cPSPVisualEffectsMan_render(sMgr_0CD0* self)
+extern "C" void cPS2VisualEffectsMan_render(sMgr_0CD0* self)
 {
     self->objs[0]->Update();
     self->objs[1]->Update();

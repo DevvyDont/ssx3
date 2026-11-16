@@ -2393,12 +2393,19 @@ extern "C" void func_002F7F00(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7F30);
+INCLUDE_ASM("visualfx/worldlightman", cFogParticleMan__cFogParticleMan);
 #ifdef SKIP_ASM
 extern void* D_00488308[];
 void operator_delete(int*);
 
-extern "C" void func_002F7F30(cFogParticleMan* self, int flags)
+/**
+ * Destroys the fog particle manager.
+ *
+ * Stores its vtable D_00488308 and frees the object when bit 0 of @p flags is set; there is nothing else to release.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cFogParticleMan__cFogParticleMan(cFogParticleMan* self, int flags)
 {
     self->mVtbl = D_00488308;
     if (flags & 1) {
@@ -2408,12 +2415,20 @@ extern "C" void func_002F7F30(cFogParticleMan* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7F60);
+INCLUDE_ASM("visualfx/worldlightman", cPS2FogParticleMan__cPS2FogParticleMan);
 #ifdef SKIP_ASM
 extern void* D_00488308[];
 void operator_delete(int*);
 
-extern "C" void func_002F7F60(cPS2FogParticleMan* self, int flags)
+/**
+ * Destroys the PS2 fog particle manager.
+ *
+ * The 256 sprites need no cleanup, so it only stores the base cFogParticleMan vtable D_00488308 back and frees the
+ * object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cPS2FogParticleMan__cPS2FogParticleMan(cPS2FogParticleMan* self, int flags)
 {
     self->mVtbl = D_00488308;
     if (flags & 1) {
@@ -2784,12 +2799,19 @@ extern "C" void func_002F82E0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8310);
+INCLUDE_ASM("visualfx/worldlightman", cVisualEffectsMan__cVisualEffectsMan);
 #ifdef SKIP_ASM
 extern void* cVisualEffectsMan_vtbl[];
 void operator_delete(int*);
 
-extern "C" void func_002F8310(void* self, int flags)
+/**
+ * Destroys the visual effects manager base.
+ *
+ * Stores cVisualEffectsMan_vtbl back at +0x44 (the vptr) and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cVisualEffectsMan__cVisualEffectsMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x44) = cVisualEffectsMan_vtbl;
     if (flags & 1) {
@@ -2799,12 +2821,19 @@ extern "C" void func_002F8310(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8340);
+INCLUDE_ASM("visualfx/worldlightman", cAIVisualEffectsMan__cAIVisualEffectsMan);
 #ifdef SKIP_ASM
 extern void* cAIVisualEffectsMan_vtbl[];
 void operator_delete(int*);
 
-extern "C" void func_002F8340(void* self, int flags)
+/**
+ * Destroys the AI-rider visual effects manager base.
+ *
+ * Stores cAIVisualEffectsMan_vtbl back at +0x4 (the vptr) and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cAIVisualEffectsMan__cAIVisualEffectsMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {

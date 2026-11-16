@@ -1478,13 +1478,22 @@ extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAE40);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_init);
 #ifdef SKIP_ASM
 
-extern "C" void func_003AAE40(void* self, int a1)
+/**
+ * Initialises the PS2 chunk resolver for the current world.
+ *
+ * Stores cWorld_m_pTheWorld at +0x0 (On Tour mp_World), @p pNash at +0xC (On Tour mp_Nash) and the world cache header's
+ * image count (the short at +0x2A; On Tour m_iNumImages = getNumImages()) at +0x10. Virtual slot 2, called by
+ * cWorldCache_init.
+ *
+ * @param pNash  the texture manager handle cWorldCache_init passes on (On Tour Nash* pNash)
+ */
+extern "C" void cPS2ChunkResolve_init(void* self, int pNash)
 {
     cWorld* w = cWorld_m_pTheWorld;
-    *(int*)((char*)self + 0xC) = a1;
+    *(int*)((char*)self + 0xC) = pNash;
     *(char****)self = (char***)w;
     *(int*)((char*)self + 0x10) = *(short*)(*(char**)w->m_pWorldCache + 0x2A);
 }

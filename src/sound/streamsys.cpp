@@ -1114,9 +1114,9 @@ INCLUDE_ASM("sound/streamsys", func_002AB200);
 #ifdef SKIP_ASM
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
-extern "C" void* func_002A69A0(void* self, int embedded, int a2, int a3, int heap);
+extern "C" void* cCrowdSys_cCrowdSys(void* self, int embedded, int a2, int a3, int heap);
 extern "C" void* func_002B28C0(void* self, int embedded, int a2, int a3, int heap);
-extern "C" void* func_002B07F8(void* self, int embedded, int a2, int a3, int heap);
+extern "C" void* cSpeechSys_cSpeechSys(void* self, int embedded, int a2, int a3, int heap);
 extern void* D_004838F8[];
 extern void* D_004837F8[];
 extern void* D_00483870[];
@@ -1152,9 +1152,9 @@ extern "C" char* func_002AB200(char* self, int embedded, int a2, int a3, int hea
         cBankManager_cBankManager(*(void**)(self + 0x6200), 0, a2, heap);
         cStreamSys_cStreamSys(*(sStreamSysA490**)(self + 0x5560), 0, a2, a3, heap);
     }
-    func_002A69A0(self, 0, a2, a3, heap);
+    cCrowdSys_cCrowdSys(self, 0, a2, a3, heap);
     func_002B28C0(self + 0x118, 0, a2, a3, heap);
-    func_002B07F8(self + 0x5560, 0, a2, a3, heap);
+    cSpeechSys_cSpeechSys(self + 0x5560, 0, a2, a3, heap);
     *(const sSsVtblAB200**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &D_004837D8_B200;
     *(const sSsVtblBB200**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760_B200;
     *(const sSsVtblCB200**)(**(char***)(self + 0x118) + 0x1D4) = &D_004837A0_B200;
@@ -1187,10 +1187,10 @@ INCLUDE_ASM("sound/streamsys", cController__cController);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void func_002A6B50(void* self, int flags);
+extern "C" void cCrowdSys__cCrowdSys(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern "C" void func_002B0AE8(char* self, int flags);
+extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
 extern "C" void func_002B3398(char* self, int flags);
 extern void* D_004838F8[];
 extern void* D_004837F8[];
@@ -1218,7 +1218,7 @@ extern const sSsVtblCB478 D_004837A0;
  * Destroys the sound controller and its bank, stream and monitor sub-systems.
  *
  * Hand-written g++ 2.95 virtual-base destruction: installs the cController vtables at +0x5558, +0x571C and +0xC and in
- * the shared sound object (+0x118), then runs the sub-object destructors (func_002B0AE8, func_002B3398, func_002A6B50,
+ * the shared sound object (+0x118), then runs the sub-object destructors (cSpeechSys__cSpeechSys, func_002B3398, cCrowdSys__cCrowdSys,
  * func_002AA648, cBankManager__cBankManager, cSoundSys__cSoundSys) with this-adjusted temporary vtables, and deletes the object when
  * bit 0 of @p flags is set.
  *
@@ -1251,9 +1251,9 @@ extern "C" void cController__cController(char* self, int flags)
         *(sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &t3;
         t3.e[1].delta = D_004837A0.e[1].delta + d2;
     }
-    func_002B0AE8(bank, 0);
+    cSpeechSys__cSpeechSys(bank, 0);
     func_002B3398(mon, 0);
-    func_002A6B50(self, 0);
+    cCrowdSys__cCrowdSys(self, 0);
     if (flags & 2) {
         func_002AA648(*(void**)(self + 0x118), 0);
         cBankManager__cBankManager(**(void***)(self + 0x118), 0);

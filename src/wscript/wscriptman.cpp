@@ -1759,9 +1759,16 @@ extern "C" void* cProcessList_removeHead(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B228);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_getCount);
 #ifdef SKIP_ASM
-extern "C" int func_0030B228(cWScriptListHead* self)
+/**
+ * Counts the processes in a world-script process list.
+ *
+ * Walks the singly linked list from head to the end.
+ *
+ * @return the number of processes
+ */
+extern "C" int cProcessList_getCount(cWScriptListHead* self)
 {
     int n = 0;
     cWScriptListNode* node = (cWScriptListNode*)self->head;
@@ -1786,9 +1793,16 @@ int func_0030B260(void* self, void* node)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B270);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_appendProcess);
 #ifdef SKIP_ASM
-extern "C" void func_0030B270(cWScriptListHead* self, cWScriptListNode* node)
+/**
+ * Appends a world-script process at the end of a process list.
+ *
+ * Clears the process's next link, then links it after the current last node, or makes it the head of an empty list.
+ *
+ * @param node  the process to add (On Tour cWScriptProcess* process)
+ */
+extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListNode* node)
 {
     node->next = 0;
     cWScriptListNode* tail = (cWScriptListNode*)self->head;
@@ -2436,7 +2450,7 @@ extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030BC80);
 #ifdef SKIP_ASM
-extern "C" int func_0030B228(cWScriptListHead* self);
+extern "C" int cProcessList_getCount(cWScriptListHead* self);
 extern "C" void func_00308038(void* node, void* stream);
 
 struct sVEntry30BC80 {
@@ -2447,7 +2461,7 @@ struct sVEntry30BC80 {
 
 extern "C" void func_0030BC80(void* self, void** list, void* stream)
 {
-    int n = func_0030B228((cWScriptListHead*)list);
+    int n = cProcessList_getCount((cWScriptListHead*)list);
     sVEntry30BC80* vtEntry = &(*(sVEntry30BC80**)stream)[1];
     vtEntry->fn((char*)stream + vtEntry->delta, &n, 4);
     char* node = (char*)*list;
@@ -2557,7 +2571,7 @@ public:
 };
 
 extern "C" void func_00308118(void* proc, func_0030BEE8_cStream* stream);
-extern "C" void func_0030B270(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListNode* node);
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 
 extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream)
@@ -2571,7 +2585,7 @@ extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_
         cWScriptListNode* node = (cWScriptListNode*)func_0030B320((char*)self + 0x2B4, id);
         cProcessList_removeProcess((cWScriptListHead*)((char*)self + 0x2B4), node);
         func_00308118(node, stream);
-        func_0030B270(list, node);
+        cProcessList_appendProcess(list, node);
     }
 }
 #endif
@@ -2967,7 +2981,7 @@ extern "C" void func_0030C790(void* self)
 INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_addEntry);
 #ifdef SKIP_ASM
 // Same layout as cWScriptQueue / cWScriptQueueEntry, which the unit defines
-// further down (above func_0030C820). Renamed here only to avoid a redefinition.
+// further down (above tMissionMenuQueue_getNextEntry). Renamed here only to avoid a redefinition.
 struct cWSQEntry {
     int a;
     int b;
@@ -3000,7 +3014,7 @@ extern "C" void tMissionMenuQueue_addEntry(cWSQueue* self, int missionId, int cm
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C820);
+INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_getNextEntry);
 #ifdef SKIP_ASM
 struct cWScriptQueueEntry {
     int a;
@@ -3014,7 +3028,15 @@ struct cWScriptQueue {
     cWScriptQueueEntry entries[16];
 };
 
-extern "C" cWScriptQueueEntry* func_0030C820(cWScriptQueue* self)
+/**
+ * Takes the next mission command off the menu queue.
+ *
+ * Returns 0 when the read position (+0x0, On Tour Current) has caught up with the write position (+0x4, On Tour Next);
+ * otherwise returns the entry at the read position and advances it, wrapping at 16.
+ *
+ * @return the entry (mission id, command, rider; On Tour tMissionMenuQueueEntry), or 0 when the queue is empty
+ */
+extern "C" cWScriptQueueEntry* tMissionMenuQueue_getNextEntry(cWScriptQueue* self)
 {
     int head = self->head;
     if (head == self->tail) {
@@ -3633,7 +3655,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D348);
 #ifdef SKIP_ASM
 extern "C" void func_0030D348(char* self)
 {
-    func_0030C820((cWScriptQueue*)(self + 0x1C4));
+    tMissionMenuQueue_getNextEntry((cWScriptQueue*)(self + 0x1C4));
 }
 #endif
 //100%

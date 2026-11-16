@@ -3445,9 +3445,20 @@ extern "C" int func_0027C040(void* self, void* entity, int type)
 extern "C" void func_0027CBB0(void*, void*);
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C050);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
-extern "C" void func_0027C050(void* self, void* entity)
+/**
+ * Handles an in-sequence key event for the game-state script object: fetches the entity's game-state frame and ignores
+ * it.
+ *
+ * Calls func_0027CBB0(@p entity, frame) with a 16-byte stack buffer and returns; nothing reads the result. On Tour's
+ * version (GetSSXGameStateManagerFrame plus asserts on the event bits and frame count) does no more in a release build.
+ * Virtual slot 3 of cScriptObjGS_vtbl (the cScriptEntity part); the event type, frame and event bits (On Tour type,
+ * currFrame, eventBits) are not used.
+ *
+ * @param entity  the script player entity the event is for (On Tour cScriptPlayerEntity* pEntity)
+ */
+extern "C" void cScriptObjGS_OnInSeqKeyEvent(void* self, void* entity)
 {
     char buf[16];
     func_0027CBB0(entity, buf);
@@ -5263,7 +5274,7 @@ extern "C" void cScriptObjRider_OnEndObjectUse(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00280458);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsMatchingEntity);
 #ifdef SKIP_ASM
 extern "C" int cRider_isLoaded(void* self);
 extern "C" int cRider_getIdentity(void* self);
@@ -5281,7 +5292,19 @@ public:
     virtual void* v06();
 };
 
-extern "C" int func_00280458(cScriptCtx0458* self, void* msg, int type)
+/**
+ * Tests whether a script player entity can be played by this rider script object.
+ *
+ * Only entity type 5 matches. Gets the attached rider (virtual slot 6), which must be loaded (cRider_isLoaded), and its
+ * identity bit from D_00481BB0[cRider_getIdentity(rider)]. The entity's actor header (func_0027C958) holds a role byte
+ * and a short character mask at +2: a zero mask or one containing the rider's bit passes, and the final answer comes
+ * from func_00280560(self, rider, role, the entity's +0x8 word) (On Tour IsSuitableRole(pRider, role, pPlayerMain)).
+ *
+ * @param msg  the script player entity (On Tour cScriptPlayerEntity* pEntity)
+ * @param type  the entity type asked for; only 5 can match
+ * @return nonzero when the entity matches this rider
+ */
+extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, void* msg, int type)
 {
     if (type != 5) return 0;
     void* rider = self->v06();

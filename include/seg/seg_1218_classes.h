@@ -206,7 +206,7 @@ public:
     cRiderE_108C80(int flag);
     virtual ~cRiderE_108C80();
     virtual void a19();
-    // Overrides of the composite's slots (cComputer_vtbl): cComputer_getControlCmd, func_0010A898, func_0010A8E8.
+    // Overrides of the composite's slots (cComputer_vtbl): cComputer_getControlCmd, cComputer_writeToReplayFrame, cComputer_readFromReplayFrame.
     virtual void v01();
     virtual void v02();
     virtual void v03();

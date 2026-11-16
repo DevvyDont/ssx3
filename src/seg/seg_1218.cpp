@@ -6669,7 +6669,7 @@ extern "C" void cComputer_getControlCmd(cComputer* self, void* _cmd)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010A898);
+INCLUDE_ASM("seg/seg_1218", cComputer_writeToReplayFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderHandler_writeToReplayFrame_A898(char*, void*) __asm__("cRiderHandler_writeToReplayFrame");
@@ -6678,14 +6678,23 @@ struct C_A898 {
     virtual void m0(char*, int);
 };
 
-extern "C" void func_0010A898(cComputer* computer, C_A898 *arg1) {
-    cRiderHandler_writeToReplayFrame_A898(((char*)computer), arg1);
-    arg1->m0(((char*)computer) + 0xDF0, 336);
+/**
+ * Writes the AI rider into a replay frame: the rider handler state, then the computer state.
+ *
+ * Calls cRiderHandler_writeToReplayFrame, then the stream's first virtual (write) with the cComputerState block at
+ * +0xDF0 (336 bytes, up to +0xF40: it includes mCruiseLogicID at +0xF38 but not the cruise-logic pointer at +0xF44,
+ * which cComputer_readFromReplayFrame rebuilds).
+ *
+ * @param data  the replay frame stream written to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void cComputer_writeToReplayFrame(cComputer* computer, C_A898 *data) {
+    cRiderHandler_writeToReplayFrame_A898(((char*)computer), data);
+    data->m0(((char*)computer) + 0xDF0, 336);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010A8E8);
+INCLUDE_ASM("seg/seg_1218", cComputer_readFromReplayFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cObj_A8E8;
@@ -6699,10 +6708,19 @@ public:
     virtual void read(void* dst, int size);
 };
 
-extern "C" void func_0010A8E8(char* self, cStream_A8E8* in)
+/**
+ * Reads the AI rider back from a replay frame: the rider handler state, then the computer state.
+ *
+ * Calls cRiderHandler_readFromReplayFrame, then the stream's second virtual (read) into the cComputerState block at
+ * +0xDF0 (336 bytes), and rebuilds the cruise-logic member-function pointer (+0xF44) from D_0043CF20[mCruiseLogicID]
+ * (the short at +0xF38), as cComputer_setCruiseLogic does, since the saved pointer is not portable between runs.
+ *
+ * @param data  the replay frame stream read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void cComputer_readFromReplayFrame(char* self, cStream_A8E8* data)
 {
-    cRiderHandler_readFromReplayFrame(self, in);
-    in->read(self + 0xDF0, 336);
+    cRiderHandler_readFromReplayFrame(self, data);
+    data->read(self + 0xDF0, 336);
     short state = *(short*)(self + 0xF38);
     *(Fn_A8E8*)(self + 0xF44) = D_0043CF20_A8E8[state];
     *(short*)(self + 0xF38) = state;

@@ -3101,7 +3101,7 @@ extern "C" void func_002B07F0(cSpeechInstance* speechInstance, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B07F8);
+INCLUDE_ASM("sound/bankmonitor", cSpeechSys_cSpeechSys);
 #ifdef SKIP_ASM
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" void* cStreamSys_cStreamSys(void* self, int inchrg, int banks, int count, int heap);
@@ -3134,8 +3134,23 @@ struct sBmonVtblB07F8 {
 extern const sBmonVtblA07F8 D_004838A0_07F8 __asm__("D_004838A0");
 extern const sBmonVtblB07F8 D_004838C0_07F8 __asm__("D_004838C0");
 
+/**
+ * Constructs the speech system.
+ *
+ * When @p inchrg is set it builds the virtual bases first: cSoundSys at +0x1C0, cBankManager at +0x1C8 and cStreamSys
+ * at +0xC98. Installs the cSpeechSys vtables (D_00483870 at mVtbl, D_004838A0 / D_004838C0 in the virtual bases,
+ * adjusted on the stack when not in charge), sets mCallbackInstance -1, clears unk_008 and mCallback, stores itself in
+ * D_004A37B4, allocates the two-entry mSpeechInstance array (both empty), clears the request table (func_002B1428) and
+ * copies the five speech .big file names into mBigFileName.
+ *
+ * @param inchrg  g++ in-charge flag: nonzero when the virtual bases are built here (the complete object)
+ * @param maxBanks  maximum number of banks (On Tour MaxBanks of the cStreamSys / cBankManager constructors)
+ * @param maxStreams  maximum number of streams (On Tour MaxStreams of the cStreamSys constructor)
+ * @param heap  audio mode (On Tour eSOUNDDEF_MODE audioMode), passed to the base constructors
+ * @return @p self
+ */
 // PORT: g++ 2.95 constructor of a class with virtual bases (stack vtable this-adjust fix-ups written out by hand).
-extern "C" char* func_002B07F8(cSpeechSys* self, int inchrg, int a2, int a3, int heap)
+extern "C" char* cSpeechSys_cSpeechSys(cSpeechSys* self, int inchrg, int maxBanks, int maxStreams, int heap)
 {
     if (inchrg) {
         char* vb = ((char*)self) + 0x1C0;
@@ -3144,8 +3159,8 @@ extern "C" char* func_002B07F8(cSpeechSys* self, int inchrg, int a2, int a3, int
         *(char**)self = vb2;
         *(char**)(((char*)self) + 0x3A0) = vb;
         cSoundSys_cSoundSys((cSoundSys*)vb, heap);
-        cBankManager_cBankManager(*(void**)(((char*)self) + 0xC98), 0, a2, heap);
-        cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
+        cBankManager_cBankManager(*(void**)(((char*)self) + 0xC98), 0, maxBanks, heap);
+        cStreamSys_cStreamSys(*(void**)self, 0, maxBanks, maxStreams, heap);
     }
     *(const sBmonVtblA07F8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0_07F8;
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
@@ -3181,7 +3196,7 @@ extern "C" char* func_002B07F8(cSpeechSys* self, int inchrg, int a2, int a3, int
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B0AE8);
+INCLUDE_ASM("sound/bankmonitor", cSpeechSys__cSpeechSys);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -3205,8 +3220,17 @@ struct sBmonVtblB0AE8 {
 extern const sBmonVtblA0AE8 D_004838A0;
 extern const sBmonVtblB0AE8 D_004838C0;
 
+/**
+ * Destroys the speech system.
+ *
+ * Re-installs the cSpeechSys vtables, frees the mSpeechInstance array (the instances themselves are destroyed by
+ * func_002B0DA0), clears D_004A37B4, destroys the virtual bases (cStreamSys via func_002AA648, cBankManager, cSoundSys)
+ * when bit 1 of @p flags is set and frees the object when bit 0 is set.
+ *
+ * @param flags  destructor flags: bit 1 destroys the virtual bases, bit 0 frees the object
+ */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void func_002B0AE8(cSpeechSys* self, int flags)
+extern "C" void cSpeechSys__cSpeechSys(cSpeechSys* self, int flags)
 {
     self->mVtbl = D_00483870;
     *(const sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0;
@@ -3853,17 +3877,27 @@ extern "C" void func_002B1A70(void) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B1A98);
+INCLUDE_ASM("sound/bankmonitor", cSongConfiguration_cSongConfiguration);
 #ifdef SKIP_ASM
 extern char D_00483980[];
 extern unsigned char D_004A35A8[];
 
-struct func_002B1A98_sElem20 {
+struct cSongConfiguration_cSongConfiguration_sElem20 {
     unsigned char b;
     char pad[0x1F];
 };
 
-extern "C" void* func_002B1A98(cSongConfiguration* self)
+/**
+ * Constructs a song configuration with the music.inf defaults.
+ *
+ * Stores the vtable D_00483980 and sets the defaults a music.inf section can override: no bank data, 4 beats per
+ * measure, 2 measures per bar, 4 phrases per bank, 8 beats per phrase, phrase align 16, delay count 0 / feedback 90 /
+ * time 100 / level 50, path and async levels 100, 120 BPM, duck to loops on, mSedValue and mPreview -1, mLowPass
+ * 0xFFFF, mSongBig 1, and empties the path strings (first byte of D_004A35A8).
+ *
+ * @return @p self
+ */
+extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
 {
     self->mVtbl = (void**)D_00483980;
     self->mNumBankData = 0;
@@ -3886,7 +3920,7 @@ extern "C" void* func_002B1A98(cSongConfiguration* self)
     self->mSongBig = 1;
     *(unsigned char*)((char*)self + 0x0) = D_004A35A8[0];
     *(unsigned char*)((char*)self + 0x20) = D_004A35A8[0];
-    func_002B1A98_sElem20* p = (func_002B1A98_sElem20*)((char*)self + 0x44);
+    cSongConfiguration_cSongConfiguration_sElem20* p = (cSongConfiguration_cSongConfiguration_sElem20*)((char*)self + 0x44);
     for (int i = 0; i >= 0; i--, p++) {
         p->b = D_004A35A8[0];
     }
@@ -4603,7 +4637,7 @@ extern "C" char* FileParser_FindNextSection(void* parser);
 extern "C" int FileParser_AssignInt(void* parser, const char* key, int* out);
 extern "C" int FileParser_AssignFloat(void* parser, const char* key, float* out);
 
-// One song's configuration (func_002B1A98 ctor, 0xAC bytes).
+// One song's configuration (cSongConfiguration_cSongConfiguration ctor, 0xAC bytes).
 struct sSongCfg28C0 {
     char name[0x20];            // 0x00
     char file[0x20];            // 0x20
@@ -4713,7 +4747,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         bit <<= *(int*)(self + 0x3E4);
         *(long*)(self + 0x3F8) |= bit;
         strcpy(self + (*(int*)(self + 0x3E4) * 11 + 292), tok);
-        sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(172, str_cSongConfiguration, 0, 0));
+        sv->ents[*(int*)(self + 0x3E4)] = (char*)cSongConfiguration_cSongConfiguration((cSongConfiguration*)cMemMan_alloc(172, str_cSongConfiguration, 0, 0));
         while (FileParser_IsEOF(L.parser) == 0) {
             char* key = FileParser_GetName(L.parser);
             if (strcasecmp(key, str_TITLE) == 0) {

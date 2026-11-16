@@ -68,7 +68,20 @@ void* cPS2LensFxMan__cPS2LensFxMan(void* self)
 }
 #endif
 
-INCLUDE_ASM("visualfx/lensfx", func_002EC478);
+/**
+ * Measures how much of a lens-flare halo is visible by reading the depth buffer back from the GS.
+ *
+ * Converts the halo's screen rectangle (floats at +0x0..+0x24 of the second argument) to ints, gets a depth threshold
+ * from func_004139F8, builds a GS-to-host transfer of that area of the Z buffer in the object's packet buffer
+ * (+0x64A0), flushes the cache, reads the 24-bit samples back into +0x6510 over the GIF (sceGsSyncPath, func_00371940),
+ * then counts the samples inside the rectangle and those at or below the threshold (unoccluded). When the count equals
+ * the halo's area (+0x8 x +0xC) the visible fraction is stored through the third argument; otherwise (a clipped
+ * rectangle) it stores max((visible - area / 2) / (area / 2), 0). Virtual slot 4. Asm only, no C body yet: the second
+ * argument is On Tour's cHalo& halo, the third its float& value.
+ *
+ * @return always 1
+ */
+INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan_sampleZBuffer);
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EC9D0__FPv);

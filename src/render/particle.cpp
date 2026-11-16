@@ -2489,7 +2489,7 @@ INCLUDE_ASM("render/particle", func_00374C90);
 extern void* cBezierMan_TheBezierMan;
 extern void* D_00493820[];
 
-extern "C" void* func_00374C90(cPSPBezierMan* self)
+extern "C" void* func_00374C90(cPS2BezierMan* self)
 {
     self->mVtbl = D_00493820;
     cBezierMan_TheBezierMan = ((void*)self);
@@ -2504,7 +2504,7 @@ extern void* cBezierMan_TheBezierMan;
 extern void* D_00493820[];
 void operator_delete(int* ptr);
 
-extern "C" void func_00374CA8(cPSPBezierMan* self, int flags)
+extern "C" void func_00374CA8(cPS2BezierMan* self, int flags)
 {
     self->mVtbl = D_00493820;
     cBezierMan_TheBezierMan = 0;

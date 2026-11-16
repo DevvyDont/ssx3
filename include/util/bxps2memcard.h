@@ -4,7 +4,7 @@
 // cPS2MemCard: the PS2 memory-card driver behind the abstract cMemCard interface (util/bxmemcard.cpp:
 // cMemCard::CreateInstance func_002C22C8 = new cPS2MemCard, DeleteInstance cMemCard_DeleteInstance). It wraps libmc as an
 // asynchronous state machine: the public calls store their arguments and call SetState (func_002C48C0), which
-// issues the sceMc* request; Update (vtable slot 3, func_002C55D8) polls sceMcSync and moves to the next state.
+// issues the sceMc* request; Update (vtable slot 3, cPS2MemCard_Update) polls sceMcSync and moves to the next state.
 // Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
 // (movie/movieplayer.cpp).
 //
@@ -21,7 +21,7 @@
 //   func_0040A688 sceMcGetDir, func_0040A998 sceMcFormat, func_0040AA68 sceMcDelete, func_0040AB80 sceMcFlush.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's constructor cPS2MemCard_cPS2MemCard, Reset func_002C4050 (vtable slot 2, called by the ctor; it sets or
+//   [R] retail's constructor cPS2MemCard_cPS2MemCard, Reset cPS2MemCard_Init (vtable slot 2, called by the ctor; it sets or
 //       clears every field from 0x4 to 0x14E8), the allocation size;
 //   [P] the July 2003 preview: inline accessors GetState (0x4), GetDevice (0xC), GetMaxFiles (0x10 -> retail
 //       0x14), GetNumDirTable (0x4C -> retail 0x54), GetMaxDevices (2) (tools/layout_xlate.py: +0x4 from 0x10,
@@ -55,7 +55,7 @@ CHECK_OFFSET(tPS2MemCardDevice, unk_0C, 0x0C);
 CHECK_OFFSET(tPS2MemCardDevice, unk_10, 0x10);
 CHECK_SIZE(tPS2MemCardDevice, 0x14);
 
-// A memory-card date/time: libmc's sceMcStDateTime layout (field names follow it). [U] func_002C64F8 (slot 17)
+// A memory-card date/time: libmc's sceMcStDateTime layout (field names follow it). [U] cPS2MemCard_GetLastSavedFile (slot 17)
 // compares Min..Year of the file entries; Update copies the directory entry's modify time into a file entry with
 // one 8-byte move (ldl/ldr at 0x488).
 struct tPS2MemCardTime {
@@ -78,7 +78,7 @@ CHECK_OFFSET(tPS2MemCardTime, m_year, 0x6);
 CHECK_SIZE(tPS2MemCardTime, 0x8);
 
 // One sceMcGetDir result: libmc's sceMcTblGetDir layout (0x40 bytes; field names follow it). [U] sceMcGetDir
-// fills 0x480 (one entry) and 0x4C0 (the table); func_002C4400 (slot 18) returns 0x490 = m_fileSizeByte; Update's
+// fills 0x480 (one entry) and 0x4C0 (the table); cPS2MemCard_GetDataSize (slot 18) returns 0x490 = m_fileSizeByte; Update's
 // view reads the table's names at 0x4E0 + i * 0x40 and func_002C68C8 copies them (= m_entryName).
 struct tPS2MemCardDirEntry {
     tPS2MemCardTime m_create;       // 0x00
@@ -110,8 +110,8 @@ struct tPS2MemCardFile {
     char unk_0C[0x40];              // 0x0C [U] the file (directory) name: slot 67 tests strlen > 0; SetState(7/0xB/0xC)
                                     //       and func_002C42B0 build "<name>/<name>" paths from it; Update copies unk_0B9
     char unk_4C[0x22];              // 0x4C [U] the save title: Update copies unk_058 into it and converts it
-                                    //       (func_002C2268 ShiftJISToAscii); func_002C6128 reads +0x52
-    tPS2MemCardTime unk_6E;         // 0x6E [U] the file's modify time (func_002C64F8 compares Min..Year)
+                                    //       (func_002C2268 ShiftJISToAscii); cPS2MemCard_GetTitleString reads +0x52
+    tPS2MemCardTime unk_6E;         // 0x6E [U] the file's modify time (cPS2MemCard_GetLastSavedFile compares Min..Year)
     char pad_76[0x2];               // 0x76
 };
 
@@ -133,8 +133,8 @@ struct cPS2MemCard {
     int unk_008;                    // 0x0008 [R] Reset 0x1C; [U] SetState(0x26) copies it (> 0) into the icon's
                                     //       offsLF (asm: lhu, a narrowing load)
     int mDevice;                    // 0x000C [P] GetDevice; [R] Reset 0; [U] the port of every sceMc* call; indexes
-                                    //       unk_17C; retail slot 4 func_002D37D8
-    int unk_010;                    // 0x0010 [R] Reset 0; [U] slot 5 func_002C4480 and func_002C67E8 store the device
+                                    //       unk_17C; retail slot 4 cPS2MemCard_GetDevice
+    int unk_010;                    // 0x0010 [R] Reset 0; [U] slot 5 cPS2MemCard_CheckDevice and func_002C67E8 store the device
                                     //       before SetState(3)
     int mMaxFiles;                  // 0x0014 [P] GetMaxFiles, "(file >= 0) && (file < mMaxFiles)"; [R] Reset 6 (the
                                     //       unk_1A4 count); retail slot 68 func_002D3970
@@ -157,7 +157,7 @@ struct cPS2MemCard {
     int unk_03C;                    // 0x003C [R] Reset 0; [U] Update sets 0/1 (operation outcome); func_002C42B0,
                                     //       func_002C4410, SetState(0xB) clear it; retail slot 75 func_002D39B0 returns it
     int unk_040;                    // 0x0040 [R] Reset 0; [U] nonzero while a sceMcSync is pending ([X] Rust); slot 11
-                                    //       (busy test), func_002C50E0, func_002C6360
+                                    //       (busy test), func_002C50E0, cPS2MemCard_CleanUp
     int unk_044;                    // 0x0044 [R] Reset 0; [U] slot 33 sets 1 (deferred: Update then SetState(0x1E));
                                     //       SetState(0x1C) clears it
     int unk_048;                    // 0x0048 [R] Reset 0; [U] slot 44 sets 1 (deferred: Update then SetState(0x18));
@@ -187,7 +187,7 @@ struct cPS2MemCard {
     tPS2MemCardDirEntry unk_4C0[64]; // 0x04C0 [R] Reset clears 0x1000; [U] the directory table (func_002C4210,
                                     //       func_002C6848 sceMcGetDir; func_002C5278 clears it); mNumDirTable entries
     char mSourceIconPath[0x20];     // 0x14C0 [P] "strlen(pszInfo) < sizeof(mSourceIconPath)" (0x20 fits the gap);
-                                    //       [R] Reset clears it; [U] slot 39 func_002C66B8 copies it; SetState(0x28/0x2C/
+                                    //       [R] Reset clears it; [U] slot 39 cPS2MemCard_SetFileSlotInfo copies it; SetState(0x28/0x2C/
                                     //       0x30) builds the icon file paths from it
     int unk_14E0;                   // 0x14E0 [R] Reset 0; [U] sceMcOpen mode (func_002C6968 stores, func_002C69A0 uses)
     int unk_14E4;                   // 0x14E4 [R] Reset 0; [U] sceMcSeek offset (func_002C6A60 stores, func_002C6A88)

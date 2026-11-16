@@ -231,7 +231,7 @@ extern "C" void func_003078C0(void* vself, void* vmsg)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003079D8);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getRunningTaskId);
 #ifdef SKIP_ASM
 struct cWScriptProcEntry {
     int a;
@@ -248,7 +248,15 @@ struct cWScriptProcList {
     cWScriptProcEntry* entries;
 };
 
-extern "C" unsigned int func_003079D8(cWScriptProcList* self)
+/**
+ * Returns the id of the task the world-script process is running.
+ *
+ * Reads the id word (+0x4) of the current task when the current index (+0x8) is below the task count (+0x4); the tasks
+ * are 0x44-byte cWScriptTask records at +0x14.
+ *
+ * @return the task id, or 0xFFFFFFFF when no task is running
+ */
+extern "C" unsigned int cWScriptProcess_getRunningTaskId(cWScriptProcList* self)
 {
     int i = self->cur;
     if (i < self->count) {

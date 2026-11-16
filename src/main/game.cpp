@@ -343,7 +343,7 @@ struct sVEntry_renderFog {
     short index;
     void (*fn)(void*, void*, int, int);
 };
-extern "C" void func_002DBF98(void* r);
+extern "C" void cFogParticleMan_render(void* r);
 
 /**
  * Hands the frustum query's two fog-volume lists (types 0 and 2) to the fog manager, then draws them.
@@ -366,7 +366,7 @@ extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
         sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
         vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 2);
     }
-    func_002DBF98(self->FogMan);
+    cFogParticleMan_render(self->FogMan);
 }
 #endif
 

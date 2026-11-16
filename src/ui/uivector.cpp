@@ -2199,9 +2199,16 @@ extern "C" void cUIListBox__cUIListBox(cUIListBox* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A56A0__FPv);
+INCLUDE_ASM("ui/uivector", cUIListBox_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A56A0(void* self)
+/**
+ * Returns the UI type id of a list box object.
+ *
+ * Virtual slot 22, as for every cUIThing type (cUIIcon_getType returns 0x11).
+ *
+ * @return always 0x12 (18)
+ */
+int cUIListBox_getType(void* self)
 {
     return 18;
 }
@@ -2994,9 +3001,16 @@ extern "C" void cUIText__cUIText(cUIText* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5DF0__FPv);
+INCLUDE_ASM("ui/uivector", cUIText_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A5DF0(void* self)
+/**
+ * Returns the UI type id of a text object.
+ *
+ * Virtual slot 22, as for every cUIThing type (cUIIcon_getType returns 0x11).
+ *
+ * @return always 0x17 (23)
+ */
+int cUIText_getType(void* self)
 {
     return 23;
 }
@@ -3198,9 +3212,16 @@ extern "C" void* cUIScrollBar_cUIScrollBar(cUIScrollBar* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6000__FPv);
+INCLUDE_ASM("ui/uivector", cUIScrollBar_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A6000(void* self)
+/**
+ * Returns the UI type id of a scroll bar object.
+ *
+ * Virtual slot 22, as for every cUIThing type (cUIIcon_getType returns 0x11).
+ *
+ * @return always 0x21 (33)
+ */
+int cUIScrollBar_getType(void* self)
 {
     return 33;
 }
@@ -3503,9 +3524,16 @@ extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6330__FPv);
+INCLUDE_ASM("ui/uivector", cUITextScroll_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A6330(void* self)
+/**
+ * Returns the UI type id of a scrolling text object.
+ *
+ * Virtual slot 22, as for every cUIThing type (cUIIcon_getType returns 0x11).
+ *
+ * @return always 0x20 (32)
+ */
+int cUITextScroll_getType(void* self)
 {
     return 0x20;
 }

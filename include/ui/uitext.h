@@ -1,7 +1,7 @@
 #ifndef UI_UITEXT_H
 #define UI_UITEXT_H
 
-// cUIText: a text object on a UI screen (object type 0x17: getType, func_003A5DF0, returns 0x17).
+// cUIText: a text object on a UI screen (object type 0x17: getType, cUIText_getType, returns 0x17).
 // cUIScreen_createObjectByStruct allocates it with `cMemMan_alloc(0xBC, "UIText", ...)` and runs its constructor
 // func_003A0348, which calls the cUIThing constructor and stores _vt$7cUIText (cUIText_vtbl): 0xBC bytes.
 //
@@ -11,7 +11,7 @@
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIText), placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors (setFontIndex/hasShadow/isUnicode lw 0x6C, setShadowColour 0x70,
-//       setStaticColour 0x80). Retail keeps their out-of-line copies in the same order (func_003A5DF0 getType ...
+//       setStaticColour 0x80). Retail keeps their out-of-line copies in the same order (cUIText_getType getType ...
 //       func_003A5F58 in ui/uivector), which places each one: retail = preview + 8 (cUIThing grew from 0x6C to 0x74),
 //       and + 0x18 after mStaticColour (retail added mDisabledColour, as On Tour has);
 //   [R] retail's constructor cUIThing_cUIThing + func_003A0348;

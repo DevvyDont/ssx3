@@ -8,11 +8,11 @@
 // "PathfinderOverlay", "cSongConfiguration", "mSongConfigurations[mNumSongs]->mNumBankData < MUSIC_MAXLOOPFILES";
 // preview vtable _vt$18cSongConfiguration). Retail methods: sound/bankmonitor unit 0x2B1A98..0x2B2850, just before
 // cMusicSys's. On Tour has no music system: no [O] evidence.
-// Sizes [R]: cMusicSys ctor func_002B28C0: func_002B1A98(cMemMan_alloc(0xAC, "cSongConfiguration"));
+// Sizes [R]: cMusicSys ctor func_002B28C0: cSongConfiguration_cSongConfiguration(cMemMan_alloc(0xAC, "cSongConfiguration"));
 // func_002B1B98: func_002B1C50(cMemMan_alloc(0xC4, "SongInstance"), ...).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] constructors func_002B1A98 / func_002B1C50, destructors func_002B1B68 / func_002B1F78, the music.inf keys
+//   [R] constructors cSongConfiguration_cSongConfiguration / func_002B1C50, destructors func_002B1B68 / func_002B1F78, the music.inf keys
 //       cMusicSys's ctor parses into each cSongConfiguration (member names follow the key; EA's own names unknown);
 //   [P] the preview's assert strings;
 //   [U] how the retail methods use the field. Names marked "(our name)" describe that use; the rest are unk_.

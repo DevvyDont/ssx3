@@ -9,11 +9,11 @@
 // d:/ssx/code/source/ui/uitextscroll.cpp (preview assert path); retail keeps its methods in ui/uitext
 // (0x3A1148-0x3A2068) and its inline accessors in ui/uivector (0x3A6250-0x3A64F8).
 // Methods: vtable cUITextScroll_vtbl slots 0 ~cUITextScroll (cUITextScroll__cUITextScroll), 9 setUIData (cUITextScroll_setUIData), 14 onInput
-// (cUITextScroll_onInput), 15 updateLocale (cUITextScroll_updateLocale), 16 render2D (cUITextScroll_render2D), 21 getType (func_003A6330); line
+// (cUITextScroll_onInput), 15 updateLocale (cUITextScroll_updateLocale), 16 render2D (cUITextScroll_render2D), 21 getType (cUITextScroll_getType); line
 // buffer helpers cUITextScroll_getFont, cUITextScroll_clearBuffer (free lines), cUITextScroll_allocLine, cUITextScroll_deleteLineByIndex; text setters
 // cUITextScroll_addAsciiString / cUITextScroll_setAsciiString (ASCII), cUITextScroll_addUnicodeString, cUITextScroll_setUnicodeStringWrap / cUITextScroll_addUnicodeStringWrap (Unicode),
 // cUITextScroll_addUnicodeStringByID (string id).
-// Class name: the preview's cUITextScroll::getType (builds/x/v2/name_map_v2.tsv, func_003A6330) and On Tour.
+// Class name: the preview's cUITextScroll::getType (builds/x/v2/name_map_v2.tsv, cUITextScroll_getType) and On Tour.
 //
 // A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUITextScroll 0xF0: its cUIThing is 0x80 and
 // it aligns tARGB to 16, so the members sit 0xC-0x20 later there; same order and types).

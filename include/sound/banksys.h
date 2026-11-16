@@ -14,7 +14,7 @@
 // lives: cMidiSys / cCrowdSys / cController / cSSXAudio all start with it (sound/midisys.h, sound/crowdsys.h,
 // sound/ssxaudio.h). The only instance is cSSXAudio + 0x0; the ctor stores it in gBankSys (EA name unknown).
 // Vtables: D_00483A48 is cBankSys's primary vtable (preview _vt$8cBankSys). cMidiSys adds no primary-table virtual, so
-// its ctor/dtor (cController_cController, func_002A82D8) store the same D_00483A48 at 0xC; cBankSys's dtor lives in
+// its ctor/dtor (cMidiSys_cMidiSys, cMidiSys__cMidiSys) store the same D_00483A48 at 0xC; cBankSys's dtor lives in
 // its virtual-base tables D_00483A60 (_vt$8cBankSys$9cSoundSys) and D_00483A80 (_vt$8cBankSys$12cBankManager).
 //
 // A FLAT layout, like main/game.h. Evidence tags:

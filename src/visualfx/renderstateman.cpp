@@ -1666,12 +1666,12 @@ extern "C" void cPS2AIVisualEffectsMan_render(cPS2AIVisualEffectsMan_update_cObj
 INCLUDE_ASM("visualfx/renderstateman", cVisualEffectsMan_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cPSPVisualEffectsMan_cPSPVisualEffectsMan(void* self);
+extern "C" void* cPS2VisualEffectsMan_cPS2VisualEffectsMan(void* self);
 extern char str_PS2VisualEffectsMan[];
 
 /**
  * Creates the visual-effects manager: allocates 0x48 bytes tagged "PS2VisualEffectsMan" and constructs a
- * cPSPVisualEffectsMan there.
+ * cPS2VisualEffectsMan there.
  *
  * The base constructor records it in D_004A3B78; this function stores it nowhere itself.
  *
@@ -1679,7 +1679,7 @@ extern char str_PS2VisualEffectsMan[];
  */
 extern "C" void* cVisualEffectsMan_construct(void)
 {
-    return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(72, str_PS2VisualEffectsMan, 0, 0));
+    return cPS2VisualEffectsMan_cPS2VisualEffectsMan(cMemMan_alloc(72, str_PS2VisualEffectsMan, 0, 0));
 }
 #endif
 
