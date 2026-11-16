@@ -3837,7 +3837,7 @@ extern void* D_004886B0[];
 extern char* D_004A5B80;
 extern int D_004A3B18;
 void* func_002E2860(void* self);
-void* func_002E3110(void* self);
+void func_002E3110(void* self);
 extern "C" void func_002F4380(void* self);
 
 // PORT: hand-written g++ 2.95 member-array construction loops (vptr at 0x649C).
@@ -3985,14 +3985,14 @@ extern "C" void func_002E30D0(void* self, int i)
 }
 #endif
 
-extern "C" void* func_002E3130(void* self);
+extern "C" void func_002E3130(void* self);
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3110__FPv);
 #ifdef SKIP_ASM
-void* func_002E3110(void* self)
+void func_002E3110(void* self)
 {
-    return func_002E3130(self);
+    func_002E3130(self);
 }
 #endif
 
