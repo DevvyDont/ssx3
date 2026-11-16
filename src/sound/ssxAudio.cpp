@@ -2360,7 +2360,69 @@ extern "C" void func_002887F8(sSaMix87F8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00288940);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+struct sAudV4_8940 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern "C" int func_00288CE8();
+void* func_00288AC0(void* self, int a1);
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sAudV4_8940 audVu0Sub_8940(const sAudV4_8940& a, const sAudV4_8940& b)
+{
+    sAudV4_8940 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float audVu0Dot_8940(const sAudV4_8940& a, const sAudV4_8940& b)
+{
+    float r;
+    int t;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: second parameter is really an sAudV4_8940*; kept int to agree with func_00288A20's declaration.
+// FAKEMATCH: register pin `register int r FM_REG("$2")` (local-alloc gives v0 to the dot asm's block-local "=&r"
+// temps before the global r; retail keeps r in v0); plain form 94.02% (unpositioned).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" int func_00288940(void* self, int id)
+{
+    if (func_00288CE8() < 2) {
+        return 0;
+    }
+    sAudV4_8940 d0 = audVu0Sub_8940(*(sAudV4_8940*)func_00288AC0(self, 0), *(sAudV4_8940*)id);
+    sAudV4_8940 d1 = audVu0Sub_8940(*(sAudV4_8940*)func_00288AC0(self, 1), *(sAudV4_8940*)id);
+    register int r FM_REG("$2") = 0;
+    if (!(audVu0Dot_8940(d0, d0) < audVu0Dot_8940(d1, d1))) {
+        r = 1;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00288A20);
