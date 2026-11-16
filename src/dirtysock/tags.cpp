@@ -141,6 +141,14 @@ INCLUDE_ASM("dirtysock/tags", func_003EB578);
 #ifdef SKIP_ASM
 extern signed char D_004A4A70;
 
+/**
+ * Sets the tag-record divider character D_004A4A70 and returns the previous one.
+ *
+ * D_004A4A70 starts as '\n'; func_003EBD70() and func_003ECBD8() write it between fields.
+ *
+ * @param arg0  the new divider character
+ * @return the divider character it replaced
+ */
 extern "C" signed char func_003EB578(signed char arg0) {
     signed char temp_2;
 
@@ -152,6 +160,18 @@ extern "C" signed char func_003EB578(signed char arg0) {
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EB588);
 #ifdef SKIP_ASM
+/**
+ * Normalizes a tag record in place, rewriting the control-character runs between its fields.
+ *
+ * Header pass: each run of control characters (below 0x20) becomes one @p sep, and the pass stops after a run that is
+ * followed by '=' or ':' plus another control character. A trailing @p sep left at the end of the output becomes '\n'
+ * (when @p sep is '\n' or more input follows) or the terminator. Body pass: the rest is copied with each control run
+ * turned into one '\n', a run ending early at a repeat of its first character (so a blank line survives). The result is
+ * terminated.
+ *
+ * @param dst  the record; rewritten in place (the output never grows)
+ * @param sep  character that replaces the header's control runs
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Normalizes a record in place: header control runs become `sep` (stopping at the first
 // key line), a trailing sep becomes a newline (or the end), then each control run in the
@@ -260,6 +280,18 @@ extern char* cDirtysock_tag_TagFieldFind_B840(char* record, char* name) __asm__(
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void strcat_EB840(char* dst, const char* src) __asm__("strcat");
 
+/**
+ * Finds a tag field whose name is a prefix followed by a name, and returns its value.
+ *
+ * With a null @p prefix it looks up @p name alone, with a null @p name it looks up @p prefix alone; otherwise it joins
+ * the two in a 256-byte stack buffer (strcpy + strcat, no length check) and looks that up with
+ * cDirtysock_tag_TagFieldFind().
+ *
+ * @param record  the tag record to search
+ * @param prefix  first part of the field name, or 0
+ * @param name    second part of the field name, or 0
+ * @return cDirtysock_tag_TagFieldFind()'s result: the field's value, or 0 when it is missing
+ */
 extern "C" char* func_003EB840(char* record, char* prefix, char* name)
 {
     char buf[256];
@@ -282,6 +314,15 @@ INCLUDE_ASM("dirtysock/tags", func_003EB8B8);
 extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
 extern char D_004A4A78[];
 
+/**
+ * Returns the text block that follows the "~~" field of a tag record.
+ *
+ * Finds the field named "~~" (D_004A4A78; func_003EBD70() appends it as "~~=\n") and skips the characters 1..0x20
+ * (control characters and spaces) after it.
+ *
+ * @param record  the tag record to search
+ * @return the first character of the block, or 0 when there is no "~~" field or nothing follows it
+ */
 extern "C" unsigned char* func_003EB8B8(char* record)
 {
     unsigned char* p = cDirtysock_tag_TagFieldFind(record, D_004A4A78);
@@ -351,6 +392,21 @@ INCLUDE_ASM("dirtysock/tags", func_003EB9E8);
 extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
 extern "C" unsigned int strlen(const char* s);
 
+/**
+ * Renames a field in a tag record, moving the rest of the record when the name length changes.
+ *
+ * Finds the field with cDirtysock_tag_TagFieldFind() (stepping back over a space before the value), takes the name as
+ * the non-space run before its '=', then writes @p value over it. Likely bug: when the new name is shorter, the shift
+ * loop never advances its pointers, so it spins forever (the field's '=' is never 0). Likely bug: when it is longer,
+ * the room check is inverted: it returns -1 when the record still fits in @p len and shifts the tail (without the '='
+ * itself) when it does not.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field's current name
+ * @param value   the new name
+ * @return 0 when renamed, -1 when the field is missing or by the inverted room check
+ */
 extern "C" int func_003EB9E8(unsigned char* record, int len, char* name, const signed char* value)
 {
     unsigned char* nameEnd = cDirtysock_tag_TagFieldFind((char*)record, name);
@@ -439,6 +495,18 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
 #ifdef SKIP_ASM
+/**
+ * Copies the name of the first field in a tag record into a buffer.
+ *
+ * Scans for the first '=' or ':', walks back over the non-space characters before it and copies them (at most @p len -
+ * 1). It copies nothing when the first separator is a bare "=" or ":" line (whitespace before, a control character
+ * after) or when there is no separator. The buffer is terminated even when @p len is 0 or less.
+ *
+ * @param rec  the tag record, or 0
+ * @param buf  receives the name
+ * @param len  size of @p buf in bytes
+ * @return the number of characters copied (0 when there is no name)
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" int func_003EBBA8(const unsigned char* rec, char* buf, int len)
 {
@@ -466,6 +534,18 @@ extern "C" int func_003EBBA8(const unsigned char* rec, char* buf, int len)
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
 #ifdef SKIP_ASM
+/**
+ * Replaces everything from a tag record's first block marker on with "=\n" plus a text block.
+ *
+ * Truncates the record at the first '=' or ':' that is followed by a control character (the end of the record when
+ * there is none). With a null @p value it stops there; otherwise it writes "=\n" and as much of @p value as fits in @p
+ * len, terminated. func_003EB8B8() and func_003ECE38() read such a block back.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param value   the block text, or 0 to just cut the record
+ * @return 0 on success, -1 when fewer than 5 bytes remain after the cut
+ */
 extern "C" int func_003EBCB0(char* record, int len, const char* value)
 {
     char* cursor = record;
@@ -505,6 +585,16 @@ INCLUDE_ASM("dirtysock/tags", func_003EBD70);
 extern signed char D_004A4A70;
 extern signed char D_004A4A80[];
 
+/**
+ * Appends the "~~=\n" block marker to a tag record.
+ *
+ * When the record's last character is printable and not already the divider D_004A4A70, it first appends the divider
+ * (if there is room). The marker string is D_004A4A80; func_003EB8B8() finds the text after it.
+ *
+ * @param buf  the tag record, terminated
+ * @param len  size of the record buffer in bytes
+ * @return 0 when the marker was appended, -1 when fewer than 5 bytes are left
+ */
 extern "C" int func_003EBD70(unsigned char* buf, int len)
 {
     const signed char* s = D_004A4A80;
@@ -1050,6 +1140,25 @@ extern "C" void* func_00416210(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
 extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 
+/**
+ * Stores a calendar date and time in a tag record as epoch seconds.
+ *
+ * Fills a zeroed tm (func_00416210) with @p year - 1900, @p mon - 1, the day and time, tm_isdst -1, converts it with
+ * func_003EB090() and passes the result minus @p adj to cDirtysock_tag_TagFieldSetEpoch() (0 when the conversion gives
+ * 0).
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name
+ * @param year    full year (e.g. 2003)
+ * @param mon     month, 1..12
+ * @param day     day of the month
+ * @param hour    hour
+ * @param min     minute
+ * @param sec     second
+ * @param adj     seconds subtracted from the converted time (a time-zone offset)
+ * @return cDirtysock_tag_TagFieldSetEpoch()'s result
+ */
 extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int mon, int day, int hour, int min, int sec, int adj)
 {
     sDsTmK2 tm;
@@ -1074,6 +1183,20 @@ extern "C" void* func_00416210(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
 extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 
+/**
+ * Stores a packed date and time in a tag record as epoch seconds.
+ *
+ * Like func_003EC8B8(), but the date comes packed as year << 16 | month << 8 | day and the time as hour << 16 | minute
+ * << 8 | second (the layout func_003EDE80() returns).
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name
+ * @param date    packed date: full year in bits 16..31, month (1..12) in bits 8..15, day in bits 0..7
+ * @param time    packed time: hour in bits 16..23, minute in bits 8..15, second in bits 0..7
+ * @param adj     seconds subtracted from the converted time (a time-zone offset)
+ * @return cDirtysock_tag_TagFieldSetEpoch()'s result
+ */
 extern "C" int func_003EC9A0(char* record, int len, char* name, int date, int time, int adj)
 {
     sDsTmK2 tm;
@@ -1098,6 +1221,18 @@ INCLUDE_ASM("dirtysock/tags", func_003ECA88);
 extern char* cDirtysock_tag_TagFieldFind_CA88(char* record, char* name) __asm__("cDirtysock_tag_TagFieldFind");
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
+/**
+ * Copies one named field from another tag record into this one.
+ *
+ * Finds @p name in @p data, backs up to the start of that field's line (just after a control character, or the start of
+ * @p data) and adds the "name=value" term to @p record with cDirtysock_tag__TagFieldSetupTerm().
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field to copy
+ * @param data    the tag record to copy it from
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result, or 0 when @p data has no such field
+ */
 extern "C" int func_003ECA88(char* record, int len, char* name, char* data)
 {
     char* field = cDirtysock_tag_TagFieldFind_CA88(data, name);
@@ -1120,6 +1255,18 @@ INCLUDE_ASM("dirtysock/tags", func_003ECB00);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
+/**
+ * Merges every field of one tag record into another and counts the fields set.
+ *
+ * Skips whitespace, stops at the end or at a line that starts with '=' or ':', and hands each term to
+ * cDirtysock_tag__TagFieldSetupTerm() (which replaces a field of the same name). The LobbyApi request builder
+ * func_003E8B10 calls it.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param data    the tag record whose fields are copied
+ * @return how many terms cDirtysock_tag__TagFieldSetupTerm() reported as set (result > 0)
+ */
 // TagFieldMerge: apply every field of `data` to the record; returns how many were set.
 extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
 {
@@ -1161,6 +1308,22 @@ typedef char* func_003ECBD8_va_list;
 extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char* key, const char* value);
 extern char D_004A4A90[];
 
+/**
+ * Formats a tag record from a printf-like template.
+ *
+ * Copies @p fmt into @p buf; each whitespace run becomes the divider D_004A4A70. A '%' conversion first drops an '='
+ * just written before it, then stores the next argument as a field with an empty name (D_004A4A90, which writes
+ * "=value"): %s cDirtysock_tag_TagFieldSetString(), %d cDirtysock_tag_TagFieldSetNumber(), %a
+ * cDirtysock_tag_TagFieldSetAddress(), %f cDirtysock_tag_TagFieldSetFlags(), %e cDirtysock_tag_TagFieldSetEpoch(); %r
+ * copies a string argument as-is. Any other letter writes nothing (and the '=' is still dropped). Stops when fewer than
+ * 2 bytes remain. Quirk: a '%' at the very start reads the byte before @p buf. Arguments are read with a hand-rolled EE
+ * va_list.
+ *
+ * @param buf  receives the record
+ * @param len  size of @p buf in bytes
+ * @param fmt  template, e.g. "NAME=%s PORT=%d"
+ * @return the number of bytes written (without the terminator)
+ */
 // TagFieldPrintf-style formatter: copies fmt into buf, turning whitespace runs into the
 // field separator and %s/%d/%a/%f/%e/%r into tag fields from the arguments.
 extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
@@ -1218,6 +1381,20 @@ extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003ECE38);
 #ifdef SKIP_ASM
+/**
+ * Copies the text block that follows a tag record's first "=\n" (or ":\n") marker.
+ *
+ * Scans for the first '=' or ':' followed by a control character and, when more text follows, copies everything after
+ * those two characters (newlines included, at most @p size - 1 characters) into @p out. Otherwise it copies @p dflt
+ * (when both @p out and @p dflt are given).
+ *
+ * @param src    the tag record
+ * @param unused not read
+ * @param out    receives the block, or 0 to only locate it
+ * @param size   size of @p out in bytes
+ * @param dflt   text copied when there is no block, or 0
+ * @return the start of the block in @p src, or 0 when there is none
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Finds the next "=" or ":" field separator in p and copies the following value into out (or dflt when there is none); returns the value start or 0.
 extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* out, int size, const char* dflt)
@@ -1380,6 +1557,24 @@ extern int strlen_D0F8(const char* s) __asm__("strlen");
 extern unsigned char D_004961C0[];
 extern unsigned char D_004962C0[];
 
+/**
+ * Copies one item of a delimited tag field value into a buffer, removing quotes and decoding %xx escapes.
+ *
+ * An opening '"' or '\'' makes that character the closing quote. It skips @p iIndex items separated by @p iDelim; when
+ * an item is missing (the scan hits the quote, a control character or the end first) it falls back to @p pDefval.
+ * Copying stops at the quote, a control character or @p iDelim, and decodes %xx through the hex tables D_004961C0 (high
+ * nibble) and D_004962C0 (low nibble); "%%" gives one '%'. Quirk: the length-only pass (null @p pBuffer) has no "%%"
+ * case, so it counts "%%x" as one character where the copy gives two.
+ *
+ * @param pData     the field value, or 0
+ * @param pBuffer   receives the item, or 0 to only measure it
+ * @param iLength   size of @p pBuffer in bytes
+ * @param pDefval   text used when the item is missing, or 0
+ * @param iIndex    0-based index of the item
+ * @param iDelim    the item separator character
+ * @return the number of characters copied (or measured), or -1 when the item is missing and there is no default, or
+ *         when @p iLength is 0 or less
+ */
 // TagFieldGetString variant that first skips iIndex fields split by iDelim.
 extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, const char* pDefval, int iIndex, int iDelim)
 {
@@ -1848,6 +2043,23 @@ INCLUDE_ASM("dirtysock/tags", func_003EDD70);
 #ifdef SKIP_ASM
 extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int dflt);
 
+/**
+ * Reads a time field from a tag record into separate calendar fields.
+ *
+ * Reads the value with cDirtysock_tag_TagFieldGetTime() (default 1) and converts value + @p offset with func_003EAEB8()
+ * into a tm; every non-null output gets its field (year as tm_year + 1900, month as tm_mon + 1). The buddy-message
+ * reader func_00261A28 calls it.
+ *
+ * @param data    the field value
+ * @param year    receives the full year, or 0
+ * @param month   receives the month (1..12), or 0
+ * @param day     receives the day of the month, or 0
+ * @param hour    receives the hour, or 0
+ * @param min     receives the minute, or 0
+ * @param sec     receives the second, or 0
+ * @param offset  seconds added before the conversion (a time-zone offset)
+ * @return 0 on success, -1 when the field is missing or below 2 or the conversion fails
+ */
 // TagFieldGetDate-style accessor: split a time tag into calendar fields.
 extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset)
 {
@@ -1879,6 +2091,18 @@ extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* h
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EDE80);
 #ifdef SKIP_ASM
+/**
+ * Reads a time field from a tag record as a packed date and a packed time.
+ *
+ * Like func_003EDD70(), but stores year << 16 | month << 8 | day in @p date and hour << 16 | minute << 8 | second in @p
+ * time (the layout func_003EC9A0() takes).
+ *
+ * @param data    the field value
+ * @param date    receives the packed date, or 0
+ * @param time    receives the packed time, or 0
+ * @param offset  seconds added before the conversion (a time-zone offset)
+ * @return 0 on success, -1 when the field is missing or below 2 or the conversion fails
+ */
 extern "C" int func_003EDE80(char* data, unsigned int* date, unsigned int* time, int offset)
 {
     sDsTmK2 tm;
