@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -284,7 +285,7 @@ extern "C" void func_002703F0(sReplay002703F0* self, int reset)
         if (self->loop != 0) {
             func_002702F8((sReplay002702F8*)self, 0);
             func_002703F0(self, 1);
-            void* list = *(void**)((char*)SSXApp->Game + 0x84);
+            void* list = SSXApp->Game->ViewMan;
             char* obj = *(char**)(*(char**)((char*)list + 0x4) + 0xA8);
             func_001620D0(obj);
             sRcVEntry03F0* vt = *(sRcVEntry03F0**)(obj + 0x14);
@@ -349,7 +350,7 @@ extern "C" void func_002705B0(void* self, int obj, int alt)
     if (*(int*)(s + 0x3D4) == 0) {
         return;
     }
-    if (*(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C) != 1) {
+    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) != 1) {
         return;
     }
     int now;
@@ -383,7 +384,7 @@ extern "C" void func_00270628(void* self)
     int* on = (int*)((char*)self + 0x3D4);
     int v = *on;
     if (v != 0) {
-        int x = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C);
+        int x = *(int*)((char*)SSXApp->Game->AI + 0x7C);
         if (x == 1) {
             if (v > 0) {
                 *on = 0;
@@ -418,7 +419,7 @@ extern "C" void func_00270670(void* self)
 {
     if (*(int*)((char*)self + 0x620) != 0) {
         func_0026F980(self);
-        cRiderMetrix_resetHUDfx(*(void**)(*(char**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18) + 0x790));
+        cRiderMetrix_resetHUDfx(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18) + 0x790));
     }
 }
 #endif
@@ -481,7 +482,7 @@ struct sRcWorld_0730 {
 
 static inline sRcWorld_0730* world_0730()
 {
-    return *(sRcWorld_0730**)((char*)SSXApp->Game + 0xC);
+    return (sRcWorld_0730*)SSXApp->Game->AI;
 }
 
 extern "C" int func_00270730(int id)
@@ -596,7 +597,7 @@ extern "C" void func_002709D8(void* self, int key, int mode)
         *(int*)((char*)self + 0x0) == 0) {
         int slot = func_00270730(key);
         if (slot >= 0) {
-            char* world = *(char**)((char*)SSXApp->Game + 0xC);
+            char* world = (char*)SSXApp->Game->AI;
             char* rider = *(char**)(world + (key << 2) + 0x28);
             switch (mode) {
             case 0:

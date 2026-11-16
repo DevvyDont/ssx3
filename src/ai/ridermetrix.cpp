@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1848,7 +1849,7 @@ struct sVE119EF8 {
 
 static inline int IsBusy119EF8()
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     return n != 0 && n < 10;
 }
 
@@ -2068,7 +2069,7 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
     cRiderMetrix_removeHUDfx(self, 0x1f);
     cRiderMetrix_removeHUDfx(self, 0x20);
 
-    if (func_0012A250(*(void**)((char*)SSXApp->Game + 0xc))) {
+    if (func_0012A250(SSXApp->Game->AI)) {
         return 0.0f;
     }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1074,7 +1075,7 @@ extern "C" void func_002867E8(char* self)
     cWorldPainterManArg* pa = (cWorldPainterManArg*)&D_004A5268;
     cWorldPainterManArg* pb = (cWorldPainterManArg*)&D_004A5278;
     cWorldPainterManArg* pc = (cWorldPainterManArg*)&D_004A5270;
-    void* q = *(void**)(*(char**)((char*)SSXApp->Game + 0x10) + 8);
+    void* q = *(void**)((char*)SSXApp->Game->World + 8);
     *(void**)(self + 0x625C) = cWorldPainterMan_getQuery(q, pa);
     *(void**)(self + 0x6260) = cWorldPainterMan_getQuery(q, pa);
     *(void**)(self + 0x5FA0) = cWorldPainterMan_getQuery(q, pb);

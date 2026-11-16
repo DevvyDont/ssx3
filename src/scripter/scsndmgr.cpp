@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -300,7 +301,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
             D_004A289C->v40(*(int*)(s + 0x10));
             if (*(int*)(s + 0x14) != 0) {
                 *(int*)(s + 0x14) = 0;
-                func_002EA860(*(void**)((char*)SSXApp->Game + 0x64));
+                func_002EA860(SSXApp->Game->CutSceneTransitionMan);
             }
         }
     }

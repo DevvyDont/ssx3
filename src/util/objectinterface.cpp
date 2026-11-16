@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 struct cObjectInterface_Impl {
@@ -136,7 +137,7 @@ struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
 extern "C" int func_002D2058(sQ128* v)
 {
-    char* inst = (char*)*(void**)((char*)SSXApp->Game + 0x8C);
+    char* inst = (char*)(void*)SSXApp->Game->OcclusionMan;
     int mask = *(int*)(inst + 0x110);
     for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
         int bit = 1 << i;

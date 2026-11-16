@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -125,7 +126,7 @@ static inline float approach_2D4C08(float x, float target, float step)
 
 static inline sPlayers_2D4C08* players_2D4C08()
 {
-    return *(sPlayers_2D4C08**)((char*)SSXApp->Game + 0x84);
+    return (sPlayers_2D4C08*)SSXApp->Game->ViewMan;
 }
 
 extern "C" void func_002D4C08(sAnger_2D4C08* self)
@@ -258,7 +259,7 @@ extern sRState_2D5048 D_00501420_2D5048 __asm__("D_00501420");
 
 static inline sViews_2D5048* views_2D5048()
 {
-    return *(sViews_2D5048**)((char*)SSXApp->Game + 0x84);
+    return (sViews_2D5048*)SSXApp->Game->ViewMan;
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1770,7 +1771,7 @@ extern "C" void func_002BB6E0(int, void *);
 extern "C" void func_002BB6B8(void) {
     void *temp_5;
 
-    temp_5 = (*(void **)((char*)(((void*)SSXApp->Game)) + (0x10)));
+    temp_5 = ((void*)SSXApp->Game->World);
     func_002BB6E0((*(int *)((char*)(temp_5) + (8))), temp_5);
 }
 #endif
@@ -1966,7 +1967,7 @@ extern "C" void func_002BB928(void* ctx, sQtTree_B928* tree, sQtNode_B928* node,
         func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), v, &mid, hi);
     } else {
         sQtCtx_B928* g = D_004A5B80_B928;
-        char* rider = *(char**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18);
+        char* rider = *(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18);
         sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
         sQtVec4_B928 t;
         t.x = lo->x;

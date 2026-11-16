@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -98,7 +99,7 @@ static inline bool isKind_A8F8(int k, int v)
 
 extern "C" void func_0020A8F8(int mode)
 {
-    int v = **(int**)((char*)SSXApp->Game + 0x28);
+    int v = *(int*)SSXApp->Game->Replay;
     int busy = v != 0 && v < 10;
     if (busy) return;
     int state = 0;
@@ -154,7 +155,7 @@ extern "C" void func_0020A8F8(int mode)
         }
         int z = !isKind_A8F8(kind, 6) && !isKind_A8F8(kind, 7) && !isKind_A8F8(kind, 8) && !isKind_A8F8(kind, 9) &&
                 !isKind_A8F8(kind, 10) && !isKind_A8F8(kind, 11);
-        if (z) func_002706B8(*(void**)((char*)SSXApp->Game + 0x28));
+        if (z) func_002706B8(SSXApp->Game->Replay);
         if (D_00534B30[0] != 0) *(int*)(D_004A2EEC + 0x64) = 0x8CA0;
         break;
     }
@@ -234,7 +235,7 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
 extern "C" void cOVStateManager_triggerOverlay(int type)
 {
     char* result = 0;
-    char* mgr = *(char**)((char*)SSXApp->Game + 0x48);
+    char* mgr = (char*)SSXApp->Game->UI;
     if (type == 0x1) {
         char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
@@ -730,7 +731,7 @@ extern char D_00474B80[];
 extern "C" void func_0020BAB8(int type)
 {
     char* result = 0;
-    char* mgr = *(char**)((char*)SSXApp->Game + 0x48);
+    char* mgr = (char*)SSXApp->Game->UI;
     int cur = (int)cUIStateStack_getCurrentState(mgr + 0x18);
     if (type == 0x1) {
         char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
@@ -1205,7 +1206,7 @@ extern "C" void func_0020CA10(void)
         signed char* g = (signed char*)D_00535BC8;
         if (g[0x49] == 0 && notMode4_0020CA10(g)) {
             cOVStateManager_triggerOverlay(1);
-        } else if (*(int*)((char*)SSXApp->Game + 0x214) == 0xB) {
+        } else if (SSXApp->Game->mCurrentStateID == 0xB) {
             cOVStateManager_triggerOverlay(4);
         } else {
             signed char* g2 = (signed char*)D_00535BC8;
@@ -1229,7 +1230,7 @@ extern char D_00471A40[];
 
 extern "C" int func_0020CB58(void)
 {
-    char* stack = *(char**)((char*)SSXApp->Game + 0x48) + 0x18;
+    char* stack = (char*)SSXApp->Game->UI + 0x18;
     return cUIStateStack_findState(stack, GetHashValue32(D_00471A40)) != 0;
 }
 #endif
@@ -1243,7 +1244,7 @@ extern char D_0046F818[];
 
 extern "C" int func_0020CBA0(void)
 {
-    char* stack = *(char**)((char*)SSXApp->Game + 0x48) + 0x18;
+    char* stack = (char*)SSXApp->Game->UI + 0x18;
     return cUIStateStack_findState(stack, GetHashValue32(D_0046F818)) != 0;
 }
 #endif
@@ -1285,7 +1286,7 @@ extern "C" int func_0020CBA0(void);
 
 extern "C" int func_0020CBE8(void)
 {
-    char* mgr = *(char**)((char*)SSXApp->Game + 0x48);
+    char* mgr = (char*)SSXApp->Game->UI;
     if (func_0020CBA0() == 0) {
         cUIState20CBE8* s = (cUIState20CBE8*)cUIStateStack_getCurrentState(mgr + 0x18);
         if (s != 0) {
@@ -1364,16 +1365,16 @@ extern "C" void func_0020CCF8(void)
     case 11:
         switch (D_004A2700) {
         case 3:
-            cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+            cReplay_stopAutoReplay(SSXApp->Game->Replay);
             D_004A2594 = 1;
             cOVStateManager_triggerOverlay(0x21);
             break;
         case 1:
-            cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+            cReplay_stopAutoReplay(SSXApp->Game->Replay);
             func_00231250(SSXApp->Game, 0xD, 0, 1);
             break;
         case 2:
-            cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+            cReplay_stopAutoReplay(SSXApp->Game->Replay);
             D_004A26FC = 4;
             break;
         case 4:
@@ -1384,9 +1385,9 @@ extern "C" void func_0020CCF8(void)
             cOVStateManager_triggerOverlay(0x17);
             break;
         case 6:
-            cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+            cReplay_stopAutoReplay(SSXApp->Game->Replay);
             cOVStateManager_triggerOverlay(0x11);
-            func_0026F8A0(*(void**)((char*)SSXApp->Game + 0x28), 0, 0, 0);
+            func_0026F8A0(SSXApp->Game->Replay, 0, 0, 0);
             break;
         case 7:
             D_004A2700 = 1;
@@ -1429,7 +1430,7 @@ extern "C" void func_0020CCF8(void)
     case 22:
         switch (D_004A2700) {
         case 2:
-            cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+            cReplay_stopAutoReplay(SSXApp->Game->Replay);
             D_004A26FC = 4;
             break;
         case 5:
@@ -1529,7 +1530,7 @@ extern char D_004743F0[];
 extern "C" void cOVStateManager_addPDATemplate(void)
 {
     if (D_004A270C == 0) {
-        char* mgr = *(char**)((char*)SSXApp->Game + 0x48);
+        char* mgr = (char*)SSXApp->Game->UI;
         void* t = cMemMan_alloc(0x48, D_00471A10, 0x100, 0);
         func_0039E2A0(t, mgr);
         *(void**)((char*)t + 8) = D_004743F0;
@@ -1833,7 +1834,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                     if (D_004A2708) {
                         Pop_20D5A8();
                     } else {
-                        cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+                        cReplay_stopAutoReplay(SSXApp->Game->Replay);
                         D_004A26FC = 3;
                     }
                     int mode = 0xE;
@@ -1858,7 +1859,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                     Pop_20D5A8();
                     cGame_restart(Game_D5A8());
                 } else {
-                    cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+                    cReplay_stopAutoReplay(SSXApp->Game->Replay);
                     func_00238348(SSXApp->GameModeMan);
                     func_00231250(SSXApp->Game, 0xD, 0, 1);
                     D_004A26FC = 3;
@@ -1866,7 +1867,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 break;
             }
             case 1: {
-                cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+                cReplay_stopAutoReplay(SSXApp->Game->Replay);
                 *(int*)(self + 0x54) = 0;
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (D_004A2EEC) {
@@ -1881,7 +1882,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 } else
                 chk:
                 if (any) {
-                    char* ui = *(char**)((char*)SSXApp->Game + 0x48);
+                    char* ui = (char*)SSXApp->Game->UI;
                     sStFlags_20D5A8* st = (sStFlags_20D5A8*)func_00212138(cMemMan_alloc(0x234, D_0046F9C0, 0x100, 0), *(void**)(self + 0x10), 1);
                     st->mode = 1;
                     cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
@@ -1903,7 +1904,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 func_0030B758(D_004A3DD8);
                 break;
             case 4: {
-                cReplay_stopAutoReplay(*(void**)((char*)SSXApp->Game + 0x28));
+                cReplay_stopAutoReplay(SSXApp->Game->Replay);
                 D_004A26FC = 3;
                 char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
                 char* i10 = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
@@ -1913,12 +1914,12 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 sVE_20D5A8* vt = *(sVE_20D5A8**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
-                func_00128A10(*(void**)((char*)SSXApp->Game + 0xC));
+                func_00128A10(SSXApp->Game->AI);
                 ((sI10_D5A8*)i10)->f10 = 1;
                 func_00231250(SSXApp->Game, 1, 1, 0);
                 cGame_partialRestart(SSXApp->Game);
-                func_0011DE60(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18), 1, 2);
-                func_0011DF18(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18), 1);
+                func_0011DE60(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1, 2);
+                func_0011DF18(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
                 break;
             }
             case 5:
@@ -1927,7 +1928,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 break;
             case 6: {
                 ((sSelf_D5A8*)self)->f54 = 0;
-                char* ui = *(char**)((char*)SSXApp->Game + 0x48);
+                char* ui = (char*)SSXApp->Game->UI;
                 sStFlags_20D5A8* st = (sStFlags_20D5A8*)func_00211088(cMemMan_alloc(0x27C, D_0046F9C0, 0x100, 0), *(void**)(self + 0x10), *(unsigned char*)(self + 0x14), 0x18);
                 st->mode = 1;
                 cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
@@ -2032,7 +2033,7 @@ extern "C" void cOVState_REPLAY_onCreateScreen(char* self)
     *(int*)(self + 0xB0) = 0x1E0;
     *(int*)(self + 0xA8) = 0;
     cOVState_REPLAY_setupCameraName(self);
-    if (*(int*)(*(char**)((char*)SSXApp->Game + 0x28) + 0x608) != 0) {
+    if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
         *(int*)(self + 0xB4) = 1;
     } else {
         *(int*)(self + 0xB4) = 0;

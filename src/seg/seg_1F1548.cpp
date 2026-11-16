@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -270,7 +271,7 @@ extern "C" void func_002F0A98(sMgr_0A98* self)
     self->objs[14]->Reset();
     self->objs[15]->Reset();
     self->objs[16]->Reset();
-    for (int i = 0; i < *(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10); i++) {
+    for (int i = 0; i < *(int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
         func_002F00A0(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
         ((cWorld_0A98*)D_004A289C)->ResetSlot(i);
     }
@@ -2249,7 +2250,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
 {
     if (D_004A424C == 0)
         return;
-    char* w = *(char**)((char*)SSXApp->Game + 0x84);
+    char* w = (char*)SSXApp->Game->ViewMan;
     if (self->idx >= *(unsigned int*)(w + 0x10))
         return;
     sV4_39E0 pos = *(sV4_39E0*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
@@ -2407,7 +2408,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
         return;
     if (D_004A4250 == 0)
         return;
-    if (self->idx != *(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x14))
+    if (self->idx != *(int*)((char*)SSXApp->Game->ViewMan + 0x14))
         return;
     if (D_004A3B60) {
         self->Reset();
@@ -3129,7 +3130,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
 extern "C" void func_002F5400(int, void *, int);
 
 extern "C" void func_002F5148(void *arg0) {
-    func_002F5400((*(int *)((char*)(((void*)SSXApp->Game)) + (0x90))), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
+    func_002F5400(((int)SSXApp->Game->WorldLightMan), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
 }
 #endif
 
@@ -3148,7 +3149,7 @@ extern "C" void *cWorldLightMan_cWorldLightMan(void *arg0, int arg1) {
     new ((char*)arg0 + 0x210) B5180[32];
     *(int *)arg0 = arg1;
     cWorldLightMan_initLightCache(arg0);
-    char *t = *(char **)((char*)SSXApp->Game + 0x10);
+    char *t = (char*)SSXApp->Game->World;
     *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&D_004A5598);
     return arg0;
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -65,7 +66,7 @@ extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
     char* o = (char*)SSXApp->Game;
     sVtS_DBF0* vt = *(sVtS_DBF0**)o;
     vt[9].fn(o + vt[9].delta, stream);
-    char* o2 = *(char**)((char*)SSXApp->Game + 0xC);
+    char* o2 = (char*)SSXApp->Game->AI;
     sVtS_DBF0* vt2 = *(sVtS_DBF0**)(o2 + 0xCC);
     vt2[8].fn(o2 + vt2[8].delta, stream);
     cAvalanche_readFromReplayFrame((char*)stream);
@@ -75,10 +76,10 @@ extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
     func_00357D28(D_004A4028, stream);
     cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
-    func_00103578(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), stream);
+    func_00103578(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);
     func_0026DE58(self, 1);
-    func_0012B788(*(void**)((char*)SSXApp->Game + 0xC));
-    cGameViewMan_updateAll(*(void**)((char*)SSXApp->Game + 0x84));
+    func_0012B788(SSXApp->Game->AI);
+    cGameViewMan_updateAll(SSXApp->Game->ViewMan);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -719,7 +720,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
             VEL_4298 = Add_4298(Add_4298(Scale_4298(VEL_4298, 1.0f - f), Scale_4298(vdir, f * speed)), Scale_4298(Scale_4298(dir, push), 0.5f));
         }
     }
-    func_002707E0(*(int*)((char*)SSXApp->Game + 0x28), *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
+    func_002707E0((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
     func_00309848(D_004A3DD8);
     func_0010E098(self, 1, func_00119E38(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
     if (*(float*)(self + 0x378) > hi + 0.019999999552965164f) {
@@ -1036,7 +1037,7 @@ extern "C" int func_00114DB8(cRider* rider)
     }
     char* ap = (char*)rider->mAirPredictor;
     int n = *(int*)(ap + 0x90);
-    char* tbl = *(char**)((char*)SSXApp->Game + 0x44) + n * 0xB0;
+    char* tbl = (char*)SSXApp->Game->SurfPropCache + n * 0xB0;
     t4Vector dir;
     t4Vector vel;
     t4Vector up = rider->unk_180;
@@ -1575,7 +1576,7 @@ extern "C" int cRider_checkForReset(char *self, int arg1, int arg2) {
         func_0011FEC8_6120(self, 9);
         cRider_setMotionState_6120(self, 3);
         func_0029A220(func_0028B180(), self);
-        func_00270970(*(int *)((char*)SSXApp->Game + 0x28), *(int *)(self + 0x86C));
+        func_00270970((int)SSXApp->Game->Replay, *(int *)(self + 0x86C));
         return 1;
     }
     return 0;

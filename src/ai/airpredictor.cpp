@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -248,9 +249,9 @@ extern "C" void func_00113200(char* vself)
     func_0032E100(&w1, &p1, &p0, 1, 1.0f);
     float param;
     if (self->state == 0) {
-        param = func_00336850(*(void**)((char*)SSXApp->Game + 0x20), &w1, &ti, 0);
+        param = func_00336850(SSXApp->Game->BXNash, &w1, &ti, 0);
     } else {
-        param = func_003378C0(*(void**)((char*)SSXApp->Game + 0x20), &w1, &ti, 0);
+        param = func_003378C0(SSXApp->Game->BXNash, &w1, &ti, 0);
     }
     if (param >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
         self->f00 = ti.pos;

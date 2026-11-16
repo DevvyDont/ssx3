@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1181,7 +1182,7 @@ extern "C" void func_001D59A0(void)
     if (mode == 2) {
         func_002412A0(app);
     } else if (mode == 1) {
-        void* replay = *(void**)((char*)SSXApp->Game + 0x28);
+        void* replay = SSXApp->Game->Replay;
         *(int*)((char*)D_004A2028 + 0x1C8) = mode;
         func_00270E68(replay);
         int size = func_0014E048(cBE_getBE());
@@ -1302,7 +1303,7 @@ extern "C" int func_001D5D78(int key)
     int out;
     if (((sFEMemCard_5D78*)D_004A2028)->mode == 1) {
         void* r = cSSXApp_getMCManager(SSXApp);
-        if (func_002710A8(*(void**)((char*)SSXApp->Game + 0x28), &out, &key) != 0) {
+        if (func_002710A8(SSXApp->Game->Replay, &out, &key) != 0) {
             func_00241138(r, out, key);
             return 1;
         }

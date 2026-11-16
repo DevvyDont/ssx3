@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -130,7 +131,7 @@ extern "C" void func_0016CA18_impl(void* vself)
     sCtMan_CA18* self = (sCtMan_CA18*)vself;
     for (int i = 0; i < self->count; i++) {
         sCtTrig_CA18* t = self->trigs[i];
-        char* w = *(char**)((char*)SSXApp->Game + 0x20);
+        char* w = (char*)SSXApp->Game->BXNash;
         sCtBox_CA18 box = t->shape->bounds();
         remove_CA18(w, t->item, &box);
     }
@@ -231,7 +232,7 @@ extern "C" void cCameraTriggerMan_purge(void* vself)
     for (int i = 0; i < self->count; i++) {
         sCtTrig_P* t = self->trigs[i];
         if (t->reg != 0) {
-            char* w = *(char**)((char*)SSXApp->Game + 0x20);
+            char* w = (char*)SSXApp->Game->BXNash;
             sCtBox_P box = t->shape->bounds();
             remove_P(w, t->item, &box);
         }
@@ -452,12 +453,12 @@ extern "C" void func_0016CF48_impl(void* vself, int mask)
         if (t->mask & mask) {
             if (t->reg == 0) {
                 t->reg = t;
-                char* w = *(char**)((char*)SSXApp->Game + 0x20);
+                char* w = (char*)SSXApp->Game->BXNash;
                 sCtBox_CF48 box = t->shape->bounds();
                 insert_CF48(w, t->item, &box);
             }
         } else if (t->reg != 0) {
-            char* w = *(char**)((char*)SSXApp->Game + 0x20);
+            char* w = (char*)SSXApp->Game->BXNash;
             sCtBox_CF48 box = t->shape->bounds();
             remove_CF48(w, t->item, &box);
             t->reg = 0;
@@ -670,7 +671,7 @@ extern "C" void func_0016D320(char* self, char* rider)
         int idx = *(int*)(rider + 0x870);
         func_0016C678(self + 0x14 + idx * 4);
         sCtx_D320 ctx;
-        sRoot_D320* w = *(sRoot_D320**)((char*)SSXApp->Game + 0x20);
+        sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
         ctx.rider = rider;
         char* sub = rider + 0x6C0;
@@ -748,7 +749,7 @@ struct sCams_E1D8 {
 
 extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
 {
-    sCams_E1D8* cams = *(sCams_E1D8**)((char*)SSXApp->Game + 0x84);
+    sCams_E1D8* cams = (sCams_E1D8*)SSXApp->Game->ViewMan;
     void* cam = *(void**)(cams->cam[*(int*)(rider + 0x870)] + 0xA8);
     switch (evt->type) {
     case 2: {

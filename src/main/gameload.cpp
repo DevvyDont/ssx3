@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -699,7 +700,7 @@ struct sPtrArr_FA98 {
 
 static inline char* GetRider_FA98(int i)
 {
-    return ((sPtrArr_FA98*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28))->at(i);
+    return ((sPtrArr_FA98*)((char*)SSXApp->Game->AI + 0x28))->at(i);
 }
 
 struct sElem14_FA98 {

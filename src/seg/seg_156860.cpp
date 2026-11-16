@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1672,7 +1673,7 @@ extern "C" void func_002578F8(char *self) {
     if (*(int *)(self + 4) == 0) {
         if (*(int *)(self + 0xC) == 0 && *(int *)(self + 0x24) == 0) {
             if ((*(int *)(self + 0x30) == 0 || *(int *)(self + 0x88) != 0) && *(int *)(self + 0xA0) == 0 && *(int *)(self + 0x80) != 0) {
-                if (*(int *)((char*)SSXApp->Game + 0x224) != 0) {
+                if (SSXApp->Game->ControllerUnplugged != 0) {
                     *(int *)(self + 0x24) = 4;
                 }
             }
@@ -1703,7 +1704,7 @@ extern int D_005366E8[];
 
 extern "C" void func_002579C8(char *self) {
     if (*(int *)(self + 0xAC) == 0 && *(int *)(self + 8) > 0) {
-        char *p = *(char **)((char*)SSXApp->Game + 0x48);
+        char *p = (char*)SSXApp->Game->UI;
         char *st;
         if (p != 0 && (p += 0x18) != 0 && ((st = cUIStateStack_getCurrentState_79C8(p), st == 0) || (st[0x1D] & 0x3F) == 5)) {
             int n = *(int *)(self + 8) - 1;
@@ -2639,7 +2640,7 @@ extern "C" void func_00258CB0(char* self)
     if (*(int*)(self + 0x84) != 0) {
         *(int*)(self + 0x60) = 0;
     }
-    char* ui = *(char**)((char*)SSXApp->Game + 0x48);
+    char* ui = (char*)SSXApp->Game->UI;
     if (ui == 0) {
         return;
     }
@@ -2656,7 +2657,7 @@ extern "C" void func_00258CB0(char* self)
     case 0:
         if (*(int*)(self + 0x74) == 0) {
             if (*(int*)(self + 0x78) != 0) {
-                int kind = **(int**)((char*)SSXApp->Game + 0xC);
+                int kind = *(int*)SSXApp->Game->AI;
                 if (kind == 4 || kind == 5 || !gcOnline_8CB0()) {
                     gcSend_8CB0(item, 0xE, buf);
                     *(int*)(self + 0x98) = 1;
@@ -2683,7 +2684,7 @@ extern "C" void func_00258CB0(char* self)
         }
         break;
     case 1:
-        if (*(int*)((char*)SSXApp->Game + 0x214) == 2 && gcOnline_8CB0()) {
+        if (SSXApp->Game->mCurrentStateID == 2 && gcOnline_8CB0()) {
             gcSend_8CB0(item, 0xF, 0);
             *(int*)(self + 0x98) = 0;
         } else if (*(int*)(self + 0x78) == 0 || *(int*)(self + 0x74) != 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -327,7 +328,7 @@ extern "C" void func_00128AF0(sAiObjAF0* self)
     func_00113C20(self);
     func_0010F560(self);
     if (self->mNumMission > 0 && self->mNumPlayers > 0) {
-        char* x = *(char**)((char*)SSXApp->Game + 0x34);
+        char* x = (char*)SSXApp->Game->PlaybackMan;
         if (x != 0 && *(int*)(x + 0x70) == 0) {
             n = 1;
             r[0] = Rider_AF0(self->mPlayers[0]);
@@ -478,7 +479,7 @@ extern "C" void func_001291E0(sAI_91E0* self)
     }
     n = 0;
     if (self->f88 > 0 && self->n7C > 0) {
-        char* x = *(char**)((char*)SSXApp->Game + 0x34);
+        char* x = (char*)SSXApp->Game->PlaybackMan;
         if (x != 0 && *(int*)(x + 0x70) == 0) {
             riders[n++] = self->a40[0] ? self->a40[0]->rider : 0;
         } else {
@@ -634,7 +635,7 @@ INCLUDE_ASM("ai/ai", func_001298C8);
 
 extern "C" int func_001298C8()
 {
-    return *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8);
+    return *(int*)((char*)SSXApp->Game->AI + 0x8);
 }
 #endif
 
@@ -868,7 +869,7 @@ extern "C" void cAI_initMissionRiders(void* p)
     if (self->mNumMission > 0)
         return;
     char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* m = *(char**)((char*)SSXApp->Game + 0x34);
+    char* m = (char*)SSXApp->Game->PlaybackMan;
     int idx = self->mCount;
     char* obj = cMissionRider_ctor((char*)cMemMan_alloc(0x1950, D_00457F20, 0x80000000, 0), 1);
     *(int*)(obj + 0xDF0) = *(int*)(m + 0x6C);
@@ -1136,7 +1137,7 @@ struct sAiObj12A340
 
 extern "C" int func_0012A340(sAiObj12A340* self, int unused, int mode, int arg)
 {
-    int lvl = func_0022E0E0(*(void**)((char*)SSXApp->Game + 0x78));
+    int lvl = func_0022E0E0(SSXApp->Game->SectionMan);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if ((unsigned)(lvl - 0x11) < 5)
     {
@@ -1161,7 +1162,7 @@ ok:
     {
         func_0026AF00(D_004D33A0);
         func_0026AD70(D_004D33A0, arg);
-        if (*(void**)((char*)SSXApp->Game + 0xC) == 0)
+        if ((void*)SSXApp->Game->AI == 0)
             return 1;
         for (int i = 0; i < self->mCount; i++)
         {
@@ -1182,7 +1183,7 @@ extern char D_004D33A0[];
 
 extern "C" void func_0012A490(void)
 {
-    if (func_0022E0E0(*(void**)((char*)SSXApp->Game + 0x78)) < 0x16)
+    if (func_0022E0E0(SSXApp->Game->SectionMan) < 0x16)
     {
         func_0026ADA0(D_004D33A0);
     }
@@ -1925,7 +1926,7 @@ extern "C" void func_0012B340(sAiObj12A250* self)
                 {
                     return;
                 }
-                func_0026FA50(*(void**)((char*)SSXApp->Game + 0x28));
+                func_0026FA50(SSXApp->Game->Replay);
                 *(int*)(*(char**)(rider + 0x18) + 0x480) = 1;
                 func_00125108(*(void**)(rider + 0x18));
             }
@@ -2255,7 +2256,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
     if (st != 5) {
         if (st != 3)
             return;
-        if (*(int*)((char*)SSXApp->Game + 0x214) != st)
+        if (SSXApp->Game->mCurrentStateID != st)
             return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2274,7 +2275,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                             func_00125108(*(void**)(self->riders[i] + 0x18));
                         }
                     }
-                    func_0026FA50(*(void**)((char*)SSXApp->Game + 0x28));
+                    func_0026FA50(SSXApp->Game->Replay);
                     self->countdown = -1;
                 }
             }
@@ -2298,12 +2299,12 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                         func_00125108(*(void**)(self->riders[i] + 0x18));
                     }
                 }
-                func_0026FA50(*(void**)((char*)SSXApp->Game + 0x28));
+                func_0026FA50(SSXApp->Game->Replay);
                 self->countdown = -1;
             }
         }
     }
-    int v = **(int**)((char*)SSXApp->Game + 0x28);
+    int v = *(int*)SSXApp->Game->Replay;
     int busy = v != 0 && v < 10;
     if (busy)
         return;
@@ -2403,7 +2404,7 @@ INCLUDE_ASM("ai/ai", func_0012C028);
 extern "C" int func_0012C028(void* self)
 {
     int r = 0;
-    char* s = *(char**)((char*)SSXApp->Game + 0xC);
+    char* s = (char*)SSXApp->Game->AI;
     if (*(int*)s == 5)
     {
         r = *(int*)(*(char**)((char*)self + 0x14) + 0xB30) <= (int)(*(int*)(s + 0xC) * 0.01666666753590107f);
@@ -2418,7 +2419,7 @@ INCLUDE_ASM("ai/ai", func_0012C078);
 
 extern "C" int func_0012C078(void* self)
 {
-    if (**(int**)((char*)SSXApp->Game + 0xC) == 5)
+    if (*(int*)SSXApp->Game->AI == 5)
         return 1;
     if (*(float*)(*(char**)((char*)self + 0x14) + 0x470) >= 0.0f)
         return 1;
@@ -2979,7 +2980,7 @@ extern "C" void func_0012CA30(sAiObj12CA30* self)
         func_00136D40(*(char**)(self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)(self->mRider + 0x1E0), (sVec4_12CA30*)D_004FF120, p30);
         *(int*)(self->mRider + 0x318) = 0;
     }
-    func_002708F0(*(void**)((char*)SSXApp->Game + 0x28), *(int*)(self->mRider + 0x86C), *(int*)(self->mRider + 0x790) + 0xFC);
+    func_002708F0(SSXApp->Game->Replay, *(int*)(self->mRider + 0x86C), *(int*)(self->mRider + 0x790) + 0xFC);
     func_00309990(D_004A3DD8);
 }
 #endif
@@ -3286,7 +3287,7 @@ extern "C" void func_0012D160(void* self)
         char* r2 = *(char**)((char*)self + 0x80);
         if (*(int*)(r2 + 0x87C) != 0)
         {
-            func_0015E360(*(void**)(*(char**)((char*)SSXApp->Game + 0x84) + (*(int*)(r2 + 0x870) << 2) + 4), 4, t, 0.0f);
+            func_0015E360(*(void**)((char*)SSXApp->Game->ViewMan + (*(int*)(r2 + 0x870) << 2) + 4), 4, t, 0.0f);
         }
     }
     float k = func_0012E528(self);

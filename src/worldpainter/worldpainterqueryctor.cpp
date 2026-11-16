@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -224,7 +225,7 @@ static inline void set_0778(sOut_0778* o, float* d, float v)
 extern "C" sOut_0778* func_002C0778(sQuery_0778* self, float x, float z, float h)
 {
     int first = 1;
-    char* map = *(char**)(*(char**)((char*)SSXApp->Game + 0x10) + 0x8);
+    char* map = *(char**)((char*)SSXApp->Game->World + 0x8);
     if (self->out->value != -99999.0f) {
         first = 0;
     }

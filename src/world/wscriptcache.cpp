@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -442,7 +443,7 @@ INCLUDE_ASM("world/wscriptcache", func_003AD198);
 
 extern "C" void* func_003AD198(void)
 {
-    return *(void**)((char*)SSXApp->Game + 0x8C);
+    return SSXApp->Game->OcclusionMan;
 }
 #endif
 
@@ -454,8 +455,8 @@ extern "C" void func_00122658(void* self);
 
 extern "C" void func_003AD1A8(void)
 {
-    func_002F5998(*(void**)((char*)SSXApp->Game + 0x90));
-    char* riders = *(char**)((char*)SSXApp->Game + 0xC);
+    func_002F5998(SSXApp->Game->WorldLightMan);
+    char* riders = (char*)SSXApp->Game->AI;
     if (riders != 0) {
         for (int i = 0; i < *(int*)(riders + 0x78); i++) {
             func_00122658(*(void**)(riders + 0x28 + i * 4));

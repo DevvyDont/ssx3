@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -28,7 +29,7 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(D_00471BF0)) {
         *(int*)((char*)w + 0x18) = 0;
-        if (*(int*)(*(char**)((char*)SSXApp->Game + 0x28) + 0x608) != 0) {
+        if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
             w->v06(0);
             w->setEnabled(1);
             w->setVisible(0);
@@ -322,7 +323,7 @@ extern "C" void cOVState_REPLAY_onUpdate(void* p)
         cUIState_hideObjSafe(self, D_00471BA0);
     }
     if (self->paused == 0) {
-        func_0026FA78(*(void**)((char*)SSXApp->Game + 0x28));
+        func_0026FA78(SSXApp->Game->Replay);
     }
     cOVState_REPLAY_setupCameraName(self);
     cOVState_REPLAY_setupTicker(self);
@@ -369,7 +370,7 @@ extern "C" void cOVState_REPLAY_setupCameraName(void* self)
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2730));
     if (text == 0)
         return;
-    unsigned int cam = *(unsigned int*)(*(char**)((char*)SSXApp->Game + 0x28) + 0x630);
+    unsigned int cam = *(unsigned int*)((char*)SSXApp->Game->Replay + 0x630);
     switch (cam) {
     case 0: __builtin_memcpy(buf, D_00471C40, 11); break;
     case 1: __builtin_memcpy(buf, D_00471C50, 14); break;
@@ -403,7 +404,7 @@ extern "C" void cOVState_REPLAY_setupTicker(void* self)
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471CC8));
     if (obj != 0) {
         sVec3_20E818 pos = *(sVec3_20E818*)(obj + 0x44);
-        char* replay = *(char**)((char*)SSXApp->Game + 0x28);
+        char* replay = (char*)SSXApp->Game->Replay;
         int total = *(int*)(replay + 0x3CC);
         float frac;
         if (total > 0) {

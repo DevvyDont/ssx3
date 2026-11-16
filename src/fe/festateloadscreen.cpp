@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -534,7 +535,7 @@ extern "C" void func_00233C50(void* self)
     cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
-    func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 4);
+    func_001F36C0(SSXApp->Game->LoadIndicator, 4);
     void* p = D_004A2EEC;
     if (p != 0) {
         func_00244880(p);
@@ -655,12 +656,12 @@ extern "C" void func_00233CD8(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (*(int*)(s + 0x14) != 0) {
         if (--*(int*)(s + 0x14) == 0) {
-            int n = **(int**)((char*)SSXApp->Game + 0x28);
+            int n = *(int*)SSXApp->Game->Replay;
             int ok = n != 0 && n < 10;
             if (!ok) {
                 func_0020CC60();
                 if (*(int*)(s + 0x10) != 2) {
-                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState(*(char**)((char*)SSXApp->Game + 0x48) + 0x18, GetHashValue32(D_0047C010));
+                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_0047C010));
                     if (o != 0) {
                         o->v24(0, 0);
                     }
@@ -708,11 +709,11 @@ extern "C" void func_00233CD8(void* self)
         if (func_002791D8(D_004A28A4, 0) == 1) {
             break;
         }
-        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState(*(char**)((char*)SSXApp->Game + 0x48) + 0x18, GetHashValue32(D_0047C010));
+        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_0047C010));
         if (o != 0) {
             o->v24(1, 0);
         }
-        cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 4);
+        cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 4);
         *(int*)(s + 0x10) = 2;
         break;
     }
@@ -743,10 +744,10 @@ void func_00278DE8(void* self, int val);
 
 extern "C" void func_00234008(sLoadScreen00234008* self)
 {
-    int n = *(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10);
+    int n = *(int*)((char*)SSXApp->Game->ViewMan + 0x10);
     int i;
     for (i = 0; i < n; i++) {
-        char* list = *(char**)((char*)SSXApp->Game + 0x84);
+        char* list = (char*)SSXApp->Game->ViewMan;
         char* item = *(char**)(list + (i << 2) + 4);
         func_00162290_v(*(void**)(item + 0xA8));
     }
@@ -864,7 +865,7 @@ extern "C" void cGFEventStartState_gainFocus(void* self, int mode)
     char* race = (char*)cBE_getInterface_41D0(cBE_getBE(), 0);
     char* player = (char*)cBE_getInterface_41D0(cBE_getBE(), 1);
     cAI_setAIState(*(void**)((char*)D_004A2C68 + 0xC), 3);
-    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 0);
+    cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     cBE_setState(0);
     sGM_2341D0* gm = (sGM_2341D0*)SSXApp->GameModeMan;
     cReplay_reset(*(void**)((char*)D_004A2C68 + 0x28));
@@ -964,7 +965,7 @@ struct sLoadScreen_43B0 {
 
 static inline void* hud_43B0()
 {
-    return *(void**)((char*)SSXApp->Game + 0x94);
+    return SSXApp->Game->LoadIndicator;
 }
 
 // Load screen update: drives the loading state machine (stream start, track setup, wait for load, finish).

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -251,7 +252,7 @@ extern "C" int func_0026B680(sPathNearList* list, sPathVec3* pos)
     for (i = 0; i < list->count; i++) {
         if (list->entries[i].type == 2 && list->entries[i].id != 0) {
             if (func_00154630(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
-                              *(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC)) != 0) {
+                              *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC)) != 0) {
                 sPathVec3 d = list->entries[i].pos - *pos;
                 float dist = pathLen(d);
                 if (dist < best) {

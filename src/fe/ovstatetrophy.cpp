@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -149,7 +150,7 @@ extern sTex_20EB50 D_004C8C58[];
 extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
 {
     if (D_004A2768 == 0) {
-        char* res = *(char**)((char*)SSXApp->Game + 0x48);
+        char* res = (char*)SSXApp->Game->UI;
         int i;
         for (i = 0; i < 11; i++) {
             D_004C8C58[i].handle = func_00398380(res + 0x58, D_004C8C58[i].name);
@@ -225,7 +226,7 @@ extern "C" void func_00210618(int i);
 extern "C" void func_0020ED20(void)
 {
     if (D_004A2750 != 0) {
-        char* race = *(char**)((char*)SSXApp->Game + 0xC);
+        char* race = (char*)SSXApp->Game->AI;
         int i;
         for (i = 0; i < *(int*)(race + 0x78); i++) {
             func_00210618(i);
@@ -438,7 +439,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     if (course == 0)
         return;
     int me = ((cBeing_EDA0*)(rider + 0x6C0))->getAIIndex();
-    sRace_EDA0* race = *(sRace_EDA0**)((char*)SSXApp->Game + 0xC);
+    sRace_EDA0* race = (sRace_EDA0*)SSXApp->Game->AI;
     float myDist = D_004C8BC8_EDA0[me].dist;
     float myPos = D_004C8BC8_EDA0[me].pos;
     int n = race->count;
@@ -943,7 +944,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     if (course == 0)
         return;
     int me = ((cBeing_FB40*)(rider + 0x6C0))->getAIIndex();
-    sRace_FB40* race = *(sRace_FB40**)((char*)SSXApp->Game + 0xC);
+    sRace_FB40* race = (sRace_FB40*)SSXApp->Game->AI;
     float myDist = D_004C8BC8_FB40[me].dist;
     float myPos = D_004C8BC8_FB40[me].pos;
     int n = race->count;
@@ -1306,7 +1307,7 @@ extern "C" void func_00210618(int i)
     sTrophySeg_210618* segs = (sTrophySeg_210618*)D_004A2754;
     if (course == 0)
         return;
-    char* race = *(char**)((char*)SSXApp->Game + 0xC);
+    char* race = (char*)SSXApp->Game->AI;
     if (i >= *(int*)(race + 0x78))
         return;
     float d = *(float*)(course + 0x10) - func_00113128(*(void**)(race + (i << 2) + 0x28));
@@ -1397,7 +1398,7 @@ static inline float sy_210820(sZone_210820* z)
 extern "C" float func_00210820(int idx)
 {
     sZone_210820* zones = (sZone_210820*)D_004A2754;
-    char* world = *(char**)((char*)SSXApp->Game + 0xC);
+    char* world = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(world + (idx << 2) + 0x28);
     sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->v05();
     float dy = suby_210820(&zones[D_slots210820[idx].zone], pos);

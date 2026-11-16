@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -332,7 +333,7 @@ extern "C" float func_00309BA8(void* self)
         return 0.0f;
     }
     char* node = func_00309BA8_resolve(**(char***)((char*)self + 0x28C), *(unsigned int*)((char*)self + 0x2C));
-    char* list = *(char**)((char*)SSXApp->Game + 0xC);
+    char* list = (char*)SSXApp->Game->AI;
     char* obj = *(char**)(list + (*(int*)((char*)self + 0x30) << 2) + 0x28);
     char* sub = obj + 0x6C0;
     func_00309BA8_sVEntry* vt = *(func_00309BA8_sVEntry**)sub;
@@ -624,7 +625,7 @@ extern "C" void func_0030A060(void* self, void* a1, void* a2, void* obj)
         r = vt[8].fn((char*)obj + vt[8].delta);
     }
     if (r) {
-        if (*(int*)((char*)SSXApp->Game + 0x214) != 4) {
+        if (SSXApp->Game->mCurrentStateID != 4) {
             char* rider = obj ? (char*)obj - 0x6C0 : 0;
             if (*(int*)(rider + 0x480) != 0) {
                 *(int*)self = saved;
@@ -1087,7 +1088,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         if (D_00535C10[0] != 4) {
             return 0;
         }
-        if (*(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C) != 1) {
+        if (*(int*)((char*)SSXApp->Game->AI + 0x7C) != 1) {
             return 0;
         }
     }
@@ -1105,7 +1106,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
     case 8:
     case 9:
     case 11: {
-        int v = **(int**)((char*)SSXApp->Game + 0x28);
+        int v = *(int*)SSXApp->Game->Replay;
         int busy = v != 0 && v < 10;
         if (!busy) {
             func_0030C7C0_a(self + 0x1C4, id, cmd, *(int*)self);
@@ -1817,8 +1818,8 @@ extern "C" void cReplay_reset(void* p);
 
 extern "C" void func_0030B540(void* self)
 {
-    func_0026CDF8(*(void**)((char*)SSXApp->Game + 0x34));
-    cReplay_reset(*(void**)((char*)SSXApp->Game + 0x28));
+    func_0026CDF8(SSXApp->Game->PlaybackMan);
+    cReplay_reset(SSXApp->Game->Replay);
     *(int*)((char*)self + 0x2AC) = 1;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
 }
@@ -1829,9 +1830,9 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B590);
 #ifdef SKIP_ASM
 extern "C" int func_0026CAF8(void*, int);
 extern "C" int func_0030B590(char* self) {
-    func_0026CDF8(*(void**)((char*)SSXApp->Game + 0x34));
-    cReplay_reset(*(void**)((char*)SSXApp->Game + 0x28));
-    if (func_0026CAF8(*(void**)((char*)SSXApp->Game + 0x34), *(int*)(self + 0x2A0)) != 0) {
+    func_0026CDF8(SSXApp->Game->PlaybackMan);
+    cReplay_reset(SSXApp->Game->Replay);
+    if (func_0026CAF8(SSXApp->Game->PlaybackMan, *(int*)(self + 0x2A0)) != 0) {
         *(int*)(self + 0x2AC) = 5;
         *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
         return 1;
@@ -1846,8 +1847,8 @@ void func_0026CBB0(void* self);
 
 extern "C" void func_0030B608(char* self)
 {
-    func_0026CDF8(*(void**)((char*)SSXApp->Game + 0x34));
-    func_0026CBB0(*(void**)((char*)SSXApp->Game + 0x34));
+    func_0026CDF8(SSXApp->Game->PlaybackMan);
+    func_0026CBB0(SSXApp->Game->PlaybackMan);
     *(int*)(self + 0x2AC) = 6;
     *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
 }
@@ -1864,11 +1865,11 @@ extern "C" void func_001235F8(void* self);
 
 extern "C" void func_0030B658(void* self)
 {
-    func_0026CDF8(*(void**)((char*)SSXApp->Game + 0x34));
-    func_0026CBB0(*(void**)((char*)SSXApp->Game + 0x34));
-    cReplay_reset(*(void**)((char*)SSXApp->Game + 0x28));
-    cReplay_startRace(*(int**)((char*)SSXApp->Game + 0x28));
-    char* riders = *(char**)((char*)SSXApp->Game + 0xC);
+    func_0026CDF8(SSXApp->Game->PlaybackMan);
+    func_0026CBB0(SSXApp->Game->PlaybackMan);
+    cReplay_reset(SSXApp->Game->Replay);
+    cReplay_startRace((int*)SSXApp->Game->Replay);
+    char* riders = (char*)SSXApp->Game->AI;
     func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
     *(int*)((char*)self + 0x2AC) = 3;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
@@ -1885,9 +1886,9 @@ extern "C" void cReplay_startRace(int* self);
 
 extern "C" void func_0030B6F8(void* self)
 {
-    func_0026CDF8(*(void**)((char*)SSXApp->Game + 0x34));
-    cReplay_reset(*(void**)((char*)SSXApp->Game + 0x28));
-    cReplay_startRace(*(int**)((char*)SSXApp->Game + 0x28));
+    func_0026CDF8(SSXApp->Game->PlaybackMan);
+    cReplay_reset(SSXApp->Game->Replay);
+    cReplay_startRace((int*)SSXApp->Game->Replay);
     *(int*)((char*)self + 0x2AC) = 2;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
 }
@@ -1904,11 +1905,11 @@ extern "C" void func_001235F8(void* self);
 
 extern "C" void func_0030B758(void* self)
 {
-    func_0026CDF8(*(void**)((char*)SSXApp->Game + 0x34));
-    func_0026CBB0(*(void**)((char*)SSXApp->Game + 0x34));
-    cReplay_reset(*(void**)((char*)SSXApp->Game + 0x28));
-    cReplay_startRace(*(int**)((char*)SSXApp->Game + 0x28));
-    char* riders = *(char**)((char*)SSXApp->Game + 0xC);
+    func_0026CDF8(SSXApp->Game->PlaybackMan);
+    func_0026CBB0(SSXApp->Game->PlaybackMan);
+    cReplay_reset(SSXApp->Game->Replay);
+    cReplay_startRace((int*)SSXApp->Game->Replay);
+    char* riders = (char*)SSXApp->Game->AI;
     func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
     *(int*)((char*)self + 0x2AC) = 4;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
@@ -2044,7 +2045,7 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int a3)
             void* i11 = cBE_getInterface_Fv(cBE_getBE(), 0xB);
             int lvl = func_00144C98(i0);
             int v = func_00151178(i11, lvl);
-            cRider_flagEventAddCollectible(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + (rider << 2) + 0x28), lvl, v);
+            cRider_flagEventAddCollectible(*(void**)((char*)SSXApp->Game->AI + (rider << 2) + 0x28), lvl, v);
             return;
         }
     }
@@ -2418,7 +2419,7 @@ extern "C" int func_0030BFC0(int* who, unsigned int id0, unsigned int id1, unsig
         void* t = lookup_BFC0(id2);
         p2 = t;
     }
-    char* rider = ((sAi_BFC0*)*(char**)((char*)SSXApp->Game + 0xC))->riders[*who];
+    char* rider = ((sAi_BFC0*)(char*)SSXApp->Game->AI)->riders[*who];
     char* obj = rider + 0x6C0;
     sVE_BFC0* vt = *(sVE_BFC0**)obj;
     if (vt[3].fn(obj + vt[3].delta, p1) != 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1325,7 +1326,7 @@ extern "C" void func_00308DB8(void* self);
 
 static inline void* wsPlayback8C60()
 {
-    return *(void**)((char*)SSXApp->Game + 0x34);
+    return SSXApp->Game->PlaybackMan;
 }
 
 extern "C" void cWScriptMan_setupMissions(void* self)
@@ -1333,7 +1334,7 @@ extern "C" void cWScriptMan_setupMissions(void* self)
     void* iface;
     func_0026C898(wsPlayback8C60());
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C10[0] == 4 && *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C) == 1) {
+    if (D_00535C10[0] == 4 && *(int*)((char*)SSXApp->Game->AI + 0x7C) == 1) {
         int i = 0;
         int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
         for (; i < n; i++) {
@@ -1530,7 +1531,7 @@ extern "C" void func_00309118(void* vself)
         func_00308DB8(self);
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 0);
         func_0029D6E0(func_0028B180(), *(int*)(self + 0x2A0));
-        cReplay_startRace(*(void**)((char*)SSXApp->Game + 0x28));
+        cReplay_startRace(SSXApp->Game->Replay);
         break;
     case 2:
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 3, 0);
@@ -1546,7 +1547,7 @@ extern "C" void func_00309118(void* vself)
         func_0029DBB0(func_0028B180(), 1);
         break;
     case 5:
-        func_0026CC48(*(void**)((char*)SSXApp->Game + 0x34));
+        func_0026CC48(SSXApp->Game->PlaybackMan);
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 1);
         func_00308DB8(self);
         break;

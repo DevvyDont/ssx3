@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 struct cWorldViewSectionList {
@@ -1664,7 +1665,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     case 14:
         data = 0;
-        func_0012A490(*(void**)((char*)SSXApp->Game + 0xC), param);
+        func_0012A490(SSXApp->Game->AI, param);
         break;
     case 22:
         cAvalanche_reset();

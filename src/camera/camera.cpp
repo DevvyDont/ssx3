@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
@@ -493,7 +494,7 @@ extern sCamShake_E360 D_004C53E0_E360[] __asm__("D_004C53E0");
 // Replays ignore types 1-4.
 extern "C" void func_0015E360(char* self, int type, float amount, float dist)
 {
-    int state = **(int**)((char*)SSXApp->Game + 0x28);
+    int state = *(int*)SSXApp->Game->Replay;
     int replay = state != 0 && state < 10;
     if (replay && (unsigned int)(type - 1) < 4) {
         return;
@@ -974,7 +975,7 @@ static inline float clamp_15EC98(float v, float lo, float hi)
 extern "C" void func_0015EC98(char* self)
 {
     float r;
-    if (*(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10) == 1)
+    if (*(int*)((char*)SSXApp->Game->ViewMan + 0x10) == 1)
         r = *(float*)(self + 0x8);
     else
         r = clamp_15EC98(*(float*)(self + 0x8), 0.0f, 15000.0f);
@@ -1197,7 +1198,7 @@ extern "C" void func_0015EE00_impl(char* self) __asm__("func_0015EE00");
 extern "C" void func_0015EE00_impl(char* self)
 {
     sHit_EE00 info;
-    void* nash = *(void**)((char*)SSXApp->Game + 0x20);
+    void* nash = SSXApp->Game->BXNash;
     sVec_EE00 correctedPos = Add_EE00(*(sVec_EE00*)(self + 0x100), Scale_EE00(D_004FF160_vEE00, *(float*)(self + 0x460)));
     sVec_EE00 look = Sub_EE00(*(sVec_EE00*)(self + 0xE0), correctedPos);
     float lookLen = Length_EE00(look);
@@ -1264,7 +1265,7 @@ extern "C" void func_0015EE00_impl(char* self)
         char line2[0xB0];
         func_0032E100(line2, riderPoint, viewPoint, 0.5f, 2);
         sHit_EE00 info2;
-        if (func_00336850(*(void**)((char*)SSXApp->Game + 0x20), line2, &info2, 0) > 0.0f) {
+        if (func_00336850(SSXApp->Game->BXNash, line2, &info2, 0) > 0.0f) {
             if (*(int*)(self + 0x4A4) != 0)
                 *(sVec_EE00*)(self + 0x100) = Add_EE00(Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 180.0f)), Scale_EE00(Forward_EE00(), 180.0f));
             else
@@ -1922,7 +1923,7 @@ static inline float ffloor_0015FD50(float x)
 // PORT: g++ `>?` / `<?` (max/min) operators.
 extern "C" void func_0015FD50(sFreeCam_0015FD50* self)
 {
-    int pad = *(int*)(*(char**)(*(char**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x4) + 0xA4) + 0xC);
+    int pad = *(int*)(*(char**)(*(char**)((char*)SSXApp->Game->ViewMan + 0x4) + 0xA4) + 0xC);
     float speed = cInput_getValue(pad, 0x34);
     float ry = cInput_getValue(pad, 0x31);
     float rx = cInput_getValue(pad, 0x30);
@@ -3582,7 +3583,7 @@ extern "C" void cChaseCameraController_update(char* self)
             }
         }
     }
-    int* st = *(int**)((char*)SSXApp->Game + 0x28);
+    int* st = (int*)SSXApp->Game->Replay;
     int idle = InRace_161BB8(st) && st[0x484 / 4] == 0;
     if (idle)
         *(float*)(self + 0x38) = 0.0f;

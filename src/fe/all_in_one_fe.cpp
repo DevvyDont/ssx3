@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 INCLUDE_ASM("fe/all_in_one_fe", __sti__all_in_one_fe_cpp);
@@ -1304,7 +1305,7 @@ extern "C" void func_0021E1B0(char* self, char* obj, int* rider, int x)
     scale.x = 1.0f;
     scale.y = 1.0f;
     float k = 1.0f;
-    char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + (rider[0] << 2) + 0x28);
+    char* r = *(char**)((char*)SSXApp->Game->AI + (rider[0] << 2) + 0x28);
     func_001E91A8(D_00477F30 + *(int*)(r + 0xEC) * 0x24, &col);
     float t = ((float*)rider)[0x12];
     if (t >= 0.0f) {
@@ -1752,7 +1753,7 @@ extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag
     char buf[64];
     V4_F660 col;
     int idx = 0x42;
-    char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + (*rider << 2) + 0x28);
+    char* r = *(char**)((char*)SSXApp->Game->AI + (*rider << 2) + 0x28);
     int sz = *(int*)(self + 0x4B4);
     if (flag) {
         sz = *(int*)(self + 0x49C);
@@ -1841,7 +1842,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
     V2_F9B0 sc;
     V4_F9B0 col;
     char buf[64];
-    char* m = *(char**)((char*)SSXApp->Game + 0x78);
+    char* m = (char*)SSXApp->Game->SectionMan;
     int id = *(int*)(m + 0x1BC);
     if (func_0022D390(m, id)) {
         float s = 1.0f;

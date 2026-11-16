@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -400,7 +401,7 @@ static inline void lensVecOneED048(sLensVec_ED048* v)
 
 extern "C" void func_002ED048(void)
 {
-    void* pm = *(void**)(*(char**)((char*)SSXApp->Game + 0x10) + 0x8);
+    void* pm = *(void**)((char*)SSXApp->Game->World + 0x8);
     int i;
     cWorldPainterManArg* a0 = &D_004A5560;
     cWorldPainterManArg* a1 = &D_004A5568;

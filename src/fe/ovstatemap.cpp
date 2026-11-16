@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -882,7 +883,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
-    char* rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
+    char* rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
     sBounds_96A8 b;
     func_00154678(&b, ifMap, *cBENewRaceInterface_getLocation(ifGame));

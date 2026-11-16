@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 void* operator_new(unsigned int size);
@@ -836,7 +837,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B1D8);
 
 extern "C" void* func_0028B1D8()
 {
-    return *(void**)((char*)SSXApp->Game + 0xC);
+    return SSXApp->Game->AI;
 }
 #endif
 
@@ -856,7 +857,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B1F8);
 
 extern "C" void* func_0028B1F8()
 {
-    return *(void**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10);
+    return *(void**)((char*)SSXApp->Game->ViewMan + 0x10);
 }
 #endif
 
@@ -866,7 +867,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B210);
 
 extern "C" void* func_0028B210(int i)
 {
-    char* riders = *(char**)((char*)SSXApp->Game + 0x84);
+    char* riders = (char*)SSXApp->Game->ViewMan;
     return *(void**)(riders + (i << 2) + 4);
 }
 #endif
@@ -875,7 +876,7 @@ extern "C" void* func_0028B210(int i)
 INCLUDE_ASM("sound/asyncsys", func_0028B230);
 #ifdef SKIP_ASM
 extern "C" int func_0028B230(void) {
-    return (*(int *)((char*)(((void*)SSXApp->Game)) + (0x10)));
+    return ((int)SSXApp->Game->World);
 }
 #endif
 

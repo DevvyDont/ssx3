@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -1145,7 +1146,7 @@ extern "C" void func_0016A510(char* p)
     char* m = *(char**)(p + 0x14) + 0x30;
     char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x22], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
+        rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
     self->x4 = f[0];
     self->x8 = f[1];
@@ -1526,7 +1527,7 @@ extern "C" void func_0016AD98(char* p)
     self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
     char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
+        rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
     char* obj = rider + 0x6C0;
     sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
@@ -1762,7 +1763,7 @@ extern "C" void func_0016B180(char* p)
     float* f = func_0027C6A0(cam);
     char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
+        rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
     self->x4 = f[0];
     self->x8 = f[1];

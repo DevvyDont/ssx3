@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -755,7 +756,7 @@ struct sAi_10D410 {
 extern "C" float func_0010D410(char* self, char* tgt)
 {
     float sc[7];
-    char* ai = *(char**)((char*)SSXApp->Game + 0xC);
+    char* ai = (char*)SSXApp->Game->AI;
     int flags = *(int*)(tgt + 0x38);
     int kind = (flags >> 7) & 7;
     int lvl = (flags >> 4) & 7;
@@ -976,7 +977,7 @@ extern "C" int func_0010DA10(char* self)
     }
     if (func_001298C8() % 6 != 0)
         return 0;
-    sAI_0010DA10* ai = *(sAI_0010DA10**)((char*)SSXApp->Game + 0xC);
+    sAI_0010DA10* ai = (sAI_0010DA10*)SSXApp->Game->AI;
     int i;
     for (i = 0; i < ai->count; i++)
     {
@@ -1076,7 +1077,7 @@ extern "C" int func_0010DBF0(char* self, int* side)
 {
     if (func_001298C8() % 6 != 0)
         return 0;
-    sAI_0010DBF0* ai = *(sAI_0010DBF0**)((char*)SSXApp->Game + 0xC);
+    sAI_0010DBF0* ai = (sAI_0010DBF0*)SSXApp->Game->AI;
     int i;
     for (i = 0; i < ai->count; i++)
     {
@@ -1119,7 +1120,7 @@ extern "C" int func_0010DEB0(void* self)
     int i = func_0010D8F8(self);
     if (i < 0)
         return 0;
-    return *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + (i << 2) + 0x28);
+    return *(int*)((char*)SSXApp->Game->AI + (i << 2) + 0x28);
 }
 #endif
 
@@ -1424,7 +1425,7 @@ extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
     {
         char* o = (char*)self + 0x6C0;
         sVEntry0010E5D8* e = &(*(sVEntry0010E5D8**)o)[7];
-        void* tgt = *(void**)((char*)SSXApp->Game + 0x28);
+        void* tgt = SSXApp->Game->Replay;
         func_00270AB0(tgt, e->fn(o + e->delta), arg[1]);
     }
 }
@@ -1523,7 +1524,7 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
     int c1 = *(int*)(m1 + 0x114);
     int b1 = *(int*)(m1 + 0x134);
     int d1 = *(int*)(m1 + 0x198);
-    func_00270870_10E910(*(void**)((char*)SSXApp->Game + 0x28), *(int*)(self + 0x86C), m1 + 0xFC);
+    func_00270870_10E910(SSXApp->Game->Replay, *(int*)(self + 0x86C), m1 + 0xFC);
     if (c0 < c1)
     {
         int v = *(int*)(self + 0x2F4);
@@ -3212,7 +3213,7 @@ extern "C" void func_00112338(char* self)
     if (0.0f < *(float*)(self + 0x4D4))
     {
         void* old = *(void**)(self + 0xAB4);
-        if (500.0f < a && *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8) % 60 == 0)
+        if (500.0f < a && *(int*)((char*)SSXApp->Game->AI + 0x8) % 60 == 0)
             func_001127F0(self, 0);
         else if (func_0026AC48(*(void**)(self + 0xAB4)) - 200.0f < b)
             func_001127F0(self, 1);
@@ -3343,7 +3344,7 @@ extern "C" void func_001125C0(char* self)
     func_001125A8_2(self, nf);
     if (0.0f < *(float*)(self + 0x4D4))
     {
-        if (500.0f < *(float*)(self + 0x4C8) && *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8) % 60 == 0)
+        if (500.0f < *(float*)(self + 0x4C8) && *(int*)((char*)SSXApp->Game->AI + 0x8) % 60 == 0)
             func_00112A50(self, 0);
         else if (func_0026AC48(*(void**)(self + 0xAB8)) - 200.0f < *(float*)(self + 0x4C4))
             func_00112A50(self, 1);

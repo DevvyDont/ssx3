@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 struct cMenuItem {
@@ -5725,7 +5726,7 @@ INCLUDE_ASM("util/menu", func_002D1AF0);
 
 extern "C" void* func_002D1AF0()
 {
-    return *(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x78);
+    return *(void**)((char*)SSXApp->Game->AI + 0x78);
 }
 #endif
 
@@ -5735,7 +5736,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
 
 extern "C" void* cObjectInterface_getNumBeings(int i)
 {
-    char* base = *(char**)((char*)SSXApp->Game + 0xC);
+    char* base = (char*)SSXApp->Game->AI;
     char* p = *(char**)(base + (i << 2) + 0x28);
     return p ? p + 0x6C0 : 0;
 }
@@ -5776,7 +5777,7 @@ public:
 
 extern "C" void func_002D1B58(int i)
 {
-    char* base = *(char**)((char*)SSXApp->Game + 0xC);
+    char* base = (char*)SSXApp->Game->AI;
     char* p = *(char**)(base + (i << 2) + 0x28);
     ((func_002D1B58_cObj*)(p + 0x6C0))->v05();
 }
@@ -5813,7 +5814,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getNash);
 
 extern "C" void* cObjectInterface_getNash()
 {
-    return *(void**)((char*)SSXApp->Game + 0x20);
+    return SSXApp->Game->BXNash;
 }
 #endif
 
@@ -5824,7 +5825,7 @@ extern "C" int func_001032C0(void* self, int a);
 
 extern "C" int func_002D1BF0(int a)
 {
-    return func_001032C0(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), a);
+    return func_001032C0(*(void**)((char*)SSXApp->Game->AI + 0xA4), a);
 }
 #endif
 
@@ -5834,7 +5835,7 @@ INCLUDE_ASM("util/menu", func_002D1C20);
 
 extern "C" void* func_002D1C20(int i)
 {
-    char* riders = *(char**)((char*)SSXApp->Game + 0x84);
+    char* riders = (char*)SSXApp->Game->ViewMan;
     return *(char**)(riders + (i << 2) + 4) + 0x20;
 }
 #endif
@@ -5843,7 +5844,7 @@ extern "C" void* func_002D1C20(int i)
 INCLUDE_ASM("util/menu", func_002D1C40);
 #ifdef SKIP_ASM
 extern "C" int func_002D1C40(void) {
-    return (*(int *)((char*)((*(void **)((char*)(((void*)SSXApp->Game)) + (0x84)))) + (0x10)));
+    return (*(int *)((char*)(((void*)SSXApp->Game->ViewMan)) + (0x10)));
 }
 #endif
 
@@ -5853,7 +5854,7 @@ INCLUDE_ASM("util/menu", func_002D1C58);
 
 extern "C" void* func_002D1C58()
 {
-    return *(void**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x14);
+    return *(void**)((char*)SSXApp->Game->ViewMan + 0x14);
 }
 #endif
 
@@ -5881,7 +5882,7 @@ INCLUDE_ASM("util/menu", func_002D1C98);
 
 extern "C" void* func_002D1C98()
 {
-    return *(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8);
+    return *(void**)((char*)SSXApp->Game->AI + 0x8);
 }
 #endif
 
@@ -5891,7 +5892,7 @@ INCLUDE_ASM("util/menu", func_002D1CB0);
 
 extern "C" void* func_002D1CB0()
 {
-    return *(void**)((char*)SSXApp->Game + 0x70);
+    return SSXApp->Game->FlagManager;
 }
 #endif
 

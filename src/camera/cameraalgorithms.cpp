@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -56,7 +57,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
     }
     switch (kind) {
     case 91: {
-        int n = **(int**)((char*)SSXApp->Game + 0x28);
+        int n = *(int*)SSXApp->Game->Replay;
         if (!camNetActive_D0A0(n)) {
             char* target = *(char**)(ctx + 8);
             if (*(int*)(target + 0x28) == 2) {
@@ -523,7 +524,7 @@ extern "C" void func_0015DB58(void)
 {
     func_0016C968(D_004C5830);
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    char* riders = *(char**)((char*)SSXApp->Game + 0x84);
+    char* riders = (char*)SSXApp->Game->ViewMan;
     int n = *(int*)riders;
     func_00162170(*(void**)(*(char**)(riders + 4) + 0xA8));
     char* cam = *(char**)(*(char**)(riders + 4) + 0xA8);

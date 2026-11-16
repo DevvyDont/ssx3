@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -907,7 +908,7 @@ extern "C" void func_002D81B0(void* self)
         }
         *(int*)self = 0;
         func_0029DEF0(func_0028B180(), 0);
-        char* p = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA8);
+        char* p = *(char**)((char*)SSXApp->Game->AI + 0xA8);
         if (*(int*)(p + 0x708) != 0) {
             *(int*)(p + 0x708) = *(int*)(p + 0x708) - 1;
         }
@@ -1598,7 +1599,7 @@ extern "C" void tActiveAvalanche_render(void* slotv)
         D_vtx_D8EA8[2 * j].pos = p;
         D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
-        char* rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
+        char* rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
         D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(rider + 0x6C0))->getPos();
         D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
@@ -1675,7 +1676,7 @@ extern int D_004A41EC;
 extern sRState_9130 D_00501420;
 extern "C" void tActiveAvalanche_render(void* slot);
 
-static inline sCam_9130* getCam_9130() { return *(sCam_9130**)((char*)SSXApp->Game + 0x84); }
+static inline sCam_9130* getCam_9130() { return (sCam_9130*)SSXApp->Game->ViewMan; }
 
 static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
 
@@ -2075,7 +2076,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
             }
             tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
             func_0029DEF0(func_0028B180(), 1);
-            (*(int*)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA8) + 0x708))++;
+            (*(int*)(*(char**)((char*)SSXApp->Game->AI + 0xA8) + 0x708))++;
             return slot - D_slots_D97A8;
         }
     }

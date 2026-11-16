@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -431,7 +432,7 @@ static inline float wakeMinStrengthD0B8()
 // PORT: g++ minimum/maximum operators (<?, >?).
 extern "C" void func_002DD0B8(sWakeD0B8* self)
 {
-    sWakeSurfD0B8* surf = (sWakeSurfD0B8*)(*(char**)((char*)SSXApp->Game + 0x44) + self->rider->mSurfaceType * 0xB0);
+    sWakeSurfD0B8* surf = (sWakeSurfD0B8*)((char*)SSXApp->Game->SurfPropCache + self->rider->mSurfaceType * 0xB0);
     int i;
     for (i = 0; i < self->count; i++) {
         int idx = (self->head + i) % self->max;
@@ -2128,7 +2129,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->v30 = wakeRowF920(o, 1);
     self->v40 = wakeRowF920(o, 2);
     self->pos = wakeRowF920(o, 3);
-    self->pD0 = *(char**)((char*)SSXApp->Game + 0x44) + *(int*)(o + 0x438) * 0xB0;
+    self->pD0 = (char*)SSXApp->Game->SurfPropCache + *(int*)(o + 0x438) * 0xB0;
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
         x = func_0011FEE8(o) != 9;
@@ -4598,9 +4599,9 @@ static inline int IsHuman_3AF8(cRider* rider)
 static inline int ShouldDraw_3AF8(sWake_3AF8* self)
 {
     int vis = 0;
-    if (*(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C) >= 2) {
+    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) >= 2) {
         if (IsHuman_3AF8(self->rider)) {
-            char* views = *(char**)((char*)SSXApp->Game + 0x84);
+            char* views = (char*)SSXApp->Game->ViewMan;
             if (*(unsigned int*)(views + 0x10) >= 2) {
                 vis = *(int*)(views + 0x14) != self->rider->mViewIndex;
             }
@@ -4612,7 +4613,7 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
     } else if (!IsHuman_3AF8(self->rider)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if ((unsigned int)(D_00535C12[0] - 4) < 2) {
-            int mode = *(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC);
+            int mode = *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC);
             if ((unsigned int)(mode - 14) < 3) vis = 1;
         }
     }
@@ -5130,7 +5131,7 @@ static inline int fadeTex47E8(sFade47E8* self)
 
 extern "C" void func_002E47E8(sFade47E8* self)
 {
-    if (self->rider != *(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x14)) {
+    if (self->rider != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
         return;
     }
     func_002EB8F0();
@@ -5962,7 +5963,7 @@ extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* a1)
     self->fx[3] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
     self->fx[4] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     self->fx[5] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    if (*(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C) >= 2) {
+    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) >= 2) {
         self->fx[6] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
         self->fx[7] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
         self->fx[8] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
@@ -6044,7 +6045,7 @@ extern "C" void func_002E5DA0(void* self)
 {
     sWakeRec_5DA0 recs[2];
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10); i++) {
+    for (i = 0; i < *(unsigned int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
         if (D_004A473C != 0) {
             recs[i].f[0] = D_004A4740;
             recs[i].f[1] = D_004A4744;
@@ -6162,7 +6163,7 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float r, float g, float b);
 
 static inline sRiders_6008* riders_6008()
 {
-    return *(sRiders_6008**)((char*)SSXApp->Game + 0x84);
+    return (sRiders_6008*)SSXApp->Game->ViewMan;
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 // 16-byte array elements; indexing as arr[i].field (rather than manual
@@ -1031,10 +1032,10 @@ extern "C" void cSectionMan_eventbegin(char* self, int mode)
         return;
     }
     cBE_setState(0);
-    if (*(int*)((char*)SSXApp->Game + 0x214) != 4) {
+    if (SSXApp->Game->mCurrentStateID != 4) {
         return;
     }
-    cAI_resetRidersStatTotals(*(void**)((char*)SSXApp->Game + 0xC));
+    cAI_resetRidersStatTotals(SSXApp->Game->AI);
     char* g = (char*)SSXApp;
     *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0xC) = 0;
     if ((unsigned int)(*(int*)(*(char**)(*(char**)(g + 0x84) + 0x78) + 0x1BC) - 14) < 3) {
@@ -1378,7 +1379,7 @@ extern "C" void func_0022DFF0(void* self)
     cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
     if (*(int*)((char*)self + 0x1CC) != 0) {
         *(int*)((char*)self + 0x1CC) = 0;
-        (*(cRace22DFF0**)((char*)SSXApp->Game + 0xC))->v05(3);
+        ((cRace22DFF0*)SSXApp->Game->AI)->v05(3);
     }
     func_00231250(*(void**)((char*)self + 0x1B0), 0xA, 0, 0);
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -719,9 +720,9 @@ extern "C" int func_0026D178(void* self, int a1)
         return 0;
     }
     int r = 1;
-    switch (**(int**)((char*)SSXApp->Game + 0x28)) {
+    switch (*(int*)SSXApp->Game->Replay) {
     case 0: {
-        char* g = *(char**)((char*)SSXApp->Game + 0x28);
+        char* g = (char*)SSXApp->Game->Replay;
         if (*(int*)(g + 0x60C) != 0 || *(int*)(g + 0x608) != 0 || *(int*)(g + 0x610) != 0) {
             break;
         }
@@ -766,7 +767,7 @@ extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
     sPbStream_D228* self = (sPbStream_D228*)stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
     if (self->count >= 0x1000) {
-        char* p = *(char**)((char*)SSXApp->Game + 0x28);
+        char* p = (char*)SSXApp->Game->Replay;
         *(int*)(p + 0x610) = 1;
         *(int*)(p + 0x614) = 0xB4;
         return;

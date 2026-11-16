@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -587,7 +588,7 @@ extern "C" void func_00137138(void* vself)
     func_0032F650(&sph, self->tree, 1);
     sSeg_137138 seg(sph.v30, sph.v20);
     self->seg = seg;
-    float d = func_00336850_137138(*(void**)((char*)SSXApp->Game + 0x20), &sph, &hit, 0);
+    float d = func_00336850_137138(SSXApp->Game->BXNash, &sph, &hit, 0);
     if (d < 0.0f) {
         func_0032F708(&sph, 2);
         return;
@@ -1221,7 +1222,7 @@ static inline float clamp_137D18(float v, float lo, float hi)
 
 static inline sMat_137D18* materials_137D18()
 {
-    return *(sMat_137D18**)((char*)SSXApp->Game + 0x44);
+    return (sMat_137D18*)SSXApp->Game->SurfPropCache;
 }
 
 static inline short triFlags_137D18(char* t)

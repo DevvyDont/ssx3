@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -667,7 +668,7 @@ int func_00276388_impl(char* self, int fade, int notify)
     }
     sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
     dm->state = 3;
-    char* table = *(char**)((char*)SSXApp->Game + 0x48) + 0x18;
+    char* table = (char*)SSXApp->Game->UI + 0x18;
     char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
     if (o != 0) {
         sDmVEntry_6388* e = &(*(sDmVEntry_6388**)(o + 0x8))[24];
@@ -715,7 +716,7 @@ int func_00276388_impl(char* self, int fade, int notify)
             if (t <= 0.0f) {
                 t = 0.5f;
             }
-            func_002EA6B8(*(void**)((char*)SSXApp->Game + 0x64), t);
+            func_002EA6B8(SSXApp->Game->CutSceneTransitionMan, t);
         }
         if (notify) {
             char* eng = *(char**)self;
@@ -724,7 +725,7 @@ int func_00276388_impl(char* self, int fade, int notify)
         }
     } else {
         if (*(int*)(self + 0x4) != 0) {
-            func_002EA860(*(void**)((char*)SSXApp->Game + 0x64));
+            func_002EA860(SSXApp->Game->CutSceneTransitionMan);
         }
         func_002839A8(*(char**)self + 0x500);
         if (notify) {
@@ -866,14 +867,14 @@ extern "C" void func_00276868(void* p, int a1)
         func_00277C08(self, 0, 0);
     }
     if (*(int*)(self + 0x4) != 0 && *(int*)(self + 0xA4) == 3) {
-        void* gm = *(void**)((char*)SSXApp->Game + 0x64);
+        void* gm = SSXApp->Game->CutSceneTransitionMan;
         if (a1 != 0) {
             func_002EA820(gm);
             if (*(int*)(self + 0xB0) != 0) {
                 func_002E4578(func_00230698(SSXApp->Game, 0));
             }
         }
-        char* table = *(char**)((char*)SSXApp->Game + 0x48) + 0x18;
+        char* table = (char*)SSXApp->Game->UI + 0x18;
         char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
         if (o != 0) {
             sDmVEntry6868* e = &(*(sDmVEntry6868**)(o + 0x8))[24];
@@ -1795,7 +1796,7 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
             func_00283B78(self->owner + 0x500, 1);
         }
         if (self->f4) {
-            func_002EA8B8(*(void**)((char*)SSXApp->Game + 0x64), 1);
+            func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 1);
             char* p = (char*)func_00230698(SSXApp->Game, 0);
             if (*(int*)(p + 0x44)) {
                 func_002E4638(p, 1);
@@ -1811,7 +1812,7 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
             func_00283B78(self->owner + 0x500, 0);
         }
         if (self->f4) {
-            func_002EA8B8(*(void**)((char*)SSXApp->Game + 0x64), 0);
+            func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 0);
             char* p = (char*)func_00230698(SSXApp->Game, 0);
             if (*(int*)(p + 0x44)) {
                 func_002E4638(p, 0);

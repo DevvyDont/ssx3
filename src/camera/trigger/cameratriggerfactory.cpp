@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -5261,7 +5262,7 @@ extern "C" void func_00178BB0(char* self)
     sVec_00178BB0 q = AxisAngle_00178BB0(D_004FF160, a);
     sVec_00178BB0 v = ctRot_00178BB0(q, *(sVec_00178BB0*)(self + 0x390));
     *(sVec_00178BB0*)(self + 0x20) = ctAdd_00178BB0(getPos_00178BB0(self), ctScale_00178BB0(D_004FF160, -3.0f));
-    int multi = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x78) >= 2;
+    int multi = *(int*)((char*)SSXApp->Game->AI + 0x78) >= 2;
     float h = 0.0f;
     if (multi) {
         h = 150.0f;

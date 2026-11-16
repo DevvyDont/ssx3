@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -73,7 +74,7 @@ extern void* D_004A3DD8;
 extern "C" void func_00234BE8(void* self, int a1)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* world = *(void**)((char*)SSXApp->Game + 0x78);
+    void* world = SSXApp->Game->SectionMan;
     int id = func_0022E098(world, *cBENewRaceInterface_getLocation(iface));
     if (func_00309DD0(D_004A3DD8, id, a1) != 0) {
         func_00309E50(D_004A3DD8, id, a1);
@@ -285,7 +286,7 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
     func_0012AB20(*(void**)(D_004A2C68 + 0xC));
     func_0012AC48(*(void**)(D_004A2C68 + 0xC));
     if (m == 0) {
-        int t = *(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC);
+        int t = *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC);
         if (t >= 14 && t <= 16) {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             char* sub = *(char**)(*(char**)(*(char**)(D_004A2C68 + 0xC) + 0x40) + 0x18) + 0x6C0;
@@ -665,7 +666,7 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
     sRace_2355C0* r = &D_00535BC8_r2355C0;
     int flag = r->flag49;
     int mode = r->mode48;
-    if (flag == 0 && !inRange_2355C0(*(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC))) {
+    if (flag == 0 && !inRange_2355C0(*(int*)((char*)SSXApp->Game->SectionMan + 0x1BC))) {
         *(int*)((char*)self + 0x4) = 0;
         *(int*)((char*)self + 0x0) = 4;
     } else {
@@ -684,7 +685,7 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
         vt[1].fn(player + vt[1].delta);
     }
     (*(sRaceMan_2355C0**)(D_004A2C68 + 0xC))->f14 = mode != 4;
-    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 0);
+    cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     if (flag) {
         *(int*)((char*)self + 0x0) = 1;
         *(int*)((char*)self + 0x4) = 0;
@@ -712,7 +713,7 @@ extern void* D_004A28A4;
 extern "C" void cGFTrackStartState_update(void* self)
 {
     if (*(int*)((char*)self + 0x1C) != 0 && cSSXScriptEngine_IsInTransportSequence(D_004A28A4) == 0) {
-        *(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1A4) = 1;
+        *(int*)((char*)SSXApp->Game->SectionMan + 0x1A4) = 1;
         *(int*)((char*)self + 0x1C) = 0;
     }
     if (func_00279220(D_004A28A4, 1) == 0) {
@@ -912,9 +913,9 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
         sVE_235AA0* vt = *(sVE_235AA0**)(player + 0xC);
         vt[1].fn(player + vt[1].delta);
     }
-    func_0012AB20(*(void**)((char*)SSXApp->Game + 0xC));
+    func_0012AB20(SSXApp->Game->AI);
     if (n >= 2)
-        func_0012AC48(*(void**)((char*)SSXApp->Game + 0xC));
+        func_0012AC48(SSXApp->Game->AI);
     *(int*)((char*)self + 0x18) = 0;
     sRace_235AA0* r2 = &D_00535BC8_r235AA0;
     if (r2->mode48 == 0) {
@@ -925,7 +926,7 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
     func_0027AAF8(D_004A28A4, *(int*)((char*)gm + 0x98) ? 3 : 2);
     func_00278F38(D_004A28A4, 0);
-    func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 3);
+    func_001F36C0(SSXApp->Game->LoadIndicator, 3);
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0x10) = 0;
 }
@@ -994,24 +995,24 @@ extern "C" void cGFNextHeatState_update(void* self)
     switch (state) {
     case 0:
         if (func_0012ABD0(*(void**)(g84 + 0xC))) {
-            cAI_cleanupAfterRace(*(void**)((char*)SSXApp->Game + 0xC));
+            cAI_cleanupAfterRace(SSXApp->Game->AI);
             if (D_00535C04[0] >= 2)
-                cAI_cleanupActors(*(void**)((char*)SSXApp->Game + 0xC));
-            cAI_initAIRiders(*(void**)((char*)SSXApp->Game + 0xC));
+                cAI_cleanupActors(SSXApp->Game->AI);
+            cAI_initAIRiders(SSXApp->Game->AI);
             *(int*)((char*)self + 0x10) = 1;
         }
         break;
     case 1:
         if (func_0012A180(*(void**)(g84 + 0xC))) {
-            func_001289F0(*(void**)((char*)SSXApp->Game + 0xC));
+            func_001289F0(SSXApp->Game->AI);
             (*(sRaceMan_235CC8**)(D_004A2C68 + 0xC))->f14 = 1;
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
-            char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40);
+            char* r = *(char**)((char*)SSXApp->Game->AI + 0x40);
             sVec4_235CC8 pos = func_00122C28(*(void**)(r + 0x18));
             func_003A9658(*cache + 0x10, idx, (const sVec4_236960*)&pos, 45000.0f);
             *(int*)((char*)self + 0x10) = 2;
         } else {
-            cAI_loadRiders(*(void**)((char*)SSXApp->Game + 0xC));
+            cAI_loadRiders(SSXApp->Game->AI);
         }
         break;
     case 2:
@@ -1050,7 +1051,7 @@ extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 
 extern "C" void cGFNextHeatState_loseFocus(void)
 {
-    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 3);
+    cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 3);
 }
 #endif
 
@@ -1129,8 +1130,8 @@ extern "C" void func_00236058(void* self)
     cGameModeMan_initGameMode(gm, 0xC);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xA);
     cGame_partialRestart(SSXApp->Game);
-    func_0011DE60(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
-    func_0011DF18(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18), 1);
+    func_0011DE60(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
+    func_0011DF18(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
     void* r = func_00230698(SSXApp->Game, 0);
     char* o = (char*)func_002E4CE8_sz(0x14);
     sColor_236058 c;
@@ -1250,7 +1251,7 @@ extern "C" void func_00236250(void* self, int mode)
             if (!isOne_6250(m))
                 func_00278E50(D_004A28A4, 1, 0xB, 3, 0, -1, -1, -1);
             func_00278F38(D_004A28A4, 1);
-            func_0011D390(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18));
+            func_0011D390(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18));
             func_00278F68(D_004A28A4, 1, *(int*)((char*)self + 0x14) == 2, 0);
         }
     }
@@ -1395,13 +1396,13 @@ extern "C" void cGFUserSelectState_update(void* self)
                     return;
                 }
                 *(int*)((char*)self + 0x1C) = 0;
-                ((sRace_6418*)*(void**)((char*)SSXApp->Game + 0x78))->f1C8 = one;
-                func_0022CEA8(*(void**)((char*)SSXApp->Game + 0x78), *(int*)((char*)self + 0x18), 7);
+                ((sRace_6418*)(void*)SSXApp->Game->SectionMan)->f1C8 = one;
+                func_0022CEA8(SSXApp->Game->SectionMan, *(int*)((char*)self + 0x18), 7);
                 ns = 3;
                 break;
             }
             if (r == 0xD || r == 0x13)
-                func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 0);
+                func_001F36C0(SSXApp->Game->LoadIndicator, 0);
             return;
         }
         cGameState_gotoNextState(self);
@@ -1561,7 +1562,7 @@ extern "C" void func_00236960(void* self)
     switch (state) {
     case 0:
         if (func_0022D278(game, *(int*)(game + 0x1BC)) != 0) {
-            char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40);
+            char* r = *(char**)((char*)SSXApp->Game->AI + 0x40);
             sVec4_236960 pos = func_00123F38(*(void**)(r + 0x18));
             char* e = *cache + idx * 0x50;
             *(int*)(e + 0x250) = 1;
@@ -1882,7 +1883,7 @@ extern "C" void func_0028CDF8(void* mgr);
 extern "C" void cGFPodiumState_gainFocus(void)
 {
     func_0028CDF8(func_0028B180());
-    *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8C) = 1;
+    *(int*)((char*)SSXApp->Game->AI + 0x8C) = 1;
 }
 #endif
 
@@ -1909,7 +1910,7 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_loseFocus);
 
 extern "C" void cGFPodiumState_loseFocus(void)
 {
-    *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8C) = 0;
+    *(int*)((char*)SSXApp->Game->AI + 0x8C) = 0;
 }
 #endif
 
@@ -1944,7 +1945,7 @@ extern "C" void cGFReplayStartState_gainFocus(void)
 {
     cWScriptMan_initMissions(D_004A3DD8);
     cWScriptMan_runGlobalScripts(D_004A3DD8);
-    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 0);
+    cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     cOVStateManager_triggerOverlay(0x11);
 }
 #endif

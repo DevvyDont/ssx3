@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -169,7 +170,7 @@ static inline void setFormatted_PO(void* obj, char* name, int n)
 
 static inline char* riders_PO()
 {
-    return *(char**)((char*)SSXApp->Game + 0x84);
+    return (char*)SSXApp->Game->ViewMan;
 }
 
 extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
@@ -450,7 +451,7 @@ static inline bool IsId_A238(char* obj, char* key)
 
 static inline void* Sound_A238(int slot)
 {
-    char* p = *(char**)((char*)SSXApp->Game + 0x84);
+    char* p = (char*)SSXApp->Game->ViewMan;
     return *(void**)(p + slot);
 }
 
@@ -464,7 +465,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
     switch (msg) {
     case 5:
         if (IsId_A238(obj, D_004A24E8)) {
-            char* stack = *(char**)((char*)SSXApp->Game + 0x48);
+            char* stack = (char*)SSXApp->Game->UI;
             char* st = (char*)func_00211088(cMemMan_alloc(0x27C, D_0046F9C0, 0x100, 0), *(void**)((char*)self + 0x10),
                                             *(unsigned char*)((char*)self + 0x14), 0x2A);
             *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
@@ -946,7 +947,7 @@ extern "C" void func_001FB2B8(void* self, void* item, int msg)
     *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
-        func_0012B340(*(void**)((char*)SSXApp->Game + 0xC));
+        func_0012B340(SSXApp->Game->AI);
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
         break;
     case 0:
@@ -2205,12 +2206,12 @@ extern "C" void func_0026F8A0(void* self, void* a1, int a2, int a3);
 extern "C" void func_001FDE60(void* self)
 {
     if (*(int*)((char*)self + 0x1C8) == 1) {
-        func_00270ED8(*(void**)((char*)SSXApp->Game + 0x28));
+        func_00270ED8(SSXApp->Game->Replay);
         *(int*)((char*)self + 0x1C8) = 0;
     }
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
     func_001D58B8(self);
-    func_0026F8A0(*(void**)((char*)SSXApp->Game + 0x28), 0, 0, 0);
+    func_0026F8A0(SSXApp->Game->Replay, 0, 0, 0);
 }
 #endif
 
@@ -2690,7 +2691,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
         *(int*)((char*)self + 0x1A8) = one;
         if (*(int*)((char*)self + 0x1C8) == one)
         {
-            func_00270ED8(*(void**)((char*)SSXApp->Game + 0x28));
+            func_00270ED8(SSXApp->Game->Replay);
             *(int*)((char*)self + 0x1C8) = 0;
         }
         func_0023CAE8(mp, 0, -1);
@@ -2749,7 +2750,7 @@ extern "C" void func_001FE8F0(void* self, void* a1, int key)
 {
     if (key == 0x16) {
         if (*(int*)((char*)self + 0x19C) == 5) {
-            func_00270ED8(*(void**)((char*)SSXApp->Game + 0x28));
+            func_00270ED8(SSXApp->Game->Replay);
             *(int*)((char*)self + 0x1C8) = 0;
         }
     }

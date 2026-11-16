@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -203,7 +204,7 @@ extern "C" void* func_0026EB48(cStream_EB48* stream)
     sRefH_EB48 h;
     stream->v02(&h, 4);
     if (~h.id != 0) {
-        r = func_003512C0(*(void**)((char*)SSXApp->Game + 0x88), h.id);
+        r = func_003512C0(SSXApp->Game->InstanceMan, h.id);
         if (r == 0) {
             void* t = lookup_EB48(h.id);
             r = t;
@@ -367,7 +368,7 @@ struct sRiderList_EDD8 {
 
 extern "C" void func_0026EDD8(void* self)
 {
-    sRiderList_EDD8* list = *(sRiderList_EDD8**)((char*)SSXApp->Game + 0x84);
+    sRiderList_EDD8* list = (sRiderList_EDD8*)SSXApp->Game->ViewMan;
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
@@ -406,7 +407,7 @@ struct sRiderList_EEA0 {
 extern "C" void func_0026EEA0(void* self)
 {
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    sRiderList_EEA0* list = *(sRiderList_EEA0**)((char*)SSXApp->Game + 0x84);
+    sRiderList_EEA0* list = (sRiderList_EEA0*)SSXApp->Game->ViewMan;
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
@@ -439,7 +440,7 @@ extern "C" void func_0015DFD8(void* self, int mode);
 extern "C" void func_0026EF80()
 {
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    func_0015DFD8(*(void**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x4), 2);
+    func_0015DFD8(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
 }
 #endif
 
@@ -656,7 +657,7 @@ extern "C" void cReplay_reset(void* self)
     int three = 3;
     *(int*)(s + 0x630) = 0;
     *(int*)(s + 0x634) = 0;
-    if (*(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C) == 1) {
+    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) == 1) {
         *(int*)(s + 0xC) = three;
         *(int*)(s + 0x10) = three;
     } else {
@@ -1064,14 +1065,14 @@ extern "C" void func_0026FA78(int* self)
     }
     void* pad = *(void**)((char*)SSXApp + (self[0x28 / 4] << 2) + 0xB0);
     if (cInput_getState(pad, 0x6C) != 0) {
-        cGameViewMan_updateAll(*(void**)((char*)SSXApp->Game + 0x84));
+        cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
     if (D_00445438[self[0x630 / 4]] != 0xB) {
         return;
     }
     if (cInput_getValue(pad, 0x31) != 0.0f || cInput_getValue(pad, 0x30) != 0.0f ||
         cInput_getValue(pad, 0x32) != 0.0f || cInput_getValue(pad, 0x33) != 0.0f) {
-        cGameViewMan_updateAll(*(void**)((char*)SSXApp->Game + 0x84));
+        cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
 }
 #endif
@@ -1280,7 +1281,7 @@ extern "C" void func_0026FE50(char* self)
     }
     *(int*)(self + 0x618) = 0;
     if (redraw) {
-        char* views = *(char**)((char*)SSXApp->Game + 0x84);
+        char* views = (char*)SSXApp->Game->ViewMan;
         char* o = *(char**)(*(char**)(views + 4) + 0xA8);
         func_001620D0(o);
         sVE_26FE50* vt = *(sVE_26FE50**)(o + 0x14);

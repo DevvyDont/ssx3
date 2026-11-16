@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -189,10 +190,10 @@ extern "C" void func_0022E550(cGameViewMan22E550* self)
     }
     if (self->views == 1) {
         int idx = self->cams[1]->index;
-        (**(sSlots22E550***)((char*)SSXApp->Game + 0x10))->e[idx].active = 0;
+        (*(sSlots22E550**)SSXApp->Game->World)->e[idx].active = 0;
     } else {
-        (**(sSlots22E550***)((char*)SSXApp->Game + 0x10))->e[0].active = 0;
-        (**(sSlots22E550***)((char*)SSXApp->Game + 0x10))->e[1].active = 0;
+        (*(sSlots22E550**)SSXApp->Game->World)->e[0].active = 0;
+        (*(sSlots22E550**)SSXApp->Game->World)->e[1].active = 0;
     }
 }
 #endif

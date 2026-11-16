@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -3549,7 +3550,7 @@ unsigned int BXrand();
 
 extern "C" void func_001E1550(void)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -3704,7 +3705,7 @@ extern sEntry14_1C10 D_00441630_1C10[] __asm__("D_00441630");
 
 extern "C" void func_001E1C10(int which)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -3787,7 +3788,7 @@ extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int id, int a1);
 static inline int IsBusy001E1DD0()
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     return n != 0 && n < 10;
 }
 // Queues the follow-up popup for an event kind unless one is already pending.
@@ -3820,7 +3821,7 @@ extern "C" void func_001E2220(int which, int flag);
 
 extern "C" void func_001E1EB8(void)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         if (func_001E3A30((void*)0x28) != 0) {
@@ -3886,7 +3887,7 @@ extern sEntry14_20D0 D_00441630_20D0[] __asm__("D_00441630");
 
 extern "C" void func_001E20D0(int which, int flag)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -3945,7 +3946,7 @@ extern sEntry14_2220 D_00441630_2220[] __asm__("D_00441630");
 
 extern "C" void func_001E2220(int which, int flag)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -3994,7 +3995,7 @@ extern "C" void func_001E3A78(int a, int b);
 
 extern "C" void func_001E2370(int which)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -4024,7 +4025,7 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
 
 extern "C" void func_001E2428(int which)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -4060,7 +4061,7 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
 
 extern "C" void func_001E2518(void)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0 && func_001E3A30((void*)0x3C) == 0) {
         func_001E3A78(0x3C, 1);
@@ -4078,7 +4079,7 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
 
 extern "C" void func_001E2578(void)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0 && func_001E3A30((void*)0x38) == 0) {
         func_001E3A78(0x38, 1);
@@ -4095,7 +4096,7 @@ extern "C" void func_001E2828(void* a, int b);
 
 extern "C" void func_001E25D8(int key, void* a1, int a2)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (key) {
@@ -4126,7 +4127,7 @@ extern "C" void func_001E32C8(int type);
 extern "C" void func_001E2648_impl(int which, int flag) __asm__("func_001E2648");
 extern "C" void func_001E2648_impl(int which, int flag)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -4216,7 +4217,7 @@ extern "C" void func_001E32C8(int type);
 extern "C" void func_001E2828_impl(int which, int flag) __asm__("func_001E2828");
 extern "C" void func_001E2828_impl(int which, int flag)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -4314,7 +4315,7 @@ extern sEntry14_2A08 D_00441630_2A08[] __asm__("D_00441630");
 
 extern "C" void func_001E2A08(int charID, int level)
 {
-    int n = **(int**)((char*)SSXApp->Game + 0x28);
+    int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy)
         return;
@@ -4627,7 +4628,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     t->entries[t->count].id = id;
     t->entries[t->count].flag = flag;
     t->mask &= ~(1 << t->count);
-    char* o = *(char**)((char*)SSXApp->Game + 0x48);
+    char* o = (char*)SSXApp->Game->UI;
     if (o != 0) {
         char* obj = (char*)cUIStateStack_findState(o + 0x18, GetHashValue32(D_004A20D0));
         if (obj != 0) {
@@ -6908,7 +6909,7 @@ extern "C" int func_001E65B8(void* self, void* a1)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E510));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(*(void**)((char*)SSXApp->Game + 0x28), *(unsigned char*)((char*)a1 + 4));
+            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)a1 + 4));
         }
     }
     return 0;
@@ -7178,7 +7179,7 @@ extern "C" int func_001E6718(void* self)
         if (track == 5 || track == 6) {
             count = 2;
         } else if (track == 0) {
-            count = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x78);
+            count = *(int*)((char*)SSXApp->Game->AI + 0x78);
         } else if (players == 2) {
             count = 2;
         }
@@ -7275,7 +7276,7 @@ extern "C" int func_001E6718(void* self)
             }
         } else {
             ids.v[0] = 3;
-            if (*(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x78) != players || same) {
+            if (*(int*)((char*)SSXApp->Game->AI + 0x78) != players || same) {
                 ((cUIThing*)t)->setVisible(0);
             } else {
                 if (D_00536730[pl0] < D_00536730[pl1]) {
@@ -7556,7 +7557,7 @@ extern "C" int func_001E7AA8(void* self, void* a1)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E510));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(*(void**)((char*)SSXApp->Game + 0x28), *(unsigned char*)((char*)a1 + 4));
+            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)a1 + 4));
         }
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -7721,7 +7722,7 @@ extern "C" void func_001E7BB0(void* self)
     } else {
         o->setVisible(0);
     }
-    char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + off + 0x28);
+    char* r = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
     if (D_00535BC8[0x49] == 2
         || *(int*)(r + 0x480) != 0
         || D_00535BC8[0x4A] == 6 || D_00535BC8[0x4A] == 7 || D_00535BC8[0x4A] == 8) {
@@ -7744,7 +7745,7 @@ extern "C" void func_001E8098(void* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    char* riders = *(char**)((char*)SSXApp->Game + 0xC);
+    char* riders = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(riders + (idx << 2) + 0x28);
     if (*(int*)(rider + 0x480) != 0) {
         limit = 1.0f;
@@ -7752,7 +7753,7 @@ extern "C" void func_001E8098(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        func_0039F840(*(char**)((char*)SSXApp->Game + 0x48) + 0x18);
+        func_0039F840((char*)SSXApp->Game->UI + 0x18);
         func_00231320(SSXApp->Game);
     }
 }
@@ -7939,7 +7940,7 @@ extern "C" void func_001E8200(void* self)
     } else {
         o->setVisible(0);
     }
-    char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + off + 0x28);
+    char* r = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
     if (D_00535BC8[0x49] == 2
         || *(int*)(r + 0x480) != 0
         || D_00535BC8[0x4A] == 9 || D_00535BC8[0x4A] == 10 || D_00535BC8[0x4A] == 11
@@ -7962,7 +7963,7 @@ extern "C" void func_001E87B8(void* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    char* riders = *(char**)((char*)SSXApp->Game + 0xC);
+    char* riders = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(riders + (idx << 2) + 0x28);
     if (*(int*)(rider + 0x480) != 0) {
         limit = 1.0f;
@@ -7970,7 +7971,7 @@ extern "C" void func_001E87B8(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        func_0039F840(*(char**)((char*)SSXApp->Game + 0x48) + 0x18);
+        func_0039F840((char*)SSXApp->Game->UI + 0x18);
         func_00231320(SSXApp->Game);
     }
 }

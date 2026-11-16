@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -115,13 +116,13 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
     for (i = 0; i < 14; i++) {
         self->aD8[i] = 1;
     }
-    if (*(int*)((char*)SSXApp->Game + 0x214) == 0xB) {
+    if (SSXApp->Game->mCurrentStateID == 0xB) {
         self->aD8[6] = 0;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (D_00534B30[0] == 0) {
         void* game = SSXApp->Game;
-        if (func_00231AB8(game) == 0 || *(int*)((char*)SSXApp->Game + 0x224) != 0) {
+        if (func_00231AB8(game) == 0 || SSXApp->Game->ControllerUnplugged != 0) {
             for (i = 0; i < 14; i++) {
                 self->aD8[i] = 0;
                 if (i == 1) {
@@ -469,7 +470,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             cOVStateManager_triggerOverlay(7);
             break;
         case 4: {
-            char* owner = *(char**)((char*)SSXApp->Game + 0x48);
+            char* owner = (char*)SSXApp->Game->UI;
             char* popup = (char*)cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_0046F860, 0, 0), owner, 0, 0);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(owner + 0x18, popup, 0, 0);

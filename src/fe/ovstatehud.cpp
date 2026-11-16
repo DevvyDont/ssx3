@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "main/ssxapp.h"
 
 struct cOVStateHUDElem {
@@ -777,7 +778,7 @@ struct sRace_9AD0 {
     char* riders[15];       // 0x40
     int numRiders;          // 0x7C
 };
-static inline sRace_9AD0* getRace_9AD0() { return *(sRace_9AD0**)((char*)SSXApp->Game + 0xC); }
+static inline sRace_9AD0* getRace_9AD0() { return (sRace_9AD0*)SSXApp->Game->AI; }
 
 // Segment count of a vertical bar: one 23-pixel segment per 23 pixels of height d above the base (rounded).
 static inline void calcBarSegments_9AD0(int& n, float d)
@@ -2226,7 +2227,7 @@ extern "C" void func_001F30D8(void* p)
     char* adj = o + vt[4].delta;
     int h = GetHashValue32(D_0046ED78);
     self->a = vt[4].fn(adj, h);
-    void* tbl = *(void**)(*(char**)((char*)SSXApp->Game + 0x48) + 8);
+    void* tbl = *(void**)((char*)SSXApp->Game->UI + 8);
     self->d = func_003983F0(tbl, GetHashValue32(D_004A21F0));
     self->b = 0;
     self->c = 0;
