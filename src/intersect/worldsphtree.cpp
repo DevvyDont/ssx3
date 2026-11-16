@@ -5255,7 +5255,7 @@ public:
     virtual void v01();
     virtual sVec4_341770* getVelocity();
     virtual void v03();
-    virtual void setVelocity(sVec4_341770* v);
+    virtual void applyBoost(sVec4_341770* v);
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
@@ -5263,15 +5263,15 @@ extern "C" float cObjectInterface_getUpdateTime();
 /**
  * Applies the node's drag to a rider.
  *
- * Passes the rider's velocity * (1 + the drag at +0x34) * cObjectInterface_getUpdateTime() to its velocity method
- * (called setVelocity in the C; the frame-time scaling suggests it adds rather than assigns).
+ * Passes the rider's velocity * (1 + the drag at +0x34) * cObjectInterface_getUpdateTime() to its applyBoost (cBeing
+ * vtable slot 4).
  *
  * @param obj  the rider (cBeing)
  */
 extern "C" void cBoostNode_applyDrag(void* self, cMover_341770* obj)
 {
     sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), cObjectInterface_getUpdateTime());
-    obj->setVelocity(&newVel);
+    obj->applyBoost(&newVel);
 }
 #endif
 
@@ -5345,7 +5345,7 @@ public:
     virtual void v01();
     virtual sVec4_341818* getVelocity();
     virtual void v03();
-    virtual void setVelocity(sVec4_341818* v);
+    virtual void applyBoost(sVec4_341818* v);
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
@@ -5365,7 +5365,7 @@ struct sSph_341818 {
 static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec4_341818& dir, float amount)
 {
     sVec4_341818 u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->scale), cObjectInterface_getUpdateTime());
-    obj->setVelocity(&u);
+    obj->applyBoost(&u);
 }
 
 /**
@@ -5374,8 +5374,7 @@ static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec
  * Takes the boost direction from the node (or the rider's own direction of travel when it is zero) and the rider's
  * speed along it. For node type 2 it passes direction * speed * scale * update time while the rider is not going
  * backwards; otherwise the missing speed (target minus current, when positive) * direction * scale * update time. The
- * vector goes to the rider's velocity method (called setVelocity in the C; the frame-time scaling suggests it adds
- * rather than assigns).
+ * vector goes to the rider's applyBoost (cBeing vtable slot 4).
  *
  * @param obj  the rider (cBeing) being boosted
  */
@@ -5392,11 +5391,11 @@ extern "C" void cBoostNode_applyBoost(sSph_341818* self, cMover_341818* obj)
     if (self->type == 2) {
         if (alongSpeed >= 0.0f) {
             sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
-            obj->setVelocity(&newVel);
+            obj->applyBoost(&newVel);
         }
     } else if (diff > 0.0f) {
         sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), cObjectInterface_getUpdateTime());
-        obj->setVelocity(&newVel);
+        obj->applyBoost(&newVel);
     }
 }
 #endif
@@ -6426,7 +6425,7 @@ public:
     virtual void v01();
     virtual sVec4_3429E0* getVelocity();
     virtual void v03();
-    virtual void setVelocity(sVec4_3429E0* v);
+    virtual void applyBoost(sVec4_3429E0* v);
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
@@ -6434,15 +6433,15 @@ extern "C" float cObjectInterface_getUpdateTime();
 /**
  * Applies the boost zone's drag to a rider: an impulse of velocity * (Drag + 1) * the frame time.
  *
- * Reads the velocity (slot 2) and passes the result to the being's slot 4, which the local view calls setVelocity;
- * in On Tour's cBeing that slot is applyBoost(const t4Vector&), an added impulse.
+ * Reads the velocity (slot 2) and passes the result to the being's slot 4,
+ * applyBoost(const t4Vector&) in On Tour's cBeing: an added impulse.
  *
  * @param obj  the rider in the zone (On Tour cBeing* pBeing)
  */
 extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cMover_3429E0* obj)
 {
     sVec4_3429E0 newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
-    obj->setVelocity(&newVelocity);
+    obj->applyBoost(&newVelocity);
 }
 #endif
 
@@ -6452,13 +6451,13 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_applyBoost);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-// Interface of a moving object (getVelocity / setVelocity at slots 2 and 4).
+// Interface of a moving object (getVelocity / applyBoost at slots 2 and 4).
 class cWsMover {
 public:
     virtual void v01();
     virtual t4Vector* getVelocity();
     virtual void v03();
-    virtual void setVelocity(t4Vector* v);
+    virtual void applyBoost(t4Vector* v);
 };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -6506,7 +6505,7 @@ struct t4Vector;
 
 static inline void setVel_342A88(cWsMover* o, t4Vector* v)
 {
-    o->setVelocity(v);
+    o->applyBoost(v);
 }
 
 struct sPlane_342A88 {
@@ -6524,7 +6523,7 @@ struct sSelf_342A88 {
  * Pushes a rider along the boost direction while its speed along it is below MaxSpeed.
  *
  * With d = MaxSpeed - velocity . Boost > 0 it passes Boost * d * (the word at +0x24, Drag) * the frame time to the
- * being's slot 4 (On Tour cBeing::applyBoost; the local view calls it setVelocity). The view sPlane_342A88 reads
+ * being's slot 4 (On Tour cBeing::applyBoost). The view sPlane_342A88 reads
  * MaxSpeed and Drag as the plane's d and k.
  *
  * @param obj  the rider in the zone (On Tour cBeing* pBeing)
