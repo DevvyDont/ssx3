@@ -488,15 +488,15 @@ static inline float Length_169570(const sVec2_169570& v)
 }
 
 struct sScrCam_169570 {
-    float roll;             // 0x0
-    float x4;               // 0x4
-    float x8;               // 0x8
+    float View;             // 0x0
+    float Near;               // 0x4
+    float Far;               // 0x8
     char padC[0x14];
-    sVec4_169570 pos;       // 0x20
-    sVec4_169570 target;    // 0x30
-    float pitch;            // 0x40
-    float yaw;              // 0x44
-    float x48;              // 0x48
+    sVec4_169570 Target;       // 0x20
+    sVec4_169570 Position;    // 0x30
+    float Roll;            // 0x40
+    float Heading;              // 0x44
+    float Pitch;              // 0x48
     float ox, oy, oz;       // 0x4C
     float dist;             // 0x58
     float r5C;              // 0x5C
@@ -528,18 +528,18 @@ extern "C" void cScriptManualAlgorithm_update(char* p)
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
     float* f = func_0027C098(cam);
     char* m = *(char**)(p + 0x14) + 0x30;
-    self->x4 = f[0];
-    self->x8 = f[1];
+    self->Near = f[0];
+    self->Far = f[1];
     func_0027C0F0(cam, &self->ox);
-    self->roll = self->r68 * 0.01745329424738884f;
-    self->target = sVec4_169570(self->ox, self->oy, self->oz, 1.0f);
-    self->target = mtxMulVec_169570(m, self->target);
-    self->pitch = self->r64 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
-    self->pos = mtxMulVec_169570(m, sVec4_169570(self->dist, self->r5C, self->r60, 1.0f));
-    sVec4_169570 d = Sub_169570(self->pos, self->target);
-    self->yaw = Atan2_169570(d.y, d.x);
+    self->View = self->r68 * 0.01745329424738884f;
+    self->Position = sVec4_169570(self->ox, self->oy, self->oz, 1.0f);
+    self->Position = mtxMulVec_169570(m, self->Position);
+    self->Roll = self->r64 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    self->Target = mtxMulVec_169570(m, sVec4_169570(self->dist, self->r5C, self->r60, 1.0f));
+    sVec4_169570 d = Sub_169570(self->Target, self->Position);
+    self->Heading = Atan2_169570(d.y, d.x);
     float h = Length_169570(sVec2_169570(d.x, d.y));
-    self->x48 = Atan2_169570(d.z, h);
+    self->Pitch = Atan2_169570(d.z, h);
     cCameraJitterer_updatePositionalJitter(p + 0x74, self->r6C);
     cCameraJitterer_updateRollJitter(p + 0x74, self->r70);
 }
@@ -858,15 +858,15 @@ static inline sVec4_169DB0 Sub_169DB0(const sVec4_169DB0& a, const sVec4_169DB0&
 }
 
 struct sScrCam_169DB0 {
-    float roll;             // 0x0
-    float x4;               // 0x4
-    float x8;               // 0x8
+    float View;             // 0x0
+    float Near;               // 0x4
+    float Far;               // 0x8
     char padC[0x14];
-    sVec4_169DB0 pos;       // 0x20
-    sVec4_169DB0 target;    // 0x30
-    float pitch;            // 0x40
-    float yaw;              // 0x44
-    float x48;              // 0x48
+    sVec4_169DB0 Target;       // 0x20
+    sVec4_169DB0 Position;    // 0x30
+    float Roll;            // 0x40
+    float Heading;              // 0x44
+    float Pitch;              // 0x48
     float ox, oy, oz;       // 0x4C
     float dist;             // 0x58
     float r5C;              // 0x5C
@@ -900,22 +900,22 @@ extern "C" void cScriptPointAlgorithm_update(char* p)
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
     float* f = func_0027C2A8(cam);
     char* m = *(char**)(p + 0x14) + 0x30;
-    self->x4 = f[0];
-    self->x8 = f[1];
+    self->Near = f[0];
+    self->Far = f[1];
     func_0027C300(cam, &self->ox);
-    self->x4 = f[0];
-    self->x8 = f[1];
-    self->roll = self->r68 * 0.01745329424738884f;
+    self->Near = f[0];
+    self->Far = f[1];
+    self->View = self->r68 * 0.01745329424738884f;
     char* g = *(char**)(p + 0x14);
-    self->yaw = self->r60 * 0.01745329424738884f + *(float*)(g + 0x78);
-    self->x48 = self->r5C * 0.01745329424738884f + *(float*)(g + 0x74);
-    self->pitch = self->r64 * 0.01745329424738884f + *(float*)(g + 0x70);
-    self->pos = mtxMulVec_169DB0(m, sVec4_169DB0(self->ox, self->oy, self->oz, 1.0f));
+    self->Heading = self->r60 * 0.01745329424738884f + *(float*)(g + 0x78);
+    self->Pitch = self->r5C * 0.01745329424738884f + *(float*)(g + 0x74);
+    self->Roll = self->r64 * 0.01745329424738884f + *(float*)(g + 0x70);
+    self->Target = mtxMulVec_169DB0(m, sVec4_169DB0(self->ox, self->oy, self->oz, 1.0f));
     float s0, c0, s1, c1;
-    func_0031BE50(&s0, &c0, self->yaw);
-    func_0031BE50(&s1, &c1, self->x48);
+    func_0031BE50(&s0, &c0, self->Heading);
+    func_0031BE50(&s1, &c1, self->Pitch);
     sVec4_169DB0 d(c1 * c0, c1 * s0, s1, 0.0f);
-    self->target = Sub_169DB0(self->pos, Scale_169DB0(d, self->dist));
+    self->Position = Sub_169DB0(self->Target, Scale_169DB0(d, self->dist));
     cCameraJitterer_updatePositionalJitter(p + 0x74, self->r6C);
     cCameraJitterer_updateRollJitter(p + 0x74, self->r70);
 }
@@ -1289,15 +1289,15 @@ static inline float Length_16A510(const sVec2_16A510& v)
 }
 
 struct sScrCam_16A510 {
-    float roll;             // 0x0
-    float x4;               // 0x4
-    float x8;               // 0x8
+    float View;             // 0x0
+    float Near;               // 0x4
+    float Far;               // 0x8
     char padC[0x14];
-    sVec4_16A510 pos;       // 0x20
-    sVec4_16A510 target;    // 0x30
-    float pitch;            // 0x40
-    float yaw;              // 0x44
-    float x48;              // 0x48
+    sVec4_16A510 Target;       // 0x20
+    sVec4_16A510 Position;    // 0x30
+    float Roll;            // 0x40
+    float Heading;              // 0x44
+    float Pitch;              // 0x48
     float ox, oy, oz;       // 0x4C
     float dist;             // 0x58
     float r5C;              // 0x5C
@@ -1342,23 +1342,23 @@ extern "C" void cScriptTargetAlgorithm_update(char* p)
     if (rider == 0) {
         rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
-    self->x4 = f[0];
-    self->x8 = f[1];
+    self->Near = f[0];
+    self->Far = f[1];
     func_0027C510(cam, &self->ox);
     char* obj = rider + 0x6C0;
     sVec4_16A510 rot = *(sVec4_16A510*)(*(char**)(rider + 0x780) + 0x140);
-    self->roll = self->r64 * 0.01745329424738884f;
-    self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
-    self->target = sVec4_16A510(self->ox, self->oy, self->oz, self->target.w);
-    self->target = mtxMulVec_16A510(m, self->target);
+    self->View = self->r64 * 0.01745329424738884f;
+    self->Roll = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    self->Position = sVec4_16A510(self->ox, self->oy, self->oz, self->Position.w);
+    self->Position = mtxMulVec_16A510(m, self->Position);
     sVEp_16A510* vt = *(sVEp_16A510**)obj;
     sVec4_16A510* rp = vt[5].fn(obj + vt[5].delta);
-    self->pos = Add_16A510(Add_16A510(*rp, Scale_16A510(vec_16A510(rider + 0x1B0), self->dist * rot.y)),
+    self->Target = Add_16A510(Add_16A510(*rp, Scale_16A510(vec_16A510(rider + 0x1B0), self->dist * rot.y)),
                                Scale_16A510(vec_16A510(rider + 0x1C0), self->r5C * rot.x));
-    sVec4_16A510 t = Sub_16A510(self->pos, self->target);
-    self->yaw = Atan2_16A510(t.y, t.x);
+    sVec4_16A510 t = Sub_16A510(self->Target, self->Position);
+    self->Heading = Atan2_16A510(t.y, t.x);
     float h = Length_16A510(sVec2_16A510(t.x, t.y));
-    self->x48 = Atan2_16A510(t.z, h);
+    self->Pitch = Atan2_16A510(t.z, h);
     cCameraJitterer_updatePositionalJitter(p + 0x70, self->r68);
     cCameraJitterer_updateRollJitter(p + 0x70, self->r6C);
 }
@@ -1704,15 +1704,15 @@ static inline float Length_16AD98(const sVec2_16AD98& v)
 }
 
 struct sScrCam_16AD98 {
-    float roll;             // 0x0
-    float x4;               // 0x4
-    float x8;               // 0x8
+    float View;             // 0x0
+    float Near;               // 0x4
+    float Far;               // 0x8
     char padC[0x14];
-    sVec4_16AD98 pos;       // 0x20
-    sVec4_16AD98 target;    // 0x30
-    float pitch;            // 0x40
-    float yaw;              // 0x44
-    float x48;              // 0x48
+    sVec4_16AD98 Target;       // 0x20
+    sVec4_16AD98 Position;    // 0x30
+    float Roll;            // 0x40
+    float Heading;              // 0x44
+    float Pitch;              // 0x48
     float ox, oy, oz;       // 0x4C
     float dist;             // 0x58
     float r5C;              // 0x5C
@@ -1759,10 +1759,10 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* p)
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
     float* f = func_0027C6A0(cam);
     func_0027C6F8(cam, &self->ox);
-    self->x4 = f[0];
-    self->x8 = f[1];
-    self->roll = self->r64 * 0.01745329424738884f;
-    self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    self->Near = f[0];
+    self->Far = f[1];
+    self->View = self->r64 * 0.01745329424738884f;
+    self->Roll = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
         rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
@@ -1771,32 +1771,32 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* p)
     sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_16AD98* vt = *(sVEp_16AD98**)obj;
     sVec4_16AD98* rp = vt[5].fn(obj + vt[5].delta);
-    self->pos = Add_16AD98(Add_16AD98(*rp, Scale_16AD98(vec_16AD98(rider + 0x1B0), self->ox * rot.y)),
+    self->Target = Add_16AD98(Add_16AD98(*rp, Scale_16AD98(vec_16AD98(rider + 0x1B0), self->ox * rot.y)),
                            Scale_16AD98(vec_16AD98(rider + 0x1C0), self->oy * rot.x));
-    float yaw;
-    float pit;
+    float pitchAngle;
+    float headingAngle;
     float k;
     if (((signed char*)f)[0x1E] == 0) {
         sVec4_16AD98 v = vec_16AD98(rider + 0x1B0);
         sVec4_16AD98* pv = &v;
         float a = self->dist * 0.01745329424738884f;
-        yaw = Atan2_16AD98(v.z, Length_16AD98(sVec2_16AD98(v.x, v.y))) - a;
+        pitchAngle = Atan2_16AD98(v.z, Length_16AD98(sVec2_16AD98(v.x, v.y))) - a;
         float b = self->r5C * 0.01745329424738884f;
-        pit = b + Atan2_16AD98(pv->y, pv->x);
+        headingAngle = b + Atan2_16AD98(pv->y, pv->x);
         k = self->oz;
     } else {
-        yaw = self->dist * 0.01745329424738884f;
-        pit = self->r5C * 0.01745329424738884f;
+        pitchAngle = self->dist * 0.01745329424738884f;
+        headingAngle = self->r5C * 0.01745329424738884f;
         k = self->oz;
     }
     float s0, c0, s1, c1;
     char* g = *(char**)(p + 0x14);
-    pit += *(float*)(g + 0x78);
-    yaw += *(float*)(g + 0x74);
-    func_0031BE50(&s0, &c0, pit);
-    func_0031BE50(&s1, &c1, yaw);
+    headingAngle += *(float*)(g + 0x78);
+    pitchAngle += *(float*)(g + 0x74);
+    func_0031BE50(&s0, &c0, headingAngle);
+    func_0031BE50(&s1, &c1, pitchAngle);
     sVec4_16AD98 d(c1 * c0, c1 * s0, -s1, 0.0f);
-    self->target = Sub_16AD98(self->pos, Scale_16AD98(d, k));
+    self->Position = Sub_16AD98(self->Target, Scale_16AD98(d, k));
     cCameraJitterer_updatePositionalJitter(p + 0x70, self->r68);
     cCameraJitterer_updateRollJitter(p + 0x70, self->r6C);
 }
@@ -1934,15 +1934,15 @@ static inline float Length_B180(const sVec2_B180& v)
 }
 
 struct sScrCam_B180 {
-    float roll;             // 0x0
-    float x4;               // 0x4
-    float x8;               // 0x8
+    float View;             // 0x0
+    float Near;               // 0x4
+    float Far;               // 0x8
     char padC[0x14];
-    sVec4_B180 pos;       // 0x20
-    sVec4_B180 target;    // 0x30
-    float pitch;            // 0x40
-    float yaw;              // 0x44
-    float x48;              // 0x48
+    sVec4_B180 Target;       // 0x20
+    sVec4_B180 Position;    // 0x30
+    float Roll;            // 0x40
+    float Heading;              // 0x44
+    float Pitch;              // 0x48
     float ox, oy, oz;       // 0x4C
     float dist;             // 0x58
     float r5C;              // 0x5C
@@ -2035,55 +2035,55 @@ extern "C" void cScriptRelativeAlgorithm_update(char* p)
     if (rider == 0) {
         rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
-    self->x4 = f[0];
-    self->x8 = f[1];
+    self->Near = f[0];
+    self->Far = f[1];
     func_0027C6F8(cam, &self->ox);
-    self->roll = self->r64 * 0.01745329424738884f;
-    self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
-    float yaw;
-    float pit;
+    self->View = self->r64 * 0.01745329424738884f;
+    self->Roll = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
+    float pitchAngle;
+    float headingAngle;
     float k;
     if (((signed char*)f)[0x1E] == 0) {
         sVec4_B180 v = vec_B180(rider + 0x1B0);
         sVec4_B180* pv = &v;
         float a = self->dist * 0.01745329424738884f;
-        yaw = Atan2_B180(v.z, Length_B180(sVec2_B180(v.x, v.y))) - a;
+        pitchAngle = Atan2_B180(v.z, Length_B180(sVec2_B180(v.x, v.y))) - a;
         float b = self->r5C * 0.01745329424738884f;
-        pit = b + Atan2_B180(pv->y, pv->x);
+        headingAngle = b + Atan2_B180(pv->y, pv->x);
         k = self->oz;
     } else {
-        yaw = self->dist * 0.01745329424738884f;
-        pit = self->r5C * 0.01745329424738884f;
+        pitchAngle = self->dist * 0.01745329424738884f;
+        headingAngle = self->r5C * 0.01745329424738884f;
         k = self->oz;
     }
     char* obj = rider + 0x6C0;
     char* g = *(char**)(p + 0x14);
-    yaw += *(float*)(g + 0x74);
-    pit += *(float*)(g + 0x78);
+    pitchAngle += *(float*)(g + 0x74);
+    headingAngle += *(float*)(g + 0x78);
     sVec4_B180 rot = *(sVec4_B180*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_B180* vt = *(sVEp_B180**)obj;
     sVec4_B180* rp = vt[5].fn(obj + vt[5].delta);
-    self->pos = Add_B180(Add_B180(*rp, Scale_B180(vec_B180(rider + 0x1B0), self->ox * rot.y)),
+    self->Target = Add_B180(Add_B180(*rp, Scale_B180(vec_B180(rider + 0x1B0), self->ox * rot.y)),
                          Scale_B180(vec_B180(rider + 0x1C0), self->oy * rot.x));
     float s0, c0, s1, c1;
-    func_0031BE50(&s0, &c0, pit);
-    func_0031BE50(&s1, &c1, yaw);
+    func_0031BE50(&s0, &c0, headingAngle);
+    func_0031BE50(&s1, &c1, pitchAngle);
     sVec4_B180 d(c1 * c0, c1 * s0, -s1, 0.0f);
-    sVec4_B180 t = Sub_B180(self->pos, Scale_B180(d, k));
-    sVec4_B180 nt = Add_B180(Scale_B180(t, f[5]), Scale_B180(self->target, 1.0f - f[5]));
+    sVec4_B180 t = Sub_B180(self->Target, Scale_B180(d, k));
+    sVec4_B180 nt = Add_B180(Scale_B180(t, f[5]), Scale_B180(self->Position, 1.0f - f[5]));
     nt.w = 1.0f;
-    sVec4_B180 dv = Sub_B180(nt, self->target);
+    sVec4_B180 dv = Sub_B180(nt, self->Position);
     float maxd = f[6];
     if (maxd < Length4_B180(dv) * 59.999996185302734f) {
-        self->target = Add_B180(self->target, Scale_B180(Normalize_B180(dv), maxd * 0.01666666753590107f));
-        self->target.w = 1.0f;
+        self->Position = Add_B180(self->Position, Scale_B180(Normalize_B180(dv), maxd * 0.01666666753590107f));
+        self->Position.w = 1.0f;
     } else {
-        self->target = nt;
+        self->Position = nt;
     }
-    sVec4_B180 t2 = Sub_B180(self->pos, self->target);
-    self->yaw = Atan2_B180(t2.y, t2.x);
+    sVec4_B180 t2 = Sub_B180(self->Target, self->Position);
+    self->Heading = Atan2_B180(t2.y, t2.x);
     float h = Length_B180(sVec2_B180(t2.x, t2.y));
-    self->x48 = Atan2_B180(t2.z, h);
+    self->Pitch = Atan2_B180(t2.z, h);
     cCameraJitterer_updatePositionalJitter(p + 0x70, self->r68);
     cCameraJitterer_updateRollJitter(p + 0x70, self->r6C);
 }

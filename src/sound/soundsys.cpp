@@ -1008,9 +1008,9 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
 extern "C" void cSSXAudio_PlayThunder(cSSXAudio* self)
 {
     func_003B58A0();
-    int busy = func_003B8AB8(self->mThunderHandle) != 0;
+    int soundFinished = func_003B8AB8(self->mThunderHandle) != 0;
     func_003B58D8();
-    if (!busy) {
+    if (!soundFinished) {
         cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mThunderHandle, 1, 0.0f);
     }
     self->mThunderHandle = snd1438AddVoice(self, 8, 0x10, 5);
@@ -2415,9 +2415,9 @@ extern "C" void cSSXAudio_Lift(cSSXAudio* self, void* obj)
     if (cSSXAudio_GetFocusRider(self, idx) == (int)obj) {
         int volume = clampVol_4170((int)(*(float*)((char*)obj + 0x75C) * 127.0f), 0x40, 0x7F);
         func_003B58A0();
-        int busy = func_003B8AB8(self->mCharLiftHandle) != 0;
+        int soundFinished = func_003B8AB8(self->mCharLiftHandle) != 0;
         func_003B58D8();
-        if (!busy) {
+        if (!soundFinished) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mCharLiftHandle, 1, 0.0f);
         }
         int flag = 0;
@@ -2600,7 +2600,7 @@ struct sSsVt48D0 { short delta; short index; int (*fn)(void*); };
  *
  * A previous landing still playing (handle at +0x5FB8) is stopped. Then a play-option level is pushed with defaults
  * (the inlined SFX_Begin) for bank 10 and patch cSSXAudio_Surface's surface class * 8 + 1 for a local human, + 5
- * otherwise (the local `prio` holds this patch); the level gets the volume, the volume-control pointer
+ * otherwise; the level gets the volume, the volume-control pointer
  * func_00287968(this, 6, 0), a 3D distance of 30 (func_002A9988), the rider's mPosition to follow, the listening view
  * from func_00288A20, and, for a local human when the byte at D_00535C11 is 2 and not replaying, its own viewport.
  * cBankSys_SFX_End starts it and the new handle is stored at +0x5FB8.
@@ -2648,17 +2648,17 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     if (vol < 0) {
         vol = 0;
     }
-    int prio;
+    int patchNum;
     int local = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (local) {
-        prio = cSSXAudio_Surface_p(self, rider) * 8 + 1;
+        patchNum = cSSXAudio_Surface_p(self, rider) * 8 + 1;
     } else {
-        prio = cSSXAudio_Surface_p(self, rider) * 8 + 5;
+        patchNum = cSSXAudio_Surface_p(self, rider) * 8 + 5;
     }
     func_003B58A0();
-    int busy = func_003B8AB8(*(int*)((char*)self + 0x5FB8)) != 0;
+    int soundFinished = func_003B8AB8(*(int*)((char*)self + 0x5FB8)) != 0;
     func_003B58D8();
-    if (!busy) {
+    if (!soundFinished) {
         cBankMonitor_BANKMONITOR_StopHandle(&(*self->p118)->sub, *(int*)((char*)self + 0x5FB8), 1, 0.0f);
     }
     int flag = 0;
@@ -2693,7 +2693,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
     self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = prio;
+    self->a8[self->mgr->sub.cur] = patchNum;
     sSnd17D0Mgr* m3 = *self->p118;
     sSnd17D0Sub* s3 = &m3->sub;
     s3->vals[m3->sub.cur] = vol;
@@ -5622,9 +5622,9 @@ extern "C" void cSSXAudio_PointsEvent(cSSXAudio* self, void* obj, int n)
         int curPoints = n % 100;
         if (curPoints < self->mPointsLastValue) {
             func_003B58A0();
-            int busy = func_003B8AB8(self->mPointsEventHandle) != 0;
+            int soundFinished = func_003B8AB8(self->mPointsEventHandle) != 0;
             func_003B58D8();
-            if (!busy) {
+            if (!soundFinished) {
                 cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mPointsEventHandle, 1, 0.0f);
             }
             self->mPointsEventHandle = sndA7D8AddVoice(self, 0, 77, 9);

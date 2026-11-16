@@ -50,8 +50,9 @@ struct cStreamMan {
                                     //       cancelStreamRequest passes it to func_003E0E90
     int m_iCarrySize;               // 0x0A0 [O]; [U] processChunk: bytes of a split 8-byte chunk header carried over
     char m_sCarryData[8];           // 0x0A4 [O]; [U] processChunk copies the carried header bytes here (lbu/sb)
-    int m_bAllocFailed;             // 0x0AC [O] (a bool); [R] reset = 0; [U] processChunk sets it when
-                                    //       addBxStreamDataTest returns -1, retries while set; update tests it
+    int m_bAllocFailed;             // 0x0AC [O] (a bool); [R] reset = 0; [U] update sets it when processChunk
+                                    //       can't finish a chunk (addBxStreamDataTest returned -1) and retries that chunk
+                                    //       first while it is set
     int m_iDecompressSizeLeft;      // 0x0B0 [O]; [R] reset = 0; [U] update stores decompressChunk's result and passes
                                     //       &it to processChunk (update's view types it void*)
     char* m_pDecompressDataLeft;    // 0x0B4 [O]; [R] reset = 0; [U] update stores m_pDecompressBuffer and passes &it to

@@ -27,7 +27,8 @@
 // 5 editing_account ("edit"), 6 requesting_lost_account ("lost" by MAIL), 7 requesting_lost_password ("lost" by
 // NAME), 8 authenticating ("auth"), 9 selecting_persona ("pers"), 10 creating_persona ("cper"), 11 deleting_persona
 // ("dper"), 12 selecting_room ("move"), 14 retrieving_news ("news"), 16 reporting_abuse ("rept"), 17 creating_room
-// ("room"), 18 requesting_quickmatch ("quik"), 19 awaiting_quickmatch, 20/22/23/24 challenge states
+// ("room"), 18 requesting_quickmatch ("quik"), 19 awaiting_quickmatch (preview; retail's
+// LobbyMan_onQuickMatchResponse moves 18 straight to 20), 20/22/23/24 challenge states
 // (22 = awaiting_game: preview li 22 before "state == awaiting_game"), 25 in game (onplaymsg), 27 "onln".
 
 #include "layout.h"

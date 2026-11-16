@@ -1678,29 +1678,29 @@ class cGameState_0F40 {
 public:
     int pad[3];
     virtual void v01();
-    virtual void enter();
+    virtual void preloadInit();
+    virtual void preloadUpdate();
+    virtual void preloadCancel();
+    virtual void gainFocus(int arg);
     virtual void update();
-    virtual void v04();
-    virtual void start(int arg);
-    virtual void tick();
-    virtual void exit();
+    virtual void loseFocus();
 };
 
 struct sGameLoad_0F40 {
     char pad0[0x84];
-    void* loader;                   // 0x84
+    void* ViewMan;                      // 0x84
     char pad88[0x174];
-    cGameState_0F40* prev;          // 0x1FC
-    cGameState_0F40* cur;           // 0x200
-    cGameState_0F40* pending;       // 0x204
-    int pendingId;                  // 0x208
-    int enteredId;                  // 0x20C
-    int nextId;                     // 0x210
-    int curId;                      // 0x214
-    int prevId;                     // 0x218
-    int nextArg;                    // 0x21C
+    cGameState_0F40* mPrevState;        // 0x1FC
+    cGameState_0F40* mCurrentState;     // 0x200
+    cGameState_0F40* mPreloadingState;  // 0x204
+    int mPendingPreloadStateID;         // 0x208
+    int mPreloadStateID;                // 0x20C
+    int mPendingStateID;                // 0x210
+    int mCurrentStateID;                // 0x214
+    int mPrevStateID;                   // 0x218
+    int mPendingStateStartupFlag;       // 0x21C
     char pad220[0x4];
-    int hold;                       // 0x224
+    int ControllerUnplugged;            // 0x224
 };
 
 /**
@@ -1726,152 +1726,152 @@ extern "C" void cGame_updateState(void* self_)
 {
     sGameLoad_0F40* self = (sGameLoad_0F40*)self_;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0 && self->hold != 0)
+    if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0 && self->ControllerUnplugged != 0)
         return;
     if (cPauseState_Flags & 0x20)
         return;
-    if (self->cur != 0 && (self->curId != 3 || self->nextId == 0))
-        self->cur->tick();
-    if (self->pendingId != 0) {
-        switch (self->pendingId) {
+    if (self->mCurrentState != 0 && (self->mCurrentStateID != 3 || self->mPendingStateID == 0))
+        self->mCurrentState->update();
+    if (self->mPendingPreloadStateID != 0) {
+        switch (self->mPendingPreloadStateID) {
     case 1:
-        self->pending = (cGameState_0F40*)((char*)self + 0xB0);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0xB0);
         break;
     case 2:
-        self->pending = (cGameState_0F40*)((char*)self + 0xD0);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0xD0);
         break;
     case 3:
-        self->pending = (cGameState_0F40*)((char*)self + 0xE0);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0xE0);
         break;
     case 4:
-        self->pending = (cGameState_0F40*)((char*)self + 0xF0);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0xF0);
         break;
     case 5:
-        self->pending = (cGameState_0F40*)((char*)self + 0x100);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x100);
         break;
     case 6:
-        self->pending = (cGameState_0F40*)((char*)self + 0x118);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x118);
         break;
     case 7:
-        self->pending = (cGameState_0F40*)((char*)self + 0x128);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x128);
         break;
     case 8:
-        self->pending = (cGameState_0F40*)((char*)self + 0x138);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x138);
         break;
     case 9:
-        self->pending = (cGameState_0F40*)((char*)self + 0x148);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x148);
         break;
     case 10:
-        self->pending = (cGameState_0F40*)((char*)self + 0x158);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x158);
         break;
     case 11:
-        self->pending = (cGameState_0F40*)((char*)self + 0x178);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x178);
         break;
     case 12:
-        self->pending = (cGameState_0F40*)((char*)self + 0x18C);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x18C);
         break;
     case 13:
-        self->pending = (cGameState_0F40*)((char*)self + 0x19C);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x19C);
         break;
     case 14:
-        self->pending = (cGameState_0F40*)((char*)self + 0x1B8);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x1B8);
         break;
     case 15:
-        self->pending = (cGameState_0F40*)((char*)self + 0x1DC);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x1DC);
         break;
     case 16:
-        self->pending = (cGameState_0F40*)((char*)self + 0x1EC);
+        self->mPreloadingState = (cGameState_0F40*)((char*)self + 0x1EC);
         break;
         }
-        self->enteredId = self->pendingId;
-        self->pendingId = 0;
-        self->pending->enter();
+        self->mPreloadStateID = self->mPendingPreloadStateID;
+        self->mPendingPreloadStateID = 0;
+        self->mPreloadingState->preloadInit();
     }
-    if (self->pending != 0)
-        self->pending->update();
-    int next = self->nextId;
+    if (self->mPreloadingState != 0)
+        self->mPreloadingState->preloadUpdate();
+    int next = self->mPendingStateID;
     if (next == 0)
         return;
-    int arg = self->nextArg;
-    if (self->cur != 0)
-        self->cur->exit();
-    self->prevId = self->curId;
-    self->prev = self->cur;
+    int arg = self->mPendingStateStartupFlag;
+    if (self->mCurrentState != 0)
+        self->mCurrentState->loseFocus();
+    self->mPrevStateID = self->mCurrentStateID;
+    self->mPrevState = self->mCurrentState;
     switch (next) {
     case 1:
-        self->cur = (cGameState_0F40*)((char*)self + 0xB0);
-        self->curId = 1;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0xB0);
+        self->mCurrentStateID = 1;
         break;
     case 2:
-        self->cur = (cGameState_0F40*)((char*)self + 0xD0);
-        self->curId = 2;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0xD0);
+        self->mCurrentStateID = 2;
         break;
     case 3:
-        self->cur = (cGameState_0F40*)((char*)self + 0xE0);
-        self->curId = 3;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0xE0);
+        self->mCurrentStateID = 3;
         break;
     case 4:
-        self->cur = (cGameState_0F40*)((char*)self + 0xF0);
-        self->curId = 4;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0xF0);
+        self->mCurrentStateID = 4;
         break;
     case 5:
-        self->cur = (cGameState_0F40*)((char*)self + 0x100);
-        self->curId = 5;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x100);
+        self->mCurrentStateID = 5;
         break;
     case 6:
-        self->cur = (cGameState_0F40*)((char*)self + 0x118);
-        self->curId = 6;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x118);
+        self->mCurrentStateID = 6;
         break;
     case 7:
-        self->cur = (cGameState_0F40*)((char*)self + 0x128);
-        self->curId = 7;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x128);
+        self->mCurrentStateID = 7;
         break;
     case 8:
-        self->cur = (cGameState_0F40*)((char*)self + 0x138);
-        self->curId = 8;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x138);
+        self->mCurrentStateID = 8;
         break;
     case 9:
-        self->cur = (cGameState_0F40*)((char*)self + 0x148);
-        self->curId = 9;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x148);
+        self->mCurrentStateID = 9;
         break;
     case 10:
-        self->cur = (cGameState_0F40*)((char*)self + 0x158);
-        self->curId = 10;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x158);
+        self->mCurrentStateID = 10;
         break;
     case 11:
-        self->cur = (cGameState_0F40*)((char*)self + 0x178);
-        self->curId = 11;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x178);
+        self->mCurrentStateID = 11;
         break;
     case 12:
-        self->cur = (cGameState_0F40*)((char*)self + 0x18C);
-        self->curId = 12;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x18C);
+        self->mCurrentStateID = 12;
         break;
     case 13:
-        self->cur = (cGameState_0F40*)((char*)self + 0x19C);
-        self->curId = 13;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x19C);
+        self->mCurrentStateID = 13;
         break;
     case 14:
-        self->cur = (cGameState_0F40*)((char*)self + 0x1B8);
-        self->curId = 14;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x1B8);
+        self->mCurrentStateID = 14;
         break;
     case 15:
-        self->cur = (cGameState_0F40*)((char*)self + 0x1DC);
-        self->curId = 15;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x1DC);
+        self->mCurrentStateID = 15;
         break;
     case 16:
-        self->cur = (cGameState_0F40*)((char*)self + 0x1EC);
-        self->curId = 16;
+        self->mCurrentState = (cGameState_0F40*)((char*)self + 0x1EC);
+        self->mCurrentStateID = 16;
         break;
     }
-    self->nextId = 0;
-    self->nextArg = 0;
-    if (self->enteredId == self->curId) {
-        self->enteredId = 0;
-        self->pending = 0;
+    self->mPendingStateID = 0;
+    self->mPendingStateStartupFlag = 0;
+    if (self->mPreloadStateID == self->mCurrentStateID) {
+        self->mPreloadStateID = 0;
+        self->mPreloadingState = 0;
     }
-    if (self->cur != 0) {
-        func_0022E550(self->loader);
-        self->cur->start(arg);
+    if (self->mCurrentState != 0) {
+        func_0022E550(self->ViewMan);
+        self->mCurrentState->gainFocus(arg);
     }
 }
 #endif
