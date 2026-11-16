@@ -5117,7 +5117,7 @@ void func_00178BA8(void* self, void* other)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178BB0);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" float func_0031C040(float x);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
@@ -5261,7 +5261,7 @@ extern "C" void func_00178BB0(char* self)
     sVec_00178BB0 q = AxisAngle_00178BB0(D_004FF160, a);
     sVec_00178BB0 v = ctRot_00178BB0(q, *(sVec_00178BB0*)(self + 0x390));
     *(sVec_00178BB0*)(self + 0x20) = ctAdd_00178BB0(getPos_00178BB0(self), ctScale_00178BB0(D_004FF160, -3.0f));
-    int multi = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x78) >= 2;
+    int multi = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x78) >= 2;
     float h = 0.0f;
     if (multi) {
         h = 150.0f;

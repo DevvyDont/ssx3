@@ -20,7 +20,7 @@ extern "C" void cUITemplate_MAP_setupPeakInfo(void* self);
 extern unsigned int D_004A2594;
 extern int D_004A2598;
 extern int D_004A259C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A25A8[];
 extern char D_004A25B0[];
 extern char D_004A25B8[];
@@ -88,7 +88,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
     cUITemplate_MAP_setShowInfo(self, 0);
     self->popup = 0;
     self->mode = -1;
-    self->file = func_001A3BF0(*(void**)((char*)D_004A28A8 + 0x11C));
+    self->file = func_001A3BF0(*(void**)((char*)SSXApp + 0x11C));
     self->pic = 0;
     cUIObj_200700* o = (cUIObj_200700*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A25A8));
     self->map = o;
@@ -214,12 +214,12 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void cOVStateManager_removePDATemplate(void);
 extern "C" void* func_0028B180(void);
 extern "C" void func_0028F678(void* mgr, int a);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern unsigned int D_004A2594;
 
 extern "C" void func_00200AF0(void* self)
 {
-    cFEAsyncManager_UnloadFEAsyncFile(*(void**)((char*)D_004A28A8 + 0x11C), *(int*)((char*)self + 0x2D8));
+    cFEAsyncManager_UnloadFEAsyncFile(*(void**)((char*)SSXApp + 0x11C), *(int*)((char*)self + 0x2D8));
     if (D_004A2594 == 1 || D_004A2594 == 3 || D_004A2594 == 4) {
         cOVStateManager_removePDATemplate();
     }
@@ -707,7 +707,7 @@ extern char D_004707A0[];
 extern char D_004707B0[];
 extern int D_004A259C;
 extern unsigned int D_004A2594;
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sColor_202828 {
     float a, r, g, b;
@@ -770,7 +770,7 @@ extern "C" void cUITemplate_MAP_onUpdate(void* vself)
         else
             cUIState_hideObjSafe(*(void**)(self + 0x2EC), buf);
     }
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x11C);
+    char* mgr = *(char**)((char*)SSXApp + 0x11C);
     if (cFEAsyncManager_GetFileStatus((cFEAsyncManager*)mgr, *(int*)(self + 0x2D8)) == 3 && *(int*)(self + 0x2DC) == 0) {
         char* pic = *(char**)(self + 0x2E4);
         if (pic != 0) {
@@ -1119,7 +1119,7 @@ extern int D_004A25A4;
 
 extern "C" void cUITemplate_MAP_setupMapPic(void* self)
 {
-    void* mgr = *(void**)((char*)D_004A28A8 + 0x11C);
+    void* mgr = *(void**)((char*)SSXApp + 0x11C);
     if (D_004A259C == 0) {
         if (*(int*)((char*)self + 0x2D4) != 1) {
             cFEAsyncManager_UnloadFEAsyncFile(mgr, *(int*)((char*)self + 0x2D8));
@@ -1272,7 +1272,7 @@ extern unsigned int D_004A2594;
 
 extern int D_004A259C;
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void* cBE_getBE();
 
@@ -1287,13 +1287,13 @@ extern sPeakGoal D_004781D0_Info[3][4] __asm__("D_004781D0");
 
 extern sPeakGoal D_004786E0_Info[3][5] __asm__("D_004786E0");
 
-// The text database (D_004A28A8 + 0x8C): localised strings by hash through vtable slot 4 (as in cUITemplate_MAP_getMedalStr).
+// The text database (SSXApp + 0x8C): localised strings by hash through vtable slot 4 (as in cUITemplate_MAP_getMedalStr).
 struct cTextDB_5098 {
     int pad;
     sVEntry<unsigned short*(void*, int)>* vt;
 };
 
-#define TextDB_5098 (*(cTextDB_5098**)((char*)D_004A28A8 + 0x8C))
+#define TextDB_5098 (*(cTextDB_5098**)((char*)SSXApp + 0x8C))
 
 // A macro, not an inline helper: an inline's key parameter is a pseudo that loop.c hoists out of case 0's loop.
 #define Loc_5098(key) (TextDB_5098->vt[4].fn((char*)TextDB_5098 + TextDB_5098->vt[4].delta, GetHashValue32(key)))
@@ -1637,7 +1637,7 @@ extern "C" void cUITemplate_MAP_setupPeakInfo(void* tmpl)
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_getMedalStr);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00470E10[];
 extern char D_00470E20[];
 extern char D_00470E30[];
@@ -1651,7 +1651,7 @@ struct sVEntry00204FF0 {
 
 static inline int setPic00204FF0(char* name)
 {
-    void* obj = *(void**)((char*)D_004A28A8 + 0x8C);
+    void* obj = *(void**)((char*)SSXApp + 0x8C);
     sVEntry00204FF0* vt = *(sVEntry00204FF0**)((char*)obj + 4);
     return vt[4].fn((char*)obj + vt[4].delta, GetHashValue32(name));
 }
@@ -1696,7 +1696,7 @@ extern unsigned int D_004A2594;
 
 extern int D_004A259C;
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void* cBE_getBE();
 
@@ -1714,9 +1714,9 @@ extern sPeakGoal D_004781D0_oals[3][4] __asm__("D_004781D0");
 
 extern sPeakGoal D_004786E0_oals[3][5] __asm__("D_004786E0");
 
-// The text database (D_004A28A8 + 0x8C): localised strings by hash through vtable slot 4 (as in cUITemplate_MAP_getMedalStr_oals).
+// The text database (SSXApp + 0x8C): localised strings by hash through vtable slot 4 (as in cUITemplate_MAP_getMedalStr_oals).
 
-#define TextDB_5098 (*(cTextDB_5098**)((char*)D_004A28A8 + 0x8C))
+#define TextDB_5098 (*(cTextDB_5098**)((char*)SSXApp + 0x8C))
 
 // A macro, not an inline helper: an inline's key parameter is a pseudo that loop.c hoists out of case 0's loop.
 #define Loc_5098(key) (TextDB_5098->vt[4].fn((char*)TextDB_5098 + TextDB_5098->vt[4].delta, GetHashValue32(key)))
@@ -2599,7 +2599,7 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
                 short line[0x130];
                 func_002C2540(fmt, D_004A2590);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
-                char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+                char* loc = *(char**)((char*)SSXApp + 0x8C);
                 sLocVEntry_207430* vt = *(sLocVEntry_207430**)(loc + 4);
                 char* thisp = loc + vt[4].delta;
                 strcpy1(pre, vt[4].fn(thisp, GetHashValue32(D_004716B0)));
@@ -2616,7 +2616,7 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
                 short line[0x130];
                 func_002C2540(fmt, D_004A26A0);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
-                char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+                char* loc = *(char**)((char*)SSXApp + 0x8C);
                 sLocVEntry_207430* vt = *(sLocVEntry_207430**)(loc + 4);
                 char* thisp = loc + vt[4].delta;
                 strcpy1(pre, vt[4].fn(thisp, GetHashValue32(D_004716B0)));

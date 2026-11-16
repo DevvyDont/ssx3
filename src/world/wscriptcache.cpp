@@ -428,36 +428,36 @@ extern "C" unsigned int func_003AD120(void* cache, void* inst, int entry)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD188);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" void* func_003AD188(void)
 {
-    return *(void**)(D_004A28A8 + 0x84);
+    return *(void**)(SSXApp + 0x84);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD198);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" void* func_003AD198(void)
 {
-    return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x8C);
+    return *(void**)(*(char**)(SSXApp + 0x84) + 0x8C);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD1A8);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern "C" void func_002F5998(void* lights);
 extern "C" void func_00122658(void* self);
 
 extern "C" void func_003AD1A8(void)
 {
-    func_002F5998(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x90));
-    char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    func_002F5998(*(void**)(*(char**)(SSXApp + 0x84) + 0x90));
+    char* riders = *(char**)(*(char**)(SSXApp + 0x84) + 0xC);
     if (riders != 0) {
         for (int i = 0; i < *(int*)(riders + 0x78); i++) {
             func_00122658(*(void**)(riders + 0x28 + i * 4));

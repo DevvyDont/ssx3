@@ -61,7 +61,7 @@ INCLUDE_ASM("visualfx/angerfx", func_002D4C08);
 #ifdef SKIP_ASM
 void* cBEAggressionInterface_getThis();
 extern "C" int func_00155B50(void* self, int a, int b);
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern float D_00488EA0[];
 extern float D_00488F48[];
 extern float D_00488FF0[];
@@ -125,7 +125,7 @@ static inline float approach_2D4C08(float x, float target, float step)
 
 static inline sPlayers_2D4C08* players_2D4C08()
 {
-    return *(sPlayers_2D4C08**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    return *(sPlayers_2D4C08**)(*(char**)(SSXApp + 0x84) + 0x84);
 }
 
 extern "C" void func_002D4C08(sAnger_2D4C08* self)
@@ -134,7 +134,7 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
         return;
     }
     for (unsigned int i = 0; i < players_2D4C08()->count; i++) {
-        char* g = *(char**)(D_004A28A8 + 0x84);
+        char* g = *(char**)(SSXApp + 0x84);
         char* other = *(char**)(*(char**)(*(char**)((*(sPlayers_2D4C08**)(g + 0x84))->p[i] + 0xA8) + 0x20) + 4);
         if (other == 0) {
             continue;
@@ -258,7 +258,7 @@ extern sRState_2D5048 D_00501420_2D5048 __asm__("D_00501420");
 
 static inline sViews_2D5048* views_2D5048()
 {
-    return *(sViews_2D5048**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    return *(sViews_2D5048**)(*(char**)(SSXApp + 0x84) + 0x84);
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).

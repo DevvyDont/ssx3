@@ -246,7 +246,7 @@ struct sMgr_0A98 {
     cObj_0A98* objs[17];
 };
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char* D_004A289C;
 extern int D_004A3BA8;
 extern "C" void func_002F00A0(void*, int);
@@ -270,7 +270,7 @@ extern "C" void func_002F0A98(sMgr_0A98* self)
     self->objs[14]->Reset();
     self->objs[15]->Reset();
     self->objs[16]->Reset();
-    for (int i = 0; i < *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x10); i++) {
+    for (int i = 0; i < *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x10); i++) {
         func_002F00A0(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
         ((cWorld_0A98*)D_004A289C)->ResetSlot(i);
     }
@@ -2146,7 +2146,7 @@ extern "C" void func_002F39C8(void *arg0) {
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_update);
 #ifdef SKIP_ASM
 extern int D_004A424C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A4258;
 extern float D_004A4260;
 extern int D_004A426C;
@@ -2250,7 +2250,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
 {
     if (D_004A424C == 0)
         return;
-    char* w = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    char* w = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
     if (self->idx >= *(unsigned int*)(w + 0x10))
         return;
     sV4_39E0 pos = *(sV4_39E0*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
@@ -2317,7 +2317,7 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 extern int D_004A424C;
 extern int D_004A4250;
 extern int D_004A3B60;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004FF1A0[];
 
 struct sV2_3E28 {
@@ -2409,7 +2409,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
         return;
     if (D_004A4250 == 0)
         return;
-    if (self->idx != *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x14))
+    if (self->idx != *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x14))
         return;
     if (D_004A3B60) {
         self->Reset();
@@ -2449,16 +2449,16 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F4118);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void *func_002306A8(void *, int);
 extern "C" void func_002F4260_4118(void *, float, void *) __asm__("func_002F4260");
-extern void *D_004A28A8;
+extern void *SSXApp;
 struct N4118 { char pad[0x84]; N4118 *c; };
 struct M4118 { char pad[0x10]; unsigned int cnt; };
 
 extern "C" void func_002F4118(void *arg0, float arg1) {
     unsigned int i = 0;
-    if (((M4118 *)((N4118 *)((N4118 *)D_004A28A8)->c)->c)->cnt != 0) {
+    if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
         do {
-            func_002F4260_4118(func_002306A8(((N4118 *)D_004A28A8)->c, i++), arg1, arg0);
-        } while (i < ((M4118 *)((N4118 *)((N4118 *)D_004A28A8)->c)->c)->cnt);
+            func_002F4260_4118(func_002306A8(((N4118 *)SSXApp)->c, i++), arg1, arg0);
+        } while (i < ((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt);
     }
 }
 #endif
@@ -2475,22 +2475,22 @@ struct Obj41A8 : Base41A8 {
     virtual void v12(); virtual void v13();
 };
 Obj41A8 *func_002306A8_41A8(void *, int) __asm__("func_002306A8__FPvi");
-extern void *D_004A28A8;
+extern void *SSXApp;
 #define F84(p) (*(char **)((char*)(p) + 0x84))
 
 extern "C" void func_002F41A8(int arg0) {
     unsigned int i = 0;
-    if (*(unsigned int *)(F84(F84(D_004A28A8)) + 0x10) != 0) {
+    if (*(unsigned int *)(F84(F84(SSXApp)) + 0x10) != 0) {
         do {
-            char *t5 = F84(D_004A28A8);
+            char *t5 = F84(SSXApp);
             if (arg0 == *(int *)(F84(t5) + (i << 2) + 4)) {
                 if (func_002306A8_41A8(t5, i) != 0) {
-                    Obj41A8 *o = func_002306A8_41A8(F84(D_004A28A8), i);
+                    Obj41A8 *o = func_002306A8_41A8(F84(SSXApp), i);
                     o->v13();
                 }
             }
             i += 1;
-        } while (i < *(unsigned int *)(F84(F84(D_004A28A8)) + 0x10));
+        } while (i < *(unsigned int *)(F84(F84(SSXApp)) + 0x10));
     }
 }
 #endif
@@ -3131,10 +3131,10 @@ extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
 INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
 #ifdef SKIP_ASM
 extern "C" void func_002F5400(int, void *, int);
-extern void *D_004A28A8;
+extern void *SSXApp;
 
 extern "C" void func_002F5148(void *arg0) {
-    func_002F5400((*(int *)((char*)((*(void **)((char*)(D_004A28A8) + (0x84)))) + (0x90))), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
+    func_002F5400((*(int *)((char*)((*(void **)((char*)(SSXApp) + (0x84)))) + (0x90))), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
 }
 #endif
 
@@ -3145,7 +3145,7 @@ extern "C" void cWorldLightMan_initLightCache(void *);
 struct cWorldPainterManArg;
 void *cWorldPainterMan_getQuery(void *, cWorldPainterManArg *);
 extern char D_004A5598;
-extern void *D_004A28A8;
+extern void *SSXApp;
 struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
 struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 
@@ -3154,7 +3154,7 @@ extern "C" void *cWorldLightMan_cWorldLightMan(void *arg0, int arg1) {
     new ((char*)arg0 + 0x210) B5180[32];
     *(int *)arg0 = arg1;
     cWorldLightMan_initLightCache(arg0);
-    char *t = *(char **)(*(char **)((char*)D_004A28A8 + 0x84) + 0x10);
+    char *t = *(char **)(*(char **)((char*)SSXApp + 0x84) + 0x10);
     *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&D_004A5598);
     return arg0;
 }

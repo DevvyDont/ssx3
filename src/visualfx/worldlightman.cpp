@@ -854,7 +854,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void func_002F64F0_v(void* self) __asm__("func_002F64F0__FPv");
 struct sWLCode6910;
 extern "C" void func_002F6910(sWLCode6910* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A3BC0;
 extern int D_00534B30[];
 
@@ -1004,7 +1004,7 @@ extern "C" void func_002F6518(sWLCode6518* self)
         D_004A3BC0--;
     }
     func_002F6910((sWLCode6910*)self);
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] != 0) {
         self->state = 0;
     }

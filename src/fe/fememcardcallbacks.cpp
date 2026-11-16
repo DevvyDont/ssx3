@@ -5,7 +5,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004677B8[];
 extern char D_0045F7E0[];
 void func_001D8C38(void* self);
@@ -28,14 +28,14 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x1F0) = 0;
     if (*(int*)(fe + 0x208) == 0) {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntryS1D66B0* ovt = *(sVEntryS1D66B0**)(o + 4);
         void* str = ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677B8));
         char* fe2 = (char*)D_004A2028;
         *(int*)(fe2 + 0x19C) = 5;
         sVEntryVS1D66B0* vt = *(sVEntryVS1D66B0**)(fe2 + 8);
         vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
-        char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o2 = *(char**)((char*)SSXApp + 0x8C);
         sVEntryS1D66B0* o2vt = *(sVEntryS1D66B0**)(o2 + 4);
         void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
         char* m = *(char**)((char*)D_004A2028 + 0x218);
@@ -53,7 +53,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackReadSuccess);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004677D0[];
 extern char D_0045F7E0[];
 extern "C" void func_001D9308(void*, int);
@@ -77,14 +77,14 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
     *(int*)(fe + 0x1B4) = 1;
     *(int*)(fe + 0x1A8) = 0;
     if (*(int*)(fe + 0x204) == 0) {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntryR1D67C8* ovt = *(sVEntryR1D67C8**)(o + 4);
         void* str = ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677D0));
         char* fe2 = (char*)D_004A2028;
         *(int*)(fe2 + 0x19C) = 6;
         sVEntryVR1D67C8* vt = *(sVEntryVR1D67C8**)(fe2 + 8);
         vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
-        char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o2 = *(char**)((char*)SSXApp + 0x8C);
         sVEntryR1D67C8* o2vt = *(sVEntryR1D67C8**)(o2 + 4);
         void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
         char* m = *(char**)((char*)D_004A2028 + 0x218);
@@ -107,7 +107,7 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004642F8[];
 
@@ -127,11 +127,11 @@ extern "C" void func_001D68E8(void)
 {
     unsigned short name[0x28];
     unsigned short* buf = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     char* s = *(char**)(mp + 0x434);
     sVEntryVK1D68E8* svt = *(sVEntryVK1D68E8**)s;
     svt[14].fn(s + svt[14].delta, *(int*)(mp + 0xF8), name);
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntryK1D68E8* ovt = *(sVEntryK1D68E8**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004642F8)), name);
     char* fe = (char*)D_004A2028;
@@ -153,7 +153,7 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* strcpy1(void* dst, void* src);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004641F0[];
 
@@ -172,7 +172,7 @@ struct sVEntryV001D69E0 {
 extern "C" void func_001D69E0(void)
 {
     void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
     strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_004641F0)));
     char* fe = (char*)D_004A2028;
@@ -199,7 +199,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_00464608[];
 extern char D_0045F7E0[];
@@ -207,10 +207,10 @@ extern char D_0045F7E0[];
 extern "C" void func_001D6AD0(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464608)), name);
     char* fe = (char*)D_004A2028;
@@ -220,7 +220,7 @@ extern "C" void func_001D6AD0(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
@@ -242,7 +242,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_00464628[];
 extern char D_0045F7E0[];
@@ -250,11 +250,11 @@ extern char D_0045F7E0[];
 extern "C" void func_001D6C28(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     *(int*)((char*)D_004A2028 + 0x19C) = 0xB;
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464628)), name);
     char* fe = (char*)D_004A2028;
@@ -263,7 +263,7 @@ extern "C" void func_001D6C28(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
@@ -285,7 +285,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004644D8[];
 extern char D_0045DCD8[];
@@ -294,7 +294,7 @@ extern char D_0045F7E0[];
 
 static inline void* Str_1D6D88(char* key)
 {
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     char* othis = o + ovt[4].delta;
     return ovt[4].fn(othis, GetHashValue32(key));
@@ -312,10 +312,10 @@ static inline void SetLine_1D6D88(char* key, int a)
 extern "C" void func_001D6D88(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644D8)), name);
     *(int*)((char*)D_004A2028 + 0x19C) = 9;
@@ -351,7 +351,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004677E8[];
 extern char D_0045F7E0[];
@@ -365,14 +365,14 @@ extern "C" void func_001D7010(void)
 {
     unsigned short name[0x100];
     unsigned short name2[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     char* sf = *(char**)(mp + 0x434);
     sVEntryV001D69E0* sfvt = *(sVEntryV001D69E0**)sf;
     sfvt[14].fn(sf + sfvt[14].delta, *(int*)(mp + 0xF8), name2);
     ((sFEMC_001D7010*)D_004A2028)->f19C = 0xC;
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677E8)), name);
     char* fe = (char*)D_004A2028;
@@ -381,7 +381,7 @@ extern "C" void func_001D7010(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
@@ -403,10 +403,10 @@ extern char D_00467800[];
 extern "C" void func_001D7190(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    void* app = D_004A28A8;
+    void* app = SSXApp;
     *(int*)((char*)D_004A2028 + 0x19C) = 0xD;
     char* o = *(char**)((char*)app + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
@@ -433,7 +433,7 @@ struct sVEntry001D72A8 {
 };
 
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_SetAction(void*, int);
 
@@ -442,7 +442,7 @@ extern "C" void func_001D72A8(void)
     char* fe = (char*)D_004A2028;
     sVEntry001D72A8* vt = *(sVEntry001D72A8**)(fe + 8);
     vt[41].fn(fe + vt[41].delta);
-    void* app = D_004A28A8;
+    void* app = SSXApp;
     *(int*)((char*)D_004A2028 + 0x1E4) = 0;
     char* obj = (char*)cSSXApp_getMCManager(app);
     sVEntry001D72A8* vt2 = *(sVEntry001D72A8**)(obj + 0x748);
@@ -462,9 +462,9 @@ extern "C" void func_001D7318(void)
 {
     unsigned short name[0x100];
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464330)), name);
     char* fe = (char*)D_004A2028;
@@ -489,15 +489,15 @@ extern char D_0045F7E0[];
 extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
 {
     void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-    cSSXApp_getMCManager(D_004A28A8);
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    cSSXApp_getMCManager(SSXApp);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
     strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_00467818)));
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x10;
     sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
     vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(o2 + 4);
     void* str = vt4[4].fn(o2 + vt4[4].delta, GetHashValue32(D_0045F7E0));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
@@ -521,16 +521,16 @@ extern "C" void func_001D7548(void)
 {
     unsigned short name[0x100];
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644F0)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x11;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
@@ -552,7 +552,7 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_00467830[];
 
@@ -565,7 +565,7 @@ struct sVEntryI_001D7688 {
 extern "C" void cFEMemCard_callbackConfirmDelete(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     char* sf = *(char**)(mp + 0x434);
     sVEntryI_001D7688* sfvt = *(sVEntryI_001D7688**)sf;
     if (sfvt[13].fn(sf + sfvt[13].delta) > 0) {
@@ -574,7 +574,7 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
         char* sf2 = *(char**)(mp + 0x434);
         sVEntryV001D69E0* sfvt2 = *(sVEntryV001D69E0**)sf2;
         sfvt2[14].fn(sf2 + sfvt2[14].delta, *(int*)(mp + 0xF8), name);
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
         sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467830)), name);
         char* fe = (char*)D_004A2028;
@@ -606,10 +606,10 @@ extern char D_00462C88[];
 extern "C" void func_001D77E8(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004644D8)), name);
     char* fe = (char*)D_004A2028;
@@ -619,7 +619,7 @@ extern "C" void func_001D77E8(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045DCD8));
@@ -627,7 +627,7 @@ extern "C" void func_001D77E8(void)
     char* m3 = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* m3vt = *(sVEntryV001D69E0**)(m3 + 8);
     char* m3this = m3 + m3vt[26].delta;
-    char* o3 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o3 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o3vt = *(sVEntry001D69E0**)(o3 + 4);
     char* o3this = o3 + o3vt[4].delta;
     void* str3 = o3vt[4].fn(o3this, GetHashValue32(D_00462C88));
@@ -649,7 +649,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_00467848[];
 extern char D_0045F7E0[];
@@ -663,11 +663,11 @@ struct sVEntryI_001D7998 {
 extern "C" void func_001D7998(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     *(int*)((char*)D_004A2028 + 0x19C) = 0x13;
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467848));
     char* sf = *(char**)(mp + 0x434);
@@ -680,7 +680,7 @@ extern "C" void func_001D7998(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
@@ -699,7 +699,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00467848[];
 extern char D_0045F7E0[];
 
@@ -717,10 +717,10 @@ extern "C" void func_001D7B18(void)
 {
     unsigned short buf[0x320];
     sLocal_001D7B18 name;
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     *(int*)((char*)D_004A2028 + 0x19C) = 0x13;
     func_00241DC8(mp, &name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467848));
     char* sf = *(char**)(mp + 0x434);
@@ -733,7 +733,7 @@ extern "C" void func_001D7B18(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
@@ -749,7 +749,7 @@ extern char D_0045F7E0[];
 
 extern "C" void cFEMemCard_callbackFileExists(void)
 {
-    void* app = D_004A28A8;
+    void* app = SSXApp;
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x17;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
@@ -758,7 +758,7 @@ extern "C" void cFEMemCard_callbackFileExists(void)
     vt[36].fn(fe + vt[36].delta, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467860)), 1, 0, 0, 0, 0);
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     mvt[26].fn(m + mvt[26].delta, o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0)), 0);
     *(int*)((char*)D_004A2028 + 0x1C0) = 1;
@@ -776,7 +776,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_00467878[];
 extern char D_0045F7E0[];
@@ -784,10 +784,10 @@ extern char D_0045F7E0[];
 extern "C" void func_001D7D70(void)
 {
     unsigned short name[0x100];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     unsigned short* buf = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467878)), name);
     char* fe = (char*)D_004A2028;
@@ -797,7 +797,7 @@ extern "C" void func_001D7D70(void)
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     char* o2this = o2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(D_0045F7E0));
@@ -818,7 +818,7 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* strcpy1(void* dst, void* src);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_00467898[];
 extern char D_0045F7E0[];
@@ -827,14 +827,14 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
 {
     if (*(int*)((char*)D_004A2028 + 0x204) == 0) {
         void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
         strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_00467898)));
         char* fe = (char*)D_004A2028;
         *(int*)(fe + 0x19C) = 7;
         sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
         vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
-        char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o2 = *(char**)((char*)SSXApp + 0x8C);
         sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
         void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
         char* m = *(char**)((char*)D_004A2028 + 0x218);
@@ -864,16 +864,16 @@ extern "C" int func_001D8020(void)
 {
     unsigned short name[0x100];
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00464640)), name);
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x8;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* o2 = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o2 = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
     void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
@@ -919,7 +919,7 @@ public:
 
 extern "C" void func_001D8160(void)
 {
-    cMoviePlayerK1D8160* mp = (cMoviePlayerK1D8160*)cSSXApp_getMCManager(D_004A28A8);
+    cMoviePlayerK1D8160* mp = (cMoviePlayerK1D8160*)cSSXApp_getMCManager(SSXApp);
     int next = *(int*)((char*)mp + 0x428) + 1;
     if (next < *(int*)((char*)mp + 0x424)) {
         func_0023FB18(mp, next);
@@ -968,7 +968,7 @@ extern "C" void func_001D8240(void)
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(D_004678B0));
     if (obj) {
         unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
         strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004678C8)));
         cUIText_setUnicodeStringWrap(obj, buf);
@@ -1015,7 +1015,7 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004678B0[];
 extern char D_004678C8[];
@@ -1037,7 +1037,7 @@ static inline void SetMode_001D83A8(char* fe, int mode)
 
 extern "C" void func_001D83A8(void)
 {
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     *(int*)((char*)D_004A2028 + 0x1C0) = 1;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(mp + 0x748);
     mvt[1].fn(mp + mvt[1].delta, 2);
@@ -1052,7 +1052,7 @@ extern "C" void func_001D83A8(void)
         void* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(D_004678B0));
         if (obj) {
             unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-            char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+            char* o = *(char**)((char*)SSXApp + 0x8C);
             sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
             strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004678C8)));
             cUIText_setUnicodeStringWrap(obj, buf);
@@ -1182,7 +1182,7 @@ extern "C" void func_001D86B0(void* self)
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D8700);
 #ifdef SKIP_ASM
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_001D9308(void*, int);
 extern "C" void func_001D7190(void);
@@ -1215,7 +1215,7 @@ extern "C" void func_001D8700(void* self_, int a1, int button)
         } else if (button == 0x11) {
             choice = 2;
         }
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         switch (*(int*)(self + 0x19C)) {
         case 2:
             if (choice == 0) {
@@ -1455,14 +1455,14 @@ struct sVEntry001D8D68 {
     void (*fn)(void*, unsigned short*, int, int, int, int, int);
 };
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241E18(void*, unsigned short*, int);
 
 extern "C" void func_001D8D68(void* self)
 {
     unsigned short buf[0x320];
-    void* obj = cSSXApp_getMCManager(D_004A28A8);
+    void* obj = cSSXApp_getMCManager(SSXApp);
     *(int*)((char*)self + 0x19C) = 0x16;
     func_00241E18(obj, buf, 0x320);
     sVEntry001D8D68* vt = *(sVEntry001D8D68**)((char*)self + 8);
@@ -1487,7 +1487,7 @@ extern "C" void func_00241380(void*);
 extern "C" int func_0023C898(void*);
 extern "C" void cMCOverlayManager_update(void*);
 extern void* D_004A2028;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004A1600[];
 
@@ -1570,13 +1570,13 @@ extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
 {
     char* self = (char*)card;
     if (*(void**)(self + 0x218) == 0 && *(int*)(self + 0x1A4) == 0) {
-        if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+        if (*(int*)((char*)SSXApp + 0x84) != 0) {
             cOVState_onUpdate();
         } else {
             func_0039E510(self);
         }
     }
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (*(int*)(self + 0x1D8) == 0) {
         func_00241380(mp);
         *(int*)(self + 0x1D8) = 1;
@@ -1608,7 +1608,7 @@ extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
         break;
     case 6:
         {
-            char* mp2 = (char*)cSSXApp_getMCManager(D_004A28A8);
+            char* mp2 = (char*)cSSXApp_getMCManager(SSXApp);
             if (!BUSY_K1D8DE0(self, mp2))
                 VCALL_K1D8DE0(self, 8, 33));
         }
@@ -1684,14 +1684,14 @@ struct sVEntry001D9308 {
     void (*fn)(void*, void*, void*);
 };
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 
 extern "C" void func_001D9308(void* self, int on)
 {
     *(int*)((char*)self + 0x1F4) = on;
     if (on) {
-        char* r = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* r = (char*)cSSXApp_getMCManager(SSXApp);
         char* obj = *(char**)(r + 0x434);
         sVEntry001D9308* vt = *(sVEntry001D9308**)obj;
         vt[14].fn(obj + vt[14].delta, *(void**)(r + 0xF8), (char*)self + 0x9C);
@@ -1806,7 +1806,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_00241DC8(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045E2A0[];
 extern char D_004A1600[];
 extern char D_004A1608[];
@@ -1849,9 +1849,9 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
-            char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+            char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             func_00241DC8(mp, buf, *(int*)(mp + 0x428));
-            char* m = *(char**)((char*)D_004A28A8 + 0x8C);
+            char* m = *(char**)((char*)SSXApp + 0x8C);
             sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
             sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(D_00463F58)), buf);
             cUIText_setUnicodeStringWrap(text, str);
@@ -1863,7 +1863,7 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         break;
     }
     case 2: {
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
         if (o) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
@@ -1879,7 +1879,7 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(0x640, D_0045E2A0, 0x100, 0);
             func_00241DC8(mp, buf, *(int*)(mp + 0x428));
-            char* m = *(char**)((char*)D_004A28A8 + 0x8C);
+            char* m = *(char**)((char*)SSXApp + 0x8C);
             sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
             sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(D_00463F58)), buf);
             cUIText_setUnicodeStringWrap(text, str);
@@ -1994,7 +1994,7 @@ extern "C" int func_001D9880(void* self)
 {
     int r = 0;
     int one = 1;
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     int st = *(int*)((char*)self + 0x1C0);
     if (st != 0 && st != 6 && *(int*)(mp + 0x340) != 0 && *(int*)(mp + 0xE0) == 0
         && (*(cMovieStreamK1D9880**)(mp + 0x434))->v11() == 0) {

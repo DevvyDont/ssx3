@@ -380,7 +380,7 @@ struct sWorld_0680 {
     sGame_0680* game;
 };
 
-extern sWorld_0680* D_004A28A8_0680 __asm__("D_004A28A8");
+extern sWorld_0680* D_004A28A8_0680 __asm__("SSXApp");
 
 extern "C" void func_00100610_0680(sV4_0680*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_0680(void*, sV4_0680*) __asm__("func_00100348");
@@ -628,7 +628,7 @@ struct sCtl_0B90 {
     int target;
 };
 
-extern sWorld_0B90* D_004A28A8_0B90 __asm__("D_004A28A8");
+extern sWorld_0B90* D_004A28A8_0B90 __asm__("SSXApp");
 
 extern "C" void func_00100610_0B90(sV4_0B90*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_0B90(void*, sV4_0B90*) __asm__("func_00100348");
@@ -858,7 +858,7 @@ struct sCtl_0F88 {
     int target;
 };
 
-extern sWorld_0F88* D_004A28A8_0F88 __asm__("D_004A28A8");
+extern sWorld_0F88* D_004A28A8_0F88 __asm__("SSXApp");
 
 extern "C" void func_00100610_0F88(sV4_0F88*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_0F88(void*, sV4_0F88*) __asm__("func_00100348");
@@ -1565,12 +1565,12 @@ struct sGame_1B60 {
     char pad_0x10[0x10];
     sNashTree* nash;            // 0x20: the world's nash cell tree
 };
-// The game singleton (D_004A28A8).
+// The game singleton (SSXApp).
 struct sApp_1B60 {
     char pad_0x0[0x84];
     sGame_1B60* game;           // 0x84
 };
-extern sApp_1B60* D_004A28A8_1B60 __asm__("D_004A28A8");
+extern sApp_1B60* D_004A28A8_1B60 __asm__("SSXApp");
 // ai/focusbox.cpp: the focus box update (prototype asserts: NumFocusInstances, numfocusinstances <
 // arraysize(focusinstances), numunfocusinstances < arraysize(unfocusinstances)).
 // nash::CellKey: a cell's level (log2 of its size) and integer coordinates.
@@ -3811,7 +3811,7 @@ struct sGame_5D98 {
     char pad0[0x84];
     sMatList_5D98* matList; // 0x84
 };
-extern sGame_5D98* D_004A28A8_5D98 __asm__("D_004A28A8");
+extern sGame_5D98* D_004A28A8_5D98 __asm__("SSXApp");
 extern float D_004A4C84;
 
 struct sInfo_5D98 {
@@ -4569,7 +4569,7 @@ extern "C" int func_00106848(cRider* self)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00106F78);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern "C" int func_00108A48_6F78(cRider* self, void* land) __asm__("func_00108A48");
 extern "C" int func_00334680_6F78(void*, t4Vector*, t4Vector*, int, float) __asm__("func_00334680");
 
@@ -4857,7 +4857,7 @@ extern "C" int func_00106F78_impl(cRider* self)
     t4Vector oldVel = self->mVelocity;
     float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
-    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)(D_004A28A8 + 0x10));
+    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)(SSXApp + 0x10));
     if (hit.obj != 0) {
         char* h = *(char**)(hit.obj + 0xC);
         if (h != 0) {
@@ -5215,12 +5215,12 @@ struct sGame_7888 {
     char pad_0x0[0xC];
     sRace_7888* race;           // 0xC
 };
-// The game singleton (D_004A28A8).
+// The game singleton (SSXApp).
 struct sApp_7888 {
     char pad_0x0[0x84];
     sGame_7888* game;           // 0x84
 };
-extern sApp_7888* D_004A28A8_7888 __asm__("D_004A28A8");
+extern sApp_7888* D_004A28A8_7888 __asm__("SSXApp");
 // Rider-rider collisions: for every other active rider, push the two apart when their sphere trees touch
 // (and exchange momentum along the contact), then shove the other rider when this one runs into it.
 

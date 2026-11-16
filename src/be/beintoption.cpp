@@ -121,7 +121,7 @@ extern "C" void func_0014F458(void* self)
 INCLUDE_ASM("be/beintoption", func_0014F4F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sOptBits_0014F4F8
 {
@@ -148,7 +148,7 @@ public:
 
 extern "C" void func_0014F4F8(void* self)
 {
-    switch (*(int*)(*(char**)((char*)D_004A28A8 + 0x9C) + 0x24))
+    switch (*(int*)(*(char**)((char*)SSXApp + 0x9C) + 0x24))
     {
     case 1:
         D_00535610_v0014F4F8[0].j = 2;
@@ -246,7 +246,7 @@ extern "C" char* func_0014F6A8(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintoption", func_0014F6E8);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void USTR_strcpyW(char* dst, void* src);
 
 struct sVEntry_0014F6E8
@@ -258,7 +258,7 @@ struct sVEntry_0014F6E8
 
 extern "C" void func_0014F6E8(void* self, int i)
 {
-    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* obj = *(char**)((char*)SSXApp + 0x8C);
     sVEntry_0014F6E8* vt = *(sVEntry_0014F6E8**)(obj + 0x4);
     char* o2 = obj + vt[4].delta;
     int h = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);

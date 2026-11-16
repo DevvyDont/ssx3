@@ -132,7 +132,7 @@ extern int D_004A1A70;
 extern int D_004A2594;
 extern int D_004A2598;
 extern int D_004A25A4;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045CE48[];
 extern char D_0045CE60[];
 extern char D_0045D6A8[];
@@ -211,8 +211,8 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             break;
         }
         case 1:
-            *(int*)((char*)D_004A28A8 + 0x60) = 0;
-            cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232738(cMemMan_alloc(8, D_0045CE48, 0x100, 0)));
+            *(int*)((char*)SSXApp + 0x60) = 0;
+            cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)func_00232738(cMemMan_alloc(8, D_0045CE48, 0x100, 0)));
             return 0;
         }
     case 1:
@@ -242,7 +242,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         D_004A19D4 = a2 != 0;
         return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, 0);
     case 23:
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
         return 0;
     case 9:
     case 11:
@@ -269,7 +269,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
                 sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
                 vt[1].fn((char*)nr + vt[1].delta);
                 D_004A19DC = 1;
-                cAppMan_setNextModule((cAppMan*)D_004A28A8, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+                cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
                 break;
             }
             case 2:
@@ -386,7 +386,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         break;
     case 20:
     case 21:
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
         break;
     case 39:
         switch (a2) {
@@ -400,7 +400,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             D_004A11B8 = 1;
             sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
             vt[1].fn((char*)nr + vt[1].delta);
-            cAppMan_setNextModule((cAppMan*)D_004A28A8, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
             break;
         }
         case 1:
@@ -485,7 +485,7 @@ extern "C" void* func_001D3780(void* mem, void* owner, int a2, int a3);
 extern "C" void* func_001D4BC8(void* mem, void* owner, int a2, int a3);
 extern "C" void* func_001F3700(void* self, void* owner);
 extern "C" void* func_001F3FF8(void* mem, void* owner);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A19D8;
 extern int D_004A1A70;
 extern int D_004A2594;
@@ -617,7 +617,7 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
             }
             return func_0018D240(cMemMan_alloc(0x4C, D_00460D60, 0, 0), *self);
         case 1:
-            cAppMan_setNextModule((struct cAppMan*)D_004A28A8, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+            cAppMan_setNextModule((struct cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
             break;
         case 2:
             if (IsMode1_1A16C0()) {
@@ -731,7 +731,7 @@ extern int D_004A4324;
 extern int D_004A45D8;
 extern int D_004A43C8;
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sVec3K1A1DC0 {
     int x, y, z;
@@ -755,7 +755,7 @@ extern "C" void func_001A1DC0(char* self)
     *(int*)(self + 0xB5ADC) = 0;
     cBE_setState(0);
     func_00369FF8(D_004A289C);
-    func_00195E58(*(void**)((char*)D_004A28A8 + 0x8C));
+    func_00195E58(*(void**)((char*)SSXApp + 0x8C));
     D_004A4324 = 0;
     D_004A45D8 = 0;
     D_004A43C8 = 0;
@@ -788,7 +788,7 @@ extern "C" void* func_001A2E20(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* func_0028B180();
 extern "C" void func_00285FB0(void* snd);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A289C;
 extern char* D_004A5B64;
 extern char D_00461278[];
@@ -850,7 +850,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     func_0014BD78(iface);
     func_0014AF10(iface);
-    func_00195BE0(*(void**)((char*)D_004A28A8 + 0x8C));
+    func_00195BE0(*(void**)((char*)SSXApp + 0x8C));
     progress_1E80(50.0f);
     {
         char* g = (char*)D_004A289C;
@@ -867,7 +867,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     cRealFE_loadCharAnimations_1(self);
     func_0019CE68((char*)self + 0x1A70);
     func_001A0498((char*)self + 0xB0);
-    sCam_1E80* cam = *(sCam_1E80**)((char*)D_004A28A8 + 0x7C);
+    sCam_1E80* cam = *(sCam_1E80**)((char*)SSXApp + 0x7C);
     sV4_1E80 pos;
     sV4_1E80 up;
     sV4_1E80 t;
@@ -896,7 +896,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     ui2->input = in;
     self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(0x14, D_00461298, 0, 0), self->ui);
     self->ui->sound = func_001A2E20(cMemMan_alloc(8, D_004612A8, 0, 0));
-    char* g = (char*)D_004A28A8;
+    char* g = (char*)SSXApp;
     void* a = *(void**)(g + 0x8C);
     self->ui->f10 = a;
     void* b = *(void**)(g + 0x88);
@@ -943,7 +943,7 @@ struct sVEntry001A2190 {
 };
 
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_005047F8[];
 extern "C" void func_001A2BC0(void* self);
 extern "C" void func_001A04C8(void* p);
@@ -961,7 +961,7 @@ extern "C" void func_001A2190(void* self)
     func_001A04C8((char*)self + 0xB0);
     func_0019CF40((char*)self + 0x1A70);
     func_0038ADB0(D_005047F8);
-    char* st = (char*)D_004A28A8;
+    char* st = (char*)SSXApp;
     *(int*)(st + 0x7C) = 0;
     *(int*)(st + 0x80) = 0;
     func_00286200(func_0028B180());
@@ -1203,7 +1203,7 @@ extern int D_0044124C[];
 extern int D_00441250[];
 extern int D_00441254[];
 extern unsigned int D_00535610[];
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A29EC;
 extern void* D_004A3028;
 
@@ -1264,7 +1264,7 @@ extern "C" void func_001A27A0(char* self)
         func_00253938(*(void**)(self + 0xB5AD4));
         if (*(int*)(self + 0xB5AD8) != 0) {
             for (int i = 0; i < 2; i++) {
-                void** p = *(void***)((char*)D_004A28A8 + (i << 2) + 0xB0);
+                void** p = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
                 int ok = *p != 0 && **(int**)p != 0;
                 if (ok) {
                     if (cInput_getState(p, 0x70) != 0 || cInput_getState(p, 0x7A) != 0) {
@@ -1290,7 +1290,7 @@ extern "C" void func_001A27A0(char* self)
     return;
     }
 noh:
-        if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+        if (*(int*)((char*)SSXApp + 4) == 0) {
             func_00398038(*(void**)(self + 0xC));
         } else {
             *(int*)(self + 8) = 1;
@@ -1300,8 +1300,8 @@ noh:
         vt[3].fn(obj + vt[3].delta);
         func_0019D250(self + 0x1A70);
         func_001A0608(self + 0xB0);
-        if (*(void**)((char*)D_004A28A8 + 0x11C) != 0) {
-            cFEAsyncManager_Update(*(void**)((char*)D_004A28A8 + 0x11C));
+        if (*(void**)((char*)SSXApp + 0x11C) != 0) {
+            cFEAsyncManager_Update(*(void**)((char*)SSXApp + 0x11C));
         }
         if (D_004A29EC != 0) {
             func_00263828(self + 0xB5AB0);
@@ -1398,7 +1398,7 @@ extern char D_00461370[];
 extern void* D_0046BC58[];
 extern int D_004A19C4;
 extern int D_004A19D8;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A2EB8;
 extern char* D_004A2EEC;
 extern void* D_004A33F4;
@@ -1451,7 +1451,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
         func_0025B6D8(D_004A3028, 1);
-        func_0014ECA0(cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7), 0);
+        func_0014ECA0(cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7), 0);
         func_0014DE28(cBE_getBE(), 1);
         func_0014DE28(cBE_getBE(), 2);
         D_004A19C4 = 0;

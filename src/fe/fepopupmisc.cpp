@@ -3535,7 +3535,7 @@ void func_001E1548(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1550);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -3549,7 +3549,7 @@ unsigned int BXrand();
 
 extern "C" void func_001E1550(void)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -3686,7 +3686,7 @@ extern "C" int func_001E1AD0(sRangeK1E1AD0* r, int arg)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1C10);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -3705,7 +3705,7 @@ extern sEntry14_1C10 D_00441630_1C10[] __asm__("D_00441630");
 
 extern "C" void func_001E1C10(int which)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -3784,12 +3784,12 @@ extern "C" void func_001E1C10(int which)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1DD0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int id, int a1);
 static inline int IsBusy001E1DD0()
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     return n != 0 && n < 10;
 }
 // Queues the follow-up popup for an event kind unless one is already pending.
@@ -3815,7 +3815,7 @@ extern "C" void func_001E1DD0(void* self, int kind, int alt)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1EB8);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E20D0(int which, int flag);
@@ -3823,7 +3823,7 @@ extern "C" void func_001E2220(int which, int flag);
 
 extern "C" void func_001E1EB8(void)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         if (func_001E3A30((void*)0x28) != 0) {
@@ -3876,7 +3876,7 @@ extern "C" void func_001E1EB8(void)
 INCLUDE_ASM("fe/fepopupmisc", func_001E20D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
@@ -3890,7 +3890,7 @@ extern sEntry14_20D0 D_00441630_20D0[] __asm__("D_00441630");
 
 extern "C" void func_001E20D0(int which, int flag)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -3936,7 +3936,7 @@ extern "C" void func_001E20D0(int which, int flag)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2220);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
@@ -3950,7 +3950,7 @@ extern sEntry14_2220 D_00441630_2220[] __asm__("D_00441630");
 
 extern "C" void func_001E2220(int which, int flag)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -3995,12 +3995,12 @@ extern "C" void func_001E2220(int which, int flag)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2370);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_001E3A78(int a, int b);
 
 extern "C" void func_001E2370(int which)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -4024,14 +4024,14 @@ extern "C" void func_001E2370(int which)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2428);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
 extern "C" void func_001E2428(int which)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
@@ -4061,14 +4061,14 @@ extern "C" void func_001E2428(int which)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2518);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
 extern "C" void func_001E2518(void)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0 && func_001E3A30((void*)0x3C) == 0) {
         func_001E3A78(0x3C, 1);
@@ -4080,14 +4080,14 @@ extern "C" void func_001E2518(void)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2578);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
 extern "C" void func_001E2578(void)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0 && func_001E3A30((void*)0x38) == 0) {
         func_001E3A78(0x38, 1);
@@ -4099,13 +4099,13 @@ extern "C" void func_001E2578(void)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E25D8);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_001E2648(void* a, int b);
 extern "C" void func_001E2828(void* a, int b);
 
 extern "C" void func_001E25D8(int key, void* a1, int a2)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (key) {
@@ -4123,7 +4123,7 @@ extern "C" void func_001E25D8(int key, void* a1, int a2)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2648);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -4137,7 +4137,7 @@ extern "C" void func_001E32C8(int type);
 extern "C" void func_001E2648_impl(int which, int flag) __asm__("func_001E2648");
 extern "C" void func_001E2648_impl(int which, int flag)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -4214,7 +4214,7 @@ extern "C" void func_001E2648_impl(int which, int flag)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2828);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -4228,7 +4228,7 @@ extern "C" void func_001E32C8(int type);
 extern "C" void func_001E2828_impl(int which, int flag) __asm__("func_001E2828");
 extern "C" void func_001E2828_impl(int which, int flag)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -4306,7 +4306,7 @@ extern "C" void func_001E2828_impl(int which, int flag)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2A08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -4327,7 +4327,7 @@ extern sEntry14_2A08 D_00441630_2A08[] __asm__("D_00441630");
 
 extern "C" void func_001E2A08(int charID, int level)
 {
-    int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int busy = n != 0 && n < 10;
     if (busy)
         return;
@@ -4598,7 +4598,7 @@ extern "C" int func_001E2EA0(int kind)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2FE0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A20D0[];
 extern "C" void func_001E31B8(int idx);
 extern "C" unsigned char func_001E3100(int i);
@@ -4641,7 +4641,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     t->entries[t->count].id = id;
     t->entries[t->count].flag = flag;
     t->mask &= ~(1 << t->count);
-    char* o = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+    char* o = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48);
     if (o != 0) {
         char* obj = (char*)cUIStateStack_findState(o + 0x18, GetHashValue32(D_004A20D0));
         if (obj != 0) {
@@ -5706,7 +5706,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4758);
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0046E0A8[];
 extern char D_0046E0C0[];
 
@@ -5720,14 +5720,14 @@ extern "C" void func_001E4758(void* self)
 {
     unsigned short buf[0x38];
     if (*(void**)((char*)self + 0x13C) != 0) {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry001E4758* vt = *(sVEntry001E4758**)(o + 4);
         unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E0A8));
         sprintf1(buf, fmt, func_001E33E8_noarg());
         cUIText_setUnicodeString(*(void**)((char*)self + 0x13C), buf);
     }
     if (*(void**)((char*)self + 0x140) != 0) {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry001E4758* vt = *(sVEntry001E4758**)(o + 4);
         unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E0C0));
         sprintf1(buf, fmt, func_001E3408());
@@ -6346,7 +6346,7 @@ extern "C" void func_001E5428(void* self)
     if (*(void**)((char*)self + 0x4C) != 0) {
         if (e->type == 4) {
             unsigned short buf[0x18];
-            char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+            char* mgr = *(char**)((char*)SSXApp + 0x8C);
             sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
             unsigned short* fmt = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046E2D0));
             sprintf1(buf, fmt, func_001E2DC0(*(int*)((char*)self + 0x68)));
@@ -6708,26 +6708,26 @@ extern "C" void func_001E5B80(void* self)
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     signed char event = D_00535BC8[0x48];
-    sInfo5B80* info = *(sInfo5B80**)((char*)D_004A28A8 + 0xC0);
+    sInfo5B80* info = *(sInfo5B80**)((char*)SSXApp + 0xC0);
     int kind = info->kind;
     cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E388));
     func_002C2540_5B80(title, (char*)func_00144BF0_5B80(iface0));
     unsigned short* fmt = 0;
     switch (event) {
     case 1: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
         fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E398));
         break;
     }
     case 2: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
         fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E3A8));
         break;
     }
     case 3: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
         fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E3C0));
         break;
@@ -6886,7 +6886,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_0020A6F0(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_00536730[];
 extern char D_0046E418[];
 extern char D_0046E4E8[];
@@ -6896,7 +6896,7 @@ extern "C" void func_001E64C8(void* self)
 {
     char buf[32];
     cUIState_onGainFocus_v(self);
-    int* p = *(int**)((char*)D_004A28A8 + 0xC0);
+    int* p = *(int**)((char*)SSXApp + 0xC0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int x = *p;
     int n = D_00536730[cBENewPlayerInterface_getHumanRider(iface, 0)] + 1;
@@ -6916,7 +6916,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E65B8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0046E510[];
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void func_0026F898(void* self, int val);
 
@@ -6925,7 +6925,7 @@ extern "C" int func_001E65B8(void* self, void* a1)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E510));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), *(unsigned char*)((char*)a1 + 4));
+            func_0026F898(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28), *(unsigned char*)((char*)a1 + 4));
         }
     }
     return 0;
@@ -7005,7 +7005,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
@@ -7097,7 +7097,7 @@ struct t3Vector {
     float x, y, z;
 };
 
-// The race setup at D_004A28A8 + 0xC0 (mode, then per-slot rider and outfit ids).
+// The race setup at SSXApp + 0xC0 (mode, then per-slot rider and outfit ids).
 struct sRaceSetup_6718 {
     int mode;
     char pad_0x4[0x14];
@@ -7109,7 +7109,7 @@ struct sRaceSetup_6718 {
 
 static inline unsigned short* Loc1E6718(char* name)
 {
-    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* obj = *(char**)((char*)SSXApp + 0x8C);
     sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -7121,7 +7121,7 @@ extern "C" int func_001E6718(void* self)
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* net = cBE_getInterface_Fv(cBE_getBE(), 2);
-        sRaceSetup_6718* p = *(sRaceSetup_6718**)((char*)D_004A28A8 + 0xC0);
+        sRaceSetup_6718* p = *(sRaceSetup_6718**)((char*)SSXApp + 0xC0);
         int mode = p->mode;
         int track = D_00535BC8[0x48];
         int players = D_00535BC8[0x49];
@@ -7196,7 +7196,7 @@ extern "C" int func_001E6718(void* self)
         if (track == 5 || track == 6) {
             count = 2;
         } else if (track == 0) {
-            count = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x78);
+            count = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x78);
         } else if (players == 2) {
             count = 2;
         }
@@ -7293,7 +7293,7 @@ extern "C" int func_001E6718(void* self)
             }
         } else {
             ids.v[0] = 3;
-            if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x78) != players || same) {
+            if (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x78) != players || same) {
                 ((cUIThing*)t)->setVisible(0);
             } else {
                 if (D_00536730[pl0] < D_00536730[pl1]) {
@@ -7361,7 +7361,7 @@ extern "C" int func_001E6718(void* self)
             sprintf(text, D_0046E4C0, i);
             cUIThing* button = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(text));
             if (button != 0) {
-                cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+                cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
                 if (D_00534B30[0] != 0) {
                     if (i < 1) {
                         cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[netIds[i]]));
@@ -7428,7 +7428,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void func_003A1310(void* self, int a1);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int* D_004A2EEC;
 extern int D_00534B30[];
 extern int D_00536730[];
@@ -7476,7 +7476,7 @@ extern "C" void func_001E75D0(void* self)
         sprintf(buf, D_0046E638, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
     }
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] != 0 && D_004A2EEC != 0 && *D_004A2EEC != 0) {
         cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E7C8));
         if (o != 0) {
@@ -7575,10 +7575,10 @@ extern "C" int func_001E7AA8(void* self, void* a1)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E510));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), *(unsigned char*)((char*)a1 + 4));
+            func_0026F898(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28), *(unsigned char*)((char*)a1 + 4));
         }
     }
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] != 0 && D_004A2EEC != 0 && *D_004A2EEC != 0) {
         sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)a1 + 8);
         if (vt[27].fn((char*)a1 + vt[27].delta) != 0) {
@@ -7635,7 +7635,7 @@ extern "C" char* func_0020A1A8(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern signed char D_00535BC8[];
 extern int D_004A213C;
 extern int D_00536730[];
@@ -7685,7 +7685,7 @@ extern "C" void func_001E7BB0(void* self)
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
     }
-    int* p = *(int**)((char*)D_004A28A8 + 0xC0);
+    int* p = *(int**)((char*)SSXApp + 0xC0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
@@ -7741,7 +7741,7 @@ extern "C" void func_001E7BB0(void* self)
     } else {
         o->setVisible(0);
     }
-    char* r = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + off + 0x28);
+    char* r = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + off + 0x28);
     if (D_00535BC8[0x49] == 2
         || *(int*)(r + 0x480) != 0
         || D_00535BC8[0x4A] == 6 || D_00535BC8[0x4A] == 7 || D_00535BC8[0x4A] == 8) {
@@ -7764,7 +7764,7 @@ extern "C" void func_001E8098(void* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    char* riders = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    char* riders = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
     char* rider = *(char**)(riders + (idx << 2) + 0x28);
     if (*(int*)(rider + 0x480) != 0) {
         limit = 1.0f;
@@ -7772,8 +7772,8 @@ extern "C" void func_001E8098(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        func_0039F840(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18);
-        func_00231320(*(void**)((char*)D_004A28A8 + 0x84));
+        func_0039F840(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48) + 0x18);
+        func_00231320(*(void**)((char*)SSXApp + 0x84));
     }
 }
 #endif
@@ -7781,7 +7781,7 @@ extern "C" void func_001E8098(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8160);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_0039F840(void* list);
 extern "C" void func_00231320(void* self);
 
@@ -7789,7 +7789,7 @@ extern "C" void func_001E8160(void* self, void* a1, int a2)
 {
     if (a1 != 0) {
         if (a2 == 5 && *(int*)((char*)self + 0xA0) != 0) {
-            char* g = *(char**)((char*)D_004A28A8 + 0x84);
+            char* g = *(char**)((char*)SSXApp + 0x84);
             func_0039F840(*(char**)(g + 0x48) + 0x18);
             func_00231320(g);
         }
@@ -7885,7 +7885,7 @@ extern "C" void func_001E8200(void* self)
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
-    int* p = *(int**)((char*)D_004A28A8 + 0xC0);
+    int* p = *(int**)((char*)SSXApp + 0xC0);
     signed char event = D_00535BC8[0x48];
     cUIState_hideObjSafe(self, D_0046E828);
     cUIState_hideObjSafe(self, D_0046E838);
@@ -7945,7 +7945,7 @@ extern "C" void func_001E8200(void* self)
         cUIState_showObjSafe(self, D_004A21A8);
     }
     o = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E868));
-    char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* loc = *(char**)((char*)SSXApp + 0x8C);
     sVEntry8200* vt = *(sVEntry8200**)(loc + 4);
     strcpy1(fmt, vt[4].fn(loc + vt[4].delta, GetHashValue32(D_0046E898)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
@@ -7960,7 +7960,7 @@ extern "C" void func_001E8200(void* self)
     } else {
         o->setVisible(0);
     }
-    char* r = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + off + 0x28);
+    char* r = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + off + 0x28);
     if (D_00535BC8[0x49] == 2
         || *(int*)(r + 0x480) != 0
         || D_00535BC8[0x4A] == 9 || D_00535BC8[0x4A] == 10 || D_00535BC8[0x4A] == 11
@@ -7983,7 +7983,7 @@ extern "C" void func_001E87B8(void* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    char* riders = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    char* riders = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
     char* rider = *(char**)(riders + (idx << 2) + 0x28);
     if (*(int*)(rider + 0x480) != 0) {
         limit = 1.0f;
@@ -7991,8 +7991,8 @@ extern "C" void func_001E87B8(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        func_0039F840(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18);
-        func_00231320(*(void**)((char*)D_004A28A8 + 0x84));
+        func_0039F840(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48) + 0x18);
+        func_00231320(*(void**)((char*)SSXApp + 0x84));
     }
 }
 #endif
@@ -8000,7 +8000,7 @@ extern "C" void func_001E87B8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8880);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_0039F840(void* list);
 extern "C" void func_00231320(void* self);
 
@@ -8008,7 +8008,7 @@ extern "C" void func_001E8880(void* self, void* a1, int a2)
 {
     if (a1 != 0) {
         if (a2 == 5 && *(int*)((char*)self + 0xA0) != 0) {
-            char* g = *(char**)((char*)D_004A28A8 + 0x84);
+            char* g = *(char**)((char*)SSXApp + 0x84);
             func_0039F840(*(char**)(g + 0x48) + 0x18);
             func_00231320(g);
         }
@@ -8070,7 +8070,7 @@ extern "C" char* func_0020A1A8(int v);
 extern "C" void* func_001FD190(int v);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern signed char D_00535C12[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -8132,7 +8132,7 @@ extern "C" void func_001E8920(void* self)
     cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* p = *(char**)((char*)D_004A28A8 + 0xC0);
+    char* p = *(char**)((char*)SSXApp + 0xC0);
     int trk = D_00535C12[0];
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A21B0));

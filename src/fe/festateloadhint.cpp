@@ -468,7 +468,7 @@ INCLUDE_ASM("fe/festateloadhint", func_00246278);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" int func_00144C98(void* iface);
 extern "C" int func_00144BF0(void* iface);
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern signed char D_00535C10[];
 extern char D_004A2BD8[];
 extern char D_0047BA48[];
@@ -489,7 +489,7 @@ struct sVEntry_246278 {
 
 static inline int Loc_246278(char* key)
 {
-    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* obj = *(char**)((char*)SSXApp + 0x8C);
     sVEntry_246278* vt = *(sVEntry_246278**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
 }
@@ -628,7 +628,7 @@ struct sVEntV_2464E8 {
 
 static inline void* Loc_2464E8(char* key)
 {
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEnt_2464E8* vt = *(sVEnt_2464E8**)(o + 4);
     return vt[4].fn(o + vt[4].delta, GetHashValue32(key));
 }
@@ -794,7 +794,7 @@ extern signed char D_00535C11[];
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
@@ -859,7 +859,7 @@ extern "C" void func_00246CF8(void* self, char player)
         if (D_005308B8[cBENewPlayerInterface_getHumanRider(iface1, player != 0)].b1) {
             rank = 1;
         }
-        cBE_getInterface_Fv(*(void**)(D_004A28A8 + 0x78), 7);
+        cBE_getInterface_Fv(*(void**)(SSXApp + 0x78), 7);
         if (D_004A2EB8 != 0 && (player == 1 || D_00534B30_6CF8.f4 != 0)) {
             if (D_00534B30_6CF8.f4 != 0) {
                 rank = 8;
@@ -918,7 +918,7 @@ extern "C" void func_00246CF8(void* self, char player)
             if (label != 0 && bar != 0) {
                 int v = stats[i];
                 int level = v / 5;
-                char* o = *(char**)(D_004A28A8 + 0x8C);
+                char* o = *(char**)(SSXApp + 0x8C);
                 sVEntry_6CF8<void*(void*, int)>* vt = *(sVEntry_6CF8<void*(void*, int)>**)(o + 4);
                 sprintf1(text, (unsigned short*)vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BCB8)), level);
                 sVEntry_6CF8<void(void*, int)>* vt2 = *(sVEntry_6CF8<void(void*, int)>**)(label + 8);
@@ -967,7 +967,7 @@ extern unsigned int D_00536640[];
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
@@ -1038,7 +1038,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     char buf[0x20];
     char fmt[0x20];
     char side = player;
-    cBE_getInterface_Fv(*(void**)(D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)(SSXApp + 0x78), 7);
     if (D_00534B30[2] == 0 && D_00534B30[0] != 0) {
         player = !player;
     }
@@ -1067,7 +1067,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     }
     obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankName.c));
     if (obj != 0) {
-        cBE_getInterface_Fv(*(void**)(D_004A28A8 + 0x78), 7);
+        cBE_getInterface_Fv(*(void**)(SSXApp + 0x78), 7);
         int rank;
         if (D_00534B30[0] != 0 && D_00534B30[1] != 0) {
             rank = 8;
@@ -1076,7 +1076,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
         }
         unsigned short fmtw[50];
         unsigned short text[100];
-        char* o = *(char**)(D_004A28A8 + 0x8C);
+        char* o = *(char**)(SSXApp + 0x8C);
         sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(o + 4);
         strcpy1(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
         sprintf1(text, fmtw, rank);
@@ -1172,7 +1172,7 @@ extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" double fptodp(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern char D_004A2C28[];
 extern char D_0047BC80[];
 extern char D_0047BEC8[];
@@ -1206,7 +1206,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         func_002C2540(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BED8)) {
-        char* o = *(char**)(D_004A28A8 + 0x8C);
+        char* o = *(char**)(SSXApp + 0x8C);
         sVEnt_7AB0* vt = *(sVEnt_7AB0**)(o + 4);
         strcpy1(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
         sprintf1(text, fmtw, func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));

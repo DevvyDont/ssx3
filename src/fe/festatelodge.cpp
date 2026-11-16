@@ -113,7 +113,7 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_00441AF8[];
 extern char D_0046EEA8[];
 extern char D_0046EEC0[];
@@ -146,7 +146,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if (*(int*)(w + 0x18) == 0 && *(int*)(self + 0x4C) == 0) {
-        char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* mgr = *(char**)((char*)SSXApp + 0x8C);
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EEA8));
         void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
@@ -157,7 +157,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
     }
     int k = *(int*)(w + 0x18);
     if (k == 6 && *(int*)(self + 0x4C) == 0) {
-        char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* mgr = *(char**)((char*)SSXApp + 0x8C);
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EED0));
         void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
@@ -214,7 +214,7 @@ extern "C" void cUIStateStack_pushSpecial(void* list, void* item, int a2, int a3
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0046EDC0[];
 extern char D_0046E050[];
 extern char D_0046EEC0[];
@@ -298,7 +298,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
             break;
         }
         case 6: {
-            char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
+            char* mgr = *(char**)((char*)SSXApp + 0x8C);
             sVE_1F3CF0s* vt = *(sVE_1F3CF0s**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EF08));
             void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);

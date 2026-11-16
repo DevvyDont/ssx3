@@ -53,7 +53,7 @@ extern "C" int func_0014B988(void* iface, int a1, int a2, void* ent, char* buf);
 extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int a5);
 extern "C" int func_0019CCE8(void* self, int a1, int a2);
 extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItemE7F0 {
@@ -84,7 +84,7 @@ static inline sItemE7F0* getItemK19E7F0(sItemListE7F0* list, int i)
 
 extern "C" void func_0019E7F0(int* self)
 {
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     sItemListE7F0* list = (sItemListE7F0*)func_0014AD28(iface, self[1], self[0]);
@@ -240,7 +240,7 @@ extern "C" int func_0019CCE8(void* self, int a1, int a2);
 extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
 extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItemEC68 {
@@ -261,7 +261,7 @@ extern "C" void func_0019EC68(void* p)
     if (self[0] < 0)
         return;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     sItemListEC68* list = (sItemListEC68*)func_0014AD28(iface, self[1], self[0]);
     int n = list->count;
     int i;
@@ -1084,7 +1084,7 @@ int func_0014D988(void* db, int g);
 extern "C" int func_0019CCE8(void* self, int a1, int a2);
 extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItemFA78 {
@@ -1117,7 +1117,7 @@ extern "C" void func_0019FA78(int* self, sItemListFA78* list)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     if (self[1] < 0)
         return;
     if (self[0] < 0)
@@ -1161,7 +1161,7 @@ extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019E070(void* mgr, int bank);
 struct sItemListFA78;
 extern "C" void func_0019FA78(int* self, sItemListFA78* list);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItemFBE0 {
@@ -1194,7 +1194,7 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int a3)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     func_0019FA78(self, (sItemListFA78*)list);
     *(int*)((char*)self + 0xCB8) = 0;
     *(int*)((char*)self + 0xCC0) = 0;
@@ -1230,7 +1230,7 @@ extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" int func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItemFD58 {
@@ -1253,7 +1253,7 @@ extern "C" int func_0019FD58(int* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sItemListFD58* list = (sItemListFD58*)func_0014AD28(iface, self[1], self[0]);
     int n = list->count;
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     for (int i = 0; i < n; i++) {
         sItemFD58* it = &list->items[i];
         int r = func_0019CCE8(D_004A1968, self[1], it->id);
@@ -1296,7 +1296,7 @@ extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
 extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int a5);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0019DF20(void* mgr, int bank);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItemFF00 {
@@ -1329,7 +1329,7 @@ extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, i
 {
     int n = list->count;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     for (int i = 0; i < n; i++) {
         sItemFF00* it = &list->items[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
@@ -1383,7 +1383,7 @@ void* func_00314A40_data(void* self, void* data) __asm__("func_00314A40__FPv");
 extern "C" void func_00314988(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A1968;
 
 struct sItem_A0100 {
@@ -1436,7 +1436,7 @@ extern "C" int func_001A0100(int* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sItemList_A0100* list = (sItemList_A0100*)func_0014AD28(iface, self[1], self[0]);
     int n = list->count;
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
     for (int i = 0; i < n; i++) {
         sItem_A0100* it = &list->items[i];
         int r = func_0019CBE0(D_004A1968, self[1], it->id);

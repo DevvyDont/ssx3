@@ -261,7 +261,7 @@ struct sApp_B1B0 {
     char pad[0x78];
     void* be;
 };
-extern sApp_B1B0* D_004A28A8;
+extern sApp_B1B0* SSXApp;
 
 struct sNet_B1B0 {
     int f0;
@@ -333,7 +333,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     func_0017A638(&self->sub);
     cBackgroundMan_loadImages((sBgMan_17ACC8*)self->bg);
     void* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
-    void* iface7 = cBE_getInterface_B1B0(D_004A28A8->be, 7);
+    void* iface7 = cBE_getInterface_B1B0(SSXApp->be, 7);
     self->f8C24 = 0;
     *(int*)cBE_getBE() = self->f8C24;
     self->f8C24 = 0;
@@ -479,7 +479,7 @@ struct sApp_B4E0 {
     char pad84[0xB0 - 0x84];
     void* input;                 // 0xB0
 };
-extern sApp_B4E0* D_004A28A8_b4 __asm__("D_004A28A8");
+extern sApp_B4E0* D_004A28A8_b4 __asm__("SSXApp");
 
 struct sRace_B4E0 {
     char pad[0x3C];

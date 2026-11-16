@@ -1305,7 +1305,7 @@ void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00466098[];
 extern char D_004660A8[];
 extern char D_004A1408[];
@@ -1333,7 +1333,7 @@ extern "C" void cScreenPopup_setTextString1(void* self, void* dst, int* info)
         cBXString_cBXString4(dst, (const char*)info[1]);
         break;
     case 3: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry_80E8* vt = *(sVEntry_80E8**)(o + 4);
         unsigned short* str = vt[4].fn(o + vt[4].delta, info[1]);
         if (str) {
@@ -1402,7 +1402,7 @@ extern "C" void* cUIText_getFont(void* self);
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" float func_003921F0(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004660A8[];
 
 struct sVEntry_8320 {
@@ -1430,7 +1430,7 @@ extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
         func_00391FB0(f, (const char*)info[1], out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         break;
     case 3: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry_8320* vt = *(sVEntry_8320**)(o + 4);
         char* str = vt[4].fn(o + vt[4].delta, info[1]);
         if (str) {
@@ -1758,7 +1758,7 @@ INCLUDE_ASM("fe/fepopup", func_001C8EF0);
 extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
 extern "C" void func_001C9210_s(void* self, void* text, const char* str, float* size) __asm__("func_001C9210");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004660A8[];
 
 struct sVEntry_8EF0 {
@@ -1787,7 +1787,7 @@ extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, flo
         func_001C9038(self, text, (unsigned short*)item[1], size);
         goto add;
     case 3: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry_8EF0* vt = *(sVEntry_8EF0**)(o + 4);
         unsigned short* str = vt[4].fn(o + vt[4].delta, item[1]);
         if (str) {
@@ -1922,7 +1922,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cScreenPopup_getMessageLineWrapSize(void* self, void* text, const char* str, void* out);
 extern "C" void func_001C94B0(void* self, void* text, void* str, void* out);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004660A8[];
 
 struct sVEntryK93B0 {
@@ -1945,7 +1945,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(void* self, int* msg, void*
         func_001C94B0(self, *(void**)((char*)self + 0x74), (void*)msg[1], out);
         break;
     case 3: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntryK93B0* vt = *(sVEntryK93B0**)(o + 4);
         void* str = vt[4].fn(o + vt[4].delta, msg[1]);
         if (str) {
@@ -2095,7 +2095,7 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* str, float* out);
 // PORT: func_001C9B28's 4th parameter is the out pointer (declared int in the unit)
 extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004660A8[];
 
 struct sVEntry_97E0 {
@@ -2123,7 +2123,7 @@ extern "C" void func_001C97E0(void* self, void* a, void* b, int which, float t)
         func_001C9938(self, text, (void*)info[1], out);
         break;
     case 3: {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntry_97E0* vt = *(sVEntry_97E0**)(o + 4);
         void* str = vt[4].fn(o + vt[4].delta, info[1]);
         if (str) {
@@ -3187,14 +3187,14 @@ struct sVEntry001CB208 {
 };
 
 extern void* D_004A2EEC;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_0039E510(void*);
 extern "C" void func_0039F190(void* self, int a1);
 
 extern "C" void func_001CB208(void* self)
 {
     func_0039E510(self);
-    if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x64) == 0 && *(int*)((char*)D_004A28A8 + 0x84) != 0) {
+    if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x64) == 0 && *(int*)((char*)SSXApp + 0x84) != 0) {
         func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
     }
     if (*(int*)((char*)self + 0x440) != 0) {
@@ -3228,7 +3228,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern int D_004A1A70;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00466398[];
 extern char D_004663A8[];
 extern char D_004663B8[];
@@ -3259,7 +3259,7 @@ extern "C" void cKeyboardPopup_onWidgetCreate(void* self, void* widget)
             sVEntryK1CB2C8* vt2 = *(sVEntryK1CB2C8**)((char*)widget + 8);
             vt2[9].fn((char*)widget + vt2[9].delta, 1);
         }
-        if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+        if (*(int*)((char*)SSXApp + 0x84) != 0) {
             sVEntryK1CB2C8* vt3 = *(sVEntryK1CB2C8**)((char*)widget + 8);
             vt3[9].fn((char*)widget + vt3[9].delta, 0);
         }
@@ -5017,7 +5017,7 @@ void func_001DA530(void* self, int i, int value);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern int D_004A1A70;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00461A70[];
 extern char D_00466940[];
 extern char D_00466950[];
@@ -5101,7 +5101,7 @@ extern "C" int func_001CDB98(void* self, char* ev)
             cKeyboardPopup_pressKey(self, 0);
         } else if (InputK1CDB98(ev, 7)) {
             if (isOnK1CDB98()) {
-                if (*(int*)((char*)D_004A28A8 + 0x84) == 0) {
+                if (*(int*)((char*)SSXApp + 0x84) == 0) {
                     changed = 1;
                     void* p = func_001D9D48(cMemMan_alloc(0x140, D_00461A70, 0x100, 0), *(void**)((char*)self + 0x10), self);
                     func_001DA528(p, 6);
@@ -5365,7 +5365,7 @@ extern "C" void USTR_strcpyW(char* dst, void* src);
 extern "C" char* func_004162D0(char* dst, const char* src);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sVEntryK1CE5E0 {
     short delta;
@@ -5380,7 +5380,7 @@ extern "C" void func_001CE5E0(void* self, int key)
     void* opt = cBE_getInterface_Fv(cBE_getBE(), 4);
     char* msg = func_0014F6A8(opt, key);
     if (msg == 0) {
-        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* o = *(char**)((char*)SSXApp + 0x8C);
         sVEntryK1CE5E0* vt = *(sVEntryK1CE5E0**)(o + 4);
         void* str = vt[4].fn(o + vt[4].delta, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)

@@ -253,7 +253,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeakByCha
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getRiderIndex(int);
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A6CAC[];
 
 // View of D_0043D950[].owner (offset 0x54); splat labels that address D_0043D9A4.
@@ -266,7 +266,7 @@ extern sMissionOwnerView_00153708 D_0043D9A4_v153708[] __asm__("D_0043D9A4");
 
 extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* self, int profile, int character, int owner)
 {
-    if (*(void**)((char*)D_004A28A8 + 0x84) != 0)
+    if (*(void**)((char*)SSXApp + 0x84) != 0)
         return cBEMissionInterface_getCurrentCollectForPeak(self, cBELibrary_getRiderIndex(profile), owner);
     int sum = 0;
     int off = profile * 0x9B50 + character * 0xF88;
@@ -439,7 +439,7 @@ struct sMissionDefView_00153C88
     char pad_0x08[0x1C];
 };
 extern sMissionDefView_00153C88 D_0043EE10_v00153C88[] __asm__("D_0043EE10");
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_00154240(void* self, int id);
 
 class cMissionObj_00153C88
@@ -455,7 +455,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionName(void* self, int id)
 {
     int i = func_00154240(self, id);
-    ((cMissionObj_00153C88*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153C88[i].f4);
+    ((cMissionObj_00153C88*)*(void**)((char*)SSXApp + 0x8C))->v4(D_0043EE10_v00153C88[i].f4);
 }
 #endif
 
@@ -471,7 +471,7 @@ struct sMissionDefView_00153CD8
     char pad_0x0C[0x18];
 };
 extern sMissionDefView_00153CD8 D_0043EE10_v00153CD8[] __asm__("D_0043EE10");
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_00154240(void* self, int id);
 
 class cMissionObj_00153CD8
@@ -487,7 +487,7 @@ public:
 extern "C" void func_00153CD8(void* self, int id)
 {
     int i = func_00154240(self, id);
-    ((cMissionObj_00153CD8*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153CD8[i].f8);
+    ((cMissionObj_00153CD8*)*(void**)((char*)SSXApp + 0x8C))->v4(D_0043EE10_v00153CD8[i].f8);
 }
 #endif
 
@@ -504,7 +504,7 @@ struct sMissionDefView_00153D28
     char pad_0x10[0x14];
 };
 extern sMissionDefView_00153D28 D_0043EE10_v00153D28[] __asm__("D_0043EE10");
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_00154240(void* self, int id);
 
 class cMissionObj_00153D28
@@ -520,7 +520,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionLongDesc(void* self, int id)
 {
     int i = func_00154240(self, id);
-    ((cMissionObj_00153D28*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153D28[i].fC);
+    ((cMissionObj_00153D28*)*(void**)((char*)SSXApp + 0x8C))->v4(D_0043EE10_v00153D28[i].fC);
 }
 #endif
 
@@ -933,7 +933,7 @@ extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("D_004A6CA8");
 
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* self, int profile, int character, int owner)
 {
-    if (*(void**)((char*)D_004A28A8 + 0x84) != 0)
+    if (*(void**)((char*)SSXApp + 0x84) != 0)
     {
         return cBEMissionInterface_getNumberCompletedMissionsOnPeak(self, owner);
     }

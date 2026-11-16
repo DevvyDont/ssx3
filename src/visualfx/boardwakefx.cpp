@@ -241,7 +241,7 @@ struct sWakeParamsD0B8 {
     float grip;
 };
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 int func_0011FE98(void*);
 extern "C" void func_002DE058_D0B8(void* self, void* surf, t4Vector* pos) __asm__("func_002DE058");
 extern "C" void func_002DDD30_D0B8(void* self, t4Vector* pos, t4Vector* fwd, float width) __asm__("func_002DDD30");
@@ -431,7 +431,7 @@ static inline float wakeMinStrengthD0B8()
 // PORT: g++ minimum/maximum operators (<?, >?).
 extern "C" void func_002DD0B8(sWakeD0B8* self)
 {
-    sWakeSurfD0B8* surf = (sWakeSurfD0B8*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + self->rider->mSurfaceType * 0xB0);
+    sWakeSurfD0B8* surf = (sWakeSurfD0B8*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x44) + self->rider->mSurfaceType * 0xB0);
     int i;
     for (i = 0; i < self->count; i++) {
         int idx = (self->head + i) % self->max;
@@ -1987,7 +1987,7 @@ struct sMtxF920 {
     sWakeVecE398 r0, r1, r2, r3;
 };
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 int func_0011FE98(void*);
 int func_0011FEE8(void*);
 int func_00312AA0(void*, int);
@@ -2129,7 +2129,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->v30 = wakeRowF920(o, 1);
     self->v40 = wakeRowF920(o, 2);
     self->pos = wakeRowF920(o, 3);
-    self->pD0 = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + *(int*)(o + 0x438) * 0xB0;
+    self->pD0 = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x44) + *(int*)(o + 0x438) * 0xB0;
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
         x = func_0011FEE8(o) != 9;
@@ -4599,21 +4599,21 @@ static inline int IsHuman_3AF8(cRider* rider)
 static inline int ShouldDraw_3AF8(sWake_3AF8* self)
 {
     int vis = 0;
-    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x7C) >= 2) {
+    if (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x7C) >= 2) {
         if (IsHuman_3AF8(self->rider)) {
-            char* views = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+            char* views = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
             if (*(unsigned int*)(views + 0x10) >= 2) {
                 vis = *(int*)(views + 0x14) != self->rider->mViewIndex;
             }
         }
-        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
         if (D_00534B30[0] != 0) {
             vis = self->rider->mIsLocal == 0;
         }
     } else if (!IsHuman_3AF8(self->rider)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if ((unsigned int)(D_00535C12[0] - 4) < 2) {
-            int mode = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78) + 0x1BC);
+            int mode = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x78) + 0x1BC);
             if ((unsigned int)(mode - 14) < 3) vis = 1;
         }
     }
@@ -5047,7 +5047,7 @@ extern "C" void func_002E46C8(char* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E47E8);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char* D_004A5B80;
 extern "C" void func_002EB8F0(void);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
@@ -5132,7 +5132,7 @@ static inline int fadeTex47E8(sFade47E8* self)
 
 extern "C" void func_002E47E8(sFade47E8* self)
 {
-    if (self->rider != *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x14)) {
+    if (self->rider != *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x14)) {
         return;
     }
     func_002EB8F0();
@@ -5929,7 +5929,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_cSnowFall);
 #ifdef SKIP_ASM
 extern void* D_00487FD8[];
 extern "C" void func_00319CC8(void);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A3B20[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -5965,7 +5965,7 @@ extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* a1)
     self->fx[3] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
     self->fx[4] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     self->fx[5] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x7C) >= 2) {
+    if (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x7C) >= 2) {
         self->fx[6] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
         self->fx[7] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
         self->fx[8] = func_002E4D88((char*)cMemMan_alloc(0xC0, D_004A3B20, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
@@ -6005,7 +6005,7 @@ extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A473C;
 extern float D_004A4740;
 extern float D_004A4744;
@@ -6048,7 +6048,7 @@ extern "C" void func_002E5DA0(void* self)
 {
     sWakeRec_5DA0 recs[2];
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x10); i++) {
+    for (i = 0; i < *(unsigned int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x10); i++) {
         if (D_004A473C != 0) {
             recs[i].f[0] = D_004A4740;
             recs[i].f[1] = D_004A4744;
@@ -6079,7 +6079,7 @@ extern "C" void func_002E5DA0(void* self)
             recs[i].c1.z = func_002EE930(k);
             recs[i].c1.w = func_002EE978(k);
         }
-        func_002F4330(func_002306A8(*(void**)((char*)D_004A28A8 + 0x84), i), recs[i].f[0]);
+        func_002F4330(func_002306A8(*(void**)((char*)SSXApp + 0x84), i), recs[i].f[0]);
     }
     int j;
     for (j = 0; j < 12; j++) {
@@ -6159,7 +6159,7 @@ struct sWakeFx_6008 {
 
 extern int D_004A4524;
 extern int D_004A4760[1];
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern sRsCtx_6008* D_004A5B80_6008 __asm__("D_004A5B80");
 extern sRsState_6008 D_00501420_6008[] __asm__("D_00501420");
 extern sV4_6008 D_004FF130;
@@ -6167,7 +6167,7 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float r, float g, float b);
 
 static inline sRiders_6008* riders_6008()
 {
-    return *(sRiders_6008**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    return *(sRiders_6008**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).

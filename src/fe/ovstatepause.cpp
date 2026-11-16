@@ -26,7 +26,7 @@ extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_00534B30[];
 extern void* D_004A33F4;
 extern char D_0046F8D8[];
@@ -141,7 +141,7 @@ struct sVE_PO {
 // Looks up a localized string by the hash of its name.
 static inline unsigned short* getString_PO(char* name)
 {
-    char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* loc = *(char**)((char*)SSXApp + 0x8C);
     sVE_PO* vt = *(sVE_PO**)(loc + 4);
     char* thisp = loc + vt[4].delta;
     return vt[4].fn(thisp, GetHashValue32(name));
@@ -169,7 +169,7 @@ static inline void setFormatted_PO(void* obj, char* name, int n)
 
 static inline char* riders_PO()
 {
-    return *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    return *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
 }
 
 extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
@@ -277,7 +277,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         o->setVisible(0);
         o->setEnabled(1);
     }
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] != 0) {
         cUIObj_PO* a = (cUIObj_PO*)find_PO(self, D_0046F9A0);
         cUIObj_PO* b = (cUIObj_PO*)find_PO(self, D_004A24D8);
@@ -321,7 +321,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_00534B30[];
 extern char D_00535BC8[];
 extern char D_004A24E0[];
@@ -351,7 +351,7 @@ static inline bool isField_FA100(signed char* g, int off, int v)
 extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] != 0 || !isField_FA100((signed char*)D_00535BC8, 0x49, 2)) {
         cUIObj_FA100* a = (cUIObj_FA100*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E0));
         if (a != 0) {
@@ -398,7 +398,7 @@ extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266F58(void* self, int a, int b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_00534B30[];
 extern void* D_004A33F4;
 extern char D_0046F9B0[];
@@ -452,7 +452,7 @@ static inline bool IsId_A238(char* obj, char* key)
 
 static inline void* Sound_A238(int slot)
 {
-    char* p = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    char* p = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
     return *(void**)(p + slot);
 }
 
@@ -466,7 +466,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
     switch (msg) {
     case 5:
         if (IsId_A238(obj, D_004A24E8)) {
-            char* stack = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+            char* stack = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48);
             char* st = (char*)func_00211088(cMemMan_alloc(0x27C, D_0046F9C0, 0x100, 0), *(void**)((char*)self + 0x10),
                                             *(unsigned char*)((char*)self + 0x14), 0x2A);
             *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
@@ -503,7 +503,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             D_00535610_A238.f16 = func_0039A738(obj) != 0;
             func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
         }
-        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
         if (D_00534B30[0] != 0 && IsId_A238(obj, D_0046F9B0)) {
             int level;
             int max;
@@ -937,7 +937,7 @@ extern "C" void cGame_exit(void* game, int a);
 extern "C" void func_0012B340(void* p);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A2A50;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -949,12 +949,12 @@ extern "C" void func_001FB2B8(void* self, void* item, int msg)
     *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
-        func_0012B340(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+        func_0012B340(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
         break;
     case 0:
     default:
-        cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 0);
+        cGame_exit(*(void**)((char*)SSXApp + 0x84), 0);
         break;
     }
 }
@@ -1208,7 +1208,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern char D_00535BC8[];
 
@@ -1285,7 +1285,7 @@ extern char D_004A2518[];
 extern char D_0046FDD8[];
 extern char D_0046FDE8[];
 
-// The game-mode manager (cGameModeMan, as in main/gamemode) that D_004A28A8 + 0xC0 points to.
+// The game-mode manager (cGameModeMan, as in main/gamemode) that SSXApp + 0xC0 points to.
 struct cGameModeMan {
     int f0;             // 0x00 current heat (1..3)
     int mode;           // 0x04
@@ -1299,7 +1299,7 @@ struct cGameModeMan {
 
 static inline unsigned short* lookupString_1FBD20(char* name)
 {
-    char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* g = *(char**)((char*)SSXApp + 0x8C);
     sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(g + 4);
     char* t = g + vt[4].delta;
     return vt[4].fn(t, GetHashValue32(name));
@@ -1329,7 +1329,7 @@ extern "C" void func_001FBD20(void* self)
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    cGameModeMan* stats = *(cGameModeMan**)((char*)D_004A28A8 + 0xC0);
+    cGameModeMan* stats = *(cGameModeMan**)((char*)SSXApp + 0xC0);
     int mode = stats->f0;
     void* o = getObj_1FBD20(self, D_0046E388);
     func_002C2540_BD20(title, func_00144BF0(iface0));
@@ -1497,7 +1497,7 @@ extern "C" void func_0020A6F0(void* self, char* text, char* label);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern "C" void func_002A31C0(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern signed char D_00535C11[];
 extern char D_0046E4E8[];
 extern char D_004A2508[];
@@ -1510,7 +1510,7 @@ extern "C" void func_001FC768(void* self)
 {
     cUIState_onGainFocus(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int* mode = *(int**)((char*)D_004A28A8 + 0xC0);
+    int* mode = *(int**)((char*)SSXApp + 0xC0);
     func_0020A6F0(self, D_004A2508, D_0046E4E8);
     if (*mode == 2) {
         func_0020A6F0(self, D_0046FDF8, D_0046E4E8);
@@ -1555,7 +1555,7 @@ extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00535BC8[];
 extern char D_0046FE08[];
 extern char D_0046E378[];
@@ -1590,7 +1590,7 @@ struct sVE_1FC878 { short delta; short index; unsigned short* (*fn)(void*, int);
 
 static inline unsigned short* lookupString_1FC878(char* name)
 {
-    char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* g = *(char**)((char*)SSXApp + 0x8C);
     sVE_1FC878* vt = *(sVE_1FC878**)(g + 4);
     char* t = g + vt[4].delta;
     return vt[4].fn(t, GetHashValue32(name));
@@ -1843,7 +1843,7 @@ struct sVEnt_1FD190 { short delta; short index; int (*fn)(void*, int); };
 // Sends the hash of the named pause-menu item to the front end's screen object.
 static inline int sendHash_1FD190(char* name)
 {
-    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* obj = *(char**)((char*)SSXApp + 0x8C);
     sVEnt_1FD190* vt = *(sVEnt_1FD190**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -1928,7 +1928,7 @@ struct sVE_1FD320 { short delta; short index; unsigned short* (*fn)(void*, int);
 
 static inline unsigned short* lookupString_1FD320(char* name)
 {
-    char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* g = *(char**)((char*)SSXApp + 0x8C);
     sVE_1FD320* vt = *(sVE_1FD320**)(g + 4);
     char* t = g + vt[4].delta;
     return vt[4].fn(t, GetHashValue32(name));
@@ -1958,7 +1958,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
         void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-        char* stats = *(char**)((char*)D_004A28A8 + 0xC0);
+        char* stats = *(char**)((char*)SSXApp + 0xC0);
         int mode = getField_1FD320((signed char*)D_00535BC8, 0x4A);
         void* o = getObj_1FD320(self, D_004A2520);
         cUIText_setAsciiString((cUIText*)o, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
@@ -2088,14 +2088,14 @@ struct sApp_DB88 {
     sGame_DB88* game;
 };
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_002872A8(void* snd);
 
 extern "C" void func_001FDB88(void* self, int a1, int a2)
 {
     if (a1 != 0 && a2 == 5) {
         D_004A26FC = 3;
-        ((sApp_DB88*)D_004A28A8)->game->mgr->f8 = 1;
+        ((sApp_DB88*)SSXApp)->game->mgr->f8 = 1;
         func_002872A8(func_0028B180());
         func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
     }
@@ -2201,7 +2201,7 @@ extern "C" void func_001FDC30(char* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FDE60);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A2A54;
 extern int D_004A2A50;
 extern int D_005366E8[];
@@ -2213,12 +2213,12 @@ extern "C" void func_0026F8A0(void* self, void* a1, int a2, int a3);
 extern "C" void func_001FDE60(void* self)
 {
     if (*(int*)((char*)self + 0x1C8) == 1) {
-        func_00270ED8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+        func_00270ED8(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28));
         *(int*)((char*)self + 0x1C8) = 0;
     }
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
     func_001D58B8(self);
-    func_0026F8A0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), 0, 0, 0);
+    func_0026F8A0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28), 0, 0, 0);
 }
 #endif
 
@@ -2409,7 +2409,7 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsi
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004700F0[];
 extern char D_00470130[];
 extern char D_00470148[];
@@ -2426,7 +2426,7 @@ extern "C" void func_001FDF40(cState_DF40* self)
 {
     unsigned short buf[0x320];
     char name[0x40];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
         if (!(*(cMCSub_DF40**)(mp + 0x434))->v53()) {
             func_001D8240();
@@ -2443,7 +2443,7 @@ extern "C" void func_001FDF40(cState_DF40* self)
         (*(cMCSub_DF40**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(o, buf);
         o->v09(0);
-        char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* g = *(char**)((char*)SSXApp + 0x8C);
         sVE_DF40* vt = *(sVE_DF40**)(g + 4);
         char* t = g + vt[4].delta;
         vt[4].fn(t, GetHashValue32(D_00470158));
@@ -2593,7 +2593,7 @@ extern "C" void func_001FE648(void* self, int a1, bool on)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE6E8);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
 void func_00270ED8(void* self);
@@ -2690,7 +2690,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         int st = *(int*)((char*)self + 0x214);
         if (st != 3)
             return;
@@ -2700,7 +2700,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
         *(int*)((char*)self + 0x1A8) = one;
         if (*(int*)((char*)self + 0x1C8) == one)
         {
-            func_00270ED8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+            func_00270ED8(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28));
             *(int*)((char*)self + 0x1C8) = 0;
         }
         func_0023CAE8(mp, 0, -1);
@@ -2711,7 +2711,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
     }
     case 6:
     {
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (*(int*)((char*)self + 0x1A8) == 1)
             return;
         int s = *(int*)((char*)self + 0x1C0);
@@ -2728,7 +2728,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
             return;
         int v = *(int*)((char*)msg + 0x18);
@@ -2752,7 +2752,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FE8F0);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 void func_00270ED8(void* self);
 extern "C" void func_001D8700(void* self, void* a1, int key);
 
@@ -2760,7 +2760,7 @@ extern "C" void func_001FE8F0(void* self, void* a1, int key)
 {
     if (key == 0x16) {
         if (*(int*)((char*)self + 0x19C) == 5) {
-            func_00270ED8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+            func_00270ED8(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28));
             *(int*)((char*)self + 0x1C8) = 0;
         }
     }
@@ -3059,7 +3059,7 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsi
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004700F0[];
 extern char D_00470130[];
 extern char D_00470148[];
@@ -3076,7 +3076,7 @@ extern "C" void func_001FECA0(cState_ECA0* self)
 {
     unsigned short buf[0x320];
     char name[0x40];
-    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v53()) {
             func_001D8240();
@@ -3092,7 +3092,7 @@ extern "C" void func_001FECA0(cState_ECA0* self)
         (*(cMCSub_ECA0**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(o, buf);
         o->v09(0);
-        char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+        char* g = *(char**)((char*)SSXApp + 0x8C);
         sVE_ECA0* vt = *(sVE_ECA0**)(g + 4);
         char* t = g + vt[4].delta;
         vt[4].fn(t, GetHashValue32(D_00470158));
@@ -3232,7 +3232,7 @@ extern "C" void func_001FF310(void* self, int a1, bool on)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
 // PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by asm label).
@@ -3328,7 +3328,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         int st = *(int*)((char*)self + 0x214);
         if (st != 3)
             return;
@@ -3344,7 +3344,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
     }
     case 6:
     {
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (*(int*)((char*)self + 0x1A8) == 1)
             return;
         int s = *(int*)((char*)self + 0x1C0);
@@ -3361,7 +3361,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
             return;
         int v = *(int*)((char*)msg + 0x18);
@@ -3604,7 +3604,7 @@ extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 void sprintf2_void(unsigned short* buf, unsigned short* fmt, ...) __asm__("sprintf2");
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00535BC8[];
 extern char D_0046F520[];
 extern char D_004A2400[];
@@ -3621,7 +3621,7 @@ struct sVE_1FFF78 { short delta; short index; unsigned short* (*fn)(void*, int);
 
 static inline unsigned short* lookupString_1FFF78(char* name)
 {
-    char* g = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* g = *(char**)((char*)SSXApp + 0x8C);
     sVE_1FFF78* vt = *(sVE_1FFF78**)(g + 4);
     char* t = g + vt[4].delta;
     return vt[4].fn(t, GetHashValue32(name));

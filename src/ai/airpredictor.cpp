@@ -80,7 +80,7 @@ struct sAirP_3200 {
 };
 
 extern sQuadR D_004FF160;
-extern void* D_004A28A8;
+extern void* SSXApp;
 // func_001139A0 is defined later in the unit (with its own vector type).
 float func_001139A0_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("func_001139A0");
 // func_0032E100 (intersect/riderspheretree) builds the capsule and returns it.
@@ -248,9 +248,9 @@ extern "C" void func_00113200(char* vself)
     func_0032E100(&w1, &p1, &p0, 1, 1.0f);
     float param;
     if (self->state == 0) {
-        param = func_00336850(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), &w1, &ti, 0);
+        param = func_00336850(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), &w1, &ti, 0);
     } else {
-        param = func_003378C0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), &w1, &ti, 0);
+        param = func_003378C0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), &w1, &ti, 0);
     }
     if (param >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
         self->f00 = ti.pos;

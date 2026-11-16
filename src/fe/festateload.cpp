@@ -240,7 +240,7 @@ INCLUDE_ASM("fe/festateload", func_00186A08);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D53B0(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_0046B570[];
 // D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
 extern void* D_004A14B8_K186A08 __asm__("D_004A14B8");
@@ -316,7 +316,7 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
     self->f19C = 0x1A;
     self->f22C = -1;
     self->f238 = -1;
-    sMemCardK186A08* mc = (sMemCardK186A08*)cSSXApp_getMCManager(D_004A28A8);
+    sMemCardK186A08* mc = (sMemCardK186A08*)cSSXApp_getMCManager(SSXApp);
     mc->f12C = one;
     mc->f124 = one;
     mc->f120 = one;

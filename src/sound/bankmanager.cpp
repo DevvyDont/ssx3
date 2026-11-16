@@ -1047,7 +1047,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028CDF8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_002B4A08(void* self, int a1);
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern int D_00536730[];
 extern int D_00536708[];
 extern char D_00482A00[];
@@ -1066,7 +1066,7 @@ extern "C" void func_0028CDF8(char* self)
     if (*(int*)(self + 0x608C) == 2) {
         return;
     }
-    sRace_28CDF8* race = *(sRace_28CDF8**)(D_004A28A8 + 0xC0);
+    sRace_28CDF8* race = *(sRace_28CDF8**)(SSXApp + 0xC0);
     if (race->mode != 3) {
         return;
     }
@@ -1754,7 +1754,7 @@ extern const sSndKey8_E8C0 D_004A3650_E8C0[] __asm__("D_004A3650");
 extern const sSndKey8_E8C0 D_004A3658_E8C0[] __asm__("D_004A3658");
 extern char D_004A3628[];
 extern signed char D_00535C10[];
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
 extern "C" void func_002ADDE0(void* mon, long key);
 extern "C" int func_002A3F90(void* self);
@@ -1860,7 +1860,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
                 int flag = 1;
                 if (func_002A4040(self) == 0) {
                     if (func_002A4078(self) || func_002A40E8(self)) {
-                        if (**(int**)(D_004A28A8 + 0xC0) >= 2) {
+                        if (**(int**)(SSXApp + 0xC0) >= 2) {
                             func_0028D488(self);
                             flag = 0;
                             func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xA, key, 0, 3, 1, 0, 0);
@@ -2166,7 +2166,7 @@ public:
 
 int GetHashValue32(char*);
 extern char D_004A3660[];
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern "C" void func_002B35A0(void* monitor);
 extern "C" float func_00287930(void* self, int a, int b);
 extern "C" cUiObj_F478* cUIStateStack_findState(void* list, int hash);
@@ -2175,7 +2175,7 @@ extern "C" void func_0028F478(void* self)
 {
     func_002B35A0((char*)self + 0x118);
     if (func_00287930(self, 1, 0) > 0.0f) {
-        char* game = *(char**)(D_004A28A8 + 0x84);
+        char* game = *(char**)(SSXApp + 0x84);
         if (game != 0) {
             char* owner = *(char**)(game + 0x48);
             if (owner != 0) {

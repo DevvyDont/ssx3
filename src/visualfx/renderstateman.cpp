@@ -1279,7 +1279,7 @@ extern "C" float func_002EEF18(int i);
 extern "C" float func_002EEF60(int i);
 extern "C" float func_002EF038(int i);
 extern "C" int func_002F7BE0(void* p);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A3B5C;
 extern int D_004A4328;
 extern int D_004A4334;
@@ -1353,7 +1353,7 @@ extern "C" void func_002F00A0(void* self, int i)
         D_004A45F8 = func_002EED50(i);
         D_004A4614 = func_002EE738(i);
         int on = 0;
-        int* st = *(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+        int* st = *(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
         if (*st == 1 || func_002F7BE0(st))
             on = 1;
         D_004A460C = on;

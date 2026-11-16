@@ -1,0 +1,4 @@
+# Global variable names from SSX On Tour's PSP dev builds (ULKS-46038), transferred to retail by
+# aligned data references in paired functions (workspace tools: ontour_names.py, ontour_globals.py).
+ps2_addr	name	previous	source	evidence
+004A28A8	SSXApp	D_004A28A8	SSXApp (cSSXApp *, 4 bytes)	data refs: release 95/107 (PSP side 95/108), debug 28/33; map size 4 = retail u32 pointer

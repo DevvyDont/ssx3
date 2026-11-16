@@ -16,7 +16,7 @@ extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 extern "C" int func_001577A0(void* self, int a1, int a2);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045D870[];
 
 struct sVE_32A8 {
@@ -38,8 +38,8 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
     sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
-    func_001A0570(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), 0);
-    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    func_001A0570(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    func_001A0508(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
     func_0028F140(func_0028B180(), 1);
     *(int*)((char*)self + 0x50) = 1;
     if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44), charID) == 0) {

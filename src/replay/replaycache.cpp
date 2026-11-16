@@ -239,7 +239,7 @@ extern "C" void func_0026DB88(void* self, void* frame);
 extern "C" void func_001620D0(void* self);
 extern "C" void cGameViewMan_updateAll(void* list);
 void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
-extern char* D_004A28A8;
+extern char* SSXApp;
 void cReplay_setReplayState(void* self, int arg);
 
 struct sRcVEntry03F0 {
@@ -284,7 +284,7 @@ extern "C" void func_002703F0(sReplay002703F0* self, int reset)
         if (self->loop != 0) {
             func_002702F8((sReplay002702F8*)self, 0);
             func_002703F0(self, 1);
-            void* list = *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+            void* list = *(void**)(*(char**)(SSXApp + 0x84) + 0x84);
             char* obj = *(char**)(*(char**)((char*)list + 0x4) + 0xA8);
             func_001620D0(obj);
             sRcVEntry03F0* vt = *(sRcVEntry03F0**)(obj + 0x14);
@@ -349,7 +349,7 @@ extern "C" void func_002705B0(void* self, int obj, int alt)
     if (*(int*)(s + 0x3D4) == 0) {
         return;
     }
-    if (*(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) != 1) {
+    if (*(int*)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x7C) != 1) {
         return;
     }
     int now;
@@ -373,7 +373,7 @@ extern "C" void func_002705B0(void* self, int obj, int alt)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270628);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 // FAKEMATCH: the clear is written as three identical arms on the sign of v (`if (v > 0) {*on = 0;} else if (v < 0)
 // {*on = 0;} else {*on = 0;}`), which keeps v a global pseudo with priority over self; plain form 97.92%.
@@ -384,7 +384,7 @@ extern "C" void func_00270628(void* self)
     int* on = (int*)((char*)self + 0x3D4);
     int v = *on;
     if (v != 0) {
-        int x = *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C);
+        int x = *(int*)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x7C);
         if (x == 1) {
             if (v > 0) {
                 *on = 0;
@@ -414,13 +414,13 @@ INCLUDE_ASM("replay/replaycache", func_00270670);
 #ifdef SKIP_ASM
 extern "C" void func_0026F980(void* self);
 extern "C" void cRiderMetrix_resetHUDfx(void* p);
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" void func_00270670(void* self)
 {
     if (*(int*)((char*)self + 0x620) != 0) {
         func_0026F980(self);
-        cRiderMetrix_resetHUDfx(*(void**)(*(char**)(*(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18) + 0x790));
+        cRiderMetrix_resetHUDfx(*(void**)(*(char**)(*(char**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x40) + 0x18) + 0x790));
     }
 }
 #endif
@@ -457,7 +457,7 @@ void cReplay_stopAutoReplay(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270730);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 class cRcIdObj_0730 {
 public:
@@ -484,7 +484,7 @@ struct sRcWorld_0730 {
 
 static inline sRcWorld_0730* world_0730()
 {
-    return *(sRcWorld_0730**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+    return *(sRcWorld_0730**)(*(char**)(SSXApp + 0x84) + 0xC);
 }
 
 extern "C" int func_00270730(int id)
@@ -591,7 +591,7 @@ extern "C" void func_00270B88(void* self, int slot, int id);
 // PORT: the unit defines func_002705A8(void*) (an empty stub), but this caller
 // passes (self, id); bind the 2-arg call by asm label.
 void func_002705A8_2(void* self, int id) __asm__("func_002705A8__FPv");
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" void func_002709D8(void* self, int key, int mode)
 {
@@ -600,7 +600,7 @@ extern "C" void func_002709D8(void* self, int key, int mode)
         *(int*)((char*)self + 0x0) == 0) {
         int slot = func_00270730(key);
         if (slot >= 0) {
-            char* world = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
+            char* world = *(char**)(*(char**)(SSXApp + 0x84) + 0xC);
             char* rider = *(char**)(world + (key << 2) + 0x28);
             switch (mode) {
             case 0:
@@ -1031,7 +1031,7 @@ INCLUDE_ASM("replay/replaycache", func_00271228);
 struct sReplayCache;
 extern "C" int func_002712F8(sReplayCache* self);
 extern "C" void func_0012BAF0(void* self, int* dst);
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 struct sReplayHdr_1228 {
     int magic;   // 0x0
@@ -1049,7 +1049,7 @@ extern "C" void func_00271228(void* self)
 {
     sReplayHdr_1228* hdr = *(sReplayHdr_1228**)((char*)self + 0x640);
     hdr->count = func_002712F8((sReplayCache*)self);
-    char* g = D_004A28A8;
+    char* g = SSXApp;
     hdr->a = *(int*)((char*)self + 0x18);
     hdr->b = *(int*)((char*)self + 0x610);
     hdr->c = *(int*)((char*)self + 0x3C8);
@@ -1361,7 +1361,7 @@ extern "C" int func_0026D558(void* self, char** pp);
 extern "C" int func_0026D678(void* self, char** pp);
 void func_0026E5C0(void* self);
 extern "C" void func_0026E5D0(void* list, void* node);
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 struct sRcSave1758 {
     int field_0x0;
@@ -1400,7 +1400,7 @@ extern "C" int func_00271758(sReplayCache1758* self, char* buf)
 {
     sRcSave1758* data = (sRcSave1758*)buf;
     char** pp = &buf;
-    if (data->streamCount != ((sRcGame1758*)D_004A28A8)->gs->world->numRiders) {
+    if (data->streamCount != ((sRcGame1758*)SSXApp)->gs->world->numRiders) {
         return 0;
     }
     {

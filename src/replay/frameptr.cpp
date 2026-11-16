@@ -151,7 +151,7 @@ extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EB48);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 struct sRefSet_EB48 {
     char pad_0x0[0x1C];
@@ -203,7 +203,7 @@ extern "C" void* func_0026EB48(cStream_EB48* stream)
     sRefH_EB48 h;
     stream->v02(&h, 4);
     if (~h.id != 0) {
-        r = func_003512C0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x88), h.id);
+        r = func_003512C0(*(void**)(*(char**)(SSXApp + 0x84) + 0x88), h.id);
         if (r == 0) {
             void* t = lookup_EB48(h.id);
             r = t;
@@ -357,7 +357,7 @@ extern "C" void func_0026ED98(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EDD8);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern int D_00445438[];
 extern "C" void func_00161FA0(void* self, int mode);
 
@@ -368,7 +368,7 @@ struct sRiderList_EDD8 {
 
 extern "C" void func_0026EDD8(void* self)
 {
-    sRiderList_EDD8* list = *(sRiderList_EDD8**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    sRiderList_EDD8* list = *(sRiderList_EDD8**)(*(char**)(SSXApp + 0x84) + 0x84);
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
@@ -394,7 +394,7 @@ extern "C" void func_0026EE68(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EEA0);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern void* D_004C5830[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void func_0015DFD8(void* self, int mode);
@@ -408,7 +408,7 @@ struct sRiderList_EEA0 {
 extern "C" void func_0026EEA0(void* self)
 {
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    sRiderList_EEA0* list = *(sRiderList_EEA0**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+    sRiderList_EEA0* list = *(sRiderList_EEA0**)(*(char**)(SSXApp + 0x84) + 0x84);
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
@@ -434,7 +434,7 @@ extern "C" void func_0026EF30(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EF80);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern void* D_004C5830[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void func_0015DFD8(void* self, int mode);
@@ -442,7 +442,7 @@ extern "C" void func_0015DFD8(void* self, int mode);
 extern "C" void func_0026EF80()
 {
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    func_0015DFD8(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84) + 0x4), 2);
+    func_0015DFD8(*(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0x84) + 0x4), 2);
 }
 #endif
 
@@ -659,7 +659,7 @@ extern "C" void cReplay_reset(void* self)
     int three = 3;
     *(int*)(s + 0x630) = 0;
     *(int*)(s + 0x634) = 0;
-    if (*(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) == 1) {
+    if (*(int*)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x7C) == 1) {
         *(int*)(s + 0xC) = three;
         *(int*)(s + 0x10) = three;
     } else {
@@ -736,13 +736,13 @@ extern "C" void func_00270628(void* self);
 extern "C" void func_00270670(void* self);
 extern "C" void func_00270E18(void* self);
 int cInput_getState(void* obj, int id);
-extern char* D_004A28A8;
+extern char* SSXApp;
 struct sApp_F4A8 {
     char pad0[0xB0];
     void* players[4];       // 0xB0
 };
 // PORT: typed view of the app global
-extern sApp_F4A8* D_004A28A8_F4A8 __asm__("D_004A28A8");
+extern sApp_F4A8* D_004A28A8_F4A8 __asm__("SSXApp");
 
 struct sReplay_F4A8 {
     int state;              // 0x0
@@ -1050,7 +1050,7 @@ extern "C" void func_0026FA50(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026FA78);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern int D_00445438[];
 int cInput_getState(void* pad, int button);
 // PORT: cInput_getValue returns the input axis value as a float ($f0).
@@ -1067,16 +1067,16 @@ extern "C" void func_0026FA78(int* self)
     if (!isStateFA78(self, 3)) {
         return;
     }
-    void* pad = *(void**)(D_004A28A8 + (self[0x28 / 4] << 2) + 0xB0);
+    void* pad = *(void**)(SSXApp + (self[0x28 / 4] << 2) + 0xB0);
     if (cInput_getState(pad, 0x6C) != 0) {
-        cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
+        cGameViewMan_updateAll(*(void**)(*(char**)(SSXApp + 0x84) + 0x84));
     }
     if (D_00445438[self[0x630 / 4]] != 0xB) {
         return;
     }
     if (cInput_getValue(pad, 0x31) != 0.0f || cInput_getValue(pad, 0x30) != 0.0f ||
         cInput_getValue(pad, 0x32) != 0.0f || cInput_getValue(pad, 0x33) != 0.0f) {
-        cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
+        cGameViewMan_updateAll(*(void**)(*(char**)(SSXApp + 0x84) + 0x84));
     }
 }
 #endif
@@ -1130,7 +1130,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1) __asm__("func_0026FB88");
 extern "C" int func_0026FB88_impl(void* self, int a1)
 {
     char* s = (char*)self;
-    char* g = D_004A28A8;
+    char* g = SSXApp;
     sFpView_FB88* v = (sFpView_FB88*)&D_004A5A58;
     sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(g + 0x84) + 0x48) + 0x14);
     if (cur != 0) v = cur;
@@ -1155,7 +1155,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
             else r = isIdleFB88(s) ? 0 : 6;
         } else if (cInput_getState(pad, 0x66)) {
             if (a1) {
-                func_002305C8(*(void**)(D_004A28A8 + 0x84));
+                func_002305C8(*(void**)(SSXApp + 0x84));
                 *(int*)(s + 0x618) = 8;
             } else if (!isStateFB88(s, 3)) {
                 *(int*)(s + 0x618) = 7;
@@ -1285,7 +1285,7 @@ extern "C" void func_0026FE50(char* self)
     }
     *(int*)(self + 0x618) = 0;
     if (redraw) {
-        char* views = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+        char* views = *(char**)(*(char**)(SSXApp + 0x84) + 0x84);
         char* o = *(char**)(*(char**)(views + 4) + 0xA8);
         func_001620D0(o);
         sVE_26FE50* vt = *(sVE_26FE50**)(o + 0x14);

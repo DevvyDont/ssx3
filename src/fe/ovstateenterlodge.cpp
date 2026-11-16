@@ -79,7 +79,7 @@ extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int a1, unsigned int
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetEvent);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A19C4;
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void func_0039F190(void*, int);
@@ -104,11 +104,11 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* wid
     if (widget != 0) {
         switch (msg) {
         case 5:
-            (*(sGame001F72E0**)((char*)D_004A28A8 + 0x84))->flag->active = 1;
+            (*(sGame001F72E0**)((char*)SSXApp + 0x84))->flag->active = 1;
             switch (*(int*)((char*)widget + 0x18)) {
             case 0:
                 {
-                    void* game = *(void**)((char*)D_004A28A8 + 0x84);
+                    void* game = *(void**)((char*)SSXApp + 0x84);
                     D_004A19C4 = 0x27;
                     cGame_exit(game, 0);
                 }
@@ -121,7 +121,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* wid
             break;
         case 6:
             self->done = 1;
-            (*(sGame001F72E0**)((char*)D_004A28A8 + 0x84))->flag->active = 1;
+            (*(sGame001F72E0**)((char*)SSXApp + 0x84))->flag->active = 1;
             func_0039F190(self->mgr + 0x18, 1);
             break;
         }
@@ -429,7 +429,7 @@ extern "C" void func_002C2540(void* str, const char* s);
 extern "C" void sprintf1_1F7958(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(void* text, void* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A2700;
 extern char D_00535BC8[];
 extern char D_0046F510[];
@@ -463,7 +463,7 @@ struct sVEntry_1F7958 {
 
 static inline int Loc1F7958(char* name)
 {
-    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* obj = *(char**)((char*)SSXApp + 0x8C);
     sVEntry_1F7958* vt = *(sVEntry_1F7958**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }

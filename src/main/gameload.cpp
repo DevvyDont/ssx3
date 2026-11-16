@@ -83,7 +83,7 @@ extern "C" void* func_002F0390();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* D_004A2EEC;
@@ -257,7 +257,7 @@ extern "C" void cGame_load(cGameGL* self)
     void** lights = self->m68;
     func_00317530(D_004A5B64 + 0x38, 13.199999809265137f);
     func_00317550(D_004A5B64 + 0x38, 43.5f);
-    func_00195DE0(*(void**)((char*)D_004A28A8 + 0x8C));
+    func_00195DE0(*(void**)((char*)SSXApp + 0x8C));
     {
         char* g = (char*)D_004A289C;
         sVEntryVoidGL* vt = *(sVEntryVoidGL**)(g + 0x10D8);
@@ -293,9 +293,9 @@ extern "C" void cGame_load(cGameGL* self)
     cGame_loadTrack((char*)self);
     self->m28 = func_0026EFB8(operator new(0x688, D_004A2A70, 0, 0));
     self->m2C = func_002DBD10(operator new(1, D_0047B5E8, 0, 0), 0);
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] != 0) {
-        float dt = *(float*)((char*)D_004A28A8 + 0x14);
+        float dt = *(float*)((char*)SSXApp + 0x14);
         int n = (int)((*(float*)&D_00534B30[4] + (float)*(int*)((char*)D_004A2EEC + 0x120) * dt) / dt) + 2;
         self->m7C = func_00237060(operator new(0x44, D_0047B5F8, 0, 0), n, *(int*)((char*)D_004A2EEC + 0x120));
     } else {
@@ -310,12 +310,12 @@ extern "C" void cGame_load(cGameGL* self)
     func_00317550(D_004A5B64 + 0x38, 55.0f);
     self->m34 = cPlaybackMan_cPlaybackMan(operator new(0x7C, D_0047B608, 0x20000000, 0), 0x28);
     cReplay_init(self->m28);
-    void* race = cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 5);
+    void* race = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 5);
     int replay = D_004A1228;
     if (replay != 0) {
         cAI_initAIRiders(self->ai);
         signed char* gs = (signed char*)D_00535BC8;
-        cGameModeMan_initGameMode(*(void**)((char*)D_004A28A8 + 0xC0), gs[0x4A]);
+        cGameModeMan_initGameMode(*(void**)((char*)SSXApp + 0xC0), gs[0x4A]);
         func_0012BAC0(self->ai, func_001526D0(race) + 0x20);
         int mode = gs[0x48];
         int sub = gs[0x4A];
@@ -353,7 +353,7 @@ extern "C" void cGame_load(cGameGL* self)
     char* hud = (char*)func_002CC018(operator new(0x68, D_004A2A80, 0, 0));
     self->hud = hud;
     *(void**)(hud + 0x58) = self->m24;
-    *(void**)(self->hud + 0x5C) = *(void**)((char*)D_004A28A8 + 0xB0);
+    *(void**)(self->hud + 0x5C) = *(void**)((char*)SSXApp + 0xB0);
     char* file = FILE_load(D_0047B628, 0x100);
     {
         char* g = (char*)D_004A289C;
@@ -377,7 +377,7 @@ extern "C" void cGame_load(cGameGL* self)
     func_00317550(D_004A5B64 + 0x38, 99.0f);
     sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, D_0047B698, 0, 0));
     self->ui = ui;
-    ui->p10 = *(void**)((char*)D_004A28A8 + 0x8C);
+    ui->p10 = *(void**)((char*)SSXApp + 0x8C);
     sName11GL name = D_0047B6A8;
     cUIEngine_loadFile(self->ui, D_0047B6A8.c);
     sUIDataGL* data = (sUIDataGL*)operator new(0x1C, D_0047B6B8, 0, 0);
@@ -389,7 +389,7 @@ extern "C" void cGame_load(cGameGL* self)
     data->e = 0;
     (self->ui)->data = data;
     (self->ui)->p14 = func_001A2F38(operator new(8, D_0047B6C8, 0, 0));
-    (self->ui)->p8 = *(void**)((char*)D_004A28A8 + 0x88);
+    (self->ui)->p8 = *(void**)((char*)SSXApp + 0x88);
     sStateGL* st = (sStateGL*)func_001E9A30(operator new(0xC98, D_0047B6D8, 0, 0), self->ui, 0);
     st->mode = 5;
     cUIStateStack_pushExplicit((self->ui)->stack, st);
@@ -636,7 +636,7 @@ extern "C" void func_00286C00(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void func_0036A290(void);
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* D_004A52D4;
@@ -700,7 +700,7 @@ struct sPtrArr_FA98 {
 
 static inline char* GetRider_FA98(int i)
 {
-    return ((sPtrArr_FA98*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x28))->at(i);
+    return ((sPtrArr_FA98*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x28))->at(i);
 }
 
 struct sElem14_FA98 {
@@ -715,7 +715,7 @@ struct sObj20_FA98 {
 extern "C" void func_0022FA98(char* self)
 {
     cBE_setState(0);
-    char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30_s.active != 0 && D_00534B30_s.ready != 0) {
         int which = D_00534B30_s.which;
         int other = which != 0;
@@ -730,7 +730,7 @@ extern "C" void func_0022FA98(char* self)
         sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x98);
         e->fn(be + e->delta);
     }
-    func_001A3C50(*(void**)((char*)D_004A28A8 + 0x11C));
+    func_001A3C50(*(void**)((char*)SSXApp + 0x11C));
     cSSXScriptEngine_ForceEndScriptsAll(D_004A28A4);
     if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
     if (*(void**)(self + 0x7C) != 0) func_002370A0(*(void**)(self + 0x7C), 3);
@@ -785,7 +785,7 @@ extern "C" void func_0022FA98(char* self)
     }
     func_0036A020(D_004A289C);
     func_0038ADB0(D_005047F8);
-    *(void**)((char*)D_004A28A8 + 0x84) = 0;
+    *(void**)((char*)SSXApp + 0x84) = 0;
     if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
     func_002B68D0(D_004A52D4);
     func_00286A80(D_004A3500);
@@ -828,7 +828,7 @@ extern "C" void func_00369FF8(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* D_004A52D4;
@@ -841,7 +841,7 @@ extern int D_004A45D8;
 
 extern "C" void func_00230050(void* self)
 {
-    func_00195D50(*(void**)((char*)D_004A28A8 + 0x8C));
+    func_00195D50(*(void**)((char*)SSXApp + 0x8C));
     void* p94 = *(void**)((char*)self + 0x94);
     D_004A270C = 0;
     func_001F30D8(p94);
@@ -958,7 +958,7 @@ extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 extern "C" void* func_0028B180(void);
 extern "C" void func_002870A0(void* mgr);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 static inline int numRiders_2302A8(void* game)
 {
@@ -973,7 +973,7 @@ static inline char* rider_2302A8(void* game, int i)
 extern "C" void cGame_restart(void* self)
 {
     cGame_partialRestart(self);
-    cGameModeMan_restartHeat(*(void**)((char*)D_004A28A8 + 0xC0));
+    cGameModeMan_restartHeat(*(void**)((char*)SSXApp + 0xC0));
     int i;
     for (i = 0; i < numRiders_2302A8(self); i++) {
         *(int*)(rider_2302A8(self, i) + 0x2F8) = 0;
@@ -1100,9 +1100,9 @@ extern "C" void cGame_exit(void* self, int toFrontEnd)
         func_00266DF8(D_004A33F4);
     }
     if (toFrontEnd != 0) {
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0047B770, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0047B770, 0x100, 0)));
     } else {
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232738(cMemMan_alloc(8, D_0047B788, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)func_00232738(cMemMan_alloc(8, D_0047B788, 0x100, 0)));
     }
 }
 #endif
@@ -1360,7 +1360,7 @@ struct sRiderList_2306B8 {
 
 static inline int canUpdate_2306B8(cGame_2306B8* self)
 {
-    if (*(int*)((char*)D_004A28A8 + 0x4) != 0) {
+    if (*(int*)((char*)SSXApp + 0x4) != 0) {
         self->f8 = 1;
         return 0;
     }
@@ -1574,8 +1574,8 @@ extern "C" void func_002306B8(cGame_2306B8* self)
     if (D_004A2EB8 != 0) {
         func_003F42A0();
     }
-    if (*(void**)((char*)D_004A28A8 + 0x11C) != 0) {
-        cFEAsyncManager_Update(*(void**)((char*)D_004A28A8 + 0x11C));
+    if (*(void**)((char*)SSXApp + 0x11C) != 0) {
+        cFEAsyncManager_Update(*(void**)((char*)SSXApp + 0x11C));
     }
     func_001E1458();
     func_001F3188(self->f94);
@@ -1656,7 +1656,7 @@ INCLUDE_ASM("main/gameload", func_00230F40);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0022E550(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A2A50;
 extern int D_00534B30[];
 
@@ -1693,7 +1693,7 @@ struct sGameLoad_0F40 {
 extern "C" void func_00230F40(void* self_)
 {
     sGameLoad_0F40* self = (sGameLoad_0F40*)self_;
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] == 0 && self->hold != 0)
         return;
     if (D_004A2A50 & 0x20)
@@ -2194,7 +2194,7 @@ extern "C" void func_002314D0(void* self_, cStream_14D0* stream)
 //100%
 INCLUDE_ASM("main/gameload", func_00231840);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A2EEC;
 extern int D_004A2E9C;
 extern int D_00534B30[];
@@ -2207,7 +2207,7 @@ int cInput_getState(void* obj, int a1);
 
 static inline void** PlayerObj_1840(int p)
 {
-    return *(void***)((char*)D_004A28A8 + (p << 2) + 0xB0);
+    return *(void***)((char*)SSXApp + (p << 2) + 0xB0);
 }
 
 static inline int IsReady_1840(void** o)
@@ -2653,7 +2653,7 @@ struct sVE_1FC0 {
 };
 
 extern cGfx_1FC0* D_004A289C_1FC0 __asm__("D_004A289C");
-extern char* D_004A28A8_1FC0 __asm__("D_004A28A8");
+extern char* D_004A28A8_1FC0 __asm__("SSXApp");
 
 extern "C" void func_00231FC0(sFade_1FC0* self)
 {

@@ -38,7 +38,7 @@ extern "C" int func_00231AB8(void* game);
 
 extern "C" void* func_0028B180();
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern char D_004A2470[];
 
@@ -115,13 +115,13 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
     for (i = 0; i < 14; i++) {
         self->aD8[i] = 1;
     }
-    if (*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x214) == 0xB) {
+    if (*(int*)(*(char**)((char*)SSXApp + 0x84) + 0x214) == 0xB) {
         self->aD8[6] = 0;
     }
-    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
     if (D_00534B30[0] == 0) {
-        void* game = *(void**)((char*)D_004A28A8 + 0x84);
-        if (func_00231AB8(game) == 0 || *(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x224) != 0) {
+        void* game = *(void**)((char*)SSXApp + 0x84);
+        if (func_00231AB8(game) == 0 || *(int*)(*(char**)((char*)SSXApp + 0x84) + 0x224) != 0) {
             for (i = 0; i < 14; i++) {
                 self->aD8[i] = 0;
                 if (i == 1) {
@@ -380,7 +380,7 @@ extern int D_004428F0[];
 extern unsigned char D_004A2468;
 extern int D_004A2594;
 extern int D_004A2708;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A2470[];
 extern char D_004A2480[];
 extern char D_0046F850[];
@@ -470,7 +470,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             cOVStateManager_triggerOverlay(7);
             break;
         case 4: {
-            char* owner = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+            char* owner = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48);
             char* popup = (char*)cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_0046F860, 0, 0), owner, 0, 0);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(owner + 0x18, popup, 0, 0);
@@ -682,7 +682,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F90E8);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern "C" int func_00231AB8(void* game);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004781C0[];
 extern int D_004A2868[2];
 
@@ -690,7 +690,7 @@ extern "C" void func_001F90E8(void* self)
 {
     int* items = D_004781C0;
     *(int*)((char*)self + 0xBC) = 3;
-    if (func_00231AB8(*(void**)((char*)D_004A28A8 + 0x84)) == 0) {
+    if (func_00231AB8(*(void**)((char*)SSXApp + 0x84)) == 0) {
         items = D_004A2868;
         *(int*)((char*)self + 0xBC) = 2;
     }

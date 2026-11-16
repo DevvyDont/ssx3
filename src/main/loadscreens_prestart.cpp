@@ -9,7 +9,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_00231F80(void* fade);
 extern "C" int func_00326CA0(void* pads, int port);
 extern "C" char* func_00326CC8(void* pads, int port);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char* D_004A28A0;
 extern char D_0047B8C8[];
 extern void* D_0047D8F0[];
@@ -28,15 +28,15 @@ struct sPreStart_232348 {
 
 extern "C" void cPreStartScreen_update(sPreStart_232348* self)
 {
-    func_00231F80(*(void**)((char*)D_004A28A8 + 0xA4));
-    float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+    func_00231F80(*(void**)((char*)SSXApp + 0xA4));
+    float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
     *f += 0.0833333358168602f;
     if (*f > 1.0f) {
         *f = 1.0f;
     }
-    if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+    if (*(int*)((char*)SSXApp + 4) == 0) {
         sModule_232348* m = (sModule_232348*)cMemMan_alloc(0xC, D_0047B8C8, 0x100, 0);
-        cAppMan* app = (cAppMan*)D_004A28A8;
+        cAppMan* app = (cAppMan*)SSXApp;
         m->vt = D_0047D8F0;
         m->f4 = 0;
         m->f8 = 0;
@@ -89,7 +89,7 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_00232488(void)
 {
@@ -97,7 +97,7 @@ extern "C" int func_00232488(void)
         return 0;
     }
     ((cWorld232488*)D_004A289C)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
-    func_00231FC0(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231FC0(*(void**)((char*)SSXApp + 0xA4));
     ((cWorld232488*)D_004A289C)->v20();
     return 1;
 }
@@ -134,11 +134,11 @@ extern "C" void func_00232538(void* self, int flags)
 INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_load);
 #ifdef SKIP_ASM
 extern "C" void cSSXApp_initload(void* app);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void cInitLoadScreen_load(void)
 {
-    cSSXApp_initload(D_004A28A8);
+    cSSXApp_initload(SSXApp);
 }
 #endif
 
@@ -150,27 +150,27 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00231F80(void* fade);
 extern "C" void* func_00232AE0(void* self, int arg);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0047B8D8[];
 
 extern "C" void func_00232588(void* self)
 {
-    func_00231F80(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231F80(*(void**)((char*)SSXApp + 0xA4));
     if (*(int*)((char*)self + 8) != 0) {
-        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
         *f -= 0.0833333358168602f;
         if (*f < 0.0f) {
             *f = 0.0f;
         }
     } else {
-        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
         *f += 0.0833333358168602f;
         if (*f > 1.0f) {
             *f = 1.0f;
         }
     }
-    if (*(int*)((char*)D_004A28A8 + 4) == 0) {
-        cAppMan_setNextModule((cAppMan*)D_004A28A8,
+    if (*(int*)((char*)SSXApp + 4) == 0) {
+        cAppMan_setNextModule((cAppMan*)SSXApp,
             (unsigned int)func_00232AE0(cMemMan_alloc(0x1C, D_0047B8D8, 0x100, 0), *(int*)((char*)self + 4) ? 2 : 0));
     }
 }
@@ -209,7 +209,7 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_00232650(void)
 {
@@ -217,7 +217,7 @@ extern "C" int func_00232650(void)
         return 0;
     }
     ((cWorld232650*)D_004A289C)->v15(sVec3_232650(0.0f, 0.0f, 0.0f));
-    func_00231FC0(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231FC0(*(void**)((char*)SSXApp + 0xA4));
     ((cWorld232650*)D_004A289C)->v20();
     return 1;
 }
@@ -231,12 +231,12 @@ struct sLoadScreen2326D8 {
     int f4;
     int done;
 };
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_002326D8(sLoadScreen2326D8* self)
 {
     self->done = 1;
-    return *(float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4) == 0.0f;
+    return *(float*)(*(char**)((char*)SSXApp + 0xA4) + 4) == 0.0f;
 }
 #endif
 
@@ -319,12 +319,12 @@ struct sLoadScreen2327B0 {
     int f0;
     int done;
 };
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_002327B0(sLoadScreen2327B0* self)
 {
     self->done = 1;
-    return *(float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4) == 0.0f;
+    return *(float*)(*(char**)((char*)SSXApp + 0xA4) + 4) == 0.0f;
 }
 #endif
 
@@ -335,12 +335,12 @@ struct sLoadScreen2327E8 {
     int f0;
     int done;
 };
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_002327E8(sLoadScreen2327E8* self)
 {
     self->done = 1;
-    return *(float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4) == 0.0f;
+    return *(float*)(*(char**)((char*)SSXApp + 0xA4) + 4) == 0.0f;
 }
 #endif
 
@@ -377,7 +377,7 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_00232820(void)
 {
@@ -385,7 +385,7 @@ extern "C" int func_00232820(void)
         return 0;
     }
     ((cWorld232820*)D_004A289C)->v15(sVec3_232820(0.0f, 0.0f, 0.0f));
-    func_00231FC0(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231FC0(*(void**)((char*)SSXApp + 0xA4));
     ((cWorld232820*)D_004A289C)->v20();
     return 1;
 }
@@ -424,7 +424,7 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_002328A8(void)
 {
@@ -432,7 +432,7 @@ extern "C" int func_002328A8(void)
         return 0;
     }
     ((cWorld2328A8*)D_004A289C)->v15(sVec3_2328A8(0.0f, 0.0f, 0.0f));
-    func_00231FC0(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231FC0(*(void**)((char*)SSXApp + 0xA4));
     ((cWorld2328A8*)D_004A289C)->v20();
     return 1;
 }
@@ -448,7 +448,7 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00231F80(void* fade);
 extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0047B8E8[];
 extern void* D_0047D788[];
 
@@ -467,22 +467,22 @@ struct sModule_232930 {
 extern "C" void func_00232930(void* self)
 {
     int tmp;
-    func_00231F80(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231F80(*(void**)((char*)SSXApp + 0xA4));
     tmp = *(int*)((char*)self + 4) != 0;
     if (tmp) {
-        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
         *f -= 0.0833333358168602f;
         if (*f < 0.0f) {
             *f = 0.0f;
         }
     } else {
-        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
         *f += 0.0833333358168602f;
         if (*f > 1.0f) {
             *f = 1.0f;
         }
     }
-    if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+    if (*(int*)((char*)SSXApp + 4) == 0) {
         sModule_232930* m = (sModule_232930*)cMemMan_alloc(0x18, D_0047B8E8, 0x100, 0);
         func_00231CD0_r(m);
         tmp = (unsigned int)m;
@@ -490,7 +490,7 @@ extern "C" void func_00232930(void* self)
         m->fC = 0;
         m->f10 = 0;
         m->f14 = 0;
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, tmp);
+        cAppMan_setNextModule((cAppMan*)SSXApp, tmp);
     }
 }
 #endif
@@ -508,7 +508,7 @@ extern "C" void func_00231F80(void* fade);
 
 extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
 
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern char D_004A2AB8[];
 extern void* D_0047D740[];
@@ -527,22 +527,22 @@ struct sModule_232A00 {
 extern "C" void cPreFELoadScreen_update(void* self)
 {
     int tmp;
-    func_00231F80(*(void**)((char*)D_004A28A8 + 0xA4));
+    func_00231F80(*(void**)((char*)SSXApp + 0xA4));
     tmp = *(int*)((char*)self + 4) != 0;
     if (tmp) {
-        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
         *f -= 0.0833333358168602f;
         if (*f < 0.0f) {
             *f = 0.0f;
         }
     } else {
-        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        float* f = (float*)(*(char**)((char*)SSXApp + 0xA4) + 4);
         *f += 0.0833333358168602f;
         if (*f > 1.0f) {
             *f = 1.0f;
         }
     }
-    if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+    if (*(int*)((char*)SSXApp + 4) == 0) {
         sModule_232A00* m = (sModule_232A00*)cMemMan_alloc(0x1C, D_004A2AB8, 0x100, 0);
         func_00231CD0_r(m);
         tmp = (unsigned int)m;
@@ -550,7 +550,7 @@ extern "C" void cPreFELoadScreen_update(void* self)
         m->fC = 0;
         m->f10 = 0;
         m->f14 = 0;
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, tmp);
+        cAppMan_setNextModule((cAppMan*)SSXApp, tmp);
     }
 }
 #endif
@@ -633,7 +633,7 @@ extern "C" void* func_00186A08(void* p, void* ui);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0047B698[];
 extern char D_0047B9E0[];
 extern char D_0047B9F0[];
@@ -668,7 +668,7 @@ extern "C" void func_00232B28(void* self)
     void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
     cUIEngine_loadFile(ui, D_0047B9E0);
-    (*(sUI_232B28**)((char*)self + 0xC))->f10 = *(int*)((char*)D_004A28A8 + 0x8C);
+    (*(sUI_232B28**)((char*)self + 0xC))->f10 = *(int*)((char*)SSXApp + 0x8C);
     sNode_232B28* n = (sNode_232B28*)operator new(0x1C, D_0047B9F0, 0x100, 0);
     n->f4 = 0;
     n->f8 = D_0046D1D0;
@@ -677,7 +677,7 @@ extern "C" void func_00232B28(void* self)
     n->f10 = 0;
     n->f14 = 0;
     (*(sUI_232B28**)((char*)self + 0xC))->fC = n;
-    (*(sUI_232B28**)((char*)self + 0xC))->f8 = *(int*)((char*)D_004A28A8 + 0x88);
+    (*(sUI_232B28**)((char*)self + 0xC))->f8 = *(int*)((char*)SSXApp + 0x88);
     int mode = *(int*)((char*)self + 0x18);
     if (mode == 0) {
         void* item = func_00186A08(operator new(0x248, D_0047B978, 0, 0), *(void**)((char*)self + 0xC));
@@ -856,7 +856,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 // PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A19D8;
 extern int D_004A19DC;
 extern char D_00535BC8[];
@@ -937,8 +937,8 @@ extern "C" void func_00232E20(void* self)
     void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
     cUIEngine_loadFile(ui, D_0047BD28);
-    (*(sUI_2E20**)((char*)self + 0xC))->f8 = *(int*)((char*)D_004A28A8 + 0x88);
-    (*(sUI_2E20**)((char*)self + 0xC))->f10 = *(int*)((char*)D_004A28A8 + 0x8C);
+    (*(sUI_2E20**)((char*)self + 0xC))->f8 = *(int*)((char*)SSXApp + 0x88);
+    (*(sUI_2E20**)((char*)self + 0xC))->f10 = *(int*)((char*)SSXApp + 0x8C);
     sNode_2E20* n = (sNode_2E20*)operator new(0x1C, D_0047B9F0, 0x100, 0);
     n->f4 = 0;
     n->f8 = D_0046D1D0;
@@ -1063,7 +1063,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
 INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
 #ifdef SKIP_ASM
 extern void* D_004A289C;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern int D_004A4324;
 extern "C" void func_00369FF8(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
@@ -1084,7 +1084,7 @@ struct sVE_3260 {
 extern "C" void func_00233260(void)
 {
     func_00369FF8(D_004A289C);
-    cSSXApp_startGameLoad(D_004A28A8);
+    cSSXApp_startGameLoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of D_004A289C.
     int* p = &D_004A4324;
     *p = 0;

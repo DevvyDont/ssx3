@@ -146,7 +146,7 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* p, int a);
 extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
 extern "C" void func_00184780(void* self, int on);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045DA28[];
 extern char D_0045DA38[];
 extern char D_0045DA48[];
@@ -175,9 +175,9 @@ extern "C" void func_001849B0(void* self)
         sVE_1849B0* vt = *(sVE_1849B0**)(player + 0xC);
         vt[2].fn(player + vt[2].delta);
     }
-    func_001A0508(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
-    func_001A0570(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), 0);
-    char* m = *(char**)((char*)D_004A28A8 + 0x7C);
+    func_001A0508(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    func_001A0570(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    char* m = *(char**)((char*)SSXApp + 0x7C);
     sVec4_1849B0 a;
     sVec4_1849B0 b;
     float z = 80.0f;
@@ -217,13 +217,13 @@ extern "C" void func_001849B0(void* self)
 //100%
 INCLUDE_ASM("fe/festatestore", func_00184B70);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void func_001A0570(void* self, int a1, int a2);
 void* cUIState_onDestroyScreen(void* self);
 
 extern "C" void func_00184B70(void* self)
 {
-    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    char* mgr = *(char**)((char*)SSXApp + 0x7C);
     if (mgr != 0) {
         func_001A0570(mgr + 0xB0, *(signed char*)((char*)self + 0x44), 0);
     }
@@ -286,7 +286,7 @@ extern "C" void* func_001A0548(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void func_0039E510(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sQuat_184C60
 {
@@ -339,7 +339,7 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
 extern "C" void func_00184C60(char* self)
 {
     if (*(int*)(self + 0x48) == 0) {
-        char* rider = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+        char* rider = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
         int ok = 0;
         if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
             ok = *(int*)(rider + 0xCB4) != 0;
@@ -371,7 +371,7 @@ extern "C" void func_00184C60(char* self)
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(D_004FF150, 0.0f));
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(D_004FF160, 1.082104206085205f));
             func_0019F3E8(rider, &xf);
-            func_001A0570(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44), 1);
+            func_001A0570(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44), 1);
         }
     }
     func_0039E510(self);
@@ -534,7 +534,7 @@ extern "C" void* func_001A0548(void* self, int idx);
 extern "C" void* func_001CABA8(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern signed char D_00535C11[];
 extern char D_004A14A8[];
 extern char D_0045D920[];
@@ -693,14 +693,14 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                 int n = 0;
                 sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                 if (*(int*)(self + 0x48) != 0) {
-                    char* r = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+                    char* r = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
                     cRiderAnimBase_play(*(void**)(r + 0xC), tbl[bi].anim, 0, -1.0f);
                 }
             }
         }
         break;
     case 1:
-        *(int*)((char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 1;
+        *(int*)((char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 1;
         if (*(char**)(item + 0x40) == *(char**)(self + 0x4C)) {
             if (*(void**)(self + 0x50) != 0 && *(int*)(item + 0x18) != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
@@ -749,7 +749,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
         }
         break;
     case 2:
-        *(int*)((char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 0;
+        *(int*)((char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 0;
         break;
     }
 }

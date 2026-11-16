@@ -1032,7 +1032,7 @@ void* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
 extern char D_004A5268;
 extern char D_004A5270;
 extern char D_004A5278;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00535BC8[];
 
 static inline int sa_state_867E8()
@@ -1074,7 +1074,7 @@ extern "C" void func_002867E8(char* self)
     cWorldPainterManArg* pa = (cWorldPainterManArg*)&D_004A5268;
     cWorldPainterManArg* pb = (cWorldPainterManArg*)&D_004A5278;
     cWorldPainterManArg* pc = (cWorldPainterManArg*)&D_004A5270;
-    void* q = *(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x10) + 8);
+    void* q = *(void**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x10) + 8);
     *(void**)(self + 0x625C) = cWorldPainterMan_getQuery(q, pa);
     *(void**)(self + 0x6260) = cWorldPainterMan_getQuery(q, pa);
     *(void**)(self + 0x5FA0) = cWorldPainterMan_getQuery(q, pb);
@@ -1299,7 +1299,7 @@ extern "C" void func_002A3708(void* self, void* rider);
 extern "C" void func_002A34D0(void* self, void* rider, int a2, int a3);
 extern "C" void func_002A45C0(void* self);
 extern char* D_004A3500;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00535BC8[];
 
 static inline int sa_state6EA0()
@@ -1320,7 +1320,7 @@ extern "C" void func_00286EA0(char* self, char* rider)
     func_00296E20(self, (int)rider);
     func_00297438(self, (int)rider);
     func_0029B3C0(self, (int)rider);
-    char* cfg = *(char**)((char*)D_004A28A8 + 0xC0);
+    char* cfg = *(char**)((char*)SSXApp + 0xC0);
     int b = *(int*)(cfg + 0x70);
     int a = *(int*)(cfg + 0x0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1387,14 +1387,14 @@ extern "C" int func_00295028(void* self, int a, int b);
 extern "C" void func_00295628(void* self, int a, int b, int c, int d, int e);
 extern "C" int func_002A4168(void* self);
 extern "C" int func_002A41D8(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void func_00287108(void* self)
 {
     func_002871B0(self);
     if (func_002A4168(self) != 0 || func_002A41D8(self) != 0) {
         if (func_002A4040(self) == 0
-            && *(int*)((char*)self + 0x5824) >= *(int*)(*(char**)((char*)D_004A28A8 + 0xC0) + 0x70)
+            && *(int*)((char*)self + 0x5824) >= *(int*)(*(char**)((char*)SSXApp + 0xC0) + 0x70)
             && func_00295028(self, 0, 0) == 0) {
             func_00295628(self, 0, 0, -1, 0, 0);
         }

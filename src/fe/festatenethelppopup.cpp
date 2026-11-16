@@ -44,7 +44,7 @@ extern "C" int func_001D9E20(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001D9E68);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" float cInput_getValue(void* self, int id);
 extern "C" void func_0039F190(void*, int);
 
@@ -53,7 +53,7 @@ extern "C" void func_001D9E68(void* self)
     int i;
     int found = 0;
     for (i = 0; i < 2; i++) {
-        int** p = *(int***)((char*)D_004A28A8 + (i << 2) + 0xB0);
+        int** p = *(int***)((char*)SSXApp + (i << 2) + 0xB0);
         int ok = *p != 0 && **p != 0;
         if (ok && cInput_getValue(p, 0x99) != 0.0f) {
             found = 1;
@@ -198,7 +198,7 @@ extern "C" void func_001DA110(void* p)
         if (ids[i] == 0) {
             break;
         }
-        sStrings_A110* s = *(sStrings_A110**)((char*)D_004A28A8 + 0x8C);
+        sStrings_A110* s = *(sStrings_A110**)((char*)SSXApp + 0x8C);
         strs[i] = s->vt[4].fn((char*)s + s->vt[4].delta, ids[i]);
         count++;
         total += USTR_length(strs[i]) + 1;
@@ -427,7 +427,7 @@ extern "C" void* func_002CCF98(void* self, int a1, void* a2, int a3);
 extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" char* func_00416958(char* dst, const char* src, int n);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_0046D690[];
 extern char D_00467A20[];
 extern char D_00467A30[];
@@ -458,8 +458,8 @@ extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
     cMenu_addItem(self, (char*)self + 0x194, -1);
     cMenu_addItem(self, (char*)self + 0x1C0, -1);
     cMenu_addItem(self, (char*)self + 0x1E4, -1);
-    copyName_1DA648((char*)self + 0x180, *(char**)((char*)D_004A28A8 + 0xC4));
-    copyName_1DA648((char*)self + 0x1AC, *(char**)((char*)D_004A28A8 + 0xC8));
+    copyName_1DA648((char*)self + 0x180, *(char**)((char*)SSXApp + 0xC4));
+    copyName_1DA648((char*)self + 0x1AC, *(char**)((char*)SSXApp + 0xC8));
     return self;
 }
 #endif
@@ -477,7 +477,7 @@ extern "C" void* func_002CCF98(void* self, int a1, void* a2, int a3);
 extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" char* func_00416958(char* dst, const char* src, int n);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_0046D6E8[];
 extern char D_00467A20[];
 extern char D_00467A30[];
@@ -508,8 +508,8 @@ extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
     cMenu_addItem(self, (char*)self + 0x194, -1);
     cMenu_addItem(self, (char*)self + 0x1C0, -1);
     cMenu_addItem(self, (char*)self + 0x1E4, -1);
-    copyName_1DA7E8((char*)self + 0x180, *(char**)((char*)D_004A28A8 + 0xC4));
-    copyName_1DA7E8((char*)self + 0x1AC, *(char**)((char*)D_004A28A8 + 0xC8));
+    copyName_1DA7E8((char*)self + 0x180, *(char**)((char*)SSXApp + 0xC4));
+    copyName_1DA7E8((char*)self + 0x1AC, *(char**)((char*)SSXApp + 0xC8));
     return self;
 }
 #endif

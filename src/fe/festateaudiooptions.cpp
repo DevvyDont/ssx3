@@ -108,7 +108,7 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* stack, int a1);
 extern "C" void cUIStateStack_push(void* stack, void* state);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_00460470[];
 extern char D_00460488[];
 extern char D_00460498[];
@@ -161,7 +161,7 @@ struct sWidget_AOWE {
 
 static inline int online_AOWE()
 {
-    return *(int*)((char*)D_004A28A8 + 0x84);
+    return *(int*)((char*)SSXApp + 0x84);
 }
 
 static inline void setOption_AOWE(sOption_AOWE* o, int state, int color)
@@ -447,7 +447,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUIMenu_setScrollableMenu(void* self, int a1);
 extern "C" void* cUIStateStack_findState(void* self, int id);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A18A8[];
 extern char D_004A18B0[];
 extern char D_00460578[];
@@ -461,7 +461,7 @@ struct sVEntry00196DB0 {
 extern "C" void cFEStateRequestLine_onCreateScreen(void* self)
 {
     char* name = D_004A18B0;
-    if (*(void**)((char*)D_004A28A8 + 0x84) != 0) {
+    if (*(void**)((char*)SSXApp + 0x84) != 0) {
         name = D_00460578;
         void* list = *(char**)((char*)self + 0x10) + 0x18;
         char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(D_004A18A8));
@@ -492,11 +492,11 @@ int GetHashValue32(char* str);
 void* cUIState_onDestroyScreen(void* self);
 extern "C" void* cUIStateStack_findState(void* self, int id);
 extern char D_004A18A8[];
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void func_00196E80(void* self)
 {
-    if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
+    if (*(int*)((char*)SSXApp + 0x84) != 0) {
         void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
             sVEntry00196E80* e = &(*(sVEntry00196E80**)((char*)obj + 8))[24];

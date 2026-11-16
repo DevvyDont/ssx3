@@ -14,7 +14,7 @@ extern "C" void func_002C2540(void* dst, void* src);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
 extern "C" void sprintf1_CE758(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* str);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sReq_CE758
 {
@@ -48,7 +48,7 @@ struct sVEntry_CE758 {
 
 static inline int Loc_CE758(char* key)
 {
-    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* obj = *(char**)((char*)SSXApp + 0x8C);
     sVEntry_CE758* vt = *(sVEntry_CE758**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
 }

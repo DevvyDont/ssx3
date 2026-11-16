@@ -10,14 +10,14 @@ struct cObjectInterface_Impl {
     void* mInstanceMan; // offset 0x88
 };
 
-extern cObjectInterface* D_004A28A8;
+extern cObjectInterface* SSXApp;
 
 //100%
 INCLUDE_ASM("util/objectinterface", cObjectInterface_getInstanceMan__Fv);
 #ifdef SKIP_ASM
 void* cObjectInterface_getInstanceMan()
 {
-    return D_004A28A8->mImpl->mInstanceMan;
+    return SSXApp->mImpl->mInstanceMan;
 }
 #endif
 
@@ -141,7 +141,7 @@ struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
 extern "C" int func_002D2058(sQ128* v)
 {
-    char* inst = (char*)*(void**)((char*)D_004A28A8->mImpl + 0x8C);
+    char* inst = (char*)*(void**)((char*)SSXApp->mImpl + 0x8C);
     int mask = *(int*)(inst + 0x110);
     for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
         int bit = 1 << i;

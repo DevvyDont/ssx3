@@ -558,7 +558,7 @@ extern "C" void func_0020EB50(void* self, void* screen, void* rect);
 extern "C" void func_003DCA40(unsigned short* dst, const char* src);
 extern "C" void func_003DC9F8(unsigned short* dst, const unsigned short* fmt, ...);
 unsigned int BXrand();
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_004A2108[];
 extern char D_004A21F0[];
 extern char D_004A20D0[];
@@ -777,7 +777,7 @@ struct sRace_9AD0 {
     char* riders[15];       // 0x40
     int numRiders;          // 0x7C
 };
-static inline sRace_9AD0* getRace_9AD0() { return *(sRace_9AD0**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC); }
+static inline sRace_9AD0* getRace_9AD0() { return *(sRace_9AD0**)(*(char**)((char*)SSXApp + 0x84) + 0xC); }
 
 // Segment count of a vertical bar: one 23-pixel segment per 23 pixels of height d above the base (rounded).
 static inline void calcBarSegments_9AD0(int& n, float d)
@@ -799,10 +799,10 @@ static inline void setupVertBar_9AD0(tBarConfig* b, const float& h)
     b->scale = h / ((float)b->count * 23.0f + 54.0f);
 }
 
-// Localised string by name from the game's text table (D_004A28A8 + 0x8C; vptr at 0x4, slot 4 = lookup by hash).
+// Localised string by name from the game's text table (SSXApp + 0x8C; vptr at 0x4, slot 4 = lookup by hash).
 static inline unsigned short* getLocString_9AD0(char* id)
 {
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(o + 4);
     o += vt[4].delta;
     int h = GetHashValue32(id);
@@ -2215,19 +2215,19 @@ struct sHudIds001F30D8 {
 
 int GetHashValue32(char* str);
 extern "C" int func_003983F0(void* self, int key);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0046ED78[];
 extern char D_004A21F0[];
 
 extern "C" void func_001F30D8(void* p)
 {
     sHudIds001F30D8* self = (sHudIds001F30D8*)p;
-    char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+    char* o = *(char**)((char*)SSXApp + 0x8C);
     sVEntry001F30D8* vt = *(sVEntry001F30D8**)(o + 4);
     char* adj = o + vt[4].delta;
     int h = GetHashValue32(D_0046ED78);
     self->a = vt[4].fn(adj, h);
-    void* tbl = *(void**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 8);
+    void* tbl = *(void**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48) + 8);
     self->d = func_003983F0(tbl, GetHashValue32(D_004A21F0));
     self->b = 0;
     self->c = 0;

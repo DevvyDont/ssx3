@@ -206,13 +206,13 @@ INCLUDE_ASM("seg/seg_14B10", func_00113DB0);
 extern "C" void cAI_setAIState(void *, int);
 extern "C" int func_0012A250(void *);
 extern "C" void func_00231250(int, int, int, int);
-extern void *D_004A28A8;
+extern void *SSXApp;
 
 extern "C" void func_00113DB0(void *arg0, void *arg1) {
     (*(int *)((char*)(arg1) + (0xC))) = (int) ((*(int *)((char*)(arg1) + (0xC))) + 1);
     if (func_0012A250(arg1) == 1) {
         cAI_setAIState(arg1, 6);
-        func_00231250((*(int *)((char*)(D_004A28A8) + (0x84))), 5, 0, 0);
+        func_00231250((*(int *)((char*)(SSXApp) + (0x84))), 5, 0, 0);
     }
 }
 #endif
@@ -719,7 +719,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
             VEL_4298 = Add_4298(Add_4298(Scale_4298(VEL_4298, 1.0f - f), Scale_4298(vdir, f * speed)), Scale_4298(Scale_4298(dir, push), 0.5f));
         }
     }
-    func_002707E0(*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
+    func_002707E0(*(int*)(*(char**)((char*)SSXApp + 0x84) + 0x28), *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
     func_00309848(D_004A3DD8);
     func_0010E098(self, 1, func_00119E38(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
     if (*(float*)(self + 0x378) > hi + 0.019999999552965164f) {
@@ -883,7 +883,7 @@ INCLUDE_ASM("seg/seg_14B10", func_00114DB8);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void func_00115168(char* s);
 extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* ap, t4Vector* pos, t4Vector* vel, float t);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern float D_004A0EA8[];
 extern t4Vector D_004FF130_4DB8 __asm__("D_004FF130");
 
@@ -1037,7 +1037,7 @@ extern "C" int func_00114DB8(cRider* rider)
     }
     char* ap = (char*)rider->mAirPredictor;
     int n = *(int*)(ap + 0x90);
-    char* tbl = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + n * 0xB0;
+    char* tbl = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x44) + n * 0xB0;
     t4Vector dir;
     t4Vector vel;
     t4Vector up = rider->unk_180;
@@ -1565,7 +1565,7 @@ extern "C" void func_0011FEC8_6120(void *, int) __asm__("func_0011FEC8__FPv");
 extern "C" int func_0028B180();
 extern "C" void func_0029A220(int, void *);
 extern "C" void func_00270970(int, int);
-extern void *D_004A28A8;
+extern void *SSXApp;
 
 extern "C" int cRider_checkForReset(char *self, int arg1, int arg2) {
     if (arg1 != 0 || arg2 != 0) {
@@ -1577,7 +1577,7 @@ extern "C" int cRider_checkForReset(char *self, int arg1, int arg2) {
         func_0011FEC8_6120(self, 9);
         cRider_setMotionState_6120(self, 3);
         func_0029A220(func_0028B180(), self);
-        func_00270970(*(int *)(*(char **)((char *)D_004A28A8 + 0x84) + 0x28), *(int *)(self + 0x86C));
+        func_00270970(*(int *)(*(char **)((char *)SSXApp + 0x84) + 0x28), *(int *)(self + 0x86C));
         return 1;
     }
     return 0;

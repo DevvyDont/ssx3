@@ -164,15 +164,15 @@ INCLUDE_ASM("util/statemachine", func_002C73C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002C7328_v(void*, int*, int*, int*, int) __asm__("func_002C7328");
 extern "C" void func_002C7260_v(void*, int*, int*, int*, int) __asm__("func_002C7260");
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" void func_002C73C0(void* self) {
     int rem;
     int now;
     int ticks;
 
-    now = *(int*)(D_004A28A8 + 0x18);
-    ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)(D_004A28A8 + 0x10);
+    now = *(int*)(SSXApp + 0x18);
+    ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)(SSXApp + 0x10);
     if (ticks != 0) {
         *(int*)((char*)self + 0x20) = now;
         rem = func_002C7328_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);
@@ -208,7 +208,7 @@ extern "C" int func_0040BC08(void);
 extern "C" int func_00402520(unsigned char* clock);
 extern "C" void func_0040BFE0(unsigned char* clock);
 extern char D_00486798[];
-extern void* D_004A28A8_7478 __asm__("D_004A28A8");
+extern void* D_004A28A8_7478 __asm__("SSXApp");
 
 extern "C" void* func_002C7478(void* self_)
 {

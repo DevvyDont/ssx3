@@ -141,7 +141,7 @@ struct sAiRiderList
     int f80;                    // 0x80
 };
 
-// The game singleton D_004A28A8 (seg/seg_1FBE38's sApp / sGame; only the members this unit reads).
+// The game singleton SSXApp (seg/seg_1FBE38's sApp / sGame; only the members this unit reads).
 struct sGame {
     char pad_0x0[0xC];
     sAiRiderList* race;         // 0xC
@@ -154,7 +154,7 @@ struct sApp {
     char pad_0x88[0x38];
     char* fC0;                  // 0xC0 (ai/ai: p)
 };
-extern sApp* D_004A28A8_UR __asm__("D_004A28A8");
+extern sApp* D_004A28A8_UR __asm__("SSXApp");
 struct sAiTune {
     char pad0[0xDC];
     float accel;     // 0xDC
@@ -665,7 +665,7 @@ struct sAi0010FC30;
 extern "C" int func_0010FC30(sAi0010FC30* self, int team);
 extern "C" float func_00112588(void* self, int arg1);
 extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sVec4_10D410 {
     float x, y, z, w;
@@ -755,7 +755,7 @@ struct sAi_10D410 {
 extern "C" float func_0010D410(char* self, char* tgt)
 {
     float sc[7];
-    char* ai = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    char* ai = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
     int flags = *(int*)(tgt + 0x38);
     int kind = (flags >> 7) & 7;
     int lvl = (flags >> 4) & 7;
@@ -957,7 +957,7 @@ struct sVE_0010DA10 { short delta; short index; int (*fn)(void*); };
 struct sEnt_0010DA10 { int vis; int val; float dist; int c; int d; int e; int f; int g; int h; };
 struct sRider_0010DA10 { sEnt_0010DA10 ent[6]; };
 struct sAI_0010DA10 { char pad[0x28]; char* riders[20]; int count; };
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" int func_001298C8();
 extern "C" int func_00311AE8(void*, int);
 unsigned int AIrand();
@@ -977,7 +977,7 @@ extern "C" int func_0010DA10(char* self)
     }
     if (func_001298C8() % 6 != 0)
         return 0;
-    sAI_0010DA10* ai = *(sAI_0010DA10**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    sAI_0010DA10* ai = *(sAI_0010DA10**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
     int i;
     for (i = 0; i < ai->count; i++)
     {
@@ -1077,7 +1077,7 @@ extern "C" int func_0010DBF0(char* self, int* side)
 {
     if (func_001298C8() % 6 != 0)
         return 0;
-    sAI_0010DBF0* ai = *(sAI_0010DBF0**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+    sAI_0010DBF0* ai = *(sAI_0010DBF0**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
     int i;
     for (i = 0; i < ai->count; i++)
     {
@@ -1114,14 +1114,14 @@ extern "C" int func_0010DBF0(char* self, int* side)
 //100%
 INCLUDE_ASM("ai/computer", func_0010DEB0);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" int func_0010DEB0(void* self)
 {
     int i = func_0010D8F8(self);
     if (i < 0)
         return 0;
-    return *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + (i << 2) + 0x28);
+    return *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + (i << 2) + 0x28);
 }
 #endif
 
@@ -1397,7 +1397,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void func_00125108(void* self);
 extern "C" void func_00270AB0(void* a, int b, int c);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern signed char D_00535BC8[];
 
 static inline int state_0010E5D8() { return D_00535BC8[0x48]; }
@@ -1407,7 +1407,7 @@ struct sVEntry0010E5D8 { short delta; short index; int (*fn)(void*); };
 extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* s = *(char**)((char*)D_004A28A8 + 0xC0);
+    char* s = *(char**)((char*)SSXApp + 0xC0);
     int mode = *cBENewRaceInterface_getLocation(iface);
     int v = 0;
     if (state_0010E5D8() == 0 || state_0010E5D8() == 1 || state_0010E5D8() == 3 || state_0010E5D8() == 2
@@ -1427,7 +1427,7 @@ extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
     {
         char* o = (char*)self + 0x6C0;
         sVEntry0010E5D8* e = &(*(sVEntry0010E5D8**)o)[7];
-        void* tgt = *(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+        void* tgt = *(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
         func_00270AB0(tgt, e->fn(o + e->delta), arg[1]);
     }
 }
@@ -1510,7 +1510,7 @@ extern "C" float func_00119D40(void* self, int stance, int alternate, int style,
 extern "C" int func_00149778(void* self, int rider, int value);
 void func_00270870_10E910(void* self, int key, void* p) __asm__("func_00270870");
 extern "C" void func_002948D0(void* mgr, void* rider, float v);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern void* D_004A3500;
 
 struct sVE_0010E910 { short delta; short index; int (*fn)(void*); };
@@ -1527,7 +1527,7 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
     int c1 = *(int*)(m1 + 0x114);
     int b1 = *(int*)(m1 + 0x134);
     int d1 = *(int*)(m1 + 0x198);
-    func_00270870_10E910(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), *(int*)(self + 0x86C), m1 + 0xFC);
+    func_00270870_10E910(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28), *(int*)(self + 0x86C), m1 + 0xFC);
     if (c0 < c1)
     {
         int v = *(int*)(self + 0x2F4);
@@ -2736,7 +2736,7 @@ void func_002F64E8(void*);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
 void cWorldPainterMan_reset_noarg() __asm__("cWorldPainterMan_reset__FPv");
 void* func_002306A8(void* self, int i);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
 
@@ -2758,7 +2758,7 @@ extern "C" void func_00111890(void* self)
     int id = *(int*)(*(char**)(s + 0x18) + 0x870);
     if (id >= 0)
     {
-        char* obj = (char*)func_002306A8(*(void**)((char*)D_004A28A8 + 0x84), id);
+        char* obj = (char*)func_002306A8(*(void**)((char*)SSXApp + 0x84), id);
         if (obj != 0)
         {
             sVEntry00111890* vt = *(sVEntry00111890**)(obj + 0xC);
@@ -3199,7 +3199,7 @@ struct sVec4_00112338 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sVE_00112338 { short delta; short index; int (*fn)(void*, float, float); };
 
 extern sEnt_00112338 D_004A5D60[];
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" void* MEM_copy(void*, void*, int);
 extern "C" void func_00112FB0(void* self, float* a, float* b, sVec4_00112338* c);
 extern "C" void func_001127F0(void* self, int a);
@@ -3218,7 +3218,7 @@ extern "C" void func_00112338(char* self)
     if (0.0f < *(float*)(self + 0x4D4))
     {
         void* old = *(void**)(self + 0xAB4);
-        if (500.0f < a && *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x8) % 60 == 0)
+        if (500.0f < a && *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x8) % 60 == 0)
             func_001127F0(self, 0);
         else if (func_0026AC48(*(void**)(self + 0xAB4)) - 200.0f < b)
             func_001127F0(self, 1);
@@ -3313,7 +3313,7 @@ extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
 sVec4_001125C0 func_0026AB20_1125C0(void* path, int* inRange, float t) __asm__("func_0026AB20");
 extern "C" float func_0026AC48(void* self);
 extern "C" void func_00112A50(void* self, int a);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 static inline float atan2_001125C0(float y, float x)
 {
@@ -3350,7 +3350,7 @@ extern "C" void func_001125C0(char* self)
     func_001125A8_2(self, nf);
     if (0.0f < *(float*)(self + 0x4D4))
     {
-        if (500.0f < *(float*)(self + 0x4C8) && *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x8) % 60 == 0)
+        if (500.0f < *(float*)(self + 0x4C8) && *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x8) % 60 == 0)
             func_00112A50(self, 0);
         else if (func_0026AC48(*(void**)(self + 0xAB8)) - 200.0f < *(float*)(self + 0x4C4))
             func_00112A50(self, 1);

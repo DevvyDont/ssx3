@@ -228,7 +228,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00154630(void* self, int value, int id);
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 // PORT: sqrt.s helper
 static inline float pathSqrt(float x)
@@ -251,7 +251,7 @@ extern "C" int func_0026B680(sPathNearList* list, sPathVec3* pos)
     for (i = 0; i < list->count; i++) {
         if (list->entries[i].type == 2 && list->entries[i].id != 0) {
             if (func_00154630(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
-                              *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x78) + 0x1BC)) != 0) {
+                              *(int*)(*(char**)(*(char**)(SSXApp + 0x84) + 0x78) + 0x1BC)) != 0) {
                 sPathVec3 d = list->entries[i].pos - *pos;
                 float dist = pathLen(d);
                 if (dist < best) {

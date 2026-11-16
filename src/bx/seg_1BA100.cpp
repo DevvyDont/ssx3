@@ -1765,12 +1765,12 @@ extern "C" void func_002BB5F0(void* vself)
 INCLUDE_ASM("bx/seg_1BA100", func_002BB6B8);
 #ifdef SKIP_ASM
 extern "C" void func_002BB6E0(int, void *);
-extern void *D_004A28A8;
+extern void *SSXApp;
 
 extern "C" void func_002BB6B8(void) {
     void *temp_5;
 
-    temp_5 = (*(void **)((char*)((*(void **)((char*)(D_004A28A8) + (0x84)))) + (0x10)));
+    temp_5 = (*(void **)((char*)((*(void **)((char*)(SSXApp) + (0x84)))) + (0x10)));
     func_002BB6E0((*(int *)((char*)(temp_5) + (8))), temp_5);
 }
 #endif
@@ -1966,7 +1966,7 @@ extern "C" void func_002BB928(void* ctx, sQtTree_B928* tree, sQtNode_B928* node,
         func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), v, &mid, hi);
     } else {
         sQtCtx_B928* g = D_004A5B80_B928;
-        char* rider = *(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18);
+        char* rider = *(char**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x40) + 0x18);
         sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
         sQtVec4_B928 t;
         t.x = lo->x;

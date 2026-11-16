@@ -9,11 +9,11 @@ INCLUDE_ASM("camera/camera", cCamera_resetChaseControllerSwitches);
 #ifdef SKIP_ASM
 struct sCam162138;
 extern "C" void func_00162138(sCam162138* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void cCamera_resetChaseControllerSwitches(void)
 {
-    void* cam = *(void**)((char*)D_004A28A8 + 0x84);
+    void* cam = *(void**)((char*)SSXApp + 0x84);
     int* chase = *(int**)((char*)cam + 0x84);
     if (chase != 0) {
         func_00162138(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8));
@@ -110,7 +110,7 @@ struct sCam162060;
 extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend);
 void func_00162310(void* self, int val);
 void* func_0015E030(void* self);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern const char D_0045B790[];
 extern void* D_0045B7A8[];
 
@@ -167,12 +167,12 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, fl
     self->f14 = c;
     self->index = idx;
     self->f460 = 0;
-    self->manual->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[0];
+    self->manual->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
     cManualCameraController_setCurrentAlgorithmType(self->manual, 0x51);
-    self->chase->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[idx];
+    self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[idx];
     sRiderRef_15DE60* p = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
     p->vt = D_0045B7A8;
-    p->rider = *(int*)(((sApp_15DE60*)D_004A28A8)->world->riders + (idx << 2) + 0x28);
+    p->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (idx << 2) + 0x28);
     func_00161A60(self->chase, (int*)p);
     func_00162060((sCam162060*)self->chase, 0x4C, 0, 1.0f);
     func_00162310((char*)self + 0xC0, (int)p);
@@ -189,7 +189,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, fl
         break;
     }
     self->fB4 = 0;
-    self->script->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[0];
+    self->script->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
 }
 #endif
 
@@ -478,7 +478,7 @@ extern "C" void func_0015E2A8(void)
 INCLUDE_ASM("camera/camera", func_0015E360);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28A8;
+extern void* SSXApp;
 struct sCamShake_E360 {
     float f0;
     float f4;
@@ -495,7 +495,7 @@ extern sCamShake_E360 D_004C53E0_E360[] __asm__("D_004C53E0");
 // Replays ignore types 1-4.
 extern "C" void func_0015E360(char* self, int type, float amount, float dist)
 {
-    int state = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int state = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int replay = state != 0 && state < 10;
     if (replay && (unsigned int)(type - 1) < 4) {
         return;
@@ -948,7 +948,7 @@ struct sVec4_15EC98
 
 extern "C" void func_003A9658(void* self, unsigned int i, sVec4_15EC98* v, float f);
 extern "C" int func_003A96E0(void* self, int i, sVec4_15EC98* outPos, float* outT);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 struct sCacheSlot_15EC98
 {
@@ -977,7 +977,7 @@ static inline float clamp_15EC98(float v, float lo, float hi)
 extern "C" void func_0015EC98(char* self)
 {
     float r;
-    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x10) == 1)
+    if (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x10) == 1)
         r = *(float*)(self + 0x8);
     else
         r = clamp_15EC98(*(float*)(self + 0x8), 0.0f, 15000.0f);
@@ -1033,7 +1033,7 @@ struct sHit_EE00 {
 
 extern sVec_EE00 D_004FF160_vEE00 __asm__("D_004FF160");
 extern sVec_EE00 D_004FF140_vEE00 __asm__("D_004FF140");
-extern void* D_004A28A8;
+extern void* SSXApp;
 // cWorldLine::cWorldLine(const t4Vector&, const t4Vector&, float, tIntPrecision)
 extern "C" void* func_0032E100(void* seg, const sVec_EE00& a, const sVec_EE00& b, float r, int n);
 extern "C" float func_00336850(void* world, void* seg, sHit_EE00* out, int a3);
@@ -1201,7 +1201,7 @@ extern "C" void func_0015EE00_impl(char* self) __asm__("func_0015EE00");
 extern "C" void func_0015EE00_impl(char* self)
 {
     sHit_EE00 info;
-    void* nash = *(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+    void* nash = *(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20);
     sVec_EE00 correctedPos = Add_EE00(*(sVec_EE00*)(self + 0x100), Scale_EE00(D_004FF160_vEE00, *(float*)(self + 0x460)));
     sVec_EE00 look = Sub_EE00(*(sVec_EE00*)(self + 0xE0), correctedPos);
     float lookLen = Length_EE00(look);
@@ -1268,7 +1268,7 @@ extern "C" void func_0015EE00_impl(char* self)
         char line2[0xB0];
         func_0032E100(line2, riderPoint, viewPoint, 0.5f, 2);
         sHit_EE00 info2;
-        if (func_00336850(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), line2, &info2, 0) > 0.0f) {
+        if (func_00336850(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), line2, &info2, 0) > 0.0f) {
             if (*(int*)(self + 0x4A4) != 0)
                 *(sVec_EE00*)(self + 0x100) = Add_EE00(Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 180.0f)), Scale_EE00(Forward_EE00(), 180.0f));
             else
@@ -1839,7 +1839,7 @@ void func_0015FD48(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_0015FD50);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 // PORT: cInput_getValue returns a float (input axis value, $f0).
 extern "C" float cInput_getValue(int pad, int axis);
 extern "C" float func_0031BF60(float x);
@@ -1927,7 +1927,7 @@ static inline float ffloor_0015FD50(float x)
 // PORT: g++ `>?` / `<?` (max/min) operators.
 extern "C" void func_0015FD50(sFreeCam_0015FD50* self)
 {
-    int pad = *(int*)(*(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x4) + 0xA4) + 0xC);
+    int pad = *(int*)(*(char**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x4) + 0xA4) + 0xC);
     float speed = cInput_getValue(pad, 0x34);
     float ry = cInput_getValue(pad, 0x31);
     float rx = cInput_getValue(pad, 0x30);
@@ -2236,7 +2236,7 @@ void func_001604B0(void* self, void* other)
 //100%
 INCLUDE_ASM("camera/camera", func_001604B8);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern "C" float cInput_getValue(int pad, int axis);
 extern "C" void func_00162568(void* self, struct sCamInfo_001607E0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
@@ -2361,7 +2361,7 @@ extern "C" void func_001604B8(char* self)
     func_00162568(self, (sCamInfo_001607E0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    sGame_1604B8* g = (sGame_1604B8*)D_004A28A8;
+    sGame_1604B8* g = (sGame_1604B8*)SSXApp;
     int pad = g->pads[*(int*)(*(char**)(g->f84 + 0x28) + 0x28)];
     float ax = cInput_getValue(pad, 0xBE);
     float ay = cInput_getValue(pad, 0xBF);
@@ -3588,7 +3588,7 @@ extern "C" void cChaseCameraController_update(char* self)
             }
         }
     }
-    int* st = *(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+    int* st = *(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
     int idle = InRace_161BB8(st) && st[0x484 / 4] == 0;
     if (idle)
         *(float*)(self + 0x38) = 0.0f;

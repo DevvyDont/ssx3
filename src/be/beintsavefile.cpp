@@ -223,7 +223,7 @@ cBEIface_2BB0* cBEScoreInterface_getThis();
 cBEIface_2BB0* cBENewPlayerInterface_getThis();
 extern "C" void cSSXApp_initLocale(void* app);
 extern "C" void cSSXApp_activateBEOptions(void* app);
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 // Restores the save block written by func_00152758 after checking its CRC; returns 0 when the CRC is wrong.
 extern "C" int func_00152BB0(void* self, char* buf)
@@ -252,8 +252,8 @@ extern "C" int func_00152BB0(void* self, char* buf)
     }
     o = cBENewPlayerInterface_getThis();
     o->onLoad();
-    cSSXApp_initLocale(D_004A28A8);
-    cSSXApp_activateBEOptions(D_004A28A8);
+    cSSXApp_initLocale(SSXApp);
+    cSSXApp_activateBEOptions(SSXApp);
     return 1;
 }
 #endif

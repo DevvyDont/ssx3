@@ -2197,11 +2197,11 @@ extern "C" void func_00245140(void) {
 INCLUDE_ASM("main/ssxappdtor", func_00245168);
 #ifdef SKIP_ASM
 extern "C" void func_00231D18(void *);
-extern char *D_004A28A8;
+extern char *SSXApp;
 
 extern "C" int func_00245168(void *self) {
     func_00231D18(self);
-    if (*(int *)(D_004A28A8 + 4) != 0) {
+    if (*(int *)(SSXApp + 4) != 0) {
         *(int *)((char *)self + 8) = 1;
         return 0;
     }

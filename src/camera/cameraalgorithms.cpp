@@ -5,7 +5,7 @@ INCLUDE_ASM("camera/cameraalgorithms", cChaseCameraController_createChaseAlgorit
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char D_0045B250[], D_0045B278[], D_0045B298[], D_0045B2B0[], D_0045B2D8[], D_0045B300[];
 extern char D_0045B328[], D_0045B348[], D_0045B370[], D_0045B390[], D_0045B3B0[];
 extern char D_0045B3D0[], D_0045B3F8[], D_0045B420[], D_0045B448[], D_0045B470[], D_0045B498[], D_0045B4C0[], D_0045B4E8[];
@@ -56,7 +56,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
     }
     switch (kind) {
     case 91: {
-        int n = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28);
+        int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
         if (!camNetActive_D0A0(n)) {
             char* target = *(char**)(ctx + 8);
             if (*(int*)(target + 0x28) == 2) {
@@ -474,11 +474,11 @@ extern "C" void func_0015D928_impl(void* self)
 //100%
 INCLUDE_ASM("camera/cameraalgorithms", func_0015DAC0);
 #ifdef SKIP_ASM
-extern void* D_004A28A8;
+extern void* SSXApp;
 
 extern "C" void func_0015DAC0(void)
 {
-    void* cam = *(void**)((char*)D_004A28A8 + 0x84);
+    void* cam = *(void**)((char*)SSXApp + 0x84);
     void* chase = *(void**)((char*)cam + 0x84);
     void* ctrl = *(void**)((char*)chase + 0x4);
     *(int*)((char*)ctrl + 0x4A4) = 1;
@@ -492,7 +492,7 @@ struct func_0015DAE0_VE { short delta; short index; void (*fn)(void*); };
 
 extern "C" void func_0015DAE0(void)
 {
-    void* cam = *(void**)((char*)D_004A28A8 + 0x84);
+    void* cam = *(void**)((char*)SSXApp + 0x84);
     char* ctx = *(char**)((char*)cam + 0x84);
     int count = *(int*)ctx;
     char* a = *(char**)(*(char**)(ctx + 4) + 0xA8);
@@ -524,7 +524,7 @@ extern "C" void func_0015DB58(void)
 {
     func_0016C968(D_004C5830);
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    char* riders = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    char* riders = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
     int n = *(int*)riders;
     func_00162170(*(void**)(*(char**)(riders + 4) + 0xA8));
     char* cam = *(char**)(*(char**)(riders + 4) + 0xA8);

@@ -587,7 +587,7 @@ extern "C" int func_00276270(char* self, int a1)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276388);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern void* D_004A28A4;
 extern char D_004A34A0[];
 int GetHashValue32(char* s);
@@ -667,7 +667,7 @@ int func_00276388_impl(char* self, int fade, int notify)
     }
     sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
     dm->state = 3;
-    char* table = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18;
+    char* table = *(char**)(*(char**)(SSXApp + 0x84) + 0x48) + 0x18;
     char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
     if (o != 0) {
         sDmVEntry_6388* e = &(*(sDmVEntry_6388**)(o + 0x8))[24];
@@ -676,7 +676,7 @@ int func_00276388_impl(char* self, int fade, int notify)
     if (func_00277DD8(self, item) == 0) {
         func_00279720_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
         if (*(int*)(self + 0x4) != 0) {
-            void* snd = func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+            void* snd = func_00230698(*(void**)(SSXApp + 0x84), 0);
             if (*(int*)((char*)snd + 0x44) != 0) {
                 func_002E4578(snd);
             }
@@ -715,7 +715,7 @@ int func_00276388_impl(char* self, int fade, int notify)
             if (t <= 0.0f) {
                 t = 0.5f;
             }
-            func_002EA6B8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64), t);
+            func_002EA6B8(*(void**)(*(char**)(SSXApp + 0x84) + 0x64), t);
         }
         if (notify) {
             char* eng = *(char**)self;
@@ -724,7 +724,7 @@ int func_00276388_impl(char* self, int fade, int notify)
         }
     } else {
         if (*(int*)(self + 0x4) != 0) {
-            func_002EA860(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64));
+            func_002EA860(*(void**)(*(char**)(SSXApp + 0x84) + 0x64));
         }
         func_002839A8(*(char**)self + 0x500);
         if (notify) {
@@ -840,7 +840,7 @@ reset:
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276868);
 #ifdef SKIP_ASM
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern char D_004A34A0[];
 int GetHashValue32(char* s);
 void* func_00230698(void* self, int a1);
@@ -867,14 +867,14 @@ extern "C" void func_00276868(void* p, int a1)
         func_00277C08(self, 0, 0);
     }
     if (*(int*)(self + 0x4) != 0 && *(int*)(self + 0xA4) == 3) {
-        void* gm = *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64);
+        void* gm = *(void**)(*(char**)(SSXApp + 0x84) + 0x64);
         if (a1 != 0) {
             func_002EA820(gm);
             if (*(int*)(self + 0xB0) != 0) {
-                func_002E4578(func_00230698(*(void**)(D_004A28A8 + 0x84), 0));
+                func_002E4578(func_00230698(*(void**)(SSXApp + 0x84), 0));
             }
         }
-        char* table = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18;
+        char* table = *(char**)(*(char**)(SSXApp + 0x84) + 0x48) + 0x18;
         char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
         if (o != 0) {
             sDmVEntry6868* e = &(*(sDmVEntry6868**)(o + 0x8))[24];
@@ -1047,7 +1047,7 @@ extern "C" int func_002839A8(void* self);
 extern "C" int func_00283BB8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" void func_002E4578(void* p);
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 extern "C" void func_00276CC8(char* self)
 {
@@ -1070,7 +1070,7 @@ extern "C" void func_00276CC8(char* self)
     }
     if (*(int*)(self + 0xB0) != 0) {
         char* item = (char*)func_00283D70(self + 0xC, 0);
-        char* obj = (char*)func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+        char* obj = (char*)func_00230698(*(void**)(SSXApp + 0x84), 0);
         if (*(int*)(self + 0xB8) != 0) {
             if (--*(int*)(self + 0xB8) == 0) {
                 if (*(int*)(self + 0xAC) == 0) {
@@ -1107,7 +1107,7 @@ extern "C" void func_00276CC8(char* self)
     if (*(int*)(self + 0xC8) != 0) {
         if (--*(int*)(self + 0xC8) == 0) {
             if (*(int*)(self + 0xB0) != 0) {
-                func_002E4578(func_00230698(*(void**)(D_004A28A8 + 0x84), 0));
+                func_002E4578(func_00230698(*(void**)(SSXApp + 0x84), 0));
                 *(int*)(self + 0xAC) = 0;
                 *(int*)(self + 0xB0) = 0;
                 *(int*)(self + 0xB8) = 0;
@@ -1573,7 +1573,7 @@ extern "C" int func_002839A8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" float func_002E4678(void* self);
 extern "C" void func_002EA780(void* self, float t);
-extern char* D_004A28A8;
+extern char* SSXApp;
 
 struct sDmCmd7838 {
     int category;   // 0x0
@@ -1613,7 +1613,7 @@ extern "C" void func_00277838(void* selfp)
         int wasOn = *(int*)(self + 0xB0);
         func_00276868(self, 0);
         if (*(int*)(self + 0x4) != 0) {
-            void* app = *(void**)(D_004A28A8 + 0x84);
+            void* app = *(void**)(SSXApp + 0x84);
             void* fade = *(void**)((char*)app + 0x64);
             char* p = (char*)func_00230698(app, 0);
             if (wasOn != 0 && *(int*)(p + 0x44) != 0) {
@@ -1642,7 +1642,7 @@ extern "C" int func_0027A4A0(void* self, int a1, int a2);
 extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
 extern "C" void func_002E44F0(void* snd, int a1, int h, float t);
 extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
-extern char* D_004A28A8;
+extern char* SSXApp;
 extern void* D_004A28A4;
 
 struct sDmFade_7980 {
@@ -1668,7 +1668,7 @@ int func_00277980_impl(char* self)
 {
     if (*(int*)(self + 0xB0) != 0) {
         if (*(int*)(self + 0xAC) != 0) {
-            func_002E4578(func_00230698(*(void**)(D_004A28A8 + 0x84), 0));
+            func_002E4578(func_00230698(*(void**)(SSXApp + 0x84), 0));
             return 0;
         }
         return 1;
@@ -1676,7 +1676,7 @@ int func_00277980_impl(char* self)
     char* item = (char*)func_00283D70(self + 0xC, 0);
     if (func_00277DD8(self, item) == 0) {
         sDmFade_7980* f = (sDmFade_7980*)func_0027C070(func_00282BF0(D_004A28A4, *(int*)(item + 0xC)));
-        void* snd = func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+        void* snd = func_00230698(*(void**)(SSXApp + 0x84), 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
         }
@@ -1701,7 +1701,7 @@ int func_00277980_impl(char* self)
         }
     } else {
         sDmEnt_7980* e = (sDmEnt_7980*)func_00277DE8(self, (int*)item);
-        void* snd = func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+        void* snd = func_00230698(*(void**)(SSXApp + 0x84), 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
         }
@@ -1725,7 +1725,7 @@ int func_00277980_impl(char* self)
 INCLUDE_ASM("scripter/datamanager", func_00277C08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char* D_004A28A8;
+extern char* SSXApp;
 void* func_00230698(void* self, int a1);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void func_002826D8(void* self, int a1);
@@ -1800,8 +1800,8 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
             func_00283B78(self->owner + 0x500, 1);
         }
         if (self->f4) {
-            func_002EA8B8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64), 1);
-            char* p = (char*)func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+            func_002EA8B8(*(void**)(*(char**)(SSXApp + 0x84) + 0x64), 1);
+            char* p = (char*)func_00230698(*(void**)(SSXApp + 0x84), 0);
             if (*(int*)(p + 0x44)) {
                 func_002E4638(p, 1);
             }
@@ -1816,8 +1816,8 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
             func_00283B78(self->owner + 0x500, 0);
         }
         if (self->f4) {
-            func_002EA8B8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x64), 0);
-            char* p = (char*)func_00230698(*(void**)(D_004A28A8 + 0x84), 0);
+            func_002EA8B8(*(void**)(*(char**)(SSXApp + 0x84) + 0x64), 0);
+            char* p = (char*)func_00230698(*(void**)(SSXApp + 0x84), 0);
             if (*(int*)(p + 0x44)) {
                 func_002E4638(p, 0);
             }

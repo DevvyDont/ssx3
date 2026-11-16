@@ -789,7 +789,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FC420);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C420 __asm__("D_004A3DD8");
 extern char **D_004A47B8_C420 __asm__("D_004A47B8");
-extern char *D_004A28A8_C420 __asm__("D_004A28A8");
+extern char *D_004A28A8_C420 __asm__("SSXApp");
 static inline char *refToPtr_C420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C420(unsigned i) { if (i == 0) return 0; return refToPtr_C420(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1317,7 +1317,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRollerFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D250 __asm__("D_004A3DD8");
 extern char **D_004A47B8_D250 __asm__("D_004A47B8");
-extern char *D_004A28A8_D250 __asm__("D_004A28A8");
+extern char *D_004A28A8_D250 __asm__("SSXApp");
 extern "C" void cMoveNode_addRoller_D250(void*, void*, int, int) __asm__("cMoveNode_addRoller");
 struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_D250 { float x, y, z; };
@@ -1513,7 +1513,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FD758);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D758 __asm__("D_004A3DD8");
 extern char **D_004A47B8_D758 __asm__("D_004A47B8");
-extern char *D_004A28A8_D758 __asm__("D_004A28A8");
+extern char *D_004A28A8_D758 __asm__("SSXApp");
 struct V4_D758 { float x, y, z, w; V4_D758() {} V4_D758(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} } __attribute__((aligned(16)));
 struct M4_D758 { V4_D758 r[4]; };
 struct Sh_D758 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual V4_D758 *v05(); virtual M4_D758 *v06(); };
@@ -1629,7 +1629,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D9F8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_D9F8 __asm__("D_004A47B8");
-extern char *D_004A28A8_D9F8 __asm__("D_004A28A8");
+extern char *D_004A28A8_D9F8 __asm__("SSXApp");
 struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void func_00355978_D9F8(void*, int, int, V4_D9F8*) __asm__("func_00355978");
 struct O_D9F8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -1717,7 +1717,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_DC60 __asm__("D_004A3DD8");
 extern char **D_004A47B8_DC60 __asm__("D_004A47B8");
-extern char *D_004A28A8_DC60 __asm__("D_004A28A8");
+extern char *D_004A28A8_DC60 __asm__("SSXApp");
 struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void func_00355978_DC60(void*, int, int, V4_DC60*) __asm__("func_00355978");
 struct O_DC60 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
@@ -1805,7 +1805,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddSplineFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_DED0 __asm__("D_004A3DD8");
 extern char **D_004A47B8_DED0 __asm__("D_004A47B8");
-extern char *D_004A28A8_DED0 __asm__("D_004A28A8");
+extern char *D_004A28A8_DED0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSpline1");
 struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DED0(unsigned i) { return (char*)(i << 2); }
@@ -1885,7 +1885,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddMultiSplineFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E0C0 __asm__("D_004A3DD8");
 extern char **D_004A47B8_E0C0 __asm__("D_004A47B8");
-extern char *D_004A28A8_E0C0 __asm__("D_004A28A8");
+extern char *D_004A28A8_E0C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpline");
 struct O_E0C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_E0C0(unsigned i) { return (char*)(i << 2); }
@@ -1966,7 +1966,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E2C0 __asm__("D_004A3DD8");
 extern char **D_004A47B8_E2C0 __asm__("D_004A47B8");
-extern char *D_004A28A8_E2C0 __asm__("D_004A28A8");
+extern char *D_004A28A8_E2C0 __asm__("SSXApp");
 extern "C" void func_00355B90_E2C0(void*, void*) __asm__("func_00355B90");
 struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E2C0 { float x, y, z; };
@@ -2037,7 +2037,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E4A8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_E4A8 __asm__("D_004A47B8");
-extern char *D_004A28A8_E4A8 __asm__("D_004A28A8");
+extern char *D_004A28A8_E4A8 __asm__("SSXApp");
 extern "C" void func_00355BF0_E4A8(void*, void*) __asm__("func_00355BF0");
 struct O_E4A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E4A8 { float x, y, z; };
@@ -2099,7 +2099,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E668 __asm__("D_004A3DD8");
 extern char **D_004A47B8_E668 __asm__("D_004A47B8");
-extern char *D_004A28A8_E668 __asm__("D_004A28A8");
+extern char *D_004A28A8_E668 __asm__("SSXApp");
 extern "C" void func_00355C50_E668(void*, void*) __asm__("func_00355C50");
 struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E668 { float x, y, z; };
@@ -2180,7 +2180,7 @@ struct Ent_E840x { char pad[0x18]; char *obj; };
 struct Lvl_E840 { char pad[0x40]; Ent_E840x *a1[12]; Ent_E840x *a2[3]; int n1; int pad80[2]; int n2; };
 struct O_E840 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual char *v24(); };
 extern char *D_004A28A4_E840 __asm__("D_004A28A4");
-extern char *D_004A28A8_E840 __asm__("D_004A28A8");
+extern char *D_004A28A8_E840 __asm__("SSXApp");
 extern "C" void cMoveNode_addParticle_E840(void*, void*) __asm__("cMoveNode_addParticle");
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline V4_E840 vSub_E840(const V4_E840 &a, const V4_E840 &b) {
@@ -2490,7 +2490,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRailFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F1C8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_F1C8 __asm__("D_004A47B8");
-extern char *D_004A28A8_F1C8 __asm__("D_004A28A8");
+extern char *D_004A28A8_F1C8 __asm__("SSXApp");
 extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
 struct O_F1C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_F1C8 { float x, y, z; };
@@ -2756,7 +2756,7 @@ extern R12_F850 D_004C9098_F850 __asm__("D_004C9098");
 extern int D_00446530_F850[] __asm__("D_00446530");
 extern "C" void func_0010F1C0(int, int, float);
 extern int* D_004A3DD8_F850 __asm__("D_004A3DD8");
-extern char* D_004A28A8_F850 __asm__("D_004A28A8");
+extern char* D_004A28A8_F850 __asm__("SSXApp");
 extern int D_004A563C_F850 __asm__("D_004A563C");
 struct T12_F850 { int a; int b; int e; Flag_F850 f; };
 extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
@@ -2796,7 +2796,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FF9A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F9A8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_F9A8 __asm__("D_004A47B8");
-extern char *D_004A28A8_F9A8 __asm__("D_004A28A8");
+extern char *D_004A28A8_F9A8 __asm__("SSXApp");
 static inline char *look_F9A8(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_F9A8 + 0x290);
@@ -2924,7 +2924,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FFD58);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_FD58 __asm__("D_004A3DD8");
 extern char **D_004A47B8_FD58 __asm__("D_004A47B8");
-extern char *D_004A28A8_FD58 __asm__("D_004A28A8");
+extern char *D_004A28A8_FD58 __asm__("SSXApp");
 static inline char *look_FD58(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_FD58 + 0x290);
@@ -2983,7 +2983,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FFF00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_FF00 __asm__("D_004A3DD8");
 extern char **D_004A47B8_FF00 __asm__("D_004A47B8");
-extern char *D_004A28A8_FF00 __asm__("D_004A28A8");
+extern char *D_004A28A8_FF00 __asm__("SSXApp");
 static inline char *refToPtr_FF00(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FF00(unsigned i) { if (i == 0) return 0; return refToPtr_FF00(i); }
 extern "C" void *func_0028B180_FF00(void) __asm__("func_0028B180");
@@ -3048,7 +3048,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003000A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_00A8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_00A8 __asm__("D_004A47B8");
-extern char *D_004A28A8_00A8 __asm__("D_004A28A8");
+extern char *D_004A28A8_00A8 __asm__("SSXApp");
 static inline char *refToPtr_00A8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_00A8(unsigned i) { if (i == 0) return 0; return refToPtr_00A8(i); }
 extern "C" void *func_0028B180_00A8(void) __asm__("func_0028B180");
@@ -3115,7 +3115,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00300260);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0260 __asm__("D_004A3DD8");
 extern char **D_004A47B8_0260 __asm__("D_004A47B8");
-extern char *D_004A28A8_0260 __asm__("D_004A28A8");
+extern char *D_004A28A8_0260 __asm__("SSXApp");
 static inline char *refToPtr_0260(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0260(unsigned i) { if (i == 0) return 0; return refToPtr_0260(i); }
 extern "C" void *func_0028B180_0260(void) __asm__("func_0028B180");
@@ -3182,7 +3182,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00300418);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0418 __asm__("D_004A3DD8");
 extern char **D_004A47B8_0418 __asm__("D_004A47B8");
-extern char *D_004A28A8_0418 __asm__("D_004A28A8");
+extern char *D_004A28A8_0418 __asm__("SSXApp");
 struct O_0418 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(int); };
 struct V3_0418 { float x, y, z; };
 extern V3_0418 D_004C9098_0418 __asm__("D_004C9098");
@@ -3304,7 +3304,7 @@ extern int D_004A5690_0770 __asm__("D_004A5690");
 extern int D_004A3C40_0770[2] __asm__("D_004A3C40");
 extern int *D_004A3DD8_0770 __asm__("D_004A3DD8");
 extern char **D_004A47B8_0770 __asm__("D_004A47B8");
-extern char *D_004A28A8_0770 __asm__("D_004A28A8");
+extern char *D_004A28A8_0770 __asm__("SSXApp");
 struct O_0770 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
 struct Lvl_0770 { char pad[0x28]; char *sh[1]; };
@@ -3376,7 +3376,7 @@ extern int D_004A56A0_0948 __asm__("D_004A56A0");
 extern int D_004A3C48_0948[2] __asm__("D_004A3C48");
 extern int *D_004A3DD8_0948 __asm__("D_004A3DD8");
 extern char **D_004A47B8_0948 __asm__("D_004A47B8");
-extern char *D_004A28A8_0948 __asm__("D_004A28A8");
+extern char *D_004A28A8_0948 __asm__("SSXApp");
 struct O_0948 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_0948 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(void*); };
 struct Lvl_0948 { char pad[0x28]; char *sh[1]; };
@@ -3674,7 +3674,7 @@ struct Ent_1120 { int idx; int val; int pad; int kind; };
 extern int D_004A3C68_1120[2] __asm__("D_004A3C68");
 extern "C" int cWScriptMan_collect_1120(char*, int, unsigned, unsigned) __asm__("cWScriptMan_collect");
 extern char *D_004A3DD8_1120 __asm__("D_004A3DD8");
-extern char *D_004A28A8_1120 __asm__("D_004A28A8");
+extern char *D_004A28A8_1120 __asm__("SSXApp");
 extern int D_004A56B4_1120 __asm__("D_004A56B4");
 struct T12_1120 { unsigned a; unsigned b; Flag_1120 f; };
 extern T12_1120 D_004FBBD0_1120 __asm__("D_004FBBD0");
@@ -3918,7 +3918,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00301680);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_1680 __asm__("D_004A3DD8");
 extern char **D_004A47B8_1680 __asm__("D_004A47B8");
-extern char *D_004A28A8_1680 __asm__("D_004A28A8");
+extern char *D_004A28A8_1680 __asm__("SSXApp");
 static inline char *look_1680(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_1680 + 0x290);
@@ -3984,7 +3984,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00301830);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_1830 __asm__("D_004A3DD8");
 extern char **D_004A47B8_1830 __asm__("D_004A47B8");
-extern char *D_004A28A8_1830 __asm__("D_004A28A8");
+extern char *D_004A28A8_1830 __asm__("SSXApp");
 static inline char *look_1830(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_1830 + 0x290);
@@ -4062,7 +4062,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003019C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_19C8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_19C8 __asm__("D_004A47B8");
-extern char *D_004A28A8_19C8 __asm__("D_004A28A8");
+extern char *D_004A28A8_19C8 __asm__("SSXApp");
 int *func_00226610(void*);
 struct O_19C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual int v32(float); };
 struct V3_19C8 { int w0, w1, w2; };
@@ -4218,7 +4218,7 @@ extern int D_004A5718_1D78 __asm__("D_004A5718");
 extern int D_004A3CB0_1D78[2] __asm__("D_004A3CB0");
 extern int *D_004A3DD8_1D78 __asm__("D_004A3DD8");
 extern char **D_004A47B8_1D78 __asm__("D_004A47B8");
-extern char *D_004A28A8_1D78 __asm__("D_004A28A8");
+extern char *D_004A28A8_1D78 __asm__("SSXApp");
 struct O_1D78 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_1D78 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
 struct Lvl_1D78 { char pad[0x28]; char *sh[1]; };
@@ -4333,7 +4333,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00302048);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *D_004A3DD8_2048 __asm__("D_004A3DD8");
-extern char *D_004A28A8_2048 __asm__("D_004A28A8");
+extern char *D_004A28A8_2048 __asm__("SSXApp");
 extern int D_00445E40_2048[] __asm__("D_00445E40");
 extern "C" void func_0030B7F8_2048(int*, int) __asm__("func_0030B7F8");
 extern "C" void cSectionMan_eventbegin_2048(int, int) __asm__("cSectionMan_eventbegin");
@@ -4409,7 +4409,7 @@ extern int D_004A5730_2210 __asm__("D_004A5730");
 extern const int D_004465C8_2210[] __asm__("D_004465C8");
 extern char* const D_00445E40_2210[] __asm__("D_00445E40");
 extern int* D_004A3DD8_2210 __asm__("D_004A3DD8");
-extern char* D_004A28A8_2210 __asm__("D_004A28A8");
+extern char* D_004A28A8_2210 __asm__("SSXApp");
 struct V3_2210 { float x, y, z; };
 extern V3_2210 D_004C9098_2210 __asm__("D_004C9098");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
@@ -4961,7 +4961,7 @@ struct Flag_2EF8 { char c; Flag_2EF8() {} Flag_2EF8(const Flag_2EF8& o) : c(o.c)
 struct Ent_2EF8 { int idx; int val; int pad; int kind; };
 extern int D_004A3D10_2EF8[2] __asm__("D_004A3D10");
 extern char *D_004A3DD8_2EF8 __asm__("D_004A3DD8");
-extern char *D_004A28A8_2EF8 __asm__("D_004A28A8");
+extern char *D_004A28A8_2EF8 __asm__("SSXApp");
 extern int D_004A57B0_2EF8 __asm__("D_004A57B0");
 extern int D_004A57A8_2EF8 __asm__("D_004A57A8");
 extern Flag_2EF8 D_004A57AC_2EF8 __asm__("D_004A57AC");
@@ -5028,7 +5028,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303130);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3130 __asm__("D_004A3DD8");
 extern char **D_004A47B8_3130 __asm__("D_004A47B8");
-extern char *D_004A28A8_3130 __asm__("D_004A28A8");
+extern char *D_004A28A8_3130 __asm__("SSXApp");
 static inline char *look_3130(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_3130 + 0x290);
@@ -5086,7 +5086,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003032C0);
 // PORT: PS2-only VU0 inline asm (vector length).
 void* func_00226618(void*);
 extern char *D_004A3DD8_32C0 __asm__("D_004A3DD8");
-extern char *D_004A28A8_32C0 __asm__("D_004A28A8");
+extern char *D_004A28A8_32C0 __asm__("SSXApp");
 struct Vec_32C0 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_32C0 { char pad[0x6C0]; };
 struct B_32C0 { virtual void v01(); virtual Vec_32C0 *v02(); };
@@ -5128,7 +5128,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303380);
 // PORT: PS2-only VU0 inline asm (vector length).
 void* func_00226618(void*);
 extern char *D_004A3DD8_3380 __asm__("D_004A3DD8");
-extern char *D_004A28A8_3380 __asm__("D_004A28A8");
+extern char *D_004A28A8_3380 __asm__("SSXApp");
 struct Vec_3380 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_3380 { char pad[0x6C0]; };
 struct B_3380 { virtual void v01(); virtual Vec_3380 *v02(); };
@@ -5223,7 +5223,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003034F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* func_00226610(void*);
 extern char *D_004A3DD8_34F8 __asm__("D_004A3DD8");
-extern char *D_004A28A8_34F8 __asm__("D_004A28A8");
+extern char *D_004A28A8_34F8 __asm__("SSXApp");
 struct A_34F8 { char pad[0x6C0]; };
 struct B_34F8 { virtual void v01(); };
 struct D_34F8 : A_34F8, B_34F8 { };
@@ -5343,7 +5343,7 @@ extern Flag_37B0 D_004A57D4_37B0 __asm__("D_004A57D4");
 extern int D_004A57D8_37B0 __asm__("D_004A57D8");
 extern int D_004A3D30_37B0[2] __asm__("D_004A3D30");
 extern int* D_004A3DD8_37B0 __asm__("D_004A3DD8");
-extern char* D_004A28A8_37B0 __asm__("D_004A28A8");
+extern char* D_004A28A8_37B0 __asm__("SSXApp");
 extern "C" int func_00122EE8_37B0(char* rider, int which) __asm__("func_00122EE8");
 
 struct Ent_37B0 { int idx; int val; int pad; int kind; };
@@ -5407,7 +5407,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003039F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_39F0 __asm__("D_004A3DD8");
 extern char **D_004A47B8_39F0 __asm__("D_004A47B8");
-extern char *D_004A28A8_39F0 __asm__("D_004A28A8");
+extern char *D_004A28A8_39F0 __asm__("SSXApp");
 extern int D_004A3FF0_39F0 __asm__("D_004A3FF0");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
 extern "C" void func_00343F38_39F0(int, int) __asm__("func_00343F38");
@@ -5596,7 +5596,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303EC8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* func_00226610(void*);
 extern char *D_004A3DD8_3EC8 __asm__("D_004A3DD8");
-extern char *D_004A28A8_3EC8 __asm__("D_004A28A8");
+extern char *D_004A28A8_3EC8 __asm__("SSXApp");
 struct A_3EC8 { char pad[0x6C0]; };
 struct B_3EC8 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual bool v09(); };
 struct D_3EC8 : A_3EC8, B_3EC8 { };
@@ -5627,7 +5627,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303F80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3F80 __asm__("D_004A3DD8");
-extern char *D_004A28A8_3F80 __asm__("D_004A28A8");
+extern char *D_004A28A8_3F80 __asm__("SSXApp");
 struct V3_3F80 { float x, y, z; };
 extern V3_3F80 D_004C9098_3F80 __asm__("D_004C9098");
 struct A_3F80 { char pad[0x6C0]; };
@@ -5882,7 +5882,7 @@ extern R12_44A8 D_004C9098_44A8 __asm__("D_004C9098");
 extern int D_004A3D60_44A8[2] __asm__("D_004A3D60");
 extern "C" void func_00238550(int, int, int);
 extern int* D_004A3DD8_44A8 __asm__("D_004A3DD8");
-extern char* D_004A28A8_44A8 __asm__("D_004A28A8");
+extern char* D_004A28A8_44A8 __asm__("SSXApp");
 extern int D_004A5808_44A8 __asm__("D_004A5808");
 extern int D_004A5800_44A8 __asm__("D_004A5800");
 extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
@@ -6003,7 +6003,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304980);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4980 __asm__("D_004A3DD8");
 extern char **D_004A47B8_4980 __asm__("D_004A47B8");
-extern char *D_004A28A8_4980 __asm__("D_004A28A8");
+extern char *D_004A28A8_4980 __asm__("SSXApp");
 void func_00355878(void*, void*);
 struct O_4980 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_4980 { float x, y, z; };
@@ -6070,7 +6070,7 @@ extern R12_4B38 D_004C9098_4B38 __asm__("D_004C9098");
 extern int D_004A3D70_4B38[2] __asm__("D_004A3D70");
 extern "C" void func_002709D8(int, int, int);
 extern int* D_004A3DD8_4B38 __asm__("D_004A3DD8");
-extern char* D_004A28A8_4B38 __asm__("D_004A28A8");
+extern char* D_004A28A8_4B38 __asm__("SSXApp");
 extern int D_004A5820_4B38 __asm__("D_004A5820");
 extern int D_004A5818_4B38 __asm__("D_004A5818");
 extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
@@ -6108,7 +6108,7 @@ struct Tag_4C50 { char c; Tag_4C50() {} Tag_4C50(const Tag_4C50 &o) : c(o.c) {} 
 struct Ent_4C50 { int idx; int val; int pad; int type; };
 extern char *D_004A3DD8_4C50 __asm__("D_004A3DD8");
 extern char **D_004A47B8_4C50 __asm__("D_004A47B8");
-extern char *D_004A28A8_4C50 __asm__("D_004A28A8");
+extern char *D_004A28A8_4C50 __asm__("SSXApp");
 extern unsigned D_5828_4C50 __asm__("D_004A5828");
 extern Tag_4C50 D_582C_4C50 __asm__("D_004A582C");
 extern int D_5830_4C50 __asm__("D_004A5830");
@@ -6182,7 +6182,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304E38);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4E38 __asm__("D_004A3DD8");
 extern char **D_004A47B8_4E38 __asm__("D_004A47B8");
-extern char *D_004A28A8_4E38 __asm__("D_004A28A8");
+extern char *D_004A28A8_4E38 __asm__("SSXApp");
 extern "C" void func_00355888_4E38(void*, void*) __asm__("func_00355888");
 struct O_4E38 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_4E38 { float x, y, z; };
@@ -6398,7 +6398,7 @@ struct sGame {
     char pad_0x7C[0x8];
     sCameras* cameras;          // 0x84
 };
-// The game singleton (D_004A28A8).
+// The game singleton (SSXApp).
 struct sApp {
     char pad_0x0[0x14];
     float f14;                  // 0x14
@@ -6409,7 +6409,7 @@ struct sApp {
     char pad_0x88[0x38];
     int fC0;                    // 0xC0
 };
-extern sApp* D_004A28A8;
+extern sApp* SSXApp;
 extern char* D_004A28A4;
 extern void* D_004A4028;
 // One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
@@ -6521,7 +6521,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     float scale = buf->scale;
     int keyword = buf->keyword;
     if (keyword == 0) {
-        sGame *game = D_004A28A8->game;
+        sGame *game = SSXApp->game;
         int np = game->race->numPlayers;
         if (obj) {
             for (int i = 0; i < np; i++) {
@@ -6619,7 +6619,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00305660);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *D_004A3DD8_5660 __asm__("D_004A3DD8");
-extern char *D_004A28A8_5660 __asm__("D_004A28A8");
+extern char *D_004A28A8_5660 __asm__("SSXApp");
 struct Sh_5660 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual int v08(); };
 extern "C" void func_00390EC8_5660(float) __asm__("func_00390EC8");
 struct V3_5660 { float x, y, z; };
@@ -6872,7 +6872,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00305D90);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_5D90 __asm__("D_004A3DD8");
 extern char **D_004A47B8_5D90 __asm__("D_004A47B8");
-extern char *D_004A28A8_5D90 __asm__("D_004A28A8");
+extern char *D_004A28A8_5D90 __asm__("SSXApp");
 static inline char *refToPtr_5D90(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5D90(unsigned i) { if (i == 0) return 0; return refToPtr_5D90(i); }
 extern "C" void func_00355A78_5D90(void*, void*) __asm__("func_00355A78");
@@ -7145,7 +7145,7 @@ extern int D_004A3DB0_6300[2] __asm__("D_004A3DB0");
 extern "C" void func_001E3510(int, int);
 extern int D_00534B30_6300[] __asm__("D_00534B30");
 extern "C" void* cBE_getInterface_6300(int, int) __asm__("cBE_getInterface__Fv");
-extern char* D_004A28A8_6300 __asm__("D_004A28A8");
+extern char* D_004A28A8_6300 __asm__("SSXApp");
 extern int D_004A588C_6300 __asm__("D_004A588C");
 struct T12_6300 { int a; int b; Flag_6300 f; };
 extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
@@ -7184,7 +7184,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306438);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6438 __asm__("D_004A3DD8");
 extern char **D_004A47B8_6438 __asm__("D_004A47B8");
-extern char *D_004A28A8_6438 __asm__("D_004A28A8");
+extern char *D_004A28A8_6438 __asm__("SSXApp");
 extern "C" void func_00101728_6438(void*, void*, float, float) __asm__("func_00101728");
 struct V3_6438 { float x, y, z; };
 extern V3_6438 D_004C9098_6438 __asm__("D_004C9098");
@@ -7245,7 +7245,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003065E8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_65E8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_65E8 __asm__("D_004A47B8");
-extern char *D_004A28A8_65E8 __asm__("D_004A28A8");
+extern char *D_004A28A8_65E8 __asm__("SSXApp");
 static inline char *look_65E8(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_65E8 + 0x290);
@@ -7301,7 +7301,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306770);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6770 __asm__("D_004A3DD8");
 extern char **D_004A47B8_6770 __asm__("D_004A47B8");
-extern char *D_004A28A8_6770 __asm__("D_004A28A8");
+extern char *D_004A28A8_6770 __asm__("SSXApp");
 static inline char *look_6770(unsigned id) {
     if (~id == 0)
         return *(char**)(D_004A3DD8_6770 + 0x290);
@@ -7371,7 +7371,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306908);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6908 __asm__("D_004A3DD8");
 extern char **D_004A47B8_6908 __asm__("D_004A47B8");
-extern char *D_004A28A8_6908 __asm__("D_004A28A8");
+extern char *D_004A28A8_6908 __asm__("SSXApp");
 extern "C" void func_00101970_6908(void*, void*) __asm__("func_00101970");
 struct V3_6908 { float x, y, z; };
 extern V3_6908 D_004C9098_6908 __asm__("D_004C9098");
@@ -7532,7 +7532,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306CB0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6CB0 __asm__("D_004A3DD8");
 extern char **D_004A47B8_6CB0 __asm__("D_004A47B8");
-extern char *D_004A28A8_6CB0 __asm__("D_004A28A8");
+extern char *D_004A28A8_6CB0 __asm__("SSXApp");
 extern void *D_004A4028_6CB0 __asm__("D_004A4028");
 void func_00357AE8(void*, int, int);
 void func_00357B10(void*, int, int);
@@ -7733,7 +7733,7 @@ extern "C" void func_003071C8(void* self) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003071F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A28A8_71F0 __asm__("D_004A28A8");
+extern char *D_004A28A8_71F0 __asm__("SSXApp");
 void func_0010F2B8_71F0(void*) __asm__("func_0010F2B8__FPv");
 extern "C" void cWScriptProcess_processStart_71F0(void*) __asm__("cWScriptProcess_processStart");
 struct Tab_71F0 { char pad[0x28]; void *arr[1]; };
@@ -7777,7 +7777,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00307308);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern char* D_004A28A8_7308 __asm__("D_004A28A8");
+extern char* D_004A28A8_7308 __asm__("SSXApp");
 extern "C" int cBEMissionInterface_isMissionCompleted(void* missions, int id);
 extern "C" void func_00154160(void* missions, int id, int done);
 extern "C" int func_00153FA0(void* missions, int id);

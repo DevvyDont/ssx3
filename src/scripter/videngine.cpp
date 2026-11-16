@@ -60,7 +60,7 @@ extern int D_00442918[];
 struct sVidObj { char pad0[0x10]; int state; };
 struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
 struct sVidMgr { char pad0[0x84]; sVidOwner* owner; };
-extern sVidMgr* D_004A28A8;
+extern sVidMgr* SSXApp;
 extern char* D_004A289C;
 
 struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
@@ -77,7 +77,7 @@ extern "C" int func_002839A8(sVidPlayer* self)
     D_005366E8[n] = 10;
     D_004A2A50 = D_00442918[0];
     D_004A2A54 = n;
-    sVidObj* q = D_004A28A8->owner->obj;
+    sVidObj* q = SSXApp->owner->obj;
     self->f14 = 0;
     int s = q->state;
     if (s != 0 && s != 2) self->f14 = 1;

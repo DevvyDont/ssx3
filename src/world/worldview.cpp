@@ -1317,7 +1317,7 @@ extern "C" void func_00242540(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
 char* func_0028B1C8_AE68() __asm__("func_0028B1C8");
 extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
-extern char* D_004A28A8_AE68 __asm__("D_004A28A8");
+extern char* D_004A28A8_AE68 __asm__("SSXApp");
 extern char*** D_004A47B8;
 extern "C" int func_0012A340(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
@@ -1495,7 +1495,7 @@ extern "C" void func_003284B8(void* node, int idx, void* item, const void* targe
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void* func_003AD198();
 extern void* D_004A28A4;
-extern void* D_004A28A8;
+extern void* SSXApp;
 extern char*** D_004A47B8;
 extern char* D_004A5B80;
 
@@ -1664,7 +1664,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     case 14:
         data = 0;
-        func_0012A490(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC), param);
+        func_0012A490(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC), param);
         break;
     case 22:
         cAvalanche_reset();
