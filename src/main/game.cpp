@@ -46,14 +46,14 @@ static inline int curLayer_C078(sRCtx_C078* c)
     return c->tbl[c->cur];
 }
 
-extern "C" void cGame_renderModels(void* self, void* world)
+extern "C" void cGame_renderModels(cGame* self, void* world)
 {
     *(short*)((char*)D_004A289C->top + 0x12) = curLayer_C078(D_004A289C);
     sRCtx_C078* ctx = D_004A289C;
     ctx->top->f4 = (ctx->top->f4 & ~0xF80) | 0x880;
     ctx->top->f0 |= 0x30;
     int flag = 0xC00;
-    if (*(unsigned int*)(*(char**)((char*)self + 0x84) + 0x10) >= 2) {
+    if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         flag = 0x400;
     }
     int n = *(int*)((char*)world + 0x209C);
@@ -299,7 +299,7 @@ struct sVEntry0022C620 {
     void (*fn)(void*);
 };
 
-extern "C" void cGame_renderPatches(void* self, void* world)
+extern "C" void cGame_renderPatches(cGame* self, void* world)
 {
     char ctx[0x30];
     func_0022C1B0(ctx);
@@ -313,7 +313,7 @@ extern "C" void cGame_renderPatches(void* self, void* world)
     for (int i = 0; i < n; i++) {
         func_0022C410(ctx, items[i], 1);
     }
-    if (*(int*)(*(char**)((char*)self + 0x84) + 0x14) == 0) {
+    if (*(int*)((char*)self->ViewMan + 0x14) == 0) {
         void* obj = D_004A4248;
         sVEntry0022C620* vt = *(sVEntry0022C620**)((char*)obj + 4);
         vt[5].fn((char*)obj + vt[5].delta);
@@ -332,23 +332,23 @@ struct sVEntry_renderFog {
 };
 extern "C" void func_002DBF98(void* r);
 
-extern "C" void cGame_renderFogVolumes(void* self, void* world)
+extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
 {
     void* fog = (char*)world + 0x78B8;
     int n = *(int*)((char*)world + 0x78B4);
     if (n != 0) {
-        void* r = *(void**)((char*)self + 0x18);
+        void* r = self->FogMan;
         sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)r + 0x4);
         vt[2].fn((char*)r + vt[2].delta, fog, n, 0);
     }
     fog = (char*)world + 0x7AC0;
     n = *(int*)((char*)world + 0x7ABC);
     if (n != 0) {
-        void* r = *(void**)((char*)self + 0x18);
+        void* r = self->FogMan;
         sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)r + 0x4);
         vt[2].fn((char*)r + vt[2].delta, fog, n, 2);
     }
-    func_002DBF98(*(void**)((char*)self + 0x18));
+    func_002DBF98(self->FogMan);
 }
 #endif
 
@@ -359,22 +359,22 @@ void func_002E2F98(void* self, int a1);
 extern "C" void func_002E2FF8(void* self, void* list, int n, int mode, int a4);
 extern "C" void func_002E30D0(void* self, int a1);
 
-extern "C" void cGame_renderLightHalos(void* self, void* world, int a2)
+extern "C" void cGame_renderLightHalos(cGame* self, void* world, int a2)
 {
-    *(int*)((char*)*(void**)((char*)self + 0x1C) + 0x6494) = 1;
-    func_002E2F98(*(void**)((char*)self + 0x1C), a2);
+    *(int*)((char*)self->LensFxMan + 0x6494) = 1;
+    func_002E2F98(self->LensFxMan, a2);
     void* p = (char*)world + 0x7BC4;
     int n = *(int*)((char*)world + 0x7BC0);
     if (n != 0) {
-        func_002E2FF8(*(void**)((char*)self + 0x1C), p, n, 0, a2);
+        func_002E2FF8(self->LensFxMan, p, n, 0, a2);
     }
     p = (char*)world + 0x7FC8;
     n = *(int*)((char*)world + 0x7FC4);
     if (n != 0) {
-        func_002E2FF8(*(void**)((char*)self + 0x1C), p, n, 2, a2);
+        func_002E2FF8(self->LensFxMan, p, n, 2, a2);
     }
-    func_002E30D0(*(void**)((char*)self + 0x1C), a2);
-    *(int*)((char*)*(void**)((char*)self + 0x1C) + 0x6494) = 0;
+    func_002E30D0(self->LensFxMan, a2);
+    *(int*)((char*)self->LensFxMan + 0x6494) = 0;
 }
 #endif
 

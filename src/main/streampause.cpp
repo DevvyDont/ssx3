@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0047C520[];
@@ -209,10 +210,10 @@ void operator_delete(int* ptr);
 extern void* D_0047D6E8[];
 extern void* D_0046D970[];
 
-extern "C" void cGame__cGame(void* self, int flags)
+extern "C" void cGame__cGame(cGame* self, int flags)
 {
     void** m = D_0047D6E8;
-    *(void***)((char*)self + 0x0) = D_0046D970;
+    self->mVtbl = D_0046D970;
     *(void***)((char*)self + 0x1F8) = m;
     *(void***)((char*)self + 0x1E8) = m;
     *(void***)((char*)self + 0x1C4) = m;

@@ -37,34 +37,34 @@ struct cSSXApp00226830 {
     int f118;
 };
 
-extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp00226830* self)
+extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp* self)
 {
-    cAppMan_cAppMan(self);
-    self->vt = D_0047D9C8;
-    self->fC4 = D_004A3E90;
-    self->fC8 = D_004A3E90;
-    self->fCC = D_004A3E90;
-    self->fD4 = 0;
-    self->fD8 = 0;
-    self->fDC = 0;
-    self->fE0 = 0;
-    self->fE4 = 0;
-    self->fE8 = 0;
+    cAppMan_cAppMan(((cSSXApp00226830*)self));
+    self->mVtbl = D_0047D9C8;
+    self->UserName = (char*)D_004A3E90;
+    self->Password = (char*)D_004A3E90;
+    self->CommandLineTrack = (char*)D_004A3E90;
+    self->unk_D4[0] = 0;
+    self->unk_D4[1] = 0;
+    self->unk_D4[2] = 0;
+    self->unk_D4[3] = 0;
+    self->unk_D4[4] = 0;
+    self->unk_D4[5] = 0;
     int i;
     for (i = 0; i < 11; i++) {
-        self->arr[i] = 0;
+        self->unk_EC[i] = 0;
     }
-    self->f118 = 0;
-    self->f74 = 0;
-    self->f68 = 0;
-    self->f6C = 0;
-    self->f70 = 0;
-    self->f60 = 1;
-    self->f64 = 1;
-    MEM_fill(self->fA8, 0, 8);
-    MEM_fill(self->fB8, 0, 8);
-    MEM_fill(self->fB0, 0, 8);
-    return self;
+    self->unk_118 = 0;
+    self->unk_74 = 0;
+    self->unk_68 = 0;
+    self->unk_6C = 0;
+    self->unk_70 = 0;
+    self->unk_60 = 1;
+    self->unk_64 = 1;
+    MEM_fill(((char*)&self->InputPads[0]), 0, 8);
+    MEM_fill(((char*)&self->InputMaps[0]), 0, 8);
+    MEM_fill(((char*)&self->Inputs[0]), 0, 8);
+    return ((cSSXApp00226830*)self);
 }
 #endif
 
@@ -124,7 +124,7 @@ extern "C" void* cConsoleConfig_construct();
 extern "C" void* func_00375A08();
 void cLightMan_construct();
 void cBezierMan_construct();
-extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv);
+extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv);
 extern "C" void* SHAPE_locate(const char* name, void* list);
 extern "C" void func_00369FF8(void* gfx);
 void* func_00232328(void* p);
@@ -138,10 +138,10 @@ typedef void (*V0Fn_6900)(char*);
 typedef void (*V1Fn_6900)(char*, int);
 typedef void* (*LoadFn_6900)(char*, void*, const char*, int, int, int);
 
-extern "C" void cSSXApp_init(char* self, int argc, char** argv)
+extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
 {
     SSXApp = (cSSXApp*)self;
-    *(void**)(self + 0x9C) = cConsoleConfig_construct();
+    *(void**)&self->ConsoleConfig = cConsoleConfig_construct();
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, D_00479A40, 0, 0);
     func_00326A28(pm);
     PadCache = pm;
@@ -155,12 +155,12 @@ extern "C" void cSSXApp_init(char* self, int argc, char** argv)
     int i;
     for (i = 0; i < 2; i++) {
         int* p = (int*)cMemMan_alloc(0x2A4, D_00479A60, 0, 0);
-        ((int**)(self + 0xA8))[i] = p;
+        ((int**)(((char*)self) + 0xA8))[i] = p;
         *p = 0;
     }
-    *(int*)(self + 0x84) = 0;
-    *(int*)(self + 0x80) = 0;
-    *(int*)(self + 0x7C) = 0;
+    *(int*)&self->Game = 0;
+    *(int*)&self->DebugFE = 0;
+    *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
     char* g2 = (char*)D_004A289C;
     sVE_6900* vt2 = ((sGfx_6900*)g2)->vt;
@@ -171,11 +171,11 @@ extern "C" void cSSXApp_init(char* self, int argc, char** argv)
     void* r = SHAPE_locate(D_0047AB40, D_004A28B0);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(o, r, D_00479A70, 0, 1, -1);
     func_00369FF8(D_004A289C);
-    *(sTint_6900**)(self + 0xA4) = new (D_00479A80, 0, 0) sTint_6900;
+    *(sTint_6900**)&self->LoadIndicator = new (D_00479A80, 0, 0) sTint_6900;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, D_00479A90, 0x100, 0)));
-    *(void**)(self + 0xC0) = cGameModeMan_getGM();
+    *(void**)&self->GameModeMan = cGameModeMan_getGM();
     void* m = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(0x590, D_00479AA0, 0, 0));
-    *(void**)(self + 0x11C) = m;
+    *(void**)&self->mFEAsyncManager = m;
     cFEAsyncManager_Init(m);
 }
 #endif
@@ -403,7 +403,7 @@ struct sParseBuf_226B60 {
 };
 
 // PORT: the unit declares it returning int (callers store the map pointer in an int field).
-extern "C" int cSSXApp_loadInputMap(void* self, const char* path)
+extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
 {
     sParseBuf_226B60 buf;
     int size;
@@ -653,7 +653,7 @@ extern char D_0047A7F8[];
 #define MAX_7BF0(x, y) ((x) > (y) ? (x) : (y))
 
 // PORT: cBXString keeps its length in a header 8 bytes before the text (pointer held in int).
-extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv)
+extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
 {
     int i = 1;
     while (i < argc) {
@@ -683,31 +683,31 @@ extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv)
                     cBXString_operatorE(&s, &t);
                     cBXString__cBXString(&t, 2);
                 }
-                cBXString_operatorE(self + 0xCC, &s);
+                cBXString_operatorE(((char*)self) + 0xCC, &s);
                 cBXString__cBXString(&s, 2);
             } else if (func_0041AA88(opt, D_0047A7D8) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_cBXString4(self + 0xC4, argv[i]);
+                cBXString_cBXString4(((char*)self) + 0xC4, argv[i]);
             } else if (func_0041AA88(opt, D_0047A7E8) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_cBXString4(self + 0xC8, argv[i]);
+                cBXString_cBXString4(((char*)self) + 0xC8, argv[i]);
             } else if (func_0041AA88(opt, D_004A29B8) == 0) {
-                *(int*)(self + 0x60) = 1;
+                self->unk_60 = 1;
             } else if (func_0041AA88(opt, D_004A29C0) == 0) {
-                *(int*)(self + 0x64) = 0;
+                self->unk_64 = 0;
             } else if (func_0041AA88(opt, D_0047A7F8) == 0) {
-                *(int*)(self + 0x74) = 1;
+                self->unk_74 = 1;
             }
         }
         i++;
     }
-    D_004A4540 = *(int*)(self + 0x64) == 0;
+    D_004A4540 = self->unk_64 == 0;
 }
 #endif
 
@@ -739,7 +739,7 @@ extern void* PadCache;
 extern void* D_004A2EB8;
 extern void* D_004A33F0;
 
-extern "C" int cSSXApp_preUpdate(void* self)
+extern "C" int cSSXApp_preUpdate(cSSXApp* self)
 {
     if (PadCache != 0 && func_00326B48(PadCache) != 0) {
         if (D_004A2EB8 != 0) {
@@ -924,12 +924,12 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cGameModeMan_getGM();
 extern char D_0047A808[];
 
-extern "C" void cSSXApp_startGameLoad(void* self)
+extern "C" void cSSXApp_startGameLoad(cSSXApp* self)
 {
     void* m = cGame_cGame(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
-    *(void**)((char*)self + 0x84) = m;
+    *(void**)&self->Game = m;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
-    *(void**)((char*)self + 0xC0) = cGameModeMan_getGM();
+    *(void**)&self->GameModeMan = cGameModeMan_getGM();
 }
 #endif
 
@@ -941,16 +941,16 @@ extern char D_0047A818[];
 extern "C" void* func_001A1CE8(void* p);
 extern "C" void* func_0017F7B8(void* p);
 
-extern "C" void cSSXApp_startFELoad(void* self)
+extern "C" void cSSXApp_startFELoad(cSSXApp* self)
 {
     D_004A203C = 0;
-    if (*(int*)((char*)self + 0x60) != 0) {
+    if (self->unk_60 != 0) {
         void* m = func_001A1CE8(cMemMan_alloc(0xB5AE0, D_0047A818, 0, 0));
-        *(void**)((char*)self + 0x7C) = m;
+        *(void**)&self->RealFE = m;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
     } else {
         void* m = func_0017F7B8(cMemMan_alloc(0x238, D_0047A818, 0, 0));
-        *(void**)((char*)self + 0x80) = m;
+        *(void**)&self->DebugFE = m;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
     }
 }
@@ -965,7 +965,7 @@ extern "C" int func_003DED50(const char* name, int a1, int a2, void* out);
 extern "C" void func_00256188();
 extern "C" void* cSSXScriptEngine_cSSXScriptEngine(void* self);
 extern "C" void cSSXScriptEngine_InitOnce(void* self);
-extern "C" int cSSXApp_loadInputMap(void* self, const char* name);
+extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* name);
 void func_00244400(void* self, int a1);
 void func_00244408(void* self, int a1);
 int GetHashValue32(char* s);
@@ -976,7 +976,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cSSXApp_activateBEOptions receives self here; the unit defines it later with no parameters.
 extern "C" void cSSXApp_activateBEOptions_self(void* self) __asm__("cSSXApp_activateBEOptions");
-extern "C" void cSSXApp_initLocale(void* self);
+extern "C" void cSSXApp_initLocale(cSSXApp* self);
 extern "C" void cRiderAnimBase_initAIAnimEventMap();
 extern "C" void* func_00314D98(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
@@ -1099,8 +1099,8 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     void* sm = cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, D_0047A8D0, 0, 0));
     D_004A28A4 = sm;
     cSSXScriptEngine_InitOnce(sm);
-    self->fB8[0] = cSSXApp_loadInputMap(self, D_0047A8E0);
-    self->fB8[1] = cSSXApp_loadInputMap(self, D_0047A8F8);
+    self->fB8[0] = cSSXApp_loadInputMap((cSSXApp*)self, D_0047A8E0);
+    self->fB8[1] = cSSXApp_loadInputMap((cSSXApp*)self, D_0047A8F8);
     for (int j = 0; j < 2; j++) {
         self->fB0[j] = new (D_004A29D0, 0, 0) sPlayerInput_82D0(self->fA8[j], self->fB8[0]);
     }
@@ -1111,7 +1111,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cUIFontInterface_loadFonts(self->f88);
     self->f78 = cBE_getBE();
     cSSXApp_activateBEOptions_self(self);
-    cSSXApp_initLocale(self);
+    cSSXApp_initLocale((cSSXApp*)self);
     cRiderAnimBase_initAIAnimEventMap();
     self->f94 = func_00314D98(cMemMan_alloc(0x1848, D_0047A958, 0, 0));
     cGameAnimMap_initMap(self->f94);
@@ -1161,18 +1161,18 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
     return o.language;
 }
 
-extern "C" void cSSXApp_initLocale(void* self)
+extern "C" void cSSXApp_initLocale(cSSXApp* self)
 {
-    if (*(void**)((char*)self + 0x8C) == 0) {
-        *(void**)((char*)self + 0x8C) = cFELocale_cFELocale(cMemMan_alloc(0xC0, D_0047A978, 0, 0));
+    if ((void*)self->FELocale == 0) {
+        *(void**)&self->FELocale = cFELocale_cFELocale(cMemMan_alloc(0xC0, D_0047A978, 0, 0));
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    char* loc = *(char**)((char*)self + 0x8C);
+    char* loc = (char*)self->FELocale;
     sVEntry_228A78* vt = *(sVEntry_228A78**)(loc + 4);
     char* thisp = loc + vt[3].delta;
     void (**pfn)(void*, int) = &vt[3].fn;
     (*pfn)(thisp, optLanguage_228A78(D_00535610_228A78));
-    func_00195B70(*(void**)((char*)self + 0x8C));
+    func_00195B70(self->FELocale);
 }
 #endif
 

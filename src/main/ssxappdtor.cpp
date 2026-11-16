@@ -7,7 +7,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp__cSSXApp);
 extern "C" void cBXString__cBXString(void* self, int flags);
 void cAppMan__cAppMan(void* self, int flags);
 
-extern "C" void cSSXApp__cSSXApp(void* self, int flags)
+extern "C" void cSSXApp__cSSXApp(cSSXApp* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xCC, 2);
     cBXString__cBXString((char*)self + 0xC8, 2);
