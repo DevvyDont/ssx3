@@ -34,7 +34,7 @@ extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* st
 extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream);
 extern "C" void func_00103578(void* self, void* stream);
 extern "C" void func_0026DE58(void* self, int a);
-extern "C" void func_0012B788(void* self);
+extern "C" void cAI_updateOverlapList(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
 extern char gBucketMan;
 extern void* D_004A3DD8;
@@ -79,7 +79,7 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
     func_00103578(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);
     func_0026DE58(self, 1);
-    func_0012B788(SSXApp->Game->AI);
+    cAI_updateOverlapList(SSXApp->Game->AI);
     cGameViewMan_updateAll(SSXApp->Game->ViewMan);
 }
 #endif

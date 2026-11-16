@@ -1874,7 +1874,7 @@ extern "C" void func_0026CDF8(void* p);
 void func_0026CBB0(void* self);
 extern "C" void cReplay_reset(void* p);
 extern "C" void cReplay_startRace(int* self);
-extern "C" void func_001235F8(void* self);
+extern "C" void cRider_resetForMission(void* self);
 
 extern "C" void func_0030B658(void* self)
 {
@@ -1883,7 +1883,7 @@ extern "C" void func_0030B658(void* self)
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace((int*)SSXApp->Game->Replay);
     char* riders = (char*)SSXApp->Game->AI;
-    func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
+    cRider_resetForMission(*(void**)(riders + (*(int*)self << 2) + 0x28));
     *(int*)((char*)self + 0x2AC) = 3;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
     *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
@@ -1914,7 +1914,7 @@ extern "C" void func_0026CDF8(void* p);
 void func_0026CBB0(void* self);
 extern "C" void cReplay_reset(void* p);
 extern "C" void cReplay_startRace(int* self);
-extern "C" void func_001235F8(void* self);
+extern "C" void cRider_resetForMission(void* self);
 
 extern "C" void func_0030B758(void* self)
 {
@@ -1923,7 +1923,7 @@ extern "C" void func_0030B758(void* self)
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace((int*)SSXApp->Game->Replay);
     char* riders = (char*)SSXApp->Game->AI;
-    func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
+    cRider_resetForMission(*(void**)(riders + (*(int*)self << 2) + 0x28));
     *(int*)((char*)self + 0x2AC) = 4;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
     *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;

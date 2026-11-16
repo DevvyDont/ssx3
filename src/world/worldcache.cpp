@@ -904,7 +904,7 @@ INCLUDE_ASM("world/worldcache", cWorldCache_updatePages);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
 extern "C" void* func_003A9A98(void* self, int i);
-extern "C" void func_003A6F88(void* self, int i, int a, int b);
+extern "C" void cStreamMan_addStreamRequest(void* self, int i, int a, int b);
 extern "C" void func_003A8528(cWorldCache* self, int i);
 extern char* D_004A5B64;
 extern char D_00494E88[];
@@ -994,7 +994,7 @@ extern "C" void cWorldCache_updatePages(cWorldCache* p)
         return;
     unsigned short* data = (unsigned short*)func_003A9A98((char*)self + 0x10, best);
     self->slot[best].page = new (D_00494E88, 0x20000000, 0) sHullPage_8668(data);
-    func_003A6F88(mgr, best, data[0], *(int*)(data + 2));
+    cStreamMan_addStreamRequest(mgr, best, data[0], *(int*)(data + 2));
     self->slot[best].state = 2;
 }
 #endif

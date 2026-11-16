@@ -13,7 +13,7 @@
 //     func_003A9770 (getTestFocus);
 //   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, func_003A9820 (getSectionName),
 //     cWorldView_isSectionLoaded, func_003A9890 (isSectionUnLoaded), func_003A98C8 (loadSection),
-//     func_003A9958 (unloadSection), func_003A99D8 (activateSection), func_003A9A48 (deactivateSection),
+//     func_003A9958 (unloadSection), cWorldView_activateSection (activateSection), func_003A9A48 (deactivateSection),
 //     func_003A9A90 (getWorldBoundBox), func_003A9A98 (getHull), func_003A9AB0 (getNumHull),
 //     func_003A9AC0 (isBoxValid), func_003A9BB8 (recursiveIsValid), func_003A9D60 (refreshStreamFocus),
 //     func_003A9E50 (getDistanceToBox), func_003AA028 (recursiveTreeFocus).

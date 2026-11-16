@@ -544,7 +544,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 // (prototype from their definition at line 316)
 extern "C" void func_001E94E0_reen(void* self, char* str, int a2, sVec2f* pos) __asm__("func_001E94E0");
@@ -1001,10 +1001,10 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
         break;
     }
     }
-    self->w16C = func_00391FB0(self->font, self->fontName, 0, 0, 1.0f, 1.0f);
-    self->w170 = func_00391FB0(self->font, D_004A2270, 0, 0, 1.0f, 1.0f);
-    self->w174 = func_00391FB0(self->font, D_004A2108, 0, 0, 1.0f, 1.0f);
-    self->w178 = (self->w170 - func_00391FB0(self->font, D_004A2278, 0, 0, 1.0f, 1.0f)) * 0.25f;
+    self->w16C = cFont_textExtent(self->font, self->fontName, 0, 0, 1.0f, 1.0f);
+    self->w170 = cFont_textExtent(self->font, D_004A2270, 0, 0, 1.0f, 1.0f);
+    self->w174 = cFont_textExtent(self->font, D_004A2108, 0, 0, 1.0f, 1.0f);
+    self->w178 = (self->w170 - cFont_textExtent(self->font, D_004A2278, 0, 0, 1.0f, 1.0f)) * 0.25f;
     self->f17C = 0;
     self->f180 = 0;
     self->f184 = 0;
@@ -1479,7 +1479,7 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int a1, int a2, int a3, in
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F1B30);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sVec4_001F1B30 {
     float x, y, z, w;
@@ -1517,7 +1517,7 @@ extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F1
     }
     font->f38 = font->f30 * escale[0];
     font->f3C = font->f34 * escale[1];
-    func_00391FB0(font, str, r, 0, font->f38, font->f3C);
+    cFont_textExtent(font, str, r, 0, font->f38, font->f3C);
     int ax = (align == 0x7F) ? e->align : align;
     int ay = (flags == 0x7F) ? defs[idx].flags : flags;
     size[0] = r[2];
@@ -1557,7 +1557,7 @@ INCLUDE_ASM("fe/ovstatehud", func_001F1E28);
 // NOTE w1 2026-10-21: func_001F1E28 best 99.94 (not committed). Only residual: 4 insns at the start of the
 // last block before the jal func_00391CB0: $f0..$f3 numbering of the font->f38/f3C = f30/f34 * resEsc[] loads
 // is swapped (local alloc; sx regs reports nothing). Tried operand order / statement order / locals (99.78-99.94).
-// Sibling func_001F25E0 is identical except: func_003921F0 instead of func_00391FB0 (str is const unsigned short*),
+// Sibling func_001F25E0 is identical except: func_003921F0 instead of cFont_textExtent (str is const unsigned short*),
 // func_00391E30 instead of func_00391CB0. Needs sColor_001F16C0, sHudElemDef_001F16C0 from func_001F16C0's block.
 // Lessons: dead stores of dOutT/dOut land in the frame because arrays are written; col shares the slot of dOutT when
 // dOutT/dOut live in an inner block; nested by-value VU0 helper calls in ONE expression share one temp slot;
@@ -1650,7 +1650,7 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
     scale[1] = 1.0f;
     font->f38 = font->f30;
     font->f3C = font->f34;
-    func_00391FB0(font, str, r, 0, font->f38, font->f3C);
+    cFont_textExtent(font, str, r, 0, font->f38, font->f3C);
     sHudElemDef_001F16C0* e1 = &defs[idx1];
     func_001E91F8(e1, pos1);
     func_001E9290(e1, esc1);
@@ -1974,7 +1974,7 @@ extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElem
 INCLUDE_ASM("fe/ovstatehud", func_001F2AA0);
 #ifdef SKIP_ASM
 extern "C" char* func_00392430(void* f, const char* str, char* dst, int max, float sx, float width);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sFont_001F2AA0 {
     char pad0[0x14];
@@ -2035,7 +2035,7 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
     int i = 0;
     if (n > 0) do {
         char* line = lines[i];
-        float w = func_00391FB0(font, line, 0, 0, font->f38, font->f3C);
+        float w = cFont_textExtent(font, line, 0, 0, font->f38, font->f3C);
         float x = pos[0];
         int al = defs[idx].align;
         if (flags & 1) {

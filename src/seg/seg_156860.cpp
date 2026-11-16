@@ -754,25 +754,25 @@ extern "C" void *func_00256698(void *arg0) {
 INCLUDE_ASM("seg/seg_156860", func_002566E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00255800_66E8(void *, int) __asm__("func_00255800");
+extern "C" void cCommChannel__cCommChannel_66E8(void *, int) __asm__("cCommChannel__cCommChannel");
 extern "C" void func_00256998(void *);
 extern char cDSockChannel_vtbl[];
 
 extern "C" void func_002566E8(cDSockChannel* arg0, int arg1) {
     ((char*)arg0->mVtbl) = cDSockChannel_vtbl;
     func_00256998(arg0);
-    func_00255800_66E8(arg0, arg1);
+    cCommChannel__cCommChannel_66E8(arg0, arg1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256730);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_readPacket);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy_6730(char *, char *, int) __asm__("MEM_copy");
 extern "C" int func_003E6B10_6730(int, char *, int) __asm__("func_003E6B10");
 
-extern "C" unsigned char func_00256730(cDSockChannel* self, char *dst, int maxlen) {
+extern "C" unsigned char cDSockChannel_readPacket(cDSockChannel* self, char *dst, int maxlen) {
     unsigned char buf[0x108];
     if (self->mState == 2) {
         while (func_003E6B10_6730((int)self->mGameLink, (char *)buf, 1) > 0) {
@@ -793,12 +793,12 @@ extern "C" unsigned char func_00256730(cDSockChannel* self, char *dst, int maxle
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002567E0);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_writePacket);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(char *, int, int);
 extern "C" int NetGameLinkSend(int, void *, int);
 
-extern "C" int func_002567E0(cDSockChannel* self, int a1, int len) {
+extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int a1, int len) {
     char buf[0x108];
     if (self->mState != 2) return 0;
     int t = self->mError;
@@ -869,7 +869,7 @@ extern "C" void func_002568F8(cDSockChannel* self, int a1, int a2) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256998);
 #ifdef SKIP_ASM
-extern "C" void func_00255840();
+extern "C" void cCommChannel_channelClose();
 extern "C" void func_003E67F8(int);
 extern "C" void func_003E6E70(int);
 
@@ -878,7 +878,7 @@ extern "C" void func_00256998(void *arg0) {
     int temp_4_2;
 
     if ((*(int *)((char*)(arg0) + (0xC))) != 0) {
-        func_00255840();
+        cCommChannel_channelClose();
         temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
         if (temp_4 != 0) {
             func_003E67F8(temp_4);
@@ -895,13 +895,13 @@ extern "C" void func_00256998(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256A00);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00256A58(void* self);
 extern "C" void func_00256AA8(cDSockChannel* self);
 
-extern "C" void func_00256A00(cDSockChannel* self)
+extern "C" void cDSockChannel_update(cDSockChannel* self)
 {
     switch (self->mState) {
     case 1:
@@ -1038,7 +1038,7 @@ INCLUDE_ASM("seg/seg_156860", func_00256C78);
 #ifdef SKIP_ASM
 void* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_0014E2C0(void* iface);
-extern "C" void func_00257038_6C78(void* self, int mode) __asm__("func_00257038");
+extern "C" void cGameComm_setState_6C78(void* self, int mode) __asm__("cGameComm_setState");
 extern "C" void MEM_fill_6C78(void* p, int c, int n) __asm__("MEM_fill");
 extern "C" int func_003E7340();
 
@@ -1149,7 +1149,7 @@ extern "C" int func_00256C78(int vself, int port, int b)
     sGameComm_6C78* self = (sGameComm_6C78*)vself;
     self->unk_6C = port;
     self->unk_44 = b;
-    func_00257038_6C78(self, 0);
+    cGameComm_setState_6C78(self, 0);
     self->bufSize = func_0014E2C0(cBE_getInterface_6C78(D_004A28A8_6C78->be, 7));
     self->unk_60 = 30;
     self->unk_0 = 1;
@@ -1278,14 +1278,14 @@ extern "C" void func_00256EE0(int self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00257038);
+INCLUDE_ASM("seg/seg_156860", cGameComm_setState);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00258330(cGameComm* arg0);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void func_0031AD18(void);
 // Switches the controller to a new mode, running per-mode setup first.
-extern "C" void func_00257038(cGameComm* self, int mode)
+extern "C" void cGameComm_setState(cGameComm* self, int mode)
 {
     switch (mode) {
     case 14:
@@ -1315,9 +1315,9 @@ INCLUDE_ASM("seg/seg_156860", func_002570D8);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0014E2C8_70D8(void* iface, int a1, int a2) __asm__("func_0014E2C8");
-extern "C" void func_0014E5C8_70D8(void* iface, int a1, int a2) __asm__("func_0014E5C8");
+extern "C" void cBENetworkInterface_setSyncData_70D8(void* iface, int a1, int a2) __asm__("cBENetworkInterface_setSyncData");
 extern "C" float func_00255D88_70D8(int arg0, int arg1) __asm__("func_00255D88");
-extern "C" void func_00257038_70D8(void* self, int mode) __asm__("func_00257038");
+extern "C" void cGameComm_setState_70D8(void* self, int mode) __asm__("cGameComm_setState");
 extern "C" void func_00257750_70D8(char* p) __asm__("func_00257750");
 extern "C" int func_002577C8_70D8(char* s) __asm__("func_002577C8");
 extern "C" void func_00257A80_70D8(char* s) __asm__("func_00257A80");
@@ -1399,67 +1399,67 @@ extern "C" void func_002570D8(cGameComm* vs)
     if (vs->mServer != 0) {
         switch ((unsigned int)vs->mState) {
         case 0:
-            func_00257038_70D8(((char*)vs), 1);
+            cGameComm_setState_70D8(((char*)vs), 1);
             break;
         case 1:
             func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 0x2C);
-            func_00257038_70D8(((char*)vs), 2);
+            cGameComm_setState_70D8(((char*)vs), 2);
             break;
         case 2:
             if (func_00258280_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 3);
+                cGameComm_setState_70D8(((char*)vs), 3);
             }
             break;
         case 3:
             func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 0x14);
-            func_00257038_70D8(((char*)vs), 4);
+            cGameComm_setState_70D8(((char*)vs), 4);
             break;
         case 4:
             if (func_002581D8_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 5);
+                cGameComm_setState_70D8(((char*)vs), 5);
             }
             break;
         case 5:
             func_0014E2C8_70D8(iface, 0, (int)vs->mBEBuffer);
             func_00258290_70D8(((char*)vs), (int)vs->mBEBuffer, vs->mBEBufferSize);
-            func_00257038_70D8(((char*)vs), 6);
+            cGameComm_setState_70D8(((char*)vs), 6);
             break;
         case 6:
             if (func_00258280_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 7);
+                cGameComm_setState_70D8(((char*)vs), 7);
             }
             break;
         case 7:
             func_002581E8_70D8(((char*)vs), (int)vs->mBEBuffer, vs->mBEBufferSize);
-            func_00257038_70D8(((char*)vs), 8);
+            cGameComm_setState_70D8(((char*)vs), 8);
             break;
         case 8:
             if (func_002581D8_70D8(((char*)vs)) != 0) {
-                func_0014E5C8_70D8(iface, 1, (int)vs->mBEBuffer);
-                func_00257038_70D8(((char*)vs), 9);
+                cBENetworkInterface_setSyncData_70D8(iface, 1, (int)vs->mBEBuffer);
+                cGameComm_setState_70D8(((char*)vs), 9);
             }
             break;
         case 9:
             vs->mNetLatency[0] = func_00255D88_70D8((int)cCommSystem_mCommSystem, vs->unk_06C);
             func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0x114), 4);
-            func_00257038_70D8(((char*)vs), 10);
+            cGameComm_setState_70D8(((char*)vs), 10);
             break;
         case 10:
             if (func_00258280_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 11);
+                cGameComm_setState_70D8(((char*)vs), 11);
             }
             break;
         case 11:
             func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0x118), 4);
-            func_00257038_70D8(((char*)vs), 12);
+            cGameComm_setState_70D8(((char*)vs), 12);
             break;
         case 12:
             if (func_002581D8_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 13);
+                cGameComm_setState_70D8(((char*)vs), 13);
             }
             break;
         case 13:
-            func_00257038_70D8(((char*)vs), 14);
+            cGameComm_setState_70D8(((char*)vs), 14);
             break;
         case 14:
             func_00257A80_70D8(((char*)vs));
@@ -1470,67 +1470,67 @@ extern "C" void func_002570D8(cGameComm* vs)
     } else {
         switch ((unsigned int)vs->mState) {
         case 0:
-            func_00257038_70D8(((char*)vs), 3);
+            cGameComm_setState_70D8(((char*)vs), 3);
             break;
         case 3:
             func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 0x2C);
-            func_00257038_70D8(((char*)vs), 4);
+            cGameComm_setState_70D8(((char*)vs), 4);
             break;
         case 4:
             if (func_002581D8_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 1);
+                cGameComm_setState_70D8(((char*)vs), 1);
             }
             break;
         case 1:
             func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 0x14);
-            func_00257038_70D8(((char*)vs), 2);
+            cGameComm_setState_70D8(((char*)vs), 2);
             break;
         case 2:
             if (func_00258280_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 7);
+                cGameComm_setState_70D8(((char*)vs), 7);
             }
             break;
         case 7:
             func_002581E8_70D8(((char*)vs), (int)vs->mBEBuffer, vs->mBEBufferSize);
-            func_00257038_70D8(((char*)vs), 8);
+            cGameComm_setState_70D8(((char*)vs), 8);
             break;
         case 8:
             if (func_002581D8_70D8(((char*)vs)) != 0) {
-                func_0014E5C8_70D8(iface, 0, (int)vs->mBEBuffer);
-                func_00257038_70D8(((char*)vs), 5);
+                cBENetworkInterface_setSyncData_70D8(iface, 0, (int)vs->mBEBuffer);
+                cGameComm_setState_70D8(((char*)vs), 5);
             }
             break;
         case 5:
             func_0014E2C8_70D8(iface, 1, (int)vs->mBEBuffer);
             func_00258290_70D8(((char*)vs), (int)vs->mBEBuffer, vs->mBEBufferSize);
-            func_00257038_70D8(((char*)vs), 6);
+            cGameComm_setState_70D8(((char*)vs), 6);
             break;
         case 6:
             if (func_00258280_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 11);
+                cGameComm_setState_70D8(((char*)vs), 11);
             }
             break;
         case 11:
             func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0x114), 4);
-            func_00257038_70D8(((char*)vs), 12);
+            cGameComm_setState_70D8(((char*)vs), 12);
             break;
         case 12:
             if (func_002581D8_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 9);
+                cGameComm_setState_70D8(((char*)vs), 9);
             }
             break;
         case 9:
             vs->mNetLatency[1] = func_00255D88_70D8((int)cCommSystem_mCommSystem, vs->unk_06C);
             func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0x118), 4);
-            func_00257038_70D8(((char*)vs), 10);
+            cGameComm_setState_70D8(((char*)vs), 10);
             break;
         case 10:
             if (func_00258280_70D8(((char*)vs)) != 0) {
-                func_00257038_70D8(((char*)vs), 13);
+                cGameComm_setState_70D8(((char*)vs), 13);
             }
             break;
         case 13:
-            func_00257038_70D8(((char*)vs), 14);
+            cGameComm_setState_70D8(((char*)vs), 14);
             break;
         case 14:
             func_00257A80_70D8(((char*)vs));
@@ -2221,10 +2221,10 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_syncGame);
 void* operator_new_8448(unsigned int size, const char* tag, int flags, int align) __asm__("operator_new__FUi");
 void cMemMan_free_8448(void* p) __asm__("cMemMan_free__FPv");
 extern "C" void func_0014E9F8(void* iface);
-extern "C" void func_0014EA90(void* iface);
+extern "C" void cBENetworkInterface_postInitBE(void* iface);
 extern "C" void func_0014F898();
 extern "C" void func_0014E2C8_8448(void* iface, int which, void* buf) __asm__("func_0014E2C8");
-extern "C" void func_0014E5C8_8448(void* iface, int which, void* buf) __asm__("func_0014E5C8");
+extern "C" void cBENetworkInterface_setSyncData_8448(void* iface, int which, void* buf) __asm__("cBENetworkInterface_setSyncData");
 extern "C" void MEM_fill_8448(char* p, int c, int n) __asm__("MEM_fill");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void* cBE_getBE();
@@ -2262,14 +2262,14 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         strncpy(((char*)self) + 0xF0, D_004805C8, 0xF);
         self->mServerSettings.unk_18 = cCommSystem_mCommSystem->mBroadBand;
         func_0014E2C8_8448(iface, 0, self->mBEBuffer);
-        func_0014E5C8_8448(iface, 0, self->mBEBuffer);
+        cBENetworkInterface_setSyncData_8448(iface, 0, self->mBEBuffer);
     } else {
         func_0014F898();
         MEM_fill_8448(((char*)self) + 0x104, 0, 0x10);
         strncpy(((char*)self) + 0x104, D_004805C8, 0xF);
         self->unk_100 = cCommSystem_mCommSystem->mBroadBand;
         func_0014E2C8_8448(iface, 1, self->mBEBuffer);
-        func_0014E5C8_8448(iface, 1, self->mBEBuffer);
+        cBENetworkInterface_setSyncData_8448(iface, 1, self->mBEBuffer);
         void* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
         func_001472C8(ui, 1, func_00147318(ui, 0));
         sVEnt_8448* vt = *(sVEnt_8448**)((char*)ui + 0xC);
@@ -2286,7 +2286,7 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
     self->mNumSamples = 3;
     self->mBEBuffer = 0;
     if (self->mError == 0) {
-        func_0014EA90(iface);
+        cBENetworkInterface_postInitBE(iface);
         func_00317908(((char*)self) + 0xD4);
         func_00237CB0(AIrand());
         ggSetTime_8448(((char*)&cBENetworkInterface_networkOpt), self->mLatency);
@@ -2333,13 +2333,13 @@ extern "C" void func_002586B0(cGameComm* self) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_156860", func_00258790);
+INCLUDE_ASM("seg/seg_156860", cGameComm_sendPauseCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern void func_002588A8_8790(void *) __asm__("func_002588A8");
-extern "C" void func_00258790(cGameComm* self, int arg1) {
+extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int arg1) {
     char buf[12];
     if (self->mError == 0 && self->mConnected != 0) {
         if (arg1 != 0) {
@@ -2459,13 +2459,13 @@ extern "C" void func_00258988(cGameComm* self) {
 INCLUDE_ASM("seg/seg_156860", func_00258A48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00257038_8A48(void *, int) __asm__("func_00257038");
+extern "C" void cGameComm_setState_8A48(void *, int) __asm__("cGameComm_setState");
 
 extern "C" void func_00258A48(cGameComm* arg0) {
     (arg0->mRaceInProgress) = 0;
     (arg0->mSyncInput) = 0;
     if ((arg0->mState) < 0xF) {
-        func_00257038_8A48(arg0, 0xF);
+        cGameComm_setState_8A48(arg0, 0xF);
     }
     if ((arg0->unk_038) == 0) {
         (arg0->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));

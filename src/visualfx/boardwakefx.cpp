@@ -1906,40 +1906,40 @@ extern const char D_00487AC8[];
 extern const char D_00487AD8[];
 extern const char D_00487AE8[];
 extern const char D_00487AF8[];
-extern "C" int func_00310C48(void* self, int idx, const char* name);
+extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name);
 
 extern "C" void func_002DF4D0(char* self)
 {
-    (*(int**)(self + 0x7C))[0] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004879D8);
-    (*(int**)(self + 0x7C))[1] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004879E8);
-    (*(int**)(self + 0x7C))[2] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004879F8);
-    (*(int**)(self + 0x7C))[3] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A08);
-    (*(int**)(self + 0x7C))[4] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A18);
-    (*(int**)(self + 0x7C))[5] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A28);
-    (*(int**)(self + 0x7C))[6] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004A3B00);
-    (*(int**)(self + 0x7C))[7] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A38);
-    (*(int**)(self + 0x7C))[8] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A48);
-    (*(int**)(self + 0x7C))[9] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A58);
-    (*(int**)(self + 0x7C))[10] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004A3B08);
-    (*(int**)(self + 0x7C))[11] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A68);
-    (*(int**)(self + 0x7C))[12] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A78);
-    (*(int**)(self + 0x7C))[13] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A88);
-    (*(int**)(self + 0x7C))[14] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A98);
-    (*(int**)(self + 0x7C))[15] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004879D8);
-    (*(int**)(self + 0x7C))[16] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004879E8);
-    (*(int**)(self + 0x7C))[17] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004879F8);
-    (*(int**)(self + 0x7C))[18] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A08);
-    (*(int**)(self + 0x7C))[19] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A18);
-    (*(int**)(self + 0x7C))[20] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A28);
-    (*(int**)(self + 0x7C))[21] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_004A3B00);
-    (*(int**)(self + 0x7C))[22] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A38);
-    (*(int**)(self + 0x7C))[23] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487A48);
-    (*(int**)(self + 0x7C))[24] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487AA8);
-    (*(int**)(self + 0x7C))[25] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487AB8);
-    (*(int**)(self + 0x7C))[26] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487AC8);
-    (*(int**)(self + 0x7C))[27] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487AD8);
-    (*(int**)(self + 0x7C))[28] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487AE8);
-    (*(int**)(self + 0x7C))[29] = func_00310C48(*(void**)(*(char**)self + 0x780), 0, D_00487AF8);
+    (*(int**)(self + 0x7C))[0] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004879D8);
+    (*(int**)(self + 0x7C))[1] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004879E8);
+    (*(int**)(self + 0x7C))[2] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004879F8);
+    (*(int**)(self + 0x7C))[3] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A08);
+    (*(int**)(self + 0x7C))[4] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A18);
+    (*(int**)(self + 0x7C))[5] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A28);
+    (*(int**)(self + 0x7C))[6] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004A3B00);
+    (*(int**)(self + 0x7C))[7] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A38);
+    (*(int**)(self + 0x7C))[8] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A48);
+    (*(int**)(self + 0x7C))[9] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A58);
+    (*(int**)(self + 0x7C))[10] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004A3B08);
+    (*(int**)(self + 0x7C))[11] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A68);
+    (*(int**)(self + 0x7C))[12] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A78);
+    (*(int**)(self + 0x7C))[13] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A88);
+    (*(int**)(self + 0x7C))[14] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A98);
+    (*(int**)(self + 0x7C))[15] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004879D8);
+    (*(int**)(self + 0x7C))[16] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004879E8);
+    (*(int**)(self + 0x7C))[17] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004879F8);
+    (*(int**)(self + 0x7C))[18] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A08);
+    (*(int**)(self + 0x7C))[19] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A18);
+    (*(int**)(self + 0x7C))[20] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A28);
+    (*(int**)(self + 0x7C))[21] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_004A3B00);
+    (*(int**)(self + 0x7C))[22] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A38);
+    (*(int**)(self + 0x7C))[23] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487A48);
+    (*(int**)(self + 0x7C))[24] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487AA8);
+    (*(int**)(self + 0x7C))[25] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487AB8);
+    (*(int**)(self + 0x7C))[26] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487AC8);
+    (*(int**)(self + 0x7C))[27] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487AD8);
+    (*(int**)(self + 0x7C))[28] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487AE8);
+    (*(int**)(self + 0x7C))[29] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, D_00487AF8);
     int i;
     for (i = 0; i < 30; i++) {
     }
@@ -5211,7 +5211,7 @@ struct sWakeParams_4B98 {
 };
 
 void func_00283430(void* self);
-extern "C" int func_0027A4A0(void* tbl, int mode, int id);
+extern "C" int cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id);
 extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 extern "C" void func_002E4540(void* self, int a1, int a3, int a5, float f2);
 
@@ -5220,11 +5220,11 @@ extern "C" void func_002E4B98(void* self)
     sWakeParams_4B98* p = (sWakeParams_4B98*)((char*)self + 0x28);
     func_00283430((char*)self + 0x10);
     if (*(int*)((char*)self + 0x28) != 7) {
-        int r1 = func_0027A4A0(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        int r2 = func_0027A4A0(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
+        int r1 = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
+        int r2 = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
         func_002E4370(self, 2, r1, r2, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
     } else {
-        func_002E4540(self, 2, func_0027A4A0(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
+        func_002E4540(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
     }
     *(float*)((char*)self + 0x48) = p->level;
 }

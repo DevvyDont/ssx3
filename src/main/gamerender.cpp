@@ -8,7 +8,7 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cCamera_cCamera(void* self, int idx);
-extern "C" void func_0015DFD8(void* self, int mode);
+extern "C" void cCamera_setCurrentController(void* self, int mode);
 extern char D_0047B538[];
 
 struct sVECam22E3B8 {
@@ -71,7 +71,7 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
             self->cams[i].p = (sCam22E3B8*)cCamera_cCamera(cMemMan_alloc(0x4B0, D_0047B538, 0x20000000, 0), i);
             sCam22E3B8* c = self->cams[i].p;
             c->vt[2].fn((char*)c + c->vt[2].delta, i, 0.7853981852531433f, 30.0f, farClip);
-            func_0015DFD8(self->cams[i].p, 2);
+            cCamera_setCurrentController(self->cams[i].p, 2);
         } else {
             self->cams[i].p = 0;
         }

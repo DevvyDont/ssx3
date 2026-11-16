@@ -32,10 +32,10 @@ struct cDSockChannel {
     // --- cDSockChannel
     int mState;                     // 0x0C [O]; [P] isConnected = (mState == 2); [R] 0; [U] 0 closed, 1 connecting
                                     //      (connect/listen), 2 connected (updateConnecting), 3 timed out and 4 packet
-                                    //      error (updateConnected); update (func_00256A00) switches on it
+                                    //      error (updateConnected); update (cDSockChannel_update) switches on it
     float mLatency;                 // 0x10 [O]; [R] 0.1; [U] updateConnected smooths the link's ping into it
                                     //      ((4 * old + new) / 5, capped at 1 s); getLatency (func_00256BA8) returns it
-    int mPacketError;               // 0x14 [O] (On Tour: bool); [R] 0; [U] readPacket (func_00256730) sets 1 on a
+    int mPacketError;               // 0x14 [O] (On Tour: bool); [R] 0; [U] readPacket (cDSockChannel_readPacket) sets 1 on a
                                     //      packet of the wrong kind; updateConnected turns it into state 4
     NetGameUtilRefT* mGameUtil;     // 0x18 [O]; [R] 0; [U] connect/listen store the NetGameUtil (func_003E6E08) and
                                     //      start it (func_003E6F40, 0x101 connect / 0x102 listen); disconnect destroys it

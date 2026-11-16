@@ -445,7 +445,7 @@ INCLUDE_ASM("replay/playbackman", func_0026CC48);
 #ifdef SKIP_ASM
 extern "C" void cAI_purgeMissionRiders(void*);
 extern "C" void cAI_reinitMissionRiders(void* self);
-extern "C" void func_0015EDC8(void* self, int value);
+extern "C" void cCamera_switchChaseControllerTargetRider(void* self, int value);
 void cReplay_setReplayState(void* self, int val);
 extern "C" void func_0026CBB8(void* self);
 void func_00317908(void* self);
@@ -465,7 +465,7 @@ extern "C" void func_0026CC48(void* self)
         *(int*)((char*)self + 0x70) = 1;
         char* x = *(char**)(*(char**)((char*)self + 0x60) + 0x70);
         int v = x ? *(int*)(x + 0x18) : 0;
-        func_0015EDC8(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
+        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
     }
 }
 #endif
@@ -475,7 +475,7 @@ INCLUDE_ASM("replay/playbackman", func_0026CD20);
 #ifdef SKIP_ASM
 extern "C" void cAI_purgeMissionRiders(void*);
 extern "C" void cAI_reinitMissionRiders(void* self);
-extern "C" void func_0015EDC8(void* self, int value);
+extern "C" void cCamera_switchChaseControllerTargetRider(void* self, int value);
 void cReplay_setReplayState(void* self, int val);
 
 extern "C" void func_0026CD20(void* self)
@@ -488,7 +488,7 @@ extern "C" void func_0026CD20(void* self)
         func_0026CC18(self);
         *(int*)((char*)self + 0x70) = 0;
         int v = *(int*)(*(char**)((char*)self + 0x60) + 0x28);
-        func_0015EDC8(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
+        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
     }
 }
 #endif

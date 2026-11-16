@@ -10993,7 +10993,7 @@ extern "C" void func_00267468(int initialize, int priority)
 }
 #endif
 
-extern "C" void* func_00255840(void* self);
+extern "C" void* cCommChannel_channelClose(void* self);
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267D88);
@@ -11021,13 +11021,13 @@ extern "C" int func_00267DA0(void *arg0) {
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_disconnect__FPv);
 #ifdef SKIP_ASM
 /**
- * Disconnects the channel by clearing its first two words, if the first is set (func_00255840).
+ * Disconnects the channel by clearing its first two words, if the first is set (cCommChannel_channelClose).
  *
- * @return no meaningful value (func_00255840() returns nothing)
+ * @return no meaningful value (cCommChannel_channelClose() returns nothing)
  */
 void* cCommChannel_disconnect(void* self)
 {
-    return func_00255840(self);
+    return cCommChannel_channelClose(self);
 }
 #endif
 

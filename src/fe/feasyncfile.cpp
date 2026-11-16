@@ -12165,7 +12165,7 @@ extern "C" void func_001B47C0(void* self, int a1);
 extern "C" void func_001B4FA0(void* self, int err);
 extern "C" void func_001B5068(void* self, int a1);
 extern "C" int func_00255F20(void* self, int a1);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" void* func_00399920(void* box);
 extern "C" void func_0039A4B0(void* box, unsigned short* str, int id);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
@@ -12258,7 +12258,7 @@ extern "C" void func_001B4CD8(void* self)
             int len;
             if (*(int*)(s + 0x6D4) >= 2) {
                 len = sprintf(buf, D_004A1B98, i + 1);
-                w = pos.x - func_00391FB0(func_00399920(*(void**)(s + 0x6E8)), buf, &size, 1, scale.x, scale.y);
+                w = pos.x - cFont_textExtent(func_00399920(*(void**)(s + 0x6E8)), buf, &size, 1, scale.x, scale.y);
             } else {
                 w = pos.x;
                 len = 0;
@@ -15754,7 +15754,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" char* func_004162D0(char*, const char*);
 extern char D_004A1BD0[];
@@ -15801,7 +15801,7 @@ public:
 static inline void Measure1B9950(cUIText* text, const char* s, sRect1B9950* out)
 {
     char* f = cUIText_getFont(text);
-    func_00391FB0(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    cFont_textExtent(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
 extern "C" void func_001B9950(void* self, cUIText* text, char* str)
@@ -21888,7 +21888,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" char* func_004162D0(char*, const char*);
 extern char D_004A1BD0[];
@@ -21935,7 +21935,7 @@ public:
 static inline void Measure1C2578(cUIText* text, const char* s, sRect1C2578* out)
 {
     char* f = cUIText_getFont(text);
-    func_00391FB0(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    cFont_textExtent(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
 extern "C" void func_001C2578(void* self, void* vtext, char* str)

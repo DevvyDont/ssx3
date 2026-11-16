@@ -92,7 +92,7 @@ struct cInputMapParser {
     tIdentifier* CurrentIdentifier; // 0x108E8 [O]; [U] parseStatement points it at the statement being parsed; parseTerm
                                     //         compares a referenced identifier with it (self-reference error)
     int FreeRegisters[63];          // 0x108EC [O]; [P] preview assert "NumFreeRegisters < arraysize(FreeRegisters)";
-                                    //         [R] filled with 63..1; [U] compileParseNode / func_00324EC8 / func_003250D8
+                                    //         [R] filled with 63..1; [U] compileParseNode / cInputMapParser_compileBinaryNode / cInputMapParser_compileUnaryNode
                                     //         pop and push output registers
     int NumFreeRegisters;           // 0x109E8 [O]; [P] same assert; [R] = 0, then counts the 63 pushes; [U] as above
 };

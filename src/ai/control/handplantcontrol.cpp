@@ -53,7 +53,7 @@ extern "C" void cHandplantMotion_gainFocus(cHandplantMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00138BA0);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_init);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -298,7 +298,7 @@ static inline sQ_8BA0 up_8BA0(char* r) { return *(sQ_8BA0*)(r + 0x1C0); }
 // Starts a handplant on a hit: stores the start/target, and works out the spin axis and angle that turn the rider
 // from its current orientation to one facing the wall.
 // PORT: `<?` / `>?` are the g++ minimum / maximum operators (EE min.s / max.s).
-extern "C" void func_00138BA0(cHandplantMotion* self, sHit_8BA0* hit, float dur)
+extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, float dur)
 {
     char* rider = (char*)self->mRider;
     (*(sQ_8BA0*)&self->InitPos) = *(sQ_8BA0*)(rider + 0x110);
@@ -1007,13 +1007,13 @@ struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, sHit_139C88*, 
 
 extern int D_004A1120;
 extern void* D_004A3DD8;
-extern "C" float func_0013A7B0_9C88(void* self, sHit_139C88* hit) __asm__("func_0013A7B0");
+extern "C" float cAirMotion_intersectBoard_9C88(void* self, sHit_139C88* hit) __asm__("cAirMotion_intersectBoard");
 extern "C" void func_0011E150_9C88(void* rider, int a) __asm__("func_0011E150");
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_00105398(void* rider, int a1);
 extern "C" void func_00105398_p(void* rider, void* v) __asm__("func_00105398");
-extern "C" void func_00107888(void* rider);
+extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern "C" void func_0010EB30_9C88(void* rider, int anim, int a2, int a3, sInfo_139C88* info) __asm__("func_0010EB30");
 extern "C" void func_0010E910(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
 extern "C" int func_00311AE8(void* ra, int layer);
@@ -1025,7 +1025,7 @@ extern "C" void func_00115640(void* rider);
 extern "C" int func_00114CC0(void* rider);
 extern "C" void func_0013A8F8(cAirMotion* self, float v);
 extern "C" void func_0013A968(cAirMotion* self, float v);
-extern "C" int func_0013AA48(cAirMotion* self, void* out);
+extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* out);
 extern "C" void func_003098B0(void* p);
 extern "C" void* cBE_getBE();
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
@@ -1207,7 +1207,7 @@ static inline sVec4HP row_139C88(char* r, int k)
 extern "C" void cAirMotion_resolve(cAirMotion* self)
 {
     sHit_139C88 hit;
-    float d = func_0013A7B0_9C88(self, &hit);
+    float d = cAirMotion_intersectBoard_9C88(self, &hit);
     float vn = 0.0f;
     if (d >= 0.5f) {
         vn = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x1E0), hit.vel), hit.normal);
@@ -1358,19 +1358,19 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
     func_0011E150_9C88(RIDER_139C88, 0);
     sVec4HP out;
     *(int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = D_004A1120;
-    int got = func_0013AA48(self, &out);
+    int got = cAirMotion_checkTerrainCollisions(self, &out);
     *(unsigned int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     if (got) {
         func_00105398_p(RIDER_139C88, &out);
     } else {
         func_00105398_p(RIDER_139C88, 0);
     }
-    func_00107888(RIDER_139C88);
+    cRider_checkOpponentCollisions(RIDER_139C88);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013A7B0);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_intersectBoard);
 #ifdef SKIP_ASM
 extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
@@ -1421,7 +1421,7 @@ static inline sVec4HP vu0Sub_13A7B0(const sVec4HP& a, const sVec4HP& b)
 
 struct sVEntry_13A7B0 { short delta; short index; void (*fn)(void*, void*); };
 
-extern "C" float func_0013A7B0(cAirMotion* self, char* hit)
+extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
 {
     char* rider = (char*)self->mRider;
     sVec4HP* pt = (sVec4HP*)(*(char**)(*(char**)(rider + 0x780) + 0x2C) + (*(int*)(rider + 0x8A0) << 5));
@@ -1495,7 +1495,7 @@ extern "C" void func_0013A968(cAirMotion* self, float v)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013AA48);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_checkTerrainCollisions);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cRider_updateOrientationImplicit(void*);
@@ -1625,7 +1625,7 @@ static inline t4Vector riderVec_AA48(char* r, int off)
 #define RIDER_AA48 (*(char**)((char*)self + 0x4))
 #define RV_AA48(off) (*(t4Vector*)(RIDER_AA48 + (off)))
 
-extern "C" int func_0013AA48(cAirMotion* self, void* outp)
+extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
 {
     if (func_0011FEE8(RIDER_AA48) == 9)
         return 0;
@@ -2420,9 +2420,9 @@ extern "C" void func_00114298(void* rider, float v);
 // PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void func_0011E150_v(void* rider, int a1) __asm__("func_0011E150");
 extern "C" void func_00105398(void* rider, int a1);
-extern "C" void func_00107888(void* rider);
-extern "C" void func_0013C140(cRailslideMotion* self);
-extern "C" void func_00294170(void* snd, void* rider);
+extern "C" void cRider_checkOpponentCollisions(void* rider);
+extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self);
+extern "C" void cSSXAudio_Lift(void* snd, void* rider);
 int func_0011FEE8(void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
@@ -2492,12 +2492,12 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
     }
     func_00105398(RIDER_BFA8, 0);
     *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 3;
-    func_0013C140(self);
+    cRailslideMotion_checkTerrainCollisions(self);
     *(unsigned int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0xFFFFFFFF;
-    func_00107888(RIDER_BFA8);
+    cRider_checkOpponentCollisions(RIDER_BFA8);
     if (self->ForceNaturalAir != 0 && func_0011FE98(RIDER_BFA8) == 4) {
         cRider_setMotionState_impl_BFA8(RIDER_BFA8, 1);
-        func_00294170((char*)gSSXAudio, RIDER_BFA8);
+        cSSXAudio_Lift((char*)gSSXAudio, RIDER_BFA8);
     }
     char* r = RIDER_BFA8;
     float len = vu0Length_BFA8(*(sVec4_BFA8*)(r + 0x1E0));
@@ -2507,7 +2507,7 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C140);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_checkTerrainCollisions);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int func_0011FEE8(void* rider);
@@ -2670,7 +2670,7 @@ static inline bool riderFlag_13C140(char* r)
 #define RV(off) (*(sVec4HP*)(RIDER + (off)))
 #define SV(off) (*(sVec4HP*)((char*)self + (off)))
 
-extern "C" void func_0013C140(cRailslideMotion* self)
+extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
 {
     if (func_0011FEE8(RIDER) == 9)
         return;
@@ -4153,10 +4153,10 @@ extern "C" void func_00114298(void* rider, float v);
 // PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void func_0011E150_v13F178(void* rider, int a1) __asm__("func_0011E150");
 extern "C" void func_00105398(void* rider, int a1);
-extern "C" void func_00107888(void* rider);
+extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
-extern "C" void func_0013F488(cGroundMotion* self);
-extern "C" void func_00294170(void* snd, void* rider);
+extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self);
+extern "C" void cSSXAudio_Lift(void* snd, void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
 void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
@@ -4291,13 +4291,13 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
     }
     func_0011E150_v13F178(RIDER_13F178, 0);
     *(int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = D_004A115C;
-    func_0013F488(self);
+    cGroundMotion_checkWallCollisions(self);
     *(unsigned int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     func_00105398(RIDER_13F178, 0);
-    func_00107888(RIDER_13F178);
+    cRider_checkOpponentCollisions(RIDER_13F178);
     if (self->ForceNaturalAir != 0 && func_0011FE98(RIDER_13F178) == 0) {
         cRider_setMotionState_impl_13F178(RIDER_13F178, 1);
-        func_00294170((char*)gSSXAudio, RIDER_13F178);
+        cSSXAudio_Lift((char*)gSSXAudio, RIDER_13F178);
     }
     char* r = RIDER_13F178;
     *(sVec4HP*)(r + 0x390) = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)(r + 0x370), 0.5f)));
@@ -4346,7 +4346,7 @@ extern "C" void cGroundMotion_loseFocus(cGroundMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F488);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_checkWallCollisions);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int func_0011FEE8(void* rider);
@@ -4497,7 +4497,7 @@ static inline bool riderFlag_13F488(char* r)
 #define RIDER (*(char**)((char*)self + 0x18))
 #define RV(off) (*(sVec4HP*)(RIDER + (off)))
 
-extern "C" void func_0013F488(cGroundMotion* self)
+extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
 {
     if (func_0011FEE8(RIDER) == 9)
         return;
@@ -7124,23 +7124,23 @@ extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_14436
 }
 #endif
 
-extern "C" void* func_00311958(void* self);
+extern "C" void* cRiderAnimBase__cRiderAnimBase(void* self);
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderAnim__cRiderAnim__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys a rider animation object by handing it to the base destructor func_00311958().
+ * Destroys a rider animation object by handing it to the base destructor cRiderAnimBase__cRiderAnimBase().
  *
  * That destructor expires the object's six animation sequencers and frees their storage, then frees the object
  * itself when bit 0 of the destructor flags is set. Only @p self is declared here: the flags the caller passed in
- * the second argument register reach func_00311958() unchanged.
+ * the second argument register reach cRiderAnimBase__cRiderAnimBase() unchanged.
  *
- * @return no meaningful value (func_00311958() returns nothing)
+ * @return no meaningful value (cRiderAnimBase__cRiderAnimBase() returns nothing)
  */
 void* cRiderAnim__cRiderAnim(void* self)
 {
-    return func_00311958(self);
+    return cRiderAnimBase__cRiderAnimBase(self);
 }
 #endif
 

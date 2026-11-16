@@ -13,7 +13,7 @@
 //
 // Retail has one more word than On Tour at 0x0 (as in the channel classes and cInSeq's tScriptMainNode): every On
 // Tour member is 4 bytes higher here, placed by [R] the constructor (zeroes 0x4..0x2C = On Tour's 0x0..0x28) and
-// [U] Init (func_002739B8), DeInit (func_00273A00), SetEntityVariation (func_00273A60), SetupPlay (func_00273AA8),
+// [U] Init (cScriptPlayerEntity_Init), DeInit (cScriptPlayerEntity_DeInit), SetEntityVariation (func_00273A60), SetupPlay (func_00273AA8),
 // ExecutePlay (func_00273D20) and the accessors. On Tour's bools are 1 byte; retail's are words.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:

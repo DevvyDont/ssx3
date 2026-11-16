@@ -5,8 +5,8 @@
 // only implementation. cCommSystem::mChannels holds them. EA's source: d:/ssx/code/source/online/commchannel.cpp
 // (the preview build's assert string). Size 0xC: two 4-byte bools, then the vptr (g++ 2.95 puts it after the data of the class
 // that declares the virtuals); cDSockChannel's first own field is at 0xC. Retail vtable D_00481320.
-// Retail methods: constructor func_002557E0 (stores the vtable, clears both flags), destructor func_00255800,
-// channelOpen func_00255830, channelClose func_00255840 (all in mem/memstd), and the default virtuals in tagsunk
+// Retail methods: constructor func_002557E0 (stores the vtable, clears both flags), destructor cCommChannel__cCommChannel,
+// channelOpen func_00255830, channelClose cCommChannel_channelClose (all in mem/memstd), and the default virtuals in tagsunk
 // (cCommChannel_disconnect = channelClose, update/isConnected/getChannelType/readPacket/writePacket return 0,
 // getLatency returns 1/60). The preview's inline getError/setError/isChannelOpen were inlined in retail.
 //
@@ -21,14 +21,14 @@
 // Names from the preview's slot functions (disconnect__12cCommChannel ... writePacket__12cCommChannelPCvi); a call
 // through slot N reads the delta at vtbl + 8*N and the function at vtbl + 8*N + 4.
 enum {
-    kCommChannelVt_dtor = 1,            // func_00255800 (cDSockChannel: func_002566E8)
+    kCommChannelVt_dtor = 1,            // cCommChannel__cCommChannel (cDSockChannel: func_002566E8)
     kCommChannelVt_disconnect = 2,      // cCommChannel_disconnect (cDSockChannel: func_00256998)
-    kCommChannelVt_update = 3,          // cCommChannel_update (cDSockChannel: func_00256A00)
+    kCommChannelVt_update = 3,          // cCommChannel_update (cDSockChannel: cDSockChannel_update)
     kCommChannelVt_isConnected = 4,     // cCommChannel_isConnected (cDSockChannel_isConnected)
     kCommChannelVt_getLatency = 5,      // cCommChannel_getLatency (cDSockChannel: func_00256BA8)
     kCommChannelVt_getChannelType = 6,  // cCommChannel_getChannelType (cDSockChannel_getChannelType: 1)
-    kCommChannelVt_readPacket = 7,      // cCommChannel_readPacket (cDSockChannel: func_00256730)
-    kCommChannelVt_writePacket = 8      // cCommChannel_writePacket (cDSockChannel: func_002567E0)
+    kCommChannelVt_readPacket = 7,      // cCommChannel_readPacket (cDSockChannel: cDSockChannel_readPacket)
+    kCommChannelVt_writePacket = 8      // cCommChannel_writePacket (cDSockChannel: cDSockChannel_writePacket)
 };
 
 struct cCommChannel {

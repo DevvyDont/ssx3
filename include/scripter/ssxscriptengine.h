@@ -45,7 +45,7 @@ struct tNISList;
 // One script data bank (On Tour struct tSSXScriptBankInfo, 0x10; retail clears it with tSSXScriptBankInfo_Clear).
 struct tSSXScriptBankInfo {
     void* dataBankHandle; // 0x0 [O]; [R] cDataManager attach handle (SyncLoadScriptBank); [U] detached by PurgeScriptBank
-    int dataIdentifier;   // 0x4 [O]; [R] the bank's key (SyncLoadScriptBank, func_0027B370); Clear sets -1
+    int dataIdentifier;   // 0x4 [O]; [R] the bank's key (SyncLoadScriptBank, cSSXScriptEngine_AsyncLoadScriptBank); Clear sets -1
     void* asyncHandle;    // 0x8 [O] (int in On Tour); [U] async file, compared with the completed file
                           //     (ProcessAsyncLoadScriptBankComplete), ASYNCFILE_cancel/release
     int dynamicMem;       // 0xC [O] (a bool in On Tour); [R] sw 1 when the engine allocated the data, 0 for a caller buffer
@@ -63,7 +63,7 @@ struct cSSXScriptEngine {
     char mEntityDatabase[30][0x14];              // 0x050 [O] tScriptEntityRecord[30]; [R] func_0027CDD0 sets 30
                                                  //       0x14-byte records to {0, -1, -1, 0, -1}
     void** mVtbl;                                // 0x2A8 [R] _vt$16cSSXScriptEngine (cSSXScriptEngine_vtbl), stored by the ctor
-                                                 //       over _vt$15cBXScriptEngine; [U] func_00278AD0 calls slot 4
+                                                 //       over _vt$15cBXScriptEngine; [U] cSSXScriptEngine_ForcePlayUpdate calls slot 4
     // --- cInSeqComm (second base of cBXScriptEngine: a vptr only)
     void** mInSeqCommVtbl;                       // 0x2AC [R] _vt$16cSSXScriptEngine$10cInSeqComm (D_00482100);
                                                  //       SetupBXEngine hands self+0x2AC to cInSeq_cInSeq
@@ -97,9 +97,9 @@ struct cSSXScriptEngine {
     char* mpMasterTableDebug;                    // 0x534 [O]; [R] InitOnce: FILE_loadz(kpScriptMasterTableDebugFilename)
     void* mFilterTableAsyncHandle;               // 0x538 [O] (int in On Tour); [R] AsyncLoadTrack opens
                                                  //       ".../scfilter<location>" into it; [U] ASYNCFILE_* (PurgeTrack)
-    tSSXHiveScriptFilterTableHeader* mpFilterTableHeader; // 0x53C [O]; [U] func_0027B6B0 stores the loaded table,
+    tSSXHiveScriptFilterTableHeader* mpFilterTableHeader; // 0x53C [O]; [U] cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete stores the loaded table,
                                                  //       PurgeTrack frees it, GetScriptFromCategory tests it
-    tSSXHiveScriptFilterCategory* mpCategoryFilterTable; // 0x540 [O]; [U] func_0027B6B0: header + 4; 8-byte
+    tSSXHiveScriptFilterCategory* mpCategoryFilterTable; // 0x540 [O]; [U] cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete: header + 4; 8-byte
                                                  //       {numScripts, scripts} records (GetScriptFromCategory)
     tSSXScriptSetupInfoLinked* mpSetupInfoHeap;  // 0x544 [O]; [R] Load: new (0xC8, "SetupInfoHeap"), 10 x 0x14
     tSSXScriptSetupInfoLinked* mpSetupInfoUnused; // 0x548 [O]; [U] free list (next at +0x10): func_0027BD78 pops,
@@ -113,7 +113,7 @@ struct cSSXScriptEngine {
                                                  //       [U] func_00278A10 / func_00278A58 (Attach/DetachAnchorDataTable)
                                                  //       index it by world section; func_0027BB08 reads codes from it
     int mNumAsyncs;                              // 0x620 [O]; [U] +1 per async load started (AsyncLoadTrack,
-                                                 //       func_0027B370), -1 when it completes or is cancelled
+                                                 //       cSSXScriptEngine_AsyncLoadScriptBank), -1 when it completes or is cancelled
     tNISList* mpIdleLists;                       // 0x624 [O]; [R] Load: new[2] ("IdleLists"), 0xCC each
     tSSXScriptBankInfo mScriptDataBanks[10];     // 0x628 [O]; [R] the ctor clears 10 with tSSXScriptBankInfo_Clear;
                                                  //       [P] IsBankAvailable reads 0x628 / 0x630 for bank i

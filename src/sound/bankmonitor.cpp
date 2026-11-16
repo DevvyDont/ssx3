@@ -133,11 +133,11 @@ extern "C" void func_002ACE40(cBankMonitor* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ACF60);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_FindFreeInstance);
 #ifdef SKIP_ASM
 extern "C" int func_002ABB80(void*);
 
-extern "C" int func_002ACF60(cBankMonitor* self, int n)
+extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n)
 {
     for (int i = 0; i < 64; i++) {
         if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) != 0) {
@@ -287,7 +287,7 @@ struct sBankMonitorView : public cSndPlayOpts {  // this unit's model of cBankMo
 };
 extern "C" void func_002ABB38(void*);
 extern "C" void bxLogPrint(const char* fmt, ...);
-extern "C" int func_002ACF60(cBankMonitor* self, int n);
+extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n);
 extern "C" void func_002ABD48(void* voice, void* mon);
 extern "C" void func_003B89E0(int h);
 extern "C" int func_003B9920(int h);
@@ -308,7 +308,7 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
 {
     sBmVoice* v = 0;
     self->busy++;
-    int idx = func_002ACF60((cBankMonitor*)self, self->busy);
+    int idx = cBankMonitor_FindFreeInstance((cBankMonitor*)self, self->busy);
     if (idx >= 0) {
         v = &self->voices[idx];
         func_002ABB38(v);
@@ -354,11 +354,11 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD2A8);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Pause);
 #ifdef SKIP_ASM
 extern "C" void func_002ACAC8(void*);
 
-extern "C" void func_002AD2A8(cBankMonitor* self)
+extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
 {
     self->mBankMonitorPaused = 1;
     for (int i = 0; i < 64; i++) {
@@ -384,12 +384,12 @@ extern "C" void func_002AD300(cBankMonitor* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD358);
 #ifdef SKIP_ASM
-extern "C" void* func_002AD550(cBankMonitor* self, int idx, int a2);
+extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int a2);
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
 extern "C" void func_002AD358(cBankMonitor* self, int idx, int key, float v)
 {
-    void* voice = func_002AD550(self, idx, key);
+    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, key);
     if (voice != 0) {
         func_002ACB80(voice, -1, 0, v);
     }
@@ -470,11 +470,11 @@ extern "C" void func_002AD4D8(cBankMonitor* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD550);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_GetHandle);
 #ifdef SKIP_ASM
 struct sVoiceC0 { int key; int idx; char pad[0xC0 - 8]; };
 
-extern "C" void* func_002AD550(cBankMonitor* self, int idx, int key)
+extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int key)
 {
     for (int i = 0; i < 64; i++) {
         if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0
@@ -488,15 +488,15 @@ extern "C" void* func_002AD550(cBankMonitor* self, int idx, int key)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/bankmonitor", func_002AD5F0);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_StopHandle);
 #ifdef SKIP_ASM
-extern "C" void* func_002AD550(cBankMonitor* self, int idx, int a2);
+extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int a2);
 extern "C" void func_002ABB38(void*);
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
-extern "C" void func_002AD5F0(cBankMonitor* self, int idx, int a2, float v)
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int a2, float v)
 {
-    void* voice = func_002AD550(self, idx, a2);
+    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, a2);
     if (voice != 0) {
         if (v != 0.0f) {
             func_002ACB80(voice, -1, 1, v);

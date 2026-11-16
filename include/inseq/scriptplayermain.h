@@ -63,7 +63,7 @@ struct cScriptPlayerMain {
     float mCurrFrame;                      // 0x28 [O]; [U] DoUpdate swc1; UpdateFrame/GetNumUpdatesToEndLeft lwc1;
                                            //      DoUpdateFrame stores 0.0f (sw $0)
     int mNumPaused;                        // 0x2C [O]; [U] Pause ++, Resume --; UpdateFrame/DoUpdateFrame skip while > 0
-    int mScriptLength;                     // 0x30 [O]; [R] ctor -1; [U] GetScriptLength (func_00274C70) caches the
+    int mScriptLength;                     // 0x30 [O]; [R] ctor -1; [U] GetScriptLength (cScriptPlayerMain_GetScriptLength) caches the
                                            //      longest entity's numFrames; Stop -1
     int mJumpFrame;                        // 0x34 [O]; [R] ctor -1; [U] Init/Stop -1; GoToFrame stores it; UpdateFrame
                                            //      consumes it
@@ -73,7 +73,7 @@ struct cScriptPlayerMain {
     int mDoStopInEntityUpdate;             // 0x40 [O] (bool); [R] ctor 0; [U] Stop sets it while an entity update is
                                            //      in progress; Play(bool) clears it; DoUpdateFrame acts on it
     cInSeqComm* mpPreviewCommInterface;    // 0x44 [O]; [R] ctor 0; [U] Preview stores/clears it;
-                                           //      GetInSeqCommInterface (func_00274D70) prefers it
+                                           //      GetInSeqCommInterface (cScriptPlayerMain_GetInSeqCommInterface) prefers it
 };
 
 CHECK_OFFSET(tInSeqScriptHeader, isSmallEndian, 0x0);

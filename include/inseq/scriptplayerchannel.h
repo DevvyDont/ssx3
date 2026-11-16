@@ -11,7 +11,7 @@
 //
 // Base cScriptPlayerChannel (abstract; no retail vtable of its own seen). On Tour's base is only a vptr (size 4) and
 // every derived member there is 4 bytes lower than here: retail's base has one more word at 0x0 and the vptr at 0x4
-// [R] (every constructor stores its vtable at +4, and the virtual calls in func_00273AA8/func_00273DC0/func_00273F68
+// [R] (every constructor stores its vtable at +4, and the virtual calls in func_00273AA8/cScriptPlayerEntity_Stop/func_00273F68
 // load it from +4). Sizes [R]: func_00273AA8 allocates 0x28 (spline), 0x28 (object), 0x2C (block), 0x28 (event);
 // On Tour 0x24/0x24/0x28/0x24.
 //

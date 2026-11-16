@@ -59,7 +59,7 @@ rom:0x12E444 reloc:MIPS_LO16 symbol:D_00442168
 // render/lightman func_0038EE78 (tools/gen/reloc_from_diff.py)
 rom:0x28FFE0 reloc:MIPS_LO16 symbol:D_004FF160
 
-// main/game func_0022D478: four more `addiu $2/$3, $6, %lo(D_00442168)` that splat left as raw 0x2168
+// main/game cSectionMan_activateSection: four more `addiu $2/$3, $6, %lo(D_00442168)` that splat left as raw 0x2168
 // (the sibling at rom 0x12E4DC is paired).
 rom:0x12E4F4 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12E50C reloc:MIPS_LO16 symbol:D_00442168
@@ -357,7 +357,7 @@ rom:0x1D5844 reloc:MIPS_LO16 symbol:D_004D5720
 rom:0x1D5860 reloc:MIPS_LO16 symbol:D_004D5730
 rom:0x1D5874 reloc:MIPS_LO16 symbol:D_004D5740
 rom:0x1D5880 reloc:MIPS_LO16 symbol:D_004D5750
-// main/gameload func_002306B8: the int[14] flag table D_004428F0 indexed by constant (the target's asm names the
+// main/gameload cGame_update: the int[14] flag table D_004428F0 indexed by constant (the target's asm names the
 // inner addresses D_004428FC / D_00442920 / D_004428F8, which other functions also use); checked against the asm.
 rom:0x1318B8 reloc:MIPS_HI16 symbol:D_004428F0 addend:0xC
 rom:0x1318BC reloc:MIPS_LO16 symbol:D_004428F0 addend:0xC

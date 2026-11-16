@@ -1510,8 +1510,8 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileParseNode);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" int func_00321AD0_i(void* self, void* var) __asm__("func_00321AD0");
 extern "C" int func_00321AD8(void* self, int a1, int a2);
-extern "C" int func_00324EC8_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("func_00324EC8");
-extern "C" int func_003250D8_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("func_003250D8");
+extern "C" int cInputMapParser_compileBinaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileBinaryNode");
+extern "C" int cInputMapParser_compileUnaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileUnaryNode");
 extern char D_0048E228[];
 extern char D_0048E240[];
 extern char D_0048E268[];
@@ -1651,41 +1651,41 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         code->j.offset = n3;
         return n1 + n2 + n3 + 2;
     }
-    case 6: return func_00324EC8_K(self, node, dst, code, cap, 4, a5);
-    case 7: return func_00324EC8_K(self, node, dst, code, cap, 5, a5);
-    case 8: return func_00324EC8_K(self, node, dst, code, cap, 6, a5);
-    case 9: return func_00324EC8_K(self, node, dst, code, cap, 7, a5);
-    case 10: return func_00324EC8_K(self, node, dst, code, cap, 8, a5);
-    case 11: return func_00324EC8_K(self, node, dst, code, cap, 9, a5);
-    case 12: return func_00324EC8_K(self, node, dst, code, cap, 10, a5);
-    case 13: return func_00324EC8_K(self, node, dst, code, cap, 11, a5);
-    case 14: return func_00324EC8_K(self, node, dst, code, cap, 12, a5);
-    case 15: return func_00324EC8_K(self, node, dst, code, cap, 13, a5);
-    case 16: return func_00324EC8_K(self, node, dst, code, cap, 14, a5);
-    case 17: return func_00324EC8_K(self, node, dst, code, cap, 15, a5);
-    case 20: return func_00324EC8_K(self, node, dst, code, cap, 16, a5);
-    case 21: return func_00324EC8_K(self, node, dst, code, cap, 17, a5);
-    case 22: return func_00324EC8_K(self, node, dst, code, cap, 18, a5);
-    case 23: return func_00324EC8_K(self, node, dst, code, cap, 19, a5);
-    case 24: return func_003250D8_K(self, node, dst, code, cap, 20, a5);
-    case 25: return func_003250D8_K(self, node, dst, code, cap, 21, a5);
-    case 26: return func_003250D8_K(self, node, dst, code, cap, 22, a5);
-    case 27: return func_003250D8_K(self, node, dst, code, cap, 23, a5);
-    case 28: return func_003250D8_K(self, node, dst, code, cap, 24, a5);
-    case 29: return func_003250D8_K(self, node, dst, code, cap, 25, a5);
-    case 30: return func_003250D8_K(self, node, dst, code, cap, 26, a5);
-    case 31: return func_003250D8_K(self, node, dst, code, cap, 27, a5);
-    case 32: return func_003250D8_K(self, node, dst, code, cap, 28, a5);
-    case 33: return func_003250D8_K(self, node, dst, code, cap, 29, a5);
-    case 18: return func_003250D8_K(self, node, dst, code, cap, 30, a5);
-    case 19: return func_003250D8_K(self, node, dst, code, cap, 31, a5);
+    case 6: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 4, a5);
+    case 7: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 5, a5);
+    case 8: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 6, a5);
+    case 9: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 7, a5);
+    case 10: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 8, a5);
+    case 11: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 9, a5);
+    case 12: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 10, a5);
+    case 13: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 11, a5);
+    case 14: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 12, a5);
+    case 15: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 13, a5);
+    case 16: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 14, a5);
+    case 17: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 15, a5);
+    case 20: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 16, a5);
+    case 21: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 17, a5);
+    case 22: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 18, a5);
+    case 23: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 19, a5);
+    case 24: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 20, a5);
+    case 25: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 21, a5);
+    case 26: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 22, a5);
+    case 27: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 23, a5);
+    case 28: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 24, a5);
+    case 29: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 25, a5);
+    case 30: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 26, a5);
+    case 31: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 27, a5);
+    case 32: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 28, a5);
+    case 33: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 29, a5);
+    case 18: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 30, a5);
+    case 19: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 31, a5);
     }
     return -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00324EC8);
+INCLUDE_ASM("input/inputparse", cInputMapParser_compileBinaryNode);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
@@ -1698,7 +1698,7 @@ struct sInsn_00324EC8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
-extern "C" int func_00324EC8(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int a6)
+extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int a6)
 {
     int src = -1;
     int n1 = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 4), &src, code, cap, a6);
@@ -1742,7 +1742,7 @@ extern "C" int func_00324EC8(cInputMapParser* self, void* node, int* dst, sInsn_
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003250D8);
+INCLUDE_ASM("input/inputparse", cInputMapParser_compileUnaryNode);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
@@ -1755,7 +1755,7 @@ struct sInsn_003250D8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
-extern "C" int func_003250D8(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int a6)
+extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int a6)
 {
     void* arg = *(void**)((char*)node + 4);
     int src = -1;

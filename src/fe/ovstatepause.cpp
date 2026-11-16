@@ -937,7 +937,7 @@ INCLUDE_ASM("fe/ovstatepause", func_001FB2B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGame_exit(void* game, int a);
-extern "C" void func_0012B340(void* p);
+extern "C" void cAI_finishRemotePlayer(void* p);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
 extern int D_004A2A50;
@@ -951,7 +951,7 @@ extern "C" void func_001FB2B8(void* self, void* item, int msg)
     *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
-        func_0012B340(SSXApp->Game->AI);
+        cAI_finishRemotePlayer(SSXApp->Game->AI);
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
         break;
     case 0:
@@ -1099,7 +1099,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
-extern "C" void func_0020A6F0(void* self, char* text, char* label);
+extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
 extern "C" void cUIState_onGainFocus(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004A2170[];
@@ -1113,10 +1113,10 @@ extern "C" void func_001FBBD8(void* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 0) + 1);
-    func_0020A6F0(self, buf, D_0046E4E8);
+    cOVState_triggerTextFade(self, buf, D_0046E4E8);
     if (D_00535C11[0] == 2) {
         sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
-        func_0020A6F0(self, buf, D_0046E4E8);
+        cOVState_triggerTextFade(self, buf, D_0046E4E8);
     }
     cGameComm* p = cGameComm_mGameComm;
     if (p != 0) {
@@ -1480,7 +1480,7 @@ extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0020A6F0(void* self, char* text, char* label);
+extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern "C" void func_002A31C0(void* self);
@@ -1497,15 +1497,15 @@ extern "C" void func_001FC768(void* self)
     cUIState_onGainFocus(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int* mode = (int*)SSXApp->GameModeMan;
-    func_0020A6F0(self, D_004A2508, D_0046E4E8);
+    cOVState_triggerTextFade(self, D_004A2508, D_0046E4E8);
     if (*mode == 2) {
-        func_0020A6F0(self, D_0046FDF8, D_0046E4E8);
+        cOVState_triggerTextFade(self, D_0046FDF8, D_0046E4E8);
     } else {
-        func_0020A6F0(self, D_004A2510, D_0046E4E8);
+        cOVState_triggerTextFade(self, D_004A2510, D_0046E4E8);
     }
     if (D_00535C11[0] == 2) {
-        func_0020A6F0(self, D_004A2518, D_0046E4E8);
-        func_0020A6F0(self, D_0046FDD8, D_0046E4E8);
+        cOVState_triggerTextFade(self, D_004A2518, D_0046E4E8);
+        cOVState_triggerTextFade(self, D_0046FDD8, D_0046E4E8);
     }
     func_00294F78(func_0028B180(), 0xE);
     func_002A31C0(func_0028B180());

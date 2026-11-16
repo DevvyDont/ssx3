@@ -5,7 +5,7 @@
 // hubs, the five skies 0x2C-0x30; 0x31 = none) and locations (eBELocationID: an event's set of sections) to world
 // sections, queues their load/activate/unload requests on the world (cWorldView loadSection/unloadSection/
 // activateSection), swaps the sky, sets the stream bandwidth, and runs the event-switch ("mode") sequence.
-// One instance: cGame_loadTrack allocates it as `func_0022CCE8(cMemMan_alloc(0x1D4, "SectionMan"), game)`; reached
+// One instance: cGame_loadTrack allocates it as `cSectionMan_cSectionMan(cMemMan_alloc(0x1D4, "SectionMan"), game)`; reached
 // as SSXApp->Game->SectionMan (cGame::SectionMan, main/game.h). No vtable, no base class.
 // EA's source: d:/ssx/code/source/main/sectionman.cpp (preview and retail assert strings).
 //
@@ -14,17 +14,17 @@
 // mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = D_00442150 = {256000, 460800, 819200, 819200, 819200}.
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
-//   main/game: func_0022CCE8 (ctor), func_0022CD18 (dtor), func_0022CD40 (init), func_0022CEA8 (load),
-//     func_0022D088 (activate), func_0022D278 (isLoaded), func_0022D390 (isActive), func_0022D3D8 (loadSection),
-//     func_0022D478 (activateSection), func_0022D598 (unloadSection), func_0022D640 (loadMode),
-//     func_0022D668 (activateMode), cSectionMan_eventbegin, cSectionMan_update, func_0022DE58 (skyLoadComplete),
-//     cSectionMan_skySwap, func_0022DF50 (preLoadMode), func_0022DFD0 (isPreLoadModeDone), func_0022DFF0 (changeMode),
+//   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init (init), func_0022CEA8 (load),
+//     cSectionMan_activate (activate), func_0022D278 (isLoaded), func_0022D390 (isActive), func_0022D3D8 (loadSection),
+//     cSectionMan_activateSection (activateSection), func_0022D598 (unloadSection), func_0022D640 (loadMode),
+//     cSectionMan_activateMode (activateMode), cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete (skyLoadComplete),
+//     cSectionMan_skySwap, cSectionMan_preLoadMode (preLoadMode), func_0022DFD0 (isPreLoadModeDone), cSectionMan_changeMode (changeMode),
 //     func_0022E078 (isSectionLoaded), func_0022E098 (getWorldSectionIDFromBELocationID),
 //     func_0022E0C8 (getWorldSectionIDFromBESectionID), func_0022E0E0 (getBESectionIDFromWorldSectionID),
 //     func_0022E118 (gotoLocation);
 //   main/sectionman: cSectionMan_setSky, func_0022E228 (initEventPool), func_0022E278 (allocEvent),
-//     func_0022E288 (freeEvent), func_0022E298 (addActiveEvent), cSectionMan_getNextActiveEvent,
-//     func_0022E360 (removeActiveEvent).
+//     func_0022E288 (freeEvent), cSectionMan_addActiveEvent (addActiveEvent), cSectionMan_getNextActiveEvent,
+//     cSectionMan_removeActiveEvent (removeActiveEvent).
 //   Inline accessors used elsewhere: tiggerskyswap (sw 0x1A4), getLocationID (lw 0x1BC), transportwait /
 //   iswaitingtransport (0x1C8), isStreamReady (lw 0x1D0).
 //
@@ -35,7 +35,7 @@
 // A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF (class cSectionMan), placed by:
 //   [P] the July 2003 preview's assert strings in sectionman.cpp ("m_pFreeEventList", "pPrevEvent->pNext==pEvent",
 //       "mpGame->World->isSectionLoaded(...)", "mMode==Mode");
-//   [R] retail's constructor and init (func_0022CCE8, func_0022CD40, func_0022E228);
+//   [R] retail's constructor and init (cSectionMan_cSectionMan, cSectionMan_init, func_0022E228);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [P], [R] or [U].
 // Unnamed fields are unk_XXX; rename only with evidence.
@@ -85,7 +85,7 @@ struct cSectionMan {
     int mModeReset;                        // 0x1CC [O] (a bool); [R] init = 0; [U] gotoLocation = 1; changeMode clears
                                            //       it and calls the AI's vtable slot 5
     int m_bStreamReady;                    // 0x1D0 [O] (a bool); [R] init = 1; [U] update stores 0/1; isStreamReady()
-                                           //       in func_002306B8, func_00244A40
+                                           //       in cGame_update, func_00244A40
 };
 
 CHECK_OFFSET(cSectionMan, m_EventPool, 0x000);

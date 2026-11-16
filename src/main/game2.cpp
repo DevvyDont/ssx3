@@ -6,7 +6,7 @@ INCLUDE_ASM("main/game2", cGame_loadTrack);
 
 INCLUDE_ASM("main/game2", func_0022FA98);
 
-INCLUDE_ASM("main/game2", func_00230050);
+INCLUDE_ASM("main/game2", cGame_gainFocus);
 
 INCLUDE_ASM("main/game2", cGame_resetWorld);
 
@@ -30,9 +30,9 @@ INCLUDE_ASM("main/game2", func_00230698);
 
 INCLUDE_ASM("main/game2", func_002306A8);
 
-INCLUDE_ASM("main/game2", func_002306B8);
+INCLUDE_ASM("main/game2", cGame_update);
 
-INCLUDE_ASM("main/game2", func_00230E98);
+INCLUDE_ASM("main/game2", cGame_loseFocus);
 
 INCLUDE_ASM("main/game2", func_00230F40);
 
@@ -44,7 +44,7 @@ INCLUDE_ASM("main/game2", func_002312D8);
 
 INCLUDE_ASM("main/game2", func_00231320);
 
-INCLUDE_ASM("main/game2", func_00231348);
+INCLUDE_ASM("main/game2", cGame_writeToReplayFrame);
 
 INCLUDE_ASM("main/game2", func_002314D0);
 

@@ -809,7 +809,7 @@ INCLUDE_ASM("main/gamemode", func_00239230);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int func_00122E50(void* self);
-extern "C" int func_0012A250(void* race);
+extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00147D20(void* iface, int a1);
 extern "C" void func_00147E18(void* iface, int a1);
@@ -864,7 +864,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.time;
         D_005366A8[idx] = 0;
     }
-    if (func_0012A250(Race_239230()) == 0)
+    if (cAI_isRaceFinished(Race_239230()) == 0)
         return;
     cGameModeMan* gm = cGameModeHandler_pManager;
     switch (gm->iHeatNum) {
@@ -1223,7 +1223,7 @@ extern "C" void func_00239EC8(void* self, int idx)
         D_00536640[idx] = st.time;
         D_005366A8[idx] = 0;
     }
-    bool over = func_0012A250(race) != 0;
+    bool over = cAI_isRaceFinished(race) != 0;
     if (over) {
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bIsEventDone = 1;
@@ -1660,7 +1660,7 @@ extern unsigned int D_00536640[];
 
 extern int D_005366A8[];
 
-extern "C" int func_0012A250(void* race);
+extern "C" int cAI_isRaceFinished(void* race);
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
@@ -1686,7 +1686,7 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
     int heat = cGameModeHandler_pManager->iHeatNum - 1;
     sRace* rc = GetRace();
-    if (func_0012A250(rc) == 0 || vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 9) == 0) {
+    if (cAI_isRaceFinished(rc) == 0 || vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 9) == 0) {
         int tick = rc->riders[idx]->mFinishTick;
         if (GetRace()->riders[idx]->mDidNotFinish) {
             self->tbl[heat][idx] = 360000;
@@ -1696,7 +1696,7 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
             D_005366A8[idx] = 0;
         }
     }
-    if (func_0012A250(rc) == 0) {
+    if (cAI_isRaceFinished(rc) == 0) {
         return;
     }
     if (vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 8) == 0) {
@@ -1875,7 +1875,7 @@ INCLUDE_ASM("main/gamemode", func_0023AE00);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
-extern "C" int func_0012A250(void* race);
+extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int func_00122D78(void* self);
 extern "C" void func_00238BF8(void* self, int n);
 
@@ -1923,7 +1923,7 @@ static inline int finished_23AE00(sRider_23AE00* r)
 extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
 {
     sRace_23AE00* rc = race_23AE00();
-    if (func_0012A250(rc) == 0 || subActive_23AE00((char*)rc->riders[idx] + 0x6C0) == 0) {
+    if (cAI_isRaceFinished(rc) == 0 || subActive_23AE00((char*)rc->riders[idx] + 0x6C0) == 0) {
         if (race_23AE00()->riders[idx]->f480) {
             D_00536640[idx] = self->times[idx] = 360000;
             D_005366A8[idx] = 1;
@@ -1934,7 +1934,7 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
             D_005366A8[idx] = 0;
         }
     }
-    if (func_0012A250(rc)) {
+    if (cAI_isRaceFinished(rc)) {
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 2; i++) {
             if (!finished_23AE00(rc->riders[i]) && i != idx) {
                 self->times[i] = func_00122D78(rc->riders[i]);
@@ -2355,7 +2355,7 @@ INCLUDE_ASM("main/gamemode", func_0023B8C8);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int func_00122D78(void* self);
-extern "C" int func_0012A250(void* race);
+extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00238BF8(void* self, int n);
 extern unsigned int D_00536640[];
@@ -2389,7 +2389,7 @@ static inline char* Rider_23B8C8(int i)
 
 extern "C" void func_0023B8C8(void* self, int idx)
 {
-    if (func_0012A250(SSXApp->Game->AI) == 0 ||
+    if (cAI_isRaceFinished(SSXApp->Game->AI) == 0 ||
         ((cRiderState_23B8C8*)(Rider_23B8C8(idx) + 0x6C0))->isFinished() == 0) {
         char* r = Rider_23B8C8(idx);
         if (*(int*)(r + 0x480) != 0) {
@@ -2400,7 +2400,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
             D_005366A8[idx] = 0;
         }
     }
-    if (func_0012A250(SSXApp->Game->AI) == 0) {
+    if (cAI_isRaceFinished(SSXApp->Game->AI) == 0) {
         return;
     }
     if (((cRiderState_23B8C8*)(Rider_23B8C8(idx) + 0x6C0))->isActive() == 0) {
@@ -2540,7 +2540,7 @@ INCLUDE_ASM("main/gamemode", func_0023BDB8);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int func_00122E50(void* self);
-extern "C" int func_0012A250(void* race);
+extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00238B70(void* self, int n);
 extern unsigned int D_00536640[];
@@ -2576,7 +2576,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
         D_005366A8[idx] = 0;
         D_00536640[idx] = st.time;
     }
-    if (func_0012A250(SSXApp->Game->AI) == 0) {
+    if (cAI_isRaceFinished(SSXApp->Game->AI) == 0) {
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);

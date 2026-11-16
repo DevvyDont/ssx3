@@ -145,7 +145,7 @@ struct cBankMonitor {
     volatile int mReEntry;           // 0x8DC [O] (volatile); [R] ctor 0; [U] BANKMONITOR_Create ++/-- around the instance search
     int mDopplerEnable;              // 0x8E0 [O] (On Tour bool); [R] ctor 1; [P] BANKMONITOR_DopplerEnabled/SetDoppler (preview 0x8D4, bracketed)
     int mPositionalEnable;           // 0x8E4 [O] (On Tour bool); [R] ctor 1; [P] BANKMONITOR_PositionalEnabled/SetPositional (preview 0x8D8, bracketed)
-    int mBankMonitorPaused;          // 0x8E8 [O] cBankMonitor::mPaused (renamed: cMonitor's mPaused is at 0x94); [P] BANKMONITOR_Paused (preview 0x8DC, bracketed); [U] BANKMONITOR_Pause (func_002AD2A8) 1, Resume (func_002AD300) 0
+    int mBankMonitorPaused;          // 0x8E8 [O] cBankMonitor::mPaused (renamed: cMonitor's mPaused is at 0x94); [P] BANKMONITOR_Paused (preview 0x8DC, bracketed); [U] BANKMONITOR_Pause (cBankMonitor_BANKMONITOR_Pause) 1, Resume (func_002AD300) 0
     cBankMonitorInstance* mBankMonitorInstance; // 0x8EC [O]; [R] operator new[](64 x 0xC0, "mBankMonitorInstance"); [P] BANKMONITOR_GetInstance (preview 0x8E0 -> 0x8EC, seen)
 };
 

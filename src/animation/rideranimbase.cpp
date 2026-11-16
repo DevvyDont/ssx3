@@ -26,14 +26,14 @@ extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311958);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase__cRiderAnimBase);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* p);
 extern "C" void cAnimSequencer_expireAll(void* self);
 extern char cRiderAnimBase_vtbl[];
 
-extern "C" void func_00311958(cRiderAnimBase* self, int flags)
+extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
 {
     self->mVtbl = (void**)cRiderAnimBase_vtbl;
     for (int i = 0; i < 6; i++)

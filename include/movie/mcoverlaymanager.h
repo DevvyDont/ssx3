@@ -181,7 +181,7 @@ struct cMCOverlayManager {
     char unk_448[0x300];        // 0x448 no access in retail; On Tour's mFileListCache[32][6] (ushort, 0x180) sits here,
                                 //       retail's region is twice that
     void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (slot 1 func_0023CF38 the state
-                                //       handler, slot 2 the dtor func_002424C8); preview 0x638
+                                //       handler, slot 2 the dtor cMCOverlayManager__cMCOverlayManager); preview 0x638
 };
 
 CHECK_OFFSET(cMCOverlayManager, callbackWriteStart, 0x0);

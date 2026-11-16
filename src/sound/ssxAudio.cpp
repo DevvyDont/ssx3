@@ -1106,7 +1106,7 @@ extern "C" void func_002867E8(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00286A80);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGameDeInit);
 #ifdef SKIP_ASM
 extern "C" void func_00289BB8(void* self);
 extern "C" void func_00285BE0(cSSXAudio* self, int a1);
@@ -1131,7 +1131,7 @@ static inline void saDeleteObj(void** slot)
     *slot = 0;
 }
 
-extern "C" void func_00286A80(cSSXAudio* self)
+extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
 {
     func_00289BB8(self);
     func_00285BE0(self, 0);
@@ -1157,7 +1157,7 @@ extern "C" void func_00286A80(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00286C00);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGamePurge);
 #ifdef SKIP_ASM
 extern "C" void func_002A6F38(void*);
 extern "C" void func_00289DF0(void*, int);
@@ -1166,7 +1166,7 @@ extern "C" void func_0028BDE0(void*, int);
 extern "C" void func_0028A230(void*);
 extern "C" void func_0029F5E0(void*);
 
-extern "C" void func_00286C00(cSSXAudio* self)
+extern "C" void cSSXAudio_InGamePurge(cSSXAudio* self)
 {
     int i;
     func_002A6F38(self);
@@ -1289,7 +1289,7 @@ extern "C" void func_00297438(void* self, int id);
 extern "C" void func_0029B3C0(void* self, int a1);
 extern "C" int func_0028D960(void* self);
 extern "C" int func_002A4078(void* self);
-extern "C" int func_0012A250(void* p);
+extern "C" int cAI_isRaceFinished(void* p);
 extern "C" char* func_0028B1D8();
 extern "C" void func_002A3708(void* self, void* rider);
 extern "C" void func_002A34D0(void* self, void* rider, int a2, int a3);
@@ -1341,7 +1341,7 @@ extern "C" void func_00286EA0(char* self, char* rider)
         if (func_002A4078(self))
             func_002A3708(self, rider);
         else if (sa_state6EA0() == 2) {
-            if (func_0012A250(func_0028B1D8()))
+            if (cAI_isRaceFinished(func_0028B1D8()))
                 func_002A3708(self, rider);
             else
                 func_002A34D0(self, rider, 0, -1);
@@ -1360,14 +1360,14 @@ INCLUDE_ASM("sound/ssxAudio", func_002870A0);
 #ifdef SKIP_ASM
 extern "C" void func_002871B0(void* self);
 extern "C" int func_002A4040(void* self);
-extern "C" int func_00295028(void* self, int a, int b);
-extern "C" void func_00295628(void* self, int a, int b, int c, int d, int e);
+extern "C" int cSSXAudio_PlayHistoryExists(void* self, int a, int b);
+extern "C" void cSSXAudio_PlayHistoryAdd(void* self, int a, int b, int c, int d, int e);
 
 extern "C" void func_002870A0(cSSXAudio* self)
 {
     func_002871B0(self);
-    if (func_002A4040(self) == 0 && func_00295028(self, 0, 0) == 0) {
-        func_00295628(self, 0, 0, -1, 0, 0);
+    if (func_002A4040(self) == 0 && cSSXAudio_PlayHistoryExists(self, 0, 0) == 0) {
+        cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0);
     }
 }
 #endif
@@ -1377,8 +1377,8 @@ INCLUDE_ASM("sound/ssxAudio", func_00287108);
 #ifdef SKIP_ASM
 extern "C" void func_002871B0(void* self);
 extern "C" int func_002A4040(void* self);
-extern "C" int func_00295028(void* self, int a, int b);
-extern "C" void func_00295628(void* self, int a, int b, int c, int d, int e);
+extern "C" int cSSXAudio_PlayHistoryExists(void* self, int a, int b);
+extern "C" void cSSXAudio_PlayHistoryAdd(void* self, int a, int b, int c, int d, int e);
 extern "C" int func_002A4168(void* self);
 extern "C" int func_002A41D8(void* self);
 
@@ -1388,8 +1388,8 @@ extern "C" void func_00287108(void* self)
     if (func_002A4168(self) != 0 || func_002A41D8(self) != 0) {
         if (func_002A4040(self) == 0
             && *(int*)((char*)self + 0x5824) >= *(int*)((char*)SSXApp->GameModeMan + 0x70)
-            && func_00295028(self, 0, 0) == 0) {
-            func_00295628(self, 0, 0, -1, 0, 0);
+            && cSSXAudio_PlayHistoryExists(self, 0, 0) == 0) {
+            cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0);
         }
     }
 }
@@ -1404,7 +1404,7 @@ extern "C" void func_00287F00(void* self, int a1, float f0, float f1);
 extern "C" char* func_0028B1D8();
 extern "C" void func_00296E20(void* self, int id);
 extern "C" void func_00297438(void* self, int id);
-extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 extern "C" void func_002871B0(void* self)
 {
@@ -1421,7 +1421,7 @@ extern "C" void func_002871B0(void* self)
     *(int*)((char*)self + 0x6074) = 0;
     *(int*)((char*)self + 0x6078) = 0;
     if (*(int*)((char*)self + 0x59E4) > 0) {
-        func_002AD5F0(**(char***)((char*)self + 0x118) + 0x1D8, *(int*)((char*)self + 0x59E0), 1, *(float*)((char*)self + 0x6074));
+        cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)self + 0x118) + 0x1D8, *(int*)((char*)self + 0x59E0), 1, *(float*)((char*)self + 0x6074));
         *(int*)((char*)self + 0x59E4) = 0;
     }
 }
@@ -1456,7 +1456,7 @@ extern "C" void func_002872A8(void* self)
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
     }
-    if (func_00295028(self, 0, 0) != 0) return;
+    if (cSSXAudio_PlayHistoryExists(self, 0, 0) != 0) return;
     signed char* g2 = (signed char*)cBENewRaceInterface_newRace;
     int a = g2[0x4A];
     if (a == 4 || a == 5) {
@@ -3160,13 +3160,13 @@ extern "C" void func_00289B18(cSSXAudio* a0, void* a1, int type)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289B70);
 #ifdef SKIP_ASM
-extern "C" void func_0029CE28(void* self);
+extern "C" void cSSXAudio_PauseSFX(void* self);
 extern "C" void func_002B3A70(void*);
 
 extern "C" void func_00289B70(cSSXAudio* self)
 {
     if (self->mAudioPaused == 0) {
-        func_0029CE28(self);
+        cSSXAudio_PauseSFX(self);
         func_002B3A70((char*)self + 0x118);
         self->mAudioPaused = 1;
     }

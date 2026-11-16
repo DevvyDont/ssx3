@@ -1374,12 +1374,12 @@ extern "C" void cOVState_onWidgetEvent(cOVState* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A6F0);
+INCLUDE_ASM("fe/ovstatemap", cOVState_triggerTextFade);
 #ifdef SKIP_ASM
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void cUIThing_playAnimation(void* self, void* anim, int mode, int v, int a4);
 
-extern "C" void func_0020A6F0(cOVState* self, char* objName, char* animName)
+extern "C" void cOVState_triggerTextFade(cOVState* self, char* objName, char* animName)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {

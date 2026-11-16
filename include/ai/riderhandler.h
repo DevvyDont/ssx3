@@ -176,7 +176,7 @@ CHECK_SIZE(cRailslideMotion, 0x60);
 // cHandplantMotion (cRiderHandler + 0x110, 0xB0 bytes): motion state 5 (MS_Handplant). Base cHandplantMotionState
 // (0x00-0xA0, [O] size 0xA0).
 struct cHandplantMotion {
-    t4Vector InitPos;          // 0x00 [O]; [U] sq/lqc2 (func_00138BA0)
+    t4Vector InitPos;          // 0x00 [O]; [U] sq/lqc2 (cHandplantMotion_init)
     t4Vector ExitVel;          // 0x10 [O]; [U] vector and x/y/z/w reads (func_00139548 calcExitVel)
     t4Vector SplineDir;        // 0x20 [O]; [U]
     t4Vector SplinePos;        // 0x30 [O]; [U] gainFocus: rider velocity = (SplinePos - pos) / EnterSec

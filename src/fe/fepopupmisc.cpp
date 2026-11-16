@@ -6900,7 +6900,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_0020A6F0(void* self, char* text, char* name);
+extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_00536730[];
 extern char D_0046E418[];
@@ -6919,9 +6919,9 @@ extern "C" void func_001E64C8(void* self)
         n = 6;
     }
     sprintf(buf, D_0046E418, n);
-    func_0020A6F0(self, buf, D_0046E4E8);
+    cOVState_triggerTextFade(self, buf, D_0046E4E8);
     sprintf(buf, D_0046E500, x, n);
-    func_0020A6F0(self, buf, D_0046E4E8);
+    cOVState_triggerTextFade(self, buf, D_0046E4E8);
     func_00294F78(func_0028B180(), 0xE);
 }
 #endif
@@ -7434,7 +7434,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_0020A6F0(void* self, char* text, char* name);
+extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -7473,15 +7473,15 @@ extern "C" void func_001E75D0(void* self)
     }
     if (first) {
         sprintf(buf, D_004A2170, D_00536730[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
-        func_0020A6F0(self, buf, D_0046E4E8);
+        cOVState_triggerTextFade(self, buf, D_0046E4E8);
         sprintf(buf, D_0046E638, D_00536730[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
-        func_0020A6F0(self, buf, D_0046E4E8);
+        cOVState_triggerTextFade(self, buf, D_0046E4E8);
     }
     if (second) {
         sprintf(buf, D_004A2170, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
-        func_0020A6F0(self, buf, D_0046E4E8);
+        cOVState_triggerTextFade(self, buf, D_0046E4E8);
         sprintf(buf, D_0046E638, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
-        func_0020A6F0(self, buf, D_0046E4E8);
+        cOVState_triggerTextFade(self, buf, D_0046E4E8);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {

@@ -44,7 +44,7 @@ struct tBENetworkDB {
                                      //       [U] tested by ~20 units ("is this an online race")
     int bIsRankedGame;               // 0x004 [O]; [P] get/setIsRankedGame; [R] func_0015C298 / func_0015C2A8
     int bIsHost;                     // 0x008 [O]; [P] get/setIsHost; [R] func_0015C2B8 / func_0015C2C8 (D_00534B38);
-                                     //       [U] cGameComm_syncGame / syncWait / gameExit, setSyncData (func_0014E5C8),
+                                     //       [U] cGameComm_syncGame / syncWait / gameExit, setSyncData (cBENetworkInterface_setSyncData),
                                      //       preInitBE (func_0014E9F8) and the results report pick the host side by it
     int iPort;                       // 0x00C [O]; [P] get/setPort; [R] func_0015C2D8 / func_0015C2E8 (D_00534B3C);
                                      //       [U] debugfe (func_0017D0A8, func_0017DE70) and tagsunk func_002639E0 read

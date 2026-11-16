@@ -37,7 +37,7 @@ struct tCameraSwitchRecord {
     int VolumeType;                 // 0x04 [O]; [R] HardReset: 0x3D; [U] func_00162060 stores the trigger's type
     int LatestReplayType;           // 0x08 [O]; [R] HardReset: 0x3D; [U] func_00161FA0 stores the replay mode
     unsigned int IsInVolume : 1;    // 0x0C bit 0 [O]; [U] func_00162060 sets it with a volume trigger
-    unsigned int IsInReplay : 1;    // 0x0C bit 1 [O]; [U] func_00161FA0 sets it (`|= 2`), func_00161F50 clears it
+    unsigned int IsInReplay : 1;    // 0x0C bit 1 [O]; [U] func_00161FA0 sets it (`|= 2`), cChaseCameraController_switchCamera_EndReplay clears it
     unsigned int IsSlow : 1;        // 0x0C bit 2 [O]; [U] func_001621A8 sets it, func_00162218 clears it
     cCTAction* TriggerAction;       // 0x10 [O]; [R] HardReset: 0; [U] func_00162060 stores the trigger's action
 };
@@ -53,12 +53,12 @@ struct cChaseCameraController {
     int Type;                       // 0x00 [O] eCamControllerType; [R] base ctor 0, then 2 (chase)
     int BlendType;                  // 0x04 [O] eCamBlendType; [R] base ctor 0, then 1
     cCameraAlgoList* AlgorithmList; // 0x08 [O]; [R] base ctor: cMemMan_alloc(8, "Algorithm List") + cCameraAlgoList ctor;
-                                    //      [U] update and func_00161E58 (setAlgorithm) walk / insert into it
+                                    //      [U] update and cChaseCameraController_addAlgorithm (setAlgorithm) walk / insert into it
     cInput* Input;                  // 0x0C [O]; [R] base ctor 0; [U] cCamera_init stores SSXApp's input of the view
     cCamera* Camera;                // 0x10 [O]; [R] the ctor's camera argument (cCamera_cCamera passes itself)
     void** mVtbl;                   // 0x14 [R] cChaseCameraController_vtbl; [P] preview vptr at 0x14
     // --- cChaseCameraController
-    int LatestAlgoType;             // 0x18 [O] eCamAlgoType; [P] getLatestAlgoType (lw); [U] func_00161E58 copies the
+    int LatestAlgoType;             // 0x18 [O] eCamAlgoType; [P] getLatestAlgoType (lw); [U] cChaseCameraController_addAlgorithm copies the
                                     //      new algorithm's AlgorithmType; func_00167FE8 returns it
     int PreferredChaseAlgoLastFrame; // 0x1C [O] eCamAlgoType; [R] HardReset: 0x3D; [U] func_00161AB0 (processInput)
     cRiderCameraTarget* Target;     // 0x20 [O]; [P] getTarget (lw); [R] ctor 0; [U] func_00161A60 (setTarget) deletes the
@@ -66,7 +66,7 @@ struct cChaseCameraController {
     tCameraSwitchRecord CamSwitchRecord; // 0x24 [O]; [P] the preview asserts on this->CamSwitchRecord.*
     float TimeSinceLastSuggestedVolumeTrigger; // 0x38 [O]; [R] HardReset: 0; [U] update (lwc1/swc1)
     int GoingSlow;                  // 0x3C [O] bool (a word in retail); [R] HardReset: 0; [U] func_00161AB0
-    int NumFramesSlowGround;        // 0x40 [O]; [R] HardReset: 0; [U] func_00162138
+    int NumFramesSlowGround;        // 0x40 [O]; [R] HardReset: 0; [U] cChaseCameraController_switchCamera_SoftReset
 };
 
 CHECK_OFFSET(cChaseCameraController, Type, 0x00);

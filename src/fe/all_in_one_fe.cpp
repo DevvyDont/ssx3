@@ -2045,7 +2045,7 @@ extern sSettings_00C0 D_00535610_00C0 __asm__("D_00535610");
 extern char D_004A2308[];
 extern char D_004A2310[];
 extern char D_004A2138[];
-extern "C" void func_00391FB0(void* self, const char* str, float* rect, int n, float sx, float sy);
+extern "C" void cFont_textExtent(void* self, const char* str, float* rect, int n, float sx, float sy);
 extern "C" void func_00391CB0(void*, float, float, char*);
 extern "C" void func_00392908(void*, float, float, char*);
 extern "C" unsigned int strlen(const char*);
@@ -2102,7 +2102,7 @@ static inline void SetScale_00C0(sFont_00C0* f, const sV2_00C0& s)
 
 static inline void TextSize_00C0(sFont_00C0* f, const char* str, float* rect, t2Vector& size)
 {
-    func_00391FB0(f, str, rect, 0, f->drawScaleX, f->drawScaleY);
+    cFont_textExtent(f, str, rect, 0, f->drawScaleX, f->drawScaleY);
     size.x = rect[2];
     size.y = rect[3];
 }

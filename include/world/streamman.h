@@ -7,13 +7,13 @@
 // (cWorldCache_cWorldCache constructs it in place, cWorldCache__cWorldCache destroys it); no vtable, no base class.
 // EA's source is d:/ssx/code/source/world/streamman.cpp (preview assert strings); methods 0x003A6D50-0x003A7598
 // (world/streamman):
-//   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init (init), func_003A6ED8 (reset),
-//   func_003A6F38 (purge), func_003A6F88 (addStreamRequest), func_003A7010 (cancelStreamRequest),
-//   func_003A7058 (setBandWidthLimit), func_003A7098 (update), func_003A7218 (decompressChunk),
+//   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init (init), cStreamMan_reset (reset),
+//   cStreamMan_purge (purge), cStreamMan_addStreamRequest (addStreamRequest), func_003A7010 (cancelStreamRequest),
+//   cStreamMan_setBandWidthLimit (setBandWidthLimit), func_003A7098 (update), func_003A7218 (decompressChunk),
 //   func_003A7238 (processChunk). The static _NULLCHUNK is D_004A47D0.
 //
 // Size 0xE8: cWorldCache's next member, mp_ChunkResolve, is at 0x3E8 = 0x300 + 0xE8 (cWorldCache_init stores
-// cChunkResolve_construct() there), and the last field written is 0xE4 (func_003A6F88, func_003A7098).
+// cChunkResolve_construct() there), and the last field written is 0xE4 (cStreamMan_addStreamRequest, func_003A7098).
 // On Tour's cStreamMan is 0xE4: its bools m_bBxNullChunk/m_bBxChunkWriteEnable share one word at 0xC4/0xC5; retail
 // stores each as a 4-byte word (func_003A7238 sw 0xC4 and 0xC8), so retail = On Tour + 4 from m_bBxChunkWriteEnable on.
 //
@@ -22,7 +22,7 @@
 //   [P] the July 2003 preview's assert strings in streamman.cpp ("uiHullID==(tUInt32)m_ActiveHull",
 //       "m_uiBxChunkSizeLeft==0");
 //   [R] retail's constructor (cStreamMan_cStreamMan: tags "cStreamMan CDBUFFER", "cStreamMan DECOMPRESS"), init and
-//       reset (func_003A6ED8);
+//       reset (cStreamMan_reset);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [P], [R] or [U].
 // PS2 bools are 4-byte ints here. Unnamed fields would be unk_XXX; there are none.
@@ -68,7 +68,7 @@ struct cStreamMan {
                                     //       (its view types it int); the dtor frees it when a shared chunk is unfinished
     char* m_pBxChunkMemPtr;         // 0x0D0 [O]; [R] reset = 0; [U] processChunk's copy cursor
     int m_bLimitBandWidth;          // 0x0D4 [O] (a bool); [R] reset = 1; [U] update throttles while set; cGame_loadTrack,
-                                    //       func_002306B8, func_00244A40 store 0/1 through the world (sw cache+0x3D4)
+                                    //       cGame_update, func_00244A40 store 0/1 through the world (sw cache+0x3D4)
     int m_iDataRatePerSecond;       // 0x0D8 [O]; [R] setBandWidthLimit stores max(0x8000, rate); reset passes 0x19000
     float m_fTicksPerChunk;         // 0x0DC [O]; [R] setBandWidthLimit: ticks per second / (rate / 32768)
     float m_fTicksLeft;             // 0x0E0 [O]; [U] update counts it down and reloads it from m_fTicksPerChunk;

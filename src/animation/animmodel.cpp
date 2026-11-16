@@ -67,9 +67,9 @@ extern "C" int func_0030DB90(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030DBA0);
+INCLUDE_ASM("animation/animmodel", cAnimModel_setScale);
 #ifdef SKIP_ASM
-extern "C" void func_0030DBA0(cAnimModel* self, float a, float b)
+extern "C" void cAnimModel_setScale(cAnimModel* self, float a, float b)
 {
     t4Vector v;
     v.x = a;
@@ -447,11 +447,11 @@ extern "C" void func_00310200(cAnimModel* self, sAnimModelBone* roots)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animmodel", func_003103F0);
+INCLUDE_ASM("animation/animmodel", cAnimModel_buildSkelMatrices);
 #ifdef SKIP_ASM
 extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* p);
 
-extern "C" void func_003103F0(cAnimModel* self)
+extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
 {
     int i;
     for (i = 0; i < self->numBones; i++)
@@ -517,7 +517,7 @@ extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310530);
+INCLUDE_ASM("animation/animmodel", cAnimModel_applyOffset);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 static inline void amVecAddEq(t4Vector* dst, t4Vector* v)
@@ -547,7 +547,7 @@ static inline t4Vector amVecAdd(const t4Vector& src, t4Vector* b)
     return r;
 }
 
-extern "C" void func_00310530(cAnimModel* self, t4Vector* v)
+extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* v)
 {
     for (int i = 0; i < self->numParts; i++) {
         for (int j = 0; j < self->parts[i].numBones; j++) {
@@ -841,7 +841,7 @@ extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310C48);
+INCLUDE_ASM("animation/animmodel", cAnimModel_getBoneSkelIndex);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
@@ -849,7 +849,7 @@ struct sAmItem50 {
     char name[0x50];
 };
 
-extern "C" int func_00310C48(cAnimModel* self, int idx, const char* name)
+extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char* name)
 {
     sAnimModelPart* g = &self->parts[self->partIndex[idx]];
     sAmItem50* items = (sAmItem50*)g->boneNames;
@@ -863,13 +863,13 @@ extern "C" int func_00310C48(cAnimModel* self, int idx, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310CE8);
+INCLUDE_ASM("animation/animmodel", cAnimModel_getGraftMask);
 #ifdef SKIP_ASM
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 extern char D_004A3DF0[];
 
 // PORT: returns a 64-bit mask (long is 8 bytes on the EE).
-extern "C" ulong func_00310CE8(cAnimModel* self, int idx, char* names)
+extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
 {
     if (self->maxPartIndex < idx)
         return 0;

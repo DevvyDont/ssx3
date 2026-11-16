@@ -12,7 +12,7 @@
 // one drives it), the stream focus it owns, the result algorithm the controllers blend into, camera shake and ground
 // avoidance. Created by cGameViewMan_cGameViewMan (main/gamerender.cpp) with cMemMan_alloc(0x4B0, "GameCamera") +
 // cCamera_cCamera(cam, viewIndex), one per view, stored at viewman + 4 + 4 * i. Retail vtable cCamera_vtbl
-// (D_0045B888; slots: deleting dtor func_0015DD88, init = cCamera_init, update = func_0015DF98). Methods in
+// (D_0045B888; slots: deleting dtor cCamera__cCamera, init = cCamera_init, update = cCamera_update). Methods in
 // camera/camera.cpp 0x15DC18-0x15F568 and accessors 0x168110-0x168138.
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
@@ -99,8 +99,8 @@ struct cCamera {
     void** mVtbl;                   // 0x090 [R] cCamera_vtbl (D_0045B888); the dtor restores cSimpleCamera_vtbl
     char unk_094[0xC];              // 0x094 padding
     // --- cCamera
-    cCameraController* Controller;  // 0x0A0 [O]; [P] getCurrentController; [U] func_0015DFD8 (setCurrentController)
-                                    //       copies one of the three below, func_0015DF98 (update) calls its slot 2
+    cCameraController* Controller;  // 0x0A0 [O]; [P] getCurrentController; [U] cCamera_setCurrentController (setCurrentController)
+                                    //       copies one of the three below, cCamera_update (update) calls its slot 2
     cManualCameraController* ManualController; // 0x0A4 [O]; [P] getManualController; [R] "Manual Cam Controller" (0x20)
     cChaseCameraController* ChaseController;   // 0x0A8 [O]; [P] getChaseController; [R] "Chase Cam Controller" (0x44)
     cScriptCameraController* ScriptController; // 0x0AC [O]; [P] getScriptController; [R] "Script Cam Controller" (0x20)

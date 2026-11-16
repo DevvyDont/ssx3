@@ -609,7 +609,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
-extern "C" void func_0020A6F0(void* self, const char* name, const char* ext);
+extern "C" void cOVState_triggerTextFade(void* self, const char* name, const char* ext);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern signed char D_00535C11[];
 extern char D_004A2428[];
@@ -622,13 +622,13 @@ static inline void LoadRider1F7F08(void* self, int n)
 {
     char name[32];
     sprintf(name, D_004A2440, n);
-    func_0020A6F0(self, name, D_0046E4E8);
+    cOVState_triggerTextFade(self, name, D_0046E4E8);
     sprintf(name, D_004A2428, n);
-    func_0020A6F0(self, name, D_0046E4E8);
+    cOVState_triggerTextFade(self, name, D_0046E4E8);
     sprintf(name, D_004A2430, n);
-    func_0020A6F0(self, name, D_0046E4E8);
+    cOVState_triggerTextFade(self, name, D_0046E4E8);
     sprintf(name, D_004A2438, n);
-    func_0020A6F0(self, name, D_0046E4E8);
+    cOVState_triggerTextFade(self, name, D_0046E4E8);
 }
 
 extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* a1)

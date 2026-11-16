@@ -4664,13 +4664,13 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002424C8);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager__cMCOverlayManager);
 #ifdef SKIP_ASM
 extern int cMCOverlayManager_mSaveInProgress;
 extern void* cMCOverlayManager_vtbl[];
 void operator_delete(int*);
 
-extern "C" void func_002424C8(cMCOverlayManager* self, int flags)
+extern "C" void cMCOverlayManager__cMCOverlayManager(cMCOverlayManager* self, int flags)
 {
     self->mVtbl = cMCOverlayManager_vtbl;
     cMCOverlayManager_mSaveInProgress = 0;

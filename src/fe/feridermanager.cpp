@@ -5,7 +5,7 @@
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_initBoneMap);
 #ifdef SKIP_ASM
-extern "C" int func_00310C48(void* self, int idx, const char* name);
+extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name);
 extern char D_004A1970[];
 extern char D_004A1978[];
 extern char D_00460A00[];
@@ -23,20 +23,20 @@ extern char D_00460AB0[];
 
 extern "C" void cFERider_initBoneMap(void* self)
 {
-    *(int*)((char*)self + 0xC7C) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_004A1970);
-    *(int*)((char*)self + 0xC80) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_004A1978);
-    *(int*)((char*)self + 0xC84) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A00);
-    *(int*)((char*)self + 0xC88) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A10);
-    *(int*)((char*)self + 0xC8C) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A20);
-    *(int*)((char*)self + 0xC90) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A30);
-    *(int*)((char*)self + 0xC94) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A40);
-    *(int*)((char*)self + 0xC98) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A50);
-    *(int*)((char*)self + 0xC9C) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A60);
-    *(int*)((char*)self + 0xCA0) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A70);
-    *(int*)((char*)self + 0xCA4) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A80);
-    *(int*)((char*)self + 0xCA8) = func_00310C48(*(void**)((char*)self + 0x8), 0, D_00460A90);
-    *(int*)((char*)self + 0xCAC) = func_00310C48(*(void**)((char*)self + 0x8), 1, D_00460AA0);
-    *(int*)((char*)self + 0xCB0) = func_00310C48(*(void**)((char*)self + 0x8), 1, D_00460AB0);
+    *(int*)((char*)self + 0xC7C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_004A1970);
+    *(int*)((char*)self + 0xC80) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_004A1978);
+    *(int*)((char*)self + 0xC84) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A00);
+    *(int*)((char*)self + 0xC88) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A10);
+    *(int*)((char*)self + 0xC8C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A20);
+    *(int*)((char*)self + 0xC90) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A30);
+    *(int*)((char*)self + 0xC94) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A40);
+    *(int*)((char*)self + 0xC98) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A50);
+    *(int*)((char*)self + 0xC9C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A60);
+    *(int*)((char*)self + 0xCA0) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A70);
+    *(int*)((char*)self + 0xCA4) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A80);
+    *(int*)((char*)self + 0xCA8) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_00460A90);
+    *(int*)((char*)self + 0xCAC) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 1, D_00460AA0);
+    *(int*)((char*)self + 0xCB0) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 1, D_00460AB0);
 }
 #endif
 
@@ -459,7 +459,7 @@ extern "C" void func_0019EE88(void* selfp)
         func_00389590(&m, func_0038AC20(D_005047F8, D_004A19A0), D_00504810, 1.0f);
         break;
     }
-    int idx = func_00310C48(self->model, 0, D_004A1978);
+    int idx = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A1978);
     pos = self->model->bones[idx * 2];
     func_00389CB8(&m, &pos, 1.0f);
     {
@@ -570,7 +570,7 @@ struct sHalfF2D0 { sQuadF2D0 a, b; };
 extern sQuadF2D0 D_004FF130;
 extern sQuadF2D0 D_004FF220;
 extern "C" void func_00310200(void* model, void* pose);
-extern "C" void func_003103F0(void* model);
+extern "C" void cAnimModel_buildSkelMatrices(void* model);
 
 extern "C" void func_0019F2D0(void* self)
 {
@@ -579,7 +579,7 @@ extern "C" void func_0019F2D0(void* self)
         p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
         p[1] = *(sHalfF2D0*)((char*)self + 0xC30);
         func_00310200(*(void**)((char*)self + 0x8), p);
-        func_003103F0(*(void**)((char*)self + 0x8));
+        cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));
     } else {
         p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
         p[1] = *(sHalfF2D0*)((char*)self + 0xC50);
@@ -588,7 +588,7 @@ extern "C" void func_0019F2D0(void* self)
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCB0)] = D_004FF130;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCB0)] = D_004FF220;
         func_00310200(*(void**)((char*)self + 0x8), p);
-        func_003103F0(*(void**)((char*)self + 0x8));
+        cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));
     }
     *(int*)((char*)self + 0x14) = 1;
 }

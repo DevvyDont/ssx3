@@ -50,12 +50,12 @@ struct cGameModeMan {
     int iNextLocation;          // 0x6C [R] purge = -1, freeride init = -1 (On Tour: iNextLocation = -1)
     int iNextHeat;              // 0x70 [R] restorePreviousHeat: iNextHeat = iRestoreHeat; freeride = 1
     int iRestoreHeat;           // 0x74 [R] restorePreviousHeat reads it; freeride = 1; not saved to replays
-    unsigned int uiTimeLimit;   // 0x78 [R] big air init = time limit of the heat * 60; [U] HUD, func_00125228
+    unsigned int uiTimeLimit;   // 0x78 [R] big air init = time limit of the heat * 60; [U] HUD, cRider_updateFinishTest
     unsigned int uiPointTarget; // 0x7C [R] purge / freeride / big air = 0; [U] HUD onRender2D
     int unk_80;                 // 0x80 [R] getGM = 0, purge = 0, freeride/big air = 0 (no On Tour counterpart)
     int bIsEventDone;           // 0x84 [R] purge = 1 (as On Tour), freeride = 0
     int bIsTimedEvent;          // 0x88 [R] purge = 0; big air = 1 with a time limit, race = 0 with uiTimeLimit = 0;
-                                //      [U] read with uiTimeLimit by func_00125228, and by the trophy screens
+                                //      [U] read with uiTimeLimit by cRider_updateFinishTest, and by the trophy screens
     int bHasPointTarget;        // 0x8C [R] cleared with uiPointTarget (big air init); [O] after bIsTimedEvent
     int unk_90;                 // 0x90 [R] purge = 0; cGMRaceHandler init (func_0023A108) = 1 in heat 1, big air = 0
     int unk_94;                 // 0x94 [R] purge = 0; big air: 1 unless iCurrentGameEvent == 2

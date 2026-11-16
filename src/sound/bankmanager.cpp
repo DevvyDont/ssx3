@@ -2229,7 +2229,7 @@ extern "C" void func_0028F558(void* self, int id)
 INCLUDE_ASM("sound/bankmanager", func_0028F5B8);
 #ifdef SKIP_ASM
 extern "C" int func_0028B1B0(void);
-extern "C" void func_0029CE28(void* self);
+extern "C" void cSSXAudio_PauseSFX(void* self);
 extern "C" void func_00294F78(void* self, int a1);
 extern "C" void func_002B3D48(void* self, float v);
 extern "C" void func_0028F768(void* self);
@@ -2247,7 +2247,7 @@ extern "C" void func_0028F5B8(void* self)
     if (*(int*)((char*)self + 0x5FB4) != 0) return;
     if (func_0028B1B0() == 0) return;
     if (*(int*)((char*)self + 0x5818) == 0) {
-        func_0029CE28(self);
+        cSSXAudio_PauseSFX(self);
         *(int*)((char*)self + 0x6088) = 1;
     }
     func_00294F78(self, 9);
@@ -2401,13 +2401,13 @@ extern "C" void func_0028F768(void* p)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028FA98);
 #ifdef SKIP_ASM
-extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 extern "C" void func_0028FA98(void* self, float v)
 {
     int idx = *(int*)((char*)self + 0x62A8);
     if (idx >= 0) {
-        func_002AD5F0((char*)**(void***)((char*)self + 0x118) + 0x1D8, idx, 1, v);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)self + 0x118) + 0x1D8, idx, 1, v);
         *(int*)((char*)self + 0x62A8) = -1;
     }
 }

@@ -369,22 +369,22 @@ extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6C68);
+INCLUDE_ASM("world/world", cWorld_getNumMissionScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD40(func_003A6BA8_sEntry* e);
 
-extern "C" int func_003A6C68(cWorld* self, int i)
+extern "C" int cWorld_getNumMissionScripts(cWorld* self, int i)
 {
     return func_003ADD40(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6C98);
+INCLUDE_ASM("world/world", cWorld_getMissionScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD70(func_003A6BA8_sEntry* e);
 
-extern "C" int func_003A6C98(cWorld* self, int i)
+extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 {
     return func_003ADD70(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }

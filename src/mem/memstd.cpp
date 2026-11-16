@@ -2760,11 +2760,11 @@ void* func_002557E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00255800);
+INCLUDE_ASM("mem/memstd", cCommChannel__cCommChannel);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
-extern "C" void func_00255800(cCommChannel* self, int flags)
+extern "C" void cCommChannel__cCommChannel(cCommChannel* self, int flags)
 {
     self->mVtbl = cCommChannel_vtbl;
     if (flags & 1) {
@@ -2786,9 +2786,9 @@ int func_00255830(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00255840);
+INCLUDE_ASM("mem/memstd", cCommChannel_channelClose);
 #ifdef SKIP_ASM
-extern "C" void func_00255840(cCommChannel* self)
+extern "C" void cCommChannel_channelClose(cCommChannel* self)
 {
     if (*(int*)self != 0) {
         *(int*)self = 0;

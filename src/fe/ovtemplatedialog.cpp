@@ -1170,7 +1170,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void func_00258C00(void* net);
-extern "C" void func_00258790(void* net, int a1);
+extern "C" void cGameComm_sendPauseCmd(void* net, int a1);
 extern "C" int func_0030B8C0(void* self);
 extern void* D_004A3DD8;
 extern char D_004A2468;
@@ -1192,7 +1192,7 @@ extern "C" void func_0020CA10(void)
             if (game != 0 && *(int*)(game + 0x224) != 0) {
                 func_00258C00((char*)net);
             }
-            func_00258790((char*)cGameComm_mGameComm, 1);
+            cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 1);
             cGameComm* n = cGameComm_mGameComm;
             n->mPauseTimeout = 0xE10;
             n->mOverlayTimeout = 0x708;
@@ -1744,9 +1744,9 @@ extern "C" void cBE_setState(int state);
 extern "C" void* func_00212138(void* self, void* a1, int a2);
 extern "C" void* func_00211088(void* self, void* a1, int a2, int a3);
 extern "C" void func_0030B758(void* self);
-extern "C" void func_00128A10(void* self);
-extern "C" void func_0011DE60(void* self, int a1, int a2);
-extern "C" void func_0011DF18(void* self, int notify);
+extern "C" void cAI_initFreeride(void* self);
+extern "C" void cRider_putAtStartpoint(void* self, int a1, int a2);
+extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 extern "C" void cGame_partialRestart(void* self);
 void func_00238348(void* self);
 extern "C" void func_00257610(void* self, int a1);
@@ -1887,12 +1887,12 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 sVE_20D5A8* vt = *(sVE_20D5A8**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
-                func_00128A10(SSXApp->Game->AI);
+                cAI_initFreeride(SSXApp->Game->AI);
                 ((sI10_D5A8*)i10)->f10 = 1;
                 func_00231250(SSXApp->Game, 1, 1, 0);
                 cGame_partialRestart(SSXApp->Game);
-                func_0011DE60(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1, 2);
-                func_0011DF18(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
+                cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1, 2);
+                cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
                 break;
             }
             case 5:

@@ -704,7 +704,7 @@ extern "C" int func_00119310(void* self, int points);
 int func_0011FEE8(void* rider);
 extern "C" int func_001298C8();
 extern "C" float func_0031C040(float a);
-extern "C" float func_0012F118(void* p, int* fail);
+extern "C" float cPrewindControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float cSpinControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float func_00135F70(void* p, int* fail);
 extern "C" float func_00136100(void* p);
@@ -851,7 +851,7 @@ extern "C" void func_00117FE0(void* vself)
         int fail = 0;
         float angle;
         if (func_0011FEE8(self->rider) == 2)
-            angle = func_0012F118((char*)self->rider->sub + 0x1F0, &fail);
+            angle = cPrewindControl_getFlipSpinInputAng((char*)self->rider->sub + 0x1F0, &fail);
         else
             angle = cSpinControl_getFlipSpinInputAng((char*)self->rider->sub + 0x230, &fail);
         if (fail != 0) {
@@ -2002,7 +2002,7 @@ struct sScoreGrades {
 extern sGameSettings cBENewRaceInterface_newRace;
 
 extern "C" void cRiderMetrix_removeHUDfx(void* self, int type);
-extern "C" int func_0012A250(void* race);
+extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int func_0011A8C8(void* self, sTrickId* id, int stance, int alternate, int style, int flag);
 extern "C" int func_00117948(void* self);
 extern "C" int func_0011B1A8(void* self, sTrickId* id);
@@ -2069,7 +2069,7 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
     cRiderMetrix_removeHUDfx(self, 0x1f);
     cRiderMetrix_removeHUDfx(self, 0x20);
 
-    if (func_0012A250(SSXApp->Game->AI)) {
+    if (cAI_isRaceFinished(SSXApp->Game->AI)) {
         return 0.0f;
     }
 

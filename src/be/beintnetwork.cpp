@@ -145,7 +145,7 @@ extern "C" void func_0014E2C8(cBENetworkInterface* self, int p, sNetState_E2C8* 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E5C8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setSyncData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -167,7 +167,7 @@ public:
     virtual void v02();
 };
 
-extern "C" void func_0014E5C8(cBENetworkInterface* self, int p, sNetState_E2C8* in)
+extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p, sNetState_E2C8* in)
 {
     D_004A11B8 = in->a;
     D_004A11BC = in->b;
@@ -243,7 +243,7 @@ extern "C" void func_0014E9F8(cBENetworkInterface* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EA90);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_postInitBE);
 #ifdef SKIP_ASM
 struct sVEntry0014EA90 {
     short delta;
@@ -262,7 +262,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: func_0014EB08 is defined (void) in this unit but called with self here.
 void func_0014EB08_self(void* self) __asm__("func_0014EB08");
 
-extern "C" void func_0014EA90(cBENetworkInterface* self)
+extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
 {
     sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 3);
     a->vtable[2].fn((char*)a + a->vtable[2].delta);

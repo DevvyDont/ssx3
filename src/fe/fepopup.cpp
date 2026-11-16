@@ -1408,7 +1408,7 @@ INCLUDE_ASM("fe/fepopup", func_001C8320);
 struct cUIText;
 struct sVec3_8320 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" float func_003921F0(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004660A8[];
@@ -1435,7 +1435,7 @@ extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
         break;
     case 2:
         f = (char*)cUIText_getFont(text);
-        func_00391FB0(f, (const char*)info[1], out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        cFont_textExtent(f, (const char*)info[1], out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         break;
     case 3: {
         char* o = (char*)SSXApp->FELocale;
@@ -1448,7 +1448,7 @@ extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
             char buf[0x40];
             sprintf(buf, D_004660A8, info[1]);
             f = (char*)cUIText_getFont(text);
-            func_00391FB0(f, buf, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+            cFont_textExtent(f, buf, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         }
         break;
     }
@@ -1465,7 +1465,7 @@ INCLUDE_ASM("fe/fepopup", func_001C84A8);
 #ifdef SKIP_ASM
 struct sVec3_84A8 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out)
 {
@@ -1476,7 +1476,7 @@ extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out
     *(float*)(f + 0x38) = sx;
     *(float*)(f + 0x3C) = sy;
     f = (char*)cUIText_getFont(text);
-    func_00391FB0(f, str, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    cFont_textExtent(f, str, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
     f = (char*)cUIText_getFont(text);
     *(float*)((char*)out + 0xC) = v.y * ((float)*(int*)(f + 0x14) * *(float*)(f + 0x34));
 }
@@ -2691,7 +2691,7 @@ struct sVEntry_A6A0 {
     void (*fn)(void*, sVec2_A6A0*);
 };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" char* func_004162D0(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -2704,7 +2704,7 @@ extern char D_004A1BD0[];
 static inline void measure_A6A0(cUIText* text, const char* s, float* out)
 {
     char* f = (char*)cUIText_getFont(text);
-    func_00391FB0(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    cFont_textExtent(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
 extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* text, const char* str)
@@ -4269,7 +4269,7 @@ struct cFont_CC8D8 {
     float ScaleX, ScaleY;
     float textExtent(const char* str, tRect_CC8D8* rect, bool add)
     {
-        return func_00391FB0(this, str, rect, add, ScaleX, ScaleY);
+        return cFont_textExtent(this, str, rect, add, ScaleX, ScaleY);
     }
 };
 
@@ -4365,7 +4365,7 @@ struct sRect_CC30 {
     float x, y, w, h;
     void Measure(char* f, const char* str, int flag)
     {
-        func_00391FB0(f, str, this, flag, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        cFont_textExtent(f, str, this, flag, *(float*)(f + 0x38), *(float*)(f + 0x3C));
     }
 };
 struct sVEntry_CC30 {

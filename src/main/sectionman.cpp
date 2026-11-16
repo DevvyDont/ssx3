@@ -116,7 +116,7 @@ int func_0022E288(void* self, void* a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/sectionman", func_0022E298);
+INCLUDE_ASM("main/sectionman", cSectionMan_addActiveEvent);
 #ifdef SKIP_ASM
 struct sSectionNode_E298 {
     int id;
@@ -124,9 +124,9 @@ struct sSectionNode_E298 {
 };
 
 void* func_0022E278(void* self);
-extern "C" void func_0022E360(cSectionMan* self, void* prev, void* node);
+extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node);
 
-extern "C" void func_0022E298(cSectionMan* self, int id)
+extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
 {
     sSectionNode_E298* n = (sSectionNode_E298*)self->m_pActiveEventList;
     sSectionNode_E298* prev = 0;
@@ -134,7 +134,7 @@ extern "C" void func_0022E298(cSectionMan* self, int id)
         if (n->id == id) {
             sSectionNode_E298* cur = n;
             n = n->next;
-            func_0022E360(self, prev, cur);
+            cSectionMan_removeActiveEvent(self, prev, cur);
         } else {
             prev = n;
             n = n->next;
@@ -165,12 +165,12 @@ extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/sectionman", func_0022E360);
+INCLUDE_ASM("main/sectionman", cSectionMan_removeActiveEvent);
 #ifdef SKIP_ASM
 // PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
 void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
 
-extern "C" void func_0022E360(cSectionMan* self, void* prev, void* node)
+extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node)
 {
     if (prev == 0) {
         self->m_pActiveEventList = (tSectionManEvent*)(*(int*)((char*)node + 0x4));

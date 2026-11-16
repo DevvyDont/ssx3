@@ -399,8 +399,8 @@ INCLUDE_ASM("replay/frameptr", func_0026EEA0);
 #ifdef SKIP_ASM
 extern void* D_004C5830[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
-extern "C" void func_0015DFD8(void* self, int mode);
-extern "C" void func_00161F50(void* cam);
+extern "C" void cCamera_setCurrentController(void* self, int mode);
+extern "C" void cChaseCameraController_switchCamera_EndReplay(void* cam);
 
 struct sRiderList_EEA0 {
     int count;
@@ -416,8 +416,8 @@ extern "C" void func_0026EEA0(void* self)
     for (i = 0; i < n; i++) {
         char* r = list->riders[i];
         void* cam = *(void**)(r + 0xA8);
-        func_0015DFD8(r, 2);
-        func_00161F50(cam);
+        cCamera_setCurrentController(r, 2);
+        cChaseCameraController_switchCamera_EndReplay(cam);
     }
     *(int*)((char*)self + 0x630) = 0;
 }
@@ -438,12 +438,12 @@ INCLUDE_ASM("replay/frameptr", func_0026EF80);
 #ifdef SKIP_ASM
 extern void* D_004C5830[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
-extern "C" void func_0015DFD8(void* self, int mode);
+extern "C" void cCamera_setCurrentController(void* self, int mode);
 
 extern "C" void func_0026EF80()
 {
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
-    func_0015DFD8(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
+    cCamera_setCurrentController(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
 }
 #endif
 
@@ -1189,7 +1189,7 @@ extern "C" void func_00270378(void* self);
 void* func_0026E448_2(void* self, int frame) __asm__("func_0026E448__FPv");
 extern "C" void func_0026E568(void* self);
 extern "C" void func_0026E528(void* self);
-extern "C" void func_001620D0(void* p);
+extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
 
 struct sVE_26FE50 {
     short delta;
@@ -1276,7 +1276,7 @@ extern "C" void func_0026FE50(char* self)
     if (redraw) {
         char* views = (char*)SSXApp->Game->ViewMan;
         char* o = *(char**)(*(char**)(views + 4) + 0xA8);
-        func_001620D0(o);
+        cChaseCameraController_switchCamera_Chapter(o);
         sVE_26FE50* vt = *(sVE_26FE50**)(o + 0x14);
         vt[4].fn(o + vt[4].delta);
         cGameViewMan_updateAll(views);

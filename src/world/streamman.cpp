@@ -8,7 +8,7 @@ INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int func_003E06B0(int a, int b, int c);
 extern "C" void* func_003E06D8(int a, int b, int c, void* buf, int size);
-extern "C" void func_003A6ED8(cStreamMan* self);
+extern "C" void cStreamMan_reset(cStreamMan* self);
 extern char D_00494D90[];
 extern char D_00494DA8[];
 
@@ -29,7 +29,7 @@ extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
     self->m_streamHandle = (int)func_003E06D8(2, 1, 1, buf, size);
     self->m_streamRequest = 0;
     self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, D_00494DA8, 0, 0);
-    func_003A6ED8(self);
+    cStreamMan_reset(self);
     return ((void*)self);
 }
 #endif
@@ -39,15 +39,15 @@ INCLUDE_ASM("world/streamman", cStreamMan__cStreamMan);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_003A6ED8(cStreamMan* self);
-extern "C" void func_003A6F38(cStreamMan* self);
+extern "C" void cStreamMan_reset(cStreamMan* self);
+extern "C" void cStreamMan_purge(cStreamMan* self);
 
 /**
  * Destroys the world streamer: frees an unfinished shared chunk, resets and purges the streamer, then frees it
  * when asked to.
  *
  * m_pBxChunkMemHandle is freed only when it is set, m_uiBxChunkSizeLeft is nonzero and the low byte of
- * m_BxChunkResourceID (the section) is 0xFF, the shared section. func_003A6ED8() (reset) and func_003A6F38()
+ * m_BxChunkResourceID (the section) is 0xFF, the shared section. cStreamMan_reset() (reset) and cStreamMan_purge()
  * (purge: releases the stream handle and frees the stream and decompression buffers) follow.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -58,8 +58,8 @@ extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
     if (buf != 0 && (int)self->m_uiBxChunkSizeLeft != 0 && *(unsigned char*)&self->m_BxChunkResourceID == 0xFF) {
         cMemMan_free(buf);
     }
-    func_003A6ED8(self);
-    func_003A6F38(self);
+    cStreamMan_reset(self);
+    cStreamMan_purge(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -82,11 +82,11 @@ extern "C" int cStreamMan_init(cStreamMan* self, const char* name, int id)
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6ED8);
+INCLUDE_ASM("world/streamman", cStreamMan_reset);
 #ifdef SKIP_ASM
-extern "C" void func_003A7058(cStreamMan* self, int size);
+extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int size);
 
-extern "C" void func_003A6ED8(cStreamMan* self)
+extern "C" void cStreamMan_reset(cStreamMan* self)
 {
     self->m_ActiveHull = -1;
     self->m_bLimitBandWidth = 1;
@@ -101,17 +101,17 @@ extern "C" void func_003A6ED8(cStreamMan* self)
     self->m_bAllocFailed = 0;
     self->m_iDecompressSizeLeft = 0;
     self->m_pDecompressDataLeft = 0;
-    func_003A7058(self, 0x19000);
+    cStreamMan_setBandWidthLimit(self, 0x19000);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6F38);
+INCLUDE_ASM("world/streamman", cStreamMan_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void func_003E0A28(int h);
 
-extern "C" void func_003A6F38(cStreamMan* self)
+extern "C" void cStreamMan_purge(cStreamMan* self)
 {
     func_003E0A28(self->m_streamHandle);
     if (self->m_streamBuffer != 0) {
@@ -124,11 +124,11 @@ extern "C" void func_003A6F38(cStreamMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6F88);
+INCLUDE_ASM("world/streamman", cStreamMan_addStreamRequest);
 #ifdef SKIP_ASM
 extern "C" int func_003E0C88(int h, void* p, int a, int tag);
 
-extern "C" int func_003A6F88(cStreamMan* self, int a1, int a2, int a3)
+extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int a1, int a2, int a3)
 {
     if (self->m_bActive == 0) {
         int r = func_003E0C88(self->m_streamHandle, (char*)self + 0x4, a3, 0x444E4543);
@@ -164,7 +164,7 @@ extern "C" void func_003A7010(cStreamMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7058);
+INCLUDE_ASM("world/streamman", cStreamMan_setBandWidthLimit);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 
@@ -173,7 +173,7 @@ static inline int imax(int a, int b)
     return a > b ? a : b;
 }
 
-extern "C" void func_003A7058(cStreamMan* self, int rate)
+extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 {
     rate = imax(0x8000, rate);
     char* app = D_004A5B64;

@@ -302,9 +302,9 @@ extern "C" void cComputer_updateRiderDifficulty(void*);
 
 //99.29% - identical instructions; jal addend differs only because the
 // callee sits at a different .text offset in our object than in the target
-INCLUDE_ASM("ai/computer", func_0010CAB8);
+INCLUDE_ASM("ai/computer", cComputer_initRiderDifficulty);
 #ifdef SKIP_ASM
-extern "C" void func_0010CAB8(cComputer* self)
+extern "C" void cComputer_initRiderDifficulty(cComputer* self)
 {
     cComputer_updateRiderDifficulty(self);
 }
@@ -348,7 +348,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned short func_001500D8(void* self, int a1, int a2);
-extern "C" float func_00120038(void* self);
+extern "C" float cRider_getGrabAnimSpeedScale(void* self);
 extern "C" float func_00312820(char* self, int a1, int frame);
 
 struct sVEntry10CBE0 { short delta; short index; int (*fn)(void*); };
@@ -370,7 +370,7 @@ extern "C" int func_0010CBE0(cComputer* p, float t)
     int idx = AIrand() % 15;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
     int anim = func_001500D8(iface, riderV7_10CBE0(((char*)self->mRider)), idx);
-    float spd = func_00120038(((char*)self->mRider));
+    float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
     float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
     float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
     if (t < a) return -1;
@@ -393,7 +393,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned short func_001500D8(void* self, int a1, int a2);
 extern "C" int func_00150138(void* self, int a1, int a2);
 extern "C" int func_00150198(void* self, int a1, int a2, int a3);
-extern "C" float func_00120038(void* self);
+extern "C" float cRider_getGrabAnimSpeedScale(void* self);
 extern "C" float func_00312820(char* self, int a1, int frame);
 
 struct sVEntry10CD20 { short delta; short index; int (*fn)(void*); };
@@ -415,7 +415,7 @@ extern "C" int func_0010CD20(cComputer* p, float t)
     int best = 10000;
     int i = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    float spd = func_00120038(((char*)self->mRider));
+    float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
     for (; i < 15; i++)
     {
         int anim = func_00150138(iface, riderV7_10CD20(((char*)self->mRider)), i);
@@ -454,7 +454,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned short func_001500D8(void* self, int a1, int a2);
 extern "C" int func_00150198(void* self, int a1, int a2, int a3);
-extern "C" float func_00120038(void* self);
+extern "C" float cRider_getGrabAnimSpeedScale(void* self);
 extern "C" float func_00312820(char* self, int a1, int frame);
 
 struct sVEntry10CF68 { short delta; short index; int (*fn)(void*); };
@@ -478,7 +478,7 @@ extern "C" int func_0010CF68(cComputer* p, float t)
     int best = 10000;
     int i = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    float spd = func_00120038(((char*)self->mRider));
+    float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
     for (; i < 15; i++)
     {
         int anim = func_00150198(iface, riderV7_10CF68(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5);
@@ -507,7 +507,7 @@ extern "C" int func_0010CF68(cComputer* p, float t)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_0010D170);
+INCLUDE_ASM("ai/computer", cComputer_resetCounters);
 #ifdef SKIP_ASM
 struct sComputer_0010D170
 {
@@ -517,7 +517,7 @@ struct sComputer_0010D170
     int c[15];
 };
 
-extern "C" void func_0010D170(cComputer* self)
+extern "C" void cComputer_resetCounters(cComputer* self)
 {
     for (int i = 0; i < 15; i++)
     {
@@ -635,10 +635,10 @@ extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_0010D410);
+INCLUDE_ASM("ai/computer", cComputer_scorePath);
 #ifdef SKIP_ASM
 unsigned int AIrand();
-extern "C" float func_0010D870(cComputer* self, int a1, int a2, int a3);
+extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int a1, int a2, int a3);
 struct sAi0010FC30;
 extern "C" int func_0010FC30(sAi0010FC30* self, int team);
 extern "C" float func_00112588(void* self, int arg1);
@@ -729,7 +729,7 @@ struct sAi_10D410 {
     int count;
 };
 
-extern "C" float func_0010D410(cComputer* self, char* tgt)
+extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
 {
     float sc[7];
     char* ai = (char*)SSXApp->Game->AI;
@@ -743,7 +743,7 @@ extern "C" float func_0010D410(cComputer* self, char* tgt)
     int b2 = (flags >> 2) & 1;
     int b1 = (flags >> 1) & 1;
     int b3 = (flags >> 3) & 1;
-    float base = func_0010D870(self, b3, b2, b1);
+    float base = cComputer_calculateDifficultyScore(self, b3, b2, b1);
     if (base <= 0.0f) {
         return 0.0f;
     }
@@ -821,9 +821,9 @@ extern "C" float func_0010D410(cComputer* self, char* tgt)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_0010D870);
+INCLUDE_ASM("ai/computer", cComputer_calculateDifficultyScore);
 #ifdef SKIP_ASM
-extern "C" float func_0010D870(cComputer* self, int a1, int a2, int a3)
+extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int a1, int a2, int a3)
 {
     short s = self->mPathDifficulty;
     if (s == 0)
@@ -914,9 +914,9 @@ extern "C" int func_0010D990(cComputer* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_0010D9E8);
+INCLUDE_ASM("ai/computer", cComputer_checkForAttack);
 #ifdef SKIP_ASM
-extern "C" int func_0010D9E8(cComputer* self, int a1)
+extern "C" int cComputer_checkForAttack(cComputer* self, int a1)
 {
     void* p = self->mRider;
     int r = 0;
@@ -1370,7 +1370,7 @@ INCLUDE_ASM("ai/computer", func_0010E5D8);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
-extern "C" void func_00125108(void* self);
+extern "C" void cRider_doFinishEvent(void* self);
 extern "C" void func_00270AB0(void* a, int b, int c);
 
 static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMode; }
@@ -1394,7 +1394,7 @@ extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
     {
         int ok = *(float*)((char*)self + 0x470) >= 0.0f;
         if (!ok)
-            func_00125108(self);
+            cRider_doFinishEvent(self);
     }
     if (*arg == 11)
     {
@@ -1889,7 +1889,7 @@ struct sVE_0010F3B8 { short delta; short index; int (*fn)(void*); };
 struct sEnt_0010F3B8 { int vis; int val; float dist; int c; int d; int e; int f; int g; int h; };
 struct sRider_0010F3B8 { sEnt_0010F3B8 ent[6]; char pad[0x10]; int fE8; char pad2[0x4D8 - 0xEC]; float f4D8; };
 struct sAI_0010F3B8 { char pad[0x28]; sRider_0010F3B8* riders[20]; int count; };
-extern "C" int func_0011D640(void*);
+extern "C" int cRider_isLoaded(void*);
 float func_00113128(void* self);
 
 // PORT: the unit declares this as returning void*; it returns nothing.
@@ -1905,7 +1905,7 @@ extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self)
             sEnt_0010F3B8* e = &self->riders[i]->ent[j];
             int v = 0;
             if (i != j && j < self->count)
-                v = func_0011D640(self->riders[i]) != 0;
+                v = cRider_isLoaded(self->riders[i]) != 0;
             e->vis = v;
             if (j < self->count)
             {
@@ -2973,7 +2973,7 @@ extern "C" void cCheatFX_readFromReplayFrame(void* self, void* s);
 extern "C" void* func_0026AF70(void* tree, int id);
 extern "C" void* func_0026AF88(void* tree, int id);
 extern "C" void func_00312598(void* self, int a1);
-extern "C" void func_003103F0(void* self);
+extern "C" void cAnimModel_buildSkelMatrices(void* self);
 extern "C" void func_00106828(void* self);
 
 static inline void* idxToPtr_00111D98(unsigned int i)
@@ -3066,7 +3066,7 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* s)
         *q = *(sQuad_00111D98*)((char*)self->GroundMotion.mRider + 0x110);
     }
     func_00312598(*(void**)((char*)self->GroundMotion.mRider + 0x784), 0);
-    func_003103F0(*(void**)((char*)self->GroundMotion.mRider + 0x780));
+    cAnimModel_buildSkelMatrices(*(void**)((char*)self->GroundMotion.mRider + 0x780));
     func_00106828(self->GroundMotion.mRider);
 }
 #endif

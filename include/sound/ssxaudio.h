@@ -61,7 +61,7 @@ struct tAttachSoundStruct {
     char unk_0C[0x4];
     t4Vector pos;   // 0x10 [O]
     int patch;      // 0x20 [O]
-    int handle;     // 0x24 [O]; [U] passed to func_002AD5F0 (stop)
+    int handle;     // 0x24 [O]; [U] passed to cBankMonitor_BANKMONITOR_StopHandle (stop)
     char unk_28[0x8];
 };
 
@@ -176,7 +176,7 @@ struct cSSXAudio {
     int mNextUsedBank;                  // 0x5878 [O]; [U] cSSXAudio_FrontEndLoad zeroes it
     char mSwapBasePath[128];            // 0x587C [O]; [U] cSSXAudio_FrontEndLoad builds it
     char mAemsSysName[128];             // 0x58FC [O]; placed by order and the cCircBuffer at 0x597C
-    cCircBuffer mPlayHistory;           // 0x597C [O]; [R] ctor: ArraySize 200, Array = operator new(800, "CircFIFOBuff"), Head/Tail 0; dtor frees Array; [U] func_00295028..func_00295CC8 (PlayHistory*)
+    cCircBuffer mPlayHistory;           // 0x597C [O]; [R] ctor: ArraySize 200, Array = operator new(800, "CircFIFOBuff"), Head/Tail 0; dtor frees Array; [U] cSSXAudio_PlayHistoryExists..func_00295CC8 (PlayHistory*)
     int mRailType;                      // 0x598C [O]; [P] SetRailSurface(int) (preview 0x5A68; retail accessor 0x2BAD58 sw 0x598C); [U] func_00291710 (Surface) reads it for a rider on a rail
     float mLastCarveEdging[10];         // 0x5990 [O]; [U] func_00293BB0/func_00293DC0 (carve programs) index it
     float mLastGlide[10];               // 0x59B8 [O]; [U] func_00293538/func_00293740/func_00293948 (glide programs)
@@ -184,13 +184,13 @@ struct cSSXAudio {
     int mTurboRef;                      // 0x59E4 [O]; [U] TurboOn increments, func_002992D8 decrements
     int mNeedLift[6];                   // 0x59E8 [O] (On Tour bool[6]); [U] func_002947B0, func_002948A0 (ResetLift) clears 6 words
     tAttachSoundStruct AttachedSounds[30]; // 0x5A00 [O] (On Tour's name); [R] ctor's 30-element empty-ctor loop; [U] func_00297950/func_00297EB8/func_00297F70/func_002980B0 walk 30 x 0x30 from 0x5A00
-    void* mpAmbienceQuery[2];           // 0x5FA0 [O] tWorldPainterQuery*[2]; [U] func_002867E8 stores, func_00286A80 frees
+    void* mpAmbienceQuery[2];           // 0x5FA0 [O] tWorldPainterQuery*[2]; [U] func_002867E8 stores, cSSXAudio_InGameDeInit frees
     int mPointsLastValue;               // 0x5FA8 [O]; [U] func_0029A7D8 (PointsEvent)
     int mPointsEventHandle;             // 0x5FAC [O]; [U] func_0029A7D8
-    int mSFXPaused;                     // 0x5FB0 [O] (On Tour bool); [R] ctor-time 0; [U] func_0029CE28 (PauseSFX) sets, func_0029CE70 reads; retail accessor 0x2BAD60 (lw)
+    int mSFXPaused;                     // 0x5FB0 [O] (On Tour bool); [R] ctor-time 0; [U] cSSXAudio_PauseSFX (PauseSFX) sets, func_0029CE70 reads; retail accessor 0x2BAD60 (lw)
     int mAudioPaused;                   // 0x5FB4 [O] (On Tour bool); [U] func_00289B70/func_00289BB8 (Pause/ResumeAudio), func_00285BF8 (Update) tests it
     int mCharLandHandle;                // 0x5FB8 [O]; [U] func_002948D0
-    int mCharLiftHandle;                // 0x5FBC [O]; [U] func_00294170
+    int mCharLiftHandle;                // 0x5FBC [O]; [U] cSSXAudio_Lift
     unsigned int mLastPatchRID;         // 0x5FC0 [O] tResourceID (4 bytes); [R] ctor 0xFFFFFFFF; [U] func_002867E8 stores byte 0 (sb), func_0029D290 compares byte 0 (lbu) and stores the word
     int mPlayingTone;                   // 0x5FC4 [O] (On Tour bool); [U] func_0029D370/func_0029D610/func_0029D678 (Start/Update/StopTone)
     int mToneHandle;                    // 0x5FC8 [O]; [R] ctor -1; [U] tone functions
@@ -227,7 +227,7 @@ struct cSSXAudio {
     int unk_6250;                       // 0x6250 [R] ctor 0
     int unk_6254;                       // 0x6254 [R] ctor 0; [U] func_002A4770; retail accessor 0x2BAD30 sets it to 1
     int unk_6258;                       // 0x6258 [U] func_002A2E50
-    void* unk_625C[2];                  // 0x625C [U] func_002867E8 (InGameInit) creates two objects, func_00286A80 (InGameDeInit) frees them
+    void* unk_625C[2];                  // 0x625C [U] func_002867E8 (InGameInit) creates two objects, cSSXAudio_InGameDeInit (InGameDeInit) frees them
     int unk_6264;                       // 0x6264 [U] func_002867E8 stores
     int unk_6268;                       // 0x6268 [U] func_002867E8 stores
     int unk_626C;                       // 0x626C [U] func_002867E8 stores
@@ -282,7 +282,7 @@ struct cSSXAudio {
     float mRMSFinalValue;               // 0x6C6C [O]
     int mTrackBankLoaded[2];            // 0x6C70 [O] (On Tour bool[2]); [R] ctor zeroes both; [U] func_0029D370 reads [1]
     int mTrackBankLoadedSection[2];     // 0x6C78 [O]; [R] ctor sets both -1
-    void* mpMixQuery[2];                // 0x6C80 [O] tWorldPainterQuery*[2]; [U] func_002867E8 stores, func_00286A80 frees
+    void* mpMixQuery[2];                // 0x6C80 [O] tWorldPainterQuery*[2]; [U] func_002867E8 stores, cSSXAudio_InGameDeInit frees
     int mPlayIntroMovieWithDJ;          // 0x6C88 [O] (On Tour bool, the last member); [R] ctor 1; [U] func_00289DE0
     char unk_6C8C[0x4];                 // 0x6C8C no retail access seen (or padding)
     // --- virtual base cSoundSys (0x8; ctor cSoundSys_cSoundSys(this + 0x6C90))

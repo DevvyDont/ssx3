@@ -108,8 +108,8 @@ extern "C" int func_0029B818(void* sys, void* name, int* rec);
 extern "C" void func_002A7468(void* sys);
 extern "C" int func_002A7678(void* sys, int a);
 extern "C" void func_002A7340(void* sys, int idx, int v);
-extern "C" void* func_002AD550(void* sub, int idx, int a2);
-extern "C" void func_002AD5F0(void* self, int idx, int a2, float v);
+extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(void* sub, int idx, int a2);
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
 extern "C" int func_002B5838(void* self, int idx);
 extern "C" int func_002B5818(void* self, int idx, int* type, int* a, int* b, int c, int d);
 extern "C" int func_002B5878(void* self, int idx, char* dst);
@@ -309,7 +309,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
     }
     if (func_002B6988(gWorldTriggerManager, t->fC) != 0 && func_002B69B8(gWorldTriggerManager, (void*)t->f4, tt) != 0) {
         if (t->f30 != -9999)
-            func_002AD5F0(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1, 0.1f);
+            cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1, 0.1f);
         sfxBegin_4C38((struct sSnd4C38Sys*)func_0028B180(), t->f60, t->f64);
         voiceTail_4C38(t);
         t->f30 = func_002906B8(func_0028B180());
@@ -324,7 +324,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
     if (t->f30 == -9999)
         return;
     {
-        char* h = (char*)func_002AD550(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1);
+        char* h = (char*)cBankMonitor_BANKMONITOR_GetHandle(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1);
         if (h == 0)
             return;
         *(int*)(h + 100) = (int)(t->f10 * 127.0f);
@@ -337,7 +337,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5758);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_002A72D8(void* snd, int id, float t);
-extern "C" void func_002AD5F0(void* self, int idx, int a2, float v);
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
 extern unsigned char D_004A35A8[];
 struct sWorldTrigger70;
 
@@ -349,7 +349,7 @@ extern "C" void func_002B5758(sWorldTrigger70* t)
             func_002A72D8(func_0028B180(), *(int*)((char*)self + 0x30), 0.25f);
         }
     } else if (*(int*)((char*)self + 0x30) != -9999) {
-        func_002AD5F0(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8, *(int*)((char*)self + 0x30), 1, 0.25f);
+        cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8, *(int*)((char*)self + 0x30), 1, 0.25f);
     }
     *(int*)((char*)self + 0x30) = -1;
     *(unsigned char*)((char*)self + 0x40) = D_004A35A8[0];

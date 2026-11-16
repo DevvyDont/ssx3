@@ -824,7 +824,7 @@ void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__(
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void func_0011E150(void* rider, int a1);
 extern "C" void func_00105398(void* rider, int a1);
-extern "C" void func_00107888(void* rider);
+extern "C" void cRider_checkOpponentCollisions(void* rider);
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vu0Dot_137860(const t4Vector& a, const t4Vector& b)
@@ -979,7 +979,7 @@ extern "C" void func_00137860(void* vself)
     }
     func_0011E150(RIDER, 0);
     func_00105398(RIDER, 0);
-    func_00107888(RIDER);
+    cRider_checkOpponentCollisions(RIDER);
     func_0032F708(&sph, 2);
 }
 
@@ -1354,7 +1354,7 @@ extern "C" void func_0032F708(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void func_00105398(void* rider, int a1);
-extern "C" void func_00107888(void* rider);
+extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern t4Vector D_004FF120_138640 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -1504,7 +1504,7 @@ extern "C" void func_00138640(void* vself)
     }
     func_0011E150(RIDER, 0);
     func_00105398(RIDER, 0);
-    func_00107888(RIDER);
+    cRider_checkOpponentCollisions(RIDER);
     if (*(int*)(self + 0x4) != 0) {
         *(int*)(self + 0x4) = 0;
         *(int*)self = 1;

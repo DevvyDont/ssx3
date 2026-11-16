@@ -1165,7 +1165,7 @@ extern "C" void func_002F22B0(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F22C8);
 #ifdef SKIP_ASM
-extern "C" int func_00310C48(void*, int, const char*);
+extern "C" int cAnimModel_getBoneSkelIndex(void*, int, const char*);
 extern char D_004879D8[];
 extern char D_004879E8[];
 extern char D_004879F8[];
@@ -1200,32 +1200,32 @@ struct sObj_22C8 {
 
 extern "C" void func_002F22C8(sObj_22C8* self)
 {
-    self->h[0] = func_00310C48(self->model, 0, D_004A3BB8);
-    self->h[1] = func_00310C48(self->model, 0, D_004A3B08);
-    self->h[2] = func_00310C48(self->model, 0, D_00487A58);
-    self->h[3] = func_00310C48(self->model, 0, D_00487A48);
-    self->h[4] = func_00310C48(self->model, 0, D_00487A38);
-    self->h[5] = func_00310C48(self->model, 0, D_004A3B00);
-    self->h[6] = func_00310C48(self->model, 0, D_00487A68);
-    self->h[7] = func_00310C48(self->model, 0, D_00487A88);
-    self->h[8] = func_00310C48(self->model, 0, D_00487A98);
-    self->h[9] = func_00310C48(self->model, 0, D_00487AA8);
-    self->h[10] = func_00310C48(self->model, 0, D_00487AB8);
-    self->h[11] = func_00310C48(self->model, 0, D_00487AC8);
-    self->h[12] = func_00310C48(self->model, 0, D_00487AD8);
-    self->h[13] = func_00310C48(self->model, 0, D_00487AE8);
-    self->h[14] = func_00310C48(self->model, 0, D_00487AF8);
-    self->h[15] = func_00310C48(self->model, 0, D_00487A78);
-    self->h[16] = func_00310C48(self->model, 0, D_00487A18);
-    self->h[17] = func_00310C48(self->model, 0, D_004879D8);
-    self->h[18] = func_00310C48(self->model, 0, D_004879E8);
-    self->h[19] = func_00310C48(self->model, 0, D_00487A28);
-    self->h[20] = func_00310C48(self->model, 0, D_004879F8);
-    self->h[21] = func_00310C48(self->model, 0, D_00487A08);
-    self->h[22] = func_00310C48(self->model, 1, D_00487CC8);
-    self->h[23] = func_00310C48(self->model, 1, D_00487CC8);
-    self->h[24] = func_00310C48(self->model, 1, D_00487CC8);
-    self->h[25] = func_00310C48(self->model, 1, D_00487CC8);
+    self->h[0] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A3BB8);
+    self->h[1] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A3B08);
+    self->h[2] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A58);
+    self->h[3] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A48);
+    self->h[4] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A38);
+    self->h[5] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004A3B00);
+    self->h[6] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A68);
+    self->h[7] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A88);
+    self->h[8] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A98);
+    self->h[9] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AA8);
+    self->h[10] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AB8);
+    self->h[11] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AC8);
+    self->h[12] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AD8);
+    self->h[13] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AE8);
+    self->h[14] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487AF8);
+    self->h[15] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A78);
+    self->h[16] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A18);
+    self->h[17] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004879D8);
+    self->h[18] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004879E8);
+    self->h[19] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A28);
+    self->h[20] = cAnimModel_getBoneSkelIndex(self->model, 0, D_004879F8);
+    self->h[21] = cAnimModel_getBoneSkelIndex(self->model, 0, D_00487A08);
+    self->h[22] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
+    self->h[23] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
+    self->h[24] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
+    self->h[25] = cAnimModel_getBoneSkelIndex(self->model, 1, D_00487CC8);
     for (int i = 0; i < 26; i++) {
         // NOTE: empty in retail (likely a compiled-out per-handle assert)
     }

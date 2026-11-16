@@ -487,12 +487,12 @@ extern "C" void func_002826B8(void *arg0) {
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002826D8);
 #ifdef SKIP_ASM
-extern "C" void func_002749E8(void* self);
+extern "C" void cScriptPlayerMain_Pause(void* self);
 
 extern "C" void func_002826D8(void* self, int a1)
 {
     char* p = (char*)self + (a1 * 0x24 + 0x2c0);
-    func_002749E8(*(void**)p);
+    cScriptPlayerMain_Pause(*(void**)p);
     if (*(int*)(*(char**)p + 0x2C) > 0) {
         *(int*)(p + 0x4) = 5;
     }
@@ -1113,13 +1113,13 @@ extern "C" void func_00283000(void* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283038);
 #ifdef SKIP_ASM
-extern "C" void func_002749E8(void* self);
+extern "C" void cScriptPlayerMain_Pause(void* self);
 
 extern "C" void func_00283038(void* self)
 {
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
-        func_002749E8(*(void**)((char*)p + 0x8));
+        cScriptPlayerMain_Pause(*(void**)((char*)p + 0x8));
     }
 }
 #endif

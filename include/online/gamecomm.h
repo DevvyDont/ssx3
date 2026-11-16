@@ -58,7 +58,7 @@ struct tGameCommPacket {
 };
 
 // tGameCmdPacket: the 0xC-byte payload of a type-3 (command) packet (On Tour tGameCmdPacket, same layout). Retail
-// commands: 0 pause and 1 unpause (sendPauseCmd func_00258790), 2 controller unplugged (sendUnplugCmd func_00258C00),
+// commands: 0 pause and 1 unpause (sendPauseCmd cGameComm_sendPauseCmd), 2 controller unplugged (sendUnplugCmd func_00258C00),
 // 3 sync-wait done (syncWait func_002586B0), 4 checksum (updateSyncPacket func_00258F20), 5 exit game (sendExitGame
 // func_00258BC8); handled by updateCmdQueue func_00257F98.
 struct tGameCmdPacket {
@@ -115,7 +115,7 @@ struct cGameComm {
     int mServer;                 // 0x044 [O]; [R] the constructor's second argument; [U] update/syncGame take the
                                  //       server side of the handshake when set
     int mAlone;                  // 0x048 [O] (On Tour's next member after mServer that retail has); [U] setFinishRaceAlone
-                                 //       (func_00258950, from ai func_0012B340) sets 1; ai func_0012BB20 and the timeouts test it
+                                 //       (func_00258950, from ai cAI_finishRemotePlayer) sets 1; ai func_0012BB20 and the timeouts test it
     int mPauseCount[2];          // 0x04C [O] (On Tour [4]); [U] [0] counted by sendPauseCmd(true), [1] by the pause
                                  //       command; 6+ means cheating 2
     int unk_054;                 // 0x054 [U] this machine's controller-unplug count (sendUnplugCmd); 3+ means cheating 3
@@ -130,7 +130,7 @@ struct cGameComm {
                                  //       menu; never armed in retail
     int unk_06C;                 // 0x06C [R] the constructor's first argument: the cCommSystem channel index passed to
                                  //       its readPacket/writePacket/getLatency/getError (On Tour has no channel member)
-    int mState;                  // 0x070 [O] tGameComm; [U] setState (func_00257038) stores it; cInputSync waits for >= 14
+    int mState;                  // 0x070 [O] tGameComm; [U] setState (cGameComm_setState) stores it; cInputSync waits for >= 14
     int mPauseMenu[2];           // 0x074 [O] (On Tour [4]); [U] [0] this machine paused (sendPauseCmd), [1] the peer
                                  //       (commands 0/1)
     int mGameStartGate;          // 0x07C [O]; [U] gameStartGate (func_00258968, from cGFGateState_gainFocus) sets 1

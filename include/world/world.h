@@ -9,8 +9,8 @@
 // strings). Methods (world/world, 0x003A6688-0x003A6D50; names from On Tour's cWorld methods):
 //   cWorld_cWorld, cWorld__cWorld, cWorld_init, cWorld_resetMap, func_003A6928 (update), cWorld_load,
 //   func_003A6B78 (getWScriptHeaderId), func_003A6BA8 (getNumGlobalScripts), func_003A6BD8 (getGlobalScripts),
-//   cWorld_getNumProcessScripts, cWorld_getProcessScripts, func_003A6C68 (getNumMissionScripts),
-//   func_003A6C98 (getMissionScripts), func_003A6CC8 (getSphereTreeInfo), func_003A6CD8 (getPolyModelInfo),
+//   cWorld_getNumProcessScripts, cWorld_getProcessScripts, cWorld_getNumMissionScripts (getNumMissionScripts),
+//   cWorld_getMissionScripts (getMissionScripts), func_003A6CC8 (getSphereTreeInfo), func_003A6CD8 (getPolyModelInfo),
 //   func_003A6D18 (getWScriptScript). Not methods: func_003A6948 (a static .sdb section-name check: path, count,
 //   names), func_003A6CE8 and func_003A6D00 (their first argument is a tPolyModelList / tSphTreeList).
 //

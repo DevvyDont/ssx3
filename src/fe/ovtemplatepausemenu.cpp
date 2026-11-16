@@ -263,7 +263,7 @@ class cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" int func_001E3408(void);
 extern "C" void cOVState_onUpdate(void* self);
-extern "C" void func_00258790(void* self, int a1);
+extern "C" void cGameComm_sendPauseCmd(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
@@ -312,7 +312,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
         go = 1;
     if (!go)
         return;
-    func_00258790((char*)cGameComm_mGameComm, 0);
+    cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 0);
     cGameComm* g2 = cGameComm_mGameComm;
     g2->mPauseTimeout = -1;
     g2->mOverlayTimeout = -1;
@@ -367,7 +367,7 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
-extern "C" void func_00258790(void* self, int a1);
+extern "C" void cGameComm_sendPauseCmd(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
@@ -425,7 +425,7 @@ struct sPauseMenu_PMWE {
 static inline void stopReplay_PMWE()
 {
     if (cGameComm_mGameComm != 0) {
-        func_00258790((char*)cGameComm_mGameComm, 0);
+        cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 0);
         cGameComm* g = cGameComm_mGameComm;
         g->mPauseTimeout = -1;
         g->mOverlayTimeout = -1;

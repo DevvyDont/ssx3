@@ -75,7 +75,7 @@ struct cAI {
     cComputer* Computers[5];        // 0x48 [P] getComputer; [R] initComputerRiders ("ComputerRider", 0x1A90)
     cComputer* Actors[5];           // 0x5C [P] getActor; [R] initComputerActors
     cMissionRider* MissionRiders[1]; // 0x70 [P] getMissionRider; [R] initMissionRiders
-    int RaceRankType;               // 0x74 [O] tRaceRankType; [R] cAI_cAI = 0; [U] setRaceRankType (func_00128A48)
+    int RaceRankType;               // 0x74 [O] tRaceRankType; [R] cAI_cAI = 0; [U] setRaceRankType (cAI_setRaceRankType)
     int NumberOfRidersAllocated;    // 0x78 [P] getNumRiders; [U] the init functions' next rider index
     int NumberOfPlayersAllocated;   // 0x7C [P] getNumPlayers
     int NumberOfComputersAllocated; // 0x80 [P] getNumComputers; [U] initComputerRiders
@@ -101,13 +101,13 @@ struct cAI {
 
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).
 enum {
-    kAIVt_delete = 1,               // func_001287B8 ~cAI
+    kAIVt_delete = 1,               // cAI__cAI ~cAI
     kAIVt_init = 2,                 // func_00128818
-    kAIVt_update = 3,               // func_00128AF0
+    kAIVt_update = 3,               // cAI_update
     kAIVt_render = 4,               // func_001291E0
-    kAIVt_restart = 5,              // func_00129768 (tAIState)
+    kAIVt_restart = 5,              // cAI_restart (tAIState)
     kAIVt_InitPlayers = 6,          // cAI_InitPlayers
-    kAIVt_writeToReplayFrame = 7,   // func_0012B7F0
+    kAIVt_writeToReplayFrame = 7,   // cAI_writeToReplayFrame
     kAIVt_readFromReplayFrame = 8   // cAI_readFromReplayFrame
 };
 

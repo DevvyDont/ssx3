@@ -257,7 +257,7 @@ extern "C" void cSSXScriptEngine_AsyncLoadTrack(void* a);
 extern "C" void func_0012AB20(void* self);
 extern "C" void func_0012AC48(void* self);
 extern "C" int func_00145D38(void* self, int index, int bit);
-extern "C" void func_0027AAF8(void* a, int b);
+extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
 extern "C" void* func_0028B180(void);
 extern char* cGameState_mpGame;
 extern signed char D_00535C11[];
@@ -302,7 +302,7 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
             }
         }
     } else {
-        func_0027AAF8(ScriptEngine, 0);
+        cSSXScriptEngine_AppendStartSequence(ScriptEngine, 0);
     }
     self->f10 = 0;
 }
@@ -385,8 +385,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0028B180(void);
 
 
-// PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
-extern "C" int func_00278F38(void* self, int i);
+// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 
@@ -394,29 +394,29 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id
 
 extern "C" void func_001473D0(void* player, int i, int v);
 
-extern "C" int func_0012ABD0(void* p);
+extern "C" int cAI_isReadyToPurgeComputerRiders(void* p);
 
 extern "C" int func_0012A180(void* p);
 
 void func_001289F0(void* p);
 
-extern "C" int func_002791D8(void* p, int a);
+extern "C" int cSSXScriptEngine_GetNISListState(void* p, int a);
 
 extern "C" void cGameModeMan_initGameMode(void* gm, int mode);
 
-extern "C" void func_00278E50(void* self, int i, int a, int b, int c, int d, int f, int g);
+extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(void* self, int i, int a, int b, int c, int d, int f, int g);
 
-extern "C" int func_00278D58(void* self);
+extern "C" int cSSXScriptEngine_IsLoadTrackComplete(void* self);
 extern "C" void func_00278E20(void* self, int i, int a, int b);
 extern "C" void func_0028CD48(void* self);
 extern "C" void func_002B3A70(void* self);
-extern "C" int func_0012ACF8(void* p);
+extern "C" int cAI_isReadyToPurgeComputerActors(void* p);
 extern "C" void cAI_cleanupAfterRace(void* p);
 extern "C" void cAI_cleanupActors(void* p);
 extern "C" void cAI_initAIRiders(void* p);
 extern "C" void cAI_loadRiders(void* p);
 extern "C" void cAI_initAIActors(void* self, int n);
-extern "C" void func_00128A10(void* self);
+extern "C" void cAI_initFreeride(void* self);
 
 static inline int isOne_235080(int v)
 {
@@ -428,9 +428,9 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
     *(int*)((char*)self + 0x18) += 1;
     switch (*(int*)((char*)self + 0x10)) {
     case 0: {
-        if (func_00278D58(ScriptEngine) == 0)
+        if (cSSXScriptEngine_IsLoadTrackComplete(ScriptEngine) == 0)
             break;
-        func_00278F38(ScriptEngine, 0);
+        cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
         char* g = D_004A28A8_date->game->f78;
         int t = *(int*)(g + 0x1BC);
         int range = t >= 14 && t <= 16;
@@ -439,25 +439,25 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
                 func_00278E20(ScriptEngine, 1, 0x1D, 3);
                 func_0028CD48(func_0028B180());
                 func_002B3A70((char*)func_0028B180() + 0x118);
-                func_00278E50(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
-                func_00278E50(ScriptEngine, 1, 1, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 1, 3, 0, -1, -1, -1);
             } else {
                 func_00278E20(ScriptEngine, 1, t == 15 ? 0x1E : 0x1F, 3);
-                func_00278E50(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
-                func_00278E50(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
             }
-            func_00278F38(ScriptEngine, 1);
+            cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
         } else if (*(int*)(g + 0x1C8) != 0 && range) {
-            func_00278E50(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
-            func_00278E50(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
+            cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
+            cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
         }
         *(int*)((char*)self + 0x10) = 1;
         break;
     }
     case 1: {
         long done = 0;
-        if (!isOne_235080(func_002791D8(ScriptEngine, 0))) {
-            if (!isOne_235080(func_002791D8(ScriptEngine, 1)))
+        if (!isOne_235080(cSSXScriptEngine_GetNISListState(ScriptEngine, 0))) {
+            if (!isOne_235080(cSSXScriptEngine_GetNISListState(ScriptEngine, 1)))
                 done = 1;
         }
         if (done)
@@ -467,9 +467,9 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
     case 2: {
         // Modes first..last are already set up; anything else needs initGameMode.
         int first = 6, last = 11;
-        if (func_0012ABD0(D_004A2C68_date->race) == 0)
+        if (cAI_isReadyToPurgeComputerRiders(D_004A2C68_date->race) == 0)
             break;
-        if (func_0012ACF8(D_004A2C68_date->race) == 0)
+        if (cAI_isReadyToPurgeComputerActors(D_004A2C68_date->race) == 0)
             break;
         char* newRace = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         char* newPlayer = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -525,7 +525,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             if (m == 5) {
                 cBERaceDB* r2 = &(*(&cBENewRaceInterface_newRace));
                 if (r2->cGamePath == 0)
-                    func_00128A10(D_004A2C68_date->race);
+                    cAI_initFreeride(D_004A2C68_date->race);
             }
             *(int*)((char*)self + 0x10) = 4;
         } else {
@@ -583,7 +583,7 @@ extern "C" int cBENewRaceInterface_getLocationID(void* race);
 extern "C" int func_00144CC0(void* race, int a);
 extern "C" void func_00146E10(void* player, int a, int b);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
-extern "C" int func_00278F68(void* self, int i, int a, int b);
+extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 extern "C" void* func_0028B180(void);
 extern "C" void func_002B3A98(void* p);
 extern "C" void func_002A4B68(void* p);
@@ -646,12 +646,12 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
         *(int*)((char*)self + 0x0) = 1;
         *(int*)((char*)self + 0x4) = 0;
         if (isMode2_2355C0(ScriptEngine)) {
-            func_00278F68(ScriptEngine, 1, 0, 1);
+            cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 0, 1);
             if (isMode2_2355C0(ScriptEngine))
-                func_00278F68(ScriptEngine, 0, 0, 1);
+                cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 0, 1);
         }
     } else if (*(int*)((char*)self + 0x14)) {
-        func_00278F68(ScriptEngine, 1, 1, 0);
+        cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     }
     func_002B3A98((char*)func_0028B180() + 0x118);
     func_002A4B68(func_0028B180());
@@ -662,7 +662,7 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_update);
 #ifdef SKIP_ASM
 extern "C" int cSSXScriptEngine_IsInTransportSequence(void* a);
-extern "C" int func_00279220(void* a, int b);
+extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cGameState_gotoNextState(void* self);
 
 extern "C" void cGFTrackStartState_update(void* self)
@@ -671,7 +671,7 @@ extern "C" void cGFTrackStartState_update(void* self)
         *(int*)((char*)SSXApp->Game->SectionMan + 0x1A4) = 1;
         *(int*)((char*)self + 0x1C) = 0;
     }
-    if (func_00279220(ScriptEngine, 1) == 0) {
+    if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) == 0) {
         cGameState_gotoNextState(self);
     }
 }
@@ -792,10 +792,10 @@ extern "C" void cGame_partialRestart(void* self);
 extern "C" void func_0012AB20(void* self);
 extern "C" void func_0012AC48(void* self);
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
-extern "C" void func_0027AAF8(void* a, int b);
-// PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
-extern "C" int func_00278F38(void* self, int i);
-extern "C" void func_0027A860(void* a, int b, int c);
+extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
+// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
+extern "C" void cSSXScriptEngine_PlayTransportSequence(void* a, int b, int c);
 extern "C" void func_001F36C0(void* a, int b);
 extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
@@ -856,11 +856,11 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     if (r2->cGameMode == 0) {
         void* sc = ScriptEngine;
         *(int*)((char*)self + 0x18) = 1;
-        func_0027A860(sc, 1, 0);
+        cSSXScriptEngine_PlayTransportSequence(sc, 1, 0);
     }
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
-    func_0027AAF8(ScriptEngine, *(int*)((char*)gm + 0x98) ? 3 : 2);
-    func_00278F38(ScriptEngine, 0);
+    cSSXScriptEngine_AppendStartSequence(ScriptEngine, *(int*)((char*)gm + 0x98) ? 3 : 2);
+    cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
     func_001F36C0(SSXApp->Game->LoadIndicator, 3);
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -900,7 +900,7 @@ struct cRiderObj_235CC8 {
     virtual int isBusy();
 };
 
-extern "C" int func_0012ABD0(void* p);
+extern "C" int cAI_isReadyToPurgeComputerRiders(void* p);
 extern "C" void cAI_cleanupAfterRace(void* p);
 extern "C" void cAI_cleanupActors(void* p);
 extern "C" void cAI_initAIRiders(void* p);
@@ -910,7 +910,7 @@ extern "C" void cAI_loadRiders(void* p);
 extern "C" sVec4_235CC8 func_00122C28(void* rider);
 extern "C" void func_003A9658(void* cache, int idx, const sVec4_236960* pos, float radius);
 extern "C" int func_003A9770(void* cache, int idx, sVec4_236960* pos, float* dist);
-extern "C" int func_002791D8(void* p, int a);
+extern "C" int cSSXScriptEngine_GetNISListState(void* p, int a);
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
 extern "C" void func_0027A9F0(void* p);
 extern "C" void cGameState_gotoNextState(void* self);
@@ -928,7 +928,7 @@ extern "C" void cGFNextHeatState_update(void* self)
     int idx = *(int*)(*(char**)(*(char**)(g84 + 0x84) + 4) + 0xB0) == 0;
     switch (state) {
     case 0:
-        if (func_0012ABD0(*(void**)(g84 + 0xC))) {
+        if (cAI_isReadyToPurgeComputerRiders(*(void**)(g84 + 0xC))) {
             cAI_cleanupAfterRace(SSXApp->Game->AI);
             if (D_00535C04[0] >= 2)
                 cAI_cleanupActors(SSXApp->Game->AI);
@@ -958,7 +958,7 @@ extern "C" void cGFNextHeatState_update(void* self)
                 break;
             if (*(int*)((char*)self + 0x14) < 120)
                 break;
-            if (func_002791D8(ScriptEngine, 0) == 1)
+            if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1)
                 break;
             char* o = (char*)func_00230698(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0)
@@ -1048,8 +1048,8 @@ INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_gainFocus);
 extern "C" void func_0030B7F8(void* self);
 extern "C" void cGameModeMan_initGameMode(void* gm, int mode);
 extern "C" void cGame_partialRestart(void* self);
-extern "C" void func_0011DE60(void* self, int a1, int a2);
-extern "C" void func_0011DF18(void* self, int notify);
+extern "C" void cRider_putAtStartpoint(void* self, int a1, int a2);
+extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 void* func_00230698(void* self, int id);
 // PORT: func_002E4CE8 is the wake pool's allocator; it ignores the size the caller passes
 extern "C" void* func_002E4CE8_sz(int size) __asm__("func_002E4CE8");
@@ -1069,8 +1069,8 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     cGameModeMan_initGameMode(gm, 0xC);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xA);
     cGame_partialRestart(SSXApp->Game);
-    func_0011DE60(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
-    func_0011DF18(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
+    cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
+    cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
     void* r = func_00230698(SSXApp->Game, 0);
     char* o = (char*)func_002E4CE8_sz(0x14);
     sColor_236058 c;
@@ -1153,10 +1153,10 @@ extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cGame_partialRestart(void* self);
 extern "C" void func_0030B7F8(void* self);
 extern "C" void func_0011D390(void* rider);
-extern "C" void func_00278E50(void* self, int i, int a, int b, int c, int d, int f, int g);
-// PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
-extern "C" int func_00278F38(void* self, int i);
-extern "C" int func_00278F68(void* self, int i, int a, int b);
+extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(void* self, int i, int a, int b, int c, int d, int f, int g);
+// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
+extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 extern char* cGameState_mpGame;
 extern void* D_004A3DD8;
 extern int D_004A11BC;
@@ -1186,17 +1186,17 @@ extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
         cGame_partialRestart(SSXApp->Game);
     int m = *(int*)((char*)self + 0x14);
     if (m == 0) {
-        func_00278E50(ScriptEngine, 1, 0x16, 3, 0, -1, -1, -1);
-        func_00278E50(ScriptEngine, 1, 0x17, 1, 0, -1, -1, -1);
-        func_00278F38(ScriptEngine, 1);
-        func_00278F68(ScriptEngine, 1, 1, 0);
+        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x16, 3, 0, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x17, 1, 0, -1, -1, -1);
+        cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
+        cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     } else if (m >= 0) {
         if (m < 4) {
             if (!isOne_6250(m))
-                func_00278E50(ScriptEngine, 1, 0xB, 3, 0, -1, -1, -1);
-            func_00278F38(ScriptEngine, 1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0xB, 3, 0, -1, -1, -1);
+            cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
             func_0011D390(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18));
-            func_00278F68(ScriptEngine, 1, *(int*)((char*)self + 0x14) == 2, 0);
+            cSSXScriptEngine_PlayNISList(ScriptEngine, 1, *(int*)((char*)self + 0x14) == 2, 0);
         }
     }
 }
@@ -1215,9 +1215,9 @@ extern "C" void func_0022CEA8(void* self, int a, int b);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 extern "C" void cGameState_gotoNextState(void* self);
 void func_00278DE8(void* self, int a);
-extern "C" int func_00279148(void* self, int a, int b);
-extern "C" int func_00279220(void* a, int b);
-extern "C" void func_0027A860(void* a, int b, int c);
+extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* self, int a, int b);
+extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
+extern "C" void cSSXScriptEngine_PlayTransportSequence(void* a, int b, int c);
 extern int D_004A2594;
 extern int D_004A2A54;
 extern int D_004A2A50;
@@ -1277,7 +1277,7 @@ extern "C" void cGFUserSelectState_update(void* self)
     int ns;
     switch (*(int*)((char*)self + 0x10)) {
     case 0: {
-        int r = func_00279220(ScriptEngine, 1);
+        int r = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1);
         if (!(r == 4 || r == 5 || r == 0))
             return;
         int m = *(int*)((char*)self + 0x14);
@@ -1323,13 +1323,13 @@ extern "C" void cGFUserSelectState_update(void* self)
             }
             if (c2 && D_00535C11[0] == 0)
                 *(int*)((char*)self + 0x8) = 0;
-            func_0027A860(ScriptEngine, !c2 && !c1, 1);
+            cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !c2 && !c1, 1);
             ns = 2;
         }
         break;
     case 2:
         if (*(int*)((char*)self + 0x14) != 0) {
-            int r = func_00279148(ScriptEngine, 1, 0);
+            int r = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
             if (r == 0xE || r == 0x14) {
                 if (*(int*)((char*)self + 0x8) == 0) {
                     if (*(int*)((char*)self + 0x1C) != 0)
@@ -1483,7 +1483,7 @@ struct cRiderObj_236960 {
 };
 
 extern "C" int func_0022D278(void* self, int idx);
-extern "C" void func_0022D088(void* self, int idx, int mode);
+extern "C" void cSectionMan_activate(void* self, int idx, int mode);
 extern "C" sVec4_236960 func_00123F38(void* rider);
 extern "C" void func_003A9658(void* cache, int idx, const sVec4_236960* pos, float radius);
 extern "C" int func_003A9770(void* cache, int idx, sVec4_236960* pos, float* dist);
@@ -1530,7 +1530,7 @@ extern "C" void func_00236960(void* self)
         }
         func_0027A9F0(ScriptEngine);
         *(int*)(game + 0x1C8) = 0;
-        func_0022D088(game, *(int*)(game + 0x1BC), 7);
+        cSectionMan_activate(game, *(int*)(game + 0x1BC), 7);
         *(int*)((char*)self + 0x10) = 2;
         break;
     }
@@ -1826,12 +1826,12 @@ extern "C" void cGFPodiumState_gainFocus(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPodiumState_update);
 #ifdef SKIP_ASM
-extern "C" int func_00279220(void* a, int b);
+extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cGameState_gotoNextState(void* self);
 
 extern "C" void cGFPodiumState_update(void* self)
 {
-    int r = func_00279220(ScriptEngine, 0);
+    int r = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
     int busy = r != 0 && r != 5;
     if (!busy) {
         cGameState_gotoNextState(self);

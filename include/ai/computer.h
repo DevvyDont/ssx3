@@ -37,7 +37,7 @@
 struct cInput;
 
 // g++ 2.95 pointer to member function (8 bytes): {delta, index, pfn | delta2}. The static cComputer::mCruiseLogic[4]
-// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): func_001009E0, func_00100680, func_00100F88
+// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): func_001009E0, func_00100680, cComputer_avoidTargetCruise
 // ([O] avoidTargetCruise) and func_00100B90, each of which also switches the logic (writes cruiseLogic/mCruiseLogicID).
 struct tComputerCruiseLogic {
     short delta;      // 0x0 [U] func_0010A960 (the call through it)
@@ -90,7 +90,7 @@ struct cComputer {
     float mFlipAxis;           // 0xE3C [O]; [U] same
     int mBoardPressTimer;      // 0xE40 [O]; [R] Init = 0
     char pad_E44[0xC];         // 0xE44 t4Vector alignment
-    t4Vector mStartJumpPos;    // 0xE50 [O]; [R] Init (sq); [U] checkForJumpEvent (func_0010B980) stores it
+    t4Vector mStartJumpPos;    // 0xE50 [O]; [R] Init (sq); [U] checkForJumpEvent (cComputer_checkForJumpEvent) stores it
     t4Vector mEndJumpPos;      // 0xE60 [O]; [R] Init (sq); [U] same
     int mTargetID;             // 0xE70 [P] getCurrentTarget (preview 0xE20); [R] Init = -1, func_00144008
     int mWanderTime;           // 0xE74 [O]; [R] Init = 0; [U] func_0010D1A0

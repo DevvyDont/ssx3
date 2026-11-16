@@ -43,7 +43,7 @@ extern "C" cCamAlgo_D0A0* func_00177068(void* mem);
 extern "C" cCamAlgo_D0A0* func_00176D68(void* mem);
 extern "C" cCamAlgo_D0A0* func_00177E50(void* mem);
 extern "C" cCamAlgo_D0A0* func_001789E8(void* mem, void* target);
-extern "C" void func_00161E58(char* self, cCamAlgo_D0A0* algo, float blend);
+extern "C" void cChaseCameraController_addAlgorithm(char* self, cCamAlgo_D0A0* algo, float blend);
 
 static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
 
@@ -180,7 +180,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         break;
     }
     r->setTarget(*(void**)(self + 0x20));
-    func_00161E58(self, r, b);
+    cChaseCameraController_addAlgorithm(self, r, b);
     r->activate();
 }
 #endif
@@ -511,7 +511,7 @@ INCLUDE_ASM("camera/cameraalgorithms", func_0015DB58);
 #ifdef SKIP_ASM
 extern "C" void func_0016C968(void* self);
 void cCameraTriggerMan_setInGameTriggers(void* self);
-extern "C" void func_00162170(void* cam);
+extern "C" void cChaseCameraController_switchCamera_Restart(void* cam);
 extern char D_004C5830[];
 
 struct sCamVE_0015DB58 {
@@ -526,7 +526,7 @@ extern "C" void func_0015DB58(void)
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
     char* riders = (char*)SSXApp->Game->ViewMan;
     int n = *(int*)riders;
-    func_00162170(*(void**)(*(char**)(riders + 4) + 0xA8));
+    cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 4) + 0xA8));
     char* cam = *(char**)(*(char**)(riders + 4) + 0xA8);
     sCamVE_0015DB58* e = &(*(sCamVE_0015DB58**)(cam + 0x14))[4];
     e->fn(cam + e->delta);
@@ -534,7 +534,7 @@ extern "C" void func_0015DB58(void)
     *(int*)(*(char**)(riders + 4) + 0x4A4) = 1;
     if (n >= 2)
     {
-        func_00162170(*(void**)(*(char**)(riders + 8) + 0xA8));
+        cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 8) + 0xA8));
         char* cam2 = *(char**)(*(char**)(riders + 8) + 0xA8);
         sCamVE_0015DB58* e2 = &(*(sCamVE_0015DB58**)(cam2 + 0x14))[4];
         e2->fn(cam2 + e2->delta);

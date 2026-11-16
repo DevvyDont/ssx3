@@ -226,7 +226,7 @@ void* func_002CA4A8(void* self)
 //100%
 INCLUDE_ASM("util/menu", func_002CA4C8);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sRect_2CA4C8 { float x, y, w, h; };
 struct sVec2_2CA4C8 {
@@ -241,7 +241,7 @@ static inline char* font_2CA4C8(char* item)
 static inline float width_2CA4C8(char* item, const char* s)
 {
     char* f = font_2CA4C8(item);
-    return func_00391FB0(f, s, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    return cFont_textExtent(f, s, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
 static inline float widthOr0_2CA4C8(char* item, const char* s)
@@ -299,7 +299,7 @@ extern "C" sRect_2CA4C8 func_002CA4C8_impl(char* item, const char* left, const c
 INCLUDE_ASM("util/menu", func_002CA768);
 #ifdef SKIP_ASM
 extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sRect_2CA768 { float x, y, w, h; };
 struct sColor_2CA768 { float r, g, b, a; };
@@ -333,12 +333,12 @@ extern "C" void func_002CA768_impl(char* item, sRect_2CA768* rect, const char* l
     }
     if (center) {
         char* f = font_2CA768(item);
-        float w = func_00391FB0(f, center, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        float w = cFont_textExtent(f, center, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         func_00391CB0(font_2CA768(item), rect->x + (rect->w - w) * 0.5f, rect->y + 6.0f - 1.0f, center);
     }
     if (right) {
         char* f = font_2CA768(item);
-        float w = func_00391FB0(f, right, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        float w = cFont_textExtent(f, right, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
         func_00391CB0(font_2CA768(item), rect->x + (rect->w - w) - 16.0f, rect->y + 6.0f - 1.0f, right);
     }
     *(sVec2_2CA768*)(font_2CA768(item) + 0x28) = sVec2_2CA768(0.0f, 0.0f);
@@ -3609,7 +3609,7 @@ INCLUDE_ASM("util/menu", func_002CE910);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sVec2_2CE910 {
     float x, y;
@@ -3745,14 +3745,14 @@ extern "C" void func_002CE910(void* self, float* rect)
         func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
     }
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float w = func_00391FB0(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    float w = cFont_textExtent(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
     if (focused) {
         font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-        float w1 = func_00391FB0(font, buf + *(int*)((char*)self + 0x28), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+        float w1 = cFont_textExtent(font, buf + *(int*)((char*)self + 0x28), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
         font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
         char* next = buf + 1;
-        float w2 = func_00391FB0(font, next + *(int*)((char*)self + 0x28), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+        float w2 = cFont_textExtent(font, next + *(int*)((char*)self + 0x28), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
         float x1 = rect[0] + (rect[2] - w1) - 16.0f;
         float bot = rect[1] + rect[3] - 6.0f;
         float x2 = rect[0] + (rect[2] - w2) - 16.0f;
@@ -3872,7 +3872,7 @@ extern "C" int cColorMenuItem_input(void* self)
 //100%
 INCLUDE_ASM("util/menu", cColorMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
 extern char D_00486700[];
@@ -3905,7 +3905,7 @@ static inline sFont_2CEEE8* font_2CEEE8(sMenuValueItem_2CEEE8* item)
 static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* str)
 {
     sFont_2CEEE8* f = font_2CEEE8(item);
-    return func_00391FB0(f, str, 0, 0, f->drawScaleX, f->drawScaleY);
+    return cFont_textExtent(f, str, 0, 0, f->drawScaleX, f->drawScaleY);
 }
 
 #define MAX_2CEEE8(a, b) ((a) > (b) ? (a) : (b))
@@ -3934,7 +3934,7 @@ INCLUDE_ASM("util/menu", cColorMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int fptodp(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_00487470[];
@@ -4080,7 +4080,7 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
             fptodp(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2))),
             (int)(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2)) * 255.99000549316406f));
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float w = func_00391FB0(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    float w = cFont_textExtent(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     func_00391CB0(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
 
     func_002CA988_sColor c1 = **(func_002CA988_sColor**)((char*)self + 0x14);
@@ -5195,7 +5195,7 @@ extern "C" int func_002D0908(sCurveItem_D0908* self)
 INCLUDE_ASM("util/menu", func_002D0D48);
 #ifdef SKIP_ASM
 extern "C" void* cMenu_getFocusItem(cMenu* self);
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern char D_00486748[];
 
 struct sMenuRect_2D0D48 { float x, y, z, w; };
@@ -5215,9 +5215,9 @@ extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
     int pad = focused ? 0x50 : 0x14;
     char* font = font_2D0D48(item);
     float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    float w = func_00391FB0(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    float w = cFont_textExtent(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     char* font2 = font_2D0D48(item);
-    float w2 = func_00391FB0(font2, D_00486748, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
+    float w2 = cFont_textExtent(font2, D_00486748, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
     if (w < w2) w = w2;
     sMenuRect_2D0D48 r;
     float zero = 0.0f;

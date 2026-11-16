@@ -3451,10 +3451,10 @@ extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300C78);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00278E50_0C78(int, int, int, int, int, int, int, int) __asm__("func_00278E50");
+extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory_0C78(int, int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptCategory");
 extern "C" void func_00278ED0_0C78(int, int, int, int, int, int, int) __asm__("func_00278ED0");
-extern "C" void func_00278F38_0C78(int, int) __asm__("func_00278F38");
-extern "C" void func_00278F68_0C78(int, int, int, int) __asm__("func_00278F68");
+extern "C" void cSSXScriptEngine_ReadyNISList_0C78(int, int) __asm__("cSSXScriptEngine_ReadyNISList");
+extern "C" void cSSXScriptEngine_PlayNISList_0C78(int, int, int, int) __asm__("cSSXScriptEngine_PlayNISList");
 struct V3_0C78 { float x, y, z; };
 extern V3_0C78 D_004C9098_0C78 __asm__("D_004C9098");
 struct Tag_0C78 { char c; Tag_0C78() {} Tag_0C78(const Tag_0C78 &o) : c(o.c) {} };
@@ -3487,14 +3487,14 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     switch ((int)buf[1]) {
     case 0:
         func_00278ED0_0C78((int)ScriptEngine, 0, id, 3, -1, -1, -1);
-        func_00278F38_0C78((int)ScriptEngine, 0);
+        cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
         break;
     case 1:
-        func_00278E50_0C78((int)ScriptEngine, 0, id, 3, 0, -1, -1, -1);
-        func_00278F38_0C78((int)ScriptEngine, 0);
+        cSSXScriptEngine_AddToNISListByScriptCategory_0C78((int)ScriptEngine, 0, id, 3, 0, -1, -1, -1);
+        cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
         break;
     case 2:
-        func_00278F68_0C78((int)ScriptEngine, 0, 1, 0);
+        cSSXScriptEngine_PlayNISList_0C78((int)ScriptEngine, 0, 1, 0);
         break;
     }
     return D_004C9098_0C78;
@@ -4372,7 +4372,7 @@ extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
 extern "C" void* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00144CE0_2210(void* iface, int id) __asm__("func_00144CE0");
 extern "C" void func_0022CEA8_2210(void* self, int hash, char* name) __asm__("func_0022CEA8");
-extern "C" void func_0022D088_2210(void* self, int hash, char* name) __asm__("func_0022D088");
+extern "C" void cSectionMan_activate_2210(void* self, int hash, char* name) __asm__("cSectionMan_activate");
 extern "C" void func_00231250_2210(void* self, int a, int b, int refresh) __asm__("func_00231250");
 extern "C" void* func_0028B180_2210() __asm__("func_0028B180");
 extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
@@ -4437,7 +4437,7 @@ extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
         case 1:
             break;
         case 2:
-            func_0022D088_2210(ui, hash, name);
+            cSectionMan_activate_2210(ui, hash, name);
             break;
         case 3:
             func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 2, 0);

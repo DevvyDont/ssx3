@@ -598,7 +598,7 @@ extern "C" void func_00277778(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
 // The unit declares func_00279720 as void; it returns func_002822A0's result.
 int func_00279720_i(void* self, int val, int key, int b, int c) __asm__("func_00279720");
-extern "C" int func_0027A4A0(void* self, int a1, int a2);
+extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
 extern "C" void func_002826D8(void* self, int a1);
 extern "C" void* func_00282BF0(void* self, int a1);
 extern "C" int func_002839A8(void* self);
@@ -692,16 +692,16 @@ int func_00276388_impl(char* self, int fade, int notify)
             *(int*)(self + 0xB8) = 0;
             if (tIn + tHold + f->tOut > 0) {
                 if (f->cat != 7) {
-                    int h = func_0027A4A0(*(void**)self, f->cat, f->key);
+                    int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
                     if (h != 0) {
-                        int h2 = func_0027A4A0(*(void**)self, f->cat, f->key);
+                        int h2 = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
                         float tt = (float)tIn * 0.01666666753590107f;
                         func_002E4370_f(snd, 2, h, h2, tt, (float)tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f, 0, 0);
                         t = tt;
                         *(int*)(self + 0xB8) = tIn + tHold;
                     }
                 } else if (tIn) {
-                    int h = func_0027A4A0(ScriptEngine, 7, f->key);
+                    int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, f->key);
                     float tt = (float)tIn * 0.01666666753590107f;
                     func_002E4540(snd, 2, h, 0, tt);
                     t = tt;
@@ -1322,7 +1322,7 @@ INCLUDE_ASM("scripter/datamanager", func_00277310);
 #ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
-extern "C" int func_00274D08(void* obj);
+extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(void* obj);
 extern "C" void func_00277980(void* self);
 
 extern "C" void func_00277310(void* self, int a1, void* obj)
@@ -1330,7 +1330,7 @@ extern "C" void func_00277310(void* self, int a1, void* obj)
     if (func_002771C8(self, obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
         *(int*)((char*)obj + 0x1C) == 0) {
         char* name = func_0027C070(obj);
-        if (func_00274D08(obj) + 1 <= *(short*)(name + 0x12)) {
+        if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= *(short*)(name + 0x12)) {
             func_00277980(self);
         }
     }
@@ -1635,7 +1635,7 @@ extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
 extern "C" void* func_00282BF0(void* self, int a1);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" void func_002E4578(void* p);
-extern "C" int func_0027A4A0(void* self, int a1, int a2);
+extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
 extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
 extern "C" void func_002E44F0(void* snd, int a1, int h, float t);
 extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
@@ -1677,15 +1677,15 @@ int func_00277980_impl(char* self)
         }
         if (f->tIn + f->tHold + f->tOut > 0) {
             if (f->cat != 7) {
-                int h = func_0027A4A0(*(void**)self, f->cat, f->key);
+                int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
                 if (h == 0) {
                     return 0;
                 }
-                int h2 = func_0027A4A0(*(void**)self, f->cat, f->key);
+                int h2 = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
                 func_002E4370(snd, 2, h, h2, 0, 0, (float)f->tIn * 0.01666666753590107f, (float)f->tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = f->tIn + f->tHold;
             } else {
-                int h = func_0027A4A0(ScriptEngine, 7, f->key);
+                int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, f->key);
                 func_002E4540(snd, 2, h, 0, (float)f->tIn * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = 0;
             }
@@ -1702,11 +1702,11 @@ int func_00277980_impl(char* self)
         }
         if (0.0f < e->t) {
             if (e->cat != 7) {
-                int h = func_0027A4A0(*(void**)self, e->cat, e->key);
+                int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, e->cat, e->key);
                 func_002E44F0(snd, 2, h, e->t);
                 *(int*)(self + 0xB8) = 0;
             } else {
-                int h = func_0027A4A0(ScriptEngine, 7, e->key);
+                int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, e->key);
                 func_002E4540(snd, 2, h, 0, e->t);
                 *(int*)(self + 0xB8) = 0;
             }

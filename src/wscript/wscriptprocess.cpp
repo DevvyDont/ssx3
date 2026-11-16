@@ -1315,8 +1315,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0026C898(void* pb);
-extern "C" int func_003A6C68(void* world, int i);
-extern "C" void* func_003A6C98(void* world, int i);
+extern "C" int cWorld_getNumMissionScripts(void* world, int i);
+extern "C" void* cWorld_getMissionScripts(void* world, int i);
 extern "C" void cWScriptMan_addProcess1(void* self, int section, void* def, int id, int flags);
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cPlaybackMan_initLocation(void* pb, void* loc);
@@ -1336,8 +1336,8 @@ extern "C" void cWScriptMan_setupMissions(void* self)
         int i = 0;
         int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
         for (; i < n; i++) {
-            int cnt = func_003A6C68(*(void**)((char*)self + 0x28C), i);
-            sWSPDef8C60* defs = (sWSPDef8C60*)func_003A6C98(*(void**)((char*)self + 0x28C), i);
+            int cnt = cWorld_getNumMissionScripts(*(void**)((char*)self + 0x28C), i);
+            sWSPDef8C60* defs = (sWSPDef8C60*)cWorld_getMissionScripts(*(void**)((char*)self + 0x28C), i);
             int j;
             for (j = 0; j < cnt; j++) {
                 cWScriptMan_addProcess1(self, i, &defs[j], (i << 16) + i, 0);
@@ -1372,8 +1372,8 @@ struct sWSPDef8DB8 {
 
 struct func_00309DD0_sValue;
 extern const char D_004898D8[];
-extern "C" int func_003A6C68(void* world, int i);
-extern "C" void* func_003A6C98(void* world, int i);
+extern "C" int cWorld_getNumMissionScripts(void* world, int i);
+extern "C" void* cWorld_getMissionScripts(void* world, int i);
 // PORT: the unit declares cWScriptMan_getScriptCode as (int); its body takes (self, id) and returns an int.
 extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScriptMan_getScriptCode");
 void func_00226600(void* self, int a1, int a2);
@@ -1386,8 +1386,8 @@ extern "C" void func_00308DB8(void* self)
     int i = 0;
     int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
     for (; i < n; i++) {
-        int cnt = func_003A6C68(*(void**)((char*)self + 0x28C), i);
-        sWSPDef8DB8* defs = (sWSPDef8DB8*)func_003A6C98(*(void**)((char*)self + 0x28C), i);
+        int cnt = cWorld_getNumMissionScripts(*(void**)((char*)self + 0x28C), i);
+        sWSPDef8DB8* defs = (sWSPDef8DB8*)cWorld_getMissionScripts(*(void**)((char*)self + 0x28C), i);
         int j;
         for (j = 0; j < cnt; j++) {
             if (defs[j].f0 != *(int*)((char*)self + 0x2A0)) {

@@ -84,7 +84,7 @@ extern "C" void cAI_forceAIState_impl(char* self, int state)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113C20);
+INCLUDE_ASM("seg/seg_14B10", cAI_AIStateUpdate);
 #ifdef SKIP_ASM
 class cAIState_3C20 {
 public:
@@ -93,7 +93,7 @@ public:
     virtual void m2(void *);
 };
 
-extern "C" void func_00113C20(cAI* self) {
+extern "C" void cAI_AIStateUpdate(cAI* self) {
     if (self->PreviousAIState != self->CurrentAIState) {
         cAIState_3C20 *prev = (cAIState_3C20*)self->PreviousAIStateHandler;
         if (prev != 0)
@@ -207,12 +207,12 @@ extern "C" void func_00113D88(void) {
 INCLUDE_ASM("seg/seg_14B10", func_00113DB0);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
-extern "C" int func_0012A250(void *);
+extern "C" int cAI_isRaceFinished(void *);
 extern "C" void func_00231250(int, int, int, int);
 
 extern "C" void func_00113DB0(void *arg0, void *arg1) {
     (*(int *)((char*)(arg1) + (0xC))) = (int) ((*(int *)((char*)(arg1) + (0xC))) + 1);
-    if (func_0012A250(arg1) == 1) {
+    if (cAI_isRaceFinished(arg1) == 1) {
         cAI_setAIState((cAI*)arg1, 6);
         func_00231250(((int)SSXApp->Game), 5, 0, 0);
     }
@@ -1152,7 +1152,7 @@ extern "C" void func_00115168(char* s)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00115358);
+INCLUDE_ASM("seg/seg_14B10", cRider_doRailslideModeOrientation);
 #ifdef SKIP_ASM
 struct V3_5358 {
     float x, y, z;
@@ -1193,7 +1193,7 @@ static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
     return r;
 }
 
-extern "C" void func_00115358(cRider* self)
+extern "C" void cRider_doRailslideModeOrientation(cRider* self)
 {
     // Half turn about the up axis (quaternion (up, 0)) whenever the landing state disagrees with the stance flag.
     int state = self->mRailStyle;
@@ -1461,7 +1461,7 @@ extern "C" void func_00115B58(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00115D48);
+INCLUDE_ASM("seg/seg_14B10", cRider_checkForProximityAction);
 #ifdef SKIP_ASM
 unsigned int AIrand();
 
@@ -1488,7 +1488,7 @@ static inline t4Vector GetFront_5D48(cRider* r)
 }
 
 // Plays a glance animation towards a nearby rider (sRiderPair mDistance/mAngle).
-extern "C" void func_00115D48(cRider* self)
+extern "C" void cRider_checkForProximityAction(cRider* self)
 {
     if (func_00311AE8(self->mRiderAnim, 1) != 0) {
         self->unk_35C = 0.0f;
@@ -1642,7 +1642,7 @@ INCLUDE_ASM("seg/seg_14B10", func_001162C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0011FEC8_62C8(void *, int) __asm__("func_0011FEC8__FPv");
 extern "C" int func_0011FEE8_62C8(void *) __asm__("func_0011FEE8__FPv");
-extern "C" void func_00131348(char *);
+extern "C" void cBoardPressControl_forceExit(char *);
 extern "C" void cCheatFX_setCheatInput(char *, int);
 
 extern "C" int func_001162C8(char *self, int arg1, int arg2) {
@@ -1650,7 +1650,7 @@ extern "C" int func_001162C8(char *self, int arg1, int arg2) {
         cCheatFX_setCheatInput(*(char **)(self + 0x77C) + 0xD20, 1);
     if ((*(float *)(self + 0x360) == 0.0f && arg1 != 0) || arg2 != 0) {
         if (func_0011FEE8_62C8(self) == 1)
-            func_00131348(*(char **)(self + 0x77C) + 0x1D0);
+            cBoardPressControl_forceExit(*(char **)(self + 0x77C) + 0x1D0);
         func_0011FEC8_62C8(self, 2);
         return 1;
     }
@@ -1675,7 +1675,7 @@ extern "C" int func_00116378(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_001163B0);
+INCLUDE_ASM("seg/seg_14B10", cRider_checkForPunch);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 extern "C" void* func_00311B20(void* anim, int layer);
@@ -1714,7 +1714,7 @@ static inline int seqDone_163B0(char* p)
     return func_001446A0(p, 2) && func_001446B8(p, 2);
 }
 
-extern "C" int func_001163B0(cRider* self, int a1, int a2)
+extern "C" int cRider_checkForPunch(cRider* self, int a1, int a2)
 {
     if (func_00311AE8(self->mRiderAnim, 1) == 3) {
         if (a1 != 0 && a2 != 0) {

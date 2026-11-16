@@ -31,12 +31,12 @@ struct sAnimModelLod {
 // 0x58 bytes, one per model part (cAnimModel::parts).
 struct sAnimModelPart {
     int id;                     // 0x00 = the source part's signed byte at +0x52; 2 (or 1..2) picks the draw argument
-    int firstBone;              // 0x04 first bone of this part (func_00310530 start + j; func_00310C48 returns firstBone + i)
+    int firstBone;              // 0x04 first bone of this part (cAnimModel_applyOffset start + j; cAnimModel_getBoneSkelIndex returns firstBone + i)
     int unk_08;
-    int unk_0C;                 // 0x0C a channel bit; >= 0 when the part has one (func_00310CE8)
+    int unk_0C;                 // 0x0C a channel bit; >= 0 when the part has one (cAnimModel_getGraftMask)
     unsigned long mask;         // 0x10 64-bit bone/channel mask OR'd into cAnimModel::mask (func_0030E9E0)
     sAnimModelLod lods[4];      // 0x18
-    char* boneNames;            // 0x38 numBones names of 0x50 bytes (func_00310C48, func_00310CE8)
+    char* boneNames;            // 0x38 numBones names of 0x50 bytes (cAnimModel_getBoneSkelIndex, cAnimModel_getGraftMask)
     char* unk_3C;               // 0x3C data + src[0x1C] (addModelPartLOD)
     char* unk_40;               // 0x40 data + src[0x2C]
     int numBones;               // 0x44 = (short)src[0x4A]; loop bound over this part's bones and names
@@ -48,8 +48,8 @@ struct sAnimModelPart {
 
 // 0x20 bytes per bone (cAnimModel::bones).
 struct sAnimModelBone {
-    t4Vector pos;               // 0x00 translated with the model (func_00310530)
-    t4Vector rot;               // 0x10 a quaternion x, y, z, w (func_00106848)
+    t4Vector pos;               // 0x00 translated with the model (cAnimModel_applyOffset)
+    t4Vector rot;               // 0x10 a quaternion x, y, z, w (cRider_checkRailBoardCollisions)
 };
 
 struct sAnimModelLodInfo {
@@ -62,8 +62,8 @@ struct cAnimModel {
     /* 0x004 */ int numLodRefs;             // refs per LOD slot (addModelPartLOD allocates this many)
     /* 0x008 */ int numParts;               // loop bound over parts everywhere
     /* 0x00C */ sAnimModelPart* parts;
-    /* 0x010 */ int numBones;               // bones/matrices count; also the first channel bit (func_00310CE8)
-    /* 0x014 */ int maxPartIndex;           // i > this -> no such part (func_0030E9E0, func_00310CE8)
+    /* 0x010 */ int numBones;               // bones/matrices count; also the first channel bit (cAnimModel_getGraftMask)
+    /* 0x014 */ int maxPartIndex;           // i > this -> no such part (func_0030E9E0, cAnimModel_getGraftMask)
     /* 0x018 */ int unk_018;                // nonzero: draw per-part LOD refs, else one call with lodInfo (func_00310640)
     /* 0x01C */ int* partIndex;             // part number -> index into parts, < 0 = none
     /* 0x020 */ int* boneChannelIndex;      // per-bone first-component index into the channel data (func_0030ECD8: first = arr[k] - arr[firstBone])
@@ -71,12 +71,12 @@ struct cAnimModel {
     /* 0x028 */ t4Vector* localRot;         // numBones local bone rotation quaternions (func_00310200)
     /* 0x02C */ sAnimModelBone* bones;      // numBones of them; streamed as numBones << 5 bytes (func_00310EA8)
     /* 0x030 */ t4Matrix* unk_030;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
-    /* 0x034 */ t4Matrix* unk_034;          // numBones, translated with the model (func_00310530)
+    /* 0x034 */ t4Matrix* unk_034;          // numBones, translated with the model (cAnimModel_applyOffset)
     /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (func_00310948, func_00310640)
     /* 0x03C */ int unk_03C;
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
     /* 0x060 */ char unk_060[0xE0];
-    /* 0x140 */ t4Vector unk_140;           // = (a, b, b, 1) (func_0030DBA0); .y is the draw call's float (func_00310640); .x scales rider lean (ai/rider)
+    /* 0x140 */ t4Vector unk_140;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (func_00310640); .x scales rider lean (ai/rider)
     /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (func_0030E9E0, func_0030EB60)
     /* 0x158 */ unsigned long unk_158;      // another such mask (func_0030ECA0)
 };

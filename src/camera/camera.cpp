@@ -13,16 +13,16 @@ typedef int cQuad128 __attribute__((mode(TI)));
 INCLUDE_ASM("camera/camera", cCamera_resetChaseControllerSwitches);
 #ifdef SKIP_ASM
 struct sCam162138;
-extern "C" void func_00162138(cChaseCameraController* self);
+extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraController* self);
 
 extern "C" void cCamera_resetChaseControllerSwitches(void)
 {
     void* cam = SSXApp->Game;
     int* chase = *(int**)((char*)cam + 0x84);
     if (chase != 0) {
-        func_00162138((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8)));
+        cChaseCameraController_switchCamera_SoftReset((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8)));
         if (*chase >= 2) {
-            func_00162138((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 8) + 0xA8)));
+            cChaseCameraController_switchCamera_SoftReset((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 8) + 0xA8)));
         }
     }
 }
@@ -69,7 +69,7 @@ extern "C" void* cCamera_cCamera(cCamera* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015DD88);
+INCLUDE_ASM("camera/camera", cCamera__cCamera);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* cCamera_vtbl[];
@@ -85,7 +85,7 @@ public:
 };
 
 // PORT: func_00176DA8__FPv is a destructor taking (self, flags); bind the 2-arg form.
-extern "C" void func_0015DD88(cCamera* self, int flags)
+extern "C" void cCamera__cCamera(cCamera* self, int flags)
 {
     self->mVtbl = cCamera_vtbl;
     func_0015CD60((cCamPartK2*)self->ManualController);
@@ -197,7 +197,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, fl
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015DF98);
+INCLUDE_ASM("camera/camera", cCamera_update);
 #ifdef SKIP_ASM
 class cCamVObj_0015DF98 {
 public:
@@ -209,7 +209,7 @@ public:
 
 extern "C" void* func_0015E668(void* self);
 
-extern "C" void func_0015DF98(cCamera* self)
+extern "C" void cCamera_update(cCamera* self)
 {
     ((cCamVObj_0015DF98*)self->Controller)->v02();
     func_0015E668(self);
@@ -217,9 +217,9 @@ extern "C" void func_0015DF98(cCamera* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015DFD8);
+INCLUDE_ASM("camera/camera", cCamera_setCurrentController);
 #ifdef SKIP_ASM
-extern "C" void func_0015DFD8(cCamera* self, int mode)
+extern "C" void cCamera_setCurrentController(cCamera* self, int mode)
 {
     switch (mode) {
     case 1:
@@ -997,7 +997,7 @@ extern "C" void func_0015EC98(cCamera* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015EDC8);
+INCLUDE_ASM("camera/camera", cCamera_switchChaseControllerTargetRider);
 #ifdef SKIP_ASM
 class cCamVObj_0015EDC8 {
 public:
@@ -1009,7 +1009,7 @@ public:
     virtual void v04();
 };
 
-extern "C" void func_0015EDC8(cCamera* self, int value)
+extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int value)
 {
     char* obj = (char*)self->ChaseController;
     *(int*)(*(char**)(obj + 0x20) + 0x4) = value;
@@ -3610,12 +3610,12 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161E58);
+INCLUDE_ASM("camera/camera", cChaseCameraController_addAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void cCameraAlgoList_insert(void* list, void* algo, int b, float w);
 extern "C" void func_0015CB08(void* list);
 
-extern "C" void func_00161E58(cChaseCameraController* self, void* algo, float w)
+extern "C" void cChaseCameraController_addAlgorithm(cChaseCameraController* self, void* algo, float w)
 {
     self->LatestAlgoType = *(int*)((char*)algo + 0xC);
     void* list = self->AlgorithmList;
@@ -3647,7 +3647,7 @@ extern "C" void func_00161EF0(cChaseCameraController* self, int v)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161F50);
+INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndReplay);
 #ifdef SKIP_ASM
 struct sCam161F50 {
     char pad_0x00[0x24];
@@ -3663,7 +3663,7 @@ struct sCam161F50 {
 
 extern "C" void* func_0015D050(void*, int, int);
 
-extern "C" void func_00161F50(cChaseCameraController* self)
+extern "C" void cChaseCameraController_switchCamera_EndReplay(cChaseCameraController* self)
 {
     int mode;
     ((sCam161F50*)self)->b1 = 0;
@@ -3735,7 +3735,7 @@ extern "C" void func_00162060(cChaseCameraController* self, int mode, int arg, f
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001620D0);
+INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Chapter);
 #ifdef SKIP_ASM
 struct sCam1620D0 {
     char pad_0x00[0x24];
@@ -3752,7 +3752,7 @@ struct sCam1620D0 {
 extern "C" void func_0015DAC0();
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
-extern "C" void func_001620D0(cChaseCameraController* self)
+extern "C" void cChaseCameraController_switchCamera_Chapter(cChaseCameraController* self)
 {
     int mode = self->CamSwitchRecord.LatestReplayType;
     ((sCam1620D0*)self)->b0 = 0;
@@ -3764,7 +3764,7 @@ extern "C" void func_001620D0(cChaseCameraController* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162138);
+INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_SoftReset);
 #ifdef SKIP_ASM
 struct sCam162138 {
     char pad_0x00[0x24];
@@ -3782,7 +3782,7 @@ struct sCam162138 {
 };
 
 
-extern "C" void func_00162138(cChaseCameraController* self)
+extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraController* self)
 {
     ((sCam162138*)self)->b1 = 0;
     ((sCam162138*)self)->b0 = 0;
@@ -3795,13 +3795,13 @@ extern "C" void func_00162138(cChaseCameraController* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162170);
+INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Restart);
 #ifdef SKIP_ASM
 extern "C" void* func_0015D050(void*, int, int);
 
-extern "C" void* func_00162170(cChaseCameraController* self)
+extern "C" void* cChaseCameraController_switchCamera_Restart(cChaseCameraController* self)
 {
-    func_00162138(self);
+    cChaseCameraController_switchCamera_SoftReset(self);
     return func_0015D050(((sCam162138*)self), self->CamSwitchRecord.PlayerChoiceType, 0);
 }
 #endif

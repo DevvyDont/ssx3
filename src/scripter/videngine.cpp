@@ -52,7 +52,7 @@ INCLUDE_ASM("scripter/videngine", func_002839A8);
 #ifdef SKIP_ASM
 extern "C" int func_00253860(void*);
 extern "C" void* func_0028B180();
-extern "C" void func_0029CE28(void*);
+extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void func_002EA820(void*);
 extern int D_004A2A54;
 extern int D_004A2A50;
@@ -91,7 +91,7 @@ extern "C" int func_002839A8(sVidPlayer* self)
         sVtEnt* vt = (sVtEnt*)o->mVtbl;
         ((void(*)(void*, int))vt[40].fn)((char*)o + vt[40].delta, 0);
     }
-    func_0029CE28(func_0028B180());
+    cSSXAudio_PauseSFX(func_0028B180());
     return 1;
 }
 #endif

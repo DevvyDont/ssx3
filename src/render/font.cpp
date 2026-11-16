@@ -365,7 +365,7 @@ extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391FB0);
+INCLUDE_ASM("render/font", cFont_textExtent);
 #ifdef SKIP_ASM
 struct sGlyph1FB0 {
     unsigned short code;    // 0x0
@@ -405,7 +405,7 @@ static inline sGlyph1FB0* sFontRes1FB0_find(cFont* f, int c)
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float func_00391FB0(cFont* f_, const char* s, void* r_, int mono, float sx, float sy)
+extern "C" float cFont_textExtent(cFont* f_, const char* s, void* r_, int mono, float sx, float sy)
 {
     cFont* f = f_;
     sRect1FB0* r = (sRect1FB0*)r_;
@@ -751,11 +751,11 @@ extern "C" unsigned short* func_00392680(cFont* f_, float sx, float width, const
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392908);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(cFont* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n, float sx, float sy);
 
 extern "C" void func_00392908(cFont* self, float x, float y, const char* str)
 {
-    float w = func_00391FB0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
+    float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
     func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
 }
 #endif
@@ -794,11 +794,11 @@ extern "C" void func_003929F8(cFont* self, const char* fmt, void* ap, float x, f
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392A60);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(cFont* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n, float sx, float sy);
 
 extern "C" void func_00392A60(cFont* self, const char* str, float x, float y)
 {
-    float w = func_00391FB0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
+    float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
     func_00391CB0(self, x - w, y, (sMat00391C48*)str);
 }
 #endif

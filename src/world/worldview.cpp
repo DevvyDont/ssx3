@@ -121,18 +121,18 @@ extern "C" int func_003A9958(sView_3A9958* self, unsigned int idx)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A99D8);
+INCLUDE_ASM("world/worldview", cWorldView_activateSection);
 #ifdef SKIP_ASM
 extern "C" void func_003A8F10(void* world, unsigned int i);
-struct func_003A99D8_sEntry { int state; int field_0x4; };
-struct func_003A99D8_sView { void* world; tStreamDataHeader* mp_Hdr; };
-extern "C" int func_003A99D8(cWorldView* self, unsigned int i)
+struct cWorldView_activateSection_sEntry { int state; int field_0x4; };
+struct cWorldView_activateSection_sView { void* world; tStreamDataHeader* mp_Hdr; };
+extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
 {
     tStreamDataHeader* list = self->mp_Hdr;
     if (list != 0 && i < (unsigned int)list->m_uiNumSections) {
         int off = i << 3;
         char* base = (char*)self + 0x14;
-        func_003A99D8_sEntry* e = (func_003A99D8_sEntry*)(base + off);
+        cWorldView_activateSection_sEntry* e = (cWorldView_activateSection_sEntry*)(base + off);
         int st = e->state;
         if (st == 5) {
             e->state = 6;

@@ -47,8 +47,8 @@ struct cRiderAnimBase {
     cAnimModel* AnimModel;          // 0x054 [O] AnimModel (follows Sequencer in On Tour); [R] the ctor stores 0;
                                     //       [U] func_00312598 passes it to func_0030F2B0 (animation/animmodel.cpp)
                                     //       with the states gathered from the 6 sequencers
-    void** mVtbl;                   // 0x058 [R] the ctor and destructor (func_00311958) store cRiderAnimBase_vtbl (slot 1 =
-                                    //       func_00311958; slot 2 = func_00411530, a stub in 5 vtables, likely
+    void** mVtbl;                   // 0x058 [R] the ctor and destructor (cRiderAnimBase__cRiderAnimBase) store cRiderAnimBase_vtbl (slot 1 =
+                                    //       cRiderAnimBase__cRiderAnimBase; slot 2 = func_00411530, a stub in 5 vtables, likely
                                     //       __pure_virtual); cRiderAnim's ctor overwrites it with
                                     //       cRiderAnim_vtbl; [P] preview vptr at 0x58; [U] slots 2 and 4 called
                                     //       (func_003123C0, cRiderAnimBase_play, cRiderAnimBase_getAIAnimFrame)
