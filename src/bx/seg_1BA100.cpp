@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sound/crowdsys.h"
+#include "sound/banksys.h"
 #include "worldpainter/worldpainterquery.h"
 #include "worldpainter/worldpainterman.h"
 #include "worldpainter/worldpainterlayer.h"
@@ -788,8 +790,8 @@ extern "C" int func_002B9F88(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FB8);
 #ifdef SKIP_ASM
-extern "C" void func_002B9FB8(void *arg0, int arg1) {
-    int *base = *(int **)((char *)arg0 + 4);
+extern "C" void func_002B9FB8(cBankSys* arg0, int arg1) {
+    int *base = arg0->mBank;
     base[*(int *)(*(char **)arg0 + 0x1F4)] = arg1;
 }
 #endif
@@ -797,8 +799,8 @@ extern "C" void func_002B9FB8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FD8);
 #ifdef SKIP_ASM
-extern "C" void func_002B9FD8(void *arg0, int arg1) {
-    int *base = *(int **)((char *)arg0 + 8);
+extern "C" void func_002B9FD8(cBankSys* arg0, int arg1) {
+    int *base = arg0->mPatch;
     base[*(int *)(*(char **)arg0 + 0x1F4)] = arg1;
 }
 #endif
@@ -1192,9 +1194,9 @@ extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD18);
 #ifdef SKIP_ASM
-extern "C" char* func_002BAD18(char *p, int i) {
+extern "C" char* func_002BAD18(cCrowdSys* p, int i) {
     int off = i * 0x54 + 0x1C;
-    return p + off;
+    return ((char*)p) + off;
 }
 #endif
 

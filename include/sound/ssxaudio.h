@@ -32,6 +32,7 @@
 #include "sound/musicsys.h"
 #include "sound/speechsys.h"
 #include "sound/bankmonitor.h"
+#include "sound/crowdsys.h"
 
 struct cBankManager;
 struct cStreamSys;
@@ -43,14 +44,6 @@ struct cCircBuffer {
     int* Array;    // 0x4 [O]; [R] operator new(ArraySize * 4, "CircFIFOBuff")
     int Head;      // 0x8 [O]
     int Tail;      // 0xC [O]
-};
-
-// One cCrowdSys intensity slot (0x54; [P] cCrowdSys::CROWD_GetData(eCrowdIntensity) returns &mCrowdData[i]).
-struct tCrowdData {
-    char unk_00[3][0x18]; // 0x00 three 0x18-byte lists, each constructed by func_002A4BA8
-    float unk_48;         // 0x48
-    float unk_4C;         // 0x4C
-    int unk_50;           // 0x50
 };
 
 // On Tour's tAttachSoundStruct (0x30), a sound attached to a world instance mesh.
@@ -97,7 +90,6 @@ struct tAudioMix {
 };
 
 CHECK_SIZE(cCircBuffer, 0x10);
-CHECK_SIZE(tCrowdData, 0x54);
 CHECK_OFFSET(tAttachSoundStruct, pos, 0x10);
 CHECK_OFFSET(tAttachSoundStruct, patch, 0x20);
 CHECK_OFFSET(tAttachSoundStruct, handle, 0x24);
