@@ -617,7 +617,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_parseCommandLine);
 extern "C" void* cBXString_cBXString2(cBXString* self, const char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n);
-extern "C" cBXString* func_00319028(cBXString* self, cBXString* other, int n);
+extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindFirstOf(cBXString* self, char ch);
@@ -653,7 +653,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 int p = MAX_7BF0(a, MAX_7BF0(b, c));
                 if (p >= 0) {
                     cBXString t;
-                    func_00319028(&t, &s, *(int*)((int)s.Str - 8) - p - 1);
+                    cBXString_right(&t, &s, *(int*)((int)s.Str - 8) - p - 1);
                     cBXString_operatorE(&s, &t);
                     cBXString__cBXString(&t, 2);
                 }

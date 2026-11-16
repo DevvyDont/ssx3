@@ -77,14 +77,14 @@ extern "C" void cBXString_Reset(cBXString* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_00318120);
+INCLUDE_ASM("bx/bxstring", cBXString_copyBeforeWrite);
 #ifdef SKIP_ASM
 extern "C" void cBXString_Reset(cBXString* self);
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
 // PORT: pointer held in int to get the target's negative load offsets.
-extern "C" void func_00318120(cBXString* self)
+extern "C" void cBXString_copyBeforeWrite(cBXString* self)
 {
     int old = (int)self->Str;
     if (*(int*)(old - 0xC) >= 2)
@@ -291,13 +291,13 @@ extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_00318540);
+INCLUDE_ASM("bx/bxstring", cBXString_concatCopy);
 #ifdef SKIP_ASM
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
 // Builds the string from two pieces: (len1, s1) followed by (len2, s2).
-extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2)
+extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2)
 {
     int total = len1 + len2;
     if (total != 0)
@@ -313,7 +313,7 @@ extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len
 INCLUDE_ASM("bx/bxstring", func_003185C8);
 #ifdef SKIP_ASM
 extern char* D_004A3E90;
-extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2);
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
@@ -324,7 +324,7 @@ extern "C" cBXString* func_003185C8(cBXString* self, cBXString* a, cBXString* b)
     // PORT: read as int; reading a->Str (char*) schedules these loads differently (refactor gate, 2026-11-16)
     int sa = *(int*)a;
     int sb = *(int*)b;
-    func_00318540((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, *(int*)(sb - 8), (char*)sb);
+    cBXString_concatCopy((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, *(int*)(sb - 8), (char*)sb);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
     return self;
@@ -336,7 +336,7 @@ INCLUDE_ASM("bx/bxstring", func_00318630);
 #ifdef SKIP_ASM
 extern char* D_004A3E90;
 extern "C" unsigned int strlen(const char* s);
-extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2);
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
@@ -350,7 +350,7 @@ extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const 
         len = strlen(str);
     else
         len = 0;
-    func_00318540((cBXString*)&tmp, *lenp, bxString->Str, len, str);
+    cBXString_concatCopy((cBXString*)&tmp, *lenp, bxString->Str, len, str);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
     return self;
@@ -362,7 +362,7 @@ INCLUDE_ASM("bx/bxstring", func_003186D0);
 #ifdef SKIP_ASM
 extern char* D_004A3E90;
 extern "C" unsigned int strlen(const char* s);
-extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2);
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
@@ -376,7 +376,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
     else
         len = 0;
     int sb = (int)bxString->Str;
-    func_00318540((cBXString*)&tmp, len, str, *(int*)(sb - 8), (char*)sb);
+    cBXString_concatCopy((cBXString*)&tmp, len, str, *(int*)(sb - 8), (char*)sb);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
     return self;
@@ -399,7 +399,7 @@ extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char c
     sBXTmp_318760 tmp(D_004A3E90);
     char c = ch;
     int sa = (int)bxString->Str;
-    func_00318540((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, 1, &c);
+    cBXString_concatCopy((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, 1, &c);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
     return self;
@@ -421,7 +421,7 @@ extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* bxStrin
     sBXTmp_3187C8 tmp(D_004A3E90);
     char c = ch;
     int sb = (int)bxString->Str;
-    func_00318540((cBXString*)&tmp, 1, &c, *(int*)(sb - 8), (char*)sb);
+    cBXString_concatCopy((cBXString*)&tmp, 1, &c, *(int*)(sb - 8), (char*)sb);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
     return self;
@@ -433,7 +433,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_ConcatImpl);
 #ifdef SKIP_ASM
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString_Reset(cBXString* self);
-extern "C" void func_00318540(cBXString* self, int len1, const char* s1, int len2, const char* s2);
+extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
 struct cBXStringHdrK2 {
@@ -453,7 +453,7 @@ extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str)
         cBXString_cBXString1((cBXString*)&tmp, self);
         int old = (int)self->Str;
         cBXString_Reset(self);
-        func_00318540(self, *(int*)(old - 8), (char*)old, len, str);
+        cBXString_concatCopy(self, *(int*)(old - 8), (char*)old, len, str);
         cBXString__cBXString((cBXString*)&tmp, 2);
     }
     else
@@ -516,12 +516,12 @@ extern "C" cBXString* func_003189A0(cBXString* self, char** other)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_003189D0);
+INCLUDE_ASM("bx/bxstring", cBXString_getBuffer);
 #ifdef SKIP_ASM
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 
 // PORT: pointer held in int to get the target's negative header offsets.
-extern "C" char* func_003189D0(cBXString* self, int size)
+extern "C" char* cBXString_getBuffer(cBXString* self, int size)
 {
     int s = (int)self->Str;
     if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < size)
@@ -541,14 +541,14 @@ extern "C" char* func_003189D0(cBXString* self, int size)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_00318A88);
+INCLUDE_ASM("bx/bxstring", cBXString_releaseBuffer);
 #ifdef SKIP_ASM
 extern char D_0048DCD4[];
 
 // PORT: pointer held in int to get the target's negative store offset.
-extern "C" void func_00318A88(cBXString* self, int len)
+extern "C" void cBXString_releaseBuffer(cBXString* self, int len)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     if (len == -1)
         len = strlen(self->Str);
     if (self->Str != D_0048DCD4)
@@ -566,7 +566,7 @@ INCLUDE_ASM("bx/bxstring", func_00318AF8);
 #ifdef SKIP_ASM
 extern "C" char* func_00318AF8(cBXString* self, int len)
 {
-    func_003189D0(self, len);
+    cBXString_getBuffer(self, len);
     *(int*)((int)self->Str - 8) = len;
     self->Str[len] = 0;
     return self->Str;
@@ -598,7 +598,7 @@ INCLUDE_ASM("bx/bxstring", func_00318BC0);
 #ifdef SKIP_ASM
 extern "C" char* func_00318BC0(cBXString* self)
 {
-    char* r = func_003189D0(self, 0);
+    char* r = cBXString_getBuffer(self, 0);
     *(int*)((int)self->Str - 0xC) = -1;
     return r;
 }
@@ -695,15 +695,15 @@ extern "C" int func_00318CE8(cBXString* self, int unused, int start)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_00318D28);
+INCLUDE_ASM("bx/bxstring", cBXString_makeUpper);
 #ifdef SKIP_ASM
 extern unsigned char D_00499C81[];
 static inline int to_upper(int c) { if (D_00499C81[c] & 2) return c - 0x20; return c; }
 // In-place upper-case; D_00499C81 is the ctype table (+1), bit 2 = lower-case.
 // PORT: pointer held in int to get the target's negative load offset.
-extern "C" void func_00318D28(cBXString* self)
+extern "C" void cBXString_makeUpper(cBXString* self)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     char* p = self->Str;
     int i = *(int*)((int)p - 8);
     while (--i >= 0)
@@ -723,7 +723,7 @@ static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; retu
 // PORT: pointer held in int to get the target's negative load offset.
 extern "C" void func_00318D90(cBXString* self)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     char* p = self->Str;
     int i = *(int*)((int)p - 8);
     while (--i >= 0)
@@ -740,7 +740,7 @@ INCLUDE_ASM("bx/bxstring", func_00318DF8);
 // PORT: pointer held in int to get the target's negative load offset.
 extern "C" void func_00318DF8(cBXString* self, char from, char to)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     char* p = self->Str;
     int i = *(int*)((int)p - 8);
     while (--i >= 0)
@@ -755,11 +755,11 @@ extern "C" void func_00318DF8(cBXString* self, char from, char to)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318E68);
 #ifdef SKIP_ASM
-extern "C" void func_00318120(cBXString* self);
+extern "C" void cBXString_copyBeforeWrite(cBXString* self);
 
 extern "C" void func_00318E68(cBXString* self, int idx, char ch)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     self->Str[idx] = ch;
 }
 #endif
@@ -825,7 +825,7 @@ extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00319028);
+INCLUDE_ASM("bx/bxstring", cBXString_right);
 #ifdef SKIP_ASM
 extern char* D_004A3E90;
 extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra);
@@ -833,7 +833,7 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
 // Right(n): the last n chars of other. PORT: pointer held in int for the header offset.
-extern "C" cBXString* func_00319028(cBXString* self, cBXString* other, int n)
+extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n)
 {
     if (n < 0)
         n = 0;

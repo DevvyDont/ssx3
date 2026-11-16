@@ -766,12 +766,12 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D160);
 #define func_0021D160_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-extern "C" void func_00391C48(int, int, char*);
+extern "C" void cFont_vtextf(int, int, char*);
 
 extern "C" void func_0021D160(float x, float y, int c, int d, ...) {
     char* ap;
     func_0021D160_va_start(ap);
-    func_00391C48(c, d, ap);
+    cFont_vtextf(c, d, ap);
 }
 #endif
 
@@ -3618,12 +3618,12 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002223E8);
 #define func_002223E8_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-extern "C" void func_003929F8(int, int, char*);
+extern "C" void cFont_vcentertextf(int, int, char*);
 
 extern "C" void func_002223E8(float x, float y, int c, int d, ...) {
     char* ap;
     func_002223E8_va_start(ap);
-    func_003929F8(c, d, ap);
+    cFont_vcentertextf(c, d, ap);
 }
 #endif
 

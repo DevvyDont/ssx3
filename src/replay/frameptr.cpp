@@ -373,7 +373,7 @@ extern "C" void func_0026ED98(void* self)
 INCLUDE_ASM("replay/frameptr", func_0026EDD8);
 #ifdef SKIP_ASM
 extern int D_00445438[];
-extern "C" void func_00161FA0(void* self, int mode);
+extern "C" void cChaseCameraController_switchCamera_ReplayToggle(void* self, int mode);
 
 struct sRiderList_EDD8 {
     int count;
@@ -386,7 +386,7 @@ extern "C" void func_0026EDD8(void* self)
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        func_00161FA0(*(void**)(list->riders[i] + 0xA8), D_00445438[*(int*)((char*)self + 0x630)]);
+        cChaseCameraController_switchCamera_ReplayToggle(*(void**)(list->riders[i] + 0xA8), D_00445438[*(int*)((char*)self + 0x630)]);
     }
 }
 #endif

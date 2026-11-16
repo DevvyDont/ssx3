@@ -66,8 +66,8 @@ enum eControlState {
 // [O] size 0x18).
 struct cGroundMotion {
     float ChatterTime;     // 0x00 [O] cGroundMotionState; [U] float (gainFocus, step cGroundMotion_step)
-    float PowderDepth1G;   // 0x04 [O]; [U] float (gainFocus, func_0013C878, step)
-    float PowderDepth3G;   // 0x08 [O]; [U] float (func_0013C878, func_0013CCF0, step)
+    float PowderDepth1G;   // 0x04 [O]; [U] float (gainFocus, cGroundMotion_getSnowForce, step)
+    float PowderDepth3G;   // 0x08 [O]; [U] float (cGroundMotion_getSnowForce, cGroundMotion_getSlipForce, step)
     int ForceNaturalAir;   // 0x0C [O] bool (a word in retail); [U] lw/sw (gainFocus, step, resolve)
     int AITickOnGainFocus; // 0x10 [O]; [R] ctor cGroundMotion_cGroundMotion = 0; [U] gainFocus stores it
     int AITickOnLoseFocus; // 0x14 [O]; [R] ctor = 0; [U] loseFocus (cGroundMotion_loseFocus) stores it, gainFocus reads it
@@ -106,7 +106,7 @@ struct cWipeoutMotion {
                                        //      eWMotionState (WMS_Ground 0, WMS_Air 1)
     int ForceNaturalAir;               // 0x04 [O] bool (word); [U] lw/sw
     char pad_08[0x8];                  // 0x08
-    t4Vector BoardVelocity;            // 0x10 [O]; [U] lq/sq/lqc2 (func_00136D40, func_00136F30, func_00137138)
+    t4Vector BoardVelocity;            // 0x10 [O]; [U] lq/sq/lqc2 (cWipeoutMotion_throwItem, func_00136F30, func_00137138)
     t4Vector BoardAngVelocity;         // 0x20 [O]; [U] lq/sq/lqc2
     t4Vector RiderAngVelocity;         // 0x30 [P] getRiderAngVel (retail cWipeoutMotion_getRiderAngVel = this + 0x30); [O]
     cRider* mRider;                    // 0x40 [R] virtual-base pointer to the shared cRider; [R] ctor cWipeoutMotion_cWipeoutMotion (in
@@ -665,7 +665,7 @@ struct cRiderHandler {
 
 // Virtual slots of _vt$13cRiderHandler (D_00458710; [O] cRiderHandler's virtual order).
 enum {
-    kRiderHandlerVt_getControlCmd = 1,      // pure (func_00411530); cPlayer func_00127998, cComputer func_0010A768
+    kRiderHandlerVt_getControlCmd = 1,      // pure (func_00411530); cPlayer func_00127998, cComputer cComputer_getControlCmd
     kRiderHandlerVt_writeToReplayFrame = 2, // cRiderHandler_writeToReplayFrame (calls every part's writeToReplayFrame)
     kRiderHandlerVt_readFromReplayFrame = 3 // cRiderHandler_readFromReplayFrame (calls every part's readFromReplayFrame / FX reset)
 };

@@ -552,8 +552,8 @@ extern "C" void cGameState_gotoNextState(void* self);
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" int cSSXScriptEngine_GetNISListState(void* self, int i);
-extern "C" int func_00279248(void* self, int i);
-extern "C" void func_0027AC60(void* self);
+extern "C" int cSSXScriptEngine_GetNISListLength(void* self, int i);
+extern "C" void cSSXScriptEngine_AppendEndEventSequence(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern int D_005366A8[];
 // PORT: function-local `static const float` with a dynamic initializer (guard D_004A4F64),
@@ -685,9 +685,9 @@ extern "C" void func_00233CD8(void* self)
             return;
         }
         cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
-        func_0027AC60(ScriptEngine);
+        cSSXScriptEngine_AppendEndEventSequence(ScriptEngine);
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
-        if (func_00279248(ScriptEngine, 0) > 0) {
+        if (cSSXScriptEngine_GetNISListLength(ScriptEngine, 0) > 0) {
             *(int*)s = 0xC;
         }
         sRace_233CD8* rc2 = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
@@ -928,7 +928,7 @@ extern "C" void func_0012AC48(void* o);
 extern "C" void cAI_initAIRiders(void* o);
 extern "C" void cAI_initAIActors(void* o, int a1);
 extern "C" void cAI_setRaceRankType(void* o, int a1);
-extern "C" int func_0012A180(void* o);
+extern "C" int cAI_isAILoadedAndReady(void* o);
 extern "C" void cAI_loadRiders(void* o);
 void func_001289F0(void* o);
 extern "C" int cAI_isReadyToPurgeComputerRiders(void* o);
@@ -1016,7 +1016,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
         break;
     }
     case 2:
-        if (!func_0012A180(MGR_43B0->obj))
+        if (!cAI_isAILoadedAndReady(MGR_43B0->obj))
             cAI_loadRiders(MGR_43B0->obj);
         else
             self->state = 3;

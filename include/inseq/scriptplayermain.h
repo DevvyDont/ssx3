@@ -5,7 +5,7 @@
 // cScriptPlayerEntity per entity of the script (inseq/scriptplayerentity.h). cInSeq owns a fixed pool of them inside
 // its tScriptMainNode list. No virtual functions, no base class.
 // Size 0x48 [R]: cInSeq_cInSeq allocates maxScripts x 0x58 nodes (func_002724C8) and runs this constructor
-// (func_00274518) on node + 8; the node's next/prev links follow at node + 0x50 / + 0x54 (On Tour tScriptMainNode:
+// (cScriptPlayerMain_cScriptPlayerMain) on node + 8; the node's next/prev links follow at node + 0x50 / + 0x54 (On Tour tScriptMainNode:
 // index, script, pNext, pPrev; retail has one more word at the node's start). On Tour's class is 0x44: its two bools
 // at 0x3C/0x3D are 1 byte; retail's are words (the constructor zeroes 0x3C, 0x40 and 0x44 separately).
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
@@ -13,7 +13,7 @@
 // 0x00274518-0x002752E8.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] the constructor func_00274518 (stores every field) and cInSeq_cInSeq;
+//   [R] the constructor cScriptPlayerMain_cScriptPlayerMain (stores every field) and cInSeq_cInSeq;
 //   [U] how retail code uses the field (asm of the 22 methods listed in methods.txt);
 //   [O] SSX On Tour's DWARF (class cScriptPlayerMain): same member order and offsets up to mNumSteps (0x38).
 
@@ -55,7 +55,7 @@ struct cScriptPlayerMain {
     tInSeqScriptHeader* mpSystemHeader;    // 0x10 [O]; [U] Init = pScriptData and returns ->size; numEntities loops
     const char* mpDataHeader;              // 0x14 [O]; [U] Init: &mpSystemHeader->nextSectionStart when headerSize >= 0xD
     cScriptPlayerEntity* mpEntityPlayers;  // 0x18 [O]; [U] Init: new[] numEntities x 0x3C + entity ctor, then Init on
-                                           //      each; GetEntity (func_00274C20) = + i * 0x3C; DeInit deletes them
+                                           //      each; GetEntity (cScriptPlayerMain_GetEntity) = + i * 0x3C; DeInit deletes them
     int mLoopScript;                       // 0x1C [O] (On Tour bool); [U] Init 0; Play(bool)/SetLoop store it; Play()
                                            //      passes it; Preview saves/restores it
     int mPlayState;                        // 0x20 [O] eScriptPlayState; [U] Play(bool) 0 -> 1; Stop 0; DoUpdateFrame

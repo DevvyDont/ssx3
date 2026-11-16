@@ -280,7 +280,7 @@ int func_00238348(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238358);
+INCLUDE_ASM("main/gamemode", cGameModeMan_raceFinish);
 #ifdef SKIP_ASM
 extern void* D_00536668[];
 extern unsigned int D_00536640[];
@@ -303,7 +303,7 @@ struct sVEntry_00238358 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00238358(cGameModeMan* self, int idx, int a2)
+extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int a2)
 {
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238358* vt = *(sVEntry_00238358**)obj;
@@ -353,7 +353,7 @@ extern "C" void func_00238510(void* self, int a, int b)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238550);
+INCLUDE_ASM("main/gamemode", cGameModeMan_riderGateHit);
 #ifdef SKIP_ASM
 struct sVEntry_00238550 {
     short delta;
@@ -363,7 +363,7 @@ struct sVEntry_00238550 {
 
 extern void* D_00536668[];
 
-extern "C" void func_00238550(cGameModeMan* self, int a, int b)
+extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int a, int b)
 {
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238550* vt = *(sVEntry_00238550**)obj;
@@ -818,7 +818,7 @@ INCLUDE_ASM("main/gamemode", func_00239230);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_00122E50(void* self);
+extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00147D20(void* iface, int a1);
@@ -925,7 +925,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
             cRider* r = Rider_239230(i);
             int done = r->mFinishTime >= 0.0f;
             if (!done)
-                self->t[2][i] = func_00122E50(r);
+                self->t[2][i] = cRider_estimateFinishScore(r);
         }
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[2][i];
@@ -1678,7 +1678,7 @@ extern "C" void func_00147D20(void* iface, int a1);
 
 extern "C" void func_00147E18(void* iface, int a1);
 
-extern "C" int func_00122D78(void* self);
+extern "C" int cRider_estimateFinishTick(void* self);
 
 extern "C" void func_00238BF8_A760(void* self, int n) __asm__("func_00238BF8");
 
@@ -1714,7 +1714,7 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
     }
     for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
         if (!Finished(rc->riders[i])) {
-            self->tbl[heat][i] = func_00122D78(rc->riders[i]);
+            self->tbl[heat][i] = cRider_estimateFinishTick(rc->riders[i]);
         }
         D_00536640[i] = self->tbl[heat][i];
     }
@@ -1886,7 +1886,7 @@ extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
 extern "C" int cAI_isRaceFinished(void* race);
-extern "C" int func_00122D78(void* self);
+extern "C" int cRider_estimateFinishTick(void* self);
 extern "C" void func_00238BF8(void* self, int n);
 
 struct sVEnt_23AE00 { short delta; short index; int (*fn)(void*); };
@@ -1947,7 +1947,7 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
     if (cAI_isRaceFinished(rc)) {
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 2; i++) {
             if (!finished_23AE00(rc->riders[i]) && i != idx) {
-                self->times[i] = func_00122D78(rc->riders[i]);
+                self->times[i] = cRider_estimateFinishTick(rc->riders[i]);
             }
             D_00536640[i] = self->times[i];
         }
@@ -2364,7 +2364,7 @@ INCLUDE_ASM("main/gamemode", func_0023B8C8);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_00122D78(void* self);
+extern "C" int cRider_estimateFinishTick(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00238BF8(void* self, int n);
@@ -2432,7 +2432,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
             char* r = Rider_23B8C8(i);
             int done = *(float*)(r + 0x470) >= 0.0f;
             if (!done) {
-                D_00536640[i] = func_00122D78(r);
+                D_00536640[i] = cRider_estimateFinishTick(r);
             }
         }
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2549,7 +2549,7 @@ INCLUDE_ASM("main/gamemode", func_0023BDB8);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_00122E50(void* self);
+extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00238B70(void* self, int n);
@@ -2606,7 +2606,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
             char* r = Rider_23BDB8(i);
             int done = *(float*)(r + 0x470) >= 0.0f;
             if (!done) {
-                D_00536640[i] = func_00122E50(r);
+                D_00536640[i] = cRider_estimateFinishScore(r);
             }
         }
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);

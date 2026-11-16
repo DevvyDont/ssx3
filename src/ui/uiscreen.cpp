@@ -274,7 +274,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_playFrameByThread);
 // parameters each reads, so they're bound here by asm label with the full argument list.
 extern void func_0039CBC8_4(void *, void *, void *, void *) __asm__("func_0039CBC8");
 extern void cUIScreen_parseKeyframeJump_4(void *, void *, void *, void *) __asm__("cUIScreen_parseKeyframeJump");
-extern void func_0039CC38_4(void *, void *, void *, void *) __asm__("func_0039CC38");
+extern void cUIScreen_parseKeyframeSpawn_4(void *, void *, void *, void *) __asm__("cUIScreen_parseKeyframeSpawn");
 extern void func_0039CCA8_4(void *, void *, void *, void *) __asm__("func_0039CCA8");
 extern void func_0039CD30_4(void *, void *, void *, void *) __asm__("func_0039CD30");
 extern void func_0039CD90_4(void *, void *, void *, void *) __asm__("func_0039CD90__FPv");
@@ -336,7 +336,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
                     cUIScreen_parseKeyframeJump_4(self, list, cmd, s);
                     break;
                 case 0x12:
-                    func_0039CC38_4(self, list, cmd, s);
+                    cUIScreen_parseKeyframeSpawn_4(self, list, cmd, s);
                     break;
                 case 0x20:
                     func_0039CCA8_4(self, list, cmd, s);
@@ -401,9 +401,9 @@ extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void*
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CC38);
+INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
 #ifdef SKIP_ASM
-extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
+extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* p1, void* p2)
 {
     sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;

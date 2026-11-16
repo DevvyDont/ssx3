@@ -1936,7 +1936,7 @@ extern "C" void func_0020CFD0(void);
 extern "C" int func_002CC098(void* p);
 extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void* func_0028B180(void);
-extern "C" void func_0029CED8(void* snd, int a, int b, float f);
+extern "C" void cSSXAudio_PlayIconSound(void* snd, int a, int b, float f);
 extern "C" void cWScriptMan_doMissionCmd(void* mgr, int a, int b, int c);
 extern "C" void func_00398038(void* p);
 extern "C" void func_0029ED18(void* snd);
@@ -1945,7 +1945,7 @@ extern "C" int func_00231840(char* self, int a);
 extern "C" int func_0020CBE8(void);
 extern "C" void func_00326AE0(void* p);
 extern "C" void func_0020CA10(void);
-extern "C" void func_00289B70(void* snd);
+extern "C" void cSSXAudio_PauseAudio(void* snd);
 extern "C" void func_00294F48(void* snd);
 extern "C" int func_0020CBA0(void);
 extern "C" void cPlaybackMan_update(void* p);
@@ -2051,7 +2051,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
                 cOVStateManager_triggerOverlay(0x1D);
                 D_005366E8[++D_004A2A54] = 3;
                 D_004A2A50 = D_004428FC[0];
-                func_0029CED8(func_0028B180(), 4, 0, 1.0f);
+                cSSXAudio_PlayIconSound(func_0028B180(), 4, 0, 1.0f);
                 return false;
             }
             if (msg->type == 9) {
@@ -2088,7 +2088,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         D_004A2A50 = D_004428F8[0];
         sUIObj_4B48* o = self->ui->fC;
         o->vt[44].fn((char*)o + o->vt[44].delta, self->f228);
-        func_00289B70(func_0028B180());
+        cSSXAudio_PauseAudio(func_0028B180());
         func_00294F48(func_0028B180());
         return false;
     }

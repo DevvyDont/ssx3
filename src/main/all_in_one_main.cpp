@@ -1091,13 +1091,13 @@ typedef char* func_001DC990_va_list;
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
-extern "C" void func_00391C48_C990(int, int, char*) __asm__("func_00391C48");
+extern "C" void cFont_vtextf_C990(int, int, char*) __asm__("cFont_vtextf");
 
 extern "C" void func_001DC990(float x, float y, int c, int d, ...)
 {
     func_001DC990_va_list ap;
     func_001DC990_va_start(ap);
-    func_00391C48_C990(c, d, ap);
+    cFont_vtextf_C990(c, d, ap);
 }
 #endif
 
@@ -1109,7 +1109,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DC9D0);
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
-extern "C" void func_00391C48_C9D0(void *, int, char *) __asm__("func_00391C48");
+extern "C" void cFont_vtextf_C9D0(void *, int, char *) __asm__("cFont_vtextf");
 
 struct V2_C9D0 { float x, y; };
 
@@ -1119,7 +1119,7 @@ extern "C" void func_001DC9D0(void *self, int d, float p0, float p1, float sx, f
     func_001DC9D0_va_start(ap);
     *(float *)((char *)self + 0x38) = *(float *)((char *)self + 0x30) * sx;
     *(float *)((char *)self + 0x3C) = *(float *)((char *)self + 0x34) * sy;
-    func_00391C48_C9D0(self, d, ap);
+    cFont_vtextf_C9D0(self, d, ap);
     *(V2_C9D0 *)((char *)self + 0x38) = *(V2_C9D0 *)((char *)self + 0x30);
 }
 #endif
@@ -1133,13 +1133,13 @@ typedef char* func_001DCA40_va_list;
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
-extern "C" void func_003929F8_CA40(int, int, char*) __asm__("func_003929F8");
+extern "C" void cFont_vcentertextf_CA40(int, int, char*) __asm__("cFont_vcentertextf");
 
 extern "C" void func_001DCA40(float x, float y, int c, int d, ...)
 {
     func_001DCA40_va_list ap;
     func_001DCA40_va_start(ap);
-    func_003929F8_CA40(c, d, ap);
+    cFont_vcentertextf_CA40(c, d, ap);
 }
 #endif
 
@@ -1152,13 +1152,13 @@ typedef char* func_001DCA80_va_list;
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
-extern "C" void func_00392B40_CA80(int, int, char*) __asm__("func_00392B40");
+extern "C" void cFont_vrighttextf_CA80(int, int, char*) __asm__("cFont_vrighttextf");
 
 extern "C" void func_001DCA80(float x, float y, int c, int d, ...)
 {
     func_001DCA80_va_list ap;
     func_001DCA80_va_start(ap);
-    func_00392B40_CA80(c, d, ap);
+    cFont_vrighttextf_CA80(c, d, ap);
 }
 #endif
 

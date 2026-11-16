@@ -754,7 +754,7 @@ extern "C" void func_0016D320(char* self, char* rider)
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E1D8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_00162060(void* self, int mode, int arg, float blend);
+extern "C" void cChaseCameraController_switchCamera_Volume(void* self, int mode, int arg, float blend);
 
 struct sCamEvt_E1D8 {
     int type;
@@ -779,7 +779,7 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
             rate = 1.0f / evt->dur * 0.016666668f;
         else
             rate = 1.0f;
-        func_00162060(cam, 0x5C, (int)evt, rate);
+        cChaseCameraController_switchCamera_Volume(cam, 0x5C, (int)evt, rate);
         break;
     }
     case 1: {
@@ -788,7 +788,7 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
             rate = 1.0f / evt->dur * 0.016666668f;
         else
             rate = 1.0f;
-        func_00162060(cam, 0x5B, (int)evt, rate);
+        cChaseCameraController_switchCamera_Volume(cam, 0x5B, (int)evt, rate);
         break;
     }
     case 0: {
@@ -870,7 +870,7 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
         case 43:
         default: mode = 0; break;
         }
-        func_00162060(cam, mode, 0, rate);
+        cChaseCameraController_switchCamera_Volume(cam, mode, 0, rate);
         break;
     }
     }

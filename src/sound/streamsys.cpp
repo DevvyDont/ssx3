@@ -1275,7 +1275,7 @@ extern "C" void func_002AB7A0(void* self, float v)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB828);
 #ifdef SKIP_ASM
-extern "C" void func_002AD940(void* e);
+extern "C" void cMonitorInstance_Reset(void* e);
 
 class cStrmTickOwner {
 public:
@@ -1295,7 +1295,7 @@ extern "C" void func_002AB828(void* e, void* self)
     if (t->active) {
         if ((t->count -= 10) < 5) {
             if ((((cStrmTickOwner*)self)->*(t->cb))(t)) {
-                func_002AD940(t);
+                cMonitorInstance_Reset(t);
             } else {
                 t->count += t->period;
             }
@@ -1307,7 +1307,7 @@ extern "C" void func_002AB828(void* e, void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AB8E8);
 #ifdef SKIP_ASM
-extern "C" void func_002ADC10(void* bm);
+extern "C" void cMonitor_MONITOR_Update(void* bm);
 extern "C" void func_002AB828(void* e, void* self);
 
 extern "C" void func_002AB8E8(void* self)
@@ -1315,7 +1315,7 @@ extern "C" void func_002AB8E8(void* self)
     char* snd = **(char***)((char*)self + 0x118);
     char* bm = snd + 0x1D8;
     if (*(int*)(snd + 0x26C) == 0) {
-        func_002ADC10(bm);
+        cMonitor_MONITOR_Update(bm);
         for (int i = 0; i < 48; i++) {
             func_002AB828(**(char***)((char*)self + 0x118) + 0x270 + i * 0x2C, self);
         }

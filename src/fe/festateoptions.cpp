@@ -1391,7 +1391,7 @@ extern "C" void* func_0028B180();
 extern "C" int func_00287670(void* snd);
 extern "C" int func_002876A0(void* snd);
 extern "C" int func_002876D0(void* snd);
-extern "C" void func_00286200(void* snd);
+extern "C" void cSSXAudio_FrontEndPurge(void* snd);
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int mode);
 extern "C" void func_00287410(void* snd, int v);
@@ -1440,7 +1440,7 @@ extern "C" void func_0018BEF8(void* self, unsigned int mode)
         int s0 = *(int*)((char*)func_0028B180() + 0x62B8);
         int s1 = *(int*)((char*)func_0028B180() + 0x62B4);
         int s2 = *(int*)((char*)func_0028B180() + 0x534);
-        func_00286200(func_0028B180());
+        cSSXAudio_FrontEndPurge(func_0028B180());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(m);
         func_00287410(func_0028B180(), (int)a);

@@ -70,13 +70,13 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ACE40);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor__cBankMonitor);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_002ABA18(void* self, int flags);
 struct sSndPlayerDAC8;
-extern "C" void func_002ADAC8(cMonitor* self, int flags);
+extern "C" void cMonitor__cMonitor(cMonitor* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* cBankMonitor_vtbl[];
 
@@ -102,7 +102,7 @@ struct sBankMonitorE40 {
     sBmVoiceE40* voices;        // 0x8EC
 };
 
-extern "C" void func_002ACE40(cBankMonitor* self, int flags)
+extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
 {
     self->mVtbl = cBankMonitor_vtbl;
     *(const sBmVtblE40**)((char*)self->mpVSoundSys + 4) = &D_00483B88_E40;
@@ -122,7 +122,7 @@ extern "C" void func_002ACE40(cBankMonitor* self, int flags)
         }
         cMemMan_free((char*)(sBmVoiceE40*)self->mBankMonitorInstance - 0x10);
     }
-    func_002ADAC8((cMonitor*)((sSndPlayerDAC8*)self), 0);
+    cMonitor__cMonitor((cMonitor*)((sSndPlayerDAC8*)self), 0);
     if (flags & 2) {
         cSoundSys__cSoundSys((char*)self->mpVSoundSys, 0);
     }
@@ -381,11 +381,11 @@ extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD300);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Resume);
 #ifdef SKIP_ASM
 extern "C" void func_002ACB30(void*);
 
-extern "C" void func_002AD300(cBankMonitor* self)
+extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
         func_002ACB30((char*)self->mBankMonitorInstance + i * 0xC0);
@@ -410,11 +410,11 @@ extern "C" void func_002AD358(cBankMonitor* self, int idx, int key, float v)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD398);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Destroy);
 #ifdef SKIP_ASM
 extern "C" void func_002ABB38(void*);
 
-extern "C" void func_002AD398(cBankMonitor* self, int i)
+extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i)
 {
     func_002ABB38((char*)self->mBankMonitorInstance + i * 0xC0);
 }
@@ -423,13 +423,13 @@ extern "C" void func_002AD398(cBankMonitor* self, int i)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002AD3C0);
 #ifdef SKIP_ASM
-extern "C" void func_002AD398(cBankMonitor* self, int i);
+extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i);
 
 extern "C" void func_002AD3C0(cBankMonitor* self)
 {
     int i;
     for (i = 0; i < 64; i++) {
-        func_002AD398(self, i);
+        cBankMonitor_BANKMONITOR_Destroy(self, i);
     }
 }
 #endif
@@ -470,9 +470,9 @@ extern "C" void func_002AD410(cBankMonitor* self, sBmKeyD410 key)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD4D8);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_DestroyAllWithPtr);
 #ifdef SKIP_ASM
-extern "C" void func_002AD4D8(cBankMonitor* self, int id)
+extern "C" void cBankMonitor_BANKMONITOR_DestroyAllWithPtr(cBankMonitor* self, int id)
 {
     for (int i = 0; i < 64; i++) {
         if (*(int*)((char*)self->mBankMonitorInstance + i * 0xC0 + 0x80) == id) {
@@ -521,7 +521,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx,
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD650);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_StopBank);
 #ifdef SKIP_ASM
 extern "C" int func_002ABB80(void*);
 extern "C" void func_002ABB38(void*);
@@ -536,7 +536,7 @@ struct sVoiceD650 {
     char pad[0xC0 - 0x10];
 };
 
-extern "C" void func_002AD650(cBankMonitor* self, int id, float v)
+extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, float v)
 {
     for (int i = 0; i < 64; i++) {
         if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
@@ -598,7 +598,7 @@ extern "C" int func_002AD7A8(cBankMonitor* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD810);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_CameraChange);
 #ifdef SKIP_ASM
 struct sBankVoice {
     char pad[0x5c];
@@ -606,7 +606,7 @@ struct sBankVoice {
     char pad2[0xc0 - 0x60];
 };
 
-extern "C" void func_002AD810(cBankMonitor* self)
+extern "C" void cBankMonitor_BANKMONITOR_CameraChange(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
         ((sBankVoice*)self->mBankMonitorInstance)[i].value = -1.0f;
@@ -639,9 +639,9 @@ extern "C" void func_002AD860(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD888);
+INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_Create);
 #ifdef SKIP_ASM
-extern "C" void func_002AD940(cMonitorInstance*);
+extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
 void func_002AD970(void* self, int a1);
 void func_002AD980(void* self);
 
@@ -652,9 +652,9 @@ struct sBmKeyD888 {
 };
 
 // PORT: 64-bit long sound key
-extern "C" void func_002AD888(cMonitorInstance* self, int a1, long key, int b, int c, int d, int e, int f)
+extern "C" void cMonitorInstance_Create(cMonitorInstance* self, int a1, long key, int b, int c, int d, int e, int f)
 {
-    func_002AD940(self);
+    cMonitorInstance_Reset(self);
     func_002AD970(self, a1);
     // PORT: the 8-byte key is copied through its in-memory layout
     *(sBmKeyD888*)&self->mCallback = *(sBmKeyD888*)&key;
@@ -668,21 +668,21 @@ extern "C" void func_002AD888(cMonitorInstance* self, int a1, long key, int b, i
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD930);
+INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_IsFree);
 #ifdef SKIP_ASM
-extern "C" int func_002AD930(cMonitorInstance* self)
+extern "C" int cMonitorInstance_IsFree(cMonitorInstance* self)
 {
     return self->mCountReset == -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD940);
+INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_Reset);
 #ifdef SKIP_ASM
 void func_002AD990(void* self);
 void func_002AD970(void* self, int a1);
 
-extern "C" void func_002AD940(cMonitorInstance* self)
+extern "C" void cMonitorInstance_Reset(cMonitorInstance* self)
 {
     func_002AD990(self);
     func_002AD970(self, -1);
@@ -798,7 +798,7 @@ extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, i
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADAC8);
+INCLUDE_ASM("sound/bankmonitor", cMonitor__cMonitor);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_003B5948(int id);
@@ -824,7 +824,7 @@ struct sSndPlayerDAC8 {
     void** vtbl;                // 0x8D8
 };
 
-extern "C" void func_002ADAC8(cMonitor* self, int flags)
+extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
 {
     cMonitorInstance* end = ((&self->mMonitorInstance[0])) + 48;
     self->mVtbl = cMonitor_vtbl;
@@ -870,9 +870,9 @@ void* func_002ADBF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADC10);
+INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Update);
 #ifdef SKIP_ASM
-extern "C" void func_002ADC10(cMonitor* self)
+extern "C" void cMonitor_MONITOR_Update(cMonitor* self)
 {
     if (self->mPaused == 0) {
         self->mCounter += 1;
@@ -881,12 +881,12 @@ extern "C" void func_002ADC10(cMonitor* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/bankmonitor", func_002ADC30);
+INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_GetFreeInstance);
 #ifdef SKIP_ASM
-extern "C" int func_002ADC30(cMonitor* self, int n)
+extern "C" int cMonitor_MONITOR_GetFreeInstance(cMonitor* self, int n)
 {
     for (int i = 0; i < 48; i++) {
-        if (func_002AD930((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C)) != 0) {
+        if (cMonitorInstance_IsFree((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C)) != 0) {
             if (--n == 0) {
                 return i;
             }
@@ -901,17 +901,17 @@ INCLUDE_ASM("sound/bankmonitor", func_002ADCA0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002ADC30(cMonitor* self, int n);
+extern "C" int cMonitor_MONITOR_GetFreeInstance(cMonitor* self, int n);
 
-void func_002AD888_cb(void* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("func_002AD888");
+void cMonitorInstance_Create_cb(void* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("cMonitorInstance_Create");
 
 extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("func_002ADCA0");
 extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f)
 {
     self->busy = self->busy + 1;
-    int idx = func_002ADC30((cMonitor*)self, self->busy);
+    int idx = cMonitor_MONITOR_GetFreeInstance((cMonitor*)self, self->busy);
     if (idx >= 0) {
-        func_002AD888_cb((char*)self + 0x98 + idx * 0x2C, a1, cb, b, c, d, e, f);
+        cMonitorInstance_Create_cb((char*)self + 0x98 + idx * 0x2C, a1, cb, b, c, d, e, f);
     }
     self->busy = self->busy - 1;
     return idx;
@@ -924,21 +924,21 @@ INCLUDE_ASM("sound/bankmonitor", func_002ADD78);
 extern "C" void func_002ADD78(cMonitor* self, int idx)
 {
     int off = idx * 0x2C + 0x98;
-    func_002AD940((cMonitorInstance*)(((char*)self) + off));
+    cMonitorInstance_Reset((cMonitorInstance*)(((char*)self) + off));
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADDA0);
 #ifdef SKIP_ASM
-extern "C" void func_002AD940(cMonitorInstance*);
+extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
 
 extern "C" void func_002ADDA0(cMonitor* self)
 {
     char* p = (char*)self + 0x98;
     int i;
     for (i = 47; i >= 0; i--) {
-        func_002AD940((cMonitorInstance*)p);
+        cMonitorInstance_Reset((cMonitorInstance*)p);
         p += 0x2C;
     }
 }
@@ -947,7 +947,7 @@ extern "C" void func_002ADDA0(cMonitor* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADDE0);
 #ifdef SKIP_ASM
-extern "C" void func_002AD940(cMonitorInstance*);
+extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
 
 struct sBmKeyDDE0 {
     short a;
@@ -981,7 +981,7 @@ void func_002ADDE0_impl(void* self, sBmKeyDDE0 key)
 {
     for (int i = 0; i < 48; i++) {
         if (func_002ADDE0_match((char*)self + 0x98 + i * 0x2C, key)) {
-            func_002AD940((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C));
+            cMonitorInstance_Reset((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C));
         }
         ASSERT_DDE0(i < 48);
     }

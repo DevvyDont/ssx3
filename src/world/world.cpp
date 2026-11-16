@@ -194,7 +194,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
 extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
-extern "C" void func_00318D28(cBXString* self);
+extern "C" void cBXString_makeUpper(cBXString* self);
 extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" int func_004165A8(const void* a, const void* b);
 void cMemMan_free(void*);
@@ -254,7 +254,7 @@ extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
             unsigned int j;
             names[i].ok = 0;
             cBXString_cBXString2(&s, names[i].name);
-            func_00318D28((cBXString*)&s);
+            cBXString_makeUpper((cBXString*)&s);
             for (j = 0; j < data->count; j++)
             {
                 if (func_004165A8(&data->entries[j], s.s) == 0)
@@ -301,64 +301,64 @@ extern "C" void cWorld_load(void** self, const char* name, int nash)
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6B78);
+INCLUDE_ASM("world/world", cWorld_getWScriptHeaderId);
 #ifdef SKIP_ASM
-struct func_003A6B78_sEntry {
+struct cWorld_getWScriptHeaderId_sEntry {
     short type;
     char pad2[6];
     void* data;
 };
 
-struct func_003A6B78_sTable {
+struct cWorld_getWScriptHeaderId_sTable {
     char pad[4];
-    func_003A6B78_sEntry* entries;
+    cWorld_getWScriptHeaderId_sEntry* entries;
 };
 
-extern "C" int func_003AD120(func_003A6B78_sEntry* e, void* obj, int i);
+extern "C" int func_003AD120(cWorld_getWScriptHeaderId_sEntry* e, void* obj, int i);
 
-extern "C" int func_003A6B78(cWorld* self, void* obj, int i)
+extern "C" int cWorld_getWScriptHeaderId(cWorld* self, void* obj, int i)
 {
-    return func_003AD120(&((func_003A6B78_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
+    return func_003AD120(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6BA8);
+INCLUDE_ASM("world/world", cWorld_getNumGlobalScripts);
 #ifdef SKIP_ASM
-struct func_003A6BA8_sEntry {
+struct cWorld_getNumGlobalScripts_sEntry {
     short type;
     char pad2[6];
     void* data;
 };
 
-struct func_003A6BA8_sTable {
+struct cWorld_getNumGlobalScripts_sTable {
     char pad[4];
-    func_003A6BA8_sEntry* entries;
+    cWorld_getNumGlobalScripts_sEntry* entries;
 };
 
-extern "C" int func_003ADC80(func_003A6BA8_sEntry* e);
+extern "C" int func_003ADC80(cWorld_getNumGlobalScripts_sEntry* e);
 
-extern "C" int func_003A6BA8(cWorld* self, int i)
+extern "C" int cWorld_getNumGlobalScripts(cWorld* self, int i)
 {
-    return func_003ADC80(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
+    return func_003ADC80(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6BD8);
+INCLUDE_ASM("world/world", cWorld_getGlobalScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADCB0(func_003A6BA8_sEntry* e);
+extern "C" int func_003ADCB0(cWorld_getNumGlobalScripts_sEntry* e);
 
-extern "C" int func_003A6BD8(cWorld* self, int i)
+extern "C" int cWorld_getGlobalScripts(cWorld* self, int i)
 {
-    return func_003ADCB0(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
+    return func_003ADCB0(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getNumProcessScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADCE0(func_003A6BA8_sEntry* e);
+extern "C" int func_003ADCE0(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns how many process scripts a world-script cache entry holds.
@@ -369,14 +369,14 @@ extern "C" int func_003ADCE0(func_003A6BA8_sEntry* e);
  */
 extern "C" int cWorld_getNumProcessScripts(cWorld* self, int i)
 {
-    return func_003ADCE0(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
+    return func_003ADCE0(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getProcessScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD10(func_003A6BA8_sEntry* e);
+extern "C" int func_003ADD10(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns the process-script list of a world-script cache entry.
@@ -387,29 +387,29 @@ extern "C" int func_003ADD10(func_003A6BA8_sEntry* e);
  */
 extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
 {
-    return func_003ADD10(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
+    return func_003ADD10(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getNumMissionScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD40(func_003A6BA8_sEntry* e);
+extern "C" int func_003ADD40(cWorld_getNumGlobalScripts_sEntry* e);
 
 extern "C" int cWorld_getNumMissionScripts(cWorld* self, int i)
 {
-    return func_003ADD40(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
+    return func_003ADD40(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getMissionScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD70(func_003A6BA8_sEntry* e);
+extern "C" int func_003ADD70(cWorld_getNumGlobalScripts_sEntry* e);
 
 extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 {
-    return func_003ADD70(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
+    return func_003ADD70(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -450,14 +450,14 @@ int func_003A6D00(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6D18);
+INCLUDE_ASM("world/world", cWorld_getWScriptScript);
 #ifdef SKIP_ASM
-extern "C" int func_003ADC50(func_003A6BA8_sEntry* e, unsigned int i);
+extern "C" int func_003ADC50(cWorld_getNumGlobalScripts_sEntry* e, unsigned int i);
 
-extern "C" int func_003A6D18(cWorld* self, unsigned int* handle)
+extern "C" int cWorld_getWScriptScript(cWorld* self, unsigned int* handle)
 {
     unsigned int h = *handle;
-    return func_003ADC50(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[h & 0xFF], h >> 8);
+    return func_003ADC50(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[h & 0xFF], h >> 8);
 }
 #endif
 

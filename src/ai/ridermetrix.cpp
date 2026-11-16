@@ -555,7 +555,7 @@ struct sGradeStep_119210;
 extern "C" int func_00119210(void* self, int* idx, sGradeStep_119210* tbl, int type, float x);
 extern "C" void func_00116FB8(void* slot);
 extern "C" void func_00117FE0(void* self);
-extern "C" void func_00290F58(void* audio, void* rider, float mult);
+extern "C" void cSSXAudio_SetCurTrickPower(void* audio, void* rider, float mult);
 extern "C" void* func_00416210(void* dst, int c, int n);
 int func_0011FE98(void* rider);
 int func_0011FEE8(void* rider);
@@ -706,7 +706,7 @@ extern "C" void func_00117C28(sMetrix17C28* self)
     }
     func_00416210(self->clear, 0, 8);
     self->dirty = 1;
-    func_00290F58(func_0028B180(), self->rider, self->mult);
+    cSSXAudio_SetCurTrickPower(func_0028B180(), self->rider, self->mult);
 }
 #endif
 
@@ -721,15 +721,15 @@ extern "C" int func_001298C8();
 extern "C" float func_0031C040(float a);
 extern "C" float cPrewindControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float cSpinControl_getFlipSpinInputAng(void* p, int* fail);
-extern "C" float func_00135F70(void* p, int* fail);
-extern "C" float func_00136100(void* p);
-extern "C" float func_00136168(void* p);
+extern "C" float cSpinControl_getFlipSpinAng(void* p, int* fail);
+extern "C" float cSpinControl_getInvertScale(void* p);
+extern "C" float cSpinControl_getOffAxisScale(void* p);
 extern "C" int func_00150960(void* iface, int a);
-extern "C" void func_0029A7D8(void* audio, void* rider, int points);
-extern "C" void func_0029B0E0(void* audio, void* rider);
-extern "C" void func_0029B3C0(void* audio, void* rider);
+extern "C" void cSSXAudio_PointsEvent(void* audio, void* rider, int points);
+extern "C" void cSSXAudio_StartUberSpin(void* audio, void* rider);
+extern "C" void cSSXAudio_EndUberSpin(void* audio, void* rider);
 extern "C" void func_00299638(void* audio, void* rider);
-extern "C" void func_002997B8(void* audio, void* rider);
+extern "C" void cSSXAudio_LoseMaxPowerEvent(void* audio, void* rider);
 extern char D_00457820[];
 extern char D_00457830[];
 extern char D_00457840[];
@@ -843,7 +843,7 @@ extern "C" void func_00117FE0(void* vself)
     int pts = func_00117948(self);
     if (pts > 0) {
         cRiderMetrix_addHUDfx1(self, 1, pts, func_00119310(self, pts), -1.0f);
-        func_0029A7D8(func_0028B180(), self->rider, pts);
+        cSSXAudio_PointsEvent(func_0028B180(), self->rider, pts);
     }
     if (func_0011FEE8(self->rider) == 8 && !subStateIs_117FE0(self->rider->sub, 3))
         func_001171A8_f(&self->slots[11], 11, 0, self->rider->sub->f330 <? 1.0f, 0);
@@ -899,7 +899,7 @@ extern "C" void func_00117FE0(void* vself)
                 cRiderMetrix_addHUDfx1(self, 0xC, 0, 0, -1.0f);
         } else {
             int fail2 = 0;
-            float yaw = func_00135F70((char*)self->rider->sub + 0x230, &fail2);
+            float yaw = cSpinControl_getFlipSpinAng((char*)self->rider->sub + 0x230, &fail2);
             if (fail2 != 0) {
                 cRiderMetrix_removeHUDfx(self, 0xC);
                 cRiderMetrix_removeHUDfx(self, 0xD);
@@ -945,8 +945,8 @@ extern "C" void func_00117FE0(void* vself)
                 } else {
                     main = 0x14;
                 }
-                float w1 = func_00136100((char*)self->rider->sub + 0x230);
-                float w2 = func_00136168((char*)self->rider->sub + 0x230);
+                float w1 = cSpinControl_getInvertScale((char*)self->rider->sub + 0x230);
+                float w2 = cSpinControl_getOffAxisScale((char*)self->rider->sub + 0x230);
                 func_001171A8_f(&self->slots[main], main, 0, 1.0f, 0);
                 if (s1 != 0x34)
                     func_001171A8_f(&self->slots[s1], s1, 0, w1, 1);
@@ -1064,14 +1064,14 @@ extern "C" void func_00117FE0(void* vself)
             k = left;
         if (slotFree_117FE0(&self->slots[10])) {
             func_001171A8_f(&self->slots[10], 10, 0, 0.0f, 0);
-            func_0029B0E0(func_0028B180(), self->rider);
+            cSSXAudio_StartUberSpin(func_0028B180(), self->rider);
         }
         float cur = self->slots[10].value / self->slots[10].total;
         float f = approach_117FE0((float)k * 0.1111111119389534f <? 1.0f, cur, 0.01666666753590107f);
         func_001171A8_f(&self->slots[10], 10, 0, f, k);
     } else {
         if (!slotFree_117FE0(&self->slots[10]))
-            func_0029B3C0(func_0028B180(), self->rider);
+            cSSXAudio_EndUberSpin(func_0028B180(), self->rider);
         cRiderMetrix_removeHUDfx(self, 10);
     }
     if (slotFree_117FE0(&self->slots[9])) {
@@ -1083,7 +1083,7 @@ extern "C" void func_00117FE0(void* vself)
         float cur = self->slots[9].value / self->slots[9].total;
         if (cur == 1.0f && self->rider->f2F0 == 0.0f) {
             cRiderMetrix_removeHUDfx(self, 9);
-            func_002997B8(func_0028B180(), self->rider);
+            cSSXAudio_LoseMaxPowerEvent(func_0028B180(), self->rider);
         } else {
             func_001171A8_f(&self->slots[9], 9, 0, approach_117FE0(1.0f - self->rider->f2F0 * 0.05000000074505806f, cur, 0.01666666753590107f), self->rider->f2F4 > 11 ? 11 : self->rider->f2F4);
         }
@@ -1969,7 +1969,7 @@ extern "C" int func_0011A8C8(void* self, sTrickId* id, int stance, int alternate
 extern "C" int func_0011B1A8(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" void* func_0028B180();
-extern "C" void func_0029B7E0(void* audio, int rider);
+extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int func_001190F0(void* self, sTrickId* id);
 extern "C" void func_00118FF8(void* self, sTrickId* id, int repeat);
 
@@ -1990,7 +1990,7 @@ extern "C" void func_0011A168(void* self, int stance, int alternate, int style, 
         {
             *(float*)((char*)self + 0x14) += pts * 9.999999747378752e-05f;
             cRiderMetrix_addHUDfx1(self, 0x32, pts, 0, 1.5f);
-            func_0029B7E0(func_0028B180(), *(int*)((char*)self + 0x1AC));
+            cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1AC));
         }
         func_00118FF8(self, id, func_001190F0(self, id) > 0);
     }
@@ -2023,14 +2023,14 @@ extern "C" int func_00117948(void* self);
 extern "C" int func_0011B1A8(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" void* func_0028B180();
-extern "C" void func_0029B7E0(void* audio, int rider);
+extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int func_001190F0(void* self, sTrickId* id);
 extern "C" void func_00118FF8(void* self, sTrickId* id, int repeat);
 extern "C" int func_00117990(void* self);
 extern "C" int func_00119310(void* self, int points);
 extern "C" int func_00117908(void* self);
 extern "C" void func_00117638(void* self, int points);
-extern "C" void func_0029B430(void* audio, int rider, int ubers, int runUbers);
+extern "C" void cSSXAudio_LandedUberTrick(void* audio, int rider, int ubers, int runUbers);
 extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 extern "C" void func_00117708(void* self, float seconds);
 extern "C" void* cBE_getBE();
@@ -2097,7 +2097,7 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
             if (bonus > 0) {
                 *(float*)((char*)self + 0x14) += (float)bonus * 0.0001f;
                 cRiderMetrix_addHUDfx1(self, 0x32, bonus, 0, 1.5f);
-                func_0029B7E0(func_0028B180(), *(int*)((char*)self + 0x1ac));
+                cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1ac));
             }
             repeats = func_001190F0(self, &id);
             func_00118FF8(self, &id, repeats > 0);
@@ -2131,7 +2131,7 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
         *(int*)((char*)self + 0x108) += *(int*)((char*)self + 0x80);
 
         if (*(int*)((char*)self + 0x54) > 0) {
-            func_0029B430(func_0028B180(), *(int*)((char*)self + 0x1ac), *(int*)((char*)self + 0x54),
+            cSSXAudio_LandedUberTrick(func_0028B180(), *(int*)((char*)self + 0x1ac), *(int*)((char*)self + 0x54),
                           *(int*)((char*)self + 0x114));
         }
 

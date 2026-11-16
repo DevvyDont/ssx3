@@ -4581,7 +4581,7 @@ extern "C" void func_00178208_v(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001783E0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_snap);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -4664,7 +4664,7 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
     return r;
 }
 
-extern "C" void func_001783E0(cCameraAlgorithm* self, long id)
+extern "C" void cSPOKEChaseAlgorithm_snap(cCameraAlgorithm* self, long id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cBeing*)(rider + 0x6C0))->getAIIndex()) {

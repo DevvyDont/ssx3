@@ -502,9 +502,9 @@ extern "C" void cWorldCache__cWorldCache(int* self, int flags)
 INCLUDE_ASM("world/worldcache", cWorldCache_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void func_003A8330(cWorldCache* self);
-extern "C" int func_003A9890(void* view, int i);
-extern "C" void func_003A8230(cWorldCache* self, int i);
+extern "C" void cWorldCache_resetPageMap(cWorldCache* self);
+extern "C" int cWorldView_isSectionUnLoaded(void* view, int i);
+extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
 struct cWorldCache_purge_sVEntry {
@@ -524,7 +524,7 @@ struct cWorldCache_purge_sObj {
 extern "C" void cWorldCache_purge(cWorldCache* p)
 {
     cWorldCache* self = p;
-    func_003A8330((cWorldCache*)self);
+    cWorldCache_resetPageMap((cWorldCache*)self);
     cWorldCache_purge_sObj* o = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
     if (o != 0) {
         o->vt[1].fn((char*)o + o->vt[1].delta, 3);
@@ -535,8 +535,8 @@ extern "C" void cWorldCache_purge(cWorldCache* p)
     if (((void*)self->m_pSectionCacheTable) != 0) {
         unsigned int i;
         for (i = 0; i < (self->mp_DataHeader)->m_uiNumSections; i++) {
-            if (func_003A9890(((char*)&self->m_WorldView), i) == 0) {
-                func_003A8230((cWorldCache*)self, i);
+            if (cWorldView_isSectionUnLoaded(((char*)&self->m_WorldView), i) == 0) {
+                cWorldCache_deactivateSectionMem((cWorldCache*)self, i);
             }
         }
         if (((void*)self->m_pSectionCacheTable) != 0) {
@@ -657,12 +657,12 @@ extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int sec
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A8230);
+INCLUDE_ASM("world/worldcache", cWorldCache_deactivateSectionMem);
 #ifdef SKIP_ASM
 extern "C" void func_003A7B98(void* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
-extern "C" void func_003A8230(cWorldCache* self, int i)
+extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i)
 {
     func_003A7B98(self->m_pWorldMemMan, i);
     int* e = ((int**)self->m_pSectionCacheTable)[i];
@@ -736,11 +736,11 @@ extern "C" void cWorldCache_initPageMap(cWorldCache_initPageMap_sCache* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8330);
+INCLUDE_ASM("world/worldcache", cWorldCache_resetPageMap);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_003A7010(void* p, int i);
-extern "C" void func_003A8528(cWorldCache* self, int i);
+extern "C" void cStreamMan_cancelStreamRequest(void* p, int i);
+extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
 
 struct sWcEnt_8330 {
     int state;
@@ -757,7 +757,7 @@ struct sWc_8330 {
     sWcEnt_8330 ents[1];        // 0x3F0
 };
 
-extern "C" void func_003A8330(cWorldCache* vself)
+extern "C" void cWorldCache_resetPageMap(cWorldCache* vself)
 {
     sWc_8330* self = (sWc_8330*)vself;
     unsigned int i;
@@ -767,14 +767,14 @@ extern "C" void func_003A8330(cWorldCache* vself)
         case 1:
             break;
         case 2:
-            func_003A7010((char*)self + 0x300, i);
+            cStreamMan_cancelStreamRequest((char*)self + 0x300, i);
             self->ents[i].state = 4;
-            func_003A8528((cWorldCache*)self, i);
+            cWorldCache_purgePage((cWorldCache*)self, i);
             break;
         case 3:
         case 4:
             self->ents[i].state = 4;
-            func_003A8528((cWorldCache*)self, i);
+            cWorldCache_purgePage((cWorldCache*)self, i);
             break;
         }
         self->ents[i].state = 0;
@@ -860,7 +860,7 @@ extern "C" int func_003A8510(int arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8528);
+INCLUDE_ASM("world/worldcache", cWorldCache_purgePage);
 #ifdef SKIP_ASM
 struct sHandle_8528 {
     unsigned int type : 8;
@@ -891,7 +891,7 @@ extern "C" void func_003A8E20(void* self, int cell, int kind, sHandle_8528 h);
 extern "C" void func_003A7C30(int* self, int flags);
 
 // Unloads a cache cell: reports each referenced object (kind, handle) to func_003A8E20, then frees the list.
-extern "C" void func_003A8528(cWorldCache* vself, int cell)
+extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
 {
     sCache_8528* self = (sCache_8528*)vself;
     sRefList_8528* list = self->cells[cell].list;
@@ -910,9 +910,9 @@ extern "C" void func_003A8528(cWorldCache* vself, int cell)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8618);
+INCLUDE_ASM("world/worldcache", cWorldCache_isPageLoaded);
 #ifdef SKIP_ASM
-extern "C" int func_003A8618(cWorldCache* self, int a1)
+extern "C" int cWorldCache_isPageLoaded(cWorldCache* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     return *(int*)(p + 0x3f0) == 3;
@@ -920,9 +920,9 @@ extern "C" int func_003A8618(cWorldCache* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8638);
+INCLUDE_ASM("world/worldcache", cWorldCache_isPageEmpty);
 #ifdef SKIP_ASM
-extern "C" int func_003A8638(cWorldCache* self, int a1)
+extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     return *(int*)(p + 0x3f0) == 0;
@@ -930,9 +930,9 @@ extern "C" int func_003A8638(cWorldCache* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8650);
+INCLUDE_ASM("world/worldcache", cWorldCache_signalPageLoadComplete);
 #ifdef SKIP_ASM
-extern "C" void func_003A8650(cWorldCache* self, int a1)
+extern "C" void cWorldCache_signalPageLoadComplete(cWorldCache* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     *(int*)(p + 0x3f0) = 3;
@@ -944,9 +944,9 @@ INCLUDE_ASM("world/worldcache", cWorldCache_updatePages);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
-extern "C" void* func_003A9A98(void* self, int i);
+extern "C" void* cWorldView_getHull(void* self, int i);
 extern "C" void cStreamMan_addStreamRequest(void* self, int i, int a, int b);
-extern "C" void func_003A8528(cWorldCache* self, int i);
+extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
 extern char* D_004A5B64;
 extern char D_00494E88[];
 
@@ -1023,7 +1023,7 @@ extern "C" void cWorldCache_updatePages(cWorldCache* p)
         case 4:
             if (Frame_8668() - self->slot[i].stamp < 5)
                 break;
-            func_003A8528((cWorldCache*)self, i);
+            cWorldCache_purgePage((cWorldCache*)self, i);
             self->slot[i].state = 0;
             break;
         }
@@ -1033,7 +1033,7 @@ extern "C" void cWorldCache_updatePages(cWorldCache* p)
     void* mgr = (char*)self + 0x300;
     if (self->busy != 0)
         return;
-    unsigned short* data = (unsigned short*)func_003A9A98((char*)self + 0x10, best);
+    unsigned short* data = (unsigned short*)cWorldView_getHull((char*)self + 0x10, best);
     self->slot[best].page = new (D_00494E88, 0x20000000, 0) sHullPage_8668(data);
     cStreamMan_addStreamRequest(mgr, best, data[0], *(int*)(data + 2));
     self->slot[best].state = 2;
@@ -1069,7 +1069,7 @@ extern "C" void func_003A88A8(cWorldCache* worldCache)
                 break;
             self->slot[i].state = 4;
         case 4:
-            func_003A8528((cWorldCache*)self, i);
+            cWorldCache_purgePage((cWorldCache*)self, i);
             self->slot[i].state = 0;
             break;
         }
@@ -1096,7 +1096,7 @@ struct sWc_89C8 {
     sWcEnt_89C8 ents[1];        // 0x3F0
 };
 
-extern "C" void func_003A8528(cWorldCache* self, int i);
+extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
 
 extern "C" void func_003A89C8(cWorldCache* vself)
 {
@@ -1123,7 +1123,7 @@ extern "C" void func_003A89C8(cWorldCache* vself)
     }
     if (best >= 0) {
         self->ents[best].state = 4;
-        func_003A8528((cWorldCache*)self, best);
+        cWorldCache_purgePage((cWorldCache*)self, best);
         self->ents[best].state = 0;
     }
 }
@@ -1699,7 +1699,7 @@ extern "C" void cWorldView_update(cWorldView* p)
             self->entries[i].state = 2;
             break;
         case 2:
-            if (func_003A8618((cWorldCache*)self->cache, self->sections[i].id)) {
+            if (cWorldCache_isPageLoaded((cWorldCache*)self->cache, self->sections[i].id)) {
                 self->entries[i].state = 5;
                 cPS2GraphicsMan* o = cGraphicsMan_TheGraphicsMan;
                 sVE_9258* vt = (sVE_9258*)o->mVtbl;
@@ -1707,12 +1707,12 @@ extern "C" void cWorldView_update(cWorldView* p)
             }
             break;
         case 4:
-            if (func_003A8638((cWorldCache*)self->cache, self->sections[i].id)) {
+            if (cWorldCache_isPageEmpty((cWorldCache*)self->cache, self->sections[i].id)) {
                 int ok = 1;
                 func_003A95C0((void**)self, self->sections[i].tree, &ok);
                 if (ok) {
                     self->entries[i].state = 0;
-                    func_003A8230((cWorldCache*)self->cache, i);
+                    cWorldCache_deactivateSectionMem((cWorldCache*)self->cache, i);
                     func_003AD1A8();
                 }
             }
@@ -1765,13 +1765,13 @@ extern "C" void func_003A9558(void** self, func_003A9558_sNode* node)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A95C0);
 #ifdef SKIP_ASM
-extern "C" int func_003A8638(cWorldCache* self, int a1);
+extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1);
 
 extern "C" void func_003A95C0(void** self, void* node, int* ok)
 {
     if (*ok != 0) {
         void* d = *(void**)((char*)node + 0x58);
-        if (d != 0 && func_003A8638((cWorldCache*)(*self), *(unsigned short*)((char*)d + 2)) == 0) {
+        if (d != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), *(unsigned short*)((char*)d + 2)) == 0) {
             *ok = 0;
             return;
         }
@@ -1866,11 +1866,11 @@ extern "C" void func_003A9658_impl(cWorldView_9658* self, int id, const sWCVec4&
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A96E0);
+INCLUDE_ASM("world/worldcache", cWorldView_getFocus);
 #ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
-extern "C" int func_003A96E0(cWorldView* self, int i, sWCQuad* outPos, float* outT)
+extern "C" int cWorldView_getFocus(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
     char* e = (char*)self + i * 0x50;
     if (*(int*)(e + 0x240) == 0) {
@@ -1889,11 +1889,11 @@ extern "C" int func_003A96E0(cWorldView* self, int i, sWCQuad* outPos, float* ou
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9770);
+INCLUDE_ASM("world/worldcache", cWorldView_getTestFocus);
 #ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
-extern "C" int func_003A9770(cWorldView* self, int i, sWCQuad* outPos, float* outT)
+extern "C" int cWorldView_getTestFocus(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
     char* e = (char*)self + i * 0x50;
     if (*(int*)(e + 0x240) == 0) {

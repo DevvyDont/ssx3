@@ -284,14 +284,14 @@ extern "C" void func_00309B00(void* self, cWScriptListNode* node)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getScriptCode);
 #ifdef SKIP_ASM
-extern "C" int func_003A6D18(void*, int*);
+extern "C" int cWorld_getWScriptScript(void*, int*);
 
 static inline bool cWScriptMan_getScriptCode_valid(int id) { return id != -1; }
 
 /**
  * Looks up the code of a world script by its resource ID.
  *
- * Asks the world (the pointer at +0x28C) through func_003A6D18 (On Tour cWorld::getWScriptScript).
+ * Asks the world (the pointer at +0x28C) through cWorld_getWScriptScript (On Tour cWorld::getWScriptScript).
  *
  * @param id  the script's resource ID; -1 means none
  * @return the script code, or 0 for ID -1
@@ -299,7 +299,7 @@ static inline bool cWScriptMan_getScriptCode_valid(int id) { return id != -1; }
 extern "C" int cWScriptMan_getScriptCode(void* self, int id)
 {
     if (cWScriptMan_getScriptCode_valid(id)) {
-        return func_003A6D18(*(void**)((char*)self + 0x28C), &id);
+        return cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id);
     }
     return 0;
 }
@@ -374,7 +374,7 @@ extern "C" float func_00309BA8(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_00309C88);
 #ifdef SKIP_ASM
-extern "C" int func_003A6D18(void*, int*);
+extern "C" int cWorld_getWScriptScript(void*, int*);
 struct func_00309DD0_sValue;
 struct sLunoValue_9C88 {
     int word0;
@@ -393,7 +393,7 @@ extern "C" void func_00309C88(void* self, int* handle)
     sLunoValue_9C88 arg;
     sLunoValue_9C88 ret;
     sLunoCall_9C88 call;
-    func_00226600(&arg, func_003A6D18(*(void**)((char*)self + 0x28C), handle), 0);
+    func_00226600(&arg, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), handle), 0);
     ret.type = 0;
     ret.word0 = 0;
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
@@ -429,7 +429,7 @@ extern "C" void func_00309D20(void* self, int* handle, int id)
     func_00309D20_sCall call;
     int saved = *(int*)((char*)self + 0x290);
     *(int*)((char*)self + 0x290) = id;
-    func_00226600(&arg, func_003A6D18(*(void**)((char*)self + 0x28C), handle), 0);
+    func_00226600(&arg, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), handle), 0);
     ret.type = 0;
     ret.word0 = 0;
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
@@ -544,8 +544,8 @@ struct cWScriptIdTable;
 extern "C" void func_0030C390(cWScriptIdTable* self);
 extern "C" void func_00309C88(void* self, int* idx);
 extern "C" void cAvalanche_reset(void);
-extern "C" int func_003A6BA8(void* world, int i);
-extern "C" int* func_003A6BD8(void* world, int i);
+extern "C" int cWorld_getNumGlobalScripts(void* world, int i);
+extern "C" int* cWorld_getGlobalScripts(void* world, int i);
 
 static inline bool wsIsType3_9F18(sWSSection9F18* s)
 {
@@ -574,9 +574,9 @@ extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
     n = cWorldView_getNumSections((cWorldView*)(self->world->view + 0x10));
     for (i = 0; i < n; i++) {
         if (wsIsType3_9F18(&self->world->info->sections[i])) {
-            int* p = func_003A6BD8(self->world, i);
+            int* p = cWorld_getGlobalScripts(self->world, i);
             if (p != 0) {
-                int cnt = func_003A6BA8(self->world, i);
+                int cnt = cWorld_getNumGlobalScripts(self->world, i);
                 int j;
                 for (j = 0; j < cnt; j++, p++) {
                     func_00309C88(self, p);
@@ -625,8 +625,8 @@ extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00309C88(void* self, int* idx);
-extern "C" int func_003A6B78(void* world, int id, int flag);
-extern "C" int func_003A6D18(void*, int*);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptScript(void*, int*);
 extern "C" void func_003097E0(void* self, int v);
 extern char D_004898D8[];
 
@@ -661,12 +661,12 @@ extern "C" void func_0030A060(void* self, void* a1, void* a2, void* obj)
         sValue_30A060 arg;
         sValue_30A060 ret;
         sCall_30A060 call;
-        int id = func_003A6B78(*(void**)((char*)self + 0x28C), *(int*)((char*)self + 0x290), 2);
+        int id = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), *(int*)((char*)self + 0x290), 2);
         if (valid_30A060(&id)) {
             if (*(int*)((char*)self + 0x2A4) == 0 && *(int*)((char*)self + 0x2A8) == 0) {
                 func_00309C88(self, &id);
             } else {
-                func_00226600(&arg, func_003A6D18(*(void**)((char*)self + 0x28C), &id), 0);
+                func_00226600(&arg, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id), 0);
                 ret.type = 0;
                 ret.word0 = 0;
                 func_002224A8(&call);
@@ -706,25 +706,25 @@ done:
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A270);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 
 extern "C" int func_0030A270(void* self, int id)
 {
-    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 1) != -1;
+    return cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 1) != -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A298);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" void func_00309C88(void* self, int* idx);
 
 extern "C" void func_0030A298(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
-    idx = func_003A6B78(*(void**)((char*)self + 0x28C), id, 1);
+    idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 1);
     int ok = idx != -1;
     if (ok) {
         func_00309C88(self, &idx);
@@ -736,11 +736,11 @@ extern "C" void func_0030A298(void* self, int id)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A2E8);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 
 extern "C" int func_0030A2E8(void* self, int id)
 {
-    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 3) != -1;
+    return cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 3) != -1;
 }
 #endif
 
@@ -879,14 +879,14 @@ extern "C" void func_0030A460(void* self, void* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A548);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" void func_00309C88(void* self, int* idx);
 
 extern "C" void func_0030A548(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
-    idx = func_003A6B78(*(void**)((char*)self + 0x28C), id, 3);
+    idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 3);
     int ok = idx != -1;
     if (ok) {
         func_00309C88(self, &idx);
@@ -898,25 +898,25 @@ extern "C" void func_0030A548(void* self, int id)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A598);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 
 extern "C" int func_0030A598(void* self, int id)
 {
-    return func_003A6B78(*(void**)((char*)self + 0x28C), id, 4) != -1;
+    return cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 4) != -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A5C0);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" void func_00309C88(void* self, int* idx);
 
 extern "C" void func_0030A5C0(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
-    idx = func_003A6B78(*(void**)((char*)self + 0x28C), id, 4);
+    idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 4);
     int ok = idx != -1;
     if (ok) {
         func_00309C88(self, &idx);
@@ -928,14 +928,14 @@ extern "C" void func_0030A5C0(void* self, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A610);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" void func_00309C88(void* self, int* idx);
 
 extern "C" void func_0030A610(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
-    idx = func_003A6B78(*(void**)((char*)self + 0x28C), id, 0);
+    idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 0);
     int ok = idx != -1;
     if (ok) {
         func_00309C88(self, &idx);
@@ -949,21 +949,21 @@ INCLUDE_ASM("wscript/wscriptman", func_0030A660);
 #ifdef SKIP_ASM
 extern "C" int func_0030A660(char* self, int a1)
 {
-    return func_003A6B78(*(void**)(self + 0x28C), a1, 5) != -1;
+    return cWorld_getWScriptHeaderId(*(void**)(self + 0x28C), a1, 5) != -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A688);
 #ifdef SKIP_ASM
-extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" void func_00309C88(void* self, int* idx);
 
 extern "C" void func_0030A688(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
-    idx = func_003A6B78(*(void**)((char*)self + 0x28C), id, 5);
+    idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 5);
     int ok = idx != -1;
     if (ok) {
         func_00309C88(self, &idx);
@@ -2068,7 +2068,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct func_0030C3E0_sTable;
 extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id);
 extern "C" void* func_0028B180();
-extern "C" void func_0029CED8(void*, int, void*, float);
+extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" int func_00144C98(void* iface);
 extern "C" int func_00151178(void* self, int level);
 extern "C" void cRider_flagEventAddCollectible(void* rider, int level, int a2);
@@ -2085,7 +2085,7 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
     for (i = 0; i < 1; i++) {
         if (slots[i].id == id) {
             func_0030C3E0((func_0030C3E0_sTable*)&slots[i], instId);
-            func_0029CED8(func_0028B180(), 5, 0, 1.0f);
+            cSSXAudio_PlayIconSound(func_0028B180(), 5, 0, 1.0f);
             void* i0 = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* i11 = cBE_getInterface_Fv(cBE_getBE(), 0xB);
             int lvl = func_00144C98(i0);

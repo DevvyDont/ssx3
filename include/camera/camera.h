@@ -39,7 +39,7 @@ struct cRider;
 // cRiderCameraTarget (0x8): what the chase algorithms follow: a cCameraTarget (On Tour: 0x4, only the vptr) bound to a
 // rider. Created by cCamera_init: operator new(8, "RiderCameraTarget") + vtable D_0045B7A8 (26 slots, all in
 // camera/camera.cpp 0x15F568-0x15F938: getPosition, getRotation, getVelocity ... each reads Rider), then handed to
-// the chase controller (func_00161A60) and the result algorithm (func_00162310).
+// the chase controller (cChaseCameraController_setTarget) and the result algorithm (func_00162310).
 // NOTE: its t4Vector-returning slots (func_0015F568 .. func_0015F668, except func_0015F640) take the hidden return
 // slot in a0 and `this` in a1.
 struct cRiderCameraTarget {
@@ -87,7 +87,7 @@ struct cCamera {
     // --- cSimpleCamera
     float View;                     // 0x000 [O]; [U] func_0015E668
     float Near;                     // 0x004 [O]; [U] func_0015E668
-    float Far;                      // 0x008 [O]; [U] func_0015E668, func_0015EC98
+    float Far;                      // 0x008 [O]; [U] func_0015E668, cCamera_updateStreamFocus
     float MaxView;                  // 0x00C [O]; [U] cCamera_init stores its arg
     float MinNear;                  // 0x010 [O]; [U] cCamera_init
     float MaxFar;                   // 0x014 [O]; [U] cCamera_init
@@ -105,18 +105,18 @@ struct cCamera {
     cChaseCameraController* ChaseController;   // 0x0A8 [O]; [P] getChaseController; [R] "Chase Cam Controller" (0x44)
     cScriptCameraController* ScriptController; // 0x0AC [O]; [P] getScriptController; [R] "Script Cam Controller" (0x20)
     int StreamFocusID;              // 0x0B0 [O] eStreamFocusID; [R] -1, then cCamera_init: 0 for view 0, 1 for view 1;
-                                    //       [U] func_0015EC98 (updateStreamFocus), func_00168138 getStreamFocusID
+                                    //       [U] cCamera_updateStreamFocus (updateStreamFocus), func_00168138 getStreamFocusID
     int bStreamIsReady;             // 0x0B4 [O] bool (a word in retail); [P] isStreamReady (lw); [R] 0;
-                                    //       [U] func_0015EC98 sets it, func_00168130 returns it
+                                    //       [U] cCamera_updateStreamFocus sets it, func_00168130 returns it
     char unk_0B8[0x8];              // 0x0B8 alignment gap
     cLookAtChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] a cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
                                     //       by func_00176D68, destroyed by func_00176DA8__FPv; [U] cCamera_init sets its
                                     //       Target (func_00162310), func_0015E030 snaps it (func_00166F28)
-    int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] func_0015E360 (shakeCamera) sw,
-                                    //       func_0015E460 (applyCameraShake) lw
-    float MaxShakeVariance;         // 0x454 [O]; [R] 0; [U] func_0015E360 lwc1/swc1, func_0015E460 lwc1
-    int DoingCamShake;              // 0x458 [O] bool; [R] 0; [U] func_0015E360 sw, func_0015E460 lw/sw
-    int DoingCamShakeLastFrame;     // 0x45C [O] bool; [R] 0; [U] func_0015E460 lw/sw
+    int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] cCamera_shakeCamera (shakeCamera) sw,
+                                    //       cCamera_applyCameraShake (applyCameraShake) lw
+    float MaxShakeVariance;         // 0x454 [O]; [R] 0; [U] cCamera_shakeCamera lwc1/swc1, cCamera_applyCameraShake lwc1
+    int DoingCamShake;              // 0x458 [O] bool; [R] 0; [U] cCamera_shakeCamera sw, cCamera_applyCameraShake lw/sw
+    int DoingCamShakeLastFrame;     // 0x45C [O] bool; [R] 0; [U] cCamera_applyCameraShake lw/sw
     float LastGroundMove;           // 0x460 [O]; [R] 0; [U] func_0015EE00 (avoidGround) lwc1/swc1
     char unk_464[0xC];              // 0x464 alignment gap
     t4Vector LastGroundNormal;      // 0x470 [O]; [R] = D_004FF160; [U] func_0015EE00

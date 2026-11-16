@@ -32,14 +32,14 @@ struct cCTAction;
 // Why and how the chase camera last switched algorithm (On Tour: tCameraSwitchRecord, 0x14). Algorithm types are
 // eCamAlgoType values (retail: 0x3D = none, 0x42 = the slow-speed camera, 0x4C = "the player's choice", 0x5D = replay).
 struct tCameraSwitchRecord {
-    int PlayerChoiceType;           // 0x00 [O]; [R] HardReset: persistentPlayerChoiceType[view]; [U] func_00161EF0
+    int PlayerChoiceType;           // 0x00 [O]; [R] HardReset: persistentPlayerChoiceType[view]; [U] cChaseCameraController_switchCamera_UserChange
                                     //      (setPlayerChoice) stores it and the persistent copy
-    int VolumeType;                 // 0x04 [O]; [R] HardReset: 0x3D; [U] func_00162060 stores the trigger's type
-    int LatestReplayType;           // 0x08 [O]; [R] HardReset: 0x3D; [U] func_00161FA0 stores the replay mode
-    unsigned int IsInVolume : 1;    // 0x0C bit 0 [O]; [U] func_00162060 sets it with a volume trigger
-    unsigned int IsInReplay : 1;    // 0x0C bit 1 [O]; [U] func_00161FA0 sets it (`|= 2`), cChaseCameraController_switchCamera_EndReplay clears it
-    unsigned int IsSlow : 1;        // 0x0C bit 2 [O]; [U] func_001621A8 sets it, func_00162218 clears it
-    cCTAction* TriggerAction;       // 0x10 [O]; [R] HardReset: 0; [U] func_00162060 stores the trigger's action
+    int VolumeType;                 // 0x04 [O]; [R] HardReset: 0x3D; [U] cChaseCameraController_switchCamera_Volume stores the trigger's type
+    int LatestReplayType;           // 0x08 [O]; [R] HardReset: 0x3D; [U] cChaseCameraController_switchCamera_ReplayToggle stores the replay mode
+    unsigned int IsInVolume : 1;    // 0x0C bit 0 [O]; [U] cChaseCameraController_switchCamera_Volume sets it with a volume trigger
+    unsigned int IsInReplay : 1;    // 0x0C bit 1 [O]; [U] cChaseCameraController_switchCamera_ReplayToggle sets it (`|= 2`), cChaseCameraController_switchCamera_EndReplay clears it
+    unsigned int IsSlow : 1;        // 0x0C bit 2 [O]; [U] cChaseCameraController_switchCamera_Slow sets it, cChaseCameraController_switchCamera_EndSlow clears it
+    cCTAction* TriggerAction;       // 0x10 [O]; [R] HardReset: 0; [U] cChaseCameraController_switchCamera_Volume stores the trigger's action
 };
 
 CHECK_OFFSET(tCameraSwitchRecord, PlayerChoiceType, 0x00);
@@ -60,12 +60,12 @@ struct cChaseCameraController {
     // --- cChaseCameraController
     int LatestAlgoType;             // 0x18 [O] eCamAlgoType; [P] getLatestAlgoType (lw); [U] cChaseCameraController_addAlgorithm copies the
                                     //      new algorithm's AlgorithmType; func_00167FE8 returns it
-    int PreferredChaseAlgoLastFrame; // 0x1C [O] eCamAlgoType; [R] HardReset: 0x3D; [U] func_00161AB0 (processInput)
-    cRiderCameraTarget* Target;     // 0x20 [O]; [P] getTarget (lw); [R] ctor 0; [U] func_00161A60 (setTarget) deletes the
+    int PreferredChaseAlgoLastFrame; // 0x1C [O] eCamAlgoType; [R] HardReset: 0x3D; [U] cChaseCameraController_processInput (processInput)
+    cRiderCameraTarget* Target;     // 0x20 [O]; [P] getTarget (lw); [R] ctor 0; [U] cChaseCameraController_setTarget (setTarget) deletes the
                                     //      old one; the dtor deletes it; func_00167FF0 returns it
     tCameraSwitchRecord CamSwitchRecord; // 0x24 [O]; [P] the preview asserts on this->CamSwitchRecord.*
     float TimeSinceLastSuggestedVolumeTrigger; // 0x38 [O]; [R] HardReset: 0; [U] update (lwc1/swc1)
-    int GoingSlow;                  // 0x3C [O] bool (a word in retail); [R] HardReset: 0; [U] func_00161AB0
+    int GoingSlow;                  // 0x3C [O] bool (a word in retail); [R] HardReset: 0; [U] cChaseCameraController_processInput
     int NumFramesSlowGround;        // 0x40 [O]; [R] HardReset: 0; [U] cChaseCameraController_switchCamera_SoftReset
 };
 

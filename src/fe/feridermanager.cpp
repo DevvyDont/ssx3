@@ -303,7 +303,7 @@ struct sHalfED80 {
     sHalfED80() {}
 };
 extern sHalfED80 D_004FF230;
-extern "C" void func_00310200(void* model, void* pose);
+extern "C" void cAnimModel_transform(void* model, void* pose);
 
 struct sFERiderED80 {
     char pad_0x0[0x8];
@@ -333,7 +333,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     sHalfED80 p[2];
     p[1] = D_004FF230;
     p[0] = D_004FF230;
-    func_00310200(self->model, p);
+    cAnimModel_transform(self->model, p);
     cFERider_initBoneMap(self);
 }
 #endif
@@ -367,7 +367,7 @@ extern "C" void func_00389260(sMtx_EE88* m);
 extern "C" void* func_0038AC20(char* tbl, char* name);
 extern "C" void func_00389590(sMtx_EE88* m, void* a, char* b, float s);
 extern "C" void func_00389CB8(sMtx_EE88* m, sVec4_EE88* v, float s);
-extern "C" void func_00310640(void* model, int a, int b, int c);
+extern "C" void cAnimModel_render(void* model, int a, int b, int c);
 extern "C" void func_002F2088(void* p);
 
 struct sModel_EE88 {
@@ -471,7 +471,7 @@ extern "C" void func_0019EE88(void* selfp)
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
     if (self->layer >= 0)
         *fl = (*fl & ~0x3E0) | ((self->layer << 5) & 0x3E0);
-    func_00310640(self->model, 0, 0, 0);
+    cAnimModel_render(self->model, 0, 0, 0);
     func_002F2088(self->fC70);
     fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *fl = (*fl & ~0x3E0) | (old << 5);
@@ -569,7 +569,7 @@ struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
 struct sHalfF2D0 { sQuadF2D0 a, b; };
 extern sQuadF2D0 D_004FF130;
 extern sQuadF2D0 D_004FF220;
-extern "C" void func_00310200(void* model, void* pose);
+extern "C" void cAnimModel_transform(void* model, void* pose);
 extern "C" void cAnimModel_buildSkelMatrices(void* model);
 
 extern "C" void func_0019F2D0(void* self)
@@ -578,7 +578,7 @@ extern "C" void func_0019F2D0(void* self)
     if (*(int*)((char*)self + 0xCCC) != 0) {
         p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
         p[1] = *(sHalfF2D0*)((char*)self + 0xC30);
-        func_00310200(*(void**)((char*)self + 0x8), p);
+        cAnimModel_transform(*(void**)((char*)self + 0x8), p);
         cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));
     } else {
         p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
@@ -587,7 +587,7 @@ extern "C" void func_0019F2D0(void* self)
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCAC)] = D_004FF220;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCB0)] = D_004FF130;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCB0)] = D_004FF220;
-        func_00310200(*(void**)((char*)self + 0x8), p);
+        cAnimModel_transform(*(void**)((char*)self + 0x8), p);
         cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));
     }
     *(int*)((char*)self + 0x14) = 1;

@@ -204,11 +204,11 @@ extern "C" void func_00113D80(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113D88);
 #ifdef SKIP_ASM
-extern "C" void func_00258988(int);
+extern "C" void cGameComm_gameStartRace(int);
 
 extern "C" void func_00113D88(void) {
     if (cGameComm_mGameComm != 0) {
-        func_00258988((int)cGameComm_mGameComm);
+        cGameComm_gameStartRace((int)cGameComm_mGameComm);
     }
 }
 #endif
@@ -442,7 +442,7 @@ INCLUDE_ASM("seg/seg_14B10", func_00114130);
 extern "C" int func_0028B180();
 extern "C" void cCheatFX_setCheatInput(char *, int);
 extern "C" void func_00298D90(int mgr, char* rider, int b);
-extern "C" void func_00299368(int mgr, char* rider);
+extern "C" void cSSXAudio_TurboDeny(int mgr, char* rider);
 extern "C" void func_002992D8(int mgr, char* rider);
 
 extern "C" void func_00114130(char* s, int a, int b)
@@ -462,7 +462,7 @@ extern "C" void func_00114130(char* s, int a, int b)
             }
             return;
         }
-        if (b) func_00299368(func_0028B180(), s);
+        if (b) cSSXAudio_TurboDeny(func_0028B180(), s);
     }
     if (*(float*)(s + 0x2FC) > 0.0f) func_002992D8(func_0028B180(), s);
     *(float*)(s + 0x2FC) = 0.0f;
@@ -479,7 +479,7 @@ int func_0011FE98(void* self);
 extern "C" void func_002707E0(int a, int b, void* c);
 extern "C" void func_00309848(void* self);
 extern "C" float func_00119E38(void* self, int a, int b);
-extern "C" void func_0010E098(void* self, int mask, float amt);
+extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt);
 extern "C" int func_001298C8();
 extern void* D_004A3DD8;
 
@@ -740,7 +740,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
     }
     func_002707E0((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
     func_00309848(D_004A3DD8);
-    func_0010E098(self, 1, func_00119E38(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
+    cRider_flagEventBoostPowerUp(self, 1, func_00119E38(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
     if (*(float*)(self + 0x378) > hi + 0.019999999552965164f) {
         sV4_4298 dv = Sub_4298(VEL_4298, oldVel);
         sV4_4298 ov = oldVel;
@@ -1185,7 +1185,7 @@ struct Q_5358 {
 } __attribute__((aligned(16)));
 
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
-extern "C" void func_0011DFE0_5358(void* self, Q_5168 dir, float angle) __asm__("func_0011DFE0");
+extern "C" void cRider_rotateOrientation_5358(void* self, Q_5168 dir, float angle) __asm__("cRider_rotateOrientation");
 // PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
 extern "C" void func_00116930_5358(void* self) __asm__("func_00116930");
 
@@ -1234,11 +1234,11 @@ extern "C" void cRider_doRailslideModeOrientation(cRider* self)
             func_00115168((char*)self);
         }
         if (self->mRailStyle == 4) {
-            func_0011DFE0_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
+            cRider_rotateOrientation_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
             SetHeading_5168((char*)self->mRiderAnim, 1.5707964f);
         } else {
-            func_0011DFE0_5358(self, *(Q_5168*)&self->mMatrix.row[2], -1.5707964f);
+            cRider_rotateOrientation_5358(self, *(Q_5168*)&self->mMatrix.row[2], -1.5707964f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707964f);
             SetHeading_5168((char*)self->mRiderAnim, -1.5707964f);
         }
@@ -1259,7 +1259,7 @@ struct Q_5640 {
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void func_0011DFE0(void* self, Q_5640 dir, float angle);
+extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
 // PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
 extern "C" void func_00116930_p(void* self) __asm__("func_00116930");
 int func_0011FE98(void* self);
@@ -1295,11 +1295,11 @@ extern "C" void func_00115640(char* self)
             cRiderAnimBase_play(*(void**)(self + 0x784), 0x10C, 0, -1.0f);
     } else if (func_0011FE98(self) == 0) {
         if (*(int*)(self + 0x328) == 3) {
-            func_0011DFE0(self, *(Q_5640*)(self + 0x1C0), 1.5707964f);
+            cRider_rotateOrientation(self, *(Q_5640*)(self + 0x1C0), 1.5707964f);
             cRiderAnimBase_changeHeadingOffset(*(void**)(self + 0x784), 1.5707964f);
             SetHeading_5640(*(char**)(self + 0x784), 0.0f);
         } else if (*(int*)(self + 0x328) == 4) {
-            func_0011DFE0(self, *(Q_5640*)(self + 0x1C0), -1.5707964f);
+            cRider_rotateOrientation(self, *(Q_5640*)(self + 0x1C0), -1.5707964f);
             cRiderAnimBase_changeHeadingOffset(*(void**)(self + 0x784), -1.5707964f);
             SetHeading_5640(*(char**)(self + 0x784), 0.0f);
         }
@@ -1382,13 +1382,13 @@ extern "C" void func_001158B8(void* self, float* y, float* x, float step, float 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00115AB0);
+INCLUDE_ASM("seg/seg_14B10", cRider_getStartGateKneeOffset);
 #ifdef SKIP_ASM
 extern "C" int cBE_getBE();
 extern "C" int cBE_getInterface__Fv(int, int);
 extern "C" float func_0014EFA8(int, int);
 
-extern "C" float func_00115AB0(void *arg0) {
+extern "C" float cRider_getStartGateKneeOffset(void *arg0) {
     return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(arg0) + (0x86C)))) * -90.0f) + 75.0f;
 }
 #endif

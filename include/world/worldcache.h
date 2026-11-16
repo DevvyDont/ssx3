@@ -192,10 +192,10 @@ CHECK_OFFSET(tWorldCacheHullPage, m_iRenderTick, 0x14);
 CHECK_SIZE(tWorldCacheHullPage, 0x18);
 
 // cWorldCache methods (world/worldcache 0x003A7DD0-0x003A8F80): cWorldCache_cWorldCache, cWorldCache__cWorldCache,
-// cWorldCache_purge, cWorldCache_reset, cWorldCache_init, cWorldCache_activateSectionMem, func_003A8230
-// (deactivateSectionMem), cWorldCache_update, cWorldCache_initPageMap, func_003A8330 (resetPageMap), func_003A8448
-// (touchPage), func_003A84C8 (flushPage), func_003A84F8 (setPageLock), func_003A8510 (isPageLocked), func_003A8528
-// (purgePage), func_003A8618 (isPageLoaded), func_003A8638 (isPageEmpty), func_003A8650 (signalPageLoadComplete),
+// cWorldCache_purge, cWorldCache_reset, cWorldCache_init, cWorldCache_activateSectionMem, cWorldCache_deactivateSectionMem
+// (deactivateSectionMem), cWorldCache_update, cWorldCache_initPageMap, cWorldCache_resetPageMap (resetPageMap), func_003A8448
+// (touchPage), func_003A84C8 (flushPage), func_003A84F8 (setPageLock), func_003A8510 (isPageLocked), cWorldCache_purgePage
+// (purgePage), cWorldCache_isPageLoaded (isPageLoaded), cWorldCache_isPageEmpty (isPageEmpty), cWorldCache_signalPageLoadComplete (signalPageLoadComplete),
 // cWorldCache_updatePages, func_003A88A8 (flushInActivePages), func_003A89C8 (flushOnePage),
 // cWorldCache_addBxStreamDataTest, func_003A8CD0 (addBxStreamDataSubmit), func_003A8E20 (removeBxStreamData),
 // func_003A8F10 (activateSectionPatches). The section/focus/bandwidth wrappers are inlined into their callers.

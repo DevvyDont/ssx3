@@ -37,8 +37,8 @@
 struct cInput;
 
 // g++ 2.95 pointer to member function (8 bytes): {delta, index, pfn | delta2}. The static cComputer::mCruiseLogic[4]
-// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): func_001009E0, func_00100680, cComputer_avoidTargetCruise
-// ([O] avoidTargetCruise) and func_00100B90, each of which also switches the logic (writes cruiseLogic/mCruiseLogicID).
+// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): cComputer_jumpSetupCruise, func_00100680, cComputer_avoidTargetCruise
+// ([O] avoidTargetCruise) and cComputer_attackTargetCruise, each of which also switches the logic (writes cruiseLogic/mCruiseLogicID).
 struct tComputerCruiseLogic {
     short delta;      // 0x0 [U] func_0010A960 (the call through it)
     short index;      // 0x2 [U] func_0010A960 tests it (-1 in every D_0043CF20 entry: non-virtual)
@@ -63,14 +63,14 @@ struct cComputer {
                                //       as in cPlayer: 0x024, 0x070, 0x0A0, 0x100 ... 0xC70, 0xD20)
     int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState; [R] cRiderHandler__getMotionState; [O]
     int ControlState;          // 0xDE4 [P] cRiderHandler::_getControlState; [R] cRiderHandler__getControlState; [O]
-    void** mVtbl;              // 0xDE8 [R] _vt$9cComputer (D_004585F0: func_0010A768, func_0010A898)
+    void** mVtbl;              // 0xDE8 [R] _vt$9cComputer (D_004585F0: cComputer_getControlCmd, func_0010A898)
     char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned
     // ---- base cComputerState (0xDF0-0xF40) ----
-    float mDesiredSpeed;       // 0xDF0 [O]; [R] Init = 0; [U] float (func_0010AA70, func_0010B790)
+    float mDesiredSpeed;       // 0xDF0 [O]; [R] Init = 0; [U] float (cComputer_getPrewindCmd, cComputer_getGateCmd)
     float mAccuracy;           // 0xDF4 [O]; [R] Init = 1.0f
     float mRiderDifficulty;    // 0xDF8 [O]; [U] set by setIndividualRiderDifficulty / updateRiderDifficulty
     float mTrickDifficulty;    // 0xDFC [O]; [U] set by the same; read by the four shouldRider* tests
-                               //       (func_0010C1D0, func_0010C258, func_0010C320, func_0010C3B8)
+                               //       (cComputer_shouldRiderWipeout, cComputer_shouldRiderUber, cComputer_shouldRiderTweak, cComputer_shouldRiderGrab)
     short mPathDifficulty;     // 0xE00 [O] short; [U] sh in updateRiderDifficulty, lh in calculateDifficultyScore
     char pad_E02[0x2];
     int mShouldTakeShortcuts;  // 0xE04 [O] (bool); [U] set by updateRiderDifficulty, read by scorePath
@@ -86,7 +86,7 @@ struct cComputer {
     float mHoldToLandTime;     // 0xE2C [O]; [U] swc1 in chooseRandom*Grab
     float mGrabStartTime;      // 0xE30 [O]; [U] same
     float mGrabEndTime;        // 0xE34 [O]; [U] same
-    float mSpinAxis;           // 0xE38 [O]; [U] func_0010B590, func_0010BFA8
+    float mSpinAxis;           // 0xE38 [O]; [U] cComputer_getNaturalAirCmd, cComputer_setupPrewindState
     float mFlipAxis;           // 0xE3C [O]; [U] same
     int mBoardPressTimer;      // 0xE40 [O]; [R] Init = 0
     char pad_E44[0xC];         // 0xE44 t4Vector alignment
@@ -95,11 +95,11 @@ struct cComputer {
     int mTargetID;             // 0xE70 [P] getCurrentTarget (preview 0xE20); [R] Init = -1, func_00144008
     int mWanderTime;           // 0xE74 [O]; [R] Init = 0; [U] func_0010D1A0
     int mBadHeadingTime;       // 0xE78 [O]; [R] Init = 0; [U] func_0010D1A0
-    int GrabHistoryCounter[15]; // 0xE7C [O] (On Tour [7]); [R] Init/resetCounters clear 0x3C bytes; [U] func_0010CBE0
-    int UberHistoryCounter[15]; // 0xEB8 [O]; [U] func_0010CF68 (chooseRandomUberGrab: sets mIsUber)
-    int TweakHistoryCounter[15]; // 0xEF4 [O]; [U] func_0010CD20 (chooseRandomTweakGrab)
-    float mBlockTimer;         // 0xF30 [O]; [R] Init = 0; [U] func_0010DA10 (float)
-    int mShouldIBlock;         // 0xF34 [O] (bool); [R] Init = 0; [U] func_0010DA10
+    int GrabHistoryCounter[15]; // 0xE7C [O] (On Tour [7]); [R] Init/resetCounters clear 0x3C bytes; [U] cComputer_chooseRandomGrab
+    int UberHistoryCounter[15]; // 0xEB8 [O]; [U] cComputer_chooseRandomUberGrab (chooseRandomUberGrab: sets mIsUber)
+    int TweakHistoryCounter[15]; // 0xEF4 [O]; [U] cComputer_chooseRandomTweakGrab (chooseRandomTweakGrab)
+    float mBlockTimer;         // 0xF30 [O]; [R] Init = 0; [U] cComputer_checkForBlock (float)
+    int mShouldIBlock;         // 0xF34 [O] (bool); [R] Init = 0; [U] cComputer_checkForBlock
     short mCruiseLogicID;      // 0xF38 [P] setCruiseLogic (preview sh 0xEE8); [R] Init = 1, func_00144040
     char pad_F3A[0x6];         // 0xF3A cComputerState is 16-byte aligned (t4Vector members)
     // ---- cComputer ----
@@ -114,7 +114,7 @@ struct cComputer {
 // Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (D_00458710: func_00411530);
 // cPlayer and cComputer each provide one.
 enum {
-    kComputerVt_getControlCmd = 1,  // func_0010A768 ([O] getControlCmd; writes mGrabEndTime)
+    kComputerVt_getControlCmd = 1,  // cComputer_getControlCmd ([O] getControlCmd; writes mGrabEndTime)
     kComputerVt_slot2 = 2           // func_0010A898
 };
 

@@ -4,7 +4,7 @@
 // cDSockChannel: the DirtySock implementation of cCommChannel: one peer-to-peer game link (NetGameUtil to connect or
 // listen on "addr:port:port", then a NetGameLink to send and receive packets). Created by
 // cCommSystem_openDSockChannel: `cMemMan_alloc(0x20, "cDSockChannel", ...)` + the constructor func_00256698, then
-// listen (func_002568F8) or connect (func_00256860). Size 0x20 [R]. Base class cCommChannel (online/commchannel.h,
+// listen (cDSockChannel_connect) or connect (cDSockChannel_listen). Size 0x20 [R]. Base class cCommChannel (online/commchannel.h,
 // 0xC bytes), written out inline. Retail vtable D_004812D0 (slots: see kCommChannelVt_* in online/commchannel.h).
 // EA's source: d:/ssx/code/source/online/dsockchannel.cpp (the preview build's assert string).
 //

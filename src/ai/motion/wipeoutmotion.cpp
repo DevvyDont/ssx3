@@ -95,7 +95,7 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136D40);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_throwItem);
 #ifdef SKIP_ASM
 struct sVec4WM {
     float x, y, z, w;
@@ -152,7 +152,7 @@ static inline void vu0SubWM(sVec4WM& dst, const sVec4WM& a, const sVec4WM& b)
         : "m"(a), "m"(b));
 }
 
-extern "C" void func_00136D40(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
+extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
 {
     *(sVecPairWM*)((char*)self->mRider + 0x130) = *c;
     *(int*)((char*)self->mRider + 0x150) = 1;
@@ -169,7 +169,7 @@ extern "C" void func_00136D40(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b, sVec
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136DE0);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_throwRider);
 #ifdef SKIP_ASM
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
@@ -190,7 +190,7 @@ static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
     return r;
 }
 
-extern "C" void func_00136DE0(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b)
+extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b)
 {
     *(sVec4WM*)&self->RiderAngVelocity = *b;
     *(sVec4WM*)((char*)self->mRider + 0x1E0) = *a;
@@ -736,7 +736,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137750);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
-extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
+extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 
 struct sVec4W7 {
     float x, y, z, w;
@@ -776,7 +776,7 @@ extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
             x *= 59.999996185302734f;
         char* r3 = (char*)wipeoutMotion->mRider;
         float k = 6.632251739501953f;
-        func_00121AA0(r3, *(char**)(r3 + 0x788) + 0x20, *(char**)(r3 + 0x788) + 0x10, x, *(float*)(r3 + 0x300) * k);
+        cRider_alignRiderAxis(r3, *(char**)(r3 + 0x788) + 0x20, *(char**)(r3 + 0x788) + 0x10, x, *(float*)(r3 + 0x300) * k);
     }
     vu0ScaleEqW7(*(sVec4W7*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
     cRider_updateOrientationImplicit(wipeoutMotion->mRider);
@@ -812,7 +812,7 @@ extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
 void func_00113998_137860(void* ap, void* pos, void* vel) __asm__("func_00113998__FPv");
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" void func_00106538(void* rider, const t4Vector& v);
-extern "C" void func_0011E150(void* rider, int a1);
+extern "C" void cRider_updateBoundBox(void* rider, int a1);
 extern "C" void func_00105398(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 
@@ -967,7 +967,7 @@ extern "C" void func_00137860(void* vself)
             cAirPredictor_startLaunchIntoAir(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity, 3333.33349609375f);
         }
     }
-    func_0011E150(RIDER, 0);
+    cRider_updateBoundBox(RIDER, 0);
     func_00105398(RIDER, 0);
     cRider_checkOpponentCollisions(RIDER);
     func_0032F708(&sph, 2);
@@ -1008,7 +1008,7 @@ struct sVEntH_137D18 { short delta; short index; void (*fn)(void*, void*, const 
 
 extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
 extern "C" int func_00311AE8(void*, int);
-extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
+extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" int cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_updateOrientationImplicit(void*);
@@ -1264,7 +1264,7 @@ extern "C" void func_00137D18(void* vself)
     if (3333.33349609375f < sp)
         vu0ScaleEq_137D18(RIDER->mVelocity, 3333.33349609375f / sp);
     t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
-    func_00121AA0(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
+    cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
     sHit_137D18 hit;
     float d = func_00138960(self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
     if (0.0f <= d) {
@@ -1492,7 +1492,7 @@ extern "C" void func_00138640(void* vself)
             }
         }
     }
-    func_0011E150(RIDER, 0);
+    cRider_updateBoundBox(RIDER, 0);
     func_00105398(RIDER, 0);
     cRider_checkOpponentCollisions(RIDER);
     if (*(int*)(self + 0x4) != 0) {

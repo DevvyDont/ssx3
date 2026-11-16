@@ -55,7 +55,7 @@ struct tCrowdData {
 
 // On Tour's tAttachSoundStruct (0x30), a sound attached to a world instance mesh.
 struct tAttachSoundStruct {
-    int used;       // 0x00 [O] (On Tour bool); [U] == 1 tests (func_00297EB8)
+    int used;       // 0x00 [O] (On Tour bool); [U] == 1 tests (cSSXAudio_DetachSound)
     void* inst;     // 0x04 [O] tInstanceRecord*
     int mesh;       // 0x08 [O]
     char unk_0C[0x4];
@@ -129,7 +129,7 @@ struct cSSXAudio {
     void* unk_5728;                     // 0x5728 [R] ctor 0; dtor closes it with func_003DEDC0(h, 100); [U] func_0029ED90 opens a language stream file into it
     int unk_572C;                       // 0x572C [R] ctor -1; [U] func_0029ED90: language mode of the stream in unk_5728
     float unk_5730;                     // 0x5730 [R] ctor 1.0f; [U] func_0029F000 returns &it as the volume control of speech type 0xB
-    int unk_5734;                       // 0x5734 [R] ctor 0; [U] func_0029F660
+    int unk_5734;                       // 0x5734 [R] ctor 0; [U] cSSXAudio_PlayGrunt
     int unk_5738;                       // 0x5738 [U] func_0029EEE0 sets it from a speech name prefix (DJ_ 2/11, PA_ 3, Arcade 10, else 4); func_0029F088 returns it
     int unk_573C;                       // 0x573C [U] func_002A2E50
     int unk_5740;                       // 0x5740 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
@@ -170,35 +170,35 @@ struct cSSXAudio {
     int unk_5824;                       // 0x5824 [U] func_0029C7B0
     int unk_5828;                       // 0x5828 [R] ctor 0
     int mGruntCycle;                    // 0x582C [O] first own member; [U] func_00286E20/func_002872A8 set it, func_002A0560 reads it
-    float mWindVolume;                  // 0x5830 [O]; [U] func_002910E0 (BeginWind) passes &it as the stream's volume control, func_002913D8 (EndWind) and func_002929D8 clear it
+    float mWindVolume;                  // 0x5830 [O]; [U] func_002910E0 (BeginWind) passes &it as the stream's volume control, cSSXAudio_EndWind (EndWind) and cSSXAudio_BeginAllRiderSound clear it
     int mWindPlaying;                   // 0x5834 [O] (On Tour bool); [U] BeginWind/EndWind
-    char mUsedBank[64];                 // 0x5838 [O]; [U] cSSXAudio_FrontEndLoad clears [0], func_0029B818 writes it
-    int mNextUsedBank;                  // 0x5878 [O]; [U] cSSXAudio_FrontEndLoad zeroes it
-    char mSwapBasePath[128];            // 0x587C [O]; [U] cSSXAudio_FrontEndLoad builds it
+    char mUsedBank[64];                 // 0x5838 [O]; [U] cSSXAudio_InGameLoad clears [0], func_0029B818 writes it
+    int mNextUsedBank;                  // 0x5878 [O]; [U] cSSXAudio_InGameLoad zeroes it
+    char mSwapBasePath[128];            // 0x587C [O]; [U] cSSXAudio_InGameLoad builds it
     char mAemsSysName[128];             // 0x58FC [O]; placed by order and the cCircBuffer at 0x597C
     cCircBuffer mPlayHistory;           // 0x597C [O]; [R] ctor: ArraySize 200, Array = operator new(800, "CircFIFOBuff"), Head/Tail 0; dtor frees Array; [U] cSSXAudio_PlayHistoryExists..func_00295CC8 (PlayHistory*)
     int mRailType;                      // 0x598C [O]; [P] SetRailSurface(int) (preview 0x5A68; retail accessor 0x2BAD58 sw 0x598C); [U] func_00291710 (Surface) reads it for a rider on a rail
-    float mLastCarveEdging[10];         // 0x5990 [O]; [U] func_00293BB0/func_00293DC0 (carve programs) index it
+    float mLastCarveEdging[10];         // 0x5990 [O]; [U] func_00293BB0/cSSXAudio_SoftCarveProgram (carve programs) index it
     float mLastGlide[10];               // 0x59B8 [O]; [U] func_00293538/func_00293740/func_00293948 (glide programs)
     int mTurboHandle;                   // 0x59E0 [O]; [U] func_00298D90 (TurboOn) sets it, func_002992D8/func_0029ED18/func_00292B48 stop it
     int mTurboRef;                      // 0x59E4 [O]; [U] TurboOn increments, func_002992D8 decrements
-    int mNeedLift[6];                   // 0x59E8 [O] (On Tour bool[6]); [U] func_002947B0, func_002948A0 (ResetLift) clears 6 words
-    tAttachSoundStruct AttachedSounds[30]; // 0x5A00 [O] (On Tour's name); [R] ctor's 30-element empty-ctor loop; [U] func_00297950/func_00297EB8/func_00297F70/func_002980B0 walk 30 x 0x30 from 0x5A00
+    int mNeedLift[6];                   // 0x59E8 [O] (On Tour bool[6]); [U] cSSXAudio_UpdateLift, cSSXAudio_ResetLift (ResetLift) clears 6 words
+    tAttachSoundStruct AttachedSounds[30]; // 0x5A00 [O] (On Tour's name); [R] ctor's 30-element empty-ctor loop; [U] cSSXAudio_AttachSound/cSSXAudio_DetachSound/cSSXAudio_InitAttachedSounds/cSSXAudio_ResetAttachedSounds walk 30 x 0x30 from 0x5A00
     void* mpAmbienceQuery[2];           // 0x5FA0 [O] tWorldPainterQuery*[2]; [U] func_002867E8 stores, cSSXAudio_InGameDeInit frees
-    int mPointsLastValue;               // 0x5FA8 [O]; [U] func_0029A7D8 (PointsEvent)
-    int mPointsEventHandle;             // 0x5FAC [O]; [U] func_0029A7D8
-    int mSFXPaused;                     // 0x5FB0 [O] (On Tour bool); [R] ctor-time 0; [U] cSSXAudio_PauseSFX (PauseSFX) sets, func_0029CE70 reads; retail accessor 0x2BAD60 (lw)
-    int mAudioPaused;                   // 0x5FB4 [O] (On Tour bool); [U] func_00289B70/func_00289BB8 (Pause/ResumeAudio), func_00285BF8 (Update) tests it
+    int mPointsLastValue;               // 0x5FA8 [O]; [U] cSSXAudio_PointsEvent (PointsEvent)
+    int mPointsEventHandle;             // 0x5FAC [O]; [U] cSSXAudio_PointsEvent
+    int mSFXPaused;                     // 0x5FB0 [O] (On Tour bool); [R] ctor-time 0; [U] cSSXAudio_PauseSFX (PauseSFX) sets, cSSXAudio_ResumeSFX reads; retail accessor 0x2BAD60 (lw)
+    int mAudioPaused;                   // 0x5FB4 [O] (On Tour bool); [U] cSSXAudio_PauseAudio/func_00289BB8 (Pause/ResumeAudio), func_00285BF8 (Update) tests it
     int mCharLandHandle;                // 0x5FB8 [O]; [U] func_002948D0
     int mCharLiftHandle;                // 0x5FBC [O]; [U] cSSXAudio_Lift
-    unsigned int mLastPatchRID;         // 0x5FC0 [O] tResourceID (4 bytes); [R] ctor 0xFFFFFFFF; [U] func_002867E8 stores byte 0 (sb), func_0029D290 compares byte 0 (lbu) and stores the word
-    int mPlayingTone;                   // 0x5FC4 [O] (On Tour bool); [U] func_0029D370/func_0029D610/func_0029D678 (Start/Update/StopTone)
+    unsigned int mLastPatchRID;         // 0x5FC0 [O] tResourceID (4 bytes); [R] ctor 0xFFFFFFFF; [U] func_002867E8 stores byte 0 (sb), cSSXAudio_UpdateTrackBanks compares byte 0 (lbu) and stores the word
+    int mPlayingTone;                   // 0x5FC4 [O] (On Tour bool); [U] func_0029D370/cSSXAudio_UpdateTone/cSSXAudio_StopTone (Start/Update/StopTone)
     int mToneHandle;                    // 0x5FC8 [O]; [R] ctor -1; [U] tone functions
-    int mThunderHandle;                 // 0x5FCC [O]; [U] func_00291438
+    int mThunderHandle;                 // 0x5FCC [O]; [U] cSSXAudio_PlayThunder
     int mCurBigChallengeType;           // 0x5FD0 [O] eBEAudioType; [U] func_0029D8E0 (BigChallengeBegin) stores it
     int mInBigChallenge;                // 0x5FD4 [O] (On Tour bool); [R] ctor 0; [U] func_0029D8E0, func_0029DBB0
     int mBigChallengeStarting;          // 0x5FD8 [O] (On Tour bool); [R] ctor 0; [U] func_0029D6D0 (SetBigChallengeStarting), func_0029D6E0
-    int mUberSpinHandle;                // 0x5FDC [O]; [R] ctor -1; [U] func_0029B0E0/func_0029B3C0 (Start/EndUberSpin)
+    int mUberSpinHandle;                // 0x5FDC [O]; [R] ctor -1; [U] cSSXAudio_StartUberSpin/cSSXAudio_EndUberSpin (Start/EndUberSpin)
     int mBoostBarPreviousValue[2];      // 0x5FE0 [O]; [R] ctor zeroes both; [U] func_0029AB40 (BoostBar)
     unsigned short mBoostBarPitchMult[2]; // 0x5FE8 [O]; [U] func_0029AB40
     int mUberSecPreviousValue[2];       // 0x5FEC [O]; [R] ctor zeroes both
@@ -211,12 +211,12 @@ struct cSSXAudio {
     char unk_6044[0xC];                 // 0x6044 padding (mAvalancheData is 16-aligned)
     tAvalanchePositionalData mAvalancheData; // 0x6050 [O]; [U] func_0029DEF0/func_0029E4A0 copy it with two sq
     int mpAvalancheRiderIndex;          // 0x6070 [O]; [U] func_0029DEF0/func_0029E4A0
-    float mCurTrickPower[2];            // 0x6074 [O]; [U] func_00290F58 (SetCurTrickPower) swc1, func_002871B0 reads [0] and zero-stores both
-    int mLastTime;                      // 0x607C [O]; [U] func_0029CCA8
-    float mLastWipeoutRecoverPercent[2]; // 0x6080 [O]; [U] func_0029E578/func_0029E590/func_0029E970 (wipeout recover hits)
+    float mCurTrickPower[2];            // 0x6074 [O]; [U] cSSXAudio_SetCurTrickPower (SetCurTrickPower) swc1, func_002871B0 reads [0] and zero-stores both
+    int mLastTime;                      // 0x607C [O]; [U] cSSXAudio_UpdateTimedEvent
+    float mLastWipeoutRecoverPercent[2]; // 0x6080 [O]; [U] func_0029E578/cSSXAudio_PlayWipeoutRecoverHit/cSSXAudio_PlayWipeoutRecoverFull (wipeout recover hits)
     char unk_6088[0x4];                 // 0x6088 no retail access seen (On Tour's mPausedSFXForMapScreen sits between mLastWipeoutRecoverPercent and mAudioMode: here or at 0x62AC)
-    int unk_608C;                       // 0x608C [R] ctor 0; [U] read by 6 methods (func_00285FB0, func_00286200, func_00287410, func_00287558, func_002899E8, func_0029D6E0), == 2 selects a radio path; retail accessor 0x2BAD68 (lw); probably the preview's GetRadioModeID (0x6134) field
-    int unk_6090;                       // 0x6090 [R] ctor 0; [U] func_00285FB0 copies unk_608C into it, func_00286200 tests == 2
+    int unk_608C;                       // 0x608C [R] ctor 0; [U] read by 6 methods (func_00285FB0, cSSXAudio_FrontEndPurge, func_00287410, func_00287558, cSSXAudio_NeedWPAmbience, func_0029D6E0), == 2 selects a radio path; retail accessor 0x2BAD68 (lw); probably the preview's GetRadioModeID (0x6134) field
+    int unk_6090;                       // 0x6090 [R] ctor 0; [U] func_00285FB0 copies unk_608C into it, cSSXAudio_FrontEndPurge tests == 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
     char unk_60A0[0x4];                 // 0x60A0 no retail access seen (or padding)
@@ -234,7 +234,7 @@ struct cSSXAudio {
     int unk_6270;                       // 0x6270 [U] func_002867E8 stores
     int unk_6274;                       // 0x6274 [U] func_002867E8 stores; maybe the preview's PathfinderCanChangeVolume (0x6314 - 0xA0)
     char unk_6278[0x4];                 // 0x6278 no retail access seen (maybe the preview's SetTransportTrack field, 0x6318 - 0xA0)
-    int unk_627C;                       // 0x627C [R] ctor 1; [U] cSSXAudio_FrontEndLoad, func_0029C420, func_0029C7B0
+    int unk_627C;                       // 0x627C [R] ctor 1; [U] cSSXAudio_InGameLoad, func_0029C420, func_0029C7B0
     int unk_6280;                       // 0x6280 retail accessor 0x2BADA0 (lw)
     int unk_6284;                       // 0x6284 [R] ctor 23
     int unk_6288;                       // 0x6288 [U] func_002867E8
@@ -244,13 +244,13 @@ struct cSSXAudio {
     int unk_6298;                       // 0x6298 [R] ctor 0; [U] func_0029C7B0
     char unk_629C[0x8];                 // 0x629C no retail access seen (or padding)
     int unk_62A4;                       // 0x62A4 [R] ctor -1
-    int unk_62A8;                       // 0x62A8 [R] ctor -1; [U] func_002974A0, func_00297950
+    int unk_62A8;                       // 0x62A8 [R] ctor -1; [U] cSSXAudio_WorldSound, cSSXAudio_AttachSound
     char unk_62AC[0x4];                 // 0x62AC no retail access seen (see 0x6088)
     int mAudioMode;                     // 0x62B0 [O] eSOUNDDEF_MODE; [R] ctor stores its audioMode argument; [U] cSSXAudio_SetMode stores, func_00285930 and func_00289DC0 (GetMode) read
     int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] func_002875D0 (SetArcadeSFX) / func_00287488 (GetArcadeSFX)
     int unk_62B8;                       // 0x62B8 [R] ctor 0; [U] func_00287558 (SetSFXVolume) stores, func_00287410 (GetSFXVolume) reads
-    tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] func_00287A10 (DuckVolume): entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume
-    float unk_636C[10];                 // 0x636C [U] DuckVolume/MixVolume (func_00287A10/func_00287C48/func_002883B0/func_002887F8): mSoundVolume[4].appliedVolume times constants D_004A352C..
+    tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] cSSXAudio_DuckVolume (DuckVolume): entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume
+    float unk_636C[10];                 // 0x636C [U] DuckVolume/MixVolume (cSSXAudio_DuckVolume/cSSXAudio_UpdateDuck/cSSXAudio_MixVolume/func_002887F8): mSoundVolume[4].appliedVolume times constants D_004A352C..
     float mDuckLevel[11];               // 0x6394 [O]; [R] ctor 11 x 1.0f; [U] DuckVolume writes [j]
     int mDucking;                       // 0x63C0 [O] (On Tour bool); [R] ctor 0; [U] DuckVolume sets it when fading
     unsigned int mCurDuck;              // 0x63C4 [O]; [U] DuckVolume stores the mask
@@ -261,23 +261,23 @@ struct cSSXAudio {
     float mDuckScale;                   // 0x63D8 [O]; [R] ctor 1.0f
     int mStreamIsDucked;                // 0x63DC [O] (On Tour bool); [R] ctor 0; [U] func_00287F00
     int mDuckedStreamHasStarted;        // 0x63E0 [O] (On Tour bool); [U] func_00285BF8
-    float mMixLevel[11];                // 0x63E4 [O]; [R] ctor 11 x 1.0f; [U] DuckVolume, func_002883B0
+    float mMixLevel[11];                // 0x63E4 [O]; [R] ctor 11 x 1.0f; [U] DuckVolume, cSSXAudio_MixVolume
     int mMixing;                        // 0x6410 [O] (On Tour bool); [U] func_00288370, func_002887F8
     float mMixStep[11];                 // 0x6414 [O]; [U] func_002887F8
     float mMixFinalValue[11];           // 0x6440 [O]; placed by order
-    int mLastMix;                       // 0x646C [O]; [R] ctor -1; [U] func_002883B0 (MixVolume)
+    int mLastMix;                       // 0x646C [O]; [R] ctor -1; [U] cSSXAudio_MixVolume (MixVolume)
     int mPreset;                        // 0x6470 [O]; [P] GetPreset (preview 0x64DC; retail accessor 0x2BADC0 lw 0x6470); [U] func_00288F60 (SetPreset), func_00289398/func_002893C8
-    int mAudioUpdateState;              // 0x6474 [O]; [P] GetAudioUpdateState (preview 0x64E4; retail accessor 0x2BADC8); [U] func_00285BE0 (SetAudioUpdateState), func_00285BF8
+    int mAudioUpdateState;              // 0x6474 [O]; [P] GetAudioUpdateState (preview 0x64E4; retail accessor 0x2BADC8); [U] cSSXAudio_SetAudioUpdateState (SetAudioUpdateState), func_00285BF8
     int mNumAudioMixes;                 // 0x6478 [O]; [U] cSSXAudio_LoadMixes
     tAudioMix mAudioMixes[25];          // 0x647C [O]; [U] cSSXAudio_LoadMixes fills 25 x 0x28
-    int mRMSFrameTick;                  // 0x6864 [O]; [U] func_00289688
+    int mRMSFrameTick;                  // 0x6864 [O]; [U] cSSXAudio_ApplyRMSData
     char mRMSData[1000];                // 0x6868 [O]; placed by order (0x6868 + 1000 = mRMSSize)
-    int mRMSSize;                       // 0x6C50 [O]; [U] func_00289688
+    int mRMSSize;                       // 0x6C50 [O]; [U] cSSXAudio_ApplyRMSData
     int mRMSDataFrameRate;              // 0x6C54 [O]; [R] ctor 60
-    int mValidRMSData;                  // 0x6C58 [O] (On Tour bool); [R] ctor 0; [U] func_00289688/func_00289880
+    int mValidRMSData;                  // 0x6C58 [O] (On Tour bool); [R] ctor 0; [U] cSSXAudio_ApplyRMSData/func_00289880
     float mLastRMSDuckLevel;            // 0x6C5C [O]; [U] func_00289830
     int mRMSStepFrame;                  // 0x6C60 [O]; [R] ctor 1
-    float mRMSStepValue;                // 0x6C64 [O]; [U] func_00289688/func_00289880
+    float mRMSStepValue;                // 0x6C64 [O]; [U] cSSXAudio_ApplyRMSData/func_00289880
     float mRMSCurValue;                 // 0x6C68 [O]
     float mRMSFinalValue;               // 0x6C6C [O]
     int mTrackBankLoaded[2];            // 0x6C70 [O] (On Tour bool[2]); [R] ctor zeroes both; [U] func_0029D370 reads [1]

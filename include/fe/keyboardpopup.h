@@ -91,7 +91,7 @@ struct cKeyboardPopup {
     unsigned int muiStatic;         // 0x42C [O]; [R] ctor zeroes; [U] cKeyboardPopup_setStatic1 stores the string id
     int meLastDirection;            // 0x430 [O] eMovementDirection; [U] the kbMove* functions store 0..3
     int miLastKey;                  // 0x434 [O]; [R] ctor 0x2B; [U] the kbMove* functions save miCurrentKey into it
-    int mbReferEventsToParent;      // 0x438 [O]; [R] ctor zeroes; [U] handleEvent (func_001CB3D0) forwards to the parent
+    int mbReferEventsToParent;      // 0x438 [O]; [R] ctor zeroes; [U] handleEvent (cKeyboardPopup_handleEvent) forwards to the parent
     int meType;                     // 0x43C [O] eKeyboardType; [R] ctor 1; [U] onGainTransition: 0 "regular", 1 "compact",
                                     //       2 "expanded"
     int mbCallParentsUpdate;        // 0x440 [O]; [R] ctor zeroes; [U] onUpdate (cKeyboardPopup_onUpdate) calls the parent's onUpdate

@@ -92,8 +92,8 @@ struct cSSXScriptEngine {
     tSSXHiveScriptMasterTableHeader* mpMasterTableHeader; // 0x52C [O]; [R] InitOnce: FILE_loadz(kpScriptMasterTableFilename);
                                                  //       [U] its first word is the script count
     tSSXHiveScriptMaster* mpMasterTable;         // 0x530 [O]; [R] InitOnce: header + 4; [U] 0xC-byte records
-                                                 //       {numTimesPlayed, hashID, name}: func_00279A70 counts a play,
-                                                 //       func_00278ED0 / func_002796B8 search by hashID
+                                                 //       {numTimesPlayed, hashID, name}: cSSXScriptEngine_OnStartScript counts a play,
+                                                 //       cSSXScriptEngine_AddToNISListByScriptHashID / cSSXScriptEngine_RequestScriptByHashID search by hashID
     char* mpMasterTableDebug;                    // 0x534 [O]; [R] InitOnce: FILE_loadz(kpScriptMasterTableDebugFilename)
     void* mFilterTableAsyncHandle;               // 0x538 [O] (int in On Tour); [R] AsyncLoadTrack opens
                                                  //       ".../scfilter<location>" into it; [U] ASYNCFILE_* (PurgeTrack)
@@ -110,8 +110,8 @@ struct cSSXScriptEngine {
     int mNumFramesNoSkip;                        // 0x554 [O]; [U] func_00278DE8 (DisallowNISListSkip) stores its arg;
                                                  //       Update counts it down and ignores the skip button until 0
     unsigned int* mpAnchorTableDB[50];           // 0x558 [O] (tResourceID*[60] in On Tour); [R] the ctor zeroes 50;
-                                                 //       [U] func_00278A10 / func_00278A58 (Attach/DetachAnchorDataTable)
-                                                 //       index it by world section; func_0027BB08 reads codes from it
+                                                 //       [U] cSSXScriptEngine_AttachAnchorDataTable / cSSXScriptEngine_DetachAnchorDataTable (Attach/DetachAnchorDataTable)
+                                                 //       index it by world section; cSSXScriptEngine_FillOrientationFromObjectOrientationInfo reads codes from it
     int mNumAsyncs;                              // 0x620 [O]; [U] +1 per async load started (AsyncLoadTrack,
                                                  //       cSSXScriptEngine_AsyncLoadScriptBank), -1 when it completes or is cancelled
     tNISList* mpIdleLists;                       // 0x624 [O]; [R] Load: new[2] ("IdleLists"), 0xCC each

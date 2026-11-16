@@ -60,7 +60,7 @@ extern "C" void cAI_setPodiumActorList(void* ai, void* p);
 extern "C" void cAI_initAIActors(void* ai, int a);
 extern "C" void cAI_loadRiders(void* ai);
 extern "C" void THREAD_yieldticks(int n);
-extern "C" int func_0012A180(void* ai);
+extern "C" int cAI_isAILoadedAndReady(void* ai);
 void func_00270EF8(void* p);
 extern "C" void func_00271758(void* p, void* a);
 void func_00270F18(void* p);
@@ -74,7 +74,7 @@ extern "C" void* cSplashManager_cSplashManager(void* p, int a, int i);
 extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* p, int a);
 extern "C" void* cFlagManager_cFlagManager(void* p, int a);
 extern "C" void* cSnowFall_cSnowFall(void* p, int a);
-extern "C" void cSSXAudio_FrontEndLoad(void* p);
+extern "C" void cSSXAudio_InGameLoad(void* p);
 extern "C" void* func_00397B08(void* p);
 extern "C" void cUIEngine_loadFile(void* ui, char* name);
 extern "C" void* func_001A2F38(void* p);
@@ -85,7 +85,7 @@ void func_00231278(void* self, int val);
 extern "C" void func_00230F40(void* self);
 extern "C" void func_003E5398(int a);
 extern "C" int func_002312D8(void* self);
-extern "C" void func_002586B0(void* comm);
+extern "C" void cGameComm_syncWait(void* comm);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 extern "C" void* cObjNode_cObjNode1(void* p, int a);
 extern "C" void* func_002F0390();
@@ -284,7 +284,7 @@ extern "C" void cGame_load(cGame* self)
                 *(int*)((char*)self->AI + 0x8C) = 0;
             }
         }
-        while (!func_0012A180((char*)self->AI)) {
+        while (!cAI_isAILoadedAndReady((char*)self->AI)) {
             cAI_loadRiders((char*)self->AI);
             THREAD_yieldticks(1);
         }
@@ -325,7 +325,7 @@ extern "C" void cGame_load(cGame* self)
     self->FlagManager = (cFlagManager*)cFlagManager_cFlagManager(operator new(0x1718, D_0047B678, 0, 0), 2);
     self->SnowFall = (cSnowFall*)cSnowFall_cSnowFall(operator new(0x60, D_0047B688, 0, 0), 2);
     self->mUpdateTick = 0;
-    cSSXAudio_FrontEndLoad(gSSXAudio);
+    cSSXAudio_InGameLoad(gSSXAudio);
     func_00317550(D_004A5B64 + 0x38, 99.0f);
     sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, D_0047B698, 0, 0));
     self->UI = (cUIEngine*)ui;
@@ -365,7 +365,7 @@ extern "C" void cGame_load(cGame* self)
             func_003E5398(0);
         } while (!func_002312D8((self)));
         if (cGameComm_mGameComm != 0)
-            func_002586B0(cGameComm_mGameComm);
+            cGameComm_syncWait(cGameComm_mGameComm);
         if (cBENewRaceInterface_newRace[0x49] == 0)
             func_00231250((self), 0xA, 0, 0);
         else
@@ -900,7 +900,7 @@ extern "C" void cGame_partialRestart(cGame* self);
 extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 extern "C" void* func_0028B180(void);
-extern "C" void func_002870A0(void* mgr);
+extern "C" void cSSXAudio_RestartEvent(void* mgr);
 
 static inline int numRiders_2302A8(void* game)
 {
@@ -917,7 +917,7 @@ static inline char* rider_2302A8(void* game, int i)
  *
  * Runs cGame_partialRestart() and cGameModeMan_restartHeat(), clears every allocated rider's unk_2F8 (which the
  * game-mode code sets to 0.7, 0.35 or 0 by the player's place), switches the game to state 1 at once
- * (func_00231250(self, 1, 2, 1)), and calls func_002870A0() on the audio system.
+ * (func_00231250(self, 1, 2, 1)), and calls cSSXAudio_RestartEvent() on the audio system.
  */
 extern "C" void cGame_restart(cGame* self)
 {
@@ -928,7 +928,7 @@ extern "C" void cGame_restart(cGame* self)
         *(int*)(rider_2302A8(self, i) + 0x2F8) = 0;
     }
     func_00231250(self, 1, 2, 1);
-    func_002870A0(func_0028B180());
+    cSSXAudio_RestartEvent(func_0028B180());
 }
 #endif
 
@@ -1026,7 +1026,7 @@ INCLUDE_ASM("main/gameload", cGame_exit);
 #ifdef SKIP_ASM
 struct cAppMan;
 void cReplay_stopAutoReplay(void* self);
-extern "C" void func_00258AE0(void* p);
+extern "C" void cGameComm_gameExit(void* p);
 extern "C" void func_00266DF8(void* p);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
@@ -1039,7 +1039,7 @@ extern char D_0047B788[];
 /**
  * Leaves the in-game module and queues the next app module.
  *
- * Stops the auto replay, sets game state 6, shuts down the online game-comm object (func_00258AE0) and the
+ * Stops the auto replay, sets game state 6, shuts down the online game-comm object (cGameComm_gameExit) and the
  * DirtySock object in D_004A33F4 when they exist. Despite the parameter name, a nonzero @p toFrontEnd queues a
  * cPreGameLoadScreen (used after choosing a new event in-game), and 0 queues the "PreFELoad" module, which
  * probably loads the front end.
@@ -1051,7 +1051,7 @@ extern "C" void cGame_exit(cGame* self, int toFrontEnd)
     cReplay_stopAutoReplay(self->Replay);
     func_00231250(self, 6, 0, 0);
     if (cGameComm_mGameComm != 0) {
-        func_00258AE0(cGameComm_mGameComm);
+        cGameComm_gameExit(cGameComm_mGameComm);
     }
     if (D_004A33F4 != 0) {
         func_00266DF8(D_004A33F4);
@@ -1164,7 +1164,7 @@ extern "C" int func_002CC098(void* p);
 extern "C" void func_002CC0C0(void* p);
 extern "C" int* func_0030C870(void* p);
 extern "C" void cOVStateManager_triggerOverlay(int id);
-extern "C" void func_0029CED8(void* p, int a, int b, float c);
+extern "C" void cSSXAudio_PlayIconSound(void* p, int a, int b, float c);
 extern "C" void cWScriptMan_doMissionCmd(void* p, int a, int b, int c);
 extern "C" void func_00398038(void* p);
 extern "C" void func_0030C820(void* p);
@@ -1176,7 +1176,7 @@ extern "C" void func_00231D18_v(void* self) __asm__("func_00231D18");
 extern "C" int func_0020CBE8(void);
 extern "C" void func_00326AE0(void* p);
 extern "C" void func_0020CA10(void);
-extern "C" void func_00289B70(void* p);
+extern "C" void cSSXAudio_PauseAudio(void* p);
 extern "C" void func_00294F48(void* p);
 extern "C" int func_0020CBA0(void);
 extern "C" void cPlaybackMan_update(void* p);
@@ -1329,7 +1329,7 @@ static inline int updateState_2306B8(cGame* self)
             if (e[1] == 8) {
                 cOVStateManager_triggerOverlay(0x1D);
                 pushState_2306B8(3);
-                func_0029CED8(func_0028B180(), 4, 0, 1.0f);
+                cSSXAudio_PlayIconSound(func_0028B180(), 4, 0, 1.0f);
                 return 0;
             }
             if (e[1] == 9) {
@@ -1367,7 +1367,7 @@ static inline int updateState_2306B8(cGame* self)
             sVEntryI_2306B8* vt = o->vtbl;
             vt[44].fn((char*)o + vt[44].delta, (*(unsigned char*)&self->PauseOwner));
         }
-        func_00289B70(func_0028B180());
+        cSSXAudio_PauseAudio(func_0028B180());
         func_00294F48(func_0028B180());
         return 0;
     }

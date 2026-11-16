@@ -8,7 +8,7 @@
 // EA's source is d:/ssx/code/source/world/streamman.cpp (preview assert strings); methods 0x003A6D50-0x003A7598
 // (world/streamman):
 //   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init (init), cStreamMan_reset (reset),
-//   cStreamMan_purge (purge), cStreamMan_addStreamRequest (addStreamRequest), func_003A7010 (cancelStreamRequest),
+//   cStreamMan_purge (purge), cStreamMan_addStreamRequest (addStreamRequest), cStreamMan_cancelStreamRequest (cancelStreamRequest),
 //   cStreamMan_setBandWidthLimit (setBandWidthLimit), func_003A7098 (update), func_003A7218 (decompressChunk),
 //   func_003A7238 (processChunk). The static _NULLCHUNK is D_004A47D0.
 //
@@ -43,7 +43,7 @@ struct cStreamMan {
     int m_bActive;                  // 0x090 [O] (a bool); [R] reset = 0; [U] addStreamRequest sets 1 (one read in flight),
                                     //       cWorldCache_updatePages tests it (lw cache+0x390)
     int m_ActiveHull;               // 0x094 [P] assert m_ActiveHull; [R] reset = -1; [U] addStreamRequest stores the hull
-                                    //       page; update passes it to signalPageLoadComplete (func_003A8650)
+                                    //       page; update passes it to signalPageLoadComplete (cWorldCache_signalPageLoadComplete)
     unsigned int m_uiNumHullChunk;  // 0x098 [O]; [R] reset = 0; [U] addStreamRequest stores the chunk count,
                                     //       processChunk counts it down
     int m_streamRequest;            // 0x09C [O]; [R] ctor = 0; [U] addStreamRequest stores the request id,

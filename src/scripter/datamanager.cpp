@@ -396,7 +396,7 @@ INCLUDE_ASM("scripter/datamanager", func_00275ED0);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_002797A0(void* eng, int a1, int a2, int a3, int a4);
+extern "C" int cSSXScriptEngine_SelectScriptFromCategory(void* eng, int a1, int a2, int a3, int a4);
 extern "C" void* func_00282BF0(void* self, int a1);
 extern "C" int func_00283BB8(void* self);
 int func_00283C58(void* self);
@@ -429,7 +429,7 @@ extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int
     cmd.a5 = a5;
     cmd.a6 = a6;
     if (lookup != 0) {
-        int id = func_002797A0(*(void**)self, a1, a4, a5, a6);
+        int id = cSSXScriptEngine_SelectScriptFromCategory(*(void**)self, a1, a4, a5, a6);
         if (id < 0) {
             return 0;
         }
@@ -607,8 +607,8 @@ void* func_00230698(void* self, int a1);
 char* func_0027C070(void* obj);
 extern "C" void func_00277778(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
-// The unit declares func_00279720 as void; it returns func_002822A0's result.
-int func_00279720_i(void* self, int val, int key, int b, int c) __asm__("func_00279720");
+// The unit declares cSSXScriptEngine_PlayRequestScript as void; it returns func_002822A0's result.
+int cSSXScriptEngine_PlayRequestScript_i(void* self, int val, int key, int b, int c) __asm__("cSSXScriptEngine_PlayRequestScript");
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
 extern "C" void func_002826D8(void* self, int a1);
 extern "C" void* func_00282BF0(void* self, int a1);
@@ -686,7 +686,7 @@ int func_00276388_impl(char* self, int fade, int notify)
         e->fn(o + e->delta, 0, 0);
     }
     if (func_00277DD8(self, item) == 0) {
-        func_00279720_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
+        cSSXScriptEngine_PlayRequestScript_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
         if (*(int*)(self + 0x4) != 0) {
             void* snd = func_00230698(SSXApp->Game, 0);
             if (*(int*)((char*)snd + 0x44) != 0) {
@@ -1404,8 +1404,8 @@ INCLUDE_ASM("scripter/datamanager", tNISList_SetupNextScript);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_00279528(void* self, int category, int a, int b, int c);
-extern "C" int func_002795D0(void* self, int key, int a, int b, int c);
+extern "C" int cSSXScriptEngine_RequestScriptByCategory(void* self, int category, int a, int b, int c);
+extern "C" int cSSXScriptEngine_RequestScriptByIndex(void* self, int key, int a, int b, int c);
 extern "C" int cVidEngine_ReadyVideo(void** self, int file);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int* func_00277DE8_p(void* self, void* ent) __asm__("func_00277DE8");
@@ -1435,9 +1435,9 @@ extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
         if (func_00277DD8(self, e) == 0) {
             void* eng = *(void**)self;
             if (e->f4 >= 0)
-                e->id = func_002795D0(eng, e->f4, e->a, e->b, e->c);
+                e->id = cSSXScriptEngine_RequestScriptByIndex(eng, e->f4, e->a, e->b, e->c);
             else
-                e->id = func_00279528(*(void**)self, e->f0, e->a, e->b, e->c);
+                e->id = cSSXScriptEngine_RequestScriptByCategory(*(void**)self, e->f0, e->a, e->b, e->c);
             if (e->id >= 0)
                 return i;
         } else {
@@ -1592,7 +1592,7 @@ extern "C" void func_00276868(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
 extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" void func_00279720(void* self, int val, int key, int b, int c);
+extern "C" void cSSXScriptEngine_PlayRequestScript(void* self, int val, int key, int b, int c);
 extern "C" int func_002839A8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" float func_002E4678(void* self);
@@ -1621,7 +1621,7 @@ extern "C" void func_00277838(void* selfp)
         *(int*)(self + 0xBC) = -1;
         sDmCmd7838* cmd = (sDmCmd7838*)func_00283D70(self + 0xC, 0);
         if (func_00277DD8(self, cmd) == 0) {
-            func_00279720(*(void**)self, *(int*)(self + 0x8), cmd->id, 0, (cmd->flags >> 3) & 1);
+            cSSXScriptEngine_PlayRequestScript(*(void**)self, *(int*)(self + 0x8), cmd->id, 0, (cmd->flags >> 3) & 1);
             char* eng = *(char**)self;
             sDmEngVEntry7838* vt = *(sDmEngVEntry7838**)(eng + 0x2A8);
             vt[6].fn(eng + vt[6].delta, cmd->id);

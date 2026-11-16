@@ -41,7 +41,7 @@ enum {
     kRiderVt_delete = 1,          // deleting destructor (cRider__cRider)
     kRiderVt_getVelocity = 2,
     kRiderVt_isIntersecting = 3,
-    kRiderVt_applyBoost = 4,      // (const t4Vector* impulse): func_001250A8
+    kRiderVt_applyBoost = 4,      // (const t4Vector* impulse): cRider_applyBoost
     kRiderVt_getPosition = 5,
     kRiderVt_getTransform = 6,
     kRiderVt_getAIIndex = 7,
@@ -55,7 +55,7 @@ enum {
     kRiderVt_vibrationUpdate = 19
 };
 
-// One of cRider's 19 smoothed channels at 0x1F0 (func_00123640 initialises {cur, rate, target}).
+// One of cRider's 19 smoothed channels at 0x1F0 (cRider_OnStartObjectUse initialises {cur, rate, target}).
 struct sRiderChannel {
     float cur;
     float rate;
@@ -79,8 +79,8 @@ struct sRiderPair {
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (func_0011D390)
-    /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in func_0010D938, func_0010DEF0
-    /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in func_0010D990
+    /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in cComputer_isFarBehind, func_0010DEF0
+    /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in cComputer_isFarAhead
     /* 0x0E4 */ char unk_0E4[0x8];
     /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
     /* 0x0F0 */ int mHasRival; // [X] cleared on reset (func_0011D390)
@@ -100,10 +100,10 @@ struct cRider {
     /* 0x190 */ char unk_190[0x10];
     /* 0x1A0 */ t4Matrix mMatrix; // [P] rows getSide/getFront/getUp (unshifted) + position; built from mRotation/mPosition
     /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (func_00140910); [P] setVelocity
-    /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by func_00123640; .cur of [0],[2],[3],[8] read as lean input
+    /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by cRider_OnStartObjectUse; .cur of [0],[2],[3],[8] read as lean input
     /* 0x2D4 */ unsigned short unk_2D4; // = hit object +0xA (func_001242B0)
     /* 0x2D6 */ char unk_2D6[0x2];
-    /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (func_00123640)
+    /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (cRider_OnStartObjectUse)
     /* 0x2DC */ float mSpinRate; // [X] cleared on transport (func_0011D660)
     /* 0x2E0 */ float mFlipRate; // [X] cleared on transport (func_0011D660)
     /* 0x2E4 */ float unk_2E4; // 4th arg of cAirPredictor_startLaunchIntoAir after a bounce (func_001057B8)
@@ -121,7 +121,7 @@ struct cRider {
     /* 0x314 */ float mCheatSpeedLerp; // [X] = 0.015 (ctor)
     /* 0x318 */ float unk_318;
     /* 0x31C */ float unk_31C; // cleared on transport (func_0011D660); lwc1, compared > 0.0f, scales mGroundNormal (func_0011EB98)
-    /* 0x320 */ int unk_320; // copied into unk_2D8 (func_00123640)
+    /* 0x320 */ int unk_320; // copied into unk_2D8 (cRider_OnStartObjectUse)
     /* 0x324 */ int mNaturalStance; // [X] = func_0014EF70(interface 2, mAIIndex) (func_0011D390)
     /* 0x328 */ int mRailStyle; // [X] landing state 1..4 from the board-vs-ground angle (cRider_checkRailBoardCollisions); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (func_0010EB30)
     /* 0x32C */ int unk_32C; // cleared on transport (func_0011D660)
@@ -133,7 +133,7 @@ struct cRider {
     /* 0x358 */ int mHudMsgId; // [X] cleared on transport (func_0011D660)
     /* 0x35C */ float unk_35C; // cleared on transport (func_0011D660); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
     /* 0x360 */ char unk_360[0x10];
-    /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in func_00121950
+    /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
     /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (func_001242B0)
     /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (func_0011EB98)
     /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (func_001242B0)
@@ -145,7 +145,7 @@ struct cRider {
     /* 0x3F4 */ float mImpactAccum2; // [X]
     /* 0x3F8 */ char unk_3F8[0x4];
     /* 0x3FC */ int unk_3FC;
-    /* 0x400 */ t4Vector mBoundsMin; // [X] with 0x410: box tested against the view (func_00122278)
+    /* 0x400 */ t4Vector mBoundsMin; // [X] with 0x410: box tested against the view (cRider_renderClip)
     /* 0x410 */ t4Vector mBoundsMax; // [X]
     /* 0x420 */ t4Vector mBoundSphere; // [X] tested by the VU0 frustum program
     /* 0x430 */ unsigned int mGroundPolyId; // [X] built as 0xFFFFFFFF with lui/ori (unsigned) in the ctor and func_001242B0
@@ -170,7 +170,7 @@ struct cRider {
     /* 0x5A8 */ int unk_5A8; // cleared on reset (func_0011D390)
     /* 0x5AC */ int unk_5AC; // cleared on reset (func_0011D390)
     /* 0x5B0 */ int unk_5B0;
-    /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (func_00121950)
+    /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (cRider_updateSplit12)
     /* 0x5B8 */ unsigned int mVisitedIds; // [X]
     /* 0x5BC */ char unk_5BC[0x104];
     /* 0x6C0 */ void* mVtbl; // cRider vtable (_vt$6cRider); cBeing's vptr slot
@@ -179,22 +179,22 @@ struct cRider {
     /* 0x6D4 */ char unk_6D4[0x4];
     /* 0x6D8 */ void* unk_6D8;
     /* 0x6DC */ char unk_6DC[0x8]; // cScriptObject data; its vptr follows
-    /* 0x6E4 */ int unk_6E4; // count or gate in the cScriptObject data: <= 0 makes func_00123F38 return mPosition unchanged
+    /* 0x6E4 */ int unk_6E4; // count or gate in the cScriptObject data: <= 0 makes cRider_GetNISEndPosition return mPosition unchanged
     /* 0x6E8 */ void* mScriptObjectVtbl; // _vt$6cRider$13cScriptObject
     /* 0x6EC */ char unk_6EC[0x14];
-    /* 0x700 */ t4Matrix mScriptMatrix; // [X] start transform used by a VU0 matrix*vector (func_00123640)
-    /* 0x740 */ float unk_740; // start-angle offset added to unk_AF0 (func_00123640)
-    /* 0x744 */ float unk_744; // start-angle offset added to unk_AF4 (func_00123640)
-    /* 0x748 */ float unk_748; // start-angle offset added to unk_AF8 (func_00123640)
+    /* 0x700 */ t4Matrix mScriptMatrix; // [X] start transform used by a VU0 matrix*vector (cRider_OnStartObjectUse)
+    /* 0x740 */ float unk_740; // start-angle offset added to unk_AF0 (cRider_OnStartObjectUse)
+    /* 0x744 */ float unk_744; // start-angle offset added to unk_AF4 (cRider_OnStartObjectUse)
+    /* 0x748 */ float unk_748; // start-angle offset added to unk_AF8 (cRider_OnStartObjectUse)
     /* 0x74C */ char unk_74C[0x4];
     /* 0x750 */ float mAudioBraking; // [P] getAudioBraking_0_to_1 (bracketed +0x40); func_001242B0 also writes it as int 0
     /* 0x754 */ float mAudioEdging; // [P] getAudioEdging_0_to_1
     /* 0x758 */ float mAudioPressure; // [P] getAudioPressure_0_to_1
     /* 0x75C */ float mAudioSpeed; // [P] getAudioSpeed_0_to_1
-    /* 0x760 */ int unk_760; // sound state = func_0011FE98(rider), written when it changes (func_00292EF8, func_00292DA0)
-    /* 0x764 */ int unk_764; // written with the same value as 0x760 (func_00292A50)
-    /* 0x768 */ int unk_768; // sound id from func_00291710(self, rider) (func_00292EF8, func_00292DA0)
-    /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one func_002934D0 result (func_00293018)
+    /* 0x760 */ int unk_760; // sound state = func_0011FE98(rider), written when it changes (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
+    /* 0x764 */ int unk_764; // written with the same value as 0x760 (cSSXAudio_BeginRiderSound)
+    /* 0x768 */ int unk_768; // sound id from func_00291710(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
+    /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one func_002934D0 result (cSSXAudio_HandleCarve)
     /* 0x770 */ float unk_770; // fed to curve D_00482D30 for the sound volume (func_002948D0)
     /* 0x774 */ int mWipeoutSlideHandle; // [P] GetWipeoutSlideHandle (bracketed +0x40)
     /* 0x778 */ int mWipeoutTumbleHandle; // [P] GetWipeoutTumbleHandle
@@ -204,9 +204,9 @@ struct cRider {
     /* 0x788 */ cAirPredictor* mAirPredictor; // [P] getAirPredictor (seen); passed to cAirPredictor_startLaunchIntoAir
     /* 0x78C */ void* mFocusBox; // [P] getFocusBox (seen); set by cRider_addFocusBox
     /* 0x790 */ cRiderMetrix* mMetrix; // [P] getMetrix (seen); set by cRider_addRiderMetrix
-    /* 0x794 */ void* unk_794[8]; // cleared as 0x20 bytes (func_00122658)
+    /* 0x794 */ void* unk_794[8]; // cleared as 0x20 bytes (cRider_flushActiveLights)
     /* 0x7B4 */ char unk_7B4[0xC];
-    /* 0x7C0 */ char unk_7C0[0xA0] __attribute__((aligned(16))); // copied as one 0xA0-byte block (func_001220D8)
+    /* 0x7C0 */ char unk_7C0[0xA0] __attribute__((aligned(16))); // copied as one 0xA0-byte block (cRider_SetRiderLights)
     /* 0x860 */ void* mOverlapList; // [X]
     /* 0x864 */ void* mLineHint; // [X]
     /* 0x868 */ void* mWallHint; // [X]
@@ -231,9 +231,9 @@ struct cRider {
     /* 0x8C8 */ char unk_8C8[0x8];
     /* 0x8D0 */ long mHeadBoneMask; // [X] 64-bit; same use for the wide-glance anims (cRider_checkForProximityAction)
     /* 0x8D8 */ char unk_8D8[0x10];
-    /* 0x8E8 */ int unk_8E8; // bone index (func_00122898)
+    /* 0x8E8 */ int unk_8E8; // bone index (cRider_RenderShadow)
     /* 0x8EC */ char unk_8EC[0x2C];
-    /* 0x918 */ int unk_918; // bone index (func_00122898)
+    /* 0x918 */ int unk_918; // bone index (cRider_RenderShadow)
     /* 0x91C */ char unk_91C[0xB4];
     /* 0x9D0 */ t4Vector mModelOffset; // [X] reset to t4vect_Zero each frame
     /* 0x9E0 */ char unk_9E0[0x50];
@@ -241,8 +241,8 @@ struct cRider {
     /* 0xA34 */ char unk_A34[0x2C];
     /* 0xA60 */ char unk_A60[0x40];
     /* 0xAA0 */ void* mSphereTree; // [P] getSphereTree (seen)
-    /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (func_00122898)
-    /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by func_00122898
+    /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
+    /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
     /* 0xAAC */ float unk_AAC; // hit f6C (func_001242B0); the ctor copies 8 bytes here from D_004A5960
     /* 0xAB0 */ float unk_AB0; // hit f70 (func_001242B0)
     /* 0xAB4 */ char unk_AB4[0x8];
@@ -253,15 +253,15 @@ struct cRider {
     /* 0xACC */ char unk_ACC[0x4];
     /* 0xAD0 */ int unk_AD0;
     /* 0xAD4 */ char unk_AD4[0xC];
-    /* 0xAE0 */ t4Vector unk_AE0; // start position (w = 1), zeroed in the ctor (func_00123640)
-    /* 0xAF0 */ float unk_AF0; // start angle, degrees * pi/180 (func_00123640)
-    /* 0xAF4 */ float unk_AF4; // start angle, degrees * pi/180 (func_00123640)
-    /* 0xAF8 */ float unk_AF8; // start angle, degrees * pi/180 (func_00123640)
+    /* 0xAE0 */ t4Vector unk_AE0; // start position (w = 1), zeroed in the ctor (cRider_OnStartObjectUse)
+    /* 0xAF0 */ float unk_AF0; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
+    /* 0xAF4 */ float unk_AF4; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
+    /* 0xAF8 */ float unk_AF8; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
     /* 0xAFC */ int unk_AFC;
     /* 0xB00 */ int unk_B00;
-    /* 0xB04 */ float unk_B04; // speed (func_001242B0), 0.0f (func_00123640)
-    /* 0xB08 */ int unk_B08[4]; // sound ids, -1 = none (func_00123B48)
-    /* 0xB18 */ int mIsOnScreen; // [P] IsRiderOnScreen, preview 0x9F8 (+0x120 assumed); [U] frustum test result (func_00122278)
+    /* 0xB04 */ float unk_B04; // speed (func_001242B0), 0.0f (cRider_OnStartObjectUse)
+    /* 0xB08 */ int unk_B08[4]; // sound ids, -1 = none (cRider_OnEndObjectUse)
+    /* 0xB18 */ int mIsOnScreen; // [P] IsRiderOnScreen, preview 0x9F8 (+0x120 assumed); [U] frustum test result (cRider_renderClip)
     /* 0xB1C */ int unk_B1C;
     /* 0xB20 */ int unk_B20; // = 1 (ctor)
     /* 0xB24 */ float mBoostMeterStart; // [X]

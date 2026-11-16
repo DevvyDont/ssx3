@@ -24,9 +24,9 @@ int cWorldView_getNumSections(cWorldView* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9820);
+INCLUDE_ASM("world/worldview", cWorldView_getSectionName);
 #ifdef SKIP_ASM
-extern "C" void* func_003A9820(cWorldView* self, unsigned int i)
+extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i)
 {
     tStreamDataHeader* list = self->mp_Hdr;
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
@@ -55,9 +55,9 @@ int cWorldView_isSectionLoaded(cWorldView* self, int section)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9890);
+INCLUDE_ASM("world/worldview", cWorldView_isSectionUnLoaded);
 #ifdef SKIP_ASM
-extern "C" int func_003A9890(cWorldView* self, unsigned int i)
+extern "C" int cWorldView_isSectionUnLoaded(cWorldView* self, unsigned int i)
 {
     tStreamDataHeader* list = self->mp_Hdr;
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
@@ -171,9 +171,9 @@ extern "C" int func_003A9A90(int arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9A98);
+INCLUDE_ASM("world/worldview", cWorldView_getHull);
 #ifdef SKIP_ASM
-extern "C" void* func_003A9A98(cWorldView* self, int a1)
+extern "C" void* cWorldView_getHull(cWorldView* self, int a1)
 {
     return (char*)(self->mp_Hulls) + a1 * 0x44;
 }
@@ -192,7 +192,7 @@ int func_003A9AB0(void* self)
 INCLUDE_ASM("world/worldview", func_003A9AC0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003A8618(void* self, int a1);
+extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 extern void func_003A9BB8_9AC0(void* self, int sec, int box, int* ok) __asm__("func_003A9BB8");
 
 extern "C" int func_003A9AC0(cWorldView* vself, int box)
@@ -203,7 +203,7 @@ extern "C" int func_003A9AC0(cWorldView* vself, int box)
     int off = *(int*)(cur + 0x18);
     off *= 0x44;
     if (*(unsigned short*)(off + (int)vself->mp_Hulls) != 0) {
-        if (func_003A8618(vself->mp_WorldCache, *(int*)(cur + 0x18)) == 0)
+        if (cWorldCache_isPageLoaded(vself->mp_WorldCache, *(int*)(cur + 0x18)) == 0)
             return 0;
     }
     ok = 1;
@@ -217,7 +217,7 @@ extern "C" int func_003A9AC0(cWorldView* vself, int box)
 //100%
 INCLUDE_ASM("world/worldview", func_003A9BB8);
 #ifdef SKIP_ASM
-extern "C" int func_003A8618(void* self, int a1);
+extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 
 struct sV4_9BB8 {
     float x, y, z, w;
@@ -278,7 +278,7 @@ extern "C" void func_003A9BB8(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* b
     if (!overlap_9BB8(box, sec))
         return;
     if (sec->info != 0) {
-        if (func_003A8618(world->mp_WorldCache, sec->info->id) == 0) {
+        if (cWorldCache_isPageLoaded(world->mp_WorldCache, sec->info->id) == 0) {
             *ok = 0;
             return;
         }
@@ -468,7 +468,7 @@ extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, cons
 INCLUDE_ASM("world/worldview", func_003AA028);
 #ifdef SKIP_ASM
 extern "C" float func_003A9E50(void* self, void* pos, void* bmin, void* bmax);
-extern "C" int func_003A8618(void* self, int a1);
+extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 extern "C" void func_003A8448(void* self, int i, float f);
 
 struct sV4_A028 {
@@ -552,14 +552,14 @@ extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
         float w;
         if (d < 0.0f) {
             w = 0.800000011920929f;
-            if (func_003A8618(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
+            if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
                 m = 0.0f;
         } else {
             if (((sWV_A028*)self_)->cams[cam].range < d)
                 return;
             w = (1.0f - d / ((sWV_A028*)self_)->cams[cam].range) * 0.800000011920929f;
             if (d < m) {
-                if (func_003A8618(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
+                if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
                     m = d;
             }
         }
@@ -1324,14 +1324,14 @@ extern "C" void func_00242540(void* self, void* obj);
 char* func_0028B1C8_AE68() __asm__("func_0028B1C8");
 extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
 extern char* D_004A28A8_AE68 __asm__("SSXApp");
-extern "C" int func_0012A340(void* self, int a, unsigned int b, void* obj);
+extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
 extern "C" void func_002BB348(void* self, int a, void* obj);
 extern "C" void func_003ACA10(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
 extern "C" void func_00230430(void* self, int a);
 void func_0016CEC8(void* a, int b);
-extern "C" void func_00278A10(void* self, int a, void* obj);
+extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* obj);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void func_001547D8_AE68(void* self, int a, void* p, int v) __asm__("func_001547D8__FPv");
@@ -1446,7 +1446,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         }
         break;
     case 18:
-        func_00278A10(ScriptEngine, RID & 0xFF, obj);
+        cSSXScriptEngine_AttachAnchorDataTable(ScriptEngine, RID & 0xFF, obj);
         break;
     case 20:
         func_00286CA8(func_0028B180(), RID, obj);
@@ -1461,7 +1461,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         func_00242540(func_003AD198(), obj);
         break;
     case 14:
-        if (!func_0012A340(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
+        if (!cAI_swaploadInjectedPathFile(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
             if (obj) {
                 cMemMan_free(obj);
             }
@@ -1488,8 +1488,8 @@ void func_001547E0_2(void* iface, unsigned char id) __asm__("func_001547E0__FPv"
 extern "C" void func_0016CF18(unsigned int param);
 extern "C" void func_00210608(void* data);
 extern "C" void func_00242570(void* p, void* data);
-extern "C" void func_00278A58(void* p, unsigned char id);
-extern "C" void func_00286D18(void* p, unsigned int param, void* data);
+extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
+extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
 extern "C" void* func_0028B180();
 extern "C" void* func_0028B1C8();
 extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
@@ -1648,10 +1648,10 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         }
         break;
     case 18:
-        func_00278A58(ScriptEngine, param);
+        cSSXScriptEngine_DetachAnchorDataTable(ScriptEngine, param);
         break;
     case 20:
-        func_00286D18(func_0028B180(), param, data);
+        cSSXAudio_UnAttachAudioBank(func_0028B180(), param, data);
         break;
     case 19:
         func_001547E0_2(cBE_getInterface_Fv(cBE_getBE(), 10), param);

@@ -12765,7 +12765,7 @@ struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* func_0028B180();
-extern "C" void func_00286200(void* p);
+extern "C" void cSSXAudio_FrontEndPurge(void* p);
 extern "C" void func_00256088();
 extern char D_00463F98[];
 
@@ -12802,7 +12802,7 @@ extern "C" void func_001B5BD8(cFEStateNet* self, void* a1, unsigned int kind)
     switch (kind) {
     case 15: {
         func_001A97B8(self, a1, 15);
-        func_00286200(func_0028B180());
+        cSSXAudio_FrontEndPurge(func_0028B180());
         func_00256088();
         cFEVObj_001B5BD8* o = (cFEVObj_001B5BD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463F98));
         if (o != 0) {
@@ -18841,7 +18841,7 @@ struct sFELists1BE038;
 extern "C" int func_0025F120(void* self);
 extern "C" const char* func_0025F150(void* self, int a1);
 extern "C" int func_0025F180(void* self, int idx);
-extern "C" void func_00319028(void* ret, void* src, int n);
+extern "C" void cBXString_right(void* ret, void* src, int n);
 extern "C" void func_0039A670(void* self);
 extern "C" int func_004165A8(const char* a, const char* b);
 extern char* D_004A3E90_p __asm__("D_004A3E90");
@@ -18902,7 +18902,7 @@ extern "C" void func_001BE0A8(void* self)
         {
             sBXTmp_001BE0A8 t(0);
             int len = *(int*)(name.p - 8) - 1;
-            func_00319028(&t, &name, len - dot);
+            cBXString_right(&t, &name, len - dot);
             cBXString_operatorE(&ext, &t);
             cBXString__cBXString(&t, 2);
         }

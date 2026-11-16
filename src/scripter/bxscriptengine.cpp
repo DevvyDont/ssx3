@@ -509,12 +509,12 @@ extern "C" void func_002826D8(void* self, int a1)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282720);
 #ifdef SKIP_ASM
-extern "C" void func_00274A08(void* self);
+extern "C" void cScriptPlayerMain_Resume(void* self);
 
 extern "C" void func_00282720(void* self, int a1)
 {
     char* p = (char*)self + (a1 * 0x24 + 0x2c0);
-    func_00274A08(*(void**)p);
+    cScriptPlayerMain_Resume(*(void**)p);
     if (*(int*)(p + 0x4) == 5) {
         char* s = *(char**)p;
         if (*(int*)(s + 0x2C) <= 0) {
@@ -1095,13 +1095,13 @@ int func_00282F80(void* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282F90);
 #ifdef SKIP_ASM
-extern "C" void func_00274240(void* p, int a1);
+extern "C" void cScriptPlayerEntity_SetEntityComm(void* p, int a1);
 
 extern "C" void func_00282F90(void* self)
 {
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
-        func_00274240(p, 0);
+        cScriptPlayerEntity_SetEntityComm(p, 0);
     }
 }
 #endif
@@ -1149,13 +1149,13 @@ extern "C" void func_00283038(void* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283060);
 #ifdef SKIP_ASM
-extern "C" void func_00274A08(void* self);
+extern "C" void cScriptPlayerMain_Resume(void* self);
 
 extern "C" void func_00283060(void* self)
 {
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
-        func_00274A08(*(void**)((char*)p + 0x8));
+        cScriptPlayerMain_Resume(*(void**)((char*)p + 0x8));
     }
 }
 #endif

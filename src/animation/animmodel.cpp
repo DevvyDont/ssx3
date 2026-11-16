@@ -221,10 +221,10 @@ extern "C" void func_0030EC18(cAnimModel* self, int i, int param)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030ECA0);
+INCLUDE_ASM("animation/animmodel", cAnimModel_addAnimMinPart);
 #ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
-extern "C" void func_0030ECA0(cAnimModel* self, int i)
+extern "C" void cAnimModel_addAnimMinPart(cAnimModel* self, int i)
 {
     sAnimModelPart* e = &self->parts[self->partIndex[i]];
     self->unk_158 |= e->mask;
@@ -308,7 +308,7 @@ extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* animModel
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310200);
+INCLUDE_ASM("animation/animmodel", cAnimModel_transform);
 #ifdef SKIP_ASM
 // Vector/quaternion with constructors (the result temps go straight into the return slot).
 struct sAmQuat_0200
@@ -420,7 +420,7 @@ struct sAmBoneInfo_0200 {
 };
 
 // Rebuilds the world bones from the local pose: bone k = parent (or the next root transform) * local k.
-extern "C" void func_00310200(cAnimModel* self, sAnimModelBone* roots)
+extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
 {
     for (int i = 0; i < self->numParts; i++)
     {
@@ -567,7 +567,7 @@ extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* offset)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310640);
+INCLUDE_ASM("animation/animmodel", cAnimModel_render);
 #ifdef SKIP_ASM
 struct sAmMat_0640;
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
@@ -662,7 +662,7 @@ typedef void (*tDraw_0640)(void*, char*, char*, int, int, float);
 extern int D_004A5948;
 extern sAmMat_0640 D_004FC420[];
 
-extern "C" void func_00310640(cAnimModel* self, int lod, int x, int y)
+extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (D_004A5948 == 0) {
@@ -907,7 +907,7 @@ extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310EA8);
+INCLUDE_ASM("animation/animmodel", cAnimModel_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cAmStream {
 public:
@@ -915,16 +915,16 @@ public:
     virtual void write(void* data, int size);
 };
 
-extern "C" void func_00310EA8(cAnimModel* self, cAmStream* s)
+extern "C" void cAnimModel_writeToReplayFrame(cAnimModel* self, cAmStream* s)
 {
     s->read(self->bones, self->numBones << 5);
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310EE0);
+INCLUDE_ASM("animation/animmodel", cAnimModel_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00310EE0(cAnimModel* self, cAmStream* s)
+extern "C" void cAnimModel_readFromReplayFrame(cAnimModel* self, cAmStream* s)
 {
     s->write(self->bones, self->numBones << 5);
 }

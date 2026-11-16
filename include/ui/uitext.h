@@ -48,7 +48,7 @@ struct cUIText {
     int mSound[2];                   // 0x06C [O] cUIThing
     // --- cUIText ---
     int mAttrText;                   // 0x074 [P] tAttrText: setFontIndex (bits 0-1), hasShadow (2), isUnicode (3), getUseStaticColour (4)
-                                     //       (preview lw 0x6C; retail func_003A5DF8..func_003A5EE8, which in On Tour's order also have
+                                     //       (preview lw 0x6C; retail func_003A5DF8..cUIText_setEllipses, which in On Tour's order also have
                                      //       get/setUseDisabledColour (5) and isEllipses/setEllipses (6)); [R] ctor sets bit 2, clears 3-6;
                                      //       [U] font index in cUIText_getFont, bit 3 in cUIText_getAsciiString/getUnicodeString
     tARGB mShadowColour;             // 0x078 [P] setShadowColour (preview 0x70; retail func_003A5F08); [U] cUIText_setUIData (setUIData)

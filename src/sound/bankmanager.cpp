@@ -344,7 +344,7 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_0028A148(void* self, int flags);
 extern "C" void func_0028B278(void* self, int flags);
-extern "C" void func_002ACE40(void* self, int flags);
+extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* gpBankManager;
 extern void* cBankMonitor_vtbl[];
@@ -397,7 +397,7 @@ extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
         }
         cMemMan_free((char*)self->banks - 0x10);
     }
-    func_002ACE40(&self->monitor, 0);
+    cBankMonitor__cBankMonitor(&self->monitor, 0);
     func_0028A148(self, 0);
     if (flags & 2) {
         cSoundSys__cSoundSys(self->monitor, 0);
@@ -841,7 +841,7 @@ extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" int func_00288AE0(void* self);
 extern "C" int func_0028D960(void* self);
 extern "C" void func_002910E0(void* self);
-extern "C" void func_002913D8(void* self);
+extern "C" void cSSXAudio_EndWind(void* self);
 extern "C" int func_002A4168(void* self);
 extern "C" int func_002A41D8(void* self);
 extern "C" void func_002B3C98(void* mon, char v);
@@ -1002,7 +1002,7 @@ have:
     }
     char* mon = self->mon;
     if (D_004A3620 == 1) {
-        func_002913D8(self);
+        cSSXAudio_EndWind(self);
         if (func_002B46E8(mon)) {
             if (func_0028D960(self))
                 self->monVt[3].fn(mon + self->monVt[3].delta, 8);
@@ -1770,8 +1770,8 @@ extern "C" char* func_0028B1D8();
 extern "C" void func_0028D5A0(void* self, int id);
 extern "C" void func_00296E20(void* self, int id);
 extern "C" void func_00297438(void* self, int id);
-extern "C" void func_0029B3C0(void* self, int a1);
-extern "C" void func_0029D678(void* self, float v);
+extern "C" void cSSXAudio_EndUberSpin(void* self, int a1);
+extern "C" void cSSXAudio_StopTone(void* self, float v);
 extern "C" void func_002B3A70(void* self);
 
 struct sBmVtE8C0 {
@@ -1851,10 +1851,10 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, key);
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_E8C0->v);
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658_E8C0->v);
-            func_0029D678(self, 5.029983997344971f);
+            cSSXAudio_StopTone(self, 5.029983997344971f);
             func_00296E20(self, *(int*)(func_0028B1D8() + 0x28));
             func_00297438(self, *(int*)(func_0028B1D8() + 0x28));
-            func_0029B3C0(self, 0);
+            cSSXAudio_EndUberSpin(self, 0);
             if (func_0028D960(self)) {
                 int flag = 1;
                 if (func_002A4040(self) == 0) {
@@ -2265,7 +2265,7 @@ extern "C" void func_0028F5B8(void* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F678);
 #ifdef SKIP_ASM
-extern "C" void func_0029CE70(void* self);
+extern "C" void cSSXAudio_ResumeSFX(void* self);
 extern "C" int func_002A3F90(void* self);
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028FA98(void* self, float v);
@@ -2273,7 +2273,7 @@ extern "C" void func_0028FA98(void* self, float v);
 extern "C" void func_0028F678(void* self, int a1)
 {
     if (*(int*)((char*)self + 0x6088) != 0) {
-        func_0029CE70(self);
+        cSSXAudio_ResumeSFX(self);
         *(int*)((char*)self + 0x6088) = 0;
     }
     if (*(int*)((char*)self + 0x62A8) >= 0) {

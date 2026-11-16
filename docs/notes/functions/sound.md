@@ -16,7 +16,7 @@ Segment `0x00284BB0`-`0x0028A1E8`.
 - **`0x00285D98`** - Returns a listener/primary rider for the audio system ((audio, -1) = primary player); also used as the local-human check for speech and as a current-rider lookup. *[static]*
 - **`0x00285FB0`** - Front-end audio init: loads the [FE] banks (bank slot 0 = SSX3Menu.bnk) with the FE scale table, releases ducks, plays charsel (id 301, no event) and sets FE music state audio+0x6290 = 10 (none). Called from `0x0018BEF8`, `0x001A1CE8`, `0x001D64C0`. *[static]*
 - **`0x00286200`** - FE -> game audio transition: stops (radio mode 2) or FadeOut(1.0 s), then unloads the FE banks. *[static]*
-- **`0x002862A8`** `cSSXAudio_FrontEndLoad` - World bank loader: loads the WORLD bank slots and the world channel scale table (`0x00288D18` with a1 = 1). *[static]*
+- **`0x002862A8`** `cSSXAudio_InGameLoad` - World bank loader: loads the WORLD bank slots and the world channel scale table (`0x00288D18` with a1 = 1). *[static]*
   - Possible mismatch with the current name: The name says front-end load, but records describe it as the world bank loader (the front-end bank load is `0x00285FB0`).
 - **`0x002867E8`** - World-load audio, called from `0x0022F6B0`: takes radio mode and custom list from the profile, PickNextSong + PlayMusic (event 0 CTM, 36 single event/MP) unless pktrans plays, posts DJ / Radio_Big_Intro / Free_Ride_Intro lines, creates painter queries, resets triggers, releases ducks and sets first-visit flags audio+0x579C[23]. Not called at the CTM gate. *[static]*
 - **`0x00286A80`** - World audio teardown when leaving the world: resume if paused, hard Stop of the song (no fade), stop loops, destroy painters, SetMix(0), cancel timers, stop speech. *[static]*

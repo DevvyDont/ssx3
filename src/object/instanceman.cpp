@@ -1078,13 +1078,13 @@ struct sInstanceManVEntry2708 {
 };
 
 int func_0034FCC0(void* self);
-extern "C" void func_0034FE28(void* self);
+extern "C" void cInstanceNode_makeThisDead(void* self);
 
 /**
  * Expires a mesh animation node according to its end mode (+0x6B0).
  *
  * When @p check is set and func_0034FCC0() runs a script for the instance (probably its on-expire script),
- * nothing else happens. Mode 0 replaces the node with a new cDeadNode for the same instance (func_0034FE28);
+ * nothing else happens. Mode 0 replaces the node with a new cDeadNode for the same instance (cInstanceNode_makeThisDead);
  * mode 2 deletes the node through its virtual destructor; other modes leave it.
  *
  * @param check  nonzero to give the instance's script the first chance (On Tour expire's runscript)
@@ -1095,7 +1095,7 @@ extern "C" void cMeshAnimNode_expire(void* self, int check)
         return;
     }
     if (*(int*)((char*)self + 0x6B0) == 0) {
-        func_0034FE28(self);
+        cInstanceNode_makeThisDead(self);
     }
     if (*(int*)((char*)self + 0x6B0) == 2 && self != 0) {
         sInstanceManVEntry2708* vt = *(sInstanceManVEntry2708**)((char*)self + 0xC);
@@ -1107,7 +1107,7 @@ extern "C" void cMeshAnimNode_expire(void* self, int check)
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_0034FE28(void* self);
+extern "C" void cInstanceNode_makeThisDead(void* self);
 
 struct sInstManVEntry2780 {
     short delta;
@@ -1120,7 +1120,7 @@ struct sInstManVEntry2780 {
  *
  * A nonzero mode resets the instance record's flag word (+0x8) the way cInstanceNode_expire() does (keeps bits
  * 8-9 and the upper half, copies the upper half down, sets bit 1) and deletes the node. Mode 0 replaces the
- * node with a new cDeadNode for the same instance (func_0034FE28).
+ * node with a new cDeadNode for the same instance (cInstanceNode_makeThisDead).
  */
 extern "C" void cMeshAnimNode_loseFocus(void* self)
 {
@@ -1133,7 +1133,7 @@ extern "C" void cMeshAnimNode_loseFocus(void* self)
             vt[1].fn((char*)self + vt[1].delta, 3);
         }
     } else {
-        func_0034FE28(self);
+        cInstanceNode_makeThisDead(self);
     }
 }
 #endif

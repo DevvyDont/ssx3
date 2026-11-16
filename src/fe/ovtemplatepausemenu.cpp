@@ -53,7 +53,7 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
-extern "C" void func_00289B70(void* audio);
+extern "C" void cSSXAudio_PauseAudio(void* audio);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char D_0046F818[];
 extern char D_0046F830[];
@@ -136,7 +136,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
     if (menu != 0) {
         cUIMenu_setSelectedByIndex(menu, D_004A2468);
     }
-    func_00289B70(func_0028B180());
+    cSSXAudio_PauseAudio(func_0028B180());
 }
 #endif
 

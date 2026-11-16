@@ -59,7 +59,7 @@ struct tGameCommPacket {
 
 // tGameCmdPacket: the 0xC-byte payload of a type-3 (command) packet (On Tour tGameCmdPacket, same layout). Retail
 // commands: 0 pause and 1 unpause (sendPauseCmd cGameComm_sendPauseCmd), 2 controller unplugged (sendUnplugCmd func_00258C00),
-// 3 sync-wait done (syncWait func_002586B0), 4 checksum (updateSyncPacket func_00258F20), 5 exit game (sendExitGame
+// 3 sync-wait done (syncWait cGameComm_syncWait), 4 checksum (updateSyncPacket func_00258F20), 5 exit game (sendExitGame
 // func_00258BC8); handled by updateCmdQueue func_00257F98.
 struct tGameCmdPacket {
     unsigned char Cmd;           // 0x0 [O]; [U] the command number above
@@ -88,14 +88,14 @@ struct tServerSettings {
 
 struct cGameComm {
     int mConnected;              // 0x000 [O]; [R] 1; [U] cleared by localDisconnected (func_00257610), displayError
-                                 //       (func_002578F8) and the remote exit command; senders require it
+                                 //       (cGameComm_displayError) and the remote exit command; senders require it
     int mError;                  // 0x004 [O]; [R] 0; [U] displayError sets 1; nearly every method returns early on it
-    int mDisplayError;           // 0x008 [O] (int); [U] displayError sets 1; updateDisplayError (func_002579C8) counts it
+    int mDisplayError;           // 0x008 [O] (int); [U] displayError sets 1; updateDisplayError (cGameComm_updateDisplayError) counts it
                                  //       down and raises overlay 0x27
     int mDesync;                 // 0x00C [O]; [U] updateSyncPacket sets 1 on a checksum mismatch; reported as "DESYNC"
     int mLocalDisconnected;      // 0x010 [O]; [U] localDisconnected sets 1; "DIDQUIT0/1"; bit 2 of mFlagsOnCommError
     int mRemoteDisconnected;     // 0x014 [O]; [U] the exit-game command (5) sets 1; "DIDQUIT0/1"; bit 3 of the flags
-    int mCommErrorWasSignificant; // 0x018 [O]; [U] setCommError (func_00257678); reported as "SCOMERR"
+    int mCommErrorWasSignificant; // 0x018 [O]; [U] setCommError (cGameComm_setCommError); reported as "SCOMERR"
     int mStateOnCommError;       // 0x01C [O] tGameComm; [U] setCommError copies mState; "CERRSTAT"
     unsigned int mFlagsOnCommError; // 0x020 [O]; [U] setCommError packs 11 flags (mLocalFinishedRace = bit 0 ...
                                  //       mLoading = bit 10); "CERRFLGS"
@@ -104,7 +104,7 @@ struct cGameComm {
     int unk_02C;                 // 0x02C [R] 0; [U] set to 1 when the link times out (unk_094 runs out in checkErrors,
                                  //       unk_05C reaches 1800 in func_00257A80); never read in retail
     int mCommError;              // 0x030 [O]; [U] setCommError sets 1 (once: it guards the other fields); "COMMERR"
-    int unk_034;                 // 0x034 [R] the time at construction; [U] gameStartRace (func_00258988) stores the race
+    int unk_034;                 // 0x034 [R] the time at construction; [U] gameStartRace (cGameComm_gameStartRace) stores the race
                                  //       start time (SSXApp +0x18 / +0x10); the reporter subtracts it from unk_038/unk_03C
     int unk_038;                 // 0x038 [U] this machine's end time (localDisconnected, gameEnded func_00258A48)
     int unk_03C;                 // 0x03C [U] the peer's end time (exit-game command, gameEnded)
@@ -136,7 +136,7 @@ struct cGameComm {
     int mGameStartGate;          // 0x07C [O]; [U] gameStartGate (func_00258968, from cGFGateState_gainFocus) sets 1
     int mRaceInProgress;         // 0x080 [O]; [U] gameStartRace sets 1, gameEnded clears it
     int mWaitingMessage;         // 0x084 [O]; [U] set when the peer goes quiet (unk_060 == 60); updateMessageDisplay
-                                 //       (func_00258CB0) then shows "kT_OVRCMNWaitPlayer"
+                                 //       (cGameComm_updateMessageDisplay) then shows "kT_OVRCMNWaitPlayer"
     int mRemoteExitGame;         // 0x088 [O]; [U] the exit-game command sets 1
     int mRemoteEndGame;          // 0x08C [O]; [U] the exit-game command sets 1 while the race still runs; checkErrors
                                  //       then calls displayError
@@ -186,7 +186,7 @@ struct cGameComm {
     int mSyncWaitComplete;       // 0x3F4 [O]; [U] command 3 sets it; syncWait loops until it is set
     int mUnPauseFlag;            // 0x3F8 [O]; [U] set by a pause during the race, cleared by an unpause; cInputSync's
                                  //       func_00237950 holds the race while it is set
-    int mUnPauseTimer;           // 0x3FC [O]; [U] setUnPauseTimer (func_002588A8) sets 180; counted down by update; the
+    int mUnPauseTimer;           // 0x3FC [O]; [U] setUnPauseTimer (cGameComm_setUnPauseTimer) sets 180; counted down by update; the
                                  //       HUD (cOVStateHUD1P_onRender2D) shows it
     int mCheckSumSent;           // 0x400 [O]; [U] updateSyncPacket
     int mCheckSumReceived;       // 0x404 [O] (On Tour [4]); [U] command 4 sets it

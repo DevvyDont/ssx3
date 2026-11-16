@@ -937,7 +937,7 @@ extern "C" void func_001A04C8(void* p);
 extern "C" void func_0019CF40(void* p);
 extern "C" void func_0038ADB0(void* p);
 extern "C" void* func_0028B180();
-extern "C" void func_00286200(void* p);
+extern "C" void cSSXAudio_FrontEndPurge(void* p);
 
 extern "C" void func_001A2190(void* self)
 {
@@ -951,7 +951,7 @@ extern "C" void func_001A2190(void* self)
     char* st = (char*)SSXApp;
     *(int*)(st + 0x7C) = 0;
     *(int*)(st + 0x80) = 0;
-    func_00286200(func_0028B180());
+    cSSXAudio_FrontEndPurge(func_0028B180());
 }
 #endif
 
@@ -1370,7 +1370,7 @@ extern "C" void func_00255CC8(void* a, int b);
 extern "C" void func_00266E88(void* a);
 extern "C" void func_00266DF8(void* a);
 extern "C" void func_0025B6D8(void* a, int b);
-extern "C" void func_0014ECA0(void* a, int b);
+extern "C" void cBENetworkInterface_restoreCharProfile(void* a, int b);
 extern "C" void func_0014DE28(void* be, int b);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1431,7 +1431,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
         func_0025B6D8(LobbyMan_mLobbyMan, 1);
-        func_0014ECA0(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
+        cBENetworkInterface_restoreCharProfile(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
         func_0014DE28(cBE_getBE(), 1);
         func_0014DE28(cBE_getBE(), 2);
         D_004A19C4 = 0;

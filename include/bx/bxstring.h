@@ -27,7 +27,7 @@ struct tStringData {
                         //       -- by cBXString_Reset / cBXString__cBXString (freed at 0); < 0 = static or locked
     int DataLength;     // 0x004 [O]; [R] cBXString_Realloc stores len; [U] read as the length (Str-8) everywhere
     int AllocLength;    // 0x008 [O]; [R] cBXString_Realloc stores len; [U] compared with the needed size by
-                        //       cBXString_Resize, cBXString_ConcatImpl, func_003189D0 (getBuffer-like)
+                        //       cBXString_Resize, cBXString_ConcatImpl, cBXString_getBuffer (getBuffer-like)
 };
 
 CHECK_OFFSET(tStringData, NumRefs, 0x0);
@@ -37,7 +37,7 @@ CHECK_SIZE(tStringData, 0xC);
 
 struct cBXString {
     char* Str;          // 0x000 [O] Str; [R] cBXString_Realloc stores the block + 0xC; [U] every method reads it as the
-                        //       text (strchr in cBXString_FindFirstOf/FindLastOf, the copies in func_00318540)
+                        //       text (strchr in cBXString_FindFirstOf/FindLastOf, the copies in cBXString_concatCopy)
 #ifdef __cplusplus
     // EA's class has user-declared constructors (here the out-of-line ones are the cBXString_cBXString* functions,
     // called explicitly). Declaring them keeps the type non-POD, as in EA's source: g++ 2.95 lays out non-POD locals

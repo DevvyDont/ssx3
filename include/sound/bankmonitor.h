@@ -6,15 +6,15 @@
 //   cSndPlayOpts : virtual cSoundSys          the play-option stack (ctor cSndPlayOpts_cSndPlayOpts 0x2A9350, in
 //                                            sound/ps2soundman; non-virtual part 0x88)
 //   cMonitor : cSndPlayOpts                  48 timed callbacks (cMonitorInstance); ctor cMonitor_cMonitor, dtor
-//                                            func_002ADAC8; vtable cMonitor_vtbl (0x483BA8); non-virtual part 0x8DC
+//                                            cMonitor__cMonitor; vtable cMonitor_vtbl (0x483BA8); non-virtual part 0x8DC
 //   cBankMonitor : cMonitor                  64 monitored sounds (cBankMonitorInstance, 0xC0 each, defined with the
 //                                            streamsys unit's methods 0x2AB9E0..); ctor cBankMonitor_cBankMonitor,
-//                                            dtor func_002ACE40; vtable cBankMonitor_vtbl (0x483B48); non-virtual 0x8F0
+//                                            dtor cBankMonitor__cBankMonitor; vtable cBankMonitor_vtbl (0x483B48); non-virtual 0x8F0
 // cSoundSys (0x8: pManager + its vptr) is a virtual base: g++ 2.95 puts it after the non-virtual part of the complete
 // object (cMonitor + 0x8DC, cBankMonitor + 0x8F0; On Tour sizes 0x8E4 / 0x8F4) and gives the class a pointer to it at
 // 0x0. The structs below are the NON-VIRTUAL parts, so they can be embedded where the object lives: the only
 // cBankMonitor is the one inside cBankManager (+0x1D8), i.e. cSSXAudio + 0x6E70 (sound/ssxaudio.h). gMonitor is the
-// current cMonitor (cMonitor_cMonitor stores this, func_002ADAC8 clears it; the static tick func_002AD998 calls its
+// current cMonitor (cMonitor_cMonitor stores this, cMonitor__cMonitor clears it; the static tick func_002AD998 calls its
 // virtual slot 1, MONITOR_Update).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
@@ -68,7 +68,7 @@ struct cDelayOpts {
 };
 
 // One of cMonitor's 48 timed callbacks (On Tour class cMonitorInstance, 0x2C). Methods 0x2AD848..0x2AD998: ctor
-// func_002AD848__FPv, dtor func_002AD860, Create func_002AD888, IsFree func_002AD930, Reset func_002AD940, CountReset
+// func_002AD848__FPv, dtor func_002AD860, Create cMonitorInstance_Create, IsFree cMonitorInstance_IsFree, Reset cMonitorInstance_Reset, CountReset
 // func_002AD970__FPvi, Enable func_002AD980__FPv, Disable func_002AD990__FPv (On Tour's order).
 struct cMonitorInstance {
     int mEnabled;           // 0x00 [O]; [U] Enable stores 1, Disable 0
@@ -105,11 +105,11 @@ struct cMonitor {
     int* mTwoPlayerPan;              // 0x080 [R] operator new[](0x10, "mTwoPlayerPan") (On Tour bool*)
     int* mTwoPlayerSide;             // 0x084 [R] operator new[](0x10, "mTwoPlayerSide")
     // --- cMonitor (On Tour: mCounter 0x8C .. mMonitorInstance 0x9C, 4 bytes later than retail)
-    volatile int mCounter;           // 0x088 [P] MONITOR_Counter / MONITOR_Delta (preview 0x7C, seen); [R] ctor 0; [U] MONITOR_Update (func_002ADC10) increments it unless paused
+    volatile int mCounter;           // 0x088 [P] MONITOR_Counter / MONITOR_Delta (preview 0x7C, seen); [R] ctor 0; [U] MONITOR_Update (cMonitor_MONITOR_Update) increments it unless paused
     volatile int mLastCounter;       // 0x08C [P] MONITOR_Delta (preview 0x80, seen); [R] ctor 0
     volatile int mReEntryCheck;      // 0x090 [O]; [R] ctor 0; [U] MONITOR_Create (func_002ADCA0) ++/-- around the slot search
-    int mPaused;                     // 0x094 [P] MONITOR_Paused/Pause/Resume (preview 0x88, seen); [U] func_002ADC10
-    cMonitorInstance mMonitorInstance[48]; // 0x098 [O]; [R] ctor constructs 48 (func_002AD848), dtor destroys them; [U] func_002ADC30/func_002ADCA0/func_002ADD78/func_002ADDA0/func_002ADDE0
+    int mPaused;                     // 0x094 [P] MONITOR_Paused/Pause/Resume (preview 0x88, seen); [U] cMonitor_MONITOR_Update
+    cMonitorInstance mMonitorInstance[48]; // 0x098 [O]; [R] ctor constructs 48 (func_002AD848), dtor destroys them; [U] cMonitor_MONITOR_GetFreeInstance/func_002ADCA0/func_002ADD78/func_002ADDA0/func_002ADDE0
     void** mVtbl;                    // 0x8D8 [R] cMonitor_vtbl (cMonitor ctor/dtor); cBankMonitor_vtbl in a cBankMonitor (shared primary vptr)
 };
 
@@ -140,12 +140,12 @@ struct cBankMonitor {
     volatile int mReEntryCheck;      // 0x090 [O]
     int mPaused;                     // 0x094 [P] MONITOR_Paused
     cMonitorInstance mMonitorInstance[48]; // 0x098 [O]
-    void** mVtbl;                    // 0x8D8 [R] cBankMonitor_vtbl (cBankMonitor ctor, func_002ACE40, and every ctor/dtor of a class that contains a cBankManager)
+    void** mVtbl;                    // 0x8D8 [R] cBankMonitor_vtbl (cBankMonitor ctor, cBankMonitor__cBankMonitor, and every ctor/dtor of a class that contains a cBankManager)
     // --- cBankMonitor
     volatile int mReEntry;           // 0x8DC [O] (volatile); [R] ctor 0; [U] BANKMONITOR_Create ++/-- around the instance search
     int mDopplerEnable;              // 0x8E0 [O] (On Tour bool); [R] ctor 1; [P] BANKMONITOR_DopplerEnabled/SetDoppler (preview 0x8D4, bracketed)
     int mPositionalEnable;           // 0x8E4 [O] (On Tour bool); [R] ctor 1; [P] BANKMONITOR_PositionalEnabled/SetPositional (preview 0x8D8, bracketed)
-    int mBankMonitorPaused;          // 0x8E8 [O] cBankMonitor::mPaused (renamed: cMonitor's mPaused is at 0x94); [P] BANKMONITOR_Paused (preview 0x8DC, bracketed); [U] BANKMONITOR_Pause (cBankMonitor_BANKMONITOR_Pause) 1, Resume (func_002AD300) 0
+    int mBankMonitorPaused;          // 0x8E8 [O] cBankMonitor::mPaused (renamed: cMonitor's mPaused is at 0x94); [P] BANKMONITOR_Paused (preview 0x8DC, bracketed); [U] BANKMONITOR_Pause (cBankMonitor_BANKMONITOR_Pause) 1, Resume (cBankMonitor_BANKMONITOR_Resume) 0
     cBankMonitorInstance* mBankMonitorInstance; // 0x8EC [O]; [R] operator new[](64 x 0xC0, "mBankMonitorInstance"); [P] BANKMONITOR_GetInstance (preview 0x8E0 -> 0x8EC, seen)
 };
 
@@ -224,7 +224,7 @@ CHECK_OFFSET(cBankMonitor, mBankMonitorPaused, 0x8E8);
 CHECK_OFFSET(cBankMonitor, mBankMonitorInstance, 0x8EC);
 CHECK_SIZE(cBankMonitor, 0x8F0);
 
-// The sound monitor (On Tour: static cMonitor* gMonitor): cMonitor_cMonitor stores itself here, func_002ADAC8
+// The sound monitor (On Tour: static cMonitor* gMonitor): cMonitor_cMonitor stores itself here, cMonitor__cMonitor
 // clears it.
 extern cMonitor* gMonitor;
 

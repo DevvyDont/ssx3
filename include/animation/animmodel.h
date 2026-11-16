@@ -15,14 +15,14 @@
 
 // One LOD's entry for one ref index: the source part block and its data (addModelPartLOD).
 struct sAnimModelLodRef {
-    char* part;     // 0x0 source part block (non-null = drawable, func_00310640)
+    char* part;     // 0x0 source part block (non-null = drawable, cAnimModel_render)
     char* data;     // 0x4 part + 0x60
-    int unk_08;     // 0x8 passed to the renderer's set-matrices call (func_00310640)
+    int unk_08;     // 0x8 passed to the renderer's set-matrices call (cAnimModel_render)
     int unk_0C;     // 0xC same
 };
 
 // A part's LOD slot. The 4 slots double as the part's "channels": enabling a part sets used on all 4
-// (func_0030E9E0), drawing checks the slot of the requested LOD (func_00310640).
+// (func_0030E9E0), drawing checks the slot of the requested LOD (cAnimModel_render).
 struct sAnimModelLod {
     int used;                   // 0x0
     sAnimModelLodRef* refs;     // 0x4 numLodRefs entries (cAnimModel_addModelPartLOD)
@@ -53,7 +53,7 @@ struct sAnimModelBone {
 };
 
 struct sAnimModelLodInfo {
-    int unk_00;                 // passed with unk_04 to the renderer when the model isn't per-part LOD'd (func_00310640)
+    int unk_00;                 // passed with unk_04 to the renderer when the model isn't per-part LOD'd (cAnimModel_render)
     int unk_04;
 };
 
@@ -64,21 +64,21 @@ struct cAnimModel {
     /* 0x00C */ sAnimModelPart* parts;
     /* 0x010 */ int numBones;               // bones/matrices count; also the first channel bit (cAnimModel_getGraftMask)
     /* 0x014 */ int maxPartIndex;           // i > this -> no such part (func_0030E9E0, cAnimModel_getGraftMask)
-    /* 0x018 */ int unk_018;                // nonzero: draw per-part LOD refs, else one call with lodInfo (func_00310640)
+    /* 0x018 */ int unk_018;                // nonzero: draw per-part LOD refs, else one call with lodInfo (cAnimModel_render)
     /* 0x01C */ int* partIndex;             // part number -> index into parts, < 0 = none
     /* 0x020 */ int* boneChannelIndex;      // per-bone first-component index into the channel data (func_0030ECD8: first = arr[k] - arr[firstBone])
-    /* 0x024 */ t4Vector* localPos;         // numBones local bone positions, scaled componentwise by unk_140 (func_00310200)
-    /* 0x028 */ t4Vector* localRot;         // numBones local bone rotation quaternions (func_00310200)
-    /* 0x02C */ sAnimModelBone* bones;      // numBones of them; streamed as numBones << 5 bytes (func_00310EA8)
+    /* 0x024 */ t4Vector* localPos;         // numBones local bone positions, scaled componentwise by unk_140 (cAnimModel_transform)
+    /* 0x028 */ t4Vector* localRot;         // numBones local bone rotation quaternions (cAnimModel_transform)
+    /* 0x02C */ sAnimModelBone* bones;      // numBones of them; streamed as numBones << 5 bytes (cAnimModel_writeToReplayFrame)
     /* 0x030 */ t4Matrix* unk_030;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
     /* 0x034 */ t4Matrix* unk_034;          // numBones, translated with the model (cAnimModel_applyOffset)
-    /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (func_00310948, func_00310640)
+    /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (func_00310948, cAnimModel_render)
     /* 0x03C */ int unk_03C;
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
     /* 0x060 */ char unk_060[0xE0];
-    /* 0x140 */ t4Vector unk_140;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (func_00310640); .x scales rider lean (ai/rider)
+    /* 0x140 */ t4Vector unk_140;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
     /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (func_0030E9E0, func_0030EB60)
-    /* 0x158 */ unsigned long unk_158;      // another such mask (func_0030ECA0)
+    /* 0x158 */ unsigned long unk_158;      // another such mask (cAnimModel_addAnimMinPart)
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);

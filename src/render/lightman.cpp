@@ -2064,12 +2064,12 @@ extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int
 //100%
 INCLUDE_ASM("render/lightman", func_003916C0);
 #ifdef SKIP_ASM
-extern "C" void func_003919E8(void* self);
+extern "C" void cFont_purge(void* self);
 void operator_delete(int* ptr);
 
 extern "C" void func_003916C0(int* self, int flags)
 {
-    func_003919E8(self);
+    cFont_purge(self);
     if (flags & 1) {
         operator_delete(self);
     }

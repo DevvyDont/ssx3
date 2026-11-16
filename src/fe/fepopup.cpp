@@ -3357,7 +3357,7 @@ extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CB3D0);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleEvent);
 #ifdef SKIP_ASM
 struct sVEntry001CB3D0 {
     short delta;
@@ -3365,7 +3365,7 @@ struct sVEntry001CB3D0 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" int func_001CB3D0(cKeyboardPopup* self, int a1, int a2)
+extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int a1, int a2)
 {
     if (self->mbReferEventsToParent != 0) {
         void* obj = self->mpParentState;

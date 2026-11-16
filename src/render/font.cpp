@@ -82,7 +82,7 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003919E8);
+INCLUDE_ASM("render/font", cFont_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -151,7 +151,7 @@ struct sFont_19E8 {
     int handle;         // 0x60
 };
 
-extern "C" void func_003919E8(cFont* self)
+extern "C" void cFont_purge(cFont* self)
 {
     if (self->Glyphs != 0) {
         cMemMan_free(self->Glyphs);
@@ -241,7 +241,7 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391C48);
+INCLUDE_ASM("render/font", cFont_vtextf);
 #ifdef SKIP_ASM
 struct sMat00391C48 {
     float m[4][4];
@@ -251,7 +251,7 @@ extern sMat00391C48 D_00500CA0;
 extern "C" void func_004186C8(sMat00391C48* m);
 extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m);
 
-extern "C" void func_00391C48(cFont* self, float x, float y)
+extern "C" void cFont_vtextf(cFont* self, float x, float y)
 {
     func_004186C8(&D_00500CA0);
     func_00391CB0(self, x, y, &D_00500CA0);
@@ -771,7 +771,7 @@ extern "C" void func_00392980(cFont* self, const unsigned short* str, float x, f
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003929F8);
+INCLUDE_ASM("render/font", cFont_vcentertextf);
 #ifdef SKIP_ASM
 extern void* D_004A3E90;
 extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
@@ -781,7 +781,7 @@ struct sBXStr_29F8 {
     char* p;
 };
 
-extern "C" void func_003929F8(cFont* self, const char* fmt, void* ap, float x, float y)
+extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_29F8 s;
     s.p = (char*)D_004A3E90;
@@ -814,7 +814,7 @@ extern "C" void func_00392AD0(cFont* self, const unsigned short* str, float x, f
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392B40);
+INCLUDE_ASM("render/font", cFont_vrighttextf);
 #ifdef SKIP_ASM
 extern void* D_004A3E90;
 extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
@@ -824,7 +824,7 @@ struct sBXStr_2B40 {
     char* p;
 };
 
-extern "C" void func_00392B40(cFont* self, const char* fmt, void* ap, float x, float y)
+extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_2B40 s;
     s.p = (char*)D_004A3E90;

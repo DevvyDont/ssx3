@@ -53,7 +53,7 @@ CHECK_OFFSET(cInstanceNode, Flags, 0x12);
 CHECK_OFFSET(cInstanceNode, SortIndex, 0x14);
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);
 // [R] cDeadNode (adds no fields: its ctor func_003506D8 writes only 0xC and the record) is allocated with
-// cMemMan_alloc(0x1C, "DeadNode") in func_0034FE28, debouncenode.cpp and wscriptman.cpp; [U] cMoveNode's first own
+// cMemMan_alloc(0x1C, "DeadNode") in cInstanceNode_makeThisDead, debouncenode.cpp and wscriptman.cpp; [U] cMoveNode's first own
 // field (ModifierBlock, On Tour 0x18) is at 0x1C in cMoveNode_cMoveNode.
 CHECK_SIZE(cInstanceNode, 0x1C);
 

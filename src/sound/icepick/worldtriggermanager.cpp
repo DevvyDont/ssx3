@@ -1101,7 +1101,7 @@ extern "C" int func_002B6918(void* self, int idx)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6950);
 #ifdef SKIP_ASM
-extern "C" void func_00289400(void* self);
+extern "C" void cSSXAudio_DelayMonitorTriggers(void* self);
 
 extern "C" void func_002B6950(char* self, int a1, int a2)
 {
@@ -1109,7 +1109,7 @@ extern "C" void func_002B6950(char* self, int a1, int a2)
         *(int*)(self + 0x334) = a1;
         return;
     }
-    func_00289400(func_0028B180());
+    cSSXAudio_DelayMonitorTriggers(func_0028B180());
 }
 #endif
 

@@ -2787,45 +2787,45 @@ extern "C" int func_003A5E58(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5E68);
+INCLUDE_ASM("ui/uivector", cUIText_setShadow);
 #ifdef SKIP_ASM
-extern "C" void func_003A5E68(cUIText* self, int enable)
+extern "C" void cUIText_setShadow(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5E88);
+INCLUDE_ASM("ui/uivector", cUIText_setUnicode);
 #ifdef SKIP_ASM
-extern "C" void func_003A5E88(cUIText* self, int enable)
+extern "C" void cUIText_setUnicode(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5EA8);
+INCLUDE_ASM("ui/uivector", cUIText_setUseStaticColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5EA8(cUIText* self, int enable)
+extern "C" void cUIText_setUseStaticColour(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5EC8);
+INCLUDE_ASM("ui/uivector", cUIText_setUseDisabledColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5EC8(cUIText* self, int enable)
+extern "C" void cUIText_setUseDisabledColour(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5EE8);
+INCLUDE_ASM("ui/uivector", cUIText_setEllipses);
 #ifdef SKIP_ASM
-extern "C" void func_003A5EE8(cUIText* self, int enable)
+extern "C" void cUIText_setEllipses(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit6 = enable;
 }

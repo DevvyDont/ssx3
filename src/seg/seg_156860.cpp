@@ -221,15 +221,15 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_openDSockChannel);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cMemMan_alloc_5BF8(int, char *, int, int) __asm__("cMemMan_alloc");
 extern "C" void *func_00256698_5BF8(void *) __asm__("func_00256698");
-extern "C" void func_00256860_5BF8(void *, int, int) __asm__("func_00256860");
-extern "C" void func_002568F8_5BF8(void *, int, int) __asm__("func_002568F8");
+extern "C" void cDSockChannel_listen_5BF8(void *, int, int) __asm__("cDSockChannel_listen");
+extern "C" void cDSockChannel_connect_5BF8(void *, int, int) __asm__("cDSockChannel_connect");
 extern char D_00480350[];
 
 /**
  * Creates and opens a DirtySock channel in the comm system's single channel slot.
  *
  * If the slot is free, allocates a 0x20-byte "cDSockChannel", constructs it and opens it on the address
- * "<a1>:<port>:<port>" with type 0x102 (func_002568F8) when @p a3 is set, or 0x101 (func_00256860) otherwise.
+ * "<a1>:<port>:<port>" with type 0x102 (cDSockChannel_connect) when @p a3 is set, or 0x101 (cDSockChannel_listen) otherwise.
  *
  * @param slots  the comm system's channel slots (only the first is used)
  * @param a1     peer address string
@@ -244,9 +244,9 @@ extern "C" int cCommSystem_openDSockChannel(void **slots, int a1, int a2, int a3
         if (slots[i] == 0) {
             void *obj = func_00256698_5BF8(cMemMan_alloc_5BF8(0x20, D_00480350, 0x20000000, 0));
             if (a3 != 0) {
-                func_002568F8_5BF8(obj, a1, n);
+                cDSockChannel_connect_5BF8(obj, a1, n);
             } else {
-                func_00256860_5BF8(obj, a1, n);
+                cDSockChannel_listen_5BF8(obj, a1, n);
             }
             slots[i] = obj;
             return i;
@@ -833,7 +833,7 @@ extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int data, int len)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256860);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_listen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00255830__FPv_6860(void *) __asm__("func_00255830__FPv");
@@ -842,7 +842,7 @@ extern "C" int func_003E6F40_6860(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_6860(char *, const char *, ...) __asm__("sprintf");
 extern char D_00480448[];
 
-extern "C" void func_00256860(cDSockChannel* self, int a1, int a2) {
+extern "C" void cDSockChannel_listen(cDSockChannel* self, int a1, int a2) {
     int n = a2 & 0xFFFF;
     char buf[0x100];
     char *vt = (char*)self->mVtbl;
@@ -859,7 +859,7 @@ extern "C" void func_00256860(cDSockChannel* self, int a1, int a2) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002568F8);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_connect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00255830__FPv_68F8(void *) __asm__("func_00255830__FPv");
@@ -868,7 +868,7 @@ extern "C" int func_003E6F40_68F8(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_68F8(char *, const char *, ...) __asm__("sprintf");
 extern char D_00480448[];
 
-extern "C" void func_002568F8(cDSockChannel* self, int a1, int a2) {
+extern "C" void cDSockChannel_connect(cDSockChannel* self, int a1, int a2) {
     int n = a2 & 0xFFFF;
     char buf[0x100];
     self->mError = 0;
@@ -918,7 +918,7 @@ INCLUDE_ASM("seg/seg_156860", cDSockChannel_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00256A58(void* self);
-extern "C" void func_00256AA8(cDSockChannel* self);
+extern "C" void cDSockChannel_updateConnected(cDSockChannel* self);
 
 extern "C" void cDSockChannel_update(cDSockChannel* self)
 {
@@ -927,7 +927,7 @@ extern "C" void cDSockChannel_update(cDSockChannel* self)
         func_00256A58(((char*)self));
         break;
     case 2:
-        func_00256AA8(self);
+        cDSockChannel_updateConnected(self);
         break;
     case 0:
     case 3:
@@ -959,7 +959,7 @@ extern "C" void func_00256A58(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256AA8);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_updateConnected);
 #ifdef SKIP_ASM
 struct VEnt_6AA8 {
     short delta;
@@ -969,7 +969,7 @@ struct VEnt_6AA8 {
 
 extern "C" char* func_003E6958(int id);
 
-extern "C" void func_00256AA8(cDSockChannel* dSockChannel)
+extern "C" void cDSockChannel_updateConnected(cDSockChannel* dSockChannel)
 {
     char* st = func_003E6958((int)dSockChannel->mGameLink);
     if (st) {
@@ -1341,7 +1341,7 @@ INCLUDE_ASM("seg/seg_156860", func_002570D8);
 // PORT: several callees are defined later in the unit with their own parameter types; bind local views by asm label
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0014E2C8_70D8(void* iface, int a1, int a2) __asm__("func_0014E2C8");
+extern "C" void cBENetworkInterface_getSyncData_70D8(void* iface, int a1, int a2) __asm__("cBENetworkInterface_getSyncData");
 extern "C" void cBENetworkInterface_setSyncData_70D8(void* iface, int a1, int a2) __asm__("cBENetworkInterface_setSyncData");
 extern "C" float func_00255D88_70D8(int arg0, int arg1) __asm__("func_00255D88");
 extern "C" void cGameComm_setState_70D8(void* self, int mode) __asm__("cGameComm_setState");
@@ -1349,7 +1349,7 @@ extern "C" void func_00257750_70D8(char* p) __asm__("func_00257750");
 extern "C" int func_002577C8_70D8(char* s) __asm__("func_002577C8");
 extern "C" void func_00257A80_70D8(char* s) __asm__("func_00257A80");
 extern "C" void func_00257CD8_70D8(char* s) __asm__("func_00257CD8");
-extern "C" void func_00257DC0_70D8(char* s) __asm__("func_00257DC0");
+extern "C" void cGameComm_updateWriteQueue_70D8(char* s) __asm__("cGameComm_updateWriteQueue");
 extern "C" void func_00257F98_70D8(char* s) __asm__("func_00257F98");
 extern "C" int func_002581D8_70D8(char* s) __asm__("func_002581D8");
 extern "C" void func_002581E8_70D8(char* s, int a1, int a2) __asm__("func_002581E8");
@@ -1357,7 +1357,7 @@ extern "C" void func_002581F8_70D8(char* s) __asm__("func_002581F8");
 extern "C" int func_00258280_70D8(char* s) __asm__("func_00258280");
 extern "C" void func_00258290_70D8(char* s, int a1, int a2) __asm__("func_00258290");
 extern "C" void func_002582A0_70D8(char* s) __asm__("func_002582A0");
-extern "C" void func_00258CB0_70D8(void* s) __asm__("func_00258CB0");
+extern "C" void cGameComm_updateMessageDisplay_70D8(void* s) __asm__("cGameComm_updateMessageDisplay");
 extern "C" int func_003E7450_70D8(int sock, int a1, char* tag, int n) __asm__("func_003E7450");
 extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __asm__("func_003E7500");
 extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
@@ -1409,13 +1409,13 @@ extern "C" void func_002570D8(cGameComm* vs)
     if (vs->mUnPauseTimer > 0) {
         vs->mUnPauseTimer = vs->mUnPauseTimer - 1;
     }
-    func_00258CB0_70D8(((char*)vs));
+    cGameComm_updateMessageDisplay_70D8(((char*)vs));
     func_00257750_70D8(((char*)vs));
     if (func_002577C8_70D8(((char*)vs)) != 0) {
         return;
     }
     func_00257CD8_70D8(((char*)vs));
-    func_00257DC0_70D8(((char*)vs));
+    cGameComm_updateWriteQueue_70D8(((char*)vs));
     func_002581F8_70D8(((char*)vs));
     func_002582A0_70D8(((char*)vs));
     func_00257F98_70D8(((char*)vs));
@@ -1447,7 +1447,7 @@ extern "C" void func_002570D8(cGameComm* vs)
             }
             break;
         case 5:
-            func_0014E2C8_70D8(iface, 0, (int)vs->mBEBuffer);
+            cBENetworkInterface_getSyncData_70D8(iface, 0, (int)vs->mBEBuffer);
             func_00258290_70D8(((char*)vs), (int)vs->mBEBuffer, vs->mBEBufferSize);
             cGameComm_setState_70D8(((char*)vs), 6);
             break;
@@ -1528,7 +1528,7 @@ extern "C" void func_002570D8(cGameComm* vs)
             }
             break;
         case 5:
-            func_0014E2C8_70D8(iface, 1, (int)vs->mBEBuffer);
+            cBENetworkInterface_getSyncData_70D8(iface, 1, (int)vs->mBEBuffer);
             func_00258290_70D8(((char*)vs), (int)vs->mBEBuffer, vs->mBEBufferSize);
             cGameComm_setState_70D8(((char*)vs), 6);
             break;
@@ -1585,9 +1585,9 @@ extern "C" void func_00257610(cGameComm* gameComm, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00257678);
+INCLUDE_ASM("seg/seg_156860", cGameComm_setCommError);
 #ifdef SKIP_ASM
-extern "C" void func_00257678(cGameComm* self) {
+extern "C" void cGameComm_setCommError(cGameComm* self) {
     if (self->mCommError == 0) {
         self->mCommError = 1;
         int *p = (int *)(((char*)self) + 0x18);
@@ -1629,70 +1629,70 @@ INCLUDE_ASM("seg/seg_156860", func_002577C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00255E40_77C8(int sys, int port) __asm__("func_00255E40");
-extern "C" void func_00257678(cGameComm* self);
-extern "C" void func_002578F8(cGameComm* self);
-extern "C" void func_002579C8(cGameComm* self);
+extern "C" void cGameComm_setCommError(cGameComm* self);
+extern "C" void cGameComm_displayError(cGameComm* self);
+extern "C" void cGameComm_updateDisplayError(cGameComm* self);
 
 extern "C" int func_002577C8(cGameComm* gameComm)
 {
     if (gameComm->mDisplayError > 0) {
-        func_002579C8(gameComm);
+        cGameComm_updateDisplayError(gameComm);
         return 1;
     }
     if (gameComm->mError != 0) return 1;
     if (gameComm->mRemoteEndGame != 0) {
-        func_002578F8(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (func_00255E40_77C8((int)cCommSystem_mCommSystem, gameComm->unk_06C) != 0) {
-        func_00257678(gameComm);
-        func_002578F8(gameComm);
+        cGameComm_setCommError(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (gameComm->unk_054 >= 3) {
         gameComm->mCheating[0] = 3;
-        func_002578F8(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (gameComm->mPauseCount[0] >= 6) {
         gameComm->mCheating[0] = 2;
-        func_002578F8(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (gameComm->unk_058 >= 3) {
         gameComm->mCheating[1] = 3;
-        func_002578F8(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (gameComm->mPauseCount[1] >= 6) {
         gameComm->mCheating[1] = 2;
-        func_002578F8(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (gameComm->mStallTimer >= 3600.0f) {
-        func_00257678(gameComm);
-        func_002578F8(gameComm);
+        cGameComm_setCommError(gameComm);
+        cGameComm_displayError(gameComm);
         return 1;
     }
     if (gameComm->unk_094 <= 0) return 0;
     if (--gameComm->unk_094 > 0) return 0;
     gameComm->unk_02C = 1;
-    func_00257678(gameComm);
-    func_002578F8(gameComm);
+    cGameComm_setCommError(gameComm);
+    cGameComm_displayError(gameComm);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002578F8);
+INCLUDE_ASM("seg/seg_156860", cGameComm_displayError);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002579C8_78F8(void *) __asm__("func_002579C8");
-extern "C" void func_00258CB0_78F8(void *) __asm__("func_00258CB0");
+extern "C" void cGameComm_updateDisplayError_78F8(void *) __asm__("cGameComm_updateDisplayError");
+extern "C" void cGameComm_updateMessageDisplay_78F8(void *) __asm__("cGameComm_updateMessageDisplay");
 extern "C" void func_00266DF8_78F8(int) __asm__("func_00266DF8");
 extern int D_004A33F4;
 
-extern "C" void func_002578F8(cGameComm* self) {
+extern "C" void cGameComm_displayError(cGameComm* self) {
     self->mWaitingMessage = 0;
     self->mPauseMenu[1] = 0;
     self->mUnPauseFlag = 0;
@@ -1708,18 +1708,18 @@ extern "C" void func_002578F8(cGameComm* self) {
         if (D_004A33F4 != 0) {
             func_00266DF8_78F8(D_004A33F4);
         }
-        func_00258CB0_78F8(((char*)self));
+        cGameComm_updateMessageDisplay_78F8(((char*)self));
         self->mSyncInput = 0;
         self->mConnected = 0;
         self->mError = 1;
         self->mDisplayError = 1;
-        func_002579C8_78F8(((char*)self));
+        cGameComm_updateDisplayError_78F8(((char*)self));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002579C8);
+INCLUDE_ASM("seg/seg_156860", cGameComm_updateDisplayError);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" char *cUIStateStack_getCurrentState_79C8(char *) __asm__("cUIStateStack_getCurrentState");
@@ -1729,7 +1729,7 @@ extern int D_004A2A54;
 extern int D_00442924[];
 extern int D_005366E8[];
 
-extern "C" void func_002579C8(cGameComm* self) {
+extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
     if (self->mLoading == 0 && self->mDisplayError > 0) {
         char *p = (char*)SSXApp->Game->UI;
         char *st;
@@ -1751,8 +1751,8 @@ extern "C" void func_002579C8(cGameComm* self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00257A80);
 #ifdef SKIP_ASM
-extern "C" void func_00257678(cGameComm* self);
-extern "C" void func_002578F8(cGameComm* self);
+extern "C" void cGameComm_setCommError(cGameComm* self);
+extern "C" void cGameComm_displayError(cGameComm* self);
 extern int D_004A3ED0;
 
 extern "C" void func_00257A80(cGameComm* gameComm)
@@ -1774,28 +1774,28 @@ extern "C" void func_00257A80(cGameComm* gameComm)
         }
         if (gameComm->mRaceInProgress != 0) {
             if (gameComm->mDesync != 0) {
-                func_00257678(gameComm);
-                func_002578F8(gameComm);
+                cGameComm_setCommError(gameComm);
+                cGameComm_displayError(gameComm);
                 return;
             }
             if (gameComm->mPauseMenu[1] == 0) ++gameComm->unk_05C;
             if (gameComm->unk_05C >= 1800) {
                 gameComm->unk_02C = 1;
-                func_00257678(gameComm);
-                func_002578F8(gameComm);
+                cGameComm_setCommError(gameComm);
+                cGameComm_displayError(gameComm);
                 return;
             }
         }
     }
     if (D_004A3ED0 != 0) {
         gameComm->mCheating[0] = 1;
-        func_002578F8(gameComm);
+        cGameComm_displayError(gameComm);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00257BD8);
+INCLUDE_ASM("seg/seg_156860", cGameComm_readPacket);
 #ifdef SKIP_ASM
 struct Packet_7BD8 {
     unsigned char type;
@@ -1817,7 +1817,7 @@ extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_copy");
 
 // PORT: the unit declares this as (void*, int, int, int); dst is a pointer passed as int
-extern "C" int func_00257BD8(cGameComm* self, int ch, int dst, int unused)
+extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int unused)
 {
     cGameComm* c = self;
     if (c->mError != 0) return 0;
@@ -1887,14 +1887,14 @@ extern "C" void func_00257CD8_7CD8(Conn_7CD8* c)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00257DC0);
+INCLUDE_ASM("seg/seg_156860", cGameComm_updateWriteQueue);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00255E00_7DC0(int, int, char *, unsigned short) __asm__("func_00255E00");
 extern "C" void func_002581B8_7DC0(char *, char *) __asm__("func_002581B8");
 struct S7DC0 { char pad[0x36C]; char *arr[32]; };
 
-extern "C" void func_00257DC0(cGameComm* self) {
+extern "C" void cGameComm_updateWriteQueue(cGameComm* self) {
     if (self->mWriteQueue.mTail != self->mWriteQueue.mHead) {
         do {
             if (self->mError != 0) return;
@@ -1926,7 +1926,7 @@ struct Packet_7E98 {
 extern "C" int func_00255E00_7E98(int sys, int port, Packet_7E98* p, int size) __asm__("func_00255E00");
 extern "C" Packet_7E98* func_00258188_7E98(char* self) __asm__("func_00258188");
 extern "C" void MEM_copy_7E98(void* dst, const void* src, int n) __asm__("MEM_copy");
-extern "C" void func_00257DC0(cGameComm* self);
+extern "C" void cGameComm_updateWriteQueue(cGameComm* self);
 
 struct Conn_7E98 {
     char pad0[0x36C];
@@ -1939,7 +1939,7 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
 {
     Packet_7E98 pkt;
     if (*(int*)(self + 4) != 0) return 0;
-    func_00257DC0((cGameComm*)self);
+    cGameComm_updateWriteQueue((cGameComm*)self);
     pkt.type = type;
     pkt.size = len + 4;
     pkt.flags = 0;
@@ -1961,9 +1961,9 @@ INCLUDE_ASM("seg/seg_156860", func_00257F98);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares this as (void*, int, int, int); dst is the packet buffer
-extern "C" int func_00257BD8_7F98(void* self, int ch, void* dst, int size) __asm__("func_00257BD8");
+extern "C" int cGameComm_readPacket_7F98(void* self, int ch, void* dst, int size) __asm__("cGameComm_readPacket");
 // PORT: defined later in the unit with a struct param; bind a void* view by asm label
-extern "C" void func_002588A8_7F98(void* self) __asm__("func_002588A8");
+extern "C" void cGameComm_setUnPauseTimer_7F98(void* self) __asm__("cGameComm_setUnPauseTimer");
 
 struct sGamePacket_7F98 {
     unsigned char type;
@@ -2011,7 +2011,7 @@ struct sGameComm_7F98 {
 extern "C" void func_00257F98(sGameComm_7F98* self)
 {
     sGamePacket_7F98 msg;
-    while (func_00257BD8_7F98(self, 3, &msg, 0xC)) {
+    while (cGameComm_readPacket_7F98(self, 3, &msg, 0xC)) {
         switch (msg.type) {
         case 0:
             if (self->f7C == 0) {
@@ -2036,7 +2036,7 @@ extern "C" void func_00257F98(sGameComm_7F98* self)
             if (self->f7C == 0) {
                 func_00258870((cGameComm*)self, 0x708, 0);
             } else {
-                func_002588A8_7F98(self);
+                cGameComm_setUnPauseTimer_7F98(self);
             }
             break;
         case 3:
@@ -2071,10 +2071,10 @@ extern "C" void func_00257F98(sGameComm_7F98* self)
 INCLUDE_ASM("seg/seg_156860", func_00258160);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00257BD8_8160(int, int, int, int) __asm__("func_00257BD8");
+extern "C" int cGameComm_readPacket_8160(int, int, int, int) __asm__("cGameComm_readPacket");
 
 extern "C" int func_00258160(int arg0, int arg1, int arg2) {
-    return func_00257BD8_8160(arg0, 1, arg1, arg2) > 0;
+    return cGameComm_readPacket_8160(arg0, 1, arg1, arg2) > 0;
 }
 #endif
 
@@ -2120,14 +2120,14 @@ extern "C" void func_002581E8(void *arg0, int arg1, int arg2) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_156860", func_002581F8);
 #ifdef SKIP_ASM
-extern "C" int func_00257BD8(cGameComm*, int, int, int);
+extern "C" int cGameComm_readPacket(cGameComm*, int, int, int);
 
 extern "C" void func_002581F8(cGameComm* gameComm) {
     int a;
     while ((a = (int)gameComm->mAsyncReadData) != 0) {
         int n = gameComm->mAsyncReadSize;
         if (n >= 0xED) n = 0xEC;
-        if (func_00257BD8(gameComm, 2, a, n) == 0) break;
+        if (cGameComm_readPacket(gameComm, 2, a, n) == 0) break;
         gameComm->mAsyncReadData = (char*)((int)gameComm->mAsyncReadData + n);
         int rem = gameComm->mAsyncReadSize - n;
         gameComm->mAsyncReadSize = rem;
@@ -2247,10 +2247,10 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_syncGame);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator_new_8448(unsigned int size, const char* tag, int flags, int align) __asm__("operator_new__FUi");
 void cMemMan_free_8448(void* p) __asm__("cMemMan_free__FPv");
-extern "C" void func_0014E9F8(void* iface);
+extern "C" void cBENetworkInterface_preInitBE(void* iface);
 extern "C" void cBENetworkInterface_postInitBE(void* iface);
 extern "C" void func_0014F898();
-extern "C" void func_0014E2C8_8448(void* iface, int which, void* buf) __asm__("func_0014E2C8");
+extern "C" void cBENetworkInterface_getSyncData_8448(void* iface, int which, void* buf) __asm__("cBENetworkInterface_getSyncData");
 extern "C" void cBENetworkInterface_setSyncData_8448(void* iface, int which, void* buf) __asm__("cBENetworkInterface_setSyncData");
 extern "C" void MEM_fill_8448(char* p, int c, int n) __asm__("MEM_fill");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
@@ -2283,19 +2283,19 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
 {
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     self->mBEBuffer = (char*)operator_new_8448((unsigned int)self->mBEBufferSize, D_004805B8, 0x100, 0);
-    func_0014E9F8(iface);
+    cBENetworkInterface_preInitBE(iface);
     if (ggHost_8448(((char*)&cBENetworkInterface_networkOpt)) != 0) {
         MEM_fill_8448(((char*)self) + 0xF0, 0, 0x10);
         strncpy(((char*)self) + 0xF0, D_004805C8, 0xF);
         self->mServerSettings.unk_18 = cCommSystem_mCommSystem->mBroadBand;
-        func_0014E2C8_8448(iface, 0, self->mBEBuffer);
+        cBENetworkInterface_getSyncData_8448(iface, 0, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 0, self->mBEBuffer);
     } else {
         func_0014F898();
         MEM_fill_8448(((char*)self) + 0x104, 0, 0x10);
         strncpy(((char*)self) + 0x104, D_004805C8, 0xF);
         self->unk_100 = cCommSystem_mCommSystem->mBroadBand;
-        func_0014E2C8_8448(iface, 1, self->mBEBuffer);
+        cBENetworkInterface_getSyncData_8448(iface, 1, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 1, self->mBEBuffer);
         void* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
         func_001472C8(ui, 1, func_00147318(ui, 0));
@@ -2321,15 +2321,15 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
             self->mNumSamples = 2;
         }
         if (self->mError == 0 && func_00416B18_70D8(((char*)self) + 0xF0, ((char*)self) + 0x104, 9) != 0) {
-            func_00257678(self);
-            func_002578F8(self);
+            cGameComm_setCommError(self);
+            cGameComm_displayError(self);
         }
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_156860", func_002586B0);
+INCLUDE_ASM("seg/seg_156860", cGameComm_syncWait);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cBE_getInterface_86B0(int, int) __asm__("cBE_getInterface__Fv");
@@ -2338,7 +2338,7 @@ extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void func_002570D8(cGameComm*);
 extern "C" void THREAD_yieldticks(int);
 static inline int rd8(char *p) { return *(int*)(p + 8); }
-extern "C" void func_002586B0(cGameComm* self) {
+extern "C" void cGameComm_syncWait(cGameComm* self) {
     char buf[12];
     cBE_getInterface_86B0((int)SSXApp->BE, 7);
     if (rd8(((char*)&cBENetworkInterface_networkOpt)) != 0) {
@@ -2365,7 +2365,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_sendPauseCmd);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(cGameComm*, int, int);
-extern void func_002588A8_8790(void *) __asm__("func_002588A8");
+extern void cGameComm_setUnPauseTimer_8790(void *) __asm__("cGameComm_setUnPauseTimer");
 extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
     char buf[12];
     if (self->mError == 0 && self->mConnected != 0) {
@@ -2390,7 +2390,7 @@ extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
             if (self->mGameStartGate == 0) {
                 func_00258870(self, 0x708, 0);
             } else {
-                func_002588A8_8790(self);
+                cGameComm_setUnPauseTimer_8790(self);
             }
         }
         func_00257E98(self, 3, (int)buf, 0xC);
@@ -2409,13 +2409,13 @@ extern "C" void func_00258870(cGameComm* gameComm, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002588A8);
+INCLUDE_ASM("seg/seg_156860", cGameComm_setUnPauseTimer);
 #ifdef SKIP_ASM
 
 struct S88A8_4 { int k0; char p[0x14]; int k18; int k1c; };
 struct S88A8_S { int k0; int k4; char p0[0x40]; int k48; char p1[0x24]; int k70; int k74; int k78; char p2[0x380]; int k3fc; };
 
-extern "C" void func_002588A8(cGameComm* self) {
+extern "C" void cGameComm_setUnPauseTimer(cGameComm* self) {
     cGame *t6;
     S88A8_4 *t4;
     self->mUnPauseTimer = 0;
@@ -2451,7 +2451,7 @@ extern "C" void func_00258968(cGameComm* gameComm) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00258988);
+INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartRace);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00260F80_8988(void) __asm__("func_00260F80");
@@ -2460,7 +2460,7 @@ extern "C" void func_002613C8_8988(int) __asm__("func_002613C8");
 extern "C" void func_0025B800_8988(void *) __asm__("func_0025B800");
 extern "C" void func_00262768_8988(int, int, int, int, int, int) __asm__("func_00262768");
 
-extern "C" void func_00258988(cGameComm* self) {
+extern "C" void cGameComm_gameStartRace(cGameComm* self) {
     if (self->mState < 0xF) {
         if (BuddyMan_mBuddyMan == 0) {
             func_00260F80_8988();
@@ -2504,7 +2504,7 @@ extern "C" void func_00258A48(cGameComm* gameComm) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00258AE0);
+INCLUDE_ASM("seg/seg_156860", cGameComm_gameExit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cIface_AE0 { public: int f0, f4, f8; virtual void v0(); virtual void v1(); };
@@ -2516,10 +2516,10 @@ extern "C" void func_0025B800(int);
 extern "C" void func_00262768(int, int, int, int, int, int);
 extern "C" void func_00258BC8(cGameComm*);
 extern "C" void func_00258A48(cGameComm*);
-extern "C" void func_0014E9C0(void *, int, int);
+extern "C" void cBENetworkInterface_copyProfile(void *, int, int);
 extern "C" void* cBE_getBE();
 extern int D_00534B38[];
-extern "C" void func_00258AE0(cGameComm* self) {
+extern "C" void cGameComm_gameExit(cGameComm* self) {
     if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
@@ -2537,7 +2537,7 @@ extern "C" void func_00258AE0(cGameComm* self) {
     func_00258A48(self);
     void *i = cBE_getInterface_8AE0((int)SSXApp->BE, 7);
     if (D_00534B38[0] == 0) {
-        func_0014E9C0(i, 1, 0);
+        cBENetworkInterface_copyProfile(i, 1, 0);
         cIface_AE0 *o = (cIface_AE0*)cBE_getInterface_8AE0((int)cBE_getBE(), 3);
         o->v1();
     }
@@ -2589,7 +2589,7 @@ extern "C" void func_00258C50(cGameComm* gameComm, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00258CB0);
+INCLUDE_ASM("seg/seg_156860", cGameComm_updateMessageDisplay);
 #ifdef SKIP_ASM
 int GetHashValue32(char* s);
 extern "C" void* cUIStateStack_findState(void* mgr, int hash);
@@ -2634,7 +2634,7 @@ static inline const char* gcString_8CB0(char* name)
 
 // Drives the connection-status popup: picks its text, then opens (0xE) or closes (0xF) it as the
 // link state changes (self+0x98: 0 closed, 1 shown while connected, 2 shown while waiting).
-extern "C" void func_00258CB0(cGameComm* self)
+extern "C" void cGameComm_updateMessageDisplay(cGameComm* self)
 {
     char buf[0x100];
     if (self->mWaitingMessage != 0) {

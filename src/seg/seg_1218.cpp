@@ -390,8 +390,8 @@ extern "C" void func_00100610_0680(sV4_0680*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_0680(void*, sV4_0680*) __asm__("func_00100348");
 extern "C" int func_0010BB18_0680(void*, float*, int*) __asm__("func_0010BB18");
 extern "C" int func_0010BBF8_0680(void*, int*) __asm__("func_0010BBF8");
-extern "C" void func_0010C140_0680(void*, void*) __asm__("func_0010C140");
-extern "C" void func_0010C0A8_0680(void*, void*) __asm__("func_0010C0A8");
+extern "C" void cComputer_setupRecklessCrouch_0680(void*, void*) __asm__("cComputer_setupRecklessCrouch");
+extern "C" void cComputer_setupCrouch_0680(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0680(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
 extern "C" int cComputer_checkForTargets_0680(char* self, int* out) __asm__("cComputer_checkForTargets");
 extern "C" void func_00100680_0680(char* self, sPad_0680* pad) __asm__("func_00100680");
@@ -434,9 +434,9 @@ extern "C" void func_00100680_0680(char* self, sPad_0680* pad)
                 pad->w0 = 0x1F;
         } else if (len < sp - 138.88890075683594f) {
             if (x)
-                func_0010C140_0680(self, pad);
+                cComputer_setupRecklessCrouch_0680(self, pad);
             else
-                func_0010C0A8_0680(self, pad);
+                cComputer_setupCrouch_0680(self, pad);
         }
     } else if (func_0010BBF8_0680(self, &y)) {
         float s = 1.0f;
@@ -459,7 +459,7 @@ extern "C" void func_00100680_0680(char* self, sPad_0680* pad)
         char* r = *(char**)(self + 0x18);
         if (*(float*)(r + 0x2F8) >= 0.8999999761581421f && *(float*)(r + 0x2F0) > 0.0f && *(float*)(self + 0xDF8) > 50.0f)
             pad->b17 = 1;
-        func_0010C0A8_0680(self, pad);
+        cComputer_setupCrouch_0680(self, pad);
     }
     float* spd = (float*)(self + 0xDF0);
     z = 0;
@@ -480,7 +480,7 @@ extern "C" void func_00100680_0680(char* self, sPad_0680* pad)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1218", func_001009E0);
+INCLUDE_ASM("seg/seg_1218", cComputer_jumpSetupCruise);
 #ifdef SKIP_ASM
 struct sVec4_09E0 {
     float x, y, z, w;
@@ -500,11 +500,11 @@ typedef void (cObj_8E88::*Fn_8E88)();
 extern "C" Fn_8E88 D_0043CF20[4];
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
-extern "C" void func_0010BFA8_09E0(char*, int, int, int, int) __asm__("func_0010BFA8");
+extern "C" void cComputer_setupPrewindState_09E0(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
 extern "C" void func_00100610_09E0(sVec4_09E0*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_09E0(void*, sVec4_09E0*) __asm__("func_00100348");
 extern "C" void func_00100680(void*, void*);
-extern "C" void func_0010C140(cComputer*, void*);
+extern "C" void cComputer_setupRecklessCrouch(cComputer*, void*);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vLen_09E0(const sVec4_09E0& v)
@@ -535,7 +535,7 @@ static inline float vAbs_09E0(float x)
     return r;
 }
 
-extern "C" void func_001009E0(cComputer* self, sPad_09E0* pad)
+extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* pad)
 {
     int below, o3, o4, o5, o6;
     if (!cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6)) {
@@ -551,13 +551,13 @@ extern "C" void func_001009E0(cComputer* self, sPad_09E0* pad)
     char* rider = (char*)self->mRider;
     float len = vLen_09E0(*(sVec4_09E0*)(rider + 0x1E0));
     if (below && *(float*)(rider + 0x4C8) < 10000.0f && vAbs_09E0(f) < 1.0f) {
-        func_0010BFA8_09E0(((char*)self), o5, o6, o4, o3);
+        cComputer_setupPrewindState_09E0(((char*)self), o5, o6, o4, o3);
         pad->b14 = 3;
         return;
     }
     float sp = self->mDesiredSpeed;
     if (len < sp - 138.88890075683594f) {
-        func_0010C140(self, pad);
+        cComputer_setupRecklessCrouch(self, pad);
         return;
     }
     if (sp + 138.88890075683594f < len)
@@ -566,7 +566,7 @@ extern "C" void func_001009E0(cComputer* self, sPad_09E0* pad)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00100B90);
+INCLUDE_ASM("seg/seg_1218", cComputer_attackTargetCruise);
 #ifdef SKIP_ASM
 struct sV4_0B90 {
     float x, y, z, w;
@@ -636,8 +636,8 @@ extern sWorld_0B90* D_004A28A8_0B90 __asm__("SSXApp");
 
 extern "C" void func_00100610_0B90(sV4_0B90*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_0B90(void*, sV4_0B90*) __asm__("func_00100348");
-extern "C" void func_0010C140_0B90(void*, void*) __asm__("func_0010C140");
-extern "C" void func_0010C0A8_0B90(void*, void*) __asm__("func_0010C0A8");
+extern "C" void cComputer_setupRecklessCrouch_0B90(void*, void*) __asm__("cComputer_setupRecklessCrouch");
+extern "C" void cComputer_setupCrouch_0B90(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0B90(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
 extern "C" int cComputer_checkForTargets_0B90(char* self, int* out) __asm__("cComputer_checkForTargets");
 extern "C" float func_0031C228(float);
@@ -740,7 +740,7 @@ static inline sV4_0B90 Scale_0B90(const sV4_0B90& v, float s)
 
 static inline sRec_0B90* Rec_0B90(char* self) { return &((sRec_0B90*)*(char**)(self + 0x18))[*(int*)(self + 0xE70)]; }
 
-extern "C" void func_00100B90(cComputer* self, sPad_0B90* pad)
+extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* pad)
 {
     int below, o3, o4, o5, o6;
     int z;
@@ -769,11 +769,11 @@ extern "C" void func_00100B90(cComputer* self, sPad_0B90* pad)
         sV4_0B90 w = Add_0B90(*tgt->GetPos(), Scale_0B90(v, 300.0f));
         if (absAng < wideAng) {
             if (absAng < narrowAng)
-                func_0010C140_0B90(((char*)self), pad);
+                cComputer_setupRecklessCrouch_0B90(((char*)self), pad);
             else
-                func_0010C0A8_0B90(((char*)self), pad);
+                cComputer_setupCrouch_0B90(((char*)self), pad);
         } else if (mySpd < hisSpd) {
-            func_0010C0A8_0B90(((char*)self), pad);
+            cComputer_setupCrouch_0B90(((char*)self), pad);
         } else if (hisSpd < mySpd) {
             pad->w0 = 0x1F;
         }
@@ -866,8 +866,8 @@ extern sWorld_0F88* D_004A28A8_0F88 __asm__("SSXApp");
 
 extern "C" void func_00100610_0F88(sV4_0F88*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_0F88(void*, sV4_0F88*) __asm__("func_00100348");
-extern "C" void func_0010C140_0F88(void*, void*) __asm__("func_0010C140");
-extern "C" void func_0010C0A8_0F88(void*, void*) __asm__("func_0010C0A8");
+extern "C" void cComputer_setupRecklessCrouch_0F88(void*, void*) __asm__("cComputer_setupRecklessCrouch");
+extern "C" void cComputer_setupCrouch_0F88(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0F88(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
 extern "C" int cComputer_checkForTargets_0F88(char* self, int* out) __asm__("cComputer_checkForTargets");
 extern "C" float func_0031C228(float);
@@ -937,9 +937,9 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
         func_00100610_0F88(&v, ((char*)self));
         steer = func_00100348_0F88(((char*)self), &v);
         if (mySpd < hisSpd)
-            func_0010C140_0F88(((char*)self), cmd);
+            cComputer_setupRecklessCrouch_0F88(((char*)self), cmd);
         else
-            func_0010C0A8_0F88(((char*)self), cmd);
+            cComputer_setupCrouch_0F88(((char*)self), cmd);
     } else {
         float d = Rec_0F88(((char*)self))->dist;
         float lim;
@@ -953,13 +953,13 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
         if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
             func_00100610_0F88(&v, ((char*)self));
             steer = func_00100348_0F88(((char*)self), &v);
-            func_0010C0A8_0F88(((char*)self), cmd);
+            cComputer_setupCrouch_0F88(((char*)self), cmd);
         } else if (tgt->Ready()) {
             if (*(int*)((char*)tgt + 0xAB8) == *(int*)((char*)self->mRider + 0xAB8))
                 func_00112A50((char*)self->mRider, 0);
             func_00100610_0F88(&v, ((char*)self));
             steer = func_00100348_0F88(((char*)self), &v);
-            func_0010C0A8_0F88(((char*)self), cmd);
+            cComputer_setupCrouch_0F88(((char*)self), cmd);
         }
     }
     cmd->b20 = (int)(steer * 31.0f);
@@ -3363,7 +3363,7 @@ int func_0011FEE8_5398(void*) __asm__("func_0011FEE8__FPv");
 int func_0011FE98(void*);
 extern "C" void func_00106F78(void*);
 extern "C" float func_00104E70_5398(char*, cScope_5398*, sContact_5398*) __asm__("func_00104E70");
-extern "C" int func_001231A8(void*);
+extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void func_001057B8_5398(char*, sSurf_5398*, sInfo_5398*, sContact_5398*, float) __asm__("func_001057B8");
 extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __asm__("cSSXAudio_CollisionSound");
 extern "C" void func_0016D320(void*, void*);
@@ -3497,7 +3497,7 @@ extern "C" void func_00105398(char* self, sV4_5398* norm)
     cScope_5398* ps = &sc;
     float d = func_00104E70_5398(self, ps, &c);
     if (d >= zero) {
-        if (func_001231A8(self))
+        if (cRider_isGroundNormalValid(self))
             norm = (sV4_5398*)(self + 0x370);
         if (norm) {
             sV4_5398 t = Sub_5398(c.normal, Scale_5398(*norm, Dot_5398(c.normal, *norm)));
@@ -4255,13 +4255,13 @@ extern "C" float func_0031C228(float);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* anim, float a);
-extern "C" void func_0011DFE0(cRider* self, const t4Vector& axis, float angle);
+extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
 extern "C" void func_0010E910(void* rider, int a, int b, int c, void* hit, float speed);
 extern "C" float func_00119D40(void* metrix, int a, int b, int c, int d);
-extern "C" void func_0010E098(cRider* self, int a, float f);
+extern "C" void cRider_flagEventBoostPowerUp(cRider* self, int a, float f);
 extern "C" void cRider_doRailslideModeOrientation(cRider* self);
 extern "C" void cRailslideControl_playGainFocusAnim(void*, int);
-extern "C" void func_0013ADC0(void* p, t4Vector* n);
+extern "C" void cRailslideMotion_setCrookedAngle(void* p, t4Vector* n);
 extern char* D_004A3500_6848 __asm__("gSSXAudio");
 extern t4Vector D_004FF130_6848 __asm__("D_004FF130");
 
@@ -4520,7 +4520,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     if (func_0011FE98(self) == 1) {
         func_0010E910(self, 0, RAIL_STYLE(self), PRESS_TYPE(self), &land, imp);
     } else {
-        func_0010E098(self, 1, func_00119D40(self->mMetrix, self->unk_320 != self->mNaturalStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
+        cRider_flagEventBoostPowerUp(self, 1, func_00119D40(self->mMetrix, self->unk_320 != self->mNaturalStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
     }
     *(int*)(D_004A3500_6848 + 0x598C) = land.mat;
     cRider_setMotionState_6848(self, 4);
@@ -4544,14 +4544,14 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
         }
     } else if (prev != RAIL_STYLE(self)) {
         if (prev == 3) {
-            func_0011DFE0(self, GetUp_6848(self), 1.5707963705062866f);
+            cRider_rotateOrientation(self, GetUp_6848(self), 1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707963705062866f);
             float yaw = 0.0f;
             char* ra = (char*)self->mRiderAnim;
             *(t4Vector*)(ra + 0x30) = D_004FF130_6848;
             *(sQuat_6848*)(ra + 0x40) = AxisAngle_6848(D_004FF160_6848, -yaw);
         } else if (prev == 4) {
-            func_0011DFE0(self, GetUp_6848(self), -1.5707963705062866f);
+            cRider_rotateOrientation(self, GetUp_6848(self), -1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707963705062866f);
             float yaw = 0.0f;
             char* ra = (char*)self->mRiderAnim;
@@ -4560,7 +4560,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
         }
         cRider_doRailslideModeOrientation(self);
     }
-    func_0013ADC0((char*)self->mRiderHandler + 0xB0, &land.n);
+    cRailslideMotion_setCrookedAngle((char*)self->mRiderHandler + 0xB0, &land.n);
     return 1;
 }
 
@@ -4841,7 +4841,7 @@ extern "C" int func_00106F78_impl(cRider* self)
     info.vn = vn;
     t4Vector off = Sub_6F78(b->pos, hit.pos);
     SubEq_6F78(off, Scale_6F78(hit.n, Dot_6F78(off, hit.n)));
-    if (func_001231A8(self)) {
+    if (cRider_isGroundNormalValid(self)) {
         SubEq_6F78(off, Scale_6F78(self->mGroundNormal, Dot_6F78(off, self->mGroundNormal)));
     }
     float l = Len_6F78(off);
@@ -5304,9 +5304,9 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
                 float omass = cRider_getMass(other);
                 t4Vector a = dir * -0.550000011920929f;
                 t4Vector b = dir * 0.550000011920929f;
-                if (func_001231A8(self))
+                if (cRider_isGroundNormalValid(self))
                     SubEq_7888(a, Scale_7888(self->mGroundNormal, Dot_7888(a, self->mGroundNormal)));
-                if (func_001231A8(other))
+                if (cRider_isGroundNormalValid(other))
                     SubEq_7888(b, Scale_7888(other->mGroundNormal, Dot_7888(b, other->mGroundNormal)));
                 func_00106538_m2537(self, a);
                 func_00106538_m2537(other, b);
@@ -5382,7 +5382,7 @@ public:
 int func_0011FEE8_7E70(void*) __asm__("func_0011FEE8__FPv");
 int func_0011FE98(void*);
 int AIrand();
-extern "C" int func_001231A8(void*);
+extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void*, sV4_7E70*, sV4_7E70*, float);
 extern "C" void func_0010EB30_7E70(char*, int, int, int, sInfo_7E70*) __asm__("func_0010EB30");
 extern "C" void func_00108388_7E70(char*, sInfo_7E70*, int) __asm__("func_00108388");
@@ -5539,7 +5539,7 @@ extern "C" void func_00107E70(char* self, char* other, sV4_7E70* n, int flag, fl
     float lim = 555.5555419921875f;
     float s = Clamp_7E70(speed, -lim, lim);
     sV4_7E70 imp = Scale_7E70(*n, s);
-    if (func_001231A8(self)) {
+    if (cRider_isGroundNormalValid(self)) {
         AddEq_7E70(*(sV4_7E70*)(self + 0x1E0),
                    Sub_7E70(imp, Scale_7E70(*(sV4_7E70*)(self + 0x370), Dot_7E70(imp, *(sV4_7E70*)(self + 0x370)))));
     } else {
@@ -6272,53 +6272,53 @@ __asm__("_vt$14cRiderE_108C80 = cComputer_vtbl\n"
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010A768);
+INCLUDE_ASM("seg/seg_1218", cComputer_getControlCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" float func_0010DEF0(void* self);
-extern "C" void func_00120090(void* self, float v);
+extern "C" void cRider_updateTimeWarp(void* self, float v);
 int func_0011FEE8_A768(void*) __asm__("func_0011FEE8__FPv");
 extern "C" void func_0010A960_A768(void* self, void* pad) __asm__("func_0010A960");
-extern "C" void func_0010AA70_A768(void* self, void* pad) __asm__("func_0010AA70");
-extern "C" void func_0010B790_A768(void* self, void* pad) __asm__("func_0010B790");
-extern "C" void func_0010B590_A768(void* self, void* pad) __asm__("func_0010B590");
-extern "C" void func_0010AED8_A768(void* self, void* pad) __asm__("func_0010AED8");
-extern "C" void func_0010B250_A768(void* self, void* pad) __asm__("func_0010B250");
+extern "C" void cComputer_getPrewindCmd_A768(void* self, void* pad) __asm__("cComputer_getPrewindCmd");
+extern "C" void cComputer_getGateCmd_A768(void* self, void* pad) __asm__("cComputer_getGateCmd");
+extern "C" void cComputer_getNaturalAirCmd_A768(void* self, void* pad) __asm__("cComputer_getNaturalAirCmd");
+extern "C" void cComputer_getRailslideCmd_A768(void* self, void* pad) __asm__("cComputer_getRailslideCmd");
+extern "C" void cComputer_getSpinCmd_A768(void* self, void* pad) __asm__("cComputer_getSpinCmd");
 extern "C" void func_0010B750_A768(void* self, void* pad) __asm__("func_0010B750");
-extern "C" void func_0010AD78_A768(void* self, void* pad) __asm__("func_0010AD78");
+extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("cComputer_getBoardPressCmd");
 
 // Clears the pad input, updates the rider, then runs the input handler for the rider state.
-extern "C" void func_0010A768(cComputer* self, void* pad)
+extern "C" void cComputer_getControlCmd(cComputer* self, void* pad)
 {
     MEM_fill(pad, 0, 8);
-    func_00120090(self->mRider, func_0010DEF0(((char*)self)));
+    cRider_updateTimeWarp(self->mRider, func_0010DEF0(((char*)self)));
     int state = func_0011FEE8_A768(self->mRider);
     switch (state) {
     case 0:
         func_0010A960_A768(((char*)self), pad);
         break;
     case 2:
-        func_0010AA70_A768(((char*)self), pad);
+        cComputer_getPrewindCmd_A768(((char*)self), pad);
         break;
     case 6:
-        func_0010B790_A768(((char*)self), pad);
+        cComputer_getGateCmd_A768(((char*)self), pad);
         break;
     case 4:
-        func_0010B590_A768(((char*)self), pad);
+        cComputer_getNaturalAirCmd_A768(((char*)self), pad);
         break;
     case 7:
-        func_0010AED8_A768(((char*)self), pad);
+        cComputer_getRailslideCmd_A768(((char*)self), pad);
         break;
     case 5:
-        func_0010B250_A768(((char*)self), pad);
+        cComputer_getSpinCmd_A768(((char*)self), pad);
         break;
     case 8:
         func_0010B750_A768(((char*)self), pad);
         break;
     case 1:
-        func_0010AD78_A768(((char*)self), pad);
+        cComputer_getBoardPressCmd_A768(((char*)self), pad);
         break;
     case 3: case 9: case 10: case 11: case 12: case 13:
         break;
@@ -6394,7 +6394,7 @@ public:
 };
 
 extern "C" int func_0010D1A0(void*);
-extern "C" int func_0010DA10(void*);
+extern "C" int cComputer_checkForBlock(void*);
 extern "C" int func_0010DBF0(void*, int*);
 
 extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
@@ -6407,7 +6407,7 @@ extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
             f->b19 = 1;
         else
             f->b18 = 1;
-    } else if (func_0010DA10(self)) {
+    } else if (cComputer_checkForBlock(self)) {
         f->b19 = 1;
         f->b18 = 1;
     }
@@ -6416,7 +6416,7 @@ extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010AA70);
+INCLUDE_ASM("seg/seg_1218", cComputer_getPrewindCmd);
 #ifdef SKIP_ASM
 struct sV4_AA70
 {
@@ -6500,7 +6500,7 @@ static inline sV4_AA70 Scale_AA70(const sV4_AA70& v, float s)
     return r;
 }
 
-extern "C" void func_0010AA70(cComputer* self, sPad_AA70* pad)
+extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* pad)
 {
     sRec_AA70 buf[12];
     char* rider = (char*)self->mRider;
@@ -6538,7 +6538,7 @@ extern "C" void func_0010AA70(cComputer* self, sPad_AA70* pad)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1218", func_0010AD78);
+INCLUDE_ASM("seg/seg_1218", cComputer_getBoardPressCmd);
 #ifdef SKIP_ASM
 struct sVec4_AD78 {
     float x, y, z, w;
@@ -6570,7 +6570,7 @@ static inline float clamp_AD78(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-extern "C" void func_0010AD78(cComputer* self, sPad_AD78* pad)
+extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* pad)
 {
     int flag;
     int r = func_0010BBF8(self, &flag);
@@ -6596,7 +6596,7 @@ extern "C" void func_0010AD78(cComputer* self, sPad_AD78* pad)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010AED8);
+INCLUDE_ASM("seg/seg_1218", cComputer_getRailslideCmd);
 #ifdef SKIP_ASM
 struct sVec4_AED8 {
     float x, y, z, w;
@@ -6610,7 +6610,7 @@ struct sPad_AED8 {
 };
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
-extern "C" void func_0010BFA8_AED8(char*, int, int, int, int) __asm__("func_0010BFA8");
+extern "C" void cComputer_setupPrewindState_AED8(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
 extern "C" int func_00311AE8(void*, int);
 extern "C" int func_0010BB18(cComputer*, float*, int*);
 
@@ -6649,7 +6649,7 @@ static inline float clamp_AED8(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-extern "C" void func_0010AED8(cComputer* self, sPad_AED8* pad)
+extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* pad)
 {
     int below, o3, o4, o5, o6, ok;
     int r = cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6);
@@ -6657,7 +6657,7 @@ extern "C" void func_0010AED8(cComputer* self, sPad_AED8* pad)
     *(unsigned int*)pad |= 0x1FE0000;
     if (r && below) {
         *(unsigned int*)pad |= 0x6000;
-        func_0010BFA8_AED8(((char*)self), o5, o6, o4, o3);
+        cComputer_setupPrewindState_AED8(((char*)self), o5, o6, o4, o3);
         return;
     }
     sVec4_AED8 p = *(sVec4_AED8*)((char*)self->mRider + 0x1A0);
@@ -6679,12 +6679,12 @@ extern "C" void func_0010AED8(cComputer* self, sPad_AED8* pad)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010B0E8);
+INCLUDE_ASM("seg/seg_1218", cComputer_setupEndSpin);
 #ifdef SKIP_ASM
 extern "C" void cSpinControl_predictSpinSec(void*, float*, float*);
 extern "C" void cSpinControl_predictFlipSec(void*, float*, float*);
 
-extern "C" void func_0010B0E8(cComputer* self, float t)
+extern "C" void cComputer_setupEndSpin(cComputer* self, float t)
 {
     float a, b, c, d;
     cSpinControl_predictSpinSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &a, &b);
@@ -6720,7 +6720,7 @@ extern "C" void func_0010B0E8(cComputer* self, float t)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010B250);
+INCLUDE_ASM("seg/seg_1218", cComputer_getSpinCmd);
 #ifdef SKIP_ASM
 struct sPad_B250 {
     unsigned int pad0 : 12;
@@ -6744,13 +6744,13 @@ static inline void SetW12_B250(sPad_B250* pad, int v)
 
 int AIrand();
 extern "C" int func_00311AE8(void*, int);
-extern "C" void func_0010B0E8(cComputer*, float);
-extern "C" int func_0010CAD8(char*, float);
+extern "C" void cComputer_setupEndSpin(cComputer*, float);
+extern "C" int cComputer_chooseGrabMain(char*, float);
 
 // Returns -1 only when no trick is queued, and has no value otherwise (the caller ignores it): the retail
 // tail keeps `lw E0C; li v0,-1` with no branch. The noop `v0 = -1` return arm survives reload as a USE,
 // so jump2 only deletes the branch after sched2 and the compare loads stay.
-extern "C" int func_0010B250(cComputer* self, sPad_B250* pad)
+extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* pad)
 {
     char* obj = *(char**)((char*)self->mRider + 0x788);
     int t = *(int*)(obj + 0xAC);
@@ -6773,7 +6773,7 @@ extern "C" int func_0010B250(cComputer* self, sPad_B250* pad)
         pad->b12 = 1;
     } else {
         if (self->mIsGonnaMessUp == 0) {
-            func_0010B0E8(self, gap);
+            cComputer_setupEndSpin(self, gap);
             if (self->mGrabEndTime <= 0.0f)
                 self->mGrabEndTime = 15.0f;
             if (self->mIsNaturalAir) {
@@ -6781,7 +6781,7 @@ extern "C" int func_0010B250(cComputer* self, sPad_B250* pad)
                 self->mIsNaturalAir = 0;
             } else if (self->mGrabID == -1 && gap > 0.5f && gap < self->mGrabEndTime &&
                        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0x14) {
-                self->mGrabID = func_0010CAD8(((char*)self), gap);
+                self->mGrabID = cComputer_chooseGrabMain(((char*)self), gap);
             } else {
                 int stop = 0;
                 if (self->mToRail && gap < 1.0f)
@@ -6820,7 +6820,7 @@ extern "C" int func_0010B250(cComputer* self, sPad_B250* pad)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1218", func_0010B590);
+INCLUDE_ASM("seg/seg_1218", cComputer_getNaturalAirCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sVec4_B590 {
@@ -6843,7 +6843,7 @@ int AIrand();
 extern "C" void func_00100610_B590(sVec4_B590*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_B590(void*, sVec4_B590*) __asm__("func_00100348");
 
-extern "C" void func_0010B590(cComputer* self, sPad_B590* pad)
+extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* pad)
 {
     char* o = *(char**)((char*)self->mRider + 0x788);
     int st = *(int*)(o + 0xAC);
@@ -6895,7 +6895,7 @@ extern "C" void func_0010B750(cComputer* computer, int *arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010B790);
+INCLUDE_ASM("seg/seg_1218", cComputer_getGateCmd);
 #ifdef SKIP_ASM
 struct sPad_B790 {
     unsigned int pad0 : 12;
@@ -6916,7 +6916,7 @@ public:
 int AIrand();
 extern "C" int func_001298C8();
 
-extern "C" void func_0010B790(cComputer* self, sPad_B790* pad)
+extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* pad)
 {
     float t = 180.0f - (float)func_001298C8();
     float th = 33.0f;
@@ -7163,10 +7163,10 @@ extern "C" int cComputer_checkForTargets(cComputer* self, int* isAttack)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010BFA8);
+INCLUDE_ASM("seg/seg_1218", cComputer_setupPrewindState);
 #ifdef SKIP_ASM
 int AIrand();
-extern "C" int func_0010C1D0(cComputer*);
+extern "C" int cComputer_shouldRiderWipeout(cComputer*);
 
 struct sObj_BFA8 {
     char pad[0xE0C];
@@ -7181,12 +7181,12 @@ struct sObj_BFA8 {
     float fE3C;
 };
 
-extern "C" void func_0010BFA8(cComputer* self, int a, int b, int c, int d)
+extern "C" void cComputer_setupPrewindState(cComputer* self, int a, int b, int c, int d)
 {
     self->mGrabID = -1;
     int* p = &self->mIsSpinTrick;
     *p = (a || b);
-    self->mIsGonnaMessUp = func_0010C1D0(self);
+    self->mIsGonnaMessUp = cComputer_shouldRiderWipeout(self);
     self->mToRail = c;
     self->mToPipe = d;
     self->mIsNaturalAir = 0;
@@ -7202,7 +7202,7 @@ extern "C" void func_0010BFA8(cComputer* self, int a, int b, int c, int d)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C0A8);
+INCLUDE_ASM("seg/seg_1218", cComputer_setupCrouch);
 #ifdef SKIP_ASM
 struct sVec4_C0A8 {
     float x, y, z, w;
@@ -7234,7 +7234,7 @@ static inline float vLen_C0A8(const sVec4_C0A8& v)
         : "m"(v));
     return r;
 }
-extern "C" void func_0010C0A8(cComputer* self, void* padp)
+extern "C" void cComputer_setupCrouch(cComputer* self, void* padp)
 {
     sPad_C0A8* pad = (sPad_C0A8*)padp;
     float len = vLen_C0A8(*(sVec4_C0A8*)((char*)self->mRider + 0x1E0));
@@ -7248,7 +7248,7 @@ extern "C" void func_0010C0A8(cComputer* self, void* padp)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C140);
+INCLUDE_ASM("seg/seg_1218", cComputer_setupRecklessCrouch);
 #ifdef SKIP_ASM
 struct sVec4_C140 {
     float x, y, z, w;
@@ -7280,7 +7280,7 @@ static inline float vLen_C140(const sVec4_C140& v)
         : "m"(v));
     return r;
 }
-extern "C" void func_0010C140(cComputer* self, void* padp)
+extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* padp)
 {
     sPad_C140* pad = (sPad_C140*)padp;
     float len = vLen_C140(*(sVec4_C140*)((char*)self->mRider + 0x1E0));
@@ -7294,9 +7294,9 @@ extern "C" void func_0010C140(cComputer* self, void* padp)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C1D0);
+INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderWipeout);
 #ifdef SKIP_ASM
-extern "C" int func_0010C1D0(cComputer* self) {
+extern "C" int cComputer_shouldRiderWipeout(cComputer* self) {
     unsigned int r = AIrand();
     float thr = self->mTrickDifficulty * 100.0f;
     return thr <= (float)(r % 100U);
@@ -7304,13 +7304,13 @@ extern "C" int func_0010C1D0(cComputer* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C258);
+INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderUber);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
-extern "C" int func_0010C258(cComputer* self) {
+extern "C" int cComputer_shouldRiderUber(cComputer* self) {
     if (*(unsigned int*)((char*)self->mRider + 0xB2C) & 1) {
         if (cBENewRaceInterface_getLocationID(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
             unsigned int r = AIrand();
@@ -7323,9 +7323,9 @@ extern "C" int func_0010C258(cComputer* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C320);
+INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderTweak);
 #ifdef SKIP_ASM
-extern "C" int func_0010C320(cComputer* self) {
+extern "C" int cComputer_shouldRiderTweak(cComputer* self) {
     unsigned int r = AIrand();
     float thr = self->mTrickDifficulty * 70.0f + 30.0f;
     return (float)(r % 100U) < thr;
@@ -7333,9 +7333,9 @@ extern "C" int func_0010C320(cComputer* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C3B8);
+INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderGrab);
 #ifdef SKIP_ASM
-extern "C" int func_0010C3B8(cComputer* self) {
+extern "C" int cComputer_shouldRiderGrab(cComputer* self) {
     unsigned int r = AIrand();
     float thr = self->mTrickDifficulty * 40.0f + 60.0f;
     return (float)(r % 100U) < thr;
@@ -7343,10 +7343,10 @@ extern "C" int func_0010C3B8(cComputer* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010C450);
+INCLUDE_ASM("seg/seg_1218", cComputer_updateRiderPathDifficulty);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_0010C450(cComputer* self, int a, int b)
+extern "C" int cComputer_updateRiderPathDifficulty(cComputer* self, int a, int b)
 {
     switch (a) {
     case 1:

@@ -250,7 +250,7 @@ INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 #ifdef SKIP_ASM
 extern "C" void func_00253418(void* p, int flags);
 extern "C" void* func_0028B180();
-extern "C" void func_0029CE70(void* p);
+extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void func_002EA860(void* p);
 extern int D_004A2A54;
 extern int D_004A2A50;
@@ -310,7 +310,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
         func_00253418(*(void**)(s + 0x0), 3);
         if (*(int*)(s + 0x4) != 0) {
             D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_0029CE70(func_0028B180());
+            cSSXAudio_ResumeSFX(func_0028B180());
             ((cWorld_3818*)GrMan)->v40(*(int*)(s + 0x10));
             if (*(int*)(s + 0x14) != 0) {
                 *(int*)(s + 0x14) = 0;

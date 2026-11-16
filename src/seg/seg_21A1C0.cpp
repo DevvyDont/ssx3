@@ -10,9 +10,9 @@ struct cBXString_91C0 {
 };
 extern "C" long func_0041E9E0(const char* s, char** end, int base);
 extern "C" int strlen(const char* s);
-extern "C" void func_003189D0(cBXString_91C0* self, int len);
+extern "C" void cBXString_getBuffer(cBXString_91C0* self, int len);
 extern "C" int func_004186C8(char* buf, const char* fmt, char* ap);
-extern "C" void func_00318A88(cBXString_91C0* self, int len);
+extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
 
 #define MAX_91C0(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN_91C0(a, b) (((a) < (b)) ? (a) : (b))
@@ -121,9 +121,9 @@ extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
         }
         maxLen += itemLen;
     }
-    func_003189D0(self, maxLen);
+    cBXString_getBuffer(self, maxLen);
     func_004186C8(self->str, fmt, args);
-    func_00318A88(self, -1);
+    cBXString_releaseBuffer(self, -1);
 }
 #endif
 
@@ -150,13 +150,13 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003194F0);
 struct cBXString_94F0 {
     char* str;
 };
-extern "C" void func_00318120(void* self);
+extern "C" void cBXString_copyBeforeWrite(void* self);
 extern unsigned char D_00499C81[];
 
 // Strips trailing white space (D_00499C81 is the ctype table + 1, bit 8 = space).
 extern "C" void func_003194F0(cBXString_94F0* self)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     char* end = 0;
     char* p;
     for (p = self->str; *p != 0; p++) {
@@ -179,14 +179,14 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319578);
 struct cBXString_9578 {
     char* str;
 };
-extern "C" void func_00318120(void* self);
+extern "C" void cBXString_copyBeforeWrite(void* self);
 extern "C" void* func_0041610C(void* dst, const void* src, int n);
 extern unsigned char D_00499C81[];
 
 // Strips leading white space.
 extern "C" void func_00319578(cBXString_9578* self)
 {
-    func_00318120(self);
+    cBXString_copyBeforeWrite(self);
     char* p = self->str;
     while (D_00499C81[(int)*p] & 8)
         p++;

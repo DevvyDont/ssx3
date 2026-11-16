@@ -15,14 +15,14 @@
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
 //   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init (init), func_0022CEA8 (load),
-//     cSectionMan_activate (activate), func_0022D278 (isLoaded), func_0022D390 (isActive), func_0022D3D8 (loadSection),
-//     cSectionMan_activateSection (activateSection), func_0022D598 (unloadSection), func_0022D640 (loadMode),
+//     cSectionMan_activate (activate), func_0022D278 (isLoaded), func_0022D390 (isActive), cSectionMan_loadSection (loadSection),
+//     cSectionMan_activateSection (activateSection), cSectionMan_unloadSection (unloadSection), cSectionMan_loadMode (loadMode),
 //     cSectionMan_activateMode (activateMode), cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete (skyLoadComplete),
 //     cSectionMan_skySwap, cSectionMan_preLoadMode (preLoadMode), func_0022DFD0 (isPreLoadModeDone), cSectionMan_changeMode (changeMode),
-//     func_0022E078 (isSectionLoaded), func_0022E098 (getWorldSectionIDFromBELocationID),
-//     func_0022E0C8 (getWorldSectionIDFromBESectionID), func_0022E0E0 (getBESectionIDFromWorldSectionID),
+//     cSectionMan_isSectionLoaded (isSectionLoaded), cSectionMan_getWorldSectionIDFromBELocationID (getWorldSectionIDFromBELocationID),
+//     cSectionMan_getWorldSectionIDFromBESectionID (getWorldSectionIDFromBESectionID), cSectionMan_getBESectionIDFromWorldSectionID (getBESectionIDFromWorldSectionID),
 //     func_0022E118 (gotoLocation);
-//   main/sectionman: cSectionMan_setSky, func_0022E228 (initEventPool), func_0022E278 (allocEvent),
+//   main/sectionman: cSectionMan_setSky, cSectionMan_initEventPool (initEventPool), func_0022E278 (allocEvent),
 //     func_0022E288 (freeEvent), cSectionMan_addActiveEvent (addActiveEvent), cSectionMan_getNextActiveEvent,
 //     cSectionMan_removeActiveEvent (removeActiveEvent).
 //   Inline accessors used elsewhere: tiggerskyswap (sw 0x1A4), getLocationID (lw 0x1BC), transportwait /
@@ -35,7 +35,7 @@
 // A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF (class cSectionMan), placed by:
 //   [P] the July 2003 preview's assert strings in sectionman.cpp ("m_pFreeEventList", "pPrevEvent->pNext==pEvent",
 //       "mpGame->World->isSectionLoaded(...)", "mMode==Mode");
-//   [R] retail's constructor and init (cSectionMan_cSectionMan, cSectionMan_init, func_0022E228);
+//   [R] retail's constructor and init (cSectionMan_cSectionMan, cSectionMan_init, cSectionMan_initEventPool);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [P], [R] or [U].
 // Unnamed fields are unk_XXX; rename only with evidence.

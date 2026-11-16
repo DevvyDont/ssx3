@@ -9,12 +9,12 @@
 // (preview assert strings). Retail splits it over two units:
 //   world/worldcache (0x003A8F80-0x003A9800): cWorldView_cWorldView, cWorldView__cWorldView, cWorldView_init,
 //     cWorldView_purge, func_003A9188 (reset), cWorldView_update, func_003A9558 (recursiveFlushPages),
-//     func_003A95C0 (recursiveIsEmptyPages), func_003A9658 (setFocus), func_003A96E0 (getFocus),
-//     func_003A9770 (getTestFocus);
-//   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, func_003A9820 (getSectionName),
-//     cWorldView_isSectionLoaded, func_003A9890 (isSectionUnLoaded), func_003A98C8 (loadSection),
+//     func_003A95C0 (recursiveIsEmptyPages), func_003A9658 (setFocus), cWorldView_getFocus (getFocus),
+//     cWorldView_getTestFocus (getTestFocus);
+//   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, cWorldView_getSectionName (getSectionName),
+//     cWorldView_isSectionLoaded, cWorldView_isSectionUnLoaded (isSectionUnLoaded), func_003A98C8 (loadSection),
 //     func_003A9958 (unloadSection), cWorldView_activateSection (activateSection), func_003A9A48 (deactivateSection),
-//     func_003A9A90 (getWorldBoundBox), func_003A9A98 (getHull), func_003A9AB0 (getNumHull),
+//     func_003A9A90 (getWorldBoundBox), cWorldView_getHull (getHull), func_003A9AB0 (getNumHull),
 //     func_003A9AC0 (isBoxValid), func_003A9BB8 (recursiveIsValid), func_003A9D60 (refreshStreamFocus),
 //     func_003A9E50 (getDistanceToBox), func_003AA028 (recursiveTreeFocus).
 // (Names from On Tour's cWorldView methods, matched by body; the rest of world/worldview is cChunkResolve,
@@ -80,7 +80,7 @@ CHECK_SIZE(tBxBSPHeader, 0x10);
 // One world section's record in the .sdb (On Tour tBxSection). 0x58 bytes: cWorldView_init steps 0x58.
 struct tBxSection {
     char m_sSectionName[16];        // 0x00 [O]; [U] cWorldView_update compares the first 4 chars with "ASKY".."ESKY";
-                                    //      cSectionMan's init matches BE section names against it (func_003A9820)
+                                    //      cSectionMan's init matches BE section names against it (cWorldView_getSectionName)
     tBxBSPHeader m_BSP;             // 0x10 [P] assert mp_Section[i].m_BSP
     short m_iTable[28];             // 0x20 [O]; [R] cWorldCache_activateSectionMem: per-type counts of the section's
                                     //      cWorldCacheTable; [U] cWorld_resetMap reads [3] (instances)
@@ -164,7 +164,7 @@ struct cWorldView {
     tStreamDataHeader* mp_Hdr;      // 0x004 [P] assert mp_Hdr->m_uiNumSections; [R] init; [U] all the section getters
     tBxSection* mp_Section;         // 0x008 [P] assert mp_Section[i]; [R] init = hdr + 0x50
     tBxBSPNode* mp_Nodes;           // 0x00C [O]; [R] init: 16-aligned after the sections, indices fixed up to pointers
-    tBxBSPHull* mp_Hulls;           // 0x010 [O]; [R] init: after the nodes; [U] func_003A9A98 (getHull) steps 0x44
+    tBxBSPHull* mp_Hulls;           // 0x010 [O]; [R] init: after the nodes; [U] cWorldView_getHull (getHull) steps 0x44
     tSectionState mp_SectionState[64]; // 0x014 [O]; [R] reset zeroes 64; [U] isSectionLoaded = state 5 or 6,
                                     //       load/unload/activate/deactivate, update's state machine
     int unk_214[3];                 // 0x214 padding (tBoundBox alignment)

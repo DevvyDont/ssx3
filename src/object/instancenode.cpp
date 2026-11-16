@@ -170,7 +170,7 @@ void* func_0034FE00(void* self, int a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FE28);
+INCLUDE_ASM("object/instancenode", cInstanceNode_makeThisDead);
 #ifdef SKIP_ASM
 struct sInstNodeDtorVEntry {
     short delta;
@@ -182,7 +182,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern char D_0048E738[];
 extern "C" void* func_003506D8(void* mem, int v);
 
-extern "C" void func_0034FE28(cInstanceNode* self)
+extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
 {
     int v = (int)self->Instance;
     if (((void*)self) != 0) {

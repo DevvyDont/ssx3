@@ -23,7 +23,7 @@
 // ControlState), placed by [P] the July 2003 preview's inline accessors (getInput lw 0xDB0, setInput sw 0xDB0/0xDB4,
 // cRiderHandler::_getMotionState lw 0xDA0, _getControlState lw 0xDA4), which retail moved by +0x40 (tools/
 // layout_xlate.py: 62 aligned observations 0xDB0 -> 0xDF0), and by [R] retail's constructor cPlayer_cPlayer and the
-// out-of-line accessors in ai/control/handplantcontrol (func_001446D0 setInput, func_001446E0 getInput,
+// out-of-line accessors in ai/control/handplantcontrol (cPlayer_setInput setInput, func_001446E0 getInput,
 // cRiderHandler__getMotionState _getMotionState, cRiderHandler__getControlState _getControlState); [U] how retail code uses the field.
 // Unnamed fields are unk_XXX; rename only with evidence.
 
@@ -49,8 +49,8 @@ struct cPlayer {
     void** mVtbl;              // 0xDE8 [R] _vt$7cPlayer (D_00458338, 3 slots: func_00127998, func_00128660)
     char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned (the parts hold t4Vectors)
     // ---- cPlayer ----
-    cInput* Input;             // 0xDF0 [P] getInput/setInput; [R] func_001446E0, func_001446D0; [O]
-    cPadDevice* Pad;           // 0xDF4 [P] setInput's second argument; [R] ctor = 0, func_001446D0; [O];
+    cInput* Input;             // 0xDF0 [P] getInput/setInput; [R] func_001446E0, cPlayer_setInput; [O]
+    cPadDevice* Pad;           // 0xDF4 [P] setInput's second argument; [R] ctor = 0, cPlayer_setInput; [O];
                                //       [U] vibrationUpdate (func_001278E8) rumbles it
     cReplayCache* ReplayCache; // 0xDF8 [R] ctor = cReplay_addCache(Game->Replay), released by ~cPlayer; [O]
     float unk_DFC;             // 0xDFC [R] ctor = 0; [U] vibrationReset = 0, vibrationBump adds to it; decayed with

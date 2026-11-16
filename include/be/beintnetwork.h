@@ -19,8 +19,8 @@
 //   cBENetworkInterface::networkOpt     cBENetworkInterface_networkOpt  tBENetworkDB (0x4B0; read by ~20 units; splat also names the
 //                                                   interior symbols D_00534B34 ... D_00534FD8 used below)
 //   cBELibrary::networkDB               D_00535088  tBENetworkDB (submit/discard's other side; On Tour has both)
-//   cBENetworkInterface::BackupPlayerDB D_00534A88  6 player records of 0x1C (backupCharProfile func_0014EBF8 /
-//                                                   restoreCharProfile func_0014ECA0; On Tour: cBEPlayerDB[4])
+//   cBENetworkInterface::BackupPlayerDB D_00534A88  6 player records of 0x1C (backupCharProfile cBENetworkInterface_backupCharProfile /
+//                                                   restoreCharProfile cBENetworkInterface_restoreCharProfile; On Tour: cBEPlayerDB[4])
 //
 // Evidence tags:
 //   [R] retail's own code: getThis (allocation, vptr, bIsActive), the constructor func_0015C660 (vptr), and the
@@ -45,7 +45,7 @@ struct tBENetworkDB {
     int bIsRankedGame;               // 0x004 [O]; [P] get/setIsRankedGame; [R] func_0015C298 / func_0015C2A8
     int bIsHost;                     // 0x008 [O]; [P] get/setIsHost; [R] func_0015C2B8 / func_0015C2C8 (D_00534B38);
                                      //       [U] cGameComm_syncGame / syncWait / gameExit, setSyncData (cBENetworkInterface_setSyncData),
-                                     //       preInitBE (func_0014E9F8) and the results report pick the host side by it
+                                     //       preInitBE (cBENetworkInterface_preInitBE) and the results report pick the host side by it
     int iPort;                       // 0x00C [O]; [P] get/setPort; [R] func_0015C2D8 / func_0015C2E8 (D_00534B3C);
                                      //       [U] debugfe (func_0017D0A8, func_0017DE70) and tagsunk func_002639E0 read
                                      //       it as an unsigned short (lhu) for openDSockChannel

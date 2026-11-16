@@ -16,7 +16,7 @@ emulator (savestates, memory reads at specific frames, or controller replays com
 File assignments follow the decomp's current translation-unit split.
 
 - `src/sound/ssxAudio.cpp`: `0x00284BB0` (`SSXAUDIO_Init`), constructor `0x00284C68`, per-frame update
-  `0x00285BF8`, loaders `0x00285FB0` / `0x002862A8` (`cSSXAudio_FrontEndLoad`, see the naming note), world load /
+  `0x00285BF8`, loaders `0x00285FB0` / `0x002862A8` (`cSSXAudio_InGameLoad`, see the naming note), world load /
   teardown `0x002867E8` / `0x00286A80`, mixer `0x002873D8`..`0x00287F00`, MIX.INF `0x00287FC8` / `0x002883B0`,
   playlist loader `0x00289520`, pause / resume `0x00289B70` / `0x00289BB8`.
 - `src/sound/asyncsys.cpp`: accessors `0x0028B180` (returns the audio system), `0x0028B1B0`, `0x0028B1C8`,
@@ -42,7 +42,7 @@ File assignments follow the decomp's current translation-unit split.
   (UI-sound listeners); `src/fe/ovstatehud.cpp` (Now Playing). The audio options state `0x00195FF0` currently falls
   in `src/util/locale.cpp`.
 
-**Naming note.** The decomp calls `0x002862A8` `cSSXAudio_FrontEndLoad`. The code reading describes it as the
+**Naming note.** The decomp calls `0x002862A8` `cSSXAudio_InGameLoad`. The code reading describes it as the
 world-side loader: it loads the WORLD bank set and applies the world channel-scale table (argument 1). In that
 reading `0x00285FB0` loads the `[FE]` banks, applies the FE table (argument 0) and starts charsel. Which name is
 right is unresolved.

@@ -60,7 +60,7 @@ int func_0014E2C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E2C8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getSyncData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sNetHdr_E2C8 {
@@ -124,7 +124,7 @@ extern char D_004A6F38[];
 extern char D_004A7778[];
 extern char D_004A7887[];
 
-extern "C" void func_0014E2C8(cBENetworkInterface* self, int p, sNetState_E2C8* out)
+extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p, sNetState_E2C8* out)
 {
     out->a = D_004A11B8;
     out->b = D_004A11BC;
@@ -205,7 +205,7 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E9C0);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_copyProfile);
 #ifdef SKIP_ASM
 struct sBEPlayerData {
     char data[0x9B50];
@@ -214,7 +214,7 @@ extern sBEPlayerData cBELibrary_profileLib[];
 
 extern "C" void func_00156858(sBEPlayerData* dst, sBEPlayerData* src);
 
-extern "C" void func_0014E9C0(cBENetworkInterface* self, int a1, int a2)
+extern "C" void cBENetworkInterface_copyProfile(cBENetworkInterface* self, int a1, int a2)
 {
     sBEPlayerData* src = &cBELibrary_profileLib[a1];
     func_00156858(&cBELibrary_profileLib[a2], src);
@@ -222,7 +222,7 @@ extern "C" void func_0014E9C0(cBENetworkInterface* self, int a1, int a2)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintnetwork", func_0014E9F8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_preInitBE);
 #ifdef SKIP_ASM
 extern "C" void func_001567B8(void* self, int arg);
 // PORT: func_0014EB08 is defined (void) in this unit but called with self here.
@@ -236,14 +236,14 @@ extern char D_004BA348[];
 extern int D_00534B38[];
 extern sRiderEntry_0014E9F8 D_00535B3C;
 
-extern "C" void func_0014E9F8(cBENetworkInterface* self)
+extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
 {
     func_001567B8(D_004BA348, 0);
     if (D_00534B38[0] == 0)
     {
         sRiderEntry_0014E9F8* e = &D_00535B3C;
         e[0] = e[-1];
-        func_0014E9C0(self, 0, 1);
+        cBENetworkInterface_copyProfile(self, 0, 1);
     }
     func_0014EB08_self(self);
 }
@@ -332,7 +332,7 @@ extern "C" void func_0014EBD8(cBENetworkInterface* self, const char* src)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EBF8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_backupCharProfile);
 #ifdef SKIP_ASM
 struct sCharEntry_0014EBF8
 {
@@ -346,7 +346,7 @@ extern sCharEntry_0014EBF8 cBELibrary_playerDB[];
 extern sCharEntry_0014EBF8 D_00534A88[];
 extern "C" void func_00156950(sBEPlayerData* data, int charID);
 
-extern "C" void func_0014EBF8(cBENetworkInterface* self, int idx)
+extern "C" void cBENetworkInterface_backupCharProfile(cBENetworkInterface* self, int idx)
 {
     func_00156950(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].charID);
     for (int i = 0; i < 6; i++)
@@ -357,11 +357,11 @@ extern "C" void func_0014EBF8(cBENetworkInterface* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014ECA0);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_restoreCharProfile);
 #ifdef SKIP_ASM
 extern "C" void func_00156988(sBEPlayerData* data);
 
-extern "C" void func_0014ECA0(cBENetworkInterface* self, int idx)
+extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self, int idx)
 {
     func_00156988(&cBELibrary_profileLib[idx]);
     if (D_00534B38[0] == 0)

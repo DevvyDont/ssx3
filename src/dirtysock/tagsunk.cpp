@@ -7528,7 +7528,7 @@ void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
 extern "C" void cGameComm_construct(int a, int b);
-extern "C" void func_0014EBF8(void* self, int a);
+extern "C" void cBENetworkInterface_backupCharProfile(void* self, int a);
 extern "C" int func_00255D50(void* comm, int chan);
 extern "C" int func_00255E40(void* comm, int chan);
 extern "C" void func_00256C50(void);
@@ -7633,7 +7633,7 @@ extern "C" void func_00263CF0(int* self)
             cBENewPlayerInterface_setRiderCharID(bi1, 0, D_00534E58[0]);
             sVEntry_263CF0* vt = *(sVEntry_263CF0**)(bi1 + 0xC);
             vt[1].fn(bi1 + vt[1].delta);
-            func_0014EBF8(bi7, 0);
+            cBENetworkInterface_backupCharProfile(bi7, 0);
             if (cGameComm_mGameComm != 0)
                 func_00256C50();
             cGameComm_construct(self[1], self[2]);

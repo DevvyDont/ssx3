@@ -69,7 +69,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
-extern "C" int func_0022E098(void* world, int id);
+extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* world, int id);
 extern "C" int func_00309DD0(void* mgr, int id, int a);
 extern "C" void func_00309E50(void* mgr, int id, int a);
 extern void* D_004A3DD8;
@@ -78,7 +78,7 @@ extern "C" void func_00234BE8(void* self, int a1)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* world = SSXApp->Game->SectionMan;
-    int id = func_0022E098(world, *cBENewRaceInterface_getLocation(iface));
+    int id = cSectionMan_getWorldSectionIDFromBELocationID(world, *cBENewRaceInterface_getLocation(iface));
     if (func_00309DD0(D_004A3DD8, id, a1) != 0) {
         func_00309E50(D_004A3DD8, id, a1);
     }
@@ -396,7 +396,7 @@ extern "C" void func_001473D0(void* player, int i, int v);
 
 extern "C" int cAI_isReadyToPurgeComputerRiders(void* p);
 
-extern "C" int func_0012A180(void* p);
+extern "C" int cAI_isAILoadedAndReady(void* p);
 
 void func_001289F0(void* p);
 
@@ -407,7 +407,7 @@ extern "C" void cGameModeMan_initGameMode(void* gm, int mode);
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(void* self, int i, int a, int b, int c, int d, int f, int g);
 
 extern "C" int cSSXScriptEngine_IsLoadTrackComplete(void* self);
-extern "C" void func_00278E20(void* self, int i, int a, int b);
+extern "C" void cSSXScriptEngine_AddToNISListByVideoCategory(void* self, int i, int a, int b);
 extern "C" void func_0028CD48(void* self);
 extern "C" void func_002B3A70(void* self);
 extern "C" int cAI_isReadyToPurgeComputerActors(void* p);
@@ -436,13 +436,13 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
         int range = t >= 14 && t <= 16;
         if (*(int*)((char*)self + 0x14) != 0) {
             if (t == 14) {
-                func_00278E20(ScriptEngine, 1, 0x1D, 3);
+                cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 0x1D, 3);
                 func_0028CD48(func_0028B180());
                 func_002B3A70((char*)func_0028B180() + 0x118);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 1, 3, 0, -1, -1, -1);
             } else {
-                func_00278E20(ScriptEngine, 1, t == 15 ? 0x1E : 0x1F, 3);
+                cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, t == 15 ? 0x1E : 0x1F, 3);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
             }
@@ -511,7 +511,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
         break;
     }
     case 3: {
-        if (func_0012A180(D_004A2C68_date->race)) {
+        if (cAI_isAILoadedAndReady(D_004A2C68_date->race)) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
             int m = r->cGameMode;
@@ -922,15 +922,15 @@ extern "C" int cAI_isReadyToPurgeComputerRiders(void* p);
 extern "C" void cAI_cleanupAfterRace(void* p);
 extern "C" void cAI_cleanupActors(void* p);
 extern "C" void cAI_initAIRiders(void* p);
-extern "C" int func_0012A180(void* p);
+extern "C" int cAI_isAILoadedAndReady(void* p);
 void func_001289F0(void* p);
 extern "C" void cAI_loadRiders(void* p);
 extern "C" sVec4_235CC8 func_00122C28(void* rider);
 extern "C" void func_003A9658(void* cache, int idx, const sVec4_236960* pos, float radius);
-extern "C" int func_003A9770(void* cache, int idx, sVec4_236960* pos, float* dist);
+extern "C" int cWorldView_getTestFocus(void* cache, int idx, sVec4_236960* pos, float* dist);
 extern "C" int cSSXScriptEngine_GetNISListState(void* p, int a);
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
-extern "C" void func_0027A9F0(void* p);
+extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 extern "C" void cGameState_gotoNextState(void* self);
 void* func_00230698(void* self, int id);
 extern char* cGameState_mpGame;
@@ -955,7 +955,7 @@ extern "C" void cGFNextHeatState_update(void* self)
         }
         break;
     case 1:
-        if (func_0012A180(*(void**)(g84 + 0xC))) {
+        if (cAI_isAILoadedAndReady(*(void**)(g84 + 0xC))) {
             func_001289F0(SSXApp->Game->AI);
             (*(sRaceMan_235CC8**)(cGameState_mpGame + 0xC))->f14 = 1;
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
@@ -971,7 +971,7 @@ extern "C" void cGFNextHeatState_update(void* self)
         if (*(int*)((char*)self + 0x18) != 0) {
             sVec4_235CC8 v;
             float dist;
-            func_003A9770(*cache + 0x10, idx, (sVec4_236960*)&v, &dist);
+            cWorldView_getTestFocus(*cache + 0x10, idx, (sVec4_236960*)&v, &dist);
             if (dist < 20000.0f)
                 break;
             if (*(int*)((char*)self + 0x14) < 120)
@@ -985,7 +985,7 @@ extern "C" void cGFNextHeatState_update(void* self)
                 break;
             if (*(int*)(o + 0x44) != 0)
                 break;
-            func_0027A9F0(ScriptEngine);
+            cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         }
         *(int*)((char*)self + 0x10) = 3;
         break;
@@ -1502,11 +1502,11 @@ struct cRiderObj_236960 {
 
 extern "C" int func_0022D278(void* self, int idx);
 extern "C" void cSectionMan_activate(void* self, int idx, int mode);
-extern "C" sVec4_236960 func_00123F38(void* rider);
+extern "C" sVec4_236960 cRider_GetNISEndPosition(void* rider);
 extern "C" void func_003A9658(void* cache, int idx, const sVec4_236960* pos, float radius);
-extern "C" int func_003A9770(void* cache, int idx, sVec4_236960* pos, float* dist);
+extern "C" int cWorldView_getTestFocus(void* cache, int idx, sVec4_236960* pos, float* dist);
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
-extern "C" void func_0027A9F0(void* p);
+extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 
 extern "C" void func_00236960(void* self)
 {
@@ -1522,7 +1522,7 @@ extern "C" void func_00236960(void* self)
     case 0:
         if (func_0022D278(game, *(int*)(game + 0x1BC)) != 0) {
             char* r = *(char**)((char*)SSXApp->Game->AI + 0x40);
-            sVec4_236960 pos = func_00123F38(*(void**)(r + 0x18));
+            sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(r + 0x18));
             char* e = *cache + idx * 0x50;
             *(int*)(e + 0x250) = 1;
             func_003A9658(*cache + 0x10, idx, &pos, 45000.0f);
@@ -1532,7 +1532,7 @@ extern "C" void func_00236960(void* self)
     case 1: {
         sVec4_236960 v;
         float dist;
-        func_003A9770(*cache + 0x10, idx, &v, &dist);
+        cWorldView_getTestFocus(*cache + 0x10, idx, &v, &dist);
         if (dist < 20000.0f) {
             break;
         }
@@ -1546,7 +1546,7 @@ extern "C" void func_00236960(void* self)
         if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0) {
             break;
         }
-        func_0027A9F0(ScriptEngine);
+        cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         *(int*)(game + 0x1C8) = 0;
         cSectionMan_activate(game, *(int*)(game + 0x1BC), 7);
         *(int*)((char*)self + 0x10) = 2;
@@ -2131,7 +2131,7 @@ struct sPackSrc_7B28;
 extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
 extern "C" void func_00237A98(void* self, sPackSrc_7B28* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern "C" int func_00257BD8(void* self, int ch, void* dst, int size);
+extern "C" int cGameComm_readPacket(void* self, int ch, void* dst, int size);
 extern "C" float func_00258360(void* self);
 
 // cInputSync::preupdate (On Tour name and member names; the SSX 3 version differs in structure).
@@ -2198,7 +2198,7 @@ extern "C" void func_002373B8(cInputSync_2373B8* self)
             int net = *(int*)(gc + 0x40) != 0 && *(int*)(gc + 4) == 0 && *(int*)(gc + 0) != 0;
             if (net) {
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1) &&
-                       func_00257BD8(GameComm(), 0, &compsample, sizeof(compsample))) {
+                       cGameComm_readPacket(GameComm(), 0, &compsample, sizeof(compsample))) {
                     func_00237BE8(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                     for (int j = 0; j < self->numsamples; j++) {
                         sp.samples[sp.writepos % self->latency] = sample;

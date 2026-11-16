@@ -158,11 +158,11 @@ extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int u
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7010);
+INCLUDE_ASM("world/streamman", cStreamMan_cancelStreamRequest);
 #ifdef SKIP_ASM
 extern "C" void func_003E0E90(int, int);
 
-extern "C" void func_003A7010(cStreamMan* self)
+extern "C" void cStreamMan_cancelStreamRequest(cStreamMan* self)
 {
     if (self->m_bActive != 0) {
         func_003E0E90(self->m_streamHandle, self->m_streamRequest);
@@ -216,7 +216,7 @@ struct sStreamMan7098 {
 extern char* D_004A5B64;
 void* func_003A7218(void* self, int a1, int a2, int a3);
 extern "C" int func_003A7238(void* self, void* a, void* b);
-extern "C" void func_003A8650(void* self, int a1);
+extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
 extern "C" unsigned char* func_003E12E0(void* cache);
 extern "C" void func_003E13E8(void* cache, void* p);
 extern "C" int func_003E1530(void* cache);
@@ -263,7 +263,7 @@ extern "C" void func_003A7098(sStreamMan7098* self)
     if (func_003E1530(self->cache) == 0) {
         return;
     }
-    func_003A8650(self->f0, self->f94);
+    cWorldCache_signalPageLoadComplete(self->f0, self->f94);
     self->active = 0;
     self->f94 = -1;
 }

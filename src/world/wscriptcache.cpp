@@ -451,7 +451,7 @@ extern "C" void* func_003AD198(void)
 INCLUDE_ASM("world/wscriptcache", func_003AD1A8);
 #ifdef SKIP_ASM
 extern "C" void func_002F5998(void* lights);
-extern "C" void func_00122658(void* self);
+extern "C" void cRider_flushActiveLights(void* self);
 
 extern "C" void func_003AD1A8(void)
 {
@@ -459,7 +459,7 @@ extern "C" void func_003AD1A8(void)
     char* riders = (char*)SSXApp->Game->AI;
     if (riders != 0) {
         for (int i = 0; i < *(int*)(riders + 0x78); i++) {
-            func_00122658(*(void**)(riders + 0x28 + i * 4));
+            cRider_flushActiveLights(*(void**)(riders + 0x28 + i * 4));
         }
     }
 }

@@ -2955,7 +2955,7 @@ extern char *D_004A28A8_FF00 __asm__("SSXApp");
 static inline char *refToPtr_FF00(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FF00(unsigned i) { if (i == 0) return 0; return refToPtr_FF00(i); }
 extern "C" void *func_0028B180_FF00(void) __asm__("func_0028B180");
-extern "C" void func_002974A0_FF00(void*, void*, int) __asm__("func_002974A0");
+extern "C" void cSSXAudio_WorldSound_FF00(void*, void*, int) __asm__("cSSXAudio_WorldSound");
 struct V3_FF00 { float x, y, z; };
 extern V3_FF00 D_004C9098_FF00 __asm__("D_004C9098");
 struct Tag_FF00 { char c; Tag_FF00() {} Tag_FF00(const Tag_FF00 &o) : c(o.c) {} };
@@ -3004,7 +3004,7 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     }
     if (obj) {
         int b1 = buf[1];
-        func_002974A0_FF00(func_0028B180_FF00(), obj, b1);
+        cSSXAudio_WorldSound_FF00(func_0028B180_FF00(), obj, b1);
     }
     return D_004C9098_FF00;
 }
@@ -3019,7 +3019,7 @@ extern char *D_004A28A8_00A8 __asm__("SSXApp");
 static inline char *refToPtr_00A8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_00A8(unsigned i) { if (i == 0) return 0; return refToPtr_00A8(i); }
 extern "C" void *func_0028B180_00A8(void) __asm__("func_0028B180");
-extern "C" void func_00297950_00A8(void*, void*, int, int) __asm__("func_00297950");
+extern "C" void cSSXAudio_AttachSound_00A8(void*, void*, int, int) __asm__("cSSXAudio_AttachSound");
 struct V3_00A8 { float x, y, z; };
 extern V3_00A8 D_004C9098_00A8 __asm__("D_004C9098");
 struct Tag_00A8 { char c; Tag_00A8() {} Tag_00A8(const Tag_00A8 &o) : c(o.c) {} };
@@ -3070,7 +3070,7 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     if (obj) {
         int b1 = buf[1];
         int b2 = buf[2];
-        func_00297950_00A8(func_0028B180_00A8(), obj, b1, b2);
+        cSSXAudio_AttachSound_00A8(func_0028B180_00A8(), obj, b1, b2);
     }
     return D_004C9098_00A8;
 }
@@ -3085,7 +3085,7 @@ extern char *D_004A28A8_0260 __asm__("SSXApp");
 static inline char *refToPtr_0260(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0260(unsigned i) { if (i == 0) return 0; return refToPtr_0260(i); }
 extern "C" void *func_0028B180_0260(void) __asm__("func_0028B180");
-extern "C" void func_00297EB8_0260(void*, void*, int, int) __asm__("func_00297EB8");
+extern "C" void cSSXAudio_DetachSound_0260(void*, void*, int, int) __asm__("cSSXAudio_DetachSound");
 struct V3_0260 { float x, y, z; };
 extern V3_0260 D_004C9098_0260 __asm__("D_004C9098");
 struct Tag_0260 { char c; Tag_0260() {} Tag_0260(const Tag_0260 &o) : c(o.c) {} };
@@ -3136,7 +3136,7 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     if (obj) {
         int b1 = buf[1];
         int b2 = buf[2];
-        func_00297EB8_0260(func_0028B180_0260(), obj, b1, b2);
+        cSSXAudio_DetachSound_0260(func_0028B180_0260(), obj, b1, b2);
     }
     return D_004C9098_0260;
 }
@@ -3452,7 +3452,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00300C78);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory_0C78(int, int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptCategory");
-extern "C" void func_00278ED0_0C78(int, int, int, int, int, int, int) __asm__("func_00278ED0");
+extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID_0C78(int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptHashID");
 extern "C" void cSSXScriptEngine_ReadyNISList_0C78(int, int) __asm__("cSSXScriptEngine_ReadyNISList");
 extern "C" void cSSXScriptEngine_PlayNISList_0C78(int, int, int, int) __asm__("cSSXScriptEngine_PlayNISList");
 struct V3_0C78 { float x, y, z; };
@@ -3486,7 +3486,7 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     unsigned id = buf[0];
     switch ((int)buf[1]) {
     case 0:
-        func_00278ED0_0C78((int)ScriptEngine, 0, id, 3, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptHashID_0C78((int)ScriptEngine, 0, id, 3, -1, -1, -1);
         cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
         break;
     case 1:
@@ -5830,7 +5830,7 @@ struct R12_44A8 { int a; int b; int c; };
 extern R12_44A8 D_004C9098_44A8 __asm__("D_004C9098");
 
 extern int D_004A3D60_44A8[2] __asm__("D_004A3D60");
-extern "C" void func_00238550(int, int, int);
+extern "C" void cGameModeMan_riderGateHit(int, int, int);
 extern int* D_004A3DD8_44A8 __asm__("D_004A3DD8");
 extern char* D_004A28A8_44A8 __asm__("SSXApp");
 extern int D_004A5808_44A8 __asm__("D_004A5808");
@@ -5856,7 +5856,7 @@ extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* e) {
             *d = p->val;
     }
     int b = *D_004A3DD8_44A8;
-    func_00238550(*(int*)(D_004A28A8_44A8 + 0xC0), b, vp[0]);
+    cGameModeMan_riderGateHit(*(int*)(D_004A28A8_44A8 + 0xC0), b, vp[0]);
     return D_004C9098_44A8;
 }
 #endif
@@ -6409,7 +6409,7 @@ extern Rec_50F0 D_004FBD40_50F0 __asm__("D_004FBD40");
 extern int D_004A583C;
 extern const int D_00446690[];
 extern int D_004A3BD8[2];  // shake type per camera-shake keyword
-extern "C" void func_0015E360(char* cam, int type, float amount, float dist);
+extern "C" void cCamera_shakeCamera(char* cam, int type, float amount, float dist);
 // Translation row of a transform (by value).
 static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
 extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
@@ -6467,7 +6467,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
                 cRider_1FBE38 *r = game->race->players[i]->rider;
                 int view = r->mViewIndex;
                 if (r->mIsLocal)
-                    func_0015E360(game->cameras->cam[view], D_004A3BD8[keyword], 1.0f, dist * scale);
+                    cCamera_shakeCamera(game->cameras->cam[view], D_004A3BD8[keyword], 1.0f, dist * scale);
             }
         } else {
             for (int i = 0; i < np; i++) {
@@ -6475,7 +6475,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
                     cRider_1FBE38 *r = game->race->players[i]->rider;
                     int view = r->mViewIndex;
                     if (r->mIsLocal)
-                        func_0015E360(game->cameras->cam[view], D_004A3BD8[keyword], 1.0f, 0.0f);
+                        cCamera_shakeCamera(game->cameras->cam[view], D_004A3BD8[keyword], 1.0f, 0.0f);
                     break;
                 }
             }
@@ -7519,7 +7519,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306E68);
 extern int D_004A3DD8_6E68 __asm__("D_004A3DD8");
 extern "C" int func_0030BFC0_6E68(int, int, int, int) __asm__("func_0030BFC0");
 extern "C" void *func_0028B180_6E68() __asm__("func_0028B180");
-extern "C" void func_002974A0_6E68(void*, void*, int) __asm__("func_002974A0");
+extern "C" void cSSXAudio_WorldSound_6E68(void*, void*, int) __asm__("cSSXAudio_WorldSound");
 int *func_00226610(void*);
 static inline char *refToPtr_6E68(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_6E68(unsigned i) { if (i == 0) return 0; return refToPtr_6E68(i); }
@@ -7569,7 +7569,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
             obj = t;
         }
         if (obj)
-            func_002974A0_6E68(func_0028B180_6E68(), obj, 0x5C);
+            cSSXAudio_WorldSound_6E68(func_0028B180_6E68(), obj, 0x5C);
     }
     ((int*)ret)[2] = 1;
     *func_00226610(ret) = r;

@@ -389,7 +389,7 @@ extern "C" void* func_00211088(void* self, void* engine, unsigned char a2, int a
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" int func_0039A738(void* obj);
-extern "C" void func_00161EF0(void* a0, int a1, void* a2);
+extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
 extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
@@ -482,11 +482,11 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
         } else if (IsId_A238(obj, D_004A24A0)) {
             int on = func_0039A738(obj);
             char* p = (char*)Sound_A238(4);
-            func_00161EF0(*(void**)(p + 0xA8), on, p);
+            cChaseCameraController_switchCamera_UserChange(*(void**)(p + 0xA8), on, p);
         } else if (IsId_A238(obj, D_004A24A8)) {
             int on = func_0039A738(obj);
             char* p = (char*)Sound_A238(8);
-            func_00161EF0(*(void**)(p + 0xA8), on, p);
+            cChaseCameraController_switchCamera_UserChange(*(void**)(p + 0xA8), on, p);
         } else if (IsId_A238(obj, D_004A24B0)) {
             SetF0_A238(*(int*)(obj + 0x74));
             func_00287410(func_0028B180(), iface->getOptions().f0);
