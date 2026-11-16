@@ -53,7 +53,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" char* func_00156A90(void* self, int a1, int a2);
+extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" int func_001CE6F0(int a, int b);
 extern "C" void func_001D47A0(void* self, int index);
 extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
@@ -141,7 +141,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             } else if (i == 0) {
-                cUIText_setAsciiString((cUIText*)w, *(char**)func_00156A90(cBE_getInterface_Fv(cBE_getBE(), 13), self->f54, self->f58));
+                cUIText_setAsciiString((cUIText*)w, *(char**)cBERewardInterface_getTrophy(cBE_getInterface_Fv(cBE_getBE(), 13), self->f54, self->f58));
             } else {
                 setChallengeName(w, self->f54, self->f58, i - 1);
             }
@@ -367,8 +367,8 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D4918);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" char* func_00156A90(void* self, int a1, int a2);
-extern "C" char* func_00156AE0(void* self, int a1, int a2);
+extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
+extern "C" char* cBERewardInterface_getMedal(void* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
 struct sTrophyRoom_4918 {
@@ -385,10 +385,10 @@ extern "C" void func_001D4918(sTrophyRoom_4918* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = (char*)SSXApp->RealFE + 0x1A70;
-    self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(func_00156A90(pi, self->f54, self->f58) + 4), 10, 1, 0);
+    self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(cBERewardInterface_getTrophy(pi, self->f54, self->f58) + 4), 10, 1, 0);
     self->count = 1;
     for (int i = 0; i < 4; i++) {
-        int id = *(int*)(func_00156AE0(pi, self->f58, i) + 4);
+        int id = *(int*)(cBERewardInterface_getMedal(pi, self->f58, i) + 4);
         if (id != 0) {
             self->ids[i + 1] = func_0019DA10(snd, self->bank, id, 10, 1, 0);
             self->count++;

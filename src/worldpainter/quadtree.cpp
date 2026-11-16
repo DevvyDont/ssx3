@@ -142,7 +142,7 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d);
+extern "C" void tQuadTreeNode_setSubNodes(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d);
 struct cQuadTree_exportNode_sOut;
 struct cQuadTree_exportNode_sNode;
 extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node);
@@ -195,7 +195,7 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
     cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map, (cQuadTree_exportNode_sNode*)((char*)self->m_nodes + self->m_root * 8));
     for (i = 0; i < cnt; i++, nodeData += 4) {
         if (nodeData[0] & 1) {
-            func_002C16B8(nodeData, map[nodeData[0] >> 1], map[nodeData[1] >> 1], map[nodeData[2] >> 1], map[nodeData[3] >> 1]);
+            tQuadTreeNode_setSubNodes(nodeData, map[nodeData[0] >> 1], map[nodeData[1] >> 1], map[nodeData[2] >> 1], map[nodeData[3] >> 1]);
             nodeData[0] = fixShort(nodeData[0], ctx);
             nodeData[1] = fixShort(nodeData[1], ctx);
             nodeData[2] = fixShort(nodeData[2], ctx);

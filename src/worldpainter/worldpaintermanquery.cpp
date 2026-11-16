@@ -843,14 +843,14 @@ void* func_002C1688(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16A8);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_setLeafNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// LANDING: later declaration (line ~656) is `extern "C" void func_002C16A8(int, int, int);` used by its caller
+// LANDING: later declaration (line ~656) is `extern "C" void tQuadTreeNode_setLeafNode(int, int, int);` used by its caller
 // with an int expression; retype it to (void*, int, int) and drop the alias if the lander prefers.
-extern "C" void func_002C16A8_impl(void* self, int a, int b) __asm__("func_002C16A8");
+extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int a, int b) __asm__("tQuadTreeNode_setLeafNode");
 
-extern "C" void func_002C16A8_impl(void* self, int key, int data)
+extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int key, int data)
 {
     *(int*)((char*)self + 0x4) = key;
     *(int*)((char*)self + 0x0) = data;
@@ -858,9 +858,9 @@ extern "C" void func_002C16A8_impl(void* self, int key, int data)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16B8);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_setSubNodes);
 #ifdef SKIP_ASM
-extern "C" void func_002C16B8(unsigned short* node, unsigned short subA, unsigned short subB, unsigned short subC, unsigned short subD)
+extern "C" void tQuadTreeNode_setSubNodes(unsigned short* node, unsigned short subA, unsigned short subB, unsigned short subC, unsigned short subD)
 {
     node[0] = (subA << 1) | 1;
     node[1] = (subB << 1) | (node[1] & 1);
@@ -870,20 +870,20 @@ extern "C" void func_002C16B8(unsigned short* node, unsigned short subA, unsigne
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1718);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_init);
 #ifdef SKIP_ASM
-extern "C" void func_002C1718(void *node) {
+extern "C" void tQuadTreeNode_init(void *node) {
     (*(int *)((char*)(node) + (0))) = 0;
     (*(int *)((char*)(node) + (4))) = 0;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1728);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_cQuadTree);
 #ifdef SKIP_ASM
 extern "C" unsigned short cQuadTree_getFreeNode();
-extern "C" void func_002C16A8(int, int, int);
+extern "C" void tQuadTreeNode_setLeafNode(int, int, int);
 
-extern "C" void *func_002C1728(void *quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
+extern "C" void *cQuadTree_cQuadTree(void *quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
     (*(int *)((char*)(quadTree) + (0x24))) = 0;
     (*(int *)((char*)(quadTree) + (0x20))) = 0;
     (*(int *)((char*)(quadTree) + (0x10))) = 0;
@@ -893,7 +893,7 @@ extern "C" void *func_002C1728(void *quadTree, int defaultKey, int defaultData, 
     (*(float *)((char*)(quadTree) + (0))) = (float) (32768.0f / fparg2);
     (*(unsigned short *)((char*)(quadTree) + (0x14))) = cQuadTree_getFreeNode();
     (*(short *)((char*)(quadTree) + (0x16))) = 0;
-    func_002C16A8((*(int *)((char*)(quadTree) + (0x20))) + ((*(unsigned short *)((char*)(quadTree) + (0x14))) * 8), defaultKey, defaultData);
+    tQuadTreeNode_setLeafNode((*(int *)((char*)(quadTree) + (0x20))) + ((*(unsigned short *)((char*)(quadTree) + (0x14))) * 8), defaultKey, defaultData);
     (*(int *)((char*)(quadTree) + (0x1C))) = defaultKey;
     (*(int *)((char*)(quadTree) + (0x18))) = defaultData;
     return quadTree;
@@ -901,9 +901,9 @@ extern "C" void *func_002C1728(void *quadTree, int defaultKey, int defaultData, 
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C17C0__FPv);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_resolve__FPv);
 #ifdef SKIP_ASM
-void func_002C17C0(void* self)
+void cQuadTree_resolve(void* self)
 {
     void* nodes = (char*)self + 0x28;
     *(void**)((char*)self + 0x20) = nodes;

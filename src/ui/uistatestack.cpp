@@ -792,32 +792,32 @@ extern "C" void cUIThing_deleteAnimation(cUIThing* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FD80);
+INCLUDE_ASM("ui/uistatestack", cUIThing_setFrameByPercent);
 #ifdef SKIP_ASM
-extern "C" int func_00397458(void* obj);
+extern "C" int cUIAnimation_getNumFrames(void* obj);
 
-extern "C" void func_0039FD80(void* self, float fraction)
+extern "C" void cUIThing_setFrameByPercent(void* self, float fraction)
 {
     void* obj = *(void**)((char*)self + 0xC);
     if (obj != 0) {
-        float frame = (float)func_00397458(obj) * fraction;
+        float frame = (float)cUIAnimation_getNumFrames(obj) * fraction;
         *(short*)((char*)*(void**)((char*)self + 0xC) + 0xA) = (short)frame;
     }
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
+INCLUDE_ASM("ui/uistatestack", cUIThing_isLastAnimFrame);
 #ifdef SKIP_ASM
-extern "C" int func_00397440(int);
+extern "C" int cUIAnimation_isLastFrame(int);
 
-extern "C" int func_0039FDD8(void *uiThing) {
+extern "C" int cUIThing_isLastAnimFrame(void *uiThing) {
     int temp_4;
     int var_2;
 
     temp_4 = (*(int *)((char*)(uiThing) + (0xC)));
     var_2 = 0;
     if (temp_4 != 0) {
-        var_2 = func_00397440(temp_4);
+        var_2 = cUIAnimation_isLastFrame(temp_4);
     }
     return var_2;
 }

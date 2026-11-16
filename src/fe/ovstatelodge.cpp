@@ -26,7 +26,7 @@ extern void* cFEStateMountainRoom_vtbl[];
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak);
 int cBELibrary_getRiderIndex(int rider) __asm__("cBELibrary_getRiderIndex__Fi");
 extern "C" int func_00148950(void* iface, int rider);
-extern "C" char* func_00156B28(void* self, int a1, int a2);
+extern "C" char* cBERewardInterface_getPeakPass(void* self, int a1, int a2);
 extern "C" void func_001D3160_Room(void* self) __asm__("func_001D3160");
 extern char str_dot_loc_arrow[];
 extern char str_dot_visit_arrow[];
@@ -110,7 +110,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     room->fB8 = func_00148950(iface3, cBELibrary_getRiderIndex(room->player));
     void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 13);
-    char* item = func_00156B28(iface13, room->fB4, room->charID);
+    char* item = cBERewardInterface_getPeakPass(iface13, room->fB4, room->charID);
     room->fBC = -1;
     room->fC4 = -1;
     room->fC0 = item;
@@ -915,7 +915,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" char* func_00156A90(void* self, int a1, int a2);
+extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern char str_screentitle[];
@@ -1006,7 +1006,7 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
         if (widgetHash == GetHashValue32(D_004415F0[i])) {
             self->slots[i] = w;
             if (cBERewardInterface_isTrophyOwned(iface, self->player, self->charID, self->mode, i)) {
-                char* info = func_00156A90(iface, self->mode, i);
+                char* info = cBERewardInterface_getTrophy(iface, self->mode, i);
                 char* eng = self->engine;
                 int hash = GetHashValue32(*(char**)(info + 8));
                 int texElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
@@ -1240,7 +1240,7 @@ void* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInterface__Fv
 extern "C" int func_001CE6F0(int mountain);
 extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
 extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
-extern "C" char* func_00156AE0(void* iface, int peak, int ch);
+extern "C" char* cBERewardInterface_getMedal(void* iface, int peak, int ch);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 
 class cWidget_3F80 {
@@ -1303,7 +1303,7 @@ extern "C" void func_001D3F80(void* vself, int peak)
         bar[i]->show(1);
         box[i]->show(1);
         if (ch != -1) {
-            char* trophyRec = func_00156AE0(iface, peak, ch);
+            char* trophyRec = cBERewardInterface_getMedal(iface, peak, ch);
             char* eng = self->engine;
             int hash = GetHashValue32(*(char**)(trophyRec + 8));
             int textureElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);

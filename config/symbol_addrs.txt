@@ -4887,6 +4887,30 @@ cFEStateNetHelpPopup_setDescription__FPvii = 0x001DA530; //type:func
 cLoadScreen_loseFocus = 0x00231C70; //type:func
 cReplayFrame__cReplayFrame = 0x00272258; //type:func
 
+// fn_leads3: names by evidence (docs/function_names.tsv)
+cBEScoreInterface_isBetterMedal = 0x001552F8; //type:func
+cBEScoreInterface_convertRankToMedal = 0x00155328; //type:func
+cBERewardInterface_getTrophy = 0x00156A90; //type:func
+cBERewardInterface_getMedal = 0x00156AE0; //type:func
+cBERewardInterface_getPeakPass = 0x00156B28; //type:func
+cBERewardInterface_getTrophies = 0x00156B70; //type:func
+cBERewardInterface_getMedals = 0x00156B90; //type:func
+cBERewardInterface_getPeakPasses = 0x00156BB0; //type:func
+cBERewardInterface_getPosters = 0x00156BD0; //type:func
+cBERewardInterface_getTradingCards = 0x00156BF0; //type:func
+cBERewardInterface_getConceptArts = 0x00156C10; //type:func
+cBERewardInterface_getToys = 0x00156C30; //type:func
+cBERewardInterface_getVideos = 0x00156C50; //type:func
+tQuadTreeNode_setLeafNode = 0x002C16A8; //type:func
+tQuadTreeNode_setSubNodes = 0x002C16B8; //type:func
+tQuadTreeNode_init = 0x002C1718; //type:func
+cQuadTree_cQuadTree = 0x002C1728; //type:func
+cQuadTree_resolve__FPv = 0x002C17C0; //type:func
+cUIAnimation_isLastFrame = 0x00397440; //type:func
+cUIAnimation_getNumFrames = 0x00397458; //type:func
+cUIThing_setFrameByPercent = 0x0039FD80; //type:func
+cUIThing_isLastAnimFrame = 0x0039FDD8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

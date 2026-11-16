@@ -136,7 +136,7 @@ INCLUDE_ASM("worldpainter/worldpainterman2", func_002C1680);
 
 INCLUDE_ASM("worldpainter/worldpainterman2", func_002C1688);
 
-INCLUDE_ASM("worldpainter/worldpainterman2", func_002C16B8);
+INCLUDE_ASM("worldpainter/worldpainterman2", tQuadTreeNode_setSubNodes);
 
-INCLUDE_ASM("worldpainter/worldpainterman2", func_002C17C0);
+INCLUDE_ASM("worldpainter/worldpainterman2", cQuadTree_resolve);
 

@@ -1371,18 +1371,18 @@ extern "C" void func_002BAEE8(void) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterLayer_resolve);
 #ifdef SKIP_ASM
-void func_002C17C0(void *);
+void cQuadTree_resolve(void *);
 struct E_AF08 { int a; int off; };
 /**
  * Relocates a loaded world-painter layer in place: turns its file offsets into pointers.
  *
- * m_iQuadTreeOffset becomes m_pQuadTree (this + offset), which func_002C17C0 then resolves; m_iRegionOffset becomes
+ * m_iQuadTreeOffset becomes m_pQuadTree (this + offset), which cQuadTree_resolve then resolves; m_iRegionOffset becomes
  * the region array pointer; each of the m_iNumRegions regions' m_iDataOffset becomes m_pData (this + offset), or 0
  * when the offset is -1.
  */
 extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
     *(char**)self = ((char*)self) + *(int*)self;
-    func_002C17C0(*(char**)self);
+    cQuadTree_resolve(*(char**)self);
     *(char**)(((char*)self) + 8) = ((char*)self) + *(int*)(((char*)self) + 8);
     E_AF08 *region = *(E_AF08**)(((char*)self) + 8);
     int i;

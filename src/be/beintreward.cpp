@@ -83,91 +83,91 @@ int cBERewardInterface_isBetterMedal(void* self, int oldMedal, int newMedal)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156A90);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophy);
 #ifdef SKIP_ASM
 extern "C" void* cBERewardInterface_getDB(void* self);
 
-extern "C" char* func_00156A90(void* self, int peakId, int trophyId)
+extern "C" char* cBERewardInterface_getTrophy(void* self, int peakId, int trophyId)
 {
     return *(char**)((char*)cBERewardInterface_getDB(self) + 0x8) + (trophyId * 3 + peakId) * 0xC;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156AE0);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBERewardInterface_getDB(void* self);
 
-extern "C" char* func_00156AE0(void* self, int trophyId, int medalId)
+extern "C" char* cBERewardInterface_getMedal(void* self, int trophyId, int medalId)
 {
     return *(char**)((char*)cBERewardInterface_getDB(self) + 0xC) + (trophyId * 4 + medalId) * 0xC;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156B28);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPass);
 #ifdef SKIP_ASM
 extern "C" void* cBERewardInterface_getDB(void* self);
 
-extern "C" char* func_00156B28(void* self, int peakId, int charId)
+extern "C" char* cBERewardInterface_getPeakPass(void* self, int peakId, int charId)
 {
     return *(char**)((char*)cBERewardInterface_getDB(self) + 0x10) + (charId * 3 + peakId) * 8;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156B70);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophies);
 #ifdef SKIP_ASM
-extern "C" int func_00156B70(void *rewardInterface) {
+extern "C" int cBERewardInterface_getTrophies(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (8)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156B90);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedals);
 #ifdef SKIP_ASM
-extern "C" int func_00156B90(void *rewardInterface) {
+extern "C" int cBERewardInterface_getMedals(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0xC)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156BB0);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPasses);
 #ifdef SKIP_ASM
-extern "C" int func_00156BB0(void *rewardInterface) {
+extern "C" int cBERewardInterface_getPeakPasses(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156BD0);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getPosters);
 #ifdef SKIP_ASM
-extern "C" int func_00156BD0(void *rewardInterface) {
+extern "C" int cBERewardInterface_getPosters(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x14)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156BF0);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getTradingCards);
 #ifdef SKIP_ASM
-extern "C" int func_00156BF0(void *rewardInterface) {
+extern "C" int cBERewardInterface_getTradingCards(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x18)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156C10);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getConceptArts);
 #ifdef SKIP_ASM
-extern "C" int func_00156C10(void *rewardInterface) {
+extern "C" int cBERewardInterface_getConceptArts(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x1C)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156C30);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getToys);
 #ifdef SKIP_ASM
-extern "C" int func_00156C30(void *rewardInterface) {
+extern "C" int cBERewardInterface_getToys(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x20)));
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintreward", func_00156C50);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getVideos);
 #ifdef SKIP_ASM
-extern "C" int func_00156C50(void *rewardInterface) {
+extern "C" int cBERewardInterface_getVideos(void *rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x24)));
 }
 #endif

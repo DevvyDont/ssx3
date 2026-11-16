@@ -200,16 +200,16 @@ extern "C" void cUIAnimation__cUIAnimation(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397440);
+INCLUDE_ASM("ui/uianimation", cUIAnimation_isLastFrame);
 #ifdef SKIP_ASM
-extern "C" int func_00397440(void *anim) {
+extern "C" int cUIAnimation_isLastFrame(void *anim) {
     return (*(short *)((char*)(anim) + (0xA))) >= (int) (*(unsigned short *)((char*)((*(void **)((char*)(anim) + (0)))) + (2)));
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397458);
+INCLUDE_ASM("ui/uianimation", cUIAnimation_getNumFrames);
 #ifdef SKIP_ASM
-extern "C" short func_00397458(void **anim) {
+extern "C" short cUIAnimation_getNumFrames(void **anim) {
     return (*(short *)((char*)(*anim) + (2)));
 }
 #endif

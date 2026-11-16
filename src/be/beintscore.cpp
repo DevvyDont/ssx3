@@ -270,7 +270,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
-extern "C" int func_00155328(void* self, int a);
+extern "C" int cBEScoreInterface_convertRankToMedal(void* self, int a);
 extern "C" void func_001E25D8(int mode, int event, int result);
 extern "C" void func_001E1EB8(void);
 extern "C" void func_001E1550(void);
@@ -306,7 +306,7 @@ extern "C" void func_00154EE8(char* self, int rider, int result, int score)
     int event = cBELibrary_locationDB[cBELibrary_raceDB.event].id;
     if (event == 22)
         event = 0;
-    int medal = func_00155328(self, result);
+    int medal = cBEScoreInterface_convertRankToMedal(self, result);
     if (mode == 4 || mode == 5)
         medal = result == 0 ? 1 : -1;
     if (cBELibrary_raceDB.b49 == 0)
@@ -471,9 +471,9 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderInde
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001552F8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_isBetterMedal);
 #ifdef SKIP_ASM
-extern "C" int func_001552F8(void* self, int currentMedal, int newMedal)
+extern "C" int cBEScoreInterface_isBetterMedal(void* self, int currentMedal, int newMedal)
 {
     if (newMedal == -1) {
         return 0;
@@ -486,9 +486,9 @@ extern "C" int func_001552F8(void* self, int currentMedal, int newMedal)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155328);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_convertRankToMedal);
 #ifdef SKIP_ASM
-extern "C" int func_00155328(void* self, int rank)
+extern "C" int cBEScoreInterface_convertRankToMedal(void* self, int rank)
 {
     switch (rank) {
     case 0:

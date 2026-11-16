@@ -693,7 +693,6 @@ func_00155190 = 0x00155190; //type:func
 func_00155208 = 0x00155208; //type:func
 func_00155270 = 0x00155270; //type:func
 func_00155288 = 0x00155288; //type:func
-func_00155328 = 0x00155328; //type:func
 func_00155390 = 0x00155390; //type:func
 func_00155420 = 0x00155420; //type:func
 lbl_00155530 = 0x00155530; //type:label
@@ -755,9 +754,6 @@ func_00156988 = 0x00156988; //type:func
 // --- src/be/beintreward.cpp ---
 func_00156A10 = 0x00156A10; //type:func
 func_00156A38 = 0x00156A38; //type:func
-func_00156A90 = 0x00156A90; //type:func
-func_00156AE0 = 0x00156AE0; //type:func
-func_00156B28 = 0x00156B28; //type:func
 func_00156C70 = 0x00156C70; //type:func
 func_00156EE0 = 0x00156EE0; //type:func
 func_00157080 = 0x00157080; //type:func
@@ -5340,8 +5336,6 @@ func_002C1670__FPv = 0x002C1670; //type:func
 func_002C1678__FPv = 0x002C1678; //type:func
 func_002C1680__FPv = 0x002C1680; //type:func
 func_002C1688__FPv = 0x002C1688; //type:func
-func_002C16B8 = 0x002C16B8; //type:func
-func_002C17C0__FPv = 0x002C17C0; //type:func
 
 // --- src/worldpainter/quadtree.cpp ---
 func_002C2210 = 0x002C2210; //type:func

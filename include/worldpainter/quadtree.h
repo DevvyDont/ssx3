@@ -20,8 +20,8 @@
 // names from On Tour's cQuadTree / tQuadTreeNode methods): see methods.txt.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's constructor func_002C1728 (cQuadTree(minx, miny, areaWidth, defaultKey, defaultData)),
-//       cQuadTree_exportTree, func_002C17C0 (resolve);
+//   [R] retail's constructor cQuadTree_cQuadTree (cQuadTree(minx, miny, areaWidth, defaultKey, defaultData)),
+//       cQuadTree_exportTree, cQuadTree_resolve (resolve);
 //   [P] the July 2003 preview's assert string (quadtree.cpp);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF (cQuadTree, tQuadTreeNode, tQuadTreeLeafNode, tQuadTreeSubNode, tQuadTreeFreeNode,
@@ -32,7 +32,7 @@
 // A leaf: the data pointer and its key (On Tour: tQuadTreeLeafNode, 8 bytes). m_data is word-aligned, so bit 0 of
 // the node's first short is 0 for a leaf.
 struct tQuadTreeLeafNode {
-    void* m_data;                   // 0x0 [O]; [R] setLeafNode (func_002C16A8) stores data here, clear (func_002C1718) 0
+    void* m_data;                   // 0x0 [O]; [R] setLeafNode (tQuadTreeNode_setLeafNode) stores data here, clear (tQuadTreeNode_init) 0
     unsigned int m_key;             // 0x4 [O]; [R] setLeafNode stores key; [U] getQuadTreeContents (func_002BAF90) returns it
 };
 
@@ -41,10 +41,10 @@ CHECK_OFFSET(tQuadTreeLeafNode, m_key, 0x4);
 CHECK_SIZE(tQuadTreeLeafNode, 0x8);
 
 // An inner node: four child indices, each stored as (index << 1) | 1 in the first one (the sub-node flag) and
-// (index << 1) | (old bit 0) in the others (setSubNodes, func_002C16B8). Child order: (ux bit, uy bit) =
+// (index << 1) | (old bit 0) in the others (setSubNodes, tQuadTreeNode_setSubNodes). Child order: (ux bit, uy bit) =
 // 00, 01, 10, 11 (getLeaf, cQuadTree_getLeaf).
 struct tQuadTreeSubNode {
-    unsigned short m_children[4];   // 0x0 [O]; [R] func_002C16B8 (setSubNodes); [U] getLeaf, exportNode, calcUsedNodes
+    unsigned short m_children[4];   // 0x0 [O]; [R] tQuadTreeNode_setSubNodes (setSubNodes); [U] getLeaf, exportNode, calcUsedNodes
 };
 
 CHECK_OFFSET(tQuadTreeSubNode, m_children, 0x0);
