@@ -300,11 +300,11 @@ extern "C" void func_002C2208(void) {
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2210);
+INCLUDE_ASM("worldpainter/quadtree", cMemCard_AsciiToShiftJIS);
 #ifdef SKIP_ASM
 extern "C" short func_002C2338(unsigned char c);
 
-extern "C" void func_002C2210(void* self, short* dst, const char* src)
+extern "C" void cMemCard_AsciiToShiftJIS(void* self, short* dst, const char* src)
 {
     while (*src != 0) {
         *dst++ = func_002C2338(*src++);
@@ -314,11 +314,11 @@ extern "C" void func_002C2210(void* self, short* dst, const char* src)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2268);
+INCLUDE_ASM("worldpainter/quadtree", cMemCard_ShiftJISToAscii);
 #ifdef SKIP_ASM
 extern "C" char func_002C2430(short c);
 
-extern "C" void func_002C2268(void* self, char* dst, const short* src)
+extern "C" void cMemCard_ShiftJISToAscii(void* self, char* dst, const short* src)
 {
     for (; *src != 0; src++, dst++) {
         *dst = func_002C2430(*src);
@@ -328,13 +328,13 @@ extern "C" void func_002C2268(void* self, char* dst, const short* src)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C22C8);
+INCLUDE_ASM("worldpainter/quadtree", cMemCard_CreateInstance);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cPS2MemCard_cPS2MemCard(cPS2MemCard*);
 extern const char str_cPS2MemCard[];
 
-extern "C" void* func_002C22C8(void)
+extern "C" void* cMemCard_CreateInstance(void)
 {
     return cPS2MemCard_cPS2MemCard((cPS2MemCard*)cMemMan_alloc(5376, str_cPS2MemCard, 0x100, 0));
 }
@@ -1716,7 +1716,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C48C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_free(void* p);
-extern "C" void func_002C2210(void* self, short* dst, const char* src);
+extern "C" void cMemCard_AsciiToShiftJIS(void* self, short* dst, const char* src);
 extern "C" int func_002C50E0(cPS2MemCard* self);
 extern "C" void func_002C5570(cPS2MemCard* self, int a1);
 extern "C" int ASYNCFILE_load(char* path, int a1);
@@ -1839,7 +1839,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         char* title = S_48C0(88);
         MEM_fill(&D_005376F8, 0, 964);
         memcpy(&D_005376F8, D_004A3960, 5);
-        func_002C2210(self, D_005376F8.title, title);
+        cMemCard_AsciiToShiftJIS(self, D_005376F8.title, title);
         if (I_48C0(0x8) > 0)
             D_005376F8.offsLF = I_48C0(0x8);
         else
@@ -2746,7 +2746,7 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
         func_002C48C0((cPS2MemCard*)self, 10);
         return;
     case 10:
-        func_002C2268(self, self->entries[self->index].x4C, D_005377B8);
+        cMemCard_ShiftJISToAscii(self, self->entries[self->index].x4C, D_005377B8);
         func_002C48C0((cPS2MemCard*)self, 9);
         return;
     case 9:

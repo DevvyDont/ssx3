@@ -170,7 +170,7 @@ struct cMCOverlayManager {
                                 //       preview 0x328
     int mCurrCheckDevice;       // 0x42C [O]; [U] checkDevice stores its arg; getDeviceState compares it with mSelectedDevice
     int mLastCheckDevice;       // 0x430 [O]; [U] ManagerLoadSaveUpdate's device poll index (MEM_fill(&mDevices[it]))
-    cMemCard* mpMemCard;        // 0x434 [P] getMemCard; [O]; [R] func_0023D5A8 stores func_002C22C8(), cMCOverlayManager_ManagerLoseState
+    cMemCard* mpMemCard;        // 0x434 [P] getMemCard; [O]; [R] func_0023D5A8 stores cMemCard_CreateInstance(), cMCOverlayManager_ManagerLoseState
                                 //       frees and zeroes it; [U] every card call goes through its vtable
     int mCurrDeleteFile;        // 0x438 [O]; [R] ctor 0; [U] UpdateInitDeleteProgress
     int mCurrDeviceStateLast;   // 0x43C [O] sDeviceState (bits: 1 / 2 / 4 full / 8 no card / 0x10 unformatted);

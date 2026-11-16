@@ -552,21 +552,21 @@ INCLUDE_ASM("dirtysock/tags2", online_AcctTooYoungEvent__AcctTooYoungEvent);
 
 INCLUDE_ASM("dirtysock/tags2", online_AcctTooYoungEvent_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_002682A8);
+INCLUDE_ASM("dirtysock/tags2", online_AcctLockedEvent__AcctLockedEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268308);
+INCLUDE_ASM("dirtysock/tags2", online_AcctLockedEvent_clone);
 
 INCLUDE_ASM("dirtysock/tags2", func_00268398);
 
 INCLUDE_ASM("dirtysock/tags2", func_002683F0);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268460);
+INCLUDE_ASM("dirtysock/tags2", online_FindPlayerEvent__FindPlayerEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_002684C0);
+INCLUDE_ASM("dirtysock/tags2", online_FindPlayerEvent_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268588);
+INCLUDE_ASM("dirtysock/tags2", online_PingEvent__PingEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_002685E0);
+INCLUDE_ASM("dirtysock/tags2", online_PingEvent_clone);
 
 INCLUDE_ASM("dirtysock/tags2", func_00268658);
 

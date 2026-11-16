@@ -9,8 +9,8 @@
 // Size 0x6D0: cFEStateOnlineMainMenu, cFEStateNetNews and cFEStateNetSSXWorld are allocated with
 // cMemMan_alloc(0x6D0, "<class name>") and their constructors (cFEStateOnlineMainMenu_cFEStateOnlineMainMenu, cFEStateNetNews_cFEStateNetNews, cFEStateNetSSXWorld_cFEStateNetSSXWorld) only
 // call this class's constructor and store mHashName and the vtable; every other subclass's own fields start at 0x6D0.
-// Constructors: cFEStateNet(cUIEngine*, cUIState*) = func_001A8500 (unit fe/feasyncfile), default copy func_001DE7B0
-// (main/all_in_one_main); destructor func_001A85D0. Retail vtable _vt$11cFEStateNet = D_0046B808 (32 slots; slots 24-31
+// Constructors: cFEStateNet(cUIEngine*, cUIState*) = cFEStateNet_cFEStateNet (unit fe/feasyncfile), default copy func_001DE7B0
+// (main/all_in_one_main); destructor cFEStateNet__cFEStateNet. Retail vtable _vt$11cFEStateNet = cFEStateNet_vtbl (32 slots; slots 24-31
 // are its own virtuals: func_001DE868, func_001A89B0, func_001AAB68, func_001AA9B0, func_001DE870, func_001DE8A8,
 // func_001A8E40, func_001A8830). Methods: fe/feasyncfile 0x1A8500-0x1ABED8, plus the out-of-line inlines
 // func_001DE860/func_001DE868/func_001DE870/func_001DE890/func_001DE8A0/func_001DE8A8 in main/all_in_one_main.
@@ -21,7 +21,7 @@
 // written out inline, as in fe/ovstate.h). Subclasses: retype a subclass method with this header only when it touches
 // nothing past 0x6D0; otherwise use the subclass's own header (e.g. fe/festatenetmessenger.h).
 // Evidence tags:
-//   [R] retail's constructors func_001A8500 / func_001DE7B0 and destructor func_001A85D0 (and the cUIState
+//   [R] retail's constructors cFEStateNet_cFEStateNet / func_001DE7B0 and destructor cFEStateNet__cFEStateNet (and the cUIState
 //       constructor func_0039E318 for the base);
 //   [P] the July 2003 preview: _vt$11cFEStateNet, its inline isProcessingEvents (lw 0x38 = preview mpScreen),
 //       getFEPath/fePathIsOnline (a global, D_004A1A70 in retail, not a member) and its default constructor
@@ -44,12 +44,12 @@ struct cKeyboardPopup;
 
 // The pending-message queue at 0x6C8: an EA STL list (8 bytes). The constructor allocates its sentinel node with
 // cMemMan_alloc(0xC, "StlBlock") and links it to itself; nodes are {next, prev, data} (func_001A8AE8 inserts one per
-// message, handleEvent func_001A8B88 walks them, the destructor deletes each message through its vtable).
+// message, handleEvent cFEStateNet_handleEvent walks them, the destructor deletes each message through its vtable).
 struct tFEStateNetMsgList {
     int unk_00;                     // 0x0 never read or written directly (list allocator / first word); the list's
                                     //     address (0x6C8) is what the list helpers take
     void* mpNode;                   // 0x4 [R] the sentinel node (cMemMan_alloc(0xC, "StlBlock")); [U] node->next == mpNode
-                                    //     means empty (func_001A8B88, the destructor)
+                                    //     means empty (cFEStateNet_handleEvent, the destructor)
 };
 
 CHECK_OFFSET(tFEStateNetMsgList, unk_00, 0x0);
@@ -60,7 +60,7 @@ struct cFEStateNet {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$11cFEStateNet D_0046B808, stored by func_001A8500/func_001DE7B0;
+    void** mVtbl;                   // 0x008 [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/func_001DE7B0;
                                     //       subclasses store theirs after calling it
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] the subclass ctors store
@@ -79,7 +79,7 @@ struct cFEStateNet {
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
                                     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
+    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
@@ -105,7 +105,7 @@ struct cFEStateNet {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       func_001A97B8 (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -113,14 +113,15 @@ struct cFEStateNet {
                                     //       keyboard edits); cUIText_setAsciiString(mpKeyboardText, mszMaskedText)
     int unk_6A8;                    // 0x6A8 [R] 1; 0 in the ctors of cFEUseExistingAccount, cFEStateNetConfig,
                                     //       cFEStateAuthDNAS, cFEStateCreateStep1/2, cFEStateCreateDuplicate, cFEStateLogin;
-                                    //       [U] while set, func_001A89B0 (slot 25) drops net messages other than kinds
-                                    //       0x31/0x33/0x4D/0x4E and opens the disconnect popup (func_001A9930)
+                                    //       [U] while set and the lobby is disconnected, func_001A89B0 (slot 25) refuses
+                                    //       to push any state but 0x31/0x33/0x4D/0x4E (net config, login, account
+                                    //       creation steps 1/2: mHashName) and opens the disconnect popup (func_001A9930)
     int unk_6AC;                    // 0x6AC [R] 0; [U] func_001A9930 sets it when it opens the "kT_POPUPCMNNetInterrupted"/
                                     //       "kT_POPUPCMNDisconnected" popup (only when clear); func_001A9668/func_001A9710
                                     //       clear it, func_001A5010 tests it
     int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
                                     //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent func_001A8B88: 1 while a net event (0xC8..0x116)
+    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
                                     //       waits for slot 30 to accept it, 0 once delivered
     void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it

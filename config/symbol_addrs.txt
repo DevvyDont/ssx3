@@ -4985,6 +4985,25 @@ online_NewsEvent_clone = 0x002681B0; //type:func
 online_AcctTooYoungEvent__AcctTooYoungEvent = 0x00268210; //type:func
 online_AcctTooYoungEvent_clone = 0x00268240; //type:func
 
+// fn_online2: names by evidence (docs/function_names.tsv)
+cFEStateNet_cFEStateNet = 0x001A8500; //type:func
+cFEStateNet__cFEStateNet = 0x001A85D0; //type:func
+cFEStateNet_onCreateScreen__FPv = 0x001A8768; //type:func
+cFEStateNet_onGainTransition__FPv = 0x001A8828; //type:func
+cFEStateNet_handleEvent = 0x001A8B88; //type:func
+cFEStateNet_onPopupEvent = 0x001A97B8; //type:func
+online_AcctLockedEvent__AcctLockedEvent = 0x002682A8; //type:func
+online_AcctLockedEvent_clone = 0x00268308; //type:func
+online_FindPlayerEvent__FindPlayerEvent = 0x00268460; //type:func
+online_FindPlayerEvent_clone = 0x002684C0; //type:func
+online_PingEvent__PingEvent = 0x00268588; //type:func
+online_PingEvent_clone = 0x002685E0; //type:func
+
+// fn_memcard1: names by evidence (docs/function_names.tsv)
+cMemCard_AsciiToShiftJIS = 0x002C2210; //type:func
+cMemCard_ShiftJISToAscii = 0x002C2268; //type:func
+cMemCard_CreateInstance = 0x002C22C8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func
@@ -10549,3 +10568,9 @@ online_NetErrorEvent_vtbl = 0x00481250;
 online_BuddyErrorEvent_vtbl = 0x00481270;
 online_ErrorEvent_vtbl = 0x00481290;
 online_Event_vtbl = 0x004812B0;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_online2_vtbls (docs/ontour_globals.tsv)
+cFEStateNet_vtbl = 0x0046B808;
+online_PingEvent_vtbl = 0x00481170;
+online_FindPlayerEvent_vtbl = 0x00481190;
+online_AcctLockedEvent_vtbl = 0x004811D0;

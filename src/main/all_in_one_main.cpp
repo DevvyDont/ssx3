@@ -3805,7 +3805,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE7B0);
 extern "C" void* func_0039E318_E7B0(void* self, int a1, int a2) __asm__("func_0039E318");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
-extern void* D_0046B808[];
+extern void* cFEStateNet_vtbl[];
 extern char D_004A1390_E7B0[] __asm__("D_004A1390");
 extern char str_StlBlock[];
 
@@ -3835,7 +3835,7 @@ extern "C" void* func_001DE7B0(cFEStateNet* self)
     self->unk_6B0 = 0;
     self->unk_6B8 = 0;
     self->unk_6BC = 2;
-    self->mVtbl = D_0046B808;
+    self->mVtbl = cFEStateNet_vtbl;
     cBXString_cBXString2(((char*)self) + 0x6C0, D_004A1390_E7B0);
     self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
     l->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
@@ -3917,11 +3917,11 @@ extern "C" int func_001DE8A8(void *netState) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE8C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_001A8500_E8C8(void *, int, int) __asm__("func_001A8500");
+extern "C" void *cFEStateNet_cFEStateNet_E8C8(void *, int, int) __asm__("cFEStateNet_cFEStateNet");
 extern int D_0046B6F8_E8C8[] __asm__("cFEBlankPopup_vtbl");
 
 extern "C" void *func_001DE8C8(void *self) {
-    func_001A8500_E8C8(self, 0, 0);
+    cFEStateNet_cFEStateNet_E8C8(self, 0, 0);
     *(int **)((char *)self + 8) = D_0046B6F8_E8C8;
     return self;
 }
@@ -3942,12 +3942,12 @@ extern "C" void func_001DE910(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEBlankPopup__cFEBlankPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_001A85D0_E918(void*) __asm__("func_001A85D0");
+extern "C" void* cFEStateNet__cFEStateNet_E918(void*) __asm__("cFEStateNet__cFEStateNet");
 extern void* cFEBlankPopup_vtbl[];
 
 extern "C" void* cFEBlankPopup__cFEBlankPopup(void *self) {
     *(void***)((char*)self + 8) = cFEBlankPopup_vtbl;
-    return func_001A85D0_E918(self);
+    return cFEStateNet__cFEStateNet_E918(self);
 }
 #endif
 

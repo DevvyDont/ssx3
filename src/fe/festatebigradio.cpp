@@ -841,7 +841,7 @@ extern "C" void func_00194080(void* self)
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_handleEvent);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
-extern "C" void* func_001A8B88(void* self, int size, int a2);
+extern "C" void* cFEStateNet_handleEvent(void* self, int size, int a2);
 
 static inline int isOn00194138()
 {
@@ -851,7 +851,7 @@ static inline int isOn00194138()
 /**
  * Passes an event on to the online states' shared handler while the game is online.
  *
- * When D_004A1A70 is 1 it returns func_001A8B88(@p self, @p msgId, @p data), the slot-24 handler that every
+ * When D_004A1A70 is 1 it returns cFEStateNet_handleEvent(@p self, @p msgId, @p data), the slot-24 handler that every
  * cFEStateNet-derived state uses; otherwise it ignores the event and returns 0.
  *
  * @param msgId  the event id (On Tour: int msg)
@@ -861,7 +861,7 @@ static inline int isOn00194138()
 extern "C" void* cFEStateBraggingRights_handleEvent(void* self, int msgId, int data)
 {
     if (isOn00194138()) {
-        return func_001A8B88(self, msgId, data);
+        return cFEStateNet_handleEvent(self, msgId, data);
     }
     return 0;
 }
@@ -872,7 +872,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onPopupEvent);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
 extern "C" void func_00194440(void* self, void* a1, int a2);
-extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 static inline int isOn00194168()
 {
@@ -880,7 +880,7 @@ static inline int isOn00194168()
 }
 
 /**
- * Handles popup events online: the cancel-challenge popup (id 0x838) separately, others with func_001A97B8.
+ * Handles popup events online: the cancel-challenge popup (id 0x838) separately, others with cFEStateNet_onPopupEvent.
  *
  * Does nothing offline.
  *
@@ -893,7 +893,7 @@ extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* pPopup, in
         if (*(int*)((char*)pPopup + 0x18) == 2104) {
             func_00194440(self, pPopup, Event);
         } else {
-            func_001A97B8(self, pPopup, Event);
+            cFEStateNet_onPopupEvent(self, pPopup, Event);
         }
     }
 }
@@ -996,7 +996,7 @@ INCLUDE_ASM("fe/festatebigradio", func_00194440);
 extern void* D_004A33CC;
 extern "C" void func_00265768(void* snd, int id);
 void func_001A94D8(void* self);
-extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 extern "C" void func_00194440(void* self, void* a1, int a2)
 {
@@ -1006,7 +1006,7 @@ extern "C" void func_00194440(void* self, void* a1, int a2)
         }
         func_001A94D8(self);
     } else {
-        func_001A97B8(self, a1, a2);
+        cFEStateNet_onPopupEvent(self, a1, a2);
     }
 }
 #endif

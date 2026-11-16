@@ -500,7 +500,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF470);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 inline void* operator new[](unsigned int, void* p) { return p; }
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern "C" void func_001926F0(void* self);
 extern void* cFEStateBraggingRights_vtbl[];
 
@@ -512,7 +512,7 @@ struct sElem_F470 {
 
 extern "C" void* func_001DF470(void* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
     new ((char*)self + 0x6D0) sElem_F470[2];
     return self;
@@ -523,8 +523,8 @@ extern "C" void* func_001DF470(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights__cFEStateBraggingRights);
 #ifdef SKIP_ASM
 extern void* cFEStateBraggingRights_vtbl[];
-// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
-extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 struct sVEntry001DF4E8 {
     short delta;
@@ -536,7 +536,7 @@ struct sVEntry001DF4E8 {
  * Destroys the bragging-rights front-end state: its two embedded 0x34-byte members (+0x6D0), then the base
  * state.
  *
- * The base destructor func_001A85D0 frees the object when asked to.
+ * The base destructor cFEStateNet__cFEStateNet frees the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -551,7 +551,7 @@ extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(void* self, int f
             vt[1].fn(panel + vt[1].delta, 0);
         }
     }
-    func_001A85D0_dtor(self, flags);
+    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -571,12 +571,12 @@ void cFEStateBraggingRights_onMenuGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF580);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChatRoom_vtbl[];
 
 extern "C" void* func_001DF580(void* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     *(int*)((char*)self + 0x6F8) = 0;
     *(void***)((char*)self + 0x8) = cFEStateChatRoom_vtbl;
     return self;
@@ -597,15 +597,15 @@ void cFEStateChatRoom_onMenuGainFocus(void* self)
 #endif
 
 extern void* cFEStateOnlineMainMenu_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1(cFEStateNet* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateOnlineMainMenu_vtbl;
     return ((void*)self);
 }
@@ -615,17 +615,17 @@ extern "C" void *cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1(cFEStateNet* sel
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the online main-menu state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the online main-menu state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateOnlineMainMenu_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -644,15 +644,15 @@ int cFEStateOnlineAgreement_onLoseTransition(void* self)
 #endif
 
 extern void* cFEStateNetQuickPlayPopup_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNetQuickPlayPopup* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mbSearching) = 0;
     (self->mVtbl) = cFEStateNetQuickPlayPopup_vtbl;
     return ((void*)self);
@@ -663,17 +663,17 @@ extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNe
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the quick-match popup state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the quick-match popup state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetQuickPlayPopup_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -692,15 +692,15 @@ int cFEStateNetQuickPlayPopup_onLoseTransition(void* self)
 #endif
 
 extern void* cFEStateNetSSXWorld_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld_cFEStateNetSSXWorld1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateNetSSXWorld_cFEStateNetSSXWorld1(cFEStateNet* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateNetSSXWorld_vtbl;
     return ((void*)self);
 }
@@ -710,30 +710,30 @@ extern "C" void *cFEStateNetSSXWorld_cFEStateNetSSXWorld1(cFEStateNet* self) {
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the SSX World hub state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the SSX World hub state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetSSXWorld_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
 extern void* cFEStateNetQuickMessages_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages_cFEStateNetQuickMessages1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQuickMessages* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateNetQuickMessages_vtbl;
     return ((void*)self);
 }
@@ -743,17 +743,17 @@ extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQ
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages__cFEStateNetQuickMessages__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the quick-messages editor state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the quick-messages editor state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetQuickMessages_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -767,13 +767,13 @@ extern "C" int func_001DF778(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateLobbyMenu_cFEStateLobbyMenu1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateLobbyMenu_vtbl[];
 extern int cBXString_EmptyString;
 
 extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu1(cFEStateLobbyMenu* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
     self->mVtbl = cFEStateLobbyMenu_vtbl;
     self->mszChannelName = (char*)emptyStr;
@@ -787,14 +787,14 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateLobbyMenu__cFEStateLobbyMenu);
 #ifdef SKIP_ASM
 extern void* cFEStateLobbyMenu_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
-extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
  * Destroys the lobby screen state: frees its room and channel name strings, then runs the cFEStateNet destructor.
  *
  * Restores cFEStateLobbyMenu_vtbl, destroys the cBXStrings mszRoomName (+0xB80) and mszChannelName (+0x76C) and
- * calls func_001A85D0 with @p flags.
+ * calls cFEStateNet__cFEStateNet with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
  */
@@ -803,20 +803,20 @@ extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, in
     self->mVtbl = cFEStateLobbyMenu_vtbl;
     cBXString__cBXString((char*)self + 0xB80, 2);
     cBXString__cBXString((char*)self + 0x76C, 2);
-    func_001A85D0_dtor(self, flags);
+    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern int cBXString_EmptyString;
 
 extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1(cFEStateNetCreateRoomPopup* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
     self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
     self->mszRoomName = (char*)emptyStr;
@@ -831,12 +831,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomP
 #ifdef SKIP_ASM
 extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
-extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
  * Destroys the create-room popup: frees its three strings (mszPassword, mszChannelName, mszRoomName), then runs the
- * cFEStateNet destructor (func_001A85D0).
+ * cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
  */
@@ -846,7 +846,7 @@ extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateN
     cBXString__cBXString((char*)self + 0x6E4, 2);
     cBXString__cBXString((char*)self + 0x6E0, 2);
     cBXString__cBXString((char*)self + 0x6DC, 2);
-    func_001A85D0_dtor(self, flags);
+    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -2409,13 +2409,13 @@ void* cFEStateMPCircuit__cFEStateMPCircuit(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEUseExistingAccount_cFEUseExistingAccount1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEUseExistingAccount_vtbl[];
 extern int cBXString_EmptyString;
 
 extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAccount* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int g = cBXString_EmptyString;
     self->mVtbl = cFEUseExistingAccount_vtbl;
     self->mszEmail = (char*)g;
@@ -2435,15 +2435,15 @@ int func_001E08D0(void* self)
 #endif
 
 extern void* cFEStateSelectPersona_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_cFEStateSelectPersona1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPersona* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateSelectPersona_vtbl;
     return ((void*)self);
 }
@@ -2453,17 +2453,17 @@ extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPers
 INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona__cFEStateSelectPersona__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the persona-selection state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the persona-selection state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateSelectPersona__cFEStateSelectPersona(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateSelectPersona_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -2487,13 +2487,13 @@ void func_001E0948(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_cFEStateChallengePopup1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChallengePopup_vtbl[];
 extern int D_00441268[];
 
 extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup1(cFEStateChallengePopup* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     self->mVtbl = cFEStateChallengePopup_vtbl;
     self->mpEventOptions = D_00441268;
     self->mbChallengeSent = 0;
@@ -2511,8 +2511,8 @@ struct sVEntry001E09A0 {
 };
 
 extern void* cFEStateChallengePopup_vtbl[];
-// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
-extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
  * Destroys the challenge popup: calls its parent state's slot 32, then runs the cFEStateNet destructor.
@@ -2528,7 +2528,7 @@ extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallenge
     void* obj = self->mpParentState;
     sVEntry001E09A0* vt = *(sVEntry001E09A0**)((char*)obj + 8);
     vt[32].fn((char*)obj + vt[32].delta);
-    func_001A85D0_dtor(self, flags);
+    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -2549,13 +2549,13 @@ int cFEStateChallengePopup_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern int cBXString_EmptyString;
 
 extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1(cFEStateChallengeReceivedPopup* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
     self->mszChallenger = (char*)emptyStr;
@@ -2568,8 +2568,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup__cFEStateChallengeR
 #ifdef SKIP_ASM
 extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
-extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 struct sVEntry001E0A50 {
     short delta;
     short index;
@@ -2589,7 +2589,7 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
     sVEntry001E0A50* vt = *(sVEntry001E0A50**)((char*)obj + 8);
     vt[32].fn((char*)obj + vt[32].delta);
     cBXString__cBXString((char*)self + 0x6D0, 2);
-    func_001A85D0_dtor(self, flags);
+    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -2608,15 +2608,15 @@ int cFEStateChallengeReceivedPopup_onLoseTransition(void* self)
 #endif
 
 extern void* cFEStateOnlineCharacterSelect_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1(cFEStateOnlineCharacterSelect* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mbConfirmed) = 0;
     (self->mVtbl) = cFEStateOnlineCharacterSelect_vtbl;
     return ((void*)self);
@@ -2628,29 +2628,29 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect__cFEStateOnlineChara
 #ifdef SKIP_ASM
 /**
  * Destroys the online character-select state: restores its vtable and runs the cFEStateNet destructor
- * (func_001A85D0).
+ * (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateOnlineCharacterSelect_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetConfig_cFEStateNetConfig1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateNetConfig_vtbl[];
 
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig1(cFEStateNetConfig* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     self->miSelectedSetting = 0;
     self->mVtbl = cFEStateNetConfig_vtbl;
     self->miNumSettings = 0;
@@ -2691,12 +2691,12 @@ int func_001E0BA8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_cFEStateAuthDNAS1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateAuthDNAS_vtbl[];
 
 extern "C" void* cFEStateAuthDNAS_cFEStateAuthDNAS1(cFEStateAuthDNAS* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     self->mVtbl = cFEStateAuthDNAS_vtbl;
     self->mpAuth = 0;
     self->mpTextAuth = 0;
@@ -2756,12 +2756,12 @@ int func_001E0C28(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_cFEStateAuthDNASError1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateAuthDNASError_vtbl[];
 
 extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError1(cFEStateAuthDNASError* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     self->mpustrBody = 0;
     self->mVtbl = cFEStateAuthDNASError_vtbl;
     self->mpustrFooter = 0;
@@ -2832,13 +2832,13 @@ int cFEStateNetAccountMem_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0CA0);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateCreateStep1_vtbl[];
 extern int cBXString_EmptyString;
 
 extern "C" void* func_001E0CA0(cFEStateCreateStep1* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
     self->mVtbl = cFEStateCreateStep1_vtbl;
     self->mszSavedPassword = (char*)emptyStr;
@@ -2855,15 +2855,15 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1__cFEStateCreateStep1);
 #ifdef SKIP_ASM
 extern void* cFEStateCreateStep1_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
-extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
+// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
  * Destroys account creation step 1: frees its saved mail, confirmation and password strings, then the cFEStateNet
  * part.
  *
  * Restores cFEStateCreateStep1_vtbl, destroys the cBXStrings mszSavedMail (+0x6DC), mszSavedConfirm (+0x6D8) and
- * mszSavedPassword (+0x6D4) and calls func_001A85D0 with @p flags.
+ * mszSavedPassword (+0x6D4) and calls cFEStateNet__cFEStateNet with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
  */
@@ -2873,7 +2873,7 @@ extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* se
     cBXString__cBXString((char*)self + 0x6DC, 2);
     cBXString__cBXString((char*)self + 0x6D8, 2);
     cBXString__cBXString((char*)self + 0x6D4, 2);
-    func_001A85D0_dtor(self, flags);
+    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -2887,15 +2887,15 @@ int func_001E0D60(void* self)
 #endif
 
 extern void* cFEStateCreateStep2_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0D68);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *func_001E0D68(cFEStateCreateStep2* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateCreateStep2_vtbl;
     return ((void*)self);
 }
@@ -2907,15 +2907,15 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
 /**
  * Destroys account creation step 2: restores cFEStateCreateStep2_vtbl and runs the cFEStateNet destructor.
  *
- * The C passes only @p self to func_001A85D0; the destructor flags reach it untouched in $a1 (a port must pass
+ * The C passes only @p self to cFEStateNet__cFEStateNet; the destructor flags reach it untouched in $a1 (a port must pass
  * them).
  *
- * @return func_001A85D0()'s result (not meaningful; declared void* by the unit)
+ * @return cFEStateNet__cFEStateNet()'s result (not meaningful; declared void* by the unit)
  */
 void* cFEStateCreateStep2__cFEStateCreateStep2(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateStep2_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -2929,15 +2929,15 @@ int func_001E0DD0(void* self)
 #endif
 
 extern void* cFEStateCreateDuplicate_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate_cFEStateCreateDuplicate1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
 extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreateDuplicate* self) {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateCreateDuplicate_vtbl;
     return ((void*)self);
 }
@@ -2947,17 +2947,17 @@ extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreate
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate__cFEStateCreateDuplicate__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the duplicate-account state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the duplicate-account state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateDuplicate_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -2973,12 +2973,12 @@ int func_001E0E40(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateLogin_cFEStateLogin1);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8500(void*, int, int);
+extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateLogin_vtbl[];
 
 extern "C" void* cFEStateLogin_cFEStateLogin1(cFEStateLogin* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     self->mpustrDisconnect = 0;
     self->mVtbl = cFEStateLogin_vtbl;
     return ((void*)self);
@@ -3003,7 +3003,7 @@ int func_001E0E90(void* self)
 #endif
 
 extern void* cFEStateStats_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
@@ -3011,15 +3011,15 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
 /**
  * Destroys the stats screen state: restores cFEStateStats_vtbl and runs the cFEStateNet destructor.
  *
- * The C passes only @p self to func_001A85D0; the destructor flags reach it untouched in $a1 (a port must pass
+ * The C passes only @p self to cFEStateNet__cFEStateNet; the destructor flags reach it untouched in $a1 (a port must pass
  * them).
  *
- * @return func_001A85D0()'s result (not meaningful; declared void* by the unit)
+ * @return cFEStateNet__cFEStateNet()'s result (not meaningful; declared void* by the unit)
  */
 void* cFEStateStats__cFEStateStats(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateStats_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -3037,23 +3037,23 @@ void cFEStateStats_onMenuGainFocus(void* self)
 #endif
 
 extern void* cFEStateNetNews_vtbl[];
-extern "C" void* func_001A85D0(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews__cFEStateNetNews__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the server-news state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ * Destroys the server-news state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
  *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
  * object when bit 0 is set.
  *
- * @return func_001A85D0()'s result (declared void* here)
+ * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
 void* cFEStateNetNews__cFEStateNetNews(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetNews_vtbl;
-    return func_001A85D0(self);
+    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -3111,7 +3111,7 @@ int cFEStateRelogin_onLoseTransition(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_cFEStateNetMessenger1);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void* func_001A8500(void* self, int a1, int a2);
+extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
 extern void* D_00467F28[];
 extern int cBXString_EmptyString;
 
@@ -3131,7 +3131,7 @@ static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F6
 
 extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int d = cBXString_EmptyString;
     self->mVtbl = D_00467F28;
     self->mszFoundName = (char*)d;
@@ -3202,7 +3202,7 @@ extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E0FF0);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void* func_001A8500(void* self, int a1, int a2);
+extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
 extern void* cFEStateReadMessagePopup_vtbl[];
 extern int cBXString_EmptyString;
 
@@ -3222,7 +3222,7 @@ static inline void InitVec_E0FF0(void* self, const sAlloc_E0FF0& a = sAlloc_E0FF
 
 extern "C" void* func_001E0FF0(void* self)
 {
-    func_001A8500(self, 0, 0);
+    cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
     *(void***)((char*)self + 0x8) = cFEStateReadMessagePopup_vtbl;
     *(int*)((char*)self + 0x6D0) = emptyStr;

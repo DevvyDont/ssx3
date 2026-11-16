@@ -13,7 +13,7 @@
 // "cFEStateChallengePopup") + cFEStateChallengePopup_cFEStateChallengePopup(mem, pEngine, pParent) (func_001ABCD0, the only site). Constructors
 // cFEStateChallengePopup_cFEStateChallengePopup (cFEStateNet(pEngine, pParent), vtable cFEStateChallengePopup_vtbl, mHashName 0x3F; resets the new-race interface) and
 // the default cFEStateChallengePopup_cFEStateChallengePopup1 (fe/fepopupmisc); destructor cFEStateChallengePopup__cFEStateChallengePopup (fe/fepopupmisc; slot 1: calls mpParentState's
-// slot 32, then cFEStateNet's func_001A85D0). Retail vtable cFEStateChallengePopup_vtbl (33 slots; vtables.tsv lists 24: 4
+// slot 32, then cFEStateNet's cFEStateNet__cFEStateNet). Retail vtable cFEStateChallengePopup_vtbl (33 slots; vtables.tsv lists 24: 4
 // onCreateScreen cFEStateChallengePopup_onCreateScreen,
 // 6 onGainFocus cFEStateChallengePopup_onGainFocus, 7 cFEStateChallengePopup_onGainTransition, 10 cFEStateChallengePopup_onLoseTransition, 12 onUpdate cFEStateChallengePopup_onUpdate, 17 onPopupEvent
 // cFEStateChallengePopup_onPopupEvent, 18 onWidgetCreate cFEStateChallengePopup_onWidgetCreate, 19 onWidgetEvent cFEStateChallengePopup_onWidgetEvent, 20 cFEStateChallengePopup_onWidgetMenu, 31 func_001AF470
@@ -31,7 +31,7 @@
 // vtables.tsv lists 24: 4
 // onCreateScreen cFEStateChallengeReceivedPopup_onCreateScreen, 7 cFEStateChallengeReceivedPopup_onGainTransition, 10 cFEStateChallengeReceivedPopup_onLoseTransition, 12 onUpdate cFEStateChallengeReceivedPopup_onUpdate, 17 onPopupEvent
 // cFEStateChallengeReceivedPopup_onPopupEvent, 18 onWidgetCreate cFEStateChallengeReceivedPopup_onWidgetCreate, 19 onWidgetEvent cFEStateChallengeReceivedPopup_onWidgetEvent, 20 cFEStateChallengeReceivedPopup_onWidgetMenu, 24 handleEvent
-// func_001A8B88, 31 func_001B0708 (net events), 32 func_001B00B8, 33 func_001B0628). Methods: fe/feasyncfile
+// cFEStateNet_handleEvent, 31 func_001B0708 (net events), 32 func_001B00B8, 33 func_001B0628). Methods: fe/feasyncfile
 // 0x1AFE08-0x1B0F28.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -73,7 +73,7 @@ struct cFEStateChallengePopup {
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
                                     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
+    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
@@ -99,7 +99,7 @@ struct cFEStateChallengePopup {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       func_001A97B8 (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -114,7 +114,7 @@ struct cFEStateChallengePopup {
                                     //       clear it, func_001A5010 tests it
     int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
                                     //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent func_001A8B88: 1 while a net event (0xC8..0x116)
+    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
                                     //       waits for slot 30 to accept it, 0 once delivered
     void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it
@@ -224,7 +224,7 @@ struct cFEStateChallengeReceivedPopup {
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
                                     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
+    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
@@ -250,7 +250,7 @@ struct cFEStateChallengeReceivedPopup {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       func_001A97B8 (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -265,7 +265,7 @@ struct cFEStateChallengeReceivedPopup {
                                     //       clear it, func_001A5010 tests it
     int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
                                     //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent func_001A8B88: 1 while a net event (0xC8..0x116)
+    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
                                     //       waits for slot 30 to accept it, 0 once delivered
     void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it

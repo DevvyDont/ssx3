@@ -482,12 +482,12 @@ extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023D5A8);
 #ifdef SKIP_ASM
-extern "C" void* func_002C22C8(void);
+extern "C" void* cMemCard_CreateInstance(void);
 
 extern "C" void func_0023D5A8(void* self)
 {
     char* manager = (char*)self;
-    void* memCard = func_002C22C8();
+    void* memCard = cMemCard_CreateInstance();
 //START
     *(void**)(manager + 0x434) = memCard;
     *(int*)(manager + 0x104) = 0;

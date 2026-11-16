@@ -2646,7 +2646,7 @@ extern char str_SPAM[];
 extern char D_004A30F0[];
 extern char str_DATE[];
 extern char str_INTRO[];
-extern void* D_004811D0_C8A8[] __asm__("D_004811D0");
+extern void* D_004811D0_C8A8[] __asm__("online_AcctLockedEvent_vtbl");
 extern void* online_ErrorEvent_vtbl[];
 static inline void post_C8A8(char* self, void* msg)
 {
@@ -2666,7 +2666,7 @@ struct sBXStrC8A8 { char* p; };
  * mAccount.mSpam, copies mUserName to mAccount.mName and mPassword to mAccount.mPassword and mAccount.unk_08, decodes
  * "CPAT" into mCPAT with func_003EFD30() (setting mHaveCPAT, or clearing it when the field is missing), sets
  * mAuthenticated and pushes an Event of type 212 onto mEventList. Status 'lock' pushes a type-258 event with vtable
- * D_004811D0 holding the code and the "DATE" and "INTRO" strings; any other status pushes a type-258 error event
+ * online_AcctLockedEvent_vtbl holding the code and the "DATE" and "INTRO" strings; any other status pushes a type-258 error event
  * (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268C70.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
@@ -3739,7 +3739,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onPingReceived);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-extern void* D_00481170[];
+extern void* online_PingEvent_vtbl[];
 extern char str_NAME[];
 extern char D_004A2F40[];
 extern char str_PING[];
@@ -3775,7 +3775,7 @@ static inline sMsgListIterDDE0 sMsgListDDE0_insert(sMsgListIterDDE0 pos, void* c
  * Handles a ping reply: pushes an event with the player's name and ping time onto mEventList.
  *
  * Reads "NAME" (up to 0x1F characters) and, on success, the "PING" number (default 0); a failed ping gets 32656. The
- * event is 0x10 bytes: type 229, vtable D_00481170, the name as a cBXString at +0x8 and the ping at +0xC. mState is not
+ * event is 0x10 bytes: type 229, vtable online_PingEvent_vtbl, the name as a cBXString at +0x8 and the ping at +0xC. mState is not
  * touched. Called only from the LobbyApi callback thunk func_00268D88.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
@@ -3791,7 +3791,7 @@ extern "C" void LobbyMan_onPingReceived(LobbyMan* self, char* msg)
         v = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_PING), 0);
     int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
     m[0] = 229;
-    *(void***)((char*)m + 0x4) = D_00481170;
+    *(void***)((char*)m + 0x4) = online_PingEvent_vtbl;
     cBXString_cBXString2((char*)m + 0x8, name);
     m[3] = v;
     void* mp = m;
@@ -4291,7 +4291,7 @@ extern char str_RANK[];
 extern char str_ROOM[];
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
-extern void* D_00481190[];
+extern void* online_FindPlayerEvent_vtbl[];
 extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeE7F0 {
@@ -4347,7 +4347,7 @@ struct sMsgE7F0 {
  * Handles the lobby server's reply to the find-player ('user') request.
  *
  * Clears mFindingPlayer (mState is not touched). On success it reads "PERS", "STAT" (decoded with the "l*" template),
- * "RANK" (default -1), "ADDR" as a number and "ROOM", and pushes a 44-byte event: type 227, vtable D_00481190, the
+ * "RANK" (default -1), "ADDR" as a number and "ROOM", and pushes a 44-byte event: type 227, vtable online_FindPlayerEvent_vtbl, the
  * persona and room as cBXStrings at +0x8 and +0xC, 1 at +0x10 when ADDR is positive, ADDR at +0x14, and at +0x18 a
  * tLobbyStats-shaped block (RANK, item 2, items 2 + 3 + 4, item 6, -1) that func_001AFA60 copies into mOpponentStats.
  * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
@@ -4378,7 +4378,7 @@ extern "C" void LobbyMan_onPlayerFound(LobbyMan* self, char* msg)
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ROOM), text, 0x100, D_004A2F40);
         sMsgE7F0* m = (sMsgE7F0*)operator new(44, str_NetEvent, 0x20000000, 0);
         m->type = 227;
-        m->vt = D_00481190;
+        m->vt = online_FindPlayerEvent_vtbl;
         cBXString_cBXString2(m->name, name);
         cBXString_cBXString2(m->text, text);
         m->on = on;
@@ -10780,7 +10780,7 @@ extern char D_00442A18[];
 extern char D_00537190[];
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" void func_003F7EE0(void* p);
-extern "C" void* func_002C22C8();
+extern "C" void* cMemCard_CreateInstance();
 
 /**
  * Initializes the shared-login manager and the network-account library it serves.
@@ -10789,7 +10789,7 @@ extern "C" void* func_002C22C8();
  * operation), D_004A33DC (port), D_004A33E0 (card-checked flag) and D_004A33E4 (retry count), hands the 17-entry
  * memory-card callback table D_00442A18 (func_00265FB8 .. func_00266550) to the library through func_003F7EE0
  * (D_004A5B48 = {table, 0}), clears the 0x40-byte name buffer D_00537190 and creates the memory-card object D_004A33D8
- * with func_002C22C8 (a cPS2MemCard).
+ * with cMemCard_CreateInstance (a cPS2MemCard).
  *
  * @param vself  the shared-login manager
  */
@@ -10807,7 +10807,7 @@ extern "C" void func_00265950(void* vself)
     D_004A5B48_s.len = 0;
     func_003F7EE0(&D_004A5B48_s);
     MEM_fill(D_00537190, 0, 0x40);
-    D_004A33D8 = func_002C22C8();
+    D_004A33D8 = cMemCard_CreateInstance();
 }
 #endif
 
@@ -13815,7 +13815,7 @@ extern "C" void* online_AcctTooYoungEvent_clone(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002682A8);
+INCLUDE_ASM("dirtysock/tagsunk", online_AcctLockedEvent__AcctLockedEvent);
 #ifdef SKIP_ASM
 extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -13830,7 +13830,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_002682A8(void* self, int flags)
+extern "C" void online_AcctLockedEvent__AcctLockedEvent(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x10, 2);
     cBXString__cBXString((char*)self + 0xC, 2);
@@ -13842,13 +13842,13 @@ extern "C" void func_002682A8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00268308);
+INCLUDE_ASM("dirtysock/tagsunk", online_AcctLockedEvent_clone);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern char str_NetEvent[];
-extern char D_004811D0[];
+extern char online_AcctLockedEvent_vtbl[];
 
 struct sLockMsg268308 {
     int type;       // 0x00
@@ -13862,7 +13862,7 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
 {
     m->type = 0x102;
     m->tag = 0x6C6F636B;
-    m->name = D_004811D0;
+    m->name = online_AcctLockedEvent_vtbl;
     cBXString_cBXString2(m->a, a);
     cBXString_cBXString2(m->b, b);
 }
@@ -13871,13 +13871,13 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
  * Returns a heap copy of this account-locked error event (type 258, code 'lock').
  *
  * Allocates 20 bytes with the "NetEvent" tag, stores type 0x102 (258), code 'lock' (0x6C6F636B) at +0x8 and vtable
- * D_004811D0 at +0x4, and copies the two strings at +0xC (DATE) and +0x10 (INTRO) with cBXString_cBXString2. The
+ * online_AcctLockedEvent_vtbl at +0x4, and copies the two strings at +0xC (DATE) and +0x10 (INTRO) with cBXString_cBXString2. The
  * matched code's view struct calls the vtable word at +0x4 `name`; it is the vtable.
  *
  * @return the new event
  */
 // Builds a "lock" message carrying the two name strings of this request.
-extern "C" void* func_00268308(char* self)
+extern "C" void* online_AcctLockedEvent_clone(char* self)
 {
     sLockMsg268308* lockMsg = (sLockMsg268308*)operator new(20, str_NetEvent, 0x20000000, 0);
     Init268308(lockMsg, *(const char**)(self + 0xC), *(const char**)(self + 0x10));
@@ -13937,7 +13937,7 @@ extern "C" void* func_002683F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00268460);
+INCLUDE_ASM("dirtysock/tagsunk", online_FindPlayerEvent__FindPlayerEvent);
 #ifdef SKIP_ASM
 extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -13952,7 +13952,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00268460(void* self, int flags)
+extern "C" void online_FindPlayerEvent__FindPlayerEvent(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xC, 2);
     cBXString__cBXString((char*)self + 0x8, 2);
@@ -13964,13 +13964,13 @@ extern "C" void func_00268460(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002684C0);
+INCLUDE_ASM("dirtysock/tagsunk", online_FindPlayerEvent_clone);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern char str_NetEvent[];
-extern void* D_00481190[];
+extern void* online_FindPlayerEvent_vtbl[];
 
 struct sBlk2684C0 {
     int v[5];
@@ -13989,7 +13989,7 @@ struct sMsg2684C0 {
 static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c, int d)
 {
     m->type = 0xE3;
-    m->vt = D_00481190;
+    m->vt = online_FindPlayerEvent_vtbl;
     cBXString_cBXString2(m->a, a);
     cBXString_cBXString2(m->b, b);
     m->f10 = c;
@@ -13999,7 +13999,7 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
 /**
  * Returns a heap copy of this find-player result event (type 227).
  *
- * Allocates 44 bytes with the "NetEvent" tag and fills it like LobbyMan_onPlayerFound does: type 0xE3, vtable D_00481190, copies
+ * Allocates 44 bytes with the "NetEvent" tag and fills it like LobbyMan_onPlayerFound does: type 0xE3, vtable online_FindPlayerEvent_vtbl, copies
  * of the persona name (+0x8) and room name (+0xC) strings, the online flag (+0x10) and the ADDR number (+0x14), then
  * copies the 20-byte stats record at +0x18 (RANK and STAT fields, laid out like tLobbyStats).
  *
@@ -14007,7 +14007,7 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
  * @return the new event
  */
 // Clones a 0xE3 message (strings, ids and trailing data block).
-extern "C" void* func_002684C0(sMsg2684C0* src)
+extern "C" void* online_FindPlayerEvent_clone(sMsg2684C0* src)
 {
     sMsg2684C0* m = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
     Init2684C0(m, *(const char**)src->a, *(const char**)src->b, src->f10, src->f14);
@@ -14017,7 +14017,7 @@ extern "C" void* func_002684C0(sMsg2684C0* src)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00268588);
+INCLUDE_ASM("dirtysock/tagsunk", online_PingEvent__PingEvent);
 #ifdef SKIP_ASM
 extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -14032,7 +14032,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00268588(void* self, int flags)
+extern "C" void online_PingEvent__PingEvent(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x8, 2);
     *(void***)((char*)self + 0x4) = online_Event_vtbl;
@@ -14043,24 +14043,24 @@ extern "C" void func_00268588(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002685E0);
+INCLUDE_ASM("dirtysock/tagsunk", online_PingEvent_clone);
 #ifdef SKIP_ASM
-extern void* D_00481170[];
+extern void* online_PingEvent_vtbl[];
 
 /**
  * Returns a heap copy of this ping result event (type 229).
  *
- * Allocates 0x10 bytes with the "NetEvent" tag, stores type 229 and vtable D_00481170, copies the name string at +0x8
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 229 and vtable online_PingEvent_vtbl, copies the name string at +0x8
  * with cBXString_cBXString2 and the ping value at +0xC.
  *
  * @return the new event
  */
-extern "C" void* func_002685E0(void* self)
+extern "C" void* online_PingEvent_clone(void* self)
 {
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     int b = *(int*)((char*)self + 0xC);
     const char* s = *(const char**)((char*)self + 0x8);
-    *(void***)((char*)p + 0x4) = D_00481170;
+    *(void***)((char*)p + 0x4) = online_PingEvent_vtbl;
     p[0] = 229;
     cBXString_cBXString2((char*)p + 0x8, s);
     p[3] = b;

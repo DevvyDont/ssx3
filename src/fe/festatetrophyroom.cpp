@@ -887,7 +887,7 @@ extern "C" int cFEStateRelogin_onPopupEvent(void* self, void* popup, int event)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5280);
 #ifdef SKIP_ASM
-extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" int func_0039F698(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
 extern "C" void* func_002591B8();
@@ -900,14 +900,14 @@ extern char str_cFEStateNetConfig[];
 extern "C" void func_001D5280(void* self, void* item, int msg)
 {
     if (msg == 0xF || msg == 20) {
-        func_001A97B8(self, item, msg);
+        cFEStateNet_onPopupEvent(self, item, msg);
         func_0039F698((char*)*(void**)((char*)self + 0x10) + 0x18);
         void* state = cUIStateStack_getCurrentState((char*)*(void**)((char*)self + 0x10) + 0x18);
         *(int*)((char*)state + 0x1C) |= 0x80;
         func_002636F0(func_002591B8(), 0);
         func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), *(void**)((char*)self + 0x10)));
     } else {
-        func_001A97B8(self, item, msg);
+        cFEStateNet_onPopupEvent(self, item, msg);
     }
 }
 #endif

@@ -14,7 +14,7 @@
 // (fe/fepopupmisc); destructor cFEStateReadMessagePopup__cFEStateReadMessagePopup (slot 1: deletes every message, frees the vector, destroys mszSender).
 // Retail vtable cFEStateReadMessagePopup_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateReadMessagePopup_onCreateScreen, 7 cFEStateReadMessagePopup_onGainTransition, 10
 // cFEStateReadMessagePopup_onLoseTransition (onLoseTransition), 12 onUpdate cFEStateReadMessagePopup_onUpdate, 18 onWidgetCreate cFEStateReadMessagePopup_onWidgetCreate, 19 onWidgetEvent
-// cFEStateReadMessagePopup_onWidgetEvent, 20 cFEStateReadMessagePopup_onWidgetMenu, 24 handleEvent func_001A8B88, 31 func_001A7D40 (net events), 32 func_001A7B40).
+// cFEStateReadMessagePopup_onWidgetEvent, 20 cFEStateReadMessagePopup_onWidgetMenu, 24 handleEvent cFEStateNet_handleEvent, 31 func_001A7D40 (net events), 32 func_001A7B40).
 // Methods: fe/feasyncfile 0x1A77A0-0x1A81F0.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -77,7 +77,7 @@ struct cFEStateReadMessagePopup {
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
                                     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
+    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
@@ -103,7 +103,7 @@ struct cFEStateReadMessagePopup {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       func_001A97B8 (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -118,7 +118,7 @@ struct cFEStateReadMessagePopup {
                                     //       clear it, func_001A5010 tests it
     int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
                                     //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent func_001A8B88: 1 while a net event (0xC8..0x116)
+    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
                                     //       waits for slot 30 to accept it, 0 once delivered
     void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it

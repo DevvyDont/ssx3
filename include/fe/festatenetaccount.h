@@ -11,7 +11,7 @@
 // _vt$21cFEUseExistingAccount. Size 0x6E4: cMemMan_alloc(0x6E4, "cFEUseExistingAccount") + cFEUseExistingAccount_cFEUseExistingAccount(mem,
 // pEngine) (cFEStateLogin_onWidgetEvent, the only site). Constructors cFEUseExistingAccount_cFEUseExistingAccount (cFEStateNet(pEngine, 0), vtable cFEUseExistingAccount_vtbl,
 // mHashName 0x35) and the default cFEUseExistingAccount_cFEUseExistingAccount1 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
-// mszEmail, then cFEStateNet's func_001A85D0). Retail vtable cFEUseExistingAccount_vtbl (32 slots: 1 dtor, 4 onCreateScreen
+// mszEmail, then cFEStateNet's cFEStateNet__cFEStateNet). Retail vtable cFEUseExistingAccount_vtbl (32 slots: 1 dtor, 4 onCreateScreen
 // cFEUseExistingAccount_onCreateScreen, 12 onUpdate cFEUseExistingAccount_onUpdate, 17 onPopupEvent cFEUseExistingAccount_onPopupEvent, 18 onWidgetCreate cFEUseExistingAccount_onWidgetCreate,
 // 19 onWidgetEvent cFEUseExistingAccount_onWidgetEvent, 20 cFEUseExistingAccount_onWidgetMenu, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
 // 31 func_001ACEF8 (net events 0xC9/0xCF/0xD2/0xD4)). Methods: fe/feasyncfile 0x1AC010-0x1ACEF8.
@@ -65,7 +65,7 @@ struct cFEUseExistingAccount {
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
                                     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
+    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
@@ -91,7 +91,7 @@ struct cFEUseExistingAccount {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       func_001A97B8 (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -106,7 +106,7 @@ struct cFEUseExistingAccount {
                                     //       clear it, func_001A5010 tests it
     int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
                                     //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent func_001A8B88: 1 while a net event (0xC8..0x116)
+    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
                                     //       waits for slot 30 to accept it, 0 once delivered
     void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it
@@ -207,7 +207,7 @@ struct cFEStateSelectPersona {
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
                                     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
+    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
@@ -233,7 +233,7 @@ struct cFEStateSelectPersona {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       func_001A97B8 (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -248,7 +248,7 @@ struct cFEStateSelectPersona {
                                     //       clear it, func_001A5010 tests it
     int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
                                     //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent func_001A8B88: 1 while a net event (0xC8..0x116)
+    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
                                     //       waits for slot 30 to accept it, 0 once delivered
     void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it

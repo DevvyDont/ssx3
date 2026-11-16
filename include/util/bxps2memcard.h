@@ -2,13 +2,13 @@
 #define UTIL_BXPS2MEMCARD_H
 
 // cPS2MemCard: the PS2 memory-card driver behind the abstract cMemCard interface (util/bxmemcard.cpp:
-// cMemCard::CreateInstance func_002C22C8 = new cPS2MemCard, DeleteInstance cMemCard_DeleteInstance). It wraps libmc as an
+// cMemCard::CreateInstance cMemCard_CreateInstance = new cPS2MemCard, DeleteInstance cMemCard_DeleteInstance). It wraps libmc as an
 // asynchronous state machine: the public calls store their arguments and call SetState (func_002C48C0), which
 // issues the sceMc* request; Update (vtable slot 3, cPS2MemCard_Update) polls sceMcSync and moves to the next state.
 // Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
 // (movie/movieplayer.cpp).
 //
-// Size 0x1500 [R]: func_002C22C8 cMemMan_alloc(0x1500, str_cPS2MemCard, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
+// Size 0x1500 [R]: cMemCard_CreateInstance cMemMan_alloc(0x1500, str_cPS2MemCard, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
 // Base: cMemCard (On Tour DWARF: size 0x4, no data, so only its vptr; the dtor cPS2MemCard__cPS2MemCard stores cMemCard's
 // vtable D_004871E8 back before the base dtor runs). cPS2MemCard's vtable cPS2MemCard_vtbl (76 slots; 59 slot
 // functions in this unit, 17 inline accessors emitted in seg_1D3510 at 0x002D37B8-0x002D39B0). EA's source:
@@ -110,7 +110,7 @@ struct tPS2MemCardFile {
     char unk_0C[0x40];              // 0x0C [U] the file (directory) name: slot 67 tests strlen > 0; SetState(7/0xB/0xC)
                                     //       and func_002C42B0 build "<name>/<name>" paths from it; Update copies unk_0B9
     char unk_4C[0x22];              // 0x4C [U] the save title: Update copies unk_058 into it and converts it
-                                    //       (func_002C2268 ShiftJISToAscii); cPS2MemCard_GetTitleString reads +0x52
+                                    //       (cMemCard_ShiftJISToAscii ShiftJISToAscii); cPS2MemCard_GetTitleString reads +0x52
     tPS2MemCardTime unk_6E;         // 0x6E [U] the file's modify time (cPS2MemCard_GetLastSavedFile compares Min..Year)
     char pad_76[0x2];               // 0x76
 };
@@ -168,7 +168,7 @@ struct cPS2MemCard {
     int mNumDirTable;               // 0x0054 [P] GetNumDirTable, "(index >= 0) && (index < mNumDirTable)"; [R] Reset 0;
                                     //       [U] func_002C5278 / func_002C6810 store it; Update stores it
     char unk_058[0x21];             // 0x0058 [U] the save title ([P] kMCTitleStringSize likely 0x21): SetState(0x26)
-                                    //       converts it into the icon's title (func_002C2210 AsciiToShiftJIS); slot 45
+                                    //       converts it into the icon's title (cMemCard_AsciiToShiftJIS AsciiToShiftJIS); slot 45
                                     //       func_002C5500 fills it; Update copies it into the file slot
     char unk_079[0x40];             // 0x0079 [R] Reset clears it; [U] scratch path (sprintf target before sceMcOpen /
                                     //       sceMcDelete of the icon files)

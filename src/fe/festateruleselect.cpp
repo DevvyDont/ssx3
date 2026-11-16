@@ -985,13 +985,13 @@ extern "C" void func_00192970(sOwner_00192970* self, void* screen)
 INCLUDE_ASM("fe/festateruleselect", func_00192D00);
 #ifdef SKIP_ASM
 extern void* cFEStateBraggingRights_vtbl[];
-extern "C" void* func_001A8500(void* self, int a1, int a2);
+extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
 
 extern "C" void* func_00192D00(void* self, int engine)
 {
     char* ruleSel;
     int i;
-    func_001A8500(self, engine, 0);
+    cFEStateNet_cFEStateNet(self, engine, 0);
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
     ruleSel = (char*)self + 0x6D0;
     for (i = 1; i != -1; i--, ruleSel += 0x34) {

@@ -4759,3 +4759,7 @@ ps2_addr	name	previous	source	evidence
 00481270	online_BuddyErrorEvent_vtbl	D_00481270	preview	its events are built only from BuddyMan's miError (kind 259); slot 2 builds an ErrorEvent-vtable copy, as the preview's clone__CQ26online15BuddyErrorEvent does
 00481290	online_ErrorEvent_vtbl	D_00481290	preview	builds/x/v2 pairs it with the preview's _vt$Q26online10ErrorEvent; the type-258 error events the lobby handlers post
 004812B0	online_Event_vtbl	D_004812B0	preview	builds/x/v2 pairs it with the preview's _vt$Q26online5Event; slot 2 = the exact body match of clone__CQ26online5Event
+004811D0	online_AcctLockedEvent_vtbl	D_004811D0	preview	builds/x/v2 pairs it with the July preview's _vt$Q26online15AcctLockedEvent; LobbyMan_onauthentication posts these events for the 'lock' reply
+00481190	online_FindPlayerEvent_vtbl	D_00481190	preview	builds/x/v2 pairs it with the preview's _vt$Q26online15FindPlayerEvent; LobbyMan_onPlayerFound posts these events
+00481170	online_PingEvent_vtbl	D_00481170	preview	builds/x/v2 pairs it with the preview's _vt$Q26online9PingEvent; LobbyMan_onPingReceived posts these events
+0046B808	cFEStateNet_vtbl	D_0046B808	preview	stored by the cFEStateNet ctor (0x1A8500); slot 1 is its dtor, slot 6 cFEStateNet_onGainFocus; the online front-end states' base vtable
