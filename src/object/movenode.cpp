@@ -901,7 +901,7 @@ public:
     virtual sMnVec_6298* v45();
 };
 
-extern sMnCam_6298** D_004A47B8_6298 __asm__("D_004A47B8");
+extern sMnCam_6298** D_004A47B8_6298 __asm__("cWorld_m_pTheWorld");
 struct sMnGfxVt_6298 {
     short delta;
     short index;

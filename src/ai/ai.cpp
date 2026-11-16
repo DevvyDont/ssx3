@@ -648,8 +648,8 @@ extern "C" int func_001298C8()
 INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_00534B30[];
-extern char D_00535BC8[];
+extern int cBENetworkInterface_networkOpt[];
+extern char cBENewRaceInterface_newRace[];
 extern void* PadCache;
 extern char D_004A1108[];
 extern "C" int func_00147290(void* iface, int i);
@@ -695,7 +695,7 @@ static inline int HudTab_IP(int ch)
     return h[0xBBB];
 }
 
-static inline char* Cfg_IP() { return D_00535BC8; }
+static inline char* Cfg_IP() { return cBENewRaceInterface_newRace; }
 
 // PORT: cMemMan_alloc with unsigned size / int flags (the argument order retail sets up); bound by asm label.
 extern "C" void* cMemMan_alloc_IP(unsigned int size, const char* tag, int flags, int d) __asm__("cMemMan_alloc");
@@ -720,8 +720,8 @@ extern "C" void cAI_InitPlayers(void* p)
         self->mRiders[i]->mIndex = idx;
         self->mRiders[i]->mCtrl = idx;
         int ctrl = func_00147618(iface, idx);
-        if (D_00534B30[0] != 0) {
-            if ((D_00534B30[2] != 0 && i != 1) || (D_00534B30[2] == 0 && i != 0)) {
+        if (cBENetworkInterface_networkOpt[0] != 0) {
+            if ((cBENetworkInterface_networkOpt[2] != 0 && i != 1) || (cBENetworkInterface_networkOpt[2] == 0 && i != 0)) {
                 char* d = (char*)SSXApp;
                 char** box = (char**)(d + 0xB0);
                 box += ch;
@@ -758,8 +758,8 @@ extern "C" void cAI_InitPlayers(void* p)
         idx++;
         self->mPlayers[i] = obj;
     }
-    if (D_00534B30[0] != 0) {
-        if (D_00534B30[2] != 0) {
+    if (cBENetworkInterface_networkOpt[0] != 0) {
+        if (cBENetworkInterface_networkOpt[2] != 0) {
             (*(sRiderIP**)(self->mPlayers[0] + 0x18))->mCtrl = 0;
             (*(sRiderIP**)(self->mPlayers[1] + 0x18))->mCtrl = -2;
         } else {
@@ -1127,7 +1127,7 @@ INCLUDE_ASM("ai/ai", func_0012A340);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_0022E0E0(void* self);
 extern char D_004D33A0[];
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 extern "C" void func_0026AF00(void* self);
 extern "C" int func_0026AD70(void* self, int v);
 extern "C" void func_00112180(void* rider, int v);
@@ -1146,7 +1146,7 @@ extern "C" int func_0012A340(sAiObj12A340* self, int unused, int mode, int arg)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if ((unsigned)(lvl - 0x11) < 5)
     {
-        signed char* g = (signed char*)D_00535BC8;
+        signed char* g = (signed char*)cBENewRaceInterface_newRace;
         if (g[0x48] == 5 || g[0x4A] == 0xB)
         {
             if (mode != 1)
@@ -1910,7 +1910,7 @@ extern "C" void cAI_loadAnims(void)
 //100%
 INCLUDE_ASM("ai/ai", func_0012B340);
 #ifdef SKIP_ASM
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 extern "C" void func_00258950(void* self);
 extern "C" void func_0026FA50(void* self);
 extern "C" void func_00125108(void* self);
@@ -1924,7 +1924,7 @@ extern "C" void func_0012B340(sAiObj12A250* self)
 {
     if (*(int*)self == 5)
     {
-        func_00258950(D_004A2EEC);
+        func_00258950(cGameComm_mGameComm);
         for (int i = 0; i < self->mCount; i++)
         {
             char* rider = self->mRiders[i];
@@ -1970,7 +1970,7 @@ extern "C" void func_00120D58(void* self);
 extern "C" void func_00125958(void* self, int a1);
 extern "C" void func_00117520(void* self, int a1);
 extern "C" int func_0014F7A8(int i);
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 
 struct sRider_12B498
 {
@@ -2023,9 +2023,9 @@ extern "C" void func_0012B498(void* self, void* obj, int i)
         *(int*)(*(char**)((char*)obj + 0x18) + 0xB20) = 2;
     (*(sRider_12B498**)((char*)obj + 0x18))->fB30 = func_0014F7A8(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] != 0)
+    if (cBENetworkInterface_networkOpt[0] != 0)
     {
-        if (D_00534B30[1] != 0)
+        if (cBENetworkInterface_networkOpt[1] != 0)
             *(int*)(*(char**)((char*)obj + 0x18) + 0xB34) = 8;
     }
     else if ((D_005308B8_12B498.e[i].f0 >> 1) & 1)
@@ -2257,7 +2257,7 @@ static inline bool riderOk_12BB20(char* rider)
 extern "C" void func_0012BB20(sAi_12BB20* self)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] == 0)
+    if (cBENetworkInterface_networkOpt[0] == 0)
         return;
     int seed = 0;
     if (self->timer % 60 == 0)
@@ -2294,7 +2294,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                 int n = self->count;
                 for (int j = 0; j < n; j++) {
                     bool ok = riderOk_12BB20(self->riders[j]);
-                    if (ok && *(int*)(D_004A2EEC + 0x8C) == 0 && *(int*)(D_004A2EEC + 0x48) == 0) {
+                    if (ok && *(int*)(cGameComm_mGameComm + 0x8C) == 0 && *(int*)(cGameComm_mGameComm + 0x48) == 0) {
                         int d = 0xD3A4 - self->timer;
                         if (d > 0x1C20) d = 0x1C20;
                         self->countdown = d;
@@ -2319,7 +2319,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
     if (busy)
         return;
     if (self->timer % 60 == 0)
-        func_00258F20(D_004A2EEC, self->timer, seed);
+        func_00258F20(cGameComm_mGameComm, self->timer, seed);
 }
 #endif
 

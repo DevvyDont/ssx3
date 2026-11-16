@@ -1322,10 +1322,10 @@ extern "C" void func_002444F0(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244520);
 #ifdef SKIP_ASM
-extern int D_004A2C70;
+extern int cGameModeHandler_pManager;
 
 extern "C" void func_00244520(int arg0) {
-    D_004A2C70 = arg0;
+    cGameModeHandler_pManager = arg0;
 }
 #endif
 
@@ -2194,11 +2194,11 @@ extern "C" void func_00244E60(void* self)
 INCLUDE_ASM("main/ssxappdtor", func_00245118);
 #ifdef SKIP_ASM
 extern "C" void func_002570D8(int);
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 
 extern "C" void func_00245118(void) {
-    if (D_004A2EEC != 0) {
-        func_002570D8(D_004A2EEC);
+    if (cGameComm_mGameComm != 0) {
+        func_002570D8(cGameComm_mGameComm);
     }
 }
 #endif
@@ -2206,10 +2206,10 @@ extern "C" void func_00245118(void) {
 INCLUDE_ASM("main/ssxappdtor", func_00245140);
 #ifdef SKIP_ASM
 extern "C" void func_003F42A0();
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 
 extern "C" void func_00245140(void) {
-    if (D_004A2EB8 != 0) {
+    if (cCommSystem_mCommSystem != 0) {
         func_003F42A0();
     }
 }

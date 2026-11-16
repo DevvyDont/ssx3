@@ -1070,7 +1070,7 @@ struct sWorld_13A8 {
     sBank_13A8** banks;
 };
 
-extern sWorld_13A8** D_004A47B8_13A8 __asm__("D_004A47B8");
+extern sWorld_13A8** D_004A47B8_13A8 __asm__("cWorld_m_pTheWorld");
 
 // Entry of cRider's primary vtable (_vt$6cRider, at self->mVtbl): g++ 2.95 {delta, index, pfn}.
 struct sVEi_13A8 { short delta; short index; int (*fn)(void*, sObj_13A8*); };
@@ -1335,12 +1335,12 @@ struct sMgr_1728 {
     int count;
 };
 
-extern sWorld_1728** D_004A47B8;
+extern sWorld_1728** cWorld_m_pTheWorld;
 extern "C" void func_00101888(sMgr_1728*, unsigned int*);
 
 static inline sObj_1728* lookup_1728(unsigned int id)
 {
-    sBank_1728* b = (*D_004A47B8)->banks[id & 0xFF];
+    sBank_1728* b = (*cWorld_m_pTheWorld)->banks[id & 0xFF];
     if (b) {
         unsigned int v = b->handles[id >> 8] >> 8;
         if (v)

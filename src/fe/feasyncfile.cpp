@@ -4784,7 +4784,7 @@ extern "C" void func_00261408(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* D_004A3328;
 extern void* D_004A3028;
 extern char D_00461618[];
@@ -5235,7 +5235,7 @@ extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data)
         }
         *(int*)(sub + 0x94) = 0x83D;
     } else {
-        func_00255FA0(D_004A2EB8);
+        func_00255FA0(cCommSystem_mCommSystem);
         *(int*)(sub + 0x94) = 0x83E;
     }
     func_00261408(GetSession_1A9CC0());
@@ -7564,7 +7564,7 @@ extern "C" void func_001A87D0(void* self, int a1);
 extern "C" void func_0039A7A8(void* self, int a1);
 extern "C" void func_001AF098(void* self, int a1);
 extern "C" void func_001AEC60(void* self, int a1);
-extern int D_00534B30_1ADFE8[] __asm__("D_00534B30");
+extern int D_00534B30_1ADFE8[] __asm__("cBENetworkInterface_networkOpt");
 extern signed char D_00535C12[];
 extern char D_00441268[];
 extern char D_00441278[];
@@ -7790,7 +7790,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int func_0039A738(void* a);
-// D_00534B34 is a splat label inside D_00534B30
+// D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
 extern int D_00534B34[];
 extern char D_005308B8[];
 
@@ -9588,14 +9588,14 @@ extern "C" int func_0039A738(void* a);
 extern "C" void func_001B1B10(void* self, int sel, int flag);
 extern "C" void func_001B1760(void* self, int index);
 extern "C" void func_001B1808(void* self);
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 
 extern "C" int func_001B1068(void* self, int a1)
 {
     if (a1 != 0) {
         func_001B1B10(self, func_0039A738(*(void**)((char*)self + 0x6D0)), 0);
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        char* net = D_00534B30;
+        char* net = cBENetworkInterface_networkOpt;
         if (*(int*)(net + 0x32C) >= 0) {
             func_001B1760(self, *(int*)(net + 0x32C));
             func_001B1B10(self, *(int*)(net + 0x32C), 1);
@@ -9861,7 +9861,7 @@ extern "C" void func_001B1A08(void* self, int on, int a2);
 extern "C" void func_001AB288(void* self, int err);
 extern void* D_004A3028;
 extern int D_004A4E88;
-extern int D_00534B30_1B15D8[] __asm__("D_00534B30");
+extern int D_00534B30_1B15D8[] __asm__("cBENetworkInterface_networkOpt");
 extern const char D_0045FF10[];
 extern const char D_0045FF28[];
 extern const char D_00460CC8[];
@@ -11682,7 +11682,7 @@ extern "C" void func_001B5268(void* self, int a1);
 extern "C" void* func_0028B180();
 void func_0028FC38(void* self);
 extern char D_00463ED0[];
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 
 extern "C" void func_001B40D0(void* self)
 {
@@ -11692,7 +11692,7 @@ extern "C" void func_001B40D0(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    if (D_004A2EEC != 0) {
+    if (cGameComm_mGameComm != 0) {
         func_00256C50();
     }
     func_001B5268(self, 0);
@@ -12284,14 +12284,14 @@ extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" int func_004165A8(const char* a, const char* b);
 extern int D_004A1B80;
 extern int D_004A1B90[2];
-extern void* D_004A2EB8;
-extern int D_004A2EBC;
+extern void* cCommSystem_mCommSystem;
+extern int cCommSystem_mNumNetConn;
 extern char* D_004A1B7C;
 extern char D_00463F88[];
 extern char D_004A1B98[];
-// the 'netw'/'list' reply buffer filled by func_00255F20 (10 entries of 0x100 bytes, count in D_004A2EBC)
+// the 'netw'/'list' reply buffer filled by func_00255F20 (10 entries of 0x100 bytes, count in cCommSystem_mNumNetConn)
 struct sNetEntry_4CD8 { int f0; char name4[0x3E]; char name42[0xBE]; };
-extern sNetEntry_4CD8 D_00536790[10];
+extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
 
 struct sVec3_001B4CD8 {
     float x, y, z;
@@ -12335,8 +12335,8 @@ extern "C" void func_001B4CD8(void* self)
     sVec4_001B4CD8 size;
     sVec3_001B4CD8 scale;
     sVec4_001B4CD8 pos;
-    func_00255F20(D_004A2EB8, D_004A1B90[D_004A1B80]);
-    *(int*)(s + 0x6D4) = D_004A2EBC;
+    func_00255F20(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
+    *(int*)(s + 0x6D4) = cCommSystem_mNumNetConn;
     if (*(int*)(s + 0x6D4) > 4) {
         *(int*)(s + 0x6D4) = 4;
     }
@@ -12366,7 +12366,7 @@ extern "C" void func_001B4CD8(void* self)
             *(int*)(s + 0x6D4) = 4;
         }
         for (int i = 0; i < *(int*)(s + 0x6D4); i++) {
-            char* nm = D_00536790[i].name42;
+            char* nm = cCommSystem_mNetConns[i].name42;
             float w;
             int len;
             if (*(int*)(s + 0x6D4) >= 2) {
@@ -12377,7 +12377,7 @@ extern "C" void func_001B4CD8(void* self)
                 len = 0;
                 buf[0] = 0;
             }
-            char* rec = D_00536790[i].name4;
+            char* rec = cCommSystem_mNetConns[i].name4;
             func_003EFA48(name, 0x40, nm);
             UIAsciiToUnicode(line, buf);
             func_00392680(func_00399920(*(void**)(s + 0x6E8)), scale.x, w, name, line + len, 0x40 - len);
@@ -20304,7 +20304,7 @@ extern "C" void func_001A9930(void* self);
 extern "C" void func_00256C50();
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* p, int a1);
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 extern void* D_004A3028;
 extern char D_004653F0[];
 
@@ -20319,7 +20319,7 @@ extern "C" void func_001BFBF8(void* self)
     if (*(int*)D_004A3028 == 0) {
         func_001A9930(self);
     }
-    if (D_004A2EEC != 0) {
+    if (cGameComm_mGameComm != 0) {
         func_00256C50();
     }
     func_0028F140(func_0028B180(), 1);
@@ -21315,7 +21315,7 @@ extern "C" void func_0025EE20(void* self, void* ids, int a2);
 extern "C" void func_0025EED8(void* self);
 extern "C" int func_0039A738(void* a);
 extern void* D_004A3028;
-// D_00534B34 is a splat label inside D_00534B30
+// D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
 extern int D_00534B34[];
 extern char D_00465938[];
 extern char D_00462C88[];

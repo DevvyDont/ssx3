@@ -164,7 +164,7 @@ struct sRaceGlobal_154AB8 {
     char pad_0x38[0x12];
     signed char mode;   // 0x4A
 };
-extern sRaceGlobal_154AB8 D_00535BC8_154AB8 __asm__("D_00535BC8");
+extern sRaceGlobal_154AB8 D_00535BC8_154AB8 __asm__("cBENewRaceInterface_newRace");
 struct sEvent_154AB8 {
     int id;
     char pad_0x4[0x60];

@@ -3202,14 +3202,14 @@ struct sVEntry001CB208 {
     void (*fn)(void*);
 };
 
-extern void* D_004A2EEC;
+extern void* cGameComm_mGameComm;
 extern "C" void func_0039E510(void*);
 extern "C" void func_0039F190(void* self, int a1);
 
 extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 {
     func_0039E510(self);
-    if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x64) == 0 && (int)SSXApp->Game != 0) {
+    if (cGameComm_mGameComm != 0 && *(int*)((char*)cGameComm_mGameComm + 0x64) == 0 && (int)SSXApp->Game != 0) {
         func_0039F190((char*)self->mpEngine + 0x18, 1);
     }
     if (self->mbCallParentsUpdate != 0) {

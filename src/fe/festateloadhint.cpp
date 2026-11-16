@@ -575,7 +575,7 @@ extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
 extern "C" int func_00148950(void* iface, int id);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern signed char D_00535BC8[];
+extern signed char cBENewRaceInterface_newRace[];
 extern char D_0047BB70[];
 extern char D_0047BB80[];
 extern char D_0047BB98[];
@@ -676,7 +676,7 @@ extern "C" void func_002464E8(void* self, char* obj)
         cUIText_setUnicodeString(obj, buf);
         return;
     }
-    switch (D_00535BC8[0x48]) {
+    switch (cBENewRaceInterface_newRace[0x48]) {
     case 0:
         if (IsId_2464E8(obj, D_0047BB80)) { Activate_2464E8(obj); return; }
         break;
@@ -699,7 +699,7 @@ extern "C" void func_002464E8(void* self, char* obj)
         if (IsId_2464E8(obj, D_0047BBC8)) { Activate_2464E8(obj); return; }
         break;
     }
-    switch (D_00535BC8[0x48]) {
+    switch (cBENewRaceInterface_newRace[0x48]) {
     case 0:
         if (IsId_2464E8(obj, D_004A2BE0)) { Activate_2464E8(obj); return; }
         break;
@@ -811,7 +811,7 @@ extern "C" signed char func_00148750(void* self, int rider);
 extern "C" signed char func_00148820(void* self, int rider);
 extern "C" signed char func_001488F0(void* self, int rider);
 extern "C" void func_0039C428(void* self, int pos);
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern char D_004A2C10[];
 extern char D_004A2C18[];
 extern char D_004A2C20[];
@@ -819,14 +819,14 @@ extern char D_004A2C28_6CF8[] __asm__("D_004A2C28");
 extern char D_0047BC98[];
 extern char D_0047BCA8[];
 extern char D_0047BCB8[];
-// The network game state (dirtysock/tagsunk sNetState); the unit declares D_00534B30 as int[] below.
+// The network game state (dirtysock/tagsunk sNetState); the unit declares cBENetworkInterface_networkOpt as int[] below.
 struct sNetState_6CF8 {
     int active;                     // 0x000
     int f4;                         // 0x004
     char pad_0x008[0x4A8 - 0x8];
     unsigned char stats[7];         // 0x4A8 (D_00534FD8)
 };
-extern sNetState_6CF8 D_00534B30_6CF8 __asm__("D_00534B30");
+extern sNetState_6CF8 D_00534B30_6CF8 __asm__("cBENetworkInterface_networkOpt");
 extern unsigned char D_00534FD8[];
 // Inline copy of the BE stat-block getter (func_0015C600).
 static inline unsigned char* GetStats_6CF8() { return D_00534FD8; }
@@ -859,7 +859,7 @@ extern "C" void func_00246CF8(void* self, char player)
             rank = 1;
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (D_004A2EB8 != 0 && (player == 1 || D_00534B30_6CF8.f4 != 0)) {
+        if (cCommSystem_mCommSystem != 0 && (player == 1 || D_00534B30_6CF8.f4 != 0)) {
             if (D_00534B30_6CF8.f4 != 0) {
                 rank = 8;
                 for (int i = 0; i < 7; i++) {
@@ -1000,7 +1000,7 @@ extern char D_004A2C18[];
 extern char D_004A2C28[] __attribute__((aligned(8)));
 extern char D_004A2C58[];
 extern char D_004A2C60[];
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 extern int D_00536730[];
 extern "C" void* cGameModeMan_getGM();
 extern "C" char* func_00155270(void* iface, int a1);
@@ -1037,7 +1037,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     char fmt[0x20];
     char side = player;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[2] == 0 && D_00534B30[0] != 0) {
+    if (cBENetworkInterface_networkOpt[2] == 0 && cBENetworkInterface_networkOpt[0] != 0) {
         player = !player;
     }
     if (side == 1) {
@@ -1067,7 +1067,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     if (obj != 0) {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         int rank;
-        if (D_00534B30[0] != 0 && D_00534B30[1] != 0) {
+        if (cBENetworkInterface_networkOpt[0] != 0 && cBENetworkInterface_networkOpt[1] != 0) {
             rank = 8;
         } else {
             rank = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));

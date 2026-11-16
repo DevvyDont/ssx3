@@ -1529,7 +1529,7 @@ extern "C" void func_00210940(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
 #ifdef SKIP_ASM
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 extern char D_004A2560[];
 extern "C" int func_00258160(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
@@ -1539,7 +1539,7 @@ extern "C" int func_00210B58(void* self, int ok)
 {
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160(D_004A2EEC, name, 0x41) != 0) {
+        if (func_00258160(cGameComm_mGameComm, name, 0x41) != 0) {
             func_00210BD8(self, name, 0);
         } else {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
@@ -1606,8 +1606,8 @@ extern "C" void func_00210BD8(void* self, char* name, int a)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A2EEC;
-extern char* D_net210D20 __asm__("D_004A2EEC");
+extern int cGameComm_mGameComm;
+extern char* D_net210D20 __asm__("cGameComm_mGameComm");
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* func_0039F698(void* list);
 extern "C" int func_00258160(int a, char* name, int len);
@@ -1626,7 +1626,7 @@ extern "C" void func_00210D20(void* self)
     }
     if (*(int*)((char*)self + 0x40) != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160(D_004A2EEC, name, 0x41) != 0) {
+        if (func_00258160(cGameComm_mGameComm, name, 0x41) != 0) {
             func_00210BD8(self, name, 0);
         }
     }
@@ -1649,7 +1649,7 @@ extern "C" void func_00210DD0(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
 #ifdef SKIP_ASM
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 extern char D_004A2560[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cOVState_onWidgetEvent(void* self);
@@ -1679,12 +1679,12 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         break;
     case 0xD: {
         char* name = (char*)self + 0x9C;
-        if (func_00258160(D_004A2EEC, name, 0x41) != 0) {
+        if (func_00258160(cGameComm_mGameComm, name, 0x41) != 0) {
             func_00210BD8(self, name, 0);
         }
         char* p = *(char**)((char*)self + 0xE0) + 0x74;
         if (strlen(p) != 0) {
-            func_00258C50(D_004A2EEC, p);
+            func_00258C50(cGameComm_mGameComm, p);
             func_00210BD8(self, p, 1);
         }
         break;
@@ -1741,7 +1741,7 @@ extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4)
 INCLUDE_ASM("fe/ovstatetrophy", func_00211088);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 extern char cOVState_PROFILE_vtbl[];
 extern "C" void func_001D53B0(void* self, int a, int b);
 extern "C" int func_00147318(void* iface, int i);
@@ -1778,7 +1778,7 @@ extern "C" sOVTrophy_1088* func_00211088(sOVTrophy_1088* self, int a, unsigned c
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int lim = 1;
-    if (D_00535BC8[0x49] == 2) lim = 2;
+    if (cBENewRaceInterface_newRace[0x49] == 2) lim = 2;
     for (int n = 0; n < lim; n++) {
         if (func_00147318(iface, n) == idx) {
             self->f1CC = n;

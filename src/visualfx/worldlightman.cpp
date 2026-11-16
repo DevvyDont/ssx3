@@ -856,7 +856,7 @@ void func_002F64F0_v(void* self) __asm__("func_002F64F0__FPv");
 struct sWLCode6910;
 extern "C" void func_002F6910(sWLCode6910* self);
 extern int D_004A3BC0;
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 
 struct sVec6518 {
     float x, y, z, w;
@@ -1005,7 +1005,7 @@ extern "C" void func_002F6518(sWLCode6518* self)
     }
     func_002F6910((sWLCode6910*)self);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] != 0) {
+    if (cBENetworkInterface_networkOpt[0] != 0) {
         self->state = 0;
     }
     if (self->state == 1) {

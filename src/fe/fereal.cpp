@@ -123,7 +123,7 @@ struct sRaceGNS {
     char pad44[5];
     signed char mode;
 };
-extern sRaceGNS D_00535BC8;
+extern sRaceGNS cBENewRaceInterface_newRace;
 extern int D_00535C08[];
 extern int D_004A19D8;
 extern int D_004A19D4;
@@ -252,7 +252,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             int one = 1;
             void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
-            sRaceGNS* g = &D_00535BC8;
+            sRaceGNS* g = &cBENewRaceInterface_newRace;
             switch (g->mode) {
             case 1:
                 return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 0);
@@ -1393,8 +1393,8 @@ extern char D_00461370[];
 extern void* cFEStateBackground_vtbl[];
 extern int D_004A19C4;
 extern int D_004A19D8;
-extern void* D_004A2EB8;
-extern char* D_004A2EEC;
+extern void* cCommSystem_mCommSystem;
+extern char* cGameComm_mGameComm;
 extern void* D_004A33F4;
 extern void* D_004A3028;
 
@@ -1441,7 +1441,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         D_004A19D8 = 0;
         void* st = func_001D5038(cMemMan_alloc(0x6D4, D_00461370, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
-        func_00255CC8(D_004A2EB8, *(int*)(D_004A2EEC + 0x6C));
+        func_00255CC8(cCommSystem_mCommSystem, *(int*)(cGameComm_mGameComm + 0x6C));
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
         func_0025B6D8(D_004A3028, 1);

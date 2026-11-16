@@ -229,7 +229,7 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_cDebugMenuScreen);
 extern char cDebugMenuScreen_vtbl[];
 extern char D_004A12B0[];
 extern int D_004A29EC;
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 extern int D_004A11B8;
 extern float D_0049D5D0;
 void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -266,13 +266,13 @@ struct sNet_B1B0 {
     int fC;
     float f10;
 };
-extern sNet_B1B0 D_00534B30;
+extern sNet_B1B0 cBENetworkInterface_networkOpt;
 
 struct sG_B1B0 {
     char pad[0x40];
     int f40;
 };
-extern sG_B1B0 D_00535BC8;
+extern sG_B1B0 cBENewRaceInterface_newRace;
 
 struct sVE_B1B0 {
     short delta;
@@ -341,14 +341,14 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     cBENewRaceInterface_setGameMode(iface0, 4);
     cBENewRaceInterface_setGameEvent(iface0, 0xC);
     self->f8C20 = 0;
-    D_00534B30.f0 = 0;
+    cBENetworkInterface_networkOpt.f0 = 0;
     if (D_004A29EC != 0) {
         func_00266CD8();
         func_00261008();
         func_0025B688();
         func_00255898();
         cCommSystem_construct();
-        func_00255F20_ls(D_004A2EB8, D_004A12B0);
+        func_00255F20_ls(cCommSystem_mCommSystem, D_004A12B0);
         func_0025B650();
         func_00260F80();
         func_00266CA0();
@@ -363,7 +363,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     int idx = self->f8C20;
     int kind = self->sub.e[idx].kind;
     D_004A11B8 = 1;
-    D_00535BC8.f40 = kind;
+    cBENewRaceInterface_newRace.f40 = kind;
     if (self->sub.e[self->f8C20].f84 == 0) {
         D_004A11B8 = 0;
     }
@@ -371,9 +371,9 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
         func_00144B20(iface0, lsEntryName_B1B0(&self->sub, self->f8C20));
     }
     self->f8C1C = 4;
-    D_00534B30.f10 = 0.016666668f;
-    D_00534B30.fC = 0xE4A;
-    D_00534B30.f8 = 0;
+    cBENetworkInterface_networkOpt.f10 = 0.016666668f;
+    cBENetworkInterface_networkOpt.fC = 0xE4A;
+    cBENetworkInterface_networkOpt.f8 = 0;
     sVE_B1B0* vt7 = *(sVE_B1B0**)((char*)iface7 + 0xC);
     vt7[1].fn((char*)iface7 + vt7[1].delta);
     self->f8C44 = 0;
@@ -416,7 +416,7 @@ extern "C" void* func_0028B180();
 
 extern "C" void func_00289520(void* snd, void* entry);
 
-extern sNet_B1B0 D_00534B30;
+extern sNet_B1B0 cBENetworkInterface_networkOpt;
 
 struct cAppMan;
 int cInput_getState(void* pad, int button);
@@ -451,13 +451,13 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern char D_0045CE48[];
 extern char D_0045CE60[];
 extern signed char D_00535C11[];
-extern int D_004A2EBC;
+extern int cCommSystem_mNumNetConn;
 
 struct sComm_B4E0 {
     char pad[0x20];
     int state;                   // 0x20
 };
-extern sComm_B4E0* D_004A2EB8_b4 __asm__("D_004A2EB8");
+extern sComm_B4E0* D_004A2EB8_b4 __asm__("cCommSystem_mCommSystem");
 
 struct sTime_B4E0 {
     char pad[0x10];
@@ -486,7 +486,7 @@ struct sRace_B4E0 {
     signed char quick;           // 0x49
     signed char event;           // 0x4A
 };
-extern sRace_B4E0 D_00535BC8_b4 __asm__("D_00535BC8");
+extern sRace_B4E0 D_00535BC8_b4 __asm__("cBENewRaceInterface_newRace");
 
 struct sVE_B4E0 {
     short delta;
@@ -560,7 +560,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (self->f8C1C == 13) {
             if (D_004A2EB8_b4 == 0) {
                 self->f8C1C = (self->f8C1C + 15 - 2) % 15;
-            } else if (D_004A2EBC <= 0) {
+            } else if (cCommSystem_mNumNetConn <= 0) {
                 self->f8C1C = (self->f8C1C + 15 - 1) % 15;
             }
         }
@@ -572,7 +572,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             self->f8C1C = (self->f8C1C + 15 + 2) % 15;
         }
         if (self->f8C1C == 13) {
-            if (D_004A2EB8_b4 == 0 || D_004A2EBC <= 0) {
+            if (D_004A2EB8_b4 == 0 || cCommSystem_mNumNetConn <= 0) {
                 self->f8C1C = (self->f8C1C + 15 + 1) % 15;
             }
         }
@@ -886,12 +886,12 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         }
         if (dir == 3) {
             self->f8C44++;
-            if (D_004A2EBC <= 0 && (self->f8C44 == 1 || self->f8C44 == 2)) {
+            if (cCommSystem_mNumNetConn <= 0 && (self->f8C44 == 1 || self->f8C44 == 2)) {
                 self->f8C44 = 3;
             }
         } else if (dir == 2) {
             self->f8C44--;
-            if (D_004A2EBC <= 0 && (self->f8C44 == 1 || self->f8C44 == 2)) {
+            if (cCommSystem_mNumNetConn <= 0 && (self->f8C44 == 1 || self->f8C44 == 2)) {
                 self->f8C44 = 0;
             }
         }
@@ -902,8 +902,8 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             self->f8C44 = 4;
         }
         void* net = cBE_getInterface_B1B0(D_004A28A8_b4->be, 7);
-        D_00534B30.f0 = netOn_B4E0(self->f8C44);
-        D_00534B30.f8 = self->f8C44 == 1;
+        cBENetworkInterface_networkOpt.f0 = netOn_B4E0(self->f8C44);
+        cBENetworkInterface_networkOpt.f8 = self->f8C44 == 1;
         update_B4E0(net);
         if (self->f8C44 != 0) {
             if (self->f8C44 != 3) {
@@ -927,7 +927,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (D_004A2EB8_b4 == 0) {
             return;
         }
-        if (D_004A2EBC <= 0) {
+        if (cCommSystem_mNumNetConn <= 0) {
             return;
         }
         if (dir == 6) {

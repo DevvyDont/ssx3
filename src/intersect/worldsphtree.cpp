@@ -1535,7 +1535,7 @@ typedef int (*Tris_4888)(void*, void*, void*, sWsHit_4888*, int);
 typedef int (*Hit_4888)(void*, void*, void*);
 typedef int (*Mesh_4888)(void*, void*, sWsHit_4888*, int);
 
-extern void* D_004A47B8;
+extern void* cWorld_m_pTheWorld;
 void* func_003A6CC8_4888(void* self, void* a1) __asm__("func_003A6CC8__FPvT0");
 void* func_003A6CD8_4888(void* self, void* a1) __asm__("func_003A6CD8__FPvT0");
 extern "C" void* func_003A6CE8(void* self, int a1);
@@ -1815,10 +1815,10 @@ extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf,
         } else {
             if (((Hit_4888)q->vt[9].fn)((char*)q + q->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
-                    tri = func_003A6CE8(func_003A6CD8_4888(D_004A47B8, node), k);
+                    tri = func_003A6CE8(func_003A6CD8_4888(cWorld_m_pTheWorld, node), k);
                     inum = ((Mesh_4888)q->vt[6].fn)((char*)q + q->vt[6].delta, tri, ii, 64);
                 } else {
-                    inum = func_0032C0F8_cap(q, func_003A6D00_4888(func_003A6CC8_4888(D_004A47B8, node), k),
+                    inum = func_0032C0F8_cap(q, func_003A6D00_4888(func_003A6CC8_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
                 }
             }

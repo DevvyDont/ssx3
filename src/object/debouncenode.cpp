@@ -592,7 +592,7 @@ typedef sDfMat_343588 (*DfViewFn_343588)(void*);
 typedef int (*DfCullFn_343588)(void*, sDfVec_343588*, sDfVec_343588*, const sDfMat_343588&);
 typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
-extern sDfCam_343588** D_004A47B8_343588 __asm__("D_004A47B8");
+extern sDfCam_343588** D_004A47B8_343588 __asm__("cWorld_m_pTheWorld");
 extern cDfGfx_343588* D_004A5B80_343588 __asm__("D_004A5B80");
 extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
 
@@ -1848,7 +1848,7 @@ INCLUDE_ASM("object/debouncenode", func_00344E18);
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** func_002D1BD8();
 extern "C" void func_00344730(sDebounce4730* self, int index);
-extern char* D_004A47B8;
+extern char* cWorld_m_pTheWorld;
 extern char* D_004A5B80;
 
 struct sModel_44E18 {
@@ -1874,7 +1874,7 @@ static inline sModel_44E18* GetModel_44E18(unsigned int* ref)
 
 static inline int IsLoaded_44E18(sModel_44E18* m)
 {
-    char* wc = *(char**)D_004A47B8;
+    char* wc = *(char**)cWorld_m_pTheWorld;
     if (m->page == 0xFF)
         return 1;
     int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;

@@ -331,3 +331,13 @@ ps2_addr	name	previous	source	evidence
 00494D08	cUIAnimation_vtbl	D_00494D08	retail vtable (tools/vtables.py)	[C] stored by cUIAnimation_cUIAnimation; g++ 2.95 symbol _vt$12cUIAnimation
 00495090	cPS2ChunkResolve_vtbl	D_00495090	retail vtable (tools/vtables.py)	[D] slot 1 cPS2ChunkResolve__cPS2ChunkResolve; g++ 2.95 symbol _vt$16cPS2ChunkResolve
 00495150	cChunkResolve_vtbl	D_00495150	retail vtable (tools/vtables.py)	[D] slot 1 cChunkResolve__cChunkResolve; g++ 2.95 symbol _vt$13cChunkResolve
+004A47B8	cWorld_m_pTheWorld	D_004A47B8	On Tour cWorld::m_pTheWorld	[R] cWorld_cWorld stores this, cWorld__cWorld clears it; 128 accesses fit include/world/world.h
+004A2EEC	cGameComm_mGameComm	D_004A2EEC	On Tour cGameComm::mGameComm (maj 5/6)	[R] cGameComm_construct stores cMemMan_alloc(0x5F0, "cGameComm"); 108 accesses fit online/gamecomm.h
+004A2EB8	cCommSystem_mCommSystem	D_004A2EB8	On Tour cCommSystem::mCommSystem	[R] cCommSystem_construct stores cMemMan_alloc(0x34, "cCommSystem")
+004A2EBC	cCommSystem_mNumNetConn	D_004A2EBC	On Tour cCommSystem::mNumNetConn	[U] the netconn list count (func_00255F20 refresh)
+00536790	cCommSystem_mNetConns	D_00536790	On Tour cCommSystem::mNetConns (NetConfigRecT[10])	[U] 0x100-byte records read at +0x4/+0x42/+0x80
+004A1204	cBENetworkInterface_instance	D_004A1204	On Tour cBENetworkInterface::instance	[R] cBENetworkInterface_getThis stores cMemMan_alloc(0x10, "BENetworkInt")
+00534B30	cBENetworkInterface_networkOpt	D_00534B30	On Tour cBENetworkInterface::networkOpt (tBENetworkDB)	[U] 225 accesses fit be/beintnetwork.h's tBENetworkDB
+004A2C6C	cGameModeMan_instance	D_004A2C6C	On Tour cGameModeMan::instance	[R] getGM stores cMemMan_alloc(0xA0, "GameModeMan")
+004A2C70	cGameModeHandler_pManager	D_004A2C70	On Tour cGameModeHandler::pManager	[U] the game-mode handlers reach the manager through it (set by func_00244520)
+00535BC8	cBENewRaceInterface_newRace	D_00535BC8	On Tour cBENewRaceInterface::newRace (cBERaceDB)	[R] func_00144928/func_001449E8 save and restore it whole (0x4C); 424 accesses fit be/beintnewrace.h

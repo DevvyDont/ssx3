@@ -87,14 +87,14 @@ extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
 extern void* D_004A289C;
-extern void* D_004A2EEC;
+extern void* cGameComm_mGameComm;
 extern void* gSSXAudio;
 extern int D_004A1228;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
 extern char D_004A5988_gl __asm__("gBucketMan");
-extern int D_00534B30[];
-extern char D_00535BC8[];
+extern int cBENetworkInterface_networkOpt[];
+extern char cBENewRaceInterface_newRace[];
 extern int D_00535BFC[];
 extern char D_004C5830[];
 extern char D_005047F8[];
@@ -273,8 +273,8 @@ extern "C" void cGame_load(cGame* self)
     grid->a0 = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     self->DebugFont = (cFont*)cFont_cFont(operator new(0x84, D_0047B548, 0, 0), D_0047B558, 0);
-    if (D_004A2EEC != 0)
-        cGameComm_syncGame(D_004A2EEC);
+    if (cGameComm_mGameComm != 0)
+        cGameComm_syncGame(cGameComm_mGameComm);
     func_0014BD98(cBE_getInterface_Fv(cBE_getBE(), 9));
     cBucketMan_init(bm, 9);
     func_00355260(bm, 1);
@@ -295,10 +295,10 @@ extern "C" void cGame_load(cGame* self)
     self->Replay = (cReplay*)func_0026EFB8(operator new(0x688, D_004A2A70, 0, 0));
     self->FXLoader = (cFXLoader*)func_002DBD10(operator new(1, D_0047B5E8, 0, 0), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] != 0) {
+    if (cBENetworkInterface_networkOpt[0] != 0) {
         float dt = *(float*)((char*)SSXApp + 0x14);
-        int n = (int)((*(float*)&D_00534B30[4] + (float)*(int*)((char*)D_004A2EEC + 0x120) * dt) / dt) + 2;
-        self->InputSync = (cInputSync*)func_00237060(operator new(0x44, D_0047B5F8, 0, 0), n, *(int*)((char*)D_004A2EEC + 0x120));
+        int n = (int)((*(float*)&cBENetworkInterface_networkOpt[4] + (float)*(int*)((char*)cGameComm_mGameComm + 0x120) * dt) / dt) + 2;
+        self->InputSync = (cInputSync*)func_00237060(operator new(0x44, D_0047B5F8, 0, 0), n, *(int*)((char*)cGameComm_mGameComm + 0x120));
     } else {
         func_00237CB0(BXrand());
     }
@@ -315,7 +315,7 @@ extern "C" void cGame_load(cGame* self)
     int replay = D_004A1228;
     if (replay != 0) {
         cAI_initAIRiders((char*)self->AI);
-        signed char* gs = (signed char*)D_00535BC8;
+        signed char* gs = (signed char*)cBENewRaceInterface_newRace;
         cGameModeMan_initGameMode(SSXApp->GameModeMan, gs[0x4A]);
         func_0012BAC0((char*)self->AI, func_001526D0(race) + 0x20);
         int mode = gs[0x48];
@@ -342,11 +342,11 @@ extern "C" void cGame_load(cGame* self)
         func_00270F18(self->Replay);
         func_00152728(race);
     }
-    if (D_00534B30[0] != 0)
+    if (cBENetworkInterface_networkOpt[0] != 0)
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, D_0047B618, 0x20000000, 0), 1);
     else
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, D_0047B618, 0x20000000, 0), D_00535BFC[0]);
-    if (D_00534B30[0] != 0 && D_00534B30[2] == 0) {
+    if (cBENetworkInterface_networkOpt[0] != 0 && cBENetworkInterface_networkOpt[2] == 0) {
         char* a = *(char**)((char*)self->AI + 0x44);
         void* cam = a != 0 ? *(void**)(a + 0x18) : 0;
         func_0015EDC8(*(void**)((char*)self->ViewMan + 0x4), cam);
@@ -413,9 +413,9 @@ extern "C" void cGame_load(cGame* self)
             func_00230F40(((cGameGL*)self));
             func_003E5398(0);
         } while (!func_002312D8(((cGameGL*)self)));
-        if (D_004A2EEC != 0)
-            func_002586B0(D_004A2EEC);
-        if (D_00535BC8[0x49] == 0)
+        if (cGameComm_mGameComm != 0)
+            func_002586B0(cGameComm_mGameComm);
+        if (cBENewRaceInterface_newRace[0x49] == 0)
             func_00231250(((cGameGL*)self), 0xA, 0, 0);
         else
             func_00231250(((cGameGL*)self), 0xA, 0, 0);
@@ -688,7 +688,7 @@ struct sGameRes_FA98 {
     char pad[0x330 - 0xC];
     sRec_FA98 rec[2];
 };
-extern sGameRes_FA98 D_00534B30_s __asm__("D_00534B30");
+extern sGameRes_FA98 D_00534B30_s __asm__("cBENetworkInterface_networkOpt");
 extern sRec_FA98 D_00534F0C_FA98 __asm__("D_00534F0C");
 
 // Pointer array member with an inline indexer.
@@ -1054,7 +1054,7 @@ struct sWorldCache_0430 {
     sScriptCache_0430* scripts;
 };
 
-extern sWorldCache_0430* D_004A47B8_0430 __asm__("D_004A47B8");
+extern sWorldCache_0430* D_004A47B8_0430 __asm__("cWorld_m_pTheWorld");
 
 static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
 {
@@ -1080,7 +1080,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void* func_00232738(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern void* D_004A2EEC;
+extern void* cGameComm_mGameComm;
 extern void* D_004A33F4;
 extern char D_0047B770[];
 extern char D_0047B788[];
@@ -1089,8 +1089,8 @@ extern "C" void cGame_exit(cGame* self, int toFrontEnd)
 {
     cReplay_stopAutoReplay(self->Replay);
     func_00231250(self, 6, 0, 0);
-    if (D_004A2EEC != 0) {
-        func_00258AE0(D_004A2EEC);
+    if (cGameComm_mGameComm != 0) {
+        func_00258AE0(cGameComm_mGameComm);
     }
     if (D_004A33F4 != 0) {
         func_00266DF8(D_004A33F4);
@@ -1238,7 +1238,7 @@ extern "C" void func_001E1458(void);
 extern "C" void func_001F3188(void* p);
 
 extern char* D_004A5B64;
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* PadCache;
 extern unsigned int D_004A20CC;
 extern char D_0047B798[];
@@ -1471,8 +1471,8 @@ extern "C" void func_002306B8(cGame* self)
     } else {
         *(int*)(D_004A5B64 + 0x34) = func_002EE400(6) > 0.9f;
     }
-    if (D_004A2EEC != 0) {
-        func_002570D8(D_004A2EEC);
+    if (cGameComm_mGameComm != 0) {
+        func_002570D8(cGameComm_mGameComm);
     }
     func_00278918(ScriptEngine);
     func_00231D18_v(((cGame_2306B8*)self));
@@ -1567,7 +1567,7 @@ extern "C" void func_002306B8(cGame* self)
             func_00237948((char*)self->InputSync);
         }
     }
-    if (D_004A2EB8 != 0) {
+    if (cCommSystem_mCommSystem != 0) {
         func_003F42A0();
     }
     if ((void*)SSXApp->mFEAsyncManager != 0) {
@@ -1653,7 +1653,7 @@ INCLUDE_ASM("main/gameload", func_00230F40);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0022E550(void* self);
 extern int D_004A2A50;
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 
 class cGameState_0F40 {
 public:
@@ -1689,7 +1689,7 @@ extern "C" void func_00230F40(void* self_)
 {
     sGameLoad_0F40* self = (sGameLoad_0F40*)self_;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] == 0 && self->hold != 0)
+    if (cBENetworkInterface_networkOpt[0] == 0 && self->hold != 0)
         return;
     if (D_004A2A50 & 0x20)
         return;
@@ -2189,9 +2189,9 @@ extern "C" void func_002314D0(cGame* self_, cStream_14D0* stream)
 //100%
 INCLUDE_ASM("main/gameload", func_00231840);
 #ifdef SKIP_ASM
-extern void* D_004A2EEC;
+extern void* cGameComm_mGameComm;
 extern int D_004A2E9C;
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2221,7 +2221,7 @@ static inline char* At_1840(char* self, int i)
 
 extern "C" int func_00231840(char* self)
 {
-    if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x8) > 0) {
+    if (cGameComm_mGameComm != 0 && *(int*)((char*)cGameComm_mGameComm + 0x8) > 0) {
         return 0;
     }
     int mask = 0;
@@ -2276,7 +2276,7 @@ extern "C" int func_00231840(char* self)
     }
     if (sel >= 0) {
         cBE_getInterface_Fv(cBE_getBE(), 7);
-        if (D_00534B30[0] != 0 || func_00231AB8(self)) {
+        if (cBENetworkInterface_networkOpt[0] != 0 || func_00231AB8(self)) {
             *(int*)(self + 0x228) = sel;
             return 1;
         }

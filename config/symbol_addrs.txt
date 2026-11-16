@@ -184,7 +184,7 @@ D_004FA370 = 0x004FA370; // size:0x780
 
 // 'netw'/'list' IOP reply buffer: 10 entries of 0x100 bytes (func_003F3BC8 sends b << 8 with b = 10, from
 // func_00255F20); D_00537190 follows. Entry fields at +0x4, +0x42, +0x80 were split as their own labels.
-D_00536790 = 0x00536790; // size:0xA00
+cCommSystem_mNetConns = 0x00536790; // size:0xA00
 
 // gp-relative globals discovered while reversing (need explicit symbols since
 // splat doesn't auto-label single-instruction $gp-relative accesses like it
@@ -199,7 +199,7 @@ D_004A01FC = 0x004A01FC; //type:f32
 D_004A11B4 = 0x004A11B4; //type:u32
 D_004A11C0 = 0x004A11C0; //type:u32
 D_004A11F4 = 0x004A11F4; //type:u32
-D_004A1204 = 0x004A1204; //type:u32
+cBENetworkInterface_instance = 0x004A1204; //type:u32
 D_004A120C = 0x004A120C; //type:u32
 D_004A1210 = 0x004A1210; //type:u32
 D_004A1214 = 0x004A1214; //type:u32
@@ -222,7 +222,7 @@ gSSXAudio = 0x004A3500; //type:u32
 D_004A3E84 = 0x004A3E84; //type:u32
 D_004A3E90 = 0x004A3E90; //type:u32
 D_004A3ED0 = 0x004A3ED0; //type:u32
-D_004A47B8 = 0x004A47B8; //type:u32
+cWorld_m_pTheWorld = 0x004A47B8; //type:u32
 gWorldTriggerManager = 0x004A52D4; //type:u32
 gBucketMan = 0x004A5988; //type:u32
 D_004A5B64 = 0x004A5B64; //type:u32
@@ -2914,3 +2914,12 @@ cListOperator_vtbl = 0x00494CE8;
 cUIAnimation_vtbl = 0x00494D08;
 cPS2ChunkResolve_vtbl = 0x00495090;
 cChunkResolve_vtbl = 0x00495150;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_classes2 (docs/ontour_globals.tsv)
+cGameModeMan_instance = 0x004A2C6C;
+cGameModeHandler_pManager = 0x004A2C70;
+cCommSystem_mCommSystem = 0x004A2EB8;
+cCommSystem_mNumNetConn = 0x004A2EBC;
+cGameComm_mGameComm = 0x004A2EEC;
+cBENetworkInterface_networkOpt = 0x00534B30;
+cBENewRaceInterface_newRace = 0x00535BC8;

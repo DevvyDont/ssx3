@@ -56,7 +56,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char D_0046F818[];
 extern char D_0046F830[];
 extern char* D_00441BC0[];
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 
 struct sPauseMenu_PM {
     char pad0[0xC];
@@ -120,7 +120,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
         self->aD8[6] = 0;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] == 0) {
+    if (cBENetworkInterface_networkOpt[0] == 0) {
         void* game = SSXApp->Game;
         if (func_00231AB8(game) == 0 || SSXApp->Game->ControllerUnplugged != 0) {
             for (i = 0; i < 14; i++) {
@@ -266,7 +266,7 @@ extern "C" void func_00258790(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 extern int D_004A2A50;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -304,7 +304,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
         }
     }
     cOVState_onUpdate(self);
-    char* g = D_004A2EEC;
+    char* g = cGameComm_mGameComm;
     if (g == 0)
         return;
     int go = 0;
@@ -312,8 +312,8 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
         go = 1;
     if (!go)
         return;
-    func_00258790(D_004A2EEC, 0);
-    char* g2 = D_004A2EEC;
+    func_00258790(cGameComm_mGameComm, 0);
+    char* g2 = cGameComm_mGameComm;
     *(int*)(g2 + 0x68) = -1;
     *(int*)(g2 + 0x64) = -1;
     int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(D_0046F850));
@@ -376,7 +376,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owne
 extern "C" void* func_0028B180();
 extern "C" void func_00289BB8(void* audio);
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on);
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 extern int D_004A2A50;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -425,9 +425,9 @@ struct sPauseMenu_PMWE {
 
 static inline void stopReplay_PMWE()
 {
-    if (D_004A2EEC != 0) {
-        func_00258790(D_004A2EEC, 0);
-        char* g = D_004A2EEC;
+    if (cGameComm_mGameComm != 0) {
+        func_00258790(cGameComm_mGameComm, 0);
+        char* g = cGameComm_mGameComm;
         *(int*)(g + 0x68) = -1;
         *(int*)(g + 0x64) = -1;
     }

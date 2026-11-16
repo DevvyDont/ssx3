@@ -761,7 +761,7 @@ extern "C" void* func_0025CD50(void*, int);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
 extern void* D_004A3028;
 extern char D_0045FF28[];
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 
 extern "C" int func_001D5138(void* self, int msg)
 {
@@ -777,7 +777,7 @@ extern "C" int func_001D5138(void* self, int msg)
         break;
     case 0x111: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        char* g = D_00534B30;
+        char* g = cBENetworkInterface_networkOpt;
         func_0025FD50(D_004A3028, *(int*)(g + 4), *(int*)(g + 8) == 0, *(int*)(g + 8) != 0, g + 0x330, g + 0x3DC);
         break;
     }

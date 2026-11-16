@@ -1155,7 +1155,7 @@ struct cWorldCache_352810 {
 struct cWorld_352810 {
     cWorldCache_352810* cache;          // 0x0
 };
-extern cWorld_352810* D_004A47B8_352810 __asm__("D_004A47B8");
+extern cWorld_352810* D_004A47B8_352810 __asm__("cWorld_m_pTheWorld");
 
 static inline bool tableValid_352810(cWorldCacheTable_352810* t, int type, unsigned int uid)
 {

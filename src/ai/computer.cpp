@@ -188,7 +188,7 @@ struct sCompSkill {
     int f8;                         // 0xE08
 };
 
-extern signed char D_00535BC8[];
+extern signed char cBENewRaceInterface_newRace[];
 extern int D_005308D0[];
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -220,16 +220,16 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
         self->f4 = 0;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535BC8[0x48] == 1 || D_00535BC8[0x48] == 6 || D_00535BC8[0x48] == 5) {
+    if (cBENewRaceInterface_newRace[0x48] == 1 || cBENewRaceInterface_newRace[0x48] == 6 || cBENewRaceInterface_newRace[0x48] == 5) {
         self->f8 = 1;
     } else {
         self->f8 = 0;
     }
-    cComputer_setIndividualRiderDifficulty_UR(self, level, func_00147CB8(cBE_getInterface_Fv(cBE_getBE(), 1), D_00535BC8[0x48] == 0));
+    cComputer_setIndividualRiderDifficulty_UR(self, level, func_00147CB8(cBE_getInterface_Fv(cBE_getBE(), 1), cBENewRaceInterface_newRace[0x48] == 0));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535BC8[0x4A] == 4) {
+    if (cBENewRaceInterface_newRace[0x4A] == 4) {
         self->diff = 0;
-    } else if (D_00535BC8[0x4A] == 5) {
+    } else if (cBENewRaceInterface_newRace[0x4A] == 5) {
         self->diff = 2;
     }
     if ((D_005308D0[0] >> 2) & 1) {
@@ -1407,9 +1407,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void func_00125108(void* self);
 extern "C" void func_00270AB0(void* a, int b, int c);
-extern signed char D_00535BC8[];
+extern signed char cBENewRaceInterface_newRace[];
 
-static inline int state_0010E5D8() { return D_00535BC8[0x48]; }
+static inline int state_0010E5D8() { return cBENewRaceInterface_newRace[0x48]; }
 
 struct sVEntry0010E5D8 { short delta; short index; int (*fn)(void*); };
 
@@ -1424,7 +1424,7 @@ extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
         || (state_0010E5D8() == 6 && *(int*)(s + 0x98) != 0)
         || mode == 5 || mode == 6 || mode == 7 || mode == 8 || mode == 9
         || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
-        || D_00535BC8[0x49] != 0)
+        || cBENewRaceInterface_newRace[0x49] != 0)
         v = 1;
     if (*arg == 1 && v != 0)
     {
@@ -2978,7 +2978,7 @@ struct sRefWorld_00111D98 {
     sRefSet_00111D98** sets;    // 0x8
 };
 
-extern sRefWorld_00111D98** D_004A47B8;
+extern sRefWorld_00111D98** cWorld_m_pTheWorld;
 extern char D_004D33A0[];
 extern "C" void func_00104DE0(void* self, void* s);
 extern "C" void func_00310EE0(void* self, void* s);
@@ -3035,7 +3035,7 @@ struct sRef_00111D98 {
 
     void* get()
     {
-        sRefSet_00111D98* set = (*D_004A47B8)->sets[id & 0xFF];
+        sRefSet_00111D98* set = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }

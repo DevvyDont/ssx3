@@ -84,9 +84,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 int func_00158F30(void* self);
 extern "C" void func_002706B8(void* p);
-extern char* D_004A2EEC;
-extern int D_00534B30[];
-extern char D_00535BC8[];
+extern char* cGameComm_mGameComm;
+extern int cBENetworkInterface_networkOpt[];
+extern char cBENewRaceInterface_newRace[];
 extern int D_004A26FC;
 extern int D_004A2704;
 extern int D_004A2700;
@@ -104,7 +104,7 @@ extern "C" void func_0020A8F8(int mode)
     if (busy) return;
     int state = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     int type = *(int*)SSXApp->GameModeMan;
     int sub = g[0x48];
     int team = g[0x49];
@@ -140,7 +140,7 @@ extern "C" void func_0020A8F8(int mode)
         int any = 0;
         if (*(int*)(a + 0x18) >= 0 || *(int*)(a + 0x1C) >= 0) any = 1;
         if (any) {
-            if (D_00534B30[0] != 0) {
+            if (cBENetworkInterface_networkOpt[0] != 0) {
                 state = func_0020A8B0(kind, type);
             } else {
                 D_004A2700 = 0;
@@ -156,7 +156,7 @@ extern "C" void func_0020A8F8(int mode)
         int z = !isKind_A8F8(kind, 6) && !isKind_A8F8(kind, 7) && !isKind_A8F8(kind, 8) && !isKind_A8F8(kind, 9) &&
                 !isKind_A8F8(kind, 10) && !isKind_A8F8(kind, 11);
         if (z) func_002706B8(SSXApp->Game->Replay);
-        if (D_00534B30[0] != 0) *(int*)(D_004A2EEC + 0x64) = 0x8CA0;
+        if (cBENetworkInterface_networkOpt[0] != 0) *(int*)(cGameComm_mGameComm + 0x64) = 0x8CA0;
         break;
     }
     if (state == 0) {
@@ -1173,10 +1173,10 @@ extern "C" void func_00258C00(void* net);
 extern "C" void func_00258790(void* net, int a1);
 extern "C" int func_0030B8C0(void* self);
 extern void* D_004A3DD8;
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 extern char D_004A2468;
-extern int D_00534B30[];
-extern char D_00535BC8[];
+extern int cBENetworkInterface_networkOpt[];
+extern char cBENewRaceInterface_newRace[];
 
 static inline bool notMode4_0020CA10(signed char* g)
 {
@@ -1187,15 +1187,15 @@ extern "C" void func_0020CA10(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] != 0) {
-        char* net = D_004A2EEC;
+    if (cBENetworkInterface_networkOpt[0] != 0) {
+        char* net = cGameComm_mGameComm;
         if (net != 0) {
             char* game = (char*)SSXApp->Game;
             if (game != 0 && *(int*)(game + 0x224) != 0) {
                 func_00258C00(net);
             }
-            func_00258790(D_004A2EEC, 1);
-            char* n = D_004A2EEC;
+            func_00258790(cGameComm_mGameComm, 1);
+            char* n = cGameComm_mGameComm;
             *(int*)(n + 0x68) = 0xE10;
             *(int*)(n + 0x64) = 0x708;
         }
@@ -1203,13 +1203,13 @@ extern "C" void func_0020CA10(void)
     } else if (func_0030B8C0(D_004A3DD8) != 0) {
         cOVStateManager_triggerOverlay(2);
     } else {
-        signed char* g = (signed char*)D_00535BC8;
+        signed char* g = (signed char*)cBENewRaceInterface_newRace;
         if (g[0x49] == 0 && notMode4_0020CA10(g)) {
             cOVStateManager_triggerOverlay(1);
         } else if (SSXApp->Game->mCurrentStateID == 0xB) {
             cOVStateManager_triggerOverlay(4);
         } else {
-            signed char* g2 = (signed char*)D_00535BC8;
+            signed char* g2 = (signed char*)cBENewRaceInterface_newRace;
             if (g2[0x48] == 4) {
                 cOVStateManager_triggerOverlay(3);
             } else {
@@ -1308,13 +1308,13 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 extern int D_004A26FC;
 
 extern "C" void func_0020CC60(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     int mode = g[0x48];
     int players = g[0x49];
     if (mode == 0 || players == 2) {
@@ -1395,9 +1395,9 @@ extern "C" void func_0020CCF8(void)
             break;
         case 8:
             cBE_getInterface_Fv(SSXApp->BE, 7);
-            if (D_00534B30[0] != 0) {
-                if (D_004A2EEC != 0) {
-                    func_00257610(D_004A2EEC, 0);
+            if (cBENetworkInterface_networkOpt[0] != 0) {
+                if (cGameComm_mGameComm != 0) {
+                    func_00257610(cGameComm_mGameComm, 0);
                 }
                 cGame_exit(SSXApp->Game, 0);
             } else {
@@ -1498,7 +1498,7 @@ extern "C" void func_0020CFD0(void)
         if (st != 0 && ((sGlobals_CFD0 *)SSXApp)->game->f214 == 2) {
             if (*(int *)(st + 0x98) == 8) {
                 cBE_getInterface_Fv(((sGlobals_CFD0 *)SSXApp)->be, 7);
-                if (D_00534B30[0] != 0) {
+                if (cBENetworkInterface_networkOpt[0] != 0) {
                     func_0039F840(mgr + 0x18);
                 }
             }
@@ -1829,7 +1829,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
             *(int*)(self + 0x54) = 1;
             switch (*(int*)(self + 0x9C)) {
             case 0: {
-                int kind = D_00535BC8[0x4A];
+                int kind = cBENewRaceInterface_newRace[0x4A];
                 if (kind >= 6 && kind <= 11) {
                     if (D_004A2708) {
                         Pop_20D5A8();
@@ -1846,14 +1846,14 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                     char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 0);
                     void* gm = SSXApp->GameModeMan;
                     cBE_setState(0);
-                    cBENewRaceInterface_setGameMode(iface, D_00535BC8[0x48]);
+                    cBENewRaceInterface_setGameMode(iface, cBENewRaceInterface_newRace[0x48]);
                     cBENewRaceInterface_setGameEvent(iface, kind);
                     D_004A11BC = mode;
-                    *(int*)(D_00535BC8 + 0x40) = mode;
+                    *(int*)(cBENewRaceInterface_newRace + 0x40) = mode;
                     sVV_D5A8* vt = *(sVV_D5A8**)(iface + 0xC);
                     D_004A11B8 = 1;
                     vt[1].fn(iface + vt[1].delta);
-                    cGameModeMan_initGameMode(gm, D_00535BC8[0x4A]);
+                    cGameModeMan_initGameMode(gm, cBENewRaceInterface_newRace[0x4A]);
                     cGame_exit(SSXApp->Game, 1);
                 } else if (D_004A2708) {
                     Pop_20D5A8();
@@ -1870,8 +1870,8 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 cReplay_stopAutoReplay(SSXApp->Game->Replay);
                 *(int*)(self + 0x54) = 0;
                 cBE_getInterface_Fv(cBE_getBE(), 4);
-                if (D_004A2EEC) {
-                    func_00257610(D_004A2EEC, 0);
+                if (cGameComm_mGameComm) {
+                    func_00257610(cGameComm_mGameComm, 0);
                 }
                 int any = 0;
                 int z = 0;
@@ -1965,13 +1965,13 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 extern char D_0046E050[];
 
 extern "C" void func_0020DBD0(void* self)
 {
     cOVState_onUpdate(self);
-    char* p = D_004A2EEC;
+    char* p = cGameComm_mGameComm;
     if (p != 0) {
         int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
         if (ok) {

@@ -796,7 +796,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 extern unsigned int D_00535610[];
 extern char D_0045A228[];
 extern char D_0045A238[];
@@ -807,7 +807,7 @@ extern char D_0045A258[];
 extern "C" char* func_00146F88(void* self, int idx)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    char* net = D_00534B30;
+    char* net = cBENetworkInterface_networkOpt;
     if (*(int*)net != 0 && idx < 2) {
         if (*(int*)(net + 0x8) != 0) {
             if (idx == 0)

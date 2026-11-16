@@ -798,31 +798,31 @@ extern "C" void func_0015C228()
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C250);
 #ifdef SKIP_ASM
-extern void* D_004A1204;
+extern void* cBENetworkInterface_instance;
 void operator_delete(int* ptr);
 
 extern "C" void func_0015C250(void)
 {
-    operator_delete((int*)D_004A1204);
-    D_004A1204 = 0;
+    operator_delete((int*)cBENetworkInterface_instance);
+    cBENetworkInterface_instance = 0;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C278);
 #ifdef SKIP_ASM
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 
 extern "C" void func_0015C278(void* self, int v) {
-    *(int*)D_00534B30 = v;
+    *(int*)cBENetworkInterface_networkOpt = v;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C288);
 #ifdef SKIP_ASM
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 
 extern "C" int func_0015C288(void) {
-    return *(int*)D_00534B30;
+    return *(int*)cBENetworkInterface_networkOpt;
 }
 #endif
 //100%
@@ -981,10 +981,10 @@ extern "C" void* func_0015C3B8(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C3C8);
 #ifdef SKIP_ASM
-extern void *D_004A1204;
+extern void *cBENetworkInterface_instance;
 
 extern "C" void func_0015C3C8(int arg0) {
-    (*(int *)((char*)(D_004A1204) + (8))) = arg0;
+    (*(int *)((char*)(cBENetworkInterface_instance) + (8))) = arg0;
 }
 #endif
 //100%

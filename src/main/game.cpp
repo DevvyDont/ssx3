@@ -1011,7 +1011,7 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cGameModeMan_initGameMode(void* self, unsigned int type);
 extern "C" void func_00231250(void* gm, int state, int a, int b);
-extern signed char D_00535BC8[];
+extern signed char cBENewRaceInterface_newRace[];
 
 struct sVE_22D6C8 {
     short delta;
@@ -1027,7 +1027,7 @@ static inline bool Is_22D6C8(int m, int v)
 extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
 {
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    int skip = D_00535BC8[0x49] != 0 || !Is_22D6C8(D_00535BC8[0x48], 4) || (unsigned int)(self->mBELocationID - 14) < 3 || mode == 1;
+    int skip = cBENewRaceInterface_newRace[0x49] != 0 || !Is_22D6C8(cBENewRaceInterface_newRace[0x48], 4) || (unsigned int)(self->mBELocationID - 14) < 3 || mode == 1;
     if (skip) {
         return;
     }
@@ -1070,7 +1070,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
     }
     sVE_22D6C8* vt = *(sVE_22D6C8**)(race + 0xC);
     vt[1].fn(race + vt[1].delta);
-    cGameModeMan_initGameMode(SSXApp->GameModeMan, D_00535BC8[0x4A]);
+    cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace[0x4A]);
     func_00231250(self->mpGame, 1, 1, 0);
 }
 #endif

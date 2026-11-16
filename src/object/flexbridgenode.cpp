@@ -1149,7 +1149,7 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_render);
 #ifdef SKIP_ASM
-extern void* D_004A47B8;
+extern void* cWorld_m_pTheWorld;
 extern char* D_004A5B80;
 
 struct sRS_7B80 {
@@ -1178,7 +1178,7 @@ struct sModel_7B80 {
 
 static inline int IsLoaded_7B80(sModel_7B80* m)
 {
-    char* wc = *(char**)D_004A47B8;
+    char* wc = *(char**)cWorld_m_pTheWorld;
     if (m->page == 0xFF)
         return 1;
     int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;

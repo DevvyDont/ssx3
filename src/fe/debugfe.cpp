@@ -9,7 +9,7 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 // load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern char* D_004A289C;
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern int D_004A11B8;
 extern int D_00535C04[];
 extern char D_004A12C0[];
@@ -188,12 +188,12 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     func_001DCA80(font, 580.0f, y, D_004A12F0, func_0028B180() + (self->optTrack * 0x14 + 0x60A4));
     y += lineheight;
     unsigned int ip = 0;
-    if (D_004A2EB8 != 0)
-        func_00256038(D_004A2EB8, (int*)&ip);
+    if (cCommSystem_mCommSystem != 0)
+        func_00256038(cCommSystem_mCommSystem, (int*)&ip);
     char ipbuf[0x20];
     sprintf(ipbuf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     sModeNamesDbg modes = D_0045CFB8;
-    if (D_004A2EB8 != 0)
+    if (cCommSystem_mCommSystem != 0)
         font->setColor(self->cursor == 12 ? selectColor : normalColor);
     else
         font->setColor(self->cursor == 12 ? selectColor : disabledColor);
@@ -234,7 +234,7 @@ struct sDbgRaceSel17D008 {
     signed char mode;  // 0x48
     signed char slot;  // 0x49
 };
-extern sDbgRaceSel17D008 D_00535BC8;
+extern sDbgRaceSel17D008 cBENewRaceInterface_newRace;
 class cBENewRaceIfaceK17D008 {
 public:
     char pad_0x00[0xC];
@@ -250,7 +250,7 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" void func_0017D008(void* self, int idx)
 {
     cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
-    ((sDbgFE17D008*)self)->modes[D_00535BC8.slot] = D_00535BC8.mode;
+    ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.slot] = cBENewRaceInterface_newRace.mode;
     func_00145108(iface, idx);
     cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
     iface->v01();
@@ -271,7 +271,7 @@ extern "C" void THREAD_yieldticks(int n);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* D_004A33F4;
 extern char D_0045D018[] __attribute__((aligned(8)));
 extern char D_0045D028[] __attribute__((aligned(8)));
@@ -282,7 +282,7 @@ struct sNetCfg_D0A8 {
     int host;               // 0x8
     unsigned short port;    // 0xC
 };
-extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("D_00534B30");
+extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("cBENetworkInterface_networkOpt");
 
 // Debug menu: opens the direct-socket link to the paired test console and starts the game comm.
 extern "C" void func_0017D0A8(void)
@@ -293,7 +293,7 @@ extern "C" void func_0017D0A8(void)
     }
     char addr[32];
     int info[4];
-    func_00256038(D_004A2EB8, info);
+    func_00256038(cCommSystem_mCommSystem, info);
     if (info[0] == 0x0A0A3519) {
         __builtin_memcpy(addr, D_0045D018, 12);
     } else {
@@ -301,12 +301,12 @@ extern "C" void func_0017D0A8(void)
     }
     int ch;
     if (D_00534B30_D0A8.host) {
-        ch = cCommSystem_openDSockChannel(D_004A2EB8, addr, D_00534B30_D0A8.port, 1);
+        ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, D_00534B30_D0A8.port, 1);
     } else {
-        ch = cCommSystem_openDSockChannel(D_004A2EB8, addr, D_00534B30_D0A8.port, 0);
+        ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, D_00534B30_D0A8.port, 0);
     }
-    while (func_00255D50(D_004A2EB8, ch) == 0) {
-        func_00255A20(D_004A2EB8);
+    while (func_00255D50(cCommSystem_mCommSystem, ch) == 0) {
+        func_00255A20(cCommSystem_mCommSystem);
         SYNCTASK_run(0);
         THREAD_yieldticks(1);
     }
@@ -543,7 +543,7 @@ extern "C" void func_0017D3B0(char* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D688);
 #ifdef SKIP_ASM
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* D_004A3028;
 extern "C" void func_00255A20(void*);
 extern "C" void func_0025AC50(void*);
@@ -569,7 +569,7 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* s)
 
 extern "C" void func_0017D688(sDebugFE17D688* self)
 {
-    func_00255A20(D_004A2EB8);
+    func_00255A20(cCommSystem_mCommSystem);
     func_0025AC50(D_004A3028);
     if (sMenuStack17D688_top(&self->stack) != 0)
         func_002CC0C0(&self->stack);
@@ -794,7 +794,7 @@ extern "C" void func_0017DA30(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 #ifdef SKIP_ASM
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* D_004A3028;
 extern void* D_004A33F4;
 extern char D_0045CE60[];
@@ -838,7 +838,7 @@ extern "C" void func_0017DB18(void* vself)
         state = self->state;
         switch (state) {
         case 0: {
-            char* comm = (char*)D_004A2EB8;
+            char* comm = (char*)cCommSystem_mCommSystem;
             bool busy = *(int*)(comm + 0x20) != 1;
             if (!busy) {
                 func_00255F50(comm, 0);
@@ -847,7 +847,7 @@ extern "C" void func_0017DB18(void* vself)
             break;
         }
         case 1:
-            if (*(int*)((char*)D_004A2EB8 + 0x20) != 3 && *(int*)((char*)D_004A2EB8 + 0x20) != 4) {
+            if (*(int*)((char*)cCommSystem_mCommSystem + 0x20) != 3 && *(int*)((char*)cCommSystem_mCommSystem + 0x20) != 4) {
                 func_0025B6D8(D_004A3028, 0);
                 self->state = 2;
             }
@@ -947,11 +947,11 @@ extern "C" void func_0017DB18(void* vself)
             break;
         }
         case 16:
-            if (func_00255D50(D_004A2EB8, self->channel) != 0) {
+            if (func_00255D50(cCommSystem_mCommSystem, self->channel) != 0) {
                 int info[4];
                 cGameComm_construct(self->channel, *(int*)((char*)D_004A3028 + 0xB4));
                 cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
-                func_00256038(D_004A2EB8, info);
+                func_00256038(cCommSystem_mCommSystem, info);
                 func_00266D58(D_004A33F4, info[0]);
                 func_00266E30(D_004A33F4);
             }
@@ -975,7 +975,7 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int
 extern "C" void func_001472C8(void* iface, int a1, int a2);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* D_004A3028;
 extern int D_004A11B8;
 extern int D_00535C08[];
@@ -987,7 +987,7 @@ struct sNetCfg_17DE70 {
     int host;
     unsigned short port;
 };
-extern sNetCfg_17DE70 D_00534B30_cfg __asm__("D_00534B30");
+extern sNetCfg_17DE70 D_00534B30_cfg __asm__("cBENetworkInterface_networkOpt");
 
 struct sVEnt_17DE70 { short delta; short index; void (*fn)(void*); };
 
@@ -1027,7 +1027,7 @@ extern "C" void func_0017DE70(char* self)
     }
     char buf[256];
     sprintf(buf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-    *(int*)(self + 0x1C10) = cCommSystem_openDSockChannel(D_004A2EB8, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
+    *(int*)(self + 0x1C10) = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
     *(int*)(self + 4) = 0x10;
 }
 #endif
@@ -1346,7 +1346,7 @@ INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* D_004A3028;
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern char D_0045D258[];
 extern char D_0045D270[];
 extern char D_0045D288[];
@@ -1585,9 +1585,9 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     scale17E5C8(font, 0.9f);
     if (top17E5C8(self) != 0)
         func_002CC350(&self->count);
-    if (isEq17E5C8(*(int*)((char*)D_004A2EB8 + 0x20), 5)) {
+    if (isEq17E5C8(*(int*)((char*)cCommSystem_mCommSystem + 0x20), 5)) {
         unsigned int ip;
-        func_00256038(D_004A2EB8, (int*)&ip);
+        func_00256038(cCommSystem_mCommSystem, (int*)&ip);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
         unsigned int v = ip;

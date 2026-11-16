@@ -95,7 +95,7 @@ extern "C" int func_00147318(void* self, int a1);
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern void* cFEStateProfileLoad_vtbl[];
 extern int D_004A15E8;
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 
 extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
 {
@@ -118,7 +118,7 @@ extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
     }
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     int n = 1;
     if (g[0x49] == 2) {
         n = 2;

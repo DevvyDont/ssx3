@@ -563,7 +563,7 @@ INCLUDE_ASM("ai/rider", func_0011D390);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
-extern signed char D_00535BC8[];
+extern signed char cBENewRaceInterface_newRace[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -604,9 +604,9 @@ void func_0011D390_impl(cRider* self)
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
         // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
         if (func_00145C38(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
-            && D_00535BC8[0x49] == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
+            && cBENewRaceInterface_newRace[0x49] == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
         {
-            if (D_00535BC8[0x48] == 4)
+            if (cBENewRaceInterface_newRace[0x48] == 4)
             {
                 func_0011DD98(self);
                 cRider_setMotionState_impl(self, 1);
@@ -616,12 +616,12 @@ void func_0011D390_impl(cRider* self)
             }
             goto m5;
         }
-        if (D_00535BC8[0x48] == 4)
+        if (cBENewRaceInterface_newRace[0x48] == 4)
             goto bb;
     m5:
-        if (D_00535BC8[0x48] == 5)
+        if (cBENewRaceInterface_newRace[0x48] == 5)
             goto bb;
-        if (D_00535BC8[0x48] == 6)
+        if (cBENewRaceInterface_newRace[0x48] == 6)
         {
         bb:
             int v = *cBENewRaceInterface_getLocation(iface);
@@ -653,7 +653,7 @@ void func_0011D390_impl(cRider* self)
             func_0011FEC8_impl(self, 6);
         }
     done:
-        if (D_00535BC8[0x49] != 0)
+        if (cBENewRaceInterface_newRace[0x49] != 0)
             func_00120D58(self);
         self->mFinishTime = -1.0f;
         self->unk_3FC = 0;
@@ -5801,7 +5801,7 @@ extern "C" void func_001250A8(cRider* self, sRiderVec4_001250A8* v)
 //100%
 INCLUDE_ASM("ai/rider", func_00125108);
 #ifdef SKIP_ASM
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 extern "C" float func_001193E0(void* self);
 extern "C" void func_00162258(void* self);
 extern "C" void func_00238358(void* self, int a1, int a2);
@@ -5817,7 +5817,7 @@ static inline void* getC0_125108()
 
 extern "C" void func_00125108(cRider* self)
 {
-    char* g = D_004A2EEC;
+    char* g = cGameComm_mGameComm;
     if (g != 0 && self->mDidNotFinish == 0 && self->mIsHuman != 0)
     {
         if (self->mIsLocal != 0)

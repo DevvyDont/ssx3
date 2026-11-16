@@ -228,7 +228,7 @@ struct sWSCItemFields {
 };
 
 extern "C" void func_003ACCD8(sWScriptCacheItem* e, void* world, int index);
-extern void* D_004A47B8;
+extern void* cWorld_m_pTheWorld;
 
 extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value)
 {
@@ -236,7 +236,7 @@ extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value)
     f->value = value;
     f->owned = 1;
     f->type = 2;
-    func_003ACCD8(e, D_004A47B8, index);
+    func_003ACCD8(e, cWorld_m_pTheWorld, index);
 }
 #endif
 

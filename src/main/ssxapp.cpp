@@ -737,14 +737,14 @@ extern "C" int func_00326CA0(void* self, int i);
 extern "C" void* func_00326CC8(void* self, int i);
 extern "C" void func_00321298(void* target, int a, void* data);
 extern void* PadCache;
-extern void* D_004A2EB8;
+extern void* cCommSystem_mCommSystem;
 extern void* D_004A33F0;
 
 extern "C" int cSSXApp_preUpdate(cSSXApp* self)
 {
     if (PadCache != 0 && func_00326B48(PadCache) != 0) {
-        if (D_004A2EB8 != 0) {
-            func_00255A20(D_004A2EB8);
+        if (cCommSystem_mCommSystem != 0) {
+            func_00255A20(cCommSystem_mCommSystem);
         }
         if (D_004A33F0 != 0) {
             func_002668E8(D_004A33F0);
@@ -1882,7 +1882,7 @@ struct sHMgr_229910 {
     sHTable_229910** tables;    // 0x8
 };
 
-extern sHMgr_229910** D_004A47B8_229910 __asm__("D_004A47B8");
+extern sHMgr_229910** D_004A47B8_229910 __asm__("cWorld_m_pTheWorld");
 
 struct sModel_229910 {
     char pad[0x10];

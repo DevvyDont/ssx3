@@ -959,7 +959,7 @@ struct sWorld_15EC98
     char pad[0x250];
     sCacheSlot_15EC98 slots[2];
 };
-extern char** D_004A47B8;
+extern char** cWorld_m_pTheWorld;
 
 // PORT: g++ min operator (<?), removed in GCC 4.3.
 static inline float clamp_15EC98(float v, float lo, float hi)
@@ -981,7 +981,7 @@ extern "C" void func_0015EC98(char* self)
         r = clamp_15EC98(*(float*)(self + 0x8), 0.0f, 15000.0f);
     float r15 = r * 1.5f;
     float far = clamp_15EC98(r * 0.6666666865348816f, 15000.0f, 30000.0f);
-    char** sys = D_004A47B8;
+    char** sys = cWorld_m_pTheWorld;
     ((sWorld_15EC98*)*sys)->slots[*(int*)(self + 0xB0)].active = 1;
     func_003A9658(*sys + 0x10, *(int*)(self + 0xB0), (sVec4_15EC98*)(self + 0x20), r15);
     *(int*)(self + 0xB4) = 0;

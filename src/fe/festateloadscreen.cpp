@@ -149,7 +149,7 @@ struct sLsOpt_3640 {
     int f4;
     int alt;        // 0x8
 };
-extern sLsOpt_3640 D_00534B30_3640[] __asm__("D_00534B30");
+extern sLsOpt_3640 D_00534B30_3640[] __asm__("cBENetworkInterface_networkOpt");
 
 struct sVE_3640 {
     short delta;
@@ -521,7 +521,7 @@ extern "C" void* func_00233C10(void* self)
 INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
-extern void* D_004A2EEC;
+extern void* cGameComm_mGameComm;
 extern "C" void func_0026FA50(void* self);
 extern "C" void func_0039F840(void* list);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
@@ -536,7 +536,7 @@ extern "C" void func_00233C50(void* self)
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
     func_001F36C0(SSXApp->Game->LoadIndicator, 4);
-    void* p = D_004A2EEC;
+    void* p = cGameComm_mGameComm;
     if (p != 0) {
         func_00244880(p);
         *(int*)((char*)p + 0x90) = 1;
@@ -573,7 +573,7 @@ struct sRace_233CD8 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_233CD8 D_00535BC8_r233CD8 __asm__("D_00535BC8");
+extern sRace_233CD8 D_00535BC8_r233CD8 __asm__("cBENewRaceInterface_newRace");
 
 static inline int isMode_233CD8(sRace_233CD8* r, int m)
 {
@@ -931,7 +931,7 @@ extern "C" int func_0012ACF8(void* o);
 extern "C" void cAI_cleanupAfterRace(void* o);
 extern "C" void cAI_cleanupActors(void* o);
 extern void* cGameState_mpGame;
-extern signed char D_00535BC8[];
+extern signed char cBENewRaceInterface_newRace[];
 extern signed char D_00535C10[];
 
 struct sLoadObj_43B0 {
@@ -984,7 +984,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
     case 1: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         func_00234910(self);
-        signed char* cfg = D_00535BC8;
+        signed char* cfg = cBENewRaceInterface_newRace;
         int mode = cfg[0x48];
         int skip = cfg[0x49];
         int sub = cfg[0x4A];
@@ -1085,7 +1085,7 @@ struct sRace_234750 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_234750 D_00535BC8_r234750 __asm__("D_00535BC8");
+extern sRace_234750 D_00535BC8_r234750 __asm__("cBENewRaceInterface_newRace");
 
 struct sRaceMan_234750 {
     char pad0[0x8C];

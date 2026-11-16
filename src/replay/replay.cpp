@@ -35,7 +35,7 @@ extern "C" void func_0026DE58(void* self, int a);
 extern "C" void func_0012B788(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
 extern char gBucketMan;
-extern void* D_004A47B8_DBF0 __asm__("D_004A47B8");
+extern void* D_004A47B8_DBF0 __asm__("cWorld_m_pTheWorld");
 extern void* D_004A3DD8;
 extern void* D_004A2A00;
 extern void* D_004A3FF0;
@@ -285,7 +285,7 @@ struct sRdbWorld {
     sRdbModelSet** sets;    // 0x8
 };
 
-extern sRdbWorld** D_004A47B8;
+extern sRdbWorld** cWorld_m_pTheWorld;
 extern char D_00481720[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* func_003506D8(void* self, void* model);
@@ -301,7 +301,7 @@ struct sRdbRef {
 
     void* get()
     {
-        sRdbModelSet* set = (*D_004A47B8)->sets[id & 0xFF];
+        sRdbModelSet* set = (*cWorld_m_pTheWorld)->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }

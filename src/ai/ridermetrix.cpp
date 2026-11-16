@@ -281,7 +281,7 @@ struct sRaceSettings_117718 {
     signed char mode;       // 0x48
     signed char online;     // 0x49
 };
-extern sRaceSettings_117718 D_00535BC8_117718 __asm__("D_00535BC8");
+extern sRaceSettings_117718 D_00535BC8_117718 __asm__("cBENewRaceInterface_newRace");
 
 // Records a trick combo (count at 0x9C, score at 0xA0) in the rider metrics and awards it.
 extern "C" void func_00117718(void* self_)
@@ -1432,7 +1432,7 @@ struct sGameSettings_119608 {
     signed char eventKind; // 0x48: 4 = free ride
     signed char gameType;  // 0x49: 0 = Conquer the Mountain
 };
-extern sGameSettings_119608 D_00535BC8_119608 __asm__("D_00535BC8");
+extern sGameSettings_119608 D_00535BC8_119608 __asm__("cBENewRaceInterface_newRace");
 
 extern "C" float func_00119608(void* self, int pts)
 {
@@ -1999,7 +1999,7 @@ struct sScoreGrades {
     int gradeCounts[6]; // 0x16c: landed tricks per grade (func_00119310)
 };
 
-extern sGameSettings D_00535BC8;
+extern sGameSettings cBENewRaceInterface_newRace;
 
 extern "C" void cRiderMetrix_removeHUDfx(void* self, int type);
 extern "C" int func_0012A250(void* race);
@@ -2132,7 +2132,7 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
 
         cBE_getInterface(cBE_getBE(), 0);
         // free ride in Conquer the Mountain pays the career instead of the HUD
-        career = D_00535BC8.eventKind == 4 && D_00535BC8.gameType == 0;
+        career = cBENewRaceInterface_newRace.eventKind == 4 && cBENewRaceInterface_newRace.gameType == 0;
         if (!career) {
             if (repeats > 0) {
                 cRiderMetrix_addHUDfx1(self, 0x24, total, grade, 2.5f);

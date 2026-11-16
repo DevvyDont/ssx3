@@ -5825,11 +5825,11 @@ extern "C" int func_002D1BA0()
 //100%
 INCLUDE_ASM("util/menu", func_002D1BD8);
 #ifdef SKIP_ASM
-extern void* D_004A47B8;
+extern void* cWorld_m_pTheWorld;
 
 extern "C" void* func_002D1BD8()
 {
-    return D_004A47B8;
+    return cWorld_m_pTheWorld;
 }
 #endif
 

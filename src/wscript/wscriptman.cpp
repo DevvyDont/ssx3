@@ -2328,7 +2328,7 @@ struct sRefWorld_BFC0 {
     char pad_0x0[0x8];
     sRefSet_BFC0** sets;    // 0x8
 };
-extern sRefWorld_BFC0** D_004A47B8_BFC0 __asm__("D_004A47B8");
+extern sRefWorld_BFC0** D_004A47B8_BFC0 __asm__("cWorld_m_pTheWorld");
 
 static inline void* refToPtr_BFC0(unsigned int p)
 {
@@ -2545,14 +2545,14 @@ struct sRefWorld_C4A8 {
     char pad_0x0[0x8];
     sRefSet_C4A8** sets;    // 0x8
 };
-extern sRefWorld_C4A8** D_004A47B8_C4A8 __asm__("D_004A47B8");
+extern sRefWorld_C4A8** D_004A47B8_C4A8 __asm__("cWorld_m_pTheWorld");
 
 struct sRace_C4A8 {
     char pad0[0x48];
     signed char mode48;
     signed char flag49;
 };
-extern sRace_C4A8 D_00535BC8_rC4A8 __asm__("D_00535BC8");
+extern sRace_C4A8 D_00535BC8_rC4A8 __asm__("cBENewRaceInterface_newRace");
 
 struct sVE_C4A8 {
     short delta;

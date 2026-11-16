@@ -3,7 +3,7 @@
 
 // cWorld: the open mountain (one instance per loaded track). cGame_load allocates it as
 // `cWorld_cWorld(operator new(0x18, "World"))` and stores it in cGame::World; the constructor also stores itself in
-// the class static cWorld::m_pTheWorld (D_004A47B8; preview asserts "m_pTheWorld == 0" / "m_pTheWorld == this"), which
+// the class static cWorld::m_pTheWorld (cWorld_m_pTheWorld; preview asserts "m_pTheWorld == 0" / "m_pTheWorld == this"), which
 // over 100 retail functions read. The cWorld itself only owns three sub-objects; the streaming lives in cWorldCache
 // (world/worldcache.h). No vtable, no base class. EA's source: d:/ssx/code/source/world/world.cpp (preview assert
 // strings). Methods (world/world, 0x003A6688-0x003A6D50; names from On Tour's cWorld methods):

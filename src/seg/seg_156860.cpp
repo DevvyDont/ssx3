@@ -7,13 +7,13 @@
 INCLUDE_ASM("seg/seg_156860", cCommSystem_construct);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 extern "C" int cCommSystem_cCommSystem_5860(int) __asm__("cCommSystem_cCommSystem");
 extern "C" int cMemMan_alloc_5860(unsigned int, void *, unsigned int, int) __asm__("cMemMan_alloc");
 extern char D_00480300[];
 
 extern "C" void cCommSystem_construct(void) {
-    D_004A2EB8 = cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(0x34, D_00480300, 0x20000000, 0));
+    cCommSystem_mCommSystem = cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(0x34, D_00480300, 0x20000000, 0));
 }
 #endif
 
@@ -21,12 +21,12 @@ extern "C" void cCommSystem_construct(void) {
 INCLUDE_ASM("seg/seg_156860", func_00255898);
 #ifdef SKIP_ASM
 extern "C" void cCommSystem__cCommSystem(int, int);
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 
 extern "C" void func_00255898(void) {
-    if (D_004A2EB8 != 0) {
-        cCommSystem__cCommSystem(D_004A2EB8, 3);
-        D_004A2EB8 = 0;
+    if (cCommSystem_mCommSystem != 0) {
+        cCommSystem__cCommSystem(cCommSystem_mCommSystem, 3);
+        cCommSystem_mCommSystem = 0;
     }
 }
 #endif
@@ -42,7 +42,7 @@ extern "C" void *ccs_new(unsigned int, void *, unsigned int, int) __asm__("opera
 extern "C" void ccs_3B18(void *) __asm__("func_003F3B18");
 extern char D_00480310[];
 extern char D_00480320[];
-extern int D_004A2EBC;
+extern int cCommSystem_mNumNetConn;
 extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSystem");
 extern "C" int *cCommSystem_cCommSystem_(int *self) {
     int a, b, n;
@@ -64,7 +64,7 @@ extern "C" int *cCommSystem_cCommSystem_(int *self) {
     for (i = 0; i < 1; i++) {
         self[i] = 0;
     }
-    D_004A2EBC = 0;
+    cCommSystem_mNumNetConn = 0;
     self[7] = -1;
     self[9] = 0;
     self[10] = 0;
@@ -119,8 +119,8 @@ extern "C" int func_003F3CC0_5A20(int sel, int a, int b) __asm__("func_003F3CC0"
 extern "C" int func_003F3C50(void* params, int a);
 extern "C" void func_00255FE8(void* self, int reason);
 extern "C" void func_00256038(void* self, int* out);
-// D_00536790: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
-extern char D_00536790[];
+// cCommSystem_mNetConns: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
+extern char cCommSystem_mNetConns[];
 
 struct sCommVE_5A20 {
     short delta;
@@ -155,7 +155,7 @@ extern "C" void func_00255A20(sComm_5A20* self)
         break;
     case 2:
         if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) == 0) {
-            func_003F3C50(D_00536790 + 0x80 + (self->index << 8), 0);
+            func_003F3C50(cCommSystem_mNetConns + 0x80 + (self->index << 8), 0);
             self->state = 3;
         }
         break;
@@ -353,11 +353,11 @@ INCLUDE_ASM("seg/seg_156860", func_00255F20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003F3BC8_5F20(int, void *, int) __asm__("func_003F3BC8");
-extern char D_00536790[];
-extern int D_004A2EBC;
+extern char cCommSystem_mNetConns[];
+extern int cCommSystem_mNumNetConn;
 
 extern "C" int func_00255F20(void *arg0, int arg1) {
-    D_004A2EBC = func_003F3BC8_5F20(arg1, D_00536790, 0xA);
+    cCommSystem_mNumNetConn = func_003F3BC8_5F20(arg1, cCommSystem_mNetConns, 0xA);
     return 1;
 }
 #endif
@@ -1010,10 +1010,10 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_construct);
 extern "C" int cMemMan_alloc(int, int *, int, int);
 extern "C" int func_00256C78(int, int, int);
 extern int D_004804B8[];
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 
 extern "C" void cGameComm_construct(int arg0, int arg1) {
-    D_004A2EEC = func_00256C78(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), arg0, arg1);
+    cGameComm_mGameComm = func_00256C78(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), arg0, arg1);
 }
 #endif
 
@@ -1021,12 +1021,12 @@ extern "C" void cGameComm_construct(int arg0, int arg1) {
 INCLUDE_ASM("seg/seg_156860", func_00256C50);
 #ifdef SKIP_ASM
 extern "C" void func_00256EE0(int, int);
-extern int D_004A2EEC;
+extern int cGameComm_mGameComm;
 
 extern "C" void func_00256C50(void) {
-    if (D_004A2EEC != 0) {
-        func_00256EE0(D_004A2EEC, 3);
-        D_004A2EEC = 0;
+    if (cGameComm_mGameComm != 0) {
+        func_00256EE0(cGameComm_mGameComm, 3);
+        cGameComm_mGameComm = 0;
     }
 }
 #endif
@@ -1332,7 +1332,7 @@ extern "C" void func_00258CB0_70D8(void* s) __asm__("func_00258CB0");
 extern "C" int func_003E7450_70D8(int sock, int a1, char* tag, int n) __asm__("func_003E7450");
 extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __asm__("func_003E7500");
 extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 extern char D_00481380[];
 
 // PORT: the unit declares func_002570D8 as (void*)
@@ -1440,7 +1440,7 @@ extern "C" void func_002570D8(void* vs)
             }
             break;
         case 9:
-            *(float*)(s + 0x114) = func_00255D88_70D8(D_004A2EB8, *(int*)(s + 0x6C));
+            *(float*)(s + 0x114) = func_00255D88_70D8(cCommSystem_mCommSystem, *(int*)(s + 0x6C));
             func_00258290_70D8(s, (int)(s + 0x114), 4);
             func_00257038_70D8(s, 10);
             break;
@@ -1520,7 +1520,7 @@ extern "C" void func_002570D8(void* vs)
             }
             break;
         case 9:
-            *(float*)(s + 0x118) = func_00255D88_70D8(D_004A2EB8, *(int*)(s + 0x6C));
+            *(float*)(s + 0x118) = func_00255D88_70D8(cCommSystem_mCommSystem, *(int*)(s + 0x6C));
             func_00258290_70D8(s, (int)(s + 0x118), 4);
             func_00257038_70D8(s, 10);
             break;
@@ -1605,7 +1605,7 @@ extern "C" int func_00255E40_77C8(int sys, int port) __asm__("func_00255E40");
 extern "C" void func_00257678(char *self);
 extern "C" void func_002578F8(char *self);
 extern "C" void func_002579C8(char *self);
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 
 extern "C" int func_002577C8(char* s)
 {
@@ -1618,7 +1618,7 @@ extern "C" int func_002577C8(char* s)
         func_002578F8(s);
         return 1;
     }
-    if (func_00255E40_77C8(D_004A2EB8, *(int*)(s + 0x6C)) != 0) {
+    if (func_00255E40_77C8(cCommSystem_mCommSystem, *(int*)(s + 0x6C)) != 0) {
         func_00257678(s);
         func_002578F8(s);
         return 1;
@@ -1862,7 +1862,7 @@ extern "C" void func_00257CD8_7CD8(Conn_7CD8* c)
 {
     while (c->busy == 0
            && (c->pending != 0
-               || (c->pending = func_00258188_7CD8(c), func_00255DC0((void*)D_004A2EB8, c->unk6C, (int)c->pending, 0xF0) != 0)
+               || (c->pending = func_00258188_7CD8(c), func_00255DC0((void*)cCommSystem_mCommSystem, c->unk6C, (int)c->pending, 0xF0) != 0)
                || (operator_delete__FPi_7CD8(c->pending), c->pending = 0, 0))) {
         Packet_7BD8* p = c->pending;
         PacketQueue_7BD8* q = &c->queues[p->type];
@@ -1881,7 +1881,7 @@ INCLUDE_ASM("seg/seg_156860", func_00257DC0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00255E00_7DC0(int, int, char *, unsigned short) __asm__("func_00255E00");
 extern "C" void func_002581B8_7DC0(char *, char *) __asm__("func_002581B8");
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 struct S7DC0 { char pad[0x36C]; char *arr[32]; };
 
 extern "C" void func_00257DC0(char *self) {
@@ -1895,7 +1895,7 @@ extern "C" void func_00257DC0(char *self) {
             } else {
                 item = 0;
             }
-            if (func_00255E00_7DC0(D_004A2EB8, *(int *)(self + 0x6C), item, *(unsigned short *)(item + 2)) == 0) return;
+            if (func_00255E00_7DC0(cCommSystem_mCommSystem, *(int *)(self + 0x6C), item, *(unsigned short *)(item + 2)) == 0) return;
             *(int *)(self + 0x368) = *(int *)(self + 0x368) + 1;
             func_002581B8_7DC0(self, item);
         } while (*(int *)(self + 0x368) != *(int *)(self + 0x364));
@@ -1917,7 +1917,7 @@ extern "C" int func_00255E00_7E98(int sys, int port, Packet_7E98* p, int size) _
 extern "C" Packet_7E98* func_00258188_7E98(char* self) __asm__("func_00258188");
 extern "C" void MEM_copy_7E98(void* dst, const void* src, int n) __asm__("MEM_copy");
 extern "C" void func_00257DC0(char *self);
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 
 struct Conn_7E98 {
     char pad0[0x36C];
@@ -1936,7 +1936,7 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
     pkt.flags = 0;
     MEM_copy_7E98(pkt.data, data, len);
     if (*(int*)(self + 0x368) == *(int*)(self + 0x364)) {
-        if (func_00255E00_7E98(D_004A2EB8, *(int*)(self + 0x6C), &pkt, pkt.size)) return 1;
+        if (func_00255E00_7E98(cCommSystem_mCommSystem, *(int*)(self + 0x6C), &pkt, pkt.size)) return 1;
     }
     {
         Packet_7E98* p = func_00258188_7E98(self);
@@ -2193,10 +2193,10 @@ extern "C" void func_00258330(void *arg0) {
 INCLUDE_ASM("seg/seg_156860", func_00258360);
 #ifdef SKIP_ASM
 extern "C" float func_00255D88(int, int);
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 
 extern "C" float func_00258360(void *arg0) {
-    return func_00255D88(D_004A2EB8, (*(int *)((char*)(arg0) + (0x6C)))) + ((float) (*(int *)((char*)(arg0) + (0x120))) * (*(float *)((char*)(SSXApp) + (0x14))));
+    return func_00255D88(cCommSystem_mCommSystem, (*(int *)((char*)(arg0) + (0x6C)))) + ((float) (*(int *)((char*)(arg0) + (0x120))) * (*(float *)((char*)(SSXApp) + (0x14))));
 }
 #endif
 
@@ -2206,7 +2206,7 @@ INCLUDE_ASM("seg/seg_156860", func_002583A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003E7450_83A8(int, int, char *, int) __asm__("func_003E7450");
 extern char D_00481380[];
-extern int D_004A2EB8;
+extern int cCommSystem_mCommSystem;
 
 struct S83A8 {
     char pad0[0xB8];
@@ -2228,7 +2228,7 @@ extern "C" void func_002583A8(S83A8 *self, int arg1, int arg2) {
         self->t138 = arg2 * 0x3C;
         self->t13c = 0;
     }
-    if (*(int *)((char*)D_004A2EB8 + 0x2C) == 0) {
+    if (*(int *)((char*)cCommSystem_mCommSystem + 0x2C) == 0) {
         self->t13c = 1;
     }
 }
@@ -2264,7 +2264,7 @@ struct sVEnt_8448 {
 
 extern char D_004805B8[];
 extern char D_004805C8[];
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 
 static inline int ggHost_8448(char* g) { return *(int*)(g + 8); }
 static inline void ggSetTime_8448(char* g, float t) { *(float*)(g + 0x10) = t; }
@@ -2278,17 +2278,17 @@ extern "C" void cGameComm_syncGame(char* self)
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     *(void**)(self + 0x3EC) = operator_new_8448(*(unsigned int*)(self + 0x3F0), D_004805B8, 0x100, 0);
     func_0014E9F8(iface);
-    if (ggHost_8448(D_00534B30) != 0) {
+    if (ggHost_8448(cBENetworkInterface_networkOpt) != 0) {
         MEM_fill_8448(self + 0xF0, 0, 0x10);
         strncpy(self + 0xF0, D_004805C8, 0xF);
-        *(int*)(self + 0xEC) = *(int*)((char*)D_004A2EB8 + 0x2C);
+        *(int*)(self + 0xEC) = *(int*)((char*)cCommSystem_mCommSystem + 0x2C);
         func_0014E2C8_8448(iface, 0, *(void**)(self + 0x3EC));
         func_0014E5C8_8448(iface, 0, *(void**)(self + 0x3EC));
     } else {
         func_0014F898();
         MEM_fill_8448(self + 0x104, 0, 0x10);
         strncpy(self + 0x104, D_004805C8, 0xF);
-        *(int*)(self + 0x100) = *(int*)((char*)D_004A2EB8 + 0x2C);
+        *(int*)(self + 0x100) = *(int*)((char*)cCommSystem_mCommSystem + 0x2C);
         func_0014E2C8_8448(iface, 1, *(void**)(self + 0x3EC));
         func_0014E5C8_8448(iface, 1, *(void**)(self + 0x3EC));
         void* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2310,7 +2310,7 @@ extern "C" void cGameComm_syncGame(char* self)
         func_0014EA90(iface);
         func_00317908(self + 0xD4);
         func_00237CB0(AIrand());
-        ggSetTime_8448(D_00534B30, *(float*)(self + 0x11C));
+        ggSetTime_8448(cBENetworkInterface_networkOpt, *(float*)(self + 0x11C));
         if (*(int*)(self + 0xEC) != 0 && *(int*)(self + 0x100) != 0) {
             *(int*)(self + 0x120) = 2;
         }
@@ -2331,12 +2331,12 @@ extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(void *, int, int);
 extern "C" void func_002570D8(void *);
 extern "C" void THREAD_yieldticks(int);
-extern char D_00534B30[];
+extern char cBENetworkInterface_networkOpt[];
 static inline int rd8(char *p) { return *(int*)(p + 8); }
 extern "C" void func_002586B0(void *self) {
     char buf[12];
     cBE_getInterface_86B0((int)SSXApp->BE, 7);
-    if (rd8(D_00534B30) != 0) {
+    if (rd8(cBENetworkInterface_networkOpt) != 0) {
         buf[0] = 3;
         func_00257E98(self, 3, (int)buf, 0xC);
     }
@@ -2346,7 +2346,7 @@ extern "C" void func_002586B0(void *self) {
         THREAD_yieldticks(1);
     }
     *(int*)((char*)self + 0x94) = 0;
-    if (*(int*)((char*)self + 4) == 0 && rd8(D_00534B30) == 0) {
+    if (*(int*)((char*)self + 4) == 0 && rd8(cBENetworkInterface_networkOpt) == 0) {
         buf[0] = 3;
         func_00257E98(self, 3, (int)buf, 0xC);
     }

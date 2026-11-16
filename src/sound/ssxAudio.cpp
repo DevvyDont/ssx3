@@ -919,7 +919,7 @@ extern char D_004A35D0[];
 extern char D_004828D0[];
 extern char D_004828E0[];
 extern char D_004828F0[];
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 
 // Front-end audio setup: reads the audio ini, registers each stream group with the async system.
 extern "C" void cSSXAudio_FrontEndLoad(char* self)
@@ -996,7 +996,7 @@ extern "C" void cSSXAudio_FrontEndLoad(char* self)
     func_0028BDA8(**(void***)(self + 0x118), 3, 0x19000, 0, 0);
     func_0028BDA8(**(void***)(self + 0x118), 12, 0x6A400, 0, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if ((signed char)D_00535BC8[0x49] == 2) {
+    if ((signed char)cBENewRaceInterface_newRace[0x49] == 2) {
         func_002A6D78(self, D_004A3558, ext, 2, 5);
     } else {
         func_002A6D78(self, D_004A3558, ext, 1, 5);
@@ -1034,11 +1034,11 @@ void* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
 extern char D_004A5268;
 extern char D_004A5270;
 extern char D_004A5278;
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 
 static inline int sa_state_867E8()
 {
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     return g[0x49];
 }
 
@@ -1300,11 +1300,11 @@ extern "C" void func_002A3708(void* self, void* rider);
 extern "C" void func_002A34D0(void* self, void* rider, int a2, int a3);
 extern "C" void func_002A45C0(void* self);
 extern char* gSSXAudio;
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 
 static inline int sa_state6EA0()
 {
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     return g[0x49];
 }
 
@@ -1324,7 +1324,7 @@ extern "C" void func_00286EA0(char* self, char* rider)
     int b = *(int*)(cfg + 0x70);
     int a = *(int*)(cfg + 0x0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     int mode = g[0x48];
     if ((mode == 2 || mode == 3) && a < b) {
         if (func_0028D960(self)) {
@@ -1443,7 +1443,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_002A26F0(void* self, int a1, int a2);
 void func_002B1758(void* self, int a1);
 int func_002B4908(void* mon);
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 
 struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
 
@@ -1451,7 +1451,7 @@ extern "C" void func_002872A8(void* self)
 {
     *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)func_0028B1C8() + 0xC) + 0x8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)D_00535BC8;
+    signed char* g = (signed char*)cBENewRaceInterface_newRace;
     int mode = g[0x48];
     if (mode != 5 && mode != 6) return;
     char* mon = (char*)self + 0x118;
@@ -1463,7 +1463,7 @@ extern "C" void func_002872A8(void* self)
         func_0028CF98(self, 0, 0, -1, 0);
     }
     if (func_00295028(self, 0, 0) != 0) return;
-    signed char* g2 = (signed char*)D_00535BC8;
+    signed char* g2 = (signed char*)cBENewRaceInterface_newRace;
     int a = g2[0x4A];
     if (a == 4 || a == 5) {
         if (g2[0x49] != 2) {

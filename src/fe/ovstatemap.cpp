@@ -1287,8 +1287,8 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_003A19F8(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern "C" int func_00258160(int a, char* name, int len);
-extern int* D_004A2EEC_A4E0 __asm__("D_004A2EEC");
-extern char D_00534B30[];
+extern int* D_004A2EEC_A4E0 __asm__("cGameComm_mGameComm");
+extern char cBENetworkInterface_networkOpt[];
 extern char D_0046E660[];
 extern char D_0046E7F8[];
 extern char D_0046E808[];
@@ -1317,7 +1317,7 @@ extern "C" int func_0020A4E0(cOVState* self)
 {
     int ret = 0;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    char* net = D_00534B30;
+    char* net = cBENetworkInterface_networkOpt;
     if (*(int*)net != 0 && self->mpScreen != 0) {
         int* sess = D_004A2EEC_A4E0;
         if (sess != 0 && *sess != 0) {

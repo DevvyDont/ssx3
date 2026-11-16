@@ -24,14 +24,14 @@ rom:0x12EA04 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA48 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA98 reloc:MIPS_LO16 symbol:D_00442168
 // fe/festateloadhint func_002464E8: `lui $16, %hi(D_0047BB70)` hoisted ahead of a loop (the relocated copy is at rom 0x147594),
-// and six `addiu $2, $17, %lo(D_00535BC8)` (the relocated sibling at rom 0x1478C0 has the same bytes).
+// and six `addiu $2, $17, %lo(cBENewRaceInterface_newRace)` (the relocated sibling at rom 0x1478C0 has the same bytes).
 rom:0x147530 reloc:MIPS_HI16 symbol:D_0047BB70
-rom:0x1477FC reloc:MIPS_LO16 symbol:D_00535BC8
-rom:0x14781C reloc:MIPS_LO16 symbol:D_00535BC8
-rom:0x14783C reloc:MIPS_LO16 symbol:D_00535BC8
-rom:0x14785C reloc:MIPS_LO16 symbol:D_00535BC8
-rom:0x14787C reloc:MIPS_LO16 symbol:D_00535BC8
-rom:0x14789C reloc:MIPS_LO16 symbol:D_00535BC8
+rom:0x1477FC reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
+rom:0x14781C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
+rom:0x14783C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
+rom:0x14785C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
+rom:0x14787C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
+rom:0x14789C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 // fe/ovstatepause func_001FD320: the bnel delay slot holds reorg's copy of the target's `lui $4, %hi(D_00470048)` (its %lo is at rom 0xFEA14).
 rom:0xFEA00 reloc:MIPS_HI16 symbol:D_00470048
 
@@ -307,11 +307,11 @@ rom:0x16D25C reloc:MIPS_HI16 symbol:D_004D32F8
 rom:0x16D28C reloc:MIPS_LO16 symbol:D_004D32F8
 rom:0x16D324 reloc:MIPS_LO16 symbol:D_004D3378
 // fe/ovstatepause cOVState_PAUSE_OPTIONS_onWidgetEvent (tools/gen/reloc_from_diff.py)
-rom:0xFB3A8 reloc:MIPS_HI16 symbol:D_00534B30
-rom:0xFB458 reloc:MIPS_HI16 symbol:D_00534B30
-rom:0xFB55C reloc:MIPS_HI16 symbol:D_00534B30
-rom:0xFB664 reloc:MIPS_HI16 symbol:D_00534B30
-rom:0xFB770 reloc:MIPS_HI16 symbol:D_00534B30
+rom:0xFB3A8 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
+rom:0xFB458 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
+rom:0xFB55C reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
+rom:0xFB664 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
+rom:0xFB770 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
 // object/railmodifier func_0035FE10 (tools/gen/reloc_from_diff.py)
 rom:0x260F7C reloc:MIPS_HI16 symbol:D_004FF940
 rom:0x261000 reloc:MIPS_LO16 symbol:D_004FF940

@@ -552,12 +552,12 @@ struct sLensSrc_DB20 {
 };
 
 extern char* D_004A289C;
-extern char** D_004A47B8;
+extern char** cWorld_m_pTheWorld;
 extern sV4_DB20 D_004FAB00;
 
 static inline int IsLoaded_DB20(sLensSrc_DB20* s)
 {
-    char* wc = *D_004A47B8;
+    char* wc = *cWorld_m_pTheWorld;
     if (s->slot < 0)
         return 0;
     int ok = *(int*)(wc + (s->page << 3) + 0x24) == 6;

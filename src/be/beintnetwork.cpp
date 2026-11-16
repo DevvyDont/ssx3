@@ -3,7 +3,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0045A648[];
 extern void* D_0045AD98[16];
-extern void* D_004A1204;
+extern void* cBENetworkInterface_instance;
 
 struct cBENetworkInterface {
     char pad_0x00[8];
@@ -16,13 +16,13 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getThis__Fv);
 #ifdef SKIP_ASM
 void* cBENetworkInterface_getThis()
 {
-    if (D_004A1204 == 0) {
+    if (cBENetworkInterface_instance == 0) {
         cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, D_0045A648, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AD98;
-        D_004A1204 = mem;
+        cBENetworkInterface_instance = mem;
     }
-    return D_004A1204;
+    return cBENetworkInterface_instance;
 }
 #endif
 
@@ -34,24 +34,24 @@ struct sNetState_0014E130
     int data[0x4B0 / 4];
 };
 
-extern sNetState_0014E130 D_00534B30;
+extern sNetState_0014E130 cBENetworkInterface_networkOpt;
 extern sNetState_0014E130 D_00535088;
 
 extern "C" void func_0014E130(void)
 {
-    D_00535088 = D_00534B30;
+    D_00535088 = cBENetworkInterface_networkOpt;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014E1F8);
 #ifdef SKIP_ASM
-extern sNetState_0014E130 D_00534B30;
+extern sNetState_0014E130 cBENetworkInterface_networkOpt;
 extern sNetState_0014E130 D_00535088;
 
 extern "C" void func_0014E1F8(void)
 {
-    D_00534B30 = D_00535088;
+    cBENetworkInterface_networkOpt = D_00535088;
 }
 #endif
 
@@ -185,7 +185,7 @@ extern "C" void func_0014E5C8(void* self, int p, sNetState_E2C8* in)
     D_004A11BC = in->b;
     D_005305B0 = in->hdr;
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 0))->v02();
-    if (D_00534B30.data[2] == 0)
+    if (cBENetworkInterface_networkOpt.data[2] == 0)
     {
         for (int i = 2; i < 6; i++)
             D_00535B20_E2C8[i] = in->chars[i];
@@ -193,7 +193,7 @@ extern "C" void func_0014E5C8(void* self, int p, sNetState_E2C8* in)
     D_00535B20_E2C8[p] = in->me;
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->v02();
     signed char c = in->charID;
-    if (D_00534B30.data[2] == 0)
+    if (cBENetworkInterface_networkOpt.data[2] == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
     D_005308B8_E5C8[p] = (&in->t0)[p];
     func_00151600(&D_004A6CA8_E5C8[p][c], c, 1);

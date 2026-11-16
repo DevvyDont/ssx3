@@ -14,7 +14,7 @@
 //   cWorldCache                           the owner: .sdb header, tables, memory, cWorldView, cStreamMan, hull pages.
 //
 // cWorldCache: one instance, cWorld::m_pWorldCache (cWorld_cWorld: cMemMan_alloc(0x1C00, "cWorldCache")), reached as
-// World->m_pWorldCache (the global cWorld::m_pTheWorld is D_004A47B8). No vtable, no base class. Size 0x1C00 [R]: the
+// World->m_pWorldCache (the global cWorld::m_pTheWorld is cWorld_m_pTheWorld). No vtable, no base class. Size 0x1C00 [R]: the
 // last field is 0x1BF0; 0x1BF4-0x1BFF is tail padding to the 16-byte alignment that cWorldView's t4Vectors give it
 // (no retail code touches it). On Tour's cWorldCache is 0x1C10 and adds a model-cache list at 0x1BF0+ that retail lacks.
 // Its static m_SectionLoadPriority[3] is D_0044C208 = {0.90, 0.91, 0.92} (cSectionMan_update indexes it).

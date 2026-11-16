@@ -23,8 +23,8 @@ extern "C" void func_0029C420(void* p, int a1);
 extern "C" void func_00234BE8(void* self, int a1);
 int GetHashValue32(char* s);
 extern char* cGameState_mpGame;
-extern char* D_004A2EEC;
-extern int D_00534B30[];
+extern char* cGameComm_mGameComm;
+extern int cBENetworkInterface_networkOpt[];
 extern signed char D_00535C10[];
 extern char D_0047C038[];
 
@@ -36,12 +36,12 @@ struct sRace_234AD0 {
 extern "C" void cGFGateState_gainFocus(void* self)
 {
     (*(sRace_234AD0**)(cGameState_mpGame + 0xC))->f8C = 0;
-    if (D_004A2EEC != 0) {
-        func_00258968(D_004A2EEC);
+    if (cGameComm_mGameComm != 0) {
+        func_00258968(cGameComm_mGameComm);
     }
     cBE_setState(0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30[0] != 0) {
+    if (cBENetworkInterface_networkOpt[0] != 0) {
         cGame_resetWorld(cGameState_mpGame);
     }
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
@@ -316,7 +316,7 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadUpdate);
 // Virtual calls in this unit go through these by hand.
 #include "vtable.h"
 
-// Race settings (D_00535BC8; ai/ai's sRaceSettings). D_00535C10 / D_00535C11 are splat symbols for its
+// Race settings (cBENewRaceInterface_newRace; ai/ai's sRaceSettings). D_00535C10 / D_00535C11 are splat symbols for its
 // fields at 0x48 / 0x49.
 struct sRaceSettings {
     char pad0[0x30];
@@ -328,7 +328,7 @@ struct sRaceSettings {
     signed char f4A;            // 0x4A
 };
 
-extern sRaceSettings D_00535BC8;
+extern sRaceSettings cBENewRaceInterface_newRace;
 
 // The race (seg/seg_1FBE38 / main/gamemode layout). It is a class with its vtable pointer at 0xCC.
 class cRace {
@@ -508,7 +508,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             break;
         char* newRace = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         char* newPlayer = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        sRaceSettings* r = &D_00535BC8;
+        sRaceSettings* r = &cBENewRaceInterface_newRace;
         cGameModeMan* gm = D_004A28A8_date->gm;
         int mode = r->f4A;
         if (mode < first || mode > last)
@@ -529,7 +529,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(newPlayer + 0xC);
             vt[1].fn(newPlayer + vt[1].delta);
         }
-        sRaceSettings* r2 = &D_00535BC8;
+        sRaceSettings* r2 = &cBENewRaceInterface_newRace;
         int quick = 0;
         cAI_cleanupAfterRace(D_004A2C68_date->race);
         cAI_cleanupActors(D_004A2C68_date->race);
@@ -548,7 +548,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
     case 3: {
         if (func_0012A180(D_004A2C68_date->race)) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            sRaceSettings* r = &D_00535BC8;
+            sRaceSettings* r = &cBENewRaceInterface_newRace;
             int m = r->mode48;
             if (m == 0) {
                 func_001289F0(D_004A2C68_date->race);
@@ -558,7 +558,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
                     D_004A2C68_date->race->f8C = 1;
             }
             if (m == 5) {
-                sRaceSettings* r2 = &D_00535BC8;
+                sRaceSettings* r2 = &cBENewRaceInterface_newRace;
                 if (r2->flag49 == 0)
                     func_00128A10(D_004A2C68_date->race);
             }
@@ -630,7 +630,7 @@ struct sRace_2355C0 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_2355C0 D_00535BC8_r2355C0 __asm__("D_00535BC8");
+extern sRace_2355C0 D_00535BC8_r2355C0 __asm__("cBENewRaceInterface_newRace");
 
 struct sRaceMan_2355C0 {
     char pad0[0x14];
@@ -734,7 +734,7 @@ struct sRace_235868 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_235868 D_00535BC8_r235868 __asm__("D_00535BC8");
+extern sRace_235868 D_00535BC8_r235868 __asm__("cBENewRaceInterface_newRace");
 
 struct sSlot_235868 {
     char pad[0x50];
@@ -856,7 +856,7 @@ struct sRace_235AA0 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_235AA0 D_00535BC8_r235AA0 __asm__("D_00535BC8");
+extern sRace_235AA0 D_00535BC8_r235AA0 __asm__("cBENewRaceInterface_newRace");
 
 struct sVE_235AA0 {
     short delta;
@@ -1506,7 +1506,7 @@ struct sRace002368A0 {
     char pad34[0x15];
     signed char flag49;
 };
-extern sRace002368A0 D_00535BC8_r002368A0 __asm__("D_00535BC8");
+extern sRace002368A0 D_00535BC8_r002368A0 __asm__("cBENewRaceInterface_newRace");
 
 extern "C" void func_002368A0(void* self)
 {
@@ -1672,7 +1672,7 @@ INCLUDE_ASM("main/gamestate", func_00236BB0);
 extern "C" void cBE_setState(int state);
 extern "C" void func_002EA820(void* p);
 extern "C" void func_0020A8F8(int mode);
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 struct sMgr_6BB0 {
     char pad0[0x64];
     void* world;    // 0x64
@@ -1692,11 +1692,11 @@ struct sGameState_6BB0 {
     int done;   // 0x8
 };
 
-// Ends the game state: pushes front-end state 1 unless D_004A2EEC is active, then hands control back.
+// Ends the game state: pushes front-end state 1 unless cGameComm_mGameComm is active, then hands control back.
 extern "C" void func_00236BB0(sGameState_6BB0* self)
 {
     self->done = 0;
-    if (D_004A2EEC != 0 && *(int*)(D_004A2EEC + 4) != 0) {
+    if (cGameComm_mGameComm != 0 && *(int*)(cGameComm_mGameComm + 4) != 0) {
         func_002EA820(D_004A28A8_s->mgr->world);
         cBE_setState(0);
         return;
@@ -1713,11 +1713,11 @@ extern "C" void func_00236BB0(sGameState_6BB0* self)
 INCLUDE_ASM("main/gamestate", func_00236C48);
 #ifdef SKIP_ASM
 extern "C" void cGameState_gotoNextState(void* self);
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 
 extern "C" void func_00236C48(void* self)
 {
-    if (D_004A2EEC == 0 || *(int*)(D_004A2EEC + 4) == 0) {
+    if (cGameComm_mGameComm == 0 || *(int*)(cGameComm_mGameComm + 4) == 0) {
         if (*(int*)((char*)self + 8) == 1) {
             cGameState_gotoNextState(self);
         }
@@ -1813,7 +1813,7 @@ struct sRace00236DA0 {
     char pad34[0x15];
     signed char flag49;
 };
-extern sRace00236DA0 D_00535BC8_r00236DA0 __asm__("D_00535BC8");
+extern sRace00236DA0 D_00535BC8_r00236DA0 __asm__("cBENewRaceInterface_newRace");
 
 extern "C" void func_00236DA0(void* self)
 {
@@ -2160,11 +2160,11 @@ extern "C" void func_00237A98(void* self, sPackSrc_7B28* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int func_00257BD8(void* self, int ch, void* dst, int size);
 extern "C" float func_00258360(void* self);
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 
 // cInputSync::preupdate (On Tour name and member names; the SSX 3 version differs in structure).
 // cGameComm::mGameComm through On Tour's GameComm() accessor.
-static inline char* GameComm() { return D_004A2EEC; }
+static inline char* GameComm() { return cGameComm_mGameComm; }
 
 // cInputSync::PadSample (On Tour, size 0x64).
 struct PadSample_2373B8 {
@@ -2293,11 +2293,11 @@ struct sOwner237950 {
     int count;
     sSlot237950 slots[1];
 };
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 
 extern "C" int func_00237950(sOwner237950* self)
 {
-    char* p = D_004A2EEC;
+    char* p = cGameComm_mGameComm;
     if (*(int*)(p + 0x70) < 14) {
         return 0;
     }
@@ -2344,7 +2344,7 @@ struct sPlayer002379C8 {
 
 extern "C" int func_002379C8(sPlayer002379C8* self)
 {
-    if (*(int*)(D_004A2EEC + 0x70) < 14) {
+    if (*(int*)(cGameComm_mGameComm + 0x70) < 14) {
         return 0;
     }
     if (func_00237950((sOwner237950*)self) == 0) {
@@ -2369,17 +2369,17 @@ struct sPackDst_7B28;
 extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
 extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
 extern "C" void func_00257E98(void* mgr, int a, char* buf, int len);
-extern char* D_004A2EEC;
+extern char* cGameComm_mGameComm;
 
 extern "C" void func_00237A98(void* self, sPackSrc_7B28* src)
 {
     char buf[32];
     int len = func_00237B28(self, src, (sPackDst_7B28*)buf);
     func_00237BE8(self, src, buf);
-    char* p = D_004A2EEC;
+    char* p = cGameComm_mGameComm;
     int ok = *(int*)(p + 0x40) != 0 && *(int*)(p + 4) == 0 && *(int*)(p + 0) != 0;
     if (ok) {
-        func_00257E98(D_004A2EEC, 0, buf, len);
+        func_00257E98(cGameComm_mGameComm, 0, buf, len);
     }
 }
 #endif

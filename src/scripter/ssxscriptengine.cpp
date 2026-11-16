@@ -1873,7 +1873,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C11[];
 extern int* D_00445488[];
-extern int D_00534B30[];
+extern int cBENetworkInterface_networkOpt[];
 extern int D_00481E80[];
 
 extern "C" void func_0027AAF8(cSSXScriptEngine* self, int state)
@@ -1883,7 +1883,7 @@ extern "C" void func_0027AAF8(cSSXScriptEngine* self, int state)
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int* tbl = D_00445488[D_00535C11[0]];
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (D_00534B30[0] != 0) {
+        if (cBENetworkInterface_networkOpt[0] != 0) {
             tbl = D_00481E80;
         }
         if (tbl != 0 && tbl[0] >= 0) {
@@ -1967,7 +1967,7 @@ struct sScBlk_AC60 {
     int w2[(0x64 - 0x58) / 4];
 };
 
-extern sScGame_AC60 D_00535BC8;
+extern sScGame_AC60 cBENewRaceInterface_newRace;
 extern int D_00536730[];
 extern int D_00536708[];
 extern sScTbl_AC60 D_00481E90;
@@ -1981,7 +1981,7 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
 extern "C" void func_0027AC60(cSSXScriptEngine* self)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScGame_AC60* g = &D_00535BC8;
+    sScGame_AC60* g = &cBENewRaceInterface_newRace;
     int mode = g->mode;
     if (mode == 4) {
         return;
@@ -2027,7 +2027,7 @@ done:
         }
         func_00278E50(ScriptEngine, 0, k, 1, 0, ids[0], ids[1], ids[2]);
     }
-    if (D_00535BC8.lock != 0) {
+    if (cBENewRaceInterface_newRace.lock != 0) {
         return;
     }
     if ((unsigned)mode >= 4) {
@@ -2553,7 +2553,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027BB08);
 extern "C" float func_0031C128(float x);
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern int D_00482660[];
-extern char** D_004A47B8;
+extern char** cWorld_m_pTheWorld;
 
 struct sVec_27BB08 {
     float x, y, z, w;
@@ -2668,7 +2668,7 @@ extern "C" void func_0027BB08(cSSXScriptEngine* self, int slot, sVec_27BB08* pos
     unsigned int code = tbl[slot];
     if (~code == 0)
         return;
-    char* model = ((char**)*(char**)(*D_004A47B8 + 8))[code & 0xFF];
+    char* model = ((char**)*(char**)(*cWorld_m_pTheWorld + 8))[code & 0xFF];
     char* m = Bone_27BB08(model, code);
     *pos = sVec_27BB08(*(float*)(m + 0x40), *(float*)(m + 0x44), *(float*)(m + 0x48), 1.0f);
     *yaw = Atan2_27BB08(*(float*)(m + 0x14), *(float*)(m + 0x10));

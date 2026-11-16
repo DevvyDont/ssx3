@@ -13,8 +13,8 @@ extern "C" void SphereTree_initCache(int a, int b, int c, int d);
 extern char D_00494D58[];
 extern char D_00494D68[];
 extern char D_00494D78[];
-// The unit declares D_004A47B8 as int (later); this view stores the world pointer.
-extern void* D_world_4A47B8 __asm__("D_004A47B8");
+// The unit declares cWorld_m_pTheWorld as int (later); this view stores the world pointer.
+extern void* D_world_4A47B8 __asm__("cWorld_m_pTheWorld");
 
 extern "C" void* cWorld_cWorld(void** self)
 {
@@ -39,7 +39,7 @@ struct sWorldVEntry0 {
 };
 
 extern char* D_004A5B80;
-extern int D_004A47B8;
+extern int cWorld_m_pTheWorld;
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
 extern "C" void func_003AC8F0(void* self, int flags);
 extern "C" void func_002BB140(void* self, int flags);
@@ -61,7 +61,7 @@ extern "C" void cWorld__cWorld(void** self, int flags)
         func_002BB140(self[2], 3);
     }
     func_0032DE20();
-    D_004A47B8 = 0;
+    cWorld_m_pTheWorld = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

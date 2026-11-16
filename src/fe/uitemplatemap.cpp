@@ -580,7 +580,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
-extern char D_00535BC8[];
+extern char cBENewRaceInterface_newRace[];
 
 struct sPeakUnlock_MAP {
     int pad0;
@@ -598,7 +598,7 @@ extern "C" void cUITemplate_MAP_setupPeakUnlock(void* p)
     self->unlocked[2] = 1;
     for (int peak = 1; peak < 3; peak++) {
         int locked;
-        if (D_00535BC8[0x49] == 2) {
+        if (cBENewRaceInterface_newRace[0x49] == 2) {
             locked = cBENewPlayerInterface_isPeakLocked(player, 0, cBENewPlayerInterface_getPlayerCharID(player, 0), peak);
             if (locked) {
                 locked = cBENewPlayerInterface_isPeakLocked(player, 1, cBENewPlayerInterface_getPlayerCharID(player, 1), peak);

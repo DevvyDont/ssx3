@@ -661,14 +661,14 @@ public:
 
 class func_00308760_cObj;
 extern "C" int func_00308760(void* a, func_00308760_cObj* obj);
-extern char* D_004A47B8;
+extern char* cWorld_m_pTheWorld;
 extern "C" int func_003ACA38(void* map, int id);
 extern "C" void func_002257E0(void* obj, void* stream, int a2);
 
 extern "C" void func_00308038(void* self, func_00308038_cStream* stream)
 {
     stream->v01(self, 0x10);
-    int x = func_003ACA38(*(void**)(D_004A47B8 + 0x4), *(int*)((char*)self + 0x24));
+    int x = func_003ACA38(*(void**)(cWorld_m_pTheWorld + 0x4), *(int*)((char*)self + 0x24));
     int has = *(void**)((char*)self + 0x1C) != 0;
     stream->v01(&has, 4);
     if (has) {
@@ -691,7 +691,7 @@ public:
     virtual void v02(void* data, int size);
 };
 
-extern char* D_004A47B8;
+extern char* cWorld_m_pTheWorld;
 extern char D_00489888[];
 extern "C" int func_003ACA38(void* map, int id);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
@@ -703,7 +703,7 @@ extern "C" int func_00308798(void* a, func_00308798_cObj* obj);
 extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
 {
     stream->v02(self, 0x10);
-    int x = func_003ACA38(*(void**)(D_004A47B8 + 0x4), *(int*)((char*)self + 0x24));
+    int x = func_003ACA38(*(void**)(cWorld_m_pTheWorld + 0x4), *(int*)((char*)self + 0x24));
     if (*(void**)((char*)self + 0x1C) != 0) {
         luno_cLunoTable__cLunoTable(*(void**)((char*)self + 0x1C), 3);
     }
@@ -1095,7 +1095,7 @@ extern "C" void func_0030C390(void* p);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_00308988(void* self);
 extern char D_00489C00[];
-extern char* D_004A47B8;
+extern char* cWorld_m_pTheWorld;
 // D_004A3DD8 is declared `int` later in the unit; it holds the current process.
 extern void* func_003087D0_current __asm__("D_004A3DD8");
 
@@ -1120,7 +1120,7 @@ extern "C" void* func_003087D0(void* self)
         p = next;
     }
     func_003087D0_current = self;
-    *(char**)((char*)self + 0x28C) = D_004A47B8;
+    *(char**)((char*)self + 0x28C) = cWorld_m_pTheWorld;
     MEM_fill((char*)self + 0x3CC, 0, 0xC8);
     func_00308988(self);
     return self;
