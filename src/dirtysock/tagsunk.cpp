@@ -13821,6 +13821,15 @@ extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
+/**
+ * Destroys the account-locked error event (an online::Event of type 258 with the code 'lock').
+ *
+ * Destroys the two cBXStrings at +0x10 (the reply's INTRO text) and +0xC (its DATE text), restores the online::Event
+ * base vtable online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's LobbyMan_onauthentication posts
+ * this event when the login reply's status is 'lock'.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_002682A8(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x10, 2);
@@ -13858,6 +13867,15 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
     cBXString_cBXString2(m->b, b);
 }
 
+/**
+ * Returns a heap copy of this account-locked error event (type 258, code 'lock').
+ *
+ * Allocates 20 bytes with the "NetEvent" tag, stores type 0x102 (258), code 'lock' (0x6C6F636B) at +0x8 and vtable
+ * D_004811D0 at +0x4, and copies the two strings at +0xC (DATE) and +0x10 (INTRO) with cBXString_cBXString2. The
+ * matched code's view struct calls the vtable word at +0x4 `name`; it is the vtable.
+ *
+ * @return the new event
+ */
 // Builds a "lock" message carrying the two name strings of this request.
 extern "C" void* func_00268308(char* self)
 {
@@ -13874,6 +13892,15 @@ extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
+/**
+ * Destroys the server-down error event (an online::Event of type 258 with the code 'down').
+ *
+ * Destroys the cBXString at +0xC (the server's message text), restores the online::Event base vtable online_Event_vtbl at +0x4
+ * and calls operator_delete when bit 0 of flags is set. LobbyMan's update func_0025AC50 posts this event when the lobby
+ * server reports 'down' while connecting.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00268398(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xC, 2);
@@ -13889,6 +13916,14 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002683F0);
 #ifdef SKIP_ASM
 extern void* D_004811B0[];
 
+/**
+ * Returns a heap copy of this server-down error event (type 258, code 'down').
+ *
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 258, code 'down' (0x646F776E) at +0x8 and vtable D_004811B0
+ * at +0x4, and copies the message string at +0xC with cBXString_cBXString2.
+ *
+ * @return the new event
+ */
 extern "C" void* func_002683F0(void* self)
 {
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
@@ -13908,6 +13943,15 @@ extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
+/**
+ * Destroys the find-player result event (an online::Event of type 227).
+ *
+ * Destroys the cBXStrings at +0xC (the room name) and +0x8 (the player's persona name), restores the online::Event base
+ * vtable online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's find-player reply handler
+ * LobbyMan_onPlayerFound posts this event.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00268460(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xC, 2);
@@ -13952,6 +13996,16 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
     m->f14 = d;
 }
 
+/**
+ * Returns a heap copy of this find-player result event (type 227).
+ *
+ * Allocates 44 bytes with the "NetEvent" tag and fills it like LobbyMan_onPlayerFound does: type 0xE3, vtable D_00481190, copies
+ * of the persona name (+0x8) and room name (+0xC) strings, the online flag (+0x10) and the ADDR number (+0x14), then
+ * copies the 20-byte stats record at +0x18 (RANK and STAT fields, laid out like tLobbyStats).
+ *
+ * @param src  the event to copy
+ * @return the new event
+ */
 // Clones a 0xE3 message (strings, ids and trailing data block).
 extern "C" void* func_002684C0(sMsg2684C0* src)
 {
@@ -13969,6 +14023,15 @@ extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
+/**
+ * Destroys the ping result event (an online::Event of type 229).
+ *
+ * Destroys the cBXString at +0x8 (the pinged user's name), restores the online::Event base vtable online_Event_vtbl at +0x4
+ * and calls operator_delete when bit 0 of flags is set. LobbyMan's LobbyMan_onPingReceived posts this event with the reply's NAME
+ * and PING (32656 when the reply carried an error).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00268588(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x8, 2);
@@ -13984,6 +14047,14 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002685E0);
 #ifdef SKIP_ASM
 extern void* D_00481170[];
 
+/**
+ * Returns a heap copy of this ping result event (type 229).
+ *
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 229 and vtable D_00481170, copies the name string at +0x8
+ * with cBXString_cBXString2 and the ping value at +0xC.
+ *
+ * @return the new event
+ */
 extern "C" void* func_002685E0(void* self)
 {
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
@@ -14003,6 +14074,15 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00268658);
 extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a race-setup update event (an online::Event of type 251, vtable D_00481150).
+ *
+ * The event holds no strings, so this only restores the online::Event base vtable online_Event_vtbl at +0x4 and calls
+ * operator_delete when bit 0 of flags is set. The setup manager posts these events with two words at +0x8/+0xC
+ * (func_00265458; the senders in bx/bxstringctor.cpp such as func_00269478).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_00268658(void* self, int flags)
 {
@@ -14020,6 +14100,14 @@ extern char str_NetEvent[];
 extern void* D_00481150[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
+/**
+ * Returns a heap copy of this race-setup update event (type 251).
+ *
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 251 and vtable D_00481150 and copies the two words at +0x8
+ * and +0xC.
+ *
+ * @return the new event
+ */
 extern "C" void* func_00268688(void* self)
 {
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
@@ -14039,6 +14127,15 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002686F0);
 extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a race-setup update event with three values (an online::Event of type 252, vtable D_00481130).
+ *
+ * The event holds no strings, so this only restores the online::Event base vtable online_Event_vtbl at +0x4 and calls
+ * operator_delete when bit 0 of flags is set. The setup manager's func_00265568 and the bx/bxstringctor.cpp senders
+ * post these events (words at +0x8, +0xC, +0x10).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_002686F0(void* self, int flags)
 {
@@ -14054,6 +14151,14 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00268720);
 #ifdef SKIP_ASM
 extern void* D_00481130[];
 
+/**
+ * Returns a heap copy of this three-value race-setup update event (type 252).
+ *
+ * Allocates 20 bytes with the "NetEvent" tag, stores type 0xFC and vtable D_00481130 and copies the words at +0x8, +0xC
+ * and +0x10.
+ *
+ * @return the new event
+ */
 extern "C" void* func_00268720(void* self)
 {
     int* p = (int*)cMemMan_alloc(20, str_NetEvent, 0x20000000, 0);
@@ -14075,6 +14180,14 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00268790);
 extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys the user-record event (an online::Event of type 269, vtable D_00481110).
+ *
+ * Its names are inline char arrays, not cBXStrings, so this only restores the online::Event base vtable online_Event_vtbl at
+ * +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's reply handler func_0025EB00 posts this event.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_00268790(void* self, int flags)
 {
@@ -14097,6 +14210,15 @@ struct sDsBlob14K2b {
     int v[5];
 };
 
+/**
+ * Returns a heap copy of this user-record event (type 269, 356 bytes).
+ *
+ * Allocates 356 bytes with the "NetEvent" tag, stores type 269 and vtable D_00481110, strcpy's the three name fields
+ * (+0x8 and +0x28, 0x20 bytes each; +0x48, 0x100 bytes: the reply's "M", "N" and "A" tags in func_0025EB00), copies the
+ * numbers at +0x148/+0x14C and the 20-byte stats record at +0x150.
+ *
+ * @return the new event
+ */
 // Clone of a message of type 0x10D (three names, two ints, a 20-byte blob).
 extern "C" void* func_002687C0(char* self)
 {
