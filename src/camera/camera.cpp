@@ -523,13 +523,7 @@ INCLUDE_ASM("camera/camera", func_0015E460);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // The camera base matrix (set up by func_001673F8), followed by the camera-shake tuning
 // table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in D_004C5430.

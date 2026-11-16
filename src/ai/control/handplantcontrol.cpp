@@ -1818,13 +1818,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013AF28);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 extern "C" int func_00334680(void* world, t4Vector* from, void* hit, int flags, float radius);
 extern "C" int func_001086B8(void* rider, t4Vector* tgt, t4Vector* dir);
 extern "C" void* cBE_getBE();

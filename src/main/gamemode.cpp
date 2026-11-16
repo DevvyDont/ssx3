@@ -1652,11 +1652,7 @@ INCLUDE_ASM("main/gamemode", func_0023A760);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
 // Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). D_004A2C6C owns it and
 // D_004A2C70_A760 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert

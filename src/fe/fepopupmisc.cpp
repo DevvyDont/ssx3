@@ -6989,13 +6989,7 @@ extern "C" void func_001E6668(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E6718);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
 // _vt$8cUIThing (as in fe/feasyncfile).

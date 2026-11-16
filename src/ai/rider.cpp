@@ -554,13 +554,7 @@ INCLUDE_ASM("ai/rider", cRider_loadRider);
 INCLUDE_ASM("ai/rider", func_0011D390);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 extern void* D_004A28A8;
 extern signed char D_00535BC8[];
 extern "C" void* cBE_getBE();

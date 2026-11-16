@@ -127,13 +127,7 @@ INCLUDE_ASM("ai/computer", cComputer_updateRiderDifficulty);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 // The AI's rider list (the game's +0xC object; ai/ai's sAiRiderList): riders at 0x28, their count at 0x78.
 struct sAiRiderList
 {

@@ -1402,13 +1402,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732E8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 struct sVec2 {

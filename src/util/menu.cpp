@@ -3136,13 +3136,7 @@ extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sI
 INCLUDE_ASM("util/menu", func_002CDD78);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // PORT: func_002CA408/func_002CA428 return a float (axis value, $f0); the unit declares them void*.
 float func_002CA408_f(void* self) __asm__("func_002CA408__FPv");

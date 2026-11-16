@@ -315,11 +315,7 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadUpdate);
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
 // Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // Race settings (D_00535BC8; ai/ai's sRaceSettings). D_00535C10 / D_00535C11 are splat symbols for its
 // fields at 0x48 / 0x49.

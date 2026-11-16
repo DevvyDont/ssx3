@@ -561,11 +561,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerLoadSaveUpdate);
 // FAKEMATCH: an empty ASSERT macro (`do { } while (0)`) in the isState inline, perhaps EA's compiled-out assert but unconfirmed; plain form 99.28%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // The overlay manager's 0xE0-byte device records at 0x344 (the unit's sMCDev / sMCOverlayMgr, defined later).
 struct sMCDev_7D8 {

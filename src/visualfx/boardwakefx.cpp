@@ -2861,13 +2861,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E1A80);
 
 // ---- Shared declarations: one type per real thing, used by the functions below ----
 
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 extern int D_004A3AFC;
 

@@ -532,13 +532,7 @@ extern "C" void* func_001E9A30(void* arg0, int a1)
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onCreateScreen);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 int GetHashValue32(char* str);
 

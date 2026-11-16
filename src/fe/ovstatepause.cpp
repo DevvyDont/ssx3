@@ -1160,13 +1160,7 @@ extern "C" void func_001FBCE0(void* self)
 INCLUDE_ASM("fe/ovstatepause", func_001FBD20);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 struct sColour {
     float r, g, b, a;

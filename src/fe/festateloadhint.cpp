@@ -945,13 +945,7 @@ extern "C" void func_00246CF8(void* self, char player)
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_InitwidgetMultiP);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
-// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
-template <class F> struct sVEntry {
-    short delta;
-    short index;
-    F* fn;
-};
+#include "vtable.h"
 
 // Declarations shared by the functions of this unit.
 struct cUIText;
