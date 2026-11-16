@@ -838,17 +838,17 @@ extern int D_004A43C8;
 extern int D_004A4324;
 extern int cScreenTint_m_Enable;
 
-extern "C" void func_00230050(void* self)
+extern "C" void func_00230050(cGame* self)
 {
     func_00195D50(SSXApp->FELocale);
-    void* p94 = *(void**)((char*)self + 0x94);
+    void* p94 = self->LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
     func_001F30D8(p94);
     func_00278710(D_004A28A4);
     D_004A4248->v17();
     D_004A4248->v04();
     func_00369FF8(D_004A289C);
-    cWorld_init(*(void**)((char*)self + 0x10));
+    cWorld_init(self->World);
     func_002B68D0(gWorldTriggerManager);
     func_002867E8(gSSXAudio);
     D_004A4324 = 1;
@@ -1466,9 +1466,9 @@ static inline int updateState_2306B8(cGame_2306B8* self)
     }
 }
 
-extern "C" void func_002306B8(cGame_2306B8* self)
+extern "C" void func_002306B8(cGame* self)
 {
-    if (*(unsigned int*)(self->mGameViewMan + 0x10) >= 2) {
+    if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         *(int*)(D_004A5B64 + 0x34) = 1;
     } else {
         *(int*)(D_004A5B64 + 0x34) = func_002EE400(6) > 0.9f;
@@ -1477,37 +1477,37 @@ extern "C" void func_002306B8(cGame_2306B8* self)
         func_002570D8(D_004A2EEC);
     }
     func_00278918(D_004A28A4);
-    func_00231D18_v(self);
-    if (canUpdate_2306B8(self) && updatePause_2306B8(self)) {
-        if (self->f7C != 0) {
-            func_002373B8(self->f7C);
+    func_00231D18_v(((cGame_2306B8*)self));
+    if (canUpdate_2306B8(((cGame_2306B8*)self)) && updatePause_2306B8(((cGame_2306B8*)self))) {
+        if ((char*)self->InputSync != 0) {
+            func_002373B8((char*)self->InputSync);
         }
         func_0020CFD0();
-        if (updateState_2306B8(self)) {
+        if (updateState_2306B8(((cGame_2306B8*)self))) {
             int skip;
-            if (self->f7C == 0 || func_00237950(self->f7C) != 0) {
-                if (self->f214 == 3) {
-                    func_00230F40(self);
+            if ((char*)self->InputSync == 0 || func_00237950((char*)self->InputSync) != 0) {
+                if (self->mCurrentStateID == 3) {
+                    func_00230F40(((cGame_2306B8*)self));
                     cBucketMan_mergeBucket(&gBucketMan, 1);
                 } else {
-                    func_00230F40(self);
+                    func_00230F40(((cGame_2306B8*)self));
                 }
                 if (!paused_2306B8()) {
-                    func_0026F4A8(self->f28);
+                    func_0026F4A8((char*)self->Replay);
                 }
-                if (func_00270280(self->f28) == 0 && !(D_004A2A50 & 8)) {
+                if (func_00270280((char*)self->Replay) == 0 && !(D_004A2A50 & 8)) {
                     char* w = (char*)D_004A28A4;
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(w + 0x2A8);
                     vt[5].fn(w + vt[5].delta);
                 }
             }
             skip = 0;
-            if ((D_004A2A50 & 1) || func_00270280(self->f28) != 0) {
+            if ((D_004A2A50 & 1) || func_00270280((char*)self->Replay) != 0) {
                 skip = 1;
             }
             if (!skip) {
-                if ((self->f7C != 0 && func_002379C8(self->f7C) == 0)
-                    || func_0026CE50(self->mPlaybackMan) != 0) {
+                if (((char*)self->InputSync != 0 && func_002379C8((char*)self->InputSync) == 0)
+                    || func_0026CE50((char*)self->PlaybackMan) != 0) {
                     skip = 1;
                 }
             }
@@ -1521,7 +1521,7 @@ extern "C" void func_002306B8(cGame_2306B8* self)
                     func_00355028(&gBucketMan, 1);
                 }
                 {
-                    char* c = self->fC;
+                    char* c = (char*)self->AI;
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(c + 0xCC);
                     vt[3].fn(c + vt[3].delta);
                 }
@@ -1531,10 +1531,10 @@ extern "C" void func_002306B8(cGame_2306B8* self)
                 if (!(D_004A2A50 & 4)) {
                     func_00354F98(&gBucketMan, 3);
                 }
-                func_00309270(self->f30);
-                func_002294C8(self->f38);
-                func_003440C8(self->f3C);
-                func_00357BF8(self->f40);
+                func_00309270((char*)self->WScriptMan);
+                func_002294C8((char*)self->CrowdMan2d);
+                func_003440C8((char*)self->CrowdMan3d);
+                func_00357BF8((char*)self->MultiParticleMan);
                 cBucketMan_mergeBucket(&gBucketMan, 1);
             } else {
                 func_00354F98(&gBucketMan, 5);
@@ -1544,29 +1544,29 @@ extern "C" void func_002306B8(cGame_2306B8* self)
             }
             func_00354F98(&gBucketMan, 4);
             {
-                int s = *((int*)self->f28);
+                int s = *((int*)(char*)self->Replay);
                 if (!inRace_2306B8(s) || notMode3_2306B8(s)) {
-                    cGameViewMan_updateAll(self->mGameViewMan);
+                    cGameViewMan_updateAll((char*)self->ViewMan);
                 }
             }
-            (self->fAC)++;
+            (self->mUpdateTick)++;
             {
                 unsigned int i;
-                for (i = 0; i < (((sViewList_2306B8*)self->mGameViewMan))->getCount(); i++) {
-                    func_002B7848(self->f4C, (((sViewList_2306B8*)self->mGameViewMan))->getView(i) + 0x20, i);
+                for (i = 0; i < (((sViewList_2306B8*)(char*)self->ViewMan))->getCount(); i++) {
+                    func_002B7848((char*)self->WorldSound, (((sViewList_2306B8*)(char*)self->ViewMan))->getView(i) + 0x20, i);
                 }
             }
             {
                 int i;
-                for (i = 0; i < (((sRiderList_2306B8*)self->fC))->getCount(); i++) {
-                    char* r = (((sRiderList_2306B8*)self->fC))->getRider(i);
+                for (i = 0; i < (((sRiderList_2306B8*)(char*)self->AI))->getCount(); i++) {
+                    char* r = (((sRiderList_2306B8*)(char*)self->AI))->getRider(i);
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x6C0);
                     vt[19].fn(r + vt[19].delta);
                 }
             }
         }
-        if (self->f7C != 0) {
-            func_00237948(self->f7C);
+        if ((char*)self->InputSync != 0) {
+            func_00237948((char*)self->InputSync);
         }
     }
     if (D_004A2EB8 != 0) {
@@ -1576,7 +1576,7 @@ extern "C" void func_002306B8(cGame_2306B8* self)
         cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
     }
     func_001E1458();
-    func_001F3188(self->f94);
+    func_001F3188((char*)self->LoadIndicator);
 }
 #endif
 
@@ -1625,9 +1625,9 @@ struct cMgr00230E98 {
     virtual void v15(const sVec3_00230E98& v);
 };
 
-extern "C" int func_00230E98(void* self)
+extern "C" int func_00230E98(cGame* self)
 {
-    void* obj = *(void**)((char*)self + 0x98);
+    void* obj = self->StreamPause;
     sVEntry00230E98* vt = *(sVEntry00230E98**)obj;
     if (vt[3].fn((char*)obj + vt[3].delta) == 0) {
         return 0;
@@ -1642,7 +1642,7 @@ extern "C" int func_00230E98(void* self)
     cScreenTint_m_Enable = 0;
     D_004A43C8 = 0;
     func_00278718(D_004A28A4);
-    func_001F3170(*(void**)((char*)self + 0x94));
+    func_001F3170(self->LoadIndicator);
     return 1;
 }
 #endif
@@ -1961,10 +1961,10 @@ extern "C" void func_00235990(void* p, void* s);
 extern "C" void func_00235F48(void* p, void* s);
 extern "C" void func_00236728(void* p, void* s);
 
-extern "C" void func_00231348(void* self, cStream_00231348* stream)
+extern "C" void func_00231348(cGame* self, cStream_00231348* stream)
 {
-    (*(cSerObj_00231348**)((char*)self + 0x70))->serialize(stream);
-    (*(cSerObj_00231348**)((char*)self + 0x74))->serialize(stream);
+    ((cSerObj_00231348*)self->FlagManager)->serialize(stream);
+    ((cSerObj_00231348*)self->SnowFall)->serialize(stream);
     stream->write((char*)self + 0x214, 4);
     stream->write((char*)self + 0x218, 4);
     stream->write((char*)self + 0x210, 4);
@@ -2049,7 +2049,7 @@ struct sGameLoad_14D0 {
 };
 
 // Game load state machine: restores the state ids and every state from a save stream.
-extern "C" void func_002314D0(void* self_, cStream_14D0* stream)
+extern "C" void func_002314D0(cGame* self_, cStream_14D0* stream)
 {
     sGameLoad_14D0* self = (sGameLoad_14D0*)self_;
     self->a->load(stream);
