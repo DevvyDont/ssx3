@@ -60,7 +60,7 @@ struct sAggrCharProfile {
     char pad_0xBF1[0xF88 - 0xBC1 - 16 * 3];
 };
 
-extern sAggrCharProfile D_004A6CA8[][10];
+extern sAggrCharProfile cBELibrary_profileLib[][10];
 
 extern "C" int func_00155AB0(void* self, int a, int b)
 {
@@ -69,7 +69,7 @@ extern "C" int func_00155AB0(void* self, int a, int b)
     int cb = cBELibrary_getCharacterID(b);
     if (func_00145750(cBENewRaceInterface_getThis()) == ca)
         return 2;
-    return D_004A6CA8[profile][cb].aggression[ca].v[0];
+    return cBELibrary_profileLib[profile][cb].aggression[ca].v[0];
 }
 #endif
 
@@ -81,7 +81,7 @@ int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
 extern "C" int func_00145750(void* race);
 
-extern sAggrCharProfile D_004A6CA8[][10];
+extern sAggrCharProfile cBELibrary_profileLib[][10];
 
 extern "C" int func_00155B50(void* self, int a, int b)
 {
@@ -90,7 +90,7 @@ extern "C" int func_00155B50(void* self, int a, int b)
     int cb = cBELibrary_getCharacterID(b);
     if (func_00145750(cBENewRaceInterface_getThis()) == ca)
         return 3;
-    return D_004A6CA8[profile][cb].aggression[ca].v[1];
+    return cBELibrary_profileLib[profile][cb].aggression[ca].v[1];
 }
 #endif
 
@@ -108,9 +108,9 @@ extern "C" void func_00155BF0(void* self, int a, int b, int event)
     int ca = cBELibrary_getCharacterID(a);
     int cb = cBELibrary_getCharacterID(b);
     int add = 0;
-    int oldLvl = D_004A6CA8[profile][ca].aggression[cb].v[1];
-    int pts = D_004A6CA8[profile][ca].aggression[cb].v[2];
-    int st = D_004A6CA8[profile][ca].aggression[cb].v[0];
+    int oldLvl = cBELibrary_profileLib[profile][ca].aggression[cb].v[1];
+    int pts = cBELibrary_profileLib[profile][ca].aggression[cb].v[2];
+    int st = cBELibrary_profileLib[profile][ca].aggression[cb].v[0];
     switch (event) {
     case 0:
         add = 1;
@@ -166,9 +166,9 @@ extern "C" void func_00155BF0(void* self, int a, int b, int event)
             break;
         }
     }
-    D_004A6CA8[profile][ca].aggression[cb].v[2] = pts;
-    D_004A6CA8[profile][ca].aggression[cb].v[1] = lvl;
-    D_004A6CA8[profile][ca].aggression[cb].v[0] = st;
+    cBELibrary_profileLib[profile][ca].aggression[cb].v[2] = pts;
+    cBELibrary_profileLib[profile][ca].aggression[cb].v[1] = lvl;
+    cBELibrary_profileLib[profile][ca].aggression[cb].v[0] = st;
 }
 #endif
 
@@ -179,7 +179,7 @@ INCLUDE_ASM("be/beintaggression", func_00155E58);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_001E2A08(int charID, int level);
-extern sAggrCharProfile D_004A6CA8[][10];
+extern sAggrCharProfile cBELibrary_profileLib[][10];
 
 struct sRaceSettings_155E58 {
     char pad_0x00[0x30];
@@ -196,10 +196,10 @@ extern "C" void func_00155E58(void)
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++) {
             int ca = cBELibrary_getCharacterID(i);
-            int pts = D_004A6CA8[profile][ca].aggression[j].v[2] - 3;
+            int pts = cBELibrary_profileLib[profile][ca].aggression[j].v[2] - 3;
             if (pts < 0)
                 pts = 0;
-            int st = D_004A6CA8[profile][ca].aggression[j].v[0];
+            int st = cBELibrary_profileLib[profile][ca].aggression[j].v[0];
             int lvl = pts / 5;
             if (D_005305B0.b49 == 0) {
                 func_001E2A08(j, pts);
@@ -237,9 +237,9 @@ extern "C" void func_00155E58(void)
                 }
                 break;
             }
-            D_004A6CA8[profile][ca].aggression[j].v[0] = st;
-            D_004A6CA8[profile][ca].aggression[j].v[2] = pts;
-            D_004A6CA8[profile][ca].aggression[j].v[1] = lvl;
+            cBELibrary_profileLib[profile][ca].aggression[j].v[0] = st;
+            cBELibrary_profileLib[profile][ca].aggression[j].v[2] = pts;
+            cBELibrary_profileLib[profile][ca].aggression[j].v[1] = lvl;
         }
     }
 }
@@ -266,7 +266,7 @@ extern "C" void func_001560A0(void* self, void* stream)
         {
             int c = cBELibrary_getCharacterID(i);
             sStreamVE_1560A0* vt2 = *(sStreamVE_1560A0**)stream;
-            vt2[1].fn((char*)stream + vt2[1].delta, &D_004A6CA8[profile][c].aggression[j], 3);
+            vt2[1].fn((char*)stream + vt2[1].delta, &cBELibrary_profileLib[profile][c].aggression[j], 3);
         }
     }
 }
@@ -292,7 +292,7 @@ extern "C" void func_001561B0(void* self, void* stream)
         {
             int c = cBELibrary_getCharacterID(i);
             sStreamVE_1561B0* vt2 = *(sStreamVE_1561B0**)stream;
-            vt2[2].fn((char*)stream + vt2[2].delta, &D_004A6CA8[profile][c].aggression[j], 3);
+            vt2[2].fn((char*)stream + vt2[2].delta, &cBELibrary_profileLib[profile][c].aggression[j], 3);
         }
     }
 }

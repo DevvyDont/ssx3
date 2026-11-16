@@ -778,11 +778,11 @@ extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int arg)
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B180);
 #ifdef SKIP_ASM
-extern void* D_004A3500;
+extern void* gSSXAudio;
 
 extern "C" void* func_0028B180()
 {
-    return D_004A3500;
+    return gSSXAudio;
 }
 #endif
 
@@ -954,7 +954,7 @@ extern "C" int func_003B6098(void* sema, int a1);
 extern "C" int func_003B6528(int id);
 extern "C" void func_003B6548(void* data, int id);
 extern "C" int func_003E1BB8(const char* name, void* data, int size);
-extern char* D_004A3614;
+extern char* gpBankManager;
 
 class cSndStream_B320 {
 public:
@@ -996,7 +996,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
         break;
     }
     if (*(int*)((char*)self + 0x8) == 2) {
-        (**(cSndStream_B320***)(D_004A3614 + 0x1D8))->v6(*(int*)((char*)self + 0xC));
+        (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(*(int*)((char*)self + 0xC));
     }
     switch (func_003B6098((char*)self + 0x4, (int)data)) {
     case 7: {
@@ -1027,7 +1027,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
         *(int*)self = 0;
         break;
     }
-    (**(cSndStream_B320***)(D_004A3614 + 0x1D8))->v7();
+    (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v7();
     strcpy((char*)self + 0x20, file);
 }
 #endif

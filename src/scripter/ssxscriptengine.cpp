@@ -3778,9 +3778,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D5E8);
 #ifdef SKIP_ASM
 void* cScriptObject_cScriptObject(void*, int);
 extern char D_004820B8[];
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
-// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
 extern "C" void* func_0027D5E8(void* self, int a1)
 {
@@ -3802,7 +3802,7 @@ extern "C" void* func_0027D5E8(void* self, int a1)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(D_004FF1A0)
+        : "r"((char*)self + 0x30), "r"(t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x7C) = a1;
     *(int*)((char*)self + 0x70) = 0;
@@ -3824,7 +3824,7 @@ void func_0027D680(void* self, int val)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D688);
 #ifdef SKIP_ASM
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sSeVEntryD688 {
     short delta;
@@ -3832,7 +3832,7 @@ struct sSeVEntryD688 {
     void (*fn)(void*, int);
 };
 
-// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
 extern "C" void func_0027D688(char* self, void* anim)
 {
@@ -3859,7 +3859,7 @@ extern "C" void func_0027D688(char* self, void* anim)
             "sqc2      $vf4, 0x30(%0)\n"
             ".set reorder\n"
             :
-            : "r"(self + 0x30), "r"(D_004FF1A0)
+            : "r"(self + 0x30), "r"(t4mat_Identity)
             : "memory");
         *(int*)(self + 0x70) = 0;
         *(int*)(self + 0x74) = 0;
@@ -4191,9 +4191,9 @@ char* func_0027C2A8_D970(void* self) __asm__("func_0027C2A8__FPv");
 char* func_0027C4B8_D970(void* self) __asm__("func_0027C4B8__FPv");
 char* func_0027C6A0_D970(void* self) __asm__("func_0027C6A0__FPv");
 extern void* D_004A28A4;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern float D_004FF140_D970[] __asm__("D_004FF140");
-extern float D_004FF150_D970[] __asm__("D_004FF150");
+extern float D_004FF150_D970[] __asm__("t4vect_YAxis");
 extern float D_004FF160_D970[] __asm__("D_004FF160");
 extern "C" void func_0027A0D8_f(void* self, int type, void* a2, sVec4_SE* out, float* roll, float* pitch, float* yaw) __asm__("func_0027A0D8");
 
@@ -4207,7 +4207,7 @@ extern "C" void func_0027A0D8_f(void* self, int type, void* a2, sVec4_SE* out, f
         (SELF)->rz = *(float*)((REC) + 0x14) * 0.01745329424738884f; \
         VSet_SE(&v, *(float*)((REC) + 8), *(float*)((REC) + 0xC), *(float*)((REC) + 0x10), 1.0f); \
         sRotMat_SE* m = &M; \
-        CopyMat_SE(m, D_004FF1A0); \
+        CopyMat_SE(m, t4mat_Identity); \
         Translate_SE(m, &v); \
         ROTATE_SE(m, D_004FF160_D970, -(SELF)->rz); \
         ROTATE_SE(m, D_004FF150_D970, (SELF)->ry); \
@@ -4233,7 +4233,7 @@ extern "C" void func_0027D970_SE(sScrCam_SE* self, sScrCam_SE* cam) __asm__("fun
 extern "C" void func_0027D970_SE(sScrCam_SE* self, sScrCam_SE* cam)
 {
     char* owner = cam->owner;
-    CopyMat_SE(&self->mat, D_004FF1A0);
+    CopyMat_SE(&self->mat, t4mat_Identity);
     self->rx = 0.0f;
     self->ry = 0.0f;
     self->rz = 0.0f;
@@ -4275,9 +4275,9 @@ void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
 extern char D_00481FD8[];
 extern char D_00482018[];
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
-// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
 extern "C" void* func_0027F968(void* self)
 {
@@ -4299,7 +4299,7 @@ extern "C" void* func_0027F968(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(D_004FF1A0)
+        : "r"((char*)self + 0x30), "r"(t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x70) = 0;
     *(int*)((char*)self + 0x74) = 0;
@@ -4320,9 +4320,9 @@ void* func_00279EF8_2(void* engine, int id) __asm__("func_00279EF8__FPv");
 extern "C" void func_0027A0D8(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern void* D_004A28A4;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern float D_004FF140[4];
-extern float D_004FF150[4];
+extern float t4vect_YAxis[4];
 extern float D_004FF160[4];
 
 struct sMat_F9F8 {
@@ -4341,7 +4341,7 @@ struct sScriptObj_F9F8 {
     void* anim1;                // 0x20
 };
 
-// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, the identity).
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, the identity).
 static inline void LoadIdentity_F9F8(void* dst)
 {
     __asm__ __volatile__(
@@ -4356,7 +4356,7 @@ static inline void LoadIdentity_F9F8(void* dst)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(dst), "r"(D_004FF1A0)
+        : "r"(dst), "r"(t4mat_Identity)
         : "memory");
 }
 
@@ -4532,14 +4532,14 @@ extern "C" void func_0027F9F8(char* self)
     LoadIdentity_F9F8(&m);
     Translate_F9F8(&m, v);
     ROTATE_F9F8(&m, D_004FF160, -*(float*)(self + 0x78));
-    ROTATE_F9F8(&m, D_004FF150, *(float*)(self + 0x74));
+    ROTATE_F9F8(&m, t4vect_YAxis, *(float*)(self + 0x74));
     ROTATE_F9F8(&m, D_004FF140, *(float*)(self + 0x70));
     sVec_F9F8 pos;
     float rx, ry, rz;
     func_0027A0D8(D_004A28A4, *(signed char*)(info + 1), *(void**)((char*)obj + 0x8), &pos, &rx, &ry, &rz);
     Translate_F9F8(mat, pos);
     ROTATE2_F9F8(mat, D_004FF160, -rz);
-    ROTATE2_F9F8(mat, D_004FF150, ry);
+    ROTATE2_F9F8(mat, t4vect_YAxis, ry);
     ROTATE2_F9F8(mat, D_004FF140, rx);
     MulMat_F9F8(mat, mat, &m);
     *(float*)(self + 0x70) += rx;
@@ -4555,9 +4555,9 @@ extern "C" void func_0027F9F8(char* self)
 INCLUDE_ASM("scripter/ssxscriptengine", func_002803F0);
 #ifdef SKIP_ASM
 void func_00283440(void*);
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
-// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, likely identity);
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
 extern "C" void func_002803F0(void* self)
 {
@@ -4574,7 +4574,7 @@ extern "C" void func_002803F0(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(D_004FF1A0)
+        : "r"((char*)self + 0x30), "r"(t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x70) = 0;
     *(int*)((char*)self + 0x74) = 0;

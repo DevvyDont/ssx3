@@ -139,7 +139,7 @@ struct cRider {
     /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (func_001242B0)
     /* 0x3B0 */ t4Vector mGroundSide; // [X] Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, func_001242B0)
     /* 0x3C0 */ char unk_3C0[0x10];
-    /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or D_004FF120 on a miss (func_001242B0)
+    /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or t4vect_Zero on a miss (func_001242B0)
     /* 0x3E0 */ t4Vector mImpulse; // [X] damped by 0.98 per frame (func_001210B0)
     /* 0x3F0 */ float mImpactAccum; // [X]
     /* 0x3F4 */ float mImpactAccum2; // [X]
@@ -235,7 +235,7 @@ struct cRider {
     /* 0x8EC */ char unk_8EC[0x2C];
     /* 0x918 */ int unk_918; // bone index (func_00122898)
     /* 0x91C */ char unk_91C[0xB4];
-    /* 0x9D0 */ t4Vector mModelOffset; // [X] reset to D_004FF120 each frame
+    /* 0x9D0 */ t4Vector mModelOffset; // [X] reset to t4vect_Zero each frame
     /* 0x9E0 */ char unk_9E0[0x50];
     /* 0xA30 */ void* unk_A30;
     /* 0xA34 */ char unk_A34[0x2C];

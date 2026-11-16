@@ -1986,7 +1986,7 @@ extern "C" void func_0017FB98(void* self)
 INCLUDE_ASM("fe/debugfe", func_0017FBF0);
 #ifdef SKIP_ASM
 extern char* D_004A289C;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern "C" int func_00231D60(void* self);
 extern "C" void func_0017F500(void* self, int a1);
 
@@ -2049,7 +2049,7 @@ extern "C" int func_0017FBF0(char* self)
         ((FnView_17FBF0)vt2[26].fn)(m2 + vt2[26].delta, 0, 0, zero, zero, 640.0f, 480.0f, -1.0f, one);
         char* m3 = D_004A289C;
         sVEnt_17FBF0* vt3 = *(sVEnt_17FBF0**)(m3 + 0x10D8);
-        ((FnP_17FBF0)vt3[34].fn)(m3 + vt3[34].delta, D_004FF1A0);
+        ((FnP_17FBF0)vt3[34].fn)(m3 + vt3[34].delta, t4mat_Identity);
         char* m4 = D_004A289C;
         setB23_17FBF0(rs_17FBF0(m4), 2);
         setB20_17FBF0(rs_17FBF0(m4), 3);

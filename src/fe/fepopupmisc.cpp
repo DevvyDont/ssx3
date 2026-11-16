@@ -5083,7 +5083,7 @@ extern "C" void func_001E3A78(int a, int b)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3AC8);
 #ifdef SKIP_ASM
-extern char* D_004A28A0;
+extern char* PadCache;
 
 class cSnd_3AC8 {
 public:
@@ -5104,8 +5104,8 @@ extern "C" void func_001E3AC8(int idx, float x, float y)
     }
     y = y * 0.9916666746139526f;
     cSnd_3AC8* s = 0;
-    if (D_004A28A0 != 0) {
-        s = *(cSnd_3AC8**)(D_004A28A0 + (i << 2) + 0x2EEC);
+    if (PadCache != 0) {
+        s = *(cSnd_3AC8**)(PadCache + (i << 2) + 0x2EEC);
     }
     if (s->getState() == 2) {
         s->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (a - 2.0f) / 972.2222290039062f) >? 0.0f);

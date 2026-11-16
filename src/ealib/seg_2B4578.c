@@ -178,10 +178,10 @@ void SHAPE_locate(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_depth);
 #ifdef SKIP_ASM
-extern unsigned char D_0044C3D0[];
+extern unsigned char shapetypetobpp[];
 
 unsigned char SHAPE_depth(unsigned char *arg0) {
-    return D_0044C3D0[*arg0 & 0x7F];
+    return shapetypetobpp[*arg0 & 0x7F];
 }
 #endif
 
@@ -189,7 +189,7 @@ unsigned char SHAPE_depth(unsigned char *arg0) {
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_depth1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char D_0044C3D0_39F8[128] __asm__("D_0044C3D0");
+extern unsigned char D_0044C3D0_39F8[128] __asm__("shapetypetobpp");
 
 unsigned char SHAPE_depth1(int arg0) {
     return D_0044C3D0_39F8[arg0 & 0x7F];
@@ -675,12 +675,12 @@ int func_003B4448(int arg0, int arg1, int arg2) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4458);
 #ifdef SKIP_ASM
 extern int D_0044C450[];
-extern int D_0044C454[];
+extern int SHAPE_memallocalign[];
 extern int D_0044C458[];
 
 void func_003B4458(int arg0, int arg1, int arg2) {
     D_0044C450[0] = arg0;
-    D_0044C454[0] = arg1;
+    SHAPE_memallocalign[0] = arg1;
     D_0044C458[0] = arg2;
 }
 #endif
@@ -781,7 +781,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_clone);
 extern int SHAPE_clonesize_4690(int) __asm__("SHAPE_clonesize");
 extern void *SHAPE_longname_4690(int) __asm__("SHAPE_longname");
 extern void SHAPE_cloneat_4690(void *, int) __asm__("SHAPE_cloneat");
-extern void *(*D_0044C454_4690)(void *, int, int, int, int) __asm__("D_0044C454");
+extern void *(*D_0044C454_4690)(void *, int, int, int, int) __asm__("SHAPE_memallocalign");
 
 void *SHAPE_clone(int arg0) {
     int sz = SHAPE_clonesize_4690(arg0);

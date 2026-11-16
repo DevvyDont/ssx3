@@ -29,7 +29,7 @@ void* cBEEconInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b)
 {
@@ -39,7 +39,7 @@ extern "C" int cBEEconInterface_getMoney(void* self, int a, int b)
     int bOff = b * 0xF88;
     int aOff = a * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC4);
 }
 #endif
@@ -57,12 +57,12 @@ extern "C" int func_00150960(void* self, int rider)
     int bOff = b * 0xF88;
     int aOff = a * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC4);
 }
 #endif
 
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
@@ -75,7 +75,7 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b)
     int bOff = b * 0xF88;
     int aOff = a * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC8);
 }
 #endif
@@ -93,7 +93,7 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
     int bOff = b * 0xF88;
     int aOff = a * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC8);
 }
 #endif
@@ -107,7 +107,7 @@ extern "C" void func_00150A58(void* self, int a, int b, int value)
         int bOff = b * 0xF88;
         int aOff = a * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         *(int*)(p + 0xAC4) = value;
     }
 }
@@ -116,7 +116,7 @@ extern "C" void func_00150A58(void* self, int a, int b, int value)
 //100%
 INCLUDE_ASM("be/beintecon", func_00150A90);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int func_00150A90(void* self, int a, int b, int amount)
 {
@@ -126,7 +126,7 @@ extern "C" int func_00150A90(void* self, int a, int b, int amount)
     int bOff = b * 0xF88;
     int aOff = a * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0xAC4) += amount;
     *(int*)(p + 0xAC8) += amount;
     return *(int*)(p + 0xAC4);
@@ -149,7 +149,7 @@ extern "C" int func_00150AE0(void* self, int rider, int a2)
 //100%
 INCLUDE_ASM("be/beintecon", func_00150B48);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int func_00150B48(void* self, int a, int b, int amount)
 {
@@ -159,7 +159,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount)
     int bOff = b * 0xF88;
     int aOff = a * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC4) -= amount;
 }
 #endif
@@ -167,7 +167,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount)
 //100%
 INCLUDE_ASM("be/beintecon", func_00150B88);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit unsigned long flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
 struct sPeakBits_0B88 {
@@ -188,13 +188,13 @@ extern "C" int func_00150B88(void* self, int a, int b, int peak, int unlocked)
         int bOff = b * 0xF88;
         int aOff = a * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         ((sPeakBits_0B88*)(p + 0x278))->peak1 = unlocked;
     } else if (peak == 2) {
         int bOff = b * 0xF88;
         int aOff = a * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         ((sPeakBits_0B88*)(p + 0x278))->peak2 = unlocked;
     }
     return 1;
@@ -229,35 +229,35 @@ extern "C" int func_00150C20(void* self, int arg1, int arg2, unsigned int arg3) 
     }
     {
         p = 0;
-        cur = ((sEconRec_0C20*)((arg1 * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->unk_AC4;
+        cur = ((sEconRec_0C20*)((arg1 * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->unk_AC4;
         switch (arg3) {
         case 0:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[0];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[0];
             break;
         case 1:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[1];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[1];
             break;
         case 2:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[2];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[2];
             break;
         case 3:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[3];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[3];
             break;
         case 4:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[4];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[4];
             break;
         case 5:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[5];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[5];
             break;
         case 6:
-            p = &((sEconRec_0C20(*)[10])D_004A6CA8)[arg1][arg2].f[6];
+            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[6];
             break;
         }
         cost = func_00150E50(self, *p / 5 - 1);
         if (cur < cost || *p == 0x37) {
             return 0;
         }
-        sEconRec_0C20* r = (sEconRec_0C20*)((arg2 * 0xF88 + arg1 * 0x9B50) + (char*)D_004A6CA8);
+        sEconRec_0C20* r = (sEconRec_0C20*)((arg2 * 0xF88 + arg1 * 0x9B50) + (char*)cBELibrary_profileLib);
         r->unk_AC4 = r->unk_AC4 - cost;
         *p = (unsigned char)*p + 1;
         cBEStatInterface_getThis()->v2();
@@ -301,19 +301,19 @@ extern "C" int func_00150E68(void* self, int profile, int c, unsigned int kind)
     if (profile >= 2) return 0;
     p = 0;
     switch (kind) {
-    case 0: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBDF]; break;
-    case 1: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE0]; break;
-    case 2: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE1]; break;
-    case 3: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE2]; break;
-    case 4: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE3]; break;
-    case 5: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE4]; break;
-    case 6: p = &((sProf0E68 (*)[10])D_004A6CA8)[profile][c].s[0xBE5]; break;
+    case 0: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBDF]; break;
+    case 1: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE0]; break;
+    case 2: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE1]; break;
+    case 3: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE2]; break;
+    case 4: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE3]; break;
+    case 5: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE4]; break;
+    case 6: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE5]; break;
     }
     if (*p == 5) return 0;
     {
         int v = D_00440550_0E68[(*p - 1) / 5].b;
         int off = c * 0xF88 + profile * 0x9B50;
-        char* q = (char*)D_004A6CA8 + off;
+        char* q = (char*)cBELibrary_profileLib + off;
         *(int*)(q + 0xAC4) += v;
     }
     (*p)++;
@@ -435,25 +435,25 @@ extern "C" int func_001511E8(void* self, int arg1, int arg2, unsigned int arg3) 
         p = 0;
         switch (arg3) {
         case 0:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[0];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[0];
             break;
         case 1:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[1];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[1];
             break;
         case 2:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[2];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[2];
             break;
         case 3:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[3];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[3];
             break;
         case 4:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[4];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[4];
             break;
         case 5:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[5];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[5];
             break;
         case 6:
-            p = &((sEconRec(*)[10])D_004A6CA8)[arg1][arg2].f[6];
+            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[6];
             break;
         }
         return ((sEconTable*)D_00440550)->entries[(*p + 1) / 5].value;

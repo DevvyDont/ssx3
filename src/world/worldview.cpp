@@ -705,7 +705,7 @@ struct func_003AA438_sEnt {
     unsigned int fC;
 };
 
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
 extern "C" int func_003AA438(func_003AA438_cObj* self, void* a1)
@@ -719,7 +719,7 @@ extern "C" int func_003AA438(func_003AA438_cObj* self, void* a1)
             self->v07((void*)e->f4, a1);
         }
         if (e->fC == 0xFFFFFFFF) {
-            e->fC = (unsigned int)D_004FF1A0;
+            e->fC = (unsigned int)t4mat_Identity;
         } else {
             e->fC += (int)a1;
         }
@@ -827,7 +827,7 @@ struct func_003AA608_sEnt {
     unsigned int fC;
 };
 
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
 extern "C" int func_003AA608(func_003AA608_cObj* self, void* a1)
@@ -841,7 +841,7 @@ extern "C" int func_003AA608(func_003AA608_cObj* self, void* a1)
             self->v16((void*)e->f4);
         }
         if (e->fC == 0xFFFFFFFF) {
-            e->fC = (unsigned int)D_004FF1A0;
+            e->fC = (unsigned int)t4mat_Identity;
         } else {
             e->fC += (int)a1;
         }

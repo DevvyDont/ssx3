@@ -1298,7 +1298,7 @@ struct sGfxVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern cQuad128 D_004FF120;
+extern cQuad128 t4vect_Zero;
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
 static inline sGfxVec4 vu0DivGM(const sGfxVec4& v, float s)
@@ -1333,7 +1333,7 @@ extern "C" void func_0036CBF8(char* self, int w, int h, float x, float y, float 
     one.y = 1.0f;
     one.z = 0.0f;
     one.w = 0.0f;
-    *(cQuad128*)(self + 0x130) = D_004FF120;
+    *(cQuad128*)(self + 0x130) = t4vect_Zero;
     *(sGfxVec4*)(self + 0x140) = one;
 }
 #endif
@@ -1403,8 +1403,8 @@ INCLUDE_ASM("render/graphicsman", func_0036CE58);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_0036CE58(void *arg0, long long *arg1) {
     (*(long long *)((char*)(arg0) + (0xB0))) = (long long) *arg1;
-    (*(long long *)((char*)(arg0) + (0xC0))) = (long long) D_004FF120;
-    (*(long long *)((char*)(arg0) + (0xD0))) = (long long) D_004FF120;
+    (*(long long *)((char*)(arg0) + (0xC0))) = (long long) t4vect_Zero;
+    (*(long long *)((char*)(arg0) + (0xD0))) = (long long) t4vect_Zero;
 }
 #endif
 //100%
@@ -1446,7 +1446,7 @@ extern "C" void func_0036CE80(char* self, sGfxVec4* a, sGfxVec4* b)
 {
     *(sGfxVec4*)(self + 0xB0) = vu0Sub_CE80(vu0Scale_CE80(*a, 2.0f), *b);
     *(sGfxVec4*)(self + 0xC0) = vu0Sub_CE80(*b, *a);
-    *(cQuad128*)(self + 0xD0) = D_004FF120;
+    *(cQuad128*)(self + 0xD0) = t4vect_Zero;
 }
 #endif
 
@@ -1508,7 +1508,7 @@ extern "C" void func_0036CEF8(char* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c)
 }
 #endif
 
-extern cQuad128 D_004FF120;
+extern cQuad128 t4vect_Zero;
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CFA8);
@@ -1524,7 +1524,7 @@ INCLUDE_ASM("render/graphicsman", func_0036D008);
 #ifdef SKIP_ASM
 extern "C" void func_0036D008(void* self)
 {
-    *(cQuad128*)((char*)self + 0xe0) = D_004FF120;
+    *(cQuad128*)((char*)self + 0xe0) = t4vect_Zero;
 }
 #endif
 
@@ -1546,7 +1546,7 @@ struct sGmFrustum_D020 {
 };
 
 extern sGmVec4_D020 D_004FF140;
-extern sGmVec4_D020 D_004FF150;
+extern sGmVec4_D020 t4vect_YAxis;
 
 // PORT: PS2-only VU0 inline asm (v / s).
 static inline sGmVec4_D020 gmDivD020(const sGmVec4_D020& v, float s)
@@ -1683,11 +1683,11 @@ extern "C" void func_0036D020(sGmFrustum_D020* self, const sGmVec4_D020* dir, fl
 {
     self->v70 = gmDivD020(*dir, self->scale);
     float len = gmLengthD020(self->v70);
-    const sGmVec4_D020* axis = (dir->x != 0.0f) ? &D_004FF150 : &D_004FF140;
+    const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &D_004FF140;
     sGmVec4_D020 norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
     self->v80 = gmScaleD020(gmScaleD020(norm, s), len);
     self->v90 = gmScaleD020(gmCrossD020(self->v70, norm), s);
-    *(cQuad128*)&self->vA0 = D_004FF120;
+    *(cQuad128*)&self->vA0 = t4vect_Zero;
     gmSubFromD020(self->v70, gmScaleD020(gmAddD020(gmAddD020(self->v80, self->v90), self->vA0), 1.5f));
 }
 #endif

@@ -384,7 +384,7 @@ struct sMat_1150 {
     sVec4_1150 r[4];
 };
 
-extern sVec4_1150 D_004FF120;
+extern sVec4_1150 t4vect_Zero;
 
 struct sFx_1150 {
     char* owner;
@@ -492,7 +492,7 @@ extern "C" void func_002F1150(sFx_1150* self)
         sVec4_1150 base = *(sVec4_1150*)(*(char**)(*(char**)(self->owner + 0x780) + 0x30) + (bone << 6) + 0x30);
         sMat_1150 m;
         CopyMat_1150(&m, &(*(sMat_1150**)(*(char**)(self->owner + 0x780) + 0x30))[bone]);
-        m.r[3] = D_004FF120;
+        m.r[3] = t4vect_Zero;
         sVec4_1150 v;
         sVec4_1150 rnd;
         {
@@ -941,7 +941,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
 {
     if (self->ready == 0)
         func_002F22C8((sObj_22C8*)self);
-    sVec4_1150 vel = D_004FF120;
+    sVec4_1150 vel = t4vect_Zero;
     self->fA0 = 0;
     sVec4_1150 nrm;
     nrm.x = 0.0f;
@@ -1002,7 +1002,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
             if (off.x != 0.0f || off.y != 0.0f || off.z != 0.0f) {
                 sMat_1150 m;
                 CopyMat_1150(&m, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
-                m.r[3] = D_004FF120;
+                m.r[3] = t4vect_Zero;
                 off = mul_1A08(m, off);
                 addEq_1A08(pos, off);
             }
@@ -1013,7 +1013,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
             if (d->dirX != 0.0f || d->dirY != 0.0f || d->dirZ != 0.0f) {
                 sMat_1150 m;
                 CopyMat_1150(&m, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
-                m.r[3] = D_004FF120;
+                m.r[3] = t4vect_Zero;
                 float dx = d->dirX;
                 float dy = d->dirY;
                 float dz = d->dirZ;
@@ -2317,7 +2317,7 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 extern int D_004A424C;
 extern int D_004A4250;
 extern int D_004A3B60;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sV2_3E28 {
     float x, y;
@@ -2421,7 +2421,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
     sV2_3E28 scr = screen;
     g->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
     g->Begin2D();
-    g->SetTexture(D_004FF1A0);
+    g->SetTexture(t4mat_Identity);
     g->stateTop[1] = g->stateTop[0];
     g->stateTop++;
     *g->stateTop = D_00501420;
@@ -2818,7 +2818,7 @@ extern "C" float func_002EE1D8(int);
 extern "C" int func_002EE220(int);
 extern "C" float func_002EE2B0(int);
 extern "C" void func_002F4690_4A08(void*, void*) __asm__("func_002F4690");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sV2_4A08 {
     float x, y;
@@ -2924,7 +2924,7 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     gfx->BeginScene();
     gfx->SetViewport(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
     gfx->Begin2D();
-    gfx->SetTexture(D_004FF1A0);
+    gfx->SetTexture(t4mat_Identity);
     gfx->stateTop->SetF22(1);
     gfx->stateTop->f4_23 = 2;
     gfx->stateTop->f4_20 = 0;
@@ -3140,7 +3140,7 @@ INCLUDE_ASM("seg/seg_1F1548", cWorldLightMan_cWorldLightMan);
 extern "C" void cWorldLightMan_initLightCache(void *);
 struct cWorldPainterManArg;
 void *cWorldPainterMan_getQuery(void *, cWorldPainterManArg *);
-extern char D_004A5598;
+extern char kWPR_Lighting;
 struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
 struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 
@@ -3150,7 +3150,7 @@ extern "C" void *cWorldLightMan_cWorldLightMan(void *arg0, int arg1) {
     *(int *)arg0 = arg1;
     cWorldLightMan_initLightCache(arg0);
     char *t = (char*)SSXApp->Game->World;
-    *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&D_004A5598);
+    *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&kWPR_Lighting);
     return arg0;
 }
 #endif

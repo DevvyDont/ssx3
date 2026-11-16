@@ -111,7 +111,7 @@ extern char D_0048FF30[];
 extern char D_0048E820[];
 
 struct sFrV_8D98 { float x, y, z, w; } __attribute__((aligned(16)));
-extern sFrV_8D98 D_004FF120;
+extern sFrV_8D98 t4vect_Zero;
 
 struct sFlexRailRef_348D98 {
     unsigned int id;
@@ -153,8 +153,8 @@ extern "C" void* func_00348D98(char* self, void* a1, char* desc)
     for (int j = 0; j < *(int*)(self + 0x20); j++) {
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].link.id = refs[j].id;
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].bone = bones[j];
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].vel = D_004FF120;
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].force = D_004FF120;
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].vel = t4vect_Zero;
+        (*(sFlexRailElem_348D98**)(self + 0x70))[j].force = t4vect_Zero;
         func_00349220(self, (sFrNode9220*)&(*(sFlexRailElem_348D98**)(self + 0x70))[j]);
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].posB = (*(sFlexRailElem_348D98**)(self + 0x70))[j].posA;
     }
@@ -589,7 +589,7 @@ struct sFrN_98E8 {
 extern "C" float func_002D1C70();
 extern "C" void func_00349220(void* self, sFrNode9220* node);
 // View (func_00348D98 earlier in this unit declares it with its own type).
-extern sFrV_98E8 D_004FF120_98E8 __asm__("D_004FF120");
+extern sFrV_98E8 D_004FF120_98E8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sFrV_98E8 vu0Sub_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
@@ -703,7 +703,7 @@ extern char D_0048FD90[];
 extern char D_0048E830[];
 
 struct sFrV_9B48 { float x, y, z, w; } __attribute__((aligned(16)));
-extern sFrV_9B48 D_004FF120_9B48 __asm__("D_004FF120");
+extern sFrV_9B48 D_004FF120_9B48 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sFrV_9B48 Sub_9B48(const sFrV_9B48& a, const sFrV_9B48& b)
@@ -1306,8 +1306,8 @@ struct sV4Slot_A8C8 {
     sV4Slot_A8C8() {}
 };
 
-// PORT: the unit declares D_004FF120 with another vector type; alias it here.
-extern sV4_A8C8 D_004FF120_A8C8 __asm__("D_004FF120");
+// PORT: the unit declares t4vect_Zero with another vector type; alias it here.
+extern sV4_A8C8 D_004FF120_A8C8 __asm__("t4vect_Zero");
 
 struct sFrElem_A8C8 {
     sV4_A8C8 pos;               // 0x00

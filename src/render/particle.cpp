@@ -58,15 +58,15 @@ struct sVec4A {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sVec4A D_004FF120;
+extern sVec4A t4vect_Zero;
 
 extern "C" void cBaseClass_DynamicEmitter_reset(void* self)
 {
     int i;
     *(int*)((char*)self + 0x17C) = 0;
     for (i = 0; i < *(int*)((char*)self + 0x178); i++) {
-        (*(sVec4A**)((char*)self + 0x1A0))[i] = D_004FF120;
-        (*(sVec4A**)((char*)self + 0x1A4))[i] = D_004FF120;
+        (*(sVec4A**)((char*)self + 0x1A0))[i] = t4vect_Zero;
+        (*(sVec4A**)((char*)self + 0x1A4))[i] = t4vect_Zero;
         *(int*)((char*)self + 0x17C) = 0;
         *(int*)((char*)self + 0x1E0) = 0;
     }
@@ -80,7 +80,7 @@ int BXrand();
 
 extern "C" void func_0036CBF8(void* sys, int count, int a2, sVec4A* v, float a, float b, float c);
 extern "C" void func_00370058(void* sys, void* a1, void* def, void* a3, float f);
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sGsState_00370DC8 {
     int w0;
@@ -187,9 +187,9 @@ extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
         self->count = (int)fceil_00370DC8(frames);
         changed = 1;
     }
-    *(sVec4A*)self->v1B0 = D_004FF120;
-    *(sVec4A*)self->v1C0 = D_004FF120;
-    *(sVec4A*)self->v1D0 = D_004FF120;
+    *(sVec4A*)self->v1B0 = t4vect_Zero;
+    *(sVec4A*)self->v1C0 = t4vect_Zero;
+    *(sVec4A*)self->v1D0 = t4vect_Zero;
     float l = life_00370DC8(def);
     sVec4A v;
     v.x = *(float*)(def + 0x78);
@@ -198,7 +198,7 @@ extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
     v.w = 0.0f;
     func_0036CBF8(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &v, l,
                   *(float*)(def + 0x20), *(float*)(def + 0xC));
-    func_00370058(self->sys, D_004FF1A0, def, self->f180, f);
+    func_00370058(self->sys, t4mat_Identity, def, self->f180, f);
     if (changed) {
         self->v01(0);
         self->v05();
@@ -12173,9 +12173,9 @@ extern int D_004A59A4;
 extern char* D_004A5B80_9CB8 __asm__("D_004A5B80");
 extern sV_9CB8 D_004FF130;
 extern sV_9CB8 D_004FF140_9CB8 __asm__("D_004FF140");
-extern sV_9CB8 D_004FF150_9CB8 __asm__("D_004FF150");
+extern sV_9CB8 D_004FF150_9CB8 __asm__("t4vect_YAxis");
 extern sV_9CB8 D_004FF160_9CB8 __asm__("D_004FF160");
-extern sMat_9CB8 D_004FF1A0_9CB8 __asm__("D_004FF1A0");
+extern sMat_9CB8 D_004FF1A0_9CB8 __asm__("t4mat_Identity");
 extern sMat_9CB8 D_00500C60;
 
 extern "C" void func_0031BE50(float* s, float* c, float angle);

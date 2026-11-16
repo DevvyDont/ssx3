@@ -343,7 +343,7 @@ typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*,
 
 extern sDfCam_350CB8** D_004A47B8_350CB8 __asm__("D_004A47B8");
 extern cDfGfx_350CB8* D_004A5B80_350CB8 __asm__("D_004A5B80");
-extern sDfMat_350CB8 D_004FF1A0_350CB8 __asm__("D_004FF1A0");
+extern sDfMat_350CB8 D_004FF1A0_350CB8 __asm__("t4mat_Identity");
 
 #define OBJ_350CB8(s) (*(sDfObj_350CB8**)((char*)(s) + 0x18))
 

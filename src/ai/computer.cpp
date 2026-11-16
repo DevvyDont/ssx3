@@ -1508,7 +1508,7 @@ extern "C" float func_00119D40(void* self, int stance, int alternate, int style,
 extern "C" int func_00149778(void* self, int rider, int value);
 void func_00270870_10E910(void* self, int key, void* p) __asm__("func_00270870");
 extern "C" void func_002948D0(void* mgr, void* rider, float v);
-extern void* D_004A3500;
+extern void* gSSXAudio;
 
 struct sVE_0010E910 { short delta; short index; int (*fn)(void*); };
 struct sVEf_0010E910 { short delta; short index; void (*fn)(void*, float); };
@@ -1555,7 +1555,7 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
         *(float*)(self + 0x2EC) = 0.0f;
     sVEf_0010E910* vf = &(*(sVEf_0010E910**)(self + 0x6C0))[17];
     vf->fn(self + vf->delta, t * 0.5f);
-    func_002948D0(D_004A3500, self, r);
+    func_002948D0(gSSXAudio, self, r);
 }
 #endif
 

@@ -59,7 +59,7 @@ INCLUDE_ASM("be/beintplayer", func_001459B8);
 struct sRecords_59B8 {
     int w[42];
 };
-extern sRecords_59B8 D_00535B20_59B8 __asm__("D_00535B20");
+extern sRecords_59B8 D_00535B20_59B8 __asm__("cBELibrary_playerDB");
 extern sRecords_59B8 D_00534FE0_59B8 __asm__("D_00534FE0");
 extern void* D_004A11C0;
 // PORT: func_00145A98 takes no arguments; this caller passes its own self through untouched in $a0.
@@ -93,7 +93,7 @@ struct sCharEntryBits_00145A98 {
 
 // Bitfield views of the two 0x1C-byte character tables.
 extern sCharEntryBits_00145A98 D_00534FE0_bits[] __asm__("D_00534FE0");
-extern sCharEntryBits_00145A98 D_00535B20_bits[] __asm__("D_00535B20");
+extern sCharEntryBits_00145A98 D_00535B20_bits[] __asm__("cBELibrary_playerDB");
 
 extern "C" void func_00145A98(void)
 {
@@ -113,11 +113,11 @@ struct sPlayerTable_00145B20
     sPlayerCharEntry entries[6];
 };
 
-extern sPlayerTable_00145B20 D_00535B20;
+extern sPlayerTable_00145B20 cBELibrary_playerDB;
 
 extern "C" void func_00145B20(void* self)
 {
-    *(sPlayerTable_00145B20*)D_00534FE0 = D_00535B20;
+    *(sPlayerTable_00145B20*)D_00534FE0 = cBELibrary_playerDB;
 }
 #endif
 
@@ -142,7 +142,7 @@ struct sCtrlEntry00145BD8 {
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self)
 {
     int i;
-    sCtrlEntry00145BD8* e = (sCtrlEntry00145BD8*)&D_00535B20;
+    sCtrlEntry00145BD8* e = (sCtrlEntry00145BD8*)&cBELibrary_playerDB;
     for (i = 0; i < 6; i++)
     {
         ((char*)&e[i])[0x13] = 0;
@@ -158,7 +158,7 @@ INCLUDE_ASM("be/beintplayer", func_00145C38);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int func_00145C38(void* self, int index)
 {
@@ -166,7 +166,7 @@ extern "C" int func_00145C38(void* self, int index)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)p;
 }
 #endif
@@ -176,7 +176,7 @@ INCLUDE_ASM("be/beintplayer", func_00145CB0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_00145CB0(void* self, int index, int value)
 {
@@ -184,7 +184,7 @@ extern "C" void func_00145CB0(void* self, int index, int value)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)p = value;
 }
 #endif
@@ -194,7 +194,7 @@ INCLUDE_ASM("be/beintplayer", func_00145D38);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int func_00145D38(void* self, int index, int bit)
 {
@@ -202,7 +202,7 @@ extern "C" int func_00145D38(void* self, int index, int bit)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = profile * 0x9B50 + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     int mask = 1 << bit;
     return (*(int*)(p + 0xACC) & mask) == 0;
 }
@@ -213,7 +213,7 @@ INCLUDE_ASM("be/beintplayer", func_00145DD0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" void func_00152430(void* self, int bit, int on);
 
 struct sProfileSlot_00145DD0 {
@@ -225,7 +225,7 @@ extern "C" void func_00145DD0(void* self, bool flag, int index, int bit)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
-    func_00152430(&((sProfileSlot_00145DD0 (*)[10])D_004A6CA8)[profile][c], bit, !flag);
+    func_00152430(&((sProfileSlot_00145DD0 (*)[10])cBELibrary_profileLib)[profile][c], bit, !flag);
 }
 #endif
 
@@ -234,7 +234,7 @@ INCLUDE_ASM("be/beintplayer", func_00145E68);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_001523E8(void* self, int kind);
 
 struct sProfileSlot_00145E68 {
@@ -246,7 +246,7 @@ extern "C" int func_00145E68(void* self, int index, int kind)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
-    return func_001523E8(&((sProfileSlot_00145E68 (*)[10])D_004A6CA8)[profile][c], kind);
+    return func_001523E8(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][c], kind);
 }
 #endif
 
@@ -255,7 +255,7 @@ INCLUDE_ASM("be/beintplayer", func_00145EF0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 
 struct sProfileSlot_00145EF0 {
@@ -267,7 +267,7 @@ extern "C" int func_00145EF0(void* self, int index, int a, int b)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((sProfileSlot_00145EF0 (*)[10])D_004A6CA8)[profile][c], a, b);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((sProfileSlot_00145EF0 (*)[10])cBELibrary_profileLib)[profile][c], a, b);
     return *stats != 0;
 }
 #endif
@@ -275,7 +275,7 @@ extern "C" int func_00145EF0(void* self, int index, int a, int b)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak)
@@ -287,7 +287,7 @@ extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int 
             int bOff = b * 0xF88;
             int aOff = a * 0x9B50;
             int off = bOff + aOff;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
         }
         else
@@ -295,7 +295,7 @@ extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int 
             int bOff = b * 0xF88;
             int aOff = a * 0x9B50;
             int off = bOff + aOff;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
         }
     }
@@ -321,7 +321,7 @@ INCLUDE_ASM("be/beintplayer", func_00146070);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
 struct sProfBits_146070 {
@@ -336,10 +336,10 @@ extern "C" void func_00146070(void* self, int index, int kind, int value)
     int id = cBENewPlayerInterface_getPlayerID(index);
     signed char c = D_00534FE0[id].mCharID;
     if (kind == 1) {
-        char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+        char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
         ((sProfBits_146070*)(p + 0x278))->b12 = value;
     } else {
-        char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+        char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
         ((sProfBits_146070*)(p + 0x278))->b13 = value;
     }
 }
@@ -350,7 +350,7 @@ INCLUDE_ASM("be/beintplayer", func_00146150);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
 extern "C" int func_00146150(void* self, int index, int kind, int flag)
@@ -361,29 +361,29 @@ extern "C" int func_00146150(void* self, int index, int kind, int flag)
     if (flag) {
         if (kind == 0) {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 3) & 1;
         } else if (kind == 1) {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 4) & 1;
         } else if (kind == 2) {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 5) & 1;
         }
     } else {
         if (kind == 0) {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 0) & 1;
         } else if (kind == 1) {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 1) & 1;
         } else if (kind == 2) {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 2) & 1;
         }
     }
@@ -396,7 +396,7 @@ INCLUDE_ASM("be/beintplayer", func_00146320);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
 struct sProfBits6320 {
@@ -415,24 +415,24 @@ extern "C" void func_00146320(void* self, int index, int kind, int flag, int val
     signed char c = D_00534FE0[id].mCharID;
     if (flag) {
         if (kind == 0) {
-            char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
             ((sProfBits6320*)(p + 0x278))->b3 = value;
         } else if (kind == 1) {
-            char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
             ((sProfBits6320*)(p + 0x278))->b4 = value;
         } else if (kind == 2) {
-            char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
             ((sProfBits6320*)(p + 0x278))->b5 = value;
         }
     } else {
         if (kind == 0) {
-            char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
             ((sProfBits6320*)(p + 0x278))->b0 = value;
         } else if (kind == 1) {
-            char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
             ((sProfBits6320*)(p + 0x278))->b1 = value;
         } else if (kind == 2) {
-            char* p = (char*)D_004A6CA8 + (c * 0xF88 + profile * 0x9B50);
+            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
             ((sProfBits6320*)(p + 0x278))->b2 = value;
         }
     }
@@ -443,7 +443,7 @@ extern "C" void func_00146320(void* self, int index, int kind, int flag, int val
 INCLUDE_ASM("be/beintplayer", func_001464D0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
 extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
@@ -454,19 +454,19 @@ extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
         case 0:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 6) & 1;
         }
         case 1:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 7) & 1;
         }
         case 2:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 8) & 1;
         }
         }
@@ -475,19 +475,19 @@ extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
         case 0:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 9) & 1;
         }
         case 1:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 10) & 1;
         }
         case 2:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 11) & 1;
         }
         }
@@ -501,7 +501,7 @@ INCLUDE_ASM("be/beintplayer", func_001466A0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 struct sTrackInfo_1466A0 {
     char pad0[0x54];
     int kind;                   // 0x54
@@ -521,19 +521,19 @@ extern "C" int func_001466A0(void* self, int index)
         case 0:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 6) & 1;
         }
         case 1:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 7) & 1;
         }
         case 2:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 8) & 1;
         }
         }
@@ -542,19 +542,19 @@ extern "C" int func_001466A0(void* self, int index)
         case 0:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 9) & 1;
         }
         case 1:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 10) & 1;
         }
         case 2:
             {
             int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)D_004A6CA8 + off;
+            char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 11) & 1;
         }
         }
@@ -566,7 +566,7 @@ extern "C" int func_001466A0(void* self, int index)
 INCLUDE_ASM("be/beintplayer", func_001468B0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
 struct sProfBits_1468B0 {
@@ -587,25 +587,25 @@ extern "C" void func_001468B0(void* self, int index, int c, int kind, int flag, 
     if (flag) {
         switch (kind) {
         case 0:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8))->b6 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b6 = value;
             break;
         case 1:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8))->b7 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b7 = value;
             break;
         case 2:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8))->b8 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b8 = value;
             break;
         }
     } else {
         switch (kind) {
         case 0:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8))->b9 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b9 = value;
             break;
         case 1:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8))->b10 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b10 = value;
             break;
         case 2:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8))->b11 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b11 = value;
             break;
         }
     }
@@ -617,7 +617,7 @@ INCLUDE_ASM("be/beintplayer", func_00146A70);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getProfileIndex(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // Returns one of the character's unlock flags (kinds 6-11, bits 14-19 of the 64-bit flag word).
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
@@ -627,32 +627,32 @@ extern "C" int func_00146A70(void* self, int index, int c, int kind)
     switch (kind) {
     case 6: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 14) & 1;
     }
     case 7: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 15) & 1;
     }
     case 8: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 16) & 1;
     }
     case 9: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 17) & 1;
     }
     case 10: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 18) & 1;
     }
     case 11: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 19) & 1;
     }
     }
@@ -680,22 +680,22 @@ extern "C" void func_00146C10(void* self, int arg1, int arg2, int arg3, int arg4
     int profile = cBELibrary_getProfileIndex(arg1);
     switch (arg3) {
     case 6:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b14 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b14 = arg4;
         break;
     case 7:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b15 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b15 = arg4;
         break;
     case 8:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b16 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b16 = arg4;
         break;
     case 9:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b17 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b17 = arg4;
         break;
     case 10:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b18 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b18 = arg4;
         break;
     case 11:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)D_004A6CA8))->b19 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b19 = arg4;
         break;
     }
 }
@@ -706,7 +706,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getLastHub);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
 {
@@ -714,7 +714,7 @@ extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0x27C);
 }
 #endif
@@ -724,7 +724,7 @@ INCLUDE_ASM("be/beintplayer", func_00146E10);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_00146E10(void* self, int index, int value)
 {
@@ -732,7 +732,7 @@ extern "C" void func_00146E10(void* self, int index, int value)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x27C) = value;
 }
 #endif
@@ -1278,14 +1278,14 @@ INCLUDE_ASM("be/beintplayer", func_00147908);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void* func_00147908(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
-    char* p = (char*)D_004A6CA8 + profile * 0x9B50 + c * 0xF88;
+    char* p = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
     return p + 0xE38;
 }
 #endif
@@ -1295,7 +1295,7 @@ INCLUDE_ASM("be/beintplayer", func_00147980);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int func_00147980(void* self, int index, int bit)
 {
@@ -1303,7 +1303,7 @@ extern "C" int func_00147980(void* self, int index, int bit)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = profile * 0x9B50 + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     p = p + (bit / 32) * 4;
     int mask = 1 << bit;
     return (*(unsigned int*)(p + 0xF08) & mask) != 0;
@@ -1315,7 +1315,7 @@ INCLUDE_ASM("be/beintplayer", func_00147A30);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_00147A30(void* self, int index, int bit, int on)
 {
@@ -1323,7 +1323,7 @@ extern "C" void func_00147A30(void* self, int index, int bit, int on)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
     int off = profile * 0x9B50 + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     p += 0xF08;
     int w = bit / 32;
     int b = bit - w * 32;
@@ -1339,7 +1339,7 @@ INCLUDE_ASM("be/beintplayer", func_00147B20);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 struct sPair_func_00147B20 {
     int a;
@@ -1355,7 +1355,7 @@ extern "C" int func_00147B20(void* self, int index, int slot)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
-    sProfileSlot_func_00147B20* s = (sProfileSlot_func_00147B20*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8);
+    sProfileSlot_func_00147B20* s = (sProfileSlot_func_00147B20*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib);
     return s->e[slot].a;
 }
 #endif
@@ -1364,7 +1364,7 @@ INCLUDE_ASM("be/beintplayer", func_00147BB0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 struct sPair_func_00147BB0 {
     int a;
@@ -1380,7 +1380,7 @@ extern "C" int func_00147BB0(void* self, int index, int slot)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = D_00534FE0[id].mCharID;
-    sProfileSlot_func_00147BB0* s = (sProfileSlot_func_00147BB0*)((profile * 0x9B50 + c * 0xF88) + (char*)D_004A6CA8);
+    sProfileSlot_func_00147BB0* s = (sProfileSlot_func_00147BB0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib);
     return s->e[slot].b;
 }
 #endif
@@ -1388,17 +1388,17 @@ extern "C" int func_00147BB0(void* self, int index, int slot)
 INCLUDE_ASM("be/beintplayer", func_00147C40);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_00147C40(void* self, int value, int flag)
 {
     int c = cBELibrary_getCharacterID(0);
     if (flag != 0) {
-        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
         *(short*)(p + 0x280) = value;
         *(short*)(p + 0x282) = 0;
     } else {
-        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
         *(short*)(p + 0x284) = value;
         *(short*)(p + 0x286) = 0;
     }
@@ -1415,12 +1415,12 @@ extern "C" short func_00147CB8(void* self, int which)
     int c = cBELibrary_getCharacterID(0);
     if (which != 0)
     {
-        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
         return *(short*)(p + 0x280);
     }
     else
     {
-        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
         return *(short*)(p + 0x284);
     }
 }
@@ -1430,7 +1430,7 @@ extern "C" short func_00147CB8(void* self, int which)
 INCLUDE_ASM("be/beintplayer", func_00147D20);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 struct sCharRec_147D20 {
     char pad0[0x280];
@@ -1448,13 +1448,13 @@ extern "C" void func_00147D20(void* self, int which)
     short a, b;
     if (which)
     {
-        b = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0;
-        a = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0;
+        b = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0;
+        a = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0;
     }
     else
     {
-        b = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1;
-        a = (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1;
+        b = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1;
+        a = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1;
     }
     a++;
     if (a >= 2)
@@ -1464,13 +1464,13 @@ extern "C" void func_00147D20(void* self, int which)
     }
     if (which)
     {
-        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0 = b;
-        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0 = a;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0 = b;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0 = a;
     }
     else
     {
-        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1 = b;
-        (*(sCharRec_147D20*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1 = a;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1 = b;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1 = a;
     }
 }
 #endif
@@ -1479,7 +1479,7 @@ extern "C" void func_00147D20(void* self, int which)
 INCLUDE_ASM("be/beintplayer", func_00147E18);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 struct sCharRec_147E18 {
     char pad0[0x280];
@@ -1497,13 +1497,13 @@ extern "C" void func_00147E18(void* self, int which)
     short a, b;
     if (which)
     {
-        b = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0;
-        a = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0;
+        b = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0;
+        a = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0;
     }
     else
     {
-        b = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1;
-        a = (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1;
+        b = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1;
+        a = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1;
     }
     a--;
     if (a < -1)
@@ -1513,13 +1513,13 @@ extern "C" void func_00147E18(void* self, int which)
     }
     if (which)
     {
-        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b0 = b;
-        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a0 = a;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0 = b;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0 = a;
     }
     else
     {
-        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).b1 = b;
-        (*(sCharRec_147E18*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).a1 = a;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1 = b;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1 = a;
     }
 }
 #endif
@@ -1528,17 +1528,17 @@ extern "C" void func_00147E18(void* self, int which)
 INCLUDE_ASM("be/beintplayer", func_00147F10);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" short func_00147F10(void* self, int flag)
 {
     int c = cBELibrary_getCharacterID(0);
     short r;
     if (flag == 0) {
-        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
         r = *(short*)(p + 0x286);
     } else {
-        char* p = (char*)D_004A6CA8 + c * 0xF88;
+        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
         r = *(short*)(p + 0x282);
     }
     return r;
@@ -1638,7 +1638,7 @@ INCLUDE_ASM("be/beintplayer", func_00148158);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getCharacterID(int);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // Returns one of a character's seven stat levels for the given profile, or -1.
 extern "C" int func_00148158(void* self, int profile, unsigned int stat)
@@ -1647,37 +1647,37 @@ extern "C" int func_00148158(void* self, int profile, unsigned int stat)
     switch (stat) {
     case 0: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBDF);
     }
     case 1: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBE0);
     }
     case 2: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBE1);
     }
     case 3: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBE2);
     }
     case 4: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBE3);
     }
     case 5: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBE4);
     }
     case 6: {
         int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(p + 0xBE5);
     }
     }

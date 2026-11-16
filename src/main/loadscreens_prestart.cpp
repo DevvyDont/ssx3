@@ -10,7 +10,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_00231F80(void* fade);
 extern "C" int func_00326CA0(void* pads, int port);
 extern "C" char* func_00326CC8(void* pads, int port);
-extern char* D_004A28A0;
+extern char* PadCache;
 extern char D_0047B8C8[];
 extern void* D_0047D8F0[];
 
@@ -45,10 +45,10 @@ extern "C" void cPreStartScreen_update(sPreStart_232348* self)
         cAppMan_setNextModule(app, (unsigned int)m);
     }
     self->t += 0.01666666753590107f;
-    if (*(int*)(D_004A28A0 + 0x2EE8) > 0) {
+    if (*(int*)(PadCache + 0x2EE8) > 0) {
         self->t += 0.15000000596046448f;
-        if (func_00326CA0(D_004A28A0, 0) >= 11) {
-            if (*(float*)(func_00326CC8(D_004A28A0, 0) + 0x20) != 0.0f && *(float*)(func_00326CC8(D_004A28A0, 0) + 0x28) != 0.0f) {
+        if (func_00326CA0(PadCache, 0) >= 11) {
+            if (*(float*)(func_00326CC8(PadCache, 0) + 0x20) != 0.0f && *(float*)(func_00326CC8(PadCache, 0) + 0x28) != 0.0f) {
                 self->next->f4 = 1;
             }
         }

@@ -739,7 +739,7 @@ public:
 
 // Typed view of the render context (the unit declares D_004A289C with another class later).
 extern func_002CB180_cCtx* D_004A289C_cb180 __asm__("D_004A289C");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 static inline void func_002CB180_setF8_5(func_002CB180_sRS* rs, int v) { rs->f8_5 = v; }
 static inline void func_002CB180_setF4_23(func_002CB180_sRS* rs, int v) { rs->f4_23 = v; }
@@ -760,7 +760,7 @@ extern "C" void func_002CB180()
     func_002CB180_setF4_12(D_004A289C_cb180->top, 0x14);
     func_002CB180_setF4_2(D_004A289C_cb180->top, 5);
     D_004A289C_cb180->v26(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    D_004A289C_cb180->v34(D_004FF1A0);
+    D_004A289C_cb180->v34(t4mat_Identity);
 }
 #endif
 

@@ -1523,18 +1523,18 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_addPDATemplate);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
-extern void* D_004A270C;
+extern void* cOVStateManager_mpPDATemplate;
 extern char D_00471A10[];
 extern char D_004743F0[];
 
 extern "C" void cOVStateManager_addPDATemplate(void)
 {
-    if (D_004A270C == 0) {
+    if (cOVStateManager_mpPDATemplate == 0) {
         char* mgr = (char*)SSXApp->Game->UI;
         void* t = cMemMan_alloc(0x48, D_00471A10, 0x100, 0);
         func_0039E2A0(t, mgr);
         *(void**)((char*)t + 8) = D_004743F0;
-        D_004A270C = t;
+        cOVStateManager_mpPDATemplate = t;
         cUIStateStack_pushExplicit(mgr + 0x18, t);
     }
 }
@@ -1549,15 +1549,15 @@ public:
     virtual ~cOVTemplate20D190();
 };
 extern "C" void cListNode_removeFromList(void* node);
-extern void* D_004A270C;
+extern void* cOVStateManager_mpPDATemplate;
 
 extern "C" void cOVStateManager_removePDATemplate(void)
 {
-    if (D_004A270C != 0) {
-        cListNode_removeFromList(D_004A270C);
-        delete (cOVTemplate20D190*)D_004A270C;
+    if (cOVStateManager_mpPDATemplate != 0) {
+        cListNode_removeFromList(cOVStateManager_mpPDATemplate);
+        delete (cOVTemplate20D190*)cOVStateManager_mpPDATemplate;
     }
-    D_004A270C = 0;
+    cOVStateManager_mpPDATemplate = 0;
 }
 #endif
 

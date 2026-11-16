@@ -270,7 +270,7 @@ struct sVE_E798 {
     void* fn;
 };
 
-extern sVec4_E798 D_004FF120;
+extern sVec4_E798 t4vect_Zero;
 extern char* D_004A5B64;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void func_00351660(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
@@ -387,8 +387,8 @@ extern "C" void func_0034E798(char* self)
     int k = 0;
     sBone_E798* ent = *(sBone_E798**)(info + 8);
     for (int i = 0; i < *(int*)(info + 4); i++, ent++) {
-        ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = D_004FF120;
-        ((sDelta_E798*)*(char**)(self + 0x4C))[i].rot = D_004FF120;
+        ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = t4vect_Zero;
+        ((sDelta_E798*)*(char**)(self + 0x4C))[i].rot = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (ent->active == 0) continue;
         char* node = *(char**)(self + 0x48) + k * 0xD0;

@@ -106,7 +106,7 @@ INCLUDE_ASM("be/beintmission", func_001533F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
 extern "C" int func_001533F8(void* self, int rider, int idx)
 {
@@ -131,8 +131,8 @@ INCLUDE_ASM("be/beintmission", func_00153498);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
-// Byte view of the profile table; the unit declares D_004A6CA8 later with a struct type.
-extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+// Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
+extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
 extern "C" int func_00153498(void* self, int rider, int idx)
 {
@@ -150,8 +150,8 @@ INCLUDE_ASM("be/beintmission", func_00153520);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-// Byte view of the profile table; the unit declares D_004A6CA8 later with a struct type.
-extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+// Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
+extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
 extern "C" int func_00153520(void* self, int rider, int idx)
 {
@@ -190,7 +190,7 @@ struct sEconChar_001535C0
 };
 
 extern sMissionEntry_0043D950 D_0043D950[];
-extern sEconChar_001535C0 D_004A6CA8_econ[][10] __asm__("D_004A6CA8");
+extern sEconChar_001535C0 D_004A6CA8_econ[][10] __asm__("cBELibrary_profileLib");
 
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner)
 {
@@ -229,7 +229,7 @@ struct sEconChar_00153688
 };
 
 extern sMissionEntry_0043D950 D_0043D950[];
-extern sEconChar_00153688 D_004A6CA8[][10];
+extern sEconChar_00153688 cBELibrary_profileLib[][10];
 
 extern "C" int func_00153688(void* self, int profile, int character, int owner)
 {
@@ -240,7 +240,7 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
         {
             if (D_0043D950[j].owner == owner)
             {
-                sum += D_004A6CA8[profile][character].records[i + j].count;
+                sum += cBELibrary_profileLib[profile][character].records[i + j].count;
             }
         }
     }
@@ -299,7 +299,7 @@ INCLUDE_ASM("be/beintmission", func_00153858);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
-extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
 extern "C" char* func_00153858(void* self, int rider, int idx)
 {
@@ -349,7 +349,7 @@ struct sCfg_1539A8 {
 };
 extern sCfg_1539A8 D_005305B0;
 extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
-extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
 extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src)
 {
@@ -392,7 +392,7 @@ struct sEconChar_00153B00
     sEconRecord_00153B00 records[22];
     char pad[0xF88 - 22 * 12];
 };
-extern sEconChar_00153B00 D_004A6CA8_econ153B00[][10] __asm__("D_004A6CA8");
+extern sEconChar_00153B00 D_004A6CA8_econ153B00[][10] __asm__("cBELibrary_profileLib");
 
 // Bit-set view of the same records, based at D_004A6CAC (record + 4).
 struct sEconBits_00153B00
@@ -532,7 +532,7 @@ extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(p + 0x118) >> 3) & 1;
 }
 #endif
@@ -548,7 +548,7 @@ extern "C" int func_00153DD0(void* self, int id)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(p + 0x118) >> 1) & 1;
 }
 #endif
@@ -564,7 +564,7 @@ extern "C" int func_00153E28(void* self, int id)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(p + 0x118)) & 1;
 }
 #endif
@@ -580,7 +580,7 @@ extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(p + 0x118) >> 2) & 1;
 }
 #endif
@@ -596,7 +596,7 @@ extern "C" int func_00153ED8(void* self, int id)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(p + 0x118) >> 4) & 1;
 }
 #endif
@@ -701,7 +701,7 @@ extern "C" void func_00154010(void* self, int id, int value)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~1) | (value & 1);
 }
 #endif
@@ -717,7 +717,7 @@ extern "C" void func_00154080(void* self, int id, int value)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 1)) | ((value & 1) << 1);
 }
 #endif
@@ -733,7 +733,7 @@ extern "C" void func_001540F0(void* self, int id, int value)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 2)) | ((value & 1) << 2);
 }
 #endif
@@ -749,7 +749,7 @@ extern "C" void func_00154160(void* self, int id, int value)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 3)) | ((value & 1) << 3);
 }
 #endif
@@ -765,7 +765,7 @@ extern "C" void func_001541D0(void* self, int id, int value)
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
     int off = (i << 2) + c * 0xF88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 4)) | ((value & 1) << 4);
 }
 #endif
@@ -926,7 +926,7 @@ struct sEconFlags_001544D0
     unsigned int flags[88];
     char pad_0x278[0xF88 - 0x118 - 88 * 4];
 };
-extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("D_004A6CA8");
+extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("cBELibrary_profileLib");
 
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* self, int profile, int character, int owner)
 {
@@ -988,13 +988,13 @@ struct sMissionEntry {
     char pad_0x1c[0x10];
 };
 
-extern sMissionEntry D_00440770[];
+extern sMissionEntry cBELibrary_pictureDB[];
 
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {
-        if (D_00440770[i].id == id) {
-            return D_00440770[i].value;
+        if (cBELibrary_pictureDB[i].id == id) {
+            return cBELibrary_pictureDB[i].value;
         }
     }
     return 0;
@@ -1007,7 +1007,7 @@ INCLUDE_ASM("be/beintmission", func_00154630);
 extern "C" int func_00154630(void* self, int value, int id)
 {
     for (int i = 0; i < 22; i++) {
-        if (D_00440770[i].id == id && D_00440770[i].value >= value) {
+        if (cBELibrary_pictureDB[i].id == id && cBELibrary_pictureDB[i].value >= value) {
             return 1;
         }
     }
@@ -1022,12 +1022,12 @@ extern "C" sMissionEntry func_00154678(void* self, int id)
 {
     for (int i = 0; i < 22; i++)
     {
-        if (D_00440770[i].id == id)
+        if (cBELibrary_pictureDB[i].id == id)
         {
-            return D_00440770[i];
+            return cBELibrary_pictureDB[i];
         }
     }
-    return D_00440770[0];
+    return cBELibrary_pictureDB[0];
 }
 #endif
 
@@ -1037,8 +1037,8 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureFileName);
 extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {
-        if (D_00440770[i].id == id) {
-            return D_00440770[i].pad_0x04;
+        if (cBELibrary_pictureDB[i].id == id) {
+            return cBELibrary_pictureDB[i].pad_0x04;
         }
     }
     return 0;

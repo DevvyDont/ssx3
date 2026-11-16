@@ -251,7 +251,7 @@ public:
 
 // Typed view of the render context (the unit declares D_004A289C as void* later).
 extern cUICtx_7DF8* D_004A289C_7df8 __asm__("D_004A289C");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern sUIRS_7DF8 D_00501420_7df8 __asm__("D_00501420");
 extern "C" void func_0039EBE0(void* p);
 
@@ -270,7 +270,7 @@ extern "C" void func_00397DF8(void* self)
     D_004A289C_7df8->v31();
     D_004A289C_7df8->v21();
     D_004A289C_7df8->v26(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
-    D_004A289C_7df8->v34(D_004FF1A0);
+    D_004A289C_7df8->v34(t4mat_Identity);
     setF4_22_7DF8(D_004A289C_7df8->top, 1);
     setF4_23_7DF8(D_004A289C_7df8->top, 2);
     setF4_20_7DF8(D_004A289C_7df8->top, 0);

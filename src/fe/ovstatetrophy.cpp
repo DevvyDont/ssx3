@@ -304,7 +304,7 @@ public:
 };
 extern cGfx_EDA0* D_004A289C_EDA0 __asm__("D_004A289C");
 extern sGs_EDA0 D_00501420_EDA0 __asm__("D_00501420");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;
@@ -473,7 +473,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     D_004A289C_EDA0->stateTop->f4_20 = 0;
     D_004A289C_EDA0->stateTop->f4_12 = 0x14;
     D_004A289C_EDA0->stateTop->f4_2 = 5;
-    D_004A289C_EDA0->SetTexture(D_004FF1A0);
+    D_004A289C_EDA0->SetTexture(t4mat_Identity);
 
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
@@ -850,7 +850,7 @@ public:
 };
 extern cGfx_FB40* D_004A289C_FB40 __asm__("D_004A289C");
 extern sGs_FB40 D_00501420_FB40 __asm__("D_00501420");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;
@@ -981,7 +981,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     D_004A289C_FB40->stateTop->f4_20 = 0;
     D_004A289C_FB40->stateTop->f4_12 = 0x14;
     D_004A289C_FB40->stateTop->f4_2 = 5;
-    D_004A289C_FB40->SetTexture(D_004FF1A0);
+    D_004A289C_FB40->SetTexture(t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
     float top = self->y;

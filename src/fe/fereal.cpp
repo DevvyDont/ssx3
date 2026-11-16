@@ -132,7 +132,7 @@ extern int D_004A11B8;
 extern int D_004A1A70;
 extern int D_004A2594;
 extern int D_004A2598;
-extern int D_004A25A4;
+extern int cUITemplate_MAP_mPeak;
 extern char D_0045CE48[];
 extern char D_0045CE60[];
 extern char D_0045D6A8[];
@@ -290,7 +290,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             switch (D_00535C11[0]) {
             case 0:
             case 1: {
-                D_004A25A4 = 1;
+                cUITemplate_MAP_mPeak = 1;
                 D_004A2594 = 0;
                 D_004A2598 = 0;
                 char* r = (char*)func_00186610(cMemMan_alloc(0x33C, D_00460C38, 0, 0), *self, 0);
@@ -302,7 +302,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
                     return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, 1);
                 if (D_004A19D4 != 0)
                     return func_001A3218(cMemMan_alloc(0x48, D_00460C20, 0, 0), *self);
-                D_004A25A4 = 1;
+                cUITemplate_MAP_mPeak = 1;
                 D_004A2594 = 0;
                 D_004A2598 = 0;
                 return func_00186610(cMemMan_alloc(0x33C, D_00460C38, 0, 0), *self, 0);
@@ -976,7 +976,7 @@ extern "C" void func_00285BF8(void* snd, int a1, float t);
 extern "C" void* func_0028B180();
 extern void* D_004A289C;
 extern int D_004A19CC;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sFeGs {
     int w0;                         // 0x0
@@ -1082,7 +1082,7 @@ extern "C" int func_001A2208(void* self)
         {
             char* g = (char*)D_004A289C;
             sFeVE* vt = *(sFeVE**)(g + 0x10D8);
-            ((void (*)(void*, void*))vt[34].fn)(g + vt[34].delta, D_004FF1A0);
+            ((void (*)(void*, void*))vt[34].fn)(g + vt[34].delta, t4mat_Identity);
         }
         feW()->top->setAlpha(9);
         sFeVert v[4];

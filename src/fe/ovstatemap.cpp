@@ -151,7 +151,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cOVState_MAP_showIndicators(void* self);
-extern char D_004C8B58[];
+extern char kMAPCOLOR_REGULAR[];
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
@@ -229,12 +229,12 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
         t = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706B8));
         if (t != 0) {
             t->f18 = 0;
-            ((VPtrFn_87F0)t->vt[11].fn)((char*)t + t->vt[11].delta, D_004C8B58);
+            ((VPtrFn_87F0)t->vt[11].fn)((char*)t + t->vt[11].delta, kMAPCOLOR_REGULAR);
         }
         t = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706C8));
         if (t != 0) {
             t->f18 = 1;
-            ((VPtrFn_87F0)t->vt[11].fn)((char*)t + t->vt[11].delta, D_004C8B58);
+            ((VPtrFn_87F0)t->vt[11].fn)((char*)t + t->vt[11].delta, kMAPCOLOR_REGULAR);
         }
     }
     return 0;
@@ -769,17 +769,17 @@ struct sVEntry_cOVState_MAP_setWidgetUnHiliteColor {
     short index;
     void (*fn)(void*, void*);
 };
-extern char D_004C8B58[];
-extern char D_004C8B48[];
+extern char kMAPCOLOR_REGULAR[];
+extern char kMAPCOLOR_REGULAR_LOCKED[];
 
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(void* self, void* obj, int on)
 {
     if (on != 0) {
         sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
-        vt[11].fn((char*)obj + vt[11].delta, D_004C8B58);
+        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR);
     } else {
         sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
-        vt[11].fn((char*)obj + vt[11].delta, D_004C8B48);
+        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR_LOCKED);
     }
 }
 #endif

@@ -194,7 +194,7 @@ INCLUDE_ASM("ui/uitext", cUIText_getNumTextLines);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned short D_004A47A8;
+extern unsigned short gUSTRBackSlash;
 extern "C" char cUIText_getNumTextLines_(void* self) __asm__("cUIText_getNumTextLines");
 extern "C" char cUIText_getNumTextLines_(void* self)
 {
@@ -205,7 +205,7 @@ extern "C" char cUIText_getNumTextLines_(void* self)
     while (*p != 0) {
         unsigned short c = *p;
         unsigned short next = p[1];
-        if (c == D_004A47A8 && next == c) {
+        if (c == gUSTRBackSlash && next == c) {
             p += 2;
             n++;
         } else if (c == 13) {
@@ -329,7 +329,7 @@ void cMemMan_free(void*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494078[];
-extern unsigned short D_004A47A8;
+extern unsigned short gUSTRBackSlash;
 
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str)
 {
@@ -345,7 +345,7 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str)
     int i = 0;
     USTR_copy(buf, str);
     while (i < len) {
-        if (buf[i] == D_004A47A8 && buf[i + 1] == buf[i]) {
+        if (buf[i] == gUSTRBackSlash && buf[i + 1] == buf[i]) {
             last = -1;
             w = 0.0f;
             i += 2;
@@ -393,7 +393,7 @@ extern "C" int cUIText_getNumTextLines(void* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494088[];
 extern char D_00494098[];
-extern unsigned short D_004A47A8;
+extern unsigned short gUSTRBackSlash;
 
 // Stores a copy of the string and splits it into lines at CR and at doubled line-break markers.
 extern "C" void cUIText_setUnicodeStringPrivate(void* self_, const unsigned short* str)
@@ -420,7 +420,7 @@ extern "C" void cUIText_setUnicodeStringPrivate(void* self_, const unsigned shor
             while (*p != 0) {
                 unsigned short c = *p;
                 unsigned short next = p[1];
-                if (c == D_004A47A8 && next == c) {
+                if (c == gUSTRBackSlash && next == c) {
                     *p = 0;
                     p += 2;
                     lines[k++] = p;
@@ -459,7 +459,7 @@ struct func_003A1030_sVec3 {
     float y;
     float z;
 };
-extern func_003A1030_sVec3 D_004FF0D8;
+extern func_003A1030_sVec3 t3vect_Zero;
 
 struct func_003A1030_sRect {
     float x0;
@@ -488,7 +488,7 @@ extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
         out->x = r.x1;
         out->y = r.y1;
     } else {
-        *out = D_004FF0D8;
+        *out = t3vect_Zero;
     }
 }
 #endif

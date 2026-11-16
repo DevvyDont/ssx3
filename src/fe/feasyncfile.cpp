@@ -7839,7 +7839,7 @@ extern "C" void cUIStateStack_pushSpecial_E7A0(void* stack, void* state, int a2,
 extern "C" void func_001AF098_E7A0(void* self, int on) __asm__("func_001AF098");
 extern "C" void func_001AEC60_E7A0(void* self, int v) __asm__("func_001AEC60");
 extern "C" void func_001AF208_E7A0(void* self, void* item, int on) __asm__("func_001AF208");
-extern int D_004A25A4;
+extern int cUITemplate_MAP_mPeak;
 extern int D_004A2594;
 extern int D_004A2598;
 extern int D_00534B34[];
@@ -7892,7 +7892,7 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
         switch (*(int*)((char*)a1 + 0x18)) {
         case 7: {
             func_001AE680_E7A0(self);
-            D_004A25A4 = 1;
+            cUITemplate_MAP_mPeak = 1;
             D_004A2594 = 0;
             D_004A2598 = 0;
             char* p = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(int*)&self->engine, 1);
@@ -23906,7 +23906,7 @@ struct sVec3_1C5630 {
     int x, y, z;
 };
 
-extern sVec3_1C5630 D_004FF0D8;
+extern sVec3_1C5630 t3vect_Zero;
 
 extern "C" void func_001C5630(void* self)
 {
@@ -23932,7 +23932,7 @@ extern "C" void func_001C5630(void* self)
     *(int*)((char*)self + 0xB0) = 0;
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x90) = 0;
-    *(sVec3_1C5630*)((char*)self + 0x9C) = D_004FF0D8;
+    *(sVec3_1C5630*)((char*)self + 0x9C) = t3vect_Zero;
     *(int*)((char*)self + 0xAC) = -1;
     *(int*)((char*)self + 0xC0) = 0;
     *(int*)((char*)self + 0xB4) = 0;

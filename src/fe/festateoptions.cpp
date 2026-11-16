@@ -2122,7 +2122,7 @@ extern "C" void func_0018D058(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018D108);
 #ifdef SKIP_ASM
-extern char* D_004A28A0;
+extern char* PadCache;
 
 class cSnd_18D108 {
 public:
@@ -2143,8 +2143,8 @@ extern "C" void func_0018D108(void* self, int idx, float x, float y)
     }
     y = y * 0.9916666746139526f;
     cSnd_18D108* s = 0;
-    if (D_004A28A0 != 0) {
-        s = *(cSnd_18D108**)(D_004A28A0 + (i << 2) + 0x2EEC);
+    if (PadCache != 0) {
+        s = *(cSnd_18D108**)(PadCache + (i << 2) + 0x2EEC);
     }
     if (s->getState() == 2) {
         s->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (a - 2.0f) / 972.2222290039062f) >? 0.0f);

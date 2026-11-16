@@ -3242,9 +3242,9 @@ void func_00395730(void* self)
 INCLUDE_ASM("render/font", func_00395750);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern float D_004FF140[4];
-extern float D_004FF150[4];
+extern float t4vect_YAxis[4];
 extern float D_004FF160[4];
 
 struct sMat_5750 {
@@ -3287,7 +3287,7 @@ static inline void LoadIdentity_5750(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(D_004FF1A0)
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(t4mat_Identity)
         : "memory");
 }
 
@@ -3394,7 +3394,7 @@ extern "C" void func_00395750(void* self, sVec_5750* pos, float rx, float ry, fl
     (*(float**)((char*)self + 0x13e4))[10] = 0.0f;
     Rotate_5750(self, D_004FF140, -rx);
     Rotate_5750(self, D_004FF160, -ry);
-    Rotate_5750(self, D_004FF150, -rz);
+    Rotate_5750(self, t4vect_YAxis, -rz);
     sVec_5750 v = Scale_5750(*pos, -1.0f);
     v.w = -v.w;
     Translate_5750(self, &v);
@@ -3485,9 +3485,9 @@ extern "C" void func_00395C70(void* self, void* m)
 //100%
 INCLUDE_ASM("render/font", func_00395CF0);
 #ifdef SKIP_ASM
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
-// Load the matrix D_004FF1A0 (likely identity) into the top of the matrix stack
+// Load the matrix t4mat_Identity (likely identity) into the top of the matrix stack
 // and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void func_00395CF0(void* self)
@@ -3504,7 +3504,7 @@ extern "C" void func_00395CF0(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(D_004FF1A0)
+        : "r"(*(char**)((char*)self + 0x13e4)), "r"(t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x6b90) = 0;
 }

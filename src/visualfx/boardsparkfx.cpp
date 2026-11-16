@@ -380,8 +380,8 @@ struct sSparkFx_ABC8 {
 };
 
 extern char* D_004A5B64;
-extern int D_004A472C;
-extern int D_004A4728;
+extern int cPowerUpFXToggles_m_SuperUberStateTest;
+extern int cPowerUpFXToggles_m_UberStateTest;
 extern int D_004A3AFC;
 // D_004FA370: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_ABC8 views a row from its +0x28 field
 extern char D_004FA370[];
@@ -564,7 +564,7 @@ extern "C" void func_002DABC8(sSparkFx_ABC8* self)
         char* r = self->rider;
         const sV4_ABC8& side = BoneRow_ABC8(r, 2);
         const sV4_ABC8& front = BoneRow_ABC8(r, 0);
-        bool uberState = D_004A472C != 0 || D_004A4728 != 0 || 0.0f < *(float*)(r + 0x2F0);
+        bool uberState = cPowerUpFXToggles_m_SuperUberStateTest != 0 || cPowerUpFXToggles_m_UberStateTest != 0 || 0.0f < *(float*)(r + 0x2F0);
         if (uberState) {
             sV4_ABC8 a, b, c, d;
             a.x = 255.0f; a.y = 0.0f; a.z = 255.0f; a.w = 153.0f;

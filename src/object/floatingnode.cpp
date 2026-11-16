@@ -376,7 +376,7 @@ struct sV4_F600 {
 } __attribute__((aligned(16)));
 
 extern sV4_F600 D_004FF140_F600[] __asm__("D_004FF140");
-extern sV4_F600 D_004FF150_F600[] __asm__("D_004FF150");
+extern sV4_F600 D_004FF150_F600[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sV4_F600 vu0Sub_F600(const sV4_F600& a, const sV4_F600& b)
@@ -498,7 +498,7 @@ struct sV4_F790 {
 } __attribute__((aligned(16)));
 
 extern sV4_F790 D_004FF140_F790[] __asm__("D_004FF140");
-extern sV4_F790 D_004FF150_F790[] __asm__("D_004FF150");
+extern sV4_F790 D_004FF150_F790[] __asm__("t4vect_YAxis");
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* a);
 
 // PORT: PS2-only VU0 inline asm (a - b).

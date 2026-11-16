@@ -259,7 +259,7 @@ extern char* D_004A47B8;
 extern int D_004A4244;
 // PORT: 128-bit integer mode for VU0 asm memory operands
 typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sRS_34B9B0 {
     unsigned int f0_0 : 12;
@@ -374,7 +374,7 @@ extern "C" void func_0034B9B0(sFlagSetEntry* e)
         {
             char* pos = (char*)m + 0x10;
             sMat_34B9B0 mat;
-            MatCopy_34B9B0(&mat, (sMat_34B9B0*)D_004FF1A0);
+            MatCopy_34B9B0(&mat, (sMat_34B9B0*)t4mat_Identity);
             mat.r[3].x = *(float*)(self + 0x88);
             mat.r[3].y = *(float*)(self + 0x8C);
             char* h = *(char**)(self + 0x60);
@@ -1986,12 +1986,12 @@ extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out
 //100%
 INCLUDE_ASM("object/flagset", func_0034E320);
 #ifdef SKIP_ASM
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 extern "C" void* func_0034E320(void* self, int i) {
     char* base = *(char**)((char*)self + 0x48);
     if (base == 0) {
-        return D_004FF1A0;
+        return t4mat_Identity;
     }
     return base + i * 0xD0 + 0x90;
 }

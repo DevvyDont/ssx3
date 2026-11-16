@@ -1054,7 +1054,7 @@ struct sVec4_29590 {
 } __attribute__((aligned(16)));
 
 extern sVec4_29590 D_004FF140;
-extern sVec4_29590 D_004FF150;
+extern sVec4_29590 t4vect_YAxis;
 extern sVec4_29590 D_004FF160;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -1103,14 +1103,14 @@ extern "C" int func_00329590(float m, sVec4_29590* mn, sVec4_29590* mx, sVec4_29
                 *hp = *p;
                 hp->y = mn->y;
                 *t = d1;
-                sVec4_29590 n = vu0Scale_29590(D_004FF150, -1.0f);
+                sVec4_29590 n = vu0Scale_29590(t4vect_YAxis, -1.0f);
                 *nrm = n;
             }
             if (d2 < *t) {
                 *hp = *p;
                 hp->y = mx->y;
                 *t = d2;
-                *nrm = D_004FF150;
+                *nrm = t4vect_YAxis;
             }
         }
     }

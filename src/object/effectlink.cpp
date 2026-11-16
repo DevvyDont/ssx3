@@ -214,7 +214,7 @@ INCLUDE_ASM("object/effectlink", func_003459A8);
 #ifdef SKIP_ASM
 void* operator_new1(int size);
 extern "C" void func_00370AF8(void* self, void* stream);
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sEffectLinkVEntry_3459A8 {
     short delta;
@@ -240,7 +240,7 @@ extern "C" void* func_003459A8(void* self, void* stream)
         func_003705E0(s + 0x50, s + 0x10, *(int*)(s + 0x1E0));
         func_00370AF8(s + 0x50, stream);
     } else {
-        vu0CopyMatrix003458C0(s + 0x10, D_004FF1A0);
+        vu0CopyMatrix003458C0(s + 0x10, t4mat_Identity);
         *(int*)(s + 0x1E0) = 0;
     }
     D_004A3FF8++;

@@ -10,7 +10,7 @@ extern "C" void* func_00370018(void* p);
 extern "C" void func_003705E0(void* sys, void* data, int n);
 extern char D_004A4030[];
 extern char D_004A4038[];
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 // PORT: array new bound to the tagged allocator
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -36,7 +36,7 @@ extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
     for (int i = 0; i < self->count; i++) {
         self->refs[i].id = 0xFFFFFFFF;
     }
-    func_003705E0(self->sys, D_004FF1A0, self->field_0x8);
+    func_003705E0(self->sys, t4mat_Identity, self->field_0x8);
 }
 #endif
 
@@ -927,14 +927,14 @@ struct sMpQuad {
     float v[4];
 } __attribute__((aligned(16)));
 
-extern sMpQuad D_004FF120;
+extern sMpQuad t4vect_Zero;
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
 
 extern "C" void func_00358F90(void* self, void* out)
 {
     cMoveNode_updateIntersectInfo((char*)self + 0x48, out);
-    *(sMpQuad*)((char*)out + 0x20) = D_004FF120;
-    *(sMpQuad*)((char*)out + 0x30) = D_004FF120;
+    *(sMpQuad*)((char*)out + 0x20) = t4vect_Zero;
+    *(sMpQuad*)((char*)out + 0x30) = t4vect_Zero;
 }
 #endif
 
@@ -1313,8 +1313,8 @@ extern "C" void* cSplineModifier_cSplineModifier1(char* self, char* desc)
     if (*(float*)(self + 0x3C) < zero || *(float*)(self + 0xE4) < *(float*)(self + 0x3C)) {
         *(float*)(self + 0x3C) = zero;
     }
-    *(sMpQuad*)(self + 0xB0) = D_004FF120;
-    *(sMpQuad*)(self + 0xC0) = D_004FF120;
+    *(sMpQuad*)(self + 0xB0) = t4vect_Zero;
+    *(sMpQuad*)(self + 0xC0) = t4vect_Zero;
     *(int*)(self + 0x58) = 1;
     *(int*)(self + 0xD0) = 0;
     *(int*)(self + 0xD4) = 0;

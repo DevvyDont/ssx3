@@ -777,7 +777,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMoveQuad;
-extern sMoveQuad D_004FF1A0[];
+extern sMoveQuad t4mat_Identity[];
 
 struct sMnVec_6298 {
     float x, y, z, w;
@@ -1053,7 +1053,7 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
     void* xf;
     if (self->v26()) {
         tex = self->v27();
-        xf = D_004FF1A0;
+        xf = t4mat_Identity;
     } else {
         tex = 0;
         xf = self->v24();
@@ -1089,7 +1089,7 @@ extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
     }
     void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
     sMnGfxVt_6298* vt = gfx->vt;
-    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, D_004FF1A0, tex, rot, flags, *(float*)((char*)self + 0x24));
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, t4mat_Identity, tex, rot, flags, *(float*)((char*)self + 0x24));
 }
 #endif
 
@@ -1589,13 +1589,13 @@ struct sMoveQuad {
 } __attribute__((aligned(16)));
 
 extern void* D_0048F5F0[];
-extern sMoveQuad D_004FF1A0[];
+extern sMoveQuad t4mat_Identity[];
 
 extern "C" void* func_00356EB8(void* self, sMoveQuad* pos)
 {
     *(void***)self = D_0048F5F0;
     *(sMoveQuad*)((char*)self + 0x30) = *pos;
-    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, D_004FF1A0 -> self+0x50).
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -1608,7 +1608,7 @@ extern "C" void* func_00356EB8(void* self, sMoveQuad* pos)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x50), "r"(D_004FF1A0)
+        : "r"((char*)self + 0x50), "r"(t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x44) = 1;
     *(sMoveQuad*)((char*)self + 0x80) = *(sMoveQuad*)((char*)self + 0x30);
@@ -1666,7 +1666,7 @@ extern "C" void* func_00356F68_ret(void* self, void* stream)
     *(void***)self = D_0048F5F0;
     sMnVEntrySer6F68* vt = *(sMnVEntrySer6F68**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x40);
-    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, D_004FF1A0 -> self+0x50).
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -1679,7 +1679,7 @@ extern "C" void* func_00356F68_ret(void* self, void* stream)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x50), "r"(D_004FF1A0)
+        : "r"((char*)self + 0x50), "r"(t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x44) = 1;
     return self;

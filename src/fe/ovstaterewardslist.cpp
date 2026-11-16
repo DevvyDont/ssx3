@@ -114,12 +114,12 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern unsigned int D_004A2594;
-extern int D_004A25A4;
+extern int cUITemplate_MAP_mPeak;
 
 extern "C" void func_002006B8(void)
 {
     if (D_004A2594 >= 2) {
-        D_004A25A4 = *(int*)((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
+        cUITemplate_MAP_mPeak = *(int*)((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
     }
 }
 #endif

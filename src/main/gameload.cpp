@@ -88,11 +88,11 @@ extern char* D_004A5B64;
 extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* D_004A2EEC;
-extern void* D_004A3500;
+extern void* gSSXAudio;
 extern int D_004A1228;
 extern int D_004A3484;
-extern void* D_004A2C68;
-extern char D_004A5988_gl __asm__("D_004A5988");
+extern void* cGameState_mpGame;
+extern char D_004A5988_gl __asm__("gBucketMan");
 extern int D_00534B30[];
 extern char D_00535BC8[];
 extern int D_00535BFC[];
@@ -374,7 +374,7 @@ extern "C" void cGame_load(cGameGL* self)
     self->m70 = cFlagManager_cFlagManager(operator new(0x1718, D_0047B678, 0, 0), 2);
     self->m74 = cSnowFall_cSnowFall(operator new(0x60, D_0047B688, 0, 0), 2);
     self->mAC = 0;
-    cSSXAudio_FrontEndLoad(D_004A3500);
+    cSSXAudio_FrontEndLoad(gSSXAudio);
     func_00317550(D_004A5B64 + 0x38, 99.0f);
     sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, D_0047B698, 0, 0));
     self->ui = ui;
@@ -403,7 +403,7 @@ extern "C" void cGame_load(cGameGL* self)
     self->m214 = 0;
     self->m210 = 0;
     self->m21C = 0;
-    D_004A2C68 = self;
+    cGameState_mpGame = self;
     if (replay != 0) {
         func_0026F898(self->m28, D_004A3484);
         func_00231250(self, 0x10, 0, 0);
@@ -639,14 +639,14 @@ extern "C" void func_0036A290(void);
 
 extern void* D_004A28A4;
 extern void* D_004A289C;
-extern void* D_004A52D4;
-extern void* D_004A3500;
+extern void* gWorldTriggerManager;
+extern void* gSSXAudio;
 extern int D_004A2A54;
 extern char* D_004A5B64;
 extern char D_004D33A0[];
 extern char D_005047F8[];
-// The unit declares D_004A5988 later as sGp2898 (8 bytes); bind a small-data alias here.
-extern char D_004A5988_gl __asm__("D_004A5988");
+// The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
+extern char D_004A5988_gl __asm__("gBucketMan");
 
 // g++ 2.95 vtable entry: this-adjust, index, function.
 struct sVEnt_FA98 {
@@ -787,9 +787,9 @@ extern "C" void func_0022FA98(char* self)
     func_0038ADB0(D_005047F8);
     *(void**)&SSXApp->Game = 0;
     if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
-    func_002B68D0(D_004A52D4);
-    func_00286A80(D_004A3500);
-    func_00286C00(D_004A3500);
+    func_002B68D0(gWorldTriggerManager);
+    func_00286A80(gSSXAudio);
+    func_00286C00(gSSXAudio);
     cSSXScriptEngine_Purge(D_004A28A4);
     func_0036A290();
     D_004A2A54 = 0;
@@ -830,9 +830,9 @@ extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
 extern void* D_004A28A4;
 extern void* D_004A289C;
-extern void* D_004A52D4;
-extern void* D_004A3500;
-extern void* D_004A270C;
+extern void* gWorldTriggerManager;
+extern void* gSSXAudio;
+extern void* cOVStateManager_mpPDATemplate;
 extern cMgr230050* D_004A4248;
 extern int D_004A43C8;
 extern int D_004A4324;
@@ -842,15 +842,15 @@ extern "C" void func_00230050(void* self)
 {
     func_00195D50(SSXApp->FELocale);
     void* p94 = *(void**)((char*)self + 0x94);
-    D_004A270C = 0;
+    cOVStateManager_mpPDATemplate = 0;
     func_001F30D8(p94);
     func_00278710(D_004A28A4);
     D_004A4248->v17();
     D_004A4248->v04();
     func_00369FF8(D_004A289C);
     cWorld_init(*(void**)((char*)self + 0x10));
-    func_002B68D0(D_004A52D4);
-    func_002867E8(D_004A3500);
+    func_002B68D0(gWorldTriggerManager);
+    func_002867E8(gSSXAudio);
     D_004A4324 = 1;
     D_004A45D8 = 1;
     D_004A43C8 = 1;
@@ -871,8 +871,8 @@ extern "C" void cWorld_resetMap(void* world);
 extern "C" void cWScriptMan_runGlobalScripts(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
 extern void* D_004A3DD8;
-// The unit declares D_004A5988 later as sGp2898 (8 bytes); bind a small-data alias here.
-extern char D_004A5988_bm __asm__("D_004A5988");
+// The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
+extern char D_004A5988_bm __asm__("gBucketMan");
 
 extern "C" void cGame_resetWorld(void* self)
 {
@@ -1157,13 +1157,13 @@ INCLUDE_ASM("main/gameload", func_00230640);
 #ifdef SKIP_ASM
 extern "C" void func_003550A0(void* mgr, int id);
 struct sGp2898 { int a, b; };
-extern sGp2898 D_004A5988; // target: raw $gp+0x2898 (splat doesn't symbolize it)
+extern sGp2898 gBucketMan; // target: raw $gp+0x2898 (splat doesn't symbolize it)
 extern int D_004428D8[];
 
 extern "C" void func_00230640(void)
 {
     int i;
-    sGp2898* mgr = &D_004A5988;
+    sGp2898* mgr = &gBucketMan;
     for (i = 0; i < 6; i++) {
         func_003550A0(mgr, D_004428D8[i]);
     }
@@ -1241,7 +1241,7 @@ extern "C" void func_001F3188(void* p);
 
 extern char* D_004A5B64;
 extern void* D_004A2EB8;
-extern void* D_004A28A0;
+extern void* PadCache;
 extern unsigned int D_004A20CC;
 extern char D_0047B798[];
 
@@ -1437,7 +1437,7 @@ static inline int updateState_2306B8(cGame_2306B8* self)
     }
     if (func_00231840_pi(self, 0) != 0 && !inRace_2306B8(*((int*)self->f28))
         && notPlaying_2306B8(self->mPlaybackMan) && func_0020CBE8() != 0) {
-        func_00326AE0(D_004A28A0);
+        func_00326AE0(PadCache);
         func_0020CA10();
         pushState_2306B8(2);
         {
@@ -1488,7 +1488,7 @@ extern "C" void func_002306B8(cGame_2306B8* self)
             if (self->f7C == 0 || func_00237950(self->f7C) != 0) {
                 if (self->f214 == 3) {
                     func_00230F40(self);
-                    cBucketMan_mergeBucket(&D_004A5988, 1);
+                    cBucketMan_mergeBucket(&gBucketMan, 1);
                 } else {
                     func_00230F40(self);
                 }
@@ -1513,12 +1513,12 @@ extern "C" void func_002306B8(cGame_2306B8* self)
             }
             if (!skip) {
                 if (!(D_004A2A50 & 2)) {
-                    func_00354F98(&D_004A5988, 1);
+                    func_00354F98(&gBucketMan, 1);
                 }
-                func_00354F98(&D_004A5988, 5);
-                func_00354F98(&D_004A5988, 6);
+                func_00354F98(&gBucketMan, 5);
+                func_00354F98(&gBucketMan, 6);
                 if (!(D_004A2A50 & 2)) {
-                    func_00355028(&D_004A5988, 1);
+                    func_00355028(&gBucketMan, 1);
                 }
                 {
                     char* c = self->fC;
@@ -1526,23 +1526,23 @@ extern "C" void func_002306B8(cGame_2306B8* self)
                     vt[3].fn(c + vt[3].delta);
                 }
                 if (!(D_004A2A50 & 0x10)) {
-                    func_00354F98(&D_004A5988, 2);
+                    func_00354F98(&gBucketMan, 2);
                 }
                 if (!(D_004A2A50 & 4)) {
-                    func_00354F98(&D_004A5988, 3);
+                    func_00354F98(&gBucketMan, 3);
                 }
                 func_00309270(self->f30);
                 func_002294C8(self->f38);
                 func_003440C8(self->f3C);
                 func_00357BF8(self->f40);
-                cBucketMan_mergeBucket(&D_004A5988, 1);
+                cBucketMan_mergeBucket(&gBucketMan, 1);
             } else {
-                func_00354F98(&D_004A5988, 5);
+                func_00354F98(&gBucketMan, 5);
                 if (!(D_004A2A50 & 4)) {
-                    func_00354F98(&D_004A5988, 3);
+                    func_00354F98(&gBucketMan, 3);
                 }
             }
-            func_00354F98(&D_004A5988, 4);
+            func_00354F98(&gBucketMan, 4);
             {
                 int s = *((int*)self->f28);
                 if (!inRace_2306B8(s) || notMode3_2306B8(s)) {
@@ -2425,7 +2425,7 @@ INCLUDE_ASM("main/gameload", func_00231D60);
 #ifdef SKIP_ASM
 extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 extern int D_004A28AC;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sRS231D60 {
     int f0;
@@ -2507,7 +2507,7 @@ extern "C" int func_00231D60(void* self)
     ctx->top++;
     *D_004A289C_231D60->top = D_00501420;
     D_004A289C_231D60->v26(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
-    D_004A289C_231D60->v34(D_004FF1A0);
+    D_004A289C_231D60->v34(t4mat_Identity);
     D_004A289C_231D60->top->f8_5 = 31;
     D_004A289C_231D60->top->f4_23 = 2;
     D_004A289C_231D60->top->f4_20 = 0;
@@ -2559,7 +2559,7 @@ INCLUDE_ASM("main/gameload", func_00231FC0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" float func_0031C040(float);
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sV2_1FC0 {
     float x, y;
@@ -2664,7 +2664,7 @@ extern "C" void func_00231FC0(sFade_1FC0* self)
     D_004A289C_1FC0->stateTop->f4_12 = 0x14;
     D_004A289C_1FC0->stateTop->f4_2 = 5;
     D_004A289C_1FC0->stateTop->f8_5 = 0x1F;
-    D_004A289C_1FC0->SetTexture(D_004FF1A0);
+    D_004A289C_1FC0->SetTexture(t4mat_Identity);
     {
         sVE_1FC0* vt = *(sVE_1FC0**)((char*)D_004A289C_1FC0 + 0x10D8);
         char* thisp = (char*)D_004A289C_1FC0 + vt[23].delta;

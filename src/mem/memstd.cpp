@@ -2332,7 +2332,7 @@ public:
 };
 
 extern cWorld_2548D0* D_004A5B80_2548D0 __asm__("D_004A5B80");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sMesh_2548D0 {
     int f0;
@@ -2363,7 +2363,7 @@ extern "C" void func_002548D0_impl(void* p)
     float w = (float)self->world->v10();
     float h = (float)self->world->v11();
     self->world->v26(0, 0, 0.0f, 0.0f, w, h, 0.0f, 1.0f);
-    self->world->v34(D_004FF1A0);
+    self->world->v34(t4mat_Identity);
     sRS_2548D0* rs = self->world->top;
     rs->f8 = (rs->f8 & ~0x3E0) | ((self->f3C << 5) & 0x3E0);
     sVtx_2548D0 v[4];

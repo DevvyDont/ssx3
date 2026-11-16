@@ -2036,8 +2036,8 @@ INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_InitOnce);
 #ifdef SKIP_ASM
 extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size);
-extern char* D_004A3494;
-extern char* D_004A3498;
+extern char* kpScriptMasterTableFilename;
+extern char* kpScriptMasterTableDebugFilename;
 
 struct sDmScript8210 {
     int field_0x0;
@@ -2059,10 +2059,10 @@ struct sDmEngine8210 {
 // PORT: script offsets are rebased into pointers held in int.
 extern "C" void cSSXScriptEngine_InitOnce(sDmEngine8210* self)
 {
-    int* hdr = (int*)FILE_loadz(D_004A3494, 0);
+    int* hdr = (int*)FILE_loadz(kpScriptMasterTableFilename, 0);
     self->hdr = hdr;
     self->scripts = (sDmScript8210*)(hdr + 1);
-    char* base = (char*)FILE_loadz(D_004A3498, 0);
+    char* base = (char*)FILE_loadz(kpScriptMasterTableDebugFilename, 0);
     self->base = base;
     if (base != 0) {
         for (int i = 0; i < *self->hdr; i++) {

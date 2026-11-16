@@ -3,16 +3,16 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self);
 extern const char D_00483588[];
-extern void* D_004A52D4;
+extern void* gWorldTriggerManager;
 
 //99.88%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_Init__Fv);
 #ifdef SKIP_ASM
 void WORLDTRIGGERMANAGER_Init()
 {
-    if (D_004A52D4 == 0) {
+    if (gWorldTriggerManager == 0) {
         void* mem = cMemMan_alloc(0x344, D_00483588, 0, 0);
-        D_004A52D4 = cWorldTriggerManager_cWorldTriggerManager(mem);
+        gWorldTriggerManager = cWorldTriggerManager_cWorldTriggerManager(mem);
     }
 }
 #endif
@@ -24,10 +24,10 @@ extern "C" void cWorldTriggerManager__cWorldTriggerManager(char** self, int flag
 
 extern "C" void WORLDTRIGGERMANAGER_DeInit()
 {
-    if (D_004A52D4 != 0) {
-        cWorldTriggerManager__cWorldTriggerManager((char**)D_004A52D4, 3);
+    if (gWorldTriggerManager != 0) {
+        cWorldTriggerManager__cWorldTriggerManager((char**)gWorldTriggerManager, 3);
     }
-    D_004A52D4 = 0;
+    gWorldTriggerManager = 0;
 }
 #endif
 
@@ -242,7 +242,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
         else
             t->f38 = 0;
         if (t->f38 == 0) {
-            if (func_002B66E8((sWorldTrigger70**)D_004A52D4, t->f4, t->f8, tt) != 0) {
+            if (func_002B66E8((sWorldTrigger70**)gWorldTriggerManager, t->f4, t->f8, tt) != 0) {
                 func_002B5898(t);
                 return;
             }
@@ -266,7 +266,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
                 func_002B5898(t);
                 return;
             }
-            r = func_002B6630((sWorldTrigger70**)D_004A52D4, t->fC);
+            r = func_002B6630((sWorldTrigger70**)gWorldTriggerManager, t->fC);
             if (r > 0) {
                 func_002B5898(t);
                 return;
@@ -279,11 +279,11 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
             }
             r = func_0029B818(func_0028B180(), t->f40, rec);
         }
-        if (func_002B67D8(D_004A52D4, t->fC) == 0 || func_002B6808((sTriggerIdCache*)D_004A52D4, t->f4) != 0) {
+        if (func_002B67D8(gWorldTriggerManager, t->fC) == 0 || func_002B6808((sTriggerIdCache*)gWorldTriggerManager, t->f4) != 0) {
             if (rec[0] == 3 && r != 1)
                 return;
-            if (func_002B6988(D_004A52D4, t->fC) != 0) {
-                if (func_002B69B8(D_004A52D4, (void*)t->f4, tt) == 0) {
+            if (func_002B6988(gWorldTriggerManager, t->fC) != 0) {
+                if (func_002B69B8(gWorldTriggerManager, (void*)t->f4, tt) == 0) {
                     t->f30 = -9999;
                     return;
                 }
@@ -302,7 +302,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
         func_002B5898(t);
         return;
     }
-    if (func_002B6988(D_004A52D4, t->fC) != 0 && func_002B69B8(D_004A52D4, (void*)t->f4, tt) != 0) {
+    if (func_002B6988(gWorldTriggerManager, t->fC) != 0 && func_002B69B8(gWorldTriggerManager, (void*)t->f4, tt) != 0) {
         if (t->f30 != -9999)
             func_002AD5F0(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1, 0.1f);
         sfxBegin_4C38((struct sSnd4C38Sys*)func_0028B180(), t->f60, t->f64);
@@ -362,7 +362,7 @@ extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int
 
 extern "C" int func_002B5818(void* self, int idx, int* type, int* a, int* b, int c, int d)
 {
-    return func_002B63D0(D_004A52D4, idx, type, a, b, c, d);
+    return func_002B63D0(gWorldTriggerManager, idx, type, a, b, c, d);
 }
 #endif
 
@@ -376,7 +376,7 @@ extern "C" int func_002B5838(void* self, int idx)
     int type;
     int a;
     int b;
-    func_002B63D0(D_004A52D4, idx, &type, &a, &b, 0, 1);
+    func_002B63D0(gWorldTriggerManager, idx, &type, &a, &b, 0, 1);
     return type == 5;
 }
 #endif
@@ -388,7 +388,7 @@ extern "C" int func_002B65B0(void* self, int idx, char* dst);
 
 extern "C" int func_002B5878(void* self, int idx, char* dst)
 {
-    return func_002B65B0(D_004A52D4, idx, dst);
+    return func_002B65B0(gWorldTriggerManager, idx, dst);
 }
 #endif
 
@@ -1182,7 +1182,7 @@ struct sQuad6AA0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sQuad6AA0 D_004FF120;
+extern sQuad6AA0 t4vect_Zero;
 
 struct sTriggerSlot120 {
     int unk0;
@@ -1199,7 +1199,7 @@ extern "C" sTriggerSlots* func_002B6AA0(sTriggerSlots* self)
     sTriggerSlot120* p = self->slots;
     for (int i = 1; i != -1; i--, p++) {
         p->unk0 = 0;
-        p->q = D_004FF120;
+        p->q = t4vect_Zero;
     }
     return self;
 }
@@ -1843,7 +1843,7 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
             d.z = diff.z;
             dist = __builtin_fabsf(wtSqrt_2B6F40(d.x * d.x + d.y * d.y + d.z * d.z));
             if (dist < s->f14) {
-                wtSet_7908(D_004A52D4, e->obj, i, c, s->id, 1, wtCurve_7908(self, s->f18, dist / s->f14), pos);
+                wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 1, wtCurve_7908(self, s->f18, dist / s->f14), pos);
             }
             break;
         }
@@ -1867,7 +1867,7 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
             float tc = s->f1C != 0.0f ? (dc * dc) / (s->f1C * s->f1C) : 0.0f;
             dist = ta + tb + tc;
             if (dist < 1.0f) {
-                wtSet_7908(D_004A52D4, e->obj, i, c, s->id, 1, wtCurve_7908(self, s->f2C, dist), pos);
+                wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 1, wtCurve_7908(self, s->f2C, dist), pos);
             }
             break;
         }
@@ -1882,7 +1882,7 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
                     v = wtCurve_7908(self, s->f24, dist / s->f14);
                     float cone = Acos_7908(s->f28);
                     v *= wtCurve_7908(self, s->f2C, Acos_7908(dot) / cone);
-                    wtSet_7908(D_004A52D4, e->obj, i, c, s->id, 1, v, pos);
+                    wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 1, v, pos);
                 }
             }
             break;
@@ -1898,7 +1898,7 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
                     v = 1.0f - dist;
                     v *= 10.0f;
                 }
-                wtSet_7908(D_004A52D4, e->obj, i, c, s->id, 0, v, pos);
+                wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 0, v, pos);
             }
             break;
         }

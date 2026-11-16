@@ -645,7 +645,7 @@ INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int D_00534B30[];
 extern char D_00535BC8[];
-extern void* D_004A28A0;
+extern void* PadCache;
 extern char D_004A1108[];
 extern "C" int func_00147290(void* iface, int i);
 extern "C" int func_00147618(void* iface, int i);
@@ -685,7 +685,7 @@ static inline void SetHud_IP(char* obj, int a, int b)
 
 static inline int HudTab_IP(int ch)
 {
-    int* h = (int*)D_004A28A0;
+    int* h = (int*)PadCache;
     h += ch;
     return h[0xBBB];
 }
@@ -734,7 +734,7 @@ extern "C" void cAI_InitPlayers(void* p)
         } else {
             char* d = (char*)SSXApp;
             char** box = (char**)(d + 0xB0);
-            int* hud = (int*)D_004A28A0;
+            int* hud = (int*)PadCache;
             int* c = (int*)d;
             box += ch;
             c += ctrl;
@@ -2739,7 +2739,7 @@ int func_0011FE98(void* self);
 extern "C" int func_00311AE8(void*, int);
 int func_00312AA0(void* self, int i);
 extern float D_004A4C8C;
-extern char D_004FF120[];
+extern char t4vect_Zero[];
 
 struct sVec4_12C678
 {
@@ -2860,7 +2860,7 @@ extern "C" void func_0012C678(sAiObj12C678* self)
         break;
     }
     case 2:
-        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)D_004FF120;
+        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
         *(float*)(*(char**)(self->mRider + 0x784) + 0x1C) = 0.75f;
         func_00115B58(self->mRider);
         *(float*)(*(char**)(self->mRider + 0x784) + 0x1C) = 1.0f;
@@ -2871,7 +2871,7 @@ extern "C" void func_0012C678(sAiObj12C678* self)
         }
         break;
     case 3:
-        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)D_004FF120;
+        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
         break;
     }
     if (anim != prev)
@@ -2920,7 +2920,7 @@ extern "C" int func_00311AE8(void*, int);
 extern "C" void func_002708F0(void* self, int key, int id);
 extern "C" void func_00309990(void* self);
 extern void* D_004A3DD8;
-extern char D_004FF120[];
+extern char t4vect_Zero[];
 
 struct sVec4_12CA30
 {
@@ -2977,7 +2977,7 @@ extern "C" void func_0012CA30(sAiObj12CA30* self)
     self->f0 = 0;
     if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x16)
     {
-        func_00136D40(*(char**)(self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)(self->mRider + 0x1E0), (sVec4_12CA30*)D_004FF120, p30);
+        func_00136D40(*(char**)(self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)(self->mRider + 0x1E0), (sVec4_12CA30*)t4vect_Zero, p30);
         *(int*)(self->mRider + 0x318) = 0;
     }
     func_002708F0(SSXApp->Game->Replay, *(int*)(self->mRider + 0x86C), *(int*)(self->mRider + 0x790) + 0xFC);
@@ -4330,7 +4330,7 @@ extern "C" void func_0012EE30(void*, void*);
 extern "C" void func_00294170(void* self, void* rider);
 extern "C" int func_00311AE8(void*, int);
 int func_00312AA0(void* self, int i);
-extern void* D_004A3500;
+extern void* gSSXAudio;
 extern char D_0043D840[];
 extern char D_0043D788[];
 
@@ -4389,7 +4389,7 @@ extern "C" void func_0012E9B8(void* self, void* in)
         {
             func_00114298(*(void**)self, *(float*)(*(char**)self + 0x220));
             cRider_setMotionState_impl(*(void**)self, 1);
-            func_00294170(D_004A3500, *(void**)self);
+            func_00294170(gSSXAudio, *(void**)self);
         }
         float z = 0.0f;
         func_00113E80(*(void**)self, z);
@@ -5507,7 +5507,7 @@ extern "C" void func_00294170(void* self, void* rider);
 // PORT: prototype mismatch. func_0011FEC8/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
-extern void* D_004A3500;
+extern void* gSSXAudio;
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_1307B8(float x)
@@ -5542,7 +5542,7 @@ extern "C" int func_001307B8(void* self, void* a1)
     func_00114298(*(void**)((char*)self + 0x14), 1.0f);
     cRider_setMotionState_impl(*(void**)((char*)self + 0x14), 1);
     func_0011FEC8_impl(*(void**)((char*)self + 0x14), 5);
-    func_00294170(D_004A3500, *(void**)((char*)self + 0x14));
+    func_00294170(gSSXAudio, *(void**)((char*)self + 0x14));
     return 1;
 }
 #endif
@@ -7967,7 +7967,7 @@ struct sXf
 };
 extern t4Vector D_004FF130_4DD0 __asm__("D_004FF130");
 extern t4Vector D_004FF140;
-extern t4Vector D_004FF150;
+extern t4Vector t4vect_YAxis;
 extern t4Vector D_004FF160_4DD0 __asm__("D_004FF160");
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sVec4 QuatMul_12E010_4DD0(const sVec4& a, const sVec4& b)
@@ -8226,7 +8226,7 @@ extern "C" void func_00134DD0_x(void* self, sXf* xf)
     else
         nv = cur;
     *(float*)((char*)self + 0x40) = nv;
-    sVec4 ax = Norm_134DD0(Sub_12E010_4DD0(ScaleO_134DD0(D_004FF150, nv),
+    sVec4 ax = Norm_134DD0(Sub_12E010_4DD0(ScaleO_134DD0(t4vect_YAxis, nv),
                                              ScaleO_134DD0(D_004FF140, 1.0f - *(float*)((char*)self + 0x40))));
     {
         sVec4 q3;

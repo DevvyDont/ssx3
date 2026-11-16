@@ -693,7 +693,7 @@ struct sPopup_6D30 {
     cUIObj_6D30* o88;
     cUIObj_6D30* o8C;
 };
-extern sVec3_6D30 D_004FF0D8_6D30 __asm__("D_004FF0D8");
+extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(void* self, void* dst, int* info);
 extern "C" void func_001C8050(void* self, cUIText* text, int* info);
 extern "C" void func_001C8628(void* self, void* obj, void* out);
@@ -847,7 +847,7 @@ extern "C" void func_001C70F0(void* self, sVec3_7258* vp)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_setPopupMessage);
 #ifdef SKIP_ASM
 struct sVec3_7258 { float x, y, z; };
-extern sVec3_7258 D_004FF0D8;
+extern sVec3_7258 t3vect_Zero;
 extern "C" void func_001C70F0(void* self, sVec3_7258* v);
 extern "C" void cScreenPopup_getMessageLineWrapSize1(void* self, int* msg, void* out);
 extern "C" void func_001C97E0(void* self, void* a, void* b, int which, float t);
@@ -862,7 +862,7 @@ extern "C" void cScreenPopup_setPopupMessage(void* self, void* a1)
         *(sVec3_7258*)(o + 0x44) = v;
         char* p = (char*)a1 + 4;
         if (*(int*)((char*)self + 0x2CC) != 0) {
-            sVec3_7258 t = D_004FF0D8;
+            sVec3_7258 t = t3vect_Zero;
             cScreenPopup_getMessageLineWrapSize1(self, (int*)p, &t);
             if (t.x > *(float*)((char*)self + 0x260))
                 func_001C70F0(self, &t);
@@ -1661,7 +1661,7 @@ struct sVec3_8A38 {
     sVec3_8A38(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
 struct sVec3_7258;
-extern sVec3_8A38 D_004FF0D8_8A38 __asm__("D_004FF0D8");
+extern sVec3_8A38 D_004FF0D8_8A38 __asm__("t3vect_Zero");
 extern "C" void func_001C70F0(void* self, sVec3_7258* v);
 extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float t);
 extern "C" void func_001C9CD0(void* self, int v);

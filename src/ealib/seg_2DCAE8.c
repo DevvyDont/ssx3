@@ -4083,7 +4083,7 @@ int func_003E16B0(int a0, int a1) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1700);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C38_1700[] __asm__("D_00450C38");
+extern int D_00450C38_1700[] __asm__("sync_priority");
 void func_003DEE18_1700(int, int) __asm__("func_003DEE18");
 void func_003E1700(int a) {
     func_003DEE18_1700(a, D_00450C38_1700[0]);
@@ -4114,7 +4114,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1798);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILESYS_atomic_1798(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 void func_003E1728_1798(void) __asm__("func_003E1728");
-extern int D_00450C38_1798[] __asm__("D_00450C38");
+extern int D_00450C38_1798[] __asm__("sync_priority");
 
 void func_003E1798(int arg0) {
     int buf[8];
@@ -4131,7 +4131,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E17D8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILESYS_atomic_17D8(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 void func_003E1728_17D8(void) __asm__("func_003E1728");
-extern int D_00450C38_17D8[] __asm__("D_00450C38");
+extern int D_00450C38_17D8[] __asm__("sync_priority");
 
 void func_003E17D8(int arg0) {
     int buf[8];
@@ -4172,7 +4172,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILE_load);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILESYS_atomic_1900(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 void func_003E1810_18C8(void) __asm__("func_003E1810");
-extern int D_00450C38_18C8[] __asm__("D_00450C38");
+extern int D_00450C38_18C8[] __asm__("sync_priority");
 
 void FILE_load(int arg0, int arg1) {
     int buf[8];
@@ -4190,7 +4190,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadz);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILESYS_atomic_1908(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 void func_003E1810_1908(void) __asm__("func_003E1810");
-extern int D_00450C38_1908[] __asm__("D_00450C38");
+extern int D_00450C38_1908[] __asm__("sync_priority");
 
 void FILE_loadz(int arg0, int arg1) {
     int buf[8];
@@ -4233,7 +4233,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1A10);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a; int b; int sz; int c; int d; } FLS_args_1A10;
 extern int FILESYS_atomic_1A10(void (*)(void), int, int, void*) __asm__("FILESYS_atomic");
-extern int D_00450C38_0C38[] __asm__("D_00450C38");
+extern int D_00450C38_0C38[] __asm__("sync_priority");
 extern void func_003E1948_1948(void) __asm__("func_003E1948");
 
 int func_003E1A10(int arg0, int *arg1, int arg2) {
@@ -4257,7 +4257,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadsizez);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a; int b; int sz; int c; int d; } FLS_args_1ACC;
 extern int FILESYS_atomic_1ACC(void (*)(void), int, int, void*) __asm__("FILESYS_atomic");
-extern int D_00450C38_0C38[] __asm__("D_00450C38");
+extern int D_00450C38_0C38[] __asm__("sync_priority");
 extern void func_003E1948_1948(void) __asm__("func_003E1948");
 
 int FILE_loadsizez(int arg0, int *arg1, int arg2) {
@@ -4304,7 +4304,7 @@ int func_003E1AD0_impl(int a, B_1AD0 *b) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1B68);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C38_0C38[] __asm__("D_00450C38");
+extern int D_00450C38_0C38[] __asm__("sync_priority");
 extern void FILESYS_atomic(int *, int, int, void *);
 extern int func_003E1AD0[];
 
@@ -4324,7 +4324,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1BB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a; int b; int c; int d; int e; int pad[3]; } S_1BB8;
-extern int D_00450C38_1BB8[] __asm__("D_00450C38");
+extern int D_00450C38_1BB8[] __asm__("sync_priority");
 extern void f_1BB8_cb(void) __asm__("func_003E1AD0");
 extern int FILESYS_atomic_1BB8(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 
@@ -4371,7 +4371,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1C98);
 extern void cb_1C98(void) __asm__("func_003E1C00");
 typedef struct Args_1C98 { int a0, a1, a2, a3, a4; } Args_1C98;
 extern int FILESYS_atomic_1C98(void (*)(void), int, int, Args_1C98 *) __asm__("FILESYS_atomic");
-extern int D_00450C38_0C38[] __asm__("D_00450C38");
+extern int D_00450C38_0C38[] __asm__("sync_priority");
 
 int func_003E1C98(int arg0, int arg1, int arg2, int arg3) {
     Args_1C98 args;
@@ -4395,7 +4395,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1D00);
 extern void cb_1D00(void) __asm__("func_003E1C00");
 typedef struct Args_1D00 { int a0, a1, a2, a3, a4; } Args_1D00;
 extern int FILESYS_atomic_1D00(void (*)(void), int, int, Args_1D00 *) __asm__("FILESYS_atomic");
-extern int D_00450C38_0C38[] __asm__("D_00450C38");
+extern int D_00450C38_0C38[] __asm__("sync_priority");
 
 int func_003E1D00(int arg0, int arg1, int arg2, int arg3) {
     Args_1D00 args;
@@ -4471,7 +4471,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1EC8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILESYS_atomic_1EC8(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 void func_003E1D68_1EC8(void) __asm__("func_003E1D68");
-extern int D_00450C38_1EC8[] __asm__("D_00450C38");
+extern int D_00450C38_1EC8[] __asm__("sync_priority");
 
 void func_003E1EC8(int arg0, int arg1) {
     int buf[8];
@@ -4489,7 +4489,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1F08);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILESYS_atomic_1F08(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 void func_003E1D68_1F08(void) __asm__("func_003E1D68");
-extern int D_00450C38_1F08[] __asm__("D_00450C38");
+extern int D_00450C38_1F08[] __asm__("sync_priority");
 
 void func_003E1F08(int arg0, int arg1) {
     int buf[8];
@@ -6989,12 +6989,12 @@ int func_003E5A10(int arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5A78);
 #ifdef SKIP_ASM
-extern char D_00451250[];
+extern char PRINTdevicelist[];
 
 void func_003E5A78(int arg0, int arg1) {
     char *temp_4;
 
-    temp_4 = D_00451250 + arg0 * 0xC;
+    temp_4 = PRINTdevicelist + arg0 * 0xC;
     (*(int *)((char*)(temp_4) + (8))) = (int) (((*(int *)((char*)(temp_4) + (8))) & ~1) | (arg1 & 1));
 }
 #endif
@@ -7004,7 +7004,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5AA8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_5AA8 { int a; unsigned int b0 : 1; unsigned int b1 : 1; unsigned int rest : 30; };
-extern struct E_5AA8 D_00450E08_5AA8[] __asm__("D_00450E08");
+extern struct E_5AA8 D_00450E08_5AA8[] __asm__("PRINTchannellist");
 
 void func_003E5AA8(int idx, int val) {
     int i;
@@ -7029,33 +7029,33 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5B60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00451008;                          /* debug output set up (func_003E5B60) */
-struct sDbgChan {                   /* 8 bytes, D_00450E08[64]: a debug message channel */
+extern int PRINTinitialized;                          /* debug output set up (func_003E5B60) */
+struct sDbgChan {                   /* 8 bytes, PRINTchannellist[64]: a debug message channel */
     int f00;
     unsigned int on : 1;
     unsigned int f04b1 : 1;
     unsigned int pad : 30;
 };
-struct sDbgOut {                    /* 12 bytes, D_00451250[8]: a debug output */
+struct sDbgOut {                    /* 12 bytes, PRINTdevicelist[8]: a debug output */
     int f00;
     void (*f04)(int, char *);
     unsigned int on : 1;
     unsigned int pad : 31;
 };
-extern struct sDbgChan D_00450E08[];
-extern struct sDbgOut D_00451250_5B60[] __asm__("D_00451250");
+extern struct sDbgChan PRINTchannellist[];
+extern struct sDbgOut D_00451250_5B60[] __asm__("PRINTdevicelist");
 extern void func_003E5EF8(int, int);
 extern void func_003E5DC8(int, int);
 
 void func_003E5B60(void) {
     int i;
-    if (D_00451008 == 0) {
-        D_00451008 = 1;
+    if (PRINTinitialized == 0) {
+        PRINTinitialized = 1;
         for (i = 0; i < 8; i++) {
             D_00451250_5B60[i].on = 0;
         }
         for (i = 0; i < 64; i++) {
-            struct sDbgChan *e = &D_00450E08[i];
+            struct sDbgChan *e = &PRINTchannellist[i];
             e->on = 0;
         }
         for (i = 4; i < 8; i++) {
@@ -7063,7 +7063,7 @@ void func_003E5B60(void) {
             D_00451250_5B60[i].f04 = 0;
         }
         for (i = 14; i < 64; i++) {
-            struct sDbgChan *e = &D_00450E08[i];
+            struct sDbgChan *e = &PRINTchannellist[i];
             e->f00 = 0;
             e->f04b1 = 0;
         }
@@ -7077,7 +7077,7 @@ void func_003E5B60(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5C60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00451008_5C60[4] __asm__("D_00451008");
+extern int D_00451008_5C60[4] __asm__("PRINTinitialized");
 
 void func_003E5C60(void) {
     if (D_00451008_5C60[0] != 0) {
@@ -7092,9 +7092,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_vstring);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_5C78 { int a; unsigned int b0 : 1; unsigned int rest : 31; };
 struct H_5C78 { int a; void (*fn)(int, char *); unsigned int b0 : 1; unsigned int rest : 31; };
-extern int D_00451008_5C78[] __asm__("D_00451008");
-extern struct E_5C78 D_00450E08_5C78[] __asm__("D_00450E08");
-extern struct H_5C78 D_00451250_5C78[] __asm__("D_00451250");
+extern int D_00451008_5C78[] __asm__("PRINTinitialized");
+extern struct E_5C78 D_00450E08_5C78[] __asm__("PRINTchannellist");
+extern struct H_5C78 D_00451250_5C78[] __asm__("PRINTdevicelist");
 
 void PRINT_vstring_5C78(int, char *, char *) __asm__("PRINT_vstring");
 void PRINT_vstring_5C78(int idx, char *fmt, char *ap) {
@@ -7151,8 +7151,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5DC8);
 struct S_5DC8 { int a; int b; int c; };
 extern void func_003E5A78(int, int);
 extern void func_003E5B60(void);
-extern int D_00451008_5DC8[] __asm__("D_00451008");
-extern struct S_5DC8 D_00451250_5DC8[] __asm__("D_00451250");
+extern int D_00451008_5DC8[] __asm__("PRINTinitialized");
+extern struct S_5DC8 D_00451250_5DC8[] __asm__("PRINTdevicelist");
 
 void func_003E5DC8(int a0, int a1) {
     if (D_00451250_5DC8[a0].b != 0) {
@@ -7169,8 +7169,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5E38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E5B60(void);
-extern char D_00451250_1250[] __asm__("D_00451250");
-extern int D_00451008_1008[] __asm__("D_00451008");
+extern char D_00451250_1250[] __asm__("PRINTdevicelist");
+extern int D_00451008_1008[] __asm__("PRINTinitialized");
 
 int func_003E5E38(int a0) {
     char *b;
@@ -7188,8 +7188,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5E88);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5E88 { int a; int b; int c; };
 extern void func_003E5B60(void);
-extern struct S_5E88 D_00451250_5E88[] __asm__("D_00451250");
-extern int D_00451008_5E88[] __asm__("D_00451008");
+extern struct S_5E88 D_00451250_5E88[] __asm__("PRINTdevicelist");
+extern int D_00451008_5E88[] __asm__("PRINTinitialized");
 
 void func_003E5E88(int a0, int a1, int a2) {
     if (D_00451008_5E88[0] == 0) {
@@ -7206,7 +7206,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5EF8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E5AA8(int, int);
 extern void func_003E5B60(void);
-extern int D_00451008_1008[] __asm__("D_00451008");
+extern int D_00451008_1008[] __asm__("PRINTinitialized");
 
 void func_003E5EF8(int a0, int a1) {
     if (D_00451008_1008[0] == 0) {
@@ -7221,8 +7221,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5F48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_5F48 { int a; int b; };
-extern struct P_5F48 D_00450E08_5F48[] __asm__("D_00450E08");
-extern int D_00451008_5F48[] __asm__("D_00451008");
+extern struct P_5F48 D_00450E08_5F48[] __asm__("PRINTchannellist");
+extern int D_00451008_5F48[] __asm__("PRINTinitialized");
 void func_003E5B60_5F48(void) __asm__("func_003E5B60");
 
 int func_003E5F48(int arg0) {
@@ -7237,8 +7237,8 @@ int func_003E5F48(int arg0) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5F98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450E08_0E08[] __asm__("D_00450E08");
-extern int D_00451008_1008[] __asm__("D_00451008");
+extern int D_00450E08_0E08[] __asm__("PRINTchannellist");
+extern int D_00451008_1008[] __asm__("PRINTinitialized");
 void func_003E5B60_5F98(void) __asm__("func_003E5B60");
 
 void func_003E5F98(int arg0, int arg1) {
@@ -7255,8 +7255,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5FF0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef struct { int a; void (*fn)(int, int); int c; } E_5FF0;
-extern int D_00451008_5FF0[] __asm__("D_00451008");
-extern E_5FF0 D_00451250_5FF0[] __asm__("D_00451250");
+extern int D_00451008_5FF0[] __asm__("PRINTinitialized");
+extern E_5FF0 D_00451250_5FF0[] __asm__("PRINTdevicelist");
 extern void func_003E5B60_5FF0(void) __asm__("func_003E5B60");
 
 void func_003E5FF0(int i, int a, int b) {
@@ -7301,8 +7301,8 @@ extern void PRINT_string_60E8(int, char *, ...) __asm__("PRINT_string");
 extern int func_004186C8_60E8(char *, char *, char *) __asm__("func_004186C8");
 extern char D_00495EF0[];
 extern char D_00495F00[];
-extern char *D_0045100C_100C[] __asm__("D_0045100C");
-extern int D_00451010_1010[] __asm__("D_00451010");
+extern char *D_0045100C_100C[] __asm__("REALabortfilename");
+extern int D_00451010_1010[] __asm__("REALabortlinenum");
 
 void SYSTEM_abortmessage(char *fmt, ...) {
     char buf[512];

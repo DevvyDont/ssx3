@@ -945,7 +945,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_render);
 extern "C" int func_002D1C58_i() __asm__("func_002D1C58");
 extern "C" void* func_002D1C20(int i);
 extern int D_004A452C;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sMat_53B10 {
     float m[16];
@@ -1011,7 +1011,7 @@ extern "C" void cSkyBox_render(void* self)
     if (*(void**)((char*)self + 0x14) == 0)
         return;
     sMat_53B10 m;
-    vu0CopyMatrix_53B10(&m, D_004FF1A0);
+    vu0CopyMatrix_53B10(&m, t4mat_Identity);
     sVec4_53B10 pos = *(sVec4_53B10*)func_002D1C20(func_002D1C58_i());
     *(sVec4_53B10*)&m.m[12] = pos;
     ctx->top[1] = ctx->top[0];

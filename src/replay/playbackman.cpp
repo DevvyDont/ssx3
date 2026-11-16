@@ -1214,8 +1214,8 @@ struct cBucketMan;
 void* cBucketMan_first(cBucketMan* self, int index);
 void* cBucketMan_next(cBucketMan* self, void* node, int index);
 // small-data alias of the bucket manager global (its real type is declared elsewhere; see gameload.cpp)
-extern char D_004A5988;
-static inline cBucketMan* bucketMan_D988() { return (cBucketMan*)&D_004A5988; }
+extern char gBucketMan;
+static inline cBucketMan* bucketMan_D988() { return (cBucketMan*)&gBucketMan; }
 
 // bucket node: 12 bytes of list links, then the polymorphic part (save is the 12th vtable entry)
 class cPbBucketNodeD988 {
@@ -1262,13 +1262,13 @@ INCLUDE_ASM("replay/playbackman", func_0026DA88);
 struct cBucketMan;
 void* cBucketMan_first(cBucketMan* self, int index);
 void* cBucketMan_next(cBucketMan* self, void* node, int index);
-extern char D_004A5988;
+extern char gBucketMan;
 struct sVEntryDA88 {
     short delta;
     short index;
     void (*fn)(void* self, ...);
 };
-static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&D_004A5988; }
+static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
 extern "C" void func_0026DA88(void* self, cPbStream* s)
 {
     int hdr[2];

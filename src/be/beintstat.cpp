@@ -390,7 +390,7 @@ extern int* D_004A1214;
 extern int* D_004A1238;
 extern int* D_004A1248;
 extern int* D_004A124C;
-extern int* D_004A1264;
+extern int* cBERewardInterface_instance;
 
 extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 {
@@ -419,8 +419,8 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     D_004A1214 = 0;
     operator_delete(D_004A124C);
     D_004A124C = 0;
-    operator_delete(D_004A1264);
-    D_004A1264 = 0;
+    operator_delete(cBERewardInterface_instance);
+    cBERewardInterface_instance = 0;
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -438,8 +438,8 @@ int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
 void* cBEBAGTInterface_getThis();
 extern char D_0045A268[];
-extern char D_00535B20[];
-extern char D_004A6CA8[];
+extern char cBELibrary_playerDB[];
+extern char cBELibrary_profileLib[];
 
 struct sVEntry_149A88
 {
@@ -466,7 +466,7 @@ static inline void vreset_149A88(char* o)
 extern "C" void func_00149A88(void* self, signed char idx)
 {
     char buf[64];
-    sRiderEntry_149A88* e = (sRiderEntry_149A88*)(D_00535B20 + idx * 0x1C);
+    sRiderEntry_149A88* e = (sRiderEntry_149A88*)(cBELibrary_playerDB + idx * 0x1C);
     func_00416210(e, 0, 0x1C);
     e->f1 = 1;
     e->c11 = 4;
@@ -474,7 +474,7 @@ extern "C" void func_00149A88(void* self, signed char idx)
     sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
     strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045A268)));
     sprintf((char*)e, buf, idx + 1);
-    func_001567B8(D_004A6CA8 + idx * 0x9B50, 1);
+    func_001567B8(cBELibrary_profileLib + idx * 0x9B50, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
     vreset_149A88((char*)cBEStatInterface_getThis());
     vreset_149A88((char*)cBEBAGTInterface_getThis());
@@ -523,7 +523,7 @@ struct sCharSrc_149BB8
 extern char D_004A6750[];
 extern char D_004C3E98[];
 extern sCharSlot_149BB8 D_005305B0;
-extern sRiderEntry_149BB8 D_00535B20_149BB8[6] __asm__("D_00535B20");
+extern sRiderEntry_149BB8 D_00535B20_149BB8[6] __asm__("cBELibrary_playerDB");
 extern const char D_0045A2E0[];
 extern char D_00530970[];
 extern sCharStat_149BB8 D_005308D8[10];
@@ -575,7 +575,7 @@ extern "C" void func_00149BB8(void)
     }
     func_00416210(D_00535898, 0, 0x288);
     for (i = 0; i < 3; i++) {
-        func_001567B8(D_004A6CA8 + i * 0x9B50, 1);
+        func_001567B8(cBELibrary_profileLib + i * 0x9B50, 1);
     }
     p = D_00530600;
     p[0x0 / 4] = 0;

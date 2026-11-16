@@ -552,7 +552,7 @@ struct func_0039FB30_sVec3 {
     float z;
 };
 
-extern func_0039FB30_sVec3 D_004FF0D8;
+extern func_0039FB30_sVec3 t3vect_Zero;
 extern char D_00494BD8[];
 
 struct func_0039FB30_sFlags {
@@ -611,16 +611,16 @@ extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a
     self->color[1] = 1.0f;
     self->color[2] = 1.0f;
     self->color[3] = 1.0f;
-    self->pos = D_004FF0D8;
+    self->pos = t3vect_Zero;
     self->unk40 = a2;
     self->unk38 = 0;
     self->unk3C = 0;
-    self->rot = D_004FF0D8;
+    self->rot = t3vect_Zero;
     self->scale.x = 1.0f;
     self->scale.y = 1.0f;
     self->scale.z = 1.0f;
     self->unk5C = a1;
-    self->offs = D_004FF0D8;
+    self->offs = t3vect_Zero;
     self->unk6C = 4;
     self->unk70 = 6;
     return self;

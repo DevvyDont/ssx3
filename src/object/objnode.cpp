@@ -2,7 +2,7 @@
 
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* D_00491F00[16];
-extern char D_004A5988;
+extern char gBucketMan;
 
 struct cObjNode {
     char pad_0x00[0xC];
@@ -15,7 +15,7 @@ INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
 cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
 {
     self->field_0xC = D_00491F00;
-    cBucketMan_add(&D_004A5988, self, param2);
+    cBucketMan_add(&gBucketMan, self, param2);
     return self;
 }
 #endif
@@ -29,7 +29,7 @@ void operator_delete(int*);
 extern "C" void cObjNode__cObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_00491F00;
-    cBucketMan_remove(&D_004A5988, self);
+    cBucketMan_remove(&gBucketMan, self);
     if (flags & 1) {
         operator_delete((int*)self);
     }

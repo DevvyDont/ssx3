@@ -3,7 +3,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0045A938[];
 extern void* D_0045AE88[16];
-extern void* D_004A1264;
+extern void* cBERewardInterface_instance;
 
 struct cBERewardInterface {
     char pad_0x00[8];
@@ -16,13 +16,13 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getThis__Fv);
 #ifdef SKIP_ASM
 void* cBERewardInterface_getThis()
 {
-    if (D_004A1264 == 0) {
+    if (cBERewardInterface_instance == 0) {
         cBERewardInterface* mem = (cBERewardInterface*)cMemMan_alloc(0x18, D_0045A938, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AE88;
-        D_004A1264 = mem;
+        cBERewardInterface_instance = mem;
     }
-    return D_004A1264;
+    return cBERewardInterface_instance;
 }
 #endif
 
@@ -162,7 +162,7 @@ extern "C" int func_00156C50(void *arg0) {
 //100%
 INCLUDE_ASM("be/beintreward", func_00156C70);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 struct sBELibTables;
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
@@ -197,7 +197,7 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
 
 extern "C" int func_00156C70(void* self, int a1, int a2, int type)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, a2);
@@ -282,7 +282,7 @@ extern "C" int func_00156C70(void* self, int a1, int a2, int type)
 //100%
 INCLUDE_ASM("be/beintreward", func_00156EE0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 struct sBELibTables;
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
@@ -312,7 +312,7 @@ static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
 
 extern "C" int func_00156EE0(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, a2);
@@ -358,7 +358,7 @@ extern "C" int func_00156EE0(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_00157080);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 unsigned int BXrand();
 extern "C" int func_00157210(void* self, int kind);
 extern "C" int func_00157518(void* self, int a1, int a2, int kind);
@@ -373,7 +373,7 @@ extern "C" int func_00157080(void* self, int profile, int c, int kind)
         return -1;
     }
     unsigned int n = BXrand() % (unsigned int)(total - have);
-    char* p = (char*)D_004A6CA8 + profile * 0x9B50 + c * 0xF88;
+    char* p = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
     signed char* bits = 0;
     switch (kind) {
     case 3: bits = (signed char*)(p + 0xF30); break;
@@ -590,14 +590,14 @@ extern "C" int func_00157518(void* self, int a1, int a2, int kind)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001575C0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_001575C0(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x3C), (signed char*)(p + 0xF30));
 }
 #endif
@@ -605,14 +605,14 @@ extern "C" int func_001575C0(void* self, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157620);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_00157620(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x40), (signed char*)(p + 0xF36));
 }
 #endif
@@ -620,14 +620,14 @@ extern "C" int func_00157620(void* self, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157680);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_00157680(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x44), (signed char*)(p + 0xF45));
 }
 #endif
@@ -635,14 +635,14 @@ extern "C" int func_00157680(void* self, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001576E0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_001576E0(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x48), (signed char*)(p + 0xF53));
 }
 #endif
@@ -650,14 +650,14 @@ extern "C" int func_001576E0(void* self, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157740);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_00157740(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x4C), (signed char*)(p + 0xF52));
 }
 #endif
@@ -665,12 +665,12 @@ extern "C" int func_00157740(void* self, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001577A0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_001577A0(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, 0x14, (signed char*)(p + 0xF57));
 }
 #endif
@@ -802,7 +802,7 @@ extern "C" int func_00157B08(void* self, int rider, int peak)
 //100%
 INCLUDE_ASM("be/beintreward", func_00157B70);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
 extern "C" int func_00157B70(void* self, int a, int b, int peak)
@@ -812,7 +812,7 @@ extern "C" int func_00157B70(void* self, int a, int b, int peak)
         int bOff = b * 0xF88;
         int aOff = a * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
     }
     if (peak == 2)
@@ -820,7 +820,7 @@ extern "C" int func_00157B70(void* self, int a, int b, int peak)
         int bOff = b * 0xF88;
         int aOff = a * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)D_004A6CA8 + off;
+        char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
     }
     return 0;
@@ -877,12 +877,12 @@ extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int k,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157D60);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157D60(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF30);
 }
 #endif
@@ -890,12 +890,12 @@ extern "C" int func_00157D60(void* self, int a1, int a2, int bit)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157DA0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157DA0(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF36);
 }
 #endif
@@ -903,12 +903,12 @@ extern "C" int func_00157DA0(void* self, int a1, int a2, int bit)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157DE0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157DE0(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF45);
 }
 #endif
@@ -916,12 +916,12 @@ extern "C" int func_00157DE0(void* self, int a1, int a2, int bit)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157E20);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157E20(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF53);
 }
 #endif
@@ -929,12 +929,12 @@ extern "C" int func_00157E20(void* self, int a1, int a2, int bit)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157E60);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit, p + 0xF52);
 }
 #endif
@@ -945,7 +945,7 @@ INCLUDE_ASM("be/beintreward", func_00157EA0);
 // PORT: 64-bit ulong bit test (ld/dsrlv).
 extern "C" int func_00157EA0(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return (int)((*(ulong*)(p + 0xF78) >> bit) & 1);
 }
 #endif
@@ -953,12 +953,12 @@ extern "C" int func_00157EA0(void* self, int a1, int a2, int bit)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157EE0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157430(self, bit-10, p + 0xF57);
 }
 #endif
@@ -1002,7 +1002,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" int func_001575C0(void* self, int a1, int a2);
 int func_001572B0(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
@@ -1016,7 +1016,7 @@ struct sRewardDef_157FD0
 extern "C" void func_00157FD0(void* self, int a1, int a2, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     func_001573F0(self, bit, p + 0xF30);
     if (give)
     {
@@ -1045,7 +1045,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" int func_00157620(void* self, int a1, int a2);
 int func_001572D0(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
@@ -1059,7 +1059,7 @@ struct sRewardDef_1580F8
 extern "C" void func_001580F8(void* self, int a1, int a2, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     func_001573F0(self, bit, p + 0xF36);
     if (give)
     {
@@ -1088,7 +1088,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" int func_00157680(void* self, int a1, int a2);
 int func_001572F0(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
@@ -1102,7 +1102,7 @@ struct sRewardDef_158220
 extern "C" void func_00158220(void* self, int a1, int a2, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     func_001573F0(self, bit, p + 0xF45);
     if (give)
     {
@@ -1131,7 +1131,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" int func_001576E0(void* self, int a1, int a2);
 int func_00157310(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
@@ -1145,7 +1145,7 @@ struct sRewardDef_158348
 extern "C" void func_00158348(void* self, int a1, int a2, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     func_001573F0(self, bit, p + 0xF53);
     if (give)
     {
@@ -1170,7 +1170,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" void func_001573F0(void* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
@@ -1178,7 +1178,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" void func_00158470(void* self, int profile, int c, int idx, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + profile * 0x9b50 + c * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88;
     func_001573F0(self, idx, p + 0xF52);
     if (award)
     {
@@ -1197,7 +1197,7 @@ INCLUDE_ASM("be/beintreward", func_00158558);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
@@ -1205,7 +1205,7 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" void func_00158558(void* self, int profile, int c, int bit, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + profile * 0x9b50 + c * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88;
     *(ulong*)(p + 0xF70) |= (ulong)1 << bit;
     if (award)
     {
@@ -1223,7 +1223,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
 void* func_0015A478_noargs() __asm__("func_0015A478");
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" void func_001573F0(void* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
@@ -1232,7 +1232,7 @@ extern "C" void func_00158618(void* self, int profile, int c, int idx, int award
 {
     idx -= 10;
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + profile * 0x9b50 + c * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88;
     func_001573F0(self, idx, p + 0xF57);
     if (award)
     {
@@ -1248,11 +1248,11 @@ extern "C" void func_00158618(void* self, int profile, int c, int idx, int award
 //100%
 INCLUDE_ASM("be/beintreward", func_00158700);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" int func_00158700(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return *(int*)(p + 0xf80);
 }
 #endif
@@ -1261,11 +1261,11 @@ extern "C" int func_00158700(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_00158728);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" long func_00158728(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return *(long*)(p + 0xf70);
 }
 #endif
@@ -1274,11 +1274,11 @@ extern "C" long func_00158728(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_00158750);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" long func_00158750(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return *(long*)(p + 0xf78);
 }
 #endif
@@ -1288,7 +1288,7 @@ INCLUDE_ASM("be/beintreward", func_00158778);
 #ifdef SKIP_ASM
 extern "C" int func_00158778(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, 0x40, (signed char*)(p + 0xF70));
 }
 #endif
@@ -1296,12 +1296,12 @@ extern "C" int func_00158778(void* self, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumSongsInPlayList);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, 0x40, (signed char*)(p + 0xF78));
 }
 #endif
@@ -1309,11 +1309,11 @@ extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int 
 //100%
 INCLUDE_ASM("be/beintreward", func_001587F8);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_001587F8(void* self, int a1, int a2, int value)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     *(int*)(p + 0xf80) = value;
 }
 #endif
@@ -1322,11 +1322,11 @@ extern "C" void func_001587F8(void* self, int a1, int a2, int value)
 INCLUDE_ASM("be/beintreward", func_00158820);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_00158820(void* self, int a1, int a2, long value)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     *(long*)(p + 0xf70) = value;
 }
 #endif
@@ -1335,11 +1335,11 @@ extern "C" void func_00158820(void* self, int a1, int a2, long value)
 INCLUDE_ASM("be/beintreward", func_00158848);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_00158848(void* self, int a1, int a2, long value)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     *(long*)(p + 0xf78) = value;
 }
 #endif
@@ -1378,7 +1378,7 @@ int cBERewardInterface_getEarningsTarget(void* self, int a1)
 #endif
 
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 //100%
 INCLUDE_ASM("be/beintreward", func_001588C8);
@@ -1403,7 +1403,7 @@ struct sProfileSlot_00158910
 
 signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])D_004A6CA8)[b][c], e, d);
+    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[b][c], e, d);
     if (result == 0) {
         return -1;
     }
@@ -1416,7 +1416,7 @@ INCLUDE_ASM("be/beintreward", func_00158960);
 #ifdef SKIP_ASM
 extern "C" int func_00158960(void* self, int b, int c, int d, int e)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])D_004A6CA8)[b][c], e, d);
+    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[b][c], e, d);
     if (result == 0) {
         return 0;
     }
@@ -1585,7 +1585,7 @@ extern "C" void cBERewardInterface_clearUserAwards(void* self)
         D_00440F48[i] = cBERewardInterface_calculateNextCollectiblesLevel(self, 0, charID, i);
     for (int i = 0; i < 3; i++)
         D_00440F58[i] = cBERewardInterface_calculateNextBigChallengesLevel(self, 0, charID, i);
-    char* p = (char*)D_004A1264;
+    char* p = (char*)cBERewardInterface_instance;
     *(int*)(p + 0x10) = 0;
     *(int*)(p + 0x14) = -1;
 }
@@ -1627,7 +1627,7 @@ INCLUDE_ASM("be/beintreward", func_00158F60);
 struct sReward_0015A628;
 extern "C" void func_0015A628(sReward_0015A628* self, int row, int col, int value);
 extern void* D_004C3EF0[];
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` flags word (ld/sd).
 struct sCharRec_158F60 {
@@ -1644,15 +1644,15 @@ extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
     case 0:
         break;
     case 2:
-        if ((int)((*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags >> 13) & 1)
+        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags >> 13) & 1)
         {
-            (*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x2000L;
+            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x2000L;
             func_0015A628(q, row, 2, c * 3 + 2);
         }
     case 1:
-        if ((int)((*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags >> 12) & 1)
+        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags >> 12) & 1)
         {
-            (*(sCharRec_158F60*)((char*)D_004A6CA8 + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x1000L;
+            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x1000L;
             func_0015A628(q, row, 2, c * 3 + 1);
         }
         break;
@@ -1746,7 +1746,7 @@ struct sProfileChar_1591E8 {
     long flags;     // 0x278
     char pad280[0xF88 - 0x280];
 };
-extern sProfileChar_1591E8 D_004A6CA8_1591E8[][10] __asm__("D_004A6CA8");
+extern sProfileChar_1591E8 D_004A6CA8_1591E8[][10] __asm__("cBELibrary_profileLib");
 extern "C" int func_00152528(sProfileChar_1591E8* pc, int event, int mode, int medal);
 
 struct sScoreStat_1591E8 {
@@ -1842,8 +1842,8 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
     }
     if (cBERewardInterface_isMountainConquered(self, profile, c) && func_0015A2E0(self, profile, c, 0) == 0)
         cBERewardInterface_awardUser(self, profile, c, 0);
-    ((sRewardState_1591E8*)D_004A1264)->medal = medal;
-    ((sRewardState_1591E8*)D_004A1264)->money = money;
+    ((sRewardState_1591E8*)cBERewardInterface_instance)->medal = medal;
+    ((sRewardState_1591E8*)cBERewardInterface_instance)->money = money;
     if (!cBERewardInterface_isBetterMedal(self, -1, medal))
         return;
     int any = 0;
@@ -2082,7 +2082,7 @@ extern sSlots2_00159CD0 D_004A1268[];
 
 extern "C" void cBERewardInterface_awardUser(void* self, int profile, int c, int bit)
 {
-    char* rec = (char*)D_004A6CA8 + profile * 0x9B50 + c * 0xF88;
+    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
     sReward_0015A628* q = (sReward_0015A628*)D_004C3EF0;
     sSlots4_00159CD0 slots4 = D_0045AA28;
     sSlots2_00159CD0 slots2 = D_004A1268[0];
@@ -2231,12 +2231,12 @@ extern "C" void cBERewardInterface_awardUser(void* self, int profile, int c, int
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A2E0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_0015A320(void* self, int bit, unsigned char* bits);
 
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_0015A320(self, bit, (unsigned char*)(p + 0xF28));
 }
 #endif

@@ -1380,7 +1380,7 @@ struct sV4_C0F8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sV4_C0F8 D_004FF120;
+extern sV4_C0F8 t4vect_Zero;
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vDot_C0F8(const sV4_C0F8& a, const sV4_C0F8& b)
@@ -1491,8 +1491,8 @@ extern "C" int func_0032C0F8(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int fla
             h->f5C = -1;
             h->f64 = -1;
             h->f4C = -1;
-            h->v20 = D_004FF120;
-            h->v30 = D_004FF120;
+            h->v20 = t4vect_Zero;
+            h->v30 = t4vect_Zero;
             h->f68 = 0;
             h->f6C = 0;
             h->f70 = 0;
@@ -1539,8 +1539,8 @@ extern "C" int func_0032C0F8(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int fla
                 h->f5C = -1;
                 h->f64 = -1;
                 h->f4C = -1;
-                h->v20 = D_004FF120;
-                h->v30 = D_004FF120;
+                h->v20 = t4vect_Zero;
+                h->v30 = t4vect_Zero;
                 h->f68 = 0;
                 h->f6C = 0;
                 h->f70 = 0;
@@ -3165,7 +3165,7 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032E690);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5978;
 extern sSphereVec4 D_004FF260[];
-extern sSphereVec4 D_004FF120_E690[] __asm__("D_004FF120");
+extern sSphereVec4 D_004FF120_E690[] __asm__("t4vect_Zero");
 
 struct sHit_E690 {
     sSphereVec4 pos;    // 0x00

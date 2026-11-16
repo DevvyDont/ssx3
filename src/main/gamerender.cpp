@@ -325,7 +325,7 @@ extern char D_0047D588[];
 extern char D_0047D638[];
 extern char D_0047D690[];
 extern char D_0047D6E8[];
-extern char* D_004A2C68;
+extern char* cGameState_mpGame;
 extern int D_004A2A54;
 extern "C" void func_00231CD0(void* self);
 extern "C" void* func_00233C10(void* self);
@@ -346,7 +346,7 @@ static inline void Base_22E968(char* s, int off)
 {
     *(void**)(s + off + 0xC) = D_0047D6E8;
     *(int*)(s + off + 0x0) = 0;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
 }
 
 static inline void Init_22E968(char* s, int off, void* vt, int id)

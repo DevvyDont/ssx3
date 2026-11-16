@@ -7,7 +7,7 @@ struct sCharEntry {
     signed char mCharID; // 0x11
     char pad_0x12[0x1C - 0x11 - 1];
 };
-extern sCharEntry D_00535B20[];
+extern sCharEntry cBELibrary_playerDB[];
 
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
@@ -15,7 +15,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
 signed char cBELibrary_getCharacterID(int index)
 {
     int charID = D_005305B0[index];
-    sCharEntry* entry = &D_00535B20[charID];
+    sCharEntry* entry = &cBELibrary_playerDB[charID];
     return entry->mCharID;
 }
 #endif
@@ -26,7 +26,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCheatCharacterID);
 extern "C" signed char cBELibrary_getCheatCharacterID(int index)
 {
     int charID = D_005305B0[index];
-    signed char* entry = (signed char*)((char*)D_00535B20 + charID * 0x1C);
+    signed char* entry = (signed char*)((char*)cBELibrary_playerDB + charID * 0x1C);
     return entry[0x12];
 }
 #endif
@@ -43,7 +43,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getProfileIndex__Fi);
 int cBELibrary_getProfileIndex(int index)
 {
     int charID = D_005305B0[index];
-    sCharEntry2* entry = (sCharEntry2*)((char*)D_00535B20 + charID * 0x1C);
+    sCharEntry2* entry = (sCharEntry2*)((char*)cBELibrary_playerDB + charID * 0x1C);
     if (entry->field_0xC == -1) {
         return 2;
     }
@@ -60,7 +60,7 @@ int cBELibrary_getRiderIndex(int flag)
     int count = 0;
     while (1) {
         int charID = *base;
-        sCharEntry2* entry = (sCharEntry2*)((char*)D_00535B20 + charID * 0x1C);
+        sCharEntry2* entry = (sCharEntry2*)((char*)cBELibrary_playerDB + charID * 0x1C);
         int bit = entry->field_0x10 & 1;
         if (bit == flag) {
             return count;
@@ -99,12 +99,12 @@ struct sProfileBlk_A188 {
     char rest[0xA8 - 2 * sizeof(sCharEntry)];
 };
 
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern sBlkF88_A188 D_004B07F8_A188[] __asm__("D_004B07F8");
 extern sBlk9B50_A188 D_004BA348_A188 __asm__("D_004BA348");
 extern sBlk20_A188 D_005308B8_A188 __asm__("D_005308B8");
 
-#define PROFILE_A188 ((sProfileBlk_A188*)D_00535B20)
+#define PROFILE_A188 ((sProfileBlk_A188*)cBELibrary_playerDB)
 
 // Save game: copies the live game-state blocks into the save buffer.
 extern "C" void func_0014A188(char* p)
@@ -115,7 +115,7 @@ extern "C" void func_0014A188(char* p)
     *(sProfileBlk_A188*)p = *PROFILE_A188;
     p += sizeof(sProfileBlk_A188);
     rider = PROFILE_A188->rider[0].mCharID;
-    *(sBlkF88_A188*)p = ((sBlkF88_A188*)D_004A6CA8)[rider];
+    *(sBlkF88_A188*)p = ((sBlkF88_A188*)cBELibrary_profileLib)[rider];
     p += sizeof(sBlkF88_A188);
     rider = PROFILE_A188->rider[1].mCharID;
     if (rider >= 0) {
@@ -151,7 +151,7 @@ struct sBlkF88_14A5E0 { char d[0xF88]; };
 struct sBlk9B50_14A5E0 { char d[0x9B50]; };
 struct sBlk20_14A5E0 { char d[0x20]; };
 
-extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("D_004A6CA8");
+extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("cBELibrary_profileLib");
 extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
 extern sBlk20_14A5E0 D_005308B8;
@@ -164,13 +164,13 @@ extern "C" void func_0014A5E0(char* p)
     *(sBlk4C_14A5E0*)D_005305B0 = *(sBlk4C_14A5E0*)p;
     cBENewRaceInterface_getThis()->onLoad();
     p += 0x4C;
-    *(sBlkA8_14A5E0*)D_00535B20 = *(sBlkA8_14A5E0*)p;
+    *(sBlkA8_14A5E0*)cBELibrary_playerDB = *(sBlkA8_14A5E0*)p;
     cBENewPlayerInterface_getThis()->onLoad();
     p += 0xA8;
-    idx = D_00535B20[0].mCharID;
+    idx = cBELibrary_playerDB[0].mCharID;
     D_004A6CA8_14A5E0[idx] = *(sBlkF88_14A5E0*)p;
     p += 0xF88;
-    idx = D_00535B20[1].mCharID;
+    idx = cBELibrary_playerDB[1].mCharID;
     if (idx >= 0) {
         D_004B07F8[idx] = *(sBlkF88_14A5E0*)p;
         p += 0xF88;
@@ -297,12 +297,12 @@ extern "C" int func_0014AC70(void* self, int rider, int* outChar)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014ACB0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" void* MEM_copy(void* dst, void* src, int n);
 
 extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     MEM_copy(p + 0x290, src, 0x834);
 }
 #endif
@@ -322,11 +322,11 @@ extern "C" void func_0014ACF8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AD28);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void* func_0014AD28(void* self, int a1, int a2)
 {
-    return (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
 }
 #endif
 
@@ -346,7 +346,7 @@ INCLUDE_ASM("be/belibrary", func_0014ADA8);
 extern "C" void* func_0014ADA8(void* self, int a1, int a2, int a3)
 {
     int off = a1 * 0x9b50 + a2 * 0xf88;
-    char* p = (char*)D_004A6CA8 + off;
+    char* p = (char*)cBELibrary_profileLib + off;
     return p + (a3 * 4 + 0x290);
 }
 #endif
@@ -368,7 +368,7 @@ INCLUDE_ASM("be/belibrary", func_0014AE28);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// One character's flag table inside a profile record: D_004A6CA8 is
+// One character's flag table inside a profile record: cBELibrary_profileLib is
 // [profile][character] of these (0x9B50 = 10 * 0xF88).
 struct sBEFlagEntryPC {
     short id;
@@ -386,7 +386,7 @@ struct sBEProfileChar {
     sBEFlagEntryPC* getEntries() { return entries; }
 };
 
-extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("D_004A6CA8");
+extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
 
 extern "C" void* func_0014AE28(void* self, int a1, int a2, int* out)
 {
@@ -411,7 +411,7 @@ extern "C" void* func_0014AE60(void* self, int rider, int* out)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AEA8);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 struct sBEFlagEntry {
     unsigned short field_0x0;
@@ -420,7 +420,7 @@ struct sBEFlagEntry {
 
 extern "C" void func_0014AEA8(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     int count = *(int*)(p + 0x28C);
     sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
     int i;
@@ -437,7 +437,7 @@ extern "C" void func_0014AEA8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AF10);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 
 extern "C" void func_0014AF10(void)
 {
@@ -445,7 +445,7 @@ extern "C" void func_0014AF10(void)
     int b;
     for (a = 0; a < 3; a++) {
         for (b = 0; b < 10; b++) {
-            char* p = (char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88;
+            char* p = (char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88;
             int count = *(int*)(p + 0x28C);
             sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
             int i;
@@ -464,7 +464,7 @@ extern "C" void func_0014AF10(void)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AFB0);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern "C" int func_00151C90(void* prof, int idx, int on);
 extern "C" int func_001521F0(void* prof);
 extern "C" int func_001520E8(void* prof, int* out);
@@ -494,7 +494,7 @@ static inline sFlagEntry_14AFB0* getEntry_14AFB0(sProfile_14AFB0* p, int idx)
 
 extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
 {
-    sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88);
+    sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88);
     sFlagEntry_14AFB0 save[0x20D];
 
     MEM_copy(save, p->entries, 0x834);
@@ -522,7 +522,7 @@ INCLUDE_ASM("be/belibrary", func_0014B0F0);
 #ifdef SKIP_ASM
 extern "C" void func_0014B0F0(void* self, int a, int b, int idx)
 {
-    sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88);
+    sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88);
     sFlagEntry_14AFB0* e = getEntry_14AFB0(p, idx);
     int on = 1;
     if (e->flags & 0x10) on = 0;
@@ -536,7 +536,7 @@ extern "C" void func_00152368(void*, int, int);
 
 extern "C" void func_0014B170(void* self, int a1, int a2, int a3, int a4)
 {
-    func_00152368((char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88, a3, a4);
+    func_00152368((char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88, a3, a4);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -549,7 +549,7 @@ extern "C" void func_0014B1B0(void* self, int rider, int b, int c)
 {
     int ch = 0;
     int profile = func_0014AC70(self, rider, &ch);
-    func_00152368((char*)D_004A6CA8 + profile * 0x9b50 + ch * 0xf88, b, c);
+    func_00152368((char*)cBELibrary_profileLib + profile * 0x9b50 + ch * 0xf88, b, c);
 }
 #endif
 //100%
@@ -557,9 +557,9 @@ INCLUDE_ASM("be/belibrary", func_0014B218);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// One character's flag table inside a profile record: D_004A6CA8 is
+// One character's flag table inside a profile record: cBELibrary_profileLib is
 // [profile][character] of these (0x9B50 = 10 * 0xF88).
-extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("D_004A6CA8");
+extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
 
 extern "C" int func_0014B218(void* self, int a1, int a2, unsigned int mask, sBEFlagEntryPC* out)
 {
@@ -581,9 +581,9 @@ INCLUDE_ASM("be/belibrary", func_0014B290);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// One character's flag table inside a profile record: D_004A6CA8 is
+// One character's flag table inside a profile record: cBELibrary_profileLib is
 // [profile][character] of these (0x9B50 = 10 * 0xF88).
-extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("D_004A6CA8");
+extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
 
 extern "C" int func_0014B290(void* self, int a1, int a2, unsigned int mask)
 {
@@ -659,7 +659,7 @@ extern "C" int func_0014B378(void* self, int a, sBEEntry38_B378* out)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B478);
 #ifdef SKIP_ASM
-extern int D_004A6CA8[];
+extern int cBELibrary_profileLib[];
 extern void* D_004A6750[];
 struct sBELibTables;
 int func_0014D988(void* self, int i);
@@ -682,7 +682,7 @@ struct sBEEntry38B {
 
 extern "C" int func_0014B478(void* self, int a1, int a2)
 {
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     int sum = 0;
     int count = func_0014D988(D_004A6750, a2);
     sBEEntry38B* e = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, a2);
@@ -745,7 +745,7 @@ static inline int scale10_14B560(int v)
 extern "C" void func_0014B560(void* self, int a1, int a2, int key, int flag)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     func_00151C48(p, key, 1);
     sBEEntry38_14B560* e = (sBEEntry38_14B560*)func_0014D998((sBELibTables*)func_0014BDB8_0(), a2);
     int n = func_0014D988(func_0014BDB8_0(), a2);
@@ -1397,7 +1397,7 @@ extern "C" void* func_0014C6A0(void* self)
             int b;
             for (a = 0; a < 3; a++) {
                 for (b = 0; b < 10; b++) {
-                    char* p = (char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88;
+                    char* p = (char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88;
                     int count = *(int*)(p + 0x28C);
                     sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
                     int i;
@@ -1442,7 +1442,7 @@ extern "C" void func_0014D068_impl(void* self)
         for (b = 0; b < 10; b++) {
             sBEReq_14D068* r = (sBEReq_14D068*)func_0014DC10((sBELibTables*)self, b);
             int n = func_0014DC00(self, b);
-            sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88);
+            sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88);
             int i;
             int count = p->count;
             sFlagEntry_14AFB0* e = p->entries;

@@ -762,7 +762,7 @@ struct sWakeDD30 {
     int n;                      // 0xB4
 };
 
-extern sVecDD30 D_004FF120_DD30 __asm__("D_004FF120");
+extern sVecDD30 D_004FF120_DD30 __asm__("t4vect_Zero");
 extern "C" float func_002D1928(int n, float x);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
@@ -973,15 +973,15 @@ struct sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sVec4 D_004FF120;
+extern sVec4 t4vect_Zero;
 
 extern "C" void func_002DE368(void* self)
 {
     *(int*)((char*)self + 0x34) = 0;
     *(int*)((char*)self + 0x30) = 0;
-    *(sVec4*)((char*)self + 0x0) = D_004FF120;
-    *(sVec4*)((char*)self + 0x20) = D_004FF120;
-    *(sVec4*)((char*)self + 0x10) = D_004FF120;
+    *(sVec4*)((char*)self + 0x0) = t4vect_Zero;
+    *(sVec4*)((char*)self + 0x20) = t4vect_Zero;
+    *(sVec4*)((char*)self + 0x10) = t4vect_Zero;
 }
 #endif
 
@@ -5341,7 +5341,7 @@ struct sMatD88 {
     sVec4D88 r[4];
 };
 
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 int BXrand();
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
@@ -5414,7 +5414,7 @@ extern "C" void* func_002E4D88(char* self, int a1, int a2, float f0, float f1, f
     *(int*)(self + 0x98) = BXrand();
     *(int*)(self + 0x9C) = BXrand();
     *(int*)(self + 0xA0) = BXrand();
-    wakeCopyMatD88((sMatD88*)(self + 0x50), (sMatD88*)D_004FF1A0);
+    wakeCopyMatD88((sMatD88*)(self + 0x50), (sMatD88*)t4mat_Identity);
     {
         sMatD88 t2;
         sVec4D88 s;
@@ -5751,7 +5751,7 @@ struct sVt55D8 {
 // PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct).
 typedef int cQuad55D8 __attribute__((mode(TI)));
 extern cQuad55D8 D_004FF140;
-extern cQuad55D8 D_004FF150;
+extern cQuad55D8 t4vect_YAxis;
 extern cQuad55D8 D_004FF160;
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * matrix).
@@ -5892,10 +5892,10 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
         wakeSubEq55D8(info.pos, D_004FF140);
     }
     if (info.pos.y < y + -0.5f) {
-        wakeAddEq55D8(info.pos, D_004FF150);
+        wakeAddEq55D8(info.pos, t4vect_YAxis);
     }
     if (y1 + 0.5f < info.pos.y) {
-        wakeSubEq55D8(info.pos, D_004FF150);
+        wakeSubEq55D8(info.pos, t4vect_YAxis);
     }
     if (info.pos.z < z + -0.5f) {
         wakeAddEq55D8(info.pos, D_004FF160);
@@ -6006,15 +6006,15 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
 extern int D_004A473C;
 extern float D_004A4740;
 extern float D_004A4744;
-extern float D_004A4748;
-extern float D_004A474C;
-extern float D_004A4750;
-extern float D_004A4754;
-extern float D_004A4758;
-extern float D_004A475C;
+extern float cSnowfallToggles_m_TestFlakeSize;
+extern float cSnowfallToggles_m_TestWindRotation;
+extern float cSnowfallToggles_m_TestSnowFlurries;
+extern float cSnowfallToggles_m_SnowGravityMultiplier;
+extern float cSnowfallToggles_m_SnowFluffItensity;
+extern float cSnowfallToggles_m_SnowFluffWindIntensity;
 struct sWakeV4_5DA0 { float x, y, z, w; };
-extern sWakeV4_5DA0 D_005059B8;
-extern sWakeV4_5DA0 D_005059C8;
+extern sWakeV4_5DA0 cSnowfallToggles_m_SnowFlakeColour;
+extern sWakeV4_5DA0 cSnowfallToggles_m_SnowFluffColour;
 extern "C" float func_002EE448(int i);
 extern "C" float func_002EE508(int i);
 extern "C" float func_002EE600(int i);
@@ -6049,14 +6049,14 @@ extern "C" void func_002E5DA0(void* self)
         if (D_004A473C != 0) {
             recs[i].f[0] = D_004A4740;
             recs[i].f[1] = D_004A4744;
-            recs[i].f[2] = D_004A4758;
-            recs[i].f[3] = D_004A475C;
-            recs[i].f[4] = D_004A4748;
-            recs[i].f[5] = D_004A474C;
-            recs[i].f[6] = D_004A4750;
-            recs[i].f[7] = D_004A4754;
-            const sWakeV4_5DA0* a = &D_005059B8; recs[i].c0.x = a->x; recs[i].c0.y = a->y; recs[i].c0.z = a->z; recs[i].c0.w = a->w;
-            const sWakeV4_5DA0* b = &D_005059C8; recs[i].c1.x = b->x; recs[i].c1.y = b->y; recs[i].c1.z = b->z; recs[i].c1.w = b->w;
+            recs[i].f[2] = cSnowfallToggles_m_SnowFluffItensity;
+            recs[i].f[3] = cSnowfallToggles_m_SnowFluffWindIntensity;
+            recs[i].f[4] = cSnowfallToggles_m_TestFlakeSize;
+            recs[i].f[5] = cSnowfallToggles_m_TestWindRotation;
+            recs[i].f[6] = cSnowfallToggles_m_TestSnowFlurries;
+            recs[i].f[7] = cSnowfallToggles_m_SnowGravityMultiplier;
+            const sWakeV4_5DA0* a = &cSnowfallToggles_m_SnowFlakeColour; recs[i].c0.x = a->x; recs[i].c0.y = a->y; recs[i].c0.z = a->z; recs[i].c0.w = a->w;
+            const sWakeV4_5DA0* b = &cSnowfallToggles_m_SnowFluffColour; recs[i].c1.x = b->x; recs[i].c1.y = b->y; recs[i].c1.z = b->z; recs[i].c1.w = b->w;
         } else {
             int k = (i == 0) ? 6 : 7;
             recs[i].f[0] = func_002EE448(k);
@@ -6155,7 +6155,7 @@ struct sWakeFx_6008 {
 };
 
 extern int D_004A4524;
-extern int D_004A4760[1];
+extern int cSnowfallToggles_m_TestAdditive[1];
 extern sRsCtx_6008* D_004A5B80_6008 __asm__("D_004A5B80");
 extern sRsState_6008 D_00501420_6008[] __asm__("D_00501420");
 extern sV4_6008 D_004FF130;
@@ -6212,7 +6212,7 @@ extern "C" void func_002E6008(sWakeFx_6008* self)
     *ctx->top = D_00501420_6008[0];
     rsSetA_6008(ctx, 0x400000, 22, 1);
     rsSetB_6008(ctx, 0x3E0, 5, 7);
-    if (D_004A4760[0] != 0) {
+    if (cSnowfallToggles_m_TestAdditive[0] != 0) {
         rsSetA_6008(ctx, 0x7C, 2, 7);
     } else {
         rsSetA_6008(ctx, 0x7C, 2, 5);
@@ -6485,9 +6485,9 @@ struct sWake_66B8 {
 };
 
 extern int D_004A4700;
-extern int D_004A4730;
-extern int D_004A4734;
-extern int D_004A4738;
+extern int cPowerUpFXToggles_m_TestSpeedBoostRibbon;
+extern int cPowerUpFXToggles_m_TestRedRibbon;
+extern int cPowerUpFXToggles_m_TestOrangeRibbon;
 extern "C" void func_002E6C08_66B8(sWake_66B8* self) __asm__("func_002E6C08");
 
 // PORT: <? and >? (g++ min/max operators)
@@ -6598,13 +6598,13 @@ extern "C" void func_002E66B8(sWake_66B8* self)
     if (type == 11) {
         k = 0.01f;
         self->tex = 61;
-    } else if (0.01f < *(float*)(r + 0x2E8) || D_004A4730 != 0) {
+    } else if (0.01f < *(float*)(r + 0x2E8) || cPowerUpFXToggles_m_TestSpeedBoostRibbon != 0) {
         k = 0.01f;
         self->tex = 60;
-    } else if (type >= 10 || D_004A4734 != 0) {
+    } else if (type >= 10 || cPowerUpFXToggles_m_TestRedRibbon != 0) {
         k = 0.01f;
         self->tex = 59;
-    } else if (type >= 5 || D_004A4738 != 0) {
+    } else if (type >= 5 || cPowerUpFXToggles_m_TestOrangeRibbon != 0) {
         k = 0.005f;
         self->tex = 58;
     } else {
@@ -6915,7 +6915,7 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E7A10);
 #ifdef SKIP_ASM
-extern int D_004A4724;
+extern int cPowerUpFXToggles_m_EnableSpeedBoostFX;
 extern "C" void* func_0037A260(void* gfx, int n);
 extern "C" void func_0037A430(void* gfx);
 
@@ -7144,7 +7144,7 @@ static inline void setVtx_7A10(sWakeVtx_7A10* base, int i, float s, float t, con
 // segment trail as a strip through the particle vertex buffer.
 extern "C" void func_002E7A10(sBoardWake_7A10* self)
 {
-    if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || D_004A4724 == 0)
+    if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
         return;
     ((cGfx_DAB8*)D_004A289C)->PushState();
     *((cGfx_DAB8*)D_004A289C)->stateTop = D_00501420_DAB8;

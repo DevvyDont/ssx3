@@ -101,7 +101,7 @@ struct sSaveHdr_2758 { int w[0x288 / 4]; };
 extern sSaveHdr_2758 D_00535898;
 extern char D_00535C18[];
 struct sCharTbl_2758 { char pad[0x10]; unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 22; unsigned char f13; char pad14[8]; };
-extern sCharTbl_2758 D_00535B20[];
+extern sCharTbl_2758 cBELibrary_playerDB[];
 struct sSaveBits_2758 { unsigned a : 1; unsigned b : 8; unsigned rest : 23; };
 struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
 
@@ -117,8 +117,8 @@ extern "C" void* func_00152758(void* self)
     p += 0xA28;
     sSaveBits6_2758 bits;
     for (int i = 0; i < 6; i++) {
-        bits.e[i].a = D_00535B20[i].b1;
-        bits.e[i].b = D_00535B20[i].f13;
+        bits.e[i].a = cBELibrary_playerDB[i].b1;
+        bits.e[i].b = cBELibrary_playerDB[i].f13;
     }
     *(sSaveBits6_2758*)p = bits;
     p += sizeof(sSaveBits6_2758);
@@ -150,7 +150,7 @@ extern "C" int func_003E62D0(void* buf, int n, int seed);
 
 extern void* D_004A1220;
 
-extern sCharTbl_2758 D_00535B20[];
+extern sCharTbl_2758 cBELibrary_playerDB[];
 
 extern "C" int func_00152BA8_2950() __asm__("func_00152BA8");
 class cBEIface_2950 {
@@ -167,7 +167,7 @@ cBEIface_2950* cBEStatInterface_getThis_2950() __asm__("cBEStatInterface_getThis
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 struct sProfSub_2950 { char pad[0xF88]; };
 struct sProfile_2950 { sProfSub_2950 sub[10]; };
-extern sProfile_2950 D_004A6CA8_2950[] __asm__("D_004A6CA8");
+extern sProfile_2950 D_004A6CA8_2950[] __asm__("cBELibrary_profileLib");
 struct sCharFlag_2950 { unsigned char f; char pad[0x1B]; };
 extern sCharFlag_2950 D_00535B31_2950[] __asm__("D_00535B31");
 
@@ -180,7 +180,7 @@ extern "C" void* func_00152950(void* self, int idx)
     func_00152700_2950(self);
     D_004A1220 = new (D_0045A7F0, 0x100, 0) char[size];
     char* p = (char*)D_004A1220;
-    strncpy(p, (char*)&D_00535B20[idx], 0xC);
+    strncpy(p, (char*)&cBELibrary_playerDB[idx], 0xC);
     p += 0xC;
     *(sProfile_2950*)p = D_004A6CA8_2950[idx];
     p += sizeof(sProfile_2950);
@@ -247,8 +247,8 @@ extern "C" int func_00152BB0(void* self, char* buf)
     o->onLoad();
     sSaveBits6_2758 bits = *(sSaveBits6_2758*)p;
     for (int i = 0; i < 6; i++) {
-        D_00535B20[i].b1 = bits.e[i].a;
-        D_00535B20[i].f13 = bits.e[i].b;
+        cBELibrary_playerDB[i].b1 = bits.e[i].a;
+        cBELibrary_playerDB[i].f13 = bits.e[i].b;
     }
     o = cBENewPlayerInterface_getThis();
     o->onLoad();
@@ -269,7 +269,7 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void func_001515B8(void* p);
 struct sProfSub_2DE0 { char pad[0x288]; int keep; char pad28C[0xF88 - 0x28C]; };
 struct sProfile_2DE0 { sProfSub_2DE0 sub[10]; };
-extern sProfile_2DE0 D_004A6CA8_2DE0[] __asm__("D_004A6CA8");
+extern sProfile_2DE0 D_004A6CA8_2DE0[] __asm__("cBELibrary_profileLib");
 struct sCharFlag_2DE0 { unsigned char f; char pad[0x1B]; };
 extern sCharFlag_2DE0 D_00535B31[];
 
@@ -288,7 +288,7 @@ extern "C" int func_00152DE0(void* self, char* buf, int idx)
         keep[i] = D_004A6CA8_2DE0[idx].sub[i].keep;
     }
     char* p = buf;
-    strncpy((char*)&D_00535B20[idx], p, 0xC);
+    strncpy((char*)&cBELibrary_playerDB[idx], p, 0xC);
     p += 0xC;
     D_004A6CA8_2DE0[idx] = *(sProfile_2DE0*)p;
     p += sizeof(sProfile_2DE0);

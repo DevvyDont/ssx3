@@ -34,7 +34,7 @@ extern "C" void func_00103578(void* self, void* stream);
 extern "C" void func_0026DE58(void* self, int a);
 extern "C" void func_0012B788(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
-extern char D_004A5988;
+extern char gBucketMan;
 extern void* D_004A47B8_DBF0 __asm__("D_004A47B8");
 extern void* D_004A3DD8;
 extern void* D_004A2A00;
@@ -47,7 +47,7 @@ struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
 
 extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
 {
-    void* bm = &D_004A5988;
+    void* bm = &gBucketMan;
     cBucketMan_mergeBucket(bm, (void*)1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
@@ -95,7 +95,7 @@ public:
 
 extern "C" void cReplay_restoreObject(void* self, void* bucket, cStreamRB* stream);
 extern "C" void cBucketMan_mergeBucket(void* mgr, void* bucket);
-extern char D_004A5988;
+extern char gBucketMan;
 
 extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* stream)
 {
@@ -108,7 +108,7 @@ extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* strea
     for (i = 0; i < hdr.count; i++) {
         cReplay_restoreObject(self, bucket, stream);
     }
-    cBucketMan_mergeBucket(&D_004A5988, bucket);
+    cBucketMan_mergeBucket(&gBucketMan, bucket);
 }
 #endif
 
@@ -127,8 +127,8 @@ struct sBucketVEntryDE58 {
 // Calls virtual slot 3 on every object in the given bucket of the global bucket manager.
 extern "C" void func_0026DE58(void* self, int a)
 {
-    void* node = cBucketMan_first((cBucketMan*)&D_004A5988, a);
-    cBucketMan* bm = (cBucketMan*)&D_004A5988;
+    void* node = cBucketMan_first((cBucketMan*)&gBucketMan, a);
+    cBucketMan* bm = (cBucketMan*)&gBucketMan;
     while (node != 0) {
         sBucketVEntryDE58* vt = *(sBucketVEntryDE58**)((char*)node + 0xC);
         vt[3].fn((char*)node + vt[3].delta);

@@ -40,7 +40,7 @@ extern char D_004A1450[];
 struct sGateVec_3DE0 {
     float x, y, z;
 };
-extern sGateVec_3DE0 D_004FF0D8;
+extern sGateVec_3DE0 t3vect_Zero;
 
 struct sGateEntry_3DE0 {
     int f0;
@@ -207,7 +207,7 @@ extern "C" void cWScriptMan_checkGate(void* vself)
         e1.x += gap;
         p1.x = x + (e0.x + gap);
     } else {
-        e1 = D_004FF0D8;
+        e1 = t3vect_Zero;
     }
     p2.x = o2.x + s2.x;
     *(sGateVec_3DE0*)(t0 + 0x44) = p0;

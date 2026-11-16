@@ -990,7 +990,7 @@ struct sTrail_EF950 {
 
 extern sRsCtx_EF950* D_004A289C;
 extern sRsState_EF950 D_00501420[];
-extern int D_004A4720;
+extern int cPowerUpFXToggles_m_TestTrickBoost;
 extern float D_004A3B74;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -1098,7 +1098,7 @@ extern "C" void func_002EF950(sTrail_EF950* self)
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
-    if (D_004A4720 != 0 || 0.0f < *(float*)(self->rider + 0x2EC)) {
+    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < *(float*)(self->rider + 0x2EC)) {
         glow = 1;
         alpha = 1.0f;
         *(short*)((char*)D_004A289C->top + 0x10) = rsTex1044_EF950(D_004A289C);

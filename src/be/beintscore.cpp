@@ -129,7 +129,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 
 struct sProfileChar_154AB8 { char data[0xF88]; };
 extern "C" int func_00152460(sProfileChar_154AB8* self, int event, int mode, unsigned int value);
-extern sProfileChar_154AB8 D_004A6CA8_154AB8[][10] __asm__("D_004A6CA8");
+extern sProfileChar_154AB8 D_004A6CA8_154AB8[][10] __asm__("cBELibrary_profileLib");
 
 struct sRaceStats_154AB8 { int w[0xAC / 4]; };
 struct sScoreSlot_154AB8 {
@@ -406,17 +406,17 @@ extern "C" void* func_00155270(void* self, int a1)
 //100%
 INCLUDE_ASM("be/beintscore", func_00155288);
 #ifdef SKIP_ASM
-extern char D_004A6CA8[];
+extern char cBELibrary_profileLib[];
 
 extern "C" void* func_00155288(void* self, int a1, int a2)
 {
-    char* p = D_004A6CA8 + (a1 * 0x9b50 + a2 * 0xf88);
+    char* p = cBELibrary_profileLib + (a1 * 0x9b50 + a2 * 0xf88);
     return p + 0xde4;
 }
 #endif
 
 signed char cBELibrary_getCharacterID(int index);
-extern char D_004A6CA8[];
+extern char cBELibrary_profileLib[];
 
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
@@ -427,7 +427,7 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderInde
 {
     int charID = cBELibrary_getCharacterID(0);
     int s = riderIndex + charID * 0xF88;
-    return ((sHL*)D_004A6CA8)->lv[s];
+    return ((sHL*)cBELibrary_profileLib)->lv[s];
 }
 #endif
 
@@ -555,7 +555,7 @@ extern "C" void func_00155420(int rider, int statsArg, int a2, int a3)
     if ((unsigned int)profile > 2)
         return;
     int charID = cBELibrary_getCharacterID(rider);
-    char* rec = (char*)D_004A6CA8 + profile * 0x9B50 + charID * 0xF88;
+    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + charID * 0xF88;
     int event = D_0043D950_r155420[rs->event].id;
     int kind = rs->b48;
     int mode = rs->mode;
@@ -695,7 +695,7 @@ extern "C" int func_00155848(void* self, int rider, int a, int b)
     if ((unsigned int)profile >= 3)
         return 0;
     int c = cBELibrary_getCharacterID(rider);
-    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(D_004A6CA8 + profile * 0x9b50 + c * 0xf88, a, b);
+    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88, a, b);
     if (stats == 0)
         return 0;
     return stats[1];
@@ -709,7 +709,7 @@ int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern signed char D_005305F9[];
-extern char D_004A6CA8[];
+extern char cBELibrary_profileLib[];
 
 extern "C" int func_001558F8(void* self, int rider, int a, int b)
 {
@@ -719,7 +719,7 @@ extern "C" int func_001558F8(void* self, int rider, int a, int b)
     if ((unsigned int)profile >= 3)
         return -1;
     int c = cBELibrary_getCharacterID(rider);
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(D_004A6CA8 + profile * 0x9b50 + c * 0xf88, a, b);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88, a, b);
     if (stats == 0)
         return -1;
     return stats[1];
@@ -742,6 +742,6 @@ extern "C" void func_001559A8(void* self, int rider, int a, int b, int c)
     if ((unsigned int)profile >= 3)
         return;
     int ch = cBELibrary_getCharacterID(rider);
-    func_00152528(D_004A6CA8 + profile * 0x9b50 + ch * 0xf88, a, b, c);
+    func_00152528(cBELibrary_profileLib + profile * 0x9b50 + ch * 0xf88, a, b, c);
 }
 #endif

@@ -69,7 +69,7 @@ extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
 //100%
 INCLUDE_ASM("main/loadscreens", func_0017AE00);
 #ifdef SKIP_ASM
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 struct sRS_AE00 {
     int f0;                     // 0x00
@@ -168,7 +168,7 @@ extern "C" void func_0017AE00(sBgMan_AE00* self)
     {
         sCtx_AE00* c = ctx_AE00();
         sVEnt_AE00* e = &c->vt[34];
-        ((fnP_AE00)e->fn)((char*)c + e->delta, D_004FF1A0);
+        ((fnP_AE00)e->fn)((char*)c + e->delta, t4mat_Identity);
     }
     setState_AE00();
     sVert_AE00 v[4];

@@ -626,7 +626,7 @@ struct sLmCtx_EE78 {
 
 extern sLmCtx_EE78* D_004A5B80_EE78 __asm__("D_004A5B80");
 extern sLmMat_EE78 D_00504D80_EE78[] __asm__("D_00504D80");
-extern sLmMat_EE78 D_004FF1A0;
+extern sLmMat_EE78 t4mat_Identity;
 extern float D_004FF160[3];
 extern int D_004A445C;
 extern float D_004A4448;
@@ -755,7 +755,7 @@ extern "C" void func_0038EE78(void)
         float b = func_0031BF60(fi + t * D_004A4464 * 0.0016666667f);
         float amp2 = D_004A4450 * func_0031BF60(fi * D_004A4468 * 0.0016666667f + b);
         float angle = D_004A4454 * func_0031BF60(fi + t * D_004A4460 * 0.0016666667f);
-        lmCopy_EE78(&m0, &D_004FF1A0);
+        lmCopy_EE78(&m0, &t4mat_Identity);
         func_0031BE50(&s, &c, angle);
         float tc = 1.0f - c;
         float x = D_004FF160[0];
@@ -785,7 +785,7 @@ extern "C" void func_0038EE78(void)
         r.m[3][3] = 1.0f;
         lmMulIn_EE78(pm, &r);
         sLmMat_EE78* cell = &D_00504D80_EE78[i];
-        lmCopy_EE78(cell, &D_004FF1A0);
+        lmCopy_EE78(cell, &t4mat_Identity);
         cell->m[2][0] += func_0031BF60(D_004A446C * 0.017453294f) * amp;
         cell->m[2][1] += func_0031C040(D_004A446C * 0.017453294f) * amp;
         m0.m[0][2] += amp2 * func_0031BF60(D_004A4470 * 0.017453294f);

@@ -69,10 +69,10 @@ extern "C" int func_0023C8B8(void *arg0) {
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
 #ifdef SKIP_ASM
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 
 extern "C" int func_0023C8C0(void) {
-    return D_004A2C78 != 0;
+    return cMCOverlayManager_mSaveInProgress != 0;
 }
 #endif
 
@@ -1351,7 +1351,7 @@ extern "C" void func_0023E8A0(void* self, int flag)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_CancelCardOp);
 #ifdef SKIP_ASM
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 extern "C" void cMCOverlayManager_WriteFailed(void* self, int a1);
 
 struct sMovieVEntryEA30 {
@@ -1364,7 +1364,7 @@ extern "C" void cMCOverlayManager_CancelCardOp(void* self, int v)
 {
     char* s = (char*)self;
     int on = *(int*)(s + 0xBC);
-    D_004A2C78 = 0;
+    cMCOverlayManager_mSaveInProgress = 0;
     if (on != 0) {
         *(int*)(s + 0xBC) = 0;
         cMCOverlayManager_WriteFailed(self, v);
@@ -1385,7 +1385,7 @@ extern "C" void func_0023FAE0(void* self);
 void func_0023FB18(void* self, int val);
 extern "C" void cMCOverlayManager_InitiateFileCheck(void* self);
 extern "C" void cMCOverlayManager_RecheckCard(void* self);
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 
 struct sMovieVEntryEA90 {
     short delta;
@@ -1403,7 +1403,7 @@ extern "C" void cMCOverlayManager_RetryCardOp(void* self)
     char* s = (char*)self;
     if (*(int*)(s + 0xBC) != 0) {
         int playing = *(int*)(s + 0x118);
-        D_004A2C78 = 0;
+        cMCOverlayManager_mSaveInProgress = 0;
         if (playing != 0) {
             void* o = *(void**)(s + 0x434);
             sMovieVEntryEA90b* vt2 = *(sMovieVEntryEA90b**)o;
@@ -3355,7 +3355,7 @@ struct sMovieVEntry0FB0 {
 extern "C" void func_00240FB0(void* self, int a, int b, int c)
 {
     void* o = *(void**)((char*)self + 0x434);
-    D_004A2C78 = 1;
+    cMCOverlayManager_mSaveInProgress = 1;
     sMovieVEntry0FB0* vt = *(sMovieVEntry0FB0**)o;
     vt[36].fn((char*)o + vt[36].delta, a, b, c);
     *(int*)((char*)self + 0xE4) = c;
@@ -3365,7 +3365,7 @@ extern "C" void func_00240FB0(void* self, int a, int b, int c)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241000);
 #ifdef SKIP_ASM
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 
 struct sMovieVEntry1000 {
     short delta;
@@ -3376,7 +3376,7 @@ struct sMovieVEntry1000 {
 extern "C" void func_00241000(void* self, int a, int b, int c)
 {
     void* o = *(void**)((char*)self + 0x434);
-    D_004A2C78 = 1;
+    cMCOverlayManager_mSaveInProgress = 1;
     sMovieVEntry1000* vt = *(sMovieVEntry1000**)o;
     vt[37].fn((char*)o + vt[37].delta, a, b, c);
     *(int*)((char*)self + 0xE4) = c;
@@ -3395,7 +3395,7 @@ struct sMovieVEntry1050 {
 extern "C" void func_00241050(void* self, int a, int b, int c)
 {
     void* o = *(void**)((char*)self + 0x434);
-    D_004A2C78 = 1;
+    cMCOverlayManager_mSaveInProgress = 1;
     sMovieVEntry1050* vt = *(sMovieVEntry1050**)o;
     vt[38].fn((char*)o + vt[38].delta, a, b, c);
     *(int*)((char*)self + 0xE4) = c;
@@ -3439,7 +3439,7 @@ extern "C" int func_002410D0(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241138);
 #ifdef SKIP_ASM
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 
 struct sMovieVEntry1138 {
     short delta;
@@ -3452,7 +3452,7 @@ extern "C" void func_00241138(void* self, int a, int b)
     void* o = *(void**)((char*)self + 0x434);
     int one = 1;
     *(int*)((char*)self + 0xE4) += b;
-    D_004A2C78 = one;
+    cMCOverlayManager_mSaveInProgress = one;
     sMovieVEntry1138* vt = *(sMovieVEntry1138**)o;
     vt[41].fn((char*)o + vt[41].delta, a, b);
 }
@@ -3462,7 +3462,7 @@ extern "C" void func_00241138(void* self, int a, int b)
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_WriteFailed);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int v) __asm__("cMCOverlayManager_SetAction");
 
 struct sMovieVEntry1180a {
@@ -3480,7 +3480,7 @@ struct sMovieVEntry1180b {
 extern "C" void cMCOverlayManager_WriteFailed(void* self, int a1)
 {
     int on = *(int*)((char*)self + 0x118);
-    D_004A2C78 = 0;
+    cMCOverlayManager_mSaveInProgress = 0;
     if (on != 0) {
         void* o = *(void**)((char*)self + 0x434);
         sMovieVEntry1180a* vt = *(sMovieVEntry1180a**)o;
@@ -3553,7 +3553,7 @@ extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm
 extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void func_00241000_r(void* self, char* text, int a, int b) __asm__("func_00241000");
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 extern char D_0047C178[];
 
 extern "C" void func_002412A0(void* self)
@@ -3562,7 +3562,7 @@ extern "C" void func_002412A0(void* self)
     char name[0x82];
     char desc[0x200];
     char fmt[0x200];
-    D_004A2C78 = 1;
+    cMCOverlayManager_mSaveInProgress = 1;
     int a = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
     int b = func_00152948_r();
     func_002C2540(fmt, D_0047C178);
@@ -4549,7 +4549,7 @@ void func_00244878(void*);
 extern "C" void MEM_fill(void* p, int c, int n);
 extern "C" void* cMCOverlayManager_SetAction(void* self, int mode);
 extern void* D_0047CBD8[];
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 
 // cMCOverlayManager constructor body: resets the state, the 45 state handlers (0x00-0xB0) and the device records.
 extern "C" void* cMCOverlayManager_cMCOverlayManager(void* self)
@@ -4602,7 +4602,7 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(void* self)
     w[0xCF] = 5;
     w[0xD0] = 0;
     w[0xCE] = 0;
-    D_004A2C78 = 0;
+    cMCOverlayManager_mSaveInProgress = 0;
     w[0x10E] = 0;
     fp[0] = (void*)func_00244860;
     fp[1] = (void*)func_00244878;
@@ -4659,14 +4659,14 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002424C8);
 #ifdef SKIP_ASM
-extern int D_004A2C78;
+extern int cMCOverlayManager_mSaveInProgress;
 extern void* D_0047CBD8[];
 void operator_delete(int*);
 
 extern "C" void func_002424C8(void* self, int flags)
 {
     *(void***)((char*)self + 0x748) = D_0047CBD8;
-    D_004A2C78 = 0;
+    cMCOverlayManager_mSaveInProgress = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

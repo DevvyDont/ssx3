@@ -615,7 +615,7 @@ extern "C" void func_00166640(void* self, int a1);                      // cLook
 extern "C" void func_00166F90(void* self);                              // cLookAtChaseAlgorithm::calcPose
 extern "C" void func_002ED490(int, float, float, float);                // cRenderStateMan::update
 extern "C" float func_002EE3B8(int);                                    // cRenderStateMan::DrawDistance
-extern t4Vector D_004FF120_E668 __asm__("D_004FF120");                  // t4vect::Zero
+extern t4Vector D_004FF120_E668 __asm__("t4vect_Zero");                  // t4vect::Zero
 extern t4Vector D_004FF130_E668 __asm__("D_004FF130");                  // t4vect::Origin
 extern t4Matrix D_004C53A0_E668 __asm__("D_004C53A0");                  // CamAxisFlip
 extern float D_004A3B68;                                                // cRenderStateMan::m_farPlane
@@ -1673,8 +1673,8 @@ struct sPair_15F9B8 {
     sV_15F9B8 b;
 };
 
-extern sM_15F9B8 D_004FF1A0_15F9B8 __asm__("D_004FF1A0");
-extern sV_15F9B8 D_004FF150_15F9B8 __asm__("D_004FF150");
+extern sM_15F9B8 D_004FF1A0_15F9B8 __asm__("t4mat_Identity");
+extern sV_15F9B8 D_004FF150_15F9B8 __asm__("t4vect_YAxis");
 extern sV_15F9B8 D_004FF160_v15F9B8 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 extern "C" sPair_15F9B8 func_0031B748_15F9B8(sM_15F9B8* m) __asm__("func_0031B748");
@@ -2103,7 +2103,7 @@ struct sVec_00160228 {
     sVec_00160228(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-extern sVec_00160228 D_004FF120_v160228 __asm__("D_004FF120");
+extern sVec_00160228 D_004FF120_v160228 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec_00160228 Scale_00160228(const sVec_00160228& v, float s)
@@ -3354,7 +3354,7 @@ struct cChaseCameraController_switchCamera_HardReset_flags {
     unsigned int b2 : 1;
 };
 
-extern int D_004A4DD0[2];
+extern int persistentPlayerChoiceType[2];
 
 extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int i)
 {
@@ -3364,7 +3364,7 @@ extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int i)
     *(int*)((char*)self + 0x3C) = 0;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x2C) = 0x3D;
-    *(int*)((char*)self + 0x24) = D_004A4DD0[i];
+    *(int*)((char*)self + 0x24) = persistentPlayerChoiceType[i];
     *(int*)((char*)self + 0x28) = 0x3D;
     *(int*)((char*)self + 0x34) = 0;
 }
@@ -3623,13 +3623,13 @@ extern "C" void func_00161E58(void* self, void* algo, float w)
 //100%
 INCLUDE_ASM("camera/camera", func_00161EF0);
 #ifdef SKIP_ASM
-extern int D_004A4DD0[2];
+extern int persistentPlayerChoiceType[2];
 extern "C" void* func_0015D050(void*, int, int);
 
 extern "C" void func_00161EF0(void* self, int v)
 {
     *(int*)((char*)self + 0x24) = v;
-    D_004A4DD0[*(int*)(*(char**)(*(char**)((char*)self + 0x20) + 0x4) + 0x870)] = v;
+    persistentPlayerChoiceType[*(int*)(*(char**)(*(char**)((char*)self + 0x20) + 0x4) + 0x870)] = v;
     if ((*(int*)((char*)self + 0x30) & 7) == 0) {
         func_0015D050(self, v, 0);
     }
@@ -3879,7 +3879,7 @@ INCLUDE_ASM("camera/camera", func_00162318);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* D_0045BBC0[];
-extern cQuad128 D_004FF120_q162318 __asm__("D_004FF120");
+extern cQuad128 D_004FF120_q162318 __asm__("t4vect_Zero");
 extern "C" float func_00167D88(void);
 // PORT: these take an unused self; they are called here with none.
 float func_00167D98_0() __asm__("func_00167D98");
@@ -3991,7 +3991,7 @@ extern "C" void func_00162560(void) {
 INCLUDE_ASM("camera/camera", func_00162568);
 #ifdef SKIP_ASM
 int func_0011FE98(void*);
-extern sVec_001607E0 D_004FF120_v162568 __asm__("D_004FF120");
+extern sVec_001607E0 D_004FF120_v162568 __asm__("t4vect_Zero");
 
 struct sVEi_162568 {
     short delta;
@@ -5746,7 +5746,7 @@ INCLUDE_ASM("camera/camera", func_001646A0);
 #include "bx/math3d.h"
 
 // Global vectors and a matrix in .bss that the camera code reads (set up elsewhere at startup).
-extern t4Vector D_004FF120_46A0 __asm__("D_004FF120");
+extern t4Vector D_004FF120_46A0 __asm__("t4vect_Zero");
 
 extern t4Vector D_004FF160_46A0 __asm__("D_004FF160");
 
@@ -7081,7 +7081,7 @@ INCLUDE_ASM("camera/camera", func_00166640);
 
 extern t4Vector D_004FF140;
 
-extern t4Vector D_004FF150;
+extern t4Vector t4vect_YAxis;
 
 extern "C" float func_0031C228(float x);
 extern "C" float func_0031C128(float x);
@@ -7193,7 +7193,7 @@ extern "C" void func_00166640_def(char* self)
     *(float*)(self + 0x54) = -func_0031C228(z / len);
     if (0.0f < len) {
         float r;
-        if (0.0f < DotP_166640(off, D_004FF150)) {
+        if (0.0f < DotP_166640(off, t4vect_YAxis)) {
             r = Angle_166640(off, D_004FF140);
         } else {
             r = 6.2831854820251465f - Angle_166640(off, D_004FF140);
@@ -7217,8 +7217,8 @@ struct sM_1668B8 {
 } __attribute__((aligned(16)));
 
 
-extern sM_1668B8 D_004FF1A0_1668B8 __asm__("D_004FF1A0");
-extern sV_1668B8 D_004FF150_1668B8 __asm__("D_004FF150");
+extern sM_1668B8 D_004FF1A0_1668B8 __asm__("t4mat_Identity");
+extern sV_1668B8 D_004FF150_1668B8 __asm__("t4vect_YAxis");
 extern sV_1668B8 D_004FF160_v1668B8 __asm__("D_004FF160");
 extern sV_1668B8 D_004FF130_v1668B8 __asm__("D_004FF130");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
@@ -7415,7 +7415,7 @@ INCLUDE_ASM("camera/camera", func_00166C60);
 // 16-byte vector with inline constructors (a non-POD sibling of t4Vector, as in ai/ai); stores x, y, z, w.
 
 // Global vectors and a matrix in .bss that the camera code reads (set up elsewhere at startup).
-extern t4Vector D_004FF120_6C60 __asm__("D_004FF120");
+extern t4Vector D_004FF120_6C60 __asm__("t4vect_Zero");
 
 extern t4Vector D_004FF160_6C60 __asm__("D_004FF160");
 
@@ -7604,8 +7604,8 @@ struct sM_166F90 {
 } __attribute__((aligned(16)));
 
 
-extern sM_166F90 D_004FF1A0_166F90 __asm__("D_004FF1A0");
-extern sV_166F90 D_004FF150_166F90 __asm__("D_004FF150");
+extern sM_166F90 D_004FF1A0_166F90 __asm__("t4mat_Identity");
+extern sV_166F90 D_004FF150_166F90 __asm__("t4vect_YAxis");
 extern sV_166F90 D_004FF160_v166F90 __asm__("D_004FF160");
 extern sV_166F90 D_004FF130_v166F90 __asm__("D_004FF130");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
@@ -7940,7 +7940,7 @@ extern sFlags_1673F8 D_004A4DA8;
 extern sFlags_1673F8 D_004A4DB0;
 extern sMatrix_1673F8 D_004C53A0;
 extern sFlags_1673F8 D_004A4DC0;
-extern int D_004A4DD0[2];
+extern int persistentPlayerChoiceType[2];
 
 extern "C" void func_0015E2A8(void);
 
@@ -8028,8 +8028,8 @@ extern "C" void func_001673F8_impl(int initialize, int priority)
                                          0.0f, 0.0f, 0.0f, 1.0f);
         func_0015E2A8();
         new (&D_004A4DC0) sFlags_1673F8(-1, -1);
-        D_004A4DD0[0] = 0x3D;
-        D_004A4DD0[1] = 0x3D;
+        persistentPlayerChoiceType[0] = 0x3D;
+        persistentPlayerChoiceType[1] = 0x3D;
     }
 }
 #endif
@@ -8132,14 +8132,14 @@ extern "C" float func_00167E30(void* self)
 }
 #endif
 
-extern cQuad128 D_004FF120;
+extern cQuad128 t4vect_Zero;
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167E40);
 #ifdef SKIP_ASM
 extern "C" void* func_00167E40(void* self)
 {
-    *(cQuad128*)self = D_004FF120;
+    *(cQuad128*)self = t4vect_Zero;
     return self;
 }
 #endif

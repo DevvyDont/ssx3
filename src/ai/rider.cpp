@@ -707,7 +707,7 @@ extern "C" void func_00122088(cRider*);
 extern "C" void func_002105B0(int);
 
 // The unit declares these later with their own vector types; bind them by asm label.
-extern const t4Vector D_004FF120_D660 __asm__("D_004FF120");
+extern const t4Vector D_004FF120_D660 __asm__("t4vect_Zero");
 extern const t4Vector D_004FF130_D660 __asm__("D_004FF130");
 extern const t4Vector D_004FF160_D660 __asm__("D_004FF160");
 
@@ -1993,7 +1993,7 @@ struct sVec4XW : t4Vector {
 } __attribute__((aligned(16)));
 extern t4Vector D_004FF130;
 extern t4Vector D_004FF140;
-extern t4Vector D_004FF150;
+extern t4Vector t4vect_YAxis;
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 
 struct sXf_LP {
@@ -2169,7 +2169,7 @@ static inline void LeanAbout_LP(char* self, sXf_LP* xf, float a, float b, float 
         AddToL_LP(xf->pos, v);
         xf->rot *= AxisAngle_LP(D_004FF140, a * ka);
     }
-    QuatMulTo_LP(xf->rot, AxisAngle_LP(D_004FF150, b * kb));
+    QuatMulTo_LP(xf->rot, AxisAngle_LP(t4vect_YAxis, b * kb));
     sVec4XW w = Scale_LP(d, -1.0f);
     sVec4XW u = Rot_LP(xf->rot, w);
     AddTo_LP(xf->pos, u);
@@ -2753,8 +2753,8 @@ struct sQuad_120F20
 {
     float v[4];
 } __attribute__((aligned(16)));
-// D_004FF120 is declared later in the unit as a 4-aligned sVec4; this view gives the lq/sq copy.
-extern sQuad_120F20 D_004FF120_q120F20 __asm__("D_004FF120");
+// t4vect_Zero is declared later in the unit as a 4-aligned sVec4; this view gives the lq/sq copy.
+extern sQuad_120F20 D_004FF120_q120F20 __asm__("t4vect_Zero");
 
 static inline int IsState1_120F20(void* obj)
 {
@@ -2966,7 +2966,7 @@ struct sVec4_00121750
 {
     float x, y, z, w;
 };
-extern sVec4_00121750 D_004FF120;
+extern sVec4_00121750 t4vect_Zero;
 
 static inline int VecChanged_00121750(cRider* self, const sVec4_00121750& b)
 {
@@ -2977,7 +2977,7 @@ static inline int VecChanged_00121750(cRider* self, const sVec4_00121750& b)
 extern "C" void func_00121750(cRider* self)
 {
     func_001114A0(self->mRiderHandler);
-    if (VecChanged_00121750(self, D_004FF120))
+    if (VecChanged_00121750(self, t4vect_Zero))
     {
         func_00310530(self->mAnimModel, &self->mModelOffset);
     }
@@ -3145,7 +3145,7 @@ INCLUDE_ASM("ai/rider", func_00121AA0);
 // caller (merging them changes code), so they are kept apart.
 // sVec4 stores x, y, z, w.
 // sVec4W stores w first, then x, y, z.
-extern t4Vector D_004FF120_1AA0 __asm__("D_004FF120");
+extern t4Vector D_004FF120_1AA0 __asm__("t4vect_Zero");
 extern t4Vector D_004FF140;
 extern "C" void func_0031BB30(void* q, const void* a, const void* b);
 extern "C" float func_0031C128(float x);
@@ -3644,7 +3644,7 @@ extern "C" void func_00121F30(cRider* self);
 extern "C" void func_00310640(void* model, int lod, int a, int b);
 
 struct sVec4_122448 { float v[4]; };
-extern sVec4_122448 D_004FF120_v122448 __asm__("D_004FF120");
+extern sVec4_122448 D_004FF120_v122448 __asm__("t4vect_Zero");
 
 struct sVEntryI_122448 { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVEntryF_122448 { short delta; short index; void (*fn)(void*, float, void*); };
@@ -3804,7 +3804,7 @@ struct sV2_2680 {
 };
 
 extern sGsState_2680 D_00501420;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern int D_004A4540;
 // Release build: the assert compiles to nothing (gcc still emits its loop notes).
 #define ASSERT_2680(cond) do { } while (0)
@@ -3837,7 +3837,7 @@ extern "C" void func_00122680(void)
         *D_004A289C_2680->stateTop = D_00501420;
         *(short*)(*(char**)((char*)D_004A289C_2680 + 0xE84) + 0x10) = -1;
         D_004A289C_2680->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
-        D_004A289C_2680->SetTexture(D_004FF1A0);
+        D_004A289C_2680->SetTexture(t4mat_Identity);
         D_004A289C_2680->stateTop->f8_5 = 24;
         D_004A289C_2680->stateTop->f4_2 = 5;
         o->f28 = sV2_2680(2.0f, 2.0f);
@@ -4526,7 +4526,7 @@ struct sV_3640
     sV_3640(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sV_3640 D_004FF120_3640 __asm__("D_004FF120");
+extern sV_3640 D_004FF120_3640 __asm__("t4vect_Zero");
 extern sV_3640 D_004FF160_3640 __asm__("D_004FF160");
 
 static inline sV_3640 AxisAngle_3640(const sV_3640& axis, float angle)
@@ -5125,7 +5125,7 @@ struct sV_42B0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sV_42B0 D_004FF120_42B0 __asm__("D_004FF120");
+extern sV_42B0 D_004FF120_42B0 __asm__("t4vect_Zero");
 extern sV_42B0 D_004FF160_42B0 __asm__("D_004FF160");
 
 struct sRay_42B0 {

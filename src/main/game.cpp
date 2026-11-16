@@ -504,11 +504,11 @@ struct sGame_C830 {
     int frames;             // 0xAC
 };
 
-extern char D_004A5988[4];
-extern void* D_004A3500;
-extern void* D_004A52D4;
+extern char gBucketMan[4];
+extern void* gSSXAudio;
+extern void* gWorldTriggerManager;
 extern void* D_004A28A4;
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern int D_004A4324;
 extern "C" void func_003550A0(void* self, int index);
 void func_002789C0(void* p);
@@ -537,7 +537,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         SetBits_C830(&g->stateTop->w4, 0x300000, 0x300000);
         Set1_C830(g, 0xFF000, 12, 0xD);
         Set2_C830(g, 0x3E0, 5, 4);
-        func_003550A0(D_004A5988, 3);
+        func_003550A0(gBucketMan, 3);
         i++;
     } while (i < self->views->count);
     }
@@ -548,7 +548,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)D_004A289C_C830->GetWidth(), (float)D_004A289C_C830->GetHeight(), 1);
     }
     D_004A289C_C830->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
-    D_004A289C_C830->SetTexture(D_004FF1A0);
+    D_004A289C_C830->SetTexture(t4mat_Identity);
     cGfx_C830* g = D_004A289C_C830;
     Set2_C830(g, 0x3E0, 5, 0x18);
     Set1_C830(g, 0x7C, 2, 5);
@@ -570,8 +570,8 @@ extern "C" void func_0022C830(sGame_C830* self)
     *p = 0;
     D_004A289C_C830->v19();
     *p = saved;
-    func_00285BF8(D_004A3500, 1, (float)self->frames * (1.0f / 60.0f));
-    func_002B5D78(D_004A52D4);
+    func_00285BF8(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
+    func_002B5D78(gWorldTriggerManager);
     self->frames = 0;
 }
 #endif

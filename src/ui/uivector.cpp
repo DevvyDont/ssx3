@@ -54,8 +54,8 @@ struct sUIVec48_34C0 {
     void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 };
 
-// The unit declares D_004FF0D8 later as a plain vec3; bind this view by asm label.
-extern sUIVec3_34C0 D_004FF0D8_34C0 __asm__("D_004FF0D8");
+// The unit declares t3vect_Zero later as a plain vec3; bind this view by asm label.
+extern sUIVec3_34C0 D_004FF0D8_34C0 __asm__("t3vect_Zero");
 
 // On Tour: tUIVector (a tUIBaseObject header, then the counts; triangle data follows).
 struct sUIVecData_34C0 {
@@ -384,14 +384,14 @@ struct cUIVector_getSize_sVec3 {
     float z;
 };
 
-extern cUIVector_getSize_sVec3 D_004FF0D8;
+extern cUIVector_getSize_sVec3 t3vect_Zero;
 
 extern "C" void cUIVector_getSize(void* self, cUIVector_getSize_sVec3* out)
 {
     if (*(cUIVector_getSize_sVec3**)((char*)self + 0x80) == 0) {
         return;
     }
-    *out = D_004FF0D8;
+    *out = t3vect_Zero;
     float minX = 1000.0f;
     float maxX = -1000.0f;
     float minY = 1000.0f;

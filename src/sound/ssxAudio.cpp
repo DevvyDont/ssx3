@@ -9,14 +9,14 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" char* cSSXAudio_cSSXAudio(void* mem, int a1, int a2, int a3, int a4);
 void func_002ADBF0(void*);
 extern const char D_004828B0[];
-extern char* D_004A3500;
+extern char* gSSXAudio;
 
 extern "C" void SSXAUDIO_Init(int a)
 {
-    if (D_004A3500 == 0) {
-        D_004A3500 = cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, a);
+    if (gSSXAudio == 0) {
+        gSSXAudio = cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, a);
     }
-    func_002ADBF0(**(char***)(D_004A3500 + 0x118) + 0x1D8);
+    func_002ADBF0(**(char***)(gSSXAudio + 0x118) + 0x1D8);
 }
 #endif
 
@@ -29,14 +29,14 @@ public:
     virtual void v01(int flags);
 };
 
-extern char* D_004A3500;
+extern char* gSSXAudio;
 
 extern "C" void SSXAUDIO_DeInit()
 {
-    if (D_004A3500 != 0) {
-        (**(SSXAUDIO_DeInit_cObj***)(D_004A3500 + 0x118))->v01(3);
+    if (gSSXAudio != 0) {
+        (**(SSXAUDIO_DeInit_cObj***)(gSSXAudio + 0x118))->v01(3);
     }
-    D_004A3500 = 0;
+    gSSXAudio = 0;
 }
 #endif
 
@@ -1261,12 +1261,12 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002A39E0(void* self);
 extern signed char D_00535C11[];
-extern void* D_004A52D4;
+extern void* gWorldTriggerManager;
 
 extern "C" void func_00286E20(void* self)
 {
     func_00285BE0(self, 6);
-    func_002B6900(D_004A52D4);
+    func_002B6900(gWorldTriggerManager);
     func_002929D8(self);
     *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)func_0028B1C8() + 0xC) + 0x8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1299,7 +1299,7 @@ extern "C" char* func_0028B1D8();
 extern "C" void func_002A3708(void* self, void* rider);
 extern "C" void func_002A34D0(void* self, void* rider, int a2, int a3);
 extern "C" void func_002A45C0(void* self);
-extern char* D_004A3500;
+extern char* gSSXAudio;
 extern char D_00535BC8[];
 
 static inline int sa_state6EA0()
@@ -1315,7 +1315,7 @@ extern "C" void func_00286EA0(char* self, char* rider)
 {
     if (rider != (char*)func_00285D98(self, *(int*)(rider + 0x870)))
         return;
-    func_002A73A8(D_004A3500, 2, func_00288AE0(self) ? 0 : *(int*)(rider + 0x870));
+    func_002A73A8(gSSXAudio, 2, func_00288AE0(self) ? 0 : *(int*)(rider + 0x870));
     int flag = 1;
     func_00296E20(self, (int)rider);
     func_00297438(self, (int)rider);
@@ -1418,7 +1418,7 @@ extern "C" void func_002871B0(void* self)
     func_002948A0(self);
     func_0029B3C0(self, 0);
     func_00287F00(self, 3, 0.5f, 1.0f);
-    func_002B6900(D_004A52D4);
+    func_002B6900(gWorldTriggerManager);
     int n = *(int*)(func_0028B1D8() + 0x78);
     for (; i < n; i++) {
         func_00296E20(self, *(int*)(func_0028B1D8() + (i << 2) + 0x28));
@@ -2808,7 +2808,7 @@ INCLUDE_ASM("sound/ssxAudio", func_00289448);
 extern "C" void func_002B6950(int, int, int);
 
 extern "C" int func_00289448(void) {
-    func_002B6950((*(int*)&D_004A52D4), 1, 0);
+    func_002B6950((*(int*)&gWorldTriggerManager), 1, 0);
     return 1;
 }
 #endif
@@ -2898,12 +2898,12 @@ INCLUDE_ASM("sound/ssxAudio", func_00289650);
 #ifdef SKIP_ASM
 // PORT: func_00289680 is defined (void*) but this caller passes (system, msg).
 void func_00289680_2(void* self, void* msg) __asm__("func_00289680__FPv");
-extern char* D_004A3500;
+extern char* gSSXAudio;
 
 extern "C" void func_00289650(void* msg)
 {
     if (*(int*)msg == 3) {
-        func_00289680_2(D_004A3500, msg);
+        func_00289680_2(gSSXAudio, msg);
     }
 }
 #endif

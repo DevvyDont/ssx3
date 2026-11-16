@@ -55,7 +55,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00138BA0);
 #include "bx/math3d.h"
 
 // Global vectors and a matrix in .bss read by the handplant code (set up elsewhere at startup).
-extern t4Vector D_004FF120_8BA0 __asm__("D_004FF120");
+extern t4Vector D_004FF120_8BA0 __asm__("t4vect_Zero");
 
 extern t4Vector D_004FF160_8BA0 __asm__("D_004FF160");
 
@@ -383,7 +383,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001391A8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern t4Vector D_004FF120_91A8 __asm__("D_004FF120");
+extern t4Vector D_004FF120_91A8 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_91A8 __asm__("D_004FF160");
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
@@ -601,7 +601,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00139548);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern t4Vector D_004FF120_9548 __asm__("D_004FF120");
+extern t4Vector D_004FF120_9548 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_9548 __asm__("D_004FF160");
 
 struct sHP_9548 {
@@ -868,7 +868,7 @@ extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
 extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
 extern "C" void func_00125970(char* self);
 int func_0011FEE8(void* rider);
-extern void* D_004FF120[];
+extern void* t4vect_Zero[];
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
 static inline void vu0ScaleEq_139A20(sVec4HP& v, float s)
@@ -923,7 +923,7 @@ extern "C" void func_00139A20(void* p)
         sVec4HP up = *(sVec4HP*)(r1 + 0x180);
         *(sVec4HP*)(r1 + 0x370) = up;
     }
-    *(sVec4HP*)(*(char**)(self + 0x4) + 0x3D0) = *(sVec4HP*)D_004FF120;
+    *(sVec4HP*)(*(char**)(self + 0x4) + 0x3D0) = *(sVec4HP*)t4vect_Zero;
     int st = *(int*)(*(char**)(*(char**)(self + 0x4) + 0x788) + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
@@ -952,7 +952,7 @@ extern "C" void func_00139A20(void* p)
                 int big = 1;
                 if (!(0.0872664749622345f < absf_139A20(*(float*)(*(char**)(r3 + 0x77C) + 0x258)))) big = 0;
                 if (big) {
-                    func_00121AA0(r3, *(char**)(r3 + 0x788) + 0x20, D_004FF120, x, y);
+                    func_00121AA0(r3, *(char**)(r3 + 0x788) + 0x20, t4vect_Zero, x, y);
                     goto done;
                 }
             }
@@ -967,7 +967,7 @@ extern "C" void func_00139A20(void* p)
                 char* r5 = *(char**)(self + 0x4);
                 func_00121AA0(r5, *(char**)(r5 + 0x788) + 0x20, &v, x, y);
             } else {
-                func_00121AA0(r4, tgt, D_004FF120, x, y);
+                func_00121AA0(r4, tgt, t4vect_Zero, x, y);
             }
         }
     }
@@ -2425,7 +2425,7 @@ int func_0011FEE8(void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
 void cRider_setMotionState_impl_BFA8(void* rider, int v) __asm__("cRider_setMotionState__FPv");
-extern char* D_004A3500;
+extern char* gSSXAudio;
 
 struct sTbl_BFA8 {
     int v[4];
@@ -2496,7 +2496,7 @@ extern "C" void func_0013BFA8(void* self)
     func_00107888(RIDER_BFA8);
     if (*(int*)((char*)self + 0x20) != 0 && func_0011FE98(RIDER_BFA8) == 4) {
         cRider_setMotionState_impl_BFA8(RIDER_BFA8, 1);
-        func_00294170(D_004A3500, RIDER_BFA8);
+        func_00294170(gSSXAudio, RIDER_BFA8);
     }
     char* r = RIDER_BFA8;
     float len = vu0Length_BFA8(*(sVec4_BFA8*)(r + 0x1E0));
@@ -3216,7 +3216,7 @@ extern "C" float func_0013D028(void* self, float* v, float a, float b, float c)
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D1B8);
 #ifdef SKIP_ASM
 extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
-extern void* D_004FF120[];
+extern void* t4vect_Zero[];
 
 struct sHit_13D1B8 {
     sVec4HP pos;            // 0x00
@@ -3237,7 +3237,7 @@ struct sHit_13D1B8 {
 
 extern "C" int func_00333EF8(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
 extern sVec4HP D_004FF160;
-extern sVec4HP D_004FF120_v __asm__("D_004FF120");
+extern sVec4HP D_004FF120_v __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4HP vu0Scale_13D1B8(const sVec4HP& v, float s)
@@ -3554,7 +3554,7 @@ extern "C" float func_0031C040(float a);
 extern "C" float func_0031C128(float x);
 int func_00312AA0(void* anim, int layer);
 
-extern t4Vector D_004FF120_13D818 __asm__("D_004FF120");
+extern t4Vector D_004FF120_13D818 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_13D818 __asm__("D_004FF160");
 
 struct sVEnt_13D818 { short delta; short index; void (*fn)(void*, sHit_13D1B8*, t4Vector*); };
@@ -4159,7 +4159,7 @@ extern "C" void func_00294170(void* snd, void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
 void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
-extern char* D_004A3500;
+extern char* gSSXAudio;
 extern int D_004A115C;
 
 struct sInfo_13F178 {
@@ -4297,7 +4297,7 @@ extern "C" void func_0013F178(void* self)
     func_00107888(RIDER_13F178);
     if (*(int*)((char*)self + 0xC) != 0 && func_0011FE98(RIDER_13F178) == 0) {
         cRider_setMotionState_impl_13F178(RIDER_13F178, 1);
-        func_00294170(D_004A3500, RIDER_13F178);
+        func_00294170(gSSXAudio, RIDER_13F178);
     }
     char* r = RIDER_13F178;
     *(sVec4HP*)(r + 0x390) = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)(r + 0x370), 0.5f)));
@@ -5056,14 +5056,14 @@ extern "C" void cBeing__cBeing(int* self, int flags)
 }
 #endif
 
-extern void* D_004FF120[];
+extern void* t4vect_Zero[];
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001406B0__FPv);
 #ifdef SKIP_ASM
 void* func_001406B0(void* self)
 {
-    return (void*)D_004FF120;
+    return (void*)t4vect_Zero;
 }
 #endif
 
@@ -5089,18 +5089,18 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001406D0__FPv);
 #ifdef SKIP_ASM
 void* func_001406D0(void* self)
 {
-    return (void*)D_004FF120;
+    return (void*)t4vect_Zero;
 }
 #endif
 
-extern void* D_004FF1A0[];
+extern void* t4mat_Identity[];
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001406E0__FPv);
 #ifdef SKIP_ASM
 void* func_001406E0(void* self)
 {
-    return (void*)D_004FF1A0;
+    return (void*)t4mat_Identity;
 }
 #endif
 

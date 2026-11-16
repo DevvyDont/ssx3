@@ -982,7 +982,7 @@ struct func_0039C428_sVec3 {
     float y;
     float z;
 };
-extern func_0039C428_sVec3 D_004FF0D8;
+extern func_0039C428_sVec3 t3vect_Zero;
 
 class func_0039C428_cWidget {
 public:
@@ -1015,7 +1015,7 @@ extern "C" void func_0039C428(void* self, int pos)
 {
     *(int*)((char*)self + 0x7C) = pos;
     func_0039C428_cWidget* a = *(func_0039C428_cWidget**)((char*)self + 0x74);
-    func_0039C428_sVec3 v = D_004FF0D8;
+    func_0039C428_sVec3 v = t3vect_Zero;
     if (a != 0) {
         a->v20(&v);
     }

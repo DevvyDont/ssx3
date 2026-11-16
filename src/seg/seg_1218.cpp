@@ -2908,13 +2908,13 @@ INCLUDE_ASM("seg/seg_1218", func_00104CC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00289B18_4CC8(int, int, int) __asm__("func_00289B18");
-extern int D_004A3500;
+extern int gSSXAudio;
 
 extern "C" void func_00104CC8(void *arg0, int arg1) {
     int temp_2 = (*(int *)((char*)(arg0) + (0x60)));
     int s = arg1 & 0xFFFF;
     if (temp_2 != 0) {
-        func_00289B18_4CC8(D_004A3500, temp_2, s);
+        func_00289B18_4CC8(gSSXAudio, temp_2, s);
     }
 }
 #endif
@@ -3104,7 +3104,7 @@ public:
     virtual float Height();
 };
 
-extern sV4_4E70 D_004FF120_4E70 __asm__("D_004FF120");
+extern sV4_4E70 D_004FF120_4E70 __asm__("t4vect_Zero");
 extern "C" int func_00334458_4E70(void*, cScope_4E70*, sHit_4E70*, int, int) __asm__("func_00334458");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -3367,7 +3367,7 @@ extern "C" void func_001057B8_5398(char*, sSurf_5398*, sInfo_5398*, sContact_539
 extern "C" void func_00296088_5398(void*, char*, sSurf_5398*, int) __asm__("func_00296088");
 extern "C" void func_0016D320(void*, void*);
 extern "C" void func_0032F708(void* self, int flags);
-extern char* D_004A3500_5398 __asm__("D_004A3500");
+extern char* D_004A3500_5398 __asm__("gSSXAudio");
 extern char D_004C5830_5398[] __asm__("D_004C5830");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -4261,7 +4261,7 @@ extern "C" void func_0010E098(cRider* self, int a, float f);
 extern "C" void func_00115358(cRider* self);
 extern "C" void func_001326C8(void*, int);
 extern "C" void func_0013ADC0(void* p, t4Vector* n);
-extern char* D_004A3500_6848 __asm__("D_004A3500");
+extern char* D_004A3500_6848 __asm__("gSSXAudio");
 extern t4Vector D_004FF130_6848 __asm__("D_004FF130");
 
 struct sLand_6848 {

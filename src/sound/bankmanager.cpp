@@ -4,7 +4,7 @@
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 #ifdef SKIP_ASM
-extern char* D_004A3614;
+extern char* gpBankManager;
 extern char D_00482998[];
 extern "C" void* func_00252FA0(void* a0, int a1, int a2);
 
@@ -22,7 +22,7 @@ extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag
     if (size != 0 || extra != 0) {
         *(int*)((char*)self + 0x8) = 1;
         if (extra != 0) {
-            int id = (**(cSndStream_B588***)(D_004A3614 + 0x1D8))->alloc(extra);
+            int id = (**(cSndStream_B588***)(gpBankManager + 0x1D8))->alloc(extra);
             if (id >= 0) {
                 *(int*)((char*)self + 0xC) = id;
                 *(int*)((char*)self + 0x8) = 2;
@@ -41,7 +41,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028B650);
 #ifdef SKIP_ASM
 extern "C" void func_0028B528(void*);
 extern "C" void* MEM_free(void* self);
-extern char* D_004A3614;
+extern char* gpBankManager;
 
 class cSndStream_B650 {
 public:
@@ -58,7 +58,7 @@ extern "C" void func_0028B650(void* self)
     int state = *(int*)((char*)self + 0x8);
     if (state != 0) {
         if (state == 2) {
-            (**(cSndStream_B650***)(D_004A3614 + 0x1D8))->stop(*(int*)((char*)self + 0xC));
+            (**(cSndStream_B650***)(gpBankManager + 0x1D8))->stop(*(int*)((char*)self + 0xC));
             *(int*)((char*)self + 0xC) = -1;
         }
         MEM_free(*(void**)((char*)self + 0x10));
@@ -186,7 +186,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028B878);
 #ifdef SKIP_ASM
 extern "C" void func_0028B528(void*);
 extern "C" void func_0028B2D0(void* self);
-extern char* D_004A3614;
+extern char* gpBankManager;
 
 class cSndStream_B878 {
 public:
@@ -204,7 +204,7 @@ extern "C" void func_0028B878(void* self)
     func_0028B2D0(self);
     *(int*)self = 2;
     if (*(int*)((char*)self + 0x8) == 2) {
-        (**(cSndStream_B878***)(D_004A3614 + 0x1D8))->v6(*(int*)((char*)self + 0xC));
+        (**(cSndStream_B878***)(gpBankManager + 0x1D8))->v6(*(int*)((char*)self + 0xC));
     }
 }
 #endif
@@ -241,7 +241,7 @@ int func_0028B928(void* self)
 INCLUDE_ASM("sound/bankmanager", func_0028B930);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
-extern char* D_004A3614;
+extern char* gpBankManager;
 
 class cSndStream_B930 {
 public:
@@ -257,7 +257,7 @@ public:
 // PORT: name is passed as int (matches the unit's 6-int caller declaration); d, e unused.
 extern "C" void func_0028B930(void* self, int id, int flag, int name, int d, int e)
 {
-    (**(cSndStream_B930***)(D_004A3614 + 0x1D8))->v7();
+    (**(cSndStream_B930***)(gpBankManager + 0x1D8))->v7();
     *(int*)((char*)self + 0x4) = id;
     if (flag == 0) {
         *(int*)self = 1;
@@ -277,7 +277,7 @@ extern "C" void* func_0028B248(void* self);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char* D_004A3614;
+extern char* gpBankManager;
 extern const char D_004829B8[];
 extern void* D_00483B48[];
 extern void* D_00483AD8[];
@@ -332,7 +332,7 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
     self->vtbl = D_00483AD8;
     sBmBank** slot = &self->banks;
     *slot = new (D_004829B8, 0, 0) sBmBank[count];
-    D_004A3614 = (char*)self;
+    gpBankManager = (char*)self;
     return self;
 }
 #endif
@@ -346,7 +346,7 @@ extern "C" void func_0028A148(void* self, int flags);
 extern "C" void func_0028B278(void* self, int flags);
 extern "C" void func_002ACE40(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern char* D_004A3614;
+extern char* gpBankManager;
 extern void* D_00483B48[];
 extern void* D_00483AD8[];
 
@@ -388,7 +388,7 @@ extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
         int d = (char*)self - base;
         vt.e[1].delta = D_00483AB8_BB10.e[1].delta + d;
     }
-    D_004A3614 = 0;
+    gpBankManager = 0;
     if (self->banks != 0) {
         sBmBankBB10* q = self->banks + ((int*)self->banks)[-4];
         while (self->banks != q) {

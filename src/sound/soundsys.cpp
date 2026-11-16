@@ -2834,7 +2834,7 @@ extern "C" int func_00288B40(void* self, int which, float f);
 int func_00295028_p(void* self, void* evt, int idx) __asm__("func_00295028");
 extern "C" int func_002B5F60(void* mgr, void* evt, int id, void* rider, int vol);
 extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
-extern void* D_004A52D4;
+extern void* gWorldTriggerManager;
 
 struct sSsVt6088 { short delta; short index; int (*fn)(void*); };
 
@@ -2855,7 +2855,7 @@ extern "C" void func_00296088(void* self, char* rider, char* evt, int idx)
     int* ids = tbl + 2;
     int* q = ids;
     if (ids[idx] != 0) q = &ids[idx];
-    int r = func_002B5F60(D_004A52D4, evt, *q, rider, v);
+    int r = func_002B5F60(gWorldTriggerManager, evt, *q, rider, v);
     if (r < 0) return;
     func_00295628(self, evt, r, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 1000, 0, idx);
 }
@@ -6446,7 +6446,7 @@ INCLUDE_ASM("sound/soundsys", func_0029CE70);
 extern "C" void func_002AD300(void* self);
 extern "C" void func_002AD810(void* self);
 extern "C" void func_002B6A68(void* self);
-extern void* D_004A52D4;
+extern void* gWorldTriggerManager;
 
 extern "C" void func_0029CE70(void* self)
 {
@@ -6455,7 +6455,7 @@ extern "C" void func_0029CE70(void* self)
         func_002AD300(**(char***)((char*)self + 0x118) + 0x1D8);
         *(int*)(**(char***)((char*)self + 0x118) + 0x26C) = 0;
         func_002AD810(**(char***)((char*)self + 0x118) + 0x1D8);
-        func_002B6A68(D_004A52D4);
+        func_002B6A68(gWorldTriggerManager);
     }
 }
 #endif

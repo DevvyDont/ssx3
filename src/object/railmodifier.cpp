@@ -503,7 +503,7 @@ struct sRmF5_C698 {
 
 extern "C" sRmWorld_C698** func_002D1BD8();
 extern "C" void func_0035C5A0_C698(void* self, sRmMat44* m) __asm__("func_0035C5A0");
-extern t4Vector D_004FF120_C698 __asm__("D_004FF120");
+extern t4Vector D_004FF120_C698 __asm__("t4vect_Zero");
 extern const sRmF5_C698 D_0048E7D8;
 extern const sRmF5_C698 D_0048E7F0;
 
@@ -2759,7 +2759,7 @@ struct sRmMtx_35FC20 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("D_004FF1A0");
+extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
 
 extern "C" sRmMtx_35FC20* func_0035FC20(sRmAxisRot_35FC20* self, sRmMtx_35FC20* m)
 {
@@ -2938,10 +2938,10 @@ extern sV4_FE10 D_004FFAB0_v __asm__("D_004FFAB0");
 extern sMat_FE10 D_004FFAC0_m __asm__("D_004FFAC0");
 extern sV4_FE10 D_004FFB00_v __asm__("D_004FFB00");
 extern sV4_FE10 D_004FFB10_v __asm__("D_004FFB10");
-extern char D_004A5988;
+extern char gBucketMan;
 
 // Static initialisation of the unit's colour globals D_004FF740..D_004FFAB0, the spline basis D_004FFAC0,
-// D_004FFB00/D_004FFB10 and the list D_004A5988 (g++ __static_initialization_and_destruction_0).
+// D_004FFB00/D_004FFB10 and the list gBucketMan (g++ __static_initialization_and_destruction_0).
 // The unit declares func_0035FE10 returning void*; bind this definition by asm label.
 extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0035FE10");
 extern "C" void func_0035FE10_init(int initialize, int priority)
@@ -3009,7 +3009,7 @@ extern "C" void func_0035FE10_init(int initialize, int priority)
                                       0.0f, 1.0f, 0.0f, 0.0f);
         new (&D_004FFB00_v) sV4_FE10(1.0f, sV3_FE10(0.23000000417232513f, 0.2800000011920929f, 0.5f));
         new (&D_004FFB10_v) sV4_FE10(D_004FF7F0_v);
-        func_003549D0(&D_004A5988);
+        func_003549D0(&gBucketMan);
     }
 }
 #endif
@@ -4723,9 +4723,9 @@ extern "C" void cMeshAnimFrame__cMeshAnimFrame(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003612C0);
 #ifdef SKIP_ASM
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
-// Copy the 4x4 matrix D_004FF1A0 into self+0x90.
+// Copy the 4x4 matrix t4mat_Identity into self+0x90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void func_003612C0(void* self)
 {
@@ -4741,7 +4741,7 @@ extern "C" void func_003612C0(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x90), "r"(D_004FF1A0)
+        : "r"((char*)self + 0x90), "r"(t4mat_Identity)
         : "memory");
 }
 #endif

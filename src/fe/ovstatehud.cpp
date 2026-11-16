@@ -2310,7 +2310,7 @@ struct sGs_31E0 {
 };
 
 extern sGs_31E0 D_00501420_31E0 __asm__("D_00501420");
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 extern int D_004A4EB0;
 extern sV2_31E0 D_004A4EA8;
 extern "C" float func_003921F0(void* obj, const unsigned short* txt, void* a, int b, float x, float y);
@@ -2401,7 +2401,7 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
     D_004A289C_31E0->stateTop->f4_20 = 0;
     D_004A289C_31E0->stateTop->f4_12 = 0x14;
     D_004A289C_31E0->stateTop->f4_2 = 5;
-    D_004A289C_31E0->SetTexture(D_004FF1A0);
+    D_004A289C_31E0->SetTexture(t4mat_Identity);
     {
         sVEntry<void(void*, float, float, float, float, int)>* vt = *(sVEntry<void(void*, float, float, float, float, int)>**)((char*)D_004A289C_31E0 + 0x10D8);
         char* thisp = (char*)D_004A289C_31E0 + vt[23].delta;

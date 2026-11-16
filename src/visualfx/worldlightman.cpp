@@ -12,7 +12,7 @@ struct sWLCVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sWLCVec4 D_004FF120;
+extern sWLCVec4 t4vect_Zero;
 
 struct sWLCList {
     unsigned int head;
@@ -75,7 +75,7 @@ extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
     for (i = 0; i < 32; i++) {
         self->nodes[i].priority = 0;
         self->nodes[i].id = 0xFFFFFFFF;
-        self->nodes[i].v = D_004FF120;
+        self->nodes[i].v = t4vect_Zero;
         self->nodes[i].fC0 = 0;
         self->nodes[i].next = 0;
         self->nodes[i].prev = 0;
@@ -1310,7 +1310,7 @@ extern int D_004A5578[2];
 extern int D_004A5580[2];
 extern int D_004A5588[2];
 extern int D_004A5590[2];
-extern int D_004A5598[2];
+extern int kWPR_Lighting[2];
 extern int D_004A55A0[2];
 extern int D_004A55A8[2];
 extern float D_004A55AC;
@@ -1620,7 +1620,7 @@ void sti_002F6B88(int init, int prio)
             initE(D_004A5580, 8);
             initE(D_004A5588, 9);
             initE(D_004A5590, 10);
-            initE(D_004A5598, 11);
+            initE(kWPR_Lighting, 11);
             initE(D_004A55A0, 12);
             initE(D_004A55A8, 13);
             new (D_004D5B70) sWlAvElem[2048];
@@ -1712,11 +1712,11 @@ void sti_002F6B88(int init, int prio)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
 #ifdef SKIP_ASM
-extern char D_004FF1A0[];
+extern char t4mat_Identity[];
 
 extern "C" void* func_002F7A50()
 {
-    return D_004FF1A0;
+    return t4mat_Identity;
 }
 #endif
 //100%
@@ -2247,10 +2247,10 @@ extern "C" void func_002F7E70(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E90);
 #ifdef SKIP_ASM
-extern int D_004A3AB8;
+extern int cAvalanche_m_fileDataDeleteable;
 
 extern "C" int func_002F7E90(void) {
-    return D_004A3AB8;
+    return cAvalanche_m_fileDataDeleteable;
 }
 #endif
 //100%

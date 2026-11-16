@@ -150,7 +150,7 @@ static inline void vu0CopyMat_351480(sImMat44_351480* d, const sImMat44_351480* 
 }
 
 extern void* D_00490AD0[];
-extern sImMat44_351480 D_004FF1A0;
+extern sImMat44_351480 t4mat_Identity;
 extern "C" void* func_00351330(void* self, float* src, float f);
 // PORT: func_00351800 is defined later in the unit with a typed self; bound by asm label.
 void func_00351800_vf(void* self, float f) __asm__("func_00351800");
@@ -159,7 +159,7 @@ extern "C" void* func_00351480(void* self, float* src, float f)
 {
     func_00351330(self, src, f);
     *(void***)((char*)self + 0x84) = D_00490AD0;
-    vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &D_004FF1A0);
+    vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
     *(float**)((char*)self + 0x40) = src;
     func_00351800_vf(self, f);
     return self;
@@ -1184,7 +1184,7 @@ struct sRCtx_352810 {
     sVE_352810* vt;         // 0x10D8
 };
 extern sRCtx_352810* D_004A5B80;
-extern char D_004FF1A0_2810[] __asm__("D_004FF1A0");
+extern char D_004FF1A0_2810[] __asm__("t4mat_Identity");
 
 // cMeshAnimNode (On Tour: cMeshAnimNode::render).
 struct sDebris_352810 {

@@ -467,12 +467,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243D20);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D690[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00243D20(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 8;
     *(void **)((char *)self + 0xC) = D_0047D690;
     *(int *)((char *)self + 4) = 0;
@@ -533,12 +533,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243DE8);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D588[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00243DE8(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 0xA;
     *(void **)((char *)self + 0xC) = D_0047D588;
     *(int *)((char *)self + 4) = 0;
@@ -583,12 +583,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243E80);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D4D8[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00243E80(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 4;
     *(void **)((char *)self + 0xC) = D_0047D4D8;
     *(int *)((char *)self + 4) = 0;
@@ -617,12 +617,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243EE8);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D480[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00243EE8(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 5;
     *(void **)((char *)self + 0xC) = D_0047D480;
     *(int *)((char *)self + 4) = 0;
@@ -667,12 +667,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243F80);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D3D0[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00243F80(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(void **)((char *)self + 0xC) = D_0047D3D0;
     *(int *)((char *)self + 0) = 1;
     *(int *)((char *)self + 4) = 3;
@@ -703,12 +703,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243FF0);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D378[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00243FF0(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 0xA;
     *(void **)((char *)self + 0xC) = D_0047D378;
     *(int *)((char *)self + 4) = 0;
@@ -777,12 +777,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002440C0);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D270[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_002440C0(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 3;
     *(void **)((char *)self + 0xC) = D_0047D270;
     *(int *)((char *)self + 4) = 0;
@@ -811,12 +811,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244128);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D218[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00244128(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 8;
     *(void **)((char *)self + 0xC) = D_0047D218;
     *(int *)((char *)self + 4) = 0;
@@ -845,12 +845,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244190);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D1C0[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_00244190(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 7;
     *(void **)((char *)self + 0xC) = D_0047D1C0;
     *(int *)((char *)self + 4) = 0;
@@ -879,12 +879,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002441F8);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D168[];
-extern int D_004A2C68;
+extern int cGameState_mpGame;
 
 extern "C" void *func_002441F8(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
-    D_004A2C68 = 0;
+    cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 4;
     *(void **)((char *)self + 0xC) = D_0047D168;
     *(int *)((char *)self + 4) = 0;
@@ -1906,7 +1906,7 @@ extern "C" void func_00294F48(void* snd);
 extern "C" int func_0020CBA0(void);
 extern "C" void cPlaybackMan_update(void* p);
 int GetHashValue32(char* str);
-extern void* D_004A28A0;
+extern void* PadCache;
 extern void* D_004A3DD8;
 // Pending script pause request; 0xFFFFFFFF = none (the store is lui/ori, so the global is unsigned).
 extern unsigned int D_004A20CC_4B48 __asm__("D_004A20CC");
@@ -2038,7 +2038,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         return false;
     }
     if (func_00231840((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && func_0020CBE8() != 0) {
-        func_00326AE0(D_004A28A0);
+        func_00326AE0(PadCache);
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
         D_004A2A50 = D_004428F8[0];
@@ -2083,7 +2083,7 @@ extern "C" void func_00357BF8(int);
 extern "C" void func_002B7848(int, int, int);
 extern "C" void cGameViewMan_updateAll(int);
 extern "C" void func_00230F40(void*);
-extern char D_004A5988[8];
+extern char gBucketMan[8];
 extern int D_004A2A50;
 extern char* D_004A28A4;
 struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
@@ -2096,11 +2096,11 @@ extern "C" void func_00244E60(void* self)
     int skip;
     if (*(int*)(s + 0x7C) == 0 || func_00237950(*(int*)(s + 0x7C)) != 0) {
         if (*(int*)(s + 0x214) == 3) {
-            obj = D_004A5988;
+            obj = gBucketMan;
             func_00230F40(self);
             cBucketMan_mergeBucket(obj, 1);
         } else {
-            obj = D_004A5988;
+            obj = gBucketMan;
             func_00230F40(self);
         }
         if ((D_004A2A50 & 1) == 0)
@@ -2110,7 +2110,7 @@ extern "C" void func_00244E60(void* self)
             ((void (*)(void*))vt[5].fn)(D_004A28A4 + vt[5].delta);
         }
     }
-    obj = D_004A5988;
+    obj = gBucketMan;
     skip = 0;
     if ((D_004A2A50 & 1) != 0 || func_00270280(*(int*)(s + 0x28)) != 0)
         skip = 1;

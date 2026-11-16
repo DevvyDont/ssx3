@@ -145,7 +145,7 @@ struct cBoardTrailFX_reset_sTrail {
 };
 
 extern cBoardTrailFX_reset_sVec4 D_004FF130;
-extern cBoardTrailFX_reset_sVec4 D_004FF120;
+extern cBoardTrailFX_reset_sVec4 t4vect_Zero;
 extern float D_004A45B0;
 extern float D_004A45B4;
 extern float D_004A45B8;
@@ -160,8 +160,8 @@ extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
     self->fA0 = 0;
     self->fA4 = 0;
     self->colB0 = D_004FF130;
-    self->colC0 = D_004FF120;
-    self->colD0 = D_004FF120;
+    self->colC0 = t4vect_Zero;
+    self->colD0 = t4vect_Zero;
     self->f4 = 1.0f;
     self->f8 = 1.0f;
     self->fE0 = 0;
@@ -1296,7 +1296,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EADD0);
 int func_0011FE98(void* self);
 void func_00392DE8(void* self, int val);
 extern "C" void func_00392D90(void* self, void* q, void* v);
-extern int D_004A4720;
+extern int cPowerUpFXToggles_m_TestTrickBoost;
 
 struct sV4_2EADD0
 {
@@ -1383,7 +1383,7 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
 extern "C" void func_002EADD0(sTrail_2EADD0* self)
 {
     float speed = *(float*)(self->rider + 0x2EC);
-    if (D_004A4720 != 0)
+    if (cPowerUpFXToggles_m_TestTrickBoost != 0)
         speed = 10.0f;
     float zero = 0.0f;
     if (zero < speed)

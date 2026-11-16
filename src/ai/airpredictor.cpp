@@ -14,7 +14,7 @@ struct sPair8 {
 };
 
 extern sQuadR D_004FF160;
-extern sQuadR D_004FF120;
+extern sQuadR t4vect_Zero;
 extern sPair8 D_004A5960[];
 
 extern "C" void cAirPredictor_reset(char* self)
@@ -25,7 +25,7 @@ extern "C" void cAirPredictor_reset(char* self)
     *(int*)(self + 0x9C) = 0;
     *(int*)(self + 0xA4) = 0;
     *(sQuadR*)(self + 0x20) = D_004FF160;
-    *(sQuadR*)(self + 0x10) = D_004FF120;
+    *(sQuadR*)(self + 0x10) = t4vect_Zero;
     *(int*)(self + 0x90) = -1;
     *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
     *(sPair8*)(self + 0x34) = D_004A5960[0];

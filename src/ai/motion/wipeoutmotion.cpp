@@ -486,7 +486,7 @@ extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __
 extern "C" void func_00329B40_137138(void* tree, const t4Vector* d) __asm__("func_00329B40");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 float AIrandf(float lo, float hi);
-extern t4Vector D_004FF120_137138 __asm__("D_004FF120");
+extern t4Vector D_004FF120_137138 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vu0Dot_137138(const t4Vector& a, const t4Vector& b)
@@ -1355,7 +1355,7 @@ extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void func_00105398(void* rider, int a1);
 extern "C" void func_00107888(void* rider);
-extern t4Vector D_004FF120_138640 __asm__("D_004FF120");
+extern t4Vector D_004FF120_138640 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vu0Dot_138640(const t4Vector& a, const t4Vector& b)

@@ -2481,7 +2481,7 @@ struct sXform_BFE8
 };
 
 extern sQuat_BFE8 D_004FF140;
-extern sQuat_BFE8 D_004FF150;
+extern sQuat_BFE8 t4vect_YAxis;
 extern sQuat_BFE8 D_004FF160;
 extern "C" void func_0019F3E8(void* rider, sXform_BFE8* xf);
 extern "C" void func_0019F548(void* rider, sXform_BFE8* xf);
@@ -2667,7 +2667,7 @@ extern "C" void func_0019BFE8(void* vself)
         zero = 0.0f;
 
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, zero));
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF150, zero));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, zero));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF160, (yaw + 80.0f) * 0.01745329424738884f));
         func_0019F3E8(rider, &xf);
         xf.pos = *(sQuat_BFE8*)(self + 0xAD0);
@@ -2680,7 +2680,7 @@ extern "C" void func_0019BFE8(void* vself)
             *(float*)(self + 0xAB0) -= 360.0f;
         }
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF160, 245.0f * 0.01745329424738884f));
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF150, 320.0f * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, 320.0f * 0.01745329424738884f));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
         func_0019F548(rider, &xf);
     }

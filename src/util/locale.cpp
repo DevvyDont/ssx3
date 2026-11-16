@@ -532,7 +532,7 @@ struct cFEStateAudioOptions_onGainFocus_sVEntryP {
     void (*fn)(void*, void*);
 };
 
-extern char D_004C66D8[];
+extern char gDisableColour[];
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 static inline void cFEStateAudioOptions_onGainFocus_call(char* o, int slot, int a)
@@ -558,10 +558,10 @@ extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int a1)
         cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x58), 9, 1);
         cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 26, 1);
         cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x50), 11, D_004C66D8);
+        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x50), 11, gDisableColour);
         cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 26, 1);
         cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x58), 11, D_004C66D8);
+        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x58), 11, gDisableColour);
         if (*(int*)(s + 0x74) == 0) {
             cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 26, 1);
             cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 6, 0);

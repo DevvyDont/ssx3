@@ -17,7 +17,7 @@ struct sCTActVec3A {
     float x, y, z;
 };
 
-extern sCTActVec3A D_004FF0D8_act __asm__("D_004FF0D8");     // zero vector
+extern sCTActVec3A D_004FF0D8_act __asm__("t3vect_Zero");     // zero vector
 extern void* D_0045C2E8[];      // cCTAction vtable
 extern void* D_0045C1D0[];      // bounded cam
 extern void* D_0045C1B8[];      // spline
@@ -216,7 +216,7 @@ struct sCTVec3G {
     sCTVec3G(float a, float b, float c) : x(a), y(b), z(c) {}
 };
 
-extern sCTVec3G D_004FF0D8;     // zero vector
+extern sCTVec3G t3vect_Zero;     // zero vector
 extern void* D_0045C3F0[];      // cCTBoundObj vtable
 extern void* D_0045C2A8[];      // ellipse
 extern void* D_0045C268[];      // box
@@ -240,7 +240,7 @@ struct sCTBoundObjG {
     sCTBoundObjG(const sCTVec3G& s, void** vt)
     {
         vtable = D_0045C3F0;
-        center = D_004FF0D8;
+        center = t3vect_Zero;
         f0C = 0;
         f10 = 0;
         f14 = 0;
@@ -265,8 +265,8 @@ struct sCTBoundLineG : sCTBoundObjG {
     sCTBoundLineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
     {
         type = 2;
-        pts[0] = D_004FF0D8;
-        pts[1] = D_004FF0D8;
+        pts[0] = t3vect_Zero;
+        pts[1] = t3vect_Zero;
     }
 };
 
@@ -456,10 +456,10 @@ struct sCTSplineG : sCTBoundObjG {
     sCTVec3G pts[4];    // 0x28
     sCTSplineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3F0)
     {
-        pts[0] = D_004FF0D8;
-        pts[1] = D_004FF0D8;
-        pts[2] = D_004FF0D8;
-        pts[3] = D_004FF0D8;
+        pts[0] = t3vect_Zero;
+        pts[1] = t3vect_Zero;
+        pts[2] = t3vect_Zero;
+        pts[3] = t3vect_Zero;
     }
 };
 
@@ -722,9 +722,9 @@ struct sM_172278 {
     sM_172278& operator=(const sM_172278& o) { vu0CopyMtx_172278(this, &o); return *this; }
 } __attribute__((aligned(16)));
 
-extern sM_172278 D_004FF1A0_v172278 __asm__("D_004FF1A0");
+extern sM_172278 D_004FF1A0_v172278 __asm__("t4mat_Identity");
 extern sV_172278 D_004FF140_v172278 __asm__("D_004FF140");
-extern sV_172278 D_004FF150_v172278 __asm__("D_004FF150");
+extern sV_172278 D_004FF150_v172278 __asm__("t4vect_YAxis");
 extern sV_172278 D_004FF160_v172278 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 
@@ -944,11 +944,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001728F8);
 
 extern t4Vector D_004FF140;
 
-extern t4Vector D_004FF150_28F8 __asm__("D_004FF150");
+extern t4Vector D_004FF150_28F8 __asm__("t4vect_YAxis");
 
 extern t4Vector D_004FF160_28F8 __asm__("D_004FF160");
 
-extern t4Matrix D_004FF1A0_28F8 __asm__("D_004FF1A0");
+extern t4Matrix D_004FF1A0_28F8 __asm__("t4mat_Identity");
 
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 
@@ -1811,8 +1811,8 @@ struct sPair_173E40 {
     sV_173E40 b;
 };
 
-extern sM_173E40 D_004FF1A0;
-extern sV_173E40 D_004FF150;
+extern sM_173E40 t4mat_Identity;
+extern sV_173E40 t4vect_YAxis;
 extern sV_173E40 D_004FF160_v173E40 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 extern "C" sPair_173E40 func_0031B748(sM_173E40* m);
@@ -1940,9 +1940,9 @@ static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float ang
 extern "C" sPair_173E40 func_00173E40(char* src)
 {
     sM_173E40 m;
-    vu0CopyMtx_173E40(&m, &D_004FF1A0);
+    vu0CopyMtx_173E40(&m, &t4mat_Identity);
     vu0TransMtx_173E40(&m, *(sV_173E40*)(src + 0x40));
-    RotAxis_173E40(&m, D_004FF150, -*(float*)(src + 0x54));
+    RotAxis_173E40(&m, t4vect_YAxis, -*(float*)(src + 0x54));
     RotAxis_173E40(&m, D_004FF160_v173E40, *(float*)(src + 0x50));
     return func_0031B748(&m);
 }
@@ -2910,10 +2910,10 @@ extern "C" float func_001762B8(void) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762C8);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern long long D_004FF120;
+extern long long t4vect_Zero;
 
 extern "C" long long *func_001762C8(long long *arg0) {
-    *arg0 = D_004FF120;
+    *arg0 = t4vect_Zero;
     return arg0;
 }
 #endif
@@ -3196,8 +3196,8 @@ struct sCTBoundLineK : sCTBoundObjG {
 sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
 {
     type = 2;
-    pts[0] = D_004FF0D8;
-    pts[1] = D_004FF0D8;
+    pts[0] = t3vect_Zero;
+    pts[1] = t3vect_Zero;
 }
 #endif
 //100%

@@ -464,9 +464,9 @@ struct sPair_9828 {
     sV_9828 b;
 };
 
-extern sM_9828 D_004FF1A0_9828 __asm__("D_004FF1A0");
+extern sM_9828 D_004FF1A0_9828 __asm__("t4mat_Identity");
 extern sV_9828 D_004FF140_9828 __asm__("D_004FF140");
-extern sV_9828 D_004FF150_9828 __asm__("D_004FF150");
+extern sV_9828 D_004FF150_9828 __asm__("t4vect_YAxis");
 extern sV_9828 D_004FF160_9828 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_9828 func_0031B748_9828(sM_9828* m) __asm__("func_0031B748");
@@ -792,9 +792,9 @@ struct sPair_9F88 {
     sV_9F88 b;
 };
 
-extern sM_9F88 D_004FF1A0_9F88 __asm__("D_004FF1A0");
+extern sM_9F88 D_004FF1A0_9F88 __asm__("t4mat_Identity");
 extern sV_9F88 D_004FF140_9F88 __asm__("D_004FF140");
-extern sV_9F88 D_004FF150_9F88 __asm__("D_004FF150");
+extern sV_9F88 D_004FF150_9F88 __asm__("t4vect_YAxis");
 extern sV_9F88 D_004FF160_9F88 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_9F88 func_0031B748_9F88(sM_9F88* m) __asm__("func_0031B748");
@@ -1186,9 +1186,9 @@ struct sPair_A868 {
     sV_A868 b;
 };
 
-extern sM_A868 D_004FF1A0_A868 __asm__("D_004FF1A0");
+extern sM_A868 D_004FF1A0_A868 __asm__("t4mat_Identity");
 extern sV_A868 D_004FF140_A868 __asm__("D_004FF140");
-extern sV_A868 D_004FF150_A868 __asm__("D_004FF150");
+extern sV_A868 D_004FF150_A868 __asm__("t4vect_YAxis");
 extern sV_A868 D_004FF160_A868 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_A868 func_0031B748_A868(sM_A868* m) __asm__("func_0031B748");
@@ -1835,9 +1835,9 @@ struct sPair_B7B8 {
     sV_B7B8 b;
 };
 
-extern sM_B7B8 D_004FF1A0_B7B8 __asm__("D_004FF1A0");
+extern sM_B7B8 D_004FF1A0_B7B8 __asm__("t4mat_Identity");
 extern sV_B7B8 D_004FF140_B7B8 __asm__("D_004FF140");
-extern sV_B7B8 D_004FF150_B7B8 __asm__("D_004FF150");
+extern sV_B7B8 D_004FF150_B7B8 __asm__("t4vect_YAxis");
 extern sV_B7B8 D_004FF160_B7B8 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_B7B8 func_0031B748_B7B8(sM_B7B8* m) __asm__("func_0031B748");

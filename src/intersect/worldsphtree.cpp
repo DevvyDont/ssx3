@@ -967,7 +967,7 @@ struct sVec4_333EF8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sVec4_333EF8 D_004FF120_333EF8[] __asm__("D_004FF120");
+extern sVec4_333EF8 D_004FF120_333EF8[] __asm__("t4vect_Zero");
 
 struct sQuery_333EF8 {
     char pad00[0x20];
@@ -1439,7 +1439,7 @@ struct sWsVObj {
 };
 
 // Constant vector table (0x004FF120; 00341388 also reads it through its ctor vector type).
-extern t4Vector D_004FF120_4888[] __asm__("D_004FF120");
+extern t4Vector D_004FF120_4888[] __asm__("t4vect_Zero");
 
 struct t4Vector;
 
@@ -1861,7 +1861,7 @@ struct sV_335128
     float& W() { return w; }
 } __attribute__((aligned(16)));
 
-extern sV_335128 D_004FF120_335128 __asm__("D_004FF120");
+extern sV_335128 D_004FF120_335128 __asm__("t4vect_Zero");
 
 struct sF5_335128 {
     float v[5];
@@ -2186,7 +2186,7 @@ struct sVec4_335960 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sVec4_335960 D_004FF120[];
+extern sVec4_335960 t4vect_Zero[];
 
 struct sQuery_335960 {
     char pad00[0x20];
@@ -2257,8 +2257,8 @@ static inline void reset_335960(sHit_335960* h)
     h->f60 = -1;
     h->f64 = -1;
     h->id = -1;
-    h->v20 = *D_004FF120;
-    h->v30 = *D_004FF120;
+    h->v20 = *t4vect_Zero;
+    h->v30 = *t4vect_Zero;
     h->f68 = 0;
     h->u = 0;
     h->v = 0;
@@ -4855,8 +4855,8 @@ struct sObj_341388 {
 
 extern void* D_004914E0[];
 extern char* D_004A5B64;
-extern sVec4_341388 D_004FF120_341388[] __asm__("D_004FF120");
-extern sVec4_341388 D_004FF150_341388[] __asm__("D_004FF150");
+extern sVec4_341388 D_004FF120_341388[] __asm__("t4vect_Zero");
+extern sVec4_341388 D_004FF150_341388[] __asm__("t4vect_YAxis");
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 
 // PORT: PS2-only VU0 inline asm (v / |v|).
@@ -5874,7 +5874,7 @@ struct sObj_342538 {
     int idx;                        // 0x5C
 };
 
-extern sVec4_342538 D_004FF150_342538[] __asm__("D_004FF150");
+extern sVec4_342538 D_004FF150_342538[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
 static inline float vu0Length_342538(const sVec4_342538& v)

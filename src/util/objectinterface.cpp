@@ -211,10 +211,10 @@ extern "C" void func_002D2140(void) {
 INCLUDE_ASM("util/objectinterface", func_002D2148);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern long long D_004FF120;
+extern long long t4vect_Zero;
 
 extern "C" long long *func_002D2148(long long *arg0) {
-    *arg0 = D_004FF120;
+    *arg0 = t4vect_Zero;
     return arg0;
 }
 #endif
@@ -222,10 +222,10 @@ extern "C" long long *func_002D2148(long long *arg0) {
 INCLUDE_ASM("util/objectinterface", func_002D2160);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern long long D_004FF120;
+extern long long t4vect_Zero;
 
 extern "C" long long *func_002D2160(long long *arg0) {
-    *arg0 = D_004FF120;
+    *arg0 = t4vect_Zero;
     return arg0;
 }
 #endif
@@ -233,10 +233,10 @@ extern "C" long long *func_002D2160(long long *arg0) {
 INCLUDE_ASM("util/objectinterface", func_002D2178);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern long long D_004FF120;
+extern long long t4vect_Zero;
 
 extern "C" long long *func_002D2178(long long *arg0) {
-    *arg0 = D_004FF120;
+    *arg0 = t4vect_Zero;
     return arg0;
 }
 #endif

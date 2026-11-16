@@ -387,7 +387,7 @@ extern cWorldPainterManArg D_004A5578;
 extern cWorldPainterManArg D_004A5580;
 extern cWorldPainterManArg D_004A5588;
 extern cWorldPainterManArg D_004A5590;
-extern cWorldPainterManArg D_004A5598;
+extern cWorldPainterManArg kWPR_Lighting;
 extern cWorldPainterManArg D_004A55A0;
 void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x);
 
@@ -410,7 +410,7 @@ extern "C" void func_002ED048(void)
     cWorldPainterManArg* a4 = &D_004A5580;
     cWorldPainterManArg* a5 = &D_004A5588;
     cWorldPainterManArg* a6 = &D_004A5590;
-    cWorldPainterManArg* a7 = &D_004A5598;
+    cWorldPainterManArg* a7 = &kWPR_Lighting;
     cWorldPainterManArg* a8 = &D_004A55A0;
     for (i = 0; i < 8; i++) {
         ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[0] = cWorldPainterMan_getQuery(pm, a0);

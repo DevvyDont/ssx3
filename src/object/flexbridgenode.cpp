@@ -657,7 +657,7 @@ struct sFM_7268 {
     sFRow_7268 r[4];
 } __attribute__((aligned(16)));
 
-extern sFV_7268 D_004FF120_v7268 __asm__("D_004FF120");
+extern sFV_7268 D_004FF120_v7268 __asm__("t4vect_Zero");
 
 struct sFMesh_7268 {
     unsigned short numTris;     // 0x0
@@ -1706,7 +1706,7 @@ struct sFbHit_8290 {
     float f70;
 };
 
-extern sFbV_8290 D_004FF120;
+extern sFbV_8290 t4vect_Zero;
 
 // tIntersectInfo::Init (On Tour name).
 static inline void Init_8290(sFbHit_8290* h)
@@ -1719,8 +1719,8 @@ static inline void Init_8290(sFbHit_8290* h)
     h->f60 = -1;
     h->seg = -1;
     h->surf = -1;
-    h->v20 = D_004FF120;
-    h->v30 = D_004FF120;
+    h->v20 = t4vect_Zero;
+    h->v30 = t4vect_Zero;
     h->t = 0.0f;
     h->f6C = 0.0f;
     h->f70 = 0.0f;

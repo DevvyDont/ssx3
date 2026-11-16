@@ -108,7 +108,7 @@ struct sTint_6900 {
     sTint_6900() : a(0), b(0), c(0) { col = sColor_6900(1.0f, 1.0f, 1.0f, 1.0f); }
 };
 
-extern void* D_004A28A0;
+extern void* PadCache;
 extern void* D_004A289C;
 extern void* D_004A28AC;
 extern char D_00479A40[];
@@ -144,7 +144,7 @@ extern "C" void cSSXApp_init(char* self, int argc, char** argv)
     *(void**)(self + 0x9C) = cConsoleConfig_construct();
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, D_00479A40, 0, 0);
     func_00326A28(pm);
-    D_004A28A0 = pm;
+    PadCache = pm;
     char* g = (char*)func_00375A08();
     D_004A289C = g;
     sVE_6900* vt = ((sGfx_6900*)g)->vt;
@@ -712,15 +712,15 @@ extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv)
 #endif
 
 extern "C" int cPadCache_flush(void* mgr);
-extern void* D_004A28A0;
+extern void* PadCache;
 
 //99.9%
 INCLUDE_ASM("main/ssxapp", cSSXApp_flush__Fv);
 #ifdef SKIP_ASM
 int cSSXApp_flush()
 {
-    if (D_004A28A0 != 0) {
-        return cPadCache_flush(D_004A28A0);
+    if (PadCache != 0) {
+        return cPadCache_flush(PadCache);
     }
     return 0;
 }
@@ -735,13 +735,13 @@ extern "C" void func_002668E8(void* p);
 extern "C" int func_00326CA0(void* self, int i);
 extern "C" void* func_00326CC8(void* self, int i);
 extern "C" void func_00321298(void* target, int a, void* data);
-extern void* D_004A28A0;
+extern void* PadCache;
 extern void* D_004A2EB8;
 extern void* D_004A33F0;
 
 extern "C" int cSSXApp_preUpdate(void* self)
 {
-    if (D_004A28A0 != 0 && func_00326B48(D_004A28A0) != 0) {
+    if (PadCache != 0 && func_00326B48(PadCache) != 0) {
         if (D_004A2EB8 != 0) {
             func_00255A20(D_004A2EB8);
         }
@@ -750,8 +750,8 @@ extern "C" int cSSXApp_preUpdate(void* self)
         }
         int i;
         for (i = 0; i < 2; i++) {
-            int a = func_00326CA0(D_004A28A0, i);
-            void* d = func_00326CC8(D_004A28A0, i);
+            int a = func_00326CA0(PadCache, i);
+            void* d = func_00326CC8(PadCache, i);
             func_00321298(((void**)((char*)self + 0xA8))[i], a, d);
         }
         return 1;
@@ -767,8 +767,8 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_timerCallback__Fv);
 #ifdef SKIP_ASM
 void cSSXApp_timerCallback()
 {
-    if (D_004A28A0 != 0) {
-        cPadCache_cacheInput(D_004A28A0);
+    if (PadCache != 0) {
+        cPadCache_cacheInput(PadCache);
     }
 }
 #endif
@@ -808,7 +808,7 @@ extern "C" void SSXAUDIO_DeInit();
 extern "C" void cBE_purgeBE(void* p);
 extern "C" void func_002380E8(void* p);
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
-extern void* D_004A28A0;
+extern void* PadCache;
 extern void* D_004A28A4;
 extern void* D_004A289C;
 
@@ -859,9 +859,9 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         func_00398438(q);
         operator_delete(q);
     }
-    int* mgr = (int*)D_004A28A0;
+    int* mgr = (int*)PadCache;
     self->f88 = 0;
-    D_004A28A0 = 0;
+    PadCache = 0;
     func_00326A68(mgr);
     operator_delete(mgr);
     if (D_004A28A4) {
@@ -1598,7 +1598,7 @@ INCLUDE_ASM("main/ssxapp", func_00229530);
 #ifdef SKIP_ASM
 unsigned int BXrand();
 extern "C" int func_002A77C8(void* self, int a1);
-extern void* D_004A3500;
+extern void* gSSXAudio;
 struct sRingOwner;
 struct sQuad229;
 extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value);
@@ -1671,7 +1671,7 @@ static inline float rands_229530(float lo, float hi)
 extern "C" void func_00229530(void* selfp)
 {
     sCrowd_229530* self = (sCrowd_229530*)selfp;
-    int n = func_002A77C8(D_004A3500, 0);
+    int n = func_002A77C8(gSSXAudio, 0);
     n = n > -1 ? n : -n;
     if (n != self->count) {
         int c = n > 0 ? n : 1;
@@ -3339,7 +3339,7 @@ void func_002789C0(void* p);
 extern "C" void func_001F31E0(void* p);
 extern "C" void func_00285BF8(void* snd, float dt, int a2);
 extern "C" void func_002B5D78(void* p);
-extern void* D_004A52D4;
+extern void* gWorldTriggerManager;
 
 struct sV4_22B008 {
     float x, y, z, w;
@@ -3377,7 +3377,7 @@ struct sDrawState_22B008 {
 };
 
 extern sDrawState_22B008 D_00501420_22B008 __asm__("D_00501420");
-extern sMat_22B008 D_004FF1A0_22B008 __asm__("D_004FF1A0");
+extern sMat_22B008 D_004FF1A0_22B008 __asm__("t4mat_Identity");
 
 class cGfx_22B008 {
 public:
@@ -3778,8 +3778,8 @@ extern "C" int func_0022B008(sGame_22B008* self)
     func_002789C0(D_004A28A4);
     func_001F31E0(self->f94);
     D_004A289C_22B008->v20();
-    func_00285BF8(D_004A3500, (float)self->frames * (1.0f / 60.0f), 1);
-    func_002B5D78(D_004A52D4);
+    func_00285BF8(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
+    func_002B5D78(gWorldTriggerManager);
     self->frames = 0;
     return 1;
 }

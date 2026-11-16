@@ -235,7 +235,7 @@ INCLUDE_ASM("object/debouncenode", func_00343130);
 #ifdef SKIP_ASM
 // PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct).
 typedef int cQuad3130 __attribute__((mode(TI)));
-extern cQuad3130 D_004FF150;
+extern cQuad3130 t4vect_YAxis;
 
 struct sVec3130 {
     float x, y, z, w;
@@ -504,7 +504,7 @@ extern "C" void func_00343130(sNode3130* self, sHit3130* hit)
         addEq3130(hit->angVel, c);
         addEq3130(hit->vel, s);
     } else {
-        loadVf8_3130(*(sVec3130*)&D_004FF150);
+        loadVf8_3130(*(sVec3130*)&t4vect_YAxis);
         sVec3130 n = norm3130(mulVec3130(m));
         sVec3130 c = scale3130(cross3130(n, hit->dir), self->strength);
         addEq3130(hit->angVel, c);
@@ -594,7 +594,7 @@ typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
 extern sDfCam_343588** D_004A47B8_343588 __asm__("D_004A47B8");
 extern cDfGfx_343588* D_004A5B80_343588 __asm__("D_004A5B80");
-extern sDfMat_343588 D_004FF1A0_343588 __asm__("D_004FF1A0");
+extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
 
 #define OBJ_343588(s) (*(sDfObj_343588**)((char*)(s) + 0x18))
 

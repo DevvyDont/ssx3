@@ -34,7 +34,7 @@ struct cSplineModifier_95D8 {
 };
 
 extern void* D_0048F250[];
-extern sSmQuad_95D8 D_004FF120;
+extern sSmQuad_95D8 t4vect_Zero;
 extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream);
 
 extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier_95D8* self, cStream003595D8* stream)
@@ -47,8 +47,8 @@ extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier
     self->follow.length = 0;
     stream->v02((char*)self + 0x10, 0x50);
     cSpline_readFromReplayFrame(f, stream);
-    self->qB0 = D_004FF120;
-    self->qC0 = D_004FF120;
+    self->qB0 = t4vect_Zero;
+    self->qC0 = t4vect_Zero;
     self->field_0x58 = 1;
     self->field_0xd0 = 0;
     self->field_0xd4 = 0;

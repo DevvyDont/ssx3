@@ -10,13 +10,13 @@ rom:0x28258C reloc:MIPS_LO16 symbol:D_0 // func_00381310
 
 // Unpaired %lo uses: splat relocated some uses of a base register that holds %hi(SYM) and left later identical
 // instructions as raw immediates. Each entry below has the same bytes and base register as a relocated sibling.
-// be/beintecon func_00150C20: `addiu $4, $19, %lo(D_004A6CA8)` (siblings at rom 0x51CB0 and 0x51DF0 are paired).
-rom:0x51CD4 reloc:MIPS_LO16 symbol:D_004A6CA8
-rom:0x51CF8 reloc:MIPS_LO16 symbol:D_004A6CA8
-rom:0x51D1C reloc:MIPS_LO16 symbol:D_004A6CA8
-rom:0x51D40 reloc:MIPS_LO16 symbol:D_004A6CA8
-rom:0x51D64 reloc:MIPS_LO16 symbol:D_004A6CA8
-rom:0x51D88 reloc:MIPS_LO16 symbol:D_004A6CA8
+// be/beintecon func_00150C20: `addiu $4, $19, %lo(cBELibrary_profileLib)` (siblings at rom 0x51CB0 and 0x51DF0 are paired).
+rom:0x51CD4 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
+rom:0x51CF8 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
+rom:0x51D1C reloc:MIPS_LO16 symbol:cBELibrary_profileLib
+rom:0x51D40 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
+rom:0x51D64 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
+rom:0x51D88 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 // ealib/seg_2DCAE8 iFILESYS_ExecCommand: `addiu $2, $20, %lo(D_00519AB0)` (siblings at rom 0x2DF028, 0x2DF0A4 are paired).
 rom:0x2DF24C reloc:MIPS_LO16 symbol:D_00519AB0
 // main/game cSectionMan_update: `addiu $2/$4, $19, %lo(D_00442168)` (sibling at rom 0x12E9D4 is paired).
@@ -51,7 +51,7 @@ rom:0x24FC8C reloc:MIPS_LO16 symbol:D_0048F858
 // camera/camera func_0015E2A8 (tools/gen/reloc_from_diff.py)
 rom:0x5F30C reloc:MIPS_LO16 symbol:D_004C5430
 // be/belibrary func_0014A188 (tools/gen/reloc_from_diff.py)
-rom:0x4B1B0 reloc:MIPS_HI16 symbol:D_004A6CA8
+rom:0x4B1B0 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B1B4 reloc:MIPS_HI16 symbol:D_004BA348
 rom:0x4B1B8 reloc:MIPS_HI16 symbol:D_005308B8
 // main/game func_0022D3D8 (tools/gen/reloc_from_diff.py)
@@ -70,7 +70,7 @@ rom:0xFCFC reloc:MIPS_LO16 symbol:D_004FF130
 
 // be/belibrary func_0014A5E0: three lui of the unaligned-copy path left raw (0x4A / 0x4C / 0x53), the same trio as
 // func_0014A188's at rom 0x4B1B0 / 0x4B1B8.
-rom:0x4B624 reloc:MIPS_HI16 symbol:D_004A6CA8
+rom:0x4B624 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B628 reloc:MIPS_HI16 symbol:D_004BA348
 rom:0x4B62C reloc:MIPS_HI16 symbol:D_005308B8
 
@@ -617,20 +617,20 @@ rom:0x21A97C reloc:MIPS_LO16 symbol:_gp
 // fe/festatecharequipdetail func_0019BFE8: two unpaired %lo uses of $23 = %hi(D_004FF140) (raw -0xEC0).
 rom:0x9D3FC reloc:MIPS_LO16 symbol:D_004FF140
 rom:0x9D6E0 reloc:MIPS_LO16 symbol:D_004FF140
-// be/beintaggression func_00155E58: D_004A7869/786A/786B are D_004A6CA8+0xBC1/0xBC2/0xBC3 (no other users).
-rom:0x56EE4 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC3
-rom:0x56EE8 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC3
-rom:0x56F04 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x56F08 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x56F64 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x56F7C reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x56F88 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x57000 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x57008 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC1
-rom:0x5700C reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC3
-rom:0x57014 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC3
-rom:0x57038 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC2
-rom:0x57040 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC2
+// be/beintaggression func_00155E58: D_004A7869/786A/786B are cBELibrary_profileLib+0xBC1/0xBC2/0xBC3 (no other users).
+rom:0x56EE4 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC3
+rom:0x56EE8 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC3
+rom:0x56F04 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x56F08 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x56F64 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x56F7C reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x56F88 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x57000 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x57008 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC1
+rom:0x5700C reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC3
+rom:0x57014 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC3
+rom:0x57038 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC2
+rom:0x57040 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC2
 // ealib/seg_2B4578 func_003C4450: D_0050B9C8 is D_0050AD00+0xCC8 (the transfer queue fCC8; its only use).
 rom:0x2C5454 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xCC8
 rom:0x2C5458 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xCC8

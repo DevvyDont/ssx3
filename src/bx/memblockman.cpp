@@ -6,7 +6,7 @@ INCLUDE_ASM("bx/memblockman", cMemMan_initialize);
 extern void* D_00538B00[16];
 extern char D_004FF250[];
 extern unsigned int D_004A3EBC;
-extern unsigned int D_004A3EC0;
+extern unsigned int cMemMan_m_heapSize;
 extern int D_004A3EB8;
 extern "C" void MUTEX_create(void* mutex);
 extern "C" void func_0031FF60(void* heap, unsigned int base, unsigned int size);
@@ -16,7 +16,7 @@ extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
 {
     MUTEX_create(D_00538B00);
     D_004A3EBC = base;
-    D_004A3EC0 = size;
+    cMemMan_m_heapSize = size;
     func_0031FF60(D_004FF250, base, size);
     D_004A3EB8 = 1;
     cMemBlockMan_initialize();

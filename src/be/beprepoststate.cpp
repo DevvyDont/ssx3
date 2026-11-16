@@ -94,7 +94,7 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* D_004A1264;
+extern void* cBERewardInterface_instance;
 
 struct sBEIface_001564B0
 {
@@ -114,7 +114,7 @@ extern "C" void func_001564B0(void)
     ((sBEIface_001564B0*)D_004A1210)->active = 0;
     ((sBEIface_001564B0*)D_004A1214)->active = 0;
     ((sBEIface_001564B0*)D_004A124C)->active = 0;
-    ((sBEIface_001564B0*)D_004A1264)->active = 0;
+    ((sBEIface_001564B0*)cBERewardInterface_instance)->active = 0;
 }
 #endif
 
@@ -131,7 +131,7 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* D_004A1264;
+extern void* cBERewardInterface_instance;
 
 struct sBEIface_00156510
 {
@@ -151,7 +151,7 @@ extern "C" void func_00156510(void)
     ((sBEIface_00156510*)D_004A1210)->active = 1;
     ((sBEIface_00156510*)D_004A1214)->active = 1;
     ((sBEIface_00156510*)D_004A124C)->active = 1;
-    ((sBEIface_00156510*)D_004A1264)->active = 1;
+    ((sBEIface_00156510*)cBERewardInterface_instance)->active = 1;
 }
 #endif
 
@@ -242,7 +242,7 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* D_004A1264;
+extern void* cBERewardInterface_instance;
 
 struct sBEIface_001566E8
 {
@@ -263,7 +263,7 @@ extern "C" void func_001566E8(void)
     ((sBEIface_001566E8*)D_004A1210)->active = 0;
     ((sBEIface_001566E8*)D_004A1214)->active = 0;
     ((sBEIface_001566E8*)D_004A124C)->active = 0;
-    ((sBEIface_001566E8*)D_004A1264)->active = 0;
+    ((sBEIface_001566E8*)cBERewardInterface_instance)->active = 0;
 }
 #endif
 
@@ -281,7 +281,7 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* D_004A1264;
+extern void* cBERewardInterface_instance;
 
 struct sBEIface_00156750
 {
@@ -302,7 +302,7 @@ extern "C" void func_00156750(void)
     ((sBEIface_00156750*)D_004A1210)->active = 1;
     ((sBEIface_00156750*)D_004A1214)->active = 1;
     ((sBEIface_00156750*)D_004A124C)->active = 1;
-    ((sBEIface_00156750*)D_004A1264)->active = 1;
+    ((sBEIface_00156750*)cBERewardInterface_instance)->active = 1;
 }
 #endif
 

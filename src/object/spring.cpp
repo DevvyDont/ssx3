@@ -35,7 +35,7 @@ struct sSpring_53EF0 {
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_0048E9C8[];
-extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("D_004FF120");
+extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("t4vect_Zero");
 extern "C" void cSpring_setupNodes(sSpring_53EF0* s)
 {
     int i;
@@ -86,7 +86,7 @@ struct sSpring_53FC0 {
 };
 
 extern char* D_004A5B64;
-extern sSpVec_53FC0 D_004FF120_sp __asm__("D_004FF120");
+extern sSpVec_53FC0 D_004FF120_sp __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sSpVec_53FC0 spSub_53FC0(const sSpVec_53FC0& a, const sSpVec_53FC0& b)
@@ -285,7 +285,7 @@ INCLUDE_ASM("object/spring", cObjNode_cObjNode1);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* D_00491F00[16];
-extern char D_004A5988;
+extern char gBucketMan;
 
 struct cObjNode {
     char pad_0x00[0xC];
@@ -295,7 +295,7 @@ struct cObjNode {
 extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* param2)
 {
     self->field_0xC = D_00491F00;
-    cBucketMan_add(&D_004A5988, self, param2);
+    cBucketMan_add(&gBucketMan, self, param2);
     return self;
 }
 #endif

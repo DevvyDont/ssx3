@@ -3134,7 +3134,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", SHAPE_create);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int SHAPE_createsize(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
 extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
-extern void* (*D_0044C454[])(char* name, int size, int a2, int align, int heap);
+extern void* (*SHAPE_memallocalign[])(char* name, int size, int a2, int align, int heap);
 extern char D_004956B0[];
 
 extern "C" void* SHAPE_create(unsigned int w, int h, int fmt, int clut, int maxLevel, int heap, int extra1, int extra2)
@@ -3144,7 +3144,7 @@ extern "C" void* SHAPE_create(unsigned int w, int h, int fmt, int clut, int maxL
     int size = SHAPE_createsize(w, h, fmt, clut, maxLevel, extra1, extra2);
     if (size != 0) {
         sprintf(name, D_004956B0, w, h, fmt);
-        tex = D_0044C454[0](name, size, 0, 0x10, heap);
+        tex = SHAPE_memallocalign[0](name, size, 0, 0x10, heap);
         if (tex != 0) {
             SHAPE_createat(tex, w, h, fmt, clut, maxLevel, extra1, extra2);
         }

@@ -120,7 +120,7 @@ struct sNetState_E2C8 {
     int b;                              // 0xC40
 };
 
-extern sCharE_E2C8 D_00535B20_E2C8[] __asm__("D_00535B20");
+extern sCharE_E2C8 D_00535B20_E2C8[] __asm__("cBELibrary_playerDB");
 extern int D_004A11B8;
 extern int D_004A11BC;
 extern sNetHdr_E2C8 D_005305B0;
@@ -170,7 +170,7 @@ struct sProfChar_E5C8 {
     char d[0xF88];
 };
 
-extern sProfChar_E5C8 D_004A6CA8_E5C8[][10] __asm__("D_004A6CA8");
+extern sProfChar_E5C8 D_004A6CA8_E5C8[][10] __asm__("cBELibrary_profileLib");
 
 class cBEIface_E5C8 {
 public:
@@ -215,14 +215,14 @@ INCLUDE_ASM("be/beintnetwork", func_0014E9C0);
 struct sBEPlayerData {
     char data[0x9B50];
 };
-extern sBEPlayerData D_004A6CA8[];
+extern sBEPlayerData cBELibrary_profileLib[];
 
 extern "C" void func_00156858(sBEPlayerData* dst, sBEPlayerData* src);
 
 extern "C" void func_0014E9C0(void* self, int a1, int a2)
 {
-    sBEPlayerData* src = &D_004A6CA8[a1];
-    func_00156858(&D_004A6CA8[a2], src);
+    sBEPlayerData* src = &cBELibrary_profileLib[a1];
+    func_00156858(&cBELibrary_profileLib[a2], src);
 }
 #endif
 
@@ -347,16 +347,16 @@ struct sCharEntry_0014EBF8
     int w[2];
 };
 
-extern sCharEntry_0014EBF8 D_00535B20[];
+extern sCharEntry_0014EBF8 cBELibrary_playerDB[];
 extern sCharEntry_0014EBF8 D_00534A88[];
 extern "C" void func_00156950(sBEPlayerData* data, int charID);
 
 extern "C" void func_0014EBF8(void* self, int idx)
 {
-    func_00156950(&D_004A6CA8[idx], D_00535B20[idx].charID);
+    func_00156950(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].charID);
     for (int i = 0; i < 6; i++)
     {
-        D_00534A88[i] = D_00535B20[i];
+        D_00534A88[i] = cBELibrary_playerDB[i];
     }
 }
 #endif
@@ -368,14 +368,14 @@ extern "C" void func_00156988(sBEPlayerData* data);
 
 extern "C" void func_0014ECA0(void* self, int idx)
 {
-    func_00156988(&D_004A6CA8[idx]);
+    func_00156988(&cBELibrary_profileLib[idx]);
     if (D_00534B38[0] == 0)
     {
-        D_00535B20[0] = D_00535B20[1];
+        cBELibrary_playerDB[0] = cBELibrary_playerDB[1];
     }
     for (int i = 1; i < 6; i++)
     {
-        D_00535B20[i] = D_00534A88[i];
+        cBELibrary_playerDB[i] = D_00534A88[i];
     }
     sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 1);
     a->vtable[2].fn((char*)a + a->vtable[2].delta);
