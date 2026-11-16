@@ -311,11 +311,11 @@ extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" void func_001E92A8(void* self);
 struct sVec2f { float x, y; };
 
-extern "C" void func_001E94E0(void* self, char* str, int font, sVec2f* pos)
+extern "C" void func_001E94E0(void* self, char* str, int font, sVec2f* scale)
 {
     func_002C2540((unsigned short*)((char*)self + 0x4C), str);
     *(int*)((char*)self + 0x8) = font;
-    *(sVec2f*)((char*)self + 0x10) = *pos;
+    *(sVec2f*)((char*)self + 0x10) = *scale;
     func_001E92A8(self);
 }
 #endif
@@ -325,11 +325,11 @@ INCLUDE_ASM("fe/ovstatehud", func_001E9540);
 #ifdef SKIP_ASM
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void func_001E92A8(void* self);
-extern "C" void func_001E9540(void* self, unsigned short* str, int font, sVec2f* pos)
+extern "C" void func_001E9540(void* self, unsigned short* str, int font, sVec2f* scale)
 {
     strcpy1((unsigned short*)((char*)self + 0x4C), str);
     *(int*)((char*)self + 0x8) = font;
-    *(sVec2f*)((char*)self + 0x10) = *pos;
+    *(sVec2f*)((char*)self + 0x10) = *scale;
     func_001E92A8(self);
 }
 #endif

@@ -1674,8 +1674,8 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 extern "C" void func_00236960(void* self)
 {
     char* appGame = (char*)SSXApp->Game;
-    char* game = *(char**)(appGame + 0x78);
-    if (*(int*)(game + 0x1C8) == 0) {
+    char* sectionMan = *(char**)(appGame + 0x78);
+    if (*(int*)(sectionMan + 0x1C8) == 0) {
         return;
     }
     int state = *(int*)((char*)self + 0x10);
@@ -1683,7 +1683,7 @@ extern "C" void func_00236960(void* self)
     int idx = *(int*)(*(char**)(*(char**)(appGame + 0x84) + 4) + 0xB0) == 0;
     switch (state) {
     case 0:
-        if (cSectionMan_isLoaded(game, *(int*)(game + 0x1BC)) != 0) {
+        if (cSectionMan_isLoaded(sectionMan, *(int*)(sectionMan + 0x1BC)) != 0) {
             char* aiPlayer = *(char**)((char*)SSXApp->Game->AI + 0x40);
             sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(aiPlayer + 0x18));
             char* viewEntry = *cache + idx * 80;
@@ -1710,8 +1710,8 @@ extern "C" void func_00236960(void* self)
             break;
         }
         cSSXScriptEngine_EndTransportSequence(ScriptEngine);
-        *(int*)(game + 0x1C8) = 0;
-        cSectionMan_activate(game, *(int*)(game + 0x1BC), 7);
+        *(int*)(sectionMan + 0x1C8) = 0;
+        cSectionMan_activate(sectionMan, *(int*)(sectionMan + 0x1BC), 7);
         *(int*)((char*)self + 0x10) = 2;
         break;
     }

@@ -800,7 +800,7 @@ static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
         : "memory");
 }
 
-// Moves the rider model's first transform by the vector v rotated into its current orientation.
+// Moves the rider model's second transform (+0xC50, orientation +0xC60) by the vector v rotated into its current orientation.
 extern "C" void func_0019F578(void* self, sVec_F578* delta)
 {
     sVec_F578* pos = (sVec_F578*)((char*)self + 0xC50);
@@ -844,7 +844,7 @@ static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
     return r;
 }
 
-// Turns the rider model's first transform about the given axis by the given angle.
+// Turns the rider model's second transform (orientation +0xC60) about the given axis by the given angle.
 extern "C" void func_0019F5E8(void* self, sQuat_F5E8* axis, float angle)
 {
     sQuat_F5E8* rot = (sQuat_F5E8*)((char*)self + 0xC60);

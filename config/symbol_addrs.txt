@@ -4575,6 +4575,10 @@ cSpaceMenuItem_canHaveFocus__FPv = 0x002CD398; //type:func
 cRGBTitleMenuItem_canHaveFocus__FPv = 0x002CFF80; //type:func
 cGraphicsMan_ResolveCharModel__FPv = 0x00394650; //type:func
 
+// fn_wtm: names by evidence (docs/function_names.tsv)
+cWorldTriggerManager_TriggerToPatch = 0x002B63D0; //type:func
+cWorldTriggerManager_AdvancedTriggerToPatch = 0x002B6550; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

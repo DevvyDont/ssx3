@@ -2352,7 +2352,8 @@ static inline void* GetSession_001A6F70()
     return BuddyMan_mBuddyMan;
 }
 
-// For every save slot that is in use, starts an operation (2) on the files that are neither busy nor present.
+// Walks the buddy list (BuddyMan_mBuddyMan, created on demand): for each named entry for which func_00262400 is set,
+// calls func_00261EF8(name, 2, buf) when neither func_00263128 nor func_00262A38 knows the name yet.
 extern "C" void func_001A6F70(void)
 {
     char buf[0x10];
@@ -4012,7 +4013,9 @@ struct sVE1A8E40 {
 // PORT: the unit declares func_001A8E40 with one arg; defined under an asm label with its real type.
 extern "C" int func_001A8E40_impl(void* self, int msg, void* data) __asm__("func_001A8E40");
 
-// Message handler for the memory-card screen.
+// Message handler of the online screens (cFEStateNet): 277/278 -> func_001A9930; 220 opens cFEStateLobbyMenu when the
+// lobby isn't busy (func_0025DA90), 239 cFEStateOnlineMainMenu; 258 with the tag 'time' (0x74696D65) ->
+// func_001A8F98, else a popup; 221-225 go to the child state at +0x20 (its virtual slot 24).
 extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
 {
     char* obj = (char*)self;
@@ -4040,7 +4043,7 @@ extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
         break;
     case 221:
     case 222:
-    case 0xE0:
+    case 224:
     case 225: {
         char* child = *(char**)(obj + 0x20);
         if (child != 0) {

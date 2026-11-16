@@ -7407,7 +7407,7 @@ struct sNetCfg_002639E0 {
 };
 
 
-extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int a4)
+extern "C" void func_002639E0(int* self, unsigned int ip, int isHost, int a3, int a4)
 {
     char buf[256];
     int one = 1;
@@ -7423,12 +7423,12 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int 
     cBENetworkInterface_networkOpt.bIsNetworkGame = one;
     cBENetworkInterface_networkOpt.fLatency = 0.01666666753590107f;
     cBENetworkInterface_networkOpt.iPort = 3658;
-    cBENetworkInterface_networkOpt.bIsHost = chan;
+    cBENetworkInterface_networkOpt.bIsHost = isHost;
     r->vt[1].fn((char*)r + r->vt[1].delta);
     r->vt[1].fn((char*)r + r->vt[1].delta);
-    self[2] = chan;
+    self[2] = isHost;
     sprintf(buf, str_pct_d_pct_d_pct_d_pct_d_b, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-    self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, chan);
+    self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, isHost);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
         func_00266D58(D_004A33F4, (void*)ip);

@@ -375,26 +375,26 @@ extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* instance)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5818);
 #ifdef SKIP_ASM
-extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
-extern "C" int func_002B5818(void* self, int idx, int* type, int* patch, int* noAudio, int viewPort, int check)
+extern "C" int func_002B5818(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
 {
-    return func_002B63D0(gWorldTriggerManager, idx, type, patch, noAudio, viewPort, check);
+    return cWorldTriggerManager_TriggerToPatch(gWorldTriggerManager, trigger, bank, patch, noAudio, viewPort, check);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5838);
 #ifdef SKIP_ASM
-extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
-extern "C" int func_002B5838(void* self, int idx)
+extern "C" int func_002B5838(void* self, int trigger)
 {
-    int type;
+    int bank;
     int patch;
     int noAudio;
-    func_002B63D0(gWorldTriggerManager, idx, &type, &patch, &noAudio, 0, 1);
-    return type == 5;
+    cWorldTriggerManager_TriggerToPatch(gWorldTriggerManager, trigger, &bank, &patch, &noAudio, 0, 1);
+    return bank == 5;
 }
 #endif
 
@@ -725,7 +725,7 @@ extern "C" void func_002B5ED8(sWorldTrigger70** self, int id)
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
-extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 extern "C" int func_002B6740(void* self, void* obj);
 struct sTriggerIdCache;
 extern "C" void func_002B6868(sTriggerIdCache* self, int id);
@@ -804,7 +804,7 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
         *(void**)(self + 0x328) = evt;
     }
     int type, a, b;
-    if (func_002B63D0(self, id, &type, &a, &b, 1, 0) != 0 && b == 0)
+    if (cWorldTriggerManager_TriggerToPatch(self, id, &type, &a, &b, 1, 0) != 0 && b == 0)
     {
         sWtSnd5F60* snd = (sWtSnd5F60*)func_0028B180();
         int tp = type;
@@ -861,11 +861,11 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B63D0);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_TriggerToPatch);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_002ADF60(int a);
-extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int arg);
+extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int type, int* a, int* b, int* c, int arg);
 
 struct sWTMObj {
     char pad0[0x10];
@@ -886,52 +886,52 @@ struct sWTMEntry {
     sWTMObj* obj;
 };
 
-extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d)
+extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
 {
-    *b = 0;
-    if (idx >= *(int*)((char*)self + 0x340)) {
-        *type = 0;
-        *a = 0;
+    *noAudio = 0;
+    if (trigger >= *(int*)((char*)self + 0x340)) {
+        *bank = 0;
+        *patch = 0;
         return 0;
     }
     int r = 1;
-    int t = (*(sWTMEntry**)((char*)self + 0x33C))[idx].type;
+    int t = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].type;
     if (t == 3) {
-        *type = t;
-        *a = 0;
+        *bank = t;
+        *patch = 0;
     } else if (t == 1) {
-        *type = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj->f10;
-        *a = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj->f14;
+        *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
+        *patch = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f14;
     } else if (t == 2) {
-        *type = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj->f10;
+        *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
         void* p = func_0028B180();
         int rnd = func_002ADF60(*(int*)(*(char**)*(void**)((char*)p + 0x118) + 0x1D8));
-        sWTMObj* o = (*(sWTMEntry**)((char*)self + 0x33C))[idx].obj;
+        sWTMObj* o = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj;
         int v = (unsigned)((rnd & 0x7FFF) * o->f34) / 0x7FFF;
-        if (v < o->f24) *a = o->f14;
-        else if (v < o->f28 + o->f24) *a = o->f18;
-        else if (v < o->f2C + o->f28 + o->f24) *a = o->f1C;
-        else *a = o->f20;
-    } else if (d == 0) {
-        r = func_002B6550(self, idx, type, a, b, c);
+        if (v < o->f24) *patch = o->f14;
+        else if (v < o->f28 + o->f24) *patch = o->f18;
+        else if (v < o->f2C + o->f28 + o->f24) *patch = o->f1C;
+        else *patch = o->f20;
+    } else if (check == 0) {
+        r = cWorldTriggerManager_AdvancedTriggerToPatch(self, trigger, bank, patch, noAudio, viewPort);
     }
     return r;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6550);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AdvancedTriggerToPatch);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
 
-extern "C" int func_002B6550(void* self, int type, int* bank, int* patch, int* noAudio, int viewPort)
+extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort)
 {
     int found = 0;
     *bank = 0;
     *patch = 0;
     *noAudio = 0;
-    if (type == 77) {
+    if (trigger == 77) {
         *noAudio = 1;
         found = func_002A34D0(func_0028B180(), 0, 1, viewPort);
     }
@@ -1138,15 +1138,15 @@ void cWorldTriggerManager_ResetStates(void* self)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6918);
 #ifdef SKIP_ASM
-extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
-extern "C" int func_002B6918(void* self, int idx)
+extern "C" int func_002B6918(void* self, int trigger)
 {
-    int type;
+    int bank;
     int patch;
     int noAudio;
-    func_002B63D0(self, idx, &type, &patch, &noAudio, 0, 2);
-    return type == 3;
+    cWorldTriggerManager_TriggerToPatch(self, trigger, &bank, &patch, &noAudio, 0, 2);
+    return bank == 3;
 }
 #endif
 //100%
