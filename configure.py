@@ -137,8 +137,10 @@ if os.environ.get("SSX3_NO_PS2EEAS") or not os.path.isfile(PS2EEAS):
 # Fork-only: the assemblers that build our C get a 16 MB frag-obstack chunk (tools/patch_as_chunk.py). Stock
 # gas splits frags every ~998 instructions, and its R5900 short-loop padding miscounts loops across those splits;
 # where they fall depends on what precedes a function in the unit, which differs between our mixed asm/C builds
-# and EA's all-C build. Idempotent; leaves unknown binaries alone.
-subprocess.run([sys.executable, f"{TOOLS_DIR}/patch_as_chunk.py", CC_DIR, *sorted(set(UNIT_CC.values()))], check=True)
+# and EA's all-C build. The native ee-gcc 2.9 `as` (UNIT_CC_NATIVE) gets the same through its `chunksize` word.
+# Idempotent; leaves unknown binaries alone.
+subprocess.run([sys.executable, f"{TOOLS_DIR}/patch_as_chunk.py", CC_DIR, *sorted(set(UNIT_CC.values()) | set(UNIT_CC_NATIVE.values()))],
+               check=True)
 # The game was built without C++ exception support: its constructors and destructors have no EH cleanup
 # landing pads, which g++ 2.95 emits by default (e.g. cAngerFX_cAngerFX only matches with -fno-exceptions).
 COMMON_CXXFLAGS = "-fno-exceptions"

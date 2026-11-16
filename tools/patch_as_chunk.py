@@ -21,8 +21,14 @@ boundaries every 998 instructions with the stock binary, none with this one, and
 alignment-frag cases. Verified on the fork: the whole objdiff report is unchanged (12,767 matched, 0 functions
 changed) and the asm-only build still checksums.
 
-usage: tools/patch_as_chunk.py COMPILER_DIR...   (patches ee/bin/as.exe and lib/gcc-lib/ee/2.95.3/as.exe in place;
-                                                    already-patched binaries are left alone)
+The Linux-native ee-gcc 2.9-ee-991111 builds (decomp.me bundle; configure.py UNIT_CC_NATIVE) have the same assembler
+behaviour but take their obstacks from the host glibc, whose default chunk is also ~4 KB. Their `as` passes its own
+`chunksize` variable (0, meaning "default") to every obstack_begin, so the patch sets that data word to 16 MB.
+Found 2026-11-15: three of peak3's hand-written MMI routines landed together in seg_2FE810 put a chunk boundary
+inside func_00404EA8's loops, and the positioned build died with `.org backwards (-12)`.
+
+usage: tools/patch_as_chunk.py COMPILER_DIR...   (patches ee/bin/as.exe and lib/gcc-lib/ee/2.95.3/as.exe, or a
+                                                    native ee/bin/as, in place; already-patched binaries are left alone)
 """
 import hashlib
 import sys
@@ -48,12 +54,38 @@ def patch(path: Path) -> str:
     path.write_bytes(data)
     return "patched"
 
+# Native i386 `as` builds: stock sha1 -> (file offset of the `chunksize` data word, patched sha1).
+NATIVE = {"51e0893fd2076a4d92cd12056de85f043244377c": (0x90C64, "6b840069a224f37187334a11397d432a627a6013"),  # 991111-01
+          "97bacf4d891313c7aa696215d1c3cab11ed74c78": (0x90A64, "70dd5a2b770d5f701cf850795d8348b54edd13e4")}  # 991111
+
+def patch_native(path: Path) -> str:
+    data = bytearray(path.read_bytes())
+    sha = hashlib.sha1(data).hexdigest()
+    if sha in {v[1] for v in NATIVE.values()}:
+        return "already patched"
+    if sha not in NATIVE:
+        return f"unknown assembler (sha1 {sha}); left alone"
+    off, want = NATIVE[sha]
+    assert data[off:off + 4] == b"\0\0\0\0", (path, hex(off))
+    data[off:off + 4] = NEW_SIZE.to_bytes(4, "little")
+    new_sha = hashlib.sha1(data).hexdigest()
+    assert new_sha == want, (path, new_sha)
+    # replace, don't rewrite in place: a running `as` keeps its old inode (writing an executing binary fails)
+    tmp = path.with_name(path.name + ".patching")
+    tmp.write_bytes(data)
+    tmp.chmod(path.stat().st_mode)
+    tmp.replace(path)
+    return "patched"
+
 def main() -> None:
     for d in sys.argv[1:]:
         for rel in ("ee/bin/as.exe", "lib/gcc-lib/ee/2.95.3/as.exe"):
             p = Path(d) / rel
             if p.is_file():
                 print(f"{p}: {patch(p)}")
+        p = Path(d) / "ee/bin/as"
+        if p.is_file():
+            print(f"{p}: {patch_native(p)}")
 
 if __name__ == "__main__":
     main()
