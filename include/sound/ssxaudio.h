@@ -239,8 +239,8 @@ struct cSSXAudio {
     int unk_62A8;                       // 0x62A8 [R] ctor -1; [U] cSSXAudio_WorldSound, cSSXAudio_AttachSound
     char unk_62AC[0x4];                 // 0x62AC no retail access seen (see 0x6088)
     int mAudioMode;                     // 0x62B0 [O] eSOUNDDEF_MODE; [R] ctor stores its audioMode argument; [U] cSSXAudio_SetMode stores, func_00285930 and func_00289DC0 (GetMode) read
-    int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] func_002875D0 (SetArcadeSFX) / func_00287488 (GetArcadeSFX)
-    int unk_62B8;                       // 0x62B8 [R] ctor 0; [U] cSSXAudio_SetArcadeSFX (SetSFXVolume) stores, func_00287410 (GetSFXVolume) reads
+    int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] func_002875D0 stores it (and sets volume controls 9/10); func_00287488 re-applies controls 9/10 only when set
+    int unk_62B8;                       // 0x62B8 [R] ctor 0; [U] cSSXAudio_SetArcadeSFX stores 1/0; func_00287410 re-applies control 2 only when set (and the mode is not 2)
     tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] cSSXAudio_DuckVolume (DuckVolume): entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume
     float unk_636C[10];                 // 0x636C [U] DuckVolume/MixVolume (cSSXAudio_DuckVolume/cSSXAudio_UpdateDuck/cSSXAudio_MixVolume/func_002887F8): mSoundVolume[4].appliedVolume times constants D_004A352C..
     float mDuckLevel[11];               // 0x6394 [O]; [R] ctor 11 x 1.0f; [U] DuckVolume writes [j]

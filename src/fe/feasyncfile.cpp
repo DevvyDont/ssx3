@@ -7473,7 +7473,9 @@ struct sVE1ADA30 {
     void (*fn)(void*, cUIText*);
 };
 
-// Message handler for the network-settings screen; returns -1 when handled.
+// Lobby/server message handler (cFEStateNet virtual slot 31) of the persona-selection screen (cFEStateSelectPersona):
+// 217 shows the "selecting persona" popup, 260 an EA Messenger error popup; unknown ids go to cFEStateNet's handler
+// func_001A8E40. Returns -1 when handled.
 extern "C" int func_001ADA30(cFEStateSelectPersona* self, int msgId, int data)
 {
     switch (msgId) {
@@ -11845,7 +11847,9 @@ extern char str_cFEStateLobbyMenu[];
 extern char str_kT_POPUP235Abuse[];
 extern char str_kT_BTNOK[];
 
-// Message handler for the save/load screen; unknown ids refresh the list and go to the base handler.
+// Lobby/server message handler (cFEStateNet virtual slot 31) of the chat room (cFEStateChatRoom): 220 opens the lobby
+// menu (cFEStateLobbyMenu) unless the lobby is busy, 232 shows the abuse-report popup; unknown ids go to cFEStateNet's
+// handler func_001A8E40.
 extern "C" void* func_001B3A30(cFEStateChatRoom* self, int msgId, int data)
 {
     switch (msgId) {
@@ -19485,7 +19489,9 @@ struct sFE1BD738 {
     void* boxes[4];     // 0x708
 };
 
-// Message handler for the slot-select screen; unknown messages go to the base handler.
+// Lobby/server message handler (cFEStateNet virtual slot 31) of the lobby menu (cFEStateLobbyMenu): 223 picks the
+// channel (miSelectedChannel) from the room list, 220/228 open the chat room (cFEStateChatRoom), 258 handles room
+// results (func_001BD848); unknown ids go to cFEStateNet's handler func_001A8E40.
 extern "C" void* func_001BD738(cFEStateLobbyMenu* self, int msgId, int data)
 {
     switch (msgId) {

@@ -36,7 +36,8 @@ struct tPS2SoundMemNode {
 struct cPS2SoundManager {
     void** mVtbl;                     // 0x000 [R] D_004835F8 (_vt$16cPS2SoundManager), stored by the ctor and dtor (cSoundManager has no data: the vptr is first)
     void* mSoundHeap;                 // 0x004 [P] "mSoundHeap == NULL" (preview dtor lw 4); [R] Init: operator new(0x32000, "mSoundHeap"), passed to the sound driver; Shutdown / dtor cMemMan_free() it
-    int unk_008;                      // 0x008 [R] ctor 0; [U] SetMode (cPS2SoundManager_SetMode) records the driver mode set (1 / 2) and returns early when unchanged
+    int unk_008;                      // 0x008 [R] ctor 0; [U] the mode group cPS2SoundManager_SetMode applied (2 after mode 3, 1 after the others); it
+                                      // refuses (returns 1) when the OTHER group is recorded, likely an inverted test
     tPS2SoundMemNode mNodes[32];      // 0x00C [P] kPS2SOUNDMANAGER_MAX_SOUNDMEM_ALLOCS (preview sltiu 32, stride 24, base 12); [R] Init chains them
     int mMainMemHighAddr;             // 0x30C [P] "(mainMemLowAddr + mainMemSize) == mMainMemHighAddr", "pNode->lowAddr == mMainMemHighAddr" (preview lw 780); [R] ctor -1, Init = sound RAM top; [U] AllocSoundMem moves it down
     int unk_310;                      // 0x310 [R] ctor -1, Init 31; [U] head of the unused-node chain (func_002A92B8 pops, func_002A92F8 pushes)

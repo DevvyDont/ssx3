@@ -4,7 +4,7 @@
 // cDSockChannel: the DirtySock implementation of cCommChannel: one peer-to-peer game link (NetGameUtil to connect or
 // listen on "addr:port:port", then a NetGameLink to send and receive packets). Created by
 // cCommSystem_openDSockChannel: `cMemMan_alloc(0x20, "cDSockChannel", ...)` + the constructor func_00256698, then
-// listen (cDSockChannel_connect) or connect (cDSockChannel_listen). Size 0x20 [R]. Base class cCommChannel (online/commchannel.h,
+// cDSockChannel_connect (mode 0x102) when the host flag isListener is set, else cDSockChannel_listen (0x101). Size 0x20 [R]. Base class cCommChannel (online/commchannel.h,
 // 0xC bytes), written out inline. Retail vtable D_004812D0 (slots: see kCommChannelVt_* in online/commchannel.h).
 // EA's source: d:/ssx/code/source/online/dsockchannel.cpp (the preview build's assert string).
 //
@@ -38,7 +38,7 @@ struct cDSockChannel {
     int mPacketError;               // 0x14 [O] (On Tour: bool); [R] 0; [U] readPacket (cDSockChannel_readPacket) sets 1 on a
                                     //      packet of the wrong kind; updateConnected turns it into state 4
     NetGameUtilRefT* mGameUtil;     // 0x18 [O]; [R] 0; [U] connect/listen store the NetGameUtil (func_003E6E08) and
-                                    //      start it (func_003E6F40, 0x101 connect / 0x102 listen); disconnect destroys it
+                                    //      start it (func_003E6F40, 0x101 listen / 0x102 connect); disconnect destroys it
     NetGameLinkRefT* mGameLink;     // 0x1C [O]; [R] 0; [U] updateConnecting creates it (func_003E66F0) once the util
                                     //      completes; read/writePacket and updateConnected use it; disconnect destroys it
 };
