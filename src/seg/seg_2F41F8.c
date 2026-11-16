@@ -627,14 +627,6 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F43D0);
 int func_003F43D0(int a, ...) { return 1; }
 #endif
 
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4410);
-
-//100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4448);
-#ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
 struct sSifReq { int f0; int f4; int pad8[5]; int key; };
@@ -675,6 +667,15 @@ struct sSifQueue {
     volatile unsigned long total;       /* 0x4E00 */
     int sema;                           /* 0x4E08 */
 };
+
+INCLUDE_ASM("seg/seg_2F41F8", func_003F4410);
+
+//100%
+INCLUDE_ASM("seg/seg_2F41F8", func_003F4448);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
 
 extern int f4C50(int) __asm__("func_00424C50");
 extern int f3B80(int, void *, void *) __asm__("func_00423B80");
@@ -1067,10 +1068,10 @@ extern int func_00424140(int);
 extern void func_00425D38(void);
 extern int func_00423DA0(struct sSemaParam_5000 *);
 extern int func_00423BA0(struct sThreadParam_5000 *);
-extern int func_00423A90(int, void (*)(void), int, void *);
+extern int func_00423A90(int, int (*)(int, void *), int, void *);
 extern int func_004248E8(int);
 extern void func_00423BC0(int, void *);
-extern void func_003F4410(void);
+extern int func_003F4410(int, void *);
 
 int func_003F5000(void) {
     struct sSifQueue *g = &D_0051F0C0;
