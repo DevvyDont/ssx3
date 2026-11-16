@@ -3808,8 +3808,8 @@ extern "C" void func_002E2B00(void* vself, void* vrect)
     pos.y = self->part->pos.y;
     pos.z = self->part->pos.z;
     pos.w = 1.0f;
-    sVEntry<int(void*, t4Vector*)>* e = &(*(sVEntry<int(void*, t4Vector*)>**)(obj + 0x10D8))[91];
-    if (e->fn(obj + e->delta, &pos)) {
+    sVEntry<int(void*, t4Vector*)>* vEntry = &(*(sVEntry<int(void*, t4Vector*)>**)(obj + 0x10D8))[91];
+    if (vEntry->fn(obj + vEntry->delta, &pos)) {
         self->on = 0;
         self->vis = 0;
     } else {
@@ -4130,8 +4130,8 @@ extern "C" void func_002E3130(void* selfp)
                 int prev = !bufferId;
                 if (self->suns[bufferId][v].active != 0) {
                     float t = 0;
-                    sVE3130* e = &self->vt[4];
-                    if (e->fn((char*)self + e->delta, &self->suns[bufferId][v], &t)) {
+                    sVE3130* vEntry = &self->vt[4];
+                    if (vEntry->fn((char*)self + vEntry->delta, &self->suns[bufferId][v], &t)) {
                         self->suns[bufferId][v].vis = t;
                     } else {
                         self->suns[bufferId][v].vis = ((sLensSunBanks3130*)self)->suns[prev][v].vis;
@@ -4144,8 +4144,8 @@ extern "C" void func_002E3130(void* selfp)
             for (int i = 0; i < self->haloCount[bufferId][v]; i++) {
                 if (self->halos[bufferId][v][i].active != 0) {
                     float t = 0;
-                    sVE3130* e = &self->vt[4];
-                    if (e->fn((char*)self + e->delta, &self->halos[bufferId][v][i], &t)) {
+                    sVE3130* vEntry = &self->vt[4];
+                    if (vEntry->fn((char*)self + vEntry->delta, &self->halos[bufferId][v][i], &t)) {
                         self->halos[bufferId][v][i].light->vis[v] = t;
                     } else {
                         self->halos[bufferId][v][i].light->vis[v] = ((sLensHaloBanks3130*)self)->halos[prev][v][i].light->vis[v];

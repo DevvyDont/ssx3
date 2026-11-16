@@ -541,9 +541,9 @@ extern "C" void cAI_render(sAI_91E0* self)
     for (n = 0; n < self->n78; n++) {
         char* r = self->list28[n];
         if (*(int*)(r + 0x884) == 0 && *(int*)(r + 0x888) == -1) {
-            cPS2GraphicsMan* g = GrMan;
-            sVEntry_91E0* vt = (sVEntry_91E0*)g->mVtbl;
-            int v = vt[114].fn((char*)g + vt[114].delta);
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sVEntry_91E0* vt = (sVEntry_91E0*)ps2GraphicsMan->mVtbl;
+            int v = vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
             *(int*)(self->list28[n] + 0x888) = v + 4;
         }
     }
@@ -1621,10 +1621,10 @@ extern "C" void func_0012A998(cAI* self)
                 cRider* r = *(cRider**)(list[i] + 0x18);
                 r->mRenderFlag = 0;
                 r->mSafeRenderTick = -1;
-                cPS2GraphicsMan* g = GrMan;
+                cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 char* obj = list[i];
-                sVEntry0012A998* gvt = (sVEntry0012A998*)g->mVtbl;
-                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn((char*)g + gvt[114].delta) + 4;
+                sVEntry0012A998* gvt = (sVEntry0012A998*)ps2GraphicsMan->mVtbl;
+                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn((char*)ps2GraphicsMan + gvt[114].delta) + 4;
             }
         }
     }
@@ -1692,10 +1692,10 @@ extern "C" void func_0012AB20(sAiObj12AB20* self)
         {
             *(int*)(r + 0x884) = 0;
             *(int*)(r + 0x888) = -1;
-            cPS2GraphicsMan* g = GrMan;
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             char* rider = self->mRiders[i];
-            sVEntry0012AB20* vt = (sVEntry0012AB20*)g->mVtbl;
-            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)g + vt[114].delta) + 4;
+            sVEntry0012AB20* vt = (sVEntry0012AB20*)ps2GraphicsMan->mVtbl;
+            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)ps2GraphicsMan + vt[114].delta) + 4;
         }
     }
 }
@@ -1760,10 +1760,10 @@ extern "C" void func_0012AC48(sAiObj12AC48* self)
         {
             *(int*)(r + 0x884) = 0;
             *(int*)(r + 0x888) = -1;
-            cPS2GraphicsMan* g = GrMan;
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             char* rider = self->mRiders[i];
-            sVEntry0012AC48* vt = (sVEntry0012AC48*)g->mVtbl;
-            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)g + vt[114].delta) + 4;
+            sVEntry0012AC48* vt = (sVEntry0012AC48*)ps2GraphicsMan->mVtbl;
+            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)ps2GraphicsMan + vt[114].delta) + 4;
         }
     }
 }
@@ -3601,7 +3601,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
 {
     char* r = (char*)self->mRider;
     tPose* nodes = *(tPose**)(*(char**)(r + 0x780) + 0x2C);
-    tPose* p1 = &nodes[*(int*)(r + 0x89C)];
+    tPose* pose = &nodes[*(int*)(r + 0x89C)];
     tPose* p2 = &nodes[*(int*)(r + 0x8A4)];
     float t = func_00312AB0(*(void**)(r + 0x784), 2);
     if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
@@ -3609,10 +3609,10 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
         char* an = func_00311B20(*(void**)((char*)self->mRider + 0x784), 2);
         float rate = *(float*)(an + 0x90);
         float s = rate / ((t - self->PrevFramePercent) * *(float*)(an + 0x10));
-        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&p1->P), (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
+        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&pose->P), (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
         float s2 = s + s;
-        sV_12CD20 d = Sub_12CD20((*(sV_12CD20*)&p1->Q), (*(sV_12CD20*)&self->RiderPrevPose.Q));
-        sV_12CD20 q = QuatMul_12CD20(d, Conj_12CD20(*p1));
+        sV_12CD20 d = Sub_12CD20((*(sV_12CD20*)&pose->Q), (*(sV_12CD20*)&self->RiderPrevPose.Q));
+        sV_12CD20 q = QuatMul_12CD20(d, Conj_12CD20(*pose));
         sV_12CD20 angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
         cWipeoutMotion_throwRider(*(char**)((char*)self->mRider + 0x77C) + 0x30, (char*)self->mRider + 0x1E0, &angvel);
         if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x17)
@@ -3643,7 +3643,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
     if (t < 0.949999988079071f)
     {
         self->PrevFramePercent = t;
-        (*(&self->RiderPrevPose)) = *p1;
+        (*(&self->RiderPrevPose)) = *pose;
         (*(&self->BoardPrevPose)) = *p2;
     }
 }
@@ -7887,10 +7887,10 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
     if (cRider_checkForReset_2A30(self->mRider, (in->flags >> 12) & 1, 0) != 0) {
         return;
     }
-    cRider* r = self->mRider;
-    int st = r->unk_32C;
+    cRider* rider = self->mRider;
+    int st = rider->unk_32C;
     if (st == 1) {
-        if (func_00312AE8(r->mRiderAnim, 2) == 0) {
+        if (func_00312AE8(rider->mRiderAnim, 2) == 0) {
             return;
         }
         if ((in->flags & 0x2000) && self->IsMissedHandplant == 0) {
@@ -7905,14 +7905,14 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         return;
     }
     if (st == 2) {
-        float dt = r->mTimeScale * 0.01666666753590107f;
+        float dt = rider->mTimeScale * 0.01666666753590107f;
         self->EnterSec += dt;
-        if ((in->flags & 0x2000) && __builtin_fabsf(r->mSlewed[8].cur) < 1.0f) {
+        if ((in->flags & 0x2000) && __builtin_fabsf(rider->mSlewed[8].cur) < 1.0f) {
             float desBal = ((in->flags << 12) >> 26) * 0.032258063554763794f;
-            if (r->unk_320 != 0) desBal = -desBal;
+            if (rider->unk_320 != 0) desBal = -desBal;
             if (self->HandplantType == 1) desBal = -desBal;
-            r->mSlewed[7].target = desBal;
-            r->mSlewed[7].rate = dt * 5.0f;
+            rider->mSlewed[7].target = desBal;
+            rider->mSlewed[7].rate = dt * 5.0f;
             float k = dt * 3.0f;
             float p = self->CurBalance;
             float np;
@@ -7933,14 +7933,14 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
                 desTilt = 1.0f;
                 if (self->mRider->mSlewed[8].cur < 0.0f) desTilt = -1.0f;
             }
-            r = self->mRider;
+            rider = self->mRider;
             float weight = self->EnterSec * 0.19999131560325623f <? 1.0f; // PORT: g++ min operator
             float b = 1.0f - weight;
-            float c = fabs_2A30(r->mSlewed[8].cur);
-            r->mSlewed[8].target = desTilt;
+            float c = fabs_2A30(rider->mSlewed[8].cur);
+            rider->mSlewed[8].target = desTilt;
             float cenRate = weight * 4.0f + b;
             float edgeRate = weight * 5.5f + b * 1.5f;
-            r->mSlewed[8].rate = (edgeRate * c + cenRate * (1.0f - c)) * dt;
+            rider->mSlewed[8].rate = (edgeRate * c + cenRate * (1.0f - c)) * dt;
             return;
         }
         if (self->IsRailSpline != 0 && __builtin_fabsf(self->mRider->mSlewed[8].cur) < 0.25f) {
@@ -7967,7 +7967,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         cHandplantControl_playHandplantAnim(self, self->mRider->unk_32C, self->HandplantType);
         return;
     }
-    if (func_0011FE98(r) == 5) {
+    if (func_0011FE98(rider) == 5) {
         cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119C38(self->mRider->mMetrix));
         cRider_setMotionState_impl(self->mRider, 1);
     }
@@ -9382,11 +9382,11 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
         } else if (self->CurrentGrab != trick) {
             self->CurrentGrab = trick;
             if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x12) {
-                cRider* r = self->mRider;
-                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->CurrentGrab), 1, -1.0f);
+                cRider* rider = self->mRider;
+                cRiderAnimBase_play(rider->mRiderAnim, func_001500D8(iface, rider->mAIIndex, self->CurrentGrab), 1, -1.0f);
             } else {
-                cRider* r = self->mRider;
-                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                cRider* rider = self->mRider;
+                cRiderAnimBase_play(rider->mRiderAnim, func_001500D8(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             }
             *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
         } else if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
@@ -9395,8 +9395,8 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     }
     if (self->GrabState == 1) {
         if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
-            cRider* r = self->mRider;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(r->mMetrix, func_00150118(iface, r->mAIIndex, self->CurrentGrab)));
+            cRider* rider = self->mRider;
+            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
             *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
             if (func_001500F8(iface, self->mRider->mAIIndex, self->CurrentGrab) != 0x1B6) {
                 cRider* r2 = self->mRider;
@@ -9408,8 +9408,8 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     }
     if (self->GrabState == 2) {
         if (trick != self->CurrentGrab) {
-            cRider* r = self->mRider;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(r->mMetrix, func_00150118(iface, r->mAIIndex, self->CurrentGrab)));
+            cRider* rider = self->mRider;
+            cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
             func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
             *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
             self->GrabState = 5;
@@ -9418,11 +9418,11 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
             func_00311E88(self->mRider->mRiderAnim, 2, 0.10000000149011612f);
             if (self->mRider->mUberTimer == 0.0f || (self->mRider->mUberFlags & 1) == 0
                 || func_00150198(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == 0x1B6) {
-                cRider* r = self->mRider;
-                cRiderAnimBase_play(r->mRiderAnim, func_00150138(iface, r->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                cRider* rider = self->mRider;
+                cRiderAnimBase_play(rider->mRiderAnim, func_00150138(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             } else {
-                cRider* r = self->mRider;
-                cRiderAnimBase_play(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
+                cRider* rider = self->mRider;
+                cRiderAnimBase_play(rider->mRiderAnim, func_00150198(iface, rider->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
             }
             cSSXAudio_Tweak(func_0028B180(), self->mRider);
             *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
@@ -9434,16 +9434,16 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
             && func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
             *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
             if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
-                cRider* r = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->CurrentGrab)));
+                cRider* rider = self->mRider;
+                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
                 if (func_00150158(iface, self->mRider->mAIIndex, self->CurrentGrab) != 0x1B6) {
                     cRider* r2 = self->mRider;
                     cRiderAnimBase_play_i(r2->mRiderAnim, func_00150158(iface, r2->mAIIndex, self->CurrentGrab), 0, -1.0f);
                     *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             } else {
-                cRider* r = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->CurrentGrab, hi)));
+                cRider* rider = self->mRider;
+                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
                 if (func_001502C8(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 0x1B6) {
                     cRider* r2 = self->mRider;
                     cRiderAnimBase_play_i(r2->mRiderAnim, func_001502C8(iface, r2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
@@ -9455,13 +9455,13 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                    || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 3)
                    || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
             if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
-                cRider* r = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->CurrentGrab)));
+                cRider* rider = self->mRider;
+                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
                 cRider* r2 = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(r2->mMetrix, func_00150178(iface, r2->mAIIndex, self->CurrentGrab)));
             } else {
-                cRider* r = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->CurrentGrab, hi)));
+                cRider* rider = self->mRider;
+                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
                 cRider* r2 = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(r2->mMetrix, func_001503F8(iface, r2->mAIIndex, self->CurrentGrab, hi)));
             }
@@ -9471,11 +9471,11 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 4) {
         if (trick != self->CurrentGrab || held == 0) {
             if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
-                cRider* r = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(r->mMetrix, func_00150178(iface, r->mAIIndex, self->CurrentGrab)));
+                cRider* rider = self->mRider;
+                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
             } else {
-                cRider* r = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->CurrentGrab, hi)));
+                cRider* rider = self->mRider;
+                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
             }
             func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
             *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
@@ -9489,8 +9489,8 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 && func_00150198(iface, self->mRider->mAIIndex, trick, hi) != 0x1B6) {
                 self->CurrentGrab = trick;
                 func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
-                cRider* r = self->mRider;
-                cRiderAnimBase_play_i(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
+                cRider* rider = self->mRider;
+                cRiderAnimBase_play_i(rider->mRiderAnim, func_00150198(iface, rider->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
                 *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
                 self->GrabState = 3;
             } else {

@@ -480,9 +480,9 @@ extern "C" void func_0019EE88(void* selfp)
     pos = self->model->bones[idx * 2];
     func_00389CB8(&m, &pos, 1.0f);
     {
-        cPS2GraphicsMan* o = GrMan;
-        sVE_EE88* vt = (sVE_EE88*)o->mVtbl;
-        vt[69].fn((char*)o + vt[69].delta, &m, 1);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVE_EE88* vt = (sVE_EE88*)ps2GraphicsMan->mVtbl;
+        vt[69].fn((char*)ps2GraphicsMan + vt[69].delta, &m, 1);
     }
     int* fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
@@ -540,9 +540,9 @@ extern "C" void func_0019F138(void* selfp)
 {
     sFERiderF138* self = (sFERiderF138*)selfp;
     if (self->pending >= 0) {
-        cPS2GraphicsMan* g = GrMan;
-        sVEF138* vt = (sVEF138*)g->mVtbl;
-        if (self->pending < vt[114].fn((char*)g + vt[114].delta)) {
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEF138* vt = (sVEF138*)ps2GraphicsMan->mVtbl;
+        if (self->pending < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta)) {
             self->pending = -1;
             cFERider_init(self, self->f4, self->fC24, self->fC28);
         }
@@ -1068,15 +1068,15 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
         int id = func_0019F878(self, name);
         if (id >= 0) {
             if (replace) {
-                cPS2GraphicsMan* o = GrMan;
-                sVE_F908b* vt = (sVE_F908b*)o->mVtbl;
-                vt[48].fn((char*)o + vt[48].delta, id, data, 1);
+                cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+                sVE_F908b* vt = (sVE_F908b*)ps2GraphicsMan->mVtbl;
+                vt[48].fn((char*)ps2GraphicsMan + vt[48].delta, id, data, 1);
             }
         } else {
             strcpy(self->entries[self->count].name, name);
-            cPS2GraphicsMan* o = GrMan;
-            sVE_F908a* vt = (sVE_F908a*)o->mVtbl;
-            self->entries[self->count].id = vt[46].fn((char*)o + vt[46].delta, data, D_004A19B0, 0, 1, -1);
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sVE_F908a* vt = (sVE_F908a*)ps2GraphicsMan->mVtbl;
+            self->entries[self->count].id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, D_004A19B0, 0, 1, -1);
             self->count++;
         }
     }

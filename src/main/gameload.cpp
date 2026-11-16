@@ -222,9 +222,9 @@ extern "C" void cGame_load(cGame* self)
     func_00317550(D_004A5B64 + 0x38, 43.5f);
     func_00195DE0(SSXApp->FELocale);
     {
-        cPS2GraphicsMan* g = GrMan;
-        sVEntryVoidGL* vt = (sVEntryVoidGL*)g->mVtbl;
-        vt[44].fn((char*)g + vt[44].delta, 0);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEntryVoidGL* vt = (sVEntryVoidGL*)ps2GraphicsMan->mVtbl;
+        vt[44].fn((char*)ps2GraphicsMan + vt[44].delta, 0);
     }
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
@@ -319,9 +319,9 @@ extern "C" void cGame_load(cGame* self)
     *(void**)((char*)self->MenuSys + 0x5C) = (void*)SSXApp->Inputs[0];
     char* file = FILE_load(D_0047B628, 0x100);
     {
-        cPS2GraphicsMan* g = GrMan;
-        sVEntryGL* vt = (sVEntryGL*)g->mVtbl;
-        int r = vt[46].fn((char*)g + vt[46].delta, file + *(int*)(file + 0x14), D_004A2A88, 0, 1, -1);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEntryGL* vt = (sVEntryGL*)ps2GraphicsMan->mVtbl;
+        int r = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, file + *(int*)(file + 0x14), D_004A2A88, 0, 1, -1);
         self->mBoxTextureID = r;
         *(int*)((char*)self->MenuSys + 0x60) = r;
     }
@@ -1368,9 +1368,9 @@ static inline int updatePause_2306B8(cGame* self)
         }
         self->IsStreamPaused = 1;
         if (self->m_bFlushStreamer != 0) {
-            cPS2GraphicsMan* r = GrMan;
-            sVEntry_2306B8* vt = (sVEntry_2306B8*)r->mVtbl;
-            vt[19].fn((char*)r + vt[19].delta);
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sVEntry_2306B8* vt = (sVEntry_2306B8*)ps2GraphicsMan->mVtbl;
+            vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
             func_0022E8B8(((char*)self->ViewMan));
             func_003A88A8(*((void**)((char*)self->World)));
             self->m_bFlushStreamer = 0;
@@ -2669,9 +2669,9 @@ extern char* D_004A28A8_1FC0 __asm__("SSXApp");
 
 extern "C" void func_00231FC0(sFade_1FC0* self)
 {
-    cPS2GraphicsMan* g = GrMan;
-    ((cGfx_1FC0*)g)->stateTop[1] = ((cGfx_1FC0*)g)->stateTop[0];
-    ((cGfx_1FC0*)g)->stateTop++;
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[0];
+    ((cGfx_1FC0*)ps2GraphicsMan)->stateTop++;
     ((cGfx_1FC0*)GrMan)->BeginScene();
     ((cGfx_1FC0*)GrMan)->Begin2D();
     *((cGfx_1FC0*)GrMan)->stateTop = D_00501420_1FC0;

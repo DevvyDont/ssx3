@@ -671,9 +671,9 @@ extern "C" void func_00189610(void* self, char* popup, int event)
                 c->f6 = a;
                 c->f5 = b;
             } else {
-                cPS2GraphicsMan* g = GrMan;
-                sVE_189610b* vt = (sVE_189610b*)g->mVtbl;
-                char* thisp = (char*)g + vt[12].delta;
+                cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+                sVE_189610b* vt = (sVE_189610b*)ps2GraphicsMan->mVtbl;
+                char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
                 void (**pf)(void*, int, int) = &vt[12].fn;
                 (*pf)(thisp, Cfg_189610().f6, Cfg_189610().f5);
             }
@@ -963,9 +963,9 @@ extern "C" void func_00189D60(void* self_)
         if (w != 0)
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().f20);
     }
-    cPS2GraphicsMan* g = GrMan;
-    sVE_189D60c* vt = (sVE_189D60c*)g->mVtbl;
-    char* thisp = (char*)g + vt[12].delta;
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_189D60c* vt = (sVE_189D60c*)ps2GraphicsMan->mVtbl;
+    char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
     void (**pf)(void*, int, int) = &vt[12].fn;
     (*pf)(thisp, iface->getOptions().f6, iface->getOptions().f5);
     cSSXApp_activateBEOptions(SSXApp);

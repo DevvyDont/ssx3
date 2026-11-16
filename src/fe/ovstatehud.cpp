@@ -2430,9 +2430,9 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
     if (f < 0.0f) {
         f = -f;
     }
-    cPS2GraphicsMan* g = GrMan;
-    ((cGfx_31E0*)g)->stateTop[1] = ((cGfx_31E0*)g)->stateTop[0];
-    ((cGfx_31E0*)g)->stateTop++;
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    ((cGfx_31E0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_31E0*)ps2GraphicsMan)->stateTop[0];
+    ((cGfx_31E0*)ps2GraphicsMan)->stateTop++;
     ((cGfx_31E0*)GrMan)->BeginScene();
     ((cGfx_31E0*)GrMan)->Begin2D();
     *((cGfx_31E0*)GrMan)->stateTop = D_00501420_31E0;

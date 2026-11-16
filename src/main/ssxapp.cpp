@@ -161,9 +161,9 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(int*)&self->DebugFE = 0;
     *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
-    cPS2GraphicsMan* g2 = GrMan;
-    sVE_6900* vt2 = (sVE_6900*)g2->mVtbl;
-    ((V1Fn_6900)vt2[44].fn)((char*)g2 + vt2[44].delta, 0x100);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_6900* vt2 = (sVE_6900*)ps2GraphicsMan->mVtbl;
+    ((V1Fn_6900)vt2[44].fn)((char*)ps2GraphicsMan + vt2[44].delta, 0x100);
     cPS2GraphicsMan* g3 = GrMan;
     sVE_6900* vt3 = (sVE_6900*)g3->mVtbl;
     char* o = (char*)g3 + vt3[46].delta;
@@ -911,23 +911,23 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     operator_delete(mgr);
     if (ScriptEngine) {
         cSSXScriptEngine_DeInitOnce(ScriptEngine);
-        cSSXScriptEngine* o = ScriptEngine;
-        if (o) {  // delete ScriptEngine: the virtual destructor (slot 1) with flags 3
-            sVEPurge* vt = (sVEPurge*)o->mVtbl;
-            vt[1].fn((char*)o + vt[1].delta, 3);
+        cSSXScriptEngine* ssxScriptEngine = ScriptEngine;
+        if (ssxScriptEngine) {  // delete ScriptEngine: the virtual destructor (slot 1) with flags 3
+            sVEPurge* vt = (sVEPurge*)ssxScriptEngine->mVtbl;
+            vt[1].fn((char*)ssxScriptEngine + vt[1].delta, 3);
         }
         ScriptEngine = 0;
     }
     {
-        cPS2GraphicsMan* g = GrMan;
-        sVEPurge0* vt = (sVEPurge0*)g->mVtbl;
-        vt[3].fn((char*)g + vt[3].delta);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEPurge0* vt = (sVEPurge0*)ps2GraphicsMan->mVtbl;
+        vt[3].fn((char*)ps2GraphicsMan + vt[3].delta);
     }
     {
-        cPS2GraphicsMan* g = GrMan;
-        if (g) {
-            sVEPurge* vt = (sVEPurge*)g->mVtbl;
-            vt[1].fn((char*)g + vt[1].delta, 3);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        if (ps2GraphicsMan) {
+            sVEPurge* vt = (sVEPurge*)ps2GraphicsMan->mVtbl;
+            vt[1].fn((char*)ps2GraphicsMan + vt[1].delta, 3);
         }
     }
     GrMan = 0;
@@ -1383,9 +1383,9 @@ extern "C" void cSSXApp_activateBEOptions()
         ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(0);
         break;
     }
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sVE_228C08* vt = (sVE_228C08*)g->mVtbl;
-    char* thisp = (char*)g + vt[12].delta;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sVE_228C08* vt = (sVE_228C08*)ps2GraphicsMan->mVtbl;
+    char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
     void (**pfn)(void*, int, int) = &vt[12].fn;
     (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
 }
@@ -2124,10 +2124,10 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
     sV3_229910 pos[4];
     sV2_229910 uv[4];
     sV4_229910 col[4];
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sModel_229910* m = HandleToModel_229910(RID);
-    sVEntry_229910* vt = (sVEntry_229910*)g->mVtbl;
-    vt[97].fn((char*)g + vt[97].delta, m, 0, pos, uv, col);
+    sVEntry_229910* vt = (sVEntry_229910*)ps2GraphicsMan->mVtbl;
+    vt[97].fn((char*)ps2GraphicsMan + vt[97].delta, m, 0, pos, uv, col);
     for (int i = 0; i < 4; i++) {
         pts[i] = MulMV_229910(m->mat, sV4_229910(pos[i], 1.0f));
     }
@@ -2249,7 +2249,7 @@ struct sMarkers_229BA8 {
 extern "C" void func_00229BA8(void* p)
 {
     sMarkers_229BA8* self = (sMarkers_229BA8*)p;
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int pushed = 0;
     sV2_229BA8 uv0;
     sV2_229BA8 uv1(1.0f, 1.0f);
@@ -2260,25 +2260,25 @@ extern "C" void func_00229BA8(void* p)
         if (m[i].count > 0) {
             if (!pushed) {
                 pushed = 1;
-                ((cGfx_229BA8*)g)->top[1] = ((cGfx_229BA8*)g)->top[0];
-                ((cGfx_229BA8*)g)->top++;
-                *((cGfx_229BA8*)g)->top = D_00501420_229BA8;
-                ((cGfx_229BA8*)g)->top->f10 = GetTexId_229BA8((cGfx_229BA8*)g, 14);
-                set0_229BA8((cGfx_229BA8*)g, 0xC, 2, 3);
-                SetBits_229BA8(&((cGfx_229BA8*)g)->top->f4, 0x400000, 0x400000);
-                set1_229BA8((cGfx_229BA8*)g, 0x1800000, 23, 0);
-                set1_229BA8((cGfx_229BA8*)g, 0x300000, 20, 0);
-                set1_229BA8((cGfx_229BA8*)g, 0xFF000, 12, 0x14);
-                set1_229BA8((cGfx_229BA8*)g, 0x3, 0, 1);
-                set2_229BA8((cGfx_229BA8*)g, 0x1FFFFC00, 10, 0);
-                set2_229BA8((cGfx_229BA8*)g, 0x3E0, 5, 4);
-                set1_229BA8((cGfx_229BA8*)g, 0x7C, 2, 7);
+                ((cGfx_229BA8*)ps2GraphicsMan)->top[1] = ((cGfx_229BA8*)ps2GraphicsMan)->top[0];
+                ((cGfx_229BA8*)ps2GraphicsMan)->top++;
+                *((cGfx_229BA8*)ps2GraphicsMan)->top = D_00501420_229BA8;
+                ((cGfx_229BA8*)ps2GraphicsMan)->top->f10 = GetTexId_229BA8((cGfx_229BA8*)ps2GraphicsMan, 14);
+                set0_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xC, 2, 3);
+                SetBits_229BA8(&((cGfx_229BA8*)ps2GraphicsMan)->top->f4, 0x400000, 0x400000);
+                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x1800000, 23, 0);
+                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x300000, 20, 0);
+                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xFF000, 12, 0x14);
+                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3, 0, 1);
+                set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x1FFFFC00, 10, 0);
+                set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3E0, 5, 4);
+                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x7C, 2, 7);
             }
-            ((cGfx_229BA8*)g)->v78(&self->markers[i].pos, &size, &uv0, &uv1, &col);
+            ((cGfx_229BA8*)ps2GraphicsMan)->v78(&self->markers[i].pos, &size, &uv0, &uv1, &col);
         }
     }
     if (pushed) {
-        ((cGfx_229BA8*)g)->top--;
+        ((cGfx_229BA8*)ps2GraphicsMan)->top--;
     }
 }
 #endif
@@ -3369,9 +3369,9 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
     w->f78B0 = 0;
     w->f7AB8 = 0;
     {
-        cPS2GraphicsMan* g = GrMan;
-        sVEMat_22ADD8* vt = (sVEMat_22ADD8*)g->mVtbl;
-        sMat_22ADD8 m = vt[43].fn((char*)g + vt[43].delta);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEMat_22ADD8* vt = (sVEMat_22ADD8*)ps2GraphicsMan->mVtbl;
+        sMat_22ADD8 m = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
         MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &m);
     }
     MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)GrMan + 0x5800));
@@ -3769,11 +3769,11 @@ extern "C" int cGame_render(sGame_22B008* self)
         return 1;
     }
     func_0036A1E8();
-    cPS2GraphicsMan* g = GrMan;
-    ((cGfx_22B008*)g)->f10A8 = ((cGfx_22B008*)g)->tbl[((cGfx_22B008*)g)->cur];
-    ((cGfx_22B008*)g)->f10AC = ((cGfx_22B008*)g)->tbl[((cGfx_22B008*)g)->f44];
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    ((cGfx_22B008*)ps2GraphicsMan)->f10A8 = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->cur];
+    ((cGfx_22B008*)ps2GraphicsMan)->f10AC = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->f44];
     self->target->views = self->views->views;
-    ((cGfx_22B008*)g)->f270 = self->views->views;
+    ((cGfx_22B008*)ps2GraphicsMan)->f270 = self->views->views;
     sWorld_22B008* world = 0;
     for (unsigned int i = 0; i < self->views->views; i++) {
         ((cGfx_22B008*)GrMan)->view = i;

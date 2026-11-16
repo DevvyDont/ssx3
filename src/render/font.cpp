@@ -175,9 +175,9 @@ extern "C" void cFont_purge(cFont* self)
     }
     self->Glyphs = 0;
     self->NumGlyphs = 0;
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     if (self->TextureID >= 0) {
-        ((sFontGfx_19E8*)g)->v50(self->TextureID);
+        ((sFontGfx_19E8*)ps2GraphicsMan)->v50(self->TextureID);
     }
 }
 #endif
@@ -229,7 +229,7 @@ struct sFontUV {
  */
 extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
 {
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int p2 = 1;
     do {
         p2 <<= 1;
@@ -257,8 +257,8 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         p[3] = (i << 7) / 15;
         p += 4;
     }
-    sFontVEntryDL* vt = (sFontVEntryDL*)g->mVtbl;
-    self->TextureID = vt[47].fn((char*)g + vt[47].delta, pix, ((char*)self) + 0x64, img->w, p2, 0, 0xB, 1, pal, 0, 1, -1);
+    sFontVEntryDL* vt = (sFontVEntryDL*)ps2GraphicsMan->mVtbl;
+    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, ((char*)self) + 0x64, img->w, p2, 0, 0xB, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -336,25 +336,25 @@ static inline int fontGetTex(void* s)
  */
 extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
 {
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    (g->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex(self);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex(self);
     sFontPos1CB0 pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
-        sDrawState* top = g->m_pCurrentDrawState;
+        sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
         int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
         int a = saved - 1;
         if (a < 0) a = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
-        sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
-        vt[80].fn((char*)g + vt[80].delta, self, str, ((char*)self) + 0x50,
+        sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
+        vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
-        sDrawState* top2 = g->m_pCurrentDrawState;
+        sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
-    vt[80].fn((char*)g + vt[80].delta, self, str, ((char*)self) + 0x40, pos.x, pos.y,
+    sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
+    vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, ((char*)self) + 0x40, pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -389,25 +389,25 @@ static inline int fontGetTex1E30(void* s)
 
 extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
 {
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    (g->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex1E30(self);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex1E30(self);
     sFontPos1E30 pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
-        sDrawState* top = g->m_pCurrentDrawState;
+        sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
         int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
         int a = saved - 1;
         if (a < 0) a = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
-        sFontVEntry1E30* vt = (sFontVEntry1E30*)g->mVtbl;
-        vt[81].fn((char*)g + vt[81].delta, self, m, ((char*)self) + 0x50,
+        sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
+        vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, m, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
-        sDrawState* top2 = g->m_pCurrentDrawState;
+        sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1E30* vt = (sFontVEntry1E30*)g->mVtbl;
-    vt[81].fn((char*)g + vt[81].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
+    sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
+    vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -431,10 +431,10 @@ static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* p = (font->Glyphs) + mid;
-        if (c == p->code)
-            return p;
-        if (c < p->code)
+        tGlyph* glyph = (font->Glyphs) + mid;
+        if (c == glyph->code)
+            return glyph;
+        if (c < glyph->code)
             hi = mid;
         else
             lo = mid + 1;
@@ -457,7 +457,7 @@ static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
 extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono, float sx, float sy)
 {
-    cFont* f = f_;
+    cFont* font = f_;
     sRect1FB0* r = (sRect1FB0*)r_;
     sRect1FB0 tmp;
     sRect1FB0* rc = r ? r : &tmp;
@@ -468,15 +468,15 @@ extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono
     float x = 0.0f;
     float y = 0.0f;
     for (; *str; str++) {
-        tGlyph* g = sFontRes1FB0_find(f, *(unsigned char*)str);
-        if (g) {
-            float adv = g->advance * sx;
-            rc->x0 = (x + g->xoffset * sx) <? rc->x0;
-            rc->y0 = (y + g->yoffset * sy) <? rc->y0;
-            rc->y1 = (y + (g->yoffset + g->height) * sy) >? rc->y1;
+        tGlyph* glyph = sFontRes1FB0_find(font, *(unsigned char*)str);
+        if (glyph) {
+            float adv = glyph->advance * sx;
+            rc->x0 = (x + glyph->xoffset * sx) <? rc->x0;
+            rc->y0 = (y + glyph->yoffset * sy) <? rc->y0;
+            rc->y1 = (y + (glyph->yoffset + glyph->height) * sy) >? rc->y1;
             float nx;
             if (!mono) {
-                rc->x1 = (x + (g->xoffset + g->width) * sx) >? rc->x1;
+                rc->x1 = (x + (glyph->xoffset + glyph->width) * sx) >? rc->x1;
                 nx = x + adv;
             } else {
                 rc->x1 = (x + adv) >? rc->x1;
@@ -487,17 +487,17 @@ extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono
     }
     rc->x1 = rc->x1 + rc->x0;
     rc->y1 = rc->y1 + rc->y0;
-    if (f->ShadowOffset[0] < 0.0f) {
-        rc->x0 = rc->x0 - f->ShadowOffset[0];
-        rc->x1 = rc->x1 - f->ShadowOffset[0];
+    if (font->ShadowOffset[0] < 0.0f) {
+        rc->x0 = rc->x0 - font->ShadowOffset[0];
+        rc->x1 = rc->x1 - font->ShadowOffset[0];
     } else {
-        rc->x1 = rc->x1 + f->ShadowOffset[0];
+        rc->x1 = rc->x1 + font->ShadowOffset[0];
     }
-    if (f->ShadowOffset[1] < 0.0f) {
-        rc->y0 = rc->y0 - f->ShadowOffset[1];
-        rc->y1 = rc->y1 - f->ShadowOffset[1];
+    if (font->ShadowOffset[1] < 0.0f) {
+        rc->y0 = rc->y0 - font->ShadowOffset[1];
+        rc->y1 = rc->y1 - font->ShadowOffset[1];
     } else {
-        rc->y1 = rc->y1 + f->ShadowOffset[1];
+        rc->y1 = rc->y1 + font->ShadowOffset[1];
     }
     return rc->x1;
 }
@@ -522,10 +522,10 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* p = (font->Glyphs) + mid;
-        if (c == p->code)
-            return p;
-        if (c < p->code)
+        tGlyph* glyph = (font->Glyphs) + mid;
+        if (c == glyph->code)
+            return glyph;
+        if (c < glyph->code)
             hi = mid;
         else
             lo = mid + 1;
@@ -536,7 +536,7 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
 extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
 {
-    cFont* f = f_;
+    cFont* font = f_;
     sRect21F0* r = (sRect21F0*)r_;
     sRect21F0 tmp;
     sRect21F0* rc = r ? r : &tmp;
@@ -547,15 +547,15 @@ extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int
     float x = 0.0f;
     float y = 0.0f;
     for (; *s; s++) {
-        tGlyph* g = sFontRes21F0_find(f, *s);
-        if (g) {
-            float adv = g->advance * sx;
-            rc->x0 = (x + g->xoffset * sx) <? rc->x0;
-            rc->y0 = (y + g->yoffset * sy) <? rc->y0;
-            rc->y1 = (y + (g->yoffset + g->height) * sy) >? rc->y1;
+        tGlyph* glyph = sFontRes21F0_find(font, *s);
+        if (glyph) {
+            float adv = glyph->advance * sx;
+            rc->x0 = (x + glyph->xoffset * sx) <? rc->x0;
+            rc->y0 = (y + glyph->yoffset * sy) <? rc->y0;
+            rc->y1 = (y + (glyph->yoffset + glyph->height) * sy) >? rc->y1;
             float nx;
             if (!mono) {
-                rc->x1 = (x + (g->xoffset + g->width) * sx) >? rc->x1;
+                rc->x1 = (x + (glyph->xoffset + glyph->width) * sx) >? rc->x1;
                 nx = x + adv;
             } else {
                 rc->x1 = (x + adv) >? rc->x1;
@@ -566,17 +566,17 @@ extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int
     }
     rc->x1 = rc->x1 + rc->x0;
     rc->y1 = rc->y1 + rc->y0;
-    if (f->ShadowOffset[0] < 0.0f) {
-        rc->x0 = rc->x0 - f->ShadowOffset[0];
-        rc->x1 = rc->x1 - f->ShadowOffset[0];
+    if (font->ShadowOffset[0] < 0.0f) {
+        rc->x0 = rc->x0 - font->ShadowOffset[0];
+        rc->x1 = rc->x1 - font->ShadowOffset[0];
     } else {
-        rc->x1 = rc->x1 + f->ShadowOffset[0];
+        rc->x1 = rc->x1 + font->ShadowOffset[0];
     }
-    if (f->ShadowOffset[1] < 0.0f) {
-        rc->y0 = rc->y0 - f->ShadowOffset[1];
-        rc->y1 = rc->y1 - f->ShadowOffset[1];
+    if (font->ShadowOffset[1] < 0.0f) {
+        rc->y0 = rc->y0 - font->ShadowOffset[1];
+        rc->y1 = rc->y1 - font->ShadowOffset[1];
     } else {
-        rc->y1 = rc->y1 + f->ShadowOffset[1];
+        rc->y1 = rc->y1 + font->ShadowOffset[1];
     }
     return rc->x1;
 }
@@ -597,10 +597,10 @@ static inline tGlyph* sFontRes2430_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* p = (font->Glyphs) + mid;
-        if (c == p->code)
-            return p;
-        if (c < p->code)
+        tGlyph* glyph = (font->Glyphs) + mid;
+        if (c == glyph->code)
+            return glyph;
+        if (c < glyph->code)
             hi = mid;
         else
             lo = mid + 1;
@@ -619,8 +619,8 @@ static inline float fabs_2430(float x)
 // Copy as much of str into dst as fits in width; returns where the next line starts (0 when done).
 extern "C" char* func_00392430(cFont* f_, const char* str, char* dst, int max, float sx, float width)
 {
-    cFont* f = f_;
-    width -= fabs_2430(f->ShadowOffset[0]);
+    cFont* font = f_;
+    width -= fabs_2430(font->ShadowOffset[0]);
     if (width < 0.0f)
         width = 0.0f;
     const char* start = str;
@@ -643,11 +643,11 @@ extern "C" char* func_00392430(cFont* f_, const char* str, char* dst, int max, f
             if (k > 0 && start[k - 1] != ' ')
                 lastSpace = k - 1;
         }
-        tGlyph* g = sFontRes2430_find(f, *(unsigned char*)str);
-        if (g) {
-            float right = (g->xoffset + g->width) * sx;
+        tGlyph* glyph = sFontRes2430_find(font, *(unsigned char*)str);
+        if (glyph) {
+            float right = (glyph->xoffset + glyph->width) * sx;
             w += pend + right;
-            pend = g->advance * sx - right;
+            pend = glyph->advance * sx - right;
         }
         if (width <= w) {
             if (lastSpace == -1) {
@@ -690,10 +690,10 @@ static inline tGlyph* sFontRes2680_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* p = (font->Glyphs) + mid;
-        if (c == p->code)
-            return p;
-        if (c < p->code)
+        tGlyph* glyph = (font->Glyphs) + mid;
+        if (c == glyph->code)
+            return glyph;
+        if (c < glyph->code)
             hi = mid;
         else
             lo = mid + 1;
@@ -712,8 +712,8 @@ static inline float fabs_2680(float x)
 // Unicode version of func_00392430: copies as much of str into dst as fits in width; returns the next line start (0 when done).
 extern "C" unsigned short* func_00392680(cFont* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
 {
-    cFont* f = f_;
-    width -= fabs_2680(f->ShadowOffset[0]);
+    cFont* font = f_;
+    width -= fabs_2680(font->ShadowOffset[0]);
     if (width < 0.0f)
         width = 0.0f;
     const unsigned short* start = str;
@@ -736,11 +736,11 @@ extern "C" unsigned short* func_00392680(cFont* f_, float sx, float width, const
             if (k > 0 && start[k - 1] != ' ')
                 lastSpace = k - 1;
         }
-        tGlyph* g = sFontRes2680_find(f, *str);
-        if (g) {
-            float right = (g->xoffset + g->width) * sx;
+        tGlyph* glyph = sFontRes2680_find(font, *str);
+        if (glyph) {
+            float right = (glyph->xoffset + glyph->width) * sx;
             w += pend + right;
-            pend = g->advance * sx - right;
+            pend = glyph->advance * sx - right;
         }
         if (width <= w) {
             if (lastSpace == -1) {
@@ -885,10 +885,10 @@ static inline tGlyph* findGlyph(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* g = &(font->Glyphs)[mid];
-        if (c == g->code)
-            return g;
-        if (c < g->code)
+        tGlyph* glyph = &(font->Glyphs)[mid];
+        if (c == glyph->code)
+            return glyph;
+        if (c < glyph->code)
             hi = mid;
         else
             lo = mid + 1;
@@ -898,9 +898,9 @@ static inline tGlyph* findGlyph(cFont* font, int c)
 
 extern "C" float func_00392BA8(cFont* font, char c)
 {
-    tGlyph* g = findGlyph((font), c);
-    if (g)
-        return g->advance;
+    tGlyph* glyph = findGlyph((font), c);
+    if (glyph)
+        return glyph->advance;
     return 0.0f;
 }
 #endif
@@ -910,9 +910,9 @@ INCLUDE_ASM("render/font", func_00392C60);
 #ifdef SKIP_ASM
 extern "C" float func_00392C60(cFont* font, unsigned short c)
 {
-    tGlyph* g = findGlyph((font), c);
-    if (g)
-        return g->advance;
+    tGlyph* glyph = findGlyph((font), c);
+    if (glyph)
+        return glyph->advance;
     return 0.0f;
 }
 #endif
@@ -945,20 +945,20 @@ extern "C" void cPlayerLights_Clear(cPlayerLights* self)
 //100%
 INCLUDE_ASM("render/font", func_00392D58);
 #ifdef SKIP_ASM
-extern "C" void func_00392D58(cPlayerLights* arg0, void *arg1) {
-    (arg0->mExtraAmbientLight.R) = (float) ((arg0->mExtraAmbientLight.R) + (*(float *)((char*)(arg1) + (0))));
-    (arg0->mExtraAmbientLight.G) = (float) ((arg0->mExtraAmbientLight.G) + (*(float *)((char*)(arg1) + (4))));
-    (arg0->mExtraAmbientLight.B) = (float) ((arg0->mExtraAmbientLight.B) + (*(float *)((char*)(arg1) + (8))));
+extern "C" void func_00392D58(cPlayerLights* playerLights, void *arg1) {
+    (playerLights->mExtraAmbientLight.R) = (float) ((playerLights->mExtraAmbientLight.R) + (*(float *)((char*)(arg1) + (0))));
+    (playerLights->mExtraAmbientLight.G) = (float) ((playerLights->mExtraAmbientLight.G) + (*(float *)((char*)(arg1) + (4))));
+    (playerLights->mExtraAmbientLight.B) = (float) ((playerLights->mExtraAmbientLight.B) + (*(float *)((char*)(arg1) + (8))));
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/font", cPlayerLights_AddDirectional);
 #ifdef SKIP_ASM
-extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* q, tRGB* v)
+extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* direction, tRGB* colour)
 {
-    ((&self->mDirectionalLightColours[0]))[self->mNumDirectionalLights] = *v;
-    ((sFontQuad*)&self->mDirectionalLightDirections[0])[self->mNumDirectionalLights] = *q;
+    ((&self->mDirectionalLightColours[0]))[self->mNumDirectionalLights] = *colour;
+    ((sFontQuad*)&self->mDirectionalLightDirections[0])[self->mNumDirectionalLights] = *direction;
     self->mNumDirectionalLights++;
 }
 #endif
@@ -966,8 +966,8 @@ extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* q, 
 //100%
 INCLUDE_ASM("render/font", func_00392DE0);
 #ifdef SKIP_ASM
-extern "C" void func_00392DE0(cPlayerLights* arg0, int arg1) {
-    (arg0->mPlayerIsAdditive) = arg1;
+extern "C" void func_00392DE0(cPlayerLights* playerLights, int arg1) {
+    (playerLights->mPlayerIsAdditive) = arg1;
 }
 #endif
 
@@ -1158,29 +1158,29 @@ int func_00394018(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394020);
 #ifdef SKIP_ASM
-extern "C" void func_00394020(cPS2GraphicsMan* arg0, int arg1) {
-    (arg0->mNumViews) = arg1;
+extern "C" void func_00394020(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
+    (ps2GraphicsMan->mNumViews) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394028);
 #ifdef SKIP_ASM
-extern "C" int func_00394028(cPS2GraphicsMan* arg0) {
-    return (arg0->mNumViews);
+extern "C" int func_00394028(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (ps2GraphicsMan->mNumViews);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394030);
 #ifdef SKIP_ASM
-extern "C" void func_00394030(cPS2GraphicsMan* arg0, int arg1) {
-    (arg0->mViewIndex) = arg1;
+extern "C" void func_00394030(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
+    (ps2GraphicsMan->mViewIndex) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394038);
 #ifdef SKIP_ASM
-extern "C" int func_00394038(cPS2GraphicsMan* arg0) {
-    return (arg0->mViewIndex);
+extern "C" int func_00394038(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (ps2GraphicsMan->mViewIndex);
 }
 #endif
 //100%
@@ -1527,22 +1527,22 @@ extern "C" void func_00394328(cPS2GraphicsMan* self, sDrawState* src)
 //100%
 INCLUDE_ASM("render/font", func_00394358);
 #ifdef SKIP_ASM
-extern "C" int func_00394358(cPS2GraphicsMan* arg0) {
-    return ((int)arg0->m_pCurrentDrawState);
+extern "C" int func_00394358(cPS2GraphicsMan* ps2GraphicsMan) {
+    return ((int)ps2GraphicsMan->m_pCurrentDrawState);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394360);
 #ifdef SKIP_ASM
-extern "C" int func_00394360(cPS2GraphicsMan* arg0) {
-    return ((int)arg0->m_pCurrentDrawState);
+extern "C" int func_00394360(cPS2GraphicsMan* ps2GraphicsMan) {
+    return ((int)ps2GraphicsMan->m_pCurrentDrawState);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394368);
 #ifdef SKIP_ASM
-extern "C" void func_00394368(cPS2GraphicsMan* arg0, int arg1) {
-    int *p = (int*)arg0->m_pCurrentDrawState;
+extern "C" void func_00394368(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
+    int *p = (int*)ps2GraphicsMan->m_pCurrentDrawState;
     int m = (arg1 << 22) & 0x400000;
     p[1] = (p[1] & ~0x400000) | m;
 }
@@ -1550,10 +1550,10 @@ extern "C" void func_00394368(cPS2GraphicsMan* arg0, int arg1) {
 //100%
 INCLUDE_ASM("render/font", func_00394398);
 #ifdef SKIP_ASM
-extern "C" void func_00394398(cPS2GraphicsMan* arg0, int arg1) {
+extern "C" void func_00394398(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
     void *temp_6;
 
-    temp_6 = ((void*)arg0->m_pCurrentDrawState);
+    temp_6 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
     (*(int *)((char*)(temp_6) + (8))) = (int) (((*(int *)((char*)(temp_6) + (8))) & ~0x3E0) | ((arg1 << 5) & 0x3E0));
 }
 #endif
@@ -1582,12 +1582,12 @@ extern "C" sFontV4 func_00394418(cPS2GraphicsMan* self, sFontV4 v, int idx)
 //100%
 INCLUDE_ASM("render/font", func_00394470);
 #ifdef SKIP_ASM
-extern "C" void func_00394470(cPS2GraphicsMan* arg0, int arg1, int arg2) {
+extern "C" void func_00394470(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg2) {
     int temp_2;
     int temp_4;
     void *temp_7;
 
-    temp_7 = ((void*)arg0->m_pCurrentDrawState);
+    temp_7 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
     temp_2 = (arg2 * 5) + 2;
     temp_4 = 0x1F << temp_2;
     (*(int *)((char*)(temp_7) + (4))) = (int) (((*(int *)((char*)(temp_7) + (4))) & ~temp_4) | ((arg1 << temp_2) & temp_4));
@@ -1596,25 +1596,25 @@ extern "C" void func_00394470(cPS2GraphicsMan* arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("render/font", func_003944A8);
 #ifdef SKIP_ASM
-extern "C" void func_003944A8(cPS2GraphicsMan* arg0, int arg1, int arg2) {
+extern "C" void func_003944A8(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg2) {
     void *temp_3;
     void *temp_8;
 
-    temp_8 = ((void*)arg0->m_pCurrentDrawState);
+    temp_8 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
     (*(int *)((char*)(temp_8) + (4))) = (int) (((*(int *)((char*)(temp_8) + (4))) & ~3) | (arg1 & 3));
-    temp_3 = ((void*)arg0->m_pCurrentDrawState);
+    temp_3 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
     (*(int *)((char*)(temp_3) + (8))) = (int) (((*(int *)((char*)(temp_3) + (8))) & 0xE00003FF) | ((arg2 << 0xA) & 0x1FFFFC00));
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003944F8);
 #ifdef SKIP_ASM
-extern "C" void func_003944F8(cPS2GraphicsMan* arg0, int arg1, int arg2) {
+extern "C" void func_003944F8(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg2) {
     int *temp_7;
     int temp_4;
     int temp_6;
 
-    temp_7 = ((int*)arg0->m_pCurrentDrawState);
+    temp_7 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
     temp_6 = (arg2 * 2) + 2;
     temp_4 = 3 << temp_6;
     *temp_7 = (*temp_7 & ~temp_4) | ((arg1 << temp_6) & temp_4);
@@ -1623,8 +1623,8 @@ extern "C" void func_003944F8(cPS2GraphicsMan* arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("render/font", func_00394530);
 #ifdef SKIP_ASM
-extern "C" void func_00394530(cPS2GraphicsMan* arg0, int arg1) {
-    int *p = (int*)arg0->m_pCurrentDrawState;
+extern "C" void func_00394530(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
+    int *p = (int*)ps2GraphicsMan->m_pCurrentDrawState;
     int m = arg1 & 0x3FFFFFFF;
     p[3] = (p[3] & 0xC0000000) | m;
 }
@@ -1632,29 +1632,29 @@ extern "C" void func_00394530(cPS2GraphicsMan* arg0, int arg1) {
 //100%
 INCLUDE_ASM("render/font", func_00394558);
 #ifdef SKIP_ASM
-extern "C" unsigned int func_00394558(cPS2GraphicsMan* arg0) {
-    return (unsigned int) ((*(int *)((char*)((arg0->m_pCurrentDrawState)) + (8))) & 0x3E0) >> 5;
+extern "C" unsigned int func_00394558(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x3E0) >> 5;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394570);
 #ifdef SKIP_ASM
-extern "C" unsigned int func_00394570(cPS2GraphicsMan* arg0) {
-    return (unsigned int) ((*(int *)((char*)((arg0->m_pCurrentDrawState)) + (4))) & 0x7C) >> 2;
+extern "C" unsigned int func_00394570(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (4))) & 0x7C) >> 2;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394588);
 #ifdef SKIP_ASM
-extern "C" int func_00394588(cPS2GraphicsMan* arg0) {
-    return (*(int *)((char*)((arg0->m_pCurrentDrawState)) + (4))) & 3;
+extern "C" int func_00394588(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (4))) & 3;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394598);
 #ifdef SKIP_ASM
-extern "C" unsigned int func_00394598(cPS2GraphicsMan* arg0) {
-    return (unsigned int) ((*(int *)((char*)((arg0->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 0xA;
+extern "C" unsigned int func_00394598(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 0xA;
 }
 #endif
 
@@ -1717,8 +1717,8 @@ void func_003945E8(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003945F0);
 #ifdef SKIP_ASM
-extern "C" int func_003945F0(cPS2GraphicsMan* arg0) {
-    return (arg0->mNumTexRefs);
+extern "C" int func_003945F0(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (ps2GraphicsMan->mNumTexRefs);
 }
 #endif
 //100%
@@ -1869,15 +1869,15 @@ extern "C" int func_00394690(void) {
 //100%
 INCLUDE_ASM("render/font", func_00394698);
 #ifdef SKIP_ASM
-extern "C" void func_00394698(cPS2GraphicsMan* arg0, int arg1) {
-    (arg0->mSpecTexID) = arg1;
+extern "C" void func_00394698(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
+    (ps2GraphicsMan->mSpecTexID) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003946A0);
 #ifdef SKIP_ASM
-extern "C" int func_003946A0(cPS2GraphicsMan* arg0) {
-    return (arg0->mSpecTexID);
+extern "C" int func_003946A0(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (ps2GraphicsMan->mSpecTexID);
 }
 #endif
 //100%
@@ -1897,22 +1897,22 @@ extern "C" int func_003946B8(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003946C8);
 #ifdef SKIP_ASM
-extern "C" void func_003946C8(cPS2GraphicsMan* arg0, int arg1) {
-    (arg0->mPatchSpecTexID) = arg1;
+extern "C" void func_003946C8(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
+    (ps2GraphicsMan->mPatchSpecTexID) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003946D0);
 #ifdef SKIP_ASM
-extern "C" int func_003946D0(cPS2GraphicsMan* arg0) {
-    return (arg0->mPatchSpecTexID);
+extern "C" int func_003946D0(cPS2GraphicsMan* ps2GraphicsMan) {
+    return (ps2GraphicsMan->mPatchSpecTexID);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003946D8);
 #ifdef SKIP_ASM
-extern "C" void func_003946D8(cPS2GraphicsMan* arg0) {
-    (arg0->mSkipNextPageFlip) = 1;
+extern "C" void func_003946D8(cPS2GraphicsMan* ps2GraphicsMan) {
+    (ps2GraphicsMan->mSkipNextPageFlip) = 1;
 }
 #endif
 
@@ -2305,15 +2305,15 @@ extern "C" int func_00394C18(cPSPBezierMan* base, int shift, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394C30);
 #ifdef SKIP_ASM
-extern "C" int func_00394C30(cPSPBezierMan* arg0) {
-    return (*(int *)((char*)(arg0) + (0x1A0)));
+extern "C" int func_00394C30(cPSPBezierMan* pspBezierMan) {
+    return (*(int *)((char*)(pspBezierMan) + (0x1A0)));
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00394C38);
 #ifdef SKIP_ASM
-extern "C" int func_00394C38(cPSPBezierMan* arg0) {
-    return (*(int *)((char*)(arg0) + (0x320)));
+extern "C" int func_00394C38(cPSPBezierMan* pspBezierMan) {
+    return (*(int *)((char*)(pspBezierMan) + (0x320)));
 }
 #endif
 //100%
@@ -2875,32 +2875,32 @@ extern "C" char* func_00395430(cPS2GraphicsMan* base, int idx)
 //100%
 INCLUDE_ASM("render/font", func_00395448);
 #ifdef SKIP_ASM
-extern "C" void func_00395448(cPS2GraphicsMan* arg0, int arg1) {
+extern "C" void func_00395448(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
     int *temp_6;
 
-    temp_6 = ((int*)arg0->m_pCurrentDrawState);
+    temp_6 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
     *temp_6 = (*temp_6 & ~0x3C0) | ((arg1 << 6) & 0x3C0);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00395470);
 #ifdef SKIP_ASM
-extern "C" void func_00395470(cPS2GraphicsMan* arg0, int arg1) {
+extern "C" void func_00395470(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
     int *temp_6;
 
-    temp_6 = ((int*)arg0->m_pCurrentDrawState);
+    temp_6 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
     *temp_6 = (*temp_6 & ~0xC00) | ((arg1 << 0xA) & 0xC00);
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00395498);
 #ifdef SKIP_ASM
-extern "C" void func_00395498(cPS2GraphicsMan* arg0, int arg1, int arg2) {
+extern "C" void func_00395498(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg2) {
     int *temp_7;
     int temp_3;
     int temp_6;
 
-    temp_7 = ((int*)arg0->m_pCurrentDrawState);
+    temp_7 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
     temp_6 = (arg2 * 8) + 0xC;
     temp_3 = 0xFF << temp_6;
     *temp_7 = (*temp_7 & ~temp_3) | (((arg1 & 0xFF) << temp_6) & temp_3);

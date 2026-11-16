@@ -2960,27 +2960,27 @@ extern "C" void func_003950C0(sViewportStack* dst, sViewportStack* src);
 
 extern "C" void func_003765B8(cPS2GraphicsMan* self)
 {
-    sViewportStack* v = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    (*(sPtScis65B8*)&v->mScissor[0]) = (*(sPtScis65B8*)&self->mScissor[0]);
-    v->mDeferScissorIndex = *(int*)((char*)self->mpDeferMan + 0x69CC4);
-    v->unk_024 = self->unk_590C;
-    v->unk_028 = self->unk_5908;
-    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mScreenMatrix), &(*(sPtMtx65B8*)&self->mScreenMatrix));
-    (*(sPtQ65B8*)&v->unk_030) = (*(sPtQ65B8*)&self->unk_6B70);
-    (*(sPtQ65B8*)&v->unk_040) = (*(sPtQ65B8*)&self->unk_6B80);
-    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mWorld), &(*(sPtMtx65B8*)&self->mWorld));
-    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mView), &(*(sPtMtx65B8*)&self->mView));
-    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mGuardBandMatrix), &(*(sPtMtx65B8*)&self->mGuardBandMatrix));
-    (*(sPtQ65B8*)&v->mGuardScale) = (*(sPtQ65B8*)&self->mGuardScale);
-    (*(sPtQ65B8*)&v->mGuardOffset) = (*(sPtQ65B8*)&self->mGuardOffset);
-    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mViewProj), &(*(sPtMtx65B8*)&self->mViewProj));
-    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mNetMatrix), &(*(sPtMtx65B8*)&self->mNetMatrix));
-    (*(sPtQ65B8*)&v->mScreenScale) = (*(sPtQ65B8*)&self->mScreenScale);
-    (*(sPtQ65B8*)&v->mScreenOffset) = (*(sPtQ65B8*)&self->mScreenOffset);
-    v->unk_02C = self->unk_5910;
-    (*(sPtQ65B8*)&v->unk_050) = (*(sPtQ65B8*)&self->unk_5920);
+    sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    (*(sPtScis65B8*)&viewportStack->mScissor[0]) = (*(sPtScis65B8*)&self->mScissor[0]);
+    viewportStack->mDeferScissorIndex = *(int*)((char*)self->mpDeferMan + 0x69CC4);
+    viewportStack->unk_024 = self->unk_590C;
+    viewportStack->unk_028 = self->unk_5908;
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&viewportStack->mScreenMatrix), &(*(sPtMtx65B8*)&self->mScreenMatrix));
+    (*(sPtQ65B8*)&viewportStack->unk_030) = (*(sPtQ65B8*)&self->unk_6B70);
+    (*(sPtQ65B8*)&viewportStack->unk_040) = (*(sPtQ65B8*)&self->unk_6B80);
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&viewportStack->mWorld), &(*(sPtMtx65B8*)&self->mWorld));
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&viewportStack->mView), &(*(sPtMtx65B8*)&self->mView));
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&viewportStack->mGuardBandMatrix), &(*(sPtMtx65B8*)&self->mGuardBandMatrix));
+    (*(sPtQ65B8*)&viewportStack->mGuardScale) = (*(sPtQ65B8*)&self->mGuardScale);
+    (*(sPtQ65B8*)&viewportStack->mGuardOffset) = (*(sPtQ65B8*)&self->mGuardOffset);
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&viewportStack->mViewProj), &(*(sPtMtx65B8*)&self->mViewProj));
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&viewportStack->mNetMatrix), &(*(sPtMtx65B8*)&self->mNetMatrix));
+    (*(sPtQ65B8*)&viewportStack->mScreenScale) = (*(sPtQ65B8*)&self->mScreenScale);
+    (*(sPtQ65B8*)&viewportStack->mScreenOffset) = (*(sPtQ65B8*)&self->mScreenOffset);
+    viewportStack->unk_02C = self->unk_5910;
+    (*(sPtQ65B8*)&viewportStack->unk_050) = (*(sPtQ65B8*)&self->unk_5920);
     self->mViewportDepth++;
-    func_003950C0(&((&self->mViewportStack[0]))[self->mViewportDepth], v);
+    func_003950C0(&((&self->mViewportStack[0]))[self->mViewportDepth], viewportStack);
 }
 #endif
 
@@ -3053,29 +3053,29 @@ extern "C" void func_00364B88(void* table, void* key);
 extern "C" void func_00376768(cPS2GraphicsMan* self)
 {
     self->mViewportDepth--;
-    sViewportStack* v = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    (*(sPtScis6768*)&self->mScissor[0]) = (*(sPtScis6768*)&v->mScissor[0]);
-    if (v->mDeferScissorIndex == -1) {
+    sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    (*(sPtScis6768*)&self->mScissor[0]) = (*(sPtScis6768*)&viewportStack->mScissor[0]);
+    if (viewportStack->mDeferScissorIndex == -1) {
         func_00364B88((char*)self->mpDeferMan, &(*(sPtScis6768*)&self->mScissor[0]));
     } else {
-        *(int*)((char*)self->mpDeferMan + 0x69CC4) = v->mDeferScissorIndex;
+        *(int*)((char*)self->mpDeferMan + 0x69CC4) = viewportStack->mDeferScissorIndex;
     }
-    self->unk_590C = v->unk_024;
-    self->unk_5908 = v->unk_028;
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mScreenMatrix), &(*(sPtMtx6768*)&v->mScreenMatrix));
-    (*(sPtQ6768*)&self->unk_6B70) = (*(sPtQ6768*)&v->unk_030);
-    (*(sPtQ6768*)&self->unk_6B80) = (*(sPtQ6768*)&v->unk_040);
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mWorld), &(*(sPtMtx6768*)&v->mWorld));
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mView), &(*(sPtMtx6768*)&v->mView));
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mGuardBandMatrix), &(*(sPtMtx6768*)&v->mGuardBandMatrix));
-    (*(sPtQ6768*)&self->mGuardScale) = (*(sPtQ6768*)&v->mGuardScale);
-    (*(sPtQ6768*)&self->mGuardOffset) = (*(sPtQ6768*)&v->mGuardOffset);
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mViewProj), &(*(sPtMtx6768*)&v->mViewProj));
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mNetMatrix), &(*(sPtMtx6768*)&v->mNetMatrix));
-    (*(sPtQ6768*)&self->mScreenScale) = (*(sPtQ6768*)&v->mScreenScale);
-    (*(sPtQ6768*)&self->mScreenOffset) = (*(sPtQ6768*)&v->mScreenOffset);
-    self->unk_5910 = v->unk_02C;
-    (*(sPtQ6768*)&self->unk_5920) = (*(sPtQ6768*)&v->unk_050);
+    self->unk_590C = viewportStack->unk_024;
+    self->unk_5908 = viewportStack->unk_028;
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mScreenMatrix), &(*(sPtMtx6768*)&viewportStack->mScreenMatrix));
+    (*(sPtQ6768*)&self->unk_6B70) = (*(sPtQ6768*)&viewportStack->unk_030);
+    (*(sPtQ6768*)&self->unk_6B80) = (*(sPtQ6768*)&viewportStack->unk_040);
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mWorld), &(*(sPtMtx6768*)&viewportStack->mWorld));
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mView), &(*(sPtMtx6768*)&viewportStack->mView));
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mGuardBandMatrix), &(*(sPtMtx6768*)&viewportStack->mGuardBandMatrix));
+    (*(sPtQ6768*)&self->mGuardScale) = (*(sPtQ6768*)&viewportStack->mGuardScale);
+    (*(sPtQ6768*)&self->mGuardOffset) = (*(sPtQ6768*)&viewportStack->mGuardOffset);
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mViewProj), &(*(sPtMtx6768*)&viewportStack->mViewProj));
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mNetMatrix), &(*(sPtMtx6768*)&viewportStack->mNetMatrix));
+    (*(sPtQ6768*)&self->mScreenScale) = (*(sPtQ6768*)&viewportStack->mScreenScale);
+    (*(sPtQ6768*)&self->mScreenOffset) = (*(sPtQ6768*)&viewportStack->mScreenOffset);
+    self->unk_5910 = viewportStack->unk_02C;
+    (*(sPtQ6768*)&self->unk_5920) = (*(sPtQ6768*)&viewportStack->unk_050);
     self->mMatricesValid = 0;
 }
 #endif
@@ -3238,10 +3238,10 @@ struct sPartSys {
 
 extern "C" void func_00376C28(cPS2GraphicsMan* self, float* a, float* b, float* c)
 {
-    sViewportStack* e = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *a = e->unk_010[2];
-    *b = e->unk_010[0];
-    *c = e->unk_010[1];
+    sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    *a = viewportStack->unk_010[2];
+    *b = viewportStack->unk_010[0];
+    *c = viewportStack->unk_010[1];
 }
 #endif
 

@@ -11943,9 +11943,9 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
         sys->mBank[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = a;
         sys->mPatch[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = key;
         {
-            cCrowdSys* s2 = D_004A36F8;
-            ((sSnd5D08Mgr*)s2->mpVBankManager)->sub.tgt[((sSnd5D08Mgr*)s2->mpVBankManager)->sub.cur] = &found->grp->vec;
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)s2->mpVBankManager;
+            cCrowdSys* crowdSys = D_004A36F8;
+            ((sSnd5D08Mgr*)crowdSys->mpVBankManager)->sub.tgt[((sSnd5D08Mgr*)crowdSys->mpVBankManager)->sub.cur] = &found->grp->vec;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)crowdSys->mpVBankManager;
             sSnd5D08Sub* ss = &m2->sub;
             ss->vals[m2->sub.cur] = found->v4;
             ss->ch[m2->sub.cur].vol = SND_5D08_MAX(0, SND_5D08_MIN(ss->vals[ss->cur], 0x7F));
@@ -12659,9 +12659,9 @@ extern "C" void func_002A64A0(cCrowdInstance* voice, int a1);
 
 extern "C" void func_002A73A8(cCrowdSys* self, int a1, int i)
 {
-    cCrowdInstance* v = self->mpCrowdInstances;
-    if (v != 0) {
-        func_002A64A0((cCrowdInstance*)(&v[i]), a1);
+    cCrowdInstance* crowdInstance = self->mpCrowdInstances;
+    if (crowdInstance != 0) {
+        func_002A64A0((cCrowdInstance*)(&crowdInstance[i]), a1);
     }
 }
 #endif
@@ -12673,9 +12673,9 @@ extern "C" void func_002A6648(cCrowdInstance* voice, int a1);
 
 extern "C" void func_002A73D8(cCrowdSys* self, int a1, int i)
 {
-    cCrowdInstance* v = self->mpCrowdInstances;
-    if (v != 0) {
-        func_002A6648((cCrowdInstance*)(&v[i]), a1);
+    cCrowdInstance* crowdInstance = self->mpCrowdInstances;
+    if (crowdInstance != 0) {
+        func_002A6648((cCrowdInstance*)(&crowdInstance[i]), a1);
     }
 }
 #endif
@@ -12687,9 +12687,9 @@ extern "C" void func_002A67F0(cCrowdInstance* voice);
 
 extern "C" void func_002A7408(cCrowdSys* self, int i)
 {
-    cCrowdInstance* v = self->mpCrowdInstances;
-    if (v != 0) {
-        func_002A67F0((cCrowdInstance*)(&v[i]));
+    cCrowdInstance* crowdInstance = self->mpCrowdInstances;
+    if (crowdInstance != 0) {
+        func_002A67F0((cCrowdInstance*)(&crowdInstance[i]));
     }
 }
 #endif
@@ -12701,9 +12701,9 @@ extern "C" void func_002A6808(cCrowdInstance* voice);
 
 extern "C" void func_002A7438(cCrowdSys* self, int i)
 {
-    cCrowdInstance* v = self->mpCrowdInstances;
-    if (v != 0) {
-        func_002A6808((cCrowdInstance*)(&v[i]));
+    cCrowdInstance* crowdInstance = self->mpCrowdInstances;
+    if (crowdInstance != 0) {
+        func_002A6808((cCrowdInstance*)(&crowdInstance[i]));
     }
 }
 #endif
@@ -12787,12 +12787,12 @@ extern "C" int func_002A5D08(void* voice, void* bank, int a1);
 
 extern "C" int func_002A7678(cCrowdSys* self, int a1)
 {
-    cCrowdInstance* v = self->mpCrowdInstances;
-    if (v == 0) {
+    cCrowdInstance* crowdInstance = self->mpCrowdInstances;
+    if (crowdInstance == 0) {
         return -1;
     }
     char* p = *(char**)self + 0x1D8;
-    int r = func_002A5D08(&v[(*(int**)(p + 0x64))[*(int*)(p + 0x1C)]], p, a1);
+    int r = func_002A5D08(&crowdInstance[(*(int**)(p + 0x64))[*(int*)(p + 0x1C)]], p, a1);
     if (r >= 0) {
         char* q = *(char**)self + 0x1D8;
         r = (r << 8) | (*(int**)(q + 0x64))[*(int*)(q + 0x1C)];
@@ -13641,7 +13641,7 @@ INCLUDE_ASM("sound/soundsys", func_002A8B28);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002A86B8(char** sys);
 
-extern "C" int func_002A8B28(cMidiSys* unused, char* obj)
+extern "C" int func_002A8B28(cMidiSys* midiSys, char* obj)
 {
     func_002A8450((char**)D_004A3744, *(int*)(obj + 0x1C), *(int*)(obj + 0x20));
     sSnd8450Mgr* m = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
@@ -13890,31 +13890,31 @@ extern "C" int func_002A8FD8(cPS2SoundManager* self, int size)
     int i = self->unk_318;
     if (i >= 0) {
         tPS2SoundMemNode* prev = 0;
-        tPS2SoundMemNode* b = &((&self->mNodes[0]))[i];
+        tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[i];
         for (;;) {
-            if (b->size == size) {
-                b->state = 2;
+            if (ps2SoundMemNode->size == size) {
+                ps2SoundMemNode->state = 2;
                 if (prev) {
-                    prev->next = b->next;
+                    prev->next = ps2SoundMemNode->next;
                 }
-                b->next = -1;
-                return b->index;
+                ps2SoundMemNode->next = -1;
+                return ps2SoundMemNode->index;
             }
-            if (size < b->size) {
+            if (size < ps2SoundMemNode->size) {
                 tPS2SoundMemNode* n = func_002A92B8_v(((sSndSys8CB0*)self));
-                int top = b->highAddr;
+                int top = ps2SoundMemNode->highAddr;
                 n->state = 2;
                 n->next = -1;
                 n->highAddr = top;
                 n->lowAddr = top - size;
                 n->size = size;
-                b->highAddr = top - size;
-                b->size -= size;
+                ps2SoundMemNode->highAddr = top - size;
+                ps2SoundMemNode->size -= size;
                 return n->index;
             }
-            if (b->next < 0) break;
-            prev = b;
-            b = &((&self->mNodes[0]))[b->next];
+            if (ps2SoundMemNode->next < 0) break;
+            prev = ps2SoundMemNode;
+            ps2SoundMemNode = &((&self->mNodes[0]))[ps2SoundMemNode->next];
         }
     }
     int avail = 0;
@@ -13949,10 +13949,10 @@ extern "C" void func_002A9128(cPS2SoundManager* self, int i)
     if (n->lowAddr == self->mMainMemHighAddr) {
         func_002A92F8_v(((sSndSys8CB0*)self), n);
         while (self->unk_318 >= 0) {
-            tPS2SoundMemNode* e = &((&self->mNodes[0]))[self->unk_318];
-            if (e->lowAddr != self->mMainMemHighAddr) return;
-            self->unk_318 = e->next;
-            func_002A92F8_v(((sSndSys8CB0*)self), e);
+            tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[self->unk_318];
+            if (ps2SoundMemNode->lowAddr != self->mMainMemHighAddr) return;
+            self->unk_318 = ps2SoundMemNode->next;
+            func_002A92F8_v(((sSndSys8CB0*)self), ps2SoundMemNode);
         }
     } else if (self->unk_318 < 0) {
         n->next = self->unk_318;
@@ -14001,8 +14001,8 @@ struct sSndPool2A9250 {
 extern "C" void func_002A9250(cPS2SoundManager* self, int i)
 {
     self->unk_31C = 1;
-    tPS2SoundMemNode* e = &((&self->mNodes[0]))[i];
-    func_003B5B20(e->lowAddr, e->highAddr);
+    tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[i];
+    func_003B5B20(ps2SoundMemNode->lowAddr, ps2SoundMemNode->highAddr);
 }
 #endif
 
@@ -14035,10 +14035,10 @@ extern "C" tPS2SoundMemNode* func_002A92B8(cPS2SoundManager* self)
     if (i < 0) {
         return 0;
     }
-    tPS2SoundMemNode* e = &((&self->mNodes[0]))[i];
-    self->unk_310 = e->next;
-    e->next = -1;
-    return e;
+    tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[i];
+    self->unk_310 = ps2SoundMemNode->next;
+    ps2SoundMemNode->next = -1;
+    return ps2SoundMemNode;
 }
 #endif
 

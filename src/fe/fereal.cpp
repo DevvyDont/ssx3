@@ -277,8 +277,8 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             int one = 1;
             void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
-            cBERaceDB* g = &(*(&cBENewRaceInterface_newRace));
-            switch (g->cGamePath) {
+            cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+            switch (beRaceDB->cGamePath) {
             case 1:
                 return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 0);
             case 0: {
@@ -286,9 +286,9 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                 cBENewRaceInterface_setGameEvent(nr, 12);
                 if (func_00145C38(pl, 0)) {
                     D_004A11B8 = one;
-                    g->iLocationIdx = 14;
+                    beRaceDB->iLocationIdx = 14;
                 } else {
-                    g->iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
+                    beRaceDB->iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
                     D_004A11B8 = one;
                 }
                 sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
@@ -978,9 +978,9 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
 
 extern "C" void func_001A2190(void* self)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sVEntry001A2190* vt = (sVEntry001A2190*)g->mVtbl;
-    vt[19].fn((char*)g + vt[19].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
+    vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
     func_001A2BC0(self);
     func_001A04C8((char*)self + 0xB0);
     func_0019CF40((char*)self + 0x1A70);
@@ -1060,16 +1060,16 @@ static inline sFeWorld* feW() { return (sFeWorld*)GrMan; }
 
 static inline void feCall(int slot)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sFeVE* vt = (sFeVE*)g->mVtbl;
-    ((void (*)(void*))vt[slot].fn)((char*)g + vt[slot].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+    ((void (*)(void*))vt[slot].fn)((char*)ps2GraphicsMan + vt[slot].delta);
 }
 
 static inline unsigned int feCallU(int slot)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sFeVE* vt = (sFeVE*)g->mVtbl;
-    return ((unsigned int (*)(void*))vt[slot].fn)((char*)g + vt[slot].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+    return ((unsigned int (*)(void*))vt[slot].fn)((char*)ps2GraphicsMan + vt[slot].delta);
 }
 
 extern "C" int func_001A2208(void* self)

@@ -505,9 +505,9 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             break;
         char* newRace = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         char* newPlayer = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+        cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         cGameModeMan* gm = D_004A28A8_date->gm;
-        int mode = r->cGameEvent;
+        int mode = beRaceDB->cGameEvent;
         if (mode < first || mode > last)
             cGameModeMan_initGameMode(gm, mode);
         int numAI = gm->iNumberAI - gm->iSimAI;
@@ -545,8 +545,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
     case 3: {
         if (cAI_isAILoadedAndReady(D_004A2C68_date->race)) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-            int m = r->cGameMode;
+            cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+            int m = beRaceDB->cGameMode;
             if (m == 0) {
                 func_001289F0(D_004A2C68_date->race);
                 if (D_004A2C68_date->race->f80 > 0)
@@ -670,9 +670,9 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
         *(int*)((char*)self + 0x1C) = 1;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 0xD));
-    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-    int flag = r->cGamePath;
-    int mode = r->cGameMode;
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+    int flag = beRaceDB->cGamePath;
+    int mode = beRaceDB->cGameMode;
     if (flag == 0 && !inRange_2355C0(*(int*)((char*)SSXApp->Game->SectionMan + 0x1BC))) {
         *(int*)((char*)self + 0x4) = 0;
         *(int*)((char*)self + 0x0) = 4;
@@ -774,12 +774,12 @@ extern "C" void cGFTrackStartState_loseFocus(void* self)
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
     cReplay_startRace(*(void**)(cGameState_mpGame + 0x28));
     *(int*)((char*)self + 0x14) = 0;
-    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-    if (r->cGamePath == 0) {
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+    if (beRaceDB->cGamePath == 0) {
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         func_00145DD0(player, 0, 0, *cBENewRaceInterface_getLocation(race));
     }
-    int m = r->cGameMode;
+    int m = beRaceDB->cGameMode;
     if (m == 5) {
         goto restart;
     }
@@ -891,13 +891,13 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     cGameModeMan* gm = SSXApp->GameModeMan;
     cGameModeMan_restartHeat(gm);
     cGame_partialRestart(SSXApp->Game);
-    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-    int m = r->cGameMode;
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+    int m = beRaceDB->cGameMode;
     if (m == 5)
         goto bail;
     if (m == 6)
         goto bail;
-    if (r->cGamePath != 0) {
+    if (beRaceDB->cGamePath != 0) {
     bail:
         *(int*)((char*)self + 0x10) = 3;
         return;
@@ -2349,11 +2349,11 @@ struct sOwner237950 {
 
 extern "C" int func_00237950(sOwner237950* self)
 {
-    cGameComm* p = cGameComm_mGameComm;
-    if (p->mState < 14) {
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm->mState < 14) {
         return 0;
     }
-    int busy = p->mUnPauseFlag != 0 || p->mUnPauseTimer > 0;
+    int busy = gameComm->mUnPauseFlag != 0 || gameComm->mUnPauseTimer > 0;
     if (busy) {
         return 0;
     }
@@ -2427,8 +2427,8 @@ extern "C" void func_00237A98(void* self, sPackSrc_7B28* src)
     char buf[32];
     int len = func_00237B28(self, src, (sPackDst_7B28*)buf);
     func_00237BE8(self, src, buf);
-    cGameComm* p = cGameComm_mGameComm;
-    int ok = p->mSyncInput != 0 && p->mError == 0 && p->mConnected != 0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    int ok = gameComm->mSyncInput != 0 && gameComm->mError == 0 && gameComm->mConnected != 0;
     if (ok) {
         func_00257E98((char*)cGameComm_mGameComm, 0, buf, len);
     }

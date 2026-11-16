@@ -336,11 +336,11 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
         }
     }
     cOVState_onUpdate(self);
-    cGameComm* g = cGameComm_mGameComm;
-    if (g == 0)
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm == 0)
         return;
     int go = 0;
-    if (g->mPauseTimeout == 0 || g->mOverlayTimeout == 0)
+    if (gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0)
         go = 1;
     if (!go)
         return;
@@ -473,9 +473,9 @@ static inline void stopReplay_PMWE()
 {
     if (cGameComm_mGameComm != 0) {
         cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 0);
-        cGameComm* g = cGameComm_mGameComm;
-        g->mPauseTimeout = -1;
-        g->mOverlayTimeout = -1;
+        cGameComm* gameComm = cGameComm_mGameComm;
+        gameComm->mPauseTimeout = -1;
+        gameComm->mOverlayTimeout = -1;
     }
 }
 

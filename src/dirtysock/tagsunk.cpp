@@ -2623,8 +2623,8 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         int type = 0xD5;
         // PORT: function pointer passed through func_0025B608's int parameter.
         func_0025B608(self, 0xA, 0x63706572, buf, (int)func_00268CE8, 20.0f);
-        LobbyMan* s = self;
-        cBXString_cBXString4(&((char**)&s->mPersonas[0])[s->mNumPersonas], name);
+        LobbyMan* lobbyMan = self;
+        cBXString_cBXString4(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         m[0] = type;
         *(void***)((char*)m + 0x4) = D_004812B0;
@@ -2801,11 +2801,11 @@ extern "C" void func_0025D538(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
-        LobbyMan* s = self;
+        LobbyMan* lobbyMan = self;
         char* lst = ((char*)self) + 0xEC;
-        s->mNumPersonas--;
-        for (int i = s->mDeletePersonaIdx; i < s->mNumPersonas; i++)
-            cBXString_operatorE(&((char**)&s->mPersonas[0])[i], &((char**)&s->mPersonas[0])[i + 1]);
+        lobbyMan->mNumPersonas--;
+        for (int i = lobbyMan->mDeletePersonaIdx; i < lobbyMan->mNumPersonas; i++)
+            cBXString_operatorE(&((char**)&lobbyMan->mPersonas[0])[i], &((char**)&lobbyMan->mPersonas[0])[i + 1]);
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
         m[0] = 0xD8;
@@ -5434,12 +5434,12 @@ extern "C" void func_00261248(BuddyMan* self_, void* name_, int a2, void* a3_, v
     self_->miPort = a2;
     strcpy(((char*)self_) + 0x44, a3);
     strcpy(((char*)self_) + 0x64, a4);
-    BuddyMan* g = self_;
-    g->miError = 0;
-    g->mfTimeout = 30.0f;
-    g->mState = 1;
-    g->mbDisconnected = 0;
-    g->mbLoggedIn = 0;
+    BuddyMan* buddyMan = self_;
+    buddyMan->miError = 0;
+    buddyMan->mfTimeout = 30.0f;
+    buddyMan->mState = 1;
+    buddyMan->mbDisconnected = 0;
+    buddyMan->mbLoggedIn = 0;
     sBXStr_261248 s1;
     cBXString_cBXString4(&s1, a3);
     cBXString_Concat(&s1, D_004A3330);
@@ -5734,17 +5734,17 @@ extern "C" void func_00261770(BuddyMan* self, int* msg)
         func_002610D0();
         register int type FM_REG("$17") = 0x107;
         (self)->mbRosterDone = 1;
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
         m[0] = type;
-        post_1770((char*)g, m);
+        post_1770((char*)lobbyMan, m);
     } else {
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
         m[0] = 0x106;
-        post_1770((char*)g, m);
+        post_1770((char*)lobbyMan, m);
     }
 }
 #endif
@@ -5786,12 +5786,12 @@ static inline sMsgListIter_002618C0 sMsgList_002618C0_insert(sMsgListIter_002618
 
 extern "C" void func_002618C0(int unused)
 {
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     *(void***)((char*)m + 0x4) = D_004812B0;
     m[0] = 0x10A;
     void* mp = m;
-    sMsgList_002618C0_insert((*(sMsgListNode_002618C0**)((char*)g + 0xF0)), mp);
+    sMsgList_002618C0_insert((*(sMsgListNode_002618C0**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -5837,12 +5837,12 @@ struct sMsg_00261970 {
 
 extern "C" void func_00261970(int unused)
 {
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261970* m = (sMsg_00261970*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m->vt = D_004812B0;
     m->kind = 0x10B;
     void* mp = m;
-    sMsgList_00261970_insert((*(sMsgListNode_00261970**)((char*)g + 0xF0)), mp);
+    sMsgList_00261970_insert((*(sMsgListNode_00261970**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -5940,9 +5940,9 @@ extern "C" void func_00261A28(BuddyMan* self, char* msg)
         sTagVec_00261A28_remove(((char*)self), name);
     }
     int kind = 0x109;
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261A28* m = new (D_00480488, 0x20000000, 0) sMsg_00261A28(kind);
-    sMsgList_00261A28_insert((*(sMsgListNode_00261A28**)((char*)g + 0xF0)), m);
+    sMsgList_00261A28_insert((*(sMsgListNode_00261A28**)((char*)lobbyMan + 0xF0)), m);
 }
 #endif
 
@@ -6694,11 +6694,11 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
             }
             int type = 0x108;
             func_002620D8(self, name, 2, &err, 0);
-            LobbyMan* g = LobbyMan_mLobbyMan;
+            LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
             m[0] = type;
             *(void***)((char*)m + 0x4) = D_004812B0;
-            post_262AF0((char*)g, m);
+            post_262AF0((char*)lobbyMan, m);
         }
     }
     else if (func_002623E0_2(((char*)self), idx))
@@ -6723,11 +6723,11 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
     *(int*)(obj + 0x28) = s6;
     void* op = obj;
     push_back_262AF0(((char*)self), (sObjVec_262AF0*)(((char*)self) + 0xB8), op);
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
     *(void***)((char*)m + 0x4) = D_004812B0;
     m[0] = 0xEC;
-    post_262AF0((char*)g, m);
+    post_262AF0((char*)lobbyMan, m);
 }
 #endif
 
@@ -7242,13 +7242,13 @@ extern "C" void func_002636F0(int* out, int val)
     if (!isState_36F0(1)) {
         func_00255FA0(cCommSystem_mCommSystem);
         if (val != 0) {
-            LobbyMan* g = LobbyMan_mLobbyMan;
+            LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(0xC, D_00480ED0, 0x20000000, 0);
             m[0] = 0x116;
             *(void***)((char*)m + 0x4) = D_00481250;
             m[2] = val;
             void* mp = m;
-            sMsgList36F0_insert((*(sMsgListNode36F0**)((char*)g + 0xF0)), mp);
+            sMsgList36F0_insert((*(sMsgListNode36F0**)((char*)lobbyMan + 0xF0)), mp);
         }
         *out = 0;
     }
@@ -7319,11 +7319,11 @@ extern "C" void func_00263828(int* self)
     case 1:
         if (isState_3828(5)) {
             t->state = 2;
-            LobbyMan* g = LobbyMan_mLobbyMan;
+            LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
             *(void***)((char*)m + 0x4) = D_004812B0;
             m[0] = 0x105;
-            post_3828((char*)g, m);
+            post_3828((char*)lobbyMan, m);
         } else if (isState_3828(6)) {
             func_002636F0(self, cCommSystem_mCommSystem->mNetConnError);
         } else {
@@ -7504,17 +7504,17 @@ extern "C" void func_00263BA8(void* p, int arg)
     func_0025F740(LobbyMan_mLobbyMan, 0);
     self[0] = 0;
     if (arg == 1) {
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
         m[0] = 0x10C;
-        post_3BA8((char*)g, m);
+        post_3BA8((char*)lobbyMan, m);
     } else if (arg == 0) {
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
         m[0] = 0x112;
-        post_3BA8((char*)g, m);
+        post_3BA8((char*)lobbyMan, m);
     }
 }
 #endif
@@ -7605,11 +7605,11 @@ extern "C" void func_00263CF0(int* self)
         {
             if (!tsIsState_263CF0(0xB))
             {
-                LobbyMan* g = LobbyMan_mLobbyMan;
+                LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
                 int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
                 *(void***)((char*)m + 0x4) = D_004812B0;
                 m[0] = 0x113;
-                post_3BA8((char*)g, m);
+                post_3BA8((char*)lobbyMan, m);
             }
             func_00263BA8(self, 2);
             return;
@@ -7881,11 +7881,11 @@ extern "C" void func_002642B8(void* vself)
             }
         } else {
             self->state = 7;
-            LobbyMan* g = LobbyMan_mLobbyMan;
+            LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
             *(void***)((char*)m + 4) = D_004812B0;
             m[0] = 0xF6;
-            post_42B8((char*)g, m);
+            post_42B8((char*)lobbyMan, m);
         }
     }
     if (func_002649B0_3(self, &msg, 0x14) == 0)
@@ -8379,12 +8379,12 @@ extern "C" void func_00265018(void* self, int rider)
         func_00264CF0(self, rider);
         int type = 0xF4;
         func_00264E50(self, 2, rider, *(int*)self);
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         m[0] = type;
         *(void***)((char*)m + 0x4) = D_004812B0;
         void* mp = m;
-        sMsgList5018_insert((*(sMsgListNode5018**)((char*)g + 0xF0)), mp);
+        sMsgList5018_insert((*(sMsgListNode5018**)((char*)lobbyMan + 0xF0)), mp);
     } else {
         func_00264E50(self, 3, rider, *(int*)self);
     }
@@ -8461,12 +8461,12 @@ extern "C" void func_00265190(void* self, int rider, sName7_00264D80* name)
     int type = 0xF3;
     func_00264E50(self, 1, rider, *(int*)self);
     {
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         m[0] = type;
         *(void***)((char*)m + 0x4) = D_004812B0;
         void* mp = m;
-        sMsgList5190_insert((*(sMsgListNode5190**)((char*)g + 0xF0)), mp);
+        sMsgList5190_insert((*(sMsgListNode5190**)((char*)lobbyMan + 0xF0)), mp);
     }
 }
 #endif
@@ -8519,12 +8519,12 @@ extern "C" void func_00265290(void* self, int rider)
     func_00264D80(self, rider, 0);
     func_00264E50(self, 3, rider, *(int*)self);
     {
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
         m[0] = type;
         *(void***)((char*)m + 0x4) = D_004812B0;
         void* mp = m;
-        sMsgList5290_insert((*(sMsgListNode5290**)((char*)g + 0xF0)), mp);
+        sMsgList5290_insert((*(sMsgListNode5290**)((char*)lobbyMan + 0xF0)), mp);
     }
 }
 #endif
@@ -8573,12 +8573,12 @@ extern "C" void func_00265398(int* self)
 {
     if (*self == 3)
         *self = 2;
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00265398* m = (sMsg_00265398*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m->vt = D_004812B0;
     m->kind = 0xF7;
     void* mp = m;
-    sMsgList_00265398_insert((*(sMsgListNode_00265398**)((char*)g + 0xF0)), mp);
+    sMsgList_00265398_insert((*(sMsgListNode_00265398**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
 

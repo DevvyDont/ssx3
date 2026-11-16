@@ -3183,8 +3183,8 @@ static inline sVec4R Add_13F0(const sVec4R& a, const sVec4R& b)
 static inline sVec4R Get_13F0(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
-    sVEntry<sVec4R(void*)>* e = &(*(sVEntry<sVec4R(void*)>**)o)[slot];
-    return e->fn(o + e->delta);
+    sVEntry<sVec4R(void*)>* vEntry = &(*(sVEntry<sVec4R(void*)>**)o)[slot];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 /**
@@ -3374,8 +3374,8 @@ static inline float cmLength_001607E0_1728(const t4Vector& v)
 static inline t4Vector cmGet_001607E0_1728(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -3461,8 +3461,8 @@ static inline t4Vector cmAdd_001607E0_1848(const t4Vector& a, const t4Vector& b)
 static inline t4Vector cmGet_001607E0_1848(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
@@ -7373,8 +7373,8 @@ static inline void DivEq_166550(t4Vector& v, float s)
 static inline t4Vector Get_166550(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract into destination).
@@ -9131,8 +9131,8 @@ extern "C" void func_00168150_def(char* self)
     if (len < 20.0f || len > 1.0000000200408773e+20f) {
         char* o = *(char**)(self + 0x30);
         t4Vector x = *(t4Vector*)(*(char**)(o + 4) + 0x1B0);
-        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-        t4Vector p = e->fn(o + e->delta);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+        t4Vector p = vEntry->fn(o + vEntry->delta);
         int one = 1;
         float k50 = 50.0f;
         t4Vector np = cmAdd_168150(cmSub2_168150(p, cmScale_168150(x, 200.0f)), cmScaleP_168150(&D_004FF160_8150, k50));
@@ -9390,8 +9390,8 @@ static inline t4Vector cmAdd_001607E0_8508(const t4Vector& a, const t4Vector& b)
 static inline t4Vector cmGet_001607E0_8508(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 // PORT: PS2-only VU0 inline asm (vector at pointer times scalar).

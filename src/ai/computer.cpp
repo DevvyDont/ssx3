@@ -2295,26 +2295,26 @@ extern "C" void func_0010F998(void* p)
     for (i = 0; i < self->count; i++)
     {
         idx[i] = i;
-        cRider* r = self->riders[i];
+        cRider* rider = self->riders[i];
         switch (self->mode)
         {
         case 1:
-            if (r->mIsActor)
+            if (rider->mIsActor)
                 keys[i] = 0xFFFF;
             else
             {
-                int far = r->mFinishTime >= 10.0f;
+                int far = rider->mFinishTime >= 10.0f;
                 if (far)
-                    keys[i] = -(int)(func_00113128(r) + (float)(r->unk_0EC * 20));
+                    keys[i] = -(int)(func_00113128(rider) + (float)(rider->unk_0EC * 20));
                 else
-                    keys[i] = -(int)(func_00113128(r) + (float)(r->unk_0EC * 20));
+                    keys[i] = -(int)(func_00113128(rider) + (float)(rider->unk_0EC * 20));
             }
             break;
         case 2:
-            if (r->mIsActor)
+            if (rider->mIsActor)
                 keys[i] = -0xFFFF;
             else
-                keys[i] = *(int*)((char*)r->mMetrix + 0x198);
+                keys[i] = *(int*)((char*)rider->mMetrix + 0x198);
             break;
         }
     }
@@ -3020,8 +3020,8 @@ struct sVE_00111948 { short delta; short index; int (*fn)(void*); };
 extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
-        cRider* r = self->GroundMotion.mRider;
-        char* o = (char*)&r->mVtbl;
+        cRider* rider = self->GroundMotion.mRider;
+        char* o = (char*)&rider->mVtbl;
         sVE_00111948* e = &(*(sVE_00111948**)o)[kRiderVt_isComputer];
         if (e->fn(o + e->delta) != 0)
             return;
@@ -3066,8 +3066,8 @@ struct sVE_001119F8 { short delta; short index; int (*fn)(void*); };
 extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
-        cRider* r = self->GroundMotion.mRider;
-        char* o = (char*)&r->mVtbl;
+        cRider* rider = self->GroundMotion.mRider;
+        char* o = (char*)&rider->mVtbl;
         sVE_001119F8* e = &(*(sVE_001119F8**)o)[kRiderVt_isComputer];
         if (e->fn(o + e->delta) != 0)
             return;

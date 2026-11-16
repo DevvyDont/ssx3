@@ -577,9 +577,9 @@ extern char D_0046E050[];
 extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        int ok = p->mPauseTimeout == 0 || p->mOverlayTimeout == 0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
             int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0046E050));
             if (frame != 0xFFFF) {
@@ -737,9 +737,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
     cUIObj_1FAB18* o = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FA08));
     if (o != 0) {
         o->setVisible(1);
-        cGameComm* p = cGameComm_mGameComm;
+        cGameComm* gameComm = cGameComm_mGameComm;
         *(int*)((char*)o + 0x14) |= 0x80;
-        int e = p->mCheating[0];
+        int e = gameComm->mCheating[0];
         int one = 1;
         if (e != 0) {
             if (e == one) {
@@ -751,9 +751,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
             } else {
                 cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA38));
             }
-        } else if (p->mCheating[1] != 0) {
+        } else if (gameComm->mCheating[1] != 0) {
             *(int*)(s + 0xA0) = 0;
-            int e2 = p->mCheating[1];
+            int e2 = gameComm->mCheating[1];
             if (e2 == one) {
                 cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
             } else if (e2 == 2) {
@@ -763,10 +763,10 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
             } else {
                 cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA58));
             }
-        } else if (p->mRemoteEndGame != 0) {
+        } else if (gameComm->mRemoteEndGame != 0) {
             cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA78));
             *(int*)(s + 0xA0) = 0;
-        } else if (p->mRemoteDisconnected != 0) {
+        } else if (gameComm->mRemoteDisconnected != 0) {
             *(int*)(s + 0xA0) = 0;
             cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046FA78));
         } else {
@@ -859,17 +859,17 @@ public:
 extern "C" void func_001FAF10(void* self)
 {
     cOVState_onUpdate(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0 && *(int*)((char*)self + 0x9C) != 0) {
-        int timedOut = p->unk_138 <= 0 && p->unk_13C == 0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0 && *(int*)((char*)self + 0x9C) != 0) {
+        int timedOut = gameComm->unk_138 <= 0 && gameComm->unk_13C == 0;
         if (timedOut) {
-            p->unk_09C = 0;
+            gameComm->unk_09C = 0;
             cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(self);
         } else {
-            if (p->unk_13C == 0) {
+            if (gameComm->unk_13C == 0) {
                 return;
             }
-            int received = p->mRaceInProgress != 0 && p->mLocalFinishedRace == 0 && p->mCheating[0] == 0;
+            int received = gameComm->mRaceInProgress != 0 && gameComm->mLocalFinishedRace == 0 && gameComm->mCheating[0] == 0;
             if (received) {
                 cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(self);
             } else {
@@ -1222,9 +1222,9 @@ extern "C" void func_001FBBD8(void* self)
         sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
         cOVState_triggerTextFade(self, buf, D_0046E4E8);
     }
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        p->mOverlayTimeout = 0x4B0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        gameComm->mOverlayTimeout = 0x4B0;
     }
 }
 #endif
@@ -1235,9 +1235,9 @@ INCLUDE_ASM("fe/ovstatepause", func_001FBCC8);
 
 extern "C" void func_001FBCC8(void)
 {
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        p->mOverlayTimeout = -1;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        gameComm->mOverlayTimeout = -1;
     }
 }
 #endif
@@ -1251,9 +1251,9 @@ extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_001FBCE0(void* self)
 {
     cOVState_onUpdate(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0 && p->mOverlayTimeout == 0) {
-        p->mOverlayTimeout = -1;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0 && gameComm->mOverlayTimeout == 0) {
+        gameComm->mOverlayTimeout = -1;
         D_004A26FC = 1;
     }
 }
@@ -1873,9 +1873,9 @@ extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void func_001FD0D8(void* self)
 {
     cUIState_onGainFocus(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        p->mOverlayTimeout = 0x4B0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        gameComm->mOverlayTimeout = 0x4B0;
     }
     func_00294F78(func_0028B180(), 0xE);
 }
@@ -1889,9 +1889,9 @@ extern "C" void func_002872A8(void* self);
 
 extern "C" void func_001FD118(void)
 {
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        p->mOverlayTimeout = -1;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        gameComm->mOverlayTimeout = -1;
     }
     func_002872A8(func_0028B180());
 }
@@ -1906,9 +1906,9 @@ extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_001FD150(void* self)
 {
     cOVState_onUpdate(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0 && p->mOverlayTimeout == 0) {
-        p->mOverlayTimeout = -1;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0 && gameComm->mOverlayTimeout == 0) {
+        gameComm->mOverlayTimeout = -1;
         D_004A26FC = 1;
     }
 }

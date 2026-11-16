@@ -314,9 +314,9 @@ extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* v, float* r)
     v[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
     v[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
     v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
 }
 #endif
 //100%
@@ -331,9 +331,9 @@ extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* v, float* r)
     v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
     v[0].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
     v[2].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
 }
 #endif
 //100%
@@ -358,9 +358,9 @@ extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* v, float* r, float* m
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
 }
 #endif
 //100%
@@ -385,9 +385,9 @@ extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* v, float* r, float* m
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
 }
 #endif
 //100%
@@ -410,9 +410,9 @@ extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
     vtx[3].s = uv[0] + uv[2];
     vtx[3].t = uv[1] + uv[3];
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
 }
 #endif
 //100%
@@ -435,9 +435,9 @@ extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
     vtx[3].s = uv[0];
     vtx[3].t = uv[1] + uv[3];
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
 }
 #endif
 //100%
@@ -470,9 +470,9 @@ extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
 }
 #endif
 //100%
@@ -505,9 +505,9 @@ extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
 }
 #endif
 
@@ -568,9 +568,9 @@ extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, floa
     v[2].t = one;
     v[3].s = one;
     v[3].t = one;
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry* vt = (sLmQuadVEntry*)g->mVtbl;
-    vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry* vt = (sLmQuadVEntry*)ps2GraphicsMan->mVtbl;
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
 }
 #endif
 
@@ -744,9 +744,9 @@ extern "C" void func_0038EE78(void)
     sLmMat_EE78 tmp;
     float s;
     float c;
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    sLmVEntry_EE78* vt = (sLmVEntry_EE78*)g->mVtbl;
-    float t = (float)vt[114].fn((char*)g + vt[114].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sLmVEntry_EE78* vt = (sLmVEntry_EE78*)ps2GraphicsMan->mVtbl;
+    float t = (float)vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
     int i;
     for (i = 0; i < 8; i++) {
         sLmMat_EE78* pm = &m0;

@@ -4874,21 +4874,21 @@ extern "C" int func_00106F78_impl(cRider* self)
     if (func_0011FE98(self) == 4) {
         return 0;
     }
-    sAnimModelBone* b = &self->mAnimModel->bones[self->mBoneHips];
-    const t4Vector& dir = Front_6F78(b);
+    sAnimModelBone* animModelBone = &self->mAnimModel->bones[self->mBoneHips];
+    const t4Vector& dir = Front_6F78(animModelBone);
     sHit_6F78 hit;
-    if (!func_00334680_6F78(self->mOverlapList, &b->pos, &hit.pos, 1, 300.0f)) {
+    if (!func_00334680_6F78(self->mOverlapList, &animModelBone->pos, &hit.pos, 1, 300.0f)) {
         return 0;
     }
     float speed = Len_6F78(self->mVelocity);
     if (speed > 0.0010000000474974513f) {
-        float back = Dot_6F78(Sub_6F78(hit.pos, b->pos), self->mVelocity);
+        float back = Dot_6F78(Sub_6F78(hit.pos, animModelBone->pos), self->mVelocity);
         if (back < speed * -0.20000000298023224f) {
             return 0;
         }
     }
-    float along = Clamp_6F78(Dot_6F78(dir, Sub_6F78(hit.pos, b->pos)), -50.0f, 50.0f);
-    t4Vector delta = Sub_6F78(Add_6F78(b->pos, Scale_6F78(dir, along)), hit.pos);
+    float along = Clamp_6F78(Dot_6F78(dir, Sub_6F78(hit.pos, animModelBone->pos)), -50.0f, 50.0f);
+    t4Vector delta = Sub_6F78(Add_6F78(animModelBone->pos, Scale_6F78(dir, along)), hit.pos);
     if (Len_6F78(delta) > 50.0f) {
         return 0;
     }
@@ -4912,7 +4912,7 @@ extern "C" int func_00106F78_impl(cRider* self)
     info.pos = hit.pos;
     info.dir = Norm_6F78(self->mVelocity);
     info.vn = vn;
-    t4Vector off = Sub_6F78(b->pos, hit.pos);
+    t4Vector off = Sub_6F78(animModelBone->pos, hit.pos);
     SubEq_6F78(off, Scale_6F78(hit.n, Dot_6F78(off, hit.n)));
     if (cRider_isGroundNormalValid(self)) {
         SubEq_6F78(off, Scale_6F78(self->mGroundNormal, Dot_6F78(off, self->mGroundNormal)));

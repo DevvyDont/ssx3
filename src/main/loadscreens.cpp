@@ -597,8 +597,8 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     switch (self->f8C1C) {
     case 0: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-        int quick = r->cGamePath;
+        cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+        int quick = beRaceDB->cGamePath;
         if (dir == 3) {
             quick = (quick + 1) % 3;
             if (quick == 0) {
@@ -608,7 +608,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                     }
                     int kind = self->sub.e[self->f8C20].kind;
                     D_004A11B8 = 1;
-                    r->iLocationIdx = kind;
+                    beRaceDB->iLocationIdx = kind;
                 } else {
                     quick = (quick + 1) % 3;
                 }
@@ -623,7 +623,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                     }
                     int kind = self->sub.e[self->f8C20].kind;
                     D_004A11B8 = 1;
-                    r->iLocationIdx = kind;
+                    beRaceDB->iLocationIdx = kind;
                 } else {
                     quick = (quick + 2) % 3;
                 }
@@ -671,14 +671,14 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     case 1: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-        if (r->cGamePath == 0) {
+        cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+        if (beRaceDB->cGamePath == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
             cBENewRaceInterface_setNumberAI(race, 0);
             update_B4E0(race);
             break;
         }
-        int mode = r->cGameMode;
+        int mode = beRaceDB->cGameMode;
         if (dir != 2 && dir != 3) {
             return;
         }
@@ -726,9 +726,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     case 2: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-        int ev = r->cGameEvent;
-        if (r->cGamePath == 0) {
+        cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+        int ev = beRaceDB->cGameEvent;
+        if (beRaceDB->cGamePath == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
             cBENewRaceInterface_setNumberAI(race, 0);
         } else if (dir == 2 || dir == 3) {
@@ -774,15 +774,15 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         if (dir != 2 && dir != 3) {
             return;
         }
-        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-        if (r->cGamePath == 0) {
+        cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+        if (beRaceDB->cGamePath == 0) {
             if (dir == 3) {
                 self->f8C20 = func_0017A028_b4(&self->sub, self->f8C20);
             } else if (dir == 2) {
                 self->f8C20 = func_0017A0B8(&self->sub, self->f8C20);
             }
         } else {
-            int mode = r->cGameMode;
+            int mode = beRaceDB->cGameMode;
             do {
                 if (dir == 3) {
                     self->f8C20 = func_0017A220(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
@@ -874,9 +874,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         if (dir != 2 && dir != 3) {
             return;
         }
-        cPS2GraphicsMan* g = GrMan;
-        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)g->mVtbl;
-        ((void (*)(void*, int))vt[8].fn)((char*)g + vt[8].delta, !((bool (*)(void*))vt[9].fn)((char*)g + vt[9].delta));
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)ps2GraphicsMan->mVtbl;
+        ((void (*)(void*, int))vt[8].fn)((char*)ps2GraphicsMan + vt[8].delta, !((bool (*)(void*))vt[9].fn)((char*)ps2GraphicsMan + vt[9].delta));
         break;
     }
     case 11:

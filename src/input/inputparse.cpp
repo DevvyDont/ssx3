@@ -626,9 +626,9 @@ extern "C" void cInputMapParser_parseStatement(cInputMapParser* self)
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
-    tIdentifier* e = &self->Identifiers[self->NumIdentifiers];
-    self->CurrentIdentifier = e;
-    strcpy(e->Name, name);
+    tIdentifier* identifier = &self->Identifiers[self->NumIdentifiers];
+    self->CurrentIdentifier = identifier;
+    strcpy(identifier->Name, name);
     cInputMapParser_readToken(self);
     if (self->CurrentToken != 3) {
         cInputMapParser_error(self, D_0048DF68);
@@ -636,7 +636,7 @@ extern "C" void cInputMapParser_parseStatement(cInputMapParser* self)
         return;
     }
     cInputMapParser_readToken(self);
-    if ((e->Expression = (tParseNode*)cInputMapParser_parseExpression(self)) == 0) {
+    if ((identifier->Expression = (tParseNode*)cInputMapParser_parseExpression(self)) == 0) {
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
@@ -1158,7 +1158,7 @@ extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
     int input;
     int mod;
     int cfg;
-    tIdentifier* var;
+    tIdentifier* identifier;
     int type;
 
 again:
@@ -1196,11 +1196,11 @@ again:
             node->index = cfg;
             return node;
         }
-        var = cInputMapParser_lookupIdentifierName(self, name);
-        if (var != 0) {
+        identifier = cInputMapParser_lookupIdentifierName(self, name);
+        if (identifier != 0) {
             int mod2;
             cInputMapParser_readToken(self);
-            if ((tIdentifier*)var == self->CurrentIdentifier) {
+            if ((tIdentifier*)identifier == self->CurrentIdentifier) {
                 cInputMapParser_error(self, D_0048E048);
                 return 0;
             }
@@ -1218,16 +1218,16 @@ again:
                 }
                 cInputMapParser_readToken(self);
             }
-            type = ((sTermNode_3BD8*)var->Expression)->type;
+            type = ((sTermNode_3BD8*)identifier->Expression)->type;
             if (type == 4) {
                 node = (sTermNode_3BD8*)func_003215F8(self);
                 node->type = type;
-                node->value = ((sTermNode_3BD8*)var->Expression)->value;
+                node->value = ((sTermNode_3BD8*)identifier->Expression)->value;
                 return node;
             }
             node = (sTermNode_3BD8*)func_003215F8(self);
             node->type = 1;
-            node->a = var;
+            node->a = identifier;
             node->b = mod2;
             return node;
         }

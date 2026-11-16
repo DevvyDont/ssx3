@@ -92,14 +92,14 @@ extern "C" int func_002839A8(sVidPlayer* self)
     if (s != 0 && s != 2) self->f14 = 1;
     func_002EA820(q);
     {
-        cPS2GraphicsMan* o = GrMan;
-        sVtEnt* vt = (sVtEnt*)o->mVtbl;
-        self->f10 = *((int*(*)(void*))vt[42].fn)((char*)o + vt[42].delta);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
+        self->f10 = *((int*(*)(void*))vt[42].fn)((char*)ps2GraphicsMan + vt[42].delta);
     }
     {
-        cPS2GraphicsMan* o = GrMan;
-        sVtEnt* vt = (sVtEnt*)o->mVtbl;
-        ((void(*)(void*, int))vt[40].fn)((char*)o + vt[40].delta, 0);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
+        ((void(*)(void*, int))vt[40].fn)((char*)ps2GraphicsMan + vt[40].delta, 0);
     }
     cSSXAudio_PauseSFX(func_0028B180());
     return 1;

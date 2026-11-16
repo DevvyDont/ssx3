@@ -549,8 +549,8 @@ extern "C" void func_001A3EA0(cFEStateNetMessenger* self, int flags)
     sVE1A3EA0* vt = *(sVE1A3EA0**)(child + 0x8);
     vt[32].fn(child + vt[32].delta);
     func_001A5450(self);
-    tFEStringPtrVector* v = &(*(&self->mNames));
-    Dealloc1A3EA0(((void**)v->mpStart), (void**)self->mNames.mpEndOfStorage - (void**)self->mNames.mpStart);
+    tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
+    Dealloc1A3EA0(((void**)feStringPtrVector->mpStart), (void**)self->mNames.mpEndOfStorage - (void**)self->mNames.mpStart);
     cBXString__cBXString(((char*)&self->unk_6E0), 2);
     cBXString__cBXString(((char*)&self->mszSearchName), 2);
     cBXString__cBXString(((char*)&self->mszFoundName), 2);
@@ -1563,12 +1563,12 @@ static inline void Construct1A54D8(sElem1A54D8* p, void* const& x) { new (p) sEl
 
 static inline void PushBack1A54D8(cFEStateNetMessenger* feStateNetMessenger, void* x)
 {
-    tFEStringPtrVector* v = &(*(&feStateNetMessenger->mNames));
+    tFEStringPtrVector* feStringPtrVector = &(*(&feStateNetMessenger->mNames));
     if (((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish) != ((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpEndOfStorage)) {
-        Construct1A54D8(((sElem1A54D8*)v->mpFinish), x);
+        Construct1A54D8(((sElem1A54D8*)feStringPtrVector->mpFinish), x);
         ++(*(sElem1A54D8**)&(*(&feStateNetMessenger->mNames)).mpFinish);
     } else {
-        func_001DB778(v, (void**)((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish), &x);
+        func_001DB778(feStringPtrVector, (void**)((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish), &x);
     }
 }
 
@@ -1707,13 +1707,13 @@ static inline void Construct1A5898(sElem1A5898* p, void* const& x) { new (p) sEl
 
 static inline void PushBack1A5898(cFEStateNetMessenger* feStateNetMessenger, void* x)
 {
-    tFEStringPtrVector* v = &(*(&feStateNetMessenger->mNames));
+    tFEStringPtrVector* feStringPtrVector = &(*(&feStateNetMessenger->mNames));
     void* const* px = &x;
     if (((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish) != ((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpEndOfStorage)) {
-        Construct1A5898(((sElem1A5898*)v->mpFinish), x);
+        Construct1A5898(((sElem1A5898*)feStringPtrVector->mpFinish), x);
         ++(*(sElem1A5898**)&(*(&feStateNetMessenger->mNames)).mpFinish);
     } else {
-        func_001DB778(v, (void**)((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish), px);
+        func_001DB778(feStringPtrVector, (void**)((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish), px);
     }
 }
 
@@ -2309,13 +2309,13 @@ extern "C" void func_001A6E70(cFEStateNetMessenger* self)
 {
     int i;
     for (i = (((int*)(*(&self->mNames)).mpFinish) - ((int*)(*(&self->mNames)).mpStart)) - 1; i >= 0; i--) {
-        tFEStringPtrVector* v = &(*(&self->mNames));
+        tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
         int id = *(int*)((char*)((int*)(*(&self->mNames)).mpStart) + (i << 2));
         if (func_002624F8(GetSession_001A6E70(), id) < 0) {
             // PORT: pointer arithmetic through int
             int* pos = (int*)(i * 4 + (int)((int*)(*(&self->mNames)).mpStart));
             if (pos + 1 != ((int*)(*(&self->mNames)).mpFinish)) {
-                Copy1A6E70(pos + 1, ((int*)v->mpFinish), pos);
+                Copy1A6E70(pos + 1, ((int*)feStringPtrVector->mpFinish), pos);
             }
             (*(int**)&(*(&self->mNames)).mpFinish)--;
         }
@@ -2504,7 +2504,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
     if (screen == 0 || name == 0) {
         return;
     }
-    cUIText* t1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004617A8));
+    cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004617A8));
     cUIText* t2 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00461558));
     if (t2 == 0) {
         return;
@@ -2524,11 +2524,11 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         func_004162D0(buf, D_004A1390);
         func_004162D0(buf, tags);
         func_003EFA48(wide, 0x60, buf);
-        sVEntryP_001A7390* vt = *(sVEntryP_001A7390**)((char*)t1 + 8);
-        vt[20].fn((char*)t1 + vt[20].delta, size);
-        sVec3_001A7390 scale = *(sVec3_001A7390*)((char*)t1 + 0x50);
-        unsigned short* rest = func_00392680(cUIText_getFont(t1), scale.x, size[0], wide, wrapped, 0x30);
-        cUIText_setUnicodeString(t1, (char*)wrapped);
+        sVEntryP_001A7390* vt = *(sVEntryP_001A7390**)((char*)uiText + 8);
+        vt[20].fn((char*)uiText + vt[20].delta, size);
+        sVec3_001A7390 scale = *(sVec3_001A7390*)((char*)uiText + 0x50);
+        unsigned short* rest = func_00392680(cUIText_getFont(uiText), scale.x, size[0], wide, wrapped, 0x30);
+        cUIText_setUnicodeString(uiText, (char*)wrapped);
         if (rest != 0) {
             cUIText_setUnicodeString(t2, (char*)rest);
         } else {
@@ -4590,17 +4590,17 @@ extern "C" int strlen(const char* s);
 
 extern "C" void func_001A98B8(cFEStateNet* self, const char* str)
 {
-    cFEStateNet* s = self;
+    cFEStateNet* feStateNet = self;
     int len = strlen(str);
     int i;
     for (i = 0; i < len && i < 0x3F; i++) {
-        s->mszMaskedText[i] = '*';
+        feStateNet->mszMaskedText[i] = '*';
     }
     if (len == 0) {
-        s->mszMaskedText[0] = ' ';
+        feStateNet->mszMaskedText[0] = ' ';
         len = 1;
     }
-    s->mszMaskedText[len] = 0;
+    feStateNet->mszMaskedText[len] = 0;
 }
 #endif
 
@@ -5802,10 +5802,10 @@ extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, in
     int stateB = func_002633C8(GetSession_001AB478(), name);
     int n = 0;
     char* sub = p + 0xBC;
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     char s[4];
     cBXString_cBXString2(s, name);
-    cBXString_operatorE((char*)g + 0x98, s);
+    cBXString_operatorE((char*)lobbyMan + 0x98, s);
     cBXString__cBXString(s, 2);
     *(int*)(p + 0xC8) = 2;
     *(int*)(p + 0x14C) = 3;
@@ -5996,11 +5996,11 @@ extern "C" void func_001ABCD0(cFEStateNet* self, int a1, void* a2, int a3, int a
         cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
     } else {
         MEM_fill(D_005308B8, 0, 0x20);
-        LobbyMan* g = LobbyMan_mLobbyMan;
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         D_004A4E88_v[1] = 4;
         char s[4];
         cBXString_cBXString2(s, (const char*)a1);
-        cBXString_operatorE((char*)g + 0x98, s);
+        cBXString_operatorE((char*)lobbyMan + 0x98, s);
         cBXString__cBXString(s, 2);
         void* p = cFEStateChallengePopup_cFEStateChallengePopup_BCD0(cMemMan_alloc(0x6F0, D_00462AE8, 0x100, 0), (int)self->mpEngine, (int)self);
         if (a4) {
@@ -7012,13 +7012,13 @@ static inline int IsHash1AD308(int id, char* name) { return id == GetHashValue32
  */
 extern "C" void cFEStateSelectPersona_onWidgetCreate(cFEStateSelectPersona* self, cUIText* text)
 {
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E00)) {
         func_001AD3E8(self, text);
     } else if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E10)) {
         *(int*)((char*)text + 0x18) = -1;
     } else if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E20)) {
-        cUIText_setAsciiString(text, ((const char*)g->mUserName));
+        cUIText_setAsciiString(text, ((const char*)lobbyMan->mUserName));
     } else if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E30)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00462E40));
     }
@@ -7059,12 +7059,12 @@ struct sFEGlobals1AD3E8 {
 
 extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text)
 {
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int i = 0;
-    for (; i < g->mNumPersonas; i++) {
+    for (; i < lobbyMan->mNumPersonas; i++) {
         cUIText* item = func_00397870((char*)text + 0x74, i);
         *(int*)((char*)item + 0x18) = i;
-        cUIText_setAsciiString(item, ((const char**)&g->mPersonas[0])[i]);
+        cUIText_setAsciiString(item, ((const char**)&lobbyMan->mPersonas[0])[i]);
         ((cFEVObj_001AD3E8*)item)->v09(1);
     }
     for (; i < 4; i++) {
@@ -8649,25 +8649,25 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
     if (screen == 0) {
         return;
     }
-    cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634B8));
+    cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634B8));
     if (track == 0) {
-        cUIText_setAsciiString(t, D_004A1390);
+        cUIText_setAsciiString(uiText, D_004A1390);
     } else {
         switch (func_00144C98(track)) {
         case 0:
-            cUIText_setAsciiString(t, D_004A14F8);
+            cUIText_setAsciiString(uiText, D_004A14F8);
             break;
         case 1:
-            cUIText_setAsciiString(t, D_004A1500);
+            cUIText_setAsciiString(uiText, D_004A1500);
             break;
         case 2:
-            cUIText_setAsciiString(t, D_004A1508);
+            cUIText_setAsciiString(uiText, D_004A1508);
             break;
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634C8));
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634C8));
     if (track == 0) {
-        cUIText_setAsciiString(t, D_004A1390);
+        cUIText_setAsciiString(uiText, D_004A1390);
     } else {
         if (D_00535C12[0] != 0) {
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -8676,13 +8676,13 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
             cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
             ((cFEVObj_001AF728*)self->mpLBCPURiders)->v08(1);
         }
-        cUIText_setAsciiString(t, func_00145340(track));
+        cUIText_setAsciiString(uiText, func_00145340(track));
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634D8));
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634D8));
     if (track == 0) {
-        cUIText_setAsciiString(t, D_004A1390);
+        cUIText_setAsciiString(uiText, D_004A1390);
     } else {
-        cUIText_setAsciiString(t, func_00144BF0(track));
+        cUIText_setAsciiString(uiText, func_00144BF0(track));
     }
 }
 #endif
@@ -8704,9 +8704,9 @@ extern char D_00463538[];
 
 static inline void Clear1AF930(void* screen, char* name)
 {
-    cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
-    if (t != 0) {
-        cUIText_setAsciiString(t, D_004A1390);
+    cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+    if (uiText != 0) {
+        cUIText_setAsciiString(uiText, D_004A1390);
     }
 }
 
@@ -8785,24 +8785,24 @@ extern "C" void func_001AFA60(void* screen, char* msg)
     cBXString_cBXString1(&s, (char*)LobbyMan_mLobbyMan + 0x98);
     (*(sStats1AFA60*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sStats1AFA60*)(msg + 0x18);
     func_0025DD08(LobbyMan_mLobbyMan, s.str, *(int*)(msg + 0x14));
-    cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463108));
-    if (t != 0) {
-        cUIText_setAsciiString(t, s.str);
+    cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463108));
+    if (uiText != 0) {
+        cUIText_setAsciiString(uiText, s.str);
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634E8));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634E8));
+    if (uiText != 0) {
         int name = Loc1AFA60(D_00463550);
         func_002C2718_1AFA60(buf, D_004A1A88, name, *(int*)(msg + 0x18));
-        cUIText_setUnicodeString(t, buf);
+        cUIText_setUnicodeString(uiText, buf);
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634F8));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634F8));
+    if (uiText != 0) {
         int name = Loc1AFA60(D_00463568);
         func_002C2718_1AFA60(buf, D_004A1A88, name, *(int*)(msg + 0x20));
-        cUIText_setUnicodeString(t, buf);
+        cUIText_setUnicodeString(uiText, buf);
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463508));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463508));
+    if (uiText != 0) {
         int b = *(int*)(msg + 0x20);
         int a = *(int*)(msg + 0x1C);
         float pct = 0.0f;
@@ -8813,13 +8813,13 @@ extern "C" void func_001AFA60(void* screen, char* msg)
         }
         int name = Loc1AFA60(D_00463580);
         func_002C2718_1AFA60(buf, D_00463590, name, st->b, st->c, fptodp(pct));
-        cUIText_setUnicodeString(t, buf);
+        cUIText_setUnicodeString(uiText, buf);
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463520));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463520));
+    if (uiText != 0) {
         int name = Loc1AFA60(D_004635A8);
         func_002C2718_1AFA60(buf, D_004A1A88, name, st->d);
-        cUIText_setUnicodeString(t, buf);
+        cUIText_setUnicodeString(uiText, buf);
     }
     cBXString__cBXString(&s, 2);
 }
@@ -9114,64 +9114,64 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeR
 {
     char buf[16];
     char* o = (char*)obj;
-    cUIText* t = (cUIText*)obj;
+    cUIText* uiText = (cUIText*)obj;
     if (IsHash_001B0150(*(int*)(o + 0x38), D_00461520)) {
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004635F8)) {
-        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463608));
+        cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463608));
         *(int*)(o + 0x18) = 0xB;
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463618)) {
         *(int*)(o + 0x18) = 0xC;
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463108)) {
-        cUIText_setAsciiString(t, ((const char*)LobbyMan_mLobbyMan->mOpponent));
+        cUIText_setAsciiString(uiText, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463118)) {
         *(int*)(o + 0x18) = 7;
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463140)) {
-        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463150));
+        cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463150));
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463168)) {
-        cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463178));
+        cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463178));
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463190)) {
-        cUIText_setUnicodeStringByID(t, GetHashValue32(D_004631A0));
+        cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_004631A0));
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004631B8)) {
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463628)) {
-        cUIText_setAsciiString(t, D_004A1A90);
+        cUIText_setAsciiString(uiText, D_004A1A90);
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463640)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int n = D_00535C04[0];
         if (n == 0) {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463228));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463228));
         } else {
             sprintf(buf, D_004A12C0, n);
-            cUIText_setAsciiString(t, buf);
+            cUIText_setAsciiString(uiText, buf);
         }
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463658)) {
         if ((D_005308D0[0] >> 8) & 1) {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
         } else {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
         }
-        cUIText_setAsciiString(t, D_004A1A90);
+        cUIText_setAsciiString(uiText, D_004A1A90);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463670)) {
         if ((D_005308D0[0] >> 6) & 1) {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
         } else {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
         }
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463688)) {
         int f = D_005308D0[0] >> 7;
         if (f & 1) {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
         } else {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+            cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
         }
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004636A0)) {
         obj->v09(1);
@@ -9496,84 +9496,84 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     if (screen == 0) {
         return;
     }
-    cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004636A0));
-    if (t != 0) {
+    cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004636A0));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
-            cUIText_setAsciiString(t, func_00145340(iface));
+            cUIText_setAsciiString(uiText, func_00145340(iface));
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004636B0));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004636B0));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
-            cUIText_setAsciiString(t, func_00144BF0(iface));
+            cUIText_setAsciiString(uiText, func_00144BF0(iface));
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463628));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463628));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
             cBE_getInterface_Fv(SSXApp->BE, 7);
             if (D_00534B34[0] != 0) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
             } else {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
             }
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463798));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463798));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
             if ((D_005308D0[0] >> 8) & 1) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
             } else {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
             }
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463670));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463670));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
             if ((D_005308D0[0] >> 6) & 1) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
             } else {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
             }
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463688));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463688));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
             int f = D_005308D0[0] >> 7;
             if (f & 1) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045FCD8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
             } else {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
             }
         }
     }
-    t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463640));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463640));
+    if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(t, D_004A1390);
+            cUIText_setAsciiString(uiText, D_004A1390);
         } else {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             int n = D_00535C04[0];
             if (n <= 0) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_00463228));
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463228));
             } else {
                 sprintf(buf, D_004A12C0, n);
-                cUIText_setAsciiString(t, buf);
+                cUIText_setAsciiString(uiText, buf);
             }
         }
     }
@@ -10659,10 +10659,10 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     cUITextScroll_setInputMap(self->mpTextScrollChat, 1);
     *(sBlk1B2070*)((char*)self->mpTextScrollChat + 0xA8) = *(sBlk1B2070*)&self->mChatColour;
     *(void**)((char*)self->mpTextScrollChat + 0xB8) = (void*)self->mpSlider2;
-    cUIText* a = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
+    cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
     cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
     cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
-    *(cUIText**)((char*)self->mpSlider2 + 0x7C) = a;
+    *(cUIText**)((char*)self->mpSlider2 + 0x7C) = uiText;
     *(cUIText**)((char*)self->mpSlider2 + 0x80) = b;
     {
         char* o = (char*)self->mpSlider2;
@@ -11006,26 +11006,26 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
         }
     }
     func_0025F288(LobbyMan_mLobbyMan, idx, &info);
-    cUIText* t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463AE8));
-    if (t != 0) {
+    cUIText* uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463AE8));
+    if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B30, Loc1B25E0(D_00463AF8), info.a);
-            cUIText_setUnicodeString(t, buf);
+            cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(t, D_004A1408);
+            cUIText_setAsciiString(uiText, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B10));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B10));
+    if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B34, Loc1B25E0(D_00463568), info.c);
-            cUIText_setUnicodeString(t, buf);
+            cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(t, D_004A1408);
+            cUIText_setAsciiString(uiText, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B20));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B20));
+    if (uiText != 0) {
         if (valid) {
             int done = info.b;
             int total = info.c;
@@ -11036,27 +11036,27 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
                 pct = 100.0f;
             }
             sprintf2_v(buf, D_004A1B38, Loc1B25E0(D_00463580), info.b, info.c, fptodp(pct));
-            cUIText_setUnicodeString(t, buf);
+            cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(t, D_004A1408);
+            cUIText_setAsciiString(uiText, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B30));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B30));
+    if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B3C, Loc1B25E0(D_004635A8), info.d);
-            cUIText_setUnicodeString(t, buf);
+            cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(t, D_004A1408);
+            cUIText_setAsciiString(uiText, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B40));
-    if (t != 0) {
+    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B40));
+    if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B40, Loc1B25E0(D_00463B58), info.a);
-            cUIText_setUnicodeString(t, buf);
+            cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(t, D_004A1408);
+            cUIText_setAsciiString(uiText, D_004A1408);
         }
     }
     cBXString__cBXString(&s, 2);
@@ -16073,29 +16073,29 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
         break;
     case 5:
         if (NameHash1B8C38(w) == GetHashValue32(D_00464768)) {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00462B88));
-            if (t != 0) {
-                func_001A9150((cFEStateNet*)self, (int)t, GetHashValue32(D_004647B8), *(int*)((char*)self->mpAccount + 0x0), 0, 10, 0x10);
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00462B88));
+            if (uiText != 0) {
+                func_001A9150((cFEStateNet*)self, (int)uiText, GetHashValue32(D_004647B8), *(int*)((char*)self->mpAccount + 0x0), 0, 10, 0x10);
                 *(int*)((char*)self->mpKeyboard + 0x58) = 1;
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_004647D0)) {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00462BA0));
-            if (t != 0) {
-                func_001A9150((cFEStateNet*)self, (int)t, GetHashValue32(D_00462D00), *(int*)((char*)self->mpAccount + 0x4), 1, 11, 0x10);
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00462BA0));
+            if (uiText != 0) {
+                func_001A9150((cFEStateNet*)self, (int)uiText, GetHashValue32(D_00462D00), *(int*)((char*)self->mpAccount + 0x4), 1, 11, 0x10);
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_004647E0)) {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004647F8));
-            if (t != 0) {
-                func_001A9150((cFEStateNet*)self, (int)t, GetHashValue32(D_00464810), *(int*)((char*)self->mpAccount + 0x8), 1, 12, 0x10);
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004647F8));
+            if (uiText != 0) {
+                func_001A9150((cFEStateNet*)self, (int)uiText, GetHashValue32(D_00464810), *(int*)((char*)self->mpAccount + 0x8), 1, 12, 0x10);
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_00464828)) {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464838));
-            if (t != 0) {
-                func_001A9150((cFEStateNet*)self, (int)t, GetHashValue32(D_00462CD0), *(int*)((char*)self->mpAccount + 0xC), 0, 13, 0x32);
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464838));
+            if (uiText != 0) {
+                func_001A9150((cFEStateNet*)self, (int)uiText, GetHashValue32(D_00462CD0), *(int*)((char*)self->mpAccount + 0xC), 0, 13, 0x32);
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_004647A8)) {
@@ -18239,8 +18239,8 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
         } else if (self->mbAccount != 0) {
-            tLobbyAccount* s = self->mpAccount;
-            cBXString_operatorE(s, &((char**)&s->mNameOptions[0])[pWidget]);
+            tLobbyAccount* lobbyAccount = self->mpAccount;
+            cBXString_operatorE(lobbyAccount, &((char**)&lobbyAccount->mNameOptions[0])[pWidget]);
             func_001BC290(self);
         } else {
             func_001BC300(self, ((char**)((char*)self->mpAccount + 0x14))[pWidget]);
@@ -19299,8 +19299,8 @@ extern "C" void func_001BD610(cFEStateLobbyMenu* self, int a1, int a2, int a3)
         *(int*)((char*)p + 0x150) = 0x828;
         *(int*)((char*)p + 0x164) = 0;
         func_001A9BC0((cFEStateNet*)self, p);
-        LobbyMan* g = LobbyMan_mLobbyMan;
-        func_0025DAC0(g, a2, name, strlen(extra) != 0 ? extra : 0);
+        LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
+        func_0025DAC0(lobbyMan, a2, name, strlen(extra) != 0 ? extra : 0);
     }
 }
 #endif
@@ -21865,10 +21865,10 @@ extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement*
 {
     ((cFEVObj_001C0B20*)self)->v32();
     char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
-    cUIText* a = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
+    cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
     cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
     cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
-    *(cUIText**)(o + 0x7C) = a;
+    *(cUIText**)(o + 0x7C) = uiText;
     *(cUIText**)(o + 0x80) = b;
     if ((unsigned int)strlen(D_00465720) > 24) {
         o[0x8C] = 0;
@@ -22367,19 +22367,19 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
             } else {
                 self->unk_6F0 = 0;
                 self->mbSearching = 1;
-                cFEStateNetQuickPlayPopup* o = self;
-                int* ids = o->miSearchOptions;
+                cFEStateNetQuickPlayPopup* feStateNetQuickPlayPopup = self;
+                int* ids = feStateNetQuickPlayPopup->miSearchOptions;
                 func_001C13E0(self, 0);
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
                 D_00534B34[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
-                o->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
-                o->miSearchOptions[1] = cUIListBox_getCurrentEntryData(self->mpLBRace);
-                o->miSearchOptions[2] = cUIListBox_getCurrentEntryData(self->mpLBBigAir);
-                o->miSearchOptions[3] = cUIListBox_getCurrentEntryData(self->mpLBSuperpipe);
-                o->miSearchOptions[4] = cUIListBox_getCurrentEntryData(self->mpLBSlopeStyle);
+                feStateNetQuickPlayPopup->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
+                feStateNetQuickPlayPopup->miSearchOptions[1] = cUIListBox_getCurrentEntryData(self->mpLBRace);
+                feStateNetQuickPlayPopup->miSearchOptions[2] = cUIListBox_getCurrentEntryData(self->mpLBBigAir);
+                feStateNetQuickPlayPopup->miSearchOptions[3] = cUIListBox_getCurrentEntryData(self->mpLBSuperpipe);
+                feStateNetQuickPlayPopup->miSearchOptions[4] = cUIListBox_getCurrentEntryData(self->mpLBSlopeStyle);
                 func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
                 ((cFEVObj_001C1560*)self->mpTextSearching)->v09(1);
                 cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(D_00462C88));
@@ -23497,12 +23497,12 @@ extern "C" void* cFEStateStats_cFEStateStats(cFEStateStats* self, int pEngine)
     self->mVtbl = cFEStateStats_vtbl;
     self->mbShowTime = 1;
     self->mHashName = 0x42;
-    cFEStateStats* s = self;
-    s->miMode = 0;
-    s->miFocusMenu = 0;
-    s->miFirstResult = 0;
+    cFEStateStats* feStateStats = self;
+    feStateStats->miMode = 0;
+    feStateStats->miFocusMenu = 0;
+    feStateStats->miFirstResult = 0;
     for (int i = 3; i >= 0; i--) {
-        ((int*)&s->mpMenus[0])[i] = 0;
+        ((int*)&feStateStats->mpMenus[0])[i] = 0;
     }
     return ((void*)self);
 }
@@ -23823,7 +23823,7 @@ extern "C" void func_001C3310(cFEStateStats* self_)
         pb = &v1;
         for (i = 0; i < 10; i++, idx++) {
             sprintf(name, D_00465D90, i);
-            cUIText* t0 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));
+            cUIText* uiText = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));
             sprintf(name, D_00465DA0, i);
             cUIText* t1 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));
             sprintf(name, D_00465DB0, i);
@@ -23838,8 +23838,8 @@ extern "C" void func_001C3310(cFEStateStats* self_)
                     }
                     cUIText_setAsciiString(t2, txt);
                 }
-                if (t0 != 0) {
-                    cUIText_setAsciiString(t0, e + 8);
+                if (uiText != 0) {
+                    cUIText_setAsciiString(uiText, e + 8);
                 }
                 if (t1 != 0) {
                     sprintf(txt, D_004A1C20, *(int*)(e + 4));
@@ -23848,7 +23848,7 @@ extern "C" void func_001C3310(cFEStateStats* self_)
             } else {
                 cUIText_setAsciiString(t1, &D_004A1390_s);
                 cUIText_setAsciiString(t2, &D_004A1390_s);
-                cUIText_setAsciiString(t0, &D_004A1390_s);
+                cUIText_setAsciiString(uiText, &D_004A1390_s);
             }
         }
     }
@@ -24254,9 +24254,9 @@ extern "C" void func_001C3EE8(cFEStateStats* self, int mode)
             o->setVisible(1);
         }
         {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465E78));
-            if (t != 0) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_00465E88));
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465E78));
+            if (uiText != 0) {
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00465E88));
             }
         }
         if (changed) {
@@ -24291,9 +24291,9 @@ extern "C" void func_001C3EE8(cFEStateStats* self, int mode)
             o->setVisible(0);
         }
         {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465E78));
-            if (t != 0) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_00465E88));
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465E78));
+            if (uiText != 0) {
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00465E88));
             }
         }
         func_001C4B78(self, 0);
@@ -24326,9 +24326,9 @@ extern "C" void func_001C3EE8(cFEStateStats* self, int mode)
             o->setVisible(0);
         }
         {
-            cUIText* t = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465E78));
-            if (t != 0) {
-                cUIText_setUnicodeStringByID(t, GetHashValue32(D_00465E98));
+            cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465E78));
+            if (uiText != 0) {
+                cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00465E98));
             }
         }
         if (changed) {
@@ -24903,10 +24903,10 @@ extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
 {
     if (on) {
         char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465F28));
-        cUIText* a = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
+        cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
         cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
         cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
-        *(cUIText**)(o + 0x7C) = a;
+        *(cUIText**)(o + 0x7C) = uiText;
         *(cUIText**)(o + 0x80) = b;
         if ((unsigned int)strlen(D_00465720) > 24) {
             o[0x8C] = 0;

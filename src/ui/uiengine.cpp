@@ -1309,13 +1309,13 @@ extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
     func_0039FB30((self));
     self->mVtbl = cUIListBox_vtbl;
     *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
-    tListBoxEntry* p = ((&self->mpEntries[0]));
-    for (int i = 31; i != -1; i--, p++) {
-        p->mStringID = 0;
-        (*(int*)&p->mpString) = 0;
-        (*(int*)&p->mpAsciiString) = 0;
-        (*(int*)&p->mpData) = 0;
-        p->mUnicodeBufferSize = 0;
+    tListBoxEntry* listBoxEntry = ((&self->mpEntries[0]));
+    for (int i = 31; i != -1; i--, listBoxEntry++) {
+        listBoxEntry->mStringID = 0;
+        (*(int*)&listBoxEntry->mpString) = 0;
+        (*(int*)&listBoxEntry->mpAsciiString) = 0;
+        (*(int*)&listBoxEntry->mpData) = 0;
+        listBoxEntry->mUnicodeBufferSize = 0;
     }
     *(char*)&self->mNumEntries = 0;
     *(char*)&self->mCurrentEntry = 0;

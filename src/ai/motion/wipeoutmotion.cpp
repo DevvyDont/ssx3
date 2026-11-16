@@ -965,8 +965,8 @@ extern "C" void func_00137860(void* vself)
     sHit_137860 hitA;
     sSphere_137860 sph;
     sHit_137860 hitB;
-    cRider* r = RIDER;
-    func_0032F650(&sph, r->mSphereTree, !isHuman_137860(r));
+    cRider* rider = RIDER;
+    func_0032F650(&sph, rider->mSphereTree, !isHuman_137860(rider));
     float d = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (d >= 0.0f)
     {

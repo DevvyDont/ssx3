@@ -2011,7 +2011,7 @@ extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode
         func_002BB928(ctx, tree, tree->nodes + (node->child[2] >> 1), v, &c, &b);
         func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), v, &mid, hi);
     } else {
-        cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+        cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         char* rider = *(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18);
         sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
         sQtVec4_B928 t;
@@ -2040,8 +2040,8 @@ extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode
         t.z = cam.z;
         t.w = 1.0f;
         v[4].pos = t;
-        sQtVEntry_B928* vt = (sQtVEntry_B928*)g->mVtbl;
-        vt[73].fn((char*)g + vt[73].delta, 5, v, 0);
+        sQtVEntry_B928* vt = (sQtVEntry_B928*)ps2GraphicsMan->mVtbl;
+        vt[73].fn((char*)ps2GraphicsMan + vt[73].delta, 5, v, 0);
     }
 }
 #endif

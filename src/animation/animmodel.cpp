@@ -122,18 +122,18 @@ extern "C" void func_0030E9E0(cAnimModel* self, int i, int channel)
     {
         return;
     }
-    sAnimModelPart* e = &self->parts[idx];
-    self->mask |= e->mask;
+    sAnimModelPart* animModelPart = &self->parts[idx];
+    self->mask |= animModelPart->mask;
     if (channel < 0)
     {
         for (int k = 0; k < 4; k++)
         {
-            e->lods[k].used = 1;
+            animModelPart->lods[k].used = 1;
         }
     }
     else
     {
-        e->lods[channel].used = 1;
+        animModelPart->lods[channel].used = 1;
     }
 }
 #endif
@@ -157,23 +157,23 @@ extern "C" void func_0030EA80(cAnimModel* self, int i, int channel)
     {
         return;
     }
-    sAnimModelPart* e = &self->parts[idx];
-    self->mask &= ~e->mask;
+    sAnimModelPart* animModelPart = &self->parts[idx];
+    self->mask &= ~animModelPart->mask;
     if (channel < 0)
     {
         for (int k = 0; k < 4; k++)
         {
-            e->lods[k].used = 0;
+            animModelPart->lods[k].used = 0;
         }
     }
     else
     {
-        e->lods[channel].used = 0;
+        animModelPart->lods[channel].used = 0;
         for (int k = 0; k < 4; k++)
         {
-            if (e->lods[k].used)
+            if (animModelPart->lods[k].used)
             {
-                self->mask |= e->mask;
+                self->mask |= animModelPart->mask;
                 break;
             }
         }
@@ -248,12 +248,12 @@ extern "C" void cAnimModel_setModelPartVariant(cAnimModel* self, int i, int vari
     {
         return;
     }
-    sAnimModelPart* e = &self->parts[idx];
-    e->refIndex = variant;
-    self->mask |= e->mask;
+    sAnimModelPart* animModelPart = &self->parts[idx];
+    animModelPart->refIndex = variant;
+    self->mask |= animModelPart->mask;
     for (int k = 0; k < 4; k++)
     {
-        e->lods[k].used = 1;
+        animModelPart->lods[k].used = 1;
     }
 }
 #endif
@@ -272,8 +272,8 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_addAnimMinPart);
 // PORT: ulong is 64-bit here
 extern "C" void cAnimModel_addAnimMinPart(cAnimModel* self, int i)
 {
-    sAnimModelPart* e = &self->parts[self->partIndex[i]];
-    self->unk_158 |= e->mask;
+    sAnimModelPart* animModelPart = &self->parts[self->partIndex[i]];
+    self->unk_158 |= animModelPart->mask;
 }
 #endif
 
@@ -767,13 +767,13 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
     if (self->unk_018 != 0) {
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* p = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAnimModelLodRef* r = &p->lods[lod].refs[p->refIndex];
-                if (r->part != 0) {
-                    ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[111].delta, D_004FC420, 0, r->unk_0C, r->unk_08, 0);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            if (animModelPart->lods[lod].used != 0) {
+                sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
+                if (animModelLodRef->part != 0) {
+                    ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[111].delta, D_004FC420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
                     int m = self->parts[j].id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, r->part, r->data, m, 0, self->unk_140.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, animModelLodRef->part, animModelLodRef->data, m, 0, self->unk_140.y);
                 }
             }
         }
@@ -781,12 +781,12 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
         ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[111].delta, D_004FC420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* p = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAnimModelLodRef* r = p->lods[lod].refs;
-                if (r->part != 0) {
-                    int m = p->id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, r->part, r->data, m, 0, self->unk_140.y);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            if (animModelPart->lods[lod].used != 0) {
+                sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
+                if (animModelLodRef->part != 0) {
+                    int m = animModelPart->id == 2 ? x : y;
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, animModelLodRef->part, animModelLodRef->data, m, 0, self->unk_140.y);
                 }
             }
         }
@@ -915,14 +915,14 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
     if (self->unk_018 != 0) {
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* p = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAnimModelLodRef* r = &p->lods[lod].refs[p->refIndex];
-                if (r->part != 0) {
-                    ((tSetMats_0948)((sAmVEnt_0948*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[111].delta, D_004FD420, 0, r->unk_0C, r->unk_08, 0);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            if (animModelPart->lods[lod].used != 0) {
+                sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
+                if (animModelLodRef->part != 0) {
+                    ((tSetMats_0948)((sAmVEnt_0948*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[111].delta, D_004FD420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
                     int ok = (unsigned)(self->parts[j].id - 1) < 2;
                     int m = ok ? x : y;
-                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, r->part, r->data, m);
+                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, animModelLodRef->part, animModelLodRef->data, m);
                 }
             }
         }
@@ -930,13 +930,13 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
         ((tSetMats_0948)((sAmVEnt_0948*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[111].delta, D_004FD420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* p = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
-            if (p->lods[lod].used != 0) {
-                sAnimModelLodRef* r = p->lods[lod].refs;
-                if (r->part != 0) {
-                    int ok = (unsigned)(p->id - 1) < 2;
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            if (animModelPart->lods[lod].used != 0) {
+                sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
+                if (animModelLodRef->part != 0) {
+                    int ok = (unsigned)(animModelPart->id - 1) < 2;
                     int m = ok ? x : y;
-                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, r->part, r->data, m);
+                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, animModelLodRef->part, animModelLodRef->data, m);
                 }
             }
         }
@@ -964,12 +964,12 @@ struct sAmItem50 {
  */
 extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char* name)
 {
-    sAnimModelPart* g = &self->parts[self->partIndex[idx]];
-    sAmItem50* items = (sAmItem50*)g->boneNames;
-    for (int i = 0; i < g->numBones; i++)
+    sAnimModelPart* animModelPart = &self->parts[self->partIndex[idx]];
+    sAmItem50* items = (sAmItem50*)animModelPart->boneNames;
+    for (int i = 0; i < animModelPart->numBones; i++)
     {
         if (func_004165A8(&items[i], name) == 0)
-            return g->firstBone + i;
+            return animModelPart->firstBone + i;
     }
     return -1;
 }

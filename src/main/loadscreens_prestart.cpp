@@ -734,9 +734,9 @@ extern "C" void func_00232C98(void* self)
     clear_2C98(&D_004A4324);
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&D_004A43C8);
-    cPS2GraphicsMan* g = GrMan;
-    sVE_2C98* vt = (sVE_2C98*)g->mVtbl;
-    vt[15].fn((char*)g + vt[15].delta, sVec3i_2C98(0, 0, 0));
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_2C98* vt = (sVE_2C98*)ps2GraphicsMan->mVtbl;
+    vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_2C98(0, 0, 0));
 }
 #endif
 
@@ -1026,9 +1026,9 @@ struct sVE_3048 {
 
 static inline int loadTex_3048(char* data, const char* name)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sVE_3048* vt = (sVE_3048*)g->mVtbl;
-    return vt[46].fn((char*)g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_3048* vt = (sVE_3048*)ps2GraphicsMan->mVtbl;
+    return vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
 /**
@@ -1102,9 +1102,9 @@ extern "C" void func_00233260(void)
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     *p = 0;
-    cPS2GraphicsMan* g = GrMan;
-    sVE_3260* vt = (sVE_3260*)g->mVtbl;
-    vt[15].fn((char*)g + vt[15].delta, sVec3i_3260(0, 0, 0));
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_3260* vt = (sVE_3260*)ps2GraphicsMan->mVtbl;
+    vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_3260(0, 0, 0));
     func_0028F768(func_0028B180());
 }
 #endif

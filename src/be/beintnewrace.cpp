@@ -470,8 +470,8 @@ INCLUDE_ASM("be/beintnewrace", func_00145108);
 #ifdef SKIP_ASM
 extern "C" void func_00145108(void* self, int mode)
 {
-    cBERaceDB* g = &(*(&cBENewRaceInterface_newRace));
-    *((char*)g + 0x49) = mode;
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+    *((char*)beRaceDB + 0x49) = mode;
     switch (mode)
     {
     case 0:
@@ -480,9 +480,9 @@ extern "C" void func_00145108(void* self, int mode)
         break;
     case 1:
         cBENewRaceInterface_setNumberHumans(self, 1);
-        if (g->iNumberAI < 0)
+        if (beRaceDB->iNumberAI < 0)
             cBENewRaceInterface_setNumberAI(self, 0);
-        if (g->iNumberAI >= 6)
+        if (beRaceDB->iNumberAI >= 6)
             cBENewRaceInterface_setNumberAI(self, 5);
         break;
     case 2:

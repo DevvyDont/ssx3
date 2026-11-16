@@ -2695,14 +2695,14 @@ extern "C" void func_0030C4A8(void* ep, int a1, int a2)
     void* iface = cBE_getInterface_C4A8(cBE_getBE(), 10);
     if (a2 <= 0)
         return;
-    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     for (int n = a2; n != 0; n--, ids++) {
         unsigned int id = *ids;
         if (~id == 0)
             continue;
         ((unsigned int*)((char*)e + 0xC))[e->count] = id;
         cBE_getInterface_C4A8(cBE_getBE(), 0);
-        if (r->cGamePath == 0) {
+        if (beRaceDB->cGamePath == 0) {
             if (func_001538E8(iface, 0, e->count, e->id))
                 respawn_C4A8(*ids);
         } else {

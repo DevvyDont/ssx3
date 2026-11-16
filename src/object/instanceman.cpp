@@ -1349,8 +1349,8 @@ extern "C" void cMeshAnimNode_render(sDebris_352810* self)
     if (self->fade >= 0.0f && self->timer <= self->fade) {
         fade = self->timer;
     }
-    cPS2GraphicsMan* c = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)c->mVtbl)[95].fn((char*)c + ((sVE_352810*)c->mVtbl)[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 0x420, fade);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn((char*)ps2GraphicsMan + ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 0x420, fade);
 }
 #endif
 

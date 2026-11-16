@@ -2152,9 +2152,9 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int fla
     *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
     int id = *(int*)((char*)self + 0x70);
     if (id >= 0) {
-        cPS2GraphicsMan* g = GrMan;
-        sVEntry001D1B68* vt = (sVEntry001D1B68*)g->mVtbl;
-        vt[50].fn((char*)g + vt[50].delta, id);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEntry001D1B68* vt = (sVEntry001D1B68*)ps2GraphicsMan->mVtbl;
+        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
     int slot = *(int*)((char*)self + 0x6C);
     if (slot >= 0) {

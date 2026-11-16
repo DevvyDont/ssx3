@@ -1627,9 +1627,9 @@ extern "C" void func_00210BD8(void* self, char* name, int a);
 extern "C" void func_00210D20(void* self)
 {
     cOVState_onUpdate(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        int ok = p->mPauseTimeout == 0 || p->mOverlayTimeout == 0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
             func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
             *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;

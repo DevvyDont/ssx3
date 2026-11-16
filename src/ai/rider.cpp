@@ -527,9 +527,9 @@ extern "C" int cRider_isSafeToDelete(cRider* self)
 {
     if (self->mSafeRenderTick != -1)
     {
-        cPS2GraphicsMan* g = GrMan;
-        sRiderVE_0011C0E0* vt = (sRiderVE_0011C0E0*)g->mVtbl;
-        return self->mSafeRenderTick < vt[114].fn((char*)g + vt[114].delta);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sRiderVE_0011C0E0* vt = (sRiderVE_0011C0E0*)ps2GraphicsMan->mVtbl;
+        return self->mSafeRenderTick < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
     }
     return 0;
 }
@@ -2443,10 +2443,10 @@ INCLUDE_ASM("ai/rider", cRider_getHipPosition);
 // Copies the quadword of the anim model's transform unk_89C into dst.
 extern "C" void* cRider_getHipPosition(cRider* dst, cRider* self)
 {
-    cAnimModel* q = self->mAnimModel;
+    cAnimModel* animModel = self->mAnimModel;
     int i = self->mBoneHips;
-    sAnimModelBone* b = q->bones;
-    *(cQuad128*)dst = (*(cQuad128*)&b[i].pos);
+    sAnimModelBone* animModelBone = animModel->bones;
+    *(cQuad128*)dst = (*(cQuad128*)&animModelBone[i].pos);
     return ((void*)dst);
 }
 #endif
@@ -2463,10 +2463,10 @@ INCLUDE_ASM("ai/rider", func_0011FF70);
 // Copies the quadword of the anim model's transform unk_8A8 into dst (sibling of cRider_getHipPosition).
 extern "C" void* func_0011FF70(void* dst, cRider* self)
 {
-    cAnimModel* q = self->mAnimModel;
+    cAnimModel* animModel = self->mAnimModel;
     int i = self->mBoneHead;
-    sAnimModelBone* b = q->bones;
-    *(cQuad128*)dst = (*(cQuad128*)&b[i].pos);
+    sAnimModelBone* animModelBone = animModel->bones;
+    *(cQuad128*)dst = (*(cQuad128*)&animModelBone[i].pos);
     return dst;
 }
 #endif
@@ -3652,9 +3652,9 @@ static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
 
 extern "C" void func_00121F30(cRider* self)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sVEntryP_121F30* gvt = (sVEntryP_121F30*)g->mVtbl;
-    sVec4_121F30* m = (sVec4_121F30*)gvt[35].fn((char*)g + gvt[35].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVEntryP_121F30* gvt = (sVEntryP_121F30*)ps2GraphicsMan->mVtbl;
+    sVec4_121F30* m = (sVec4_121F30*)gvt[35].fn((char*)ps2GraphicsMan + gvt[35].delta);
     char* obj = (char*)&self->mVtbl;
     sVEntryP_121F30* vt = *(sVEntryP_121F30**)obj;
     sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
@@ -3920,10 +3920,10 @@ static inline int inFrustum_122278(sQ128_122278* v)
 
 static inline int test_122278(void* a, void* b)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sVE_122278* vt = (sVE_122278*)g->mVtbl;
-    char* obj = (char*)g + vt[93].delta;
-    sMat_122278 m = ((GetMatFn_122278)vt[43].fn)((char*)g + vt[43].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_122278* vt = (sVE_122278*)ps2GraphicsMan->mVtbl;
+    char* obj = (char*)ps2GraphicsMan + vt[93].delta;
+    sMat_122278 m = ((GetMatFn_122278)vt[43].fn)((char*)ps2GraphicsMan + vt[43].delta);
     return ((TestFn_122278)vt[93].fn)(obj, a, b, &m);
 }
 
@@ -3993,9 +3993,9 @@ extern "C" void cRider_renderBody(cRider* self)
         if (*(int*)(q + 0xA4) || self->mUberLevel >= 11)
             a = 1;
         func_00121F30(self);
-        cPS2GraphicsMan* g = GrMan;
-        sVEntryI_122448* vt = (sVEntryI_122448*)g->mVtbl;
-        vt[69].fn((char*)g + vt[69].delta, self->unk_7C0, 1);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEntryI_122448* vt = (sVEntryI_122448*)ps2GraphicsMan->mVtbl;
+        vt[69].fn((char*)ps2GraphicsMan + vt[69].delta, self->unk_7C0, 1);
         cPS2GraphicsMan* g2 = GrMan;
         int* rs = (int*)g2->m_pCurrentDrawState;
         rs[1] = (rs[1] & ~0x7C) | 0x14;
@@ -4172,9 +4172,9 @@ extern "C" void func_00122680(void)
         o->f38 = o->f30;
         ((cGraphicsMan_2680*)GrMan)->BeginScene();
         ((cGraphicsMan_2680*)GrMan)->Begin2D();
-        cPS2GraphicsMan* g = GrMan;
-        ((cGraphicsMan_2680*)g)->stateTop[1] = ((cGraphicsMan_2680*)g)->stateTop[0];
-        ((cGraphicsMan_2680*)g)->stateTop++;
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[1] = ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[0];
+        ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop++;
         *((cGraphicsMan_2680*)GrMan)->stateTop = D_00501420;
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         ((cGraphicsMan_2680*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
@@ -4317,9 +4317,9 @@ extern "C" void cRider_RenderShadow(cRider* self)
 {
     if (self->unk_AA4 == 0) {
         self->unk_AA4 = 1;
-        cPS2GraphicsMan* g = GrMan;
-        top_2898(g)[1] = top_2898(g)[0];
-        top_2898(g)++;
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        top_2898(ps2GraphicsMan)[1] = top_2898(ps2GraphicsMan)[0];
+        top_2898(ps2GraphicsMan)++;
         sV3_2898 a;
         {
             sV4_2898 m = Scale_2898(Add_2898(BonePos_2898(self, self->unk_918), BonePos_2898(self, self->unk_8E8)), 0.5f);
@@ -6298,13 +6298,13 @@ static inline void* getC0_125108()
  */
 extern "C" void cRider_doFinishEvent(cRider* self)
 {
-    cGameComm* g = cGameComm_mGameComm;
-    if (g != 0 && self->mDidNotFinish == 0 && self->mIsHuman != 0)
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0 && self->mDidNotFinish == 0 && self->mIsHuman != 0)
     {
         if (self->mIsLocal != 0)
-            g->mLocalFinishedRace = 1;
+            gameComm->mLocalFinishedRace = 1;
         else
-            g->mRemoteFinishedRace = 1;
+            gameComm->mRemoteFinishedRace = 1;
     }
     func_001193E0(self->mMetrix);
     self->mFinishTick = *(int*)((char*)SSXApp->Game->AI + 0xC) + self->mPenaltyTicks;

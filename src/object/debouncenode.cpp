@@ -1967,7 +1967,7 @@ struct sVE5_44E18 { short delta; short index; void (*fn)(void*, void*, void*, in
 
 extern "C" void func_00344E18(void* self)
 {
-    cPS2GraphicsMan* r = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     unsigned int* ref = (unsigned int*)((char*)self + 0xC);
     int off = 0;
     for (int i = 0; i < 32; ref += 2, i++, off += 8)
@@ -1980,13 +1980,13 @@ extern "C" void func_00344E18(void* self)
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
-            sVE7_44E18* vt = (sVE7_44E18*)r->mVtbl;
-            vt[95].fn((char*)r + vt[95].delta, m, 1.0f, (char*)self + 0x118, (char*)m + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
+            sVE7_44E18* vt = (sVE7_44E18*)ps2GraphicsMan->mVtbl;
+            vt[95].fn((char*)ps2GraphicsMan + vt[95].delta, m, 1.0f, (char*)self + 0x118, (char*)m + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
         {
-            sVE5_44E18* vt = (sVE5_44E18*)r->mVtbl;
-            vt[96].fn((char*)r + vt[96].delta, m, *(void**)((char*)self + 0x1E8), 0, 0);
+            sVE5_44E18* vt = (sVE5_44E18*)ps2GraphicsMan->mVtbl;
+            vt[96].fn((char*)ps2GraphicsMan + vt[96].delta, m, *(void**)((char*)self + 0x1E8), 0, 0);
         }
     }
 }

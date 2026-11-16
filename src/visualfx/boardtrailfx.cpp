@@ -1235,9 +1235,9 @@ extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
     col.c[3] = self->from[3] + (self->to[3] - self->from[3]) * k;
     col.c[0] = self->from[0] + (self->to[0] - self->from[0]) * k;
     col.c[1] = self->from[1] + (self->to[1] - self->from[1]) * k;
-    cPS2GraphicsMan* d = cGraphicsMan_TheGraphicsMan;
-    sVE_A900* vt = (sVE_A900*)d->mVtbl;
-    vt[41].fn((char*)d + vt[41].delta, &col);
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+    sVE_A900* vt = (sVE_A900*)ps2GraphicsMan->mVtbl;
+    vt[41].fn((char*)ps2GraphicsMan + vt[41].delta, &col);
 }
 #endif
 

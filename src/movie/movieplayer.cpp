@@ -5317,8 +5317,8 @@ static inline sVec4_25C0 mulT_25C0(const sMtx_25C0* m, const sVec4_25C0& v)
 
 static inline sMtx_25C0* camMtx_25C0()
 {
-    cPS2GraphicsMan* c = GrMan;
-    return ((tCamMtxP_25C0)((sCamVt_25C0*)c->mVtbl)[0x23].fn)((char*)c + ((sCamVt_25C0*)c->mVtbl)[0x23].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    return ((tCamMtxP_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].fn)((char*)ps2GraphicsMan + ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].delta);
 }
 
 extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
@@ -5327,8 +5327,8 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
     self->mask = 0;
     if (self->enabled == 0)
         return;
-    cPS2GraphicsMan* c = GrMan;
-    sMtx_25C0 mtx = ((tCamMtx_25C0)((sCamVt_25C0*)c->mVtbl)[0x2B].fn)((char*)c + ((sCamVt_25C0*)c->mVtbl)[0x2B].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sMtx_25C0 mtx = ((tCamMtx_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].fn)((char*)ps2GraphicsMan + ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].delta);
     sVec4_25C0 p = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
     p = mulT_25C0(camMtx_25C0(), p);
     self->count = 0;

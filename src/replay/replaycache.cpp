@@ -42,12 +42,12 @@ INCLUDE_ASM("replay/replaycache", cReplay_removeCache);
 #ifdef SKIP_ASM
 extern "C" void func_0026D0E8(void* p, int mode);
 
-extern "C" void cReplay_removeCache(cReplay* self, void* p)
+extern "C" void cReplay_removeCache(cReplay* self, void* pCache)
 {
-    if (p != 0) {
+    if (pCache != 0) {
         void** slot = (void**)((char*)self + 0x48C);
         for (int i = 0; i < 2; i++, slot++) {
-            if (*slot == p) {
+            if (*slot == pCache) {
                 if (*slot != 0) {
                     func_0026D0E8(*slot, 3);
                 }
@@ -115,21 +115,21 @@ struct sRcNode1A0 {
 
 extern "C" void cReplay_freeOneReplayFrame(cReplay* self)
 {
-    cReplay* c = self;
+    cReplay* replay = self;
     int i;
     for (i = 0; i < 2; i++) {
-        while (((sRcNode1A0*)c->NextCandidate) != 0 && ((sRcNode1A0*)c->NextCandidate)->next != 0 && ((sRcNode1A0*)c->NextCandidate)->next->next != 0) {
-            sRcNode1A0* n = ((sRcNode1A0*)c->NextCandidate)->next;
+        while (((sRcNode1A0*)replay->NextCandidate) != 0 && ((sRcNode1A0*)replay->NextCandidate)->next != 0 && ((sRcNode1A0*)replay->NextCandidate)->next->next != 0) {
+            sRcNode1A0* n = ((sRcNode1A0*)replay->NextCandidate)->next;
             if (n->used == 0) {
                 if (n->locked == 0) {
-                    (*(sRcNode1A0**)&c->NextCandidate) = n->next;
+                    (*(sRcNode1A0**)&replay->NextCandidate) = n->next;
                     cReplay_freeReplayFrame(self, n);
                     return;
                 }
             }
-            (*(sRcNode1A0**)&c->NextCandidate) = ((sRcNode1A0*)c->NextCandidate)->next;
+            (*(sRcNode1A0**)&replay->NextCandidate) = ((sRcNode1A0*)replay->NextCandidate)->next;
         }
-        (*(sRcNode1A0**)&c->NextCandidate) = (*(sRcNode1A0**)&c->FrameList);
+        (*(sRcNode1A0**)&replay->NextCandidate) = (*(sRcNode1A0**)&replay->FrameList);
     }
 }
 #endif
@@ -759,9 +759,9 @@ extern "C" int cReplay_countHighlights(cReplay* self, int i, int positive)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_maxHighlights);
 #ifdef SKIP_ASM
-extern "C" int cReplay_maxHighlights(cReplay* self, int a1)
+extern "C" int cReplay_maxHighlights(cReplay* self, int land)
 {
-    if (a1 != 0) {
+    if (land != 0) {
         return self->MaxPlayerHighlights;
     }
     return 1;
@@ -4125,9 +4125,9 @@ extern "C" void func_002746F8(cScriptPlayerMain* scriptPlayerMain)
         cScriptPlayerEntity_DeInit((cScriptPlayerEntity*)(&(self->mpEntityPlayers)[i]));
     }
     // delete[] self->elems (element count in the 16-byte array cookie)
-    cScriptPlayerEntity* e = (self->mpEntityPlayers);
-    if (e != 0) {
-        cScriptPlayerEntity* q = e + *(int*)((char*)e - 0x10);
+    cScriptPlayerEntity* scriptPlayerEntity = (self->mpEntityPlayers);
+    if (scriptPlayerEntity != 0) {
+        cScriptPlayerEntity* q = scriptPlayerEntity + *(int*)((char*)scriptPlayerEntity - 0x10);
         while ((self->mpEntityPlayers) != q) {
             q--;
             cScriptPlayerEntity__cScriptPlayerEntity((cScriptPlayerEntity*)q, 0);

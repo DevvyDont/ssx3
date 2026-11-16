@@ -2490,31 +2490,31 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
         self->Reset();
         return;
     }
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int i = 0;
-    ((cGfx_3E28*)g)->BeginScene();
-    const sV2_3E28& screen = ((cGfx_3E28*)g)->GetScreenSize();
+    ((cGfx_3E28*)ps2GraphicsMan)->BeginScene();
+    const sV2_3E28& screen = ((cGfx_3E28*)ps2GraphicsMan)->GetScreenSize();
     sV2_3E28 scr = screen;
-    ((cGfx_3E28*)g)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    ((cGfx_3E28*)g)->Begin2D();
-    ((cGfx_3E28*)g)->SetTexture(t4mat_Identity);
-    ((cGfx_3E28*)g)->stateTop[1] = ((cGfx_3E28*)g)->stateTop[0];
-    ((cGfx_3E28*)g)->stateTop++;
-    *((cGfx_3E28*)g)->stateTop = D_00501420;
-    ((cGfx_3E28*)g)->stateTop->f8_5 = 8;
-    ((cGfx_3E28*)g)->stateTop->f4_23 = 2;
-    ((cGfx_3E28*)g)->stateTop->f4_20 = 0;
-    ((cGfx_3E28*)g)->stateTop->f4_12 = 0;
-    ((cGfx_3E28*)g)->stateTop->f4_0 = 0;
-    ((cGfx_3E28*)g)->stateTop->f8_10 = 0;
-    SetF22_3E28(((cGfx_3E28*)g)->stateTop, 1);
+    ((cGfx_3E28*)ps2GraphicsMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    ((cGfx_3E28*)ps2GraphicsMan)->Begin2D();
+    ((cGfx_3E28*)ps2GraphicsMan)->SetTexture(t4mat_Identity);
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop[1] = ((cGfx_3E28*)ps2GraphicsMan)->stateTop[0];
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop++;
+    *((cGfx_3E28*)ps2GraphicsMan)->stateTop = D_00501420;
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f8_5 = 8;
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_23 = 2;
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_20 = 0;
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_12 = 0;
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_0 = 0;
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f8_10 = 0;
+    SetF22_3E28(((cGfx_3E28*)ps2GraphicsMan)->stateTop, 1);
     for (i = 0; i < self->nSmoke; i++)
         func_002F2C30(self->smoke[i], &scr);
     for (i = 0; i < self->nParts; i++)
         func_002F3418_3E28(self->parts[i], &scr);
-    ((cGfx_3E28*)g)->stateTop--;
-    ((cGfx_3E28*)g)->End2D();
-    ((cGfx_3E28*)g)->EndScene();
+    ((cGfx_3E28*)ps2GraphicsMan)->stateTop--;
+    ((cGfx_3E28*)ps2GraphicsMan)->End2D();
+    ((cGfx_3E28*)ps2GraphicsMan)->EndScene();
 }
 #endif
 
@@ -3131,7 +3131,7 @@ static inline float clamp_4DB8(float v, float lo, float hi)
 
 extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
 {
-    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     if (func_002EE220(6) == -1) {
         self->visible = 0;
         self->onScreen = 0;
@@ -3177,7 +3177,7 @@ extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
     sun.w = 0.0f;
     ScaleEq_4DB8(sun, dist);
     AddEq_4DB8(sun, dir);
-    if (((cGfx_4DB8*)g)->IsCulled(sun)) {
+    if (((cGfx_4DB8*)ps2GraphicsMan)->IsCulled(sun)) {
         self->visible = 0;
         self->onScreen = 0;
         self->intensity = 0.0f;
@@ -3185,7 +3185,7 @@ extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
     }
     self->visible = 1;
     self->onScreen = 1;
-    self->screen = ((cGfx_4DB8*)g)->Project(sun);
+    self->screen = ((cGfx_4DB8*)ps2GraphicsMan)->Project(sun);
     self->rect.x = self->screen.x - 8.0f;
     self->rect.y = self->screen.y - 8.0f;
     self->rect.w = 16.0f;

@@ -94,9 +94,9 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cFELoadScreen_load(void* self)
 {
     {
-        cPS2GraphicsMan* g = GrMan;
-        sVE_233438* vt = (sVE_233438*)g->mVtbl;
-        vt[44].fn((char*)g + vt[44].delta, 0x100);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVE_233438* vt = (sVE_233438*)ps2GraphicsMan->mVtbl;
+        vt[44].fn((char*)ps2GraphicsMan + vt[44].delta, 0x100);
     }
     void* eng = func_00397B08(cMemMan_alloc(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = eng;
@@ -164,9 +164,9 @@ struct sVE_3640 {
 
 static inline int loadTex_3640(char* data, const char* name)
 {
-    cPS2GraphicsMan* g = GrMan;
-    sVE_3640* vt = (sVE_3640*)g->mVtbl;
-    return vt[46].fn((char*)g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_3640* vt = (sVE_3640*)ps2GraphicsMan->mVtbl;
+    return vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
 extern "C" void func_00233640(void* self, int type)
@@ -235,9 +235,9 @@ extern "C" void func_002338C8(void)
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     *p = 0;
-    cPS2GraphicsMan* g = GrMan;
-    sVE_38C8* vt = (sVE_38C8*)g->mVtbl;
-    vt[15].fn((char*)g + vt[15].delta, sVec3i_38C8(0, 0, 0));
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVE_38C8* vt = (sVE_38C8*)ps2GraphicsMan->mVtbl;
+    vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_38C8(0, 0, 0));
     func_0028F768(func_0028B180());
 }
 #endif
@@ -541,10 +541,10 @@ extern "C" void func_00233C50(void* self)
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
     func_001F36C0(SSXApp->Game->LoadIndicator, 4);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        func_00244880(p);
-        p->unk_090 = 1;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        func_00244880(gameComm);
+        gameComm->unk_090 = 1;
     }
 }
 #endif
@@ -1139,8 +1139,8 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
     cBE_getInterface_4750(cBE_getBE(), 0);
-    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
-    int mode = r->cGameMode;
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+    int mode = beRaceDB->cGameMode;
     if (mode == 0) {
         cAI_initAIRiders(*(void**)((char*)cGameState_mpGame + 0xC));
         func_001289F0(*(void**)((char*)cGameState_mpGame + 0xC));

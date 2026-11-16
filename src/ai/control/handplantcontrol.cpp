@@ -4270,9 +4270,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     if (func_00311AE8(self->mRider->mRiderAnim, 2) == 10 || func_00311AE8(self->mRider->mRiderAnim, 2) == 4 ||
         func_00311AE8(self->mRider->mRiderAnim, 2) == 5 || func_00312AA0(self->mRider->mRiderAnim, 2) == 0x16)
         ch = 0.0f;
-    cRider* r = self->mRider;
-    r->mSlewed[18].target = ch * scale;
-    r->mSlewed[18].rate = dt * 100.0f;
+    cRider* rider = self->mRider;
+    rider->mSlewed[18].target = ch * scale;
+    rider->mSlewed[18].rate = dt * 100.0f;
 
     float yawRate = 0.0f;
     float spd2 = vu0Len_13D818(rel);

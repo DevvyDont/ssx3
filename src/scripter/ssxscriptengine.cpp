@@ -2435,8 +2435,8 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
 extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
-    cBERaceDB* g = &(*(&cBENewRaceInterface_newRace));
-    int mode = g->cGameMode;
+    cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
+    int mode = beRaceDB->cGameMode;
     if (mode == 4) {
         return;
     }
@@ -2449,7 +2449,7 @@ extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
     }
     int found = 0;
     sScList_AC60* list = *(sScList_AC60**)(x + 0xC);
-    if (g->cGamePath == 0) {
+    if (beRaceDB->cGamePath == 0) {
         for (int i = 0; i < list->nslots; i++) {
             if (D_00536730[Call_AC60(list->slots[i]->rider, 7)] < 3) {
                 found = 1;
@@ -2845,18 +2845,18 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
         int size;
     } r;
     for (int i = 0; i < 10; i++) {
-        tSSXScriptBankInfo* s = &((&(self)->mScriptDataBanks[0]))[i];
-        if ((void*)((int)s->asyncHandle) == file) {
+        tSSXScriptBankInfo* ssxScriptBankInfo = &((&(self)->mScriptDataBanks[0]))[i];
+        if ((void*)((int)ssxScriptBankInfo->asyncHandle) == file) {
             ASYNCFILE_release_out(file, &r.data, &r.size);
             self->mNumAsyncs -= 1;
             if (r.size == 0) {
-                tSSXScriptBankInfo_Clear(s);
+                tSSXScriptBankInfo_Clear(ssxScriptBankInfo);
                 return;
             }
-            sprintf(buf, D_00481EB0, s->dataIdentifier);
-            (*(int*)&s->asyncHandle) = 0;
+            sprintf(buf, D_00481EB0, ssxScriptBankInfo->dataIdentifier);
+            (*(int*)&ssxScriptBankInfo->asyncHandle) = 0;
             self->mCurrAttachingBankNum = i;
-            (*(int*)&s->dataBankHandle) = func_00275920((char*)self + 0x51C, buf, r.data, r.size);
+            (*(int*)&ssxScriptBankInfo->dataBankHandle) = func_00275920((char*)self + 0x51C, buf, r.data, r.size);
             self->mCurrAttachingBankNum = 10;
             return;
         }

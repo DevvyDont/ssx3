@@ -1953,22 +1953,22 @@ extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_co
 // PORT: the unit declares this as (void*, int, int, int); dst is a pointer passed as int
 extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsize)
 {
-    cGameComm* c = self;
-    if (c->mError != 0) return 0;
-    func_00257CD8(c);
-    PacketQueue_7BD8* q = &((PacketQueue_7BD8*)&c->mReadQueue[0])[ch];
+    cGameComm* gameComm = self;
+    if (gameComm->mError != 0) return 0;
+    func_00257CD8(gameComm);
+    PacketQueue_7BD8* q = &((PacketQueue_7BD8*)&gameComm->mReadQueue[0])[ch];
     if (q->rd != q->wr) {
         Packet_7BD8* p = q->slots[q->rd++ % 32];
         int len = p->size - 4;
         MEM_copy_7BD8((void*)dst, p->data, len);
-        func_002581B8((cGameComm*)c, (int*)p);
+        func_002581B8((cGameComm*)gameComm, (int*)p);
         if (ch == 0) {
-            c->unk_05C = 0;
-            c->unk_060 = 0;
-            c->mStallThreshold = 0;
-            c->mWaitingMessage = 0;
+            gameComm->unk_05C = 0;
+            gameComm->unk_060 = 0;
+            gameComm->mStallThreshold = 0;
+            gameComm->mWaitingMessage = 0;
         }
-        if (c->unk_094 > 0) func_00258870((cGameComm*)c, 0x708, 0);
+        if (gameComm->unk_094 > 0) func_00258870((cGameComm*)gameComm, 0x708, 0);
         return len;
     }
     return 0;
@@ -2589,13 +2589,13 @@ struct S88A8_S { int k0; int k4; char p0[0x40]; int k48; char p1[0x24]; int k70;
  * than 150 countdown ticks left.
  */
 extern "C" void cGameComm_setUnPauseTimer(cGameComm* self) {
-    cGame *t6;
+    cGame *game;
     S88A8_4 *t4;
     self->mUnPauseTimer = 0;
-    t6 = ((SSXApp)->Game);
-    if (t6->mCurrentStateID != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
+    game = ((SSXApp)->Game);
+    if (game->mCurrentStateID != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
         && self->mState < 0xF
-        && ((t4 = ((S88A8_4*)t6->AI), t4->k0 != 4) || t4->k1c < 0x97)
+        && ((t4 = ((S88A8_4*)game->AI), t4->k0 != 4) || t4->k1c < 0x97)
         && t4->k18 <= 0 && self->mPauseMenu[0] == 0 && self->mPauseMenu[1] == 0) {
         self->mUnPauseTimer = 0xB4;
     }
@@ -2651,9 +2651,9 @@ extern "C" void cGameComm_gameStartRace(cGameComm* self) {
         if (BuddyMan_mBuddyMan == 0) {
             func_0025B800_8988((char*)LobbyMan_mLobbyMan);
         }
-        BuddyMan* t4 = BuddyMan_mBuddyMan;
-        if (t4 != 0) {
-            func_00262768_8988((int)t4, 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
+        BuddyMan* buddyMan = BuddyMan_mBuddyMan;
+        if (buddyMan != 0) {
+            func_00262768_8988((int)buddyMan, 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
         }
         self->unk_034 = *(int *)((char*)SSXApp + 0x18) / *(int *)((char*)SSXApp + 0x10);
         self->mRaceInProgress = 1;
@@ -2716,9 +2716,9 @@ extern "C" void cGameComm_gameExit(cGameComm* self) {
     if (BuddyMan_mBuddyMan == 0) {
         func_0025B800((int)LobbyMan_mLobbyMan);
     }
-    BuddyMan* t = BuddyMan_mBuddyMan;
-    if (t != 0) {
-        func_00262768((int)t, 1, 0, 0, 0, 0);
+    BuddyMan* buddyMan = BuddyMan_mBuddyMan;
+    if (buddyMan != 0) {
+        func_00262768((int)buddyMan, 1, 0, 0, 0, 0);
     }
     func_00258BC8(self);
     func_00258A48(self);
@@ -2974,10 +2974,10 @@ struct VEnt_9098 {
 
 extern "C" void func_00259098(int a0, int a1, int a2)
 {
-    LobbyMan* g = LobbyMan_mLobbyMan;
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int v;
-    if (g->mIsHost) v = g->mOppoAddr;
-    else v = g->mHostAddr;
+    if (lobbyMan->mIsHost) v = lobbyMan->mOppoAddr;
+    else v = lobbyMan->mHostAddr;
     void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
     char* ri = (char*)cBE_getInterface_9098(SSXApp->BE, 7);
     D_00534E58[0] = cBENewPlayerInterface_getPlayerCharID(pi, 0);
@@ -2987,7 +2987,7 @@ extern "C" void func_00259098(int a0, int a1, int a2)
         VEnt_9098* vt = *(VEnt_9098**)(ri + 0xC);
         vt[1].fn(ri + vt[1].delta);
     }
-    func_002639E0(a0, v, g->mIsHost, a1, a2);
+    func_002639E0(a0, v, lobbyMan->mIsHost, a1, a2);
 }
 #endif
 

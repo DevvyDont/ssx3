@@ -257,9 +257,9 @@ struct sVEntryK199148 {
 static inline void releaseK199148(int id)
 {
     if (id >= 0) {
-        cPS2GraphicsMan* g = GrMan;
-        sVEntryK199148* vt = (sVEntryK199148*)g->mVtbl;
-        vt[50].fn((char*)g + vt[50].delta, id);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEntryK199148* vt = (sVEntryK199148*)ps2GraphicsMan->mVtbl;
+        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
 }
 
@@ -1140,13 +1140,13 @@ extern "C" int func_0019A098(void* self, const char* name)
             char* data = (char*)pkg + e->off;
             int id = *(int*)((char*)self + 0xA68);
             if (id == -1) {
-                cPS2GraphicsMan* g = GrMan;
-                sVEK19A098a* vt = (sVEK19A098a*)g->mVtbl;
-                *(int*)((char*)self + 0xA68) = vt[46].fn((char*)g + vt[46].delta, data, D_004A1950, 0, 1, -1);
+                cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+                sVEK19A098a* vt = (sVEK19A098a*)ps2GraphicsMan->mVtbl;
+                *(int*)((char*)self + 0xA68) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, D_004A1950, 0, 1, -1);
             } else {
-                cPS2GraphicsMan* g = GrMan;
-                sVEK19A098b* vt = (sVEK19A098b*)g->mVtbl;
-                vt[48].fn((char*)g + vt[48].delta, id, data, 1);
+                cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+                sVEK19A098b* vt = (sVEK19A098b*)ps2GraphicsMan->mVtbl;
+                vt[48].fn((char*)ps2GraphicsMan + vt[48].delta, id, data, 1);
             }
             return *(int*)((char*)self + 0xA68);
         }
@@ -1402,9 +1402,9 @@ extern "C" void func_0019A638(void* self)
         if (func_0019E238((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C))) {
             char* e = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
             if (e != 0) {
-                cPS2GraphicsMan* g = GrMan;
-                sVEntryK19A638* vt = (sVEntryK19A638*)g->mVtbl;
-                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)g + vt[46].delta, e + *(int*)(e + 0x14), D_004A1960, 0, 1, -1);
+                cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+                sVEntryK19A638* vt = (sVEntryK19A638*)ps2GraphicsMan->mVtbl;
+                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), D_004A1960, 0, 1, -1);
             } else {
                 *(int*)((char*)self + 0xA70) = -1;
             }
@@ -4217,9 +4217,9 @@ extern "C" void func_0019E498(void* self, int flags)
     int none = -1;
     for (i = 0xFF; i >= 0; i--, s++) {
         if (s->id >= 0) {
-            cPS2GraphicsMan* g = GrMan;
-            sVEntry0019E498* vt = (sVEntry0019E498*)g->mVtbl;
-            vt[50].fn((char*)g + vt[50].delta, s->id);
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sVEntry0019E498* vt = (sVEntry0019E498*)ps2GraphicsMan->mVtbl;
+            vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, s->id);
         }
         s->id = none;
         s->flag = 0;

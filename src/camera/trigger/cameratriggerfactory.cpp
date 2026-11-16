@@ -1658,8 +1658,8 @@ extern "C" void func_001732E8_x(char* self, long key)
 {
     char* o = *(char**)(self + 0x30);
     char* r = *(char**)(o + 4) + 0x6C0;
-    sVEntry<long(void*)>* e = &(*(sVEntry<long(void*)>**)r)[7];
-    if (key != e->fn(r + e->delta))
+    sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)r)[7];
+    if (key != vEntry->fn(r + vEntry->delta))
         return;
     t4Vector a, b, dir;
     {
@@ -1872,14 +1872,14 @@ extern "C" void func_001736E0(char* self)
 {
     t4Vector a, b, c;
     char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-    ((void (*)(void*, void*))e->fn)(&a, o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+    ((void (*)(void*, void*))vEntry->fn)(&a, o + vEntry->delta);
     o = *(char**)(self + 0x30);
-    e = &(*(sVEntry<t4Vector(void*)>**)o)[3];
-    ((void (*)(void*, void*))e->fn)(&b, o + e->delta);
+    vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[3];
+    ((void (*)(void*, void*))vEntry->fn)(&b, o + vEntry->delta);
     o = *(char**)(self + 0x30);
-    e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-    ((void (*)(void*, void*))e->fn)(&c, o + e->delta);
+    vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+    ((void (*)(void*, void*))vEntry->fn)(&c, o + vEntry->delta);
     {
         t4Vector t;
         ScaleTo_1736E0(t, D_004FF160_36E0, *(float*)(self + 0x6C));
@@ -2266,12 +2266,12 @@ extern "C" void func_00174200(char* self)
     } else {
         t4Vector c, a, t, b;
         char* o = *(char**)(self + 0x30);
-        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-        ((void (*)(void*, void*))e->fn)(&a, o + e->delta);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+        ((void (*)(void*, void*))vEntry->fn)(&a, o + vEntry->delta);
         float k = *(float*)(self + 0x74);
         o = *(char**)(self + 0x30);
-        e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-        ((void (*)(void*, void*))e->fn)(&b, o + e->delta);
+        vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+        ((void (*)(void*, void*))vEntry->fn)(&b, o + vEntry->delta);
         ScaleTo_174200(t, b, k);
         AddTo_174200(c, a, t);
         t4Vector t2;
@@ -2281,8 +2281,8 @@ extern "C" void func_00174200(char* self)
     *(t4Vector*)(self + 0x20) = p;
     {
         char* o = *(char**)(*(char**)(self + 0x80) + 8);
-        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
-        ((void (*)(void*, void*))e->fn)(o + e->delta, self + 0x40);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
+        ((void (*)(void*, void*))vEntry->fn)(o + vEntry->delta, self + 0x40);
     }
     t4Vector d = Sub_174200(p, *(t4Vector*)(self + 0x40));
     *(float*)(self + 0x50) = Atan2_174200(d.y, d.x);
@@ -2424,8 +2424,8 @@ extern "C" void func_001744B0(char* self, long a1)
 {
     {
         char* o = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
-        sVEntry<long(void*)>* e = &(*(sVEntry<long(void*)>**)o)[7];
-        if (e->fn(o + e->delta) != a1)
+        sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)o)[7];
+        if (vEntry->fn(o + vEntry->delta) != a1)
             return;
     }
     char* act = *(char**)(self + 0x80);
@@ -2438,12 +2438,12 @@ extern "C" void func_001744B0(char* self, long a1)
     } else {
         t4Vector c, a, t, b;
         char* o = *(char**)(self + 0x30);
-        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-        ((void (*)(void*, void*))e->fn)(&a, o + e->delta);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+        ((void (*)(void*, void*))vEntry->fn)(&a, o + vEntry->delta);
         float k = *(float*)(self + 0x74);
         o = *(char**)(self + 0x30);
-        e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-        ((void (*)(void*, void*))e->fn)(&b, o + e->delta);
+        vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+        ((void (*)(void*, void*))vEntry->fn)(&b, o + vEntry->delta);
         ScaleTo_1744B0(t, b, k);
         AddTo_1744B0(c, a, t);
         t4Vector t2;
@@ -2459,8 +2459,8 @@ extern "C" void func_001744B0(char* self, long a1)
     func_001732E8(self, a1);
     {
         char* o = *(char**)(*(char**)(self + 0x80) + 8);
-        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
-        ((void (*)(void*, void*))e->fn)(o + e->delta, self + 0x40);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
+        ((void (*)(void*, void*))vEntry->fn)(o + vEntry->delta, self + 0x40);
     }
     t4Vector d = Sub_1744B0(p, *(t4Vector*)(self + 0x40));
     *(float*)(self + 0x50) = Atan2_1744B0(d.y, d.x);
@@ -4389,15 +4389,15 @@ static inline void ctDivEq_7FC0(t4Vector& v, float len)
 static inline t4Vector* ctGetA_7FC0(void* self)
 {
     char* o = *(char**)((char*)self + 0x30);
-    sVEntry<t4Vector*(void*)>* e = &(*(sVEntry<t4Vector*(void*)>**)o)[10];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector*(void*)>* vEntry = &(*(sVEntry<t4Vector*(void*)>**)o)[10];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 static inline t4Vector ctGetC_7FC0(void* self)
 {
     char* o = *(char**)((char*)self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar, vector by address).
@@ -4716,11 +4716,11 @@ extern "C" void cSPOKEChaseAlgorithm_snap(cCameraAlgorithm* self, long id)
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cBeing*)(rider + 0x6C0))->getAIIndex()) {
         char* o = *(char**)((char*)self + 0x30);
-        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-        *(t4Vector*)((char*)self + 0x390) = e->fn(o + e->delta);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+        *(t4Vector*)((char*)self + 0x390) = vEntry->fn(o + vEntry->delta);
         o = *(char**)((char*)self + 0x30);
-        e = &(*(sVEntry<t4Vector(void*)>**)o)[3];
-        *(t4Vector*)((char*)self + 0x40) = f_177FC0_1783E0(self, e->fn(o + e->delta));
+        vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[3];
+        *(t4Vector*)((char*)self + 0x40) = f_177FC0_1783E0(self, vEntry->fn(o + vEntry->delta));
         *(t4Vector*)((char*)self + 0x20) = Add_1783E0(f_177EF8_1783E0(self), ScaleP_1783E0(&D_004FF160_83E0, 37.0f));
         f_166C60_1783E0(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
@@ -4949,8 +4949,8 @@ static inline t4Vector ScaleP_178758(const t4Vector* v, float s)
 static inline t4Vector CallA_178758(char* self)
 {
     char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-    return e->fn(o + e->delta);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+    return vEntry->fn(o + vEntry->delta);
 }
 
 extern "C" t4Vector f_178758(char* self) __asm__("func_00178758");

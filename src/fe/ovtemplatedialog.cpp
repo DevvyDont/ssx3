@@ -1988,9 +1988,9 @@ extern char D_0046E050[];
 extern "C" void func_0020DBD0(void* self)
 {
     cOVState_onUpdate(self);
-    cGameComm* p = cGameComm_mGameComm;
-    if (p != 0) {
-        int ok = p->mPauseTimeout == 0 || p->mOverlayTimeout == 0;
+    cGameComm* gameComm = cGameComm_mGameComm;
+    if (gameComm != 0) {
+        int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
             int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0046E050));
             if (frame != 0xFFFF) {

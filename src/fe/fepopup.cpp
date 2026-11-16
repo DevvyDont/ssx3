@@ -804,57 +804,57 @@ extern "C" void func_001C9B68(void* self, float* size, float* item);
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
 {
     int* info = (int*)infop;
-    cScreenPopup* p = self;
+    cScreenPopup* screenPopup = self;
     float size[4];
     if (info[0] == -1) {
         sVec3_6D30 pos = D_004FF0D8_6D30;
         float w = 0.0f;
-        if (((cUIObj_6D30*)p->mpStaticBox) != 0) {
+        if (((cUIObj_6D30*)screenPopup->mpStaticBox) != 0) {
             float item[4];
             int* it = info + 5;
-            func_001C8050(self, (cUIText*)((cUIObj_6D30*)p->mpStaticBox), it);
-            func_001C8628(self, ((cUIObj_6D30*)p->mpStaticBox), size);
-            func_001C8320(self, (cUIText*)((cUIObj_6D30*)p->mpStaticBox), it, item);
+            func_001C8050(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it);
+            func_001C8628(self, ((cUIObj_6D30*)screenPopup->mpStaticBox), size);
+            func_001C8320(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it, item);
             w = item[2];
-            pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)p->mpStaticBox) + 0x44);
-            ((cUIObj_6D30*)p->mpStaticBox)->setEnabled(0);
-            ((cUIObj_6D30*)p->mpStaticBox)->setVisible(1);
+            pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpStaticBox) + 0x44);
+            ((cUIObj_6D30*)screenPopup->mpStaticBox)->setEnabled(0);
+            ((cUIObj_6D30*)screenPopup->mpStaticBox)->setVisible(1);
         }
-        if (((cUIObj_6D30*)p->mpEnterBox) != 0) {
+        if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
             cScreenPopup_setTextString1(self, (char*)self + 0x2B0, info + 7);
             sVec3_6D30 v = pos;
             v.x = v.x + w + 10.0f;
-            *(sVec3_6D30*)((char*)((cUIObj_6D30*)p->mpEnterBox) + 0x44) = v;
+            *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = v;
             func_001C9B68(self, (float*)((char*)self + 0x260), size);
-            ((cUIObj_6D30*)p->mpEnterBox)->setEnabled(0);
-            ((cUIObj_6D30*)p->mpEnterBox)->setVisible(1);
+            ((cUIObj_6D30*)screenPopup->mpEnterBox)->setEnabled(0);
+            ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(1);
         }
-        if (((cUIObj_6D30*)p->mpTextBoxPair) != 0) {
-            ((cUIObj_6D30*)p->mpTextBoxPair)->setEnabled(0);
-            ((cUIObj_6D30*)p->mpTextBoxPair)->setVisible(1);
+        if (((cUIObj_6D30*)screenPopup->mpTextBoxPair) != 0) {
+            ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setEnabled(0);
+            ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setVisible(1);
         }
-        if (((cUIObj_6D30*)p->mpEnterBoxBackground) != 0) {
-            ((cUIObj_6D30*)p->mpEnterBoxBackground)->setVisible(1);
+        if (((cUIObj_6D30*)screenPopup->mpEnterBoxBackground) != 0) {
+            ((cUIObj_6D30*)screenPopup->mpEnterBoxBackground)->setVisible(1);
         }
         info[0] = 1;
         return 1;
     }
-    if (((cUIObj_6D30*)p->mpTextBoxPair) != 0) {
-        ((cUIObj_6D30*)p->mpTextBoxPair)->setEnabled(1);
-        ((cUIObj_6D30*)p->mpTextBoxPair)->setVisible(0);
+    if (((cUIObj_6D30*)screenPopup->mpTextBoxPair) != 0) {
+        ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setEnabled(1);
+        ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setVisible(0);
     }
-    if (((cUIObj_6D30*)p->mpStaticBox) != 0) {
-        ((cUIObj_6D30*)p->mpStaticBox)->setEnabled(1);
-        ((cUIObj_6D30*)p->mpStaticBox)->setVisible(0);
+    if (((cUIObj_6D30*)screenPopup->mpStaticBox) != 0) {
+        ((cUIObj_6D30*)screenPopup->mpStaticBox)->setEnabled(1);
+        ((cUIObj_6D30*)screenPopup->mpStaticBox)->setVisible(0);
     }
-    if (((cUIObj_6D30*)p->mpEnterBox) != 0) {
-        ((cUIObj_6D30*)p->mpEnterBox)->setEnabled(1);
-        ((cUIObj_6D30*)p->mpEnterBox)->setVisible(0);
+    if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
+        ((cUIObj_6D30*)screenPopup->mpEnterBox)->setEnabled(1);
+        ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(0);
     }
-    if (((cUIObj_6D30*)p->mpEnterBoxBackground) != 0) {
-        ((cUIObj_6D30*)p->mpEnterBoxBackground)->setVisible(0);
+    if (((cUIObj_6D30*)screenPopup->mpEnterBoxBackground) != 0) {
+        ((cUIObj_6D30*)screenPopup->mpEnterBoxBackground)->setVisible(0);
     }
-    func_001C8628(self, ((cUIObj_6D30*)p->mpEnterBox), size);
+    func_001C8628(self, ((cUIObj_6D30*)screenPopup->mpEnterBox), size);
     func_001C9B68(self, (float*)((char*)self + 0x260), size);
     return 0;
 }

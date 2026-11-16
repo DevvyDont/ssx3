@@ -770,13 +770,13 @@ extern "C" void func_00238E20(sScore_238E20* self)
         } else {
             gm->iSimAI = 5;
         }
-        cGameModeMan* g1 = cGameModeHandler_pManager;
-        g1->iNextLocation = -1;
-        g1->unk_90 = 0;
-        if (g1->iCurrentGameEvent == 1) {
-            g1->unk_94 = g1->iCurrentGameEvent;
+        cGameModeMan* gameModeMan = cGameModeHandler_pManager;
+        gameModeMan->iNextLocation = -1;
+        gameModeMan->unk_90 = 0;
+        if (gameModeMan->iCurrentGameEvent == 1) {
+            gameModeMan->unk_94 = gameModeMan->iCurrentGameEvent;
         } else {
-            g1->unk_94 = 0;
+            gameModeMan->unk_94 = 0;
         }
         func_00416210(self->t, 0, 0x78);
         self->vt[4].fn((char*)self + self->vt[4].delta);
@@ -977,10 +977,10 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         gm->bAreResultsLocked = 1;
         int last = Race_239230()->f80;
         for (int i = 0; i < last + 1; i++) {
-            cRider* r = Rider_239230(i);
-            int done = r->mFinishTime >= 0.0f;
+            cRider* rider = Rider_239230(i);
+            int done = rider->mFinishTime >= 0.0f;
             if (!done)
-                self->t[2][i] = cRider_estimateFinishScore(r);
+                self->t[2][i] = cRider_estimateFinishScore(rider);
         }
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[2][i];
@@ -1022,11 +1022,11 @@ INCLUDE_ASM("main/gamemode", func_002398E8);
 
 extern "C" int func_002398E8(void* self, int a1, int secs)
 {
-    cGameModeMan* m = cGameModeHandler_pManager;
-    if (m->iCurrentGameEvent == 1) {
+    cGameModeMan* gameModeMan = cGameModeHandler_pManager;
+    if (gameModeMan->iCurrentGameEvent == 1) {
         unsigned int limit = *(unsigned int*)((char*)SSXApp->Game->AI + 8);
-        unsigned int t = m->uiTimeLimit + secs * 60;
-        m->uiTimeLimit = t;
+        unsigned int t = gameModeMan->uiTimeLimit + secs * 60;
+        gameModeMan->uiTimeLimit = t;
         if (t < limit) {
             return 0;
         }
@@ -1317,13 +1317,13 @@ extern "C" int func_0023A070(char* self, int player, int secs)
     if (*(short*)((char*)score + (other << 1)) >= s) {
         return 0;
     }
-    cGameModeMan* m = cGameModeHandler_pManager;
-    if (m->iCurrentGameEvent == 1) {
-        unsigned int t = m->uiTimeLimit;
+    cGameModeMan* gameModeMan = cGameModeHandler_pManager;
+    if (gameModeMan->iCurrentGameEvent == 1) {
+        unsigned int t = gameModeMan->uiTimeLimit;
         if (t < *(unsigned int*)((char*)SSXApp->Game->AI + 8)) {
             return 0;
         }
-        m->uiTimeLimit = secs * 60 + t;
+        gameModeMan->uiTimeLimit = secs * 60 + t;
         return 1;
     }
     return 1;
@@ -1419,9 +1419,9 @@ static inline void fillOthers_23A108(int* dst, int p)
 
 extern "C" void func_0023A108(sMode_23A108* self)
 {
-    cGameModeMan* g0 = cGameModeHandler_pManager;
-    g0->bAreResultsLocked = 0;
-    g0->iHeatNum = g0->iNextHeat;
+    cGameModeMan* gameModeMan = cGameModeHandler_pManager;
+    gameModeMan->bAreResultsLocked = 0;
+    gameModeMan->iHeatNum = gameModeMan->iNextHeat;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int quick = D_00535C11[0];

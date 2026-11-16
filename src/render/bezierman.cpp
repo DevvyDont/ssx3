@@ -168,13 +168,13 @@ struct sBezObj_B190 {
     unsigned short tex8;    // 0x1AA
 };
 
-extern "C" void func_0038B190(cPSPBezierMan* m, sBezObj_B190* o, unsigned char* t, int unused, int extra)
+extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsigned char* t, int unused, int extra)
 {
     if (t[0] == t[2] && t[1] == t[3] && t[0] == t[1]) {
         switch (t[0]) {
         case 4:
-            if (m->mNum4x4Patches < 900) {
-                sBezPatch_B190* e = &((sBezPatch_B190*)&m->m4x4Patches[0])[m->mNum4x4Patches++];
+            if (pspBezierMan->mNum4x4Patches < 900) {
+                sBezPatch_B190* e = &((sBezPatch_B190*)&pspBezierMan->m4x4Patches[0])[pspBezierMan->mNum4x4Patches++];
                 e->extra = extra;
                 e->obj = o;
                 e->kind = 0;
@@ -182,8 +182,8 @@ extern "C" void func_0038B190(cPSPBezierMan* m, sBezObj_B190* o, unsigned char* 
             }
             break;
         case 6:
-            if (m->mNum6x6Patches < 220) {
-                sBezPatch_B190* e = &((sBezPatch_B190*)&m->m6x6Patches[0])[m->mNum6x6Patches++];
+            if (pspBezierMan->mNum6x6Patches < 220) {
+                sBezPatch_B190* e = &((sBezPatch_B190*)&pspBezierMan->m6x6Patches[0])[pspBezierMan->mNum6x6Patches++];
                 e->extra = extra;
                 e->kind = 1;
                 e->obj = o;
@@ -191,8 +191,8 @@ extern "C" void func_0038B190(cPSPBezierMan* m, sBezObj_B190* o, unsigned char* 
             }
             break;
         case 8:
-            if (m->mNum8x8Patches < 50) {
-                sBezPatch_B190* e = &((sBezPatch_B190*)&m->m8x8Patches[0])[m->mNum8x8Patches++];
+            if (pspBezierMan->mNum8x8Patches < 50) {
+                sBezPatch_B190* e = &((sBezPatch_B190*)&pspBezierMan->m8x8Patches[0])[pspBezierMan->mNum8x8Patches++];
                 e->extra = extra;
                 e->kind = 2;
                 e->obj = o;
@@ -202,8 +202,8 @@ extern "C" void func_0038B190(cPSPBezierMan* m, sBezObj_B190* o, unsigned char* 
         }
         return;
     }
-    if (m->mNumMixedPatches < 75) {
-        sBezMixPatch_B190* e = &((sBezMixPatch_B190*)&m->mMixedPatches[0])[m->mNumMixedPatches++];
+    if (pspBezierMan->mNumMixedPatches < 75) {
+        sBezMixPatch_B190* e = &((sBezMixPatch_B190*)&pspBezierMan->mMixedPatches[0])[pspBezierMan->mNumMixedPatches++];
         e->extra = extra;
         e->obj = o;
         int* pk = &e->kind;
@@ -227,11 +227,11 @@ struct sBezVEntry_B338 {
     void (*fn)(void*, void*, void*, void*, void*, int);
 };
 
-extern "C" void cPSPBezierMan_AddPatch(cPSPBezierMan* self, void* a, void* b, void* c, void* d)
+extern "C" void cPSPBezierMan_AddPatch(cPSPBezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
 {
     if (D_004A44D4 == 0) {
         sBezVEntry_B338* vt = (sBezVEntry_B338*)self->mVtbl;
-        vt[22].fn((char*)self + vt[22].delta, a, b, c, d, 0);
+        vt[22].fn((char*)self + vt[22].delta, pPatch, edges, texid, clip, 0);
     }
 }
 #endif

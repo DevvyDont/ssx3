@@ -969,10 +969,10 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
     func_003B5948((int)func_002AD998);
     gMonitor = 0;
     if (((&self->mMonitorInstance[0])) != 0) {
-        cMonitorInstance* p = end;
-        while (((&self->mMonitorInstance[0])) != p) {
-            p--;
-            func_002AD860((int*)p, 0);
+        cMonitorInstance* monitorInstance = end;
+        while (((&self->mMonitorInstance[0])) != monitorInstance) {
+            monitorInstance--;
+            func_002AD860((int*)monitorInstance, 0);
         }
     }
     func_002A97C0(((sSndPlayerDAC8*)self), 0);
@@ -3024,9 +3024,9 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* a)
         int lang = func_002B03B8((char*)*slot + 4);
         char buf[0x100];
         sprintf(buf, D_004832F8, D_004A3590, (char*)D_004A37B4 + 0x158 + lang * 0x14, (char*)*slot + 4);
-        cSpeechSys* d0 = D_004A37B4;
-        sSndVtSlot* vt0 = (sSndVtSlot*)d0->mVtbl;
-        int h = ((int (*)(void*, int, int))vt0[2].fn)((char*)d0 + vt0[2].delta, self->f0, (*slot)->f40);
+        cSpeechSys* speechSys = D_004A37B4;
+        sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
+        int h = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
         char* d; sSndVtSlot* vt;
         int t = (int)func_002AAE78(D_004A37B4->mpVStreamSys, self->id);
         int r;

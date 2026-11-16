@@ -187,9 +187,9 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     font->setColor(self->cursor == 10 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, D_004A12E8);
     {
-        cPS2GraphicsMan* g = GrMan;
-        sDbgVEntry* vt = (sDbgVEntry*)g->mVtbl;
-        func_001DCA80(font, 580.0f, y, D_004A12F0, vt[9].fn((char*)g + vt[9].delta) ? D_0045CF68 : D_0045CF78);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sDbgVEntry* vt = (sDbgVEntry*)ps2GraphicsMan->mVtbl;
+        func_001DCA80(font, 580.0f, y, D_004A12F0, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? D_0045CF68 : D_0045CF78);
     }
     y += lineheight;
     font->setColor(self->cursor == 11 ? selectColor : normalColor);
@@ -1069,18 +1069,18 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const ch
     cBXString_cBXString4((char*)self + 0x1C04, a);
     cBXString_cBXString4((char*)self + 0x1C08, b);
     self->state = 0x4;
-    LobbyMan* g = LobbyMan_mLobbyMan;
-    cBXString_cBXString4(&g->mNewAccount.mName, a);
-    cBXString_cBXString4(&g->mNewAccount.mPassword, b);
-    cBXString_cBXString4(&g->mNewAccount.unk_08, b);
-    cBXString_cBXString4(&g->mNewAccount.mMail, D_0045D248);
-    g->mNewAccount.mBornYear = 0x79E;
-    g->mNewAccount.mGender = 1;
-    g->mNewAccount.mBornMonth = 1;
-    g->mNewAccount.mSpam[1] = 0;
-    g->mNewAccount.mSpam[0] = 0;
-    g->mNewAccount.mBornDay = 1;
-    func_0025B9C8(LobbyMan_mLobbyMan, &g->mNewAccount.mName);
+    LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
+    cBXString_cBXString4(&lobbyMan->mNewAccount.mName, a);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.mPassword, b);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.unk_08, b);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.mMail, D_0045D248);
+    lobbyMan->mNewAccount.mBornYear = 0x79E;
+    lobbyMan->mNewAccount.mGender = 1;
+    lobbyMan->mNewAccount.mBornMonth = 1;
+    lobbyMan->mNewAccount.mSpam[1] = 0;
+    lobbyMan->mNewAccount.mSpam[0] = 0;
+    lobbyMan->mNewAccount.mBornDay = 1;
+    func_0025B9C8(LobbyMan_mLobbyMan, &lobbyMan->mNewAccount.mName);
 }
 #endif
 
@@ -1700,14 +1700,14 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
 extern "C" void func_0017F500(void* p_, int tex)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
-    cPS2GraphicsMan* m = GrMan;
-    set1_17F500((char*)m, 0x1800000, 23, 2);
-    set1_17F500((char*)m, 0x300000, 20, 3);
-    set1_17F500((char*)m, 0xFF000, 12, 0xD);
-    set1_17F500((char*)m, 0x7C, 2, 5);
-    set1_17F500((char*)m, 0x400000, 22, 1);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    set1_17F500((char*)ps2GraphicsMan, 0x1800000, 23, 2);
+    set1_17F500((char*)ps2GraphicsMan, 0x300000, 20, 3);
+    set1_17F500((char*)ps2GraphicsMan, 0xFF000, 12, 0xD);
+    set1_17F500((char*)ps2GraphicsMan, 0x7C, 2, 5);
+    set1_17F500((char*)ps2GraphicsMan, 0x400000, 22, 1);
     sV2_17F500 size(6.0f, 6.0f);
-    (m->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
+    (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     for (int i = 1; i < 64; i++) {
         sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
         float t = (float)i * 0.015625f;
@@ -1826,9 +1826,9 @@ struct sDebugFE_17F868 {
  */
 extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 {
-    cPS2GraphicsMan* m = GrMan;
-    sVEnt_17F868* vt = (sVEnt_17F868*)m->mVtbl;
-    ((Fn1_17F868)vt[44].fn)((char*)m + vt[44].delta, 0);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVEnt_17F868* vt = (sVEnt_17F868*)ps2GraphicsMan->mVtbl;
+    ((Fn1_17F868)vt[44].fn)((char*)ps2GraphicsMan + vt[44].delta, 0);
     self->font = (char*)cFont_cFont(cMemMan_alloc(0x84, D_0045D4B8, 0, 0), D_0045D4C8, 0);
     sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
     *(sVec2_17F868*)(self->font + 0x30) = sc;
@@ -1953,15 +1953,15 @@ extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
     *(int*)(g + 0x80) = 0;
     if (self->snd20 >= 0)
     {
-        cPS2GraphicsMan* m = GrMan;
-        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)m->mVtbl;
-        vt[50].fn((char*)m + vt[50].delta, self->snd20);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)ps2GraphicsMan->mVtbl;
+        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->snd20);
     }
     if (self->snd1C >= 0)
     {
-        cPS2GraphicsMan* m = GrMan;
-        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)m->mVtbl;
-        vt[50].fn((char*)m + vt[50].delta, self->snd1C);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)ps2GraphicsMan->mVtbl;
+        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->snd1C);
     }
     if (self->font != 0)
         func_003916C0(self->font, 3);
@@ -2049,9 +2049,9 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
  */
 extern "C" int cDebugFE_render(char* self)
 {
-    cPS2GraphicsMan* m = GrMan;
-    sVEnt_17FBF0* vt = (sVEnt_17FBF0*)m->mVtbl;
-    if (!((FnI_17FBF0)vt[17].fn)((char*)m + vt[17].delta)) {
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    sVEnt_17FBF0* vt = (sVEnt_17FBF0*)ps2GraphicsMan->mVtbl;
+    if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
     if (func_00231D60(self) == 0) {

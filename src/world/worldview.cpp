@@ -1646,15 +1646,15 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     }
     case 9: {
-        cPS2GraphicsMan* o = cGraphicsMan_TheGraphicsMan;
-        sWVEntry_B498* vt = (sWVEntry_B498*)o->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)o + vt[50].delta, param >> 8);
+        cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+        sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
+        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, param >> 8);
         break;
     }
     case 10: {
-        cPS2GraphicsMan* o = cGraphicsMan_TheGraphicsMan;
-        sWVEntry_B498* vt = (sWVEntry_B498*)o->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)o + vt[50].delta, (param >> 8) + *(int*)(self + 0x10));
+        cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+        sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
+        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, (param >> 8) + *(int*)(self + 0x10));
         break;
     }
     case 3: {

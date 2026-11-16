@@ -162,9 +162,9 @@ extern "C" int cUIListBox_getEntryByData(cUIListBox* self, int key, unsigned cha
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_setCurrentEntryByIndex);
 #ifdef SKIP_ASM
-extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int a1)
+extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int Index)
 {
-    unsigned char v = (unsigned char)a1;
+    unsigned char v = (unsigned char)Index;
     if (v < self->mNumEntries) {
         *(char*)&self->mCurrentEntry = v;
     }
@@ -174,9 +174,9 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int a1)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryDataByIndex);
 #ifdef SKIP_ASM
-extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int a1, int value)
+extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int Index, int value)
 {
-    unsigned char v = (unsigned char)a1;
+    unsigned char v = (unsigned char)Index;
     if (v < self->mNumEntries) {
         *(int*)((char*)self + v * 0x14 + 0xA4) = value;
     }

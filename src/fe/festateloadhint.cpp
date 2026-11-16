@@ -488,9 +488,9 @@ extern "C" void func_00246098(void* self)
                     sVEK246098* vt2 = *(sVEK246098**)(o + 8);
                     vt2[8].fn(o + vt2[8].delta, 1);
                 }
-                cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-                sVEK246098* vt3 = (sVEK246098*)g->mVtbl;
-                vt3[8].fn((char*)g + vt3[8].delta, 0);
+                cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+                sVEK246098* vt3 = (sVEK246098*)ps2GraphicsMan->mVtbl;
+                vt3[8].fn((char*)ps2GraphicsMan + vt3[8].delta, 0);
             }
         }
     }

@@ -141,8 +141,8 @@ static inline sVec_C1B0 MulVec_C1B0(const sMat_C1B0* m, const sVec_C1B0& v)
 
 static inline sMat_C1B0* viewMat_C1B0()
 {
-    cPS2GraphicsMan* c = GrMan;
-    return ((sVEm_C1B0*)c->mVtbl)[35].fn((char*)c + ((sVEm_C1B0*)c->mVtbl)[35].delta);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    return ((sVEm_C1B0*)ps2GraphicsMan->mVtbl)[35].fn((char*)ps2GraphicsMan + ((sVEm_C1B0*)ps2GraphicsMan->mVtbl)[35].delta);
 }
 
 // PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.
@@ -552,13 +552,13 @@ extern "C" void func_0022C830(sGame_C830* self)
         ((cGfx_C830*)GrMan)->v24(cam->x, cam->y, cam->z);
         ((cGfx_C830*)GrMan)->SetTexture(cam->tex);
         *(short*)((char*)((cGfx_C830*)GrMan)->stateTop + 0x12) = ((cGfx_C830*)GrMan)->GetLayer();
-        cPS2GraphicsMan* g = GrMan;
-        Set1_C830((cGfx_C830*)g, 0xF80, 7, 7);
-        SetBits_C830(&((cGfx_C830*)g)->stateTop->w0, 0x30, 0x30);
-        Set1_C830((cGfx_C830*)g, 0x1800000, 23, 1);
-        SetBits_C830(&((cGfx_C830*)g)->stateTop->w4, 0x300000, 0x300000);
-        Set1_C830((cGfx_C830*)g, 0xFF000, 12, 0xD);
-        Set2_C830((cGfx_C830*)g, 0x3E0, 5, 4);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xF80, 7, 7);
+        SetBits_C830(&((cGfx_C830*)ps2GraphicsMan)->stateTop->w0, 0x30, 0x30);
+        Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x1800000, 23, 1);
+        SetBits_C830(&((cGfx_C830*)ps2GraphicsMan)->stateTop->w4, 0x300000, 0x300000);
+        Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xFF000, 12, 0xD);
+        Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 4);
         cBucketMan_renderBucket(gBucketMan, 3);
         i++;
     } while (i < self->views->count);
@@ -571,9 +571,9 @@ extern "C" void func_0022C830(sGame_C830* self)
     }
     ((cGfx_C830*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
     ((cGfx_C830*)GrMan)->SetTexture(t4mat_Identity);
-    cPS2GraphicsMan* g = GrMan;
-    Set2_C830((cGfx_C830*)g, 0x3E0, 5, 0x18);
-    Set1_C830((cGfx_C830*)g, 0x7C, 2, 5);
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 0x18);
+    Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x7C, 2, 5);
     self->font->SetScale(0.8f, 0.8f);
     self->font->scale = sV2_C830(2.0f, 2.0f);
     self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
