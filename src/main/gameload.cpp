@@ -1085,6 +1085,15 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
     return c->sections[sectionId].state >= 2 && c->sections[sectionId].data != 0;
 }
 
+/**
+ * Runs a world section's scripts once they are loaded: calls func_00308B58 on cWScriptMan_TheWScriptMan with the
+ * section id.
+ *
+ * Does nothing while the world's script cache (cWorld_m_pTheWorld->m_pWScriptCache) holds the section in a state below
+ * 2 or without data. cPS2ChunkResolve_resolve calls it when a section's chunk resolves.
+ *
+ * @param sectionId  the world section
+ */
 extern "C" void func_00230430(void* self, int sectionId)
 {
     if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
@@ -1154,6 +1163,13 @@ struct sGameLoad_0558 {
     void* field_0xA4;       // 0xA4
 };
 
+/**
+ * Starts replay playback, the mirror of cGame_stopReplay.
+ *
+ * Pushes pause state 8 (D_005366E8[++D_004A2A54] = 8) and sets cPauseState_Flags to that state's flags (D_00442910,
+ * entry 8 of the table D_004428F0), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
+ * func_002CC0B8 (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
+ */
 extern "C" void func_00230558(sGameLoad_0558* self)
 {
     D_005366E8[++D_004A2A54] = 8;
@@ -1198,6 +1214,11 @@ struct sGp2898 { int a, b; };
 extern sGp2898 gBucketMan; // target: raw $gp+0x2898 (splat doesn't symbolize it)
 extern int D_004428D8[];
 
+/**
+ * Renders the six game buckets listed in D_004428D8, in order, with cBucketMan_renderBucket on gBucketMan.
+ *
+ * cGame_render calls it in each of its three render paths.
+ */
 extern "C" void func_00230640(void)
 {
     int i;
@@ -1211,6 +1232,12 @@ extern "C" void func_00230640(void)
 //100%
 INCLUDE_ASM("main/gameload", func_00230698__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the game's transition manager for one view: TransitionMan[@p i] (+0x5C).
+ *
+ * @param i  the view (player) index, 0 or 1
+ * @return the cTransitionMan
+ */
 int func_00230698(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x5C);
@@ -1220,6 +1247,12 @@ int func_00230698(void* self, int i)
 //100%
 INCLUDE_ASM("main/gameload", func_002306A8__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the game's splash manager for one view: SplashManager[@p i] (+0x68).
+ *
+ * @param i  the view (player) index, 0 or 1
+ * @return the cSplashManager
+ */
 int func_002306A8(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x68);
@@ -1593,6 +1626,9 @@ extern "C" void cGame_update(cGame* self)
 //100%
 INCLUDE_ASM("main/gameload", func_00230E90);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 extern "C" void func_00230E90(void) {
 
 }
@@ -1903,6 +1939,13 @@ extern "C" void cGame_setState(void* self, int iNextState, int startupFlag, int 
 //100%
 INCLUDE_ASM("main/gameload", func_00231278__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Asks the game to preload a state next: stores @p val in mPendingPreloadStateID (+0x208).
+ *
+ * cGame_load and cSectionMan_preLoadMode call it.
+ *
+ * @param val  the state id to preload
+ */
 void func_00231278(void* self, int val)
 {
     *(int*)((char*)self + 0x208) = val;
@@ -1912,6 +1955,13 @@ void func_00231278(void* self, int val)
 //100%
 INCLUDE_ASM("main/gameload", func_00231280);
 #ifdef SKIP_ASM
+/**
+ * Cancels the game's state preload.
+ *
+ * Clears mPendingPreloadStateID (+0x208); when a preload is running (mPreloadStateID, +0x20C), calls the preloading
+ * state's preloadCancel (vtable slot +0x24 of mPreloadingState, +0x204) and clears mPreloadStateID and
+ * mPreloadingState.
+ */
 extern "C" void func_00231280(void *self) {
     void *obj;
     void *vtbl;
@@ -1965,6 +2015,10 @@ INCLUDE_ASM("main/gameload", func_00231320);
 #ifdef SKIP_ASM
 extern "C" void cGameState_gotoNextState(void* p);
 
+/**
+ * Moves the game to its next state: calls cGameState_gotoNextState on the current state (mCurrentState, +0x200) when
+ * there is one.
+ */
 extern "C" void func_00231320(void* self)
 {
     void* gameState = *(void**)((char*)self + 0x200);
@@ -2399,6 +2453,15 @@ struct sQuadVtx {
     t4Vector pos;
 };
 
+/**
+ * Draws the current texture over a unit quad: sets the draw state's texture (+0x10) to @p value and draws four
+ * vertices.
+ *
+ * The vertices span (0, 0)-(1, 1) with matching texture coordinates, colour 0x80 (neutral) in all channels and q = 1;
+ * they go to GrMan's vertex-drawing slot (vtable +0x238) with count 4.
+ *
+ * @param value  the texture id
+ */
 extern "C" void func_00231B50(void* self, int value) {
     sQuadVtx verts[4];
     t4Vector cornerPos;
@@ -2436,6 +2499,14 @@ INCLUDE_ASM("main/gameload", cLoadScreen_loseFocus);
 extern "C" int cFadeScreen_loseFocus(void* self);
 extern char* cAppMan_TheAppMan;
 
+/**
+ * Lets a load screen lose focus only when the app's progress value (cAppMan_TheAppMan + 0x38) is exactly 100.
+ *
+ * Then it returns cFadeScreen_loseFocus; otherwise 0. It fills the loseFocus slot (+0x24) of cFELoadScreen_vtbl and
+ * D_0047D818. The tree now calls this function cLoadScreen_loseFocus.
+ *
+ * @return cFadeScreen_loseFocus's result, or 0
+ */
 extern "C" int cLoadScreen_loseFocus(void* self)
 {
     if (*(float*)(cAppMan_TheAppMan + 0x38) == 100.0f) {
@@ -2450,6 +2521,14 @@ extern "C" void* cFadeScreen_update(void* self);
 //100%
 INCLUDE_ASM("main/gameload", func_00231CB0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Updates a load screen: calls cFadeScreen_update.
+ *
+ * It fills the update slot (+0x34) of the load-screen vtable D_0047D818; cFELoadScreen_update and the pre-start
+ * screens' updates call it too.
+ *
+ * @return cFadeScreen_update's result
+ */
 void* func_00231CB0(void* self)
 {
     return cFadeScreen_update(self);
@@ -2461,6 +2540,13 @@ INCLUDE_ASM("main/gameload", func_00231CD0);
 #ifdef SKIP_ASM
 extern char D_0047D980[];
 
+/**
+ * Constructs a screen fade: vtable D_0047D980, fade timer (+0x4) 0.2, ending flag (+0x8) 0.
+ *
+ * cGame_cGame, cFE_cFE, the debug front end and the load-screen constructors call it for their fade base.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00231CD0(void* self)
 {
     *(void**)((char*)self + 0) = D_0047D980;
@@ -2591,6 +2677,16 @@ static inline float Clamp231D60(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Draws a screen fade: a full-screen quad whose alpha is the fade timer times 5, clamped to [0, 1].
+ *
+ * Does nothing and returns 0 while the timer (+0x4) is 0 or less. Otherwise pushes a copy of the draw state, resets it
+ * to sDrawState_s_defaultDrawState, sets the full-screen viewport and the identity matrix and the blend bits, draws a
+ * quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through func_0038EC40 (D_004A28AC), and pops the draw
+ * state. cGame_render, cRealFE_render, cDebugFE_render and cFELoadScreen_render call it.
+ *
+ * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
+ */
 extern "C" int func_00231D60(void* self)
 {
     if (*(float*)((char*)self + 4) > 0.0f) {
@@ -2745,6 +2841,15 @@ struct sVE_1FC0 {
 
 extern char* D_004A28A8_1FC0 __asm__("SSXApp");
 
+/**
+ * Draws the load indicator: a pulsing sprite at (599, 445) in a full-screen 2D pass.
+ *
+ * Pushes a copy of the draw state, begins a scene and 2D mode, resets the state to sDrawState_s_defaultDrawState with
+ * its blend bits, loads t4mat_Identity, sets the full-screen viewport (640x480) and the texture LoadIconTextureID
+ * (SSXApp + 0xA0). The sprite is 18 high and (sin(2 * pi * phase) + 1) * 9 wide, phase being the first field (advanced
+ * by cLoadIndicator_update); its colour (+0xC) takes the field at +0x4 as its first component. Then ends 2D mode and
+ * the scene and pops the draw state. The pre-start load screens call it.
+ */
 extern "C" void func_00231FC0(sFade_1FC0* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;

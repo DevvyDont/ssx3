@@ -109,6 +109,14 @@ struct sSectionLink {
     sSectionLink* next; // 0x4
 };
 
+/**
+ * Takes an event from the section manager's free list: pops the head of m_pFreeEventList (+0x198), whose next link is
+ * at +0x4.
+ *
+ * There is no check for an empty list. cSectionMan_addActiveEvent calls it.
+ *
+ * @return the event
+ */
 void* func_0022E278(void* self)
 {
     sSectionLink* node = *(sSectionLink**)((char*)self + 0x198);
@@ -120,6 +128,14 @@ void* func_0022E278(void* self)
 //100%
 INCLUDE_ASM("main/sectionman", func_0022E288__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns an event to the section manager's free list: links @p node in front of m_pFreeEventList (+0x198).
+ *
+ * cSectionMan_removeActiveEvent calls it.
+ *
+ * @param node  the event to free
+ * @return the previous head of the free list
+ */
 int func_0022E288(void* self, void* node)
 {
     int prevHead = *(int*)((char*)self + 0x198);

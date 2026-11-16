@@ -160,6 +160,16 @@ static inline void setState_AE00()
     setMode_AE00(ctx_AE00()->top, 5);
 }
 
+/**
+ * Draws the background manager's active image as a full-screen textured quad.
+ *
+ * Does nothing unless the active index (+0x8) is in [0, count) (count at +0x4). Pushes viewport and view (GrMan slots
+ * 21 and 31) and a copy of the draw state, sets the blend bits, the viewport rectangle (slot 26: 0, 0, 640x480, depth
+ * 0-1) and t4mat_Identity (slot 34). Draws four vertices from (0, 0) to (640, 480) with texture coordinates 0-1, colour
+ * 0x80 in all channels and q = 1 through RenderTriStrip (slot 71), with the image's texture id (images[active], from
+ * the array at +0x0) as the state's texture (+0x10). Then pops the draw state, view and viewport (slots 32, 22).
+ * cDebugMenuScreen_draw calls it for its popup instead of the menu.
+ */
 extern "C" void func_0017AE00(sBgMan_AE00* self)
 {
     if (self->cur < 0 || self->cur >= self->count) {

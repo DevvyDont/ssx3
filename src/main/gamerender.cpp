@@ -151,6 +151,17 @@ struct cGameViewMan22E550 {
     sRect22E550 rects[2];    // 0x18
 };
 
+/**
+ * Splits or joins the screen when the game's state changes: one full-screen view, or two side-by-side halves for states
+ * 3-5.
+ *
+ * Does nothing when the stored state (+0xC) already equals the game's mCurrentStateID (+0x214), while a replay is
+ * playing (Replay state 1-9), or with one player (+0x0). Otherwise stores the state and, from GrMan's width and height
+ * (vtable slots 10 and 11), sets the view count (+0x10), current view (+0x14) and view rectangles (+0x18): states 3-5
+ * give two half-width views with far clip 20000 on both cameras, any other state one full view with far clip 30000.
+ * Then clears the world view's active flags for the unused view (one view) or for both (two views). cGame_updateState
+ * calls it.
+ */
 extern "C" void func_0022E550(cGameViewMan22E550* self)
 {
     char* game = (char*)SSXApp->Game;
@@ -308,6 +319,12 @@ INCLUDE_ASM("main/gamerender", func_0022E8B8);
 #ifdef SKIP_ASM
 extern "C" void cCamera_updateStreamFocus(void* p);
 
+/**
+ * Updates the streaming focus of each view's camera: cCamera_updateStreamFocus on the cameras at +0x4 for the view
+ * count at +0x10.
+ *
+ * cGame_update and cGame_render call it.
+ */
 extern "C" void func_0022E8B8(void* self)
 {
     unsigned int i;
@@ -326,6 +343,13 @@ struct sRenderList {
     unsigned int count;
 };
 
+/**
+ * Tells whether streaming is ready for every view: each view camera's word at +0xB4 is non-zero.
+ *
+ * Checks the cameras at +0x4 for the view count at +0x10. cGame_update and cGame_render test it.
+ *
+ * @return 1 when every view is ready, otherwise 0
+ */
 extern "C" int func_0022E920(sRenderList* self)
 {
     unsigned int i;

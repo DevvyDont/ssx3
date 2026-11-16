@@ -102,6 +102,15 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 
+/**
+ * Renders the pre-start screen: clears to black and draws the load indicator once the renderer is ready.
+ *
+ * Returns 0 without drawing while GrMan's IsRenderReady (slot 17) is 0. Otherwise sets the clear colour to (0, 0, 0)
+ * (SetScreenClearColour, slot 15), draws SSXApp's load indicator (func_00231FC0) and the frame (DrawFrame, slot 20).
+ * Render slot (+0x3C) of cPreStartScreen_vtbl.
+ *
+ * @return 1 when a frame was drawn, otherwise 0
+ */
 extern "C" int func_00232488(void)
 {
     if (((cWorld232488*)GrMan)->v17() == 0) {
@@ -117,6 +126,13 @@ extern "C" int func_00232488(void)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232510);
 #ifdef SKIP_ASM
+/**
+ * Lets the pre-start screen lose focus once its timer (+0x4) reaches 0.75.
+ *
+ * LoseFocus slot (+0x24) of cPreStartScreen_vtbl.
+ *
+ * @return 1 when the timer is at least 0.75, otherwise 0
+ */
 extern "C" int func_00232510(void* self)
 {
     if (*(float*)((char*)self + 0x4) < 0.75f) {
@@ -173,6 +189,15 @@ extern "C" void cLoadIndicator_update(void* fade);
 extern "C" void* func_00232AE0(void* self, int arg);
 extern char str_StartScreen[];
 
+/**
+ * Updates the initial load screen: animates and fades the load indicator, then queues the start screen.
+ *
+ * Steps the indicator's phase (cLoadIndicator_update); its alpha (SSXApp's load indicator + 0x4) falls by 1/12 per
+ * frame while the ending flag (+0x8) is set and rises otherwise, clamped to [0, 1]. When no next module is queued
+ * (SSXApp + 0x4), creates a start screen (0x1C bytes, tag "StartScreen", func_00232AE0) with type 2 when the
+ * progressive flag (+0x4) is set, otherwise 0, and queues it with cAppMan_setNextModule. Update slot (+0x34) of
+ * cInitLoadScreen_vtbl.
+ */
 extern "C" void func_00232588(void* self)
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
@@ -229,6 +254,14 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 
+/**
+ * Renders the initial load screen: clears to black and draws the load indicator once the renderer is ready.
+ *
+ * Same body as func_00232488: IsRenderReady (slot 17), SetScreenClearColour (slot 15) with (0, 0, 0), the load
+ * indicator (func_00231FC0) and DrawFrame (slot 20). Render slot (+0x3C) of cInitLoadScreen_vtbl.
+ *
+ * @return 1 when a frame was drawn, otherwise 0
+ */
 extern "C" int func_00232650(void)
 {
     if (((cWorld232650*)GrMan)->v17() == 0) {
@@ -250,6 +283,14 @@ struct sLoadScreen2326D8 {
     int done;
 };
 
+/**
+ * Asks the initial load screen to finish: sets the ending flag (+0x8) and lets it lose focus once the load indicator
+ * has faded out.
+ *
+ * LoseFocus slot (+0x24) of cInitLoadScreen_vtbl.
+ *
+ * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
+ */
 extern "C" int func_002326D8(sLoadScreen2326D8* self)
 {
     self->done = 1;
@@ -271,6 +312,9 @@ void cPreGameLoadScreen_load(void* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232718__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the load slot (+0x14) of D_0047D860, the pre-front-end load screen's vtable.
+ */
 void func_00232718(void* self)
 {
 }
@@ -299,6 +343,13 @@ extern void* D_0047D860[];
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232738__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs the pre-front-end load screen: clears the ending flag (+0x4) and stores the vtable D_0047D860.
+ *
+ * cFECustom_getNextState, cGame_exit and cDebugMenuScreen_update build it when they go back to the front end.
+ *
+ * @return @p self
+ */
 void* func_00232738(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -336,6 +387,14 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232780);
 void operator_delete(int* ptr);
 extern void* D_0046D970[];
 
+/**
+ * Destroys the pre-front-end load screen: restores the base module vtable D_0046D970 and frees the object when bit 0
+ * of @p flags is set.
+ *
+ * Destructor slot (+0xC) of D_0047D860.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00232780(void* self, int flags)
 {
     *(void***)self = D_0046D970;
@@ -353,6 +412,14 @@ struct sLoadScreen2327B0 {
     int done;
 };
 
+/**
+ * Asks the pre-game load screen to finish: sets the ending flag (+0x4) and lets it lose focus once the load indicator
+ * has faded out.
+ *
+ * LoseFocus slot (+0x24) of cPreGameLoadScreen_vtbl.
+ *
+ * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
+ */
 extern "C" int func_002327B0(sLoadScreen2327B0* self)
 {
     self->done = 1;
@@ -368,6 +435,14 @@ struct sLoadScreen2327E8 {
     int done;
 };
 
+/**
+ * Asks the pre-front-end load screen to finish: sets the ending flag (+0x4) and lets it lose focus once the load
+ * indicator has faded out.
+ *
+ * LoseFocus slot (+0x24) of D_0047D860.
+ *
+ * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
+ */
 extern "C" int func_002327E8(sLoadScreen2327E8* self)
 {
     self->done = 1;
@@ -408,6 +483,14 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 
+/**
+ * Renders the pre-game load screen: clears to black and draws the load indicator once the renderer is ready.
+ *
+ * Same body as func_00232488 (IsRenderReady, SetScreenClearColour (0, 0, 0), func_00231FC0, DrawFrame). Render slot
+ * (+0x3C) of cPreGameLoadScreen_vtbl.
+ *
+ * @return 1 when a frame was drawn, otherwise 0
+ */
 extern "C" int func_00232820(void)
 {
     if (((cWorld232820*)GrMan)->v17() == 0) {
@@ -453,6 +536,14 @@ public:
 };
 extern "C" void func_00231FC0(void* a);
 
+/**
+ * Renders the pre-front-end load screen: clears to black and draws the load indicator once the renderer is ready.
+ *
+ * Same body as func_00232488 (IsRenderReady, SetScreenClearColour (0, 0, 0), func_00231FC0, DrawFrame). Render slot
+ * (+0x3C) of D_0047D860.
+ *
+ * @return 1 when a frame was drawn, otherwise 0
+ */
 extern "C" int func_002328A8(void)
 {
     if (((cWorld2328A8*)GrMan)->v17() == 0) {
@@ -487,6 +578,14 @@ struct sModule_232930 {
     int f14;
 };
 
+/**
+ * Updates the pre-game load screen: animates and fades the load indicator, then queues the game load screen.
+ *
+ * Steps the indicator's phase (cLoadIndicator_update); its alpha (+0x4) falls by 1/12 per frame while the ending flag
+ * (+0x4 of this) is set and rises otherwise, clamped to [0, 1]. When no next module is queued (SSXApp + 0x4), allocates
+ * 0x18 bytes tagged "cGameLoadScreen", builds the fade base (func_00231CD0), stores D_0047D788, clears +0xC, +0x10 and
+ * +0x14 and queues it with cAppMan_setNextModule. Update slot (+0x34) of cPreGameLoadScreen_vtbl.
+ */
 // Matches only with exceptions enabled for this unit (UNIT_CFLAGS "-fexceptions" in configure.py).
 // `tmp` is reused for the fade direction and the module handle: one variable spanning both blocks is what
 // gives the retail register allocation (the handle is taken before the fields are filled in).
@@ -593,6 +692,15 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232AE0);
 extern "C" void func_00231CD0(void* self);
 extern void* D_0047D7D0[];
 
+/**
+ * Constructs a start screen of a type: builds the fade base (func_00231CD0), stores the vtable D_0047D7D0, the type
+ * (+0x18) and clears the UI engine pointer (+0xC).
+ *
+ * cInitLoadScreen's update (func_00232588) builds it with type 2 (progressive) or 0.
+ *
+ * @param arg  the start screen type (0 shows the memory card state, 2 the progressive-scan state)
+ * @return @p self
+ */
 extern "C" void* func_00232AE0(void* self, int arg)
 {
     func_00231CD0(self);
@@ -692,6 +800,15 @@ struct sUI_232B28 {
     char list[4];
 };
 
+/**
+ * Loads the start screen: creates its UI engine from "data/ui/su" and pushes the memory card or progressive-scan state.
+ *
+ * Calls GrMan's InitTextures (slot 44) with 0x100, builds a 0x70-byte UI engine (tag "UIEngine", func_00397B08) into
+ * +0xC, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale (+0x10) and Fonts (+0x8) and a new
+ * 0x1C-byte input (tag "GLUIInput", cFEInput_vtbl at +0x8) at +0xC of the engine. Type (+0x18) 0 pushes a
+ * cFEStateMemCard (584 bytes, func_00186A08); type 2 pushes a 72-byte "cFEStateProgressive" (cUIState base
+ * func_0039E2A0, vtable D_0047CA18); any other type pushes nothing. Load slot (+0x14) of D_0047D7D0.
+ */
 extern "C" void func_00232B28(void* self)
 {
     ((cWorld_232B28*)GrMan)->v44(0x100);
@@ -746,6 +863,13 @@ static inline void clear_2C98(int* p)
     *p = 0;
 }
 
+/**
+ * Starts the start screen: uploads textures, resets the display tick count (+0x14) and turns off depth fog, screen tint
+ * and light glow.
+ *
+ * Calls cGraphicsMan_UploadTextures, clears cDepthFog_m_Enable, cScreenTint_m_Enable and cLightGlow_m_Enable and sets
+ * the clear colour to (0, 0, 0) (SetScreenClearColour, slot 15). GainFocus slot (+0x2C) of D_0047D7D0.
+ */
 extern "C" void func_00232C98(void* self)
 {
     cGraphicsMan_UploadTextures(GrMan);
@@ -764,6 +888,13 @@ extern "C" void* cFadeScreen_loseFocus(void* self);
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232CF8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Lets the start screen lose focus when its fade allows it: returns cFadeScreen_loseFocus.
+ *
+ * LoseFocus slot (+0x24) of D_0047D7D0.
+ *
+ * @return cFadeScreen_loseFocus's result
+ */
 void* func_00232CF8(void* self)
 {
     return cFadeScreen_loseFocus(self);
@@ -776,6 +907,12 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232D18);
 void func_00231CB0(void*);
 extern "C" void func_00398038(void*);
 
+/**
+ * Updates the start screen: runs the load-screen update (func_00231CB0), updates the UI engine (func_00398038 on +0xC)
+ * and counts a display tick (+0x14).
+ *
+ * Update slot (+0x34) of D_0047D7D0.
+ */
 extern "C" void func_00232D18(void* self)
 {
     func_00231CB0(self);
@@ -813,6 +950,12 @@ public:
 extern "C" void func_00397B70(void* obj, int a);
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 
+/**
+ * Purges the start screen: flushes the renderer, destroys the UI engine and purges textures.
+ *
+ * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set, clears the
+ * pointer and calls cGraphicsMan_PurgeTextures. Purge slot (+0x1C) of D_0047D7D0.
+ */
 extern "C" void func_00232D50(void* self)
 {
     ((cWorld232D50*)GrMan)->v19();
@@ -855,6 +998,14 @@ public:
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* obj);
 
+/**
+ * Renders the start screen once the renderer is ready: the UI engine unless the fade covers the screen, then the frame.
+ *
+ * Returns 0 while GrMan's IsRenderReady (slot 17) is 0. Otherwise draws the fade (func_00231D60) and, when it is not
+ * fully opaque, the UI engine (func_00397DF8 on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of D_0047D7D0.
+ *
+ * @return 1 when a frame was drawn, otherwise 0
+ */
 extern "C" int func_00232DA8(void* self)
 {
     if (((cWorld232DA8*)GrMan)->v17() == 0) {
@@ -953,6 +1104,20 @@ struct cLoadItemC_2E20 {
     }
 };
 
+/**
+ * Loads the game load screen: creates its UI engine from "data/ui/gl" and pushes the loading state for the race.
+ *
+ * Calls GrMan's InitTextures (slot 44) with 0x100 and cBE_getInterface (result unused), builds a 0x70-byte UI engine
+ * (tag "UIEngine", func_00397B08) into +0xC, loads "data/ui/gl", gives it SSXApp's Fonts and FELocale and a 0x1C-byte
+ * "GLUIInput" input. Then pushes one 0x48-byte state built on func_0039E2A0:
+ * - "cGameLoadStateOutLodge" (vtable D_0047C878, clears D_004A19D8) when D_004A19D8 is set, or on the career path
+ *   (cGamePath 0) in game mode 5 or 6;
+ * - "cGameLoadStateConquer" (D_0047C7A8, clears D_004A19DC) on the career path in any other mode;
+ * - otherwise "cGameLoadState" (D_0047C948) with this screen as its owner (+0x48), after
+ *   cGameLoadScreen_loadTexture(this, 0).
+ *
+ * Load slot (+0x14) of D_0047D788.
+ */
 extern "C" void func_00232E20(void* self)
 {
     cPS2GraphicsMan* w = GrMan;
@@ -1114,6 +1279,13 @@ struct sVE_3260 {
     void (*fn)(void*, sVec3i_3260);
 };
 
+/**
+ * Starts the game load screen: uploads textures, starts the game load, turns off depth fog and clears to black.
+ *
+ * Calls cGraphicsMan_UploadTextures and cSSXApp_startGameLoad(SSXApp), clears cDepthFog_m_Enable, sets the clear colour
+ * (0, 0, 0) (SetScreenClearColour, slot 15) and calls func_0028F768 on the audio (func_0028B180). GainFocus slot
+ * (+0x2C) of D_0047D788.
+ */
 extern "C" void func_00233260(void)
 {
     cGraphicsMan_UploadTextures(GrMan);
@@ -1133,6 +1305,13 @@ extern "C" void* cLoadScreen_loseFocus(void* self);
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_002332C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Lets the game load screen lose focus: returns whether cLoadScreen_loseFocus returns non-zero.
+ *
+ * LoseFocus slot (+0x24) of D_0047D788.
+ *
+ * @return 1 or 0
+ */
 int func_002332C8(void* self)
 {
     return (cLoadScreen_loseFocus(self) != 0);
@@ -1202,6 +1381,15 @@ public:
     virtual void v50(void* obj);
 };
 
+/**
+ * Purges the game load screen: flushes the renderer, destroys the UI engine, removes its two textures and purges
+ * textures.
+ *
+ * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set (the
+ * pointer is not cleared), removes each non-zero texture id of the pair at +0x10 (RemoveTexture, slot 50), calls
+ * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (func_0028B180). Purge slot (+0x1C) of
+ * D_0047D788.
+ */
 extern "C" void func_002332E8(void* self)
 {
     ((cWorld002332E8*)GrMan)->v19();
@@ -1251,6 +1439,15 @@ public:
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* obj);
 
+/**
+ * Renders the game load screen once the renderer is ready: the UI engine unless the fade covers the screen, then the
+ * frame.
+ *
+ * Same body as func_00232DA8 (IsRenderReady, func_00231D60, func_00397DF8 on +0xC, DrawFrame). Render slot (+0x3C) of
+ * D_0047D788.
+ *
+ * @return 1 when a frame was drawn, otherwise 0
+ */
 extern "C" int func_00233390(void* self)
 {
     if (((cWorld233390*)GrMan)->v17() == 0) {
@@ -1270,6 +1467,12 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00233408);
 extern "C" void func_00398038(void*);
 void func_00231CB0(void*);
 
+/**
+ * Updates the game load screen: updates the UI engine (func_00398038 on +0xC), then runs the load-screen update
+ * (func_00231CB0).
+ *
+ * Update slot (+0x34) of D_0047D788.
+ */
 extern "C" void func_00233408(void* self)
 {
     func_00398038(*(void**)((char*)self + 0xC));

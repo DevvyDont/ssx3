@@ -1011,6 +1011,14 @@ extern "C" void cChunkResolve__cChunkResolve(void* self, int flags)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADC48__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports success for a mesh-context record without doing any work: always returns 1.
+ *
+ * It sits in slot 8 of both cChunkResolve_vtbl and cPS2ChunkResolve_vtbl, between resolveMesh and resolveMaterial, so
+ * it is the base chunk resolver's no-op handler for that record kind.
+ *
+ * @return always 1 (resolved)
+ */
 int func_003ADC48(void* self)
 {
     return 0x1;
@@ -1020,6 +1028,16 @@ int func_003ADC48(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADC50);
 #ifdef SKIP_ASM
+/**
+ * Returns the code of one script in a world-script cache entry.
+ *
+ * When the entry's state (the short at +0x0) is 3 (loaded), it reads the script table pointer at +0x3C of the entry's
+ * data (+0x8) and returns element @p i; otherwise it returns 0. Unlike the other getters it does not check the data
+ * pointer for null. cWorld_getWScriptScript calls it with the high 24 bits of a script resource id.
+ *
+ * @param i  index of the script within the section
+ * @return the script's code pointer, or 0 when the entry is not loaded
+ */
 extern "C" int func_003ADC50(void* self, int i)
 {
     if (*(short*)self == 3) {
@@ -1033,6 +1051,12 @@ extern "C" int func_003ADC50(void* self, int i)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADC80);
 #ifdef SKIP_ASM
+/**
+ * Returns how many global scripts a loaded world-script cache entry has.
+ *
+ * @return the count at +0x10 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
+ *         has data, else 0
+ */
 extern "C" int func_003ADC80(void* self)
 {
     if (*(short*)self == 3) {
@@ -1048,6 +1072,12 @@ extern "C" int func_003ADC80(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADCB0);
 #ifdef SKIP_ASM
+/**
+ * Returns the global-script records of a loaded world-script cache entry.
+ *
+ * @return the pointer at +0x14 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
+ *         it has data, else 0
+ */
 extern "C" int func_003ADCB0(void* self)
 {
     if (*(short*)self == 3) {
@@ -1103,6 +1133,12 @@ extern "C" int cWScriptCacheEntry_getProcessScripts(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADD40);
 #ifdef SKIP_ASM
+/**
+ * Returns how many mission scripts a loaded world-script cache entry has.
+ *
+ * @return the count at +0x20 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
+ *         has data, else 0
+ */
 extern "C" int func_003ADD40(void* self)
 {
     if (*(short*)self == 3) {
@@ -1118,6 +1154,12 @@ extern "C" int func_003ADD40(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADD70);
 #ifdef SKIP_ASM
+/**
+ * Returns the mission-script records of a loaded world-script cache entry.
+ *
+ * @return the pointer at +0x24 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
+ *         it has data, else 0
+ */
 extern "C" int func_003ADD70(void* self)
 {
     if (*(short*)self == 3) {
@@ -1135,6 +1177,14 @@ extern "C" void* func_003AD290(int, int);
 //99.38%
 INCLUDE_ASM("world/wscriptcache", func_003ADDA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's static initializers: calls func_003AD290(1, 0xFFFF).
+ *
+ * func_003AD290 is the unit's static init/destroy routine (it fills the shared colour constants); the arguments select
+ * the construct pass at the default priority 0xFFFF. The declared parameter is not used.
+ *
+ * @return func_003AD290's result (that routine returns nothing, so no meaningful value)
+ */
 void* func_003ADDA0(void* self)
 {
     return func_003AD290(1, 0xffff);

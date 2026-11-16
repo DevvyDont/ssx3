@@ -222,6 +222,13 @@ extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern char* cGameState_mpGame;
 extern signed char D_00535C10[];
 
+/**
+ * Starts the riding game state: lets the AI riders go and hands the game to the back end's racing state.
+ *
+ * Calls cAI_setAIState on the game's AI (mpGame + 0xC) with 5; unless the race's game mode (cGameMode, D_00535C10) is
+ * 4, sets the AI's +0x14 to 1 and +0x8C to 0. Then cBE_setState(1) and, when no replay is playing (Replay state outside
+ * 1-9), purges the UI's normal states (cUIStateStack_purgeNormalStates). Slot +0x2C (gainFocus) of D_0047D480.
+ */
 extern "C" void func_00234E20(void)
 {
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 5);
@@ -282,6 +289,15 @@ extern char D_0047D6E8[];
 extern char cGFTrackStartState_vtbl[];
 extern char* cGameState_mpGame;
 
+/**
+ * Constructs the track-start game state.
+ *
+ * The cGameState part sets mNextState (+0x0) to 0, its vtable D_0047D6E8 at +0xC and clears the static
+ * cGameState_mpGame; then the class stores cGFTrackStartState_vtbl, mNextState 4, the preload state (+0x10) 5 and
+ * clears mStartupFlag (+0x4), +0x14, +0x18 and +0x1C. cGame_cGame builds it at +0x158 of the game.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00234EF8(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -1296,6 +1312,15 @@ extern char D_0047D6E8[];
 extern char cGFUserSelectState_vtbl[];
 extern char* cGameState_mpGame;
 
+/**
+ * Constructs the user-select game state.
+ *
+ * The cGameState part sets mNextState to 0, its vtable D_0047D6E8 and clears cGameState_mpGame; then the class stores
+ * cGFUserSelectState_vtbl, mNextState 4, the next location (+0x18) 23 and clears mStartupFlag (+0x4), the overlay-done
+ * flag (+0x8) and +0x14. cGame_cGame builds it at +0x1B8 of the game.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00236208(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -1616,6 +1641,14 @@ extern char D_0047D6E8[];
 extern char D_0047D2C8[];
 extern char* cGameState_mpGame;
 
+/**
+ * Constructs the section-load game state (vtable D_0047D2C8).
+ *
+ * The cGameState part sets mNextState to 0, its vtable D_0047D6E8 and clears cGameState_mpGame; then stores D_0047D2C8,
+ * mNextState 10 and clears mStartupFlag (+0x4). cGame_cGame builds it at +0x178 of the game.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00236868(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -1646,6 +1679,13 @@ struct sRace002368A0 {
     signed char flag49;
 };
 
+/**
+ * Starts the section-load game state: back end state 0, replay reset, and on the career path resets each rider's entry.
+ *
+ * Calls cBE_setState(0) and cReplay_reset on the game's replay; when the race's cGamePath is 0, calls
+ * func_00145CB0(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
+ * (gainFocus) of D_0047D2C8.
+ */
 extern "C" void func_002368A0(void* self)
 {
     cBE_setState(0);
@@ -1689,6 +1729,16 @@ extern "C" int cWorldView_getTestFocus(void* cache, int idx, sVec4_236960* pos, 
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
 extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 
+/**
+ * Steps the section-load game state while the section manager waits for a transport.
+ *
+ * Does nothing unless the section manager's mWaitTransport (+0x1C8) is set. Sub-state 0: once the location's section
+ * (mBELocationID) is loaded, puts the world view's focus for the inactive view at the first rider's NIS end position
+ * (cRider_GetNISEndPosition) with radius 45000 and goes to 1. Sub-state 1: waits until the test focus is at least 20000
+ * away, the first transition manager (func_00230698) is idle and no NIS is in transition, then ends the transport
+ * sequence (cSSXScriptEngine_EndTransportSequence), clears mWaitTransport, activates the location in mode 7
+ * (cSectionMan_activate) and goes to 2. Slot +0x34 (update) of D_0047D2C8.
+ */
 extern "C" void func_00236960(void* self)
 {
     char* appGame = (char*)SSXApp->Game;
@@ -1742,6 +1792,9 @@ extern "C" void func_00236960(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", func_00236AF0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the section-load game state's loseFocus (slot +0x3C of D_0047D2C8).
+ */
 void func_00236AF0(void* self)
 {
 }
@@ -1795,6 +1848,11 @@ public:
 };
 extern char* cGameState_mpGame;
 
+/**
+ * Ends the transport-wait game state: calls virtual slot 5 of the game's AI (mpGame + 0xC, vtable at +0xCC) with 3.
+ *
+ * Slot +0x3C (loseFocus) of D_0047D588.
+ */
 extern "C" void func_00236B38(void)
 {
     (*(cRace236B38**)(cGameState_mpGame + 0xC))->v05(3);
@@ -1861,7 +1919,14 @@ struct sGameState_6BB0 {
     int done;   // 0x8
 };
 
-// Ends the game state: pushes front-end state 1 unless cGameComm_mGameComm is active, then hands control back.
+/**
+ * Starts the pre-event game state: opens overlay 2 under pause state 1, unless the online session has failed.
+ *
+ * Clears the overlay-done flag (+0x8). When cGameComm_mGameComm reports an error it only forces the cut-scene
+ * transition to regular mode and calls cBE_setState(0); otherwise it also calls cOVStateManager_gotoOverlay(2) and
+ * pushes pause state 1 (D_005366E8[++D_004A2A54] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
+ * D_0047D270.
+ */
 extern "C" void func_00236BB0(sGameState_6BB0* self)
 {
     self->done = 0;
@@ -1883,6 +1948,12 @@ INCLUDE_ASM("main/gamestate", func_00236C48);
 #ifdef SKIP_ASM
 extern "C" void cGameState_gotoNextState(void* self);
 
+/**
+ * Steps the pre-event game state: moves to the next state once the overlay is done (+0x8 is 1), unless the online
+ * session has failed.
+ *
+ * Calls cGameState_gotoNextState. Slot +0x34 (update) of D_0047D270.
+ */
 extern "C" void func_00236C48(void* self)
 {
     if (cGameComm_mGameComm == 0 || cGameComm_mGameComm->mError == 0) {
@@ -1902,6 +1973,12 @@ extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
+/**
+ * Ends the pre-event game state: pops the pause stack (restoring cPauseState_Flags) and resets the game state with
+ * func_00236CD8.
+ *
+ * Slot +0x3C (loseFocus) of D_0047D270. The pause stack index is not checked.
+ */
 extern "C" void func_00236C88(void* self)
 {
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
@@ -1935,6 +2012,12 @@ static inline int isMode4_236CD8()
     return D_00535C10[0] == 4;
 }
 
+/**
+ * Resets the race for the event: clears the NIS list, sets the AI back, and resets the audio.
+ *
+ * Calls cSSXScriptEngine_ResetNISList(ScriptEngine, 0); unless the race's game mode (cGameMode, D_00535C10) is 4, calls
+ * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then func_002871B0 on the audio (func_0028B180).
+ */
 extern "C" void func_00236CD8(void* self)
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
@@ -1998,6 +2081,14 @@ struct sRace00236DA0 {
     signed char flag49;
 };
 
+/**
+ * Starts the post-event game state: on the career path resets each rider's entry, clears the NIS list and opens overlay
+ * 7.
+ *
+ * When the race's cGamePath is 0, calls func_00145CB0(player interface, i, 0) for each rider; then
+ * cSSXScriptEngine_ResetNISList(ScriptEngine, 0), clears the overlay-done flag (+0x8) and calls
+ * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of D_0047D218.
+ */
 extern "C" void func_00236DA0(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2019,6 +2110,12 @@ INCLUDE_ASM("main/gamestate", func_00236E60);
 #ifdef SKIP_ASM
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 
+/**
+ * Steps the post-event game state: once the overlay is done (+0x8 is 1) sets the game's state to 14 with
+ * cGame_setState(game, 0xE, 2, 0).
+ *
+ * Slot +0x34 (update) of D_0047D218.
+ */
 extern "C" void func_00236E60(void* self)
 {
     if (*(int*)((char*)self + 8) == 1) {
@@ -2033,6 +2130,12 @@ INCLUDE_ASM("main/gamestate", func_00236EA0);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern char* cGameState_mpGame;
 
+/**
+ * Ends the post-event game state: purges the UI's normal states (cUIStateStack_purgeNormalStates on the UI engine's
+ * stack, mpGame + 0x48).
+ *
+ * Slot +0x3C (loseFocus) of D_0047D218.
+ */
 extern "C" void func_00236EA0(void)
 {
     cUIStateStack_purgeNormalStates(*(char**)(cGameState_mpGame + 0x48) + 0x18);
@@ -2215,6 +2318,16 @@ extern "C" void cGFReplayStartState_loseFocus(void)
 //100%
 INCLUDE_ASM("main/gamestate", func_00237060);
 #ifdef SKIP_ASM
+/**
+ * Constructs a networked input synchroniser for a latency and a sample count.
+ *
+ * Stores sendlimit (+0x0) = @p latencyFrames * @p numSamples, latency (+0x4) = (60 / @p numSamples) * @p numSamples,
+ * numsamples (+0x8), and clears tick (+0xC) and the synced-pad count (+0x10). cGame_load builds it.
+ *
+ * @param latencyFrames  the latency in frames
+ * @param numSamples  copies per sample
+ * @return @p self
+ */
 extern "C" void* func_00237060(void* self, int latencyFrames, int numSamples)
 {
     *(int*)((char*)self + 0x4) = latencyFrames;
@@ -2246,6 +2359,14 @@ struct sObj_func_002370A0 {
     sEntry_func_002370A0 entries[1];
 };
 
+/**
+ * Destroys a networked input synchroniser: for each synced pad frees its sample ring (cMemMan_free) and deletes its two
+ * input objects (+0x10, +0x14 of the pad), then frees the object when bit 0 of @p flags is set.
+ *
+ * cGame_purge calls it.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_002370A0(sObj_func_002370A0* self, int flags)
 {
     int i;
@@ -2467,6 +2588,15 @@ struct cInputSync_2373B8 {
     SyncedPad_2373B8 syncedpads[1];     // 0x14
 };
 
+/**
+ * Fills the synced pads' sample rings for this frame: reads remote samples from the network and samples the local pads.
+ *
+ * Does nothing until cGameComm_mGameComm's state is 14 or more. A remote pad (no source pad) takes compressed samples
+ * from cGameComm_readPacket while its ring has room, or, offline, neutral samples; each is decompressed (func_00237BE8)
+ * and written numsamples times. A local pad, while under the send limit, samples its buttons every numsamples ticks,
+ * sends them (func_00237A98), queues them, and recomputes the send limit from the connection's latency (func_00258360)
+ * divided by the frame time (SSXApp + 0x14), at least 2 samples, capped at the ring size. cGame_update calls it.
+ */
 extern "C" void func_002373B8(cInputSync_2373B8* self)
 {
     PadSample_2373B8 sample;
@@ -2553,6 +2683,14 @@ struct sOwner237950 {
     sSlot237950 slots[1];
 };
 
+/**
+ * Tells whether every synced pad has a sample ready for the AI update.
+ *
+ * Returns 0 while cGameComm_mGameComm's state is below 14, while it is unpausing (flag or timer), or when any pad's
+ * read position equals its write position.
+ *
+ * @return 1 when input is ready, otherwise 0
+ */
 extern "C" int func_00237950(sOwner237950* self)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -2636,6 +2774,15 @@ extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
 extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
 extern "C" void func_00257E98(void* mgr, int a, char* buf, int len);
 
+/**
+ * Sends one local pad sample: compresses it, decompresses it back into @p src, and posts it on the network when the
+ * session is synced, error-free and connected.
+ *
+ * Uses func_00237B28 and func_00237BE8, then func_00257E98(cGameComm_mGameComm, 0, buffer, length). Decompressing back
+ * makes the local copy match what the peer receives.
+ *
+ * @param src  the pad sample (button count and values)
+ */
 extern "C" void func_00237A98(void* self, sPackSrc_7B28* src)
 {
     char buf[32];
@@ -2663,6 +2810,16 @@ struct sPackDst_7B28 {
     unsigned char vals[1];
 };
 
+/**
+ * Compresses a pad sample: each button value times 255 becomes a byte, and only the non-zero bytes are kept, with a bit
+ * mask.
+ *
+ * Writes the button count, three mask bytes (bit i set for a non-zero button i) and the kept bytes to @p dst.
+ *
+ * @param src  the pad sample (count, float values)
+ * @param dst  the compressed sample
+ * @return the compressed size in bytes (4 + the kept bytes)
+ */
 extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
 {
     int i;
@@ -2689,6 +2846,14 @@ INCLUDE_ASM("main/gamestate", func_00237BE8);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
+/**
+ * Decompresses a pad sample: buttons whose mask bit is set take the next byte / 255, the others 0.
+ *
+ * Clears the 24 button values first.
+ *
+ * @param out  the pad sample written
+ * @param buf  the compressed sample
+ */
 extern "C" void func_00237BE8(void* self, sPackSrc_7B28* out, char* buf)
 {
     sPackDst_7B28* in = (sPackDst_7B28*)buf;

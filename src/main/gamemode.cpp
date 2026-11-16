@@ -252,6 +252,11 @@ INCLUDE_ASM("main/gamemode", func_002382B8);
 #ifdef SKIP_ASM
 extern int D_00536730[];
 
+/**
+ * Sets entry @p i of the rank table D_00536730 to -1.
+ *
+ * @param i  the rider index
+ */
 extern "C" void func_002382B8(cGameModeMan* self, int i)
 {
     D_00536730[i] = -1;
@@ -289,6 +294,13 @@ extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
 //100%
 INCLUDE_ASM("main/gamemode", func_00238348__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes back the last heat decision: copies iRestoreHeat (+0x74) into iNextHeat (+0x70).
+ *
+ * The pause dialog's onWidgetEvent (cOVTemplate_Dialog_onWidgetEvent) calls it.
+ *
+ * @return the restored heat number
+ */
 int func_00238348(void* self)
 {
     int restoreHeat = *(int*)((char*)self + 0x74);
@@ -568,6 +580,14 @@ extern "C" int func_00245E30(const void* a, const void* b);
 extern "C" int func_00245EC0(const void* a, const void* b);
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
 
+/**
+ * Ranks the first @p n riders by score, highest first, into the rank tables.
+ *
+ * Resets D_00536730 and D_00536708 to 0..9, then sorts D_00536708 with func_00418EF8 (qsort) and func_00245E30, and
+ * D_00536730 with func_00245EC0, both over the scores in D_00536640. The game-mode handlers call it after every heat.
+ *
+ * @param n  number of riders to rank
+ */
 extern "C" void func_00238B70(void* self, int n)
 {
     int i;
@@ -589,6 +609,14 @@ extern "C" int func_00245E78(const void* a, const void* b);
 extern "C" int func_00245EC0(const void* a, const void* b);
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
 
+/**
+ * Ranks the first @p n riders by time, lowest first, into the rank tables.
+ *
+ * Same as func_00238B70 except that D_00536708 is sorted with func_00245E78 (ascending), so the smallest values in
+ * D_00536640 come first.
+ *
+ * @param n  number of riders to rank
+ */
 extern "C" void func_00238BF8(void* self, int n)
 {
     int i;
@@ -636,6 +664,14 @@ struct sVEntry00238C80 {
     void (*fn)(void*);
 };
 
+/**
+ * Purges a game-mode handler: resets the game-mode manager to "no event" and clears its tables.
+ *
+ * Through cGameModeHandler_pManager it sets bIsEventDone to 1, iCurrModeHandler, iLocation, iNextLocation and
+ * iCurrentGameEvent to -1, clears the heat numbers, AI counts, time limit, point target and flags, zeroes iCharacters
+ * and iCheatCharacters, then calls the handler's own slot +0x2C (func_00238DA8 by default). It is slot +0x1C of every
+ * handler vtable; cGameModeMan_initGameMode calls it on the old handler.
+ */
 extern "C" void func_00238C80(void* self)
 {
     cGameModeMan* gm = cGameModeHandler_pManager;
@@ -674,6 +710,12 @@ extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int cGameModeMan_bGiveUp[];
 
+/**
+ * Clears the rank and score tables for a scored event.
+ *
+ * Fills D_00536730 with the byte 9, and D_00536708, the score table D_00536640, D_005366A8 and cGameModeMan_bGiveUp
+ * with 0. It is slot +0x24 of every handler vtable. Quirk: memset with 9 makes each rank word 0x09090909, not 9.
+ */
 extern "C" void func_00238D30(void)
 {
     func_00416210(D_00536730, 9, 40);
@@ -694,6 +736,12 @@ extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int cGameModeMan_bGiveUp[];
 
+/**
+ * Clears the rank and score tables for a timed event.
+ *
+ * Fills D_00536730 and the time table D_00536640 with the byte 9 (0x09090909 per word, a large time), and D_00536708,
+ * D_005366A8 and cGameModeMan_bGiveUp with 0. It is slot +0x2C of every handler vtable; func_00238C80 calls it.
+ */
 extern "C" void func_00238DA8(void)
 {
     func_00416210(D_00536730, 9, 40);
@@ -768,6 +816,16 @@ static inline sRace_238E20* race_238E20()
     return (sRace_238E20*)SSXApp->Game->AI;
 }
 
+/**
+ * Starts a heat of the scored three-heat event (handler 0, vtable D_0047CFA0; offline events 1-3).
+ *
+ * Sets the time limit from func_001454F8(race, heat) * 60 and iHeatNum from iNextHeat. Heat 1 (or 0) sets five timed AI
+ * riders and, when the event was done, clears the score table (+0x4, 3 heats x 10 riders), runs slot +0x24, picks the
+ * line-up (func_00239938) and the AI scores (func_00239AA0); it then ranks twice with sortScores (func_00238B70) and
+ * puts the two leaders' characters in the race (AI + 0x20, + 0x24). Heat 2 ranks on heats 1 + 2; heat 3 is the last
+ * heat and ranks on heat 3. When the game path (D_00535C11) is not 0 it first sets up a single heat-3 event with fresh
+ * line-up. It fills the init slot (+0x14), which cGameModeMan_restartHeat calls.
+ */
 extern "C" void func_00238E20(sScore_238E20* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -928,6 +986,17 @@ static inline cRider* Rider_239230(int i)
     return Race_239230()->riders[i];
 }
 
+/**
+ * Records a rider's heat score in the scored three-heat event and, when the race is over, decides the next heat.
+ *
+ * Stores the rider's score (its metrics block + 0xFC + 0x9C) or 0 when it did not finish (D_005366A8 marks that) in the
+ * heat's column. Once cAI_isRaceFinished: heat 1 ranks on heats 1 + 2 and sends a top-3 rider to heat 3; heat 2 also
+ * reports the result to the player interface (func_00147D20 for a win, func_00147E18 for a loss, career only); heat 3
+ * estimates unfinished riders' scores (cRider_estimateFinishScore), locks the results and ranks. Finally sets the human
+ * rider's +0x2F8 to 0.7, 0.35 or 0 for first, second or other place. Slot +0x44 (raceFinish) of D_0047CFA0.
+ *
+ * @param idx  the rider index
+ */
 extern "C" void func_00239230(sScore_239230* self, int idx)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1033,6 +1102,16 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
 INCLUDE_ASM("main/gamemode", func_002398E8);
 #ifdef SKIP_ASM
 
+/**
+ * Handles a checkpoint in the scored three-heat event: in event 1 adds @p secs seconds to the time limit.
+ *
+ * Returns 1 except in event 1 when the new limit is still below the race clock (AI + 0x8). Slot +0x34
+ * (riderCheckpointHit) of D_0047CFA0.
+ *
+ * @param player  the rider index (unused)
+ * @param secs  seconds to add
+ * @return 1, or 0 when the extended limit has already run out
+ */
 extern "C" int func_002398E8(void* self, int player, int secs)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
@@ -1072,6 +1151,13 @@ struct sGM_239938 {
     int a40[10];
 };
 
+/**
+ * Builds the AI line-up: the player's character, the rival, then the other characters in random order.
+ *
+ * Takes the human rider's character (cBENewPlayerInterface_getRiderCharID) and the rival (func_00145750), shuffles the
+ * remaining characters 0-9 with func_0023C770 and stores them in iCharacters (cheat characters 0, the player's from
+ * func_00147410). Off the career path (cGamePath != 0) the rival slot gets the last shuffled character instead.
+ */
 extern "C" void func_00239938(void)
 {
     int n = 0;
@@ -1130,6 +1216,13 @@ static inline int opt49_239AA0(sOpts_239AA0* o)
     return o->f49;
 }
 
+/**
+ * Fills the AI riders' scores for all three heats of the scored event.
+ *
+ * For the non-simulated riders it clears all three heats and ranks them 5, 4, ...; for each simulated AI rider it asks
+ * the race interface (func_001453D0) for a score per heat (or repeats heat 1's when the race setting at newRace + 0x49
+ * is set), then ranks everyone with sortScores (func_00238B70).
+ */
 extern "C" void func_00239AA0(sScore_239AA0* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1174,6 +1267,15 @@ struct sScoreTable239CE0 {
     int tbl[8][10];
 };
 
+/**
+ * Returns a rider's score in one heat of the scored event, or 0 for a heat not run yet.
+ *
+ * Slot +0x4C (getHeatScore) of D_0047CFA0; reads the table at +0x4 (heat x 10 riders).
+ *
+ * @param col  the rider index
+ * @param row  the heat
+ * @return the score, or 0 when @p row is past iHeatNum
+ */
 extern "C" int func_00239CE0(sScoreTable239CE0* self, int col, int row)
 {
     if (cGameModeHandler_pManager->iHeatNum < row) {
@@ -1186,26 +1288,41 @@ extern "C" int func_00239CE0(sScoreTable239CE0* self, int col, int row)
 //100%
 INCLUDE_ASM("main/gamemode", func_00239D18);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 class cGameModeStream {
 public:
-    virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void write(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
+/**
+ * Saves the scored event handler's 160-byte table (+0x4) to a replay frame with the stream's write (its first virtual).
+ *
+ * Slot +0x54 (writeToReplayFrame) of D_0047CFA0.
+ *
+ * @param s  the replay stream
+ */
 extern "C" void func_00239D18(void* self, cGameModeStream* s)
 {
-    s->v01((char*)self + 0x4, 160);
+    s->write((char*)self + 0x4, 160);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_00239D50);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+/**
+ * Restores the scored event handler's 160-byte table (+0x4) from a replay frame with the stream's read (its second
+ * virtual).
+ *
+ * Slot +0x5C (readFromReplayFrame) of D_0047CFA0.
+ *
+ * @param s  the replay stream
+ */
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 extern "C" void func_00239D50(void* self, cGameModeStream* s)
 {
-    s->v02((char*)self + 0x4, 160);
+    s->read((char*)self + 0x4, 160);
 }
 #endif
 
@@ -1250,6 +1367,12 @@ struct sVEntry_239D88 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts the two-player online event of handler 9 (vtable D_0047CE68; online events 1-3).
+ *
+ * Sets a single last heat (3) with no AI, a time limit of func_001454F8(race, 3) * 60, runs slot +0x24, puts both
+ * players' characters and cheat characters in the tables and clears the two per-player counters (+0x4, +0x6).
+ */
 extern "C" void func_00239D88(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1289,6 +1412,15 @@ extern "C" void func_00239D88(void* self)
 //100%
 INCLUDE_ASM("main/gamemode", func_00239EC8);
 #ifdef SKIP_ASM
+/**
+ * Records a rider's finish in the two-player online event of handler 9 and locks the results when the race is over.
+ *
+ * Stores the rider's score (or 0 and a did-not-finish mark in D_005366A8); when cAI_isRaceFinished, sets the event
+ * done, locks the results, ranks the two riders with sortScores and clears +0x100 of a rider who did not win. Slot
+ * +0x44 (raceFinish) of D_0047CE68.
+ *
+ * @param idx  the rider index
+ */
 extern "C" void func_00239EC8(void* self, int idx)
 {
     sRace_239230* race = Race_239230();
@@ -1318,6 +1450,17 @@ extern "C" void func_00239EC8(void* self, int idx)
 INCLUDE_ASM("main/gamemode", func_0023A070);
 #ifdef SKIP_ASM
 
+/**
+ * Counts a checkpoint for one player in the two-player event of handler 9.
+ *
+ * Increments the player's counter (+0x4 + 2 * @p player); returns 0 unless it is now ahead of the other player's. In
+ * event 1 the leader also adds @p secs seconds to the time limit, unless the limit has already passed (then 0). Slot
+ * +0x34 (riderCheckpointHit) of D_0047CE68.
+ *
+ * @param player  the player (0 or 1)
+ * @param secs  seconds to add
+ * @return 1 when the player took the lead (and time was added), otherwise 0
+ */
 extern "C" int func_0023A070(char* self, int player, int secs)
 {
     short* score = (short*)(self + 4);
@@ -1430,6 +1573,15 @@ static inline void fillOthers_23A108(int* dst, int p)
     }
 }
 
+/**
+ * Starts a heat of the three-heat timed event (handler 1, vtable D_0047CF38; offline event 0).
+ *
+ * Sets iHeatNum from iNextHeat (forced to 3 off the career path) and five AI riders. Heat 1 builds the heat line-ups
+ * (func_0023A4F0) and applies one (func_0023A668) when the event was done, fills the time table (+0x58) with 9s and
+ * runs slot +0x2C. Heat 2 and heat 3 record the player's character and the riders that survived the last heat
+ * (D_00536708) in the next line-up and apply it, and reset the score and rank tables. +0x8 and +0xC remember which heat
+ * set-up already ran.
+ */
 extern "C" void func_0023A108(sMode_23A108* self)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
@@ -1562,6 +1714,13 @@ extern "C" int func_00145750(void* iface);
 extern "C" unsigned int GMrand(void);
 extern "C" void func_0023C770(int* arr, unsigned int n);
 
+/**
+ * Builds the timed event's heat line-ups: the player, two random characters from 10-16, then the other characters.
+ *
+ * Draws two distinct values with GMrand (10 + rand % 7, and 10 + rand % 6 skipping the first), lists the characters 0-9
+ * other than the player's and the rival's (func_00145750), shuffles all ten with func_0023C770 and stores the player's
+ * character and the shuffled values in the line-up rows at +0x10 .. +0x54.
+ */
 extern "C" void func_0023A4F0(void* self)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1636,6 +1795,13 @@ int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int func_00147410(void* iface, int player);
 
 extern "C" void func_0023A668_A668(cGMRaceHandler* self) __asm__("func_0023A668");
+/**
+ * Applies the current heat's line-up row to the game-mode manager's character tables.
+ *
+ * For the row of heat iHeatNum - 1 (+0x10, six entries) it copies each character to iCharacters; values of 10 and above
+ * go to iCheatCharacters with the player's character in iCharacters. The human rider's slot gets the player's cheat
+ * character (func_00147410).
+ */
 extern "C" void func_0023A668_A668(cGMRaceHandler* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1756,6 +1922,17 @@ static inline int vcall_23A760(char* obj, int slot)
     return vt[slot].fn(obj + vt[slot].delta);
 }
 
+/**
+ * Records a rider's time in the timed three-heat event and, when the race is over, decides who goes on.
+ *
+ * Stores the finish tick (360000 for did-not-finish) in the heat's row of the table at +0x58. When the race is over and
+ * the rider's state says so, estimates unfinished riders (cRider_estimateFinishTick), ranks with sortTimes
+ * (func_00238BF8) and: a top-3 human goes to the next heat (heat 3 ends the event), otherwise repeats the heat. On the
+ * career path it reports big wins and losses to the player interface (func_00147D20 / func_00147E18), and heat 3 locks
+ * the results. Sets the human's +0x2F8 to 0.7, 0.35 or 0 by place. Slot +0x44 (raceFinish) of D_0047CF38.
+ *
+ * @param idx  the rider index
+ */
 // cGMRaceHandler slot 7: records rider idx's heat time, ranks the heat and moves the heat state on.
 extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
 {
@@ -1838,6 +2015,9 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
 //100%
 INCLUDE_ASM("main/gamemode", func_0023AC10__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: slot +0x3C (riderGateHit) of the timed event handler's vtable D_0047CF38.
+ */
 void func_0023AC10(void* self)
 {
 }
@@ -1846,20 +2026,35 @@ void func_0023AC10(void* self)
 //100%
 INCLUDE_ASM("main/gamemode", func_0023AC18);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+/**
+ * Saves the whole 208-byte timed event handler to a replay frame with the stream's write (its first virtual).
+ *
+ * Slot +0x54 (writeToReplayFrame) of D_0047CF38. Quirk: the 208 bytes start at the object itself, so its vtable pointer
+ * is written too.
+ *
+ * @param s  the replay stream
+ */
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 extern "C" void func_0023AC18(void* self, cGameModeStream* s)
 {
-    s->v01(self, 208);
+    s->write(self, 208);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_0023AC50);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+/**
+ * Restores the whole 208-byte timed event handler from a replay frame with the stream's read (its second virtual).
+ *
+ * Slot +0x5C (readFromReplayFrame) of D_0047CF38. Quirk: the read covers the vtable pointer at +0x0 as well.
+ *
+ * @param s  the replay stream
+ */
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 extern "C" void func_0023AC50(void* self, cGameModeStream* s)
 {
-    s->v02(self, 208);
+    s->read(self, 208);
 }
 #endif
 
@@ -1905,6 +2100,13 @@ struct sVEntry_23AC88 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts the online race of handler 8 (vtable D_0047CED0; online event 0 and the online default).
+ *
+ * Sets path 2 and event 0, a single last heat (3) with four AI riders (D_00535C04 when cBENetworkInterface_networkOpt
+ * says it is a network game), no time limit, fills the time table (+0x4) with 9s, runs slot +0x2C and stores both
+ * players' characters. When the event was done it also runs func_0023B0A8.
+ */
 extern "C" void func_0023AC88(void* self)
 {
     int one = 1;
@@ -1998,6 +2200,15 @@ static inline int finished_23AE00(sRider_23AE00* r)
     return r->f470 >= 0.0f;
 }
 
+/**
+ * Records a rider's time in the online race of handler 8 and ranks the riders when the race is over.
+ *
+ * Stores the rider's time (360000 for did-not-finish) in its table (+0x0) and D_00536640. Once cAI_isRaceFinished,
+ * estimates the unfinished riders (cRider_estimateFinishTick), ranks with sortTimes (func_00238BF8), clears +0x100 of a
+ * rider placed 4th or worse and locks the results. Slot +0x44 (raceFinish) of D_0047CED0.
+ *
+ * @param idx  the rider index
+ */
 extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
 {
     sRace_23AE00* rc = race_23AE00();
@@ -2031,20 +2242,36 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
 //100%
 INCLUDE_ASM("main/gamemode", func_0023B038);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+/**
+ * Saves the online race handler's first 44 bytes (from +0x0, vtable pointer included) to a replay frame with the
+ * stream's write (its first virtual).
+ *
+ * Slot +0x54 (writeToReplayFrame) of D_0047CED0.
+ *
+ * @param s  the replay stream
+ */
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 extern "C" void func_0023B038(void* self, cGameModeStream* s)
 {
-    s->v01(self, 44);
+    s->write(self, 44);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_0023B070);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+/**
+ * Restores the online race handler's first 44 bytes (from +0x0, vtable pointer included) from a replay frame with the
+ * stream's read (its second virtual).
+ *
+ * Slot +0x5C (readFromReplayFrame) of D_0047CED0.
+ *
+ * @param s  the replay stream
+ */
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 extern "C" void func_0023B070(void* self, cGameModeStream* s)
 {
-    s->v02(self, 44);
+    s->read(self, 44);
 }
 #endif
 
@@ -2090,6 +2317,12 @@ struct sVEntry_23B170 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts a freeride (handler 2, vtable D_0047CE00; event 12): one last heat, no AI, no time limit, results locked.
+ *
+ * Clears iCharacters to -1 and gives the human rider its character, runs slot +0x24, sets iNextHeat and iRestoreHeat to
+ * 1 and clears the time limit, point target and flags. Slot +0x14 (init) of D_0047CE00.
+ */
 extern "C" void func_0023B170(void* self)
 {
     int one = 1;
@@ -2171,6 +2404,14 @@ struct sMode_23B268 {
     short fA;
 };
 
+/**
+ * Starts the timed event of handler 4 (vtable D_0047CD98; events 6-8) at its location.
+ *
+ * Event 6, 7 or 8 maps to location 14, 15 or 16 (next locations 0, 3, 4). The medal already won there (func_001558F8)
+ * picks the target tier (+0xA: 2 for results 1-2, 1 for 3, else 0); the time limit (+0x4 and uiTimeLimit) is
+ * func_001455D0(race, event, tier) * 60 and also becomes the point target. Runs slot +0x2C, gives the human its
+ * character and clears the checkpoint counter (+0x8). Slot +0x14 (init) of D_0047CD98.
+ */
 extern "C" void func_0023B268(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2269,6 +2510,15 @@ static inline char* rider_23B468(char* g, int off)
     return *(char**)(*(char**)(*(char**)(g + 0x84) + 0xC) + off + 0x28);
 }
 
+/**
+ * Records the rider's time in the timed event of handler 4 and awards a place by the medal times.
+ *
+ * Copies the rider's finish tick (+0x478) to D_00536640; did-not-finish stores 0x57E40 and retries the heat. A time
+ * above the limit (+0x4) also retries; otherwise the event is done and the rank is 0, 1 or 2 against the tier-2 and
+ * tier-1 times (func_001455D0 * 60). Always locks the results. Slot +0x44 (raceFinish) of D_0047CD98.
+ *
+ * @param p  the rider index
+ */
 extern "C" void func_0023B468(void* self, int p)
 {
     int one = 1;
@@ -2316,6 +2566,16 @@ extern "C" int func_00145668(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitTime(void* self, int value);
 extern signed char D_00535C12[];
 
+/**
+ * Handles a checkpoint in the timed event of handler 4: at locations 17-21 subtracts that checkpoint's bonus from the
+ * race clock.
+ *
+ * Asks func_00145668 for the bonus of checkpoint +0x8 (then advances it) at the target tier (+0xA) and, when non-zero,
+ * calls cRiderMetrix_evSplitTime on the first rider's object (+0x790) with the clock in seconds minus the bonus. Slot
+ * +0x34 (riderCheckpointHit) of D_0047CD98.
+ *
+ * @return 1
+ */
 extern "C" int func_0023B5F8(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2383,6 +2643,12 @@ struct sVEntry_23B6C0 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts the head-to-head event of handler 5 (vtable D_0047CD30; event 4): one last heat against one AI rider.
+ *
+ * Runs slot +0x2C. Online (path 2) both players take their characters and no AI; offline the human gets its character
+ * and the next slot gets the rival (func_00145750). Slot +0x14 (init) of D_0047CD30.
+ */
 extern "C" void func_0023B6C0(void* self)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2465,6 +2731,15 @@ static inline char* Rider_23B8C8(int i)
     return ((sClk_23B8C8*)SSXApp->Game->AI)->riders[i];
 }
 
+/**
+ * Records a rider's time in the head-to-head event of handler 5 and decides the winner when the race is over.
+ *
+ * Stores the finish tick (0x57E40 for did-not-finish). Online it ranks with sortTimes and returns early for the faster
+ * player. Offline it estimates unfinished riders, ranks with sortTimes, and a human in first place that finished ends
+ * the event (iNextHeat 0); otherwise the rider's +0x100 is cleared. Slot +0x44 (raceFinish) of D_0047CD30.
+ *
+ * @param idx  the rider index
+ */
 extern "C" void func_0023B8C8(void* self, int idx)
 {
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0 ||
@@ -2566,6 +2841,13 @@ struct sVEntry_23BB98 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts the head-to-head scored event of handler 6 (vtable D_0047CCC8; event 5): one timed last heat against one AI
+ * rider.
+ *
+ * The time limit is func_001454F8(race, 1) * 60. Runs slot +0x24; online both players take their characters, offline
+ * the human and the rival (func_00145750). Slot +0x14 (init) of D_0047CCC8.
+ */
 extern "C" void func_0023BB98(void* self)
 {
     int one = 1;
@@ -2643,6 +2925,15 @@ static inline char* Rider_23BDB8(int i)
     return ((sClk_23BDB8*)SSXApp->Game->AI)->riders[i];
 }
 
+/**
+ * Records a rider's score in the head-to-head scored event of handler 6 and decides the winner when the race is over.
+ *
+ * Stores the score (0 for did-not-finish). Online it ranks the two players with sortScores and clears +0x100 of the
+ * loser; offline it estimates unfinished riders' scores, ranks, and a human in first place that finished ends the event
+ * (iNextHeat 0). Slot +0x44 (raceFinish) of D_0047CCC8.
+ *
+ * @param idx  the rider index
+ */
 extern "C" void func_0023BDB8(void* self, int idx)
 {
     char* r = Rider_23BDB8(idx);
@@ -2740,6 +3031,14 @@ struct sVEntry_23C0D0 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts the point-target event of handler 7 (vtable D_0047CC60; events 9-11) at its location.
+ *
+ * Event 9, 10 or 11 maps to location 14, 15 or 16 (next locations 5, 6, 4). The medal already won (func_001558F8) picks
+ * the tier (+0xA); the point target (+0x4) is func_001455D0(race, event, tier) * 100 and the time limit
+ * func_00145600(..) * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot
+ * +0x14 (init) of D_0047CC60.
+ */
 extern "C" void func_0023C0D0(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2846,6 +3145,15 @@ struct sClk_23C2D8 {
     char* riders[1];    // 0x28
 };
 
+/**
+ * Records the rider's score in the point-target event of handler 7 and awards a place by the medal scores.
+ *
+ * Did-not-finish or a score below uiPointTarget retries the heat; otherwise the event is done and the rank is 0, 1 or 2
+ * against the tier-2 and tier-1 targets (func_001455D0 * 100). Always locks the results. Slot +0x44 (raceFinish) of
+ * D_0047CC60.
+ *
+ * @param idx  the rider index
+ */
 extern "C" void func_0023C2D8(void* self, int idx)
 {
     sClk_23C2D8* clk = (sClk_23C2D8*)SSXApp->Game->AI;
@@ -2895,6 +3203,16 @@ extern "C" int func_00145668(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
 extern signed char D_00535C12[];
 
+/**
+ * Handles a checkpoint in the point-target event of handler 7: at locations 17-21 subtracts that checkpoint's bonus
+ * points from the first rider's score.
+ *
+ * Asks func_00145668 for the bonus of checkpoint +0x8 (then advances it) at the tier (+0xA), times 100, and calls
+ * cRiderMetrix_evSplitPoints on the first rider's object (+0x790) with its score (+0x198) minus the bonus. Slot +0x34
+ * (riderCheckpointHit) of D_0047CC60.
+ *
+ * @return 1
+ */
 extern "C" int func_0023C560(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2960,6 +3278,13 @@ struct sVEntry_23C618 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts a single-heat event with D_00535C04 AI riders in a random line-up.
+ *
+ * Puts the human rider's character in its slot and fills the others from a shuffled 0-9 list (func_0023C770) without
+ * repeating the player's character, runs slot +0x24 and clears the time limit, point target and flags. Slot +0x14 of
+ * the handler vtable at cMCOverlayManager_vtbl + 0x20.
+ */
 extern "C" void func_0023C618(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -3013,6 +3338,12 @@ INCLUDE_ASM("main/gamemode", func_0023C770);
 #ifdef SKIP_ASM
 extern "C" unsigned int GMrand(void);
 
+/**
+ * Shuffles an int array: 25 swaps of two random entries (GMrand() % @p n each).
+ *
+ * @param arr  the array
+ * @param n  number of entries
+ */
 extern "C" void func_0023C770(int* arr, unsigned int n)
 {
     int i;

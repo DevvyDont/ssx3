@@ -2035,6 +2035,14 @@ void* cVisualEffectsMainMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024D6D0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing and returns its first argument: an empty variadic function.
+ *
+ * It only spills the remaining integer argument registers and the float argument registers to its frame (the variadic
+ * prologue) before returning.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0024D6D0(void* self, ...)
 {
     return self;
@@ -3814,6 +3822,14 @@ extern "C" void* __sti__visualeffectsmenu_cpp(int, int);
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_002501A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the visual effects menu unit's static constructors: calls __sti__visualeffectsmenu_cpp(1, 0xFFFF).
+ *
+ * It is entry +0x30 of the global constructor table D_0043CE38 that func_0040FBE0 (libgcc's __do_global_ctors) walks;
+ * func_002501C8 is its destructor twin. The declared parameter is not used.
+ *
+ * @return __sti__visualeffectsmenu_cpp's result
+ */
 void* func_002501A8(void* self)
 {
     return __sti__visualeffectsmenu_cpp(1, 0xffff);
@@ -3825,6 +3841,14 @@ extern "C" void* __sti__visualeffectsmenu_cpp(int, int);
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_002501C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the visual effects menu unit's static destructors: calls __sti__visualeffectsmenu_cpp(0, 0xFFFF).
+ *
+ * It is entry +0x14 of the global destructor table D_0043CEE4; func_002501A8 is its constructor twin. The declared
+ * parameter is not used.
+ *
+ * @return __sti__visualeffectsmenu_cpp's result
+ */
 void* func_002501C8(void* self)
 {
     return __sti__visualeffectsmenu_cpp(0, 0xffff);
@@ -4059,6 +4083,14 @@ void* cAIVisualEffectsMainMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", func_00250AA0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing and returns its first argument: an empty variadic function, the same body as func_0024D6D0.
+ *
+ * It only spills the remaining integer argument registers and the float argument registers to its frame before
+ * returning.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00250AA0(void* self, ...)
 {
     return self;
@@ -4309,6 +4341,14 @@ extern "C" void* __sti__aivisualeffectsmenu_cpp(int, int);
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_00251690__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the AI visual effects menu unit's static constructors: calls __sti__aivisualeffectsmenu_cpp(1, 0xFFFF).
+ *
+ * It is entry +0x34 of the global constructor table D_0043CE38; func_002516B0 is its destructor twin. The declared
+ * parameter is not used.
+ *
+ * @return __sti__aivisualeffectsmenu_cpp's result
+ */
 void* func_00251690(void* self)
 {
     return __sti__aivisualeffectsmenu_cpp(1, 0xffff);
@@ -4320,6 +4360,14 @@ extern "C" void* __sti__aivisualeffectsmenu_cpp(int, int);
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_002516B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the AI visual effects menu unit's static destructors: calls __sti__aivisualeffectsmenu_cpp(0, 0xFFFF).
+ *
+ * It is entry +0x18 of the global destructor table D_0043CEE4; func_00251690 is its constructor twin. The declared
+ * parameter is not used.
+ *
+ * @return __sti__aivisualeffectsmenu_cpp's result
+ */
 void* func_002516B0(void* self)
 {
     return __sti__aivisualeffectsmenu_cpp(0, 0xffff);
@@ -4363,6 +4411,9 @@ INCLUDE_ASM("main/debugmenu", func_002516F0);
 extern "C" void MEM_fill(void* dst, int val, int n);
 extern char D_004D2438[];
 
+/**
+ * Clears the 256-byte buffer D_004D2438 with MEM_fill.
+ */
 extern "C" void func_002516F0(void)
 {
     MEM_fill(D_004D2438, 0, 0x100);

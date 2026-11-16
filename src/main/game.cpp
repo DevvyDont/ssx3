@@ -148,6 +148,17 @@ static inline sMat_C1B0* viewMat_C1B0()
 // PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.
 sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self) __asm__("func_0022C1B0");
 
+/**
+ * Sets up the 0x30-byte context cGame_renderPatches uses to draw terrain patches, and starts a patch batch.
+ *
+ * Stores cBezierMan_TheBezierMan at +0x0; computes the eye position (+0x10) from GrMan's view matrix (vtable slot 35):
+ * the negated translation row, multiplied by the matrix, with w = 1. Sets the level range n = 1 (+0x28) and f = 3
+ * (+0x2C), reads two distances from the bezier manager (vtable slots 8 and 9), and stores k (+0x20) and c (+0x24) so
+ * that c + k * d maps a summed squared distance d of 2 * near^2 to f and 2 * far^2 to n. Finally calls slot 17 of the
+ * bezier manager.
+ *
+ * @return @p self
+ */
 sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
 {
     self->cam = (sCamObj_C1B0*)cBezierMan_TheBezierMan;
@@ -184,6 +195,14 @@ struct sVEntry_func_0022C3B8 {
     void (*fn)(void*);
 };
 
+/**
+ * Ends a patch-render context: calls slot 18 of its bezier manager (+0x0), then frees the context when bit 0
+ * of @p flags is set.
+ *
+ * cGame_renderPatches calls it with flags 2 on its stack context after drawing.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the context
+ */
 extern "C" void func_0022C3B8(void* self, int flags)
 {
     void* obj = *(void**)self;
@@ -243,6 +262,19 @@ static inline float clamp_C410(float v, float lo, float hi)
 // PORT: the unit declares func_0022C410(void*, int, int) for its callers; this definition takes the
 // patch as a typed pointer, so it binds to the same symbol through an asm label.
 extern "C" void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag) __asm__("func_0022C410");
+/**
+ * Submits one terrain patch to the bezier manager with a level per edge, from the eye's distance to its corners.
+ *
+ * Takes the squared distances from the context's eye position to the patch's four corners (+0x170, 12 bytes each), sums
+ * them per edge (corners 0-1, 2-3, 0-2, 1-3), maps each sum to c + k * sum clamped to [n, f] (the values func_0022C1B0
+ * set up), and converts each level to a byte through the table D_004A2A10 ({4, 4, 6, 8}). Then calls slot 21 of the
+ * context's bezier manager with the patch, the four bytes, the patch's two ids (+0x1A0, +0x1A2, as ints) and @p flag.
+ * cGame_renderPatches calls it for each patch of its two lists, with flag 0 and 1.
+ *
+ * @param vctx  the patch-render context (func_0022C1B0)
+ * @param patch  the terrain patch
+ * @param flag  the list pass (0 or 1), passed on to the bezier manager
+ */
 void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag)
 {
     sRenderCam_C410* ctx = (sRenderCam_C410*)vctx;
@@ -541,6 +573,21 @@ extern "C" void func_002CC350(void* p);
 extern "C" void func_00285BF8(void* self, int a, float dt);
 extern "C" void func_002B5D78(void* p);
 
+/**
+ * Finishes a game frame: draws each view's bucket 3, then the full-screen 2D overlays, and runs the per-frame audio and
+ * trigger updates.
+ *
+ * For each view of ViewMan (+0x84, count at +0x10) it selects the view, sets GrMan's viewport (slot 23) and camera
+ * position (slot 24), loads the camera's matrix, sets the layer and several GS state bits, and calls
+ * cBucketMan_renderBucket(gBucketMan, 3). Then it resets the viewport to the full screen (slot 22 with GrMan's width
+ * and height, then SetViewport 640x480), loads t4mat_Identity, sets the debug font (+0x24) to scale 0.8, size 2 and
+ * colour (1, 0.8, 0.8, 0), and draws the script engine (func_002789C0(ScriptEngine)), the UI (func_00397DF8 on +0x48),
+ * the load indicator (func_001F31E0 on +0x94) and, when cMenuSys_isActive, the debug menu system (func_002CC350 on
+ * +0xA4). It calls GrMan slot 14 with a zero vector and slot 19 with cDepthFog_m_Enable cleared for the call, then
+ * advances the audio by mUpdateTick / 60 seconds (func_00285BF8(gSSXAudio, 1, ..)), runs
+ * func_002B5D78(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
+ * three render paths.
+ */
 extern "C" void func_0022C830(sGame_C830* self)
 {
     unsigned int i = 0;

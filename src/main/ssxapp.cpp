@@ -827,6 +827,11 @@ INCLUDE_ASM("main/ssxapp", func_00227FA0);
 #ifdef SKIP_ASM
 extern "C" void func_0023C850();
 
+/**
+ * Asks whether the memory card overlay manager exists: calls func_0023C850, which tests cMCOverlayManager_instance.
+ *
+ * The source declares it void, but the callee's result stays in the return register.
+ */
 extern "C" void func_00227FA0(void) {
     func_0023C850();
 }
@@ -1529,6 +1534,17 @@ struct sCrowd_229180 {
     char* anim;
 };
 
+/**
+ * Constructs the 2D crowd manager: empty quad slots, its crowd renderer and animation, and the shared crowd record.
+ *
+ * Builds 128 resource ids (+0x8) set to 0xFFFFFFFF, 128 0x40-byte quad slots (+0x210) and the 40 0x20-byte marker ring
+ * entries (+0x2220); makes itself the singleton D_004A2A00. Creates a cCrowdRender2D (0x10 bytes, tag "cCrowdRender2D")
+ * at +0x0 and its animation (cCrowdRender2D_constructCrowdAnim2D) at +0x4. Fills the shared record D_00536690: the
+ * first short takes the animation's current frame texture id (+0x10), +0xC 0x20000, the shorts at +0x2, +0x4 and +0x6
+ * -1, +0x8 and +0x10 0. Then resets the slots (func_002292E0). cGame_load builds it as CrowdMan2d (10016 bytes).
+ *
+ * @return @p self
+ */
 extern "C" void* func_00229180(sCrowd_229180* self)
 {
     new ((char*)self + 0x8) sCrowdId_229180[128];
@@ -1559,6 +1575,14 @@ extern int D_004A2A00;
 void operator_delete(int* p);
 void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
 
+/**
+ * Destroys the 2D crowd manager: releases every slot, clears the singleton D_004A2A00, frees the animation (+0x4),
+ * destroys the renderer (+0x0) and frees the object when bit 0 of @p flags is set.
+ *
+ * Uses func_00229398, operator_delete and cCrowdRender2D__cCrowdRender2D(renderer, 3). cGame_purge calls it.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00229278(void* self, int flags)
 {
     func_00229398(self);
@@ -1599,6 +1623,13 @@ struct sCrowd_2292E0 {
     char rest[0x500];               // 0x2220
 };
 
+/**
+ * Resets the 2D crowd manager's slots and markers.
+ *
+ * Clears the crowd level (+0x2210) and the 128 quad slots (+0x210, 0x2000 bytes); sets every resource id (+0x8) to
+ * 0xFFFFFFFF and every slot's delay (+0x30) to 300 + BXrand() % 300; clears the marker ring index (+0x2214) and its 40
+ * entries (+0x2220, 1280 bytes).
+ */
 extern "C" void func_002292E0(void* self)
 {
     sCrowd_2292E0* crowd = (sCrowd_2292E0*)self;
@@ -1620,6 +1651,10 @@ INCLUDE_ASM("main/ssxapp", func_00229398);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void func_00229B90(void* self, int a1);
 
+/**
+ * Releases every used quad slot of the 2D crowd manager (each resource id at +0x8 other than 0xFFFFFFFF) with
+ * func_00229B90.
+ */
 extern "C" void func_00229398(void* self)
 {
     int i;
@@ -1637,6 +1672,14 @@ INCLUDE_ASM("main/ssxapp", func_00229408);
 #ifdef SKIP_ASM
 extern "C" void func_00229B90(void* self, int a1);
 
+/**
+ * Releases the 2D crowd manager's quad slots in one world section: each used slot whose resource id has @p id as its
+ * low (section) byte.
+ *
+ * cGame_sectionUnloading calls it through the singleton D_004A2A00.
+ *
+ * @param id  the world section id
+ */
 extern "C" void func_00229408(void* self, int id)
 {
     int i;
@@ -1655,6 +1698,11 @@ INCLUDE_ASM("main/ssxapp", func_00229498);
 extern "C" void func_00229398(void* self);
 extern "C" void func_002292E0(void* self);
 
+/**
+ * Restarts the 2D crowd manager: releases every slot (func_00229398) and resets slots and markers (func_002292E0).
+ *
+ * cGame_partialRestart calls it.
+ */
 extern "C" void func_00229498(void* self)
 {
     func_00229398(self);
@@ -1669,6 +1717,14 @@ extern "C" void cCrowdAnim2D_update(void* p);
 extern "C" void func_00229530(void* self);
 extern short D_00536690[];
 
+/**
+ * Updates the 2D crowd manager once per frame: the crowd animation, the shared frame, the marker lifetimes, then the
+ * marker spawns.
+ *
+ * Calls cCrowdAnim2D_update on the animation (+0x4) and copies its current frame texture id (+0x10) into the first
+ * short of D_00536690; counts down each live marker of the 40-entry ring (+0x2230 in each 0x20-byte entry); then calls
+ * func_00229530. cGame_update calls it.
+ */
 extern "C" void func_002294C8(void* self)
 {
     int i;
@@ -1762,6 +1818,17 @@ static inline float rands_229530(float lo, float hi)
     return randf_229530() * (hi - lo) + lo;
 }
 
+/**
+ * Spawns markers over the crowd quads at a rate that follows the crowd's cheer level.
+ *
+ * Takes the absolute value of func_002A77C8(gSSXAudio, 0) (crowd instance 0's cheer value); when it changes, stores it
+ * as the crowd level (+0x2210) and sets the animation's target state (+0x0) to it, at least 1. Each used slot's delay
+ * (+0x30) falls by 10 * level + 4; when it reaches 0, a marker goes into the ring (func_00229738, lifetime 3) at the
+ * slot's centre (+0x0) plus its two half-axes (+0x10, +0x20) each scaled by a random value in [-1, 1), and the delay
+ * restarts at 300 + BXrand() % 300.
+ *
+ * @param selfp  the 2D crowd manager
+ */
 extern "C" void func_00229530(void* selfp)
 {
     sCrowd_229530* self = (sCrowd_229530*)selfp;
@@ -1809,6 +1876,15 @@ struct sRingOwner {
     sRingEntry entries[40]; // 0x2220
 };
 
+/**
+ * Adds a marker to the 2D crowd manager's 40-entry ring: stores @p pos and @p value in the entry at the ring index
+ * (+0x2214), then advances the index modulo 40.
+ *
+ * The oldest marker is overwritten when the ring is full.
+ *
+ * @param pos  the marker position (a 16-byte vector)
+ * @param value  the marker's lifetime in updates
+ */
 extern "C" void func_00229738(sRingOwner* self, sQuad229* pos, int value)
 {
     self->entries[self->index].q = *pos;
@@ -1823,6 +1899,13 @@ INCLUDE_ASM("main/ssxapp", func_00229788);
 #ifdef SKIP_ASM
 extern "C" void func_00229910(void* self, int slot, int a1);
 
+/**
+ * Takes the first free quad slot among the first 64 and places it on the model of @p resourceId (func_00229910).
+ *
+ * Does nothing when those 64 are all used. func_00303BA0 (a script command) calls it for its command 2.
+ *
+ * @param resourceId  the world resource id of the crowd model
+ */
 extern "C" void func_00229788(void* self, int resourceId)
 {
     int i;
@@ -1840,6 +1923,13 @@ INCLUDE_ASM("main/ssxapp", func_002297D8);
 #ifdef SKIP_ASM
 extern "C" void func_00229B90(void* self, int a1);
 
+/**
+ * Releases the first quad slot among the first 64 whose resource id equals @p val (func_00229B90).
+ *
+ * func_00303BA0 (a script command) calls it for its command 3.
+ *
+ * @param val  the world resource id
+ */
 extern "C" void func_002297D8(void* self, int val)
 {
     int i;
@@ -1921,6 +2011,17 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
     return lookup_229820(t, h >> 8);
 }
 
+/**
+ * Points one bone of a model's pose at the shared crowd record D_00536690.
+ *
+ * Finds the model behind @p handle in the world cache (cObjectInterface_getWorld: table by the low byte, entry by the
+ * rest); when part @p a exists in its skeleton (+0x80) and has a bone @p b, stores D_00536690 in the pose (+0x94) entry
+ * of that bone. @p self is not used. func_00303BA0 (a script command) calls it for its command 0.
+ *
+ * @param handle  the model's resource handle
+ * @param a  the skeleton part index
+ * @param b  the bone index within the part
+ */
 // Points bone b of part a of the model behind handle at the shared crowd pose.
 extern "C" void func_00229820(void* self, unsigned int handle, int a, int b)
 {
@@ -2116,6 +2217,18 @@ struct sCrowd_229910 {
 // PORT: callers declare func_00229910 as (void*, int, int); defined under an asm label.
 extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_229910 RID) __asm__("func_00229910");
 
+/**
+ * Places quad slot @p index on the crowd model of @p RID: keeps the id and derives the slot's centre and half-axes from
+ * the model's quad.
+ *
+ * Stores @p RID in the slot's id (+0x8). Gets the model's four corners (with texture coordinates and colours) from
+ * GrMan's GetMeshQuad (slot 97) and transforms them by the model's matrix (+0x10). The centre (+0x0) is corner 0 plus
+ * half of (corner 3 - corner 0), raised by 150 in z; the half-axes are 0.45 * (corner 2 - corner 0) (+0x10) and 0.45 *
+ * (corner 1 - corner 0) (+0x20). The model must exist: the lookup result is not checked.
+ *
+ * @param index  the quad slot (0-127)
+ * @param RID  the world resource id of the model
+ */
 // Places crowd quad index on the model behind RID: corner points from the renderer, then base/width/height.
 extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_229910 RID)
 {
@@ -2146,6 +2259,11 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229B90);
 #ifdef SKIP_ASM
+/**
+ * Frees quad slot @p slotIndex of the 2D crowd manager: sets its resource id (+0x8) to 0xFFFFFFFF.
+ *
+ * @param slotIndex  the slot (0-127)
+ */
 extern "C" void func_00229B90(void* self, int slotIndex)
 {
     ((unsigned int*)self)[slotIndex + 2] = 0xFFFFFFFFU;
@@ -2246,6 +2364,16 @@ struct sMarkers_229BA8 {
     sMarker_229BA8 markers[40];   // 0x2220
 };
 
+/**
+ * Draws each live crowd marker as a 100 x 100 white sprite.
+ *
+ * The first live marker (count at +0x10 of each 0x20-byte ring entry, from +0x2220) pushes a draw state reset to
+ * sDrawState_s_defaultDrawState, with GrMan's texture id entry 14 (+0x1054) as texture and its blend and test bits set.
+ * Each live marker is drawn with GrMan's DrawSprite (slot 78) at its position, texture coordinates (0, 0)-(1, 1) and
+ * colour (1, 1, 1, 1); the state is popped at the end. cGame_render calls it for CrowdMan2d.
+ *
+ * @param p  the 2D crowd manager
+ */
 extern "C" void func_00229BA8(void* p)
 {
     sMarkers_229BA8* self = (sMarkers_229BA8*)p;
@@ -2286,16 +2414,24 @@ extern "C" void func_00229BA8(void* p)
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229E20);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 class cSSXAppStream {
 public:
-    virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void write(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
+/**
+ * Saves the 2D crowd manager into a replay frame: writes its 128 resource ids (0x200 bytes at +0x8) with the stream's
+ * first virtual.
+ *
+ * cReplay_saveFrame calls it.
+ *
+ * @param s  the replay stream
+ */
 extern "C" void func_00229E20(void* self, cSSXAppStream* s)
 {
-    s->v01((char*)self + 0x8, 0x200);
+    s->write((char*)self + 0x8, 0x200);
 }
 #endif
 
@@ -2306,11 +2442,11 @@ extern "C" void func_00229398(void* self);
 extern "C" void func_002292E0(void* self);
 extern "C" void func_00229910(void* self, int slot, int a1);
 
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+// Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 class cSSXAppStream_229E58 {
 public:
-    virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void write(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 struct sCrowdId_229E58 {
@@ -2318,12 +2454,20 @@ struct sCrowdId_229E58 {
     sCrowdId_229E58() : id(0xFFFFFFFF) {}
 };
 
+/**
+ * Restores the 2D crowd manager from a replay frame: releases and resets every slot, reads 128 resource ids (0x200
+ * bytes) with the stream's second virtual and places each used one again (func_00229910).
+ *
+ * The slot delays restart at random values (func_002292E0). cReplay_restoreFrame calls it.
+ *
+ * @param s  the replay stream
+ */
 extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* s)
 {
     func_00229398(self);
     func_002292E0(self);
     sCrowdId_229E58 ids[128];
-    s->v02(ids, 0x200);
+    s->read(ids, 0x200);
     int i;
     for (i = 0; i < 128; i++) {
         if (ids[i].id != 0xFFFFFFFF) {
@@ -2336,7 +2480,16 @@ extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* s)
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229F30);
 #ifdef SKIP_ASM
-// Upload two 4x4 matrices (a, b) to VU0 data memory starting at qword 4 (address 0x40).
+/**
+ * Stores two 4x4 matrices in VU0 data memory, eight quadwords from the address 0x40 put in vi1.
+ *
+ * The matrices go in order, @p firstMatrix then @p secondMatrix, with vsqi (which advances vi1 by one quadword).
+ * func_0022ADD8 calls it with its two matrices before gathering the visible world.
+ *
+ * @param firstMatrix  the first 4x4 matrix (16-byte aligned)
+ * @param secondMatrix  the second 4x4 matrix (16-byte aligned)
+ */
+// Upload two 4x4 matrices (a, b) to VU0 data memory starting at quadword 0x40 (vi1 counts quadwords).
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own matrix store.
 extern "C" void func_00229F30(void* firstMatrix, void* secondMatrix)
 {
@@ -2369,6 +2522,9 @@ extern "C" void func_00229F30(void* firstMatrix, void* secondMatrix)
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229F80__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: func_0022ADD8 calls it right after func_00229F30.
+ */
 void func_00229F80(void* self)
 {
 }
@@ -2377,6 +2533,15 @@ void func_00229F80(void* self)
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229F88);
 #ifdef SKIP_ASM
+/**
+ * Stores a vector and a 4x4 matrix (five quadwords) in VU0 data memory at quadword 80 + 5 * @p index.
+ *
+ * func_002425C0 (movie player) calls it.
+ *
+ * @param index  the slot
+ * @param vector  the vector (16-byte aligned)
+ * @param matrix  the 4x4 matrix (16-byte aligned)
+ */
 // Upload a vector plus a 4x4 matrix (5 qwords) to VU0 data memory slot `index`,
 // starting at qword 0x50 + index * 5.
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own store.
@@ -2448,6 +2613,21 @@ static inline int visOk_9FC8(sVisOwner_9FC8 *self, char *node)
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
 extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustum) __asm__("func_00229FC8");
+/**
+ * Files the previously tested world node by its VU0 frustum result, then starts the test for @p vnode.
+ *
+ * Reads the last microprogram's result (cfc2 of vi1) and files the pending node (+0x50A4): result 0 or 3 appends it to
+ * the list at +0x20A0 (count +0x209C, 0x800 entries), 4 to the list at +0x40A4 (count +0x40A0, 0x400 entries), 1 or 2
+ * drops it. Then @p vnode becomes pending. A node is tested only when the low two bits of its flags (+0x8) are set and
+ * it is resident: its section byte (+0x7D) is 0xFF, or that section's state in the world cache's view is 6 and its hull
+ * page (+0x7E) is loaded (m_State 3), the cache being m_pWorldCache of the world at +0x90. Otherwise the call returns
+ * at once and the pending node waits for the next call. The test loads the node's box (+0x60 min, +0x6C max, w = 1) and
+ * the vector at +0x50 into vf20-vf22 and @p frustum into vi14, and starts the VU0 microprogram at 0xDB8 (vcallms).
+ * func_0022A368 calls it for each node, then once with null to file the last one.
+ *
+ * @param vnode  the node to test, or null to file the pending node
+ * @param frustum  the value put in vi14 for the microprogram
+ */
 extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustum)
 {
     char *node = (char *)vnode;
@@ -2545,6 +2725,18 @@ static inline int visOk_A128(sVisOwner_A128 *self, char *node)
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
 extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustum) __asm__("func_0022A128");
+/**
+ * Files the previously tested world node of the second kind by its VU0 frustum result, then starts the test
+ * for @p vnode.
+ *
+ * Same pipeline as func_00229FC8 with other offsets: the pending node is +0x78B0, result 0 or 3 appends it to the list
+ * at +0x50AC (count +0x50A8, 0x800 entries), 4 to the list at +0x70B0 (count +0x70AC, 0x200 entries). A node is tested
+ * only when its hull page (+0x156) is not negative, the state of its section (+0x155) is 6 and the page is loaded
+ * (m_State 3). The test uses the box at +0x158 / +0x164 and the vector at +0x140. func_0022A408 calls it.
+ *
+ * @param vnode  the node to test, or null to file the pending node
+ * @param frustum  the value put in vi14 for the microprogram
+ */
 extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustum)
 {
     char *node = (char *)vnode;
@@ -2622,6 +2814,16 @@ struct sVisOwner_A270 {
 // PORT: callers declare func_0022A270 with other pointer types; defined under an asm label.
 extern "C" void func_0022A270_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum) __asm__("func_0022A270");
 
+/**
+ * Files the previously tested object by its VU0 frustum result, then starts the test for @p obj.
+ *
+ * Same pipeline as func_00229FC8 without the residency checks: the pending object is +0x7AB8, result 0 or 3 appends it
+ * to the list at +0x78B8 (count +0x78B4), 4 to the list at +0x7AC0 (count +0x7ABC). The test uses the box at +0x68 /
+ * +0x74 and the vector at +0x50. func_0022A4A8 calls it for objects of type 7.
+ *
+ * @param obj  the object to test, or null to file the pending object
+ * @param frustum  the value put in vi14 for the microprogram
+ */
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
 // Files the previous object by the result of its test, then starts the test for this one.
@@ -2697,6 +2899,15 @@ struct sList_A368 {
     int vuFrustum;
 };
 
+/**
+ * Frustum-tests the nodes of each listed source with func_00229FC8, then files the last pending one.
+ *
+ * Each of the @p count 8-byte entries holds a source and a frustum value; the source's linked node list starts at +0x20
+ * (next link at +0x0). Ends with func_00229FC8(self, 0, 0) when a node is pending (+0x50A4). func_0022ADD8 calls it.
+ *
+ * @param list  the source entries
+ * @param count  the number of entries
+ */
 extern "C" void func_0022A368(void* self, sList_A368* list, int count)
 {
     for (; count > 0; count--, list++) {
@@ -2731,6 +2942,14 @@ struct sList_A408 {
     int vuFrustum;
 };
 
+/**
+ * Frustum-tests the nodes of each listed source with func_0022A128, then files the last pending one.
+ *
+ * Same as func_0022A368 with the list at +0x24 of each source and the pending node at +0x78B0. func_0022ADD8 calls it.
+ *
+ * @param list  the source entries
+ * @param count  the number of entries
+ */
 extern "C" void func_0022A408(void* self, sList_A408* list, int count)
 {
     for (; count > 0; count--, list++) {
@@ -2770,6 +2989,17 @@ struct sWorld_22A4A8 {
     sNode_22A4A8* nodes[1];
 };
 
+/**
+ * Sorts the objects of each listed source: type 7 is frustum-tested (func_0022A270), type 8 goes straight into the list
+ * at +0x7BC4 (count +0x7BC0).
+ *
+ * Walks the linked list at +0x28 of each of the @p n 8-byte entries (source, frustum value); the type is at +0x8 of
+ * each object. Other types are skipped. Ends with func_0022A270(self, 0, 0) when an object is pending (+0x7AB8).
+ * func_0022ADD8 calls it.
+ *
+ * @param items  the source entries
+ * @param n  the number of entries
+ */
 extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
 {
     for (; n > 0; n--, items++) {
