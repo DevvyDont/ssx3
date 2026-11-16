@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ai/computer.h"
 #include "world/world.h"
 #include "main/ssxapp.h"
@@ -2908,13 +2909,13 @@ INCLUDE_ASM("seg/seg_1218", func_00104CC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00289B18_4CC8(int, int, int) __asm__("func_00289B18");
-extern int gSSXAudio;
+extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
 
 extern "C" void func_00104CC8(void *arg0, int arg1) {
     int temp_2 = (*(int *)((char*)(arg0) + (0x60)));
     int s = arg1 & 0xFFFF;
     if (temp_2 != 0) {
-        func_00289B18_4CC8(gSSXAudio, temp_2, s);
+        func_00289B18_4CC8(gSSXAudio_seg_1218, temp_2, s);
     }
 }
 #endif

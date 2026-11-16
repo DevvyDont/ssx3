@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "online/commsystem.h"
@@ -1577,7 +1578,6 @@ INCLUDE_ASM("main/ssxapp", func_00229530);
 #ifdef SKIP_ASM
 unsigned int BXrand();
 extern "C" int func_002A77C8(void* self, int a1);
-extern void* gSSXAudio;
 struct sRingOwner;
 struct sQuad229;
 extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value);

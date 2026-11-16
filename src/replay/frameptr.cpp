@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/replay.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -554,20 +555,20 @@ struct cReplayFramePtr_F180 {
 };
 
 extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size);
-extern "C" void cReplay_reset(void* self);
+extern "C" void cReplay_reset(cReplay* self);
 void cReplay_setReplayState(void* self, int state);
 
-extern "C" void cReplay_init(cReplayFramePtr_F180* self)
+extern "C" void cReplay_init(cReplay* self)
 {
-    self->blockSize = 0x14000;
-    self->numBlocks = 0xC9800 / self->blockSize;
-    self->field_0x18 = 0;
+    self->FrameBlockSize = 0x14000;
+    self->MaxFrames = 0xC9800 / self->FrameBlockSize;
+    self->SaveFrameTicks = 0;
     int i = 0;
     do {
-        cReplayFramePtr_initBlock(&self->blocks[i], self->blockSize);
+        cReplayFramePtr_initBlock(&((sReplayBlock_F180*)&self->Frames[0])[i], self->FrameBlockSize);
         i++;
-    } while (i < self->numBlocks);
-    cReplay_setReplayState(self, 10);
+    } while (i < self->MaxFrames);
+    cReplay_setReplayState(((cReplayFramePtr_F180*)self), 10);
     cReplay_reset(self);
 }
 #endif
@@ -587,59 +588,58 @@ struct sFpSlot_F228 {
     int fB0;
 };
 
-extern "C" void cReplay_reset(void* self)
+extern "C" void cReplay_reset(cReplay* self)
 {
-    char* s = (char*)self;
-    unsigned int st = *(int*)s - 14;
+    unsigned int st = self->State - 14;
     bool b = !(st < 2);
     if (!b) return;
     func_0026F498(self);
     int i = 0;
-    char* l0 = s + 0x3B0;
-    char* l1 = s + 0x3BC;
+    char* l0 = ((char*)self) + 0x3B0;
+    char* l1 = ((char*)self) + 0x3BC;
     int none = -1;
-    *(int*)(s + 0x4) = 15;
+    self->SaveState = 15;
     cReplay_setReplayState(self, 10);
-    *(int*)(s + 0x60C) = 0;
-    *(int*)(s + 0x610) = 0;
-    *(int*)(s + 0x614) = 0;
-    *(int*)(s + 0x628) = 0;
-    *(int*)(s + 0x62C) = 0;
-    *(int*)(s + 0x28) = 0;
-    *(int*)(s + 0x608) = 0;
-    *(int*)(s + 0x484) = 0;
-    *(int*)(s + 0x3C8) = 0;
-    *(int*)(s + 0x3CC) = 0;
-    *(int*)(s + 0x488) = 0;
-    *(int*)(s + 0x3D4) = 0;
-    *(int*)(s + 0x3AC) = 0;
-    *(int*)(s + 0x3D0) = 0;
-    *(int*)(s + 0x1C) = 0;
-    *(int*)(s + 0x20) = 0;
-    *(int*)(s + 0x618) = 0;
-    *(int*)(s + 0x61C) = 0;
-    *(int*)(s + 0x620) = 0;
-    *(int*)(s + 0x624) = 0;
-    *(int*)(s + 0x63C) = 0;
-    *(int*)(s + 0x650) = 0;
-    *(int*)(s + 0x640) = 0;
-    *(int*)(s + 0x644) = 0;
-    *(int*)(s + 0x648) = 0;
-    *(int*)(s + 0x638) = 0;
-    *(int*)(s + 0x64C) = 0;
-    *(int*)(s + 0x654) = 0;
-    *(int*)(s + 0x658) = 0;
-    *(int*)(s + 0x65C) = 0;
-    *(int*)(s + 0x660) = 0;
-    *(int*)(s + 0x664) = 0;
-    *(int*)(s + 0x66C) = 0;
-    *(int*)(s + 0x674) = 0;
-    *(int*)(s + 0x678) = 0;
-    *(int*)(s + 0x67C) = 0;
-    *(int*)(s + 0x668) = 0;
-    sFpSlot_F228* e = (sFpSlot_F228*)(s + 0x494);
-    char* d = s + 0x498;
-    void** pp = (void**)(s + 0x48C);
+    self->EndReplay = 0;
+    self->ReplayError = 0;
+    self->ShowError = 0;
+    self->PauseRecord = 0;
+    self->PauseRecordTick = 0;
+    self->PadNum = 0;
+    self->Loaded = 0;
+    self->PlaybackTick = 0;
+    self->RecordTick = 0;
+    self->EndRecordTick = 0;
+    self->PlaybackFrame = 0;
+    self->InstantReplayFrame = 0;
+    self->NextCandidate = 0;
+    self->SaveFrame = 0;
+    self->SkipFrameTicks = 0;
+    self->SkipFrame = 0;
+    self->Cmd = 0;
+    self->AutoReplay = 0;
+    self->InstantReplay = 0;
+    self->StartInstantReplay = 0;
+    self->WriteBlock = 0;
+    self->WriteData = 0;
+    self->WriteTmp = 0;
+    self->WriteSrc = 0;
+    self->WriteSrcSize = 0;
+    self->WriteState = 0;
+    self->WriteSize = 0;
+    self->WriteIndex = 0;
+    self->WriteIndexMax = 0;
+    self->WriteFrame = 0;
+    self->WriteBlockData = 0;
+    self->WriteBlockDataSize = 0;
+    self->WriteCmdFrame = 0;
+    self->WriteCacheSave = 0;
+    self->WriteSaveSize = 0;
+    self->WriteRemaining = 0;
+    self->WriteFrameCount = 0;
+    sFpSlot_F228* e = (sFpSlot_F228*)(((char*)self) + 0x494);
+    char* d = ((char*)self) + 0x498;
+    void** pp = (void**)(((char*)self) + 0x48C);
     do {
         if (*pp) func_0026D168(*pp);
         e->fB0 = 0;
@@ -653,18 +653,18 @@ extern "C" void cReplay_reset(void* self)
     } while (i < 2);
     func_0026E5C0(l0);
     func_0026E5C0(l1);
-    for (i = 0; i < *(int*)(s + 8); i++) {
-        func_0026E5D0(l1, s + 0x2C + i * 0x38);
+    for (i = 0; i < self->MaxFrames; i++) {
+        func_0026E5D0(l1, ((char*)self) + 0x2C + i * 0x38);
     }
     int three = 3;
-    *(int*)(s + 0x630) = 0;
-    *(int*)(s + 0x634) = 0;
+    self->CurrentReplayCamIndex = 0;
+    self->CurrentInstantReplayCamIndex = 0;
     if (*(int*)((char*)SSXApp->Game->AI + 0x7C) == 1) {
-        *(int*)(s + 0xC) = three;
-        *(int*)(s + 0x10) = three;
+        self->MaxPlayerHighlights = three;
+        self->MaxChapters = three;
     } else {
-        *(int*)(s + 0xC) = 1;
-        *(int*)(s + 0x10) = 0;
+        self->MaxPlayerHighlights = 1;
+        self->MaxChapters = 0;
     }
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "ai/ai.h"
 #include "be/beintnewrace.h"
@@ -4289,7 +4290,6 @@ extern "C" void func_0012EE30(void*, void*);
 extern "C" void func_00294170(void* self, void* rider);
 extern "C" int func_00311AE8(void*, int);
 int func_00312AA0(void* self, int i);
-extern void* gSSXAudio;
 extern char D_0043D840[];
 extern char D_0043D788[];
 
@@ -5466,7 +5466,6 @@ extern "C" void func_00294170(void* self, void* rider);
 // PORT: prototype mismatch. func_0011FEC8/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
-extern void* gSSXAudio;
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_1307B8(float x)

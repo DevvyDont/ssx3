@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/rigidbody.h"
+#include "object/rollermodifier.h"
 #include "render/ps2graphicsman.h"
 #include "object/instancenode.h"
 
@@ -1279,7 +1281,7 @@ public:
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void cRigidBody_writeToReplayFrame(void* self, cRigidBody_writeToReplayFrame_cObj* obj)
+extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cRigidBody_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 0x50);
 }
@@ -1443,40 +1445,40 @@ static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int
     *w = (*w & mask) | bits;
 }
 
-extern "C" char* cRollerModifier_cRollerModifier(char* self, char* a1, char* a2, char* a3)
+extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* a1, char* a2, char* a3)
 {
-    float* timing = (float*)(self + 0x4);
+    float* timing = (float*)(((char*)self) + 0x4);
     *(void***)self = D_004913F8;
-    func_0035CFE8(self + 0x30);
+    func_0035CFE8(((char*)self) + 0x30);
     *(void***)self = cRollerModifier_vtbl;
-    func_0032C508(self + 0xE0);
-    *(int*)(self + 0x20) = 0;
-    *(int*)(self + 0xD0) = *(int*)(a2 + 0x50);
-    func_00327CC8(self + 0xE0, *(void**)(a2 + 0x48));
-    *(float*)(self + 0x8) = *(float*)(a1 + 0x4);
-    char* t = *(char**)(self + 0x178);
-    *(float*)(self + 0xC) = *(float*)(a1 + 0x8);
-    *(float*)(self + 0x70) = 1.0f / timing[1];
+    func_0032C508(((char*)self) + 0xE0);
+    *(int*)&self->Life = 0;
+    self->m_pInstance = (tInstanceRecord*)(*(int*)(a2 + 0x50));
+    func_00327CC8(((char*)self) + 0xE0, *(void**)(a2 + 0x48));
+    self->mMass = *(float*)(a1 + 0x4);
+    char* t = (char*)self->SphTree.treeInfo;
+    self->mElast = *(float*)(a1 + 0x8);
+    self->InvM = 1.0f / timing[1];
     sRmVec4 v;
     v.x = *(float*)(t + 0x2C);
     v.y = *(float*)(t + 0x30);
     v.z = *(float*)(t + 0x34);
     v.w = 0.0f;
-    *(sRmVec4*)(self + 0x2B0) = v;
-    *(sRmMat33*)(self + 0x280) = *(sRmMat33*)(t + 0x5C);
-    ((sRmMat33*)(self + 0x280))->m[0][0] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[0][1] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[0][2] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[1][0] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[1][1] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[1][2] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[2][0] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[2][1] *= 0.5f;
-    ((sRmMat33*)(self + 0x280))->m[2][2] *= 0.5f;
-    sXf_DA70 x = func_0031B748(*(char**)(self + 0xD0) + 0x10);
+    *(sRmVec4*)&self->COMOffset = v;
+    *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)(t + 0x5C);
+    ((sRmMat33*)(((char*)self) + 0x280))->m[0][0] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[0][1] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[0][2] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[1][0] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[1][1] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[1][2] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[2][0] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[2][1] *= 0.5f;
+    ((sRmMat33*)(((char*)self) + 0x280))->m[2][2] *= 0.5f;
+    sXf_DA70 x = func_0031B748((char*)self->m_pInstance + 0x10);
     {
         sRmVec4 r1;
-        QuatRotTo_DA70(r1, x.quat, *(sRmVec4*)(self + 0x2B0));
+        QuatRotTo_DA70(r1, x.quat, *(sRmVec4*)&self->COMOffset);
         v = r1;
         sRmVec4 b;
         sRmVec4 r2;
@@ -1484,20 +1486,20 @@ extern "C" char* cRollerModifier_cRollerModifier(char* self, char* a1, char* a2,
         b = r2;
         AddTo_DA70(x.pos, b);
     }
-    *(sXf_DA70*)(self + 0x30) = x;
-    sXf_DA70 y = func_0035E770_DA70(self);
-    QuatPosToMtx_DA70(self + 0x240, y.quat, y.pos);
-    func_0035E248(self);
-    func_0035D288((sRmBody*)(self + 0x30));
-    *(float*)(self + 0x14) = 0.10000000149011612f;
-    *(float*)(self + 0x18) = 0.4000000059604645f;
-    *(float*)(self + 0x1C) = 277.77777099609375f;
-    *(int*)(self + 0x10) = 0;
-    SetBits_DA70((unsigned int*)(*(char**)(self + 0xD0) + 0x8), 0xFFFFFFDFu, 0x40);
-    SetBits_DA70((unsigned int*)(*(char**)(self + 0xD0) + 0x8), 0xFFFFFFFDu, 0x4);
-    *(unsigned int*)(*(char**)(self + 0xD0) + 0x8) |= 0x1;
-    cRollerModifier_Collision_DA70(self, a3, a2);
-    return self;
+    *(sXf_DA70*)&self->Pose = x;
+    sXf_DA70 y = func_0035E770_DA70(((char*)self));
+    QuatPosToMtx_DA70(((char*)self) + 0x240, y.quat, y.pos);
+    func_0035E248(((char*)self));
+    func_0035D288((sRmBody*)(((char*)self) + 0x30));
+    self->ContactElastic = 0.10000000149011612f;
+    self->ContactFriction = 0.4000000059604645f;
+    self->StopContactSpeed = 277.77777099609375f;
+    *(int*)&self->ViscousDrag = 0;
+    SetBits_DA70((unsigned int*)((char*)self->m_pInstance + 0x8), 0xFFFFFFDFu, 0x40);
+    SetBits_DA70((unsigned int*)((char*)self->m_pInstance + 0x8), 0xFFFFFFFDu, 0x4);
+    *(unsigned int*)((char*)self->m_pInstance + 0x8) |= 0x1;
+    cRollerModifier_Collision_DA70(((char*)self), a3, a2);
+    return ((char*)self);
 }
 #endif
 
@@ -1759,7 +1761,7 @@ public:
 
 extern "C" void func_0035E1E0(void* self, func_0035E1E0_cObj* obj)
 {
-    cRigidBody_writeToReplayFrame((char*)self + 0x30, (cRigidBody_writeToReplayFrame_cObj*)obj);
+    cRigidBody_writeToReplayFrame((cRigidBody*)((char*)self + 0x30), (cRigidBody_writeToReplayFrame_cObj*)obj);
     obj->v01((char*)self + 0x4, 0x28);
     obj->v05(*(void**)((char*)self + 0xD0));
 }
@@ -2187,7 +2189,7 @@ static inline void setOutDirEDC8(sRailEDC8* r, const sRmVec4& v)
     r->body.outDir = v;
 }
 
-extern "C" void cRollerModifier_collide(sRailEDC8* self)
+extern "C" void cRollerModifier_collide(cRollerModifier* self)
 {
     sHitEDC8 hit;
     char tree[0x70];
@@ -2199,20 +2201,20 @@ extern "C" void cRollerModifier_collide(sRailEDC8* self)
         sRmVec4 push = vu0ScaleEDC8(hit.normal, d + 2.0f);
         func_0035ED90((sRmBody*)self, &push);
         float k = 0.975f;
-        setPosEDC8(self, vu0ScaleEDC8(self->body.pos, k));
-        setOutDirEDC8(self, vu0ScaleEDC8(self->body.outDir, k));
-        float dp = vu0DotEDC8(vu0AddEDC8(self->body.outDir, vu0CrossEDC8(self->body.outPos, vu0SubEDC8(hit.pos, *(sRmVec4*)&self->body))), hit.normal);
+        setPosEDC8(((sRailEDC8*)self), vu0ScaleEDC8((*(sRmVec4*)&self->L), k));
+        setOutDirEDC8(((sRailEDC8*)self), vu0ScaleEDC8((*(sRmVec4*)&self->V), k));
+        float dp = vu0DotEDC8(vu0AddEDC8((*(sRmVec4*)&self->V), vu0CrossEDC8((*(sRmVec4*)&self->W), vu0SubEDC8(hit.pos, *(sRmVec4*)&(*(sRmBody*)&self->Pose)))), hit.normal);
         if (dp < zero) {
-            float lim = self->f1C;
-            float len = vu0LengthEDC8(self->body.outDir);
-            float a = self->f14;
-            float c = self->f18;
+            float lim = self->StopContactSpeed;
+            float len = vu0LengthEDC8((*(sRmVec4*)&self->V));
+            float a = self->ContactElastic;
+            float c = self->ContactFriction;
             if (len < lim)
                 a = zero;
-            func_0035D4A0_EDC8(&self->body, &hit, &hit.normal, a, c);
-            self->f28 += 0.016666668f;
-            if (5.0f < self->f20)
-                self->f20 = 10.0f;
+            func_0035D4A0_EDC8(&(*(sRmBody*)&self->Pose), &hit, &hit.normal, a, c);
+            self->HitFrequency += 0.016666668f;
+            if (5.0f < self->Life)
+                self->Life = 10.0f;
         }
     }
     func_003304E8(tree, 2);
@@ -6132,7 +6134,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier__cRollerModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void cRollerModifier__cRollerModifier(void* self, int flags)
+extern "C" void cRollerModifier__cRollerModifier(cRollerModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -6158,9 +6160,9 @@ int cRollerModifier_shouldRebound(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_isComplete);
 #ifdef SKIP_ASM
-extern "C" int cRollerModifier_isComplete(void* self)
+extern "C" int cRollerModifier_isComplete(cRollerModifier* self)
 {
-    return *(float*)((char*)self + 0x20) >= 17.0f;
+    return self->Life >= 17.0f;
 }
 #endif
 
@@ -6193,10 +6195,10 @@ int cRollerModifier_runCollide(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cRollerModifier_setBoundBox(void* self, void* a1)
+extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, void* a1)
 {
-    *(cQuad128*)((char*)self + 0x220) = *(cQuad128*)a1;
-    *(cQuad128*)((char*)self + 0x230) = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->boundbox = *(cQuad128*)a1;
+    *(cQuad128*)&self->boundbox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
 }
 #endif
 

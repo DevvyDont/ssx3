@@ -1157,7 +1157,7 @@ INCLUDE_ASM("render/font", func_00393FB8);
 #ifdef SKIP_ASM
 extern "C" void func_00393FB8(cPS2GraphicsMan* self, int a1, int a2)
 {
-    *(float*)self = (float)a1;
+    self->m_screenOffset[0] = (float)a1;
     self->m_screenOffset[1] = (float)a2;
 }
 #endif
@@ -1167,7 +1167,7 @@ INCLUDE_ASM("render/font", func_00393FD8);
 #ifdef SKIP_ASM
 extern "C" int func_00393FD8(cPS2GraphicsMan* self)
 {
-    return (int)*(float*)self;
+    return (int)self->m_screenOffset[0];
 }
 #endif
 

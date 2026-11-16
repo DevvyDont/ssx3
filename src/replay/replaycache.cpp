@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/replay.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -9,7 +10,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0026D0A0(void* self);
 extern const char D_004817B0[];
 
-extern "C" void* cReplay_addCache(void* self)
+extern "C" void* cReplay_addCache(cReplay* self)
 {
     void** slot = (void**)((char*)self + 0x48C);
     for (int i = 0; i < 2; i++, slot++) {

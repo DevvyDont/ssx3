@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -778,7 +779,6 @@ extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int arg)
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B180);
 #ifdef SKIP_ASM
-extern void* gSSXAudio;
 
 extern "C" void* func_0028B180()
 {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "main/sectionman.h"
@@ -506,7 +507,6 @@ struct sGame_C830 {
 };
 
 extern char gBucketMan[4];
-extern void* gSSXAudio;
 extern void* gWorldTriggerManager;
 extern char t4mat_Identity[];
 extern int D_004A4324;

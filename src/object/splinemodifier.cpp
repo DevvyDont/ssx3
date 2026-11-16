@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/railmodifier.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -2090,19 +2091,19 @@ static inline void grow_B708(sSmBox_B708& box, float d)
     addEq_B708(box.max, pad);
 }
 
-extern "C" char* cRailModifier_cRailModifier(char* self, sSmDesc_B708* desc, sSmModel_B708* model)
+extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* desc, sSmModel_B708* model)
 {
-    sSmBox_B708* box = (sSmBox_B708*)(self + 0x10);
-    *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
-    *(void**)(self + 0x8) = cRailModifier_vtbl;
-    *(void**)(self + 0x0) = 0;
-    *(void**)(self + 0x4) = 0;
-    *(sSmModel_B708**)(self + 0x40) = model;
-    *(unsigned int*)(self + 0x30) = desc->id;
-    *(int*)(self + 0x34) = desc->f8;
+    sSmBox_B708* box = (sSmBox_B708*)(((char*)self) + 0x10);
+    self->SplineId = 0xFFFFFFFF;
+    self->mVtbl = (void**)cRailModifier_vtbl;
+    self->Next = 0;
+    self->Prev = 0;
+    self->Instance = (tInstanceRecord*)model;
+    self->SplineId = desc->id;
+    self->Mesh = desc->f8;
     sSmModelObj_B708* o = model->obj;
     if (o->vt[44].fn((char*)o + o->vt[44].delta) == 0) {
-        sSmModel_B708* m = *(sSmModel_B708**)(self + 0x40);
+        sSmModel_B708* m = (sSmModel_B708*)self->Instance;
         sSmBox_B708 b;
         b.min.x = m->minx;
         b.min.y = m->miny;
@@ -2112,19 +2113,19 @@ extern "C" char* cRailModifier_cRailModifier(char* self, sSmDesc_B708* desc, sSm
         b.max.y = m->maxy;
         b.max.z = m->maxz;
         b.max.w = 1.0f;
-        setBox_B708(self, b);
+        setBox_B708(((char*)self), b);
         sSmVec4_B708 pad;
         pad.x = 100.0f;
         pad.y = 100.0f;
         pad.z = 100.0f;
         pad.w = 0.0f;
-        subEq_B708(((sSmBox_B708*)(self + 0x10))->min, pad);
-        addEq_B708(((sSmBox_B708*)(self + 0x10))->max, pad);
+        subEq_B708(((sSmBox_B708*)(((char*)self) + 0x10))->min, pad);
+        addEq_B708(((sSmBox_B708*)(((char*)self) + 0x10))->max, pad);
     }
-    cRailModifier_buildXform(self);
+    cRailModifier_buildXform(((char*)self));
     cRailModifier_updateBoundBox((sSmMod_C040*)self);
-    insert_B708((char*)cObjectInterface_getNash(), *(void**)(self + 0x44), box);
-    sSmTrack_B708* t = ((sSmRef_B708*)(self + 0x30))->get();
+    insert_B708((char*)cObjectInterface_getNash(), self->Node, box);
+    sSmTrack_B708* t = ((sSmRef_B708*)(((char*)self) + 0x30))->get();
     sSmSeg_B708* seg = t->first;
     for (int i = 0; i < t->count; i++) {
         sSmBox_B708 b;
@@ -2139,7 +2140,7 @@ extern "C" char* cRailModifier_cRailModifier(char* self, sSmDesc_B708* desc, sSm
         remove_B708((char*)cObjectInterface_getNash(), seg, &b);
         seg = seg->next;
     }
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -2270,17 +2271,17 @@ struct sSmRef_BA88 {
     }
 };
 
-extern "C" char* cRailModifier_cRailModifier1(char* self, cSmStream_BA88* src)
+extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cSmStream_BA88* src)
 {
-    *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
-    *(void**)(self + 0x8) = cRailModifier_vtbl;
-    *(void**)(self + 0x0) = 0;
-    *(void**)(self + 0x4) = 0;
-    src->v02(self + 0x10, 0x30);
-    *(int*)(self + 0x40) = src->v03();
-    cRailModifier_buildXform(self);
-    insert_BA88((char*)cObjectInterface_getNash(), *(void**)(self + 0x44), (sSmBox_BA88*)(self + 0x10));
-    sSmTrack_BA88* t = ((sSmRef_BA88*)(self + 0x30))->get();
+    self->SplineId = 0xFFFFFFFF;
+    self->mVtbl = (void**)cRailModifier_vtbl;
+    self->Next = 0;
+    self->Prev = 0;
+    src->v02(((char*)self) + 0x10, 0x30);
+    self->Instance = (tInstanceRecord*)src->v03();
+    cRailModifier_buildXform(((char*)self));
+    insert_BA88((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BA88*)(((char*)self) + 0x10));
+    sSmTrack_BA88* t = ((sSmRef_BA88*)(((char*)self) + 0x30))->get();
     sSmSeg_BA88* seg = t->first;
     for (int i = 0; i < t->count; i++) {
         sSmBox_BA88 b;
@@ -2295,7 +2296,7 @@ extern "C" char* cRailModifier_cRailModifier1(char* self, cSmStream_BA88* src)
         remove_BA88((char*)cObjectInterface_getNash(), seg, &b);
         seg = seg->next;
     }
-    return self;
+    return ((char*)self);
 }
 #endif
 

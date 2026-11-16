@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ai/computer.h"
 #include "ai/player.h"
 #include "main/game.h"
@@ -2427,7 +2428,6 @@ int func_0011FEE8(void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
 void cRider_setMotionState_impl_BFA8(void* rider, int v) __asm__("cRider_setMotionState__FPv");
-extern char* gSSXAudio;
 
 struct sTbl_BFA8 {
     int v[4];
@@ -2498,7 +2498,7 @@ extern "C" void func_0013BFA8(void* self)
     func_00107888(RIDER_BFA8);
     if (*(int*)((char*)self + 0x20) != 0 && func_0011FE98(RIDER_BFA8) == 4) {
         cRider_setMotionState_impl_BFA8(RIDER_BFA8, 1);
-        func_00294170(gSSXAudio, RIDER_BFA8);
+        func_00294170((char*)gSSXAudio, RIDER_BFA8);
     }
     char* r = RIDER_BFA8;
     float len = vu0Length_BFA8(*(sVec4_BFA8*)(r + 0x1E0));
@@ -4161,7 +4161,6 @@ extern "C" void func_00294170(void* snd, void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
 void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
-extern char* gSSXAudio;
 extern int D_004A115C;
 
 struct sInfo_13F178 {
@@ -4299,7 +4298,7 @@ extern "C" void func_0013F178(void* self)
     func_00107888(RIDER_13F178);
     if (*(int*)((char*)self + 0xC) != 0 && func_0011FE98(RIDER_13F178) == 0) {
         cRider_setMotionState_impl_13F178(RIDER_13F178, 1);
-        func_00294170(gSSXAudio, RIDER_13F178);
+        func_00294170((char*)gSSXAudio, RIDER_13F178);
     }
     char* r = RIDER_13F178;
     *(sVec4HP*)(r + 0x390) = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)(r + 0x370), 0.5f)));

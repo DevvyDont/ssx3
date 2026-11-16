@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
@@ -91,7 +92,6 @@ extern "C" void* func_002F0390();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
-extern void* gSSXAudio;
 extern int D_004A1228;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
@@ -589,7 +589,6 @@ extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void func_0036A290(void);
 
 extern void* gWorldTriggerManager;
-extern void* gSSXAudio;
 extern int D_004A2A54;
 extern char* D_004A5B64;
 extern char D_004D33A0[];
@@ -777,7 +776,6 @@ extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
 extern void* gWorldTriggerManager;
-extern void* gSSXAudio;
 extern void* cOVStateManager_mpPDATemplate;
 extern cMgr230050* D_004A4248;
 extern int D_004A43C8;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/replay.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -720,7 +721,7 @@ extern "C" int func_0026D178(void* self, int a1)
         return 0;
     }
     int r = 1;
-    switch (*(int*)SSXApp->Game->Replay) {
+    switch (SSXApp->Game->Replay->State) {
     case 0: {
         char* g = (char*)SSXApp->Game->Replay;
         if (*(int*)(g + 0x60C) != 0 || *(int*)(g + 0x608) != 0 || *(int*)(g + 0x610) != 0) {
@@ -1079,7 +1080,7 @@ struct sPbBytes4D760 {
 };
 
 extern "C" void* func_00270130(void* self);
-extern "C" void cReplay_saveFrame(void* self, void* out);
+extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 // PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
 // argument; bind the 2-arg form to the symbol.
 void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
@@ -1088,7 +1089,7 @@ extern "C" void* func_0026D760(void* self, sPbBytes4D760* src)
 {
     void* out = func_00270130(self);
     *(sPbBytes4D760*)((char*)out + 0x1C) = *src;
-    cReplay_saveFrame(self, out);
+    cReplay_saveFrame((cReplay*)self, out);
     *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
     func_0026ED88_2(out, 0);
     return out;
@@ -1102,12 +1103,12 @@ struct sPbBytes4 {
     char b[4];
 };
 
-extern "C" void cReplay_saveFrame(void* self, void* out);
+extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 
 extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src)
 {
     *(sPbBytes4*)((char*)out + 0x1C) = *src;
-    cReplay_saveFrame(self, out);
+    cReplay_saveFrame((cReplay*)self, out);
     *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
 }
 #endif
@@ -1180,7 +1181,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
     return *(cPbWorld**)((char*)o + 0xC);
 }
 
-extern "C" void cReplay_saveFrame(void* self, void* stream)
+extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
 {
     cPbStream* out = (cPbStream*)stream;
     sPbTime t;
@@ -1317,7 +1318,7 @@ INCLUDE_ASM("replay/playbackman", cReplay_restoreFrame1);
 /**
  * Thin wrapper that restores a replay frame through cReplay_restoreFrame().
  */
-extern "C" void cReplay_restoreFrame1(void* self)
+extern "C" void cReplay_restoreFrame1(cReplay* self)
 {
     cReplay_restoreFrame(self);
 }

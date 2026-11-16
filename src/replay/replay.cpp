@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/replay.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -29,8 +30,8 @@ extern "C" void func_0030BD20(void* self, void* stream);
 extern "C" void func_00229E58(void* self, void* stream);
 extern "C" void func_00344240(void* self, void* stream);
 extern "C" void func_00357D28(void* self, void* stream);
-extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* stream);
-extern "C" void cReplay_restoreDeadBucket(void* self, cStreamRDB* stream);
+extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream);
+extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream);
 extern "C" void func_00103578(void* self, void* stream);
 extern "C" void func_0026DE58(void* self, int a);
 extern "C" void func_0012B788(void* self);
@@ -45,7 +46,7 @@ extern int D_004A5B7C;
 
 struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
 
-extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
+extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
 {
     void* bm = &gBucketMan;
     cBucketMan_mergeBucket(bm, (void*)1);
@@ -93,11 +94,11 @@ public:
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void cReplay_restoreObject(void* self, void* bucket, cStreamRB* stream);
+extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* stream);
 extern "C" void cBucketMan_mergeBucket(void* mgr, void* bucket);
 extern char gBucketMan;
 
-extern "C" void cReplay_restoreBucket(void* self, void* bucket, cStreamRB* stream)
+extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream)
 {
     struct {
         int count;
@@ -191,7 +192,7 @@ struct sObj_RO { int pad[3]; sVE_RO* vt; };
 extern "C" sObj_RO* func_00350B98_RO(void* self, void* bucket, void* stream) __asm__("func_00350B98");
 
 // Recreates a replay object of the recorded type and links it into the bucket.
-extern "C" void cReplay_restoreObject(void* self, void* bucket, cStreamRB* stream)
+extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* stream)
 {
     switch (cReplayFramePtr_peekObjNodeType(stream)) {
     case 0:
@@ -312,7 +313,7 @@ struct sRdbRef {
     }
 };
 
-extern "C" void cReplay_restoreDeadBucket(void* self, cStreamRDB* stream)
+extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
 {
     struct {
         int count;
