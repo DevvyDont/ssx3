@@ -1868,7 +1868,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 INCLUDE_ASM("fe/debugfe", cDebugFE_gainFocus);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_00369FF8(void* p);
+extern "C" void cGraphicsMan_UploadTextures(void* p);
 extern int D_004A4324;
 struct sVec3K17FA60 {
     int x, y, z;
@@ -1879,13 +1879,13 @@ typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
 /**
  * Gives the debug front end focus: uploads the textures, clears D_004A4324 and sets a black clear colour.
  *
- * Calls func_00369FF8 (On Tour cGraphicsMan::UploadTextures), then GrMan's slot 15 (SetClearColor) with (0, 0, 0).
+ * Calls cGraphicsMan_UploadTextures (On Tour cGraphicsMan::UploadTextures), then GrMan's slot 15 (SetClearColor) with (0, 0, 0).
  */
 extern "C" void cDebugFE_gainFocus(void* self)
 {
     char* m;
     char* vt;
-    func_00369FF8((char*)GrMan);
+    cGraphicsMan_UploadTextures((char*)GrMan);
     D_004A4324 = 0;
     m = (char*)GrMan;
     vt = *(char**)(m + 0x10D8);

@@ -4,12 +4,12 @@
 // cPS2GraphicsMan: the PS2 renderer (one instance). It owns the matrix/viewport stacks, the projective textures,
 // the deferred draw list (cPS2DeferManager), the texture manager, the VIF/GIF double buffers and the DMA kick thread
 // that flips the frame. Size 0x75E0: cMemMan_alloc(0x75E0, "PS2GraphicsMan") + cPS2GraphicsMan ctor func_00395288 in
-// its create function func_00375A08. Base class cGraphicsMan (ctor func_003691F8, dtor func_003695D8, vtable
+// its create function func_00375A08. Base class cGraphicsMan (ctor func_003691F8, dtor cGraphicsMan__cGraphicsMan, vtable
 // D_00493950): its data is 0x0-0x10D8 and it declares the virtuals, so the vptr is at +0x10D8 (cPS2GraphicsMan's
 // vtable D_00493260, 124 slots, stored by func_00395288). EA paths (preview asserts): source/render/graphicsman.cpp,
 // source/render/graphicsman.h, source/render/ps2graphicsman.cpp/.h.
 // Instance: cGraphicsMan::TheGraphicsMan = cGraphicsMan_TheGraphicsMan (gp+0x2A90), stored by the cGraphicsMan ctor (func_003691F8)
-// and cleared by its dtor (func_003695D8); every holder points at this cPS2GraphicsMan.
+// and cleared by its dtor (cGraphicsMan__cGraphicsMan); every holder points at this cPS2GraphicsMan.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
 //   [R] retail's constructors (func_003691F8, func_00395288), Init (vtable slot 2, func_00375A40) and the allocation;
@@ -62,22 +62,22 @@ struct tTVDisplayFormat {
 
 // One projective texture (0xA0). [P] GetProjTexInfo(i) = self + 0x13F0 + i * 0xA0; the members follow
 // cGraphicsMan::AddProjectiveTexture(const t4Vector&, const t4Matrix&, const t4Matrix&, float, int), which
-// func_0037D758 (cPS2GraphicsMan's override) copies in order. EA's type name is not known.
+// cPS2GraphicsMan_AddProjectiveTexture (cPS2GraphicsMan's override) copies in order. EA's type name is not known.
 struct tProjTexInfo {
-    t4Vector unk_00;                // 0x00 [U] func_0037D758 (first argument)
-    t4Matrix unk_10;                // 0x10 [U] func_0037D758 (second argument); passed to slot 93 by func_0037DF88
-    t4Matrix unk_50;                // 0x50 [U] func_0037D758 (third argument)
-    float unk_90;                   // 0x90 [U] func_0037D758 (float argument)
-    int unk_94;                     // 0x94 [U] func_0037D758 (int argument)
+    t4Vector unk_00;                // 0x00 [U] cPS2GraphicsMan_AddProjectiveTexture (first argument)
+    t4Matrix unk_10;                // 0x10 [U] cPS2GraphicsMan_AddProjectiveTexture (second argument); passed to slot 93 by func_0037DF88
+    t4Matrix unk_50;                // 0x50 [U] cPS2GraphicsMan_AddProjectiveTexture (third argument)
+    float unk_90;                   // 0x90 [U] cPS2GraphicsMan_AddProjectiveTexture (float argument)
+    int unk_94;                     // 0x94 [U] cPS2GraphicsMan_AddProjectiveTexture (int argument)
     char unk_98[0x8];               // 0x98 padding to 16
 };
 
 // [P] cPS2GraphicsMan::sViewportStack (the preview's __as__Q215cPS2GraphicsMan14sViewportStack = func_003950C0):
-// one pushed viewport/projection state, 0x230 bytes. PushViewport (func_003765B8) saves the live members listed
-// below into it, PopViewport (func_00376768) restores them.
+// one pushed viewport/projection state, 0x230 bytes. PushViewport (cPS2GraphicsMan_PushViewport) saves the live members listed
+// below into it, PopViewport (cPS2GraphicsMan_PopViewport) restores them.
 struct sViewportStack {
     float unk_000[4];               // 0x000 [U] func_00376A70 (SetViewportWindow); [X] viewport x, y, w, h
-    float unk_010[3];               // 0x010 [U] func_00376C58 / func_00377458 store, func_00376C28 reads; [X] near?, 1.0, fov
+    float unk_010[3];               // 0x010 [U] func_00376C58 / func_00377458 store, cPS2GraphicsMan_GetViewportPerspective reads; [X] near?, 1.0, fov
     float unk_01C;                  // 0x01C [U] func_00376C58 / func_00377278 read; [R] Init zeroes entry 0
     int unk_020;                    // 0x020 [U] func_00376C58 / func_00377458 store; [X] projection type
     float unk_024;                  // 0x024 [U] copy of unk_590C
@@ -103,7 +103,7 @@ struct sViewportStack {
 
 struct cPS2GraphicsMan {
     // --- cGraphicsMan (On Tour: size 0x10D0; retail's ends at 0x10DC with the vptr)
-    float m_screenOffset[2];        // 0x000 [O] t2Vector; [P] Get/SetScreenOffset (func_00393FB8/FD8/FF0)
+    float m_screenOffset[2];        // 0x000 [O] t2Vector; [P] Get/SetScreenOffset (cGraphicsMan_SetScreenOffset/FD8/FF0)
     int m_AIUpdatesPerRender;       // 0x008 [O]; [R] ctor zeroes it
     int m_SpecularTextureId[8];     // 0x00C [O]; [P] get/setSpecularTextureId (preview: one int); [U] cVisualEffectsMan ctor
     int m_PatchSpecularTextureId[8]; // 0x02C [O]; [U] cVisualEffectsMan ctor stores [6]
@@ -133,7 +133,7 @@ struct cPS2GraphicsMan {
     int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (func_003945F0)
     sDrawState* m_pCurrentDrawState; // 0xE84 [O]; [P] CurrentDrawState; [R] ctor points it at the stack
     sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (D_00501420)
-    sDrawState m_activeDrawState;   // 0xED8 [O]; [P] ActiveDrawState returns its address; [U] func_00369610
+    sDrawState m_activeDrawState;   // 0xED8 [O]; [P] ActiveDrawState returns its address; [U] cGraphicsMan_ForceActiveDrawState
     sTextureState* m_pCurrentTextureState; // 0xEEC [O]
     sTextureState m_textureStateStack[4]; // 0xEF0 [O]; [R] ctor fills -1
     sTextureState m_activeTextureState; // 0xF00 [O]
@@ -148,19 +148,19 @@ struct cPS2GraphicsMan {
     int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors func_003946A8/func_003946B8
     void** mVtbl;                   // 0x10D8 [R] cGraphicsMan D_00493950, cPS2GraphicsMan D_00493260
     // --- cPS2GraphicsMan
-    int mViewportDepth;             // 0x10DC [U] index into mViewportStack (func_003765B8/func_00376768); [X] viewDepth
+    int mViewportDepth;             // 0x10DC [U] index into mViewportStack (cPS2GraphicsMan_PushViewport/cPS2GraphicsMan_PopViewport); [X] viewDepth
     t4Matrix mViewStack[12];        // 0x10E0 [R] ctor's first array loop (12); [U] PushView/PopView step 0x40
-    int mViewDepth;                 // 0x13E0 [U] PushView (func_003956E8) +1, PopView -1; [X] matrixDepth
+    int mViewDepth;                 // 0x13E0 [U] PushView (cPS2GraphicsMan_PushView) +1, PopView -1; [X] matrixDepth
     t4Matrix* mCurrentView;         // 0x13E4 [P] GetView; [R] Init points it at mViewStack
     void* mpScratchpad;             // 0x13E8 [R] Init stores 0x70000000; [X] spad
     int mNumProjTextures;           // 0x13EC [P] GetNumProjTextures / ClearProjTextures
     tProjTexInfo mProjTextures[8];  // 0x13F0 [P] GetProjTexInfo; [R] ctor's second array loop (8)
     cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (func_00395658); [X] "DEFER MAN" (0x6B100)
     cTextureMan* mpTextureMan;      // 0x18F4 [P] GetTextureMan (func_00395538); [X] "TEX MAN" (0x6740)
-    int unk_18F8[2000];             // 0x18F8 [U] per texture id: func_0037C830 frees each non-zero one, func_0037CB50 clears it
+    int unk_18F8[2000];             // 0x18F8 [U] per texture id: cPS2GraphicsMan_PlatformPurgeTextures frees each non-zero one, cPS2GraphicsMan_RemoveTexture clears it
     int unk_3838[2000];             // 0x3838 [U] per texture id: func_0037CAF8 sets 1 after creating it
     char unk_5778[0x8];             // 0x5778 padding to 16
-    t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] func_00376768 restores it
+    t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] cPS2GraphicsMan_PopViewport restores it
     t4Matrix mView;                 // 0x57C0 [X] view; [U] func_00376C58 / func_00377458 build it
     t4Matrix mGuardBandMatrix;      // 0x5800 [P] GetGuardBandMatrix returns its address (func_00395418)
     t4Vector mGuardScale;           // 0x5840 [X] guardScale (uploaded to VU1)
@@ -170,11 +170,11 @@ struct cPS2GraphicsMan {
     t4Vector mScreenScale;          // 0x58E0 [X] screenScale
     t4Vector mScreenOffset;         // 0x58F0 [X] screenOffset
     unsigned short mScissor[4];     // 0x5900 [X] scissor x, y, w, h; [U] func_00376938, func_0036B158
-    float unk_5908;                 // 0x5908 [U] saved by func_003765B8; [X] fovOrAspect?
-    float unk_590C;                 // 0x590C [U] saved by func_003765B8
-    float unk_5910;                 // 0x5910 [U] saved by func_003765B8; [X] far
+    float unk_5908;                 // 0x5908 [U] saved by cPS2GraphicsMan_PushViewport; [X] fovOrAspect?
+    float unk_590C;                 // 0x590C [U] saved by cPS2GraphicsMan_PushViewport
+    float unk_5910;                 // 0x5910 [U] saved by cPS2GraphicsMan_PushViewport; [X] far
     char unk_5914[0xC];             // 0x5914 padding to 16
-    t4Vector unk_5920;              // 0x5920 [U] saved by func_003765B8; func_00395ED8
+    t4Vector unk_5920;              // 0x5920 [U] saved by cPS2GraphicsMan_PushViewport; func_00395ED8
     t4Matrix unk_5930[2];           // 0x5930 [R] ctor's third array loop (2); [U] per view, func_0036A428; [X] viewMatrices
     unsigned short unk_59B0[2][4];  // 0x59B0 [R] ctor's fourth array loop (2); [U] per-view scissor, func_0036B158/func_0036C790
     int unk_59C0;                   // 0x59C0 [U] accessor func_003956D8; func_00363490 loop count; [X] numViews (split screen)
@@ -244,12 +244,12 @@ struct cPS2GraphicsMan {
     int mKickThreadId;              // 0x5AD0 [X]; [U] ditto
     char unk_5AD4[0xC];             // 0x5AD4 padding to 16
     char mKickThreadStack[0x1000];  // 0x5AE0 [X]; [R] Init passes self + 0x5AE0
-    unsigned int mClearColour;      // 0x6AE0 [U] func_00389098 (slot 15, [X] SetClearColor) stores it
+    unsigned int mClearColour;      // 0x6AE0 [U] cPS2GraphicsMan_SetScreenClearColour (slot 15, [X] SetClearColor) stores it
     char unk_6AE4[0xC];             // 0x6AE4 padding to 16
     t4Matrix mScreenMatrix;         // 0x6AF0 [X] screenMatrix (clip -> GS coordinates)
     t4Matrix mScreenWorld;          // 0x6B30 [X] screenWorld; [U] the draw slots load it
-    t4Vector unk_6B70;              // 0x6B70 [U] saved by func_003765B8; func_00395FA8; [X] screenOffset4
-    t4Vector unk_6B80;              // 0x6B80 [U] saved by func_003765B8
+    t4Vector unk_6B70;              // 0x6B70 [U] saved by cPS2GraphicsMan_PushViewport; func_00395FA8; [X] screenOffset4
+    t4Vector unk_6B80;              // 0x6B80 [U] saved by cPS2GraphicsMan_PushViewport
     int mMatricesValid;             // 0x6B90 [P] updateNetMat recomputes when 0; [U] PopView clears it; [X] matricesValid
     tTVDisplayFormat mTVDisplayFormat; // 0x6B94 [P] GetTVDisplayFormat returns its address (func_003953B0)
     char unk_6BA8[0x8];             // 0x6BA8 padding to 16

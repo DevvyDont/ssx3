@@ -708,7 +708,7 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232C98);
 extern int D_004A4324;
 extern int cScreenTint_m_Enable;
 extern int D_004A43C8;
-extern "C" void func_00369FF8(void* g);
+extern "C" void cGraphicsMan_UploadTextures(void* g);
 
 struct sVec3i_2C98 {
     int x, y, z;
@@ -729,7 +729,7 @@ static inline void clear_2C98(int* p)
 
 extern "C" void func_00232C98(void* self)
 {
-    func_00369FF8(GrMan);
+    cGraphicsMan_UploadTextures(GrMan);
     *(int*)((char*)self + 0x14) = 0;
     clear_2C98(&D_004A4324);
     clear_2C98(&cScreenTint_m_Enable);
@@ -792,7 +792,7 @@ public:
     virtual void v19();
 };
 extern "C" void func_00397B70(void* obj, int a);
-extern "C" void func_0036A020(void* world);
+extern "C" void cGraphicsMan_PurgeTextures(void* world);
 
 extern "C" void func_00232D50(void* self)
 {
@@ -802,7 +802,7 @@ extern "C" void func_00232D50(void* self)
         func_00397B70(p, 3);
     }
     *(void**)((char*)self + 0xC) = 0;
-    func_0036A020(GrMan);
+    cGraphicsMan_PurgeTextures(GrMan);
 }
 #endif
 
@@ -1079,7 +1079,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
 INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
 #ifdef SKIP_ASM
 extern int D_004A4324;
-extern "C" void func_00369FF8(void* g);
+extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F768(void* snd);
@@ -1097,7 +1097,7 @@ struct sVE_3260 {
 
 extern "C" void func_00233260(void)
 {
-    func_00369FF8(GrMan);
+    cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startGameLoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
@@ -1123,7 +1123,7 @@ int func_002332C8(void* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_002332E8);
 #ifdef SKIP_ASM
-extern "C" void func_0036A020(void* world);
+extern "C" void cGraphicsMan_PurgeTextures(void* world);
 extern "C" void func_00397B70(void* obj, int a);
 extern "C" void* func_0028B180(void);
 extern "C" void func_0028FA98(void* self, float v);
@@ -1197,7 +1197,7 @@ extern "C" void func_002332E8(void* self)
             ((cWorld002332E8*)GrMan)->v50(p);
         }
     }
-    func_0036A020(GrMan);
+    cGraphicsMan_PurgeTextures(GrMan);
     func_0028FA98(func_0028B180(), 1.0f);
 }
 #endif

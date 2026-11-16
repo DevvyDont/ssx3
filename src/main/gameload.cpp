@@ -599,7 +599,7 @@ extern "C" void func_00242518(void* p, int flags);
 struct cBigFile;
 void cBigFile__cBigFile(cBigFile* self, int flags);
 extern "C" void func_003916C0(void* p, int flags);
-extern "C" void func_0036A020(void* p);
+extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void func_0038ADB0(void* p);
 extern "C" void func_002B6AE0(void* p, int flags);
 extern "C" void func_002B68D0(void* a);
@@ -692,7 +692,7 @@ struct sObj20_FA98 {
  * MultiParticleMan, PlaybackMan and InstanceMan, purges the camera triggers and render states, and deletes ViewMan,
  * AI, Replay, StreamPause, SectionMan, FXLoader, WorldLightMan, World, OcclusionMan, the track BigFile,
  * LoadIndicator (freed only), DebugFont and BXNash. Finally GrMan slots 113 and 50 (the box texture mBoxTextureID),
- * func_0036A020 and func_0038ADB0, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
+ * cGraphicsMan_PurgeTextures and func_0038ADB0, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
  * audio de-initialised and purged, the script engine purged, and D_004A2A54 and the word at D_004A5B64 + 0x34
  * cleared.
  */
@@ -767,7 +767,7 @@ extern "C" void cGame_purge(char* self)
         sVEnt1_FA98* e = (sVEnt1_FA98*)((char*)be->mVtbl + 0x190);
         e->fn((char*)be + e->delta, *(void**)(self + 0x220));
     }
-    func_0036A020(GrMan);
+    cGraphicsMan_PurgeTextures(GrMan);
     func_0038ADB0(D_005047F8);
     *(void**)&SSXApp->Game = 0;
     if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
@@ -808,7 +808,7 @@ public:
 extern "C" void func_00195D50(void* a);
 extern "C" void func_001F30D8(void* a);
 void func_00278710(void* a);
-extern "C" void func_00369FF8(void* a);
+extern "C" void cGraphicsMan_UploadTextures(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
@@ -835,7 +835,7 @@ extern "C" void cGame_gainFocus(cGame* self)
     func_00278710(ScriptEngine);
     cBezierMan_TheBezierMan->v17();
     cBezierMan_TheBezierMan->v04();
-    func_00369FF8(GrMan);
+    cGraphicsMan_UploadTextures(GrMan);
     cWorld_init(self->World);
     func_002B68D0(gWorldTriggerManager);
     func_002867E8(gSSXAudio);

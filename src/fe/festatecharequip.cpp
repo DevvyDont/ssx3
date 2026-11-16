@@ -58,7 +58,7 @@ INCLUDE_ASM("fe/festatecharequip", func_001957D0);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 extern "C" void func_00397B70(void* p, int flags);
-extern "C" void func_0036A020(void* p);
+extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void func_002DBEE0(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
 extern "C" void func_001A0420(void* p, int flags);
@@ -72,7 +72,7 @@ extern "C" void func_001957D0(void* self, int flags)
     if (*(void**)((char*)self + 0xC) != 0) {
         func_00397B70(*(void**)((char*)self + 0xC), 3);
     }
-    func_0036A020(GrMan);
+    cGraphicsMan_PurgeTextures(GrMan);
     if (*(void**)((char*)self + 0xB5AA0) != 0) {
         func_002DBEE0(*(void**)((char*)self + 0xB5AA0), 3);
     }

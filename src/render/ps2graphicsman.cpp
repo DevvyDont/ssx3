@@ -1345,12 +1345,12 @@ extern "C" void* func_003691F8(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003695D8);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan__cGraphicsMan);
 #ifdef SKIP_ASM
 extern void* D_00493950[];
 void operator_delete(int* ptr);
 
-extern "C" void func_003695D8(cPS2GraphicsMan* self, int flags)
+extern "C" void cGraphicsMan__cGraphicsMan(cPS2GraphicsMan* self, int flags)
 {
     self->mVtbl = D_00493950;
     cGraphicsMan_TheGraphicsMan = 0;
@@ -1361,7 +1361,7 @@ extern "C" void func_003695D8(cPS2GraphicsMan* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369610);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_ForceActiveDrawState);
 #ifdef SKIP_ASM
 struct sVEntry00369610 {
     short delta;
@@ -1369,7 +1369,7 @@ struct sVEntry00369610 {
     void (*fn)(void*, int*);
 };
 
-extern "C" void func_00369610(cPS2GraphicsMan* self, int* mask)
+extern "C" void cGraphicsMan_ForceActiveDrawState(cPS2GraphicsMan* self, int* mask)
 {
     int i;
     unsigned int j;

@@ -2869,16 +2869,16 @@ extern "C" int func_003764C0(sPartTexCache_3764C0* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376560);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetDisplayModeName);
 #ifdef SKIP_ASM
-extern "C" void* func_00376560(cPS2GraphicsMan* self, int a1)
+extern "C" void* cPS2GraphicsMan_GetDisplayModeName(cPS2GraphicsMan* self, int a1)
 {
     return (char*)self->DisplayModes + a1 * 0xa4;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376578);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDTV);
 #ifdef SKIP_ASM
 struct sPartVEntry122 {
     short delta;
@@ -2886,7 +2886,7 @@ struct sPartVEntry122 {
     int (*fn)(void*, int, int, int, int, int, int);
 };
 
-extern "C" int func_00376578(cPS2GraphicsMan* self, int a1)
+extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int a1)
 {
     sPartVEntry122* vt = (sPartVEntry122*)self->mVtbl;
     return vt[122].fn((char*)self + vt[122].delta, 0x200, 0x1C0, 0x18, 0x20, 0x18, a1);
@@ -2894,7 +2894,7 @@ extern "C" int func_00376578(cPS2GraphicsMan* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003765B8);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_PushViewport);
 #ifdef SKIP_ASM
 struct sPtQ65B8 {
     float v[4];
@@ -2958,7 +2958,7 @@ static inline void vu0CopyMtx65B8(sPtMtx65B8* dst, sPtMtx65B8* src)
 
 extern "C" void func_003950C0(sViewportStack* dst, sViewportStack* src);
 
-extern "C" void func_003765B8(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
     (*(sPtScis65B8*)&viewportStack->mScissor[0]) = (*(sPtScis65B8*)&self->mScissor[0]);
@@ -2985,7 +2985,7 @@ extern "C" void func_003765B8(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376768);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_PopViewport);
 #ifdef SKIP_ASM
 struct sPtQ6768 {
     float v[4];
@@ -3050,7 +3050,7 @@ static inline void vu0CopyMtx6768(sPtMtx6768* dst, sPtMtx6768* src)
 
 extern "C" void func_00364B88(void* table, void* key);
 
-extern "C" void func_00376768(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
 {
     self->mViewportDepth--;
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
@@ -3215,9 +3215,9 @@ extern "C" sPartVec4i* func_00376B90(sPartVec4i* r, void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376C10);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportFOV);
 #ifdef SKIP_ASM
-extern "C" float func_00376C10(cPS2GraphicsMan* self)
+extern "C" float cPS2GraphicsMan_GetViewportFOV(cPS2GraphicsMan* self)
 {
     int i = self->mViewportDepth;
     char* p = (char*)self + i * 0x230;
@@ -3226,7 +3226,7 @@ extern "C" float func_00376C10(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376C28);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportPerspective);
 #ifdef SKIP_ASM
 
 struct sPartSys {
@@ -3236,7 +3236,7 @@ struct sPartSys {
     sViewportStack emitters[1];
 };
 
-extern "C" void func_00376C28(cPS2GraphicsMan* self, float* a, float* b, float* c)
+extern "C" void cPS2GraphicsMan_GetViewportPerspective(cPS2GraphicsMan* self, float* a, float* b, float* c)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
     *a = viewportStack->unk_010[2];
@@ -3343,7 +3343,7 @@ extern "C" void func_00376C58(sPtGfx6C58* self, float fov, float zNear, float zF
     v->zNear = zNear;
     v->zFar = zFar;
     v->fov = fov;
-    // PORT: int-arithmetic view address (as in func_00376C10); the typed self->views[i] reads score 94-95%.
+    // PORT: int-arithmetic view address (as in cPS2GraphicsMan_GetViewportFOV); the typed self->views[i] reads score 94-95%.
     char* p = (char*)self + self->curView * 0x230;
     float x = *(float*)(p + 0x6D20);
     float y = *(float*)(p + 0x6D24);
@@ -4061,7 +4061,7 @@ static inline sV_7CF0 Sub_7CF0(const sV_7CF0& a, const sV_7CF0& b)
     return r;
 }
 
-// Guard-band outcode of a projected point (as func_0037DBE8).
+// Guard-band outcode of a projected point (as cPS2GraphicsMan_GetOutCode).
 static inline int ClipCode_7CF0(sGfx_7CF0* self, const sV_7CF0& v)
 {
     int code = 0;
@@ -6219,12 +6219,12 @@ extern "C" float func_0037C770(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037C7C0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_InitTextures);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 void func_00366FE0(void* p, int a1);
 
-extern "C" void func_0037C7C0(cPS2GraphicsMan* self, int a1)
+extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int a1)
 {
     MEM_fill((char*)self + 0x3838, 0, 0x1F40);
     func_00366FE0(self->mpTextureMan, a1);
@@ -6243,7 +6243,7 @@ void* func_0037C808(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037C830);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformPurgeTextures);
 #ifdef SKIP_ASM
 struct sVEntry0037C830 {
     short delta;
@@ -6251,7 +6251,7 @@ struct sVEntry0037C830 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0037C830(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
 {
     int i;
     for (i = 0; i < 2000; i++) {
@@ -6268,9 +6268,9 @@ extern "C" void func_0037C830(cPS2GraphicsMan* self)
 extern "C" void func_00366FE0__FPvi(void*);
 
 //100%
-INCLUDE_ASM("render/particle", func_0037C8A0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTextureMemType);
 #ifdef SKIP_ASM
-extern "C" void func_0037C8A0(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_SetTextureMemType(cPS2GraphicsMan* self)
 {
     func_00366FE0__FPvi(self->mpTextureMan);
 }
@@ -6400,11 +6400,11 @@ extern "C" int func_0037CAF8(cPS2GraphicsMan* self, int a1, int a2, int a3, int 
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037CB50);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveTexture);
 #ifdef SKIP_ASM
 extern "C" void func_00367BC0(void* tbl, int idx);
 
-extern "C" void func_0037CB50(cPS2GraphicsMan* self, int idx)
+extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
 {
     func_00367BC0(self->mpTextureMan, idx);
     *(int*)((char*)self + (idx << 2) + 0x18F8) = 0;
@@ -6412,7 +6412,7 @@ extern "C" void func_0037CB50(cPS2GraphicsMan* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037CB90);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_IsValidTexture);
 #ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 struct sGsTex0 {
@@ -6440,7 +6440,7 @@ struct sPartTexTable {
     sPartTex* entries[2000];
 };
 
-extern "C" int func_0037CB90(cPS2GraphicsMan* self, int idx)
+extern "C" int cPS2GraphicsMan_IsValidTexture(cPS2GraphicsMan* self, int idx)
 {
     sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
     int r;
@@ -6469,7 +6469,7 @@ void* func_0037CBC8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037CBE8);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_CreateScreenGrabTexture);
 #ifdef SKIP_ASM
 struct sPartVEntry52 {
     short delta;
@@ -6477,7 +6477,7 @@ struct sPartVEntry52 {
     int (*fn)(void*, int, int, int);
 };
 
-extern "C" void func_0037CBE8(cPS2GraphicsMan* self, void* out, int a2, int a3)
+extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, void* out, int a2, int a3)
 {
     sPartVEntry52* vt = (sPartVEntry52*)self->mVtbl;
     *(int*)((char*)out + 4) = vt[52].fn((char*)self + vt[52].delta, a2, a3, 0);
@@ -6485,7 +6485,7 @@ extern "C" void func_0037CBE8(cPS2GraphicsMan* self, void* out, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037CC30);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveScreenGrabTexture);
 #ifdef SKIP_ASM
 struct sVEntry0037CC30 {
     short delta;
@@ -6495,7 +6495,7 @@ struct sVEntry0037CC30 {
 
 extern "C" void func_00367B60(void* mgr, int id);
 
-extern "C" void func_0037CC30(cPS2GraphicsMan* self, void* item)
+extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, void* item)
 {
     if (*(int*)((char*)item + 0x4) != -1) {
         func_00367B60(self->mpTextureMan, *(int*)((char*)item + 0x4));
@@ -6976,7 +6976,7 @@ void* func_0037D738(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D758);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddProjectiveTexture);
 #ifdef SKIP_ASM
 struct sPartQ16 {
     int w[4];
@@ -7010,7 +7010,7 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
         : "memory");
 }
 
-extern "C" void func_0037D758(cPS2GraphicsMan* self, sPartQ16* q, sPartMtx* m0, sPartMtx* m1, float f, int i)
+extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* q, sPartMtx* m0, sPartMtx* m1, float f, int i)
 {
     (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_00) = *q;
     vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_10), m0);
@@ -7090,10 +7090,10 @@ extern "C" void func_0037D800(sPtGfx_D800* self, int idx, float* color)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D908);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureWidth);
 #ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
-extern "C" int func_0037D908(cPS2GraphicsMan* self, int idx)
+extern "C" int cPS2GraphicsMan_GetTextureWidth(cPS2GraphicsMan* self, int idx)
 {
     sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
     return 1 << t->entries[idx]->tex0.TW;
@@ -7101,10 +7101,10 @@ extern "C" int func_0037D908(cPS2GraphicsMan* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D938);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureHeight);
 #ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
-extern "C" int func_0037D938(cPS2GraphicsMan* self, int idx)
+extern "C" int cPS2GraphicsMan_GetTextureHeight(cPS2GraphicsMan* self, int idx)
 {
     sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
     return 1 << t->entries[idx]->tex0.TH;
@@ -7194,7 +7194,7 @@ extern "C" void func_0037D968(cPS2GraphicsMan* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037DBE8);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetOutCode);
 #ifdef SKIP_ASM
 struct sPtVecDBE8 {
     float x, y, z, w;
@@ -7241,7 +7241,7 @@ static inline sPtVecDBE8 mtxApplyDBE8(t4Matrix* m, const sPtVecDBE8& v)
     return out;
 }
 
-extern "C" int func_0037DBE8(cPS2GraphicsMan* self, const sPtVecDBE8* p)
+extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const sPtVecDBE8* p)
 {
     if (self->mMatricesValid == 0) {
         func_0037D968(self);
@@ -7330,14 +7330,14 @@ extern "C" sPtVecDD20 func_0037DD20(sPtGfxDD20* self, const sPtVecDD20* p)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037DE88);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_ClipBoundBox);
 #ifdef SKIP_ASM
 // VU0 microprogram entry (micro-memory address 0x570; resolved via undefined_syms_auto.txt)
 extern char D_570[];
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
 // version of the microprogram.
-extern "C" int func_0037DE88(cPS2GraphicsMan* self, void* a, void* b, void* m)
+extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* a, void* b, void* m)
 {
     int r1;
     int r2;
@@ -7576,7 +7576,7 @@ extern "C" void func_0037E120(void* self, sPartPktQuad* m, sPartPktQuad* hdr, in
 INCLUDE_ASM("render/particle", func_0037E238);
 
 //100%
-INCLUDE_ASM("render/particle", func_00380380);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetMeshQuad);
 #ifdef SKIP_ASM
 struct sV3_0380 {
     float x, y, z;
@@ -7604,7 +7604,7 @@ struct sMdl0380 {
     int dataOff;            // 0x24
 };
 
-extern "C" void func_00380380(cPS2GraphicsMan* self, char* obj, int idx, float* pos, float* uv, float* col)
+extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, char* obj, int idx, float* pos, float* uv, float* col)
 {
     sMdl0380* mdl = *(sMdl0380**)(obj + 0x80);
     char* base = *(char**)(*(char**)(*(char**)(mdl->ents[idx].node + 0x20)) + 0x4);
@@ -10696,13 +10696,13 @@ extern "C" void func_003865E8(void* head)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00386640);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_UpdateFullScreenEffects);
 #ifdef SKIP_ASM
 extern "C" void func_0036ABA0(void* self, int a1);
 extern "C" void func_00390458(void* self, int a1);
 extern "C" void func_0036C740(void* self, int a1);
 
-extern "C" void func_00386640(cPS2GraphicsMan* self, int a1)
+extern "C" void cPS2GraphicsMan_UpdateFullScreenEffects(cPS2GraphicsMan* self, int a1)
 {
     func_0036ABA0(self, a1);
     func_00390458(self, a1);
@@ -10711,7 +10711,7 @@ extern "C" void func_00386640(cPS2GraphicsMan* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00386688);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderFullScreenEffects);
 #ifdef SKIP_ASM
 struct sPartPair {
     int a, b;
@@ -10719,7 +10719,7 @@ struct sPartPair {
 
 // Pushes the current matrix (self+0x6AF0) and the pair at self+0x5900 onto slot i.
 // PORT: PS2-only VU0 asm (lqc2/sqc2 matrix copy).
-extern "C" void func_00386688(cPS2GraphicsMan* self, int i)
+extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, int i)
 {
     // PORT: (int)self pointer arithmetic (index added first, as in the target).
     __asm__ __volatile__(
@@ -10884,7 +10884,7 @@ extern "C" void func_003866F0(cPS2GraphicsMan* gfx, sMdl_66F0* m, char* base, in
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00386BD0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GenerateBlendedMatrices);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sBlendMtx_6BD0 {
@@ -10960,7 +10960,7 @@ static inline void blendStore_6BD0(sBlendMtx_6BD0* d)
         : "=m"(d->m[0]), "=m"(d->m[4]), "=m"(d->m[8]), "=m"(d->m[12]));
 }
 
-extern "C" void func_00386BD0(cPS2GraphicsMan* self, sBlendMtx_6BD0* mats, int unused, sBlendEnt_6BD0* ents, int n, sBlendMtx_6BD0* out)
+extern "C" void cPS2GraphicsMan_GenerateBlendedMatrices(cPS2GraphicsMan* self, sBlendMtx_6BD0* mats, int unused, sBlendEnt_6BD0* ents, int n, sBlendMtx_6BD0* out)
 {
     if (out == 0) {
         out = (sBlendMtx_6BD0*)self->mpScratchpad;
@@ -10985,11 +10985,11 @@ extern "C" void func_00386BD0(cPS2GraphicsMan* self, sBlendMtx_6BD0* mats, int u
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00386CF0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_update);
 #ifdef SKIP_ASM
 void func_00369FF0(void* self);
 
-extern "C" void func_00386CF0(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_update(cPS2GraphicsMan* self)
 {
     func_00369FF0(self);
 }
@@ -11756,11 +11756,11 @@ void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ri
 INCLUDE_ASM("render/particle", func_003889F0);
 
 //100%
-INCLUDE_ASM("render/particle", func_00389098);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetScreenClearColour);
 #ifdef SKIP_ASM
 extern "C" int func_004139F8(float f);
 
-extern "C" void func_00389098(cPS2GraphicsMan* self, const float* c)
+extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, const float* c)
 {
     float k = 255.0f;
     int r = func_004139F8(c[0] * k);

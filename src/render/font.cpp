@@ -1102,9 +1102,9 @@ int func_00393FB0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FB8);
+INCLUDE_ASM("render/font", cGraphicsMan_SetScreenOffset);
 #ifdef SKIP_ASM
-extern "C" void func_00393FB8(cPS2GraphicsMan* self, int a1, int a2)
+extern "C" void cGraphicsMan_SetScreenOffset(cPS2GraphicsMan* self, int a1, int a2)
 {
     self->m_screenOffset[0] = (float)a1;
     self->m_screenOffset[1] = (float)a2;
@@ -1112,18 +1112,18 @@ extern "C" void func_00393FB8(cPS2GraphicsMan* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FD8);
+INCLUDE_ASM("render/font", cGraphicsMan_GetScreenXOffset);
 #ifdef SKIP_ASM
-extern "C" int func_00393FD8(cPS2GraphicsMan* self)
+extern "C" int cGraphicsMan_GetScreenXOffset(cPS2GraphicsMan* self)
 {
     return (int)self->m_screenOffset[0];
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FF0);
+INCLUDE_ASM("render/font", cGraphicsMan_GetScreenYOffset);
 #ifdef SKIP_ASM
-extern "C" int func_00393FF0(cPS2GraphicsMan* self)
+extern "C" int cGraphicsMan_GetScreenYOffset(cPS2GraphicsMan* self)
 {
     return (int)self->m_screenOffset[1];
 }
@@ -1505,21 +1505,21 @@ void func_003942E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942E8);
+INCLUDE_ASM("render/font", cGraphicsMan_SetDefaultDrawState);
 #ifdef SKIP_ASM
 
 extern sDrawState D_00501420;
 
-extern "C" void func_003942E8(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_SetDefaultDrawState(cPS2GraphicsMan* self)
 {
     *(self->m_pCurrentDrawState) = D_00501420;
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394328);
+INCLUDE_ASM("render/font", cGraphicsMan_SetDrawState);
 #ifdef SKIP_ASM
 
-extern "C" void func_00394328(cPS2GraphicsMan* self, sDrawState* src)
+extern "C" void cGraphicsMan_SetDrawState(cPS2GraphicsMan* self, sDrawState* src)
 {
     *(self->m_pCurrentDrawState) = *src;
 }
@@ -1558,13 +1558,13 @@ extern "C" void func_00394398(cPS2GraphicsMan* ps2GraphicsMan, int arg1) {
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003943C0);
+INCLUDE_ASM("render/font", cGraphicsMan_SetConstantColour);
 #ifdef SKIP_ASM
 struct sFontV4 {
     float x, y, z, w;
 };
 
-extern "C" void func_003943C0(cPS2GraphicsMan* self, sFontV4 v, int idx)
+extern "C" void cGraphicsMan_SetConstantColour(cPS2GraphicsMan* self, sFontV4 v, int idx)
 {
     // PORT: pointer arithmetic via int (index-first addu)
     *(sFontV4*)((char*)((idx << 4) + (int)self) + 0xF04) = v;
@@ -1925,9 +1925,9 @@ void func_003946E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003946F0);
+INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
 #ifdef SKIP_ASM
-extern "C" void func_003946F0(cPS2GraphicsMan* self, int a, int b, int c)
+extern "C" void cGraphicsMan_SetPixelTest(cPS2GraphicsMan* self, int a, int b, int c)
 {
     int sa = (a << 23) & 0x01800000;
     *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x01800000) | sa;
@@ -1938,17 +1938,17 @@ extern "C" void func_003946F0(cPS2GraphicsMan* self, int a, int b, int c)
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394770);
+INCLUDE_ASM("render/font", cGraphicsMan_SetTexture);
 #ifdef SKIP_ASM
-extern "C" void func_00394770(cPS2GraphicsMan* self, short value, int idx) {
+extern "C" void cGraphicsMan_SetTexture(cPS2GraphicsMan* self, short value, int idx) {
     *(short*)((char*)self->m_pCurrentDrawState + (idx << 1) + 0x10) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394788);
+INCLUDE_ASM("render/font", cGraphicsMan_PushDrawState);
 #ifdef SKIP_ASM
 
-extern "C" void func_00394788(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_PushDrawState(cPS2GraphicsMan* self)
 {
     sDrawState* top = self->m_pCurrentDrawState;
     top[1] = top[0];
@@ -2692,14 +2692,14 @@ extern "C" sFontState50C0* func_003950C0(sFontState50C0* self, const sFontState5
 }
 #endif
 
-extern "C" void* func_003695D8(void* self);
+extern "C" void* cGraphicsMan__cGraphicsMan(void* self);
 
 //100%
 INCLUDE_ASM("render/font", func_00395268__FPv);
 #ifdef SKIP_ASM
 void* func_00395268(void* self)
 {
-    return func_003695D8(self);
+    return cGraphicsMan__cGraphicsMan(self);
 }
 #endif
 
@@ -2766,9 +2766,9 @@ struct sFontEntry {
 };
 
 //100%
-INCLUDE_ASM("render/font", func_00395330);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenWidth);
 #ifdef SKIP_ASM
-extern "C" int func_00395330(cPS2GraphicsMan* self)
+extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
     sFontEntry* p = (sFontEntry*)self->DisplayModes;
@@ -2777,9 +2777,9 @@ extern "C" int func_00395330(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395350);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenHeight);
 #ifdef SKIP_ASM
-extern "C" int func_00395350(cPS2GraphicsMan* self)
+extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
     sFontEntry* p = (sFontEntry*)self->DisplayModes;
@@ -2908,13 +2908,13 @@ extern "C" void func_00395498(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003954D0);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_SetIrradiance);
 #ifdef SKIP_ASM
 struct sFontBlockA0 {
     float f[40];
 } __attribute__((aligned(16)));
 
-extern "C" void func_003954D0(cPS2GraphicsMan* self, sFontBlockA0* src)
+extern "C" void cPS2GraphicsMan_SetIrradiance(cPS2GraphicsMan* self, sFontBlockA0* src)
 {
     *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
 }
@@ -3148,11 +3148,11 @@ void func_003956E0(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003956E8);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_PushView);
 #ifdef SKIP_ASM
 // Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_003956E8(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
 {
     char* top = (char*)self->mCurrentView;
     __asm__ __volatile__(
@@ -3384,12 +3384,12 @@ int func_00395C68(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395C70);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_AppendView);
 #ifdef SKIP_ASM
 // Multiply the top of the matrix stack by m in place (top = top * m) and clear
 // the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void func_00395C70(cPS2GraphicsMan* self, void* m)
+extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* m)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3430,14 +3430,14 @@ extern "C" void func_00395C70(cPS2GraphicsMan* self, void* m)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395CF0);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_IdentityView);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
 // Load the matrix t4mat_Identity (likely identity) into the top of the matrix stack
 // and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_00395CF0(cPS2GraphicsMan* self)
+extern "C" void cPS2GraphicsMan_IdentityView(cPS2GraphicsMan* self)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3458,13 +3458,13 @@ extern "C" void func_00395CF0(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395D28);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_TranslateView);
 #ifdef SKIP_ASM
 // Translate the top matrix of the stack: row 3 = top * v (v is a 4-vector),
 // then clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
 // needs a C fallback.
-extern "C" void func_00395D28(cPS2GraphicsMan* self, void* v)
+extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3487,7 +3487,7 @@ extern "C" void func_00395D28(cPS2GraphicsMan* self, void* v)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395D60);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_RotateView);
 #ifdef SKIP_ASM
 struct sFontRotMat {
     float m[4][4];
@@ -3497,7 +3497,7 @@ extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void func_00395D60(cPS2GraphicsMan* self, float* axis, float angle)
+extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, float angle)
 {
     sFontRotMat r;
     float s;

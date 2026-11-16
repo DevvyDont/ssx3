@@ -212,7 +212,7 @@ extern "C" void func_00233640(void* self, int type)
 INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
 #ifdef SKIP_ASM
 extern int D_004A4324;
-extern "C" void func_00369FF8(void* g);
+extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startFELoad(void* app);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F768(void* snd);
@@ -230,7 +230,7 @@ struct sVE_38C8 {
 
 extern "C" void func_002338C8(void)
 {
-    func_00369FF8(GrMan);
+    cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startFELoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
@@ -300,7 +300,7 @@ struct cGame00233930 {
 };
 
 extern "C" void func_00397B70(void* self, int a1);
-extern "C" void func_0036A020(void* self);
+extern "C" void cGraphicsMan_PurgeTextures(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028FA98(void* self, float f);
 
@@ -322,7 +322,7 @@ extern "C" void func_00233930(void* self)
             ((cGame00233930*)GrMan)->v50(h);
         }
     }
-    func_0036A020(GrMan);
+    cGraphicsMan_PurgeTextures(GrMan);
     func_0028FA98(func_0028B180(), 1.0f);
 }
 #endif

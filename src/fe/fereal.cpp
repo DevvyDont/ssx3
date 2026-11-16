@@ -745,7 +745,7 @@ extern "C" void* cBE_getBE();
 extern "C" void func_0014DE28(void* be, int b);
 extern "C" void* MEM_fill(void* p, int c, int n);
 extern "C" void cBE_setState(int state);
-extern "C" void func_00369FF8(void* p);
+extern "C" void cGraphicsMan_UploadTextures(void* p);
 extern "C" void func_00195E58(void* p);
 extern "C" void cFEFlowState_setNumStates(void* flow, int n);
 extern char D_004A4E80;
@@ -776,7 +776,7 @@ extern "C" void func_001A1DC0(char* self)
     *(int*)(self + 0xB5AD8) = 0;
     *(int*)(self + 0xB5ADC) = 0;
     cBE_setState(0);
-    func_00369FF8(GrMan);
+    cGraphicsMan_UploadTextures(GrMan);
     func_00195E58(SSXApp->FELocale);
     D_004A4324 = 0;
     cScreenTint_m_Enable = 0;

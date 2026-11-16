@@ -3341,6 +3341,57 @@ FileParser_GetChar__FPv = 0x002A78E0; //type:func
 FileParser_SkipSpace = 0x002A78F8; //type:func
 FileParser_GetName = 0x002A7DA0; //type:func
 
+// fn_names_e: names by evidence (docs/function_names.tsv)
+cGraphicsMan__cGraphicsMan = 0x003695D8; //type:func
+cGraphicsMan_ForceActiveDrawState = 0x00369610; //type:func
+cGraphicsMan_FlushRenderer = 0x00369C28; //type:func
+cGraphicsMan_RenderIndexedTriList = 0x00369CF8; //type:func
+cGraphicsMan_UploadTextures = 0x00369FF8; //type:func
+cGraphicsMan_PurgeTextures = 0x0036A020; //type:func
+cGraphicsMan_RenderSpline = 0x0036A048; //type:func
+cGraphicsMan_DeformMeshMatrix = 0x0036A2C0; //type:func
+cPS2GraphicsMan_GetDisplayModeName = 0x00376560; //type:func
+cPS2GraphicsMan_SetDTV = 0x00376578; //type:func
+cPS2GraphicsMan_PushViewport = 0x003765B8; //type:func
+cPS2GraphicsMan_PopViewport = 0x00376768; //type:func
+cPS2GraphicsMan_GetViewportFOV = 0x00376C10; //type:func
+cPS2GraphicsMan_GetViewportPerspective = 0x00376C28; //type:func
+cPS2GraphicsMan_InitTextures = 0x0037C7C0; //type:func
+cPS2GraphicsMan_PlatformPurgeTextures = 0x0037C830; //type:func
+cPS2GraphicsMan_SetTextureMemType = 0x0037C8A0; //type:func
+cPS2GraphicsMan_RemoveTexture = 0x0037CB50; //type:func
+cPS2GraphicsMan_IsValidTexture = 0x0037CB90; //type:func
+cPS2GraphicsMan_CreateScreenGrabTexture = 0x0037CBE8; //type:func
+cPS2GraphicsMan_RemoveScreenGrabTexture = 0x0037CC30; //type:func
+cPS2GraphicsMan_AddProjectiveTexture = 0x0037D758; //type:func
+cPS2GraphicsMan_GetTextureWidth = 0x0037D908; //type:func
+cPS2GraphicsMan_GetTextureHeight = 0x0037D938; //type:func
+cPS2GraphicsMan_GetOutCode = 0x0037DBE8; //type:func
+cPS2GraphicsMan_ClipBoundBox = 0x0037DE88; //type:func
+cPS2GraphicsMan_GetMeshQuad = 0x00380380; //type:func
+cPS2GraphicsMan_UpdateFullScreenEffects = 0x00386640; //type:func
+cPS2GraphicsMan_RenderFullScreenEffects = 0x00386688; //type:func
+cPS2GraphicsMan_GenerateBlendedMatrices = 0x00386BD0; //type:func
+cPS2GraphicsMan_update = 0x00386CF0; //type:func
+cPS2GraphicsMan_SetScreenClearColour = 0x00389098; //type:func
+cGraphicsMan_SetScreenOffset = 0x00393FB8; //type:func
+cGraphicsMan_GetScreenXOffset = 0x00393FD8; //type:func
+cGraphicsMan_GetScreenYOffset = 0x00393FF0; //type:func
+cGraphicsMan_SetDefaultDrawState = 0x003942E8; //type:func
+cGraphicsMan_SetDrawState = 0x00394328; //type:func
+cGraphicsMan_SetConstantColour = 0x003943C0; //type:func
+cGraphicsMan_SetPixelTest = 0x003946F0; //type:func
+cGraphicsMan_SetTexture = 0x00394770; //type:func
+cGraphicsMan_PushDrawState = 0x00394788; //type:func
+cPS2GraphicsMan_GetScreenWidth = 0x00395330; //type:func
+cPS2GraphicsMan_GetScreenHeight = 0x00395350; //type:func
+cPS2GraphicsMan_SetIrradiance = 0x003954D0; //type:func
+cPS2GraphicsMan_PushView = 0x003956E8; //type:func
+cPS2GraphicsMan_AppendView = 0x00395C70; //type:func
+cPS2GraphicsMan_IdentityView = 0x00395CF0; //type:func
+cPS2GraphicsMan_TranslateView = 0x00395D28; //type:func
+cPS2GraphicsMan_RotateView = 0x00395D60; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

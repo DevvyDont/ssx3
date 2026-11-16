@@ -129,7 +129,7 @@ fail:
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369C28);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_FlushRenderer);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 extern "C" void SYNCTASK_run(int a);
@@ -159,7 +159,7 @@ public:
     virtual void v12();
 };
 
-extern "C" void func_00369C28(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_FlushRenderer(cPS2GraphicsMan* self)
 {
     for (;;) {
         sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
@@ -189,7 +189,7 @@ extern "C" void func_00369CB0(cPS2GraphicsMan* self, void* obj, int a2, int a3, 
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369CF8);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderIndexedTriList);
 #ifdef SKIP_ASM
 struct sGmV3_369CF8 {
     float x, y, z;
@@ -234,7 +234,7 @@ struct sGmVE_369CF8 {
 
 // cGraphicsMan::RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices,
 //     const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector& Offset)
-extern "C" void func_00369CF8(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* P,
+extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* P,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
     sGmVert_369CF8 V[3];
@@ -287,9 +287,9 @@ void func_00369FF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369FF8);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_UploadTextures);
 #ifdef SKIP_ASM
-extern "C" void func_00369FF8(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_UploadTextures(cPS2GraphicsMan* self)
 {
     char* vt = (char*)self->mVtbl;
     ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
@@ -297,9 +297,9 @@ extern "C" void func_00369FF8(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A020);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_PurgeTextures);
 #ifdef SKIP_ASM
-extern "C" void func_0036A020(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_PurgeTextures(cPS2GraphicsMan* self)
 {
     char* vt = (char*)self->mVtbl;
     ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
@@ -307,7 +307,7 @@ extern "C" void func_0036A020(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A048);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderSpline);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV4_A048 {
@@ -350,7 +350,7 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
 }
 
 // Evaluates the cubic (t^3, t^2, t, 1) * m at n evenly spaced t in [0, 1] and draws the points as one strip.
-extern "C" void func_0036A048(cPS2GraphicsMan* self, sV4_A048* m, float* color, int n)
+extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* m, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
     int c0 = (int)(color[1] * 128.0f);
@@ -456,7 +456,7 @@ extern "C" void func_0036A290()
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A2C0);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeformMeshMatrix);
 #ifdef SKIP_ASM
 struct sGmVec4_A2C0 {
     float x, y, z, w;
@@ -526,7 +526,7 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
         : "memory");
 }
 
-extern "C" void func_0036A2C0(cPS2GraphicsMan* self, sGmMtx_A2C0* m)
+extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0* m)
 {
     if (self->m_isInNIS[6] != 0) {
         sGmMtx_A2C0 t2;

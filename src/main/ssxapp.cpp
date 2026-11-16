@@ -113,7 +113,7 @@ void cLightMan_construct();
 void cBezierMan_construct();
 extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv);
 extern "C" void* SHAPE_locate(const char* name, void* list);
-extern "C" void func_00369FF8(void* gfx);
+extern "C" void cGraphicsMan_UploadTextures(void* gfx);
 void* func_00232328(void* p);
 extern "C" void* cFEAsyncManager_cFEAsyncManager(void* p);
 extern "C" void cFEAsyncManager_Init(void* p);
@@ -169,7 +169,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     char* o = (char*)g3 + vt3[46].delta;
     void* r = SHAPE_locate(D_0047AB40, D_004A28B0);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(o, r, D_00479A70, 0, 1, -1);
-    func_00369FF8(GrMan);
+    cGraphicsMan_UploadTextures(GrMan);
     *(sTint_6900**)&self->LoadIndicator = new (D_00479A80, 0, 0) sTint_6900;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, D_00479A90, 0x100, 0)));
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
