@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/inputparse.h"
 
 //100%
 INCLUDE_ASM("input/inputmap", cInputMap_init);
@@ -59,12 +60,12 @@ extern "C" void func_00320D50(void* self, const char* path)
 INCLUDE_ASM("input/inputmap", cInputMap_loadMapFile);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cInputMapParser_cInputMapParser(void* self, void* a1, void* a2);
+extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* self, void* a1, void* a2);
 extern char D_0048DD10[];
 
 extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2)
 {
-    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser(cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), a1, a2);
+    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), a1, a2);
 }
 #endif
 
@@ -319,7 +320,7 @@ struct sMapData_1428 {
 };
 
 // Initialises a compiled input map: id stack 63..1 and the node free list.
-extern "C" void* cInputMapParser_cInputMapParser(void* vself, void* a1, void* a2)
+extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* a1, void* a2)
 {
     sMapData_1428* self = (sMapData_1428*)vself;
     self->f4 = a2;
@@ -357,13 +358,13 @@ extern "C" int sprintf(char* dst, const char* fmt, ...);
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
 extern char D_0048DD40[];
 
-extern "C" void cInputMapParser_error(void* self, const char* fmt, ...)
+extern "C" void cInputMapParser_error(cInputMapParser* self, const char* fmt, ...)
 {
     char buf[0x400];
     cInputMapParser_error_va_list ap;
     cInputMapParser_error_va_start(ap);
-    func_004186C8(buf + sprintf(buf, D_0048DD40, (char*)self + 0xC, *(int*)((char*)self + 0x8C)), fmt, ap);
-    *(int*)((char*)self + 0x94) = 1;
+    func_004186C8(buf + sprintf(buf, D_0048DD40, (char*)self + 0xC, self->LineNumber), fmt, ap);
+    self->ErrorFlag = 1;
 }
 #endif
 
@@ -372,9 +373,9 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_skipPastSemicolon);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 
-extern "C" void cInputMapParser_skipPastSemicolon(void* self)
+extern "C" void cInputMapParser_skipPastSemicolon(cInputMapParser* self)
 {
-    while (*(int*)((char*)self + 0x98) != 5 && *(int*)((char*)self + 0x98) != 0) {
+    while (self->CurrentToken != 5 && self->CurrentToken != 0) {
         cInputMapParser_readToken(self);
     }
     cInputMapParser_readToken(self);
@@ -407,7 +408,7 @@ struct sMapNode_1638 {
 };
 
 // Frees an expression node and its children back onto the map's node free list.
-extern "C" void cInputMapParser_freeParseNode(void* self, sMapNode_1638* node)
+extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, sMapNode_1638* node)
 {
     if (node == 0) {
         return;
@@ -433,8 +434,8 @@ extern "C" void cInputMapParser_freeParseNode(void* self, sMapNode_1638* node)
     case 22: case 23:
         break;
     }
-    node->a = *(sMapNode_1638**)((char*)self + 0xE0);
-    *(sMapNode_1638**)((char*)self + 0xE0) = node;
+    node->a = (sMapNode_1638*)self->FreeParseNodes;
+    self->FreeParseNodes = (tParseNode*)node;
 }
 #endif
 
@@ -444,7 +445,7 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_lookupButtonName);
 extern "C" int func_0041AB78(const char* a, const char* b, int n);
 extern char D_004A3EF0[];
 
-extern "C" int cInputMapParser_lookupButtonName(void* self, char* name)
+extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* name)
 {
     if (func_0041AB78(name, D_004A3EF0, 6) != 0) {
         return -1;

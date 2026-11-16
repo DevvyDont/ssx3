@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/inputparse.h"
 
 //100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupModifierName);
@@ -10,7 +11,7 @@ extern char D_004A3F08[];
 extern char D_0048DDD8[];
 extern char D_004A3F10[];
 
-extern "C" int cInputMapParser_lookupModifierName(void* self, const char* name)
+extern "C" int cInputMapParser_lookupModifierName(cInputMapParser* self, const char* name)
 {
     if (func_0041AA88(name, D_004A3EF8) == 0) {
         return 0;
@@ -42,7 +43,7 @@ extern char D_004A3F18[];
 extern char D_004A3F20[];
 extern char D_004A3F28[];
 
-extern "C" int cInputMapParser_lookupConfigName(void* self, char* name)
+extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* name)
 {
     if (func_0041AA88(name, D_004A3F18) == 0)
         return 0;
@@ -94,23 +95,14 @@ extern "C" int cInputMapParser_lookupConfigName(void* self, char* name)
 //100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupIdentifierName);
 #ifdef SKIP_ASM
-struct sEntry_321A40 {
-    char name[0x40];
-    int value;
-};
-struct sTable_321A40 {
-    char pad[0x80E4];
-    int count;
-    sEntry_321A40 entries[1];
-};
 extern "C" int func_0041AA88(const char* a, const char* b);
 
-extern "C" sEntry_321A40* cInputMapParser_lookupIdentifierName(sTable_321A40* self, const char* name)
+extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* self, const char* name)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (func_0041AA88(name, self->entries[i].name) == 0) {
-            return &self->entries[i];
+    for (i = 0; i < self->NumIdentifiers; i++) {
+        if (func_0041AA88(name, self->Identifiers[i].Name) == 0) {
+            return &self->Identifiers[i];
         }
     }
     return 0;
@@ -228,7 +220,7 @@ static inline void blanks_321AF0(sTok_321AF0* s)
     *p++ = c;                               \
     adv_321AF0(s);
 
-extern "C" void cInputMapParser_readToken(void* self)
+extern "C" void cInputMapParser_readToken(cInputMapParser* self)
 {
     sTok_321AF0* s = (sTok_321AF0*)self;
     int c;
@@ -534,13 +526,13 @@ extern "C" void cInputMapParser_readToken(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseFile);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
-extern "C" void cInputMapParser_parseStatement(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
+extern "C" void cInputMapParser_parseStatement(cInputMapParser* self);
 
-extern "C" void cInputMapParser_parseFile(void* self)
+extern "C" void cInputMapParser_parseFile(cInputMapParser* self)
 {
     cInputMapParser_readToken(self);
-    while (*(int*)((char*)self + 0x98) != 0) {
+    while (self->CurrentToken != 0) {
         cInputMapParser_parseStatement(self);
     }
 }
@@ -549,13 +541,13 @@ extern "C" void cInputMapParser_parseFile(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseStatement);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" void cInputMapParser_skipPastSemicolon(void* self);
 extern "C" int cInputMapParser_lookupButtonName(void* self, char* name);
-extern "C" int cInputMapParser_lookupConfigName(void* self, char* name);
-extern "C" void* cInputMapParser_parseExpression(void* self);
+extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* name);
+extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self);
 extern char D_0048DED0[];
 extern char D_0048DEF8[];
 extern char D_0048DF20[];
@@ -563,28 +555,14 @@ extern char D_0048DF48[];
 extern char D_0048DF68[];
 extern char D_0048DF88[];
 
-struct sMapEntry_003230E0 {
-    char name[0x40];
-    void* expr;         // 0x40
-};
-struct sMapParser_003230E0 {
-    char pad0[0x98];
-    int tok;                            // 0x98
-    char name[0x8048];                  // 0x9C
-    int count;                          // 0x80E4
-    sMapEntry_003230E0 entries[512];    // 0x80E8
-    sMapEntry_003230E0* cur;            // 0x108E8
-};
-
-extern "C" void cInputMapParser_parseStatement(void* p)
+extern "C" void cInputMapParser_parseStatement(cInputMapParser* self)
 {
-    sMapParser_003230E0* self = (sMapParser_003230E0*)p;
-    if (self->tok != 2) {
+    if (self->CurrentToken != 2) {
         cInputMapParser_error(self, D_0048DED0);
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
-    char* name = self->name;
+    char* name = self->TokenText;
     if (cInputMapParser_lookupButtonName(self, name) >= 0) {
         cInputMapParser_error(self, D_0048DEF8, name);
         cInputMapParser_skipPastSemicolon(self);
@@ -595,43 +573,43 @@ extern "C" void cInputMapParser_parseStatement(void* p)
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
-    if (cInputMapParser_lookupIdentifierName((sTable_321A40*)self, name) != 0) {
+    if (cInputMapParser_lookupIdentifierName(self, name) != 0) {
         cInputMapParser_error(self, D_0048DF48, name);
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
-    sMapEntry_003230E0* e = &self->entries[self->count];
-    self->cur = e;
-    strcpy(e->name, name);
+    tIdentifier* e = &self->Identifiers[self->NumIdentifiers];
+    self->CurrentIdentifier = e;
+    strcpy(e->Name, name);
     cInputMapParser_readToken(self);
-    if (self->tok != 3) {
+    if (self->CurrentToken != 3) {
         cInputMapParser_error(self, D_0048DF68);
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
     cInputMapParser_readToken(self);
-    if ((e->expr = cInputMapParser_parseExpression(self)) == 0) {
+    if ((e->Expression = (tParseNode*)cInputMapParser_parseExpression(self)) == 0) {
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
-    if (self->tok != 5) {
+    if (self->CurrentToken != 5) {
         cInputMapParser_error(self, D_0048DF88);
         cInputMapParser_skipPastSemicolon(self);
         return;
     }
     cInputMapParser_readToken(self);
-    self->count++;
+    self->NumIdentifiers++;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseExpression);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
-extern "C" void* cInputMapParser_parseOr(void* self);
+extern "C" void* cInputMapParser_parseOr(cInputMapParser* self);
 extern char D_0048DFA8[];
 
 struct sExprNode_00323268 {
@@ -644,13 +622,13 @@ struct sExprNode_00323268 {
     sExprNode_00323268* b;
 };
 
-extern "C" void* cInputMapParser_parseExpression(void* self)
+extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self)
 {
     sExprNode_00323268* cond = (sExprNode_00323268*)cInputMapParser_parseOr(self);
     if (cond == 0) {
         return 0;
     }
-    if (*(int*)((char*)self + 0x98) != 6) {
+    if (self->CurrentToken != 6) {
         return cond;
     }
     cInputMapParser_readToken(self);
@@ -659,7 +637,7 @@ extern "C" void* cInputMapParser_parseExpression(void* self)
         cInputMapParser_freeParseNode(self, cond);
         return 0;
     }
-    if (*(int*)((char*)self + 0x98) != 7) {
+    if (self->CurrentToken != 7) {
         cInputMapParser_error(self, D_0048DFA8);
         cInputMapParser_freeParseNode(self, cond);
         cInputMapParser_freeParseNode(self, a);
@@ -692,10 +670,10 @@ extern "C" void* cInputMapParser_parseExpression(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseOr);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
-extern "C" void* cInputMapParser_parseAnd(void* self);
+extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self);
 
 struct sOrNode_003233B8 {
     int type;
@@ -706,7 +684,7 @@ struct sOrNode_003233B8 {
     sOrNode_003233B8* b;
 };
 
-extern "C" void* cInputMapParser_parseOr(void* self)
+extern "C" void* cInputMapParser_parseOr(cInputMapParser* self)
 {
     sOrNode_003233B8* left = (sOrNode_003233B8*)cInputMapParser_parseAnd(self);
     if (left == 0) {
@@ -716,7 +694,7 @@ extern "C" void* cInputMapParser_parseOr(void* self)
     if (left->type == 4 && left->value != 0.0f) {
         isTrue = 1;
     }
-    while (*(int*)((char*)self + 0x98) == 0xC) {
+    while (self->CurrentToken == 0xC) {
         cInputMapParser_readToken(self);
         sOrNode_003233B8* right = (sOrNode_003233B8*)cInputMapParser_parseAnd(self);
         if (right == 0) {
@@ -753,10 +731,10 @@ extern "C" void* cInputMapParser_parseOr(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseAnd);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
-extern "C" void* cInputMapParser_parseCompare(void* self);
+extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self);
 
 struct sAndNode_00323540 {
     int type;
@@ -767,7 +745,7 @@ struct sAndNode_00323540 {
     sAndNode_00323540* b;
 };
 
-extern "C" void* cInputMapParser_parseAnd(void* self)
+extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
 {
     sAndNode_00323540* left = (sAndNode_00323540*)cInputMapParser_parseCompare(self);
     if (left == 0) {
@@ -777,7 +755,7 @@ extern "C" void* cInputMapParser_parseAnd(void* self)
     if (left->type == 4 && left->value == 0.0f) {
         isFalse = 1;
     }
-    while (*(int*)((char*)self + 0x98) == 0xD) {
+    while (self->CurrentToken == 0xD) {
         cInputMapParser_readToken(self);
         sAndNode_00323540* right = (sAndNode_00323540*)cInputMapParser_parseCompare(self);
         if (right == 0) {
@@ -815,7 +793,7 @@ extern "C" void* cInputMapParser_parseAnd(void* self)
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseCompare);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cInputMapParser_parseSum(void* self);
+extern "C" void* cInputMapParser_parseSum(cInputMapParser* self);
 
 struct sCmpNode_003236D8 {
     int type;
@@ -827,7 +805,7 @@ struct sCmpNode_003236D8 {
 };
 
 // Parses a chain of comparison operators; comparisons of two constants are folded to 1.0/0.0.
-extern "C" void* cInputMapParser_parseCompare(void* self)
+extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
 {
     sCmpNode_003236D8* left = (sCmpNode_003236D8*)cInputMapParser_parseSum(self);
     if (left == 0) {
@@ -835,7 +813,7 @@ extern "C" void* cInputMapParser_parseCompare(void* self)
     }
     for (;;) {
         int op;
-        switch (*(int*)((char*)self + 0x98)) {
+        switch (self->CurrentToken) {
         case 0x10:
             op = 0xA;
             break;
@@ -899,10 +877,10 @@ extern "C" void* cInputMapParser_parseCompare(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseSum);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
-extern "C" void* cInputMapParser_parseProduct(void* self);
+extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self);
 
 struct sAddNode_00323900 {
     int type;
@@ -913,7 +891,7 @@ struct sAddNode_00323900 {
     sAddNode_00323900* b;
 };
 
-extern "C" void* cInputMapParser_parseSum(void* self)
+extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
 {
     sAddNode_00323900* left = (sAddNode_00323900*)cInputMapParser_parseProduct(self);
     if (left == 0) {
@@ -925,7 +903,7 @@ extern "C" void* cInputMapParser_parseSum(void* self)
     }
     for (;;) {
         int op;
-        switch (*(int*)((char*)self + 0x98)) {
+        switch (self->CurrentToken) {
         case 0x14:
             op = 0xE;
             break;
@@ -977,10 +955,10 @@ extern "C" void* cInputMapParser_parseSum(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseProduct);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* func_003215F8(void* self);
-extern "C" void* cInputMapParser_parseTerm(void* self);
+extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self);
 
 struct sMulNode_00323A68 {
     int type;
@@ -991,7 +969,7 @@ struct sMulNode_00323A68 {
     sMulNode_00323A68* b;
 };
 
-extern "C" void* cInputMapParser_parseProduct(void* self)
+extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
 {
     sMulNode_00323A68* left = (sMulNode_00323A68*)cInputMapParser_parseTerm(self);
     if (left == 0) {
@@ -1003,7 +981,7 @@ extern "C" void* cInputMapParser_parseProduct(void* self)
     }
     for (;;) {
         int op;
-        switch (*(int*)((char*)self + 0x98)) {
+        switch (self->CurrentToken) {
         case 0x16:
             op = 0x10;
             break;
@@ -1055,8 +1033,8 @@ extern "C" void* cInputMapParser_parseProduct(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseTerm);
 #ifdef SKIP_ASM
-extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op);
-extern "C" void* cInputMapParser_parseUnaryFunc(void* self, int op);
+extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op);
+extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op);
 extern char D_0048E008[];
 extern char D_0048E028[];
 extern char D_0048E048[];
@@ -1080,18 +1058,8 @@ struct sTermVar_3BD8 {
     sTermNode_3BD8* expr;       // 0x40
 };
 
-struct sTermParser_3BD8 {
-    char pad0[0x98];
-    int tok;                    // 0x98
-    char name[0x40];            // 0x9C
-    float number;               // 0xDC
-    char padE0[0x108E8 - 0xE0];
-    sTermVar_3BD8* cur;         // 0x108E8
-};
-
-extern "C" void* cInputMapParser_parseTerm(void* p)
+extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
 {
-    sTermParser_3BD8* self = (sTermParser_3BD8*)p;
     sTermNode_3BD8* node;
     sTermNode_3BD8* t;
     char* name;
@@ -1102,16 +1070,16 @@ extern "C" void* cInputMapParser_parseTerm(void* p)
     int type;
 
 again:
-    switch (self->tok) {
+    switch (self->CurrentToken) {
     case 2:
-        name = self->name;
+        name = self->TokenText;
         input = cInputMapParser_lookupButtonName(self, name);
         if (input >= 0) {
             mod = 5;
             cInputMapParser_readToken(self);
-            if (self->tok == 4) {
+            if (self->CurrentToken == 4) {
                 cInputMapParser_readToken(self);
-                if (self->tok != 2) {
+                if (self->CurrentToken != 2) {
                     cInputMapParser_error(self, D_0048E008);
                     return 0;
                 }
@@ -1136,18 +1104,18 @@ again:
             node->index = cfg;
             return node;
         }
-        var = (sTermVar_3BD8*)cInputMapParser_lookupIdentifierName((sTable_321A40*)self, name);
+        var = (sTermVar_3BD8*)cInputMapParser_lookupIdentifierName(self, name);
         if (var != 0) {
             int mod2;
             cInputMapParser_readToken(self);
-            if (var == self->cur) {
+            if ((tIdentifier*)var == self->CurrentIdentifier) {
                 cInputMapParser_error(self, D_0048E048);
                 return 0;
             }
             mod2 = 5;
-            if (self->tok == 4) {
+            if (self->CurrentToken == 4) {
                 cInputMapParser_readToken(self);
-                if (self->tok != 2) {
+                if (self->CurrentToken != 2) {
                     cInputMapParser_error(self, D_0048E008);
                     return 0;
                 }
@@ -1176,7 +1144,7 @@ again:
     case 11:
         node = (sTermNode_3BD8*)func_003215F8(self);
         node->type = 4;
-        node->value = self->number;
+        node->value = self->TokenValue;
         cInputMapParser_readToken(self);
         return node;
     case 20:
@@ -1211,7 +1179,7 @@ again:
     case 9:
         cInputMapParser_readToken(self);
         node = (sTermNode_3BD8*)cInputMapParser_parseExpression(self);
-        if (self->tok != 10) {
+        if (self->CurrentToken != 10) {
             cInputMapParser_error(self, D_0048E0B8);
             cInputMapParser_freeParseNode(self, node);
             return 0;
@@ -1270,8 +1238,8 @@ again:
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseBinaryFunc);
 #ifdef SKIP_ASM
-extern "C" void cInputMapParser_readToken(void* self);
-extern "C" void* cInputMapParser_parseExpression(void* self);
+extern "C" void cInputMapParser_readToken(cInputMapParser* self);
+extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" void* func_003215F8(void* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
@@ -1319,9 +1287,9 @@ static inline float atan2_4138(float y, float x)
 }
 
 // PORT: uses g++ min/max operators (<? >?).
-extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op)
+extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
 {
-    if (*(int*)((char*)self + 0x98) != 9) {
+    if (self->CurrentToken != 9) {
         cInputMapParser_error(self, D_0048E198);
         return 0;
     }
@@ -1330,7 +1298,7 @@ extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op)
     if (a == 0) {
         return 0;
     }
-    if (*(int*)((char*)self + 0x98) != 8) {
+    if (self->CurrentToken != 8) {
         cInputMapParser_error(self, D_0048E1B8);
         cInputMapParser_freeParseNode(self, a);
         return 0;
@@ -1340,7 +1308,7 @@ extern "C" void* cInputMapParser_parseBinaryFunc(void* self, int op)
     if (b == 0) {
         return 0;
     }
-    if (*(int*)((char*)self + 0x98) != 0xA) {
+    if (self->CurrentToken != 0xA) {
         cInputMapParser_error(self, D_0048E0B8);
         cInputMapParser_freeParseNode(self, a);
         cInputMapParser_freeParseNode(self, b);
@@ -1431,9 +1399,9 @@ static inline float abs_43A0(float x)
 }
 
 // Parses "(expr)" after a unary function name; constant arguments are folded immediately.
-extern "C" void* cInputMapParser_parseUnaryFunc(void* self, int op)
+extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
 {
-    if (*(int*)((char*)self + 0x98) != 9) {
+    if (self->CurrentToken != 9) {
         cInputMapParser_error(self, D_0048E198);
         return 0;
     }
@@ -1442,7 +1410,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(void* self, int op)
     if (a == 0) {
         return 0;
     }
-    if (*(int*)((char*)self + 0x98) != 0xA) {
+    if (self->CurrentToken != 0xA) {
         cInputMapParser_error(self, D_0048E0B8);
         cInputMapParser_freeParseNode(self, a);
         return 0;
@@ -1501,12 +1469,12 @@ struct sEntry_324590 {
     void* code;     // 0x40
 };
 extern "C" sEntry_324590* cInputMapParser_lookupIdentifierName_K(void* self, const char* name) __asm__("cInputMapParser_lookupIdentifierName");
-extern "C" int cInputMapParser_compileParseNode(void* self, void* node, int* src, void* code, int cap, int a5);
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
 extern char D_0048E208[];
 extern char D_0048E228[];
 
 // Compiles one named statement into out (space-terminated); returns the new length or -1.
-extern "C" int cInputMapParser_compileStatement(void* self, const char* name, int* out, int max, int a5)
+extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const char* name, int* out, int max, int a5)
 {
     sEntry_324590* e = cInputMapParser_lookupIdentifierName_K(self, name);
     if (e == 0) {
@@ -1534,8 +1502,8 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileParseNode);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" int func_00321AD0_i(void* self, void* var) __asm__("func_00321AD0");
 extern "C" int func_00321AD8(void* self, int a1, int a2);
-extern "C" int func_00324EC8_K(void* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("func_00324EC8");
-extern "C" int func_003250D8_K(void* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("func_003250D8");
+extern "C" int func_00324EC8_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("func_00324EC8");
+extern "C" int func_003250D8_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("func_003250D8");
 extern char D_0048E228[];
 extern char D_0048E240[];
 extern char D_0048E268[];
@@ -1571,22 +1539,15 @@ union sInsn_324678 {
     } j;
     float f;
 };
-struct sCodeGen_324678 {
-    char pad0[0x108EC];
-    int freeRegs[63];           // 0x108EC
-    int numFree;                // 0x109E8
-};
-
-extern "C" int cInputMapParser_compileParseNode(void* vself, void* vnode, int* dst, void* vcode, int cap, int a5)
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vnode, int* dst, void* vcode, int cap, int a5)
 {
-    sCodeGen_324678* self = (sCodeGen_324678*)vself;
     sNode_324678* node = (sNode_324678*)vnode;
     sInsn_324678* code = (sInsn_324678*)vcode;
     switch (node->type) {
     case 4:
         if (*dst < 0) {
-            if (self->numFree > 0) {
-                *dst = self->freeRegs[--self->numFree];
+            if (self->NumFreeRegisters > 0) {
+                *dst = self->FreeRegisters[--self->NumFreeRegisters];
             }
             if (*dst < 0) {
                 cInputMapParser_error(self, D_0048E240);
@@ -1651,7 +1612,7 @@ extern "C" int cInputMapParser_compileParseNode(void* vself, void* vnode, int* d
         code->j.op = 2;
         code->j.reg = reg;
         if (reg < 0x40) {
-            self->freeRegs[self->numFree++] = reg;
+            self->FreeRegisters[self->NumFreeRegisters++] = reg;
         }
         cap--;
         int n2 = cInputMapParser_compileParseNode(self, node->then_, dst, code + 1, cap, a5);
@@ -1719,7 +1680,7 @@ extern "C" int cInputMapParser_compileParseNode(void* vself, void* vnode, int* d
 INCLUDE_ASM("input/inputparse", func_00324EC8);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int cInputMapParser_compileParseNode(void* self, void* node, int* src, void* code, int cap, int a5);
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
 extern char D_0048E240[];
 extern char D_0048E228[];
 
@@ -1729,13 +1690,7 @@ struct sInsn_00324EC8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
-struct sCodeGen_00324EC8 {
-    char pad0[0x108EC];
-    int freeRegs[63];  // 0x108EC
-    int numFree;                // 0x109E8
-};
-
-extern "C" int func_00324EC8(sCodeGen_00324EC8* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int a6)
+extern "C" int func_00324EC8(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int a6)
 {
     int src = -1;
     int n1 = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 4), &src, code, cap, a6);
@@ -1752,14 +1707,14 @@ extern "C" int func_00324EC8(sCodeGen_00324EC8* self, void* node, int* dst, sIns
     code += n2;
     cap -= n2;
     if ((unsigned int)arg < 0x40) {
-        self->freeRegs[self->numFree++] = arg;
+        self->FreeRegisters[self->NumFreeRegisters++] = arg;
     }
     if ((unsigned int)src < 0x40) {
-        self->freeRegs[self->numFree++] = src;
+        self->FreeRegisters[self->NumFreeRegisters++] = src;
     }
     if (*dst < 0) {
-        if (self->numFree > 0) {
-            *dst = self->freeRegs[--self->numFree];
+        if (self->NumFreeRegisters > 0) {
+            *dst = self->FreeRegisters[--self->NumFreeRegisters];
         }
         if (*dst < 0) {
             cInputMapParser_error(self, D_0048E240);
@@ -1782,7 +1737,7 @@ extern "C" int func_00324EC8(sCodeGen_00324EC8* self, void* node, int* dst, sIns
 INCLUDE_ASM("input/inputparse", func_003250D8);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int cInputMapParser_compileParseNode(void* self, void* node, int* src, void* code, int cap, int a5);
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
 extern char D_0048E240[];
 extern char D_0048E228[];
 
@@ -1792,13 +1747,7 @@ struct sInsn_003250D8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
-struct sCodeGen_003250D8 {
-    char pad0[0x108EC];
-    int freeRegs[63];  // 0x108EC
-    int numFree;                // 0x109E8
-};
-
-extern "C" int func_003250D8(sCodeGen_003250D8* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int a6)
+extern "C" int func_003250D8(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int a6)
 {
     void* arg = *(void**)((char*)node + 4);
     int src = -1;
@@ -1809,11 +1758,11 @@ extern "C" int func_003250D8(sCodeGen_003250D8* self, void* node, int* dst, sIns
     code += n;
     cap -= n;
     if ((unsigned int)src < 0x40) {
-        self->freeRegs[self->numFree++] = src;
+        self->FreeRegisters[self->NumFreeRegisters++] = src;
     }
     if (*dst < 0) {
-        if (self->numFree > 0) {
-            *dst = self->freeRegs[--self->numFree];
+        if (self->NumFreeRegisters > 0) {
+            *dst = self->FreeRegisters[--self->NumFreeRegisters];
         }
         if (*dst < 0) {
             cInputMapParser_error(self, D_0048E240);
