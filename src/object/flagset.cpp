@@ -827,6 +827,11 @@ struct sFlagSetOwner {
 
 extern "C" void func_0034B9B0(sFlagSetEntry* e);
 
+/**
+ * Renders every active flag set held by the flag manager.
+ *
+ * Walks the 15 entries from offset 0x20 and calls func_0034B9B0() on each whose active word is set.
+ */
 extern "C" void cFlagManager_render(sFlagSetOwner* self)
 {
     int i;

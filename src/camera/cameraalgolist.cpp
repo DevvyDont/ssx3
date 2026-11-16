@@ -31,6 +31,18 @@ struct sAlgoListK2 {
     int count;
 };
 
+/**
+ * Adds a camera algorithm to the front of an algorithm list with a target blend weight.
+ *
+ * Calls the algorithm's virtual at slot 4 first (empty in cCameraAlgorithm, func_00166F28 in
+ * cLookAtChaseAlgorithm). It then allocates an "Algorithm List Node" whose current weight is 1 when @p w is
+ * exactly 1 and 0 otherwise, with @p w as its target weight, pushes it on the front and bumps the count.
+ *
+ * @param list   the algorithm list
+ * @param algo   algorithm to add
+ * @param owned  nonzero if removing the node should also destroy the algorithm
+ * @param w      target weight
+ */
 extern "C" void cCameraAlgoList_insert(sAlgoListK2* list, cCamAlgoK2* algo, int owned, float w)
 {
     algo->v04();

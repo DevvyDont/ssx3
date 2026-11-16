@@ -77,6 +77,14 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_001C5750(void* self, int flags);
 extern "C" void func_0039E390(void* self, int flags);
 
+/**
+ * Destroys a screen popup: its two strings and popup info, then the cUIState base.
+ *
+ * Restores cScreenPopup_vtbl, destroys mszStaticText and mszInputText (cBXString destructor, flags 2) and the
+ * embedded cPopupInfo (func_001C5750, flags 2), then calls the cUIState destructor func_0039E390(self, flags).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
 {
     self->mVtbl = cScreenPopup_vtbl;
@@ -95,6 +103,12 @@ extern char D_004A1C40[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the popup's "popup" screen and starts it at frame 0.
+ *
+ * Adds the screen through cUIEngine_addScreenByHashName() and stores it in mpScreen; when that succeeds, sets
+ * mbShowing and plays frame 0.
+ */
 extern "C" void cScreenPopup_onCreateScreen(cScreenPopup* self)
 {
     void* engine = self->mpEngine;
@@ -112,6 +126,11 @@ void* cUIState_onDestroyScreen(void*);
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the popup's showing flag, then destroys its screens with the base cUIState_onDestroyScreen().
+ *
+ * @return the result of cUIState_onDestroyScreen()
+ */
 void* cScreenPopup_onDestroyScreen(void* self)
 {
     *(int*)((char*)self + 0x2b8) = 0;
@@ -1381,6 +1400,15 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char D_004660B8[];
 extern char D_004A1408[];
 
+/**
+ * Copies a text widget's string into a cBXString as ASCII.
+ *
+ * Uses the widget's ASCII string when it has one. Otherwise narrows its unicode string with strcpy2() through a
+ * temporary heap buffer, or stores the empty string when the widget has neither.
+ *
+ * @param dst   cBXString that receives the text
+ * @param text  text widget to read
+ */
 extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUIText* text)
 {
     char* s = cUIText_getAsciiString(text);
@@ -2581,6 +2609,15 @@ public:
     virtual int v24(int, int);
 };
 
+/**
+ * Passes an event on to the popup's parent state.
+ *
+ * Calls handleEvent (vtable slot 24) on mpParentState with both arguments unchanged.
+ *
+ * @param a1  event message (On Tour: msg)
+ * @param a2  event parameter (On Tour: pParam)
+ * @return the parent state's handleEvent result
+ */
 extern "C" int cScreenPopup_handleEvent(cScreenPopup* self, int a1, int a2)
 {
     return ((cScreenPopup_handleEvent_cObj*)self->mpParentState)->v24(a1, a2);
@@ -2598,6 +2635,12 @@ struct sVEntry001CA528 {
 
 extern "C" void func_0039E510(void*);
 
+/**
+ * Updates the popup, first updating its parent state when the popup passes updates through.
+ *
+ * When mbPassUpdate is set, calls the parent state's onUpdate (vtable slot 12); then runs the base UI-state
+ * update func_0039E510().
+ */
 extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
 {
     if (self->mbPassUpdate != 0) {
@@ -2789,6 +2832,17 @@ int GetHashValue32(char* str);
 extern char D_004661B8[];
 extern char D_004661E0[];
 
+/**
+ * Fills a buy popup's info for buying a song with cash.
+ *
+ * Stores the price, the cash and -1 in the first three words (the third is the credit count that
+ * cBuyPopupInfo_initBuySongByCredit() sets), the song title as an ASCII element, and the text ids "kT_OVRSong"
+ * and "kT_16BuyMusicTrack" as two ID elements.
+ *
+ * @param a1  song title (an ASCII string pointer)
+ * @param a2  price of the song
+ * @param a3  cash the player has (cFEStateRequestLine_showBuyPopup() passes its cash total)
+ */
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3)
 {
     int three = 3;
@@ -2865,6 +2919,16 @@ int GetHashValue32(char* str);
 extern char D_004662B8[];
 extern char D_004661F8[];
 
+/**
+ * Fills a buy popup's info for buying an equipment item.
+ *
+ * Same layout as cBuyPopupInfo_initBuySong(): the price, the cash and -1 (no credits), the item's name as an
+ * ASCII element, and the text ids "kT_CMNItemColon" and "kT_OVRCMNBuyItem" as two ID elements.
+ *
+ * @param a1  item name (an ASCII string pointer; the equipment-detail state passes the item's word at 0x14)
+ * @param a2  price (the caller passes the item's price times 10)
+ * @param a3  cash the player has
+ */
 extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int a1, int a2, int a3)
 {
     int three = 3;
@@ -3176,6 +3240,11 @@ extern char D_00466388[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the on-screen keyboard's "Fullkeyboard" screen and starts it at frame 0.
+ *
+ * The screen goes into mpScreen; frame 0 is played only when the screen was created.
+ */
 extern "C" void cKeyboardPopup_onCreateScreen(cKeyboardPopup* self)
 {
     void* engine = self->mpEngine;
@@ -3199,6 +3268,13 @@ struct sVEntry001CB208 {
 extern "C" void func_0039E510(void*);
 extern "C" void func_0039F190(void* self, int a1);
 
+/**
+ * Updates the on-screen keyboard and closes it when the online overlay timeout runs out in a game.
+ *
+ * Runs the base UI-state update func_0039E510(). When cGameComm exists, its mOverlayTimeout is 0 and a game is
+ * running, pops the top state off the UI state stack (func_0039F190(stack, 1)). When mbCallParentsUpdate is set,
+ * also calls the parent state's onUpdate (vtable slot 12).
+ */
 extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 {
     func_0039E510(self);
@@ -4493,6 +4569,14 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char D_00466580[];
 extern char D_00466590[];
 
+/**
+ * Sets the keyboard's static label ("StaticValue") from a unicode string.
+ *
+ * Before the screen exists, keeps a heap copy of @p str in mpustrStatic (freeing any earlier copy); afterwards
+ * it sets the "StaticValue" text widget directly.
+ *
+ * @param str  NUL-terminated unicode label text
+ */
 extern "C" void cKeyboardPopup_setStatic(cKeyboardPopup* self, unsigned short* str)
 {
     if (self->mpScreen == 0) {
@@ -4522,6 +4606,13 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char D_00466580[];
 
+/**
+ * Sets the keyboard's static label ("StaticValue") from a localised string id.
+ *
+ * Before the screen exists, stores @p id in muiStatic; afterwards it sets the "StaticValue" text widget by id.
+ *
+ * @param id  string id (hash of the text's key)
+ */
 extern "C" void cKeyboardPopup_setStatic1(cKeyboardPopup* self, int id)
 {
     if (self->mpScreen == 0) {
@@ -4638,6 +4729,14 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainFocus);
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
+/**
+ * Keeps the keyboard's text cursor inside the text when the keyboard regains focus.
+ *
+ * Steps miCursorPos back by one when it sits at miMaxCharacters, redraws the cursor with
+ * cKeyboardPopup_updateCursor(), then runs the base cUIState_onGainFocus().
+ *
+ * @param a1  the state that had focus before (On Tour: pPrevState), passed on to cUIState_onGainFocus()
+ */
 extern "C" void cKeyboardPopup_onGainFocus(cKeyboardPopup* self, int a1)
 {
     if (self->miCursorPos == self->miMaxCharacters) {
@@ -4934,6 +5033,18 @@ static inline void SetVisible_1CD9B8(cUIText* text, int on)
     ((void (*)(void*, int))vt[9].fn)((char*)text + vt[9].delta, on);
 }
 
+/**
+ * Sets the label text and colour of one on-screen keyboard key.
+ *
+ * Colours the label by whether cKeyboardPopup_allowSelection() accepts the key (caps lock and shift always use
+ * the selectable colour). Special keys get localised names: 0 escape, 27 backspace, 28 tab, 42 caps lock, 55
+ * enter, 56 shift, 70 clear, 75 space; keys 4-13 read "Q1" to "Q10". The escape key and keys 4-13 are hidden on
+ * the compact keyboard (meType 1). Other keys only get the colour; a null @p text does nothing.
+ *
+ * @param vself  the keyboard popup
+ * @param text   the key's text widget; may be 0
+ * @param key    key index, 0-83
+ */
 extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* text, int key)
 {
     char buf[16];
@@ -5329,6 +5440,16 @@ extern "C" void cKeyboardPopup_checkAndFixConflict(cKeyboardPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_allowSelection);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a keyboard key can be selected in the current caps lock and shift state.
+ *
+ * The regular key set applies when caps lock XOR shift is on (for keys 15-26, when shift is off); otherwise the
+ * alternate set applies. The key's flag in the other set is written to @p out.
+ *
+ * @param idx  key index, 0-83
+ * @param out  address of an int that receives the key's flag in the other set (On Tour: bOtherSet); may be 0
+ * @return nonzero when the key is included in the set that applies
+ */
 // PORT: out is an int* out-param (the unit declares it int)
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int idx, int out)
 {

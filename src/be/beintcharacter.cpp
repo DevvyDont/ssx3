@@ -12,6 +12,15 @@ extern sCharWeightEntry D_00530970[];
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the weight of a rider's character.
+ *
+ * Looks up the rider's character id with cBELibrary_getCharacterID() and reads that character's mWeight from the
+ * character table D_00530970.
+ *
+ * @param riderIndex  rider whose character is looked up
+ * @return the character's weight
+ */
 int cBECharacterInterface_getWeight(void* self, int riderIndex)
 {
     return D_00530970[cBELibrary_getCharacterID(riderIndex)].mWeight;

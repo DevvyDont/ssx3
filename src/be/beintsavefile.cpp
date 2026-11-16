@@ -16,6 +16,15 @@ struct cBESaveInterface {
 //99.8%
 INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the save interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BESaveInt", clears the word at 0x8, stores the vtable D_0045AD08,
+ * keeps the object in D_004A121C and clears D_004A1228 (the flag set while the 512 KB save buffer from
+ * func_00152688() exists).
+ *
+ * @return the save interface
+ */
 void* cBESaveInterface_getThis()
 {
     if (D_004A121C == 0) {

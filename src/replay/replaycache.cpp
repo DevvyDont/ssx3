@@ -3379,26 +3379,19 @@ struct sTrackHdr_274100 {
     unsigned char id;       // 0x3
 };
 
-struct sTrack_274100 {
-    char pad0[0x1C];
-    sTrackHdr_274100* hdr;          // 0x1C
-    int pad20;
-    cChan_274100** chans;           // 0x24
-    int active;                     // 0x28
-};
 
 // Plays the track from prev to time; when jumping, stops at every channel event in between.
 extern "C" int func_00274100(cScriptPlayerEntity* self_, float prev, float time, float speed, int jump)
 {
-    sTrack_274100* self = (sTrack_274100*)self_;
-    if (self->active == 0) {
+    cScriptPlayerEntity* self = self_;
+    if (self->mIsPlaying == 0) {
         return 1;
     }
     if (jump) {
         for (;;) {
             float next = time;
-            for (int i = 0; i < self->hdr->count; i++) {
-                float f = (float)self->chans[i]->nextTime();
+            for (int i = 0; i < ((sTrackHdr_274100*)self->mpSystemHeader)->count; i++) {
+                float f = (float)((cChan_274100**)self->mpChannelPlayers)[i]->nextTime();
                 if (f >= 0.0f && f < next) {
                     next = f;
                 }
@@ -3594,34 +3587,26 @@ class cB2743E8 {
 public:
     virtual void b1();
     virtual void b2();
-    virtual void b3(sSelf2743E8* s, float t, unsigned char b, int flags);
-    virtual void b4(sSelf2743E8* s, float t, float dt, unsigned char b, int flags);
-};
-struct sSelf2743E8 {
-    char pad0[0x1C];
-    sInfo2743E8* info;
-    char pad20[4];
-    cA2743E8** objs;
-    char pad28[4];
-    cB2743E8* sink;
+    virtual void b3(cScriptPlayerEntity* s, float t, unsigned char b, int flags);
+    virtual void b4(cScriptPlayerEntity* s, float t, float dt, unsigned char b, int flags);
 };
 
 extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* p, float t, float dt)
 {
-    sSelf2743E8* self = (sSelf2743E8*)p;
+    cScriptPlayerEntity* self = p;
     int flags = 0;
     bool any = false;
-    for (int i = 0; i < self->info->count; i++) {
+    for (int i = 0; i < ((sInfo2743E8*)self->mpSystemHeader)->count; i++) {
         int out = 0;
-        any = self->objs[i]->a3(t, dt, &out) | any;
+        any = ((cA2743E8**)self->mpChannelPlayers)[i]->a3(t, dt, &out) | any;
         flags |= out;
     }
-    cB2743E8* s = self->sink;
+    cB2743E8* s = ((cB2743E8*)self->mpEntityComm);
     if (s != 0) {
         if (flags != 0) {
-            s->b3(self, t, self->info->b3, flags);
+            s->b3(self, t, ((sInfo2743E8*)self->mpSystemHeader)->b3, flags);
         }
-        self->sink->b4(self, t, dt, self->info->b3, flags);
+        ((cB2743E8*)self->mpEntityComm)->b4(self, t, dt, ((sInfo2743E8*)self->mpSystemHeader)->b3, flags);
     }
     return any;
 }
@@ -3742,59 +3727,42 @@ struct sRcHdr46F8 {
     unsigned char count;    // 0x1
 };
 
-struct sRcStream46F8 {
-    int field_0x0;          // 0x0
-    void* data;             // 0x4
-    void* owner;            // 0x8
-    int field_0xC;          // 0xC
-    sRcHdr46F8* hdr;        // 0x10
-    char* ext;              // 0x14
-    sRcElem46F8* elems;     // 0x18
-    int field_0x1C;         // 0x1C
-    int field_0x20;         // 0x20
-    float field_0x24;       // 0x24
-    int field_0x28;         // 0x28
-    int field_0x2C;         // 0x2C
-    int field_0x30;         // 0x30
-    int field_0x34;         // 0x34
-    int field_0x38;         // 0x38
-};
 
 extern "C" void func_002746F8(cScriptPlayerMain* p)
 {
-    sRcStream46F8* self = (sRcStream46F8*)p;
-    if (self->data == 0) {
+    cScriptPlayerMain* self = p;
+    if (((void*)self->mpData) == 0) {
         return;
     }
     cScriptPlayerMain_Stop((cScriptPlayerMain*)self);
-    for (int i = 0; i < self->hdr->count; i++) {
-        cScriptPlayerEntity_DeInit((cScriptPlayerEntity*)(&self->elems[i]));
+    for (int i = 0; i < ((sRcHdr46F8*)self->mpSystemHeader)->count; i++) {
+        cScriptPlayerEntity_DeInit((cScriptPlayerEntity*)(&((sRcElem46F8*)self->mpEntityPlayers)[i]));
     }
     // delete[] self->elems (element count in the 16-byte array cookie)
-    sRcElem46F8* e = self->elems;
+    sRcElem46F8* e = ((sRcElem46F8*)self->mpEntityPlayers);
     if (e != 0) {
         sRcElem46F8* q = e + *(int*)((char*)e - 0x10);
-        while (self->elems != q) {
+        while (((sRcElem46F8*)self->mpEntityPlayers) != q) {
             q--;
             func_00273970((cScriptPlayerEntity*)q, 0);
         }
-        func_00272510((char*)self->elems - 0x10);
+        func_00272510((char*)((sRcElem46F8*)self->mpEntityPlayers) - 0x10);
     }
-    self->field_0x38 = 0;
-    self->field_0x0 = -1;
-    self->data = 0;
-    self->owner = 0;
-    self->field_0xC = 0;
-    self->hdr = 0;
-    self->ext = 0;
-    self->elems = 0;
-    self->field_0x1C = 0;
-    self->field_0x20 = 0;
-    self->field_0x28 = 0;
-    self->field_0x2C = 0;
-    self->field_0x30 = -1;
-    self->field_0x24 = 1.0f;
-    self->field_0x34 = -1;
+    self->mNumSteps = 0;
+    self->mID = -1;
+    (*(void**)&self->mpData) = 0;
+    (*(void**)&self->mpManager) = 0;
+    (*(int*)&self->mpUserData) = 0;
+    (*(sRcHdr46F8**)&self->mpSystemHeader) = 0;
+    (*(char**)&self->mpDataHeader) = 0;
+    (*(sRcElem46F8**)&self->mpEntityPlayers) = 0;
+    self->mLoopScript = 0;
+    self->mPlayState = 0;
+    (*(int*)&self->mCurrFrame) = 0;
+    self->mNumPaused = 0;
+    self->mScriptLength = -1;
+    self->mPlaySpeed = 1.0f;
+    self->mJumpFrame = -1;
 }
 #endif
 
@@ -3957,79 +3925,68 @@ void* func_00274810(void* self);
 extern "C" void func_00274DE0(void* self);
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
-struct sRcPlay_4A30 {
-    char pad0[0x1C];
-    int loop;       // 0x1C
-    int playing;    // 0x20
-    float speed;    // 0x24
-    float pos;      // 0x28
-    int f2C;        // 0x2C
-    char pad30[4];
-    int seekTo;     // 0x34
-    int steps;      // 0x38
-};
 
 extern "C" void func_00274A30(cScriptPlayerMain* p)
 {
-    sRcPlay_4A30* self = (sRcPlay_4A30*)p;
+    cScriptPlayerMain* self = p;
     int need = 1;
-    if (self->seekTo >= 0)
+    if (self->mJumpFrame >= 0)
     {
-        int target = self->seekTo;
-        self->seekTo = -1;
+        int target = self->mJumpFrame;
+        self->mJumpFrame = -1;
         int len = cScriptPlayerMain_GetScriptLength((cScriptPlayerMain*)self);
-        int saved = self->f2C;
-        self->f2C = 0;
-        if (self->loop != 0)
+        int saved = self->mNumPaused;
+        self->mNumPaused = 0;
+        if (self->mLoopScript != 0)
             target = target % len;
         float ft = (float)target;
-        if (self->playing == 1)
+        if (self->mPlayState == 1)
             func_00274DE0(self);
-        if (ft != self->pos)
+        if (ft != self->mCurrFrame)
         {
-            if (ft < self->pos)
+            if (ft < self->mCurrFrame)
             {
                 cScriptPlayerMain_Stop((cScriptPlayerMain*)self);
                 func_00274810(self);
                 func_00274DE0(self);
             }
             float one = 1.0f;
-            float pos = self->pos;
+            float pos = self->mCurrFrame;
             float frac = (float)((int)pos + 1) - pos;
-            float speed = self->speed;
+            float speed = self->mPlaySpeed;
             if (frac < one)
             {
-                self->speed = frac;
+                self->mPlaySpeed = frac;
                 func_00274DE0(self);
             }
-            self->speed = one;
-            while (self->playing != 0 && self->pos < ft)
+            self->mPlaySpeed = one;
+            while (self->mPlayState != 0 && self->mCurrFrame < ft)
                 func_00274DE0(self);
-            self->speed = speed;
+            self->mPlaySpeed = speed;
         }
-        if (self->playing != 0)
-            self->f2C = saved;
+        if (self->mPlayState != 0)
+            self->mNumPaused = saved;
         need = 0;
     }
-    if (self->steps != 0)
+    if (self->mNumSteps != 0)
     {
-        int steps = self->steps;
-        int saved2 = self->f2C;
-        self->steps = 0;
-        self->f2C = 0;
-        if (self->playing != 0)
+        int steps = self->mNumSteps;
+        int saved2 = self->mNumPaused;
+        self->mNumSteps = 0;
+        self->mNumPaused = 0;
+        if (self->mPlayState != 0)
         {
             do
             {
                 func_00274DE0(self);
                 steps--;
-                if (self->playing == 0)
+                if (self->mPlayState == 0)
                     goto skip;
             } while (steps != 0);
-            self->f2C = saved2;
+            self->mNumPaused = saved2;
         }
     skip:
-        if (self->f2C <= 0)
+        if (self->mNumPaused <= 0)
             cScriptPlayerMain_Pause((cScriptPlayerMain*)self);
         need = 0;
     }
@@ -4101,9 +4058,6 @@ extern "C" unsigned char func_00274C68_impl(void *arg0) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GetScriptLength);
 #ifdef SKIP_ASM
-struct sRcTrack4C70 {
-    char pad[0x3C];
-};
 
 extern "C" int cScriptPlayerMain_GetScriptLength(cScriptPlayerMain* self)
 {
@@ -4112,7 +4066,7 @@ extern "C" int cScriptPlayerMain_GetScriptLength(cScriptPlayerMain* self)
         int best = 0;
         int i;
         for (i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 1); i++) {
-            int v = func_00274348(&((sRcTrack4C70*)self->mpEntityPlayers)[i]);
+            int v = func_00274348(&(self->mpEntityPlayers)[i]);
             if (best < v) {
                 best = v;
             }
@@ -4370,6 +4324,11 @@ extern "C" int func_002751A0(sRcAnim51A0* self, float time, float prev, float sp
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetValue__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the spline channel's value storage at +0x1C.
+ *
+ * @return a pointer into the channel object (On Tour: void*)
+ */
 void* cScriptPlayerChannelSpline_GetValue(void* self)
 {
     return (char*)self + 0x1C;
@@ -4379,6 +4338,11 @@ void* cScriptPlayerChannelSpline_GetValue(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetCustom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the spline channel's custom data word at +0x20.
+ *
+ * @return the custom data (a void* in On Tour, typed int here)
+ */
 int cScriptPlayerChannelSpline_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x20);
@@ -4416,6 +4380,11 @@ int cScriptPlayerChannelSpline_GetType(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetOwner__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the spline channel's owner, the word at +0xC.
+ *
+ * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
+ */
 int cScriptPlayerChannelSpline_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
@@ -4425,6 +4394,11 @@ int cScriptPlayerChannelSpline_GetOwner(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_IsPlaying__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the spline channel is playing, from its word at +0x8.
+ *
+ * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ */
 int cScriptPlayerChannelSpline_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
@@ -4434,6 +4408,11 @@ int cScriptPlayerChannelSpline_IsPlaying(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetValue__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the block channel's value storage at +0x28.
+ *
+ * @return a pointer into the channel object (On Tour: void*)
+ */
 void* cScriptPlayerChannelBlock_GetValue(void* self)
 {
     return (char*)self + 0x28;
@@ -4443,6 +4422,11 @@ void* cScriptPlayerChannelBlock_GetValue(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetCustom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the block channel's custom data word at +0x24.
+ *
+ * @return the custom data (a void* in On Tour, typed int here)
+ */
 int cScriptPlayerChannelBlock_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x24);
@@ -4466,6 +4450,11 @@ int cScriptPlayerChannelBlock_GetType(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetOwner__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the block channel's owner, the word at +0xC.
+ *
+ * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
+ */
 int cScriptPlayerChannelBlock_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
@@ -4475,6 +4464,11 @@ int cScriptPlayerChannelBlock_GetOwner(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_IsPlaying__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the block channel is playing, from its word at +0x8.
+ *
+ * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ */
 int cScriptPlayerChannelBlock_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
@@ -4484,6 +4478,11 @@ int cScriptPlayerChannelBlock_IsPlaying(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetValue__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the event channel's value storage at +0x20.
+ *
+ * @return a pointer into the channel object (On Tour: void*)
+ */
 void* cScriptPlayerChannelEvent_GetValue(void* self)
 {
     return (char*)self + 0x20;
@@ -4493,6 +4492,11 @@ void* cScriptPlayerChannelEvent_GetValue(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetCustom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the event channel's custom data word at +0x1C.
+ *
+ * @return the custom data (a void* in On Tour, typed int here)
+ */
 int cScriptPlayerChannelEvent_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x1C);
@@ -4516,6 +4520,11 @@ int cScriptPlayerChannelEvent_GetType(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetOwner__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the event channel's owner, the word at +0xC.
+ *
+ * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
+ */
 int cScriptPlayerChannelEvent_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
@@ -4525,6 +4534,11 @@ int cScriptPlayerChannelEvent_GetOwner(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_IsPlaying__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the event channel is playing, from its word at +0x8.
+ *
+ * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ */
 int cScriptPlayerChannelEvent_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
@@ -4534,6 +4548,11 @@ int cScriptPlayerChannelEvent_IsPlaying(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetValue__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the object channel's value storage at +0x24.
+ *
+ * @return a pointer into the channel object (On Tour: void*)
+ */
 void* cScriptPlayerChannelObject_GetValue(void* self)
 {
     return (char*)self + 0x24;
@@ -4543,6 +4562,11 @@ void* cScriptPlayerChannelObject_GetValue(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetCustom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the object channel's custom data word at +0x20.
+ *
+ * @return the custom data (a void* in On Tour, typed int here)
+ */
 int cScriptPlayerChannelObject_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x20);
@@ -4566,6 +4590,11 @@ int cScriptPlayerChannelObject_GetType(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetOwner__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the object channel's owner, the word at +0xC.
+ *
+ * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
+ */
 int cScriptPlayerChannelObject_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
@@ -4575,6 +4604,11 @@ int cScriptPlayerChannelObject_GetOwner(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_IsPlaying__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the object channel is playing, from its word at +0x8.
+ *
+ * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ */
 int cScriptPlayerChannelObject_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);

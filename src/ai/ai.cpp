@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
@@ -188,6 +189,14 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cAI_initComputerActors(cAI*);
 extern signed char D_00535C11[];
 
+/**
+ * Sets how many AI actors are needed and creates them, unless the race is on game path 1 or 2.
+ *
+ * Fetches the BE interface (result unused). Only when the new race's cGamePath (D_00535C11) is 0 does it store
+ * @p n in NumberOfActorsRequired and call cAI_initComputerActors(); path 2 is online play.
+ *
+ * @param n  number of AI actors to create
+ */
 extern "C" void cAI_initAIActors(cAI* self, int n)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -543,6 +552,12 @@ INCLUDE_ASM("ai/ai", cAI_loadRiders);
 extern "C" int cRider_isLoaded(void* self);
 extern "C" void cRider_loadRider(void* self);
 
+/**
+ * Loads the next rider that is not loaded yet; at most one rider per call.
+ *
+ * Walks Riders[0 .. NumberOfRidersAllocated) and calls cRider_loadRider() on the first one for which
+ * cRider_isLoaded() is 0, then stops.
+ */
 extern "C" void cAI_loadRiders(sAiObj128A48* self)
 {
     for (int i = 0; i < self->mCount; i++)
@@ -1831,6 +1846,12 @@ INCLUDE_ASM("ai/ai", cAI_resetRidersStatTotals);
 extern "C" void func_00154A58(int rider, int a);
 extern "C" void cRiderMetrix_resetTotals(char* self);
 
+/**
+ * Records each rider's race stats with the BE score code, then clears the rider's metrix totals.
+ *
+ * For every allocated rider, passes the stats block at offset 0xFC of its mMetrix to func_00154A58() (which hands
+ * them to func_00155420() for profile indexes 0 and 1 only), then calls cRiderMetrix_resetTotals() on the metrix.
+ */
 extern "C" void cAI_resetRidersStatTotals(sAiObj128A48* self)
 {
     for (int i = 0; i < self->mCount; i++)
@@ -2974,14 +2995,6 @@ extern "C" void func_0012D160(cWipeoutControl* self);
 extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self);
 extern "C" void func_0012D9D8(cWipeoutControl* self);
 
-struct sAiObj12CB68
-{
-    int f0;                 // 0x00
-    char pad4[0x6C];
-    float f70;              // 0x70
-    char pad74[0xC];
-    char* mRider;           // 0x80
-};
 
 // Decays or charges the AI's 0x70 meter (updating its sound), then runs the current state's handler.
 extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
@@ -3023,7 +3036,7 @@ extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
     }
     switch (self->RiderState) {
     case 0:
-        func_0012CD20_CB68(((sAiObj12CB68*)self));
+        func_0012CD20_CB68((self));
         break;
     case 1:
         func_0012D4E8(self);
@@ -3064,22 +3077,7 @@ struct sV_12CD20
     sV_12CD20(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sVP_12CD20
-{
-    sV_12CD20 a;
-    sV_12CD20 b;
-};
 
-struct sAiObj12CD20
-{
-    int f0;              // 0x00
-    char pad4[0xC];
-    sVP_12CD20 m10;      // 0x10
-    sVP_12CD20 m30;      // 0x30
-    float f50;           // 0x50
-    char pad54[0x2C];
-    char* mRider;        // 0x80
-};
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sV_12CD20 Sub_12CD20(const sV_12CD20& a, const sV_12CD20& b)
@@ -3136,13 +3134,13 @@ static inline sV_12CD20 QuatMul_12CD20(const sV_12CD20& a, const sV_12CD20& b)
     return r;
 }
 
-static inline sV_12CD20 Conj_12CD20(const sVP_12CD20& p)
+static inline sV_12CD20 Conj_12CD20(const tPose& p)
 {
     sV_12CD20 r;
-    r.w = p.b.w;
-    r.x = p.b.x;
-    r.y = p.b.y;
-    r.z = p.b.z;
+    r.w = (*(sV_12CD20*)&p.Q).w;
+    r.x = (*(sV_12CD20*)&p.Q).x;
+    r.y = (*(sV_12CD20*)&p.Q).y;
+    r.z = (*(sV_12CD20*)&p.Q).z;
     r.x = -r.x;
     r.y = -r.y;
     r.z = -r.z;
@@ -3152,25 +3150,25 @@ static inline sV_12CD20 Conj_12CD20(const sVP_12CD20& p)
 extern "C" void func_0012CD20(cWipeoutControl* self)
 {
     char* r = (char*)self->mRider;
-    sVP_12CD20* nodes = *(sVP_12CD20**)(*(char**)(r + 0x780) + 0x2C);
-    sVP_12CD20* p1 = &nodes[*(int*)(r + 0x89C)];
-    sVP_12CD20* p2 = &nodes[*(int*)(r + 0x8A4)];
+    tPose* nodes = *(tPose**)(*(char**)(r + 0x780) + 0x2C);
+    tPose* p1 = &nodes[*(int*)(r + 0x89C)];
+    tPose* p2 = &nodes[*(int*)(r + 0x8A4)];
     float t = func_00312AB0(*(void**)(r + 0x784), 2);
     if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
     {
         char* an = func_00311B20(*(void**)((char*)self->mRider + 0x784), 2);
         float rate = *(float*)(an + 0x90);
         float s = rate / ((t - self->PrevFramePercent) * *(float*)(an + 0x10));
-        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p1->a, (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
+        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&p1->P), (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
         float s2 = s + s;
-        sV_12CD20 d = Sub_12CD20(p1->b, (*(sV_12CD20*)&self->RiderPrevPose.Q));
+        sV_12CD20 d = Sub_12CD20((*(sV_12CD20*)&p1->Q), (*(sV_12CD20*)&self->RiderPrevPose.Q));
         sV_12CD20 q = QuatMul_12CD20(d, Conj_12CD20(*p1));
         sV_12CD20 angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
         func_00136DE0(*(char**)((char*)self->mRider + 0x77C) + 0x30, (char*)self->mRider + 0x1E0, &angvel);
         if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x17)
         {
-            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p2->a, (*(sV_12CD20*)&self->BoardPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
-            d = Sub_12CD20(p2->b, (*(sV_12CD20*)&self->BoardPrevPose.Q));
+            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&p2->P), (*(sV_12CD20*)&self->BoardPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
+            d = Sub_12CD20((*(sV_12CD20*)&p2->Q), (*(sV_12CD20*)&self->BoardPrevPose.Q));
             q = QuatMul_12CD20(d, Conj_12CD20(*p2));
             angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
             func_00136D40(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, (sVecPair_12CA30*)p2);
@@ -3186,17 +3184,17 @@ extern "C" void func_0012CD20(cWipeoutControl* self)
             func_0012DA88(self);
             if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
                 func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
-                func_00296868(func_0028B180(), ((sAiObj12CD20*)self));
+                func_00296868(func_0028B180(), (self));
             else
-                func_00296E80(func_0028B180(), ((sAiObj12CD20*)self));
+                func_00296E80(func_0028B180(), (self));
         }
         return;
     }
     if (t < 0.949999988079071f)
     {
         self->PrevFramePercent = t;
-        (*(sVP_12CD20*)&self->RiderPrevPose) = *p1;
-        (*(sVP_12CD20*)&self->BoardPrevPose) = *p2;
+        (*(&self->RiderPrevPose)) = *p1;
+        (*(&self->BoardPrevPose)) = *p2;
     }
 }
 #endif
@@ -5607,19 +5605,10 @@ static inline void aiSetLean_08D8(char* r, float v)
     *(float*)(r + 0x280) = *(float*)(r + 0x288) = v;
 }
 
-struct sAiObj_08D8
-{
-    float mHeading;  // 0x00
-    float mTimer;    // 0x04
-    int mFlag;       // 0x08
-    float mC;        // 0x0C
-    int mId;         // 0x10
-    char* mRider;    // 0x14
-};
 
 extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void* in)
 {
-    sAiObj_08D8* self = (sAiObj_08D8*)vself;
+    cBoardPressControl* self = vself;
     sAiBits_08D8* bits = (sAiBits_08D8*)((char*)in + 4);
     float b = bits->lo * 0.032258063554763794f;
     float a = bits->hi * 0.032258063554763794f;
@@ -5627,14 +5616,14 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
     float ab = aiAbs_08D8(b);
     float m = aa < ab ? ab : aa;
     char* r0;
-    if (m < 0.1f || aiDot_08D8(*(sAiVec4_08D8*)((r0 = self->mRider) + 0x1E0), *(sAiVec4_08D8*)(r0 + 0x3A0)) < 0.0f || self->mId != 0)
+    if (m < 0.1f || aiDot_08D8(*(sAiVec4_08D8*)((r0 = ((char*)self->mRider)) + 0x1E0), *(sAiVec4_08D8*)(r0 + 0x3A0)) < 0.0f || self->IsOllieHeld != 0)
     {
         cBoardPressControl_autoCompletePivot((cBoardPressControl*)self);
-        float ra = aiAbs_08D8(*(float*)(self->mRider + 0x280));
+        float ra = aiAbs_08D8(*(float*)(((char*)self->mRider) + 0x280));
         if (ra <= 0.2f || ra >= 0.8f)
         {
             if (m < 0.1f)
-                self->mC = 1.0f;
+                self->PressTimer = 1.0f;
             cBoardPressControl_blendOutOfPivot((cBoardPressControl*)self);
             return 0;
         }
@@ -5643,13 +5632,13 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
     if (*(int*)(r0 + 0x320) != 0)
         a = -a;
     float ang = aiAtan2_08D8(a, b);
-    float h = *(float*)(self->mRider + 0x280) * 3.1415927410125732f;
+    float h = *(float*)(((char*)self->mRider) + 0x280) * 3.1415927410125732f;
     float d = aiWrap_08D8(ang - h);
-    int anim = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
+    int anim = func_00312AA0(*(void**)(((char*)self->mRider) + 0x784), 2);
     int special = anim == 0x25 || anim == 0x26 || anim == 0x1D || anim == 0x1E;
     if (!special && aiAbs_08D8(d) >= 0.4712389409542084f)
     {
-        char* r = self->mRider;
+        char* r = ((char*)self->mRider);
         if (aiAbs_08D8(*(float*)(r + 0x280)) > 0.5f)
         {
             if (d > 0.0f)
@@ -5667,7 +5656,7 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
     }
     else
     {
-        char* r = self->mRider;
+        char* r = ((char*)self->mRider);
         float step = d * 0.01666666753590107f * (*(float*)(r + 0x300) * 2.0f);
         float nh;
         if (h < 0.0f && step > 0.0f)
@@ -5676,15 +5665,15 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
             nh = aiWrap_08D8(h + step + 6.2831854820251465f);
         else
             nh = aiWrap_08D8(h + step);
-        aiSetLean_08D8(self->mRider, nh * 0.31830987334251404f);
+        aiSetLean_08D8(((char*)self->mRider), nh * 0.31830987334251404f);
     }
-    char* r3 = self->mRider;
+    char* r3 = ((char*)self->mRider);
     float ra = aiAbs_08D8(*(float*)(r3 + 0x280));
     if (ra >= 0.15000000596046448f && ra <= 0.8500000238418579f)
     {
         *(float*)(r3 + 0x27C) = 0.5f;
         *(float*)(r3 + 0x278) = *(float*)(r3 + 0x300) * 0.01666666753590107f;
-        char* r2 = self->mRider;
+        char* r2 = ((char*)self->mRider);
         int na;
         if (*(int*)(r2 + 0x330) == 1)
             na = *(float*)(r2 + 0x280) > 0.0f ? 0x1D : 0x1E;
@@ -5694,7 +5683,7 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
             return 1;
         if (!special)
             cBoardPressControl_changeFakieBoardPress((cBoardPressControl*)self);
-        cRiderAnimBase_play(*(void**)(self->mRider + 0x784), na, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)(((char*)self->mRider) + 0x784), na, 0, -1.0f);
         return 1;
     }
     cBoardPressControl_blendOutOfPivot((cBoardPressControl*)self);
@@ -8286,147 +8275,139 @@ extern "C" float func_00119708(void* metrix, int id);
 extern "C" float func_001197D8(void* metrix, int id);
 extern "C" void func_0029A530(void* self, void* obj);
 
-// Trick-animation sequencer: state at 0x4 (0..5), current trick at 0x8, rider at 0x58.
-struct sTrickAnim_52A8 {
-    int unk_00;
-    int state;      // 0x04
-    int trick;      // 0x08
-    char pad_0C[0x58 - 0xC];
-    cRider* rider;  // 0x58
-};
 
 extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int held)
 {
-    sTrickAnim_52A8* self = (sTrickAnim_52A8*)vself;
-    float speed = cRider_getGrabAnimSpeedScale(self->rider);
+    cSpinControl* self = vself;
+    float speed = cRider_getGrabAnimSpeedScale(self->mRider);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    int hi = self->rider->mUberLevel >= 5;
+    int hi = self->mRider->mUberLevel >= 5;
     int anim;
 
-    if (self->state == 0) {
+    if (self->GrabState == 0) {
         if (trick == -1) {
-            if (self->trick != trick) {
-                *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = -1.0f;
-                cRiderAnimBase_play(self->rider->mRiderAnim, 0x11F, 0, -1.0f);
-                self->trick = trick;
+            if (self->CurrentGrab != trick) {
+                *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = -1.0f;
+                cRiderAnimBase_play(self->mRider->mRiderAnim, 0x11F, 0, -1.0f);
+                self->CurrentGrab = trick;
             }
-        } else if (self->trick != trick) {
-            self->trick = trick;
-            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x12) {
-                cRider* r = self->rider;
-                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->trick), 1, -1.0f);
+        } else if (self->CurrentGrab != trick) {
+            self->CurrentGrab = trick;
+            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x12) {
+                cRider* r = self->mRider;
+                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->CurrentGrab), 1, -1.0f);
             } else {
-                cRider* r = self->rider;
-                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->trick), 0, -1.0f);
+                cRider* r = self->mRider;
+                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->CurrentGrab), 0, -1.0f);
             }
-            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
-        } else if (func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 0)) {
-            self->state = 1;
+            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+        } else if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
+            self->GrabState = 1;
         }
     }
-    if (self->state == 1) {
-        if (func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 1)) {
-            cRider* r = self->rider;
-            func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_00150118(iface, r->mAIIndex, self->trick)));
-            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = 0.0f;
-            if (func_001500F8(iface, self->rider->mAIIndex, self->trick) != 0x1B6) {
-                cRider* r2 = self->rider;
-                cRiderAnimBase_play_i(r2->mRiderAnim, func_001500F8(iface, r2->mAIIndex, self->trick), 0, -1.0f);
-                *(float*)(func_00311B20(self->rider->mRiderAnim, 1) + 0x90) = speed;
+    if (self->GrabState == 1) {
+        if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+            cRider* r = self->mRider;
+            func_0010E098(self->mRider, 1, func_00119708(r->mMetrix, func_00150118(iface, r->mAIIndex, self->CurrentGrab)));
+            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
+            if (func_001500F8(iface, self->mRider->mAIIndex, self->CurrentGrab) != 0x1B6) {
+                cRider* r2 = self->mRider;
+                cRiderAnimBase_play_i(r2->mRiderAnim, func_001500F8(iface, r2->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
             }
-            self->state = 2;
+            self->GrabState = 2;
         }
     }
-    if (self->state == 2) {
-        if (trick != self->trick) {
-            cRider* r = self->rider;
-            func_0010E098(self->rider, 1, func_001197D8(r->mMetrix, func_00150118(iface, r->mAIIndex, self->trick)));
-            func_00311E88(self->rider->mRiderAnim, 1, 0.33000001311302185f);
-            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
-            self->state = 5;
+    if (self->GrabState == 2) {
+        if (trick != self->CurrentGrab) {
+            cRider* r = self->mRider;
+            func_0010E098(self->mRider, 1, func_001197D8(r->mMetrix, func_00150118(iface, r->mAIIndex, self->CurrentGrab)));
+            func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
+            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            self->GrabState = 5;
         } else if (held != 0) {
-            func_00311E88(self->rider->mRiderAnim, 1, 0.10000000149011612f);
-            func_00311E88(self->rider->mRiderAnim, 2, 0.10000000149011612f);
-            if (self->rider->mUberTimer == 0.0f || (self->rider->mUberFlags & 1) == 0
-                || func_00150198(iface, self->rider->mAIIndex, self->trick, hi) == 0x1B6) {
-                cRider* r = self->rider;
-                cRiderAnimBase_play(r->mRiderAnim, func_00150138(iface, r->mAIIndex, self->trick), 0, -1.0f);
+            func_00311E88(self->mRider->mRiderAnim, 1, 0.10000000149011612f);
+            func_00311E88(self->mRider->mRiderAnim, 2, 0.10000000149011612f);
+            if (self->mRider->mUberTimer == 0.0f || (self->mRider->mUberFlags & 1) == 0
+                || func_00150198(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == 0x1B6) {
+                cRider* r = self->mRider;
+                cRiderAnimBase_play(r->mRiderAnim, func_00150138(iface, r->mAIIndex, self->CurrentGrab), 0, -1.0f);
             } else {
-                cRider* r = self->rider;
-                cRiderAnimBase_play(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->trick, hi), 0, -1.0f);
+                cRider* r = self->mRider;
+                cRiderAnimBase_play(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
             }
-            func_0029A530(func_0028B180(), self->rider);
-            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
-            self->state = 3;
+            func_0029A530(func_0028B180(), self->mRider);
+            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            self->GrabState = 3;
         }
     }
-    if (self->state == 3) {
-        if (trick == self->trick && held != 0
-            && func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 1)) {
-            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = 0.0f;
-            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x13) {
-                cRider* r = self->rider;
-                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->trick)));
-                if (func_00150158(iface, self->rider->mAIIndex, self->trick) != 0x1B6) {
-                    cRider* r2 = self->rider;
-                    cRiderAnimBase_play_i(r2->mRiderAnim, func_00150158(iface, r2->mAIIndex, self->trick), 0, -1.0f);
-                    *(float*)(func_00311B20(self->rider->mRiderAnim, 1) + 0x90) = speed;
+    if (self->GrabState == 3) {
+        if (trick == self->CurrentGrab && held != 0
+            && func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
+            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
+                cRider* r = self->mRider;
+                func_0010E098(self->mRider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->CurrentGrab)));
+                if (func_00150158(iface, self->mRider->mAIIndex, self->CurrentGrab) != 0x1B6) {
+                    cRider* r2 = self->mRider;
+                    cRiderAnimBase_play_i(r2->mRiderAnim, func_00150158(iface, r2->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                    *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             } else {
-                cRider* r = self->rider;
-                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->trick, hi)));
-                if (func_001502C8(iface, self->rider->mAIIndex, self->trick, hi) != 0x1B6) {
-                    cRider* r2 = self->rider;
-                    cRiderAnimBase_play_i(r2->mRiderAnim, func_001502C8(iface, r2->mAIIndex, self->trick, hi), 0, -1.0f);
-                    *(float*)(func_00311B20(self->rider->mRiderAnim, 1) + 0x90) = speed;
+                cRider* r = self->mRider;
+                func_0010E098(self->mRider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->CurrentGrab, hi)));
+                if (func_001502C8(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 0x1B6) {
+                    cRider* r2 = self->mRider;
+                    cRiderAnimBase_play_i(r2->mRiderAnim, func_001502C8(iface, r2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
+                    *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             }
-            self->state = 4;
-        } else if (func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 1)
-                   || func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 3)
-                   || func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 2)) {
-            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x13) {
-                cRider* r = self->rider;
-                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->trick)));
-                cRider* r2 = self->rider;
-                func_0010E098(self->rider, 1, func_001197D8(r2->mMetrix, func_00150178(iface, r2->mAIIndex, self->trick)));
+            self->GrabState = 4;
+        } else if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)
+                   || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 3)
+                   || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
+            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
+                cRider* r = self->mRider;
+                func_0010E098(self->mRider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->CurrentGrab)));
+                cRider* r2 = self->mRider;
+                func_0010E098(self->mRider, 1, func_001197D8(r2->mMetrix, func_00150178(iface, r2->mAIIndex, self->CurrentGrab)));
             } else {
-                cRider* r = self->rider;
-                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->trick, hi)));
-                cRider* r2 = self->rider;
-                func_0010E098(self->rider, 1, func_001197D8(r2->mMetrix, func_001503F8(iface, r2->mAIIndex, self->trick, hi)));
+                cRider* r = self->mRider;
+                func_0010E098(self->mRider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->CurrentGrab, hi)));
+                cRider* r2 = self->mRider;
+                func_0010E098(self->mRider, 1, func_001197D8(r2->mMetrix, func_001503F8(iface, r2->mAIIndex, self->CurrentGrab, hi)));
             }
-            self->state = 5;
+            self->GrabState = 5;
         }
     }
-    if (self->state == 4) {
-        if (trick != self->trick || held == 0) {
-            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x13) {
-                cRider* r = self->rider;
-                func_0010E098(self->rider, 1, func_001197D8(r->mMetrix, func_00150178(iface, r->mAIIndex, self->trick)));
+    if (self->GrabState == 4) {
+        if (trick != self->CurrentGrab || held == 0) {
+            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
+                cRider* r = self->mRider;
+                func_0010E098(self->mRider, 1, func_001197D8(r->mMetrix, func_00150178(iface, r->mAIIndex, self->CurrentGrab)));
             } else {
-                cRider* r = self->rider;
-                func_0010E098(self->rider, 1, func_001197D8(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->trick, hi)));
+                cRider* r = self->mRider;
+                func_0010E098(self->mRider, 1, func_001197D8(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->CurrentGrab, hi)));
             }
-            func_00311E88(self->rider->mRiderAnim, 1, 0.33000001311302185f);
-            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
-            self->state = 5;
+            func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
+            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            self->GrabState = 5;
         }
     }
-    anim = func_00311AE8(self->rider->mRiderAnim, 2);
-    if (self->state == 5) {
-        if (anim == 2 || func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 3)) {
+    anim = func_00311AE8(self->mRider->mRiderAnim, 2);
+    if (self->GrabState == 5) {
+        if (anim == 2 || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
             if (anim == 0x14 && held != 0 && trick != -1
-                && func_00150198(iface, self->rider->mAIIndex, trick, hi) != 0x1B6) {
-                self->trick = trick;
-                func_00311E88(self->rider->mRiderAnim, 1, 0.33000001311302185f);
-                cRider* r = self->rider;
-                cRiderAnimBase_play_i(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->trick, hi), 1, -1.0f);
-                *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
-                self->state = 3;
+                && func_00150198(iface, self->mRider->mAIIndex, trick, hi) != 0x1B6) {
+                self->CurrentGrab = trick;
+                func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
+                cRider* r = self->mRider;
+                cRiderAnimBase_play_i(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
+                *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+                self->GrabState = 3;
             } else {
-                self->state = 0;
-                self->trick = -1;
+                self->GrabState = 0;
+                self->CurrentGrab = -1;
             }
         }
     }

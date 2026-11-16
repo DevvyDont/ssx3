@@ -178,6 +178,16 @@ struct sGameModeMan {
     int f84;       // 0x84
 };
 
+/**
+ * Switches the game-mode manager to a new event type and picks the matching mode handler.
+ *
+ * Purges the current handler (its slot 3, func_00238C80), stores @p type in iCurrentGameEvent and the new race's
+ * cGamePath in iCurrentGamePath. Online (path 2): events 0 -> handler 8, 1-3 -> 9, 4 -> 5, 5 -> 6, others 8.
+ * Offline: 1-3 -> 0, 0 -> 1, 12 -> 2, 6-8 -> 4, 4 -> 5, 5 -> 6, 9-11 -> 7; other types keep the purged
+ * handler index. Then sets bIsEventDone and calls cGameModeMan_restartHeat().
+ *
+ * @param type  the BE game event (newRace.cGameEvent)
+ */
 extern "C" void cGameModeMan_initGameMode(cGameModeMan* self, unsigned int type)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);

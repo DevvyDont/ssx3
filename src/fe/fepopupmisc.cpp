@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/messagecenter.h"
+#include "fe/festatenetmessenger.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -136,6 +138,14 @@ extern "C" void* func_0039E390(void*);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos__cFEPopupScreenPos__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the screen-position popup through the UI-state destructor func_0039E390().
+ *
+ * Restores cFEPopupScreenPos_vtbl first. Only @p self is declared: the destructor flags the caller passed in the
+ * second argument register reach func_0039E390() unchanged.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 void* cFEPopupScreenPos__cFEPopupScreenPos(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEPopupScreenPos_vtbl;
@@ -192,6 +202,13 @@ extern "C" void cFEPopupScreenPos_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_getData);
 #ifdef SKIP_ASM
+/**
+ * Returns one of the screen-position popup's results.
+ *
+ * @param i  0 for the horizontal offset, 1 for the vertical offset (both clamped to -20..20 by the popup's
+ *           update), anything else for the accepted flag
+ * @return the x offset, the y offset, or 1 when the popup was accepted and 0 when it was cancelled
+ */
 extern "C" int cFEPopupScreenPos_getData(void* self, int i)
 {
     switch (i) {
@@ -760,6 +777,14 @@ extern "C" void* func_001DF900(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup__cFEStateNetHelpPopup__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the network help popup through the UI-state destructor func_0039E390().
+ *
+ * Restores cFEStateNetHelpPopup_vtbl first. Only @p self is declared: the destructor flags the caller passed in
+ * the second argument register reach func_0039E390() unchanged.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetHelpPopup_vtbl;
@@ -1679,6 +1704,14 @@ extern "C" int func_001E02C8(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the multiplayer-mode selection popup through the UI-state destructor func_0039E390().
+ *
+ * Restores cFEPopupSelectMultiplayerMode_vtbl first. Only @p self is declared: the destructor flags the caller
+ * passed in the second argument register reach func_0039E390() unchanged.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEPopupSelectMultiplayerMode_vtbl;
@@ -1767,6 +1800,17 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
+/**
+ * Handles the multiplayer-mode popup's menu events by moving the selection on scroll events.
+ *
+ * cUIMenu_onInputChangeItem() sends event 2 when the menu scrolls up and 3 when it scrolls down. Event 3 selects
+ * item @p idx + 1; event 2 selects @p idx - 1 and then, falling through into event 3's case, @p idx + 1.
+ *
+ * @param menu  the menu that sent the event
+ * @param key   menu event number (On Tour: Event)
+ * @param idx   the event's index argument (the menu's scroll offset for events 2 and 3)
+ * @return always 0x101, the base handler's result
+ */
 extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(void* self, void* menu, unsigned int key, int idx)
 {
     switch (key) {
@@ -1793,6 +1837,11 @@ extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(void* self, void* menu
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_getData__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a multiplayer mode was chosen in the popup.
+ *
+ * @return 1 after an entry was chosen (widget event 5), 0 after widget event 6 (probably cancel)
+ */
 signed char cFEPopupSelectMultiplayerMode_getData(void* self)
 {
     return *(signed char*)((char*)self + 0x48);
@@ -2729,16 +2778,16 @@ static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F6
     *(int*)((char*)self + 0x6F0) = 0;
 }
 
-extern "C" void* func_001E0F60(void* self)
+extern "C" void* func_001E0F60(cFEStateNetMessenger* self)
 {
     func_001A8500(self, 0, 0);
     int d = D_004A3E90;
-    *(void***)((char*)self + 0x8) = D_00467F28;
-    *(int*)((char*)self + 0x6D0) = d;
-    *(int*)((char*)self + 0x6D4) = d;
-    *(int*)((char*)self + 0x6E0) = d;
+    self->mVtbl = D_00467F28;
+    self->mszFoundName = (char*)d;
+    self->mszSearchName = (char*)d;
+    self->unk_6E0 = (char*)d;
     InitVec_E0F60(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2791,9 +2840,9 @@ public:
     virtual void v32();
 };
 
-extern "C" int func_001E0FC0(func_001E0FC0_cObj* self)
+extern "C" int func_001E0FC0(cFEStateNetMessenger* self)
 {
-    self->v32();
+    ((func_001E0FC0_cObj*)self)->v32();
     return 1;
 }
 #endif
@@ -2949,6 +2998,11 @@ INCLUDE_ASM("fe/fepopupmisc", cUIInput__cUIInput);
 void operator_delete(int* ptr);
 extern void* cUIInput_vtbl[];
 
+/**
+ * Destroys a UI input object: restores cUIInput's vtable, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cUIInput__cUIInput(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cUIInput_vtbl;
@@ -3330,6 +3384,11 @@ int func_001E1290(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_setPadNum__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the controller pad number of a UI input object.
+ *
+ * @param val  pad number, stored as a byte at offset 4
+ */
 void cUIInput_setPadNum(void* self, int val)
 {
     *(char*)((char*)self + 0x4) = (char)val;
@@ -5173,17 +5232,17 @@ struct sObj_3C00 {
     int h16C;   // 0x16C
 };
 
-extern "C" void* func_001E3C00(void* self, void* engine, int a2)
+extern "C" void* func_001E3C00(cOVState_MESSAGECENTER* self, void* engine, int a2)
 {
     sObj_3C00* o = (sObj_3C00*)self;
     func_0039E2A0(self, engine);
-    *(int*)((char*)self + 0x98) = a2;
-    *(void***)((char*)self + 0x8) = D_00474E08;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x54) = 0;
+    self->mOVID = a2;
+    self->mVtbl = D_00474E08;
+    self->mDoneTransition = 0;
+    self->mAllowPauseMenu = 0;
+    self->mRemovePDA = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A2088[0];
-    *(void***)((char*)self + 0x8) = D_00474318;
+    self->mVtbl = D_00474318;
     int i;
     for (i = 0; i < 8; i++) {
         o->a[i] = 0;
@@ -5192,40 +5251,40 @@ extern "C" void* func_001E3C00(void* self, void* engine, int a2)
         o->d[i] = 0;
         o->e[i] = 0;
     }
-    *(int*)((char*)self + 0x13C) = 0;
-    *(int*)((char*)self + 0x140) = 0;
-    *(int*)((char*)self + 0x144) = 0;
-    *(int*)((char*)self + 0x14C) = 0;
-    *(int*)((char*)self + 0x150) = 0;
-    *(int*)((char*)self + 0x154) = 0;
-    *(int*)((char*)self + 0x158) = 0;
-    *(int*)((char*)self + 0x15C) = 0;
-    *(int*)((char*)self + 0x160) = 0;
+    self->mpTotalMessagesLabel = 0;
+    self->mpUnreadMessagesLabel = 0;
+    self->mpMenu = 0;
+    self->mpButtonSquare = 0;
+    self->mpButtonText3 = 0;
+    self->mpButtonCross = 0;
+    self->mpButtonText1 = 0;
+    self->mpArrowUp = 0;
+    self->mpArrowDown = 0;
     {
-        char* eng = *(char**)((char*)self + 0x10);
+        char* eng = (char*)self->mpEngine;
         int h = GetHashValue32(D_004A20D8);
         o->h164 = func_00398380(eng + 0x58, h);
     }
     {
-        char* eng = *(char**)((char*)self + 0x10);
+        char* eng = (char*)self->mpEngine;
         int h = GetHashValue32(D_0046DF68);
         o->h168 = func_00398380(eng + 0x58, h);
     }
     {
-        char* eng = *(char**)((char*)self + 0x10);
+        char* eng = (char*)self->mpEngine;
         int h = GetHashValue32(D_0046DF78);
         o->h16C = func_00398380(eng + 0x58, h);
     }
     if (~D_004A20CC != 0) {
         if (func_001E3A30((void*)7) != 0)
-            *(int*)((char*)self + 0x18) = 0;
+            self->miMiscData = 0;
         else
-            *(int*)((char*)self + 0x18) = 1;
+            self->miMiscData = 1;
         func_001E3A78(7, 1);
     } else {
-        *(int*)((char*)self + 0x18) = 2;
+        self->miMiscData = 2;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -5236,22 +5295,22 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3D58);
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVStateManager_addPDATemplate();
-extern "C" void func_001E48B0(void*);
-extern "C" void func_001E4758(void*);
-extern "C" void func_001E4458(void*);
-extern "C" void func_001E4658(void*);
+extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4458(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
 extern char D_0046DF88[];
 
-extern "C" void func_001E3D58(void* self)
+extern "C" void func_001E3D58(cOVState_MESSAGECENTER* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046DF88), 0);
-    *(void**)((char*)self + 0x17C) = screen;
+    self->mpMessageScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    int mode = *(int*)((char*)self + 0x18);
+    int mode = self->miMiscData;
     if (mode == 0) {
         goto add;
     }
@@ -5259,10 +5318,10 @@ extern "C" void func_001E3D58(void* self)
     add:
         cOVStateManager_addPDATemplate();
     }
-    *(int*)((char*)self + 0x174) = 0;
+    self->mScrollOffset = 0;
     int n = func_001E33E8_noarg();
     n += func_001E2BB8(4, 1);
-    cUIMenu_setScrollableMenu(*(void**)((char*)self + 0x144), (unsigned char)n);
+    cUIMenu_setScrollableMenu(self->mpMenu, (unsigned char)n);
     func_001E48B0(self);
     func_001E4758(self);
     func_001E4458(self);
@@ -5282,9 +5341,9 @@ extern int D_004A2A50;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
-extern "C" void func_001E3E30(void* self)
+extern "C" void func_001E3E30(cOVState_MESSAGECENTER* self)
 {
-    int s = *(int*)((char*)self + 0x18);
+    int s = self->miMiscData;
     if (s == 1) {
         func_001E3A78(7, 0);
         cOVStateManager_removePDATemplate();
@@ -5428,7 +5487,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4168);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" unsigned char func_001E3680(int id);
-extern "C" void func_001E50C8(void* self, int a1, int a2);
+extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
 
 struct sVEntry001E4168 {
     short delta;
@@ -5436,21 +5495,21 @@ struct sVEntry001E4168 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E4168(void* self)
+extern "C" void func_001E4168(cOVState_MESSAGECENTER* self)
 {
-    int state = *(int*)((char*)self + 0x18);
+    int state = self->miMiscData;
     if (state == 0) {
         goto reset;
     }
     if (state == 1) {
     reset:
-        cUIMenu_setSelectedByIndex(*(void**)((char*)self + 0x144), func_001E3680(0x25));
-        void* menu = *(void**)((char*)self + 0x144);
+        cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(0x25));
+        void* menu = self->mpMenu;
         sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
         vt[7].fn((char*)menu + vt[7].delta, 1);
         func_001E50C8(self, 0x25, -1);
     } else {
-        void* menu = *(void**)((char*)self + 0x144);
+        void* menu = self->mpMenu;
         sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
         vt[7].fn((char*)menu + vt[7].delta, 1);
     }
@@ -5493,13 +5552,13 @@ unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" bool func_001E3A30_b(int id) __asm__("func_001E3A30");
 extern "C" int func_001E3620(int idx);
 extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E48B0(void*);
-extern "C" void func_001E4458(void*);
-extern "C" void func_001E4658(void*);
-extern "C" void func_001E50C8(void* self, int a1, int a2);
-extern "C" void func_001E5148(void* self, int idx);
+extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4458(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
+extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
+extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
 
-extern "C" void func_001E4200(void* self, void* widget, unsigned int event)
+extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -5510,7 +5569,7 @@ extern "C" void func_001E4200(void* self, void* widget, unsigned int event)
     switch (event) {
     case 5:
         if (n1 + n2 > 0) {
-            int k = *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95);
+            int k = *(unsigned char*)((char*)self->mpMenu + 0x95);
             int idx = n2 - k - 1;
             if (idx >= 0) {
                 int id = func_001E3620(idx);
@@ -5532,22 +5591,22 @@ extern "C" void func_001E4200(void* self, void* widget, unsigned int event)
         }
         break;
     case 7:
-        *(int*)((char*)self + 0x170) = 0;
+        self->mbMessageDeleted = 0;
         if (n2 > 0) {
-            int idx = n2 - *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95) - 1;
+            int idx = n2 - *(unsigned char*)((char*)self->mpMenu + 0x95) - 1;
             if (idx >= 0) {
                 func_001E5148(self, idx);
-                *(int*)((char*)self + 0x170) = 1;
+                self->mbMessageDeleted = 1;
             }
             func_001E4458(self);
         }
         break;
     case 6: {
-        int f = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x17C), GetHashValue32(D_0046E050));
+        int f = cUIScreen_getFrameByLabel(self->mpMessageScreen, GetHashValue32(D_0046E050));
         if (f != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x17C), f, 1);
+            cUIScreen_playFrame(self->mpMessageScreen, f, 1);
         }
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        func_0039F190((char*)self->mpEngine + 0x18, 1);
         D_004A20C0 = 0;
         break;
     }
@@ -5574,8 +5633,8 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" int func_001E2C80(int type, int idx, int mode);
 extern "C" int func_001E3A30(void* self);
-extern "C" void func_001E4840(void* self, void* obj);
-extern "C" void func_001E4878(void* self, void* obj);
+extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj);
+extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj);
 extern char D_0046E060[];
 extern char D_0046E070[];
 extern char D_0046E080[];
@@ -5593,30 +5652,30 @@ struct sEntry14_4458 {
 };
 extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
 
-extern "C" void func_001E4458(void* self)
+extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
 {
-    int base = *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95);
+    int base = *(unsigned char*)((char*)self->mpMenu + 0x95);
     int diff = func_001E33E8_noarg() - base;
     if (diff - 1 >= 0) {
-        func_001E4878(self, *(void**)((char*)self + 0x14C));
-        func_001E4878(self, *(void**)((char*)self + 0x150));
-        if (*(cUIText**)((char*)self + 0x158) != 0)
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x158), GetHashValue32(D_0046E060));
+        func_001E4878(self, self->mpButtonSquare);
+        func_001E4878(self, self->mpButtonText3);
+        if (self->mpButtonText1 != 0)
+            cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(D_0046E060));
     } else {
-        func_001E4840(self, *(void**)((char*)self + 0x14C));
-        func_001E4840(self, *(void**)((char*)self + 0x150));
-        if (*(cUIText**)((char*)self + 0x158) != 0) {
+        func_001E4840(self, self->mpButtonSquare);
+        func_001E4840(self, self->mpButtonText3);
+        if (self->mpButtonText1 != 0) {
             int id = func_001E2C80(4, -diff, 1);
             sEntry18_4458* a = &D_004C6C08_4458[id];
             int t = a->field_0x4;
             sEntry14_4458* b = &D_00441630_4458[t];
             if (id == b->field_0x4) {
                 if (func_001E3A30((void*)t))
-                    cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x158), GetHashValue32(D_0046E070));
+                    cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(D_0046E070));
                 else
-                    cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x158), GetHashValue32(D_0046E080));
+                    cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(D_0046E080));
             } else {
-                cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x158), GetHashValue32(D_0046E060));
+                cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(D_0046E060));
             }
         }
     }
@@ -5627,15 +5686,15 @@ extern "C" void func_001E4458(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E4578);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_001E4658(void* self);
-extern "C" void func_001E48B0(void* self);
-extern "C" void func_001E4458(void* self);
+extern "C" void func_001E4658(cOVState_MESSAGECENTER* self);
+extern "C" void func_001E48B0(cOVState_MESSAGECENTER* self);
+extern "C" void func_001E4458(cOVState_MESSAGECENTER* self);
 
-extern "C" int func_001E4578(char* self, void* widget, int event, int value)
+extern "C" int func_001E4578(cOVState_MESSAGECENTER* self, void* widget, int event, int value)
 {
     switch (event) {
     case 4:
-        *(int*)(self + 0x174) = value;
+        self->mScrollOffset = value;
         func_001E4658(self);
         func_001E48B0(self);
         break;
@@ -5645,7 +5704,7 @@ extern "C" int func_001E4578(char* self, void* widget, int event, int value)
     case 9:
         return 0;
     case 8:
-        return *(int*)(self + 0x170) != 0;
+        return self->mbMessageDeleted != 0;
     case 6:
     case 7:
         return 1;
@@ -5657,16 +5716,16 @@ extern "C" int func_001E4578(char* self, void* widget, int event, int value)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4610);
 #ifdef SKIP_ASM
-extern "C" void func_001E48B0(void*);
-extern "C" void func_001E4758(void*);
+extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
 extern "C" void func_0039F190(void* self, int a1);
 
-extern "C" void func_001E4610(void* self, int a1, int a2)
+extern "C" void func_001E4610(cOVState_MESSAGECENTER* self, int a1, int a2)
 {
     if (a2 == 0x14) {
         func_001E48B0(self);
         func_001E4758(self);
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        func_0039F190((char*)self->mpEngine + 0x18, 1);
     }
 }
 #endif
@@ -5685,14 +5744,14 @@ struct sVEntryK1E4658 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E4658(void* self)
+extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
 {
-    if (*(int*)((char*)self + 0x174) == 0) {
-        char* o = *(char**)((char*)self + 0x15C);
+    if (self->mScrollOffset == 0) {
+        char* o = (char*)self->mpArrowUp;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
         vt[9].fn(o + vt[9].delta, 0);
     } else {
-        char* o = *(char**)((char*)self + 0x15C);
+        char* o = (char*)self->mpArrowUp;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
         vt[9].fn(o + vt[9].delta, 1);
     }
@@ -5704,12 +5763,12 @@ extern "C" void func_001E4658(void* self)
         n = func_001E33E8_noarg();
         n += func_001E2BB8(4, 0);
     }
-    if (*(int*)((char*)self + 0x174) + 8 >= n) {
-        char* o = *(char**)((char*)self + 0x160);
+    if (self->mScrollOffset + 8 >= n) {
+        char* o = (char*)self->mpArrowDown;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
         vt[9].fn(o + vt[9].delta, 0);
     } else {
-        char* o = *(char**)((char*)self + 0x160);
+        char* o = (char*)self->mpArrowDown;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
         vt[9].fn(o + vt[9].delta, 1);
     }
@@ -5732,22 +5791,22 @@ struct sVEntry001E4758 {
     unsigned short* (*fn)(void*, int);
 };
 
-extern "C" void func_001E4758(void* self)
+extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
 {
     unsigned short buf[0x38];
-    if (*(void**)((char*)self + 0x13C) != 0) {
+    if (self->mpTotalMessagesLabel != 0) {
         char* o = (char*)SSXApp->FELocale;
         sVEntry001E4758* vt = *(sVEntry001E4758**)(o + 4);
         unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E0A8));
         sprintf1(buf, fmt, func_001E33E8_noarg());
-        cUIText_setUnicodeString(*(void**)((char*)self + 0x13C), buf);
+        cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
     }
-    if (*(void**)((char*)self + 0x140) != 0) {
+    if (self->mpUnreadMessagesLabel != 0) {
         char* o = (char*)SSXApp->FELocale;
         sVEntry001E4758* vt = *(sVEntry001E4758**)(o + 4);
         unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E0C0));
         sprintf1(buf, fmt, func_001E3408());
-        cUIText_setUnicodeString(*(void**)((char*)self + 0x140), buf);
+        cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
     }
 }
 #endif
@@ -5761,7 +5820,7 @@ struct sVEntry_func_001E4840 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E4840(void* self, void* obj)
+extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_func_001E4840* vt = *(sVEntry_func_001E4840**)((char*)obj + 0x8);
@@ -5779,7 +5838,7 @@ struct sVEntry_func_001E4878 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E4878(void* self, void* obj)
+extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_func_001E4878* vt = *(sVEntry_func_001E4878**)((char*)obj + 0x8);
@@ -5831,7 +5890,7 @@ struct sList_48B0 {
 };
 
 // Rebuilds the eight rows of the friends/buddies list from the local and online entries.
-extern "C" void func_001E48B0(void* selfp)
+extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
 {
     sList_48B0* self = (sList_48B0*)selfp;
     int online;
@@ -5911,7 +5970,7 @@ struct sPopupEntry18_4B80 {
 };
 extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
 
-extern "C" unsigned char func_001E4B80(void* self, int idx)
+extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
 {
     unsigned char r = 0xFF;
     if (D_004A20C4 == 0) {
@@ -5951,7 +6010,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int func_001E2EA0(int id);
-extern "C" void func_001E4F70(void* self, int slot, int id, unsigned char sub);
+extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char sub);
 extern char D_004A2100[];
 extern char D_004A2108[];
 extern char D_004A2110[];
@@ -6019,7 +6078,7 @@ static inline void show_4C78(sObj_4C78* o)
     o->vt[9].fn((char*)o + o->vt[9].delta, 1);
 }
 
-extern "C" void func_001E4C78(void* self_, int idx, int slot, int id, unsigned char sub)
+extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, int id, unsigned char sub)
 {
     sPopup_4C78* self = (sPopup_4C78*)self_;
     char buf[16];
@@ -6037,16 +6096,16 @@ extern "C" void func_001E4C78(void* self_, int idx, int slot, int id, unsigned c
                 setTint_4C78(self->aBC[slot], self->f16C, idx);
             }
         }
-        func_001E4840(self, self->a9C[slot]);
-        func_001E4878(self, self->aBC[slot]);
+        func_001E4840((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
+        func_001E4878((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
     } else {
         int mask = 1 << idx;
         if (*(int*)(p + 0xC8) & mask) {
-            func_001E4840(self, self->a9C[slot]);
-            func_001E4840(self, self->aBC[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
         } else {
-            func_001E4878(self, self->a9C[slot]);
-            func_001E4840(self, self->aBC[slot]);
+            func_001E4878((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
         }
     }
     if (self->a11C[slot] != 0) {
@@ -6071,7 +6130,7 @@ extern "C" void func_001E4C78(void* self_, int idx, int slot, int id, unsigned c
         self->aDC[slot]->f18 = id;
     }
     if (a->f8 == 1) {
-        func_001E4F70(self, slot, id, sub);
+        func_001E4F70((cOVState_MESSAGECENTER*)self, slot, id, sub);
     } else if (self->aFC[slot] != 0) {
         cUIText_setUnicodeStringByID((cUIText*)self->aFC[slot], a->f10);
         show_4C78(self->aFC[slot]);
@@ -6086,7 +6145,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4F70);
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" unsigned char func_001E5AA0(void* self, int idx);
+extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx);
 extern "C" int func_001E3388(int id);
 extern "C" unsigned char func_001E3650(int idx);
 extern "C" int func_001E2D58(int v, int i);
@@ -6110,7 +6169,7 @@ struct sVE1E4F70 {
 };
 
 // Fills text slot `slot` with the "level N" string for the reward id and shows it.
-extern "C" void func_001E4F70(void* self, int slot, int id, unsigned char lvl)
+extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char lvl)
 {
     char buf[48];
     if (func_001E2D58(3, id)) {
@@ -6143,14 +6202,14 @@ extern "C" void func_001E4F70(void* self, int slot, int id, unsigned char lvl)
 INCLUDE_ASM("fe/fepopupmisc", func_001E50C8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001E51D0(void* self, void* a1, void* owner, int a3, int a4);
+extern "C" void* func_001E51D0(cOVState_ViewPopup* self, void* a1, void* owner, int a3, int a4);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_0046E240[];
 
-extern "C" void func_001E50C8(void* self, int a1, int a2)
+extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2)
 {
-    void* item = func_001E51D0(cMemMan_alloc(0x70, D_0046E240, 0, 0), *(void**)((char*)self + 0x10), self, a1, a2);
-    void* a = *(void**)((char*)self + 0x17C);
+    void* item = func_001E51D0((cOVState_ViewPopup*)cMemMan_alloc(0x70, D_0046E240, 0, 0), self->mpEngine, self, a1, a2);
+    void* a = self->mpMessageScreen;
     void* b = *(void**)((char*)a + 0xD0);
     void* c = *(void**)((char*)b + 0x10);
     cUIStateStack_pushPopup((char*)c + 0x18, item);
@@ -6164,20 +6223,20 @@ extern "C" void func_001E31B8(int idx);
 extern "C" int func_001E2BB8(int a0, int a1);
 // PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-extern "C" void func_001E48B0(void*);
-extern "C" void func_001E4758(void*);
-extern "C" void func_001E4658(void*);
+extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
+extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
 
-extern "C" void func_001E5148(void* self, int idx)
+extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx)
 {
     func_001E31B8(idx);
-    int cur = *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95);
+    int cur = *(unsigned char*)((char*)self->mpMenu + 0x95);
     int n = func_001E2BB8(4, 1);
     n += func_001E33E8_noarg();
     if (cur >= n) {
         cur--;
     }
-    *(unsigned char*)(*(char**)((char*)self + 0x144) + 0x95) = cur;
+    *(unsigned char*)((char*)self->mpMenu + 0x95) = cur;
     func_001E48B0(self);
     func_001E4758(self);
     func_001E4658(self);
@@ -6190,21 +6249,21 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E51D0);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern void* D_00474248[];
 
-extern "C" void* func_001E51D0(void* self, void* engine, void* owner, int a3, int a4)
+extern "C" void* func_001E51D0(cOVState_ViewPopup* self, void* engine, void* owner, int a3, int a4)
 {
     func_0039E318(self, engine, owner);
-    *(int*)((char*)self + 0x68) = a3;
-    *(int*)((char*)self + 0x6C) = a4;
-    *(void***)((char*)self + 0x8) = D_00474248;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x50) = 0;
-    *(int*)((char*)self + 0x54) = 0;
-    *(int*)((char*)self + 0x5C) = 0;
-    *(int*)((char*)self + 0x60) = 0;
-    *(int*)((char*)self + 0x64) = 0;
-    *(int*)((char*)self + 0x58) = 0;
-    return self;
+    self->miMessage = a3;
+    self->miNumber = a4;
+    self->mVtbl = D_00474248;
+    self->mpNumberLabel = 0;
+    self->mpNumber = 0;
+    self->mpFrom = 0;
+    self->mpSubject = 0;
+    self->mpButtonSquare = 0;
+    self->mpDeleteMessage = 0;
+    self->mpKeepMessage = 0;
+    self->mpMessageLine0 = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -6216,11 +6275,11 @@ extern char D_0046E258[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-extern "C" void func_001E5248(void* self)
+extern "C" void func_001E5248(cOVState_ViewPopup* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E258), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -6241,9 +6300,9 @@ void* func_001E52B0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E52D0);
 #ifdef SKIP_ASM
-extern "C" void func_001E5428(void* self);
+extern "C" void func_001E5428(cOVState_ViewPopup* self);
 
-extern "C" int func_001E52D0(void* self, int on)
+extern "C" int func_001E52D0(cOVState_ViewPopup* self, int on)
 {
     if (on != 0) {
         func_001E5428(self);
@@ -6272,27 +6331,27 @@ struct sVEntryK1E52F8 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E52F8(void* self, void* widget)
+extern "C" void func_001E52F8(cOVState_ViewPopup* self, void* widget)
 {
     int h = *(int*)((char*)widget + 0x38);
     sVEntryK1E52F8* vt = *(sVEntryK1E52F8**)((char*)widget + 8);
     vt[9].fn((char*)widget + vt[9].delta, 1);
     if (h == GetHashValue32(D_004A2120)) {
-        *(void**)((char*)self + 0x50) = widget;
+        self->mpFrom = (cUIText*)widget;
     } else if (h == GetHashValue32(D_004A2128)) {
-        *(void**)((char*)self + 0x54) = widget;
+        self->mpSubject = (cUIText*)widget;
     } else if (h == GetHashValue32(D_0046E268)) {
-        *(void**)((char*)self + 0x48) = widget;
+        self->mpNumberLabel = (cUIText*)widget;
     } else if (h == GetHashValue32(D_004A2130)) {
-        *(void**)((char*)self + 0x4C) = widget;
+        self->mpNumber = (cUIText*)widget;
     } else if (h == GetHashValue32(D_0046E278)) {
-        *(void**)((char*)self + 0x64) = widget;
+        self->mpKeepMessage = (cUIText*)widget;
     } else if (h == GetHashValue32(D_004A20A8)) {
-        *(void**)((char*)self + 0x5C) = widget;
+        self->mpButtonSquare = (cUIThing*)widget;
     } else if (h == GetHashValue32(D_0046E288)) {
-        *(void**)((char*)self + 0x60) = widget;
+        self->mpDeleteMessage = (cUIThing*)widget;
     } else if (h == GetHashValue32(D_0046E2A0)) {
-        *(void**)((char*)self + 0x58) = widget;
+        self->mpMessageLine0 = (cUIText*)widget;
     } else if (h == GetHashValue32(D_0046E2B0)) {
         *(int*)((char*)widget + 0x90) |= 8;
     }
@@ -6337,47 +6396,47 @@ extern char D_004A2138[];
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int func_001E2EA0(int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001E55D0(void* self, int idx);
-extern "C" void func_001E5780(void* self, int idx);
+extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx);
+extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx);
 
-extern "C" void func_001E5428(void* self)
+extern "C" void func_001E5428(cOVState_ViewPopup* self)
 {
-    sPopupEntry18_5428* a = &D_004C6C08_5428[*(int*)((char*)self + 0x68)];
+    sPopupEntry18_5428* a = &D_004C6C08_5428[self->miMessage];
     sPopupEntry14_5428* e = &D_00441630_5428[a->field_0x4];
     if (e->type == 4) {
-        void* o = *(void**)((char*)self + 0x5C);
+        void* o = self->mpButtonSquare;
         if (o != 0) {
             sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)o + 8);
             vt[9].fn((char*)o + vt[9].delta, 0);
         }
-        o = *(void**)((char*)self + 0x60);
+        o = (void*)self->mpDeleteMessage;
         if (o != 0) {
             sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)o + 8);
             vt[9].fn((char*)o + vt[9].delta, 0);
         }
-        if (*(cUIText**)((char*)self + 0x64) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x64), GetHashValue32(D_0046E2C0));
+        if (self->mpKeepMessage != 0) {
+            cUIText_setUnicodeStringByID(self->mpKeepMessage, GetHashValue32(D_0046E2C0));
         }
     }
-    if (*(void**)((char*)self + 0x4C) != 0) {
+    if (self->mpNumber != 0) {
         if (e->type == 4) {
             unsigned short buf[0x18];
             char* mgr = (char*)SSXApp->FELocale;
             sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
             unsigned short* fmt = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046E2D0));
-            sprintf1(buf, fmt, func_001E2DC0(*(int*)((char*)self + 0x68)));
-            cUIText_setUnicodeString(*(void**)((char*)self + 0x4C), buf);
+            sprintf1(buf, fmt, func_001E2DC0(self->miMessage));
+            cUIText_setUnicodeString(self->mpNumber, buf);
         } else {
             char buf[0x30];
-            sprintf(buf, D_004A2138, *(int*)((char*)self + 0x6C));
-            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x4C), buf);
+            sprintf(buf, D_004A2138, self->miNumber);
+            cUIText_setAsciiString(self->mpNumber, buf);
         }
     }
-    if (*(cUIText**)((char*)self + 0x50) != 0) {
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), func_001E2EA0(a->field_0xC));
+    if (self->mpFrom != 0) {
+        cUIText_setUnicodeStringByID(self->mpFrom, func_001E2EA0(a->field_0xC));
     }
-    func_001E55D0(self, *(int*)((char*)self + 0x68));
-    func_001E5780(self, *(int*)((char*)self + 0x68));
+    func_001E55D0(self, self->miMessage);
+    func_001E5780(self, self->miMessage);
 }
 #endif
 
@@ -6386,15 +6445,15 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E55D0);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void func_001E5638(void* self, int idx);
+extern "C" void func_001E5638(cOVState_ViewPopup* self, int idx);
 
-extern "C" void func_001E55D0(void* self, int idx)
+extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx)
 {
     char* e = (char*)&D_004C6C08[idx];
     if (*(int*)(e + 0x8) == 1) {
         func_001E5638(self, idx);
     } else {
-        cUIText* t = *(cUIText**)((char*)self + 0x54);
+        cUIText* t = self->mpSubject;
         if (t != 0) {
             cUIText_setUnicodeStringByID(t, *(int*)(e + 0x10));
         }
@@ -6409,7 +6468,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E5638);
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" unsigned char func_001E5AA0(void* self, int idx);
+extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx);
 extern "C" int func_001E3388(int id);
 extern "C" unsigned char func_001E3650(int idx);
 extern "C" int func_001E2D58(int v, int i);
@@ -6422,7 +6481,7 @@ extern char D_0046E1A0[];
 extern char D_0046E1C0[];
 
 // Sets the popup text to the "level N" string matching the reward id's category.
-extern "C" void func_001E5638(void* self, int id)
+extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
 {
     char buf[32];
     unsigned char lvl;
@@ -6447,8 +6506,8 @@ extern "C" void func_001E5638(void* self, int id)
     } else if (func_001E2D58(8, id)) {
         sprintf(buf, D_0046E1C0, lvl);
     }
-    if (*(cUIText**)((char*)self + 0x54) != 0) {
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x54), GetHashValue32(buf));
+    if (self->mpSubject != 0) {
+        cUIText_setUnicodeStringByID(self->mpSubject, GetHashValue32(buf));
     }
 }
 #endif
@@ -6462,16 +6521,16 @@ struct sVEntry001E5780 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E5780(void* self, int idx)
+extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
 {
     char* e = (char*)&D_004C6C08[idx];
     int kind = *(int*)(e + 0x8);
     if (kind < 2) {
         if (kind >= 0) {
-            char* t = *(char**)((char*)self + 0x58);
+            char* t = (char*)self->mpMessageLine0;
             *(int*)(t + 0x14) |= 0x80;
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), *(int*)(e + 0x14));
-            void* obj = *(void**)((char*)self + 0x58);
+            cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(e + 0x14));
+            void* obj = self->mpMessageLine0;
             sVEntry001E5780* vt = *(sVEntry001E5780**)((char*)obj + 8);
             vt[9].fn((char*)obj + vt[9].delta, 1);
         }
@@ -6501,11 +6560,11 @@ struct sVE5800 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001E5800(void* self, void* a1, unsigned int msg)
+extern "C" void func_001E5800(cOVState_ViewPopup* self, void* a1, unsigned int msg)
 {
     switch (msg) {
     case 7: {
-        int id = *(int*)((char*)self + 0x68);
+        int id = self->miMessage;
         sPopupEntry18_5800* a = &D_004C6C08_5800[id];
         sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
         if (b->type == 4) {
@@ -6514,13 +6573,13 @@ extern "C" void func_001E5800(void* self, void* a1, unsigned int msg)
         func_001E3268(id);
     }
     case 5: {
-        char* o = *(char**)((char*)self + 0x20);
+        char* o = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(o + 8);
         vt[17].fn(o + vt[17].delta, self, 0x14);
         break;
     }
     case 6: {
-        char* o = *(char**)((char*)self + 0x20);
+        char* o = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(o + 8);
         vt[17].fn(o + vt[17].delta, self, 0x14);
         break;
@@ -6536,35 +6595,35 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E58E0);
 extern "C" int func_001E34D8(int i);
 extern "C" int func_001E3408();
 extern "C" int func_001E3460(int* out);
-extern "C" void func_001E5428(void* self);
+extern "C" void func_001E5428(cOVState_ViewPopup* self);
 // PORT: func_001E33E8 is declared (void*) but called with no argument here
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 
-extern "C" void func_001E58E0(void* self)
+extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 {
-    int id = *(int*)((char*)self + 0x68);
+    int id = self->miMessage;
     sPopupEntry18_5800* a = &D_004C6C08_5800[id];
     sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
     if (b->type == 4) {
         int n = func_001E34D8(id);
         if (n == -1) {
-            char* o = *(char**)((char*)self + 0x20);
+            char* o = (char*)self->mpParentState;
             sVE5800* vt = *(sVE5800**)(o + 8);
             vt[17].fn(o + vt[17].delta, self, 0x14);
             return;
         }
-        *(int*)((char*)self + 0x68) = n;
-        *(int*)((char*)self + 0x6C) = *(int*)((char*)self + 0x6C) + 1;
+        self->miMessage = n;
+        self->miNumber = self->miNumber + 1;
         func_001E5428(self);
     } else if (func_001E3408() > 0) {
         sPopupList* t = func_001E39F8_list();
         int idx;
-        *(int*)((char*)self + 0x68) = func_001E3460(&idx);
+        self->miMessage = func_001E3460(&idx);
         t->mask |= 1 << idx;
-        *(int*)((char*)self + 0x6C) = func_001E33E8_noarg() - idx;
+        self->miNumber = func_001E33E8_noarg() - idx;
         func_001E5428(self);
     } else {
-        char* o = *(char**)((char*)self + 0x20);
+        char* o = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(o + 8);
         vt[17].fn(o + vt[17].delta, self, 0x14);
     }
@@ -6574,7 +6633,7 @@ extern "C" void func_001E58E0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5A18);
 #ifdef SKIP_ASM
-extern "C" int func_001E5A18(void* self, int a1, unsigned int a2)
+extern "C" int func_001E5A18(cOVState_ViewPopup* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 6:
@@ -6583,7 +6642,7 @@ extern "C" int func_001E5A18(void* self, int a1, unsigned int a2)
     case 9:
         return 0;
     case 8: {
-        sPopupEntry18* a = &D_004C6C08[*(int*)((char*)self + 0x68)];
+        sPopupEntry18* a = &D_004C6C08[self->miMessage];
         sPopupEntry14* b = &D_00441630[a->field_0x4];
         return *(int*)b->pad_0x0 != 4;
     }
@@ -6597,7 +6656,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E5AA0);
 #ifdef SKIP_ASM
 extern int D_004A20C4;
 
-extern "C" unsigned char func_001E5AA0(void* self, int idx)
+extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
 {
     if (D_004A20C4 == 0) {
         return 0xFF;

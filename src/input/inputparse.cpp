@@ -11,6 +11,15 @@ extern char D_004A3F08[];
 extern char D_0048DDD8[];
 extern char D_004A3F10[];
 
+/**
+ * Maps a button modifier name to its modifier code.
+ *
+ * Compared case-insensitively (func_0041AA88): "value" 0, "held" 1, "pressed" 2, "released" 3, "repeat" 4. Any
+ * other name gives 6 rather than an error value.
+ *
+ * @param name  modifier name
+ * @return the modifier code, or 6 for an unknown name
+ */
 extern "C" int cInputMapParser_lookupModifierName(cInputMapParser* self, const char* name)
 {
     if (func_0041AA88(name, D_004A3EF8) == 0) {
@@ -43,6 +52,16 @@ extern char D_004A3F18[];
 extern char D_004A3F20[];
 extern char D_004A3F28[];
 
+/**
+ * Maps a config variable name ("padtype", "argN" or "configN") to its config index.
+ *
+ * "padtype" (case-insensitive) is 0; "arg" followed by a decimal N below 8 is N + 1; "config" followed by a
+ * decimal N below 23 is N + 9. The number must not be followed by a letter or '_'. The prefixes are compared
+ * with func_0041AB78 over 3 and 6 characters.
+ *
+ * @param name  identifier text to look up
+ * @return the config index (0 to 31), or -1 if @p name is not a config name
+ */
 extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* name)
 {
     if (func_0041AA88(name, D_004A3F18) == 0)
@@ -567,6 +586,13 @@ extern char D_0048DF48[];
 extern char D_0048DF68[];
 extern char D_0048DF88[];
 
+/**
+ * Parses one `name = expression;` statement of an input map and records it as a new identifier.
+ *
+ * The name must be an identifier token that is not a button name, a config name or an existing identifier. On
+ * any error it reports through cInputMapParser_error() (for example "Expected '=' in statement.") and skips past
+ * the next semicolon; NumIdentifiers only grows when the whole statement parsed.
+ */
 extern "C" void cInputMapParser_parseStatement(cInputMapParser* self)
 {
     if (self->CurrentToken != 2) {
@@ -696,6 +722,15 @@ struct sOrNode_003233B8 {
     sOrNode_003233B8* b;
 };
 
+/**
+ * Parses an OR expression: one or more AND expressions joined by the `||` token (token 12).
+ *
+ * Folds constants (node type 4): a true constant operand turns the result into the constant 1.0 and a false one
+ * is dropped. Other operands are joined into type-6 OR nodes taken from the node pool (func_003215F8). If an
+ * operand fails to parse, the nodes built so far are freed.
+ *
+ * @return the expression's parse node, or 0 on a parse error
+ */
 extern "C" void* cInputMapParser_parseOr(cInputMapParser* self)
 {
     sOrNode_003233B8* left = (sOrNode_003233B8*)cInputMapParser_parseAnd(self);
@@ -2296,6 +2331,11 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_writeString);
 #ifdef SKIP_ASM
 extern "C" void cInputPreProcessor_writeChar(void* self, char c);
 
+/**
+ * Writes a null-terminated string to the preprocessor output, one cInputPreProcessor_writeChar() per character.
+ *
+ * @param s  the string to write
+ */
 extern "C" void cInputPreProcessor_writeString(void* self, char* s)
 {
     while (*s != 0) {

@@ -803,20 +803,17 @@ struct sBmVtblDAC8 {
 } __attribute__((aligned(8)));
 extern const sBmVtblDAC8 D_00483BC0_DAC8 __asm__("D_00483BC0");
 
-struct sBmSlotDAC8 {
-    char pad_0x0[0x2C];
-};
 
 struct sSndPlayerDAC8 {
     char* vbase;                // 0x0
     char pad_0x4[0x98 - 0x4];
-    sBmSlotDAC8 slots[48];      // 0x98
+    cMonitorInstance slots[48];      // 0x98
     void** vtbl;                // 0x8D8
 };
 
 extern "C" void func_002ADAC8(cMonitor* self, int flags)
 {
-    sBmSlotDAC8* end = ((sBmSlotDAC8*)&self->mMonitorInstance[0]) + 48;
+    cMonitorInstance* end = ((&self->mMonitorInstance[0])) + 48;
     self->mVtbl = cMonitor_vtbl;
     *(const sBmVtblDAC8**)((char*)self->mpVSoundSys + 4) = &D_00483BC0_DAC8;
     if (flags == 0) {
@@ -830,9 +827,9 @@ extern "C" void func_002ADAC8(cMonitor* self, int flags)
     // PORT: function pointer passed as int
     func_003B5948((int)func_002AD998);
     gMonitor = 0;
-    if (((sBmSlotDAC8*)&self->mMonitorInstance[0]) != 0) {
-        sBmSlotDAC8* p = end;
-        while (((sBmSlotDAC8*)&self->mMonitorInstance[0]) != p) {
+    if (((&self->mMonitorInstance[0])) != 0) {
+        cMonitorInstance* p = end;
+        while (((&self->mMonitorInstance[0])) != p) {
             p--;
             func_002AD860((int*)p, 0);
         }
@@ -3380,21 +3377,16 @@ extern "C" int func_002B1348(cSpeechSys* self, void* msg)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1428);
 #ifdef SKIP_ASM
-struct sBankSlot0018 {
-    int value;
-    int timer;
-    char pad[0x18];
-};
 
 struct sBankSlots {
     char pad[0x18];
-    sBankSlot0018 slots[10];
+    tSpeechRequest slots[10];
 };
 
 extern "C" void func_002B1428(cSpeechSys* self)
 {
     for (int i = 9; i >= 0; i--) {
-        ((sBankSlot0018*)&self->mRequest[0])[i].value = 0;
+        ((&self->mRequest[0]))[i].used = 0;
     }
 }
 #endif
@@ -3562,9 +3554,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1720);
 extern "C" void func_002B1720(sBankSlots* self)
 {
     for (int i = 0; i < 10; i++) {
-        if (self->slots[i].value != 0) {
+        if (self->slots[i].used != 0) {
             if (--self->slots[i].timer <= 0) {
-                self->slots[i].value = 0;
+                self->slots[i].used = 0;
             }
         }
     }

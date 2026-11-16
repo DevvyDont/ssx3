@@ -1929,6 +1929,18 @@ INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu__cRenderTogglesMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Render Toggles Menu" debug menu: its 49 embedded menu items in reverse order, then the cMenu
+ * base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Render Toggles". __sti__visualeffectsmenu_cpp calls it with flags
+ * 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0xA18, 2);
@@ -1990,6 +2002,18 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu__cVisualEffectsTestMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Visual Effects Test Menu" debug menu: its 19 embedded menu items in reverse order, then the
+ * cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Visual Effects Test". __sti__visualeffectsmenu_cpp calls it with
+ * flags 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x464, 2);
@@ -2021,6 +2045,17 @@ INCLUDE_ASM("main/debugmenu", cLightGlowMenu__cLightGlowMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Light Glow Menu" debug menu: its 31 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Light Glow". __sti__visualeffectsmenu_cpp calls it with flags 2 to
+ * destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cLightGlowMenu__cLightGlowMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x700, 2);
@@ -2070,6 +2105,19 @@ static inline void dtorSubMenuItem_24DC68(void* p)
     cMenuItem__cMenuItem(p, 2);
 }
 
+/**
+ * Destroys the "Depth Fog Menu" debug menu: its 10 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set. The ARGB colour item is torn down inline:
+ * its four channel items and RGB title item, its expand sub-menu (cMenu__cMenu() with flags 2), then the item
+ * itself.
+ *
+ * The "Visual Effects Main Menu" lists it as "Depth Fog". __sti__visualeffectsmenu_cpp calls it with flags 2 to
+ * destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cDepthFogMenu__cDepthFogMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x904, 2);
@@ -2097,6 +2145,17 @@ INCLUDE_ASM("main/debugmenu", cScreenTintMenu__cScreenTintMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Screen Tint Menu" debug menu: its 42 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Screen Tint". __sti__visualeffectsmenu_cpp calls it with flags 2
+ * to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScreenTintMenu__cScreenTintMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x928, 2);
@@ -2148,6 +2207,17 @@ extern "C" void cScreenTintMenu__cScreenTintMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cBoardTrailMenu__cBoardTrailMenu);
 #ifdef SKIP_ASM
+/**
+ * Destroys the "Board Trail Menu" debug menu: its 24 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Board Trail". __sti__visualeffectsmenu_cpp calls it with flags 2
+ * to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBoardTrailMenu__cBoardTrailMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x59C, 2);
@@ -2184,6 +2254,18 @@ INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "PowerUpFXToggles Menu" debug menu: its 17 embedded menu items in reverse order, then the cMenu
+ * base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Power Up Effects Toggles". __sti__visualeffectsmenu_cpp calls it
+ * with flags 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x418, 2);
@@ -2216,6 +2298,19 @@ static inline void dtorSubMenuItem_24E200(void* p)
     cMenuItem__cMenuItem(p, 2);
 }
 
+/**
+ * Destroys the "Snowfall Toggles" debug menu: its 14 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set. The ARGB colour items are torn down
+ * inline: each one's four channel items and RGB title item, its expand sub-menu (cMenu__cMenu() with flags 2),
+ * then the item itself.
+ *
+ * The "Visual Effects Main Menu" lists it as "Snowfall Test Effects". __sti__visualeffectsmenu_cpp calls it with
+ * flags 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0xFEC, 2);
@@ -2258,6 +2353,20 @@ static inline void dtorSubMenuItem_24E388(void* p)
     cMenuItem__cMenuItem(p, 2);
 }
 
+/**
+ * Destroys the "Camera Splash Menu" debug menu: its 58 embedded menu items in reverse order, then the cMenu
+ * base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set. The ARGB colour items are torn down
+ * inline: each one's four channel items and RGB title item, its expand sub-menu (cMenu__cMenu() with flags 2),
+ * then the item itself.
+ *
+ * The "Visual Effects Main Menu" lists it as "Camera Snow Splash Effects". __sti__visualeffectsmenu_cpp calls it
+ * with flags 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x252C, 2);
@@ -2348,6 +2457,17 @@ INCLUDE_ASM("main/debugmenu", cPathArrowMenu__cPathArrowMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "PathArrow Menu" debug menu: its 18 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Path Arrow Effects". __sti__visualeffectsmenu_cpp calls it with
+ * flags 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPathArrowMenu__cPathArrowMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x458, 2);
@@ -2588,6 +2708,19 @@ extern sSlot_E8D8 D_004A4FF0, D_004A4FF8, D_004A5000, D_004A5008, D_004A5010, D_
 
 // PORT: the unit declares __sti__visualeffectsmenu_cpp as void*(int, int); it returns nothing.
 extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio) __asm__("__sti__visualeffectsmenu_cpp");
+/**
+ * Constructs or destroys the visual-effects debug menus' static objects (the g++ static initialisation and
+ * destruction routine of visualeffectsmenu.cpp).
+ *
+ * Acts only for the default priority. With @p init set it builds the 56 four-float constants (the same table
+ * that opens the static initialisers of path/pathsys and object/railmodifier, probably colours), zeroes
+ * D_004A4FE8 and D_004A4FEC, numbers the 14 key objects D_004A4FF0..D_004A5058 from 0 to 13, then constructs the
+ * 17 static sub-menus that the "Visual Effects Main Menu" links to. With @p init clear it destroys those 17
+ * menus in reverse order with flags 2 (no free), inlining the destructors of seven of them.
+ *
+ * @param init  nonzero to construct the static objects, 0 to destroy them
+ * @param prio  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ */
 extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF) {
@@ -2710,6 +2843,18 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu__cVisualEffectsMainMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Visual Effects Main Menu" debug menu: its 19 embedded menu items in reverse order, then the
+ * cMenu base.
+ *
+ * The items are the title, the spacer and the 17 sub-menu links to the static effect menus. Each item goes
+ * through the base cMenuItem destructor with flags 2, which only resets the item's vtable; cMenu__cMenu() then
+ * frees the object when bit 0 of @p flags is set.
+ *
+ * No direct call is known: it is reached through the destructor slot of the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cVisualEffectsMainMenu__cVisualEffectsMainMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x324, 2);
@@ -2803,6 +2948,17 @@ INCLUDE_ASM("main/debugmenu", cPlantsMenu__cPlantsMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Plants Menu" debug menu: its 14 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Plants". __sti__visualeffectsmenu_cpp destroys the static instance
+ * with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPlantsMenu__cPlantsMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x398, 2);
@@ -2922,6 +3078,17 @@ INCLUDE_ASM("main/debugmenu", cHeightFogMenu__cHeightFogMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Height Fog Menu" debug menu: its 5 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Height Fog". __sti__visualeffectsmenu_cpp destroys the static
+ * instance with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cHeightFogMenu__cHeightFogMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
@@ -2970,6 +3137,18 @@ INCLUDE_ASM("main/debugmenu", cDetailSystemMenu__cDetailSystemMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Detail System Menu" debug menu: its 12 embedded menu items in reverse order, then the cMenu
+ * base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Detail System". __sti__visualeffectsmenu_cpp destroys the static
+ * instance with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cDetailSystemMenu__cDetailSystemMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x334, 2);
@@ -3025,6 +3204,17 @@ INCLUDE_ASM("main/debugmenu", cShellRendererMenu__cShellRendererMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Shell Renderer Menu" debug menu: its 11 embedded menu items in reverse order, then the cMenu
+ * base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * No direct call is known: it is reached through the destructor slot of the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cShellRendererMenu__cShellRendererMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
@@ -3110,6 +3300,17 @@ INCLUDE_ASM("main/debugmenu", cShadowMenu__cShadowMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Shadow Menu" debug menu: its 11 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Shadow". __sti__visualeffectsmenu_cpp destroys the static instance
+ * with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cShadowMenu__cShadowMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
@@ -3164,6 +3365,17 @@ INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu__cSnowSurfaceMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Snow Surface Menu" debug menu: its 9 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Snow Surface". __sti__visualeffectsmenu_cpp destroys the static
+ * instance with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cSnowSurfaceMenu__cSnowSurfaceMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x294, 2);
@@ -3247,6 +3459,17 @@ INCLUDE_ASM("main/debugmenu", cFlagsMenu__cFlagsMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Flags Menu" debug menu: its 4 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Flags". __sti__visualeffectsmenu_cpp destroys the static instance
+ * with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFlagsMenu__cFlagsMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x194, 2);
@@ -3381,6 +3604,17 @@ void* cSplashTogglesMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cTubeMenu__cTubeMenu);
 #ifdef SKIP_ASM
+/**
+ * Destroys the "Tube Menu" debug menu: its 8 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "Visual Effects Main Menu" lists it as "Tube Effects". __sti__visualeffectsmenu_cpp destroys the static
+ * instance with an inlined copy of this body, so this out-of-line copy is reached through the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cTubeMenu__cTubeMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x25C, 2);
@@ -3707,6 +3941,17 @@ INCLUDE_ASM("main/debugmenu", cAvalancheMenu__cAvalancheMenu);
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "Avalanche Menu" debug menu: its 34 embedded menu items in reverse order, then the cMenu base.
+ *
+ * Each item goes through the base cMenuItem destructor with flags 2, which only resets the item's vtable;
+ * cMenu__cMenu() then frees the object when bit 0 of @p flags is set.
+ *
+ * The "AIVisual Effects Main Menu" lists it as "Avalanche Effects". __sti__aivisualeffectsmenu_cpp calls it with
+ * flags 2 to destroy the static instance at exit.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cAvalancheMenu__cAvalancheMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x77C, 2);
@@ -3775,6 +4020,18 @@ extern sSlot_0CB0 D_004A5068, D_004A5070, D_004A5078, D_004A5080, D_004A5088, D_
 
 // PORT: the unit declares __sti__aivisualeffectsmenu_cpp as void*(int, int); it returns nothing.
 extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio) __asm__("__sti__aivisualeffectsmenu_cpp");
+/**
+ * Constructs or destroys the AI visual-effects debug menu's static objects (the g++ static initialisation and
+ * destruction routine of aivisualeffectsmenu.cpp).
+ *
+ * Acts only for the default priority. With @p init set it builds the same 56 four-float constants as
+ * __sti__visualeffectsmenu_cpp (its own copies at D_004D1908..D_004D1C78), zeroes D_004A5060 and D_004A5064,
+ * numbers the 14 key objects D_004A5068..D_004A50D0 from 0 to 13 and constructs the static "Avalanche Menu" at
+ * D_004D1C88. With @p init clear it destroys that menu with flags 2 (no free).
+ *
+ * @param init  nonzero to construct the static objects, 0 to destroy them
+ * @param prio  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ */
 extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF) {
@@ -3896,6 +4153,18 @@ INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu__cAIVisualEffectsMainMenu
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
+/**
+ * Destroys the "AIVisual Effects Main Menu" debug menu: its 3 embedded menu items in reverse order, then the
+ * cMenu base.
+ *
+ * The items are the title, the spacer and the sub-menu link to the "Avalanche Menu". Each item goes through the
+ * base cMenuItem destructor with flags 2, which only resets the item's vtable; cMenu__cMenu() then frees the
+ * object when bit 0 of @p flags is set.
+ *
+ * No direct call is known: it is reached through the destructor slot of the menu's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cAIVisualEffectsMainMenu__cAIVisualEffectsMainMenu(void* self, int flags)
 {
     cMenuItem__cMenuItem((char*)self + 0x164, 2);

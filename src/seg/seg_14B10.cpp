@@ -10,6 +10,16 @@ INCLUDE_ASM("seg/seg_14B10", cAI_setAIState);
 #ifdef SKIP_ASM
 extern "C" void cAI_forceAIState(void *);
 
+/**
+ * Changes the AI state when the requested one differs from the current one.
+ *
+ * Saves CurrentAIState and CurrentAIStateHandler as the previous state and handler, then calls
+ * cAI_forceAIState(), which receives @p arg1 unchanged in its second argument register and installs the new
+ * state's id, handler and name. Asking for the current state does nothing.
+ *
+ * @param arg0  the AI
+ * @param arg1  the new AI state (tAIState)
+ */
 extern "C" void cAI_setAIState(cAI* arg0, int arg1) {
     int old = arg0->CurrentAIState;
     if (arg1 != old) {
@@ -242,6 +252,14 @@ INCLUDE_ASM("seg/seg_14B10", cShutdownHandler_OnGainState);
 #ifdef SKIP_ASM
 extern "C" void cAI_shutdown(int);
 
+/**
+ * Shuts the AI down when its state machine enters the shutdown state.
+ *
+ * Calls cAI_shutdown() on the AI the state machine passes in.
+ *
+ * @param arg0  the shutdown state handler (unused)
+ * @param arg1  the AI that gains the state
+ */
 extern "C" void cShutdownHandler_OnGainState(int arg0, int arg1) {
     cAI_shutdown(arg1);
 }

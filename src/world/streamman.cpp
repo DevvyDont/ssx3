@@ -17,6 +17,15 @@ static inline int cStreamMan_min(int a, int b)
     return a < b ? a : b;
 }
 
+/**
+ * Constructs the world stream manager and allocates its disc and decompression buffers.
+ *
+ * Sizes the stream buffer as the EA stream bookkeeping for 2 slots, 1 queue and 1 request plus 0x68000 bytes,
+ * capped at 0x80000; allocates it as "cStreamMan CDBUFFER" and creates the stream in it (func_003E06D8). Then
+ * allocates the 0x14000-byte "cStreamMan DECOMPRESS" buffer and calls cStreamMan_reset().
+ *
+ * @return @p self
+ */
 extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
 {
     self->m_BxChunkResourceID = 0xFFFFFFFF;

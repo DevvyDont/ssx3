@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uithing.h"
+#include "ui/uivector.h"
 #include "render/ps2graphicsman.h"
 #include "vtable.h"
 #include "ui/uitext.h"
@@ -461,6 +463,13 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned s
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringByID__FP7cUITexti);
 #ifdef SKIP_ASM
+/**
+ * Makes a text widget show a localised string, given the string's id.
+ *
+ * Stores @p id in mStringID and calls setCached(0) (vtable slot 5) so the text is no longer treated as cached.
+ *
+ * @param id  string id (hash of the text's key)
+ */
 void cUIText_setUnicodeStringByID(cUIText* self, int id)
 {
     self->mStringID = id;
@@ -1741,20 +1750,20 @@ struct func_003A3280_s {
     int unk8C;
 };
 
-extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
+extern "C" func_003A3280_s* func_003A3280(cUIVector* self, int a1, int a2)
 {
-    func_0039FB30(self, a1, a2);
-    self->vtbl = cUIVector_vtbl;
-    self->b0 = 0;
-    self->b1 = 0;
-    self->hi = 0;
-    self->unk78 = 0;
-    self->unk7C = 0;
-    self->unk80 = 0;
-    self->unk84 = 0;
-    self->unk88 = 0;
-    self->unk8C = 0;
-    return self;
+    func_0039FB30(((func_003A3280_s*)self), a1, a2);
+    self->mVtbl = cUIVector_vtbl;
+    ((func_003A3280_s*)self)->b0 = 0;
+    ((func_003A3280_s*)self)->b1 = 0;
+    ((func_003A3280_s*)self)->hi = 0;
+    self->mpTriangles = 0;
+    self->mpVertexColour = 0;
+    self->mpVertexPosition = 0;
+    self->mpVertexPositionRender = 0;
+    self->mpUV = 0;
+    self->mpVertices = 0;
+    return ((func_003A3280_s*)self);
 }
 #endif
 
@@ -1764,23 +1773,31 @@ INCLUDE_ASM("ui/uitext", cUIVector__cUIVector);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* cUIVector_vtbl[];
 
-extern "C" void cUIVector__cUIVector(void* self, int flags)
+/**
+ * Destroys a UI vector: frees its vertex arrays, then runs the cUIThing destructor.
+ *
+ * Restores cUIVector_vtbl, frees mpVertexColour, mpVertexPosition, mpVertexPositionRender, mpUV and mpVertices
+ * where set, then calls cUIThing__cUIThing(self, flags).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cUIVector__cUIVector(cUIVector* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cUIVector_vtbl;
-    if (*(void**)((char*)self + 0x7C) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x7C));
+    self->mVtbl = cUIVector_vtbl;
+    if (self->mpVertexColour != 0) {
+        cMemMan_free(self->mpVertexColour);
     }
-    if (*(void**)((char*)self + 0x80) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x80));
+    if (self->mpVertexPosition != 0) {
+        cMemMan_free(self->mpVertexPosition);
     }
-    if (*(void**)((char*)self + 0x84) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x84));
+    if (self->mpVertexPositionRender != 0) {
+        cMemMan_free(self->mpVertexPositionRender);
     }
-    if (*(void**)((char*)self + 0x88) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x88));
+    if (self->mpUV != 0) {
+        cMemMan_free(self->mpUV);
     }
-    if (*(void**)((char*)self + 0x8C) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8C));
+    if (self->mpVertices != 0) {
+        cMemMan_free(self->mpVertices);
     }
     cUIThing__cUIThing(self, flags);
 }
@@ -1789,27 +1806,21 @@ extern "C" void cUIVector__cUIVector(void* self, int flags)
 //100%
 INCLUDE_ASM("ui/uitext", cUIVector_setColour);
 #ifdef SKIP_ASM
-struct cUIVector_setColour_sColor {
-    float r;
-    float g;
-    float b;
-    float a;
-};
 
-extern "C" void cUIVector_setColour(void* self, cUIVector_setColour_sColor* c)
+extern "C" void cUIVector_setColour(cUIVector* self, tARGB* c)
 {
-    cUIVector_setColour_sColor tmp = *c;
+    tARGB tmp = *c;
     unsigned int i;
-    *(cUIVector_setColour_sColor*)((char*)self + 0x1C) = *c;
-    if (*(cUIVector_setColour_sColor**)((char*)self + 0x7C) == 0) {
+    *(&self->mColour) = *c;
+    if (self->mpVertexColour == 0) {
         return;
     }
-    tmp.r = (int)(c->r * 255.0f);
-    tmp.g = (int)(c->g * 255.0f);
-    tmp.b = (int)(c->b * 255.0f);
-    tmp.a = (int)(c->a * 255.0f);
-    for (i = 0; i < *(unsigned int*)((char*)self + 0x74) >> 17; i++) {
-        (*(cUIVector_setColour_sColor**)((char*)self + 0x7C))[i] = tmp;
+    tmp.A = (int)(c->A * 255.0f);
+    tmp.R = (int)(c->R * 255.0f);
+    tmp.G = (int)(c->G * 255.0f);
+    tmp.B = (int)(c->B * 255.0f);
+    for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
+        (self->mpVertexColour)[i] = tmp;
     }
 }
 #endif

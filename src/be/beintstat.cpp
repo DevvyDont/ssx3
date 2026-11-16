@@ -353,6 +353,16 @@ struct sStatDefaults_149860
 extern sStatDefaults_149860 D_00535C18;
 extern sStatDefaults_149860 D_0043FB28;
 
+/**
+ * Constructs the BE library: resets its data tables and creates every BE interface singleton.
+ *
+ * Calls func_00149BB8() (resets the character, player and profile tables), copies the default score tables (26
+ * entries of 0x64 bytes, D_0043FB28) into D_00535C18, then calls each interface's getThis(): new race, new
+ * player, character, stat, option, save, BAGT, network, score, bolt (func_0014ABE0), mission, econ, aggression
+ * and reward.
+ *
+ * @return @p self
+ */
 extern "C" void* cBELibrary_cBELibrary(void* self)
 {
     func_00149BB8();
@@ -392,6 +402,14 @@ extern int* D_004A1238;
 extern int* D_004A1248;
 extern int* D_004A124C;
 
+/**
+ * Destroys the BE library: frees every BE interface singleton, then the object itself when asked to.
+ *
+ * Each interface goes to operator delete (no destructor runs) and its pointer is cleared; func_00153050() does
+ * the save interface and frees its save buffer.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 {
     operator_delete(D_004A11B4);

@@ -185,6 +185,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_depth);
 #ifdef SKIP_ASM
 extern unsigned char shapetypetobpp[];
 
+/**
+ * Returns the bits per pixel of a shape from its type byte.
+ *
+ * Looks up the low 7 bits of the shape header's first byte in shapetypetobpp.
+ *
+ * @param arg0  the shape header
+ * @return bits per pixel, or 0 for types with no entry
+ */
 unsigned char SHAPE_depth(unsigned char *arg0) {
     return shapetypetobpp[*arg0 & 0x7F];
 }
@@ -196,6 +204,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_depth1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044C3D0_39F8[128] __asm__("shapetypetobpp");
 
+/**
+ * Returns the bits per pixel for a shape type code.
+ *
+ * Same lookup as SHAPE_depth() (shapetypetobpp at the low 7 bits), but takes the type itself.
+ *
+ * @param arg0  shape type code
+ * @return bits per pixel, or 0 for types with no entry
+ */
 unsigned char SHAPE_depth1(int arg0) {
     return D_0044C3D0_39F8[arg0 & 0x7F];
 }
@@ -204,6 +220,15 @@ unsigned char SHAPE_depth1(int arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_longname);
 #ifdef SKIP_ASM
+/**
+ * Finds a shape's long name in its chain of attached blocks.
+ *
+ * Follows each block's 24-bit next offset (the upper three bytes of its first word) until it reaches a
+ * block of type 0x70.
+ *
+ * @param p  the shape header
+ * @return the name text just after that block's 4-byte header, or 0 if the chain has none
+ */
 unsigned char *SHAPE_longname(unsigned char *p) {
     while (p) {
         int off;
@@ -709,6 +734,15 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_clonesize);
 extern int SHAPE_size_4478(unsigned char *) __asm__("SHAPE_size");
 extern int SHAPE_isclut_4478(int) __asm__("SHAPE_isclut");
 
+/**
+ * Computes how many bytes SHAPE_clone() needs to copy a shape and its attached blocks.
+ *
+ * Adds SHAPE_size() for each block in the chain, starting each block after the first at the next 16-byte
+ * boundary relative to @p p's own alignment. The palette and non-palette branches compute the same rounding.
+ *
+ * @param p  the shape header
+ * @return total size in bytes, or 0 for a null @p p
+ */
 int SHAPE_clonesize(unsigned char *p) {
     int size = 0;
     int pad = (((int)p + 15) & ~15) - (int)p;
@@ -799,6 +833,15 @@ extern void *SHAPE_longname_4690(int) __asm__("SHAPE_longname");
 extern void SHAPE_cloneat_4690(void *, int) __asm__("SHAPE_cloneat");
 extern void *(*D_0044C454_4690)(void *, int, int, int, int) __asm__("SHAPE_memallocalign");
 
+/**
+ * Makes a copy of a shape, with its attached blocks, in newly allocated memory.
+ *
+ * Allocates SHAPE_clonesize() bytes through the SHAPE_memallocalign hook (16-byte aligned, tagged with the
+ * shape's long name) and fills it with SHAPE_cloneat(). The allocation is not checked for failure.
+ *
+ * @param arg0  the shape to copy
+ * @return the copy
+ */
 void *SHAPE_clone(int arg0) {
     int sz = SHAPE_clonesize_4690(arg0);
     void *r = D_0044C454_4690(SHAPE_longname_4690(arg0), sz, 0, 0x10, 0x400);

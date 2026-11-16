@@ -5,6 +5,13 @@ INCLUDE_ASM("seg/seg_1D3510", get_float);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int get_float_2510(unsigned char **pp, float *out) __asm__("get_float");
+/**
+ * Reads a little-endian 32-bit float from a byte stream and advances the cursor.
+ *
+ * @param pp   pointer to the read cursor, moved forward 4 bytes
+ * @param out  receives the float
+ * @return 4, the number of bytes read
+ */
 extern "C" int get_float_2510(unsigned char **pp, float *out) {
     unsigned char *p = *pp;
     union { unsigned int u; float f; } x;
@@ -18,6 +25,13 @@ extern "C" int get_float_2510(unsigned char **pp, float *out) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", get_uint);
 #ifdef SKIP_ASM
+/**
+ * Reads a little-endian 32-bit unsigned integer from a byte stream and advances the cursor.
+ *
+ * @param pp   pointer to the read cursor, moved forward 4 bytes
+ * @param out  receives the value
+ * @return 4, the number of bytes read
+ */
 extern "C" int get_uint(unsigned char **pp, unsigned int *out) {
     unsigned char *p = *pp;
     *out = (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
@@ -136,6 +150,16 @@ extern "C" int func_002D2790_27B0(unsigned char **, unsigned char *) __asm__("fu
 extern "C" char *strcpy(char *, const char *);
 extern char D_004D49B8[];
 extern char D_00486768[];
+/**
+ * Reads a null-terminated string from a byte stream into a newly allocated copy.
+ *
+ * Copies bytes into the static buffer D_004D49B8 until a 0 or 1000 bytes (a string cut at 1000 is terminated at
+ * byte 999), allocates that many bytes named "Comm String" (type 0x100) and copies the text there.
+ *
+ * @param src  pointer to the read cursor, advanced past the bytes read
+ * @param out  receives the new string
+ * @return the number of bytes read, including the terminator
+ */
 extern "C" int get_string(unsigned char **src, char **out) {
     int n = 0;
     char c = 1;
@@ -990,6 +1014,14 @@ INCLUDE_ASM("seg/seg_1D3510", cExpandMenuItem__cExpandMenuItem);
 extern void cMenuItem__cMenuItem_3DB0(int, int) __asm__("cMenuItem__cMenuItem");
 extern "C" void cMenu__cMenu(int, int);
 
+/**
+ * Destroys an expand menu item: its embedded sub-menu, then the cMenuItem base.
+ *
+ * Runs cMenu__cMenu() on the menu at offset 0x18 with flags 2 (no free), then cMenuItem__cMenuItem().
+ *
+ * @param arg0  the item
+ * @param arg1  g++ destructor flags, passed to cMenuItem__cMenuItem(); bit 0 set frees the item's memory
+ */
 extern "C" void cExpandMenuItem__cExpandMenuItem(int arg0, int arg1) {
     cMenu__cMenu(arg0 + 0x18, 2);
     cMenuItem__cMenuItem_3DB0(arg0, arg1);

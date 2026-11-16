@@ -10,6 +10,20 @@ extern char D_00486500[];
 extern char D_00486510[];
 extern char D_00486528[];
 
+/**
+ * Formats a time of day as "hh:mm:ss", in 24-hour or AM/PM form.
+ *
+ * Mode 0 prints the 24-hour time. Mode 1 adds " AM" before noon; from 12 on it adds " PM" and prints
+ * hour % 13 - 12 as the hour, which gives 0 for 12 and negative values from 13 on. Any other mode copies an
+ * uninitialised buffer. The text goes to @p dst through func_002C25B8(), a bounded copy of 16-bit units.
+ *
+ * @param dst   destination buffer
+ * @param size  most units func_002C25B8() copies
+ * @param hour  hour, 0-23
+ * @param min   minutes
+ * @param sec   seconds
+ * @param mode  0 for 24-hour time, 1 for AM/PM
+ */
 extern "C" void cConsoleConfig_setTimeString(void* self, char* dst, int size, int hour, int min, int sec, int mode)
 {
     char buf[0x40];
@@ -190,6 +204,15 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_002C7478(void* self);
 extern char D_00486560[];
 
+/**
+ * Allocates and constructs the console configuration object.
+ *
+ * Allocates 0x38 bytes named "cPS2ConsoleConfig" and runs func_002C7478() on them, which fills the object from
+ * the console's system settings (probably the PS2 system configuration and clock). The app keeps the result in
+ * ConsoleConfig.
+ *
+ * @return the new console configuration object
+ */
 extern "C" void* cConsoleConfig_construct(void)
 {
     return func_002C7478(cMemMan_alloc(0x38, D_00486560, 0, 0));

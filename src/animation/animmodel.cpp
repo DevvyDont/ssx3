@@ -981,6 +981,14 @@ extern "C" void func_00416210(void* dst, int c, int n);
 // caller passes the model in $4.
 void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCache");
 
+/**
+ * Constructs the animation database: makes it the global instance, zeroes it and clears the channel cache.
+ *
+ * Stores @p self in D_004A3DF8 (whose start is the bank table cScriptAnimBankManager_LinkBank() installs banks
+ * into), zero-fills its 0x3FC bytes (func_00416210) and calls cAnimDataBase_initChanCache().
+ *
+ * @return @p self
+ */
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
 {
     D_004A3DF8 = self;
@@ -1015,6 +1023,12 @@ INCLUDE_ASM("animation/animmodel", cAnimDataBase_initChanCache);
 extern int D_004FE7A0[];
 extern int D_004FE860[];
 
+/**
+ * Clears the 48 bucket pointers in both tables of the animation channel cache.
+ *
+ * Zeroes D_004FE7A0[i] and D_004FE860[i] for i 0-47: the bucket node rings gGenCacheBucket() allocates and their
+ * current nodes. It takes no parameters here, though On Tour declares it as a cAnimDataBase method.
+ */
 extern "C" void cAnimDataBase_initChanCache(void)
 {
     for (int i = 0; i < 48; i++)

@@ -12,6 +12,14 @@ struct cStreamPause {
 //99.67%
 INCLUDE_ASM("main/streampause", cStreamPause_construct__Fv);
 #ifdef SKIP_ASM
+/**
+ * Allocates and constructs the game's stream-pause object.
+ *
+ * Allocates 4 bytes named "GenericStreamPause" (type 0x20000000) and stores the vtable D_0047D0E8; there is no
+ * null check. cGame_load keeps the result in StreamPause.
+ *
+ * @return the new cStreamPause
+ */
 cStreamPause* cStreamPause_construct()
 {
     cStreamPause* self = (cStreamPause*)cMemMan_alloc(4, D_0047C520, 0x20000000, 0);

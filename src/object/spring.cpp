@@ -292,6 +292,15 @@ struct cObjNode {
     void* field_0xC;
 };
 
+/**
+ * Constructs an object node and adds it to a render bucket.
+ *
+ * Stores cObjNode's vtable and calls cBucketMan_add(&gBucketMan, self, param2), which appends the node to one
+ * of that bucket's two lists depending on the bucket's flags.
+ *
+ * @param param2  bucket index (callers pass 3, 4, 6 and others)
+ * @return @p self
+ */
 extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* param2)
 {
     self->field_0xC = cObjNode_vtbl;

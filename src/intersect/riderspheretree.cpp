@@ -3725,6 +3725,14 @@ int func_0032F8B0(void* self)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_GetIdealParam);
 #ifdef SKIP_ASM
+/**
+ * Returns the diameter of the rider's collision sphere tree, or -1 when the object is inactive.
+ *
+ * The diameter is twice the radius of the root sphere that offset 0x60 points to; the inactive case is a zero
+ * first word.
+ *
+ * @return 2 * the root sphere's radius, or -1.0 if the first word is 0
+ */
 extern "C" float cWorldRider_GetIdealParam(void* self)
 {
     if (*(int*)self == 0) {

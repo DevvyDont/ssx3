@@ -13,6 +13,11 @@ void cCameraTriggerList_initHeader(cCameraTriggerList* self);
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_init__FP18cCameraTriggerList);
 #ifdef SKIP_ASM
+/**
+ * Initialises an empty camera trigger list.
+ *
+ * Clears the trigger array pointer, then resets the header fields with cCameraTriggerList_initHeader().
+ */
 void cCameraTriggerList_init(cCameraTriggerList* self)
 {
     self->field_0x0 = 0;
@@ -156,6 +161,18 @@ extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_0045BF30[];
 
+/**
+ * Replaces the list's camera triggers with those loaded from a file.
+ *
+ * Returns 1 without changing anything if the file does not exist. Otherwise it clears the list with
+ * cCameraTriggerList_reset(), reads the file into a "Read Buffer" (FILE_loadpackat unpacks it if packed),
+ * parses it with cCameraTriggerList_loadFromBuffer() and frees the buffer. cCameraTriggerMan_loadTriggers()
+ * passes a nonzero result on as an error.
+ *
+ * @param name  file to load
+ * @return 0 on success, 1 if the file is missing, 2 if the buffer could not be allocated, otherwise the
+ *         error from cCameraTriggerList_loadFromBuffer()
+ */
 extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
 {
     if (!BXFILE_exists(name))
@@ -200,6 +217,17 @@ struct tCameraTrigger_K3 {
     tCameraTrigger_K3() { f1C = 4; f8 = 0; fC = 0; f10 = 0; f0 = 0; f4 = 3; }
 };
 
+/**
+ * Parses a camera trigger file image into the list's trigger array.
+ *
+ * Reads the version cookie, which must be 7, and the header (including the trigger count). It then allocates
+ * the "Camera Trigger Array" and reads each trigger with readTrigger(). A failed trigger is destroyed and its
+ * error returned, leaving the triggers before it in place.
+ *
+ * @param self_  the cCameraTriggerList, untyped
+ * @param buf    start of the file image
+ * @return 0 on success, 3 for a wrong version, otherwise readTrigger's error
+ */
 extern "C" int cCameraTriggerList_loadFromBuffer(void* self_, void* buf)
 {
     cCameraTriggerList* self = (cCameraTriggerList*)self_;
@@ -240,6 +268,12 @@ extern "C" int func_0016C388(void) {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_initHeader__FP18cCameraTriggerList);
 #ifdef SKIP_ASM
+/**
+ * Resets a camera trigger list's header fields.
+ *
+ * Sets the trigger count and the words at +0x08 and +0x10 to 0, and the version to 7. The array pointer at
+ * +0x00 is left alone.
+ */
 void cCameraTriggerList_initHeader(cCameraTriggerList* self)
 {
     self->field_0x4 = 0;
@@ -254,6 +288,14 @@ extern "C" int get_uint(void* buffer, void* dest);
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readCookie__FP18cCameraTriggerListPv);
 #ifdef SKIP_ASM
+/**
+ * Reads a trigger file's version cookie into the list.
+ *
+ * Stores the next uint from the stream in the version field (+0x0C); cCameraTriggerList_loadFromBuffer()
+ * requires 7.
+ *
+ * @param buffer  pointer to the stream's read cursor
+ */
 void cCameraTriggerList_readCookie(cCameraTriggerList* self, void* buffer)
 {
     get_uint(buffer, (char*)self + 0xC);
@@ -267,6 +309,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readHeader);
 // The unit declares get_uint with C++ linkage; the target calls the unmangled symbol.
 int get_uint_c(void* buffer, void* dest) __asm__("get_uint");
 
+/**
+ * Reads a trigger file's header fields into the list.
+ *
+ * Reads three uints, in order, into +0x10, the trigger count (+0x04) and +0x08.
+ *
+ * @param buffer  pointer to the stream's read cursor
+ * @return always 0
+ */
 extern "C" int cCameraTriggerList_readHeader(cCameraTriggerList* self, void* buffer)
 {
     get_uint_c(buffer, &self->field_0x10);

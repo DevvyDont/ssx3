@@ -9,6 +9,14 @@ extern void* D_0045AE88[16];
 //99.84%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x18 bytes tagged "BERewardInt", clears bIsActive, stores cBEInterface's vtable
+ * D_0045AE88 and keeps the object in cBERewardInterface_instance.
+ *
+ * @return the reward interface
+ */
 void* cBERewardInterface_getThis()
 {
     if (cBERewardInterface_instance == 0) {
@@ -52,6 +60,16 @@ extern "C" int func_00156A38(void)
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isBetterMedal__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Tells whether medal @p b is better than medal @p a.
+ *
+ * Medal ids run from 0 (best) to 3 (lowest), and -1 means no medal: no medal is never better, and any medal is
+ * better than none.
+ *
+ * @param a  medal to compare against, or -1
+ * @param b  medal to test, or -1
+ * @return 1 when @p b is better than @p a, else 0
+ */
 int cBERewardInterface_isBetterMedal(void* self, int a, int b)
 {
     if (b == -1) {
@@ -679,6 +697,16 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEScoreInterface_getCurrentHighlightLevel(void* self, int i);
 extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int a, int b, int i);
 
+/**
+ * Tells whether a character has conquered the whole mountain.
+ *
+ * Needs all three peaks conquered (cBERewardInterface_isPeakConquered()) and the score interface's current
+ * highlight levels over the 8 highlight categories to add up to at least 24 (every tier of every highlight).
+ *
+ * @param a  profile index (On Tour: iProfileIndex)
+ * @param b  character id (On Tour: iCharacterID)
+ * @return 1 when conquered, else 0
+ */
 extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
@@ -701,6 +729,13 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isMountainCompleted);
 #ifdef SKIP_ASM
 extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int a, int b, int i);
 
+/**
+ * Tells whether a character has completed the whole mountain, that is all three peaks.
+ *
+ * @param a  profile index (On Tour: iProfileIndex)
+ * @param b  character id (On Tour: iCharacterID)
+ * @return 1 when cBERewardInterface_isPeakCompleted() holds for peaks 0-2, else 0
+ */
 extern "C" int cBERewardInterface_isMountainCompleted(cBERewardInterface* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
@@ -728,6 +763,18 @@ struct sRewardReq_157920
 };
 extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("D_0045AAD8");
 
+/**
+ * Tells whether a character has conquered a peak: top medals in all of its events.
+ *
+ * Walks the peak's event table D_0045AAD8 for trophies 0-2 (trophy 3, earnings, is skipped). Events on tracks
+ * 4-11 need any medal, other events medal 0 or 1; trophy 2 needs the best medal (0) for both collectibles and
+ * big challenges.
+ *
+ * @param a  profile index (On Tour: iProfileIndex)
+ * @param b  character id (On Tour: iCharacterID)
+ * @param k  peak id
+ * @return 1 when conquered, else 0
+ */
 extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int a, int b, int k)
 {
     for (int i = 0; i < 4; i++)
@@ -769,6 +816,14 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isPeakCompleted);
 #ifdef SKIP_ASM
 extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
 
+/**
+ * Tells whether a character has completed a peak, that is owns all four of its trophies.
+ *
+ * @param a  profile index (On Tour: iProfileIndex)
+ * @param b  character id (On Tour: iCharacterID)
+ * @param c  peak id
+ * @return 1 when cBERewardInterface_isTrophyOwned() holds for trophies 0-3, else 0
+ */
 extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int a, int b, int c)
 {
     for (int i = 0; i < 4; i++)
@@ -839,6 +894,19 @@ struct sRewardReq_157BF0
 };
 extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("D_0045AAD8");
 
+/**
+ * Tells whether a character owns one of a peak's four trophies.
+ *
+ * Trophies 0 and 1 need a medal in every event listed for them in D_0045AAD8; trophy 2 needs a collectibles
+ * medal and a big-challenges medal; trophy 3 needs the peak's earnings target reached (any medal from
+ * cBERewardInterface_getEarningsMedal()).
+ *
+ * @param a  profile index (On Tour: iProfileIndex)
+ * @param b  character id (On Tour: iCharacterID)
+ * @param k  peak id
+ * @param i  trophy id, 0-3
+ * @return 1 when the trophy is owned, 0 otherwise or for a trophy id outside 0-3
+ */
 extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int k, int i)
 {
     switch (i)
@@ -1504,6 +1572,16 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextEarningsLevel);
 #ifdef SKIP_ASM
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
 
+/**
+ * Returns the next earnings target the character has not reached yet.
+ *
+ * Checks the per-peak earnings targets D_0045B048 (100,000, 250,000 and 1,000,000) in order against the econ
+ * interface's total money earned.
+ *
+ * @param a  profile index (On Tour: iProfileIndex)
+ * @param b  character id (On Tour: iCharacterID)
+ * @return the first unreached target (as a pointer-typed value), or 0 when all three are reached
+ */
 extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
@@ -1522,6 +1600,17 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextCollectiblesLevel)
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind);
 extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 
+/**
+ * Returns the collectibles count needed for the next better medal on a peak.
+ *
+ * Takes the smallest target in the peak's row of D_0045AFE8 among the medals better than the current
+ * collectibles medal.
+ *
+ * @param a     profile index (On Tour: iProfileIndex)
+ * @param b     character id (On Tour: iCharacterID)
+ * @param kind  peak id
+ * @return the next target, or 0 when the best medal is already held
+ */
 extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(cBERewardInterface* self, int a, int b, int kind)
 {
     int medal = cBERewardInterface_getCollectiblesMedal(self, a, b, kind);
@@ -1545,6 +1634,17 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextBigChallengesLevel
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind);
 extern int D_0045B018_2d[][4] __asm__("D_0045B018");
 
+/**
+ * Returns the completed big-challenge count needed for the next better medal on a peak.
+ *
+ * Takes the smallest target in the peak's row of D_0045B018 among the medals better than the current
+ * big-challenges medal.
+ *
+ * @param a     profile index (On Tour: iProfileIndex)
+ * @param b     character id (On Tour: iCharacterID)
+ * @param kind  peak id
+ * @return the next target, or 0 when the best medal is already held
+ */
 extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInterface* self, int a, int b, int kind)
 {
     int medal = cBERewardInterface_getBigChallengesMedal(self, a, b, kind);
@@ -1658,6 +1758,18 @@ extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getAwardTrophyCategory);
 #ifdef SKIP_ASM
+/**
+ * Maps a peak's trophy to its award category number.
+ *
+ * The category is 5 + 3 * @p tier + @p kind, so 5-16 for peaks 0-2 and trophies 0-3. The profile and character
+ * arguments are not used.
+ *
+ * @param a1    profile index (unused)
+ * @param a2    character id (unused)
+ * @param kind  peak id, 0-2
+ * @param tier  trophy id, 0-3
+ * @return the award category, or -1 for a peak or trophy id out of range
+ */
 extern "C" int cBERewardInterface_getAwardTrophyCategory(cBERewardInterface* self, int a1, int a2, int kind, int tier)
 {
     int r = -1;
@@ -1706,6 +1818,18 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserTrophy);
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 
+/**
+ * Awards a peak trophy to a character unless it was already awarded.
+ *
+ * Maps the trophy to its award category with cBERewardInterface_getAwardTrophyCategory(), and calls
+ * cBERewardInterface_awardUser() only when func_0015A2E0() finds that category's bit clear in the character's
+ * award bits.
+ *
+ * @param a1    profile index (On Tour: iProfileIndex)
+ * @param a2    character id (On Tour: iCharacterID)
+ * @param kind  peak id
+ * @param tier  trophy id
+ */
 extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier)
 {
     int bit = cBERewardInterface_getAwardTrophyCategory(self, a1, a2, kind, tier);

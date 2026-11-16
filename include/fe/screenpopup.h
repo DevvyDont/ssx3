@@ -20,6 +20,7 @@
 // arrays here because fe/fepopup.cpp defines its own t3Vector.
 
 #include "layout.h"
+#include "fe/popupinfo.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -33,12 +34,7 @@ struct cUIPair;
 struct cKeyboardPopup;
 
 // One option's confirmation request (On Tour: tConfirmElement, 0xC bytes, a tPopupElement + iDefaultOption).
-struct tConfirmElement {
-    int eType;          // 0x0 [O] tPopupElement::eType (ePopupStringType); [U] non-zero = ask for confirmation
-                        //     (cScreenPopup_onWidgetEvent)
-    int unk_04;         // 0x4 [O] tPopupElement's anonymous union (string pointer or string id, by eType)
-    int iDefaultOption; // 0x8 [O]; [U] copied to the confirmation popup's default option
-};
+// tConfirmElement: fe/popupinfo.h
 
 struct cScreenPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
@@ -84,7 +80,7 @@ struct cScreenPopup {
     float mvAnimateIncrement[3];    // 0x0AC [O] t3Vector; [U] onGainTransition: per-frame scale step (x at 0xAC, y at 0xB0)
     int mbNoEntryOnNext;            // 0x0B8 [O] (On Tour: bool); [U] cScreenPopup_onWidgetEvent sets/clears it,
                                     //       cScreenPopup_onWidgetMenu (case 6) tests it
-    char info[0xCC];                // 0x0BC [O] cPopupInfo info; [R] constructed by func_001C55F8(self + 0xBC), destroyed by
+    cPopupInfo info;                // 0x0BC [O] cPopupInfo info; [R] constructed by func_001C55F8(self + 0xBC), destroyed by
                                     //       func_001C5750; getPopupInfo (func_001DDC20) returns self + 0xBC; retail cPopupInfo
                                     //       is 0xCC bytes (data to 0xC4, vptr D_0046CCA8 at 0xC8)
     float mvPosBackWhite[3];        // 0x188 [O]; [U] FillObjectPointers: "whitefg" position

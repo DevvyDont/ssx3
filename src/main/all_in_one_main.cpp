@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatenet.h"
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", __sti__all_in_one_main_cpp);
@@ -3603,35 +3604,34 @@ struct sList_E7B0 {
 };
 
 // Front-end state constructor: clears the state fields, sets the vtable, the name string and an empty list.
-extern "C" void* func_001DE7B0(void* self)
+extern "C" void* func_001DE7B0(cFEStateNet* self)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int unused[4];
-    char* s = (char*)self;
     func_0039E318_E7B0(self, 0, 0);
-    sList_E7B0* l = (sList_E7B0*)(s + 0x6C8);
-    *(int*)(s + 0x48) = 0;
-    *(int*)(s + 0x58) = 0;
-    *(int*)(s + 0x69C) = 0;
-    *(int*)(s + 0x6A4) = 0;
-    *(int*)(s + 0x6AC) = 0;
-    *(int*)(s + 0x6B0) = 0;
-    *(int*)(s + 0x6B8) = 0;
-    *(int*)(s + 0x6BC) = 2;
-    *(void***)(s + 0x8) = D_0046B808;
-    cBXString_cBXString2(s + 0x6C0, D_004A1390_E7B0);
-    *(sListNode_E7B0**)(s + 0x6CC) = (sListNode_E7B0*)cMemMan_alloc(0xC, D_0045CDE8, 0x20000000, 0);
-    l->head->next = *(sListNode_E7B0**)(s + 0x6CC);
-    l->head->prev = *(sListNode_E7B0**)(s + 0x6CC);
-    return self;
+    sList_E7B0* l = (sList_E7B0*)(((char*)self) + 0x6C8);
+    self->unk_048 = 0;
+    self->unk_058 = 0;
+    self->mpKeyboard = 0;
+    self->mpKeyboardText = 0;
+    self->unk_6AC = 0;
+    self->unk_6B0 = 0;
+    self->unk_6B8 = 0;
+    self->unk_6BC = 2;
+    self->mVtbl = D_0046B808;
+    cBXString_cBXString2(((char*)self) + 0x6C0, D_004A1390_E7B0);
+    self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, D_0045CDE8, 0x20000000, 0));
+    l->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
+    l->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE860);
 #ifdef SKIP_ASM
-extern "C" int func_001DE860(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x58)));
+extern "C" int func_001DE860(cFEStateNet* arg0) {
+    return (arg0->unk_058);
 }
 #endif
 
@@ -3669,16 +3669,16 @@ extern "C" int func_001DE880(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE890);
 #ifdef SKIP_ASM
-extern "C" void func_001DE890(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x6B0))) = 1;
+extern "C" void func_001DE890(cFEStateNet* arg0) {
+    (arg0->unk_6B0) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
 #ifdef SKIP_ASM
-extern "C" void func_001DE8A0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x6C4))) = arg1;
+extern "C" void func_001DE8A0(cFEStateNet* arg0, int arg1) {
+    (arg0->unk_6C4) = arg1;
 }
 #endif
 

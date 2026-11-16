@@ -130,6 +130,17 @@ static inline void cMemMan_freeBlockK2(void* p)
     MUTEX_unlock(cMemMan_m_mutex);
 }
 
+/**
+ * Resizes a heap block by allocating a new one, copying the contents across and freeing the old block.
+ *
+ * The new block comes from operator new with the tag "resizeBlock" and flags 0x100. It copies the smaller of
+ * @p size and the old block's size (func_0041605C, probably memcpy); the size query and the free each take the
+ * memory manager's mutex.
+ *
+ * @param old   block to resize; freed on return
+ * @param size  new size in bytes
+ * @return the new block, which callers must use in place of @p old
+ */
 extern "C" void* cMemMan_internalResizeBlock(void* old, unsigned int size)
 {
     void* p = operator_new_K2(size, D_0048DA08, 0x100, 0);

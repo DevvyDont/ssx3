@@ -108,6 +108,13 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_getSignature);
 #ifdef SKIP_ASM
 extern char D_00481370[];
 
+/**
+ * Returns the build signature that online peers compare.
+ *
+ * The lobby code rejects another player whose message carries a different signature.
+ *
+ * @return the string "NA_R_F004" (D_00481370)
+ */
 extern "C" char *cCommSystem_getSignature(void) {
     return D_00481370;
 }
@@ -218,6 +225,18 @@ extern "C" void func_00256860_5BF8(void *, int, int) __asm__("func_00256860");
 extern "C" void func_002568F8_5BF8(void *, int, int) __asm__("func_002568F8");
 extern char D_00480350[];
 
+/**
+ * Creates and opens a DirtySock channel in the comm system's single channel slot.
+ *
+ * If the slot is free, allocates a 0x20-byte "cDSockChannel", constructs it and opens it on the address
+ * "<a1>:<port>:<port>" with type 0x102 (func_002568F8) when @p a3 is set, or 0x101 (func_00256860) otherwise.
+ *
+ * @param slots  the comm system's channel slots (only the first is used)
+ * @param a1     peer address string
+ * @param a2     port; only the low 16 bits are used
+ * @param a3     the lobby's host flag (nonzero when this machine hosts)
+ * @return the slot index (0), or -1 when the slot is already taken
+ */
 extern "C" int cCommSystem_openDSockChannel(void **slots, int a1, int a2, int a3) {
     int i;
     int n = a2 & 0xFFFF;
@@ -991,6 +1010,14 @@ INCLUDE_ASM("seg/seg_156860", RpcAlloc);
 extern "C" void *operator_new_6BB0(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
 extern char D_00480478[];
 
+/**
+ * Allocates a buffer for the SIF RPC layer.
+ *
+ * Calls operator new with the name "RpcAlloc" and type 0x20000000.
+ *
+ * @param size  bytes to allocate
+ * @return the new buffer
+ */
 extern "C" void *RpcAlloc(unsigned int size) {
     return operator_new_6BB0(size, D_00480478, 0x20000000, 0);
 }

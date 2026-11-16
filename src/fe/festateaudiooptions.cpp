@@ -514,6 +514,12 @@ extern "C" void func_00197E70(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
+/**
+ * Gives the request-line state focus and redraws its play list from the top.
+ *
+ * Runs the base cFEState_onGainFocus(), resets the list's first visible song (0x150) to 0, then refreshes the
+ * play list, the now-playing title and artist texts (func_00197E70()), the button texts and the help text.
+ */
 extern "C" void cFEStateRequestLine_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
@@ -532,6 +538,14 @@ extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
+/**
+ * Refreshes the request line's list arrows, button texts and help text when its gain transition starts.
+ *
+ * Does the refresh only when @p a1 is nonzero, and returns 0 like the base cUIState_onGainTransition().
+ *
+ * @param a1  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
+ * @return always 0
+ */
 extern "C" int cFEStateRequestLine_onGainTransition(void* self, int a1)
 {
     if (a1 != 0) {

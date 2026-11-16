@@ -278,6 +278,15 @@ static inline sRabXform_00311B48 Combine_00311BF0(const sRabXform_00311B48& a, c
     return r;
 }
 
+/**
+ * Applies a transform on top of the orientation offset of every sequence in the rider's six sequencers.
+ *
+ * For each sequence's offset (sequence +0x60): rotation = xf rotation * offset rotation, and position = xf
+ * rotation applied to (offset position - D_004FF130), plus xf position. VU0 code. The OrientationOffset field
+ * itself is not changed; cRiderAnimBase_changeHeadingOffset() calls this with a rotation about D_004FF160.
+ *
+ * @param xf  transform to apply: a position, then a rotation quaternion
+ */
 extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRabXform_00311B48* xf)
 {
     for (int i = 0; i < 6; i++) {
@@ -985,6 +994,18 @@ static inline void setType_003130A8(sRabChannelSet* self, sRabChannel* ch, int t
     ch->type = type;
 }
 
+/**
+ * Sets up a compressed-animation frame accessor from a packed channel buffer.
+ *
+ * Reads the channel count (first byte; 0 leaves the accessor untouched), one 4-bit type per channel (high nibble
+ * first) and each channel's constants as 24-bit floats (the top three bytes; type 5 adds a 16-bit integer).
+ * Channels of types 6-9 get an index within their type, and the four key streams that follow are located: type 6
+ * (a byte per frame), type 7 (half rate), type 8 (16-bit, padded to an even offset) and type 9 (floats, after
+ * further padding).
+ *
+ * @param data    the packed channel buffer (On Tour: chanBuf)
+ * @param frames  number of frames in the animation (On Tour: numFrames)
+ */
 extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data, int frames)
 {
     unsigned char* p = data;

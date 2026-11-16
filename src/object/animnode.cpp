@@ -484,6 +484,15 @@ struct sRange_EBE0 {
     float end;    // 0xC
 };
 
+/**
+ * Tells whether a time lies inside the range stored at offsets 8 and 0xC.
+ *
+ * With start < end the range is [start, end); otherwise it is [end, start). A start of 1e10 means the range is
+ * unset, and the answer is then 0.
+ *
+ * @param t  the time to test
+ * @return 1 if @p t is inside the range, otherwise 0
+ */
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
 extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float t)
 {
@@ -607,6 +616,13 @@ extern "C" void cFloatingNode_restoreOverlapSystem(void* self);
 extern "C" void cMoveNode__cMoveNode(void* self, int flags);
 void operator_delete(int*);
 
+/**
+ * Destroys a floating node: restores its vtable, undoes its overlap-system changes and frees its buffer.
+ *
+ * Calls cFloatingNode_restoreOverlapSystem(), frees the block at offset 0x74, then runs cMoveNode__cMoveNode().
+ *
+ * @param flags  g++ destructor flags, passed to cMoveNode__cMoveNode(); bit 0 set frees the object's memory
+ */
 extern "C" void cFloatingNode__cFloatingNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cFloatingNode_vtbl;

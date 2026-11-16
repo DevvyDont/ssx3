@@ -2405,6 +2405,14 @@ struct sGmSer12 {
     int c;
 };
 
+/**
+ * Writes a static emitter's replay state as one 12-byte record.
+ *
+ * Packs the float at offset 0 (the emitter's remaining time, which cParticleModifier_update watches), the float
+ * at 0x18 and the int at 0xC, and writes them through the stream's write virtual (slot 1).
+ *
+ * @param out  replay stream to write to
+ */
 extern "C" void cStaticEmitter_writeToReplayFrame(void* self, sGmSerObj* out)
 {
     sGmSer12 buf;
@@ -2499,6 +2507,13 @@ extern "C" void func_00370CF8(void* self, int flag);
 void operator_delete(int* ptr);
 extern void* cBaseClass_DynamicEmitter_vtbl[];
 
+/**
+ * Destroys a dynamic emitter: restores its base vtable and releases its particle buffers.
+ *
+ * func_00370CF8(self, 1) frees the two blocks at offsets 0x1A0 and 0x1A4 and resets the emitter.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags)
 {
     *(void***)((char*)self + 0x1F8) = cBaseClass_DynamicEmitter_vtbl;

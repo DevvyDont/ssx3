@@ -730,6 +730,11 @@ struct cUIGroup_updateLocale_sVEntry {
     void (*fn)(void*);
 };
 
+/**
+ * Refreshes the localised text of every object in a UI group.
+ *
+ * Calls updateLocale (vtable slot 16) on each child in the group's list.
+ */
 extern "C" void cUIGroup_updateLocale(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
@@ -832,6 +837,13 @@ struct cUIGroup_update_sVEntry {
     void (*fn)(void*, unsigned short);
 };
 
+/**
+ * Updates every object in a UI group for a frame, then the group itself.
+ *
+ * Calls update (vtable slot 19) on each child in the group's list, then cUIThing_update() on the group.
+ *
+ * @param ev  frame number (On Tour: FrameNum), passed to every update
+ */
 extern "C" void cUIGroup_update(void* self, unsigned short ev)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));

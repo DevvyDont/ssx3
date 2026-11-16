@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/messagecenter.h"
 #include "render/ps2graphicsman.h"
 #include "fe/ovstate.h"
 #include "scripter/ssxscriptengine.h"
@@ -56,6 +57,12 @@ extern "C" void func_0021C6D8(void *arg0) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVState_allowPauseMenu);
 #ifdef SKIP_ASM
+/**
+ * Tells whether an overlay state lets the pause menu open.
+ *
+ * @param arg0  the overlay state
+ * @return mAllowPauseMenu
+ */
 extern "C" int cOVState_allowPauseMenu(cOVState* arg0) {
     return (arg0->mAllowPauseMenu);
 }
@@ -340,8 +347,8 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CAE0);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void func_0021CAE0(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
+extern "C" void func_0021CAE0(cOVState_MESSAGECENTER* arg0) {
+    arg0->mVtbl = (void**)D_00474E08;
     func_0039E390_a(arg0);
 }
 #endif
@@ -366,8 +373,8 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CB40);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474248[];
 
-extern "C" void func_0021CB40(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474248;
+extern "C" void func_0021CB40(cOVState_ViewPopup* arg0) {
+    arg0->mVtbl = (void**)D_00474248;
     func_0039E390_a(arg0);
 }
 #endif
@@ -3197,6 +3204,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PROFILE__cOVState_PROFILE);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D5428_x(void*) __asm__("func_001D5428");
 extern char cOVState_PROFILE_vtbl[];
+/**
+ * Destroys the profile overlay state through the memory-card base destructor func_001D5428().
+ *
+ * Stores cOVState_PROFILE_vtbl, then calls func_001D5428(), which clears the memory-card callbacks' state
+ * pointer D_004A2028 and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
+ * func_001D5428() unchanged in the second argument register.
+ *
+ * @return no meaningful value (func_001D5428() returns nothing)
+ */
 extern "C" void* cOVState_PROFILE__cOVState_PROFILE(void *self) {
     *(char**)((char*)self + 8) = cOVState_PROFILE_vtbl;
     return func_001D5428_x(self);
@@ -3504,6 +3520,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_AUTOSAVE__cOVState_AUTOSAVE);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D5428_x(void*) __asm__("func_001D5428");
 extern char cOVState_AUTOSAVE_vtbl[];
+/**
+ * Destroys the autosave overlay state through the memory-card base destructor func_001D5428().
+ *
+ * Stores cOVState_AUTOSAVE_vtbl, then calls func_001D5428(), which clears the memory-card callbacks' state
+ * pointer D_004A2028 and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
+ * func_001D5428() unchanged in the second argument register.
+ *
+ * @return no meaningful value (func_001D5428() returns nothing)
+ */
 extern "C" void* cOVState_AUTOSAVE__cOVState_AUTOSAVE(void *self) {
     *(char**)((char*)self + 8) = cOVState_AUTOSAVE_vtbl;
     return func_001D5428_x(self);

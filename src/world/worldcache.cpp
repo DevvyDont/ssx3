@@ -28,6 +28,17 @@ struct sWBAlloc {
     sWBABlock* freeList;
 };
 
+/**
+ * Sets up a world block allocator with a fixed number of equal-sized memory blocks.
+ *
+ * Allocates the block descriptors as "WORLD BLOCK ARRAY" and each block's memory as "WORLD MEMBLOCK" (type
+ * 0x25000000, 128-byte aligned), marks every block unused and chains them all into the free list. The world memory
+ * manager makes three: 2 blocks of 16 KB, none of 32 KB, and 53 of 128 KB.
+ *
+ * @param selfp      the allocator
+ * @param count      number of blocks
+ * @param blockSize  size of each block in bytes
+ */
 extern "C" void cWorldBlockAllocator_init(void* selfp, int count, int blockSize)
 {
     sWBAlloc* self = (sWBAlloc*)selfp;
@@ -385,6 +396,16 @@ struct sWCTable {
     short* sizes;
 };
 
+/**
+ * Constructs a world cache table with 28 slot lists carved out of one pool.
+ *
+ * Reads the 28 list lengths from @p data, allocates one zeroed int pool of their total size named
+ * "WorldCacheTableMem", and points every non-empty list at its slice of the pool.
+ *
+ * @param selfp  the table
+ * @param data   28 shorts giving each list's length (from the world data header); kept by the table
+ * @return @p selfp
+ */
 extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void* data)
 {
     sWCTable* self = (sWCTable*)selfp;
@@ -458,6 +479,14 @@ extern "C" void cWorldCache_purge(cWorldCache* self);
 extern "C" void cStreamMan__cStreamMan(void* p, int flags);
 extern "C" void cWorldView__cWorldView(cWorldView* p, int flags);
 
+/**
+ * Destroys the world cache and its embedded stream manager and world view.
+ *
+ * Purges the cache, then runs cStreamMan__cStreamMan() on offset 0x300 and cWorldView__cWorldView() on offset 0x10
+ * (both with flags 2, so nothing is freed), and frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorldCache__cWorldCache(int* self, int flags)
 {
     cWorldCache_purge((cWorldCache*)self);
@@ -651,6 +680,12 @@ extern "C" void cWorldView_update(cWorldView* p);
 extern "C" void cWorldCache_updatePages(cWorldCache* self);
 extern "C" void func_003A7098(void* p);
 
+/**
+ * Runs the world cache's per-frame update.
+ *
+ * Updates the world view (offset 0x10), the cache pages, then the stream manager (offset 0x300) with
+ * func_003A7098().
+ */
 extern "C" void cWorldCache_update(cWorldCache* self)
 {
     cWorldView_update((cWorldView*)((char*)self + 0x10));
@@ -679,6 +714,12 @@ struct cWorldCache_initPageMap_sCache {
     cWorldCache_initPageMap_sEntry entries[1]; // 0x3F0
 };
 
+/**
+ * Clears the world cache's page map, sizing it from the world view.
+ *
+ * Stores the view's page count (func_003A9AB0, a word of the view's header) at offset 0x3EC and zeroes the six
+ * words of each page entry from offset 0x3F0.
+ */
 extern "C" void cWorldCache_initPageMap(cWorldCache_initPageMap_sCache* self)
 {
     unsigned int i;
@@ -1382,6 +1423,14 @@ extern "C" void func_003A9188_8F80(void* self) __asm__("func_003A9188");
 
 // PORT: the unit declares this as void(void*); defined under an asm label with its real type
 extern "C" void* cWorldView_cWorldView_impl(void* self) __asm__("cWorldView_cWorldView");
+/**
+ * Constructs a world view by clearing its state.
+ *
+ * func_003A9188() zeroes the view's counters and its 64 entry pairs, and sets both of its view slots and its two
+ * position vectors to D_004FF130.
+ *
+ * @return @p self
+ */
 extern "C" void* cWorldView_cWorldView_impl(void* self)
 {
     new (self) sCacheHead_3A8F80[2];

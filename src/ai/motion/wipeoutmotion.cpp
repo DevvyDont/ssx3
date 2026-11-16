@@ -468,16 +468,6 @@ struct sSeg_137138 {
     sSeg_137138(const t4Vector& pa, const t4Vector& pb) : a(pa), b(pb) {}
 };
 
-struct sWipe_137138 {
-    char pad0[0x10];
-    t4Vector vel;       // 0x10
-    t4Vector angVel;    // 0x20
-    char pad30[0x10];
-    sBody_137138* body; // 0x40
-    void* tree;         // 0x44
-    char pad48[8];
-    sSeg_137138 seg;    // 0x50
-};
 
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
 extern "C" void func_0032F708(void* self, int flags);
@@ -580,34 +570,34 @@ struct sVec4c_137138 : t4Vector {
 
 extern "C" void func_00137138(cWipeoutMotion* vself)
 {
-    sWipe_137138* self = (sWipe_137138*)vself;
-    if (self->body->active == 0)
+    cWipeoutMotion* self = vself;
+    if (((sBody_137138*)self->mRider)->active == 0)
         return;
     func_00137550((cWipeoutMotion*)((char*)self));
     sHit_137138 hit;
     sSphere_137138 sph;
-    func_0032F650(&sph, self->tree, 1);
+    func_0032F650(&sph, ((void*)self->BoardSphereTree), 1);
     sSeg_137138 seg(sph.v30, sph.v20);
-    self->seg = seg;
+    (*(sSeg_137138*)&self->BoardIntersectBox) = seg;
     float d = func_00336850_137138(SSXApp->Game->BXNash, &sph, &hit, 0);
     if (d < 0.0f) {
         func_0032F708(&sph, 2);
         return;
     }
     t4Vector push = vu0Scale_137138(vu0Scale_137138(hit.normal, 1.100000023841858f), d);
-    vu0AddEq_137138(self->body->pos, push);
-    func_00329B40_137138(self->tree, &push);
+    vu0AddEq_137138(((sBody_137138*)self->mRider)->pos, push);
+    func_00329B40_137138(((void*)self->BoardSphereTree), &push);
     // The binary copies the segment back into the local before moving it (the copy is never read).
-    seg = self->seg;
-    vu0AddEq_137138(self->seg.a, push);
-    vu0AddEq_137138(self->seg.b, push);
-    float v = vu0Dot_137138(vu0Scale_137138(hit.normal, -1.0f), self->vel);
+    seg = (*(sSeg_137138*)&self->BoardIntersectBox);
+    vu0AddEq_137138((*(sSeg_137138*)&self->BoardIntersectBox).a, push);
+    vu0AddEq_137138((*(sSeg_137138*)&self->BoardIntersectBox).b, push);
+    float v = vu0Dot_137138(vu0Scale_137138(hit.normal, -1.0f), self->BoardVelocity);
     if (555.5555419921875f <= v || hit.normal.z < 0.800000011920929f) {
         float k = v * 0.5f;
         if (k < 27.77777862548828f)
             k = 27.77777862548828f;
         t4Vector impulse = vu0Scale_137138(hit.normal, v + k);
-        vu0AddEq_137138(self->vel, impulse);
+        vu0AddEq_137138(self->BoardVelocity, impulse);
         if (hit.obj != 0) {
             char* o = *(char**)(hit.obj + 0xC);
             if (o != 0) {
@@ -616,15 +606,15 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
                           vu0Scale_137138(impulse, (float)*(int*)((char*)SSXApp + 0x10) * -0.05000000074505806f));
             }
         }
-        vu0ScaleEq_137138(self->angVel, 0.8500000238418579f);
-        if (vu0Length_137138(self->angVel) < 12.56637191772461f) {
+        vu0ScaleEq_137138(self->BoardAngVelocity, 0.8500000238418579f);
+        if (vu0Length_137138(self->BoardAngVelocity) < 12.56637191772461f) {
             float pitch = AIrandf(-1.5707963705062866f, 1.5707963705062866f);
             float yaw = AIrandf(-3.1415927410125732f, 3.1415927410125732f);
             float sp, cp, sy, cy;
             func_0031BE50(&sp, &cp, pitch);
             func_0031BE50(&sy, &cy, yaw);
             float deg = AIrandf(45.0f, 180.0f);
-            vu0AddEq_137138(self->angVel,
+            vu0AddEq_137138(self->BoardAngVelocity,
                             vu0Scale_137138(sVec4c_137138(cp * sy, cp * cy, sp, 0.0f), deg * 0.01745329424738884f));
         }
     } else {
@@ -633,11 +623,11 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
                 vt[43].fn(o + vt[43].delta, &hit,
-                          vu0Scale_137138(self->vel, (float)*(int*)((char*)SSXApp + 0x10) * 0.05000000074505806f));
+                          vu0Scale_137138(self->BoardVelocity, (float)*(int*)((char*)SSXApp + 0x10) * 0.05000000074505806f));
             }
         }
-        self->vel = D_004FF120_137138;
-        self->angVel = D_004FF120_137138;
+        self->BoardVelocity = D_004FF120_137138;
+        self->BoardAngVelocity = D_004FF120_137138;
     }
     func_0032F708(&sph, 2);
 }

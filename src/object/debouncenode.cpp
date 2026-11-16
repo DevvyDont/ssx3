@@ -35,6 +35,14 @@ struct sDebounceVEntry2D88 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Counts down the debounce node's timer and expires the node when it runs out.
+ *
+ * When the counter at offset 0x2C is positive it is decremented; on reaching 0 the node's expire virtual
+ * (slot 34, cDebounceNode_expire) is called with 1.
+ *
+ * @return 0 on the tick the node expires, otherwise 1
+ */
 extern "C" int cDebounceNode_updateNode(void* self)
 {
     int n = *(int*)((char*)self + 0x2C);
@@ -738,6 +746,12 @@ struct sDebounceVEntry1 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Expires the counter node once its count has reached zero.
+ *
+ * When the count (offset 0x1C, decremented by cCounterNode_signal) is 0, sets it to -1 so this happens once, and
+ * calls the node's expire virtual (slot 34, cInstanceNode_expire) with 1.
+ */
 extern "C" void cCounterNode_update(void* self)
 {
     if (*(int*)((char*)self + 0x1C) == 0) {
@@ -825,6 +839,14 @@ struct sDebounceVEntryA18 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a counter node's state to a replay frame.
+ *
+ * Writes the instance-node part with cInstanceNode_writeToReplayFrame(), then the 8 bytes at offset 0x1C (the
+ * count and the signal-level bits) through the stream's write virtual (slot 1).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void cCounterNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);

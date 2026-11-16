@@ -11,6 +11,12 @@ struct sWPQuery {
 
 extern sWPQuery* D_004A3880;
 
+/**
+ * Resets the result of every world-painter query.
+ *
+ * Walks the global query list (D_004A3880, linked through offset 0x14) and writes -99999.0 into the first
+ * float of each query's implementation object, probably as a "no result yet" marker.
+ */
 extern "C" void cWorldPainterQuery_reset(void)
 {
     for (sWPQuery* q = D_004A3880; q != 0; q = q->next) {

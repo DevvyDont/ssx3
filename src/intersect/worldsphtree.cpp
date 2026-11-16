@@ -4523,6 +4523,13 @@ void func_00340A08(void* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldLine_GetIdealParam__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the world line's capsule radius.
+ *
+ * Unlike the sphere and rider versions it neither doubles the value nor checks the active word.
+ *
+ * @return the radius stored at offset 0xA0 by the line's constructor
+ */
 float cWorldLine_GetIdealParam(void* self)
 {
     return *(float*)((char*)self + 0xA0);
@@ -4532,6 +4539,13 @@ float cWorldLine_GetIdealParam(void* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphere_GetIdealParam);
 #ifdef SKIP_ASM
+/**
+ * Returns the world sphere's diameter, or -1 when the sphere is inactive.
+ *
+ * The sphere's constructor sets the first word to 1 unless it is told otherwise.
+ *
+ * @return 2 * the radius at offset 0x70, or -1.0 if the first word is 0
+ */
 extern "C" float cWorldSphere_GetIdealParam(void* self)
 {
     if (*(int*)self == 0) {
@@ -4973,6 +4987,14 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode__cBoostNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a boost node: restores cBoostNode's vtable, then runs the cInstanceNode destructor.
+ *
+ * Only @p self is declared here; the destructor flags the caller passed in the second argument register reach
+ * cInstanceNode__cInstanceNode() unchanged, and it frees the object when bit 0 is set.
+ *
+ * @return cInstanceNode__cInstanceNode()'s result (it returns nothing meaningful)
+ */
 void* cBoostNode__cBoostNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cBoostNode_vtbl;
@@ -5228,6 +5250,14 @@ struct sSerVEntry_00341A50 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a boost node's state to a replay frame.
+ *
+ * Writes the instance-node part with cInstanceNode_writeToReplayFrame(), then the 0x30 bytes at offset 0x20
+ * through the stream's write virtual (slot 1). The stream constructor reads the same block back.
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void cBoostNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);

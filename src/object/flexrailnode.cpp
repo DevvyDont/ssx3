@@ -1594,6 +1594,14 @@ INCLUDE_ASM("object/flexrailnode", cFlagNode_cFlagNode);
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char cFlagNode_vtbl[];
 
+/**
+ * Constructs a flag node on top of the instance-node constructor.
+ *
+ * Runs cInstanceNode_cInstanceNode(), then stores cFlagNode's vtable. Only @p self is declared; the constructor
+ * arguments the caller passed reach cInstanceNode_cInstanceNode() unchanged in their registers.
+ *
+ * @return @p self
+ */
 extern "C" void* cFlagNode_cFlagNode(void* self)
 {
     cInstanceNode_cInstanceNode(self);
@@ -1610,6 +1618,14 @@ extern "C" void* func_002D1CB0(void);
 extern "C" void func_0034C600(void* set, void* arg);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
+/**
+ * Destroys a flag node and removes its object from the game's flag manager.
+ *
+ * Restores cFlagNode's vtable, asks the flag manager (func_0034C600) to remove the object at offset 0x18 from
+ * the first active flag set holding it, then runs cInstanceNode__cInstanceNode().
+ *
+ * @param flags  g++ destructor flags, passed to cInstanceNode__cInstanceNode(); bit 0 set frees the object's memory
+ */
 extern "C" void cFlagNode__cFlagNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;

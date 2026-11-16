@@ -45,6 +45,11 @@ INCLUDE_ASM("object/multiparticle", cMultiParticle_update);
 #ifdef SKIP_ASM
 extern "C" void cStaticEmitter_update(void* self, float dt);
 
+/**
+ * Advances the multi-particle's static emitter by one 1/60-second frame.
+ *
+ * Calls cStaticEmitter_update() on the emitter that offset 0x10 points to.
+ */
 extern "C" void cMultiParticle_update(void* self)
 {
     cStaticEmitter_update(*(void**)((char*)self + 0x10), 0.01666666753590107f);
@@ -727,6 +732,14 @@ struct sSerVEntry_00358C30 {
 
 extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a rail-manager node's state to a replay frame.
+ *
+ * Writes the sort-object part with cSortObjNode_writeToReplayFrame(), then the 0x200 bytes at offset 0x18
+ * through the stream's write virtual (slot 1).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void cRailManNode_writeToReplayFrame(void* self, void* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);
@@ -1045,6 +1058,12 @@ INCLUDE_ASM("object/multiparticle", cAnimComboNode_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_loseFocus(void*);
 
+/**
+ * Passes loseFocus to the anim-combo node's embedded instance node unless the combo has finished.
+ *
+ * Calls cInstanceNode_loseFocus() on the node at offset 0x48 only while byte 0x15 is 0; the update sets that
+ * byte when the animation reaches its end with byte 0x16 set.
+ */
 extern "C" void cAnimComboNode_loseFocus(void* self)
 {
     if (*(signed char*)((char*)self + 0x15) == 0) {

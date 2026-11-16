@@ -15,6 +15,14 @@ extern void* D_004A122C;
 //99.86%
 INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the cBERaceState singleton, creating it on first use.
+ *
+ * The first call allocates 8 bytes tagged "BERace", stores @p self in the first word and the cBERaceState vtable
+ * in the second, and keeps the object in D_004A122C. cBE_getBE() passes the state index (1) as @p self.
+ *
+ * @return the cBERaceState object
+ */
 void* cBERaceState_getState(void* self)
 {
     if (D_004A122C == 0) {

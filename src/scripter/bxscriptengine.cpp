@@ -44,6 +44,13 @@ extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
 extern "C" void cInSeq__cInSeq(void* obj, int flags);
 void cMemMan_free(void*);
 
+/**
+ * Tears down the BX script engine's script database, InSeq sequencer and InSeq heap.
+ *
+ * Does nothing unless mpScriptDatabase was allocated (cBXScriptEngine_SetupBXEngine). Otherwise it stops every
+ * script, releases every script request, removes every database object, frees the database and zeroes its size,
+ * destroys mpInSeq (destructor flags 3), frees mpInSeqHeap, and finally calls cBXScriptEngine_ResetInstVars().
+ */
 extern "C" void cBXScriptEngine_PurgeBXEngine(void* self)
 {
     if (*(void**)((char*)self + 0x2B0) != 0) {
@@ -606,6 +613,14 @@ struct sScriptEngine2B8 {
     int unk2BC;                     // 0x2BC
     sScriptThread2C0 threads[16];   // 0x2C0
 };
+/**
+ * Resets the BX script engine's instance variables: the InSeq pointers and the 16 script request records.
+ *
+ * Zeroes mpInSeq and mpInSeqHeap without freeing them (cBXScriptEngine_PurgeBXEngine frees them first). Each
+ * 0x24-byte request record gets its index at +0x1C, -1 at +0x14, and 0 in the words at +0x0, +0x4, +0x18 and
+ * +0x20 and the halfwords at +0x10 and +0x12; +0x8 and +0xC are left as they were. +0x0 and +0x20 are the flags
+ * cBXScriptEngine_StopScriptAll() and cBXScriptEngine_ReleaseRequestAll() test.
+ */
 extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
 {
     int i;
@@ -1052,6 +1067,13 @@ extern void* cScriptEntity_vtbl[];
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_cScriptEntity__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a script entity: installs cScriptEntity's vtable and initialises its two fields.
+ *
+ * The word at +0x4 is set to -1 and the word at +0x8 to 0.
+ *
+ * @return @p self
+ */
 void* cScriptEntity_cScriptEntity(void* self)
 {
     *(void***)self = cScriptEntity_vtbl;
@@ -1233,6 +1255,14 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject__cScriptObject);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a script object, first removing it from the script database if it is still registered.
+ *
+ * Restores cScriptObject's vtable (at +0xC). When the database handle at +0x4 is neither -1 nor 0 it calls
+ * cScriptObject_DeInitScriptObject() and sets the handle to -1.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptObject__cScriptObject(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cScriptObject_vtbl;
@@ -1272,6 +1302,13 @@ struct sBxsVEntryB {
     int (*fn)(void*, int);
 };
 
+/**
+ * Removes the script object from the script engine's object database and marks it unregistered.
+ *
+ * Calls virtual slot 3 of the global script engine (func_0027D2E8()) through its cScriptDatabaseObject vtable at
+ * +0x2A8, passing the object's database handle (+0x4); cScriptDatabaseObject_RemoveObjectAll() uses the same
+ * slot to remove each entry. The handle is then set to -1.
+ */
 extern "C" void cScriptObject_DeInitScriptObject(void* self)
 {
     char* mgr = (char*)func_0027D2E8();

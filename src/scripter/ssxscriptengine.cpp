@@ -683,6 +683,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetNISList);
 extern "C" void func_00276868(void* self, int a1);
 extern "C" void cSSXScriptEngine_ClearNISPlayListState(cSSXScriptEngine* self);
 
+/**
+ * Resets one of the engine's two NIS lists, clearing the NIS play state if that list is playing.
+ *
+ * Calls the NIS list reset routine func_00276868(list, 1) on mpNISLists[@p i]; when @p i equals mPlayingNISList
+ * it then calls cSSXScriptEngine_ClearNISPlayListState().
+ *
+ * @param i  which NIS list to reset (On Tour's eNISList: 0 or 1)
+ */
 extern "C" void cSSXScriptEngine_ResetNISList(cSSXScriptEngine* self, int i)
 {
     func_00276868((char*)self->mpNISLists + i * 0xCC, 1);
@@ -792,6 +800,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsActiveNISInTransition
 #ifdef SKIP_ASM
 int tNISList_IsInTransition(void*);
 
+/**
+ * Tells whether the NIS list that is playing is in a transition.
+ *
+ * @return 0 when no list is playing (mPlayingNISList is 2), otherwise tNISList_IsInTransition() of the playing
+ *     list
+ */
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(cSSXScriptEngine* self)
 {
     int i = self->mPlayingNISList;
@@ -889,6 +903,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetIdleListAll);
 #ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
 
+/**
+ * Resets both of the engine's idle lists with the NIS list reset routine func_00276868(list, 1).
+ *
+ * Unlike cSSXScriptEngine_ResetNISList(), it leaves the NIS play state alone.
+ */
 extern "C" void cSSXScriptEngine_ResetIdleListAll(cSSXScriptEngine* self)
 {
     for (int i = 0; i < 2; i++) {
@@ -1027,6 +1046,16 @@ extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int
 extern const char D_00481C68[];
 extern const char D_00481C78[];
 
+/**
+ * Starts an asynchronous load of the script data bank file that holds a missing data identifier.
+ *
+ * The file name is "data/scripts/scdat.big|data/scripts/" followed by @p key as eight digits and ".big".
+ * cSSXScriptEngine_AsyncLoadScriptBank() loads it with memory flags 0x100 and @p key as the data identifier into
+ * the first free bank from 2 up (func_0027B528, which gives -1 when all are in use).
+ *
+ * @param key  the script data identifier that is not available (On Tour: scriptDataIndex)
+ * @return always 1
+ */
 extern "C" int cSSXScriptEngine_OnDataUnavailable(cSSXScriptEngine* self, int key)
 {
     char buf[128];
@@ -1042,6 +1071,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnPendingDataCancelled)
 extern "C" int cSSXScriptEngine_GetBankNumberByDataIdentifier(cSSXScriptEngine* self, int a1, int a2);
 extern "C" void cSSXScriptEngine_CancelAsyncLoadScriptBank(cSSXScriptEngine* self, int idx, int a);
 
+/**
+ * Cancels the pending asynchronous load of the script bank that holds a data identifier.
+ *
+ * Finds the bank with cSSXScriptEngine_GetBankNumberByDataIdentifier(), searching from bank 2, and passes it to
+ * cSSXScriptEngine_CancelAsyncLoadScriptBank(), which acts only if that bank has an async handle. A -1 (not
+ * found) result is not checked.
+ *
+ * @param a1  the script data identifier whose load was cancelled (On Tour: scriptDataIndex)
+ */
 extern "C" void cSSXScriptEngine_OnPendingDataCancelled(cSSXScriptEngine* self, int a1)
 {
     cSSXScriptEngine_CancelAsyncLoadScriptBank(self, cSSXScriptEngine_GetBankNumberByDataIdentifier(self, a1, 2), a1);
@@ -1054,6 +1092,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnScriptDataReleased);
 extern "C" int cSSXScriptEngine_GetBankNumberByDataIdentifier(cSSXScriptEngine* self, int a1, int a2);
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int idx);
 
+/**
+ * Purges the script bank that holds a data identifier once that data has been released.
+ *
+ * Finds the bank with cSSXScriptEngine_GetBankNumberByDataIdentifier(), searching from bank 2, and calls
+ * cSSXScriptEngine_PurgeScriptBank() only when one was found.
+ *
+ * @param a1  the released script data identifier (On Tour: scriptDataIndex)
+ */
 extern "C" void cSSXScriptEngine_OnScriptDataReleased(cSSXScriptEngine* self, int a1)
 {
     int idx = cSSXScriptEngine_GetBankNumberByDataIdentifier(self, a1, 2);
@@ -2287,6 +2333,16 @@ static inline int IsFree27B578(int* key)
     return key[1] == 0 && key[-1] == 0;
 }
 
+/**
+ * Finds the in-use script data bank that holds a given data identifier.
+ *
+ * Scans mScriptDataBanks from @p start to bank 9. A bank counts as in use when it has a data bank handle or a
+ * pending async load.
+ *
+ * @param key    data identifier to look for
+ * @param start  first bank number to check
+ * @return the bank number, or -1 if no bank in use holds @p key
+ */
 // Finds the next used entry (from `start`) whose key matches; returns its index or -1.
 extern "C" int cSSXScriptEngine_GetBankNumberByDataIdentifier(cSSXScriptEngine* self, int key, int start)
 {
@@ -3416,6 +3472,13 @@ struct sVEntry0027D050 {
     int (*fn)(void*, int);
 };
 
+/**
+ * Removes every object registered in the script object database.
+ *
+ * For each of the 20 mpObjectDatabase slots that holds an object it calls virtual slot 3 (vtable at +0x2A8) with
+ * the slot index. cScriptDatabaseObject's own slot 3 (func_0027CF88) unregisters the object's script entities
+ * and clears the slot; cSSXScriptEngine overrides it with func_00279DA8.
+ */
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self)
 {
     int i;
@@ -3918,6 +3981,14 @@ extern "C" void func_0027D970(void* self, int a1);
 extern "C" void cScriptCameraController_addCamera(void* ctrl, void* script);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 
+/**
+ * Starts using a script camera: hands it to the script camera controller of the camera it belongs to.
+ *
+ * First counts the use with the base handler func_00283430 (use count at +0x8). Only while a game exists: sets
+ * the float at +0x18 to 1.0, builds the camera's matrix and angles from its script record (func_0027D970), adds
+ * this object to the cScriptCameraController (+0xAC) of the view manager's camera whose index is in the word at
+ * +0x7C, and makes controller 3 current on that camera when the controller's word at +0x18 is set.
+ */
 extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
 {
     func_00283430(self);

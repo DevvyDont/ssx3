@@ -152,6 +152,13 @@ extern float D_004A45B0;
 extern float D_004A45B4;
 extern float D_004A45B8;
 
+/**
+ * Resets a board trail's state and the texture data of its six vertex strips.
+ *
+ * Clears the trail's counters, sets the first colour vector to D_004FF130 and the other two to zero, sets both
+ * scales to 1, and rewrites the first three floats of all 54 vertices in each strip: probably texture
+ * coordinates, with u fixed per strip (0.25, 0.75, 0.0, 1.0, 0.375, 0.625), v alternating 0 and 1, and q = 1.
+ */
 extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
 {
     self->f94 = 2;
@@ -989,6 +996,15 @@ extern void* cCutSceneTransitionMan_vtbl[];
 extern "C" void* cObjNode_cObjNode1(void* self);
 extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
 
+/**
+ * Constructs the cut-scene transition manager as a render object.
+ *
+ * Runs cObjNode_cObjNode1() (the caller's bucket, 3, reaches it in the second argument register), stores the
+ * vtable, clears the words at 0x10 and 0x1C, and calls cCutSceneTransitionMan_FindTVParameters(), which saves the
+ * graphics manager's current display settings and picks the ones to use during a transition.
+ *
+ * @return @p self
+ */
 extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* self)
 {
     cObjNode_cObjNode1(self);

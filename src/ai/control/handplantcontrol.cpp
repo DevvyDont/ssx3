@@ -45,6 +45,12 @@ static inline sVec4HP vu0DivHP(const sVec4HP& v, float s)
     return r;
 }
 
+/**
+ * Sets the rider's velocity so it reaches the handplant's spline position in the entry time.
+ *
+ * When the handplant motion gains focus, the rider's mVelocity becomes (SplinePos - mPosition) / EnterSec,
+ * computed with VU0 instructions.
+ */
 extern "C" void cHandplantMotion_gainFocus(cHandplantMotion* self)
 {
     char* rider = (char*)self->mRider;
@@ -403,21 +409,6 @@ struct sQ_91A8 {
 } __attribute__((aligned(16)));
 
 
-struct sHP_91A8 {
-    sQ_91A8 start;   // 0x00
-    sQ_91A8 vel;     // 0x10
-    sQ_91A8 v20;     // 0x20
-    sQ_91A8 target;  // 0x30
-    sQ_91A8 v40;     // 0x40
-    sQ_91A8 lpos;    // 0x50
-    sQ_91A8 lvel;    // 0x60
-    sQ_91A8 axis;    // 0x70
-    float spin;      // 0x80
-    float dur;       // 0x84
-    float time;      // 0x88
-    char pad8C[0x14];
-    char* rider;     // 0xA0
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sQ_91A8 vu0Sub_91A8(const sQ_91A8& a, const sQ_91A8& b)
@@ -533,9 +524,9 @@ static inline sQ_91A8 AxisAngle_91A8(const sQ_91A8& axis, float angle)
     return sQ_91A8(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-static inline int eq_91A8(sHP_91A8* a, const sQ_91A8& b)
+static inline int eq_91A8(cHandplantMotion* a, const sQ_91A8& b)
 {
-    return a->vel.x == b.x && a->vel.y == b.y && a->vel.z == b.z && a->vel.w == b.w;
+    return (*(sQ_91A8*)&a->ExitVel).x == b.x && (*(sQ_91A8*)&a->ExitVel).y == b.y && (*(sQ_91A8*)&a->ExitVel).z == b.z && (*(sQ_91A8*)&a->ExitVel).w == b.w;
 }
 
 static inline int landed_91A8(char* ap)
@@ -565,8 +556,8 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
     } else {
         *(sQ_91A8*)((char*)self->mRider + 0x110) = (*(sQ_91A8*)&self->SplinePos);
         *(sQ_91A8*)((char*)self->mRider + 0x1E0) = (const sQ_91A8&)D_004FF120_91A8;
-        if (eq_91A8(((sHP_91A8*)self), (const sQ_91A8&)D_004FF120_91A8)) {
-            if (func_00139548(((sHP_91A8*)self))) {
+        if (eq_91A8((self), (const sQ_91A8&)D_004FF120_91A8)) {
+            if (func_00139548((self))) {
                 (*(sQ_91A8*)&self->AirPredictorPos) = vu0Add_91A8((*(sQ_91A8*)&self->SplinePos), vu0ScaleP_91A8((const sQ_91A8*)&D_004FF160_91A8, 5.0f));
                 (*(sQ_91A8*)&self->AirPredictorVel) = (*(sQ_91A8*)&self->ExitVel);
                 cAirPredictor_startLaunchIntoAir(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel),
@@ -3510,15 +3501,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_step);
 #ifdef SKIP_ASM
 #include "ai/rider.h"
 
-// The handplant controller: a cRider pointer at +0x18 (shared with func_0013C878/func_0013CCF0/func_0013D028).
-struct sHpCtl_13D818 {
-    float mPhase;     // 0x00: wobble phase, wrapped to [0, 2pi)
-    float m4;         // 0x04: slewed toward rider scale * surface m14
-    float m8;         // 0x08: slewed toward rider scale * surface m18
-    int mC;           // 0x0C: set to 1 when the plant is lost
-    char pad10[0x8];
-    cRider* mRider;   // 0x18
-};
 
 // One 0xB0-byte surface entry (SSXApp -> +0x84 -> +0x44, indexed by cRider::mSurfaceType).
 struct sSurf_13D818 {
@@ -3905,9 +3887,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float dF = vu0Dot_13D818(rel, self->mRider->mGroundForward);
     float dS = vu0Dot_13D818(rel, self->mRider->mGroundSide);
     float lean = -self->mRider->mSlewed[0].cur;
-    float push = func_0013C878_13D818(((sHpCtl_13D818*)self), e, self->mRider->unk_454, dN, dt);
-    float drag = func_0013C948_D818(((sHpCtl_13D818*)self), e);
-    float steer = func_0013CCF0_13D818(((sHpCtl_13D818*)self), e, dF, push / e->m00);
+    float push = func_0013C878_13D818((self), e, self->mRider->unk_454, dN, dt);
+    float drag = func_0013C948_D818((self), e);
+    float steer = func_0013CCF0_13D818((self), e, dF, push / e->m00);
     float edge = func_0013D028(self, (float*)e, dS, dF, lean);
     if (self->mRider->mGroundNormal.z < 0.0f && push < 0.0f)
         push = 0.0f;
@@ -5728,6 +5710,11 @@ extern "C" int func_00140B78(void *arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAIIndex__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's AI index, which is also its character and stat lookup index.
+ *
+ * @return mAIIndex (cRider offset 0x86C)
+ */
 int cRider_getAIIndex(void* self)
 {
     return *(int*)((char*)self + 0x86C);
@@ -5773,6 +5760,11 @@ extern "C" void func_00140BB0(void *arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_isHuman__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider is controlled by a human player.
+ *
+ * @return mIsHuman (cRider offset 0x874): nonzero for a human rider, 0 for a computer one
+ */
 int cRider_isHuman(void* self)
 {
     return *(int*)((char*)self + 0x874);
@@ -7224,6 +7216,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", cMissionRider__cMissionRider);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a mission rider; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code restores the vtables, runs the base destructor func_00125EB8(), destroys the virtual
+ * cRider base with cRider__cRider() when in charge, and frees the object when bit 0 of the destructor flags is set.
+ */
 cHpD_1446F8::~cHpD_1446F8()
 {
 }

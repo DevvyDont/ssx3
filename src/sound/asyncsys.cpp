@@ -19,6 +19,15 @@ extern const char D_00482988[];
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
 void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags) __asm__("cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi");
+/**
+ * Allocates the async system's buffer.
+ *
+ * When @p x is nonzero, stores it at offset 0x1D0 and allocates an @p x-byte block named "AsyncSysBuffer" into
+ * offset 0x1CC; with 0 it does nothing.
+ *
+ * @param x      buffer size in bytes, or 0 for no buffer
+ * @param flags  allocation type passed to operator new
+ */
 void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 {
     if (x != 0) {

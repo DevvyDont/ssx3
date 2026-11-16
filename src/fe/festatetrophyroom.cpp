@@ -216,6 +216,13 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onUpdate);
 extern "C" void func_001D4A20(void* self);
 extern "C" void* func_0039E510(void* self);
 
+/**
+ * Updates the trophy room, first finishing any of its pending trophy picture loads.
+ *
+ * While the pending count at 0x5C is positive, func_001D4A20() hands each of the five slots that has finished
+ * loading to GrMan under the name "trph", releases it and decrements the count. Then runs the base UI-state
+ * update func_0039E510().
+ */
 extern "C" void cFEStateTrophyRoom_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x5C) > 0) {

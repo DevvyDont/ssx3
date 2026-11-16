@@ -15,6 +15,14 @@ INCLUDE_ASM("camera/camera", cCamera_resetChaseControllerSwitches);
 struct sCam162138;
 extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraController* self);
 
+/**
+ * Soft-resets the camera-switch state of the chase controller in each view.
+ *
+ * Reads the game's view manager (cGame::ViewMan). It resets the first view's camera, and also the second
+ * when the manager's first word is 2 or more (probably the split-screen view count). Each reset is
+ * cChaseCameraController_switchCamera_SoftReset() on that camera's ChaseController. Does nothing without a
+ * view manager.
+ */
 extern "C" void cCamera_resetChaseControllerSwitches(void)
 {
     void* cam = SSXApp->Game;
@@ -3379,6 +3387,17 @@ extern void* cChaseCameraController_vtbl[];
 extern "C" void* cCameraController_cCameraController(void* self, int a);
 extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraController* self, int idx);
 
+/**
+ * Constructs a chase camera controller for one view.
+ *
+ * Runs the base cCameraController constructor, then sets the chase vtable, Type 2, BlendType 1 and no Target.
+ * It then clears the camera-switch state with cChaseCameraController_switchCamera_HardReset(), which also
+ * takes the view's persistent camera choice (persistentPlayerChoiceType).
+ *
+ * @param idx  view index, used to pick persistentPlayerChoiceType[idx]
+ * @param a    owning cCamera, passed as an int to the base constructor
+ * @return @p self
+ */
 extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int a)
 {
     cCameraController_cCameraController(self, a);
@@ -8331,6 +8350,11 @@ extern "C" void* cChaseAlgorithm_getTargetPos(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_shouldSnapOnUpdate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the look-at chase algorithm should snap on its next update.
+ *
+ * @return the DoSnap flag (nonzero to snap)
+ */
 int cLookAtChaseAlgorithm_shouldSnapOnUpdate(void* self)
 {
     return *(int*)((char*)self + 0x2F0);
@@ -8453,6 +8477,11 @@ INCLUDE_ASM("camera/camera", cSimpleCamera__cSimpleCamera);
 extern void* cSimpleCamera_vtbl[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a simple camera: restores its vtable pointer, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cSimpleCamera__cSimpleCamera(void* self, int flags)
 {

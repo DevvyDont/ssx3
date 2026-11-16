@@ -111,6 +111,18 @@ struct sAnimList;
 extern "C" void* func_00275718(sAnimList* self, int id);
 extern "C" void* func_002757F0_v(void* self) __asm__("func_002757F0");
 
+/**
+ * Links attached animation bank data to the script anim bank manager, creating the bank's entry if needed.
+ *
+ * When no in-use entry has @p id yet, it takes the first free entry (no check for a full table), stores @p id
+ * and @p data, wraps the data in a new 0x18-byte cAdfDataSource (func_00311220) and installs that in the anim
+ * database's bank table (D_004A3DF8) at the entry's slot. It also counts the bank's non-null items and, if there
+ * are any, builds pTableAnimID, the table of their indices. An existing entry is returned unchanged.
+ *
+ * @param id    bank number (cSSXScriptEngine_OnAttachData passes mCurrAttachingBankNum)
+ * @param data  the attached animation bank data
+ * @return the entry's slot (set by the constructor to the base slot plus the entry index)
+ */
 extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* data)
 {
     sScLinkEntry* e = (sScLinkEntry*)func_00275718((sAnimList*)self, id);
@@ -187,6 +199,15 @@ struct sDmTable275698 {
     sDmVEntry275698* vt;
 };
 
+/**
+ * Unlinks every bank the script anim bank manager currently has linked.
+ *
+ * For each entry whose data pointer is set it calls the manager's virtual slot 2 (vtable at +0xC) on the entry.
+ * In cScriptAnimBankManager's vtable that is func_00275760, which takes the bank out of the anim database's
+ * table, destroys it, frees its index table and clears the entry.
+ *
+ * @param self_  the cScriptAnimBankManager, untyped
+ */
 extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self_)
 {
     sDmTable275698* self = (sDmTable275698*)self_;

@@ -141,6 +141,15 @@ static inline sWRMObj* sWRM_get(sWRMWorld* w, unsigned int id)
     return sWRM_lookup(t, id >> 8);
 }
 
+/**
+ * Resets the state flags of every object in the loaded world sections.
+ *
+ * For each loaded section of the world view, looks up each of its objects by handle (object index << 8 | section
+ * index) and rewrites the object's flag word: the low half is replaced by the high half, probably the initial
+ * state, and bit 1 (value 2) is set. cInstanceNode_loseFocus applies the same change to one instance.
+ *
+ * @param selfp  the world
+ */
 extern "C" void cWorld_resetMap(cWorld* selfp)
 {
     sWRMWorld** self = (sWRMWorld**)selfp;
@@ -351,6 +360,13 @@ INCLUDE_ASM("world/world", cWorld_getNumProcessScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADCE0(func_003A6BA8_sEntry* e);
 
+/**
+ * Returns how many process scripts a world-script cache entry holds.
+ *
+ * @param i  index into the world-script cache's entries
+ * @return the entry data's count at offset 0x28, or 0 when the entry's state is not 3 (probably loaded) or it has
+ *         no data
+ */
 extern "C" int cWorld_getNumProcessScripts(cWorld* self, int i)
 {
     return func_003ADCE0(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
@@ -362,6 +378,13 @@ INCLUDE_ASM("world/world", cWorld_getProcessScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD10(func_003A6BA8_sEntry* e);
 
+/**
+ * Returns the process-script list of a world-script cache entry.
+ *
+ * @param i  index into the world-script cache's entries
+ * @return the entry data's word at offset 0x2C, or 0 when the entry's state is not 3 (probably loaded) or it has
+ *         no data
+ */
 extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
 {
     return func_003ADD10(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);

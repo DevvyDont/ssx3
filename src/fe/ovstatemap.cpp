@@ -282,6 +282,12 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void func_0020A088(void* self);
 extern "C" void cOVState_onDestroyScreen(cOVState* self);
 
+/**
+ * Tears down the map overlay: unloads its map picture, deletes its marker widgets, then runs the base teardown.
+ *
+ * Unloads the async file slot kept at 0xC4, deletes the cursor and the two sets of 8 widgets (func_0020A088()),
+ * then calls cOVState_onDestroyScreen().
+ */
 extern "C" void cOVState_MAP_onDestroyScreen(void* self)
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, *(int*)((char*)self + 0xC4));
@@ -451,6 +457,13 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void cFEAsyncManager_LoadLocationPic(void* mgr, int a1, int file, int a3);
 
+/**
+ * Starts loading the map picture for the current race location.
+ *
+ * Unloads the map's async file slot (0xC4), queues cFEAsyncManager_LoadLocationPic() for the new-race
+ * interface's location into the same slot, and clears the loaded flag at 0xC8 so the map's update fades the new
+ * picture in once it has loaded.
+ */
 extern "C" void cOVState_MAP_setupMapPic(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -775,6 +788,14 @@ struct sVEntry_cOVState_MAP_setWidgetUnHiliteColor {
 extern char kMAPCOLOR_REGULAR[];
 extern char kMAPCOLOR_REGULAR_LOCKED[];
 
+/**
+ * Gives a map text widget its normal (not highlighted) colour.
+ *
+ * Calls setColour (vtable slot 11) with kMAPCOLOR_REGULAR, or with kMAPCOLOR_REGULAR_LOCKED when @p on is 0.
+ *
+ * @param obj  text widget to colour (On Tour: pText)
+ * @param on   nonzero for an unlocked entry (On Tour: unlocked)
+ */
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(void* self, void* obj, int on)
 {
     if (on != 0) {

@@ -35,6 +35,14 @@ extern void* cRailLink_vtbl[16];
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_tModifierBlock__FP14tModifierBlock);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty modifier block.
+ *
+ * Clears the node pointer, the two buffers, the object at offset 0xC and the heads of the effect-link and
+ * rail-link lists, and stores the cEffectLink and cRailLink vtables of those two lists.
+ *
+ * @return @p self
+ */
 tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self)
 {
     self->field_0x18 = cEffectLink_vtbl;
@@ -64,6 +72,14 @@ extern "C" void func_0035B6D0(void* self);
 extern "C" void func_00345760(void* self);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a modifier block and everything it owns.
+ *
+ * Deletes the node, frees the two buffers at offsets 4 and 8, deletes the object at offset 0xC, every effect
+ * link and every rail link (func_00353300 with id ~0), then tears down the two list heads.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
 {
     func_003530D0(self);
@@ -91,6 +107,13 @@ struct sMbVEntryI {
     int (*fn)(void*);
 };
 
+/**
+ * Returns the bounding box of the modifier block's node.
+ *
+ * Calls slot 12 of the node at offset 0.
+ *
+ * @return the node's result, or 0 when the block has no node
+ */
 extern "C" int tModifierBlock_getBoundBox(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -115,6 +138,13 @@ struct sMbVEntry {
 // to the virtual call untouched, so the real function takes a second argument.
 void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
 
+/**
+ * Passes a bounding box to the modifier block's node.
+ *
+ * Calls slot 13 of the node with @p box; does nothing when the block has no node.
+ *
+ * @param box  the bounding box, passed through unchanged
+ */
 void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
 {
     sBoundBoxNode* node = self->node;
@@ -318,6 +348,13 @@ extern "C" void func_00352E98(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_isComplete);
 #ifdef SKIP_ASM
+/**
+ * Asks the modifier block's node whether it is complete.
+ *
+ * Calls slot 6 of the node at offset 0.
+ *
+ * @return the node's answer, or 0 when the block has no node
+ */
 extern "C" int tModifierBlock_isComplete(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -338,6 +375,11 @@ struct sMbVEntryV {
     void (*fn)(void*);
 };
 
+/**
+ * Clears the modifier block node's complete state.
+ *
+ * Calls slot 7 of the node at offset 0; does nothing when the block has no node.
+ */
 extern "C" void tModifierBlock_clearComplete(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -932,6 +974,15 @@ extern "C" void* cObjNode__cObjNode(void*);
 //100%
 INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the sky box: restores cSkyBox's vtable, then runs the cObjNode destructor.
+ *
+ * Only @p self is declared here; the destructor flags the caller passed in the second argument register reach
+ * cObjNode__cObjNode() unchanged. That removes the node from its render bucket and frees the object when bit 0
+ * is set.
+ *
+ * @return cObjNode__cObjNode()'s result (it returns nothing meaningful)
+ */
 void* cSkyBox__cSkyBox(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cSkyBox_vtbl;

@@ -347,6 +347,13 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_restart);
 extern "C" void func_0026CDF8(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Restarts the playback manager: ends the active playback mode and clears the CurrentFrame buffer.
+ *
+ * func_0026CDF8 ends playback mode 1 or 2; then the words at +0x10 and +0x70 (the mode) are zeroed. If the
+ * CurrentFrame buffer at +0x4 exists, its 0x1C22C bytes are cleared and its header rewritten (0xDBAC0101,
+ * 0x1C200), as cPlaybackMan_initLocation() does. cGame_resetWorld() and cGame_partialRestart() call it.
+ */
 extern "C" void cPlaybackMan_restart(void* self)
 {
     func_0026CDF8(self);
@@ -974,6 +981,13 @@ struct sPlaybackKey {
     char c;
 };
 
+/**
+ * Resets a replay frame's fields to their empty values.
+ *
+ * Zeroes the frame type at +0x1C (a halfword and two bytes), the start tick at +0x30 and the words at +0x8, +0xC
+ * and +0x10, and sets the words at +0x20, +0x24, +0x28, +0x2C and +0x34 to -1. The vtable and the list links
+ * (+0x14, +0x18) are left alone.
+ */
 extern "C" void cReplayFrame_clearFrame(void* self)
 {
     sPlaybackKey k;

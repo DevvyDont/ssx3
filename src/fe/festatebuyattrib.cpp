@@ -103,6 +103,12 @@ struct sVEntry001F49F8 {
 
 extern "C" void cFEState_onGainFocus(void* self);
 
+/**
+ * Gives the buy-attribute state focus, then focuses its "AttribMenu" widget.
+ *
+ * Runs the base cFEState_onGainFocus() and calls setFocus(1) (vtable slot 7) on the widget that
+ * cFEStateBuyAttrib_onWidgetCreate() stored at 0xAC, without a null check.
+ */
 extern "C" void cFEStateBuyAttrib_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
@@ -668,6 +674,12 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onGainFocus);
 extern "C" void cFEState_onGainFocus(void* self);
 extern "C" void cFEStateCareerStats_setupMenuFocus(void* self, int focus);
 
+/**
+ * Gives the career-stats state focus and re-applies the focus of its current menu.
+ *
+ * Runs the base cFEState_onGainFocus(), then cFEStateCareerStats_setupMenuFocus() with the menu index kept at
+ * 0x48.
+ */
 extern "C" void cFEStateCareerStats_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
@@ -1039,6 +1051,16 @@ struct sCareerStats5DA0 {
     int scroll;                 // 0x4C
 };
 
+/**
+ * Fills the three visible rows of the career highlights list from the current scroll position.
+ *
+ * The list has 24 highlights, 3 tiers in each of 8 categories. Shows "HL_arrowup" when scrolled down and
+ * "HL_arrowdown" while rows remain below. Each row gets the highlight's text, a check mark or empty check box
+ * from the score interface's current highlight level, "<trick> Monster Trick", and the monster-trick requirement
+ * once the tier is reached ("kT_FEUnlockMonsterTrick" before that).
+ *
+ * @param vself  the career-stats state; its scroll position is the word at 0x4C
+ */
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* vself)
 {
     sCareerStats5DA0* self = (sCareerStats5DA0*)vself;

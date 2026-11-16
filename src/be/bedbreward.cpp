@@ -1336,6 +1336,12 @@ INCLUDE_ASM("be/bedbreward", cBEPreRaceState_purgeState);
 extern int* D_004A1258;
 void operator_delete(int* ptr);
 
+/**
+ * Frees the cBEPreRaceState singleton and clears its pointer.
+ *
+ * The object goes to operator delete without a destructor call; D_004A1258 is set to 0 so the next
+ * cBEPreRaceState_getState() creates a new one.
+ */
 extern "C" void cBEPreRaceState_purgeState(void)
 {
     operator_delete(D_004A1258);
@@ -1361,6 +1367,12 @@ INCLUDE_ASM("be/bedbreward", cBERaceState_purgeState);
 extern int* D_004A122C;
 void operator_delete(int* ptr);
 
+/**
+ * Frees the cBERaceState singleton and clears its pointer.
+ *
+ * The object goes to operator delete without a destructor call; D_004A122C is set to 0 so the next
+ * cBERaceState_getState() creates a new one.
+ */
 extern "C" void cBERaceState_purgeState(void)
 {
     operator_delete(D_004A122C);
@@ -1386,6 +1398,12 @@ INCLUDE_ASM("be/bedbreward", cBEPostRaceState_purgeState);
 extern int* D_004A1254;
 void operator_delete(int* ptr);
 
+/**
+ * Frees the cBEPostRaceState singleton and clears its pointer.
+ *
+ * The object goes to operator delete without a destructor call; D_004A1254 is set to 0 so the next
+ * cBEPostRaceState_getState() creates a new one.
+ */
 extern "C" void cBEPostRaceState_purgeState(void)
 {
     operator_delete(D_004A1254);

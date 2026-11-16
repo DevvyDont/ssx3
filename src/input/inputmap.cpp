@@ -413,6 +413,15 @@ struct sMapNode_1638 {
     sMapNode_1638* c;           // 0xC
 };
 
+/**
+ * Returns a parse node and all of its child nodes to the parser's free node list.
+ *
+ * The node type decides how many children are freed first: one for types 18-19 and 24-33, two for 6-17 and
+ * 20-21, three for type 5, none for 0-4 and 22-23. The node is then pushed onto FreeParseNodes, linked through
+ * its first child field. A null node is ignored.
+ *
+ * @param node  the node to free, or 0
+ */
 // Frees an expression node and its children back onto the map's node free list.
 extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, sMapNode_1638* node)
 {

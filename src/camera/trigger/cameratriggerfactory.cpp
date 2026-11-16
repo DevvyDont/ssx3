@@ -103,6 +103,17 @@ struct sCTActNoneA : sCTActA {
     sCTActNoneA() : sCTActA(3) {}
 };
 
+/**
+ * Reads a camera trigger action of any type from a trigger stream and allocates it.
+ *
+ * Reads the type word, constructs the matching action and reads its data: 0 "Camera Switch Action",
+ * 1 "Camera Bound Action", 2 "Camera Spline Action", 3 "Camera Action None". An unknown type leaves
+ * @p out unwritten.
+ *
+ * @param reader  pointer to the stream's read cursor, advanced past what is read
+ * @param out     receives the new action
+ * @return the number of bytes read
+ */
 extern "C" int get_camaction(void* reader, void** out)
 {
     int type;
@@ -151,6 +162,16 @@ extern "C" int get_uint(void* reader, void* dst);
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
+/**
+ * Reads a bounded-camera action's data from a trigger stream.
+ *
+ * Sets the action type to 1, then reads six floats into +0x0C to +0x20, a uint into +0x24 and a vector
+ * into +0x28.
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param obj     the bounded-camera action to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTActionBoundedCam(void* reader, char* obj)
 {
     int n;
@@ -173,6 +194,16 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSwitchCam);
 extern "C" int get_float(void* reader, void* dst);
 extern "C" int get_uint(void* reader, void* dst);
 
+/**
+ * Reads a switch-camera action's data from a trigger stream.
+ *
+ * Sets the action type to 0, then reads a float into +0x0C and a uint into +0x08 (the fields the factory
+ * constructor sets to 1.0 and 0).
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param dst     the switch-camera action to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTActionSwitchCam(void* reader, void* dst)
 {
     *(int*)dst = 0;
@@ -184,6 +215,15 @@ extern "C" int get_cCTActionSwitchCam(void* reader, void* dst)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSpline);
 #ifdef SKIP_ASM
+/**
+ * Reads a spline-camera action's data from a trigger stream.
+ *
+ * Sets the action type to 2, then reads five floats into +0x0C to +0x1C.
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param dst     the spline action to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTActionSpline(void* reader, void* dst)
 {
     *(int*)dst = 2;
@@ -198,6 +238,15 @@ extern "C" int get_cCTActionSpline(void* reader, void* dst)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionNone__FPvPi);
 #ifdef SKIP_ASM
+/**
+ * Fills in a no-op camera action, which has no stream data.
+ *
+ * Sets the action type to 3 and reads nothing.
+ *
+ * @param unused   the stream's read cursor, not touched
+ * @param outType  the action's type field, set to 3
+ * @return 0, the number of bytes read (typed as a pointer)
+ */
 void* get_cCTActionNone(void* unused, int* outType)
 {
     *outType = 3;
@@ -285,6 +334,17 @@ extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj);
 extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj);
 void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
 
+/**
+ * Reads a camera bounding object of any type from a trigger stream and allocates it.
+ *
+ * Reads the type word, constructs the matching shape (scale 1, position zero) and reads its data:
+ * 0 "Camera Ellipse BoundObj", 1 "Camera Box BoundObj", 2 "Camera Line BoundObj", 3 "Camera Point
+ * BoundObj". An unknown type leaves @p out unwritten.
+ *
+ * @param reader  pointer to the stream's read cursor, advanced past what is read
+ * @param out     receives the new bounding object
+ * @return the number of bytes read
+ */
 extern "C" int get_camboundobj(void* reader, void** out)
 {
     int type;
@@ -342,6 +402,16 @@ public:
     virtual void* axis();
 };
 
+/**
+ * Reads an ellipse bounding object's data from a trigger stream.
+ *
+ * Sets the shape type to 0, then reads through the object's cCTObject accessors: position and scale
+ * vectors, then heading, pitch and roll.
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param obj     the ellipse to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj)
 {
     int n;
@@ -373,6 +443,16 @@ public:
     virtual void* axis();
 };
 
+/**
+ * Reads a box bounding object's data from a trigger stream.
+ *
+ * Sets the shape type to 1, then reads through the object's cCTObject accessors: position and scale vectors,
+ * then heading, pitch and roll.
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param obj     the box to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj)
 {
     int n;
@@ -404,6 +484,16 @@ public:
     virtual void* axis();
 };
 
+/**
+ * Reads a line bounding object's data from a trigger stream.
+ *
+ * Sets the shape type to 2, reads position, scale, heading, pitch and roll like the other shapes, then the
+ * line's two end points (vectors at +0x2C and +0x38).
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param obj     the line to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj)
 {
     int n;
@@ -1238,6 +1328,16 @@ struct sCTVolBoxG : sCTBoundObjG {
     sCTVolBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C300) { type = 1; }
 };
 
+/**
+ * Reads a camera trigger volume from a trigger stream and allocates it.
+ *
+ * Reads the type word and constructs the matching volume: 0 "Camera Sphere Trigger" (an ellipse) or
+ * 1 "Camera Box Trigger". For any other type it moves the cursor back over the type word and returns 0.
+ *
+ * @param reader  pointer to the stream's read cursor, advanced past what is read
+ * @param out     receives the new volume
+ * @return the number of bytes read, or 0 for an unknown type
+ */
 extern "C" int get_camvolume(void* reader, void** out)
 {
     int type;
@@ -1283,6 +1383,16 @@ public:
     virtual void* axis();
 };
 
+/**
+ * Reads an ellipse (sphere) trigger volume's data from a trigger stream.
+ *
+ * Sets the shape type to 0, then reads through the object's cCTObject accessors: position and scale vectors,
+ * then heading, pitch and roll.
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param obj     the volume to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj)
 {
     int n;
@@ -1314,6 +1424,16 @@ public:
     virtual void* axis();
 };
 
+/**
+ * Reads a box trigger volume's data from a trigger stream.
+ *
+ * Sets the shape type to 1, then reads through the object's cCTObject accessors: position and scale vectors,
+ * then heading, pitch and roll.
+ *
+ * @param reader  pointer to the stream's read cursor
+ * @param obj     the volume to fill
+ * @return the number of bytes read
+ */
 extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj)
 {
     int n;
@@ -3100,6 +3220,11 @@ void* cCTObject_pos(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_heading__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of a camera trigger object's heading.
+ *
+ * @return a pointer to the heading, the float at +0x0C
+ */
 void* cCTObject_heading(void* self)
 {
     return (char*)self + 0xC;
@@ -3109,6 +3234,11 @@ void* cCTObject_heading(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pitch__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of a camera trigger object's pitch.
+ *
+ * @return a pointer to the pitch, the float at +0x10
+ */
 void* cCTObject_pitch(void* self)
 {
     return (char*)self + 0x10;
@@ -3118,6 +3248,11 @@ void* cCTObject_pitch(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_roll__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of a camera trigger object's roll.
+ *
+ * @return a pointer to the roll, the float at +0x14
+ */
 void* cCTObject_roll(void* self)
 {
     return (char*)self + 0x14;
@@ -3127,6 +3262,11 @@ void* cCTObject_roll(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_scale__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of a camera trigger object's scale vector.
+ *
+ * @return a pointer to the scale, the vector at +0x18 (the factory constructors set it to 1, 1, 1)
+ */
 void* cCTObject_scale(void* self)
 {
     return (char*)self + 0x18;

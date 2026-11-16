@@ -849,6 +849,18 @@ static inline int isMode4_2341D0()
     return D_00535C10[0] == 4;
 }
 
+/**
+ * Prepares an event start: resets the AI, BE state and replay and copies the game mode's AI riders into the
+ * race.
+ *
+ * Sets the AI state to 3, hides the load indicator, sets BE state 0 and resets the replay. The AI count is the
+ * game mode manager's rider total minus its humans; each AI rider from the AI's first index (its word at 0x7C)
+ * gets the mode's character id and a second per-rider value (func_001473D0, probably the board), and both
+ * interfaces are submitted. Mode 2 queues start sequence 1, mode 1 sequence 0 (not when the race mode byte
+ * D_00535C10 is 4), mode 0 none. Finally clears the word at 0x1C.
+ *
+ * @param mode  startup flag (On Tour: startupFlag): 0 no start sequence, 1 or 2 as above
+ */
 extern "C" void cGFEventStartState_gainFocus(void* self, int mode)
 {
     int i = 0;

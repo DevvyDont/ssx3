@@ -427,6 +427,14 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 extern "C" void cWScriptMan_processStart(void* man, void* proc);
 extern char D_00489888[];
 
+/**
+ * Starts a world-script process: gives it a fresh local table, runs its start script and starts its first task.
+ *
+ * Destroys any old luno table at +0x1C and creates a new 8-entry one ("ProcessLocalTable"), sets the state to 1
+ * and the current task to 0, runs the script at +0x28 if there is one (cWScriptMan_runScriptCode), and moves the
+ * process onto the manager's running list (cWScriptMan_processStart). If there are tasks, it calls the first
+ * task's virtual slot 4, which marks a task active and runs its script at +0x8.
+ */
 extern "C" void cWScriptProcess_processStart(cWScriptProcess_processStart_sProc* self)
 {
     if (self->luno != 0) {
@@ -482,6 +490,13 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_end);
 extern "C" void cWScriptMan_processEnd(void* man, void* proc);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
+/**
+ * Ends a world-script process: marks it ended, takes it off the running list and deletes its local table.
+ *
+ * Sets the state to 3 and calls cWScriptMan_processEnd(), which moves the process from the manager's running
+ * list (+0x2B8) back to the list at +0x2B4 if it is there. Then destroys the luno table at +0x1C and clears the
+ * pointer.
+ */
 extern "C" void cWScriptProcess_end(void* self)
 {
     *(int*)self = 3;
@@ -505,6 +520,13 @@ struct sVEntry00307DC8 {
     void (*fn)(void*);
 };
 
+/**
+ * Completes a world-script process if its manager still has it on the running list.
+ *
+ * func_0030B898() looks for a process with the same id (+0x20) on the running list; when there is one, this
+ * calls its own virtual slot 6, which for cWScriptProcess (func_00307D30) sets the state to 3, runs the script
+ * at +0x30 and calls cWScriptProcess_end(). The task stepper func_00307E10 calls it after the last task.
+ */
 extern "C" void cWScriptProcess_processComplete(void* self)
 {
     if (func_0030B898(*(void**)((char*)self + 0x10), self) != 0) {
@@ -758,6 +780,16 @@ struct cWScriptTask_initTask_sObj {
     void* owner;
 };
 
+/**
+ * Initialises a world-script task from its task data, resolving the data's script ids to script code.
+ *
+ * Stores @p owner, copies the task id from the data's first word to +0x4 (func_00307EC0 finds tasks by it), and
+ * turns the data's 3 + 10 script resource ids into code pointers with cWScriptMan_getScriptCode() through the
+ * owner's manager (func_00308018).
+ *
+ * @param owner  the cWScriptProcess the task belongs to
+ * @param def    the task's data record (On Tour: tWScriptTaskData)
+ */
 extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* owner, cWScriptTask_initTask_sDef* def)
 {
     int i;
@@ -1292,6 +1324,15 @@ struct cWScriptMan_activeSection_sDef {
     char pad[0x40];
 };
 
+/**
+ * Adds the world-script processes of a world section that has become active.
+ *
+ * Calls cWScriptMan_addProcess(self, @p section, record, 0) for each of the section's 0x40-byte process script
+ * records, which come from the world (+0x28C) through cWorld_getNumProcessScripts() and
+ * cWorld_getProcessScripts().
+ *
+ * @param section  world section id
+ */
 extern "C" void cWScriptMan_activeSection(void* self, int section)
 {
     int n = cWorld_getNumProcessScripts(*(void**)((char*)self + 0x28C), section);
@@ -1437,6 +1478,14 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_purgeSection);
 extern "C" void cProcessList_unloadSection(void* list, int section);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
+/**
+ * Removes a world section's processes from the manager's three process lists and deletes its local table.
+ *
+ * Calls cProcessList_unloadSection() on the lists at +0x2B4, +0x2B8 and +0x2BC, then destroys the section's luno
+ * table (pointer array at +0x3CC, indexed by section) and clears the pointer.
+ *
+ * @param section  world section id
+ */
 extern "C" void cWScriptMan_purgeSection(void* self, int section)
 {
     cProcessList_unloadSection((char*)self + 0x2B4, section);
@@ -1462,6 +1511,15 @@ struct cWScriptMan_unloadSection_sEntry {
 extern "C" void cWScriptMan_purgeSection(void* self, int i);
 extern "C" void func_003ACC90(void* entry);
 
+/**
+ * Unloads a world section's scripts: purges its processes, then releases its world script cache entry.
+ *
+ * After cWScriptMan_purgeSection() it calls func_003ACC90 on entry @p i of the world's script cache
+ * (m_pWScriptCache of the world at +0x28C), which frees the entry's buffer unless its +0x2 flag is set and
+ * clears the entry.
+ *
+ * @param i  world section id
+ */
 extern "C" void cWScriptMan_unloadSection(void* self, int i)
 {
     cWScriptMan_purgeSection(self, i);

@@ -8,6 +8,11 @@ struct cBigFile {
 //100%
 INCLUDE_ASM("bx/bigfile", cBigFile_cBigFile__FP8cBigFile);
 #ifdef SKIP_ASM
+/**
+ * Constructs a closed big file: no handle (-1) and the open flag cleared.
+ *
+ * @return @p self
+ */
 cBigFile* cBigFile_cBigFile(cBigFile* self)
 {
     self->field_0x4 = 0;
@@ -21,6 +26,14 @@ extern "C" void cBigFile_open(cBigFile* self);
 //100%
 INCLUDE_ASM("bx/bigfile", cBigFile_cBigFile1__FP8cBigFile);
 #ifdef SKIP_ASM
+/**
+ * Constructs a big file and opens it at once.
+ *
+ * Sets the handle to -1 and the open flag to 0, then calls cBigFile_open(). Only @p self is declared here: the
+ * path and memory class the callers pass (for example the load screens' 0x100) reach cBigFile_open() in registers.
+ *
+ * @return @p self
+ */
 cBigFile* cBigFile_cBigFile1(cBigFile* self)
 {
     self->field_0x4 = 0;

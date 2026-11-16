@@ -190,6 +190,14 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onGainFocus);
 extern "C" void func_001D3340(void* self);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
+/**
+ * Refreshes the mountain room's event widgets, then gives the state focus.
+ *
+ * func_001D3340() shows one widget per event of the first two peaks on each of the three mountains, coloured by
+ * the event's state for the room's player and character; cFEState_onGainFocus() is the base focus handling.
+ *
+ * @param a1  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
+ */
 extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int a1)
 {
     func_001D3340(self);
@@ -560,6 +568,13 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onUpdate);
 extern "C" void func_001D31C0(void* self);
 extern "C" void* func_0039E510(void* self);
 
+/**
+ * Updates the mountain room, first finishing its picture load while one is pending.
+ *
+ * While the async slot at 0xBC is not -1, func_001D31C0() checks the load; once it has loaded, the data is
+ * handed to GrMan under the name "pass" and attached to the widget at 0x50, and the slot is released. Then runs
+ * the base UI-state update func_0039E510().
+ */
 extern "C" void cFEStateMountainRoom_onUpdate(void* self)
 {
     if (~*(int*)((char*)self + 0xBC) != 0) {

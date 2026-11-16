@@ -2309,6 +2309,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onUpdate);
 extern "C" void func_001D2198(void* self);
 extern "C" void* func_0039E510(void* self);
 
+/**
+ * Updates the reward preview, first finishing its preview picture load while one is pending.
+ *
+ * While the async slot at 0x6C is not negative, func_001D2198() checks the load; once it has loaded, the shape
+ * is handed to GrMan, the slot is released and set to -1 and the preview widget shows it. Then runs the base
+ * UI-state update func_0039E510().
+ */
 extern "C" void cFEStatePreviewReward_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x6C) >= 0) {

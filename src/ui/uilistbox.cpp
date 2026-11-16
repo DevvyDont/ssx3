@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByAsciiString);
@@ -252,51 +253,51 @@ struct sUIFlags39A928 {
     unsigned int active : 1;
 };
 
-extern "C" void cUIMenu_setFocus(char* self, int on)
+extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
 {
-    ((sUIFlags39A928*)(self + 0x14))->active = on != 0;
+    ((sUIFlags39A928*)(((char*)self) + 0x14))->active = on != 0;
     if (on) {
-        if (*(unsigned char*)(self + 0xA4) != 0xFF) {
-            cUIMenu_setSelectedByIndex(self, *(unsigned char*)(self + 0xA4));
+        if (self->mStoredIndex != 0xFF) {
+            cUIMenu_setSelectedByIndex(((char*)self), self->mStoredIndex);
             return;
         }
-        char* cur = *(char**)(self + 0xA0);
+        char* cur = (char*)self->mpSelected;
         if (cur == 0) {
-            unsigned char idx = func_0039B7B0(self, 0);
+            unsigned char idx = func_0039B7B0(((char*)self), 0);
             if (idx == 0xFF)
                 idx = 0;
-            cUIMenu_setSelectedByIndex(self, idx);
+            cUIMenu_setSelectedByIndex(((char*)self), idx);
         } else if (((*(int*)(cur + 0x14) >> 4) & 1) == 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 0);
             if (ev != 0xFFFF) {
-                void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+                void* scr = *(void**)((char*)self->mpSelected + 0x5C);
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            char* c = *(char**)(self + 0xA0);
+            char* c = (char*)self->mpSelected;
             sVEntry39A928a* va = *(sVEntry39A928a**)(c + 8);
             va[7].fn(c + va[7].delta, 1);
-            char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            char* o = *(char**)((char*)self->mpScreen + 0xD0);
             sVEntry39A928b* vb = *(sVEntry39A928b**)(o + 8);
-            vb[19].fn(o + vb[19].delta, *(void**)(self + 0xA0), 1);
+            vb[19].fn(o + vb[19].delta, self->mpSelected, 1);
         }
     } else {
-        char* cur = *(char**)(self + 0xA0);
+        char* cur = (char*)self->mpSelected;
         if (cur != 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
             if (ev != 0xFFFF) {
-                void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+                void* scr = *(void**)((char*)self->mpSelected + 0x5C);
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            char* c = *(char**)(self + 0xA0);
+            char* c = (char*)self->mpSelected;
             sVEntry39A928a* va = *(sVEntry39A928a**)(c + 8);
             va[7].fn(c + va[7].delta, 0);
-            char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            char* o = *(char**)((char*)self->mpScreen + 0xD0);
             sVEntry39A928b* vb = *(sVEntry39A928b**)(o + 8);
-            vb[19].fn(o + vb[19].delta, *(void**)(self + 0xA0), 2);
+            vb[19].fn(o + vb[19].delta, self->mpSelected, 2);
         }
     }
 }
@@ -307,14 +308,14 @@ INCLUDE_ASM("ui/uilistbox", cUIMenu_setUIData);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_setUIData(void* self);
 extern "C" char cList_size(void*);
-extern "C" void cUIMenu_setInputMap(void* self, char a1);
+extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1);
 
-extern "C" void cUIMenu_setUIData(void* self)
+extern "C" void cUIMenu_setUIData(cUIMenu* self)
 {
     cUIThing_setUIData(self);
     char v = cList_size((char*)self + 0x74);
-    *(char*)((char*)self + 0x97) = v;
-    *(char*)((char*)self + 0x96) = v;
+    *(char*)&self->mScrollItemNumVisible = v;
+    *(char*)&self->mScrollItemNum = v;
     cUIMenu_setInputMap(self, 0);
 }
 #endif
@@ -322,7 +323,7 @@ extern "C" void cUIMenu_setUIData(void* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIMenu_setInputMap);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setInputMap(void* self, char a1)
+extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1)
 {
     if (a1 == 0) {
         *(char*)((char*)self + 0x91) = 0;
@@ -345,14 +346,14 @@ extern "C" void* func_00397870(void* list, unsigned char i);
 
 struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
 
-extern "C" unsigned char cUIMenu_getNext(void* self)
+extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
 {
-    unsigned char i = *(unsigned char*)((char*)self + 0x95) + 1;
-    unsigned char n = *(unsigned char*)((char*)self + 0x96);
+    unsigned char i = self->mScrollItemCurrent + 1;
+    unsigned char n = self->mScrollItemNum;
     do {
-        if (i < *(unsigned char*)((char*)self + 0x96)) {
-            if (*(int*)((char*)self + 0x90) & 4) {
-                char* o = *(char**)(*(char**)((char*)self + 0x5C) + 0xD0);
+        if (i < self->mScrollItemNum) {
+            if (*(int*)&self->mAttrMenu & 4) {
+                char* o = *(char**)((char*)self->mpScreen + 0xD0);
                 sUIVtAB50* vt = *(sUIVtAB50**)(o + 8);
                 if (vt[20].fn(o + vt[20].delta, self, 1, i) != 0) return i;
             } else {
@@ -362,8 +363,8 @@ extern "C" unsigned char cUIMenu_getNext(void* self)
             }
             i = i + 1;
         } else {
-            int f = *(int*)((char*)self + 0x14) >> 7;
-            if ((f & 1) == 0) return *(unsigned char*)((char*)self + 0x95);
+            int f = self->mAttr >> 7;
+            if ((f & 1) == 0) return self->mScrollItemCurrent;
             i = 0;
         }
     } while (n-- != 0);
@@ -382,14 +383,14 @@ struct func_0039AC48_sVEntry {
     int (*fn)(void*, void*, int, unsigned char);
 };
 
-extern "C" unsigned char func_0039AC48(void* self)
+extern "C" unsigned char func_0039AC48(cUIMenu* self)
 {
-    unsigned char n = *(unsigned char*)((char*)self + 0x96);
-    unsigned char i = *(unsigned char*)((char*)self + 0x95) - 1;
+    unsigned char n = self->mScrollItemNum;
+    unsigned char i = self->mScrollItemCurrent - 1;
     do {
         if (i != 0xFF) {
-            if (*(int*)((char*)self + 0x90) & 4) {
-                char* mgr = *(char**)(*(char**)((char*)self + 0x5C) + 0xD0);
+            if (*(int*)&self->mAttrMenu & 4) {
+                char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
                 func_0039AC48_sVEntry* vt = *(func_0039AC48_sVEntry**)(mgr + 8);
                 if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
                     return i;
@@ -403,11 +404,11 @@ extern "C" unsigned char func_0039AC48(void* self)
             }
             i--;
         } else {
-            int f = *(int*)((char*)self + 0x14) >> 7;
+            int f = self->mAttr >> 7;
             if ((f & 1) == 0) {
-                return *(unsigned char*)((char*)self + 0x95);
+                return self->mScrollItemCurrent;
             }
-            i = *(unsigned char*)((char*)self + 0x96) - 1;
+            i = self->mScrollItemNum - 1;
         }
         n--;
     } while (n != 0xFF);

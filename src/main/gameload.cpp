@@ -912,6 +912,13 @@ static inline char* rider_2302A8(void* game, int i)
     return *(char**)(*(char**)((char*)game + 0xC) + (i << 2) + 0x28);
 }
 
+/**
+ * Restarts the current event from the start.
+ *
+ * Runs cGame_partialRestart() and cGameModeMan_restartHeat(), clears every allocated rider's unk_2F8 (which the
+ * game-mode code sets to 0.7, 0.35 or 0 by the player's place), switches the game to state 1 at once
+ * (func_00231250(self, 1, 2, 1)), and calls func_002870A0() on the audio system.
+ */
 extern "C" void cGame_restart(cGame* self)
 {
     cGame_partialRestart(self);
@@ -1029,6 +1036,16 @@ extern void* D_004A33F4;
 extern char D_0047B770[];
 extern char D_0047B788[];
 
+/**
+ * Leaves the in-game module and queues the next app module.
+ *
+ * Stops the auto replay, sets game state 6, shuts down the online game-comm object (func_00258AE0) and the
+ * DirtySock object in D_004A33F4 when they exist. Despite the parameter name, a nonzero @p toFrontEnd queues a
+ * cPreGameLoadScreen (used after choosing a new event in-game), and 0 queues the "PreFELoad" module, which
+ * probably loads the front end.
+ *
+ * @param toFrontEnd  nonzero for the pre-game load screen, 0 for the "PreFELoad" module
+ */
 extern "C" void cGame_exit(cGame* self, int toFrontEnd)
 {
     cReplay_stopAutoReplay(self->Replay);
@@ -2284,6 +2301,14 @@ extern "C" void* func_00231CD0(void* self)
 //100%
 INCLUDE_ASM("main/gameload", cFadeScreen_loseFocus);
 #ifdef SKIP_ASM
+/**
+ * Starts the screen fade-out and reports whether it has gone far enough.
+ *
+ * Sets the fade-out flag (offset 8), which makes the per-frame update raise the fade level by 1/60; the level
+ * starts at 0.2 when constructed.
+ *
+ * @return 1 once the fade level (offset 4) is at least 0.2, otherwise 0
+ */
 extern "C" int cFadeScreen_loseFocus(void* self)
 {
     *(int*)((char*)self + 8) = 1;

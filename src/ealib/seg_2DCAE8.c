@@ -56,6 +56,12 @@ int func_003DBC98(int arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", USTR_length);
 #ifdef SKIP_ASM
+/**
+ * Counts the characters of a zero-terminated 16-bit (wide) string.
+ *
+ * @param arg0  the wide string
+ * @return the number of 16-bit characters before the terminating 0
+ */
 int USTR_length(unsigned short *arg0) {
     int var_3;
     unsigned short *var_4;
@@ -151,6 +157,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_copy);
 #ifdef SKIP_ASM
 extern void USTR_ncopy(int, int, int);
 
+/**
+ * Copies a zero-terminated wide string with no length limit.
+ *
+ * Calls USTR_ncopy() with a count of 0x7FFFFFFF, so the copy stops only at the source's terminator.
+ *
+ * @param a  destination wide string
+ * @param b  source wide string
+ */
 void USTR_copy(int a, int b) {
     USTR_ncopy(a, b, 0x7FFFFFFF);
 }
@@ -162,6 +176,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_ncopy);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) __asm__("USTR_ncopy");
+/**
+ * Copies at most @p n characters of a wide string and always terminates the copy.
+ *
+ * Stops early at the source's 0, then writes a 0 after the last character copied, so @p d needs room for
+ * n + 1 characters.
+ *
+ * @param d  destination wide string
+ * @param s  source wide string
+ * @param n  maximum number of characters to copy
+ */
 void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) {
     int i;
     for (i = 0; i < n && s[i] != 0; i++) d[i] = s[i];
@@ -681,6 +705,19 @@ extern char D_00495D28_CBD8[] __asm__("D_00495D28");
 extern int D_00519AB0_CBD8[] __asm__("D_00519AB0");
 extern int D_00519AE8_CBD8[] __asm__("D_00519AE8");
 
+/**
+ * Sets up the EA file system once: allocates its work memory and builds the command manager.
+ *
+ * Only acts while the command manager (D_00519AB0) is unset. It allocates func_003DCD98()'s size through the
+ * file-system allocator hook (tag "File Sys"), keeps the block in D_00519AE8 and hands it to func_003DCC88().
+ * Zero arguments take func_003DCC88's defaults: 16 file handles of 0x110 bytes, 1000 disc-directory entries
+ * and 32 command slots of 0x30 bytes.
+ *
+ * @param arg0  number of file handles (0 for 16)
+ * @param arg1  size of the disc directory table, probably in entries (0 for 1000)
+ * @param arg2  number of queued-command slots (0 for 32)
+ * @return 1 when the file system was set up by this call, 0 if it already was
+ */
 int FILESYS_init(int arg0, int arg1, int arg2) {
     int r;
     if (D_00519AB0_CBD8[0] == 0) {
@@ -1501,6 +1538,19 @@ extern void iFILESYS_ExecCommand(int);
 extern int D_00519AB0_9AB0[] __asm__("D_00519AB0");
 
 int FILESYS_atomic_DDF0(int (*arg0)(int, int), int arg1, int arg2, int arg3) __asm__("FILESYS_atomic");
+/**
+ * Runs a file-system callback with the command queue's priority limit set to a given priority.
+ *
+ * Saves the limit (D_00519AB0 word 2; only queued commands at or below it may start), sets it to @p arg2, calls
+ * arg0(arg2, arg3), restores the old limit and then restarts the queue with iFILESYS_ExecCommand(0). The
+ * FILE_load family uses it to load synchronously at sync_priority.
+ *
+ * @param arg0  callback to run, called with (priority, @p arg3)
+ * @param arg1  unused
+ * @param arg2  priority limit to use while the callback runs
+ * @param arg3  argument passed through to the callback
+ * @return the callback's result
+ */
 int FILESYS_atomic_DDF0(int (*arg0)(int, int), int arg1, int arg2, int arg3) {
     int temp_18;
     int temp_2;
@@ -1600,6 +1650,18 @@ extern void func_003DE8C0_FX(void *) __asm__("func_003DE8C0");
 extern void iFILESYS_CommandCompleteCallback_FX(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 void iFILESYS_ExecCommand_impl(struct sFsCmd *c) __asm__("iFILESYS_ExecCommand");
+/**
+ * Queues a file-system command and, when the device is idle, starts the next queued command.
+ *
+ * A non-null @p c is inserted into the pending list ordered by priority (after any of equal priority). Nothing
+ * starts while a command is current or a completion callback is running, or when the head's priority is above
+ * the limit. The started command runs by type (bits 20-23 of its first word): 2 opens and 8 checks a file
+ * (a plain name opens a device file, "|name" or "archive|name" looks inside the mounted BIG archives), 3
+ * closes, 4 reads, 5 writes, 6 reports the file size, and 7, 9 and 10 complete at once. An aborted command
+ * completes at once with status -1.
+ *
+ * @param c  command to queue, or 0 just to try starting the next one
+ */
 void iFILESYS_ExecCommand_impl(struct sFsCmd *c) {
     char path[256];
     char file[256];
@@ -1745,6 +1807,16 @@ extern struct G_IFS D_00519AB0_IFS __asm__("D_00519AB0");
 extern void iFILESYS_ExecCommand_IFS(int) __asm__("iFILESYS_ExecCommand");
 
 void iFILESYS_CommandCompleteCallback_impl(int ok) __asm__("iFILESYS_CommandCompleteCallback");
+/**
+ * Finishes the current file-system command: sets its status, runs its callback and starts the next one.
+ *
+ * The status is -1 for an aborted command, otherwise 1 on success and -2 on failure; the command's callback gets
+ * (handle, status, user data). The nesting count is raised around the callback, and the queue is restarted
+ * with iFILESYS_ExecCommand(0) once it drops back to 0. With no current command it returns early and leaves
+ * the count raised.
+ *
+ * @param ok  nonzero if the command succeeded
+ */
 void iFILESYS_CommandCompleteCallback_impl(int ok) {
     struct Cmd_IFS *c;
     D_00519AB0_IFS.busy++;
@@ -1783,6 +1855,18 @@ extern int func_003E34E8_E4D0(int) __asm__("func_003E34E8");
 extern int func_003E32F8_E4D0(int) __asm__("func_003E32F8");
 extern int func_004165A8_E4D0(char *, char *) __asm__("func_004165A8");
 extern int BIG_locateentryz_E4D0(int, char *, int, int *, int *) __asm__("BIG_locateentryz");
+/**
+ * Looks a file up immediately, without going through the command queue, and reports its size.
+ *
+ * Uses the same name rules as the queued open: a plain name tries a device file only (and also the BIG
+ * archives when bit 0 of @p flags is set), "|name" searches every mounted archive, and "archive|name" only
+ * the archive with that name. A device file is opened, sized and closed again.
+ *
+ * @param name   file name, optionally with an archive prefix
+ * @param flags  open flags; bit 0 also searches the archives for a plain name
+ * @param out    receives the file's size, or 0 when it is not found
+ * @return 1 if the file was found, otherwise 0
+ */
 int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
     char path[256];
     char file[256];
@@ -2715,6 +2799,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_getstatus);
 extern void mlock_F980(char *) __asm__("MUTEX_lock");
 extern void munlock_F980(char *) __asm__("MUTEX_unlock");
 
+/**
+ * Reports whether an asynchronous file request has finished.
+ *
+ * Looks the request up under the request-list mutex (func_003DEF70 checks the handle's sequence number).
+ *
+ * @param h  request handle
+ * @return 1 when the request has no file-system command pending, 0 while one is, -1 for an invalid handle
+ */
 int ASYNCFILE_getstatus(int h) {
     struct sReq *e;
     int r;
@@ -2735,6 +2827,18 @@ extern void MUTEX_unlock_AR(void *) __asm__("MUTEX_unlock");
 extern int func_003DD1D8(int);
 
 int ASYNCFILE_release(int h, int *a, int *b);
+/**
+ * Waits for an asynchronous file request to finish, reports what it loaded and frees the request.
+ *
+ * Fails at once for an invalid or already-cancelled request; otherwise sets its release flag and waits on its
+ * pending command with func_003DD1D8(). If it was cancelled meanwhile, both outputs are zeroed. Either way
+ * releaserequest() returns it to the free list.
+ *
+ * @param h  request handle
+ * @param a  if not 0, receives the start of the loaded data
+ * @param b  if not 0, receives the number of bytes loaded
+ * @return 1 on success, -1 for an invalid or cancelled request
+ */
 int ASYNCFILE_release(int h, int *a, int *b) {
     struct sReq *f;
     int busy = 0;
@@ -4174,6 +4278,18 @@ void FILESYS_atomic_1900(void (*)(void), int, int, void *) __asm__("FILESYS_atom
 void func_003E1810_18C8(void) __asm__("func_003E1810");
 extern int D_00450C38_18C8[] __asm__("sync_priority");
 
+/**
+ * Loads a whole file into newly allocated memory, synchronously.
+ *
+ * Runs func_003E1810 through FILESYS_atomic() at sync_priority: it opens the file, allocates its size through
+ * the file-system allocator hook (with @p arg1 as the allocation flags) and reads it. The C is declared void,
+ * but the asm leaves FILESYS_atomic's result, the buffer or 0, in the return register, and callers use it.
+ * FILE_loadz() differs only in the 0 it stores in the argument block's fourth word, which func_003E1810
+ * does not read.
+ *
+ * @param arg0  file name
+ * @param arg1  allocation flags for the buffer
+ */
 void FILE_load(int arg0, int arg1) {
     int buf[8];
 
@@ -4192,6 +4308,16 @@ void FILESYS_atomic_1908(void (*)(void), int, int, void *) __asm__("FILESYS_atom
 void func_003E1810_1908(void) __asm__("func_003E1810");
 extern int D_00450C38_1908[] __asm__("sync_priority");
 
+/**
+ * Loads a whole file into newly allocated memory, synchronously; the variant of FILE_load().
+ *
+ * Same call as FILE_load() (func_003E1810 through FILESYS_atomic() at sync_priority) except that the argument
+ * block's fourth word is 0 instead of 1. The C is declared void, but the buffer (or 0) is left in the return
+ * register and callers use it.
+ *
+ * @param arg0  file name
+ * @param arg1  allocation flags for the buffer
+ */
 void FILE_loadz(int arg0, int arg1) {
     int buf[8];
 
@@ -4260,6 +4386,17 @@ extern int FILESYS_atomic_1ACC(void (*)(void), int, int, void*) __asm__("FILESYS
 extern int D_00450C38_0C38[] __asm__("sync_priority");
 extern void func_003E1948_1948(void) __asm__("func_003E1948");
 
+/**
+ * Loads a whole file into newly allocated memory, synchronously, and reports its size.
+ *
+ * Runs func_003E1948 through FILESYS_atomic() at sync_priority; it works like FILE_load's loader but also
+ * stores the file size in the argument block.
+ *
+ * @param arg0  file name
+ * @param arg1  if not 0, receives the file size
+ * @param arg2  allocation flags for the buffer
+ * @return the loaded buffer, or 0 on failure
+ */
 int FILE_loadsizez(int arg0, int *arg1, int arg2) {
     FLS_args_1ACC s;
     int r;
@@ -4686,6 +4823,18 @@ extern int func_003B4818_pkz(int) __asm__("func_003B4818");
 extern void MEM_copy_pkz(int, int, int) __asm__("MEM_copy");
 
 int FILE_loadpackatz_pkz(int name, int dst, int max) __asm__("FILE_loadpackatz");
+/**
+ * Loads a file into a caller's buffer, unpacking it first when it is RefPack-compressed.
+ *
+ * Loads the file with FILE_loadsizez(). When func_003B4818 reports an unpacked size (a 0xFB-tagged header) it
+ * unpacks into a second allocation with func_003B4740. It copies at most @p max bytes to @p dst, frees the
+ * temporary buffers and writes back the whole data cache.
+ *
+ * @param name  file name
+ * @param dst   destination buffer
+ * @param max   maximum number of bytes to copy, or 0 or less for no limit
+ * @return the number of bytes copied, or 0 if loading or unpacking failed
+ */
 // PORT: hand-written EE data-cache writeback of every line (sync + cache 0x14 on ways 0/1, 64 sets of 0x40 bytes), the
 // same loop (same text) as the landed func_003E2190 DCACHE_WB_ALL_2190 macro; evidence: `addiu $8,$0,0` (gcc emits move = daddu for 0), fixed
 // $8/$9 and the unfilled `bnez; nop; nop` (a C loop around sync/cache asm scores 96.61); a port replaces it with its
@@ -4805,6 +4954,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", BIG_sizeofheader);
 extern int BIG_typeofheader_SZ(unsigned char *) __asm__("BIG_typeofheader");
 
 int BIG_sizeofheader_impl(unsigned char *h) __asm__("BIG_sizeofheader");
+/**
+ * Returns the header size of a BIG archive from its first bytes.
+ *
+ * For a 0xC0FB header (BIG_typeofheader() type 1) the size is the big-endian 16-bit value at byte 2 plus 4. For
+ * "BIGF" and other "BIG" headers (types 2 and 3) it is the big-endian 32-bit value at byte 12.
+ *
+ * @param h  start of the archive
+ * @return the header size in bytes, or 0 if @p h is not a BIG archive
+ */
 int BIG_sizeofheader_impl(unsigned char *h) {
     int r = 0;
     int t = BIG_typeofheader_SZ(h);
@@ -6116,6 +6274,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", REAL_restore);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*D_00450C78_0C78[])(void) __asm__("D_00450C78");
 
+/**
+ * Runs and clears every registered exit handler.
+ *
+ * Walks the 64-slot handler table (D_00450C78, filled by func_003E4A30) from the last slot to the first,
+ * calling each non-null entry and then clearing its slot. REAL_exit() calls it before trapping.
+ */
 void REAL_restore(void) {
     int i;
     for (i = 0x3F; i >= 0; i--) {
@@ -6617,6 +6781,16 @@ extern int D_0DE4_YT[] __asm__("D_00450DE4");
 extern char D_5E20_YT[] __asm__("D_00495E20");
 extern char fE5290_YT[] __asm__("func_003E5290");
 
+/**
+ * Puts the calling thread to sleep for a number of library timer ticks, or just yields when given none.
+ *
+ * For @p a0 > 0 it converts the ticks to H-blank counts (a0 times the H-blank rate D_00450DA0, divided by the
+ * tick rate), sets a kernel alarm whose handler wakes this thread, and sleeps; it aborts with "ERROR SETTING
+ * WAKEUP ALARM" if the alarm can't be set. Otherwise it rotates the ready queue at the thread's current
+ * priority (through func_00424CE8 inside a timer handler).
+ *
+ * @param a0  ticks to sleep, or 0 or less to yield
+ */
 void THREAD_yieldticks(int a0) {
     int buf[12];
     int t16;
@@ -6860,6 +7034,15 @@ extern void func_00423DD0(int);
 extern int D_00450DE4_5760[] __asm__("D_00450DE4");
 
 void MUTEX_unlock_5760(void *arg0) __asm__("MUTEX_unlock");
+/**
+ * Releases one level of a recursive EA mutex.
+ *
+ * When the calling thread owns it, the lock count drops by one and only a count of 0 clears the owner and
+ * signals the semaphore. A caller that does not own it signals the semaphore anyway. Inside a timer handler
+ * the interrupt-safe signal is used.
+ *
+ * @param arg0  the mutex (owner thread at word 1, lock count at word 2, semaphore ID at word 3)
+ */
 void MUTEX_unlock_5760(void *arg0) {
     int *p = (int *)arg0;
     if (p[1] == func_00423C90()) {
@@ -6880,6 +7063,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0051ED98_57D0[] __asm__("D_0051ED98");
 void MEM_fill_57D0(char *, int, int) __asm__("MEM_fill");
+/**
+ * Clears the synchronous task table.
+ *
+ * Zeroes all 16 entries (256 bytes) of D_0051ED98, the tasks SYNCTASK_run() calls.
+ */
 void SYNCTASK_init(void) {
     MEM_fill_57D0(D_0051ED98_57D0, 0, 0x100);
 }
@@ -6895,6 +7083,17 @@ extern int D_00450E00_STA __asm__("D_00450E00");
 extern volatile int D_00450DD0_STA __asm__("D_00450DD0");
 
 void SYNCTASK_add_impl(int fn, int mode, int delay) __asm__("SYNCTASK_add");
+/**
+ * Schedules a function in the synchronous task table, or reschedules it if it is already there.
+ *
+ * Reuses the function's existing slot, otherwise takes a free one; a full table drops the request. A reentrant
+ * call skips one free slot per nesting level, probably so nested adds don't pick the same slot. @p mode becomes
+ * the period between runs, with -1 mapped to 0 and 0 mapped to 1.
+ *
+ * @param fn     task function, called as fn(arg, lateness) by SYNCTASK_run()
+ * @param mode   period in library ticks (-1 means 0, 0 means 1)
+ * @param delay  ticks from now until the first run
+ */
 void SYNCTASK_add_impl(int fn, int mode, int delay) {
     int i;
     int idx;
@@ -6935,6 +7134,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_del);
 typedef struct { int fn; int b; int c; int d; } STsk_5924;
 extern STsk_5924 D_0051ED98_ED98[] __asm__("D_0051ED98");
 
+/**
+ * Removes a function from the synchronous task table.
+ *
+ * Clears the first of the 16 slots whose function is @p arg0; does nothing if none is.
+ *
+ * @param arg0  task function to remove
+ */
 void SYNCTASK_del(int arg0) {
     int i = 0;
 
@@ -6957,6 +7163,15 @@ struct sSyncTask {                  /* 16 bytes, D_0051ED98[16]: a task SYNCTASK
 extern struct sSyncTask D_0051ED98[16];
 extern int D_00450E04_5928 __asm__("D_00450E04");
 
+/**
+ * Runs every synchronous task that is due.
+ *
+ * Records the current library tick in D_00450E04. Each task whose due time has passed and that isn't
+ * already running is marked running, called with (@p arg, ticks late), and rescheduled one period after now.
+ *
+ * @param arg  value passed to every task
+ * @return the OR of the results of the tasks that ran
+ */
 int SYNCTASK_run(int arg) {
     int i;
     int r = 0;
@@ -7131,6 +7346,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_string);
 #ifdef SKIP_ASM
 extern void PRINT_vstring(char *, const char *, char *);
 
+/**
+ * Formats a message and sends it to the debug print outputs.
+ *
+ * Passes its variable arguments to PRINT_vstring(), which formats into an 8 KB buffer and hands the text to
+ * every enabled output when the channel is enabled. Despite its type, @p dst is that channel number: callers
+ * pass 2 (SYSTEM_abortmessage, memstd).
+ *
+ * @param dst  debug channel number, declared as a char pointer
+ * @param fmt  printf-style format; the arguments follow
+ */
 // PORT: SN-specific va_start
 void PRINT_string(char *dst, const char *fmt, ...) {
     char *ap;
@@ -7288,6 +7513,14 @@ extern int func_004186C8(char *dst, const char *fmt, char *ap);
 extern void (*D_00450DD8_6070[])(char *, char *) __asm__("D_00450DD8");
 extern char D_00495EE8_6070[] __asm__("D_00495EE8");
 
+/**
+ * Formats an abort message and hands it to the installed abort handler.
+ *
+ * Formats into a 512-byte buffer (empty for a null @p fmt) and calls the handler in D_00450DD8 with "%s" and
+ * the text. The default handler is SYSTEM_abortmessage(), which prints it and exits.
+ *
+ * @param fmt  printf-style format, or 0; the arguments follow
+ */
 void REAL_abortmessage(const char *fmt, ...) {
     char buf[0x200];
     if (fmt) {
@@ -7335,6 +7568,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MEM_move);
 extern void MEM_copy_6188(unsigned char *, unsigned char *, int) __asm__("MEM_copy");
 void MEM_move_6188(unsigned char *dst, unsigned char *src, int n) __asm__("MEM_move");
 
+/**
+ * Copies memory correctly even when the source and destination overlap.
+ *
+ * Uses MEM_copy() unless @p dst starts inside the source range above @p src; then it copies byte by byte from
+ * the end.
+ *
+ * @param dst  destination
+ * @param src  source
+ * @param n    number of bytes
+ */
 void MEM_move_6188(unsigned char *dst, unsigned char *src, int n) {
     unsigned char *e;
     if (src >= dst || dst >= (e = src + n)) {

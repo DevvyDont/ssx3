@@ -49,6 +49,14 @@ extern sPad16 D_0043E7D0;
 //99.58%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the new-race interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BENewRaceInt", clears the word at 0x8, stores the vtable
+ * D_0045AE58 and keeps the object in D_004A11B4.
+ *
+ * @return the new-race interface
+ */
 void* cBENewRaceInterface_getThis()
 {
     if (D_004A11B4 == 0) {
@@ -113,6 +121,14 @@ void cBENewRaceInterface_setNumberHumans(void* self, int humans)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberMission__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the number of mission riders in the new race and updates the total rider count.
+ *
+ * Writes the static race settings cBENewRaceInterface_newRace (@p self is unused): iNumberMissionRiders =
+ * @p mission and iNumberRiders = iNumberHumans + iNumberAI + @p mission.
+ *
+ * @param mission  number of mission riders
+ */
 void cBENewRaceInterface_setNumberMission(void* self, int mission)
 {
     int a = cBENewRaceInterface_newRace.iNumberHumans;
@@ -153,6 +169,14 @@ extern "C" void* cBENewRaceInterface_getLocation()
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationID);
 #ifdef SKIP_ASM
+/**
+ * Returns the id of the current race location.
+ *
+ * The id selects the 0x64-byte location record that cBENewRaceInterface_getLocation() returns; the profile
+ * screen sets it from the player's last hub.
+ *
+ * @return the location id stored in D_00535C08
+ */
 extern "C" int cBENewRaceInterface_getLocationID()
 {
     return D_00535C08.value;
@@ -300,6 +324,15 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberAI);
 // Max AI riders per [gameType][eventKind] (7 event kinds per row).
 extern unsigned int D_0043D8F8[][7];
 
+/**
+ * Sets the number of AI riders in the new race and checks it against the limit for the race type.
+ *
+ * Stores @p count and recomputes iNumberRiders (humans + AI + mission riders) even when the count is over the
+ * limit. The limit comes from the table D_0043D8F8, indexed by cGamePath and cGameMode.
+ *
+ * @param count  number of AI riders
+ * @return 1 when @p count is within the limit (compared unsigned, so a negative count fails), else 0
+ */
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
 {
     cBENewRaceInterface_newRace.iNumberAI = count;

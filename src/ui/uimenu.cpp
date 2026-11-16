@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_setSelected);
@@ -19,35 +20,35 @@ struct cUIMenu_sVEntryB {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void cUIMenu_setSelected(char* self, char* item, int play)
+extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play)
 {
-    *(unsigned char*)(self + 0xA4) = 0xFF;
-    char* cur = *(char**)(self + 0xA0);
+    self->mStoredIndex = 0xFF;
+    char* cur = (char*)self->mpSelected;
     if (cur != 0 && ((*(int*)(cur + 0x14) >> 4) & 1)) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
         if (ev != 0xFFFF) {
-            void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+            void* scr = *(void**)((char*)self->mpSelected + 0x5C);
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        char* c = *(char**)(self + 0xA0);
+        char* c = (char*)self->mpSelected;
         cUIMenu_sVEntryA* va = *(cUIMenu_sVEntryA**)(c + 8);
         va[7].fn(c + va[7].delta, 0);
-        char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        char* o = *(char**)((char*)self->mpScreen + 0xD0);
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(o + 8);
-        vb[19].fn(o + vb[19].delta, *(void**)(self + 0xA0), 2);
+        vb[19].fn(o + vb[19].delta, self->mpSelected, 2);
     }
-    *(char**)(self + 0xA0) = item;
-    char* o2 = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+    self->mpSelected = (cUIThing*)item;
+    char* o2 = *(char**)((char*)self->mpScreen + 0xD0);
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(o2 + 8);
     vb2[19].fn(o2 + vb2[19].delta, item, 1);
-    char* c2 = *(char**)(self + 0xA0);
+    char* c2 = (char*)self->mpSelected;
     cUIMenu_sVEntryA* va2 = *(cUIMenu_sVEntryA**)(c2 + 8);
     va2[7].fn(c2 + va2[7].delta, 1);
-    unsigned short ev2 = cUIThing_getKeyframerEvent(*(cUIThing**)(self + 0xA0), 0);
+    unsigned short ev2 = cUIThing_getKeyframerEvent(self->mpSelected, 0);
     if (ev2 != 0xFFFF) {
-        void* scr = *(void**)(*(char**)(self + 0xA0) + 0x5C);
+        void* scr = *(void**)((char*)self->mpSelected + 0x5C);
         if (scr != 0) {
             if (play) {
                 cUIScreen_playFrame(scr, ev2, 1);
@@ -62,7 +63,7 @@ extern "C" void cUIMenu_setSelected(char* self, char* item, int play)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_onInputChangeItem);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setSelected(char* self, char* item, int play);
+extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
 void* func_00397870_i_AE98(void* list, int i) __asm__("func_00397870");
 
@@ -83,25 +84,24 @@ static inline void cUIMenu_onInputChangeItem_notify(char* self, int ev, unsigned
 // cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent) (On Tour debug 0x0027E39C):
 // keeps the selected row (0x95) inside the visible window (top 0x98, rows 0x97), then reselects.
 // MenuEntryIndex is a short in On Tour's DWARF; the short is what keeps the second 0x95 load.
-extern "C" int cUIMenu_onInputChangeItem(void* selfp, unsigned char OldScrollItemCurrent)
+extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScrollItemCurrent)
 {
-    char* self = (char*)selfp;
-    if (OldScrollItemCurrent != *(unsigned char*)(self + 0x95)) {
-        short MenuEntryIndex = *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98);
+    if (OldScrollItemCurrent != selfp->mScrollItemCurrent) {
+        short MenuEntryIndex = selfp->mScrollItemCurrent - selfp->mScrollItemOffset;
         if (MenuEntryIndex < 0) {
-            *(unsigned char*)(self + 0x98) = *(unsigned char*)(self + 0x95);
+            selfp->mScrollItemOffset = selfp->mScrollItemCurrent;
             MenuEntryIndex = 0;
-            cUIMenu_onInputChangeItem_notify(self, 2, *(unsigned char*)(self + 0x98));
-            cUIMenu_onInputChangeItem_notify(self, 4, *(unsigned char*)(self + 0x98));
-        } else if (MenuEntryIndex >= *(unsigned char*)(self + 0x97)) {
-            *(unsigned char*)(self + 0x98) = *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x97) + 1;
-            MenuEntryIndex = *(unsigned char*)(self + 0x97) - 1;
-            cUIMenu_onInputChangeItem_notify(self, 3, *(unsigned char*)(self + 0x98));
-            cUIMenu_onInputChangeItem_notify(self, 4, *(unsigned char*)(self + 0x98));
+            cUIMenu_onInputChangeItem_notify(((char*)selfp), 2, selfp->mScrollItemOffset);
+            cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
+        } else if (MenuEntryIndex >= selfp->mScrollItemNumVisible) {
+            selfp->mScrollItemOffset = selfp->mScrollItemCurrent - selfp->mScrollItemNumVisible + 1;
+            MenuEntryIndex = selfp->mScrollItemNumVisible - 1;
+            cUIMenu_onInputChangeItem_notify(((char*)selfp), 3, selfp->mScrollItemOffset);
+            cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
         }
-        char* pNextSelected = (char*)func_00397870_i_AE98(self + 0x74, MenuEntryIndex);
-        cUIMenu_setSelected(self, pNextSelected, *(int*)(self + 0x90) & 1);
-        cUIMenu_onInputChangeItem_notify(self, 5, *(unsigned char*)(self + 0x98));
+        char* pNextSelected = (char*)func_00397870_i_AE98(((char*)selfp) + 0x74, MenuEntryIndex);
+        cUIMenu_setSelected(selfp, pNextSelected, *(int*)&selfp->mAttrMenu & 1);
+        cUIMenu_onInputChangeItem_notify(((char*)selfp), 5, selfp->mScrollItemOffset);
         return 1;
     }
     return 0;
@@ -118,7 +118,7 @@ extern "C" int func_003A0318(void* self, int a);
 extern char D_004A5A58[4];
 extern "C" unsigned char cUIMenu_getNext(void* self);
 extern "C" unsigned char func_0039AC48(void* self);
-extern "C" int cUIMenu_onInputChangeItem(void* self, unsigned char old);
+extern "C" int cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
 
 struct sVE_B000 { short delta; short index; int (*fn)(void*, ...); };
 struct sVEv_B000 { short delta; short index; void (*fn)(void*, ...); };
@@ -167,13 +167,13 @@ static inline void playEvent_B000(char* thing, int which)
 
 // 2D menu input: the focused child gets the input first; then up/down/left/right move the selection
 // (by row or by column), the paging slots move the focus between items, accept notifies.
-extern "C" int cUIMenu_onInput(char* self, void* in)
+extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
 {
-    if (((*(int*)(self + 0x14) >> 5) & 1) || *(char**)(self + 0xA0) == 0) {
+    if (((self->mAttr >> 5) & 1) || (char*)self->mpSelected == 0) {
         return 0;
     }
-    char* cur = *(char**)(self + 0xA0);
-    if (!bit_B000(self, 0x14, 4)) {
+    char* cur = (char*)self->mpSelected;
+    if (!bit_B000(((char*)self), 0x14, 4)) {
         return 0;
     }
     if (bit_B000(cur, 0x14, 3) && !bit_B000(cur, 0x14, 5)) {
@@ -183,109 +183,109 @@ extern "C" int cUIMenu_onInput(char* self, void* in)
         }
     }
     int result = 0;
-    unsigned char old = *(unsigned char*)(self + 0x95);
+    unsigned char old = self->mScrollItemCurrent;
     int f;
-    if ((inputBtn_B000(in, *(signed char*)(self + 0x94)) && !(*(int*)(self + 0x14) & 1)) ||
-        (inputBtn_B000(in, *(signed char*)(self + 0x92)) && (*(int*)(self + 0x14) & 1))) {
+    if ((inputBtn_B000(in, *(signed char*)(((char*)self) + 0x94)) && !(self->mAttr & 1)) ||
+        (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x92)) && (self->mAttr & 1))) {
         unsigned short ev;
-        if (inputBtn_B000(in, *(signed char*)(self + 0x94)) && !(*(int*)(self + 0x14) & 1)) {
+        if (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x94)) && !(self->mAttr & 1)) {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
         } else {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 7);
         }
         if (ev != 0xFFFF) {
-            void* scr = *(void**)(self + 0x5C);
+            void* scr = self->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        *(unsigned char*)(self + 0x95) = cUIMenu_getNext(self);
+        self->mScrollItemCurrent = cUIMenu_getNext(((char*)self));
         int moved = cUIMenu_onInputChangeItem(self, old);
-        if (!bit_B000(self, 0x90, 3)) {
+        if (!bit_B000(((char*)self), 0x90, 3)) {
             if (moved) {
                 result = 1;
             } else {
-                result = func_003A0318(*(void**)(self + 0xA0), 0);
+                result = func_003A0318(self->mpSelected, 0);
             }
         }
-    } else if ((inputBtn_B000(in, *(signed char*)(self + 0x93)) && !(*(int*)(self + 0x14) & 1)) ||
-               (inputBtn_B000(in, *(signed char*)(self + 0x91)) && (*(int*)(self + 0x14) & 1))) {
+    } else if ((inputBtn_B000(in, *(signed char*)(((char*)self) + 0x93)) && !(self->mAttr & 1)) ||
+               (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x91)) && (self->mAttr & 1))) {
         unsigned short ev;
-        if (inputBtn_B000(in, *(signed char*)(self + 0x93)) && !(*(int*)(self + 0x14) & 1)) {
+        if (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x93)) && !(self->mAttr & 1)) {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
         } else {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 6);
         }
         if (ev != 0xFFFF) {
-            void* scr = *(void**)(self + 0x5C);
+            void* scr = self->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        *(unsigned char*)(self + 0x95) = func_0039AC48(self);
+        self->mScrollItemCurrent = func_0039AC48(((char*)self));
         int moved = cUIMenu_onInputChangeItem(self, old);
-        if (!bit_B000(self, 0x90, 3)) {
+        if (!bit_B000(((char*)self), 0x90, 3)) {
             if (moved) {
                 result = 1;
             } else {
-                result = func_003A0318(*(void**)(self + 0xA0), 0);
+                result = func_003A0318(self->mpSelected, 0);
             }
         }
     } else if (inputIs_B000(in, 5)) {
-        char* item = (char*)func_00397870_i(self + 0x74, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
-        focusNotify_B000(self, item, 5);
-        f = focusMove_B000(self, 6, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
+        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        focusNotify_B000(((char*)self), item, 5);
+        f = focusMove_B000(((char*)self), 6, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (f & 0x100) {
             playEvent_B000(item, 2);
         }
         if (f & 1) {
-            result = func_003A0318(*(void**)(self + 0xA0), 1);
+            result = func_003A0318(self->mpSelected, 1);
         } else if (f & 0x10) {
-            result = func_003A0318(*(void**)(self + 0xA0), 0);
+            result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 6)) {
-        char* item = (char*)func_00397870_i(self + 0x74, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
-        focusNotify_B000(self, item, 6);
-        f = focusMove_B000(self, 7, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
+        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        focusNotify_B000(((char*)self), item, 6);
+        f = focusMove_B000(((char*)self), 7, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (f & 0x100) {
             playEvent_B000(item, 3);
         }
         if (f & 1) {
-            result = func_003A0318(*(void**)(self + 0xA0), 1);
+            result = func_003A0318(self->mpSelected, 1);
         } else if (f & 0x10) {
-            result = func_003A0318(*(void**)(self + 0xA0), 0);
+            result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 8)) {
-        char* item = (char*)func_00397870_i(self + 0x74, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
-        focusNotify_B000(self, item, 8);
-        f = focusMove_B000(self, 9, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
+        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        focusNotify_B000(((char*)self), item, 8);
+        f = focusMove_B000(((char*)self), 9, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (f & 0x100) {
             playEvent_B000(item, 5);
         }
         if (f & 1) {
-            result = func_003A0318(*(void**)(self + 0xA0), 1);
+            result = func_003A0318(self->mpSelected, 1);
         } else if (f & 0x10) {
-            result = func_003A0318(*(void**)(self + 0xA0), 0);
+            result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 7)) {
-        char* item = (char*)func_00397870_i(self + 0x74, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
-        focusNotify_B000(self, item, 7);
-        f = focusMove_B000(self, 8, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
+        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        focusNotify_B000(((char*)self), item, 7);
+        f = focusMove_B000(((char*)self), 8, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (f & 0x100) {
             playEvent_B000(item, 4);
         }
         if (f & 1) {
-            result = func_003A0318(*(void**)(self + 0xA0), 1);
+            result = func_003A0318(self->mpSelected, 1);
         } else if (f & 0x10) {
-            result = func_003A0318(*(void**)(self + 0xA0), 0);
+            result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 4)) {
-        char* item = (char*)func_00397870_i(self + 0x74, *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98));
-        focusNotify_B000(self, item, 4);
+        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        focusNotify_B000(((char*)self), item, 4);
     } else {
         return 0;
     }
-    char* owner = (char*)func_0039FF50(self);
+    char* owner = (char*)func_0039FF50(((char*)self));
     char* listener = *(char**)(owner + 0x14);
     if (listener == 0) {
         listener = D_004A5A58;
@@ -313,18 +313,18 @@ struct cUIMenu_render2D_sVEntry {
     void (*fn)(void*, float, float);
 };
 
-extern "C" void cUIMenu_render2D(void* self, float x, float y)
+extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
 {
-    void* p = *(void**)((char*)self + 0x9C);
+    void* p = self->mpScrollBar;
     if (p != 0) {
-        func_0039DA20(p, *(unsigned char*)((char*)self + 0x98), *(unsigned char*)((char*)self + 0x97), *(unsigned char*)((char*)self + 0x96));
+        func_0039DA20(p, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
     }
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIMenu_render2D_sVEntry* vt = *(cUIMenu_render2D_sVEntry**)((char*)n + 8);
-                vt[0x11].fn((char*)n + vt[0x11].delta, *(float*)((char*)self + 0x44) + x, *(float*)((char*)self + 0x48) + y);
+                vt[0x11].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -337,13 +337,13 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollableMenu);
 #ifdef SKIP_ASM
 extern "C" char cList_size(void*);
 
-extern "C" void cUIMenu_setScrollableMenu(void* self, char a1)
+extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char a1)
 {
-    *(char*)((char*)self + 0x95) = 0;
-    *(char*)((char*)self + 0x96) = a1;
-    *(int*)((char*)self + 0x90) |= 4;
-    *(char*)((char*)self + 0x97) = cList_size((char*)self + 0x74);
-    *(char*)((char*)self + 0x98) = 0;
+    *(char*)&self->mScrollItemCurrent = 0;
+    *(char*)&self->mScrollItemNum = a1;
+    *(int*)&self->mAttrMenu |= 4;
+    *(char*)&self->mScrollItemNumVisible = cList_size((char*)self + 0x74);
+    *(char*)&self->mScrollItemOffset = 0;
 }
 #endif
 
@@ -366,13 +366,13 @@ struct func_0039B7B0_sVEntry {
     int (*fn)(void*, void*, int, unsigned char);
 };
 
-extern "C" unsigned char func_0039B7B0(void* self, unsigned char start)
+extern "C" unsigned char func_0039B7B0(cUIMenu* self, unsigned char start)
 {
     unsigned char i = start == 0xFF ? 0 : start;
-    for (; i < *(unsigned char*)((char*)self + 0x96); i++) {
+    for (; i < self->mScrollItemNum; i++) {
         void* item = func_00397870((char*)self + 0x74, i);
-        if (*(int*)((char*)self + 0x90) & 4) {
-            char* mgr = *(char**)(*(char**)((char*)self + 0x5C) + 0xD0);
+        if (*(int*)&self->mAttrMenu & 4) {
+            char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
             func_0039B7B0_sVEntry* vt = *(func_0039B7B0_sVEntry**)(mgr + 8);
             if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
                 return i;
@@ -394,24 +394,24 @@ INCLUDE_ASM("ui/uimenu", func_0039B878);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
 
-extern "C" unsigned char func_0039B878(char* self, unsigned char idx) {
+extern "C" unsigned char func_0039B878(cUIMenu* self, unsigned char idx) {
     short i;
     unsigned char cnt;
     char* obj;
     char* vtbl;
     char* item;
 
-    cnt = *(unsigned char*)(self + 0x96);
+    cnt = self->mScrollItemNum;
     if (idx >= cnt) {
         idx = cnt - 1;
     }
     i = idx;
     for (; i >= 0; i--) {
-        item = (char*)func_00397870_i(self + 0x74, i);
-        if (*(int*)(self + 0x90) & 4) {
-            obj = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        item = (char*)func_00397870_i(((char*)self) + 0x74, i);
+        if (*(int*)&self->mAttrMenu & 4) {
+            obj = *(char**)((char*)self->mpScreen + 0xD0);
             vtbl = *(char**)(obj + 8);
-            if ((*(int (**)(void*, void*, int, int))(vtbl + 0xA4))(obj + *(short*)(vtbl + 0xA0), self, 1, i)) {
+            if ((*(int (**)(void*, void*, int, int))(vtbl + 0xA4))(obj + *(short*)(vtbl + 0xA0), ((char*)self), 1, i)) {
                 return i;
             }
         } else if (((*(int*)(item + 0x14) >> 5) & 1) == 0) {
@@ -425,7 +425,7 @@ extern "C" unsigned char func_0039B878(char* self, unsigned char idx) {
 //100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_setSelectedByIndex);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setSelected(char* self, char* item, int play);
+extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
 void* func_00397870_i(void* list, int i) __asm__("func_00397870");
 
@@ -436,25 +436,25 @@ static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
     vt[20].fn(mgr + vt[20].delta, self, ev, v);
 }
 
-extern "C" void cUIMenu_setSelectedByIndex(char* self, unsigned char idx)
+extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
 {
-    if (((*(int*)(self + 0x14) >> 4) & 1) == 0 || ((*(int*)(*(char**)(*(char**)(self + 0x5C) + 0xD0) + 0x1C) >> 5) & 1) == 0) {
-        *(unsigned char*)(self + 0xA4) = idx;
+    if (((self->mAttr >> 4) & 1) == 0 || ((*(int*)(*(char**)((char*)self->mpScreen + 0xD0) + 0x1C) >> 5) & 1) == 0) {
+        self->mStoredIndex = idx;
         return;
     }
-    unsigned char top = *(unsigned char*)(self + 0x98);
-    unsigned char vis = *(unsigned char*)(self + 0x97);
-    *(unsigned char*)(self + 0x95) = idx;
+    unsigned char top = self->mScrollItemOffset;
+    unsigned char vis = self->mScrollItemNumVisible;
+    self->mScrollItemCurrent = idx;
     if (idx >= top + vis) {
-        *(unsigned char*)(self + 0x98) = idx - vis + 1;
-        cUIMenu_notify(self, 3, *(unsigned char*)(self + 0x98));
-        cUIMenu_notify(self, 4, *(unsigned char*)(self + 0x98));
+        self->mScrollItemOffset = idx - vis + 1;
+        cUIMenu_notify(((char*)self), 3, self->mScrollItemOffset);
+        cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     } else if (idx < top) {
-        *(unsigned char*)(self + 0x98) = idx;
-        cUIMenu_notify(self, 2, *(unsigned char*)(self + 0x98));
-        cUIMenu_notify(self, 4, *(unsigned char*)(self + 0x98));
+        self->mScrollItemOffset = idx;
+        cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
+        cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (char*)func_00397870_i(self + 0x74, idx - *(unsigned char*)(self + 0x98)), 1);
+    cUIMenu_setSelected(self, (char*)func_00397870_i(((char*)self) + 0x74, idx - self->mScrollItemOffset), 1);
 }
 #endif
 
@@ -496,6 +496,14 @@ struct cUIPair_setActive_s {
     cUIPair_setActive_cVirt* b;
 };
 
+/**
+ * Marks a UI pair and both of its child objects as active or not.
+ *
+ * Sets the pair's mActive bit to @p on != 0, then calls setActive (vtable slot 4) on the first child (at 0x78,
+ * not null-checked) and on the second (at 0x7C) when there is one.
+ *
+ * @param on  nonzero to activate (On Tour: active)
+ */
 extern "C" void cUIPair_setActive(cUIPair_setActive_s* self, int on)
 {
     self->b1 = (on != 0);
@@ -616,6 +624,16 @@ public:
     virtual int v02(void*);
 };
 
+/**
+ * Applies a list operator to the pair itself, without visiting its two child objects.
+ *
+ * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
+ * the pair, the same as cListNode's own traverseFlat.
+ *
+ * @param a    the pair
+ * @param obj  the list operator (On Tour: pOperator)
+ * @return the operator's onListNode result
+ */
 extern "C" int cUIPair_traverseFlat(void* a, cUIPair_traverseFlat_cVirt* obj)
 {
     return obj->v02(a);
@@ -916,6 +934,13 @@ extern "C" void cUIProgress__cUIProgress(void* self, int flags)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIProgress_setUIData);
 #ifdef SKIP_ASM
+/**
+ * Sets up a progress bar from its UI data, then sets its default range.
+ *
+ * Runs the base cUIThing_setUIData(), then stores 10 at 0x80 (the full-scale value that the bar setter
+ * func_0039C428() divides by) and 100 at 0x84. Only @p self is declared: the UI data pointer reaches
+ * cUIThing_setUIData() unchanged in its register.
+ */
 extern "C" void cUIProgress_setUIData(void* self)
 {
     cUIThing_setUIData(self);

@@ -74,6 +74,15 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void func_00181BD0(void* self, int index, signed char charID);
 
+/**
+ * Shows the stats of the player's current character when the character-select gain transition starts.
+ *
+ * When @p on is nonzero, reads the character id for mUserNum from the new-player interface and passes both to
+ * func_00181BD0(), which fills the seven stat texts and bars and the overall average.
+ *
+ * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
+ * @return always 0
+ */
 extern "C" int cFEStateCharSelect_onGainTransition(void* self, int on)
 {
     if (on != 0) {

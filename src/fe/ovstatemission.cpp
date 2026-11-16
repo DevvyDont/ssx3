@@ -222,6 +222,12 @@ struct sMissionSlot {
 
 extern unsigned char D_004A1408[];
 
+/**
+ * Resets the front-end async file manager's five file slots to empty.
+ *
+ * Each 0x11C-byte slot gets an empty name, a null data pointer, handle -1, 1 at 0x108, size 0, id -1, status 0
+ * (idle) and -1 at 0x118.
+ */
 extern "C" void cFEAsyncManager_Init(sMissionSlot* self)
 {
     int i;

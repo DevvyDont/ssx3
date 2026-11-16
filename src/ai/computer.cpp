@@ -2235,6 +2235,13 @@ INCLUDE_ASM("ai/computer", cRiderHandler_cRiderHandler);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/computer_classes.h"
 
+/**
+ * Constructs a computer rider's handler, a composite of 31 rider behaviour parts sharing one virtual cRider base.
+ *
+ * Compiler-generated g++ 2.95 code builds the cRider base and every part (motion, control and FX parts such as
+ * cGroundMotion, cWipeoutMotion, cBoardTrailFX, cPunchFX, cCheatFX) and fixes up their vtables; the body then
+ * points mRiderHandler at the object itself and sets the handler's two trailing fields to 6 and 14.
+ */
 cComp_cmp::cComp_cmp()
 {
     mRiderHandler = this;
@@ -2309,6 +2316,14 @@ INCLUDE_ASM("ai/computer", cRiderHandler__setMotionState);
 extern "C" void cRiderHandler_loseMotionState();
 extern "C" void cRiderHandler_gainMotionState(cRiderHandler*, int);
 
+/**
+ * Switches the rider handler to a new motion state, notifying the old and new states.
+ *
+ * Calls cRiderHandler_loseMotionState(), stores @p v in MotionState, then calls cRiderHandler_gainMotionState()
+ * with the previous state.
+ *
+ * @param v  the new motion state
+ */
 extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int v)
 {
     cRiderHandler_loseMotionState();

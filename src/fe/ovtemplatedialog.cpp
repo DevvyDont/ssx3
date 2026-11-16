@@ -1525,6 +1525,12 @@ public:
 extern "C" void cListNode_removeFromList(void* node);
 extern void* cOVStateManager_mpPDATemplate;
 
+/**
+ * Removes and deletes the overlay manager's PDA template, if there is one.
+ *
+ * Unlinks cOVStateManager_mpPDATemplate from its list and deletes it through its virtual destructor; the pointer
+ * is cleared either way.
+ */
 extern "C" void cOVStateManager_removePDATemplate(void)
 {
     if (cOVStateManager_mpPDATemplate != 0) {

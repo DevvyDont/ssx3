@@ -19,6 +19,14 @@ struct cBXStrK2 {
     void* str;
 };
 
+/**
+ * Initialises nine consecutive cBXString members to the shared empty string.
+ *
+ * Points five single strings and a four-entry string array at D_004A3E90, the shared empty-string pointer. The
+ * lobby manager's constructor runs it on two such blocks (offsets 0x260 and 0x2B0).
+ *
+ * @return @p self
+ */
 cBXString2* cBXString_cBXString(cBXString2* self)
 {
     self->field_0x0 = D_004A3E90;

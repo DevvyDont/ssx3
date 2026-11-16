@@ -120,6 +120,15 @@ INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_constructCrowdAnim2D__FPv);
 
 extern "C" void* cMemMan_alloc(int a, const char* b, uint32_t c, int d);
 
+/**
+ * Allocates and constructs a 2D crowd animation.
+ *
+ * Allocates 0x20 bytes named "cCrowdAnim2D" (type 0x20000000) and runs cCrowdAnim2D_cCrowdAnim2D() on them,
+ * which starts the animation at the first frame of the default crowd animation in play mode 4.
+ *
+ * @param param  stored in the animation (offset 0x1C); the app passes its crowd renderer
+ * @return the new animation
+ */
 void* cCrowdRender2D_constructCrowdAnim2D(void* param) {
 	void* memory = cMemMan_alloc(0x20, D_004875D8, 0x20000000, 0);
 	return cCrowdAnim2D_cCrowdAnim2D(memory, param);

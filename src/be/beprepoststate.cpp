@@ -16,6 +16,15 @@ extern void* D_004A1254;
 //99.86%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the cBEPostRaceState singleton, creating it on first use.
+ *
+ * The first call allocates 8 bytes tagged "BEPreRace" (the post-race state reuses the pre-race tag), stores
+ * @p self in the first word and the cBEPostRaceState vtable in the second, and keeps the object in D_004A1254.
+ * cBE_getBE() passes the state index (2) as @p self.
+ *
+ * @return the cBEPostRaceState object
+ */
 void* cBEPostRaceState_getState(void* self)
 {
     if (D_004A1254 == 0) {
@@ -159,6 +168,14 @@ extern void* D_004A1258;
 //99.86%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the cBEPreRaceState singleton, creating it on first use.
+ *
+ * The first call allocates 8 bytes tagged "BEPreRace", stores @p self in the first word and the cBEPreRaceState
+ * vtable in the second, and keeps the object in D_004A1258. cBE_getBE() passes the state index (0) as @p self.
+ *
+ * @return the cBEPreRaceState object
+ */
 void* cBEPreRaceState_getState(void* self)
 {
     if (D_004A1258 == 0) {

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uivector.h"
+#include "ui/uimenu.h"
 #include "render/ps2graphicsman.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
@@ -69,43 +71,33 @@ struct sUIVecData_34C0 {
     char mPad;                  // 0x23
 };
 
-struct sUIVector_34C0 {
-    char pad0[0x74];
-    sUIVecFlags_34C0 flags;     // 0x74
-    void* extra;                // 0x78
-    sUIVec16_34C0* a;           // 0x7C
-    sUIVec3_34C0* b;            // 0x80
-    sUIVec3b_34C0* c;           // 0x84
-    char pad88[4];
-    sUIVec48_34C0* d;           // 0x8C
-};
 
-extern "C" void cUIVector_setUIData(void* p, void* pUIBase)
+extern "C" void cUIVector_setUIData(cUIVector* p, void* pUIBase)
 {
-    sUIVector_34C0* self = (sUIVector_34C0*)p;
+    cUIVector* self = p;
     cUIThing_setUIData(self, pUIBase);
     sUIVecData_34C0* pIYFVector = (sUIVecData_34C0*)pUIBase;
-    self->flags.mFill = pIYFVector->mFlags & 1;
-    self->flags.mLoop = pIYFVector->mFlags & 2;
-    self->flags.mNumTriangles = pIYFVector->mNumTriangles;
-    if (self->flags.mNumTriangles)
-        self->extra = (unsigned char*)(pIYFVector + 1);
-    self->flags.mNumVertices = pIYFVector->mNumVertices;
+    (*(sUIVecFlags_34C0*)&self->mAttrVector).mFill = pIYFVector->mFlags & 1;
+    (*(sUIVecFlags_34C0*)&self->mAttrVector).mLoop = pIYFVector->mFlags & 2;
+    (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles = pIYFVector->mNumTriangles;
+    if ((*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles)
+        (*(void**)&self->mpTriangles) = (unsigned char*)(pIYFVector + 1);
+    (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices = pIYFVector->mNumVertices;
     if (pIYFVector->mNumVertices)
     {
-        sUIVec16_34C0** pa = &self->a;
+        sUIVec16_34C0** pa = &(*(sUIVec16_34C0**)&self->mpVertexColour);
         *pa = new (D_004940C8, 0x100, 0) sUIVec16_34C0[pIYFVector->mNumVertices];
-        sUIVec3_34C0** pb = &self->b;
+        sUIVec3_34C0** pb = &(*(sUIVec3_34C0**)&self->mpVertexPosition);
         *pb = new (D_004940D8, 0x100, 0) sUIVec3_34C0[pIYFVector->mNumVertices];
-        sUIVec3b_34C0** pc = &self->c;
+        sUIVec3b_34C0** pc = &(*(sUIVec3b_34C0**)&self->mpVertexPositionRender);
         *pc = new (D_004940E8, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
         for (int i = 0; i < pIYFVector->mNumVertices; i++)
-            self->b[i] = D_004FF0D8_34C0;
+            ((sUIVec3_34C0*)self->mpVertexPosition)[i] = D_004FF0D8_34C0;
     }
-    if (!self->flags.mFill)
+    if (!(*(sUIVecFlags_34C0*)&self->mAttrVector).mFill)
     {
-        sUIVec48_34C0** pd = &self->d;
-        *pd = new (D_004940F8, 0x100, 0) sUIVec48_34C0[self->flags.mNumVertices];
+        sUIVec48_34C0** pd = &(*(sUIVec48_34C0**)&self->mpVertices);
+        *pd = new (D_004940F8, 0x100, 0) sUIVec48_34C0[(*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices];
     }
 }
 #endif
@@ -254,17 +246,11 @@ INCLUDE_ASM("ui/uivector", cUIVector_render2D);
 // PORT: func_004139F8 is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
 extern "C" unsigned int func_004139F8(float f);
 
-struct sV3_3A39F8 {
-    float x, y, z;
-};
 
 struct sV4_3A39F8 {
     float v[4];
 } __attribute__((aligned(16)));
 
-struct sCol_3A39F8 {
-    float r, g, b, a;
-};
 
 struct sVtx_3A39F8 {
     float s;
@@ -303,54 +289,54 @@ static inline void AddPos_3A39F8(sV4_3A39F8& p, int k, float d)
     p.v[k] += d;
 }
 
-extern "C" void cUIVector_render2D(char* self, float x, float y)
+extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
 {
-    if (*(sV3_3A39F8**)(self + 0x80) == 0)
+    if (self->mpVertexPosition == 0)
         return;
-    for (unsigned int i = 0; i < ((sCount_3A39F8*)(self + 0x74))->count; i++)
+    for (unsigned int i = 0; i < ((sCount_3A39F8*)(((char*)self) + 0x74))->count; i++)
     {
-        (*(sV3_3A39F8**)(self + 0x84))[i] = (*(sV3_3A39F8**)(self + 0x80))[i];
-        (*(sV3_3A39F8**)(self + 0x84))[i].x *= *(float*)(self + 0x50);
-        (*(sV3_3A39F8**)(self + 0x84))[i].y *= *(float*)(self + 0x54);
+        (self->mpVertexPositionRender)[i] = (self->mpVertexPosition)[i];
+        (self->mpVertexPositionRender)[i].x *= self->mScale.x;
+        (self->mpVertexPositionRender)[i].y *= self->mScale.y;
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | (((((sFlags14_3A39F8*)(self + 0x14))->layer) + 9) << 5 & 0x3E0);
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | (((((sFlags14_3A39F8*)(((char*)self) + 0x14))->layer) + 9) << 5 & 0x3E0);
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
-    if (((sCount_3A39F8*)(self + 0x74))->flag)
+    if (((sCount_3A39F8*)(((char*)self) + 0x74))->flag)
     {
         float pos[3];
-        pos[0] = *(float*)(self + 0x44) + x;
-        pos[1] = *(float*)(self + 0x48) + y;
+        pos[0] = self->mPosition.x + x;
+        pos[1] = self->mPosition.y + y;
         pos[2] = 0.0f;
         cPS2GraphicsMan* g = GrMan;
         sVE_3A39F8* vt = (sVE_3A39F8*)g->mVtbl;
-        ((tDraw_3A39F8)vt[72].fn)((char*)g + vt[72].delta, ((sCount_3A39F8*)(self + 0x74))->mode, ((sCount_3A39F8*)(self + 0x74))->count,
-                                  *(void**)(self + 0x78), *(void**)(self + 0x84), 0, *(void**)(self + 0x7C), pos);
+        ((tDraw_3A39F8)vt[72].fn)((char*)g + vt[72].delta, ((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count,
+                                  self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour, pos);
         return;
     }
-    if (*(sVtx_3A39F8**)(self + 0x8C) == 0)
+    if ((sVtx_3A39F8*)self->mpVertices == 0)
         return;
-    for (unsigned int i = 0; i < ((sCount_3A39F8*)(self + 0x74))->count; i++)
+    for (unsigned int i = 0; i < ((sCount_3A39F8*)(((char*)self) + 0x74))->count; i++)
     {
         sV4_3A39F8 tt;
-        tt.v[0] = (*(sV3_3A39F8**)(self + 0x84))[i].x;
-        tt.v[1] = (*(sV3_3A39F8**)(self + 0x84))[i].y;
-        tt.v[2] = (*(sV3_3A39F8**)(self + 0x84))[i].z;
+        tt.v[0] = (self->mpVertexPositionRender)[i].x;
+        tt.v[1] = (self->mpVertexPositionRender)[i].y;
+        tt.v[2] = (self->mpVertexPositionRender)[i].z;
         tt.v[3] = 1.0f;
-        (*(sVtx_3A39F8**)(self + 0x8C))[i].pos = tt;
-        AddPos_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i].pos, 0, *(float*)(self + 0x44) + x);
-        AddPos_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i].pos, 1, *(float*)(self + 0x48) + y);
-        (*(sVtx_3A39F8**)(self + 0x8C))[i].q = 1.0f;
-        (*(sVtx_3A39F8**)(self + 0x8C))[i].s = 0.0f;
-        (*(sVtx_3A39F8**)(self + 0x8C))[i].t = 0.0f;
-        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 3, (*(sCol_3A39F8**)(self + 0x7C))[i].r);
-        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 0, (*(sCol_3A39F8**)(self + 0x7C))[i].g);
-        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 1, (*(sCol_3A39F8**)(self + 0x7C))[i].b);
-        SetCol_3A39F8((*(sVtx_3A39F8**)(self + 0x8C))[i], 2, (*(sCol_3A39F8**)(self + 0x7C))[i].a);
+        ((sVtx_3A39F8*)self->mpVertices)[i].pos = tt;
+        AddPos_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i].pos, 0, self->mPosition.x + x);
+        AddPos_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i].pos, 1, self->mPosition.y + y);
+        ((sVtx_3A39F8*)self->mpVertices)[i].q = 1.0f;
+        ((sVtx_3A39F8*)self->mpVertices)[i].s = 0.0f;
+        ((sVtx_3A39F8*)self->mpVertices)[i].t = 0.0f;
+        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 3, (self->mpVertexColour)[i].A);
+        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 0, (self->mpVertexColour)[i].R);
+        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 1, (self->mpVertexColour)[i].G);
+        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 2, (self->mpVertexColour)[i].B);
     }
     cPS2GraphicsMan* g = GrMan;
     sVE_3A39F8* vt = (sVE_3A39F8*)g->mVtbl;
-    ((tDraw2_3A39F8)vt[73].fn)((char*)g + vt[73].delta, ((sCount_3A39F8*)(self + 0x74))->count, *(void**)(self + 0x8C), 0);
+    ((tDraw2_3A39F8)vt[73].fn)((char*)g + vt[73].delta, ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
 }
 #endif
 
@@ -360,12 +346,12 @@ INCLUDE_ASM("ui/uivector", cUIVector_update);
 extern "C" void cUIAnimation_updateThing(void*, void*, unsigned char, unsigned short);
 extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
 
-extern "C" void cUIVector_update(void* self, unsigned short ev)
+extern "C" void cUIVector_update(cUIVector* self, unsigned short ev)
 {
-    void* a = *(void**)((char*)self + 0xC);
+    void* a = self->mpAnim;
     if (a != 0) {
-        cUIAnimation_updateThing(a, self, *(unsigned char*)((char*)self + 0x10), ev);
-        cUIAnimation_updateFrame(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+        cUIAnimation_updateThing(a, self, self->mAnimPlaybackStatus, ev);
+        cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
     }
 }
 #endif
@@ -373,17 +359,12 @@ extern "C" void cUIVector_update(void* self, unsigned short ev)
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_getSize);
 #ifdef SKIP_ASM
-struct cUIVector_getSize_sVec3 {
-    float x;
-    float y;
-    float z;
-};
 
-extern cUIVector_getSize_sVec3 t3vect_Zero;
+extern t3Vector t3vect_Zero;
 
-extern "C" void cUIVector_getSize(void* self, cUIVector_getSize_sVec3* out)
+extern "C" void cUIVector_getSize(cUIVector* self, t3Vector* out)
 {
-    if (*(cUIVector_getSize_sVec3**)((char*)self + 0x80) == 0) {
+    if (self->mpVertexPosition == 0) {
         return;
     }
     *out = t3vect_Zero;
@@ -392,8 +373,8 @@ extern "C" void cUIVector_getSize(void* self, cUIVector_getSize_sVec3* out)
     float minY = 1000.0f;
     float maxY = -1000.0f;
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)((char*)self + 0x74) >> 17; i++) {
-        cUIVector_getSize_sVec3* p = &(*(cUIVector_getSize_sVec3**)((char*)self + 0x80))[i];
+    for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
+        t3Vector* p = &(self->mpVertexPosition)[i];
         if (p->x < minX) {
             minX = p->x;
         }
@@ -415,30 +396,33 @@ extern "C" void cUIVector_getSize(void* self, cUIVector_getSize_sVec3* out)
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setSize);
 #ifdef SKIP_ASM
-struct cUIVector_setSize_sVec3 {
-    float x;
-    float y;
-    float z;
-};
 
 struct cUIVector_setSize_sCount74 {
     unsigned int lo : 17;
     unsigned int count : 15;
 };
 
-extern "C" void cUIVector_setSize(void* self, cUIVector_setSize_sVec3* off)
+/**
+ * Sets a UI vector's size, rebuilding its corners when it is a four-vertex quad.
+ *
+ * With exactly four vertices, vertex 0 stays put and the others become v0 + (x, 0), v0 + (x, y) and v0 + (0, y),
+ * in order 1, 2, 3; the z offset is ignored. mSize is set to @p off whatever the vertex count.
+ *
+ * @param off  new width and height (x, y); z is only copied into mSize
+ */
+extern "C" void cUIVector_setSize(cUIVector* self, t3Vector* off)
 {
     if (((cUIVector_setSize_sCount74*)((char*)self + 0x74))->count == 4) {
         signed char i;
         for (i = 1; i < 4; i++) {
-            (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[i] = (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[0];
+            (self->mpVertexPosition)[i] = (self->mpVertexPosition)[0];
         }
-        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[1].x += off->x;
-        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[3].y += off->y;
-        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[2].x += off->x;
-        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[2].y += off->y;
+        (self->mpVertexPosition)[1].x += off->x;
+        (self->mpVertexPosition)[3].y += off->y;
+        (self->mpVertexPosition)[2].x += off->x;
+        (self->mpVertexPosition)[2].y += off->y;
     }
-    *(cUIVector_setSize_sVec3*)((char*)self + 0x60) = *off;
+    *(&self->mSize) = *off;
 }
 #endif
 
@@ -839,6 +823,13 @@ extern "C" int func_003A49D8(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setActive);
 #ifdef SKIP_ASM
+/**
+ * Marks a UI thing as active or not.
+ *
+ * Sets mActive, bit 1 of the attribute word mAttr, to @p enable != 0.
+ *
+ * @param enable  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void cUIThing_setActive(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit1 = enable;
@@ -848,6 +839,13 @@ extern "C" void cUIThing_setActive(cUIThing* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setCached);
 #ifdef SKIP_ASM
+/**
+ * Marks a UI thing as cached or not.
+ *
+ * Sets mCached, bit 2 of the attribute word mAttr, to @p enable != 0.
+ *
+ * @param enable  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void cUIThing_setCached(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit2 = enable;
@@ -857,6 +855,13 @@ extern "C" void cUIThing_setCached(cUIThing* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setEnabled);
 #ifdef SKIP_ASM
+/**
+ * Marks a UI thing as enabled or not.
+ *
+ * Sets mEnabled, bit 3 of the attribute word mAttr, to @p enable != 0.
+ *
+ * @param enable  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void cUIThing_setEnabled(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit3 = enable;
@@ -866,6 +871,13 @@ extern "C" void cUIThing_setEnabled(cUIThing* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setFocus);
 #ifdef SKIP_ASM
+/**
+ * Marks a UI thing as focused or not.
+ *
+ * Sets mFocused, bit 4 of the attribute word mAttr, to @p enable != 0.
+ *
+ * @param enable  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void cUIThing_setFocus(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit4 = enable;
@@ -875,6 +887,13 @@ extern "C" void cUIThing_setFocus(cUIThing* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setStatic);
 #ifdef SKIP_ASM
+/**
+ * Marks a UI thing as static or not.
+ *
+ * Sets mStatic, bit 5 of the attribute word mAttr, to @p enable != 0.
+ *
+ * @param enable  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void cUIThing_setStatic(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit5 = enable;
@@ -884,6 +903,13 @@ extern "C" void cUIThing_setStatic(cUIThing* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setVisible);
 #ifdef SKIP_ASM
+/**
+ * Marks a UI thing as visible or not.
+ *
+ * Sets mVisible, bit 6 of the attribute word mAttr, to @p enable != 0.
+ *
+ * @param enable  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void cUIThing_setVisible(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit6 = enable;
@@ -1189,6 +1215,14 @@ struct sVEntry3A4D00 {
     int (*fn)(void*, void*);
 };
 
+/**
+ * Offers the operator's controller input to one list node.
+ *
+ * Calls the node's onInput (vtable slot 15) with the input kept at offset 4 of the operator.
+ *
+ * @param obj  list node (a UI thing) to try
+ * @return @p obj when it handled the input, 0 otherwise
+ */
 extern "C" void* cListOpOnInput_onListNode(void* self, void* obj)
 {
     sVEntry3A4D00* vt = *(sVEntry3A4D00**)((char*)obj + 8);
@@ -1320,6 +1354,14 @@ extern "C" void* func_003A4E38(char* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIIcon__cUIIcon__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a UI icon: restores cUIIcon_vtbl, then runs the cUIThing destructor.
+ *
+ * Only @p self is declared: the destructor flags the caller passed in the second argument register reach
+ * cUIThing__cUIThing() unchanged.
+ *
+ * @return no meaningful value (the cUIThing destructor returns nothing)
+ */
 void* cUIIcon__cUIIcon(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cUIIcon_vtbl;
@@ -1330,6 +1372,11 @@ void* cUIIcon__cUIIcon(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIIcon_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI type id of an icon.
+ *
+ * @return always 0x11 (groups return 0x10, menus 0x13)
+ */
 int cUIIcon_getType(void* self)
 {
     return 0x11;
@@ -1580,6 +1627,16 @@ public:
     virtual int v02(void*);
 };
 
+/**
+ * Applies a list operator to the group itself, without visiting its children.
+ *
+ * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
+ * the group, the same as cListNode's own traverseFlat.
+ *
+ * @param a    the group
+ * @param obj  the list operator (On Tour: pOperator)
+ * @return the operator's onListNode result
+ */
 extern "C" int cUIGroup_traverseFlat(void* a, cUIGroup_traverseFlat_cVirt* obj)
 {
     return obj->v02(a);
@@ -1616,21 +1673,21 @@ extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_003977E8(void* p);
 extern "C" void* func_003A5338(void* self);
 
-extern "C" void* func_003A5230(char* self)
+extern "C" void* func_003A5230(cUIMenu* self)
 {
-    func_0039FB30_self(self);
-    *(void***)(self + 0x8) = cUIGroup_vtbl;
-    func_003977E8(self + 0x74);
-    *(void***)(self + 0x8) = cUIMenu_vtbl;
-    func_003A5338(self + 0x90);
-    *(unsigned char*)(self + 0xA4) = 0xFF;
-    *(unsigned char*)(self + 0x95) = 0;
-    *(unsigned char*)(self + 0x96) = 0;
-    *(unsigned char*)(self + 0x97) = 0;
-    *(unsigned char*)(self + 0x98) = 0;
-    *(int*)(self + 0x9C) = 0;
-    *(int*)(self + 0xA0) = 0;
-    return self;
+    func_0039FB30_self(((char*)self));
+    self->mVtbl = cUIGroup_vtbl;
+    func_003977E8(((char*)self) + 0x74);
+    self->mVtbl = cUIMenu_vtbl;
+    func_003A5338(((char*)self) + 0x90);
+    self->mStoredIndex = 0xFF;
+    self->mScrollItemCurrent = 0;
+    self->mScrollItemNum = 0;
+    self->mScrollItemNumVisible = 0;
+    self->mScrollItemOffset = 0;
+    self->mpScrollBar = 0;
+    self->mpSelected = 0;
+    return ((char*)self);
 }
 #endif
 
@@ -1647,22 +1704,27 @@ extern "C" void func_003A4868(void* p);
 extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
 // Second destructor variant; same body as cUIGroup__cUIGroup.
-extern "C" void cUIMenu__cUIMenu(char* self, int flag)
+extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
-    *(void***)(self + 0x8) = cUIGroup_vtbl;
-    *(void***)(self + 0x8C) = cList_vtbl;
-    cList_destroyList_v(self + 0x74);
-    *(void***)(self + 0x88) = D_00494CC0;
-    func_003A4868(self + 0x80);
-    *(void***)(self + 0x7C) = D_00494CC0;
-    func_003A4868(self + 0x74);
-    cUIThing__cUIThing_2(self, flag);
+    self->mVtbl = cUIGroup_vtbl;
+    *(void***)(((char*)self) + 0x8C) = cList_vtbl;
+    cList_destroyList_v(((char*)self) + 0x74);
+    *(void***)(((char*)self) + 0x88) = D_00494CC0;
+    func_003A4868(((char*)self) + 0x80);
+    *(void***)(((char*)self) + 0x7C) = D_00494CC0;
+    func_003A4868(((char*)self) + 0x74);
+    cUIThing__cUIThing_2(((char*)self), flag);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ui/uivector", cUIMenu_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI type id of a menu.
+ *
+ * @return always 0x13 (icons return 0x11, pairs 0x15)
+ */
 int cUIMenu_getType(void* self)
 {
     return 0x13;
@@ -1682,14 +1744,14 @@ extern "C" void* func_003A5338(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5350);
 #ifdef SKIP_ASM
-extern "C" int func_003A5350(void *arg0) {
-    return ((int) (*(int *)((char*)(arg0) + (0x90))) >> 1) & 1;
+extern "C" int func_003A5350(cUIMenu* arg0) {
+    return ((int) (*(int*)&arg0->mAttrMenu) >> 1) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5360);
 #ifdef SKIP_ASM
-extern "C" void func_003A5360(void* self, int enable)
+extern "C" void func_003A5360(cUIMenu* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x90))->bit1 = enable;
 }
@@ -1697,14 +1759,14 @@ extern "C" void func_003A5360(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5380);
 #ifdef SKIP_ASM
-extern "C" int func_003A5380(void *arg0) {
-    return ((int) (*(int *)((char*)(arg0) + (0x90))) >> 3) & 1;
+extern "C" int func_003A5380(cUIMenu* arg0) {
+    return ((int) (*(int*)&arg0->mAttrMenu) >> 3) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5390);
 #ifdef SKIP_ASM
-extern "C" void func_003A5390(void* self, int enable)
+extern "C" void func_003A5390(cUIMenu* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x90))->bit3 = enable;
 }
@@ -1712,71 +1774,71 @@ extern "C" void func_003A5390(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53B0);
 #ifdef SKIP_ASM
-extern "C" int func_003A53B0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x90))) & 1;
+extern "C" int func_003A53B0(cUIMenu* arg0) {
+    return (*(int*)&arg0->mAttrMenu) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53C0);
 #ifdef SKIP_ASM
-extern "C" void func_003A53C0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x90))) = (int) (((*(int *)((char*)(arg0) + (0x90))) & ~1) | (arg1 != 0));
+extern "C" void func_003A53C0(cUIMenu* arg0, int arg1) {
+    (*(int*)&arg0->mAttrMenu) = (int) (((*(int*)&arg0->mAttrMenu) & ~1) | (arg1 != 0));
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53E0);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A53E0(void *arg0) {
-    return (*(unsigned char *)((char*)(arg0) + (0x95)));
+extern "C" unsigned char func_003A53E0(cUIMenu* arg0) {
+    return (arg0->mScrollItemCurrent);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53E8);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A53E8(void *arg0) {
-    return (*(unsigned char *)((char*)(arg0) + (0x98)));
+extern "C" unsigned char func_003A53E8(cUIMenu* arg0) {
+    return (arg0->mScrollItemOffset);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53F0);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A53F0(void *arg0) {
-    return (*(unsigned char *)((char*)(arg0) + (0x96)));
+extern "C" unsigned char func_003A53F0(cUIMenu* arg0) {
+    return (arg0->mScrollItemNum);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53F8);
 #ifdef SKIP_ASM
-extern "C" void func_003A53F8(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x95))) = arg1;
+extern "C" void func_003A53F8(cUIMenu* arg0, signed char arg1) {
+    (*(signed char*)&arg0->mScrollItemCurrent) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5400);
 #ifdef SKIP_ASM
-extern "C" void func_003A5400(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x96))) = arg1;
+extern "C" void func_003A5400(cUIMenu* arg0, signed char arg1) {
+    (*(signed char*)&arg0->mScrollItemNum) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5408);
 #ifdef SKIP_ASM
-extern "C" void func_003A5408(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x98))) = arg1;
+extern "C" void func_003A5408(cUIMenu* arg0, signed char arg1) {
+    (*(signed char*)&arg0->mScrollItemOffset) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5410);
 #ifdef SKIP_ASM
-extern "C" int func_003A5410(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA0)));
+extern "C" int func_003A5410(cUIMenu* arg0) {
+    return ((int)arg0->mpSelected);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5418);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A5418(void *arg0) {
-    return (*(unsigned char *)((char*)(arg0) + (0x95)));
+extern "C" unsigned char func_003A5418(cUIMenu* arg0) {
+    return (arg0->mScrollItemCurrent);
 }
 #endif
 //100%
@@ -1823,6 +1885,13 @@ extern "C" void cUIPair_destroyPair(void* self);
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
 extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
+/**
+ * Destroys a UI pair: deletes its two child objects, then runs the cUIThing destructor.
+ *
+ * Restores cUIPair_vtbl, calls cUIPair_destroyPair() and then cUIThing__cUIThing(self, flags).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cUIPair__cUIPair(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cUIPair_vtbl;
@@ -1834,6 +1903,11 @@ extern "C" void cUIPair__cUIPair(void* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", cUIPair_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI type id of a pair.
+ *
+ * @return always 0x15 (menus return 0x13, vectors 0x18)
+ */
 int cUIPair_getType(void* self)
 {
     return 0x15;
@@ -2943,6 +3017,11 @@ extern "C" void* func_003A6120(char* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIProgress_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI type id of a progress bar.
+ *
+ * @return always 0x19 (vectors return 0x18)
+ */
 int cUIProgress_getType(void* self)
 {
     return 0x19;
@@ -3274,12 +3353,12 @@ extern "C" void* func_0039FB30(void* self, int a, int b);
 extern "C" void* func_003A6618(void* p);
 extern void* cUIVector_vtbl[];
 
-extern "C" void* func_003A64F8(char* self)
+extern "C" void* func_003A64F8(cUIVector* self)
 {
-    func_0039FB30(self, 0, 0);
-    *(void***)(self + 0x8) = cUIVector_vtbl;
-    func_003A6618(self + 0x74);
-    return self;
+    func_0039FB30(((char*)self), 0, 0);
+    self->mVtbl = cUIVector_vtbl;
+    func_003A6618(((char*)self) + 0x74);
+    return ((char*)self);
 }
 #endif
 

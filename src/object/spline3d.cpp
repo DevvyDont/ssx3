@@ -29,6 +29,14 @@ struct cSpline {
 //100%
 INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
 #ifdef SKIP_ASM
+/**
+ * Returns the spline's total length, read from its last segment.
+ *
+ * Follows the next links from the first segment to the last one (numPoints - 1 steps) and adds that segment's
+ * floats at 0x84 and 0xC (probably the distance to the segment's start and the segment's own length).
+ *
+ * @return the spline's length
+ */
 float cSpline_calcLength(cSpline* self)
 {
     sSplineHeader* header = self->node->header;
@@ -49,6 +57,11 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Writes the spline's first 8 bytes to a replay frame through the stream's write virtual (slot 1).
+ *
+ * @param obj  replay stream to write to
+ */
 extern "C" void cSpline_writeToReplayFrame(void* self, cSpline_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 8);

@@ -4181,6 +4181,14 @@ INCLUDE_ASM("seg/seg_2FE810", _sequenceScalableExtension);
 #ifdef SKIP_ASM
 extern char D_00497D58[];
 extern void func_004034A8(int *, int);
+/**
+ * Reports that MPEG-2 sequence scalable extensions are not supported.
+ *
+ * Passes "_sequenceScalableExtension() is not implemented" to func_004034A8(), which hands it to the decoder's
+ * error callback when one is set and prints it otherwise.
+ *
+ * @param p  the MPEG decoder state
+ */
 void _sequenceScalableExtension(int *p) {
     func_004034A8(p, (int)D_00497D58);
 }
@@ -8917,6 +8925,17 @@ extern char D_00498320[];
 extern void func_0040C8B0(void *);
 extern void func_00423DE0(int);
 extern void func_00425C60(char *, int);
+/**
+ * Starts a request for the USB port location of a keyboard (Sony libusbkb).
+ *
+ * Takes the keyboard RPC semaphore and sends RPC 3 to the IOP asynchronously; the reply is copied to @p b when
+ * the pending command is collected later.
+ *
+ * @param a  keyboard number
+ * @param b  receives the location
+ * @return 0 when the request was sent, -1 if the library is not initialised, -11 for a bad keyboard number,
+ *         -2 if the RPC call failed
+ */
 int sceUsbKbGetLocation(int a, void *b) {
     if (D_00453438 == -1)
         return -1;
@@ -8945,6 +8964,16 @@ extern char D_00498350[];
 extern void func_0040C8B0(void *);
 extern void func_00423DE0(int);
 extern void func_00425C60(char *, int);
+/**
+ * Starts a request to set a keyboard's LED state (Sony libusbkb).
+ *
+ * Takes the keyboard RPC semaphore and sends RPC 4 with the keyboard number and @p b to the IOP asynchronously.
+ *
+ * @param a  keyboard number
+ * @param b  LED state bits
+ * @return 0 when the request was sent, -1 if the library is not initialised, -11 for a bad keyboard number,
+ *         -2 if the RPC call failed
+ */
 int sceUsbKbSetLEDStatus(int a, unsigned char b) {
     if (D_00453438 == -1)
         return -1;
@@ -8975,6 +9004,16 @@ extern char D_00498380[];
 extern void func_0040C8B0(void *);
 extern void func_00423DE0(int);
 extern void func_00425C60(char *, int);
+/**
+ * Sets a keyboard's LED mode and sends it to the IOP (Sony libusbkb).
+ *
+ * Records the mode in the keyboard's state, takes the keyboard RPC semaphore and sends RPC 5 asynchronously.
+ *
+ * @param a  keyboard number
+ * @param b  LED mode, 0 to 2
+ * @return 0 when the request was sent, -1 if the library is not initialised, -11 for a bad keyboard number,
+ *         -12 for a mode above 2, -2 if the RPC call failed
+ */
 int sceUsbKbSetLEDMode(int a, unsigned b) {
     int h = D_00453438;
     if (h == -1)

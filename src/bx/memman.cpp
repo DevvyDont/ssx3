@@ -7,6 +7,15 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 //100%
 INCLUDE_ASM("bx/memman", operator_new1__Fi);
 #ifdef SKIP_ASM
+/**
+ * Allocates memory with the default allocation name and type.
+ *
+ * Calls cMemMan_alloc() with the name "default" (D_004A3E88), the type in D_004A3E84 (0 in the image) and no
+ * header size. operator_new2() has the same body.
+ *
+ * @param size  bytes to allocate
+ * @return the new block, or 0 if the allocation failed
+ */
 void* operator_new1(int size)
 {
     return cMemMan_alloc(size, D_004A3E88, D_004A3E84, 0);
@@ -16,6 +25,15 @@ void* operator_new1(int size)
 //100%
 INCLUDE_ASM("bx/memman", operator_new2__Fi);
 #ifdef SKIP_ASM
+/**
+ * Allocates memory with the default allocation name and type; same body as operator_new1().
+ *
+ * Calls cMemMan_alloc() with the name "default" (D_004A3E88), the type in D_004A3E84 (0 in the image) and no
+ * header size.
+ *
+ * @param size  bytes to allocate
+ * @return the new block, or 0 if the allocation failed
+ */
 void* operator_new2(int size)
 {
     return cMemMan_alloc(size, D_004A3E88, D_004A3E84, 0);
@@ -30,6 +48,22 @@ extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top);
 
+/**
+ * Allocates a heap block, choosing its alignment from the allocation type, under the memory manager's mutex.
+ *
+ * Alignment: 4 << n when bits 24-27 of @p type hold a nonzero n; otherwise 128 when bit 0x400 is set, else 16
+ * (8 for blocks under 16 bytes). func_00319A90() then serves small blocks (up to 0x200 bytes, @p headersize 0)
+ * from the block manager and the rest from TheDynamicMemMan, and zero-fills the block when bit 31 of @p type is
+ * set.
+ *
+ * @param size        bytes to allocate
+ * @param name        allocation name (On Tour's operator new calls it name); not passed on to the allocator
+ * @param type        allocation flags: alignment in bits 24-27, bit 0x400 for 128-byte alignment, bit 31 to
+ *                    zero-fill the block
+ * @param headersize  passed on as func_00319A90()'s fourth argument; nonzero bypasses the small-block pool and
+ *                    uses the other dynamic-heap allocator (func_00320078 instead of func_00320058)
+ * @return the new block, or 0 if the allocation failed
+ */
 // On Tour: operator new(unsigned int size, const char* name, int type, int headersize); its debug build keeps this
 // branchless mask arithmetic statement by statement. The unit declares (int, const char*, unsigned int, int).
 extern "C" void* cMemMan_alloc(int size, const char* name, unsigned int type, int headersize)

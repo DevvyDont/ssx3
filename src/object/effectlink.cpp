@@ -147,6 +147,13 @@ struct sEffVEntry {
     void (*fn)(void*, void*);
 };
 
+/**
+ * Writes an effect modifier's value (offset 0xC) to a replay frame.
+ *
+ * Passes the value to the stream's slot-5 virtual; the stream constructor reads it back through slot 3.
+ *
+ * @param obj  replay stream to write to
+ */
 extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* obj)
 {
     sEffVEntry* vt = *(sEffVEntry**)obj;
@@ -305,6 +312,12 @@ INCLUDE_ASM("object/effectlink", cParticleModifier_render);
 #ifdef SKIP_ASM
 extern "C" void cStaticEmitter_render1(void*);
 
+/**
+ * Renders the particle modifier's static emitter unless the effect has finished.
+ *
+ * Calls cStaticEmitter_render1() on the emitter embedded at offset 0x50 while the finished flag (offset 0x1E4,
+ * set by cParticleModifier_update when the emitter's time runs out) is clear.
+ */
 extern "C" void cParticleModifier_render(void* self)
 {
     if (*(int*)((char*)self + 0x1E4) == 0) {
@@ -562,6 +575,12 @@ extern "C" void cDynamicParticleModifier_update(void* self)
 //100%
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_fadeEffect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Makes a dynamic particle effect fade out instead of stopping at once.
+ *
+ * Sets the fade flag (offset 0x14). cDynamicParticleModifier_update then stops emitting and marks the effect
+ * finished once the emitter's count at offset 0x240 (probably its live particles) reaches 0.
+ */
 void cDynamicParticleModifier_fadeEffect(void* self)
 {
     *(int*)((char*)self + 0x14) = 1;
@@ -573,6 +592,12 @@ INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_render);
 #ifdef SKIP_ASM
 extern "C" void cDynamicEmitter_render(void*, int);
 
+/**
+ * Renders the dynamic particle modifier's emitter unless the effect has finished.
+ *
+ * Calls cDynamicEmitter_render() with 7 on the emitter embedded at offset 0x60 while the finished flag
+ * (offset 0x18) is clear.
+ */
 extern "C" void cDynamicParticleModifier_render(void* self)
 {
     if (*(int*)((char*)self + 0x18) == 0) {
@@ -750,6 +775,14 @@ struct sEffectLinkVEntry {
 
 extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a halo modifier's state to a replay frame.
+ *
+ * Writes the effect-modifier part with cEffectModifier_writeToReplayFrame(), then the 0x30 bytes at offset 0x10
+ * through the stream's write virtual (slot 1).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void cHaloModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);

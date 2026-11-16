@@ -836,6 +836,11 @@ INCLUDE_ASM("world/wscriptcache", cChunkResolve__cChunkResolve);
 extern void* cChunkResolve_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a chunk-resolve object: restores its vtable and frees it when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cChunkResolve__cChunkResolve(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cChunkResolve_vtbl;
