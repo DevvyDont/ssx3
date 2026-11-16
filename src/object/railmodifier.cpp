@@ -5087,7 +5087,83 @@ extern "C" int func_003615C0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003615D8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern float D_004FFAC0[16];
+
+
+
+// PORT: PS2-only VU0 inline asm (vector * 4x4 basis matrix, row-vector convention).
+static inline void vu0BasisMul_15D8(t4Vector& dst, const t4Vector& g, const float* b)
+{
+    __asm__(
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        : "=m"(dst)
+        : "m"(g), "r"(b)
+        : "memory");
+}
+
+typedef int tMmiQuad __attribute__((mode(TI)));
+
+// PORT: hand-written MMI 4x4 transpose in place (lq/pextlw/pextuw/pcpyld/pcpyud/sq: no gcc 2.95 pattern); a port
+// swaps m[i][j] and m[j][i] in plain C.
+#define MMI_TRANSPOSE4(m)                                                                                              \
+    {                                                                                                                  \
+        tMmiQuad r0_, r1_, r2_, r3_, t0_, t1_, t2_, t3_;                                                               \
+        __asm__ __volatile__(                                                                                          \
+            "lq      %0, 0x0(%8)\n"                                                                                    \
+            "lq      %1, 0x10(%8)\n"                                                                                   \
+            "lq      %2, 0x20(%8)\n"                                                                                   \
+            "lq      %3, 0x30(%8)\n"                                                                                   \
+            "pextlw  %4, %1, %0\n"                                                                                     \
+            "pextuw  %5, %1, %0\n"                                                                                     \
+            "pextlw  %6, %3, %2\n"                                                                                     \
+            "pextuw  %7, %3, %2\n"                                                                                     \
+            "pcpyld  %0, %6, %4\n"                                                                                     \
+            "pcpyud  %1, %4, %6\n"                                                                                     \
+            "pcpyld  %2, %7, %5\n"                                                                                     \
+            "pcpyud  %3, %5, %7\n"                                                                                     \
+            "sq      %0, 0x0(%8)\n"                                                                                    \
+            "sq      %1, 0x10(%8)\n"                                                                                   \
+            "sq      %2, 0x20(%8)\n"                                                                                   \
+            "sq      %3, 0x30(%8)\n"                                                                                   \
+            : "=&r"(r0_), "=&r"(r1_), "=&r"(r2_), "=&r"(r3_), "=&r"(t0_), "=&r"(t1_), "=&r"(t2_), "=&r"(t3_)          \
+            : "r"(m)                                                                                                   \
+            : "memory");                                                                                               \
+    }
+
+// PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
+// retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
+// plain C transpose and a C vector-matrix product.
+extern "C" void func_003615D8(void* self, t4Matrix* out, const float* a, const float* b, const float* c, const float* d)
+{
+    t4Matrix L;
+    t4Vector v;
+    L.row[1].x = a[0]; L.row[1].y = b[0]; L.row[1].z = c[0]; L.row[1].w = d[0];
+    vu0BasisMul_15D8(L.row[2], L.row[1], D_004FFAC0);
+    L.row[0] = L.row[2];
+    L.row[2].x = a[1]; L.row[2].y = b[1]; L.row[2].z = c[1]; L.row[2].w = d[1];
+    vu0BasisMul_15D8(L.row[3], L.row[2], D_004FFAC0);
+    L.row[1] = L.row[3];
+    L.row[3].x = a[2]; L.row[3].y = b[2]; L.row[3].z = c[2]; L.row[3].w = d[2];
+    vu0BasisMul_15D8(v, L.row[3], D_004FFAC0);
+    L.row[2] = v;
+    L.row[3].x = 0.0f; L.row[3].y = 0.0f; L.row[3].z = 0.0f; L.row[3].w = 1.0f;
+    *out = L;
+    MMI_TRANSPOSE4(out);
+}
+#endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361750);
 #ifdef SKIP_ASM

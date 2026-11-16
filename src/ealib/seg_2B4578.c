@@ -7158,17 +7158,331 @@ int func_003BF0F0(int *data, int key, char *buf) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF3E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "fakematch.h"
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F3E0;
 
+// PORT: PS2-only VU0 inline asm (load eight consecutive vec4 rows into vf1..vf8).
+static inline void vu0Load8_F3E0(const V4_F3E0 *p) {
+    __asm__ volatile(
+        "lqc2       $vf1, 0x0(%0)\n"
+        "lqc2       $vf2, 0x10(%0)\n"
+        "lqc2       $vf3, 0x20(%0)\n"
+        "lqc2       $vf4, 0x30(%0)\n"
+        "lqc2       $vf5, 0x40(%0)\n"
+        "lqc2       $vf6, 0x50(%0)\n"
+        "lqc2       $vf7, 0x60(%0)\n"
+        "lqc2       $vf8, 0x70(%0)\n"
+        : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf1..vf6 to rows 0..5).
+static inline void vu0Store6_F3E0(V4_F3E0 *d) {
+    __asm__ volatile(
+        "sqc2       $vf1, 0x0(%0)\n"
+        "sqc2       $vf2, 0x10(%0)\n"
+        "sqc2       $vf3, 0x20(%0)\n"
+        "sqc2       $vf4, 0x30(%0)\n"
+        "sqc2       $vf5, 0x40(%0)\n"
+        "sqc2       $vf6, 0x50(%0)\n"
+        : : "r"(d) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf7 to row 6).
+static inline void vu0StoreV7_F3E0(V4_F3E0 *d) {
+    __asm__ volatile("sqc2       $vf7, 0x60(%0)\n" : : "r"(d) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf8 to row 7).
+static inline void vu0StoreV8_F3E0(V4_F3E0 *d) {
+    __asm__ volatile("sqc2       $vf8, 0x70(%0)\n" : : "r"(d) : "memory");
+}
+
+// FAKEMATCH: FM_REG("$2") pin on the block counter i (global.c's set_preference ties `i = n >> 5` to n's a2;
+// retail counts in v0); plain form 99.13%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+/* Copies n words (n >> 5 blocks of 128 bytes) through VU0 registers. The goto loop has no loop notes, so gcc
+   doesn't align its label (a do-while gets an alignment slot: 94.78). */
+void func_003BF3E0(V4_F3E0 *src, V4_F3E0 *dst, unsigned int n) {
+    register int i FM_REG("$2") = n >> 5;
+top:
+    vu0Load8_F3E0(src);
+    vu0Store6_F3E0(dst);
+    i--;
+    vu0StoreV7_F3E0(dst);
+    src += 8;
+    vu0StoreV8_F3E0(dst);
+    dst += 8;
+    if (i != 0) goto top;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF440);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "fakematch.h"
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F440;
+
+// PORT: hand-written MMI + VU0 asm (pextlh/psraw have no gcc 2.95 pattern; the fixed $7..$10 are registers no
+// allocator picks here: gcc's own choice was v1/a0..a2, 87.74): loads 16 16-bit samples, widens each to a 32-bit
+// lane as sample << 8 (pextlh with $0, then psraw 8), moves them to vf1..vf4 and converts them to float. A port
+// writes dst[k] = (float)(src[k] * 256) in C.
+static inline void mmiSamplesToFloat_F440(const long *s) {
+    __asm__ volatile(
+        "ld         $7, 0x0(%0)\n"
+        "ld         $8, 0x8(%0)\n"
+        "ld         $9, 0x10(%0)\n"
+        "ld         $10, 0x18(%0)\n"
+        "pextlh     $7, $7, $0\n"
+        "pextlh     $8, $8, $0\n"
+        "pextlh     $9, $9, $0\n"
+        "pextlh     $10, $10, $0\n"
+        "psraw      $7, $7, 8\n"
+        "psraw      $8, $8, 8\n"
+        "psraw      $9, $9, 8\n"
+        "psraw      $10, $10, 8\n"
+        "qmtc2.ni   $7, $vf1\n"
+        "qmtc2.ni   $8, $vf2\n"
+        "qmtc2.ni   $9, $vf3\n"
+        "qmtc2.ni   $10, $vf4\n"
+        "vitof0.xyzw $vf1, $vf1\n"
+        "vitof0.xyzw $vf2, $vf2\n"
+        "vitof0.xyzw $vf3, $vf3\n"
+        "vitof0.xyzw $vf4, $vf4\n"
+        : : "r"(s) : "$7", "$8", "$9", "$10", "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf1, vf2 to rows 0, 1).
+static inline void vu0Store12_F440(V4_F440 *d) {
+    __asm__ volatile(
+        "sqc2       $vf1, 0x0(%0)\n"
+        "sqc2       $vf2, 0x10(%0)\n"
+        : : "r"(d) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf3 to row 2).
+static inline void vu0StoreV3_F440(V4_F440 *d) {
+    __asm__ volatile("sqc2       $vf3, 0x20(%0)\n" : : "r"(d) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf4 to row 3).
+static inline void vu0StoreV4_F440(V4_F440 *d) {
+    __asm__ volatile("sqc2       $vf4, 0x30(%0)\n" : : "r"(d) : "memory");
+}
+
+// PORT: hand-written MMI sample conversion (mmiSamplesToFloat_F440 above: pextlh/psraw, fixed $7..$10); a port
+// replaces it with a C int16-to-float loop.
+// FAKEMATCH: FM_REG("$2") pin on the block counter i (global.c's set_preference ties `i = n >> 4` to n's a2;
+// retail counts in v0); plain form 99.35%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+/* Converts n 16-bit samples to floats, 16 per pass (n >> 4 passes). */
+void func_003BF440(long *src, V4_F440 *dst, unsigned int n) {
+    register int i FM_REG("$2") = n >> 4;
+top:
+    mmiSamplesToFloat_F440(src);
+    vu0Store12_F440(dst);
+    i--;
+    vu0StoreV3_F440(dst);
+    src += 4;
+    vu0StoreV4_F440(dst);
+    dst += 4;
+    if (i != 0) goto top;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF4C0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF5A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F5A0;
+
+// PORT: hand-written VU0 + MMI loop: each pass computes out_j = sum_t b[t] * a[j + 2t] (t < 6, j < 4; b rows at
+// stride 0x100, a rows at stride 0x80) in ACC (vmula/vmadda), moves the four sums to $7..$10, transposes them with
+// pextlw/pextuw/pcpyld/pcpyud (no gcc 2.95 pattern) and stores them with sq. The counter and pointer steps are
+// hand-scheduled between the sq stores; a C loop gets there only by carrying $9/$11/$12 across separate asm
+// statements behind gcc's back, so the loop stays one block. A port replaces it with a C multiply-accumulate
+// loop and a 4x4 transpose.
+void func_003BF5A0(V4_F5A0 *a, V4_F5A0 *b, V4_F5A0 *out) {
+    int i = 16; /* 16 passes, four outputs each */
+    __asm__ volatile(
+        ".set noreorder\n"
+        "1:\n"
+        "lqc2       $vf1, 0x0(%2)\n"
+        "lqc2       $vf2, 0x100(%2)\n"
+        "lqc2       $vf3, 0x200(%2)\n"
+        "lqc2       $vf4, 0x300(%2)\n"
+        "lqc2       $vf5, 0x400(%2)\n"
+        "lqc2       $vf6, 0x500(%2)\n"
+        "lqc2       $vf7, 0x0(%1)\n"
+        "lqc2       $vf8, 0x80(%1)\n"
+        "lqc2       $vf9, 0x100(%1)\n"
+        "lqc2       $vf10, 0x180(%1)\n"
+        "lqc2       $vf11, 0x200(%1)\n"
+        "lqc2       $vf12, 0x280(%1)\n"
+        "lqc2       $vf13, 0x300(%1)\n"
+        "lqc2       $vf14, 0x380(%1)\n"
+        "lqc2       $vf15, 0x400(%1)\n"
+        "lqc2       $vf16, 0x480(%1)\n"
+        "lqc2       $vf17, 0x500(%1)\n"
+        "lqc2       $vf18, 0x580(%1)\n"
+        "lqc2       $vf19, 0x600(%1)\n"
+        "lqc2       $vf20, 0x680(%1)\n"
+        "vmula.xyzw ACC, $vf1, $vf7\n"
+        "vmadda.xyzw ACC, $vf2, $vf9\n"
+        "vmadda.xyzw ACC, $vf3, $vf11\n"
+        "vmadda.xyzw ACC, $vf4, $vf13\n"
+        "vmadda.xyzw ACC, $vf5, $vf15\n"
+        "vmadd.xyzw $vf7, $vf6, $vf17\n"
+        "vmula.xyzw ACC, $vf1, $vf8\n"
+        "vmadda.xyzw ACC, $vf2, $vf10\n"
+        "vmadda.xyzw ACC, $vf3, $vf12\n"
+        "vmadda.xyzw ACC, $vf4, $vf14\n"
+        "vmadda.xyzw ACC, $vf5, $vf16\n"
+        "vmadd.xyzw $vf8, $vf6, $vf18\n"
+        "vmula.xyzw ACC, $vf1, $vf9\n"
+        "vmadda.xyzw ACC, $vf2, $vf11\n"
+        "vmadda.xyzw ACC, $vf3, $vf13\n"
+        "vmadda.xyzw ACC, $vf4, $vf15\n"
+        "vmadda.xyzw ACC, $vf5, $vf17\n"
+        "vmadd.xyzw $vf9, $vf6, $vf19\n"
+        "vmula.xyzw ACC, $vf1, $vf10\n"
+        "vmadda.xyzw ACC, $vf2, $vf12\n"
+        "vmadda.xyzw ACC, $vf3, $vf14\n"
+        "vmadda.xyzw ACC, $vf4, $vf16\n"
+        "vmadda.xyzw ACC, $vf5, $vf18\n"
+        "vmadd.xyzw $vf10, $vf6, $vf20\n"
+        "qmfc2.ni   $7, $vf7\n"
+        "qmfc2.ni   $8, $vf8\n"
+        "qmfc2.ni   $9, $vf9\n"
+        "qmfc2.ni   $10, $vf10\n"
+        "pextlw     $11, $8, $7\n"
+        "pextuw     $8, $8, $7\n"
+        "pextlw     $12, $10, $9\n"
+        "pextuw     $10, $10, $9\n"
+        "pcpyld     $7, $12, $11\n"
+        "pcpyud     $9, $11, $12\n"
+        "pcpyld     $11, $10, $8\n"
+        "pcpyud     $12, $8, $10\n"
+        "sq         $7, 0x0(%3)\n"
+        "addiu      %0, %0, -0x1\n"
+        "sq         $9, 0x10(%3)\n"
+        "addiu      %1, %1, 0x10\n"
+        "sq         $11, 0x20(%3)\n"
+        "addiu      %2, %2, 0x10\n"
+        "sq         $12, 0x30(%3)\n"
+        "bnez       %0, 1b\n"
+        "addiu      %3, %3, 0x40\n"
+        ".set reorder\n"
+        : "+r"(i), "+r"(a), "+r"(b), "+r"(out)
+        :
+        : "$7", "$8", "$9", "$10", "$11", "$12", "memory");
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF6B0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF800);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "fakematch.h"
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F800;
+
+// PORT: PS2-only VU0 inline asm (lo: rows 0..3 to vf1..vf4 and rows 32..35 to vf9..vf12; hi = lo + 31: rows 28..31
+// to vf5..vf8 and rows 60..63 to vf13..vf16).
+static inline void vu0LoadButterfly_F800(const V4_F800 *lo, const V4_F800 *hi) {
+    __asm__ volatile(
+        "lqc2       $vf9, 0x200(%0)\n"
+        "lqc2       $vf10, 0x210(%0)\n"
+        "lqc2       $vf11, 0x220(%0)\n"
+        "lqc2       $vf12, 0x230(%0)\n"
+        "lqc2       $vf13, 0x1D0(%1)\n"
+        "lqc2       $vf14, 0x1E0(%1)\n"
+        "lqc2       $vf15, 0x1F0(%1)\n"
+        "lqc2       $vf16, 0x200(%1)\n"
+        "lqc2       $vf1, 0x0(%0)\n"
+        "lqc2       $vf2, 0x10(%0)\n"
+        "lqc2       $vf3, 0x20(%0)\n"
+        "lqc2       $vf4, 0x30(%0)\n"
+        "lqc2       $vf5, -0x30(%1)\n"
+        "lqc2       $vf6, -0x20(%1)\n"
+        "lqc2       $vf7, -0x10(%1)\n"
+        "lqc2       $vf8, 0x0(%1)\n"
+        : : "r"(lo), "r"(hi) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (butterfly: sums and differences of the mirrored rows).
+static inline void vu0Butterfly_F800(void) {
+    __asm__ volatile(
+        "vadd.xyzw  $vf16, $vf9, $vf16\n"
+        "vadd.xyzw  $vf15, $vf10, $vf15\n"
+        "vadd.xyzw  $vf14, $vf11, $vf14\n"
+        "vadd.xyzw  $vf13, $vf12, $vf13\n"
+        "vsub.xyzw  $vf9, $vf1, $vf8\n"
+        "vsub.xyzw  $vf10, $vf2, $vf7\n"
+        "vsub.xyzw  $vf11, $vf3, $vf6\n"
+        "vsub.xyzw  $vf12, $vf4, $vf5\n"
+        "vsub.xyzw  $vf8, $vf8, $vf1\n"
+        "vsub.xyzw  $vf7, $vf7, $vf2\n"
+        "vsub.xyzw  $vf6, $vf6, $vf3\n"
+        "vsub.xyzw  $vf5, $vf5, $vf4\n"
+        "vsub.xyzw  $vf1, $vf9, $vf16\n"
+        "vsub.xyzw  $vf2, $vf10, $vf15\n"
+        "vsub.xyzw  $vf3, $vf11, $vf14\n"
+        "vsub.xyzw  $vf4, $vf12, $vf13\n"
+        "vsub.xyzw  $vf8, $vf8, $vf16\n"
+        "vsub.xyzw  $vf7, $vf7, $vf15\n"
+        "vsub.xyzw  $vf6, $vf6, $vf14\n"
+        "vsub.xyzw  $vf5, $vf5, $vf13\n");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf1..vf4 to the front rows, vf5 and vf6 to the back rows).
+static inline void vu0StoreFront4Back2_F800(V4_F800 *lo, V4_F800 *hi) {
+    __asm__ volatile(
+        "sqc2       $vf1, 0x0(%0)\n"
+        "sqc2       $vf2, 0x10(%0)\n"
+        "sqc2       $vf3, 0x20(%0)\n"
+        "sqc2       $vf4, 0x30(%0)\n"
+        "sqc2       $vf5, -0x30(%1)\n"
+        "sqc2       $vf6, -0x20(%1)\n"
+        : : "r"(lo), "r"(hi) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf7 to back row -1).
+static inline void vu0StoreV7_F800(V4_F800 *hi) {
+    __asm__ volatile("sqc2       $vf7, -0x10(%0)\n" : : "r"(hi) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf8 to back row 0).
+static inline void vu0StoreV8_F800(V4_F800 *hi) {
+    __asm__ volatile("sqc2       $vf8, 0x0(%0)\n" : : "r"(hi) : "memory");
+}
+
+// FAKEMATCH: FM_REG("$5") pin on the back pointer q (global-alloc gives it v0, the highest-priority free register,
+// and the counter v1; retail keeps q in a1 and the counter in v0); plain form 98.17%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+/* In-place butterfly over 64 vec4 rows: front rows p[0..15], p[32..47] against mirrored back rows, four per pass. */
+void func_003BF800(V4_F800 *p) {
+    int i = 4;
+    register V4_F800 *q FM_REG("$5") = p + 31;
+top:
+    vu0LoadButterfly_F800(p, q);
+    vu0Butterfly_F800();
+    vu0StoreFront4Back2_F800(p, q);
+    i--;
+    vu0StoreV7_F800(q);
+    p += 4;
+    vu0StoreV8_F800(q);
+    q -= 4;
+    if (i != 0) goto top;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF8D0);
 
@@ -8241,7 +8555,86 @@ void func_003C0640(void *in, void *out, float s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C06B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: hand-written FPU filter (mula.s/madda.s/madd.s accumulator ops and trapping addi have no gcc 2.95 pattern;
+// coefficients and filter state live in fixed $f1..$f13/$f20..$f25 across both loops, and the callee-saved
+// $f20..$f25/$f31 are used without being saved, which no compiled function does, so they are deliberately left out
+// of the clobber list). For each of 8 outputs it runs 64 input samples through a three-stage filter whose state is
+// read from and written back to state[0..5]. A port replaces the block with the same filter in C.
+void func_003C06B0(short *in, float *out, float *state, const float *coef) {
+    __asm__ volatile(
+        ".set noreorder\n"
+        "addi       $8, %1, 0x20\n"
+        "mtc1       $0, $f0\n"
+        "lwc1       $f1, 0x0(%3)\n"
+        "lwc1       $f2, 0x4(%3)\n"
+        "lwc1       $f3, 0x8(%3)\n"
+        "lwc1       $f4, 0xC(%3)\n"
+        "lwc1       $f5, 0x10(%3)\n"
+        "lwc1       $f6, 0x14(%3)\n"
+        "lwc1       $f7, 0x18(%3)\n"
+        "lwc1       $f8, 0x1C(%3)\n"
+        "lwc1       $f9, 0x20(%3)\n"
+        "lwc1       $f10, 0x24(%3)\n"
+        "lwc1       $f11, 0x28(%3)\n"
+        "lwc1       $f12, 0x2C(%3)\n"
+        "lwc1       $f13, 0x30(%3)\n"
+        "lwc1       $f20, 0x0(%2)\n"
+        "lwc1       $f21, 0x4(%2)\n"
+        "lwc1       $f22, 0x8(%2)\n"
+        "lwc1       $f23, 0xC(%2)\n"
+        "lwc1       $f24, 0x10(%2)\n"
+        "lwc1       $f25, 0x14(%2)\n"
+        "1:\n"
+        "addi       $9, %0, 0x80\n"
+        "2:\n"
+        "lh         $12, 0x0(%0)\n"
+        "mtc1       $12, $f31\n"
+        "cvt.s.w    $f31, $f31\n"
+        "mula.s     $f1, $f31\n"
+        "madda.s    $f20, $f2\n"
+        "madda.s    $f21, $f3\n"
+        "addi       %0, %0, 0x2\n"
+        "madd.s     $f31, $f0, $f0\n"
+        "madda.s    $f20, $f4\n"
+        "madda.s    $f21, $f5\n"
+        "mov.s      $f20, $f21\n"
+        "mov.s      $f21, $f31\n"
+        "madda.s    $f22, $f6\n"
+        "madda.s    $f23, $f7\n"
+        "madd.s     $f31, $f0, $f0\n"
+        "madda.s    $f22, $f8\n"
+        "madda.s    $f23, $f9\n"
+        "mov.s      $f22, $f23\n"
+        "mov.s      $f23, $f31\n"
+        "madda.s    $f24, $f10\n"
+        "madda.s    $f25, $f11\n"
+        "madd.s     $f31, $f0, $f0\n"
+        "madda.s    $f24, $f12\n"
+        "madda.s    $f25, $f13\n"
+        "mov.s      $f24, $f25\n"
+        "bne        $9, %0, 2b\n"
+        "mov.s      $f25, $f31\n"
+        "addi       %1, %1, 0x4\n"
+        "madd.s     $f31, $f0, $f0\n"
+        "bne        $8, %1, 1b\n"
+        "swc1       $f31, -0x4(%1)\n"
+        "swc1       $f20, 0x0(%2)\n"
+        "swc1       $f21, 0x4(%2)\n"
+        "swc1       $f22, 0x8(%2)\n"
+        "swc1       $f23, 0xC(%2)\n"
+        "swc1       $f24, 0x10(%2)\n"
+        "swc1       $f25, 0x14(%2)\n"
+        ".set reorder\n"
+        : "+r"(in), "+r"(out)
+        : "r"(state), "r"(coef)
+        : "$8", "$9", "$12", "$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7", "$f8", "$f9", "$f10", "$f11",
+          "$f12", "$f13", "memory");
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C07A8);
@@ -15235,7 +15628,70 @@ void func_003CA610(void *arg0, void *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA6A8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S3CA6A8 { char p0[8]; int *obj; char p1[0xE]; unsigned char f1A; };
+int func_003CA6A8_C(struct S3CA6A8 *self, int n, float *src, short *dst) __asm__("func_003CA6A8");
+// PORT: hand-written VU0 + MMI loop (ppach and trapping addi have no gcc 2.95 pattern; bgtzl with the pointer step in
+// its slot; the block keeps its count/source/destination in fixed $4/$5/$6, gcc's own choice is the s-registers:
+// 95.40): clamps n floats to [-32768, 32767], converts them to int and packs them to 16-bit samples, 16 per pass.
+// A port replaces it with a C clamp-and-convert loop.
+int func_003CA6A8_C(struct S3CA6A8 *self, int n, float *src, short *dst) {
+    if (self->obj) {
+        int r = ((int (*)(int *, int, short *, float *, int))*self->obj)(self->obj, n, dst, src, self->f1A);
+        if (r <= 0) return r;
+    }
+    // PORT: PS2-only VU0 hand-written loop (clamp floats to the 16-bit range and pack); one inline asm block.
+    __asm__ volatile(
+        ".set push\n\t"
+        ".set noreorder\n\t"
+        ".set noat\n\t"
+        "move $4, %0\n\t"
+        "move $5, %1\n\t"
+        "move $6, %2\n\t"
+        "addiu $8, $0, -0x8000\n\t"
+        "addiu $9, $0, 0x7FFF\n\t"
+        "qmtc2.ni $8, $vf1\n\t"
+        "qmtc2.ni $9, $vf2\n\t"
+        "vitof0.xyzw $vf1, $vf1\n\t"
+        "vitof0.xyzw $vf2, $vf2\n"
+        "1:\n\t"
+        "lqc2 $vf3, 0x0($5)\n\t"
+        "lqc2 $vf4, 0x10($5)\n\t"
+        "lqc2 $vf5, 0x20($5)\n\t"
+        "lqc2 $vf6, 0x30($5)\n\t"
+        "vmaxx.xyzw $vf3, $vf3, $vf1x\n\t"
+        "vmaxx.xyzw $vf4, $vf4, $vf1x\n\t"
+        "vmaxx.xyzw $vf5, $vf5, $vf1x\n\t"
+        "vmaxx.xyzw $vf6, $vf6, $vf1x\n\t"
+        "vminix.xyzw $vf3, $vf3, $vf2x\n\t"
+        "vminix.xyzw $vf4, $vf4, $vf2x\n\t"
+        "vminix.xyzw $vf5, $vf5, $vf2x\n\t"
+        "vminix.xyzw $vf6, $vf6, $vf2x\n\t"
+        "vftoi0.xyzw $vf3, $vf3\n\t"
+        "vftoi0.xyzw $vf4, $vf4\n\t"
+        "vftoi0.xyzw $vf5, $vf5\n\t"
+        "vftoi0.xyzw $vf6, $vf6\n\t"
+        "addi $4, $4, -0x10\n\t"
+        "addi $5, $5, 0x40\n\t"
+        "qmfc2.ni $7, $vf3\n\t"
+        "qmfc2.ni $8, $vf4\n\t"
+        "qmfc2.ni $9, $vf5\n\t"
+        "qmfc2.ni $10, $vf6\n\t"
+        "ppach $7, $8, $7\n\t"
+        "ppach $9, $10, $9\n\t"
+        "sq $7, 0x0($6)\n\t"
+        "sq $9, 0x10($6)\n\t"
+        "bgtzl $4, 1b\n\t"
+        "addi $6, $6, 0x20\n\t"
+        ".set pop\n"
+        : : "r"(n), "r"(src), "r"(dst)
+        : "$4", "$5", "$6", "$7", "$8", "$9", "$10", "memory");
+    return n;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CA7A0);
@@ -15764,7 +16220,53 @@ void func_003CBB28(int *self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBB78);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: hand-written VU0 loop dst[k] += src[k] * scale over n floats, 16 per pass (trapping add/addi have no gcc 2.95
+// pattern; the block moves its operands into fixed $4/$6/$7 itself: retail's double copies `daddu $3,$4` then
+// `daddu $4,$3` are gcc moving n out of the clobbered $4 for the asm's own `move $4, %0`). A port replaces it with
+// the C loop.
+void func_003CBB78(int n, float *src, float *dst, float scale) {
+    __asm__ volatile(
+        ".set noreorder\n"
+        "mfc1 $8, %3\n"
+        "move $4, %0\n"
+        "qmtc2.ni $8, $vf1\n"
+        "sll $4, $4, 2\n"
+        "move $6, %1\n"
+        "move $7, %2\n"
+        "add $4, $4, $6\n"
+        "1:\n"
+        "lqc2 $vf2, 0x0($6)\n"
+        "lqc2 $vf3, 0x10($6)\n"
+        "lqc2 $vf4, 0x20($6)\n"
+        "lqc2 $vf5, 0x30($6)\n"
+        "lqc2 $vf6, 0x0($7)\n"
+        "lqc2 $vf7, 0x10($7)\n"
+        "lqc2 $vf8, 0x20($7)\n"
+        "lqc2 $vf9, 0x30($7)\n"
+        "vmulx.xyzw $vf2, $vf2, $vf1x\n"
+        "vmulx.xyzw $vf3, $vf3, $vf1x\n"
+        "vmulx.xyzw $vf4, $vf4, $vf1x\n"
+        "vmulx.xyzw $vf5, $vf5, $vf1x\n"
+        "vadd.xyzw $vf6, $vf6, $vf2\n"
+        "vadd.xyzw $vf7, $vf7, $vf3\n"
+        "addi $6, $6, 0x40\n"
+        "vadd.xyzw $vf8, $vf8, $vf4\n"
+        "vadd.xyzw $vf9, $vf9, $vf5\n"
+        "sqc2 $vf6, 0x0($7)\n"
+        "sqc2 $vf7, 0x10($7)\n"
+        "sqc2 $vf8, 0x20($7)\n"
+        "sqc2 $vf9, 0x30($7)\n"
+        "bne $4, $6, 1b\n"
+        "addi $7, $7, 0x40\n"
+        ".set reorder\n"
+        : : "r"(n), "r"(src), "r"(dst), "f"(scale)
+        : "$4", "$6", "$7", "$8", "memory");
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBC00);
@@ -16124,7 +16626,69 @@ void func_003CC848(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC878);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int *D_00515B54;                 /* D_00515B40.f14: the output buffer */
+
+struct s5D80 {                      /* D_00515D80: the effect send buffer */
+    float f0000[0x600];
+    int f1800;
+};
+
+extern struct s5D80 D_00515D80;
+
+// PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
+// $4/$5/$6 itself: retail's `daddu $7,$4` then `daddu $4,$7` is gcc moving n out of the clobbered $4 for the asm's own
+// `move $4, %0`): scales n floats of the send buffer by 127, converts them to int into the output buffer and clears
+// the send buffer, 16 per pass. A port replaces it with the C loop.
+void func_003CC878(int n) {
+    int *dst = D_00515B54;
+    if (dst != 0) {
+        // PORT: PS2-only VU0 hand-written loop (scale by 127, convert, clear source); one inline asm block.
+        __asm__ volatile(
+            ".set push\n\t"
+            ".set noreorder\n\t"
+            ".set noat\n\t"
+            "move $4, %0\n\t"
+            "move $5, %1\n\t"
+            "move $6, %2\n\t"
+            "addiu $8, $0, 0x7F\n\t"
+            "sll $4, $4, 2\n\t"
+            "qmtc2.ni $8, $vf1\n\t"
+            "add $4, $4, $5\n\t"
+            "vitof0.xyzw $vf1, $vf1\n"
+            "1:\n\t"
+            "lqc2 $vf2, 0x0($5)\n\t"
+            "lqc2 $vf3, 0x10($5)\n\t"
+            "lqc2 $vf4, 0x20($5)\n\t"
+            "lqc2 $vf5, 0x30($5)\n\t"
+            "vmulx.xyzw $vf2, $vf2, $vf1x\n\t"
+            "sq $0, 0x0($5)\n\t"
+            "vmulx.xyzw $vf3, $vf3, $vf1x\n\t"
+            "sq $0, 0x10($5)\n\t"
+            "vmulx.xyzw $vf4, $vf4, $vf1x\n\t"
+            "sq $0, 0x20($5)\n\t"
+            "vmulx.xyzw $vf5, $vf5, $vf1x\n\t"
+            "sq $0, 0x30($5)\n\t"
+            "addi $5, $5, 0x40\n\t"
+            "addi $6, $6, 0x40\n\t"
+            "vftoi0.xyzw $vf2, $vf2\n\t"
+            "vftoi0.xyzw $vf3, $vf3\n\t"
+            "vftoi0.xyzw $vf4, $vf4\n\t"
+            "vftoi0.xyzw $vf5, $vf5\n\t"
+            "sqc2 $vf2, -0x40($6)\n\t"
+            "sqc2 $vf3, -0x30($6)\n\t"
+            "sqc2 $vf4, -0x20($6)\n\t"
+            "bne $4, $5, 1b\n\t"
+            "sqc2 $vf5, -0x10($6)\n\t"
+            ".set pop\n"
+            : : "r"(n), "r"(D_00515D80.f0000), "r"(dst)
+            : "$4", "$5", "$6", "$8", "memory");
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC918);
@@ -17894,7 +18458,54 @@ void func_003CEFF8(char *self, int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF060);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S3CF060 { char p0[8]; int *obj; char p1[0xE]; unsigned char f1A; char p2[1]; float f1C; };
+int func_003CF060_C(struct S3CF060 *self, int n, float *src, float *dst) __asm__("func_003CF060");
+// PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
+// $4/$6/$7 and the scale through $2 itself): dst[k] = src[k] * self->f1C over n floats, 16 per pass. A port replaces it
+// with the C loop.
+int func_003CF060_C(struct S3CF060 *self, int n, float *src, float *dst) {
+    if (self->obj) {
+        int r = ((int (*)(int *, int, float *, float *, int))*self->obj)(self->obj, n, dst, src, self->f1A);
+        if (r <= 0) return r;
+    }
+    // PORT: PS2-only VU0 hand-written loop (scale 4x4 blocks by a factor); one inline asm block.
+    __asm__ volatile(
+        ".set push\n\t"
+        ".set noreorder\n\t"
+        ".set noat\n\t"
+        "mfc1 $2, %3\n\t"
+        "move $4, %0\n\t"
+        "qmtc2.ni $2, $vf1\n\t"
+        "sll $4, $4, 2\n\t"
+        "move $6, %1\n\t"
+        "move $7, %2\n\t"
+        "add $4, $4, $6\n"
+        "1:\n\t"
+        "lqc2 $vf2, 0x0($6)\n\t"
+        "lqc2 $vf3, 0x10($6)\n\t"
+        "lqc2 $vf4, 0x20($6)\n\t"
+        "lqc2 $vf5, 0x30($6)\n\t"
+        "addi $6, $6, 0x40\n\t"
+        "vmulx.xyzw $vf2, $vf2, $vf1x\n\t"
+        "vmulx.xyzw $vf3, $vf3, $vf1x\n\t"
+        "vmulx.xyzw $vf4, $vf4, $vf1x\n\t"
+        "vmulx.xyzw $vf5, $vf5, $vf1x\n\t"
+        "sqc2 $vf2, 0x0($7)\n\t"
+        "sqc2 $vf3, 0x10($7)\n\t"
+        "sqc2 $vf4, 0x20($7)\n\t"
+        "sqc2 $vf5, 0x30($7)\n\t"
+        "bne $4, $6, 1b\n\t"
+        "addi $7, $7, 0x40\n\t"
+        ".set pop\n"
+        : : "r"(n), "r"(src), "r"(dst), "f"(self->f1C)
+        : "$2", "$4", "$6", "$7", "memory");
+    return n;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF128);
@@ -17922,7 +18533,65 @@ void func_003CF158(void *arg0, int *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF178);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S3CF178 { char p0[8]; int *f8; int *fC; char p1[0xC]; void *f1C; int f20; };
+extern void ff_F178(void *) __asm__("func_003B5E98");
+extern void *fa_F178(int) __asm__("func_003B5C60");
+int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) __asm__("func_003CF178");
+// PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
+// $4/$5/$6 itself): a3[k] += self->f1C[k] over n floats, 16 per pass. A port replaces it with the C loop.
+int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) {
+    int r;
+    if (self->f20 < n) {
+        if (self->f1C) ff_F178(self->f1C);
+        self->f20 = n;
+        self->f1C = fa_F178(n << 2);
+    }
+    r = ((int (*)(int *, int, int, float *, int))*self->f8)(self->f8, n, a2, a3, 1);
+    if (r <= 0) return r;
+    r = ((int (*)(int *, int, int, void *, int))*self->fC)(self->fC, n, a2, self->f1C, 2);
+    if (r <= 0) return r;
+    {
+            // PORT: PS2-only VU0 hand-written loop (add a scratch buffer into the destination, 4x4 floats per step).
+            __asm__ volatile(
+                ".set push\n\t"
+                ".set noreorder\n\t"
+                ".set noat\n\t"
+                "move $4, %0\n\t"
+                "sll $4, $4, 2\n\t"
+                "move $5, %1\n\t"
+                "move $6, %2\n\t"
+                "add $4, $4, $5\n"
+                "1:\n\t"
+                "lqc2 $vf2, 0x0($5)\n\t"
+                "lqc2 $vf3, 0x10($5)\n\t"
+                "lqc2 $vf4, 0x20($5)\n\t"
+                "lqc2 $vf5, 0x30($5)\n\t"
+                "lqc2 $vf6, 0x0($6)\n\t"
+                "lqc2 $vf7, 0x10($6)\n\t"
+                "lqc2 $vf8, 0x20($6)\n\t"
+                "lqc2 $vf9, 0x30($6)\n\t"
+                "addi $5, $5, 0x40\n\t"
+                "vadd.xyzw $vf6, $vf6, $vf2\n\t"
+                "vadd.xyzw $vf7, $vf7, $vf3\n\t"
+                "vadd.xyzw $vf8, $vf8, $vf4\n\t"
+                "vadd.xyzw $vf9, $vf9, $vf5\n\t"
+                "sqc2 $vf6, 0x0($6)\n\t"
+                "sqc2 $vf7, 0x10($6)\n\t"
+                "sqc2 $vf8, 0x20($6)\n\t"
+                "sqc2 $vf9, 0x30($6)\n\t"
+                "bne $4, $5, 1b\n\t"
+                "addi $6, $6, 0x40\n\t"
+                ".set pop\n"
+                : : "r"(n), "r"(self->f1C), "r"(a3)
+                : "$4", "$5", "$6", "memory");
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF298);
@@ -18187,7 +18856,97 @@ int func_003CF7B0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF7D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S3CF7D0 { char p0[8]; int *obj; char p1[0xE]; unsigned char f1A; char p2[1]; float *f1C; int f20; int f24; int f28; int f2C; float f30[4]; };
+int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *a2, float *a3) __asm__("func_003CF7D0");
+// PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
+// $4..$8 itself): per chunk, a delay-line step d' = d * f.x + in, out = d' * f.y + d with f = self->f30, d' written back
+// to the delay line at self->f1C + pos and out to dst, 16 floats per pass. A port replaces it with the C loop.
+int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *a2, float *a3) {
+    float *src;
+    float *dst;
+    int rem;
+    int chunk;
+    if (self->obj) {
+        chunk = ((int (*)(int *, int, float *, float *, int))*self->obj)(self->obj, n, a3, a2, self->f1A);
+        if (chunk <= 0) return chunk;
+    }
+    src = a2;
+    dst = a3;
+    rem = n;
+    if (rem > 0) {
+        int size = self->f28;
+        do {
+            int pos;
+            if (!(self->f24 < size)) self->f24 = 0;
+            pos = self->f24;
+            chunk = self->f28 - pos;
+            if (rem < chunk) chunk = rem;
+            // PORT: PS2-only VU0 hand-written loop (blend two 4x4 float blocks with a 2-term factor); one inline asm block.
+            __asm__ volatile(
+                ".set push\n\t"
+                ".set noreorder\n\t"
+                ".set noat\n\t"
+                "move $6, %0\n\t"
+                "move $4, %1\n\t"
+                "move $5, %2\n\t"
+                "sll $6, $6, 2\n\t"
+                "move $7, %3\n\t"
+                "move $8, %4\n\t"
+                "add $6, $6, $7\n\t"
+                "lqc2 $vf1, 0x0($4)\n"
+                "1:\n\t"
+                "lqc2 $vf4, 0x0($5)\n\t"
+                "lqc2 $vf5, 0x10($5)\n\t"
+                "lqc2 $vf6, 0x20($5)\n\t"
+                "lqc2 $vf7, 0x30($5)\n\t"
+                "lqc2 $vf8, 0x0($7)\n\t"
+                "lqc2 $vf9, 0x10($7)\n\t"
+                "lqc2 $vf10, 0x20($7)\n\t"
+                "lqc2 $vf11, 0x30($7)\n\t"
+                "vmulx.xyzw $vf12, $vf4, $vf1x\n\t"
+                "vmulx.xyzw $vf13, $vf5, $vf1x\n\t"
+                "vmulx.xyzw $vf14, $vf6, $vf1x\n\t"
+                "vmulx.xyzw $vf15, $vf7, $vf1x\n\t"
+                "vadd.xyzw $vf12, $vf12, $vf8\n\t"
+                "vadd.xyzw $vf13, $vf13, $vf9\n\t"
+                "vadd.xyzw $vf14, $vf14, $vf10\n\t"
+                "vadd.xyzw $vf15, $vf15, $vf11\n\t"
+                "vmuly.xyzw $vf8, $vf12, $vf1y\n\t"
+                "vmuly.xyzw $vf9, $vf13, $vf1y\n\t"
+                "vmuly.xyzw $vf10, $vf14, $vf1y\n\t"
+                "vmuly.xyzw $vf11, $vf15, $vf1y\n\t"
+                "vadd.xyzw $vf8, $vf8, $vf4\n\t"
+                "vadd.xyzw $vf9, $vf9, $vf5\n\t"
+                "vadd.xyzw $vf10, $vf10, $vf6\n\t"
+                "vadd.xyzw $vf11, $vf11, $vf7\n\t"
+                "addi $7, $7, 0x40\n\t"
+                "addi $8, $8, 0x40\n\t"
+                "sqc2 $vf12, 0x0($5)\n\t"
+                "sqc2 $vf13, 0x10($5)\n\t"
+                "sqc2 $vf14, 0x20($5)\n\t"
+                "sqc2 $vf15, 0x30($5)\n\t"
+                "sqc2 $vf8, -0x40($8)\n\t"
+                "sqc2 $vf9, -0x30($8)\n\t"
+                "sqc2 $vf10, -0x20($8)\n\t"
+                "sqc2 $vf11, -0x10($8)\n\t"
+                "bne $6, $7, 1b\n\t"
+                "addi $5, $5, 0x40\n\t"
+                ".set pop\n"
+                : : "r"(chunk), "r"(self->f30), "r"(self->f1C + pos), "r"(src), "r"(dst)
+                : "$4", "$5", "$6", "$7", "$8", "memory");
+            self->f24 = pos + chunk;
+            rem -= chunk;
+            src += chunk;
+            dst += chunk;
+        } while (rem > 0);
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF958);
