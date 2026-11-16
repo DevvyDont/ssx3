@@ -230,13 +230,13 @@ extern "C" int func_0040BB38(void);
 extern "C" int func_0040BC08(void);
 extern "C" int func_00402520(unsigned char* clock);
 extern "C" void func_0040BFE0(unsigned char* clock);
-extern char D_00486798[];
+extern char cPS2ConsoleConfig_vtbl[];
 extern void* D_004A28A8_7478 __asm__("SSXApp");
 
 /**
  * Constructs the PS2 console configuration object from the system settings and clock.
  *
- * Clears +0x24 and points +0x34 at D_00486798. Stores 1 at +0x28 when func_0040BAA8 returns 0 (else 0), 1 at +0x2C, the
+ * Clears +0x24 and points +0x34 at cPS2ConsoleConfig_vtbl. Stores 1 at +0x28 when func_0040BAA8 returns 0 (else 0), 1 at +0x2C, the
  * language from func_0040B9E8 (0 to 7, otherwise 1) at +0x30, func_0040BB38's 0 to 2 at +0x0 and func_0040BC08's 0 or 1
  * at +0x4. When func_00402520 reads the clock, func_0040BFE0 converts it and the BCD bytes give the hour, minute and
  * second (+0x8 to +0x10) and the year (+ 2000), month and day (+0x14 to +0x1C); otherwise the date defaults to
@@ -249,7 +249,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
     int* self = (int*)self_;
     unsigned char clock[8];
     self[9] = 0;
-    *(char**)&self[13] = D_00486798;
+    *(char**)&self[13] = cPS2ConsoleConfig_vtbl;
     int r = func_0040BAA8();
     switch (r) {
     case 0:

@@ -2766,13 +2766,13 @@ extern "C" void func_00231FC0(sFade_1FC0* self)
 }
 #endif
 
-extern void* D_0047D938[];
+extern void* cPreStartScreen_vtbl[];
 
 //100%
 INCLUDE_ASM("main/gameload", cPreStartScreen_cPreStartScreen__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the pre-start screen app module: installs its vtable (D_0047D938) and clears +0x4 and +0x8.
+ * Constructs the pre-start screen app module: installs its vtable (cPreStartScreen_vtbl) and clears +0x4 and +0x8.
  *
  * @return @p self
  */
@@ -2780,7 +2780,7 @@ void* cPreStartScreen_cPreStartScreen(void* self)
 {
     int t0 = 0;
     *(int*)((char*)self + 0x4) = t0;
-    *(int*)self = (int)(void*)D_0047D938;
+    *(int*)self = (int)(void*)cPreStartScreen_vtbl;
     *(int*)((char*)self + 0x8) = t0;
     return self;
 }

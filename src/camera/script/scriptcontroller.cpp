@@ -321,7 +321,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_cScriptManu
 #ifdef SKIP_ASM
 struct cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
-extern void* D_0045C850[];
+extern void* cScriptManualAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
@@ -329,7 +329,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 /**
  * Constructs a manual script camera algorithm (camera at a scripted position and orientation).
  *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs D_0045C850 at +0x10, constructs the jitterer at +0x74 with
+ * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptManualAlgorithm_vtbl at +0x10, constructs the jitterer at +0x74 with
  * cCameraJitterer_cCameraJitterer, sets the position (+0x30) to t4vect_Origin and the type (+0xC) to 0x56
  * (On Tour SCRIPT_MANUAL), and zeroes roll, heading and pitch (+0x40..+0x48).
  *
@@ -338,7 +338,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self)
 {
     cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = D_0045C850;
+    *(void***)((char*)self + 0x10) = cScriptManualAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 86;
@@ -694,7 +694,7 @@ extern "C" sPair_9828 func_00169828(char* p)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_cScriptPointAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045C7E8[];
+extern void* cScriptPointAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
@@ -702,7 +702,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 /**
  * Constructs a point script camera algorithm (camera at a scripted point).
  *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs D_0045C7E8 at +0x10, constructs the jitterer at +0x74, sets the position (+0x30)
+ * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptPointAlgorithm_vtbl at +0x10, constructs the jitterer at +0x74, sets the position (+0x30)
  * to t4vect_Origin and the type (+0xC) to 0x57 (On Tour SCRIPT_POINT), and zeroes roll, heading and pitch.
  *
  * @return @p self
@@ -710,7 +710,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self)
 {
     cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = D_0045C7E8;
+    *(void***)((char*)self + 0x10) = cScriptPointAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 87;
@@ -1030,7 +1030,7 @@ extern "C" sPair_9F88 func_00169F88(char* p)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045C780[];
+extern void* cScriptTargetAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
@@ -1038,7 +1038,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 /**
  * Constructs a target script camera algorithm (camera looking at a scripted subject).
  *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs D_0045C780 at +0x10, constructs the jitterer at +0x70, sets the position (+0x30)
+ * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptTargetAlgorithm_vtbl at +0x10, constructs the jitterer at +0x70, sets the position (+0x30)
  * to t4vect_Origin and the type (+0xC) to 0x58 (On Tour SCRIPT_TARGET), and zeroes roll, heading and pitch.
  *
  * @return @p self
@@ -1046,7 +1046,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self)
 {
     cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = D_0045C780;
+    *(void***)((char*)self + 0x10) = cScriptTargetAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 88;
@@ -1431,7 +1431,7 @@ extern "C" sPair_A868 func_0016A868(char* p)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045C718[];
+extern void* cScriptRelativeAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
@@ -1439,7 +1439,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 /**
  * Constructs a relative script camera algorithm (camera placed relative to an algorithmic subject).
  *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs D_0045C718 at +0x10, constructs the jitterer at +0x70, sets the position (+0x30)
+ * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptRelativeAlgorithm_vtbl at +0x10, constructs the jitterer at +0x70, sets the position (+0x30)
  * to t4vect_Origin and the type (+0xC) to 0x59 (On Tour SCRIPT_RELATIVE), and zeroes roll, heading and pitch.
  *
  * @return @p self
@@ -1447,7 +1447,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self)
 {
     cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = D_0045C718;
+    *(void***)((char*)self + 0x10) = cScriptRelativeAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 89;

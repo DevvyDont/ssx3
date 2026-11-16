@@ -8,7 +8,7 @@
 //                             Emitter") +
 //                             ctor func_002F7A68 (empty) in cBoardSparkFX's ctor; embedded at +0x10 / +0x20 below.
 //   cStaticEmitter            a fixed emitter (cParticleModifier, cMultiParticle). Size 0x190: cMemMan_alloc(0x190,
-//                             "Emitter") + ctor cStaticEmitter_cStaticEmitter in cMultiParticle_setupMultiParticle. Vtable D_00493160.
+//                             "Emitter") + ctor cStaticEmitter_cStaticEmitter in cMultiParticle_setupMultiParticle. Vtable cStaticEmitter_vtbl.
 //   cBaseClass_DynamicEmitter an emitter that follows a moving source and keeps a ring of sub-emitter positions.
 //                             Size 0x200: embedded at cDynamicParticleModifier +0x60 with ParticleData at +0x260, and
 //                             cDynamicColourEmitter's own fields start at +0x200. Vtable cBaseClass_DynamicEmitter_vtbl
@@ -160,7 +160,7 @@ struct cStaticEmitter {
     int mNumFlipTextures;           // 0x180 [O]; [R] setupEmitter (data +0xD0); [U] update wraps the frame at it
     float mCurrentFlipTexture;      // 0x184 [O]; [R] ctor zeroes it (sw); [U] update, render
     float mFlipTextureRate;         // 0x188 [O]; [R] setupEmitter (data +0xD4); [U] update
-    void** mVtbl;                   // 0x18C [R] ctor cStaticEmitter_cStaticEmitter and dtor cStaticEmitter__cStaticEmitter store D_00493160 (1 slot: the
+    void** mVtbl;                   // 0x18C [R] ctor cStaticEmitter_cStaticEmitter and dtor cStaticEmitter__cStaticEmitter store cStaticEmitter_vtbl (1 slot: the
                                     //       dtor); [P] the preview's cStaticEmitter slot-1 pair touches 0x18C (On Tour
                                     //       has no virtuals here)
 };

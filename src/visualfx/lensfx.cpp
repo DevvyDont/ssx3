@@ -27,7 +27,7 @@ void* cLensFxMan_construct()
 INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan_cPS2LensFxMan);
 #ifdef SKIP_ASM
 extern "C" void cLensFxMan_cLensFxMan(void* self);
-extern void* D_00487F00[];
+extern void* cPS2LensFxMan_vtbl[];
 
 // PORT: asm label because the unit's forward declaration above has C++ linkage;
 // fix that declaration to extern "C" and this can be a plain extern "C" definition.
@@ -35,19 +35,19 @@ void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self) __asm__("cPS2LensFxMan_cPS2Le
 /**
  * Constructs the PS2 lens flare effects manager.
  *
- * Runs cLensFxMan_cLensFxMan and stores the PS2 vtable D_00487F00 at +0x649C.
+ * Runs cLensFxMan_cLensFxMan and stores the PS2 vtable cPS2LensFxMan_vtbl at +0x649C.
  *
  * @return this
  */
 void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self)
 {
     cLensFxMan_cLensFxMan(self);
-    *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
+    *(int*)((char*)self + 0x649c) = (int)(void*)cPS2LensFxMan_vtbl;
     return self;
 }
 #endif
 
-extern void* D_00487F00[];
+extern void* cPS2LensFxMan_vtbl[];
 extern "C" void* cLensFxMan__cLensFxMan(void*);
 
 //100%
@@ -56,14 +56,14 @@ INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan__cPS2LensFxMan__FPv);
 /**
  * Destroys the PS2 lens flare effects manager.
  *
- * Stores D_00487F00 at +0x649C again and tail-calls cLensFxMan__cLensFxMan, which also frees the object when the
+ * Stores cPS2LensFxMan_vtbl at +0x649C again and tail-calls cLensFxMan__cLensFxMan, which also frees the object when the
  * in-charge flag asks for it.
  *
  * @return cLensFxMan__cLensFxMan's result
  */
 void* cPS2LensFxMan__cPS2LensFxMan(void* self)
 {
-    *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
+    *(int*)((char*)self + 0x649c) = (int)(void*)cPS2LensFxMan_vtbl;
     return cLensFxMan__cLensFxMan(self);
 }
 #endif

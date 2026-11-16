@@ -4726,3 +4726,24 @@ ps2_addr	name	previous	source	evidence
 00519C08	hlafile_mutex	D_00519C08	SSX On Tour DWARF (verified)	identity verified ([T] MUTEX 16 bytes: extent 0x10, address passed to the mutex calls ...); hlafile.cpp static, file-prefixed (`mutex` is a common identifier)
 00450C34	hlafile_request	D_00450C34	SSX On Tour DWARF (verified)	identity verified ([U] written by ASYNCFILE_init and ASYNCFILE_restore (= PSP's), co-use 3/3 rev 3/3 ...); hlafile.cpp static, file-prefixed (`request` is a common identifier)
 00519C18	stream_requestidcounter	D_00519C18	SSX On Tour DWARF (verified)	requestidcounter (stream.cpp's own static: func_003DFCD8 = getfreerequest, identical code) duplicates hlafile.cpp's requestidcounter at 00519C00; needs a disambiguation convention, e.g. requestidcounter_stream; stream.cpp static, file-prefixed (hlafile.cpp has its own, 00519C00)
+0045C718	cScriptRelativeAlgorithm_vtbl	D_0045C718	vtables.py	retail vtable [C] stored by cScriptRelativeAlgorithm_cScriptRelativeAlgorithm
+0045C780	cScriptTargetAlgorithm_vtbl	D_0045C780	vtables.py	retail vtable [C] stored by cScriptTargetAlgorithm_cScriptTargetAlgorithm
+0045C7E8	cScriptPointAlgorithm_vtbl	D_0045C7E8	vtables.py	retail vtable [C] stored by cScriptPointAlgorithm_cScriptPointAlgorithm
+0045C850	cScriptManualAlgorithm_vtbl	D_0045C850	vtables.py	retail vtable [C] stored by cScriptManualAlgorithm_cScriptManualAlgorithm
+00469318	cOVSound_vtbl	D_00469318	vtables.py	retail vtable [C] stored by cOVSound_cOVSound
+0047D938	cPreStartScreen_vtbl	D_0047D938	vtables.py	retail vtable [C] stored by cPreStartScreen_cPreStartScreen__FPv
+00481850	cReplayFrame_vtbl	D_00481850	vtables.py	retail vtable [C] stored by cReplayFrame_cReplayFrame
+00481FD8	cScriptObjRider_vtbl	D_00481FD8	vtables.py	retail vtable [C] stored by cScriptObjRider_cScriptObjRider
+00482398	cScriptObjCameraManager_vtbl	D_00482398	vtables.py	retail vtable [C] stored by cScriptObjCameraManager_cScriptObjCameraManager
+00482528	cScriptDatabaseObject_vtbl	D_00482528	vtables.py	retail vtable [D] slot 1 cScriptDatabaseObject__cScriptDatabaseObject
+00483B10	cAsyncSys_vtbl	D_00483B10	vtables.py	retail vtable [D] slot 1 cAsyncSys__cAsyncSys
+00486798	cPS2ConsoleConfig_vtbl	D_00486798	vtables.py	retail vtable [C] stored by cPS2ConsoleConfig_cPS2ConsoleConfig
+00487D28	cPSPVisualEffectsMan_vtbl	D_00487D28	vtables.py	retail vtable [D] slot 1 cPSPVisualEffectsMan__cPSPVisualEffectsMan
+00487D50	cPS2AIVisualEffectsMan_vtbl	D_00487D50	vtables.py	retail vtable [D] slot 1 cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan
+00487D78	cAIVisualEffectsMan_vtbl	D_00487D78	vtables.py	retail vtable [C] stored by cAIVisualEffectsMan_cAIVisualEffectsMan
+00487F00	cPS2LensFxMan_vtbl	D_00487F00	vtables.py	retail vtable [C] stored by cPS2LensFxMan_cPS2LensFxMan
+004880E0	cTransitionObj_vtbl	D_004880E0	vtables.py	retail vtable [D] slot 1 cTransitionObj__cTransitionObj
+00489C00	cWScriptMan_vtbl	D_00489C00	vtables.py	retail vtable [D] slot 1 cWScriptMan__cWScriptMan
+00492FD0	cVisualEffectsTest_vtbl	D_00492FD0	vtables.py	retail vtable [D] slot 1 cVisualEffectsTest__cVisualEffectsTest
+00493160	cStaticEmitter_vtbl	D_00493160	vtables.py	retail vtable [D] slot 1 cStaticEmitter__cStaticEmitter
+004936D8	cLightMan_vtbl	D_004936D8	vtables.py	retail vtable [D] slot 1 cLightMan__cLightMan; also stored by cPSPLightMan_cPSPLightMan__FP12cPSPLightMan

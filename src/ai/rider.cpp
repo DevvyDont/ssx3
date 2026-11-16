@@ -180,7 +180,7 @@ extern void* D_00459C18[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
 extern void* D_00482018[];
-extern void* D_00481FD8[];
+extern void* cScriptObjRider_vtbl[];
 extern void* cBeing_vtbl[];
 
 static inline void vdel_11B978(char* o, int off)
@@ -241,7 +241,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     if (member != 0)
         cPlayerShadow__cPlayerShadow(member, 3);
     self->mScriptObjectVtbl = D_00482018;
-    self->mScriptObjRiderVtbl = D_00481FD8;
+    self->mScriptObjRiderVtbl = cScriptObjRider_vtbl;
     cScriptObject__cScriptObject(self->unk_6DC, 0);
     self->mVtbl = cBeing_vtbl;
     if (flags & 1)

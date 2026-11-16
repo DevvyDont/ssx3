@@ -2150,18 +2150,18 @@ extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500*
 //100%
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_cStaticEmitter);
 #ifdef SKIP_ASM
-extern char D_00493160[];
+extern char cStaticEmitter_vtbl[];
 void func_002F7A68(void*);
 
 /**
- * Constructs a static particle emitter: vtable D_00493160, the embedded tParticleEmitter at +0x10 (func_002F7A68),
+ * Constructs a static particle emitter: vtable cStaticEmitter_vtbl, the embedded tParticleEmitter at +0x10 (func_002F7A68),
  * m_initialized 0 and mCurrentFlipTexture 0.
  *
  * @return @p self
  */
 extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
 {
-    self->mVtbl = (void**)D_00493160;
+    self->mVtbl = (void**)cStaticEmitter_vtbl;
     func_002F7A68((char*)self + 0x10);
     self->m_initialized = 0;
     *(int*)&self->mCurrentFlipTexture = 0;
@@ -2391,7 +2391,7 @@ INCLUDE_ASM("render/graphicsman", cStaticEmitter__cStaticEmitter);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00493160[];
+extern char cStaticEmitter_vtbl[];
 
 /**
  * Destroys a static particle emitter: restores its vtable and frees it if asked.
@@ -2404,7 +2404,7 @@ extern char D_00493160[];
  */
 extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags)
 {
-    *(void**)((char*)self + 0x18C) = D_00493160;
+    *(void**)((char*)self + 0x18C) = cStaticEmitter_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }

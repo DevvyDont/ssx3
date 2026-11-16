@@ -2500,20 +2500,20 @@ extern "C" int func_002F7FF8(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cTransitionObj__cTransitionObj);
 #ifdef SKIP_ASM
-extern void* D_004880E0[];
+extern void* cTransitionObj_vtbl[];
 extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
  * Destroys a screen transition object and returns its buffer to the pool.
  *
- * Sets the vtable at +0x0 to D_004880E0 and, when bit 0 of @p flags is set, gives the memory back with cTransitionObj_operator_delete
+ * Sets the vtable at +0x0 to cTransitionObj_vtbl and, when bit 0 of @p flags is set, gives the memory back with cTransitionObj_operator_delete
  * instead of the global operator delete.
  *
  * @param flags  g++ in-charge flags; bit 0 frees the object
  */
 extern "C" void cTransitionObj__cTransitionObj(void* self, int flags)
 {
-    *(void***)self = D_004880E0;
+    *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
         cTransitionObj_operator_delete(self);
     }
@@ -2523,11 +2523,11 @@ extern "C" void cTransitionObj__cTransitionObj(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cFade_TObj__cFade_TObj);
 #ifdef SKIP_ASM
-extern void* D_004880E0[];
+extern void* cTransitionObj_vtbl[];
 extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
- * Destroys a fade transition object: stores the base vtable (D_004880E0), then releases its slot when asked to.
+ * Destroys a fade transition object: stores the base vtable (cTransitionObj_vtbl), then releases its slot when asked to.
  *
  * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
  * pool (D_005382C0) instead of freeing heap memory.
@@ -2536,7 +2536,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  */
 extern "C" void cFade_TObj__cFade_TObj(void* self, int flags)
 {
-    *(void***)self = D_004880E0;
+    *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
         cTransitionObj_operator_delete(self);
     }
@@ -2563,11 +2563,11 @@ extern "C" void* func_002F8060(void* self, sLightVec_002F8060 v)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWipe_TObj__cWipe_TObj);
 #ifdef SKIP_ASM
-extern void* D_004880E0[];
+extern void* cTransitionObj_vtbl[];
 extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
- * Destroys a wipe transition object: stores the base vtable (D_004880E0), then releases its slot when asked to.
+ * Destroys a wipe transition object: stores the base vtable (cTransitionObj_vtbl), then releases its slot when asked to.
  *
  * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
  * pool (D_005382C0) instead of freeing heap memory.
@@ -2576,7 +2576,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  */
 extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
 {
-    *(void***)self = D_004880E0;
+    *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
         cTransitionObj_operator_delete(self);
     }
@@ -2586,11 +2586,11 @@ extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCircle_TObj__cCircle_TObj);
 #ifdef SKIP_ASM
-extern void* D_004880E0[];
+extern void* cTransitionObj_vtbl[];
 extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
- * Destroys a circle transition object: stores the base vtable (D_004880E0), then releases its slot when asked
+ * Destroys a circle transition object: stores the base vtable (cTransitionObj_vtbl), then releases its slot when asked
  * to.
  *
  * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
@@ -2600,7 +2600,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  */
 extern "C" void cCircle_TObj__cCircle_TObj(void* self, int flags)
 {
-    *(void***)self = D_004880E0;
+    *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
         cTransitionObj_operator_delete(self);
     }
@@ -2801,12 +2801,12 @@ extern "C" void func_002F8310(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8340);
 #ifdef SKIP_ASM
-extern void* D_00487D78[];
+extern void* cAIVisualEffectsMan_vtbl[];
 void operator_delete(int*);
 
 extern "C" void func_002F8340(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00487D78;
+    *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

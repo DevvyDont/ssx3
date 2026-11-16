@@ -10071,3 +10071,26 @@ cBENewPlayerInterface_tempPlayers = 0x00534FE0;
 cBEOptionInterface_mOption = 0x00535610;
 cGameModeMan_bGiveUp = 0x005366D0;
 cAvalanche_m_nodeList = 0x00538450;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round8 (docs/ontour_globals.tsv)
+cScriptRelativeAlgorithm_vtbl = 0x0045C718;
+cScriptTargetAlgorithm_vtbl = 0x0045C780;
+cScriptPointAlgorithm_vtbl = 0x0045C7E8;
+cScriptManualAlgorithm_vtbl = 0x0045C850;
+cOVSound_vtbl = 0x00469318;
+cPreStartScreen_vtbl = 0x0047D938;
+cReplayFrame_vtbl = 0x00481850;
+cScriptObjRider_vtbl = 0x00481FD8;
+cScriptObjCameraManager_vtbl = 0x00482398;
+cScriptDatabaseObject_vtbl = 0x00482528;
+cAsyncSys_vtbl = 0x00483B10;
+cPS2ConsoleConfig_vtbl = 0x00486798;
+cPSPVisualEffectsMan_vtbl = 0x00487D28;
+cPS2AIVisualEffectsMan_vtbl = 0x00487D50;
+cAIVisualEffectsMan_vtbl = 0x00487D78;
+cPS2LensFxMan_vtbl = 0x00487F00;
+cTransitionObj_vtbl = 0x004880E0;
+cWScriptMan_vtbl = 0x00489C00;
+cVisualEffectsTest_vtbl = 0x00492FD0;
+cStaticEmitter_vtbl = 0x00493160;
+cLightMan_vtbl = 0x004936D8;

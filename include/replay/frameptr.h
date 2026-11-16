@@ -7,7 +7,7 @@
 // 1..7 = write (cReplayFramePtr_write), read (cReplayFramePtr_read), readReplayInstance() (func_0026EB48),
 // readReplayInstance(cInstanceNode*) (func_0026EC08), writeReplayInstance(const tInstanceRecord*) (func_0026ECD8),
 // writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
-// cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable D_00481850, ctor cReplayFrame_cReplayFrame) derives from it;
+// cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable cReplayFrame_vtbl, ctor cReplayFrame_cReplayFrame) derives from it;
 // cPlaybackMan embeds one at +0x14 (its destructor cPlaybackMan__cPlaybackMan stores cReplayFramePtr_vtbl there).
 // Size 0x14 [R]: the constructor cReplayFramePtr_cReplayFramePtr stores the vptr and zeroes 0x4..0x10, and cReplayFrame's first own
 // member (Next) is at 0x14 (On Tour cReplayFrame, same offsets as here). Same size, order and offsets as On Tour's
@@ -37,7 +37,7 @@ struct tFramePos {
 struct cReplayFramePtr {
     // --- cBxReplayFrame (interface: a vptr only)
     void** mVtbl;           // 0x00 [R] ctor cReplayFramePtr_cReplayFramePtr and dtor cReplayFramePtr__cReplayFramePtr store cReplayFramePtr_vtbl (cReplayFrame's
-                            //      ctor then stores D_00481850); [U] peekObjNodeType and the readReplayInstance /
+                            //      ctor then stores cReplayFrame_vtbl); [U] peekObjNodeType and the readReplayInstance /
                             //      writeReplayInstance bodies call slots 1/2 (write/read) through it
     // --- cReplayFramePtr
     char* Block;            // 0x04 [O]; [P] getBlock (func_00272210) lw 0x4; assert "Block && ReadData"; [R] ctor 0;

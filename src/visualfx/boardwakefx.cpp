@@ -5537,14 +5537,14 @@ extern "C" void cTransitionObj_operator_delete(void* memory)
 }
 #endif
 
-extern void* D_004880E0[];
+extern void* cTransitionObj_vtbl[];
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4D70__FPv);
 #ifdef SKIP_ASM
 void* func_002E4D70(void* self)
 {
-    *(int*)self = (int)(void*)D_004880E0;
+    *(int*)self = (int)(void*)cTransitionObj_vtbl;
     return self;
 }
 #endif

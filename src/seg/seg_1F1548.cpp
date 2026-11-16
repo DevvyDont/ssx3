@@ -11,7 +11,7 @@ extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void* cVisualEffectsMan_cVisualEffectsMan(void*);
 extern "C" void* func_00372AA0(void*);
 void* func_003759E8(void*);
-extern char D_00487D28[];
+extern char cPSPVisualEffectsMan_vtbl[];
 extern char str_RenderToggles[];
 extern char str_VisualEffectsTest[];
 extern char str_LightGlow[];
@@ -36,7 +36,7 @@ extern char D_00488050[];
 extern char D_004882B0[];
 extern char D_00488330[];
 extern char D_00492FA0[];
-extern char D_00492FD0[];
+extern char cVisualEffectsTest_vtbl[];
 extern char D_004930A0[];
 extern char D_00493178[];
 extern char D_004931A8[];
@@ -64,9 +64,9 @@ struct sMgr_0548 {
 extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
-    self->vptr = D_00487D28;
+    self->vptr = cPSPVisualEffectsMan_vtbl;
     { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = D_004931A8; self->objs[0] = effect; }
-    { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = D_00492FD0; self->objs[1] = effect; }
+    { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = cVisualEffectsTest_vtbl; self->objs[1] = effect; }
     { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; self->objs[2] = effect; }
     { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = D_00493178; self->objs[3] = effect; }
     { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; self->objs[4] = effect; }
@@ -93,7 +93,7 @@ void operator_delete(int *);
 struct Obj0820 {
     virtual ~Obj0820();
 };
-extern char D_00487D28[];
+extern char cPSPVisualEffectsMan_vtbl[];
 extern char cVisualEffectsMan_vtbl[];
 
 struct sMgr_0820 {
@@ -104,7 +104,7 @@ struct sMgr_0820 {
 /**
  * Destroys the visual effects manager: deletes its 17 effect components, then the base part.
  *
- * Stores its vtable D_00487D28 (+0x44), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
+ * Stores its vtable cPSPVisualEffectsMan_vtbl (+0x44), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
  * m_RenderToggles .. m_PathArrow) through their virtual destructors (null ones skipped), stores cVisualEffectsMan_vtbl
  * and frees the object when bit 0 of @p flags is set.
  *
@@ -112,7 +112,7 @@ struct sMgr_0820 {
  */
 extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int flags)
 {
-    self->vptr = D_00487D28;
+    self->vptr = cPSPVisualEffectsMan_vtbl;
     delete self->objs[0];
     delete self->objs[1];
     delete self->objs[2];

@@ -1514,20 +1514,20 @@ extern "C" int func_002F0360(void) {
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_cAIVisualEffectsMan);
 #ifdef SKIP_ASM
-extern void* D_00487D78[];
+extern void* cAIVisualEffectsMan_vtbl[];
 extern void* D_004A3B80;
 
 /**
  * Constructs the base AI visual effects manager and makes it the current one.
  *
- * Clears +0x0, sets the vtable D_00487D78 at +0x4 and stores this in D_004A3B80.
+ * Clears +0x0, sets the vtable cAIVisualEffectsMan_vtbl at +0x4 and stores this in D_004A3B80.
  *
  * @return this
  */
 extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self)
 {
     *(int*)self = 0;
-    *(void***)((char*)self + 0x4) = D_00487D78;
+    *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
     D_004A3B80 = self;
     return self;
 }
@@ -1568,13 +1568,13 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self);
 extern "C" void cAvalanche_init(void* self);
 extern char str_Avalanche[];
-extern void* D_00487D50[];
+extern void* cPS2AIVisualEffectsMan_vtbl[];
 extern void* cAvalanche_vtbl[];
 
 /**
  * Constructs the PS2 AI visual effects manager with its avalanche effect.
  *
- * Runs cAIVisualEffectsMan_cAIVisualEffectsMan, sets the vtable D_00487D50 at +0x4, allocates the avalanche object ("Avalanche", 4 bytes), gives
+ * Runs cAIVisualEffectsMan_cAIVisualEffectsMan, sets the vtable cPS2AIVisualEffectsMan_vtbl at +0x4, allocates the avalanche object ("Avalanche", 4 bytes), gives
  * it cAvalanche_vtbl, runs cAvalanche_init on it and keeps it at +0x0.
  *
  * @return this
@@ -1582,7 +1582,7 @@ extern void* cAvalanche_vtbl[];
 extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self)
 {
     cAIVisualEffectsMan_cAIVisualEffectsMan(self);
-    *(void***)((char*)self + 0x4) = D_00487D50;
+    *(void***)((char*)self + 0x4) = cPS2AIVisualEffectsMan_vtbl;
     void** p = (void**)cMemMan_alloc(4, str_Avalanche, 0, 0);
     *p = cAvalanche_vtbl;
     cAvalanche_init(p);
@@ -1595,8 +1595,8 @@ extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self)
 INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_00487D50[];
-extern void* D_00487D78[];
+extern void* cPS2AIVisualEffectsMan_vtbl[];
+extern void* cAIVisualEffectsMan_vtbl[];
 
 class cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt {
 public:
@@ -1607,19 +1607,19 @@ public:
 /**
  * Destroys the PS2 AI visual effects manager and its avalanche effect.
  *
- * Restores D_00487D50, destroys the object at +0x0 (if any) through its virtual slot 1 with flag 3, switches to the
- * base vtable D_00487D78 and calls operator delete when bit 0 of @p flags is set.
+ * Restores cPS2AIVisualEffectsMan_vtbl, destroys the object at +0x0 (if any) through its virtual slot 1 with flag 3, switches to the
+ * base vtable cAIVisualEffectsMan_vtbl and calls operator delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
 extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00487D50;
+    *(void***)((char*)self + 0x4) = cPS2AIVisualEffectsMan_vtbl;
     cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt* o = *(cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt**)self;
     if (o != 0) {
         o->v01(3);
     }
-    *(void***)((char*)self + 0x4) = D_00487D78;
+    *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

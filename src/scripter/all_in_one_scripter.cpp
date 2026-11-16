@@ -279,11 +279,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002848A0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_48A0(void *) __asm__("cScriptObject__cScriptObject");
 extern char D_00482360[];
-extern char D_00482398[];
+extern char cScriptObjCameraManager_vtbl[];
 
 extern "C" void func_002848A0(void *arg0) {
     *(char **)((char*)arg0 + 0x10) = D_00482360;
-    *(char **)((char*)arg0 + 0xC) = D_00482398;
+    *(char **)((char*)arg0 + 0xC) = cScriptObjCameraManager_vtbl;
     cScriptObject__cScriptObject_48A0(arg0);
 }
 #endif
@@ -618,12 +618,12 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AE8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_4AE8(void *, int) __asm__("cScriptObject__cScriptObject");
 void operator_delete(int *);
-extern char D_00481FD8[];
+extern char cScriptObjRider_vtbl[];
 extern char D_00482018[];
 
 extern "C" void func_00284AE8(void *arg0, int arg1) {
     *(char **)((char*)arg0 + 0x18) = D_00482018;
-    *(char **)((char*)arg0 + 0x0) = D_00481FD8;
+    *(char **)((char*)arg0 + 0x0) = cScriptObjRider_vtbl;
     cScriptObject__cScriptObject_4AE8((char*)arg0 + 0xC, 0);
     if (arg1 & 1) {
         operator_delete((int *)arg0);

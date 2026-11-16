@@ -4,8 +4,8 @@
 // cPS2LightMan: the light manager (cLightMan::TheLightMan): an array of light instances, the first n static (from the
 // world's light records) followed by 50 dynamic slots handed out per frame. Size 0x14: [R] cLightMan_construct__Fv
 // (render/lightman) does cMemMan_alloc(0x14, "LightMan") + cPSPLightMan_cPSPLightMan__FP12cPSPLightMan (vtable
-// D_004936D8, stores TheLightMan), then stores D_00493650. Destructors cPS2LightMan__cPS2LightMan__FPv (slot 0) ->
-// cLightMan__cLightMan (restores D_004936D8, clears TheLightMan).
+// cLightMan_vtbl, stores TheLightMan), then stores D_00493650. Destructors cPS2LightMan__cPS2LightMan__FPv (slot 0) ->
+// cLightMan__cLightMan (restores cLightMan_vtbl, clears TheLightMan).
 // Bases: cLightMan (On Tour 0x4: vptr only) <- cPSPLightMan (retail class name kept from On Tour, render/ps2lightman)
 // <- cPS2LightMan. The vptr is at 0x0 because cLightMan has no data.
 // Methods (D_00493650, On Tour's cPSPLightMan order): 0 ~cPS2LightMan, 1 GetLightObj(i) func_00394C88__FPvi,
@@ -24,7 +24,7 @@ struct cLightInst;
 
 struct cPS2LightMan {
     // --- cLightMan
-    void** mVtbl;                    // 0x00 [R] D_004936D8 (cPSPLightMan ctor), D_00493650 (cLightMan_construct)
+    void** mVtbl;                    // 0x00 [R] cLightMan_vtbl (cPSPLightMan ctor), D_00493650 (cLightMan_construct)
     // --- cPSPLightMan
     cLightInst** m_pLights;          // 0x04 [O]; [R] Init: = new((n + 50) * 4); [U] GetLightObj returns &m_pLights[i];
                                      //      Purge frees it; CreateLights / Create* index it

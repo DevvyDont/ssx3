@@ -3710,7 +3710,7 @@ INCLUDE_ASM("sound/ssxAudio", cAsyncSys_cAsyncSys);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00483B10[];
+extern char cAsyncSys_vtbl[];
 extern char str_CircFIFOBuff[];
 extern void* D_004A3610;
 
@@ -3718,7 +3718,7 @@ extern void* D_004A3610;
  * Constructs the asynchronous sound-bank loader.
  *
  * Creates four circular FIFOs of 6 entries (each a 0x18-byte "CircFIFOBuff" buffer at +0x190, +0x1A0, +0x1B0, +0x1C0
- * with zeroed read/write indices), clears the other counters, installs the vtable D_00483B10 at +0x1D4 and stores
+ * with zeroed read/write indices), clears the other counters, installs the vtable cAsyncSys_vtbl at +0x1D4 and stores
  * itself in D_004A3610.
  *
  * @return this
@@ -3730,7 +3730,7 @@ extern "C" void* cAsyncSys_cAsyncSys(void* self)
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x194) = 0;
     *(int*)((char*)self + 0x198) = 0;
-    *(void**)((char*)self + 0x1D4) = D_00483B10;
+    *(void**)((char*)self + 0x1D4) = cAsyncSys_vtbl;
     *(void**)((char*)self + 0x190) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
     *(int*)((char*)self + 0x19C) = 6;
     *(int*)((char*)self + 0x1A4) = 0;
@@ -3757,7 +3757,7 @@ INCLUDE_ASM("sound/ssxAudio", cAsyncSys__cAsyncSys);
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(void*);
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern char D_00483B10[];
+extern char cAsyncSys_vtbl[];
 extern void* D_004A3610;
 
 struct sAudioSys_A148 {
@@ -3783,7 +3783,7 @@ struct sAudioSys_A148 {
  */
 extern "C" void cAsyncSys__cAsyncSys(sAudioSys_A148* self, int flags)
 {
-    self->vtbl = D_00483B10;
+    self->vtbl = cAsyncSys_vtbl;
     cAsyncSys_ASYNCSYS_DeInit(self);
     D_004A3610 = 0;
     if (self->buf1C0 != 0) {

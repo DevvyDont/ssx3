@@ -1088,12 +1088,12 @@ INCLUDE_ASM("replay/playbackman", cReplayFrame_cReplayFrame);
 #ifdef SKIP_ASM
 void* cReplayFramePtr_cReplayFramePtr(void* self);
 extern "C" void cReplayFrame_clearFrame(void* self);
-extern void* D_00481850[];
+extern void* cReplayFrame_vtbl[];
 
 /**
  * Constructs an empty replay frame.
  *
- * Runs the cReplayFramePtr base constructor, installs the cReplayFrame vtable D_00481850 and clears the frame
+ * Runs the cReplayFramePtr base constructor, installs the cReplayFrame vtable cReplayFrame_vtbl and clears the frame
  * (cReplayFrame_clearFrame). cReplay_cReplay builds its 16 Frames and cPlaybackMan_cPlaybackMan its saved frame (+0x14)
  * with it.
  *
@@ -1102,7 +1102,7 @@ extern void* D_00481850[];
 extern "C" void* cReplayFrame_cReplayFrame(void* self)
 {
     cReplayFramePtr_cReplayFramePtr(self);
-    *(void***)self = D_00481850;
+    *(void***)self = cReplayFrame_vtbl;
     cReplayFrame_clearFrame(self);
     return self;
 }

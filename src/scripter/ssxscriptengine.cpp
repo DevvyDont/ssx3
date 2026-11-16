@@ -3898,14 +3898,14 @@ struct sScrEngine_CDD0 {
     void* vtbl;                 // 0x2A8
 };
 
-extern char D_00482528[];
+extern char cScriptDatabaseObject_vtbl[];
 extern void* D_004A34DC;
 
 extern "C" void* func_0027CDD0(void* self_)
 {
     sScrEngine_CDD0* self = (sScrEngine_CDD0*)self_;
     int i;
-    self->vtbl = D_00482528;
+    self->vtbl = cScriptDatabaseObject_vtbl;
     D_004A34DC = self;
     for (i = 19; i >= 0; i--) {
         self->vars[i] = 0;
@@ -3926,13 +3926,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject__cScriptDatabaseOb
 #ifdef SKIP_ASM
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
 void operator_delete(int*);
-extern char D_00482528[];
+extern char cScriptDatabaseObject_vtbl[];
 extern void* D_004A34DC;
 
 /**
  * Destroys the script database: removes every registered object and clears the global database pointer.
  *
- * Restores the cScriptDatabaseObject vtable (D_00482528) at +0x2A8, calls cScriptDatabaseObject_RemoveObjectAll() and
+ * Restores the cScriptDatabaseObject vtable (cScriptDatabaseObject_vtbl) at +0x2A8, calls cScriptDatabaseObject_RemoveObjectAll() and
  * zeroes D_004A34DC (On Tour cScriptDatabaseObject::mpDatabaseObject, the object func_0027D2E8 returns), then frees the
  * object when asked. cBXScriptEngine__cBXScriptEngine chains to it.
  *
@@ -3940,7 +3940,7 @@ extern void* D_004A34DC;
  */
 extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(void* self, int flags)
 {
-    *(void**)((char*)self + 0x2A8) = D_00482528;
+    *(void**)((char*)self + 0x2A8) = cScriptDatabaseObject_vtbl;
     cScriptDatabaseObject_RemoveObjectAll(self);
     D_004A34DC = 0;
     if (flags & 1) {
@@ -4922,7 +4922,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_cScriptObjRider);
 #ifdef SKIP_ASM
 void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
-extern char D_00481FD8[];
+extern char cScriptObjRider_vtbl[];
 extern char D_00482018[];
 extern char t4mat_Identity[];
 
@@ -4930,7 +4930,7 @@ extern char t4mat_Identity[];
  * Constructs a rider's script object: a script entity plus a cScriptObject of type 3 with an identity base transform.
  *
  * Builds the cScriptEntity part (cScriptEntity_cScriptEntity) at +0x0 and the cScriptObject part at +0xC with type 3,
- * installs the vtables D_00481FD8 (+0x0) and D_00482018 (+0x18), clears the animation and sound bank infos (+0x1C,
+ * installs the vtables cScriptObjRider_vtbl (+0x0) and D_00482018 (+0x18), clears the animation and sound bank infos (+0x1C,
  * +0x20), copies t4mat_Identity into the base transform (+0x30) and zeroes the base rotations (+0x70..+0x78).
  * cRider_cRider builds the rider's embedded one with it.
  *
@@ -4943,7 +4943,7 @@ extern "C" void* cScriptObjRider_cScriptObjRider(void* self)
     cScriptEntity_cScriptEntity(self);
     cScriptObject_cScriptObject((char*)self + 0xC, 3);
     *(void**)((char*)self + 0x18) = D_00482018;
-    *(void**)((char*)self + 0x0) = D_00481FD8;
+    *(void**)((char*)self + 0x0) = cScriptObjRider_vtbl;
     *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x20) = 0;
     __asm__ __volatile__(
@@ -5867,7 +5867,7 @@ cScriptEngine_1018::cScriptEngine_1018() : cScriptObject_1018(0)
 
 // PORT: the retail names of the vtables g++ references here.
 __asm__("_vt$18cScriptEngine_1018$18cScriptEntity_1018 = D_00482360\n"
-        "_vt$18cScriptEngine_1018 = D_00482398\n");
+        "_vt$18cScriptEngine_1018 = cScriptObjCameraManager_vtbl\n");
 #endif
 
 //100%

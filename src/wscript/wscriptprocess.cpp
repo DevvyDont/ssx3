@@ -1303,14 +1303,14 @@ void func_0030B058(void* p);
 extern "C" void cCollectPool_init(void* p);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void cWScriptMan_init(void* self);
-extern char D_00489C00[];
+extern char cWScriptMan_vtbl[];
 // cWScriptMan_TheWScriptMan is declared `int` later in the unit; it holds the current process.
 extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan");
 
 /**
  * Constructs the world script manager.
  *
- * Sets +0x2C to -1, constructs the mission menu queue at +0x1C4, sets the vtable D_00489C00 at +0x494, constructs the
+ * Sets +0x2C to -1, constructs the mission menu queue at +0x1C4, sets the vtable cWScriptMan_vtbl at +0x494, constructs the
  * idle (+0x2B4), active (+0x2B8) and pending (+0x2BC) process lists and the collect pool at +0x2C0, stores this in
  * cWScriptMan_TheWScriptMan, takes cWorld_m_pTheWorld as its world (+0x28C), zeroes the 50 section table pointers at
  * +0x3CC and runs cWScriptMan_init.
@@ -1321,7 +1321,7 @@ extern "C" void* cWScriptMan_cWScriptMan(void* self)
 {
     *(unsigned int*)((char*)self + 0x2C) = 0xFFFFFFFF;
     tMissionMenuQueue_tMissionMenuQueue((char*)self + 0x1C4);
-    *(void**)((char*)self + 0x494) = D_00489C00;
+    *(void**)((char*)self + 0x494) = cWScriptMan_vtbl;
     func_0030B058((char*)self + 0x2B4);
     func_0030B058((char*)self + 0x2B8);
     func_0030B058((char*)self + 0x2BC);
@@ -1351,20 +1351,20 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan__cWScriptMan);
 extern "C" void cWScriptMan_purgeGlobalTables(void* self);
 extern "C" void cProcessList__cProcessList(void* self, int flags);
 void operator_delete(int* p);
-extern char D_00489C00[];
+extern char cWScriptMan_vtbl[];
 extern int cWScriptMan_TheWScriptMan;
 
 /**
  * Destroys the world script manager.
  *
- * Restores the vtable D_00489C00, runs cWScriptMan_purgeGlobalTables, clears cWScriptMan_TheWScriptMan, destroys the pending, active
+ * Restores the vtable cWScriptMan_vtbl, runs cWScriptMan_purgeGlobalTables, clears cWScriptMan_TheWScriptMan, destroys the pending, active
  * and idle process lists (cProcessList__cProcessList, flag 2) and calls operator delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
 extern "C" void cWScriptMan__cWScriptMan(void* self, int flags)
 {
-    *(void**)((char*)self + 0x494) = D_00489C00;
+    *(void**)((char*)self + 0x494) = cWScriptMan_vtbl;
     cWScriptMan_purgeGlobalTables(self);
     cWScriptMan_TheWScriptMan = 0;
     if ((char*)self + 0x2C0 != 0) {
