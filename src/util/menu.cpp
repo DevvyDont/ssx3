@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "util/menu.h"
 #include "main/game.h"
@@ -748,7 +749,6 @@ public:
 };
 
 // Typed view of the render context (the unit declares GrMan with another class later).
-extern func_002CB180_cCtx* D_004A289C_cb180 __asm__("GrMan");
 extern char t4mat_Identity[];
 
 static inline void func_002CB180_setF8_5(func_002CB180_sRS* rs, int v) { rs->f8_5 = v; }
@@ -759,18 +759,18 @@ static inline void func_002CB180_setF4_2(func_002CB180_sRS* rs, int v) { rs->f4_
 
 extern "C" void func_002CB180()
 {
-    func_002CB180_cCtx* ctx = D_004A289C_cb180;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    D_004A289C_cb180->v21();
-    D_004A289C_cb180->v31();
-    func_002CB180_setF8_5(D_004A289C_cb180->top, 0x11);
-    func_002CB180_setF4_23(D_004A289C_cb180->top, 2);
-    func_002CB180_setF4_20(D_004A289C_cb180->top, 3);
-    func_002CB180_setF4_12(D_004A289C_cb180->top, 0x14);
-    func_002CB180_setF4_2(D_004A289C_cb180->top, 5);
-    D_004A289C_cb180->v26(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    D_004A289C_cb180->v34(t4mat_Identity);
+    cPS2GraphicsMan* ctx = GrMan;
+    ((func_002CB180_cCtx*)ctx)->top[1] = ((func_002CB180_cCtx*)ctx)->top[0];
+    ((func_002CB180_cCtx*)ctx)->top++;
+    ((func_002CB180_cCtx*)GrMan)->v21();
+    ((func_002CB180_cCtx*)GrMan)->v31();
+    func_002CB180_setF8_5(((func_002CB180_cCtx*)GrMan)->top, 0x11);
+    func_002CB180_setF4_23(((func_002CB180_cCtx*)GrMan)->top, 2);
+    func_002CB180_setF4_20(((func_002CB180_cCtx*)GrMan)->top, 3);
+    func_002CB180_setF4_12(((func_002CB180_cCtx*)GrMan)->top, 0x14);
+    func_002CB180_setF4_2(((func_002CB180_cCtx*)GrMan)->top, 5);
+    ((func_002CB180_cCtx*)GrMan)->v26(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+    ((func_002CB180_cCtx*)GrMan)->v34(t4mat_Identity);
 }
 #endif
 
@@ -814,13 +814,12 @@ public:
     virtual void v32();
 };
 
-extern func_002CB2F8_cObj* GrMan;
 
 extern "C" void func_002CB2F8()
 {
-    GrMan->v32();
-    GrMan->v22();
-    *(int*)((char*)GrMan + 0xE84) = *(int*)((char*)GrMan + 0xE84) - 0x14;
+    ((func_002CB2F8_cObj*)GrMan)->v32();
+    ((func_002CB2F8_cObj*)GrMan)->v22();
+    *(int*)&GrMan->m_pCurrentDrawState = (int)GrMan->m_pCurrentDrawState - 0x14;
 }
 #endif
 
@@ -916,7 +915,6 @@ public:
 };
 
 // Typed view of the render context (the unit declares GrMan with another class later).
-extern func_002CB350_cCtx* D_004A289C_cb350 __asm__("GrMan");
 
 extern "C" void func_002CB350(func_002CB350_sVtx* v, float* r, float* t)
 {
@@ -932,7 +930,7 @@ extern "C" void func_002CB350(func_002CB350_sVtx* v, float* r, float* t)
     v[3].pos = func_002CB350_sVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
     v[3].u = t[0] + t[2];
     v[3].v = t[1] + t[3];
-    D_004A289C_cb350->v71(4, v, 0);
+    ((func_002CB350_cCtx*)GrMan)->v71(4, v, 0);
 }
 #endif
 
@@ -964,7 +962,6 @@ public:
     sRS_2CB498* top;
 };
 
-extern cCtx_2CB498* D_004A289C_cb498 __asm__("GrMan");
 
 static inline int func_002CB498_getF8_5(sRS_2CB498* rs)
 {
@@ -988,11 +985,11 @@ extern "C" void func_002CB498(void* self, float* rect, func_002CA988_sColor* col
         v[i].b = (int)(col->b * 128.0f);
         v[i].q = 1.0f;
     }
-    int old = func_002CB498_getF8_5(D_004A289C_cb498->top);
-    func_002CB498_setF8_5(D_004A289C_cb498->top, old - 2);
-    D_004A289C_cb498->top->f4_2 = 5;
+    int old = func_002CB498_getF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState));
+    func_002CB498_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old - 2);
+    ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f4_2 = 5;
     int id = *(int*)(*(char**)((char*)self + 0x124) + 0x60);
-    D_004A289C_cb498->top->f10 = id;
+    ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f10 = id;
     float r[4];
     float t[4];
     float left = rect[0] + 5.0f;
@@ -1028,7 +1025,7 @@ extern "C" void func_002CB498(void* self, float* rect, func_002CA988_sColor* col
     r[0] = left; r[1] = top; r[2] = w; r[3] = h;
     t[0] = 0.25f; t[1] = 0.25f; t[2] = 0.5f; t[3] = 0.5f;
     func_002CB350((func_002CB350_sVtx*)v, r, t);
-    func_002CB498_setF8_5(D_004A289C_cb498->top, old);
+    func_002CB498_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old);
 }
 #endif
 
@@ -1160,14 +1157,13 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CB8C8* D_004A289C_cb8c8 __asm__("GrMan");
 
 extern "C" void func_002CB8C8(void* self, float* rect)
 {
     sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
     vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
-    *(short*)((char*)D_004A289C_cb8c8->top + 0x10) = -1;
-    D_004A289C_cb8c8->top->f4_2 = 1;
+    *(short*)((char*)((cCtx_2CB8C8*)GrMan)->top + 0x10) = -1;
+    ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
     sVtx_2CB8C8 v[6];
     int i;
     for (i = 0; i < 6; i++) {
@@ -1197,7 +1193,7 @@ extern "C" void func_002CB8C8(void* self, float* rect)
     v[4].pos = p;
     p.x = right; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
     v[5].pos = p;
-    D_004A289C_cb8c8->v71(6, v, 0);
+    ((cCtx_2CB8C8*)GrMan)->v71(6, v, 0);
 }
 #endif
 
@@ -1307,14 +1303,13 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CBAC8* D_004A289C_cbac8 __asm__("GrMan");
 
 extern "C" void func_002CBAC8(void* self, float* rect)
 {
     sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
     vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
-    *(short*)((char*)D_004A289C_cbac8->top + 0x10) = -1;
-    D_004A289C_cbac8->top->f4_2 = 1;
+    *(short*)((char*)((cCtx_2CBAC8*)GrMan)->top + 0x10) = -1;
+    ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
     sVtx_2CBAC8 v[6];
     int i;
     for (i = 0; i < 6; i++) {
@@ -1344,7 +1339,7 @@ extern "C" void func_002CBAC8(void* self, float* rect)
     v[4].pos = p;
     p.x = right; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
     v[5].pos = p;
-    D_004A289C_cbac8->v71(6, v, 0);
+    ((cCtx_2CBAC8*)GrMan)->v71(6, v, 0);
 }
 #endif
 
@@ -3709,7 +3704,6 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CE910* D_004A289C_ce910 __asm__("GrMan");
 
 extern "C" void func_002CE910(void* self, float* rect)
 {
@@ -3775,9 +3769,9 @@ extern "C" void func_002CE910(void* self, float* rect)
         p.Set(x2, y2, zero, one);
         v[3] = v[0];
         v[3].pos = p;
-        D_004A289C_ce910->top->f4_2 = 1;
-        *(short*)((char*)D_004A289C_ce910->top + 0x10) = -1;
-        D_004A289C_ce910->v71(4, v, 0);
+        ((cCtx_2CE910*)GrMan)->top->f4_2 = 1;
+        *(short*)((char*)((cCtx_2CE910*)GrMan)->top + 0x10) = -1;
+        ((cCtx_2CE910*)GrMan)->v71(4, v, 0);
     }
     *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(0.0f, 0.0f);
 }
@@ -4049,7 +4043,6 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CF1C8* D_004A289C_cf1c8 __asm__("GrMan");
 
 extern "C" void cColorMenuItem_render(void* self, float* rect)
 {
@@ -4129,12 +4122,12 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     p.Set(r.x + r.w, r.y + r.h, zero, one);
     v[3].pos = p;
     if ((*(float**)((char*)self + 0x14))[0] != 1.0f) {
-        D_004A289C_cf1c8->top->f4_2 = 5;
+        ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 5;
     } else {
-        D_004A289C_cf1c8->top->f4_2 = 1;
+        ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
     }
-    *(short*)((char*)D_004A289C_cf1c8->top + 0x10) = -1;
-    D_004A289C_cf1c8->v71(4, v, 0);
+    *(short*)((char*)((cCtx_2CF1C8*)GrMan)->top + 0x10) = -1;
+    ((cCtx_2CF1C8*)GrMan)->v71(4, v, 0);
 
     float mx = r.x + r.w * *(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2));
     v[0].r = (int)(c.r * 128.0f);
@@ -4152,7 +4145,7 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     v[2].b = (int)(c.b * 128.0f);
     p.x = mx + 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
     v[2].pos = p;
-    D_004A289C_cf1c8->v71(3, v, 0);
+    ((cCtx_2CF1C8*)GrMan)->v71(3, v, 0);
 }
 #endif
 
@@ -4757,7 +4750,6 @@ public:
     virtual void v71(int prim, void* verts, int n);
 };
 
-extern cCtx_2D0008* D_004A289C_2d0008 __asm__("GrMan");
 
 // PORT: rect pointer passed through func_002CA988's int parameter
 extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
@@ -4807,12 +4799,12 @@ extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
     v[3].q = one;
     *(sVec4_2D0008*)v[3].pos = sVec4_2D0008(x2, y2, zero, one);
     if (c->a != 1.0f) {
-        D_004A289C_2d0008->top->f4_2 = 5;
+        ((cCtx_2D0008*)GrMan)->top->f4_2 = 5;
     } else {
-        D_004A289C_2d0008->top->f4_2 = 1;
+        ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
     }
-    *(short*)((char*)D_004A289C_2d0008->top + 0x10) = -1;
-    D_004A289C_2d0008->v71(4, v, 0);
+    *(short*)((char*)((cCtx_2D0008*)GrMan)->top + 0x10) = -1;
+    ((cCtx_2D0008*)GrMan)->v71(4, v, 0);
 }
 #endif
 
@@ -5350,7 +5342,6 @@ public:
     virtual void v73(int n, void* verts, int flags);
 };
 
-extern cRenderCtx* D_004A289C_0EF8 __asm__("GrMan");
 
 // 16-byte vector for the menu's vertices (built with the constructor or with Set).
 struct sVec4 {
@@ -5419,7 +5410,6 @@ extern sColor D_004D53D0;
 extern sColor D_004D53E0;
 // The focused-row style passed to the menu's frame draw is the line colour of the graph's axis.
 extern sColor D_004D5380_c __asm__("D_004D5380");
-extern cRenderCtx* cGraphicsMan_TheGraphicsMan;
 
 // The font scale (font + 0x28), built from references like sVec4_2D0008: with the unit's by-value sVec2 the
 // second store keeps the temporary's address in a register (the target stores both straight to the frame).
@@ -5488,7 +5478,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
     gr.h = h;
     gr.y = rect[1] + (rect[3] - h) * 0.5f;
     gr.x = rect[0] + rect[2] - 16.0f - gr.w;
-    int old = GetDepth_D0EF8(D_004A289C_0EF8->top);
+    int old = GetDepth_D0EF8(((cRenderCtx*)GrMan)->top);
     sVtxF v[4];
     int i;
     for (i = 0; i < 4; i++) {
@@ -5498,7 +5488,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
         v[i].b = (int)(D_004D53C0.b * 128.0f);
         v[i].q = 1.0f;
     }
-    D_004A289C_0EF8->top->f10 = -1;
+    ((cRenderCtx*)GrMan)->top->f10 = -1;
     {
         float t[4];
         t[0] = 0.0f;
@@ -5512,7 +5502,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
     float ox = gr.x - self->minX * sx;
     float oy = gr.y - self->minY * sy;
     if ((self->maxY >= 0.0f) != (self->minY > 0.0f)) {
-        SetDepth_D0EF8(D_004A289C_0EF8->top, old, 1);
+        SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 1);
         for (i = 0; i < 2; i++) {
             v[i].a = (int)(D_004D5380_c.a * 128.0f);
             v[i].r = (int)(D_004D5380_c.r * 128.0f);
@@ -5530,9 +5520,9 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
         p.z = 0.0f;
         p.w = 1.0f;
         *(sVec4*)v[1].pos = p;
-        cGraphicsMan_TheGraphicsMan->v73(2, v, 0);
+        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, v, 0);
     }
-    SetDepth_D0EF8(D_004A289C_0EF8->top, old, 2);
+    SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 2);
     for (i = 0; i < 2; i++) {
         v[i].a = (int)(D_004D53D0.a * 128.0f);
         v[i].r = (int)(D_004D53D0.r * 128.0f);
@@ -5555,10 +5545,10 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
         p.z = 0.0f;
         p.w = 1.0f;
         *(sVec4*)v[1].pos = p;
-        cGraphicsMan_TheGraphicsMan->v73(2, v, 0);
+        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, v, 0);
     }
     if (self->showCur) {
-        SetDepth_D0EF8(D_004A289C_0EF8->top, old, 3);
+        SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 3);
         for (i = 0; i < 4; i++) {
             v[i].a = (int)(D_004D53E0.a * 128.0f);
             v[i].r = (int)(D_004D53E0.r * 128.0f);
@@ -5580,7 +5570,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
         func_002CB350_0EF8((func_002CB350_sVtx*)v, r, tt);
     }
     // Restore the depth the item started with.
-    D_004A289C_0EF8->top->f8 = (D_004A289C_0EF8->top->f8 & ~0x3E0) | ((old << 5) & 0x3E0);
+    ((cRenderCtx*)GrMan)->top->f8 = (((cRenderCtx*)GrMan)->top->f8 & ~0x3E0) | ((old << 5) & 0x3E0);
 }
 #endif
 

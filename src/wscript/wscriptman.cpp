@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "world/world.h"
 #include "main/game.h"
@@ -3642,12 +3643,11 @@ struct sWSMan_D540 {
     sWSRec_D540* f130;          // 0x130
 };
 
-extern sWSGfx_D540* cGraphicsMan_TheGraphicsMan;
 
 // render context singleton (cGraphicsMan_TheGraphicsMan) accessor
 static inline sWSGfx_D540* GetGfx_D540()
 {
-    return cGraphicsMan_TheGraphicsMan;
+    return (sWSGfx_D540*)cGraphicsMan_TheGraphicsMan;
 }
 
 extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)

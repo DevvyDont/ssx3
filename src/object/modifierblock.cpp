@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 struct sBoundBoxTarget {
     char pad_0x00[0x68];
@@ -979,7 +980,6 @@ struct sCtx_53B10 {
     sVE_53B10* vtable;          // 0x10D8
 };
 
-extern sCtx_53B10* D_004A5B80_53B10 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrix_53B10(sMat_53B10* dst, void* src)
@@ -1007,34 +1007,34 @@ extern "C" void cSkyBox_render(void* self)
 {
     if (D_004A452C != 0)
         return;
-    sCtx_53B10* ctx = D_004A5B80_53B10;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (*(void**)((char*)self + 0x14) == 0)
         return;
     sMat_53B10 m;
     vu0CopyMatrix_53B10(&m, t4mat_Identity);
     sVec4_53B10 pos = *(sVec4_53B10*)func_002D1C20(func_002D1C58_i());
     *(sVec4_53B10*)&m.m[12] = pos;
-    ctx->top[1] = ctx->top[0];
-    sRS_53B10* t = ctx->top;
-    ctx->top = t + 1;
+    ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = ((sRS_53B10*)ctx->m_pCurrentDrawState)[0];
+    sRS_53B10* t = (sRS_53B10*)ctx->m_pCurrentDrawState;
+    *(sRS_53B10**)&ctx->m_pCurrentDrawState = t + 1;
     int f8 = t[1].f8;
     t[1].f8 = f8 & ~0x3E0;
     int old = (unsigned int)(f8 & 0x3E0) >> 5;
-    ctx->top->f0b = 3;
-    SetZOn_53B10(ctx->top, 1);
-    SetBlendM_53B10(ctx->top, 2);
-    SetZMode_53B10(ctx->top, 0);
-    SetAlpha_53B10(ctx->top, 0x14);
+    ((sRS_53B10*)ctx->m_pCurrentDrawState)->f0b = 3;
+    SetZOn_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 1);
+    SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
+    SetZMode_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0);
+    SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0x14);
     char* o = *(char**)((char*)self + 0x14);
     if (o != 0)
     {
         *(unsigned int*)(o + 8) = (*(unsigned int*)(o + 8) & ~2u) | 4;
         char* o2 = *(char**)((char*)self + 0x14);
-        sVE_53B10* vt = ctx->vtable;
+        sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
         vt[95].fn((char*)ctx + vt[95].delta, o2, 1.0f, *(void**)(*(char**)(o2 + 0x80) + 0xC), &m, 0, 0, 0x5420);
     }
-    sRS_53B10* t2 = ctx->top;
-    ctx->top = t2 - 1;
+    sRS_53B10* t2 = (sRS_53B10*)ctx->m_pCurrentDrawState;
+    *(sRS_53B10**)&ctx->m_pCurrentDrawState = t2 - 1;
     int* pf = (int*)((char*)t2 - 0xC);
     *pf = (*pf & ~0x3E0) | (old << 5);
 }

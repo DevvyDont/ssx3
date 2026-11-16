@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
@@ -546,7 +547,7 @@ done:
 INCLUDE_ASM("visualfx/boardwakefx", func_002DDAB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char* GrMan;
+extern char* GrMan_boardwakefx __asm__("GrMan");
 extern int D_004A4528;
 
 struct sGs_DAB8 {
@@ -696,18 +697,18 @@ extern "C" void func_002DDAB8(sWake_DAB8* self)
 {
     if (D_004A4528 != 0 || self->count == 0)
         return;
-    ((cGfx_DAB8*)GrMan)->PushState();
-    *((cGfx_DAB8*)GrMan)->stateTop = D_00501420_DAB8;
-    *(short*)(*(char**)(GrMan + 0xE84) + 0x10) = ((cGfx_DAB8*)GrMan)->Get1030();
-    ((cGfx_DAB8*)GrMan)->stateTop->f0_2 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->SetF22(1);
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_23 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_12 = 0x14;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_0 = 2;
-    ((cGfx_DAB8*)GrMan)->stateTop->f8_10 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->f8_5 = 7;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_2 = 5;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
+    *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = D_00501420_DAB8;
+    *(short*)(*(char**)(GrMan_boardwakefx + 0xE84) + 0x10) = ((cGfx_DAB8*)GrMan_boardwakefx)->Get1030();
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_20 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_12 = 0x14;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_0 = 2;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_10 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_5 = 7;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_2 = 5;
     float k = 1.25f;
     int draw = self->count;
     int n = draw;
@@ -721,8 +722,8 @@ extern "C" void func_002DDAB8(sWake_DAB8* self)
         a = t * k;
     float da = (a - k) / (float)n;
     if (draw >= 2)
-        ((cGfx_DAB8*)GrMan)->DrawStrip(self->verts10, self->tex, self->first, self->max, draw, k, da);
-    ((cGfx_DAB8*)GrMan)->stateTop--;
+        ((cGfx_DAB8*)GrMan_boardwakefx)->DrawStrip(self->verts10, self->tex, self->first, self->max, draw, k, da);
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop--;
 }
 #endif
 
@@ -3698,7 +3699,7 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2B00);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sV3c_2B00 {
     float x, y, z;
@@ -3745,7 +3746,7 @@ extern "C" void func_002E2B00(void* vself, void* vrect)
 {
     sWake_2B00* self = (sWake_2B00*)vself;
     float* rect = (float*)vrect;
-    char* obj = cGraphicsMan_TheGraphicsMan;
+    char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
     t4Vector pos;
     pos.x = self->part->pos.x;
     pos.y = self->part->pos.y;
@@ -3830,7 +3831,7 @@ struct sWakeMgr2E18 {
 };
 
 extern void* cLensFxMan_vtbl[];
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A3B18;
 void* func_002E2860(void* self);
 void func_002E3110(void* self);
@@ -3880,7 +3881,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
         }
     }
     {
-        char* obj = cGraphicsMan_TheGraphicsMan;
+        char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry2E18* e = &(*(sBWVEntry2E18**)(obj + 0x10D8))[117];
         e->fn(obj + e->delta, (void*)func_002E3110, self);
     }
@@ -3951,13 +3952,13 @@ struct sBWVEntry2 {
 };
 
 extern void* cLensFxMan_vtbl[];
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A3B18;
 void operator_delete(int* p);
 
 extern "C" void func_002E3060(void* self, int flags)
 {
-    char* obj = cGraphicsMan_TheGraphicsMan;
+    char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
     *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
     sBWVEntry2* e = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
     e->fn(obj + e->delta, 0, 0);
@@ -4130,7 +4131,7 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
 extern "C" void func_002E3338(void* vself, int idx)
 {
     sWkFx3338* self = (sWkFx3338*)vself;
-    char* ctx = cGraphicsMan_TheGraphicsMan;
+    char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
     sWkRect3338 r;
     {
         sWkVtR3338* vt = *(sWkVtR3338**)(ctx + 0x10D8);
@@ -4228,7 +4229,7 @@ struct sWakeRCtx {
     sWakeRState* top;
 };
 
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern sWakeRState D_00501420;
 
 static inline void setA22_3578(sWakeRCtx* c, int v) { c->top->a22 = v; }
@@ -4239,7 +4240,7 @@ static inline void setB5_3578(sWakeRCtx* c, int v) { c->top->b5 = v; }
 
 extern "C" void func_002E3578(void)
 {
-    sWakeRCtx* ctx = (sWakeRCtx*)cGraphicsMan_TheGraphicsMan;
+    sWakeRCtx* ctx = (sWakeRCtx*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *ctx->top = D_00501420;
@@ -4254,11 +4255,11 @@ extern "C" void func_002E3578(void)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3668);
 #ifdef SKIP_ASM
-extern char* GrMan;
+extern char* GrMan_boardwakefx __asm__("GrMan");
 
 extern "C" void func_002E3668(void)
 {
-    *(char**)(GrMan + 0xE84) -= 0x14;
+    *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
 }
 #endif
 
@@ -4630,13 +4631,13 @@ extern "C" void func_002E3AF8(sWake_3AF8* self)
         return;
     }
     {
-        sRCtx_3AF8* c = (sRCtx_3AF8*)GrMan;
+        sRCtx_3AF8* c = (sRCtx_3AF8*)GrMan_boardwakefx;
         c->top[1] = c->top[0];
         c->top++;
     }
-    *((sRCtx_3AF8*)GrMan)->top = D_00501420_3AF8;
+    *((sRCtx_3AF8*)GrMan_boardwakefx)->top = D_00501420_3AF8;
     {
-        sRCtx_3AF8* c = (sRCtx_3AF8*)GrMan;
+        sRCtx_3AF8* c = (sRCtx_3AF8*)GrMan_boardwakefx;
         rsSetA_3AF8(c, 0x400000, 22, 1);
         rsSetA_3AF8(c, 0x7C, 2, 7);
         rsSetA_3AF8(c, 0x3, 0, 2);
@@ -4644,7 +4645,7 @@ extern "C" void func_002E3AF8(sWake_3AF8* self)
         rsSetB_3AF8(c, 0x3E0, 5, 7);
         *(short*)((char*)c->top + 0x10) = rsTex_3AF8(c);
     }
-    float* m = ((sRCtx_3AF8*)GrMan)->v35();
+    float* m = ((sRCtx_3AF8*)GrMan_boardwakefx)->v35();
     t4Vector side;
     Set4_3AF8(side, m[0], m[4], m[8], 0.0f);
     t4Vector up;
@@ -4749,8 +4750,8 @@ extern "C" void func_002E3AF8(sWake_3AF8* self)
         v[7].s = 1.0f;
         v[7].t = 0.0f;
     }
-    ((sRCtx_3AF8*)GrMan)->v71(8, v, 0);
-    *(char**)(GrMan + 0xE84) -= 0x14;
+    ((sRCtx_3AF8*)GrMan_boardwakefx)->v71(8, v, 0);
+    *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
 }
 #endif
 
@@ -4798,7 +4799,7 @@ struct sBWVEntry1 {
     void (*fn)(void*, void*);
 };
 
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_002E4578(void* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
@@ -4811,7 +4812,7 @@ extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
     char* m = (char*)self + 0x10;
     func_002E4578(self);
     if (*(int*)((char*)self + 0x7C) != 0) {
-        char* obj = cGraphicsMan_TheGraphicsMan;
+        char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry1* e = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
         e->fn(obj + e->delta, (char*)self + 0x68);
         *(int*)((char*)self + 0x7C) = 0;
@@ -4837,7 +4838,7 @@ struct sBWVEntryI4370 {
     void (*fn)(void*, int);
 };
 
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_002E4578(void* self);
 
 // PORT: later callers declare this as void (and an int alias); the body returns int.
@@ -4856,7 +4857,7 @@ extern "C" int func_002E4370_def(void* self, int a1, void* o1, void* o2, float f
         }
         char* ref = (char*)self + 0x68;
         if (~*(int*)((char*)self + 0x6C) == 0) {
-            char* obj = cGraphicsMan_TheGraphicsMan;
+            char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             sBWVEntry4370* e = &(*(sBWVEntry4370**)(obj + 0x10D8))[59];
             e->fn(obj + e->delta, ref, 0x100, 0x100);
             if (~*(int*)((char*)self + 0x6C) == 0) {
@@ -4941,7 +4942,7 @@ struct sBWVEntryR_4578 {
     int (*fn)(void*);
 };
 
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void func_002E4578(void* self)
 {
@@ -4962,7 +4963,7 @@ extern "C" void func_002E4578(void* self)
         *(char**)((char*)self + 0x50) = 0;
         *(int*)((char*)self + 0x70) = 0;
         if (~*(int*)((char*)self + 0x6C) != 0) {
-            char* obj = cGraphicsMan_TheGraphicsMan;
+            char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             *(int*)((char*)self + 0x7C) = 1;
             sBWVEntryR_4578* e = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[0x72];
             *(int*)((char*)self + 0x80) = e->fn(obj + e->delta);
@@ -5013,7 +5014,7 @@ extern "C" float func_002E4678(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_update);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern char* D_004A5B64;
 
 struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
@@ -5021,7 +5022,7 @@ struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
 
 extern "C" void cTransitionMan_update(char* self)
 {
-    char* ctx = cGraphicsMan_TheGraphicsMan;
+    char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (*(int*)(self + 0x7C) != 0) {
         sWkVtA46C8* vt = *(sWkVtA46C8**)(ctx + 0x10D8);
         if (vt[114].fn(ctx + vt[114].delta) - *(int*)(self + 0x80) >= 3) {
@@ -5048,7 +5049,7 @@ extern "C" void cTransitionMan_update(char* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_render);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
+extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_002EB8F0(void);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
 void cWorldPainterMan_reset_47E8() __asm__("cWorldPainterMan_reset__FPv");
@@ -5136,7 +5137,7 @@ extern "C" void cTransitionMan_render(sFade47E8* self)
         return;
     }
     func_002EB8F0();
-    sRsCtx47E8* ctx = (sRsCtx47E8*)cGraphicsMan_TheGraphicsMan;
+    sRsCtx47E8* ctx = (sRsCtx47E8*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->active == 0) {
         return;
     }
@@ -5665,7 +5666,7 @@ extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* d)
 INCLUDE_ASM("visualfx/boardwakefx", func_002E55D8);
 #ifdef SKIP_ASM
 struct sMat_6008;
-extern char* GrMan;
+extern char* GrMan_boardwakefx __asm__("GrMan");
 
 struct sVec55D8 {
     float x, y, z, w;
@@ -5910,13 +5911,13 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
     wakeSubV55D8(info.pos, v);
     switch (self->type) {
     case 0: {
-        sVt55D8* vt = *(sVt55D8**)(GrMan + 0x10D8);
-        vt[85].fn(GrMan + vt[85].delta, &info);
+        sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
+        vt[85].fn(GrMan_boardwakefx + vt[85].delta, &info);
         break;
     }
     case 1: {
-        sVt55D8* vt = *(sVt55D8**)(GrMan + 0x10D8);
-        vt[86].fn(GrMan + vt[86].delta, &info);
+        sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
+        vt[86].fn(GrMan_boardwakefx + vt[86].delta, &info);
         break;
     }
     }
@@ -6321,7 +6322,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
 cVbDtor002E64C0::~cVbDtor002E64C0()
 {
     if (m3AC != 0) cMemMan_free(m3AC);
-    func_0037C720(GrMan, 0.0f);
+    func_0037C720(GrMan_boardwakefx, 0.0f);
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002E64C0; expose it under the address-derived name.
@@ -7117,7 +7118,7 @@ struct sGfxTex_7A10 {
 
 static inline int texId_7A10(int i)
 {
-    return ((sGfxTex_7A10*)GrMan)->tex[i];
+    return ((sGfxTex_7A10*)GrMan_boardwakefx)->tex[i];
 }
 
 // Bone position (row 3 of the rider's bone matrix unk_89C).
@@ -7146,18 +7147,18 @@ extern "C" void func_002E7A10(sBoardWake_7A10* self)
 {
     if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
         return;
-    ((cGfx_DAB8*)GrMan)->PushState();
-    *((cGfx_DAB8*)GrMan)->stateTop = D_00501420_DAB8;
-    *(short*)(*(char**)(GrMan + 0xE84) + 0x10) = texId_7A10(self->tex);
-    ((cGfx_DAB8*)GrMan)->stateTop->f0_2 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->SetF22(1);
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_23 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_12 = 0x14;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_0 = 2;
-    ((cGfx_DAB8*)GrMan)->stateTop->f8_10 = 0;
-    ((cGfx_DAB8*)GrMan)->stateTop->f8_5 = 7;
-    ((cGfx_DAB8*)GrMan)->stateTop->f4_2 = 7;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
+    *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = D_00501420_DAB8;
+    *(short*)(*(char**)(GrMan_boardwakefx + 0xE84) + 0x10) = texId_7A10(self->tex);
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_20 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_12 = 0x14;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_0 = 2;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_10 = 0;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_5 = 7;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_2 = 7;
     {
         sWakeVtx_7A10 left[42];
         sWakeVtx_7A10 right[42];
@@ -7197,12 +7198,12 @@ extern "C" void func_002E7A10(sBoardWake_7A10* self)
             v += dv;
         }
         if (n >= 4) {
-            ((cGfx_7A10*)GrMan)->DrawRibbon(n, left, 0);
-            ((cGfx_7A10*)GrMan)->DrawRibbon(n, right, 0);
+            ((cGfx_7A10*)GrMan_boardwakefx)->DrawRibbon(n, left, 0);
+            ((cGfx_7A10*)GrMan_boardwakefx)->DrawRibbon(n, right, 0);
         }
     }
     if (self->nsegs >= 2) {
-        char* gfx = cGraphicsMan_TheGraphicsMan;
+        char* gfx = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sWakeVtx_7A10* p = (sWakeVtx_7A10*)func_0037A260(gfx, self->nsegs * 2);
         // PORT: g++ minimum operator (<?).
         float len = self->f4 <? self->f18;
@@ -7230,7 +7231,7 @@ extern "C" void func_002E7A10(sBoardWake_7A10* self)
         }
         func_0037A430(gfx);
     }
-    ((cGfx_DAB8*)GrMan)->stateTop--;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop--;
 }
 #endif
 

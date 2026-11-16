@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -87,14 +88,12 @@ static inline int tex_1D10(sRCtx_1D10* c, int i)
     return c->texs[i];
 }
 
-extern sRCtx_1D10* GrMan;
-extern sRCtx_1D10* cGraphicsMan_TheGraphicsMan;
 extern sRState_1D10 D_00501420;
 
 extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float angle)
 {
-    sRCtx_1D10* g = GrMan;
-    if (((IsHiddenFn_1D10)g->vt[91].fn)((char*)g + g->vt[91].delta, obj) != 0) {
+    cPS2GraphicsMan* g = GrMan;
+    if (((IsHiddenFn_1D10)((sVE_1D10*)g->mVtbl)[91].fn)((char*)g + ((sVE_1D10*)g->mVtbl)[91].delta, obj) != 0) {
         return;
     }
     sCol_1D10 col;
@@ -102,28 +101,28 @@ extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float
     col.r = src[0];
     col.g = src[1];
     col.b = src[2];
-    sRCtx_1D10* ctx = cGraphicsMan_TheGraphicsMan;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    *ctx->top = D_00501420;
-    setA_1D10(ctx->top, 1, 1, 22);
-    setA_1D10(ctx->top, 0, 3, 0);
-    setB_1D10(ctx->top, 0, 0x7FFFF, 10);
-    setA_1D10(ctx->top, 7, 0x1F, 2);
-    setB_1D10(ctx->top, 8, 0x1F, 5);
-    setA_1D10(ctx->top, 1, 3, 23);
-    setA_1D10(ctx->top, 0, 3, 20);
-    setA_1D10(ctx->top, 0x14, 0xFF, 12);
-    ctx->top->f10 = tex_1D10(ctx, kind + 0x25);
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
+    ((sRState_1D10*)ctx->m_pCurrentDrawState)[1] = ((sRState_1D10*)ctx->m_pCurrentDrawState)[0];
+    (*(sRState_1D10**)&ctx->m_pCurrentDrawState)++;
+    *((sRState_1D10*)ctx->m_pCurrentDrawState) = D_00501420;
+    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 1, 1, 22);
+    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0, 3, 0);
+    setB_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0, 0x7FFFF, 10);
+    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 7, 0x1F, 2);
+    setB_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 8, 0x1F, 5);
+    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 1, 3, 23);
+    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0, 3, 20);
+    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0x14, 0xFF, 12);
+    ((sRState_1D10*)ctx->m_pCurrentDrawState)->f10 = tex_1D10((sRCtx_1D10*)ctx, kind + 0x25);
     if (angle != 0.0f) {
-        ((DrawRotFn_1D10)ctx->vt[79].fn)((char*)ctx + ctx->vt[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+        ((DrawRotFn_1D10)((sVE_1D10*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         if (kind == 1 || kind == 4) {
-            ((DrawRotFn_1D10)ctx->vt[79].fn)((char*)ctx + ctx->vt[79].delta, -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+            ((DrawRotFn_1D10)((sVE_1D10*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[79].delta, -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         }
     } else {
-        ((DrawFn_1D10)ctx->vt[78].fn)((char*)ctx + ctx->vt[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
+        ((DrawFn_1D10)((sVE_1D10*)ctx->mVtbl)[78].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
     }
-    ctx->top--;
+    (*(sRState_1D10**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
 

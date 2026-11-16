@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -282,7 +283,6 @@ extern "C" void func_0019EC68(void* p)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019ED80);
 #ifdef SKIP_ASM
-extern void* GrMan;
 void func_00369890(void* self, int a1, int a2);
 extern "C" void func_00369690(void* self, int count, void* src);
 extern "C" void cAnimModel_compile(void* self, int a1);
@@ -341,7 +341,6 @@ extern "C" void func_0019ED80(sFERiderED80* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 #ifdef SKIP_ASM
-extern void* GrMan;
 extern char D_005047F8[];
 extern char D_00504810[];
 extern char D_004A1620[];
@@ -464,17 +463,17 @@ extern "C" void func_0019EE88(void* selfp)
     pos = self->model->bones[idx * 2];
     func_00389CB8(&m, &pos, 1.0f);
     {
-        char* o = (char*)GrMan;
-        sVE_EE88* vt = *(sVE_EE88**)(o + 0x10D8);
-        vt[69].fn(o + vt[69].delta, &m, 1);
+        cPS2GraphicsMan* o = GrMan;
+        sVE_EE88* vt = (sVE_EE88*)o->mVtbl;
+        vt[69].fn((char*)o + vt[69].delta, &m, 1);
     }
-    int* fl = (int*)(*(char**)((char*)GrMan + 0xE84) + 8);
+    int* fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
     if (self->layer >= 0)
         *fl = (*fl & ~0x3E0) | ((self->layer << 5) & 0x3E0);
     func_00310640(self->model, 0, 0, 0);
     func_002F2088(self->fC70);
-    fl = (int*)(*(char**)((char*)GrMan + 0xE84) + 8);
+    fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *fl = (*fl & ~0x3E0) | (old << 5);
 }
 #endif
@@ -482,7 +481,6 @@ extern "C" void func_0019EE88(void* selfp)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feridermanager", func_0019F138);
 #ifdef SKIP_ASM
-extern void* GrMan;
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int func_001A0100(int* self);
 extern "C" int func_0019FD58(int* self);
@@ -525,9 +523,9 @@ extern "C" void func_0019F138(void* selfp)
 {
     sFERiderF138* self = (sFERiderF138*)selfp;
     if (self->pending >= 0) {
-        char* g = (char*)GrMan;
-        sVEF138* vt = *(sVEF138**)(g + 0x10D8);
-        if (self->pending < vt[114].fn(g + vt[114].delta)) {
+        cPS2GraphicsMan* g = GrMan;
+        sVEF138* vt = (sVEF138*)g->mVtbl;
+        if (self->pending < vt[114].fn((char*)g + vt[114].delta)) {
             self->pending = -1;
             cFERider_init(self, self->f4, self->fC24, self->fC28);
         }
@@ -1012,7 +1010,6 @@ INCLUDE_ASM("fe/feridermanager", func_0019F908);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
-extern void* GrMan;
 extern char D_004A19A8[];
 extern char D_004A19B0[];
 
@@ -1054,15 +1051,15 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
         int id = func_0019F878(self, name);
         if (id >= 0) {
             if (replace) {
-                char* o = (char*)GrMan;
-                sVE_F908b* vt = *(sVE_F908b**)(o + 0x10D8);
-                vt[48].fn(o + vt[48].delta, id, data, 1);
+                cPS2GraphicsMan* o = GrMan;
+                sVE_F908b* vt = (sVE_F908b*)o->mVtbl;
+                vt[48].fn((char*)o + vt[48].delta, id, data, 1);
             }
         } else {
             strcpy(self->entries[self->count].name, name);
-            char* o = (char*)GrMan;
-            sVE_F908a* vt = *(sVE_F908a**)(o + 0x10D8);
-            self->entries[self->count].id = vt[46].fn(o + vt[46].delta, data, D_004A19B0, 0, 1, -1);
+            cPS2GraphicsMan* o = GrMan;
+            sVE_F908a* vt = (sVE_F908a*)o->mVtbl;
+            self->entries[self->count].id = vt[46].fn((char*)o + vt[46].delta, data, D_004A19B0, 0, 1, -1);
             self->count++;
         }
     }

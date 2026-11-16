@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "world/world.h"
 
 //100%
@@ -593,7 +594,6 @@ typedef sDfMat_343588 (*DfViewFn_343588)(void*);
 typedef int (*DfCullFn_343588)(void*, sDfVec_343588*, sDfVec_343588*, const sDfMat_343588&);
 typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
-extern cDfGfx_343588* D_004A5B80_343588 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
 
 #define OBJ_343588(s) (*(sDfObj_343588**)((char*)(s) + 0x18))
@@ -638,9 +638,9 @@ extern "C" void func_00343588(char* self)
     if (!Visible_343588(cam, OBJ_343588(self))) {
         return;
     }
-    cDfGfx_343588* gfx = D_004A5B80_343588;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     {
-        sDfGfxVt_343588* vt = gfx->vt;
+        sDfGfxVt_343588* vt = (sDfGfxVt_343588*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         sDfVec_343588 b[2];
         b[0].x = OBJ_343588(self)->pos[0];
@@ -651,7 +651,7 @@ extern "C" void func_00343588(char* self)
         b[1].y = OBJ_343588(self)->scl[1];
         b[1].z = OBJ_343588(self)->scl[2];
         b[1].w = 1.0f;
-        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_343588)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
         if (res == 1) {
             return;
         }
@@ -660,7 +660,7 @@ extern "C" void func_00343588(char* self)
     MatCopy_343588(&xf, &D_004FF1A0_343588);
     xf.r[3].x = *(float*)(self + 0x40);
     xf.r[3].y = *(float*)(self + 0x44);
-    ((DfDrawFn_343588)gfx->vt[96].fn)((char*)gfx + gfx->vt[96].delta, OBJ_343588(self), 0, &xf, 2);
+    ((DfDrawFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[96].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[96].delta, OBJ_343588(self), 0, &xf, 2);
 }
 #endif
 
@@ -1848,7 +1848,6 @@ INCLUDE_ASM("object/debouncenode", func_00344E18);
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** func_002D1BD8();
 extern "C" void func_00344730(sDebounce4730* self, int index);
-extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sModel_44E18 {
     char pad_0x0[0x7D];
@@ -1885,7 +1884,7 @@ struct sVE5_44E18 { short delta; short index; void (*fn)(void*, void*, void*, in
 
 extern "C" void func_00344E18(void* self)
 {
-    char* r = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* r = cGraphicsMan_TheGraphicsMan;
     unsigned int* ref = (unsigned int*)((char*)self + 0xC);
     int off = 0;
     for (int i = 0; i < 32; ref += 2, i++, off += 8)
@@ -1898,13 +1897,13 @@ extern "C" void func_00344E18(void* self)
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
-            sVE7_44E18* vt = *(sVE7_44E18**)(r + 0x10D8);
-            vt[95].fn(r + vt[95].delta, m, 1.0f, (char*)self + 0x118, (char*)m + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
+            sVE7_44E18* vt = (sVE7_44E18*)r->mVtbl;
+            vt[95].fn((char*)r + vt[95].delta, m, 1.0f, (char*)self + 0x118, (char*)m + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
         {
-            sVE5_44E18* vt = *(sVE5_44E18**)(r + 0x10D8);
-            vt[96].fn(r + vt[96].delta, m, *(void**)((char*)self + 0x1E8), 0, 0);
+            sVE5_44E18* vt = (sVE5_44E18*)r->mVtbl;
+            vt[96].fn((char*)r + vt[96].delta, m, *(void**)((char*)self + 0x1E8), 0, 0);
         }
     }
 }
@@ -2165,10 +2164,10 @@ extern "C" int func_00345320(sTrackRef51C0* self)
     b[1].y = v[5];
     b[1].z = v[6];
     b[1].w = 1.0f;
-    cDfGfx_343588* gfx = D_004A5B80_343588;
-    sDfGfxVt_343588* vt = gfx->vt;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
+    sDfGfxVt_343588* vt = (sDfGfxVt_343588*)gfx->mVtbl;
     char* thisp = (char*)gfx + vt[93].delta;
-    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_343588)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
     return res != 1;
 }
 #endif
@@ -2258,7 +2257,6 @@ public:
     virtual void v74();
     virtual void v75(void* a, int b, int c);
 };
-extern cWorld00345430* D_004A5B80_w345430 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sCtl00345430 {
     int f0;
@@ -2272,16 +2270,16 @@ struct sCtl00345430 {
 
 extern "C" void func_00345430(void* self, int arg)
 {
-    cWorld00345430* w = D_004A5B80_w345430;
+    cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     char* list = *(char**)(*(char**)((char*)self + 8) + 0x68);
     int n = *(int*)(list + 0x20);
     char* node = *(char**)(list + 0x24);
-    (*(sCtl00345430**)((char*)w + 0xE84))->f10 = -1;
-    (*(sCtl00345430**)((char*)w + 0xE84))->mode = 1;
+    (((sCtl00345430*)w->m_pCurrentDrawState))->f10 = -1;
+    (((sCtl00345430*)w->m_pCurrentDrawState))->mode = 1;
     int i;
     for (i = 0; i < n; i++) {
         if (func_00345638(node) != 0) {
-            w->v75(node + 0x10, arg, 10);
+            ((cWorld00345430*)w)->v75(node + 0x10, arg, 10);
         }
         node = *(char**)(node + 0x64);
     }

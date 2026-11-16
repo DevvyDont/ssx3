@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "online/commsystem.h"
 #include "main/ssxapp.h"
@@ -10,7 +11,6 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 // ... *(int*)(hi + 0xc1c)` (same address, same single load; the unflagged non-pointer base makes sched1's alias check keep the
 // load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern char* GrMan;
 extern int D_004A11B8;
 extern int D_00535C04[];
 extern char D_004A12C0[];
@@ -179,9 +179,9 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     font->setColor(self->cursor == 10 ? selectColor : normalColor);
     func_00391CB0(font, 60.0f, y, D_004A12E8);
     {
-        char* g = GrMan;
-        sDbgVEntry* vt = *(sDbgVEntry**)(g + 0x10D8);
-        func_001DCA80(font, 580.0f, y, D_004A12F0, vt[9].fn(g + vt[9].delta) ? D_0045CF68 : D_0045CF78);
+        cPS2GraphicsMan* g = GrMan;
+        sDbgVEntry* vt = (sDbgVEntry*)g->mVtbl;
+        func_001DCA80(font, 580.0f, y, D_004A12F0, vt[9].fn((char*)g + vt[9].delta) ? D_0045CF68 : D_0045CF78);
     }
     y += lineheight;
     font->setColor(self->cursor == 11 ? selectColor : normalColor);
@@ -1674,7 +1674,6 @@ extern "C" void func_0017F2D0(void* p)
 INCLUDE_ASM("fe/debugfe", func_0017F500);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char* GrMan;
 extern void* D_004A28AC;
 extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 
@@ -1716,14 +1715,14 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
 extern "C" void func_0017F500(void* p_, int tex)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
-    char* m = GrMan;
-    set1_17F500(m, 0x1800000, 23, 2);
-    set1_17F500(m, 0x300000, 20, 3);
-    set1_17F500(m, 0xFF000, 12, 0xD);
-    set1_17F500(m, 0x7C, 2, 5);
-    set1_17F500(m, 0x400000, 22, 1);
+    cPS2GraphicsMan* m = GrMan;
+    set1_17F500((char*)m, 0x1800000, 23, 2);
+    set1_17F500((char*)m, 0x300000, 20, 3);
+    set1_17F500((char*)m, 0xFF000, 12, 0xD);
+    set1_17F500((char*)m, 0x7C, 2, 5);
+    set1_17F500((char*)m, 0x400000, 22, 1);
     sV2_17F500 size(6.0f, 6.0f);
-    (*(sRS_17F500**)(m + 0xE84))->tex = tex;
+    ((sRS_17F500*)m->m_pCurrentDrawState)->tex = tex;
     for (int i = 1; i < 64; i++) {
         sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
         float t = (float)i * 0.015625f;
@@ -1794,8 +1793,6 @@ extern "C" void func_0017F838(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_load);
 #ifdef SKIP_ASM
-extern char* GrMan;
-extern char* cGraphicsMan_TheGraphicsMan;
 extern char D_0045D4B8[];
 extern char D_0045D4C8[];
 extern char D_0045D4E0[];
@@ -1832,9 +1829,9 @@ struct sDebugFE_17F868 {
 
 extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 {
-    char* m = GrMan;
-    sVEnt_17F868* vt = *(sVEnt_17F868**)(m + 0x10D8);
-    ((Fn1_17F868)vt[44].fn)(m + vt[44].delta, 0);
+    cPS2GraphicsMan* m = GrMan;
+    sVEnt_17F868* vt = (sVEnt_17F868*)m->mVtbl;
+    ((Fn1_17F868)vt[44].fn)((char*)m + vt[44].delta, 0);
     self->font = (char*)cFont_cFont(cMemMan_alloc(0x84, D_0045D4B8, 0, 0), D_0045D4C8, 0);
     sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
     *(sVec2_17F868*)(self->font + 0x30) = sc;
@@ -1844,16 +1841,16 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     if (data) {
         char* p = (char*)data + data[5];
         if (p) {
-            char* g = cGraphicsMan_TheGraphicsMan;
-            sVEnt_17F868* gvt = *(sVEnt_17F868**)(g + 0x10D8);
-            self->snd1C = ((Load_17F868)gvt[46].fn)(g + gvt[46].delta, p, D_004A1340, 0, 1, -1);
+            cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+            sVEnt_17F868* gvt = (sVEnt_17F868*)g->mVtbl;
+            self->snd1C = ((Load_17F868)gvt[46].fn)((char*)g + gvt[46].delta, p, D_004A1340, 0, 1, -1);
         }
         cMemMan_free(data);
     }
     data = FILE_load(D_0045D4F8, 0x100);
-    char* m2 = GrMan;
-    sVEnt_17F868* vt2 = *(sVEnt_17F868**)(m2 + 0x10D8);
-    self->snd20 = ((Load_17F868)vt2[46].fn)(m2 + vt2[46].delta, (char*)data + data[5], D_004A1348, 0, 1, -1);
+    cPS2GraphicsMan* m2 = GrMan;
+    sVEnt_17F868* vt2 = (sVEnt_17F868*)m2->mVtbl;
+    self->snd20 = ((Load_17F868)vt2[46].fn)((char*)m2 + vt2[46].delta, (char*)data + data[5], D_004A1348, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
     }
@@ -1886,9 +1883,9 @@ extern "C" void func_0017FA60(void* self)
 {
     char* m;
     char* vt;
-    func_00369FF8(GrMan);
+    func_00369FF8((char*)GrMan);
     D_004A4324 = 0;
-    m = GrMan;
+    m = (char*)GrMan;
     vt = *(char**)(m + 0x10D8);
     ((tFn_17FA60)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K17FA60());
 }
@@ -1908,7 +1905,6 @@ int func_0017FAB0(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017FAD0);
 #ifdef SKIP_ASM
-extern char* GrMan;
 extern "C" void func_003916C0(void* p, int flags);
 
 struct sVEi_0017FAD0 {
@@ -1942,15 +1938,15 @@ extern "C" void func_0017FAD0(sDebugFE_0017FAD0* self)
     *(int*)(g + 0x80) = 0;
     if (self->snd20 >= 0)
     {
-        char* m = GrMan;
-        sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)(m + 0x10D8);
-        vt[50].fn(m + vt[50].delta, self->snd20);
+        cPS2GraphicsMan* m = GrMan;
+        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)m->mVtbl;
+        vt[50].fn((char*)m + vt[50].delta, self->snd20);
     }
     if (self->snd1C >= 0)
     {
-        char* m = GrMan;
-        sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)(m + 0x10D8);
-        vt[50].fn(m + vt[50].delta, self->snd1C);
+        cPS2GraphicsMan* m = GrMan;
+        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)m->mVtbl;
+        vt[50].fn((char*)m + vt[50].delta, self->snd1C);
     }
     if (self->font != 0)
         func_003916C0(self->font, 3);
@@ -1980,7 +1976,6 @@ extern "C" void func_0017FB98(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", func_0017FBF0);
 #ifdef SKIP_ASM
-extern char* GrMan;
 extern char t4mat_Identity[];
 extern "C" int func_00231D60(void* self);
 extern "C" void func_0017F500(void* self, int a1);
@@ -2022,15 +2017,15 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 
 extern "C" int func_0017FBF0(char* self)
 {
-    char* m = GrMan;
-    sVEnt_17FBF0* vt = *(sVEnt_17FBF0**)(m + 0x10D8);
-    if (!((FnI_17FBF0)vt[17].fn)(m + vt[17].delta)) {
+    cPS2GraphicsMan* m = GrMan;
+    sVEnt_17FBF0* vt = (sVEnt_17FBF0*)m->mVtbl;
+    if (!((FnI_17FBF0)vt[17].fn)((char*)m + vt[17].delta)) {
         return 0;
     }
     if (func_00231D60(self) == 0) {
-        char* m1 = GrMan;
-        sVEnt_17FBF0* vt1 = *(sVEnt_17FBF0**)(m1 + 0x10D8);
-        char* this1 = m1 + vt1[15].delta;
+        cPS2GraphicsMan* m1 = GrMan;
+        sVEnt_17FBF0* vt1 = (sVEnt_17FBF0*)m1->mVtbl;
+        char* this1 = (char*)m1 + vt1[15].delta;
         sVec4_17FBF0 pos;
         float one = 1.0f;
         sVec4_17FBF0 col(one, 0.0f, 0.0f, 0.0f);
@@ -2039,27 +2034,27 @@ extern "C" int func_0017FBF0(char* self)
         pos.y = zero;
         pos.z = zero;
         ((FnP_17FBF0)vt1[15].fn)(this1, &pos);
-        char* m2 = GrMan;
-        sVEnt_17FBF0* vt2 = *(sVEnt_17FBF0**)(m2 + 0x10D8);
-        ((FnView_17FBF0)vt2[26].fn)(m2 + vt2[26].delta, 0, 0, zero, zero, 640.0f, 480.0f, -1.0f, one);
-        char* m3 = GrMan;
-        sVEnt_17FBF0* vt3 = *(sVEnt_17FBF0**)(m3 + 0x10D8);
-        ((FnP_17FBF0)vt3[34].fn)(m3 + vt3[34].delta, t4mat_Identity);
-        char* m4 = GrMan;
-        setB23_17FBF0(rs_17FBF0(m4), 2);
-        setB20_17FBF0(rs_17FBF0(m4), 3);
-        setB12_17FBF0(rs_17FBF0(m4), 0xD);
-        setB2_17FBF0(rs_17FBF0(m4), 5);
-        setB22_17FBF0(rs_17FBF0(m4), 1);
+        cPS2GraphicsMan* m2 = GrMan;
+        sVEnt_17FBF0* vt2 = (sVEnt_17FBF0*)m2->mVtbl;
+        ((FnView_17FBF0)vt2[26].fn)((char*)m2 + vt2[26].delta, 0, 0, zero, zero, 640.0f, 480.0f, -1.0f, one);
+        cPS2GraphicsMan* m3 = GrMan;
+        sVEnt_17FBF0* vt3 = (sVEnt_17FBF0*)m3->mVtbl;
+        ((FnP_17FBF0)vt3[34].fn)((char*)m3 + vt3[34].delta, t4mat_Identity);
+        cPS2GraphicsMan* m4 = GrMan;
+        setB23_17FBF0(rs_17FBF0((char*)m4), 2);
+        setB20_17FBF0(rs_17FBF0((char*)m4), 3);
+        setB12_17FBF0(rs_17FBF0((char*)m4), 0xD);
+        setB2_17FBF0(rs_17FBF0((char*)m4), 5);
+        setB22_17FBF0(rs_17FBF0((char*)m4), 1);
         func_0017F500(self + 0x24, *(int*)(self + 0x1C));
-        setC5_17FBF0(rs_17FBF0(GrMan), 9);
+        setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
         void* menu = *(void**)(self + 0x14);
         sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }
-    char* m5 = GrMan;
-    sVEnt_17FBF0* vt5 = *(sVEnt_17FBF0**)(m5 + 0x10D8);
-    ((FnV_17FBF0)vt5[20].fn)(m5 + vt5[20].delta);
+    cPS2GraphicsMan* m5 = GrMan;
+    sVEnt_17FBF0* vt5 = (sVEnt_17FBF0*)m5->mVtbl;
+    ((FnV_17FBF0)vt5[20].fn)((char*)m5 + vt5[20].delta);
     return 1;
 }
 #endif

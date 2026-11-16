@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "main/sectionman.h"
 #include "scripter/ssxscriptengine.h"
@@ -42,7 +43,6 @@ struct sRCtx_C078 {
     sRVEntry_C078* vt;
 };
 
-extern sRCtx_C078* GrMan;
 
 static inline int curLayer_C078(sRCtx_C078* c)
 {
@@ -51,10 +51,10 @@ static inline int curLayer_C078(sRCtx_C078* c)
 
 extern "C" void cGame_renderModels(cGame* self, void* world)
 {
-    *(short*)((char*)GrMan->top + 0x12) = curLayer_C078(GrMan);
-    sRCtx_C078* ctx = GrMan;
-    ctx->top->f4 = (ctx->top->f4 & ~0xF80) | 0x880;
-    ctx->top->f0 |= 0x30;
+    *(short*)((char*)(sRState_C078*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
+    cPS2GraphicsMan* ctx = GrMan;
+    ((sRState_C078*)ctx->m_pCurrentDrawState)->f4 = (((sRState_C078*)ctx->m_pCurrentDrawState)->f4 & ~0xF80) | 0x880;
+    ((sRState_C078*)ctx->m_pCurrentDrawState)->f0 |= 0x30;
     int flag = 0xC00;
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         flag = 0x400;
@@ -62,12 +62,12 @@ extern "C" void cGame_renderModels(cGame* self, void* world)
     int n = *(int*)((char*)world + 0x209C);
     int* items = (int*)((char*)world + 0x20A0);
     for (int i = 0; i < n; i++) {
-        GrMan->vt[0x60].fn((char*)GrMan + GrMan->vt[0x60].delta, items[i], 0, 0, flag);
+        ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn((char*)GrMan + ((sRVEntry_C078*)GrMan->mVtbl)[0x60].delta, items[i], 0, 0, flag);
     }
     int n2 = *(int*)((char*)world + 0x40A0);
     items = (int*)((char*)world + 0x40A4);
     for (int i = 0; i < n2; i++) {
-        GrMan->vt[0x60].fn((char*)GrMan + GrMan->vt[0x60].delta, items[i], 0, 0, flag | 0x20);
+        ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn((char*)GrMan + ((sRVEntry_C078*)GrMan->mVtbl)[0x60].delta, items[i], 0, 0, flag | 0x20);
     }
 }
 #endif
@@ -95,7 +95,6 @@ struct sRCtx_C1B0 {
     char pad0[0x10D8];
     sVEm_C1B0* vt;      // 0x10D8
 };
-extern sRCtx_C1B0* D_004A289C_C1B0 __asm__("GrMan");
 
 struct sCamObj_C1B0 {
     char pad0[4];
@@ -139,8 +138,8 @@ static inline sVec_C1B0 MulVec_C1B0(const sMat_C1B0* m, const sVec_C1B0& v)
 
 static inline sMat_C1B0* viewMat_C1B0()
 {
-    sRCtx_C1B0* c = D_004A289C_C1B0;
-    return c->vt[35].fn((char*)c + c->vt[35].delta);
+    cPS2GraphicsMan* c = GrMan;
+    return ((sVEm_C1B0*)c->mVtbl)[35].fn((char*)c + ((sVEm_C1B0*)c->mVtbl)[35].delta);
 }
 
 // PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.
@@ -443,7 +442,6 @@ public:
     virtual void SetTexture(void*);
 };
 
-extern cGfx_C830* D_004A289C_C830 __asm__("GrMan");
 
 static inline void SetBits_C830(int* p, int mask, int bits) { *p = (*p & ~mask) | bits; }
 
@@ -528,32 +526,32 @@ extern "C" void func_0022C830(sGame_C830* self)
     do {
         self->views->cur = i;
         sCam_C830* cam = self->views->cams[self->views->cur];
-        D_004A289C_C830->v23(&self->views->views[i], 1);
-        D_004A289C_C830->v24(cam->x, cam->y, cam->z);
-        D_004A289C_C830->SetTexture(cam->tex);
-        *(short*)((char*)D_004A289C_C830->stateTop + 0x12) = D_004A289C_C830->GetLayer();
-        cGfx_C830* g = D_004A289C_C830;
-        Set1_C830(g, 0xF80, 7, 7);
-        SetBits_C830(&g->stateTop->w0, 0x30, 0x30);
-        Set1_C830(g, 0x1800000, 23, 1);
-        SetBits_C830(&g->stateTop->w4, 0x300000, 0x300000);
-        Set1_C830(g, 0xFF000, 12, 0xD);
-        Set2_C830(g, 0x3E0, 5, 4);
+        ((cGfx_C830*)GrMan)->v23(&self->views->views[i], 1);
+        ((cGfx_C830*)GrMan)->v24(cam->x, cam->y, cam->z);
+        ((cGfx_C830*)GrMan)->SetTexture(cam->tex);
+        *(short*)((char*)((cGfx_C830*)GrMan)->stateTop + 0x12) = ((cGfx_C830*)GrMan)->GetLayer();
+        cPS2GraphicsMan* g = GrMan;
+        Set1_C830((cGfx_C830*)g, 0xF80, 7, 7);
+        SetBits_C830(&((cGfx_C830*)g)->stateTop->w0, 0x30, 0x30);
+        Set1_C830((cGfx_C830*)g, 0x1800000, 23, 1);
+        SetBits_C830(&((cGfx_C830*)g)->stateTop->w4, 0x300000, 0x300000);
+        Set1_C830((cGfx_C830*)g, 0xFF000, 12, 0xD);
+        Set2_C830((cGfx_C830*)g, 0x3E0, 5, 4);
         func_003550A0(gBucketMan, 3);
         i++;
     } while (i < self->views->count);
     }
     {
-        sVE_C830* vt = *(sVE_C830**)((char*)D_004A289C_C830 + 0x10D8);
-        char* thisp = (char*)D_004A289C_C830 + vt[23].delta;
+        sVE_C830* vt = (sVE_C830*)GrMan->mVtbl;
+        char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)D_004A289C_C830->GetWidth(), (float)D_004A289C_C830->GetHeight(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_C830*)GrMan)->GetWidth(), (float)((cGfx_C830*)GrMan)->GetHeight(), 1);
     }
-    D_004A289C_C830->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
-    D_004A289C_C830->SetTexture(t4mat_Identity);
-    cGfx_C830* g = D_004A289C_C830;
-    Set2_C830(g, 0x3E0, 5, 0x18);
-    Set1_C830(g, 0x7C, 2, 5);
+    ((cGfx_C830*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
+    ((cGfx_C830*)GrMan)->SetTexture(t4mat_Identity);
+    cPS2GraphicsMan* g = GrMan;
+    Set2_C830((cGfx_C830*)g, 0x3E0, 5, 0x18);
+    Set1_C830((cGfx_C830*)g, 0x7C, 2, 5);
     self->font->SetScale(0.8f, 0.8f);
     self->font->scale = sV2_C830(2.0f, 2.0f);
     self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
@@ -565,12 +563,12 @@ extern "C" void func_0022C830(sGame_C830* self)
         self->font->scale = sV2_C830(2.0f, 2.0f);
         self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     }
-    D_004A289C_C830->v14(sV3_C830(0.0f, 0.0f, 0.0f));
+    ((cGfx_C830*)GrMan)->v14(sV3_C830(0.0f, 0.0f, 0.0f));
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     int saved = *p;
     *p = 0;
-    D_004A289C_C830->v19();
+    ((cGfx_C830*)GrMan)->v19();
     *p = saved;
     func_00285BF8(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
     func_002B5D78(gWorldTriggerManager);

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "render/font.h"
+#include "render/ps2graphicsman.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -10,7 +12,7 @@ INCLUDE_ASM("render/font", cFont_linkFont);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct sFontTexHdr;
-extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img);
+extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img);
 extern char D_004A46F8[];
 
 struct sGlyph_1788 {
@@ -39,7 +41,7 @@ struct sFont_1788 {
     sPad_1788 pad;          // 0x18
 };
 
-extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
+extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
 {
     sFont_1788* self = (sFont_1788*)vself;
     char* data = (char*)vdata;
@@ -84,7 +86,7 @@ extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
             self->maxH = self->table[i].h + self->table[i].yoff;
         }
     }
-    cFont_downloadTexture((char*)self, (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
+    cFont_downloadTexture((cFont*)((char*)self), (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
 }
 #endif
 
@@ -150,7 +152,6 @@ public:
     virtual void v50(int);
 };
 
-extern sFontGfx_19E8* D_004A5B80_19E8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sFont_19E8 {
     int f0;
@@ -159,16 +160,16 @@ struct sFont_19E8 {
     int handle;         // 0x60
 };
 
-extern "C" void func_003919E8(sFont_19E8* self)
+extern "C" void func_003919E8(cFont* self)
 {
-    if (self->pix != 0) {
-        cMemMan_free(self->pix);
+    if (self->Glyphs != 0) {
+        cMemMan_free(self->Glyphs);
     }
-    self->pix = 0;
-    self->f0 = 0;
-    sFontGfx_19E8* g = D_004A5B80_19E8;
-    if (self->handle >= 0) {
-        g->v50(self->handle);
+    self->Glyphs = 0;
+    self->NumGlyphs = 0;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    if (self->TextureID >= 0) {
+        ((sFontGfx_19E8*)g)->v50(self->TextureID);
     }
 }
 #endif
@@ -195,7 +196,6 @@ struct sFontCtxDL {
     sFontVEntryDL* vtable;      // 0x10D8
 };
 
-extern sFontCtxDL* D_004A5B80_DL __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sFontTexHdr {
     int f0;
@@ -210,9 +210,9 @@ struct sFontUV {
     float u, v;
 };
 
-extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img)
+extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
 {
-    sFontCtxDL* g = D_004A5B80_DL;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
     int p2 = 1;
     do {
         p2 <<= 1;
@@ -220,7 +220,7 @@ extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img)
     sFontUV uv;
     uv.v = 1.0f / p2;
     uv.u = 1.0f / img->w;
-    *(sFontUV*)(self + 0x20) = uv;
+    *(sFontUV*)&self->UVScale[0] = uv;
     unsigned char* pix = (unsigned char*)operator_new_tag((img->w * p2) >> 1, D_00492F40, 0x100, 0);
     unsigned char* pal = (unsigned char*)operator_new_tag(0x40, D_00492F50, 0x100, 0);
     MEM_fill(pix, 0, (img->w * p2) >> 1);
@@ -240,8 +240,8 @@ extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img)
         p[3] = (i << 7) / 15;
         p += 4;
     }
-    sFontVEntryDL* vt = g->vtable;
-    *(int*)(self + 0x60) = vt[47].fn((char*)g + vt[47].delta, pix, self + 0x64, img->w, p2, 0, 0xB, 1, pal, 0, 1, -1);
+    sFontVEntryDL* vt = (sFontVEntryDL*)g->mVtbl;
+    self->TextureID = vt[47].fn((char*)g + vt[47].delta, pix, ((char*)self) + 0x64, img->w, p2, 0, 0xB, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -258,9 +258,9 @@ struct sMat00391C48 {
 
 extern sMat00391C48 D_00500CA0;
 extern "C" void func_004186C8(sMat00391C48* m);
-extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m);
+extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m);
 
-extern "C" void func_00391C48(void* self, float x, float y)
+extern "C" void func_00391C48(cFont* self, float x, float y)
 {
     func_004186C8(&D_00500CA0);
     func_00391CB0(self, x, y, &D_00500CA0);
@@ -292,7 +292,6 @@ struct sFontCtx1CB0 {
     sFontVEntry1CB0* vtable;    // 0x10D8
 };
 
-extern sFontCtx1CB0* cGraphicsMan_TheGraphicsMan;
 
 struct sFontPos1CB0 {
     float x, y, z, w;
@@ -304,29 +303,28 @@ static inline int fontGetTex(void* s)
     return *(int*)((char*)s + 0x60);
 }
 
-extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m)
+extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m)
 {
-    sFontCtx1CB0* g = cGraphicsMan_TheGraphicsMan;
-    char* s = (char*)self;
-    g->top->tex = fontGetTex(self);
-    sFontPos1CB0 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
-                     y + *(float*)(s + 0x1C) * *(float*)(s + 0x3C), 0.0f, 0.0f);
-    if (*(float*)(s + 0x28) != 0.0f || *(float*)(s + 0x2C) != 0.0f) {
-        sFontRS1CB0* top = g->top;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    ((sFontRS1CB0*)g->m_pCurrentDrawState)->tex = fontGetTex(self);
+    sFontPos1CB0 pos(x + self->Offset[0] * self->Scale[0],
+                     y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
+    if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
+        sFontRS1CB0* top = (sFontRS1CB0*)g->m_pCurrentDrawState;
         int saved = (unsigned)(top->flags & 0x3E0) >> 5;
         int a = saved - 1;
         if (a < 0) a = 0;
         top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
-        sFontVEntry1CB0* vt = g->vtable;
-        vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x50,
-                  pos.x + *(float*)(s + 0x28), pos.y + *(float*)(s + 0x2C),
-                  *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
-        sFontRS1CB0* top2 = g->top;
+        sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
+        vt[80].fn((char*)g + vt[80].delta, self, m, ((char*)self) + 0x50,
+                  pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
+                  self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
+        sFontRS1CB0* top2 = (sFontRS1CB0*)g->m_pCurrentDrawState;
         top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1CB0* vt = g->vtable;
-    vt[80].fn((char*)g + vt[80].delta, self, m, s + 0x40, pos.x, pos.y,
-              *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+    sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
+    vt[80].fn((char*)g + vt[80].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
+              self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
 
@@ -356,7 +354,6 @@ struct sFontCtx1E30 {
     sFontVEntry1E30* vtable;    // 0x10D8
 };
 
-extern sFontCtx1E30* D_004A5B80_1E30 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sFontPos1E30 {
     float x, y, z, w;
@@ -368,29 +365,28 @@ static inline int fontGetTex1E30(void* s)
     return *(int*)((char*)s + 0x60);
 }
 
-extern "C" void func_00391E30(void* self, float x, float y, void* m)
+extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
 {
-    sFontCtx1E30* g = D_004A5B80_1E30;
-    char* s = (char*)self;
-    g->top->tex = fontGetTex1E30(self);
-    sFontPos1E30 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
-                     y + *(float*)(s + 0x1C) * *(float*)(s + 0x3C), 0.0f, 0.0f);
-    if (*(float*)(s + 0x28) != 0.0f || *(float*)(s + 0x2C) != 0.0f) {
-        sFontRS1E30* top = g->top;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    ((sFontRS1E30*)g->m_pCurrentDrawState)->tex = fontGetTex1E30(self);
+    sFontPos1E30 pos(x + self->Offset[0] * self->Scale[0],
+                     y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
+    if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
+        sFontRS1E30* top = (sFontRS1E30*)g->m_pCurrentDrawState;
         int saved = (unsigned)(top->flags & 0x3E0) >> 5;
         int a = saved - 1;
         if (a < 0) a = 0;
         top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
-        sFontVEntry1E30* vt = g->vtable;
-        vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x50,
-                  pos.x + *(float*)(s + 0x28), pos.y + *(float*)(s + 0x2C),
-                  *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
-        sFontRS1E30* top2 = g->top;
+        sFontVEntry1E30* vt = (sFontVEntry1E30*)g->mVtbl;
+        vt[81].fn((char*)g + vt[81].delta, self, m, ((char*)self) + 0x50,
+                  pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
+                  self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
+        sFontRS1E30* top2 = (sFontRS1E30*)g->m_pCurrentDrawState;
         top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1E30* vt = g->vtable;
-    vt[81].fn((char*)g + vt[81].delta, self, m, s + 0x40, pos.x, pos.y,
-              *(float*)(s + 0x38), *(float*)(s + 0x3C), *(float*)(s + 0x20), *(float*)(s + 0x24), pos.z);
+    sFontVEntry1E30* vt = (sFontVEntry1E30*)g->mVtbl;
+    vt[81].fn((char*)g + vt[81].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
+              self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
 
@@ -445,7 +441,7 @@ static inline sGlyph1FB0* sFontRes1FB0_find(sFontRes1FB0* f, int c)
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float func_00391FB0(void* f_, const char* s, void* r_, int mono, float sx, float sy)
+extern "C" float func_00391FB0(cFont* f_, const char* s, void* r_, int mono, float sx, float sy)
 {
     sFontRes1FB0* f = (sFontRes1FB0*)f_;
     sRect1FB0* r = (sRect1FB0*)r_;
@@ -544,7 +540,7 @@ static inline sGlyph21F0* sFontRes21F0_find(sFontRes21F0* f, int c)
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
+extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
 {
     sFontRes21F0* f = (sFontRes21F0*)f_;
     sRect21F0* r = (sRect21F0*)r_;
@@ -647,7 +643,7 @@ static inline float fabs_2430(float x)
 }
 
 // Copy as much of str into dst as fits in width; returns where the next line starts (0 when done).
-extern "C" char* func_00392430(void* f_, const char* str, char* dst, int max, float sx, float width)
+extern "C" char* func_00392430(cFont* f_, const char* str, char* dst, int max, float sx, float width)
 {
     sFontRes2430* f = (sFontRes2430*)f_;
     width -= fabs_2430(f->padX);
@@ -760,7 +756,7 @@ static inline float fabs_2680(float x)
 }
 
 // Unicode version of func_00392430: copies as much of str into dst as fits in width; returns the next line start (0 when done).
-extern "C" unsigned short* func_00392680(void* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
+extern "C" unsigned short* func_00392680(cFont* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
 {
     sFontRes2680* f = (sFontRes2680*)f_;
     width -= fabs_2680(f->padX);
@@ -821,11 +817,11 @@ extern "C" unsigned short* func_00392680(void* f_, float sx, float width, const 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392908);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float func_00391FB0(cFont* self, const char* str, void* out, int n, float sx, float sy);
 
-extern "C" void func_00392908(void* self, float x, float y, const char* str)
+extern "C" void func_00392908(cFont* self, float x, float y, const char* str)
 {
-    float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    float w = func_00391FB0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
     func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
 }
 #endif
@@ -833,9 +829,9 @@ extern "C" void func_00392908(void* self, float x, float y, const char* str)
 //100%
 INCLUDE_ASM("render/font", func_00392980);
 #ifdef SKIP_ASM
-extern "C" void func_00392980(void* self, const unsigned short* str, float x, float y)
+extern "C" void func_00392980(cFont* self, const unsigned short* str, float x, float y)
 {
-    float w = func_003921F0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    float w = func_003921F0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
     func_00391E30(self, x - w * 0.5f, y, (void*)str);
 }
 #endif
@@ -851,7 +847,7 @@ struct sBXStr_29F8 {
     char* p;
 };
 
-extern "C" void func_003929F8(void* self, const char* fmt, void* ap, float x, float y)
+extern "C" void func_003929F8(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_29F8 s;
     s.p = (char*)D_004A3E90;
@@ -864,11 +860,11 @@ extern "C" void func_003929F8(void* self, const char* fmt, void* ap, float x, fl
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/font", func_00392A60);
 #ifdef SKIP_ASM
-extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float func_00391FB0(cFont* self, const char* str, void* out, int n, float sx, float sy);
 
-extern "C" void func_00392A60(void* self, const char* str, float x, float y)
+extern "C" void func_00392A60(cFont* self, const char* str, float x, float y)
 {
-    float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    float w = func_00391FB0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
     func_00391CB0(self, x - w, y, (sMat00391C48*)str);
 }
 #endif
@@ -876,9 +872,9 @@ extern "C" void func_00392A60(void* self, const char* str, float x, float y)
 //100%
 INCLUDE_ASM("render/font", func_00392AD0);
 #ifdef SKIP_ASM
-extern "C" void func_00392AD0(void* self, const unsigned short* str, float x, float y)
+extern "C" void func_00392AD0(cFont* self, const unsigned short* str, float x, float y)
 {
-    float w = func_003921F0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
+    float w = func_003921F0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
     func_00391E30(self, x - w, y, (void*)str);
 }
 #endif
@@ -894,7 +890,7 @@ struct sBXStr_2B40 {
     char* p;
 };
 
-extern "C" void func_00392B40(void* self, const char* fmt, void* ap, float x, float y)
+extern "C" void func_00392B40(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_2B40 s;
     s.p = (char*)D_004A3E90;
@@ -943,9 +939,9 @@ static inline sGlyph* findGlyph(sGlyphTable* t, int c)
     return t->fallback;
 }
 
-extern "C" float func_00392BA8(sGlyphTable* t, char c)
+extern "C" float func_00392BA8(cFont* t, char c)
 {
-    sGlyph* g = findGlyph(t, c);
+    sGlyph* g = findGlyph(((sGlyphTable*)t), c);
     if (g)
         return g->width;
     return 0.0f;
@@ -955,9 +951,9 @@ extern "C" float func_00392BA8(sGlyphTable* t, char c)
 //100%
 INCLUDE_ASM("render/font", func_00392C60);
 #ifdef SKIP_ASM
-extern "C" float func_00392C60(sGlyphTable* t, unsigned short c)
+extern "C" float func_00392C60(cFont* t, unsigned short c)
 {
-    sGlyph* g = findGlyph(t, c);
+    sGlyph* g = findGlyph(((sGlyphTable*)t), c);
     if (g)
         return g->width;
     return 0.0f;
@@ -1159,17 +1155,17 @@ int func_00393FB0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00393FB8);
 #ifdef SKIP_ASM
-extern "C" void func_00393FB8(void* self, int a1, int a2)
+extern "C" void func_00393FB8(cPS2GraphicsMan* self, int a1, int a2)
 {
     *(float*)self = (float)a1;
-    *(float*)((char*)self + 0x4) = (float)a2;
+    self->m_screenOffset[1] = (float)a2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/font", func_00393FD8);
 #ifdef SKIP_ASM
-extern "C" int func_00393FD8(void* self)
+extern "C" int func_00393FD8(cPS2GraphicsMan* self)
 {
     return (int)*(float*)self;
 }
@@ -1178,9 +1174,9 @@ extern "C" int func_00393FD8(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00393FF0);
 #ifdef SKIP_ASM
-extern "C" int func_00393FF0(void* self)
+extern "C" int func_00393FF0(cPS2GraphicsMan* self)
 {
-    return (int)*(float*)((char*)self + 0x4);
+    return (int)self->m_screenOffset[1];
 }
 #endif
 
@@ -2036,20 +2032,20 @@ static inline short* sFontRS_shorts_47D8(char* st)
     return (short*)(st + 0x10);
 }
 
-extern "C" int func_003947D8(char* self)
+extern "C" int func_003947D8(cPS2GraphicsMan* self)
 {
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        char* obj = *(char**)(self + 0x10D8);
-        int* a = (int*)(*(char**)(self + 0xE84) + (i << 2));
-        char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(self + *(short*)(obj + 0x200));
+        char* obj = (char*)self->mVtbl;
+        int* a = (int*)((char*)self->m_pCurrentDrawState + (i << 2));
+        char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*a != *(int*)(cmp + (i << 2))) return 1;
     }
     for (j = 0; j < 2; j++) {
-        char* obj = *(char**)(self + 0x10D8);
-        short* a = sFontRS_shorts_47D8(*(char**)(self + 0xE84)) + j;
-        char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(self + *(short*)(obj + 0x200));
+        char* obj = (char*)self->mVtbl;
+        short* a = sFontRS_shorts_47D8((char*)self->m_pCurrentDrawState) + j;
+        char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*a != *(short*)(cmp + (j << 1) + 0x10)) return 1;
     }
     return 0;
@@ -2774,16 +2770,16 @@ struct sRenderSlot5288 {
     sRenderSlot5288() {}
 };
 
-extern "C" void* func_00395288(void* self)
+extern "C" void* func_00395288(cPS2GraphicsMan* self)
 {
     func_003691F8(self);
-    *(void***)((char*)self + 0x10D8) = D_00493260;
+    self->mVtbl = D_00493260;
     new ((char*)self + 0x10E0) sRenderSlot5288[12];
     new ((char*)self + 0x11A0) sRenderSlot5288[8];
     new ((char*)self + 0x1220) sRenderSlot5288[2];
     new ((char*)self + 0x1240) sRenderSlot5288[2];
     new ((char*)self + 0x1260) sRenderSlot5288[4];
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2826,10 +2822,10 @@ struct sFontEntry {
 //100%
 INCLUDE_ASM("render/font", func_00395330);
 #ifdef SKIP_ASM
-extern "C" int func_00395330(void* self)
+extern "C" int func_00395330(cPS2GraphicsMan* self)
 {
-    int i = *(int*)((char*)self + 0x59c8);
-    sFontEntry* p = *(sFontEntry**)((char*)self + 0x59cc);
+    int i = self->CurrentDisplayMode;
+    sFontEntry* p = (sFontEntry*)self->DisplayModes;
     return p[i].field_0x88;
 }
 #endif
@@ -2837,10 +2833,10 @@ extern "C" int func_00395330(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395350);
 #ifdef SKIP_ASM
-extern "C" int func_00395350(void* self)
+extern "C" int func_00395350(cPS2GraphicsMan* self)
 {
-    int i = *(int*)((char*)self + 0x59c8);
-    sFontEntry* p = *(sFontEntry**)((char*)self + 0x59cc);
+    int i = self->CurrentDisplayMode;
+    sFontEntry* p = (sFontEntry*)self->DisplayModes;
     return p[i].field_0x8c;
 }
 #endif
@@ -2854,9 +2850,9 @@ struct sFontVEntry23 {
     void (*fn)(void*, int, float, float, float, float);
 };
 
-extern "C" void func_00395370(void* self, float* v, int a2)
+extern "C" void func_00395370(cPS2GraphicsMan* self, float* v, int a2)
 {
-    sFontVEntry23* vt = *(sFontVEntry23**)((char*)self + 0x10D8);
+    sFontVEntry23* vt = (sFontVEntry23*)self->mVtbl;
     vt[23].fn((char*)self + vt[23].delta, a2, v[0], v[1], v[2], v[3]);
 }
 #endif
@@ -2873,13 +2869,13 @@ void* func_003953B0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003953B8);
 #ifdef SKIP_ASM
-extern "C" void func_003956B0(void* self);
+extern "C" void func_003956B0(cPS2GraphicsMan* self);
 
 // Fetch the current (combined) matrix into out and return out.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void* func_003953B8(void* out, void* self)
 {
-    func_003956B0(self);
+    func_003956B0((cPS2GraphicsMan*)self);
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -2918,8 +2914,8 @@ void func_00395420(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395428);
 #ifdef SKIP_ASM
-extern "C" int func_00395428(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x13EC)));
+extern "C" int func_00395428(cPS2GraphicsMan* arg0) {
+    return (arg0->mNumProjTextures);
 }
 #endif
 //100%
@@ -2972,7 +2968,7 @@ struct sFontBlockA0 {
     float f[40];
 } __attribute__((aligned(16)));
 
-extern "C" void func_003954D0(void* self, sFontBlockA0* src)
+extern "C" void func_003954D0(cPS2GraphicsMan* self, sFontBlockA0* src)
 {
     *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
 }
@@ -3035,8 +3031,8 @@ extern "C" int func_00395530(void *arg0) {
 //100%
 INCLUDE_ASM("render/font", func_00395538);
 #ifdef SKIP_ASM
-extern "C" int func_00395538(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18F4)));
+extern "C" int func_00395538(cPS2GraphicsMan* arg0) {
+    return ((int)arg0->mpTextureMan);
 }
 #endif
 //100%
@@ -3142,10 +3138,10 @@ struct sGfx_55B0 {
 };
 
 // Queues a draw entry with the current render state in the uncached ring.
-extern "C" void func_003955B0(sGfx_55B0* gfx, unsigned int buf, unsigned int next, int flag)
+extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
-    sRS_55B0* rs = gfx->top;
-    sRing_55B0* ring = gfx->ring;
+    sRS_55B0* rs = (sRS_55B0*)gfx->m_pCurrentDrawState;
+    sRing_55B0* ring = (sRing_55B0*)gfx->mpDeferMan;
     if (ring->count < 0xA28) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
@@ -3161,8 +3157,8 @@ extern "C" void func_003955B0(sGfx_55B0* gfx, unsigned int buf, unsigned int nex
 //100%
 INCLUDE_ASM("render/font", func_00395658);
 #ifdef SKIP_ASM
-extern "C" int func_00395658(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18F0)));
+extern "C" int func_00395658(cPS2GraphicsMan* arg0) {
+    return ((int)arg0->mpDeferMan);
 }
 #endif
 //100%
@@ -3189,9 +3185,9 @@ INCLUDE_ASM("render/font", func_003956B0);
 #ifdef SKIP_ASM
 extern "C" void func_0037D968(void* self);
 
-extern "C" void func_003956B0(void* self)
+extern "C" void func_003956B0(cPS2GraphicsMan* self)
 {
-    if (*(int*)((char*)self + 0x6B90) == 0) {
+    if (self->mMatricesValid == 0) {
         func_0037D968(self);
     }
 }
@@ -3200,8 +3196,8 @@ extern "C" void func_003956B0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003956D8);
 #ifdef SKIP_ASM
-extern "C" int func_003956D8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x59C0)));
+extern "C" int func_003956D8(cPS2GraphicsMan* arg0) {
+    return (arg0->unk_59C0);
 }
 #endif
 
@@ -3219,9 +3215,9 @@ INCLUDE_ASM("render/font", func_003956E8);
 #ifdef SKIP_ASM
 // Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_003956E8(void* self)
+extern "C" void func_003956E8(cPS2GraphicsMan* self)
 {
-    char* top = *(char**)((char*)self + 0x13e4);
+    char* top = (char*)self->mCurrentView;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -3236,8 +3232,8 @@ extern "C" void func_003956E8(void* self)
         :
         : "r"(top + 0x40), "r"(top)
         : "memory");
-    *(char**)((char*)self + 0x13e4) += 0x40;
-    *(int*)((char*)self + 0x13e0) += 1;
+    *(char**)&self->mCurrentView += 0x40;
+    self->mViewDepth += 1;
 }
 #endif
 
@@ -3399,20 +3395,20 @@ static inline void Translate_5750(void* self, void* v)
 
 // Builds the view matrix on top of the stack: identity with y/z swapped, rotations about x, z, y,
 // then a translation by -pos.
-extern "C" void func_00395750(void* self, sVec_5750* pos, float rx, float ry, float rz)
+extern "C" void func_00395750(cPS2GraphicsMan* self, sVec_5750* pos, float rx, float ry, float rz)
 {
     LoadIdentity_5750(self);
-    (*(float**)((char*)self + 0x13e4))[5] = 0.0f;
-    (*(float**)((char*)self + 0x13e4))[9] = 1.0f;
-    (*(float**)((char*)self + 0x13e4))[6] = 1.0f;
-    (*(float**)((char*)self + 0x13e4))[10] = 0.0f;
+    ((float*)self->mCurrentView)[5] = 0.0f;
+    ((float*)self->mCurrentView)[9] = 1.0f;
+    ((float*)self->mCurrentView)[6] = 1.0f;
+    ((float*)self->mCurrentView)[10] = 0.0f;
     Rotate_5750(self, D_004FF140, -rx);
     Rotate_5750(self, D_004FF160, -ry);
     Rotate_5750(self, t4vect_YAxis, -rz);
     sVec_5750 v = Scale_5750(*pos, -1.0f);
     v.w = -v.w;
     Translate_5750(self, &v);
-    *(int*)((char*)self + 0x6b90) = 0;
+    self->mMatricesValid = 0;
 }
 #endif
 
@@ -3421,7 +3417,7 @@ INCLUDE_ASM("render/font", func_00395C38);
 #ifdef SKIP_ASM
 // Load matrix m into the top of the matrix stack and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_00395C38(void* self, void* m)
+extern "C" void func_00395C38(cPS2GraphicsMan* self, void* m)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3435,9 +3431,9 @@ extern "C" void func_00395C38(void* self, void* m)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(m)
+        : "r"((char*)self->mCurrentView), "r"(m)
         : "memory");
-    *(int*)((char*)self + 0x6b90) = 0;
+    self->mMatricesValid = 0;
 }
 #endif
 
@@ -3456,7 +3452,7 @@ INCLUDE_ASM("render/font", func_00395C70);
 // Multiply the top of the matrix stack by m in place (top = top * m) and clear
 // the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void func_00395C70(void* self, void* m)
+extern "C" void func_00395C70(cPS2GraphicsMan* self, void* m)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3490,9 +3486,9 @@ extern "C" void func_00395C70(void* self, void* m)
         "sqc2      $vf15, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(m)
+        : "r"((char*)self->mCurrentView), "r"(m)
         : "memory");
-    *(int*)((char*)self + 0x6b90) = 0;
+    self->mMatricesValid = 0;
 }
 #endif
 
@@ -3504,7 +3500,7 @@ extern char t4mat_Identity[];
 // Load the matrix t4mat_Identity (likely identity) into the top of the matrix stack
 // and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_00395CF0(void* self)
+extern "C" void func_00395CF0(cPS2GraphicsMan* self)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3518,9 +3514,9 @@ extern "C" void func_00395CF0(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(t4mat_Identity)
+        : "r"((char*)self->mCurrentView), "r"(t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x6b90) = 0;
+    self->mMatricesValid = 0;
 }
 #endif
 
@@ -3531,7 +3527,7 @@ INCLUDE_ASM("render/font", func_00395D28);
 // then clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
 // needs a C fallback.
-extern "C" void func_00395D28(void* self, void* v)
+extern "C" void func_00395D28(cPS2GraphicsMan* self, void* v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3547,9 +3543,9 @@ extern "C" void func_00395D28(void* self, void* v)
         "sqc2         $vf12, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(v)
+        : "r"((char*)self->mCurrentView), "r"(v)
         : "memory");
-    *(int*)((char*)self + 0x6b90) = 0;
+    self->mMatricesValid = 0;
 }
 #endif
 
@@ -3564,12 +3560,12 @@ extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void func_00395D60(void* self, float* axis, float angle)
+extern "C" void func_00395D60(cPS2GraphicsMan* self, float* axis, float angle)
 {
     sFontRotMat r;
     float s;
     float c;
-    char* top = *(char**)((char*)self + 0x13e4);
+    char* top = (char*)self->mCurrentView;
     func_0031BE50(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis[0];
@@ -3631,7 +3627,7 @@ extern "C" void func_00395D60(void* self, float* axis, float angle)
         :
         : "r"(top), "r"(&r)
         : "memory");
-    *(int*)((char*)self + 0x6b90) = 0;
+    self->mMatricesValid = 0;
 }
 #endif
 
@@ -3641,10 +3637,10 @@ extern "C" void* func_003826E0(void* self);
 INCLUDE_ASM("render/font", func_00395ED8);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (matrix * vector, clamp, clip flags read back from vi1).
-extern "C" int func_00395ED8(void* self, void* vec)
+extern "C" int func_00395ED8(cPS2GraphicsMan* self, void* vec)
 {
     long r;
-    if (*(int*)((char*)self + 0x6B90) == 0) {
+    if (self->mMatricesValid == 0) {
         func_0037D968(self);
     }
     __asm__ __volatile__(
@@ -3665,7 +3661,7 @@ extern "C" int func_00395ED8(void* self, void* vec)
         "vmtir      $vi1, $vf11w\n"
         "cfc2.ni    %0, $vi1\n"
         : "=&r"(r)
-        : "r"(self), "r"(vec), "r"((char*)self + 0x58A0)
+        : "r"(((void*)self)), "r"(vec), "r"((char*)self + 0x58A0)
         : "memory");
     return (int)r;
 }
@@ -3702,30 +3698,30 @@ void func_00395FA0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395FA8);
 #ifdef SKIP_ASM
-extern "C" int func_00395FA8(char* self, char* vec) {
+extern "C" int func_00395FA8(cPS2GraphicsMan* self, char* vec) {
     float x = *(float*)(vec + 0);
     int flags = 0;
-    if (x < *(float*)(self + 0x6B70)) {
+    if (x < self->unk_6B70.x) {
         flags = 2;
     }
-    if (*(float*)(self + 0x6B80) < x) {
+    if (self->unk_6B80.x < x) {
         flags |= 1;
     }
     float y = *(float*)(vec + 4);
-    if (y < *(float*)(self + 0x6B74)) {
+    if (y < self->unk_6B70.y) {
         flags |= 8;
     }
-    if (*(float*)(self + 0x6B84) < y) {
+    if (self->unk_6B80.y < y) {
         flags |= 4;
     }
     if (*(float*)(vec + 0xC) < 0.0f) {
         return flags ^ 0x2F;
     }
     float z = *(float*)(vec + 8);
-    if (*(float*)(self + 0x6B78) < z) {
+    if (self->unk_6B70.z < z) {
         flags |= 0x20;
     }
-    if (z < *(float*)(self + 0x6B88)) {
+    if (z < self->unk_6B80.z) {
         flags |= 0x10;
     }
     return flags;

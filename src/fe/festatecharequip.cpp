@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("fe/festatecharequip", cFE_cFE);
@@ -51,7 +52,6 @@ extern "C" void func_0036A020(void* p);
 extern "C" void func_002DBEE0(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
 extern "C" void func_001A0420(void* p, int flags);
-extern void* GrMan;
 extern void* D_0046D878[];
 extern void* D_0046D970[];
 extern void* cSimpleCamera_vtbl[];

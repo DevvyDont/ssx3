@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 struct cEffectLink {
     cEffectLink* next; // 0x0
@@ -783,7 +784,6 @@ extern "C" void* func_0034FB00(void* self, int a1, int a2, int a3);
 void func_00353DA8(void* self);
 extern "C" void func_00353E08(void* self, int a1, float len);
 extern "C" void cFlexBridgeNode_initSpringNodes(void* self);
-extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
 extern "C" void cFlexBridgeNode_updateGrid(void*);
 extern void* cFlexBridgeNode_vtbl[];
@@ -816,8 +816,8 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int a1, int a2, int
     sEffV3_346350 pts[4];
     sEffV2_346350 uv[4];
     sEffV4_346350 col[4];
-    sEffVE_346350* vt = *(sEffVE_346350**)(cGraphicsMan_TheGraphicsMan + 0x10D8);
-    vt[97].fn(cGraphicsMan_TheGraphicsMan + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
+    sEffVE_346350* vt = (sEffVE_346350*)cGraphicsMan_TheGraphicsMan->mVtbl;
+    vt[97].fn((char*)cGraphicsMan_TheGraphicsMan + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
     sEffV3_346350 d;
     d.x = pts[1].x - pts[0].x;
     d.y = pts[1].y - pts[0].y;
@@ -898,7 +898,6 @@ struct sRCtx_346568 {
     char pad[0x10D8];
     sRVEntry_346568* vt;
 };
-extern sRCtx_346568* D_004A5B80_346568 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
 {
@@ -913,7 +912,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
         cMemMan_free(*(void**)(self + 0x7C));
     }
     sBox_346568* box = (sBox_346568*)(self + 0x90);
-    D_004A5B80_346568->vt[77].fn((char*)D_004A5B80_346568 + D_004A5B80_346568->vt[77].delta, *(void**)(self + 0x78));
+    ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, *(void**)(self + 0x78));
     sBox_346568 old = *(sBox_346568*)(self + 0x90);
     sInst_346568* inst = *(sInst_346568**)(self + 0x18);
     sVec4_346568 t;

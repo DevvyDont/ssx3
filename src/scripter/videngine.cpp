@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -60,7 +61,6 @@ extern int D_00442918[];
 
 struct sVidObj { char pad0[0x10]; int state; };
 struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
-extern char* GrMan;
 
 struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
 struct sVtEnt { short delta; short index; void* fn; };
@@ -82,14 +82,14 @@ extern "C" int func_002839A8(sVidPlayer* self)
     if (s != 0 && s != 2) self->f14 = 1;
     func_002EA820(q);
     {
-        char* o = GrMan;
-        sVtEnt* vt = *(sVtEnt**)(o + 0x10D8);
-        self->f10 = *((int*(*)(void*))vt[42].fn)(o + vt[42].delta);
+        cPS2GraphicsMan* o = GrMan;
+        sVtEnt* vt = (sVtEnt*)o->mVtbl;
+        self->f10 = *((int*(*)(void*))vt[42].fn)((char*)o + vt[42].delta);
     }
     {
-        char* o = GrMan;
-        sVtEnt* vt = *(sVtEnt**)(o + 0x10D8);
-        ((void(*)(void*, int))vt[40].fn)(o + vt[40].delta, 0);
+        cPS2GraphicsMan* o = GrMan;
+        sVtEnt* vt = (sVtEnt*)o->mVtbl;
+        ((void(*)(void*, int))vt[40].fn)((char*)o + vt[40].delta, 0);
     }
     func_0029CE28(func_0028B180());
     return 1;

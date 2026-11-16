@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBD10);
@@ -165,10 +166,10 @@ public:
   virtual void v48b();
   virtual void v50(int);
 };
-extern Mgr_BEE0 *cGraphicsMan_TheGraphicsMan;
+extern Mgr_BEE0 *cGraphicsMan_TheGraphicsMan_seg_1DCD10 __asm__("cGraphicsMan_TheGraphicsMan");
 void operator_delete(int *);
 extern "C" void func_002DBEE0(int *self, int flags) {
-    Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan;
+    Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan_seg_1DCD10;
     int i;
     for (i = 0; i < 0x51; i++) {
         int *slot = (int*)((char*)m + 0xF50) + i;
@@ -218,21 +219,21 @@ struct RS_BF98 {
     int w4;
 };
 struct Ctx_BF98 { char pad[0xE84]; RS_BF98* top; char pad2[0xF60 - 0xE88]; int f60; };
-extern Ctx_BF98* GrMan;
+extern Ctx_BF98* GrMan_seg_1DCD10 __asm__("GrMan");
 extern char D_00537AC0[];
 struct VEnt_BF98 { short delta; short idx; void (*fn)(void*); };
 struct Obj_BF98 { int n; char* vt; };
 
 static inline void Push_BF98() {
-    Ctx_BF98* ctx = GrMan;
+    Ctx_BF98* ctx = GrMan_seg_1DCD10;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
 }
 static inline void Pop_BF98() {
-    GrMan->top--;
+    GrMan_seg_1DCD10->top--;
 }
 static inline void G3_BF98(int c, int f, int g, int e, int d) {
-    Ctx_BF98* ctx = GrMan;
+    Ctx_BF98* ctx = GrMan_seg_1DCD10;
     ctx->top->c = c;
     ctx->top->f = f;
     ctx->top->g = g;
@@ -245,7 +246,7 @@ extern "C" void func_002DBF98(Obj_BF98* self) {
         func_00418EF8_BF98(D_00537AC0, self->n, 8, func_002DC168);
         Push_BF98();
         {
-            Ctx_BF98* ctx = GrMan;
+            Ctx_BF98* ctx = GrMan_seg_1DCD10;
             int v = ctx->f60;
             ctx->top->h = 7;
             ctx->top->b = 2;
@@ -253,7 +254,7 @@ extern "C" void func_002DBF98(Obj_BF98* self) {
             *(short*)((char*)ctx->top + 0x10) = v;
         }
         {
-            Ctx_BF98* ctx = GrMan;
+            Ctx_BF98* ctx = GrMan_seg_1DCD10;
             ctx->top->a = 3;
             *(short*)((char*)ctx->top + 0x12) = -1;
         }

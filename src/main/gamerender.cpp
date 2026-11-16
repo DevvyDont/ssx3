@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -8,7 +9,6 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cCamera_cCamera(void* self, int idx);
 extern "C" void func_0015DFD8(void* self, int mode);
-extern char* GrMan;
 extern char D_0047B538[];
 
 struct sVECam22E3B8 {
@@ -92,7 +92,6 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
 //100%
 INCLUDE_ASM("main/gamerender", func_0022E550);
 #ifdef SKIP_ASM
-extern char* GrMan;
 
 class cDisp22E550 {
 public:

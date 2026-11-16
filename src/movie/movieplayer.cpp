@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "movie/mcoverlaymanager.h"
 #include "main/ssxapp.h"
 
@@ -4806,7 +4807,6 @@ struct sCam_25C0 {
     sCamVt_25C0* vt;        // 0x10D8
 };
 
-extern sCam_25C0* GrMan;
 
 typedef sMtx_25C0 (*tCamMtx_25C0)(void*);
 typedef sMtx_25C0* (*tCamMtxP_25C0)(void*);
@@ -4884,8 +4884,8 @@ static inline sVec4_25C0 mulT_25C0(const sMtx_25C0* m, const sVec4_25C0& v)
 
 static inline sMtx_25C0* camMtx_25C0()
 {
-    sCam_25C0* c = GrMan;
-    return ((tCamMtxP_25C0)c->vt[0x23].fn)((char*)c + c->vt[0x23].delta);
+    cPS2GraphicsMan* c = GrMan;
+    return ((tCamMtxP_25C0)((sCamVt_25C0*)c->mVtbl)[0x23].fn)((char*)c + ((sCamVt_25C0*)c->mVtbl)[0x23].delta);
 }
 
 extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
@@ -4894,8 +4894,8 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
     self->mask = 0;
     if (self->enabled == 0)
         return;
-    sCam_25C0* c = GrMan;
-    sMtx_25C0 mtx = ((tCamMtx_25C0)c->vt[0x2B].fn)((char*)c + c->vt[0x2B].delta);
+    cPS2GraphicsMan* c = GrMan;
+    sMtx_25C0 mtx = ((tCamMtx_25C0)((sCamVt_25C0*)c->mVtbl)[0x2B].fn)((char*)c + ((sCamVt_25C0*)c->mVtbl)[0x2B].delta);
     sVec4_25C0 p = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
     p = mulT_25C0(camMtx_25C0(), p);
     self->count = 0;
@@ -4917,8 +4917,8 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
               && bb->miny <= box.max.y && box.min.y <= bb->maxy
               && bb->minz <= box.max.z && box.min.z <= bb->maxz;
         if (ov) {
-            sCam_25C0* c2 = GrMan;
-            bool vis = !((tCamCull_25C0)c2->vt[0x5D].fn)((char*)c2 + c2->vt[0x5D].delta, &box.min, &box.max, &mtx);
+            cPS2GraphicsMan* c2 = GrMan;
+            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)c2->mVtbl)[0x5D].fn)((char*)c2 + ((sCamVt_25C0*)c2->mVtbl)[0x5D].delta, &box.min, &box.max, &mtx);
             if (vis) {
                 if (!(0.0f < vu0Dot_25C0(p, v->normal))) {
                     float d = vu0DistSq_25C0(p, v->pos);

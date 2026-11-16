@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
@@ -514,7 +515,6 @@ static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec
         : "memory");
 }
 
-extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("func_003281D0");
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off)
@@ -535,9 +535,9 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
             }
         }
     } else {
-        char* w = cGraphicsMan_TheGraphicsMan;
-        sVE87_281D0* vt = &(*(sVE87_281D0**)(w + 0x10D8))[87];
-        char* thisp = w + vt->delta;
+        cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
+        sVE87_281D0* vt = &((sVE87_281D0*)w->mVtbl)[87];
+        char* thisp = (char*)w + vt->delta;
         sVec4_281D0 v;
         float f = self->grid->levels[level].scale * self->unit;
         v.x = 1.0f;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -323,7 +324,6 @@ INCLUDE_ASM("fe/ovstatehud", func_001E95A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_00391E30_95A0(void* self, float x, float y, void* m) __asm__("func_00391E30");
-extern char* GrMan;
 
 struct sCol_E95A0 {
     float a, r, g, b;
@@ -481,9 +481,9 @@ extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sC
             p.z = 0.0f;
             p.w = 1.0f;
             v[3].pos = p;
-            *(short*)(*(char**)(GrMan + 0xE84) + 0x10) = texOf_E95A0(img);
-            sVEnt_E95A0* vt = *(sVEnt_E95A0**)(GrMan + 0x10D8);
-            vt[71].fn(GrMan + vt[71].delta, 4, v, 0);
+            *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
+            sVEnt_E95A0* vt = (sVEnt_E95A0*)GrMan->mVtbl;
+            vt[71].fn((char*)GrMan + vt[71].delta, 4, v, 0);
             pos[0] += wh.x;
         }
     }
@@ -543,7 +543,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern char* GrMan;
 
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
@@ -938,16 +937,16 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     for (int i = 0; i < 26; i++) {
         self->icons[i] = func_00398380(self->engine + 0x58, D_004C88D8[i]);
     }
-    cGfx_9AD0* gfx = (cGfx_9AD0*)GrMan;
-    self->mode = gfx->mode;
+    cPS2GraphicsMan* gfx = GrMan;
+    self->mode = gfx->_EffectTexMap[0];
     self->f490 = 0xDEEDDEED;
     {
-        sVEntry<unsigned int(void*, int)>* vt = *(sVEntry<unsigned int(void*, int)>**)(GrMan + 0x10D8);
-        self->scrW.set(vt[56].fn(GrMan + vt[56].delta, self->mode));
+        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
+        self->scrW.set(vt[56].fn((char*)GrMan + vt[56].delta, self->mode));
     }
     {
-        sVEntry<unsigned int(void*, int)>* vt = *(sVEntry<unsigned int(void*, int)>**)(GrMan + 0x10D8);
-        self->scrH.set(vt[57].fn(GrMan + vt[57].delta, self->mode));
+        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
+        self->scrH.set(vt[57].fn((char*)GrMan + vt[57].delta, self->mode));
     }
     self->w444[0] = findElem_9AD0(self->engine, D_004A2210);
     self->w444[1] = findElem_9AD0(self->engine, D_004A2208);
@@ -1150,12 +1149,11 @@ struct sHudVert_001F1190 {
 static inline int texOf_001F1190(cOVStateHUDElem* e) { return e->field_0x0; }
 
 struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1190*, int); };
-extern char* GrMan;
 
 extern "C" void func_001F1190(void* self, cOVStateHUDElem* e, float* pos, float* size, float* scale, float* color)
 {
     if (e != 0) {
-        *(short*)(*(char**)(GrMan + 0xE84) + 0x10) = texOf_001F1190(e);
+        *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_001F1190(e);
         sHudVert_001F1190 v[4];
         int a = (int)(color[0] * 128.0f);
         int r = (int)(color[1] * 128.0f);
@@ -1201,8 +1199,8 @@ extern "C" void func_001F1190(void* self, cOVStateHUDElem* e, float* pos, float*
         p.z = 0.0f;
         p.w = 1.0f;
         v[3].pos = p;
-        sVEnt_001F1190* vt = *(sVEnt_001F1190**)(GrMan + 0x10D8);
-        vt[71].fn(GrMan + vt[71].delta, 4, v, 0);
+        sVEnt_001F1190* vt = (sVEnt_001F1190*)GrMan->mVtbl;
+        vt[71].fn((char*)GrMan + vt[71].delta, 4, v, 0);
     }
 }
 #endif
@@ -1222,7 +1220,6 @@ struct sHudVert_001F1338 {
 };
 
 struct sVEnt_001F1338 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1338*, int); };
-extern char* GrMan;
 
 extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale, float* color)
 {
@@ -1263,9 +1260,9 @@ extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale,
     p.z = 0.0f;
     p.w = 1.0f;
     v[3].pos = p;
-    *(short*)(*(char**)(GrMan + 0xE84) + 0x10) = -1;
-    sVEnt_001F1338* vt = *(sVEnt_001F1338**)(GrMan + 0x10D8);
-    vt[71].fn(GrMan + vt[71].delta, 4, v, 0);
+    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
+    sVEnt_001F1338* vt = (sVEnt_001F1338*)GrMan->mVtbl;
+    vt[71].fn((char*)GrMan + vt[71].delta, 4, v, 0);
 }
 #endif
 
@@ -1547,7 +1544,7 @@ extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F1
         col = *color;
     }
     sVec4_001F1B30 t(col.r, 0.0f, 0.0f, 0.0f);
-    sRS_001F1B30* rs = *(sRS_001F1B30**)(GrMan + 0xE84);
+    sRS_001F1B30* rs = (sRS_001F1B30*)GrMan->m_pCurrentDrawState;
     rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
     font->tint = t;
@@ -1725,7 +1722,7 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
         col = *(sCol_001F1E28*)color;
         col.r = col.r * (1.0f - t);
     }
-    sRS_001F1E28* rs = *(sRS_001F1E28**)(GrMan + 0xE84);
+    sRS_001F1E28* rs = (sRS_001F1E28*)GrMan->m_pCurrentDrawState;
     rs->f8 = (rs->f8 & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
     font->color = col;
     float g0 = font->f30;
@@ -1809,7 +1806,7 @@ extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F1
         col = *color;
     }
     sVec4_001F22E8 t(col.r, 0.0f, 0.0f, 0.0f);
-    sRS_001F22E8* rs = *(sRS_001F22E8**)(GrMan + 0xE84);
+    sRS_001F22E8* rs = (sRS_001F22E8*)GrMan->m_pCurrentDrawState;
     rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
     font->tint = t;
@@ -1978,7 +1975,7 @@ extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElem
         col = *(sCol_001F25E0*)color;
         col.r = col.r * (1.0f - t);
     }
-    sRS_001F25E0* rs = *(sRS_001F25E0**)(GrMan + 0xE84);
+    sRS_001F25E0* rs = (sRS_001F25E0*)GrMan->m_pCurrentDrawState;
     rs->f8 = (rs->f8 & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
     font->color = col;
     float g0 = font->f30;
@@ -2049,7 +2046,7 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
     func_001E91A8(&defs[idx], &col);
     font->color = col;
     float fn = (float)n;
-    sRS_001F2AA0* rs = *(sRS_001F2AA0**)(GrMan + 0xE84);
+    sRS_001F2AA0* rs = (sRS_001F2AA0*)GrMan->m_pCurrentDrawState;
     rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     float lineH = (float)font->count * font->f34 * escale[1];
     float totalH = lineH * fn;
@@ -2145,7 +2142,7 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
     func_001E91A8(&defs[idx], &col);
     font->color = col;
     float fn = (float)n;
-    sRS_001F2DB0* rs = *(sRS_001F2DB0**)(GrMan + 0xE84);
+    sRS_001F2DB0* rs = (sRS_001F2DB0*)GrMan->m_pCurrentDrawState;
     rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     float lineH = (float)font->count * font->f34 * escale[1];
     float totalH = lineH * fn;
@@ -2355,7 +2352,6 @@ public:
     virtual void DrawSprite(const sVec4_31E0&, const sV2_31E0&, const sV2_31E0&, const sV2_31E0&, const sCol_31E0&);
 };
 
-extern cGfx_31E0* D_004A289C_31E0 __asm__("GrMan");
 
 struct sFont_001F31E0 {
     char pad0[0x14];
@@ -2391,31 +2387,31 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
     if (f < 0.0f) {
         f = -f;
     }
-    cGfx_31E0* g = D_004A289C_31E0;
-    g->stateTop[1] = g->stateTop[0];
-    g->stateTop++;
-    D_004A289C_31E0->BeginScene();
-    D_004A289C_31E0->Begin2D();
-    *D_004A289C_31E0->stateTop = D_00501420_31E0;
-    D_004A289C_31E0->stateTop->f4_23 = 2;
-    D_004A289C_31E0->stateTop->f4_20 = 0;
-    D_004A289C_31E0->stateTop->f4_12 = 0x14;
-    D_004A289C_31E0->stateTop->f4_2 = 5;
-    D_004A289C_31E0->SetTexture(t4mat_Identity);
+    cPS2GraphicsMan* g = GrMan;
+    ((cGfx_31E0*)g)->stateTop[1] = ((cGfx_31E0*)g)->stateTop[0];
+    ((cGfx_31E0*)g)->stateTop++;
+    ((cGfx_31E0*)GrMan)->BeginScene();
+    ((cGfx_31E0*)GrMan)->Begin2D();
+    *((cGfx_31E0*)GrMan)->stateTop = D_00501420_31E0;
+    ((cGfx_31E0*)GrMan)->stateTop->f4_23 = 2;
+    ((cGfx_31E0*)GrMan)->stateTop->f4_20 = 0;
+    ((cGfx_31E0*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_31E0*)GrMan)->stateTop->f4_2 = 5;
+    ((cGfx_31E0*)GrMan)->SetTexture(t4mat_Identity);
     {
-        sVEntry<void(void*, float, float, float, float, int)>* vt = *(sVEntry<void(void*, float, float, float, float, int)>**)((char*)D_004A289C_31E0 + 0x10D8);
-        char* thisp = (char*)D_004A289C_31E0 + vt[23].delta;
+        sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)GrMan->mVtbl;
+        char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)D_004A289C_31E0->GetWidth(), (float)D_004A289C_31E0->GetHeight(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_31E0*)GrMan)->GetWidth(), (float)((cGfx_31E0*)GrMan)->GetHeight(), 1);
     }
-    D_004A289C_31E0->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    ((cGfx_31E0*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
     self->font->color = sVec4_31E0(1.0f, 1.0f, 1.0f, 0.0f);
     self->font->SetScale(0.7f, 0.7f);
     self->font->color2 = sVec4_31E0(1.0f, 0.0f, 0.0f, 0.0f);
     self->font->scale = D_004A4EA8;
     float w = func_003921F0(self->font, self->text, 0, 0, self->font->f38, self->font->f3C);
     sVec4_31E0 pos(620.0f - w, 445.0f - (float)self->font->count * self->font->f34 * 0.35f, 0.0f, 1.0f);
-    D_004A289C_31E0->stateTop->f8_5 = 0x1F;
+    ((cGfx_31E0*)GrMan)->stateTop->f8_5 = 0x1F;
     func_00391E30(self->font, pos.x, pos.y, self->text);
     self->font->scale = sV2_31E0(2.0f, 2.0f);
     pos.x = pos.x - 17.0f;
@@ -2425,11 +2421,11 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
     sV2_31E0 uv1(1.0f, 1.0f);
     size.x = f * 18.0f;
     size.y = 18.0f;
-    *(short*)((char*)D_004A289C_31E0->stateTop + 0x10) = D_004A289C_31E0->GetF1068();
-    D_004A289C_31E0->DrawSprite(pos, size, uv0, uv1, sCol_31E0(1.0f, 1.0f, 1.0f, 1.0f));
-    D_004A289C_31E0->End2D();
-    D_004A289C_31E0->EndScene();
-    D_004A289C_31E0->stateTop--;
+    *(short*)((char*)((cGfx_31E0*)GrMan)->stateTop + 0x10) = ((cGfx_31E0*)GrMan)->GetF1068();
+    ((cGfx_31E0*)GrMan)->DrawSprite(pos, size, uv0, uv1, sCol_31E0(1.0f, 1.0f, 1.0f, 1.0f));
+    ((cGfx_31E0*)GrMan)->End2D();
+    ((cGfx_31E0*)GrMan)->EndScene();
+    ((cGfx_31E0*)GrMan)->stateTop--;
 }
 #endif
 

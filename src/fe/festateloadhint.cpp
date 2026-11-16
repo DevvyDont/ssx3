@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
@@ -384,7 +385,6 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* func_0039E510(void* self);
-extern void* cGraphicsMan_TheGraphicsMan;
 extern char D_004A2AC0[];
 extern char D_004A2AC8[];
 extern char D_004A2AD0[];
@@ -422,9 +422,9 @@ extern "C" void func_00246098(void* self)
                     sVEK246098* vt2 = *(sVEK246098**)(o + 8);
                     vt2[8].fn(o + vt2[8].delta, 1);
                 }
-                char* g = (char*)cGraphicsMan_TheGraphicsMan;
-                sVEK246098* vt3 = *(sVEK246098**)(g + 0x10D8);
-                vt3[8].fn(g + vt3[8].delta, 0);
+                cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+                sVEK246098* vt3 = (sVEK246098*)g->mVtbl;
+                vt3[8].fn((char*)g + vt3[8].delta, 0);
             }
         }
     }

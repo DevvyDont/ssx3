@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -148,10 +149,10 @@ public:
     virtual void v12();
 };
 
-extern "C" void func_00369C28(void* self)
+extern "C" void func_00369C28(cPS2GraphicsMan* self)
 {
     for (;;) {
-        sGmVEntryI_9C28* vt = *(sGmVEntryI_9C28**)((char*)self + 0x10D8);
+        sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
         if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
         (*(cGmApp_9C28**)(D_004A5B64 + 0x8))->v11();
         SYNCTASK_run(0);
@@ -170,9 +171,9 @@ struct sGfxVEntry95 {
     void (*fn)(void*, void*, int, void*, int, int, int, float);
 };
 
-extern "C" void func_00369CB0(void* self, void* obj, int a2, int a3, int a4)
+extern "C" void func_00369CB0(cPS2GraphicsMan* self, void* obj, int a2, int a3, int a4)
 {
-    sGfxVEntry95* vt = *(sGfxVEntry95**)((char*)self + 0x10D8);
+    sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
     vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, a2, a3, a4, 1.0f);
 }
 #endif
@@ -223,7 +224,7 @@ struct sGmVE_369CF8 {
 
 // cGraphicsMan::RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices,
 //     const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector& Offset)
-extern "C" void func_00369CF8(char* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* P,
+extern "C" void func_00369CF8(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* P,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
     sGmVert_369CF8 V[3];
@@ -243,8 +244,8 @@ extern "C" void func_00369CF8(char* self, int NumTris, int NumVerts, unsigned ch
                 V[j].uv.y = UV[Index].y();
             }
             Indices += 3;
-            sGmVE_369CF8* vt = *(sGmVE_369CF8**)(self + 0x10D8);
-            vt[71].fn(self + vt[71].delta, 3, V, 0);
+            sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
+            vt[71].fn(((char*)self) + vt[71].delta, 3, V, 0);
         }
     } else {
         for (int i = 0; i < NumTris; i++) {
@@ -260,8 +261,8 @@ extern "C" void func_00369CF8(char* self, int NumTris, int NumVerts, unsigned ch
                 V[j].uv.y = 0.0f;
             }
             Indices += 3;
-            sGmVE_369CF8* vt = *(sGmVE_369CF8**)(self + 0x10D8);
-            vt[71].fn(self + vt[71].delta, 3, V, 0);
+            sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
+            vt[71].fn(((char*)self) + vt[71].delta, 3, V, 0);
         }
     }
 }
@@ -278,9 +279,9 @@ void func_00369FF0(void* self)
 //100%
 INCLUDE_ASM("render/graphicsman", func_00369FF8);
 #ifdef SKIP_ASM
-extern "C" void func_00369FF8(void* self)
+extern "C" void func_00369FF8(cPS2GraphicsMan* self)
 {
-    char* vt = *(char**)((char*)self + 0x10D8);
+    char* vt = (char*)self->mVtbl;
     ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
 }
 #endif
@@ -288,9 +289,9 @@ extern "C" void func_00369FF8(void* self)
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036A020);
 #ifdef SKIP_ASM
-extern "C" void func_0036A020(void* self)
+extern "C" void func_0036A020(cPS2GraphicsMan* self)
 {
-    char* vt = *(char**)((char*)self + 0x10D8);
+    char* vt = (char*)self->mVtbl;
     ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
 }
 #endif
@@ -339,7 +340,7 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
 }
 
 // Evaluates the cubic (t^3, t^2, t, 1) * m at n evenly spaced t in [0, 1] and draws the points as one strip.
-extern "C" void func_0036A048(void* self, sV4_A048* m, float* color, int n)
+extern "C" void func_0036A048(cPS2GraphicsMan* self, sV4_A048* m, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
     int c0 = (int)(color[1] * 128.0f);
@@ -362,7 +363,7 @@ extern "C" void func_0036A048(void* self, sV4_A048* m, float* color, int n)
         verts[i].pos = pos;
         t += step;
     }
-    sGmVE_A048* vt = *(sGmVE_A048**)((char*)self + 0x10D8);
+    sGmVE_A048* vt = (sGmVE_A048*)self->mVtbl;
     vt[73].fn((char*)self + vt[73].delta, n, verts, 0);
 }
 #endif
@@ -515,9 +516,9 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
         : "memory");
 }
 
-extern "C" void func_0036A2C0(void* self, sGmMtx_A2C0* m)
+extern "C" void func_0036A2C0(cPS2GraphicsMan* self, sGmMtx_A2C0* m)
 {
-    if (*(int*)((char*)self + 0xA4) != 0) {
+    if (self->m_isInNIS[6] != 0) {
         sGmMtx_A2C0 t2;
         sGmVec4_A2C0 pos = m->r[3];
         sGmMtx_A2C0 tmp;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "vtable.h"
 #include "ui/uitext.h"
 
@@ -19,7 +20,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char D_00494078[];
 extern unsigned short D_004A47B0[];
 extern unsigned short D_00508750[];
-extern char* GrMan;
 
 struct sV2_05E8 {
     float x, y;
@@ -131,7 +131,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
     } else {
         font->shadowOfs = sV2_05E8(0.0f, 0.0f);
     }
-    int* d = (int*)(*(char**)(GrMan + 0xE84) + 8);
+    int* d = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *d = (*d & ~0x3E0) | (((((sLayerBits_05E8*)&self->flags14)->layer + 9) << 5) & 0x3E0);
     sV3_05E8 pos(self->x + x, self->y + y, 0.0f);
     int i = 0;
@@ -741,7 +741,6 @@ extern "C" float func_003921F0(void* font, int str, void* out, int flags, float 
 extern "C" void func_0039FEB8(void* self, void* pos, void* size);
 extern "C" void func_00391E30(void* font, float x, float y, int str);
 extern "C" void func_0039DA20(void* sb, int top, int rows, int count);
-extern char* GrMan;
 
 struct sV2_1588 {
     float x, y;
@@ -832,7 +831,7 @@ extern "C" void func_003A1588(sText_1588* self, float x, float y)
     } else {
         font->shadowOfs = sV2_1588(0.0f, 0.0f);
     }
-    int* d = (int*)(*(char**)(GrMan + 0xE84) + 8);
+    int* d = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *d = (*d & ~0x3E0) | (((((sLayerBits_1588*)&self->flags14)->layer + 9) << 5) & 0x3E0);
     sV3_1588 pos(self->x + x, self->y + y, 0.0f);
     float lineH = self->sy * ((float)font->height * font->scale.y) + 3.0f;
@@ -1205,7 +1204,6 @@ struct sSprite_20A0 {
     float v1;               // 0x18
 };
 // The unit declares GrMan as char*; typed view by asm label.
-extern sGfx_20A0* D_004A289C_20A0 __asm__("GrMan");
 extern int D_004A28AC_20A0 __asm__("D_004A28AC");
 extern "C" void func_0038E118(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
 extern "C" void func_0038E200(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
@@ -1216,7 +1214,7 @@ extern "C" void func_003A20A0(sSprite_20A0* o, sRect_20A0 r, sColor_20A0 c, int 
     if (tex < 0) {
         return;
     }
-    D_004A289C_20A0->top->tex = tex;
+    ((sRS_20A0*)GrMan->m_pCurrentDrawState)->tex = tex;
     float v0 = o->v0;
     float v1 = o->v1;
     float u0 = o->u0;
@@ -1288,7 +1286,6 @@ struct sSprite_2220 {
     float v1;               // 0x18
 };
 // The unit declares GrMan as char*; typed views by asm label.
-extern sGfx_2220* D_004A289C_2220 __asm__("GrMan");
 extern int D_004A28AC_2220 __asm__("D_004A28AC");
 extern void func_0038E118_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E118");
 extern void func_0038E200_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E200");
@@ -1297,7 +1294,7 @@ extern "C" void func_003A2220(sSprite_2220* o, sRect_2220 r, sColor_2220 c, int 
 {
     float k = 1.0f - t;
     int tex = o->tex;
-    D_004A289C_2220->top->tex = tex;
+    ((sRS_2220*)GrMan->m_pCurrentDrawState)->tex = tex;
     float v0 = o->v0;
     float v1 = o->v1;
     float u0 = o->u0;
@@ -1365,7 +1362,6 @@ struct sSprite_23B8 {
     float u1;               // 0x14
     float v1;               // 0x18
 };
-extern sGfx_23B8* D_004A289C_23B8 __asm__("GrMan");
 extern int D_004A28AC_23B8 __asm__("D_004A28AC");
 extern "C" void func_0038E5E8(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
@@ -1374,7 +1370,7 @@ extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_
 extern "C" void func_003A23B8(sSprite_23B8* o, sRect_23B8 r, sColor_23B8 c, int flags, float tx, float ty)
 {
     int tex = o->tex;
-    D_004A289C_23B8->top->tex = tex;
+    ((sRS_23B8*)GrMan->m_pCurrentDrawState)->tex = tex;
     float x0 = r.x;
     float y0 = r.y;
     float v0 = o->v0;
@@ -1515,7 +1511,6 @@ struct sSprite_2A00 {
     float v1;               // 0x18
 };
 // The unit declares GrMan as char*; typed views by asm label.
-extern sGfx_2A00* D_004A289C_2A00 __asm__("GrMan");
 extern int D_004A28AC_2A00 __asm__("D_004A28AC");
 extern "C" void func_0038E2E8(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
@@ -1523,7 +1518,7 @@ extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A
 extern "C" void func_003A2A00(sSprite_2A00* o, sRect_2A00 r, sMat3_2A00 m, sColor_2A00 c, int flags)
 {
     int tex = o->tex;
-    D_004A289C_2A00->top->tex = tex;
+    ((sRS_2A00*)GrMan->m_pCurrentDrawState)->tex = tex;
     float v0 = o->v0;
     float v1 = o->v1;
     float u0 = o->u0;
@@ -1599,7 +1594,6 @@ struct sSprite_2BC8 {
     float u1;               // 0x14
     float v1;               // 0x18
 };
-extern sGfx_2BC8* D_004A289C_2BC8 __asm__("GrMan");
 extern int D_004A28AC_2BC8 __asm__("D_004A28AC");
 extern "C" void func_0038E880(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 extern "C" void func_0038EA60(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
@@ -1610,7 +1604,7 @@ extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColo
     int j;
     float x;
     int tex = o->tex;
-    D_004A289C_2BC8->top->tex = tex;
+    ((sRS_2BC8*)GrMan->m_pCurrentDrawState)->tex = tex;
     float x0 = r.x;
     float y0 = r.y;
     float v0 = o->v0;

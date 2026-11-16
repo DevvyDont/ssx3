@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -1271,7 +1272,6 @@ struct sCtx_8A00 {
     sVE_8A00* vt;               // 0x10D8
 };
 
-extern sCtx_8A00* D_004A289C_8A00 __asm__("GrMan");
 extern int D_004A3A58;
 extern sOut_8A00 D_004D5B70_8A00[] __asm__("D_004D5B70");
 extern sMat_8A00 D_004FF1A0_8A00 __asm__("t4mat_Identity");
@@ -1412,8 +1412,8 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
     }
     sMat_8A00 m;
     CopyMat_8A00(&m, &D_004FF1A0_8A00);
-    PushRS_8A00(D_004A289C_8A00);
-    SetBits_8A00(D_004A289C_8A00->top->w1, 0x7C, 2, 1);
+    PushRS_8A00((sCtx_8A00*)GrMan);
+    SetBits_8A00(((sRS_8A00*)GrMan->m_pCurrentDrawState)->w1, 0x7C, 2, 1);
     if (D_004A3A58 != 0) {
         int i = 0;
         sRow_8A00 pos = node->obj->pos;
@@ -1432,9 +1432,9 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
             D_004D5B70_8A00[i].b = node->obj->recs[i].b;
             D_004D5B70_8A00[i].pos = pos;
         }
-        D_004A289C_8A00->vt[0x248 / 8].fn((char*)D_004A289C_8A00 + D_004A289C_8A00->vt[0x248 / 8].delta, (int)node->obj->count, D_004D5B70_8A00, 0);
+        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn((char*)GrMan + ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].delta, (int)node->obj->count, D_004D5B70_8A00, 0);
     }
-    D_004A289C_8A00->top--;
+    (*(sRS_8A00**)&GrMan->m_pCurrentDrawState)--;
 }
 #endif
 
@@ -1566,7 +1566,6 @@ public:
     virtual void v72();
     virtual void drawLines(int n, sAvVert_D8EA8* v, int f);
 };
-extern cRCtx_D8EA8* D_ctx_D8EA8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 class cRiderPos_D8EA8 {
 public:
@@ -1580,7 +1579,7 @@ public:
 extern "C" void tActiveAvalanche_render(void* slotv)
 {
     sAvSlot_D8EA8* slot = (sAvSlot_D8EA8*)slotv;
-    cRCtx_D8EA8* ctx = D_ctx_D8EA8;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (slot->group == 0)
         return;
     int i = 0;
@@ -1604,12 +1603,12 @@ extern "C" void tActiveAvalanche_render(void* slotv)
         D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
     }
-    sRState_D8EA8* top = ctx->top;
+    sRState_D8EA8* top = ((cRCtx_D8EA8*)ctx)->top;
     unsigned int w = top->f4;
     top->f4 = (w & 0xFE7FFFFF) | 0x1000000;
     int saved = (w & 0x1800000) >> 23;
-    ctx->drawLines(slot->group->nPairs, D_vtx_D8EA8, 0);
-    ctx->top->f4 = (ctx->top->f4 & 0xFE7FFFFF) | ((saved << 23) & 0x1800000);
+    ((cRCtx_D8EA8*)ctx)->drawLines(slot->group->nPairs, D_vtx_D8EA8, 0);
+    ((cRCtx_D8EA8*)ctx)->top->f4 = (((cRCtx_D8EA8*)ctx)->top->f4 & 0xFE7FFFFF) | ((saved << 23) & 0x1800000);
 }
 #endif
 
@@ -1671,7 +1670,6 @@ struct sCam_9130 {
     int cur;                    // 0x14
     float mats[4][4];           // 0x18
 };
-extern sRCtx_9130* cGraphicsMan_TheGraphicsMan;
 extern int D_004A41EC;
 extern sRState_9130 D_00501420;
 extern "C" void tActiveAvalanche_render(void* slot);
@@ -1684,22 +1682,22 @@ extern "C" void cAvalanche_render(void)
 {
     if ((D_004A3A30 != 0 && cAvalanche_m_resolved != 0) || D_004A41EC != 0)
     {
-        sRCtx_9130* ctx = cGraphicsMan_TheGraphicsMan;
+        cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
         float* view = getCam_9130()->views[getCam_9130()->cur];
-        ctx->top[1] = ctx->top[0];
-        ctx->top++;
-        *ctx->top = D_00501420;
-        setB5_9130(ctx, 7);
-        *(short*)((char*)ctx->top + 0x10) = -1;
-        ctx->setMatrix(getCam_9130()->mats[getCam_9130()->cur], 1);
-        ctx->setPos(view[0], view[1], view[2]);
-        ctx->setRot(view + 0x10);
+        ((sRCtx_9130*)ctx)->top[1] = ((sRCtx_9130*)ctx)->top[0];
+        ((sRCtx_9130*)ctx)->top++;
+        *((sRCtx_9130*)ctx)->top = D_00501420;
+        setB5_9130((sRCtx_9130*)ctx, 7);
+        *(short*)((char*)((sRCtx_9130*)ctx)->top + 0x10) = -1;
+        ((sRCtx_9130*)ctx)->setMatrix(getCam_9130()->mats[getCam_9130()->cur], 1);
+        ((sRCtx_9130*)ctx)->setPos(view[0], view[1], view[2]);
+        ((sRCtx_9130*)ctx)->setRot(view + 0x10);
         if (D_004A3A30 != 0)
         {
             for (int i = 0; i < 16; i++)
                 tActiveAvalanche_render(&cAvalanche_m_activeAvalanches[i]);
         }
-        ctx->top--;
+        ((sRCtx_9130*)ctx)->top--;
     }
 }
 #endif

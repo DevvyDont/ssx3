@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
@@ -18,7 +19,6 @@ extern "C" void cUIEngine_loadFile(void* engine, const char* name);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
-extern void* GrMan;
 extern int D_004A19C4;
 extern signed char D_00535C11[];
 extern char D_0047B698[];
@@ -86,9 +86,9 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cFELoadScreen_load(void* self)
 {
     {
-        char* g = (char*)GrMan;
-        sVE_233438* vt = *(sVE_233438**)(g + 0x10D8);
-        vt[44].fn(g + vt[44].delta, 0x100);
+        cPS2GraphicsMan* g = GrMan;
+        sVE_233438* vt = (sVE_233438*)g->mVtbl;
+        vt[44].fn((char*)g + vt[44].delta, 0x100);
     }
     void* eng = func_00397B08(cMemMan_alloc(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = eng;
@@ -156,9 +156,9 @@ struct sVE_3640 {
 
 static inline int loadTex_3640(char* data, const char* name)
 {
-    char* g = (char*)GrMan;
-    sVE_3640* vt = *(sVE_3640**)(g + 0x10D8);
-    return vt[46].fn(g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+    cPS2GraphicsMan* g = GrMan;
+    sVE_3640* vt = (sVE_3640*)g->mVtbl;
+    return vt[46].fn((char*)g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
 extern "C" void func_00233640(void* self, int type)
@@ -227,9 +227,9 @@ extern "C" void func_002338C8(void)
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     *p = 0;
-    char* g = (char*)GrMan;
-    sVE_38C8* vt = *(sVE_38C8**)(g + 0x10D8);
-    vt[15].fn(g + vt[15].delta, sVec3i_38C8(0, 0, 0));
+    cPS2GraphicsMan* g = GrMan;
+    sVE_38C8* vt = (sVE_38C8*)g->mVtbl;
+    vt[15].fn((char*)g + vt[15].delta, sVec3i_38C8(0, 0, 0));
     func_0028F768(func_0028B180());
 }
 #endif
@@ -291,7 +291,6 @@ struct cGame00233930 {
     virtual void v50(int id);
 };
 
-extern void* GrMan;
 extern "C" void func_00397B70(void* self, int a1);
 extern "C" void func_0036A020(void* self);
 extern "C" void* func_0028B180();
@@ -334,7 +333,6 @@ struct sVEntryV002339F8 {
     void (*fn)(void*);
 };
 
-extern void* GrMan;
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* engine);
 

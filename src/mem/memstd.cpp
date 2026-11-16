@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "online/commchannel.h"
 
 //100%
@@ -1589,7 +1590,6 @@ public:
     virtual void v18();
     virtual void v19();
 };
-extern cWorld002535F8* D_004A5B80_w __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sVEntry002535F8 {
     short delta;
@@ -1612,7 +1612,7 @@ extern "C" void func_002535F8(void* self)
 {
     sStream002535F8* s = (sStream002535F8*)self;
     if (s->f38 != 0 && s->f3C != 0) {
-        D_004A5B80_w->v19();
+        ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->v19();
     }
     if (s->f40 != 0 && s->fC != 0) {
         func_003B0680(*(void**)(s->f38 + 0x64), s->fC);
@@ -1642,7 +1642,6 @@ INCLUDE_ASM("mem/memstd", func_002536C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2E9C;
-extern int cGraphicsMan_TheGraphicsMan;
 extern "C" int func_003AE450(void* p, int a, int b);
 extern "C" void* func_00254368(void* a0, int a1, int a2, int a3);
 int func_003AE938(void*);
@@ -1657,7 +1656,7 @@ extern "C" void func_002536C8(void* self)
     *(int*)(s + 0xC) = func_003AE450(*(void**)(s + 0x38), 1, 0x21);
     *(int*)(s + 0x40) = 1;
     func_003AE938(*(void**)(s + 0x38));
-    *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), cGraphicsMan_TheGraphicsMan, *(int*)(s + 0x30));
+    *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(s + 0x30));
     func_003AE958_i(*(void**)(s + 0x38));
     D_004A2E9C++;
 }
@@ -1689,7 +1688,6 @@ struct sWorld_253748 {
     char pad[0x10D8];
     sVE0_253748* vt;            // 0x10D8
 };
-extern sWorld_253748* D_004A5B80_253748 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void func_00253748(void* self)
 {
@@ -1706,8 +1704,8 @@ extern "C" void func_00253748(void* self)
                 sVE1_253748* e = &(*(sVE1_253748**)(o + 4))[4];
                 e->fn(o + e->delta, s->fC);
             }
-            sVE0_253748* w = &D_004A5B80_253748->vt[20];
-            w->fn((char*)D_004A5B80_253748 + w->delta);
+            sVE0_253748* w = &((sVE0_253748*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
+            w->fn((char*)cGraphicsMan_TheGraphicsMan + w->delta);
             SYNCTASK_run(0);
             func_003E5398(0);
             if (func_003AE780(s->f38) != 0) {
@@ -2075,7 +2073,6 @@ struct sCtx_4410 {
     sVE_4410a* vt;
 };
 // PORT: the unit declares cGraphicsMan_TheGraphicsMan with other types; view bound by asm label
-extern sCtx_4410* D_004A5B80_4410 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sVE_4410b {
     short delta;
@@ -2108,9 +2105,9 @@ struct sTile_4410 {
     {
         w = 16;
         h = height;
-        sCtx_4410* g = D_004A5B80_4410;
-        tex = g->vt[47].fn((char*)g + g->vt[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
-        func_0037D090_6(g, tex, 0, 0, 0, 0);
+        cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+        tex = ((sVE_4410a*)g->mVtbl)[47].fn((char*)g + ((sVE_4410a*)g->mVtbl)[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
+        func_0037D090_6((sCtx_4410*)g, tex, 0, 0, 0, 0);
     }
 };
 
@@ -2198,7 +2195,6 @@ struct sRCtx_2547B8 {
     char pad[0x10D8];
     sRVEntry_2547B8* vt;
 };
-extern sRCtx_2547B8* D_004A5B80_2547B8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sTexCache_2547B8 {
     void* owner;
@@ -2216,7 +2212,7 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
     for (int i = 0; i < self->count; i++) {
         int* t = self->texs[i];
         if (t != 0) {
-            D_004A5B80_2547B8->vt[50].fn((char*)D_004A5B80_2547B8 + D_004A5B80_2547B8->vt[50].delta, *t);
+            ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].delta, *t);
             *t = -1;
             D_00509430.free(t);
         }
@@ -2338,7 +2334,6 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cWorld_2548D0* D_004A5B80_2548D0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char t4mat_Identity[];
 
 struct sMesh_2548D0 {
@@ -2404,7 +2399,7 @@ extern "C" void func_002548D0_impl(void* p)
                 float y = self->y + 0.5f + yoff;
                 float ch = (float)*wp * self->ch;
                 int id = *self->items[cell];
-                D_004A5B80_2548D0->top->f10 = id;
+                ((cWorld_2548D0*)cGraphicsMan_TheGraphicsMan)->top->f10 = id;
                 { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[0].pos = q; }
                 { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[1].pos = q; }
                 { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[2].pos = q; }
@@ -2480,7 +2475,6 @@ public:
     virtual void v49(int a, char* p, int b, int c, int d, int e, int f, int g, int h);
 };
 extern "C" void* func_002548D0(void* self);
-extern cWorld_254C48* D_004A5B80_254C48 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sMesh_254C48 {
     int f0;
@@ -2514,7 +2508,7 @@ extern "C" void func_00254C48(sMesh_254C48* self, void* res)
         int off = 0;
         for (int j = 0; j < self->cols; j++) {
             int* e = ((int**)self->items)[k];
-            D_004A5B80_254C48->v49(e[0], data + ((off << 6) + stride * (i << 6)), e[1], e[2], 0, 0, 0, 0, 0);
+            ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->v49(e[0], data + ((off << 6) + stride * (i << 6)), e[1], e[2], 0, 0, 0, 0, 0);
             k++;
             off += self->widths[j];
         }

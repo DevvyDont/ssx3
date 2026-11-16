@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -988,7 +989,7 @@ struct sTrail_EF950 {
     int len;                    // 0x14
 };
 
-extern sRsCtx_EF950* GrMan;
+extern sRsCtx_EF950* GrMan_renderstateman __asm__("GrMan");
 extern sRsState_EF950 D_00501420[];
 extern int cPowerUpFXToggles_m_TestTrickBoost;
 extern float D_004A3B74;
@@ -1093,23 +1094,23 @@ extern "C" void func_002EF950(sTrail_EF950* self)
     if (self->count < 2) {
         return;
     }
-    rsPush_EF950(GrMan);
-    *GrMan->top = D_00501420[0];
+    rsPush_EF950(GrMan_renderstateman);
+    *GrMan_renderstateman->top = D_00501420[0];
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
     if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < *(float*)(self->rider + 0x2EC)) {
         glow = 1;
         alpha = 1.0f;
-        *(short*)((char*)GrMan->top + 0x10) = rsTex1044_EF950(GrMan);
-        GrMan->top->f0 &= ~0xC;
+        *(short*)((char*)GrMan_renderstateman->top + 0x10) = rsTex1044_EF950(GrMan_renderstateman);
+        GrMan_renderstateman->top->f0 &= ~0xC;
         start = self->start;
     } else {
-        sRsCtx_EF950* c = GrMan;
+        sRsCtx_EF950* c = GrMan_renderstateman;
         c->top->f0 |= 0xC;
         *(short*)((char*)c->top + 0x10) = rsTex104C_EF950(c);
     }
-    sRsCtx_EF950* ctx = GrMan;
+    sRsCtx_EF950* ctx = GrMan_renderstateman;
     rsSetA_EF950(ctx, 0x400000, 22, 1);
     rsSetA_EF950(ctx, 0x1800000, 23, 0);
     rsSetA_EF950(ctx, 0x300000, 20, 0);
@@ -1166,11 +1167,11 @@ extern "C" void func_002EF950(sTrail_EF950* self)
         j--;
         t += 1.0f;
     }
-    sRsCtx_EF950* o = GrMan;
+    sRsCtx_EF950* o = GrMan_renderstateman;
     o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v1, 0);
-    o = GrMan;
+    o = GrMan_renderstateman;
     o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v2, 0);
-    rsPop_EF950(GrMan);
+    rsPop_EF950(GrMan_renderstateman);
 }
 #endif
 
@@ -1198,7 +1199,7 @@ struct sRSMan_002EFF98 {
     void* vt;
 };
 extern char cVisualEffectsMan_vtbl[];
-extern sRSEntry_002EFF98* cGraphicsMan_TheGraphicsMan;
+extern sRSEntry_002EFF98* cGraphicsMan_TheGraphicsMan_renderstateman __asm__("cGraphicsMan_TheGraphicsMan");
 struct sShadowCfg_002EFF98 {
     int texIndex;
 };
@@ -1229,7 +1230,7 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
     D_004A45D4.texIndex = 0x37;
     D_004A443C = 0x30;
     D_004A3B78 = self;
-    sRSEntry_002EFF98* e = cGraphicsMan_TheGraphicsMan;
+    sRSEntry_002EFF98* e = cGraphicsMan_TheGraphicsMan_renderstateman;
     e[1].f4 = 0x2E;
     e[2].f4 = 0x31;
     e[4].f4 = 0x2F;

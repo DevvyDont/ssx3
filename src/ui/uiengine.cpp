@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("ui/uiengine", UIAsciiToUnicode__FPUsPCc);
@@ -332,13 +333,13 @@ struct sVEntry398078 {
     short index;
     void (*fn)(void*, int);
 };
-extern void* GrMan;
+extern void* GrMan_uiengine __asm__("GrMan");
 
 extern "C" void func_00398078(void* self, int flags)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x8); i++) {
-        char* obj = (char*)GrMan;
+        char* obj = (char*)GrMan_uiengine;
         sVEntry398078* vt = *(sVEntry398078**)(obj + 0x10D8);
         vt[0x32].fn(obj + vt[0x32].delta, (*(int**)((char*)self + 0x4))[i]);
     }

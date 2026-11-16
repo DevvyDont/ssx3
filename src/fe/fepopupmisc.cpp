@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
@@ -211,7 +212,6 @@ struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel_us(cUIScreen* screen, int hash) __asm__("cUIScreen_getFrameByLabel__FP9cUIScreeni");
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0039F190(void* self, int a1);
-extern char* GrMan;
 extern char D_004A1550[];
 extern char D_004A1558[];
 extern char D_004A1560[];
@@ -330,8 +330,8 @@ extern "C" void cFEPopupScreenPos_onUpdate(sPopup_F050* self)
         }
         self->x = clamp_F050(self->x, -20, 20);
         self->y = clamp_F050(self->y, -20, 20);
-        sVEp_F050* rv = *(sVEp_F050**)(GrMan + 0x10D8);
-        rv[12].fn(GrMan + rv[12].delta, self->x, self->y);
+        sVEp_F050* rv = (sVEp_F050*)GrMan->mVtbl;
+        rv[12].fn((char*)GrMan + rv[12].delta, self->x, self->y);
         return;
     }
 }

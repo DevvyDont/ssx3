@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
@@ -89,7 +90,6 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* GrMan;
 
 extern "C" int func_00232488(void)
 {
@@ -209,7 +209,6 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* GrMan;
 
 extern "C" int func_00232650(void)
 {
@@ -373,7 +372,6 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* GrMan;
 
 extern "C" int func_00232820(void)
 {
@@ -419,7 +417,6 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* GrMan;
 
 extern "C" int func_002328A8(void)
 {
@@ -625,7 +622,6 @@ extern "C" int cUIEngine_loadFile(void* ui, const char* name);
 extern "C" void* func_00186A08(void* p, void* ui);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern void* GrMan;
 extern char D_0047B698[];
 extern char D_0047B9E0[];
 extern char D_0047B9F0[];
@@ -715,9 +711,9 @@ extern "C" void func_00232C98(void* self)
     clear_2C98(&D_004A4324);
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&D_004A43C8);
-    char* g = (char*)GrMan;
-    sVE_2C98* vt = *(sVE_2C98**)(g + 0x10D8);
-    vt[15].fn(g + vt[15].delta, sVec3i_2C98(0, 0, 0));
+    cPS2GraphicsMan* g = GrMan;
+    sVE_2C98* vt = (sVE_2C98*)g->mVtbl;
+    vt[15].fn((char*)g + vt[15].delta, sVec3i_2C98(0, 0, 0));
 }
 #endif
 
@@ -774,7 +770,6 @@ public:
 };
 extern "C" void func_00397B70(void* obj, int a);
 extern "C" void func_0036A020(void* world);
-extern void* GrMan;
 
 extern "C" void func_00232D50(void* self)
 {
@@ -817,7 +812,6 @@ public:
 };
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* obj);
-extern void* GrMan;
 
 extern "C" int func_00232DA8(void* self)
 {
@@ -847,7 +841,6 @@ extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 // PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
-extern void* GrMan;
 extern int D_004A19D8;
 extern int D_004A19DC;
 extern char D_0047B698[];
@@ -920,9 +913,9 @@ struct cLoadItemC_2E20 {
 
 extern "C" void func_00232E20(void* self)
 {
-    char* w = (char*)GrMan;
-    sVE_2E20* vt = *(sVE_2E20**)(w + 0x10D8);
-    vt[44].fn(w + vt[44].delta, 0x100);
+    cPS2GraphicsMan* w = GrMan;
+    sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
+    vt[44].fn((char*)w + vt[44].delta, 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
@@ -1001,7 +994,6 @@ extern char D_004A2C30[];
 extern char* D_00442928[];
 extern char* D_00442950[];
 extern int D_004A2B3C;
-extern char* D_004A289C_3048 __asm__("GrMan");
 
 struct sVE_3048 {
     short delta;
@@ -1011,9 +1003,9 @@ struct sVE_3048 {
 
 static inline int loadTex_3048(char* data, const char* name)
 {
-    char* g = D_004A289C_3048;
-    sVE_3048* vt = *(sVE_3048**)(g + 0x10D8);
-    return vt[46].fn(g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+    cPS2GraphicsMan* g = GrMan;
+    sVE_3048* vt = (sVE_3048*)g->mVtbl;
+    return vt[46].fn((char*)g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
 extern "C" void cGameLoadScreen_loadTexture(char* self)
@@ -1052,7 +1044,6 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
 #ifdef SKIP_ASM
-extern void* GrMan;
 extern int D_004A4324;
 extern "C" void func_00369FF8(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
@@ -1077,9 +1068,9 @@ extern "C" void func_00233260(void)
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     *p = 0;
-    char* g = (char*)GrMan;
-    sVE_3260* vt = *(sVE_3260**)(g + 0x10D8);
-    vt[15].fn(g + vt[15].delta, sVec3i_3260(0, 0, 0));
+    cPS2GraphicsMan* g = GrMan;
+    sVE_3260* vt = (sVE_3260*)g->mVtbl;
+    vt[15].fn((char*)g + vt[15].delta, sVec3i_3260(0, 0, 0));
     func_0028F768(func_0028B180());
 }
 #endif
@@ -1102,7 +1093,6 @@ extern "C" void func_0036A020(void* world);
 extern "C" void func_00397B70(void* obj, int a);
 extern "C" void* func_0028B180(void);
 extern "C" void func_0028FA98(void* self, float v);
-extern void* GrMan;
 
 class cWorld002332E8 {
 public:
@@ -1207,7 +1197,6 @@ public:
 };
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* obj);
-extern void* GrMan;
 
 extern "C" int func_00233390(void* self)
 {

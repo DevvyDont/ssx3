@@ -1,4 +1,6 @@
 #include "common.h"
+#include "camera/camera.h"
+#include "camera/race/racecontroller.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -11,16 +13,16 @@ typedef int cQuad128 __attribute__((mode(TI)));
 INCLUDE_ASM("camera/camera", cCamera_resetChaseControllerSwitches);
 #ifdef SKIP_ASM
 struct sCam162138;
-extern "C" void func_00162138(sCam162138* self);
+extern "C" void func_00162138(cChaseCameraController* self);
 
 extern "C" void cCamera_resetChaseControllerSwitches(void)
 {
     void* cam = SSXApp->Game;
     int* chase = *(int**)((char*)cam + 0x84);
     if (chase != 0) {
-        func_00162138(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8));
+        func_00162138((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8)));
         if (*chase >= 2) {
-            func_00162138(*(sCam162138**)(*(char**)((char*)chase + 8) + 0xA8));
+            func_00162138((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 8) + 0xA8)));
         }
     }
 }
@@ -33,7 +35,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0015D698(void* self);
 extern "C" void* func_00176D68(void* self);
 extern "C" void* cManualCameraController_cManualCameraController(void* self, void* cam);
-extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int idx, int a);
+extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int a);
 extern "C" void* cScriptCameraController_cScriptCameraController(void* self, int idx, void* cam);
 extern void* cCamera_vtbl[];
 extern const char D_0045B748[];
@@ -43,26 +45,26 @@ extern const char D_0045B778[];
 extern cQuad128 D_004FF160;
 extern cQuad128 D_004FF130;
 
-extern "C" void* cCamera_cCamera(void* self, int idx)
+extern "C" void* cCamera_cCamera(cCamera* self, int idx)
 {
     func_0015D698(self);
-    *(void***)((char*)self + 0x90) = cCamera_vtbl;
+    self->mVtbl = cCamera_vtbl;
     func_00176D68((char*)self + 0xC0);
-    *(void**)((char*)self + 0xA4) = cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, D_0045B748, 0, 0), self);
-    *(void**)((char*)self + 0xA8) = cChaseCameraController_cChaseCameraController(cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
-    *(void**)((char*)self + 0xAC) = cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, D_0045B778, 0, 0), idx, self);
-    *(int*)((char*)self + 0xB0) = -1;
-    *(int*)((char*)self + 0xB4) = 0;
-    *(int*)((char*)self + 0x454) = 0;
-    *(int*)((char*)self + 0x458) = 0;
-    *(int*)((char*)self + 0x45C) = 0;
-    *(int*)((char*)self + 0x450) = 0;
-    *(int*)((char*)self + 0x460) = 0;
-    *(cQuad128*)((char*)self + 0x470) = D_004FF160;
-    *(cQuad128*)((char*)self + 0x490) = D_004FF130;
-    *(int*)((char*)self + 0x4A4) = 1;
-    *(int*)((char*)self + 0x4A0) = 0;
-    return self;
+    self->ManualController = (cManualCameraController*)cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, D_0045B748, 0, 0), self);
+    self->ChaseController = (cChaseCameraController*)cChaseCameraController_cChaseCameraController((cChaseCameraController*)cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
+    self->ScriptController = (cScriptCameraController*)cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, D_0045B778, 0, 0), idx, self);
+    self->StreamFocusID = -1;
+    self->bStreamIsReady = 0;
+    *(int*)&self->MaxShakeVariance = 0;
+    self->DoingCamShake = 0;
+    self->DoingCamShakeLastFrame = 0;
+    self->DominantCamShakeType = 0;
+    *(int*)&self->LastGroundMove = 0;
+    *(cQuad128*)&self->LastGroundNormal = D_004FF160;
+    *(cQuad128*)&self->LastSafePosition = D_004FF130;
+    self->LastSafePositionInvalid = 1;
+    self->UsingSafePositionLastFrame = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -83,17 +85,17 @@ public:
 };
 
 // PORT: func_00176DA8__FPv is a destructor taking (self, flags); bind the 2-arg form.
-extern "C" void func_0015DD88(void* self, int flags)
+extern "C" void func_0015DD88(cCamera* self, int flags)
 {
-    *(void***)((char*)self + 0x90) = cCamera_vtbl;
-    func_0015CD60(*(cCamPartK2**)((char*)self + 0xA4));
-    func_0015CD60(*(cCamPartK2**)((char*)self + 0xA8));
-    func_0015CD60(*(cCamPartK2**)((char*)self + 0xAC));
-    delete *(cCamPartK2**)((char*)self + 0xA4);
-    delete *(cCamPartK2**)((char*)self + 0xA8);
-    delete *(cCamPartK2**)((char*)self + 0xAC);
+    self->mVtbl = cCamera_vtbl;
+    func_0015CD60((cCamPartK2*)self->ManualController);
+    func_0015CD60((cCamPartK2*)self->ChaseController);
+    func_0015CD60((cCamPartK2*)self->ScriptController);
+    delete (cCamPartK2*)self->ManualController;
+    delete (cCamPartK2*)self->ChaseController;
+    delete (cCamPartK2*)self->ScriptController;
     func_00176DA8_2((char*)self + 0xC0, 2);
-    *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
+    self->mVtbl = cSimpleCamera_vtbl;
     if (flags & 1)
     {
         operator_delete((int*)self);
@@ -107,9 +109,9 @@ INCLUDE_ASM("camera/camera", cCamera_init);
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg);
-extern "C" void func_00161A60(void* self, int* p);
+extern "C" void func_00161A60(cChaseCameraController* self, int* p);
 struct sCam162060;
-extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend);
+extern "C" void func_00162060(cChaseCameraController* self, int mode, int arg, float blend);
 void func_00162310(void* self, int val);
 void* func_0015E030(void* self);
 extern const char D_0045B790[];
@@ -174,8 +176,8 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, fl
     sRiderRef_15DE60* p = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
     p->vt = D_0045B7A8;
     p->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (idx << 2) + 0x28);
-    func_00161A60(self->chase, (int*)p);
-    func_00162060((sCam162060*)self->chase, 0x4C, 0, 1.0f);
+    func_00161A60((cChaseCameraController*)self->chase, (int*)p);
+    func_00162060((cChaseCameraController*)((sCam162060*)self->chase), 0x4C, 0, 1.0f);
     func_00162310((char*)self + 0xC0, (int)p);
     func_0015E030(self);
     self->f454 = 0;
@@ -207,9 +209,9 @@ public:
 
 extern "C" void* func_0015E668(void* self);
 
-extern "C" void func_0015DF98(void* self)
+extern "C" void func_0015DF98(cCamera* self)
 {
-    (*(cCamVObj_0015DF98**)((char*)self + 0xA0))->v02();
+    ((cCamVObj_0015DF98*)self->Controller)->v02();
     func_0015E668(self);
 }
 #endif
@@ -217,17 +219,17 @@ extern "C" void func_0015DF98(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_0015DFD8);
 #ifdef SKIP_ASM
-extern "C" void func_0015DFD8(void* self, int mode)
+extern "C" void func_0015DFD8(cCamera* self, int mode)
 {
     switch (mode) {
     case 1:
-        *(int*)((char*)self + 0xA0) = *(int*)((char*)self + 0xA4);
+        self->Controller = (cCameraController*)((int)self->ManualController);
         break;
     case 2:
-        *(int*)((char*)self + 0xA0) = *(int*)((char*)self + 0xA8);
+        self->Controller = (cCameraController*)((int)self->ChaseController);
         break;
     case 3:
-        *(int*)((char*)self + 0xA0) = *(int*)((char*)self + 0xAC);
+        self->Controller = (cCameraController*)((int)self->ScriptController);
         break;
     }
 }
@@ -493,7 +495,7 @@ extern sCamShake_E360 D_004C53E0_E360[] __asm__("D_004C53E0");
 
 // Requests a camera shake of 'type' with strength 'amount' at 'dist' from the camera; keeps the strongest request.
 // Replays ignore types 1-4.
-extern "C" void func_0015E360(char* self, int type, float amount, float dist)
+extern "C" void func_0015E360(cCamera* self, int type, float amount, float dist)
 {
     int state = *(int*)SSXApp->Game->Replay;
     int replay = state != 0 && state < 10;
@@ -509,11 +511,11 @@ extern "C" void func_0015E360(char* self, int type, float amount, float dist)
         scale = 1.0f;
     }
     float v = amount * scale * D_004C53E0_E360[type].weight;
-    if (*(float*)(self + 0x454) < v) {
-        *(int*)(self + 0x450) = type;
-        *(float*)(self + 0x454) = v;
+    if (self->MaxShakeVariance < v) {
+        self->DominantCamShakeType = type;
+        self->MaxShakeVariance = v;
     }
-    *(int*)(self + 0x458) = 1;
+    self->DoingCamShake = 1;
 }
 #endif
 
@@ -564,9 +566,9 @@ extern "C" void func_00165938(char* self, int flag, int sel, float base, float s
 extern "C" void func_001656B0_E460(char* self, float base, float spread, float r) __asm__("func_001656B0");
 extern "C" void func_0015E360_E460(char* self, int type, float amount, float dist) __asm__("func_0015E360");
 
-extern "C" void func_0015E460(char* self)
+extern "C" void func_0015E460(cCamera* self)
 {
-    char* tgt = *(char**)(*(char**)(self + 0xA8) + 0x20);
+    char* tgt = *(char**)((char*)self->ChaseController + 0x20);
     sVEntry<float(void*)>* vf = *(sVEntry<float(void*)>**)tgt;
     float spd = vf[0x11].fn(tgt + vf[0x11].delta);
     if (((D_004A2A50 & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
@@ -583,24 +585,24 @@ extern "C" void func_0015E460(char* self)
             k = 0.0f;
         }
         if (spd > 0.699999988079071f)
-            func_0015E360_E460(self, 3, k, 0.0f);
+            func_0015E360_E460(((char*)self), 3, k, 0.0f);
         else if (spd > 0.4000000059604645f)
-            func_0015E360_E460(self, 2, k, 0.0f);
+            func_0015E360_E460(((char*)self), 2, k, 0.0f);
         else
-            func_0015E360_E460(self, 1, k, 0.0f);
+            func_0015E360_E460(((char*)self), 1, k, 0.0f);
     }
-    int idx = *(int*)(self + 0x450);
+    int idx = self->DominantCamShakeType;
     float f21 = D_004C53E0_E460[idx].base;
     float f22 = D_004C53E0_E460[idx].spread;
     int sel = D_004C5430[idx];
-    char* p = self + 0xC0;
-    float t = *(float*)(self + 0x454);
-    if (*(int*)(self + 0x458) != 0 && *(int*)(self + 0x45C) == 0)
+    char* p = ((char*)self) + 0xC0;
+    float t = self->MaxShakeVariance;
+    if (self->DoingCamShake != 0 && self->DoingCamShakeLastFrame == 0)
         func_001656B0_E460(p, f21, f22, t);
-    func_00165938(p, *(int*)(self + 0x458), sel, f21, f22, t);
-    *(int*)(self + 0x45C) = *(int*)(self + 0x458);
-    *(int*)(self + 0x458) = 0;
-    *(int*)(self + 0x454) = 0;
+    func_00165938(p, self->DoingCamShake, sel, f21, f22, t);
+    self->DoingCamShakeLastFrame = self->DoingCamShake;
+    self->DoingCamShake = 0;
+    *(int*)&self->MaxShakeVariance = 0;
 }
 #endif
 
@@ -972,24 +974,24 @@ static inline float clamp_15EC98(float v, float lo, float hi)
     return r;
 }
 
-extern "C" void func_0015EC98(char* self)
+extern "C" void func_0015EC98(cCamera* self)
 {
     float r;
     if (*(int*)((char*)SSXApp->Game->ViewMan + 0x10) == 1)
-        r = *(float*)(self + 0x8);
+        r = self->Far;
     else
-        r = clamp_15EC98(*(float*)(self + 0x8), 0.0f, 15000.0f);
+        r = clamp_15EC98(self->Far, 0.0f, 15000.0f);
     float r15 = r * 1.5f;
     float far = clamp_15EC98(r * 0.6666666865348816f, 15000.0f, 30000.0f);
     cWorld* sys = cWorld_m_pTheWorld;
-    ((sWorld_15EC98*)(char*)sys->m_pWorldCache)->slots[*(int*)(self + 0xB0)].active = 1;
-    func_003A9658((char*)sys->m_pWorldCache + 0x10, *(int*)(self + 0xB0), (sVec4_15EC98*)(self + 0x20), r15);
-    *(int*)(self + 0xB4) = 0;
+    ((sWorld_15EC98*)(char*)sys->m_pWorldCache)->slots[self->StreamFocusID].active = 1;
+    func_003A9658((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, (sVec4_15EC98*)(((char*)self) + 0x20), r15);
+    self->bStreamIsReady = 0;
     sVec4_15EC98 pos;
     float t;
-    if (func_003A96E0((char*)sys->m_pWorldCache + 0x10, *(int*)(self + 0xB0), &pos, &t)) {
+    if (func_003A96E0((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, &pos, &t)) {
         if (far <= t || r <= t)
-            *(int*)(self + 0xB4) = 1;
+            self->bStreamIsReady = 1;
     }
 }
 #endif
@@ -1007,11 +1009,11 @@ public:
     virtual void v04();
 };
 
-extern "C" void func_0015EDC8(void* self, int value)
+extern "C" void func_0015EDC8(cCamera* self, int value)
 {
-    char* obj = *(char**)((char*)self + 0xA8);
+    char* obj = (char*)self->ChaseController;
     *(int*)(*(char**)(obj + 0x20) + 0x4) = value;
-    (*(cCamVObj_0015EDC8**)((char*)self + 0xA8))->v04();
+    ((cCamVObj_0015EDC8*)self->ChaseController)->v04();
 }
 #endif
 
@@ -3356,17 +3358,17 @@ struct cChaseCameraController_switchCamera_HardReset_flags {
 
 extern int persistentPlayerChoiceType[2];
 
-extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int i)
+extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraController* self, int i)
 {
-    *(int*)((char*)self + 0x1C) = 0x3D;
-    *(int*)((char*)self + 0x38) = 0;
+    self->PreferredChaseAlgoLastFrame = 0x3D;
+    *(int*)&self->TimeSinceLastSuggestedVolumeTrigger = 0;
     ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b1 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b0 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b2 = 0;
-    *(int*)((char*)self + 0x3C) = 0;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x2C) = 0x3D;
-    *(int*)((char*)self + 0x24) = persistentPlayerChoiceType[i];
-    *(int*)((char*)self + 0x28) = 0x3D;
-    *(int*)((char*)self + 0x34) = 0;
+    self->GoingSlow = 0;
+    self->NumFramesSlowGround = 0;
+    self->CamSwitchRecord.LatestReplayType = 0x3D;
+    self->CamSwitchRecord.PlayerChoiceType = persistentPlayerChoiceType[i];
+    self->CamSwitchRecord.VolumeType = 0x3D;
+    self->CamSwitchRecord.TriggerAction = 0;
 }
 #endif
 
@@ -3375,17 +3377,17 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_cChaseCameraController);
 #ifdef SKIP_ASM
 extern void* cChaseCameraController_vtbl[];
 extern "C" void* cCameraController_cCameraController(void* self, int a);
-extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int idx);
+extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraController* self, int idx);
 
-extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int idx, int a)
+extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int a)
 {
     cCameraController_cCameraController(self, a);
-    *(void***)((char*)self + 0x14) = cChaseCameraController_vtbl;
-    *(int*)((char*)self + 0x0) = 2;
-    *(int*)((char*)self + 0x4) = 1;
-    *(int*)((char*)self + 0x20) = 0;
+    self->mVtbl = cChaseCameraController_vtbl;
+    self->Type = 2;
+    self->BlendType = 1;
+    self->Target = 0;
     cChaseCameraController_switchCamera_HardReset(self, idx);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3396,10 +3398,10 @@ extern void* cChaseCameraController_vtbl[];
 void operator_delete(int* ptr);
 extern "C" void cCameraController__cCameraController(void* self, int flags);
 
-extern "C" void cChaseCameraController__cChaseCameraController(void* self, int flags)
+extern "C" void cChaseCameraController__cChaseCameraController(cChaseCameraController* self, int flags)
 {
-    *(void***)((char*)self + 0x14) = cChaseCameraController_vtbl;
-    operator_delete(*(int**)((char*)self + 0x20));
+    self->mVtbl = cChaseCameraController_vtbl;
+    operator_delete((int*)self->Target);
     cCameraController__cCameraController(self, flags);
 }
 #endif
@@ -3409,21 +3411,21 @@ INCLUDE_ASM("camera/camera", func_00161A60);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_00161A60(void* self, int* p)
+extern "C" void func_00161A60(cChaseCameraController* self, int* p)
 {
-    int* old = *(int**)((char*)self + 0x20);
+    int* old = (int*)self->Target;
     if (old != 0) {
         operator_delete(old);
     }
-    *(int**)((char*)self + 0x20) = p;
+    self->Target = (cRiderCameraTarget*)p;
 }
 #endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00161AA0);
 #ifdef SKIP_ASM
-extern "C" int func_00161AA0(void *arg0) {
-    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x20)))) + (4)));
+extern "C" int func_00161AA0(cChaseCameraController* arg0) {
+    return (*(int *)((char*)((arg0->Target)) + (4)));
 }
 #endif
 
@@ -3431,9 +3433,9 @@ extern "C" int func_00161AA0(void *arg0) {
 INCLUDE_ASM("camera/camera", func_00161AB0);
 #ifdef SKIP_ASM
 struct sCam162138;
-extern "C" void func_00161EF0(void* self, int v);
-extern "C" void func_001621A8(sCam162138* self);
-extern "C" void func_00162218(sCam162138* self);
+extern "C" void func_00161EF0(cChaseCameraController* self, int v);
+extern "C" void func_001621A8(cChaseCameraController* self);
+extern "C" void func_00162218(cChaseCameraController* self);
 int func_0011FE98(void*);
 
 struct sCamVec4_161AB0
@@ -3470,22 +3472,22 @@ static inline float vlength_161AB0(const sCamVec4_161AB0& v)
     return r;
 }
 
-extern "C" void func_00161AB0(char* self)
+extern "C" void func_00161AB0(cChaseCameraController* self)
 {
     int mode = 0x3D;
-    if (*(int*)(self + 0x1C) != mode && *(int*)(self + 0x18) != 0x4A)
+    if (self->PreferredChaseAlgoLastFrame != mode && self->LatestAlgoType != 0x4A)
         func_00161EF0(self, mode);
-    *(int*)(self + 0x1C) = mode;
-    float speed = vlength_161AB0((*(cCamRider_161AB0**)(self + 0x20))->getVelocity()) * 0.035999998450279236f;
-    int boarding = func_0011FE98(*(void**)(*(char**)(self + 0x20) + 4)) == 5;
-    if (*(int*)(self + 0x3C) == 0) {
+    self->PreferredChaseAlgoLastFrame = mode;
+    float speed = vlength_161AB0(((cCamRider_161AB0*)self->Target)->getVelocity()) * 0.035999998450279236f;
+    int boarding = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5;
+    if (self->GoingSlow == 0) {
         if (boarding) {
-            *(int*)(self + 0x3C) = 1;
-            func_001621A8((sCam162138*)self);
+            self->GoingSlow = 1;
+            func_001621A8(self);
         }
     } else if (speed > 35.0f) {
-        *(int*)(self + 0x3C) = 0;
-        func_00162218((sCam162138*)self);
+        self->GoingSlow = 0;
+        func_00162218(self);
     }
 }
 #endif
@@ -3494,7 +3496,7 @@ extern "C" void func_00161AB0(char* self)
 INCLUDE_ASM("camera/camera", cChaseCameraController_update);
 #ifdef SKIP_ASM
 struct sCam162060;
-extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend);
+extern "C" void func_00162060(cChaseCameraController* self, int mode, int arg, float blend);
 extern int D_004A2A50;
 
 class cCamAlgo_161BB8 {
@@ -3562,11 +3564,11 @@ static inline int InRace_161BB8(int* st)
     return *st && *st < 10;
 }
 
-extern "C" void cChaseCameraController_update(char* self)
+extern "C" void cChaseCameraController_update(cChaseCameraController* self)
 {
     if ((D_004A2A50 & 1) == 0) {
         func_00161AB0(self);
-        sAlgoNode_161BB8* n = (*(sAlgoList_161BB8**)(self + 0x8))->head;
+        sAlgoNode_161BB8* n = ((sAlgoList_161BB8*)self->AlgorithmList)->head;
         n->algo->v09(0);
         float rate = n->rate;
         Smooth_161BB8(n, Approach_161BB8(n->weight, 1.0f, rate));
@@ -3576,7 +3578,7 @@ extern "C" void cChaseCameraController_update(char* self)
             if (n->algo->type == 0x4A)
                 n->weight = 0.0f;
             if (n->weight <= 0.0f || n->blend <= 0.0f) {
-                n = func_0015CA50(*(sAlgoList_161BB8**)(self + 0x8), n);
+                n = func_0015CA50((sAlgoList_161BB8*)self->AlgorithmList, n);
             } else {
                 n->algo->v09(1);
                 n = n->next;
@@ -3586,15 +3588,15 @@ extern "C" void cChaseCameraController_update(char* self)
     int* st = (int*)SSXApp->Game->Replay;
     int idle = InRace_161BB8(st) && st[0x484 / 4] == 0;
     if (idle)
-        *(float*)(self + 0x38) = 0.0f;
-    if (InRace_161BB8(st) && *(int*)(self + 0x2C) == 0x5D && *(int*)(self + 0x18) != *(int*)(self + 0x24)) {
-        *(float*)(self + 0x38) += 0.01666666753590107f;
-        if (*(float*)(self + 0x38) > 10.0f) {
-            *(float*)(self + 0x38) = 0.0f;
-            func_00162060((sCam162060*)self, *(int*)(self + 0x24), 0, 1.0f);
+        self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
+    if (InRace_161BB8(st) && self->CamSwitchRecord.LatestReplayType == 0x5D && self->LatestAlgoType != self->CamSwitchRecord.PlayerChoiceType) {
+        self->TimeSinceLastSuggestedVolumeTrigger += 0.01666666753590107f;
+        if (self->TimeSinceLastSuggestedVolumeTrigger > 10.0f) {
+            self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
+            func_00162060(self, self->CamSwitchRecord.PlayerChoiceType, 0, 1.0f);
         }
     } else {
-        *(float*)(self + 0x38) = 0.0f;
+        self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
     }
 }
 #endif
@@ -3605,18 +3607,18 @@ INCLUDE_ASM("camera/camera", func_00161E58);
 extern "C" void cCameraAlgoList_insert(void* list, void* algo, int b, float w);
 extern "C" void func_0015CB08(void* list);
 
-extern "C" void func_00161E58(void* self, void* algo, float w)
+extern "C" void func_00161E58(cChaseCameraController* self, void* algo, float w)
 {
-    *(int*)((char*)self + 0x18) = *(int*)((char*)algo + 0xC);
-    void* list = *(void**)((char*)self + 0x8);
+    self->LatestAlgoType = *(int*)((char*)algo + 0xC);
+    void* list = self->AlgorithmList;
     if (*(int*)((char*)list + 0x4) == 0) {
         cCameraAlgoList_insert(list, algo, 1, 1.0f);
         return;
     }
     if (w == 1.0f) {
-        func_0015CB08(*(void**)((char*)self + 0x8));
+        func_0015CB08(self->AlgorithmList);
     }
-    cCameraAlgoList_insert(*(void**)((char*)self + 0x8), algo, 1, w);
+    cCameraAlgoList_insert(self->AlgorithmList, algo, 1, w);
 }
 #endif
 
@@ -3626,10 +3628,10 @@ INCLUDE_ASM("camera/camera", func_00161EF0);
 extern int persistentPlayerChoiceType[2];
 extern "C" void* func_0015D050(void*, int, int);
 
-extern "C" void func_00161EF0(void* self, int v)
+extern "C" void func_00161EF0(cChaseCameraController* self, int v)
 {
-    *(int*)((char*)self + 0x24) = v;
-    persistentPlayerChoiceType[*(int*)(*(char**)(*(char**)((char*)self + 0x20) + 0x4) + 0x870)] = v;
+    self->CamSwitchRecord.PlayerChoiceType = v;
+    persistentPlayerChoiceType[*(int*)(*(char**)((char*)self->Target + 0x4) + 0x870)] = v;
     if ((*(int*)((char*)self + 0x30) & 7) == 0) {
         func_0015D050(self, v, 0);
     }
@@ -3653,40 +3655,40 @@ struct sCam161F50 {
 
 extern "C" void* func_0015D050(void*, int, int);
 
-extern "C" void func_00161F50(sCam161F50* self)
+extern "C" void func_00161F50(cChaseCameraController* self)
 {
     int mode;
-    self->b1 = 0;
-    self->b0 = 0;
+    ((sCam161F50*)self)->b1 = 0;
+    ((sCam161F50*)self)->b0 = 0;
     mode = 0x42;
-    if (!self->b2) {
-        mode = self->field_0x24;
+    if (!((sCam161F50*)self)->b2) {
+        mode = self->CamSwitchRecord.PlayerChoiceType;
     }
-    func_0015D050(self, mode, self->field_0x34);
+    func_0015D050(((sCam161F50*)self), mode, (int)self->CamSwitchRecord.TriggerAction);
 }
 #endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00161FA0);
 #ifdef SKIP_ASM
-extern "C" void func_00161FA0(void* self, int mode)
+extern "C" void func_00161FA0(cChaseCameraController* self, int mode)
 {
     int flags = *(int*)((char*)self + 0x30) | 2;
     *(int*)((char*)self + 0x30) = flags;
     if (mode == 0x4C) {
-        mode = *(int*)((char*)self + 0x24);
+        mode = self->CamSwitchRecord.PlayerChoiceType;
         func_0015D050(self, mode, 0);
     } else if (mode == 0x5D) {
         if (flags & 1)
-            func_0015D050(self, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x34));
+            func_0015D050(self, self->CamSwitchRecord.VolumeType, (int)self->CamSwitchRecord.TriggerAction);
         else if (flags & 4)
             func_0015D050(self, 0x42, 0);
         else
-            func_0015D050(self, *(int*)((char*)self + 0x24), 0);
+            func_0015D050(self, self->CamSwitchRecord.PlayerChoiceType, 0);
     } else {
         func_0015D050(self, mode, 0);
     }
-    *(int*)((char*)self + 0x2C) = mode;
+    self->CamSwitchRecord.LatestReplayType = mode;
 }
 #endif
 
@@ -3707,19 +3709,19 @@ struct sCam162060 {
 
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
-extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend)
+extern "C" void func_00162060(cChaseCameraController* self, int mode, int arg, float blend)
 {
     if (mode == 0x4C) {
-        self->b0 = 0;
-        mode = self->field_0x24;
+        ((sCam162060*)self)->b0 = 0;
+        mode = self->CamSwitchRecord.PlayerChoiceType;
     } else {
-        self->field_0x28 = mode;
-        self->b0 = 1;
-        self->field_0x34 = arg;
+        self->CamSwitchRecord.VolumeType = mode;
+        ((sCam162060*)self)->b0 = 1;
+        self->CamSwitchRecord.TriggerAction = (cCTAction*)arg;
     }
-    int ok = !self->b1 ? 1 : self->field_0x2C == 0x5D;
+    int ok = !((sCam162060*)self)->b1 ? 1 : self->CamSwitchRecord.LatestReplayType == 0x5D;
     if (ok) {
-        cChaseCameraController_createChaseAlgorithmBlend(self, mode, arg, blend);
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162060*)self), mode, arg, blend);
     }
 }
 #endif
@@ -3742,14 +3744,14 @@ struct sCam1620D0 {
 extern "C" void func_0015DAC0();
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
-extern "C" void func_001620D0(sCam1620D0* self)
+extern "C" void func_001620D0(cChaseCameraController* self)
 {
-    int mode = self->field_0x2C;
-    self->b0 = 0;
+    int mode = self->CamSwitchRecord.LatestReplayType;
+    ((sCam1620D0*)self)->b0 = 0;
     if (mode == 0x5D)
-        mode = self->field_0x24;
+        mode = self->CamSwitchRecord.PlayerChoiceType;
     func_0015DAC0();
-    cChaseCameraController_createChaseAlgorithmBlend(self, mode, 0, 1.0f);
+    cChaseCameraController_createChaseAlgorithmBlend(((sCam1620D0*)self), mode, 0, 1.0f);
 }
 #endif
 
@@ -3772,15 +3774,15 @@ struct sCam162138 {
 };
 
 
-extern "C" void func_00162138(sCam162138* self)
+extern "C" void func_00162138(cChaseCameraController* self)
 {
-    self->b1 = 0;
-    self->b0 = 0;
-    self->b2 = 0;
-    self->field_0x28 = self->field_0x24;
-    self->field_0x3C = 0;
-    self->field_0x40 = 0;
-    self->field_0x34 = 0;
+    ((sCam162138*)self)->b1 = 0;
+    ((sCam162138*)self)->b0 = 0;
+    ((sCam162138*)self)->b2 = 0;
+    self->CamSwitchRecord.VolumeType = self->CamSwitchRecord.PlayerChoiceType;
+    self->GoingSlow = 0;
+    self->NumFramesSlowGround = 0;
+    self->CamSwitchRecord.TriggerAction = 0;
 }
 #endif
 
@@ -3789,10 +3791,10 @@ INCLUDE_ASM("camera/camera", func_00162170);
 #ifdef SKIP_ASM
 extern "C" void* func_0015D050(void*, int, int);
 
-extern "C" void* func_00162170(sCam162138* self)
+extern "C" void* func_00162170(cChaseCameraController* self)
 {
     func_00162138(self);
-    return func_0015D050(self, self->field_0x24, 0);
+    return func_0015D050(((sCam162138*)self), self->CamSwitchRecord.PlayerChoiceType, 0);
 }
 #endif
 
@@ -3801,12 +3803,12 @@ INCLUDE_ASM("camera/camera", func_001621A8);
 #ifdef SKIP_ASM
 int func_0011FE98(void*);
 
-extern "C" void func_001621A8(sCam162138* self)
+extern "C" void func_001621A8(cChaseCameraController* self)
 {
-    self->b2 = 1;
-    if (!self->b0 && !self->b1) {
-        float t = func_0011FE98(*(void**)(*(char**)((char*)self + 0x20) + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
-        cChaseCameraController_createChaseAlgorithmBlend(self, 0x42, 0, t * 0.01666666753590107f);
+    ((sCam162138*)self)->b2 = 1;
+    if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
+        float t = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 0x42, 0, t * 0.01666666753590107f);
     }
 }
 #endif
@@ -3814,11 +3816,11 @@ extern "C" void func_001621A8(sCam162138* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00162218);
 #ifdef SKIP_ASM
-extern "C" void func_00162218(sCam162138* self)
+extern "C" void func_00162218(cChaseCameraController* self)
 {
-    self->b2 = 0;
-    if (!self->b0 && !self->b1) {
-        cChaseCameraController_createChaseAlgorithmBlend(self, self->field_0x24, 0, 0.0066666672937572f);
+    ((sCam162138*)self)->b2 = 0;
+    if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), self->CamSwitchRecord.PlayerChoiceType, 0, 0.0066666672937572f);
     }
 }
 #endif
@@ -3826,10 +3828,10 @@ extern "C" void func_00162218(sCam162138* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00162258);
 #ifdef SKIP_ASM
-extern "C" void func_00162258(sCam162138* self)
+extern "C" void func_00162258(cChaseCameraController* self)
 {
-    if (!self->b0) {
-        cChaseCameraController_createChaseAlgorithmBlend(self, 0x44, 0, 0.016793444752693176f);
+    if (!((sCam162138*)self)->b0) {
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 0x44, 0, 0.016793444752693176f);
     }
 }
 #endif
@@ -8376,15 +8378,15 @@ extern "C" int func_00167FE0(void *arg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FE8);
 #ifdef SKIP_ASM
-extern "C" int func_00167FE8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_00167FE8(cChaseCameraController* arg0) {
+    return (arg0->LatestAlgoType);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00167FF0);
 #ifdef SKIP_ASM
-extern "C" int func_00167FF0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x20)));
+extern "C" int func_00167FF0(cChaseCameraController* arg0) {
+    return ((int)arg0->Target);
 }
 #endif
 //100%
@@ -8569,43 +8571,43 @@ extern "C" void func_00168108(void *arg0, float fparg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168110);
 #ifdef SKIP_ASM
-extern "C" int func_00168110(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA0)));
+extern "C" int func_00168110(cCamera* arg0) {
+    return ((int)arg0->Controller);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168118);
 #ifdef SKIP_ASM
-extern "C" int func_00168118(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA4)));
+extern "C" int func_00168118(cCamera* arg0) {
+    return ((int)arg0->ManualController);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168120);
 #ifdef SKIP_ASM
-extern "C" int func_00168120(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA8)));
+extern "C" int func_00168120(cCamera* arg0) {
+    return ((int)arg0->ChaseController);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168128);
 #ifdef SKIP_ASM
-extern "C" int func_00168128(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAC)));
+extern "C" int func_00168128(cCamera* arg0) {
+    return ((int)arg0->ScriptController);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168130);
 #ifdef SKIP_ASM
-extern "C" int func_00168130(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB4)));
+extern "C" int func_00168130(cCamera* arg0) {
+    return (arg0->bStreamIsReady);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168138);
 #ifdef SKIP_ASM
-extern "C" int func_00168138(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB0)));
+extern "C" int func_00168138(cCamera* arg0) {
+    return (arg0->StreamFocusID);
 }
 #endif
 //100%

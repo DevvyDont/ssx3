@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "world/world.h"
 
 //100%
@@ -917,7 +918,6 @@ typedef sMnMat_6298 (*MnViewFn_6298)(void*);
 typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const sMnMat_6298&);
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
-extern cMnGfx_6298* D_004A5B80_6298 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_00352DD0(void* self);
 extern "C" int func_002D2058(void* v);
 extern "C" void* func_0035FC20(void* self, void* m);
@@ -999,7 +999,7 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
         return;
     }
     int flags = 0;
-    cMnGfx_6298* gfx = D_004A5B80_6298;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     if (MOD_6298(self)) {
         func_00352DD0(MOD_6298(self));
         cMnOwner_6298* o = MOD_6298(self)->owner;
@@ -1019,11 +1019,11 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
     int res;
     if (mat) {
         sMnVec_6298* m = self->v45();
-        sMnGfxVt_6298* vt = gfx->vt;
+        sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
-        res = ((MnCullFn_6298)vt[93].fn)(thisp, m, m + 1, ((MnViewFn_6298)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+        res = ((MnCullFn_6298)vt[93].fn)(thisp, m, m + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)gfx->mVtbl)[43].fn)((char*)gfx + ((sMnGfxVt_6298*)gfx->mVtbl)[43].delta));
     } else {
-        sMnGfxVt_6298* vt = gfx->vt;
+        sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         sMnVec_6298 b[2];
         b[0].x = OBJ_6298(self)->pos[0];
@@ -1034,7 +1034,7 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
         b[1].y = OBJ_6298(self)->scl[1];
         b[1].z = OBJ_6298(self)->scl[2];
         b[1].w = 1.0f;
-        res = ((MnCullFn_6298)vt[93].fn)(thisp, &b[0], &b[1], ((MnViewFn_6298)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+        res = ((MnCullFn_6298)vt[93].fn)(thisp, &b[0], &b[1], ((MnViewFn_6298)((sMnGfxVt_6298*)gfx->mVtbl)[43].fn)((char*)gfx + ((sMnGfxVt_6298*)gfx->mVtbl)[43].delta));
     }
     if (res == 1) {
         return;
@@ -1064,7 +1064,7 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
         flags |= 2;
     }
     void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
-    sMnGfxVt_6298* vt = gfx->vt;
+    sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
     ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, *(float*)((char*)self + 0x24));
 }
 #endif
@@ -1081,14 +1081,14 @@ extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
         return;
     }
     void* rot = 0;
-    cMnGfx_6298* gfx = D_004A5B80_6298;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     sMnMat_6298 rm;
     if (HasRot_6298(MOD_6298(self))) {
         rot = RotOf_6298(self, &rm);
         flags |= 2;
     }
     void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
-    sMnGfxVt_6298* vt = gfx->vt;
+    sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
     ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, t4mat_Identity, tex, rot, flags, *(float*)((char*)self + 0x24));
 }
 #endif

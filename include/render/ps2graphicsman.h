@@ -478,4 +478,10 @@ CHECK_OFFSET(cPS2GraphicsMan, unk_6D18, 0x6D18);
 CHECK_OFFSET(cPS2GraphicsMan, mViewportStack, 0x6D20);
 CHECK_SIZE(cPS2GraphicsMan, 0x75E0);
 
+// The graphics manager: GrMan holds what cSSXApp_init got from cGraphicsMan::construct() (On Tour: GrMan), and
+// the cGraphicsMan constructor stores itself in the class static (cGraphicsMan::TheGraphicsMan). Both point to the
+// one cPS2GraphicsMan.
+extern cPS2GraphicsMan* GrMan;
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan;
+
 #endif /* RENDER_PS2GRAPHICSMAN_H */

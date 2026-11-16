@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -1811,7 +1812,6 @@ extern int D_004A44B4;   // cVisualEffectsTest::m_Enable
 extern int D_004A3860;   // cWorldPainterMan::m_iCurrSection
 extern int D_004A44B8;   // cVisualEffectsTest::m_LayerId
 static inline int layerId_B6E0() { return D_004A44B8; }
-extern cGraphicsMan_B6E0* cGraphicsMan_TheGraphicsMan;
 extern sDrawState_B6E0 D_00501420;  // sDrawState::s_defaultDrawState
 // cWorldPainterMan::render(cQuadTree*, const tQuadTreeNode*, tBxVertex*, t4Vector&, t4Vector&)
 extern "C" void func_002BB928_B6E0(cWorldPainterMan_B6E0*, cQuadTree_B6E0*, char*, tBxVertex_B6E0*, t4Vector_B6E0*, t4Vector_B6E0*) __asm__("func_002BB928");
@@ -1827,11 +1827,11 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                 if (layer) {
                     cQuadTree_B6E0* tree = layer->tree;
                     if (tree) {
-                        cGraphicsMan_B6E0* gm = cGraphicsMan_TheGraphicsMan;
+                        cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
                         // PushDrawState + SetDefaultDrawState
-                        gm->m_pCurrentDrawState[1] = gm->m_pCurrentDrawState[0];
-                        gm->m_pCurrentDrawState++;
-                        *gm->m_pCurrentDrawState = D_00501420;
+                        ((sDrawState_B6E0*)gm->m_pCurrentDrawState)[1] = ((sDrawState_B6E0*)gm->m_pCurrentDrawState)[0];
+                        (*(sDrawState_B6E0**)&gm->m_pCurrentDrawState)++;
+                        *((sDrawState_B6E0*)gm->m_pCurrentDrawState) = D_00501420;
                         tBxVertex_B6E0 vertlist[5];
                         tBxVertex_B6E0* v;
                         int i;
@@ -1850,7 +1850,7 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                         t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
                                                 (float)(int)(32768.0f / tree->scale + tree->miny), 0.0f, 1.0f);
                         func_002BB928_B6E0(self, tree, tree->nodes + tree->root * 8, vertlist, &mincorner, &maxcorner);
-                        gm->m_pCurrentDrawState--;  // PopDrawState
+                        (*(sDrawState_B6E0**)&gm->m_pCurrentDrawState)--;  // PopDrawState
                     }
                 }
             }
@@ -1903,7 +1903,6 @@ public:
     virtual sQtVec4_B928* v05();
 };
 
-extern sQtCtx_B928* D_004A5B80_B928 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (a + b).
 static inline sQtVec4_B928 qtAdd_B928(const sQtVec4_B928& a, const sQtVec4_B928& b)
@@ -1971,7 +1970,7 @@ extern "C" void func_002BB928(void* ctx, sQtTree_B928* tree, sQtNode_B928* node,
         func_002BB928(ctx, tree, tree->nodes + (node->child[2] >> 1), v, &c, &b);
         func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), v, &mid, hi);
     } else {
-        sQtCtx_B928* g = D_004A5B80_B928;
+        cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
         char* rider = *(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18);
         sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
         sQtVec4_B928 t;
@@ -2000,7 +1999,7 @@ extern "C" void func_002BB928(void* ctx, sQtTree_B928* tree, sQtNode_B928* node,
         t.z = cam.z;
         t.w = 1.0f;
         v[4].pos = t;
-        sQtVEntry_B928* vt = g->vtable;
+        sQtVEntry_B928* vt = (sQtVEntry_B928*)g->mVtbl;
         vt[73].fn((char*)g + vt[73].delta, 5, v, 0);
     }
 }

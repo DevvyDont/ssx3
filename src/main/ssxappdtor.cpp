@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/gamemode.h"
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
@@ -1872,7 +1873,6 @@ extern "C" int func_0022E920(int);
 extern "C" void func_00230F40(void *);
 void func_003A6928(void *);
 extern "C" void func_003A88A8(void *);
-extern void *GrMan;
 
 extern "C" int func_00244A40(void *self) {
     void *vtbl;
@@ -1890,7 +1890,7 @@ extern "C" int func_00244A40(void *self) {
         }
         *(int *)((char*)self + 0x9C) = 1;
         if (*(int *)((char*)self + 0xA0) != 0) {
-            vtbl = *(void **)((char*)GrMan + 0x10D8);
+            vtbl = (void*)GrMan->mVtbl;
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
             func_0022E8B8(*(int *)((char*)self + 0x84));
             func_003A88A8(**(void ***)((char*)self + 0x10));
@@ -2314,7 +2314,6 @@ struct sRCtx_2452D8 {
     char pad[0x10D8];
     sRVEntry_2452D8* vt;
 };
-extern sRCtx_2452D8* cGraphicsMan_TheGraphicsMan;
 
 static inline int isHash_2452D8(int id, char* s)
 {
@@ -2341,7 +2340,7 @@ extern "C" void func_002452D8(void* self, char* msg, int type)
     if (isHash_2452D8(*(int*)(msg + 0x38), D_004A2AC8)) {
         sUIObj_2452D8* o = newUIObj_2452D8(self, 0);
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, o);
-        cGraphicsMan_TheGraphicsMan->vt[8].fn((char*)cGraphicsMan_TheGraphicsMan + cGraphicsMan_TheGraphicsMan->vt[8].delta, 1);
+        ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].delta, 1);
     } else {
         sUIObj_2452D8* o = newUIObj_2452D8(self, 1);
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, o);

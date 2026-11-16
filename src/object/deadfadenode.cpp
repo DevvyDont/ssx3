@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "world/world.h"
 
 //100%
@@ -342,7 +343,6 @@ typedef sDfMat_350CB8 (*DfViewFn_350CB8)(void*);
 typedef int (*DfCullFn_350CB8)(void*, sDfVec_350CB8*, sDfVec_350CB8*, const sDfMat_350CB8&);
 typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*, int);
 
-extern cDfGfx_350CB8* D_004A5B80_350CB8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sDfMat_350CB8 D_004FF1A0_350CB8 __asm__("t4mat_Identity");
 
 #define OBJ_350CB8(s) (*(sDfObj_350CB8**)((char*)(s) + 0x18))
@@ -387,9 +387,9 @@ extern "C" void cDeadFadeNode_render(char* self)
     if (!Visible_350CB8(cam, OBJ_350CB8(self))) {
         return;
     }
-    cDfGfx_350CB8* gfx = D_004A5B80_350CB8;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     {
-        sDfGfxVt_350CB8* vt = gfx->vt;
+        sDfGfxVt_350CB8* vt = (sDfGfxVt_350CB8*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         sDfVec_350CB8 b[2];
         b[0].x = OBJ_350CB8(self)->pos[0];
@@ -400,7 +400,7 @@ extern "C" void cDeadFadeNode_render(char* self)
         b[1].y = OBJ_350CB8(self)->scl[1];
         b[1].z = OBJ_350CB8(self)->scl[2];
         b[1].w = 1.0f;
-        int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_350CB8)gfx->vt[43].fn)((char*)gfx + gfx->vt[43].delta));
+        int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[43].delta));
         if (res == 1) {
             return;
         }
@@ -413,7 +413,7 @@ extern "C" void cDeadFadeNode_render(char* self)
     t.z = -*(float*)(self + 0x30);
     t.w = 1.0f;
     xf.r[3] = t;
-    ((DfDrawFn_350CB8)gfx->vt[95].fn)((char*)gfx + gfx->vt[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
+    ((DfDrawFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[95].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
                                       *(float*)(self + 0x28), *(void**)(self + 0x38), 0, 0);
 }
 #endif

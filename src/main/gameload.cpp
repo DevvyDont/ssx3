@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
 #include "online/commsystem.h"
@@ -90,7 +91,6 @@ extern "C" void* func_002F0390();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
-extern void* GrMan;
 extern void* gSSXAudio;
 extern int D_004A1228;
 extern int D_004A3484;
@@ -211,9 +211,9 @@ extern "C" void cGame_load(cGame* self)
     func_00317550(D_004A5B64 + 0x38, 43.5f);
     func_00195DE0(SSXApp->FELocale);
     {
-        char* g = (char*)GrMan;
-        sVEntryVoidGL* vt = *(sVEntryVoidGL**)(g + 0x10D8);
-        vt[44].fn(g + vt[44].delta, 0);
+        cPS2GraphicsMan* g = GrMan;
+        sVEntryVoidGL* vt = (sVEntryVoidGL*)g->mVtbl;
+        vt[44].fn((char*)g + vt[44].delta, 0);
     }
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
@@ -308,9 +308,9 @@ extern "C" void cGame_load(cGame* self)
     *(void**)((char*)self->MenuSys + 0x5C) = (void*)SSXApp->Inputs[0];
     char* file = FILE_load(D_0047B628, 0x100);
     {
-        char* g = (char*)GrMan;
-        sVEntryGL* vt = *(sVEntryGL**)(g + 0x10D8);
-        int r = vt[46].fn(g + vt[46].delta, file + *(int*)(file + 0x14), D_004A2A88, 0, 1, -1);
+        cPS2GraphicsMan* g = GrMan;
+        sVEntryGL* vt = (sVEntryGL*)g->mVtbl;
+        int r = vt[46].fn((char*)g + vt[46].delta, file + *(int*)(file + 0x14), D_004A2A88, 0, 1, -1);
         self->mBoxTextureID = r;
         *(int*)((char*)self->MenuSys + 0x60) = r;
     }
@@ -588,7 +588,6 @@ extern "C" void func_00286C00(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void func_0036A290(void);
 
-extern void* GrMan;
 extern void* gWorldTriggerManager;
 extern void* gSSXAudio;
 extern int D_004A2A54;
@@ -675,9 +674,9 @@ extern "C" void func_0022FA98(char* self)
     }
     cCameraTriggerMan_cleanupOnExit(D_004C5830);
     {
-        char* be = (char*)GrMan;
-        sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x98);
-        e->fn(be + e->delta);
+        cPS2GraphicsMan* be = GrMan;
+        sVEnt0_FA98* e = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
+        e->fn((char*)be + e->delta);
     }
     func_001A3C50(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
@@ -723,14 +722,14 @@ extern "C" void func_0022FA98(char* self)
         }
     }
     {
-        char* be = (char*)GrMan;
-        sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x388);
-        e->fn(be + e->delta);
+        cPS2GraphicsMan* be = GrMan;
+        sVEnt0_FA98* e = (sVEnt0_FA98*)((char*)be->mVtbl + 0x388);
+        e->fn((char*)be + e->delta);
     }
     {
-        char* be = (char*)GrMan;
-        sVEnt1_FA98* e = (sVEnt1_FA98*)(*(char**)(be + 0x10D8) + 0x190);
-        e->fn(be + e->delta, *(void**)(self + 0x220));
+        cPS2GraphicsMan* be = GrMan;
+        sVEnt1_FA98* e = (sVEnt1_FA98*)((char*)be->mVtbl + 0x190);
+        e->fn((char*)be + e->delta, *(void**)(self + 0x220));
     }
     func_0036A020(GrMan);
     func_0038ADB0(D_005047F8);
@@ -777,7 +776,6 @@ extern "C" void func_00369FF8(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
-extern void* GrMan;
 extern void* gWorldTriggerManager;
 extern void* gSSXAudio;
 extern void* cOVStateManager_mpPDATemplate;
@@ -1289,9 +1287,9 @@ static inline int updatePause_2306B8(cGame* self)
         }
         self->IsStreamPaused = 1;
         if (self->m_bFlushStreamer != 0) {
-            char* r = (char*)GrMan;
-            sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x10D8);
-            vt[19].fn(r + vt[19].delta);
+            cPS2GraphicsMan* r = GrMan;
+            sVEntry_2306B8* vt = (sVEntry_2306B8*)r->mVtbl;
+            vt[19].fn((char*)r + vt[19].delta);
             func_0022E8B8(((char*)self->ViewMan));
             func_003A88A8(*((void**)((char*)self->World)));
             self->m_bFlushStreamer = 0;
@@ -1544,8 +1542,8 @@ extern "C" int func_00230E98(cGame* self)
     if (cFadeScreen_loseFocus(self) == 0) {
         return 0;
     }
-    cMgr00230E98* mgr = (cMgr00230E98*)GrMan;
-    mgr->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
+    cPS2GraphicsMan* mgr = GrMan;
+    ((cMgr00230E98*)mgr)->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
     ((cMgr00230E98*)GrMan)->f270 = 1;
     D_004A4324 = 0;
     cScreenTint_m_Enable = 0;
@@ -2239,8 +2237,8 @@ extern "C" void func_00231B50(void* self, int value) {
     verts[1].u = 1.0f; verts[1].v = 0.0f;
     verts[2].u = 0.0f; verts[2].v = 1.0f;
     verts[3].u = 1.0f; verts[3].v = 1.0f;
-    *(short*)(*(char**)((char*)GrMan + 0xE84) + 0x10) = value;
-    obj = *(char**)((char*)GrMan + 0x10D8);
+    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = value;
+    obj = (char*)GrMan->mVtbl;
     (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)GrMan + *(short*)(obj + 0x238), 4, verts, 0);
 }
 #endif
@@ -2380,7 +2378,6 @@ public:
 };
 
 // Typed view of the render context (the unit declares GrMan as void*).
-extern cCtx231D60* D_004A289C_231D60 __asm__("GrMan");
 
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp231D60(float v, float lo, float hi)
@@ -2394,16 +2391,16 @@ static inline float Clamp231D60(float v, float lo, float hi)
 extern "C" int func_00231D60(void* self)
 {
     if (*(float*)((char*)self + 4) > 0.0f) {
-    cCtx231D60* ctx = D_004A289C_231D60;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    *D_004A289C_231D60->top = D_00501420;
-    D_004A289C_231D60->v26(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
-    D_004A289C_231D60->v34(t4mat_Identity);
-    D_004A289C_231D60->top->f8_5 = 31;
-    D_004A289C_231D60->top->f4_23 = 2;
-    D_004A289C_231D60->top->f4_20 = 0;
-    D_004A289C_231D60->top->f4_12 = 0;
+    cPS2GraphicsMan* ctx = GrMan;
+    ((cCtx231D60*)ctx)->top[1] = ((cCtx231D60*)ctx)->top[0];
+    ((cCtx231D60*)ctx)->top++;
+    *((cCtx231D60*)GrMan)->top = D_00501420;
+    ((cCtx231D60*)GrMan)->v26(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
+    ((cCtx231D60*)GrMan)->v34(t4mat_Identity);
+    ((cCtx231D60*)GrMan)->top->f8_5 = 31;
+    ((cCtx231D60*)GrMan)->top->f4_23 = 2;
+    ((cCtx231D60*)GrMan)->top->f4_20 = 0;
+    ((cCtx231D60*)GrMan)->top->f4_12 = 0;
     float a = Clamp231D60(*(float*)((char*)self + 4) * 5.0f, 0.0f, 1.0f);
     float p0[2];
     float p1[2];
@@ -2417,7 +2414,7 @@ extern "C" int func_00231D60(void* self)
     col[2] = 0.0f;
     col[3] = 0.0f;
     func_0038EC40((void*)D_004A28AC, p0, p1, col, 0.0f);
-    *(int*)((char*)D_004A289C_231D60 + 0xE84) -= 0x14;
+    *(int*)&GrMan->m_pCurrentDrawState -= 0x14;
     return a >= 1.0f;
     }
     return 0;
@@ -2540,42 +2537,41 @@ struct sVE_1FC0 {
     void (*fn)(void*, float, float, float, float, int);
 };
 
-extern cGfx_1FC0* D_004A289C_1FC0 __asm__("GrMan");
 extern char* D_004A28A8_1FC0 __asm__("SSXApp");
 
 extern "C" void func_00231FC0(sFade_1FC0* self)
 {
-    cGfx_1FC0* g = D_004A289C_1FC0;
-    g->stateTop[1] = g->stateTop[0];
-    g->stateTop++;
-    D_004A289C_1FC0->BeginScene();
-    D_004A289C_1FC0->Begin2D();
-    *D_004A289C_1FC0->stateTop = D_00501420_1FC0;
-    D_004A289C_1FC0->stateTop->f4_23 = 2;
-    D_004A289C_1FC0->stateTop->f4_20 = 0;
-    D_004A289C_1FC0->stateTop->f4_12 = 0x14;
-    D_004A289C_1FC0->stateTop->f4_2 = 5;
-    D_004A289C_1FC0->stateTop->f8_5 = 0x1F;
-    D_004A289C_1FC0->SetTexture(t4mat_Identity);
+    cPS2GraphicsMan* g = GrMan;
+    ((cGfx_1FC0*)g)->stateTop[1] = ((cGfx_1FC0*)g)->stateTop[0];
+    ((cGfx_1FC0*)g)->stateTop++;
+    ((cGfx_1FC0*)GrMan)->BeginScene();
+    ((cGfx_1FC0*)GrMan)->Begin2D();
+    *((cGfx_1FC0*)GrMan)->stateTop = D_00501420_1FC0;
+    ((cGfx_1FC0*)GrMan)->stateTop->f4_23 = 2;
+    ((cGfx_1FC0*)GrMan)->stateTop->f4_20 = 0;
+    ((cGfx_1FC0*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_1FC0*)GrMan)->stateTop->f4_2 = 5;
+    ((cGfx_1FC0*)GrMan)->stateTop->f8_5 = 0x1F;
+    ((cGfx_1FC0*)GrMan)->SetTexture(t4mat_Identity);
     {
-        sVE_1FC0* vt = *(sVE_1FC0**)((char*)D_004A289C_1FC0 + 0x10D8);
-        char* thisp = (char*)D_004A289C_1FC0 + vt[23].delta;
+        sVE_1FC0* vt = (sVE_1FC0*)GrMan->mVtbl;
+        char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)D_004A289C_1FC0->GetWidth(), (float)D_004A289C_1FC0->GetHeight(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetWidth(), (float)((cGfx_1FC0*)GrMan)->GetHeight(), 1);
     }
-    D_004A289C_1FC0->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    ((cGfx_1FC0*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
     float s = func_0031C040(self->t * 6.2831854820251465f);
     sV2_1FC0 size((s + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
     int f10v = *(int*)(D_004A28A8_1FC0 + 0xA0);
-    *(short*)((char*)D_004A289C_1FC0->stateTop + 0x10) = f10v;
+    *(short*)((char*)((cGfx_1FC0*)GrMan)->stateTop + 0x10) = f10v;
     self->col.r = self->f4;
     sV2_1FC0 uv0(0.0f, 0.0f);
     sV2_1FC0 uv1(1.0f, 1.0f);
-    D_004A289C_1FC0->DrawSprite(pos, size, uv0, uv1, self->col);
-    D_004A289C_1FC0->End2D();
-    D_004A289C_1FC0->EndScene();
-    D_004A289C_1FC0->stateTop--;
+    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, self->col);
+    ((cGfx_1FC0*)GrMan)->End2D();
+    ((cGfx_1FC0*)GrMan)->EndScene();
+    ((cGfx_1FC0*)GrMan)->stateTop--;
 }
 #endif
 

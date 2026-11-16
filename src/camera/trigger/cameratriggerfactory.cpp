@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -6148,7 +6149,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABE0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
-extern char* GrMan;
 
 struct sVE_0017ABE0 {
     short delta;
@@ -6170,9 +6170,9 @@ extern "C" void func_0017ABE0(sIdList_0017ABE0* self, int flags)
             int id = self->ids[i];
             if (id >= 0)
             {
-                char* obj = GrMan;
-                sVE_0017ABE0* vt = *(sVE_0017ABE0**)(obj + 0x10D8);
-                vt[50].fn(obj + vt[50].delta, id);
+                cPS2GraphicsMan* obj = GrMan;
+                sVE_0017ABE0* vt = (sVE_0017ABE0*)obj->mVtbl;
+                vt[50].fn((char*)obj + vt[50].delta, id);
             }
         }
         if (self->ids != 0)

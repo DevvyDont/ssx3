@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
@@ -26,7 +27,6 @@ struct sRCtx_17ACC8 {
     char pad[0x10D8];
     sRVEntry_17ACC8* vt;
 };
-extern sRCtx_17ACC8* GrMan;
 
 struct sBgFile_17ACC8 {
     int f0;
@@ -57,7 +57,7 @@ extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
     for (int i = 0; i < self->count; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->images[i] = GrMan->vt[46].fn((char*)GrMan + GrMan->vt[46].delta, img, D_004A12A8, 0, 1, -1);
+        self->images[i] = ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].delta, img, D_004A12A8, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }
@@ -488,7 +488,6 @@ struct sGfx_B4E0 {
     char pad[0x10D8];
     sGfxVE_B4E0* vt;
 };
-extern sGfx_B4E0* D_004A289C_b4 __asm__("GrMan");
 
 static inline void update_B4E0(void* iface)
 {
@@ -842,8 +841,8 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (dir != 2 && dir != 3) {
             return;
         }
-        sGfx_B4E0* g = D_004A289C_b4;
-        sGfxVE_B4E0* vt = g->vt;
+        cPS2GraphicsMan* g = GrMan;
+        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)g->mVtbl;
         ((void (*)(void*, int))vt[8].fn)((char*)g + vt[8].delta, !((bool (*)(void*))vt[9].fn)((char*)g + vt[9].delta));
         break;
     }

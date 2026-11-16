@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPSPBezierMan_cPSPBezierMan(void* self);
@@ -966,7 +967,7 @@ extern "C" void func_0038C788(void* self, int type, int idx)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038CA08);
 #ifdef SKIP_ASM
-extern void* cGraphicsMan_TheGraphicsMan;
+extern void* cGraphicsMan_TheGraphicsMan_bezierman __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" unsigned int func_0037DF88(void* self, void* a1, void* a2);
 
 struct sBezVec4_CA08 {
@@ -986,7 +987,7 @@ extern "C" void func_0038CA08(void* self, void* obj)
     b.y = *(float*)(o + 0x168);
     b.z = *(float*)(o + 0x16C);
     b.w = 1.0f;
-    func_0037DF88(cGraphicsMan_TheGraphicsMan, &a, &b);
+    func_0037DF88(cGraphicsMan_TheGraphicsMan_bezierman, &a, &b);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -355,7 +356,6 @@ extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_001D47A0(void* self, int index);
-extern void* GrMan;
 extern char D_004A1FF8[];
 
 struct cGame_4A20 {
@@ -494,7 +494,6 @@ struct cGame001D4B20 {
     virtual void v50(int id);
 };
 
-extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sSelf001D4B20 {
     char pad[0x50];

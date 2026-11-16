@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "world/world.h"
 
 //100%
@@ -119,16 +120,15 @@ struct sFlexGrid {
     sGridBox box;         // 0x90
 };
 
-extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
 {
-    char* world = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* world = cGraphicsMan_TheGraphicsMan;
     int n = self->count;
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    sGridVEntry* e = &(*(sGridVEntry**)(world + 0x10D8))[76];
-    self->mesh = (sGridMesh*)e->fn(world + e->delta, n, 2, 0x20000000);
+    sGridVEntry* e = &(((sGridVEntry*)world->mVtbl))[76];
+    self->mesh = (sGridMesh*)e->fn((char*)world + e->delta, n, 2, 0x20000000);
     sGridV4*& p0 = self->pts[0];
     p0 = new (D_0048E778, 0x20000000, 0) sGridV4[nverts];
     sGridV4*& p1 = self->pts[1];
@@ -139,8 +139,8 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridCol cols[4];
     sGridV2* uv = new (D_0048E7A8, 0x100, 0) sGridV2[nverts];
     sGridCol* col = new (D_0048E7B8, 0x100, 0) sGridCol[nverts];
-    sGridVEntryV* e2 = &(*(sGridVEntryV**)(world + 0x10D8))[97];
-    e2->fn(world + e2->delta, self->def, 0, pos, uvs, cols);
+    sGridVEntryV* e2 = &(((sGridVEntryV*)world->mVtbl))[97];
+    e2->fn((char*)world + e2->delta, self->def, 0, pos, uvs, cols);
     for (int i = 0; i < n; i++) {
         float t = (float)i;
         float inv = 1.0f / (float)(n - 1);
@@ -1150,7 +1150,6 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_render);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sRS_7B80 {
     unsigned int f0_0 : 12;
@@ -1201,7 +1200,7 @@ extern "C" void cFlexBridgeNode_render(char* self)
     if (!IsLoaded_7B80(m)) {
         return;
     }
-    char* ctx = cGraphicsMan_TheGraphicsMan;
+    char* ctx = (char*)cGraphicsMan_TheGraphicsMan;
     {
         sVE93_7B80* vt = *(sVE93_7B80**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
@@ -1432,7 +1431,6 @@ struct sCtx_3480C8 {
     char padE88[0x10D8 - 0xE88];
     sVE_3480C8* vt;         // 0x10D8
 };
-extern sCtx_3480C8* D_004A5B80_3480C8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A5980;
 extern float D_004FF6C0[8][4];
 
@@ -1446,8 +1444,8 @@ struct sFlex_3480C8 {
 
 extern "C" void func_003480C8(sFlex_3480C8* self)
 {
-    sCtx_3480C8* ctx = D_004A5B80_3480C8;
-    sVE_3480C8* vt = ctx->vt;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
+    sVE_3480C8* vt = (sVE_3480C8*)ctx->mVtbl;
     if (((tCull_3480C8)vt[93].fn)((char*)ctx + vt[93].delta, self->boxMin, self->boxMax,
                                   ((tGetMat_3480C8)vt[43].fn)((char*)ctx + vt[43].delta)) == 1) return;
     if (D_004A5980 == 0) {
@@ -1485,8 +1483,8 @@ extern "C" void func_003480C8(sFlex_3480C8* self)
         D_004FF6C0[7][3] = 1.0f;
         D_004A5980 = 1;
     }
-    ctx->top->tex = -1;
-    ctx->top->flagsA = (ctx->top->flagsA & ~0x7C) | 4;
+    ((sRS_3480C8*)ctx->m_pCurrentDrawState)->tex = -1;
+    ((sRS_3480C8*)ctx->m_pCurrentDrawState)->flagsA = (((sRS_3480C8*)ctx->m_pCurrentDrawState)->flagsA & ~0x7C) | 4;
     int n = self->count - 1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < 8; j++) {

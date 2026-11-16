@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("object/splinemodifier", cSplineModifier_cSplineModifier);
@@ -1775,7 +1776,6 @@ struct cMultiSpline_35B418 {
     char** insts;           // 0x44
 };
 
-extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void func_00345430(void* a, void* b);
 
 extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
@@ -1784,13 +1784,13 @@ extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
         self->vtable[3].fn((char*)self + self->vtable[3].delta);
     }
     char* model = *(char**)(self->model + 0xC);
-    char* w = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     for (int i = 1; i < self->count; i++) {
-        sSmVE93_35B418* vt = *(sSmVE93_35B418**)(w + 0x10D8);
-        char* thisp = w + vt[93].delta;
+        sSmVE93_35B418* vt = (sSmVE93_35B418*)w->mVtbl;
+        char* thisp = (char*)w + vt[93].delta;
         sSmBox_35B418* box = &self->boxes[i];
-        sSmVE43_35B418* vt2 = *(sSmVE43_35B418**)(w + 0x10D8);
-        int hit = vt[93].fn(thisp, &box->min, &box->max, vt2[43].fn(w + vt2[43].delta));
+        sSmVE43_35B418* vt2 = (sSmVE43_35B418*)w->mVtbl;
+        int hit = vt[93].fn(thisp, &box->min, &box->max, vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
             sSmVEModel_35B418* mvt = *(sSmVEModel_35B418**)(model + 0xC);
             mvt[33].fn(model + mvt[33].delta, self->insts[i] + 0x10, self->mode);

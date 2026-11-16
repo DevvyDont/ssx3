@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewNonBindTexID);
@@ -1214,7 +1215,6 @@ INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
 #ifdef SKIP_ASM
 extern "C" void func_00416210(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
-extern void* cGraphicsMan_TheGraphicsMan;
 extern void* D_00493950[];
 
 inline void* operator new(unsigned int, void* p) { return p; }
@@ -1288,7 +1288,7 @@ extern "C" void* func_003691F8(char* self)
     *(void***)(self + 0x10D8) = D_00493950;
     new (self + 0xE84) sGfxState_691F8;
     *(int*)(self + 0xF44) = 0;
-    cGraphicsMan_TheGraphicsMan = self;
+    cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
     for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
     func_00416210(&D_00501420, 0, 0x10);
     gfxSetA_691F8(&D_00501420, 1, 3, 23);
@@ -1329,13 +1329,12 @@ extern "C" void* func_003691F8(char* self)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_003695D8);
 #ifdef SKIP_ASM
-extern void* cGraphicsMan_TheGraphicsMan;
 extern void* D_00493950[];
 void operator_delete(int* ptr);
 
-extern "C" void func_003695D8(void* self, int flags)
+extern "C" void func_003695D8(cPS2GraphicsMan* self, int flags)
 {
-    *(void***)((char*)self + 0x10D8) = D_00493950;
+    self->mVtbl = D_00493950;
     cGraphicsMan_TheGraphicsMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1352,7 +1351,7 @@ struct sVEntry00369610 {
     void (*fn)(void*, int*);
 };
 
-extern "C" void func_00369610(void* self, int* mask)
+extern "C" void func_00369610(cPS2GraphicsMan* self, int* mask)
 {
     int i;
     unsigned int j;
@@ -1362,7 +1361,7 @@ extern "C" void func_00369610(void* self, int* mask)
     for (j = 0; j < 2; j++) {
         ((short*)((char*)self + 0xEE8))[j] = 0x7FFF;
     }
-    sVEntry00369610* vt = *(sVEntry00369610**)((char*)self + 0x10D8);
+    sVEntry00369610* vt = (sVEntry00369610*)self->mVtbl;
     vt[62].fn((char*)self + vt[62].delta, mask);
 }
 #endif
@@ -1407,7 +1406,7 @@ struct sGfx_96C8 {
 };
 
 // Look up (or load and cache) a texture by its 4-character name.
-extern "C" int func_003696C8(void* self_, const char* name)
+extern "C" int func_003696C8(cPS2GraphicsMan* self_, const char* name)
 {
     sGfx_96C8* self = (sGfx_96C8*)self_;
     char buf[0x10];

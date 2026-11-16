@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "animation/animmodel.h"
 
 //100%
@@ -659,12 +660,11 @@ typedef void (*tSetMats_0640)(void*, sAmMat_0640*, int, int, int, int);
 typedef void (*tDraw_0640)(void*, char*, char*, int, int, float);
 
 extern int D_004A5948;
-extern sAmCtx_0640* D_004A5B80_0640 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sAmMat_0640 D_004FC420[];
 
 extern "C" void func_00310640(cAnimModel* self, int lod, int x, int y)
 {
-    sAmCtx_0640* ctx = D_004A5B80_0640;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (D_004A5948 == 0) {
         new ((void*)D_004FC420) sAmMat_0640[64];
         D_004A5948 = 1;
@@ -679,14 +679,14 @@ extern "C" void func_00310640(cAnimModel* self, int lod, int x, int y)
             if (p->lods[lod].used != 0) {
                 sAnimModelLodRef* r = &p->lods[lod].refs[p->refIndex];
                 if (r->part != 0) {
-                    ((tSetMats_0640)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FC420, 0, r->unk_0C, r->unk_08, 0);
+                    ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[111].delta, D_004FC420, 0, r->unk_0C, r->unk_08, 0);
                     int m = self->parts[j].id == 2 ? x : y;
-                    ((tDraw_0640)ctx->vt[99].fn)((char*)ctx + ctx->vt[99].delta, r->part, r->data, m, 0, self->unk_140.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, r->part, r->data, m, 0, self->unk_140.y);
                 }
             }
         }
     } else {
-        ((tSetMats_0640)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FC420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
+        ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[111].delta, D_004FC420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
             sAnimModelPart* p = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
@@ -694,7 +694,7 @@ extern "C" void func_00310640(cAnimModel* self, int lod, int x, int y)
                 sAnimModelLodRef* r = p->lods[lod].refs;
                 if (r->part != 0) {
                     int m = p->id == 2 ? x : y;
-                    ((tDraw_0640)ctx->vt[99].fn)((char*)ctx + ctx->vt[99].delta, r->part, r->data, m, 0, self->unk_140.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, r->part, r->data, m, 0, self->unk_140.y);
                 }
             }
         }
@@ -796,7 +796,6 @@ typedef void (*tSetMats_0948)(void*, sAmMat_0948*, int, int, int, int);
 typedef void (*tDraw_0948)(void*, char*, char*, int);
 
 extern int D_004A594C;
-extern sAmCtx_0948* D_004A5B80_0948 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sAmMat_0948 D_004FD420[];
 
 extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)
@@ -805,7 +804,7 @@ extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)
         new ((void*)D_004FD420) sAmMat_0948[64];
         D_004A594C = 1;
     }
-    sAmCtx_0948* ctx = D_004A5B80_0948;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     for (int i = 0; i < self->numBones; i++) {
         D_004FD420[i] = mulMat_0948(((sAmMat_0948*)self->unk_030)[i], ((sAmMat_0948*)self->unk_038)[i]);
     }
@@ -816,15 +815,15 @@ extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)
             if (p->lods[lod].used != 0) {
                 sAnimModelLodRef* r = &p->lods[lod].refs[p->refIndex];
                 if (r->part != 0) {
-                    ((tSetMats_0948)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FD420, 0, r->unk_0C, r->unk_08, 0);
+                    ((tSetMats_0948)((sAmVEnt_0948*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[111].delta, D_004FD420, 0, r->unk_0C, r->unk_08, 0);
                     int ok = (unsigned)(self->parts[j].id - 1) < 2;
                     int m = ok ? x : y;
-                    ((tDraw_0948)ctx->vt[100].fn)((char*)ctx + ctx->vt[100].delta, r->part, r->data, m);
+                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, r->part, r->data, m);
                 }
             }
         }
     } else {
-        ((tSetMats_0948)ctx->vt[111].fn)((char*)ctx + ctx->vt[111].delta, D_004FD420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
+        ((tSetMats_0948)((sAmVEnt_0948*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[111].delta, D_004FD420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
             sAnimModelPart* p = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
@@ -833,7 +832,7 @@ extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)
                 if (r->part != 0) {
                     int ok = (unsigned)(p->id - 1) < 2;
                     int m = ok ? x : y;
-                    ((tDraw_0948)ctx->vt[100].fn)((char*)ctx + ctx->vt[100].delta, r->part, r->data, m);
+                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, r->part, r->data, m);
                 }
             }
         }

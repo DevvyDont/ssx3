@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -698,7 +699,6 @@ struct cGame001CFFF8 {
     virtual int v46(void* name, void* entry, int a, int b, int c);
 };
 
-extern void* GrMan;
 extern "C" void SHAPE_name(void* data, int i, void* entry);
 struct sEntry001CFFF8 {
     char name[5];
@@ -795,7 +795,6 @@ struct cGame001D00C0 {
     virtual void v50(int id);
 };
 
-extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sEntry001D00C0 {
     char name[5];
@@ -2088,7 +2087,6 @@ struct sVEntry001D1B68 {
 
 extern void* cFEStatePreviewReward_vtbl[];
 extern void* D_0046D0D0[];
-extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
@@ -2097,9 +2095,9 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int fla
     *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
     int id = *(int*)((char*)self + 0x70);
     if (id >= 0) {
-        char* g = (char*)GrMan;
-        sVEntry001D1B68* vt = *(sVEntry001D1B68**)(g + 0x10D8);
-        vt[50].fn(g + vt[50].delta, id);
+        cPS2GraphicsMan* g = GrMan;
+        sVEntry001D1B68* vt = (sVEntry001D1B68*)g->mVtbl;
+        vt[50].fn((char*)g + vt[50].delta, id);
     }
     int slot = *(int*)((char*)self + 0x6C);
     if (slot >= 0) {

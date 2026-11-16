@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "online/commsystem.h"
 #include "scripter/ssxscriptengine.h"
@@ -86,7 +87,6 @@ struct sTint_6900 {
 };
 
 extern void* PadCache;
-extern void* GrMan;
 extern void* D_004A28AC;
 extern char D_00479A40[];
 extern char D_00479A50[];
@@ -123,7 +123,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     func_00326A28(pm);
     PadCache = pm;
     char* g = (char*)func_00375A08();
-    GrMan = g;
+    GrMan = (cPS2GraphicsMan*)(g);
     sVE_6900* vt = ((sGfx_6900*)g)->vt;
     ((V0Fn_6900)vt[2].fn)(g + vt[2].delta);
     cLightMan_construct();
@@ -139,12 +139,12 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(int*)&self->DebugFE = 0;
     *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
-    char* g2 = (char*)GrMan;
-    sVE_6900* vt2 = ((sGfx_6900*)g2)->vt;
-    ((V1Fn_6900)vt2[44].fn)(g2 + vt2[44].delta, 0x100);
-    char* g3 = (char*)GrMan;
-    sVE_6900* vt3 = ((sGfx_6900*)g3)->vt;
-    char* o = g3 + vt3[46].delta;
+    cPS2GraphicsMan* g2 = GrMan;
+    sVE_6900* vt2 = (sVE_6900*)g2->mVtbl;
+    ((V1Fn_6900)vt2[44].fn)((char*)g2 + vt2[44].delta, 0x100);
+    cPS2GraphicsMan* g3 = GrMan;
+    sVE_6900* vt3 = (sVE_6900*)g3->mVtbl;
+    char* o = (char*)g3 + vt3[46].delta;
     void* r = SHAPE_locate(D_0047AB40, D_004A28B0);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(o, r, D_00479A70, 0, 1, -1);
     func_00369FF8(GrMan);
@@ -792,7 +792,6 @@ extern "C" void cBE_purgeBE(void* p);
 extern "C" void func_002380E8(void* p);
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
 extern void* PadCache;
-extern void* GrMan;
 
 struct sVEPurge0 {
     short delta;
@@ -856,15 +855,15 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         ScriptEngine = 0;
     }
     {
-        char* g = (char*)GrMan;
-        sVEPurge0* vt = *(sVEPurge0**)(g + 0x10D8);
-        vt[3].fn(g + vt[3].delta);
+        cPS2GraphicsMan* g = GrMan;
+        sVEPurge0* vt = (sVEPurge0*)g->mVtbl;
+        vt[3].fn((char*)g + vt[3].delta);
     }
     {
-        char* g = (char*)GrMan;
+        cPS2GraphicsMan* g = GrMan;
         if (g) {
-            sVEPurge* vt = *(sVEPurge**)(g + 0x10D8);
-            vt[1].fn(g + vt[1].delta, 3);
+            sVEPurge* vt = (sVEPurge*)g->mVtbl;
+            vt[1].fn((char*)g + vt[1].delta, 3);
         }
     }
     GrMan = 0;
@@ -1174,7 +1173,6 @@ struct sExecPurgeMgr {
     sExecPurgeVTable* vtable;
 };
 
-extern sExecPurgeMgr* cGraphicsMan_TheGraphicsMan;
 
 //99.95%
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
@@ -1184,7 +1182,7 @@ void cSSXApp_loadexecpurge(void* self)
     WORLDTRIGGERMANAGER_DeInit(self);
     SSXAUDIO_DeInit();
     cAppMan_loadexecpurge(self);
-    sExecPurgeVTable* vt = cGraphicsMan_TheGraphicsMan->vtable;
+    sExecPurgeVTable* vt = (sExecPurgeVTable*)cGraphicsMan_TheGraphicsMan->mVtbl;
     vt->fn((char*)cGraphicsMan_TheGraphicsMan + vt->field_0x3B8);
 }
 #endif
@@ -1261,27 +1259,26 @@ struct sVE_228C08 {
     void (*fn)(void*, int, int);
 };
 
-extern cGfx_228C08* D_004A5B80_228C08 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void cSSXApp_activateBEOptions()
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (GetOptions_228C08().mode) {
     case 0:
-        D_004A5B80_228C08->v40(0);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(0);
         break;
     case 1:
-        D_004A5B80_228C08->v40(1);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(1);
         break;
     case 2:
-        D_004A5B80_228C08->v40(2);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(2);
         break;
     default:
-        D_004A5B80_228C08->v40(0);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(0);
         break;
     }
-    cGfx_228C08* g = D_004A5B80_228C08;
-    sVE_228C08* vt = *(sVE_228C08**)((char*)g + 0x10D8);
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sVE_228C08* vt = (sVE_228C08*)g->mVtbl;
     char* thisp = (char*)g + vt[12].delta;
     void (**pfn)(void*, int, int) = &vt[12].fn;
     (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
@@ -1873,7 +1870,6 @@ struct sGfx_229910 {
     sVEntry_229910* vt;         // 0x10D8
 };
 
-extern sGfx_229910* D_004A5B80_229910 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline sModel_229910* refToPtr_229910(unsigned int p)
 {
@@ -2013,9 +2009,9 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
     sV3_229910 pos[4];
     sV2_229910 uv[4];
     sV4_229910 col[4];
-    sGfx_229910* g = D_004A5B80_229910;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
     sModel_229910* m = HandleToModel_229910(RID);
-    sVEntry_229910* vt = g->vt;
+    sVEntry_229910* vt = (sVEntry_229910*)g->mVtbl;
     vt[97].fn((char*)g + vt[97].delta, m, 0, pos, uv, col);
     for (int i = 0; i < 4; i++) {
         pts[i] = MulMV_229910(m->mat, sV4_229910(pos[i], 1.0f));
@@ -2123,7 +2119,6 @@ static inline void set2_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
     g->top->f8 = (g->top->f8 & ~mask) | ((v << shift) & mask);
 }
 
-extern cGfx_229BA8* D_004A5B80_229BA8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sMarker_229BA8 {
     sV4_229BA8 pos;     // 0x0
@@ -2139,7 +2134,7 @@ struct sMarkers_229BA8 {
 extern "C" void func_00229BA8(void* p)
 {
     sMarkers_229BA8* self = (sMarkers_229BA8*)p;
-    cGfx_229BA8* g = D_004A5B80_229BA8;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
     int pushed = 0;
     sV2_229BA8 uv0;
     sV2_229BA8 uv1(1.0f, 1.0f);
@@ -2150,25 +2145,25 @@ extern "C" void func_00229BA8(void* p)
         if (m[i].count > 0) {
             if (!pushed) {
                 pushed = 1;
-                g->top[1] = g->top[0];
-                g->top++;
-                *g->top = D_00501420_229BA8;
-                g->top->f10 = GetTexId_229BA8(g, 14);
-                set0_229BA8(g, 0xC, 2, 3);
-                SetBits_229BA8(&g->top->f4, 0x400000, 0x400000);
-                set1_229BA8(g, 0x1800000, 23, 0);
-                set1_229BA8(g, 0x300000, 20, 0);
-                set1_229BA8(g, 0xFF000, 12, 0x14);
-                set1_229BA8(g, 0x3, 0, 1);
-                set2_229BA8(g, 0x1FFFFC00, 10, 0);
-                set2_229BA8(g, 0x3E0, 5, 4);
-                set1_229BA8(g, 0x7C, 2, 7);
+                ((cGfx_229BA8*)g)->top[1] = ((cGfx_229BA8*)g)->top[0];
+                ((cGfx_229BA8*)g)->top++;
+                *((cGfx_229BA8*)g)->top = D_00501420_229BA8;
+                ((cGfx_229BA8*)g)->top->f10 = GetTexId_229BA8((cGfx_229BA8*)g, 14);
+                set0_229BA8((cGfx_229BA8*)g, 0xC, 2, 3);
+                SetBits_229BA8(&((cGfx_229BA8*)g)->top->f4, 0x400000, 0x400000);
+                set1_229BA8((cGfx_229BA8*)g, 0x1800000, 23, 0);
+                set1_229BA8((cGfx_229BA8*)g, 0x300000, 20, 0);
+                set1_229BA8((cGfx_229BA8*)g, 0xFF000, 12, 0x14);
+                set1_229BA8((cGfx_229BA8*)g, 0x3, 0, 1);
+                set2_229BA8((cGfx_229BA8*)g, 0x1FFFFC00, 10, 0);
+                set2_229BA8((cGfx_229BA8*)g, 0x3E0, 5, 4);
+                set1_229BA8((cGfx_229BA8*)g, 0x7C, 2, 7);
             }
-            g->v78(&self->markers[i].pos, &size, &uv0, &uv1, &col);
+            ((cGfx_229BA8*)g)->v78(&self->markers[i].pos, &size, &uv0, &uv1, &col);
         }
     }
     if (pushed) {
-        g->top--;
+        ((cGfx_229BA8*)g)->top--;
     }
 }
 #endif
@@ -3157,7 +3152,6 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022ADD8);
 #ifdef SKIP_ASM
-extern void* GrMan;
 extern "C" void func_002425C0(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
 void func_00229F80(void* p);
@@ -3260,9 +3254,9 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
     w->f78B0 = 0;
     w->f7AB8 = 0;
     {
-        char* g = (char*)GrMan;
-        sVEMat_22ADD8* vt = *(sVEMat_22ADD8**)(g + 0x10D8);
-        sMat_22ADD8 m = vt[43].fn(g + vt[43].delta);
+        cPS2GraphicsMan* g = GrMan;
+        sVEMat_22ADD8* vt = (sVEMat_22ADD8*)g->mVtbl;
+        sMat_22ADD8 m = vt[43].fn((char*)g + vt[43].delta);
         MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &m);
     }
     MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)GrMan + 0x5800));
@@ -3421,7 +3415,6 @@ public:
     virtual void v116(int view);
 };
 
-extern cGfx_22B008* D_004A289C_22B008 __asm__("GrMan");
 
 static inline int CurLayer_22B008(cGfx_22B008* g)
 {
@@ -3623,10 +3616,10 @@ static inline int IsReady_22B008(sGame_22B008* self)
 
 extern "C" int func_0022B008(sGame_22B008* self)
 {
-    if (D_004A289C_22B008->v17() == 0) {
+    if (((cGfx_22B008*)GrMan)->v17() == 0) {
         return 0;
     }
-    D_004A289C_22B008->v116(-1);
+    ((cGfx_22B008*)GrMan)->v116(-1);
     {
         sLoader_22B008* l = self->loader;
         sVELoader_22B008* vt = l->vt;
@@ -3644,36 +3637,36 @@ extern "C" int func_0022B008(sGame_22B008* self)
         return 1;
     }
     func_0036A1E8();
-    cGfx_22B008* g = D_004A289C_22B008;
-    g->f10A8 = g->tbl[g->cur];
-    g->f10AC = g->tbl[g->f44];
+    cPS2GraphicsMan* g = GrMan;
+    ((cGfx_22B008*)g)->f10A8 = ((cGfx_22B008*)g)->tbl[((cGfx_22B008*)g)->cur];
+    ((cGfx_22B008*)g)->f10AC = ((cGfx_22B008*)g)->tbl[((cGfx_22B008*)g)->f44];
     self->target->views = self->views->views;
-    g->f270 = self->views->views;
+    ((cGfx_22B008*)g)->f270 = self->views->views;
     sWorld_22B008* world = 0;
     for (unsigned int i = 0; i < self->views->views; i++) {
-        D_004A289C_22B008->view = i;
-        D_004A289C_22B008->v66();
+        ((cGfx_22B008*)GrMan)->view = i;
+        ((cGfx_22B008*)GrMan)->v66();
         self->views->cur = i;
         sCam_22B008* cam = self->views->cams[self->views->cur];
-        D_004A289C_22B008->v24(&self->views->rects[i], 1);
-        D_004A289C_22B008->v34(&cam->mat);
-        D_004A289C_22B008->v25(cam->fov, 1.0f, cam->farClip);
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFE7FFFFF) | 0x800000;
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFCFFFFF) | 0x300000;
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFF00FFF) | 0xD000;
+        ((cGfx_22B008*)GrMan)->v24(&self->views->rects[i], 1);
+        ((cGfx_22B008*)GrMan)->v34(&cam->mat);
+        ((cGfx_22B008*)GrMan)->v25(cam->fov, 1.0f, cam->farClip);
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFE7FFFFF) | 0x800000;
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFCFFFFF) | 0x300000;
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
         self->renderer->v04();
-        D_004A289C_22B008->v25(cam->fov, cam->nearClip, cam->farClip);
-        D_004A289C_22B008->v116(i);
-        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
-        *(short*)((char*)D_004A289C_22B008->top + 0x12) = CurLayer_22B008(D_004A289C_22B008);
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & ~0xF80) | 0x380;
-        D_004A289C_22B008->top->f0 |= 0x30;
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFE7FFFFF) | 0x800000;
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFCFFFFF) | 0x300000;
-        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFF00FFF) | 0xD000;
-        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
+        ((cGfx_22B008*)GrMan)->v25(cam->fov, cam->nearClip, cam->farClip);
+        ((cGfx_22B008*)GrMan)->v116(i);
+        ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
+        *(short*)((char*)((cGfx_22B008*)GrMan)->top + 0x12) = CurLayer_22B008((cGfx_22B008*)GrMan);
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0xF80) | 0x380;
+        ((cGfx_22B008*)GrMan)->top->f0 |= 0x30;
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFE7FFFFF) | 0x800000;
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFCFFFFF) | 0x300000;
+        ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
+        ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
         sBox_22B008 box;
-        sMat_22B008 view = D_004A289C_22B008->v43();
+        sMat_22B008 view = ((cGfx_22B008*)GrMan)->v43();
         float nearClip = cam->nearClip;
         float farClip = cam->farClip;
         sMat_22B008 inv;
@@ -3718,24 +3711,24 @@ extern "C" int func_0022B008(sGame_22B008* self)
         func_00229BA8(self->f38);
         func_00344138(self->f3C);
         cMultiParticleMan_render(self->f40);
-        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
+        ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
         self->scene->v04();
         cGame_renderModels(self, world);
         cGame_renderFogVolumes(self, world);
         cGame_renderLightHalos(self, world, i);
-        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x40;
+        ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x40;
         cGame_renderPatches(self, world);
     }
     {
-        sVEView_22B008* vt = *(sVEView_22B008**)((char*)D_004A289C_22B008 + 0x10D8);
-        char* thisp = (char*)D_004A289C_22B008 + vt[23].delta;
+        sVEView_22B008* vt = (sVEView_22B008*)GrMan->mVtbl;
+        char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)D_004A289C_22B008->v10(), (float)D_004A289C_22B008->v11(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_22B008*)GrMan)->v10(), (float)((cGfx_22B008*)GrMan)->v11(), 1);
     }
-    D_004A289C_22B008->v26(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
-    D_004A289C_22B008->v34(&D_004FF1A0_22B008);
-    D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x300;
-    D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & ~0x7C) | 0x14;
+    ((cGfx_22B008*)GrMan)->v26(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
+    ((cGfx_22B008*)GrMan)->v34(&D_004FF1A0_22B008);
+    ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
+    ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
     sHud_22B008* hud = self->hud;
     hud->f38 = hud->f30 * 0.8f;
     hud->f3C = hud->f34 * 0.8f;
@@ -3746,9 +3739,9 @@ extern "C" int func_0022B008(sGame_22B008* self)
         self->hud->scale = sScale_22B008(2.0f, 2.0f);
         self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     }
-    *D_004A289C_22B008->top = D_00501420_22B008;
-    D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x300;
-    D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & ~0x7C) | 0x14;
+    *((cGfx_22B008*)GrMan)->top = D_00501420_22B008;
+    ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
+    ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
     self->hud->scale = sScale_22B008(2.0f, 2.0f);
     self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     if (D_004A4540 == 0) {
@@ -3758,7 +3751,7 @@ extern "C" int func_0022B008(sGame_22B008* self)
     }
     func_002789C0(ScriptEngine);
     func_001F31E0(self->f94);
-    D_004A289C_22B008->v20();
+    ((cGfx_22B008*)GrMan)->v20();
     func_00285BF8(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
     func_002B5D78(gWorldTriggerManager);
     self->frames = 0;

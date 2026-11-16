@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "ai/ai.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -401,7 +402,6 @@ extern "C" void func_00129160(sAiObj128A48* self)
 //100%
 INCLUDE_ASM("ai/ai", func_001291E0);
 #ifdef SKIP_ASM
-extern void* GrMan;
 extern "C" int func_00122278(void*);
 extern "C" void func_00122448(void*);
 extern "C" void func_001225C0(void*);
@@ -460,9 +460,9 @@ extern "C" void func_001291E0(sAI_91E0* self)
     for (n = 0; n < self->n78; n++) {
         char* r = self->list28[n];
         if (*(int*)(r + 0x884) == 0 && *(int*)(r + 0x888) == -1) {
-            char* g = (char*)GrMan;
-            sVEntry_91E0* vt = *(sVEntry_91E0**)(g + 0x10D8);
-            int v = vt[114].fn(g + vt[114].delta);
+            cPS2GraphicsMan* g = GrMan;
+            sVEntry_91E0* vt = (sVEntry_91E0*)g->mVtbl;
+            int v = vt[114].fn((char*)g + vt[114].delta);
             *(int*)(self->list28[n] + 0x888) = v + 4;
         }
     }
@@ -1419,7 +1419,6 @@ INCLUDE_ASM("ai/ai", func_0012A998);
 // its cRider virtual-base pointer at +0x18.
 struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
 
-extern void* GrMan;
 extern "C" int func_0012A1F0(cAI*, int);
 
 extern "C" void func_0012A998(cAI* self)
@@ -1437,10 +1436,10 @@ extern "C" void func_0012A998(cAI* self)
                 cRider* r = *(cRider**)(list[i] + 0x18);
                 r->mRenderFlag = 0;
                 r->mSafeRenderTick = -1;
-                char* g = (char*)GrMan;
+                cPS2GraphicsMan* g = GrMan;
                 char* obj = list[i];
-                sVEntry0012A998* gvt = *(sVEntry0012A998**)(g + 0x10D8);
-                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn(g + gvt[114].delta) + 4;
+                sVEntry0012A998* gvt = (sVEntry0012A998*)g->mVtbl;
+                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn((char*)g + gvt[114].delta) + 4;
             }
         }
     }
@@ -1497,7 +1496,6 @@ struct sAiObj12AB20
 
 struct sVEntry0012AB20 { short delta; short index; int (*fn)(void*); };
 
-extern void* GrMan;
 
 extern "C" void func_0012AB20(sAiObj12AB20* self)
 {
@@ -1509,10 +1507,10 @@ extern "C" void func_0012AB20(sAiObj12AB20* self)
         {
             *(int*)(r + 0x884) = 0;
             *(int*)(r + 0x888) = -1;
-            char* g = (char*)GrMan;
+            cPS2GraphicsMan* g = GrMan;
             char* rider = self->mRiders[i];
-            sVEntry0012AB20* vt = *(sVEntry0012AB20**)(g + 0x10D8);
-            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn(g + vt[114].delta) + 4;
+            sVEntry0012AB20* vt = (sVEntry0012AB20*)g->mVtbl;
+            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)g + vt[114].delta) + 4;
         }
     }
 }
@@ -1558,7 +1556,6 @@ struct sAiObj12AC48
 
 struct sVEntry0012AC48 { short delta; short index; int (*fn)(void*); };
 
-extern void* GrMan;
 
 extern "C" void func_0012AC48(sAiObj12AC48* self)
 {
@@ -1570,10 +1567,10 @@ extern "C" void func_0012AC48(sAiObj12AC48* self)
         {
             *(int*)(r + 0x884) = 0;
             *(int*)(r + 0x888) = -1;
-            char* g = (char*)GrMan;
+            cPS2GraphicsMan* g = GrMan;
             char* rider = self->mRiders[i];
-            sVEntry0012AC48* vt = *(sVEntry0012AC48**)(g + 0x10D8);
-            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn(g + vt[114].delta) + 4;
+            sVEntry0012AC48* vt = (sVEntry0012AC48*)g->mVtbl;
+            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)g + vt[114].delta) + 4;
         }
     }
 }

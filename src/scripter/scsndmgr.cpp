@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -288,7 +289,6 @@ public:
     virtual void v40(int a);
 };
 
-extern cWorld_3818* GrMan;
 
 extern "C" void cVidEngine_ResetVideoEngine(void* self)
 {
@@ -298,7 +298,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
         if (*(int*)(s + 0x4) != 0) {
             D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
             func_0029CE70(func_0028B180());
-            GrMan->v40(*(int*)(s + 0x10));
+            ((cWorld_3818*)GrMan)->v40(*(int*)(s + 0x10));
             if (*(int*)(s + 0x14) != 0) {
                 *(int*)(s + 0x14) = 0;
                 func_002EA860(SSXApp->Game->CutSceneTransitionMan);

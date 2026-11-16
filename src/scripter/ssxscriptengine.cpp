@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
@@ -1772,7 +1773,6 @@ struct sSseGame_A860 {
     char pad_0x0[0xF44];
     int field_0xF44;        // 0xF44
 };
-extern sSseGame_A860* D_004A289C_A860 __asm__("GrMan");
 
 static inline int sseWorldMode_A860()
 {
@@ -1796,7 +1796,7 @@ extern "C" void func_0027A860(cSSXScriptEngine* self, int online, int intro)
             func_00278E50(self, 1, 0xC, 1, 1, -1, -1, -1);
         }
         func_00278E50(self, 1, 0xD, 0, 1, -1, -1, -1);
-        D_004A289C_A860->field_0xF44 = 1;
+        GrMan->mSkipNextPageFlip = 1;
         if (sseWorldMode_A860() == 1) {
             func_00278E50(self, 1, 0xE, 8, 1, -1, -1, -1);
         } else {

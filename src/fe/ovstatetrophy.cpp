@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -303,7 +304,6 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void DrawPrims(int n, sVert_EDA0* v, int flags);
 };
-extern cGfx_EDA0* D_004A289C_EDA0 __asm__("GrMan");
 extern sGs_EDA0 D_00501420_EDA0 __asm__("D_00501420");
 extern char t4mat_Identity[];
 
@@ -467,14 +467,14 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         v[i].a = 0x80;
         v[i].q = 1.0f;
     }
-    D_004A289C_EDA0->Begin2D();
-    D_004A289C_EDA0->PushState();
-    *D_004A289C_EDA0->stateTop = D_00501420_EDA0;
-    D_004A289C_EDA0->stateTop->f4_23 = 2;
-    D_004A289C_EDA0->stateTop->f4_20 = 0;
-    D_004A289C_EDA0->stateTop->f4_12 = 0x14;
-    D_004A289C_EDA0->stateTop->f4_2 = 5;
-    D_004A289C_EDA0->SetTexture(t4mat_Identity);
+    ((cGfx_EDA0*)GrMan)->Begin2D();
+    ((cGfx_EDA0*)GrMan)->PushState();
+    *((cGfx_EDA0*)GrMan)->stateTop = D_00501420_EDA0;
+    ((cGfx_EDA0*)GrMan)->stateTop->f4_23 = 2;
+    ((cGfx_EDA0*)GrMan)->stateTop->f4_20 = 0;
+    ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_EDA0*)GrMan)->stateTop->f4_2 = 5;
+    ((cGfx_EDA0*)GrMan)->SetTexture(t4mat_Identity);
 
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
@@ -504,7 +504,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     D_004A2764_EDA0->SetScale(0.666700005531311f, 0.666700005531311f);
     D_004A2764_EDA0->color2 = D_004C6878;
     D_004A2764_EDA0->scale = D_004A4EC0;
-    D_004A289C_EDA0->stateTop->SetPrim(10);
+    ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
     func_00392908(D_004A2764_EDA0, self->x, self->y, buf);
     D_004A2764_EDA0->SetScale(1.0f, 1.0f);
 
@@ -554,9 +554,9 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         p.z = 0.0f;
         p.w = 1.0f;
         v[3].pos = p;
-        D_004A289C_EDA0->stateTop->SetPrim(10);
-        *(short*)((char*)D_004A289C_EDA0->stateTop + 0x10) = atex->GetHandle();
-        D_004A289C_EDA0->DrawPrims(4, v, 0);
+        ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
+        *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = atex->GetHandle();
+        ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
     }
 
     sTex_EDA0* tex = D_004C8C58_EDA0[0].tex;
@@ -595,9 +595,9 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     p.z = 0.0f;
     p.w = 1.0f;
     v[3].pos = p;
-    D_004A289C_EDA0->stateTop->SetPrim(9);
-    *(short*)((char*)D_004A289C_EDA0->stateTop + 0x10) = tex->GetHandle();
-    D_004A289C_EDA0->DrawPrims(4, v, 0);
+    ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(9);
+    *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = tex->GetHandle();
+    ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
 
     float markY = barTop + (barBottom - barTop) * frac;
     p.x = self->cx - 2.7497661113739014f;
@@ -625,9 +625,9 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         v[i].g = 0;
         v[i].b = 0;
     }
-    D_004A289C_EDA0->stateTop->SetPrim(10);
-    *(short*)((char*)D_004A289C_EDA0->stateTop + 0x10) = -1;
-    D_004A289C_EDA0->DrawPrims(4, v, 0);
+    ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
+    *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = -1;
+    ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
     for (int i = 0; i < 4; i++) {
         v[i].r = 0x80;
         v[i].g = 0x80;
@@ -705,9 +705,9 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         p.z = 0.0f;
         p.w = 1.0f;
         v[3].pos = p;
-        D_004A289C_EDA0->stateTop->SetPrim(prim);
-        *(short*)((char*)D_004A289C_EDA0->stateTop + 0x10) = t->GetHandle();
-        D_004A289C_EDA0->DrawPrims(4, v, 0);
+        ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(prim);
+        *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = t->GetHandle();
+        ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
     }
 
     if (*(int*)(course + 8) != 0) {
@@ -772,13 +772,13 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             p.z = 0.0f;
             p.w = 1.0f;
             v[3].pos = p;
-            D_004A289C_EDA0->stateTop->SetPrim(0xB);
-            *(short*)((char*)D_004A289C_EDA0->stateTop + 0x10) = t->GetHandle();
-            D_004A289C_EDA0->DrawPrims(4, v, 0);
+            ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(0xB);
+            *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = t->GetHandle();
+            ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
         }
     }
-    D_004A289C_EDA0->stateTop--;
-    D_004A289C_EDA0->End2D();
+    ((cGfx_EDA0*)GrMan)->stateTop--;
+    ((cGfx_EDA0*)GrMan)->End2D();
     self->last = me;
 }
 #endif
@@ -849,7 +849,6 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void DrawPrims(int n, sVert_FB40* v, int flags);
 };
-extern cGfx_FB40* D_004A289C_FB40 __asm__("GrMan");
 extern sGs_FB40 D_00501420_FB40 __asm__("D_00501420");
 extern char t4mat_Identity[];
 
@@ -975,14 +974,14 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     float x = self->x;
     if (right == 0)
         x += self->w;
-    D_004A289C_FB40->Begin2D();
-    D_004A289C_FB40->PushState();
-    *D_004A289C_FB40->stateTop = D_00501420_FB40;
-    D_004A289C_FB40->stateTop->f4_23 = 2;
-    D_004A289C_FB40->stateTop->f4_20 = 0;
-    D_004A289C_FB40->stateTop->f4_12 = 0x14;
-    D_004A289C_FB40->stateTop->f4_2 = 5;
-    D_004A289C_FB40->SetTexture(t4mat_Identity);
+    ((cGfx_FB40*)GrMan)->Begin2D();
+    ((cGfx_FB40*)GrMan)->PushState();
+    *((cGfx_FB40*)GrMan)->stateTop = D_00501420_FB40;
+    ((cGfx_FB40*)GrMan)->stateTop->f4_23 = 2;
+    ((cGfx_FB40*)GrMan)->stateTop->f4_20 = 0;
+    ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_FB40*)GrMan)->stateTop->f4_2 = 5;
+    ((cGfx_FB40*)GrMan)->SetTexture(t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
     float top = self->y;
@@ -1018,9 +1017,9 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     p.z = 0.0f;
     p.w = 1.0f;
     v[3].pos = p;
-    D_004A289C_FB40->stateTop->SetPrim(9);
-    *(short*)((char*)D_004A289C_FB40->stateTop + 0x10) = tex->GetHandle();
-    D_004A289C_FB40->DrawPrims(4, v, 0);
+    ((cGfx_FB40*)GrMan)->stateTop->SetPrim(9);
+    *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = tex->GetHandle();
+    ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
 
     float topFade = top + 60.0f;
     float bottomFade = bottom - 60.0f;
@@ -1119,9 +1118,9 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
             p.w = 1.0f;
             v[3].pos = p;
         }
-        D_004A289C_FB40->stateTop->SetPrim(prim);
-        *(short*)((char*)D_004A289C_FB40->stateTop + 0x10) = t->GetHandle();
-        D_004A289C_FB40->DrawPrims(4, v, 0);
+        ((cGfx_FB40*)GrMan)->stateTop->SetPrim(prim);
+        *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = t->GetHandle();
+        ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
     }
 
     for (int i = 0; i < 4; i++)
@@ -1219,13 +1218,13 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
                 p.w = 1.0f;
                 v[3].pos = p;
             }
-            D_004A289C_FB40->stateTop->SetPrim(0xB);
-            *(short*)((char*)D_004A289C_FB40->stateTop + 0x10) = t->GetHandle();
-            D_004A289C_FB40->DrawPrims(4, v, 0);
+            ((cGfx_FB40*)GrMan)->stateTop->SetPrim(0xB);
+            *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = t->GetHandle();
+            ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
         }
     }
-    D_004A289C_FB40->stateTop--;
-    D_004A289C_FB40->End2D();
+    ((cGfx_FB40*)GrMan)->stateTop--;
+    ((cGfx_FB40*)GrMan)->End2D();
     self->last = me;
 }
 #endif

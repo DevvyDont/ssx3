@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -225,7 +226,6 @@ struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 extern "C" void func_0019A498(void* self);
 extern "C" void func_0039E390(void* self, int flags);
-extern void* GrMan;
 extern void* cFEStateCharEquip_vtbl[];
 extern void* D_0046D0D0[];
 
@@ -238,9 +238,9 @@ struct sVEntryK199148 {
 static inline void releaseK199148(int id)
 {
     if (id >= 0) {
-        char* g = (char*)GrMan;
-        sVEntryK199148* vt = *(sVEntryK199148**)(g + 0x10D8);
-        vt[50].fn(g + vt[50].delta, id);
+        cPS2GraphicsMan* g = GrMan;
+        sVEntryK199148* vt = (sVEntryK199148*)g->mVtbl;
+        vt[50].fn((char*)g + vt[50].delta, id);
     }
 }
 
@@ -968,7 +968,6 @@ struct sEquipTable;
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" int func_004165A8(const void* a, const void* b);
-extern void* GrMan;
 extern char D_004A1950[];
 
 struct sPkgEntK19A098 {
@@ -1013,13 +1012,13 @@ extern "C" int func_0019A098(void* self, const char* name)
             char* data = (char*)pkg + e->off;
             int id = *(int*)((char*)self + 0xA68);
             if (id == -1) {
-                char* g = (char*)GrMan;
-                sVEK19A098a* vt = *(sVEK19A098a**)(g + 0x10D8);
-                *(int*)((char*)self + 0xA68) = vt[46].fn(g + vt[46].delta, data, D_004A1950, 0, 1, -1);
+                cPS2GraphicsMan* g = GrMan;
+                sVEK19A098a* vt = (sVEK19A098a*)g->mVtbl;
+                *(int*)((char*)self + 0xA68) = vt[46].fn((char*)g + vt[46].delta, data, D_004A1950, 0, 1, -1);
             } else {
-                char* g = (char*)GrMan;
-                sVEK19A098b* vt = *(sVEK19A098b**)(g + 0x10D8);
-                vt[48].fn(g + vt[48].delta, id, data, 1);
+                cPS2GraphicsMan* g = GrMan;
+                sVEK19A098b* vt = (sVEK19A098b*)g->mVtbl;
+                vt[48].fn((char*)g + vt[48].delta, id, data, 1);
             }
             return *(int*)((char*)self + 0xA68);
         }
@@ -1251,7 +1250,6 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
 extern "C" void func_0019A9B8(void* self);
-extern void* GrMan;
 extern char D_004A1960[];
 
 struct sVEntryK19A638 {
@@ -1276,9 +1274,9 @@ extern "C" void func_0019A638(void* self)
         if (func_0019E238((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C))) {
             char* e = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
             if (e != 0) {
-                char* g = (char*)GrMan;
-                sVEntryK19A638* vt = *(sVEntryK19A638**)(g + 0x10D8);
-                *(int*)((char*)self + 0xA70) = vt[46].fn(g + vt[46].delta, e + *(int*)(e + 0x14), D_004A1960, 0, 1, -1);
+                cPS2GraphicsMan* g = GrMan;
+                sVEntryK19A638* vt = (sVEntryK19A638*)g->mVtbl;
+                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)g + vt[46].delta, e + *(int*)(e + 0x14), D_004A1960, 0, 1, -1);
             } else {
                 *(int*)((char*)self + 0xA70) = -1;
             }
@@ -4071,7 +4069,6 @@ struct sSlot0019E498 {
     char pad[7];
 };
 
-extern void* GrMan;
 extern "C" void func_0019EBA0(void* self);
 void operator_delete(int* p);
 
@@ -4083,9 +4080,9 @@ extern "C" void func_0019E498(void* self, int flags)
     int none = -1;
     for (i = 0xFF; i >= 0; i--, s++) {
         if (s->id >= 0) {
-            char* g = (char*)GrMan;
-            sVEntry0019E498* vt = *(sVEntry0019E498**)(g + 0x10D8);
-            vt[50].fn(g + vt[50].delta, s->id);
+            cPS2GraphicsMan* g = GrMan;
+            sVEntry0019E498* vt = (sVEntry0019E498*)g->mVtbl;
+            vt[50].fn((char*)g + vt[50].delta, s->id);
         }
         s->id = none;
         s->flag = 0;
@@ -4118,7 +4115,6 @@ extern "C" void func_0019E538(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E588);
 #ifdef SKIP_ASM
-extern void* GrMan;
 
 struct sVE_E588 {
     short delta;
@@ -4168,9 +4164,9 @@ extern "C" void func_0019E588(sRider_E588* self, unsigned int item, int flag)
         return;
     }
     if (self->timer < 0) {
-        char* w = (char*)GrMan;
-        sVE_E588* vt = *(sVE_E588**)(w + 0x10D8);
-        self->timer = vt[114].fn(w + vt[114].delta) + 4;
+        cPS2GraphicsMan* w = GrMan;
+        sVE_E588* vt = (sVE_E588*)w->mVtbl;
+        self->timer = vt[114].fn((char*)w + vt[114].delta) + 4;
         self->fCC4 = self->fCC8;
         self->fCC8 = 0;
     }

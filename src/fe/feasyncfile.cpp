@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
@@ -92,7 +93,6 @@ int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 void cMemMan_free(void* p);
 extern "C" int ASYNCFILE_release(int handle, void** data, int* size);
-extern char* GrMan;
 
 struct sFEUnloadFile {
     char name[0x100];
@@ -128,9 +128,9 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx
         m->files[idx].data = 0;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     } else if (cFEAsyncManager_GetFileStatus(self, idx) == 3) {
-        char* obj = GrMan;
-        sVEUnload* vt = *(sVEUnload**)(obj + 0x10D8);
-        m->files[idx].f118 = vt[114].fn(obj + vt[114].delta) + 0xE;
+        cPS2GraphicsMan* obj = GrMan;
+        sVEUnload* vt = (sVEUnload*)obj->mVtbl;
+        m->files[idx].f118 = vt[114].fn((char*)obj + vt[114].delta) + 0xE;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     }
 }
@@ -218,7 +218,6 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx);
 extern "C" int ASYNCFILE_release(int handle, void** data, int* size);
 extern "C" int ASYNCFILE_getstatus(int handle);
 void cMemMan_free(void* p);
-extern char* GrMan;
 extern char D_004A1A18[];
 
 extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
@@ -227,13 +226,13 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
     int i;
     for (i = 0; i < 5; i++) {
         if (cFEAsyncManager_GetFileStatus(self, i) == 0 || cFEAsyncManager_GetFileStatus(self, i) == 1) {
-            char* obj = GrMan;
-            sVE39F0* vt = *(sVE39F0**)(obj + 0x10D8);
-            if (m->files[i].f118 < vt[114].fn(obj + vt[114].delta)) {
+            cPS2GraphicsMan* obj = GrMan;
+            sVE39F0* vt = (sVE39F0*)obj->mVtbl;
+            if (m->files[i].f118 < vt[114].fn((char*)obj + vt[114].delta)) {
                 if (m->files[i].data != 0) {
-                    char* obj2 = GrMan;
-                    sVE39F0V* vt2 = *(sVE39F0V**)(obj2 + 0x10D8);
-                    vt2[50].fn(obj2 + vt2[50].delta, m->files[i].id);
+                    cPS2GraphicsMan* obj2 = GrMan;
+                    sVE39F0V* vt2 = (sVE39F0V*)obj2->mVtbl;
+                    vt2[50].fn((char*)obj2 + vt2[50].delta, m->files[i].id);
                     if (m->files[i].data != 0) {
                         cMemMan_free(m->files[i].data);
                     }
@@ -244,9 +243,9 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
             }
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 1) {
-            char* obj = GrMan;
-            sVE39F0* vt = *(sVE39F0**)(obj + 0x10D8);
-            if (m->files[i].f118 < vt[114].fn(obj + vt[114].delta)) {
+            cPS2GraphicsMan* obj = GrMan;
+            sVE39F0* vt = (sVE39F0*)obj->mVtbl;
+            if (m->files[i].f118 < vt[114].fn((char*)obj + vt[114].delta)) {
                 cFEAsyncManager_LoadDataFile(self, i);
             }
         }
@@ -254,10 +253,10 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
             if (ASYNCFILE_getstatus(m->files[i].handle) == 1) {
                 cFEAsyncManager_SetFileStatus(self, i, 3);
                 ASYNCFILE_release(m->files[i].handle, 0, 0);
-                char* obj = GrMan;
-                sVE39F0L* vt = *(sVE39F0L**)(obj + 0x10D8);
+                cPS2GraphicsMan* obj = GrMan;
+                sVE39F0L* vt = (sVE39F0L*)obj->mVtbl;
                 char* data = m->files[i].data;
-                m->files[i].id = vt[46].fn(obj + vt[46].delta, data + *(int*)(data + 0x14), D_004A1A18, 0, 0, -1);
+                m->files[i].id = vt[46].fn((char*)obj + vt[46].delta, data + *(int*)(data + 0x14), D_004A1A18, 0, 0, -1);
             }
         }
     }
@@ -305,7 +304,6 @@ struct sVE3C50 {
     void (*fn)(void*, int);
 };
 
-extern char* GrMan;
 void cMemMan_free(void* p);
 
 extern "C" void func_001A3C50(cFEAsyncManager* self)
@@ -314,9 +312,9 @@ extern "C" void func_001A3C50(cFEAsyncManager* self)
     int i;
     for (i = 0; i < 5; i++) {
         if (m->files[i].data != 0) {
-            char* obj = GrMan;
-            sVE3C50* vt = *(sVE3C50**)(obj + 0x10D8);
-            vt[50].fn(obj + vt[50].delta, m->files[i].id);
+            cPS2GraphicsMan* obj = GrMan;
+            sVE3C50* vt = (sVE3C50*)obj->mVtbl;
+            vt[50].fn((char*)obj + vt[50].delta, m->files[i].id);
             if (m->files[i].data != 0) {
                 cMemMan_free(m->files[i].data);
             }

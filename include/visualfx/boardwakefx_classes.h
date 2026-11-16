@@ -91,7 +91,6 @@ public:
     static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
-extern char* GrMan;
 
 extern "C" void func_0037C720(void* mgr, float f);
 

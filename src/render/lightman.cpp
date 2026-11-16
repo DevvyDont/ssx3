@@ -1,4 +1,6 @@
 #include "common.h"
+#include "render/font.h"
+#include "render/ps2graphicsman.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00492EE0[];
@@ -295,7 +297,6 @@ struct sLmQuadCtx_E118 {
     sLmQuadVEntry_E118* vtable;      // 0x10D8
 };
 
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // Fills the four corner positions of a quad from a rect {x, y, w, h}, then submits it.
 extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* v, float* r)
@@ -304,8 +305,8 @@ extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* v, float* r)
     v[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
     v[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
     v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
 #endif
@@ -313,7 +314,6 @@ extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* v, float* r)
 INCLUDE_ASM("render/lightman", func_0038E200);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // Fills the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, then submits it.
 extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* v, float* r)
@@ -322,8 +322,8 @@ extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* v, float* r)
     v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
     v[0].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
     v[2].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
 #endif
@@ -331,7 +331,6 @@ extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* v, float* r)
 INCLUDE_ASM("render/lightman", func_0038E2E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
@@ -350,8 +349,8 @@ extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* v, float* r, float* m
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
 #endif
@@ -359,7 +358,6 @@ extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* v, float* r, float* m
 INCLUDE_ASM("render/lightman", func_0038E468);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
@@ -378,8 +376,8 @@ extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* v, float* r, float* m
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
 #endif
@@ -387,7 +385,6 @@ extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* v, float* r, float* m
 INCLUDE_ASM("render/lightman", func_0038E5E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, then submits it.
 extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv)
@@ -404,8 +401,8 @@ extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
     vtx[3].s = uv[0] + uv[2];
     vtx[3].t = uv[1] + uv[3];
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
 }
 #endif
@@ -413,7 +410,6 @@ extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* r, float*
 INCLUDE_ASM("render/lightman", func_0038E738);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, (rotated mapping), then submits it.
 extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv)
@@ -430,8 +426,8 @@ extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
     vtx[3].s = uv[0];
     vtx[3].t = uv[1] + uv[3];
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
 }
 #endif
@@ -439,7 +435,6 @@ extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float*
 INCLUDE_ASM("render/lightman", func_0038E880);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
@@ -466,8 +461,8 @@ extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
 }
 #endif
@@ -475,7 +470,6 @@ extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* r, float*
 INCLUDE_ASM("render/lightman", func_0038EA60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
@@ -502,8 +496,8 @@ extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* r, float*
     *p1 = func_0038E0A8(&p1->x, m);
     *p2 = func_0038E0A8(&p2->x, m);
     *p3 = func_0038E0A8(&p3->x, m);
-    sLmQuadCtx_E118* g = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, vtx, 0);
 }
 #endif
@@ -538,7 +532,6 @@ struct sLmQuadCtx {
     sLmQuadVEntry* vtable;      // 0x10D8
 };
 
-extern sLmQuadCtx* D_004A5B80_EC40 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z)
 {
@@ -566,8 +559,8 @@ extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, floa
     v[2].t = one;
     v[3].s = one;
     v[3].t = one;
-    sLmQuadCtx* g = D_004A5B80_EC40;
-    sLmQuadVEntry* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry* vt = (sLmQuadVEntry*)g->mVtbl;
     vt[71].fn((char*)g + vt[71].delta, 4, v, 0);
 }
 #endif
@@ -576,7 +569,6 @@ extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, floa
 INCLUDE_ASM("render/lightman", func_0038ED90);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-extern sLmQuadCtx_E118* D_004A5B80_E118 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // Submits two coloured points/vertices at the positions *p0 and *p1; col is {alpha, r, g, b} in 0..1.
 extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* p0, sLmQuadVec4_E118* p1, float* col)
@@ -596,8 +588,8 @@ extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* p0, sLmQuadVec4_E118
     v[0].c[1] = g;
     v[0].c[2] = b;
     v[0].c[3] = a;
-    sLmQuadCtx_E118* ctx = D_004A5B80_E118;
-    sLmQuadVEntry_E118* vt = ctx->vtable;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
+    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ctx->mVtbl;
     vt[73].fn((char*)ctx + vt[73].delta, 2, v, 0);
 }
 #endif
@@ -624,7 +616,6 @@ struct sLmCtx_EE78 {
     sLmVEntry_EE78* vtable;      // 0x10D8
 };
 
-extern sLmCtx_EE78* D_004A5B80_EE78 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sLmMat_EE78 D_00504D80_EE78[] __asm__("D_00504D80");
 extern sLmMat_EE78 t4mat_Identity;
 extern float D_004FF160[3];
@@ -744,8 +735,8 @@ extern "C" void func_0038EE78(void)
     sLmMat_EE78 tmp;
     float s;
     float c;
-    sLmCtx_EE78* g = D_004A5B80_EE78;
-    sLmVEntry_EE78* vt = g->vtable;
+    cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+    sLmVEntry_EE78* vt = (sLmVEntry_EE78*)g->mVtbl;
     float t = (float)vt[114].fn((char*)g + vt[114].delta);
     int i;
     for (i = 0; i < 8; i++) {
@@ -1532,7 +1523,6 @@ INCLUDE_ASM("render/lightman", func_003905E8);
 //100%
 INCLUDE_ASM("render/lightman", func_00390C20);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 extern int D_004A44C0;
 extern int D_004A44C8;
 
@@ -1544,9 +1534,9 @@ struct sLmVEntry_0C20 {
 
 extern "C" void func_00390C20()
 {
-    char* mgr = cGraphicsMan_TheGraphicsMan;
-    sLmVEntry_0C20* vt = *(sLmVEntry_0C20**)(mgr + 0x10D8);
-    vt[16].fn(mgr + vt[16].delta, D_004A44C0);
+    cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
+    sLmVEntry_0C20* vt = (sLmVEntry_0C20*)mgr->mVtbl;
+    vt[16].fn((char*)mgr + vt[16].delta, D_004A44C0);
     if (D_004A44C8 != 0) {
         D_004A44C8 = 0;
     }
@@ -1772,7 +1762,6 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void v70(int, sHudVert_0F20*, int);
 };
-extern cGfx_0F20* D_004A5B80_g __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void func_00390F20()
 {
@@ -1783,32 +1772,32 @@ extern "C" void func_00390F20()
         }
     }
     if (flag) {
-        cGfx_0F20* g = D_004A5B80_g;
-        g->PushState();
-        g->v20();
-        g->v30();
-        g->v36();
+        cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
+        ((cGfx_0F20*)g)->PushState();
+        ((cGfx_0F20*)g)->v20();
+        ((cGfx_0F20*)g)->v30();
+        ((cGfx_0F20*)g)->v36();
         float a;
         float b;
-        if (g->f270 == 1) {
+        if (((cGfx_0F20*)g)->f270 == 1) {
             a = 640.0f;
             b = 0.0f;
         } else {
             a = 320.0f;
             b = 0.0f;
-            if (g->f274 != 0) {
+            if (((cGfx_0F20*)g)->f274 != 0) {
                 b = a;
             }
         }
-        g->v25(b, 0.0f, a, 480.0f, 0.0f, 1.0f, 0, 0);
-        *g->stateTop = D_00501420_0F20;
-        g->stateTop->f8_5 = 5;
-        g->stateTop->SetF22(1);
-        g->stateTop->f4_23 = 2;
-        g->stateTop->f4_20 = 0;
-        g->stateTop->f4_12 = 0x14;
-        g->stateTop->SetF2(D_004A46AC_i);
-        *(short*)((char*)g->stateTop + 0x10) = -1;
+        ((cGfx_0F20*)g)->v25(b, 0.0f, a, 480.0f, 0.0f, 1.0f, 0, 0);
+        *((cGfx_0F20*)g)->stateTop = D_00501420_0F20;
+        ((cGfx_0F20*)g)->stateTop->f8_5 = 5;
+        ((cGfx_0F20*)g)->stateTop->SetF22(1);
+        ((cGfx_0F20*)g)->stateTop->f4_23 = 2;
+        ((cGfx_0F20*)g)->stateTop->f4_20 = 0;
+        ((cGfx_0F20*)g)->stateTop->f4_12 = 0x14;
+        ((cGfx_0F20*)g)->stateTop->SetF2(D_004A46AC_i);
+        *(short*)((char*)((cGfx_0F20*)g)->stateTop + 0x10) = -1;
         sHudVert_0F20 v[4];
         sPos_0F20 p;
         p.x = b;
@@ -1841,11 +1830,11 @@ extern "C" void func_00390F20()
                 v[i].a = aa;
                 v[i].q = 1.0f;
             }
-            g->v70(4, v, 0);
+            ((cGfx_0F20*)g)->v70(4, v, 0);
         }
-        g->v31();
-        g->v21();
-        g->stateTop--;
+        ((cGfx_0F20*)g)->v31();
+        ((cGfx_0F20*)g)->v21();
+        ((cGfx_0F20*)g)->stateTop--;
     }
 }
 #endif
@@ -2049,7 +2038,7 @@ struct sLmLight_15E8 {
     unsigned char b64;      // 0x64
 };
 
-extern "C" void cFont_loadFont(void* self, const char* name, int flags);
+extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
 
 extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int flags)
 {
@@ -2067,7 +2056,7 @@ extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int
     }
     self->v50 = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
     self->b64 = 0;
-    cFont_loadFont(self, name, flags);
+    cFont_loadFont((cFont*)self, name, flags);
     return self;
 }
 #endif
@@ -2096,7 +2085,7 @@ extern "C" void cFont_linkFont(void* self, void* data, int flags);
 void cMemMan_free(void*);
 extern const char D_00492F30[];
 
-extern "C" void cFont_loadFont(void* self, const char* name, int flags)
+extern "C" void cFont_loadFont(cFont* self, const char* name, int flags)
 {
     void* data;
 
