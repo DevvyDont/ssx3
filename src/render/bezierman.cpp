@@ -145,33 +145,18 @@ void func_0038B178(void* self)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038B190);
 #ifdef SKIP_ASM
-struct sBezPatch_B190 {
-    void* obj;              // 0x0
-    int extra;              // 0x4
-    int kind;               // 0x8
-    unsigned short tex;     // 0xC
-    short pad;
-};
 
-struct sBezMixPatch_B190 {
-    void* obj;              // 0x0
-    int extra;              // 0x4
-    int kind;               // 0x8
-    unsigned short tex;     // 0xC
-    short pad;
-    unsigned char types[4]; // 0x10
-};
 
 struct sBezMan_B190 {
     char pad_0x0[0x458];
     int n4;                         // 0x458
-    sBezPatch_B190 list4[900];      // 0x45C
+    tBezierPatchEntry list4[900];      // 0x45C
     int n6;                         // 0x3C9C
-    sBezPatch_B190 list6[220];      // 0x3CA0
+    tBezierPatchEntry list6[220];      // 0x3CA0
     int n8;                         // 0x4A60
-    sBezPatch_B190 list8[50];       // 0x4A64
+    tBezierPatchEntry list8[50];       // 0x4A64
     int nMix;                       // 0x4D84
-    sBezMixPatch_B190 mix[75];      // 0x4D88
+    tBezierMixedPatchEntry mix[75];      // 0x4D88
 };
 
 struct sBezObj_B190 {
@@ -187,43 +172,43 @@ extern "C" void func_0038B190(cPSPBezierMan* pspBezierMan, sBezObj_B190* o, unsi
         switch (t[0]) {
         case 4:
             if (pspBezierMan->mNum4x4Patches < 900) {
-                sBezPatch_B190* e = &((sBezPatch_B190*)&pspBezierMan->m4x4Patches[0])[pspBezierMan->mNum4x4Patches++];
-                e->extra = extra;
-                e->obj = o;
-                e->kind = 0;
-                e->tex = o->tex4;
+                tBezierPatchEntry* e = &((&pspBezierMan->m4x4Patches[0]))[pspBezierMan->mNum4x4Patches++];
+                (*(int*)&e->unk_04) = extra;
+                e->mpPatch = o;
+                e->mLod = 0;
+                e->unk_0C = o->tex4;
             }
             break;
         case 6:
             if (pspBezierMan->mNum6x6Patches < 220) {
-                sBezPatch_B190* e = &((sBezPatch_B190*)&pspBezierMan->m6x6Patches[0])[pspBezierMan->mNum6x6Patches++];
-                e->extra = extra;
-                e->kind = 1;
-                e->obj = o;
-                e->tex = o->tex6;
+                tBezierPatchEntry* e = &((&pspBezierMan->m6x6Patches[0]))[pspBezierMan->mNum6x6Patches++];
+                (*(int*)&e->unk_04) = extra;
+                e->mLod = 1;
+                e->mpPatch = o;
+                e->unk_0C = o->tex6;
             }
             break;
         case 8:
             if (pspBezierMan->mNum8x8Patches < 50) {
-                sBezPatch_B190* e = &((sBezPatch_B190*)&pspBezierMan->m8x8Patches[0])[pspBezierMan->mNum8x8Patches++];
-                e->extra = extra;
-                e->kind = 2;
-                e->obj = o;
-                e->tex = o->tex8;
+                tBezierPatchEntry* e = &((&pspBezierMan->m8x8Patches[0]))[pspBezierMan->mNum8x8Patches++];
+                (*(int*)&e->unk_04) = extra;
+                e->mLod = 2;
+                e->mpPatch = o;
+                e->unk_0C = o->tex8;
             }
             break;
         }
         return;
     }
     if (pspBezierMan->mNumMixedPatches < 75) {
-        sBezMixPatch_B190* e = &((sBezMixPatch_B190*)&pspBezierMan->mMixedPatches[0])[pspBezierMan->mNumMixedPatches++];
-        e->extra = extra;
-        e->obj = o;
-        int* pk = &e->kind;
+        tBezierMixedPatchEntry* e = &((&pspBezierMan->mMixedPatches[0]))[pspBezierMan->mNumMixedPatches++];
+        (*(int*)&e->unk_04) = extra;
+        e->mpPatch = o;
+        int* pk = &e->mLod;
         *pk = (t[0] == 8 || t[1] == 8 || t[2] == 8 || t[3] == 8) ? 2 : 0;
-        e->tex = o->tex8;
+        e->unk_0C = o->tex8;
         for (int i = 0; i < 4; i++) {
-            e->types[i] = t[i];
+            e->mEdgeLods[i] = t[i];
         }
     }
 }

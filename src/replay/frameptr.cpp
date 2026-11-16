@@ -836,34 +836,8 @@ struct sApp_F4A8 {
 // PORT: typed view of the app global
 extern sApp_F4A8* D_004A28A8_F4A8 __asm__("SSXApp");
 
-struct sReplay_F4A8 {
-    int state;              // 0x0
-    char pad4[0x14];
-    int keyRate;            // 0x18
-    char pad1C[0x4];
-    int f20;                // 0x20
-    char pad24[0x4];
-    int player;             // 0x28
-    char pad2C[0x39C];
-    int frame;              // 0x3C8
-    int seconds;            // 0x3CC
-    void* block;            // 0x3D0
-    int f3D4;               // 0x3D4
-    char pad3D8[0xAC];
-    int last;               // 0x484
-    char pad488[0x17C];
-    int f604;               // 0x604
-    int f608;               // 0x608
-    int f60C;               // 0x60C
-    int paused;             // 0x610
-    int timer;              // 0x614
-    int f618;               // 0x618
-    int f61C;               // 0x61C
-    int f620;               // 0x620
-    int f624;               // 0x624
-};
 
-static inline void addFrame_F4A8(sReplay_F4A8* self, short type)
+static inline void addFrame_F4A8(cReplay* self, short type)
 {
     sFrameDesc_F4A8 desc;
     desc.type = type;
@@ -902,47 +876,47 @@ extern "C" void cReplay_update(cReplay* self)
         self->ShowError--;
     self->NextFrame = 0;
     if (self->Cmd == 7)
-        cReplay_setReplayState(((sReplay_F4A8*)self), 3);
+        cReplay_setReplayState((self), 3);
     if (!(self->State == 3 || self->State == 4))
         self->SkipFrame = 0;
     switch (self->State) {
     case 11:
-        cReplay_setReplayState(((sReplay_F4A8*)self), 12);
+        cReplay_setReplayState((self), 12);
         return;
     case 2:
         if (self->PlaybackTick < self->RecordTick - 1) {
-            func_0026FB88(((sReplay_F4A8*)self), 0);
+            func_0026FB88((self), 0);
             cReplay_processInput(self);
             return;
         }
-        cReplay_stopInstantReplay(((sReplay_F4A8*)self));
+        cReplay_stopInstantReplay((self));
     case 0:
     case 12:
-        cReplay_setReplayState(((sReplay_F4A8*)self), 0);
+        cReplay_setReplayState((self), 0);
         self->SaveFrame = 0;
         if (self->EndReplay != 0) {
             if (self->Loaded != 0)
                 return;
-            cReplay_cancelMarkInstantReplay(((sReplay_F4A8*)self));
-            cReplay_cancelMarkHighlights(((sReplay_F4A8*)self));
-            cReplay_purgeIdleFrames(((sReplay_F4A8*)self));
-            addFrame_F4A8(((sReplay_F4A8*)self), 1);
-            cReplay_setReplayState(((sReplay_F4A8*)self), 13);
+            cReplay_cancelMarkInstantReplay((self));
+            cReplay_cancelMarkHighlights((self));
+            cReplay_purgeIdleFrames((self));
+            addFrame_F4A8((self), 1);
+            cReplay_setReplayState((self), 13);
             return;
         }
         if (self->StartInstantReplay != 0) {
-            cReplay_startReplay_F4A8(((sReplay_F4A8*)self), (int)self->InstantReplayFrame, 1, 0);
-            cReplay_setReplayState(((sReplay_F4A8*)self), 2);
+            cReplay_startReplay_F4A8((self), (int)self->InstantReplayFrame, 1, 0);
+            cReplay_setReplayState((self), 2);
             self->StartInstantReplay = 0;
             self->InstantReplay = 1;
             return;
         }
         if (self->ReplayError == 0 && self->RecordTick % 60 == 0) {
-            cReplay_purgeIdleFrames(((sReplay_F4A8*)self));
+            cReplay_purgeIdleFrames((self));
             if (self->RecordTick == 0 || (self->SaveFrameTicks != 0 && self->RecordTick % self->SaveFrameTicks == 0))
-                addFrame_F4A8(((sReplay_F4A8*)self), 1);
+                addFrame_F4A8((self), 1);
             else
-                addFrame_F4A8(((sReplay_F4A8*)self), 0);
+                addFrame_F4A8((self), 0);
         }
         if (self->ReplayError == 0)
             self->EndRecordTick++;
@@ -951,22 +925,22 @@ extern "C" void cReplay_update(cReplay* self)
     case 3: {
         void* o = D_004A28A8_F4A8->players[self->PadNum];
         if (o != 0 && cInput_getState(o, 0x6B))
-            func_0026FB88(((sReplay_F4A8*)self), 0);
+            func_0026FB88((self), 0);
         cReplay_processInput(self);
         return;
     }
     case 9:
-        cReplay_startReplay_F4A8(((sReplay_F4A8*)self), 0, 0, 1);
-        cReplay_setReplayState(((sReplay_F4A8*)self), 1);
+        cReplay_startReplay_F4A8((self), 0, 0, 1);
+        cReplay_setReplayState((self), 1);
         self->AutoReplay = 1;
         return;
     case 8:
-        cReplay_startReplay_F4A8(((sReplay_F4A8*)self), 0, 0, 0);
+        cReplay_startReplay_F4A8((self), 0, 0, 0);
     case 4:
     case 5:
     case 6:
     case 7:
-        cReplay_setReplayState(((sReplay_F4A8*)self), 3);
+        cReplay_setReplayState((self), 3);
         return;
     default:
         cReplay_processInput(self);
@@ -1074,15 +1048,6 @@ extern "C" void cReplay_stepFrame(void* self, int a1);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F200(void* self);
 
-struct cReplayFramePtr_F8A0 {
-    int state;              // 0x0
-    char pad_0x4[0x604];
-    int field_0x608;        // 0x608
-    char pad_0x60c[0xC];
-    int field_0x618;        // 0x618
-    int field_0x61c;        // 0x61C
-    int field_0x620;        // 0x620
-};
 
 /**
  * Starts playing back the replay from @p frame, unless the replay is paused (14) or not set up (15).
@@ -1104,12 +1069,12 @@ extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantRepla
         if (self->Loaded == 0) {
             cReplay_pushReplaySaveFrame(self);
         }
-        cReplay_setReplayState(((cReplayFramePtr_F8A0*)self), 7);
+        cReplay_setReplayState((self), 7);
         self->Cmd = 0;
         self->AutoReplay = 0;
         self->InstantReplay = instantReplay;
-        cReplay_rewind(((cReplayFramePtr_F8A0*)self), frame);
-        cReplay_stepFrame(((cReplayFramePtr_F8A0*)self), 1);
+        cReplay_rewind((self), frame);
+        cReplay_stepFrame((self), 1);
         if (instantReplay) {
             cReplay_setupInstantReplayCameras(self);
         } else {

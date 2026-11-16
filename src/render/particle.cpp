@@ -381,15 +381,6 @@ extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_Dynamic
 //100%
 INCLUDE_ASM("render/particle", cDynamicEmitter_render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sPtRS1380 {
-    int field_0x0;          // 0x1E4
-    int flagsA;             // 0x1E8, bits 2..6 = layer
-    int flagsB;             // 0x1EC, bits 5..9 = blend
-    int field_0xC;          // 0x1F0
-    short tex;              // 0x1F4
-    short pad;
-};
 
 struct sPtVEntry1380 {
     short delta;
@@ -399,7 +390,7 @@ struct sPtVEntry1380 {
 
 struct sPtCtx1380 {
     char pad_0x0[0xE84];
-    sPtRS1380* top;             // 0xE84
+    sDrawState* top;             // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
     sPtVEntry1380* vtable;      // 0x10D8
@@ -409,18 +400,6 @@ extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraph
 extern sPtCtx1380* D_004A5B80_ctx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_0044B420[];
 
-struct sPtObj1380 {
-    char pad_0x0[0x4];
-    int base;               // 0x4
-    int kind;               // 0x8
-    char pad_0xC[0x4];
-    float frame;            // 0x10
-    char pad_0x14[0x160];
-    int field_0x174;        // 0x174
-    char pad_0x178[0x68];
-    int field_0x1E0;        // 0x1E0
-    sPtRS1380 rs;           // 0x1E4
-};
 
 /**
  * Draws a dynamic emitter's particles with its current texture frame and draw state.
@@ -451,9 +430,9 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     self->mDrawState.m_textureState.m_texid[0] = tex;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *ctx->top = (*(sPtRS1380*)&self->mDrawState);
+    *ctx->top = (*(&self->mDrawState));
     sPtVEntry1380* vt = ctx->vtable;
-    vt[83].fn((char*)ctx + vt[83].delta, ((sPtObj1380*)self));
+    vt[83].fn((char*)ctx + vt[83].delta, (self));
     ctx->top--;
 }
 #endif
@@ -590,15 +569,6 @@ extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
 //100%
 INCLUDE_ASM("render/particle", func_00371688);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sPtRS1688 {
-    int field_0x0;          // 0x1E4
-    int flagsA;             // 0x1E8, bits 2..6 = layer
-    int flagsB;             // 0x1EC, bits 5..9 = blend
-    int field_0xC;          // 0x1F0
-    short tex;              // 0x1F4
-    short pad;
-};
 
 struct sPtVEntry1688 {
     short delta;
@@ -608,7 +578,7 @@ struct sPtVEntry1688 {
 
 struct sPtCtx1688 {
     char pad_0x0[0xE84];
-    sPtRS1688* top;             // 0xE84
+    sDrawState* top;             // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
     sPtVEntry1688* vtable;      // 0x10D8
@@ -618,18 +588,6 @@ extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraph
 extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_0044B420[];
 
-struct sPtObj1688 {
-    char pad_0x0[0x4];
-    int base;               // 0x4
-    int kind;               // 0x8
-    char pad_0xC[0x4];
-    float frame;            // 0x10
-    char pad_0x14[0x160];
-    int field_0x174;        // 0x174
-    char pad_0x178[0x68];
-    int field_0x1E0;        // 0x1E0
-    sPtRS1688 rs;           // 0x1E4
-};
 
 extern "C" void func_00371688(cDynamicColourEmitter* self, int blend)
 {
@@ -649,9 +607,9 @@ extern "C" void func_00371688(cDynamicColourEmitter* self, int blend)
     self->mDrawState.m_textureState.m_texid[0] = tex;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *ctx->top = (*(sPtRS1688*)&self->mDrawState);
+    *ctx->top = (*(&self->mDrawState));
     sPtVEntry1688* vt = ctx->vtable;
-    vt[84].fn((char*)ctx + vt[84].delta, ((sPtObj1688*)self));
+    vt[84].fn((char*)ctx + vt[84].delta, (self));
     ctx->top--;
 }
 #endif

@@ -6243,19 +6243,6 @@ struct sSphDef_342768 {
     float f10;
     float x, y, z;
 };
-struct sSph_342768 {
-    int refs;
-    void** vt;
-    int pad08[2];
-    sVec4_342768 pos;
-    float f20;
-    float f24;
-    int t28;
-    int t2C;
-    int type;
-    int pad34[3];
-    int a40;
-};
 extern void* cBoostModifier_vtbl[];
 extern char* D_004A5B64;
 
@@ -6277,7 +6264,7 @@ extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int a2
     self->MaxSpeed = def->f10 * 100.0f;
     self->Drag = def->f0C;
     self->Time = type == 1 ? t : 0;
-    return ((sSph_342768*)self);
+    return (self);
 }
 #endif
 

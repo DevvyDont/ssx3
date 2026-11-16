@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/worldview.h"
+#include "object/spline3d.h"
 #include "object/splinemodifier.h"
 #include "object/raillink.h"
 #include "object/multisplinemodifier.h"
@@ -19,24 +21,7 @@ struct sSmQuad_95D8 {
     float v[4];
 } __attribute__((aligned(16)));
 
-struct sSmFollow_95D8 {
-    unsigned int id;        // 0xD8
-    int count;              // 0xDC
-    void* node;             // 0xE0
-    float length;           // 0xE4
-};
 
-struct cSplineModifier_95D8 {
-    void** vtable;          // 0x0
-    char pad_0x4[0x54];
-    int field_0x58;         // 0x58
-    char pad_0x5c[0x54];
-    sSmQuad_95D8 qB0;       // 0xB0
-    sSmQuad_95D8 qC0;       // 0xC0
-    int field_0xd0;         // 0xD0
-    int field_0xd4;         // 0xD4
-    sSmFollow_95D8 follow;  // 0xD8
-};
 
 extern void* cSplineModifier_vtbl[];
 extern sSmQuad_95D8 t4vect_Zero;
@@ -53,10 +38,10 @@ extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream)
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier* self, cStream003595D8* stream)
+extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* self, cStream003595D8* stream)
 {
     self->mVtbl = cSplineModifier_vtbl;
-    sSmFollow_95D8* follower = &(*(sSmFollow_95D8*)&self->Spline);
+    cSpline* follower = &(*(&self->Spline));
     self->Spline.SplineId = 0xFFFFFFFF;
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
@@ -68,7 +53,7 @@ extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier
     self->RootTransformDirty = 1;
     *(int*)&self->X2 = 0;
     *(int*)&self->Y2 = 0;
-    return ((cSplineModifier_95D8*)self);
+    return (self);
 }
 #endif
 
@@ -430,9 +415,6 @@ struct sSmVec4_9CF8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sSmMat_9CF8 {
-    sSmVec4_9CF8 r[4];
-};
 
 struct sSmBody_9CF8 {
     sSmVec4_9CF8 pos;       // 0x00
@@ -448,7 +430,7 @@ struct cSplineModifier_9CF8 {
     int stopped;            // 0x50
     int active;             // 0x54
     char pad_0x58[0x8];
-    sSmMat_9CF8 mat;        // 0x60
+    t4Matrix mat;        // 0x60
     sSmVec4_9CF8 origin;    // 0xA0
     sSmVec4_9CF8 dir;       // 0xB0
     float fC0;              // 0xC0
@@ -514,7 +496,7 @@ static inline sSmVec4_9CF8 vu0Scale_9CF8(const sSmVec4_9CF8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sSmVec4_9CF8 vu0MulMat_9CF8(const sSmMat_9CF8* m, const sSmVec4_9CF8& v)
+static inline sSmVec4_9CF8 vu0MulMat_9CF8(const t4Matrix* m, const sSmVec4_9CF8& v)
 {
     sSmVec4_9CF8 r;
     __asm__(
@@ -632,7 +614,7 @@ extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBo
     w.z = rateZ * self->Velocity;
     w.y = rateY * self->Velocity;
     w.w = 0.0f;
-    w = vu0MulMat_9CF8(&(*(sSmMat_9CF8*)&self->Transform), w);
+    w = vu0MulMat_9CF8(&(*(&self->Transform)), w);
     sSmVec4_9CF8 relPos = vu0Sub_9CF8(body->pos, (*(sSmVec4_9CF8*)&self->Pos));
     vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
     vu0AddTo_9CF8(body->rot, w);
@@ -779,23 +761,7 @@ public:
     virtual int v03();
 };
 
-struct sSmFollow_A118 {
-    unsigned int id;        // 0x48
-    int count;              // 0x4C
-    void* node;             // 0x50
-    float length;           // 0x54
-};
 
-struct cMultiSplineModifier_A118 {
-    void** vtable;          // 0x0
-    int count;              // 0x4
-    char pad_0x8[0x28];
-    int field_0x30;         // 0x30
-    char pad_0x34[0xC];
-    int field_0x40;         // 0x40
-    void** insts;           // 0x44
-    sSmFollow_A118 follow;  // 0x48
-};
 
 extern void* cMultiSplineModifier_vtbl[];
 // PORT: same symbol as the unit's cSpline_readFromReplayFrame(void*, cStream003595D8*).
@@ -817,10 +783,10 @@ extern "C" void* cInstanceMan_allocInstance(void* man, unsigned int id);
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" cMultiSplineModifier_A118* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier* self, cStream0035A118* stream)
+extern "C" cMultiSplineModifier* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier* self, cStream0035A118* stream)
 {
     self->mVtbl = cMultiSplineModifier_vtbl;
-    sSmFollow_A118* follower = &(*(sSmFollow_A118*)&self->Spline);
+    cSpline* follower = &(*(&self->Spline));
     self->Spline.SplineId = 0xFFFFFFFF;
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
@@ -837,7 +803,7 @@ extern "C" cMultiSplineModifier_A118* cMultiSplineModifier_cMultiSplineModifier1
     cMultiSplineModifier_setupNodes(self);
     cMultiSplineModifier_setupOverlapSystem(self);
     self->RootTransformDirty = 1;
-    return ((cMultiSplineModifier_A118*)self);
+    return (self);
 }
 #endif
 
@@ -915,15 +881,6 @@ struct sSplineSeg_A330 {
     sSplineSeg_A330() {}
 };
 
-struct sMultiSpline_A330 {
-    int f0;
-    int count;                  // 0x4
-    char pad8[0x38 - 0x8];
-    sSplineNode_A330* nodes;    // 0x38
-    sSplineSeg_A330* segs;      // 0x3C
-    char* owner;                // 0x40
-    int* indices;               // 0x44
-};
 
 /**
  * Allocates a multi-spline modifier's arrays: shared animation matrices, per-copy nodes and per-copy instance
@@ -937,12 +894,12 @@ struct sMultiSpline_A330 {
  */
 extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* selfv)
 {
-    sMultiSpline_A330* self = (sMultiSpline_A330*)selfv;
-    sSplineNode_A330** pn = &self->nodes;
-    *pn = new (str_MultiAnimMats, 0x20000000, 0) sSplineNode_A330[*(int*)(*(char**)(self->owner + 0x80) + 0x4)];
-    sSplineSeg_A330** ps = &self->segs;
-    *ps = new (str_MultiNodes, 0xA0000000, 0) sSplineSeg_A330[self->count];
-    self->indices = new (str_NodeInsts, 0x20000000, 0) int[self->count];
+    cMultiSplineModifier* self = selfv;
+    sSplineNode_A330** pn = &(*(sSplineNode_A330**)&self->AnimMats);
+    *pn = new (str_MultiAnimMats, 0x20000000, 0) sSplineNode_A330[*(int*)(*(char**)(((char*)self->Instance) + 0x80) + 0x4)];
+    sSplineSeg_A330** ps = &(*(sSplineSeg_A330**)&self->Nodes);
+    *ps = new (str_MultiNodes, 0xA0000000, 0) sSplineSeg_A330[self->NumModels];
+    (*(int**)&self->NodeInst) = new (str_NodeInsts, 0x20000000, 0) int[self->NumModels];
 }
 #endif
 
@@ -982,13 +939,6 @@ struct sSplineInstA458 {
     int field_0x78;         // 0x78
 };
 
-struct sMultiSplineA458 {
-    char pad_0x0[0x4];
-    int count;                      // 0x4
-    char pad_0x8[0x38];
-    void* tmpl;                     // 0x40
-    sSplineInstA458** insts;        // 0x44
-};
 
 /**
  * Fills a multi-spline modifier's instance copies with the data of its model instance.
@@ -1000,15 +950,15 @@ struct sMultiSplineA458 {
  */
 extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* multiSpline)
 {
-    sMultiSplineA458* self = (sMultiSplineA458*)multiSpline;
+    cMultiSplineModifier* self = multiSpline;
     int i;
-    int keep = self->insts[0]->field_0x78;
-    MEM_copy(self->insts[0], self->tmpl, 0xA0);
-    self->insts[0]->field_0x78 = keep;
-    for (i = 1; i < self->count; i++) {
-        cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)self->insts[i], self->tmpl);
-        self->insts[i]->flags = (self->insts[i]->flags & ~0x40) | 0x20;
-        self->insts[i]->flags &= ~0x100;
+    int keep = ((sSplineInstA458**)self->NodeInst)[0]->field_0x78;
+    MEM_copy(((sSplineInstA458**)self->NodeInst)[0], ((void*)self->Instance), 0xA0);
+    ((sSplineInstA458**)self->NodeInst)[0]->field_0x78 = keep;
+    for (i = 1; i < self->NumModels; i++) {
+        cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)((sSplineInstA458**)self->NodeInst)[i], ((void*)self->Instance));
+        ((sSplineInstA458**)self->NodeInst)[i]->flags = (((sSplineInstA458**)self->NodeInst)[i]->flags & ~0x40) | 0x20;
+        ((sSplineInstA458**)self->NodeInst)[i]->flags &= ~0x100;
     }
 }
 #endif
@@ -1148,14 +1098,6 @@ struct sSub_A5F8 {
     float radius;           // 0x18
 };
 
-struct cMultiSpline_A5F8 {
-    int pad_0x0;
-    sSub_A5F8 sub;          // 0x4
-    char pad_0x1c[0x20];
-    sSmElem* boxes;     // 0x3C
-    char** model;           // 0x40
-    sSmInst_A5F8** insts;   // 0x44
-};
 
 extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* box, float* radius);
 extern "C" void* cObjectInterface_getNash();
@@ -1188,9 +1130,9 @@ static inline void vu0Add_A5F8(t4Vector& out, const t4Vector& a, const t4Vector&
     out = r;
 }
 
-static inline t4Vector instPos_A5F8(cMultiSpline_A5F8* self, int i)
+static inline t4Vector instPos_A5F8(cMultiSplineModifier* self, int i)
 {
-    return self->insts[i]->pos;
+    return ((sSmInst_A5F8**)self->NodeInst)[i]->pos;
 }
 
 
@@ -1212,11 +1154,11 @@ static inline void insert_A5F8(char* w, void* item, const void* box)
  */
 extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vself)
 {
-    cMultiSpline_A5F8* self = (cMultiSpline_A5F8*)vself;
+    cMultiSplineModifier* self = vself;
     char bound[0x20];
-    cInstanceNode_getBoundBoxInfo(((void**)self->model)[3], bound, &self->sub.radius);
-    sSub_A5F8* sub = &self->sub;
-    for (int i = 1; i < self->sub.count; i++) {
+    cInstanceNode_getBoundBoxInfo(((void**)((char**)self->Instance))[3], bound, &(*(sSub_A5F8*)&self->NumModels).radius);
+    sSub_A5F8* sub = &(*(sSub_A5F8*)&self->NumModels);
+    for (int i = 1; i < (*(sSub_A5F8*)&self->NumModels).count; i++) {
         t4Vector ext;
         ext.x = sub->radius;
         ext.y = sub->radius;
@@ -1225,13 +1167,13 @@ extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vs
         {
             t4Vector corner;
             vu0Sub_A5F8(corner, instPos_A5F8(self, i), ext);
-            self->boxes[i].box.min = corner;
+            ((sSmElem*)self->Nodes)[i].box.min = corner;
             vu0Add_A5F8(corner, instPos_A5F8(self, i), ext);
-            self->boxes[i].box.max = corner;
+            ((sSmElem*)self->Nodes)[i].box.max = corner;
         }
-        void* item = self->insts[i];
+        void* item = ((sSmInst_A5F8**)self->NodeInst)[i];
         char* w = (char*)cObjectInterface_getNash();
-        insert_A5F8(w, item, &self->boxes[i].box.min);
+        insert_A5F8(w, item, &((sSmElem*)self->Nodes)[i].box.min);
     }
 }
 #endif
@@ -1816,21 +1758,6 @@ struct sSplineInst_AC20 {
     sSmMat_AC20 mat;        // 0x10
 };
 
-struct cMultiSplineModifier_AC20 {
-    void** vtable;                  // 0x0
-    int count;                      // 0x4
-    int mode;                       // 0x8
-    float angle;                    // 0xC
-    float pos;                      // 0x10
-    char pad_0x14[0x1C];
-    int dirty;                      // 0x30
-    char pad_0x34[0x8];
-    sSplinePt_AC20* points;         // 0x3C
-    void* tmpl;                     // 0x40
-    sSplineInst_AC20** insts;       // 0x44
-    char follow[0xC];               // 0x48
-    float length;                   // 0x54
-};
 
 /**
  * Places every instance copy along the spline: evaluates it at evenly spaced distances and writes each copy's
@@ -1846,45 +1773,45 @@ struct cMultiSplineModifier_AC20 {
  */
 extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpline)
 {
-    cMultiSplineModifier_AC20* self = (cMultiSplineModifier_AC20*)multiSpline;
+    cMultiSplineModifier* self = multiSpline;
     float offsets[256];
     sSmMat_AC20 rot;
     sSmVec4_AC20 ang;
     int i;
-    float step = self->length / (float)self->count;
-    offsets[0] = self->pos;
-    for (int k = 1; k < self->count; k++) {
+    float step = self->Spline.Length / (float)self->NumModels;
+    offsets[0] = self->OffsetDistance;
+    for (int k = 1; k < self->NumModels; k++) {
         offsets[k] = offsets[k - 1] + step;
     }
     char* sub = (char*)self + 0x4;
-    for (int k = 0; k < self->count; k++) {
+    for (int k = 0; k < self->NumModels; k++) {
         if (offsets[k] < 0.0f) {
-            offsets[k] = offsets[k] + self->length;
-        } else if (offsets[k] >= self->length) {
-            offsets[k] = offsets[k] - self->length;
+            offsets[k] = offsets[k] + self->Spline.Length;
+        } else if (offsets[k] >= self->Spline.Length) {
+            offsets[k] = offsets[k] - self->Spline.Length;
         }
     }
-    if (self->angle != 0.0f) {
+    if (self->HeadTweak != 0.0f) {
         rot.setAxisRot(D_004FF160_AC20, *(float*)(sub + 0x8));
     }
-    sSplinePt_AC20* pt = self->points;
-    for (i = 0; i < self->count; i++, pt++) {
+    sSplinePt_AC20* pt = ((sSplinePt_AC20*)self->Nodes);
+    for (i = 0; i < self->NumModels; i++, pt++) {
         float rx = 0.0f;
         float ry = rx;
         float rz = rx;
         func_00345248_AC20((char*)self + 0x48, &pt->pos, &pt->dir, &pt->f20, offsets[i]);
         pt->f50 = pt->dir.x * pt->dir.x;
         pt->f54 = pt->dir.y * pt->dir.y;
-        if (self->mode == 2 || self->mode == 3) {
+        if (self->OrientType == 2 || self->OrientType == 3) {
             rz -= atan2_AC20(pt->dir.y, pt->dir.x);
         }
-        if (self->mode == 1 || self->mode == 3) {
+        if (self->OrientType == 1 || self->OrientType == 3) {
             ry += atan2_AC20(pt->dir.z, Sqrt_AC20(pt->f50 + pt->f54));
         }
         ang.x = rx;
         ang.y = ry;
         ang.z = rz;
-        sSplineInst_AC20* node = self->insts[i];
+        sSplineInst_AC20* node = ((sSplineInst_AC20**)self->NodeInst)[i];
         float sx, cx, sy, cy, sz, cz;
         func_0031BE50(&sx, &cx, ang.x);
         sSmMat_AC20* nodeMat = &node->mat;
@@ -1908,11 +1835,11 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         node->mat.r[3].y = pt->pos.y;
         node->mat.r[3].z = pt->pos.z;
         node->mat.r[3].w = 1.0f;
-        if (self->angle != 0.0f) {
+        if (self->HeadTweak != 0.0f) {
             *nodeMat = mulMat_AC20(*nodeMat, rot);
         }
     }
-    self->dirty = 0;
+    self->RootTransformDirty = 0;
 }
 #endif
 
@@ -2711,10 +2638,6 @@ struct sSmVec4_C040 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sSmBox_C040 {
-    sSmVec4_C040 min;
-    sSmVec4_C040 max;
-};
 
 struct sSmVEntryI_C040 {
     short delta;
@@ -2725,7 +2648,7 @@ struct sSmVEntryI_C040 {
 struct sSmVEntryB_C040 {
     short delta;
     short index;
-    sSmBox_C040* (*fn)(void*);
+    tBoundBox* (*fn)(void*);
 };
 
 struct sSmVtbl_C040 {
@@ -2789,15 +2712,15 @@ extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
     sSmObj_C040* ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
     if (ownerObj->vt->v44.fn((char*)ownerObj + ownerObj->vt->v44.delta) != 0) {
         ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
-        sSmBox_C040* bounds = ownerObj->vt->v45.fn((char*)ownerObj + ownerObj->vt->v45.delta);
-        (*(sSmBox_C040*)&self->BoundBox) = *bounds;
+        tBoundBox* bounds = ownerObj->vt->v45.fn((char*)ownerObj + ownerObj->vt->v45.delta);
+        (*(&self->BoundBox)) = *bounds;
         sSmVec4_C040 margin;
         margin.x = 100.0f;
         margin.y = 100.0f;
         margin.z = 100.0f;
         margin.w = 0.0f;
-        vecSubEq_C040((*(sSmBox_C040*)&self->BoundBox).min, margin);
-        vecAddEq_C040((*(sSmBox_C040*)&self->BoundBox).max, margin);
+        vecSubEq_C040((*(sSmVec4_C040*)&(*(&self->BoundBox)).MinPoint), margin);
+        vecAddEq_C040((*(sSmVec4_C040*)&(*(&self->BoundBox)).MaxPoint), margin);
     }
 }
 #endif

@@ -421,16 +421,11 @@ struct sObj_C190 {
     sV3_C190 max;                   // 0x74
 };
 
-struct sSprite_C190 {
-    sV4_C190 a;                     // 0x0
-    sV4_C190 b;                     // 0x10
-    float col[4];                   // 0x20
-};
 
 struct sOut_C190 {
     int count;
     int pad[3];
-    sSprite_C190 e[1];              // 0x10
+    tFogSprite e[1];              // 0x10
 };
 
 struct sKey_C190 {
@@ -566,16 +561,16 @@ extern "C" void func_002DC190(cPS2FogParticleMan* out, sObj_C190** objs, int n, 
                             p.y *= p.w;
                             float s = v->size * p.w;
                             sV4_C190 off(g->sx * s, g->sy * s);
-                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].a = sub_C190(p, off);
-                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].b = add4_C190(p, off);
+                            (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mTopLeft) = sub_C190(p, off);
+                            (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mBottomRight) = add4_C190(p, off);
                             if (clip != 0) {
-                                if (outcode_C190(g, ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].a) & outcode_C190(g, ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].b))
+                                if (outcode_C190(g, (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mTopLeft)) & outcode_C190(g, (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mBottomRight)))
                                     continue;
                             }
-                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[0] = a * 128.0f;
-                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[1] = v->col[0] * 128.0f;
-                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[2] = v->col[1] * 128.0f;
-                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[3] = v->col[2] * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[0] = a * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[1] = v->col[0] * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[2] = v->col[1] * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[3] = v->col[2] * 128.0f;
                             out->miNumSphere++;
                         }
                     }
@@ -623,15 +618,10 @@ struct sGfx_C7B0 {
     char pad_0x18F4[0x5A00 - 0x18F4];
     unsigned int bufAddr;
 };
-struct sVtx_C7B0 {
-    float x0, y0, z0, q;
-    float x1, y1, z1, w1;
-    float a, r, g, b;
-};
 struct sList_C7B0 {
     int count;
     int pad[3];
-    sVtx_C7B0 v[1];
+    tFogSprite v[1];
 };
 struct sSort_C7B0 { int idx; int key; };
 
@@ -685,13 +675,13 @@ extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
         int rest = left - n;
         p += 10;
         for (int i = start; i < start + n; i++) {
-            sVtx_C7B0* v = &((sVtx_C7B0*)&list->mSprites[0])[((sSort_C7B0*)D_00537AC0)[i].idx];
-            float q = v->q;
+            tFogSprite* v = &((&list->mSprites[0]))[((sSort_C7B0*)D_00537AC0)[i].idx];
+            float q = v->mTopLeft.w;
             p[0] = FBits_C7B0(st0[0] * q) | ((unsigned long)FBits_C7B0(st0[1] * q) << 32);
-            p[1] = (int)v->r | ((unsigned long)(int)v->g << 8) | ((unsigned long)(int)v->b << 16) | ((unsigned long)(int)v->a << 24) | ((unsigned long)FBits_C7B0(q) << 32);
-            p[2] = (int)v->x0 | ((unsigned long)(int)v->y0 << 16) | ((unsigned long)(int)(v->z0 * q) << 32);
+            p[1] = (int)v->mColour[1] | ((unsigned long)(int)v->mColour[2] << 8) | ((unsigned long)(int)v->mColour[3] << 16) | ((unsigned long)(int)v->mColour[0] << 24) | ((unsigned long)FBits_C7B0(q) << 32);
+            p[2] = (int)v->mTopLeft.x | ((unsigned long)(int)v->mTopLeft.y << 16) | ((unsigned long)(int)(v->mTopLeft.z * q) << 32);
             p[3] = FBits_C7B0(st1[0] * q) | ((unsigned long)FBits_C7B0(st1[1] * q) << 32);
-            p[4] = (int)v->x1 | ((unsigned long)(int)v->y1 << 16) | ((unsigned long)(int)(v->z1 * q) << 32);
+            p[4] = (int)v->mBottomRight.x | ((unsigned long)(int)v->mBottomRight.y << 16) | ((unsigned long)(int)(v->mBottomRight.z * q) << 32);
             p += 5;
         }
         if (pad) *p++ = 0;

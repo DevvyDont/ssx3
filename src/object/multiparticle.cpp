@@ -270,13 +270,6 @@ struct sSerVEntry_58380 {
     void (*fn)(void*, void*, int);
 };
 
-struct sMultiPart_58380 {
-    void* owner;            // 0x0
-    int count;              // 0x4
-    void* data;             // 0x8
-    int* items;             // 0xC
-    void* desc;             // 0x10
-};
 
 extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
 
@@ -293,7 +286,7 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
 extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* stream)
 {
     sSerVEntry_58380* writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, ((sMultiPart_58380*)self), 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (self), 4);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, &self->NumInst, 4);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];

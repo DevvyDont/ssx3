@@ -654,10 +654,6 @@ struct sFlBase_F790 {
     float f40;
 };
 
-struct sFloat_F790 {
-    char pad_0x00[0xC];
-    sFlVE_F790* vt;     // 0x0C
-};
 
 /**
  * Adds a floating object's motion to an intersection's velocities.
@@ -669,7 +665,7 @@ struct sFloat_F790 {
  */
 extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790* intInfo)
 {
-    cMoveNode_updateIntersectInfo(((sFloat_F790*)self), intInfo);
+    cMoveNode_updateIntersectInfo((self), intInfo);
     sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
     sV4_F790* transform = vt[24].fn((char*)self + vt[24].delta);
     sFlBase_F790* base = (sFlBase_F790*)((char*)self + 0x2C);

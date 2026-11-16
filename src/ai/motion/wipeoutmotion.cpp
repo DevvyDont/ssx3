@@ -506,12 +506,6 @@ struct sSphere_137138 {
 
 struct sVEntH_137138 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
-struct sBody_137138 {
-    char pad0[0x130];
-    t4Vector pos;       // 0x130
-    t4Vector quat;      // 0x140
-    int active;         // 0x150
-};
 
 struct sSeg_137138 {
     t4Vector a, b;
@@ -622,7 +616,7 @@ struct sVec4c_137138 : t4Vector {
 extern "C" void func_00137138(cWipeoutMotion* vself)
 {
     cWipeoutMotion* self = vself;
-    if (((sBody_137138*)self->mRider)->active == 0)
+    if ((self->mRider)->mUseRootPoseOverride == 0)
         return;
     cWipeoutMotion_updateBoardSphereTree((cWipeoutMotion*)((char*)self));
     sHit_137138 hit;
@@ -636,7 +630,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         return;
     }
     t4Vector push = vu0Scale_137138(vu0Scale_137138(hit.normal, 1.100000023841858f), d);
-    vu0AddEq_137138(((sBody_137138*)self->mRider)->pos, push);
+    vu0AddEq_137138((self->mRider)->mRootPoseOverridePos, push);
     func_00329B40_137138(((void*)self->BoardSphereTree), &push);
     // The binary copies the segment back into the local before moving it (the copy is never read).
     seg = (*(sSeg_137138*)&self->BoardIntersectBox);

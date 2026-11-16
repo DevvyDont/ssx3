@@ -2991,17 +2991,6 @@ struct sPartDesc_7DD8 {
     sQuad_7DD8 b;           // 0x170
 };
 
-struct sMultiPart_7DD8 {
-    void* owner;            // 0x0
-    int field_0x4;          // 0x4
-    void* data;             // 0x8
-    int field_0xc;          // 0xC
-    sPartDesc_7DD8* desc;   // 0x10
-    char pad_0x14[0xC];
-    sQuad_7DD8 a;           // 0x20
-    sQuad_7DD8 b;           // 0x30
-    sQuad_7DD8 pos;         // 0x40
-};
 
 extern char str_Particle_b[];
 extern "C" void MEM_copy(void* dst, const void* src, int n);
@@ -3009,17 +2998,17 @@ extern "C" void cMultiParticle_setupMultiParticle(void* self);
 
 extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
 {
-    sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
-    self->owner = a2;
-    self->field_0x4 = 0;
+    cMultiParticle* self = mem;
+    (*(void**)&self->MaxInst) = a2;
+    self->NumInst = 0;
     void* buf = cMemMan_alloc(0xD8, str_Particle_b, 0x20000000, 0);
-    self->data = buf;
+    (*(void**)&self->Particle) = buf;
     MEM_copy(buf, a1, 0xD8);
     cMultiParticle_setupMultiParticle(self);
-    sPartDesc_7DD8* d = self->desc;
-    self->a = d->a;
-    self->b = d->b;
-    self->pos = sQuad_7DD8(d->pos[0], d->pos[1], d->pos[2], 0.0f);
+    sPartDesc_7DD8* d = ((sPartDesc_7DD8*)self->Emitter);
+    (*(sQuad_7DD8*)&self->BoundBox) = d->a;
+    (*(sQuad_7DD8*)&self->BoundBox.MaxPoint) = d->b;
+    (*(sQuad_7DD8*)&self->Offset) = sQuad_7DD8(d->pos[0], d->pos[1], d->pos[2], 0.0f);
     return self;
 }
 #endif
@@ -3043,19 +3032,19 @@ static inline void read_357E80(void* stream, void* dst, int n)
 
 extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
 {
-    sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
-    sQuad_7DD8* ab = &self->a;
+    cMultiParticle* self = mem;
+    sQuad_7DD8* ab = &(*(sQuad_7DD8*)&self->BoundBox);
     read_357E80(stream, self, 4);
-    read_357E80(stream, &self->field_0x4, 4);
+    read_357E80(stream, &self->NumInst, 4);
     void* buf = cMemMan_alloc(0xD8, str_Particle_b, 0x20000000, 0);
-    self->data = buf;
+    (*(void**)&self->Particle) = buf;
     read_357E80(stream, buf, 0xD8);
     cMultiParticle_setupMultiParticle(self);
-    cStaticEmitter_readFromReplayFrame(self->desc, stream);
-    read_357E80(stream, &self->pos, 0x10);
+    cStaticEmitter_readFromReplayFrame(((sPartDesc_7DD8*)self->Emitter), stream);
+    read_357E80(stream, &(*(sQuad_7DD8*)&self->Offset), 0x10);
     read_357E80(stream, ab, 0x20);
-    if (self->field_0x4 > 0) {
-        read_357E80(stream, (void*)self->field_0xc, self->field_0x4 * 4);
+    if (self->NumInst > 0) {
+        read_357E80(stream, (void*)((int)self->InstIds), self->NumInst * 4);
     }
     return self;
 }

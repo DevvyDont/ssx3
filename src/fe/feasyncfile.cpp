@@ -3069,14 +3069,8 @@ struct sObj1A7DD8 {
     sVE1A7DD8* vt;
 };
 
-struct sObjVec1A7DD8 {
-    int f0;
-    sObj1A7DD8** mBegin;
-    sObj1A7DD8** mEnd;
-    sObj1A7DD8** mCap;
-};
 
-extern "C" void func_001DB918(sObjVec1A7DD8* vec, sObj1A7DD8** pos, sObj1A7DD8* const* x);
+extern "C" void func_001DB918(tFEPrivateMessageVector* vec, sObj1A7DD8** pos, sObj1A7DD8* const* x);
 
 static inline sObj1A7DD8** Copy1A7DD8(sObj1A7DD8** first, sObj1A7DD8** last, sObj1A7DD8** result)
 {
@@ -3090,25 +3084,25 @@ extern "C" void func_001A7DD8(cFEStateReadMessagePopup* selfp, void* item)
     cFEStateReadMessagePopup* self = selfp;
     sObj1A7DD8* x = (sObj1A7DD8*)item;
     for (;;) {
-        if ((unsigned int)((*(sObjVec1A7DD8*)&self->mMessages).mEnd - (*(sObjVec1A7DD8*)&self->mMessages).mBegin) < 31) break;
-        sObjVec1A7DD8* v = &(*(sObjVec1A7DD8*)&self->mMessages);
-        sObj1A7DD8** pos = (*(sObjVec1A7DD8*)&self->mMessages).mBegin;
+        if ((unsigned int)(((sObj1A7DD8**)(*(&self->mMessages)).mpFinish) - ((sObj1A7DD8**)(*(&self->mMessages)).mpStart)) < 31) break;
+        tFEPrivateMessageVector* v = &(*(&self->mMessages));
+        sObj1A7DD8** pos = ((sObj1A7DD8**)(*(&self->mMessages)).mpStart);
         sObj1A7DD8* p = *pos;
         if (p) {
-            if (pos + 1 != (*(sObjVec1A7DD8*)&self->mMessages).mEnd) {
-                Copy1A7DD8(pos + 1, v->mEnd, pos);
+            if (pos + 1 != ((sObj1A7DD8**)(*(&self->mMessages)).mpFinish)) {
+                Copy1A7DD8(pos + 1, ((sObj1A7DD8**)v->mpFinish), pos);
             }
-            (*(sObjVec1A7DD8*)&self->mMessages).mEnd--;
+            (*(sObj1A7DD8***)&(*(&self->mMessages)).mpFinish)--;
             p->vt[1].fn((char*)p + p->vt[1].delta, 3);
         }
     }
-    sObjVec1A7DD8* v2 = &(*(sObjVec1A7DD8*)&self->mMessages);
-    if ((*(sObjVec1A7DD8*)&self->mMessages).mEnd != (*(sObjVec1A7DD8*)&self->mMessages).mCap) {
-        sObj1A7DD8** e = v2->mEnd;
+    tFEPrivateMessageVector* v2 = &(*(&self->mMessages));
+    if (((sObj1A7DD8**)(*(&self->mMessages)).mpFinish) != ((sObj1A7DD8**)(*(&self->mMessages)).mpEndOfStorage)) {
+        sObj1A7DD8** e = ((sObj1A7DD8**)v2->mpFinish);
         if (e) *e = x;
-        (*(sObjVec1A7DD8*)&self->mMessages).mEnd++;
+        (*(sObj1A7DD8***)&(*(&self->mMessages)).mpFinish)++;
     } else {
-        func_001DB918(v2, (*(sObjVec1A7DD8*)&self->mMessages).mEnd, &x);
+        func_001DB918(v2, ((sObj1A7DD8**)(*(&self->mMessages)).mpFinish), &x);
     }
 }
 #endif

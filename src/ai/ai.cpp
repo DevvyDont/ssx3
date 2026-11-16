@@ -3340,13 +3340,8 @@ struct sVec4_12CA30
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sVecPair_12CA30
-{
-    sVec4_12CA30 a;
-    sVec4_12CA30 b;
-};
 
-extern "C" void cWipeoutMotion_throwItem(char* self, sVec4_12CA30* a, sVec4_12CA30* b, sVecPair_12CA30* c);
+extern "C" void cWipeoutMotion_throwItem(char* self, sVec4_12CA30* a, sVec4_12CA30* b, tPose* c);
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 static inline void vu0AddEq_12CA30(sVec4_12CA30& dst, const sVec4_12CA30& b)
@@ -3364,8 +3359,8 @@ struct sAiObj12CA30
 {
     int f0;                 // 0x00
     char pad4[0xC];
-    sVecPair_12CA30 m10;    // 0x10
-    sVecPair_12CA30 m30;    // 0x30
+    tPose m10;    // 0x10
+    tPose m30;    // 0x30
     char pad50[0x4];
     int f54;                // 0x54
     char pad58[0x18];
@@ -3385,15 +3380,15 @@ struct sAiObj12CA30
  */
 extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
 {
-    sVecPair_12CA30* boardPrevPose = &(*(sVecPair_12CA30*)&self->BoardPrevPose);
+    tPose* boardPrevPose = &(*(&self->BoardPrevPose));
     *(int*)((char*)self->mRider + 0x2EC) = 0;
     *(int*)((char*)self->mRider + 0x2E8) = 0;
     self->IsNewImpact = 0;
     *(int*)&self->RecoverPercent = 0;
     func_0029E578(func_0028B180(), (char*)self->mRider);
     char* rider = (char*)self->mRider;
-    (*(sVecPair_12CA30*)&self->RiderPrevPose) = (*(sVecPair_12CA30**)(*(char**)(rider + 0x780) + 0x2C))[*(int*)(rider + 0x89C)];
-    (*(sVecPair_12CA30*)&self->BoardPrevPose) = (*(sVecPair_12CA30**)(*(char**)(rider + 0x780) + 0x2C))[*(int*)(rider + 0x8A4)];
+    (*(&self->RiderPrevPose)) = (*(tPose**)(*(char**)(rider + 0x780) + 0x2C))[*(int*)(rider + 0x89C)];
+    (*(&self->BoardPrevPose)) = (*(tPose**)(*(char**)(rider + 0x780) + 0x2C))[*(int*)(rider + 0x8A4)];
     vu0AddEq_12CA30((*(sVec4_12CA30*)&self->RiderPrevPose), *(sVec4_12CA30*)((char*)self->mRider + 0x9D0));
     vu0AddEq_12CA30((*(sVec4_12CA30*)&self->BoardPrevPose), *(sVec4_12CA30*)((char*)self->mRider + 0x9D0));
     self->RiderState = 0;
@@ -3621,7 +3616,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
             deltaQuat = Sub_12CD20((*(sV_12CD20*)&boardPose->Q), (*(sV_12CD20*)&self->BoardPrevPose.Q));
             angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*boardPose));
             angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
-            cWipeoutMotion_throwItem(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, (sVecPair_12CA30*)boardPose);
+            cWipeoutMotion_throwItem(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, boardPose);
         }
         if (*(int*)(*(char**)((char*)self->mRider + 0x77C) + 0x30) == 1)
         {

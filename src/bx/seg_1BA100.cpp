@@ -1773,41 +1773,35 @@ struct sReloc_B5F0 {
     int offs[1];        // 0x8
 };
 
-struct sRes_B5F0 {
-    short state;        // 0x0
-    short keep;         // 0x2
-    int pad4;
-    sReloc_B5F0* data;  // 0x8
-};
 
 // Relocates the loaded block's offset table (dropping it if it has the wrong magic) and marks it ready.
 extern "C" void func_002BB5F0(cWorldPainterSection* vself)
 {
-    sRes_B5F0* self = (sRes_B5F0*)vself;
-    if (self->data == 0) {
-        self->state = 3;
+    cWorldPainterSection* self = vself;
+    if (((sReloc_B5F0*)self->m_pWPHeader) == 0) {
+        self->m_iState = 3;
         return;
     }
     {
-        if (self->data->magic != 0x10) {
-            if (self->keep == 0) {
-                cMemMan_free(self->data);
+        if (((sReloc_B5F0*)self->m_pWPHeader)->magic != 0x10) {
+            if (self->m_iStreamed == 0) {
+                cMemMan_free(((sReloc_B5F0*)self->m_pWPHeader));
             }
-            self->data = 0;
+            (*(sReloc_B5F0**)&self->m_pWPHeader) = 0;
         }
-        if (self->data != 0) {
-            int* p = self->data->offs;
-            for (int i = 0; i < self->data->count; i++, p++) {
+        if (((sReloc_B5F0*)self->m_pWPHeader) != 0) {
+            int* p = ((sReloc_B5F0*)self->m_pWPHeader)->offs;
+            for (int i = 0; i < ((sReloc_B5F0*)self->m_pWPHeader)->count; i++, p++) {
                 if (*p == -1) {
                     *p = 0;
                 } else {
-                    *p = (int)self->data + *p;
+                    *p = (int)((sReloc_B5F0*)self->m_pWPHeader) + *p;
                     cWorldPainterLayer_resolve_B5F0(*p);
                 }
             }
         }
     }
-    self->state = 3;
+    self->m_iState = 3;
 }
 #endif
 
@@ -2969,47 +2963,29 @@ extern "C" void *func_002BC980(tWPInGameData_Surface* arg0) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BC9B0);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Query impl constructor: clears eight pairs, copies the default pair into each slot pair, sets weights.
-struct sPair_002BC9B0
-{
-    int a;
-    int b;
-};
-extern sPair_002BC9B0 D_004A53D0_2BC9B0 __asm__("D_004A53D0");
+extern tWPNameField D_004A53D0_2BC9B0 __asm__("D_004A53D0");
 extern char D_00484290[];
-struct sQuery_002BC9B0
-{
-    float minValue;         // 0x00
-    char* vtable;           // 0x04
-    sPair_002BC9B0 p[8];    // 0x08
-    float w0;               // 0x48
-    float w1;               // 0x4C
-    float w2;               // 0x50
-    float w3;               // 0x54
-};
 extern "C" void* func_002BC9B0(tWPInGameData_Lighting* o)
 {
     o->mVtbl = (void**)D_00484290;
     o->m_wpTravelDistance = -99999.0f;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[0].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[0].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[1].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[1].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[2].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[2].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[3].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[3].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[4].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[4].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[5].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[5].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[6].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[6].b = 0;
-    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[7].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[7].b = 0;
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[0] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[1] = t; }
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[2] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[3] = t; }
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[4] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[5] = t; }
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[6] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[7] = t; }
+    ((&o->m_LightIrradianceName))[0].m_nameId[0] = ((&o->m_LightIrradianceName))[0].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[1].m_nameId[0] = ((&o->m_LightIrradianceName))[1].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[2].m_nameId[0] = ((&o->m_LightIrradianceName))[2].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[3].m_nameId[0] = ((&o->m_LightIrradianceName))[3].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[4].m_nameId[0] = ((&o->m_LightIrradianceName))[4].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[5].m_nameId[0] = ((&o->m_LightIrradianceName))[5].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[6].m_nameId[0] = ((&o->m_LightIrradianceName))[6].m_nameId[1] = 0;
+    ((&o->m_LightIrradianceName))[7].m_nameId[0] = ((&o->m_LightIrradianceName))[7].m_nameId[1] = 0;
+    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[0] = ((&o->m_LightIrradianceName))[1] = t; }
+    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[2] = ((&o->m_LightIrradianceName))[3] = t; }
+    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[4] = ((&o->m_LightIrradianceName))[5] = t; }
+    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[6] = ((&o->m_LightIrradianceName))[7] = t; }
     o->m_lastAmbientLightIntensityOffset = 1.0f;
     o->m_lastRimLightIntensityOffset = 0.75f;
     o->m_AmbientLightIntensityOffset = 1.0f;
     o->m_RimLightIntensityOffset = 0.75f;
-    return ((sQuery_002BC9B0*)o);
+    return (o);
 }
 #endif
 
@@ -3924,25 +3900,18 @@ extern "C" void func_002BE1E0(tWPInGameData_Surface* arg0) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE1F8);
 #ifdef SKIP_ASM
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Copies the default pair into four slots, sets 0x48 to 1.0 and 0x50 to 0.75, and clears 0x00.
-struct sPair_002BE1F8
-{
-    float a;
-    float b;
-};
-extern sPair_002BE1F8 D_004A53D0;
+extern tWPNameField D_004A53D0;
 struct sPairSet_002BE1F8
 {
     int flags;              // 0x00
     char pad_0x04[4];
-    sPair_002BE1F8 k0;      // 0x08
+    tWPNameField k0;      // 0x08
     char pad_0x10[8];
-    sPair_002BE1F8 k1;      // 0x18
+    tWPNameField k1;      // 0x18
     char pad_0x20[8];
-    sPair_002BE1F8 k2;      // 0x28
+    tWPNameField k2;      // 0x28
     char pad_0x30[8];
-    sPair_002BE1F8 k3;      // 0x38
+    tWPNameField k3;      // 0x38
     char pad_0x40[8];
     float field_0x48;       // 0x48
     char pad_0x4C[4];
@@ -3951,10 +3920,10 @@ struct sPairSet_002BE1F8
 
 extern "C" void func_002BE1F8(tWPInGameData_Lighting* o)
 {
-    (*(sPair_002BE1F8*)&o->m_LightIrradianceName) = D_004A53D0;
-    (*(sPair_002BE1F8*)&o->m_ShadowIrradianceName) = D_004A53D0;
-    (*(sPair_002BE1F8*)&o->m_TunnelIrradianceName) = D_004A53D0;
-    (*(sPair_002BE1F8*)&o->m_ObjectIrradianceName) = D_004A53D0;
+    (*(&o->m_LightIrradianceName)) = D_004A53D0;
+    (*(&o->m_ShadowIrradianceName)) = D_004A53D0;
+    (*(&o->m_TunnelIrradianceName)) = D_004A53D0;
+    (*(&o->m_ObjectIrradianceName)) = D_004A53D0;
     o->m_AmbientLightIntensityOffset = 1.0f;
     o->m_RimLightIntensityOffset = 0.75f;
     *(int*)&o->m_wpTravelDistance = 0;

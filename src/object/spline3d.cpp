@@ -113,12 +113,6 @@ struct sTrackRef5570 {
     }
 };
 
-struct sSplineFollow5570 {
-    sTrackRef5570 ref;      // 0x0
-    int count;              // 0x4
-    sSplineNode* node;      // 0x8
-    float length;           // 0xC
-};
 
 /**
  * Restores a spline follower from a replay frame: re-finds its current node by index and recomputes its
@@ -128,7 +122,7 @@ struct sSplineFollow5570 {
  */
 extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
 {
-    stream->v02(((sSplineFollow5570*)self), 8);
+    stream->v02((self), 8);
     self->Seg = (void*)(*(sTrackRef5570*)&self->SplineId).get()->node;
     for (int i = 0; i < self->SegIndex; i++) {
         self->Seg = (void*)(*(sSplineNode**)((char*)(sSplineNode*)self->Seg + 0x64));

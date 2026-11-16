@@ -1341,12 +1341,6 @@ struct sVE_8A00 {
     void (*fn)(void*, int, void*, int);
 };
 
-struct sCtx_8A00 {
-    char pad[0xE84];
-    sDrawState* top;              // 0xE84
-    char pad2[0x10D8 - 0xE88];
-    sVE_8A00* vt;               // 0x10D8
-};
 
 extern int D_004A3A58;
 extern sOut_8A00 D_004D5B70_8A00[] __asm__("D_004D5B70");
@@ -1468,10 +1462,10 @@ static inline void Rotate_8A00(sMat_8A00& m, const sRow_8A00& axis, float angle)
     m *= old;
 }
 
-static inline void PushRS_8A00(sCtx_8A00* ctx)
+static inline void PushRS_8A00(cPS2GraphicsMan* ctx)
 {
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
 }
 
 static inline void SetBits_8A00(int& w, int mask, int shift, int v)
@@ -1497,7 +1491,7 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
     }
     sMat_8A00 matrix;
     CopyMat_8A00(&matrix, &D_004FF1A0_8A00);
-    PushRS_8A00((sCtx_8A00*)GrMan);
+    PushRS_8A00(GrMan);
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
     if (D_004A3A58 != 0) {
         int i = 0;

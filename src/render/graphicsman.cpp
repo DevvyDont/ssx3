@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldview.h"
 #include "render/particle.h"
 #include "render/ps2graphicsman.h"
 
@@ -2435,10 +2436,6 @@ struct sGmQuad {
     float v[4];
 } __attribute__((aligned(16)));
 
-struct sGmQuad2 {
-    sGmQuad a;
-    sGmQuad b;
-};
 
 extern "C" void cStaticEmitter_render1(cStaticEmitter* self);
 
@@ -2448,9 +2445,9 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* self);
  * @param bbox  bounding box to cull against (On Tour const tBoundBox&)
  * @param pos  emitter position (On Tour const t4Vector&)
  */
-extern "C" void cStaticEmitter_render(cStaticEmitter* self, const sGmQuad2* bbox, const sGmQuad* pos)
+extern "C" void cStaticEmitter_render(cStaticEmitter* self, const tBoundBox* bbox, const sGmQuad* pos)
 {
-    *(sGmQuad2*)&self->BoundBox = *bbox;
+    *(&self->BoundBox) = *bbox;
     *(sGmQuad*)&self->Emitter.X0 = *pos;
     cStaticEmitter_render1(self);
 }
@@ -2494,12 +2491,6 @@ typedef sGfxMat_708C0 (*tGetMat_708C0)(void*);
 typedef int (*tCull_708C0)(void*, void*, void*, const sGfxMat_708C0&);
 typedef void (*tDraw_708C0)(void*, void*);
 
-struct sGfxObj_708C0 {
-    char pad_0x0[0x4];
-    int base;               // 0x4
-    int kind;               // 0x8
-    int visible;            // 0xC
-};
 
 static inline int GetTexId_708C0(int i)
 {
@@ -2523,10 +2514,10 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
                                  ((tGetMat_708C0)vt[43].fn)((char*)gfx + vt[43].delta)) == 1) {
         return;
     }
-    if (((sGfxObj_708C0*)selfp)->visible == 0) {
+    if ((selfp)->m_initialized == 0) {
         return;
     }
-    int layer = D_0044B420[((sGfxObj_708C0*)selfp)->kind];
+    int layer = D_0044B420[(selfp)->BlendMode];
     gfx->top[1] = gfx->top[0];
     sGfxRS_708C0* prev = gfx->top;
     gfx->top = prev + 1;
@@ -2536,7 +2527,7 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
     gfx->top->flagsA = gfx->top->flagsA & 0xFFCFFFFF;
     gfx->top->flagsA = (gfx->top->flagsA & 0xFFF00FFF) | 0x14000;
     gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
-    gfx->top->tex = GetTexId_708C0(((sGfxObj_708C0*)selfp)->base + (int)selfp->mCurrentFlipTexture);
+    gfx->top->tex = GetTexId_708C0((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
     sGfxVEntry_708C0* vt2 = gfx->vtable;
     ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, ((char*)selfp) + 0x10);
     gfx->top--;
@@ -2620,25 +2611,6 @@ void func_002F7A68(void*);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cBaseClass_DynamicEmitter_vtbl[];
 
-struct sGmView_0B60 {
-    char pad_0x0[0xC];
-    int field_0xc;          // 0xC
-    int field_0x10;         // 0x10
-    int field_0x14;         // 0x14
-    char pad_0x18[0x158];
-    int field_0x170;        // 0x170
-    int field_0x174;        // 0x174
-    int field_0x178;        // 0x178
-    int field_0x17c;        // 0x17C
-    char pad_0x180[0x20];
-    int field_0x1a0;        // 0x1A0
-    int field_0x1a4;        // 0x1A4
-    char pad_0x1a8[0x38];
-    int field_0x1e0;        // 0x1E0
-    char block[0x10];       // 0x1E4
-    short ids[2];           // 0x1F4
-    void** vtable;          // 0x1F8
-};
 
 /**
  * Constructs the dynamic particle emitter base: no flip textures, cBaseClass_DynamicEmitter_vtbl, the embedded
@@ -2648,7 +2620,7 @@ struct sGmView_0B60 {
  *
  * @return @p self
  */
-extern "C" sGmView_0B60* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self)
+extern "C" cBaseClass_DynamicEmitter* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self)
 {
     self->mNumFlipTextures = 0;
     *(int*)&self->mCurrentFlipTexture = 0;
@@ -2667,7 +2639,7 @@ extern "C" sGmView_0B60* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(cBa
         ((short*)&self->mDrawState.m_textureState)[i] = -1;
     }
     func_00416210(blk, 0, 0x10);
-    return ((sGmView_0B60*)self);
+    return (self);
 }
 #endif
 

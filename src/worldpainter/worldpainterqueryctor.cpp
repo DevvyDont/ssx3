@@ -44,16 +44,8 @@ struct sWPQueryType {
     unsigned int kind : 24;
 };
 
-struct sWPQuery_0410 {
-    void* impl;                     // 0x0
-    void* vtbl;                     // 0x4
-    float minDist;                  // 0x8
-    float maxDist;                  // 0xC
-    sWPQueryType type;              // 0x10
-    sWPQuery_0410* next;            // 0x14
-};
 
-extern sWPQuery_0410* D_004A3880_0410 __asm__("D_004A3880");
+extern cWorldPainterQuery* D_004A3880_0410 __asm__("D_004A3880");
 
 /**
  * Constructs a world painter query for a region type, creates the matching query implementation and links the
@@ -68,7 +60,7 @@ extern sWPQuery_0410* D_004A3880_0410 __asm__("D_004A3880");
  * @return @p self
  */
 // Creates the query implementation for the requested kind and links the query into the global list.
-extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQuery* self, unsigned int type)
+extern "C" cWorldPainterQuery* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQuery* self, unsigned int type)
 {
     (*(sWPQueryType*)&self->m_regionType).flags = type;
     (*(sWPQueryType*)&self->m_regionType).kind = type >> 8;
@@ -120,8 +112,8 @@ extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQue
         break;
     }
     self->m_next = (cWorldPainterQuery*)D_004A3880_0410;
-    D_004A3880_0410 = ((sWPQuery_0410*)self);
-    return ((sWPQuery_0410*)self);
+    D_004A3880_0410 = (self);
+    return (self);
 }
 #endif
 

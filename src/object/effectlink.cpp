@@ -130,11 +130,6 @@ extern void* cEffectModifier_vtbl[];
 extern void* cEffectLink_vtbl[];
 void operator_delete(int*);
 
-struct sEffectLinkObj_5828 {
-    sEffectLinkView link;  // 0x0
-    void** vt;         // 0x8
-    int value;         // 0xC
-};
 
 /**
  * Destroys an effect modifier: decrements the live count (D_004A3FF4), unlinks it from its effect chain, then
@@ -144,11 +139,11 @@ struct sEffectLinkObj_5828 {
  */
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags)
 {
-    sEffectLinkObj_5828* effectLink = (sEffectLinkObj_5828*)self;
-    effectLink->vt = cEffectModifier_vtbl;
+    cEffectModifier* effectLink = self;
+    effectLink->mVtbl = cEffectModifier_vtbl;
     D_004A3FF4--;
-    effectLink->vt = cEffectLink_vtbl;
-    func_00345760((cEffectLink*)&effectLink->link);
+    effectLink->mVtbl = cEffectLink_vtbl;
+    func_00345760((cEffectLink*)&(*(sEffectLinkView*)&effectLink->Next));
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -211,11 +206,6 @@ static inline void* vu0CopyMatrix003458C0(void* dst, void* src)
     return dst;
 }
 
-struct sEffObj003458C0 {
-    char pad0[0x1E0];
-    int f1E0;
-    int f1E4;
-};
 
 /**
  * Constructs a static particle effect on an instance (On Tour cParticleModifier(tParticleData* pdata,
@@ -247,7 +237,7 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
         m = vu0CopyMatrix003458C0(((char*)self) + 0x10, own + 0x10);
     }
     cStaticEmitter_setupEmitter(((char*)self) + 0x50, m, (int)self->ParticleData);
-    ((sEffObj003458C0*)self)->f1E4 = 0;
+    (self)->Complete = 0;
     D_004A3FF8++;
     return ((void*)self);
 }
@@ -423,26 +413,8 @@ struct sTarget00345C90 {
     float z;
 };
 
-struct sEff00345C90 {
-    void* next;
-    void* prev;
-    void** vt;
-    void* owner;
-    int bone;
-    int f14;
-    int f18;
-    int f1C;
-    sVec4_00345C90 localA;
-    sVec4_00345C90 worldA;
-    sVec4_00345C90 worldB;
-    sVec4_00345C90 localB;
-    char sub60[0x258 - 0x60];
-    void** subVt;
-    int f25C;
-    sTarget00345C90* target;
-};
 
-extern "C" sEff00345C90* func_00345C90(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
+extern "C" cDynamicParticleModifier* func_00345C90(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     self->mVtbl = cDynamicParticleModifier_vtbl;
@@ -460,7 +432,7 @@ extern "C" sEff00345C90* func_00345C90(cDynamicParticleModifier* self, sTarget00
     func_00345EF8(self);
     D_004A3FFC++;
     self->Complete = 0;
-    return ((sEff00345C90*)self);
+    return (self);
 }
 #endif
 
@@ -493,7 +465,7 @@ struct sEffectLinkVEntry_345D80 {
  * @param stream  the replay frame to read from (On Tour data)
  * @return @p self
  */
-extern "C" sEff00345C90* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, void* stream)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, void* stream)
 {
     func_003457C8((cEffectModifier*)self, stream);
     self->mVtbl = cDynamicParticleModifier_vtbl;
@@ -514,7 +486,7 @@ extern "C" sEff00345C90* cDynamicParticleModifier_cDynamicParticleModifier(cDyna
         self->ParticleData = 0;
     }
     D_004A3FFC++;
-    return ((sEff00345C90*)self);
+    return (self);
 }
 #endif
 
