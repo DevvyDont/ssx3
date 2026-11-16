@@ -62,12 +62,12 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     *(void***)(((char*)self) + 0xCC) = cList_vtbl;
     *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
     cList_destroyList_C558(((char*)self) + 0xB4);
-    char* m40 = ((char*)self) + 0x40;
+    char* rootGroup = ((char*)self) + 0x40;
     *(void***)(((char*)self) + 0xC8) = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self) + 0xC0);
     *(void***)(((char*)self) + 0xBC) = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self) + 0xB4);
-    cUIThing__cUIThing(m40, 2);
+    cUIThing__cUIThing(rootGroup, 2);
     *(void***)(((char*)self) + 0x30) = cList_vtbl;
     cList_destroyList_C558(((char*)self) + 0x18);
     *(void***)(((char*)self) + 0x2C) = cListNode_vtbl;
@@ -1102,15 +1102,15 @@ extern void* cUIScrollBar_vtbl[];
 extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
     self->mVtbl = cUIScrollBar_vtbl;
-    void* a = self->mpObjBackground;
-    if (a != 0) {
-        sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
-        t->fn((char*)a + t->field_0x8, 3);
+    void* background = self->mpObjBackground;
+    if (background != 0) {
+        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)background + 0x8);
+        dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
     }
-    void* b = self->mpObjKnob;
-    if (b != 0) {
-        sDeleteTarget* t = *(sDeleteTarget**)((char*)b + 0x8);
-        t->fn((char*)b + t->field_0x8, 3);
+    void* knob = self->mpObjKnob;
+    if (knob != 0) {
+        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)knob + 0x8);
+        dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
     }
     cUIThing__cUIThing(self, flags);
 }
@@ -1386,15 +1386,15 @@ extern void* cUISlider_vtbl[];
 extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
     self->mVtbl = cUISlider_vtbl;
-    void* a = self->mpObjBackground;
-    if (a != 0) {
-        sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
-        t->fn((char*)a + t->field_0x8, 3);
+    void* background = self->mpObjBackground;
+    if (background != 0) {
+        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)background + 0x8);
+        dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
     }
-    void* b = self->mpObjKnob;
-    if (b != 0) {
-        sDeleteTarget* t = *(sDeleteTarget**)((char*)b + 0x8);
-        t->fn((char*)b + t->field_0x8, 3);
+    void* knob = self->mpObjKnob;
+    if (knob != 0) {
+        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)knob + 0x8);
+        dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
     }
     cUIThing__cUIThing(self, flags);
 }
@@ -1540,12 +1540,12 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
     vb[20].fn(knob + vb[20].delta, &knobSize);
     float w = bgSize.x - knobSize.x;
     char* knobObj = (char*)self->mpObjKnob;
-    cUISlider_render2D_sVec3 p = *(cUISlider_render2D_sVec3*)(knobObj + 0x44);
-    p.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
-    *(cUISlider_render2D_sVec3*)(knobObj + 0x44) = p;
-    char* b3 = (char*)self->mpObjKnob;
-    cUISlider_render2D_sVEntryF* vb3 = *(cUISlider_render2D_sVEntryF**)(b3 + 8);
-    vb3[17].fn(b3 + vb3[17].delta, x, y);
+    cUISlider_render2D_sVec3 knobPos = *(cUISlider_render2D_sVec3*)(knobObj + 0x44);
+    knobPos.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
+    *(cUISlider_render2D_sVec3*)(knobObj + 0x44) = knobPos;
+    char* knobWidget = (char*)self->mpObjKnob;
+    cUISlider_render2D_sVEntryF* vb3 = *(cUISlider_render2D_sVEntryF**)(knobWidget + 8);
+    vb3[17].fn(knobWidget + vb3[17].delta, x, y);
 }
 #endif
 

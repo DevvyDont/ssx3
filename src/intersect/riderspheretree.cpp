@@ -274,18 +274,18 @@ extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphere
 /**
  * Moves a sphere tree node and its child spheres by a matrix, then scales their positions and radii.
  *
- * @param s  the sphere tree node
- * @param m  the transform (On Tour const t4Matrix& mat)
+ * @param node  the sphere tree node
+ * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  uniform scale applied after the transform
  */
-extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphereVec4* m, float scale)
+extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* node, sSphereVec4* mat, float scale)
 {
     sScale_9B90 sc(scale);
-    s->center = sProd_9B90(mtxMulVec_9B90(m, &s->center), sc);
-    s->radius = s->radius * scale;
-    for (int i = 0; i < s->count; i++) {
-        s->children[i].pos = sProd_9B90(mtxMulVec_9B90(m, &s->children[i].pos), sc);
-        s->children[i].radius = s->children[i].radius * scale;
+    node->center = sProd_9B90(mtxMulVec_9B90(mat, &node->center), sc);
+    node->radius = node->radius * scale;
+    for (int i = 0; i < node->count; i++) {
+        node->children[i].pos = sProd_9B90(mtxMulVec_9B90(mat, &node->children[i].pos), sc);
+        node->children[i].radius = node->children[i].radius * scale;
     }
 }
 #endif
@@ -1778,27 +1778,27 @@ extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float
  * Transforms a sphere tree's four axis directions (their opposites follow) and its centre, then scales them
  * and its radius.
  *
- * @param m  the transform (On Tour const t4Matrix& transMat)
+ * @param mat  the transform (On Tour const t4Matrix& transMat)
  * @param scale  uniform scale (On Tour s)
  */
-extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float scale)
+extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* mat, float scale)
 {
     for (int i = 0; i < 4; i++) {
-        self->dirs[i] = Scale_B2B8(mtxMulVec_9B90(m, &self->dirs[i]), scale);
+        self->dirs[i] = Scale_B2B8(mtxMulVec_9B90(mat, &self->dirs[i]), scale);
         self->dirs[7 - i] = Scale_B2B8(self->dirs[i], -1.0f);
     }
-    sSphereVec4 r;
-    sSphereVec4 t = mtxMulVec_9B90(m, &self->center);
+    sSphereVec4 scaledCenter;
+    sSphereVec4 transformedCenter = mtxMulVec_9B90(mat, &self->center);
     sSc_C770 sc;
     sc.w = 1.0f;
     sc.x = scale;
     sc.y = scale;
     sc.z = scale;
-    r.x = t.x * sc.x;
-    r.y = t.y * sc.y;
-    r.z = t.z * sc.z;
-    r.w = t.w * sc.w;
-    self->center = r;
+    scaledCenter.x = transformedCenter.x * sc.x;
+    scaledCenter.y = transformedCenter.y * sc.y;
+    scaledCenter.z = transformedCenter.z * sc.z;
+    scaledCenter.w = transformedCenter.w * sc.w;
+    self->center = scaledCenter;
     self->radius = self->radius * scale;
 }
 #endif
@@ -3212,29 +3212,29 @@ struct sCapsuleV_E5E8 {
 /**
  * Intersects the line with a two-sided triangle: the one-sided test with the normal flipped to face the line.
  *
- * When dir . @p v < 0 it calls the IsTriInt virtual (slot 4) with -@p v, otherwise with @p v.
+ * When dir . @p normal < 0 it calls the IsTriInt virtual (slot 4) with -@p normal, otherwise with @p normal.
  *
  * @param vertA  the triangle's first corner (On Tour a)
  * @param vertB  the second corner
  * @param vertC  the third corner
- * @param v  the triangle's normal (On Tour n)
+ * @param normal  the triangle's normal (On Tour n)
  * @param ipos  receives the intersection point (On Tour ipos)
  * @param inorm  receives the hit normal (On Tour inorm)
  * @param hitParam  receives the line parameter (On Tour param)
  * @return the IsTriInt result
  */
-extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* vertA, void* vertB, void* vertC, sSphereVec4* v, void* ipos, void* inorm, void* hitParam)
+extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* vertA, void* vertB, void* vertC, sSphereVec4* normal, void* ipos, void* inorm, void* hitParam)
 {
-    float dp = vu0Dot_E4D0(self->dir, *v);
+    float dp = vu0Dot_E4D0(self->dir, *normal);
     sVE_E5E8* vt;
     if (dp < 0.0f) {
         vt = self->vt;
         char* target = (char*)self + vt[4].delta;
-        sSphereVec4 n = vu0Scale_E4D0(*v, -1.0f);
+        sSphereVec4 n = vu0Scale_E4D0(*normal, -1.0f);
         return vt[4].fn(target, vertA, vertB, vertC, &n, ipos, inorm, hitParam);
     }
     vt = self->vt;
-    return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, v, ipos, inorm, hitParam);
+    return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, normal, ipos, inorm, hitParam);
 }
 #endif
 
@@ -3383,11 +3383,11 @@ extern "C" int cWorldLine_IsBoxInt(sRay_E690* self, float* bmin, float* bmax, sH
     }
     int n = 0;
     if (0.0f <= tmin) {
-        sHit_E690* h = &hits[0];
-        reset_E690(h);
-        h->nrm = D_004FF260[fmin];
-        h->pos = vu0Add_E4D0(self->origin, vu0Scale_E4D0(self->dir, tmin));
-        h->dist = tmin;
+        sHit_E690* entryHit = &hits[0];
+        reset_E690(entryHit);
+        entryHit->nrm = D_004FF260[fmin];
+        entryHit->pos = vu0Add_E4D0(self->origin, vu0Scale_E4D0(self->dir, tmin));
+        entryHit->dist = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
@@ -3561,20 +3561,20 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
     sSphereVec4* mat3 = patch->m[3];
     sSphereVec4 surfPos;
     sSphereVec4 rowVecs[4];
-    float v2 = patchV * patchV;
-    float v3 = patchV * v2;
-    float u2 = patchU * patchU;
-    float u3 = patchU * u2;
-    sVec4_E9A0 V(v3, v2, patchV, 1.0f);
-    sVec4_E9A0 U(u3, u2, patchU, 1.0f);
-    rowVecs[0] = mtxMulVec_9B90(mat0, &U);
-    rowVecs[1] = mtxMulVec_9B90(mat1, &U);
-    rowVecs[2] = mtxMulVec_9B90(mat2, &U);
-    rowVecs[3] = mtxMulVec_9B90(mat3, &U);
-    surfPos = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(rowVecs, 0), V), vu0Dot_E4D0(Column_E9A0(rowVecs, 1), V),
-                   vu0Dot_E4D0(Column_E9A0(rowVecs, 2), V), 1.0f);
-    sVec4_E9A0 dV(3.0f * v2, 2.0f * patchV, 1.0f);
-    sVec4_E9A0 dU(3.0f * u2, 2.0f * patchU, 1.0f);
+    float vSquared = patchV * patchV;
+    float vCubed = patchV * vSquared;
+    float uSquared = patchU * patchU;
+    float uCubed = patchU * uSquared;
+    sVec4_E9A0 vPowers(vCubed, vSquared, patchV, 1.0f);
+    sVec4_E9A0 uPowers(uCubed, uSquared, patchU, 1.0f);
+    rowVecs[0] = mtxMulVec_9B90(mat0, &uPowers);
+    rowVecs[1] = mtxMulVec_9B90(mat1, &uPowers);
+    rowVecs[2] = mtxMulVec_9B90(mat2, &uPowers);
+    rowVecs[3] = mtxMulVec_9B90(mat3, &uPowers);
+    surfPos = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(rowVecs, 0), vPowers), vu0Dot_E4D0(Column_E9A0(rowVecs, 1), vPowers),
+                   vu0Dot_E4D0(Column_E9A0(rowVecs, 2), vPowers), 1.0f);
+    sVec4_E9A0 dV(3.0f * vSquared, 2.0f * patchV, 1.0f);
+    sVec4_E9A0 dU(3.0f * uSquared, 2.0f * patchU, 1.0f);
     float dvx = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 0));
     float dvy = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 1));
     float dvz = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 2));
@@ -3582,56 +3582,56 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
     rowVecs[1] = mtxMulVec_9B90(mat1, &dU);
     rowVecs[2] = mtxMulVec_9B90(mat2, &dU);
     rowVecs[3] = mtxMulVec_9B90(mat3, &dU);
-    float dux = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 0));
-    float duy = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 1));
-    float duz = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 2));
+    float dux = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 0));
+    float duy = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 1));
+    float duz = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 2));
     for (int i = 0; i < 4; i++) {
-        sVec3_E9A0 d(vu0Sub_E9A0(line->origin, surfPos));
+        sVec3_E9A0 originDelta(vu0Sub_E9A0(line->origin, surfPos));
         // Jacobian [dP/du dP/dv -dir], filled row by row
-        sMat3_E9A0 m;
-        m.m[0] = dux;
-        m.m[3] = dvx;
-        m.m[6] = -line->dir.x;
-        m.m[1] = duy;
-        m.m[4] = dvy;
-        m.m[7] = -line->dir.y;
-        m.m[2] = duz;
-        m.m[5] = dvz;
-        m.m[8] = -line->dir.z;
+        sMat3_E9A0 jacobian;
+        jacobian.m[0] = dux;
+        jacobian.m[3] = dvx;
+        jacobian.m[6] = -line->dir.x;
+        jacobian.m[1] = duy;
+        jacobian.m[4] = dvy;
+        jacobian.m[7] = -line->dir.y;
+        jacobian.m[2] = duz;
+        jacobian.m[5] = dvz;
+        jacobian.m[8] = -line->dir.z;
         {
             sMat3_E9A0 adj;
-            adj.m[0] = m.m[4] * m.m[8] - m.m[5] * m.m[7];
-            adj.m[1] = m.m[7] * m.m[2] - m.m[8] * m.m[1];
-            adj.m[2] = m.m[1] * m.m[5] - m.m[2] * m.m[4];
-            adj.m[3] = m.m[6] * m.m[5] - m.m[8] * m.m[3];
-            adj.m[4] = m.m[0] * m.m[8] - m.m[2] * m.m[6];
-            adj.m[5] = m.m[3] * m.m[2] - m.m[5] * m.m[0];
-            adj.m[6] = m.m[3] * m.m[7] - m.m[4] * m.m[6];
-            adj.m[7] = m.m[6] * m.m[1] - m.m[7] * m.m[0];
-            adj.m[8] = m.m[0] * m.m[4] - m.m[1] * m.m[3];
-            float det = m.m[0] * adj.m[0] + m.m[3] * adj.m[1] + m.m[6] * adj.m[2];
-            m = adj * (1.0f / det);
+            adj.m[0] = jacobian.m[4] * jacobian.m[8] - jacobian.m[5] * jacobian.m[7];
+            adj.m[1] = jacobian.m[7] * jacobian.m[2] - jacobian.m[8] * jacobian.m[1];
+            adj.m[2] = jacobian.m[1] * jacobian.m[5] - jacobian.m[2] * jacobian.m[4];
+            adj.m[3] = jacobian.m[6] * jacobian.m[5] - jacobian.m[8] * jacobian.m[3];
+            adj.m[4] = jacobian.m[0] * jacobian.m[8] - jacobian.m[2] * jacobian.m[6];
+            adj.m[5] = jacobian.m[3] * jacobian.m[2] - jacobian.m[5] * jacobian.m[0];
+            adj.m[6] = jacobian.m[3] * jacobian.m[7] - jacobian.m[4] * jacobian.m[6];
+            adj.m[7] = jacobian.m[6] * jacobian.m[1] - jacobian.m[7] * jacobian.m[0];
+            adj.m[8] = jacobian.m[0] * jacobian.m[4] - jacobian.m[1] * jacobian.m[3];
+            float det = jacobian.m[0] * adj.m[0] + jacobian.m[3] * adj.m[1] + jacobian.m[6] * adj.m[2];
+            jacobian = adj * (1.0f / det);
         }
-        sVec3_E9A0 delta = m * d;
+        sVec3_E9A0 delta = jacobian * originDelta;
         patchU += delta.x;
         patchV += delta.y;
         if (patchU < 0.0f || 1.0f < patchU || patchV < 0.0f || 1.0f < patchV) {
             return;
         }
-        v2 = patchV * patchV;
-        v3 = patchV * v2;
-        u2 = patchU * patchU;
-        u3 = patchU * u2;
-        V = sVec4_E9A0(v3, v2, patchV, 1.0f);
-        U = sVec4_E9A0(u3, u2, patchU, 1.0f);
-        rowVecs[0] = mtxMulVec_9B90(mat0, &U);
-        rowVecs[1] = mtxMulVec_9B90(mat1, &U);
-        rowVecs[2] = mtxMulVec_9B90(mat2, &U);
-        rowVecs[3] = mtxMulVec_9B90(mat3, &U);
-        surfPos = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(rowVecs, 0), V), vu0Dot_E4D0(Column_E9A0(rowVecs, 1), V),
-                       vu0Dot_E4D0(Column_E9A0(rowVecs, 2), V), 1.0f);
-        dV = sVec4_E9A0(3.0f * v2, 2.0f * patchV, 1.0f);
-        dU = sVec4_E9A0(3.0f * u2, 2.0f * patchU, 1.0f);
+        vSquared = patchV * patchV;
+        vCubed = patchV * vSquared;
+        uSquared = patchU * patchU;
+        uCubed = patchU * uSquared;
+        vPowers = sVec4_E9A0(vCubed, vSquared, patchV, 1.0f);
+        uPowers = sVec4_E9A0(uCubed, uSquared, patchU, 1.0f);
+        rowVecs[0] = mtxMulVec_9B90(mat0, &uPowers);
+        rowVecs[1] = mtxMulVec_9B90(mat1, &uPowers);
+        rowVecs[2] = mtxMulVec_9B90(mat2, &uPowers);
+        rowVecs[3] = mtxMulVec_9B90(mat3, &uPowers);
+        surfPos = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(rowVecs, 0), vPowers), vu0Dot_E4D0(Column_E9A0(rowVecs, 1), vPowers),
+                       vu0Dot_E4D0(Column_E9A0(rowVecs, 2), vPowers), 1.0f);
+        dV = sVec4_E9A0(3.0f * vSquared, 2.0f * patchV, 1.0f);
+        dU = sVec4_E9A0(3.0f * uSquared, 2.0f * patchU, 1.0f);
         dvx = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 0));
         dvy = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 1));
         dvz = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 2));
@@ -3639,9 +3639,9 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
         rowVecs[1] = mtxMulVec_9B90(mat1, &dU);
         rowVecs[2] = mtxMulVec_9B90(mat2, &dU);
         rowVecs[3] = mtxMulVec_9B90(mat3, &dU);
-        dux = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 0));
-        duy = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 1));
-        duz = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 2));
+        dux = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 0));
+        duy = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 1));
+        duz = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 2));
     }
     sVec4_E9A0 du(dux, duy, duz);
     sVec4_E9A0 dv(dvx, dvy, dvz);

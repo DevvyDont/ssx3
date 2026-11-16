@@ -37,24 +37,24 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream) __asm__("cMoveNod
  * system
  * and marks the node for update.
  *
- * @param a  the bucket the node belongs to (On Tour const int bucket)
+ * @param bucket  the bucket the node belongs to (On Tour const int bucket)
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
+void* cMoveNode_cMoveNode_3(void* self, void* bucket, void* stream)
 {
     int flag;
-    cInstanceNode_cInstanceNode(self, a, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(int*)((char*)self + 0x1C) = 0;
     *(void**)((char*)self + 0xC) = cMoveNode_vtbl;
-    sSerVEntry_55298* e = &(*(sSerVEntry_55298**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x20, 4);
-    e = &(*(sSerVEntry_55298**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x24, 4);
-    e = &(*(sSerVEntry_55298**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x28, 4);
-    e = &(*(sSerVEntry_55298**)stream)[2];
-    e->fn((char*)stream + e->delta, &flag, 4);
+    sSerVEntry_55298* readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x20, 4);
+    readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x24, 4);
+    readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x28, 4);
+    readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, &flag, 4);
     if (flag) {
         cMoveNode_addModifierBlock((cMoveNode*)self);
         tModifierBlock_readFromReplayFrame(*(void**)((char*)self + 0x1C), stream);
@@ -1713,15 +1713,15 @@ void cMoveNode_writeToReplayFrame_2(void* self, void* stream) __asm__("cMoveNode
 void cMoveNode_writeToReplayFrame_2(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sSerVEntry_56B30* e = &(*(sSerVEntry_56B30**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x20, 4);
-    e = &(*(sSerVEntry_56B30**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x24, 4);
-    e = &(*(sSerVEntry_56B30**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x28, 4);
+    sSerVEntry_56B30* writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x20, 4);
+    writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x24, 4);
+    writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x28, 4);
     int flag = *(void**)((char*)self + 0x1C) != 0;
-    e = &(*(sSerVEntry_56B30**)stream)[1];
-    e->fn((char*)stream + e->delta, &flag, 4);
+    writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, &flag, 4);
     void* block = *(void**)((char*)self + 0x1C);
     if (block != 0) {
         tModifierBlock_writeToReplayFrame(block, stream);
@@ -2771,6 +2771,12 @@ extern void* D_004A4028;
 extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the multi-particle manager: deletes each of its up to 4 cMultiParticle (destructor flags 3) and clears the
+ * global D_004A4028 that points at the manager.
+ *
+ * @param flags  destructor flags; bit 0 frees the manager itself with operator_delete
+ */
 extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, int flags)
 {
     int i;
@@ -2793,11 +2799,22 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_addParticle);
 extern char str_MultiParticle[];
 extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2);
 
-extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, void* a2, void* a3)
+/**
+ * Creates the cMultiParticle for slot @p i if the slot is empty (On Tour addParticle(int id, tParticleData* pdata,
+ * int numInst)).
+ *
+ * Allocates 0x50 bytes (tag str_MultiParticle, "MultiParticle") and runs the cMultiParticle constructor (func_00357DD8) with
+ * @p pdata and @p numInst. An occupied slot is left alone; @p i is not range-checked against the 4 slots.
+ *
+ * @param i  the slot index (On Tour id)
+ * @param pdata  the tParticleData the particles use
+ * @param numInst  how many instances the cMultiParticle can track (On Tour numInst)
+ */
+extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, void* pdata, void* numInst)
 {
     void** slot = (void**)((char*)self + (i << 2));
     if (*slot == 0) {
-        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(0x50, str_MultiParticle, 0x20000000, 0), a2, a3);
+        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(0x50, str_MultiParticle, 0x20000000, 0), pdata, numInst);
     }
 }
 #endif
@@ -3056,6 +3073,12 @@ struct sMnDtorVEntry7FA0 {
 void operator_delete(int* ptr);
 void cMemMan_free(void*);
 
+/**
+ * Destroys a cMultiParticle: deletes Particle, frees the InstIds buffer, destroys the Emitter through its virtual
+ * destructor (vtable at +0x18C, slot 1, flags 3) and frees the object when @p flags bit 0 is set.
+ *
+ * @param flags  destructor flags; bit 0 frees the object
+ */
 extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* self, int flags)
 {
     operator_delete((int*)self->Particle);

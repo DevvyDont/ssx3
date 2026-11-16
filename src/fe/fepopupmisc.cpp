@@ -147,11 +147,11 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(sPopup_EC68* self, char* in
         } else {
             self->flags = ((self->flags | 0x80) & ~0x3F00) | 0x700;
         }
-        sDefObj_EC68* p = *(sDefObj_EC68**)(self->owner + 0x14);
-        if (p == 0)
-            p = &D_004A5A58_EC68;
-        if (p != 0)
-            p->vt[2].fn((char*)p + p->vt[2].delta, 6);
+        sDefObj_EC68* uiSound = *(sDefObj_EC68**)(self->owner + 0x14);
+        if (uiSound == 0)
+            uiSound = &D_004A5A58_EC68;
+        if (uiSound != 0)
+            uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 6);
     }
     return 1;
 }
@@ -544,11 +544,11 @@ extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(void* self, int f
 {
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
     if ((char*)self + 0x6D0 != 0) {
-        char* p = (char*)self + 0x6D0 + 0x68;
-        while ((char*)self + 0x6D0 != p) {
-            p -= 0x34;
-            sVEntry001DF4E8* vt = *(sVEntry001DF4E8**)(p + 0x30);
-            vt[1].fn(p + vt[1].delta, 0);
+        char* panel = (char*)self + 0x6D0 + 0x68;
+        while ((char*)self + 0x6D0 != panel) {
+            panel -= 0x34;
+            sVEntry001DF4E8* vt = *(sVEntry001DF4E8**)(panel + 0x30);
+            vt[1].fn(panel + vt[1].delta, 0);
         }
     }
     func_001A85D0_dtor(self, flags);

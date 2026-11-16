@@ -318,9 +318,9 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                 cUITemplate_MAP_mPeak = 1;
                 D_004A2594 = 0;
                 D_004A2598 = 0;
-                char* r = (char*)func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
-                r[0x44] = 0;
-                return r;
+                char* eventSelect = (char*)func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
+                eventSelect[0x44] = 0;
+                return eventSelect;
             }
             case 2:
                 if (st->x44 == 0)
@@ -923,10 +923,10 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(0x14, str_FEUICustom, 0, 0), self->ui);
     self->ui->sound = func_001A2E20(cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
-    void* a = *(void**)(g + 0x8C);
-    self->ui->f10 = a;
-    void* b = *(void**)(g + 0x88);
-    self->ui->f8 = b;
+    void* feLocale = *(void**)(g + 0x8C);
+    self->ui->f10 = feLocale;
+    void* fontInterface = *(void**)(g + 0x88);
+    self->ui->f8 = fontInterface;
     cIrradianceDataBase_Load(D_005047F8);
     func_00285FB0(func_0028B180());
 }
@@ -1101,15 +1101,15 @@ extern "C" int func_001A2208(void* self)
             w->top++;
         }
         {
-            cPS2GraphicsMan* g = GrMan;
-            sFeVE* vt = (sFeVE*)g->mVtbl;
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
             ((void (*)(void*, int, int, float, float, float, float, float, float))vt[26].fn)(
-                (char*)g + vt[26].delta, 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
+                (char*)ps2GraphicsMan + vt[26].delta, 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
         }
         {
-            cPS2GraphicsMan* g = GrMan;
-            sFeVE* vt = (sFeVE*)g->mVtbl;
-            ((void (*)(void*, void*))vt[34].fn)((char*)g + vt[34].delta, t4mat_Identity);
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+            ((void (*)(void*, void*))vt[34].fn)((char*)ps2GraphicsMan + vt[34].delta, t4mat_Identity);
         }
         feW()->top->setAlpha(9);
         sFeVert v[4];
@@ -1143,9 +1143,9 @@ extern "C" int func_001A2208(void* self)
         v[3].pos = p;
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         {
-            cPS2GraphicsMan* g = GrMan;
-            sFeVE* vt = (sFeVE*)g->mVtbl;
-            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)((char*)g + vt[71].delta, 4, v, 0);
+            cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+            sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
         }
         feCall(22);
         feCall(32);
@@ -1156,15 +1156,15 @@ extern "C" int func_001A2208(void* self)
     feCall(21);
     feCall(31);
     {
-        cPS2GraphicsMan* g = GrMan;
-        sFeVE* vt = (sFeVE*)g->mVtbl;
-        ((void (*)(void*, float, float, float))vt[25].fn)((char*)g + vt[25].delta,
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+        ((void (*)(void*, float, float, float))vt[25].fn)((char*)ps2GraphicsMan + vt[25].delta,
             *(float*)((char*)self + 0x10), *(float*)((char*)self + 0x14), *(float*)((char*)self + 0x18));
     }
     {
-        cPS2GraphicsMan* g = GrMan;
-        sFeVE* vt = (sFeVE*)g->mVtbl;
-        ((void (*)(void*, void*))vt[34].fn)((char*)g + vt[34].delta, (char*)self + 0x50);
+        cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+        sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+        ((void (*)(void*, void*))vt[34].fn)((char*)ps2GraphicsMan + vt[34].delta, (char*)self + 0x50);
     }
     {
         sFeWorld* w = feW();

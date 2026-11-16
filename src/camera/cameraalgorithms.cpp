@@ -90,15 +90,15 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
     case 92: {
         char* target = *(char**)(ctx + 8);
         void* mem = cMemMan_alloc(0x3D0, D_0045B298, 0x20000000, 0);
-        sCamTmp_D0A0 c0;
-        func_00170D20(&c0, target, 0);
-        sCamTmp_D0A0 c1;
-        func_00170D20(&c1, target, 1);
-        sCamTmp_D0A0 c2;
-        func_00170D20(&c2, target, 2);
-        sCamTmp_D0A0 c3;
-        func_00170D20(&c3, target, 3);
-        algo = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &c0, &c1, &c2, &c3,
+        sCamTmp_D0A0 point1;
+        func_00170D20(&point1, target, 0);
+        sCamTmp_D0A0 point2;
+        func_00170D20(&point2, target, 1);
+        sCamTmp_D0A0 point3;
+        func_00170D20(&point3, target, 2);
+        sCamTmp_D0A0 point4;
+        func_00170D20(&point4, target, 3);
+        algo = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &point1, &point2, &point3, &point4,
                           *(float*)(ctx + 0x18), *(float*)(ctx + 0x14), *(float*)(ctx + 0x1C), *(float*)(ctx + 0x10));
         break;
     }

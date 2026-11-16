@@ -40,6 +40,16 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern char str_UILISTBOXSTR[];
 
+/**
+ * Appends an entry with a heap copy of @p str (tag str_UILISTBOXSTR "UILISTBOXSTR") as its text, no ASCII text and @p data
+ * as its data.
+ *
+ * There is no check against the 32-entry array; mStringID of the new entry is left as it was.
+ *
+ * @param str  the UTF-16 text (On Tour pUnicode)
+ * @param data  the entry's user data (On Tour pData)
+ * @return the new entry's index
+ */
 extern "C" unsigned char cUIListBox_addEntryByUnicodeString(cUIListBox* self, unsigned short* str, int data)
 {
     unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
@@ -122,6 +132,11 @@ extern "C" void func_0039A670(void* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentAsciiText);
 #ifdef SKIP_ASM
+/**
+ * Returns the ASCII text of the current entry (mpAsciiString), or 0 when mCurrentEntry is out of range.
+ *
+ * @return the text pointer (as an int)
+ */
 extern "C" int cUIListBox_getCurrentAsciiText(cUIListBox* self)
 {
     if (self->mCurrentEntry < self->mNumEntries) {
@@ -134,6 +149,11 @@ extern "C" int cUIListBox_getCurrentAsciiText(cUIListBox* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentEntryData);
 #ifdef SKIP_ASM
+/**
+ * Returns the user data of the current entry (mpData), or 0 when mCurrentEntry is out of range.
+ *
+ * @return the data (as an int)
+ */
 extern "C" int cUIListBox_getCurrentEntryData(cUIListBox* self)
 {
     if (self->mCurrentEntry < self->mNumEntries) {
@@ -146,6 +166,13 @@ extern "C" int cUIListBox_getCurrentEntryData(cUIListBox* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_getEntryByData);
 #ifdef SKIP_ASM
+/**
+ * Finds the first entry whose user data equals @p key and stores its index in @p out.
+ *
+ * @param key  the data to look for (On Tour pData)
+ * @param out  receives the entry index (On Tour pIndex)
+ * @return 1 when found, 0 otherwise
+ */
 extern "C" int cUIListBox_getEntryByData(cUIListBox* self, int key, unsigned char* out)
 {
     int i;
@@ -162,6 +189,11 @@ extern "C" int cUIListBox_getEntryByData(cUIListBox* self, int key, unsigned cha
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_setCurrentEntryByIndex);
 #ifdef SKIP_ASM
+/**
+ * Makes entry @p Index current; the index is truncated to a byte and ignored when not below mNumEntries.
+ *
+ * @param Index  the entry index
+ */
 extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int Index)
 {
     unsigned char v = (unsigned char)Index;
@@ -174,6 +206,12 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int Index)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryDataByIndex);
 #ifdef SKIP_ASM
+/**
+ * Sets the user data of entry @p Index; the index is truncated to a byte and ignored when not below mNumEntries.
+ *
+ * @param Index  the entry index
+ * @param value  the new user data (On Tour pData)
+ */
 extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int Index, int value)
 {
     unsigned char v = (unsigned char)Index;
@@ -247,6 +285,13 @@ struct sVEntry39A8D8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Turns the list box into a callback list of @p count entries: mNumEntries = count, mCurrentEntry 0, sets mCallback
+ * (bit 4 of mAttrListBox) and notifies the owning state (mpScreen->mpState) through its virtual slot 19 with (this,
+ * 9).
+ *
+ * @param count  the number of entries (On Tour NumEntries)
+ */
 extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
 {
     *(char*)&self->mNumEntries = count;

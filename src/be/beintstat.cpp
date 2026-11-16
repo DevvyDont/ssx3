@@ -39,12 +39,12 @@ extern "C" float cBEStatInterface_getCollisionAttrib(void* self, int rider, int 
     int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538_getCollisionAttrib[profile].e[charID][5] / 5;
-    return (float)v / (float)D_005308D8_getCollisionAttrib[charID].v[0xD];
+        attribLevel = D_00535538_getCollisionAttrib[profile].e[charID][5] / 5;
+    return (float)attribLevel / (float)D_005308D8_getCollisionAttrib[charID].v[0xD];
 }
 #endif
 

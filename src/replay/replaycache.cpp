@@ -42,6 +42,12 @@ INCLUDE_ASM("replay/replaycache", cReplay_removeCache);
 #ifdef SKIP_ASM
 extern "C" void func_0026D0E8(void* p, int mode);
 
+/**
+ * Removes a rider's input cache: finds @p pCache in InputCache[2], destroys it (func_0026D0E8, flags 3) and clears
+ * the slot. A cache that is not registered is left alone.
+ *
+ * @param pCache  the cReplayCache to remove
+ */
 extern "C" void cReplay_removeCache(cReplay* self, void* pCache)
 {
     if (pCache != 0) {
@@ -113,6 +119,14 @@ struct sRcNode1A0 {
 };
 
 
+/**
+ * Frees one recorded frame to make room (On Tour freeOneReplayFrame).
+ *
+ * Walks the frame list from NextCandidate, looking past the candidate for a frame that is neither a highlight nor a
+ * chapter (FrameType bytes +0x1E and +0x1F both 0) and is not the newest; it moves NextCandidate past that frame and
+ * frees it. When the walk reaches the end it restarts from the oldest frame, once; if nothing qualifies nothing is
+ * freed.
+ */
 extern "C" void cReplay_freeOneReplayFrame(cReplay* self)
 {
     cReplay* replay = self;
@@ -251,6 +265,11 @@ extern "C" int func_0026D4D8(void* stream, unsigned int pos);
 void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
 
 
+/**
+ * Moves the playback cursor to the newest recorded frame: clears NextFrame, PlaybackFrame = the frame containing tick
+ * 100000000, PlaybackTick = its FrameStartTick, and every input cache moves there (func_0026D4D8,
+ * cReplayCache::moveTo).
+ */
 extern "C" void cReplay_lastFrame(cReplay* self)
 {
     int i;
@@ -346,6 +365,10 @@ struct sReplayNode270538 {
     unsigned char b;
 };
 
+/**
+ * Frees every recorded frame that carries nothing: plain frames (FrameType.Type 0) that are not marked as a highlight
+ * or a chapter (bytes +0x1E and +0x1F both 0).
+ */
 extern "C" void cReplay_purgeIdleFrames(cReplay* self)
 {
     sReplayNode270538* node = *(sReplayNode270538**)&self->FrameList;
@@ -375,6 +398,18 @@ INCLUDE_ASM("replay/replaycache", cReplay_endMarkInstantReplay);
 #ifdef SKIP_ASM
 extern "C" void cReplay_startInstantReplay(cReplay* self);
 
+/**
+ * Finishes marking an instant replay after a landing or wipeout (On Tour endMarkInstantReplay(const tRiderStats*
+ * stats, bool land)).
+ *
+ * Only when a mark is open (InstantReplayFrame) and exactly one player is allocated (cAI NumberOfPlayersAllocated, AI
+ * + 0x7C): compares a stats counter with its value when the mark began (InstantReplayStats), the int at +0x9C for a
+ * landing or +0xA4 for a wipeout. A gain of 1000 or more starts the instant replay; otherwise the mark is dropped
+ * (InstantReplayFrame = 0).
+ *
+ * @param obj  the rider's tRiderStats (declared int; On Tour stats)
+ * @param alt  non-zero for a landing, 0 for a wipeout (On Tour land)
+ */
 // PORT: the unit declares the object argument as int.
 extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int obj, int alt)
 {
@@ -436,6 +471,10 @@ extern "C" void cReplay_cancelMarkInstantReplay(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_startInstantReplay);
 #ifdef SKIP_ASM
+/**
+ * Requests an instant replay: sets StartInstantReplay unless one is already playing (InstantReplay). cReplay_update
+ * starts it.
+ */
 extern "C" void cReplay_startInstantReplay(cReplay* self)
 {
     if (self->InstantReplay == 0) {
@@ -450,6 +489,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_stopInstantReplay);
 extern "C" void cReplay_stopReplay(void* self);
 extern "C" void cRiderMetrix_resetHUDfx(void* p);
 
+/**
+ * Stops a playing instant replay: stopReplay, then resets the HUD effects of player 0's rider metrix
+ * (cRiderMetrix_resetHUDfx on Players[0] + 0x18, then + 0x790). Does nothing when no instant replay is playing.
+ */
 extern "C" void cReplay_stopInstantReplay(cReplay* self)
 {
     if (self->InstantReplay != 0) {
@@ -551,6 +594,16 @@ extern "C" void func_00270B88(cReplay* self, int slot, int id);
 // passes (self, id); bind the 2-arg call by asm label.
 void func_002705A8_2(void* self, int id) __asm__("func_002705A8__FPv");
 
+/**
+ * Records a rider's jump while recording (On Tour eventJump(int rider, const tRiderStats& stats)).
+ *
+ * Ignored during auto or instant replays, after ReplayError or EndReplay, or outside kGameRecording. Otherwise, for a
+ * rider that is a player (func_00270730, findPlayerId), begins a highlight mark for that player (func_00270B88) and
+ * an instant-replay mark (func_002705A8).
+ *
+ * @param key  the rider index (On Tour rider)
+ * @param id  the rider's tRiderStats (declared int; On Tour stats)
+ */
 extern "C" void cReplay_eventJump(cReplay* self, int key, int id)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
@@ -572,6 +625,16 @@ extern "C" int func_00270730(int id);
 extern "C" void func_00270CE8(cReplay* self, int slot, int id, int flag);
 extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int id, int flag);
 
+/**
+ * Records a rider's landing while recording (On Tour eventLand(int rider, const tRiderStats& stats)).
+ *
+ * Ignored during auto or instant replays or outside kGameRecording. For a player rider (findPlayerId) ends the
+ * highlight mark as a landing (func_00270CE8 with land 1) and ends the instant-replay mark
+ * (cReplay_endMarkInstantReplay with land 1).
+ *
+ * @param key  the rider index (On Tour rider)
+ * @param id  the rider's tRiderStats (declared int; On Tour stats)
+ */
 extern "C" void cReplay_eventLand(cReplay* self, int key, int id)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
@@ -592,6 +655,16 @@ extern "C" int func_00270730(int id);
 extern "C" void func_00270CE8(cReplay* self, int slot, int id, int flag);
 extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int id, int flag);
 
+/**
+ * Records a rider's wipeout while recording (On Tour eventWipeout(int rider, const tRiderStats& stats)).
+ *
+ * Ignored during auto or instant replays or outside kGameRecording. For a player rider (findPlayerId) ends the
+ * highlight mark as a wipeout (func_00270CE8 with land 0) and ends the instant-replay mark
+ * (cReplay_endMarkInstantReplay with land 0).
+ *
+ * @param key  the rider index (On Tour rider)
+ * @param id  the rider's tRiderStats (declared int; On Tour stats)
+ */
 extern "C" void cReplay_eventWipeout(cReplay* self, int key, int id)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
@@ -643,6 +716,17 @@ extern "C" void func_00270B88(cReplay* self, int slot, int id);
 // passes (self, id); bind the 2-arg call by asm label.
 void func_002705A8_2(void* self, int id) __asm__("func_002705A8__FPv");
 
+/**
+ * Handles a world-script replay command for a rider while recording (On Tour eventWScript(int rider, int cmd)).
+ *
+ * Ignored during auto or instant replays, after ReplayError or EndReplay, or outside kGameRecording. For a player
+ * rider (findPlayerId) it takes the rider's stats (its +0x790 object + 0xFC, from cAI Riders[rider]): command 0
+ * begins an instant-replay mark (func_002705A8), command 1 begins a highlight mark (func_00270B88); others are
+ * ignored.
+ *
+ * @param key  the rider index (On Tour rider)
+ * @param mode  the command, 0 or 1 (On Tour cmd)
+ */
 extern "C" void cReplay_eventWScript(cReplay* self, int key, int mode)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
@@ -738,6 +822,16 @@ struct sReplayCacheNode {
     int values[1];
 };
 
+/**
+ * Counts player @p i's highlight frames of one kind (On Tour countHighlights(int playerId, bool land)).
+ *
+ * Counts the frames whose highlight bits (+0x1E) include bit @p i and whose ranking for the player (+0x20 + i * 4) is
+ * positive (landings) or negative (wipeouts).
+ *
+ * @param i  the player index (On Tour playerId)
+ * @param positive  non-zero to count landings, 0 for wipeouts (On Tour land)
+ * @return the number of matching frames
+ */
 extern "C" int cReplay_countHighlights(cReplay* self, int i, int positive)
 {
     int count = 0;
@@ -759,6 +853,12 @@ extern "C" int cReplay_countHighlights(cReplay* self, int i, int positive)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_maxHighlights);
 #ifdef SKIP_ASM
+/**
+ * Returns how many highlights a player may keep of one kind: MaxPlayerHighlights for landings, 1 for wipeouts.
+ *
+ * @param land  non-zero for landings (On Tour land)
+ * @return the highlight limit
+ */
 extern "C" int cReplay_maxHighlights(cReplay* self, int land)
 {
     if (land != 0) {
@@ -780,6 +880,18 @@ struct sReplayCacheNode2 {
     int values[1];
 };
 
+/**
+ * Finds player @p i's weakest highlight of one kind, starting from @p best (On Tour compareHighlights(playerId,
+ * frame1, land)).
+ *
+ * Scans the frames marked for the player that are not chapters (+0x1F zero): for landings keeps the lowest positive
+ * ranking, for wipeouts the negative ranking closest to zero (ties go to the later frame).
+ *
+ * @param i  the player index (On Tour playerId)
+ * @param best  the frame to compare against (On Tour frame1)
+ * @param positive  non-zero for landings, 0 for wipeouts (On Tour land)
+ * @return @p best or a weaker matching frame
+ */
 extern "C" sReplayCacheNode2* cReplay_compareHighlights(cReplay* self, int i, sReplayCacheNode2* best, int positive)
 {
     sReplayCacheNode2* result = best;
@@ -864,6 +976,9 @@ extern "C" void cReplay_cancelMarkHighlight(cReplay* self, int i)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_cancelMarkHighlights);
 #ifdef SKIP_ASM
+/**
+ * Cancels both players' open highlight marks (func_0026E800 on Highlight[0] and [1]) while recording (State 0).
+ */
 extern "C" void cReplay_cancelMarkHighlights(cReplay* self)
 {
     if (self->State == 0) {
@@ -879,6 +994,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_initSave);
 #ifdef SKIP_ASM
 extern "C" void cReplay_allocSaveSpace(cReplay* self);
 
+/**
+ * Prepares the replay for saving: allocates the save buffers (allocSaveSpace), clears every writer field and seeds
+ * WriteCheckSum (Size 0, CheckSum 0xDEADBEEF).
+ */
 extern "C" void cReplay_initSave(cReplay* self)
 {
     cReplay_allocSaveSpace(self);
@@ -940,6 +1059,10 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern const char str_WriteBlock[];
 extern const char str_WriteTmp[];
 
+/**
+ * Allocates the save buffers: WriteBlock, a 0x4000-byte memory-card block (cMemMan_alloc, tag str_WriteBlock
+ * "WriteBlock"), and WriteTmp, a 0xC800-byte staging buffer (operator_new_tag, tag str_WriteTmp "WriteTmp").
+ */
 extern "C" void cReplay_allocSaveSpace(cReplay* self)
 {
     self->WriteBlock = (tReplayMemCardBlock*)cMemMan_alloc(0x4000, str_WriteBlock, 0x20000000, 0);
@@ -953,6 +1076,14 @@ INCLUDE_ASM("replay/replaycache", cReplay_purgeSaveSpace);
 void cMemMan_free(void* p);
 void operator_delete(int* p);
 
+/**
+ * Frees the save buffers and clears WriteBlock and WriteTmp.
+ *
+ * WriteBlock (from cMemMan_alloc) goes to operator_delete and WriteTmp (from operator_new_tag) to cMemMan_free: each
+ * is released by the other allocator's partner.
+ *
+ * @return nothing meaningful (declared void*; the unit's tail-call wrapper func_00270ED8 uses this declaration)
+ */
 // The unit declares this as returning void* (line ~198, used by the tail-call
 // wrapper func_00270ED8); nothing meaningful is returned.
 extern "C" void* cReplay_purgeSaveSpace(cReplay* self)
@@ -980,6 +1111,10 @@ struct sRcStream0FC0 {
     char* dst;      // 0x650
 };
 
+/**
+ * Copies as much pending save data (WriteSrc, WriteSrcSize bytes) as fits into the rest of the 0x4000-byte
+ * WriteBlock, advancing WriteData, WriteSrc and WriteSize.
+ */
 extern "C" void cReplay_writeBuffered(cReplay* self)
 {
     if (self->WriteSrc != 0) {
@@ -1001,6 +1136,13 @@ extern "C" void cReplay_writeBuffered(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_writeSetup);
 #ifdef SKIP_ASM
+/**
+ * Queues @p size bytes of @p data for saving: adds the size to WriteCheckSum.Size and WriteSaveSize and every
+ * (signed) byte to WriteCheckSum.CheckSum, then points WriteSrc / WriteSrcSize at it.
+ *
+ * @param data  the bytes to save
+ * @param size  how many bytes
+ */
 extern "C" void cReplay_writeSetup(cReplay* self, signed char* data, int size)
 {
     self->WriteCheckSum.Size += size;
@@ -1031,6 +1173,18 @@ void* cReplay_writeCheckSumStart(void* self);
 extern "C" void cReplay_writeCheckSum(cReplay* self);
 
 
+/**
+ * Produces the next block of the replay save (On Tour getSaveData(tReplayMemCardBlock** data, int& size)).
+ *
+ * Unless the writer is done (WriteState 11), fills WriteBlock from its start: copies pending data (writeBuffered) and
+ * runs the writer step for WriteState (0 header start, 1 header, 2 frames start, 3 frames, 4 input start, 5 input, 6
+ * pad start, 7 pad, 8 checksum start, 9 checksum, 10 finish) until the 0x4000-byte block is full or the writer is
+ * done.
+ *
+ * @param block  receives WriteBlock
+ * @param size  receives the bytes in the block (0 when done)
+ * @return 1 when a block was produced, 0 when the save is complete
+ */
 // Runs the replay-cache writer state machine until the 16 KB block is full or the stream is done (state 11);
 // returns the block and its size, or 0 if there was nothing to write.
 extern "C" int cReplay_getSaveData(cReplay* self, char** block, int* size)
@@ -1087,6 +1241,13 @@ struct sReplayHdr_1228 {
     int data[2]; // 0x20
 };
 
+/**
+ * Builds the 0x28-byte save header in WriteTmp and advances WriteState.
+ *
+ * Header: magic 0xABCD0002, the frame count (writeFrameCount), SaveFrameTicks, ReplayError, RecordTick,
+ * EndRecordTick, the number of players (cAI NumberOfPlayersAllocated) and at +0x20 the podium actor list
+ * (cAI_getPodiumActorList). The word at +0x1C is not written, so it keeps whatever WriteTmp held.
+ */
 extern "C" void cReplay_writeHeaderStart(cReplay* self)
 {
     sReplayHdr_1228* hdr = (sReplayHdr_1228*)self->WriteTmp;
@@ -1109,6 +1270,9 @@ extern "C" void cReplay_writeHeaderStart(cReplay* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cReplay_writeHeader);
 #ifdef SKIP_ASM
+/**
+ * Queues the 0x28-byte header from WriteTmp (writeSetup) and advances WriteState.
+ */
 extern "C" void cReplay_writeHeader(cReplay* self)
 {
     cReplay_writeSetup(self, (signed char*)self->WriteTmp, 0x28);
@@ -1125,6 +1289,15 @@ struct sCacheNode {
 };
 
 
+/**
+ * Counts the recorded frames that will be saved: walks FrameList from the oldest frame, leaving out SaveFrame. Leaves
+ * WriteFrame null.
+ *
+ * When it meets SaveFrame it skips it and then steps once more without counting, so the frame after SaveFrame is not
+ * counted either; the count is only right when SaveFrame is the newest frame (or absent).
+ *
+ * @return the number of frames
+ */
 extern "C" int cReplay_writeFrameCount(cReplay* self)
 {
     int count = 0;
@@ -1146,6 +1319,10 @@ extern "C" int cReplay_writeFrameCount(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_writeFramesStart);
 #ifdef SKIP_ASM
+/**
+ * Starts writing frames: WriteFrame = the oldest recorded frame (or the next one when the oldest is SaveFrame),
+ * clears WriteBlockData, WriteSrc, WriteSrcSize and WriteFrameCount, and advances WriteState.
+ */
 extern "C" void cReplay_writeFramesStart(cReplay* self)
 {
     void* p = *(void**)&self->FrameList;
@@ -1231,6 +1408,10 @@ extern "C" void func_00271380(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_writeInputStart);
 #ifdef SKIP_ASM
+/**
+ * Starts writing the input caches: WriteIndexMax = 2 (the InputCache count), WriteIndex 0, no pending cache header or
+ * command data, and advances WriteState.
+ */
 extern "C" void cReplay_writeInputStart(cReplay* self)
 {
     self->WriteIndexMax = 2;
@@ -1320,6 +1501,10 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBE_getBE();
 extern "C" int func_0014E048(void* be);
 
+/**
+ * Starts the padding: clears WriteTmp and sets WriteRemaining so the save fills 0x7FFF8 bytes (minus the BE data size
+ * from cBE::getDataSize and WriteSaveSize); advances WriteState. With the 8-byte checksum that makes 512 KB.
+ */
 extern "C" void cReplay_writePadStart(cReplay* self)
 {
     MEM_fill(self->WriteTmp, 0, 0xC800);
@@ -1332,6 +1517,10 @@ extern "C" void cReplay_writePadStart(cReplay* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cReplay_writePad);
 #ifdef SKIP_ASM
+/**
+ * Queues up to 0x4000 zero bytes of padding from WriteTmp per call until WriteRemaining is used up, then advances
+ * WriteState.
+ */
 extern "C" void cReplay_writePad(cReplay* self)
 {
     int left = self->WriteRemaining;
@@ -1348,6 +1537,11 @@ extern "C" void cReplay_writePad(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_writeCheckSumStart__FPv);
 #ifdef SKIP_ASM
+/**
+ * Starts the checksum step: advances WriteState and clears WriteSrc / WriteSrcSize.
+ *
+ * @return the new WriteState (declared void*)
+ */
 void* cReplay_writeCheckSumStart(void* self)
 {
     int t0 = 0;
@@ -1365,6 +1559,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_writeCheckSum);
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void cReplay_writeSetup(cReplay* self, signed char* data, int size);
 
+/**
+ * Queues the 8-byte WriteCheckSum (Size, CheckSum) from a copy in WriteTmp and advances WriteState. writeSetup adds
+ * the copied bytes to the checksum afterwards, which does not change the bytes already copied.
+ */
 extern "C" void cReplay_writeCheckSum(cReplay* self)
 {
     MEM_copy(self->WriteTmp, (char*)self + 0x680, 8);
@@ -2158,6 +2356,16 @@ struct sRcNode272938 {
 };
 
 
+/**
+ * Readies a script player for a script (On Tour ReadyPlayer(const char* pScriptData)).
+ *
+ * Pops the first node of the unused list (mpScriptUnused), initialises its cScriptPlayerMain with the script, the
+ * sequencer and the node's id (func_002745C0, cScriptPlayerMain::Init) and pushes it on the used list (mpScriptUsed).
+ * There is no check for an empty unused list.
+ *
+ * @param src  the script data (On Tour pScriptData)
+ * @return the readied player's id
+ */
 extern "C" int cInSeq_ReadyPlayer(cInSeq* self, void* src)
 {
     sRcNode272938* n = ((sRcNode272938*)self->mpScriptUnused);
@@ -3971,14 +4179,14 @@ public:
  * they raise. With an entity comm interface it then calls OnInSeqKeyEvent (slot 3, only when bits were
  * raised) and OnInSeqUpdate (slot 4) with the frame, the step and the entity type.
  *
- * @param p             the entity player (this)
+ * @param entity             the entity player (this)
  * @param currFrameNum  script frame to update to
  * @param dt            frame step since the last update (On Tour frameDelta)
  * @return nonzero while any channel is still playing (its Update returned true)
  */
-extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* p, float currFrameNum, float dt)
+extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* entity, float currFrameNum, float dt)
 {
-    cScriptPlayerEntity* self = p;
+    cScriptPlayerEntity* self = entity;
     int flags = 0;
     bool any = false;
     for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {

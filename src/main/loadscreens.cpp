@@ -752,7 +752,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     case 3: {
         cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
         void* player = cBE_getInterface_B1B0(D_004A28A8_b4->be, 1);
-        int v = func_00145C38(player, 0);
+        int firstTimeOnTrack = func_00145C38(player, 0);
         if (D_00535C11[0] != 0) {
             break;
         }
@@ -760,12 +760,12 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             return;
         }
         if (dir == 3) {
-            v = 1;
+            firstTimeOnTrack = 1;
         } else if (dir == 2) {
-            v = 0;
+            firstTimeOnTrack = 0;
         }
-        func_00145CB0(player, 0, v);
-        func_00145DD0(player, v, 0, 14);
+        func_00145CB0(player, 0, firstTimeOnTrack);
+        func_00145DD0(player, firstTimeOnTrack, 0, 14);
         update_B4E0(player);
         break;
     }

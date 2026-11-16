@@ -1945,45 +1945,45 @@ extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int) __asm__("gGenT
  * There is no check on the output's length; the third argument is unused.
  *
  * @param out  receives the name
- * @param t  the trick descriptor
+ * @param nameDef  the trick descriptor
  */
-extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int)
+extern "C" void gGenTrickName_desc(char* out, sTrickDesc* nameDef, int)
 {
-    const char* p;
-    p = D_0043D118[t->f0];
-    while (*p) *out++ = *p++;
-    p = D_0043D130[t->f3];
-    while (*p) *out++ = *p++;
-    p = D_0043CF40[t->f7];
-    while (*p) *out++ = *p++;
-    p = D_0043CF60[t->f10];
-    while (*p) *out++ = *p++;
-    p = D_0043CF70[t->f12];
-    while (*p) *out++ = *p++;
-    p = D_0043CFB0[t->f16];
-    while (*p) *out++ = *p++;
-    p = D_0043CFC8[t->f19];
-    while (*p) *out++ = *p++;
-    p = D_0043CFE0[t->f22];
-    while (*p) *out++ = *p++;
-    p = D_0043D0C0[t->f28];
-    while (*p) *out++ = *p++;
-    p = ((char**)D_0043D160)[t->f35];
-    while (*p) *out++ = *p++;
-    p = D_004A0FF0[t->f42];
-    while (*p) *out++ = *p++;
-    p = ((char**)D_0043D160)[t->f43];
-    while (*p) *out++ = *p++;
-    p = D_0043D2B8[t->f32];
-    while (*p) *out++ = *p++;
-    p = D_0043D2D0[t->f50];
-    while (*p) *out++ = *p++;
-    p = D_0043D2E0[t->f52];
-    while (*p) *out++ = *p++;
-    p = D_0043D100[t->f56];
-    while (*p) *out++ = *p++;
-    p = D_0043D320[t->f59];
-    while (*p) *out++ = *p++;
+    const char* part;
+    part = D_0043D118[nameDef->f0];
+    while (*part) *out++ = *part++;
+    part = D_0043D130[nameDef->f3];
+    while (*part) *out++ = *part++;
+    part = D_0043CF40[nameDef->f7];
+    while (*part) *out++ = *part++;
+    part = D_0043CF60[nameDef->f10];
+    while (*part) *out++ = *part++;
+    part = D_0043CF70[nameDef->f12];
+    while (*part) *out++ = *part++;
+    part = D_0043CFB0[nameDef->f16];
+    while (*part) *out++ = *part++;
+    part = D_0043CFC8[nameDef->f19];
+    while (*part) *out++ = *part++;
+    part = D_0043CFE0[nameDef->f22];
+    while (*part) *out++ = *part++;
+    part = D_0043D0C0[nameDef->f28];
+    while (*part) *out++ = *part++;
+    part = ((char**)D_0043D160)[nameDef->f35];
+    while (*part) *out++ = *part++;
+    part = D_004A0FF0[nameDef->f42];
+    while (*part) *out++ = *part++;
+    part = ((char**)D_0043D160)[nameDef->f43];
+    while (*part) *out++ = *part++;
+    part = D_0043D2B8[nameDef->f32];
+    while (*part) *out++ = *part++;
+    part = D_0043D2D0[nameDef->f50];
+    while (*part) *out++ = *part++;
+    part = D_0043D2E0[nameDef->f52];
+    while (*part) *out++ = *part++;
+    part = D_0043D100[nameDef->f56];
+    while (*part) *out++ = *part++;
+    part = D_0043D320[nameDef->f59];
+    while (*part) *out++ = *part++;
     *out = 0;
 }
 #endif

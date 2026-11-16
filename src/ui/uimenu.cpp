@@ -578,9 +578,9 @@ extern "C" void cUIPair_setActive(cUIPair_setActive_s* self, int on)
 {
     self->b1 = (on != 0);
     self->a->v04(on);
-    cUIPair_setActive_cVirt* b = self->b;
-    if (b != 0) {
-        b->v04(on);
+    cUIPair_setActive_cVirt* widget = self->b;
+    if (widget != 0) {
+        widget->v04(on);
     }
 }
 #endif
@@ -1034,15 +1034,15 @@ struct cUIProgress__cUIProgress_sVEntry {
 extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
 {
     self->mVtbl = cUIProgress_vtbl;
-    void* a = self->mpObjBackground;
-    if (a != 0) {
-        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)a + 8);
-        vt[1].fn((char*)a + vt[1].delta, 3);
+    void* background = self->mpObjBackground;
+    if (background != 0) {
+        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)background + 8);
+        vt[1].fn((char*)background + vt[1].delta, 3);
     }
-    void* b = self->mpObjKnob;
-    if (b != 0) {
-        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)b + 8);
-        vt[1].fn((char*)b + vt[1].delta, 3);
+    void* knob = self->mpObjKnob;
+    if (knob != 0) {
+        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)knob + 8);
+        vt[1].fn((char*)knob + vt[1].delta, 3);
     }
     cUIThing__cUIThing(self, flags);
 }
@@ -1169,6 +1169,15 @@ public:
     virtual void v21(cUIProgress_setValue_sVec3*);
 };
 
+/**
+ * Sets the progress value and resizes the knob to match (On Tour setValue(int value)).
+ *
+ * Stores mValue, takes the background's size (virtual slot 20, getSize; zero without a background) and, when there is
+ * a knob and mNumValues is non-zero, scales the width (horizontal, mAttr bit 0 clear) or the height (vertical) by
+ * mValue / mNumValues and gives it to the knob (slot 21, setSize). The value is not clamped.
+ *
+ * @param pos  the new value (On Tour value)
+ */
 extern "C" void cUIProgress_setValue(cUIProgress* self, int pos)
 {
     self->mValue = pos;

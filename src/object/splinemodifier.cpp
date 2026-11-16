@@ -357,7 +357,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
     sSmM44_9830 rotMat;
     sSmM44_9830 copyMat;
     sSmM44_9830 product;
-    sSmM44_9830* m = &self->mat;
+    sSmM44_9830* rootMat = &self->mat;
     float sc[4][2];
     func_0031BE50(&sc[0][0], &sc[0][1], rot.x);
     func_0031BE50(&sc[1][0], &sc[1][1], rot.y);
@@ -389,35 +389,35 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
     self->mat.m[3][3] = 1.0f;
     char* sub = (char*)self + 0x10;
     if (self->angle != 0.0f) {
-        const sSmV3_9830* a = &D_004FF160;
+        const sSmV3_9830* axis = &D_004FF160;
         func_0031BE50(&sc[3][0], &sc[3][1], *(float*)(sub + 0x28));
         float k = 1.0f - sc[3][1];
-        float kx = k * a->x;
-        float ky = k * a->y;
-        float kz = k * a->z;
-        float sX = sc[3][0] * a->x;
-        float sY = sc[3][0] * a->y;
-        float sZ = sc[3][0] * a->z;
-        rotMat.m[0][0] = kx * a->x + sc[3][1];
-        rotMat.m[1][0] = kx * a->y + sZ;
-        rotMat.m[2][0] = kx * a->z - sY;
+        float kx = k * axis->x;
+        float ky = k * axis->y;
+        float kz = k * axis->z;
+        float sX = sc[3][0] * axis->x;
+        float sY = sc[3][0] * axis->y;
+        float sZ = sc[3][0] * axis->z;
+        rotMat.m[0][0] = kx * axis->x + sc[3][1];
+        rotMat.m[1][0] = kx * axis->y + sZ;
+        rotMat.m[2][0] = kx * axis->z - sY;
         rotMat.m[3][0] = 0.0f;
-        rotMat.m[0][1] = ky * a->x - sZ;
-        rotMat.m[1][1] = ky * a->y + sc[3][1];
-        rotMat.m[2][1] = ky * a->z + sX;
+        rotMat.m[0][1] = ky * axis->x - sZ;
+        rotMat.m[1][1] = ky * axis->y + sc[3][1];
+        rotMat.m[2][1] = ky * axis->z + sX;
         rotMat.m[3][1] = 0.0f;
-        rotMat.m[0][2] = kz * a->x + sY;
-        rotMat.m[1][2] = kz * a->y - sX;
-        rotMat.m[2][2] = kz * a->z + sc[3][1];
+        rotMat.m[0][2] = kz * axis->x + sY;
+        rotMat.m[1][2] = kz * axis->y - sX;
+        rotMat.m[2][2] = kz * axis->z + sc[3][1];
         rotMat.m[3][2] = 0.0f;
         rotMat.m[0][3] = 0.0f;
         rotMat.m[1][3] = 0.0f;
         rotMat.m[2][3] = 0.0f;
         rotMat.m[3][3] = 1.0f;
         sSmM44_9830* tp = &copyMat;
-        vu0MulMat_9830(&product, m, &rotMat);
+        vu0MulMat_9830(&product, rootMat, &rotMat);
         vu0CopyMat_9830(tp, &product);
-        vu0CopyMat_9830(m, tp);
+        vu0CopyMat_9830(rootMat, tp);
     }
     self->dirty = 0;
 }
@@ -633,8 +633,8 @@ extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBo
     w.y = rateY * self->Velocity;
     w.w = 0.0f;
     w = vu0MulMat_9CF8(&(*(sSmMat_9CF8*)&self->Transform), w);
-    sSmVec4_9CF8 d = vu0Sub_9CF8(body->pos, (*(sSmVec4_9CF8*)&self->Pos));
-    vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(d, w)));
+    sSmVec4_9CF8 relPos = vu0Sub_9CF8(body->pos, (*(sSmVec4_9CF8*)&self->Pos));
+    vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
     vu0AddTo_9CF8(body->rot, w);
 }
 #endif
@@ -996,11 +996,11 @@ struct sMultiSplineA458 {
  * Copy 0 gets the model record's first 0xA0 bytes but keeps its own word at +0x78; the other copies go
  * through cInstanceMan_copyInstance() and then have flag 0x40 cleared, 0x20 set and 0x100 cleared.
  *
- * @param p  the multi-spline modifier (this)
+ * @param multiSpline  the multi-spline modifier (this)
  */
-extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* p)
+extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* multiSpline)
 {
-    sMultiSplineA458* self = (sMultiSplineA458*)p;
+    sMultiSplineA458* self = (sMultiSplineA458*)multiSpline;
     int i;
     int keep = self->insts[0]->field_0x78;
     MEM_copy(self->insts[0], self->tmpl, 0xA0);
@@ -1841,12 +1841,12 @@ struct cMultiSplineModifier_AC20 {
  * or 3 adds yaw and 1 or 3 pitch; with the position this forms the copy's record matrix (+0x10), turned by
  * HeadTweak (+0xC) about the up axis when nonzero. Clears RootTransformDirty (+0x30).
  *
- * @param p  the multi-spline modifier (this)
+ * @param multiSpline  the multi-spline modifier (this)
  * @return no meaningful value (the C body has no return statement; On Tour's updateNodes returns void)
  */
-extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* p)
+extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpline)
 {
-    cMultiSplineModifier_AC20* self = (cMultiSplineModifier_AC20*)p;
+    cMultiSplineModifier_AC20* self = (cMultiSplineModifier_AC20*)multiSpline;
     float offsets[256];
     sSmMat_AC20 rot;
     sSmVec4_AC20 ang;
@@ -1887,7 +1887,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* p)
         sSplineInst_AC20* node = self->insts[i];
         float sx, cx, sy, cy, sz, cz;
         func_0031BE50(&sx, &cx, ang.x);
-        sSmMat_AC20* m = &node->mat;
+        sSmMat_AC20* nodeMat = &node->mat;
         func_0031BE50(&sy, &cy, ang.y);
         func_0031BE50(&sz, &cz, ang.z);
         float sxsy = sx * sy;
@@ -1909,7 +1909,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* p)
         node->mat.r[3].z = pt->pos.z;
         node->mat.r[3].w = 1.0f;
         if (self->angle != 0.0f) {
-            *m = mulMat_AC20(*m, rot);
+            *nodeMat = mulMat_AC20(*nodeMat, rot);
         }
     }
     self->dirty = 0;
@@ -2681,19 +2681,19 @@ extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
     self->mVtbl = (void**)cRailModifier_vtbl;
     remove_BD70((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BD70*)(((char*)self) + 0x10));
     operator_delete((int*)self->Node);
-    sSmTrack_BD70* t = ((sSmRef_BD70*)(((char*)self) + 0x30))->get();
-    sSmSeg_BD70* seg = t->first;
-    for (int i = 0; i < t->count; i++) {
-        sSmBox_BD70 b;
-        b.min.x = seg->minx;
-        b.min.y = seg->miny;
-        b.min.z = seg->minz;
-        b.min.w = 1.0f;
-        b.max.x = seg->maxx;
-        b.max.y = seg->maxy;
-        b.max.z = seg->maxz;
-        b.max.w = 1.0f;
-        insert_BD70((char*)cObjectInterface_getNash(), seg, &b);
+    sSmTrack_BD70* spline = ((sSmRef_BD70*)(((char*)self) + 0x30))->get();
+    sSmSeg_BD70* seg = spline->first;
+    for (int i = 0; i < spline->count; i++) {
+        sSmBox_BD70 segBox;
+        segBox.min.x = seg->minx;
+        segBox.min.y = seg->miny;
+        segBox.min.z = seg->minz;
+        segBox.min.w = 1.0f;
+        segBox.max.x = seg->maxx;
+        segBox.max.y = seg->maxy;
+        segBox.max.z = seg->maxz;
+        segBox.max.w = 1.0f;
+        insert_BD70((char*)cObjectInterface_getNash(), seg, &segBox);
         seg = seg->next;
     }
     self->mVtbl = (void**)cRailLink_vtbl;

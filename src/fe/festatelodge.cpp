@@ -205,9 +205,9 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
     cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut_b)), 1);
     char* obj = **(char***)(self + 0x10);
     sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
-    void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
-    if (r != 0) {
-        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+    void* nextState = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
+    if (nextState != 0) {
+        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
     }
 }
 #endif
@@ -679,18 +679,18 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
         cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut_b)), 1);
         char* obj = **(char***)(self + 0x10);
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
-        void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
-        if (r != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         }
         break;
     }
     case 6: {
         char* obj = **(char***)(self + 0x10);
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
-        void* r = vt[5].fn(obj + vt[5].delta, self, 0);
-        if (r != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn(obj + vt[5].delta, self, 0);
+        if (nextState != 0) {
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         }
         break;
     }

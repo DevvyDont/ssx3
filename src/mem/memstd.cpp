@@ -98,23 +98,23 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     *(sMemNode_251718**)(mem + 0x34) = head;
     *(int*)(mem + 0x48) = 0;
     sMemNode_251718* nextNode = head;
-    sMemNode_251718* p = nextNode;
+    sMemNode_251718* prevNode = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
     if (*(char**)(mem + 0x30) + (*(char**)(mem + 0x34) - *(char**)(mem + 0x30)) / 2 < (char*)blk) {
         do
-            p = p->prev;
-        while (blk < p);
-        nextNode = p->next;
+            prevNode = prevNode->prev;
+        while (blk < prevNode);
+        nextNode = prevNode->next;
     } else {
         do
             nextNode = nextNode->next;
         while (nextNode < blk);
-        p = nextNode->prev;
+        prevNode = nextNode->prev;
     }
     blk->size = sz;
     blk->next = nextNode;
-    blk->prev = p;
-    p->next = blk;
+    blk->prev = prevNode;
+    prevNode->next = blk;
     nextNode->prev = blk;
     blk->tag = 0x4246;
     blk->flags |= 0x4000;
@@ -578,9 +578,9 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
         char* blockName = (char*)func_00252658(data);
         if (blockName == 0)
             blockName = D_004A2E58;
-        char* n2 = (char*)func_00252660(data);
-        if (n2 == 0)
-            n2 = D_004A2E58;
+        char* comment = (char*)func_00252660(data);
+        if (comment == 0)
+            comment = D_004A2E58;
         if (blk->flags & 0x4000) {
             int sz = blk->size;
             if (sz > 0x10 && !(blk->flags & 0x8000))
@@ -594,7 +594,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
             if (sz != 0 && !(blk->flags & 0x8000))
                 crc = func_003E62D0(data, sz, 0xFBEA);
             int st = func_002522B0((sMemBlock002522B0*)blk);
-            cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], n2);
+            cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], comment);
         }
         cb(D_004A2E70);
     }

@@ -177,7 +177,7 @@ extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
 {
     int old = self->count;
     float one;
-    sWakeColDCF28 c;
+    sWakeColDCF28 white;
     int i;
     if (*(int*)(self->obj + 0x870) >= 0) {
         self->count = 5;
@@ -189,11 +189,11 @@ extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
         self->fBC = 0.800000011920929f;
     }
     one = 1.0f;
-    c.r = one;
-    c.g = one;
-    c.b = one;
-    c.a = one;
-    self->col = c;
+    white.r = one;
+    white.g = one;
+    white.b = one;
+    white.a = one;
+    self->col = white;
     self->f38 = 0;
     self->f4 = 0;
     self->f8 = 0;
@@ -202,11 +202,11 @@ extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
     func_002DE368(self->sub60);
     if (old != self->count) {
         for (i = 0; i < 5; i++) {
-            float t = 0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->count - 1));
+            float heightFactor = 0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->count - 1));
             int j;
             for (j = 0; j < 32; j++) {
                 self->elems[i][j].a = 0;
-                self->elems[i][j].b = t;
+                self->elems[i][j].b = heightFactor;
                 self->elems[i][j].c = 1.0f;
                 self->elems[i][j].d = 0;
             }
@@ -514,16 +514,16 @@ done:
         wakeScaleD0B8(wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->rider, 2), 15.0f), lean < 0.0f ? -1.0f : 1.0f), sign));
     t4Vector dirn = wakeNormD0B8(self->rider->mVelocity);
     float bal = (wakeAbsD0B8(wakeDotD0B8(self->rider->mGroundSide, dirn)) * 0.8f + amt * 0.5f) <? 1.0f;
-    float a = wakeClampD0B8(bal + bal, 0.0f, 0.25f);
-    float b = 0.0f;
+    float baseStrength = wakeClampD0B8(bal + bal, 0.0f, 0.25f);
+    float speedBonus = 0.0f;
     if (555.5555419921875f < speed) {
-        b = wakeClampD0B8((bal - 0.25f) * 2.7f, 0.0f, 0.35f);
+        speedBonus = wakeClampD0B8((bal - 0.25f) * 2.7f, 0.0f, 0.35f);
     }
     float width = 0.0f;
     if (surf->i84 != 0 && 1111.111083984375f < speed) {
         width = wakeClampD0B8((bal - 0.54f) * 35.0f, 0.0f, 4.5f);
     }
-    curParams.strength = speed * (a + b) * surf->f4C;
+    curParams.strength = speed * (baseStrength + speedBonus) * surf->f4C;
     int ok = 1;
     if (func_0011FE98(self->rider) != 0 || wakeAbsD0B8(self->rider->mSlewed[11].cur) > 0.15f ||
         wakeMinStrengthD0B8() > curParams.strength || amt < 0.15f || curParams.grip < 0.05f) {
@@ -3948,8 +3948,8 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
     }
     {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sBWVEntry2E18* e = &(*(sBWVEntry2E18**)(obj + 0x10D8))[117];
-        e->fn(obj + e->delta, (void*)func_002E3110, self);
+        sBWVEntry2E18* setPhase2Slot = &(*(sBWVEntry2E18**)(obj + 0x10D8))[117];
+        setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)func_002E3110, self);
     }
     D_004A3B18 = 1;
     return self;
@@ -4032,8 +4032,8 @@ extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
 {
     char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
     *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
-    sBWVEntry2* e = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
-    e->fn(obj + e->delta, 0, 0);
+    sBWVEntry2* setPhase2Slot = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
+    setPhase2Slot->fn(obj + setPhase2Slot->delta, 0, 0);
     D_004A3B18 = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4487,9 +4487,9 @@ struct sWkCol39D8 {
  */
 extern "C" void cPlayerIndicatorFX_update(sWkCol39D8* self)
 {
-    char* o = self->rider + 0x6C0;
-    sWkVt39D8* vt = *(sWkVt39D8**)o;
-    if (vt[8].fn(o + vt[8].delta) == 0) return;
+    char* riderVptr = self->rider + 0x6C0;
+    sWkVt39D8* vt = *(sWkVt39D8**)riderVptr;
+    if (vt[8].fn(riderVptr + vt[8].delta) == 0) return;
     float half = 0.5f;
     float newPhase = self->phase + D_004A55AC * 0.01666666753590107f;
     float turns = newPhase * 0.15915493667125702f + half;
@@ -4499,12 +4499,12 @@ extern "C" void cPlayerIndicatorFX_update(sWkCol39D8* self)
     if (turns < wholeTurns) wholeTurns -= 1.0f;
     float wrapped = newPhase - wholeTurns * 6.2831854820251465f;
     self->phase = wrapped;
-    float s = func_0031C040(wrapped) * half + half;
-    float u = 1.0f - s;
-    self->out[0] = s * self->a[0] + u * self->b[0];
-    self->out[1] = s * self->a[1] + u * self->b[1];
-    self->out[2] = s * self->a[2] + u * self->b[2];
-    self->out[3] = s * self->a[3] + u * self->b[3];
+    float blend = func_0031C040(wrapped) * half + half;
+    float invBlend = 1.0f - blend;
+    self->out[0] = blend * self->a[0] + invBlend * self->b[0];
+    self->out[1] = blend * self->a[1] + invBlend * self->b[1];
+    self->out[2] = blend * self->a[2] + invBlend * self->b[2];
+    self->out[3] = blend * self->a[3] + invBlend * self->b[3];
 }
 #endif
 
@@ -4755,104 +4755,104 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     t4Vector pos = *(t4Vector*)((char*)self->rider->mAnimModel->unk_030 + (self->rider->mBoneHead << 6) + 0x30);
     const t4Vector* base = &pos;
     t4Vector beamTip = Add_3AF8(*base, Scale_3AF8(up, 20260.0f));
-    t4Vector p1 = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
-    t4Vector p2 = Add_3AF8(*base, Scale_3AF8(up, 130.0f));
+    t4Vector beamUpper = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
+    t4Vector beamLower = Add_3AF8(*base, Scale_3AF8(up, 130.0f));
     t4Vector off = Scale_3AF8(side, 85.0f);
     sWkColor_3AF8 fade;
     fade.a = 0.0f;
     fade.r = self->color.r;
     fade.g = self->color.g;
     fade.b = self->color.b;
-    sVtx_3AF8 v[8];
+    sVtx_3AF8 verts[8];
     {
-        t4Vector p = Sub_3AF8(*base, off);
-        v[0].r = (int)(fade.r * 255.0f);
-        v[0].g = (int)(fade.g * 255.0f);
-        v[0].b = (int)(fade.b * 255.0f);
-        v[0].a = (int)(fade.a * 128.0f);
-        v[0].q = 1.0f;
-        v[0].pos = p;
-        v[0].s = 0.0f;
-        v[0].t = 1.0f;
+        t4Vector vertPos = Sub_3AF8(*base, off);
+        verts[0].r = (int)(fade.r * 255.0f);
+        verts[0].g = (int)(fade.g * 255.0f);
+        verts[0].b = (int)(fade.b * 255.0f);
+        verts[0].a = (int)(fade.a * 128.0f);
+        verts[0].q = 1.0f;
+        verts[0].pos = vertPos;
+        verts[0].s = 0.0f;
+        verts[0].t = 1.0f;
     }
     {
-        t4Vector p = Add_3AF8(*base, off);
-        v[1].r = (int)(fade.r * 255.0f);
-        v[1].g = (int)(fade.g * 255.0f);
-        v[1].b = (int)(fade.b * 255.0f);
-        v[1].a = (int)(fade.a * 128.0f);
-        v[1].q = 1.0f;
-        v[1].pos = p;
-        v[1].s = 1.0f;
-        v[1].t = 1.0f;
+        t4Vector vertPos = Add_3AF8(*base, off);
+        verts[1].r = (int)(fade.r * 255.0f);
+        verts[1].g = (int)(fade.g * 255.0f);
+        verts[1].b = (int)(fade.b * 255.0f);
+        verts[1].a = (int)(fade.a * 128.0f);
+        verts[1].q = 1.0f;
+        verts[1].pos = vertPos;
+        verts[1].s = 1.0f;
+        verts[1].t = 1.0f;
     }
     {
-        t4Vector p = Sub_3AF8(p2, off);
-        v[2].r = (int)(self->color.r * 255.0f);
-        v[2].g = (int)(self->color.g * 255.0f);
-        v[2].b = (int)(self->color.b * 255.0f);
-        v[2].a = (int)(self->color.a * 128.0f);
-        v[2].q = 1.0f;
-        v[2].pos = p;
-        v[2].s = 0.0f;
-        v[2].t = 0.0f;
+        t4Vector vertPos = Sub_3AF8(beamLower, off);
+        verts[2].r = (int)(self->color.r * 255.0f);
+        verts[2].g = (int)(self->color.g * 255.0f);
+        verts[2].b = (int)(self->color.b * 255.0f);
+        verts[2].a = (int)(self->color.a * 128.0f);
+        verts[2].q = 1.0f;
+        verts[2].pos = vertPos;
+        verts[2].s = 0.0f;
+        verts[2].t = 0.0f;
     }
     {
-        t4Vector p = Add_3AF8(p2, off);
-        v[3].r = (int)(self->color.r * 255.0f);
-        v[3].g = (int)(self->color.g * 255.0f);
-        v[3].b = (int)(self->color.b * 255.0f);
-        v[3].a = (int)(self->color.a * 128.0f);
-        v[3].q = 1.0f;
-        v[3].pos = p;
-        v[3].s = 1.0f;
-        v[3].t = 0.0f;
+        t4Vector vertPos = Add_3AF8(beamLower, off);
+        verts[3].r = (int)(self->color.r * 255.0f);
+        verts[3].g = (int)(self->color.g * 255.0f);
+        verts[3].b = (int)(self->color.b * 255.0f);
+        verts[3].a = (int)(self->color.a * 128.0f);
+        verts[3].q = 1.0f;
+        verts[3].pos = vertPos;
+        verts[3].s = 1.0f;
+        verts[3].t = 0.0f;
     }
     {
-        t4Vector p = Sub_3AF8(p1, off);
-        v[4].r = (int)(self->color.r * 255.0f);
-        v[4].g = (int)(self->color.g * 255.0f);
-        v[4].b = (int)(self->color.b * 255.0f);
-        v[4].a = (int)(self->color.a * 128.0f);
-        v[4].q = 1.0f;
-        v[4].pos = p;
-        v[4].s = 0.0f;
-        v[4].t = 1.0f;
+        t4Vector vertPos = Sub_3AF8(beamUpper, off);
+        verts[4].r = (int)(self->color.r * 255.0f);
+        verts[4].g = (int)(self->color.g * 255.0f);
+        verts[4].b = (int)(self->color.b * 255.0f);
+        verts[4].a = (int)(self->color.a * 128.0f);
+        verts[4].q = 1.0f;
+        verts[4].pos = vertPos;
+        verts[4].s = 0.0f;
+        verts[4].t = 1.0f;
     }
     {
-        t4Vector p = Add_3AF8(p1, off);
-        v[5].r = (int)(self->color.r * 255.0f);
-        v[5].g = (int)(self->color.g * 255.0f);
-        v[5].b = (int)(self->color.b * 255.0f);
-        v[5].a = (int)(self->color.a * 128.0f);
-        v[5].q = 1.0f;
-        v[5].pos = p;
-        v[5].s = 1.0f;
-        v[5].t = 1.0f;
+        t4Vector vertPos = Add_3AF8(beamUpper, off);
+        verts[5].r = (int)(self->color.r * 255.0f);
+        verts[5].g = (int)(self->color.g * 255.0f);
+        verts[5].b = (int)(self->color.b * 255.0f);
+        verts[5].a = (int)(self->color.a * 128.0f);
+        verts[5].q = 1.0f;
+        verts[5].pos = vertPos;
+        verts[5].s = 1.0f;
+        verts[5].t = 1.0f;
     }
     {
-        t4Vector p = Sub_3AF8(beamTip, off);
-        v[6].r = (int)(fade.r * 255.0f);
-        v[6].g = (int)(fade.g * 255.0f);
-        v[6].b = (int)(fade.b * 255.0f);
-        v[6].a = (int)(fade.a * 128.0f);
-        v[6].q = 1.0f;
-        v[6].pos = p;
-        v[6].s = 0.0f;
-        v[6].t = 0.0f;
+        t4Vector vertPos = Sub_3AF8(beamTip, off);
+        verts[6].r = (int)(fade.r * 255.0f);
+        verts[6].g = (int)(fade.g * 255.0f);
+        verts[6].b = (int)(fade.b * 255.0f);
+        verts[6].a = (int)(fade.a * 128.0f);
+        verts[6].q = 1.0f;
+        verts[6].pos = vertPos;
+        verts[6].s = 0.0f;
+        verts[6].t = 0.0f;
     }
     {
-        t4Vector p = Add_3AF8(beamTip, off);
-        v[7].r = (int)(fade.r * 255.0f);
-        v[7].g = (int)(fade.g * 255.0f);
-        v[7].b = (int)(fade.b * 255.0f);
-        v[7].a = (int)(fade.a * 128.0f);
-        v[7].q = 1.0f;
-        v[7].pos = p;
-        v[7].s = 1.0f;
-        v[7].t = 0.0f;
+        t4Vector vertPos = Add_3AF8(beamTip, off);
+        verts[7].r = (int)(fade.r * 255.0f);
+        verts[7].g = (int)(fade.g * 255.0f);
+        verts[7].b = (int)(fade.b * 255.0f);
+        verts[7].a = (int)(fade.a * 128.0f);
+        verts[7].q = 1.0f;
+        verts[7].pos = vertPos;
+        verts[7].s = 1.0f;
+        verts[7].t = 0.0f;
     }
-    ((sRCtx_3AF8*)GrMan_boardwakefx)->v71(8, v, 0);
+    ((sRCtx_3AF8*)GrMan_boardwakefx)->v71(8, verts, 0);
     *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
 }
 #endif
@@ -4920,16 +4920,16 @@ extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x1C) = D_00488100;
     *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
-    char* m = (char*)self + 0x10;
+    char* scriptObj = (char*)self + 0x10;
     func_002E4578(self);
     if (*(int*)((char*)self + 0x7C) != 0) {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sBWVEntry1* e = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
-        e->fn(obj + e->delta, (char*)self + 0x68);
+        sBWVEntry1* removeScreenGrab = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
+        removeScreenGrab->fn(obj + removeScreenGrab->delta, (char*)self + 0x68);
         *(int*)((char*)self + 0x7C) = 0;
     }
-    cScriptObject_DeInitScriptObject(m);
-    cScriptObject__cScriptObject(m, 0);
+    cScriptObject_DeInitScriptObject(scriptObj);
+    cScriptObject__cScriptObject(scriptObj, 0);
     cObjNode__cObjNode(self, flags);
 }
 #endif
@@ -6132,9 +6132,9 @@ extern "C" void cSnowFall__cSnowFall(void* self, int flags)
     func_00319CC8();
     int i;
     for (i = 0; i < 12; i++) {
-        int* p = ((int**)((char*)self + 0x10))[i];
-        if (p != 0) {
-            func_002E4F28(p, 3);
+        int* snowBox = ((int**)((char*)self + 0x10))[i];
+        if (snowBox != 0) {
+            func_002E4F28(snowBox, 3);
         }
     }
     func_00319CC8();
@@ -6384,16 +6384,16 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
     snowMatrix = *ctx->vtable[35].fn((char*)ctx + ctx->vtable[35].delta);
     snowMatrix.v[3] = D_004FF130;
     sRiders_6008* rs2 = riders_6008();
-    sWakeVec5430 c = *(sWakeVec5430*)(rs2->riders[rs2->cur] + 0x80);
-    float r = c.x * 0.6f + -0.5f;
-    float g = c.y * 0.6f + -0.5f;
-    float b = c.z * 0.6f + -0.5f;
+    sWakeVec5430 camDir = *(sWakeVec5430*)(rs2->riders[rs2->cur] + 0x80);
+    float boxMinX = camDir.x * 0.6f + -0.5f;
+    float boxMinY = camDir.y * 0.6f + -0.5f;
+    float boxMinZ = camDir.z * 0.6f + -0.5f;
     int i;
     for (i = 0; i < 12; i++) {
-        int* p = self->parts[i];
-        if (p != 0 && *p == k) {
-            func_002E5430((sWakeGrid5430*)p, &camDiff);
-            func_002E55D8(self->parts[i], &snowMatrix, r, g, b);
+        int* snowBox = self->parts[i];
+        if (snowBox != 0 && *snowBox == k) {
+            func_002E5430((sWakeGrid5430*)snowBox, &camDiff);
+            func_002E55D8(self->parts[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
         }
     }
     ctx->top--;
@@ -7411,22 +7411,22 @@ extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
         int vertIdx = 0;
         for (j = 0; j < self->nsegs; j++) {
             acc += self->segs[j].len;
-            float t = acc / len;
-            float vv = self->v0 + t;
-            float al = wakeClampE058(self->alpha * (1.0f - t), 0.0f, 1.0f);
-            sWakeCol_7A10 c;
-            c.a = wakeClampE058(al, 0.0f, 1.0f);
-            c.r = 1.0f;
-            c.g = 1.0f;
-            c.b = 1.0f;
+            float trailFrac = acc / len;
+            float vv = self->v0 + trailFrac;
+            float al = wakeClampE058(self->alpha * (1.0f - trailFrac), 0.0f, 1.0f);
+            sWakeCol_7A10 vertColour;
+            vertColour.a = wakeClampE058(al, 0.0f, 1.0f);
+            vertColour.r = 1.0f;
+            vertColour.g = 1.0f;
+            vertColour.b = 1.0f;
             int si = (self->head + j) % 30;
             sWakeV4_7A10 pos;
             pos.SetXYZ(self->segs[si].p0);
             pos.w = 1.0f;
-            setVtx_7A10(verts, vertIdx++, 0.0f, vv, c, pos);
+            setVtx_7A10(verts, vertIdx++, 0.0f, vv, vertColour, pos);
             pos.SetXYZ(self->segs[si].p1);
             pos.w = 1.0f;
-            setVtx_7A10(verts, vertIdx++, 1.0f, vv, c, pos);
+            setVtx_7A10(verts, vertIdx++, 1.0f, vv, vertColour, pos);
         }
         func_0037A430(gfx);
     }

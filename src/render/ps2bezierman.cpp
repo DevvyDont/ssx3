@@ -45,6 +45,12 @@ INCLUDE_ASM("render/ps2bezierman", cPSPBezierMan__cPSPBezierMan);
 extern "C" void cPSPBezierMan_Purge(void* self);
 extern "C" void func_00374CA8(void* self, int flags);
 
+/**
+ * Destroys the Bezier patch manager: stores cPSPBezierMan_vtbl, runs Purge and chains to the base destructor
+ * func_00374CA8 with @p flags.
+ *
+ * @param flags  destructor flags passed to the base destructor
+ */
 extern "C" void cPSPBezierMan__cPSPBezierMan(cPSPBezierMan* self, int flags)
 {
     self->mVtbl = cPSPBezierMan_vtbl;

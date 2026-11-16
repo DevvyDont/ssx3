@@ -226,24 +226,24 @@ extern void* D_0046D970[];
  */
 extern "C" void cGame__cGame(cGame* self, int flags)
 {
-    void** m = D_0047D6E8;
+    void** gameStateVtbl = D_0047D6E8;
     self->mVtbl = D_0046D970;
-    *(void***)((char*)self + 0x1F8) = m;
-    *(void***)((char*)self + 0x1E8) = m;
-    *(void***)((char*)self + 0x1C4) = m;
-    *(void***)((char*)self + 0x1A8) = m;
-    *(void***)((char*)self + 0x198) = m;
-    *(void***)((char*)self + 0x184) = m;
-    *(void***)((char*)self + 0x164) = m;
-    *(void***)((char*)self + 0x154) = m;
-    *(void***)((char*)self + 0x144) = m;
-    *(void***)((char*)self + 0x134) = m;
-    *(void***)((char*)self + 0x124) = m;
-    *(void***)((char*)self + 0x10C) = m;
-    *(void***)((char*)self + 0xFC) = m;
-    *(void***)((char*)self + 0xEC) = m;
-    *(void***)((char*)self + 0xDC) = m;
-    *(void***)((char*)self + 0xBC) = m;
+    *(void***)((char*)self + 0x1F8) = gameStateVtbl;
+    *(void***)((char*)self + 0x1E8) = gameStateVtbl;
+    *(void***)((char*)self + 0x1C4) = gameStateVtbl;
+    *(void***)((char*)self + 0x1A8) = gameStateVtbl;
+    *(void***)((char*)self + 0x198) = gameStateVtbl;
+    *(void***)((char*)self + 0x184) = gameStateVtbl;
+    *(void***)((char*)self + 0x164) = gameStateVtbl;
+    *(void***)((char*)self + 0x154) = gameStateVtbl;
+    *(void***)((char*)self + 0x144) = gameStateVtbl;
+    *(void***)((char*)self + 0x134) = gameStateVtbl;
+    *(void***)((char*)self + 0x124) = gameStateVtbl;
+    *(void***)((char*)self + 0x10C) = gameStateVtbl;
+    *(void***)((char*)self + 0xFC) = gameStateVtbl;
+    *(void***)((char*)self + 0xEC) = gameStateVtbl;
+    *(void***)((char*)self + 0xDC) = gameStateVtbl;
+    *(void***)((char*)self + 0xBC) = gameStateVtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

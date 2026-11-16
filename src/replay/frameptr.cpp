@@ -492,6 +492,10 @@ extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setupInstantReplayCameras);
 #ifdef SKIP_ASM
+/**
+ * Sets up the instant-replay cameras: installs the replay camera triggers (func_0016D1D8, cCameraTriggerMan::
+ * setReplayTriggers, on D_004C5830) and steps CurrentInstantReplayCamIndex to the next of 9.
+ */
 extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 {
     func_0016D1D8(D_004C5830);
@@ -868,6 +872,25 @@ static inline void addFrame_F4A8(sReplay_F4A8* self, short type)
     func_0026D740_F4A8(self, cReplay_saveReplayFrame_F4A8(self, &desc));
 }
 
+/**
+ * Runs one frame of the replay state machine: records the race, plays instant replays and drives replay playback (On
+ * Tour cReplay::update).
+ *
+ * Does nothing while paused or uninitialised (State 14 / 15). Counts ShowError down, clears NextFrame, turns Cmd 7
+ * into kPlaybackInput (3) and clears SkipFrame outside states 3 / 4. Then by State:
+ * - 11 (kStartRace) moves to 12; 12 and 0 (recording) set state 0 and clear SaveFrame. On EndReplay (ignored once a
+ *   replay is Loaded) it cancels the instant-replay and highlight marks, purges idle frames, saves a final full frame
+ *   and enters kReplayEnd (13). On StartInstantReplay it starts the replay at InstantReplayFrame and enters
+ *   kInstantPlayback (2). Otherwise every 60 ticks without ReplayError it purges idle frames and saves a frame, a
+ *   full one (type 1) at tick 0 and every SaveFrameTicks ticks; EndRecordTick (without ReplayError) and RecordTick
+ *   advance.
+ * - 2 (instant replay) reads input (func_0026FB88, updateInput) and runs processInput until PlaybackTick reaches
+ *   RecordTick minus 1, then stops the instant replay and falls into recording.
+ * - 3 (kPlaybackInput) reads input when the replay pad (PadNum) has button state 0x6B, then processInput.
+ * - 9 starts an auto replay (startReplay(0, 0, 1)), enters kGamePlayback (1) and sets AutoReplay; 8 starts a replay
+ *   from the beginning and, like 4..7, enters kPlaybackInput.
+ * - 10 and 13 do nothing; any other state (1) runs processInput.
+ */
 // Replay recorder/player: per-frame update of the replay state machine.
 extern "C" void cReplay_update(cReplay* self)
 {
@@ -1161,6 +1184,10 @@ extern "C" void cReplay_stopReplay(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_endReplay);
 #ifdef SKIP_ASM
+/**
+ * Requests the end of the recording: sets EndReplay unless the replay is paused or uninitialised (State 14 / 15).
+ * cReplay_update acts on it.
+ */
 extern "C" void cReplay_endReplay(cReplay* self)
 {
     int s = self->State;
@@ -1331,6 +1358,21 @@ struct sVE_26FE50 {
     void (*fn)(void*);
 };
 
+/**
+ * Applies the pending replay-menu command (Cmd, set by updateInput) and clears it (On Tour processInput).
+ *
+ * - 1: rewinds to the start; 2: jumps to the last frame; 3: goes back to the previous key frame (to the start of the
+ *   frame PlaybackTick is in, or the one before when already at a frame start). Each then steps once with setframe
+ *   and enters kPlaybackStepUpdate (6) at tick 0, else kPlaybackUpdate (5).
+ * - 4: when PlaybackFrame has a next frame, moves to it, steps with setframe and enters kPlaybackUpdate.
+ * - 5: steps one frame and enters kPlaybackStep (4).
+ * - 6: toggles pause: kPlaybackInput (3) goes to kGamePlayback (1), any other state to kPlaybackInput.
+ * - 7: enters kPlaybackInput; 8: nothing.
+ * - 0 (and any other value): unless paused (State 3), sets NextFrame and steps one frame.
+ *
+ * Commands 1 to 4 also redraw: they switch the first view's chase camera (cChaseCameraController_switchCamera_Chapter
+ * on ViewMan + 4, then + 0xA8), call its virtual slot 4 and update all views (cGameViewMan_updateAll).
+ */
 extern "C" void cReplay_processInput(cReplay* self)
 {
     int redraw = 0;

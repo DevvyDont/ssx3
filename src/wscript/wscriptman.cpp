@@ -603,12 +603,12 @@ extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
     n = cWorldView_getNumSections((cWorldView*)(self->world->view + 0x10));
     for (i = 0; i < n; i++) {
         if (wsIsType3_9F18(&self->world->info->sections[i])) {
-            int* p = cWorld_getGlobalScripts(self->world, i);
-            if (p != 0) {
+            int* globalScript = cWorld_getGlobalScripts(self->world, i);
+            if (globalScript != 0) {
                 int cnt = cWorld_getNumGlobalScripts(self->world, i);
                 int j;
-                for (j = 0; j < cnt; j++, p++) {
-                    func_00309C88(self, p);
+                for (j = 0; j < cnt; j++, globalScript++) {
+                    func_00309C88(self, globalScript);
                 }
             }
         }
@@ -3757,8 +3757,8 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
     cPS2GraphicsMan* gfx = GetGfx_D540();
     int i;
     int j;
-    int m;
-    int v;
+    int variant;
+    int textureId;
     if (self->f38 != 0) {
         cMemMan_free(self->f38);
     }
@@ -3768,13 +3768,13 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
                 cMemMan_free(self->slots[k].a);
             }
             for (j = 0; j < self->f8; j++) {
-                for (m = 0; m < self->f4; m++) {
-                    if (self->grps[j].s[k].arr[m].fC != 0) {
-                        cMemMan_free(self->grps[j].s[k].arr[m].fC);
+                for (variant = 0; variant < self->f4; variant++) {
+                    if (self->grps[j].s[k].arr[variant].fC != 0) {
+                        cMemMan_free(self->grps[j].s[k].arr[variant].fC);
                     }
-                    ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].delta, (int)self->grps[j].s[k].arr[m].f0);
-                    if (self->grps[j].s[k].arr[m].f0 != 0) {
-                        cMemMan_free(self->grps[j].s[k].arr[m].f0);
+                    ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].delta, (int)self->grps[j].s[k].arr[variant].f0);
+                    if (self->grps[j].s[k].arr[variant].f0 != 0) {
+                        cMemMan_free(self->grps[j].s[k].arr[variant].f0);
                     }
                 }
                 if (self->grps[j].s[k].arr != 0) {
@@ -3785,9 +3785,9 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
     }
     if (self->f130 != 0) {
         for (i = 0; i < self->f12C; i++) {
-            v = self->f130[i].id;
-            if (v >= 0) {
-                ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].delta, v);
+            textureId = self->f130[i].id;
+            if (textureId >= 0) {
+                ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].delta, textureId);
             }
         }
     }

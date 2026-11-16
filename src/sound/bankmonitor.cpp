@@ -131,14 +131,14 @@ extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
         sBmVtblE40 vt = D_00483B88_E40;
         *(sBmVtblE40**)((char*)self->mpVSoundSys + 4) = &vt;
         char* base = (char*)self->mpVSoundSys - 0x8F0;
-        int d = (char*)self - base;
-        vt.e[1].delta = D_00483B88_E40.e[1].delta + d;
+        int thisAdjust = (char*)self - base;
+        vt.e[1].delta = D_00483B88_E40.e[1].delta + thisAdjust;
     }
     if ((sBmVoiceE40*)self->mBankMonitorInstance != 0) {
-        sBmVoiceE40* q = (sBmVoiceE40*)self->mBankMonitorInstance + ((int*)(sBmVoiceE40*)self->mBankMonitorInstance)[-4];
-        while ((sBmVoiceE40*)self->mBankMonitorInstance != q) {
-            q--;
-            func_002ABA18(q, 0);
+        sBmVoiceE40* bankInstance = (sBmVoiceE40*)self->mBankMonitorInstance + ((int*)(sBmVoiceE40*)self->mBankMonitorInstance)[-4];
+        while ((sBmVoiceE40*)self->mBankMonitorInstance != bankInstance) {
+            bankInstance--;
+            func_002ABA18(bankInstance, 0);
         }
         cMemMan_free((char*)(sBmVoiceE40*)self->mBankMonitorInstance - 0x10);
     }
@@ -433,18 +433,18 @@ extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx,
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
 /**
- * Fades out one playing bank sound: cBankMonitorInstance::Fade(@p type, -1, 0) on the voice that
+ * Fades out one playing bank sound: cBankMonitorInstance::Fade(@p FadeTime, -1, 0) on the voice that
  * cBankMonitor_BANKMONITOR_GetHandle finds, when there is one.
  *
  * @param idx  the sound's handle (On Tour int Handle)
- * @param key  passed to GetHandle (On Tour eMonitorType type)
- * @param type  the fade time (On Tour float FadeTime)
+ * @param type  passed to GetHandle (On Tour eMonitorType type)
+ * @param FadeTime  the fade time (On Tour float FadeTime)
  */
-extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, int key, float type)
+extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, int type, float FadeTime)
 {
-    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, key);
+    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, type);
     if (voice != 0) {
-        func_002ACB80(voice, -1, 0, type);
+        func_002ACB80(voice, -1, 0, FadeTime);
     }
 }
 #endif
@@ -570,15 +570,15 @@ extern "C" void func_002ACB80(void* voice, int a, int b, float v);
  * The names of the last two parameters are swapped against their use (On Tour: Handle, float FadeTime, type).
  *
  * @param idx       the sound handle
- * @param FadeTime  despite its name, the monitor type passed to GetHandle
- * @param type      despite its name, the fade time; 0 stops the sound at once
+ * @param type  despite its name, the monitor type passed to GetHandle
+ * @param FadeTime      despite its name, the fade time; 0 stops the sound at once
  */
-extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int FadeTime, float type)
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int type, float FadeTime)
 {
-    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, FadeTime);
+    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, type);
     if (voice != 0) {
-        if (type != 0.0f) {
-            func_002ACB80(voice, -1, 1, type);
+        if (FadeTime != 0.0f) {
+            func_002ACB80(voice, -1, 1, FadeTime);
         } else {
             func_002ABB38(voice);
         }
@@ -962,8 +962,8 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
         sBmVtblDAC8 vt = D_00483BC0_DAC8;
         *(sBmVtblDAC8**)((char*)self->mpVSoundSys + 4) = &vt;
         char* base = (char*)self->mpVSoundSys - 0x8DC;
-        int d = (char*)self - base;
-        vt.e[1].delta = D_00483BC0_DAC8.e[1].delta + d;
+        int thisAdjust = (char*)self - base;
+        vt.e[1].delta = D_00483BC0_DAC8.e[1].delta + thisAdjust;
     }
     // PORT: function pointer passed as int
     func_003B5948((int)func_002AD998);

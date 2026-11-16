@@ -164,26 +164,26 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         if (((self->flags >> 6) & 1) && self->numLines >= 2) {
             unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, str_UITEXTTEMP_b, 0x100, 0);
             func_002C2718(buf, D_004A47B0, str);
-            sRect_05E8 r;
-            func_003921F0_s(font, buf, &r, 0, textScale.x, textScale.y);
-            sV3_05E8 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
-            sV3_05E8 p = pos;
-            func_0039FEB8(self, &p, &size);
+            sRect_05E8 textBounds;
+            func_003921F0_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
+            sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+            sV3_05E8 drawPos = pos;
+            func_0039FEB8(self, &drawPos, &size);
             pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
-            func_00391E30_s(font, p.x, p.y, buf);
+            func_00391E30_s(font, drawPos.x, drawPos.y, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
             return;
         }
-        sRect_05E8 r;
-        func_003921F0_s(font, str, &r, 0, textScale.x, textScale.y);
+        sRect_05E8 textBounds;
+        func_003921F0_s(font, str, &textBounds, 0, textScale.x, textScale.y);
         i++;
-        sV3_05E8 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
-        sV3_05E8 p = pos;
-        func_0039FEB8(self, &p, &size);
+        sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+        sV3_05E8 drawPos = pos;
+        func_0039FEB8(self, &drawPos, &size);
         pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
-        func_00391E30_s(font, p.x, p.y, str);
+        func_00391E30_s(font, drawPos.x, drawPos.y, str);
     } while (i < self->numLines);
 }
 #endif
@@ -230,19 +230,19 @@ extern "C" char cUIText_getNumTextLines_(void* self)
 {
     unsigned short* text = *(unsigned short**)((char*)self + 0xB4);
     if (text == 0) return 0;
-    unsigned short* p = text;
+    unsigned short* cursor = text;
     int n = 1;
-    while (*p != 0) {
-        unsigned short c = *p;
-        unsigned short next = p[1];
-        if (c == gUSTRBackSlash && next == c) {
-            p += 2;
+    while (*cursor != 0) {
+        unsigned short curChar = *cursor;
+        unsigned short next = cursor[1];
+        if (curChar == gUSTRBackSlash && next == curChar) {
+            cursor += 2;
             n++;
-        } else if (c == 13) {
-            p++;
+        } else if (curChar == 13) {
+            cursor++;
             n++;
         } else {
-            p++;
+            cursor++;
         }
     }
     return n;
@@ -690,6 +690,12 @@ extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
 #ifdef SKIP_ASM
+/**
+ * Returns the text box's font: entry mFont + 1 (bits 1-2 of mAttrTextScroll) of the UI engine's font table (engine +
+ * 8, 12-byte entries), the engine being mpScreen->mpState->mpEngine.
+ *
+ * @return the cFont (as an int), or 0 without an engine
+ */
 extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 {
     void* p = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
@@ -703,6 +709,11 @@ extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_setInputMap);
 #ifdef SKIP_ASM
+/**
+ * Fills mInputMap with input ids 0, 1, 2, 3 when @p value is 0, else 4, 5, 6, 7.
+ *
+ * @param value  which input set to use
+ */
 extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char value)
 {
     if (value == 0) {
@@ -987,9 +998,9 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
         }
         int str = self->strs[i + self->top];
         i++;
-        sRect_1588 r;
-        func_003921F0(font, str, &r, 0, self->sx, self->sy);
-        sV3_1588 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+        sRect_1588 textBounds;
+        func_003921F0(font, str, &textBounds, 0, self->sx, self->sy);
+        sV3_1588 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
         sV3_1588 drawPos = pos;
         func_0039FEB8(self, &drawPos, &size);
         pos.y += lineH;
@@ -1006,7 +1017,16 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_clearBuffer);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-extern "C" void cUITextScroll_clearBuffer(cUITextScroll* self, void* a1)
+/**
+ * Frees every text line (mpLineOffset[0 .. mLineSize - 1]) and the line array, then zeroes mpLineOffset, mLinesOffset
+ * and mLineSize.
+ *
+ * mpLineOffset is declared unsigned short* but holds an array of line pointers. On Tour's clearBuffer() takes no
+ * argument.
+ *
+ * @param ignored  not read (callers pass whatever is in $a1)
+ */
+extern "C" void cUITextScroll_clearBuffer(cUITextScroll* self, void* ignored)
 {
     if ((void**)self->mpLineOffset != 0) {
         unsigned short i;
@@ -1065,6 +1085,17 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_addAsciiString);
 extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str);
 extern "C" void func_002C2540(void* dst, void* src);
 
+/**
+ * Appends ASCII text, word-wrapped to the box width (On Tour addAsciiString).
+ *
+ * Calls virtual slot 5 (cUIThing_setCached) with 1 and needs a font. Widens the text into a temporary UTF-16 buffer
+ * (tag str_UITEXTTEMP_b "UITEXTTEMP") and adds lines with addUnicodeString: a doubled backslash or a carriage return ends a
+ * line; otherwise character advances (cFont::charAdvance times mScale.x) add up and the line breaks at the last space
+ * once the width passes mSize.x. Without a space it breaks before the overflowing character and the character before
+ * it is overwritten with the terminator, so that character is lost.
+ *
+ * @param str  the ASCII text (On Tour pString)
+ */
 extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
 {
     ((cUIText_3A0C70*)self)->v05(1);
@@ -1160,6 +1191,12 @@ struct sUTVEntry1C80 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Replaces the text with ASCII text: clears the lines (cUITextScroll_clearBuffer_1), clears mStringID, calls virtual
+ * slot 5 (cUIThing_setCached) with 1 and slot 24 (cUITextScroll_setUnicode) with 0, then addAsciiString.
+ *
+ * @param str  the ASCII text (On Tour pAscii)
+ */
 extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
 {
     cUITextScroll_clearBuffer_1(self);
@@ -1176,6 +1213,12 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_setUnicodeStringWrap);
 extern "C" void cUITextScroll_clearBuffer(cUITextScroll*, void*);
 extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll*, void*);
 
+/**
+ * Replaces the text with word-wrapped UTF-16 text: clearBuffer, then addUnicodeStringWrap. mStringID is left as it
+ * was.
+ *
+ * @param pString  the UTF-16 text
+ */
 extern "C" void cUITextScroll_setUnicodeStringWrap(cUITextScroll* self, void* pString)
 {
     cUITextScroll_clearBuffer(self, pString);
@@ -1188,6 +1231,15 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeStringWrap);
 #ifdef SKIP_ASM
 extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str);
 
+/**
+ * Appends UTF-16 text, word-wrapped to the box width (On Tour addUnicodeStringWrap).
+ *
+ * Same as addAsciiString on a heap copy of the text (tag str_UITEXTTEMP_b "UITEXTTEMP"), except that only a doubled
+ * backslash forces a line break (a carriage return does not), and with the same lost character on a forced break
+ * without a space.
+ *
+ * @param vstr  the UTF-16 text (On Tour pString)
+ */
 extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vstr)
 {
     unsigned short* str = (unsigned short*)vstr;
@@ -1267,6 +1319,13 @@ public:
     virtual void v05(int);
 };
 
+/**
+ * Appends the localised string @p id: stores mStringID, looks the string up through the UI engine's string table
+ * (engine + 0x10, its virtual slot 4), adds it with addUnicodeStringWrap when found and calls virtual slot 5
+ * (cUIThing_setCached) with 1. Does nothing without a string table.
+ *
+ * @param id  the string's hash id (On Tour hashname)
+ */
 extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
 {
     self->mStringID = (unsigned int)id;
@@ -1284,6 +1343,14 @@ extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_deleteLineByIndex);
 #ifdef SKIP_ASM
+/**
+ * Removes line @p idx: allocates a line array one shorter (tag str_UITEXTSCBUF "UITEXTSCBUF"), copies the lines before and
+ * after it, frees the old array and decrements mLineSize.
+ *
+ * The removed line's own string is not freed, and a negative @p idx is not rejected.
+ *
+ * @param idx  the line index (On Tour index)
+ */
 extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
 {
     if ((void**)self->mpLineOffset != 0) {

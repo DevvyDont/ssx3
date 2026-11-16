@@ -1053,8 +1053,8 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
             break;
         }
         int nisState = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
-        int r2 = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 0, 0);
-        int busy = nisState && r2 != 5;
+        int scriptCategory = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 0, 0);
+        int busy = nisState && scriptCategory != 5;
         if (busy)
             break;
         cBE_getInterface_Fv(cBE_getBE(), 0);

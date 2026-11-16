@@ -109,6 +109,16 @@ extern const sSndDtVt4 D_00483A60;
 extern const sSndDtVt7 D_00483A80;
 extern char cBankMonitor_vtbl[];
 
+/**
+ * Destroys the bank SFX system (g++ 2.95 destructor with virtual bases cSoundSys and cBankManager).
+ *
+ * Restores the class's vtables (D_00483A48, D_00483A60, cBankMonitor_vtbl, D_00483A80); when called from a derived
+ * class (@p flags 0) it fixes up stack copies of the virtual-base tables for the offsets. Frees mBank and mPatch and
+ * clears gBankSys. Flags bit 1 also destroys the virtual bases (func_0028BB10, cBankManager::~cBankManager, then
+ * cSoundSys__cSoundSys); bit 0 frees the object.
+ *
+ * @param flags  destructor flags: bit 1 destroys the virtual bases, bit 0 frees the object
+ */
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void cBankSys__cBankSys(cBankSys* self, int flags)
 {
@@ -227,6 +237,16 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
     self->a8[self->mgr->sub.cur] = b;
 }
 
+/**
+ * Monitor callback that plays a delayed 2D sound effect (On Tour Play2DCallback(cMonitorInstance* Inst)).
+ *
+ * Works on gBankSys rather than @p self: SFX_Begin with the instance's bank and patch (mData1 / mData2), sets the
+ * volume control pointer (mVolControl) from mPtr and the base volume from mData3 (the voice volume clamped to
+ * 0..127), then SFX_End plays it.
+ *
+ * @param req  the cMonitorInstance that fired (On Tour Inst)
+ * @return 1
+ */
 // Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), then commits.
 extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
 {
@@ -332,6 +352,17 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
     self->a8[self->mgr->sub.cur] = b;
 }
 
+/**
+ * Monitor callback that plays a delayed 2D sound effect with a pitch multiplier (On Tour
+ * Play2DCallbackWithPitchMult(cMonitorInstance* Inst)).
+ *
+ * Same as cBankSys_Play2DCallback (bank / patch from mData1 / mData2, volume control from mPtr, base volume from
+ * mData3), and also stores mData4 in the current play options' pitch field (+0xC) before SFX_End. Works on gBankSys
+ * rather than @p self.
+ *
+ * @param req  the cMonitorInstance that fired (On Tour Inst)
+ * @return 1
+ */
 // Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), stores its 16-bit field, then commits.
 extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req* req)
 {
@@ -439,6 +470,20 @@ static inline int snd06B8CloseOnEnd(sSnd06B8Sub* o)
     return o->p7C[o->cur];
 }
 
+/**
+ * Plays the sound effect set up since SFX_Begin and pops its play-option level (On Tour SFX_End).
+ *
+ * Uses the play options of the current level (mInst) in the cBankManager's cBankMonitor (mpVBankManager + 0x1D8). A
+ * positioned sound (mPosition set) starts at volume 0; otherwise a volume control (mVolControl) scales mBaseVol,
+ * clamped to 0..127. Plays bank mBank[mInst] / patch mPatch[mInst] (func_003B6820, between func_003B58A0 and
+ * func_003B58D8). Unless the play failed with CloseOnEnd set, creates a bank monitor for the voice
+ * (BANKMONITOR_Create, then func_002ABCE8) and queues the echoes from cDelayOpts: each repeat mTime later and
+ * mFeedback percent quieter (starting from mLevel percent of the base volume), until mCount runs out or the volume
+ * reaches 0 (func_002ADCA0, MONITOR_Create). Finally decrements mInst.
+ *
+ * @param vself  the bank system (this)
+ * @return the voice handle, negative when the play failed
+ */
 extern "C" int cBankSys_SFX_End(cBankSys* vself)
 {
     cBankSys* self = vself;
@@ -2394,19 +2439,19 @@ struct sSsVt4678 { short delta; short index; int (*fn)(void*); };
  */
 extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, char* rider)
 {
-    int s = *(int*)(*(char**)(rider + 0x788) + 0xAC);
-    int ok = s == 1 || s == 3;
+    int simState = *(int*)(*(char**)(rider + 0x788) + 0xAC);
+    int ok = simState == 1 || simState == 3;
     if (!ok) {
-        char* o = rider + 0x6C0;
-        sSsVt4678* vtEntry = &(*(sSsVt4678**)o)[7];
-        func_00294880(self, vtEntry->fn(o + vtEntry->delta), 1);
+        char* riderObj = rider + 0x6C0;
+        sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
+        func_00294880(self, vtEntry->fn(riderObj + vtEntry->delta), 1);
         return;
     }
     int idx = -1;
     {
-        char* o = rider + 0x6C0;
-        sSsVt4678* vtEntry = &(*(sSsVt4678**)o)[7];
-        func_00294880(self, vtEntry->fn(o + vtEntry->delta), 0);
+        char* riderObj = rider + 0x6C0;
+        sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
+        func_00294880(self, vtEntry->fn(riderObj + vtEntry->delta), 0);
     }
     float x = *(float*)(*(char**)(rider + 0x788) + 0x98);
     func_0029FCC8(self, rider);
@@ -3788,20 +3833,20 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, char* evt, int n)
     }
     snd74A0AddVoice(self, type, patch, 5);
     sSnd74A0Mgr** pp;
-    int r;
+    int closestCamera;
     sSnd74A0Sys* sys = (sSnd74A0Sys*)self;
-    sSnd74A0Mgr* m3 = *sys->p118;
-    m3->sub.tgt[m3->sub.cur] = &pos;
-    sSnd74A0Mgr* m4 = *sys->p118;
-    m4->sub.p34[m4->sub.cur] = 1;
+    sSnd74A0Mgr* voiceMgr = *sys->p118;
+    voiceMgr->sub.tgt[voiceMgr->sub.cur] = &pos;
+    sSnd74A0Mgr* voiceMgr2 = *sys->p118;
+    voiceMgr2->sub.p34[voiceMgr2->sub.cur] = 1;
     func_002A9988(&(*sys->p118)->sub, 300.0f, -1.0f);
     pp = sys->p118;
-    r = func_00288940(sys, &pos);
-    (*pp)->sub.p64[(*pp)->sub.cur] = r;
-    sSnd74A0Mgr* m5 = *sys->p118;
-    m5->sub.p78[m5->sub.cur] = pri;
-    int h = cBankSys_SFX_End((cBankSys*)self);
-    cSSXAudio_PlayHistoryAdd(self, evt, h, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 50, 0, 0);
+    closestCamera = func_00288940(sys, &pos);
+    (*pp)->sub.p64[(*pp)->sub.cur] = closestCamera;
+    sSnd74A0Mgr* voiceMgr3 = *sys->p118;
+    voiceMgr3->sub.p78[voiceMgr3->sub.cur] = pri;
+    int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
+    cSSXAudio_PlayHistoryAdd(self, evt, sfxHandle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -3965,8 +4010,8 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     }
     sndPushVoice(((sSSXAudioView*)self), curBank, curPatch);
     cBankManager** pp = (cBankManager**)self->MusicSys.mpVStreamSys;
-    int r = (int)func_00287968(((sSSXAudioView*)self), 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumePtr = (int)func_00287968(((sSSXAudioView*)self), 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
     *(int*)((char*)self + i * 0x30 + 0x5A24) = snd7950Commit(((sSSXAudioView*)self), (char*)self + i * 0x30 + 0x5A10, radius, pri);
 }
 #endif
@@ -4502,8 +4547,8 @@ extern "C" void cSSXAudio_KnockdownSFX(cSSXAudio* self, void* obj)
     if (ok) {
         char* bankMon = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
         sSndKey8* key = D_004A3678;
-        int r = (int)func_00287968(self, 9, 0);
-        func_002ADCA0(bankMon, 0xFA, key->v, r, 0, 0x72, 0x7F, 0);
+        int volumePtr = (int)func_00287968(self, 9, 0);
+        func_002ADCA0(bankMon, 0xFA, key->v, volumePtr, 0, 0x72, 0x7F, 0);
     }
 }
 #endif
@@ -6723,8 +6768,8 @@ extern "C" void cSSXAudio_UpdateTimedEvent(cSSXAudio* self)
     if (secsLeft != self->mLastTime && secsLeft < 11 && (secsLeft == 10 || secsLeft == 8 || secsLeft == 6 || secsLeft < 5)) {
         char* bankMon = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
         sSndKey8* key = D_004A3678;
-        int r = (int)func_00287968(((char*)self), 9, 0);
-        func_002ADCA0(bankMon, 0x1C2, key->v, r, 0, 0x4E, 0x7F, 0);
+        int volumePtr = (int)func_00287968(((char*)self), 9, 0);
+        func_002ADCA0(bankMon, 0x1C2, key->v, volumePtr, 0, 0x4E, 0x7F, 0);
     }
     self->mLastTime = secsLeft;
 }
@@ -8329,19 +8374,19 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, void* vrider, int length, 
     voiceSub->p7C[voiceMgr->sub.cur] = 1;
     self->a4[self->mgr->sub.cur] = kind;
     self->a8[self->mgr->sub.cur] = prio;
-    sSnd17D0Mgr* m3 = *self->p118;
-    sSnd17D0Sub* s3 = &m3->sub;
-    s3->vals[m3->sub.cur] = vol;
-    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    sSnd17D0Mgr* curVoiceMgr = *self->p118;
+    sSnd17D0Sub* curVoiceSub = &curVoiceMgr->sub;
+    curVoiceSub->vals[curVoiceMgr->sub.cur] = vol;
+    curVoiceSub->ch[curVoiceMgr->sub.cur].vol = (curVoiceSub->vals[curVoiceSub->cur] < 0x7F && curVoiceSub->vals[curVoiceSub->cur] < 0) ? 0 : (curVoiceSub->vals[curVoiceSub->cur] < 0x7F ? (unsigned char)curVoiceSub->vals[curVoiceSub->cur] : 0x7F);
     {
         sSnd17D0Mgr** pq = self->p118;
-        int q = func_00288A20(self, rider);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int closestCamera = func_00288A20(self, rider);
+        (*pq)->sub.p64[(*pq)->sub.cur] = closestCamera;
     }
     {
         sSnd17D0Mgr** pp = self->p118;
-        int r = (int)func_00287968(self, 4, cRider_getIdentity(rider));
-        (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+        int volumePtr = (int)func_00287968(self, 4, cRider_getIdentity(rider));
+        (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
     }
     int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (ok3) {
@@ -8360,8 +8405,8 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, void* vrider, int length, 
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
     }
-    int h = cBankSys_SFX_End((cBankSys*)self);
-    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
+    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, sfxHandle, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -12907,9 +12952,9 @@ void operator_delete(int*);
  */
 extern "C" void FileParser__FileParser(FileParser* self, int flags)
 {
-    void* p = self->mBasePtr;
-    if (p != 0) {
-        cMemMan_free(p);
+    void* basePtr = self->mBasePtr;
+    if (basePtr != 0) {
+        cMemMan_free(basePtr);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -12920,6 +12965,11 @@ extern "C" void FileParser__FileParser(FileParser* self, int flags)
 //100%
 INCLUDE_ASM("sound/soundsys", FileParser_GetChar__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the character at mPtr and advances mPtr (On Tour GetChar).
+ *
+ * @return the character read
+ */
 signed char FileParser_GetChar(void* self)
 {
     return *(*(signed char**)((char*)self + 0x8))++;
@@ -12936,6 +12986,13 @@ extern "C" int FileParser_SkipComment(FileParser* self);
 // FileParser_SkipSpace returns int (its body leaves a result in v0); the unit declares it void.
 int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 
+/**
+ * Skips whitespace and comments (On Tour SkipSpace).
+ *
+ * Stops at the first other character; '#' and ';' comments are skipped to the end of the line (SkipComment).
+ *
+ * @return 1 when the data ends or the next character is '[' (a section header), else 0
+ */
 int FileParser_SkipSpace_r(void* self)
 {
     while (**(signed char**)((char*)self + 0x8) != 0) {
@@ -12957,6 +13014,11 @@ INCLUDE_ASM("sound/soundsys", FileParser_SkipComment);
 #ifdef SKIP_ASM
 extern "C" int FileParser_FindEOL(FileParser* self);
 
+/**
+ * Skips a '#' or ';' comment up to (not past) the end of its line (FindEOL).
+ *
+ * @return 1 at the end of the data, else 0
+ */
 extern "C" int FileParser_SkipComment(FileParser* self)
 {
     signed char c = *(signed char*)self->mPtr;
@@ -12982,6 +13044,11 @@ int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 extern "C" char* FileParser_FindNextSection(FileParser*);
 extern "C" int FileParser_IsEOF(FileParser*);
 
+/**
+ * Skips any section headers ("[...]") at the parse position along with the whitespace around them, then calls IsEOF.
+ *
+ * Declared void, but On Tour's SkipSectionNames returns int: the IsEOF result is left in $v0.
+ */
 extern "C" void FileParser_SkipSectionNames(FileParser* self)
 {
     FileParser_SkipSpace_r(self);
@@ -12996,6 +13063,11 @@ extern "C" void FileParser_SkipSectionNames(FileParser* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", FileParser_FindEOL);
 #ifdef SKIP_ASM
+/**
+ * Advances mPtr to the next '\r' or '\n' without consuming it.
+ *
+ * @return 0 at the end of a line, 1 at the end of the data
+ */
 extern "C" int FileParser_FindEOL(FileParser* self)
 {
     while (*(signed char*)self->mPtr != 0) {
@@ -13020,6 +13092,15 @@ extern "C" int FileParser_SkipComment(FileParser* self);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern const char D_004A3720[];
 
+/**
+ * Advances to the next section header "[name]" and returns its name (On Tour FindNextSection).
+ *
+ * Skips comments, reads characters until a '[', copies the name into mTempStr up to ']' and consumes the ']'
+ * (ExpectToken). The copy has no length limit for the 2048-byte mTempStr and does not stop at the end of the data, so
+ * a '[' without ']' runs past the buffer.
+ *
+ * @return mTempStr holding the name, or 0 when no further section exists
+ */
 extern "C" char* FileParser_FindNextSection(FileParser* self)
 {
     while (*(signed char*)self->mPtr != 0) {
@@ -13051,6 +13132,12 @@ INCLUDE_ASM("sound/soundsys", FileParser_FindSection);
 extern "C" char* FileParser_FindNextSection(FileParser*);
 extern "C" int func_0041AA88(const char* a, const char* b);
 
+/**
+ * Advances to the section whose name equals @p name, ignoring case (strcasecmp).
+ *
+ * @param name  the section name (On Tour Section)
+ * @return 1 when found, 0 at the end of the data
+ */
 extern "C" int FileParser_FindSection(FileParser* self, const char* name)
 {
     char* s;
@@ -13069,6 +13156,13 @@ INCLUDE_ASM("sound/soundsys", FileParser_FindPartialSection);
 extern "C" char* FileParser_FindNextSection(FileParser*);
 extern "C" char* func_0041AD80(const char* s, const char* sub);
 
+/**
+ * Advances to the first section whose name and @p name match as prefixes either way (one starts with the other, via
+ * strstr).
+ *
+ * @param name  the section name to match (On Tour Section)
+ * @return 1 when found, 0 at the end of the data
+ */
 extern "C" int FileParser_FindPartialSection(FileParser* self, char* name)
 {
     char* tok;
@@ -13089,6 +13183,13 @@ extern "C" void FileParser_SkipSpace(void*);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern const char D_004A3728[];
 
+/**
+ * Reads a quoted string: skips whitespace, consumes the opening '"', copies characters into mTempStr up to the
+ * closing '"' and consumes it. Neither ExpectToken result is checked, and the copy has no length or end-of-data
+ * limit.
+ *
+ * @return mTempStr holding the string
+ */
 extern "C" char* FileParser_GetString(FileParser* self)
 {
     int n = 0;
@@ -13114,6 +13215,12 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetName);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" char* FileParser_GetName_t(void* self) __asm__("FileParser_GetName");
+/**
+ * Reads a bare token: skips whitespace and comments, then copies characters into mTempStr up to whitespace or the end
+ * of the data.
+ *
+ * @return mTempStr holding the token
+ */
 extern "C" char* FileParser_GetName_t(void* self)
 {
     int n = 0;
@@ -13139,6 +13246,12 @@ extern "C" void FileParser_GetName(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
 extern char str_pct_f[];
 
+/**
+ * Reads a token (GetName) and converts it with sscanf("%f"). The value is left uninitialised when the conversion
+ * fails.
+ *
+ * @return the number read
+ */
 extern "C" float FileParser_GetFloat(FileParser* self)
 {
     float f;
@@ -13157,6 +13270,12 @@ extern "C" void FileParser_GetName(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
 extern char str_pct_d_h[];
 
+/**
+ * Reads a token (GetName) and converts it with sscanf("%d"). The value is left uninitialised when the conversion
+ * fails.
+ *
+ * @return the number read
+ */
 extern "C" int FileParser_GetInt(FileParser* self)
 {
     int v;
@@ -13174,6 +13293,12 @@ INCLUDE_ASM("sound/soundsys", FileParser_ExpectToken);
 signed char FileParser_GetChar(void* self);
 int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 
+/**
+ * Skips whitespace and comments, then consumes characters while they match @p name.
+ *
+ * @param name  the expected token (On Tour Token)
+ * @return 0 when the whole token matched; 1 on a mismatch; the next expected character when the data ended first
+ */
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* name)
 {
     int i = 0;
@@ -13194,6 +13319,12 @@ INCLUDE_ASM("sound/soundsys", FileParser_IsEOF);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 
+/**
+ * Tells whether the current section is finished: true at the end of the file (mPtr - mBasePtr >= mFileSize) or when,
+ * after whitespace and comments, the data ends or a new section ('[') starts.
+ *
+ * @return 1 when finished, else 0
+ */
 extern "C" int FileParser_IsEOF(FileParser* self)
 {
     if (self->mPtr - self->mBasePtr >= self->mFileSize) {
@@ -13218,6 +13349,13 @@ extern "C" char* FileParser_GetString(FileParser* self);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char D_004A3740[];
 
+/**
+ * Reads "= \"value\"" into @p out when the key last read (mTempStr) equals @p name, ignoring case.
+ *
+ * @param name  the key to accept (On Tour ID)
+ * @param out  receives the string (On Tour Dest); unbounded strcpy
+ * @return 1 when assigned, 0 when the key differs or no '=' follows
+ */
 extern "C" int FileParser_AssignString(FileParser* self, const char* name, char* out)
 {
     if (func_0041AA88((char*)self + 0xC, name) != 0) {
@@ -13243,6 +13381,13 @@ extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern "C" float FileParser_GetFloat(FileParser* self);
 extern char D_004A3740[];
 
+/**
+ * Reads "= value" as a float into @p out when the key last read (mTempStr) equals @p name, ignoring case.
+ *
+ * @param name  the key to accept (On Tour ID)
+ * @param out  receives the value (On Tour Dest)
+ * @return 1 when assigned, 0 when the key differs or no '=' follows
+ */
 extern "C" int FileParser_AssignFloat(FileParser* self, const char* name, float* out)
 {
     if (func_0041AA88((char*)self + 0xC, name) != 0) {
@@ -13264,6 +13409,13 @@ extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern "C" int FileParser_GetInt(FileParser* self);
 extern char D_004A3740[];
 
+/**
+ * Reads "= value" as an int into @p out when the key last read (mTempStr) equals @p name, ignoring case.
+ *
+ * @param name  the key to accept (On Tour ID)
+ * @param out  receives the value (On Tour Dest)
+ * @return 1 when assigned, 0 when the key differs or no '=' follows
+ */
 extern "C" int FileParser_AssignInt(FileParser* self, const char* name, int* out)
 {
     if (func_0041AA88((char*)self + 0xC, name) != 0) {

@@ -435,40 +435,40 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         case 3:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(str_poster_icon);
-                w->tex = func_00398380(ui + 0x58, h);
+                int texHash = GetHashValue32(str_poster_icon);
+                w->tex = func_00398380(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
         case 4:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(str_trading_card_icon);
-                w->tex = func_00398380(ui + 0x58, h);
+                int texHash = GetHashValue32(str_trading_card_icon);
+                w->tex = func_00398380(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
         case 5:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(str_art_icon);
-                w->tex = func_00398380(ui + 0x58, h);
+                int texHash = GetHashValue32(str_art_icon);
+                w->tex = func_00398380(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
         case 6:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(str_video_icon);
-                w->tex = func_00398380(ui + 0x58, h);
+                int texHash = GetHashValue32(str_video_icon);
+                w->tex = func_00398380(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
         case 7:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(str_toys_icon);
-                w->tex = func_00398380(ui + 0x58, h);
+                int texHash = GetHashValue32(str_toys_icon);
+                w->tex = func_00398380(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
@@ -2351,8 +2351,8 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         if (item != 0 && self->frames[sel] != 0) {
             item->f78 = self->f70;
             item->f7C = 0;
-            sWidget_1C98* f = self->frames[self->sel];
-            f->vt[9].fn((char*)f + f->vt[9].delta, 1);
+            sWidget_1C98* frame = self->frames[self->sel];
+            frame->vt[9].fn((char*)frame + frame->vt[9].delta, 1);
         }
     }
 }

@@ -50,9 +50,9 @@ extern "C" void cFEStateUberTrick_costVisible(void* self, int on)
     if (haveNum) {
         haveNum->setVisible(on);
     }
-    cWidget_00184668* d = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_text));
-    if (d) {
-        d->setVisible(on);
+    cWidget_00184668* haveText = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_text));
+    if (haveText) {
+        haveText->setVisible(on);
     }
 }
 #endif

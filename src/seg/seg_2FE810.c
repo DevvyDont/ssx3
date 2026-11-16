@@ -9062,9 +9062,9 @@ int sceUsbKbSetLEDMode(int kbdNo, unsigned mode) {
     D_00529100[1] = mode;
     func_00423DE0(semaId);
     {
-        int r = func_00426D18(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
-        if (r != 0) {
-            func_00425C60(D_00498380, r);
+        int rpcResult = func_00426D18(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
+        if (rpcResult != 0) {
+            func_00425C60(D_00498380, rpcResult);
             return -2;
         }
     }

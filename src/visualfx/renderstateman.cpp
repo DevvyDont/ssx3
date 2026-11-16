@@ -1205,8 +1205,8 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
     color.y = 1.0f;
     color.z = 1.0f;
     color.w = 1.0f;
-    sRsVec4_EF950 A;
-    sRsVec4_EF950 B;
+    sRsVec4_EF950 leftPos;
+    sRsVec4_EF950 rightPos;
     rider = self->rider;
     sRsVec4_EF950 col = rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x34), *(int*)(rider + 0x8A4), 0x20);
     float size = 15.0f;
@@ -1226,23 +1226,23 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
         if (color.x < 0.0f) {
             color.x = 0.0f;
         }
-        A = rsAdd_EF950(self->ring[j].p0, off);
-        B = rsAdd_EF950(self->ring[j].p1, off);
-        rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(A, half));
-        rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(B, half));
+        leftPos = rsAdd_EF950(self->ring[j].p0, off);
+        rightPos = rsAdd_EF950(self->ring[j].p1, off);
+        rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(leftPos, half));
+        rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(rightPos, half));
         k++;
-        rsVert_EF950(&vertsL[k], 1.0f, uvy, color, rsAdd_EF950(A, half));
-        rsVert_EF950(&vertsR[k], 1.0f, uvy, color, rsAdd_EF950(B, half));
+        rsVert_EF950(&vertsL[k], 1.0f, uvy, color, rsAdd_EF950(leftPos, half));
+        rsVert_EF950(&vertsR[k], 1.0f, uvy, color, rsAdd_EF950(rightPos, half));
         k++;
         uvy += dv;
         nverts += 2;
         j--;
         falloffT += 1.0f;
     }
-    sRsCtx_EF950* o = GrMan_renderstateman;
-    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, vertsL, 0);
-    o = GrMan_renderstateman;
-    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, vertsR, 0);
+    sRsCtx_EF950* grMan = GrMan_renderstateman;
+    grMan->vtable[71].fn((char*)grMan + grMan->vtable[71].delta, nverts, vertsL, 0);
+    grMan = GrMan_renderstateman;
+    grMan->vtable[71].fn((char*)grMan + grMan->vtable[71].delta, nverts, vertsR, 0);
     rsPop_EF950(GrMan_renderstateman);
 }
 #endif

@@ -91,12 +91,12 @@ struct sFlagElem_CM {
  * are
  * interpolated from the quad's corners (renderer slot 97). The four flag phases start random.
  *
- * @param p  the flag set
+ * @param flagSet  the flag set
  * @param item  the flag's instance record (On Tour tInstanceRecord* pInst)
  */
-extern "C" void cFlagSet_CreateMesh(void* p, void* item)
+extern "C" void cFlagSet_CreateMesh(void* flagSet, void* item)
 {
-    sFlagElem_CM* self = (sFlagElem_CM*)p;
+    sFlagElem_CM* self = (sFlagElem_CM*)flagSet;
     int i;
     for (i = 0; i < 4; i++) {
         self->phase[i] = randf_CM();
@@ -129,10 +129,10 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     sFsV2_CM uv[50];
     sFsCol_CM col[50];
     int idx = 0;
-    for (int r = 0; r < self->rows; r++) {
+    for (int row = 0; row < self->rows; row++) {
         for (int column = 0; column < self->cols; column++) {
             float fc = (float)column / self->colScale;
-            float fr = (float)r / self->rowScale;
+            float fr = (float)row / self->rowScale;
             self->verts[idx] = (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
             uv[idx] = (quv[0] * (1.0f - fc) + quv[1] * fc) * (1.0f - fr) + (quv[2] * (1.0f - fc) + quv[3] * fc) * fr;
             col[idx].a = 1.0f;
@@ -685,10 +685,10 @@ extern "C" void cFlagManager__cFlagManager(sFlagSet_C4B8* self, int flags)
 {
     self->vtable = cFlagManager_vtbl;
     if (self->elems != 0) {
-        sFlagSetElem_C4B8* p = self->elems + 15;
-        while (self->elems != p) {
-            p--;
-            p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+        sFlagSetElem_C4B8* flagSet = self->elems + 15;
+        while (self->elems != flagSet) {
+            flagSet--;
+            flagSet->vt[1].fn((char*)flagSet + flagSet->vt[1].delta, 0);
         }
     }
     cObjNode__cObjNode(self, flags);
@@ -1138,13 +1138,13 @@ struct sFlagSetVEntryCB80 {
  */
 extern "C" void cFenceNode__cFenceNode(void* self, int flags)
 {
-    char* s = (char*)self;
-    *(void***)(s + 0xC) = cFenceNode_vtbl;
-    void* h = *(void**)(s + 0x40);
-    if (h != 0) {
+    char* fenceNode = (char*)self;
+    *(void***)(fenceNode + 0xC) = cFenceNode_vtbl;
+    void* gridMesh = *(void**)(fenceNode + 0x40);
+    if (gridMesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
-        vt[77].fn(mgr + vt[77].delta, h);
+        vt[77].fn(mgr + vt[77].delta, gridMesh);
     }
     cInstanceNode__cInstanceNode(self, flags);
 }
@@ -1700,8 +1700,8 @@ extern "C" void cFenceNode_render(char* self)
         sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
         hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)model + 0x94), 0);
     } else {
-        sVE96_34B9B0* v96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
-        v96[96].fn(ctx + v96[96].delta, model, 0, 0, 0);
+        sVE96_34B9B0* vt96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
+        vt96[96].fn(ctx + vt96[96].delta, model, 0, 0, 0);
     }
     TOP_34B9B0(ctx)--;
 }

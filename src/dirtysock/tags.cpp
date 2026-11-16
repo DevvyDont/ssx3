@@ -47,87 +47,87 @@ extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
  *
  * @param record  the tag record to edit (NUL-terminated)
  * @param len     size of the record buffer in bytes
- * @param temp    the term to store, "name=value"; must start with a printable character
+ * @param field    the term to store, "name=value"; must start with a printable character
  * @return the stored term's length, 0 when an identical term was already there, or -1 on a null record, an
  *         invalid term or no room
  */
 // Adds or replaces the "name=value" term temp in the record. Names compare
 // through the D_004964C0 class table; "~..." terms are appended at the end.
-extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp)
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* field)
 {
     unsigned char* rec = (unsigned char*)record;
-    unsigned char* p;
+    unsigned char* cursor;
     unsigned char* start;
     unsigned char* end;
     int n;
-    int d;
-    unsigned int a;
-    unsigned int b;
+    int sizeDelta;
+    unsigned int recordClass;
+    unsigned int fieldClass;
     if (rec == 0) return -1;
-    if (temp == 0 || (unsigned char)*temp <= ' ') return -1;
-    if (*temp == '~') {
-        p = rec;
-        while (*p != 0) p++;
-        if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
-            *p++ = D_004A4A70;
-            *p = 0;
+    if (field == 0 || (unsigned char)*field <= ' ') return -1;
+    if (*field == '~') {
+        cursor = rec;
+        while (*cursor != 0) cursor++;
+        if (cursor != rec && cursor[-1] >= 0x20 && cursor[-1] != D_004A4A70 && cursor < rec + len - 1) {
+            *cursor++ = D_004A4A70;
+            *cursor = 0;
         }
-        end = p;
-        start = p;
+        end = cursor;
+        start = cursor;
     } else {
-        p = rec;
+        cursor = rec;
         for (;;) {
-            if (*p == 0) {
-                if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
-                    *p++ = D_004A4A70;
-                    *p = 0;
+            if (*cursor == 0) {
+                if (cursor != rec && cursor[-1] >= 0x20 && cursor[-1] != D_004A4A70 && cursor < rec + len - 1) {
+                    *cursor++ = D_004A4A70;
+                    *cursor = 0;
                 }
-                end = p;
-                start = p;
+                end = cursor;
+                start = cursor;
                 break;
             }
-            if (*p <= ' ') {
-                p++;
+            if (*cursor <= ' ') {
+                cursor++;
                 continue;
             }
-            if (D_004964C0[*p] == 1) {
-                end = p;
-                start = p;
+            if (D_004964C0[*cursor] == 1) {
+                end = cursor;
+                start = cursor;
                 break;
             }
-            a = D_004964C0[*p];
-            b = D_004964C0[*temp];
+            recordClass = D_004964C0[*cursor];
+            fieldClass = D_004964C0[*field];
             n = 0;
-            while (a == b && a >= 2) {
+            while (recordClass == fieldClass && recordClass >= 2) {
                 n++;
-                a = D_004964C0[p[n]];
-                b = D_004964C0[temp[n]];
+                recordClass = D_004964C0[cursor[n]];
+                fieldClass = D_004964C0[field[n]];
             }
-            if (a + b == 2) {
-                end = p;
-                start = p;
+            if (recordClass + fieldClass == 2) {
+                end = cursor;
+                start = cursor;
                 while (*end >= 0x20) end++;
                 if (*end != 0) end++;
                 goto found;
             }
-            p++;
-            while (*p >= 0x20) p++;
+            cursor++;
+            while (*cursor >= 0x20) cursor++;
         }
     }
 found:
-    int old = end - p;
+    int old = end - cursor;
     n = 0;
-    while (temp[n] >= 0x20) n++;
-    p = end;
+    while (field[n] >= 0x20) n++;
+    cursor = end;
     n++;
-    d = n - old;
-    while (*p != 0) p++;
-    p++;
-    if (d > 0 && rec + len - p < d) return -1;
-    if (d == 0 && func_00415FC8(start, temp, n) == 0) return 0;
-    if (d > 0) func_0041610C(end + d, end, p - end);
-    if (d < 0) func_0041610C(start, start - d, p - (start - d));
-    func_0041605C(start, temp, n);
+    sizeDelta = n - old;
+    while (*cursor != 0) cursor++;
+    cursor++;
+    if (sizeDelta > 0 && rec + len - cursor < sizeDelta) return -1;
+    if (sizeDelta == 0 && func_00415FC8(start, field, n) == 0) return 0;
+    if (sizeDelta > 0) func_0041610C(end + sizeDelta, end, cursor - end);
+    if (sizeDelta < 0) func_0041610C(start, start - sizeDelta, cursor - (start - sizeDelta));
+    func_0041605C(start, field, n);
     if (start[n] == 0 && D_004A4A70 != '\n')
         start[n - 1] = 0;
     else
@@ -721,7 +721,7 @@ extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char
  */
 extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char* name, const unsigned char* value)
 {
-    char temp[0xA00];
+    char fieldBuf[0xA00];
     char* data;
     const unsigned char* scan;
 
@@ -730,7 +730,7 @@ extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char
         cDirtysock_tag_TagFieldDelete_s(record, name);
         return 0;
     }
-    data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
 
     for (scan = value; (*scan != 0) && (*scan != ' '); ++scan)
         ;
@@ -755,7 +755,7 @@ extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char
     if (*scan == ' ')
         *data++ = '"';
     *data = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 

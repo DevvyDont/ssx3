@@ -131,15 +131,15 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     for (i = 3; i >= 0; i--) {
         self->unk_B08[i] = -1;
     }
-    int m1 = -1;
+    int invalidHandle = -1;
     self->mShadow = func_003758F8(cMemMan_alloc(0x1A0, str_BoaderShadow, 0, 0));
-    self->unk_450 = m1;
+    self->unk_450 = invalidHandle;
     self->unk_AA4 = 0;
     self->mIsOnScreen = 0;
     self->unk_B1C = 0;
     func_00283298(self->unk_6DC);
-    self->mWipeoutSlideHandle = m1;
-    self->mWipeoutTumbleHandle = m1;
+    self->mWipeoutSlideHandle = invalidHandle;
+    self->mWipeoutTumbleHandle = invalidHandle;
     func_00289AF0_impl(func_0028B180(), self);
     self->mBoostMeterStart = 0.0f;
     self->mBoostMode = 1;
@@ -207,39 +207,39 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     self->mVtbl = D_00459C18;
     func_00289AF8_impl(func_0028B180(), self);
     cScriptObject_DeInitScriptObject(self->unk_6DC);
-    char* o = (char*)self->mRiderAnim;
-    if (o != 0)
-        vdel_11B978(o, 0x58);
-    void* p = self->mAnimModel;
-    if (p != 0)
-        cAnimModel__cAnimModel(p, 3);
-    p = self->mSphereTree;
-    if (p != 0)
-        cRiderSphereTree__cRiderSphereTree(p, 3);
+    char* polyMember = (char*)self->mRiderAnim;
+    if (polyMember != 0)
+        vdel_11B978(polyMember, 0x58);
+    void* member = self->mAnimModel;
+    if (member != 0)
+        cAnimModel__cAnimModel(member, 3);
+    member = self->mSphereTree;
+    if (member != 0)
+        cRiderSphereTree__cRiderSphereTree(member, 3);
     operator_delete(self->mTrackPathHint);
     operator_delete(self->mAIPathHint);
-    p = self->mAirPredictor;
-    if (p != 0)
-        func_00113170(p, 3);
+    member = self->mAirPredictor;
+    if (member != 0)
+        func_00113170(member, 3);
     void* box = self->mFocusBox;
     if (box != 0)
         func_001033F8(*(void**)((char*)SSXApp->Game->AI + 0xA4), box);
     operator_delete((int*)self->mFocusBox);
-    p = self->mMetrix;
-    if (p != 0)
-        func_00117290(p, 3);
+    member = self->mMetrix;
+    if (member != 0)
+        func_00117290(member, 3);
     operator_delete((int*)self->mOverlapList);
     operator_delete((int*)self->mWallHint);
     operator_delete((int*)self->mLineHint);
-    o = (char*)self->mBoltOnFX;
-    if (o != 0)
-        vdel_11B978(o, 0xC4);
-    o = (char*)self->mAttachedEmitterFX;
-    if (o != 0)
-        vdel_11B978(o, 0xA4);
-    p = self->mShadow;
-    if (p != 0)
-        func_00375918(p, 3);
+    polyMember = (char*)self->mBoltOnFX;
+    if (polyMember != 0)
+        vdel_11B978(polyMember, 0xC4);
+    polyMember = (char*)self->mAttachedEmitterFX;
+    if (polyMember != 0)
+        vdel_11B978(polyMember, 0xA4);
+    member = self->mShadow;
+    if (member != 0)
+        func_00375918(member, 3);
     self->mScriptObjectVtbl = D_00482018;
     self->mScriptObjRiderVtbl = D_00481FD8;
     cScriptObject__cScriptObject(self->unk_6DC, 0);
@@ -1594,17 +1594,17 @@ extern "C" void cRider_updateBoundBox_impl(cRider* self, sVec4* pin)
     sVec4 up = *(sVec4*)&self->mMatrix.row[2];
     sVec4 side = *(sVec4*)&self->mMatrix.row[0];
     sVec4 front = *(sVec4*)&self->mMatrix.row[1];
-    sVec4* p = pin ? pin : (sVec4*)&self->mPosition;
-    *(sVec4*)&self->mBoundsMin = *(sVec4*)&self->mBoundsMax = *p;
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    *(sVec4*)&self->mBoundSphere = *p;
+    sVec4* basePos = pin ? pin : (sVec4*)&self->mPosition;
+    *(sVec4*)&self->mBoundsMin = *(sVec4*)&self->mBoundsMax = *basePos;
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    *(sVec4*)&self->mBoundSphere = *basePos;
     self->mBoundSphere.w = 250.0f;
 }
 #endif
@@ -2320,16 +2320,16 @@ extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf) __asm__("cRide
  */
 extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf)
 {
-    float a = deadzone_LP(*(float*)(self + 0x208), *(float*)(self + 0x214));
-    float b = deadzone_LP(*(float*)(self + 0x1F0), *(float*)(self + 0x214));
-    if (b != 0.0f || a != 0.0f)
-        LeanAbout_LP(self, xf, a, b, 0.523598849773407f, 0.7853982448577881f);
+    float leanAboutX = deadzone_LP(*(float*)(self + 0x208), *(float*)(self + 0x214));
+    float leanAboutY = deadzone_LP(*(float*)(self + 0x1F0), *(float*)(self + 0x214));
+    if (leanAboutY != 0.0f || leanAboutX != 0.0f)
+        LeanAbout_LP(self, xf, leanAboutX, leanAboutY, 0.523598849773407f, 0.7853982448577881f);
     float k = *(float*)(self + 0x250);
     if (k != 0.0f) {
         QuatMulTo_LP(xf->rot, AxisAngle_LP(D_004FF140, k * 0.7853982448577881f));
     }
-    sVec4XW g = Scale_LP(*(sVec4XW*)(self + 0x3B0), *(float*)(*(char**)(self + 0x780) + 0x140) * (*(float*)(self + 0x1F0) * 45.0f));
-    AddTo_LP(xf->pos, g);
+    sVec4XW sideShift = Scale_LP(*(sVec4XW*)(self + 0x3B0), *(float*)(*(char**)(self + 0x780) + 0x140) * (*(float*)(self + 0x1F0) * 45.0f));
+    AddTo_LP(xf->pos, sideShift);
 }
 #endif
 
@@ -3026,9 +3026,9 @@ skip:
     self->unk_A30 = 0;
     self->mVisitedIds = 0xFFFFFFFF;
     func_0011B3F8(self);
-    float t = self->mFinishTime;
-    if (t >= 0.0f)
-        self->mFinishTime = t + 0.01666666753590107f;
+    float finishTime = self->mFinishTime;
+    if (finishTime >= 0.0f)
+        self->mFinishTime = finishTime + 0.01666666753590107f;
 }
 #endif
 
@@ -3287,10 +3287,10 @@ struct sVEntry00121818 { short delta; short index; void (*fn)(void*, void*, void
  */
 extern "C" void cRider_updateSplit10(cRider* self)
 {
-    char* h = (char*)self->unk_A30;
-    if (h != 0)
+    char* collideInst = (char*)self->unk_A30;
+    if (collideInst != 0)
     {
-        char* obj = *(char**)(h + 0xC);
+        char* obj = *(char**)(collideInst + 0xC);
         if (obj != 0)
         {
             sVEntry00121818* vt = *(sVEntry00121818**)(obj + 0xC);
@@ -3832,36 +3832,36 @@ extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
  */
 extern "C" void cRider_SetRiderLights(cRider* self)
 {
-    sQ_20D8 q;
+    sQ_20D8 hipPos;
     func_00389260(self->unk_7C0);
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
         *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)func_002EDFB8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta));
     }
-    cRider_getHipPosition((cRider*)(&q), self);
+    cRider_getHipPosition((cRider*)(&hipPos), self);
     char* lightState = self->unk_7C0;
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
-        func_00389CB8(lightState, &q, func_002EEFA8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)));
+        func_00389CB8(lightState, &hipPos, func_002EEFA8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)));
     }
     for (int i = 0; i < 8; i++) {
         void* light = self->unk_794[i];
         if (light != 0)
-            func_0038A6A8(self->unk_7C0, &q, light);
+            func_0038A6A8(self->unk_7C0, &hipPos, light);
     }
     char* x = (char*)self->mRiderHandler;
     sPath_20D8* playerLights = x ? (sPath_20D8*)(x + 0xD30) : 0;
     if (playerLights != 0) {
         {
-            sV3_20D8 v(playerLights->x, playerLights->y, playerLights->z);
-            func_00389558(self->unk_7C0, &v);
+            sV3_20D8 lightColour(playerLights->x, playerLights->y, playerLights->z);
+            func_00389558(self->unk_7C0, &lightColour);
         }
         for (int j = 0; j < playerLights->n; j++) {
             sQ_20D8* qq = &playerLights->q[j];
-            sV3_20D8 v(playerLights->pts[j].x, playerLights->pts[j].y, playerLights->pts[j].z);
-            func_00389520(self->unk_7C0, qq, &v);
+            sV3_20D8 lightColour(playerLights->pts[j].x, playerLights->pts[j].y, playerLights->pts[j].z);
+            func_00389520(self->unk_7C0, qq, &lightColour);
         }
     }
 }
@@ -4002,17 +4002,17 @@ extern "C" void cRider_renderBody(cRider* self)
         sVEntryF_122448* vt2 = (sVEntryF_122448*)graphicsMan->mVtbl;
         vt2[27].fn((char*)graphicsMan + vt2[27].delta, 0.0f, &self->mPosition);
         cAnimModel_render(self->mAnimModel, self->mLOD, additiveBoard, additivePlayer);
-        cPS2GraphicsMan* g3 = GrMan;
-        sVEntryF_122448* vt3 = (sVEntryF_122448*)g3->mVtbl;
-        vt3[27].fn((char*)g3 + vt3[27].delta, 0.0f, &D_004FF120_v122448);
+        cPS2GraphicsMan* grManReset = GrMan;
+        sVEntryF_122448* vt3 = (sVEntryF_122448*)grManReset->mVtbl;
+        vt3[27].fn((char*)grManReset + vt3[27].delta, 0.0f, &D_004FF120_v122448);
     }
     if (*(int*)((char*)SSXApp->Game->ViewMan + 0x14) == 0 || self->unk_B1C)
     {
-        int* f = &self->unk_B1C;
-        int v = 0;
+        int* lowDetailFlag = &self->unk_B1C;
+        int lowDetail = 0;
         if (self->mIsOnScreen == 0 || self->mLOD == 2)
-            v = 1;
-        *f = v;
+            lowDetail = 1;
+        *lowDetailFlag = lowDetail;
     }
 }
 #endif
@@ -4331,59 +4331,59 @@ extern "C" void cRider_RenderShadow(cRider* self)
             Set3_2898(D_004A5E40, 0.0f, 0.0f, -1.0f);
             D_004A4C00 = 1;
         }
-        sV3_2898 b;
+        sV3_2898 objUp;
         {
-            sV4_2898 p = *(sV4_2898*)&self->mMatrix.row[2];
-            b.x = p.x;
-            b.y = p.y;
-            b.z = p.z;
+            sV4_2898 upRow = *(sV4_2898*)&self->mMatrix.row[2];
+            objUp.x = upRow.x;
+            objUp.y = upRow.y;
+            objUp.z = upRow.z;
         }
         float k = 0.3f;
-        func_00374D00(Shadow_2898(self), &center, &b, &D_004A5E40, (sMat_2898*)Model_2898(self)->unk_030, 0);
-        cPS2GraphicsMan* g2 = GrMan;
-        top_2898(g2)->f8 = (top_2898(g2)->f8 & ~0x3E0) | 0x20;
-        top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFE7FFFFF) | 0x1000000;
-        top_2898(g2)->f4 = top_2898(g2)->f4 & 0xFFCFFFFF;
-        top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFFF00FFF) | 0x14000;
-        top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFFBFFFFF) | 0x400000;
-        top_2898(g2)->f4 = (top_2898(g2)->f4 & ~0x7C) | 4;
-        sVE0_2898* vt = (sVE0_2898*)g2->mVtbl;
-        vt[31].fn((char*)g2 + vt[31].delta);
-        cPS2GraphicsMan* g3 = GrMan;
-        sVE2_2898* vt3 = (sVE2_2898*)g3->mVtbl;
-        vt3[53].fn((char*)g3 + vt3[53].delta, Shadow_2898(self)->f170, 1);
-        cPS2GraphicsMan* g4 = GrMan;
-        sVEI3_2898* vt4 = (sVEI3_2898*)g4->mVtbl;
-        vt4[55].fn((char*)g4 + vt4[55].delta, Tex_2898(Shadow_2898(self)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
+        func_00374D00(Shadow_2898(self), &center, &objUp, &D_004A5E40, (sMat_2898*)Model_2898(self)->unk_030, 0);
+        cPS2GraphicsMan* grManPushView = GrMan;
+        top_2898(grManPushView)->f8 = (top_2898(grManPushView)->f8 & ~0x3E0) | 0x20;
+        top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFE7FFFFF) | 0x1000000;
+        top_2898(grManPushView)->f4 = top_2898(grManPushView)->f4 & 0xFFCFFFFF;
+        top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFFF00FFF) | 0x14000;
+        top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFFBFFFFF) | 0x400000;
+        top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & ~0x7C) | 4;
+        sVE0_2898* vt = (sVE0_2898*)grManPushView->mVtbl;
+        vt[31].fn((char*)grManPushView + vt[31].delta);
+        cPS2GraphicsMan* grManLockTex = GrMan;
+        sVE2_2898* vt3 = (sVE2_2898*)grManLockTex->mVtbl;
+        vt3[53].fn((char*)grManLockTex + vt3[53].delta, Shadow_2898(self)->f170, 1);
+        cPS2GraphicsMan* grManClearTex = GrMan;
+        sVEI3_2898* vt4 = (sVEI3_2898*)grManClearTex->mVtbl;
+        vt4[55].fn((char*)grManClearTex + vt4[55].delta, Tex_2898(Shadow_2898(self)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
         if (func_0011FE98(self) == 0) {
             k = 0.0f;
         }
         sMat_2898 mat;
         CopyMat_2898(&mat, &Shadow_2898(self)->mat);
-        sV4_2898 p0 = Shadow_2898(self)->f150;
-        sV4_2898 p1 = Shadow_2898(self)->f160;
-        cPS2GraphicsMan* g5 = GrMan;
-        sVE4_2898* vt5 = (sVE4_2898*)g5->mVtbl;
-        vt5[101].fn((char*)g5 + vt5[101].delta, &mat, &p0, &p1);
-        sV4_2898 c1;
-        c1.x = 1.0f;
-        c1.y = k;
-        c1.z = k;
-        c1.w = k;
-        sV4_2898 c2;
-        c2.x = 1.0f;
-        c2.y = 0.3f;
-        c2.z = 0.3f;
-        c2.w = 0.3f;
-        cAnimModel_rendershadow(Model_2898(self), 3, &c1, &c2);
-        cPS2GraphicsMan* g6 = GrMan;
-        sVEI_2898* vt6 = (sVEI_2898*)g6->mVtbl;
-        vt6[54].fn((char*)g6 + vt6[54].delta);
-        cPS2GraphicsMan* g7 = GrMan;
-        sVE0_2898* vt7 = (sVE0_2898*)g7->mVtbl;
-        vt7[32].fn((char*)g7 + vt7[32].delta);
-        cPS2GraphicsMan* g8 = GrMan;
-        top_2898(g8)--;
+        sV4_2898 tuvScale = Shadow_2898(self)->f150;
+        sV4_2898 tuvTrans = Shadow_2898(self)->f160;
+        cPS2GraphicsMan* grManTuvBatch = GrMan;
+        sVE4_2898* vt5 = (sVE4_2898*)grManTuvBatch->mVtbl;
+        vt5[101].fn((char*)grManTuvBatch + vt5[101].delta, &mat, &tuvScale, &tuvTrans);
+        sV4_2898 boardColour;
+        boardColour.x = 1.0f;
+        boardColour.y = k;
+        boardColour.z = k;
+        boardColour.w = k;
+        sV4_2898 shadowColour;
+        shadowColour.x = 1.0f;
+        shadowColour.y = 0.3f;
+        shadowColour.z = 0.3f;
+        shadowColour.w = 0.3f;
+        cAnimModel_rendershadow(Model_2898(self), 3, &boardColour, &shadowColour);
+        cPS2GraphicsMan* grManRestoreLock = GrMan;
+        sVEI_2898* vt6 = (sVEI_2898*)grManRestoreLock->mVtbl;
+        vt6[54].fn((char*)grManRestoreLock + vt6[54].delta);
+        cPS2GraphicsMan* grManPopView = GrMan;
+        sVE0_2898* vt7 = (sVE0_2898*)grManPopView->mVtbl;
+        vt7[32].fn((char*)grManPopView + vt7[32].delta);
+        cPS2GraphicsMan* grManPopState = GrMan;
+        top_2898(grManPopState)--;
     }
     func_00375890(Shadow_2898(self));
 }
@@ -4781,12 +4781,12 @@ extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transp
  * notifies view 0's camera controller (slot 3), places the rider (func_0011D660), points the old speed along
  * the new front axis and resets the FX.
  *
- * @param m  the target transform, row 3 = position (On Tour: const t4Matrix & mat)
+ * @param mat  the target transform, row 3 = position (On Tour: const t4Matrix & mat)
  */
-extern "C" void cRider_transport_v(cRider* self, char* m)
+extern "C" void cRider_transport_v(cRider* self, char* mat)
 {
     cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
-    sVec4 pos = *(sVec4*)(m + 0x30);
+    sVec4 pos = *(sVec4*)(mat + 0x30);
     sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
     int i = self->mAIIndex;
     if (i == 0) {
@@ -4802,9 +4802,9 @@ extern "C" void cRider_transport_v(cRider* self, char* m)
     } else if (i == 5) {
         off = sVec4(2.0f, 1.0f, 0.0f, 0.0f);
     }
-    off = Scale_3210(MatMulV_3210(m, off), 100.0f);
+    off = Scale_3210(MatMulV_3210(mat, off), 100.0f);
     AddEq_3210(pos, off);
-    sVec4 dir = MatMulV_3210(m, D_004FF140);
+    sVec4 dir = MatMulV_3210(mat, D_004FF140);
     func_00119368(self->mMetrix, 1);
     cRider_setMotionState_impl(self, 0);
     func_0011FEC8_impl(self, 0);
@@ -5081,25 +5081,25 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     self->unk_AD0 = rec[4] != 0;
     func_0027C9B0((int)self->unk_6D8, buf);
     float* fb = (float*)buf;
-    sV_3640 q;
-    q.x = fb[6];
-    q.y = fb[7];
-    q.z = fb[8];
-    q.w = one;
+    sV_3640 poseVec;
+    poseVec.x = fb[6];
+    poseVec.y = fb[7];
+    poseVec.z = fb[8];
+    poseVec.w = one;
     self->unk_AF0 = fb[9] * 0.01745329424738884f;
     self->unk_AF4 = fb[10] * 0.01745329424738884f;
     self->unk_AF8 = fb[11] * 0.01745329424738884f;
-    *(sV_3640*)&self->unk_AE0 = q;
-    q = MatMulV_3640((char*)self + 0x700, *(sV_3640*)&self->unk_AE0);
-    *(sV_3640*)&self->mPosition = q;
+    *(sV_3640*)&self->unk_AE0 = poseVec;
+    poseVec = MatMulV_3640((char*)self + 0x700, *(sV_3640*)&self->unk_AE0);
+    *(sV_3640*)&self->mPosition = poseVec;
     float ry = self->unk_744;
     float rz = self->unk_740;
-    cRider_EulerToQuat(self, (sQuat_001241C0*)&q, zeroF,
+    cRider_EulerToQuat(self, (sQuat_001241C0*)&poseVec, zeroF,
                   self->unk_AF4 + ry,
                   self->unk_AF0 + rz);
     float rx = self->unk_748;
     *(sV_3640*)&self->mRotation = AxisAngle_3640(D_004FF160_3640, self->unk_AF8 + rx - 1.5707963705062866f);
-    *(sV_3640*)&self->mRotation = QuatMul_3640(q, *(sV_3640*)&self->mRotation);
+    *(sV_3640*)&self->mRotation = QuatMul_3640(poseVec, *(sV_3640*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
     *(sV_3640*)&self->mVelocity = D_004FF120_3640;
     self->unk_B04 = zeroF;
@@ -5133,14 +5133,14 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_3640();
         sDb_3640* db = (sDb_3640*)func_0014AD50(iface, self->mAIIndex);
-        int g = cRider_getIdentity(self);
-        int n = func_0014D988(tbl, g);
-        sEnt_3640* e = (sEnt_3640*)func_0014D998(tbl, g);
+        int identity = cRider_getIdentity(self);
+        int n = func_0014D988(tbl, identity);
+        sEnt_3640* entry = (sEnt_3640*)func_0014D998(tbl, identity);
         int i;
-        for (i = 0; i < n; i++, e++) {
-            int id = e->id;
-            if (id >= 0 && (e->flags & 0x40)) {
-                if (lookup_3640(db, e->item)->flags & 0x10) {
+        for (i = 0; i < n; i++, entry++) {
+            int id = entry->id;
+            if (id >= 0 && (entry->flags & 0x40)) {
+                if (lookup_3640(db, entry->item)->flags & 0x10) {
                     func_0030EA80(self->mAnimModel, id, 0);
                     func_0030EA80(self->mAnimModel, id, 1);
                     func_0030EA80(self->mAnimModel, id, 2);
@@ -5263,14 +5263,14 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_noarg();
         sDb_123B48* db = (sDb_123B48*)func_0014AD50(iface, self->mAIIndex);
-        int g = cRider_getIdentity(self);
-        int n = func_0014D988(tbl, g);
-        sEnt_123B48* e = (sEnt_123B48*)func_0014D998(tbl, g);
+        int identity = cRider_getIdentity(self);
+        int n = func_0014D988(tbl, identity);
+        sEnt_123B48* entry = (sEnt_123B48*)func_0014D998(tbl, identity);
         int i;
-        for (i = 0; i < n; i++, e++) {
-            int id = entId_123B48(e);
-            if (id >= 0 && entOn_123B48(e)) {
-                if (itemFlags_123B48(db, e) & 0x10) {
+        for (i = 0; i < n; i++, entry++) {
+            int id = entId_123B48(entry);
+            if (id >= 0 && entOn_123B48(entry)) {
+                if (itemFlags_123B48(db, entry) & 0x10) {
                     setChan_123B48(self, id, 0);
                     setChan_123B48(self, id, 1);
                     setChan_123B48(self, id, 2);
@@ -5305,19 +5305,19 @@ extern "C" void func_00125448(void*, void*, float, float, int);
  * is its type.
  *
  * @param id  the script player entity (On Tour: pEntity)
- * @param type  the current frame (the first float argument; On Tour: currFrame)
- * @param currFrame  the frame step (the second float argument; On Tour: frameDelta)
- * @param frameDelta  the entity type (On Tour: type); unused
+ * @param currFrame  the current frame (the first float argument; On Tour: currFrame)
+ * @param frameDelta  the frame step (the second float argument; On Tour: frameDelta)
+ * @param type  the entity type (On Tour: type); unused
  * @param flags  event bits, passed on to both updates
  */
-extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float type, float currFrame, int frameDelta, int flags)
+extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float currFrame, float frameDelta, int type, int flags)
 {
     int buf[12];
     if (self->mIsInNIS)
     {
         func_0027C9B0(id, buf);
-        func_00124788(self, buf, type, currFrame, flags);
-        func_00125448(self, buf, type, currFrame, flags);
+        func_00124788(self, buf, currFrame, frameDelta, flags);
+        func_00125448(self, buf, currFrame, frameDelta, flags);
     }
 }
 #endif
@@ -6366,9 +6366,9 @@ extern "C" int cRider_updateFinishTest(cRider* self)
             char* app = (char*)SSXApp;
             char* gameModeMan = *(char**)(app + 0xC0);
             if (*(int*)(gameModeMan + 0x88) != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
-                int t = *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0xC);
+                int eventTicks = *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0xC);
                 int secs = func_004139F8((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f);
-                if (secs * 60 < t) {
+                if (secs * 60 < eventTicks) {
                     self->mDidNotFinish = 1;
                     cRider_doFinishEvent(self);
                     func_002A3C00(func_0028B180(), self, 2);

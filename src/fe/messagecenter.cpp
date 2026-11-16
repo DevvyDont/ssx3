@@ -293,14 +293,14 @@ static inline int countSel_7500(sReqLine_7500* self)
  * hands the playlist to the sound manager and pops (in game) or opens cFEStateAudioOptions. Event 1 updates
  * the song info, help and button texts.
  *
- * @param p  the cFEStateRequestLine (raw pointer)
+ * @param requestLine  the cFEStateRequestLine (raw pointer)
  * @param item  the widget; its misc data (+0x18) is the row
  * @param msg  UI event code (1, 5 or 6)
  */
 // Request-line widget events: 1 hilights a song, 5 toggles it (done/selected masks), 6 saves the masks and leaves.
-extern "C" void cFEStateRequestLine_onWidgetEvent(void* p, void* item, unsigned int msg)
+extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item, unsigned int msg)
 {
-    sReqLine_7500* self = (sReqLine_7500*)p;
+    sReqLine_7500* self = (sReqLine_7500*)requestLine;
     if (item == 0) {
         return;
     }
@@ -388,15 +388,15 @@ extern "C" void func_002B4978(void* list, int idx);
  * +0x508, func_0028CF98) or previews it in the front end (func_002B4978); key 4 scrolls the list to the row;
  * key 9 gives 0.
  *
- * @param p  the cFEStateRequestLine (raw pointer)
+ * @param requestLine  the cFEStateRequestLine (raw pointer)
  * @param item  the menu (unused)
  * @param msg  menu key/event code (4, 6, 8 or 9)
  * @param k  row index in the menu
  * @return 0x10 to refuse, 0 for key 9, else 0x101
  */
-extern "C" int cFEStateRequestLine_onWidgetMenu(void* p, void* item, unsigned int msg, int k)
+extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, unsigned int msg, int k)
 {
-    sReqLine_7500* self = (sReqLine_7500*)p;
+    sReqLine_7500* self = (sReqLine_7500*)requestLine;
     switch (msg) {
     case 6: {
         int idx = self->list[self->top + k];
@@ -855,11 +855,11 @@ struct sMsgCenter_00198118 {
  *
  * Counts the bits of the playlist mask (+0x158) and writes the formatted text to the counter widget (+0x1E4).
  *
- * @param p  the cFEStateRequestLine (raw pointer)
+ * @param requestLine  the cFEStateRequestLine (raw pointer)
  */
-extern "C" void cFEStateRequestLine_updatePlayListCounter(void* p)
+extern "C" void cFEStateRequestLine_updatePlayListCounter(void* requestLine)
 {
-    sMsgCenter_00198118* self = (sMsgCenter_00198118*)p;
+    sMsgCenter_00198118* self = (sMsgCenter_00198118*)requestLine;
     char* db = (char*)SSXApp->FELocale;
     sVtEntry_00198118* vt = *(sVtEntry_00198118**)(db + 4);
     unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongsInList));
@@ -922,12 +922,12 @@ static inline int countSel_001981F8(sReqLine_001981F8* self)
  * kT_HELPAUDIOAvailBuy when affordable or free, else kT_16SaveMoreCarsh. Otherwise kT_FAQRADIOBA or
  * kT_CMNHELPBuySongCTM by D_00535C11[0].
  *
- * @param p  the cFEStateRequestLine (raw pointer)
+ * @param requestLine  the cFEStateRequestLine (raw pointer)
  * @param idx  song index
  */
-extern "C" void cFEStateRequestLine_updateHelpText(void* p, int idx)
+extern "C" void cFEStateRequestLine_updateHelpText(void* requestLine, int idx)
 {
-    sReqLine_001981F8* self = (sReqLine_001981F8*)p;
+    sReqLine_001981F8* self = (sReqLine_001981F8*)requestLine;
     if (self->text == 0) {
         return;
     }
@@ -1020,13 +1020,13 @@ static inline int countSel_UBT(sReqLine_UBT* self)
  * than 6 songs have their bit set. In a game (SSXApp->Game set), the two buttons hide for songs without their
  * bit.
  *
- * @param p    the request line state (this)
+ * @param requestLine    the request line state (this)
  * @param idx  the song index (bit number in the masks)
  */
 // Updates the action button label of the selected request line and shows or hides the buttons.
-extern "C" void cFEStateRequestLine_updateButtonsText(void* p, int idx)
+extern "C" void cFEStateRequestLine_updateButtonsText(void* requestLine, int idx)
 {
-    sReqLine_UBT* self = (sReqLine_UBT*)p;
+    sReqLine_UBT* self = (sReqLine_UBT*)requestLine;
     if (self->text != 0) {
         int shown = 0;
         cUIText_setAsciiString((cUIText*)self->text, D_004A1390);

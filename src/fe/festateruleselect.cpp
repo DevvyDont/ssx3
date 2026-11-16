@@ -178,17 +178,17 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
         sel = *(unsigned char*)(menu + 0x95);
     char frame[32];
     if (self->rules[sel] == 0) {
-        char* a = (char*)find_1388(self, str_arrw_left);
-        char* b = (char*)find_1388(self, str_arrw_right);
-        if (a) SetVisible_1388(a, 0);
-        if (b) SetVisible_1388(b, 0);
+        char* arrowLeft = (char*)find_1388(self, str_arrw_left);
+        char* arrowRight = (char*)find_1388(self, str_arrw_right);
+        if (arrowLeft) SetVisible_1388(arrowLeft, 0);
+        if (arrowRight) SetVisible_1388(arrowRight, 0);
         __builtin_memcpy(frame, D_004A1708, 7);
     } else {
         __builtin_memcpy(frame, D_0045FAD8, 10);
     }
-    int f = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(frame));
-    if (f != 0xFFFF)
-        cUIScreen_playFrame(self->screen, f, 1);
+    int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(frame));
+    if (frameIndex != 0xFFFF)
+        cUIScreen_playFrame(self->screen, frameIndex, 1);
     cFEStateRuleSelect_updateMenuColor(self);
 }
 #endif
@@ -306,9 +306,9 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     sStr2_19188 label;
     char* lp = label.c;
     int n = 14;
-    signed char* p = &self->sel[14];
+    signed char* disableCounter = &self->sel[14];
     for (; n >= 0; n--)
-        *p-- = 0;
+        *disableCounter-- = 0;
     self->count = count;
     MEM_fill(D_005308B8, 0, 0x20);
     cFEStateRuleSelect_setupMenu(self, 0);
@@ -325,12 +325,12 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     name = *(sStr3_19188*)str_0b;
     label = *(sStr2_19188*)D_004A13A0;
     for (signed char i = 0; i < 11; i++) {
-        sUIObj_19188* o = (sUIObj_19188*)find_19188(self, name.c);
-        o->flags &= ~1;
-        sUIObj_19188* l = (sUIObj_19188*)find_19188(self, lp);
+        sUIObj_19188* rowListBox = (sUIObj_19188*)find_19188(self, name.c);
+        rowListBox->flags &= ~1;
+        sUIObj_19188* rowItem = (sUIObj_19188*)find_19188(self, lp);
         if (i >= count) {
-            l->vt[9].fn((char*)l + l->vt[9].delta, 0);
-            l->vt[8].fn((char*)l + l->vt[8].delta, 1);
+            rowItem->vt[9].fn((char*)rowItem + rowItem->vt[9].delta, 0);
+            rowItem->vt[8].fn((char*)rowItem + rowItem->vt[8].delta, 1);
         }
         if (i < 9) {
             label.c[0]++;
@@ -534,9 +534,9 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned
             __builtin_memcpy(label, D_004A1708, 7);
         }
         if (play) {
-            int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(label));
-            if (f != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x40), f, 1);
+            int frameIndex = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(label));
+            if (frameIndex != 0xFFFF) {
+                cUIScreen_playFrame(*(void**)(self + 0x40), frameIndex, 1);
             }
         }
         return locked;

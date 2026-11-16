@@ -264,8 +264,8 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         if (text == 0)
             return;
         bool isOnline = false;
-        bool c = false;
-        bool b = false;
+        bool toggle2Enabled = false;
+        bool toggle1Enabled = false;
         switch (w->idx) {
         case 0:
             setText_AOWE(text, str_kT_HELPAUDIORadioBig);
@@ -275,7 +275,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             break;
         case 1:
             if (self->f7C == 0) {
-                b = online_AOWE();
+                toggle1Enabled = online_AOWE();
                 if (online_AOWE())
                     setText_AOWE(text, str_kT_HELPAUDIOCreateInLodge);
                 else if (self->f74 == 0)
@@ -287,7 +287,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             break;
         case 3:
             if (self->f7C == 0) {
-                c = online_AOWE();
+                toggle2Enabled = online_AOWE();
                 if (online_AOWE())
                     setText_AOWE(text, str_kT_HELPAUDIOCreateInLodge);
                 else if (self->f74 == 0)
@@ -310,8 +310,8 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         }
         if (online_AOWE()) {
             setEnabled_AOWE(self->toggles[0], isOnline);
-            setEnabled_AOWE(self->toggles[1], b);
-            setEnabled_AOWE(self->toggles[2], c);
+            setEnabled_AOWE(self->toggles[1], toggle1Enabled);
+            setEnabled_AOWE(self->toggles[2], toggle2Enabled);
         }
         break;
     }

@@ -955,6 +955,14 @@ extern "C" void func_00392D58(cPlayerLights* playerLights, void *arg1) {
 //100%
 INCLUDE_ASM("render/font", cPlayerLights_AddDirectional);
 #ifdef SKIP_ASM
+/**
+ * Appends a directional light: stores @p colour and @p direction at index mNumDirectionalLights and increments it.
+ *
+ * There is no bound check against the size of mDirectionalLightColours / mDirectionalLightDirections.
+ *
+ * @param direction  the light's direction (a 16-byte vector)
+ * @param colour  the light's colour
+ */
 extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* direction, tRGB* colour)
 {
     ((&self->mDirectionalLightColours[0]))[self->mNumDirectionalLights] = *colour;
@@ -1087,6 +1095,11 @@ INCLUDE_ASM("render/font", func_00393048);
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetDTV__FPv);
 #ifdef SKIP_ASM
+/**
+ * The base cGraphicsMan::SetDTV: does nothing (cPS2GraphicsMan_SetDTV is the PS2 override).
+ *
+ * Declared with only the this pointer; On Tour's SetDTV(bool Enable) takes the flag, which stays unused in $a1.
+ */
 void cGraphicsMan_SetDTV(void* self)
 {
 }
@@ -1104,6 +1117,12 @@ int func_00393FB0(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetScreenOffset);
 #ifdef SKIP_ASM
+/**
+ * Sets the screen offset: m_screenOffset[0] / [1] = @p xoffset / @p yoffset converted to float.
+ *
+ * @param xoffset  the horizontal offset in pixels
+ * @param yoffset  the vertical offset in pixels
+ */
 extern "C" void cGraphicsMan_SetScreenOffset(cPS2GraphicsMan* self, int xoffset, int yoffset)
 {
     self->m_screenOffset[0] = (float)xoffset;
@@ -1114,6 +1133,11 @@ extern "C" void cGraphicsMan_SetScreenOffset(cPS2GraphicsMan* self, int xoffset,
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_GetScreenXOffset);
 #ifdef SKIP_ASM
+/**
+ * Returns the horizontal screen offset, m_screenOffset[0] truncated to int.
+ *
+ * @return the X offset in pixels
+ */
 extern "C" int cGraphicsMan_GetScreenXOffset(cPS2GraphicsMan* self)
 {
     return (int)self->m_screenOffset[0];
@@ -1123,6 +1147,11 @@ extern "C" int cGraphicsMan_GetScreenXOffset(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_GetScreenYOffset);
 #ifdef SKIP_ASM
+/**
+ * Returns the vertical screen offset, m_screenOffset[1] truncated to int.
+ *
+ * @return the Y offset in pixels
+ */
 extern "C" int cGraphicsMan_GetScreenYOffset(cPS2GraphicsMan* self)
 {
     return (int)self->m_screenOffset[1];
@@ -1466,6 +1495,10 @@ extern "C" void* func_003942A0(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_RemoveScreenGrabTexture__FPv);
 #ifdef SKIP_ASM
+/**
+ * The base cGraphicsMan::RemoveScreenGrabTexture: does nothing (cPS2GraphicsMan_RemoveScreenGrabTexture is the PS2
+ * version). Declared with only the this pointer.
+ */
 void cGraphicsMan_RemoveScreenGrabTexture(void* self)
 {
 }
@@ -1510,6 +1543,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDefaultDrawState);
 
 extern sDrawState D_00501420;
 
+/**
+ * Resets the current draw state (*m_pCurrentDrawState) to the default draw state D_00501420 built by the cGraphicsMan
+ * constructor.
+ */
 extern "C" void cGraphicsMan_SetDefaultDrawState(cPS2GraphicsMan* self)
 {
     *(self->m_pCurrentDrawState) = D_00501420;
@@ -1519,6 +1556,11 @@ extern "C" void cGraphicsMan_SetDefaultDrawState(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/font", cGraphicsMan_SetDrawState);
 #ifdef SKIP_ASM
 
+/**
+ * Copies @p src into the current draw state (*m_pCurrentDrawState).
+ *
+ * @param src  the draw state to apply
+ */
 extern "C" void cGraphicsMan_SetDrawState(cPS2GraphicsMan* self, sDrawState* src)
 {
     *(self->m_pCurrentDrawState) = *src;
@@ -1564,6 +1606,13 @@ struct sFontV4 {
     float x, y, z, w;
 };
 
+/**
+ * Stores @p colour in constant-colour slot @p idx (16-byte entries at +0xF04, m_constantColours). @p idx is not
+ * range-checked.
+ *
+ * @param colour  the colour, passed by value as a 16-byte vector
+ * @param idx  the constant-colour slot
+ */
 extern "C" void cGraphicsMan_SetConstantColour(cPS2GraphicsMan* self, sFontV4 colour, int idx)
 {
     // PORT: pointer arithmetic via int (index-first addu)
@@ -1669,6 +1718,10 @@ void func_003945B8(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_AddProjectiveTexture__FPv);
 #ifdef SKIP_ASM
+/**
+ * The base cGraphicsMan::AddProjectiveTexture: does nothing (cPS2GraphicsMan_AddProjectiveTexture is the PS2
+ * version). Declared with only the this pointer.
+ */
 void cGraphicsMan_AddProjectiveTexture(void* self)
 {
 }
@@ -1813,6 +1866,10 @@ void func_00394658(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_GenerateBlendedMatrices__FPv);
 #ifdef SKIP_ASM
+/**
+ * The base cGraphicsMan::GenerateBlendedMatrices: does nothing (cPS2GraphicsMan_GenerateBlendedMatrices is the PS2
+ * version). Declared with only the this pointer.
+ */
 void cGraphicsMan_GenerateBlendedMatrices(void* self)
 {
 }
@@ -1927,6 +1984,14 @@ void func_003946E8(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
 #ifdef SKIP_ASM
+/**
+ * Sets the current draw state's pixel tests in its word at +4: depth test bits 23-24, alpha test bits 20-21 and the
+ * alpha reference bits 12-19.
+ *
+ * @param depthtestmode  the depth test mode (2 bits)
+ * @param atestmode  the alpha test mode (2 bits)
+ * @param aref  the alpha reference value (8 bits)
+ */
 extern "C" void cGraphicsMan_SetPixelTest(cPS2GraphicsMan* self, int depthtestmode, int atestmode, int aref)
 {
     int sa = (depthtestmode << 23) & 0x01800000;
@@ -1940,6 +2005,13 @@ extern "C" void cGraphicsMan_SetPixelTest(cPS2GraphicsMan* self, int depthtestmo
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetTexture);
 #ifdef SKIP_ASM
+/**
+ * Sets texture @p idx of the current draw state: the short at draw state + 0x10 + idx * 2 (On Tour SetTexture(texid,
+ * contextID)).
+ *
+ * @param value  the texture id to store (On Tour texid)
+ * @param idx  the texture context (On Tour contextID); not range-checked
+ */
 extern "C" void cGraphicsMan_SetTexture(cPS2GraphicsMan* self, short value, int idx) {
     *(short*)((char*)self->m_pCurrentDrawState + (idx << 1) + 0x10) = value;
 }
@@ -1948,6 +2020,10 @@ extern "C" void cGraphicsMan_SetTexture(cPS2GraphicsMan* self, short value, int 
 INCLUDE_ASM("render/font", cGraphicsMan_PushDrawState);
 #ifdef SKIP_ASM
 
+/**
+ * Pushes the draw-state stack: copies the current draw state into the next entry and makes that entry current. No
+ * overflow check.
+ */
 extern "C" void cGraphicsMan_PushDrawState(cPS2GraphicsMan* self)
 {
     sDrawState* top = self->m_pCurrentDrawState;
@@ -2697,6 +2773,14 @@ extern "C" void* cGraphicsMan__cGraphicsMan(void* self);
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan__cPS2GraphicsMan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the PS2 graphics manager by chaining to cGraphicsMan__cGraphicsMan.
+ *
+ * Declared with only the this pointer: the destructor flags stay in $a1 and reach the base destructor, which frees
+ * the object when bit 0 is set.
+ *
+ * @return the base destructor's result (declared void*)
+ */
 void* cPS2GraphicsMan__cPS2GraphicsMan(void* self)
 {
     return cGraphicsMan__cGraphicsMan(self);
@@ -2716,6 +2800,14 @@ struct sRenderSlot5288 {
     sRenderSlot5288() {}
 };
 
+/**
+ * Constructs the PS2 graphics manager: runs the cGraphicsMan constructor and stores cPS2GraphicsMan_vtbl.
+ *
+ * Then placement-constructs five sRenderSlot5288 arrays (12 at +0x10E0, 8 at +0x11A0, 2 at +0x1220, 2 at +0x1240, 4
+ * at +0x1260); the element type has no constructor, so these loops do no work.
+ *
+ * @return @p self
+ */
 extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 {
     cGraphicsMan_cGraphicsMan(self);
@@ -2768,6 +2860,11 @@ struct sFontEntry {
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenWidth);
 #ifdef SKIP_ASM
+/**
+ * Returns the width of the current display mode: DisplayModes[CurrentDisplayMode] field +0x88.
+ *
+ * @return the screen width in pixels
+ */
 extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
@@ -2779,6 +2876,11 @@ extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenHeight);
 #ifdef SKIP_ASM
+/**
+ * Returns the height of the current display mode: DisplayModes[CurrentDisplayMode] field +0x8C.
+ *
+ * @return the screen height in pixels
+ */
 extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
@@ -2914,6 +3016,12 @@ struct sFontBlockA0 {
     float f[40];
 } __attribute__((aligned(16)));
 
+/**
+ * Copies the 0xA0-byte irradiance block @p src into mIrradianceInfo (+0x6BB0). On Tour's SetIrradiance also takes a
+ * bool that it ignores; retail has no such parameter.
+ *
+ * @param src  the irradiance info to use
+ */
 extern "C" void cPS2GraphicsMan_SetIrradiance(cPS2GraphicsMan* self, sFontBlockA0* src)
 {
     *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
@@ -3150,6 +3258,10 @@ void func_003956E0(void* self, int val)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_PushView);
 #ifdef SKIP_ASM
+/**
+ * Pushes the view matrix stack: copies the top matrix (mCurrentView) into the next 0x40-byte slot with VU0, advances
+ * mCurrentView to it and increments mViewDepth. No overflow check.
+ */
 // Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
@@ -3386,10 +3498,16 @@ int func_00395C68(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_AppendView);
 #ifdef SKIP_ASM
+/**
+ * Concatenates @p mat onto the top view matrix in place with VU0 (each of @p mat's four vectors is transformed by the
+ * current top matrix) and clears mMatricesValid.
+ *
+ * @param mat  the 4x4 matrix to append (On Tour m)
+ */
 // Multiply the top of the matrix stack by m in place (top = top * m) and clear
 // the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* m)
+extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* mat)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3423,7 +3541,7 @@ extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* m)
         "sqc2      $vf15, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(m)
+        : "r"((char*)self->mCurrentView), "r"(mat)
         : "memory");
     self->mMatricesValid = 0;
 }
@@ -3434,6 +3552,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_IdentityView);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
+/**
+ * Sets the top view matrix (mCurrentView) to t4mat_Identity.
+ */
 // Load the matrix t4mat_Identity (likely identity) into the top of the matrix stack
 // and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
@@ -3460,11 +3581,17 @@ extern "C" void cPS2GraphicsMan_IdentityView(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_TranslateView);
 #ifdef SKIP_ASM
+/**
+ * Translates the top view matrix: its fourth row becomes the top matrix applied to @p pos (a 4-vector, VU0), then
+ * clears mMatricesValid.
+ *
+ * @param pos  the translation as a 4-vector (On Tour pos)
+ */
 // Translate the top matrix of the stack: row 3 = top * v (v is a 4-vector),
 // then clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
 // needs a C fallback.
-extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* v)
+extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* pos)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3480,7 +3607,7 @@ extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* v)
         "sqc2         $vf12, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(v)
+        : "r"((char*)self->mCurrentView), "r"(pos)
         : "memory");
     self->mMatricesValid = 0;
 }
@@ -3495,6 +3622,16 @@ struct sFontRotMat {
 
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
+/**
+ * Rotates the top view matrix by @p angle about @p axis: builds the axis-angle rotation matrix (sin and cos from
+ * func_0031BE50) and concatenates it onto the top matrix with VU0, then clears mMatricesValid.
+ *
+ * On Tour's RotateView(float deg, const t4Vector& axis) takes degrees and the reverse order; here the axis comes
+ * first and the angle goes straight to the sincos helper.
+ *
+ * @param axis  the rotation axis (x, y, z; assumed unit length)
+ * @param angle  the rotation angle
+ */
 // Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
 extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, float angle)

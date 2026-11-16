@@ -81,8 +81,8 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     }
     int* row1 = room->b[1];
     int* row2 = room->b[2];
-    int* r3 = room->b[3];
-    int* r4 = room->b[4];
+    int* row3 = room->b[3];
+    int* row4 = room->b[4];
     for (int i = 2; i >= 0; i--) {
         room->b[0][i] = 0;
     }
@@ -93,10 +93,10 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
         row2[i] = 0;
     }
     for (int i = 2; i >= 0; i--) {
-        r3[i] = 0;
+        row3[i] = 0;
     }
     for (int i = 2; i >= 0; i--) {
-        r4[i] = 0;
+        row4[i] = 0;
     }
     room->fA8 = 0;
     room->fAC = 0;
@@ -199,9 +199,9 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
     if (textObj2 != 0) {
         cUIText_setAsciiString(textObj2, D_004A1500);
     }
-    cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_3));
-    if (c != 0) {
-        cUIText_setAsciiString(c, D_004A1508);
+    cUIText* textObj3 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_3));
+    if (textObj3 != 0) {
+        cUIText_setAsciiString(textObj3, D_004A1508);
     }
     func_0028F140(func_0028B180(), 7);
 }
@@ -336,9 +336,9 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         char* eng = *(char**)(state + 0x10);
         buf[2] = *(unsigned char*)(state + 0xB8) + '0';
         int hash = GetHashValue32(buf);
-        int r = func_00398380(eng + 0x58, hash);
+        int texElem = func_00398380(eng + 0x58, hash);
         w->f78 = -1;
-        w->f7C = r;
+        w->f7C = texElem;
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_0)) {
@@ -611,8 +611,8 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
             }
             break;
         }
-        sText_MR* t = *(sText_MR**)(self + 0x54);
-        t->vt[9].fn((char*)t + t->vt[9].delta, 1);
+        sText_MR* helpText = *(sText_MR**)(self + 0x54);
+        helpText->vt[9].fn((char*)helpText + helpText->vt[9].delta, 1);
         cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x54), stringId);
         break;
     }
@@ -1009,10 +1009,10 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
                 char* info = func_00156A90(iface, self->mode, i);
                 char* eng = self->engine;
                 int hash = GetHashValue32(*(char**)(info + 8));
-                int r = func_00398380(eng + 0x58, hash);
+                int texElem = func_00398380(eng + 0x58, hash);
                 sWidget_38F8* sw = self->slots[i];
                 sw->f78 = -1;
-                sw->f7C = r;
+                sw->f7C = texElem;
             } else {
                 wShow_38F8(self->slots[i], 0);
             }

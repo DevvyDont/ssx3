@@ -243,11 +243,11 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(char* self, char* obj, int msg)
             cUIStateBuyPopup_initBuyAttributes(o, 0, *(int*)(self + 0xA0), *(int*)(self + 0xA4));
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
         } else {
-            sDefObj_4A90* p = *(sDefObj_4A90**)(*(char**)(self + 0x10) + 0x14);
-            if (p == 0)
-                p = &D_004A5A58;
-            if (p != 0)
-                p->vt[2].fn((char*)p + p->vt[2].delta, 4);
+            sDefObj_4A90* sound = *(sDefObj_4A90**)(*(char**)(self + 0x10) + 0x14);
+            if (sound == 0)
+                sound = &D_004A5A58;
+            if (sound != 0)
+                sound->vt[2].fn((char*)sound + sound->vt[2].delta, 4);
         }
         break;
     case 6:
@@ -406,11 +406,11 @@ struct sBuyAttribK1F4EA8 {
  * The level is the attribute's points (0x4C) / 5 and raises the stored level (0x68) when higher; the text is
  * "%d.%d" of the level and the leftover points times 2 (each point is 0.2 of a level).
  *
- * @param p  the buy-attributes state (this)
+ * @param buyAttribState  the buy-attributes state (this)
  */
-extern "C" void cFEStateBuyAttrib_updateLevels(void* p)
+extern "C" void cFEStateBuyAttrib_updateLevels(void* buyAttribState)
 {
-    sBuyAttribK1F4EA8* self = (sBuyAttribK1F4EA8*)p;
+    sBuyAttribK1F4EA8* self = (sBuyAttribK1F4EA8*)buyAttribState;
     char name[0x20];
     char text[0x10];
     int i;
@@ -509,11 +509,11 @@ struct sVEK1F50B0b {
  * Each bar is set (setSize, vtable slot 21) to 37/11 pixels per point and 12 high, so 55 points fill 185
  * pixels, then shown (setVisible(1)).
  *
- * @param p  the buy-attributes state (this)
+ * @param buyAttribState  the buy-attributes state (this)
  */
-extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* p)
+extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* buyAttribState)
 {
-    sBuyAttribK1F50B0* self = (sBuyAttribK1F50B0*)p;
+    sBuyAttribK1F50B0* self = (sBuyAttribK1F50B0*)buyAttribState;
     char name[0x20];
     int i;
     for (i = 0; i < 7; i++) {
@@ -1003,11 +1003,11 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
             }
         }
     }
-    sDefObj_4A90* p = *(sDefObj_4A90**)(self->owner + 0x14);
-    if (p == 0)
-        p = &D_004A5A58;
-    if (p != 0)
-        p->vt[2].fn((char*)p + p->vt[2].delta, msg);
+    sDefObj_4A90* sound = *(sDefObj_4A90**)(self->owner + 0x14);
+    if (sound == 0)
+        sound = &D_004A5A58;
+    if (sound != 0)
+        sound->vt[2].fn((char*)sound + sound->vt[2].delta, msg);
     return handled;
 }
 #endif
@@ -1117,9 +1117,9 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
     char* menuTab2 = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_fs_platinumdummyMenu));
     if (menuTab2 != 0)
         setFocus_5BA8(menuTab2, 0);
-    char* d = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_ridersbestDummyMenu));
-    if (d != 0)
-        setFocus_5BA8(d, 0);
+    char* menuTab3 = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_ridersbestDummyMenu));
+    if (menuTab3 != 0)
+        setFocus_5BA8(menuTab3, 0);
     switch (*(int*)(self + 0x48)) {
     case 0:
         setFocus_5BA8(menuTab0, 1);
@@ -1134,7 +1134,7 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
         func_001F6490(self);
         break;
     case 3:
-        setFocus_5BA8(d, 1);
+        setFocus_5BA8(menuTab3, 1);
         cFEStateCareerStats_setupRidersBest(self);
         break;
     }

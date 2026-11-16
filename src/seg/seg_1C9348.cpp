@@ -175,26 +175,26 @@ extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsign
 /**
  * Appends up to 32 bits of a code to the packed output, most significant first, flushing whole bytes.
  *
- * @param s  the encoder context (On Tour HuffEncodeContext* EC)
+ * @param encodeCtx  the encoder context (On Tour HuffEncodeContext* EC)
  * @param out  the output buffer (On Tour HUFFMemStruct* dest)
  * @param code  the bits to write, right-aligned
  * @param len  number of bits
  */
-extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len)
+extern "C" void HUFF_writebits_impl(HuffState_8600* encodeCtx, HuffOut_8600* out, unsigned int code, unsigned int len)
 {
     if (len > 16) {
-        HUFF_writebits_impl(s, out, code >> 16, len - 16);
-        HUFF_writebits_impl(s, out, code, 16);
+        HUFF_writebits_impl(encodeCtx, out, code >> 16, len - 16);
+        HUFF_writebits_impl(encodeCtx, out, code, 16);
         return;
     }
-    s->bitcount += len;
-    s->bitbuf += (code & s->mask[len]) << (24 - s->bitcount);
-    while (s->bitcount >= 8) {
-        out->buf[out->pos] = (unsigned char)(s->bitbuf >> 16);
+    encodeCtx->bitcount += len;
+    encodeCtx->bitbuf += (code & encodeCtx->mask[len]) << (24 - encodeCtx->bitcount);
+    while (encodeCtx->bitcount >= 8) {
+        out->buf[out->pos] = (unsigned char)(encodeCtx->bitbuf >> 16);
         out->pos++;
-        s->bitbuf <<= 8;
-        s->bitcount -= 8;
-        s->nbytes++;
+        encodeCtx->bitbuf <<= 8;
+        encodeCtx->bitcount -= 8;
+        encodeCtx->nbytes++;
     }
 }
 #endif
@@ -278,11 +278,11 @@ extern "C" void HUFF_maketree(struct HS_8770 *self) {
                     }
                 }
 
-            unsigned a = id[imax];
+            unsigned left = id[imax];
             unsigned right = id[imin];
             w[imax] = mx + mn;
             id[imax] = node;
-            self->l[node] = a;
+            self->l[node] = left;
             n--;
             w[imin] = w[n];
             self->r[node] = right;

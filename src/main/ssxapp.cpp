@@ -164,18 +164,18 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_6900* vt2 = (sVE_6900*)ps2GraphicsMan->mVtbl;
     ((V1Fn_6900)vt2[44].fn)((char*)ps2GraphicsMan + vt2[44].delta, 0x100);
-    cPS2GraphicsMan* g3 = GrMan;
-    sVE_6900* vt3 = (sVE_6900*)g3->mVtbl;
-    char* o = (char*)g3 + vt3[46].delta;
-    void* r = SHAPE_locate(D_0047AB40, str_load);
-    ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(o, r, str_loadicon, 0, 1, -1);
+    cPS2GraphicsMan* gfxMan = GrMan;
+    sVE_6900* vt3 = (sVE_6900*)gfxMan->mVtbl;
+    char* gfxThis = (char*)gfxMan + vt3[46].delta;
+    void* loadShape = SHAPE_locate(D_0047AB40, str_load);
+    ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(gfxThis, loadShape, str_loadicon, 0, 1, -1);
     cGraphicsMan_UploadTextures(GrMan);
     *(sTint_6900**)&self->LoadIndicator = new (str_LoadIndicator, 0, 0) sTint_6900;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, str_PreStartScreen, 0x100, 0)));
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
-    void* m = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(0x590, str_FEAsyncManager, 0, 0));
-    *(void**)&self->mFEAsyncManager = m;
-    cFEAsyncManager_Init(m);
+    void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(0x590, str_FEAsyncManager, 0, 0));
+    *(void**)&self->mFEAsyncManager = feAsyncManager;
+    cFEAsyncManager_Init(feAsyncManager);
 }
 #endif
 
@@ -687,17 +687,17 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 int c = cBXString_FindFirstOf(&track, ':');
                 int sepPos = MAX_7BF0(a, MAX_7BF0(b, c));
                 if (sepPos >= 0) {
-                    cBXString t;
-                    cBXString_right(&t, &track, *(int*)((int)track.Str - 8) - sepPos - 1);
-                    cBXString_operatorE(&track, &t);
-                    cBXString__cBXString(&t, 2);
+                    cBXString trimmed;
+                    cBXString_right(&trimmed, &track, *(int*)((int)track.Str - 8) - sepPos - 1);
+                    cBXString_operatorE(&track, &trimmed);
+                    cBXString__cBXString(&trimmed, 2);
                 }
                 int dot = cBXString_FindLastOf(&track, '.', 0);
                 if (dot >= 0) {
-                    cBXString t;
-                    cBXString_cBXString5(&t, &track, dot);
-                    cBXString_operatorE(&track, &t);
-                    cBXString__cBXString(&t, 2);
+                    cBXString trimmed;
+                    cBXString_cBXString5(&trimmed, &track, dot);
+                    cBXString_operatorE(&track, &trimmed);
+                    cBXString__cBXString(&trimmed, 2);
                 }
                 cBXString_operatorE(((char*)self) + 0xCC, &track);
                 cBXString__cBXString(&track, 2);
@@ -949,10 +949,10 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     func_002380E8(self->fC0);
     if (self->f11C) cFEAsyncManager__cFEAsyncManager(self->f11C, 3);
     {
-        char* m = self->f9C;
-        if (m) {
-            sVEPurge* vt = *(sVEPurge**)(m + 0x34);
-            vt[1].fn(m + vt[1].delta, 3);
+        char* consoleConfig = self->f9C;
+        if (consoleConfig) {
+            sVEPurge* vt = *(sVEPurge**)(consoleConfig + 0x34);
+            vt[1].fn(consoleConfig + vt[1].delta, 3);
         }
     }
     SSXApp = 0;
@@ -3804,38 +3804,38 @@ extern "C" int cGame_render(sGame_22B008* self)
         sMat_22B008 inv;
         MatCopy_22B008(&inv, &view);
         func_0031B6C8(&inv);
-        sMat_22B008 m = inv;
+        sMat_22B008 invView = inv;
         sBox_22B008& bounds = box;
-        const sV4_22B008& right = m.row[0];
-        const sV4_22B008& up = m.row[1];
-        const sV4_22B008& front = m.row[2];
-        const sV4_22B008& pos = m.row[3];
-        sV4_22B008 c;
-        c = (pos - front + right + up) * nearClip;
-        c.w = 1.0f;
-        bounds.min = c;
-        bounds.max = c;
-        c = (pos - front + right - up) * nearClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
-        c = (pos - front - right + up) * nearClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
-        c = (pos - front - right - up) * nearClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
-        c = (pos + front - right - up) * farClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
-        c = (pos + front - right + up) * farClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
-        c = (pos + front + right - up) * farClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
-        c = (pos + front + right + up) * farClip;
-        c.w = 1.0f;
-        Grow_22B008(bounds, c);
+        const sV4_22B008& right = invView.row[0];
+        const sV4_22B008& up = invView.row[1];
+        const sV4_22B008& front = invView.row[2];
+        const sV4_22B008& pos = invView.row[3];
+        sV4_22B008 corner;
+        corner = (pos - front + right + up) * nearClip;
+        corner.w = 1.0f;
+        bounds.min = corner;
+        bounds.max = corner;
+        corner = (pos - front + right - up) * nearClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
+        corner = (pos - front - right + up) * nearClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
+        corner = (pos - front - right - up) * nearClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
+        corner = (pos + front - right - up) * farClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
+        corner = (pos + front - right + up) * farClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
+        corner = (pos + front + right - up) * farClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
+        corner = (pos + front + right + up) * farClip;
+        corner.w = 1.0f;
+        Grow_22B008(bounds, corner);
         sWorld_22B008 worldData;
         world = &worldData;
         func_0022ADD8((char*)world, self->cfg, self->f8C, &box, self->f10);

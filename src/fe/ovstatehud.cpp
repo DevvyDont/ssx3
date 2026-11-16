@@ -916,14 +916,14 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
         getElemScale_9AD0(&D_00477000, &sc);
         size.x *= sc.x;
         size.y *= sc.y;
-        t2Vector p;
-        p.x = 1.0f;
-        p.y = 1.0f;
-        sc = p;
-        func_001F10F8_reen(self, &p.x, &a.x, &size.x, &sc.x, D_00477000.alignX, D_00477000.alignY, 0);
+        t2Vector outPos;
+        outPos.x = 1.0f;
+        outPos.y = 1.0f;
+        sc = outPos;
+        func_001F10F8_reen(self, &outPos.x, &a.x, &size.x, &sc.x, D_00477000.alignX, D_00477000.alignY, 0);
         tRect_9AD0 r;
-        r.x = p.x;
-        r.y = p.y;
+        r.x = outPos.x;
+        r.y = outPos.y;
         r.w = size.x;
         r.h = size.y;
         func_0020EB50(self->panels[0].trophy, &scr, &r);
@@ -937,24 +937,24 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
         getElemScale_9AD0(&D_00477B40, &sc);
         size.x *= sc.x;
         size.y *= sc.y;
-        t2Vector p;
-        p.x = 1.0f;
-        p.y = 1.0f;
-        sc = p;
-        func_001F10F8_reen(self, &p.x, &a.x, &size.x, &sc.x, D_00477B40.alignX, D_00477B40.alignY, 0);
-        tRect_9AD0 r0;
-        r0.x = p.x;
-        r0.y = p.y;
-        r0.w = size.x;
-        r0.h = size.y;
-        func_0020EB50(self->panels[0].trophy, &scr, &r0);
-        func_001F10F8_reen(self, &p.x, &a.x, &size.x, &sc.x, D_00477B40.alignX, D_00477B40.alignY, 1);
-        tRect_9AD0 r1;
-        r1.x = p.x;
-        r1.y = p.y;
-        r1.w = size.x;
-        r1.h = size.y;
-        func_0020EB50(self->panels[1].trophy, &scr, &r1);
+        t2Vector outPos;
+        outPos.x = 1.0f;
+        outPos.y = 1.0f;
+        sc = outPos;
+        func_001F10F8_reen(self, &outPos.x, &a.x, &size.x, &sc.x, D_00477B40.alignX, D_00477B40.alignY, 0);
+        tRect_9AD0 trophyRect0;
+        trophyRect0.x = outPos.x;
+        trophyRect0.y = outPos.y;
+        trophyRect0.w = size.x;
+        trophyRect0.h = size.y;
+        func_0020EB50(self->panels[0].trophy, &scr, &trophyRect0);
+        func_001F10F8_reen(self, &outPos.x, &a.x, &size.x, &sc.x, D_00477B40.alignX, D_00477B40.alignY, 1);
+        tRect_9AD0 trophyRect1;
+        trophyRect1.x = outPos.x;
+        trophyRect1.y = outPos.y;
+        trophyRect1.w = size.x;
+        trophyRect1.h = size.y;
+        func_0020EB50(self->panels[1].trophy, &scr, &trophyRect1);
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     self->bank428 = findFont_9AD0(*(void**)(self->engine + 8), str_fefont);
@@ -1533,8 +1533,8 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
     for (int i = 1; i < 3; i++) {
         cFont_text(self->font, out[0], out[1], self->sep);
         out[0] += digW;
-        char* p = bufs[i];
-        cFont_text(self->font, out[0] + oneAdj_001F1840(p, oneW), out[1], p);
+        char* fieldText = bufs[i];
+        cFont_text(self->font, out[0] + oneAdj_001F1840(fieldText, oneW), out[1], fieldText);
         out[0] += sepW;
     }
     if (timeRenderFlags & 1)

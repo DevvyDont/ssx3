@@ -357,11 +357,11 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * indices), sets the pickup multiplier (+0x18) to 1 and the trackers (rail +0x24, press +0x2C, air +0x30,
  * hold +0x40, +0x6C, handplant +0x78) to -1 (inactive). The combo fields from +0x9C on are left alone.
  *
- * @param p  the score object (this)
+ * @param riderMetrix  the score object (this)
  */
-extern "C" void cRiderMetrix_resetCurTrick(void* p)
+extern "C" void cRiderMetrix_resetCurTrick(void* riderMetrix)
 {
-    char* self = (char*)p;
+    char* self = (char*)riderMetrix;
     *(int*)(self + 0x14) = 0;
     *(float*)(self + 0x18) = 1.0f;
     *(int*)(self + 0x1C) = 0;
@@ -563,18 +563,18 @@ int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d)
  * Without a bank it does nothing and returns -1. Otherwise it takes a slot from cRiderMetrix_allocHUDfx() and
  * fills it with cHUDFX_set(): type, text, decay time, data, elapsed 0. A -1 from allocHUDfx is not checked.
  *
- * @param a  message type (On Tour eHUDFXID hfx)
- * @param b  text to show, copied into the slot
- * @param c  seconds the message stays
- * @param d  extra data stored in the slot (+0xC)
+ * @param hfx  message type (On Tour eHUDFXID hfx)
+ * @param displayStr  text to show, copied into the slot
+ * @param decayTime  seconds the message stays
+ * @param data  extra data stored in the slot (+0xC)
  * @return the slot index used, or -1 without a bank
  */
-int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d)
+int cRiderMetrix_addHUDfx_impl(void* self, int hfx, const char* displayStr, float decayTime, int data)
 {
     if (*(sMetrixSlotAE8**)((char*)self + 0x1B0) == 0)
         return -1;
-    int idx = cRiderMetrix_allocHUDfx(self, a);
-    cHUDFX_set(&(*(sMetrixSlotAE8**)((char*)self + 0x1B0))[idx], a, b, c, d);
+    int idx = cRiderMetrix_allocHUDfx(self, hfx);
+    cHUDFX_set(&(*(sMetrixSlotAE8**)((char*)self + 0x1B0))[idx], hfx, displayStr, decayTime, data);
     return idx;
 }
 #endif
@@ -600,16 +600,16 @@ int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float 
  *
  * @param type      message type (On Tour eHUDFXID hfx)
  * @param value     number to show (On Tour displayInt)
- * @param arg       extra data stored in the slot (+0xC), such as a grade or a count
+ * @param data       extra data stored in the slot (+0xC), such as a grade or a count
  * @param duration  seconds the message stays
  * @return the slot index used, or -1 without a bank
  */
-int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float duration)
+int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int data, float duration)
 {
     if (*(sMetrixSlotB88**)((char*)self + 0x1B0) == 0)
         return -1;
     int idx = cRiderMetrix_allocHUDfx(self, type);
-    cHUDFX_set1(&(*(sMetrixSlotB88**)((char*)self + 0x1B0))[idx], type, value, duration, arg);
+    cHUDFX_set1(&(*(sMetrixSlotB88**)((char*)self + 0x1B0))[idx], type, value, duration, data);
     return idx;
 }
 #endif

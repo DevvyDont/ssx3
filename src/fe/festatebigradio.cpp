@@ -157,9 +157,9 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
         cUIText* txt = (cUIText*)find_2DB0(self, name.c);
         if (txt != 0)
             cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441108[self->rules[row]]));
-        for (int p = 0; p < 2; p++) {
+        for (int playerIndex = 0; playerIndex < 2; playerIndex++) {
             unsigned char out = 0;
-            void* lb = ((sRadioPanel_2DB0*)((char*)self + 0x6D0))[p].items[row];
+            void* lb = ((sRadioPanel_2DB0*)((char*)self + 0x6D0))[playerIndex].items[row];
             switch (self->rules[row]) {
             case 1:
             case 2:
@@ -169,7 +169,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
             case 6:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNNo), 0);
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNYes), 1);
-                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, playerIndex, self->rules[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case 0:
@@ -178,7 +178,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10s, 10);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15s, 15);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_20s, 20);
-                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, playerIndex, self->rules[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case 7:
@@ -187,33 +187,33 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_5000, 5000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10000, 10000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15000, 15000);
-                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, playerIndex, self->rules[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             }
         }
     }
-    cUIObj_2DB0* o = (cUIObj_2DB0*)find_2DB0(self, str_ongroup);
-    if (o != 0) {
+    cUIObj_2DB0* onGroupWidget = (cUIObj_2DB0*)find_2DB0(self, str_ongroup);
+    if (onGroupWidget != 0) {
         if (isNet_2DB0()) {
-            o->setVisible(1);
-            cUIObj_2DB0* c = (cUIObj_2DB0*)find_2DB0(self, str_x_continue2);
-            if (c != 0)
-                c->setVisible(0);
-            cUIObj_2DB0* d = (cUIObj_2DB0*)find_2DB0(self, str_nml_player2);
-            if (d != 0)
-                d->setVisible(0);
+            onGroupWidget->setVisible(1);
+            cUIObj_2DB0* hiddenWidget = (cUIObj_2DB0*)find_2DB0(self, str_x_continue2);
+            if (hiddenWidget != 0)
+                hiddenWidget->setVisible(0);
+            cUIObj_2DB0* player2Widget = (cUIObj_2DB0*)find_2DB0(self, str_nml_player2);
+            if (player2Widget != 0)
+                player2Widget->setVisible(0);
         } else {
-            o->setVisible(0);
+            onGroupWidget->setVisible(0);
         }
     }
     if (isNet_2DB0()) {
-        cUIObj_2DB0* c = (cUIObj_2DB0*)find_2DB0(self, str_fegroup);
-        if (c != 0)
-            c->setVisible(0);
-        cUIObj_2DB0* d = (cUIObj_2DB0*)find_2DB0(self, str_x_nml_player2);
-        if (d != 0)
-            d->setVisible(0);
+        cUIObj_2DB0* hiddenWidget = (cUIObj_2DB0*)find_2DB0(self, str_fegroup);
+        if (hiddenWidget != 0)
+            hiddenWidget->setVisible(0);
+        cUIObj_2DB0* player2Widget = (cUIObj_2DB0*)find_2DB0(self, str_x_nml_player2);
+        if (player2Widget != 0)
+            player2Widget->setVisible(0);
     }
 }
 #endif
@@ -477,12 +477,12 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
         *(int*)(wp + 0x90) |= 1;
     } else if (Is_193650(*(int*)(wp + 0x38), str_Player1_title) || Is_193650(*(int*)(wp + 0x38), str_Player1_name)) {
         void* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
-        void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(newPlayer, 0)));
+        void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
+        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(character, cBENewPlayerInterface_getHumanRider(newPlayer, 0)));
     } else if (Is_193650(*(int*)(wp + 0x38), str_Player2_title) || Is_193650(*(int*)(wp + 0x38), str_Player2_name)) {
         void* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
-        void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(newPlayer, 1)));
+        void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
+        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(character, cBENewPlayerInterface_getHumanRider(newPlayer, 1)));
     } else if (Is_193650(*(int*)(wp + 0x38), str_player1_info)) {
         *(void**)(self + 0x6D4) = w;
     } else if (Is_193650(*(int*)(wp + 0x38), str_player2_info)) {

@@ -523,9 +523,9 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(locale2 + 4);
     void* str = vt4[4].fn(locale2 + vt4[4].delta, GetHashValue32(str_kT_CMNContinue));
-    char* m = *(char**)((char*)D_004A2028 + 0x218);
-    sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(m + 8);
-    vt3[26].fn(m + vt3[26].delta, str, 0);
+    char* popup = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(popup + 8);
+    vt3[26].fn(popup + vt3[26].delta, str, 0);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -885,9 +885,9 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
         void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-        char* m = *(char**)((char*)D_004A2028 + 0x218);
-        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-        mvt[26].fn(m + mvt[26].delta, str2, 0);
+        char* popup = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+        mvt[26].fn(popup + mvt[26].delta, str2, 0);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1913,9 +1913,9 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
             unsigned short* str = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             func_00241DC8(mp, buf, *(int*)(mp + 0x428));
-            char* m = (char*)SSXApp->FELocale;
-            sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
-            sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
+            char* locale = (char*)SSXApp->FELocale;
+            sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(locale + 4);
+            sprintf1(str, mvt[4].fn(locale + mvt[4].delta, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
             sVEntryT1D9470* tvt = *(sVEntryT1D9470**)(text + 8);
             tvt[9].fn(text + tvt[9].delta, 1);
@@ -1941,9 +1941,9 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
             func_00241DC8(mp, buf, *(int*)(mp + 0x428));
-            char* m = (char*)SSXApp->FELocale;
-            sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(m + 4);
-            sprintf1(str, mvt[4].fn(m + mvt[4].delta, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
+            char* locale = (char*)SSXApp->FELocale;
+            sVEntryF1D9470* mvt = *(sVEntryF1D9470**)(locale + 4);
+            sprintf1(str, mvt[4].fn(locale + mvt[4].delta, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
             sVEntryT1D9470* tvt = *(sVEntryT1D9470**)(text + 8);
             tvt[9].fn(text + tvt[9].delta, 1);

@@ -552,11 +552,11 @@ struct cWorldCache_purge_sObj {
  * Unloads everything the world cache holds: pages, chunk resolver, cache tables, active sections, header and
  * memory manager.
  *
- * @param p  the world cache
+ * @param worldCache  the world cache
  */
-extern "C" void cWorldCache_purge(cWorldCache* p)
+extern "C" void cWorldCache_purge(cWorldCache* worldCache)
 {
-    cWorldCache* self = p;
+    cWorldCache* self = worldCache;
     cWorldCache_resetPageMap((cWorldCache*)self);
     cWorldCache_purge_sObj* chunkResolve = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
     if (chunkResolve != 0) {
@@ -1073,11 +1073,11 @@ static inline int Frame_8668()
  * stale
  * age drop their request or start purging; a purge completes 5 frames later.
  *
- * @param p  the world cache
+ * @param worldCache  the world cache
  */
-extern "C" void cWorldCache_updatePages(cWorldCache* p)
+extern "C" void cWorldCache_updatePages(cWorldCache* worldCache)
 {
-    sWCPCache_8668* self = (sWCPCache_8668*)p;
+    sWCPCache_8668* self = (sWCPCache_8668*)worldCache;
     int now = *(int*)(D_004A5B64 + 0x1C);
     int best = -1;
     float bestPri = -1.0f;
@@ -1799,11 +1799,11 @@ struct sVE_9258 {
  * renderer
  * (slot 102).
  *
- * @param p  the world view
+ * @param worldView  the world view
  */
-extern "C" void cWorldView_update(cWorldView* p)
+extern "C" void cWorldView_update(cWorldView* worldView)
 {
-    sWCLoader_9258* self = (sWCLoader_9258*)p;
+    sWCLoader_9258* self = (sWCLoader_9258*)worldView;
     if (self->info == 0)
         return;
     self->f2E0 = 0;

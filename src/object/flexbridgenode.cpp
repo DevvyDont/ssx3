@@ -148,26 +148,26 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridCol cols[4];
     sGridV2* uv = new (str_TempBridgeUVs, 0x100, 0) sGridV2[nverts];
     sGridCol* col = new (str_TempBridgeRGBs, 0x100, 0) sGridCol[nverts];
-    sGridVEntryV* e2 = &(((sGridVEntryV*)world->mVtbl))[97];
-    e2->fn((char*)world + e2->delta, self->def, 0, pos, uvs, cols);
+    sGridVEntryV* gfxVtEntry = &(((sGridVEntryV*)world->mVtbl))[97];
+    gfxVtEntry->fn((char*)world + gfxVtEntry->delta, self->def, 0, pos, uvs, cols);
     for (int i = 0; i < n; i++) {
-        float t = (float)i;
+        float floatIndex = (float)i;
         float inv = 1.0f / (float)(n - 1);
-        self->pts[0][i] = sGridV4(pos[0] + (pos[1] - pos[0]) * t * inv, 1.0f);
-        self->pts[0][n + i] = sGridV4(pos[2] + (pos[3] - pos[2]) * t * inv, 1.0f);
-        uv[i] = uvs[0] + (uvs[1] - uvs[0]) * t * inv;
-        uv[n + i] = uvs[2] + (uvs[3] - uvs[2]) * t * inv;
+        self->pts[0][i] = sGridV4(pos[0] + (pos[1] - pos[0]) * floatIndex * inv, 1.0f);
+        self->pts[0][n + i] = sGridV4(pos[2] + (pos[3] - pos[2]) * floatIndex * inv, 1.0f);
+        uv[i] = uvs[0] + (uvs[1] - uvs[0]) * floatIndex * inv;
+        uv[n + i] = uvs[2] + (uvs[3] - uvs[2]) * floatIndex * inv;
         col[i].a = 1.0f;
-        col[i].r = cols[0].r + (cols[1].r - cols[0].r) * t * inv;
-        col[i].g = cols[0].g + (cols[1].g - cols[0].g) * t * inv;
-        col[i].b = cols[0].b + (cols[1].b - cols[0].b) * t * inv;
+        col[i].r = cols[0].r + (cols[1].r - cols[0].r) * floatIndex * inv;
+        col[i].g = cols[0].g + (cols[1].g - cols[0].g) * floatIndex * inv;
+        col[i].b = cols[0].b + (cols[1].b - cols[0].b) * floatIndex * inv;
         col[n + i].a = 1.0f;
-        col[n + i].r = cols[2].r + (cols[3].r - cols[2].r) * t * inv;
-        col[n + i].g = cols[2].g + (cols[3].g - cols[2].g) * t * inv;
-        col[n + i].b = cols[2].b + (cols[3].b - cols[2].b) * t * inv;
+        col[n + i].r = cols[2].r + (cols[3].r - cols[2].r) * floatIndex * inv;
+        col[n + i].g = cols[2].g + (cols[3].g - cols[2].g) * floatIndex * inv;
+        col[n + i].b = cols[2].b + (cols[3].b - cols[2].b) * floatIndex * inv;
     }
-    sGridVEntryV* e3 = &self->mesh->vt[6];
-    e3->fn((char*)self->mesh + e3->delta, pos, col, uv);
+    sGridVEntryV* meshVtEntry = &self->mesh->vt[6];
+    meshVtEntry->fn((char*)self->mesh + meshVtEntry->delta, pos, col, uv);
     if (uv != 0) {
         cMemMan_free(uv);
     }
@@ -184,16 +184,16 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     // PORT: the unit declares nash_Nash_movenode's third parameter as int; the def pointer is passed through it
     int id = (int)self->def;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox00348058*)&self->box, (sBox00348058*)&old);
-    int v = 0;
+    int baseVertex = 0;
     int j = 0;
     for (int k = 0; k < ntris - 1; k += 2) {
-        self->idx[j + 0] = v;
-        self->idx[j + 1] = v + n;
-        self->idx[j + 2] = v + 1;
-        self->idx[j + 3] = v + n;
-        self->idx[j + 4] = v + n + 1;
-        self->idx[j + 5] = v + 1;
-        v++;
+        self->idx[j + 0] = baseVertex;
+        self->idx[j + 1] = baseVertex + n;
+        self->idx[j + 2] = baseVertex + 1;
+        self->idx[j + 3] = baseVertex + n;
+        self->idx[j + 4] = baseVertex + n + 1;
+        self->idx[j + 5] = baseVertex + 1;
+        baseVertex++;
         j += 6;
     }
 }
@@ -666,9 +666,9 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlSta
         sV4_70D0* matrix = vt[24].fn((char*)self + vt[24].delta);
         sFlEnt_70D0* entry = (sFlEnt_70D0*)(pairIndex * 0x50 + (int)ents);
         sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->f24));
-        sV4_70D0 d = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, entry->a));
-        sV4_70D0 t = vu0Add_70D0(vu0MtxMul_70D0(matrix, entry->b), vu0Cross_70D0(d, axisVec));
-        vu0AddEq_70D0(intInfo->v[2], t);
+        sV4_70D0 arm = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, entry->a));
+        sV4_70D0 pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, entry->b), vu0Cross_70D0(arm, axisVec));
+        vu0AddEq_70D0(intInfo->v[2], pointVelocity);
         vu0AddEq_70D0(intInfo->v[3], axisVec);
     }
 }
@@ -1173,9 +1173,9 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
     sMat_75D8* matrix = (sMat_75D8*)self->vt[24].fn((char*)self + self->vt[24].delta);
-    for (int v = 0; v < nverts; v++) {
-        pos[v] = self->pts[v];
-        sV4_75D8 w = MulMat_75D8(matrix, self->pts[v]);
+    for (int vertexIndex = 0; vertexIndex < nverts; vertexIndex++) {
+        pos[vertexIndex] = self->pts[vertexIndex];
+        sV4_75D8 w = MulMat_75D8(matrix, self->pts[vertexIndex]);
         minX = w.X() < minX ? w.X() : minX;
         maxX = maxX < w.X() ? w.X() : maxX;
         minY = w.Y() < minY ? w.Y() : minY;
@@ -1184,16 +1184,16 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
         maxZ = maxZ < w.Z() ? w.Z() : maxZ;
     }
     sBox_75D8 old = self->box;
-    sV4_75D8 e;
-    e.x = minX;
-    e.y = minY;
-    e.z = minZ;
-    e.w = 1.0f;
-    self->box.min = e;
-    e.x = maxX;
-    e.y = maxY;
-    e.z = maxZ;
-    self->box.max = e;
+    sV4_75D8 corner;
+    corner.x = minX;
+    corner.y = minY;
+    corner.z = minZ;
+    corner.w = 1.0f;
+    self->box.min = corner;
+    corner.x = maxX;
+    corner.y = maxY;
+    corner.z = maxZ;
+    self->box.max = corner;
     int id = self->def;
     nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
     self->mesh->vt[3].fn((char*)self->mesh + self->mesh->vt[3].delta, pos);
@@ -1267,8 +1267,8 @@ extern "C" void cFlexBridgeNode_render(char* self)
         char* lo = self + 0x90;
         char* hi = self + 0xA0;
         sVE43_7B80* vt43 = *(sVE43_7B80**)(ctx + 0x10D8);
-        sPair_7B80 c = vt43[43].fn(ctx + vt43[43].delta);
-        if (vt[93].fn(thisp, lo, hi, &c) == 1) {
+        sPair_7B80 viewMatrix = vt43[43].fn(ctx + vt43[43].delta);
+        if (vt[93].fn(thisp, lo, hi, &viewMatrix) == 1) {
             return;
         }
     }
@@ -1475,11 +1475,11 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* 
  * The box comes from virtual slot 50 (func_00349F18: the rail elements' box, padded by 200); the node moves
  * from its old box to the new one as type 2.
  *
- * @param p  the flexible rail node
+ * @param node  the flexible rail node
  */
-extern "C" void cFlexRailNode_updateSpaceHash(void* p)
+extern "C" void cFlexRailNode_updateSpaceHash(void* node)
 {
-    sObj00348058* self = (sObj00348058*)p;
+    sObj00348058* self = (sObj00348058*)node;
     sBox00348058* box = &self->box;
     sBox00348058 old = self->box;
     self->vt[50].fn((char*)self + self->vt[50].delta);

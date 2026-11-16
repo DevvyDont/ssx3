@@ -51,9 +51,9 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     corner.z = center.z - radius;
     corner.w = 1.0f;
     *(sSphV4*)((char*)self + 0x30) = corner;
-    void* p = cMemMan_alloc(0x140, str_SphereTree, 0, 0);
-    func_0032C508(p);
-    *(void**)((char*)self + 0x68) = p;
+    void* localTree = cMemMan_alloc(0x140, str_SphereTree, 0, 0);
+    func_0032C508(localTree);
+    *(void**)((char*)self + 0x68) = localTree;
     return self;
 }
 #endif
@@ -5190,8 +5190,8 @@ extern "C" void cBoostNode_update(sNode_003415D0* self)
     sVEnt_003415D0* vtbl2 = self->vt;
     ((Fn0_003415D0)vtbl2[50].fn)((char*)self + vtbl2[50].delta);
     if (hit == 0) {
-        sVEnt_003415D0* v3 = self->vt;
-        ((FnI_003415D0)v3[34].fn)((char*)self + v3[34].delta, 1);
+        sVEnt_003415D0* vtbl3 = self->vt;
+        ((FnI_003415D0)vtbl3[34].fn)((char*)self + vtbl3[34].delta, 1);
     }
 }
 #endif

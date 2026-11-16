@@ -57,9 +57,9 @@ extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
     {
         cAnimSequencer_expireAll((char*)self->Sequencer + (i << 3));
     }
-    void* p = self->Sequencer;
-    if (p)
-        cMemMan_free(p);
+    void* sequencer = self->Sequencer;
+    if (sequencer)
+        cMemMan_free(sequencer);
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -124,11 +124,11 @@ struct sRiderAnimBase {
  * Expires each sequencer and sets its CurrentAnimID to 0x1B6 (no anim), then IsFlipped = 0, FrameRateFactor =
  * 1.0, OrientationOffset = the identity pose (D_004FF230) and GraftMask = -1 (cleared).
  *
- * @param p  the animation player (this)
+ * @param riderAnimBase  the animation player (this)
  */
-extern "C" void cRiderAnimBase_reset(cRiderAnimBase* p)
+extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
 {
-    sRiderAnimBase* self = (sRiderAnimBase*)p;
+    sRiderAnimBase* self = (sRiderAnimBase*)riderAnimBase;
     for (int i = 0; i < 6; i++)
     {
         cAnimSequencer_expireAll(self->mSequencers + (i << 3));
@@ -661,18 +661,18 @@ struct sAnimState_00312660
  * @return the first 0x50-byte blend state (On Tour tAnimBlendFrame)
  */
 // Samples anim at time t on a scratch sequencer and returns the first resulting state.
-extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, int anim, int startFrameTime, float animid)
+extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, int anim, int animid, float startFrameTime)
 {
     sAnimState_00312660 states[0x40];
     cAnimSequencer seq;
     cAnimSequencer_init(&seq);
-    if (startFrameTime == D_004A5950)
+    if (animid == D_004A5950)
     {
         sVEntry00312660* vt = (sVEntry00312660*)self->mVtbl;
-        startFrameTime = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
+        animid = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
     }
-    func_00311F00(((char*)self), &seq, anim, startFrameTime, 1, 0, 0.0f);
-    func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, animid);
+    func_00311F00(((char*)self), &seq, anim, animid, 1, 0, 0.0f);
+    func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
     func_00314418(&seq, (sAnimState_00312598*)states, 0x40);
     cAnimSequencer_expireAll(&seq);
     return states[0];
@@ -782,9 +782,9 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
     {
         blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
     }
-    int h = *(int*)(id * 4 + D_004A3E7C + 0x1030);
+    int animId = *(int*)(id * 4 + D_004A3E7C + 0x1030);
     int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
-    return *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, h, flags, D_0048D808[slot], blend);
+    return *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, animId, flags, D_0048D808[slot], blend);
 }
 #endif
 
@@ -1131,13 +1131,13 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
     } while (ch != end);
     int sizeQB = frames * self->count6;
     int sizeQB2 = ((frames - 2) / 2 + 2) * self->count7;
-    int c = frames * self->count8 * 2;
+    int sizeShort = frames * self->count8 * 2;
     int ofs = (p - data) + sizeQB + sizeQB2;
     self->data4 = p;
     self->data8 = p + sizeQB;
-    int pad = ofs & 1;
-    self->dataC = p + sizeQB + sizeQB2 + pad;
-    self->data10 = p + sizeQB + sizeQB2 + c + ((ofs + c + pad) & 3);
+    int alignPad = ofs & 1;
+    self->dataC = p + sizeQB + sizeQB2 + alignPad;
+    self->data10 = p + sizeQB + sizeQB2 + sizeShort + ((ofs + sizeShort + alignPad) & 3);
 }
 #endif
 

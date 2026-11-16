@@ -183,12 +183,12 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     self->params = (sBsParams*)cMemMan_alloc(0xD8, str_mEmitterData, 0, 0);
     self->gfx = func_002F7A68(cMemMan_alloc(0x150, str_Board_Spark_Emitter, 0, 0));
     func_0036CCB8(self->gfx);
-    sBsVec4 v;
-    v.x = zeroF;
-    v.y = zeroF;
-    v.z = -3000.0f;
-    v.w = zeroF;
-    tParticleEmitter_init(self->gfx, 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &v);
+    sBsVec4 force;
+    force.x = zeroF;
+    force.y = zeroF;
+    force.z = -3000.0f;
+    force.w = zeroF;
+    tParticleEmitter_init(self->gfx, 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &force);
     tParticleEmitter_setSize(self->gfx, 7.5f, zeroF, 7.5f);
     tParticleEmitter_setLife(self->gfx, 0.10000000149011612f, 0.1940000057220459f);
     tParticleEmitter_stopMotion(self->gfx);
@@ -595,10 +595,10 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
         func_003717C0(self->emitter, &particlePosition, 0, 0, 0, 0.01666666753590107f);
     }
     if (self->f70) {
-        char* r = self->rider;
-        const sV4_ABC8& side = BoneRow_ABC8(r, 2);
-        const sV4_ABC8& front = BoneRow_ABC8(r, 0);
-        bool uberState = cPowerUpFXToggles_m_SuperUberStateTest != 0 || cPowerUpFXToggles_m_UberStateTest != 0 || 0.0f < *(float*)(r + 0x2F0);
+        char* riderObj = self->rider;
+        const sV4_ABC8& side = BoneRow_ABC8(riderObj, 2);
+        const sV4_ABC8& front = BoneRow_ABC8(riderObj, 0);
+        bool uberState = cPowerUpFXToggles_m_SuperUberStateTest != 0 || cPowerUpFXToggles_m_UberStateTest != 0 || 0.0f < *(float*)(riderObj + 0x2F0);
         if (uberState) {
             sV4_ABC8 a, b, c, d;
             a.x = 255.0f; a.y = 0.0f; a.z = 255.0f; a.w = 153.0f;

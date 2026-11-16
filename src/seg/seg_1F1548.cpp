@@ -2005,15 +2005,15 @@ extern char cSplashManager_vtbl[];
  * drops (0x3C bytes from +0x1C) and 30 ice crystals (0x4C bytes from +0x724), clears the rest of the state
  * (+0x101C = 1.0) and resets it (func_002F39C8). Drop and crystal are the SplashToggles debug menu's words.
  *
- * @param p          the object to construct (this)
+ * @param splashManager          the object to construct (this)
  * @param bucket     passed to the cObjNode constructor (On Tour: const int bucket)
  * @param viewIndex  the view whose camera the splashes belong to
- * @return the constructed object (@p p)
+ * @return the constructed object (@p splashManager)
  */
 // Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
-extern "C" void* cSplashManager_cSplashManager(void* p, void* bucket, int viewIndex)
+extern "C" void* cSplashManager_cSplashManager(void* splashManager, void* bucket, int viewIndex)
 {
-    char* self = (char*)p;
+    char* self = (char*)splashManager;
     cObjNode_cObjNode1(self, bucket);
     *(int*)(self + 0x10) = viewIndex;
     *(int*)(self + 0x14) = 0;

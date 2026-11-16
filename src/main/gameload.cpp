@@ -309,8 +309,8 @@ extern "C" void cGame_load(cGame* self)
     else
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, str_GameViewMan, 0x20000000, 0), D_00535BFC[0]);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsHost == 0) {
-        char* a = *(char**)((char*)self->AI + 0x44);
-        void* cam = a != 0 ? *(void**)(a + 0x18) : 0;
+        char* secondPlayer = *(char**)((char*)self->AI + 0x44);
+        void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
         cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->ViewMan + 0x4), cam);
     }
     char* hud = (char*)func_002CC018(operator new(0x68, str_MenuSys, 0, 0));
@@ -382,24 +382,24 @@ extern "C" void cGame_load(cGame* self)
         else
             func_00231250((self), 0xA, 0, 0);
     }
-    sNamedGL* o = (sNamedGL*)operator new(0x14, str_AIVisualEffectsMan, 0, 0);
-    cObjNode_cObjNode1(o, 6);
-    o->vtbl = D_0047CB60;
+    sNamedGL* objNode = (sNamedGL*)operator new(0x14, str_AIVisualEffectsMan, 0, 0);
+    cObjNode_cObjNode1(objNode, 6);
+    objNode->vtbl = D_0047CB60;
     void* r = func_002F0390();
-    self->AIVisualEffectsMan = (cAIVisualEffectsObjNode*)o;
-    o->obj = r;
-    o = (sNamedGL*)operator new(0x14, str_VisualEffectsMan, 0, 0);
-    cObjNode_cObjNode1(o, 3);
-    o->vtbl = D_0047D070;
+    self->AIVisualEffectsMan = (cAIVisualEffectsObjNode*)objNode;
+    objNode->obj = r;
+    objNode = (sNamedGL*)operator new(0x14, str_VisualEffectsMan, 0, 0);
+    cObjNode_cObjNode1(objNode, 3);
+    objNode->vtbl = D_0047D070;
     r = cVisualEffectsMan_construct();
-    self->VisualEffectsMan = (cVisualEffectsObjNode*)o;
-    o->obj = r;
-    o = (sNamedGL*)operator new(0x14, str_SSXStatsMan, 0, 0);
-    cObjNode_cObjNode1(o, 4);
-    o->vtbl = cSSXStatsObjNode_vtbl;
+    self->VisualEffectsMan = (cVisualEffectsObjNode*)objNode;
+    objNode->obj = r;
+    objNode = (sNamedGL*)operator new(0x14, str_SSXStatsMan, 0, 0);
+    cObjNode_cObjNode1(objNode, 4);
+    objNode->vtbl = cSSXStatsObjNode_vtbl;
     r = func_002D2100();
-    o->obj = r;
-    self->SSXStatsMan = (cSSXStatsObjNode*)o;
+    objNode->obj = r;
+    self->SSXStatsMan = (cSSXStatsObjNode*)objNode;
 }
 #endif
 
@@ -547,10 +547,10 @@ extern "C" void cGame_loadTrack(cGame* self)
     *(int*)(*(char**)self->World + 0x3D4) = 1;
     {
         sBXStr_F6B0 worldPath;
-        sBXStr_F6B0 c;
-        func_0016CA10_F6B0(D_004C5830, (func_003186D0(&c, D_004A2AA0, &dir), func_00318630(&worldPath, &c, str_cam), worldPath.p));
+        sBXStr_F6B0 camBasePath;
+        func_0016CA10_F6B0(D_004C5830, (func_003186D0(&camBasePath, D_004A2AA0, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
         cBXString__cBXString(&worldPath, 2);
-        cBXString__cBXString(&c, 2);
+        cBXString__cBXString(&camBasePath, 2);
     }
     char* obj = (char*)cMemMan_alloc(0x3010, str_cPS2FogParticleMan, 0, 0);
     func_002DBF80(obj);

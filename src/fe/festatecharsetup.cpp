@@ -112,10 +112,10 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
     showIdx_182928(self, str_Option_Equip, 1);
     showIdx_182928(self, str_Option_Rider, 2);
     showIdx_182928(self, str_Option_Radio, 3);
-    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Option_GBA));
-    if (o != 0) {
-        o->show(0);
-        o->enable(1);
+    cWidget_182928* gbaOption = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Option_GBA));
+    if (gbaOption != 0) {
+        gbaOption->show(0);
+        gbaOption->enable(1);
     }
 }
 #endif

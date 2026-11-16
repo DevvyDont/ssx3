@@ -175,11 +175,11 @@ extern char D_00474E08[];
  * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  *
- * @param arg0  the replay overlay state being destroyed
+ * @param replayState  the replay overlay state being destroyed
  */
-extern "C" void cOVState_REPLAY__cOVState_REPLAY(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void cOVState_REPLAY__cOVState_REPLAY(void *replayState) {
+    *(char **)((char*)replayState + 8) = D_00474E08;
+    func_0039E390_a(replayState);
 }
 #endif
 
@@ -386,14 +386,14 @@ extern char cOVState_ViewPopup_vtbl[];
  * Destroys the message view popup: restores cOVState_ViewPopup_vtbl and runs the cUIState destructor
  * (func_0039E390).
  *
- * Only @p arg0 is passed in C; the g++ destructor flags reach func_0039E390 untouched in $a1, so a port must pass
+ * Only @p viewPopup is passed in C; the g++ destructor flags reach func_0039E390 untouched in $a1, so a port must pass
  * them explicitly.
  *
- * @param arg0  the popup being destroyed
+ * @param viewPopup  the popup being destroyed
  */
-extern "C" void cOVState_ViewPopup__cOVState_ViewPopup(cOVState_ViewPopup* arg0) {
-    arg0->mVtbl = (void**)cOVState_ViewPopup_vtbl;
-    func_0039E390_a(arg0);
+extern "C" void cOVState_ViewPopup__cOVState_ViewPopup(cOVState_ViewPopup* viewPopup) {
+    viewPopup->mVtbl = (void**)cOVState_ViewPopup_vtbl;
+    func_0039E390_a(viewPopup);
 }
 #endif
 
@@ -493,10 +493,10 @@ extern char cOVStateHUD1P_vtbl[];
 extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *self, int flags) {
     (*(char **)((char*)(self) + (8))) = cOVStateHUD1P_vtbl;
     if ((char*)self + 0x48 != 0) {
-        char *p = (char*)self + 0x48 + 0x118;
-        while ((char*)self + 0x48 != p) {
-            p -= 0x8C;
-            func_0020EB08(p + 8, 2);
+        char *element = (char*)self + 0x48 + 0x118;
+        while ((char*)self + 0x48 != element) {
+            element -= 0x8C;
+            func_0020EB08(element + 8, 2);
         }
     }
     func_0039E390(self, flags);
@@ -2395,11 +2395,11 @@ extern char D_00474E08[];
  * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  *
- * @param arg0  the enter-lodge overlay state being destroyed
+ * @param enterLodgeState  the enter-lodge overlay state being destroyed
  */
-extern "C" void cOVState_ENTERLODGE__cOVState_ENTERLODGE(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void cOVState_ENTERLODGE__cOVState_ENTERLODGE(void *enterLodgeState) {
+    *(char **)((char*)enterLodgeState + 8) = D_00474E08;
+    func_0039E390_a(enterLodgeState);
 }
 #endif
 
@@ -2567,11 +2567,11 @@ extern char D_00474E08[];
  * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  *
- * @param arg0  the top-times overlay state being destroyed
+ * @param topTimesState  the top-times overlay state being destroyed
  */
-extern "C" void cOVState_TOPTIMES__cOVState_TOPTIMES(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void cOVState_TOPTIMES__cOVState_TOPTIMES(void *topTimesState) {
+    *(char **)((char*)topTimesState + 8) = D_00474E08;
+    func_0039E390_a(topTimesState);
 }
 #endif
 

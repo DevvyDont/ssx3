@@ -546,15 +546,15 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
         if (cAI_isAILoadedAndReady(D_004A2C68_date->race)) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
-            int m = beRaceDB->cGameMode;
-            if (m == 0) {
+            int gameMode = beRaceDB->cGameMode;
+            if (gameMode == 0) {
                 func_001289F0(D_004A2C68_date->race);
                 if (D_004A2C68_date->race->f80 > 0)
                     D_004A2C68_date->race->f14 = 1;
                 if (D_004A2C68_date->race->f84 > 0)
                     D_004A2C68_date->race->f8C = 1;
             }
-            if (m == 5) {
+            if (gameMode == 5) {
                 cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
                 if (raceDB->cGamePath == 0)
                     cAI_initFreeride(D_004A2C68_date->race);
@@ -1037,12 +1037,12 @@ extern "C" void cGFNextHeatState_update(void* self)
                 break;
             if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1)
                 break;
-            char* o = (char*)func_00230698(SSXApp->Game, 0);
+            char* transitionMan = (char*)func_00230698(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0)
                 break;
-            if (((cRiderObj_235CC8*)(o + 0x10))->isBusy() != 0)
+            if (((cRiderObj_235CC8*)(transitionMan + 0x10))->isBusy() != 0)
                 break;
-            if (*(int*)(o + 0x44) != 0)
+            if (*(int*)(transitionMan + 0x44) != 0)
                 break;
             cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         }
@@ -1152,7 +1152,7 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     cGame_partialRestart(SSXApp->Game);
     cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
     cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
-    void* r = func_00230698(SSXApp->Game, 0);
+    void* transitionMan = func_00230698(SSXApp->Game, 0);
     char* fade = (char*)func_002E4CE8_sz(0x14);
     sColor_236058 colour;
     colour.r = one;
@@ -1162,7 +1162,7 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     func_002E4D70(fade);
     *(void***)fade = cFade_TObj_vtbl;
     *(sColor_236058*)(fade + 4) = colour;
-    func_002E4370(r, 1, 0, fade, 0.0f, 0.0f, 0, 0, one);
+    func_002E4370(transitionMan, 1, 0, fade, 0.0f, 0.0f, 0, 0, one);
 }
 #endif
 
@@ -1408,17 +1408,17 @@ extern "C" void cGFUserSelectState_update(void* self)
         {
             int curLocation = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
             int destLocation = *(int*)((char*)self + 0x18);
-            int c1 = (unsigned)(curLocation - 0xE) < 3;
-            int c2 = (unsigned)(destLocation - 0xE) < 3;
-            if (destLocation == curLocation && !c2) {
+            int curInBackcountry = (unsigned)(curLocation - 0xE) < 3;
+            int destInBackcountry = (unsigned)(destLocation - 0xE) < 3;
+            if (destLocation == curLocation && !destInBackcountry) {
                 *(int*)((char*)self + 0x10) = 3;
                 ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 0xA))->f10 = one;
                 func_00231250(SSXApp->Game, 0xF, 0, 0);
                 return;
             }
-            if (c2 && D_00535C11[0] == 0)
+            if (destInBackcountry && D_00535C11[0] == 0)
                 *(int*)((char*)self + 0x8) = 0;
-            cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !c2 && !c1, 1);
+            cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !destInBackcountry && !curInBackcountry, 1);
             ns = 2;
         }
         break;

@@ -49,22 +49,22 @@ extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t) __asm__("cAIAn
  * and records, for each group, the index where its run starts and how many entries it has. A group is
  * expected to occupy one contiguous run; the start of a group with no entries is left as it was.
  *
- * @param t  the map: one (start, count) pair of shorts per group
+ * @param rangeTable  the map: one (start, count) pair of shorts per group
  */
-extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t)
+extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* rangeTable)
 {
     Groups_15E0 tab = D_00489D60;
     int prev;
     int i, j;
-    for (j = 0x1B4; j >= 0; j--) t->r[j].count = 0;
+    for (j = 0x1B4; j >= 0; j--) rangeTable->r[j].count = 0;
     prev = 0x1B6;
     for (i = 0; i < 0x1D8; i++) {
-        int g = tab.v[i];
-        if (g != prev) {
-            prev = g;
-            t->r[g].start = i;
+        int group = tab.v[i];
+        if (group != prev) {
+            prev = group;
+            rangeTable->r[group].start = i;
         }
-        t->r[prev].count++;
+        rangeTable->r[prev].count++;
     }
 }
 #endif

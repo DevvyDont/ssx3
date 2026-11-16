@@ -919,20 +919,20 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     } else {
         char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
+        char *inst;
         if (!section)
-            r = 0;
+            inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_C5D8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_C5D8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 22, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 22, buf))
         return D_004C9098_C5D8;
     cDeadFadeNode_cDeadFadeNode_C5D8(cMemMan_alloc(0x3C, D_004896D8_C5D8, 0x20000000, 0), 1, obj, buf, 0);
     return D_004C9098_C5D8;
@@ -1234,20 +1234,20 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     } else {
         char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
+        char *inst;
         if (!section)
-            r = 0;
+            inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_CDC8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_CDC8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 5, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 5, buf))
         return D_004C9098_CDC8;
     cFlexBridgeNode_cFlexBridgeNode_CDC8(cMemMan_alloc(0xB0, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_CDC8;
@@ -1381,9 +1381,9 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
     Ent_D250 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004460A0[idx];
+        int keywordType = D_004460A0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != keywordType && keywordType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1400,10 +1400,10 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_D250 *p = *(O_D250**)(obj + 0xC);
-    if (p) {
-        if (p->v16())
-            cMoveNode_addRoller_D250(p, buf, *(int*)(D_004A3DD8_D250 + 0x298), *(int*)(D_004A3DD8_D250 + 0x294));
+    O_D250 *activeNode = *(O_D250**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v16())
+            cMoveNode_addRoller_D250(activeNode, buf, *(int*)(D_004A3DD8_D250 + 0x298), *(int*)(D_004A3DD8_D250 + 0x294));
     }
     return D_004C9098_D250;
 }
@@ -1900,21 +1900,21 @@ extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
     } else {
         char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
+        char *inst;
         if (!section)
-            r = 0;
+            inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_DED0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (~buf[1] != 0) {
-        O_DED0 *p = *(O_DED0**)(obj + 0xC);
-        if (p) {
-            if (p->v16())
-                cMoveNode_addSpline1_DED0(p, buf);
+        O_DED0 *activeNode = *(O_DED0**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16())
+                cMoveNode_addSpline1_DED0(activeNode, buf);
         }
     }
     return D_004C9098_DED0;
@@ -1991,21 +1991,21 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
     } else {
         char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
+        char *inst;
         if (!section)
-            r = 0;
+            inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_E0C0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (~buf[1] != 0) {
-        O_E0C0 *p = *(O_E0C0**)(obj + 0xC);
-        if (p) {
-            if (p->v16())
-                cMoveNode_addSpline_E0C0(p, buf);
+        O_E0C0 *activeNode = *(O_E0C0**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16())
+                cMoveNode_addSpline_E0C0(activeNode, buf);
         }
     }
     return D_004C9098_E0C0;
@@ -2383,24 +2383,24 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E840 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_E840(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
-    O_E840 *p = *(O_E840**)(obj + 0xC);
-    if (p) {
-        if (p->v16()) {
-            V4_E840 pos = *(V4_E840*)(p->v24() + 0x30);
+    O_E840 *activeNode = *(O_E840**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v16()) {
+            V4_E840 pos = *(V4_E840*)(activeNode->v24() + 0x30);
             if (nearViewer_E840(pos)) {
-                cMoveNode_addParticle_E840(p, buf);
+                cMoveNode_addParticle_E840(activeNode, buf);
                 return D_004C9098_E840;
             }
         }
@@ -2586,9 +2586,9 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
     Ent_F1C8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446470[idx];
+        int keywordType = D_00446470[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != keywordType && keywordType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2600,18 +2600,18 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
     } else {
         char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
+        char *inst;
         if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
     if (~buf[1] != 0) {
-        O_F1C8 *p = *(O_F1C8**)(obj + 0xC);
-        if (p) {
-            if (p->v16())
-                cMoveNode_addRail_F1C8(p, buf);
+        O_F1C8 *activeNode = *(O_F1C8**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16())
+                cMoveNode_addRail_F1C8(activeNode, buf);
         }
     }
     return D_004C9098_F1C8;

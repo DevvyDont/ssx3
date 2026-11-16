@@ -843,9 +843,9 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
     if (IsSection(extra)) {
         cSectionMan_activateSection_D088(self, extra);
     }
-    int b = D_00442488_D088[idx].b;
-    if (b >= 0) {
-        cSectionMan_activateSection_D088(self, b);
+    int secondExtra = D_00442488_D088[idx].b;
+    if (secondExtra >= 0) {
+        cSectionMan_activateSection_D088(self, secondExtra);
     }
     cSectionMan_activateMode_D088(self, sectionMode);
 }

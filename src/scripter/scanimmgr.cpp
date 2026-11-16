@@ -73,9 +73,9 @@ extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int f
 {
     *(void**)((char*)self + 0xC) = cScriptAnimBankManager_vtbl;
     cScriptAnimBankManager_UnlinkBanksAll(self);
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* banks = *(void**)((char*)self + 0x8);
+    if (banks != 0) {
+        cMemMan_free(banks);
     }
     if (flags & 1) {
         operator_delete((int*)self);

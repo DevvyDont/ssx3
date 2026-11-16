@@ -1925,7 +1925,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 cReplay_stopAutoReplay(SSXApp->Game->Replay);
                 D_004A26FC = 3;
                 char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-                char* i10 = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
+                char* missionIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
                 cBE_setState(0);
                 cBENewRaceInterface_setGameEvent(iface, 0xC);
                 cBENewRaceInterface_setGameMode(iface, 4);
@@ -1933,7 +1933,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 vt[1].fn(iface + vt[1].delta);
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
                 cAI_initFreeride(SSXApp->Game->AI);
-                ((sI10_D5A8*)i10)->f10 = 1;
+                ((sI10_D5A8*)missionIface)->f10 = 1;
                 func_00231250(SSXApp->Game, 1, 1, 0);
                 cGame_partialRestart(SSXApp->Game);
                 cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1, 2);
@@ -2067,12 +2067,12 @@ extern "C" void cOVState_REPLAY_onCreateScreen(char* self)
     *(int*)(obj + 0x90) |= 8;
     if (*(int*)(self + 0xB4) != 0) {
         if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_option_savereplay));
-        if (o != 0) {
-            sVE_20DC68* e = &(*(sVE_20DC68**)(o + 8))[9];
-            e->fn(o + e->delta, 0);
-            e = &(*(sVE_20DC68**)(o + 8))[8];
-            e->fn(o + e->delta, 0);
+        char* saveReplayOption = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_option_savereplay));
+        if (saveReplayOption != 0) {
+            sVE_20DC68* vtEntry = &(*(sVE_20DC68**)(saveReplayOption + 8))[9];
+            vtEntry->fn(saveReplayOption + vtEntry->delta, 0);
+            vtEntry = &(*(sVE_20DC68**)(saveReplayOption + 8))[8];
+            vtEntry->fn(saveReplayOption + vtEntry->delta, 0);
         }
     }
 }

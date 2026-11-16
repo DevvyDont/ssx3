@@ -105,10 +105,10 @@ extern "C" void cWScriptProcess__cWScriptProcess(void* self, int flags)
     *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
     char* arr = *(char**)((char*)self + 0x14);
     if (arr != 0) {
-        char* p = (char*)(*(int*)(arr - 0x10) * 0x44 + (int)arr);
-        while (*(char**)((char*)self + 0x14) != p) {
-            p -= 0x44;
-            ((cWScriptProcess__cWScriptProcess_cElem*)p)->v01(0);
+        char* task = (char*)(*(int*)(arr - 0x10) * 0x44 + (int)arr);
+        while (*(char**)((char*)self + 0x14) != task) {
+            task -= 0x44;
+            ((cWScriptProcess__cWScriptProcess_cElem*)task)->v01(0);
         }
         cMemMan_free(*(char**)((char*)self + 0x14) - 0x10);
     }

@@ -365,9 +365,9 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     *(int*)(selfBytes + 0xC) = 0x10;
     *(void***)(selfBytes + 0x8) = cFEStateAudioOptions_vtbl;
     *(signed char*)(selfBytes + 0x44) = idx;
-    void* p = **(void***)(selfBytes + 0x10);
-    if (p != 0) {
-        *(unsigned char*)(selfBytes + 0x15) = func_001A1CD0(p, idx);
+    void* feCustom = **(void***)(selfBytes + 0x10);
+    if (feCustom != 0) {
+        *(unsigned char*)(selfBytes + 0x15) = func_001A1CD0(feCustom, idx);
     }
     *(int*)(selfBytes + 0x48) = 0;
     *(int*)(selfBytes + 0x64) = 0;
@@ -381,8 +381,8 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     int hash = GetHashValue32(str_checkbox);
     *(void**)(selfBytes + 0x5C) = func_00398380(engineObj + 0x58, hash);
     char* engineObj2 = *(char**)(selfBytes + 0x10);
-    int h2 = GetHashValue32(str_empty_box);
-    *(void**)(selfBytes + 0x60) = func_00398380(engineObj2 + 0x58, h2);
+    int emptyBoxHash = GetHashValue32(str_empty_box);
+    *(void**)(selfBytes + 0x60) = func_00398380(engineObj2 + 0x58, emptyBoxHash);
     *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
     *(int*)(selfBytes + 0x78) = func_00158700(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));

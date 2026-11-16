@@ -48,6 +48,15 @@ struct sUVTables_AF30 {
 
 extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
 
+/**
+ * Initialises the Bezier patch manager: VIF caches, render switches, LOD distances and the UV grids.
+ *
+ * Sets up the patch builder at +0x10 (func_00372B78 with 900, 220, 140, 0, 146, 93), allocates the three VIF packet
+ * caches (0x38400, 0xDC00 and 0x8C00 bytes, tags str_4x4VifCache / str_6x6VifCache / str_8x8VifCache) and their positions, turns on
+ * wire mode, the base pass, light maps and shadows, sets mLmapStart 0, unk_0358 8, mNearLODcm 3000 and mFarLODcm
+ * 15000, calls virtual slot 17 (func_0038D638) and fills the UV grids in D_005049C0: 6 x 6 at step 0.2 and 8 x 8 at
+ * step 1/7.
+ */
 extern "C" void cPSPBezierMan_Init(cPSPBezierMan* self)
 {
     func_00372B78(((char*)self) + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
@@ -91,6 +100,10 @@ INCLUDE_ASM("render/bezierman", cPSPBezierMan_Purge);
 void func_0038D660(void*);
 void cMemMan_free(void*);
 
+/**
+ * Releases the Bezier patch manager's resources: runs the base purge (func_0038D660, empty) and frees the three VIF
+ * packet caches allocated by Init.
+ */
 extern "C" void cPSPBezierMan_Purge(cPSPBezierMan* self)
 {
     func_0038D660(self);
@@ -227,6 +240,16 @@ struct sBezVEntry_B338 {
     void (*fn)(void*, void*, void*, void*, void*, int);
 };
 
+/**
+ * Queues a Bezier patch for drawing unless patch drawing is disabled (D_004A44D4 non-zero).
+ *
+ * Forwards to virtual slot 22 with the same arguments and a trailing 0.
+ *
+ * @param pPatch  the patch to draw
+ * @param edges  the patch's edge data
+ * @param texid  the patch's texture id (passed through as a pointer-sized value)
+ * @param clip  the patch's clip data
+ */
 extern "C" void cPSPBezierMan_AddPatch(cPSPBezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
 {
     if (D_004A44D4 == 0) {
@@ -816,6 +839,15 @@ static inline void Render_B370(sBezMan_B370* self)
     func_0038D968_B370(self, cursor);
 }
 
+/**
+ * Draws all queued Bezier patches: uploads the 4x4, 6x6, 8x8 and mixed patch lists and emits or defers each patch.
+ *
+ * Builds the shine matrix from the camera position (D_004A4440) and D_005049C0, and the effect rotation (D_004A4344)
+ * about the X, Y and Z axes; sets colour 128 and pushes the draw state. The patch lists go to the VIF cache
+ * (func_00374A88 / func_00374AE0, func_00374B38 for view 0); new patches are cached (func_003747A0) and emitted
+ * (func_0038C788, func_0038CA70, func_0038CE20 for the mixed list). Deferred patches are flushed into DeferMan
+ * buckets grouped by texture. Finally pops the draw state and calls func_0038D968.
+ */
 extern "C" void cPSPBezierMan_DrawPatches(cPSPBezierMan* self)
 {
     Render_B370(((sBezMan_B370*)self));

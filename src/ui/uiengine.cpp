@@ -1216,31 +1216,31 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     func_0039FEB8(self, &pos, &size);
     pos.x += x;
     pos.y += y;
-    sM33_8A78 m = D_004FF170_8a78;
+    sM33_8A78 rotMat = D_004FF170_8a78;
     if (self->rot.x != 0.0f) {
         sV3_8A78 axis(1.0f, 0.0f, 0.0f);
-        Rotate_8A78(m, axis, self->rot.x);
+        Rotate_8A78(rotMat, axis, self->rot.x);
     }
     if (self->rot.y != 0.0f) {
         sV3_8A78 axis(0.0f, 1.0f, 0.0f);
-        Rotate_8A78(m, axis, self->rot.y);
+        Rotate_8A78(rotMat, axis, self->rot.y);
     }
     if (self->rot.z != 0.0f) {
         sV3_8A78 axis(0.0f, 0.0f, 1.0f);
-        Rotate_8A78(m, axis, self->rot.z);
+        Rotate_8A78(rotMat, axis, self->rot.z);
     }
-    sV3_8A78 a(pos.x - self->pos.x, pos.y - self->pos.y, pos.z - self->pos.z);
-    sV3_8A78 b;
+    sV3_8A78 minCorner(pos.x - self->pos.x, pos.y - self->pos.y, pos.z - self->pos.z);
+    sV3_8A78 maxCorner;
     {
         sV3_8A78 end = pos + size;
-        b.x = end.x - self->pos.x;
-        b.y = end.y - self->pos.y;
-        b.z = end.z - self->pos.z;
+        maxCorner.x = end.x - self->pos.x;
+        maxCorner.y = end.y - self->pos.y;
+        maxCorner.z = end.z - self->pos.z;
     }
-    verts[0].pos = Xform_8A78(m, sV4_8A78(a.x, a.y, 0.0f, 1.0f));
-    verts[1].pos = Xform_8A78(m, sV4_8A78(b.x, a.y, 0.0f, 1.0f));
-    verts[2].pos = Xform_8A78(m, sV4_8A78(a.x, b.y, 0.0f, 1.0f));
-    verts[3].pos = Xform_8A78(m, sV4_8A78(b.x, b.y, 0.0f, 1.0f));
+    verts[0].pos = Xform_8A78(rotMat, sV4_8A78(minCorner.x, minCorner.y, 0.0f, 1.0f));
+    verts[1].pos = Xform_8A78(rotMat, sV4_8A78(maxCorner.x, minCorner.y, 0.0f, 1.0f));
+    verts[2].pos = Xform_8A78(rotMat, sV4_8A78(minCorner.x, maxCorner.y, 0.0f, 1.0f));
+    verts[3].pos = Xform_8A78(rotMat, sV4_8A78(maxCorner.x, maxCorner.y, 0.0f, 1.0f));
     vu0AddEq_8A78(verts[0].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
     vu0AddEq_8A78(verts[1].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
     vu0AddEq_8A78(verts[2].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
@@ -1390,6 +1390,12 @@ struct cUIListBox_getFont_sEntry {
     int c;
 };
 
+/**
+ * Returns the list box's font: entry mFont + 1 of the UI engine's font table (engine + 8, 12-byte entries), found
+ * through getEngine (func_0039FF50).
+ *
+ * @return the cFont (as an int), or 0 without an engine
+ */
 extern "C" int cUIListBox_getFont(cUIListBox* self)
 {
     void* o = func_0039FF50(self);
@@ -1571,6 +1577,15 @@ struct cUIListBox_setUnicodePrivate_sEntry {
     int pad[4];
 };
 
+/**
+ * Replaces the Unicode text of entry @p idx with a heap copy of @p str (tag str_UILISTBOXSTR "UILISTBOXSTR"), freeing the
+ * old copy.
+ *
+ * Does nothing unless the UI engine (mpScreen->mpState->mpEngine) has its string table at +0x10.
+ *
+ * @param idx  the entry index (On Tour Index); not range-checked
+ * @param str  the UTF-16 text (On Tour pUnicode)
+ */
 extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
     void* a = self->mpScreen;
@@ -1749,12 +1764,12 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
     int over = 0;
     float* box = &self->mSize.x;
     {
-        sRect_9F00 r;
-        func_003921F0(font, str, &r, 0, listScale.x, listScale.y);
-        if (self->mSize.x < r.x1) {
+        sRect_9F00 textRect;
+        func_003921F0(font, str, &textRect, 0, listScale.x, listScale.y);
+        if (self->mSize.x < textRect.x1) {
             over = 1;
         }
-        sV3_9F00 size(r.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
+        sV3_9F00 size(textRect.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
         sV3_9F00 position(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
         func_0039FEB8((self), &position, &size);
         func_00391E30(font, position.x, position.y, str);

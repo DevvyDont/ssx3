@@ -2086,13 +2086,13 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     *(void***)(((char*)self) + 0x928) = D_00482318;
     *(void***)(((char*)self) + 0x910) = cScriptObjGS_vtbl;
     cScriptObject__cScriptObject(((char*)self) + 0x91C, 0);
-    sSlot_780B8* p = (sSlot_780B8*)(((char*)self) + 0x910);
+    sSlot_780B8* cameraManager = (sSlot_780B8*)(((char*)self) + 0x910);
     sSlot_780B8* begin = (sSlot_780B8*)(((char*)self) + 0x6D0);
     if (begin != 0) {
         do {
-            while (begin != p) {
-                p--;
-                p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+            while (begin != cameraManager) {
+                cameraManager--;
+                cameraManager->vt[1].fn((char*)cameraManager + cameraManager->vt[1].delta, 0);
             }
         } while (0);
     }

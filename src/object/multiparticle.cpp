@@ -443,11 +443,11 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
  */
 extern "C" void cRailManNode__cRailManNode(void* self, int flags)
 {
-    char* s = (char*)self;
+    char* selfBytes = (char*)self;
     int i;
-    *(void***)(s + 0xC) = cRailManNode_vtbl;
+    *(void***)(selfBytes + 0xC) = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(s + 0x18))[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)(selfBytes + 0x18))[i] != 0xFFFFFFFF) {
             func_00358998(self, i);
         }
     }

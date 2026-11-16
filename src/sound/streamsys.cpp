@@ -578,8 +578,8 @@ extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchr
         sSsVtblBA490 vtCopyB = D_004839B8;
         *(sSsVtblBA490**)(self->vbase + 0x1D4) = &vtCopyB;
         char* base2 = self->vbase - 0x14;
-        int d2 = (char*)self - base2;
-        vtCopyB.e[1].delta = D_004839B8.e[1].delta + d2;
+        int adjustB = (char*)self - base2;
+        vtCopyB.e[1].delta = D_004839B8.e[1].delta + adjustB;
     }
     self->count = count;
     self->items = new (str_StreamArray, 0, 0) void*[count];

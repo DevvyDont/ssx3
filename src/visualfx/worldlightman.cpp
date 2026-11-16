@@ -1066,34 +1066,34 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
         self->rider->f2E8 = 0.0f;
         self->rider->f304 = 1;
     }
-    sRider6518* r = self->rider;
-    if (r->mode != 11) {
+    sRider6518* curRider = self->rider;
+    if (curRider->mode != 11) {
         return;
     }
-    if (!(0.0f < r->f2FC)) {
+    if (!(0.0f < curRider->f2FC)) {
         return;
     }
-    float len = len6518(r->vel);
-    if (len < r->maxSpeed && len != 0.0f) {
-        r->vel = norm6518(r->vel);
+    float len = len6518(curRider->vel);
+    if (len < curRider->maxSpeed && len != 0.0f) {
+        curRider->vel = norm6518(curRider->vel);
         scaleEq6518(self->rider->vel, self->rider->maxSpeed * self->rider->blend + len * (1.0f - self->rider->blend));
         len = len6518(self->rider->vel);
     }
-    r = self->rider;
-    if (r->steer == 0.0f) {
+    curRider = self->rider;
+    if (curRider->steer == 0.0f) {
         return;
     }
-    if (!(0.0010000000474974513f < len6518(r->dir))) {
+    if (!(0.0010000000474974513f < len6518(curRider->dir))) {
         return;
     }
-    if (!(9.999999747378752e-05f < len6518(r->vel))) {
+    if (!(9.999999747378752e-05f < len6518(curRider->vel))) {
         return;
     }
-    r->vel = add6518(scale6518(norm6518(r->dir), len * self->rider->steer),
+    curRider->vel = add6518(scale6518(norm6518(curRider->dir), len * self->rider->steer),
                      scale6518(norm6518(self->rider->vel), len * (1.0f - self->rider->steer)));
-    r = self->rider;
-    if (r->vel.x < 0.0f && r->vel.x >= 0.0f) {
-        r->vel = D_004FF130;
+    curRider = self->rider;
+    if (curRider->vel.x < 0.0f && curRider->vel.x >= 0.0f) {
+        curRider->vel = D_004FF130;
     }
 }
 #endif

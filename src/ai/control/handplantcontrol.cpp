@@ -1008,34 +1008,34 @@ extern "C" void cAirMotion_step(cAirMotion* self)
         }
         if (idx != 0x12 && *(int*)(snow + 0x44) == 0 && flag) {
             float timeLeft = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
-            float t = *(float*)(rider2 + 0x300);
+            float timeScale = *(float*)(rider2 + 0x300);
             float x;
             if (timeLeft >= 0.01666666753590107f)
-                x = t / timeLeft;
+                x = timeScale / timeLeft;
             else
-                x = t * 59.999996185302734f;
+                x = timeScale * 59.999996185302734f;
             float y = *(float*)((char*)self->mRider + 0x300) * 1.396263599395752f;
             if (func_0011FEE8(self->mRider) == 5) {
-                char* r3 = (char*)self->mRider;
+                char* rider3 = (char*)self->mRider;
                 int big = 1;
-                if (!(0.0872664749622345f < absf_139A20(*(float*)(*(char**)(r3 + 0x77C) + 0x258)))) big = 0;
+                if (!(0.0872664749622345f < absf_139A20(*(float*)(*(char**)(rider3 + 0x77C) + 0x258)))) big = 0;
                 if (big) {
-                    cRider_alignRiderAxis(r3, *(char**)(r3 + 0x788) + 0x20, t4vect_Zero, x, y);
+                    cRider_alignRiderAxis(rider3, *(char**)(rider3 + 0x788) + 0x20, t4vect_Zero, x, y);
                     goto done;
                 }
             }
-            char* r4 = (char*)self->mRider;
-            char* ap4 = *(char**)(r4 + 0x788);
+            char* rider4 = (char*)self->mRider;
+            char* ap4 = *(char**)(rider4 + 0x788);
             char* tgt = ap4 + 0x20;
             if (*(float*)(ap4 + 0x28) < 0.30000001192092896f || *(int*)self != 0) {
-                sVec4HP v = *(sVec4HP*)(ap4 + 0x10);
-                if (vu0Dot_139A20(v, *(sVec4HP*)(r4 + 0x1B0)) < 0.0f) {
-                    vu0ScaleEq_139A20(v, -1.0f);
+                sVec4HP frontAlign = *(sVec4HP*)(ap4 + 0x10);
+                if (vu0Dot_139A20(frontAlign, *(sVec4HP*)(rider4 + 0x1B0)) < 0.0f) {
+                    vu0ScaleEq_139A20(frontAlign, -1.0f);
                 }
-                char* r5 = (char*)self->mRider;
-                cRider_alignRiderAxis(r5, *(char**)(r5 + 0x788) + 0x20, &v, x, y);
+                char* rider5 = (char*)self->mRider;
+                cRider_alignRiderAxis(rider5, *(char**)(rider5 + 0x788) + 0x20, &frontAlign, x, y);
             } else {
-                cRider_alignRiderAxis(r4, tgt, t4vect_Zero, x, y);
+                cRider_alignRiderAxis(rider4, tgt, t4vect_Zero, x, y);
             }
         }
     }
@@ -1358,13 +1358,13 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                 flip = 1;
             }
             if (flip) {
-                float a = vu0Dot_139C88(row_139C88(r4, 0), V4_139C88(r4, 0x370));
-                float b = vu0Dot_139C88(row_139C88(r4, 1), V4_139C88(r4, 0x370));
-                float c = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370));
-                if (absf_139C88(b) > absf_139C88(a) && absf_139C88(b) > absf_139C88(c)) {
-                    anim = b < 0.0f ? 0x162 : 0x163;
-                } else if (absf_139C88(c) > absf_139C88(a) && absf_139C88(c) > absf_139C88(b)) {
-                    if (c < 0.0f) {
+                float sideDot = vu0Dot_139C88(row_139C88(r4, 0), V4_139C88(r4, 0x370));
+                float frontDot = vu0Dot_139C88(row_139C88(r4, 1), V4_139C88(r4, 0x370));
+                float upDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370));
+                if (absf_139C88(frontDot) > absf_139C88(sideDot) && absf_139C88(frontDot) > absf_139C88(upDot)) {
+                    anim = frontDot < 0.0f ? 0x162 : 0x163;
+                } else if (absf_139C88(upDot) > absf_139C88(sideDot) && absf_139C88(upDot) > absf_139C88(frontDot)) {
+                    if (upDot < 0.0f) {
                         anim = 0x15E;
                     } else {
                         int k;
@@ -1380,14 +1380,14 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                         }
                     }
                 } else {
-                    anim = a < 0.0f ? 0x165 : 0x164;
+                    anim = sideDot < 0.0f ? 0x165 : 0x164;
                 }
             } else if (*(int*)(r4 + 0x330) == 0) {
-                float f = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x3A0));
+                float tiltDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x3A0));
                 float k = func_00149120(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER_139C88 + 0x86C), *(int*)(RIDER_139C88 + 0xB34)) * 0.29999101161956787f + 1.0f;
-                if (k * 0.699962317943573f < f) {
+                if (k * 0.699962317943573f < tiltDot) {
                     anim = 0x15C;
-                } else if (f < k * -0.699962317943573f) {
+                } else if (tiltDot < k * -0.699962317943573f) {
                     anim = 0x15D;
                 }
             }
@@ -1400,8 +1400,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             info.speed = absf_139C88(vn);
             func_0010EB30_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
         } else {
-            char* r5 = RIDER_139C88;
-            func_0010E910(r5, *(float*)(r5 + 0x378) < 0.699999988079071f, 0, *(int*)(r5 + 0x330), &hit, spd);
+            char* rider5 = RIDER_139C88;
+            func_0010E910(rider5, *(float*)(rider5 + 0x378) < 0.699999988079071f, 0, *(int*)(rider5 + 0x330), &hit, spd);
             cRider_setMotionState_9C88(RIDER_139C88, 0);
             if (func_0011FEE8(RIDER_139C88) != 0xC) {
                 if (func_0011FEE8(RIDER_139C88) == 2) {
@@ -2291,14 +2291,14 @@ extern "C" void cRailslideMotion_step(char* self)
         *(t4Vector*)(RIDER_AF28 + 0x3D0) = hit.v20;
         char* rider3 = RIDER_AF28;
         float spd = ScaleAtLeast_AF28(Len_AF28(*(t4Vector*)(rider3 + 0x1E0)), 0.0009000000427477062f, 0.5f);
-        float spd2 = spd * spd;
+        float speedSq = spd * spd;
         if (*(float*)(self + 0x14) < 0.6000000238418579f)
             *(float*)(rider3 + 0x25C) = 2.0f;
         if (func_001086B8(RIDER_AF28, &hit.pos, &hit.nrm)) {
             *(int*)(self + 0x20) = 0;
             *(float*)(self + 0x14) += dt;
-            t4Vector v = Sub_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), *(t4Vector*)(RIDER_AF28 + 0x3D0));
-            float dn = Dot_AF28(v, hit.nrm);
+            t4Vector relVel = Sub_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), *(t4Vector*)(RIDER_AF28 + 0x3D0));
+            float dn = Dot_AF28(relVel, hit.nrm);
             if (dn < 0.0f) {
                 dn = -dn;
                 ScaleEq_AF28(hit.nrm, -1.0f);
@@ -2311,13 +2311,13 @@ extern "C" void cRailslideMotion_step(char* self)
             up = ClampAbs_AF28(up, lim);
             AddEq_AF28(*(t4Vector*)(RIDER_AF28 + 0x110), Scale_AF28(up_AF28(self), up));
             t4Vector nv = Scale_AF28(hit.nrm, dn);
-            float k30 = dt * 30.0f;
-            float vl = Len_AF28(v);
-            v = Add_AF28(Scale_AF28(nv, k30), Scale_AF28(v, 1.0f - k30));
-            float nl = Len_AF28(v);
+            float normalBlend = dt * 30.0f;
+            float vl = Len_AF28(relVel);
+            relVel = Add_AF28(Scale_AF28(nv, normalBlend), Scale_AF28(relVel, 1.0f - normalBlend));
+            float nl = Len_AF28(relVel);
             if (nl > 0.0010000000474974513f)
-                ScaleEq_AF28(v, vl / nl);
-            *(t4Vector*)(RIDER_AF28 + 0x1E0) = Add_AF28(v, *(t4Vector*)(RIDER_AF28 + 0x3D0));
+                ScaleEq_AF28(relVel, vl / nl);
+            *(t4Vector*)(RIDER_AF28 + 0x1E0) = Add_AF28(relVel, *(t4Vector*)(RIDER_AF28 + 0x3D0));
             if (D_004A4C04 == 0) {
                 D_004A5E50.x = 0.0f;
                 D_004A5E50.y = 0.0f;
@@ -2326,9 +2326,9 @@ extern "C" void cRailslideMotion_step(char* self)
                 D_004A4C04 = 1;
             }
             t4Vector acc = Sub_AF28(Scale_AF28(hit.nrm, Dot_AF28(D_004A5E50, hit.nrm)), Scale_AF28(nv, 0.0f));
-            float m = *(float*)(RIDER_AF28 + 0x2FC);
-            if (m > 0.0f)
-                AddEq_AF28(acc, Scale_AF28(hit.nrm, m * (dn > 0.0f ? 2450.0f : -2450.0f)));
+            float boostStrength = *(float*)(RIDER_AF28 + 0x2FC);
+            if (boostStrength > 0.0f)
+                AddEq_AF28(acc, Scale_AF28(hit.nrm, boostStrength * (dn > 0.0f ? 2450.0f : -2450.0f)));
             if (hit.obj) {
                 char* handler = *(char**)(hit.obj + 0xC);
                 if (handler) {
@@ -2356,10 +2356,10 @@ extern "C" void cRailslideMotion_step(char* self)
                     k = Min_AF28(k, -1.0f);
                 k *= 1.0f / (func_00149208(cBE_getInterface__Fv(cBE_getBE(), 3), *(int*)(RIDER_AF28 + 0x86C), *(int*)(RIDER_AF28 + 0xB34)) * 1.650076150894165f + 1.0f);
             }
-            float s2 = side;
+            float clampedSide = side;
             if (k >= 0.0f)
-                s2 = Clamp_AF28(side, -20.0f, 20.0f);
-            turn -= s2 * (k * Clamp_AF28(1.0f / spd2, 1.0f, 4.0f));
+                clampedSide = Clamp_AF28(side, -20.0f, 20.0f);
+            turn -= clampedSide * (k * Clamp_AF28(1.0f / speedSq, 1.0f, 4.0f));
             int flip = up_AF28(self).z < 0.0f && Abs_AF28(side) < 20.0f;
             if (flip) {
                 if (side > 0.0f)
@@ -2383,43 +2383,43 @@ extern "C" void cRailslideMotion_step(char* self)
             }
             if (up_AF28(self).z < 0.0f)
                 target = -target;
-            float a = Approach_AF28(*(float*)(self + 0x10), target, dt * 300.0f);
-            *(float*)(self + 0x10) = a;
-            float s, c;
-            func_0031BE50(&s, &c, a);
+            float leanAngle = Approach_AF28(*(float*)(self + 0x10), target, dt * 300.0f);
+            *(float*)(self + 0x10) = leanAngle;
+            float sinLean, cosLean;
+            func_0031BE50(&sinLean, &cosLean, leanAngle);
             t4Vector dir = func_0013BD80_AF28(self, hit.nrm);
             *(t4Vector*)(RIDER_AF28 + 0x370) = dir;
             t4Vector cr = Cross_AF28(dir, hit.nrm);
-            t4Vector v2 = Add_AF28(Scale_AF28(dir, c), Scale_AF28(cr, s));
-            float s1, c1;
-            func_0031BE50(&s1, &c1, roll);
-            t4Vector v3 = Sub_AF28(Scale_AF28(cr, c1), Scale_AF28(hit.nrm, s1));
-            t4Vector axis = Normalize_AF28(Cross_AF28(v3, v2));
-            float f = Dot_AF28(axis, fwd_AF28(self)) * 0.5f + 0.5f;
-            char* r4 = RIDER_AF28;
-            cRider_alignRiderAxis(r4, &v2, &axis, (f * 15.0f + (1.0f - f)) * *(float*)(r4 + 0x300), 10000000000.0f);
+            t4Vector leanDir = Add_AF28(Scale_AF28(dir, cosLean), Scale_AF28(cr, sinLean));
+            float sinRoll, cosRoll;
+            func_0031BE50(&sinRoll, &cosRoll, roll);
+            t4Vector rollDir = Sub_AF28(Scale_AF28(cr, cosRoll), Scale_AF28(hit.nrm, sinRoll));
+            t4Vector axis = Normalize_AF28(Cross_AF28(rollDir, leanDir));
+            float forwardWeight = Dot_AF28(axis, fwd_AF28(self)) * 0.5f + 0.5f;
+            char* rider4 = RIDER_AF28;
+            cRider_alignRiderAxis(rider4, &leanDir, &axis, (forwardWeight * 15.0f + (1.0f - forwardWeight)) * *(float*)(rider4 + 0x300), 10000000000.0f);
         } else {
-            t4Vector d = Sub_AF28(*pt, hit.pos);
+            t4Vector fromHit = Sub_AF28(*pt, hit.pos);
             t4Vector dirn;
-            float dl = Len_AF28(d);
+            float dl = Len_AF28(fromHit);
             if (dl < 0.0010000000474974513f) {
                 dirn = hit.nrm;
             } else {
-                dirn = Div_AF28(d, dl);
+                dirn = Div_AF28(fromHit, dl);
                 if (Abs_AF28(Dot_AF28(dirn, hit.nrm)) > 0.5f)
                     dirn = hit.nrm;
             }
             float vd = Dot_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), dirn);
             if (vd < 0.0f) {
-                char* r5 = RIDER_AF28;
-                float vl = Len_AF28(*(t4Vector*)(r5 + 0x1E0));
+                char* rider5 = RIDER_AF28;
+                float vl = Len_AF28(*(t4Vector*)(rider5 + 0x1E0));
                 if (vl < 0.0010000000474974513f) {
                     dirn = hit.nrm;
                 } else {
-                    t4Vector p = Sub_AF28(dirn, Scale_AF28(*(t4Vector*)(r5 + 0x1E0), vd / vl));
-                    float pl = Len_AF28(p);
+                    t4Vector pushDir = Sub_AF28(dirn, Scale_AF28(*(t4Vector*)(rider5 + 0x1E0), vd / vl));
+                    float pl = Len_AF28(pushDir);
                     if (pl > 0.0010000000474974513f)
-                        dirn = Div_AF28(p, pl);
+                        dirn = Div_AF28(pushDir, pl);
                     else
                         dirn = Div_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), vl);
                 }
@@ -3091,15 +3091,15 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
     self->m8 = k * snow->m18;
     *(sHpVec4_13C7A8*)(rider + 0x390) = *(sHpVec4_13C7A8*)(rider + 0x370);
     self->mC = 0;
-    int t = func_001298C8();
-    self->m10 = t;
-    int d = t - self->m14;
-    float f;
-    if (d > 0x28)
-        f = (d - 0x28) * 0.010000000707805157f + 0.699999988079071f;
+    int aiTick = func_001298C8();
+    self->m10 = aiTick;
+    int ticksOutOfGround = aiTick - self->m14;
+    float penaltyFraction;
+    if (ticksOutOfGround > 0x28)
+        penaltyFraction = (ticksOutOfGround - 0x28) * 0.010000000707805157f + 0.699999988079071f;
     else
-        f = 0.699999988079071f;
-    vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), f <? 1.0f);
+        penaltyFraction = 0.699999988079071f;
+    vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), penaltyFraction <? 1.0f);
 }
 #endif
 
@@ -3394,16 +3394,16 @@ extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, sHpCfg_13CCF0* 
     float powderFactor = 1.0f;
     if (*(int*)(RIDER + 0x438) == 2 || *(int*)(RIDER + 0x438) == 3 || *(int*)(RIDER + 0x438) == 13)
         powderFactor = 0.5f - *(float*)(RIDER + 0x454) / self->PowderDepth3G;
-    float f12 = 1.0f;
+    float risingFactor = 1.0f;
     if (0.0f < *(float*)(RIDER + 0x1E8) - *(float*)(RIDER + 0x3D8))
-        f12 = 0.5999583005905151f;
-    float f2 = 1.0f;
+        risingFactor = 0.5999583005905151f;
+    float switchFactor = 1.0f;
     if (*(int*)(RIDER + 0x320) != *(int*)(RIDER + 0x324) && *(float*)(RIDER + 0x2FC) == 0.0f)
-        f2 = 1.1147289276123047f;
-    float f5 = 1.0f;
+        switchFactor = 1.1147289276123047f;
+    float climbFactor = 1.0f;
     if (0.0f < forwardVel && 0.0f < *(float*)(RIDER + 0x1E8) - *(float*)(RIDER + 0x3D8) && *(int*)(RIDER + 0x438) == 13)
-        f5 = 34.84144592285156f;
-    return ((-forwardVel * powderFactor) * (slipCurve + lift) * f12 * f2 - drag) * f5;
+        climbFactor = 34.84144592285156f;
+    return ((-forwardVel * powderFactor) * (slipCurve + lift) * risingFactor * switchFactor - drag) * climbFactor;
 }
 #undef RIDER
 #endif
@@ -3773,10 +3773,10 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
         *(unsigned int*)(RIDER + 0x430) = 0xFFFFFFFF;
     }
     if (out->obj != 0) {
-        char* h = *(char**)(out->obj + 0xC);
-        if (h) {
-            sVEnt_13D1B8* vt = *(sVEnt_13D1B8**)(h + 0xC);
-            vt[42].fn(h + vt[42].delta, out);
+        char* handler = *(char**)(out->obj + 0xC);
+        if (handler) {
+            sVEnt_13D1B8* vt = *(sVEnt_13D1B8**)(handler + 0xC);
+            vt[42].fn(handler + vt[42].delta, out);
         }
     }
     *(int*)(RIDER + 0x438) = out->m4C;
@@ -4212,11 +4212,11 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float lo = curve_13D818(D_004A1148, spd * 0.035999998450279236f);
     float hi = curve_13D818(D_004A1150, spd * 0.035999998450279236f);
     float k = func_00148E68_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
-    float d = hi - lo;
-    float s, c;
-    func_0031BE50(&s, &c, snow->m0C * (lo + (k * d + d)) * 0.01745329424738884f * lean);
+    float curveRange = hi - lo;
+    float sinBank, c;
+    func_0031BE50(&sinBank, &c, snow->m0C * (lo + (k * curveRange + curveRange)) * 0.01745329424738884f * lean);
     float lift = (push <? (snow->m00 + snow->m00)) / c;
-    t4Vector up = vu0Add_13D818(vu0Scale_13D818(self->mRider->mGroundNormal, c), vu0Scale_13D818(self->mRider->mGroundSide, s));
+    t4Vector up = vu0Add_13D818(vu0Scale_13D818(self->mRider->mGroundNormal, c), vu0Scale_13D818(self->mRider->mGroundSide, sinBank));
     push -= lift;
     sVec4C_13D818 grav(0.0f, 0.0f, -snow->m00, 0.0f);
     t4Vector force = vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(
@@ -4244,7 +4244,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     }
 
     float vv = vu0Dot_13D818(rel, rel);
-    float h0 = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
+    float heightBefore = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
     if (0.5f < absf_13D818(self->mRider->mSlewed[3].cur) && vv < 250026.640625f) {
         t4Vector n = self->mRider->mGroundNormal;
         if (0.866100013256073f < n.z) {
@@ -4261,10 +4261,10 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     vu0AddEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mVelocity, dt));
     vu0AddEq_13D818(self->mRider->mVelocity, vu0Scale_13D818(force, dt));
     rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->unk_3D0);
-    float h1 = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
+    float heightAfter = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
     float lo2 = (1.0f - self->mRider->mSlewed[4].cur) * -20.0f;
     float hi2 = self->mRider->mSlewed[4].cur * 10.0f;
-    float ch = self->mRider->mSlewed[18].cur + (h0 - h1) * 10.0f;
+    float ch = self->mRider->mSlewed[18].cur + (heightBefore - heightAfter) * 10.0f;
     ch *= 1.0f - dt * 20.0f;
     ch = clamp_13D818(ch, lo2, hi2);
     if (func_00311AE8(self->mRider->mRiderAnim, 2) == 10 || func_00311AE8(self->mRider->mRiderAnim, 2) == 4 ||
@@ -4275,21 +4275,21 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     rider->mSlewed[18].rate = dt * 100.0f;
 
     float yawRate = 0.0f;
-    float spd2 = vu0Len_13D818(rel);
+    float relSpeed = vu0Len_13D818(rel);
     int st = func_0011FEE8(self->mRider);
     if ((st != 2 || (func_0011FEE8(self->mRider) == 2 && 0.6499999761581421f < self->mRider->mGroundNormal.z)) &&
-        9.999999747378752e-06f < spd2) {
-        t4Vector ax = vu0Div_13D818(vu0Cross_13D818(rel, self->mRider->mGroundForward), spd2);
+        9.999999747378752e-06f < relSpeed) {
+        t4Vector ax = vu0Div_13D818(vu0Cross_13D818(rel, self->mRider->mGroundForward), relSpeed);
         float yaw = -func_0031C128(clamp_13D818(vu0Dot_13D818(ax, self->mRider->mGroundNormal), -1.0f, 1.0f));
-        float k30 = snow->m30;
-        float turn = (k30 * ((1.0f - lean * lean) * 0.4000000059604645f) + 1.100000023841858f) * lean *
-                     (curve_13D818(D_004A1130, spd2 * 0.035999998450279236f) * 0.01745329424738884f);
+        float turnKickFlare = snow->m30;
+        float turn = (turnKickFlare * ((1.0f - lean * lean) * 0.4000000059604645f) + 1.100000023841858f) * lean *
+                     (curve_13D818(D_004A1130, relSpeed * 0.035999998450279236f) * 0.01745329424738884f);
         turn /= self->mRider->mSlewed[4].cur * 0.9955680966377258f + 1.0f;
-        turn *= curveB_13D818(D_004A1138, spd2 * 0.035999998450279236f);
+        turn *= curveB_13D818(D_004A1138, relSpeed * 0.035999998450279236f);
         yaw += turn;
         if (vu0Dot_13D818(rel, self->mRider->mGroundForward) < 0.0f)
             yaw = -yaw;
-        float rate = (snow->m34 * (spd2 * 9.999999974752427e-07f) * spd2 * dt) <? 1.0f;
+        float rate = (snow->m34 * (relSpeed * 9.999999974752427e-07f) * relSpeed * dt) <? 1.0f;
         float lowSpd = 555.5555419921875f; // kph2cps(20)
         t4Vector dir;
         t4Vector side = vu0Cross_13D818(self->mRider->mGroundNormal, D_004FF160_13D818);
@@ -4300,9 +4300,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         } else {
             dir = front_13D818(self->mRider);
         }
-        float g = absf_13D818(vu0Dot_13D818(rel, dir)) / spd2;
-        float b = (spd2 / lowSpd) <? 1.0f;
-        float c = (b * (0.5f - g) * (snow->m28 + snow->m28)) >? 0.0f;
+        float fallLineAlign = absf_13D818(vu0Dot_13D818(rel, dir)) / relSpeed;
+        float speedRatio = (relSpeed / lowSpd) <? 1.0f;
+        float c = (speedRatio * (0.5f - fallLineAlign) * (snow->m28 + snow->m28)) >? 0.0f;
         float grip = (snow->m2C + c) <? 1.0f;
         if (grip <= (yaw <= 0.0f ? -lean : lean) * 0.8999999761581421f)
             rate = (yaw <= 0.0f) ? rate * 0.8999999761581421f * -lean : rate * 0.8999999761581421f * lean;
@@ -4344,19 +4344,19 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         if (absf_13D818(ang) < spinEndAng) {
             self->mRider->mSpinRate = 0.0f;
         } else {
-            float t = -dt * clamp_13D818(ang * (spinDecay / spinDecelAng), -spinDecay, spinDecay);
-            if (t < 0.0f && yawRate < 0.0f)
-                yawRate = yawRate <? t;
-            else if (0.0f < t && 0.0f < yawRate)
-                yawRate = yawRate >? t;
+            float spinYaw = -dt * clamp_13D818(ang * (spinDecay / spinDecelAng), -spinDecay, spinDecay);
+            if (spinYaw < 0.0f && yawRate < 0.0f)
+                yawRate = yawRate <? spinYaw;
+            else if (0.0f < spinYaw && 0.0f < yawRate)
+                yawRate = yawRate >? spinYaw;
             else
-                yawRate += t;
+                yawRate += spinYaw;
         }
     }
 
-    float fwd = (0.0f < spd2) ? vu0Dot_13D818(rel, front_13D818(self->mRider)) / spd2 : 0.0f;
+    float fwd = (0.0f < relSpeed) ? vu0Dot_13D818(rel, front_13D818(self->mRider)) / relSpeed : 0.0f;
     fwd = (fwd - 0.10000000149011612f) >? 0.0f;
-    float kf = curve_13D818(D_004A1158, spd2 * 0.035999998450279236f);
+    float kf = curve_13D818(D_004A1158, relSpeed * 0.035999998450279236f);
     yawRate -= fwd * self->mRider->mSlewed[0].cur * kf;
     if (yawRate != 0.0f)
         cRider_rotateOrientation(self->mRider, self->mRider->mGroundNormal, yawRate);
@@ -4368,24 +4368,24 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     if (got == 0) {
         lost = self->mRider->unk_308 == 0;
     } else if (hit.obj != 0) {
-        char* h = *(char**)(hit.obj + 0xC);
-        if (h) {
-            sVEnt_13D818* vt = *(sVEnt_13D818**)(h + 0xC);
-            vt[43].fn(h + vt[43].delta, &hit, &diff);
+        char* handler = *(char**)(hit.obj + 0xC);
+        if (handler) {
+            sVEnt_13D818* vt = *(sVEnt_13D818**)(handler + 0xC);
+            vt[43].fn(handler + vt[43].delta, &hit, &diff);
         }
     }
 
     int surf = self->mRider->mSurfaceType;
     if (!(surf == 2 || surf == 3 || surf == 13)) {
         float vn = vu0Dot_13D818(rel, self->mRider->mGroundNormal);
-        float l0 = vu0Len_13D818(rel);
+        float lenBefore = vu0Len_13D818(rel);
         t4Vector bump = vu0Scale_13D818(self->mRider->mGroundNormal, vn * -0.4000000059604645f);
         if (bump.z < -40.0f)
             bump.z = -40.0f;
         vu0AddEq_13D818(rel, bump);
-        float l1 = vu0Len_13D818(rel);
-        if (l1 != 0.0f)
-            vu0ScaleEq_13D818(rel, l0 / l1);
+        float lenAfter = vu0Len_13D818(rel);
+        if (lenAfter != 0.0f)
+            vu0ScaleEq_13D818(rel, lenBefore / lenAfter);
         self->mRider->mVelocity = vu0Add_13D818(self->mRider->unk_3D0, rel);
     }
 
@@ -4395,9 +4395,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
             self->ForceNaturalAir = 1;
     } else {
         if (dist < 5.0f) {
-            t4Vector n2 = vu0Normalize_13D818(vu0Add_13D818(self->mRider->mGroundNormal,
+            t4Vector biasedNormal = vu0Normalize_13D818(vu0Add_13D818(self->mRider->mGroundNormal,
                 sVec4C_13D818(0.0f, 0.0f, self->mRider->mGroundNormal.z * 0.5f, 0.0f)));
-            t4Vector axis = vu0Cross_13D818(n2, up_13D818(self->mRider));
+            t4Vector axis = vu0Cross_13D818(biasedNormal, up_13D818(self->mRider));
             float al = vu0Len_13D818(axis);
             if (0.0010000000474974513f < al) {
                 vu0DivEq_13D818(axis, al);
@@ -4411,22 +4411,22 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         int brace = !onSlope && layer != 10 && layer != 5 && anim != 0x16 && anim != 2;
         if (onSlope) {
             float tgt = curve_13D818(D_004A1128, vu0Len_13D818(rel) * 0.035999998450279236f);
-            cRider* r2 = self->mRider;
-            r2->mSlewed[2].target = tgt;
-            r2->mSlewed[2].rate = absf_13D818(r2->mSlewed[2].cur - tgt) * (dt * 3.0f);
+            cRider* rider2 = self->mRider;
+            rider2->mSlewed[2].target = tgt;
+            rider2->mSlewed[2].rate = absf_13D818(rider2->mSlewed[2].cur - tgt) * (dt * 3.0f);
         } else {
-            cRider* r2 = self->mRider;
-            r2->mSlewed[2].target = 0.0f;
-            r2->mSlewed[2].rate = dt * 3.0f;
+            cRider* rider2 = self->mRider;
+            rider2->mSlewed[2].target = 0.0f;
+            rider2->mSlewed[2].rate = dt * 3.0f;
         }
         if (brace) {
-            cRider* r3 = self->mRider;
-            r3->mSlewed[17].target = 1.0f;
-            r3->mSlewed[17].rate = dt * 3.0f;
+            cRider* rider3 = self->mRider;
+            rider3->mSlewed[17].target = 1.0f;
+            rider3->mSlewed[17].rate = dt * 3.0f;
         } else {
-            cRider* r3 = self->mRider;
-            r3->mSlewed[17].target = 0.0f;
-            r3->mSlewed[17].rate = dt * 3.0f;
+            cRider* rider3 = self->mRider;
+            rider3->mSlewed[17].target = 0.0f;
+            rider3->mSlewed[17].rate = dt * 3.0f;
         }
         float base = absf_13D818(lean) + absf_13D818(self->mRider->mSlewed[3].cur) + 0.10000000149011612f;
         float amt = vu0Len_13D818(rel) * 0.0003600000054575503f;
@@ -4623,8 +4623,8 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
     *(float*)(RIDER_13F178 + 0x75C) = k;
     char* rider4 = RIDER_13F178;
     *(float*)(rider4 + 0x754) = absf_13F178(*(float*)(rider4 + 0x1F0));
-    char* r5 = RIDER_13F178;
-    *(float*)(r5 + 0x750) = absf_13F178(*(float*)(r5 + 0x214));
+    char* rider5 = RIDER_13F178;
+    *(float*)(rider5 + 0x750) = absf_13F178(*(float*)(rider5 + 0x214));
 }
 #endif
 

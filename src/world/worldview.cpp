@@ -1038,9 +1038,9 @@ extern "C" int cChunkResolve_resolveInstance(char** self, char* node)
         resolved = converted;
     }
     *(char**)(node + 0x80) = resolved;
-    int v = *(int*)(resolved + 0xC);
+    int activeNode = *(int*)(resolved + 0xC);
     *(int*)(node + 0x8C) = 0;
-    *(int*)(node + 0x94) = v;
+    *(int*)(node + 0x94) = activeNode;
     return 1;
 }
 #endif

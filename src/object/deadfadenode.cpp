@@ -210,22 +210,22 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
         if (other != 0) {
             base = ((DfMatFn_0750)other->vt[24].fn)((char*)other + other->vt[24].delta);
         }
-        sDfPart_0750* p = model->parts;
+        sDfPart_0750* part = model->parts;
         float k = self->inst->scale;
-        sDfV4_0750 s;
-        s.x = k;
-        s.y = k;
-        s.z = k;
-        s.w = 1.0f;
-        sDfMat_0750 t2;
-        for (int i = 0; i < model->count; i++, p++) {
-            int parent = p->parent;
+        sDfV4_0750 scaleVec;
+        scaleVec.x = k;
+        scaleVec.y = k;
+        scaleVec.z = k;
+        scaleVec.w = 1.0f;
+        sDfMat_0750 partMatrix;
+        for (int i = 0; i < model->count; i++, part++) {
+            int parent = part->parent;
             if (parent != -1) {
-                partMat_0750(&t2, &self->mats[parent], p->mat, s);
-                vu0CopyMat_0750(&self->mats[i], &t2);
+                partMat_0750(&partMatrix, &self->mats[parent], part->mat, scaleVec);
+                vu0CopyMat_0750(&self->mats[i], &partMatrix);
             } else {
-                partMat_0750(&t2, base, p->mat, s);
-                vu0CopyMat_0750(&self->mats[i], &t2);
+                partMat_0750(&partMatrix, base, part->mat, scaleVec);
+                vu0CopyMat_0750(&self->mats[i], &partMatrix);
             }
         }
     }
@@ -270,9 +270,9 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 extern "C" void cDeadFadeNode__cDeadFadeNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
-    void* p = *(void**)((char*)self + 0x38);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* partMats = *(void**)((char*)self + 0x38);
+    if (partMats != 0) {
+        cMemMan_free(partMats);
     }
     cInstanceNode__cInstanceNode(self, flags);
 }

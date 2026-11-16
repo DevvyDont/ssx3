@@ -150,14 +150,14 @@ INCLUDE_ASM("md5", md5_init__FP7md5_ctx);
  */
 void md5_init(md5_ctx* ctx)
 {
-    unsigned int a = 0x67452301;
-    unsigned int b = 0xEFCDAB89;
-    unsigned int c = 0x98BADCFE;
-    unsigned int d = 0x10325476;
-    ctx->a = a;
-    ctx->d = d;
-    ctx->b = b;
-    ctx->c = c;
+    unsigned int initA = 0x67452301;
+    unsigned int initB = 0xEFCDAB89;
+    unsigned int initC = 0x98BADCFE;
+    unsigned int initD = 0x10325476;
+    ctx->a = initA;
+    ctx->d = initD;
+    ctx->b = initB;
+    ctx->c = initC;
     ctx->lo = 0;
     ctx->hi = 0;
 }

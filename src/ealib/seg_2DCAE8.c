@@ -1575,24 +1575,24 @@ int FILESYS_atomic_DDF0(int (*arg0)(int, int), int arg1, int arg2, int arg3) __a
 /**
  * Runs a file-system callback with the command queue's priority limit set to a given priority.
  *
- * Saves the limit (D_00519AB0 word 2; only queued commands at or below it may start), sets it to @p arg2, calls
+ * Saves the limit (D_00519AB0 word 2; only queued commands at or below it may start), sets it to @p priority, calls
  * arg0(arg2, arg3), restores the old limit and then restarts the queue with iFILESYS_ExecCommand(0). The
  * FILE_load family uses it to load synchronously at sync_priority.
  *
- * @param arg0  callback to run, called with (priority, @p arg3)
- * @param arg1  unused
- * @param arg2  priority limit to use while the callback runs
- * @param arg3  argument passed through to the callback
+ * @param func  callback to run, called with (priority, @p userData)
+ * @param fileDevice  unused
+ * @param priority  priority limit to use while the callback runs
+ * @param userData  argument passed through to the callback
  * @return the callback's result
  */
-int FILESYS_atomic_DDF0(int (*arg0)(int, int), int arg1, int arg2, int arg3) {
-    int temp_18;
+int FILESYS_atomic_DDF0(int (*func)(int, int), int fileDevice, int priority, int userData) {
+    int prevMinPriority;
     int temp_2;
 
-    temp_18 = D_00519AB0_9AB0[2];
-    D_00519AB0_9AB0[2] = arg2;
-    temp_2 = arg0(arg2, arg3);
-    D_00519AB0_9AB0[2] = temp_18;
+    prevMinPriority = D_00519AB0_9AB0[2];
+    D_00519AB0_9AB0[2] = priority;
+    temp_2 = func(priority, userData);
+    D_00519AB0_9AB0[2] = prevMinPriority;
     iFILESYS_ExecCommand(0);
     return temp_2;
 }
@@ -1687,16 +1687,16 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *c) __asm__("iFILESYS_ExecCommand")
 /**
  * Queues a file-system command and, when the device is idle, starts the next queued command.
  *
- * A non-null @p c is inserted into the pending list ordered by priority (after any of equal priority). Nothing
+ * A non-null @p fileOp is inserted into the pending list ordered by priority (after any of equal priority). Nothing
  * starts while a command is current or a completion callback is running, or when the head's priority is above
  * the limit. The started command runs by type (bits 20-23 of its first word): 2 opens and 8 checks a file
  * (a plain name opens a device file, "|name" or "archive|name" looks inside the mounted BIG archives), 3
  * closes, 4 reads, 5 writes, 6 reports the file size, and 7, 9 and 10 complete at once. An aborted command
  * completes at once with status -1.
  *
- * @param c  command to queue, or 0 just to try starting the next one
+ * @param fileOp  command to queue, or 0 just to try starting the next one
  */
-void iFILESYS_ExecCommand_impl(struct sFsCmd *c) {
+void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
     char path[256];
     char file[256];
     int off;
@@ -1706,17 +1706,17 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *c) {
     int mode;
     int found;
     MUTEX_lock_FX(D_00519AC4.f00);
-    if (c != 0) {
+    if (fileOp != 0) {
         struct sFsCmd *prev = 0;
-        c->f2C = D_00519AC4.f1C;
-        while (c->f2C != 0 && !(c->f10 < c->f2C->f10)) {
-            prev = c->f2C;
-            c->f2C = prev->f2C;
+        fileOp->f2C = D_00519AC4.f1C;
+        while (fileOp->f2C != 0 && !(fileOp->f10 < fileOp->f2C->f10)) {
+            prev = fileOp->f2C;
+            fileOp->f2C = prev->f2C;
         }
         if (prev != 0) {
-            prev->f2C = c;
+            prev->f2C = fileOp;
         } else {
-            D_00519AB0.f30 = c;
+            D_00519AB0.f30 = fileOp;
         }
         D_00519AB0.f0C++;
     }
@@ -1724,52 +1724,52 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *c) {
         MUTEX_unlock_FX(D_00519AB0.f14);
         return;
     }
-    c = D_00519AB0.f30;
-    if (c != 0 && c->f10 <= D_00519AB0.f08) {
-        D_00519AB0.f30 = c->f2C;
+    fileOp = D_00519AB0.f30;
+    if (fileOp != 0 && fileOp->f10 <= D_00519AB0.f08) {
+        D_00519AB0.f30 = fileOp->f2C;
         D_00519AB0.f0C--;
     } else {
-        c = 0;
+        fileOp = 0;
     }
-    D_00519AB0.f24 = c;
+    D_00519AB0.f24 = fileOp;
     MUTEX_unlock_FX(D_00519AB0.f14);
-    if (c == 0) return;
-    if (c->f04 != 0) {
+    if (fileOp == 0) return;
+    if (fileOp->f04 != 0) {
         iFILESYS_CommandCompleteCallback_FX(0);
         return;
     }
-    switch ((c->f00.w >> 20) & 0xF) {
+    switch ((fileOp->f00.w >> 20) & 0xF) {
     case 2:
     case 8:
         file[0] = 0;
-        if (strchr_FX(c->f24->f10, '|')) {
-            if (*c->f24->f10 == '|') {
+        if (strchr_FX(fileOp->f24->f10, '|')) {
+            if (*fileOp->f24->f10 == '|') {
                 mode = 2;
             } else {
                 int len;
-                char *bar = strchr_FX(c->f24->f10, '|');
+                char *bar = strchr_FX(fileOp->f24->f10, '|');
                 mode = 4;
-                len = bar - c->f24->f10;
+                len = bar - fileOp->f24->f10;
                 path[0] = 0;
-                strncpy(path, c->f24->f10, len);
+                strncpy(path, fileOp->f24->f10, len);
                 path[len] = 0;
             }
-            strcpy(file, strchr_FX(c->f24->f10, '|') + 1);
+            strcpy(file, strchr_FX(fileOp->f24->f10, '|') + 1);
         } else {
             mode = 1;
-            if (c->f18 & 1) {
+            if (fileOp->f18 & 1) {
                 mode = 3;
-                strcpy(file, c->f24->f10);
+                strcpy(file, fileOp->f24->f10);
             }
         }
         found = 0;
-        if ((mode & 1) && func_003E3208_FX(c->f24->f10, c->f18, c->f24)) {
+        if ((mode & 1) && func_003E3208_FX(fileOp->f24->f10, fileOp->f18, fileOp->f24)) {
             found = 1;
-            if (((c->f00.w >> 20) & 0xF) == 8) {
-                func_003E32F8_FX(c->f24->f00);
+            if (((fileOp->f00.w >> 20) & 0xF) == 8) {
+                func_003E32F8_FX(fileOp->f24->f00);
             } else {
-                c->f24->f04 = func_003E34E8_FX(c->f24->f00);
-                c->f24->f0C = func_003E3538_FX(c->f24->f00);
+                fileOp->f24->f04 = func_003E34E8_FX(fileOp->f24->f00);
+                fileOp->f24->f0C = func_003E3538_FX(fileOp->f24->f00);
             }
         }
         if (!found && (mode & 6)) {
@@ -1777,54 +1777,54 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *c) {
                 if ((mode & 4) && func_004165A8_FX(n->f0C->f10, path)) continue;
                 if (BIG_locateentryz_FX(n->f00, file, 0, &x, &off)) {
                     found = 1;
-                    c->f24->f00 = (int)n;
-                    c->f24->f04 = off;
-                    c->f24->f08 = x;
+                    fileOp->f24->f00 = (int)n;
+                    fileOp->f24->f04 = off;
+                    fileOp->f24->f08 = x;
                 }
             }
         }
-        if (((c->f00.w >> 20) & 0xF) == 8) {
-            func_003DE8C0_FX(c->f24);
-            c->f18 = found;
+        if (((fileOp->f00.w >> 20) & 0xF) == 8) {
+            func_003DE8C0_FX(fileOp->f24);
+            fileOp->f18 = found;
         }
         iFILESYS_CommandCompleteCallback_FX(found);
         break;
     case 3:
-        c->f0C = 1;
-        hd = c->f24;
+        fileOp->f0C = 1;
+        hd = fileOp->f24;
         if (hd != 0) {
             if (hd->f08 == 0) {
-                c->f0C = func_003E32F8_FX(hd->f00);
+                fileOp->f0C = func_003E32F8_FX(hd->f00);
             } else {
-                c->f0C = 0;
+                fileOp->f0C = 0;
             }
-            func_003DE8C0_FX(c->f24);
-            c->f24 = 0;
+            func_003DE8C0_FX(fileOp->f24);
+            fileOp->f24 = 0;
         }
-        iFILESYS_CommandCompleteCallback_FX(c->f0C == 0);
+        iFILESYS_CommandCompleteCallback_FX(fileOp->f0C == 0);
         break;
     case 4:
-        if (c->f1C > 0) {
-            if (c->f24->f08 != 0) {
-                func_003E3350_FX(((struct sFsNode *)c->f24->f00)->f0C->f00, c->f20, c->f24->f08 + c->f18, c->f1C);
+        if (fileOp->f1C > 0) {
+            if (fileOp->f24->f08 != 0) {
+                func_003E3350_FX(((struct sFsNode *)fileOp->f24->f00)->f0C->f00, fileOp->f20, fileOp->f24->f08 + fileOp->f18, fileOp->f1C);
             } else {
-                func_003E3350_FX(c->f24->f00, c->f20, c->f18, c->f1C);
+                func_003E3350_FX(fileOp->f24->f00, fileOp->f20, fileOp->f18, fileOp->f1C);
             }
         } else {
             iFILESYS_CommandCompleteCallback_FX(1);
         }
         break;
     case 5:
-        func_003E3478_FX(c->f24->f00, c->f20, c->f18, c->f1C);
+        func_003E3478_FX(fileOp->f24->f00, fileOp->f20, fileOp->f18, fileOp->f1C);
         break;
     case 6:
-        c->f18 = c->f24->f04;
+        fileOp->f18 = fileOp->f24->f04;
         iFILESYS_CommandCompleteCallback_FX(1);
         break;
     case 7:
     case 9:
     case 10:
-        iFILESYS_CommandCompleteCallback_FX(c->f0C == 0);
+        iFILESYS_CommandCompleteCallback_FX(fileOp->f0C == 0);
         break;
     }
 }
@@ -1852,20 +1852,20 @@ void iFILESYS_CommandCompleteCallback_impl(int ok) __asm__("iFILESYS_CommandComp
  * @param ok  nonzero if the command succeeded
  */
 void iFILESYS_CommandCompleteCallback_impl(int ok) {
-    struct Cmd_IFS *c;
+    struct Cmd_IFS *fileOp;
     D_00519AB0_IFS.busy++;
-    c = D_00519AB0_IFS.cur;
-    if (c == 0) {
+    fileOp = D_00519AB0_IFS.cur;
+    if (fileOp == 0) {
         return;
     }
-    if (c->abort != 0) {
-        c->status = -1;
+    if (fileOp->abort != 0) {
+        fileOp->status = -1;
     } else {
-        c->status = ok ? 1 : -2;
+        fileOp->status = ok ? 1 : -2;
     }
     D_00519AB0_IFS.cur = 0;
-    if (c->cb != 0) {
-        c->cb(c->f0, c->status, c->f14);
+    if (fileOp->cb != 0) {
+        fileOp->cb(fileOp->f0, fileOp->status, fileOp->f14);
     }
     D_00519AB0_IFS.busy--;
     if (D_00519AB0_IFS.busy == 0) {
@@ -2569,11 +2569,11 @@ extern char fF0F0_F1E0[] __asm__("func_003DF0F0");
  *
  * The buffer comes from the allocator hook ("ASYNCFILEBUF", D_00450C14); reads go in chunks of at most 32 KB.
  *
- * @param a  unused (callback argument)
- * @param b  unused (callback argument)
+ * @param opHandle  unused (callback argument)
+ * @param opStatus  unused (callback argument)
  * @param userdata  the load request (On Tour void* userdata)
  */
-void loadfilesizecallback(int a, int b, char *userdata) {
+void loadfilesizecallback(int opHandle, int opStatus, char *userdata) {
     int fileSize, buffer, readSize, old;
     fileSize = fD310_F1E0(*(volatile int *)(userdata + 0x1C));
     if (*(int *)(userdata + 0x10) != 0) {
@@ -2953,7 +2953,7 @@ extern char D_9C08_FAF0[] __asm__("D_00519C08");
  * @return 1 when cancelled; -1 for a bad handle, an already-cancelled request or one that has completed
  */
 int ASYNCFILE_cancel(int handle) {
-    int releaseFlag, fileOp, cancelFlag, r;
+    int releaseFlag, fileOp, cancelFlag, lockState;
     char *req;
     fileOp = 0;
     cancelFlag = 0;
@@ -4912,26 +4912,26 @@ int FILE_loadpackatz_pkz(int name, int dst, int max) __asm__("FILE_loadpackatz")
 // platform's data-cache flush (or nothing).
 int FILE_loadpackatz_pkz(int name, int dst, int max) {
     int size;
-    int h, n, buf;
-    h = FILE_loadsizez_pkz(name, &size, 0x100);
-    if (h == 0) return 0;
-    n = func_003B4818_pkz(h);
+    int buffer, n, buf;
+    buffer = FILE_loadsizez_pkz(name, &size, 0x100);
+    if (buffer == 0) return 0;
+    n = func_003B4818_pkz(buffer);
     if (size > 0 && n > 0) {
         buf = (int)D_00450C10.f04((char *)name, n, 0x100);
         if (buf != 0) {
-            if (func_003B4740_pkz(h, buf) == 0) {
+            if (func_003B4740_pkz(buffer, buf) == 0) {
                 D_00450C10.f08((void *)buf);
                 buf = 0;
             }
         }
-        D_00450C10.f08((void *)h);
+        D_00450C10.f08((void *)buffer);
         if (buf == 0) return 0;
         size = n;
-        h = buf;
+        buffer = buf;
     }
     if (max > 0 && max < size) size = max;
-    MEM_copy_pkz(dst, h, size);
-    D_00450C10.f08((void *)h);
+    MEM_copy_pkz(dst, buffer, size);
+    D_00450C10.f08((void *)buffer);
     /* PORT: hand-written data-cache writeback loop (see the PORT line above the function). */
     __asm__ __volatile__(
         ".set push\n\t"
@@ -5037,21 +5037,21 @@ int BIG_sizeofheader_impl(unsigned char *h) __asm__("BIG_sizeofheader");
  * For a 0xC0FB header (BIG_typeofheader() type 1) the size is the big-endian 16-bit value at byte 2 plus 4. For
  * "BIGF" and other "BIG" headers (types 2 and 3) it is the big-endian 32-bit value at byte 12.
  *
- * @param h  start of the archive
- * @return the header size in bytes, or 0 if @p h is not a BIG archive
+ * @param bigFile  start of the archive
+ * @return the header size in bytes, or 0 if @p bigFile is not a BIG archive
  */
-int BIG_sizeofheader_impl(unsigned char *h) {
-    int r = 0;
-    int t = BIG_typeofheader_SZ(h);
-    if (t == 1) {
-        r = ((h[2] << 8) | h[3]) + 4;
-    } else if (t > 0) {
-        if (t < 4) {
-            unsigned char *p = h + 12;
-            r = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+int BIG_sizeofheader_impl(unsigned char *bigFile) {
+    int headerSize = 0;
+    int headerType = BIG_typeofheader_SZ(bigFile);
+    if (headerType == 1) {
+        headerSize = ((bigFile[2] << 8) | bigFile[3]) + 4;
+    } else if (headerType > 0) {
+        if (headerType < 4) {
+            unsigned char *sizeField = bigFile + 12;
+            headerSize = (sizeField[0] << 24) | (sizeField[1] << 16) | (sizeField[2] << 8) | sizeField[3];
         }
     }
-    return r;
+    return headerSize;
 }
 #endif
 
@@ -5144,54 +5144,54 @@ char *BIG_locateentryz_LOC(char *base, char *name, int idx, int *out1, int *out2
  * @return the entry's name in the directory, or 0 when not found
  */
 char *BIG_locateentryz_LOC(char *base, char *name, int idx, int *out1, int *out2) {
-    unsigned char *p = (unsigned char *)base + 0x10;
-    int n1 = 4;
-    int n2 = 4;
+    unsigned char *bigEntry = (unsigned char *)base + 0x10;
+    int sizeOfOffset = 4;
+    int sizeOfLen = 4;
     int i = 0;
     int dbg;
     unsigned char *end;
-    int t;
+    int headerType;
 
     dbg = BIG_debuginfo_LOC(base, 0, 0);
     end = (unsigned char *)base + BIG_sizeofheader_LOC(base) - dbg;
-    t = BIG_typeofheader_LOC(base);
-    switch (t) {
+    headerType = BIG_typeofheader_LOC(base);
+    switch (headerType) {
     case 2:
         break;
     case 3:
-        n1 = base[3] - 0x30;
-        n2 = n1;
-        if (n1 > 4) n2 = 4;
+        sizeOfOffset = base[3] - 0x30;
+        sizeOfLen = sizeOfOffset;
+        if (sizeOfOffset > 4) sizeOfLen = 4;
         break;
     case 1:
-        p = (unsigned char *)base + 6;
-        n1 = 3;
-        n2 = 3;
+        bigEntry = (unsigned char *)base + 6;
+        sizeOfOffset = 3;
+        sizeOfLen = 3;
         break;
     }
     if (name != 0) {
-        while (p < end) {
-            unsigned char *key = p + n1 + n2;
+        while (bigEntry < end) {
+            unsigned char *key = bigEntry + sizeOfOffset + sizeOfLen;
             if (func_003E2490_LOC((char *)key, name) == 0) {
-                if (out1 != 0) *out1 = rd8_LOC(p, n1);
+                if (out1 != 0) *out1 = rd8_LOC(bigEntry, sizeOfOffset);
                 if (out2 == 0) return (char *)key;
-                *out2 = rd4_LOC(p + n1, n2);
+                *out2 = rd4_LOC(bigEntry + sizeOfOffset, sizeOfLen);
                 return (char *)key;
             }
             i = strlen((char *)key);
-            p = key + i + 1;
+            bigEntry = key + i + 1;
         }
     } else {
-        while (p < end) {
-            unsigned char *key = p + n1 + n2;
+        while (bigEntry < end) {
+            unsigned char *key = bigEntry + sizeOfOffset + sizeOfLen;
             if (i == idx) {
-                if (out1 != 0) *out1 = rd8_LOC(p, n1);
+                if (out1 != 0) *out1 = rd8_LOC(bigEntry, sizeOfOffset);
                 if (out2 == 0) return (char *)key;
-                *out2 = rd4_LOC(p + n1, n2);
+                *out2 = rd4_LOC(bigEntry + sizeOfOffset, sizeOfLen);
                 return (char *)key;
             }
             i++;
-            p = key + strlen((char *)key) + 1;
+            bigEntry = key + strlen((char *)key) + 1;
         }
     }
     if (out1 != 0) *out1 = 0;
@@ -7148,18 +7148,18 @@ void MUTEX_unlock_5760(void *arg0) __asm__("MUTEX_unlock");
  * signals the semaphore. A caller that does not own it signals the semaphore anyway. Inside a timer handler
  * the interrupt-safe signal is used.
  *
- * @param arg0  the mutex (owner thread at word 1, lock count at word 2, semaphore ID at word 3)
+ * @param mutex  the mutex (owner thread at word 1, lock count at word 2, semaphore ID at word 3)
  */
-void MUTEX_unlock_5760(void *arg0) {
-    int *p = (int *)arg0;
-    if (p[1] == func_00423C90()) {
-        if (--p[2] != 0) return;
-        p[1] = 0;
+void MUTEX_unlock_5760(void *mutex) {
+    int *mutexWords = (int *)mutex;
+    if (mutexWords[1] == func_00423C90()) {
+        if (--mutexWords[2] != 0) return;
+        mutexWords[1] = 0;
     }
     if (D_00450DE4_5760[0] != 0) {
-        func_00423DD0(p[3]);
+        func_00423DD0(mutexWords[3]);
     } else {
-        func_00423DC0(p[3]);
+        func_00423DC0(mutexWords[3]);
     }
 }
 #endif
@@ -7439,21 +7439,21 @@ void PRINT_vstring_5C78(int, char *, char *) __asm__("PRINT_vstring");
  */
 void PRINT_vstring_5C78(int idx, char *fmt, char *ap) {
     char buf[0x2000];
-    int h;
+    int handler;
     if (D_00451008_5C78[0] == 0) {
         func_003E5B60();
     }
     if (D_00450E08_5C78[idx].b0) {
         func_004186C8(buf, fmt, ap);
-        h = (int)D_00451250_5C78;
+        handler = (int)D_00451250_5C78;
         do {
-            if (((struct H_5C78 *)h)->b0) {
-                if (((struct H_5C78 *)h)->fn) {
-                    ((struct H_5C78 *)h)->fn(idx, buf);
+            if (((struct H_5C78 *)handler)->b0) {
+                if (((struct H_5C78 *)handler)->fn) {
+                    ((struct H_5C78 *)handler)->fn(idx, buf);
                 }
             }
-            h += 12;
-        } while (h < (int)D_00451250_5C78 + 0x60);
+            handler += 12;
+        } while (handler < (int)D_00451250_5C78 + 0x60);
     }
 }
 #endif
@@ -7707,13 +7707,13 @@ void MEM_move_6188(unsigned char *dst, unsigned char *src, int n) __asm__("MEM_m
  * @param n    number of bytes
  */
 void MEM_move_6188(unsigned char *dst, unsigned char *src, int n) {
-    unsigned char *e;
-    if (src >= dst || dst >= (e = src + n)) {
+    unsigned char *srcEnd;
+    if (src >= dst || dst >= (srcEnd = src + n)) {
         MEM_copy_6188(dst, src, n);
     } else {
         dst += n;
         n--;
-        src = e;
+        src = srcEnd;
         while (n != -1) {
             src--;
             dst--;

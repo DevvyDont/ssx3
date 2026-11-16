@@ -661,9 +661,9 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         break;
     }
     case 7: {
-        char* o = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
-        *(int*)(o + 0x1C) = (*(int*)(o + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, o, 0, 0);
+        char* optionsState = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
+        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, optionsState, 0, 0);
         break;
     }
     case 8:
@@ -756,8 +756,8 @@ extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
     sVEi_195328* ovt = *(sVEi_195328**)(obj + 8);
     if (ovt[23].fn(obj + ovt[23].delta, 0) != 0) {
         *(int*)((char*)self + 0x48) = 1;
-        int v = *(signed char*)((char*)self + 0x50);
-        *(char*)((char*)self + 0x14) = v;
+        int savedCtrl = *(signed char*)((char*)self + 0x50);
+        *(char*)((char*)self + 0x14) = savedCtrl;
         cUIThing_playKeyframerEvent(*(void**)((char*)self + 0x4C), 2);
         sVEv_195328* svt = *(sVEv_195328**)((char*)self + 8);
         svt[19].fn((char*)self + svt[19].delta, *(void**)((char*)self + 0x4C), 5);

@@ -215,20 +215,20 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     font->setColor(self->cursor == 14 ? selectColor : normalColor);
     func_001DCA40(font, 320.0f, y + lineheight, str_Real_Front_End);
     if (*(int*)((char*)SSXApp + 0x4) == 0) {
-        tARGB t;
-        t.A = 1.0f;
-        t.R = 0.9f;
-        t.G = 0.9f;
-        t.B = 0.0f;
-        font->setColor(t);
+        tARGB promptColour;
+        promptColour.A = 1.0f;
+        promptColour.R = 0.9f;
+        promptColour.G = 0.9f;
+        promptColour.B = 0.0f;
+        font->setColor(promptColour);
         func_00392908(font, 320.0f, 420.0f, str_press_start_to_play);
     }
-    tARGB t2;
-    t2.A = 1.0f;
-    t2.R = 0.5f;
-    t2.G = 0.5f;
-    t2.B = 0.5f;
-    font->setColor(t2);
+    tARGB animCountColour;
+    animCountColour.A = 1.0f;
+    animCountColour.R = 0.5f;
+    animCountColour.G = 0.5f;
+    animCountColour.B = 0.5f;
+    font->setColor(animCountColour);
     func_001DC9D0(font, 60.0f, 420.0f, 0.5f, 0.5f, str_Anims_pct_d, 7);
 }
 #endif
@@ -1845,9 +1845,9 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
         cMemMan_free(data);
     }
     data = FILE_load(str_data_fonts_menu_ssh, 0x100);
-    cPS2GraphicsMan* m2 = GrMan;
-    sVEnt_17F868* vt2 = (sVEnt_17F868*)m2->mVtbl;
-    self->snd20 = ((Load_17F868)vt2[46].fn)((char*)m2 + vt2[46].delta, (char*)data + data[5], str_menu, 0, 1, -1);
+    cPS2GraphicsMan* graphicsMan = GrMan;
+    sVEnt_17F868* vt2 = (sVEnt_17F868*)graphicsMan->mVtbl;
+    self->snd20 = ((Load_17F868)vt2[46].fn)((char*)graphicsMan + vt2[46].delta, (char*)data + data[5], str_menu, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
     }

@@ -187,9 +187,9 @@ extern "C" void cUIAnimation__cUIAnimation(void* self, int flags)
     *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
     char* base = *(char**)((char*)self + 0x4);
     if (base != 0) {
-        char* p = base + *(int*)(base - 0x10) * 4;
-        while (*(char**)((char*)self + 0x4) != p) {
-            p -= 4;
+        char* elemPtr = base + *(int*)(base - 0x10) * 4;
+        while (*(char**)((char*)self + 0x4) != elemPtr) {
+            elemPtr -= 4;
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }

@@ -65,21 +65,21 @@ extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSy
  * @return self
  */
 extern "C" int *cCommSystem_cCommSystem_(int *self) {
-    int a, b, n;
+    int nextOffset, blockOffset, n;
     int i;
     ccs_5698(self + 1);
     ccs_6448(self, 0, 4);
     self[5] = (int)ccs_new(0xFC00, str_Comm_pool, 0x20000000, 0);
     ccs_6448((void *)self[5], 0, 0xFC00);
     self[6] = self[5];
-    a = 0xFC;
-    b = 0;
+    nextOffset = 0xFC;
+    blockOffset = 0;
     n = 0xFE;
     do {
         n--;
-        *(int *)(b + self[5]) = self[5] + a;
-        a += 0xFC;
-        b += 0xFC;
+        *(int *)(blockOffset + self[5]) = self[5] + nextOffset;
+        nextOffset += 0xFC;
+        blockOffset += 0xFC;
     } while (n >= 0);
     for (i = 0; i < 1; i++) {
         self[i] = 0;
@@ -114,9 +114,9 @@ extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) __asm__("cC
  */
 extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) {
     func_003E56E0_59B0((char*)self + 4);
-    void *p = *(void **)((char*)self + 0x14);
-    if (p != 0) {
-        cMemMan_free__FPv_59B0(p);
+    void *blockPool = *(void **)((char*)self + 0x14);
+    if (blockPool != 0) {
+        cMemMan_free__FPv_59B0(blockPool);
     }
     *(int *)((char*)self + 0x14) = 0;
     *(int *)((char*)self + 0x18) = 0;

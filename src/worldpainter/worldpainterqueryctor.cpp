@@ -154,15 +154,15 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
 {
     self->mVtbl = (void**)cWorldPainterQuery_vtbl;
     operator_delete((int*)self->m_data);
-    sWPQuery_06C0* p = D_004A3880;
-    if (p == ((sWPQuery_06C0*)self)) {
+    sWPQuery_06C0* query = D_004A3880;
+    if (query == ((sWPQuery_06C0*)self)) {
         D_004A3880 = (sWPQuery_06C0*)self->m_next;
     } else {
-        while (p->next != ((sWPQuery_06C0*)self)) {
-            p = p->next;
+        while (query->next != ((sWPQuery_06C0*)self)) {
+            query = query->next;
         }
-        if (p != 0) {
-            p->next = (sWPQuery_06C0*)self->m_next;
+        if (query != 0) {
+            query->next = (sWPQuery_06C0*)self->m_next;
         }
     }
     self->mVtbl = (void**)D_00485D30;

@@ -1059,9 +1059,9 @@ extern "C" void cPS2MemCard__cPS2MemCard(void* self, int flags)
 {
     *(void***)self = cPS2MemCard_vtbl;
     func_002C6360((cPS2MemCard*)self);
-    void* p = *(void**)((char*)self + 0x30);
-    if (p != 0) {
-        MEM_free(p);
+    void* iconData = *(void**)((char*)self + 0x30);
+    if (iconData != 0) {
+        MEM_free(iconData);
     }
     *(void***)self = D_004871E8;
     if (flags & 1) {

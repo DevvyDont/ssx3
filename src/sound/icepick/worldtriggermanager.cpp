@@ -477,10 +477,10 @@ extern "C" void cWorldTriggerManager__cWorldTriggerManager(char** self, int flag
 {
     char* base = *self;
     if (base != 0) {
-        char* p = base + *(int*)(base - 0x10) * 0x70;
-        while (*self != p) {
-            p -= 0x70;
-            func_002B4BE0((int*)p, 0);
+        char* entry = base + *(int*)(base - 0x10) * 0x70;
+        while (*self != entry) {
+            entry -= 0x70;
+            func_002B4BE0((int*)entry, 0);
         }
         cMemMan_free(*self - 0x10);
     }
@@ -524,19 +524,19 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
         }
         *(int*)((char*)self + 0x340) = *(int*)(data + 8) + 2;
         *(sTrigInfoEnt**)((char*)self + 0x33C) = (sTrigInfoEnt*)operator_new_tag(*(int*)((char*)self + 0x340) * 8, str_m_aTriggerInfoInstances, 0, 0);
-        int* p = (int*)(data + 0xC);
+        int* cursor = (int*)(data + 0xC);
         for (int i = 2; i < *(int*)((char*)self + 0x340); i++) {
-            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].type = *p;
-            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].data = p;
-            int t = *p;
-            if (t == 1) {
-                p += 6;
-            } else if (t == 2) {
-                p += 14;
-            } else if (t == 3) {
-                p += 12;
-            } else if (t == 4) {
-                p += 4;
+            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].type = *cursor;
+            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].data = cursor;
+            int trigType = *cursor;
+            if (trigType == 1) {
+                cursor += 6;
+            } else if (trigType == 2) {
+                cursor += 14;
+            } else if (trigType == 3) {
+                cursor += 12;
+            } else if (trigType == 4) {
+                cursor += 4;
             }
         }
     } else {

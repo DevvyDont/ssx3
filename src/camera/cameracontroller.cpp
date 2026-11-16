@@ -46,9 +46,9 @@ void operator_delete(int* ptr);
 extern "C" void cCameraController__cCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = cCameraController_vtbl;
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cCameraAlgoList__cCameraAlgoList(p, 3);
+    void* algoList = *(void**)((char*)self + 0x8);
+    if (algoList != 0) {
+        cCameraAlgoList__cCameraAlgoList(algoList, 3);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -191,15 +191,15 @@ struct sCamCtrlVEDtor {
 extern "C" void cManualCameraController__cManualCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = cManualCameraController_vtbl;
-    char* a = *(char**)((char*)self + 0x18);
-    if (a != 0) {
-        sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(a + 0x10);
-        vt[1].fn(a + vt[1].delta, 3);
+    char* manualAlgo = *(char**)((char*)self + 0x18);
+    if (manualAlgo != 0) {
+        sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(manualAlgo + 0x10);
+        vt[1].fn(manualAlgo + vt[1].delta, 3);
     }
-    char* b = *(char**)((char*)self + 0x1C);
-    if (b != 0) {
-        sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(b + 0x10);
-        vt[1].fn(b + vt[1].delta, 3);
+    char* editorAlgo = *(char**)((char*)self + 0x1C);
+    if (editorAlgo != 0) {
+        sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(editorAlgo + 0x10);
+        vt[1].fn(editorAlgo + vt[1].delta, 3);
     }
     cCameraController__cCameraController(self, flags);
 }

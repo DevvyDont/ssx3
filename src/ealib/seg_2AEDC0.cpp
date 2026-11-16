@@ -3150,14 +3150,14 @@ static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
  *
  * @param tex  memory for the shape, sized by SHAPE_createsize (On Tour SHAPE* shp)
  * @param w  width in pixels
- * @param h  height in pixels
+ * @param height  height in pixels
  * @param fmt  pixel format; 0 means 32 bpp (On Tour bpp)
  * @param clut  palette colour depth, 0 for none (On Tour clutbpp)
  * @param levels  number of mipmap levels (On Tour mipmaplevels)
  * @param extra1  comment size, 0 for none (On Tour commentsize)
  * @param extra2  metal-bin size, 0 for none (On Tour metalbinsize)
  */
-extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int levels, int extra1, int extra2)
+extern "C" void SHAPE_createat(void* tex, int w, int height, int fmt, int clut, int levels, int extra1, int extra2)
 {
     sTexHdr_27C8* texHeader = (sTexHdr_27C8*)tex;
     int bpp = 0x20;
@@ -3166,10 +3166,10 @@ extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int l
     MEM_fill(texHeader, 0, 0x10);
     texHeader->type = shapeType;
     texHeader->w = w;
-    texHeader->h = h;
+    texHeader->h = height;
     texHeader->levels = levels;
     sTexHdr_27C8* hdr = texHeader;
-    unsigned char* cursor = (unsigned char*)hdr + (SHAPE_imagesize(w, h, bpp, levels) + 0x10);
+    unsigned char* cursor = (unsigned char*)hdr + (SHAPE_imagesize(w, height, bpp, levels) + 0x10);
     if (bpp < 9 && clut != 0) {
         int n = GetNumberOfColours(bpp);
         unsigned char cfmt = func_003B38B8(clut);
@@ -3293,11 +3293,11 @@ extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* 
     if (mode == 3) {
         for (unsigned int y = 0; y < 4; y++) {
             for (unsigned int x = 0; x < 2; x++) {
-                unsigned char b = *src++;
-                unsigned int lo = b & 0xF;
+                unsigned char alphas = *src++;
+                unsigned int lo = alphas & 0xF;
                 *dst = (*dst & 0xFFFFFF) | (int)((lo | (lo << 4)) << 24);
                 dst++;
-                unsigned int hi = b & 0xF0;
+                unsigned int hi = alphas & 0xF0;
                 *dst = (*dst & 0xFFFFFF) | (int)((hi | (hi >> 4)) << 24);
                 dst++;
             }
@@ -3305,46 +3305,46 @@ extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* 
         }
         return;
     }
-    unsigned char* s = src;
-    unsigned char* d = (unsigned char*)dst + 3;
-    unsigned char a0 = *s++;
-    unsigned char a1 = *s++;
-    unsigned char a2, a3, a4, a5, a6, a7;
-    if (a0 > a1) {
-        a2 = (6 * a0 + a1 + 3) / 7;
-        a3 = (5 * a0 + 2 * a1 + 3) / 7;
-        a4 = (4 * a0 + 3 * a1 + 3) / 7;
-        a5 = (3 * a0 + 4 * a1 + 3) / 7;
-        a6 = (2 * a0 + 5 * a1 + 3) / 7;
-        a7 = (a0 + 6 * a1 + 3) / 7;
+    unsigned char* curPtr = src;
+    unsigned char* dstAlpha = (unsigned char*)dst + 3;
+    unsigned char alpha0 = *curPtr++;
+    unsigned char alpha1 = *curPtr++;
+    unsigned char alpha2, alpha3, alpha4, alpha5, alpha6, alpha7;
+    if (alpha0 > alpha1) {
+        alpha2 = (6 * alpha0 + alpha1 + 3) / 7;
+        alpha3 = (5 * alpha0 + 2 * alpha1 + 3) / 7;
+        alpha4 = (4 * alpha0 + 3 * alpha1 + 3) / 7;
+        alpha5 = (3 * alpha0 + 4 * alpha1 + 3) / 7;
+        alpha6 = (2 * alpha0 + 5 * alpha1 + 3) / 7;
+        alpha7 = (alpha0 + 6 * alpha1 + 3) / 7;
     } else {
-        a2 = (4 * a0 + a1 + 2) / 5;
-        a3 = (3 * a0 + 2 * a1 + 2) / 5;
-        a4 = (2 * a0 + 3 * a1 + 2) / 5;
-        a5 = (a0 + 4 * a1 + 2) / 5;
-        a6 = 0;
-        a7 = 0xFF;
+        alpha2 = (4 * alpha0 + alpha1 + 2) / 5;
+        alpha3 = (3 * alpha0 + 2 * alpha1 + 2) / 5;
+        alpha4 = (2 * alpha0 + 3 * alpha1 + 2) / 5;
+        alpha5 = (alpha0 + 4 * alpha1 + 2) / 5;
+        alpha6 = 0;
+        alpha7 = 0xFF;
     }
     for (int i = 0; i < 2; i++) {
-        unsigned long bits = *(unsigned long*)s;
-        s += 3;
+        unsigned long bits = *(unsigned long*)curPtr;
+        curPtr += 3;
         for (int y = 0; y < 2; y++) {
             for (int x = 0; x < 4; x++) {
                 unsigned char idx = bits & 7;
                 bits >>= 3;
                 switch (idx) {
-                case 0: *d = a0; break;
-                case 1: *d = a1; break;
-                case 2: *d = a2; break;
-                case 3: *d = a3; break;
-                case 4: *d = a4; break;
-                case 5: *d = a5; break;
-                case 6: *d = a6; break;
-                case 7: *d = a7; break;
+                case 0: *dstAlpha = alpha0; break;
+                case 1: *dstAlpha = alpha1; break;
+                case 2: *dstAlpha = alpha2; break;
+                case 3: *dstAlpha = alpha3; break;
+                case 4: *dstAlpha = alpha4; break;
+                case 5: *dstAlpha = alpha5; break;
+                case 6: *dstAlpha = alpha6; break;
+                case 7: *dstAlpha = alpha7; break;
                 }
-                d += 4;
+                dstAlpha += 4;
             }
-            d += stride - 0x10;
+            dstAlpha += stride - 0x10;
         }
     }
 }
@@ -3390,19 +3390,19 @@ extern "C" void decodeRGB(char* src, int pitch, char* dst)
         int blue0 = color0 & 0xFF0000;
         int blue1 = color1 & 0xFF0000;
         int green0 = color0 & 0xFF00;
-        int g1 = color1 & 0xFF00;
-        int r0 = color0 & 0xFF;
-        int r1 = color1 & 0xFF;
-        pal[2] = ((((blue0 * 5 + blue1 * 3) >> 3) & 0xFF0000) | (((green0 * 5 + g1 * 3) >> 3) & 0xFF00)) | (((r0 * 5 + r1 * 3) >> 3) & 0xFF);
-        pal[3] = (((((blue0 * 3 + blue1 * 5) >> 3) & 0xFF0000) | (((green0 * 3 + g1 * 5) >> 3) & 0xFF00)) | (((r0 * 3 + r1 * 5) >> 3) & 0xFF)) | 0xFF000000UL;
+        int green1 = color1 & 0xFF00;
+        int red0 = color0 & 0xFF;
+        int red1 = color1 & 0xFF;
+        pal[2] = ((((blue0 * 5 + blue1 * 3) >> 3) & 0xFF0000) | (((green0 * 5 + green1 * 3) >> 3) & 0xFF00)) | (((red0 * 5 + red1 * 3) >> 3) & 0xFF);
+        pal[3] = (((((blue0 * 3 + blue1 * 5) >> 3) & 0xFF0000) | (((green0 * 3 + green1 * 5) >> 3) & 0xFF00)) | (((red0 * 3 + red1 * 5) >> 3) & 0xFF)) | 0xFF000000UL;
     } else {
         int blue0 = color0 & 0xFF0000;
         int blue1 = color1 & 0xFF0000;
         int green0 = color0 & 0xFF00;
-        int g1 = color1 & 0xFF00;
-        int r0 = color0 & 0xFF;
-        int r1 = color1 & 0xFF;
-        pal[2] = ((ulong)((r0 + r1) | ((green0 + g1) | (blue0 + blue1))) >> 1) | 0xFF000000UL;
+        int green1 = color1 & 0xFF00;
+        int red0 = color0 & 0xFF;
+        int red1 = color1 & 0xFF;
+        pal[2] = ((ulong)((red0 + red1) | ((green0 + green1) | (blue0 + blue1))) >> 1) | 0xFF000000UL;
         pal[3] = 0;
     }
     pal[0] |= 0xFF000000;
@@ -3412,30 +3412,30 @@ extern "C" void decodeRGB(char* src, int pitch, char* dst)
     pal[1] = dxtTo1555_2E78(pal[1]);
     pal[2] = dxtTo1555_2E78(pal[2]);
     pal[3] = dxtTo1555_2E78(pal[3]);
-    unsigned int b;
-    b = ((unsigned char*)dst)[4];
-    ((ulong*)src)[0] = pal[b & 3];
-    ((ulong*)src)[1] = pal[(b >> 2) & 3];
-    ((ulong*)src)[2] = pal[(b >> 4) & 3];
-    ((ulong*)src)[3] = pal[b >> 6];
+    unsigned int rowIndices;
+    rowIndices = ((unsigned char*)dst)[4];
+    ((ulong*)src)[0] = pal[rowIndices & 3];
+    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
+    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
+    ((ulong*)src)[3] = pal[rowIndices >> 6];
     src += pitch;
-    b = ((unsigned char*)dst)[5];
-    ((ulong*)src)[0] = pal[b & 3];
-    ((ulong*)src)[1] = pal[(b >> 2) & 3];
-    ((ulong*)src)[2] = pal[(b >> 4) & 3];
-    ((ulong*)src)[3] = pal[b >> 6];
+    rowIndices = ((unsigned char*)dst)[5];
+    ((ulong*)src)[0] = pal[rowIndices & 3];
+    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
+    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
+    ((ulong*)src)[3] = pal[rowIndices >> 6];
     src += pitch;
-    b = ((unsigned char*)dst)[6];
-    ((ulong*)src)[0] = pal[b & 3];
-    ((ulong*)src)[1] = pal[(b >> 2) & 3];
-    ((ulong*)src)[2] = pal[(b >> 4) & 3];
-    ((ulong*)src)[3] = pal[b >> 6];
+    rowIndices = ((unsigned char*)dst)[6];
+    ((ulong*)src)[0] = pal[rowIndices & 3];
+    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
+    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
+    ((ulong*)src)[3] = pal[rowIndices >> 6];
     src += pitch;
-    b = ((unsigned char*)dst)[7];
-    ((ulong*)src)[0] = pal[b & 3];
-    ((ulong*)src)[1] = pal[(b >> 2) & 3];
-    ((ulong*)src)[2] = pal[(b >> 4) & 3];
-    ((ulong*)src)[3] = pal[b >> 6];
+    rowIndices = ((unsigned char*)dst)[7];
+    ((ulong*)src)[0] = pal[rowIndices & 3];
+    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
+    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
+    ((ulong*)src)[3] = pal[rowIndices >> 6];
 }
 #endif
 

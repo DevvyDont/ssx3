@@ -289,9 +289,9 @@ extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* st
         func_00349DB0_RO(cMemMan_alloc(0x80, str_SpringRail, 0x20000000, 0), bucket, stream);
         break;
     case 22: {
-        sObj_RO* o = func_00350B98_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
-        if (o != 0) {
-            o->vt[1].fn((char*)o + o->vt[1].delta, 3);
+        sObj_RO* deadFadeNode = func_00350B98_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
+        if (deadFadeNode != 0) {
+            deadFadeNode->vt[1].fn((char*)deadFadeNode + deadFadeNode->vt[1].delta, 3);
         }
         break;
     }
@@ -385,6 +385,15 @@ void* func_0026E448(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
 #ifdef SKIP_ASM
+/**
+ * Returns the recorded frame after the one containing a tick, or that frame itself when it is the newest (On Tour
+ * findNextFrame(int tick)).
+ *
+ * Declared with only self: the tick stays in $a1 and reaches func_0026E448 (findFrame), whose frame's Next (+0x14) is
+ * taken when non-null.
+ *
+ * @return the next cReplayFrame
+ */
 extern "C" void* cReplay_findNextFrame(cReplay* self)
 {
     void* p = func_0026E448(self);
@@ -399,6 +408,15 @@ extern "C" void* cReplay_findNextFrame(cReplay* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
 #ifdef SKIP_ASM
+/**
+ * Returns the recorded frame before the one containing a tick, or that frame itself when it is the oldest (On Tour
+ * findPrevFrame(int tick)).
+ *
+ * Declared with only self: the tick stays in $a1 and reaches func_0026E448 (findFrame), whose frame's Prev (+0x18) is
+ * taken when non-null.
+ *
+ * @return the previous cReplayFrame
+ */
 extern "C" void* cReplay_findPrevFrame(cReplay* self)
 {
     void* p = func_0026E448(self);
@@ -419,6 +437,13 @@ void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
 extern "C" int func_0026D4D8(void* stream, unsigned int pos);
 
 
+/**
+ * Moves the playback cursor back to the start of its frame: PlaybackFrame = the frame containing PlaybackTick,
+ * PlaybackTick = its FrameStartTick (+0x30), and each rider input cache moves there (func_0026D4D8,
+ * cReplayCache::moveTo).
+ *
+ * @param self_  the replay (this; copied into a local self)
+ */
 extern "C" void cReplay_rewindFrame(cReplay* self_)
 {
     cReplay* self = self_;
@@ -441,6 +466,10 @@ INCLUDE_ASM("replay/replay", cReplay_nextFrame);
 void* cReplay_findNextFrame_2(void* self, int idx) __asm__("cReplay_findNextFrame");
 extern "C" void cReplay_rewindFrame(cReplay* self);
 
+/**
+ * Moves the playback cursor to the start of the next recorded frame (findNextFrame of PlaybackTick), then rewindFrame
+ * re-syncs the frame and the input caches.
+ */
 extern "C" void cReplay_nextFrame(cReplay* self)
 {
     void* p = cReplay_findNextFrame_2(self, self->PlaybackTick);
@@ -457,6 +486,10 @@ INCLUDE_ASM("replay/replay", cReplay_prevFrame);
 void* cReplay_findPrevFrame_2(void* self, int idx) __asm__("cReplay_findPrevFrame");
 extern "C" void cReplay_rewindFrame(cReplay* self);
 
+/**
+ * Moves the playback cursor to the start of the previous recorded frame (findPrevFrame of PlaybackTick), then
+ * rewindFrame re-syncs the frame and the input caches.
+ */
 extern "C" void cReplay_prevFrame(cReplay* self)
 {
     void* p = cReplay_findPrevFrame_2(self, self->PlaybackTick);

@@ -42,6 +42,12 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
+/**
+ * Frees the sub-emitter position and velocity buffers (m_positions, m_velocities); with @p reset also clears
+ * m_initialized and sets m_numSubEmitters to -1.
+ *
+ * @param reset  non-zero to reset the emitter as well (On Tour resetEmitter)
+ */
 extern "C" void cBaseClass_DynamicEmitter_purge(cBaseClass_DynamicEmitter* self, int reset)
 {
     if (self->m_positions != 0) {
@@ -314,6 +320,12 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Saves a dynamic emitter to a replay frame: writes 0x14 bytes (Duration, the emitter's EndTime, m_enabled,
+ * m_initialized, m_subEmitterId) with the stream's slot 1.
+ *
+ * @param stream  the replay frame to write to (On Tour data)
+ */
 extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicEmitter* self, cStream003712B8* stream)
 {
     struct {
@@ -342,6 +354,12 @@ public:
     virtual void v02(void* buf, int size);
 };
 
+/**
+ * Restores a dynamic emitter from a replay frame: reads the 0x14 bytes written by writeToReplayFrame (Duration,
+ * EndTime, m_enabled, m_initialized, m_subEmitterId) with the stream's slot 2.
+ *
+ * @param stream  the replay frame to read from (On Tour data)
+ */
 extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_DynamicEmitter* self, cStream00371318* stream)
 {
     struct {
@@ -446,6 +464,11 @@ INCLUDE_ASM("render/particle", cDynamicColourEmitter_cDynamicColourEmitter);
 extern "C" void* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(void* self);
 extern void* cDynamicColourEmitter_vtbl[];
 
+/**
+ * Constructs a dynamic colour emitter: clears m_IsAvalanche and m_colours.
+ *
+ * @return @p self
+ */
 extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(cDynamicColourEmitter* self)
 {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(self);
@@ -2870,9 +2893,16 @@ extern "C" int func_003764C0(sPartTexCache_3764C0* self, int idx)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetDisplayModeName);
 #ifdef SKIP_ASM
-extern "C" void* cPS2GraphicsMan_GetDisplayModeName(cPS2GraphicsMan* self, int a1)
+/**
+ * Returns the name of display mode @p mode: the start of DisplayModes[@p mode] (0xA4-byte entries). @p mode is not
+ * range-checked.
+ *
+ * @param mode  the display mode index (On Tour mode)
+ * @return the mode's name string
+ */
+extern "C" void* cPS2GraphicsMan_GetDisplayModeName(cPS2GraphicsMan* self, int mode)
 {
-    return (char*)self->DisplayModes + a1 * 0xa4;
+    return (char*)self->DisplayModes + mode * 0xa4;
 }
 #endif
 
@@ -2885,10 +2915,17 @@ struct sPartVEntry122 {
     int (*fn)(void*, int, int, int, int, int, int);
 };
 
-extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int a1)
+/**
+ * Switches the digital TV output: calls virtual slot 122 with a 512 x 448 mode (0x200, 0x1C0, 0x18, 0x20, 0x18) and
+ * @p enable.
+ *
+ * @param enable  non-zero to enable DTV output (On Tour Enable)
+ * @return the result of slot 122
+ */
+extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int enable)
 {
     sPartVEntry122* vt = (sPartVEntry122*)self->mVtbl;
-    return vt[122].fn((char*)self + vt[122].delta, 0x200, 0x1C0, 0x18, 0x20, 0x18, a1);
+    return vt[122].fn((char*)self + vt[122].delta, 0x200, 0x1C0, 0x18, 0x20, 0x18, enable);
 }
 #endif
 
@@ -2957,6 +2994,12 @@ static inline void vu0CopyMtx65B8(sPtMtx65B8* dst, sPtMtx65B8* src)
 
 extern "C" void func_003950C0(sViewportStack* dst, sViewportStack* src);
 
+/**
+ * Pushes the viewport stack: saves the scissor, the DeferMan scissor index, the screen, world, view, guard-band,
+ * view-projection and net matrices, the guard and screen scales and offsets, and the clip bounds (unk_6B70 /
+ * unk_6B80) into mViewportStack[mViewportDepth], then increments mViewportDepth and copies the entry into the new top
+ * (func_003950C0). No overflow check.
+ */
 extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
@@ -3049,6 +3092,12 @@ static inline void vu0CopyMtx6768(sPtMtx6768* dst, sPtMtx6768* src)
 
 extern "C" void func_00364B88(void* table, void* key);
 
+/**
+ * Pops the viewport stack: decrements mViewportDepth and restores everything PushViewport saved.
+ *
+ * The scissor is re-registered with DeferMan (func_00364B88) when the saved scissor index is -1, otherwise the index
+ * is put back. Clears mMatricesValid.
+ */
 extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
 {
     self->mViewportDepth--;
@@ -3216,6 +3265,12 @@ extern "C" sPartVec4i* func_00376B90(sPartVec4i* r, void* self)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportFOV);
 #ifdef SKIP_ASM
+/**
+ * Returns the current viewport's field of view (the float at +0x6D38 in viewport stack entry mViewportDepth, 0x230
+ * bytes each).
+ *
+ * @return the field of view
+ */
 extern "C" float cPS2GraphicsMan_GetViewportFOV(cPS2GraphicsMan* self)
 {
     int i = self->mViewportDepth;
@@ -3235,12 +3290,21 @@ struct sPartSys {
     sViewportStack emitters[1];
 };
 
-extern "C" void cPS2GraphicsMan_GetViewportPerspective(cPS2GraphicsMan* self, float* a, float* b, float* c)
+/**
+ * Reads the current viewport's perspective (On Tour GetViewportPerspective(float& fov, float& minz, float& maxz)).
+ *
+ * The viewport entry stores them as unk_010[0] = near, [1] = far, [2] = field of view.
+ *
+ * @param fov  receives the field of view (unk_010[2])
+ * @param minz  receives the near distance (unk_010[0])
+ * @param maxz  receives the far distance (unk_010[1])
+ */
+extern "C" void cPS2GraphicsMan_GetViewportPerspective(cPS2GraphicsMan* self, float* fov, float* minz, float* maxz)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *a = viewportStack->unk_010[2];
-    *b = viewportStack->unk_010[0];
-    *c = viewportStack->unk_010[1];
+    *fov = viewportStack->unk_010[2];
+    *minz = viewportStack->unk_010[0];
+    *maxz = viewportStack->unk_010[1];
 }
 #endif
 
@@ -6223,10 +6287,15 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_InitTextures);
 extern "C" void MEM_fill(void* dst, int c, int n);
 void func_00366FE0(void* p, int a1);
 
-extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int a1)
+/**
+ * Clears the texture table (0x1F40 bytes at +0x3838) and sets the texture manager's memory type (func_00366FE0).
+ *
+ * @param memtype  the memory type for textures (On Tour memtype)
+ */
+extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
 {
     MEM_fill((char*)self + 0x3838, 0, 0x1F40);
-    func_00366FE0(self->mpTextureMan, a1);
+    func_00366FE0(self->mpTextureMan, memtype);
 }
 #endif
 
@@ -6250,6 +6319,10 @@ struct sVEntry0037C830 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Removes every loaded texture: for each of the 2000 slots with a non-zero entry at +0x18F8 calls virtual slot 50
+ * (the remove) with its index.
+ */
 extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
 {
     int i;
@@ -6269,6 +6342,12 @@ extern "C" void func_00366FE0__FPvi(void*);
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTextureMemType);
 #ifdef SKIP_ASM
+/**
+ * Passes a memory type to the texture manager (func_00366FE0).
+ *
+ * Declared with only the this pointer: On Tour's SetTextureMemType(int memtype) passes the type, which stays in $a1
+ * and reaches func_00366FE0.
+ */
 extern "C" void cPS2GraphicsMan_SetTextureMemType(cPS2GraphicsMan* self)
 {
     func_00366FE0__FPvi(self->mpTextureMan);
@@ -6403,6 +6482,11 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveTexture);
 #ifdef SKIP_ASM
 extern "C" void func_00367BC0(void* tbl, int idx);
 
+/**
+ * Removes texture @p idx from the texture manager (func_00367BC0) and clears its slot at +0x18F8.
+ *
+ * @param idx  the texture id (On Tour texid)
+ */
 extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
 {
     func_00367BC0(self->mpTextureMan, idx);
@@ -6439,6 +6523,13 @@ struct sPartTexTable {
     sPartTex* entries[2000];
 };
 
+/**
+ * Tells whether a texture id is usable: negative ids count as valid (no texture), ids below 2000 are valid when the
+ * texture manager has an entry, larger ids are not.
+ *
+ * @param idx  the texture id (On Tour texid)
+ * @return 1 if valid, else 0
+ */
 extern "C" int cPS2GraphicsMan_IsValidTexture(cPS2GraphicsMan* self, int idx)
 {
     sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
@@ -6476,10 +6567,18 @@ struct sPartVEntry52 {
     int (*fn)(void*, int, int, int);
 };
 
-extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, void* out, int a2, int a3)
+/**
+ * Creates a screen-grab texture: stores the texture id returned by virtual slot 52 (@p width, @p height, 0) in the handle's
+ * second word.
+ *
+ * @param out  the tScreenGrabHandle to fill
+ * @param width  the texture width (On Tour width)
+ * @param height  the texture height (On Tour height)
+ */
+extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, void* out, int width, int height)
 {
     sPartVEntry52* vt = (sPartVEntry52*)self->mVtbl;
-    *(int*)((char*)out + 4) = vt[52].fn((char*)self + vt[52].delta, a2, a3, 0);
+    *(int*)((char*)out + 4) = vt[52].fn((char*)self + vt[52].delta, width, height, 0);
 }
 #endif
 
@@ -6494,6 +6593,12 @@ struct sVEntry0037CC30 {
 
 extern "C" void func_00367B60(void* mgr, int id);
 
+/**
+ * Releases a screen-grab texture: when the handle's texture id is not -1, frees it in the texture manager
+ * (func_00367B60), removes it (virtual slot 50) and sets the id to -1.
+ *
+ * @param item  the tScreenGrabHandle to release
+ */
 extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, void* item)
 {
     if (*(int*)((char*)item + 0x4) != -1) {
@@ -7009,12 +7114,22 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
         : "memory");
 }
 
-extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* q, sPartMtx* m0, sPartMtx* m1, float f, int i)
+/**
+ * Appends a projected texture to mProjTextures and increments mNumProjTextures (On Tour AddProjectiveTexture(pos,
+ * clipMat, projMat, intensity, texid)). There is no bound check on the 8-entry array.
+ *
+ * @param pos  the projector position (unk_00)
+ * @param clipMat  the clip matrix (unk_10)
+ * @param projMat  the projection matrix (unk_50)
+ * @param intensity  the intensity (unk_90)
+ * @param i  the texture id (On Tour texid; unk_94)
+ */
+extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* pos, sPartMtx* clipMat, sPartMtx* projMat, float intensity, int i)
 {
-    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_00) = *q;
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_10), m0);
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_50), m1);
-    ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_90 = f;
+    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_00) = *pos;
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_10), clipMat);
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_50), projMat);
+    ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_90 = intensity;
     ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_94 = i;
     self->mNumProjTextures++;
 }
@@ -7091,6 +7206,12 @@ extern "C" void func_0037D800(sPtGfx_D800* self, int idx, float* color)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureWidth);
 #ifdef SKIP_ASM
+/**
+ * Returns the width of texture @p idx: 1 << TW from its GS TEX0 register. @p idx is not range-checked.
+ *
+ * @param idx  the texture id (On Tour texid)
+ * @return the width in texels
+ */
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 extern "C" int cPS2GraphicsMan_GetTextureWidth(cPS2GraphicsMan* self, int idx)
 {
@@ -7102,6 +7223,12 @@ extern "C" int cPS2GraphicsMan_GetTextureWidth(cPS2GraphicsMan* self, int idx)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureHeight);
 #ifdef SKIP_ASM
+/**
+ * Returns the height of texture @p idx: 1 << TH from its GS TEX0 register. @p idx is not range-checked.
+ *
+ * @param idx  the texture id (On Tour texid)
+ * @return the height in texels
+ */
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 extern "C" int cPS2GraphicsMan_GetTextureHeight(cPS2GraphicsMan* self, int idx)
 {
@@ -7240,12 +7367,23 @@ static inline sPtVecDBE8 mtxApplyDBE8(t4Matrix* m, const sPtVecDBE8& v)
     return out;
 }
 
-extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const sPtVecDBE8* p)
+/**
+ * Computes the clip outcode of a point against the current screen bounds.
+ *
+ * Refreshes the matrices if mMatricesValid is clear (func_0037D968), transforms @p point by mScreenWorld and divides x
+ * and y by w. Bits: 2 / 1 for x below unk_6B70.x / above unk_6B80.x, 8 / 4 for y below / above, and when w is
+ * positive 0x20 for z above unk_6B70.z and 0x10 for z below unk_6B80.z (z is not divided by w). A point behind the
+ * eye (w < 0) has its code xor'd with 0x2F.
+ *
+ * @param point  the world-space point (On Tour point)
+ * @return the outcode bits (0 = inside)
+ */
+extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const sPtVecDBE8* point)
 {
     if (self->mMatricesValid == 0) {
         func_0037D968(self);
     }
-    sPtVecDBE8 v = mtxApplyDBE8(&(*(&self->mScreenWorld)), *p);
+    sPtVecDBE8 v = mtxApplyDBE8(&(*(&self->mScreenWorld)), *point);
     int code = 0;
     float w = 1.0f / v.w;
     v.x *= w;
@@ -7334,9 +7472,18 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_ClipBoundBox);
 // VU0 microprogram entry (micro-memory address 0x570; resolved via undefined_syms_auto.txt)
 extern char D_570[];
 
+/**
+ * Classifies a bounding box against the view with the VU0 microprogram at D_570 (On Tour ClipBoundBox(iMinp, iMaxp,
+ * iMat), returning GMClipCodes).
+ *
+ * @param minp  the box's minimum corner
+ * @param maxp  the box's maximum corner
+ * @param mat  the box's transform
+ * @return 1 when the microprogram's second result is set, else 2 when its first is set, else 0
+ */
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
 // version of the microprogram.
-extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* a, void* b, void* m)
+extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, void* maxp, void* mat)
 {
     int r1;
     int r2;
@@ -7354,7 +7501,7 @@ extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* a, void
         "cfc2.i    %0, $vi1\n"
         "cfc2.ni   %1, $vi2\n"
         : "=r"(r1), "=r"(r2)
-        : "r"(a), "r"(b), "r"(m), "r"((unsigned int)D_570 >> 3));
+        : "r"(minp), "r"(maxp), "r"(mat), "r"((unsigned int)D_570 >> 3));
     if (r2 != 0) {
         return 1;
     }
@@ -7603,6 +7750,18 @@ struct sMdl0380 {
     int dataOff;            // 0x24
 };
 
+/**
+ * Reads the four corners of a quad mesh of an instance (On Tour GetMeshQuad(pInstance, mesh, vert, uv, rgb)).
+ *
+ * Finds the mesh's vertex data through the instance's model (+0x80); positions are the 16-bit values times scale /
+ * 32767, texture coordinates the 16-bit values / 4096, colours r, g, b / 31 with alpha copied raw.
+ *
+ * @param obj  the tInstanceRecord
+ * @param idx  the mesh index
+ * @param pos  receives 4 x (x, y, z)
+ * @param uv  receives 4 x (u, v)
+ * @param col  receives 4 x (a, r, g, b)
+ */
 extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, char* obj, int idx, float* pos, float* uv, float* col)
 {
     sMdl0380* mdl = *(sMdl0380**)(obj + 0x80);
@@ -8724,8 +8883,16 @@ static inline void CopyMat_1F10(sMat_1F10* dst, const sMat_1F10* src)
 
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
+/**
+ * Draws a cubic spline on PS2: writes a GIF/VIF packet with the colour (scaled by 128), the point count and @p BezMat into
+ * the uncached render buffer, and records it as a DeferMan entry while the entry count is below 0xA28.
+ *
+ * @param BezMat  the Bezier basis matrix (On Tour BezMat)
+ * @param col  the colour as four floats a, r, g, b in 0..1
+ * @param n  the number of points
+ */
 // PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `unsigned long`.
-extern "C" void cPS2GraphicsMan_RenderSpline(sPtGfx_1F10* self, sMat_1F10* m, float* col, int n)
+extern "C" void cPS2GraphicsMan_RenderSpline(sPtGfx_1F10* self, sMat_1F10* BezMat, float* col, int n)
 {
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
     self->top->fC &= 0xC0000000;
@@ -8744,7 +8911,7 @@ extern "C" void cPS2GraphicsMan_RenderSpline(sPtGfx_1F10* self, sMat_1F10* m, fl
     p[7] = 1;
     p[8] = (unsigned long)(n | 0x8000) | ((unsigned long)0x800A << 45);
     p[9] = 4;
-    CopyMat_1F10((sMat_1F10*)(p + 10), m);
+    CopyMat_1F10((sMat_1F10*)(p + 10), BezMat);
     p[18] = n;
     p[19] = 0;
     p[20] = 0;
@@ -10701,11 +10868,16 @@ extern "C" void func_0036ABA0(void* self, int a1);
 extern "C" void func_00390458(void* self, int a1);
 extern "C" void func_0036C740(void* self, int a1);
 
-extern "C" void cPS2GraphicsMan_UpdateFullScreenEffects(cPS2GraphicsMan* self, int a1)
+/**
+ * Updates the full-screen effects of a view: func_0036ABA0, func_00390458 and func_0036C740, each with @p view.
+ *
+ * @param view  the view index (On Tour View)
+ */
+extern "C" void cPS2GraphicsMan_UpdateFullScreenEffects(cPS2GraphicsMan* self, int view)
 {
-    func_0036ABA0(self, a1);
-    func_00390458(self, a1);
-    func_0036C740(self, a1);
+    func_0036ABA0(self, view);
+    func_00390458(self, view);
+    func_0036C740(self, view);
 }
 #endif
 
@@ -10716,6 +10888,12 @@ struct sPartPair {
     int a, b;
 };
 
+/**
+ * Records view @p i for the full-screen effects rather than drawing anything: copies mScreenMatrix (+0x6AF0) to
+ * unk_5930[i] and the scissor to unk_59B0[i], and sets unk_59C0 = i + 1.
+ *
+ * @param i  the view index (On Tour View)
+ */
 // Pushes the current matrix (self+0x6AF0) and the pair at self+0x5900 onto slot i.
 // PORT: PS2-only VU0 asm (lqc2/sqc2 matrix copy).
 extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, int i)
@@ -10959,7 +11137,19 @@ static inline void blendStore_6BD0(sBlendMtx_6BD0* d)
         : "=m"(d->m[0]), "=m"(d->m[4]), "=m"(d->m[8]), "=m"(d->m[12]));
 }
 
-extern "C" void cPS2GraphicsMan_GenerateBlendedMatrices(cPS2GraphicsMan* self, sBlendMtx_6BD0* mats, int unused, sBlendEnt_6BD0* ents, int n, sBlendMtx_6BD0* out)
+/**
+ * Builds skinning matrices as weighted sums of bone matrices.
+ *
+ * For each of @p n entries, sums its links' matrices from @p mats (index and weight per link) into one matrix with
+ * VU0; the VU0 I register is set to 0.01 first. Output goes to @p out, or to mpScratchpad when @p out is null.
+ *
+ * @param mats  the bone matrices (On Tour matlist)
+ * @param partBoneOffsets  not read (On Tour partBoneOffsets)
+ * @param ents  the blend table: per output matrix a link count and (index, weight) links
+ * @param n  the number of matrices to build (On Tour numMatrices)
+ * @param out  the output array, or null for the scratchpad (On Tour blendedmatlist)
+ */
+extern "C" void cPS2GraphicsMan_GenerateBlendedMatrices(cPS2GraphicsMan* self, sBlendMtx_6BD0* mats, int partBoneOffsets, sBlendEnt_6BD0* ents, int n, sBlendMtx_6BD0* out)
 {
     if (out == 0) {
         out = (sBlendMtx_6BD0*)self->mpScratchpad;
@@ -10988,6 +11178,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_update);
 #ifdef SKIP_ASM
 void func_00369FF0(void* self);
 
+/**
+ * Per-frame graphics update: calls func_00369FF0.
+ */
 extern "C" void cPS2GraphicsMan_update(cPS2GraphicsMan* self)
 {
     func_00369FF0(self);
@@ -11759,12 +11952,18 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetScreenClearColour);
 #ifdef SKIP_ASM
 extern "C" int func_004139F8(float f);
 
-extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, const float* c)
+/**
+ * Sets the screen clear colour: mClearColour (+0x6AE0) = the colour's r, g, b times 255 converted (func_004139F8) and
+ * packed as 0x00BBGGRR.
+ *
+ * @param col  the colour as three floats in 0..1 (On Tour col)
+ */
+extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, const float* col)
 {
     float k = 255.0f;
-    int r = func_004139F8(c[0] * k);
-    r |= func_004139F8(c[1] * k) << 8;
-    r |= func_004139F8(c[2] * k) << 16;
+    int r = func_004139F8(col[0] * k);
+    r |= func_004139F8(col[1] * k) << 8;
+    r |= func_004139F8(col[2] * k) << 16;
     *(int*)((char*)self + 0x6AE0) = r;
 }
 #endif

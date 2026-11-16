@@ -1605,12 +1605,12 @@ struct cMenu_onGainFocus_sMenu {
  *
  * Clamps FocusItem to NumItems - 1, calls that item's gainFocus(2) (slot 6), then cMenu_checkFocus().
  *
- * @param p     the menu (this)
+ * @param menu     the menu (this)
  * @param wrap  the owning cMenuSys (On Tour's onGainFocus parent), stored in MenuSys (+0x124)
  */
-extern "C" void cMenu_onGainFocus(cMenu* p, int wrap)
+extern "C" void cMenu_onGainFocus(cMenu* menu, int wrap)
 {
-    cMenu_onGainFocus_sMenu* self = (cMenu_onGainFocus_sMenu*)p;
+    cMenu_onGainFocus_sMenu* self = (cMenu_onGainFocus_sMenu*)menu;
     self->wrap = wrap;
     if (self->selected >= self->count) {
         self->selected = self->count - 1;
@@ -1643,11 +1643,11 @@ struct s2CBFD0Menu {
  * Calls Items[FocusItem]'s loseFocus (cMenuItem vtable slot 7, empty in the base item) and clears MenuSys
  * (+0x124, which the local struct calls wrap). cMenuSys calls it on the menu a newly pushed menu covers.
  *
- * @param p  the menu (this)
+ * @param menu  the menu (this)
  */
-extern "C" void cMenu_onLoseFocus(cMenu* p)
+extern "C" void cMenu_onLoseFocus(cMenu* menu)
 {
-    s2CBFD0Menu* self = (s2CBFD0Menu*)p;
+    s2CBFD0Menu* self = (s2CBFD0Menu*)menu;
     void* item = self->items[self->selected];
     sVEntry2CBFD0* vt = *(sVEntry2CBFD0**)((char*)item + 0x10);
     vt[7].fn((char*)item + vt[7].delta);
@@ -3559,17 +3559,17 @@ void* prettyFloat_impl(void* out, float v) __asm__("prettyFloat");
  * "%.1f" up to 1000, "%.0f" below 10^7 and "%.3g" above, printing through a temporary cBXString.
  *
  * @param out  the cBXString to construct with the result (the hidden return slot)
- * @param v    the value to format
+ * @param value    the value to format
  * @return @p out
  */
-void* prettyFloat_impl(void* out, float v)
+void* prettyFloat_impl(void* out, float value)
 {
-    float d = func_0040DA10(v) / func_0040DA10(10.0f) + 4.3431620724732056e-05f;
-    float t;
+    float logValue = func_0040DA10(value) / func_0040DA10(10.0f) + 4.3431620724732056e-05f;
+    float logFloor;
     // PORT: FPU-only float->int->float round trip (floor helper); no C cast reproduces it.
-    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(d));
-    if (d < t) t -= 1.0f;
-    int n = (int)t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(logFloor) : "f"(logValue));
+    if (logValue < logFloor) logFloor -= 1.0f;
+    int n = (int)logFloor;
     const char* fmt;
     if (n < 0) {
         fmt = str_pct_4f;
@@ -3584,11 +3584,11 @@ void* prettyFloat_impl(void* out, float v)
     } else {
         fmt = str_pct_3g;
     }
-    sBXStrDFD8 s;
-    s.p = (char*)D_004A3E90;
-    func_003194A8(&s, fmt, fptodp(v));
-    cBXString_cBXString1(out, &s);
-    cBXString__cBXString(&s, 2);
+    sBXStrDFD8 formatted;
+    formatted.p = (char*)D_004A3E90;
+    func_003194A8(&formatted, fmt, fptodp(value));
+    cBXString_cBXString1(out, &formatted);
+    cBXString__cBXString(&formatted, 2);
     return out;
 }
 #endif
@@ -4125,15 +4125,15 @@ struct cColorMenuItem__cColorMenuItem_sItem {
  * colour at +0x14 and the channel at +0x18, then cColorMenuItem's vtable. cARGBMenuItem_cARGBMenuItem() makes
  * four, for channels 0 to 3.
  *
- * @param a1  the colour being edited, stored at +0x14
- * @param a2  channel index 0 to 3, stored at +0x18
+ * @param color  the colour being edited, stored at +0x14
+ * @param adjust  channel index 0 to 3, stored at +0x18
  * @return @p self
  */
-extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(cColorMenuItem__cColorMenuItem_sItem* self, void* a1, void* a2)
+extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(cColorMenuItem__cColorMenuItem_sItem* self, void* color, void* adjust)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = a1;
-    self->field_0x18 = a2;
+    self->field_0x14 = color;
+    self->field_0x18 = adjust;
     self->vtable = cColorMenuItem_vtbl;
     return self;
 }
@@ -4447,79 +4447,79 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     cFont_text(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
 
     func_002CA988_sColor rampStart = **(func_002CA988_sColor**)((char*)self + 0x14);
-    func_002CA988_sColor c2 = **(func_002CA988_sColor**)((char*)self + 0x14);
+    func_002CA988_sColor rampEnd = **(func_002CA988_sColor**)((char*)self + 0x14);
     *(float*)((char*)&rampStart + (*(int*)((char*)self + 0x18) << 2)) = 0.0f;
-    *(float*)((char*)&c2 + (*(int*)((char*)self + 0x18) << 2)) = 1.0f;
-    sRect_2CF1C8 r;
-    r.x = barX;
-    r.y = rect[1] + rect[3] - 6.0f - 10.0f;
-    r.w = 80.0f;
-    r.h = 10.0f;
-    sVtx_2CF1C8 v[4];
+    *(float*)((char*)&rampEnd + (*(int*)((char*)self + 0x18) << 2)) = 1.0f;
+    sRect_2CF1C8 barRect;
+    barRect.x = barX;
+    barRect.y = rect[1] + rect[3] - 6.0f - 10.0f;
+    barRect.w = 80.0f;
+    barRect.h = 10.0f;
+    sVtx_2CF1C8 verts[4];
     float zero = 0.0f;
     float one = 1.0f;
-    sVec4_2CF1C8 p;
-    v[0].r = (int)(rampStart.r * 128.0f);
-    v[0].g = (int)(rampStart.g * 128.0f);
-    v[0].b = (int)(rampStart.b * 128.0f);
-    v[0].a = 0x80;
-    v[0].v = zero;
-    v[0].u = zero;
-    v[0].q = one;
-    p.Set(r.x, r.y, zero, one);
-    v[0].pos = p;
-    v[1].r = (int)(rampStart.r * 128.0f);
-    v[1].g = (int)(rampStart.g * 128.0f);
-    v[1].b = (int)(rampStart.b * 128.0f);
-    v[1].a = 0x80;
-    v[1].v = zero;
-    v[1].u = zero;
-    v[1].q = one;
-    p.Set(r.x, r.y + r.h, zero, one);
-    v[1].pos = p;
-    v[2].r = (int)(c2.r * 128.0f);
-    v[2].g = (int)(c2.g * 128.0f);
-    v[2].b = (int)(c2.b * 128.0f);
-    v[2].a = 0x80;
-    v[2].v = zero;
-    v[2].u = zero;
-    v[2].q = one;
-    p.Set(r.x + r.w, r.y, zero, one);
-    v[2].pos = p;
-    v[3].r = (int)(c2.r * 128.0f);
-    v[3].g = (int)(c2.g * 128.0f);
-    v[3].b = (int)(c2.b * 128.0f);
-    v[3].a = 0x80;
-    v[3].v = zero;
-    v[3].u = zero;
-    v[3].q = one;
-    p.Set(r.x + r.w, r.y + r.h, zero, one);
-    v[3].pos = p;
+    sVec4_2CF1C8 vertPos;
+    verts[0].r = (int)(rampStart.r * 128.0f);
+    verts[0].g = (int)(rampStart.g * 128.0f);
+    verts[0].b = (int)(rampStart.b * 128.0f);
+    verts[0].a = 0x80;
+    verts[0].v = zero;
+    verts[0].u = zero;
+    verts[0].q = one;
+    vertPos.Set(barRect.x, barRect.y, zero, one);
+    verts[0].pos = vertPos;
+    verts[1].r = (int)(rampStart.r * 128.0f);
+    verts[1].g = (int)(rampStart.g * 128.0f);
+    verts[1].b = (int)(rampStart.b * 128.0f);
+    verts[1].a = 0x80;
+    verts[1].v = zero;
+    verts[1].u = zero;
+    verts[1].q = one;
+    vertPos.Set(barRect.x, barRect.y + barRect.h, zero, one);
+    verts[1].pos = vertPos;
+    verts[2].r = (int)(rampEnd.r * 128.0f);
+    verts[2].g = (int)(rampEnd.g * 128.0f);
+    verts[2].b = (int)(rampEnd.b * 128.0f);
+    verts[2].a = 0x80;
+    verts[2].v = zero;
+    verts[2].u = zero;
+    verts[2].q = one;
+    vertPos.Set(barRect.x + barRect.w, barRect.y, zero, one);
+    verts[2].pos = vertPos;
+    verts[3].r = (int)(rampEnd.r * 128.0f);
+    verts[3].g = (int)(rampEnd.g * 128.0f);
+    verts[3].b = (int)(rampEnd.b * 128.0f);
+    verts[3].a = 0x80;
+    verts[3].v = zero;
+    verts[3].u = zero;
+    verts[3].q = one;
+    vertPos.Set(barRect.x + barRect.w, barRect.y + barRect.h, zero, one);
+    verts[3].pos = vertPos;
     if ((*(float**)((char*)self + 0x14))[0] != 1.0f) {
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 5;
     } else {
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
     }
     *(short*)((char*)((cCtx_2CF1C8*)GrMan)->top + 0x10) = -1;
-    ((cCtx_2CF1C8*)GrMan)->v71(4, v, 0);
+    ((cCtx_2CF1C8*)GrMan)->v71(4, verts, 0);
 
-    float mx = r.x + r.w * *(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2));
-    v[0].r = (int)(textClr.r * 128.0f);
-    v[0].g = (int)(textClr.g * 128.0f);
-    v[0].b = (int)(textClr.b * 128.0f);
-    p.x = mx - 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
-    v[0].pos = p;
-    v[1].r = (int)(textClr.r * 128.0f);
-    v[1].g = (int)(textClr.g * 128.0f);
-    v[1].b = (int)(textClr.b * 128.0f);
-    p.x = mx; p.y = r.y - 2.0f; p.z = 0.0f; p.w = 1.0f;
-    v[1].pos = p;
-    v[2].r = (int)(textClr.r * 128.0f);
-    v[2].g = (int)(textClr.g * 128.0f);
-    v[2].b = (int)(textClr.b * 128.0f);
-    p.x = mx + 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
-    v[2].pos = p;
-    ((cCtx_2CF1C8*)GrMan)->v71(3, v, 0);
+    float mx = barRect.x + barRect.w * *(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2));
+    verts[0].r = (int)(textClr.r * 128.0f);
+    verts[0].g = (int)(textClr.g * 128.0f);
+    verts[0].b = (int)(textClr.b * 128.0f);
+    vertPos.x = mx - 5.0f; vertPos.y = barRect.y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
+    verts[0].pos = vertPos;
+    verts[1].r = (int)(textClr.r * 128.0f);
+    verts[1].g = (int)(textClr.g * 128.0f);
+    verts[1].b = (int)(textClr.b * 128.0f);
+    vertPos.x = mx; vertPos.y = barRect.y - 2.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
+    verts[1].pos = vertPos;
+    verts[2].r = (int)(textClr.r * 128.0f);
+    verts[2].g = (int)(textClr.g * 128.0f);
+    verts[2].b = (int)(textClr.b * 128.0f);
+    vertPos.x = mx + 5.0f; vertPos.y = barRect.y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
+    verts[2].pos = vertPos;
+    ((cCtx_2CF1C8*)GrMan)->v71(3, verts, 0);
 }
 #endif
 
@@ -4782,13 +4782,13 @@ struct cExpandMenuItem_input_sOwner {
  * result is returned as is. Result 3 moves to the next sub-item and 4 to the previous one; when that wraps
  * around, the focus is put back and the 3 or 4 is returned so the parent menu moves on instead.
  *
- * @param p  the expandable menu item
+ * @param expandItem  the expandable menu item
  * @return 0 when the move was handled inside the sub-menu, otherwise the focused item's input result (tMIR)
  */
 // PORT: returns a key code (int) through the unit's void* declaration.
-extern "C" void* cExpandMenuItem_input(void* p)
+extern "C" void* cExpandMenuItem_input(void* expandItem)
 {
-    cExpandMenuItem_input_sOwner* self = (cExpandMenuItem_input_sOwner*)p;
+    cExpandMenuItem_input_sOwner* self = (cExpandMenuItem_input_sOwner*)expandItem;
     cMenu_checkFocus((cMenu*)(&self->menu));
     int prev = self->menu.selected;
     int key = ((cExpandMenuItem_input_cItem*)self->menu.items[prev])->v02();
@@ -5204,7 +5204,7 @@ public:
 extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
 {
     func_002CA988_5(self, (int)rect, *(int*)(self + 0x18), 0, 0);
-    sVtx_2D0008 v[4];
+    sVtx_2D0008 verts[4];
     sRect_2D0008 rc;
     rc.w = 20.0f;
     rc.h = 17.0f;
@@ -5215,45 +5215,45 @@ extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
     sCol_2D0008* colour = *(sCol_2D0008**)(self + 0x14);
     float zeroF = 0.0f;
     float one = 1.0f;
-    v[0].r = (int)(colour->r * 128.0f);
-    v[0].g = (int)(colour->g * 128.0f);
-    v[0].b = (int)(colour->b * 128.0f);
-    v[0].a = (int)(colour->a * 128.0f);
-    v[0].v = zeroF;
-    v[0].u = zeroF;
-    v[0].q = one;
-    *(sVec4_2D0008*)v[0].pos = sVec4_2D0008(rc.x, rc.y, zeroF, one);
-    v[1].r = (int)(colour->r * 128.0f);
-    v[1].g = (int)(colour->g * 128.0f);
-    v[1].b = (int)(colour->b * 128.0f);
-    v[1].a = (int)(colour->a * 128.0f);
-    v[1].v = zeroF;
-    v[1].u = zeroF;
-    v[1].q = one;
-    *(sVec4_2D0008*)v[1].pos = sVec4_2D0008(rc.x, y2, zeroF, one);
-    v[2].r = (int)(colour->r * 128.0f);
-    v[2].g = (int)(colour->g * 128.0f);
-    v[2].b = (int)(colour->b * 128.0f);
-    v[2].a = (int)(colour->a * 128.0f);
-    v[2].v = zeroF;
-    v[2].u = zeroF;
-    v[2].q = one;
-    *(sVec4_2D0008*)v[2].pos = sVec4_2D0008(x2, rc.y, zeroF, one);
-    v[3].r = (int)(colour->r * 128.0f);
-    v[3].g = (int)(colour->g * 128.0f);
-    v[3].b = (int)(colour->b * 128.0f);
-    v[3].a = (int)(colour->a * 128.0f);
-    v[3].v = zeroF;
-    v[3].u = zeroF;
-    v[3].q = one;
-    *(sVec4_2D0008*)v[3].pos = sVec4_2D0008(x2, y2, zeroF, one);
+    verts[0].r = (int)(colour->r * 128.0f);
+    verts[0].g = (int)(colour->g * 128.0f);
+    verts[0].b = (int)(colour->b * 128.0f);
+    verts[0].a = (int)(colour->a * 128.0f);
+    verts[0].v = zeroF;
+    verts[0].u = zeroF;
+    verts[0].q = one;
+    *(sVec4_2D0008*)verts[0].pos = sVec4_2D0008(rc.x, rc.y, zeroF, one);
+    verts[1].r = (int)(colour->r * 128.0f);
+    verts[1].g = (int)(colour->g * 128.0f);
+    verts[1].b = (int)(colour->b * 128.0f);
+    verts[1].a = (int)(colour->a * 128.0f);
+    verts[1].v = zeroF;
+    verts[1].u = zeroF;
+    verts[1].q = one;
+    *(sVec4_2D0008*)verts[1].pos = sVec4_2D0008(rc.x, y2, zeroF, one);
+    verts[2].r = (int)(colour->r * 128.0f);
+    verts[2].g = (int)(colour->g * 128.0f);
+    verts[2].b = (int)(colour->b * 128.0f);
+    verts[2].a = (int)(colour->a * 128.0f);
+    verts[2].v = zeroF;
+    verts[2].u = zeroF;
+    verts[2].q = one;
+    *(sVec4_2D0008*)verts[2].pos = sVec4_2D0008(x2, rc.y, zeroF, one);
+    verts[3].r = (int)(colour->r * 128.0f);
+    verts[3].g = (int)(colour->g * 128.0f);
+    verts[3].b = (int)(colour->b * 128.0f);
+    verts[3].a = (int)(colour->a * 128.0f);
+    verts[3].v = zeroF;
+    verts[3].u = zeroF;
+    verts[3].q = one;
+    *(sVec4_2D0008*)verts[3].pos = sVec4_2D0008(x2, y2, zeroF, one);
     if (colour->a != 1.0f) {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 5;
     } else {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
     }
     *(short*)((char*)((cCtx_2D0008*)GrMan)->top + 0x10) = -1;
-    ((cCtx_2D0008*)GrMan)->v71(4, v, 0);
+    ((cCtx_2D0008*)GrMan)->v71(4, verts, 0);
 }
 #endif
 

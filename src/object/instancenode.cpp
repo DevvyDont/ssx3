@@ -55,9 +55,9 @@ extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
     func_0034FC80(self, self->Instance);
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
-        char* o = (char*)self->Instance;
-        int v = *(int*)(o + 8);
-        *(int*)(o + 8) = v | (v >> 16);
+        char* instance = (char*)self->Instance;
+        int instFlags = *(int*)(instance + 8);
+        *(int*)(instance + 8) = instFlags | (instFlags >> 16);
     }
     *(int*)((char*)self->Instance + 8) |= 2;
     cSortObjNode__cSortObjNode_dtor(self, flags);

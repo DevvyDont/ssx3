@@ -70,9 +70,9 @@ extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int
 {
     *(void**)((char*)self + 0xC) = cScriptSoundBankManager_vtbl;
     cScriptSoundBankManager_UnlinkBanksAll(self);
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* bankInfo = *(void**)((char*)self + 0x8);
+    if (bankInfo != 0) {
+        cMemMan_free(bankInfo);
     }
     if (flags & 1) {
         operator_delete((int*)self);

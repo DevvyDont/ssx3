@@ -270,16 +270,16 @@ static inline void Reset_5778(sAvAct_5778* self)
  * frame 0 or going back; while m_updateEmitters is set, each step also emits debris at m_UpdateTimeStep x
  * speed intervals, and the flag is cleared afterwards. Updates the scales first (calculateScale).
  *
- * @param t  time since the avalanche started, in seconds
+ * @param currTime  time since the avalanche started, in seconds
  * @return the frame data: position, colour (packed bytes / 128, alpha = m_emitterAlphaScale) and rotation at
  *         t
  */
 // Steps the active node's path up to the frame at time t (emitting debris for the skipped frames while
 // it is emitting) and returns the interpolated position, colour and orientation at t.
-extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, float t)
+extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, float currTime)
 {
-    tActiveAvalancheNode_calculateScale_Data(self, t);
-    float x = t * 30.0f;
+    tActiveAvalancheNode_calculateScale_Data(self, currTime);
+    float x = currTime * 30.0f;
     int frame = (int)x;
     float frac = x - (float)frame;
     if (frame >= (int)self->data->length - 1) {
@@ -2180,8 +2180,8 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                         CopyMatrix_D97A8(&act->m20, &D_004FF1A0_D97A8);
                         act->f2EC = 0;
                         {
-                            sVec_D97A8 p = *(sVec_D97A8*)(n->obj + 0x40);
-                            act->objPos = p;
+                            sVec_D97A8 objPosition = *(sVec_D97A8*)(n->obj + 0x40);
+                            act->objPos = objPosition;
                         }
                         CopyMatrix_D97A8(&act->m70, &D_004FF1A0_D97A8);
                         act->scale = sVec_D97A8(1.0f, 1.0f, 1.0f, 1.0f);
@@ -2190,10 +2190,10 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                             cDynamicColourEmitter_reset(act->emitter);
                             func_00370DC8(act->emitter, n, 2.0f);
                             act->f2D0 = 1;
-                            float r = cRenderStateMan_SnowFlakeColourR(0);
+                            float flakeRed = cRenderStateMan_SnowFlakeColourR(0);
                             float gg = cRenderStateMan_SnowFlakeColourG(0);
-                            float b = cRenderStateMan_SnowFlakeColourB(0);
-                            act->colour = sVec_D97A8(r, gg, b, 0.0f);
+                            float flakeBlue = cRenderStateMan_SnowFlakeColourB(0);
+                            act->colour = sVec_D97A8(flakeRed, gg, flakeBlue, 0.0f);
                         }
                         break;
                     }
@@ -2505,14 +2505,14 @@ extern "C" void cAvalanche_readFromReplayFrame(int* self)
                 sSlotRR* slot = &slots_RR()[n];
                 slot->time = buf.times[i];
                 if (buf.times[i] != 0.0f) {
-                    sActRR* a = slot->active;
-                    while (a != 0) {
-                        if (*(unsigned char*)(a->data + 0xF2) != 0) {
-                            a->f2EC = 1;
+                    sActRR* activeNode = slot->active;
+                    while (activeNode != 0) {
+                        if (*(unsigned char*)(activeNode->data + 0xF2) != 0) {
+                            activeNode->f2EC = 1;
                         }
-                        tActiveAvalancheNode_calculateScale(a, buf.times[i]);
-                        getFrameData_RR(a, slot->time);
-                        a = a->next;
+                        tActiveAvalancheNode_calculateScale(activeNode, buf.times[i]);
+                        getFrameData_RR(activeNode, slot->time);
+                        activeNode = activeNode->next;
                     }
                     while (slot->cur0 < slot->group->n0 && slot->group->a[slot->cur0].t <= slot->time) {
                         slot->cur0++;

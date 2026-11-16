@@ -70,13 +70,22 @@ struct sEffectLinkObj_5798 {
     int value;         // 0xC
 };
 
-extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1)
+/**
+ * Constructs a cEffectModifier for an instance (On Tour cEffectModifier(tInstanceRecord* inst)).
+ *
+ * Clears the effect-link Next/Prev, stores cEffectModifier_vtbl and the instance (Instance, +0xC), and increments the
+ * live effect count D_004A3FF4 (On Tour cEffectModifier::EffectCount).
+ *
+ * @param inst  the tInstanceRecord the effect is attached to (declared int)
+ * @return @p self
+ */
+extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst)
 {
     sEffectLinkObj_5798* o = (sEffectLinkObj_5798*)self;
     o->link.next = 0;
     o->link.prev = 0;
     o->vt = cEffectModifier_vtbl;
-    o->value = a1;
+    o->value = inst;
     D_004A3FF4++;
     return ((void*)self);
 }
@@ -100,16 +109,16 @@ struct sEffVEntry57C8 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_003457C8(cEffectModifier* p, void* obj)
+extern "C" void* func_003457C8(cEffectModifier* effectModifier, void* obj)
 {
-    sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)p;
+    sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)effectModifier;
     self->link.next = 0;
     self->link.prev = 0;
     self->vt = cEffectModifier_vtbl;
     sEffVEntry57C8* vt = *(sEffVEntry57C8**)obj;
     self->value = vt[3].fn((char*)obj + vt[3].delta);
     D_004A3FF4++;
-    return ((void*)p);
+    return ((void*)effectModifier);
 }
 #endif
 
@@ -135,11 +144,11 @@ struct sEffectLinkObj_5828 {
  */
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags)
 {
-    sEffectLinkObj_5828* o = (sEffectLinkObj_5828*)self;
-    o->vt = cEffectModifier_vtbl;
+    sEffectLinkObj_5828* effectLink = (sEffectLinkObj_5828*)self;
+    effectLink->vt = cEffectModifier_vtbl;
     D_004A3FF4--;
-    o->vt = cEffectLink_vtbl;
-    func_00345760((cEffectLink*)&o->link);
+    effectLink->vt = cEffectLink_vtbl;
+    func_00345760((cEffectLink*)&effectLink->link);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -208,12 +217,26 @@ struct sEffObj003458C0 {
     int f1E4;
 };
 
-extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, int a1, int owner)
+/**
+ * Constructs a static particle effect on an instance (On Tour cParticleModifier(tParticleData* pdata,
+ * tInstanceRecord* inst)).
+ *
+ * Runs the cEffectModifier constructor with @p owner, stores cParticleModifier_vtbl, constructs the cStaticEmitter at
+ * +0x50 and keeps the particle data. The transform (+0x10) is copied from the instance node's (Instance + 0xC)
+ * virtual slot 24 matrix, or from the instance record's own matrix (Instance + 0x10) when there is no node. Then
+ * cStaticEmitter_setupEmitter(+0x50, transform, @p pdata), Complete (+0x1E4) = 0 and the particle count D_004A3FF8 is
+ * incremented.
+ *
+ * @param pdata  the tParticleData describing the emitter (declared int)
+ * @param owner  the tInstanceRecord the effect is attached to (On Tour inst; declared int)
+ * @return @p self
+ */
+extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, int pdata, int owner)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(((char*)self) + 0x50);
-    self->ParticleData = (tParticleData*)a1;
+    self->ParticleData = (tParticleData*)pdata;
     char* own = (char*)self->Instance;
     void* obj = *(void**)(own + 0xC);
     void* m;
@@ -455,6 +478,21 @@ struct sEffectLinkVEntry_345D80 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Rebuilds a dynamic (moving) particle effect from a replay frame (On Tour cDynamicParticleModifier(cBxReplayFrame*
+ * data)).
+ *
+ * Runs the cEffectModifier replay constructor (func_003457C8), stores cDynamicParticleModifier_vtbl, constructs the
+ * embedded emitter (cBaseClass_DynamicEmitter constructor, then cDynamicEmitter_vtbl) and reads the 0x50-byte state
+ * block starting at Mesh through the stream's read (slot 2). If the effect is not Complete it allocates a 0xD8-byte
+ * tParticleData with operator_new1, reads it from the stream, sets the emitter up from it with a random seed
+ * (func_00370DC8, cBaseClass_DynamicEmitter::setupEmitter, seed -1), restores the emitter's own replay state and
+ * steps it once at Pos/Vel for 1/60 s (func_003710D0). A Complete effect gets no ParticleData. Increments D_004A3FFC
+ * (the dynamic particle count).
+ *
+ * @param stream  the replay frame to read from (On Tour data)
+ * @return @p self
+ */
 extern "C" sEff00345C90* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, void* stream)
 {
     func_003457C8((cEffectModifier*)self, stream);
@@ -814,10 +852,10 @@ extern "C" void func_002D1D10(sEffVec4_62A0* pos, void* p, int n, float a, float
 extern "C" void cHaloModifier_render(void* self)
 {
     sEffMtx_62A0 matrix;
-    void* p = (char*)self + 0x10;
+    void* colour = (char*)self + 0x10;
     func_0034FED8(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &matrix);
     sEffVec4_62A0 origin = matrix.r[3];
-    func_002D1D10(&origin, p, *(int*)((char*)self + 0x24),
+    func_002D1D10(&origin, colour, *(int*)((char*)self + 0x24),
                   *(float*)((char*)self + 0x20), *(float*)((char*)self + 0x30));
 }
 #endif
@@ -1037,17 +1075,17 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
     ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, *(void**)(self + 0x78));
     sBox_346568 old = *(sBox_346568*)(self + 0x90);
     sInst_346568* inst = *(sInst_346568**)(self + 0x18);
-    sVec4_346568 t;
-    t.x = inst->min[0];
-    t.y = inst->min[1];
-    t.z = inst->min[2];
-    t.w = 1.0f;
-    *(sVec4_346568*)(self + 0x90) = t;
-    t.x = inst->max[0];
-    t.y = inst->max[1];
-    t.z = inst->max[2];
-    t.w = 1.0f;
-    *(sVec4_346568*)(self + 0xA0) = t;
+    sVec4_346568 corner;
+    corner.x = inst->min[0];
+    corner.y = inst->min[1];
+    corner.z = inst->min[2];
+    corner.w = 1.0f;
+    *(sVec4_346568*)(self + 0x90) = corner;
+    corner.x = inst->max[0];
+    corner.y = inst->max[1];
+    corner.z = inst->max[2];
+    corner.w = 1.0f;
+    *(sVec4_346568*)(self + 0xA0) = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
     cSpring__cSpring(self + 0x50, 2);
     cInstanceNode__cInstanceNode(self, flags);

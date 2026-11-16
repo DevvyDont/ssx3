@@ -228,25 +228,25 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
  *
  * For each of the 16 channels whose bit is set in the anim record's mask (+0x18) it takes the channel's current
  * cubic segment (the record's curve table at +0x20, the frame's segment index per channel at +0x0), moves to the
- * segment holding @p t when needed (func_00351A80, On Tour cAnimChannel::nextSegment) and stores ((a t + b) t + c)
+ * segment holding @p time when needed (func_00351A80, On Tour cAnimChannel::nextSegment) and stores ((a t + b) t + c)
  * t + d in Vals[i] (+0x44). Channels whose bit is clear keep their value.
  *
- * @param t  the time to evaluate at (On Tour time)
+ * @param time  the time to evaluate at (On Tour time)
  */
-void cAnimFrame_update_impl(char* self, float t)
+void cAnimFrame_update_impl(char* self, float time)
 {
     sImCurve_351538** curves = *(sImCurve_351538***)(*(char**)(self + 0x40) + 0x20);
     int* cur = (int*)self;
     unsigned int mask = 1;
     float* out = (float*)(self + 0x44);
     for (int i = 0; i < 16; i++) {
-        sImCurve_351538* c = *curves;
+        sImCurve_351538* curve = *curves;
         if (*(unsigned int*)(*(char**)(self + 0x40) + 0x18) & mask) {
-            sImSeg_351538* e = &c->segs[*cur];
-            if (!inRange_351538(e, t)) {
-                e = (sImSeg_351538*)func_00351A80((sImRangeTable*)c, cur, t);
+            sImSeg_351538* segment = &curve->segs[*cur];
+            if (!inRange_351538(segment, time)) {
+                segment = (sImSeg_351538*)func_00351A80((sImRangeTable*)curve, cur, time);
             }
-            *out = ((e->a * t + e->b) * t + e->c) * t + e->d;
+            *out = ((segment->a * time + segment->b) * time + segment->c) * time + segment->d;
             curves++;
             cur++;
         }

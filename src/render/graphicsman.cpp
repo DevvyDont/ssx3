@@ -160,6 +160,10 @@ public:
     virtual void v12();
 };
 
+/**
+ * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app object's (D_004A5B64 + 8) slot 11,
+ * SYNCTASK_run(0), func_003E5398(0) and the app's slot 12.
+ */
 extern "C" void cGraphicsMan_FlushRenderer(cPS2GraphicsMan* self)
 {
     for (;;) {
@@ -233,9 +237,24 @@ struct sGmVE_369CF8 {
     void (*fn)(void*, int, sGmVert_369CF8*, int);
 };
 
+/**
+ * Draws an indexed triangle list one triangle at a time through virtual slot 71 (three vertices per call).
+ *
+ * Each vertex is @p Positions[index] + *Offset with w 1, its colour Color[index] halved into a, r, g, b, and its texture
+ * coordinates UV[index] (or 0, 0 when @p UV is null). Indices are bytes, so at most 256 vertices can be addressed.
+ * @p NumVerts is not used.
+ *
+ * @param NumTris  the number of triangles
+ * @param NumVerts  the number of vertices (unused)
+ * @param Indices  three byte indices per triangle
+ * @param Positions  the vertex positions (On Tour P)
+ * @param UV  the vertex texture coordinates, or null for none
+ * @param Color  the vertex colours (a, r, g, b floats)
+ * @param Offset  a translation added to every position
+ */
 // cGraphicsMan::RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices,
 //     const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector& Offset)
-extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* P,
+extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
     sGmVert_369CF8 V[3];
@@ -246,7 +265,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int Num
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                V[j].pos = sGmV4_369CF8(P[Index] + *Offset, 1.0f);
+                V[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
                 V[j].a = (int)(Color[Index].x * 0.5f);
                 V[j].r = (int)(Color[Index].y * 0.5f);
                 V[j].g = (int)(Color[Index].z * 0.5f);
@@ -262,7 +281,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int Num
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                V[j].pos = sGmV4_369CF8(P[Index] + *Offset, 1.0f);
+                V[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
                 V[j].a = (int)(Color[Index].x * 0.5f);
                 V[j].r = (int)(Color[Index].y * 0.5f);
                 V[j].g = (int)(Color[Index].z * 0.5f);
@@ -290,6 +309,9 @@ void func_00369FF0(void* self)
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_UploadTextures);
 #ifdef SKIP_ASM
+/**
+ * Calls the graphics manager's virtual slot 121 (vtable entry at +0x3C8), the platform texture upload.
+ */
 extern "C" void cGraphicsMan_UploadTextures(cPS2GraphicsMan* self)
 {
     char* vt = (char*)self->mVtbl;
@@ -300,6 +322,9 @@ extern "C" void cGraphicsMan_UploadTextures(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_PurgeTextures);
 #ifdef SKIP_ASM
+/**
+ * Calls the graphics manager's virtual slot 120 (vtable entry at +0x3C0), the platform texture purge.
+ */
 extern "C" void cGraphicsMan_PurgeTextures(cPS2GraphicsMan* self)
 {
     char* vt = (char*)self->mVtbl;
@@ -350,6 +375,17 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
     return r;
 }
 
+/**
+ * Draws a cubic spline as a strip of @p n points through virtual slot 73.
+ *
+ * Point i is (t^3, t^2, t, 1) * @p BezMat at t = i / (n - 1); every point gets texture coordinates (0, 0, 1) and the
+ * colour @p color scaled by 128 (r, g, b from color[1..3], a from color[0]). The vertices live in a fixed 20-entry
+ * local array, so @p n above 20 overruns the stack.
+ *
+ * @param BezMat  the Bezier basis matrix of the curve
+ * @param color  the colour as four floats a, r, g, b in 0..1
+ * @param n  the number of points (On Tour NumPoints); at most 20
+ */
 // Evaluates the cubic (t^3, t^2, t, 1) * m at n evenly spaced t in [0, 1] and draws the points as one strip.
 extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* BezMat, float* color, int n)
 {
@@ -393,11 +429,20 @@ void* func_0036A190(void* self, int a1)
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
 #ifdef SKIP_ASM
-int cGraphicsMan_CreateScreenGrabTexture(void* self, void* a1)
+/**
+ * The base cGraphicsMan::CreateScreenGrabTexture: marks the handle empty (word 0 = 0, texture id = -1) and returns
+ * -1.
+ *
+ * On Tour's version takes (tScreenGrabHandle&, width, height); this one is declared with the handle only.
+ *
+ * @param screenGrabHandle  the handle to reset (On Tour screenGrabHandle)
+ * @return -1
+ */
+int cGraphicsMan_CreateScreenGrabTexture(void* self, void* screenGrabHandle)
 {
     int t0 = -1;
-    *(int*)a1 = 0;
-    *(int*)((char*)a1 + 0x4) = t0;
+    *(int*)screenGrabHandle = 0;
+    *(int*)((char*)screenGrabHandle + 0x4) = t0;
     return t0;
 }
 #endif
@@ -527,6 +572,12 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
         : "memory");
 }
 
+/**
+ * Applies the NIS deformation to a mesh matrix: when m_isInNIS[6] is set, multiplies @p mat by the deformation matrix
+ * that func_0038F2A8 returns for the matrix's translation.
+ *
+ * @param mat  the mesh matrix, updated in place
+ */
 extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0* mat)
 {
     if (self->m_isInNIS[6] != 0) {
@@ -1331,15 +1382,29 @@ static inline sGfxVec4 vu0DivGM(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int h, float x, float y, float s, sGfxVec4* v)
+/**
+ * Initialises a particle emitter's counts, time step, force and blur (On Tour init(num, numblur, duration, blurstep,
+ * force, damp), with damp and force swapped).
+ *
+ * TimeStep = @p x * @p damp / @p w, Force = @p force / @p damp / @p damp, Damp = @p damp, BlurAlpha = 1 / NumBlur, BlurStep = @p y *
+ * @p damp, UpperUV = 0 and LowerUV = (1, 1, 0, 0). Damp acts as the time scale: setLife and setTime multiply by it too.
+ *
+ * @param w  the number of particles (On Tour num)
+ * @param numblur  the number of blur copies per particle
+ * @param x  the emission duration (On Tour duration)
+ * @param y  the blur step (On Tour blurstep)
+ * @param damp  the time scale (tParticleData::Damp)
+ * @param force  the force vector, divided by damp squared
+ */
+extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int numblur, float x, float y, float damp, sGfxVec4* force)
 {
     self->NumParticles = w;
-    self->NumBlur = h;
-    self->TimeStep = x * s / (float)w;
-    *(sGfxVec4*)&self->Force = vu0DivGM(vu0DivGM(*v, s), s);
-    self->Damp = s;
+    self->NumBlur = numblur;
+    self->TimeStep = x * damp / (float)w;
+    *(sGfxVec4*)&self->Force = vu0DivGM(vu0DivGM(*force, damp), damp);
+    self->Damp = damp;
     self->BlurAlpha = 1.0f / (float)self->NumBlur;
-    self->BlurStep = y * s;
+    self->BlurStep = y * damp;
     sGfxVec4 one;
     one.x = 1.0f;
     one.y = 1.0f;
@@ -1379,44 +1444,57 @@ extern "C" void func_0036CCB8(tParticleEmitter* self)
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setSize);
 #ifdef SKIP_ASM
-extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float a, float b, float c)
+/**
+ * Sets the particle size range: SizeR = @p sizerandomness, SizeFinalDelta = @p endsize - @p startsize and Size0 = @p startsize - 1.5 * @p sizerandomness.
+ *
+ * @param startsize  the size at birth
+ * @param endsize  the size at death
+ * @param sizerandomness  the random size spread
+ */
+extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float startsize, float endsize, float sizerandomness)
 {
-    self->SizeR = c;
-    self->SizeFinalDelta = b - a;
-    self->Size0 = a - c * 1.5f;
+    self->SizeR = sizerandomness;
+    self->SizeFinalDelta = endsize - startsize;
+    self->Size0 = startsize - sizerandomness * 1.5f;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setLife);
 #ifdef SKIP_ASM
-extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float a, float b)
+/**
+ * Sets the particle life range scaled by Damp: LifeR = (@p maxlife - @p minlife) * Damp and Life0 = @p minlife * Damp - LifeR.
+ *
+ * @param minlife  the shortest particle life
+ * @param maxlife  the longest particle life
+ */
+extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float minlife, float maxlife)
 {
-    float d = b - a;
+    float d = maxlife - minlife;
     float s = self->Damp;
-    a = a * s;
+    minlife = minlife * s;
     d = d * s;
     self->LifeR = d;
-    self->Life0 = a - d;
+    self->Life0 = minlife - d;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE48);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE48(tParticleEmitter* arg0) {
-    (*(int*)&arg0->LifeR) = 0;
-    (arg0->Life0) = 1e20f;
+extern "C" void func_0036CE48(tParticleEmitter* particleEmitter) {
+    (*(int*)&particleEmitter->LifeR) = 0;
+    (particleEmitter->Life0) = 1e20f;
 }
 #endif
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE58);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_0036CE58(tParticleEmitter* arg0, long long *arg1) {
-    (*(long long*)&arg0->X0) = (long long) *arg1;
-    (*(long long*)&arg0->Xr0) = (long long) t4vect_Zero;
-    (*(long long*)&arg0->Xr1) = (long long) t4vect_Zero;
+extern "C" void func_0036CE58(tParticleEmitter* particleEmitter, long long *arg1) {
+    (*(long long*)&particleEmitter->X0) = (long long) *arg1;
+    (*(long long*)&particleEmitter->Xr0) = (long long) t4vect_Zero;
+    (*(long long*)&particleEmitter->Xr1) = (long long) t4vect_Zero;
 }
 #endif
 //100%
@@ -1534,6 +1612,9 @@ extern "C" void func_0036CFA8(tParticleEmitter* self, sGfxVec4* v, float s)
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_stopMotion);
 #ifdef SKIP_ASM
+/**
+ * Stops the emitter's own motion: zeroes Xi (On Tour stopMotion).
+ */
 extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self)
 {
     *(cQuad128*)&self->Xi = t4vect_Zero;
@@ -1813,6 +1894,11 @@ extern "C" void func_0036D318(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b, 
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setTime);
 #ifdef SKIP_ASM
+/**
+ * Sets the emitter's end time: EndTime = @p val * Damp.
+ *
+ * @param val  the time in seconds (On Tour t)
+ */
 extern "C" void tParticleEmitter_setTime(tParticleEmitter* self, float val)
 {
     self->EndTime = val * self->Damp;
@@ -2054,6 +2140,12 @@ INCLUDE_ASM("render/graphicsman", cStaticEmitter_cStaticEmitter);
 extern char D_00493160[];
 void func_002F7A68(void*);
 
+/**
+ * Constructs a static particle emitter: vtable D_00493160, the embedded tParticleEmitter at +0x10 (func_002F7A68),
+ * m_initialized 0 and mCurrentFlipTexture 0.
+ *
+ * @return @p self
+ */
 extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
 {
     self->mVtbl = (void**)D_00493160;
@@ -2173,35 +2265,53 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
         : "memory");
 }
 
+/**
+ * Sets a particle emitter up from particle data placed by a transform (On Tour setupEmitter(transform, particleData,
+ * boundBox, seed)).
+ *
+ * From the tParticleData: setSize(Size, SizeFinal, SizeR) and setLife(Life -/+ LifeR / 2); a negative @p seed randomises
+ * the emitter (func_0036CCB8), otherwise SeedX0 = @p seed. After stopMotion, X0 is the transformed offset (OffX.. OffZ,
+ * w 1) and Xr0 / Xr1 the transformed position spreads R0 / R1, with X0 moved back by 1.5 * (Xr0 + Xr1); V0 and
+ * Vr0..Vr2 are the transformed velocity and its three spreads divided by Damp, V0 moved back by 1.5 * (Vr0 + Vr1 +
+ * Vr2). The start, end and two random colours (scaled by 128) go to func_0036D318 with the maximum life, then
+ * setTime(Duration < 0 ? maximum life : 0) and calcBoundBox (func_0036D500) into @p boundBox.
+ *
+ * The source comment above the function ("camera parameters ... frustum planes") does not describe this code.
+ *
+ * @param transform  the emitter's world transform (On Tour transform)
+ * @param particleData  the tParticleData to read
+ * @param boundBox  receives the emitter's bounding box
+ * @param seed  the random seed; negative picks a random one
+ */
 // Sets up the view from the camera parameters p (frustum planes transformed by m).
-extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* m, void* p, void* a3, float t)
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* transform, void* particleData, void* boundBox, float seed)
 {
-    tParticleEmitter_setSize(self, *(float*)((char*)p + 0x10), *(float*)((char*)p + 0xCC), *(float*)((char*)p + 0x18));
-    float h = *(float*)((char*)p + 0x1C) * 0.5f;
-    tParticleEmitter_setLife(self, *(float*)((char*)p + 0x14) - h, *(float*)((char*)p + 0x14) + h);
-    if (t < 0.0f) {
+    tParticleEmitter_setSize(self, *(float*)((char*)particleData + 0x10), *(float*)((char*)particleData + 0xCC), *(float*)((char*)particleData + 0x18));
+    float h = *(float*)((char*)particleData + 0x1C) * 0.5f;
+    tParticleEmitter_setLife(self, *(float*)((char*)particleData + 0x14) - h, *(float*)((char*)particleData + 0x14) + h);
+    if (seed < 0.0f) {
         func_0036CCB8(self);
     } else {
-        self->SeedX0 = t;
+        self->SeedX0 = seed;
     }
     tParticleEmitter_stopMotion(self);
-    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x24), *(float*)((char*)p + 0x28), *(float*)((char*)p + 0x2C), 1.0f));
-    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x30), *(float*)((char*)p + 0x34), *(float*)((char*)p + 0x38), 0.0f));
-    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x3C), *(float*)((char*)p + 0x40), *(float*)((char*)p + 0x44), 0.0f));
+    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x24), *(float*)((char*)particleData + 0x28), *(float*)((char*)particleData + 0x2C), 1.0f));
+    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x30), *(float*)((char*)particleData + 0x34), *(float*)((char*)particleData + 0x38), 0.0f));
+    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x3C), *(float*)((char*)particleData + 0x40), *(float*)((char*)particleData + 0x44), 0.0f));
     vu0SubInGM_0058(*(sGmV4_0058*)&self->X0, vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)&self->Xr0, *(sGmV4_0058*)&self->Xr1), 1.5f));
-    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x48), *(float*)((char*)p + 0x4C), *(float*)((char*)p + 0x50), 0.0f)), *(float*)((char*)p + 0xC));
-    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x54), *(float*)((char*)p + 0x58), *(float*)((char*)p + 0x5C), 0.0f)), *(float*)((char*)p + 0xC));
-    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x60), *(float*)((char*)p + 0x64), *(float*)((char*)p + 0x68), 0.0f)), *(float*)((char*)p + 0xC));
-    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x6C), *(float*)((char*)p + 0x70), *(float*)((char*)p + 0x74), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x48), *(float*)((char*)particleData + 0x4C), *(float*)((char*)particleData + 0x50), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x54), *(float*)((char*)particleData + 0x58), *(float*)((char*)particleData + 0x5C), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x60), *(float*)((char*)particleData + 0x64), *(float*)((char*)particleData + 0x68), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x6C), *(float*)((char*)particleData + 0x70), *(float*)((char*)particleData + 0x74), 0.0f)), *(float*)((char*)particleData + 0xC));
     vu0SubInGM_0058(*(sGmV4_0058*)&self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)&self->Vr0, *(sGmV4_0058*)&self->Vr1), *(sGmV4_0058*)&self->Vr2), 1.5f));
     func_0036D318_0058(self,
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0x88), *(float*)((char*)p + 0x8C), *(float*)((char*)p + 0x90), *(float*)((char*)p + 0x84)), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0x98), *(float*)((char*)p + 0x9C), *(float*)((char*)p + 0xA0), *(float*)((char*)p + 0x94)), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0xA8), *(float*)((char*)p + 0xAC), *(float*)((char*)p + 0xB0), *(float*)((char*)p + 0xA4)), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0xB8), *(float*)((char*)p + 0xBC), *(float*)((char*)p + 0xC0), *(float*)((char*)p + 0xB4)), 128.0f),
-                       *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f);
-    tParticleEmitter_setTime(self, *(float*)((char*)p + 0x8) < 0.0f ? *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f : 0.0f);
-    func_0036D500(self, a3);
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x88), *(float*)((char*)particleData + 0x8C), *(float*)((char*)particleData + 0x90), *(float*)((char*)particleData + 0x84)), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x98), *(float*)((char*)particleData + 0x9C), *(float*)((char*)particleData + 0xA0), *(float*)((char*)particleData + 0x94)), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0xA8), *(float*)((char*)particleData + 0xAC), *(float*)((char*)particleData + 0xB0), *(float*)((char*)particleData + 0xA4)), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0xB8), *(float*)((char*)particleData + 0xBC), *(float*)((char*)particleData + 0xC0), *(float*)((char*)particleData + 0xB4)), 128.0f),
+                       *(float*)((char*)particleData + 0x14) + *(float*)((char*)particleData + 0x1C) * 0.5f);
+    tParticleEmitter_setTime(self, *(float*)((char*)particleData + 0x8) < 0.0f ? *(float*)((char*)particleData + 0x14) + *(float*)((char*)particleData + 0x1C) * 0.5f : 0.0f);
+    func_0036D500(self, boundBox);
 }
 #endif
 
@@ -2210,28 +2320,40 @@ INCLUDE_ASM("render/graphicsman", cStaticEmitter_setupEmitter);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, void* a1, void* desc, void* out, float f);
 
-extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* a1, char* d)
+/**
+ * Sets a static emitter up from particle data (On Tour setupEmitter(const t4Matrix& transform, const tParticleData*
+ * particleData)).
+ *
+ * Copies NumFlipTextures, FlipTextureRate, TextureId and BlendMode; Duration is the data's Duration when negative
+ * (endless), otherwise Duration + Life + LifeR / 2. Runs tParticleEmitter_init on the embedded emitter (+0x10) with
+ * NumParticles, NumBlur, the duration (Life + LifeR / 2 for an endless effect), BlurStep, Damp and the force, then
+ * tParticleEmitter_setupEmitter with a random seed (-1), writing the bounding box at +0x160.
+ *
+ * @param transform  the emitter's world transform
+ * @param particleData  the tParticleData to read
+ */
+extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* transform, char* particleData)
 {
-    self->mNumFlipTextures = *(int*)(d + 0xD0);
-    self->mFlipTextureRate = *(float*)(d + 0xD4);
-    self->TextureId = *(int*)(d + 0xC4);
-    self->BlendMode = *(int*)(d + 0xC8);
-    float t = *(float*)(d + 0x8);
+    self->mNumFlipTextures = *(int*)(particleData + 0xD0);
+    self->mFlipTextureRate = *(float*)(particleData + 0xD4);
+    self->TextureId = *(int*)(particleData + 0xC4);
+    self->BlendMode = *(int*)(particleData + 0xC8);
+    float t = *(float*)(particleData + 0x8);
     float r;
     if (t < 0.0f) {
         r = t;
     } else {
-        r = t + *(float*)(d + 0x14) + *(float*)(d + 0x1C) * 0.5f;
+        r = t + *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
     }
     self->Duration = r;
-    float x = *(float*)(d + 0x8) >= 0.0f ? *(float*)(d + 0x8) : *(float*)(d + 0x14) + *(float*)(d + 0x1C) * 0.5f;
+    float x = *(float*)(particleData + 0x8) >= 0.0f ? *(float*)(particleData + 0x8) : *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
     sGfxVec4 v;
-    v.x = *(float*)(d + 0x78);
-    v.y = *(float*)(d + 0x7C);
-    v.z = *(float*)(d + 0x80);
+    v.x = *(float*)(particleData + 0x78);
+    v.y = *(float*)(particleData + 0x7C);
+    v.z = *(float*)(particleData + 0x80);
     v.w = 0.0f;
-    tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
-    tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), a1, d, ((char*)self) + 0x160, -1.0f);
+    tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &v);
+    tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), transform, particleData, ((char*)self) + 0x160, -1.0f);
 }
 #endif
 
@@ -2470,6 +2592,12 @@ public:
 
 extern "C" void func_0036D500(void* a, void* b);
 
+/**
+ * Restores a static emitter from a replay frame: reads 12 bytes (Duration, the emitter's EndTime, m_initialized) with
+ * the stream's slot 2 and recomputes the bounding box at +0x160 (func_0036D500, calcBoundBox).
+ *
+ * @param stream  the replay frame to read from (On Tour data)
+ */
 extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream00370AF8* stream)
 {
     struct {
@@ -2512,6 +2640,14 @@ struct sGmView_0B60 {
     void** vtable;          // 0x1F8
 };
 
+/**
+ * Constructs the dynamic particle emitter base: no flip textures, cBaseClass_DynamicEmitter_vtbl, the embedded
+ * tParticleEmitter at +0x20 (func_002F7A68), m_initialized 0, m_enabled 1, m_numSubEmitters -1, m_subEmitterId 0, no
+ * position or velocity buffers, m_enabledCount 0, and a draw state whose 16 flag bytes are zeroed (memset) and whose
+ * two texture ids (m_textureState, +0x10) are -1.
+ *
+ * @return @p self
+ */
 extern "C" sGmView_0B60* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self)
 {
     self->mNumFlipTextures = 0;

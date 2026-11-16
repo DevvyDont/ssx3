@@ -1301,6 +1301,15 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
     r->tex = t;
 }
 
+/**
+ * Constructs the base graphics manager and publishes it in cGraphicsMan_TheGraphicsMan.
+ *
+ * Stores cGraphicsMan_vtbl at +0x10D8, builds the default draw state D_00501420 (depth, alpha, blend and texture
+ * fields; texture ids -1), copies it into all 4 draw-state stack entries (+0xE88) and makes the first current, fills
+ * the 86-entry effect texture map (+0xF50) with -1 and sets mNumViews (+0x270) to 1.
+ *
+ * @return @p self
+ */
 extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
 {
     *(void***)(self + 0x10D8) = cGraphicsMan_vtbl;
@@ -1350,6 +1359,12 @@ INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan__cGraphicsMan);
 extern void* cGraphicsMan_vtbl[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the base graphics manager: stores cGraphicsMan_vtbl, clears cGraphicsMan_TheGraphicsMan and frees the
+ * object when @p flags bit 0 is set.
+ *
+ * @param flags  destructor flags; bit 0 frees the object
+ */
 extern "C" void cGraphicsMan__cGraphicsMan(cPS2GraphicsMan* self, int flags)
 {
     self->mVtbl = cGraphicsMan_vtbl;
@@ -1369,6 +1384,12 @@ struct sVEntry00369610 {
     void (*fn)(void*, int*);
 };
 
+/**
+ * Forces the whole draw state to be resent: the cached active state (+0xED8, 4 words) becomes ~mask so every field
+ * differs, the cached texture ids become 0x7FFF, then virtual slot 62 applies @p mask.
+ *
+ * @param mask  the draw state to apply (4 words)
+ */
 extern "C" void cGraphicsMan_ForceActiveDrawState(cPS2GraphicsMan* self, int* mask)
 {
     int i;

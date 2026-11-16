@@ -241,10 +241,10 @@ extern "C" void cSpring_update(sSpring_53FC0* self)
     torques[0] = torques[self->n - 1] = 0.0f;
     for (int i = 1; i < self->n - 1; i++) {
         sSpVec_53FC0 toPrev = spSub_53FC0(self->nodes[i - 1].p, self->nodes[i].p);
-        sSpVec_53FC0 d2 = spSub_53FC0(self->nodes[i + 1].p, self->nodes[i].p);
+        sSpVec_53FC0 toNext = spSub_53FC0(self->nodes[i + 1].p, self->nodes[i].p);
         spScaleEq_53FC0(toPrev, 1.0f - self->rest * self->scale / spLength_53FC0(toPrev));
-        spScaleEq_53FC0(d2, 1.0f - self->rest * self->scale / spLength_53FC0(d2));
-        forces[i] = spScaleF_53FC0(self->k, spAdd_53FC0(toPrev, d2));
+        spScaleEq_53FC0(toNext, 1.0f - self->rest * self->scale / spLength_53FC0(toNext));
+        forces[i] = spScaleF_53FC0(self->k, spAdd_53FC0(toPrev, toNext));
         spAddEq_53FC0(forces[i], spScaleF_53FC0(dt * self->k, spSub_53FC0(spAdd_53FC0(self->nodes[i - 1].v, self->nodes[i + 1].v), spScale_53FC0(self->nodes[i].v, 2.0f))));
         // PORT: pointer arithmetic in int (only form that gives the target's index-first addu and
         // signed -0x30 offsets; g++ 2.95 turns nd[-1] into an unsigned 0xFFFFFFB0 offset).
@@ -259,9 +259,9 @@ extern "C" void cSpring_update(sSpring_53FC0* self)
         torques[i] += self->nodes[i].t;
     }
     for (int i = 1; i < self->n - 1; i++) {
-        sSpVec_53FC0 v = spAdd_53FC0(spScale_53FC0(forces[i], dt), spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * self->k, spAdd_53FC0(forces[i - 1], forces[i + 1])), dt * dt * 2.0f * self->k + 1.0f));
-        v = spDiv_53FC0(v, dt * dt * 2.0f * self->k + 1.0f);
-        spAddEq_53FC0(self->nodes[i].v, v);
+        sSpVec_53FC0 deltaVel = spAdd_53FC0(spScale_53FC0(forces[i], dt), spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * self->k, spAdd_53FC0(forces[i - 1], forces[i + 1])), dt * dt * 2.0f * self->k + 1.0f));
+        deltaVel = spDiv_53FC0(deltaVel, dt * dt * 2.0f * self->k + 1.0f);
+        spAddEq_53FC0(self->nodes[i].v, deltaVel);
         spAddEq_53FC0(self->nodes[i].p, spScale_53FC0(self->nodes[i].v, dt));
         self->nodes[i].av += (dt * torques[i] + dt * dt * dt * self->c * (torques[i - 1] + torques[i + 1]) / (dt * dt * 2.0f * self->c + 1.0f)) / (dt * dt * 2.0f * self->c + 1.0f);
         self->nodes[i].a += dt * self->nodes[i].av;

@@ -772,8 +772,8 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
                 sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
                 if (animModelLodRef->part != 0) {
                     ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[111].delta, D_004FC420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
-                    int m = self->parts[j].id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, animModelLodRef->part, animModelLodRef->data, m, 0, self->unk_140.y);
+                    int additive = self->parts[j].id == 2 ? x : y;
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, animModelLodRef->part, animModelLodRef->data, additive, 0, self->unk_140.y);
                 }
             }
         }
@@ -785,8 +785,8 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
-                    int m = animModelPart->id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, animModelLodRef->part, animModelLodRef->data, m, 0, self->unk_140.y);
+                    int additive = animModelPart->id == 2 ? x : y;
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)((char*)ctx + ((sAmVEnt_0640*)ctx->mVtbl)[99].delta, animModelLodRef->part, animModelLodRef->data, additive, 0, self->unk_140.y);
                 }
             }
         }
@@ -921,8 +921,8 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
                 if (animModelLodRef->part != 0) {
                     ((tSetMats_0948)((sAmVEnt_0948*)ctx->mVtbl)[111].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[111].delta, D_004FD420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
                     int ok = (unsigned)(self->parts[j].id - 1) < 2;
-                    int m = ok ? x : y;
-                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, animModelLodRef->part, animModelLodRef->data, m);
+                    int colour = ok ? x : y;
+                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, animModelLodRef->part, animModelLodRef->data, colour);
                 }
             }
         }
@@ -935,8 +935,8 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
                     int ok = (unsigned)(animModelPart->id - 1) < 2;
-                    int m = ok ? x : y;
-                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, animModelLodRef->part, animModelLodRef->data, m);
+                    int colour = ok ? x : y;
+                    ((tDraw_0948)((sAmVEnt_0948*)ctx->mVtbl)[100].fn)((char*)ctx + ((sAmVEnt_0948*)ctx->mVtbl)[100].delta, animModelLodRef->part, animModelLodRef->data, colour);
                 }
             }
         }
@@ -1347,38 +1347,38 @@ void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* 
  * on first use), set up with dcmpInitFrameAccessor() and claimed. dcmpGetFrame (func_00312C20) then writes
  * the channels.
  *
- * @param p2  destination float buffer (On Tour: dest)
- * @param p3  the source frame: word 0 >> 8 = animation number, word 1 = time in seconds (On Tour:
+ * @param dest  destination float buffer (On Tour: dest)
+ * @param frame  the source frame: word 0 >> 8 = animation number, word 1 = time in seconds (On Tour:
  *            tAnimSourceFrame*)
- * @param p4  part number (On Tour: part)
- * @param p5  first channel to decode (On Tour: start)
- * @param p6  number of channels, clamped to the block's channel count (On Tour: len)
+ * @param part  part number (On Tour: part)
+ * @param startChan  first channel to decode (On Tour: start)
+ * @param numChans  number of channels, clamped to the block's channel count (On Tour: len)
  */
-void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6)
+void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* dest, unsigned int* frame, int part, void* startChan, long numChans)
 {
-    float t = *(float*)(p3 + 1) * 30.0f;
-    sSeqAM* seq = (sSeqAM*)(self->seqs + (p3[0] >> 8) * 0x14);
+    float findex = *(float*)(frame + 1) * 30.0f;
+    sSeqAM* seq = (sSeqAM*)(self->seqs + (frame[0] >> 8) * 0x14);
     float lim = (float)(seq->n - 1);
     int idx;
-    int a;
-    int b;
-    if (lim <= t) {
+    int numChunks;
+    int chunkFrames;
+    if (lim <= findex) {
         idx = seq->a - 1;
-        t = lim;
-        b = seq->b;
-        a = seq->a;
+        findex = lim;
+        chunkFrames = seq->b;
+        numChunks = seq->a;
     } else {
-        idx = (int)t / (seq->b - 1);
-        b = seq->b;
-        a = seq->a;
+        idx = (int)findex / (seq->b - 1);
+        chunkFrames = seq->b;
+        numChunks = seq->a;
     }
     sNodeAM* node;
-    sEntAM* ent = (sEntAM*)(self->ents + seq->base * 8 + p4 * a * 8 + idx * 8);
-    t = t - (float)(idx * (b - 1));
-    long v = *(unsigned char*)(self->data + ent->off);
+    sEntAM* ent = (sEntAM*)(self->ents + seq->base * 8 + part * numChunks * 8 + idx * 8);
+    findex = findex - (float)(idx * (chunkFrames - 1));
+    long chunkChans = *(unsigned char*)(self->data + ent->off);
     int kind = ent->kind;
-    if (v < p6) {
-        p6 = v;
+    if (chunkChans < numChans) {
+        numChans = chunkChans;
     }
     if (ent->slot != 0xFF) {
         node = D_pool_AM[kind] + ent->slot;
@@ -1393,12 +1393,12 @@ void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* 
             (*head)->prev->next = node;
             (*head)->prev = node;
         }
-        func_00312C20((char*)node + 4, t, p5, p6, p2);
+        func_00312C20((char*)node + 4, findex, startChan, numChans, dest);
     } else {
         int slot;
         node = D_head_AM[kind];
         if (node == 0) {
-            node = gGenCacheBucket_AM(kind, v);
+            node = gGenCacheBucket_AM(kind, chunkChans);
         } else if (node->owner != 0) {
             slot = node->owner->slot;
             node->owner->slot = 0xFF;
@@ -1411,7 +1411,7 @@ have_slot:
         D_head_AM[kind] = node->next;
         char* np = (char*)node + 4;
         dcmpInitFrameAccessor(np, self->data + ent->off, ent->len);
-        func_00312C20(np, t, p5, p6, p2);
+        func_00312C20(np, findex, startChan, numChans, dest);
     }
 }
 #endif

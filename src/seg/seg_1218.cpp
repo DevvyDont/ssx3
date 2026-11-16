@@ -558,11 +558,11 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
     }
     sVec4_09E0 targetPos;
     func_00100610_09E0(&targetPos, ((char*)self));
-    float f = func_00100348_09E0(((char*)self), &targetPos);
-    cmd->b20 = (int)(f * 31.0f);
+    float steer = func_00100348_09E0(((char*)self), &targetPos);
+    cmd->b20 = (int)(steer * 31.0f);
     char* rider = (char*)self->mRider;
     float len = vLen_09E0(*(sVec4_09E0*)(rider + 0x1E0));
-    if (below && *(float*)(rider + 0x4C8) < 10000.0f && vAbs_09E0(f) < 1.0f) {
+    if (below && *(float*)(rider + 0x4C8) < 10000.0f && vAbs_09E0(steer) < 1.0f) {
         cComputer_setupPrewindState_09E0(((char*)self), isSpin, isFlip, toRail, toPipe);
         cmd->b14 = 3;
         return;
@@ -978,13 +978,13 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
         else
             cComputer_setupCrouch_0F88(((char*)self), cmd);
     } else {
-        float d = Rec_0F88(((char*)self))->dist;
+        float targetDist = Rec_0F88(((char*)self))->dist;
         float lim;
-        if (d == 0.0f) {
+        if (targetDist == 0.0f) {
             lim = 1.5707963705062866f;
         } else {
-            lim = func_0031C228(150.0f / d);
-            if (d < 0.0f)
+            lim = func_0031C228(150.0f / targetDist);
+            if (targetDist < 0.0f)
                 lim += 3.1415927410125732f;
         }
         if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
@@ -6625,8 +6625,8 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
         cmd->b14 = 1;
     if (self->mToPipe) {
         sV4_AA70 jumpSpan = Sub_AA70(*(sV4_AA70*)&self->mEndJumpPos, *(sV4_AA70*)&self->mStartJumpPos);
-        sV4_AA70 b = Sub_AA70(*(sV4_AA70*)((char*)self->mRider + 0x110), *(sV4_AA70*)&self->mStartJumpPos);
-        if (Len_AA70(b) < Len_AA70(jumpSpan) - 50.0f)
+        sV4_AA70 fromJumpStart = Sub_AA70(*(sV4_AA70*)((char*)self->mRider + 0x110), *(sV4_AA70*)&self->mStartJumpPos);
+        if (Len_AA70(fromJumpStart) < Len_AA70(jumpSpan) - 50.0f)
             cmd->b13 = 1;
         return;
     }
@@ -6697,7 +6697,7 @@ static inline float clamp_AD78(float v, float lo, float hi)
 extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
 {
     int flag;
-    int r = func_0010BBF8(self, &flag);
+    int pressMarkerFound = func_0010BBF8(self, &flag);
     float pressDir = 1.0f;
     if (flag)
         pressDir = -1.0f;
@@ -6706,7 +6706,7 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
         func_00100610(&targetPos, ((char*)self));
         cmd->b18 = (int)(func_00100348(((char*)self), &targetPos) * 31.0f);
     }
-    if (r) {
+    if (pressMarkerFound) {
         cmd->w0 = (int)(pressDir * 31.0f);
         sVec4_AD78 sideAxis = *(sVec4_AD78*)((char*)self->mRider + 0x1A0);
         float z = sideAxis.z + sideAxis.z;
@@ -6803,12 +6803,12 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
     char* rider = (char*)self->mRider;
     if ((unsigned int)(*(int*)(rider + 0x328) - 3) >= 2 &&
         func_00311AE8(*(void**)(rider + 0x784), 2) != 0xE) {
-        float s = (self->mSpinAxis < 0.0f) ? 1.0f : -1.0f;
-        cmd->w0 = (int)(s * 31.0f);
+        float spinSign = (self->mSpinAxis < 0.0f) ? 1.0f : -1.0f;
+        cmd->w0 = (int)(spinSign * 31.0f);
     }
-    int r2 = func_0010BB18(self, (float*)(((char*)self) + 0xDF0), &ok);
+    int speedMarkerFound = func_0010BB18(self, (float*)(((char*)self) + 0xDF0), &ok);
     float len = vLen_AED8(*(sVec4_AED8*)((char*)self->mRider + 0x1E0));
-    if (r2 && ok && len < self->mDesiredSpeed - 138.88890075683594f)
+    if (speedMarkerFound && ok && len < self->mDesiredSpeed - 138.88890075683594f)
         *(unsigned int*)cmd |= 0x10000;
 }
 #endif

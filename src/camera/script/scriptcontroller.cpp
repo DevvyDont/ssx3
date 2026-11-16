@@ -216,10 +216,10 @@ extern "C" void cScriptCameraController_update(void* self)
 {
     sScrAlgoNodeK2* n = **(sScrAlgoNodeK2***)((char*)self + 0x8);
     while (n != 0) {
-        float t = *(float*)(func_001694B0_K2(n->algo) + 0x18);
-        float progressSq = t * t;
-        float smoothed = progressSq * 3.0f - progressSq * 2.0f * t;
-        n->t = t;
+        float progress = *(float*)(func_001694B0_K2(n->algo) + 0x18);
+        float progressSq = progress * progress;
+        float smoothed = progressSq * 3.0f - progressSq * 2.0f * progress;
+        n->t = progress;
         if (smoothed > 1.0f)
             smoothed = 1.0f;
         n->weight = smoothed;

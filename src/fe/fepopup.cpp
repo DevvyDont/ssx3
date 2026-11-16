@@ -1430,10 +1430,10 @@ extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
     scale.z = 1.0f;
     char* background = (char*)self->mpEnterBoxBackground;
     if (background != 0) {
-        sVec3_7EB0 d = enterPos;
-        d.y = d.y + self->mvSizeBackEnterBox[1] * 0.5f + menuPos.y - 3.0f;
-        d.x = d.x + (size.x + 6.0f) * 0.5f;
-        *(sVec3_7EB0*)(background + 0x44) = d;
+        sVec3_7EB0 backPos = enterPos;
+        backPos.y = backPos.y + self->mvSizeBackEnterBox[1] * 0.5f + menuPos.y - 3.0f;
+        backPos.x = backPos.x + (size.x + 6.0f) * 0.5f;
+        *(sVec3_7EB0*)(background + 0x44) = backPos;
         *(sVec3_7EB0*)((char*)self->mpEnterBoxBackground + 0x50) = scale;
     }
 }
@@ -2533,8 +2533,8 @@ extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx
     *(int*)(popup + 0xBC) = 2;
     func_001C57C0(slots, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(slots, 1, GetHashValue32(str_kT_CMNNo));
-    sVec3K1C9B98 v(30.0f, 40.0f, 0.0f);
-    *(sVec3K1C9B98*)(popup + 0x158) = v;
+    sVec3K1C9B98 popupOffset(30.0f, 40.0f, 0.0f);
+    *(sVec3K1C9B98*)(popup + 0x158) = popupOffset;
     *(int*)(popup + 0x14C) = self->miLayerOffset + 3;
     *(int*)(popup + 0x168) = ((sSelfK1C9B98*)self)->entries[idx].c;
     *(sPairK1C9B98*)(popup + 0xC0) = ((sSelfK1C9B98*)self)->entries[idx].p;
@@ -3274,9 +3274,9 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void*
     cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)self + 0x48));
     self->mUserNum = idx;
     self->mHashName = 7;
-    void* p = *(void**)self->mpEngine;
-    if (p != 0) {
-        *(char*)&self->mCtrlBits = func_001A1CD0(p, idx);
+    void* custom = *(void**)self->mpEngine;
+    if (custom != 0) {
+        *(char*)&self->mCtrlBits = func_001A1CD0(custom, idx);
     }
     cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)self + 0x48));
     return ((void*)self);
@@ -3603,9 +3603,9 @@ extern "C" void func_0039E390(void* self, int flags);
 extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
 {
     self->mVtbl = cKeyboardPopup_vtbl;
-    void* p = self->mpustrStatic;
-    if (p != 0) {
-        cMemMan_free(p);
+    void* ustrStatic = self->mpustrStatic;
+    if (ustrStatic != 0) {
+        cMemMan_free(ustrStatic);
         self->mpustrStatic = 0;
     }
     cBXString__cBXString((char*)self + 0x424, 2);
@@ -5453,37 +5453,37 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         if (oc != 0) {
             SetVis_D348(oc, showRegular);
         }
-        int f = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(buf));
-        if (f != 0xFFFF) {
-            cUIScreen_playFrame(self->mpScreen, f, 1);
+        int frameNum = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(buf));
+        if (frameNum != 0xFFFF) {
+            cUIScreen_playFrame(self->mpScreen, frameNum, 1);
         }
-        char* o1 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
-        if (o1 != 0) {
-            sVEp_D348* vt = *(sVEp_D348**)(o1 + 8);
-            vt[20].fn(o1 + vt[20].delta, ((char*)self) + 0x400);
-            *(sVec3_D348*)&self->mvPosCursor[0] = *(sVec3_D348*)(o1 + 0x44);
+        char* charCursor = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
+        if (charCursor != 0) {
+            sVEp_D348* vt = *(sVEp_D348**)(charCursor + 8);
+            vt[20].fn(charCursor + vt[20].delta, ((char*)self) + 0x400);
+            *(sVec3_D348*)&self->mvPosCursor[0] = *(sVec3_D348*)(charCursor + 0x44);
         }
-        char* o2 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
-        if (o2 != 0) {
-            sVEp_D348* vt = *(sVEp_D348**)(o2 + 8);
-            vt[20].fn(o2 + vt[20].delta, ((char*)self) + 0x3F4);
-            *(sVec3_D348*)&self->mvPosEnter[0] = *(sVec3_D348*)(o2 + 0x44);
+        char* enterValue = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
+        if (enterValue != 0) {
+            sVEp_D348* vt = *(sVEp_D348**)(enterValue + 8);
+            vt[20].fn(enterValue + vt[20].delta, ((char*)self) + 0x3F4);
+            *(sVec3_D348*)&self->mvPosEnter[0] = *(sVec3_D348*)(enterValue + 0x44);
             self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1];
         }
-        char* o3 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Name_bar));
-        if (o3 != 0) {
-            sVec3_D348 p = *(sVec3_D348*)(o3 + 0x44);
-            self->mvPosEnter[0] += p.x;
-            self->mvPosEnter[1] += p.y;
-            self->mvPosEnter[2] += p.z;
+        char* nameBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Name_bar));
+        if (nameBar != 0) {
+            sVec3_D348 nameBarPos = *(sVec3_D348*)(nameBar + 0x44);
+            self->mvPosEnter[0] += nameBarPos.x;
+            self->mvPosEnter[1] += nameBarPos.y;
+            self->mvPosEnter[2] += nameBarPos.z;
         }
-        char* o4 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorLeft));
-        if (o4 != 0) {
-            SetVis_D348(o4, 0);
+        char* extendCursorLeft = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorLeft));
+        if (extendCursorLeft != 0) {
+            SetVis_D348(extendCursorLeft, 0);
         }
-        char* o5 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorRight));
-        if (o5 != 0) {
-            SetVis_D348(o5, 0);
+        char* extendCursorRight = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorRight));
+        if (extendCursorRight != 0) {
+            SetVis_D348(extendCursorRight, 0);
         }
         if (self->mbSetInputText != 0) {
             cKeyboardPopup_setInputText(self, ((char*)self) + 0x74);
@@ -5925,12 +5925,12 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 }
                 default:
                     if (InputK1CDB98(ev, 43) >= 0x20) {
-                        char c = InputK1CDB98(ev, 43);
-                        fail = !cKeyboardPopup_updateToAscii_b(self, c);
+                        char asciiChar = InputK1CDB98(ev, 43);
+                        fail = !cKeyboardPopup_updateToAscii_b(self, asciiChar);
                         if (!fail) {
                             if (cKeyboardPopup_allowSelection(self, self->miCurrentKey, 0)) {
-                                if (c == 0x60) cKeyboardPopup_AddAsciiEdit(self, 0x7E);
-                                else cKeyboardPopup_AddAsciiEdit(self, c);
+                                if (asciiChar == 0x60) cKeyboardPopup_AddAsciiEdit(self, 0x7E);
+                                else cKeyboardPopup_AddAsciiEdit(self, asciiChar);
                             } else {
                                 fail = 1;
                             }

@@ -124,7 +124,7 @@ extern "C" void cWScriptMan_checkGate(void* vself)
             *mp = 0;
         }
     }
-    sGateVec_3DE0 textSize0, textSize1, textSize2, s3, o0, o1, o2, p0, p1, p2, e0, e1, e2;
+    sGateVec_3DE0 textSize0, textSize1, textSize2, s3, instPos0, instPos1, instPos2, btnPos0, btnPos1, btnPos2, btnSize0, btnSize1, btnSize2;
     int count;
     int cur;
     int slot = 1;
@@ -159,40 +159,40 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     }
     int ca = 0;
     int cb = 0;
-    int c0 = lookup_3DE0(self, str_bsl2);
-    int c1 = lookup_3DE0(self, str_bsl1);
-    int c2 = lookup_3DE0(self, str_bsr1);
-    int c3 = lookup_3DE0(self, str_bsr2);
-    int c4 = lookup_3DE0(self, str_square_NML);
+    int iconL2 = lookup_3DE0(self, str_bsl2);
+    int iconL1 = lookup_3DE0(self, str_bsl1);
+    int iconR1 = lookup_3DE0(self, str_bsr1);
+    int iconR2 = lookup_3DE0(self, str_bsr2);
+    int iconSquare = lookup_3DE0(self, str_square_NML);
     switch (slot) {
     case 1:
-        ca = c1;
+        ca = iconL1;
         break;
     case 3:
-        ca = c3;
+        ca = iconR2;
         break;
     case 0:
-        ca = c0;
+        ca = iconL2;
         break;
     case 4:
-        ca = c0;
-        cb = c1;
+        ca = iconL2;
+        cb = iconL1;
         break;
     case 9:
-        cb = c3;
-        ca = c2;
+        cb = iconR2;
+        ca = iconR1;
         break;
     case 2:
-        ca = c2;
+        ca = iconR1;
         break;
     }
     float gap = 10.0f;
-    char* t0 = getObj_3DE0(screen, str_InstBtn0);
-    setTab_3DE0(t0, ca);
-    char* t1 = getObj_3DE0(screen, str_InstBtn1);
-    setTab_3DE0(t1, cb);
-    char* t2 = getObj_3DE0(screen, str_InstBtn2);
-    setTab_3DE0(t2, c4);
+    char* instBtn0 = getObj_3DE0(screen, str_InstBtn0);
+    setTab_3DE0(instBtn0, ca);
+    char* instBtn1 = getObj_3DE0(screen, str_InstBtn1);
+    setTab_3DE0(instBtn1, cb);
+    char* instBtn2 = getObj_3DE0(screen, str_InstBtn2);
+    setTab_3DE0(instBtn2, iconSquare);
     char* w0 = getObj_3DE0(screen, str_inst0);
     char* w1 = getObj_3DE0(screen, str_inst1);
     char* w2 = getObj_3DE0(screen, str_inst2);
@@ -201,34 +201,34 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     func_003A1030(w1, &textSize1);
     func_003A1030(w2, &textSize2);
     textSize2.x += gap;
-    func_003A0290(w0, &o0);
-    func_003A0290(w2, &o2);
-    p0 = *(sGateVec_3DE0*)(t0 + 0x44);
-    p1 = *(sGateVec_3DE0*)(t1 + 0x44);
-    p2 = *(sGateVec_3DE0*)(t2 + 0x44);
-    sUIVtP_3DE0* vt0 = *(sUIVtP_3DE0**)(t0 + 8);
-    vt0[20].fn(t0 + vt0[20].delta, &e0);
-    sUIVtP_3DE0* vt1 = *(sUIVtP_3DE0**)(t1 + 8);
-    vt1[20].fn(t1 + vt1[20].delta, &e1);
-    sUIVtP_3DE0* vt2 = *(sUIVtP_3DE0**)(t2 + 8);
-    vt2[20].fn(t2 + vt2[20].delta, &e2);
-    float x = o0.x + textSize0.x;
-    p0.x = x;
-    p1.x = x;
-    if (*(int*)(t1 + 0x7C) != 0) {
-        e1.x += gap;
-        p1.x = x + (e0.x + gap);
+    func_003A0290(w0, &instPos0);
+    func_003A0290(w2, &instPos2);
+    btnPos0 = *(sGateVec_3DE0*)(instBtn0 + 0x44);
+    btnPos1 = *(sGateVec_3DE0*)(instBtn1 + 0x44);
+    btnPos2 = *(sGateVec_3DE0*)(instBtn2 + 0x44);
+    sUIVtP_3DE0* vt0 = *(sUIVtP_3DE0**)(instBtn0 + 8);
+    vt0[20].fn(instBtn0 + vt0[20].delta, &btnSize0);
+    sUIVtP_3DE0* vt1 = *(sUIVtP_3DE0**)(instBtn1 + 8);
+    vt1[20].fn(instBtn1 + vt1[20].delta, &btnSize1);
+    sUIVtP_3DE0* vt2 = *(sUIVtP_3DE0**)(instBtn2 + 8);
+    vt2[20].fn(instBtn2 + vt2[20].delta, &btnSize2);
+    float x = instPos0.x + textSize0.x;
+    btnPos0.x = x;
+    btnPos1.x = x;
+    if (*(int*)(instBtn1 + 0x7C) != 0) {
+        btnSize1.x += gap;
+        btnPos1.x = x + (btnSize0.x + gap);
     } else {
-        e1 = t3vect_Zero;
+        btnSize1 = t3vect_Zero;
     }
-    p2.x = o2.x + textSize2.x;
-    *(sGateVec_3DE0*)(t0 + 0x44) = p0;
-    *(sGateVec_3DE0*)(t1 + 0x44) = p1;
-    *(sGateVec_3DE0*)(t2 + 0x44) = p2;
-    o0 = *(sGateVec_3DE0*)(w0 + 0x44);
-    o1 = *(sGateVec_3DE0*)(w1 + 0x44);
-    o1.x = o0.x + textSize0.x + 10.0f + e0.x + e1.x;
-    *(sGateVec_3DE0*)(w1 + 0x44) = o1;
+    btnPos2.x = instPos2.x + textSize2.x;
+    *(sGateVec_3DE0*)(instBtn0 + 0x44) = btnPos0;
+    *(sGateVec_3DE0*)(instBtn1 + 0x44) = btnPos1;
+    *(sGateVec_3DE0*)(instBtn2 + 0x44) = btnPos2;
+    instPos0 = *(sGateVec_3DE0*)(w0 + 0x44);
+    instPos1 = *(sGateVec_3DE0*)(w1 + 0x44);
+    instPos1.x = instPos0.x + textSize0.x + 10.0f + btnSize0.x + btnSize1.x;
+    *(sGateVec_3DE0*)(w1 + 0x44) = instPos1;
 }
 #endif
 

@@ -516,9 +516,9 @@ extern "C" void cFloatingNode_applyForce(cFloatingNode* self, sV4_F600* intInfo,
     sV4_F600 axisX = vu0MtxMul_F600(transform, &D_004FF140_F600[0]);
     sV4_F600 axisY = vu0MtxMul_F600(transform, &D_004FF150_F600[0]);
     self->Force += vu0Dot_F600(*force, intInfo[1]);
-    sV4_F600 c = vu0Cross_F600(*force, arm);
-    self->TX += vu0Dot_F600(c, axisX);
-    self->TY += vu0Dot_F600(c, axisY);
+    sV4_F600 torque = vu0Cross_F600(*force, arm);
+    self->TX += vu0Dot_F600(torque, axisX);
+    self->TY += vu0Dot_F600(torque, axisY);
 }
 #endif
 
@@ -676,9 +676,9 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
     sV4_F790 axisX = vu0MtxMul_F790(transform, &D_004FF140_F790[0]);
     sV4_F790 axisY = vu0MtxMul_F790(transform, &D_004FF150_F790[0]);
-    sV4_F790 s = vu0Add_F790(vu0Scale_F790(axisX, base->f30), vu0Scale_F790(axisY, base->f40));
-    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, base->f1C, 0.0f), vu0Cross_F790(arm, s)));
-    vu0AddEq_F790(intInfo[3], s);
+    sV4_F790 angVel = vu0Add_F790(vu0Scale_F790(axisX, base->f30), vu0Scale_F790(axisY, base->f40));
+    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, base->f1C, 0.0f), vu0Cross_F790(arm, angVel)));
+    vu0AddEq_F790(intInfo[3], angVel);
 }
 #endif
 

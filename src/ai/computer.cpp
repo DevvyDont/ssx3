@@ -226,8 +226,8 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
     int mode = *(int*)D_004A28A8_UR->fC0;
     char* obj = rider + 0x6C0;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    int r = vt[7].fn(obj + vt[7].delta);
-    int level = ValidOr_UR(r, -1, 1);
+    int aiIndex = vt[7].fn(obj + vt[7].delta);
+    int level = ValidOr_UR(aiIndex, -1, 1);
     self->diff = cComputer_updateRiderPathDifficulty(self, level, mode);
     if (level == 1 && mode == 3) {
         self->f4 = 1;
@@ -844,19 +844,19 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     float lookAheadSec = func_00112588(rider, 1) / len;
     sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x110), vu0Scale_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0), lookAheadSec));
     sVec4_10D410 out;
-    float t;
-    func_0026A428(tgt, &pos, &out, &t, 1);
-    float d = t;
-    float v = 100.0f - d * d * 1.5999999959603883e-05f;
-    if (v < 0.0f) {
-        v = 0.0f;
+    float distOut;
+    func_0026A428(tgt, &pos, &out, &distOut, 1);
+    float distToPath = distOut;
+    float distScore = 100.0f - distToPath * distToPath * 1.5999999959603883e-05f;
+    if (distScore < 0.0f) {
+        distScore = 0.0f;
     }
-    if (5000.0f < d) {
+    if (5000.0f < distToPath) {
         return -1.0f;
     }
-    sc[0] = v * 0.22727273404598236f;
-    char* r2 = (char*)self->mRider;
-    if (*(int*)(r2 + 0xF0) != 0 && *(char**)(((sAi_10D410*)ai)->riders[*(int*)(r2 + 0xF8)] + 0xAB8) == tgt) {
+    sc[0] = distScore * 0.22727273404598236f;
+    char* rider2 = (char*)self->mRider;
+    if (*(int*)(rider2 + 0xF0) != 0 && *(char**)(((sAi_10D410*)ai)->riders[*(int*)(rider2 + 0xF8)] + 0xAB8) == tgt) {
         return 100.0f;
     }
     float zero = 0.0f;
@@ -866,16 +866,16 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     // PORT: the path pointer is passed as func_0010FC30's int team
     int n = func_0010FC30((sAi0010FC30*)ai, (int)tgt);
     n -= tgt == *(char**)((char*)self->mRider + 0xAB8);
-    float c;
+    float occupiedScore;
     if (n <= 0) {
-        c = 100.0f;
+        occupiedScore = 100.0f;
     } else if (n == 1) {
-        c = 25.0f;
+        occupiedScore = 25.0f;
     } else {
-        c = zero;
+        occupiedScore = zero;
     }
     w = 5.0f / total;
-    sc[3] = c * w;
+    sc[3] = occupiedScore * w;
     w = base / total;
     sc[4] = w;
     w = 5.0f / total;
@@ -2062,16 +2062,16 @@ extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self)
         int j;
         for (j = 0; j < 6; j++)
         {
-            sEnt_0010F3B8* e = &self->riders[i]->ent[j];
-            int v = 0;
+            sEnt_0010F3B8* relation = &self->riders[i]->ent[j];
+            int visible = 0;
             if (i != j && j < self->count)
-                v = cRider_isLoaded(self->riders[i]) != 0;
-            e->vis = v;
+                visible = cRider_isLoaded(self->riders[i]) != 0;
+            relation->vis = visible;
             if (j < self->count)
             {
-                char* o = (char*)self->riders[j] + 0x6C0;
-                sVE_0010F3B8* ve = &(*(sVE_0010F3B8**)o)[8];
-                self->riders[i]->ent[j].val = ve->fn(o + ve->delta);
+                char* otherBeing = (char*)self->riders[j] + 0x6C0;
+                sVE_0010F3B8* ve = &(*(sVE_0010F3B8**)otherBeing)[8];
+                self->riders[i]->ent[j].val = ve->fn(otherBeing + ve->delta);
             }
             self->riders[i]->ent[j].dist = 10000000000.0f;
             self->riders[i]->ent[j].c = 0;

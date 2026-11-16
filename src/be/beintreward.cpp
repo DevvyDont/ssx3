@@ -2335,10 +2335,10 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
             func_001580F8(self, profile, iCharacterID, slots4.v[i], 0);
             func_0015A628(rewardLog, bit, 4, slots4.v[i]);
         }
-        int v = func_00157080(self, profile, iCharacterID, 3);
-        if (v >= 0) {
-            func_00157FD0(self, profile, iCharacterID, v, 0);
-            func_0015A628(rewardLog, bit, 3, v);
+        int rewardBit = func_00157080(self, profile, iCharacterID, 3);
+        if (rewardBit >= 0) {
+            func_00157FD0(self, profile, iCharacterID, rewardBit, 0);
+            func_0015A628(rewardLog, bit, 3, rewardBit);
         }
         if (bit == 11)
             func_001E38B8(profile);
@@ -2351,10 +2351,10 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
     case 15:
     {
         int i;
-        int v = func_00157080(self, profile, iCharacterID, 7);
-        if (v >= 0) {
-            func_00158348(self, profile, iCharacterID, v, 0);
-            func_0015A628(rewardLog, bit, 7, v);
+        int rewardBit = func_00157080(self, profile, iCharacterID, 7);
+        if (rewardBit >= 0) {
+            func_00158348(self, profile, iCharacterID, rewardBit, 0);
+            func_0015A628(rewardLog, bit, 7, rewardBit);
         }
         for (i = 0; i < 2 && (slots2.v[i] = func_00157080(self, profile, iCharacterID, 5)) >= 0; i++) {
             func_00158220(self, profile, iCharacterID, slots2.v[i], 0);

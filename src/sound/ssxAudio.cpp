@@ -177,15 +177,15 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int maxBanks, int m
         sSaVtbl8_4C68 vtbl2 = D_00483648_4C68;
         *(sSaVtbl8_4C68**)(BM_4C68 + 0xAB0) = &vtbl2;
         char* base2 = BM_4C68 - 0x6C98;
-        int d2 = S_4C68 - base2;
-        vtbl2.e[1].delta = D_00483648_4C68.e[1].delta + d2;
-        vtbl2.e[2].delta = D_00483648_4C68.e[2].delta + d2;
-        vtbl2.e[3].delta = D_00483648_4C68.e[3].delta + d2;
-        vtbl2.e[5].delta = D_00483648_4C68.e[5].delta + d2;
-        vtbl2.e[6].delta = D_00483648_4C68.e[6].delta + d2;
-        sSaVtbl7_4C68 v3 = D_00483728_4C68;
-        *(sSaVtbl7_4C68**)(BM_4C68 + 0x1D4) = &v3;
-        v3.e[1].delta = D_00483728_4C68.e[1].delta + d2;
+        int delta2 = S_4C68 - base2;
+        vtbl2.e[1].delta = D_00483648_4C68.e[1].delta + delta2;
+        vtbl2.e[2].delta = D_00483648_4C68.e[2].delta + delta2;
+        vtbl2.e[3].delta = D_00483648_4C68.e[3].delta + delta2;
+        vtbl2.e[5].delta = D_00483648_4C68.e[5].delta + delta2;
+        vtbl2.e[6].delta = D_00483648_4C68.e[6].delta + delta2;
+        sSaVtbl7_4C68 vtbl3 = D_00483728_4C68;
+        *(sSaVtbl7_4C68**)(BM_4C68 + 0x1D4) = &vtbl3;
+        vtbl3.e[1].delta = D_00483728_4C68.e[1].delta + delta2;
     }
     *(void***)(S_4C68 + 0x5558) = D_00483688;
     *(void***)(S_4C68 + 0x571C) = D_004836D8;
@@ -345,7 +345,7 @@ extern const sSaVtbl7_285210 D_00483728_285210 __asm__("D_00483728");
  */
 extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
 {
-    char* p5560 = S_285210 + 0x5560;
+    char* speechSys = S_285210 + 0x5560;
     *(void***)(S_285210 + 0x5558) = D_00483688;
     *(void***)(S_285210 + 0x571C) = D_004836D8;
     *(void***)(S_285210 + 0xC) = cSSXAudio_vtbl;
@@ -354,28 +354,28 @@ extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
     *(const sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &D_00483728_285210;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtables on the stack), written out by hand.
-        sSaVtbl4_285210 v1 = D_00483708_285210;
-        *(sSaVtbl4_285210**)(*(char**)(BM_285210 + 0x1D8) + 4) = &v1;
+        sSaVtbl4_285210 vtbl1 = D_00483708_285210;
+        *(sSaVtbl4_285210**)(*(char**)(BM_285210 + 0x1D8) + 4) = &vtbl1;
         char* base1 = *(char**)(BM_285210 + 0x1D8) - 0x6C90;
-        int d1 = S_285210 - base1;
-        v1.e[1].delta = D_00483708_285210.e[1].delta + d1;
-        v1.e[2].delta = D_00483708_285210.e[2].delta + d1;
-        sSaVtbl8_285210 v2 = D_00483648_285210;
-        *(sSaVtbl8_285210**)(BM_285210 + 0xAB0) = &v2;
+        int delta1 = S_285210 - base1;
+        vtbl1.e[1].delta = D_00483708_285210.e[1].delta + delta1;
+        vtbl1.e[2].delta = D_00483708_285210.e[2].delta + delta1;
+        sSaVtbl8_285210 vtbl2 = D_00483648_285210;
+        *(sSaVtbl8_285210**)(BM_285210 + 0xAB0) = &vtbl2;
         char* base2 = BM_285210 - 0x6C98;
-        int d2 = S_285210 - base2;
-        v2.e[1].delta = D_00483648_285210.e[1].delta + d2;
-        v2.e[2].delta = D_00483648_285210.e[2].delta + d2;
-        v2.e[3].delta = D_00483648_285210.e[3].delta + d2;
-        v2.e[5].delta = D_00483648_285210.e[5].delta + d2;
-        v2.e[6].delta = D_00483648_285210.e[6].delta + d2;
-        sSaVtbl7_285210 v3 = D_00483728_285210;
-        *(sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &v3;
-        v3.e[1].delta = D_00483728_285210.e[1].delta + d2;
+        int delta2 = S_285210 - base2;
+        vtbl2.e[1].delta = D_00483648_285210.e[1].delta + delta2;
+        vtbl2.e[2].delta = D_00483648_285210.e[2].delta + delta2;
+        vtbl2.e[3].delta = D_00483648_285210.e[3].delta + delta2;
+        vtbl2.e[5].delta = D_00483648_285210.e[5].delta + delta2;
+        vtbl2.e[6].delta = D_00483648_285210.e[6].delta + delta2;
+        sSaVtbl7_285210 vtbl3 = D_00483728_285210;
+        *(sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &vtbl3;
+        vtbl3.e[1].delta = D_00483728_285210.e[1].delta + delta2;
     }
     func_0028F730(self);
     func_003B5A60(func_00289650);
-    func_002B0DA0(p5560);
+    func_002B0DA0(speechSys);
     if (*(void**)(S_285210 + 0x5728))
         func_003DEDC0(*(void**)(S_285210 + 0x5728), 100);
     if (*(void**)(S_285210 + 0x5980))
@@ -2360,49 +2360,49 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
     float musicVol = func_00288370(self, 1, self->entries[id].f0);
     float djVol = func_00288370(self, 2, self->entries[id].f4);
     float paVol = func_00288370(self, 3, self->entries[id].f8);
-    float v4 = func_00288370(self, 4, self->entries[id].fC);
-    float v6 = func_00288370(self, 6, self->entries[id].f10);
-    float v7 = func_00288370(self, 7, self->entries[id].f14);
-    float v8 = func_00288370(self, 8, self->entries[id].f18);
-    float v9 = func_00288370(self, 9, self->entries[id].f1C);
-    float v10 = func_00288370(self, 10, self->entries[id].f20);
-    float t = self->entries[id].f24;
-    if (t == 0.0f) {
+    float characterVol = func_00288370(self, 4, self->entries[id].fC);
+    float boardVol = func_00288370(self, 6, self->entries[id].f10);
+    float collisionVol = func_00288370(self, 7, self->entries[id].f14);
+    float ambientVol = func_00288370(self, 8, self->entries[id].f18);
+    float arcadeSfxVol = func_00288370(self, 9, self->entries[id].f1C);
+    float arcadeSpeechVol = func_00288370(self, 10, self->entries[id].f20);
+    float fadeTime = self->entries[id].f24;
+    if (fadeTime == 0.0f) {
         self->cur[1] = musicVol;
         self->cur[2] = djVol;
         self->cur[3] = paVol;
-        self->cur[4] = v4;
-        self->cur[6] = v6;
-        self->cur[7] = v7;
-        self->cur[8] = v8;
-        self->cur[9] = v9;
-        self->cur[10] = v10;
+        self->cur[4] = characterVol;
+        self->cur[6] = boardVol;
+        self->cur[7] = collisionVol;
+        self->cur[8] = ambientVol;
+        self->cur[9] = arcadeSfxVol;
+        self->cur[10] = arcadeSpeechVol;
         for (int k = 0; k < 11; k++) {
             self->chan[k].out = self->chan[k].gain * self->cur[k];
         }
-        float m = self->chan[4].out;
-        sSaMixOut83B0* o = (sSaMixOut83B0*)self;
-        o->mix[0] = m * D_004A352C;
-        o->mix[1] = m * D_004A3530;
-        o->mix[2] = m * D_004A3534;
-        o->mix[3] = m * D_004A3538;
-        o->mix[4] = m * D_004A353C;
-        o->mix[5] = m * D_004A3540;
-        o->mix[6] = m * D_004A3544;
-        o->mix[7] = m * D_004A3548;
-        o->mix[8] = m * D_004A354C;
-        o->mix[9] = m * D_004A3550;
+        float characterOut = self->chan[4].out;
+        sSaMixOut83B0* mixOut = (sSaMixOut83B0*)self;
+        mixOut->mix[0] = characterOut * D_004A352C;
+        mixOut->mix[1] = characterOut * D_004A3530;
+        mixOut->mix[2] = characterOut * D_004A3534;
+        mixOut->mix[3] = characterOut * D_004A3538;
+        mixOut->mix[4] = characterOut * D_004A353C;
+        mixOut->mix[5] = characterOut * D_004A3540;
+        mixOut->mix[6] = characterOut * D_004A3544;
+        mixOut->mix[7] = characterOut * D_004A3548;
+        mixOut->mix[8] = characterOut * D_004A354C;
+        mixOut->mix[9] = characterOut * D_004A3550;
     } else {
-        sAudioFade_87A8* f = (sAudioFade_87A8*)self;
-        func_002887A8(f, 1, self->entries[id].f0 != -1, musicVol, t);
-        func_002887A8(f, 2, self->entries[id].f4 != -1, djVol, t);
-        func_002887A8(f, 3, self->entries[id].f8 != -1, paVol, t);
-        func_002887A8(f, 4, self->entries[id].fC != -1, v4, t);
-        func_002887A8(f, 6, self->entries[id].f10 != -1, v6, t);
-        func_002887A8(f, 7, self->entries[id].f14 != -1, v7, t);
-        func_002887A8(f, 8, self->entries[id].f18 != -1, v8, t);
-        func_002887A8(f, 9, self->entries[id].f1C != -1, v9, t);
-        func_002887A8(f, 10, self->entries[id].f20 != -1, v10, t);
+        sAudioFade_87A8* fader = (sAudioFade_87A8*)self;
+        func_002887A8(fader, 1, self->entries[id].f0 != -1, musicVol, fadeTime);
+        func_002887A8(fader, 2, self->entries[id].f4 != -1, djVol, fadeTime);
+        func_002887A8(fader, 3, self->entries[id].f8 != -1, paVol, fadeTime);
+        func_002887A8(fader, 4, self->entries[id].fC != -1, characterVol, fadeTime);
+        func_002887A8(fader, 6, self->entries[id].f10 != -1, boardVol, fadeTime);
+        func_002887A8(fader, 7, self->entries[id].f14 != -1, collisionVol, fadeTime);
+        func_002887A8(fader, 8, self->entries[id].f18 != -1, ambientVol, fadeTime);
+        func_002887A8(fader, 9, self->entries[id].f1C != -1, arcadeSfxVol, fadeTime);
+        func_002887A8(fader, 10, self->entries[id].f20 != -1, arcadeSpeechVol, fadeTime);
         self->faded = 1;
     }
 }
@@ -3114,36 +3114,36 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
             if (idx < audio->f6C50) {
                 int val = *(signed char*)(((char*)self_) + idx + 0x6868);
                 if (val > 0) {
-                    int t0, t1, t2;
+                    int lowThreshold, midThreshold, highThreshold;
                     float vb, va;
                     switch (func_0029F088(((char*)self_), 0)) {
                     case 2:
-                        t0 = 0;
-                        t1 = 0;
-                        t2 = 30;
+                        lowThreshold = 0;
+                        midThreshold = 0;
+                        highThreshold = 30;
                         vb = 1.0f;
                         va = 0.0f;
                         break;
                     case 3:
                         va = 1.0f;
-                        t0 = 30;
-                        t1 = 40;
-                        t2 = 50;
+                        lowThreshold = 30;
+                        midThreshold = 40;
+                        highThreshold = 50;
                         vb = 1.0f;
                         break;
                     default:
                         va = 1.0f;
-                        t0 = 30;
-                        t1 = 40;
-                        t2 = 50;
+                        lowThreshold = 30;
+                        midThreshold = 40;
+                        highThreshold = 50;
                         vb = 1.0f;
                         break;
                     }
-                    if (val < t0)
+                    if (val < lowThreshold)
                         audio->f6C6C = 1.0f;
-                    else if (val < t1)
+                    else if (val < midThreshold)
                         audio->f6C6C = vb;
-                    else if (val < t2)
+                    else if (val < highThreshold)
                         audio->f6C6C = vb;
                     else
                         audio->f6C6C = va;
@@ -3158,9 +3158,9 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
         }
         (audio->f6864)++;
     }
-    int c = audio->f6C60;
-    if (c <= 0) {
-        if (c == 0) {
+    int stepFrame = audio->f6C60;
+    if (stepFrame <= 0) {
+        if (stepFrame == 0) {
             func_00289830(((char*)self_), audio->f6C6C);
             (audio->f6C60)++;
         } else {
@@ -3234,24 +3234,24 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, char* rider)
     if (idx >= 2) return;
     sSaVec98A8 pos;
     {
-        char* o = rider + 0x6C0;
-        sSaVt98A8a* vt = *(sSaVt98A8a**)o;
-        pos = *vt[5].fn(o + vt[5].delta);
+        char* being = rider + 0x6C0;
+        sSaVt98A8a* vt = *(sSaVt98A8a**)being;
+        pos = *vt[5].fn(being + vt[5].delta);
     }
     if (func_0028D960(self) != 0) {
         float k = -99999.0f;
-        char* a = ((sSaObjs98A8*)self)->a[idx];
-        sSaVt98A8b* va = *(sSaVt98A8b**)(a + 4);
-        func_0028D988(self, rider, va[2].fn(a + va[2].delta, pos.x, pos.y, k));
-        char* b = ((sSaObjs98A8*)self)->b[idx];
-        sSaVt98A8b* vb = *(sSaVt98A8b**)(b + 4);
+        char* painterQuery = ((sSaObjs98A8*)self)->a[idx];
+        sSaVt98A8b* va = *(sSaVt98A8b**)(painterQuery + 4);
+        func_0028D988(self, rider, va[2].fn(painterQuery + va[2].delta, pos.x, pos.y, k));
+        char* mixQuery = ((sSaObjs98A8*)self)->b[idx];
+        sSaVt98A8b* vb = *(sSaVt98A8b**)(mixQuery + 4);
         // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
-        cSSXAudio_ReactToWPMixEvent(self, (int)rider, vb[2].fn(b + vb[2].delta, pos.x, pos.y, k));
+        cSSXAudio_ReactToWPMixEvent(self, (int)rider, vb[2].fn(mixQuery + vb[2].delta, pos.x, pos.y, k));
     }
     if (cSSXAudio_NeedWPAmbience(self) != 0) {
-        char* c = ((sSaObjs98A8*)self)->c[idx];
-        sSaVt98A8b* vc = *(sSaVt98A8b**)(c + 4);
-        func_002899F8(self, rider, vc[2].fn(c + vc[2].delta, pos.x, pos.y, -99999.0f));
+        char* ambienceQuery = ((sSaObjs98A8*)self)->c[idx];
+        sSaVt98A8b* vc = *(sSaVt98A8b**)(ambienceQuery + 4);
+        func_002899F8(self, rider, vc[2].fn(ambienceQuery + vc[2].delta, pos.x, pos.y, -99999.0f));
     }
 }
 #endif

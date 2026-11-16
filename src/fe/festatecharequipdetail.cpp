@@ -120,16 +120,16 @@ static inline int Find_8DB8(char* mgr, int hash)
  * else 1), otherwise -1. Builds the root item list (func_0019B180) and loads the character's icon file into
  * the FE file cache (slot kept at 0xA64).
  *
- * @param p  the state being constructed (this)
+ * @param mem  the state being constructed (this)
  * @param owner  the UI engine (On Tour pEngine)
  * @param team  the user number (On Tour userNum)
  * @param inStore  nonzero to open in store mode (buying), zero for the inventory (equipping)
  * @param canSwitchMode  nonzero when the option button may switch between the two modes (kept at 0xAE4)
  * @return the constructed state
  */
-extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signed char team, int inStore, int canSwitchMode)
+extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, signed char team, int inStore, int canSwitchMode)
 {
-    sCharEquip_8DB8* self = (sCharEquip_8DB8*)p;
+    sCharEquip_8DB8* self = (sCharEquip_8DB8*)mem;
     func_0039E2A0(self);
     self->vtbl = cFEStateCharEquip_vtbl;
     self->camPos.x = -105.0f;

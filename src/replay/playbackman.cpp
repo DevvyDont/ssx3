@@ -75,10 +75,10 @@ extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self,
     self->field_0x64 = info[0];
     self->buf = (int*)cMemMan_alloc(0x2A4, str_cInputPad, 0x20000000, 0);
     self->buf[0] = 0;
-    void* s = cMemMan_alloc(8, str_cInput, 0x20000000, 0);
-    func_00244400(s, (int)self->buf);
-    func_00244408(s, n);
-    self->stream = s;
+    void* replayStream = cMemMan_alloc(8, str_cInput, 0x20000000, 0);
+    func_00244400(replayStream, (int)self->buf);
+    func_00244408(replayStream, n);
+    self->stream = replayStream;
     char name[0x100];
     sprintf(name, D_004A3418, D_004A3410);
     cBigFile* bf = cBigFile_cBigFile((cBigFile*)cMemMan_alloc(8, str_BigFile_b, 0, 0));

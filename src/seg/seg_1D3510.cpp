@@ -14,9 +14,9 @@ extern "C" int get_float_2510(unsigned char **pp, float *out) __asm__("get_float
  * @return 4, the number of bytes read
  */
 extern "C" int get_float_2510(unsigned char **pp, float *out) {
-    unsigned char *p = *pp;
+    unsigned char *bytes = *pp;
     union { unsigned int u; float f; } x;
-    x.u = (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
+    x.u = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | bytes[0];
     *out = x.f;
     *pp += 4;
     return 4;
@@ -1042,12 +1042,12 @@ extern "C" void cMenu__cMenu(int, int);
  *
  * Runs cMenu__cMenu() on the menu at offset 0x18 with flags 2 (no free), then cMenuItem__cMenuItem().
  *
- * @param arg0  the item
- * @param arg1  g++ destructor flags, passed to cMenuItem__cMenuItem(); bit 0 set frees the item's memory
+ * @param menuItem  the item
+ * @param flags  g++ destructor flags, passed to cMenuItem__cMenuItem(); bit 0 set frees the item's memory
  */
-extern "C" void cExpandMenuItem__cExpandMenuItem(int arg0, int arg1) {
-    cMenu__cMenu(arg0 + 0x18, 2);
-    cMenuItem__cMenuItem_3DB0(arg0, arg1);
+extern "C" void cExpandMenuItem__cExpandMenuItem(int menuItem, int flags) {
+    cMenu__cMenu(menuItem + 0x18, 2);
+    cMenuItem__cMenuItem_3DB0(menuItem, flags);
 }
 #endif
 
@@ -1084,17 +1084,17 @@ extern "C" void cMenu__cMenu(int, int);
  * Destroys a colour (ARGB) debug-menu item: its five channel items and embedded menu, then the cMenuItem
  * base.
  *
- * @param arg0  the menu item
- * @param arg1  g++ destructor flags; bit 0 set frees the object's memory
+ * @param menuItem  the menu item
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cARGBMenuItem__cARGBMenuItem(int arg0, int arg1) {
-    cMenuItem__cMenuItem_3E20(arg0 + 0x640, 2);
-    cMenuItem__cMenuItem_3E20(arg0 + 0x61C, 2);
-    cMenuItem__cMenuItem_3E20(arg0 + 0x5F8, 2);
-    cMenuItem__cMenuItem_3E20(arg0 + 0x5D4, 2);
-    cMenuItem__cMenuItem_3E20(arg0 + 0x5B0, 2);
-    cMenu__cMenu(arg0 + 0x18, 2);
-    cMenuItem__cMenuItem_3E20(arg0, arg1);
+extern "C" void cARGBMenuItem__cARGBMenuItem(int menuItem, int flags) {
+    cMenuItem__cMenuItem_3E20(menuItem + 0x640, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 0x61C, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 0x5F8, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 0x5D4, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 0x5B0, 2);
+    cMenu__cMenu(menuItem + 0x18, 2);
+    cMenuItem__cMenuItem_3E20(menuItem, flags);
 }
 #endif
 
@@ -1134,16 +1134,16 @@ extern "C" void cMenu__cMenu(int, int);
 /**
  * Destroys a vector debug-menu item: its four component items and embedded menu, then the cMenuItem base.
  *
- * @param arg0  the menu item
- * @param arg1  g++ destructor flags; bit 0 set frees the object's memory
+ * @param menuItem  the menu item
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cVectorMenuItem__cVectorMenuItem(int arg0, int arg1) {
-    cMenuItem__cMenuItem_3ED0(arg0 + 0x654, 2);
-    cMenuItem__cMenuItem_3ED0(arg0 + 0x620, 2);
-    cMenuItem__cMenuItem_3ED0(arg0 + 0x5EC, 2);
-    cMenuItem__cMenuItem_3ED0(arg0 + 0x5B8, 2);
-    cMenu__cMenu(arg0 + 0x18, 2);
-    cMenuItem__cMenuItem_3ED0(arg0, arg1);
+extern "C" void cVectorMenuItem__cVectorMenuItem(int menuItem, int flags) {
+    cMenuItem__cMenuItem_3ED0(menuItem + 0x654, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 0x620, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 0x5EC, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 0x5B8, 2);
+    cMenu__cMenu(menuItem + 0x18, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem, flags);
 }
 #endif
 

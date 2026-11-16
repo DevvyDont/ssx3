@@ -45,7 +45,7 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
     int size;
     int fmt;
     int w;
-    int h;
+    int alignedHeight;
     int w2;
     int mipHeight;
     short rw;
@@ -84,23 +84,23 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
             rw = hdr.w % 4;
             rh = hdr.h % 4;
             w = hdr.w;
-            h = hdr.h;
+            alignedHeight = hdr.h;
             if (rw) {
                 w += 4 - rw;
             }
             if (rh) {
-                h += 4 - rh;
+                alignedHeight += 4 - rh;
             }
             hdr.w = w;
-            hdr.h = h;
+            hdr.h = alignedHeight;
             TYPE_3578(&hdr) = 5;
             size = f_3BB0_3578(&hdr);
             shape = D_0044C450_3578(D_004956E8_3578, size + clonelen, 0);
             memcpy_3578(shape, old, 16);
             TYPE_3578(shape) = 5;
             shape->w = w;
-            shape->h = h;
-            for (i = 0, w2 = w, mipHeight = h; i < (int)(shape->wC >> 28) + 1; i++) {
+            shape->h = alignedHeight;
+            for (i = 0, w2 = w, mipHeight = alignedHeight; i < (int)(shape->wC >> 28) + 1; i++) {
                 srcPixels = f_4010_3578(old, 0, 0, i);
                 f_33B0_3578(srcPixels, f_4010_3578(shape, 0, 0, i), w2, mipHeight, fmt);
                 if (w2 >= 2) {
@@ -161,24 +161,24 @@ char *SHAPE_locatez_3900(struct H_3900 *, int) __asm__("SHAPE_locatez");
 /**
  * Finds a shape in a shape file (FSH) by name: its long name when it has one, else its directory name.
  *
- * @param arg0  the shape file (On Tour const void* shpfile)
- * @param arg1  the name to find (const char*, passed as int)
+ * @param shpfile  the shape file (On Tour const void* shpfile)
+ * @param name  the name to find (const char*, passed as int)
  * @return the shape, or 0 when not found
  */
-char *SHAPE_locatez_3900(struct H_3900 *arg0, int arg1) {
+char *SHAPE_locatez_3900(struct H_3900 *shpfile, int name) {
     int i;
-    int n = arg0->n;
+    int n = shpfile->n;
     struct B_3900 buf;
-    char *p;
+    char *shapeName;
     for (i = 0; i < n; i++) {
-        p = f_3A10_3900((char *)arg0 + arg0->t[i].off);
-        if (p == 0) {
+        shapeName = f_3A10_3900((char *)shpfile + shpfile->t[i].off);
+        if (shapeName == 0) {
             buf.c = 0;
-            f_3D00_3900((char *)arg0, i, &buf);
-            p = (char *)&buf;
+            f_3D00_3900((char *)shpfile, i, &buf);
+            shapeName = (char *)&buf;
         }
-        if (f_65A8_3900(p, arg1) == 0)
-            return (char *)arg0 + arg0->t[i].off;
+        if (f_65A8_3900(shapeName, name) == 0)
+            return (char *)shpfile + shpfile->t[i].off;
     }
     return 0;
 }
@@ -345,7 +345,7 @@ int SHAPE_size(char *shp) {
     int metalBinSize;
     int shapeSize = 0;
     int w;
-    unsigned int u;
+    unsigned int payloadSize;
     char *metalData;
     unsigned int shapeType = *(unsigned char *)shp;
     switch (shapeType) {
@@ -357,9 +357,9 @@ int SHAPE_size(char *shp) {
         return (*(int *)(shp + 4) << 3) + 8;
     case 0x69:
         if (*(unsigned short *)(shp + 6) & 0x10) {
-            u = *(unsigned short *)(shp + 4);
-            if (u == 0) u = 0xF0;
-            return u + 0x10;
+            payloadSize = *(unsigned short *)(shp + 4);
+            if (payloadSize == 0) payloadSize = 0xF0;
+            return payloadSize + 0x10;
         }
         return 0x10;
     default:

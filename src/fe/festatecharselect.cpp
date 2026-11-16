@@ -936,8 +936,8 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_24
             *sp = w;
             w->id18 = i;
             if (i == 0) {
-                sCWVtP_2460* e = &((sCWVtP_2460*)self->slots[0]->vt)[21];
-                e->fn((char*)self->slots[0] + e->delta, D_004C66B8);
+                sCWVtP_2460* vtEntry = &((sCWVtP_2460*)self->slots[0]->vt)[21];
+                vtEntry->fn((char*)self->slots[0] + vtEntry->delta, D_004C66B8);
             }
             if (i >= self->count) {
                 vcall_2460(*sp, 9, 0);

@@ -701,9 +701,9 @@ public:
 extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
 {
     self->mVtbl = (void**)cUIThing_vtbl;
-    cUIThing__cUIThing_cVirt* o = (cUIThing__cUIThing_cVirt*)self->mpAnim;
-    if (o != 0) {
-        o->v01(3);
+    cUIThing__cUIThing_cVirt* anim = (cUIThing__cUIThing_cVirt*)self->mpAnim;
+    if (anim != 0) {
+        anim->v01(3);
     }
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);

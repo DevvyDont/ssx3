@@ -1536,12 +1536,12 @@ struct S12_B140 { int a, b, c; };
 extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int flags) {
     S12_B140 *arr = (S12_B140*)self->m_pCache;
     if (arr != 0) {
-        S12_B140 *p = arr + *(int*)((char*)arr - 0x10);
-        if (arr != p) {
+        S12_B140 *section = arr + *(int*)((char*)arr - 0x10);
+        if (arr != section) {
             do {
-                p--;
-                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)p, 0);
-            } while ((S12_B140*)self->m_pCache != p);
+                section--;
+                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)section, 0);
+            } while ((S12_B140*)self->m_pCache != section);
         }
         cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
     }
@@ -1653,10 +1653,10 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object itself (operator delete)
  */
 extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection* self, int flags) {
-    void *p = self->m_pWPHeader;
-    if (p != 0) {
+    void *wpHeader = self->m_pWPHeader;
+    if (wpHeader != 0) {
         if (self->m_iStreamed == 0) {
-            cMemMan_free(p);
+            cMemMan_free(wpHeader);
         }
     }
     if (flags & 1) {

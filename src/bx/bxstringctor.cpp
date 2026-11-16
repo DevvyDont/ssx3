@@ -34,9 +34,9 @@ cBXString2* cBXString_cBXString(cBXString2* self)
     self->field_0x8 = D_004A3E90;
     self->field_0xC = D_004A3E90;
     self->field_0x10 = D_004A3E90;
-    cBXStrK2* p = (cBXStrK2*)self->arr;
-    for (int i = 3; i != -1; i--, p++) {
-        p->str = D_004A3E90;
+    cBXStrK2* entry = (cBXStrK2*)self->arr;
+    for (int i = 3; i != -1; i--, entry++) {
+        entry->str = D_004A3E90;
     }
     return self;
 }

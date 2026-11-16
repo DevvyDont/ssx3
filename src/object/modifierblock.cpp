@@ -477,12 +477,12 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     }
     sMbLink2F40* firstEffect = *(sMbLink2F40**)&self->field_0x10;
     if (firstEffect != 0) {
-        sMbLink2F40* p = firstEffect;
+        sMbLink2F40* effect = firstEffect;
         do {
-            sMbLink2F40* next = p->next;
-            p->vt[7].fn((char*)p + p->vt[7].delta, id, value);
-            p = next;
-        } while (p != 0);
+            sMbLink2F40* next = effect->next;
+            effect->vt[7].fn((char*)effect + effect->vt[7].delta, id, value);
+            effect = next;
+        } while (effect != 0);
     }
 }
 #endif
@@ -1038,17 +1038,17 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         self->field_0xC = (int)func_00342808(cMemMan_alloc(0x50, str_BoostModifier, 0x20000000, 0), stream);
     }
     for (i = 0; i < hdr.numA; i++) {
-        void* p;
+        void* effect;
         if (hdr.typesA[i] == 1) {
-            p = func_003459A8(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
+            effect = func_003459A8(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 2) {
-            p = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(0x270, str_DynamicParticleModifier, 0x20000000, 0), stream);
+            effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(0x270, str_DynamicParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 3) {
-            p = func_003461C0(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
+            effect = func_003461C0(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
         } else {
-            p = 0;
+            effect = 0;
         }
-        func_00345720((char*)self + 0x10, p);
+        func_00345720((char*)self + 0x10, effect);
     }
     for (i = 0; i < hdr.numB; i++) {
         cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(0x90, str_RailModifier, 0x20000000, 0), stream));
@@ -1173,16 +1173,16 @@ extern "C" void cSkyBox_render(void* self)
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (*(void**)((char*)self + 0x14) == 0)
         return;
-    sMat_53B10 m;
-    vu0CopyMatrix_53B10(&m, t4mat_Identity);
+    sMat_53B10 skyMatrix;
+    vu0CopyMatrix_53B10(&skyMatrix, t4mat_Identity);
     sVec4_53B10 pos = *(sVec4_53B10*)func_002D1C20(func_002D1C58_i());
-    *(sVec4_53B10*)&m.m[12] = pos;
+    *(sVec4_53B10*)&skyMatrix.m[12] = pos;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = ((sRS_53B10*)ctx->m_pCurrentDrawState)[0];
     sRS_53B10* drawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = drawState + 1;
-    int f8 = drawState[1].f8;
-    drawState[1].f8 = f8 & ~0x3E0;
-    int old = (unsigned int)(f8 & 0x3E0) >> 5;
+    int stateFlags = drawState[1].f8;
+    drawState[1].f8 = stateFlags & ~0x3E0;
+    int old = (unsigned int)(stateFlags & 0x3E0) >> 5;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)->f0b = 3;
     SetZOn_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 1);
     SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
@@ -1194,11 +1194,11 @@ extern "C" void cSkyBox_render(void* self)
         *(unsigned int*)(skyInstance + 8) = (*(unsigned int*)(skyInstance + 8) & ~2u) | 4;
         char* instToDraw = *(char**)((char*)self + 0x14);
         sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
-        vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &m, 0, 0, 0x5420);
+        vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 0x5420);
     }
-    sRS_53B10* t2 = (sRS_53B10*)ctx->m_pCurrentDrawState;
-    *(sRS_53B10**)&ctx->m_pCurrentDrawState = t2 - 1;
-    int* pf = (int*)((char*)t2 - 0xC);
+    sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
+    *(sRS_53B10**)&ctx->m_pCurrentDrawState = topDrawState - 1;
+    int* pf = (int*)((char*)topDrawState - 0xC);
     *pf = (*pf & ~0x3E0) | (old << 5);
 }
 #endif
@@ -1311,9 +1311,9 @@ void operator_delete(int* ptr);
  */
 extern "C" void cSpring__cSpring(void* self, int flags)
 {
-    void* p = *(void**)((char*)self + 0x24);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* nodes = *(void**)((char*)self + 0x24);
+    if (nodes != 0) {
+        cMemMan_free(nodes);
     }
     if (flags & 1) {
         operator_delete((int*)self);

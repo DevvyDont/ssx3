@@ -667,9 +667,9 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             break;
         case 27:
             if (m_Regs[op.ABC.B].Type != eLunoVar_Nil) {
-                cLunoVar& arg = m_Regs[op.ABC.C];
+                cLunoVar& callArg = m_Regs[op.ABC.C];
                 cLunoVM vm;
-                vm.call(m_Regs[op.ABC.B].castFunc(), m_Regs[0], arg, m_Regs[op.ABC.A]);
+                vm.call(m_Regs[op.ABC.B].castFunc(), m_Regs[0], callArg, m_Regs[op.ABC.A]);
             } else {
                 func_002224A0();
             }
@@ -700,9 +700,9 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             break;
         }
         case 29: {
-            cLunoFunc f;
-            f.init(code, ops[pc++]);
-            m_Regs[op.ABC.A] = f;
+            cLunoFunc newFunc;
+            newFunc.init(code, ops[pc++]);
+            m_Regs[op.ABC.A] = newFunc;
             break;
         }
         case 36: {
@@ -935,12 +935,12 @@ extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n) __as
  */
 extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n)
 {
-    cLunoTable* t = (cLunoTable*)new (str_LunoTable, 0xA0000000, 0) cLunoTable;
-    cLunoTableEntry** slot = &t->nodes;
-    t->nodes = 0;
-    t->refCount = 0;
-    t->modulus = 0;
-    ref->table = t;
+    cLunoTable* newTable = (cLunoTable*)new (str_LunoTable, 0xA0000000, 0) cLunoTable;
+    cLunoTableEntry** slot = &newTable->nodes;
+    newTable->nodes = 0;
+    newTable->refCount = 0;
+    newTable->modulus = 0;
+    ref->table = newTable;
     *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[n];
     ref->table->modulus = n - 1;
     ref->table->refCount = 1;

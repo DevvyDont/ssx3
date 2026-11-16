@@ -90,12 +90,12 @@ struct sUIVecData_34C0 {
  * the triangle list just past the record, and allocates the vertex colour, position (zeroed) and
  * render-position arrays. An unfilled (line) shape also gets an array of 0x30-byte line vertices.
  *
- * @param p        the vector object
+ * @param uiVector        the vector object
  * @param pUIBase  its record (On Tour tUIBaseObject*)
  */
-extern "C" void cUIVector_setUIData(cUIVector* p, void* pUIBase)
+extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
 {
-    cUIVector* self = p;
+    cUIVector* self = uiVector;
     cUIThing_setUIData(self, pUIBase);
     sUIVecData_34C0* pIYFVector = (sUIVecData_34C0*)pUIBase;
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mFill = pIYFVector->mFlags & 1;
@@ -155,10 +155,10 @@ extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v)
  * while the shape has no vertex positions; vertex channels past the last vertex are ignored.
  *
  * @param key  channel number (On Tour channel)
- * @param v    the channel's new value
+ * @param data    the channel's new value
  */
 // Sets a keyframed property: keys < 0x15 go to the base thing, higher keys address per-vertex position/UV/colour.
-extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short key, float v)
+extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short key, float data)
 {
     if (self->verts == 0) {
         return;
@@ -170,18 +170,18 @@ extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short ke
             return;
         }
         switch ((unsigned short)(key % 9)) {
-        case 0: self->verts[idx].x = v; break;
-        case 1: self->verts[idx].y = v; break;
-        case 2: self->verts[idx].z = v; break;
-        case 3: self->uvs[idx].u = v; break;
-        case 4: self->uvs[idx].v = v; break;
-        case 5: self->cols[idx].r = v; break;
-        case 6: self->cols[idx].g = v; break;
-        case 7: self->cols[idx].b = v; break;
-        case 8: self->cols[idx].a = v; break;
+        case 0: self->verts[idx].x = data; break;
+        case 1: self->verts[idx].y = data; break;
+        case 2: self->verts[idx].z = data; break;
+        case 3: self->uvs[idx].u = data; break;
+        case 4: self->uvs[idx].v = data; break;
+        case 5: self->cols[idx].r = data; break;
+        case 6: self->cols[idx].g = data; break;
+        case 7: self->cols[idx].b = data; break;
+        case 8: self->cols[idx].a = data; break;
         }
     } else {
-        cUIThing_setChannelData(self, key, v);
+        cUIThing_setChannelData(self, key, data);
     }
 }
 #endif
@@ -775,6 +775,9 @@ extern "C" void func_003A4860(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("ui/uivector", cListNode_destroyListNode);
 #ifdef SKIP_ASM
+/**
+ * Unlinks the node from its list (cListNode_removeFromList).
+ */
 extern "C" void cListNode_destroyListNode(cListNode* self)
 {
     cListNode_removeFromList(self);
@@ -1012,6 +1015,11 @@ struct sUIVectorFlags8 {
     bool bit6 : 1;
     bool bit7 : 1;
 };
+/**
+ * Sets the wrap flag (mWrap, bit 7 of mAttr).
+ *
+ * @param enable  non-zero to wrap
+ */
 extern "C" void cUIThing_setWrap(cUIThing* self, int enable)
 {
     ((sUIVectorFlags8*)((char*)self + 0x14))->bit7 = enable;
@@ -1190,6 +1198,11 @@ extern "C" int func_003A4C00(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_getPosition);
 #ifdef SKIP_ASM
+/**
+ * Copies mPosition into @p out.
+ *
+ * @param out  receives the position
+ */
 extern "C" void cUIThing_getPosition(cUIThing* self, t3Vector* out)
 {
     *out = *(&self->mPosition);
@@ -1198,6 +1211,11 @@ extern "C" void cUIThing_getPosition(cUIThing* self, t3Vector* out)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setPosition);
 #ifdef SKIP_ASM
+/**
+ * Sets mPosition from @p out.
+ *
+ * @param out  the new position (read, despite its name; On Tour vec)
+ */
 extern "C" void cUIThing_setPosition(cUIThing* self, t3Vector* out)
 {
     *(&self->mPosition) = *out;
@@ -1206,6 +1224,11 @@ extern "C" void cUIThing_setPosition(cUIThing* self, t3Vector* out)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_getScale);
 #ifdef SKIP_ASM
+/**
+ * Copies mScale into @p out.
+ *
+ * @param out  receives the scale
+ */
 extern "C" void cUIThing_getScale(cUIThing* self, t3Vector* out)
 {
     *out = *(&self->mScale);
@@ -1214,6 +1237,11 @@ extern "C" void cUIThing_getScale(cUIThing* self, t3Vector* out)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setScale);
 #ifdef SKIP_ASM
+/**
+ * Sets mScale from @p out.
+ *
+ * @param out  the new scale (read, despite its name; On Tour vec)
+ */
 extern "C" void cUIThing_setScale(cUIThing* self, t3Vector* out)
 {
     *(&self->mScale) = *out;
@@ -1420,6 +1448,13 @@ extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_0021CCC8(void* p);
 extern void* cUIIcon_vtbl[];
 
+/**
+ * Constructs a UI icon: the cUIThing constructor (func_0039FB30, declared with only self, so the screen and parent
+ * pass through in $a1 / $a2), cUIIcon_vtbl, the icon attributes at +0x74 (func_0021CCC8), mTextureID -1 and
+ * mpTextureElem 0.
+ *
+ * @return @p self
+ */
 extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 {
     func_0039FB30_self(((char*)self));
@@ -1602,6 +1637,12 @@ extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_003977E8(void* p);
 extern void* cUIGroup_vtbl[];
 
+/**
+ * Constructs a UI group: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 / $a2),
+ * cUIGroup_vtbl and its child list at +0x74 (cList::cList).
+ *
+ * @return @p self
+ */
 extern "C" void* cUIGroup_cUIGroup(cUIGroup* self)
 {
     func_0039FB30_self(((char*)self));
@@ -1980,6 +2021,12 @@ extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_003A5508(void* self);
 extern void* cUIPair_vtbl[];
 
+/**
+ * Constructs a UI pair: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 / $a2),
+ * cUIPair_vtbl, its tAttrPair (func_003A5508), no entry or widget, and sets mActive (bit 1 of mAttr).
+ *
+ * @return @p self
+ */
 extern "C" void* cUIPair_cUIPair(cUIPair* self)
 {
     func_0039FB30_self(((char*)self));
@@ -2057,6 +2104,12 @@ struct sVEntry5530 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Replaces the pair's entry object: destroys the old one through its virtual destructor (slot 1, flags 3) and stores
+ * @p obj.
+ *
+ * @param obj  the new entry (On Tour pWidget)
+ */
 extern "C" void cUIPair_setEntry(cUIPair* self, void* obj)
 {
     char* old = (char*)self->mpEntry;
@@ -2083,6 +2136,12 @@ struct sVEntry5588 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Replaces the pair's widget object: destroys the old one through its virtual destructor (slot 1, flags 3) and stores
+ * @p obj.
+ *
+ * @param obj  the new widget (On Tour pWidget)
+ */
 extern "C" void cUIPair_setWidget(cUIPair* self, void* obj)
 {
     char* old = (char*)self->mpWidget;
@@ -2166,6 +2225,11 @@ extern "C" int func_003A56C8(cUIListBox* uiListBox) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIListBox_setShadow);
 #ifdef SKIP_ASM
+/**
+ * Sets the shadow flag (mShadow, bit 2 of mAttrListBox).
+ *
+ * @param enable  non-zero to draw a shadow
+ */
 extern "C" void cUIListBox_setShadow(cUIListBox* self, int enable) {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
 }
@@ -2182,6 +2246,11 @@ extern "C" int func_003A56F8(cUIListBox* uiListBox) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIListBox_setUseStaticColour);
 #ifdef SKIP_ASM
+/**
+ * Sets the static-colour flag (mStaticColour, bit 5 of mAttrListBox).
+ *
+ * @param enable  non-zero to draw in mStaticColour
+ */
 extern "C" void cUIListBox_setUseStaticColour(cUIListBox* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
@@ -2207,6 +2276,11 @@ extern "C" void func_003A5738(cUIListBox* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIListBox_setShadowColour);
 #ifdef SKIP_ASM
+/**
+ * Copies @p in into mShadowColour.
+ *
+ * @param in  the shadow colour (On Tour pSColour)
+ */
 extern "C" void cUIListBox_setShadowColour(cUIListBox* self, tARGB* in)
 {
     *(&self->mShadowColour) = *in;
@@ -2215,6 +2289,11 @@ extern "C" void cUIListBox_setShadowColour(cUIListBox* self, tARGB* in)
 //100%
 INCLUDE_ASM("ui/uivector", cUIListBox_setStaticColour);
 #ifdef SKIP_ASM
+/**
+ * Copies @p in into mStaticColour.
+ *
+ * @param in  the static colour (On Tour pSColour)
+ */
 extern "C" void cUIListBox_setStaticColour(cUIListBox* self, tARGB* in)
 {
     *(&self->mStaticColour) = *in;
@@ -2441,6 +2520,9 @@ struct sUIVecMode1C {
     unsigned int bit0 : 1;
     unsigned int mode : 2;
 };
+/**
+ * Increments the state's popup count (mHasPopup, the 2-bit field at bits 1-2 of mAttrState). It wraps from 3 to 0.
+ */
 extern "C" void cUIState_incrementPopup(cUIState* self)
 {
     sUIVecMode1C* f = (sUIVecMode1C*)(((char*)self) + 0x1C);
@@ -2450,6 +2532,9 @@ extern "C" void cUIState_incrementPopup(cUIState* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_decrementPopup);
 #ifdef SKIP_ASM
+/**
+ * Decrements the state's popup count (mHasPopup, bits 1-2 of mAttrState) when it is non-zero.
+ */
 extern "C" void cUIState_decrementPopup(cUIState* self)
 {
     sUIVecMode1C* f = (sUIVecMode1C*)(((char*)self) + 0x1C);
@@ -2722,6 +2807,17 @@ extern "C" void* func_003977E8(void* p);
 extern "C" void* func_0039FB30(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
 
+/**
+ * Constructs a UI screen for a state (On Tour cUIScreen(cUIState* pState)).
+ *
+ * Self-links its list node, clears mpBuffer and mpScreenHeader, stores cUIScreen_vtbl, constructs its attributes at
+ * +0x14 (func_001DD580) and the thread list (+0x18), clears the keyframe and object blocks and the object list, and
+ * builds the root group in place (cUIThing constructor at +0x40 with no screen or parent, cUIGroup_vtbl, its cList at
+ * +0xB4). Then mpState = @p pState.
+ *
+ * @param pState  the owning cUIState (declared int)
+ * @return @p self
+ */
 extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
 {
     self->mpNext = (cListNode*)((char*)self);
@@ -2789,6 +2885,11 @@ extern "C" int func_003A5D10(int arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIScreen_setVisible);
 #ifdef SKIP_ASM
+/**
+ * Shows or hides the screen through its root group's visible flag (bit 6 of +0x54).
+ *
+ * @param enable  non-zero to show (On Tour b)
+ */
 extern "C" void cUIScreen_setVisible(cUIScreen* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x54))->bit6 = enable;
@@ -2984,6 +3085,11 @@ extern "C" void cUIText_setEllipses(cUIText* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setShadowColour);
 #ifdef SKIP_ASM
+/**
+ * Copies @p in into mShadowColour.
+ *
+ * @param in  the shadow colour (On Tour pSColour)
+ */
 extern "C" void cUIText_setShadowColour(cUIText* self, tARGB* in)
 {
     *(&self->mShadowColour) = *in;
@@ -2992,6 +3098,11 @@ extern "C" void cUIText_setShadowColour(cUIText* self, tARGB* in)
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setStaticColour);
 #ifdef SKIP_ASM
+/**
+ * Copies @p in into mStaticColour.
+ *
+ * @param in  the static colour (On Tour pSColour)
+ */
 extern "C" void cUIText_setStaticColour(cUIText* self, tARGB* in)
 {
     *(&self->mStaticColour) = *in;
@@ -3024,6 +3135,13 @@ extern void* cUIScrollBar_vtbl[];
 // PORT: the other ctors in the unit call this base ctor with (self, 0, 0)
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 
+/**
+ * Constructs a UI scroll bar: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 /
+ * $a2), cUIScrollBar_vtbl, no background, knob, arrows or hide-on-empty object, meHideState, mValue, mNumValues and
+ * mPage 0, and empty up / down animation names.
+ *
+ * @return @p self
+ */
 extern "C" void* cUIScrollBar_cUIScrollBar(cUIScrollBar* self)
 {
     func_0039FB30_self(((char*)self));
@@ -3151,6 +3269,12 @@ INCLUDE_ASM("ui/uivector", cUIProgress_cUIProgress);
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern void* cUIProgress_vtbl[];
 
+/**
+ * Constructs a UI progress bar: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 /
+ * $a2), cUIProgress_vtbl, no background or knob, mValue, mNumValues and mBackWidth 0.
+ *
+ * @return @p self
+ */
 extern "C" void* cUIProgress_cUIProgress(cUIProgress* self)
 {
     func_0039FB30_self(((char*)self));
@@ -3226,6 +3350,12 @@ INCLUDE_ASM("ui/uivector", cUISlider_cUISlider);
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern void* cUISlider_vtbl[];
 
+/**
+ * Constructs a UI slider: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 / $a2),
+ * cUISlider_vtbl, mValue, mNumValues, mStartPixel and mBackWidth 0, no background or knob.
+ *
+ * @return @p self
+ */
 extern "C" void* cUISlider_cUISlider(cUISlider* self)
 {
     func_0039FB30_self(((char*)self));
@@ -3370,6 +3500,11 @@ extern "C" int func_003A6368(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", cUITextScroll_setShadow);
 #ifdef SKIP_ASM
+/**
+ * Sets the shadow flag (mShadow, bit 3 of mAttrTextScroll).
+ *
+ * @param enable  non-zero to draw a shadow
+ */
 extern "C" void cUITextScroll_setShadow(cUITextScroll* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
@@ -3379,6 +3514,11 @@ extern "C" void cUITextScroll_setShadow(cUITextScroll* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUITextScroll_setUnicode);
 #ifdef SKIP_ASM
+/**
+ * Sets the Unicode flag (mUnicode, bit 4 of mAttrTextScroll).
+ *
+ * @param enable  non-zero when the text is UTF-16
+ */
 extern "C" void cUITextScroll_setUnicode(cUITextScroll* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
@@ -3388,6 +3528,11 @@ extern "C" void cUITextScroll_setUnicode(cUITextScroll* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUITextScroll_setShadowColour);
 #ifdef SKIP_ASM
+/**
+ * Copies @p in into mShadowColour.
+ *
+ * @param in  the shadow colour (On Tour pSColour)
+ */
 extern "C" void cUITextScroll_setShadowColour(cUITextScroll* self, tARGB* in)
 {
     *(&self->mShadowColour) = *in;

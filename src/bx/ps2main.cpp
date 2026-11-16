@@ -69,9 +69,9 @@ extern "C" void systemInit(void)
     func_00402520(clock);
     BXsrand(clock[0] ^ (clock[1] << 3));
     func_003E5018();
-    char* p = (char*)func_004188C0(0x400);
-    func_00418910(p);
-    char* heap = (char*)(((int)p + 0x3F) & ~0x3F) + 0x800;
+    char* heapProbe = (char*)func_004188C0(0x400);
+    func_00418910(heapProbe);
+    char* heap = (char*)(((int)heapProbe + 0x3F) & ~0x3F) + 0x800;
     cMemMan_initialize(heap, func_00423D80() - heap);
     func_003E6690(1);
     func_003E4AF0(0x3C);

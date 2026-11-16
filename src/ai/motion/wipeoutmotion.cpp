@@ -775,9 +775,9 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 {
     sVec4_7550 pts[4];
     sRadii_7550 radii = D_00458220;
-    char* r = (char*)self->mRider;
-    char* model = *(char**)(r + 0x780);
-    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(r + 0x8A4)];
+    char* rider = (char*)self->mRider;
+    char* model = *(char**)(rider + 0x780);
+    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(rider + 0x8A4)];
     float modelScale = *(float*)(model + 0x140);
     sVec4_7550 boardAxis = vu0Scale_7550(xAxis_7550(bone), modelScale);
     pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));

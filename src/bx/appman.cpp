@@ -189,11 +189,11 @@ static inline void call1_6F00(char* o, int vtoff, int slot, int a)
  * to
  * load, 2 swaps it in, 3 shuts the active module down and returns.
  *
- * @param p  the application manager
+ * @param appMan  the application manager
  */
-extern "C" void cAppMan_mainLoop(void* p)
+extern "C" void cAppMan_mainLoop(void* appMan)
 {
-    char* self = (char*)p;
+    char* self = (char*)appMan;
     int count = 0;
     calli_6F00(self, 0x5C, 5);
     for (;;) {

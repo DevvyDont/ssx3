@@ -4560,17 +4560,17 @@ extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* self)
 {
     if (*(int*)((char*)self + 0x42C) != *(int*)((char*)self + 0x428))
         return *(sMovieFlags_1B20*)((char*)self + 0x43C);
-    sMovieFlags_1B20 s = {0, 0, 0, 0, 0, 0, 0};
-    s.a = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v49();
-    int b = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v51() || (*(cMovieSub434_1B20**)((char*)self + 0x434))->v59();
-    s.b = b;
-    int c = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v13() && (*(cMovieSub434_1B20**)((char*)self + 0x434))->v20() < (*(cMovieSub434_1B20**)((char*)self + 0x434))->v23();
-    s.c = c;
-    s.d = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v53();
-    int e = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v55() || !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v58();
-    s.e = e;
-    s.f = 0;
-    return s;
+    sMovieFlags_1B20 state = {0, 0, 0, 0, 0, 0, 0};
+    state.a = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v49();
+    int isDamaged = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v51() || (*(cMovieSub434_1B20**)((char*)self + 0x434))->v59();
+    state.b = isDamaged;
+    int isFull = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v13() && (*(cMovieSub434_1B20**)((char*)self + 0x434))->v20() < (*(cMovieSub434_1B20**)((char*)self + 0x434))->v23();
+    state.c = isFull;
+    state.d = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v53();
+    int isUnformatted = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v55() || !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v58();
+    state.e = isUnformatted;
+    state.f = 0;
+    return state;
 }
 #endif
 

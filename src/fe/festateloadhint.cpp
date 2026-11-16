@@ -55,14 +55,14 @@ extern "C" void cFELoadHintState_onCreateScreen(void* self)
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(body));
     }
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0000_b));
-    if (o != 0) {
-        char* p = *(char**)((char*)self + 0x48);
-        if (p != 0) {
-            int q = *(int*)(p + 0x10);
-            if (q != 0) {
-                *(int*)(o + 0x78) = q;
-                *(int*)(o + 0x7C) = 0;
+    char* icon = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0000_b));
+    if (icon != 0) {
+        char* loadInfo = *(char**)((char*)self + 0x48);
+        if (loadInfo != 0) {
+            int textureId = *(int*)(loadInfo + 0x10);
+            if (textureId != 0) {
+                *(int*)(icon + 0x78) = textureId;
+                *(int*)(icon + 0x7C) = 0;
             }
         }
     }
@@ -1161,12 +1161,12 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     if (obj != 0) {
         if (D_00535C10[0] == 0 || D_00535C10[0] == 5) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
-            unsigned int t = func_004139F8((float)D_00536640[i] * (1.0f / 60.0f));
+            unsigned int seconds = func_004139F8((float)D_00536640[i] * (1.0f / 60.0f));
             char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Time));
             if (o != 0) {
                 Activate_72C0(o);
             }
-            strcpy(buf, func_0020A1A8(t));
+            strcpy(buf, func_0020A1A8(seconds));
         } else {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int score = D_00536640[i];
@@ -1217,11 +1217,11 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     sName2_72C0 picName = *(sName2_72C0*)D_004A2C18;
     picName.c[0] = side + '0';
     char* pic = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(picName.c));
-    sLoadInfo_72C0* p = *(sLoadInfo_72C0**)((char*)self + 0x48);
-    if (p != 0 && pic != 0) {
-        int q = p->image[player];
-        if (q != 0) {
-            *(int*)(pic + 0x78) = q;
+    sLoadInfo_72C0* loadInfo = *(sLoadInfo_72C0**)((char*)self + 0x48);
+    if (loadInfo != 0 && pic != 0) {
+        int textureId = loadInfo->image[player];
+        if (textureId != 0) {
+            *(int*)(pic + 0x78) = textureId;
             *(int*)(pic + 0x7C) = 0;
         }
     }
@@ -1315,9 +1315,9 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         sprintf1(text, fmtw, *(int*)(st + 0xC));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(str_results_grabtime)) {
-        int t = (int)*(float*)(st + 0x48);
-        int min = t / 60;
-        int sec = t % 60;
+        int totalSeconds = (int)*(float*)(st + 0x48);
+        int min = totalSeconds / 60;
+        int sec = totalSeconds % 60;
         char fmt[0x20];
         char buf[0x20];
         __builtin_memcpy(fmt, D_0047BF78, sizeof("%02.0f:%02.0f"));

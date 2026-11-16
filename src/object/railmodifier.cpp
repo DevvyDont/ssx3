@@ -227,55 +227,55 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
         while (i != -1) {
             sLink_C0E8* nextLink = (sLink_C0E8*)(i * 16 + (int)links);
             t4Matrix* mm = xform;
-            t4Matrix t2;
-            t4Matrix a;
+            t4Matrix productCopy;
+            t4Matrix linkMat;
             t4Vector res;
             t4Vector r3b;
             t4Matrix* lm = nextLink->mat;
             res = lm->row[0];
-            a.row[0] = res;
+            linkMat.row[0] = res;
             res = lm->row[1];
-            a.row[1] = res;
+            linkMat.row[1] = res;
             res = lm->row[2];
-            a.row[2] = res;
+            linkMat.row[2] = res;
             r3b = lm->row[3];
             res.x = r3b.x * scl.x;
             res.y = r3b.y * scl.y;
             res.z = r3b.z * scl.z;
             res.w = r3b.w * scl.w;
-            a.row[3] = res;
-            t4Matrix t;
-            t4Matrix* pt2 = &t2;
-            t4Matrix* pt = &t;
-            vu0MulMat_C0E8(pt, &a, mm);
+            linkMat.row[3] = res;
+            t4Matrix product;
+            t4Matrix* pt2 = &productCopy;
+            t4Matrix* pt = &product;
+            vu0MulMat_C0E8(pt, &linkMat, mm);
             vu0CopyMat_C0E8(pt2, pt);
             vu0CopyMat_C0E8(mm, pt2);
             i = nextLink->next;
         }
         }
-        t4Matrix t4;
-        t4Matrix t3;
-        t4Matrix* pt3 = &t3;
-        t4Matrix* pt4 = &t4;
+        t4Matrix worldCopy;
+        t4Matrix worldProduct;
+        t4Matrix* pt3 = &worldProduct;
+        t4Matrix* pt4 = &worldCopy;
         vu0MulMat_C0E8(pt3, &self->model->mat, xform);
-        vu0CopyMat_C0E8(pt4, &t3);
+        vu0CopyMat_C0E8(pt4, &worldProduct);
         vu0CopyMat_C0E8(xform, pt4);
     }
-    float f;
-    f = self->mat.row[0].y;
+    float swapValue;
+    swapValue = self->mat.row[0].y;
     self->mat.row[0].y = self->mat.row[1].x;
-    self->mat.row[1].x = f;
-    f = self->mat.row[0].z;
+    self->mat.row[1].x = swapValue;
+    swapValue = self->mat.row[0].z;
     self->mat.row[0].z = self->mat.row[2].x;
-    self->mat.row[2].x = f;
-    f = self->mat.row[1].z;
+    self->mat.row[2].x = swapValue;
+    swapValue = self->mat.row[1].z;
     self->mat.row[1].z = self->mat.row[2].y;
-    self->mat.row[2].y = f;
-    t4Vector v = vu0Scale(row_C0E8(&self->mat, 3), -1.0f);
-    v.w = 0.0f;
-    v = vu0MtxMul_C0E8(xform, v);
-    v.w = 1.0f;
-    self->mat.row[3] = v;
+    self->mat.row[2].y = swapValue;
+    t4Vector invTranslation = vu0Scale(row_C0E8(&self->mat, 3), -1.0f);
+    invTranslation.w = 0.0f;
+    invTranslation = vu0MtxMul_C0E8(xform, invTranslation);
+    invTranslation.w = 1.0f;
+    self->mat.row[3] = invTranslation;
     void* n = cMemMan_alloc(0x10, str_RailNode, 0x20000000, 0);
     ((void**)n)[3] = self;
     ((int*)n)[2] = 2;
@@ -836,9 +836,9 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, vo
                 tc = td;
                 td = tc * 0.618034f + tHi * 0.381966f;
                 pos = evalSeg_C698(&segMat, td);
-                float f = vu0Length_C698(vu0Sub_C698(pos, *point));
+                float probeDist = vu0Length_C698(vu0Sub_C698(pos, *point));
                 fc = fd;
-                fd = f;
+                fd = probeDist;
                 t = td;
                 dist = fd;
             } else {
@@ -846,9 +846,9 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, vo
                 td = tc;
                 tc = td * 0.618034f + tLo * 0.381966f;
                 pos = evalSeg_C698(&segMat, tc);
-                float f = vu0Length_C698(vu0Sub_C698(pos, *point));
+                float probeDist = vu0Length_C698(vu0Sub_C698(pos, *point));
                 fd = fc;
-                fc = f;
+                fc = probeDist;
                 t = tc;
                 dist = fc;
             }
@@ -2887,10 +2887,10 @@ extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
  * Builds the texture matrix of a UV-scroll modifier: a rotation by Angle about Axis (identity when Angle is 0) whose
  * row 3 holds the UV offset (UV[0], UV[1]).
  *
- * @param m  receives the matrix (On Tour t4Matrix& mat)
- * @return @p m
+ * @param mat  receives the matrix (On Tour t4Matrix& mat)
+ * @return @p mat
  */
-extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, sRmMtx_35FC20* m)
+extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, sRmMtx_35FC20* mat)
 {
     float zeroF = 0.0f;
     if (self->Angle != zeroF) {
@@ -2905,22 +2905,22 @@ extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* sel
         float sx = sinA * self->Axis.x;
         float ty = oneMinusCos * self->Axis.y;
         float tz = oneMinusCos * self->Axis.z;
-        m->m[0][0] = tx * self->Axis.x + cosA;
-        m->m[1][0] = tx * self->Axis.y + sz;
-        m->m[2][0] = tx * self->Axis.z - sy;
-        m->m[3][0] = zeroF;
-        m->m[0][1] = ty * self->Axis.x - sz;
-        m->m[1][1] = ty * self->Axis.y + cosA;
-        m->m[2][1] = ty * self->Axis.z + sx;
-        m->m[3][1] = zeroF;
-        m->m[0][2] = tz * self->Axis.x + sy;
-        m->m[1][2] = tz * self->Axis.y - sx;
-        m->m[2][2] = tz * self->Axis.z + cosA;
-        m->m[3][2] = zeroF;
-        m->m[0][3] = zeroF;
-        m->m[1][3] = zeroF;
-        m->m[2][3] = zeroF;
-        m->m[3][3] = one;
+        mat->m[0][0] = tx * self->Axis.x + cosA;
+        mat->m[1][0] = tx * self->Axis.y + sz;
+        mat->m[2][0] = tx * self->Axis.z - sy;
+        mat->m[3][0] = zeroF;
+        mat->m[0][1] = ty * self->Axis.x - sz;
+        mat->m[1][1] = ty * self->Axis.y + cosA;
+        mat->m[2][1] = ty * self->Axis.z + sx;
+        mat->m[3][1] = zeroF;
+        mat->m[0][2] = tz * self->Axis.x + sy;
+        mat->m[1][2] = tz * self->Axis.y - sx;
+        mat->m[2][2] = tz * self->Axis.z + cosA;
+        mat->m[3][2] = zeroF;
+        mat->m[0][3] = zeroF;
+        mat->m[1][3] = zeroF;
+        mat->m[2][3] = zeroF;
+        mat->m[3][3] = one;
         } else {
         // PORT: PS2-only VU0 inline asm (4x4 matrix copy, identity -> m).
         __asm__ __volatile__(
@@ -2935,12 +2935,12 @@ extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* sel
             "sqc2      $vf4, 0x30(%0)\n"
             ".set reorder\n"
             :
-            : "r"(m), "r"(D_004FF1A0_35FC20)
+            : "r"(mat), "r"(D_004FF1A0_35FC20)
             : "memory");
     }
-    m->m[3][0] = self->UV[0];
-    m->m[3][1] = self->UV[1];
-    return m;
+    mat->m[3][0] = self->UV[0];
+    mat->m[3][1] = self->UV[1];
+    return mat;
 }
 #endif
 

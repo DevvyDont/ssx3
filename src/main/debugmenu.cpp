@@ -4339,13 +4339,13 @@ INCLUDE_ASM("main/debugmenu", MEM_initblock);
  *
  * @param name  the heap name (unused)
  * @param size  block size in bytes, excluding the 16-byte header
- * @param p3  the heap's extra header size (unused)
+ * @param infoSize  the heap's extra header size (unused)
  * @param flags  block flags
  * @param prev  the previous block
  * @param next  the next block
  * @return @p size + 16, the block's size with its header (declared as a pointer)
  */
-extern "C" void* MEM_initblock(void* self, int name, void* size, int p3, short flags, int prev, int next)
+extern "C" void* MEM_initblock(void* self, int name, void* size, int infoSize, short flags, int prev, int next)
 {
     *(short*)self = 0x424d;
     *(short*)((char*)self + 0x2) = flags;

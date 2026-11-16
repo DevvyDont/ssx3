@@ -309,9 +309,9 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                             sz.x -= 0.10000000149011612f;
                             sz.y -= 0.10000000149011612f;
                         }
-                        sRect_185F40 r;
-                        func_003921F0(font, line, &r, 0, sz.x, sz.y);
-                        newPos.x = (640.0f - r.x1) * 0.5f;
+                        sRect_185F40 textRect;
+                        func_003921F0(font, line, &textRect, 0, sz.x, sz.y);
+                        newPos.x = (640.0f - textRect.x1) * 0.5f;
                         DrawText_185F40(font, line, newPos.x, newPos.y, sz);
                     }
                 }

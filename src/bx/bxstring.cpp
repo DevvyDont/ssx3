@@ -193,16 +193,16 @@ void operator_delete(int*);
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString__cBXString(cBXString* self, int flags)
 {
-    int s = (int)self->Str;
-    if ((char*)s != D_0048DCD4)
+    int strAddr = (int)self->Str;
+    if ((char*)strAddr != D_0048DCD4)
     {
-        int rc = *(int*)(s - 0xC) - 1;
-        *(int*)(s - 0xC) = rc;
+        int rc = *(int*)(strAddr - 0xC) - 1;
+        *(int*)(strAddr - 0xC) = rc;
         if (rc <= 0)
         {
-            void* h = (void*)((int)self->Str - 0xC);
-            if (h != 0)
-                cMemMan_free(h);
+            void* header = (void*)((int)self->Str - 0xC);
+            if (header != 0)
+                cMemMan_free(header);
         }
     }
     if (flags & 1)

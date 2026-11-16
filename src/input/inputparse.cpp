@@ -35,11 +35,11 @@ extern "C" int cInputMapParser_lookupModifierName(cInputMapParser* self, const c
         return 3;
     }
     int cmpResult = func_0041AA88(name, str_repeat);
-    int r = 4;
+    int modifier = 4;
     if (cmpResult != 0) {
-        r = 6;
+        modifier = 6;
     }
-    return r;
+    return modifier;
 }
 #endif
 
@@ -685,37 +685,37 @@ extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self)
         return cond;
     }
     cInputMapParser_readToken(self);
-    sExprNode_00323268* a = (sExprNode_00323268*)cInputMapParser_parseExpression(self);
-    if (a == 0) {
+    sExprNode_00323268* thenExpr = (sExprNode_00323268*)cInputMapParser_parseExpression(self);
+    if (thenExpr == 0) {
         cInputMapParser_freeParseNode(self, cond);
         return 0;
     }
     if (self->CurrentToken != 7) {
         cInputMapParser_error(self, D_0048DFA8);
         cInputMapParser_freeParseNode(self, cond);
-        cInputMapParser_freeParseNode(self, a);
+        cInputMapParser_freeParseNode(self, thenExpr);
         return 0;
     }
     cInputMapParser_readToken(self);
-    sExprNode_00323268* b = (sExprNode_00323268*)cInputMapParser_parseExpression(self);
-    if (b == 0) {
+    sExprNode_00323268* elseExpr = (sExprNode_00323268*)cInputMapParser_parseExpression(self);
+    if (elseExpr == 0) {
         cInputMapParser_freeParseNode(self, cond);
-        cInputMapParser_freeParseNode(self, a);
+        cInputMapParser_freeParseNode(self, thenExpr);
         return 0;
     }
     if (cond->type == 4) {
         if (cond->value != 0.0f) {
-            cInputMapParser_freeParseNode(self, b);
-            return a;
+            cInputMapParser_freeParseNode(self, elseExpr);
+            return thenExpr;
         }
-        cInputMapParser_freeParseNode(self, a);
-        return b;
+        cInputMapParser_freeParseNode(self, thenExpr);
+        return elseExpr;
     }
     sExprNode_00323268* n = (sExprNode_00323268*)func_003215F8(self);
     n->type = 5;
     n->cond = cond;
-    n->a = a;
-    n->b = b;
+    n->a = thenExpr;
+    n->b = elseExpr;
     return n;
 }
 #endif
@@ -1394,49 +1394,49 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    sBinNode_4138* a = (sBinNode_4138*)cInputMapParser_parseExpression(self);
-    if (a == 0) {
+    sBinNode_4138* firstArg = (sBinNode_4138*)cInputMapParser_parseExpression(self);
+    if (firstArg == 0) {
         return 0;
     }
     if (self->CurrentToken != 8) {
         cInputMapParser_error(self, str_Expected_in_expression_c);
-        cInputMapParser_freeParseNode(self, a);
+        cInputMapParser_freeParseNode(self, firstArg);
         return 0;
     }
     cInputMapParser_readToken(self);
-    sBinNode_4138* b = (sBinNode_4138*)cInputMapParser_parseExpression(self);
-    if (b == 0) {
+    sBinNode_4138* secondArg = (sBinNode_4138*)cInputMapParser_parseExpression(self);
+    if (secondArg == 0) {
         return 0;
     }
     if (self->CurrentToken != 0xA) {
         cInputMapParser_error(self, str_Expected_in_expression);
-        cInputMapParser_freeParseNode(self, a);
-        cInputMapParser_freeParseNode(self, b);
+        cInputMapParser_freeParseNode(self, firstArg);
+        cInputMapParser_freeParseNode(self, secondArg);
         return 0;
     }
     cInputMapParser_readToken(self);
-    if (a->type == 4 && b->type == 4) {
+    if (firstArg->type == 4 && secondArg->type == 4) {
         switch (op) {
         case 0x15:
-            a->value = b->value <? a->value;
+            firstArg->value = secondArg->value <? firstArg->value;
             break;
         case 0x14:
-            a->value = b->value >? a->value;
+            firstArg->value = secondArg->value >? firstArg->value;
             break;
         case 0x16:
-            a->value = pow_4138(a->value, b->value);
+            firstArg->value = pow_4138(firstArg->value, secondArg->value);
             break;
         case 0x17:
-            a->value = atan2_4138(a->value, b->value);
+            firstArg->value = atan2_4138(firstArg->value, secondArg->value);
             break;
         }
-        cInputMapParser_freeParseNode(self, b);
-        return a;
+        cInputMapParser_freeParseNode(self, secondArg);
+        return firstArg;
     }
     sBinNode_4138* n = (sBinNode_4138*)func_003215F8(self);
     n->type = op;
-    n->a = a;
-    n->b = b;
+    n->a = firstArg;
+    n->b = secondArg;
     return n;
 }
 #endif
@@ -1515,56 +1515,56 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    sUnNode_43A0* a = (sUnNode_43A0*)cInputMapParser_parseExpression(self);
-    if (a == 0) {
+    sUnNode_43A0* operand = (sUnNode_43A0*)cInputMapParser_parseExpression(self);
+    if (operand == 0) {
         return 0;
     }
     if (self->CurrentToken != 0xA) {
         cInputMapParser_error(self, str_Expected_in_expression);
-        cInputMapParser_freeParseNode(self, a);
+        cInputMapParser_freeParseNode(self, operand);
         return 0;
     }
     cInputMapParser_readToken(self);
-    if (a->type == 4) {
+    if (operand->type == 4) {
         switch (op) {
         case 0x18:
-            a->value = func_0031C228(a->value);
+            operand->value = func_0031C228(operand->value);
             break;
         case 0x19:
-            a->value = func_0031BF60(a->value);
+            operand->value = func_0031BF60(operand->value);
             break;
         case 0x1A:
-            a->value = func_0031C040(a->value);
+            operand->value = func_0031C040(operand->value);
             break;
         case 0x1B:
-            a->value = func_0040D758(a->value);
+            operand->value = func_0040D758(operand->value);
             break;
         case 0x1C:
-            a->value = func_0040DA10(a->value);
+            operand->value = func_0040DA10(operand->value);
             break;
         case 0x1D:
-            a->value = floor_43A0(a->value);
+            operand->value = floor_43A0(operand->value);
             break;
         case 0x1E:
-            a->value = ceil_43A0(a->value);
+            operand->value = ceil_43A0(operand->value);
             break;
         case 0x1F:
-            a->value = abs_43A0(a->value);
+            operand->value = abs_43A0(operand->value);
             break;
         case 0x20:
-            a->value = sqrt_43A0(a->value);
+            operand->value = sqrt_43A0(operand->value);
             break;
         case 0x21: {
-            float x = a->value;
-            a->value = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
+            float x = operand->value;
+            operand->value = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         }
-        return a;
+        return operand;
     }
     sUnNode_43A0* n = (sUnNode_43A0*)func_003215F8(self);
     n->type = op;
-    n->a = a;
+    n->a = operand;
     return n;
 }
 #endif
@@ -1844,15 +1844,15 @@ extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* no
     }
     code += srcLen;
     cap -= srcLen;
-    int arg = -1;
-    int argLen = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 8), &arg, code, cap, defaultModifier);
+    int argReg = -1;
+    int argLen = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 8), &argReg, code, cap, defaultModifier);
     if (argLen < 0) {
         return -1;
     }
     code += argLen;
     cap -= argLen;
-    if ((unsigned int)arg < 0x40) {
-        self->FreeRegisters[self->NumFreeRegisters++] = arg;
+    if ((unsigned int)argReg < 0x40) {
+        self->FreeRegisters[self->NumFreeRegisters++] = argReg;
     }
     if ((unsigned int)src < 0x40) {
         self->FreeRegisters[self->NumFreeRegisters++] = src;
@@ -1873,7 +1873,7 @@ extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* no
     code->op = op;
     code->dst = *dst;
     code->src = src;
-    code->arg = arg;
+    code->arg = argReg;
     return srcLen + argLen + 1;
 }
 #endif
@@ -1905,9 +1905,9 @@ struct sInsn_003250D8 {
  */
 extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
 {
-    void* arg = *(void**)((char*)node + 4);
+    void* operand = *(void**)((char*)node + 4);
     int src = -1;
-    int n = cInputMapParser_compileParseNode(self, arg, &src, code, cap, defaultModifier);
+    int n = cInputMapParser_compileParseNode(self, operand, &src, code, cap, defaultModifier);
     if (n < 0) {
         return -1;
     }

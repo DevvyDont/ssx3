@@ -236,14 +236,14 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
         char* game = (char*)SSXApp->Game;
         if (game != 0) {
             char* rider = *(char**)(*(char**)(game + 0xC) + 0x28);
-            sV4_87F0 p = *((cRiderSub_87F0*)(rider + 0x6C0))->v05();
-            sV3_87F0 q;
-            q.x = p.x;
-            q.y = p.y;
-            q.z = p.z;
-            int r = func_0026B680(D_004D33A0, &q);
-            int idx = r - 1;
-            if (r == 0) {
+            sV4_87F0 riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->v05();
+            sV3_87F0 riderPos3;
+            riderPos3.x = riderPos.x;
+            riderPos3.y = riderPos.y;
+            riderPos3.z = riderPos.z;
+            int nearestPointId = func_0026B680(D_004D33A0, &riderPos3);
+            int idx = nearestPointId - 1;
+            if (nearestPointId == 0) {
                 idx = 0;
             }
             cUIMenu_setSelectedByIndex(menu, idx);
@@ -434,8 +434,8 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
             *(int*)(self + 0xBC) = 1;
             *(int*)(self + 0xD8) = *(int*)((char*)pWidget + 0x18);
             cOVState_MAP_setupPopup(self);
-            cObjV_00208C28* o = (cObjV_00208C28*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu_No));
-            o->set(cVec_00208C28(1.0f, 0.0f, 0.0f, 0.0f));
+            cObjV_00208C28* confirmNo = (cObjV_00208C28*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu_No));
+            confirmNo->set(cVec_00208C28(1.0f, 0.0f, 0.0f, 0.0f));
         }
         break;
     case 6:
@@ -604,40 +604,40 @@ extern "C" void cOVState_MAP_setupPopup(void* selfp)
             ((VIntFn_9010)menu->vt[7].fn)((char*)menu + menu->vt[7].delta, 1);
             ((VIntFn_9010)menu->vt[9].fn)((char*)menu + menu->vt[9].delta, 1);
         }
-        sStrMgr_9010* g = (sStrMgr_9010*)SSXApp->FELocale;
-        sVE_9010* vt = g->vt;
-        void* str = ((VGetFn_9010)vt[4].fn)((char*)g + vt[4].delta, GetHashValue32(str_kT_MAPSessionPt));
+        sStrMgr_9010* locale = (sStrMgr_9010*)SSXApp->FELocale;
+        sVE_9010* vt = locale->vt;
+        void* str = ((VGetFn_9010)vt[4].fn)((char*)locale + vt[4].delta, GetHashValue32(str_kT_MAPSessionPt));
         if (str != 0) {
             sprintf2(text, str_pct_s_pct_d_d, str, n + 1);
-            void* t = cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_PopupTitle));
-            if (t != 0) {
-                cUIText_setUnicodeString(t, text);
+            void* label = cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_PopupTitle));
+            if (label != 0) {
+                cUIText_setUnicodeString(label, text);
             }
         }
         int id = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), 0, cBELibrary_getCharacterID(0));
         sprintf(buf, str_pct_d_f, id);
-        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_CashAvailable));
-        if (t != 0) {
-            cUIText_setAsciiString(t, buf);
+        cUIText* label = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_CashAvailable));
+        if (label != 0) {
+            cUIText_setAsciiString(label, buf);
         }
         sprintf(buf, str_pct_d_f, 500);
-        t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_SessionCost));
-        if (t != 0) {
-            cUIText_setAsciiString(t, buf);
+        label = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_SessionCost));
+        if (label != 0) {
+            cUIText_setAsciiString(label, buf);
         }
-        t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_ExtraText));
-        if (t != 0) {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_OVRCMNSessArea));
+        label = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_ExtraText));
+        if (label != 0) {
+            cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_OVRCMNSessArea));
         }
         cUIState_hideObjSafe(self, str_ConfirmMenu_No_x);
-        cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu_Yes));
-        sUIObj_9010* b = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu_No));
-        if (a != 0) {
-            cUIText_setUnicodeStringByID(a, GetHashValue32(str_kT_CMNYes_b));
+        cUIText* confirmYes = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu_Yes));
+        sUIObj_9010* confirmNo = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu_No));
+        if (confirmYes != 0) {
+            cUIText_setUnicodeStringByID(confirmYes, GetHashValue32(str_kT_CMNYes_b));
         }
-        if (b != 0) {
-            ((VIntFn_9010)b->vt[9].fn)((char*)b + b->vt[9].delta, 1);
-            ((VIntFn_9010)b->vt[8].fn)((char*)b + b->vt[8].delta, 0);
+        if (confirmNo != 0) {
+            ((VIntFn_9010)confirmNo->vt[9].fn)((char*)confirmNo + confirmNo->vt[9].delta, 1);
+            ((VIntFn_9010)confirmNo->vt[8].fn)((char*)confirmNo + confirmNo->vt[8].delta, 0);
         }
         cUIState_showObjSafe(self, str_ConfirmMenu_No);
     } else {
@@ -1142,11 +1142,11 @@ struct sMap_9E78 {
  * The selected point is the misc data of "SessionViewPoints"'s current item (default 1); it gets its
  * highlight icon and every other point its dot. The object lookup is not null-checked.
  *
- * @param p  the cOVState_MAP (raw pointer)
+ * @param mapState  the cOVState_MAP (raw pointer)
  */
-extern "C" void cOVState_MAP_showIndicators(void* p)
+extern "C" void cOVState_MAP_showIndicators(void* mapState)
 {
-    sMap_9E78* self = (sMap_9E78*)p;
+    sMap_9E78* self = (sMap_9E78*)mapState;
     if (self->cursor != 0) {
         self->cursor->setVisible(1);
     }
@@ -1461,17 +1461,17 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 ret = 1;
                 char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
                 unsigned short origNumLines = *(unsigned short*)(obj + 0xC8);
-                unsigned short c4 = *(unsigned short*)(obj + 0xC4);
-                unsigned short c6 = *(unsigned short*)(obj + 0xC6);
+                unsigned short selectedIndex = *(unsigned short*)(obj + 0xC4);
+                unsigned short linesOffset = *(unsigned short*)(obj + 0xC6);
                 int none = origNumLines == 0;
-                sBXString_A4E0 s;
-                cBXString_cBXString2(&s, net + 0x498);
-                cBXString_Concat(&s, D_004A2710);
-                cBXString_Concat(&s, name);
-                cUITextScroll_addAsciiString(obj, s.str);
-                func_001A83D8(obj, 0x28, 4, origNumLines, c4, c6, none, 1);
+                sBXString_A4E0 chatLine;
+                cBXString_cBXString2(&chatLine, net + 0x498);
+                cBXString_Concat(&chatLine, D_004A2710);
+                cBXString_Concat(&chatLine, name);
+                cUITextScroll_addAsciiString(obj, chatLine.str);
+                func_001A83D8(obj, 0x28, 4, origNumLines, selectedIndex, linesOffset, none, 1);
                 show_A4E0(obj, 1);
-                cBXString__cBXString(&s, 2);
+                cBXString__cBXString(&chatLine, 2);
             }
         }
     }

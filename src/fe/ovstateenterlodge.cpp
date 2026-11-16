@@ -604,9 +604,9 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
     }
     }
     cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_track_xxx)), wtext);
-    signed char* g2 = (signed char*)((char*)&cBENewRaceInterface_newRace);
-    int m = g2[0x48];
-    if (m == 0 || m == 5) {
+    signed char* newRace = (signed char*)((char*)&cBENewRaceInterface_newRace);
+    int gameMode = newRace[0x48];
+    if (gameMode == 0 || gameMode == 5) {
         cUIState_showObjSafe(self, str_time);
         cUIState_hideObjSafe(self, str_points_b);
         cUIState_showObjSafe(self, str_top5record);
@@ -631,19 +631,19 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
     }
     for (int i = 1; i < 6; i++) {
         sprintf(buf, str_name0pct_d, i);
-        cUIText* t1 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
-        cUIText_setAsciiString_i(t1, func_00155208(stats, i - 1));
+        cUIText* nameText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+        cUIText_setAsciiString_i(nameText, func_00155208(stats, i - 1));
         sprintf(buf, str_with0pct_d, i);
-        cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
-        cUIText_setAsciiString_i(t2, func_00155190(stats, i - 1));
+        cUIText* withText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+        cUIText_setAsciiString_i(withText, func_00155190(stats, i - 1));
         sprintf(buf, str_time0pct_d, i);
-        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+        cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
         if (full == 1) {
             sprintf(line, func_0020A1A8(func_00155130(stats, i - 1)));
         } else {
             sprintf(line, D_004A2138, func_00155130(stats, i - 1));
         }
-        cUIText_setAsciiString_i(t, line);
+        cUIText_setAsciiString_i(timeText, line);
     }
     func_00294F78(func_0028B180(), 0xE);
 }
