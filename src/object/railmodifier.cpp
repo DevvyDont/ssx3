@@ -5860,9 +5860,9 @@ extern "C" void cPositionModifier__cPositionModifier(cPositionModifier* self, in
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003618F8__FPv);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_update__FPv);
 #ifdef SKIP_ASM
-void func_003618F8(void* self)
+void cPositionModifier_update(void* self)
 {
 }
 #endif
@@ -5957,18 +5957,18 @@ extern "C" void cParentModifier__cParentModifier(cParentModifier* self, int flag
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003619B8__FPv);
+INCLUDE_ASM("object/railmodifier", cParentModifier_update__FPv);
 #ifdef SKIP_ASM
-void func_003619B8(void* self)
+void cParentModifier_update(void* self)
 {
     *(int*)((char*)self + 0x44) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003619C8__FPv);
+INCLUDE_ASM("object/railmodifier", cParentModifier_getMesh__FPv);
 #ifdef SKIP_ASM
-int func_003619C8(void* self)
+int cParentModifier_getMesh(void* self)
 {
     return *(int*)((char*)self + 0x90);
 }
@@ -6007,36 +6007,36 @@ extern "C" void cMagnetModifier__cMagnetModifier(cMagnetModifier* self, int flag
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A10__FPv);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_isRootTransformDirty__FPv);
 #ifdef SKIP_ASM
-int func_00361A10(void* self)
+int cMagnetModifier_isRootTransformDirty(void* self)
 {
     return (*(int*)((char*)self + 0x50) != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A20__FPv);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_hasIntersect__FPv);
 #ifdef SKIP_ASM
-int func_00361A20(void* self)
+int cMagnetModifier_hasIntersect(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A28__FPv);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
-void* func_00361A28(void* self)
+void* cMagnetModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x20;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A30);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void func_00361A30(cMagnetModifier* self, void* a1)
+extern "C" void cMagnetModifier_setBoundBox(cMagnetModifier* self, void* a1)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
     *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
@@ -6044,18 +6044,18 @@ extern "C" void func_00361A30(cMagnetModifier* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A48__FPv);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_getRadius__FPv);
 #ifdef SKIP_ASM
-float func_00361A48(void* self)
+float cMagnetModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x40);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A50__FPv);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_setRadius__FPv);
 #ifdef SKIP_ASM
-void func_00361A50(void* self)
+void cMagnetModifier_setRadius(void* self)
 {
 }
 #endif
@@ -6104,18 +6104,18 @@ extern "C" void cAvaSplineModifier__cAvaSplineModifier(cAvaSplineModifier* self,
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361AD8__FPv);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
-void* func_00361AD8(void* self)
+void* cAvaSplineModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x10;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361AE0);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void func_00361AE0(cAvaSplineModifier* self, void* a1)
+extern "C" void cAvaSplineModifier_setBoundBox(cAvaSplineModifier* self, void* a1)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
     *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
@@ -6123,18 +6123,18 @@ extern "C" void func_00361AE0(cAvaSplineModifier* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361AF8__FPv);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRadius__FPv);
 #ifdef SKIP_ASM
-float func_00361AF8(void* self)
+float cAvaSplineModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x30);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361B00__FPvf);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setRadius__FPvf);
 #ifdef SKIP_ASM
-void func_00361B00(void* self, float val)
+void cAvaSplineModifier_setRadius(void* self, float val)
 {
     *(float*)((char*)self + 0x30) = val;
 }

@@ -10,9 +10,9 @@
 // Size 0xB84: cMemMan_alloc(0xB84, "cFEStateLobbyMenu") + cFEStateLobbyMenu_cFEStateLobbyMenu(mem, pEngine) (func_001A8E40,
 // func_001B2378, func_001B3A30, func_001BFE70); its last member, the cBXString at 0xB80, ends there. Constructors
 // cFEStateLobbyMenu_cFEStateLobbyMenu and the default func_001DF780 (fe/fepopupmisc), destructor cFEStateLobbyMenu__cFEStateLobbyMenu (fe/fepopupmisc; the
-// preview's _$_17cFEStateLobbyMenu). Retail vtable cFEStateLobbyMenu_vtbl (32 slots: 1 dtor, 4 onCreateScreen func_001BCC30,
-// 7 onGainTransition func_001BCD18, 12 onUpdate func_001BCE18, 17 onPopupEvent func_001BDDE8, 18 onWidgetCreate
-// func_001BCE38, 19 onWidgetEvent func_001BD1B8, 20 onWidgetMenu func_001BDC18, 21 func_001BDCA0, 25
+// preview's _$_17cFEStateLobbyMenu). Retail vtable cFEStateLobbyMenu_vtbl (32 slots: 1 dtor, 4 onCreateScreen cFEStateLobbyMenu_onCreateScreen,
+// 7 onGainTransition cFEStateLobbyMenu_onGainTransition, 12 onUpdate cFEStateLobbyMenu_onUpdate, 17 onPopupEvent cFEStateLobbyMenu_onPopupEvent, 18 onWidgetCreate
+// cFEStateLobbyMenu_onWidgetCreate, 19 onWidgetEvent cFEStateLobbyMenu_onWidgetEvent, 20 onWidgetMenu cFEStateLobbyMenu_onWidgetMenu, 21 cFEStateLobbyMenu_onWidgetPair, 25
 // func_001BDE48 (help), 31 func_001BD738 (net events), 32 func_001BCCA8). Methods: fe/feasyncfile
 // 0x1BCB58-0x1BE720. tools/layout_xlate.py: preview 0xAC..0x128 = retail 0x6D0..0x74C (+0x624), preview 0x12C =
 // retail 0x760.
@@ -20,7 +20,7 @@
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). No On Tour DWARF exists for
 // this class and the preview keeps no accessors for it: widget pointers are named after the UI object
-// onWidgetCreate (func_001BCE38) binds to them, the rest from retail use. Channel arrays are indexed by the
+// onWidgetCreate (cFEStateLobbyMenu_onWidgetCreate) binds to them, the rest from retail use. Channel arrays are indexed by the
 // channel (0 beginner, 1 voice, 2 advanced, 3 expert/elite: the RoomMenus row). Evidence tags:
 //   [R] retail's constructors cFEStateLobbyMenu_cFEStateLobbyMenu / func_001DF780 and destructor cFEStateLobbyMenu__cFEStateLobbyMenu (and cFEStateNet's);
 //   [P] the July 2003 preview (see fe/festatenet.h);
@@ -131,20 +131,20 @@ struct cFEStateLobbyMenu {
                                     //       func_001BE3A8
     unsigned int miChannelRow[4];   // 0x750 [R] 0; [U] func_001BE038: the selected row of each channel list, clamped to
                                     //       its count and selected again (func_0039A7A8)
-    int mbRoomChanged;              // 0x760 [U] onWidgetEvent func_001BD1B8 sets it with miSelectedChannel / miSelectedRoom;
-                                    //       onGainTransition func_001BCD18 reselects them when set and clears it
-    int miSelectedChannel;          // 0x764 [U] func_001BD1B8 / func_001BD738 (event 0xDF: the RoomMenus row); < 4 indexes the
+    int mbRoomChanged;              // 0x760 [U] onWidgetEvent cFEStateLobbyMenu_onWidgetEvent sets it with miSelectedChannel / miSelectedRoom;
+                                    //       onGainTransition cFEStateLobbyMenu_onGainTransition reselects them when set and clears it
+    int miSelectedChannel;          // 0x764 [U] cFEStateLobbyMenu_onWidgetEvent / func_001BD738 (event 0xDF: the RoomMenus row); < 4 indexes the
                                     //       channel arrays
-    int miSelectedRoom;             // 0x768 [U] func_001BD1B8 stores the room list's selected row (list + 0x319); onGainTransition
+    int miSelectedRoom;             // 0x768 [U] cFEStateLobbyMenu_onWidgetEvent stores the room list's selected row (list + 0x319); onGainTransition
                                     //       clamps it to the list count and selects it
     char* mszChannelName;           // 0x76C [R] cBXString (empty rep D_004A3E90; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD738
                                     //       assigns the selected list entry's text (func_0039A708)
     int mbRoomHasPassword;          // 0x770 [U] func_001BD460 / func_001BD540: 1 when a password was given when entering the room;
                                     //       func_001BD8C8 asks for the password ("kT_POPUP231RoomPassword") only when it is 0
-    int miRoomId;                   // 0x774 [U] onWidgetEvent func_001BD1B8 stores the chosen room id and asks LobbyMan for it
-                                    //       (func_0025D770); func_001BD738 event 0xE0 / onWidgetMenu func_001BDC18 pass it on
+    int miRoomId;                   // 0x774 [U] onWidgetEvent cFEStateLobbyMenu_onWidgetEvent stores the chosen room id and asks LobbyMan for it
+                                    //       (func_0025D770); func_001BD738 event 0xE0 / onWidgetMenu cFEStateLobbyMenu_onWidgetMenu pass it on
     int miFirstPlayer;              // 0x778 [R] 0; [U] the players list's scroll offset: func_001BE540 shows players
-                                    //       miFirstPlayer..+9, func_001BE720 the up/down arrows; func_001BD1B8 / func_001BE3A8 reset it
+                                    //       miFirstPlayer..+9, func_001BE720 the up/down arrows; cFEStateLobbyMenu_onWidgetEvent / func_001BE3A8 reset it
     int miNumPlayers;               // 0x77C [U] func_001BE540: LobbyMan's player count in the room (func_0025F1B0); func_001BE720
     unsigned short mustrPopupText[0x200]; // 0x780 [U] func_001BD8C8: sprintf1 (unicode) of "kT_POPUP231RoomPassword" with
                                     //       mszRoomName, the popup's message (+ 0xC4); extent: up to 0xB80

@@ -10,9 +10,9 @@
 // Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + cFEStateStats_cFEStateStats(mem, pEngine) (func_001BFE70); the
 // constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and func_001C2D90 (the default one), destructor
 // cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable cFEStateStats_vtbl (32 slots: 1 dtor, 4
-// onCreateScreen func_001C2E00, 7 onGainTransition func_001C32B8, 9 onInputAlways func_001C4BD8, 12 onUpdate
-// func_001C2EE0, 13 func_001E0EC0, 18 onWidgetCreate func_001C2F00, 19 onWidgetEvent func_001C3668, 20
-// onWidgetMenu func_001C4B98, 25 func_001C3570 (help), 31 func_001C4CD8 (net event 0xE1), 32 func_001C2E70).
+// onCreateScreen cFEStateStats_onCreateScreen, 7 onGainTransition cFEStateStats_onGainTransition, 9 onInputAlways cFEStateStats_onInputAlways, 12 onUpdate
+// cFEStateStats_onUpdate, 13 func_001E0EC0, 18 onWidgetCreate cFEStateStats_onWidgetCreate, 19 onWidgetEvent cFEStateStats_onWidgetEvent, 20
+// onWidgetMenu cFEStateStats_onWidgetMenu, 25 func_001C3570 (help), 31 func_001C4CD8 (net event 0xE1), 32 func_001C2E70).
 // Methods: fe/feasyncfile 0x1C2D18-0x1C4F58. tools/layout_xlate.py: preview 0xC4 = retail 0x6E4 (+0x620).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -104,14 +104,14 @@ struct cFEStateStats {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateStats
-    cUIMenu* mpMenus[4];            // 0x6D0 [R] 0 (both ctors loop over the four); [U] onWidgetCreate func_001C2F00: [0] "HeadingsMenu",
+    cUIMenu* mpMenus[4];            // 0x6D0 [R] 0 (both ctors loop over the four); [U] onWidgetCreate cFEStateStats_onWidgetCreate: [0] "HeadingsMenu",
                                     //       [1] "EventsMenu", [2] "CoursesMenu", [3] "ResultsMenu" (scrollable, input map 1); func_001C4D28 /
                                     //       func_001C4E40 move the focus with mpMenus[miFocusMenu]; func_001C4CD8 selects row 0 of [3]
     int miMode;                     // 0x6E0 [R] 0; [U] func_001C3EE8(self, mode) stores it (0 overall, 1 race, 2 freestyle: the "Txt_Overal" /
-                                    //       "Txt_Race" / "Txt_FreeStyle" highlights); func_001C3668 / func_001C47A8 / func_001C49C8 switch on it
+                                    //       "Txt_Race" / "Txt_FreeStyle" highlights); cFEStateStats_onWidgetEvent / func_001C47A8 / func_001C49C8 switch on it
     unsigned int miFocusMenu;       // 0x6E4 [R] 0; [U] the focused mpMenus[] index: func_001C4D28 / func_001C4E40 step it (0..3,
-                                    //       wrapping); onInputAlways func_001C4BD8 moves only while it is < 3
-    int miFirstResult;              // 0x6E8 [R] 0; [U] the results list's scroll offset: onWidgetMenu func_001C4B98 stores it (event 4),
+                                    //       wrapping); onInputAlways cFEStateStats_onInputAlways moves only while it is < 3
+    int miFirstResult;              // 0x6E8 [R] 0; [U] the results list's scroll offset: onWidgetMenu cFEStateStats_onWidgetMenu stores it (event 4),
                                     //       func_001C3310 shows rows miFirstResult..+9, func_001C4B78 resets it
     int mbShowTime;                 // 0x6EC [R] 1 (cFEStateStats_cFEStateStats); [U] func_001C3EE8 sets it for mode 1, clears it for 0 and 2;
                                     //       func_001C3310 prints the score as a time (func_001C4F58) when set, else as points

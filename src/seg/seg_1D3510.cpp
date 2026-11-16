@@ -766,11 +766,11 @@ extern "C" int func_002D3BA8(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3BB0);
+INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem__cNullMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3BB0(void) {
+extern "C" void cNullMenuItem__cNullMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -792,11 +792,11 @@ extern "C" void func_002D3BD8(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3BE0);
+INCLUDE_ASM("seg/seg_1D3510", cSpaceMenuItem__cSpaceMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3BE0(void) {
+extern "C" void cSpaceMenuItem__cSpaceMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -1044,11 +1044,11 @@ extern "C" void cExpandMenuItem__cExpandMenuItem(int arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3DF8);
+INCLUDE_ASM("seg/seg_1D3510", cRGBTitleMenuItem__cRGBTitleMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3DF8(void) {
+extern "C" void cRGBTitleMenuItem__cRGBTitleMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif

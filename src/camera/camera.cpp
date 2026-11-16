@@ -1931,9 +1931,9 @@ extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015FD48__FPv);
+INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_snap__FPv);
 #ifdef SKIP_ASM
-void func_0015FD48(void* self)
+void cManualCameraAlgorithm_snap(void* self)
 {
 }
 #endif

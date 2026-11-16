@@ -26,7 +26,7 @@ struct cParentModifier {
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361910 returns +0x10, setBoundBox func_00361918
                                     //      (sq 0x10/0x20)
     t4Vector Offset;                // 0x30 [O]; [R] ctor (t4Vector) stores the offset, ctor (t4Matrix) row 3; [U]
-                                    //      updateRootTransform func_00356FF0 (lq 0x30)
+                                    //      updateRootTransform cPositionModifier_updateRootTransform (lq 0x30)
     float Radius;                   // 0x40 [O]; [U] getRadius/setRadius func_00361930/func_00361938 (lwc1/swc1 0x40)
     int RootTransformDirty;         // 0x44 [O] bool (4 bytes); [R] ctors store 1; [U] func_00361900
                                     //      (isRootTransformDirty), getRootTransform func_00361940, updateRootTransform
@@ -35,10 +35,10 @@ struct cParentModifier {
                                     //      row 3 (sq 0x80); [U] getRootTransform returns +0x50
     // --- cParentModifierState / cParentModifier
     int Mesh;                       // 0x90 [O] cParentModifierState::Mesh; [R] ctor stores the mesh arg, replay ctor
-                                    //      reads 4 bytes here; [U] getMesh func_003619C8, updateRootTransform
+                                    //      reads 4 bytes here; [U] getMesh cParentModifier_getMesh, updateRootTransform
     char unk_94[0xc];               // 0x94 padding (no access)
-    tInstanceRecord* ParentInst;    // 0xA0 [O]; [R] ctors; [U] updateRootTransform func_00357108, updateIntersectInfo
-                                    //      func_00357210; func_003619D8 (unreferenced setter) stores it
+    tInstanceRecord* ParentInst;    // 0xA0 [O]; [R] ctors; [U] updateRootTransform cParentModifier_updateRootTransform, updateIntersectInfo
+                                    //      cParentModifier_updateIntersectInfo; func_003619D8 (unreferenced setter) stores it
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
 };
 

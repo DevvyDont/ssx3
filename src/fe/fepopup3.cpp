@@ -210,9 +210,9 @@ INCLUDE_ASM("fe/fepopup3", func_001E0C80);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0C88);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C90);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetAccountMem_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C98);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetAccountMem_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep1__cFEStateCreateStep1);
 
@@ -490,13 +490,13 @@ INCLUDE_ASM("fe/fepopup3", func_001E5148);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_cOVState_ViewPopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5248);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001E52B0);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onUpdate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E52D0);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E52F8);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetCreate);
 
 INCLUDE_ASM("fe/fepopup3", func_001E5428);
 
@@ -506,9 +506,9 @@ INCLUDE_ASM("fe/fepopup3", func_001E5638);
 
 INCLUDE_ASM("fe/fepopup3", func_001E5780);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5800);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5A18);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetMenu);
 
 INCLUDE_ASM("fe/fepopup3", func_001E5AA0);
 

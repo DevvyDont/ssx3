@@ -2645,18 +2645,18 @@ int func_001E0C88(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C90__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onGainTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0C90(void* self)
+int cFEStateNetAccountMem_onGainTransition(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C98__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0C98(void* self)
+int cFEStateNetAccountMem_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -6401,14 +6401,14 @@ extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self,
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E5248);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0046E258[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-extern "C" void func_001E5248(cOVState_ViewPopup* self)
+extern "C" void cOVState_ViewPopup_onCreateScreen(cOVState_ViewPopup* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E258), 0);
@@ -6422,20 +6422,20 @@ extern "C" void func_001E5248(cOVState_ViewPopup* self)
 extern "C" void* func_0039E510(void* self);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E52B0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onUpdate__FPv);
 #ifdef SKIP_ASM
-void* func_001E52B0(void* self)
+void* cOVState_ViewPopup_onUpdate(void* self)
 {
     return func_0039E510(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E52D0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void func_001E5428(cOVState_ViewPopup* self);
 
-extern "C" int func_001E52D0(cOVState_ViewPopup* self, int on)
+extern "C" int cOVState_ViewPopup_onGainTransition(cOVState_ViewPopup* self, int on)
 {
     if (on != 0) {
         func_001E5428(self);
@@ -6445,7 +6445,7 @@ extern "C" int func_001E52D0(cOVState_ViewPopup* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E52F8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2120[];
@@ -6464,7 +6464,7 @@ struct sVEntryK1E52F8 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001E52F8(cOVState_ViewPopup* self, void* widget)
+extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void* widget)
 {
     int h = *(int*)((char*)widget + 0x38);
     sVEntryK1E52F8* vt = *(sVEntryK1E52F8**)((char*)widget + 8);
@@ -6672,7 +6672,7 @@ extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E5800);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPopupEntry18_5800 {
@@ -6693,7 +6693,7 @@ struct sVE5800 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001E5800(cOVState_ViewPopup* self, void* a1, unsigned int msg)
+extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void* a1, unsigned int msg)
 {
     switch (msg) {
     case 7: {
@@ -6764,9 +6764,9 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E5A18);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001E5A18(cOVState_ViewPopup* self, int a1, unsigned int a2)
+extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 6:

@@ -11525,7 +11525,7 @@ extern "C" void cFEStateNetConfig__cFEStateNetConfig(cFEStateNetConfig* self, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B40D0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -11536,7 +11536,7 @@ extern "C" void* func_0028B180();
 void func_0028FC38(void* self);
 extern char D_00463ED0[];
 
-extern "C" void func_001B40D0(cFEStateNetConfig* self)
+extern "C" void cFEStateNetConfig_onCreateScreen(cFEStateNetConfig* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_00463ED0), 0);
@@ -11553,13 +11553,13 @@ extern "C" void func_001B40D0(cFEStateNetConfig* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B4168);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onDestroyScreen);
 #ifdef SKIP_ASM
 void* cUIState_onDestroyScreen(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028FC58(void*);
 
-extern "C" void func_001B4168(cFEStateNetConfig* self)
+extern "C" void cFEStateNetConfig_onDestroyScreen(cFEStateNetConfig* self)
 {
     cUIState_onDestroyScreen(self);
     func_0028FC58(func_0028B180());
@@ -11576,7 +11576,7 @@ void func_001B4198(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B41A8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -11611,7 +11611,7 @@ static inline int VCall1B41A8(int slot)
 }
 
 // Per-frame update for the online-login screen: steps the login state machine on the network object.
-extern "C" void func_001B41A8(cFEStateNetConfig* self)
+extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
 {
     if (D_004A1B78_p != 0) {
         char* obj = D_004A1B78_p;
@@ -12352,7 +12352,7 @@ extern "C" void func_001B5268(cFEStateNetConfig* obj, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B52C8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -12399,7 +12399,7 @@ public:
 
 static inline int IsHash1B52C8(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001B52C8(cFEStateNetConfig* self, cUIText* item)
+extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUIText* item)
 {
     cFEVObj_001B52C8* obj = (cFEVObj_001B52C8*)item;
     if (IsHash1B52C8(*(int*)((char*)item + 0x38), D_00463F98)) {
@@ -12850,12 +12850,12 @@ extern "C" void func_001B5CF8(cFEStateNetConfig* self, void* a1, int a2)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B5D58);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onPopupEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_001B5A58(cFEStateNetConfig* self, void* a1, int a2);
 // Dispatches a message to the matching handler, falling back to the base handler.
-extern "C" void func_001B5D58(cFEStateNetConfig* self, void* a1, int a2)
+extern "C" void cFEStateNetConfig_onPopupEvent(cFEStateNetConfig* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x81C:
@@ -12984,19 +12984,19 @@ extern "C" int func_001B5E28(cFEStateNetConfig* self, int id, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6078__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetPair__FPv);
 #ifdef SKIP_ASM
-int func_001B6078(void* self)
+int cFEStateNetConfig_onWidgetPair(void* self)
 {
     return 0x101;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6080);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetListBox);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_001B6080(cFEStateNetConfig* self, int a1, unsigned int key)
+extern "C" int cFEStateNetConfig_onWidgetListBox(cFEStateNetConfig* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 2) {
@@ -13011,7 +13011,7 @@ extern "C" int func_001B6080(cFEStateNetConfig* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B60A8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -13048,7 +13048,7 @@ public:
 static inline int IsHash1B60A8(int id, char* name) { return id == GetHashValue32(name); }
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
-extern "C" void func_001B60A8(cFEStateNetConfig* self, int a1, unsigned int msg)
+extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int a1, unsigned int msg)
 {
     char* obj = (char*)a1;
     if (obj == 0) {
@@ -13851,9 +13851,9 @@ extern "C" void cFEStateNetAccountMem__cFEStateNetAccountMem(cFEStateNetAccountM
 extern "C" void* func_001ABFA8(cFEStateNet* self);
 
 //99.29%
-INCLUDE_ASM("fe/feasyncfile", func_001B7088__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onCreateScreen__FPv);
 #ifdef SKIP_ASM
-void* func_001B7088(void* self)
+void* cFEStateNetAccountMem_onCreateScreen(void* self)
 {
     return func_001ABFA8((cFEStateNet*)self);
 }
@@ -14453,7 +14453,7 @@ extern "C" void func_001B7C70(cFEStateNetAccountMem* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B7CB8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onUpdate);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int* D_004A33D0;
@@ -14474,7 +14474,7 @@ extern "C" void func_001B7C28(cFEStateNetAccountMem* self);
 extern "C" void func_001B7C70(cFEStateNetAccountMem* self);
 
 // Polls the memory card, then runs the step handler for the current memory-card state.
-extern "C" void func_001B7CB8(cFEStateNetAccountMem* self)
+extern "C" void cFEStateNetAccountMem_onUpdate(cFEStateNetAccountMem* self)
 {
     func_00265A68(D_004A33D0);
     int* mc = D_004A33D0;
@@ -14783,7 +14783,7 @@ extern "C" void func_001B83C0(cFEStateNetAccountMem* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onPopupEvent);
 #ifdef SKIP_ASM
 // PORT: the unit declares func_001A97B8 as returning int; the result is unused here.
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
@@ -14814,7 +14814,7 @@ public:
     virtual void v17(void* owner, int v);
 };
 
-extern "C" void func_001B84D8(cFEStateNetAccountMem* self, void* w, unsigned int msg)
+extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, void* w, unsigned int msg)
 {
     int v;
     switch (self->miState) {
@@ -15046,7 +15046,7 @@ extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* se
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8960);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -15054,7 +15054,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 void func_001A8768(void* self);
 extern char D_00464740[];
 
-extern "C" void func_001B8960(cFEStateCreateStep1* self)
+extern "C" void cFEStateCreateStep1_onCreateScreen(cFEStateCreateStep1* self)
 {
     if (self->mbEditAccount != 0) {
         self->mpAccount = (tLobbyAccount*)((char*)LobbyMan_mLobbyMan + 0x260);
@@ -15072,16 +15072,16 @@ extern "C" void func_001B8960(cFEStateCreateStep1* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B89E8__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onUpdate__FPv);
 #ifdef SKIP_ASM
-void* func_001B89E8(void* self)
+void* cFEStateCreateStep1_onUpdate(void* self)
 {
     return func_001A8770((cFEStateNet*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8A08);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onGainTransition);
 #ifdef SKIP_ASM
 struct sVE1B8A08 {
     short delta;
@@ -15098,7 +15098,7 @@ extern "C" void func_001B9740(cFEStateCreateStep1* self);
 extern "C" void func_001B97B0(cFEStateCreateStep1* self);
 extern "C" void func_001BA178(cFEStateCreateStep1* self);
 
-extern "C" int func_001B8A08(cFEStateCreateStep1* self, int a1)
+extern "C" int cFEStateCreateStep1_onGainTransition(cFEStateCreateStep1* self, int a1)
 {
     if (a1 != 0) {
         func_001B95C0(self);
@@ -15120,7 +15120,7 @@ extern "C" int func_001B8A08(cFEStateCreateStep1* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8AA0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -15168,7 +15168,7 @@ public:
 
 static inline int IsHash1B8AA0(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001B8AA0(cFEStateCreateStep1* self, cUIText* text)
+extern "C" void cFEStateCreateStep1_onWidgetCreate(cFEStateCreateStep1* self, cUIText* text)
 {
     cFEVObj_001B8AA0* obj = (cFEVObj_001B8AA0*)text;
     if (IsHash1B8AA0(*(int*)((char*)text + 0x38), D_00461520)) {
@@ -15195,7 +15195,7 @@ extern "C" void func_001B8AA0(cFEStateCreateStep1* self, cUIText* text)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8C38);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -15247,7 +15247,7 @@ struct sVE_001B8C38 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001B8C38(cFEStateCreateStep1* self, char* w, int msg)
+extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, char* w, int msg)
 {
     switch (msg) {
     case 9:
@@ -15456,13 +15456,13 @@ extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* a1, int a2)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001B9428);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001B91C8(cFEStateCreateStep1* self, void* a1, int a2);
 extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* a1, int a2);
 
-extern "C" void func_001B9428(cFEStateCreateStep1* self, void* a1, int a2)
+extern "C" void cFEStateCreateStep1_onPopupEvent(cFEStateCreateStep1* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x81E:
@@ -16157,7 +16157,7 @@ extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* se
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA428);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -16171,7 +16171,7 @@ extern "C" void func_001BB4B0(cFEStateCreateStep2* self);
 extern char D_004649F8[];
 
 
-extern "C" void func_001BA428(cFEStateCreateStep2* self)
+extern "C" void cFEStateCreateStep2_onCreateScreen(cFEStateCreateStep2* self)
 {
     self->mbScreenReady = 0;
     self->mpAccount = (tLobbyAccount*)((char*)LobbyMan_mLobbyMan + 0x260);
@@ -16194,16 +16194,16 @@ extern "C" void func_001BA428(cFEStateCreateStep2* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA4E0__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onUpdate__FPv);
 #ifdef SKIP_ASM
-void* func_001BA4E0(void* self)
+void* cFEStateCreateStep2_onUpdate(void* self)
 {
     return func_001A8770((cFEStateNet*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA500);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001BB520(cFEStateCreateStep2* self, void* box, int flag);
@@ -16218,7 +16218,7 @@ extern char D_00464A18[];
 
 static inline int IsHash1BA500(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001BA500(cFEStateCreateStep2* self, void* box)
+extern "C" void cFEStateCreateStep2_onWidgetCreate(cFEStateCreateStep2* self, void* box)
 {
     if (IsHash1BA500(*(int*)((char*)box + 0x38), D_00464A08)) {
         func_001A9A18((cFEStateNet*)self, (cUIListBox_001A9A18*)box, 0);
@@ -16235,7 +16235,7 @@ extern "C" void func_001BA500(cFEStateCreateStep2* self, void* box)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BA618);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -16265,7 +16265,7 @@ extern char D_00464860[];
 static inline int IsHash_001BA618(int id, char* name) { return id == GetHashValue32(name); }
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
-extern "C" void func_001BA618(cFEStateCreateStep2* self, int a1, unsigned int msg)
+extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int a1, unsigned int msg)
 {
     char* obj = (char*)a1;
     switch (msg) {
@@ -16387,7 +16387,7 @@ extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BAA88);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onPopupEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_001BB158(cFEStateCreateStep2* self, void* a1, unsigned int a2);
@@ -16396,7 +16396,7 @@ extern "C" void func_001BB098(cFEStateCreateStep2* self, void* a1, int a2);
 extern "C" void func_001BADE8(cFEStateCreateStep2* self, void* a1, int a2);
 extern "C" void func_001BAED8(cFEStateCreateStep2* self, void* a1, int a2);
 // Dispatches a message to the matching handler, falling back to the base handler.
-extern "C" void func_001BAA88(cFEStateCreateStep2* self, void* a1, int a2)
+extern "C" void cFEStateCreateStep2_onPopupEvent(cFEStateCreateStep2* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x81F:
@@ -17811,7 +17811,7 @@ extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58*
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCC30);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onCreateScreen);
 #ifdef SKIP_ASM
 class cFEVObj_001BCC30 {
 public:
@@ -17852,7 +17852,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern char D_00464DA0[];
 
-extern "C" void func_001BCC30(cFEStateLobbyMenu* self)
+extern "C" void cFEStateLobbyMenu_onCreateScreen(cFEStateLobbyMenu* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, ((cFEVObj_001BCC30*)self), GetHashValue32(D_00464DA0), 0);
@@ -17889,7 +17889,7 @@ extern "C" void func_001BCCA8()
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCD18);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 // PORT: func_001BDF60's own definition takes an sFESlots1BDF60* (defined later); bound by asm label.
@@ -17905,7 +17905,7 @@ struct sVE1BCD18 {
     void (*fn)(void*);
 };
 
-extern "C" int func_001BCD18(cFEStateLobbyMenu* self, int reset)
+extern "C" int cFEStateLobbyMenu_onGainTransition(cFEStateLobbyMenu* self, int reset)
 {
     if (reset != 0) {
         sVE1BCD18* vt = (sVE1BCD18*)self->mVtbl;
@@ -17936,16 +17936,16 @@ extern "C" int func_001BCD18(cFEStateLobbyMenu* self, int reset)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCE18__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onUpdate__FPv);
 #ifdef SKIP_ASM
-void* func_001BCE18(void* self)
+void* cFEStateLobbyMenu_onUpdate(void* self)
 {
     return func_001A8770((cFEStateNet*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BCE38);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -17994,7 +17994,7 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001BCE38(cFEStateLobbyMenu* self, cFEVObj_001BCE38* obj)
+extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVObj_001BCE38* obj)
 {
     char buf[16];
     char* o = (char*)obj;
@@ -18086,7 +18086,7 @@ extern "C" void func_001BCE38(cFEStateLobbyMenu* self, cFEVObj_001BCE38* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BD1B8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -18135,7 +18135,7 @@ struct cState_D1B8 {
 };
 
 // Message handler for the profile-select screen.
-extern "C" void func_001BD1B8(cState_D1B8* self, char* a1, int msg)
+extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* a1, int msg)
 {
     switch (msg) {
     case 9:
@@ -18542,7 +18542,7 @@ extern "C" void func_001BDA88(cFEStateLobbyMenu* self, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDC18);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onWidgetMenu);
 #ifdef SKIP_ASM
 // PORT: func_001BDF60's own definition takes an sFESlots1BDF60* (defined later); bound by asm label.
 void func_001BDF60_1BDC18(void* self, int id) __asm__("func_001BDF60");
@@ -18550,7 +18550,7 @@ extern "C" void func_001BE3A8(cFEStateLobbyMenu* self, int id);
 // PORT: func_001BE510 is defined as (self) in this unit, but this caller passes a second arg.
 void func_001BE510_2(void* self, int a1) __asm__("func_001BE510");
 
-extern "C" int func_001BDC18(cFEStateLobbyMenu* self, void* obj, int msg, int a3)
+extern "C" int cFEStateLobbyMenu_onWidgetMenu(cFEStateLobbyMenu* self, void* obj, int msg, int a3)
 {
     if (obj == (void*)self->mpMenuRoomMenus) {
         if (msg == 5) {
@@ -18572,7 +18572,7 @@ extern "C" int func_001BDC18(cFEStateLobbyMenu* self, void* obj, int msg, int a3
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BDCA0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onWidgetPair);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 
@@ -18589,7 +18589,7 @@ struct sState_BDCA0 {
 
 // FAKEMATCH: do-while(0) wrapper around the if/else, per-function volatile view of the dead boxes[i]->f318 read, and FM_BARRIER() after it (the wrapper keeps loop.c from moving the found arm out of the loop, so jump2 cross-jumps the msg==1 return into it); plain form 42.05%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" int func_001BDCA0(void* self_, int id, int msg)
+extern "C" int cFEStateLobbyMenu_onWidgetPair(void* self_, int id, int msg)
 {
     sState_BDCA0* self = (sState_BDCA0*)self_;
     do {
@@ -18652,13 +18652,13 @@ extern "C" void func_001BDD60(cFEStateLobbyMenu* self, void* a1, int a2)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feasyncfile", func_001BDDE8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001BDCF8(cFEStateLobbyMenu* self, void* a1, int a2);
 extern "C" void func_001BDD60(cFEStateLobbyMenu* self, void* a1, int a2);
 
-extern "C" void func_001BDDE8(cFEStateLobbyMenu* self, void* a1, int a2)
+extern "C" void cFEStateLobbyMenu_onPopupEvent(cFEStateLobbyMenu* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x823:
@@ -22188,7 +22188,7 @@ extern "C" void* func_001C2D90(cFEStateStats* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2E00);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -22196,7 +22196,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void func_001C3310(cFEStateStats* self);
 extern char D_00465C68[];
 
-extern "C" void func_001C2E00(cFEStateStats* self)
+extern "C" void cFEStateStats_onCreateScreen(cFEStateStats* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_00465C68), 0);
@@ -22233,16 +22233,16 @@ extern "C" void func_001C2E70()
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2EE0__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onUpdate__FPv);
 #ifdef SKIP_ASM
-void* func_001C2EE0(void* self)
+void* cFEStateStats_onUpdate(void* self)
 {
     return func_001A8770((cFEStateNet*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C2F00);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -22293,7 +22293,7 @@ public:
 
 static inline int IsHash_001C2F00(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001C2F00(cFEStateStats* self, cFEVObj_001C2F00* obj)
+extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F00* obj)
 {
     char* o = (char*)obj;
     if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465C78) || IsHash_001C2F00(*(int*)(o + 0x38), D_00465C88)) {
@@ -22360,7 +22360,7 @@ extern "C" void func_001C2F00(cFEStateStats* self, cFEVObj_001C2F00* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C32B8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onGainTransition);
 #ifdef SKIP_ASM
 class cFEVObj_001C32B8 {
 public:
@@ -22402,7 +22402,7 @@ public:
 
 extern "C" void func_001C3EE8(cFEStateStats* self, int a1);
 
-extern "C" int func_001C32B8(cFEStateStats* self, int a1)
+extern "C" int cFEStateStats_onGainTransition(cFEStateStats* self, int a1)
 {
     ((cFEVObj_001C32B8*)self)->v32();
     if (a1 != 0) {
@@ -22518,7 +22518,7 @@ extern "C" void func_001C3570(cFEStateStats* self, void* menu)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C3668);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -22604,7 +22604,7 @@ static inline int isButton_3668(cObj_3668* w, char* name)
 }
 
 // Widget events of the online leaderboard screen: page buttons, row highlight and row selection.
-extern "C" void func_001C3668(cFEStateStats* self, cObj_3668* w, int msg)
+extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, int msg)
 {
     cObj_3668* o;
     cObjB_3668* p;
@@ -23171,11 +23171,11 @@ extern "C" void func_001C4B78(cFEStateStats* self, int slot)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4B98);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void func_001C3310(cFEStateStats* self);
 
-extern "C" int func_001C4B98(cFEStateStats* self, void* a1, int a2, int a3)
+extern "C" int cFEStateStats_onWidgetMenu(cFEStateStats* self, void* a1, int a2, int a3)
 {
     switch (a2) {
     case 6:
@@ -23190,7 +23190,7 @@ extern "C" int func_001C4B98(cFEStateStats* self, void* a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C4BD8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onInputAlways);
 #ifdef SKIP_ASM
 // PORT: cUIState_onInputAlways__FPv is called with (self, pad) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, void* pad) __asm__("cUIState_onInputAlways__FPv");
@@ -23209,7 +23209,7 @@ static inline int Pad1C4BD8(char* pad, int slot)
     return vt[slot].fn(pad + vt[slot].delta);
 }
 
-extern "C" void func_001C4BD8(cFEStateStats* self, char* pad)
+extern "C" void cFEStateStats_onInputAlways(cFEStateStats* self, char* pad)
 {
     cUIState_onInputAlways_2(self, pad);
     if ((Pad1C4BD8(pad, 17) || Pad1C4BD8(pad, 18) || Pad1C4BD8(pad, 20) || Pad1C4BD8(pad, 19)) &&

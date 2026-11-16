@@ -1940,9 +1940,9 @@ extern "C" void* func_00356F68_ret(void* self, void* stream)
 typedef int cQuad128 __attribute__((mode(TI)));
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356FF0);
+INCLUDE_ASM("object/movenode", cPositionModifier_updateRootTransform);
 #ifdef SKIP_ASM
-extern "C" void func_00356FF0(cPositionModifier* self)
+extern "C" void cPositionModifier_updateRootTransform(cPositionModifier* self)
 {
     cQuad128 v = *(cQuad128*)&self->Offset;
     self->RootTransformDirty = 0;
@@ -2011,7 +2011,7 @@ extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* st
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357108);
+INCLUDE_ASM("object/movenode", cParentModifier_updateRootTransform);
 #ifdef SKIP_ASM
 struct sMnVec4_357108 {
     float x, y, z, w;
@@ -2095,7 +2095,7 @@ struct sMnVEntryM_357108 {
     sMnMtx_357108* (*fn)(void*, int);
 };
 
-extern "C" void func_00357108(cParentModifier* self)
+extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
 {
     char* o = *(char**)((char*)self->ParentInst + 0xC);
     if (o != 0) {
@@ -2113,7 +2113,7 @@ extern "C" void func_00357108(cParentModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357210);
+INCLUDE_ASM("object/movenode", cParentModifier_updateIntersectInfo);
 #ifdef SKIP_ASM
 struct sMnVEntry7210 {
     short delta;
@@ -2121,7 +2121,7 @@ struct sMnVEntry7210 {
     void (*fn)(void*, void*);
 };
 
-extern "C" void func_00357210(cParentModifier* self, void* obj)
+extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, void* obj)
 {
     void* p = self->ParentInst;
     if (p == 0) {
@@ -2234,7 +2234,7 @@ extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003573F8);
+INCLUDE_ASM("object/movenode", cMagnetModifier_update);
 #ifdef SKIP_ASM
 extern "C" float func_002D1C70();
 extern "C" void* func_002D1B58(int id);
@@ -2317,7 +2317,7 @@ struct sMnMover_3573F8 {
     int arrived;
 };
 
-extern "C" void func_003573F8(cMagnetModifier* self)
+extern "C" void cMagnetModifier_update(cMagnetModifier* self)
 {
     if (self->Being < 0) {
         return;
@@ -2340,9 +2340,9 @@ extern "C" void func_003573F8(cMagnetModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357528);
+INCLUDE_ASM("object/movenode", cMagnetModifier_updateRootTransform);
 #ifdef SKIP_ASM
-extern "C" void func_00357528(cMagnetModifier* self)
+extern "C" void cMagnetModifier_updateRootTransform(cMagnetModifier* self)
 {
     cQuad128 v = *(cQuad128*)&self->Offset;
     self->RootTransformDirty = 0;
@@ -2350,10 +2350,10 @@ extern "C" void func_00357528(cMagnetModifier* self)
 }
 #endif
 
-INCLUDE_ASM("object/movenode", func_00357538);
+INCLUDE_ASM("object/movenode", cMagnetModifier_intersect);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357660);
+INCLUDE_ASM("object/movenode", cMagnetModifier_runCollide);
 #ifdef SKIP_ASM
 struct sMnVEntryI7660 {
     short delta;
@@ -2363,7 +2363,7 @@ struct sMnVEntryI7660 {
 
 extern "C" void* cObjectInterface_getNumBeings(int id);
 
-extern "C" int func_00357660(cMagnetModifier* self, int id)
+extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
 {
     int cur = self->Being;
     if (cur >= 0) {
@@ -2470,13 +2470,13 @@ extern "C" void* func_00357798(cAvaSplineModifier* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357820);
+INCLUDE_ASM("object/movenode", cAvaSplineModifier_update);
 #ifdef SKIP_ASM
 // PORT: the project names this func_002D1CF0__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 
-extern "C" void func_00357820(cAvaSplineModifier* self)
+extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
 {
     func_002D1CF0_2(self->Instance, (char*)self + 0x40);
 }

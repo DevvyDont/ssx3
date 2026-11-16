@@ -25,7 +25,7 @@ struct cPositionModifier {
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361910 returns +0x10, setBoundBox func_00361918
                                     //      (sq 0x10/0x20)
     t4Vector Offset;                // 0x30 [O]; [R] ctor (t4Vector) stores the offset, ctor (t4Matrix) row 3; [U]
-                                    //      updateRootTransform func_00356FF0 (lq 0x30)
+                                    //      updateRootTransform cPositionModifier_updateRootTransform (lq 0x30)
     float Radius;                   // 0x40 [O]; [U] getRadius/setRadius func_00361930/func_00361938 (lwc1/swc1 0x40)
     int RootTransformDirty;         // 0x44 [O] bool (4 bytes); [R] ctors store 1; [U] func_00361900
                                     //      (isRootTransformDirty), getRootTransform func_00361940, updateRootTransform

@@ -19,13 +19,13 @@ struct cAvaSplineModifier {
     void** mVtbl;                   // 0x00 [R] ctors store cAvaSplineModifier_vtbl; dtor cAvaSplineModifier__cAvaSplineModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cAvaSplineModifierState
-    tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361AD8 returns +0x10, setBoundBox func_00361AE0
+    tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox cAvaSplineModifier_getBoundBox returns +0x10, setBoundBox cAvaSplineModifier_setBoundBox
                                     //      (sq 0x10/0x20)
     float Radius;                   // 0x30 [O]; [R] ctor zeroes it (sw $0); [U] getRadius/setRadius
-                                    //      func_00361AF8/func_00361B00
+                                    //      cAvaSplineModifier_getRadius/cAvaSplineModifier_setRadius
     char unk_34[0xc];               // 0x34 padding (Transform is 16-byte aligned)
     // --- cAvaSplineModifier
-    t4Matrix Transform;             // 0x40 [O]; [U] getRootTransform func_00361B10 returns +0x40; update func_00357820
+    t4Matrix Transform;             // 0x40 [O]; [U] getRootTransform func_00361B10 returns +0x40; update cAvaSplineModifier_update
                                     //      fills it from the instance
     tInstanceRecord* Instance;      // 0x80 [O]; [R] ctor stores the instance, replay ctor reads it; [U] update,
                                     //      writeToReplayFrame func_00357848

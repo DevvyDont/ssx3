@@ -16,7 +16,7 @@
 // cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor cOVState_ViewPopup_cOVState_ViewPopup(this,
 // pEngine, pParent, message, number)). Size 0x70. Base cUIState (ui/uistate.h, 0x48), written out flat (it is not a
 // cOVState: the constructor is cUIState(cUIEngine*, cUIState*) func_0039E318 and nothing stores 0x48..0x9C as
-// cOVState does). Retail vtable cOVState_ViewPopup_vtbl (destructor func_0021CB40 in fe/all_in_one_fe).
+// cOVState does). Retail vtable cOVState_ViewPopup_vtbl (destructor cOVState_ViewPopup__cOVState_ViewPopup in fe/all_in_one_fe).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. There is no
 // SSX On Tour DWARF for these classes and the preview keeps no accessors, so the own members carry [R]/[U]
@@ -157,24 +157,24 @@ struct cOVState_ViewPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_ViewPopup_vtbl, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor func_0021CB40
+    void** mVtbl;                   // 0x008 [R] cOVState_ViewPopup_vtbl, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor cOVState_ViewPopup__cOVState_ViewPopup
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument (the message center's mpEngine);
-                                    //       [U] cUIEngine_addScreenByHashName (func_001E5248)
+                                    //       [U] cUIEngine_addScreenByHashName (cOVState_ViewPopup_onCreateScreen)
     signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
     unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
     char unk_016[0x2];              // 0x016 padding
     int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218
     cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument (the cOVState_MESSAGECENTER);
-                                    //       [U] func_001E5800 / func_001E58E0 send it onPopupEvent(this, 0x14)
+                                    //       [U] cOVState_ViewPopup_onWidgetEvent / func_001E58E0 send it onPopupEvent(this, 0x14)
     char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by func_003977E8(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen (func_001E5248) stores the "113ViewMessage" screen
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen (cOVState_ViewPopup_onCreateScreen) stores the "113ViewMessage" screen
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding
     // --- cOVState_ViewPopup
-    cUIText* mpNumberLabel;         // 0x048 [R] cOVState_ViewPopup_cOVState_ViewPopup zeroes it; [U] onWidgetCreate (func_001E52F8): widget "NumberLabel"
+    cUIText* mpNumberLabel;         // 0x048 [R] cOVState_ViewPopup_cOVState_ViewPopup zeroes it; [U] onWidgetCreate (cOVState_ViewPopup_onWidgetCreate): widget "NumberLabel"
     cUIText* mpNumber;              // 0x04C [R] zeroed; [U] widget "Number"; func_001E5428 prints the message number
     cUIText* mpFrom;                // 0x050 [R] zeroed; [U] widget "From"; func_001E5428 cUIText_setUnicodeStringByID
     cUIText* mpSubject;             // 0x054 [R] zeroed; [U] widget "Subject"; func_001E55D0 / func_001E5638 set it
@@ -183,7 +183,7 @@ struct cOVState_ViewPopup {
     cUIThing* mpDeleteMessage;      // 0x060 [R] zeroed; [U] widget "MV_DeleteMessage"; func_001E5428 shows/hides it
     cUIText* mpKeepMessage;         // 0x064 [R] zeroed; [U] widget "MV_KeepMessage"; func_001E5428 sets kT_BTNKeepMsg
     int miMessage;                  // 0x068 [R] the ctor's 4th argument; [U] index into the message list D_004C6C08
-                                    //       (func_001E5428, func_001E5A18); func_001E58E0 steps it to the next message
+                                    //       (func_001E5428, cOVState_ViewPopup_onWidgetMenu); func_001E58E0 steps it to the next message
     int miNumber;                   // 0x06C [R] the ctor's 5th argument; [U] func_001E5428 prints it with "%d"
                                     //       (D_004A2138); func_001E58E0 increments / recomputes it
 };

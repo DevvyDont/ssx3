@@ -20,15 +20,15 @@ struct cMagnetModifier {
     void** mVtbl;                   // 0x00 [R] ctors store cMagnetModifier_vtbl; dtor cMagnetModifier__cMagnetModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cMagnetModifierState
-    t4Vector Offset;                // 0x10 [O]; [R] ctor copies Transform row 3 here; [U] update func_003573F8,
-                                    //      updateRootTransform func_00357528
-    tBoundBox BoundBox;             // 0x20 [O]; [U] getBoundBox func_00361A28 returns +0x20, setBoundBox func_00361A30
-                                    //      (sq 0x20/0x30), intersect func_00357538
-    float Radius;                   // 0x40 [O]; [R] ctor ($f12); [U] getRadius func_00361A48
-    int Being;                      // 0x44 [O]; [R] ctor; [U] update, runCollide func_00357660
+    t4Vector Offset;                // 0x10 [O]; [R] ctor copies Transform row 3 here; [U] update cMagnetModifier_update,
+                                    //      updateRootTransform cMagnetModifier_updateRootTransform
+    tBoundBox BoundBox;             // 0x20 [O]; [U] getBoundBox cMagnetModifier_getBoundBox returns +0x20, setBoundBox cMagnetModifier_setBoundBox
+                                    //      (sq 0x20/0x30), intersect cMagnetModifier_intersect
+    float Radius;                   // 0x40 [O]; [R] ctor ($f12); [U] getRadius cMagnetModifier_getRadius
+    int Being;                      // 0x44 [O]; [R] ctor; [U] update, runCollide cMagnetModifier_runCollide
     float Speed;                    // 0x48 [O]; [R] ctor ($f13); [U] update
     float Time;                     // 0x4C [O]; [R] ctor zeroes it; [U] update
-    int RootTransformDirty;         // 0x50 [O] bool; [R] ctors; [U] func_00361A10 (isRootTransformDirty),
+    int RootTransformDirty;         // 0x50 [O] bool; [R] ctors; [U] cMagnetModifier_isRootTransformDirty (isRootTransformDirty),
                                     //      getRootTransform func_00361A60, update
     int AllowCollide;               // 0x54 [O] bool; [R] ctor zeroes it; [U] update, runCollide
     char unk_58[0x8];               // 0x58 padding (Transform is 16-byte aligned)
