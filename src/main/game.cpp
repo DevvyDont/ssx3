@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/sectionman.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -579,13 +580,13 @@ extern "C" void func_0022C830(sGame_C830* self)
 //100%
 INCLUDE_ASM("main/game", func_0022CCE8);
 #ifdef SKIP_ASM
-extern "C" void func_0022CD40(void* self);
+extern "C" void func_0022CD40(cSectionMan* self);
 
-extern "C" void* func_0022CCE8(void* self, int a1)
+extern "C" void* func_0022CCE8(cSectionMan* self, int a1)
 {
-    *(int*)((char*)self + 0x1B0) = a1;
+    self->mpGame = (cGame*)a1;
     func_0022CD40(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -594,7 +595,7 @@ INCLUDE_ASM("main/game", func_0022CD18);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_0022CD18(void* self, int flags)
+extern "C" void func_0022CD18(cSectionMan* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);
@@ -620,7 +621,7 @@ static inline cWorldView* gameWorldView_22CD40(void* self)
     return (cWorldView*)(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x10);
 }
 
-extern "C" void func_0022CD40(void* self)
+extern "C" void func_0022CD40(cSectionMan* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     int i;
@@ -639,18 +640,18 @@ extern "C" void func_0022CD40(void* self)
             }
         }
     }
-    *(int*)((char*)self + 0x1B8) = 0;
-    *(int*)((char*)self + 0x1B4) = 0;
-    *(int*)((char*)self + 0x1C0) = 0;
-    *(int*)((char*)self + 0x1C8) = 0;
-    *(int*)((char*)self + 0x1CC) = 0;
-    *(int*)((char*)self + 0x1BC) = 0x16;
-    *(int*)((char*)self + 0x1D0) = 1;
+    self->mMode = 0;
+    self->mModeState = 0;
+    self->mbLocationIsActivated = 0;
+    self->mWaitTransport = 0;
+    self->mModeReset = 0;
+    self->mBELocationID = 0x16;
+    self->m_bStreamReady = 1;
     func_0022E228(self);
-    *(int*)((char*)self + 0x1AC) = -1;
-    *(int*)((char*)self + 0x1A4) = 0;
-    *(int*)((char*)self + 0x1A8) = 0;
-    *(int*)((char*)self + 0x1C4) = 0;
+    self->m_iNextSkySectionID = -1;
+    self->m_bTriggerSkySwap = 0;
+    self->m_bSkySwapPending = 0;
+    self->mStreamRate = 0;
 }
 #endif
 
@@ -671,9 +672,9 @@ struct sMode_CEA8 {
 };
 extern sGroup_CEA8 D_00442488_CEA8[] __asm__("D_00442488");
 extern sMode_CEA8 D_00442820_CEA8[] __asm__("D_00442820");
-extern "C" void func_0022D598(void* self, int idx);
-extern "C" void func_0022D3D8(void* self, int idx);
-extern "C" void func_0022D640(void* self, int a1);
+extern "C" void func_0022D598(cSectionMan* self, int idx);
+extern "C" void func_0022D3D8(cSectionMan* self, int idx);
+extern "C" void func_0022D640(cSectionMan* self, int a1);
 
 // PORT: the unit's other callers declare (void*, int, char*); the body reads three ints, bound by asm label
 extern "C" void func_0022CEA8_impl(void* self, int idx, int mode) __asm__("func_0022CEA8");
@@ -711,23 +712,23 @@ extern "C" void func_0022CEA8_impl(void* self, int idx, int mode)
             found = 0;
         }
         if (found) {
-            func_0022D598(self, i);
+            func_0022D598((cSectionMan*)self, i);
         }
     }
     *(int*)((char*)self + 0x1BC) = idx;
     *(int*)((char*)self + 0x1C0) = 0;
     for (int k = 0; k < D_00442488_CEA8[idx].count; k++) {
-        func_0022D3D8(self, D_00442488_CEA8[idx].ids[k]);
+        func_0022D3D8((cSectionMan*)self, D_00442488_CEA8[idx].ids[k]);
     }
     if (IsSection(extra)) {
         *(int*)((char*)self + 0x1A4) = 0;
-        func_0022D3D8(self, extra);
+        func_0022D3D8((cSectionMan*)self, extra);
     }
     int b = D_00442488_CEA8[idx].b;
     if (b >= 0) {
-        func_0022D3D8(self, b);
+        func_0022D3D8((cSectionMan*)self, b);
     }
-    func_0022D640(self, v);
+    func_0022D640((cSectionMan*)self, v);
 }
 #endif
 
@@ -755,7 +756,7 @@ extern "C" void func_0022D668_D088(void* self, int v) __asm__("func_0022D668");
 extern "C" void func_0022D598_D088(void* self, int idx) __asm__("func_0022D598");
 extern "C" void cSectionMan_setSky(void* self, int sky);
 
-extern "C" void func_0022D088(void* self, int idx, int mode)
+extern "C" void func_0022D088(cSectionMan* self, int idx, int mode)
 {
     int v;
     if (mode == 7) {
@@ -785,8 +786,8 @@ extern "C" void func_0022D088(void* self, int idx, int mode)
             func_0022D598_D088(self, i);
         }
     }
-    *(int*)((char*)self + 0x1C0) = 1;
-    *(int*)((char*)self + 0x1BC) = idx;
+    self->mbLocationIsActivated = 1;
+    self->mBELocationID = idx;
     for (int k = 0; k < D_00442488_D088[idx].count; k++) {
         func_0022D478_D088(self, D_00442488_D088[idx].ids[k]);
     }
@@ -813,7 +814,7 @@ struct sGroup_D278 {
     int ids[6];
 };
 extern sGroup_D278 D_00442488_D278[] __asm__("D_00442488");
-extern "C" int func_0022E078(void* self, int id);
+extern "C" int func_0022E078(cSectionMan* self, int id);
 
 // PORT: the unit declares func_0022D278(void*) for its callers; the body reads a1, bound by asm label
 int func_0022D278_impl(void* self, int idx) __asm__("func_0022D278");
@@ -822,20 +823,20 @@ int func_0022D278_impl(void* self, int idx)
 {
     int ok = 1;
     for (int i = 0; i < D_00442488_D278[idx].count; i++) {
-        if (func_0022E078(self, D_00442488_D278[idx].ids[i]) == 0) {
+        if (func_0022E078((cSectionMan*)self, D_00442488_D278[idx].ids[i]) == 0) {
             ok = 0;
             break;
         }
     }
     int a = D_00442488_D278[idx].a;
     if (a >= 0 && D_00442168[a].field_0x4 >= 0) {
-        if (func_0022E078(self, a) == 0) {
+        if (func_0022E078((cSectionMan*)self, a) == 0) {
             ok = 0;
         }
     }
     int b = D_00442488_D278[idx].b;
     if (b >= 0 && D_00442168[b].field_0x4 >= 0) {
-        if (func_0022E078(self, b) == 0) {
+        if (func_0022E078((cSectionMan*)self, b) == 0) {
             ok = 0;
         }
     }
@@ -848,11 +849,11 @@ INCLUDE_ASM("main/game", func_0022D390);
 #ifdef SKIP_ASM
 extern "C" int func_0022D278(void* self);
 
-extern "C" int func_0022D390(void* self)
+extern "C" int func_0022D390(cSectionMan* self)
 {
     int r = 0;
     if (func_0022D278(self) != 0) {
-        r = *(int*)((char*)self + 0x1C0) != 0;
+        r = self->mbLocationIsActivated != 0;
     }
     return r;
 }
@@ -864,7 +865,7 @@ INCLUDE_ASM("main/game", func_0022D3D8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_0022E298(void* self);
 
-extern "C" void func_0022D3D8(void* self, int idx)
+extern "C" void func_0022D3D8(cSectionMan* self, int idx)
 {
     if (D_00442168[idx].field_0x4 >= 0) {
         int changed = 0;
@@ -895,9 +896,8 @@ INCLUDE_ASM("main/game", func_0022D478);
 void func_0022E298_478(void* self, int i) __asm__("func_0022E298");
 void func_003A99D8_478(void* mgr, int handle) __asm__("func_003A99D8");
 
-extern "C" void func_0022D478(void* self_, int i)
+extern "C" void func_0022D478(cSectionMan* self_, int i)
 {
-    char* self = (char*)self_;
     int changed;
     if (D_00442168[i].field_0x4 < 0)
         return;
@@ -922,14 +922,14 @@ extern "C" void func_0022D478(void* self_, int i)
     case 1:
     case 5:
         D_00442168[i].field_0x8 = 2;
-        func_003A99D8_478(*(char**)*(char**)(*(char**)(self + 0x1B0) + 0x10) + 0x10, D_00442168[i].field_0x4);
+        func_003A99D8_478(*(char**)*(char**)((char*)self_->mpGame + 0x10) + 0x10, D_00442168[i].field_0x4);
         changed = 1;
         break;
     case 8:
         break;
     }
     if (changed)
-        func_0022E298_478(self, i);
+        func_0022E298_478(((char*)self_), i);
 }
 #endif
 
@@ -939,7 +939,7 @@ INCLUDE_ASM("main/game", func_0022D598);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_0022E298(void* self);
 
-extern "C" void func_0022D598(void* self, int idx)
+extern "C" void func_0022D598(cSectionMan* self, int idx)
 {
     if (D_00442168[idx].field_0x4 >= 0) {
         int changed = 0;
@@ -965,11 +965,11 @@ extern "C" void func_0022D598(void* self, int idx)
 //100%
 INCLUDE_ASM("main/game", func_0022D640);
 #ifdef SKIP_ASM
-extern "C" void func_0022D640(void* self, int a1)
+extern "C" void func_0022D640(cSectionMan* self, int a1)
 {
-    if (a1 != 0 && *(int*)((char*)self + 0x1B4) == 0) {
-        *(int*)((char*)self + 0x1B4) = 1;
-        *(int*)((char*)self + 0x1B8) = a1;
+    if (a1 != 0 && self->mModeState == 0) {
+        self->mModeState = 1;
+        self->mMode = a1;
     }
 }
 #endif
@@ -978,21 +978,21 @@ extern "C" void func_0022D640(void* self, int a1)
 INCLUDE_ASM("main/game", func_0022D668);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0022D668(void* self, int flag)
+extern "C" void func_0022D668(cSectionMan* self, int flag)
 {
     if (flag == 0) {
         return;
     }
-    switch (*(int*)((char*)self + 0x1B4)) {
+    switch (self->mModeState) {
     case 0:
-        *(int*)((char*)self + 0x1B8) = flag;
-        *(int*)((char*)self + 0x1B4) = 3;
+        self->mMode = flag;
+        self->mModeState = 3;
         break;
     case 1:
-        *(int*)((char*)self + 0x1B4) = 3;
+        self->mModeState = 3;
         break;
     case 2:
-        *(int*)((char*)self + 0x1B4) = 4;
+        self->mModeState = 4;
         break;
     case 3:
     case 4:
@@ -1024,10 +1024,10 @@ static inline bool Is_22D6C8(int m, int v)
     return m == v;
 }
 
-extern "C" void cSectionMan_eventbegin(char* self, int mode)
+extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
 {
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    int skip = D_00535BC8[0x49] != 0 || !Is_22D6C8(D_00535BC8[0x48], 4) || (unsigned int)(*(int*)(self + 0x1BC) - 14) < 3 || mode == 1;
+    int skip = D_00535BC8[0x49] != 0 || !Is_22D6C8(D_00535BC8[0x48], 4) || (unsigned int)(self->mBELocationID - 14) < 3 || mode == 1;
     if (skip) {
         return;
     }
@@ -1071,7 +1071,7 @@ extern "C" void cSectionMan_eventbegin(char* self, int mode)
     sVE_22D6C8* vt = *(sVE_22D6C8**)(race + 0xC);
     vt[1].fn(race + vt[1].delta);
     cGameModeMan_initGameMode(SSXApp->GameModeMan, D_00535BC8[0x4A]);
-    func_00231250(*(void**)(self + 0x1B0), 1, 1, 0);
+    func_00231250(self->mpGame, 1, 1, 0);
 }
 #endif
 
@@ -1086,11 +1086,11 @@ unsigned int cWorldView_getNumSections_u(cWorldView* view) __asm__("cWorldView_g
 int cWorldView_isSectionLoaded(cWorldView* view, int section);
 extern "C" void* func_00144D38(void* iface, int i);
 extern "C" int func_00144D50(void* iface, int i);
-extern "C" void func_0022DE58(void* self, int v);
-extern "C" void cSectionMan_skySwap(void* self);
-extern "C" void func_0022DF50(void* self);
+extern "C" void func_0022DE58(cSectionMan* self, int v);
+extern "C" void cSectionMan_skySwap(cSectionMan* self);
+extern "C" void func_0022DF50(cSectionMan* self);
 void* func_0022DFD0(void* self);
-extern "C" void func_0022DFF0(void* self);
+extern "C" void func_0022DFF0(cSectionMan* self);
 extern "C" int* cSectionMan_getNextActiveEvent(void* self, int* node);
 extern "C" void func_0022E360(void* self, int* prev, int* node);
 extern "C" void func_00230338(void* game, int section);
@@ -1112,15 +1112,15 @@ static inline cWorldView* gameWorldView_22D8D8(void* self)
     return (cWorldView*)(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x10);
 }
 
-extern "C" void cSectionMan_update(void* self)
+extern "C" void cSectionMan_update(cSectionMan* self)
 {
     char buf[0x100];
-    if (*(int*)((char*)self + 0x1A8) != 0) {
+    if (self->m_bSkySwapPending != 0) {
         cSectionMan_skySwap(self);
     }
     int* node = cSectionMan_getNextActiveEvent(self, 0);
     int* prev = 0;
-    if (node == 0 && *(int*)((char*)self + 0x1B4) == 0) {
+    if (node == 0 && self->mModeState == 0) {
         return;
     }
     int busy = 0;
@@ -1143,14 +1143,14 @@ extern "C" void cSectionMan_update(void* self)
         case 5:
             if (func_003A9958(gameWorldView_22D8D8(self), section)) {
                 D_00442168[idx].field_0x8 = 7;
-                cGame_sectionUnloading(*(void**)((char*)self + 0x1B0), section);
+                cGame_sectionUnloading(self->mpGame, section);
             }
             busy = 1;
             break;
         case 6:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
                 D_00442168[idx].field_0x8 = 1;
-                func_00230338(*(void**)((char*)self + 0x1B0), section);
+                func_00230338(self->mpGame, section);
             } else {
                 changed = 1;
             }
@@ -1158,7 +1158,7 @@ extern "C" void cSectionMan_update(void* self)
         case 8:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
                 D_00442168[idx].field_0x8 = 2;
-                func_00230338(*(void**)((char*)self + 0x1B0), section);
+                func_00230338(self->mpGame, section);
                 func_003A99D8(gameWorldView_22D8D8(self), section);
             } else {
                 changed = 1;
@@ -1182,7 +1182,7 @@ extern "C" void cSectionMan_update(void* self)
             if (func_00144D50(iface, idx) == 4) {
                 func_0022DE58(self, idx);
             }
-            if (*(int*)((char*)self + 0x1A8) != 0) {
+            if (self->m_bSkySwapPending != 0) {
                 cSectionMan_skySwap(self);
             }
             remove = 1;
@@ -1221,65 +1221,65 @@ extern "C" void cSectionMan_update(void* self)
         }
     }
     if (changed) {
-        *(int*)((char*)self + 0x1C4) = 2;
-    } else if (*(int*)((char*)self + 0x1C0) == 0) {
-        *(int*)((char*)self + 0x1C4) = 3;
+        self->mStreamRate = 2;
+    } else if (self->mbLocationIsActivated == 0) {
+        self->mStreamRate = 3;
     } else {
-        char* w = *(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10);
+        char* w = *(char**)*(char**)((char*)self->mpGame + 0x10);
         if (*(int*)(w + 0x250) != 0 && *(int*)(w + 0x2A0) != 0) {
-            *(int*)((char*)self + 0x1C4) = 1;
+            self->mStreamRate = 1;
         } else {
-            *(int*)((char*)self + 0x1C4) = 0;
+            self->mStreamRate = 0;
         }
     }
     int hold = 0;
-    switch (*(unsigned int*)((char*)self + 0x1B4)) {
+    switch ((unsigned int)self->mModeState) {
     case 0:
         break;
     case 1:
         func_0022DF50(self);
-        *(int*)((char*)self + 0x1B4) = 2;
+        self->mModeState = 2;
         break;
     case 2:
         break;
     case 3:
         hold = 1;
         func_0022DF50(self);
-        *(int*)((char*)self + 0x1B4) = 4;
+        self->mModeState = 4;
         break;
     case 4:
         if (forceOff) {
             hold = 1;
         } else if (func_0022DFD0(self) != 0) {
             func_0022DFF0(self);
-            *(int*)((char*)self + 0x1B4) = 0;
-            *(int*)((char*)self + 0x1B8) = 0;
+            self->mModeState = 0;
+            self->mMode = 0;
         } else {
             hold = 1;
         }
         break;
     }
     if (forceOff || hold) {
-        *(int*)((char*)self + 0x1D0) = 0;
-        *(int*)((char*)self + 0x1C4) = 4;
+        self->m_bStreamReady = 0;
+        self->mStreamRate = 4;
     } else {
-        *(int*)((char*)self + 0x1D0) = 1;
+        self->m_bStreamReady = 1;
     }
-    func_003A7058(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x300, D_00442150[*(int*)((char*)self + 0x1C4)]);
+    func_003A7058(*(char**)*(char**)((char*)self->mpGame + 0x10) + 0x300, D_00442150[self->mStreamRate]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022DE58);
 #ifdef SKIP_ASM
-extern "C" void func_0022D478(void* self, int v);
+extern "C" void func_0022D478(cSectionMan* self, int v);
 
-extern "C" void func_0022DE58(void* self, int v)
+extern "C" void func_0022DE58(cSectionMan* self, int v)
 {
-    if (*(int*)((char*)self + 0x1AC) != v) {
-        *(int*)((char*)self + 0x1AC) = v;
+    if (self->m_iNextSkySectionID != v) {
+        self->m_iNextSkySectionID = v;
         func_0022D478(self, v);
-        *(int*)((char*)self + 0x1A8) = 1;
+        self->m_bSkySwapPending = 1;
     }
 }
 #endif
@@ -1287,33 +1287,33 @@ extern "C" void func_0022DE58(void* self, int v)
 //100%
 INCLUDE_ASM("main/game", cSectionMan_skySwap);
 #ifdef SKIP_ASM
-extern "C" void func_0022D598(void* self, int id);
+extern "C" void func_0022D598(cSectionMan* self, int id);
 void func_00353D98(void* self);
 extern "C" void func_00353CF0(void* self, int id);
 
-extern "C" void cSectionMan_skySwap(void* self)
+extern "C" void cSectionMan_skySwap(cSectionMan* self)
 {
-    if (*(int*)((char*)self + 0x1A8) == 0) {
+    if (self->m_bSkySwapPending == 0) {
         return;
     }
-    if (*(int*)((char*)self + 0x1A4) == 0) {
+    if (self->m_bTriggerSkySwap == 0) {
         return;
     }
     int i;
     for (i = 0x2C; i < 0x31; i++) {
-        if (i != *(int*)((char*)self + 0x1AC)) {
+        if (i != self->m_iNextSkySectionID) {
             func_0022D598(self, i);
         }
     }
-    int id = D_00442168[*(int*)((char*)self + 0x1AC)].field_0x4;
-    void* o = *(void**)((char*)*(void**)((char*)self + 0x1B0) + 0x14);
+    int id = D_00442168[self->m_iNextSkySectionID].field_0x4;
+    void* o = *(void**)((char*)self->mpGame + 0x14);
     if (*(int*)((char*)o + 0x10) != id) {
         func_00353D98(o);
-        func_00353CF0(*(void**)((char*)*(void**)((char*)self + 0x1B0) + 0x14), id);
+        func_00353CF0(*(void**)((char*)self->mpGame + 0x14), id);
     }
-    *(int*)((char*)self + 0x1A4) = 0;
-    *(int*)((char*)self + 0x1A8) = 0;
-    *(int*)((char*)self + 0x1AC) = -1;
+    self->m_bTriggerSkySwap = 0;
+    self->m_bSkySwapPending = 0;
+    self->m_iNextSkySectionID = -1;
 }
 #endif
 
@@ -1333,14 +1333,14 @@ void func_00231278(void* gm, int state);
 extern int D_00535C08[];
 extern int D_004A11B8;
 
-extern "C" void func_0022DF50(void* self)
+extern "C" void func_0022DF50(cSectionMan* self)
 {
-    func_00231250(*(void**)((char*)self + 0x1B0), 0xB, 0, 1);
+    func_00231250(self->mpGame, 0xB, 0, 1);
     cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    D_00535C08[0] = *(int*)((char*)self + 0x1BC);
+    D_00535C08[0] = self->mBELocationID;
     D_004A11B8 = 1;
     iface->v01();
-    func_00231278(*(void**)((char*)self + 0x1B0), 0xA);
+    func_00231278(self->mpGame, 0xA);
 }
 #endif
 
@@ -1374,21 +1374,21 @@ extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cSectionMan_setSky(void* self, int sky);
 extern "C" void func_00231250(void* gm, int state, int a, int b);
 
-extern "C" void func_0022DFF0(void* self)
+extern "C" void func_0022DFF0(cSectionMan* self)
 {
     cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
-    if (*(int*)((char*)self + 0x1CC) != 0) {
-        *(int*)((char*)self + 0x1CC) = 0;
+    if (self->mModeReset != 0) {
+        self->mModeReset = 0;
         ((cRace22DFF0*)SSXApp->Game->AI)->v05(3);
     }
-    func_00231250(*(void**)((char*)self + 0x1B0), 0xA, 0, 0);
+    func_00231250(self->mpGame, 0xA, 0, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022E078);
 #ifdef SKIP_ASM
-extern "C" int func_0022E078(void* self, int a1)
+extern "C" int func_0022E078(cSectionMan* self, int a1)
 {
     int v = D_00442168[a1].field_0x8;
     return (unsigned int)(v - 1) < 2;
@@ -1412,7 +1412,7 @@ struct sGameEntry2 {
 };
 extern sGameEntry2 D_00442488[];
 
-extern "C" int func_0022E098(void* self, int a1)
+extern "C" int func_0022E098(cSectionMan* self, int a1)
 {
     return D_00442168[D_00442488[a1].field_0x10].field_0x4;
 }
@@ -1421,7 +1421,7 @@ extern "C" int func_0022E098(void* self, int a1)
 //100%
 INCLUDE_ASM("main/game", func_0022E0C8);
 #ifdef SKIP_ASM
-extern "C" int func_0022E0C8(void* self, int a1)
+extern "C" int func_0022E0C8(cSectionMan* self, int a1)
 {
     return D_00442168[a1].field_0x4;
 }
@@ -1430,7 +1430,7 @@ extern "C" int func_0022E0C8(void* self, int a1)
 //100%
 INCLUDE_ASM("main/game", func_0022E0E0);
 #ifdef SKIP_ASM
-extern "C" int func_0022E0E0(void* self, int a1)
+extern "C" int func_0022E0E0(cSectionMan* self, int a1)
 {
     int i;
     for (i = 0; i < 50; i++) {
@@ -1448,15 +1448,15 @@ INCLUDE_ASM("main/game", func_0022E118);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0022D088(void* self, int a1, int a2);
+extern "C" void func_0022D088(cSectionMan* self, int a1, int a2);
 extern signed char D_00535C11[];
 
-extern "C" void func_0022E118(void* self, int a1)
+extern "C" void func_0022E118(cSectionMan* self, int a1)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 0) {
         func_0022D088(self, a1, 1);
-        *(int*)((char*)self + 0x1CC) = 1;
+        self->mModeReset = 1;
     }
 }
 #endif

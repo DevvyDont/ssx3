@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("world/world", cWorld_cWorld);
@@ -67,7 +68,7 @@ extern "C" void cWorld__cWorld(void** self, int flags)
 }
 #endif
 
-extern "C" void cWorld_resetMap(void*);
+extern "C" void cWorld_resetMap(cWorld*);
 
 //100%
 INCLUDE_ASM("world/world", cWorld_init);
@@ -75,7 +76,7 @@ INCLUDE_ASM("world/world", cWorld_init);
 /**
  * Initialises the world by resetting its map with cWorld_resetMap().
  */
-extern "C" void cWorld_init(void* self)
+extern "C" void cWorld_init(cWorld* self)
 {
     cWorld_resetMap(self);
 }
@@ -142,7 +143,7 @@ static inline sWRMObj* sWRM_get(sWRMWorld* w, unsigned int id)
     return sWRM_lookup(t, id >> 8);
 }
 
-extern "C" void cWorld_resetMap(void* selfp)
+extern "C" void cWorld_resetMap(cWorld* selfp)
 {
     sWRMWorld** self = (sWRMWorld**)selfp;
     unsigned int ref = 0xFFFFFFFF;
@@ -308,9 +309,9 @@ struct func_003A6B78_sTable {
 
 extern "C" int func_003AD120(func_003A6B78_sEntry* e, void* obj, int i);
 
-extern "C" int func_003A6B78(void* self, void* obj, int i)
+extern "C" int func_003A6B78(cWorld* self, void* obj, int i)
 {
-    return func_003AD120(&(*(func_003A6B78_sTable**)((char*)self + 0x4))->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
+    return func_003AD120(&((func_003A6B78_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
 }
 #endif
 
@@ -330,9 +331,9 @@ struct func_003A6BA8_sTable {
 
 extern "C" int func_003ADC80(func_003A6BA8_sEntry* e);
 
-extern "C" int func_003A6BA8(void* self, int i)
+extern "C" int func_003A6BA8(cWorld* self, int i)
 {
-    return func_003ADC80(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+    return func_003ADC80(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -341,9 +342,9 @@ INCLUDE_ASM("world/world", func_003A6BD8);
 #ifdef SKIP_ASM
 extern "C" int func_003ADCB0(func_003A6BA8_sEntry* e);
 
-extern "C" int func_003A6BD8(void* self, int i)
+extern "C" int func_003A6BD8(cWorld* self, int i)
 {
-    return func_003ADCB0(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+    return func_003ADCB0(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -352,9 +353,9 @@ INCLUDE_ASM("world/world", cWorld_getNumProcessScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADCE0(func_003A6BA8_sEntry* e);
 
-extern "C" int cWorld_getNumProcessScripts(void* self, int i)
+extern "C" int cWorld_getNumProcessScripts(cWorld* self, int i)
 {
-    return func_003ADCE0(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+    return func_003ADCE0(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -363,9 +364,9 @@ INCLUDE_ASM("world/world", cWorld_getProcessScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD10(func_003A6BA8_sEntry* e);
 
-extern "C" int cWorld_getProcessScripts(void* self, int i)
+extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
 {
-    return func_003ADD10(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+    return func_003ADD10(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -374,9 +375,9 @@ INCLUDE_ASM("world/world", func_003A6C68);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD40(func_003A6BA8_sEntry* e);
 
-extern "C" int func_003A6C68(void* self, int i)
+extern "C" int func_003A6C68(cWorld* self, int i)
 {
-    return func_003ADD40(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+    return func_003ADD40(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -385,9 +386,9 @@ INCLUDE_ASM("world/world", func_003A6C98);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD70(func_003A6BA8_sEntry* e);
 
-extern "C" int func_003A6C98(void* self, int i)
+extern "C" int func_003A6C98(cWorld* self, int i)
 {
-    return func_003ADD70(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[i]);
+    return func_003ADD70(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -432,10 +433,10 @@ INCLUDE_ASM("world/world", func_003A6D18);
 #ifdef SKIP_ASM
 extern "C" int func_003ADC50(func_003A6BA8_sEntry* e, unsigned int i);
 
-extern "C" int func_003A6D18(void* self, unsigned int* handle)
+extern "C" int func_003A6D18(cWorld* self, unsigned int* handle)
 {
     unsigned int h = *handle;
-    return func_003ADC50(&(*(func_003A6BA8_sTable**)((char*)self + 0x4))->entries[h & 0xFF], h >> 8);
+    return func_003ADC50(&((func_003A6BA8_sTable*)self->m_pWScriptCache)->entries[h & 0xFF], h >> 8);
 }
 #endif
 

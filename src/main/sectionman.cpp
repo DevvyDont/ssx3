@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/sectionman.h"
 
 //100%
 INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
@@ -14,7 +15,7 @@ extern int D_004A43C4;
 extern "C" int func_0038AC50(void* self, const char* name);
 
 // Picks the default rider irradiance bank for the given course.
-extern "C" void cSectionMan_setSky(void* self, int sky)
+extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
 {
     switch (sky) {
     case 1:
@@ -71,18 +72,18 @@ struct sSectionMan {
     int field_0x1a0;
 };
 
-extern "C" void func_0022E228(sSectionMan* self)
+extern "C" void func_0022E228(cSectionMan* self)
 {
     int i;
-    self->freeList = self->nodes;
+    self->m_pFreeEventList = (tSectionManEvent*)((sSectionNode*)&self->m_EventPool[0]);
     for (i = 0; i < 50; i++) {
-        self->nodes[i].field_0x0 = 49;
-        self->nodes[i].next = &self->nodes[i + 1];
+        ((sSectionNode*)&self->m_EventPool[0])[i].field_0x0 = 49;
+        ((sSectionNode*)&self->m_EventPool[0])[i].next = &((sSectionNode*)&self->m_EventPool[0])[i + 1];
     }
-    self->field_0x190 = 49;
-    self->field_0x194 = 0;
-    self->field_0x19c = 0;
-    self->field_0x1a0 = 0;
+    self->m_EventPool[50].SectionID = 49;
+    self->m_EventPool[50].pNext = 0;
+    self->m_pActiveEventList = 0;
+    self->m_iNumActiveEvent = 0;
 }
 #endif
 
@@ -123,11 +124,11 @@ struct sSectionNode_E298 {
 };
 
 void* func_0022E278(void* self);
-extern "C" void func_0022E360(void* self, void* prev, void* node);
+extern "C" void func_0022E360(cSectionMan* self, void* prev, void* node);
 
-extern "C" void func_0022E298(void* self, int id)
+extern "C" void func_0022E298(cSectionMan* self, int id)
 {
-    sSectionNode_E298* n = *(sSectionNode_E298**)((char*)self + 0x19C);
+    sSectionNode_E298* n = (sSectionNode_E298*)self->m_pActiveEventList;
     sSectionNode_E298* prev = 0;
     while (n != 0) {
         if (n->id == id) {
@@ -145,21 +146,21 @@ extern "C" void func_0022E298(void* self, int id)
     if (prev != 0) {
         prev->next = n;
     } else {
-        *(sSectionNode_E298**)((char*)self + 0x19C) = n;
+        self->m_pActiveEventList = (tSectionManEvent*)n;
     }
-    *(int*)((char*)self + 0x1A0) += 1;
+    self->m_iNumActiveEvent += 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/sectionman", cSectionMan_getNextActiveEvent);
 #ifdef SKIP_ASM
-extern "C" int cSectionMan_getNextActiveEvent(void* self, void* a1)
+extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* a1)
 {
     if (a1 != 0) {
         return *(int*)((char*)a1 + 0x4);
     }
-    return *(int*)((char*)self + 0x19c);
+    return (int)self->m_pActiveEventList;
 }
 #endif
 
@@ -169,15 +170,15 @@ INCLUDE_ASM("main/sectionman", func_0022E360);
 // PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
 void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
 
-extern "C" void func_0022E360(void* self, void* prev, void* node)
+extern "C" void func_0022E360(cSectionMan* self, void* prev, void* node)
 {
     if (prev == 0) {
-        *(int*)((char*)self + 0x19C) = *(int*)((char*)node + 0x4);
+        self->m_pActiveEventList = (tSectionManEvent*)(*(int*)((char*)node + 0x4));
     } else {
         *(int*)((char*)prev + 0x4) = *(int*)((char*)node + 0x4);
     }
     func_0022E288_v(self, node);
-    *(int*)((char*)self + 0x1A0) = *(int*)((char*)self + 0x1A0) - 1;
+    self->m_iNumActiveEvent = self->m_iNumActiveEvent - 1;
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/streamman.h"
 
 //100%
 INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
@@ -7,7 +8,7 @@ INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int func_003E06B0(int a, int b, int c);
 extern "C" void* func_003E06D8(int a, int b, int c, void* buf, int size);
-extern "C" void func_003A6ED8(void* self);
+extern "C" void func_003A6ED8(cStreamMan* self);
 extern char D_00494D90[];
 extern char D_00494DA8[];
 
@@ -16,20 +17,20 @@ static inline int cStreamMan_min(int a, int b)
     return a < b ? a : b;
 }
 
-extern "C" void* cStreamMan_cStreamMan(void* self)
+extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
 {
-    *(unsigned int*)((char*)self + 0xBC) = 0xFFFFFFFF;
+    self->m_BxChunkResourceID = 0xFFFFFFFF;
     int size = func_003E06B0(2, 1, 1);
     size += 0x18000;
     size += 0x50000;
     size = cStreamMan_min(0x80000, size);
     void* buf = operator_new_tag(size, D_00494D90, 0, 0);
-    *(void**)((char*)self + 0x84) = buf;
-    *(void**)((char*)self + 0x88) = func_003E06D8(2, 1, 1, buf, size);
-    *(int*)((char*)self + 0x9C) = 0;
-    *(void**)((char*)self + 0x8C) = operator_new_tag(0x14000, D_00494DA8, 0, 0);
+    self->m_streamBuffer = (char*)buf;
+    self->m_streamHandle = (int)func_003E06D8(2, 1, 1, buf, size);
+    self->m_streamRequest = 0;
+    self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, D_00494DA8, 0, 0);
     func_003A6ED8(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -38,13 +39,13 @@ INCLUDE_ASM("world/streamman", cStreamMan__cStreamMan);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_003A6ED8(void* self);
-extern "C" void func_003A6F38(void* self);
+extern "C" void func_003A6ED8(cStreamMan* self);
+extern "C" void func_003A6F38(cStreamMan* self);
 
-extern "C" void cStreamMan__cStreamMan(void* self, int flags)
+extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
 {
-    void* buf = *(void**)((char*)self + 0xCC);
-    if (buf != 0 && *(int*)((char*)self + 0xC0) != 0 && *(unsigned char*)((char*)self + 0xBC) == 0xFF) {
+    void* buf = self->m_pBxChunkMemHandle;
+    if (buf != 0 && (int)self->m_uiBxChunkSizeLeft != 0 && *(unsigned char*)&self->m_BxChunkResourceID == 0xFF) {
         cMemMan_free(buf);
     }
     func_003A6ED8(self);
@@ -62,7 +63,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern const char D_004A47D8[];
 extern const char D_004A47E0[];
 
-extern "C" int cStreamMan_init(void* self, const char* name, int id)
+extern "C" int cStreamMan_init(cStreamMan* self, const char* name, int id)
 {
     *(int*)self = id;
     sprintf((char*)self + 4, D_004A47D8, name, D_004A47E0);
@@ -73,23 +74,23 @@ extern "C" int cStreamMan_init(void* self, const char* name, int id)
 //100%
 INCLUDE_ASM("world/streamman", func_003A6ED8);
 #ifdef SKIP_ASM
-extern "C" void func_003A7058(void* self, int size);
+extern "C" void func_003A7058(cStreamMan* self, int size);
 
-extern "C" void func_003A6ED8(void* self)
+extern "C" void func_003A6ED8(cStreamMan* self)
 {
-    *(int*)((char*)self + 0x94) = -1;
-    *(int*)((char*)self + 0xD4) = 1;
-    *(int*)((char*)self + 0x98) = 0;
+    self->m_ActiveHull = -1;
+    self->m_bLimitBandWidth = 1;
+    self->m_uiNumHullChunk = (unsigned int)0;
     *(char*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x90) = 0;
-    *(int*)((char*)self + 0xC0) = 0;
-    *(int*)((char*)self + 0xCC) = 0;
-    *(int*)((char*)self + 0xD0) = 0;
-    *(int*)((char*)self + 0xC8) = 0;
-    *(int*)((char*)self + 0xC4) = 0;
-    *(int*)((char*)self + 0xAC) = 0;
-    *(int*)((char*)self + 0xB0) = 0;
-    *(int*)((char*)self + 0xB4) = 0;
+    self->m_bActive = 0;
+    self->m_uiBxChunkSizeLeft = (unsigned int)0;
+    self->m_pBxChunkMemHandle = 0;
+    self->m_pBxChunkMemPtr = 0;
+    self->m_bBxChunkWriteEnable = 0;
+    self->m_bBxNullChunk = 0;
+    self->m_bAllocFailed = 0;
+    self->m_iDecompressSizeLeft = 0;
+    self->m_pDecompressDataLeft = 0;
     func_003A7058(self, 0x19000);
 }
 #endif
@@ -100,14 +101,14 @@ INCLUDE_ASM("world/streamman", func_003A6F38);
 void cMemMan_free(void*);
 extern "C" void func_003E0A28(int h);
 
-extern "C" void func_003A6F38(void* self)
+extern "C" void func_003A6F38(cStreamMan* self)
 {
-    func_003E0A28(*(int*)((char*)self + 0x88));
-    if (*(void**)((char*)self + 0x84) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x84));
+    func_003E0A28(self->m_streamHandle);
+    if (self->m_streamBuffer != 0) {
+        cMemMan_free(self->m_streamBuffer);
     }
-    if (*(void**)((char*)self + 0x8C) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8C));
+    if (self->m_pDecompressBuffer != 0) {
+        cMemMan_free(self->m_pDecompressBuffer);
     }
 }
 #endif
@@ -117,19 +118,19 @@ INCLUDE_ASM("world/streamman", func_003A6F88);
 #ifdef SKIP_ASM
 extern "C" int func_003E0C88(int h, void* p, int a, int tag);
 
-extern "C" int func_003A6F88(void* self, int a1, int a2, int a3)
+extern "C" int func_003A6F88(cStreamMan* self, int a1, int a2, int a3)
 {
-    if (*(int*)((char*)self + 0x90) == 0) {
-        int r = func_003E0C88(*(int*)((char*)self + 0x88), (char*)self + 0x4, a3, 0x444E4543);
-        *(int*)((char*)self + 0x9C) = r;
+    if (self->m_bActive == 0) {
+        int r = func_003E0C88(self->m_streamHandle, (char*)self + 0x4, a3, 0x444E4543);
+        self->m_streamRequest = r;
         if (r != 0) {
-            *(int*)((char*)self + 0x94) = a1;
-            *(int*)((char*)self + 0x90) = 1;
-            *(int*)((char*)self + 0x98) = a2;
-            *(int*)((char*)self + 0xA0) = 0;
-            *(int*)((char*)self + 0xC4) = 0;
-            *(int*)((char*)self + 0xE4) = 0;
-            *(int*)((char*)self + 0xE0) = 0;
+            self->m_ActiveHull = a1;
+            self->m_bActive = 1;
+            self->m_uiNumHullChunk = (unsigned int)a2;
+            self->m_iCarrySize = 0;
+            self->m_bBxNullChunk = 0;
+            self->m_iLastTimerTick = 0;
+            *(int*)&self->m_fTicksLeft = 0;
             return 1;
         }
     }
@@ -142,12 +143,12 @@ INCLUDE_ASM("world/streamman", func_003A7010);
 #ifdef SKIP_ASM
 extern "C" void func_003E0E90(int, int);
 
-extern "C" void func_003A7010(void* self)
+extern "C" void func_003A7010(cStreamMan* self)
 {
-    if (*(int*)((char*)self + 0x90) != 0) {
-        func_003E0E90(*(int*)((char*)self + 0x88), *(int*)((char*)self + 0x9C));
-        *(int*)((char*)self + 0x90) = 0;
-        *(int*)((char*)self + 0x94) = -1;
+    if (self->m_bActive != 0) {
+        func_003E0E90(self->m_streamHandle, self->m_streamRequest);
+        self->m_bActive = 0;
+        self->m_ActiveHull = -1;
     }
 }
 #endif
@@ -162,12 +163,12 @@ static inline int imax(int a, int b)
     return a > b ? a : b;
 }
 
-extern "C" void func_003A7058(void* self, int rate)
+extern "C" void func_003A7058(cStreamMan* self, int rate)
 {
     rate = imax(0x8000, rate);
     char* app = D_004A5B64;
-    *(int*)((char*)self + 0xD8) = rate;
-    *(float*)((char*)self + 0xDC) = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
+    self->m_iDataRatePerSecond = rate;
+    self->m_fTicksPerChunk = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
 }
 #endif
 

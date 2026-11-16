@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/worldview.h"
+#include "world/worldcache.h"
 
 //100%
 INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
@@ -252,7 +254,7 @@ struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
 extern cWorldMemoryMan_cWorldMemoryMan_sCfg D_0044C1E0[];
 extern "C" void cWorldBlockAllocator_init(void* self, int size, int count);
 
-extern "C" void* cWorldMemoryMan_cWorldMemoryMan(void* self)
+extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
 {
     cWorldBlockAllocator_init(self, D_0044C1E0[0].size, D_0044C1E0[0].count);
     cWorldBlockAllocator_init((char*)self + 0x14, D_0044C1E0[1].size, D_0044C1E0[1].count);
@@ -261,7 +263,7 @@ extern "C" void* cWorldMemoryMan_cWorldMemoryMan(void* self)
     for (i = 63; i >= 0; i--) {
         ((int*)((char*)self + 0x3C))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -302,7 +304,7 @@ struct cWorldMemoryMan_sSection {
 };
 
 // PORT: the section pointer is passed as int (the callee's mangled name is __FPvii).
-extern "C" void cWorldMemoryMan_activateSectionMem(void* self, int index, int section)
+extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int index, int section)
 {
     void** mem = (void**)((char*)self + 0x3C);
     void** slot = &mem[index];
@@ -382,7 +384,7 @@ struct sWCTable {
     short* sizes;
 };
 
-extern "C" void* cWorldCacheTable_cWorldCacheTable(void* selfp, void* data)
+extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void* data)
 {
     sWCTable* self = (sWCTable*)selfp;
     self->sizes = (short*)data;
@@ -431,19 +433,19 @@ extern "C" void cWorldView_cWorldView(void* self);
 extern "C" void cStreamMan_cStreamMan(void* self);
 extern char* D_004A5B64;
 
-extern "C" void* cWorldCache_cWorldCache(void* self)
+extern "C" void* cWorldCache_cWorldCache(cWorldCache* self)
 {
     cWorldView_cWorldView((char*)self + 0x10);
     cStreamMan_cStreamMan((char*)self + 0x300);
     char* app = D_004A5B64;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x3EC) = 0;
-    *(int*)((char*)self + 0x3E8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x1BF0) = (int)((float)*(int*)(app + 0x10) * 0.10000000149011612f);
-    return self;
+    self->mp_DataHeader = 0;
+    self->m_uiNumHullPage = (unsigned int)0;
+    self->mp_ChunkResolve = 0;
+    self->m_pWorldMemMan = 0;
+    self->m_pSharedCacheTable = 0;
+    self->m_pSectionCacheTable = 0;
+    self->m_iTouchStaleAge = (int)((float)*(int*)(app + 0x10) * 0.10000000149011612f);
+    return ((void*)self);
 }
 #endif
 
@@ -451,15 +453,15 @@ extern "C" void* cWorldCache_cWorldCache(void* self)
 INCLUDE_ASM("world/worldcache", cWorldCache__cWorldCache);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern "C" void cWorldCache_purge(void* self);
+extern "C" void cWorldCache_purge(cWorldCache* self);
 extern "C" void cStreamMan__cStreamMan(void* p, int flags);
-extern "C" void cWorldView__cWorldView(void* p, int flags);
+extern "C" void cWorldView__cWorldView(cWorldView* p, int flags);
 
 extern "C" void cWorldCache__cWorldCache(int* self, int flags)
 {
-    cWorldCache_purge(self);
+    cWorldCache_purge((cWorldCache*)self);
     cStreamMan__cStreamMan((char*)self + 0x300, 2);
-    cWorldView__cWorldView((char*)self + 0x10, 2);
+    cWorldView__cWorldView((cWorldView*)((char*)self + 0x10), 2);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -470,9 +472,9 @@ extern "C" void cWorldCache__cWorldCache(int* self, int flags)
 INCLUDE_ASM("world/worldcache", cWorldCache_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void func_003A8330(void* self);
+extern "C" void func_003A8330(cWorldCache* self);
 extern "C" int func_003A9890(void* view, int i);
-extern "C" void func_003A8230(void* self, int i);
+extern "C" void func_003A8230(cWorldCache* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
 struct cWorldCache_purge_sVEntry {
@@ -502,10 +504,10 @@ struct cWorldCache_purge_sCache {
     cWorldCache_purge_sObj* obj;
 };
 
-extern "C" void cWorldCache_purge(void* p)
+extern "C" void cWorldCache_purge(cWorldCache* p)
 {
     cWorldCache_purge_sCache* self = (cWorldCache_purge_sCache*)p;
-    func_003A8330(self);
+    func_003A8330((cWorldCache*)self);
     cWorldCache_purge_sObj* o = self->obj;
     if (o != 0) {
         o->vt[1].fn((char*)o + o->vt[1].delta, 3);
@@ -517,7 +519,7 @@ extern "C" void cWorldCache_purge(void* p)
         unsigned int i;
         for (i = 0; i < self->hdr->count; i++) {
             if (func_003A9890(self->view, i) == 0) {
-                func_003A8230(self, i);
+                func_003A8230((cWorldCache*)self, i);
             }
         }
         if (self->f08 != 0) {
@@ -536,14 +538,14 @@ extern "C" void cWorldCache_purge(void* p)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_reset);
 #ifdef SKIP_ASM
-extern "C" void cWorldCache_purge(void* self);
+extern "C" void cWorldCache_purge(cWorldCache* self);
 
-extern "C" void cWorldCache_reset(void* self)
+extern "C" void cWorldCache_reset(cWorldCache* self)
 {
     cWorldCache_purge(self);
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x3EC) = 0;
-    *(int*)((char*)self + 0x3E8) = 0;
+    self->mp_DataHeader = 0;
+    self->m_uiNumHullPage = (unsigned int)0;
+    self->mp_ChunkResolve = 0;
 }
 #endif
 
@@ -553,8 +555,8 @@ INCLUDE_ASM("world/worldcache", cWorldCache_init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cWorldMemoryMan_cWorldMemoryMan(void* self);
-extern "C" void* cWorldCacheTable_cWorldCacheTable(void* self, void* data);
+extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self);
+extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* self, void* data);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void* cChunkResolve_construct(void);
 extern "C" int cStreamMan_init(void* self, const char* name, void* owner);
@@ -583,9 +585,9 @@ extern "C" void cBXString__cBXString(sBXStr_7FC0* self, int flags);
 
 struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
 
-extern "C" int cWorldCache_init(void* self, const char* name, int arg)
+extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int arg)
 {
-    *(void**)((char*)self + 0xC) = cWorldMemoryMan_cWorldMemoryMan(cMemMan_alloc(0x13C, D_00494E30, 0, 0));
+    self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(0x13C, D_00494E30, 0, 0));
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
@@ -595,19 +597,19 @@ extern "C" int cWorldCache_init(void* self, const char* name, int arg)
     cBXString__cBXString(&path, 2);
     cBXString__cBXString(&full, 2);
     cBXString__cBXString(&base, 2);
-    char* hdr = *(char**)self;
+    char* hdr = (char*)self->mp_DataHeader;
     *(char**)(hdr + 0x14) = hdr + 0x50;
-    *(void**)((char*)self + 0x4) = cWorldCacheTable_cWorldCacheTable(cMemMan_alloc(0xE8, D_00494E40, 0, 0), *(char**)self + 0x18);
-    *(void***)((char*)self + 0x8) = (void**)operator_new_tag(*(int*)(*(char**)self + 0x8) * 4, D_00494E50, 0, 0);
-    for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 0x8); i++)
-        (*(void***)((char*)self + 0x8))[i] = 0;
+    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, D_00494E40, 0, 0), (char*)self->mp_DataHeader + 0x18);
+    self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag(*(int*)((char*)self->mp_DataHeader + 0x8) * 4, D_00494E50, 0, 0));
+    for (unsigned int i = 0; i < *(unsigned int*)((char*)self->mp_DataHeader + 0x8); i++)
+        ((void**)self->m_pSectionCacheTable)[i] = 0;
     char* x = (char*)cChunkResolve_construct();
-    *(char**)((char*)self + 0x3E8) = x;
+    self->mp_ChunkResolve = (cChunkResolve*)x;
     sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
     vt[2].fn(x + vt[2].delta, arg);
     if (cStreamMan_init((char*)self + 0x300, name, self) == 0)
         return 0;
-    int r = cWorldView_init_p((char*)self + 0x10, *(void**)self, self);
+    int r = cWorldView_init_p((char*)self + 0x10, self->mp_DataHeader, self);
     if (r == 0)
         return 0;
     cWorldCache_initPageMap((cWorldCache_initPageMap_sCache*)self);
@@ -619,15 +621,15 @@ extern "C" int cWorldCache_init(void* self, const char* name, int arg)
 INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
 #ifdef SKIP_ASM
 extern char D_00494E60[];
-extern "C" void* cWorldCacheTable_cWorldCacheTable(void* self, void* data);
+extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* self, void* data);
 
-extern "C" void cWorldCache_activateSectionMem(void* self, int i, int section)
+extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int section)
 {
-    cWorldMemoryMan_activateSectionMem(*(void**)((char*)self + 0xC), i, section);
+    cWorldMemoryMan_activateSectionMem(self->m_pWorldMemMan, i, section);
     // PORT: pointer held in int (index-first address arithmetic)
-    void** slot = (void**)(i * 4 + *(int*)((char*)self + 0x8));
-    *slot = cWorldCacheTable_cWorldCacheTable(cMemMan_alloc(0xE8, D_00494E60, 0, 0),
-        *(char**)(*(char**)self + 0x14) + i * 0x58 + 0x20);
+    void** slot = (void**)(i * 4 + (int)self->m_pSectionCacheTable);
+    *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, D_00494E60, 0, 0),
+        *(char**)((char*)self->mp_DataHeader + 0x14) + i * 0x58 + 0x20);
 }
 #endif
 
@@ -637,27 +639,27 @@ INCLUDE_ASM("world/worldcache", func_003A8230);
 extern "C" void func_003A7B98(void* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
-extern "C" void func_003A8230(void* self, int i)
+extern "C" void func_003A8230(cWorldCache* self, int i)
 {
-    func_003A7B98(*(void**)((char*)self + 0xC), i);
-    int* e = (*(int***)((char*)self + 0x8))[i];
+    func_003A7B98(self->m_pWorldMemMan, i);
+    int* e = ((int**)self->m_pSectionCacheTable)[i];
     if (e != 0) {
         func_003A7D80(e, 3);
     }
-    (*(int***)((char*)self + 0x8))[i] = 0;
+    ((int**)self->m_pSectionCacheTable)[i] = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_update);
 #ifdef SKIP_ASM
-extern "C" void cWorldView_update(void* p);
-extern "C" void cWorldCache_updatePages(void* self);
+extern "C" void cWorldView_update(cWorldView* p);
+extern "C" void cWorldCache_updatePages(cWorldCache* self);
 extern "C" void func_003A7098(void* p);
 
-extern "C" void cWorldCache_update(void* self)
+extern "C" void cWorldCache_update(cWorldCache* self)
 {
-    cWorldView_update((char*)self + 0x10);
+    cWorldView_update((cWorldView*)((char*)self + 0x10));
     cWorldCache_updatePages(self);
     func_003A7098((char*)self + 0x300);
 }
@@ -703,7 +705,7 @@ INCLUDE_ASM("world/worldcache", func_003A8330);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_003A7010(void* p, int i);
-extern "C" void func_003A8528(void* self, int i);
+extern "C" void func_003A8528(cWorldCache* self, int i);
 
 struct sWcEnt_8330 {
     int state;
@@ -720,7 +722,7 @@ struct sWc_8330 {
     sWcEnt_8330 ents[1];        // 0x3F0
 };
 
-extern "C" void func_003A8330(void* vself)
+extern "C" void func_003A8330(cWorldCache* vself)
 {
     sWc_8330* self = (sWc_8330*)vself;
     unsigned int i;
@@ -732,12 +734,12 @@ extern "C" void func_003A8330(void* vself)
         case 2:
             func_003A7010((char*)self + 0x300, i);
             self->ents[i].state = 4;
-            func_003A8528(self, i);
+            func_003A8528((cWorldCache*)self, i);
             break;
         case 3:
         case 4:
             self->ents[i].state = 4;
-            func_003A8528(self, i);
+            func_003A8528((cWorldCache*)self, i);
             break;
         }
         self->ents[i].state = 0;
@@ -854,7 +856,7 @@ extern "C" void func_003A8E20(void* self, int cell, int kind, sHandle_8528 h);
 extern "C" void func_003A7C30(int* self, int flags);
 
 // Unloads a cache cell: reports each referenced object (kind, handle) to func_003A8E20, then frees the list.
-extern "C" void func_003A8528(void* vself, int cell)
+extern "C" void func_003A8528(cWorldCache* vself, int cell)
 {
     sCache_8528* self = (sCache_8528*)vself;
     sRefList_8528* list = self->cells[cell].list;
@@ -875,7 +877,7 @@ extern "C" void func_003A8528(void* vself, int cell)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8618);
 #ifdef SKIP_ASM
-extern "C" int func_003A8618(void* self, int a1)
+extern "C" int func_003A8618(cWorldCache* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     return *(int*)(p + 0x3f0) == 3;
@@ -885,7 +887,7 @@ extern "C" int func_003A8618(void* self, int a1)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8638);
 #ifdef SKIP_ASM
-extern "C" int func_003A8638(void* self, int a1)
+extern "C" int func_003A8638(cWorldCache* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     return *(int*)(p + 0x3f0) == 0;
@@ -895,7 +897,7 @@ extern "C" int func_003A8638(void* self, int a1)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8650);
 #ifdef SKIP_ASM
-extern "C" void func_003A8650(void* self, int a1)
+extern "C" void func_003A8650(cWorldCache* self, int a1)
 {
     char* p = (char*)self + a1 * 0x18;
     *(int*)(p + 0x3f0) = 3;
@@ -909,7 +911,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
 extern "C" void* func_003A9A98(void* self, int i);
 extern "C" void func_003A6F88(void* self, int i, int a, int b);
-extern "C" void func_003A8528(void* self, int i);
+extern "C" void func_003A8528(cWorldCache* self, int i);
 extern char* D_004A5B64;
 extern char* D_004A5B80;
 extern char D_00494E88[];
@@ -948,7 +950,7 @@ static inline int Frame_8668()
     return vt[114].fn(o + vt[114].delta);
 }
 
-extern "C" void cWorldCache_updatePages(void* p)
+extern "C" void cWorldCache_updatePages(cWorldCache* p)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)p;
     int now = *(int*)(D_004A5B64 + 0x1C);
@@ -987,7 +989,7 @@ extern "C" void cWorldCache_updatePages(void* p)
         case 4:
             if (Frame_8668() - self->slot[i].stamp < 5)
                 break;
-            func_003A8528(self, i);
+            func_003A8528((cWorldCache*)self, i);
             self->slot[i].state = 0;
             break;
         }
@@ -1008,7 +1010,7 @@ extern "C" void cWorldCache_updatePages(void* p)
 INCLUDE_ASM("world/worldcache", func_003A88A8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_003A88A8(void* p)
+extern "C" void func_003A88A8(cWorldCache* p)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)p;
     int now = *(int*)(D_004A5B64 + 0x1C);
@@ -1033,7 +1035,7 @@ extern "C" void func_003A88A8(void* p)
                 break;
             self->slot[i].state = 4;
         case 4:
-            func_003A8528(self, i);
+            func_003A8528((cWorldCache*)self, i);
             self->slot[i].state = 0;
             break;
         }
@@ -1060,9 +1062,9 @@ struct sWc_89C8 {
     sWcEnt_89C8 ents[1];        // 0x3F0
 };
 
-extern "C" void func_003A8528(void* self, int i);
+extern "C" void func_003A8528(cWorldCache* self, int i);
 
-extern "C" void func_003A89C8(void* vself)
+extern "C" void func_003A89C8(cWorldCache* vself)
 {
     sWc_89C8* self = (sWc_89C8*)vself;
     int best = -1;
@@ -1087,7 +1089,7 @@ extern "C" void func_003A89C8(void* vself)
     }
     if (best >= 0) {
         self->ents[best].state = 4;
-        func_003A8528(self, best);
+        func_003A8528((cWorldCache*)self, best);
         self->ents[best].state = 0;
     }
 }
@@ -1406,7 +1408,7 @@ void cWorldView_purge(void* self);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldView__cWorldView(void* self, int flags)
+extern "C" void cWorldView__cWorldView(cWorldView* self, int flags)
 {
     cWorldView_purge(self);
     if (flags & 1) {
@@ -1630,7 +1632,7 @@ struct sVE_9258 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cWorldView_update(void* p)
+extern "C" void cWorldView_update(cWorldView* p)
 {
     sWCLoader_9258* self = (sWCLoader_9258*)p;
     if (self->info == 0)
@@ -1647,15 +1649,15 @@ extern "C" void cWorldView_update(void* p)
                 || func_00416B18(self->sections[i].name, D_004A47F8, 4) == 0
                 || func_00416B18(self->sections[i].name, D_004A4800, 4) == 0
                 || func_00416B18(self->sections[i].name, D_004A4808, 4) == 0)
-                cWorldCache_activateSectionMem(self->cache, i, 0);
+                cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 0);
             else
-                cWorldCache_activateSectionMem(self->cache, i, 2);
+                cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 2);
             func_003A8448((sWCSlots*)self->cache, self->sections[i].id, self->entries[i].pri);
             func_003A84F8(self->cache, self->sections[i].id, 1);
             self->entries[i].state = 2;
             break;
         case 2:
-            if (func_003A8618(self->cache, self->sections[i].id)) {
+            if (func_003A8618((cWorldCache*)self->cache, self->sections[i].id)) {
                 self->entries[i].state = 5;
                 char* o = D_004A5B80;
                 sVE_9258* vt = *(sVE_9258**)(o + 0x10D8);
@@ -1663,12 +1665,12 @@ extern "C" void cWorldView_update(void* p)
             }
             break;
         case 4:
-            if (func_003A8638(self->cache, self->sections[i].id)) {
+            if (func_003A8638((cWorldCache*)self->cache, self->sections[i].id)) {
                 int ok = 1;
                 func_003A95C0((void**)self, self->sections[i].tree, &ok);
                 if (ok) {
                     self->entries[i].state = 0;
-                    func_003A8230(self->cache, i);
+                    func_003A8230((cWorldCache*)self->cache, i);
                     func_003AD1A8();
                 }
             }
@@ -1721,13 +1723,13 @@ extern "C" void func_003A9558(void** self, func_003A9558_sNode* node)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", func_003A95C0);
 #ifdef SKIP_ASM
-extern "C" int func_003A8638(void* self, int a1);
+extern "C" int func_003A8638(cWorldCache* self, int a1);
 
 extern "C" void func_003A95C0(void** self, void* node, int* ok)
 {
     if (*ok != 0) {
         void* d = *(void**)((char*)node + 0x58);
-        if (d != 0 && func_003A8638(*self, *(unsigned short*)((char*)d + 2)) == 0) {
+        if (d != 0 && func_003A8638((cWorldCache*)(*self), *(unsigned short*)((char*)d + 2)) == 0) {
             *ok = 0;
             return;
         }
@@ -1826,7 +1828,7 @@ INCLUDE_ASM("world/worldcache", func_003A96E0);
 #ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
-extern "C" int func_003A96E0(void* self, int i, sWCQuad* outPos, float* outT)
+extern "C" int func_003A96E0(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
     char* e = (char*)self + i * 0x50;
     if (*(int*)(e + 0x240) == 0) {
@@ -1849,7 +1851,7 @@ INCLUDE_ASM("world/worldcache", func_003A9770);
 #ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
-extern "C" int func_003A9770(void* self, int i, sWCQuad* outPos, float* outT)
+extern "C" int func_003A9770(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
     char* e = (char*)self + i * 0x50;
     if (*(int*)(e + 0x240) == 0) {

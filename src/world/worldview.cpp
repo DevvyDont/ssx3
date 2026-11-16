@@ -2,16 +2,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
-
-struct cWorldViewSectionList {
-    char pad_0x00[0x8];
-    int mNumSections; // 0x8
-};
-
-struct cWorldView {
-    char pad_0x00[0x4];
-    cWorldViewSectionList* mSections; // 0x4
-};
+#include "world/worldview.h"
 
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
@@ -19,14 +10,14 @@ INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
 /**
  * Returns the number of sections in the world view.
  *
- * @return mSections->mNumSections, or 0 when there is no section table
+ * @return mp_Hdr->m_uiNumSections, or 0 when there is no section table
  */
 int cWorldView_getNumSections(cWorldView* self)
 {
-    if (self->mSections == 0) {
+    if (self->mp_Hdr == 0) {
         return 0;
     }
-    return self->mSections->mNumSections;
+    return self->mp_Hdr->m_uiNumSections;
 }
 #endif
 
@@ -35,11 +26,11 @@ INCLUDE_ASM("world/worldview", func_003A9820);
 #ifdef SKIP_ASM
 extern "C" void* func_003A9820(cWorldView* self, unsigned int i)
 {
-    cWorldViewSectionList* list = self->mSections;
-    if (list == 0 || i >= (unsigned int)list->mNumSections) {
+    tStreamDataHeader* list = self->mp_Hdr;
+    if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
         return 0;
     }
-    return *(char**)((char*)self + 0x8) + i * 0x58;
+    return (char*)self->mp_Section + i * 0x58;
 }
 #endif
 
@@ -53,7 +44,7 @@ INCLUDE_ASM("world/worldview", cWorldView_isSectionLoaded__FP10cWorldViewi);
 #ifdef SKIP_ASM
 int cWorldView_isSectionLoaded(cWorldView* self, int section)
 {
-    if (self->mSections == 0 || (unsigned int)section >= (unsigned int)self->mSections->mNumSections) {
+    if (self->mp_Hdr == 0 || (unsigned int)section >= (unsigned int)self->mp_Hdr->m_uiNumSections) {
         return 0;
     }
     cWorldViewEntry* entry = (cWorldViewEntry*)((char*)self + section * 8);
@@ -66,8 +57,8 @@ INCLUDE_ASM("world/worldview", func_003A9890);
 #ifdef SKIP_ASM
 extern "C" int func_003A9890(cWorldView* self, unsigned int i)
 {
-    cWorldViewSectionList* list = self->mSections;
-    if (list == 0 || i >= (unsigned int)list->mNumSections) {
+    tStreamDataHeader* list = self->mp_Hdr;
+    if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
         return 0;
     }
     return *(int*)((char*)self + (i << 3) + 0x14) == 0;
@@ -132,18 +123,18 @@ INCLUDE_ASM("world/worldview", func_003A99D8);
 #ifdef SKIP_ASM
 extern "C" void func_003A8F10(void* world, unsigned int i);
 struct func_003A99D8_sEntry { int state; int field_0x4; };
-struct func_003A99D8_sView { void* world; cWorldViewSectionList* mSections; };
-extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
+struct func_003A99D8_sView { void* world; tStreamDataHeader* mp_Hdr; };
+extern "C" int func_003A99D8(cWorldView* self, unsigned int i)
 {
-    cWorldViewSectionList* list = self->mSections;
-    if (list != 0 && i < (unsigned int)list->mNumSections) {
+    tStreamDataHeader* list = self->mp_Hdr;
+    if (list != 0 && i < (unsigned int)list->m_uiNumSections) {
         int off = i << 3;
         char* base = (char*)self + 0x14;
         func_003A99D8_sEntry* e = (func_003A99D8_sEntry*)(base + off);
         int st = e->state;
         if (st == 5) {
             e->state = 6;
-            func_003A8F10(self->world, i);
+            func_003A8F10(self->mp_WorldCache, i);
             return 1;
         } else if (st == 6) {
             return 1;
@@ -157,10 +148,10 @@ extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
 INCLUDE_ASM("world/worldview", func_003A9A48);
 #ifdef SKIP_ASM
 struct sWVSlot_9A48 { int state; int pad; };
-struct sWV_9A48 { char pad0[4]; cWorldViewSectionList* sec; char pad8[0xC]; sWVSlot_9A48 slots[1]; };
+struct sWV_9A48 { char pad0[4]; tStreamDataHeader* sec; char pad8[0xC]; sWVSlot_9A48 slots[1]; };
 extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
 {
-    if (self->sec != 0 && idx < (unsigned int)self->sec->mNumSections) {
+    if (self->sec != 0 && idx < (unsigned int)self->sec->m_uiNumSections) {
         if (self->slots[idx].state == 6) {
             self->slots[idx].state = 5;
         }
@@ -180,9 +171,9 @@ extern "C" int func_003A9A90(int arg0) {
 //100%
 INCLUDE_ASM("world/worldview", func_003A9A98);
 #ifdef SKIP_ASM
-extern "C" void* func_003A9A98(void* self, int a1)
+extern "C" void* func_003A9A98(cWorldView* self, int a1)
 {
-    return (char*)(*(void**)((char*)self + 0x10)) + a1 * 0x44;
+    return (char*)(self->mp_Hulls) + a1 * 0x44;
 }
 #endif
 
@@ -202,22 +193,21 @@ INCLUDE_ASM("world/worldview", func_003A9AC0);
 extern "C" int func_003A8618(void* self, int a1);
 extern void func_003A9BB8_9AC0(void* self, int sec, int box, int* ok) __asm__("func_003A9BB8");
 
-extern "C" int func_003A9AC0(void* vself, int box)
+extern "C" int func_003A9AC0(cWorldView* vself, int box)
 {
-    char* self = (char*)vself;
-    char* cur = *(char**)(self + 8);
+    char* cur = (char*)vself->mp_Section;
     int ok;
     unsigned i;
     int off = *(int*)(cur + 0x18);
     off *= 0x44;
-    if (*(unsigned short*)(off + *(int*)(self + 0x10)) != 0) {
-        if (func_003A8618(*(void**)self, *(int*)(cur + 0x18)) == 0)
+    if (*(unsigned short*)(off + (int)vself->mp_Hulls) != 0) {
+        if (func_003A8618(vself->mp_WorldCache, *(int*)(cur + 0x18)) == 0)
             return 0;
     }
     ok = 1;
-    for (i = 0; i < ((cWorldView*)self)->mSections->mNumSections; i++) {
-        if (*(int*)(self + 0x14 + i * 8) == 6)
-            func_003A9BB8_9AC0(self, *(int*)(*(char**)(self + 8) + i * 0x58 + 0x1C), box, &ok);
+    for (i = 0; i < ((cWorldView*)vself)->mp_Hdr->m_uiNumSections; i++) {
+        if (*(int*)(((char*)vself) + 0x14 + i * 8) == 6)
+            func_003A9BB8_9AC0(((char*)vself), *(int*)((char*)vself->mp_Section + i * 0x58 + 0x1C), box, &ok);
     }
     return ok;
 }
@@ -279,14 +269,14 @@ static inline int overlap_9BB8(const sV4_9BB8* c, const sSection_9BB8* s)
     return r;
 }
 
-extern "C" void func_003A9BB8(void* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
+extern "C" void func_003A9BB8(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
 {
     if (*ok == 0)
         return;
     if (!overlap_9BB8(box, sec))
         return;
     if (sec->info != 0) {
-        if (func_003A8618(*(void**)world, sec->info->id) == 0) {
+        if (func_003A8618(world->mp_WorldCache, sec->info->id) == 0) {
             *ok = 0;
             return;
         }
@@ -332,7 +322,7 @@ struct sWVCam_9D60 {
 
 struct sWV_9D60 {
     void* world;
-    cWorldViewSectionList* mSections;
+    tStreamDataHeader* mp_Hdr;
     sWVItem_9D60* items;
     int fC;
     int f10;
@@ -352,7 +342,7 @@ extern "C" void func_003A9D60(sWV_9D60* self, int cam)
         *(float*)((char*)self + cam * 0x50 + 0x284) = v;
         *(float*)((char*)self + cam * 0x50 + 0x288) = v;
         unsigned int i;
-        for (i = 0; i < (unsigned int)self->mSections->mNumSections; i++) {
+        for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
             int st = self->slots[i].state;
             if (st == 5 || st == 6) {
                 func_003AA028(self, self->items[i].section, cam, st == 6);
