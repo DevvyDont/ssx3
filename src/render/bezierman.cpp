@@ -122,9 +122,15 @@ extern "C" void cPS2BezierMan_Purge(cPS2BezierMan* self)
 extern "C" void* func_003739D0(void*);
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B158__FPv);
+INCLUDE_ASM("render/bezierman", cPS2BezierMan_Reset__FPv);
 #ifdef SKIP_ASM
-void* func_0038B158(void* self)
+/**
+ * Empties the Bezier patch cache.
+ *
+ * Calls func_003739D0 on the patch cache at +0x10 (mPatchCache), which zero-fills its three pools and resets its
+ * counters.
+ */
+void* cPS2BezierMan_Reset(void* self)
 {
     return func_003739D0((char*)self + 0x10);
 }

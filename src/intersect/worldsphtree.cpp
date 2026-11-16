@@ -5227,7 +5227,7 @@ extern "C" void cBoostNode_update(sNode_003415D0* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00341770);
+INCLUDE_ASM("intersect/worldsphtree", cBoostNode_applyDrag);
 #ifdef SKIP_ASM
 struct sVec4_341770 {
     float x, y, z, w;
@@ -5260,7 +5260,15 @@ public:
 
 extern "C" float cObjectInterface_getUpdateTime();
 
-extern "C" void func_00341770(void* self, cMover_341770* obj)
+/**
+ * Applies the node's drag to a rider.
+ *
+ * Passes the rider's velocity * (1 + the drag at +0x34) * cObjectInterface_getUpdateTime() to its velocity method
+ * (called setVelocity in the C; the frame-time scaling suggests it adds rather than assigns).
+ *
+ * @param obj  the rider (cBeing)
+ */
+extern "C" void cBoostNode_applyDrag(void* self, cMover_341770* obj)
 {
     sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), cObjectInterface_getUpdateTime());
     obj->setVelocity(&newVel);
@@ -5268,7 +5276,7 @@ extern "C" void func_00341770(void* self, cMover_341770* obj)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00341818);
+INCLUDE_ASM("intersect/worldsphtree", cBoostNode_applyBoost);
 #ifdef SKIP_ASM
 struct sVec4_341818 {
     float x, y, z, w;
@@ -5360,7 +5368,18 @@ static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec
     obj->setVelocity(&u);
 }
 
-extern "C" void func_00341818(sSph_341818* self, cMover_341818* obj)
+/**
+ * Applies the boost to a rider passing through the node.
+ *
+ * Takes the boost direction from the node (or the rider's own direction of travel when it is zero) and the rider's
+ * speed along it. For node type 2 it passes direction * speed * scale * update time while the rider is not going
+ * backwards; otherwise the missing speed (target minus current, when positive) * direction * scale * update time. The
+ * vector goes to the rider's velocity method (called setVelocity in the C; the frame-time scaling suggests it adds
+ * rather than assigns).
+ *
+ * @param obj  the rider (cBeing) being boosted
+ */
+extern "C" void cBoostNode_applyBoost(sSph_341818* self, cMover_341818* obj)
 {
     sVec4_341818 vel = *obj->getVelocity();
     sVec4_341818 dir = self->params.dir;

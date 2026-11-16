@@ -127,12 +127,20 @@ extern "C" int func_00232510(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232538);
+INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen__cInitLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046D970[];
 
-extern "C" void func_00232538(void* self, int flags)
+/**
+ * Destroys the start-up load screen.
+ *
+ * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * frees the object with operator_delete() when bit 0 of @p flags is set.
+ *
+ * @param flags  the destructor flags (bit 0: free the memory)
+ */
+extern "C" void cInitLoadScreen__cInitLoadScreen(void* self, int flags)
 {
     *(void***)self = D_0046D970;
     if (flags & 1) {
@@ -250,9 +258,12 @@ extern "C" int func_002326D8(sLoadScreen2326D8* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232710__FPv);
+INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_load__FPv);
 #ifdef SKIP_ASM
-void func_00232710(void* self)
+/**
+ * Loads nothing: the pre-game load screen has no data of its own (empty, as in On Tour).
+ */
+void cPreGameLoadScreen_load(void* self)
 {
 }
 #endif
@@ -297,12 +308,20 @@ void* func_00232738(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232750);
+INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen__cPreGameLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046D970[];
 
-extern "C" void func_00232750(void* self, int flags)
+/**
+ * Destroys the pre-game load screen.
+ *
+ * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * frees the object with operator_delete() when bit 0 of @p flags is set.
+ *
+ * @param flags  the destructor flags (bit 0: free the memory)
+ */
+extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(void* self, int flags)
 {
     *(void***)self = D_0046D970;
     if (flags & 1) {

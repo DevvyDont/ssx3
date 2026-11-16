@@ -117,7 +117,7 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
  *
  * After the UI update (cUIState_onUpdate), an active entry in either controller's input list resets the timer
  * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of cRealFE_mMovieList is set, which
- * func_001A27A0 plays as a skippable movie.
+ * cRealFE_update plays as a skippable movie.
  */
 extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 {

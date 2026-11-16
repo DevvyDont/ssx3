@@ -8,7 +8,7 @@
 //   cMultiParticle    0x50: cMemMan_alloc(0x50, "MultiParticle") + ctor func_00357DD8(pdata, maxInst) in
 //                     cMultiParticleMan::addParticle (cMultiParticleMan_addParticle) and + func_00357E80(replay) in its
 //                     readFromReplayFrame. No vtable (dtor cMultiParticle__cMultiParticle is called directly).
-//   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor func_003579C8 in cGame (main/gameload.cpp;
+//   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor cMultiParticleMan_cMultiParticleMan in cGame (main/gameload.cpp;
 //                     cGame::MultiParticleMan, main/game.h +0x40). Instance cMultiParticleMan::TheMultiParticleMan =
 //                     cMultiParticleMan_TheMultiParticleMan (gp-relative; the ctor stores it, the dtor clears it; playbackman reads it).
 //
@@ -53,7 +53,7 @@ CHECK_OFFSET(cMultiParticle, Offset, 0x40);
 CHECK_SIZE(cMultiParticle, 0x50);
 
 struct cMultiParticleMan {
-    cMultiParticle* Particles[4];   // 0x000 [O]; [R] ctor func_003579C8 zeroes all 4; [U] addParticle allocates [id]
+    cMultiParticle* Particles[4];   // 0x000 [O]; [R] ctor cMultiParticleMan_cMultiParticleMan zeroes all 4; [U] addParticle allocates [id]
                                     //       (cMemMan_alloc(0x50, "MultiParticle")), reset/dtor delete them,
                                     //       update/render/replay/unloadSection loop over 4
 };

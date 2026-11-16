@@ -24,7 +24,7 @@ extern "C" void cFEStateNetHelpPopup_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001D9E20);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_handleEvent);
 #ifdef SKIP_ASM
 struct sVEntry001D9E20 {
     short delta;
@@ -32,7 +32,17 @@ struct sVEntry001D9E20 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" int func_001D9E20(void* self, int msg, int msgParam)
+/**
+ * Forwards an event to the state that opened the help popup.
+ *
+ * When +0x50 is non-zero and the parent state (mpParentState, +0x20) exists, returns the parent's virtual slot 24
+ * (handleEvent) with @p msg and @p msgParam; otherwise returns 0.
+ *
+ * @param msg       the event id (On Tour: int msg)
+ * @param msgParam  the event data (On Tour: void *pParam)
+ * @return the parent's result, or 0
+ */
+extern "C" int cFEStateNetHelpPopup_handleEvent(void* self, int msg, int msgParam)
 {
     if (*(int*)((char*)self + 0x50) != 0) {
         void* obj = *(void**)((char*)self + 0x20);

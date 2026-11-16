@@ -214,12 +214,20 @@ extern "C" void func_00243A70(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243A80);
+INCLUDE_ASM("main/ssxappdtor", cPreStartScreen__cPreStartScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0046D970[];
 
-extern "C" void func_00243A80(int* self, int flags)
+/**
+ * Destroys the pre-start screen.
+ *
+ * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * frees the object with operator_delete() when bit 0 of @p flags is set.
+ *
+ * @param flags  the destructor flags (bit 0: free the memory)
+ */
+extern "C" void cPreStartScreen__cPreStartScreen(int* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -229,9 +237,12 @@ extern "C" void func_00243A80(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243AB0__FPv);
+INCLUDE_ASM("main/ssxappdtor", cPreStartScreen_load__FPv);
 #ifdef SKIP_ASM
-void func_00243AB0(void* self)
+/**
+ * Loads nothing: the pre-start screen has no data of its own (empty, as in On Tour).
+ */
+void cPreStartScreen_load(void* self)
 {
 }
 #endif
@@ -339,13 +350,21 @@ extern "C" int func_00243BF0(void *self, int index) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243C00);
+INCLUDE_ASM("main/ssxappdtor", cFELoadScreen__cFELoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0046D970[];
 
-extern "C" void func_00243C00(int* self, int flags)
+/**
+ * Destroys a front-end load screen.
+ *
+ * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * frees the object with operator_delete() when bit 0 of @p flags is set.
+ *
+ * @param flags  the destructor flags (bit 0: free the memory)
+ */
+extern "C" void cFELoadScreen__cFELoadScreen(int* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {

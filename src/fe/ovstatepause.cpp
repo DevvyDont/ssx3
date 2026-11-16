@@ -832,7 +832,7 @@ int cOVState_PAUSE_ONLINE_ERROR_onGainTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FAF10);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onUpdate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -856,7 +856,17 @@ public:
     virtual void setVisible(int v);
 };
 
-extern "C" void func_001FAF10(void* self)
+/**
+ * Per-frame update of the online error overlay: reports the result of the connection ping once it is known.
+ *
+ * Calls cOVState_onUpdate(). While a ping is pending (+0x9C) and cGameComm_mGameComm exists: if its timer (unk_138)
+ * has run out with no reply (unk_13C == 0), it clears the comm's unk_09C and shows the timed-out message
+ * (cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut()). If a reply came, it shows the received message
+ * (cOVState_PAUSE_ONLINE_ERROR_displayPingReceived()) when a race is in progress, the local rider has not finished and
+ * mCheating[0] is clear, else it hides the "TextInfo" object. In both cases it then calls func_001FAFF8(self, 1)
+ * and clears +0x9C; with no reply and time left it waits.
+ */
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -982,7 +992,7 @@ extern char str_kT_PauseErrorServerCheckTimedOut[];
 /**
  * Reports that the server check timed out: TextInfo gets kT_PauseErrorServerCheckTimedOut.
  *
- * Called by the overlay update (func_001FAF10) when the ping runs out with no reply. The text is set only
+ * Called by the overlay update (cOVState_PAUSE_ONLINE_ERROR_onUpdate) when the ping runs out with no reply. The text is set only
  * while +0xA0 is set, and TextInfo's visibility is set to +0xA0 without a null check on the object.
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self)
@@ -1018,7 +1028,7 @@ extern char str_kT_PauseErrorOpponentDisconnected[];
  * Reports that the server answered, so the opponent dropped: shows kT_PauseErrorOpponentDisconnected and the
  * continue option.
  *
- * Called by func_001FAF10 when a reply came while the race runs, the local rider has not finished and this
+ * Called by cOVState_PAUSE_ONLINE_ERROR_onUpdate when a reply came while the race runs, the local rider has not finished and this
  * machine is not flagged. The text is set only while +0xA0 is set; TextInfo's visibility becomes +0xA0 (no
  * null check), then setContinueOptionVisible(self, 1).
  */

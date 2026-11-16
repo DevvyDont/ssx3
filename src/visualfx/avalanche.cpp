@@ -1549,7 +1549,7 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void tActiveAvalancheNode_renderLines(void* node);
-extern "C" void func_00371688(void* p, int a);
+extern "C" void cDynamicColourEmitter_render(void* p, int a);
 extern int D_004A3A54;
 extern int D_004A3A58;
 
@@ -1685,7 +1685,7 @@ public:
 /**
  * Renders one active avalanche: its emitters and, in debug mode, its paths and collision lines.
  *
- * For each active node: path lines for the first D_004A3A58 nodes, and func_00371688(emitter, 7) when
+ * For each active node: path lines for the first D_004A3A58 nodes, and cDynamicColourEmitter_render(emitter, 7) when
  * D_004A3A54 (On Tour m_RenderEmitters, default 1) is set and the node has an emitter. With D_004A3A58 set it
  * also draws a line from each collision instance to the player's rider, red once the collision time has
  * passed and green before.
@@ -1704,7 +1704,7 @@ extern "C" void tActiveAvalanche_render(void* slotv)
             if (i < D_004A3A58)
                 tActiveAvalancheNode_renderLines(n);
             if (D_004A3A54 && ((unsigned char*)n->data)[0xF2])
-                func_00371688(n->fx, 7);
+                cDynamicColourEmitter_render(n->fx, 7);
         }
     }
     if (D_004A3A58 == 0)

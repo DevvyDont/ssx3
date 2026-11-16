@@ -209,7 +209,7 @@ extern "C" void func_00233640(void* self, int type)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
+INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_gainFocus);
 #ifdef SKIP_ASM
 extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
@@ -228,7 +228,14 @@ struct sVE_38C8 {
     void (*fn)(void*, sVec3i_38C8);
 };
 
-extern "C" void func_002338C8(void)
+/**
+ * Starts loading the front end when the load screen gains focus.
+ *
+ * Uploads the textures (cGraphicsMan_UploadTextures()), starts the front-end load (cSSXApp_startFELoad()), turns depth
+ * fog off, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)) and calls func_0028F768 on the
+ * audio object. The object itself is not used, so the C takes no arguments.
+ */
+extern "C" void cFELoadScreen_gainFocus(void)
 {
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startFELoad(SSXApp);
@@ -243,7 +250,7 @@ extern "C" void func_002338C8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233930);
+INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_purge);
 #ifdef SKIP_ASM
 struct cGame00233930 {
     char pad[0x10D8];
@@ -304,7 +311,15 @@ extern "C" void cGraphicsMan_PurgeTextures(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028FA98(void* self, float f);
 
-extern "C" void func_00233930(void* self)
+/**
+ * Unloads the front-end load screen's textures and UI object.
+ *
+ * Flushes the renderer (graphics manager slot 19), removes the texture id at +0x18 when it is >= 0 (slot 50,
+ * RemoveTexture), destroys the object at +0xC (func_00397B70 with flags 3), removes the texture ids at +0x10 and +0x14
+ * when non-zero, purges the textures (cGraphicsMan_PurgeTextures()) and calls func_0028FA98 on the audio object with
+ * 1.0.
+ */
+extern "C" void cFELoadScreen_purge(void* self)
 {
     ((cGame00233930*)GrMan)->v19();
     int id = *(int*)((char*)self + 0x18);
@@ -328,7 +343,7 @@ extern "C" void func_00233930(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_002339F8);
+INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_render);
 #ifdef SKIP_ASM
 struct sVEntryI002339F8 {
     short delta;
@@ -344,7 +359,15 @@ struct sVEntryV002339F8 {
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* engine);
 
-extern "C" int func_002339F8(void* self)
+/**
+ * Draws the front-end load screen.
+ *
+ * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Unless func_00231D60 (the base fade) draws
+ * this frame, the UI object at +0xC is drawn (func_00397DF8); then the frame is flipped (slot 20) and 1 returned.
+ *
+ * @return 1 when a frame was drawn, 0 when the renderer was not ready
+ */
+extern "C" int cFELoadScreen_render(void* self)
 {
     char* graphicsMan = (char*)GrMan;
     sVEntryI002339F8* vt = *(sVEntryI002339F8**)(graphicsMan + 0x10D8);
@@ -362,12 +385,16 @@ extern "C" int func_002339F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233A70);
+INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_update);
 #ifdef SKIP_ASM
 extern "C" void func_00398038(void*);
 void func_00231CB0(void*);
 
-extern "C" void func_00233A70(void* self)
+/**
+ * Per-frame update of the front-end load screen: updates its UI object (+0xC, func_00398038), then runs the base
+ * update func_00231CB0 (which calls cFadeScreen_update()).
+ */
+extern "C" void cFELoadScreen_update(void* self)
 {
     func_00398038(*(void**)((char*)self + 0xC));
     func_00231CB0(self);

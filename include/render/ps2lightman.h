@@ -9,14 +9,14 @@
 // Bases: cLightMan (On Tour 0x4: vptr only) <- cPSPLightMan (retail class name kept from On Tour, render/ps2lightman)
 // <- cPS2LightMan. The vptr is at 0x0 because cLightMan has no data.
 // Methods (D_00493650, On Tour's cPSPLightMan order): 0 ~cPS2LightMan, 1 GetLightObj(i) func_00394C88__FPvi,
-// 2 Init(n) func_00394C98, 3 Purge cPS2LightMan_Purge, 4 CreateLights cPS2LightMan_CreateLights, 5 ResetDynamicLights,
-// 6 GetDynamicLight func_00394D18, 7 SetAmbient (empty), 8-11 CreateAmbient/Directional/Point/Spot cPS2LightMan_CreateAmbient,
+// 2 Init(n) cPS2LightMan_Init, 3 Purge cPS2LightMan_Purge, 4 CreateLights cPS2LightMan_CreateLights, 5 ResetDynamicLights,
+// 6 GetDynamicLight cPS2LightMan_GetDynamicLight, 7 SetAmbient (empty), 8-11 CreateAmbient/Directional/Point/Spot cPS2LightMan_CreateAmbient,
 // cPS2LightMan_CreateDirectional, cPS2LightMan_CreatePoint, cPS2LightMan_CreateSpot (render/lightman), 12-14 func_00394D38/40/48 (empty).
 // Instance global: cLightMan_TheLightMan (gp+0x2A9C) = cLightMan::TheLightMan, returned by func_00394C40 (getTheLightMan).
 //
 // FLAT layout. Members: [O] On Tour's cPSPLightMan (0x18: m_iStartDynLight 4, m_iDynLight 8, m_iMaxLights 0xC,
 // m_pLights 0x10, m_iHighWaterLightCount 0x14); retail has no high-water count and a different order, so each member is
-// placed by [R] Init (func_00394C98) and [U] the accessors.
+// placed by [R] Init (cPS2LightMan_Init) and [U] the accessors.
 
 #include "layout.h"
 

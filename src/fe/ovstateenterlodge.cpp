@@ -771,10 +771,10 @@ struct sVEntry_001F80D8 {
 };
 
 /**
- * On Cross, passes the chosen button to the panel's virtual slot 26 (func_001F8118: continue or save
+ * On Cross, passes the chosen button to the panel's virtual slot 26 (cOVState_TOPTIMES_handleNext: continue or save
  * records).
  *
- * The C call passes only self, while func_001F8118 takes the item as its second argument: it gets @p pWidget
+ * The C call passes only self, while cOVState_TOPTIMES_handleNext takes the item as its second argument: it gets @p pWidget
  * only because the argument register still holds it, so a port must pass it explicitly.
  *
  * @param pWidget  the chosen item; ignored when null
@@ -792,15 +792,24 @@ extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* pWidget, int E
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F8118);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_handleNext);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern "C" void cOVStateManager_triggerOverlay(int id);
 
-extern "C" void func_001F8118(void* self, void* a1)
+/**
+ * Acts on the button chosen on the top-times panel: continue, or save the records.
+ *
+ * Only acts once (+0xA0 still 0). The chosen item's index (@p pWidget +0x18) 0 sets +0xA0 and cOVStateManager_mStatus to
+ * 1 (continue); 1 sets +0xA0 and opens overlay 19 with cOVStateManager_triggerOverlay() (save). It is virtual slot
+ * 26, called by cOVState_TOPTIMES_onWidgetEvent() on Cross.
+ *
+ * @param pWidget  the chosen item (On Tour: cUIThing *pWidget)
+ */
+extern "C" void cOVState_TOPTIMES_handleNext(void* self, void* pWidget)
 {
     if (*(int*)((char*)self + 0xA0) == 0) {
-        int choice = *(int*)((char*)a1 + 0x18);
+        int choice = *(int*)((char*)pWidget + 0x18);
         switch (choice) {
         case 0:
             *(int*)((char*)self + 0xA0) = 1;

@@ -4,9 +4,9 @@ INCLUDE_ASM("main/ssxapp2", cSSXApp__cSSXApp);
 
 INCLUDE_ASM("main/ssxapp2", func_00243A40);
 
-INCLUDE_ASM("main/ssxapp2", func_00243A80);
+INCLUDE_ASM("main/ssxapp2", cPreStartScreen__cPreStartScreen);
 
-INCLUDE_ASM("main/ssxapp2", func_00243AB0);
+INCLUDE_ASM("main/ssxapp2", cPreStartScreen_load);
 
 INCLUDE_ASM("main/ssxapp2", func_00243AE8);
 
@@ -14,7 +14,7 @@ INCLUDE_ASM("main/ssxapp2", func_00243B50);
 
 INCLUDE_ASM("main/ssxapp2", func_00243B80);
 
-INCLUDE_ASM("main/ssxapp2", func_00243C00);
+INCLUDE_ASM("main/ssxapp2", cFELoadScreen__cFELoadScreen);
 
 INCLUDE_ASM("main/ssxapp2", func_00243C80);
 

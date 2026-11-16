@@ -3350,18 +3350,28 @@ extern "C" void cPadDevice__cPadDevice(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327800__FPv);
+INCLUDE_ASM("input/inputparse", cPadDevice_numActuators__FPv);
 #ifdef SKIP_ASM
-int func_00327800(void* self)
+/**
+ * Base-class default: a pad device has no vibration actuators.
+ *
+ * @return 0
+ */
+int cPadDevice_numActuators(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327808__FPv);
+INCLUDE_ASM("input/inputparse", cPadDevice_setActuator__FPv);
 #ifdef SKIP_ASM
-void func_00327808(void* self)
+/**
+ * Base-class default for driving a vibration actuator: does nothing.
+ *
+ * On Tour's version only fails an assert, which retail compiles out.
+ */
+void cPadDevice_setActuator(void* self)
 {
 }
 #endif

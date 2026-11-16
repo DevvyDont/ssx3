@@ -838,7 +838,7 @@ extern "C" void func_00194080(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00194138);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_handleEvent);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
 extern "C" void* func_001A8B88(void* self, int size, int a2);
@@ -848,7 +848,17 @@ static inline int isOn00194138()
     return D_004A1A70 == 1;
 }
 
-extern "C" void* func_00194138(void* self, int msgId, int data)
+/**
+ * Passes an event on to the online states' shared handler while the game is online.
+ *
+ * When D_004A1A70 is 1 it returns func_001A8B88(@p self, @p msgId, @p data), the slot-24 handler that every
+ * cFEStateNet-derived state uses; otherwise it ignores the event and returns 0.
+ *
+ * @param msgId  the event id (On Tour: int msg)
+ * @param data   the event data (On Tour: void *pParam)
+ * @return the handler's result, or 0
+ */
+extern "C" void* cFEStateBraggingRights_handleEvent(void* self, int msgId, int data)
 {
     if (isOn00194138()) {
         return func_001A8B88(self, msgId, data);

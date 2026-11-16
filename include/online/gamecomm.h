@@ -145,7 +145,7 @@ struct cGameComm {
     int unk_094;                 // 0x094 [U] link timeout in frames: func_00258870 arms it (1800/3600/3660), checkErrors
                                  //       counts it down (0 = timed out, unk_02C)
     int mMessageDisplay;         // 0x098 [O]; [U] updateMessageDisplay's popup state (0 none, 1 peer paused, 2 waiting)
-    int unk_09C;                 // 0x09C [R] 1; [U] ping result: cleared by the online-error overlay (func_001FAF10) when
+    int unk_09C;                 // 0x09C [R] 1; [U] ping result: cleared by the online-error overlay (cOVState_PAUSE_ONLINE_ERROR_onUpdate) when
                                  //       the ping times out; "PINGRSLT"
     int mLocalFinishedRace;      // 0x0A0 [O]; [U] "FINISH0/1"; bit 0 of the flags
     int mRemoteFinishedRace;     // 0x0A4 [O]; [U] "FINISH0/1"; bit 1

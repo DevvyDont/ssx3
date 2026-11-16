@@ -87,7 +87,7 @@ extern "C" void cBXScriptEngine_PurgeBXEngine(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_002820B0);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_Update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cInSeq_UpdateFrame(void* obj);
@@ -109,7 +109,14 @@ struct sScriptEngine_2820B0 {
 
 // Retail builds compile the per-state debug hooks to nothing.
 static inline void slotNop_2820B0(void* self, void* slot) {}
-extern "C" void func_002820B0(sScriptEngine_2820B0* self)
+/**
+ * Per-frame update of the script engine.
+ *
+ * Calls cInSeq_UpdateFrame() on the sequencer at +0x2B8, then for each of the 16 requests in state 1 runs its
+ * pending-state handler by request type: type 1 goes to func_00282908, the others to slotNop_2820B0 (On Tour does this
+ * in UpdatePendingRequestState).
+ */
+extern "C" void cBXScriptEngine_Update(sScriptEngine_2820B0* self)
 {
     int i;
     cInSeq_UpdateFrame(self->obj2B8);
@@ -417,7 +424,7 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282540);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00282338(void* self, int id);
 int func_00274C10(void* obj, int a);
-extern "C" void func_002729A8(void* mgr, int handle);
+extern "C" void cInSeq_RecyclePlayer(void* mgr, int handle);
 void func_00282C88(void* self, void* slot);
 
 struct sVEnt_282540 {
@@ -493,7 +500,7 @@ extern "C" int func_00282540_impl(sScriptEngine_282540* self, int id)
     VCALL2(self, 12, id, s->fC);
     if (s->obj != 0) {
         func_00274C10(s->obj, 0);
-        func_002729A8(self->mgr, *s->obj);
+        cInSeq_RecyclePlayer(self->mgr, *s->obj);
     }
     if (s->tblIdx >= 0) {
         sTblEnt_282540* e = self->tbl + s->tblIdx;

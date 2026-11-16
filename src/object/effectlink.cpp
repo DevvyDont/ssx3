@@ -413,7 +413,7 @@ extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 extern "C" void* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(void* self);
 extern "C" void cBaseClass_DynamicEmitter_setupEmitter(void* self, void* target, float t);
 struct sEffectLink5EF8;
-extern "C" void func_00345EF8(cDynamicParticleModifier* self);
+extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self);
 extern int D_004A3FFC;
 extern void* cDynamicParticleModifier_vtbl[];
 extern void* cDynamicEmitter_vtbl[];
@@ -446,7 +446,7 @@ extern "C" cDynamicParticleModifier* func_00345C90(cDynamicParticleModifier* sel
     t->y = 0.0f;
     t->z = 0.0f;
     cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
-    func_00345EF8(self);
+    cDynamicParticleModifier_updatePosition(self);
     D_004A3FFC++;
     self->Complete = 0;
     return (self);
@@ -536,7 +536,7 @@ extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParti
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345EF8);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_updatePosition);
 #ifdef SKIP_ASM
 struct sEffVec4_5EF8 {
     float x, y, z, w;
@@ -584,7 +584,13 @@ struct sEffectLink5EF8 {
     sEffVec4_5EF8 localB;   // 0x50
 };
 
-extern "C" void func_00345EF8(cDynamicParticleModifier* self)
+/**
+ * Moves the effect to follow the mesh it is attached to.
+ *
+ * Builds the mesh matrix of Instance/Mesh with cInstanceNode_buildMeshMat() and sets Pos to that matrix applied to
+ * Offset and Vel to it applied to InitVel.
+ */
+extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self)
 {
     sEffMtx_5EF8 meshMat;
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (sEffMtx_62A0*)&meshMat);
@@ -597,13 +603,13 @@ extern "C" void func_00345EF8(cDynamicParticleModifier* self)
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_update);
 #ifdef SKIP_ASM
 struct sEffectLink5EF8;
-extern "C" void func_00345EF8(cDynamicParticleModifier* self);
+extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self);
 extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
 
 /**
  * Advances a dynamic particle effect by one 1/60 s step and marks it finished when it is done.
  *
- * Follows its link first (func_00345EF8), then updates the emitter at +0x60 with the positions at
+ * Follows its link first (cDynamicParticleModifier_updatePosition), then updates the emitter at +0x60 with the positions at
  * +0x30/+0x40. While fading (+0x14) it stops emitting and finishes once no particles are left (+0x240);
  * otherwise it keeps emitting and finishes when a non-negative life (+0x60) runs out. Does nothing once
  * finished (+0x18).
@@ -613,7 +619,7 @@ extern "C" void cDynamicParticleModifier_update(cDynamicParticleModifier* self)
     if (self->Complete != 0) {
         return;
     }
-    func_00345EF8(self);
+    cDynamicParticleModifier_updatePosition(self);
     if (self->Fade > 0) {
         float* sub = (float*)(((char*)self) + 0x60);
         if (self->Emitter.m_enabledCount > 0) {

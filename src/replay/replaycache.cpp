@@ -2451,16 +2451,24 @@ extern "C" int cInSeq_ReadyPlayer(cInSeq* self, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002729A8);
+INCLUDE_ASM("replay/replaycache", cInSeq_RecyclePlayer);
 #ifdef SKIP_ASM
 extern "C" void cInSeq_Stop(cInSeq* self, int a1);
 extern "C" void func_002746F8(cScriptPlayerMain* p);
 
-extern "C" void func_002729A8(cInSeq* self, int i)
+/**
+ * Gives a script player back to the free pool.
+ *
+ * Calls cInSeq_Stop() on it, shuts its cScriptPlayerMain down (func_002746F8), unlinks its 0x58-byte node from
+ * mpScriptUsed and pushes it on mpScriptUnused.
+ *
+ * @param playerID  the player id
+ */
+extern "C" void cInSeq_RecyclePlayer(cInSeq* self, int playerID)
 {
-    cInSeq_Stop((cInSeq*)self, i);
+    cInSeq_Stop((cInSeq*)self, playerID);
     char* base = *(char**)((char*)self + 0x14);
-    sRcNode272938* n = (sRcNode272938*)(base + i * 0x58);
+    sRcNode272938* n = (sRcNode272938*)(base + playerID * 0x58);
     func_002746F8((cScriptPlayerMain*)n->data);
     if (n->prev == 0) {
         (*(sRcNode272938**)&self->mpScriptUsed) = n->next;
@@ -2488,14 +2496,14 @@ extern "C" void func_002729A8(cInSeq* self, int i)
 INCLUDE_ASM("replay/replaycache", cInSeq_RecycleAll);
 #ifdef SKIP_ASM
 /**
- * Gives every playing script's player back to the free pool (func_002729A8, RecyclePlayer, on each used node).
+ * Gives every playing script's player back to the free pool (cInSeq_RecyclePlayer, RecyclePlayer, on each used node).
  */
 extern "C" void cInSeq_RecycleAll(cInSeq* self)
 {
     sRcNode272938* n = (sRcNode272938*)self->mpScriptUsed;
     while (n != 0) {
         sRcNode272938* next = n->next;
-        func_002729A8((self), n->id);
+        cInSeq_RecyclePlayer((self), n->id);
         n = next;
     }
 }

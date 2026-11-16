@@ -218,7 +218,7 @@ extern char str_hud_e[];
 struct sSsxScriptRider;
 struct sScrObj05B8;
 extern "C" void func_00276CC8(void* r);
-extern "C" void func_002820B0(void* self);
+extern "C" void cBXScriptEngine_Update(void* self);
 extern "C" void cVidEngine_UpdateVideo(void* snd);
 extern "C" void cScriptObjCameraManager_Update(void* slot);
 extern "C" void cScriptObjEvent_Update(sScrObj05B8* self);
@@ -274,7 +274,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
         func_00276CC8(&self->objsA[i]);
     for (int i = 0; i < 2; i++)
         func_00276CC8(&self->objsB[i]);
-    func_002820B0(self);
+    cBXScriptEngine_Update(self);
     cVidEngine_UpdateVideo(self->snd);
     for (int i = 0; i < 2; i++)
         cScriptObjCameraManager_Update(self->rigs[i]);

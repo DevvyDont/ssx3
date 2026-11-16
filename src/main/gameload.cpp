@@ -38,7 +38,7 @@ extern "C" void* cWorldLightMan_cWorldLightMan(void* p, void* a);
 extern "C" void* cWScriptMan_cWScriptMan(void* p);
 extern "C" void* func_00229180(void* p);
 extern "C" void* func_00343A68(void* p);
-extern "C" void* func_003579C8(void* p);
+extern "C" void* cMultiParticleMan_cMultiParticleMan(void* p);
 extern "C" void* cWScriptCompile_parseKeywords(void* p, int a, int b);
 extern "C" void cIrradianceDataBase_Load(void* p);
 void* cBXLoadIndicator_cBXLoadIndicator(void* p);
@@ -248,7 +248,7 @@ extern "C" void cGame_load(cGame* self)
     self->WScriptMan = (cWScriptMan*)cWScriptMan_cWScriptMan(operator new(1176, str_WScriptMan, 0x20000000, 0));
     self->CrowdMan2d = (cCrowdMan2d*)func_00229180(operator new(10016, str_CrowdMan2d, 0x20000000, 0));
     self->CrowdMan3d = (cCrowdMan3d*)func_00343A68(operator new(2500, str_CrowdMan3d, 0x20000000, 0));
-    self->MultiParticleMan = (cMultiParticleMan*)func_003579C8(operator new(0x10, str_MultiParticleMan, 0x20000000, 0));
+    self->MultiParticleMan = (cMultiParticleMan*)cMultiParticleMan_cMultiParticleMan(operator new(0x10, str_MultiParticleMan, 0x20000000, 0));
     self->InstanceMan = (cInstanceMan*)cWScriptCompile_parseKeywords(operator new(0x10, str_InstancesMan, 0x20000000, 0), 0x80, 0x40);
     cIrradianceDataBase_Load(D_005047F8);
     self->LoadIndicator = (cBXLoadIndicator*)cBXLoadIndicator_cBXLoadIndicator(operator new(0x10, str_LoadIndicator, 0x20000000, 0));

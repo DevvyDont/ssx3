@@ -4,13 +4,13 @@ INCLUDE_ASM("fe/festateload3", cFELoadScreen_load);
 
 INCLUDE_ASM("fe/festateload3", func_00233640);
 
-INCLUDE_ASM("fe/festateload3", func_002338C8);
+INCLUDE_ASM("fe/festateload3", cFELoadScreen_gainFocus);
 
-INCLUDE_ASM("fe/festateload3", func_00233930);
+INCLUDE_ASM("fe/festateload3", cFELoadScreen_purge);
 
-INCLUDE_ASM("fe/festateload3", func_002339F8);
+INCLUDE_ASM("fe/festateload3", cFELoadScreen_render);
 
-INCLUDE_ASM("fe/festateload3", func_00233A70);
+INCLUDE_ASM("fe/festateload3", cFELoadScreen_update);
 
 INCLUDE_ASM("fe/festateload3", cGameState_gotoNextState);
 

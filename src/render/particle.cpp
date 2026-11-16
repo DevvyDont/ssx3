@@ -312,11 +312,19 @@ extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00371268);
+INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_setTime);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setTime(void* p, float v);
 
-extern "C" void func_00371268(cBaseClass_DynamicEmitter* self, float duration)
+/**
+ * Sets the dynamic emitter's particle time.
+ *
+ * For a non-zero @p duration it stores it in the first word and calls tParticleEmitter_setTime() on the base emitter at
+ * +0x20 with it. For 0 it only calls tParticleEmitter_setTime(.., 0) and leaves the stored duration unchanged.
+ *
+ * @param duration  the time
+ */
+extern "C" void cBaseClass_DynamicEmitter_setTime(cBaseClass_DynamicEmitter* self, float duration)
 {
     if (duration == 0.0f) {
         tParticleEmitter_setTime(((char*)self) + 0x20, 0.0f);
@@ -583,7 +591,7 @@ extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00371688);
+INCLUDE_ASM("render/particle", cDynamicColourEmitter_render);
 #ifdef SKIP_ASM
 
 struct sPtVEntry1688 {
@@ -605,7 +613,17 @@ extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_0044B420[];
 
 
-extern "C" void func_00371688(cDynamicColourEmitter* self, int blend)
+/**
+ * Draws the colour emitter's sub-emitters.
+ *
+ * Returns when the emitter is disabled, has no enabled sub-emitters, or its texture (TextureId + mCurrentFlipTexture)
+ * is not loaded. Otherwise it writes the blend mode (D_0044B420[BlendMode]) and @p blend (bits 5-9 of draw-state word
+ * 2) into mDrawState, sets its texture, pushes it on the graphics manager's draw-state stack, calls GrMan slot 84 with
+ * the emitter and pops the state.
+ *
+ * @param blend  the draw layer (On Tour drawLayer)
+ */
+extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int blend)
 {
     if (self->m_enabled == 0) {
         return;
@@ -2747,10 +2765,19 @@ extern "C" void* func_00375A08(void)
 }
 #endif
 
-INCLUDE_ASM("render/particle", func_00375A40);
+/**
+ * Initialises the PS2 renderer: kick thread and semaphores, interrupt handlers, texture and defer managers.
+ *
+ * Hand-checked from the asm only (no C body yet): it calls a run of setup functions (func_003FDF88, func_003912A8,
+ * func_00391360, ...), allocates two objects with operator_new, creates two semaphores and the kick thread (CreateSema,
+ * CreateThread, StartThread), calls func_00424880, func_00423A90, func_004248E8, func_00424950, func_00423AC0 and
+ * func_004249B8 (the interrupt-handler setup that Purge undoes), then allocates the texture manager (cMemMan_alloc +
+ * func_00366FE8) and the defer manager and sets up the default render state. cPS2GraphicsMan_Purge (Purge) undoes these steps.
+ */
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_Init);
 
 //100%
-INCLUDE_ASM("render/particle", func_00376268);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_Purge);
 #ifdef SKIP_ASM
 extern "C" void func_00424880(int);
 extern "C" void RemoveIntcHandler(int, int);
@@ -2764,7 +2791,15 @@ void* func_00361F40(void* self);
 void operator_delete(int* ptr);
 extern char D_005059D8[];
 
-extern "C" void func_00376268(void* self)
+/**
+ * Shuts the PS2 renderer down, undoing cPS2GraphicsMan_Init (Init).
+ *
+ * Calls func_00424880(2) and removes the INTC 2 handler (mIntcHandlerId), calls func_00424950(1) and removes the DMAC 0
+ * handler (mDmacHandlerId), terminates and deletes the kick thread (mKickThreadId), deletes mKickSema and mQueueMutex,
+ * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (func_00367360, mpTextureMan), and
+ * finally calls func_00361F40 on the render queue D_005059D8.
+ */
+extern "C" void cPS2GraphicsMan_Purge(void* self)
 {
     func_00424880(2);
     RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
@@ -3258,13 +3293,23 @@ extern "C" void func_00376A70(sPtGfx6A70* self, float x, float y, float w, float
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376B90);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportWindow);
 #ifdef SKIP_ASM
 struct sPartVec4i {
     float x, y, z, w;
 };
 
-extern "C" sPartVec4i* func_00376B90(sPartVec4i* out, void* self)
+/**
+ * Returns the current viewport's window rectangle.
+ *
+ * Reads the four floats at the start of mViewportStack[mViewportDepth] (0x230-byte entries from +0x6D20; depth at
+ * +0x10DC), truncates each to an integer and stores them back as floats in @p out. The truncation means a fractional
+ * window comes back rounded toward zero.
+ *
+ * @param out  the rectangle to fill (the hidden struct-return pointer)
+ * @return @p out
+ */
+extern "C" sPartVec4i* cPS2GraphicsMan_GetViewportWindow(sPartVec4i* out, void* self)
 {
     int i = *(int*)((char*)self + 0x10dc);
     float* window = (float*)((char*)self + (i * 0x230 + 0x6d20));
@@ -3555,7 +3600,7 @@ extern "C" void func_00376C58(sPtGfx6C58* self, float fov, float zNear, float zF
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00377278);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportZBias);
 #ifdef SKIP_ASM
 struct sPt7278 {
     float x, y, z, w;
@@ -3673,7 +3718,17 @@ static inline float DepthOffset7278(sPtGfx7278* self, sPt7278* pos, float dist)
     return 0.0f;
 }
 
-extern "C" void func_00377278(sPtGfx7278* self, sPt7278* pos, float dist)
+/**
+ * Sets a depth bias for the current viewport from a world position and a world-space distance.
+ *
+ * Updates the clip matrices first when they are stale. The offset comes from DepthOffset7278(); when it differs from
+ * the viewport's stored depth it is saved there and added to 32767.5 (8388467.5 when the mode word is 49) to give the
+ * two Z constants at +0x58F8 and +0x5858, and texReady is cleared so the state is re-sent.
+ *
+ * @param pos  the world position the bias is measured at
+ * @param dist  the bias distance in world units
+ */
+extern "C" void cPS2GraphicsMan_SetViewportZBias(sPtGfx7278* self, sPt7278* pos, float dist)
 {
     sPtView7278* v = &self->views[self->curView];
     if (self->texReady == 0) {
@@ -3888,7 +3943,7 @@ extern "C" void func_003779E0(cPS2GraphicsMan* self, tTVDisplayFormat* src)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00377A10);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRect_7A10 {
@@ -3974,7 +4029,7 @@ public:
     virtual void v53();
     virtual void DrawClear();
 
-    void EndFrame_impl() __asm__("func_00377A10");
+    void EndFrame_impl() __asm__("cPS2GraphicsMan_DrawFrame");
     void ResetViewport();
 };
 
@@ -3992,6 +4047,14 @@ inline void cGfx_7A10::ResetViewport()
     (*pf)((char*)this + vt[24].delta, sRect_7A10(0.0f, 0.0f, (float)GetWidth(), (float)GetHeight()), 1);
 }
 
+/**
+ * Ends the frame: queues this frame's packets for the kick thread and switches to the other packet buffer.
+ *
+ * Defined in C as cGfx_7A10::EndFrame_impl(). It calls func_00363490 on the render ring, waits on mQueueMutex
+ * (+0x5ACC), stores the packet-buffer words at +0x5AA4..+0x5AB4, signals mQueueMutex and mKickSema (+0x5AC8), swaps the
+ * double-buffered packet pointers around +0x5A00..+0x5A24, calls func_004247D8 on the new buffer ranges, resets the
+ * draw state to sDrawState_s_defaultDrawState and calls func_00362CC8 on the ring.
+ */
 void cGfx_7A10::EndFrame_impl()
 {
     char* s = (char*)this;
@@ -4030,7 +4093,7 @@ void cGfx_7A10::EndFrame_impl()
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00377CF0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawSprite);
 #ifdef SKIP_ASM
 // PORT: 128-bit GPR quadword (TImode); the PC port needs a 16-byte struct.
 typedef int cQuad_7CF0 __attribute__((mode(TI)));
@@ -4171,9 +4234,22 @@ static inline int ClipCode_7CF0(sGfx_7CF0* self, const sV_7CF0& v)
     return code;
 }
 
+/**
+ * Draws a screen-facing textured sprite centred on a world position.
+ *
+ * Projects @p pos with the clip matrix, divides by w, scales @p size by the projection's x and y scale, and returns
+ * early when both corners fall outside the same clip plane; otherwise it emits the sprite with the given UVs and
+ * colour.
+ *
+ * @param pos  the sprite centre in world space
+ * @param size  the half width and half height
+ * @param uv0  the top-left texture coordinate
+ * @param uv1  the bottom-right texture coordinate
+ * @param col  the colour
+ */
 // PORT: uncached (0x30000000) pointers held in int.
 // Emits one screen-aligned sprite (GS SPRITE, ST + RGBAQ + two XYZ2) centred on pos.
-extern "C" void func_00377CF0(sGfx_7CF0* self, sV_7CF0* pos, float* size, int* uv0, int* uv1, float* col)
+extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, sV_7CF0* pos, float* size, int* uv0, int* uv1, float* col)
 {
     if (self->clipValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
@@ -4234,7 +4310,7 @@ extern "C" void func_00377CF0(sGfx_7CF0* self, sV_7CF0* pos, float* size, int* u
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003781A0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawRotatedSprite);
 #ifdef SKIP_ASM
 struct sV_81A0 {
     float x, y, z, w;
@@ -4362,9 +4438,24 @@ static inline sV_81A0 Project_81A0(sGfx_81A0* self, const sV_81A0* v)
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
+/**
+ * Draws a camera-facing textured sprite rotated about its centre.
+ *
+ * Builds the two corner axes from the sine and cosine of @p angle (func_0031BE50) in camera space, scales them by @p
+ * size, projects the centre and both axis ends, and forms the four corners from the differences; @p count is the number
+ * of passes.
+ *
+ * @param pos  the sprite centre in world space
+ * @param size  the half width and half height
+ * @param uv0  the top-left texture coordinate
+ * @param uv1  the bottom-right texture coordinate
+ * @param col  the colour
+ * @param count  the number of passes (On Tour numPass)
+ * @param angle  the rotation in radians
+ */
 // PORT: uncached (0x30000000) pointers held in int.
 // Emits count camera-facing rotated sprites (GS tri-strip quads) centred on pos.
-extern "C" void func_003781A0(sGfx_81A0* self, sV_81A0* pos, float* size, int* uv0, int* uv1, float* col, int count, float angle)
+extern "C" void cPS2GraphicsMan_DrawRotatedSprite(sGfx_81A0* self, sV_81A0* pos, float* size, int* uv0, int* uv1, float* col, int count, float angle)
 {
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
@@ -4914,7 +5005,7 @@ extern "C" void func_00379028(sGfx9028* self, sFontRes9028* font, unsigned short
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00379860);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderTriStrip);
 #ifdef SKIP_ASM
 struct sPtRS_9860 {
     int f0;                         // bits 6..9 = layer
@@ -4979,8 +5070,19 @@ static inline void QueueRecord_9860(sPtGfx_9860* self, unsigned int buf, unsigne
     }
 }
 
+/**
+ * Draws a triangle strip.
+ *
+ * Picks the VU program (D_12B0 once after D_004A4380 is set, else D_12B8) and the textured or untextured primitive from
+ * the top draw state, then copies the vertices into DMA packets of at most 72 vertices; each new chunk starts again two
+ * vertices back so the strip stays connected. Packets that would overflow the buffer are flushed with func_0038F668.
+ * The bool argument On Tour has (isstatic) is not read.
+ *
+ * @param numVerts  the number of vertices (On Tour numverts)
+ * @param src  the vertices
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void func_00379860(sPtGfx_9860* self, int n, sVtx_9860* src)
+extern "C" void cPS2GraphicsMan_RenderTriStrip(sPtGfx_9860* self, int numVerts, sVtx_9860* src)
 {
     unsigned int prog;
     if (D_004A4380) {
@@ -5008,10 +5110,10 @@ extern "C" void func_00379860(sPtGfx_9860* self, int n, sVtx_9860* src)
     unsigned long* p = func_0038F460(dma, buf, -1, 0);
     int qwc = *(int*)(dma + 0x10);
     unsigned long* end = (unsigned long*)((char*)p + qwc * 16);
-    for (; n >= 3; ) {
-        int k = n < 73 ? n : 72;
+    for (; numVerts >= 3; ) {
+        int k = numVerts < 73 ? numVerts : 72;
         int m = k * 3;
-        n -= k;
+        numVerts -= k;
         if (p + (m + 5) * 2 >= end) {
             int sz = qwc * 16;
             unsigned int a = func_0038F668(dma, p, 4);
@@ -5033,7 +5135,7 @@ extern "C" void func_00379860(sPtGfx_9860* self, int n, sVtx_9860* src)
         while (i--) {
             *d++ = *src++;
         }
-        n += 2;
+        numVerts += 2;
         src -= 2;
         p = (unsigned long*)((sVtx_9860*)p + k);
         p[0] = 0;
@@ -5260,7 +5362,7 @@ extern "C" void func_0037A430(sPtGfx_A430* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037A540);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_CreateGridMesh);
 #ifdef SKIP_ASM
 struct sPartVEntryI_A540 {
     short delta;
@@ -5282,7 +5384,18 @@ struct sPartEmitter_A540 {
 extern "C" sPartEmitter_A540* func_00385138(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
 extern const char str_cPS2GridMesh[];
 
-extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
+/**
+ * Creates a grid mesh (flags, fences, flex bridges) of the given size.
+ *
+ * Allocates 460 bytes tagged str_cPS2GridMesh with @p flags and constructs a cPS2GridMesh (func_00385138). When bit 30
+ * of @p flags is set it calls the mesh's slot 2 and, if that fails, destroys it (slot 1 with flags 3) and returns 0.
+ *
+ * @param width  the grid width
+ * @param height  the grid height
+ * @param flags  the memory flags (On Tour memtype)
+ * @return the new mesh, or 0
+ */
+extern "C" sPartEmitter_A540* cPS2GraphicsMan_CreateGridMesh(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
 {
     sPartEmitter_A540* gridMesh = func_00385138(cMemMan_alloc(460, str_cPS2GridMesh, flags, 0), width, height, pS2GraphicsMan, flags);
     if (flags & 0x40000000) {
@@ -5301,7 +5414,7 @@ extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* pS2GraphicsMan, voi
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037A610);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawCharModel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -5491,8 +5604,20 @@ static inline void SetTex2_A610(sGfx_A610* self, int t)
 
 #define MIN_A610(a, b) ((a) < (b) ? (a) : (b))
 
+/**
+ * Draws a skinned character model.
+ *
+ * Unless D_004A4510 is set: pushes the draw state, starts the batch with slot 124 (cPS2GraphicsMan_InitCharMatrices, InitCharMatrices) and
+ * walks the model's chunks, binding each chunk's texture and emitting its geometry with the bone matrices. With @p
+ * shadow set it changes the draw state for the shadow pass (alpha and Z-test fields) and skips the per-chunk material
+ * flags.
+ *
+ * @param mdl  the model header
+ * @param base  the model data the header's offsets are relative to
+ * @param shadow  non-zero for the shadow pass
+ */
 // PORT: PS2-only DMA/VIF packet build; uncached (0x30000000) pointers held in int.
-extern "C" void func_0037A610(sGfx_A610* self, sMdl_A610* mdl, char* base, int shadow)
+extern "C" void cPS2GraphicsMan_DrawCharModel(sGfx_A610* self, sMdl_A610* mdl, char* base, int shadow)
 {
     if (D_004A4510 == 0) {
         self->top[1] = *self->top;
@@ -5692,7 +5817,7 @@ extern "C" void func_0037A610(sGfx_A610* self, sMdl_A610* mdl, char* base, int s
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037B548);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawCharShadowModel);
 #ifdef SKIP_ASM
 struct sPtRS_B548 {
     int f0;
@@ -5830,8 +5955,18 @@ static inline void QueueRecord_B548(sPtGfx_B548* self, unsigned int buf, unsigne
     }
 }
 
+/**
+ * Draws a character model as a flat-coloured shadow.
+ *
+ * Sets the top draw state for the shadow (no textures, fixed blend and test fields) and, for each bone flagged in the
+ * model, writes a header in @p col and the matrices of its tracks into the packet.
+ *
+ * @param model  the model header
+ * @param base  the model data the header's offsets are relative to
+ * @param col  the shadow colour
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void func_0037B548(sPtGfx_B548* self, sMdl_B548* m, char* base, float* col)
+extern "C" void cPS2GraphicsMan_DrawCharShadowModel(sPtGfx_B548* self, sMdl_B548* model, char* base, float* col)
 {
     unsigned int buf = self->bufAddr;
     unsigned long* p = (unsigned long*)(buf | 0x30000000);
@@ -5845,12 +5980,12 @@ extern "C" void func_0037B548(sPtGfx_B548* self, sMdl_B548* m, char* base, float
     self->top->f4 = (self->top->f4 & 0xFFF00FFF) | 0x00014000;
     self->top->tex = -1;
     self->top->tex2 = -1;
-    sBone_B548* bone = (sBone_B548*)(base + m->o20);
-    for (int i = 0; i < m->nbones; i++, bone++) {
+    sBone_B548* bone = (sBone_B548*)(base + model->o20);
+    for (int i = 0; i < model->nbones; i++, bone++) {
         if (bone->flags & 1) {
             p[0] = 0x10000003;
             BoneHeader_B548(&p, col);
-            sTrk_B548* tr = &m->tracks[cnt];
+            sTrk_B548* tr = &model->tracks[cnt];
             for (int j = 0; j < bone->ntracks; j++, tr++) {
                 AddMats_B548(&p, self->mats, tr->n, tr->idx);
                 p[0] = ((unsigned long)*bone->refs[j].p << 32) | 0x50000000;
@@ -5870,7 +6005,7 @@ extern "C" void func_0037B548(sPtGfx_B548* self, sMdl_B548* m, char* base, float
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037BA50);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetShadowCharMatrices);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only GS packet build; uncached (0x30000000) pointers held in int and 128-bit qword copies.
@@ -5900,8 +6035,18 @@ static inline void CopyMat_BA50(void* dst, const void* src)
         : "memory");
 }
 
+/**
+ * Sends the shadow projection matrix plus its scale and translation to VU1.
+ *
+ * Writes a GIF header, the four rows of @p mat and the qwords @p sscale and @p strans at the packet address (+0x5A00), advances
+ * it, and sets the top render state's mode to 7 (0x1C0) pointing at the packet.
+ *
+ * @param mat  the shadow projection matrix
+ * @param sscale  the shadow scale
+ * @param strans  the shadow translation
+ */
 // Emits a particle-batch header packet: GIF tag, the batch matrix and two parameter qwords.
-extern "C" void func_0037BA50(char* self, void* mat, cQuad128_BA50* a, cQuad128_BA50* b)
+extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(char* self, void* mat, cQuad128_BA50* sscale, cQuad128_BA50* strans)
 {
     unsigned int buf = *(unsigned int*)(self + 0x5A00);
     unsigned long* p = (unsigned long*)(buf | 0x30000000);
@@ -5910,8 +6055,8 @@ extern "C" void func_0037BA50(char* self, void* mat, cQuad128_BA50* a, cQuad128_
     p[3] = (unsigned long)55308 << 47;
     p[1] = 0;
     CopyMat_BA50(p + 4, mat);
-    ((cQuad128_BA50*)p)[6] = *a;
-    ((cQuad128_BA50*)p)[7] = *b;
+    ((cQuad128_BA50*)p)[6] = *sscale;
+    ((cQuad128_BA50*)p)[7] = *strans;
     p += 16;
     *(unsigned int*)(self + 0x5A00) = (unsigned int)p & 0x0FFFFFFF;
     sRS_BA50* rs = *(sRS_BA50**)(self + 0xE84);
@@ -6320,9 +6465,14 @@ extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
 extern "C" void* MEM_copy(void*, void*, int);
 
 //100%
-INCLUDE_ASM("render/particle", func_0037C808__FPv);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformUploadTextures__FPv);
 #ifdef SKIP_ASM
-void* func_0037C808(void* self)
+/**
+ * Makes the staged texture table current.
+ *
+ * MEM_copy()s 0x1F40 bytes from +0x3838 to +0x18F8. Called by cGraphicsMan_UploadTextures() through slot 121.
+ */
+void* cPS2GraphicsMan_PlatformUploadTextures(void* self)
 {
     return MEM_copy((char*)self + 0x18f8, (char*)self + 0x3838, 8000);
 }
@@ -6629,7 +6779,7 @@ extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, v
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037CC98);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_TakeScreenGrab);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -6682,7 +6832,16 @@ struct sPtGfxB_CC98 {
     int f5A88;
 };
 
-extern "C" void func_0037CC98(sPtGfxB_CC98* self, int* obj)
+/**
+ * Copies the current frame buffer into a screen-grab texture.
+ *
+ * Pushes the render state, looks up the texture named by @p obj[1] in the texture table, and builds a GS packet that
+ * points FRAME at that texture and draws the display buffer into it as a textured sprite, then restores the scissor and
+ * queues the packet on the render ring.
+ *
+ * @param obj  the screen-grab handle (word 1: the texture id)
+ */
+extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
 {
     self->top[1] = *self->top;
     self->top++;
@@ -6889,7 +7048,7 @@ extern "C" void func_0037D318(cPS2GraphicsMan* self, int texId, int pixels, int 
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D348);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_LockFrameToTexture);
 #ifdef SKIP_ASM
 struct sPtRS_D348 {
     int f0;
@@ -6927,9 +7086,18 @@ struct sPtGfx_D348 {
 
 extern "C" void func_00367DB8_D348(void* texset, int idx, unsigned int* buf) __asm__("func_00367DB8");
 
+/**
+ * Redirects drawing into a locked texture.
+ *
+ * Builds a GS packet with func_00367DB8 that sets FRAME, the scissor and XYOFFSET for texture @p idx, and queues it on
+ * the render ring.
+ *
+ * @param idx  the texture id from cPS2GraphicsMan_AddLockedFrameTexture()
+ * @return 1
+ */
 // PORT: uncached (0x30000000) pointers held in int.
 // Uploads texture idx into the uncached buffer and queues a ring entry for it.
-extern "C" int func_0037D348(sPtGfx_D348* self, int idx)
+extern "C" int cPS2GraphicsMan_LockFrameToTexture(sPtGfx_D348* self, int idx)
 {
     unsigned int buf = self->bufAddr;
     unsigned int p = buf | 0x30000000;
@@ -6954,7 +7122,7 @@ extern "C" int func_0037D348(sPtGfx_D348* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D450);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RestoreFrameLock);
 #ifdef SKIP_ASM
 struct sPtRS_D450 {
     int f0;
@@ -7003,8 +7171,16 @@ struct sPtGfx_D450 {
     unsigned int fbp;               // 0x5A84
 };
 
+/**
+ * Points drawing back at the normal frame buffer after cPS2GraphicsMan_LockFrameToTexture().
+ *
+ * Writes a GS packet that restores FRAME (base, width, pixel format), the scissor from the screen rectangle and
+ * XYOFFSET to the screen centre, and queues it. Returns 0, where On Tour's bool version presumably reports success.
+ *
+ * @return 0
+ */
 // PORT: 64-bit `ulong` GS packet words; uncached (0x30000000) pointers held in int.
-extern "C" int func_0037D450(sPtGfx_D450* self)
+extern "C" int cPS2GraphicsMan_RestoreFrameLock(sPtGfx_D450* self)
 {
     unsigned int buf = self->bufAddr;
     ulong* p = (ulong*)(buf | 0x30000000);
@@ -7089,9 +7265,18 @@ extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int frameMask, int 
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D738__FPv);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
 #ifdef SKIP_ASM
-void* func_0037D738(void* self)
+/**
+ * Creates a texture the frame can later be rendered into.
+ *
+ * Calls func_00367CD0 on the texture manager (mpTextureMan, +0x18F4), which allocates the "LockTex" texture. The C
+ * declaration has only self: the width, height and texel format arrive in a1-a3 and pass through to func_00367CD0
+ * unchanged.
+ *
+ * @return the new texture id
+ */
+void* cPS2GraphicsMan_AddLockedFrameTexture(void* self)
 {
     return func_00367CD0(*(int*)((char*)self + 0x18f4));
 }
@@ -7154,7 +7339,7 @@ extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPar
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037D800);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_ShadowClearLockTexture);
 #ifdef SKIP_ASM
 struct sPtRS_D800 {
     int f0;
@@ -7195,9 +7380,18 @@ extern "C" void func_00367F18_D800(void* texset, int idx, float* color, unsigned
 // Release-build assert: expands to an empty do { } while (0); its loop notes keep the target's scheduling.
 #define ASSERT_D800(cond) do { } while (0)
 
+/**
+ * Clears a locked shadow texture to a colour.
+ *
+ * Builds a packet with func_00367F18 that draws a full-size sprite of @p color over texture @p idx, and queues it on
+ * the render ring.
+ *
+ * @param idx  the texture id
+ * @param color  the clear colour
+ */
 // PORT: uncached (0x30000000) pointers held in int.
-// Like func_0037D348 for the two-argument upload; the queued entry is flagged.
-extern "C" void func_0037D800(sPtGfx_D800* self, int idx, float* color)
+// Like cPS2GraphicsMan_LockFrameToTexture for the two-argument upload; the queued entry is flagged.
+extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(sPtGfx_D800* self, int idx, float* color)
 {
     unsigned int buf = self->bufAddr;
     unsigned int p = buf | 0x30000000;
@@ -7435,7 +7629,7 @@ extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const sPtVecDBE
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037DD20);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetScreenCoord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPtVecDD20 {
@@ -7471,7 +7665,16 @@ static inline int clampDD20(int n)
     return r;
 }
 
-extern "C" sPtVecDD20 func_0037DD20(sPtGfxDD20* self, const sPtVecDD20* point)
+/**
+ * Projects a world point to screen coordinates.
+ *
+ * Refreshes the clip matrices when stale, projects @p point (func_0037DEE0_DD20), subtracts the GS offset (2048 minus
+ * half the screen size) from x and y and truncates them to whole pixels, and clamps z to the depth range.
+ *
+ * @param point  the world-space point
+ * @return the screen position (x, y in pixels, z the depth)
+ */
+extern "C" sPtVecDD20 cPS2GraphicsMan_GetScreenCoord(sPtGfxDD20* self, const sPtVecDD20* point)
 {
     if (self->clipValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
@@ -7813,7 +8016,7 @@ extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, char* obj, in
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00380518);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderParticleEmitter);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -7874,8 +8077,17 @@ static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
     *pp = (unsigned long*)d;
 }
 
+/**
+ * Draws a static particle system.
+ *
+ * Does nothing while D_004A44F8 is set. Pushes the render state with the particle mode, copies 21 qwords of @p obj (the
+ * tParticleEmitter) into a packet followed by a VIF call of the microprogram, queues it on the render ring and pops the
+ * state.
+ *
+ * @param obj  the particle emitter (tParticleEmitter)
+ */
 // Sends obj's 0x15 quads to the VU1 program at address 0 under a pushed render state.
-extern "C" void func_00380518(sPtGfx_0518* self, sQuad_0518* obj)
+extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0518* obj)
 {
     if (D_004A44F8 != 0)
         return;
@@ -8329,7 +8541,7 @@ extern "C" void func_00380CE0(sPS2GfxView_0CE0* self, sTrail_0CE0* obj)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00381310);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSnowBoxFlakes);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sPtRS_1310 {
@@ -8459,8 +8671,16 @@ static inline void CopyQuads_1310(unsigned long** pp, const void* srcp, int n)
     *pp = (unsigned long*)d;
 }
 
+/**
+ * Draws the falling snow flakes of a snow box.
+ *
+ * Sets the snow render mode, multiplies the box matrix with the view (+0x5860) and writes the flake packet.
+ * func_002E55D8 calls it for snow-box type 0; cPS2GraphicsMan_RenderSnowBoxFluffs is the fluff variant.
+ *
+ * @param obj  the snow box data
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void func_00381310(sPtGfx_1310* self, sPtObj_1310* obj)
+extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(sPtGfx_1310* self, sPtObj_1310* obj)
 {
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0x140;
     self->top->fC &= 0xC0000000;
@@ -8517,7 +8737,7 @@ extern "C" void func_00381310(sPtGfx_1310* self, sPtObj_1310* obj)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003816F0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSnowBoxFluffs);
 #ifdef SKIP_ASM
 struct sPtRS_16F0 {
     int f0;                         // bits 6..9 = layer
@@ -8646,8 +8866,16 @@ static inline void CopyQuads_16F0(unsigned long** pp, const void* srcp, int n)
     *pp = (unsigned long*)d;
 }
 
+/**
+ * Draws the snow fluff (larger soft flakes) of a snow box.
+ *
+ * The same setup as cPS2GraphicsMan_RenderSnowBoxFlakes (RenderSnowBoxFlakes): snow render mode, box matrix times the view (+0x5860), then
+ * the packet. func_002E55D8 calls it for snow-box type 1.
+ *
+ * @param obj  the snow box data
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void func_003816F0(sPtGfx_16F0* self, sPtObj_16F0* obj)
+extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(sPtGfx_16F0* self, sPtObj_16F0* obj)
 {
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0x140;
     self->top->fC &= 0xC0000000;
@@ -8954,7 +9182,7 @@ extern "C" void cPS2GraphicsMan_RenderSpline(sPtGfx_1F10* self, sMat_1F10* BezMa
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00382170);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawSphere);
 #ifdef SKIP_ASM
 struct sPt2170 {
     float x, y, z, w;
@@ -9123,7 +9351,19 @@ static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
     return r;
 }
 
-extern "C" void func_00382170(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, float radius, int segs)
+/**
+ * Draws a debug sphere.
+ *
+ * Transforms @p pos into view space and returns when it is more than 3000 units away. @p segs > 0 forces the step
+ * through the circle table; otherwise the step is 4 beyond 2000 units, 2 beyond 750 and 1 nearer. The first call fills
+ * the static circle table D_004FFBC0.
+ *
+ * @param pos  the centre
+ * @param col  the colour
+ * @param radius  the radius
+ * @param segs  the detail step, or 0 to pick it from the distance
+ */
+extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, float radius, int segs)
 {
     sMat2170 m;
     int step;
@@ -11760,7 +12000,7 @@ void func_00387EC0_impl(sPtGfx_7EC0* self, sVtx_7EC0** tbl, int start, int n, in
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003883B8);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderBoardWake);
 #ifdef SKIP_ASM
 struct sPtRS_83B8 {
     int f0;                         // bits 6..9 = layer
@@ -11803,8 +12043,23 @@ extern sPtRS_83B8 D_00501420_rs __asm__("sDrawState_s_defaultDrawState");
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 extern "C" void func_003885E0(void* self, void* a, void* b, void* c, void* d, int i0, int i1, float f0, float f1);
 
+/**
+ * Draws a board's snow wake.
+ *
+ * Sets the wake render mode, clears the 0x30-byte scratch at D_004A5B84 and calls func_003885E0 for each pair of
+ * adjacent segments (0-1, 1-2, ...), then queues the packet on the render ring. The C declares the three index
+ * arguments as pointers; they are ints passed straight through.
+ *
+ * @param verts  the wake vertices, one array per segment
+ * @param numSegmentsWide  the number of segments across
+ * @param startIndex  the first index
+ * @param numIndices  the number of indices
+ * @param stripLength  the strip length
+ * @param alphaMultiplier  the alpha multiplier
+ * @param alphaDelta  the alpha change along the strip
+ */
 // PORT: uncached (0x30000000) pointers held in int.
-extern "C" void func_003883B8(sPtGfx_83B8* self, void* a1, int n, void* a3, void* a4, void* a5, float f0, float f1)
+extern "C" void cPS2GraphicsMan_RenderBoardWake(sPtGfx_83B8* self, void* verts, int numSegmentsWide, void* startIndex, void* numIndices, void* stripLength, float alphaMultiplier, float alphaDelta)
 {
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
     self->top->fC &= 0xC0000000;
@@ -11814,8 +12069,8 @@ extern "C" void func_003883B8(sPtGfx_83B8* self, void* a1, int n, void* a3, void
     unsigned int buf = self->bufAddr;
     MEM_fill((void*)D_004A5B84, 0, 0x30);
     int i;
-    for (i = 0; i < n - 1; i++) {
-        func_003885E0(self, a1, a3, a4, a5, i, i + 1, f0, f1);
+    for (i = 0; i < numSegmentsWide - 1; i++) {
+        func_003885E0(self, verts, startIndex, numIndices, stripLength, i, i + 1, alphaMultiplier, alphaDelta);
     }
     sPtRing_83B8* ring = self->ring;
     unsigned int next = self->bufAddr;
@@ -11859,7 +12114,7 @@ static inline unsigned int Unpack_85E0(int addr, int num, int flg, unsigned int 
     return addr | ((num << 16) | (flg << 15)) | cmd;
 }
 
-// The unit declares func_003885E0 with void* parameters (caller func_003883B8); bind the real types.
+// The unit declares func_003885E0 with void* parameters (caller cPS2GraphicsMan_RenderBoardWake); bind the real types.
 extern "C" void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ring, int count, int i0, int i1,
                                    float t, float dt) __asm__("func_003885E0");
 
@@ -11983,7 +12238,16 @@ void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ri
 }
 #endif
 
-INCLUDE_ASM("render/particle", func_003889F0);
+/**
+ * Reads the colour of a texture at a texture coordinate.
+ *
+ * Asm only so far. Looks the texture up in the texture manager's table (+0x18F4); a missing texture gives the colour 1,
+ * 1, 0, 1. Otherwise it scales u and v by the texture's width and height (from the TEX0 log2 fields), clamps them to
+ * the texture and reads the texel. The filter argument is not used: $7 is overwritten before it is read.
+ *
+ * @return the colour, through the hidden result pointer
+ */
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTexel);
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetScreenClearColour);
@@ -12007,14 +12271,20 @@ extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, cons
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00389118);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_loadexecpurge);
 #ifdef SKIP_ASM
 extern "C" void func_00424880(int);
 extern "C" void RemoveIntcHandler(int, int);
 extern "C" void func_00424950(int);
 extern "C" void RemoveDmacHandler(int, int);
 
-extern "C" void func_00389118(void* self)
+/**
+ * Removes the renderer's interrupt handlers before another executable is loaded.
+ *
+ * Calls func_00424880(2) and removes the INTC 2 handler (+0x5AC0), then func_00424950(1) and removes the DMAC 0 handler
+ * (+0x5AC4): the same first steps as cPS2GraphicsMan_Purge (Purge), leaving the threads and memory alone.
+ */
+extern "C" void cPS2GraphicsMan_loadexecpurge(void* self)
 {
     func_00424880(2);
     RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));

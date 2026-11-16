@@ -961,7 +961,7 @@ extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212208);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
@@ -984,9 +984,18 @@ struct cMCOverlayManager_2208 {
     int mSelectedDevice;        // 0x428
 };
 
+/**
+ * Per-frame update of the autosave overlay: starts the save and watches the memory card while it runs.
+ *
+ * In state 1 (mState, +0x1C0) with nothing in progress (mIsProcessing, +0x1A8) it starts the save on the memory-card
+ * overlay manager (func_0023CAE8(pMC, 1, 0)), sets mIsProcessing, mIsSavePressed (+0x1DC) and mIsOverwriteOK (+0x1F0)
+ * and moves to state 3. In state 3, if the selected card is no longer plugged in, valid and formatted, it clears
+ * mIsSavePressed, sets mIsCancelPressed (+0x1E4), clears mIsProcessing and moves to state 6. It always finishes with
+ * the memory-card base update func_001D8DE0.
+ */
 // cOVState_AUTOSAVE::onUpdate (On Tour name); cFEMemCard fields: 0x1A8 mIsProcessing, 0x1C0 mState,
 // 0x1DC mIsSavePressed, 0x1E4 mIsCancelPressed, 0x1F0 mIsOverwriteOK.
-extern "C" void func_00212208(void* self)
+extern "C" void cOVState_AUTOSAVE_onUpdate(void* self)
 {
     cMCOverlayManager_2208* pMC = (cMCOverlayManager_2208*)cSSXApp_getMCManager(SSXApp);
     if (*(int*)((char*)self + 0x1C0) == 1 && !*(int*)((char*)self + 0x1A8)) {

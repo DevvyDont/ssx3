@@ -42,5 +42,5 @@ INCLUDE_ASM("fe/ovstatelodge3", cOVState_TOPTIMES_onWidgetMenu);
 
 INCLUDE_ASM("fe/ovstatelodge3", cOVState_TOPTIMES_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F8118);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_TOPTIMES_handleNext);
 

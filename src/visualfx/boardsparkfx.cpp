@@ -33,7 +33,7 @@ extern "C" void cRider_cRider(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(void* self);
 void* func_002F7A68(void* self);
-extern "C" void func_0036CCB8(void* self);
+extern "C" void tParticleEmitter_randomize(void* self);
 extern "C" void tParticleEmitter_setSize(void* self, float a, float b, float c);
 extern "C" void tParticleEmitter_setLife(void* self, float a, float b);
 extern "C" void tParticleEmitter_stopMotion(void* self);
@@ -182,7 +182,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(528, str_mEmitter, 0, 0));
     self->params = (sBsParams*)cMemMan_alloc(216, str_mEmitterData, 0, 0);
     self->gfx = func_002F7A68(cMemMan_alloc(336, str_Board_Spark_Emitter, 0, 0));
-    func_0036CCB8(self->gfx);
+    tParticleEmitter_randomize(self->gfx);
     sBsVec4 force;
     force.x = zeroF;
     force.y = zeroF;
@@ -415,9 +415,9 @@ extern char cRenderStateMan_m_state[];
 extern "C" void func_0036D428(void* self, float val);
 int func_0011FE98(void* self);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
-extern "C" void func_0036D318(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
+extern "C" void tParticleEmitter_setColour(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
 extern "C" void func_0036D1F0(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d);
-extern "C" void func_0036CEF8(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c);
+extern "C" void tParticleEmitter_setPlane(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sV4_ABC8 Scale_ABC8(const sV4_ABC8& v, float s)
@@ -605,14 +605,14 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
             b.x = 255.0f; b.y = 0.0f; b.z = 255.0f; b.w = 102.0f;
             c.x = 0.0f; c.y = 0.0f; c.z = 0.0f; c.w = 0.0f;
             d.x = 0.0f; d.y = 0.0f; d.z = 0.0f; d.w = 0.0f;
-            func_0036D318(self->gfx, &a, &b, &c, &d, 0.1940000057220459f);
+            tParticleEmitter_setColour(self->gfx, &a, &b, &c, &d, 0.1940000057220459f);
         } else {
             sV4_ABC8 a, b, c, d;
             a.x = 77.0f; a.y = 77.0f; a.z = 255.0f; a.w = 153.0f;
             b.x = 255.0f; b.y = 51.0f; b.z = 51.0f; b.w = 102.0f;
             c.x = 0.0f; c.y = 0.0f; c.z = 0.0f; c.w = 0.0f;
             d.x = 0.0f; d.y = 0.0f; d.z = 0.0f; d.w = 0.0f;
-            func_0036D318(self->gfx, &a, &b, &c, &d, 0.1940000057220459f);
+            tParticleEmitter_setColour(self->gfx, &a, &b, &c, &d, 0.1940000057220459f);
         }
         {
             sV4_ABC8 a, b, c, d;
@@ -625,11 +625,11 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
         if (isRailSlide) {
             sV4_ABC8 a = Scale_ABC8(side, 10.0f);
             sV4_ABC8 b = Scale_ABC8(front, 10.0f);
-            func_0036CEF8(self->gfx, &particlePosition, &a, &b);
+            tParticleEmitter_setPlane(self->gfx, &particlePosition, &a, &b);
         } else {
             sV4_ABC8 a = Scale_ABC8(side, 15.0f);
             sV4_ABC8 b = Scale_ABC8(front, 90.0f);
-            func_0036CEF8(self->gfx, &particlePosition, &a, &b);
+            tParticleEmitter_setPlane(self->gfx, &particlePosition, &a, &b);
         }
     }
     if (self->f74 && 0.699999988079071f < Rand_ABC8()) {
@@ -647,7 +647,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
 //100%
 INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_render);
 #ifdef SKIP_ASM
-extern "C" void func_00371688(void* self, int a1);
+extern "C" void cDynamicColourEmitter_render(void* self, int a1);
 
 struct sRS_B478 {
     int v[5];
@@ -709,7 +709,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
 {
     char* gfx = *(char**)(((char*)self) + 0x20);
     if (*(int*)(gfx + 0x1E0) > 0) {
-        func_00371688(gfx, 7);
+        cDynamicColourEmitter_render(gfx, 7);
     }
     if (*(int*)(((char*)self) + 0x70) != 0) {
         push_B478((sRenderCtx_B478*)GrMan);

@@ -146,7 +146,7 @@ INCLUDE_ASM("replay/replay2", cInSeq_UpdateFrame);
 
 INCLUDE_ASM("replay/replay2", cInSeq_ReadyPlayer);
 
-INCLUDE_ASM("replay/replay2", func_002729A8);
+INCLUDE_ASM("replay/replay2", cInSeq_RecyclePlayer);
 
 INCLUDE_ASM("replay/replay2", cInSeq_Play);
 

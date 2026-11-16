@@ -1417,7 +1417,7 @@ extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int numblur
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CCB8);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_randomize);
 #ifdef SKIP_ASM
 int BXrand();
 
@@ -1428,7 +1428,12 @@ static inline float randf_0036CCB8(float a, float b)
     return a + (b - a) * (u.f - 1.0f);
 }
 
-extern "C" void func_0036CCB8(tParticleEmitter* self)
+/**
+ * Gives the particle system new random seeds.
+ *
+ * Sets SeedX0, SeedX1, SeedV0, SeedV1, SeedV2, SeedC0, SeedC1, SeedSize and SeedLife each to randf_0036CCB8(1.0, 2.0).
+ */
+extern "C" void tParticleEmitter_randomize(tParticleEmitter* self)
 {
     self->SeedX0 = randf_0036CCB8(1.0f, 2.0f);
     self->SeedX1 = randf_0036CCB8(1.0f, 2.0f);
@@ -1499,7 +1504,7 @@ extern "C" void func_0036CE58(tParticleEmitter* particleEmitter, long long *poin
 }
 #endif
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE80);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (a - b). Same body as vu0SubGM (defined later in the unit).
 static inline sGfxVec4 vu0Sub_CE80(const sGfxVec4& a, const sGfxVec4& b)
@@ -1533,7 +1538,16 @@ static inline sGfxVec4 vu0Scale_CE80(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CE80(tParticleEmitter* self, sGfxVec4* start, sGfxVec4* end)
+/**
+ * Makes particles start along a line segment.
+ *
+ * Sets X0 to 2 * @p start - @p end, Xr0 to @p end - @p start and Xr1 to zero, so the random emission offsets span the
+ * segment (the same scheme as tParticleEmitter_setPlane() with one axis).
+ *
+ * @param start  one end of the segment
+ * @param end  the other end
+ */
+extern "C" void tParticleEmitter_setLine(tParticleEmitter* self, sGfxVec4* start, sGfxVec4* end)
 {
     *(sGfxVec4*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
     *(sGfxVec4*)&self->Xr0 = vu0Sub_CE80(*end, *start);
@@ -1542,7 +1556,7 @@ extern "C" void func_0036CE80(tParticleEmitter* self, sGfxVec4* start, sGfxVec4*
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CEF8);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setPlane);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector add).
 static inline sGfxVec4 vu0AddGM(const sGfxVec4& a, const sGfxVec4& b)
@@ -1591,7 +1605,17 @@ static inline sGfxVec4 vu0ScaleGM(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CEF8(tParticleEmitter* self, sGfxVec4* center, sGfxVec4* axis0, sGfxVec4* axis1)
+/**
+ * Makes particles start on a parallelogram given by a centre and two axes.
+ *
+ * Sets X0 to @p center - 3 * (@p axis0 + @p axis1), Xr0 to 2 * @p axis0 and Xr1 to 2 * @p axis1; the emitter adds
+ * random multiples of Xr0 and Xr1 to X0.
+ *
+ * @param center  the centre
+ * @param axis0  the first half axis
+ * @param axis1  the second half axis
+ */
+extern "C" void tParticleEmitter_setPlane(tParticleEmitter* self, sGfxVec4* center, sGfxVec4* axis0, sGfxVec4* axis1)
 {
     *(sGfxVec4*)&self->X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
     *(sGfxVec4*)&self->Xr0 = vu0ScaleGM(*axis0, 2.0f);
@@ -1602,9 +1626,18 @@ extern "C" void func_0036CEF8(tParticleEmitter* self, sGfxVec4* center, sGfxVec4
 extern cQuad128 t4vect_Zero;
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CFA8);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setMotion);
 #ifdef SKIP_ASM
-extern "C" void func_0036CFA8(tParticleEmitter* self, sGfxVec4* delta, float time)
+/**
+ * Sets how far the emission point drifts over a time.
+ *
+ * Sets Xi to @p delta * TimeStep / (@p time * Damp), the displacement per particle step; tParticleEmitter_stopMotion()
+ * clears it again.
+ *
+ * @param delta  the total displacement
+ * @param time  the time it takes
+ */
+extern "C" void tParticleEmitter_setMotion(tParticleEmitter* self, sGfxVec4* delta, float time)
 {
     *(sGfxVec4*)&self->Xi = vu0DivGM(vu0ScaleGM(*delta, self->TimeStep), time * self->Damp);
 }
@@ -1877,13 +1910,25 @@ extern "C" void func_0036D1F0(tParticleEmitter* self, const sGmVec4* baseVel, co
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D318);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setColour);
 #ifdef SKIP_ASM
+/**
+ * Sets the particles' colour over their life.
+ *
+ * Sets C0 to @p colStart - 1.5 * (@p colRand0 + @p colRand1), Ct to (@p colEnd - @p colStart) / (@p time * Damp), and
+ * Cr0/Cr1 to the two random ranges.
+ *
+ * @param colStart  the start colour
+ * @param colEnd  the colour after @p time
+ * @param colRand0  the first random colour range
+ * @param colRand1  the second random colour range
+ * @param time  the time to go from start to end colour
+ */
 // PORT: PS2-only VU0 inline asm (vector add).
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-extern "C" void func_0036D318(tParticleEmitter* self, sGfxVec4* colStart, sGfxVec4* colEnd, sGfxVec4* colRand0, sGfxVec4* colRand1, float time)
+extern "C" void tParticleEmitter_setColour(tParticleEmitter* self, sGfxVec4* colStart, sGfxVec4* colEnd, sGfxVec4* colRand0, sGfxVec4* colRand1, float time)
 {
     *(sGfxVec4*)&self->C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
     *(sGfxVec4*)&self->Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * self->Damp);
@@ -1907,11 +1952,18 @@ extern "C" void tParticleEmitter_setTime(tParticleEmitter* self, float val)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D3E8);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_step);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3E8(tParticleEmitter* self, float val)
+/**
+ * Advances the particle system's clock.
+ *
+ * Adds @p deltaTime * Damp to EndTime.
+ *
+ * @param deltaTime  the elapsed time
+ */
+extern "C" void tParticleEmitter_step(tParticleEmitter* self, float deltaTime)
 {
-    self->EndTime += val * self->Damp;
+    self->EndTime += deltaTime * self->Damp;
 }
 #endif
 
@@ -1953,7 +2005,7 @@ struct sGmAnim_D428 {
     sGmVec4_D428 vel;       // 0xE0
 };
 
-extern "C" void func_0036D3E8(tParticleEmitter* self, float val);
+extern "C" void tParticleEmitter_step(tParticleEmitter* self, float val);
 // PORT: func_0036D400 returns the new seed in $f0 (float); the unit defines it as void, so the
 // float-returning view binds to the same symbol through an asm label. The unused call_value result
 // is what keeps $f0 busy at the loop-exit test (product in $f1), so jump2 does not cross-jump the
@@ -1979,7 +2031,7 @@ static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
 extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt) __asm__("func_0036D428");
 extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt)
 {
-    func_0036D3E8((tParticleEmitter*)self, dt);
+    tParticleEmitter_step((tParticleEmitter*)self, dt);
     for (;;) {
         float step = self->step;
         float time = self->time;
@@ -2174,7 +2226,7 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setupEmitter);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float a, float b, float c);
 extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float a, float b);
-extern "C" void func_0036CCB8(tParticleEmitter* self);
+extern "C" void tParticleEmitter_randomize(tParticleEmitter* self);
 extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self);
 extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
 struct sGmV4_0058 {
@@ -2185,9 +2237,9 @@ struct sGmV4_0058 {
     sGmV4_0058(const sGmV4_0058& o) { *(cQuad128*)this = *(const cQuad128*)&o; }
 } __attribute__((aligned(16)));
 
-// The unit's func_0036D318 takes pointers; this caller passes the four corners as references to temporaries.
-extern "C" void func_0036D318_0058(void* self, const sGmV4_0058& a, const sGmV4_0058& b, const sGmV4_0058& c,
-                                   const sGmV4_0058& d, float t) __asm__("func_0036D318");
+// The unit's tParticleEmitter_setColour takes pointers; this caller passes the four corners as references to temporaries.
+extern "C" void tParticleEmitter_setColour_0058(void* self, const sGmV4_0058& a, const sGmV4_0058& b, const sGmV4_0058& c,
+                                   const sGmV4_0058& d, float t) __asm__("tParticleEmitter_setColour");
 
 struct sGmMtx_0058 {
     float m[4][4];
@@ -2283,10 +2335,10 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
  * boundBox, seed)).
  *
  * From the tParticleData: setSize(Size, SizeFinal, SizeR) and setLife(Life -/+ LifeR / 2); a negative @p seed randomises
- * the emitter (func_0036CCB8), otherwise SeedX0 = @p seed. After stopMotion, X0 is the transformed offset (OffX.. OffZ,
+ * the emitter (tParticleEmitter_randomize), otherwise SeedX0 = @p seed. After stopMotion, X0 is the transformed offset (OffX.. OffZ,
  * w 1) and Xr0 / Xr1 the transformed position spreads R0 / R1, with X0 moved back by 1.5 * (Xr0 + Xr1); V0 and
  * Vr0..Vr2 are the transformed velocity and its three spreads divided by Damp, V0 moved back by 1.5 * (Vr0 + Vr1 +
- * Vr2). The start, end and two random colours (scaled by 128) go to func_0036D318 with the maximum life, then
+ * Vr2). The start, end and two random colours (scaled by 128) go to tParticleEmitter_setColour with the maximum life, then
  * setTime(Duration < 0 ? maximum life : 0) and calcBoundBox (tParticleEmitter_calcBoundBox) into @p boundBox.
  *
  * The source comment above the function ("camera parameters ... frustum planes") does not describe this code.
@@ -2303,7 +2355,7 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* tran
     float halfSpread = *(float*)((char*)particleData + 0x1C) * 0.5f;
     tParticleEmitter_setLife(self, *(float*)((char*)particleData + 0x14) - halfSpread, *(float*)((char*)particleData + 0x14) + halfSpread);
     if (seed < 0.0f) {
-        func_0036CCB8(self);
+        tParticleEmitter_randomize(self);
     } else {
         self->SeedX0 = seed;
     }
@@ -2317,7 +2369,7 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* tran
     *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x60), *(float*)((char*)particleData + 0x64), *(float*)((char*)particleData + 0x68), 0.0f)), *(float*)((char*)particleData + 0xC));
     *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x6C), *(float*)((char*)particleData + 0x70), *(float*)((char*)particleData + 0x74), 0.0f)), *(float*)((char*)particleData + 0xC));
     vu0SubInGM_0058(*(sGmV4_0058*)&self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)&self->Vr0, *(sGmV4_0058*)&self->Vr1), *(sGmV4_0058*)&self->Vr2), 1.5f));
-    func_0036D318_0058(self,
+    tParticleEmitter_setColour_0058(self,
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x88), *(float*)((char*)particleData + 0x8C), *(float*)((char*)particleData + 0x90), *(float*)((char*)particleData + 0x84)), 128.0f),
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x98), *(float*)((char*)particleData + 0x9C), *(float*)((char*)particleData + 0xA0), *(float*)((char*)particleData + 0x94)), 128.0f),
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0xA8), *(float*)((char*)particleData + 0xAC), *(float*)((char*)particleData + 0xB0), *(float*)((char*)particleData + 0xA4)), 128.0f),
@@ -2435,7 +2487,7 @@ extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
     if (timer < 0.0f) {
         func_0036D428(((char*)self) + 0x10, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else {
-        func_0036D3E8((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        tParticleEmitter_step((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
         self->Duration -= 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
         if (self->Duration < 0.0f) {
             self->Duration = 0.0f;

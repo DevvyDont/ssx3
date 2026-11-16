@@ -690,7 +690,7 @@ extern "C" void cOVState_MAP_onInputAlways(void* self, sObj00209300* pInput)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00209370);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onUpdate);
 #ifdef SKIP_ASM
 struct sCol_9370 {
     float a, r, g, b;
@@ -764,7 +764,18 @@ struct cFEAsyncManager;
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 extern "C" void cOVState_onUpdate(void* self);
 
-extern "C" void func_00209370(sMap_9370* self)
+/**
+ * Per-frame update of the mountain map overlay: fades the map picture in once it has loaded and pulses the player
+ * indicators.
+ *
+ * Calls cOVState_onUpdate() first and stops there while +0xDC is set. Once the picture is loaded (+0xC8) its alpha
+ * (+0xCC) rises by 0.1 per frame up to 1.0 and the picture object (+0xD0) is shown; until then the alpha is 0 and
+ * the object hidden. When the async file manager reports file +0xC4 with status 3 and the picture is not yet
+ * loaded, the file's data is attached to the picture object and it is marked loaded. The indicator size (+0x1CC)
+ * swings between 18 and 21.5 at 0.16 per frame (+0x1D0); each of the 8 indicator objects (+0x104) is placed at its
+ * base position (+0x124) minus half the growth, so it stays centred, and scaled to that size.
+ */
+extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
 {
     cOVState_onUpdate(self);
     if (self->busy != 0) {

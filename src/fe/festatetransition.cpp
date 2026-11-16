@@ -73,13 +73,22 @@ extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetransition", func_001946A8);
+INCLUDE_ASM("fe/festatetransition", cFEStateTransition_handleEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
-extern "C" int func_001946A8(void* self, int which)
+/**
+ * Starts one of the two transition animations on request.
+ *
+ * For @p which 0 it marks the screen at +0x48 (its word +0x54 |= 0x40), plays it from frame 0 and plays menu sound
+ * 15; for 1 it does the same with the screen at +0x4C, without a sound. Always returns 0.
+ *
+ * @param which  the event id (On Tour: int msg); only 0 and 1 do anything
+ * @return 0
+ */
+extern "C" int cFEStateTransition_handleEvent(void* self, int which)
 {
     if (which == 0) {
         void* screen = *(void**)((char*)self + 0x48);

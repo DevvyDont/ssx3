@@ -2309,7 +2309,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVSound_soundInitialize__FPv);
 /**
  * Does nothing: the overlay sound interface needs no set-up.
  *
- * Empty, like On Tour's cOVSound::soundInitialize. Vtable slot 3 of cOVSound_vtbl, after func_001A2F70 (slot 2, which
+ * Empty, like On Tour's cOVSound::soundInitialize. Vtable slot 3 of cOVSound_vtbl, after cOVSound_playSound (slot 2, which
  * plays the menu sounds) and before cOVSound_soundShutdown.
  */
 void cOVSound_soundInitialize(void* self)

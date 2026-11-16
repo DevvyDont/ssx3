@@ -44,13 +44,21 @@ extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, i
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002758C0);
+INCLUDE_ASM("scripter/datamanager", cDataManager__cDataManager);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern char cDataManager_vtbl[];
 
-extern "C" void func_002758C0(void* self, int flags)
+/**
+ * Destroys the data manager.
+ *
+ * Restores cDataManager_vtbl (its vptr is at +0xC), frees the instance heap at +0x4 with cMemMan_free() when there is
+ * one, and frees the object with operator_delete() when bit 0 of @p flags is set.
+ *
+ * @param flags  the destructor flags (bit 0: free the memory)
+ */
+extern "C" void cDataManager__cDataManager(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cDataManager_vtbl;
     void* instanceHeap = *(void**)((char*)self + 0x4);
@@ -2172,7 +2180,7 @@ extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags);
 extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
-extern "C" void func_002758C0(void* self, int flags);
+extern "C" void cDataManager__cDataManager(void* self, int flags);
 extern "C" void cVidEngine__cVidEngine(void* self, int flags);
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);
 
@@ -2223,7 +2231,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
             }
         } while (0);
     }
-    func_002758C0(((char*)self) + 0x51C, 0);
+    cDataManager__cDataManager(((char*)self) + 0x51C, 0);
     cVidEngine__cVidEngine(((char*)self) + 0x500, 0);
     cBXScriptEngine__cBXScriptEngine(((char*)self), flags);
 }

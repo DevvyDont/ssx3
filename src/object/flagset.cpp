@@ -872,7 +872,7 @@ extern "C" void cFlagManager_render(sFlagSetOwner* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C848);
+INCLUDE_ASM("object/flagset", cFlagManager_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sFlagSetElem_C848 {
     char data[0x188];
@@ -885,7 +885,15 @@ struct sFlagSet_C848 {
 
 extern "C" void func_0034C2E0(void* elem, void* arg);
 
-extern "C" void func_0034C848(sFlagSet_C848* self, void* stream)
+/**
+ * Saves the flag manager's flags into a replay frame.
+ *
+ * Calls func_0034C2E0 on each of its 15 flag records with @p stream; cFlagManager_readFromReplayFrame() reads them
+ * back.
+ *
+ * @param stream  the replay frame
+ */
+extern "C" void cFlagManager_writeToReplayFrame(sFlagSet_C848* self, void* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -895,7 +903,7 @@ extern "C" void func_0034C848(sFlagSet_C848* self, void* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C898);
+INCLUDE_ASM("object/flagset", cFlagManager_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sFlagSetElem_C898 {
     char data[0x188];
@@ -908,7 +916,14 @@ struct sFlagSet_C898 {
 
 extern "C" void func_0034C378(void* elem, void* arg);
 
-extern "C" void func_0034C898(sFlagSet_C898* self, void* stream)
+/**
+ * Restores the flag manager's flags from a replay frame.
+ *
+ * Calls func_0034C378 on each of its 15 flag records with @p stream, the inverse of cFlagManager_writeToReplayFrame().
+ *
+ * @param stream  the replay frame
+ */
+extern "C" void cFlagManager_readFromReplayFrame(sFlagSet_C898* self, void* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {

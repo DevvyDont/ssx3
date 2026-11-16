@@ -1106,9 +1106,16 @@ void cGraphicsMan_SetDTV(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00393FB0__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_GetDTV__FPv);
 #ifdef SKIP_ASM
-int func_00393FB0(void* self)
+/**
+ * Base-class default: reports that no DTV (digital TV) output is in use.
+ *
+ * Returns 0. cPS2GraphicsMan replaces this slot (9) with its own func_00395320__FPv.
+ *
+ * @return 0 (false)
+ */
+int cGraphicsMan_GetDTV(void* self)
 {
     return 0;
 }
@@ -1167,18 +1174,33 @@ void func_00394008(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394010__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_IsRenderReady__FPv);
 #ifdef SKIP_ASM
-int func_00394010(void* self)
+/**
+ * Base-class default: reports that the renderer is ready for a new frame.
+ *
+ * Returns 1. The module render functions call slot 17 and skip the frame while it returns 0; cPS2GraphicsMan overrides
+ * it with cPS2GraphicsMan_IsRenderReady__FPv.
+ *
+ * @return 1 (true)
+ */
+int cGraphicsMan_IsRenderReady(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394018__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_IsRenderIdle__FPv);
 #ifdef SKIP_ASM
-int func_00394018(void* self)
+/**
+ * Base-class default: reports that the renderer has no work in flight.
+ *
+ * Returns 1. cGraphicsMan_FlushRenderer() polls slot 18; cPS2GraphicsMan overrides it with cPS2GraphicsMan_IsRenderIdle__FPv.
+ *
+ * @return 1 (true)
+ */
+int cGraphicsMan_IsRenderIdle(void* self)
 {
     return 0x1;
 }
@@ -1480,9 +1502,18 @@ extern "C" float func_00394290(cPS2GraphicsMan* base, int idx) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942A0);
+INCLUDE_ASM("render/font", cGraphicsMan_GetTexel);
 #ifdef SKIP_ASM
-extern "C" void* func_003942A0(void* self)
+/**
+ * Base-class default for reading one texel: returns a fixed colour without looking at any texture.
+ *
+ * The C parameter called self is really the hidden pointer to the returned tARGB (the object pointer and the texture
+ * id, u, v and filter arguments follow it in registers and are ignored). It stores 1.0 in words 0, 1 and 3 and 0 in
+ * word 2 and returns the same pointer. cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_GetTexel.
+ *
+ * @return the result pointer
+ */
+extern "C" void* cGraphicsMan_GetTexel(void* self)
 {
     *(float*)self = 1.0f;
     *(float*)((char*)self + 0x4) = 1.0f;
@@ -1505,9 +1536,14 @@ void cGraphicsMan_RemoveScreenGrabTexture(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942C8__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_TakeScreenGrab__FPv);
 #ifdef SKIP_ASM
-void func_003942C8(void* self)
+/**
+ * Base-class default for capturing the screen into a screen-grab texture: does nothing.
+ *
+ * cPS2GraphicsMan overrides slot 61 with cPS2GraphicsMan_TakeScreenGrab.
+ */
+void cGraphicsMan_TakeScreenGrab(void* self)
 {
 }
 #endif
@@ -1708,9 +1744,14 @@ extern "C" unsigned int func_00394598(cPS2GraphicsMan* ps2GraphicsMan) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945B8__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_ClearProjTextures__FPv);
 #ifdef SKIP_ASM
-void func_003945B8(void* self)
+/**
+ * Base-class default for forgetting the projected textures of the frame: does nothing.
+ *
+ * cPS2GraphicsMan overrides slot 66 with cPS2GraphicsMan_ClearProjTextures__FPv, which zeroes mNumProjTextures.
+ */
+void cGraphicsMan_ClearProjTextures(void* self)
 {
 }
 #endif
@@ -1752,17 +1793,27 @@ void func_003945D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945E0__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_RenderBoardWake__FPv);
 #ifdef SKIP_ASM
-void func_003945E0(void* self)
+/**
+ * Base-class default for drawing a board wake: does nothing.
+ *
+ * cPS2GraphicsMan overrides slot 90 with cPS2GraphicsMan_RenderBoardWake, which cBoardWakeFX_render() calls.
+ */
+void cGraphicsMan_RenderBoardWake(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945E8__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_SetShinyBoarder__FPv);
 #ifdef SKIP_ASM
-void func_003945E8(void* self)
+/**
+ * Base-class default for the shiny-boarder (chrome rider) flag: does nothing.
+ *
+ * cPS2GraphicsMan overrides slot 98 with cPS2GraphicsMan_SetShinyBoarder__FPvi, which stores the flag.
+ */
+void cGraphicsMan_SetShinyBoarder(void* self)
 {
 }
 #endif
@@ -1784,9 +1835,14 @@ extern "C" char* func_003945F8(cPS2GraphicsMan* base, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394610__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_DrawCharShadowModel__FPv);
 #ifdef SKIP_ASM
-void func_00394610(void* self)
+/**
+ * Base-class default for drawing a character's shadow model: does nothing.
+ *
+ * cPS2GraphicsMan overrides slot 100 with cPS2GraphicsMan_DrawCharShadowModel, which cAnimModel_rendershadow() calls.
+ */
+void cGraphicsMan_DrawCharShadowModel(void* self)
 {
 }
 #endif
@@ -1856,9 +1912,14 @@ void cGraphicsMan_ResolveCharModel(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394658__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_InitCharModelPart__FPv);
 #ifdef SKIP_ASM
-void func_00394658(void* self)
+/**
+ * Base-class default for preparing one part of a character model: does nothing.
+ *
+ * cAnimModel_compile() calls slot 110; cPS2GraphicsMan's override cPS2GraphicsMan_InitCharModelPart__FPv is empty too.
+ */
+void cGraphicsMan_InitCharModelPart(void* self)
 {
 }
 #endif
@@ -1892,9 +1953,17 @@ void func_00394670(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394678__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_getCurrentFrameCount__FPv);
 #ifdef SKIP_ASM
-int func_00394678(void* self)
+/**
+ * Base-class default for the rendered-frame counter: always 0.
+ *
+ * cPS2GraphicsMan overrides slot 114 with cPS2GraphicsMan_getCurrentFrameCount__FPv, which returns its frame counter; the AI uses the value to
+ * tell when a rider was last drawn.
+ *
+ * @return 0
+ */
+int cGraphicsMan_getCurrentFrameCount(void* self)
 {
     return 0;
 }
@@ -1974,9 +2043,15 @@ extern "C" void func_003946D8(cPS2GraphicsMan* ps2GraphicsMan) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003946E8__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_loadexecpurge__FPv);
 #ifdef SKIP_ASM
-void func_003946E8(void* self)
+/**
+ * Base-class default for the shutdown done before loading another executable: does nothing.
+ *
+ * cSSXApp_loadexecpurge__FPv() calls slot 119; cPS2GraphicsMan overrides it with cPS2GraphicsMan_loadexecpurge, which removes its
+ * interrupt handlers.
+ */
+void cGraphicsMan_loadexecpurge(void* self)
 {
 }
 #endif
@@ -2273,99 +2348,176 @@ extern "C" void func_00394B98(cPS2BezierMan* self, int a, int b, int c, int d, i
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BC0__FPvf);
+INCLUDE_ASM("render/font", cPS2BezierMan_SetNearLOD__FPvf);
 #ifdef SKIP_ASM
-void func_00394BC0(void* self, float val)
+/**
+ * Sets the near level-of-detail distance for the Bezier patches.
+ *
+ * Stores @p nearLOD at +0x33C (On Tour mNearLODcm).
+ *
+ * @param nearLOD  the near LOD distance
+ */
+void cPS2BezierMan_SetNearLOD(void* self, float nearLOD)
 {
-    *(float*)((char*)self + 0x33C) = val;
+    *(float*)((char*)self + 0x33C) = nearLOD;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BC8__FPvf);
+INCLUDE_ASM("render/font", cPS2BezierMan_SetFarLOD__FPvf);
 #ifdef SKIP_ASM
-void func_00394BC8(void* self, float val)
+/**
+ * Sets the far level-of-detail distance for the Bezier patches.
+ *
+ * Stores @p farLOD at +0x340 (On Tour mFarLODcm).
+ *
+ * @param farLOD  the far LOD distance
+ */
+void cPS2BezierMan_SetFarLOD(void* self, float farLOD)
 {
-    *(float*)((char*)self + 0x340) = val;
+    *(float*)((char*)self + 0x340) = farLOD;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BD0__FPv);
+INCLUDE_ASM("render/font", cPS2BezierMan_GetNearLOD__FPv);
 #ifdef SKIP_ASM
-float func_00394BD0(void* self)
+/**
+ * Returns the near level-of-detail distance.
+ *
+ * Reads +0x33C (On Tour mNearLODcm).
+ *
+ * @return the near LOD distance
+ */
+float cPS2BezierMan_GetNearLOD(void* self)
 {
     return *(float*)((char*)self + 0x33C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BD8__FPv);
+INCLUDE_ASM("render/font", cPS2BezierMan_GetFarLOD__FPv);
 #ifdef SKIP_ASM
-float func_00394BD8(void* self)
+/**
+ * Returns the far level-of-detail distance.
+ *
+ * Reads +0x340 (On Tour mFarLODcm).
+ *
+ * @return the far LOD distance
+ */
+float cPS2BezierMan_GetFarLOD(void* self)
 {
     return *(float*)((char*)self + 0x340);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BE0__FPvi);
+INCLUDE_ASM("render/font", cPS2BezierMan_SetLmapStart__FPvi);
 #ifdef SKIP_ASM
-void func_00394BE0(void* self, int val)
+/**
+ * Sets the first light-map index used by the patches.
+ *
+ * Stores @p lmapStart at +0x354.
+ *
+ * @param lmapStart  the first light-map index
+ */
+void cPS2BezierMan_SetLmapStart(void* self, int lmapStart)
 {
-    *(int*)((char*)self + 0x354) = val;
+    *(int*)((char*)self + 0x354) = lmapStart;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BE8__FPvi);
+INCLUDE_ASM("render/font", cPS2BezierMan_EnableWireMode__FPvi);
 #ifdef SKIP_ASM
-void func_00394BE8(void* self, int val)
+/**
+ * Turns wireframe drawing of the patches on or off.
+ *
+ * Stores @p enable at +0x344 (On Tour mWireModeEnabled).
+ *
+ * @param enable  non-zero to draw wireframe
+ */
+void cPS2BezierMan_EnableWireMode(void* self, int enable)
 {
-    *(int*)((char*)self + 0x344) = val;
+    *(int*)((char*)self + 0x344) = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BF0__FPvi);
+INCLUDE_ASM("render/font", cPS2BezierMan_EnableLightMaps__FPvi);
 #ifdef SKIP_ASM
-void func_00394BF0(void* self, int val)
+/**
+ * Turns the patches' light maps on or off.
+ *
+ * Stores @p enable at +0x34C (On Tour mLightMapsEnabled).
+ *
+ * @param enable  non-zero to use light maps
+ */
+void cPS2BezierMan_EnableLightMaps(void* self, int enable)
 {
-    *(int*)((char*)self + 0x34C) = val;
+    *(int*)((char*)self + 0x34C) = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394BF8__FPvi);
+INCLUDE_ASM("render/font", cPS2BezierMan_EnableShadows__FPvi);
 #ifdef SKIP_ASM
-void func_00394BF8(void* self, int val)
+/**
+ * Turns shadows on the patches on or off.
+ *
+ * Stores @p enable at +0x350 (On Tour mShadowsEnabled).
+ *
+ * @param enable  non-zero to draw shadows
+ */
+void cPS2BezierMan_EnableShadows(void* self, int enable)
 {
-    *(int*)((char*)self + 0x350) = val;
+    *(int*)((char*)self + 0x350) = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C00__FPv);
+INCLUDE_ASM("render/font", cPS2BezierMan_IsWireModeEnabled__FPv);
 #ifdef SKIP_ASM
-int func_00394C00(void* self)
+/**
+ * Reports whether the patches are drawn as wireframe.
+ *
+ * Reads +0x344.
+ *
+ * @return the wireframe flag
+ */
+int cPS2BezierMan_IsWireModeEnabled(void* self)
 {
     return *(int*)((char*)self + 0x344);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C08__FPv);
+INCLUDE_ASM("render/font", cPS2BezierMan_IsLightMapsEnabled__FPv);
 #ifdef SKIP_ASM
-int func_00394C08(void* self)
+/**
+ * Reports whether the patches use light maps.
+ *
+ * Reads +0x34C.
+ *
+ * @return the light-map flag
+ */
+int cPS2BezierMan_IsLightMapsEnabled(void* self)
 {
     return *(int*)((char*)self + 0x34C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C10__FPv);
+INCLUDE_ASM("render/font", cPS2BezierMan_IsShadowsEnabled__FPv);
 #ifdef SKIP_ASM
-int func_00394C10(void* self)
+/**
+ * Reports whether shadows are drawn on the patches.
+ *
+ * Reads +0x350.
+ *
+ * @return the shadow flag
+ */
+int cPS2BezierMan_IsShadowsEnabled(void* self)
 {
     return *(int*)((char*)self + 0x350);
 }
@@ -2414,25 +2566,40 @@ void cLightMan_CreateAmbient(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C50__FPv);
+INCLUDE_ASM("render/font", cLightMan_LoadLight__FPv);
 #ifdef SKIP_ASM
-void func_00394C50(void* self)
+/**
+ * Base-class default for loading a light into a hardware slot: does nothing.
+ *
+ * cLightMan vtable slot 13; cPS2LightMan overrides it.
+ */
+void cLightMan_LoadLight(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C58__FPv);
+INCLUDE_ASM("render/font", cLightMan_SetChannel__FPv);
 #ifdef SKIP_ASM
-void func_00394C58(void* self)
+/**
+ * Base-class default for setting a light channel's mask: does nothing.
+ *
+ * cLightMan vtable slot 14; cPS2LightMan overrides it.
+ */
+void cLightMan_SetChannel(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C60__FPv);
+INCLUDE_ASM("render/font", cLightMan_ClearChannel__FPv);
 #ifdef SKIP_ASM
-void func_00394C60(void* self)
+/**
+ * Base-class default for clearing a light channel: does nothing.
+ *
+ * cLightMan vtable slot 15; cPS2LightMan overrides it.
+ */
+void cLightMan_ClearChannel(void* self)
 {
 }
 #endif
@@ -2466,18 +2633,26 @@ void* func_00394C88(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C98);
+INCLUDE_ASM("render/font", cPS2LightMan_Init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_LightInst[];
 
-extern "C" void func_00394C98(cPS2LightMan* self, int n)
+/**
+ * Sets up the light manager for a number of static lights plus 50 dynamic ones.
+ *
+ * Stores @p numLights as m_iStartDynLight (the first dynamic light index), clears m_iDynLight, sets m_iMaxLights to @p numLights + 50
+ * and allocates that many cLightInst pointers (operator_new_tag, tag str_LightInst) into m_pLights.
+ *
+ * @param numLights  the number of static lights
+ */
+extern "C" void cPS2LightMan_Init(cPS2LightMan* self, int numLights)
 {
-    self->m_iStartDynLight = n;
+    self->m_iStartDynLight = numLights;
     self->m_iDynLight = 0;
-    self->m_iMaxLights = n + 50;
-    self->m_pLights = (cLightInst**)operator_new_tag((n + 50) * 4, str_LightInst, 0, 0);
+    self->m_iMaxLights = numLights + 50;
+    self->m_pLights = (cLightInst**)operator_new_tag((numLights + 50) * 4, str_LightInst, 0, 0);
 }
 #endif
 
@@ -2511,9 +2686,18 @@ void cPS2LightMan_ResetDynamicLights(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D18);
+INCLUDE_ASM("render/font", cPS2LightMan_GetDynamicLight);
 #ifdef SKIP_ASM
-extern "C" char* func_00394D18(cPS2LightMan* self)
+/**
+ * Hands out the next dynamic light index.
+ *
+ * Returns m_iStartDynLight + m_iDynLight and increments m_iDynLight. No limit check: the preview asserted m_iDynLight <
+ * 50 (the 50 spare slots cPS2LightMan_Init allocates). The C declares the result as char*; it is an int index.
+ * cPS2LightMan_ResetDynamicLights__FPv sets the counter back to 0.
+ *
+ * @return the light index
+ */
+extern "C" char* cPS2LightMan_GetDynamicLight(cPS2LightMan* self)
 {
     return (char*)self->m_iStartDynLight + (self->m_iDynLight)++;
 }
@@ -2822,9 +3006,16 @@ extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395318__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetNumDisplayModes__FPv);
 #ifdef SKIP_ASM
-int func_00395318(void* self)
+/**
+ * Returns how many display modes the renderer offers.
+ *
+ * Reads the count at +0x59C4.
+ *
+ * @return the number of display modes
+ */
+int cPS2GraphicsMan_GetNumDisplayModes(void* self)
 {
     return *(int*)((char*)self + 0x59C4);
 }
@@ -2906,9 +3097,16 @@ extern "C" void func_00395370(cPS2GraphicsMan* self, float* rect, int applyScree
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003953B0__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetTVDisplayFormat__FPv);
 #ifdef SKIP_ASM
-void* func_003953B0(void* self)
+/**
+ * Returns the TV display format record.
+ *
+ * Returns the address of the record at +0x6B94.
+ *
+ * @return this + 0x6B94
+ */
+void* cPS2GraphicsMan_GetTVDisplayFormat(void* self)
 {
     return (char*)self + 0x6B94;
 }
@@ -2951,9 +3149,14 @@ extern "C" int func_00395418(int graphicsMan) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395420__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_ClearProjTextures__FPv);
 #ifdef SKIP_ASM
-void func_00395420(void* self)
+/**
+ * Forgets the projected textures queued for the frame.
+ *
+ * Sets mNumProjTextures (+0x13EC) to 0; cPS2GraphicsMan_AddProjectiveTexture() adds them again.
+ */
+void cPS2GraphicsMan_ClearProjTextures(void* self)
 {
     *(int*)((char*)self + 0x13EC) = 0;
 }
@@ -3029,26 +3232,45 @@ extern "C" void cPS2GraphicsMan_SetIrradiance(cPS2GraphicsMan* self, sFontBlockA
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395500__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetIrradiance__FPv);
 #ifdef SKIP_ASM
-void* func_00395500(void* self)
+/**
+ * Returns the irradiance (ambient lighting) record.
+ *
+ * Returns the address of mIrradianceInfo (+0x6BB0), which cPS2GraphicsMan_SetIrradiance() fills.
+ *
+ * @return &mIrradianceInfo
+ */
+void* cPS2GraphicsMan_GetIrradiance(void* self)
 {
     return (char*)self + 0x6BB0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395508__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_InitCharModelPart__FPv);
 #ifdef SKIP_ASM
-void func_00395508(void* self)
+/**
+ * Prepares one part of a character model: empty in the PS2 renderer.
+ *
+ * cAnimModel_compile() calls slot 110.
+ */
+void cPS2GraphicsMan_InitCharModelPart(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395510__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_getCurrentFrameCount__FPv);
 #ifdef SKIP_ASM
-int func_00395510(void* self)
+/**
+ * Returns the number of frames the renderer has drawn.
+ *
+ * Reads the counter at +0x5A74. The AI compares it with each rider's last-drawn frame before deleting riders.
+ *
+ * @return the frame counter
+ */
+int cPS2GraphicsMan_getCurrentFrameCount(void* self)
 {
     return *(int*)((char*)self + 0x5A74);
 }
@@ -3247,11 +3469,18 @@ extern "C" int func_003956D8(cPS2GraphicsMan* pS2GraphicsMan) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003956E0__FPvi);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_SetShinyBoarder__FPvi);
 #ifdef SKIP_ASM
-void func_003956E0(void* self, int val)
+/**
+ * Turns the shiny-boarder (chrome rider) rendering flag on or off.
+ *
+ * Stores @p state in the word at +0x6D14.
+ *
+ * @param state  non-zero to draw riders shiny (On Tour State)
+ */
+void cPS2GraphicsMan_SetShinyBoarder(void* self, int state)
 {
-    *(int*)((char*)self + 0x6D14) = val;
+    *(int*)((char*)self + 0x6D14) = state;
 }
 #endif
 
@@ -3287,9 +3516,15 @@ extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395730__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_PopView__FPv);
 #ifdef SKIP_ASM
-void func_00395730(void* self)
+/**
+ * Pops the view-matrix stack.
+ *
+ * Moves mCurrentView (+0x13E4) back by one 0x40-byte matrix, decrements mViewDepth (+0x13E0) and clears mMatricesValid
+ * (+0x6B90) so the combined matrices are rebuilt. No underflow check (the preview asserted).
+ */
+void cPS2GraphicsMan_PopView(void* self)
 {
     *(int*)((char*)self + 0x6b90) = 0;
     *(char**)((char*)self + 0x13e4) -= 0x40;
@@ -3487,9 +3722,16 @@ extern "C" void func_00395C38(cPS2GraphicsMan* self, void* viewMat)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395C68__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetView__FPv);
 #ifdef SKIP_ASM
-int func_00395C68(void* self)
+/**
+ * Returns the current view matrix.
+ *
+ * Returns mCurrentView (+0x13E4), the top of the view stack.
+ *
+ * @return the current view matrix
+ */
+int cPS2GraphicsMan_GetView(void* self)
 {
     return *(int*)((char*)self + 0x13E4);
 }
@@ -3742,9 +3984,16 @@ extern "C" int func_00395ED8(cPS2GraphicsMan* self, void* vec)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395F60__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderReady__FPv);
 #ifdef SKIP_ASM
-void* func_00395F60(void* self)
+/**
+ * Reports whether the renderer can accept a new frame.
+ *
+ * Returns func_003826E0().
+ *
+ * @return non-zero when a frame can be drawn
+ */
+void* cPS2GraphicsMan_IsRenderReady(void* self)
 {
     return func_003826E0(self);
 }
@@ -3753,18 +4002,28 @@ void* func_00395F60(void* self)
 extern "C" void* func_00382730(void* self);
 
 //100%
-INCLUDE_ASM("render/font", func_00395F80__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderIdle__FPv);
 #ifdef SKIP_ASM
-void* func_00395F80(void* self)
+/**
+ * Reports whether the renderer has finished all queued work.
+ *
+ * Returns func_00382730(); cGraphicsMan_FlushRenderer() polls it.
+ *
+ * @return non-zero when idle
+ */
+void* cPS2GraphicsMan_IsRenderIdle(void* self)
 {
     return func_00382730(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395FA0__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_SetLightMats__FPv);
 #ifdef SKIP_ASM
-void func_00395FA0(void* self)
+/**
+ * Sets the lighting matrices: empty in the PS2 renderer.
+ */
+void cPS2GraphicsMan_SetLightMats(void* self)
 {
 }
 #endif
@@ -5077,7 +5336,7 @@ extern "C" int *func_00396B30(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396B40);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_InitCharMatrices);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only GS packet build; uncached (0x30000000) pointers held in int and 128-bit qword copies.
@@ -5091,8 +5350,16 @@ struct sRS_6B40 {
     int fC;
 };
 
+/**
+ * Starts a character-model batch: sends the lighting setup to VU1.
+ *
+ * Sets the top render state's mode bits to 6 (0x180) and points it at the current packet address (+0x5A00), then writes
+ * a 12-qword DMA packet: a GIF/VIF header, the 10 qwords of mIrradianceInfo (+0x6BB0) and a VIF call of the
+ * microprogram at D_1150. cPS2GraphicsMan_DrawCharModel (DrawCharModel) calls it through slot 124 with a scale of 1.0, which this code
+ * ignores.
+ */
 // Emits the font's GS setup packet (register set + the 10 cached qwords) and a VU call for the glyph program.
-extern "C" void func_00396B40(char* self)
+extern "C" void cPS2GraphicsMan_InitCharMatrices(char* self)
 {
     sRS_6B40* rs = *(sRS_6B40**)(self + 0xE84);
     unsigned int addrMask = 0x3FFFFFFF;

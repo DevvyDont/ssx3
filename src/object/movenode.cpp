@@ -2749,11 +2749,18 @@ void* cParticleNode_writeToReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003579C8);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_cMultiParticleMan);
 #ifdef SKIP_ASM
 extern void* cMultiParticleMan_TheMultiParticleMan;
 
-extern "C" void* func_003579C8(cMultiParticleMan* self)
+/**
+ * Constructs the multi-particle manager and makes it the global instance.
+ *
+ * Stores this in cMultiParticleMan_TheMultiParticleMan and clears its four words.
+ *
+ * @return this
+ */
+extern "C" void* cMultiParticleMan_cMultiParticleMan(cMultiParticleMan* self)
 {
     int i;
     cMultiParticleMan_TheMultiParticleMan = ((void*)self);

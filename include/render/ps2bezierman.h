@@ -10,10 +10,10 @@
 // then cBezierMan dtor func_00374CA8, which clears TheBezierMan).
 // Bases: cBezierMan (On Tour 0x8: m_currPatchDist 0x0, then its vptr at 0x4) <- cPS2BezierMan.
 // Methods (D_00493760; the same order as On Tour's cBezierMan declarations): 0 ~ cPS2BezierMan__cPS2BezierMan, 1 Init cPS2BezierMan_Init,
-// 2 Purge cPS2BezierMan_Purge, 3 Reset func_0038B158__FPv, 4 UpdatePatchesCache func_00394B80__FPv (empty), 5/6 SetNearLOD/
-// SetFarLOD func_00394BC0/C8__FPvf, 7/8 GetNearLOD/GetFarLOD func_00394BD0/D8__FPv, 9 SetLmapStart func_00394BE0__FPvi,
-// 10-12 EnableWireMode/EnableLightMaps/EnableShadows func_00394BE8/F0/F8__FPvi, 13-15 IsWireModeEnabled/
-// IsLightMapsEnabled/IsShadowsEnabled func_00394C00/08/10__FPv, 16 ClearPatches func_0038B178__FPv, 17 DrawPatches
+// 2 Purge cPS2BezierMan_Purge, 3 Reset cPS2BezierMan_Reset__FPv, 4 UpdatePatchesCache func_00394B80__FPv (empty), 5/6 SetNearLOD/
+// SetFarLOD cPS2BezierMan_SetNearLOD/C8__FPvf, 7/8 GetNearLOD/GetFarLOD cPS2BezierMan_GetNearLOD/D8__FPv, 9 SetLmapStart cPS2BezierMan_SetLmapStart__FPvi,
+// 10-12 EnableWireMode/EnableLightMaps/EnableShadows cPS2BezierMan_EnableWireMode/F0/F8__FPvi, 13-15 IsWireModeEnabled/
+// IsLightMapsEnabled/IsShadowsEnabled cPS2BezierMan_IsWireModeEnabled/08/10__FPv, 16 ClearPatches func_0038B178__FPv, 17 DrawPatches
 // cPS2BezierMan_DrawPatches, 18/19 SetPatchDist/GetPatchDist func_00394B88__FPvf / func_00394B90__FPv (cBezierMan's), 20 AddPatch
 // cPS2BezierMan_AddPatch, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (D_00493820):
 // func_00394B78__FPv (3), func_00394B80__FPv (4), func_00394B98 (21: calls slot 20). Non-virtual accessors:
@@ -72,7 +72,7 @@ struct cPS2BezierMan {
     int mBasePassEnabled;            // 0x0348 [O] bool (a word; On Tour order); [R] Init = 1
     int mLightMapsEnabled;           // 0x034C [O] bool (a word); [R] Init = 1; [U] slots 11 / 14
     int mShadowsEnabled;             // 0x0350 [O] bool (a word); [R] Init = 1; [U] slots 12 / 15
-    int mLmapStart;                  // 0x0354 [U] SetLmapStart (slot 9, func_00394BE0); [R] Init = 0
+    int mLmapStart;                  // 0x0354 [U] SetLmapStart (slot 9, cPS2BezierMan_SetLmapStart); [R] Init = 0
     float unk_0358;                  // 0x0358 [R] Init = 8.0
     char unk_035C[0xE4];             // 0x035C (no retail access found in these methods)
     void* mVifCache[3];              // 0x0440 [R] Init: new(0x38400, "4x4VifCache"), new(0xDC00, "6x6VifCache"),

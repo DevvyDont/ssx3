@@ -26,7 +26,7 @@
 // starts there: the preview pairs cStaticEmitter::render with particle.cpp line 410), the dynamic emitters in
 // src/render/graphicsman.cpp (ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter, dtor) and src/render/particle.cpp (0x370C60-0x3717C0); see each
 // class's methods.txt. The draw calls are cPS2GraphicsMan virtuals: slot 82 RenderParticleEmitter(const
-// tParticleEmitter&) func_00380518, slot 83 (cDynamicEmitter*) func_003807A0, slot 84 (cDynamicColourEmitter*)
+// tParticleEmitter&) cPS2GraphicsMan_RenderParticleEmitter, slot 83 (cDynamicEmitter*) func_003807A0, slot 84 (cDynamicColourEmitter*)
 // func_00380CE0.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet; the base's fields are
@@ -179,7 +179,7 @@ CHECK_SIZE(cStaticEmitter, 0x190);
 
 // The moving emitter base (On Tour class cBaseClass_DynamicEmitter, 0x200).
 struct cBaseClass_DynamicEmitter {
-    float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (func_00371268), replay
+    float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (cBaseClass_DynamicEmitter_setTime), replay
                                     //       record; cDynamicParticleModifier_update tests it (its +0x60)
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
@@ -252,7 +252,7 @@ CHECK_SIZE(cBaseClass_DynamicEmitter, 0x200);
 // cDynamicEmitter: cBaseClass_DynamicEmitter with its own vtable (cDynamicEmitter_vtbl) and render; no members.
 struct cDynamicEmitter {
     // --- cBaseClass_DynamicEmitter (0x000-0x1FC)
-    float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (func_00371268), replay
+    float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (cBaseClass_DynamicEmitter_setTime), replay
                                     //       record; cDynamicParticleModifier_update tests it (its +0x60)
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
@@ -325,7 +325,7 @@ CHECK_SIZE(cDynamicEmitter, 0x200);
 // cDynamicColourEmitter: cBaseClass_DynamicEmitter + one packed colour per sub-emitter.
 struct cDynamicColourEmitter {
     // --- cBaseClass_DynamicEmitter (0x000-0x1FC)
-    float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (func_00371268), replay
+    float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (cBaseClass_DynamicEmitter_setTime), replay
                                     //       record; cDynamicParticleModifier_update tests it (its +0x60)
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]

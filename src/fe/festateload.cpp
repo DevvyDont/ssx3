@@ -251,12 +251,17 @@ extern "C" void cFEStateEventSelect_onInputAlways(void* self, int pInput)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_001869D8);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void cUITemplate_MAP_onUpdate(void* tmpl);
 
-extern "C" void func_001869D8(void* self)
+/**
+ * Per-frame update of the event select screen: the base UI state update, then the map template's.
+ *
+ * Calls cUIState_onUpdate() and then cUITemplate_MAP_onUpdate() on the template embedded at +0x48.
+ */
+extern "C" void cFEStateEventSelect_onUpdate(void* self)
 {
     cUIState_onUpdate(self);
     cUITemplate_MAP_onUpdate((char*)self + 0x48);

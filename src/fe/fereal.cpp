@@ -721,14 +721,23 @@ extern "C" void* func_001A1CE8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1D50);
+INCLUDE_ASM("fe/fereal", cRealFE__cRealFE);
 #ifdef SKIP_ASM
 extern void* cRealFE_vtbl[];
 extern "C" void func_002639B0(void* self, int flags);
 extern "C" void func_00263678(void* self, int flags);
 extern "C" void func_001957D0(void* self, int flags);
 
-extern "C" void func_001A1D50(void* self, int flags)
+/**
+ * Destroys the front-end module.
+ *
+ * Restores cRealFE_vtbl, destroys the members at +0xB5ABC and +0xB5AB0 (func_002639B0 and func_00263678, each with
+ * flags 2: destroy without freeing), then runs the base-class destructor func_001957D0 with @p flags, which frees
+ * the object when bit 0 is set.
+ *
+ * @param flags  the destructor flags (bit 0: free the memory)
+ */
+extern "C" void cRealFE__cRealFE(void* self, int flags)
 {
     *(void***)self = cRealFE_vtbl;
     func_002639B0((char*)self + 0xB5ABC, 2);
@@ -738,7 +747,7 @@ extern "C" void func_001A1D50(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1DC0);
+INCLUDE_ASM("fe/fereal", cRealFE_gainFocus);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cBE_getBE();
@@ -762,7 +771,16 @@ struct sVec3K1A1DC0 {
 typedef void (*tFn_1A1DC0)(void*, const sVec3K1A1DC0&);
 typedef void (*tVoid_1A1DC0)(void*);
 
-extern "C" void func_001A1DC0(char* self)
+/**
+ * Prepares the front end when it gains focus and pushes its first states.
+ *
+ * If gWeHaveToClearTheBackEnd is set, it resets back-end entries 0-2 (func_0014DE28), zeroes the 0x20 bytes at
+ * D_005308B8 and clears the flag. It then clears +0xB5AD8 and +0xB5ADC, sets back-end state 0 (cBE_setState()),
+ * uploads the textures (cGraphicsMan_UploadTextures()), calls func_00195E58 on the front-end locale, turns off depth
+ * fog, screen tint and light glow, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)), gives
+ * the front-end flow state D_004A4E80 86 states and finally calls its own virtual slot 8 (cRealFE_loadStartState()).
+ */
+extern "C" void cRealFE_gainFocus(char* self)
 {
     char* m;
     char* vt;
@@ -933,7 +951,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2128);
+INCLUDE_ASM("fe/fereal", cRealFE_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cFadeScreen_loseFocus(void* self);
 extern "C" void func_00253418(void* p, int a1);
@@ -941,7 +959,16 @@ extern "C" void func_001A06B0(void* flow);
 extern int cRealFE_mMovieList;
 extern char D_004A4E80;
 
-extern "C" int func_001A2128(void* self)
+/**
+ * Lets the front end lose focus once the base fade allows it, stopping any movie that is playing.
+ *
+ * Returns 0 while cFadeScreen_loseFocus() still refuses. Otherwise it destroys the movie player at +0xB5AD4 (On Tour
+ * mpMoviePlayer; func_00253418 with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and +0xB5ADC, calls
+ * func_001A06B0 on the front-end flow state D_004A4E80 and returns 1.
+ *
+ * @return 1 when focus may move on, 0 to keep it
+ */
+extern "C" int cRealFE_loseFocus(void* self)
 {
     if (cFadeScreen_loseFocus(self) == 0) {
         return 0;
@@ -960,7 +987,7 @@ extern "C" int func_001A2128(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2190);
+INCLUDE_ASM("fe/fereal", cRealFE_purge);
 #ifdef SKIP_ASM
 struct sVEntry001A2190 {
     short delta;
@@ -976,7 +1003,15 @@ extern "C" void func_0038ADB0(void* p);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
 
-extern "C" void func_001A2190(void* self)
+/**
+ * Unloads the front end: flushes the renderer, then frees the character animations, front-end data and audio.
+ *
+ * Calls the graphics manager's slot 19 (cGraphicsMan_FlushRenderer) first, then func_001A2BC0 (releases the animation
+ * data sources that cRealFE_loadCharAnimations() registered), func_001A04C8 on the rider manager (+0xB0),
+ * func_0019CF40 on +0x1A70 and func_0038ADB0 on D_005047F8, clears the app's words at +0x7C and +0x80 and finally
+ * calls cSSXAudio_FrontEndPurge() on the audio object.
+ */
+extern "C" void cRealFE_purge(void* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
@@ -993,7 +1028,7 @@ extern "C" void func_001A2190(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2208);
+INCLUDE_ASM("fe/fereal", cRealFE_render);
 #ifdef SKIP_ASM
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00253890(void* h, int a1);
@@ -1072,7 +1107,20 @@ static inline unsigned int feCallU(int slot)
     return ((unsigned int (*)(void*))vt[slot].fn)((char*)ps2GraphicsMan + vt[slot].delta);
 }
 
-extern "C" int func_001A2208(void* self)
+/**
+ * Draws the front end: a black backdrop while a movie is queued, otherwise the 3D scene and the UI.
+ *
+ * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Counts +0xB5ADC down. If func_00231D60 (the
+ * base fade) returns non-zero, or a movie player exists (+0xB5AD4; drawn with func_00253890), it flips the frame (slot
+ * 20) and returns 1. While cRealFE_mMovieList is non-zero it draws a full-screen black quad in an orthographic viewport
+ * (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it sets the perspective from the camera (+0x10, +0x14, +0x18
+ * to slot 25) and the view matrix (+0x50 to slot 34), draws the scene with a fixed draw state (func_00398018 on the UI
+ * engine at +0xC, func_001A0598 on the rider manager at +0xB0), then the UI (func_00397DF8), flips the frame and calls
+ * func_00285BF8 on the audio object with 0.02.
+ *
+ * @return 1 when a frame was drawn, 0 when the renderer was not ready
+ */
+extern "C" int cRealFE_render(void* self)
 {
     if (feCallU(17) == 0) {
         return 0;
@@ -1191,7 +1239,7 @@ extern "C" int func_001A2208(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A27A0);
+INCLUDE_ASM("fe/fereal", cRealFE_update);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1240,7 +1288,21 @@ struct sVE_27A0 {
     void (*fn)(void*);
 };
 
-extern "C" void func_001A27A0(char* self)
+/**
+ * Per-frame update of the front end: plays a queued movie, else updates the UI, camera, riders and online managers.
+ *
+ * Does nothing while +0xB5ADC (a frame counter that cRealFE_render() counts down) is set; then calls
+ * cFadeScreen_update(). If there is no movie player (+0xB5AD4) and cRealFE_mMovieList has a bit set, it creates one
+ * ("MoviePlayer", 68 bytes) and starts the movie of the lowest set bit (1, 2 or 4; for 4 the file depends on the BE
+ * option bits and func_00289DE0), clearing that bit and recording it in D_004A19D0; bit 4 also makes the movie
+ * skippable (+0xB5AD8). While a movie plays it runs cMoviePlayer_asyncUpdate() and, when skippable, ends it on a
+ * press of input 0x70 or 122 on either pad; when it ends the player is destroyed, +0xB5ADC is set to 1 and, if no
+ * movie is left, func_002B3A98 is called on the audio object (+0x118). Without a movie it updates the UI engine (+0xC,
+ * func_00398038; or sets +0x8 when SSXApp +0x4 is set), the camera at +0x10 (its virtual slot 3), func_0019D250 on
+ * +0x1A70, the rider manager (+0xB0, func_001A0608) and the async file manager, and, when D_004A29EC is set, the
+ * online members at +0xB5AB0 and +0xB5ABC and the lobby manager.
+ */
+extern "C" void cRealFE_update(char* self)
 {
     if (*(int*)(self + 0xB5ADC) != 0) return;
     cFadeScreen_update(self);
@@ -1562,12 +1624,20 @@ extern "C" void* cOVSound_cOVSound(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2F70);
+INCLUDE_ASM("fe/fereal", cOVSound_playSound);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
-extern "C" void func_001A2F70(void* self, int sel)
+/**
+ * Plays the overlay menu sound for a UI sound event.
+ *
+ * Maps @p sel to a front-end menu sound played with cSSXAudio_MenuSound() on the audio object (func_0028B180()):
+ * 1 -> 11, 2 -> 12, 3 -> 10, 4 -> 13, 5 and 6 -> 9; other values play nothing.
+ *
+ * @param sel  the sound event (On Tour: int e)
+ */
+extern "C" void cOVSound_playSound(void* self, int sel)
 {
     switch (sel) {
     case 1:

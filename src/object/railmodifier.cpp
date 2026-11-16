@@ -4165,17 +4165,23 @@ void func_00360AE8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AF0__FPv);
+INCLUDE_ASM("object/railmodifier", cBoostNode_boostStart__FPv);
 #ifdef SKIP_ASM
-void func_00360AF0(void* self)
+/**
+ * Hook called when a boost starts: does nothing.
+ */
+void cBoostNode_boostStart(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AF8__FPv);
+INCLUDE_ASM("object/railmodifier", cBoostNode_boostEnd__FPv);
 #ifdef SKIP_ASM
-void func_00360AF8(void* self)
+/**
+ * Hook called when a boost ends: does nothing.
+ */
+void cBoostNode_boostEnd(void* self)
 {
 }
 #endif
@@ -4497,18 +4503,30 @@ int cTransformModifier_getParent(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360BF8__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
-int func_00360BF8(void* self)
+/**
+ * Returns the transform-modifier type id of cTransformModifier: 0.
+ *
+ * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
+ *
+ * @return 0
+ */
+int cTransformModifier_getTransformType(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360C00__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_00360C00(void* self)
+/**
+ * Base-class default for saving a transform modifier into a replay frame: writes nothing.
+ *
+ * Subclasses with state override slot 27 (cPositionModifier_writeToReplayFrame, cAvaSplineModifier_writeToReplayFrame).
+ */
+void cTransformModifier_writeToReplayFrame(void* self)
 {
 }
 #endif
@@ -6076,9 +6094,16 @@ int func_00361900(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361908__FPv);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
-int func_00361908(void* self)
+/**
+ * Returns the transform-modifier type id of cPositionModifier: 3.
+ *
+ * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
+ *
+ * @return 3
+ */
+int cPositionModifier_getTransformType(void* self)
 {
     return 0x3;
 }
@@ -6200,9 +6225,16 @@ int cParentModifier_getMesh(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003619D0__FPv);
+INCLUDE_ASM("object/railmodifier", cParentModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
-int func_003619D0(void* self)
+/**
+ * Returns the transform-modifier type id of cParentModifier: 4.
+ *
+ * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
+ *
+ * @return 4
+ */
+int cParentModifier_getTransformType(void* self)
 {
     return 0x4;
 }
@@ -6321,9 +6353,16 @@ void cMagnetModifier_setRadius(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A58__FPv);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
-int func_00361A58(void* self)
+/**
+ * Returns the transform-modifier type id of cMagnetModifier: 6.
+ *
+ * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
+ *
+ * @return 6
+ */
+int cMagnetModifier_getTransformType(void* self)
 {
     return 0x6;
 }
@@ -6433,9 +6472,16 @@ void cAvaSplineModifier_setRadius(void* self, float val)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361B08__FPv);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
-int func_00361B08(void* self)
+/**
+ * Returns the transform-modifier type id of cAvaSplineModifier: 7.
+ *
+ * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
+ *
+ * @return 7
+ */
+int cAvaSplineModifier_getTransformType(void* self)
 {
     return 0x7;
 }
