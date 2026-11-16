@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstate.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -25,16 +26,16 @@ extern "C" void *func_0039E2A0(void*, ...);
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
-extern "C" void *func_0021C678(void *arg0, int arg1, int arg2) {
+extern "C" void *func_0021C678(cOVState* arg0, int arg1, int arg2) {
     func_0039E2A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    (arg0->mOVID) = arg2;
+    (arg0->mDoneTransition) = 0;
+    ((char*)arg0->mVtbl) = D_00474E08;
+    (arg0->mAllowPauseMenu) = 0;
+    (arg0->mRemovePDA) = 0;
     unsigned short t = D_004A2088[0];
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+    return ((void*)arg0);
 }
 #endif
 
@@ -54,8 +55,8 @@ extern "C" void func_0021C6D8(void *arg0) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVState_allowPauseMenu);
 #ifdef SKIP_ASM
-extern "C" int cOVState_allowPauseMenu(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x4C)));
+extern "C" int cOVState_allowPauseMenu(cOVState* arg0) {
+    return (arg0->mAllowPauseMenu);
 }
 #endif
 
@@ -80,17 +81,17 @@ extern char D_00474D30[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
-extern "C" void *func_0021C730(void *arg0, int arg1, int arg2) {
+extern "C" void *func_0021C730(cOVState* arg0, int arg1, int arg2) {
     func_0039E2A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
+    (arg0->mOVID) = arg2;
+    (arg0->mDoneTransition) = 0;
+    ((char*)arg0->mVtbl) = D_00474E08;
+    (arg0->mAllowPauseMenu) = 0;
+    (arg0->mRemovePDA) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00474D30;
+    ((char*)arg0->mVtbl) = D_00474D30;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+    return ((void*)arg0);
 }
 #endif
 

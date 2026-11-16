@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstate.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -10,7 +11,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct sSelf0020A380;
-extern "C" void cOVState_onCreateScreen(sSelf0020A380* self);
+extern "C" void cOVState_onCreateScreen(cOVState* self);
 extern "C" int func_001A3BF0(void* mgr);
 extern "C" void cOVState_MAP_setupMapPic(void* self);
 extern "C" void cOVState_MAP_setupPopup(void* self);
@@ -64,7 +65,7 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen((sSelf0020A380*)self);
+    cOVState_onCreateScreen((cOVState*)((sSelf0020A380*)self));
     self->fC4 = func_001A3BF0(SSXApp->mFEAsyncManager);
     self->fDC = 0;
     self->fBC = 0;
@@ -277,13 +278,13 @@ INCLUDE_ASM("fe/ovstatemap", func_00208B78);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void func_0020A088(void* self);
-extern "C" void cOVState_onDestroyScreen(void* self);
+extern "C" void cOVState_onDestroyScreen(cOVState* self);
 
 extern "C" void func_00208B78(void* self)
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, *(int*)((char*)self + 0xC4));
     func_0020A088(self);
-    cOVState_onDestroyScreen(self);
+    cOVState_onDestroyScreen((cOVState*)self);
 }
 #endif
 
@@ -1216,9 +1217,9 @@ struct sSelf0020A380 {
     int pdaOn;
 };
 
-extern "C" void cOVState_onCreateScreen(sSelf0020A380* self)
+extern "C" void cOVState_onCreateScreen(cOVState* self)
 {
-    self->pdaOn = 0;
+    self->mRestoreCutSceneMode = 0;
     char* game = (char*)SSXApp->Game;
     if (game != 0) {
         char* p = *(char**)(game + 0x64);
@@ -1226,11 +1227,11 @@ extern "C" void cOVState_onCreateScreen(sSelf0020A380* self)
         if (mode != 0) {
             func_002EA820(p);
             if (mode == 1 || mode == 3) {
-                self->pdaOn = 1;
+                self->mRestoreCutSceneMode = 1;
             }
         }
     }
-    char* obj = (char*)cUIStateStack_findState(self->mgr + 0x18, GetHashValue32(D_004A20D0));
+    char* obj = (char*)cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(D_004A20D0));
     if (obj != 0) {
         sVEntry0020A380* e = &(*(sVEntry0020A380**)(obj + 8))[24];
         e->fn(obj + e->delta, 3, 0);
@@ -1253,21 +1254,21 @@ struct sVEntry0020A430 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" void cOVState_onDestroyScreen(void* self)
+extern "C" void cOVState_onDestroyScreen(cOVState* self)
 {
-    if (*(int*)((char*)self + 0x50) != 0) {
+    if (self->mRestoreCutSceneMode != 0) {
         char* game = (char*)SSXApp->Game;
         if (game != 0) {
             func_002EA860(*(void**)(game + 0x64));
-            *(int*)((char*)self + 0x50) = 0;
+            self->mRestoreCutSceneMode = 0;
         }
     }
-    char* obj = (char*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A20D0));
+    char* obj = (char*)cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(D_004A20D0));
     if (obj != 0) {
         sVEntry0020A430* e = &(*(sVEntry0020A430**)(obj + 8))[24];
         e->fn(obj + e->delta, 4, 0);
     }
-    if (*(int*)((char*)self + 0x54) != 0) {
+    if (self->mRemovePDA != 0) {
         cOVStateManager_removePDATemplate();
     }
     cUIState_onDestroyScreen(self);
@@ -1312,24 +1313,24 @@ static inline void show_A4E0(char* o, int on)
 }
 
 // PORT: the session pointer is passed through func_00258160's int parameter.
-extern "C" int func_0020A4E0(char* self)
+extern "C" int func_0020A4E0(cOVState* self)
 {
     int ret = 0;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     char* net = D_00534B30;
-    if (*(int*)net != 0 && *(void**)(self + 0x40) != 0) {
+    if (*(int*)net != 0 && self->mpScreen != 0) {
         int* sess = D_004A2EEC_A4E0;
         if (sess != 0 && *sess != 0) {
-            char* name = self + 0x58;
+            char* name = ((char*)self) + 0x58;
             if (func_00258160((int)sess, name, 0x41) != 0) {
-                char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E660));
+                char* a = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_0046E660));
                 if (a != 0)
                     show_A4E0(a, 0);
-                char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E7F8));
+                char* b = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_0046E7F8));
                 if (b != 0)
                     show_A4E0(b, 0);
                 ret = 1;
-                char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E808));
+                char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_0046E808));
                 unsigned short c8 = *(unsigned short*)(obj + 0xC8);
                 unsigned short c4 = *(unsigned short*)(obj + 0xC4);
                 unsigned short c6 = *(unsigned short*)(obj + 0xC6);
@@ -1359,7 +1360,7 @@ struct sVEntry0020A6A8 {
 };
 
 
-extern "C" void cOVState_onWidgetEvent(void* self, int a1, int a2)
+extern "C" void cOVState_onWidgetEvent(cOVState* self, int a1, int a2)
 {
     char* w = (char*)SSXApp->Game;
     if (w != 0) {
@@ -1378,11 +1379,11 @@ INCLUDE_ASM("fe/ovstatemap", func_0020A6F0);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void cUIThing_playAnimation(void* self, void* anim, int mode, int v, int a4);
 
-extern "C" void func_0020A6F0(void* self, char* objName, char* animName)
+extern "C" void func_0020A6F0(cOVState* self, char* objName, char* animName)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(objName));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = (char*)*(void**)((char*)self + 0x10) + 0x50;
+        void* bank = (char*)self->mpEngine + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 0);

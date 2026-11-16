@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstate.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -266,7 +267,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern "C" void cOVState_onUpdate(void* self);
+extern "C" void cOVState_onUpdate(cOVState* self);
 extern "C" void func_0026FA78(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
@@ -294,7 +295,7 @@ struct sReplay_0020E530 {
 extern "C" void cOVState_REPLAY_onUpdate(void* p)
 {
     sReplay_0020E530* self = (sReplay_0020E530*)p;
-    cOVState_onUpdate(self);
+    cOVState_onUpdate((cOVState*)self);
     self->pos += self->speed;
     if (self->pos <= self->start) {
         self->pos = self->start;
@@ -339,7 +340,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern "C" void cOVState_onUpdate(void* self);
+extern "C" void cOVState_onUpdate(cOVState* self);
 extern "C" void func_0026FA78(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
@@ -443,7 +444,7 @@ extern "C" void func_0039E510(void* self);
 /**
  * Updates the overlay state: calls func_00231840(SSXApp->Game, 1), then the UI-screen update func_0039E510().
  */
-extern "C" void cOVState_onUpdate(void* self)
+extern "C" void cOVState_onUpdate(cOVState* self)
 {
     func_00231840(SSXApp->Game, 1);
     func_0039E510(self);
