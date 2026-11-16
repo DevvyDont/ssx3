@@ -588,10 +588,10 @@ extern "C" void func_0036AA60(void* self, int x, int y, char** pp)
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036ABA0);
 #ifdef SKIP_ASM
-extern float D_004A432C;
-extern float D_004A4330;
-extern int D_004A4334;
-extern float D_004A4338;
+extern float cDepthFog_m_NearPlane;
+extern float cDepthFog_m_FarPlane;
+extern int cDepthFog_m_Exponent;
+extern float cDepthFog_m_Density;
 
 struct sGmQuad_ABA0 {
     int v[4];
@@ -614,10 +614,10 @@ struct sGmOwner_ABA0 {
 extern "C" void func_0036ABA0(void* self, int idx)
 {
     char* e = (char*)&((sGmOwner_ABA0*)self)->entries[idx];
-    *(float*)(e + 0x0) = D_004A432C;
-    *(float*)(e + 0x4) = D_004A4330;
-    *(int*)(e + 0x8) = D_004A4334;
-    *(float*)(e + 0xC) = D_004A4338;
+    *(float*)(e + 0x0) = cDepthFog_m_NearPlane;
+    *(float*)(e + 0x4) = cDepthFog_m_FarPlane;
+    *(int*)(e + 0x8) = cDepthFog_m_Exponent;
+    *(float*)(e + 0xC) = cDepthFog_m_Density;
     *(sGmQuad_ABA0*)(e + 0x10) = D_00504720;
 }
 #endif

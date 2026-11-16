@@ -62,3 +62,31 @@ ps2_addr	name	previous	source	evidence
 004A4714	cPowerUpFXToggles_m_SpeedBoostMinSpeed	D_004A4714	On Tour cPowerUpFXToggles::m_SpeedBoostMinSpeed (tier A: release+debug agree)	co-use release 1/1, rev 1/1; debug 1/1, rev 1/1; layout agrees (release 9, debug 9); value same; retail extent 0x4
 004A4718	cPowerUpFXToggles_m_SpeedBoostMaxSpeed	D_004A4718	On Tour cPowerUpFXToggles::m_SpeedBoostMaxSpeed (tier A: release+debug agree)	co-use release 1/1, rev 1/1; debug 1/1, rev 1/1; layout agrees (release 10, debug 10); value same; retail extent 0x4
 004A471C	cPowerUpFXToggles_m_MinSpeedBoostTimeBeforeBlur	D_004A471C	On Tour cPowerUpFXToggles::m_MinSpeedBoostTimeBeforeBlur (tier A: release+debug agree)	co-use release 1/1, rev 1/1; debug 1/1, rev 1/1; layout agrees (release 10, debug 10); value same; retail extent 0x4
+004A3EB8	cMemMan_m_initialized	D_004A3EB8	On Tour cMemMan::m_initialized (hand-checked correction)	set to 1 at the end of cMemMan::initialize (memblockman.cpp); PSP pair swapped by store scheduling
+004A3EBC	cMemMan_m_heap	D_004A3EBC	On Tour cMemMan::m_heap (hand-checked correction)	stores the heap base in cMemMan::initialize
+004FF250	TheDynamicMemMan	D_004FF250	On Tour TheDynamicMemMan (hand-checked correction)	object passed to the dynamic heap's init/alloc/free (cDynamicMemMan partners)
+00538B00	cMemMan_m_mutex	D_00538B00	On Tour cMemMan::m_mutex (hand-checked correction)	MUTEX_lock/unlock argument around every cMemMan operation
+004A4700	cPowerUpFXToggles_m_EnableSpeedBoostStreamers	D_004A4700	On Tour cPowerUpFXToggles::m_EnableSpeedBoostStreamers (hand-checked correction)	menu item 0x164, label 'Enable Speed Boost Streamers'
+004A4704	cPowerUpFXToggles_m_EnableSpeedBoostScreenBlur	D_004A4704	On Tour cPowerUpFXToggles::m_EnableSpeedBoostScreenBlur (hand-checked correction)	menu item 0x194, label 'Enable Speed Boost Screen Blur'
+004A4708	cPowerUpFXToggles_m_SpeedBoostScreenBlurMaxPercent	D_004A4708	On Tour cPowerUpFXToggles::m_SpeedBoostScreenBlurMaxPercent (hand-checked correction)	menu item 0x1C4 (DWARF SpeedBoostScreenBlurMaxPercentItem), label 'Max Screen Blur Percent'
+004A470C	cPowerUpFXToggles_m_SpeedBoostScreenBlurIncreaseRate	D_004A470C	On Tour cPowerUpFXToggles::m_SpeedBoostScreenBlurIncreaseRate (hand-checked correction)	menu item 0x1F8 (DWARF ...IncreaseRateItem), label 'Screen Blur Transition On Rate'
+004A473C	cSnowfallToggles_m_EnableTest	D_004A473C	On Tour cSnowfallToggles::m_EnableTest (hand-checked correction)	menu item 0x164, label 'Enable Test Values'
+004A4740	cSnowfallToggles_m_TestSnowIntensity	D_004A4740	On Tour cSnowfallToggles::m_TestSnowIntensity (hand-checked correction)	menu item 0x194, label 'Test Snowfall Intensity'
+004A4744	cSnowfallToggles_m_TestWindIntensity	D_004A4744	On Tour cSnowfallToggles::m_TestWindIntensity (hand-checked correction)	menu item 0x1C8, DWARF order between m_TestSnowIntensity and m_TestFlakeSize
+004A432C	cDepthFog_m_NearPlane	D_004A432C	On Tour cDepthFog::m_NearPlane (hand-checked correction)	initial value run: 8500.0f, DWARF declaration order
+004A4330	cDepthFog_m_FarPlane	D_004A4330	On Tour cDepthFog::m_FarPlane (hand-checked correction)	30000.0f
+004A4334	cDepthFog_m_Exponent	D_004A4334	On Tour cDepthFog::m_Exponent (hand-checked correction)	int 1 (DWARF int)
+004A4338	cDepthFog_m_Density	D_004A4338	On Tour cDepthFog::m_Density (hand-checked correction)	5.0f
+004A433C	cDepthFog_m_XBoxDensityScale	D_004A433C	On Tour cDepthFog::m_XBoxDensityScale (hand-checked correction)	0.8f
+004A45D8	cScreenTint_m_Enable	D_004A45D8	On Tour cScreenTint::m_Enable (hand-checked correction)	initial value run (int 1) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45DC	cScreenTint_m_OverrideWP	D_004A45DC	On Tour cScreenTint::m_OverrideWP (hand-checked correction)	initial value run (int 0) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45E0	cScreenTint_m_DisplayValues	D_004A45E0	On Tour cScreenTint::m_DisplayValues (hand-checked correction)	initial value run (int 1) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45E4	cScreenTint_m_ColourR	D_004A45E4	On Tour cScreenTint::m_ColourR (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45E8	cScreenTint_m_ColourG	D_004A45E8	On Tour cScreenTint::m_ColourG (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45EC	cScreenTint_m_ColourB	D_004A45EC	On Tour cScreenTint::m_ColourB (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45F0	cScreenTint_m_FillR	D_004A45F0	On Tour cScreenTint::m_FillR (hand-checked correction)	initial value run (0) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45F4	cScreenTint_m_FillG	D_004A45F4	On Tour cScreenTint::m_FillG (hand-checked correction)	initial value run (0) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45F8	cScreenTint_m_FillB	D_004A45F8	On Tour cScreenTint::m_FillB (hand-checked correction)	initial value run (0) in DWARF declaration order; font.cpp reference accessors in the same order
+004A45FC	cScreenTint_m_XNColourR	D_004A45FC	On Tour cScreenTint::m_XNColourR (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
+004A4600	cScreenTint_m_XNColourG	D_004A4600	On Tour cScreenTint::m_XNColourG (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
+004A4604	cScreenTint_m_XNColourB	D_004A4604	On Tour cScreenTint::m_XNColourB (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order

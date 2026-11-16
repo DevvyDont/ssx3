@@ -836,7 +836,7 @@ extern void* cOVStateManager_mpPDATemplate;
 extern cMgr230050* D_004A4248;
 extern int D_004A43C8;
 extern int D_004A4324;
-extern int D_004A45D8;
+extern int cScreenTint_m_Enable;
 
 extern "C" void func_00230050(void* self)
 {
@@ -852,7 +852,7 @@ extern "C" void func_00230050(void* self)
     func_002B68D0(gWorldTriggerManager);
     func_002867E8(gSSXAudio);
     D_004A4324 = 1;
-    D_004A45D8 = 1;
+    cScreenTint_m_Enable = 1;
     D_004A43C8 = 1;
 }
 #endif
@@ -1639,7 +1639,7 @@ extern "C" int func_00230E98(void* self)
     mgr->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
     ((cMgr00230E98*)D_004A289C)->f270 = 1;
     D_004A4324 = 0;
-    D_004A45D8 = 0;
+    cScreenTint_m_Enable = 0;
     D_004A43C8 = 0;
     func_00278718(D_004A28A4);
     func_001F3170(*(void**)((char*)self + 0x94));

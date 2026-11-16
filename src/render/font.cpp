@@ -5099,109 +5099,109 @@ extern "C" void* func_00393048(int, int);
 //100%
 INCLUDE_ASM("render/font", func_00396D60);
 #ifdef SKIP_ASM
-extern int D_004A45D8;
+extern int cScreenTint_m_Enable;
 
 extern "C" int *func_00396D60(void) {
-    return &D_004A45D8;
+    return &cScreenTint_m_Enable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396D70);
 #ifdef SKIP_ASM
-extern int D_004A45DC;
+extern int cScreenTint_m_OverrideWP;
 
 extern "C" int *func_00396D70(void) {
-    return &D_004A45DC;
+    return &cScreenTint_m_OverrideWP;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396D80);
 #ifdef SKIP_ASM
-extern int D_004A45E0;
+extern int cScreenTint_m_DisplayValues;
 
 extern "C" int *func_00396D80(void) {
-    return &D_004A45E0;
+    return &cScreenTint_m_DisplayValues;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396D90);
 #ifdef SKIP_ASM
-extern int D_004A45E4;
+extern int cScreenTint_m_ColourR;
 
 extern "C" int *func_00396D90(void) {
-    return &D_004A45E4;
+    return &cScreenTint_m_ColourR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396DA0);
 #ifdef SKIP_ASM
-extern int D_004A45E8;
+extern int cScreenTint_m_ColourG;
 
 extern "C" int *func_00396DA0(void) {
-    return &D_004A45E8;
+    return &cScreenTint_m_ColourG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396DB0);
 #ifdef SKIP_ASM
-extern int D_004A45EC;
+extern int cScreenTint_m_ColourB;
 
 extern "C" int *func_00396DB0(void) {
-    return &D_004A45EC;
+    return &cScreenTint_m_ColourB;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396DC0);
 #ifdef SKIP_ASM
-extern int D_004A45F0;
+extern int cScreenTint_m_FillR;
 
 extern "C" int *func_00396DC0(void) {
-    return &D_004A45F0;
+    return &cScreenTint_m_FillR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396DD0);
 #ifdef SKIP_ASM
-extern int D_004A45F4;
+extern int cScreenTint_m_FillG;
 
 extern "C" int *func_00396DD0(void) {
-    return &D_004A45F4;
+    return &cScreenTint_m_FillG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396DE0);
 #ifdef SKIP_ASM
-extern int D_004A45F8;
+extern int cScreenTint_m_FillB;
 
 extern "C" int *func_00396DE0(void) {
-    return &D_004A45F8;
+    return &cScreenTint_m_FillB;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396DF0);
 #ifdef SKIP_ASM
-extern int D_004A45FC;
+extern int cScreenTint_m_XNColourR;
 
 extern "C" int *func_00396DF0(void) {
-    return &D_004A45FC;
+    return &cScreenTint_m_XNColourR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396E00);
 #ifdef SKIP_ASM
-extern int D_004A4600;
+extern int cScreenTint_m_XNColourG;
 
 extern "C" int *func_00396E00(void) {
-    return &D_004A4600;
+    return &cScreenTint_m_XNColourG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396E10);
 #ifdef SKIP_ASM
-extern int D_004A4604;
+extern int cScreenTint_m_XNColourB;
 
 extern "C" int *func_00396E10(void) {
-    return &D_004A4604;
+    return &cScreenTint_m_XNColourB;
 }
 #endif
 //100%
@@ -5460,9 +5460,9 @@ extern "C" int *func_00396FD0(void) {
 INCLUDE_ASM("render/font", func_00396FE0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern float colR __asm__("D_004A45E4");
-extern float colG __asm__("D_004A45E8");
-extern float colB __asm__("D_004A45EC");
+extern float colR __asm__("cScreenTint_m_ColourR");
+extern float colG __asm__("cScreenTint_m_ColourG");
+extern float colB __asm__("cScreenTint_m_ColourB");
 
 extern "C" int func_00396FE0(void)
 {
@@ -5506,9 +5506,9 @@ extern "C" float func_00397058(void) {
 INCLUDE_ASM("render/font", func_00397068);
 #ifdef SKIP_ASM
 extern "C" void func_00397068(float value) {
-    *(float*)&D_004A45F8 = value;
-    *(float*)&D_004A45F4 = value;
-    *(float*)&D_004A45F0 = value;
+    *(float*)&cScreenTint_m_FillB = value;
+    *(float*)&cScreenTint_m_FillG = value;
+    *(float*)&cScreenTint_m_FillR = value;
 }
 #endif
 //100%

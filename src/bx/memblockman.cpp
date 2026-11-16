@@ -3,22 +3,22 @@
 //100%
 INCLUDE_ASM("bx/memblockman", cMemMan_initialize);
 #ifdef SKIP_ASM
-extern void* D_00538B00[16];
-extern char D_004FF250[];
-extern unsigned int D_004A3EBC;
+extern void* cMemMan_m_mutex[16];
+extern char TheDynamicMemMan[];
+extern unsigned int cMemMan_m_heap;
 extern unsigned int cMemMan_m_heapSize;
-extern int D_004A3EB8;
+extern int cMemMan_m_initialized;
 extern "C" void MUTEX_create(void* mutex);
 extern "C" void func_0031FF60(void* heap, unsigned int base, unsigned int size);
 extern "C" void cMemBlockMan_initialize(void);
 
 extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
 {
-    MUTEX_create(D_00538B00);
-    D_004A3EBC = base;
+    MUTEX_create(cMemMan_m_mutex);
+    cMemMan_m_heap = base;
     cMemMan_m_heapSize = size;
-    func_0031FF60(D_004FF250, base, size);
-    D_004A3EB8 = 1;
+    func_0031FF60(TheDynamicMemMan, base, size);
+    cMemMan_m_initialized = 1;
     cMemBlockMan_initialize();
 }
 #endif
@@ -28,7 +28,7 @@ INCLUDE_ASM("bx/memblockman", func_00319A90);
 #ifdef SKIP_ASM
 extern "C" void* func_00319E48(unsigned int size);
 extern "C" void func_003E6220(void* p, unsigned int n);
-extern char D_004FF250[];
+extern char TheDynamicMemMan[];
 // PORT: func_00320058__FPv / func_00320078__FPv take (heap, align, size); the defining unit declares 1 arg.
 void* func_00320058_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320058__FPv");
 void* func_00320078_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320078__FPv");
@@ -42,9 +42,9 @@ extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags,
         if (align <= 15)
             align = 16;
         if (top != 0)
-            p = func_00320078_K2(D_004FF250, align, size);
+            p = func_00320078_K2(TheDynamicMemMan, align, size);
         else
-            p = func_00320058_K2(D_004FF250, align, size);
+            p = func_00320058_K2(TheDynamicMemMan, align, size);
     }
     if (p != 0 && flags < 0)
         func_003E6220(p, size);
@@ -57,7 +57,7 @@ INCLUDE_ASM("bx/memblockman", func_00319B48);
 #ifdef SKIP_ASM
 extern "C" int func_0031A088(void* p);
 extern "C" void func_00319F68(void* p);
-extern char D_004FF250[];
+extern char TheDynamicMemMan[];
 // PORT: func_003200C0__FPv is called with (list, item) here; bind the 2-arg form to that symbol.
 int func_003200C0_2(void* list, void* item) __asm__("func_003200C0__FPv");
 
@@ -71,7 +71,7 @@ extern "C" void func_00319B48(void* p)
         }
         else
         {
-            func_003200C0_2(D_004FF250, p);
+            func_003200C0_2(TheDynamicMemMan, p);
         }
     }
 }
@@ -82,12 +82,12 @@ INCLUDE_ASM("bx/memblockman", func_00319B98);
 #ifdef SKIP_ASM
 extern "C" int func_0031A130(void* self);
 void func_0031FBB8(void* list, void* item);
-extern char D_004FF250[];
+extern char TheDynamicMemMan[];
 
 extern "C" void func_00319B98(void* self)
 {
     if (func_0031A130(self) == 0) {
-        func_0031FBB8(D_004FF250, self);
+        func_0031FBB8(TheDynamicMemMan, self);
     }
 }
 #endif
@@ -98,7 +98,7 @@ INCLUDE_ASM("bx/memblockman", cMemMan_internalResizeBlock);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
-extern void* D_00538B00[16];
+extern void* cMemMan_m_mutex[16];
 extern char D_0048DA08[];
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -107,17 +107,17 @@ extern "C" unsigned int func_00319B98_K2(void* p) __asm__("func_00319B98");
 
 static inline unsigned int cMemMan_blockSizeK2(void* p)
 {
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     unsigned int n = func_00319B98_K2(p);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
     return n;
 }
 
 static inline void cMemMan_freeBlockK2(void* p)
 {
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     func_00319B48(p);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
 }
 
 extern "C" void* cMemMan_internalResizeBlock(void* old, unsigned int size)
@@ -135,13 +135,13 @@ INCLUDE_ASM("bx/memblockman", func_00319CC8);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void func_0031A200(void);
-extern void* D_00538B00[16];
+extern void* cMemMan_m_mutex[16];
 
 extern "C" void func_00319CC8(void)
 {
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     func_0031A200();
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
 }
 #endif
 

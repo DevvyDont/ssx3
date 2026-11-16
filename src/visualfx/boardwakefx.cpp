@@ -6003,9 +6003,9 @@ extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
 #ifdef SKIP_ASM
-extern int D_004A473C;
-extern float D_004A4740;
-extern float D_004A4744;
+extern int cSnowfallToggles_m_EnableTest;
+extern float cSnowfallToggles_m_TestSnowIntensity;
+extern float cSnowfallToggles_m_TestWindIntensity;
 extern float cSnowfallToggles_m_TestFlakeSize;
 extern float cSnowfallToggles_m_TestWindRotation;
 extern float cSnowfallToggles_m_TestSnowFlurries;
@@ -6046,9 +6046,9 @@ extern "C" void func_002E5DA0(void* self)
     sWakeRec_5DA0 recs[2];
     unsigned int i;
     for (i = 0; i < *(unsigned int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
-        if (D_004A473C != 0) {
-            recs[i].f[0] = D_004A4740;
-            recs[i].f[1] = D_004A4744;
+        if (cSnowfallToggles_m_EnableTest != 0) {
+            recs[i].f[0] = cSnowfallToggles_m_TestSnowIntensity;
+            recs[i].f[1] = cSnowfallToggles_m_TestWindIntensity;
             recs[i].f[2] = cSnowfallToggles_m_SnowFluffItensity;
             recs[i].f[3] = cSnowfallToggles_m_SnowFluffWindIntensity;
             recs[i].f[4] = cSnowfallToggles_m_TestFlakeSize;
@@ -6484,7 +6484,7 @@ struct sWake_66B8 {
     float& Width() { return fC; }
 };
 
-extern int D_004A4700;
+extern int cPowerUpFXToggles_m_EnableSpeedBoostStreamers;
 extern int cPowerUpFXToggles_m_TestSpeedBoostRibbon;
 extern int cPowerUpFXToggles_m_TestRedRibbon;
 extern int cPowerUpFXToggles_m_TestOrangeRibbon;
@@ -6622,7 +6622,7 @@ extern "C" void func_002E66B8(sWake_66B8* self)
         self->f8 *= 0.95f;
         self->Width() *= 0.95f;
     }
-    if (D_004A4700 != 0) {
+    if (cPowerUpFXToggles_m_EnableSpeedBoostStreamers != 0) {
         t4Vector pos = *(t4Vector*)(self->rider + 0x1A0);
         Trail_66B8(self, pos, on, k, speed);
     }

@@ -2299,7 +2299,7 @@ extern void* D_004A3E94;
 extern char D_004A5960[], D_004A5968[], D_004A5970[];
 extern char t3vect_Zero[], D_004FF0E8[], D_004FF0F8[], D_004FF108[];
 extern char t4vect_Zero[], D_004FF130[], D_004FF140[], t4vect_YAxis[], D_004FF160[];
-extern char D_004FF170[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], D_004FF230[], D_004FF250[];
+extern char D_004FF170[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], D_004FF230[], TheDynamicMemMan[];
 
 extern "C" void func_00320550(int init, int prio)
 {
@@ -2335,9 +2335,9 @@ extern "C" void func_00320550(int init, int prio)
             new (D_004FF1E0) sM44_0550(0.0f);
             new (D_004FF220) sQ_0550(0.0f, 0.0f, 0.0f, 1.0f);
             new (D_004FF230) sXf_0550(*(sV4_0550*)D_004FF130, *(sQ_0550*)D_004FF220);
-            func_0031FF20(D_004FF250);
+            func_0031FF20(TheDynamicMemMan);
         } else {
-            func_0031FF38(D_004FF250, 2);
+            func_0031FF38(TheDynamicMemMan, 2);
         }
     }
 }

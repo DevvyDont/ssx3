@@ -1466,12 +1466,12 @@ extern "C" int func_00390198(void* self, int w, int h, unsigned char* src, unsig
 //100%
 INCLUDE_ASM("render/lightman", func_00390458);
 #ifdef SKIP_ASM
-extern float D_004A45E4;
-extern float D_004A45E8;
-extern float D_004A45EC;
-extern float D_004A45F0;
-extern float D_004A45F4;
-extern float D_004A45F8;
+extern float cScreenTint_m_ColourR;
+extern float cScreenTint_m_ColourG;
+extern float cScreenTint_m_ColourB;
+extern float cScreenTint_m_FillR;
+extern float cScreenTint_m_FillG;
+extern float cScreenTint_m_FillB;
 
 struct sLmEntry_0458 {
     float v[6];
@@ -1485,20 +1485,20 @@ struct sLmOwner_0458 {
 extern "C" void func_00390458(void* self, int idx)
 {
     char* e = (char*)&((sLmOwner_0458*)self)->entries[idx];
-    *(float*)(e + 0x0) = D_004A45E4;
-    *(float*)(e + 0x4) = D_004A45E8;
-    *(float*)(e + 0x8) = D_004A45EC;
-    *(float*)(e + 0xC) = D_004A45F0;
-    *(float*)(e + 0x10) = D_004A45F4;
-    *(float*)(e + 0x14) = D_004A45F8;
+    *(float*)(e + 0x0) = cScreenTint_m_ColourR;
+    *(float*)(e + 0x4) = cScreenTint_m_ColourG;
+    *(float*)(e + 0x8) = cScreenTint_m_ColourB;
+    *(float*)(e + 0xC) = cScreenTint_m_FillR;
+    *(float*)(e + 0x10) = cScreenTint_m_FillG;
+    *(float*)(e + 0x14) = cScreenTint_m_FillB;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_003904A0);
 #ifdef SKIP_ASM
-extern int D_004A45D8;
-extern int D_004A45DC;
+extern int cScreenTint_m_Enable;
+extern int cScreenTint_m_OverrideWP;
 extern void* D_004A4474;
 
 extern "C" void func_003905E8(void* self, int idx, int* mark);
@@ -1509,10 +1509,10 @@ extern "C" void func_00368138(void* self, void* pkt);
 
 extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
 {
-    if (D_004A45D8 == 0) {
+    if (cScreenTint_m_Enable == 0) {
         return;
     }
-    if (D_004A45DC != 0) {
+    if (cScreenTint_m_OverrideWP != 0) {
         func_00390458(self, idx);
     }
     float* e = ((sLmOwner_0458*)self)->entries[idx].v;
@@ -1578,9 +1578,9 @@ extern float D_004A4648;
 extern float D_004A464C;
 extern float D_004A4650;
 extern float D_004A4654;
-extern float D_004A45E4;
-extern float D_004A45E8;
-extern float D_004A45EC;
+extern float cScreenTint_m_ColourR;
+extern float cScreenTint_m_ColourG;
+extern float cScreenTint_m_ColourB;
 extern float D_004A46A0;
 extern float D_004A46A4;
 extern float D_004A46A8;
@@ -1653,9 +1653,9 @@ extern "C" void func_00390C60()
         D_004A46AC = 5;
     } else {
         D_004A4698 = -1;
-        D_004A46A0 = D_004A45E4;
-        D_004A46A4 = D_004A45E8;
-        D_004A46A8 = D_004A45EC;
+        D_004A46A0 = cScreenTint_m_ColourR;
+        D_004A46A4 = cScreenTint_m_ColourG;
+        D_004A46A8 = cScreenTint_m_ColourB;
         D_004A46AC = 5;
         *(float*)&D_004A469C = 0.0f;
     }

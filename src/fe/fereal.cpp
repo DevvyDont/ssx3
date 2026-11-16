@@ -727,7 +727,7 @@ extern char D_004A4E80;
 extern char D_005308B8[];
 extern int D_004A19B8;
 extern int D_004A4324;
-extern int D_004A45D8;
+extern int cScreenTint_m_Enable;
 extern int D_004A43C8;
 extern void* D_004A289C;
 
@@ -755,7 +755,7 @@ extern "C" void func_001A1DC0(char* self)
     func_00369FF8(D_004A289C);
     func_00195E58(SSXApp->FELocale);
     D_004A4324 = 0;
-    D_004A45D8 = 0;
+    cScreenTint_m_Enable = 0;
     D_004A43C8 = 0;
     m = (char*)D_004A289C;
     vt = *(char**)(m + 0x10D8);

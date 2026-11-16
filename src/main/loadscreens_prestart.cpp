@@ -683,7 +683,7 @@ extern "C" void func_00232B28(void* self)
 INCLUDE_ASM("main/loadscreens_prestart", func_00232C98);
 #ifdef SKIP_ASM
 extern int D_004A4324;
-extern int D_004A45D8;
+extern int cScreenTint_m_Enable;
 extern int D_004A43C8;
 extern "C" void func_00369FF8(void* g);
 
@@ -709,7 +709,7 @@ extern "C" void func_00232C98(void* self)
     func_00369FF8(D_004A289C);
     *(int*)((char*)self + 0x14) = 0;
     clear_2C98(&D_004A4324);
-    clear_2C98(&D_004A45D8);
+    clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&D_004A43C8);
     char* g = (char*)D_004A289C;
     sVE_2C98* vt = *(sVE_2C98**)(g + 0x10D8);

@@ -25,7 +25,7 @@ void* operator_new2(int size)
 //100%
 INCLUDE_ASM("bx/memman", cMemMan_alloc);
 #ifdef SKIP_ASM
-extern void* D_00538B00[16];
+extern void* cMemMan_m_mutex[16];
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top);
@@ -41,9 +41,9 @@ extern "C" void* cMemMan_alloc(int size, const char* name, unsigned int type, in
     alignmask = (alignbits - 1) >> 31;
     align &= alignmask;
     align |= (4 << alignbits) & ~alignmask;
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     void* p = func_00319A90(size, align, type, headersize);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
     return p;
 }
 #endif
@@ -60,7 +60,7 @@ void* operator_new(unsigned int size)
 }
 #endif
 
-extern void* D_00538B00[16];
+extern void* cMemMan_m_mutex[16];
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void func_00319B48(void* ptr);
@@ -70,9 +70,9 @@ INCLUDE_ASM("bx/memman", operator_delete__FPi);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr)
 {
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     func_00319B48(ptr);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
 }
 #endif
 
@@ -81,9 +81,9 @@ INCLUDE_ASM("bx/memman", cMemMan_free__FPv);
 #ifdef SKIP_ASM
 void cMemMan_free(void* ptr)
 {
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     func_00319B48(ptr);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
 }
 #endif
 
@@ -91,8 +91,8 @@ void cMemMan_free(void* ptr)
 INCLUDE_ASM("bx/memman", func_00317EE0);
 #ifdef SKIP_ASM
 extern "C" void func_00317EE0(void) {
-    MUTEX_lock(D_00538B00);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
+    MUTEX_unlock(cMemMan_m_mutex);
 }
 #endif
 //100%

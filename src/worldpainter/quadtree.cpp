@@ -635,7 +635,7 @@ extern "C" void MUTEX_unlock_p(void*) __asm__("MUTEX_unlock");
 extern "C" int cMemMan_internalResizeBlock(int, int);
 extern "C" int func_002C28C0(int, int, int);
 extern "C" void func_002C28F8(int);
-extern char D_00538B00[];
+extern char cMemMan_m_mutex[];
 
 extern "C" int func_002C2940(int block, int a, int size, int c) {
     if (block == 0) {
@@ -646,9 +646,9 @@ extern "C" int func_002C2940(int block, int a, int size, int c) {
         return 0;
     } else {
         int r;
-        MUTEX_lock_p(D_00538B00);
+        MUTEX_lock_p(cMemMan_m_mutex);
         r = cMemMan_internalResizeBlock(block, size);
-        MUTEX_unlock_p(D_00538B00);
+        MUTEX_unlock_p(cMemMan_m_mutex);
         return r;
     }
 }
@@ -858,7 +858,7 @@ extern "C" void MUTEX_unlock_p(void*) __asm__("MUTEX_unlock");
 extern "C" int cMemMan_internalResizeBlock(int, int);
 extern "C" int func_002C2D30(int, int, int);
 extern "C" void func_002C2D68(int);
-extern char D_00538B00[];
+extern char cMemMan_m_mutex[];
 
 extern "C" int func_002C2DB0(int block, int a, int size, int c) {
     if (block == 0) {
@@ -869,9 +869,9 @@ extern "C" int func_002C2DB0(int block, int a, int size, int c) {
         return 0;
     } else {
         int r;
-        MUTEX_lock_p(D_00538B00);
+        MUTEX_lock_p(cMemMan_m_mutex);
         r = cMemMan_internalResizeBlock(block, size);
-        MUTEX_unlock_p(D_00538B00);
+        MUTEX_unlock_p(cMemMan_m_mutex);
         return r;
     }
 }

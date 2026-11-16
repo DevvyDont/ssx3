@@ -755,14 +755,14 @@ INCLUDE_ASM("mem/memstd", func_002525F8);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" int func_00319B98(int);
-extern void* D_00538B00[16];
+extern void* cMemMan_m_mutex[16];
 
 extern "C" int func_002525F8(int arg0) {
     int temp_17;
 
-    MUTEX_lock(&D_00538B00);
+    MUTEX_lock(&cMemMan_m_mutex);
     temp_17 = func_00319B98(arg0);
-    MUTEX_unlock(&D_00538B00);
+    MUTEX_unlock(&cMemMan_m_mutex);
     return temp_17;
 }
 #endif
@@ -830,14 +830,14 @@ INCLUDE_ASM("mem/memstd", func_002526B8);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
-extern void* D_00538B00[16];
+extern void* cMemMan_m_mutex[16];
 
 extern "C" void* func_002526B8(void* block, int size)
 {
     void* r;
-    MUTEX_lock(D_00538B00);
+    MUTEX_lock(cMemMan_m_mutex);
     r = cMemMan_internalResizeBlock(block, size);
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
     return r;
 }
 #endif

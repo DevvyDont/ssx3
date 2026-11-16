@@ -466,17 +466,17 @@ struct sMallinfo_99D0 {
 extern "C" sMallinfo_99D0 func_0031FC20(void* ms);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
-extern void* D_00538B00[16];
-extern char D_004FF250[];
+extern void* cMemMan_m_mutex[16];
+extern char TheDynamicMemMan[];
 extern unsigned int cMemMan_m_heapSize;
 
 // Free heap bytes: heap size minus the bytes dlmalloc has handed out.
 extern "C" int func_003199D0(void)
 {
-    MUTEX_lock(D_00538B00);
-    sMallinfo_99D0 mi = func_0031FC20(D_004FF250);
+    MUTEX_lock(cMemMan_m_mutex);
+    sMallinfo_99D0 mi = func_0031FC20(TheDynamicMemMan);
     int r = cMemMan_m_heapSize - mi.uordblks;
-    MUTEX_unlock(D_00538B00);
+    MUTEX_unlock(cMemMan_m_mutex);
     return r;
 }
 #endif
