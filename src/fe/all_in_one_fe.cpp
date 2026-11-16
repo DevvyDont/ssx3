@@ -382,6 +382,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_ViewPopup__cOVState_ViewPopup);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char cOVState_ViewPopup_vtbl[];
 
+/**
+ * Destroys the message view popup: restores cOVState_ViewPopup_vtbl and runs the cUIState destructor
+ * (func_0039E390).
+ *
+ * Only @p arg0 is passed in C; the g++ destructor flags reach func_0039E390 untouched in $a1, so a port must pass
+ * them explicitly.
+ *
+ * @param arg0  the popup being destroyed
+ */
 extern "C" void cOVState_ViewPopup__cOVState_ViewPopup(cOVState_ViewPopup* arg0) {
     arg0->mVtbl = (void**)cOVState_ViewPopup_vtbl;
     func_0039E390_a(arg0);
@@ -391,6 +400,11 @@ extern "C" void cOVState_ViewPopup__cOVState_ViewPopup(cOVState_ViewPopup* arg0)
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVState_ViewPopup_onLoseTransition);
 #ifdef SKIP_ASM
+/**
+ * Ends the message view popup's lose-focus transition at once.
+ *
+ * @return always 1 (the transition is done)
+ */
 extern "C" int cOVState_ViewPopup_onLoseTransition(void) {
     return 1;
 }

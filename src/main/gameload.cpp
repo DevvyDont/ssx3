@@ -679,6 +679,23 @@ struct sObj20_FA98 {
     sElem14_FA98 e[8];
 };
 
+/**
+ * Tears down a running event: saves the ranked-game records, deletes every game manager and resets the graphics,
+ * audio and scripts.
+ *
+ * Sets the BE state to 0. For a ranked network game it copies each rider's 0xAC-byte record (rider +0x790 -> +0xFC;
+ * host order by bIsHost) into the network options (+0x330) and D_00534F0C and calls the network interface's virtual
+ * slot 1. Then: camera-trigger cleanup, GrMan slot 19, the FE async manager (cFEAsyncManager_FlushFEAsyncTextures), every script
+ * force-ended; deletes UI and InputSync, returns the cut-scene transitions to regular mode, purges and frees
+ * SurfPropCache, deletes SkyBox, FogMan and LensFxMan, purges the paths (func_0026AF00) and BXNash's AI cache,
+ * deletes MenuSys, merges bucket 1 of the bucket manager D_004A5988, then deletes WScriptMan, CrowdMan2d/3d,
+ * MultiParticleMan, PlaybackMan and InstanceMan, purges the camera triggers and render states, and deletes ViewMan,
+ * AI, Replay, StreamPause, SectionMan, FXLoader, WorldLightMan, World, OcclusionMan, the track BigFile,
+ * LoadIndicator (freed only), DebugFont and BXNash. Finally GrMan slots 113 and 50 (the box texture mBoxTextureID),
+ * func_0036A020 and func_0038ADB0, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
+ * audio de-initialised and purged, the script engine purged, and D_004A2A54 and the word at D_004A5B64 + 0x34
+ * cleared.
+ */
 extern "C" void cGame_purge(char* self)
 {
     cBE_setState(0);
@@ -2030,6 +2047,20 @@ public:
 };
 
 
+/**
+ * Restores the game's flow state from a replay frame: the flag manager, snowfall, state ids and every game-flow
+ * state.
+ *
+ * Loads FlagManager and SnowFall (their load virtuals), reads mCurrentStateID, mPrevStateID, mPendingStateID and
+ * mPendingStateStartupFlag (4 bytes each), then each cGF*State in mStates (event start, pre-event, gate, riding,
+ * finish line, end, post-event, end wait, transport wait, track start, section load, podium, next heat, user
+ * select, session teleport; the state at +0x1EC is not read). mCurrentState and mPrevState are pointed at the state
+ * object for their id (1-16; 0 is none, an unknown id becomes 0). The comment above the definition calls it a save
+ * stream; it is a replay frame.
+ *
+ * @param self_  the game (this)
+ * @param stream  the replay frame to read from (On Tour cReplayFramePtr*)
+ */
 // Game load state machine: restores the state ids and every state from a save stream.
 extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
 {

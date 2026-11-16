@@ -180,6 +180,14 @@ struct sCamCtrlVEDtor {
     void (*fn)(void*, int);
 };
 
+/**
+ * Destroys the manual camera controller: deletes its manual and editor algorithms, then runs the base destructor.
+ *
+ * Restores cManualCameraController_vtbl (+0x14), deletes ManualAlgo (+0x18) and EditorAlgo (+0x1C) through their
+ * destructor virtual (slot 1, flags 3) when set, and passes @p flags on to cCameraController__cCameraController.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ */
 extern "C" void cManualCameraController__cManualCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = cManualCameraController_vtbl;
@@ -211,10 +219,17 @@ public:
 
 extern "C" void func_0015CC70(void* self);
 
-extern "C" void cManualCameraController_snap(void* self, int a)
+/**
+ * Snaps the camera to a subject: the base controller's snap, then the manual algorithm's.
+ *
+ * Calls func_0015CC70 (On Tour cCameraController::snap) and the snap virtual (slot 3) of ManualAlgo (+0x18).
+ *
+ * @param subjectID  the subject to snap to (On Tour subjectID), passed only to the manual algorithm
+ */
+extern "C" void cManualCameraController_snap(void* self, int subjectID)
 {
     func_0015CC70(self);
-    (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->v03(a);
+    (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->v03(subjectID);
 }
 #endif
 
@@ -234,6 +249,12 @@ public:
 
 extern "C" void func_0015CCF0(void* self);
 
+/**
+ * Snaps the camera to its current subject: the base controller's snapCurrent, then the manual algorithm's.
+ *
+ * Calls func_0015CCF0 (On Tour cCameraController::snapCurrent) and the snapCurrent virtual (slot 4) of ManualAlgo
+ * (+0x18).
+ */
 extern "C" void cManualCameraController_snapCurrent(void* self)
 {
     func_0015CCF0(self);
@@ -290,6 +311,9 @@ extern "C" int func_0015CFD0(void *arg0) {
 //100%
 INCLUDE_ASM("camera/cameracontroller", cManualCameraController_update);
 #ifdef SKIP_ASM
+/**
+ * Updates the manual camera: runs the update virtual (slot 5) of the first algorithm in its AlgorithmList (+0x8).
+ */
 extern "C" void cManualCameraController_update(void* self)
 {
     void** p = *(void***)((char*)self + 0x8);

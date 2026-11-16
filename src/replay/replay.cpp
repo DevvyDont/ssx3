@@ -669,6 +669,11 @@ extern void* cReplayFramePtr_vtbl[];
 //100%
 INCLUDE_ASM("replay/replay", cReplayFramePtr_cReplayFramePtr__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty replay frame: stores cReplayFramePtr_vtbl and clears Block, WriteData, ReadData and Size.
+ *
+ * @return @p self
+ */
 void* cReplayFramePtr_cReplayFramePtr(void* self)
 {
     int t0 = 0;

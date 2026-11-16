@@ -867,15 +867,25 @@ struct sVec3_7040 { float x, y, z; };
 extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t);
 extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float t);
 
-extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* a1)
+/**
+ * Places and sizes the popup's post-pending text below the title when the popup description has one.
+ *
+ * With mpPostText set and the description's mtPostPending given (eType at +0x4C nonzero), moves the text to
+ * mvPosTitle + (0, mvCurSize.y), grows mvCurSize by its wrapped size with a 10.0 gap
+ * (cScreenPopup_getTextBoxWrapSize on the post text) and, when mbCenterText is set, re-pivots it (func_001C8930, On
+ * Tour changePivot, pivot 0x11).
+ *
+ * @param pInfo  the popup description (On Tour cPopupInfo* pInfo)
+ */
+extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* pInfo)
 {
     char* o = (char*)self->mpPostText;
     if (o != 0) {
-        if (*(int*)((char*)a1 + 0x4C) != 0) {
+        if (*(int*)((char*)pInfo + 0x4C) != 0) {
             sVec3_7040 v = *(sVec3_7040*)&self->mvPosTitle[0];
             v.y += self->mvCurSize[1];
             *(sVec3_7040*)(o + 0x44) = v;
-            cScreenPopup_getTextBoxWrapSize(self, (char*)a1 + 0x4C, (char*)self + 0x260, 0, 10.0f);
+            cScreenPopup_getTextBoxWrapSize(self, (char*)pInfo + 0x4C, (char*)self + 0x260, 0, 10.0f);
             if (self->mbCenterText != 0) {
                 func_001C8930(self, self->mpPostText, 0x11, 0.0f);
             }
@@ -914,6 +924,16 @@ struct cW_70F0 {
 struct sVec3_70F0 { float x, y, z; };
 struct sVec3_7258;
 
+/**
+ * Sets the size of the popup's message, post and title texts, keeping each text's own width or height where @p vp
+ * is 0.
+ *
+ * For each existing text it reads the current size and replaces the components that are nonzero in @p vp, but only
+ * the post text gets that merged size: the message and title texts are set to @p vp itself, so a 0 component zeroes
+ * their size. Likely an original bug (copy-paste of the post-text branch).
+ *
+ * @param vp  the new size (On Tour t3Vector& vSize); 0 components mean "keep"
+ */
 extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* vp)
 {
     sVec3_70F0* v = (sVec3_70F0*)vp;
@@ -1291,6 +1311,11 @@ extern "C" void func_001C78C0(void* self, sVec3_78C0 v, float a, float b)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_centerOffset);
 #ifdef SKIP_ASM
+/**
+ * Gives the x offset that centres the popup box on the 640-pixel screen.
+ *
+ * @return 0 when mbCenterText is set, otherwise (640 - mvCurSize.x) / 2 - mvPosTitle.x
+ */
 extern "C" float cScreenPopup_centerOffset(cScreenPopup* self)
 {
     if (self->mbCenterText != 0) {
@@ -1374,6 +1399,13 @@ struct sVE_7EB0 {
     void (*fn)(void*, sVec2_7EB0*);
 };
 
+/**
+ * Stretches the popup's text-entry box and its background to the popup's current width.
+ *
+ * The entry box (mpEnterBox) gets width mvCurSize.x - (its x - mpStaticBox's x) - 10 (size get / set virtuals,
+ * slots 20 and 21). mpEnterBoxBackground, when present, is centred on it (x + (width + 6) / 2, y + half the
+ * background height + the menu's y - 3) and scaled in x by (width + 6) / mvSizeBackEnterBox.x.
+ */
 extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
 {
     char* o80 = (char*)self->mpEnterBox;
@@ -1688,12 +1720,21 @@ extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
 extern "C" void func_001C9B68(void* self, float* size, float* item);
 extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float t);
 
-extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* a1)
+/**
+ * Shows and sizes the popup's title bar from the popup description, or hides it when there is no title.
+ *
+ * With mpTitleText set: when the description's mtTitle is given (eType at +0xC nonzero) it sets the text
+ * (func_001C8050, On Tour setTextString), shows it (slot 9), adds its size (getStringSize, increaseBoxSize) to
+ * mvCurSize plus 5 in y and re-pivots it when mbCenterText is set; otherwise it hides it.
+ *
+ * @param pInfo  the popup description (On Tour cPopupInfo* pInfo)
+ */
+extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* pInfo)
 {
     cUIText* text = self->mpTitleText;
     if (text != 0) {
-        int* info = (int*)((char*)a1 + 0xC);
-        if (*(int*)((char*)a1 + 0xC) != 0) {
+        int* info = (int*)((char*)pInfo + 0xC);
+        if (*(int*)((char*)pInfo + 0xC) != 0) {
             float item[4];
             func_001C8050(self, text, info);
             {
@@ -1721,6 +1762,13 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_adjustMenuPosition);
 struct sVec3_8758 { float x, y, z; };
 extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float t);
 
+/**
+ * Centres the popup's option menu below the text and remembers the shift for the buttons.
+ *
+ * With mpMenu set: x = (640 - mvLargestOption.x) / 2 - the first option's x; the menu goes to mvPosMenu + (x,
+ * mvMenuSize.y), mpTextBoxPair moves by -x + 5, the options are re-pivoted around half the widest option when
+ * mbCenterOptions is set, and mvButtonOffset becomes (x, mvMenuSize.y).
+ */
 extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self)
 {
     char* p = (char*)self->mpMenu;
@@ -1754,6 +1802,10 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_adjustButtonPosition);
 #ifdef SKIP_ASM
 struct sVec3_88C8 { float x, y, z; };
 
+/**
+ * Moves the popup's button group to mvPosButtons plus the shift cScreenPopup_adjustMenuPosition stored in
+ * mvButtonOffset.
+ */
 extern "C" void cScreenPopup_adjustButtonPosition(cScreenPopup* self)
 {
     void* p = self->mpButtonGroup;
@@ -2291,10 +2343,23 @@ struct sVEntry_97E0 {
     void* (*fn)(void*, int);
 };
 
-extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t)
+/**
+ * Sets the popup's message or post text from a popup string and grows a size by the wrapped text plus a gap.
+ *
+ * Picks mpMessageText when @p which is nonzero, else mpPostText (nothing without one). By the string's type: 2
+ * ascii (func_001C9B28) and 1 unicode (func_001C9938) wrap the text into @p vSize; 3 looks the id up in the FE locale
+ * (slot 4) and wraps that string, or, when missing, the ascii text "String %08x" and returns without the gap; 0
+ * only sets the text (func_001C8050) and returns. Otherwise adds @p bMessage to the size's y.
+ *
+ * @param ptElement  the popup string (On Tour tPopupElement* ptElement): type word, then the value
+ * @param vSize  the size to grow (On Tour t3Vector& vSize)
+ * @param which  nonzero for the message text, 0 for the post text (On Tour bMessage)
+ * @param bMessage  the gap added below the text (On Tour fGapDistance)
+ */
+extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElement, void* vSize, int which, float bMessage)
 {
-    int* info = (int*)a;
-    float* out = (float*)b;
+    int* info = (int*)ptElement;
+    float* out = (float*)vSize;
     cUIText* text;
     if (which != 0)
         text = self->mpMessageText;
@@ -2327,7 +2392,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, voi
         func_001C8050(self, text, info);
         return;
     }
-    out[1] += t;
+    out[1] += bMessage;
 }
 #endif
 
@@ -2535,12 +2600,12 @@ struct sVEntry_A0F0 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int a)
+extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
 {
     char* o = *(char**)((char*)self + (idx << 2) + 0x90);
     if (o != 0) {
         sVEntry_A0F0* vt = *(sVEntry_A0F0**)(o + 8);
-        vt[8].fn(o + vt[8].delta, a);
+        vt[8].fn(o + vt[8].delta, bStatic);
         sVEntry_A0F0* vt2 = *(sVEntry_A0F0**)(o + 8);
         vt2[25].fn(o + vt2[25].delta, 1);
     }
@@ -3171,6 +3236,18 @@ extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern void* cUIStateBuyPopup_vtbl[];
 
+/**
+ * Constructs the buy-confirmation popup state for one user.
+ *
+ * Runs the cUIState constructor (func_0039E318), stores cUIStateBuyPopup_vtbl, clears the embedded cBuyPopupInfo
+ * (+0x48, cBuyPopupInfo_clear) twice (before and after the other stores), stores @p idx as mUserNum and mHashName 7, and
+ * when the engine's first word is set takes mCtrlBits from func_001A1CD0(that word, idx).
+ *
+ * @param engine  the UI engine (On Tour pEngine)
+ * @param owner  the parent state (On Tour pParentState)
+ * @param idx  the user the popup belongs to (On Tour userNum)
+ * @return @p self
+ */
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void* engine, void* owner, signed char idx)
 {
     func_0039E318(self, engine, owner);
@@ -3394,14 +3471,14 @@ int GetHashValue32(char* str);
 extern char D_00466368[];
 extern char D_004A1408[];
 
-extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int a1, int a2, int a3)
+extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int pAttrName, int cost, int money)
 {
     char* s = D_004A1408;
     int two = 2;
     *(char**)((char*)self + 0x58) = s;
     self->mInfo.mItemName.eType = two;
-    self->mInfo.mCost = a2;
-    self->mInfo.mMoney = a3;
+    self->mInfo.mCost = cost;
+    self->mInfo.mMoney = money;
     int h = GetHashValue32(D_00466368);
     self->mInfo.mQuestion.eType = two;
     *(char**)((char*)self + 0x68) = s;
@@ -3420,12 +3497,27 @@ extern int D_004A3E90;
 extern void* D_004A33F0;
 extern void* cKeyboardPopup_vtbl[];
 
-extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int a3, unsigned char a4)
+/**
+ * Constructs the on-screen keyboard popup: caps on, cursor at key 29, a 63-character limit and the default key set.
+ *
+ * Runs the cUIState constructor (func_0039E318), stores @p CtrlBits in mCtrlBits and @p Password in mbPassword, clears the edit
+ * string (+0x74), cursor, view range and flags (mbPopOnEnd 1, mbCapsOn 1), stores cKeyboardPopup_vtbl, miCurrentKey
+ * 0x1D, mszStatic = the empty string, miMaxCharacters 63, meSkipState 2 (both), miLastKey 0x2B and meType 1
+ * (compact); resets the cBXString at +0x424 and clears the static texts and the three backgrounds. When D_004A33F0
+ * is set, mbCapsOn comes from bit 1 of its word +0x88. Ends with cKeyboardPopup_fillSelectableKeys().
+ *
+ * @param engine  the UI engine (On Tour pEngine)
+ * @param owner  the parent state (On Tour pParentState)
+ * @param Password  nonzero for a password entry (On Tour Password; stored in mbPassword)
+ * @param CtrlBits  the controller bits (On Tour CtrlBits; stored in mCtrlBits)
+ * @return @p self
+ */
+extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int Password, unsigned char CtrlBits)
 {
     func_0039E318(self, engine, owner);
     int d = D_004A3E90;
-    self->mCtrlBits = a4;
-    self->mbPassword = a3;
+    self->mCtrlBits = CtrlBits;
+    self->mbPassword = Password;
     self->mbSetInputText = 0;
     self->mbTransistionDone = 0;
     self->mbPopOnEnd = 1;
@@ -3711,7 +3803,18 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_kbMoveLeft);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern signed char D_00441390[];
 
-extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int a1)
+/**
+ * Moves the keyboard cursor one key left, wrapping within the 14-key row and skipping blank and disabled keys.
+ *
+ * The case (caps XOR shift; keys 15-26 use !shift) decides which key set a refused key falls back to. With @p bControllerInput
+ * set it saves miCurrentKey in miLastKey and sets meLastDirection to left (2); if the previous move was right (3)
+ * it simply returns to miLastKey's old value. Otherwise column 0 wraps to 13, '*' (blank) keys of D_00441390 are
+ * skipped leftwards, and a key cKeyboardPopup_allowSelection refuses is passed over by moving again (with @p bControllerInput 0),
+ * setting meSkipState to the other case when the key exists in it.
+ *
+ * @param bControllerInput  nonzero for a move from the controller (On Tour bControllerInput); 0 for the internal repeat
+ */
+extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int bControllerInput)
 {
     bool b = self->mbCapsOn != 0;
     int flag;
@@ -3728,7 +3831,7 @@ extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int a1)
         flag = !*(bool*)&self->mbShiftOn;
     }
     int st = self->meLastDirection;
-    if (a1) {
+    if (bControllerInput) {
         self->miLastKey = idx;
         self->meLastDirection = 2;
         if (st == 3) {
@@ -3761,7 +3864,17 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_kbMoveRight);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern signed char D_00441390[];
 
-extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int a1)
+/**
+ * Moves the keyboard cursor one key right, wrapping within the 14-key row and skipping blank and disabled keys.
+ *
+ * Mirrors cKeyboardPopup_kbMoveLeft (direction right, 3; column 13 wraps to 0), but the undo after a left move
+ * happens only when meSkipState is 2 or 0 and the old key is selectable. The test reads (flag && state == 0) ||
+ * (!flag && state == 0): both arms check 0 (Reg), so the case flag has no effect (probably one arm was meant to
+ * test 1, Alt).
+ *
+ * @param bControllerInput  nonzero for a move from the controller (On Tour bControllerInput); 0 for the internal repeat
+ */
+extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int bControllerInput)
 {
     bool b = self->mbCapsOn != 0;
     int flag;
@@ -3778,7 +3891,7 @@ extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int a1)
         flag = !*(bool*)&self->mbShiftOn;
     }
     int st = self->meLastDirection;
-    if (a1) {
+    if (bControllerInput) {
         self->miLastKey = idx;
         self->meLastDirection = 3;
         if (st == 2) {
@@ -3822,7 +3935,17 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
 extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int a1);
 
-extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int a1)
+/**
+ * Moves the keyboard cursor one row up, with special targets from the bottom, number and quick-key rows.
+ *
+ * The undo after a down move (meLastDirection 1) has the same always-0 skip-state test as
+ * cKeyboardPopup_kbMoveRight. Keys 70-83, 14-27 and 0-13 first try cKeyboardPopup_handleMovementUpFromLast,
+ * ..FromNumberRow and ..FromQuickKeyRow; otherwise the cursor moves up 14 keys (row 0 wraps to row 5, +70), skips
+ * '*' keys leftwards and repeats when the key is refused. With @p bControllerInput set it records miLastKey and direction up (0).
+ *
+ * @param bControllerInput  nonzero for a move from the controller (On Tour bControllerInput); 0 for the internal repeat
+ */
+extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int bControllerInput)
 {
     bool b = self->mbCapsOn != 0;
     int flag;
@@ -3839,7 +3962,7 @@ extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int a1)
         flag = !*(bool*)&self->mbShiftOn;
     }
     int st = self->meLastDirection;
-    if (a1) {
+    if (bControllerInput) {
         self->miLastKey = idx;
         self->meLastDirection = 0;
         if (st == 1) {
@@ -3970,7 +4093,17 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleMovementUpFromQuickKeyRow);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern "C" void cKeyboardPopup_skipRowToBottom(cKeyboardPopup* self, int a1);
 
-extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* self, int a1)
+/**
+ * Moves up from the quick-key row (keys 0-13) onto the bottom row's wide keys.
+ *
+ * Keys 5-8 go to key 0x4B (space), 9-10 to 0x4C and 11-12 to 0x4F when selectable; else meSkipState becomes the
+ * other case (if the key exists there) and cKeyboardPopup_skipRowToBottom(-1) picks the lowest selectable key of
+ * the column.
+ *
+ * @param bUseReg  the case flag of the caller (On Tour bUseReg): the skip state becomes Alt when it is 0
+ * @return 1 when the key was one of 5-12 and the cursor moved, otherwise 0
+ */
+extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* self, int bUseReg)
 {
     int val;
     int state = self->miCurrentKey;
@@ -3979,7 +4112,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
             self->miCurrentKey = 0x4B;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToBottom(self, -1);
         }
@@ -3989,7 +4122,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
             self->miCurrentKey = 0x4C;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToBottom(self, -1);
         }
@@ -3999,7 +4132,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
             self->miCurrentKey = 0x4F;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToBottom(self, -1);
         }
@@ -4107,7 +4240,17 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleMovementUpFromNumberRow);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern "C" void cKeyboardPopup_skipRowToBottom(cKeyboardPopup* self, int a1);
 
-extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self, int a1)
+/**
+ * Moves up from the number row (keys 14-27) to the quick keys or onto the bottom row's wide keys.
+ *
+ * When key 0 is selectable (a quick-key row is shown) keys 16-17 go to 4 and 18 to 5. Otherwise 15-22 go to 0x4B
+ * (space), 23 to 0x4C, 26 to 0x53 and 24-25 to 0x4F when selectable, else the skip state is updated and
+ * cKeyboardPopup_skipRowToBottom picks the column's lowest selectable key (from key 0x3E for key 0x14).
+ *
+ * @param bUseReg  the case flag of the caller (On Tour bUseReg): the skip state becomes Alt when it is 0
+ * @return 1 when the cursor moved, otherwise 0
+ */
+extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self, int bUseReg)
 {
     int val;
     int r = cKeyboardPopup_allowSelection_out(self, 0, 0);
@@ -4127,7 +4270,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
             self->miCurrentKey = 0x4B;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             if (self->miCurrentKey == 0x14) {
                 cKeyboardPopup_skipRowToBottom(self, 0x3E);
@@ -4141,7 +4284,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
             self->miCurrentKey = 0x4C;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToBottom(self, -1);
         }
@@ -4151,7 +4294,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
             self->miCurrentKey = 0x53;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToBottom(self, -1);
         }
@@ -4161,7 +4304,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
             self->miCurrentKey = 0x4F;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToBottom(self, -1);
         }
@@ -4178,7 +4321,13 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleMovementUpFromLast);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern "C" void cKeyboardPopup_moveUpRows(cKeyboardPopup* self);
 
-extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int a1)
+/**
+ * Moves up from the bottom row's keys 0x4C and 0x4F to key 0x42, or up the rows to the first selectable key.
+ *
+ * @param bUseReg  the case flag of the caller (On Tour bUseReg): the skip state becomes Alt when it is 0
+ * @return 1 when the cursor was on 0x4C or 0x4F (and moved), otherwise 0
+ */
+extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int bUseReg)
 {
     int val;
     int state = self->miCurrentKey;
@@ -4187,7 +4336,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int
             self->miCurrentKey = 0x42;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_moveUpRows(self);
         }
@@ -4197,7 +4346,7 @@ extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int
             self->miCurrentKey = 0x42;
         } else {
             if (val) {
-                self->meSkipState = a1 == 0;
+                self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_moveUpRows(self);
         }
@@ -4289,6 +4438,11 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_skipRowToBottom);
 #ifdef SKIP_ASM
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 
+/**
+ * Puts the cursor on the lowest selectable key of a column, searching upwards one 14-key row at a time.
+ *
+ * @param start  the key to start from (On Tour iStartingLook); -1 starts four rows below the cursor (+0x38)
+ */
 extern "C" void cKeyboardPopup_skipRowToBottom(cKeyboardPopup* self, int start)
 {
     int i;
@@ -4309,6 +4463,9 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_moveUpRows);
 #ifdef SKIP_ASM
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 
+/**
+ * Moves the cursor up 14 keys at a time until cKeyboardPopup_allowSelection accepts the key.
+ */
 extern "C" void cKeyboardPopup_moveUpRows(cKeyboardPopup* self)
 {
     int i = self->miCurrentKey - 0xE;
@@ -4993,34 +5150,39 @@ extern "C" void cKeyboardPopup_setStatic1(cKeyboardPopup* self, int id)
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setMaxCharacters);
 #ifdef SKIP_ASM
-extern "C" void cKeyboardPopup_setMaxCharacters(cKeyboardPopup* self, int v)
+/**
+ * Sets the keyboard's text length limit, clamped to 0..63.
+ *
+ * @param iMaxCharacters  the requested limit (On Tour iMaxCharacters)
+ */
+extern "C" void cKeyboardPopup_setMaxCharacters(cKeyboardPopup* self, int iMaxCharacters)
 {
-    if (v < 0) {
+    if (iMaxCharacters < 0) {
         self->miMaxCharacters = 0;
         return;
     }
-    if (v >= 0x40) {
+    if (iMaxCharacters >= 0x40) {
         self->miMaxCharacters = 0x3f;
         return;
     }
-    self->miMaxCharacters = v;
+    self->miMaxCharacters = iMaxCharacters;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setMinCharacters);
 #ifdef SKIP_ASM
-extern "C" void cKeyboardPopup_setMinCharacters(cKeyboardPopup* self, int v)
+extern "C" void cKeyboardPopup_setMinCharacters(cKeyboardPopup* self, int iMinCharacters)
 {
-    if (v < 0) {
+    if (iMinCharacters < 0) {
         self->miMinCharacters = 0;
         return;
     }
-    if (v >= 0x40) {
+    if (iMinCharacters >= 0x40) {
         self->miMinCharacters = 0x3f;
         return;
     }
-    self->miMinCharacters = v;
+    self->miMinCharacters = iMinCharacters;
 }
 #endif
 
@@ -5748,6 +5910,13 @@ extern "C" void func_001CE468(void* self, int a1);
 extern "C" int strlen(const char* s);
 extern signed char D_00441390[];
 
+/**
+ * Sets which of the 84 keyboard keys can be selected in both key sets, then refreshes the key display.
+ *
+ * Excludes the blank keys ('*' in D_00441390) and keys 0x1C, 0x29, 0x45 and 0x4F; key 0x4B (space) is included only
+ * when the edit string is not empty and mbDisableForFirst is set; every other key is included
+ * (cKeyboardPopup_setIncludeKey(key, on, 2)). Ends with func_001CE468(self, 0).
+ */
 extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self)
 {
     int i;

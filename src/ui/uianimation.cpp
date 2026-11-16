@@ -174,6 +174,14 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern void* cUIAnimation_vtbl[];
 
+/**
+ * Destroys a UI animation: frees its array (+0x4, allocated with new[]: its count lives 0x10 bytes before it) and
+ * frees the object when bit 0 of @p flags is set.
+ *
+ * The loop that walks the array back to its start destroys nothing (the elements have no destructor).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cUIAnimation__cUIAnimation(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;

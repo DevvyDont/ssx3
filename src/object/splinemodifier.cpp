@@ -2660,6 +2660,17 @@ struct sSmRef_BD70 {
     }
 };
 
+/**
+ * Destroys a rail modifier: takes its rail-space node out of the Nash octree, re-inserts the spline's segments and
+ * unlinks the rail.
+ *
+ * Removes Node from Nash with the rail's bound box (+0x10) and frees it, then inserts every segment of the rail's
+ * spline (the reference at +0x30) back into Nash with its own segment box (w = 1.0). Restores the cRailLink_vtbl
+ * base, unlinks the rail from its list (func_0035B6D0, On Tour cRailLink::unlink) and frees the object when bit 0
+ * of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
 {
     self->mVtbl = (void**)cRailModifier_vtbl;

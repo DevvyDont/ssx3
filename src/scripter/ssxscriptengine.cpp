@@ -4480,6 +4480,10 @@ public:
     virtual void v03();
 };
 
+/**
+ * Pauses the camera object's script: calls the second virtual of the object at +0x10 (On Tour mpCameraManager, a
+ * cScriptEntity; presumably PauseEntityScript).
+ */
 extern "C" void cScriptObjCamera_PauseObjScript(void* self)
 {
     (*(cSsxScriptVirt**)((char*)self + 0x10))->v02();
@@ -4489,6 +4493,10 @@ extern "C" void cScriptObjCamera_PauseObjScript(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_ResumeObjScript);
 #ifdef SKIP_ASM
+/**
+ * Resumes the camera object's script: calls the third virtual of the object at +0x10 (On Tour mpCameraManager, a
+ * cScriptEntity; presumably ResumeEntityScript).
+ */
 extern "C" void cScriptObjCamera_ResumeObjScript(void* self)
 {
     (*(cSsxScriptVirt**)((char*)self + 0x10))->v03();
@@ -4544,6 +4552,16 @@ public:
     virtual void v4();
 };
 
+/**
+ * Releases a script camera when its sequence stops using it, returning the view's camera to the chase camera when
+ * no script camera is left.
+ *
+ * Drops the use count (func_00283440). During a game it clears mWeight (+0x18), takes the camera of view mViewIndex
+ * (+0x7C) from the game's ViewMan, removes this object from the camera's ScriptController (func_001692D8) and, when
+ * that controller's count (+0x18) reaches 0, switches the camera to controller 2 (chase), restarts the chase camera
+ * and calls the current Controller's slot 4. The local view calls the camera a rider. On Tour passes a playerID;
+ * this C takes none.
+ */
 extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
 {
     func_00283440(self);

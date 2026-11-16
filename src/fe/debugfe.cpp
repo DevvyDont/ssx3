@@ -1766,6 +1766,13 @@ INCLUDE_ASM("fe/debugfe", cDebugFE__cDebugFE);
 void operator_delete(int* ptr);
 extern char D_0046D970[];
 
+/**
+ * Destroys the debug front end: stores the base vtable D_0046D970 at +0x0 and, if asked, frees the object.
+ *
+ * It does not free the screens, font or textures; cDebugFE_purge does that.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cDebugFE__cDebugFE(void* self, int flags)
 {
     *(void**)self = D_0046D970;
@@ -1869,6 +1876,11 @@ struct sVec3K17FA60 {
 };
 typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
 
+/**
+ * Gives the debug front end focus: uploads the textures, clears D_004A4324 and sets a black clear colour.
+ *
+ * Calls func_00369FF8 (On Tour cGraphicsMan::UploadTextures), then GrMan's slot 15 (SetClearColor) with (0, 0, 0).
+ */
 extern "C" void cDebugFE_gainFocus(void* self)
 {
     char* m;
@@ -1886,6 +1898,11 @@ extern "C" void* cFadeScreen_loseFocus(void* self);
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_loseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus from the debug front end: the fade screen's loseFocus result as a bool.
+ *
+ * @return 1 when cFadeScreen_loseFocus() reports the fade done, otherwise 0
+ */
 int cDebugFE_loseFocus(void* self)
 {
     return (cFadeScreen_loseFocus(self) != 0);
@@ -1912,6 +1929,14 @@ struct sDebugFE_0017FAD0 {
     int snd20;          // 0x20
 };
 
+/**
+ * Releases the debug front end's screens, textures and font, and unregisters both front ends from the app.
+ *
+ * Deletes the two screens (+0xC, +0x10: debug menu and lobby menu) through their destructor virtual (slot 1, flags
+ * 3), zeroes SSXApp->RealFE and SSXApp->DebugFE, frees the two texture ids loaded by cDebugFE_load (+0x20, +0x1C,
+ * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with func_003916C0(font, 3). The local view calls
+ * the texture ids snd1C/snd20; they are On Tour's ParticleTID and BoxTID.
+ */
 extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
 {
     for (int i = 0; i < 2; i++)
@@ -1954,6 +1979,12 @@ public:
 extern "C" void func_00231D18(void* self);
 extern "C" void func_0017F2D0(void* p);
 
+/**
+ * Runs one frame of the debug front end: the fade, the active screen and the heartbeat.
+ *
+ * Calls func_00231D18 (On Tour cFadeScreen::update); while the app's word +0x4 is 0 it updates the active screen
+ * (+0x14, virtual slot 2); then func_0017F2D0 (On Tour cHeartBeat::update) on the heartbeat at +0x24.
+ */
 extern "C" void cDebugFE_update(void* self)
 {
     func_00231D18(self);
@@ -2005,6 +2036,17 @@ static inline void setB2_17FBF0(sRS_17FBF0* r, int v) { r->b2 = v; }
 static inline void setB22_17FBF0(sRS_17FBF0* r, int v) { r->b22 = v; }
 static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 
+/**
+ * Draws the debug front end: a full-screen 640x480 view, the heartbeat and the active screen.
+ *
+ * Returns 0 at once when GrMan's slot 17 returns 0. Draws the fade overlay with func_00231D60 (cFadeScreen's
+ * render); unless that reports the screen fully faded it sets a black clear colour (slot 15), the 640x480 viewport
+ * (slot 26), the identity matrix (slot 34) and the render-state bits, draws the heartbeat (func_0017F500 on +0x24
+ * with the texture at +0x1C) and calls the active screen's render virtual (+0x14, slot 3). Always ends with GrMan
+ * slot 20.
+ *
+ * @return 0 when GrMan's slot 17 returns 0, otherwise 1
+ */
 extern "C" int cDebugFE_render(char* self)
 {
     cPS2GraphicsMan* m = GrMan;
@@ -2079,6 +2121,11 @@ void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's start state is active: cInput_getState(mpInput, 0x70).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isStart(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x70);
@@ -2088,6 +2135,11 @@ void* cFEInput_isStart(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isSelect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's select state is active: cInput_getState(mpInput, 0x71).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isSelect(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x71);
@@ -2097,6 +2149,11 @@ void* cFEInput_isSelect(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isNext__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's next state is active: cInput_getState(mpInput, 0x7A).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isNext(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7a);
@@ -2106,6 +2163,11 @@ void* cFEInput_isNext(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isPrevious__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's previous state is active: cInput_getState(mpInput, 0x7B).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isPrevious(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7b);
@@ -2115,6 +2177,11 @@ void* cFEInput_isPrevious(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isOption__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's option state is active: cInput_getState(mpInput, 0x7C).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isOption(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7c);
@@ -2124,6 +2191,11 @@ void* cFEInput_isOption(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isMisc__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's misc state is active: cInput_getState(mpInput, 0x7D).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isMisc(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7d);
@@ -2205,6 +2277,11 @@ void* cFEInput_isMiscReleased(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isUp__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's up state is active: cInput_getState(mpInput, 0x72).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isUp(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x72);
@@ -2214,6 +2291,11 @@ void* cFEInput_isUp(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isDown__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's down state is active: cInput_getState(mpInput, 0x73).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isDown(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x73);
@@ -2223,6 +2305,11 @@ void* cFEInput_isDown(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isLeft__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's left state is active: cInput_getState(mpInput, 0x74).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isLeft(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x74);
@@ -2277,6 +2364,11 @@ void* cFEInput_isRightHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's R1 state is active: cInput_getState(mpInput, 0x7E).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isRShift1(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7e);
@@ -2286,6 +2378,11 @@ void* cFEInput_isRShift1(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's R2 state is active: cInput_getState(mpInput, 0x7F).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isRShift2(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7f);
@@ -2295,6 +2392,11 @@ void* cFEInput_isRShift2(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's L1 state is active: cInput_getState(mpInput, 0x80).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isLShift1(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x80);
@@ -2304,6 +2406,11 @@ void* cFEInput_isLShift1(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input's L2 state is active: cInput_getState(mpInput, 0x81).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isLShift2(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x81);
@@ -2313,6 +2420,11 @@ void* cFEInput_isLShift2(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether R1 is held on the front-end input: cInput_getState(mpInput, 0x82).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isRShift1Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x82);
@@ -2322,6 +2434,11 @@ void* cFEInput_isRShift1Held(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether R2 is held on the front-end input: cInput_getState(mpInput, 0x83).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isRShift2Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x83);
@@ -2331,6 +2448,11 @@ void* cFEInput_isRShift2Held(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether L1 is held on the front-end input: cInput_getState(mpInput, 0x84).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isLShift1Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x84);

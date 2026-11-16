@@ -3729,6 +3729,23 @@ static inline int IsReady_22B008(sGame_22B008* self)
     return 1;
 }
 
+/**
+ * Draws one game frame: every camera view of the world, then the 2D overlays, UI and audio tick.
+ *
+ * Returns 0 when GrMan's slot 17 does; returns 1 early while StreamPause (slot 2) holds the frame, while the fade
+ * screen is fully faded (func_00231D60) or while a script plays (func_0022C830 draws the cut scene). For each
+ * ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws SkyBox
+ * (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space box
+ * of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
+ * distance), gathers the visible world (func_0022ADD8 with BXNash, OcclusionMan and World), and draws
+ * func_00230640, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes, light
+ * halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
+ * WScriptMan (unless D_004A4540), the script engine, LoadIndicator, GrMan slot 20, the audio update for mUpdateTick
+ * / 60 seconds and the world triggers; clears mUpdateTick. The local view's names are off: scene is AI, renderer
+ * SkyBox, target LensFxMan, cfg BXNash, hud DebugFont, loader StreamPause, frames mUpdateTick.
+ *
+ * @return 0 when GrMan's slot 17 returns 0, otherwise 1
+ */
 extern "C" int cGame_render(sGame_22B008* self)
 {
     if (((cGfx_22B008*)GrMan)->v17() == 0) {

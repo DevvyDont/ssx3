@@ -418,6 +418,12 @@ extern "C" void cAvalanche_reset(void* self);
 extern "C" void cDynamicColourEmitter_purge(void* p, int flags);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the avalanche effect: resets it, purges its 64 dynamic colour emitters (D_004EE840), restores the base
+ * vtable (D_00488680) and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cAvalanche__cAvalanche(int* self, int flags)
 {
     *(void***)self = cAvalanche_vtbl;
@@ -453,6 +459,13 @@ extern char D_00538450[];
 extern int D_004A3AC0;
 extern "C" void func_00416210(void* dst, int c, int n);
 
+/**
+ * Initialises the avalanche's static vertex tables and clears its state.
+ *
+ * Sets the 0x800 entries of D_004D5B70 to alternating black and white (alpha 0xFF, z 1.0, x / y / w 0) and the 0x20
+ * entries of D_004EDB70 to yellow, clears D_004A3AC0 and zeroes 0x400 bytes at D_00538450. On Tour's init is a
+ * member (this); this C takes no object.
+ */
 extern "C" void cAvalanche_init(void)
 {
     int i;

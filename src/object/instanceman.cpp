@@ -223,6 +223,16 @@ static inline bool inRange_351538(sImSeg_351538* e, float x)
 // PORT: the unit declares cAnimFrame_update(void*) for its caller; the body also reads t from $f12
 void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 
+/**
+ * Evaluates the animation's channels at a time into the frame's 16 values.
+ *
+ * For each of the 16 channels whose bit is set in the anim record's mask (+0x18) it takes the channel's current
+ * cubic segment (the record's curve table at +0x20, the frame's segment index per channel at +0x0), moves to the
+ * segment holding @p t when needed (func_00351A80, On Tour cAnimChannel::nextSegment) and stores ((a t + b) t + c)
+ * t + d in Vals[i] (+0x44). Channels whose bit is clear keep their value.
+ *
+ * @param t  the time to evaluate at (On Tour time)
+ */
 void cAnimFrame_update_impl(char* self, float t)
 {
     sImCurve_351538** curves = *(sImCurve_351538***)(*(char**)(self + 0x40) + 0x20);
@@ -313,6 +323,13 @@ struct sImInst_351800 {
     float m[4][4];      // 0x90
 };
 
+/**
+ * Evaluates a mesh animation frame and rebuilds its transform from the rotation (degrees) and translation channels.
+ *
+ * Calls cAnimFrame_update(self) without a time: On Tour's update(float time) passes it on, and here it reaches
+ * cAnimFrame_update untouched in $f12 (a port must pass it). The matrix is the X-Y-Z Euler rotation of minus the
+ * rotation values (converted to radians, func_0031BE50 sine / cosine) with the translation in row 3.
+ */
 extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
 {
     cAnimFrame_update(self);

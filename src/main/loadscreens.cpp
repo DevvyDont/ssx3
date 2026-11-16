@@ -545,6 +545,20 @@ static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
     return bg->count;
 }
 
+/**
+ * Runs one frame of the debug start menu: moves between its 15 items, changes the selected one and starts the game.
+ *
+ * Input state 0x65 saves the choices (func_0017D0A8) and starts: item 14 (On Tour kRealFEItem) sets the app's word
+ * +0x60 and moves to a cPreFELoadScreen module (func_00232738), any other item to a cPreGameLoadScreen. Up / down
+ * (cInput_getValue(.., 0x3D) 0 / 1, only while no background is previewed, f8C30 == -1) step the item, skipping 12
+ * (network) without a comm system and 13 without a network connection. Left / right (2 / 3) change the item: 0 game
+ * path (3 values; path 0 needs the track list and a WCBAM start location), 1 game mode (7), 2 game event (14), 3
+ * the player's first-time-on-track flag, 4 location (cTrackFileMan next / previous), 5 character (10), 6 a player
+ * flag (func_00147658), 7 a one-value option stored in the BE's first word (always 0), 8 the AI rider count up to
+ * getMaxAIRiders, 9 the background preview, 10 GrMan slot 8 toggled from slot 9, 11 the song, 12 the network mode
+ * 0-4 (sets bIsNetworkGame / bIsHost and starts or stops the comm system), 13 (event 6) copies a word of the app's
+ * +0x80 object. Mode, event, location and AI count are re-validated after each change.
+ */
 extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
 {
     if (cInput_getState(D_004A28A8_b4->input, 0x65)) {

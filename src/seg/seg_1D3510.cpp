@@ -770,6 +770,10 @@ INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem__cNullMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a null (empty) debug menu item: only the cMenuItem destructor, which receives the object and flags in
+ * the untouched argument registers.
+ */
 extern "C" void cNullMenuItem__cNullMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -796,6 +800,10 @@ INCLUDE_ASM("seg/seg_1D3510", cSpaceMenuItem__cSpaceMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a spacer debug menu item: only the cMenuItem destructor, which receives the object and flags in the
+ * untouched argument registers.
+ */
 extern "C" void cSpaceMenuItem__cSpaceMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -1048,6 +1056,10 @@ INCLUDE_ASM("seg/seg_1D3510", cRGBTitleMenuItem__cRGBTitleMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a coloured-title debug menu item: only the cMenuItem destructor, which receives the object and flags in
+ * the untouched argument registers.
+ */
 extern "C" void cRGBTitleMenuItem__cRGBTitleMenuItem(void) {
     cMenuItem__cMenuItem();
 }

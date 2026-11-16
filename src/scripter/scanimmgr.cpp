@@ -63,6 +63,12 @@ void operator_delete(int* ptr);
 extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self);
 extern char cScriptAnimBankManager_vtbl[];
 
+/**
+ * Destroys the script animation bank manager: unlinks every bank, frees its bank table (+0x8) and frees the object
+ * when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cScriptAnimBankManager_vtbl;

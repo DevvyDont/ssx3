@@ -728,6 +728,14 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
+/**
+ * Destroys the lobby screen state: frees its room and channel name strings, then runs the cFEStateNet destructor.
+ *
+ * Restores cFEStateLobbyMenu_vtbl, destroys the cBXStrings mszRoomName (+0xB80) and mszChannelName (+0x76C) and
+ * calls func_001A85D0 with @p flags.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ */
 extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, int flags)
 {
     self->mVtbl = cFEStateLobbyMenu_vtbl;
@@ -2647,6 +2655,11 @@ int func_001E0C88(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the account memory-card popup's gain-focus transition at once.
+ *
+ * @return always 1 (the transition is done)
+ */
 int cFEStateNetAccountMem_onGainTransition(void* self)
 {
     return 0x1;
@@ -2656,6 +2669,11 @@ int cFEStateNetAccountMem_onGainTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the account memory-card popup's lose-focus transition at once.
+ *
+ * @return always 1 (the transition is done)
+ */
 int cFEStateNetAccountMem_onLoseTransition(void* self)
 {
     return 0x1;
@@ -2691,6 +2709,15 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
+/**
+ * Destroys account creation step 1: frees its saved mail, confirmation and password strings, then the cFEStateNet
+ * part.
+ *
+ * Restores cFEStateCreateStep1_vtbl, destroys the cBXStrings mszSavedMail (+0x6DC), mszSavedConfirm (+0x6D8) and
+ * mszSavedPassword (+0x6D4) and calls func_001A85D0 with @p flags.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ */
 extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* self, int flags)
 {
     self->mVtbl = cFEStateCreateStep1_vtbl;
@@ -2728,6 +2755,14 @@ extern "C" void *func_001E0D68(cFEStateCreateStep2* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys account creation step 2: restores cFEStateCreateStep2_vtbl and runs the cFEStateNet destructor.
+ *
+ * The C passes only @p self to func_001A85D0; the destructor flags reach it untouched in $a1 (a port must pass
+ * them).
+ *
+ * @return func_001A85D0()'s result (not meaningful; declared void* by the unit)
+ */
 void* cFEStateCreateStep2__cFEStateCreateStep2(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateStep2_vtbl;
@@ -2816,6 +2851,14 @@ extern "C" void* func_001A85D0(void*);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the stats screen state: restores cFEStateStats_vtbl and runs the cFEStateNet destructor.
+ *
+ * The C passes only @p self to func_001A85D0; the destructor flags reach it untouched in $a1 (a port must pass
+ * them).
+ *
+ * @return func_001A85D0()'s result (not meaningful; declared void* by the unit)
+ */
 void* cFEStateStats__cFEStateStats(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateStats_vtbl;
@@ -3148,6 +3191,11 @@ extern "C" void cUIInput__cUIInput(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's getState: always 0 (On Tour getState(char state); retail's stub reads no state).
+ *
+ * @return always 0 (not active)
+ */
 int cUIInput_getState(void* self)
 {
     return 0;
@@ -3157,6 +3205,11 @@ int cUIInput_getState(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isStart__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's start test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isStart(void* self)
 {
     return 0;
@@ -3166,6 +3219,11 @@ int cUIInput_isStart(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isSelect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's select test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isSelect(void* self)
 {
     return 0;
@@ -3175,6 +3233,11 @@ int cUIInput_isSelect(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isNext__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's next test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isNext(void* self)
 {
     return 0;
@@ -3184,6 +3247,11 @@ int cUIInput_isNext(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isPrevious__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's previous test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isPrevious(void* self)
 {
     return 0;
@@ -3193,6 +3261,11 @@ int cUIInput_isPrevious(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isOption__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's option test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isOption(void* self)
 {
     return 0;
@@ -3202,6 +3275,11 @@ int cUIInput_isOption(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isMisc__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's misc test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isMisc(void* self)
 {
     return 0;
@@ -3211,6 +3289,11 @@ int cUIInput_isMisc(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isNextHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's next-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isNextHeld(void* self)
 {
     return 0;
@@ -3220,6 +3303,11 @@ int cUIInput_isNextHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isPreviousHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's previous-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isPreviousHeld(void* self)
 {
     return 0;
@@ -3229,6 +3317,11 @@ int cUIInput_isPreviousHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isOptionHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's option-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isOptionHeld(void* self)
 {
     return 0;
@@ -3238,6 +3331,11 @@ int cUIInput_isOptionHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isMiscHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's misc-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isMiscHeld(void* self)
 {
     return 0;
@@ -3247,6 +3345,11 @@ int cUIInput_isMiscHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isNextReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's next-released test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isNextReleased(void* self)
 {
     return 0;
@@ -3256,6 +3359,11 @@ int cUIInput_isNextReleased(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isPreviousReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's previous-released test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isPreviousReleased(void* self)
 {
     return 0;
@@ -3265,6 +3373,11 @@ int cUIInput_isPreviousReleased(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isOptionReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's option-released test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isOptionReleased(void* self)
 {
     return 0;
@@ -3274,6 +3387,11 @@ int cUIInput_isOptionReleased(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isMiscReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's misc-released test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isMiscReleased(void* self)
 {
     return 0;
@@ -3283,6 +3401,11 @@ int cUIInput_isMiscReleased(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isUp__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's up test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isUp(void* self)
 {
     return 0;
@@ -3292,6 +3415,11 @@ int cUIInput_isUp(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isDown__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's down test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isDown(void* self)
 {
     return 0;
@@ -3301,6 +3429,11 @@ int cUIInput_isDown(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLeft__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's left test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isLeft(void* self)
 {
     return 0;
@@ -3310,6 +3443,11 @@ int cUIInput_isLeft(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRight__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's right test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isRight(void* self)
 {
     return 0;
@@ -3319,6 +3457,11 @@ int cUIInput_isRight(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isUpHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's up-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isUpHeld(void* self)
 {
     return 0;
@@ -3328,6 +3471,11 @@ int cUIInput_isUpHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isDownHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's down-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isDownHeld(void* self)
 {
     return 0;
@@ -3337,6 +3485,11 @@ int cUIInput_isDownHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLeftHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's left-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isLeftHeld(void* self)
 {
     return 0;
@@ -3346,6 +3499,11 @@ int cUIInput_isLeftHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRightHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's right-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isRightHeld(void* self)
 {
     return 0;
@@ -3355,6 +3513,11 @@ int cUIInput_isRightHeld(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift1__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's R1 test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isRShift1(void* self)
 {
     return 0;
@@ -3364,6 +3527,11 @@ int cUIInput_isRShift1(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift2__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's R2 test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isRShift2(void* self)
 {
     return 0;
@@ -3373,6 +3541,11 @@ int cUIInput_isRShift2(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift1__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's L1 test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isLShift1(void* self)
 {
     return 0;
@@ -3382,6 +3555,11 @@ int cUIInput_isLShift1(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift2__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's L2 test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isLShift2(void* self)
 {
     return 0;
@@ -3391,6 +3569,11 @@ int cUIInput_isLShift2(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift1Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's R1-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isRShift1Held(void* self)
 {
     return 0;
@@ -3400,6 +3583,11 @@ int cUIInput_isRShift1Held(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift2Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's R2-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isRShift2Held(void* self)
 {
     return 0;
@@ -3409,6 +3597,11 @@ int cUIInput_isRShift2Held(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift1Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's L1-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isLShift1Held(void* self)
 {
     return 0;
@@ -3418,6 +3611,11 @@ int cUIInput_isLShift1Held(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift2Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's L2-held test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isLShift2Held(void* self)
 {
     return 0;
@@ -3427,6 +3625,11 @@ int cUIInput_isLShift2Held(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isCamZoom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's camera-zoom test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isCamZoom(void* self)
 {
     return 0;
@@ -3436,6 +3639,11 @@ int cUIInput_isCamZoom(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isCamPan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's camera-pan test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isCamPan(void* self)
 {
     return 0;
@@ -3445,6 +3653,11 @@ int cUIInput_isCamPan(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isCamRotate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's camera-rotate test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isCamRotate(void* self)
 {
     return 0;
@@ -3454,6 +3667,11 @@ int cUIInput_isCamRotate(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getCamZoom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's camera-zoom amount: always 0.0; device classes override it.
+ *
+ * @return always 0.0
+ */
 float cUIInput_getCamZoom(void* self)
 {
     return 0.0f;
@@ -3463,6 +3681,11 @@ float cUIInput_getCamZoom(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getCamPan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's camera-pan amount: always 0.0; device classes override it.
+ *
+ * @return always 0.0
+ */
 float cUIInput_getCamPan(void* self)
 {
     return 0.0f;
@@ -3472,6 +3695,11 @@ float cUIInput_getCamPan(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getCamRotate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's camera-rotate amount: always 0.0; device classes override it.
+ *
+ * @return always 0.0
+ */
 float cUIInput_getCamRotate(void* self)
 {
     return 0.0f;
@@ -3481,6 +3709,11 @@ float cUIInput_getCamRotate(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_keyPressed__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's key-pressed test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_keyPressed(void* self)
 {
     return 0;
@@ -3490,6 +3723,11 @@ int cUIInput_keyPressed(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getKeyReady__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's key-ready test (a typed key waiting): always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_getKeyReady(void* self)
 {
     return 0;
@@ -3499,6 +3737,11 @@ int cUIInput_getKeyReady(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getVKey__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's virtual key code: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_getVKey(void* self)
 {
     return 0;
@@ -3508,6 +3751,11 @@ int cUIInput_getVKey(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_getAsciiKey__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's typed ASCII key: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_getAsciiKey(void* self)
 {
     return 0;
@@ -3531,6 +3779,11 @@ void cUIInput_setPadNum(void* self, int val)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_isActive__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's active test: always 0; device classes override it.
+ *
+ * @return always 0
+ */
 int cUIInput_isActive(void* self)
 {
     return 0;
@@ -3540,6 +3793,9 @@ int cUIInput_isActive(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUIInput_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base UI input's per-frame update: an empty stub; device classes override it.
+ */
 void cUIInput_update(void* self)
 {
 }
@@ -5365,11 +5621,25 @@ struct sObj_3C00 {
     int h16C;   // 0x16C
 };
 
-extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* self, void* engine, int a2)
+/**
+ * Constructs the in-game message center overlay: clears its widget tables and looks up its folder icons.
+ *
+ * Runs the cUIState constructor (func_0039E2A0), then the inlined cOVState part (mOVID = @p id, vtable D_00474E08,
+ * mDoneTransition, mAllowPauseMenu and mRemovePDA 0, chat buffer " "), stores D_00474318, zeroes the eight-row
+ * widget tables (unread mail, FAQ icon, from, subject, number) and the labels, menu, buttons and arrows (not
+ * mpNoMessage), and looks up the "folder", "minus folder" and "questmark" textures in the engine's texture bank
+ * (+0x58, func_00398380). miMiscData becomes the opening mode: 2 when D_004A20CC is -1, else 0 or 1 by whether
+ * new-player hint 7 is set (func_001E3A30), which it then sets (func_001E3A78(7, 1)).
+ *
+ * @param engine  the UI engine (On Tour pEngine)
+ * @param id  the overlay's id (On Tour cOVState ctor tOVStateEnum id; the overlay factory passes 0x22)
+ * @return @p self
+ */
+extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* self, void* engine, int id)
 {
     sObj_3C00* o = (sObj_3C00*)self;
     func_0039E2A0(self, engine);
-    self->mOVID = a2;
+    self->mOVID = id;
     self->mVtbl = D_00474E08;
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
@@ -6382,11 +6652,23 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_cOVState_ViewPopup);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern void* cOVState_ViewPopup_vtbl[];
 
-extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, void* engine, void* owner, int a3, int a4)
+/**
+ * Constructs the popup that shows one saved message (screen "113ViewMessage").
+ *
+ * Runs the cUIState constructor (func_0039E318), stores the message index and number, cOVState_ViewPopup_vtbl, and
+ * zeroes every widget pointer.
+ *
+ * @param engine  the UI engine (the message center's mpEngine)
+ * @param owner  the parent state (the cOVState_MESSAGECENTER)
+ * @param message  the message's index in the saved list D_004C6C08 (miMessage)
+ * @param number  the number shown for it (miNumber)
+ * @return @p self
+ */
+extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, void* engine, void* owner, int message, int number)
 {
     func_0039E318(self, engine, owner);
-    self->miMessage = a3;
-    self->miNumber = a4;
+    self->miMessage = message;
+    self->miNumber = number;
     self->mVtbl = cOVState_ViewPopup_vtbl;
     self->mpNumberLabel = 0;
     self->mpNumber = 0;
@@ -6408,6 +6690,9 @@ extern char D_0046E258[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Opens the message view popup's "113ViewMessage" screen into mpScreen and plays its frame 0.
+ */
 extern "C" void cOVState_ViewPopup_onCreateScreen(cOVState_ViewPopup* self)
 {
     void* engine = self->mpEngine;
@@ -6424,6 +6709,11 @@ extern "C" void* func_0039E510(void* self);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onUpdate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs one frame of the message view popup: only the cUIState update (func_0039E510).
+ *
+ * @return func_0039E510()'s result (not meaningful; declared void* by the unit)
+ */
 void* cOVState_ViewPopup_onUpdate(void* self)
 {
     return func_0039E510(self);
@@ -6435,6 +6725,12 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void func_001E5428(cOVState_ViewPopup* self);
 
+/**
+ * Fills the message view the first time it gains focus (func_001E5428: number, sender, subject, body and buttons).
+ *
+ * @param on  nonzero on the first transition (On Tour bFirstTime)
+ * @return always 0
+ */
 extern "C" int cOVState_ViewPopup_onGainTransition(cOVState_ViewPopup* self, int on)
 {
     if (on != 0) {
@@ -6464,6 +6760,15 @@ struct sVEntryK1E52F8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows each of the message view's widgets as it is created and binds the ones it fills.
+ *
+ * Every widget is shown (slot 9). "From", "Subject", "NumberLabel", "Number", "MV_KeepMessage", the square button
+ * (D_004A20A8), "MV_DeleteMessage" and "MessageLine0" are stored in their members; "MenuDummy" gets bit 3 of its
+ * +0x90 word.
+ *
+ * @param widget  the widget being created (On Tour pWidget)
+ */
 extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void* widget)
 {
     int h = *(int*)((char*)widget + 0x38);
@@ -6693,7 +6998,17 @@ struct sVE5800 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void* a1, unsigned int msg)
+/**
+ * Handles the message view's widget events: delete the message, or close the popup.
+ *
+ * Event 7 deletes the shown message from the saved list (func_001E3268) unless its type (D_00441630[entry +0x4]) is
+ * 4, in which case nothing happens; it then falls through to close. Events 5 and 6 (and a delete) tell the parent
+ * state's onPopupEvent (slot 17) event 0x14 (back) from this popup.
+ *
+ * @param pWidget  the widget (On Tour pWidget); not used
+ * @param msg  the widget event (On Tour Event)
+ */
+extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void* pWidget, unsigned int msg)
 {
     switch (msg) {
     case 7: {
@@ -6766,9 +7081,16 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int a1, unsigned int a2)
+/**
+ * Answers the message view's menu events; event 8 asks whether the shown message can be deleted.
+ *
+ * @param pMenu  the menu (On Tour pMenu); not used
+ * @param Event  the menu event (On Tour Event)
+ * @return 1 for events 6 and 7, 0 for 9, for 8 whether the message's type is not 4, otherwise 0x101
+ */
+extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMenu, unsigned int Event)
 {
-    switch (a2) {
+    switch (Event) {
     case 6:
     case 7:
         return 1;

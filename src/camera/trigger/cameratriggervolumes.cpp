@@ -34,6 +34,11 @@ INCLUDE_ASM("camera/trigger/cameratriggervolumes", cActiveTriggerList__cActiveTr
 struct cActiveTriggerList;
 void cActiveTriggerList_purge(cActiveTriggerList* self);
 
+/**
+ * Destroys an active camera-trigger list: empties it with cActiveTriggerList_purge() and, if asked, frees it.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cActiveTriggerList__cActiveTriggerList(cActiveTriggerList* self, int flags)
 {
     cActiveTriggerList_purge(self);

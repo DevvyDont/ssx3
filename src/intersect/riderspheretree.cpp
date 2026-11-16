@@ -3009,6 +3009,15 @@ extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVe
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsInBoxTransformed);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the line's transformed segment (p0 .. p0 + dir) can touch an axis-aligned box.
+ *
+ * A quick reject only: the segment is outside when both of its end points lie beyond the same face of the box.
+ *
+ * @param mn  the box's minimum corner (On Tour bMin)
+ * @param mx  the box's maximum corner (On Tour bMax)
+ * @return 0 when both end points are past one face, otherwise 1
+ */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // segment self->p0 .. p0+dir overlaps the box [mn, mx]?
 extern "C" int cWorldLine_IsInBoxTransformed(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereVec4* mx)
@@ -3034,12 +3043,22 @@ struct sSphereProd_E398 : sSphereV4_E100 {
     }
 };
 
+/**
+ * Transforms the line's base segment into a model's space: matrix times base point and direction, then a uniform
+ * scale.
+ *
+ * Stores the results in p0 / dir (+0x60 / +0x70; w kept at 1 by the scale vector) and sets the transformed flag
+ * (+0x4).
+ *
+ * @param mat  the transform (On Tour const t4Matrix& mat)
+ * @param scale  the uniform scale applied after the matrix
+ */
 // Transforms the capsule's base segment (p0b, dirb) by a matrix and a uniform scale (w kept at 1).
-extern "C" void cWorldLine_Transform(sRiderCapsule_E100* self, sSphereVec4* m, float scale)
+extern "C" void cWorldLine_Transform(sRiderCapsule_E100* self, sSphereVec4* mat, float scale)
 {
     sSphereV4_E100 sc(scale, scale, scale, 1.0f);
-    self->p0 = sSphereProd_E398(mtxMulVec_9B90(m, &self->p0b), sc);
-    self->dir = sSphereProd_E398(mtxMulVec_9B90(m, &self->dirb), sc);
+    self->p0 = sSphereProd_E398(mtxMulVec_9B90(mat, &self->p0b), sc);
+    self->dir = sSphereProd_E398(mtxMulVec_9B90(mat, &self->dirb), sc);
     self->f4 = 1;
 }
 #endif
@@ -3047,6 +3066,10 @@ extern "C" void cWorldLine_Transform(sRiderCapsule_E100* self, sSphereVec4* m, f
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldLine_UnTransform);
 #ifdef SKIP_ASM
+/**
+ * Undoes cWorldLine_Transform: copies the base point and direction (+0x80, +0x90) back to +0x60 / +0x70 and clears
+ * the transformed flag.
+ */
 extern "C" void cWorldLine_UnTransform(void* self)
 {
     cQuad128 a = *(cQuad128*)((char*)self + 0x80);
@@ -3128,8 +3151,24 @@ static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
     return r;
 }
 
+/**
+ * Intersects the line's segment with a triangle's plane and tests whether the hit lies inside the triangle.
+ *
+ * Solves origin + t * dir on the plane through @p vertA with normal @p n (no hit when |dir . n| < 1e-10); stores t in
+ * @p outT, and for 0 <= t <= 1 the hit point and the normal, then runs the point-in-triangle test (func_0032B6A8,
+ * tolerance 1e-4).
+ *
+ * @param vertA  the triangle's first corner, also the point on the plane (On Tour a)
+ * @param vertB  the second corner
+ * @param vertC  the third corner
+ * @param n  the triangle's normal
+ * @param hit  receives the intersection point (On Tour ipos)
+ * @param outN  receives the hit normal, @p n (On Tour inorm)
+ * @param outT  receives the line parameter t (On Tour param); written even when out of range
+ * @return nonzero when the segment hits inside the triangle, otherwise 0
+ */
 // segment origin(0x60)+t*dir(0x70) against the plane through *p with normal *n
-extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* p, sSphereVec4* b, sSphereVec4* c, sSphereVec4* n,
+extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* n,
                              sSphereVec4* hit, sSphereVec4* outN, float* outT)
 {
     sSphereVec4* origin = (sSphereVec4*)((char*)self + 0x60);
@@ -3140,7 +3179,7 @@ extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* p, sSphereVec4* b, s
     }
     float t;
     {
-        sSphereVec4 d = vu0Sub_E4D0(*p, *origin);
+        sSphereVec4 d = vu0Sub_E4D0(*vertA, *origin);
         t = vu0Dot_E4D0(d, *n) / denom;
     }
     *outT = t;
@@ -3149,7 +3188,7 @@ extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* p, sSphereVec4* b, s
     }
     *hit = vu0Add_E4D0(*origin, vu0Scale_E4D0(*dir, t));
     *outN = *n;
-    return func_0032B6A8_tol(p, b, c, hit, 9.999999747378752e-05f);
+    return func_0032B6A8_tol(vertA, vertB, vertC, hit, 9.999999747378752e-05f);
 }
 #endif
 
@@ -3170,7 +3209,21 @@ struct sCapsuleV_E5E8 {
     sSphereVec4 dir; // 0x70
 };
 
-extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* a, void* b, void* c, sSphereVec4* v, void* d, void* e, void* f)
+/**
+ * Intersects the line with a two-sided triangle: the one-sided test with the normal flipped to face the line.
+ *
+ * When dir . @p v < 0 it calls the IsTriInt virtual (slot 4) with -@p v, otherwise with @p v.
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner
+ * @param vertC  the third corner
+ * @param v  the triangle's normal (On Tour n)
+ * @param ipos  receives the intersection point (On Tour ipos)
+ * @param inorm  receives the hit normal (On Tour inorm)
+ * @param f  receives the line parameter (On Tour param)
+ * @return the IsTriInt result
+ */
+extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* vertA, void* vertB, void* vertC, sSphereVec4* v, void* ipos, void* inorm, void* f)
 {
     float dp = vu0Dot_E4D0(self->dir, *v);
     sVE_E5E8* vt;
@@ -3178,16 +3231,21 @@ extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* a, void* b,
         vt = self->vt;
         char* t = (char*)self + vt[4].delta;
         sSphereVec4 n = vu0Scale_E4D0(*v, -1.0f);
-        return vt[4].fn(t, a, b, c, &n, d, e, f);
+        return vt[4].fn(t, vertA, vertB, vertC, &n, ipos, inorm, f);
     }
     vt = self->vt;
-    return vt[4].fn((char*)self + vt[4].delta, a, b, c, v, d, e, f);
+    return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, v, ipos, inorm, f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsSphTreeInt__FPv);
 #ifdef SKIP_ASM
+/**
+ * Intersects the line with a sphere tree: not supported for lines, always 0 (no hits).
+ *
+ * @return always 0
+ */
 int cWorldLine_IsSphTreeInt(void* self)
 {
     return 0;
@@ -3246,6 +3304,19 @@ struct sRay_E690 {
     sSphereVec4 dir;        // 0x70
 };
 
+/**
+ * Intersects the line's segment with an axis-aligned box and records the entry and exit points.
+ *
+ * A slab test over t in [0, 1] (tmin starts at -1, tmax at 2); an axis whose direction is under 1e-10 is skipped
+ * entirely, so a segment parallel to a face but outside that slab is not rejected. The face normals come from a
+ * table D_004FF260 built on first use (flag D_004A5978). A hit is written for the entry (tmin >= 0) and for the
+ * exit (tmax < 1): normal, point and t.
+ *
+ * @param bmin  the box's minimum corner (On Tour bMin)
+ * @param bmax  the box's maximum corner (On Tour bMax)
+ * @param hits  receives up to 2 intersections (On Tour tIntersectInfo* ti); On Tour's max count is not passed
+ * @return the number of hits written (0-2)
+ */
 extern "C" int cWorldLine_IsBoxInt(sRay_E690* self, float* bmin, float* bmax, sHit_E690* hits)
 {
     float tmin = -1.0f;
@@ -3465,9 +3536,23 @@ static inline sSphereVec4 vu0Normalize_E9A0(const sSphereVec4& v)
     return r;
 }
 
+/**
+ * Intersects the line with one bicubic patch by four Newton steps from a starting (u, v).
+ *
+ * Each step solves the 3x3 system [dP/du dP/dv -dir] * delta = origin - P(u, v) (inverse by adjugate) and moves u
+ * and v; if either leaves [0, 1] it returns without writing a hit. After four steps it writes P(u, v) and the
+ * normalised cross(dP/dv, dP/du). The line parameter (delta.z) is not kept (On Tour returns it in param).
+ *
+ * @param line  the world line (On Tour this)
+ * @param patch  the patch's four basis-multiplied control matrices (On Tour tPatchRecord* pPatch)
+ * @param patchU  in: the starting patch coordinate, out: the refined one (On Tour s)
+ * @param patchV  in: the starting patch coordinate, out: the refined one (On Tour t)
+ * @param outPos  receives the hit point (On Tour ipos)
+ * @param outNrm  receives the surface normal (On Tour inorm)
+ */
 // Intersect the line with a bicubic patch: four Newton steps from (u, v). Writes the hit point and the
 // surface normal only if (u, v) stays inside the unit square.
-extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patch, float& u, float& v, sSphereVec4* outPos,
+extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patch, float& patchU, float& patchV, sSphereVec4* outPos,
                               sSphereVec4* outNrm)
 {
     sSphereVec4* m0 = patch->m[0];
@@ -3476,20 +3561,20 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
     sSphereVec4* m3 = patch->m[3];
     sSphereVec4 P;
     sSphereVec4 c[4];
-    float v2 = v * v;
-    float v3 = v * v2;
-    float u2 = u * u;
-    float u3 = u * u2;
-    sVec4_E9A0 V(v3, v2, v, 1.0f);
-    sVec4_E9A0 U(u3, u2, u, 1.0f);
+    float v2 = patchV * patchV;
+    float v3 = patchV * v2;
+    float u2 = patchU * patchU;
+    float u3 = patchU * u2;
+    sVec4_E9A0 V(v3, v2, patchV, 1.0f);
+    sVec4_E9A0 U(u3, u2, patchU, 1.0f);
     c[0] = mtxMulVec_9B90(m0, &U);
     c[1] = mtxMulVec_9B90(m1, &U);
     c[2] = mtxMulVec_9B90(m2, &U);
     c[3] = mtxMulVec_9B90(m3, &U);
     P = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(c, 0), V), vu0Dot_E4D0(Column_E9A0(c, 1), V),
                    vu0Dot_E4D0(Column_E9A0(c, 2), V), 1.0f);
-    sVec4_E9A0 dV(3.0f * v2, 2.0f * v, 1.0f);
-    sVec4_E9A0 dU(3.0f * u2, 2.0f * u, 1.0f);
+    sVec4_E9A0 dV(3.0f * v2, 2.0f * patchV, 1.0f);
+    sVec4_E9A0 dU(3.0f * u2, 2.0f * patchU, 1.0f);
     float dvx = vu0Dot_E4D0(dV, Column_E9A0(c, 0));
     float dvy = vu0Dot_E4D0(dV, Column_E9A0(c, 1));
     float dvz = vu0Dot_E4D0(dV, Column_E9A0(c, 2));
@@ -3528,25 +3613,25 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
             m = adj * (1.0f / det);
         }
         sVec3_E9A0 delta = m * d;
-        u += delta.x;
-        v += delta.y;
-        if (u < 0.0f || 1.0f < u || v < 0.0f || 1.0f < v) {
+        patchU += delta.x;
+        patchV += delta.y;
+        if (patchU < 0.0f || 1.0f < patchU || patchV < 0.0f || 1.0f < patchV) {
             return;
         }
-        v2 = v * v;
-        v3 = v * v2;
-        u2 = u * u;
-        u3 = u * u2;
-        V = sVec4_E9A0(v3, v2, v, 1.0f);
-        U = sVec4_E9A0(u3, u2, u, 1.0f);
+        v2 = patchV * patchV;
+        v3 = patchV * v2;
+        u2 = patchU * patchU;
+        u3 = patchU * u2;
+        V = sVec4_E9A0(v3, v2, patchV, 1.0f);
+        U = sVec4_E9A0(u3, u2, patchU, 1.0f);
         c[0] = mtxMulVec_9B90(m0, &U);
         c[1] = mtxMulVec_9B90(m1, &U);
         c[2] = mtxMulVec_9B90(m2, &U);
         c[3] = mtxMulVec_9B90(m3, &U);
         P = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(c, 0), V), vu0Dot_E4D0(Column_E9A0(c, 1), V),
                        vu0Dot_E4D0(Column_E9A0(c, 2), V), 1.0f);
-        dV = sVec4_E9A0(3.0f * v2, 2.0f * v, 1.0f);
-        dU = sVec4_E9A0(3.0f * u2, 2.0f * u, 1.0f);
+        dV = sVec4_E9A0(3.0f * v2, 2.0f * patchV, 1.0f);
+        dU = sVec4_E9A0(3.0f * u2, 2.0f * patchU, 1.0f);
         dvx = vu0Dot_E4D0(dV, Column_E9A0(c, 0));
         dvy = vu0Dot_E4D0(dV, Column_E9A0(c, 1));
         dvz = vu0Dot_E4D0(dV, Column_E9A0(c, 2));
@@ -3653,6 +3738,12 @@ extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 void operator_delete(int* ptr);
 extern void* cWorldRider_vtbl[];
 
+/**
+ * Destroys a rider collision primitive: restores cWorldRider_vtbl (+0x50), destroys its sphere-tree copy (+0x70)
+ * and, if asked, frees it.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorldRider__cWorldRider(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = cWorldRider_vtbl;
@@ -3702,6 +3793,15 @@ static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
     return r;
 }
 
+/**
+ * Tells whether the rider's current sphere tree's root sphere overlaps an axis-aligned box.
+ *
+ * Uses the root (+0x60) centre +/- its radius as the sphere's bounding box.
+ *
+ * @param mn  the box's minimum corner (On Tour bMin)
+ * @param mx  the box's maximum corner (On Tour bMax)
+ * @return 1 when the boxes overlap, otherwise 0
+ */
 // sphere (self+0x60) overlaps the box [mn, mx]?
 extern "C" int cWorldRider_IsInBoxTransformed(void* self, sSphereVec4* mn, sSphereVec4* mx)
 {
@@ -3730,12 +3830,22 @@ struct sSphereMtx;
 extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src);
 extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* m, float scale);
 
-extern "C" void cWorldRider_Transform(void* self, sSphereMtx* m, float scale)
+/**
+ * Transforms the rider's sphere tree into a model's space using its own copy.
+ *
+ * Copies the current tree (+0x60) into the embedded copy at +0x70 (func_00329A28, On Tour
+ * cRiderSphereTree::operator=), makes the copy current, applies @p mat and @p scale (cRiderSphereTree_ApplyTransform)
+ * and sets the transformed flag (+0x4).
+ *
+ * @param mat  the transform (On Tour const t4Matrix& mat)
+ * @param scale  the uniform scale
+ */
+extern "C" void cWorldRider_Transform(void* self, sSphereMtx* mat, float scale)
 {
     sSphereTreeNode* node = (sSphereTreeNode*)((char*)self + 0x70);
     func_00329A28((sSphereNode_9A28*)node, *(sSphereNode_9A28**)((char*)self + 0x60));
     *(sSphereTreeNode**)((char*)self + 0x60) = node;
-    cRiderSphereTree_ApplyTransform(node, m, scale);
+    cRiderSphereTree_ApplyTransform(node, mat, scale);
     *(int*)((char*)self + 0x4) = 1;
 }
 #endif
@@ -3743,6 +3853,12 @@ extern "C" void cWorldRider_Transform(void* self, sSphereMtx* m, float scale)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_UnTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Undoes cWorldRider_Transform: makes the original tree (+0x64) current again (+0x60) and clears the transformed
+ * flag.
+ *
+ * @return the original tree pointer (declared int; On Tour returns void)
+ */
 int cWorldRider_UnTransform(void* self)
 {
     int t0 = *(int*)((char*)self + 0x64);
@@ -3797,10 +3913,25 @@ static inline float sphereLength_32F8F0(const sSphereVec4& v)
 
 extern "C" int func_0032A1C0(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
 
-extern "C" int cWorldRider_IsTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sSphereVec4* outDir, float* outLen)
+/**
+ * Collides the rider's sphere tree with a triangle and returns the push-out direction and depth.
+ *
+ * Calls func_0032A1C0 (On Tour cRiderSphereTree::IsTriCollision) on the current tree; on a hit the penetration
+ * vector is split into its length and unit direction.
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner (On Tour b)
+ * @param vertC  the third corner (On Tour c)
+ * @param n  the triangle's normal (On Tour n)
+ * @param ipos  receives the collision point (On Tour ipos)
+ * @param outDir  receives the unit push-out direction (On Tour inorm)
+ * @param outLen  receives the penetration depth (On Tour param)
+ * @return nonzero on a collision, otherwise 0
+ */
+extern "C" int cWorldRider_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 v;
-    int r = func_0032A1C0(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
+    int r = func_0032A1C0(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
     if (r != 0) {
         float len = sphereLength_32F8F0(v);
         *outLen = len;
@@ -3834,10 +3965,24 @@ static inline float sphereLength_32F990(const sSphereVec4& v)
 
 extern "C" int func_0032AA28(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
 
-extern "C" int cWorldRider_Is2SidedTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sSphereVec4* outDir, float* outLen)
+/**
+ * Collides the rider's sphere tree with a two-sided triangle and returns the push-out direction and depth.
+ *
+ * As cWorldRider_IsTriInt with func_0032AA28 (On Tour cRiderSphereTree::Is2SidedTriCollision).
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner (On Tour b)
+ * @param vertC  the third corner (On Tour c)
+ * @param n  the triangle's normal (On Tour n)
+ * @param ipos  receives the collision point (On Tour ipos)
+ * @param outDir  receives the unit push-out direction (On Tour inorm)
+ * @param outLen  receives the penetration depth (On Tour param)
+ * @return nonzero on a collision, otherwise 0
+ */
+extern "C" int cWorldRider_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 v;
-    int r = func_0032AA28(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
+    int r = func_0032AA28(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
     if (r != 0) {
         float len = sphereLength_32F990(v);
         *outLen = len;
@@ -3897,9 +4042,18 @@ struct sSphereHit_32FA30 {
 
 extern "C" int func_00327F18(void* a, void* tree, sSphereVec4* dir, sSphereHit_32FA30* hit);
 
-extern "C" int cWorldRider_IsSphTreeInt(void* self, void* a1, sSphereHit_32FA30* hit)
+/**
+ * Collides another sphere tree with the rider's current tree and normalises the hit's push-out vector.
+ *
+ * On a hit (func_00327F18) the hit's direction is divided by its length, which goes to the hit's length field.
+ *
+ * @param tree  the other sphere tree (On Tour bxSphereTree* tree)
+ * @param hit  receives the intersection (On Tour tIntersectInfo* ti)
+ * @return 1 on a hit, otherwise 0
+ */
+extern "C" int cWorldRider_IsSphTreeInt(void* self, void* tree, sSphereHit_32FA30* hit)
 {
-    if (func_00327F18(a1, *(void**)((char*)self + 0x60), &hit->dir, hit) != 0) {
+    if (func_00327F18(tree, *(void**)((char*)self + 0x60), &hit->dir, hit) != 0) {
         float len = sphereLength_32FA30(hit->dir);
         hit->len = len;
         sphereDivEq_32FA30(hit->dir, len);
@@ -3959,9 +4113,17 @@ struct sSphereHit_32FAC0 {
 
 extern "C" int func_0032B2B8(void* tree, void* a1, void* a2, sSphereVec4* dir, sSphereHit_32FAC0* hit);
 
-extern "C" int cWorldRider_IsBoxInt(void* self, void* a1, void* a2, sSphereHit_32FAC0* hit)
+/**
+ * Collides the rider's current sphere tree with an axis-aligned box and normalises the hit's push-out vector.
+ *
+ * @param bMin  the box's minimum corner (On Tour bMin)
+ * @param bMax  the box's maximum corner (On Tour bMax)
+ * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
+ * @return 1 on a hit (func_0032B2B8), otherwise 0
+ */
+extern "C" int cWorldRider_IsBoxInt(void* self, void* bMin, void* bMax, sSphereHit_32FAC0* hit)
 {
-    if (func_0032B2B8(*(void**)((char*)self + 0x60), a1, a2, &hit->dir, hit) != 0) {
+    if (func_0032B2B8(*(void**)((char*)self + 0x60), bMin, bMax, &hit->dir, hit) != 0) {
         float len = sphereLength_32FAC0(hit->dir);
         hit->len = len;
         sphereDivEq_32FAC0(hit->dir, len);
@@ -4025,6 +4187,13 @@ extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsInBoxTransformed);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the transformed sphere (centre +0x60, radius +0x70) can touch an axis-aligned box.
+ *
+ * @param mn  the box's minimum corner (On Tour bMin)
+ * @param mx  the box's maximum corner (On Tour bMax)
+ * @return 0 when the sphere's bounding box lies wholly beyond one face, otherwise 1
+ */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // sphere (pos 0x60, radius 0x70) overlaps the box [mn, mx]?
@@ -4074,9 +4243,18 @@ static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
     return r;
 }
 
-extern "C" void cWorldSphere_Transform(void* self, sSphereVec4* m, float scale)
+/**
+ * Transforms the sphere into a model's space: centre = matrix times the base centre (+0x80), radius = scale times
+ * the base radius (+0x90).
+ *
+ * Sets the transformed flag (+0x4).
+ *
+ * @param mat  the transform (On Tour const t4Matrix& mat)
+ * @param scale  the uniform scale for the radius
+ */
+extern "C" void cWorldSphere_Transform(void* self, sSphereVec4* mat, float scale)
 {
-    sSphereVec4 p = sphereMtxMulVec(m, (sSphereVec4*)((char*)self + 0x80));
+    sSphereVec4 p = sphereMtxMulVec(mat, (sSphereVec4*)((char*)self + 0x80));
     *(int*)((char*)self + 0x4) = 1;
     *(sSphereVec4*)((char*)self + 0x60) = p;
     *(float*)((char*)self + 0x70) = scale * *(float*)((char*)self + 0x90);
@@ -4086,6 +4264,10 @@ extern "C" void cWorldSphere_Transform(void* self, sSphereVec4* m, float scale)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_UnTransform);
 #ifdef SKIP_ASM
+/**
+ * Undoes cWorldSphere_Transform: copies the base centre and radius back (+0x60, +0x70) and clears the transformed
+ * flag.
+ */
 extern "C" void cWorldSphere_UnTransform(void* self)
 {
     cQuad128 a = *(cQuad128*)((char*)self + 0x80);
@@ -4146,9 +4328,16 @@ struct sSphereHit_32FDB0 {
 
 extern "C" int func_0032C898(void* self, void* a1, float f, void* a2, void* a3);
 
-extern "C" int cWorldSphere_IsSphTreeInt(void* self, void* a1, sSphereHit_32FDB0* hit)
+/**
+ * Collides the sphere with a sphere tree and normalises the hit's push-out vector.
+ *
+ * @param tree  the sphere tree (On Tour bxSphereTree* tree)
+ * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
+ * @return 1 on a hit (func_0032C898 with the centre and radius), otherwise 0
+ */
+extern "C" int cWorldSphere_IsSphTreeInt(void* self, void* tree, sSphereHit_32FDB0* hit)
 {
-    if (func_0032C898(a1, (char*)self + 0x60, *(float*)((char*)self + 0x70), &hit->dir, hit) != 0) {
+    if (func_0032C898(tree, (char*)self + 0x60, *(float*)((char*)self + 0x70), &hit->dir, hit) != 0) {
         float len = sphereLength_32FDB0(hit->dir);
         hit->len = len;
         sphereDivEq_32FDB0(hit->dir, len);
@@ -4163,9 +4352,17 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsBoxInt);
 #ifdef SKIP_ASM
 extern "C" int func_00329590(void* a, void* b, void* center, void* box, void* boxMin, void* boxMax, float radius);
 
-extern "C" int cWorldSphere_IsBoxInt(void* self, void* a, void* b, void* box)
+/**
+ * Collides the sphere with an axis-aligned box (func_00329590 with the centre and radius).
+ *
+ * @param bMin  the box's minimum corner (On Tour bMin)
+ * @param bMax  the box's maximum corner (On Tour bMax)
+ * @param box  receives the intersection (On Tour tIntersectInfo* ti; its +0x10 and +0x40 parts are passed too)
+ * @return 1 on a hit, otherwise 0
+ */
+extern "C" int cWorldSphere_IsBoxInt(void* self, void* bMin, void* bMax, void* box)
 {
-    return func_00329590(a, b, (char*)self + 0x60, box, (char*)box + 0x10, (char*)box + 0x40,
+    return func_00329590(bMin, bMax, (char*)self + 0x60, box, (char*)box + 0x10, (char*)box + 0x40,
                          *(float*)((char*)self + 0x70)) != 0;
 }
 #endif
@@ -4206,23 +4403,39 @@ static inline sSphereVec4 sphereSub_32FE78(const sSphereVec4& a, const sSphereVe
     return r;
 }
 
+/**
+ * Collides the sphere with a one-sided triangle: the plane test, then the face or the edges.
+ *
+ * func_00330360 (On Tour isIntersectingPlane) gives the distance t to the plane; the centre projected onto the
+ * plane goes to @p outPos. A hit is reported when that point lies inside the triangle (func_0032B6A8, tolerance
+ * 1e-4) or the sphere touches an edge (func_00330250, On Tour edgeSphereCollision).
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner
+ * @param vertC  the third corner
+ * @param plane  the triangle's normal (On Tour n)
+ * @param outPos  receives the centre projected onto the plane (On Tour ipos)
+ * @param outDir  receives the hit normal, @p plane (On Tour inorm)
+ * @param outDist  receives the penetration depth, radius - t (On Tour param)
+ * @return 1 on a hit, otherwise 0
+ */
 // Like cWorldSphere_Is2SidedTriInt without the plane-side flip. The success tail is written out twice (jump2 merges the
 // copies); the extra self reference keeps the target's register order for self and a.
-extern "C" int cWorldSphere_IsTriInt(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
+extern "C" int cWorldSphere_IsTriInt(void* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* plane,
                              sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
 {
     float t;
-    if (func_00330360(self, plane, a, &t) == 0) {
+    if (func_00330360(self, plane, vertA, &t) == 0) {
         return 0;
     }
     sSphereVec4 p = sphereSub_32FE78(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FE78(*plane, t));
     *outPos = p;
-    if (func_0032B6A8_tol(a, b, c, outPos, 9.999999747378752e-05f) != 0) {
+    if (func_0032B6A8_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0) {
         *outDir = *plane;
         *outDist = *(float*)((char*)self + 0x70) - t;
         return 1;
     }
-    if (func_00330250(self, a, b, c) == 0)
+    if (func_00330250(self, vertA, vertB, vertC) == 0)
         return 0;
     *outDir = *plane;
     *outDist = *(float*)((char*)self + 0x70) - t;
@@ -4280,12 +4493,25 @@ static inline sSphereVec4 sphereSub_32FFA0(const sSphereVec4& a, const sSphereVe
     return r;
 }
 
-extern "C" int cWorldSphere_Is2SidedTriInt(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
+/**
+ * Collides the sphere with a two-sided triangle: as cWorldSphere_IsTriInt, but a centre behind the plane uses the
+ * flipped normal.
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner
+ * @param vertC  the third corner
+ * @param plane  the triangle's normal (On Tour n)
+ * @param outPos  receives the centre projected onto the plane (On Tour ipos)
+ * @param outDir  receives the normal facing the centre (On Tour inorm)
+ * @param outDist  receives the penetration depth, radius - |t| (On Tour param)
+ * @return 1 on a hit, otherwise 0
+ */
+extern "C" int cWorldSphere_Is2SidedTriInt(void* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* plane,
                              sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
 {
     sSphereVec4 d = *plane;
     float t;
-    if (func_00330360(self, plane, a, &t) == 0) {
+    if (func_00330360(self, plane, vertA, &t) == 0) {
         return 0;
     }
     if (t < 0.0f) {
@@ -4294,7 +4520,7 @@ extern "C" int cWorldSphere_Is2SidedTriInt(void* self, sSphereVec4* a, sSphereVe
     }
     sSphereVec4 p = sphereSub_32FFA0(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FFA0(d, t));
     *outPos = p;
-    if (func_0032B6A8_tol(a, b, c, outPos, 9.999999747378752e-05f) != 0 || func_00330250(self, a, b, c) != 0) {
+    if (func_0032B6A8_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0 || func_00330250(self, vertA, vertB, vertC) != 0) {
         *outDir = d;
         *outDist = *(float*)((char*)self + 0x70) - t;
         return 1;

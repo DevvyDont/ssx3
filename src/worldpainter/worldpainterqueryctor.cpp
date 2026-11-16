@@ -141,6 +141,15 @@ struct sWPQuery_06C0 {
 
 extern sWPQuery_06C0* D_004A3880;
 
+/**
+ * Destroys a world painter query: frees its data and unlinks it from the global query list (D_004A3880).
+ *
+ * When the query is not the list's head the list is walked until the entry before it; the null test after that walk
+ * is useless (the walk dereferences each entry first). Restores the base vtable (D_00485D30) and frees the object
+ * when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self, int flags)
 {
     self->mVtbl = (void**)cWorldPainterQuery_vtbl;
@@ -235,7 +244,23 @@ static inline void set_0778(sOut_0778* o, float* d, float v)
     ((tSet_0778)o->vt[66].fn)((char*)o + o->vt[66].delta, d, v);
 }
 
-extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float x, float z, float h)
+/**
+ * Looks up the world painter layer value under a position and blends it into the query's result, tracking the
+ * distance travelled.
+ *
+ * The result's value is -99999 before the first query; later queries add the distance from the previous (x, z). The
+ * cell of the query's layer (id low byte) in the painter map (World +0x8) at D_004A3860 is searched for (x, z)
+ * (cWorldPainterQuery_lookupRegion); a hit with another key (id >> 8) returns the result unchanged, a missing cell or hit ends the
+ * result (end_0778). The first hit sets the data with weight -1 and the distance 0. Later hits use @p blend as the
+ * weight; with @p blend == -99999 the weight is 1 (and the distance resets) when the hit's first value lies between 0
+ * and the distance travelled, else minus that value. The while loop never repeats (D_004A3860 is not advanced).
+ *
+ * @param x  the world x
+ * @param z  the world z (On Tour fy)
+ * @param blend  the blend weight, or -99999 for the distance rule (On Tour blend)
+ * @return the query's result (On Tour const tWPInGameData*)
+ */
+extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float x, float z, float blend)
 {
     int first = 1;
     char* map = *(char**)((char*)SSXApp->Game->World + 0x8);
@@ -274,17 +299,17 @@ extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float 
             self->out->value = 0.0f;
             return self->out;
         }
-        if (h == -99999.0f) {
-            h = 0.0f;
+        if (blend == -99999.0f) {
+            blend = 0.0f;
             float v = *hit->data;
-            if (h <= v && v <= self->out->value) {
+            if (blend <= v && v <= self->out->value) {
                 set_0778(self->out, hit->data, 1.0f);
-                self->out->value = h;
+                self->out->value = blend;
             } else {
                 set_0778(self->out, hit->data, -*hit->data);
             }
         } else {
-            set_0778(self->out, hit->data, h);
+            set_0778(self->out, hit->data, blend);
         }
         return self->out;
     }

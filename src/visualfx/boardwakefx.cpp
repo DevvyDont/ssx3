@@ -4022,6 +4022,12 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern int D_004A3B18;
 void operator_delete(int* p);
 
+/**
+ * Destroys the lens effects manager: unregisters its graphics-manager callback (GrMan slot 117 with 0, 0), clears
+ * D_004A3B18 and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
 {
     char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;

@@ -491,6 +491,9 @@ extern "C" int func_00155328(void* self, int a)
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes the score interface's state to a replay frame: an empty stub, nothing is recorded.
+ */
 void cBEScoreInterface_writeToReplayFrame(void* self)
 {
 }
@@ -499,6 +502,9 @@ void cBEScoreInterface_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reads the score interface's state from a replay frame: an empty stub, nothing is restored.
+ */
 void cBEScoreInterface_readFromReplayFrame(void* self)
 {
 }

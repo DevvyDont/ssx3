@@ -1933,6 +1933,9 @@ extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_snap__FPv);
 #ifdef SKIP_ASM
+/**
+ * Snaps the manual camera algorithm to its subject: an empty stub in retail (On Tour snap(int subjectID)).
+ */
 void cManualCameraAlgorithm_snap(void* self)
 {
 }

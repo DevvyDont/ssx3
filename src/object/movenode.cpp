@@ -710,6 +710,16 @@ struct sNodeVEntryV_355F10 {
     void (*fn)(void*);
 };
 
+/**
+ * Takes over an old instance node's effects and transform, then deletes the old node.
+ *
+ * When the old node has effects (slot 16) they move over (cMoveNode_transferEffectModifier). If its transform (slot
+ * 24) is this node's own instance matrix (Instance + 0x10) the old node is just deleted; otherwise the matrix is
+ * copied, the old node deleted (keeping Instance's word +0x8), the copy applied with func_00355918, TransferHack
+ * set and virtual slot 50 called.
+ *
+ * @param srcv  the node being replaced (On Tour cInstanceNode* pOldNode); null is ignored
+ */
 extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* srcv)
 {
     char* src = (char*)srcv;
@@ -745,6 +755,13 @@ INCLUDE_ASM("object/movenode", cMoveNode_transferEffectModifier);
 #ifdef SKIP_ASM
 extern "C" void func_00353398(void* block, void* other);
 
+/**
+ * Moves another node's effect links into this node's modifier block, creating the block when needed.
+ *
+ * Uses func_00353398 (On Tour tModifierBlock::transferEffectModifier) on the other block's effect link (+0x10).
+ *
+ * @param other  the node giving up its effects (On Tour oldNode)
+ */
 extern "C" void cMoveNode_transferEffectModifier(cMoveNode* self, cMoveNode* other)
 {
     if (((void*)other->ModifierBlock) != 0) {
@@ -1942,6 +1959,10 @@ typedef int cQuad128 __attribute__((mode(TI)));
 //100%
 INCLUDE_ASM("object/movenode", cPositionModifier_updateRootTransform);
 #ifdef SKIP_ASM
+/**
+ * Rebuilds the position modifier's transform: Offset goes into the matrix's row 3 (translation) and the dirty flag
+ * is cleared.
+ */
 extern "C" void cPositionModifier_updateRootTransform(cPositionModifier* self)
 {
     cQuad128 v = *(cQuad128*)&self->Offset;
@@ -1998,6 +2019,15 @@ struct sMnVEntryRd7090 {
 extern "C" void func_00356F68(void* self, void* stream);
 extern char cParentModifier_vtbl[];
 
+/**
+ * Constructs a parent modifier from a replay frame: the position-modifier part, then Mesh and ParentInst.
+ *
+ * Runs func_00356F68 (On Tour cPositionModifier(cBxReplayFrame*)), stores cParentModifier_vtbl, reads 4 bytes into
+ * Mesh (+0x90, frame slot 2) and ParentInst (slot 3).
+ *
+ * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* stream)
 {
     func_00356F68(self, stream);
@@ -2095,6 +2125,14 @@ struct sMnVEntryM_357108 {
     sMnMtx_357108* (*fn)(void*, int);
 };
 
+/**
+ * Follows the parent instance: copies the parent mesh's matrix and places the offset in its space.
+ *
+ * With the parent's node set (+0xC), Transform is the node's mesh matrix for Mesh (slot 29) when its slot 26 is
+ * nonzero, else func_0034FED8 (On Tour cInstanceNode::buildMeshMat) builds it; row 3 becomes that position plus the
+ * matrix applied to Offset (the local view's vel_357108 is Transform row 3, +0x80). Clears RootTransformDirty in
+ * any case.
+ */
 extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
 {
     char* o = *(char**)((char*)self->ParentInst + 0xC);
@@ -2121,6 +2159,14 @@ struct sMnVEntry7210 {
     void (*fn)(void*, void*);
 };
 
+/**
+ * Lets the parent instance's node fill an intersection record as if it hit Mesh.
+ *
+ * Temporarily stores Mesh in the record's mesh index (+0x5C), calls the parent node's slot 42 with it, then
+ * restores the index. Does nothing without a parent or its node.
+ *
+ * @param obj  the intersection record (On Tour tIntersectInfo& intInfo)
+ */
 extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, void* obj)
 {
     void* p = self->ParentInst;
@@ -2317,6 +2363,13 @@ struct sMnMover_3573F8 {
     int arrived;
 };
 
+/**
+ * Pulls the magnet's object toward the rider it has caught, faster the longer it chases.
+ *
+ * With a rider attached (Being >= 0) Time grows by the frame time; d = the rider's position (func_002D1B58) -
+ * Offset. Within 50 units AllowCollide is set; otherwise Offset moves by d * Speed * Time / |d|, clamped to d
+ * (which also sets AllowCollide). Marks the root transform dirty.
+ */
 extern "C" void cMagnetModifier_update(cMagnetModifier* self)
 {
     if (self->Being < 0) {
@@ -2342,6 +2395,9 @@ extern "C" void cMagnetModifier_update(cMagnetModifier* self)
 //100%
 INCLUDE_ASM("object/movenode", cMagnetModifier_updateRootTransform);
 #ifdef SKIP_ASM
+/**
+ * Rebuilds the magnet's transform: Offset goes into the matrix's row 3 (translation) and the dirty flag is cleared.
+ */
 extern "C" void cMagnetModifier_updateRootTransform(cMagnetModifier* self)
 {
     cQuad128 v = *(cQuad128*)&self->Offset;
@@ -2363,6 +2419,16 @@ struct sMnVEntryI7660 {
 
 extern "C" void* cObjectInterface_getNumBeings(int id);
 
+/**
+ * Decides whether the magnet object collides with a rider, catching the first human rider that touches it.
+ *
+ * With a rider attached only that rider may collide, once AllowCollide is set. Otherwise the rider
+ * (cObjectInterface_getNumBeings(id), which returns the being, not a count) is attached when its slot 8 (On Tour
+ * cBeing::isHuman) is set.
+ *
+ * @param id  the rider's being index (On Tour being)
+ * @return AllowCollide for the attached rider, otherwise 0
+ */
 extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
 {
     int cur = self->Being;
@@ -2476,6 +2542,10 @@ INCLUDE_ASM("object/movenode", cAvaSplineModifier_update);
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 
+/**
+ * Updates the avalanche spline modifier: fills Transform (+0x40) from its instance (func_002D1CF0, called with two
+ * arguments though declared with one).
+ */
 extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
 {
     func_002D1CF0_2(self->Instance, (char*)self + 0x40);

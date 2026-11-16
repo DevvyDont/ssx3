@@ -318,7 +318,20 @@ static inline int fontGetTex(void* s)
     return *(int*)((char*)s + 0x60);
 }
 
-extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m)
+/**
+ * Draws a string with the font at a screen position, with a drop shadow when the font has a shadow offset.
+ *
+ * Binds the font texture (fontGetTex) and offsets the position by Offset * Scale. With a nonzero ShadowOffset it
+ * first draws the text at the shadow offset in ShadowColor (+0x50), with the draw state's 5-bit field at bits 5-9
+ * lowered by one, then restores it; the text itself is drawn in Color (+0x40). Both draws go through GrMan slot 80
+ * with Scale and UVScale. The unit's view types the string as a matrix (sMat00391C48*); callers pass a char string
+ * (cFont_vtextf's buffer, the centred / right-aligned text helpers, cDebugFE).
+ *
+ * @param x  the screen x
+ * @param y  the screen y
+ * @param str  the text to draw (On Tour const char* str)
+ */
+extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
 {
     cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
     (g->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex(self);
@@ -331,14 +344,14 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m)
         if (a < 0) a = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
         sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
-        vt[80].fn((char*)g + vt[80].delta, self, m, ((char*)self) + 0x50,
+        vt[80].fn((char*)g + vt[80].delta, self, str, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = g->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
-    vt[80].fn((char*)g + vt[80].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
+    vt[80].fn((char*)g + vt[80].delta, self, str, ((char*)self) + 0x40, pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif

@@ -1685,10 +1685,18 @@ extern float D_004A3B44;
 
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
-extern "C" void cFade_TObj_Draw(void* self, float s)
+/**
+ * Draws the fade transition: a full-screen (640x480) rectangle in the fade colour with its alpha scaled by @p amount.
+ *
+ * The texture rectangle is the screen's UV rectangle (D_004A3B30, D_004A3B3C, D_004A3B38, D_004A3B44); drawn with
+ * func_002EB938 (On Tour drawRect).
+ *
+ * @param amount  how far the fade has covered the screen, 0..1 (On Tour d)
+ */
+extern "C" void cFade_TObj_Draw(void* self, float amount)
 {
     sBTRect4 color = *(sBTRect4*)((char*)self + 4);
-    color.x = ((sBTRect4*)((char*)self + 4))->x * s;
+    color.x = ((sBTRect4*)((char*)self + 4))->x * amount;
     sBTRect4 pos;
     pos.x = 0.0f;
     pos.y = 0.0f;
@@ -1743,9 +1751,17 @@ extern float D_004A3B40;
 extern float D_004A3B44;
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
-extern "C" void cWipe_TObj_Draw(char* self, float t)
+/**
+ * Draws the wipe transition: a full-screen rectangle in the wipe colour slid in from the side by @p amount.
+ *
+ * The rectangle is offset by (1 - @p amount) of the screen in the horizontal (+0x14) and vertical (+0x18) directions and
+ * cropped to the screen, with its texture rectangle cropped to match; drawn with func_002EB938 (On Tour drawRect).
+ *
+ * @param amount  how far the wipe has covered the screen, 0..1 (On Tour d)
+ */
+extern "C" void cWipe_TObj_Draw(char* self, float amount)
 {
-    float k = 1.0f - t;
+    float k = 1.0f - amount;
     float dx = (float)*(int*)(self + 0x14) * k * 640.0f;
     float dy = (float)*(int*)(self + 0x18) * k * -480.0f;
     float w = 640.0f;
@@ -1928,9 +1944,18 @@ static inline void BuildArc_C060(float* ys, float* xs, const float& cx, float r,
     }
 }
 
-extern "C" void cCircle_TObj_Draw(char* self, float t)
+/**
+ * Draws the circle (iris) transition: the screen outside a circle around the origin is covered in the colour.
+ *
+ * The circle's radius is (1 - @p amount) * 800 around (+0x14, +0x18). Draws the rectangles left and right of it, then
+ * the parts above and below the circle as two 80-vertex strips over 40 columns (BuildArc_C060, step pi / 39; y
+ * clamped to 0..480) through GrMan slot 71.
+ *
+ * @param amount  how far the circle has closed, 0..1 (On Tour delta)
+ */
+extern "C" void cCircle_TObj_Draw(char* self, float amount)
 {
-    float r = (1.0f - t) * 800.0f;
+    float r = (1.0f - amount) * 800.0f;
     float x1 = *(float*)(self + 0x14) + r;
     float x0 = *(float*)(self + 0x14) - r;
     sBTRect4 pos;

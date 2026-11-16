@@ -38,12 +38,20 @@ extern "C" void cReplayFramePtr_initBlock(cReplayFramePtr* self, unsigned int si
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_setBlock);
 #ifdef SKIP_ASM
-extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, int a1, int a2)
+/**
+ * Points the replay frame at an existing block of data: the read cursor at its start, the write cursor at its end.
+ *
+ * Sets Block and ReadData to @p data, WriteData to @p data + @p size and Size to @p size.
+ *
+ * @param data  the block's data (On Tour char* data)
+ * @param size  the block's size in bytes (On Tour size)
+ */
+extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, int data, int size)
 {
-    self->Block = (char*)a1;
-    self->WriteData = (char*)(a1 + a2);
-    self->ReadData = (char*)a1;
-    self->Size = a2;
+    self->Block = (char*)data;
+    self->WriteData = (char*)(data + size);
+    self->ReadData = (char*)data;
+    self->Size = size;
 }
 #endif
 
@@ -149,6 +157,17 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_loadBlock);
 #ifdef SKIP_ASM
 extern "C" int func_002C85A0(void* src, int a, int dst);
 
+/**
+ * Loads a saved replay frame block: unpacks the saved bytes into Block and rewinds the read cursor.
+ *
+ * Reads the 4-byte size at *@p pp and steps over it, unpacks the data that follows into Block (func_002C85A0, which
+ * returns the unpacked size), steps *@p pp past the saved size, sets WriteData to Block + the unpacked size and
+ * calls cReplayFramePtr_readRewind. The 4-byte tag copied from @p src is not used.
+ *
+ * @param pp  the read cursor in the saved data (On Tour char** d); advanced past the block
+ * @param src  the frame's save record (On Tour tFramePtrSave* ptrsave)
+ * @return always 1
+ */
 extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, void* src)
 {
     struct {
@@ -989,7 +1008,7 @@ struct cReplayFramePtr_F8A0 {
     int field_0x620;        // 0x620
 };
 
-extern "C" void cReplay_startReplay(cReplay* self, void* a1, int a2, int a3)
+extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantReplay, int autoReplay)
 {
     int ok = !(self->State == 14 || self->State == 15);
     if (ok) {
@@ -999,15 +1018,15 @@ extern "C" void cReplay_startReplay(cReplay* self, void* a1, int a2, int a3)
         cReplay_setReplayState(((cReplayFramePtr_F8A0*)self), 7);
         self->Cmd = 0;
         self->AutoReplay = 0;
-        self->InstantReplay = a2;
-        cReplay_rewind(((cReplayFramePtr_F8A0*)self), a1);
+        self->InstantReplay = instantReplay;
+        cReplay_rewind(((cReplayFramePtr_F8A0*)self), frame);
         cReplay_stepFrame(((cReplayFramePtr_F8A0*)self), 1);
-        if (a2) {
+        if (instantReplay) {
             func_0026EF30(self);
         } else {
             cReplay_setupReplayCameras(self);
         }
-        if (a2 == 0 && a3 == 0) {
+        if (instantReplay == 0 && autoReplay == 0) {
             func_0028F200(func_0028B180());
         }
     }

@@ -302,6 +302,12 @@ extern "C" void cRailModifier_updateBoundBox(void* self);
 extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox0035C4E0* box, sBox0035C4E0* old);
 
+/**
+ * Recomputes the rail's world bound box and moves its rail-space node in the Nash octree from the old box to the
+ * new one.
+ *
+ * Calls cRailModifier_updateBoundBox, then nash_Nash_movenode(Nash, 2 (the rail space), Node, new box, old box).
+ */
 extern "C" void cRailModifier_update(cRailModifier* self)
 {
     sBox0035C4E0* box = &(*(sBox0035C4E0*)&self->BoundBox);
@@ -324,6 +330,12 @@ public:
     virtual void v05(void* p);
 };
 
+/**
+ * Writes the rail modifier to a replay frame: the 0x30-byte cRailModifierState (+0x10: BoundBox, SplineId, Mesh)
+ * with slot 1, then Instance with slot 5.
+ *
+ * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream0035C540* stream)
 {
     stream->v01((char*)self + 0x10, 0x30);
@@ -394,15 +406,15 @@ static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
 
 extern "C" void func_0034FED8(void* model, int bone, sRmMat44C5A0* out);
 
-extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* m)
+extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
 {
-    func_0034FED8(self->Instance, self->Mesh, m);
+    func_0034FED8(self->Instance, self->Mesh, mat);
     sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)self + 0x50);
     sRmMat44C5A0 t2;
     sRmMat44C5A0 t;
-    vu0MulMatC5A0(&t, m, src);
+    vu0MulMatC5A0(&t, mat, src);
     vu0CopyMatC5A0(&t2, &t);
-    vu0CopyMatC5A0(m, &t2);
+    vu0CopyMatC5A0(mat, &t2);
 }
 #endif
 
@@ -850,6 +862,9 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, vo
 //100%
 INCLUDE_ASM("object/railmodifier", cRailModifier_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * The rail modifier's render virtual (cRailModifier_vtbl slot 3): an empty stub; rails draw nothing themselves.
+ */
 void cRailModifier_render(void* self)
 {
 }
@@ -1806,6 +1821,15 @@ public:
     virtual void v05(void* ptr);
 };
 
+/**
+ * Writes the roller modifier to a replay frame: its rigid body (+0x30), the 0x28-byte cRollerNodeState (+0x4) and
+ * Instance (+0xD0).
+ *
+ * The same order as On Tour's writeToReplayFrame (cRigidBody first, then the state, then the instance pointer with
+ * slot 5).
+ *
+ * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cRollerModifier_writeToReplayFrame(void* self, cRollerModifier_writeToReplayFrame_cObj* obj)
 {
     cRigidBody_writeToReplayFrame((cRigidBody*)((char*)self + 0x30), (cRigidBody_writeToReplayFrame_cObj*)obj);
@@ -2465,6 +2489,15 @@ extern "C" void func_0035F3A8(sRailModSelect* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_update);
 #ifdef SKIP_ASM
+/**
+ * Advances the tex-flip timer and, on each whole step, shows the next (or previous) texture of the flip sequence.
+ *
+ * Time grows by Speed per frame (nothing happens while Speed <= 0); when it reaches 1.0 it drops by 1.0 and Type
+ * decides: 0 steps TexIndex forward or, with Dir set, backward, wrapping at NumTexFlipMaterials; 1 sets Speed to 10
+ * / the frame rate (D_004A5B64 + 0x10), switches to type 2 and steps forward; 2 sets Speed to BaseSpeed times a
+ * random 0.25..1.0 (BXrand mantissa trick), switches to type 1 and steps forward. Ends with func_0035F378 (On Tour
+ * setTexIndex). The comment above the definition calls the timer a rail timer; it is the tex-flip one.
+ */
 // Advances the rail timer; each whole step moves to the next/previous frame (mode 0), or alternates between a
 // fixed 10-per-second step (mode 1) and a random 25..100% rate (mode 2).
 extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
@@ -2531,16 +2564,26 @@ static inline float fTrunc_F598(float x)
     return r;
 }
 
-extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float v)
+/**
+ * Handles a script signal for the tex-flip modifier: set its speed, pick a texture or step to the next one.
+ *
+ * Signal 300 sets Speed to @p value; 301 with 0 <= @p value < 9 sets TexIndex to @p value rounded up and applies it
+ * (func_0035F378, On Tour setTexIndex); 302 steps TexIndex forward, wrapping to 1 (not 0 as cTexFlipModifier_update
+ * does), and applies it. Other ids are ignored.
+ *
+ * @param id  the signal id (On Tour signal)
+ * @param value  the signal's argument value (On Tour arg)
+ */
+extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float value)
 {
     switch (id) {
     case 300:
-        self->Speed = v;
+        self->Speed = value;
         break;
     case 301:
-        if (v >= 0.0f && v < 9.0f) {
-            float c = fTrunc_F598(v);
-            if (c < v) {
+        if (value >= 0.0f && value < 9.0f) {
+            float c = fTrunc_F598(value);
+            if (c < value) {
                 c += 1.0f;
             }
             int n = (int)c;
@@ -2572,6 +2615,12 @@ public:
     virtual void v05(void* p);
 };
 
+/**
+ * Writes the tex-flip modifier to a replay frame: the 0x18-byte cTexFlipModifierState (Type .. TexIndex) with slot
+ * 1, then Instance with slot 5.
+ *
+ * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStream0035F688* stream)
 {
     stream->v01((char*)self + 0x0, 0x18);
@@ -2687,6 +2736,18 @@ struct sRmState_F7D0 {
     int active;         // 0x40
 };
 
+/**
+ * Advances the UV-scroll modifier: rotates the texture, scrolls its UV offset and switches between the on and off
+ * phases.
+ *
+ * Does nothing unless TimeOn or TimeOff is positive. Time grows by 1 / the frame rate (D_004A5B64 + 0x10). While
+ * On: Angle grows by AngVel; at TimeOn the timer restarts, On clears when TimeOff > 0 and types 2 and 6 reverse
+ * UVScroll. While still on, type 6 eases the UV offset with a triangle profile over the on phase (UVScroll * t /
+ * TimeOn, the sign of UVScroll[0] choosing the half), other types add UVScroll per frame; each UV component wraps
+ * into -1..1. While off, at TimeOff the timer restarts and On is set again when TimeOn > 0. The 2*pi wrap tests and
+ * adjusts AngVel instead of Angle, and its second test is AngVel <= 2*pi (not -2*pi), so a slow AngVel gains 2*pi
+ * every other frame and Angle grows without bound (harmless for the rotation, likely an original bug).
+ */
 extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
 {
     if (self->TimeOn > 0.0f || self->TimeOff > 0.0f) {
@@ -2762,30 +2823,40 @@ extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_signal);
 #ifdef SKIP_ASM
-extern "C" void cUVScrollModifier_signal(cUVScrollModifier* self, int id, float v)
+/**
+ * Handles a script signal for the UV-scroll modifier: scroll speeds, on / off times or the UV offset.
+ *
+ * Signal 201 sets UVScroll[0] and 200 UVScroll[1] (range -1..1; note the order is the reverse of 204/205); 202 sets
+ * TimeOn and 203 TimeOff (0..60 seconds); 204 sets UV[0] and 205 UV[1] (-4..4). Values out of range and other ids
+ * are ignored.
+ *
+ * @param id  the signal id (On Tour signal)
+ * @param value  the signal's argument value (On Tour arg)
+ */
+extern "C" void cUVScrollModifier_signal(cUVScrollModifier* self, int id, float value)
 {
     if (id == 200 || id == 201) {
-        if (v >= -1.0f && v <= 1.0f) {
+        if (value >= -1.0f && value <= 1.0f) {
             if (id == 201) {
-                self->UVScroll[0] = v;
+                self->UVScroll[0] = value;
             } else {
-                self->UVScroll[1] = v;
+                self->UVScroll[1] = value;
             }
         }
     } else if (id == 202 || id == 203) {
-        if (v >= 0.0f && v <= 60.0f) {
+        if (value >= 0.0f && value <= 60.0f) {
             if (id == 202) {
-                self->TimeOn = v;
+                self->TimeOn = value;
             } else {
-                self->TimeOff = v;
+                self->TimeOff = value;
             }
         }
     } else if (id == 204 || id == 205) {
-        if (v >= -4.0f && v <= 4.0f) {
+        if (value >= -4.0f && value <= 4.0f) {
             if (id == 204) {
-                self->UV[0] = v;
+                self->UV[0] = value;
             } else {
-                self->UV[1] = v;
+                self->UV[1] = value;
             }
         }
     }
@@ -2875,6 +2946,12 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Writes the whole UV-scroll modifier (0x50 bytes, all cUVScrollModifierState) through the replay frame's write
+ * virtual (slot 1).
+ *
+ * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cUVScrollModifier_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 0x50);
@@ -4343,10 +4420,10 @@ INCLUDE_ASM("object/railmodifier", func_00360C08);
 #ifdef SKIP_ASM
 extern void* cPhysicsModifier_vtbl[];
 
-extern "C" void *func_00360C08(cPhysicsModifier* arg0) {
-    ((int*)arg0->mVtbl) = &(*(int*)&cPhysicsModifier_vtbl);
-    (arg0->Active) = 1;
-    return ((void*)arg0);
+extern "C" void *func_00360C08(cPhysicsModifier* physicsModifier) {
+    ((int*)physicsModifier->mVtbl) = &(*(int*)&cPhysicsModifier_vtbl);
+    (physicsModifier->Active) = 1;
+    return ((void*)physicsModifier);
 }
 #endif
 
@@ -4735,11 +4812,11 @@ extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E50);
 #ifdef SKIP_ASM
-extern "C" int func_00360E50(cMoveNode* arg0) {
+extern "C" int func_00360E50(cMoveNode* moveNode) {
     int var_2;
     void *temp_3;
 
-    temp_3 = ((void*)arg0->ModifierBlock);
+    temp_3 = ((void*)moveNode->ModifierBlock);
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = (*(int *)((char*)(temp_3) + (4))) != 0;
@@ -4750,11 +4827,11 @@ extern "C" int func_00360E50(cMoveNode* arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E70);
 #ifdef SKIP_ASM
-extern "C" int func_00360E70(cMoveNode* arg0) {
+extern "C" int func_00360E70(cMoveNode* moveNode) {
     int var_2;
     void *temp_3;
 
-    temp_3 = ((void*)arg0->ModifierBlock);
+    temp_3 = ((void*)moveNode->ModifierBlock);
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = (*(int *)((char*)(temp_3) + (8))) != 0;
@@ -4811,10 +4888,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F20);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTransformModifier(int);
 
-extern "C" void func_00360F20(cMoveNode* arg0) {
+extern "C" void func_00360F20(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remTransformModifier(temp_4);
     }
@@ -4825,10 +4902,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F48);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remUVScrollModifier(int);
 
-extern "C" void func_00360F48(cMoveNode* arg0) {
+extern "C" void func_00360F48(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remUVScrollModifier(temp_4);
     }
@@ -4839,10 +4916,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F70);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTexFlipModifier(int);
 
-extern "C" void func_00360F70(cMoveNode* arg0) {
+extern "C" void func_00360F70(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remTexFlipModifier(temp_4);
     }
@@ -4853,10 +4930,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F98);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remPhysicsModifier(int);
 
-extern "C" void func_00360F98(cMoveNode* arg0) {
+extern "C" void func_00360F98(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remPhysicsModifier(temp_4);
     }
@@ -4867,10 +4944,10 @@ INCLUDE_ASM("object/railmodifier", func_00360FC0);
 #ifdef SKIP_ASM
 extern "C" void func_00353278(int);
 
-extern "C" void func_00360FC0(cMoveNode* arg0) {
+extern "C" void func_00360FC0(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         func_00353278(temp_4);
     }
@@ -4881,10 +4958,10 @@ INCLUDE_ASM("object/railmodifier", func_00360FE8);
 #ifdef SKIP_ASM
 extern "C" void func_003531D0(int);
 
-extern "C" void func_00360FE8(cMoveNode* arg0) {
+extern "C" void func_00360FE8(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         func_003531D0(temp_4);
     }
@@ -4895,10 +4972,10 @@ INCLUDE_ASM("object/railmodifier", func_00361010);
 #ifdef SKIP_ASM
 extern "C" void func_00353228(int);
 
-extern "C" void func_00361010(cMoveNode* arg0) {
+extern "C" void func_00361010(cMoveNode* moveNode) {
     int temp_4;
 
-    temp_4 = ((int)arg0->ModifierBlock);
+    temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
         func_00353228(temp_4);
     }
@@ -5850,6 +5927,12 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier__cPositionModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
+/**
+ * Destroys a position modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the object when
+ * bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPositionModifier__cPositionModifier(cPositionModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
@@ -5862,6 +5945,9 @@ extern "C" void cPositionModifier__cPositionModifier(cPositionModifier* self, in
 //100%
 INCLUDE_ASM("object/railmodifier", cPositionModifier_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * The position modifier's update virtual: an empty stub (a fixed position needs no per-frame work).
+ */
 void cPositionModifier_update(void* self)
 {
 }
@@ -5897,10 +5983,10 @@ void* func_00361910(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cPositionModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* a1)
+extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 
@@ -5947,6 +6033,12 @@ INCLUDE_ASM("object/railmodifier", cParentModifier__cParentModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
+/**
+ * Destroys a parent modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the object when
+ * bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cParentModifier__cParentModifier(cParentModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
@@ -5959,6 +6051,10 @@ extern "C" void cParentModifier__cParentModifier(cParentModifier* self, int flag
 //100%
 INCLUDE_ASM("object/railmodifier", cParentModifier_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * The parent modifier's update virtual: marks the root transform dirty (+0x44) so it follows the parent every
+ * frame.
+ */
 void cParentModifier_update(void* self)
 {
     *(int*)((char*)self + 0x44) = 1;
@@ -5968,6 +6064,11 @@ void cParentModifier_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cParentModifier_getMesh__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the parent mesh index the modifier follows (Mesh, +0x90).
+ *
+ * @return the mesh index within the parent instance
+ */
 int cParentModifier_getMesh(void* self)
 {
     return *(int*)((char*)self + 0x90);
@@ -5997,6 +6098,12 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier__cMagnetModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
+/**
+ * Destroys a magnet modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the object when
+ * bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMagnetModifier__cMagnetModifier(cMagnetModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
@@ -6009,6 +6116,11 @@ extern "C" void cMagnetModifier__cMagnetModifier(cMagnetModifier* self, int flag
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_isRootTransformDirty__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the magnet's transform changed since it was last rebuilt (RootTransformDirty, +0x50).
+ *
+ * @return 1 when dirty, otherwise 0
+ */
 int cMagnetModifier_isRootTransformDirty(void* self)
 {
     return (*(int*)((char*)self + 0x50) != 0);
@@ -6018,6 +6130,11 @@ int cMagnetModifier_isRootTransformDirty(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_hasIntersect__FPv);
 #ifdef SKIP_ASM
+/**
+ * The magnet modifier's hasIntersect virtual: always 1 (the magnet object takes part in rider intersection).
+ *
+ * @return always 1
+ */
 int cMagnetModifier_hasIntersect(void* self)
 {
     return 0x1;
@@ -6027,6 +6144,11 @@ int cMagnetModifier_hasIntersect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the magnet modifier's bound box (BoundBox, +0x20).
+ *
+ * @return a pointer to the bound box (On Tour returns tBoundBox&)
+ */
 void* cMagnetModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x20;
@@ -6036,16 +6158,26 @@ void* cMagnetModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cMagnetModifier_setBoundBox(cMagnetModifier* self, void* a1)
+/**
+ * Copies a bound box (min and max, two quadwords) into the magnet modifier's BoundBox.
+ *
+ * @param boundbox  the new bound box (On Tour const tBoundBox& boundbox)
+ */
+extern "C" void cMagnetModifier_setBoundBox(cMagnetModifier* self, void* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_getRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the magnet modifier's radius (Radius, +0x40).
+ *
+ * @return the radius
+ */
 float cMagnetModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x40);
@@ -6055,6 +6187,10 @@ float cMagnetModifier_getRadius(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_setRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * The magnet modifier's setRadius virtual: an empty stub, so the radius set by the constructor never changes (On
+ * Tour setRadius(float radius); the float is ignored).
+ */
 void cMagnetModifier_setRadius(void* self)
 {
 }
@@ -6094,6 +6230,12 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier__cAvaSplineModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
+/**
+ * Destroys an avalanche spline modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the
+ * object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cAvaSplineModifier__cAvaSplineModifier(cAvaSplineModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
@@ -6106,6 +6248,11 @@ extern "C" void cAvaSplineModifier__cAvaSplineModifier(cAvaSplineModifier* self,
 //100%
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the avalanche spline modifier's bound box (BoundBox, +0x10).
+ *
+ * @return a pointer to the bound box (On Tour returns tBoundBox&)
+ */
 void* cAvaSplineModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x10;
@@ -6115,16 +6262,26 @@ void* cAvaSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cAvaSplineModifier_setBoundBox(cAvaSplineModifier* self, void* a1)
+/**
+ * Copies a bound box (min and max, two quadwords) into the avalanche spline modifier's BoundBox.
+ *
+ * @param boundbox  the new bound box (On Tour const tBoundBox& boundbox)
+ */
+extern "C" void cAvaSplineModifier_setBoundBox(cAvaSplineModifier* self, void* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the avalanche spline modifier's radius (Radius, +0x30).
+ *
+ * @return the radius
+ */
 float cAvaSplineModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x30);
@@ -6134,6 +6291,11 @@ float cAvaSplineModifier_getRadius(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setRadius__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the avalanche spline modifier's radius (Radius, +0x30).
+ *
+ * @param val  the new radius (On Tour radius)
+ */
 void cAvaSplineModifier_setRadius(void* self, float val)
 {
     *(float*)((char*)self + 0x30) = val;
@@ -6351,8 +6513,8 @@ extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, voi
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361C08);
 #ifdef SKIP_ASM
-extern "C" int func_00361C08(cMultiSplineModifier* arg0) {
-    return (arg0->FocusCount);
+extern "C" int func_00361C08(cMultiSplineModifier* multiSplineModifier) {
+    return (multiSplineModifier->FocusCount);
 }
 #endif
 

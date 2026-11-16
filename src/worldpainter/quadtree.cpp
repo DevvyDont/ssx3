@@ -981,6 +981,13 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_cPS2MemCard);
 extern "C" void func_002C4050(void*);
 extern void* cPS2MemCard_vtbl[];
 
+/**
+ * Constructs the PS2 memory card object: stores cPS2MemCard_vtbl and resets every field (func_002C4050, Reset).
+ *
+ * The unit is worldpainter/quadtree, but the class is util/bxps2memcard.h's.
+ *
+ * @return @p self
+ */
 extern "C" void* cPS2MemCard_cPS2MemCard(cPS2MemCard* self)
 {
     *(void***)self = cPS2MemCard_vtbl;
@@ -998,6 +1005,15 @@ extern "C" void func_002C6360(cPS2MemCard* self);
 extern void* cPS2MemCard_vtbl[];
 extern void* D_004871E8[];
 
+/**
+ * Destroys the PS2 memory card object: finishes any pending card operation, frees the icon data and restores the
+ * cMemCard base vtable.
+ *
+ * Calls func_002C6360 (waits for a pending sceMcSync and clears the operation state), MEM_frees the icon file data
+ * (+0x30), stores D_004871E8 and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPS2MemCard__cPS2MemCard(void* self, int flags)
 {
     *(void***)self = cPS2MemCard_vtbl;

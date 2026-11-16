@@ -294,12 +294,21 @@ public:
     virtual int v02(void*);
 };
 
-extern "C" int cList_traverseFlat(void* self, void* arg)
+/**
+ * Applies an operator to each node of the list, without visiting sub-lists, until one returns nonzero.
+ *
+ * Walks the nodes from the one at +0x4 along their link to the sentinel (a node linked to itself), reading the next
+ * link first, and calls each node's slot 2 with the operator.
+ *
+ * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
+ * @return the first nonzero node result, or 0 (On Tour returns void*)
+ */
+extern "C" int cList_traverseFlat(void* self, void* pOperator)
 {
     cList_traverseFlat_cVirt* n = *(cList_traverseFlat_cVirt**)((char*)self + 0x4);
     while (n->prev != n) {
         cList_traverseFlat_cVirt* p = n->prev;
-        int r = n->v02(arg);
+        int r = n->v02(pOperator);
         if (r != 0) {
             return r;
         }
@@ -322,12 +331,20 @@ public:
     virtual int v03(void*);
 };
 
-extern "C" int cList_traverseRecurse(void* self, void* arg)
+/**
+ * Applies an operator to each node of the list and its sub-lists, until one returns nonzero.
+ *
+ * The same walk as cList_traverseFlat, calling each node's slot 3 (the recursive form) instead.
+ *
+ * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
+ * @return the first nonzero node result, or 0 (On Tour returns void*)
+ */
+extern "C" int cList_traverseRecurse(void* self, void* pOperator)
 {
     cList_traverseRecurse_cVirt* n = *(cList_traverseRecurse_cVirt**)((char*)self + 0x4);
     while (n->prev != n) {
         cList_traverseRecurse_cVirt* p = n->prev;
-        int r = n->v03(arg);
+        int r = n->v03(pOperator);
         if (r != 0) {
             return r;
         }

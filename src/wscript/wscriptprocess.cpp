@@ -846,6 +846,10 @@ public:
     virtual void v05();
 };
 
+/**
+ * Runs one frame of a world-script task: a started task (state 1) becomes running (2), and a running task runs its
+ * update script (slot 5, taskUpdate).
+ */
 extern "C" void cWScriptTask_update(cWScriptTask_update_cProcess* self)
 {
     switch (self->state) {
@@ -878,6 +882,15 @@ static inline void VCall_003083A0(char* self, int slot)
     vt[slot].fn(self + vt[slot].delta);
 }
 
+/**
+ * Passes a world-script event to a running task (state 2) as the matching event virtual.
+ *
+ * Event types 0-9 call slots 7-16: on collide, jump, land, trick, wipeout, reset, collect and event 1-3. For a
+ * trick the event's data (+0x4) is put in the script manager's word +0x29C while the handler runs.
+ *
+ * @param vself  the task (On Tour this)
+ * @param vmsg  the event (On Tour const tWScriptEvent& event): type in the first halfword
+ */
 // Same event dispatch as func_003078C0 for a running (state 2) sub-process.
 extern "C" void cWScriptTask_dispatchTaskEvent(void* vself, void* vmsg)
 {
@@ -928,6 +941,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnCollide);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-collide script (EventScriptCode[0], +0x14), when it has one, through the process's script
+ * manager (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnCollide(void* self)
 {
     void* script = *(void**)((char*)self + 0x14);
@@ -942,6 +959,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnJump);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-jump script (EventScriptCode[1], +0x18), when it has one, through the process's script manager
+ * (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnJump(void* self)
 {
     void* script = *(void**)((char*)self + 0x18);
@@ -956,6 +977,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnLand);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-land script (EventScriptCode[2], +0x1C), when it has one, through the process's script manager
+ * (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnLand(void* self)
 {
     void* script = *(void**)((char*)self + 0x1c);
@@ -970,6 +995,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnTrick);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-trick script (EventScriptCode[3], +0x20), when it has one, through the process's script
+ * manager (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnTrick(void* self)
 {
     void* script = *(void**)((char*)self + 0x20);
@@ -984,6 +1013,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnWipeout);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-wipeout script (EventScriptCode[4], +0x24), when it has one, through the process's script
+ * manager (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnWipeout(void* self)
 {
     void* script = *(void**)((char*)self + 0x24);
@@ -998,6 +1031,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnReset);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-reset script (EventScriptCode[5], +0x28), when it has one, through the process's script
+ * manager (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnReset(void* self)
 {
     void* script = *(void**)((char*)self + 0x28);
@@ -1012,6 +1049,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnCollect);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's on-collect script (EventScriptCode[6], +0x2C), when it has one, through the process's script
+ * manager (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnCollect(void* self)
 {
     void* script = *(void**)((char*)self + 0x2c);
@@ -1026,6 +1067,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnEvent1);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's event-1 script (EventScriptCode[7], +0x30), when it has one, through the process's script manager
+ * (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnEvent1(void* self)
 {
     void* script = *(void**)((char*)self + 0x30);
@@ -1040,6 +1085,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnEvent2);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's event-2 script (EventScriptCode[8], +0x34), when it has one, through the process's script manager
+ * (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnEvent2(void* self)
 {
     void* script = *(void**)((char*)self + 0x34);
@@ -1054,6 +1103,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnEvent3);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's event-3 script (EventScriptCode[9], +0x38), when it has one, through the process's script manager
+ * (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_eventOnEvent3(void* self)
 {
     void* script = *(void**)((char*)self + 0x38);
@@ -1068,6 +1121,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskStart);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Starts the task once: sets its state to 1 (started) and runs its start script (TaskScriptCode[0], +0x8) when it
+ * has one.
+ */
 extern "C" void cWScriptTask_taskStart(void* self)
 {
     if (*(int*)self != 1) {
@@ -1085,6 +1142,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Runs the task's update script (TaskScriptCode[1], +0xC), when it has one, through the process's script manager
+ * (func_0030ADA8, On Tour cWScriptMan::runScriptCode).
+ */
 extern "C" void cWScriptTask_taskUpdate(void* self)
 {
     void* script = *(void**)((char*)self + 0xc);
@@ -1099,6 +1160,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskEnd);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
+/**
+ * Ends the task once: sets its state to 3 (ended) and runs its end script (TaskScriptCode[2], +0x10) when it has
+ * one.
+ */
 extern "C" void cWScriptTask_taskEnd(void* self)
 {
     if (*(int*)self != 3) {

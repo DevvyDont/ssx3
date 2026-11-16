@@ -44,6 +44,12 @@ extern "C" void func_00289DF0(void* self, int a);
 extern "C" void func_003E4FB0(int a);
 void cMemMan_free(void* p);
 
+/**
+ * Shuts the async system down: services it until no request is pending, then frees its buffer.
+ *
+ * Calls func_00289DF0(self, 1) and, while the pending count (+0x4) is nonzero, sleeps (func_003E4FB0(2)) and calls
+ * it again. Frees the "AsyncSysBuffer" (+0x1CC) and clears it and its size (+0x1D0).
+ */
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 {
     func_00289DF0(self, 1);

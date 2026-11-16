@@ -164,6 +164,11 @@ struct sMbVEntryF {
     float (*fn)(void*);
 };
 
+/**
+ * Returns the block's bounding radius from its transform modifier (slot 14), or 0 without one.
+ *
+ * @return the radius (0.0 when the block has no transform modifier)
+ */
 extern "C" float tModifierBlock_getRadius(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -218,6 +223,13 @@ extern "C" void cUVScrollModifier_update(int h);
 extern "C" void cTexFlipModifier_update(int h);
 extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self);
 
+/**
+ * Updates every modifier in the block before the instance moves, dropping a physics modifier that has gone
+ * inactive.
+ *
+ * Runs RootTransform's update (slot 2), cUVScrollModifier_update and cTexFlipModifier_update, then Physics' update
+ * (slot 2); when Physics' isActive (slot 4) is 0 afterwards it is removed (tModifierBlock_remPhysicsModifier).
+ */
 extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -326,6 +338,11 @@ extern "C" void tModifierBlock_render(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_isRootTransformDirty);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the block's transform modifier reports a changed transform (slot 17).
+ *
+ * @return 1 when there is a transform modifier and it is dirty, otherwise 0
+ */
 extern "C" int tModifierBlock_isRootTransformDirty(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -426,29 +443,38 @@ struct sMbLink2F40 {
 extern "C" void cUVScrollModifier_signal(void* self, int id, float v);
 extern "C" void cTexFlipModifier_signal(void* self, int id, float v);
 
-extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float v)
+/**
+ * Passes a script signal to every modifier in the block and to each linked effect.
+ *
+ * Sends (@p id, @p value) to RootTransform (slot 5), the UV-scroll and tex-flip modifiers, Physics (slot 3) and every
+ * node of the effect link list (+0x10, slot 7).
+ *
+ * @param id  the signal id (On Tour signal)
+ * @param value  the signal's argument value (On Tour arg)
+ */
+extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
         sMbVEntryP2F40* vt = *(sMbVEntryP2F40**)node;
-        vt[5].fn((char*)node + vt[5].delta, id, v);
+        vt[5].fn((char*)node + vt[5].delta, id, value);
     }
     if (self->field_0x4 != 0) {
-        cUVScrollModifier_signal((void*)self->field_0x4, id, v);
+        cUVScrollModifier_signal((void*)self->field_0x4, id, value);
     }
     if (self->field_0x8 != 0) {
-        cTexFlipModifier_signal((void*)self->field_0x8, id, v);
+        cTexFlipModifier_signal((void*)self->field_0x8, id, value);
     }
     sMbChild2F40* c = (sMbChild2F40*)self->field_0xC;
     if (c != 0) {
-        c->vt[3].fn((char*)c + c->vt[3].delta, id, v);
+        c->vt[3].fn((char*)c + c->vt[3].delta, id, value);
     }
     sMbLink2F40* h = *(sMbLink2F40**)&self->field_0x10;
     if (h != 0) {
         sMbLink2F40* p = h;
         do {
             sMbLink2F40* next = p->next;
-            p->vt[7].fn((char*)p + p->vt[7].delta, id, v);
+            p->vt[7].fn((char*)p + p->vt[7].delta, id, value);
             p = next;
         } while (p != 0);
     }
@@ -526,6 +552,9 @@ struct sMbVEntryDel {
     void (*fn)(void*, int);
 };
 
+/**
+ * Deletes the block's transform modifier through its destructor virtual (slot 1, flags 3) and clears the slot.
+ */
 extern "C" void tModifierBlock_remTransformModifier(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -542,6 +571,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remUVScrollModifier);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Frees the block's UV-scroll modifier (operator_delete only, no destructor runs) and clears the slot.
+ */
 extern "C" void tModifierBlock_remUVScrollModifier(tModifierBlock* self)
 {
     int** p = (int**)((char*)self + 0x4);
@@ -557,6 +589,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remTexFlipModifier);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Frees the block's tex-flip modifier (operator_delete only, no destructor runs) and clears the slot.
+ */
 extern "C" void tModifierBlock_remTexFlipModifier(tModifierBlock* self)
 {
     int** p = (int**)((char*)self + 0x8);
@@ -576,6 +611,10 @@ struct sMbVEntryDel2 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Deletes the block's physics modifier through its destructor virtual (vtable at +0x4, slot 1, flags 3) and clears
+ * the slot.
+ */
 extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 {
     void* obj = *(void**)((char*)self + 0xC);

@@ -60,6 +60,12 @@ void operator_delete(int* ptr);
 extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self);
 extern char cScriptSoundBankManager_vtbl[];
 
+/**
+ * Destroys the script sound bank manager: unlinks every bank, frees its bank table (+0x8) and frees the object when
+ * bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cScriptSoundBankManager_vtbl;
@@ -206,11 +212,19 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBank);
 extern "C" void* func_0028B180();
 extern "C" void func_0028BE90(void* bank, int handle);
 
-extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* e)
+/**
+ * Unloads one script sound bank from the audio system and frees its slot.
+ *
+ * Unloads the slot's bank number (+0x4) from the audio object's sound system (func_0028B180() +0x118,
+ * func_0028BE90), then sets the slot's user ID to -1 and its data to 0.
+ *
+ * @param pBankInfo  the bank's slot (On Tour tScriptSoundBankInfo* pBankInfo: userID, bankNum, pData)
+ */
+extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* pBankInfo)
 {
-    func_0028BE90(**(void***)((char*)func_0028B180() + 0x118), e->unk4);
-    e->id = -1;
-    e->data = 0;
+    func_0028BE90(**(void***)((char*)func_0028B180() + 0x118), pBankInfo->unk4);
+    pBankInfo->id = -1;
+    pBankInfo->data = 0;
 }
 #endif
 
@@ -258,6 +272,12 @@ void operator_delete(int* ptr);
 extern "C" void cVidEngine_ResetVideoEngine(void* self);
 extern char cVidEngine_vtbl[];
 
+/**
+ * Destroys the video engine: restores its vtable (+0x18), resets it (cVidEngine_ResetVideoEngine) and frees the
+ * object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cVidEngine__cVidEngine(void* self, int flags)
 {
     *(void**)((char*)self + 0x18) = cVidEngine_vtbl;

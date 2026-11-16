@@ -64,6 +64,14 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree__cWorldSphTree);
 void operator_delete(int* ptr);
 extern void* cWorldSphTree_vtbl[];
 
+/**
+ * Destroys a world sphere-tree primitive: restores cWorldSphTree_vtbl (+0x50), frees its working tree copy (+0x68)
+ * and, if asked, itself.
+ *
+ * The copy is released with operator_delete only (no destructor runs).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorldSphTree__cWorldSphTree(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
@@ -113,6 +121,15 @@ static inline sV4_330540 sub_330540(const sV4_330540& a, const sV4_330540& b)
 
 extern "C" float func_0032C590(void* self);
 
+/**
+ * Tells whether the current sphere tree's root sphere (centre at tree + 0x80) can touch an axis-aligned box.
+ *
+ * The radius comes from func_0032C590(tree), called once per axis.
+ *
+ * @param lo  the box's minimum corner (On Tour bMin)
+ * @param hi  the box's maximum corner (On Tour bMax)
+ * @return 0 when the sphere's bounding box lies wholly beyond one face, otherwise 1
+ */
 extern "C" int cWorldSphTree_IsInBoxTransformed(void* self, float* lo, float* hi)
 {
     sV4_330540 ext;
@@ -171,11 +188,20 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_Transform);
 extern "C" void* func_00327CC8(void* self, void* src);
 extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
 
-extern "C" void cWorldSphTree_Transform(void* self, void* a1, float f)
+/**
+ * Transforms the sphere tree into a model's space using its working copy.
+ *
+ * Copies the current tree (+0x60) into the copy at +0x68 (func_00327CC8, On Tour bxSphereTree::operator=), makes
+ * the copy current, applies @p mat and @p scale (SphereTree_TransformRel) and sets the transformed flag (+0x4).
+ *
+ * @param mat  the transform (On Tour const t4Matrix& mat)
+ * @param scale  the uniform scale (On Tour scale)
+ */
+extern "C" void cWorldSphTree_Transform(void* self, void* mat, float scale)
 {
     func_00327CC8(*(void**)((char*)self + 0x68), *(void**)((char*)self + 0x60));
     *(void**)((char*)self + 0x60) = *(void**)((char*)self + 0x68);
-    SphereTree_TransformRel(*(void**)((char*)self + 0x60), a1, f);
+    SphereTree_TransformRel(*(void**)((char*)self + 0x60), mat, scale);
     *(int*)((char*)self + 0x4) = 1;
 }
 #endif
@@ -183,6 +209,12 @@ extern "C" void cWorldSphTree_Transform(void* self, void* a1, float f)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_UnTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Undoes cWorldSphTree_Transform: makes the original tree (+0x64) current again (+0x60) and clears the transformed
+ * flag.
+ *
+ * @return the original tree pointer (declared int; On Tour returns void)
+ */
 int cWorldSphTree_UnTransform(void* self)
 {
     int t0 = *(int*)((char*)self + 0x64);
@@ -242,10 +274,25 @@ static inline sWsVec4 wsDiv_330788(const sWsVec4& v, float s)
 
 extern "C" int func_0032CA78(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
 
-extern "C" int cWorldSphTree_IsTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
+/**
+ * Collides the sphere tree with a triangle and returns the push-out direction and depth.
+ *
+ * Calls func_0032CA78 (On Tour SphereTree::IsTriCollision) on the current tree; on a hit the penetration vector is
+ * split into its length and unit direction.
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner (On Tour b)
+ * @param vertC  the third corner (On Tour c)
+ * @param n  the triangle's normal (On Tour n)
+ * @param ipos  receives the collision point (On Tour ipos)
+ * @param outDir  receives the unit push-out direction (On Tour inorm)
+ * @param outLen  receives the penetration depth (On Tour param)
+ * @return nonzero on a collision, otherwise 0
+ */
+extern "C" int cWorldSphTree_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 v;
-    int r = func_0032CA78(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
+    int r = func_0032CA78(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
     if (r != 0) {
         float len = wsLength_330788(v);
         *outLen = len;
@@ -301,10 +348,24 @@ static inline sWsVec4 wsDiv_330828(const sWsVec4& v, float s)
 
 extern "C" int func_00328030(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
 
-extern "C" int cWorldSphTree_Is2SidedTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
+/**
+ * Collides the sphere tree with a two-sided triangle and returns the push-out direction and depth.
+ *
+ * As cWorldSphTree_IsTriInt with func_00328030 (On Tour bxSphereTree::Is2SidedTriCollision).
+ *
+ * @param vertA  the triangle's first corner (On Tour a)
+ * @param vertB  the second corner (On Tour b)
+ * @param vertC  the third corner (On Tour c)
+ * @param n  the triangle's normal (On Tour n)
+ * @param ipos  receives the collision point (On Tour ipos)
+ * @param outDir  receives the unit push-out direction (On Tour inorm)
+ * @param outLen  receives the penetration depth (On Tour param)
+ * @return nonzero on a collision, otherwise 0
+ */
+extern "C" int cWorldSphTree_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 v;
-    int r = func_00328030(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
+    int r = func_00328030(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
     if (r != 0) {
         float len = wsLength_330828(v);
         *outLen = len;
@@ -364,9 +425,16 @@ struct sWsHit_3308C8 {
 
 extern "C" int func_0032CB58(void* self, void* other, void* a2, void* a3);
 
-extern "C" int cWorldSphTree_IsSphTreeInt(void* self, void* a1, sWsHit_3308C8* hit)
+/**
+ * Collides another sphere tree with this one's current tree and normalises the hit's push-out vector.
+ *
+ * @param tree  the other sphere tree (On Tour bxSphereTree* tree)
+ * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
+ * @return 1 on a hit (func_0032CB58), otherwise 0
+ */
+extern "C" int cWorldSphTree_IsSphTreeInt(void* self, void* tree, sWsHit_3308C8* hit)
 {
-    if (func_0032CB58(*(void**)((char*)self + 0x60), a1, &hit->dir, hit) != 0) {
+    if (func_0032CB58(*(void**)((char*)self + 0x60), tree, &hit->dir, hit) != 0) {
         float len = wsLength_3308C8(hit->dir);
         hit->len = len;
         wsDivEq_3308C8(hit->dir, len);
@@ -426,9 +494,17 @@ struct sWsHit_330950 {
 
 extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4);
 
-extern "C" int cWorldSphTree_IsBoxInt(void* self, void* a1, void* a2, sWsHit_330950* hit)
+/**
+ * Collides the current sphere tree with an axis-aligned box and normalises the hit's push-out vector.
+ *
+ * @param bMin  the box's minimum corner (On Tour bMin)
+ * @param bMax  the box's maximum corner (On Tour bMax)
+ * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
+ * @return 1 on a hit (func_0032C928), otherwise 0
+ */
+extern "C" int cWorldSphTree_IsBoxInt(void* self, void* bMin, void* bMax, sWsHit_330950* hit)
 {
-    if (func_0032C928(*(void**)((char*)self + 0x60), a1, a2, &hit->dir, hit) != 0) {
+    if (func_0032C928(*(void**)((char*)self + 0x60), bMin, bMax, &hit->dir, hit) != 0) {
         float len = wsLength_330950(hit->dir);
         hit->len = len;
         wsDivEq_330950(hit->dir, len);
@@ -6319,6 +6395,14 @@ public:
 
 extern "C" float func_002D1C70();
 
+/**
+ * Applies the boost zone's drag to a rider: an impulse of velocity * (Drag + 1) * the frame time.
+ *
+ * Reads the velocity (slot 2) and passes the result to the being's slot 4, which the local view calls setVelocity;
+ * in On Tour's cBeing that slot is applyBoost(const t4Vector&), an added impulse.
+ *
+ * @param obj  the rider in the zone (On Tour cBeing* pBeing)
+ */
 extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cMover_3429E0* obj)
 {
     sVec4_3429E0 u = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), func_002D1C70());
@@ -6400,6 +6484,15 @@ struct sSelf_342A88 {
     sPlane_342A88 plane;
 };
 
+/**
+ * Pushes a rider along the boost direction while its speed along it is below MaxSpeed.
+ *
+ * With d = MaxSpeed - velocity . Boost > 0 it passes Boost * d * (the word at +0x24, Drag) * the frame time to the
+ * being's slot 4 (On Tour cBeing::applyBoost; the local view calls it setVelocity). The view sPlane_342A88 reads
+ * MaxSpeed and Drag as the plane's d and k.
+ *
+ * @param obj  the rider in the zone (On Tour cBeing* pBeing)
+ */
 extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
 {
     float d = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
@@ -6444,6 +6537,15 @@ struct sVEntry1_cBoostModifier_writeToReplayFrame {
     void (*fn)(void*, int);
 };
 
+/**
+ * Writes the boost modifier to a replay frame: the physics-modifier part, the 0x30-byte boost state and the
+ * instance.
+ *
+ * After cPhysicsModifier_writeToReplayFrame it writes Boost .. Type (+0x10, 0x30 bytes) with the frame's write
+ * virtual (slot 1) and the Instance pointer with slot 5.
+ *
+ * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, void* stream)
 {
     cPhysicsModifier_writeToReplayFrame(self, stream);

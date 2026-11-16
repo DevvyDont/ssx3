@@ -338,6 +338,11 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Writes the physics modifier's Active word (4 bytes at +0x0) through the replay frame's write virtual (slot 1).
+ *
+ * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cPhysicsModifier_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 4);

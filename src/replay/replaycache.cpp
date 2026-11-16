@@ -683,9 +683,9 @@ struct sRcSlotsB88 {
     sRcSlotB88 slots[1];
 };
 
-extern "C" void func_00270B88(cReplay* p, int playerId, int id)
+extern "C" void func_00270B88(cReplay* replay, int playerId, int id)
 {
-    sRcSlotsB88* self = (sRcSlotsB88*)p;
+    sRcSlotsB88* self = (sRcSlotsB88*)replay;
     if (self->state == 0 && self->slots[playerId].isFree()) {
         func_0026E6E0_3(&self->slots[playerId], self->rider, id);
     }
@@ -789,9 +789,9 @@ struct sRcSlotsCE8 {
     sRcSlotCE8 slots[1];
 };
 
-extern "C" void func_00270CE8(cReplay* p, int playerId, int id, int positive)
+extern "C" void func_00270CE8(cReplay* replay, int playerId, int id, int positive)
 {
-    sRcSlotsCE8* self = (sRcSlotsCE8*)p;
+    sRcSlotsCE8* self = (sRcSlotsCE8*)replay;
     if (self->slots[playerId].isActive()) {
         if (func_0026E838_s(&self->slots[playerId], id, positive)) {
             if (!(func_00270BD8((cReplay*)self, playerId, positive) < func_00270C40((cReplay*)self, positive))) {
@@ -1563,6 +1563,12 @@ void operator_delete(int* p);
 
 extern void* cReplayFramePtr_vtbl[];
 
+/**
+ * Destroys a replay frame: restores cReplayFramePtr_vtbl and frees the object when bit 0 of @p flags is set (the
+ * block itself is not freed here).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cReplayFramePtr__cReplayFramePtr(int* self, int flags)
 {
     *(void**)self = cReplayFramePtr_vtbl;
@@ -1585,15 +1591,15 @@ extern "C" void cReplayFramePtr_clearBlock(cReplayFramePtr* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272210);
 #ifdef SKIP_ASM
-extern "C" int func_00272210(cReplayFramePtr* arg0) {
-    return ((int)arg0->Block);
+extern "C" int func_00272210(cReplayFramePtr* replayFramePtr) {
+    return ((int)replayFramePtr->Block);
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272218);
 #ifdef SKIP_ASM
-extern "C" void func_00272218(cReplayFramePtr* arg0, int *arg1) {
-    *arg1 = ((int)arg0->ReadData);
+extern "C" void func_00272218(cReplayFramePtr* replayFramePtr, int *arg1) {
+    *arg1 = ((int)replayFramePtr->ReadData);
 }
 #endif
 //100%
@@ -1606,15 +1612,15 @@ extern "C" void func_00272228(void *arg0, int *arg1) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272238);
 #ifdef SKIP_ASM
-extern "C" int func_00272238(cReplayFramePtr* arg0) {
-    return (arg0->Size);
+extern "C" int func_00272238(cReplayFramePtr* replayFramePtr) {
+    return (replayFramePtr->Size);
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272240);
 #ifdef SKIP_ASM
-extern "C" int func_00272240(cReplayFramePtr* arg0) {
-    return (arg0->Size);
+extern "C" int func_00272240(cReplayFramePtr* replayFramePtr) {
+    return (replayFramePtr->Size);
 }
 #endif
 //100%
@@ -1747,16 +1753,16 @@ struct sRcHeap {
     sRcBlock* freeList;
 };
 
-extern "C" void func_002723A8(cScriptHeap* h, void* p)
+extern "C" void func_002723A8(cScriptHeap* scriptHeap, void* p)
 {
     if (p) {
         sRcBlock* b = (sRcBlock*)((char*)p - 8);
-        if (!(sRcBlock*)h->mpTopFreeBlock) {
-            h->mpTopFreeBlock = (tFreeBlock*)b;
+        if (!(sRcBlock*)scriptHeap->mpTopFreeBlock) {
+            scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
             return;
         }
         sRcBlock* prev = 0;
-        sRcBlock* cur = (sRcBlock*)h->mpTopFreeBlock;
+        sRcBlock* cur = (sRcBlock*)scriptHeap->mpTopFreeBlock;
         do {
             if (b < cur) {
                 int size = b->size + 8;
@@ -1764,14 +1770,14 @@ extern "C" void func_002723A8(cScriptHeap* h, void* p)
                     b->next = cur->next;
                     b->size = size + cur->size;
                     if (!prev)
-                        h->mpTopFreeBlock = (tFreeBlock*)b;
+                        scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
                     else
                         prev->next = b;
                     return;
                 }
                 if (!prev) {
-                    b->next = (sRcBlock*)h->mpTopFreeBlock;
-                    h->mpTopFreeBlock = (tFreeBlock*)b;
+                    b->next = (sRcBlock*)scriptHeap->mpTopFreeBlock;
+                    scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
                 } else {
                     b->next = prev->next;
                     prev->next = b;
@@ -1785,7 +1791,7 @@ extern "C" void func_002723A8(cScriptHeap* h, void* p)
                 cur = b->next;
                 b->next = 0;
                 if (!prev)
-                    h->mpTopFreeBlock = (tFreeBlock*)cur;
+                    scriptHeap->mpTopFreeBlock = (tFreeBlock*)cur;
                 else
                     prev->next = cur;
             } else {
@@ -1794,8 +1800,8 @@ extern "C" void func_002723A8(cScriptHeap* h, void* p)
             }
         } while (cur);
         if (!prev) {
-            b->next = (sRcBlock*)h->mpTopFreeBlock;
-            h->mpTopFreeBlock = (tFreeBlock*)b;
+            b->next = (sRcBlock*)scriptHeap->mpTopFreeBlock;
+            scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
         } else {
             b->next = prev->next;
             prev->next = b;
@@ -1927,6 +1933,18 @@ struct sRcTrack25F0 {
     char* next;             // 0x24
 };
 
+/**
+ * Starts a spline channel of an in-game script sequence at its first key and evaluates its value at frame 0.
+ *
+ * Stores the data and owner, the header (key count in its first word) and the first key (data + 4), resets the key
+ * index (+0x18) and points the next key at the first key plus its size (u16 at +0) when there are at least two
+ * keys. The value is GetCubicSplineValue (func_00272570) of the key's coefficients at 0; keys larger than 0x14
+ * bytes carry custom data at +0x14.
+ *
+ * @param data  the channel's script data (On Tour pScriptData)
+ * @param key  the script player entity that owns the channel (On Tour pOwner)
+ * @return 1 when there is a next key to reach, otherwise 0
+ */
 extern "C" int cScriptPlayerChannelSpline_Play(sRcTrack25F0* self, unsigned int* data, int key)
 {
     char* body = (char*)data + 4;
@@ -1954,6 +1972,9 @@ extern "C" int cScriptPlayerChannelSpline_Play(sRcTrack25F0* self, unsigned int*
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Stop__FPv);
 #ifdef SKIP_ASM
+/**
+ * Stops a spline channel: clears its data, owner, header, keys, key index, value and custom data (+0x8 .. +0x24).
+ */
 void cScriptPlayerChannelSpline_Stop(void* self)
 {
     *(int*)((char*)self + 0x8) = 0;
@@ -1970,11 +1991,21 @@ void cScriptPlayerChannelSpline_Stop(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Update);
 #ifdef SKIP_ASM
-extern "C" int cScriptPlayerChannelSpline_Update(sRcTrack25F0* self, float t)
+/**
+ * Advances a spline channel to a frame and evaluates the current key's spline there.
+ *
+ * When the next key's start frame (u16 at +2) has been reached it becomes the current key (with its custom data)
+ * and the index grows; at the last key the value is evaluated at the key's start and 0 is returned. Otherwise the
+ * value is GetCubicSplineValue (func_00272570) at @p currFrameNum minus the current key's start frame.
+ *
+ * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
+ * @return 1 while the channel runs, 0 once it reached its last key (or has none to reach)
+ */
+extern "C" int cScriptPlayerChannelSpline_Update(sRcTrack25F0* self, float currFrameNum)
 {
     char* n = self->next;
     if (n == 0) return 0;
-    if ((float)*(unsigned short*)(n + 2) <= t) {
+    if ((float)*(unsigned short*)(n + 2) <= currFrameNum) {
         self->body = n;
         self->extra = 0;
         self->field_0x18++;
@@ -1987,7 +2018,7 @@ extern "C" int cScriptPlayerChannelSpline_Update(sRcTrack25F0* self, float t)
         self->next = self->body + *(unsigned short*)self->body;
     }
     char* b = self->body;
-    self->value = func_00272570((float*)(b + 4), t - (float)*(unsigned short*)(b + 2));
+    self->value = func_00272570((float*)(b + 4), currFrameNum - (float)*(unsigned short*)(b + 2));
     return 1;
 }
 #endif
@@ -2180,9 +2211,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Preview);
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag);
 
-extern "C" void cInSeq_Preview(cInSeq* self, int a1, int flag)
+extern "C" void cInSeq_Preview(cInSeq* self, int playerID, int flag)
 {
-    cScriptPlayerMain_Preview((cScriptPlayerMain*)((char*)cInSeq_GetPlayer(self, a1)), flag);
+    cScriptPlayerMain_Preview((cScriptPlayerMain*)((char*)cInSeq_GetPlayer(self, playerID)), flag);
 }
 #endif
 
@@ -2192,22 +2223,22 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Play);
 extern "C" void* func_00274830(void*, int);
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 
-extern "C" void* cInSeq_Play(cInSeq* self, int a1, int a2)
+extern "C" void* cInSeq_Play(cInSeq* self, int playerID, int loopScript)
 {
-    return func_00274830(cInSeq_GetPlayer(self, a1), a2);
+    return func_00274830(cInSeq_GetPlayer(self, playerID), loopScript);
 }
 #endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272B00);
 #ifdef SKIP_ASM
-extern "C" void func_00272B00(cInSeq* arg0, int arg1) {
+extern "C" void func_00272B00(cInSeq* inSeq, int arg1) {
     void *var_16;
 
-    var_16 = ((void*)arg0->mpScriptUsed);
+    var_16 = ((void*)inSeq->mpScriptUsed);
     if (var_16 != 0) {
         do {
-            cInSeq_Play(arg0, (*(int *)((char*)(var_16) + (4))), arg1);
+            cInSeq_Play(inSeq, (*(int *)((char*)(var_16) + (4))), arg1);
             var_16 = (*(void **)((char*)(var_16) + (0x50)));
         } while (var_16 != 0);
     }
@@ -2220,9 +2251,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Stop);
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* p);
 
-extern "C" void cInSeq_Stop(cInSeq* self, int a1)
+extern "C" void cInSeq_Stop(cInSeq* self, int playerID)
 {
-    cScriptPlayerMain_Stop((cScriptPlayerMain*)cInSeq_GetPlayer(self, a1));
+    cScriptPlayerMain_Stop((cScriptPlayerMain*)cInSeq_GetPlayer(self, playerID));
 }
 #endif
 
@@ -2242,9 +2273,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Pause);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
-extern "C" void cInSeq_Pause(cInSeq* self, int a1)
+extern "C" void cInSeq_Pause(cInSeq* self, int playerID)
 {
-    cScriptPlayerMain_Pause((cScriptPlayerMain*)cInSeq_GetPlayer(self, a1));
+    cScriptPlayerMain_Pause((cScriptPlayerMain*)cInSeq_GetPlayer(self, playerID));
 }
 #endif
 //100%
@@ -2265,9 +2296,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Resume);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Resume(cScriptPlayerMain* self);
 
-extern "C" void cInSeq_Resume(cInSeq* self, int a1)
+extern "C" void cInSeq_Resume(cInSeq* self, int playerID)
 {
-    cScriptPlayerMain_Resume((cScriptPlayerMain*)cInSeq_GetPlayer(self, a1));
+    cScriptPlayerMain_Resume((cScriptPlayerMain*)cInSeq_GetPlayer(self, playerID));
 }
 #endif
 //100%
@@ -2287,10 +2318,10 @@ extern "C" void cInSeq_ResumeAll(cInSeq* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_GetPlayer);
 #ifdef SKIP_ASM
-extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1)
+extern "C" void* cInSeq_GetPlayer(cInSeq* self, int playerID)
 {
     char* base = (char*)self->mpScriptHeap;
-    char* p = base + a1 * 0x58;
+    char* p = base + playerID * 0x58;
     return *(int*)(p + 0xc) != 0 ? p + 0x8 : 0;
 }
 #endif
@@ -2360,6 +2391,12 @@ extern "C" void cScriptPlayerChannelBlock_Stop(void* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelBlock_vtbl[];
 
+/**
+ * Destroys a block channel: restores its vtable (+0x4), stops it (freeing its key buffer) and, when bit 0 of @p
+ * flags is set, frees it with func_002724E8 (On Tour cScriptMemOp::operator delete).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptPlayerChannelBlock__cScriptPlayerChannelBlock(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cScriptPlayerChannelBlock_vtbl;
@@ -2379,6 +2416,19 @@ extern "C" void* func_00272308(void* heap, int size);
 extern "C" sCacheEntry* cScriptPlayerChannelBlock_AddActiveKey(cScriptPlayerChannelBlock* self, sCacheRecord* rec);
 extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannelBlock* self);
 
+/**
+ * Starts a block channel of an in-game script sequence and activates every key that starts at frame 0.
+ *
+ * Stores the data and owner; when the channel has keys it allocates data[1] active-key records of 0x1C bytes from
+ * the owner's script heap (func_00272308, On Tour cScriptHeap::AllocMem), resets the index and starts at the first
+ * key (data + 4). Each key whose start frame (+4) is 0 sets 0x4 in @p flags and is activated (cScriptPlayerChannelBlock_AddActiveKey
+ * AddActiveKey, cScriptPlayerChannelBlock_LoadNextScriptKey LoadNextScriptKey).
+ *
+ * @param data  the channel's script data (On Tour pScriptData): key count, active-key count, keys
+ * @param owner  the script player entity that owns the channel (On Tour pOwner)
+ * @param flags  the sequence's event bits (On Tour int& events)
+ * @return 1 when the channel has keys, otherwise 0
+ */
 extern "C" int cScriptPlayerChannelBlock_Play(void* self, unsigned short* data, void* owner, int* flags)
 {
     *(unsigned short**)((char*)self + 0x8) = data;
@@ -2404,6 +2454,10 @@ extern "C" int cScriptPlayerChannelBlock_Play(void* self, unsigned short* data, 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Stop);
 #ifdef SKIP_ASM
+/**
+ * Stops a block channel: frees its active-key buffer to the owner's script heap and clears its state (only when it
+ * has an owner).
+ */
 extern "C" void cScriptPlayerChannelBlock_Stop(void* self)
 {
     char* owner = *(char**)((char*)self + 0xC);
@@ -2447,14 +2501,24 @@ struct sCacheTrack_2F28 {
     int numEvents;                  // 0x28
 };
 
+/**
+ * Advances a block channel to a frame: drops active keys that have ended and activates every key that has started.
+ *
+ * Each active key whose end frame has passed is unlinked (0x8 in @p flags) and the active count drops; then every
+ * pending key whose start frame is reached sets 0x4 and is activated (AddActiveKey, LoadNextScriptKey).
+ *
+ * @param flags  the sequence's event bits (On Tour int& events)
+ * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
+ * @return 0 when no key is active or pending, otherwise 1
+ */
 // Drops finished events and plays every record whose start time has been reached.
-extern "C" int cScriptPlayerChannelBlock_Update(sCacheTrack_2F28* self, int* flags, float t)
+extern "C" int cScriptPlayerChannelBlock_Update(sCacheTrack_2F28* self, int* flags, float currFrameNum)
 {
     float zero;
     sCacheEvent_2F28* prev = 0;
     sCacheEvent_2F28* e = self->events;
     while (e != 0) {
-        if ((float)e->end <= t) {
+        if ((float)e->end <= currFrameNum) {
             *flags |= 8;
             if (prev == 0) {
                 e = self->events = e->next;
@@ -2471,7 +2535,7 @@ extern "C" int cScriptPlayerChannelBlock_Update(sCacheTrack_2F28* self, int* fla
     zero = 0.0f;
 loop:
     do {
-        if (self->rec != 0 && t - (float)self->rec->time >= zero) {
+        if (self->rec != 0 && currFrameNum - (float)self->rec->time >= zero) {
             *flags |= 4;
             cScriptPlayerChannelBlock_AddActiveKey((cScriptPlayerChannelBlock*)self, (sCacheRecord*)self->rec);
             cScriptPlayerChannelBlock_LoadNextScriptKey((cScriptPlayerChannelBlock*)self);
@@ -2494,6 +2558,12 @@ struct sCacheTimeNode {
     sCacheTimeNode* next;
 };
 
+/**
+ * Returns the earliest frame at which the block channel changes: the soonest end of an active key or the next key's
+ * start.
+ *
+ * @return that frame, or -1 when the channel is not playing, has no keys or nothing is left
+ */
 extern "C" int cScriptPlayerChannelBlock_GetNextKeyFrame(void* self)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
@@ -2605,6 +2675,12 @@ extern "C" void cScriptPlayerChannelEvent_Stop(void* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelEvent_vtbl[];
 
+/**
+ * Destroys an event channel: restores its vtable (+0x4), stops it (freeing its key buffer) and, when bit 0 of @p
+ * flags is set, frees it with func_002724E8 (On Tour cScriptMemOp::operator delete).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptPlayerChannelEvent__cScriptPlayerChannelEvent(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cScriptPlayerChannelEvent_vtbl;
@@ -2624,6 +2700,19 @@ extern "C" void* func_00272308(void* heap, int size);
 extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec);
 extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannelEvent* self);
 
+/**
+ * Starts an event channel of an in-game script sequence and fires every event key at frame 0.
+ *
+ * Stores the data and owner; when the channel has keys it allocates data[1] records of 8 bytes from the owner's
+ * script heap (func_00272308), resets the index and starts at the first key (data + 4). Each key whose frame (+2)
+ * is 0 sets 0x10 in @p flags and is fired (cScriptPlayerChannelEvent_AddActiveKey AddActiveKey, cScriptPlayerChannelEvent_LoadNextScriptKey LoadNextScriptKey); the
+ * last-fired frame (+0x24) is reset each time.
+ *
+ * @param data  the channel's script data (On Tour pScriptData): key count, buffer count, keys
+ * @param owner  the script player entity that owns the channel (On Tour pOwner)
+ * @param flags  the sequence's event bits (On Tour int& events)
+ * @return 1 while a key is still pending, otherwise 0
+ */
 extern "C" int cScriptPlayerChannelEvent_Play(void* self, unsigned short* data, void* owner, int* flags)
 {
     *(unsigned short**)((char*)self + 0x8) = data;
@@ -2650,6 +2739,10 @@ extern "C" int cScriptPlayerChannelEvent_Play(void* self, unsigned short* data, 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Stop);
 #ifdef SKIP_ASM
+/**
+ * Stops an event channel: frees its key buffer to the owner's script heap and clears its state (only when it has an
+ * owner).
+ */
 extern "C" void cScriptPlayerChannelEvent_Stop(void* self)
 {
     char* owner = *(char**)((char*)self + 0xC);
@@ -2678,14 +2771,24 @@ struct sCacheRef;
 extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec);
 extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannelEvent* self);
 
-extern "C" int cScriptPlayerChannelEvent_Update(void* self, int* flags, float t)
+/**
+ * Advances an event channel to a frame and fires every event key that has been reached.
+ *
+ * When @p currFrameNum differs from the last fired frame (+0x24) the per-frame count (+0x20) is cleared. Each pending key
+ * whose frame is reached sets 0x10 in @p flags, is fired (AddActiveKey), records its frame and loads the next key.
+ *
+ * @param flags  the sequence's event bits (On Tour int& events)
+ * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
+ * @return 1 while a key is still pending, otherwise 0
+ */
+extern "C" int cScriptPlayerChannelEvent_Update(void* self, int* flags, float currFrameNum)
 {
-    if (*(float*)((char*)self + 0x24) != t) {
+    if (*(float*)((char*)self + 0x24) != currFrameNum) {
         *(int*)((char*)self + 0x20) = 0;
     }
     while (*(char**)((char*)self + 0x14) != 0) {
         float v = (float)*(unsigned short*)(*(char**)((char*)self + 0x14) + 2);
-        if (t < v) break;
+        if (currFrameNum < v) break;
         *flags |= 0x10;
         cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, *(sCacheRec**)((char*)self + 0x14));
         *(float*)((char*)self + 0x24) = v;
@@ -2698,6 +2801,11 @@ extern "C" int cScriptPlayerChannelEvent_Update(void* self, int* flags, float t)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetNextKeyFrame);
 #ifdef SKIP_ASM
+/**
+ * Returns the frame of the event channel's next pending key.
+ *
+ * @return that frame, or -1 when the channel is not playing, has no keys or none is pending
+ */
 extern "C" int cScriptPlayerChannelEvent_GetNextKeyFrame(void* self)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
@@ -2785,6 +2893,12 @@ extern "C" void cScriptPlayerChannelObject_Stop(void* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelObject_vtbl[];
 
+/**
+ * Destroys an object channel: restores its vtable (+0x4), stops it (freeing its key buffer) and, when bit 0 of @p
+ * flags is set, frees it with func_002724E8 (On Tour cScriptMemOp::operator delete).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptPlayerChannelObject__cScriptPlayerChannelObject(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cScriptPlayerChannelObject_vtbl;
@@ -2804,6 +2918,19 @@ struct sCacheEntry2;
 extern "C" sCacheEntry2* cScriptPlayerChannelObject_AddActiveKey(cScriptPlayerChannelObject* self, sCacheRecord2* rec);
 extern "C" void cScriptPlayerChannelObject_LoadNextScriptKey(cScriptPlayerChannelObject* self);
 
+/**
+ * Starts an object channel of an in-game script sequence and activates every key that starts at frame 0.
+ *
+ * Stores the data and owner; when the channel has keys it allocates data[1] active-key records of 0x24 bytes from
+ * the owner's script heap (func_00272308; an empty loop over them follows), resets the index and starts at the
+ * first key. Each key whose start frame (+4) is 0 sets 0x1 in @p flags and is activated (cScriptPlayerChannelObject_AddActiveKey
+ * AddActiveKey, cScriptPlayerChannelObject_LoadNextScriptKey LoadNextScriptKey).
+ *
+ * @param data  the channel's script data (On Tour pScriptData): key count, active-key count, keys
+ * @param owner  the script player entity that owns the channel (On Tour pOwner)
+ * @param flags  the sequence's event bits (On Tour int& events)
+ * @return 1 when the channel has keys, otherwise 0
+ */
 extern "C" int cScriptPlayerChannelObject_Play(void* self, unsigned short* data, void* owner, int* flags)
 {
     *(unsigned short**)((char*)self + 0x8) = data;
@@ -2831,6 +2958,10 @@ extern "C" int cScriptPlayerChannelObject_Play(void* self, unsigned short* data,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Stop);
 #ifdef SKIP_ASM
+/**
+ * Stops an object channel: frees its active-key buffer to the owner's script heap and clears its state (only when
+ * it has an owner).
+ */
 extern "C" void cScriptPlayerChannelObject_Stop(void* self)
 {
     char* owner = *(char**)((char*)self + 0xC);
@@ -2877,14 +3008,27 @@ struct sCacheTrack_3698 {
     int numEvents;                  // 0x24
 };
 
+/**
+ * Advances an object channel to a frame: moves active keys on, drops ended ones and activates every key that has
+ * started.
+ *
+ * Active keys that have ended are unlinked (0x2 in @p flags); the others advance their value by speed * @p dt. Each
+ * pending key whose start frame is reached sets 0x1, is activated and has its value advanced by the frames it is
+ * late (t - start) times its speed.
+ *
+ * @param flags  the sequence's event bits (On Tour int& events)
+ * @param frameDelta  the sequence's current frame (On Tour currFrameNum)
+ * @param dt  the frames since the last update (On Tour frameDelta)
+ * @return 0 when no key is active or pending, otherwise 1
+ */
 // Advances running events by dt, drops finished ones and starts every record that is due.
-extern "C" int cScriptPlayerChannelObject_Update(sCacheTrack_3698* self, int* flags, float t, float dt)
+extern "C" int cScriptPlayerChannelObject_Update(sCacheTrack_3698* self, int* flags, float frameDelta, float dt)
 {
     float zero;
     sCacheEvent_3698* prev = 0;
     sCacheEvent_3698* e = self->events;
     while (e != 0) {
-        if ((float)e->end <= t) {
+        if ((float)e->end <= frameDelta) {
             *flags |= 2;
             if (prev == 0) {
                 e = self->events = e->next;
@@ -2903,7 +3047,7 @@ extern "C" int cScriptPlayerChannelObject_Update(sCacheTrack_3698* self, int* fl
 loop:
     do {
         if (self->rec != 0) {
-            float d = t - (float)self->rec->time;
+            float d = frameDelta - (float)self->rec->time;
             if (d >= zero) {
                 *flags |= 1;
                 sCacheEvent_3698* n = (sCacheEvent_3698*)cScriptPlayerChannelObject_AddActiveKey((cScriptPlayerChannelObject*)self, (sCacheRecord2*)self->rec);
@@ -2929,6 +3073,12 @@ struct sCacheTimeNode2 {
     sCacheTimeNode2* next;
 };
 
+/**
+ * Returns the earliest frame at which the object channel changes: the soonest end of an active key or the next
+ * key's start.
+ *
+ * @return that frame, or -1 when the channel is not playing, has no keys or nothing is left
+ */
 extern "C" int cScriptPlayerChannelObject_GetNextKeyFrame(void* self)
 {
     if (*(int*)((char*)self + 0x8) == 0) {

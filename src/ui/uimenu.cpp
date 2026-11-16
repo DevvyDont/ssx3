@@ -410,6 +410,15 @@ struct cUIMenu_findFirstHighlightable_sVEntry {
     int (*fn)(void*, void*, int, unsigned char);
 };
 
+/**
+ * Finds the first menu item, from a start index, that can be highlighted.
+ *
+ * With menu attribute bit 2 set the screen's handler (+0xD0, slot 20) decides per index (called with the menu, 1
+ * and the index); otherwise an item qualifies when bit 5 of its flags (+0x14) is clear.
+ *
+ * @param start  the first index to try (On Tour startIndex); 0xFF means 0
+ * @return the item's index, or 0xFF when none qualifies
+ */
 extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned char start)
 {
     unsigned char i = start == 0xFF ? 0 : start;

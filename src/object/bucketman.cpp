@@ -298,6 +298,15 @@ void* cBucketMan_first(cBucketMan* self, int index)
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_last);
 #ifdef SKIP_ASM
+/**
+ * Returns the last node of one bucket's list, or 0 when the bucket is empty.
+ *
+ * Buckets are 0x44-byte headers (Head sentinel at +0x4, Tail at +0x14); the tail's previous link (+0x1C) pointing
+ * back at Head means empty.
+ *
+ * @param index  the bucket (On Tour bucket)
+ * @return the last node (On Tour cObjNode*), or 0
+ */
 // PORT: holds a pointer in an int (same shape as cBucketMan_first); not 64-bit safe.
 extern "C" void* cBucketMan_last(cBucketMan* self, int index)
 {
@@ -331,6 +340,13 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index)
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_prev);
 #ifdef SKIP_ASM
+/**
+ * Returns the node before @p node in a bucket's list, or 0 at the start.
+ *
+ * @param node  the current node (On Tour cObjNode*); its previous link is at +0x8
+ * @param index  the bucket (On Tour bucket)
+ * @return the previous node, or 0 when it is the bucket's Head sentinel
+ */
 extern "C" void* cBucketMan_prev(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x8);
@@ -362,6 +378,13 @@ void* cBucketMan_addfirst(cBucketMan* self, int index)
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_addnext);
 #ifdef SKIP_ASM
+/**
+ * Returns the node after @p node in a bucket's pending-add list, or 0 at its end.
+ *
+ * @param node  the current node (On Tour cObjNode*); its next link is at +0x4
+ * @param index  the bucket (On Tour bucket)
+ * @return the next node, or 0 when it is the add list's tail sentinel (bucket + 0x34)
+ */
 extern "C" void* cBucketMan_addnext(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x4);
@@ -378,6 +401,14 @@ struct sBucketVEntry4F98 {
     void (*fn)(void*);
 };
 
+/**
+ * Runs the update virtual (slot 2) of every node in one bucket, reading each node's successor first so a node may
+ * unlink itself.
+ *
+ * A final cBucketMan_first() call's result is unused.
+ *
+ * @param index  the bucket (On Tour bucket)
+ */
 extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);
@@ -400,6 +431,11 @@ struct sBucketVEntry5028 {
     void (*fn)(void*);
 };
 
+/**
+ * Runs the apply virtual (slot 3) of every node in one bucket, in list order.
+ *
+ * @param index  the bucket (On Tour bucket)
+ */
 extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);

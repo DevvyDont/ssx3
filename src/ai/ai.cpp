@@ -147,6 +147,15 @@ struct sAiObj128818
     sVEntry128818* vt;  // 0xCC
 };
 
+/**
+ * Initialises the AI manager for a new event: clears its state, counts and rider tables, then sets up the players.
+ *
+ * Resets FocusMan (cFocusMan_reset) and DangerMan (cDangerMan_Reset); zeroes IsAIReadyToRace, ComputerRidersActive,
+ * MissionRidersActive, the rider / player / computer / actor / mission-rider counts, CountdownTicksLeft,
+ * CurrentAIStateHandler and CurrentAIState; sets the AI state to 1 (GameInit) and clears Riders[6],
+ * MissionRiders[1] and Computers[5]. Then loads the AI anims, calls the InitPlayers virtual (slot 6),
+ * cAI_commonInit(self, 1) and clears PodiumActorList[2].
+ */
 extern "C" void cAI_init(sAiObj128818* self)
 {
     int i;
@@ -508,6 +517,18 @@ struct sAI_91E0 {
     int f8C;
 };
 
+/**
+ * Draws every active rider and its per-rider effects, pass by pass across all riders.
+ *
+ * First gives each allocated rider whose mRenderFlag is 0 and mSafeRenderTick is unset (-1) a safe render tick of
+ * GrMan's slot 114 value + 4. Then gathers the riders as cAI_update does: with a mission rider loaded (and a
+ * player), only player 0 when PlaybackMan exists with mode (+0x70) 0, else the mission rider; otherwise the
+ * players, the computers (if ComputerRidersActive) and the actors (if ComputerActorsActive). Each pass runs over
+ * all of them: cRider_renderClip (visibility), then lights, body and shadow for visible riders, the board trails
+ * (func_002EA538 on each handler's cBoardTrailFX, +0x520), the player indicator, cheat, board wake, air streamer,
+ * speed boost and trick boost FX, then for visible riders board sparks, cAngerFX (func_002D5048), cDynamicSprayFX
+ * (func_002E24D0) and punch FX, and finally func_00122638 per rider.
+ */
 extern "C" void cAI_render(sAI_91E0* self)
 {
     char* riders[8];

@@ -1072,6 +1072,10 @@ public:
     virtual void v03();
 };
 
+/**
+ * Pauses the transition object's script: calls the second virtual of the object at +0x10 (On Tour mpCameraManager,
+ * a cScriptEntity; presumably PauseEntityScript).
+ */
 extern "C" void cScriptObjTransition_PauseObjScript(void* self)
 {
     (*(cBxScriptVirt**)((char*)self + 0x10))->v02();
@@ -1081,6 +1085,10 @@ extern "C" void cScriptObjTransition_PauseObjScript(void* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_ResumeObjScript);
 #ifdef SKIP_ASM
+/**
+ * Resumes the transition object's script: calls the third virtual of the object at +0x10 (On Tour mpCameraManager,
+ * a cScriptEntity; presumably ResumeEntityScript).
+ */
 extern "C" void cScriptObjTransition_ResumeObjScript(void* self)
 {
     (*(cBxScriptVirt**)((char*)self + 0x10))->v03();
