@@ -18805,7 +18805,45 @@ extern "C" int func_001BDC18(void* self, void* obj, int msg, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BDCA0);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+
+struct sListBox_BDCA0 {
+    char pad0[0x318];
+    unsigned char f318;
+};
+
+struct sState_BDCA0 {
+    char pad0[0x708];
+    sListBox_BDCA0* boxes[4];   // 0x708
+    int ids[4];                 // 0x718
+};
+
+// FAKEMATCH: do-while(0) wrapper around the if/else, per-function volatile view of the dead boxes[i]->f318 read, and FM_BARRIER() after it (the wrapper keeps loop.c from moving the found arm out of the loop, so jump2 cross-jumps the msg==1 return into it); plain form 42.05%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" int func_001BDCA0(void* self_, int id, int msg)
+{
+    sState_BDCA0* self = (sState_BDCA0*)self_;
+    do {
+        if (msg != 1) {
+            if (msg == 0) {
+                for (int i = 0; i < 4; i++) {
+                    if (id == self->ids[i]) {
+                        *(volatile unsigned char*)&self->boxes[i]->f318;
+                        FM_BARRIER();
+                        return 0x101;
+                    }
+                }
+            }
+        } else {
+            return 0x101;
+        }
+    } while (0);
+    return 0x101;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001BDCF8);

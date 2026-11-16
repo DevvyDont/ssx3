@@ -668,7 +668,36 @@ struct sSifQueue {
     int sema;                           /* 0x4E08 */
 };
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4410);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only COP0 (read the Count register, enable interrupts) and memory barrier.
+#define MFC0_COUNT_2F41(v) __asm__ volatile("mfc0 %0, $9" : "=r"(v))
+#define EI_2F41() __asm__ volatile("ei")
+#define SYNC_2F41() __asm__ volatile("sync")
+
+/* The SIF queue's interrupt handler (installed by func_003F5000 through func_00423A90 with cause 2 and arg = the queue):
+   it adds the Count cycles since the last update to the queue's total. */
+// FAKEMATCH: the Count read is wrapped in `do { ... } while (0)`; its loop notes make sched1 treat the next insn as a
+// barrier, so the volatile `total` load issues before `c - last` as in retail; plain form 84.62%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_003F4410(int cause, void *arg) {
+    struct sSifQueue *d = (struct sSifQueue *)arg;
+    unsigned c;
+    unsigned last = d->last;
+    unsigned long total;
+    do {
+        MFC0_COUNT_2F41(c);
+    } while (0);
+    total = d->total;
+    d->total = total + (unsigned)(c - last);
+    d->last = c;
+    SYNC_2F41();
+    EI_2F41();
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4448);
@@ -972,7 +1001,36 @@ int func_003F4D68(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4DE8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only COP0 (read the Count register).
+#define MFC0_COUNT_2F41(v) __asm__ volatile("mfc0 %0, $9" : "=r"(v))
+
+extern long func_00411538_4DE8(long, long) __asm__("func_00411538");
+// FAKEMATCH: `t = cnt; t = last;` (a dead read of the volatile local cnt into t, which then carries last into the
+// test) reproduces retail's `lw v1,0(sp); lw v1,4(sp)`; plain form 96.97% (volatile locals kept: retail stores each
+// snapshot to the stack and reloads it; without them 43.24%).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_003F4DE8(void) {
+    volatile unsigned cnt;
+    volatile unsigned last;
+    volatile unsigned long total;
+    volatile unsigned long sum;
+    unsigned c, t;
+    do {
+        last = D_0051F0C0.last;
+        total = D_0051F0C0.total;
+        MFC0_COUNT_2F41(c);
+        cnt = c;
+        t = cnt;
+        t = last;
+    } while (t != D_0051F0C0.last || total != D_0051F0C0.total);
+    sum = total + (unsigned)(cnt - last);
+    return (int)func_00411538_4DE8(sum, 0x48000);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4E80);
@@ -5806,7 +5864,37 @@ void func_003FBA78(int key, int n, int *val) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FBAD0);
+#ifdef SKIP_ASM
+/* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
+   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+#include "fakematch.h"
+extern struct sMcState *D_004A5B20;
+
+// FAKEMATCH: FM_OPAQUE(e) after the e->c store hides that e == t, so the pre-if `t = &f9C[f94]` (v0) is copied into e (a3) at the join as in retail; e->c is stored through an int view (retail reloads D_004A5B20 after that store, which a struct-field store lets sched hoist); plain form 67.84% (91.38% with the struct-field store).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_003FBAD0(int key, int size, int *val) {
+    struct sMcEnt *e, *t;
+    int len;
+    int end;
+    if (D_004A5B20->f94 == D_004A5B20->f90) return D_004A5B20->f98;
+    t = D_004A5B20->f9C + D_004A5B20->f94;
+    if (D_004A5B20->f94 == 0) D_004A5B20->f9C->a = 0;
+    e = t;
+    e->key = key;
+    e->b = size;
+    len = size + 0xC;
+    if (len == 0) len = 1;
+    *(int *)&e->c = *val;
+    FM_OPAQUE(e);
+    D_004A5B20->f94++;
+    end = e->a + len;
+    D_004A5B20->f98 = end;
+    if (D_004A5B20->f94 != D_004A5B20->f90) e[1].a = end;
+    return e->a;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FBB50);

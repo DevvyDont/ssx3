@@ -4676,7 +4676,62 @@ void func_003E22F0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadpackatz);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int FILE_loadsizez_pkz(int, int *, int) __asm__("FILE_loadsizez");
+extern int func_003B4740_pkz(int, int) __asm__("func_003B4740");
+extern int func_003B4818_pkz(int) __asm__("func_003B4818");
+extern void MEM_copy_pkz(int, int, int) __asm__("MEM_copy");
+
+int FILE_loadpackatz_pkz(int name, int dst, int max) __asm__("FILE_loadpackatz");
+// PORT: hand-written EE data-cache writeback of every line (sync + cache 0x14 on ways 0/1, 64 sets of 0x40 bytes), the
+// same loop (same text) as the landed func_003E2190 DCACHE_WB_ALL_2190 macro; evidence: `addiu $8,$0,0` (gcc emits move = daddu for 0), fixed
+// $8/$9 and the unfilled `bnez; nop; nop` (a C loop around sync/cache asm scores 96.61); a port replaces it with its
+// platform's data-cache flush (or nothing).
+int FILE_loadpackatz_pkz(int name, int dst, int max) {
+    int size;
+    int h, n, buf;
+    h = FILE_loadsizez_pkz(name, &size, 0x100);
+    if (h == 0) return 0;
+    n = func_003B4818_pkz(h);
+    if (size > 0 && n > 0) {
+        buf = (int)D_00450C10.f04((char *)name, n, 0x100);
+        if (buf != 0) {
+            if (func_003B4740_pkz(h, buf) == 0) {
+                D_00450C10.f08((void *)buf);
+                buf = 0;
+            }
+        }
+        D_00450C10.f08((void *)h);
+        if (buf == 0) return 0;
+        size = n;
+        h = buf;
+    }
+    if (max > 0 && max < size) size = max;
+    MEM_copy_pkz(dst, h, size);
+    D_00450C10.f08((void *)h);
+    /* PORT: hand-written data-cache writeback loop (see the PORT line above the function). */
+    __asm__ __volatile__(
+        ".set push\n\t"
+        ".set noreorder\n\t"
+        "li $8, 0\n"
+        "1:\n\t"
+        "sync\n\t"
+        "cache 0x14, 0($8)\n\t"
+        "sync\n\t"
+        "cache 0x14, 1($8)\n\t"
+        "sync\n\t"
+        "addiu $8, $8, 0x40\n\t"
+        "slti $9, $8, 0x1000\n\t"
+        "bnez $9, 1b\n\t"
+        "nop\n\t"
+        "nop\n\t"
+        ".set pop" : : : "$8", "$9", "memory");
+    return size;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadpackat);

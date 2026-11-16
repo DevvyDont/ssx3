@@ -323,9 +323,43 @@ int SHAPE_size(char *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3CCC);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: hand-written shape-table accessor returning the entry count at +8 (starts 4 mod 8 where every gcc function in seg_2B4578 is .align 3, unfilled jr delay slot, and it sits in the hand-written run with func_003B3CD8 and SHAPE_name, which landed as PORT asm); a port replaces it with `int func_003B3CCC(void *s) { return *(int *)((char *)s + 8); }`.
+__asm__(
+    ".set push\n.set noreorder\n.set noat\n"
+    ".text\n.align 2\n.globl func_003B3CCC\n.type func_003B3CCC, @function\nfunc_003B3CCC:\n"
+    "lw $2, 0x8($4)\n"
+    "jr $31\n"
+    "nop\n"
+    ".size func_003B3CCC, . - func_003B3CCC\n"
+    ".set pop\n");
+#endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3CD8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: hand-written bounds-checked shape lookup returning base + table[i].off (the assembler bgeu macro sltu $1 + beqz $1, $9/$11 temporaries, li as addiu $2,$0,0 where gcc emits move; same body as the landed PORT SHAPE_name with offset 0x14 for 0x10); a port replaces it with `char *f(char *s, unsigned i) { return i < *(unsigned *)(s + 8) ? s + *(int *)(s + 0x14 + i * 8) : 0; }`.
+__asm__(
+    ".set push\n.set noreorder\n.set noat\n"
+    ".text\n.align 3\n.globl func_003B3CD8\n.type func_003B3CD8, @function\nfunc_003B3CD8:\n"
+    "lw $9, 0x8($4)\n"
+    "sll $11, $5, 3\n"
+    "sltu $1, $5, $9\n"
+    "beqz $1, .L003B3CF8\n"
+    "addu $11, $4, $11\n"
+    "lw $2, 0x14($11)\n"
+    "jr $31\n"
+    "addu $2, $4, $2\n"
+    ".L003B3CF8:\n"
+    "jr $31\n"
+    "addiu $2, $0, 0x0\n"
+    ".size func_003B3CD8, . - func_003B3CD8\n"
+    ".set pop\n");
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_name);
@@ -7668,7 +7702,87 @@ top:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF8D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// NOTE: retail pads this function's object with nops up to the next 16-byte boundary; that padding comes from the build
+// (a file-boundary .align 4 after the body, or a pad segment in the seg_2B4578 split), not from code: nothing here emits it.
+/* Types and VU0 helpers shared by the func_003BF8D0 .. func_003C01A0 family (EA audio engine transform
+   routines). Kept in one unguarded block so that no function's block depends on another's (types and unused
+   static inline helpers emit no code when the functions are built from asm). */
+/* --- used by func_003BF8D0 and later family members --- */
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F8D0;
+
+// PORT: PS2-only VU0 inline asm (clear running-sum register vf1).
+static inline void vu0ClearSum(void) {
+    __asm__ volatile("vsub.xyzw  $vf1, $vf0, $vf0\n");
+}
+
+// PORT: PS2-only VU0 inline asm (load eight vec4 rows into vf2..vf9).
+static inline void vu0LoadRows2to9(const V4_F8D0 *p) {
+    __asm__ volatile(
+        "lqc2       $vf2, 0x0(%0)\n"
+        "lqc2       $vf3, 0x10(%0)\n"
+        "lqc2       $vf4, 0x20(%0)\n"
+        "lqc2       $vf5, 0x30(%0)\n"
+        "lqc2       $vf6, 0x40(%0)\n"
+        "lqc2       $vf7, 0x50(%0)\n"
+        "lqc2       $vf8, 0x60(%0)\n"
+        "lqc2       $vf9, 0x70(%0)\n"
+        : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (add each row to its successor: vf1..vf8 += vf2..vf9).
+static inline void vu0AddNext1to8(void) {
+    __asm__ volatile(
+        "vadd.xyzw  $vf1, $vf1, $vf2\n"
+        "vadd.xyzw  $vf2, $vf2, $vf3\n"
+        "vadd.xyzw  $vf3, $vf3, $vf4\n"
+        "vadd.xyzw  $vf4, $vf4, $vf5\n"
+        "vadd.xyzw  $vf5, $vf5, $vf6\n"
+        "vadd.xyzw  $vf6, $vf6, $vf7\n"
+        "vadd.xyzw  $vf7, $vf7, $vf8\n"
+        "vadd.xyzw  $vf8, $vf8, $vf9\n");
+}
+
+// PORT: PS2-only VU0 inline asm (store first six sums).
+static inline void vu0StoreSums(V4_F8D0 *d) {
+    __asm__ volatile(
+        "sqc2       $vf2, 0x0(%0)\n"
+        "sqc2       $vf4, 0x10(%0)\n"
+        "sqc2       $vf6, 0x20(%0)\n"
+        "sqc2       $vf8, 0x30(%0)\n"
+        "sqc2       $vf1, 0x100(%0)\n"
+        "sqc2       $vf3, 0x110(%0)\n"
+        : : "r"(d) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store sum vf5).
+static inline void vu0StoreSum5(V4_F8D0 *d) {
+    __asm__ volatile("sqc2       $vf5, 0x120(%0)\n" : : "r"(d) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store sum vf7, carry last row vf9 into vf1).
+static inline void vu0StoreSum7Carry(V4_F8D0 *d) {
+    __asm__ volatile("sqc2       $vf7, 0x130(%0)\n" "vmove.xyzw $vf1, $vf9\n" : : "r"(d) : "memory");
+}
+
+void func_003BF8D0(V4_F8D0 *src, V4_F8D0 *dst) {
+    int i = 4;
+    vu0ClearSum();
+    do {
+        vu0LoadRows2to9(src);
+        vu0AddNext1to8();
+        vu0StoreSums(dst);
+        i--;
+        vu0StoreSum5(dst);
+        src += 8;
+        vu0StoreSum7Carry(dst);
+        dst += 4;
+    } while (i != 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF960);
@@ -8151,7 +8265,127 @@ top:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BFD60);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// NOTE: retail pads this function's object with nops up to the next 16-byte boundary; that padding comes from the build
+// (a file-boundary .align 4 after the body, or a pad segment in the seg_2B4578 split), not from code: nothing here emits it.
+/* --- used by func_003BFD60 and later family members --- */
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_FD60_FD60;
+
+// PORT: PS2-only VU0 inline asm (load two twiddle vectors into vf15 and vf16).
+static inline void vu0LoadTwiddles15and16_FD60(const V4_FD60_FD60 *p) {
+    __asm__ volatile(
+        "lqc2       $vf15, 0x0(%0)\n"
+        "lqc2       $vf16, 0x10(%0)\n"
+        : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (head sums and differences of rows 1..4).
+static inline void vu0AddSubRows1to4Head(void) {
+    __asm__ volatile(
+        "vadd.xyzw  $vf9, $vf1, $vf3\n"
+        "vadd.xyzw  $vf10, $vf2, $vf4\n"
+        "vsub.xyzw  $vf11, $vf4, $vf2\n"
+        "vsub.xyzw  $vf12, $vf3, $vf1\n");
+}
+
+// PORT: PS2-only VU0 inline asm (scale vf9..vf12 per lane by vf15 and vf7/vf8 by vf16.x/y).
+static inline void vu0ScaleHeadLanes(void) {
+    __asm__ volatile(
+        "vmulx.xyzw $vf9, $vf9, $vf15x\n"
+        "vmuly.xyzw $vf10, $vf10, $vf15y\n"
+        "vmulz.xyzw $vf11, $vf11, $vf15z\n"
+        "vmulw.xyzw $vf12, $vf12, $vf15w\n"
+        "vmulx.xyzw $vf7, $vf7, $vf16x\n"
+        "vmuly.xyzw $vf8, $vf8, $vf16y\n");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf9..vf12 to rows 0..3).
+static inline void vu0StoreResults4_FD60(void *p) {
+    __asm__ volatile(
+        "sqc2       $vf9, 0x0(%0)\n"
+        "sqc2       $vf10, 0x10(%0)\n"
+        "sqc2       $vf11, 0x20(%0)\n"
+        "sqc2       $vf12, 0x30(%0)\n"
+        : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (sums and differences of rows 5..8).
+static inline void vu0AddSubRows5to8(void) {
+    __asm__ volatile(
+        "vadd.xyzw  $vf9, $vf5, $vf7\n"
+        "vadd.xyzw  $vf10, $vf6, $vf8\n"
+        "vsub.xyzw  $vf11, $vf6, $vf8\n"
+        "vsub.xyzw  $vf12, $vf5, $vf7\n");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf9 and vf10 to rows 4 and 5).
+static inline void vu0StoreResults5and6_FD60(void *p) {
+    __asm__ volatile(
+        "sqc2       $vf9, 0x40(%0)\n"
+        "sqc2       $vf10, 0x50(%0)\n"
+        : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf11 to row 6).
+static inline void vu0StoreV11At60_FD60(void *p) {
+    __asm__ volatile("sqc2       $vf11, 0x60(%0)\n" : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (store vf12 to row 7).
+static inline void vu0StoreV12At70Of_FD60(void *p) {
+    __asm__ volatile("sqc2       $vf12, 0x70(%0)\n" : : "r"(p) : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (loop: scale rows 3, 4, 7, 8 by vf16.x/y).
+static inline void vu0ScaleLoopRows(void) {
+    __asm__ volatile(
+        "vmulx.xyzw $vf3, $vf3, $vf16x\n"
+        "vmuly.xyzw $vf4, $vf4, $vf16y\n"
+        "vmulx.xyzw $vf7, $vf7, $vf16x\n"
+        "vmuly.xyzw $vf8, $vf8, $vf16y\n");
+}
+
+// PORT: PS2-only VU0 inline asm (loop sums and differences of rows 1..4).
+static inline void vu0AddSubRows1to4Loop(void) {
+    __asm__ volatile(
+        "vadd.xyzw  $vf9, $vf1, $vf3\n"
+        "vadd.xyzw  $vf10, $vf2, $vf4\n"
+        "vsub.xyzw  $vf11, $vf2, $vf4\n"
+        "vsub.xyzw  $vf12, $vf1, $vf3\n");
+}
+
+void func_003BFD60(V4_FD60_FD60 *src, V4_FD60_FD60 *dst, V4_FD60_FD60 *p6) {
+    int i;
+    vu0LoadTwiddles15and16_FD60(dst);
+    vu0LoadRows1to8(src);
+    vu0AddSubRows1to4Head();
+    vu0ScaleHeadLanes();
+    vu0StoreResults4_FD60(p6);
+    vu0AddSubRows5to8();
+    vu0StoreResults5and6_FD60(p6);
+    i = 3;
+    vu0StoreV11At60_FD60(p6);
+    src += 8;
+    vu0StoreV12At70Of_FD60(p6);
+    p6 += 8;
+top:
+    vu0LoadRows1to8(src);
+    vu0ScaleLoopRows();
+    vu0AddSubRows1to4Loop();
+    vu0StoreResults4_FD60(p6);
+    vu0AddSubRows5to8();
+    vu0StoreResults5and6_FD60(p6);
+    i--;
+    vu0StoreV11At60_FD60(p6);
+    src += 8;
+    vu0StoreV12At70Of_FD60(p6);
+    p6 += 8;
+    if (i != 0) goto top;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BFE80);
@@ -8587,7 +8821,88 @@ void func_003C01A0(void *in, void *scale, void *out, int stride) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C03E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: hand-written MMI routine (no gcc frame; fixed $2/$6-$14; pnor/psrlw sign mask, lq + pand/pmaxw, pextlw/pextuw/
+// pcpyld/pcpyud transpose, loop counter and pointer steps hand-interleaved into the MMI schedule: MMI has no gcc 2.95
+// pattern): for each of 6 blocks of 4 rows x 16 floats it stores the largest |x| of every row (integer max of the
+// sign-masked bits); only the final `jr $31; nop` is the compiler's. A port replaces it with
+// `for (b = 0; b < 6; b++) for (r = 0; r < 4; r++) dst[b*4+r] = max over k < 16 of fabsf(src[b*64 + r*16 + k]);`.
+void func_003C03E0(void *src, float *dst) {
+    __asm__ __volatile__(
+        ".set noreorder\n\t"
+        "pnor $14, $0, $0\n\t"
+        "psrlw $14, $14, 1\n\t"
+        "addiu $2, $0, 0x6\n\t"
+        "1:\n\t"
+        "lq $6, 0x0(%0)\n\t"
+        "lq $7, 0x40(%0)\n\t"
+        "lq $8, 0x80(%0)\n\t"
+        "lq $9, 0xC0(%0)\n\t"
+        "pand $6, $6, $14\n\t"
+        "pand $7, $7, $14\n\t"
+        "pand $8, $8, $14\n\t"
+        "pand $9, $9, $14\n\t"
+        "lq $10, 0x10(%0)\n\t"
+        "lq $11, 0x50(%0)\n\t"
+        "lq $12, 0x90(%0)\n\t"
+        "lq $13, 0xD0(%0)\n\t"
+        "pand $10, $10, $14\n\t"
+        "pand $11, $11, $14\n\t"
+        "pand $12, $12, $14\n\t"
+        "pand $13, $13, $14\n\t"
+        "pmaxw $6, $6, $10\n\t"
+        "pmaxw $7, $7, $11\n\t"
+        "pmaxw $8, $8, $12\n\t"
+        "pmaxw $9, $9, $13\n\t"
+        "lq $10, 0x20(%0)\n\t"
+        "lq $11, 0x60(%0)\n\t"
+        "lq $12, 0xA0(%0)\n\t"
+        "lq $13, 0xE0(%0)\n\t"
+        "pand $10, $10, $14\n\t"
+        "pand $11, $11, $14\n\t"
+        "pand $12, $12, $14\n\t"
+        "pand $13, $13, $14\n\t"
+        "pmaxw $6, $6, $10\n\t"
+        "pmaxw $7, $7, $11\n\t"
+        "pmaxw $8, $8, $12\n\t"
+        "pmaxw $9, $9, $13\n\t"
+        "lq $10, 0x30(%0)\n\t"
+        "lq $11, 0x70(%0)\n\t"
+        "lq $12, 0xB0(%0)\n\t"
+        "lq $13, 0xF0(%0)\n\t"
+        "pand $10, $10, $14\n\t"
+        "pand $11, $11, $14\n\t"
+        "pand $12, $12, $14\n\t"
+        "pand $13, $13, $14\n\t"
+        "pmaxw $6, $6, $10\n\t"
+        "pmaxw $7, $7, $11\n\t"
+        "pmaxw $8, $8, $12\n\t"
+        "pmaxw $9, $9, $13\n\t"
+        "pextlw $10, $7, $6\n\t"
+        "pextuw $7, $7, $6\n\t"
+        "pextlw $11, $9, $8\n\t"
+        "pextuw $9, $9, $8\n\t"
+        "pcpyld $6, $11, $10\n\t"
+        "pcpyud $8, $10, $11\n\t"
+        "pcpyld $10, $9, $7\n\t"
+        "pcpyud $11, $7, $9\n\t"
+        "pmaxw $6, $6, $8\n\t"
+        "pmaxw $10, $10, $11\n\t"
+        "addiu $2, $2, -0x1\n\t"
+        "pmaxw $6, $6, $10\n\t"
+        "addiu %0, %0, 0x100\n\t"
+        "sq $6, 0x0(%1)\n\t"
+        "bnez $2, 1b\n\t"
+        "addiu %1, %1, 0x10\n\t"
+        ".set reorder"
+        : "+r"(src), "+r"(dst)
+        :
+        : "$2", "$6", "$7", "$8", "$9", "$10", "$11", "$12", "$13", "$14", "memory");
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C04F0);
@@ -15496,7 +15811,68 @@ void func_003C9DA0(int n, short *src, float *dst) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9E50);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void func_003C9DA0(int n, short *src, float *dst);
+
+// PORT: hand-written MMI/VU0 loop converting 16 int16 samples to floats per pass (ld + pextlh/psraw sign extension,
+// qmtc2.ni/vitof0, sqc2; fixed $4-$6/$8-$11 with hand-interleaved pointer steps and a bgtzl loop: MMI has no gcc 2.95
+// pattern); the C around it (alignment checks, the func_003C9DA0 scalar fallback) is the compiler's. A port replaces
+// the asm with `for (i = 0; i < n; i++) dst[i] = (float)src[i];`.
+void func_003C9E50(int n, short *src, float *dst) {
+    int rem;
+    if (((int)src & 7) != 0 || ((int)dst & 0xF) != 0) {
+        func_003C9DA0(n, src, dst);
+        return;
+    }
+    rem = n & 0xF;
+    if (rem != 0) {
+        n &= 0x7FF0;
+        func_003C9DA0(rem, src + n, dst + n);
+        if (n <= 0) return;
+    }
+    /* PORT: the hand-written conversion loop (see above); n > 0 and a multiple of 16 here. */
+    __asm__ volatile(
+        ".set noreorder\n\t"
+        "move $4, %0\n\t"
+        "move $5, %1\n\t"
+        "move $6, %2\n"
+        "1:\n\t"
+        "ld $8, 0x0($5)\n\t"
+        "ld $9, 0x8($5)\n\t"
+        "ld $10, 0x10($5)\n\t"
+        "ld $11, 0x18($5)\n\t"
+        "pextlh $8, $8, $0\n\t"
+        "pextlh $9, $9, $0\n\t"
+        "pextlh $10, $10, $0\n\t"
+        "pextlh $11, $11, $0\n\t"
+        "psraw $8, $8, 16\n\t"
+        "psraw $9, $9, 16\n\t"
+        "psraw $10, $10, 16\n\t"
+        "psraw $11, $11, 16\n\t"
+        "qmtc2.ni $8, $vf1\n\t"
+        "qmtc2.ni $9, $vf2\n\t"
+        "qmtc2.ni $10, $vf3\n\t"
+        "qmtc2.ni $11, $vf4\n\t"
+        "vitof0.xyzw $vf1, $vf1\n\t"
+        "vitof0.xyzw $vf2, $vf2\n\t"
+        "vitof0.xyzw $vf3, $vf3\n\t"
+        "vitof0.xyzw $vf4, $vf4\n\t"
+        "sqc2 $vf1, 0x0($6)\n\t"
+        "sqc2 $vf2, 0x10($6)\n\t"
+        "addiu $4, $4, -0x10\n\t"
+        "sqc2 $vf3, 0x20($6)\n\t"
+        "addiu $5, $5, 0x20\n\t"
+        "sqc2 $vf4, 0x30($6)\n\t"
+        "bgtzl $4, 1b\n\t"
+        "addiu $6, $6, 0x40\n\t"
+        ".set reorder\n"
+        : : "r"(n), "r"(src), "r"(dst)
+        : "$4", "$5", "$6", "$8", "$9", "$10", "$11", "memory");
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9F58);

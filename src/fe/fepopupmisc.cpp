@@ -3342,7 +3342,125 @@ void* func_001E12D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E12F0);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+// sPopupEntry14 (0x14 bytes: +0x4 start, +0x8 count) is defined later in the unit.
+struct sPopupEntry14;
+extern sPopupEntry14 D_00441630[];
+
+struct sCount_12F0 {
+    int f0;
+    int start;
+    int count;
+    int fC;
+    int f10;
+};
+
+struct sRun_12F0 {
+    int start;
+    int count;
+    int f8;
+    int fC;
+    int f10;
+};
+
+// FAKEMATCH: statement order (each run of equal counts is written with its first entry last, and the
+// zero and one entries of the tail interleaved, so sched1 reproduces retail's store order) plus five
+// FM_OPAQUE(n) after n = 1 (delays the ones by five cycles so d[52] issues after d[46]); plain form 99.82%
+// (natural index order: 99.02%).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" void func_001E12F0(void)
+{
+    sCount_12F0* d = (sCount_12F0*)D_00441630;
+    int i;
+    int n;
+
+    n = 6;
+    d[2].count = n;
+    d[3].count = n;
+    d[4].count = n;
+    d[5].count = n;
+    d[6].count = n;
+    d[1].count = n;
+    d[0].count = 0;
+    n = 11;
+    d[7].count = n;
+    n = 17;
+    d[8].count = n;
+    n = 7;
+    d[9].count = n;
+    n = 6;
+    d[10].count = n;
+    n = 8;
+    d[11].count = n;
+    n = 3;
+    d[13].count = n;
+    d[14].count = n;
+    d[15].count = n;
+    d[16].count = n;
+    d[17].count = n;
+    d[18].count = n;
+    d[19].count = n;
+    d[20].count = n;
+    d[21].count = n;
+    d[12].count = n;
+    n = 4;
+    d[23].count = n;
+    d[24].count = n;
+    d[25].count = n;
+    d[26].count = n;
+    d[27].count = n;
+    d[22].count = n;
+    n = 16;
+    d[28].count = n;
+    d[29].count = n;
+    d[30].count = n;
+    d[31].count = n;
+    d[32].count = n;
+    d[33].count = n;
+    d[40].count = 0;
+    n = 2;
+    d[35].count = n;
+    d[36].count = n;
+    d[37].count = n;
+    d[38].count = n;
+    d[39].count = n;
+    d[34].count = n;
+    d[41].count = 0;
+    d[42].count = 0;
+    d[43].count = 0;
+    d[44].count = 0;
+    d[45].count = 0;
+    d[46].count = 0;
+    d[47].count = 0;
+    n = 1;
+    FM_OPAQUE(n);
+    FM_OPAQUE(n);
+    FM_OPAQUE(n);
+    FM_OPAQUE(n);
+    FM_OPAQUE(n);
+    d[53].count = n;
+    d[48].count = 0;
+    d[54].count = n;
+    d[49].count = 0;
+    d[55].count = n;
+    d[50].count = 0;
+    d[56].count = n;
+    d[51].count = 0;
+    d[57].count = n;
+    d[0].start = 0;
+    d[58].count = n;
+    d[59].count = n;
+    d[60].count = n;
+    d[52].count = n;
+    for (i = 1; i <= 60; i++) {
+        sRun_12F0* e = (sRun_12F0*)&d->start;
+        e[i].start = e[i - 1].start + e[i - 1].count;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1450);

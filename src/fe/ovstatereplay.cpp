@@ -47,7 +47,24 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetMenu);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+
+// FAKEMATCH: register pin `register int r FM_REG("$2")` keeps the result in v0 (local-alloc gives v0 to the block-local temps first, so the plain r lands in a0 and is copied to v0 at the end); plain form 88.50%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" int cOVState_REPLAY_onWidgetMenu(void* self, int a1, unsigned int key)
+{
+    register int r FM_REG("$2") = 0;
+    if (*(int*)((char*)self + 0x9c) != 0) {
+        if (key - 2 <= 3) {
+            r = 0x101;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onInputBegin);

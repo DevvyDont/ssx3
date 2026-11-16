@@ -1788,7 +1788,120 @@ extern "C" int func_0019B098(void* self, int a1, sEquipDb_B098* db, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B180);
+#ifdef SKIP_ASM
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+extern "C" void func_00418EF8_B180(void* base, int n, int size, int (*cmp)(const void*, const void*)) __asm__("func_00418EF8");
+extern "C" int func_00198DA0(const void* a, const void* b);
+
+struct sEquipEntry_B180 {
+    unsigned short f0;
+    unsigned short flags;
+};
+struct sEquipDb_B180 {
+    char pad_0x0[0x288];
+    short* map;     // 0x288
+    char pad_0x28c[4];
+    sEquipEntry_B180 entries[1];  // 0x290
+};
+struct sEquipItem_B180 {
+    short f0;
+    signed char slot;   // 0x2
+    char f3;
+    short id;           // 0x4
+    char pad_0x6[0x14 - 0x6];
+    char* name;         // 0x14
+    char pad_0x18[0x34 - 0x18];
+    int flags;          // 0x34
+};
+
+static inline sEquipEntry_B180* getEntry_B180(sEquipDb_B180* db, int id)
+{
+    short idx = db->map[id];
+    if (idx >= 0) {
+        return &db->entries[idx];
+    }
+    return 0;
+}
+
+static inline int isMode1_B180(void* self)
+{
+    return *(int*)((char*)self + 0xC8) == 1;
+}
+
+struct sCharEquip_B180 {
+    char pad0[0x44];
+    signed char team;               // 0x44
+    char pad45[0xBC - 0x45];
+    int slot;                       // 0xBC
+    char padC0[0x124 - 0xC0];
+    sEquipItem_B180* items[(0x958 - 0x124) / 4]; // 0x124
+    int count;                      // 0x958
+};
+
+// PORT: the unit declares func_0019B180 as void; the body returns the item count.
+extern "C" int func_0019B180_impl(void* selfv, int cat) __asm__("func_0019B180");
+// FAKEMATCH: identical arms `if (self) { if (it->name == 0) continue; } else { <same> }` in the second
+// loop (cross-jumped away after reload; before that they lengthen the live range of the self->items
+// copy, so global-alloc gives the loop-1 counter s5 and the copy s6 as in retail); plain form 99.01%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" int func_0019B180_impl(void* selfv, int cat)
+{
+    sCharEquip_B180* self = (sCharEquip_B180*)selfv;
+    void* iface = cBE_getInterface(cBE_getBE(), 9);
+    int lib = (int)func_0014BDB8_noarg();
+    sEquipDb_B180* db = (sEquipDb_B180*)func_0014AD28(iface, self->team, self->slot);
+    sEquipItem_B180* list[528];
+    int n = func_0014D7E8(lib, self->slot, cat, list, -1, 0);
+    self->count = 0;
+    MEM_fill(self->items, 0, 0x834);
+    if (isMode1_B180(self)) {
+        for (int i = 0; i < n; i++) {
+            sEquipItem_B180* it = list[i];
+            if (it->name == 0)
+                continue;
+            if (!(it->flags & 4)) {
+                if (!(it->flags & 0x20))
+                    continue;
+            }
+            sEquipEntry_B180* e = getEntry_B180(db, it->id);
+            if ((it->flags & 0x20) && func_0019B098(self, lib, (sEquipDb_B098*)db, it->id) == 0) {
+                self->items[self->count] = it;
+                self->count++;
+            } else if (!(it->flags & 0x20) && !(e->flags & 2)
+                       && (*(int*)((char*)self + 0xCC) == -1 || *(int*)((char*)self + 0xCC) == it->slot)) {
+                self->items[self->count] = it;
+                self->count++;
+            }
+        }
+    } else {
+        for (int i = 0; i < n; i++) {
+            sEquipItem_B180* it = list[i];
+            if (self) {
+                if (it->name == 0)
+                    continue;
+            } else {
+                if (it->name == 0)
+                    continue;
+            }
+            if (!(it->flags & 4)) {
+                if (!(it->flags & 0x20))
+                    continue;
+            }
+            sEquipEntry_B180* e = getEntry_B180(db, it->id);
+            if ((!(it->flags & 0x20) && (e->flags & 2))
+                || ((it->flags & 0x20) && func_0019AFD0(self, lib, (sEquipDb_AFD0*)db, it->id) != 0)) {
+                self->items[self->count] = it;
+                self->count++;
+            }
+        }
+    }
+    func_00418EF8_B180(self->items, self->count, 4, func_00198DA0);
+    return self->count;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B458);

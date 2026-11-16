@@ -3781,7 +3781,87 @@ extern "C" void* func_003012F0(void* self, int n, Ent_12F0* e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00301440);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cLunoValue_1440 {
+    int word0;
+    int word1;
+    int type;
+};
+extern cLunoValue_1440 D_004C9098_1440 __asm__("D_004C9098");
+// Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
+// and the slot; refs[slot] >> 8 is the object address >> 2.
+struct sRefSet_1440 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+struct sRefWorld_1440 {
+    char pad_0x0[0x8];
+    sRefSet_1440** sets;         // 0x8
+};
+extern sRefWorld_1440** D_004A47B8_1440 __asm__("D_004A47B8");
+// The script manager (cWScriptMan_1440 in the prototype, whose setBeing stores at 0x0); D_004A3DD8_1440 points at the instance.
+struct cWScriptMan_1440 {
+    int being;              // 0x0: index of the current being (rider)
+    char pad_0x4[0x28C];
+    char* f290;             // 0x290: object of the reference id -1
+    void* f294;             // 0x294
+    int f298;               // 0x298
+    char pad_0x29C[0x8];
+    char* f2A4;             // 0x2A4
+};
+extern cWScriptMan_1440* D_004A3DD8_1440 __asm__("D_004A3DD8");
+struct sBindArg_1FBE38_1440 { int idx; int val; int pad; int type; };
+struct sBindEnd_1FBE38_1440 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void MEM_copy(void*, void*, int);
+struct T12_1440 { unsigned a; int b; sBindEnd_1FBE38_1440 f; };
+extern T12_1440 D_004FBBF0_1440 __asm__("D_004FBBF0");
+extern int D_004A56BC_1440 __asm__("D_004A56BC");
+extern int D_004A3C78_1440[2] __asm__("D_004A3C78");
+// FAKEMATCH: the dead lookup of the object for the packed reference id buf[0] (`obj`, never used: in retail only its
+// `lw; nor` survive, the branch being removed after register allocation; the release build's user was debug code);
+// plain form 97.22%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* e) {
+    if (D_004A56BC_1440 == 0) {
+        D_004FBBF0_1440.a = 0xFFFFFFFF;
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        D_004FBBF0_1440.b = 1;
+        D_004FBBF0_1440.f = sBindEnd_1FBE38_1440();
+        D_004A56BC_1440 = 1;
+    }
+    unsigned buf64[3] __attribute__((aligned(16)));
+    unsigned* buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    MEM_copy(buf, &D_004FBBF0_1440, 12);
+    sBindArg_1FBE38_1440* x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004A3C78_1440[idx];
+        unsigned* d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = D_004A3DD8_1440->f290;
+    } else {
+        sRefSet_1440 *s = (*D_004A47B8_1440)->sets[id & 0xFF];
+        unsigned i;
+        if (!s || (i = s->refs[id >> 8] >> 8) == 0)
+            obj = 0;
+        else
+            obj = (char*)(i << 2);
+    }
+    return D_004C9098_1440;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00301560);

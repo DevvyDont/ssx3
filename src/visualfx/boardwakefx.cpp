@@ -3996,7 +3996,97 @@ void func_002E3110(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3130);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sLight3130 {
+    char pad0[0x40];
+    float vis[2];               // 0x40, per view
+};
+
+struct sHalo3130 {
+    char pad0[0x20];
+    sLight3130* light;          // 0x20
+    char pad24[0xA];
+    unsigned short active;      // 0x2E
+};
+
+struct sSun3130 {
+    char pad0[0x2E];
+    unsigned short active;      // 0x2E
+    char pad30[0x204 - 0x30];
+    float vis;                  // 0x204
+    char pad208[0x210 - 0x208];
+} __attribute__((aligned(16)));
+
+typedef sVEntry<int(void*, void*, float*)> sVE3130;
+
+struct sLens3130 {
+    char pad0[0x60];
+    int haloCount[1][2];        // 0x60
+    sHalo3130 halos[1][2][256]; // 0x68
+    char pad6068[8];
+    sSun3130 suns[1][2];        // 0x6070
+    int viewCount;              // 0x6490
+    int f6494;                  // 0x6494
+    int pad6498;
+    sVE3130* vt;                // 0x649C
+};
+
+// PORT: retail reads the "previous" bank [!bufferId] = [1] although the arrays have one bank (an out-of-range read in
+// the original). These two views give that read a second bank in range, so no compiler can treat it as undefined;
+// it reads the same memory after the first bank as retail. A port should give the class a real previous bank.
+struct sLensHaloBanks3130 {
+    char pad0[0x68];
+    sHalo3130 halos[2][2][256]; // 0x68
+};
+
+struct sLensSunBanks3130 {
+    char pad0[0x6070];
+    sSun3130 suns[2][2];        // 0x6070
+};
+
+// FAKEMATCH: the invented zero-valued bank index `int bufferId = 0;` (as landed func_002E3478's `bank`), so retail's
+// zeroed register times 0x6000 is kept; plain form (constant bank 0, prev bank 1 through the same views) 79.77%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" void func_002E3130(void* selfp)
+{
+    sLens3130* self = (sLens3130*)selfp;
+    if (self->f6494 == 0) {
+        // Double-buffered state with a bank dimension of one: bank 0 is current, the previous bank is !bufferId.
+        int bufferId = 0;
+        if (D_004A3B18 != 0) {
+            for (int v = 0; v < self->viewCount; v++) {
+                int prev = !bufferId;
+                if (self->suns[bufferId][v].active != 0) {
+                    float t = 0;
+                    sVE3130* e = &self->vt[4];
+                    if (e->fn((char*)self + e->delta, &self->suns[bufferId][v], &t)) {
+                        self->suns[bufferId][v].vis = t;
+                    } else {
+                        self->suns[bufferId][v].vis = ((sLensSunBanks3130*)self)->suns[prev][v].vis;
+                    }
+                }
+            }
+        }
+        for (int v = 0; v < self->viewCount; v++) {
+            int prev = !bufferId;
+            for (int i = 0; i < self->haloCount[bufferId][v]; i++) {
+                if (self->halos[bufferId][v][i].active != 0) {
+                    float t = 0;
+                    sVE3130* e = &self->vt[4];
+                    if (e->fn((char*)self + e->delta, &self->halos[bufferId][v][i], &t)) {
+                        self->halos[bufferId][v][i].light->vis[v] = t;
+                    } else {
+                        self->halos[bufferId][v][i].light->vis[v] = ((sLensHaloBanks3130*)self)->halos[prev][v][i].light->vis[v];
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3338);
