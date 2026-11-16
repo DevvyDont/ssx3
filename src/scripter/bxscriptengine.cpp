@@ -90,7 +90,7 @@ extern "C" void cBXScriptEngine_PurgeBXEngine(void* self)
 INCLUDE_ASM("scripter/bxscriptengine", func_002820B0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_002728F8(void* obj);
+extern "C" void cInSeq_UpdateFrame(void* obj);
 extern "C" void func_00282908(void* self, void* script);
 
 struct sScriptSlot_2820B0 {
@@ -112,7 +112,7 @@ static inline void slotNop_2820B0(void* self, void* slot) {}
 extern "C" void func_002820B0(sScriptEngine_2820B0* self)
 {
     int i;
-    func_002728F8(self->obj2B8);
+    cInSeq_UpdateFrame(self->obj2B8);
     for (i = 0; i < 16; i++) {
         sScriptSlot_2820B0* s = &self->slots[i];
         if (s->state == 0) {
@@ -168,8 +168,8 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002821A0);
 struct sBxsThreadHdr;
 extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1);
 extern "C" int func_00272938(void* self, void* src);
-// PORT: the unit declares func_00272CC0(int), but it really takes (self, id).
-void* func_00272CC0_2(void* self, int id) __asm__("func_00272CC0");
+// PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
+void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
 // PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
 int func_00274C10(void* self, int a1);
 void func_00282C88(void* self, void* v);
@@ -216,7 +216,7 @@ extern "C" int func_002821A0(void* self, int idx, int arg)
         t->slot = idx;
         t->state = 2;
         int id = func_00272938(*(void**)((char*)self + 0x2B8), s->data);
-        void* obj = func_00272CC0_2(*(void**)((char*)self + 0x2B8), id);
+        void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
         t->owner = obj;
         func_00274C10(obj, (int)t);
         s->uses++;
@@ -230,7 +230,7 @@ extern "C" int func_002821A0(void* self, int idx, int arg)
 INCLUDE_ASM("scripter/bxscriptengine", func_002822A0);
 #ifdef SKIP_ASM
 extern "C" void* func_00282CB0(void* self, int a1);
-extern "C" void func_00272AD0(void* cache, void* data, int a2);
+extern "C" void cInSeq_Play(void* cache, void* data, int a2);
 
 extern "C" int func_002822A0(void* self, int id, int value, int arg)
 {
@@ -245,7 +245,7 @@ extern "C" int func_002822A0(void* self, int id, int value, int arg)
     *(short*)(e + 0x10) = value;
     if (*(int*)(e + 0x20) == 1) {
         *(int*)(e + 0x4) = 3;
-        func_00272AD0(*(void**)((char*)self + 0x2B8), **(void***)e, arg);
+        cInSeq_Play(*(void**)((char*)self + 0x2B8), **(void***)e, arg);
     }
     return *(int*)(e + 0x4);
 }
@@ -255,14 +255,14 @@ extern "C" int func_002822A0(void* self, int id, int value, int arg)
 INCLUDE_ASM("scripter/bxscriptengine", func_00282338);
 #ifdef SKIP_ASM
 extern "C" void* func_00282CB0(void* self, int a1);
-extern "C" void func_00272B58(void* cache, void* data);
+extern "C" void cInSeq_Stop(void* cache, void* data);
 
 extern "C" void func_00282338(void* self, int a1)
 {
     char* e = (char*)func_00282CB0(self, a1);
     char* obj = *(char**)e;
     if (obj != 0 && *(int*)(obj + 0x20) != 0 && *(int*)(e + 0x20) == 1) {
-        func_00272B58(*(void**)((char*)self + 0x2B8), *(void**)obj);
+        cInSeq_Stop(*(void**)((char*)self + 0x2B8), *(void**)obj);
     }
 }
 #endif
@@ -500,19 +500,19 @@ extern "C" int func_00282540_impl(sScriptEngine_282540* self, int id)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282698);
 #ifdef SKIP_ASM
-extern "C" void func_00272BF8(int);
+extern "C" void cInSeq_PauseAll(int);
 
 extern "C" void func_00282698(void *arg0) {
-    func_00272BF8((*(int *)((char*)(arg0) + (0x2B8))));
+    cInSeq_PauseAll((*(int *)((char*)(arg0) + (0x2B8))));
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002826B8);
 #ifdef SKIP_ASM
-extern "C" void func_00272C70(int);
+extern "C" void cInSeq_ResumeAll(int);
 
 extern "C" void func_002826B8(void *arg0) {
-    func_00272C70((*(int *)((char*)(arg0) + (0x2B8))));
+    cInSeq_ResumeAll((*(int *)((char*)(arg0) + (0x2B8))));
 }
 #endif
 
@@ -668,8 +668,8 @@ extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
 INCLUDE_ASM("scripter/bxscriptengine", func_00282908);
 #ifdef SKIP_ASM
 extern "C" int func_00272938(void* self, void* src);
-// PORT: the unit declares func_00272CC0(int), but it really takes (self, id).
-void* func_00272CC0_2(void* self, int id) __asm__("func_00272CC0");
+// PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
+void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
 // PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
 int func_00274C10(void* self, int a1);
 void func_00274808(void* self, float t);
@@ -701,7 +701,7 @@ extern "C" void func_00282908(void* self, void* script)
     t->state = 2;
     t->f12 = 0;
     int id = func_00272938(*(void**)((char*)self + 0x2B8), s->data);
-    void* obj = func_00272CC0_2(*(void**)((char*)self + 0x2B8), id);
+    void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
     t->owner = obj;
     func_00274C10(obj, (int)t);
     if (t->time > 0.0f) {
@@ -862,14 +862,14 @@ extern "C" int func_00282BF0(void* self, int a1)
 }
 #endif
 
-extern "C" void* func_00272CC0(int);
+extern "C" void* cInSeq_GetPlayer(int);
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282C18__FPv);
 #ifdef SKIP_ASM
 void* func_00282C18(void* self)
 {
-    return func_00272CC0(*(int*)((char*)self + 0x2b8));
+    return cInSeq_GetPlayer(*(int*)((char*)self + 0x2b8));
 }
 #endif
 

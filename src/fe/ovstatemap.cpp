@@ -1396,7 +1396,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A4E0);
+INCLUDE_ASM("fe/ovstatemap", cOVState_onUpdate_HandleIncomingChat);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1431,7 +1431,7 @@ static inline void show_A4E0(char* o, int on)
 }
 
 // PORT: the session pointer is passed through func_00258160's int parameter.
-extern "C" int func_0020A4E0(cOVState* self)
+extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
 {
     int ret = 0;
     cBE_getInterface_Fv(SSXApp->BE, 7);

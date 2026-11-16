@@ -10,7 +10,7 @@
 //
 // The empty string is shared and static: cBXString::EmptyString (retail D_004A3E90 holds 0x0048DCD4), whose header at
 // 0x0048DCC8 is {NumRefs -1, DataLength 0, AllocLength 0}. NumRefs < 0 also marks a locked buffer (lockBuffer,
-// func_00318BC0, stores -1); the copy constructor (cBXString_cBXString1) deep-copies instead of sharing then.
+// cBXString_lockBuffer, stores -1); the copy constructor (cBXString_cBXString1) deep-copies instead of sharing then.
 //
 // A FLAT, POD layout (no constructors): matched code builds and destroys strings through the C-linkage functions
 // (cBXString_cBXString1/2/4/5, cBXString__cBXString, ...). Code whose stack frame needs a non-POD local string (gcc

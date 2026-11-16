@@ -5,16 +5,16 @@
 // overlay screens: cScreenPopup's "whitefg" / "Big shape" ..., cKeyboardPopup's boxes). EA's source is
 // d:/ssx/code/source/ui/uivector.cpp (preview assert path). Retail keeps its methods in ui/uivector
 // (cUIVector_setUIData .. cUIVector_setSize, the default constructor func_003A64F8, getType) and ui/uitext (the
-// constructor func_003A3280, the destructor cUIVector__cUIVector, cUIVector_setColour).
+// constructor cUIVector_cUIVector, the destructor cUIVector__cUIVector, cUIVector_setColour).
 //
-// Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "UIVector") + func_003A3280(this, pScreen, 0).
-// Retail vtable _vt$9cUIVector = D_004941B8 (cUIVector_vtbl; stored by func_003A3280, func_003A64F8 and the destructor).
+// Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "UIVector") + cUIVector_cUIVector(this, pScreen, 0).
+// Retail vtable _vt$9cUIVector = D_004941B8 (cUIVector_vtbl; stored by cUIVector_cUIVector, func_003A64F8 and the destructor).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below; the vptr is cUIThing's (0x8).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
 // Member names and types are EA's, from SSX On Tour's PSP DWARF (class cUIVector, size 0xA0: its cUIThing is 0x80, so
 // every cUIVector member sits exactly 0xC later there), placed at retail offsets by:
-//   [R] retail's constructors func_003A3280 (stores 0x74 bits and every pointer) / func_003A64F8, the destructor
+//   [R] retail's constructors cUIVector_cUIVector (stores 0x74 bits and every pointer) / func_003A64F8, the destructor
 //       cUIVector__cUIVector (frees 0x7C..0x8C) and the 0x90 allocation;
 //   [U] how retail code uses the field: cUIVector_setUIData allocates the arrays with their tags ("UIVectorClr" 16-byte
 //       tARGB, "UIVectorVtx" / "UIVectorVtxRdr" 12-byte t3Vector, "UIVectorLine" 0x30-byte tBxVertex);
@@ -49,7 +49,7 @@ struct cUIVector {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the cUIThing ctor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
-    void** mVtbl;                    // 0x008 [R] _vt$9cUIVector D_004941B8 (cUIVector_vtbl), stored by func_003A3280,
+    void** mVtbl;                    // 0x008 [R] _vt$9cUIVector D_004941B8 (cUIVector_vtbl), stored by cUIVector_cUIVector,
                                      //       func_003A64F8 and cUIVector__cUIVector
     cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation (ui/uithing.h); [U] cUIVector_update
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0 (cUIThing ctor); [U] cUIVector_update passes it on
@@ -78,7 +78,7 @@ struct cUIVector {
     t3Vector* mpVertexPosition;      // 0x080 [O]; [R] = 0, freed; [U] setUIData new[]s it ("UIVectorVtx", t3vect_Zero);
                                      //       getSize / setSize / setChannelData / render2D
     t3Vector* mpVertexPositionRender; // 0x084 [O]; [R] = 0, freed; [U] setUIData new[]s it ("UIVectorVtxRdr"); render2D
-    t2Vector* mpUV;                  // 0x088 [O]; [R] = 0 (func_003A3280), freed by the dtor; [U] cUIVector_setChannelData
+    t2Vector* mpUV;                  // 0x088 [O]; [R] = 0 (cUIVector_cUIVector), freed by the dtor; [U] cUIVector_setChannelData
                                      //       reads it (never allocated by setUIData)
     tBxVertex* mpVertices;           // 0x08C [O]; [R] = 0, freed; [U] setUIData new[]s mNumVertices 0x30-byte entries
                                      //       ("UIVectorLine") when mFill is clear; cUIVector_render2D fills them

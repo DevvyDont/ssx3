@@ -332,7 +332,7 @@ extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream003
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035C5A0);
+INCLUDE_ASM("object/railmodifier", cRailModifier_getInvMat);
 #ifdef SKIP_ASM
 struct sRmMat44C5A0 {
     float m[4][4];
@@ -394,7 +394,7 @@ static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
 
 extern "C" void func_0034FED8(void* model, int bone, sRmMat44C5A0* out);
 
-extern "C" void func_0035C5A0(cRailModifier* self, sRmMat44C5A0* m)
+extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* m)
 {
     func_0034FED8(self->Instance, self->Mesh, m);
     sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)self + 0x50);
@@ -407,7 +407,7 @@ extern "C" void func_0035C5A0(cRailModifier* self, sRmMat44C5A0* m)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035C698);
+INCLUDE_ASM("object/railmodifier", cRailModifier_splineIntersect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -530,7 +530,7 @@ struct sRmF5_C698 {
 };
 
 extern "C" sRmWorld_C698** func_002D1BD8();
-extern "C" void func_0035C5A0_C698(void* self, sRmMat44* m) __asm__("func_0035C5A0");
+extern "C" void cRailModifier_getInvMat_C698(void* self, sRmMat44* m) __asm__("cRailModifier_getInvMat");
 extern t4Vector D_004FF120_C698 __asm__("t4vect_Zero");
 extern const sRmF5_C698 D_0048E7D8;
 extern const sRmF5_C698 D_0048E7F0;
@@ -747,7 +747,7 @@ static inline void resetHit_C698(sRmHit_C698* h)
     h->v = 0;
 }
 
-extern "C" void func_0035C698(cRailModifier* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
+extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
                               int* found, float* bestDist, sRmHit_C698* out)
 {
     sRmSpline_C698* spline = (sRmSpline_C698*)(*(sRmRef_C698*)&self->SplineId).get(*func_002D1BD8());
@@ -755,7 +755,7 @@ extern "C" void func_0035C698(cRailModifier* self, void* box, void* box2, const 
         return;
     }
     sRmMat44 mat;
-    func_0035C5A0_C698(((sRmObj_C698*)self), &mat);
+    cRailModifier_getInvMat_C698(((sRmObj_C698*)self), &mat);
     sRmSeg_C698* seg = spline->segs;
     for (int i = 0; i < spline->numSegs; i++, seg = seg->next) {
         float a = 0.0f;
@@ -2793,7 +2793,7 @@ extern "C" void cUVScrollModifier_signal(cUVScrollModifier* self, int id, float 
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035FC20);
+INCLUDE_ASM("object/railmodifier", cUVScrollModifier_getTextureMat);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
@@ -2812,7 +2812,7 @@ struct sRmMtx_35FC20 {
 
 extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
 
-extern "C" sRmMtx_35FC20* func_0035FC20(cUVScrollModifier* self, sRmMtx_35FC20* m)
+extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, sRmMtx_35FC20* m)
 {
     float zero = 0.0f;
     if (self->Angle != zero) {
@@ -4031,12 +4031,12 @@ void func_00360AF8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360B00);
+INCLUDE_ASM("object/railmodifier", cTransformModifier__cTransformModifier);
 #ifdef SKIP_ASM
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_00360B00(cTransformModifier* self, int flags)
+extern "C" void cTransformModifier__cTransformModifier(cTransformModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -4721,9 +4721,9 @@ extern "C" int func_00360DE8(cMoveNode* self)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360E30);
+INCLUDE_ASM("object/railmodifier", cMoveNode_getTransformModifier);
 #ifdef SKIP_ASM
-extern "C" int func_00360E30(cMoveNode* self)
+extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
 {
     int* p = (int*)self->ModifierBlock;
     if (p != 0) {
@@ -4763,9 +4763,9 @@ extern "C" int func_00360E70(cMoveNode* arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360E90);
+INCLUDE_ASM("object/railmodifier", cMoveNode_getMaterialBlock);
 #ifdef SKIP_ASM
-extern "C" int func_00360E90(cMoveNode* self)
+extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
 {
     int cond;
     char* p = (char*)self->ModifierBlock;
@@ -4784,13 +4784,13 @@ extern "C" int func_00360E90(cMoveNode* self)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360ED0);
+INCLUDE_ASM("object/railmodifier", cMoveNode_getTextureMat);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// the unit declares func_0035FC20 with two parameters; this caller passes one
-void* func_0035FC20_1arg(void*) __asm__("func_0035FC20");
+// the unit declares cUVScrollModifier_getTextureMat with two parameters; this caller passes one
+void* cUVScrollModifier_getTextureMat_1arg(void*) __asm__("cUVScrollModifier_getTextureMat");
 
-extern "C" void* func_00360ED0(cMoveNode* self)
+extern "C" void* cMoveNode_getTextureMat(cMoveNode* self)
 {
     char* p = (char*)self->ModifierBlock;
     int cond = 0;
@@ -4800,7 +4800,7 @@ extern "C" void* func_00360ED0(cMoveNode* self)
     if (cond != 0) {
         void* q = *(void**)(p + 4);
         if (q != 0) {
-            return func_0035FC20_1arg(q);
+            return cUVScrollModifier_getTextureMat_1arg(q);
         }
     }
     return 0;
@@ -5895,9 +5895,9 @@ void* func_00361910(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361918);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void func_00361918(cPositionModifier* self, void* a1)
+extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* a1)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
     *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
@@ -5923,7 +5923,7 @@ void func_00361938(void* self, float val)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361940);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_getRootTransform);
 #ifdef SKIP_ASM
 struct sRailVEntry1940 {
     short delta;
@@ -5931,7 +5931,7 @@ struct sRailVEntry1940 {
     void (*fn)(void*);
 };
 
-extern "C" void* func_00361940(cPositionModifier* self)
+extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
 {
     if (self->RootTransformDirty != 0) {
         sRailVEntry1940* vt = *(sRailVEntry1940**)self;
@@ -6070,7 +6070,7 @@ int func_00361A58(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361A60);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier_getRootTransform);
 #ifdef SKIP_ASM
 struct sRailVEntry1A60 {
     short delta;
@@ -6078,7 +6078,7 @@ struct sRailVEntry1A60 {
     void (*fn)(void*);
 };
 
-extern "C" void* func_00361A60(cMagnetModifier* self)
+extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
 {
     if (self->RootTransformDirty != 0) {
         sRailVEntry1A60* vt = *(sRailVEntry1A60**)self;

@@ -54,8 +54,8 @@ struct cUIStateBuyPopup {
     signed char mUserNum;           // 0x044 [O]; [R] cUIStateBuyPopup_cUIStateBuyPopup stores its userNum argument (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cUIStateBuyPopup
-    cBuyPopupInfo mInfo;            // 0x048 [O]; [R] clear (func_001CA8A0) in both ctors; [U] getPopupInfo func_001DDCB8
-                                    //       returns &mInfo; initBuyTrick / initBuyAttributes (func_001CAFC0) and the
+    cBuyPopupInfo mInfo;            // 0x048 [O]; [R] clear (cBuyPopupInfo_clear) in both ctors; [U] getPopupInfo func_001DDCB8
+                                    //       returns &mInfo; initBuyTrick / initBuyAttributes (cUIStateBuyPopup_initBuyAttributes) and the
                                     //       inline initBuySong* (func_001DDCC8/DCE8/DD08) fill it; onWidgetCreate shows it
     int mbAccept;                   // 0x06C [O] bool mAccept (1 byte in On Tour; retail lw/sw the word);
                                     //       [U] onWidgetEvent stores 1 for "yes", else 0; isAccept func_001DDCC0 returns it

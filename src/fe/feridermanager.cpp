@@ -943,7 +943,7 @@ void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" int func_0014D448(void* self, int g, int key);
 extern "C" void func_0030EB60(void* model);
-extern "C" void func_0030EC18(void* model, int i, int param);
+extern "C" void cAnimModel_setModelPartVariant(void* model, int i, int param);
 
 struct sItemF780 {
     short id;
@@ -986,7 +986,7 @@ extern "C" void func_0019F780(int* self)
         if (it[i].flags & 0x10) {
             sBoneEntF780* e = getEntK19F780(db, func_0014D448(db, self[0], it[i].id));
             if (e->f10 >= 0)
-                func_0030EC18(*(void**)((char*)self + 0x8), e->f10, e->f1);
+                cAnimModel_setModelPartVariant(*(void**)((char*)self + 0x8), e->f10, e->f1);
         }
     }
     **(int**)((char*)self + 0xC74) = 1;

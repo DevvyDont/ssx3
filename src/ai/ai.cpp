@@ -1228,13 +1228,13 @@ extern "C" int cAI_isRaceFinished(cAI* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012A2B0);
+INCLUDE_ASM("ai/ai", cAI_swaploadPathFile);
 #ifdef SKIP_ASM
 extern "C" void func_00112180(void* rider, int v);
 extern "C" void func_0026AF00(void* self);
 extern "C" void func_0026ADA8(void*, int);
 extern char D_004D33A0[];
-extern "C" void func_0012A2B0(cAI* self, int arg1) {
+extern "C" void cAI_swaploadPathFile(cAI* self, int arg1) {
     int i;
     func_0026AF00(D_004D33A0);
     func_0026ADA8(D_004D33A0, arg1);
@@ -1774,11 +1774,11 @@ extern "C" int cAI_isReadyToPurgeComputerActors(cAI* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012AD70);
+INCLUDE_ASM("ai/ai", cAI_prepareToPurgeMissionRiders);
 #ifdef SKIP_ASM
 // self is a cAI (no header yet); +0x70 is its list of rider objects (count at +0x88),
 // each holding its cRider virtual-base pointer at +0x18.
-extern "C" void func_0012AD70(cAI* self)
+extern "C" void cAI_prepareToPurgeMissionRiders(cAI* self)
 {
     for (int i = 0; i < self->NumberOfMissionRidersLoaded; i++)
     {
@@ -1793,9 +1793,9 @@ extern "C" void func_0012AD70(cAI* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ai/ai", func_0012ADC0);
+INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeMissionRiders);
 #ifdef SKIP_ASM
-extern "C" int func_0012ADC0(cAI* self) {
+extern "C" int cAI_isReadyToPurgeMissionRiders(cAI* self) {
     int i;
     int ok = 1;
     for (i = 0; i < self->NumberOfMissionRidersLoaded; i++) {
@@ -1960,9 +1960,9 @@ extern "C" void cAI_cleanupAfterRace(cAI* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012B060);
+INCLUDE_ASM("ai/ai", cAI_cleanupAfterFreeride);
 #ifdef SKIP_ASM
-extern "C" void func_0012B060(cAI* self)
+extern "C" void cAI_cleanupAfterFreeride(cAI* self)
 {
     cAI_purgeMissionRiders(self);
     cAI_RefreshGroupAI(self);

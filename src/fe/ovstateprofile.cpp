@@ -710,7 +710,7 @@ extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
 extern "C" void cKeyboardPopup_setInputText(void* kb, void* name);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* kb, int a1);
-extern "C" void func_001CD0B0(void* kb, int a1);
+extern "C" void cKeyboardPopup_setMinCharacters(void* kb, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* kb, int key, int a2, int a3);
 extern "C" void func_001CE408(void* kb, int a1);
 extern "C" void cKeyboardPopup_setStatic(void* kb, void* text);
@@ -832,7 +832,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0x40, 0, 2);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0x41, 0, 2);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0x42, 0, 2);
-                func_001CD0B0(self->keyboard, 1);
+                cKeyboardPopup_setMinCharacters(self->keyboard, 1);
             }
             cKeyboardPopup_setStatic(self->keyboard, GetText_K211BC8(D_00471DE8));
             *(int*)(self->keyboard + 0x54) = 1;

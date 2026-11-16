@@ -2,7 +2,7 @@
 #define OBJECT_RAILSPACENODE_H
 
 // cRailSpaceNode: the Nash (intersect/nash.cpp) space-partition node that puts one cRailModifier's bound box into the
-// world octree, so rail queries (worldsphtree's spline callback -> cRailModifier splineIntersect func_0035C698) find it.
+// world octree, so rail queries (worldsphtree's spline callback -> cRailModifier splineIntersect cRailModifier_splineIntersect) find it.
 // Size 0x10: retail cMemMan_alloc(0x10, "RailNode", ...) in cRailModifier_buildXform; On Tour 0x10.
 // Bases (On Tour DWARF): nash Node {next 0x0, prev 0x4} (0x8) -> cTypedSpaceNode {type 0x8, eSpaceNodeType} (0xC) ->
 // cRailSpaceNode {Rail 0xC}. No vptr. The constructor is inline in buildXform: type = 2 (kSNT_Rail), Rail = the modifier.

@@ -52,7 +52,7 @@ struct cOVState {
     int mRemovePDA;             // 0x054 [O]; [R] zeroed by func_0021C678; [U] cOVState_onDestroyScreen calls
                                 //       cOVStateManager_removePDATemplate when it is set
     char mszChatBuff[0x40];     // 0x058 [O] (On Tour: char[63]); [R] func_0021C678 copies " " into it (sh);
-                                //       [U] func_0020A4E0 fills it with the incoming chat name and prints it
+                                //       [U] cOVState_onUpdate_HandleIncomingChat fills it with the incoming chat name and prints it
     int mOVID;                  // 0x098 [O] tOVStateEnum; [R] func_0021C678 stores its id argument
 };
 

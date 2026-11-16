@@ -3,13 +3,13 @@
 
 // cUIMenu: a UI group whose children are selectable items (the "Menu0000" / "MenuFroms" widgets of the FE and overlay
 // screens). EA's source is d:/ssx/code/source/ui/uimenu.cpp (preview assert path). Retail spreads its code over
-// ui/uilistbox (cUIMenu_setFocus .. cUIMenu_getNext, func_0039AC48), ui/uimenu (cUIMenu_setSelected ..
-// cUIMenu_setSelectedByIndex) and ui/uivector (the constructor func_003A5230, the destructor cUIMenu__cUIMenu, getType
+// ui/uilistbox (cUIMenu_setFocus .. cUIMenu_getNext, cUIMenu_getPrev), ui/uimenu (cUIMenu_setSelected ..
+// cUIMenu_setSelectedByIndex) and ui/uivector (the constructor cUIMenu_cUIMenu, the destructor cUIMenu__cUIMenu, getType
 // and the out-of-line inline accessors func_003A5338 .. func_003A5418).
 //
 // Size 0xA8: cUIScreen_createObjectByStruct (record type 0x13) does operator new(0xA8, "UIMenu") and builds it inline
 // (cUIThing ctor func_0039FB30, cUIGroup's vtable, cList ctor func_003977E8 at 0x74, cUIMenu's vtable, tAttrMenu ctor
-// func_003A5338 at 0x90, then the stores below); func_003A5230 is the same constructor out of line. Retail vtable
+// func_003A5338 at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
 // _vt$7cUIMenu = D_00494928 (cUIMenu_vtbl).
 // Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uithing.h, tag "cUIGroup" 0x90) <- cUIThing <-
 // cListNode, written out flat below. The vptr is cUIThing's (0x8).
@@ -21,8 +21,8 @@
 //       getScrollOffset / getScrollNum / setScrollIndex / setScrollNum / setScrollOffset / getSelected /
 //       getSelectedIndex, in that declaration order). Retail keeps out-of-line copies of them in the same order in
 //       ui/uivector (func_003A5350 .. func_003A5418), which places each one; retail adds get/set pairs for two more
-//       tAttrMenu bits (func_003A5380/func_003A5390 bit 3, func_003A53B0/func_003A53C0 bit 0);
-//   [R] retail's constructors (func_003A5230 and the inlined copy in cUIScreen_createObjectByStruct), the destructor
+//       tAttrMenu bits (func_003A5380/cUIMenu_setDisableDirSound bit 3, func_003A53B0/func_003A53C0 bit 0);
+//   [R] retail's constructors (cUIMenu_cUIMenu and the inlined copy in cUIScreen_createObjectByStruct), the destructor
 //       cUIMenu__cUIMenu and the 0xA8 allocation;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order and types alone, where the fields on both sides of it are placed by [P] or [R].
@@ -46,9 +46,9 @@ struct cUIScrollBar;
 struct tAttrMenu {
     unsigned char mCreateThread : 1;    // bit 0 [U] func_003A53B0/func_003A53C0; passed to cUIMenu_setSelected by onInputChangeItem
     unsigned char mFlipInput : 1;       // bit 1 [P] isFlipInput/setFlipInput (func_003A5350/func_003A5360)
-    unsigned char mScrollMenu : 1;      // bit 2 [O]; [U] cUIMenu_setScrollableMenu sets it; getNext / func_0039AC48 /
-                                        //       cUIMenu_findFirstHighlightable / func_0039B878 / onInputChangeItem test it
-    unsigned char mDisableDirSound : 1; // bit 3 [O]; [U] func_003A5380/func_003A5390; cUIMenu_onInput tests it
+    unsigned char mScrollMenu : 1;      // bit 2 [O]; [U] cUIMenu_setScrollableMenu sets it; getNext / cUIMenu_getPrev /
+                                        //       cUIMenu_findFirstHighlightable / cUIMenu_reverseFindFirstHighlightable / onInputChangeItem test it
+    unsigned char mDisableDirSound : 1; // bit 3 [O]; [U] func_003A5380/cUIMenu_setDisableDirSound; cUIMenu_onInput tests it
 };
 
 CHECK_SIZE(tAttrMenu, 0x1);

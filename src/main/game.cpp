@@ -532,7 +532,7 @@ extern char gBucketMan[4];
 extern void* gWorldTriggerManager;
 extern char t4mat_Identity[];
 extern int D_004A4324;
-extern "C" void func_003550A0(void* self, int index);
+extern "C" void cBucketMan_renderBucket(void* self, int index);
 void func_002789C0(void* p);
 extern "C" void func_00397DF8(void* p);
 extern "C" void func_001F31E0(void* p);
@@ -559,7 +559,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         SetBits_C830(&((cGfx_C830*)g)->stateTop->w4, 0x300000, 0x300000);
         Set1_C830((cGfx_C830*)g, 0xFF000, 12, 0xD);
         Set2_C830((cGfx_C830*)g, 0x3E0, 5, 4);
-        func_003550A0(gBucketMan, 3);
+        cBucketMan_renderBucket(gBucketMan, 3);
         i++;
     } while (i < self->views->count);
     }
@@ -893,11 +893,11 @@ int func_0022D278_impl(void* self, int idx)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/game", func_0022D390);
+INCLUDE_ASM("main/game", cSectionMan_isActive);
 #ifdef SKIP_ASM
 extern "C" int func_0022D278(void* self);
 
-extern "C" int func_0022D390(cSectionMan* self)
+extern "C" int cSectionMan_isActive(cSectionMan* self)
 {
     int r = 0;
     if (func_0022D278(self) != 0) {
@@ -1585,14 +1585,14 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(cSectionMan* self, i
 
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/game", func_0022E118);
+INCLUDE_ASM("main/game", cSectionMan_gotoLocation);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSectionMan_activate(cSectionMan* self, int a1, int a2);
 extern signed char D_00535C11[];
 
-extern "C" void func_0022E118(cSectionMan* self, int a1)
+extern "C" void cSectionMan_gotoLocation(cSectionMan* self, int a1)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 0) {

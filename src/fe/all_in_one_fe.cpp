@@ -1866,7 +1866,7 @@ void func_001E91A8(void*, void*);
 extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
 extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
 extern "C" int sprintf(char*, const char*, ...);
-extern "C" int func_0022D390(void*, int);
+extern "C" int cSectionMan_isActive(void*, int);
 extern "C" int func_00153520(void*, int, int);
 extern "C" int func_00153350(void*, int);
 extern "C" void cFont_text(void*, float, float, char*);
@@ -1881,7 +1881,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
     char buf[64];
     char* m = (char*)SSXApp->Game->SectionMan;
     int id = *(int*)(m + 0x1BC);
-    if (func_0022D390(m, id)) {
+    if (cSectionMan_isActive(m, id)) {
         float s = 1.0f;
         scale.x = 1.0f;
         scale.y = 1.0f;

@@ -6,7 +6,7 @@
 // cAvaSplineModifier, cRollerModifier. Size 0x4 (vptr only): On Tour 0x4; every derived retail ctor stores its vtable at
 // +0x0 and its own state from +0x4 (cMultiSplineModifier) or +0x10 (the 16-byte-aligned states).
 // EA's header: d:/ssx/code/source/object/transformmodifier.h (preview assert string). Base vtable D_004913F8 (27 slots):
-// ~cTransformModifier func_00360B00, update func_00360B30, updateRootTransform func_00360B38, postUpdate, signal,
+// ~cTransformModifier cTransformModifier__cTransformModifier, update func_00360B30, updateRootTransform func_00360B38, postUpdate, signal,
 // isComplete, clearComplete, shouldRebound, runCollide, collide, render, getBoundBox func_00360B80, setBoundBox
 // func_00360B88, getRadius func_00360B90, setRadius func_00360BA0, getMesh, isRootTransformDirty, getRootTransform()
 // func_00360BB8, getRootTransform(inst), hasIntersect, intersect, updateIntersectInfo, getAnimMats, updateOverlapSystem,
@@ -16,7 +16,7 @@
 #include "layout.h"
 
 struct cTransformModifier {
-    void** mVtbl;                   // 0x00 [R] func_00360B00 (dtor) stores D_004913F8; derived ctors store their own
+    void** mVtbl;                   // 0x00 [R] cTransformModifier__cTransformModifier (dtor) stores D_004913F8; derived ctors store their own
                                     //      vtable
 };
 

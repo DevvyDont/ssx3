@@ -2615,13 +2615,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDC48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E318_DC48(void *, int, int) __asm__("func_0039E318");
-extern "C" void func_001CA8A0_DC48(void *) __asm__("func_001CA8A0");
+extern "C" void cBuyPopupInfo_clear_DC48(void *) __asm__("cBuyPopupInfo_clear");
 extern int cUIStateBuyPopup_vtbl[];
 
 extern "C" void *func_001DDC48(cUIStateBuyPopup* self) {
     func_0039E318_DC48(self, 0, 0);
     self->mVtbl = (void**)cUIStateBuyPopup_vtbl;
-    func_001CA8A0_DC48((char *)self + 0x48);
+    cBuyPopupInfo_clear_DC48((char *)self + 0x48);
     return ((void*)self);
 }
 #endif

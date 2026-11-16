@@ -6,5 +6,5 @@ INCLUDE_ASM("worldpainter/worldpainterquery2", cWorldPainterQuery__cWorldPainter
 
 INCLUDE_ASM("worldpainter/worldpainterquery2", cWorldPainterQuery_queryPosition);
 
-INCLUDE_ASM("worldpainter/worldpainterquery2", func_002C0A10);
+INCLUDE_ASM("worldpainter/worldpainterquery2", cWorldPainterQuery_lookupRegion);
 

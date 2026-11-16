@@ -7260,11 +7260,11 @@ extern "C" int func_00144010(cComputer* computer, float fparg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144040);
+INCLUDE_ASM("ai/control/handplantcontrol", cComputer_setCruiseLogic);
 #ifdef SKIP_ASM
 extern tComputerCruiseLogic D_0043CF20[];
 
-extern "C" void func_00144040(cComputer* self, int idx)
+extern "C" void cComputer_setCruiseLogic(cComputer* self, int idx)
 {
     *(&self->cruiseLogic) = D_0043CF20[idx];
     self->mCruiseLogicID = idx;

@@ -199,9 +199,9 @@ extern "C" void func_0030EB60(cAnimModel* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EBC0);
+INCLUDE_ASM("animation/animmodel", cAnimModel_isPartEnabled);
 #ifdef SKIP_ASM
-extern "C" int func_0030EBC0(cAnimModel* self, int i, int channel)
+extern "C" int cAnimModel_isPartEnabled(cAnimModel* self, int i, int channel)
 {
     int idx;
     if (i > self->maxPartIndex || self->partIndex == 0 || (idx = self->partIndex[i]) < 0)
@@ -213,10 +213,10 @@ extern "C" int func_0030EBC0(cAnimModel* self, int i, int channel)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EC18);
+INCLUDE_ASM("animation/animmodel", cAnimModel_setModelPartVariant);
 #ifdef SKIP_ASM
 // PORT: ulong is 64-bit here
-extern "C" void func_0030EC18(cAnimModel* self, int i, int param)
+extern "C" void cAnimModel_setModelPartVariant(cAnimModel* self, int i, int param)
 {
     if (i > self->maxPartIndex)
     {
@@ -265,13 +265,13 @@ INCLUDE_ASM("animation/animmodel", func_0030ECD8);
 INCLUDE_ASM("animation/animmodel", func_0030F2B0);
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310120);
+INCLUDE_ASM("animation/animmodel", cAnimModel_setSkelMatrix);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 macro-mode asm. Builds bone matrix unk_030[i] from the bone's quaternion
 // (rot, rows 0-2) and position (pos, row 3), then unk_034[i] = unk_030[i] with each row scaled
 // by the matching component of unk_140.
 // PORT: index-first (int) address arithmetic (pointer in int).
-extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* animModelBone)
+extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone* animModelBone)
 {
     __asm__ __volatile__(
         ".set push\n"
@@ -488,12 +488,12 @@ extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animmodel", cAnimModel_buildSkelMatrices);
 #ifdef SKIP_ASM
-extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* p);
+extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone* p);
 
 /**
  * Builds the skeleton matrices of every bone from its world transform.
  *
- * func_00310120 writes unk_030[i] from the bone's rotation and position, and unk_034[i] as that matrix with
+ * cAnimModel_setSkelMatrix writes unk_030[i] from the bone's rotation and position, and unk_034[i] as that matrix with
  * its rows scaled by unk_140 (probably On Tour's getSkelMatrices and getSkelMatricesScaled).
  */
 extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
@@ -501,7 +501,7 @@ extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
     int i;
     for (i = 0; i < self->numBones; i++)
     {
-        func_00310120(self, i, &self->bones[i]);
+        cAnimModel_setSkelMatrix(self, i, &self->bones[i]);
     }
 }
 #endif
@@ -768,7 +768,7 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310948);
+INCLUDE_ASM("animation/animmodel", cAnimModel_rendershadow);
 #ifdef SKIP_ASM
 struct sAmMat_0948;
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
@@ -863,7 +863,7 @@ typedef void (*tDraw_0948)(void*, char*, char*, int);
 extern int D_004A594C;
 extern sAmMat_0948 D_004FD420[];
 
-extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)
+extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
 {
     if (D_004A594C == 0) {
         new ((void*)D_004FD420) sAmMat_0948[64];

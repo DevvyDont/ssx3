@@ -403,7 +403,7 @@ extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int iRider, int iG
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238590);
+INCLUDE_ASM("main/gamemode", cGameModeMan_getHeatScore);
 #ifdef SKIP_ASM
 struct sVEntry_00238590 {
     short delta;
@@ -413,7 +413,7 @@ struct sVEntry_00238590 {
 
 extern void* D_00536668[];
 
-extern "C" void func_00238590(cGameModeMan* self, int a, int b)
+extern "C" void cGameModeMan_getHeatScore(cGameModeMan* self, int a, int b)
 {
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238590* vt = *(sVEntry_00238590**)obj;
@@ -422,7 +422,7 @@ extern "C" void func_00238590(cGameModeMan* self, int a, int b)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_002385D0);
+INCLUDE_ASM("main/gamemode", cGameModeMan_writeToReplayFrame);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 class cGmStream_385D0 {
@@ -448,7 +448,7 @@ public:
 
 extern int D_00536708[];
 
-extern "C" void func_002385D0(cGameModeMan* self, cGmStream_385D0* s)
+extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cGmStream_385D0* s)
 {
     s->write(((char*)self) + 4, 4);
     s->write(((char*)self), 4);
@@ -476,7 +476,7 @@ extern "C" void func_002385D0(cGameModeMan* self, cGmStream_385D0* s)
 }
 #endif
 //100%
-INCLUDE_ASM("main/gamemode", func_002388A0);
+INCLUDE_ASM("main/gamemode", cGameModeMan_readFromReplayFrame);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 class cGameModeObj_2388A0 {
@@ -494,7 +494,7 @@ public:
     virtual void load(cGmStream_385D0* s);
 };
 
-extern "C" void func_002388A0(cGameModeMan* self, cGmStream_385D0* s)
+extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_385D0* s)
 {
     s->read(((char*)self) + 4, 4);
     s->read(((char*)self), 4);

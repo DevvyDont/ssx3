@@ -424,12 +424,12 @@ extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD358);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_FadeOut);
 #ifdef SKIP_ASM
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int a2);
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
-extern "C" void func_002AD358(cBankMonitor* self, int idx, int key, float v)
+extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, int key, float v)
 {
     void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, key);
     if (voice != 0) {
@@ -618,7 +618,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, fl
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD730);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Active);
 #ifdef SKIP_ASM
 extern "C" int func_002ABB80(void*);
 
@@ -628,7 +628,7 @@ struct sVoiceAD730 {
     char pad[0xC0 - 0xC];
 };
 
-extern "C" int func_002AD730(cBankMonitor* self)
+extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
@@ -644,11 +644,11 @@ extern "C" int func_002AD730(cBankMonitor* self)
 }
 #endif
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AD7A8);
+INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Used);
 #ifdef SKIP_ASM
 extern "C" int func_002ABB80(void*);
 
-extern "C" int func_002AD7A8(cBankMonitor* self)
+extern "C" int cBankMonitor_BANKMONITOR_Used(cBankMonitor* self)
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
@@ -1035,9 +1035,9 @@ extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADD78);
+INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Destroy);
 #ifdef SKIP_ASM
-extern "C" void func_002ADD78(cMonitor* self, int idx)
+extern "C" void cMonitor_MONITOR_Destroy(cMonitor* self, int idx)
 {
     int off = idx * 0x2C + 0x98;
     cMonitorInstance_Reset((cMonitorInstance*)(((char*)self) + off));

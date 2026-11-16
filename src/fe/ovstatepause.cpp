@@ -1339,7 +1339,7 @@ extern "C" char* func_00144BF0(void* iface);
 extern "C" unsigned short* func_002C2540_BD20(unsigned short* dst, char* src) __asm__("func_002C2540");
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
-extern "C" int func_00238590(void* stats, int id, int kind);
+extern "C" int cGameModeMan_getHeatScore(void* stats, int id, int kind);
 extern "C" char* func_0014EEC8(void* iface, int id, int a2);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
@@ -1445,8 +1445,8 @@ extern "C" void func_001FBD20(void* self)
             cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(D_0046FCC0));
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(D_0046FCD8));
         } else if (mode == 2) {
-            int total = func_00238590(stats, D_00536708[2], 0) + func_00238590(stats, D_00536708[2], 1);
-            int n = total - func_00238590(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
+            int total = cGameModeMan_getHeatScore(stats, D_00536708[2], 0) + cGameModeMan_getHeatScore(stats, D_00536708[2], 1);
+            int n = total - cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
             if (n > 0) {
                 unsigned short buf[0x320];
                 unsigned short* fmt = lookupString_1FBD20(D_0046FCF0);
@@ -1526,7 +1526,7 @@ extern "C" void func_001FBD20(void* self)
             sprintf(name, D_0046E428, i);
             t = getObj_1FBD20(self, name);
             if (t != 0) {
-                sprintf(num, D_004A2138, func_00238590(stats, id, mode == 3 ? 2 : 0));
+                sprintf(num, D_004A2138, cGameModeMan_getHeatScore(stats, id, mode == 3 ? 2 : 0));
                 cUIText_setAsciiString((cUIText*)t, num);
             }
             sprintf(name, D_0046E438, i);
@@ -1534,12 +1534,12 @@ extern "C" void func_001FBD20(void* self)
             if (cBENewRaceInterface_newRace[0x49] == 0 && mode == 2) {
                 char name2[0x20];
                 char total[0x10];
-                sprintf(num, D_004A2138_n, func_00238590(stats, id, 1));
+                sprintf(num, D_004A2138_n, cGameModeMan_getHeatScore(stats, id, 1));
                 cUIText_setAsciiString((cUIText*)t, num);
                 sprintf(name2, D_0046E448, i);
                 t = getObj_1FBD20(self, name2);
-                int a = func_00238590(stats, id, 0);
-                int b = func_00238590(stats, id, 1);
+                int a = cGameModeMan_getHeatScore(stats, id, 0);
+                int b = cGameModeMan_getHeatScore(stats, id, 1);
                 sprintf(total, D_004A2138_n, a + b);
                 cUIText_setAsciiString((cUIText*)t, total);
             } else {
@@ -1553,7 +1553,7 @@ extern "C" void func_001FBD20(void* self)
     o = getObj_1FBD20(self, D_004A2510);
     if (cBENewRaceInterface_newRace[0x49] == 0 && mode == 2) {
         char buf[0x10];
-        int score = func_00238590(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
+        int score = cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
         sprintf(buf, D_004A2138, score);
         cUIText_setAsciiString((cUIText*)o, buf);
     } else {

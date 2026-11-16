@@ -633,7 +633,7 @@ extern "C" bool func_0014EF70(void* iface, int riderIndex);
 extern "C" void func_00112180(void* rider, int v);
 extern "C" int func_00145C38(void* iface, int index);
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
-extern "C" void func_0011DD98(cRider* self);
+extern "C" void cRider_putAtDropOffBC(cRider* self);
 extern "C" void func_00119E38(void* p, int flip, int c);
 extern "C" void cRider_putAtStartpoint(cRider* self, int a1, int a2);
 extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify);
@@ -667,7 +667,7 @@ void func_0011D390_impl(cRider* self)
         {
             if (cBENewRaceInterface_newRace.cGameMode == 4)
             {
-                func_0011DD98(self);
+                cRider_putAtDropOffBC(self);
                 cRider_setMotionState_impl(self, 1);
                 func_0011FEC8_impl(self, 4);
                 func_00119E38(self->mMetrix, 0, 0);
@@ -1174,7 +1174,7 @@ extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const floa
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/rider", func_0011DD98);
+INCLUDE_ASM("ai/rider", cRider_putAtDropOffBC);
 #ifdef SKIP_ASM
 extern "C" void* func_0026B5E0(void*, int, int);
 extern char D_004D33A0[];
@@ -1219,7 +1219,7 @@ static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
         : "m"(dst), "m"(b));
 }
 
-extern "C" void func_0011DD98(cRider* self)
+extern "C" void cRider_putAtDropOffBC(cRider* self)
 {
     float* p = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
     sVec4_0011DD98 dir;
@@ -2399,7 +2399,7 @@ extern "C" void func_0011FEF8(void *arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/rider", func_0011FF18);
+INCLUDE_ASM("ai/rider", cRider_getControlCmd);
 #ifdef SKIP_ASM
 struct sVEntry0011FF18 {
     short delta;
@@ -2408,7 +2408,7 @@ struct sVEntry0011FF18 {
 };
 
 // Forwards its second argument to vtable slot 1 of the rider handler.
-extern "C" void func_0011FF18(cRider* self, void* out)
+extern "C" void cRider_getControlCmd(cRider* self, void* out)
 {
     char* obj = (char*)self->mRiderHandler;
     sVEntry0011FF18* vt = *(sVEntry0011FF18**)(obj + 0xDE8);
@@ -4223,7 +4223,7 @@ extern int D_004A4C00;
 extern sV3_2898 D_004A5E40;
 
 extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, sMat_2898* bones, int f);
-extern "C" void func_00310948(void* model, int lod, sV4_2898* a, sV4_2898* b);
+extern "C" void cAnimModel_rendershadow(void* model, int lod, sV4_2898* a, sV4_2898* b);
 extern "C" void func_00375890(void* obj);
 int func_0011FE98(void*);
 
@@ -4297,7 +4297,7 @@ static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE
  *
  * On the frame's first call (unk_AA4 clear): pushes a draw state, sets up the projection (func_00374D00)
  * centred between bones unk_918 and unk_8E8, lit straight down, with the rider's up axis, renders the model's
- * shadow pass (func_00310948 at LOD 3; board colour grey 0.3, black on the ground; shadow colour grey 0.3)
+ * shadow pass (cAnimModel_rendershadow at LOD 3; board colour grey 0.3, black on the ground; shadow colour grey 0.3)
  * through graphics slots 31, 53, 55, 101, 54 and 32, and pops the state. The shadow itself is drawn on every
  * call (func_00375890).
  */
@@ -4363,7 +4363,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         c2.y = 0.3f;
         c2.z = 0.3f;
         c2.w = 0.3f;
-        func_00310948(Model_2898(self), 3, &c1, &c2);
+        cAnimModel_rendershadow(Model_2898(self), 3, &c1, &c2);
         cPS2GraphicsMan* g6 = GrMan;
         sVEI_2898* vt6 = (sVEI_2898*)g6->mVtbl;
         vt6[54].fn((char*)g6 + vt6[54].delta);
@@ -4614,13 +4614,13 @@ extern "C" int cRider_getIdentity(cRider* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00123168);
+INCLUDE_ASM("ai/rider", cRider_getCheatIdentity);
 #ifdef SKIP_ASM
 extern "C" int func_00147410(void* iface, int riderIndex);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern "C" int func_00123168(cRider* self)
+extern "C" int cRider_getCheatIdentity(cRider* self)
 {
     return func_00147410(cBE_getInterface_Fv(cBE_getBE(), 1), self->mAIIndex);
 }

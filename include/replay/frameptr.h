@@ -4,7 +4,7 @@
 // cReplayFramePtr: a replay data block with a write cursor and a read cursor: the stream every replayable object
 // writes itself to and reads itself back from (writeToReplayFrame / readFromReplayFrame in On Tour). Derived from
 // the interface cBxReplayFrame (vptr only; On Tour size 4), whose virtuals it implements: vtable cReplayFramePtr_vtbl, slots
-// 1..7 = write (func_0026E9D0), read (func_0026EA20), readReplayInstance() (func_0026EB48),
+// 1..7 = write (cReplayFramePtr_write), read (cReplayFramePtr_read), readReplayInstance() (func_0026EB48),
 // readReplayInstance(cInstanceNode*) (func_0026EC08), writeReplayInstance(const tInstanceRecord*) (func_0026ECD8),
 // writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
 // cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable D_00481850, ctor func_0026D5E8) derives from it;
@@ -43,9 +43,9 @@ struct cReplayFramePtr {
     char* Block;            // 0x04 [O]; [P] getBlock (func_00272210) lw 0x4; assert "Block && ReadData"; [R] ctor 0;
                             //      [U] initBlock stores the new "Frame Block" (operator new), setBlock stores data,
                             //      purgeBlock frees it; readRewind / writeRewind reset the cursors to it
-    char* WriteData;        // 0x08 [O]; [R] ctor 0; [U] write (func_0026E9D0) copies to it and advances it;
+    char* WriteData;        // 0x08 [O]; [R] ctor 0; [U] write (cReplayFramePtr_write) copies to it and advances it;
                             //      setBlock = data + size; loadBlock = Block + unpacked size; writeRewind = Block
-    char* ReadData;         // 0x0C [O]; [P] assert "Block && ReadData"; [R] ctor 0; [U] read (func_0026EA20) copies
+    char* ReadData;         // 0x0C [O]; [P] assert "Block && ReadData"; [R] ctor 0; [U] read (cReplayFramePtr_read) copies
                             //      from it and advances it; peekObjNodeType restores it; readRewind = Block
     int Size;               // 0x10 [O]; [P] GetSize / getBlockSaveSize (func_00272238 / func_00272240) lw 0x10; [R]
                             //      ctor 0; [U] write adds len; setBlock stores size; writeRewind / purgeBlock 0

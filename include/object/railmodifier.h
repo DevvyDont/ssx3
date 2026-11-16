@@ -45,10 +45,10 @@ struct cRailModifier {
                                   //      [U] cRailModifier_updateBoundBox writes it (sq 0x10/0x20), update
                                   //      (cRailModifier_update) passes old and new box to nash_Nash_movenode
     unsigned int SplineId;        // 0x30 [O] tResourceID (low 8 bits: resource set, >> 8: index); [R] ctor: -1, then
-                                  //      the descriptor's id (+0x4); [U] splineIntersect (func_0035C698) and the
+                                  //      the descriptor's id (+0x4); [U] splineIntersect (cRailModifier_splineIntersect) and the
                                   //      ctors/destructor look the spline up through it
     int Mesh;                     // 0x34 [O]; [R] ctor: descriptor + 0x8; [U] buildXform: < 0 = the instance's own
-                                  //      matrix, else a link (bone) index; getInvMat (func_0035C5A0) passes it on
+                                  //      matrix, else a link (bone) index; getInvMat (cRailModifier_getInvMat) passes it on
     char unk_38[0x8];             // 0x38 padding to the state's 0x30 size
     // --- cRailModifier
     tInstanceRecord* Instance;    // 0x40 [O]; [R] ctor stores the instance argument, ctor1 reads it from the frame;

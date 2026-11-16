@@ -734,7 +734,7 @@ extern "C" void* func_003A5508(void* self);
 extern "C" void* func_00399768(void* mem, void* screen, int a2);
 extern "C" void* func_003A0348(void* mem, void* screen, int a2);
 extern "C" void* func_003A1148(void* mem, void* screen, int a2);
-extern "C" void* func_003A3280(void* mem, void* screen, int a2);
+extern "C" void* cUIVector_cUIVector(void* mem, void* screen, int a2);
 extern char D_004A4788[];
 extern char D_004A4790[];
 extern char D_004A4798[];
@@ -989,7 +989,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         return o;
     }
     case 0x18: {
-        char* o = (char*)func_003A3280(alloc_D078(0x90, D_00493F60), self, 0);
+        char* o = (char*)cUIVector_cUIVector(alloc_D078(0x90, D_00493F60), self, 0);
         initFromRec_D078(o, rec);
         return o;
     }

@@ -94,8 +94,8 @@ CHECK_SIZE(tWPInGameData, 0x8);
 // read exactly these offsets (ints through lw, or lwc1 for the int->float blend).
 struct tWPData_MusicTrigger {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    int m_Type;                      // 0x04 [O]; [U] func_002BCC00 (blend) / func_002BDA98 (isEqual)
-    int m_Value;                     // 0x08 [O]; [U] func_002BCC00 (blend) / func_002BDA98 (isEqual)
+    int m_Type;                      // 0x04 [O]; [U] tWPInGameData_MusicTrigger_blend (blend) / func_002BDA98 (isEqual)
+    int m_Value;                     // 0x08 [O]; [U] tWPInGameData_MusicTrigger_blend (blend) / func_002BDA98 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_MusicTrigger, m_blendData, 0x00);
@@ -105,7 +105,7 @@ CHECK_SIZE(tWPData_MusicTrigger, 0x0C);
 
 struct tWPData_Mix {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    int m_MixPreset;                 // 0x04 [O]; [U] func_002BCCC8 (blend) / func_002BDAC8 (isEqual)
+    int m_MixPreset;                 // 0x04 [O]; [U] tWPInGameData_Mix_blend (blend) / func_002BDAC8 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Mix, m_blendData, 0x00);
@@ -114,7 +114,7 @@ CHECK_SIZE(tWPData_Mix, 0x08);
 
 struct tWPData_Ambience {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    int m_BankID;                    // 0x04 [O]; [U] func_002BCD68 (blend) / func_002BDAE0 (isEqual)
+    int m_BankID;                    // 0x04 [O]; [U] tWPInGameData_Ambience_blend (blend) / func_002BDAE0 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Ambience, m_blendData, 0x00);
@@ -123,7 +123,7 @@ CHECK_SIZE(tWPData_Ambience, 0x08);
 
 struct tWPData_Speech {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    int m_SpeechID;                  // 0x04 [O]; [U] func_002BCE08 (blend) / func_002BDAF8 (isEqual)
+    int m_SpeechID;                  // 0x04 [O]; [U] tWPInGameData_Speech_blend (blend) / func_002BDAF8 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Speech, m_blendData, 0x00);
@@ -132,7 +132,7 @@ CHECK_SIZE(tWPData_Speech, 0x08);
 
 struct tWPData_Camera {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_DrawDistance;            // 0x04 [O]; [U] func_002BCEA8 (blend) / func_002BDB10 (isEqual)
+    float m_DrawDistance;            // 0x04 [O]; [U] tWPInGameData_Camera_blend (blend) / func_002BDB10 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Camera, m_blendData, 0x00);
@@ -141,12 +141,12 @@ CHECK_SIZE(tWPData_Camera, 0x08);
 
 struct tWPData_Fog {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_FogDensity;              // 0x04 [O]; [U] func_002BCF38 (blend) / func_002BDB38 (isEqual)
-    float m_FogNear;                 // 0x08 [O]; [U] func_002BCF38 (blend) / func_002BDB38 (isEqual)
-    float m_FogFar;                  // 0x0C [O]; [U] func_002BCF38 (blend) / func_002BDB38 (isEqual)
-    float m_FogColourR;              // 0x10 [O]; [U] func_002BCF38 (blend) / func_002BDB38 (isEqual)
-    float m_FogColourG;              // 0x14 [O]; [U] func_002BCF38 (blend) / func_002BDB38 (isEqual)
-    float m_FogColourB;              // 0x18 [O]; [U] func_002BCF38 (blend) / func_002BDB38 (isEqual)
+    float m_FogDensity;              // 0x04 [O]; [U] tWPInGameData_Fog_blend (blend) / func_002BDB38 (isEqual)
+    float m_FogNear;                 // 0x08 [O]; [U] tWPInGameData_Fog_blend (blend) / func_002BDB38 (isEqual)
+    float m_FogFar;                  // 0x0C [O]; [U] tWPInGameData_Fog_blend (blend) / func_002BDB38 (isEqual)
+    float m_FogColourR;              // 0x10 [O]; [U] tWPInGameData_Fog_blend (blend) / func_002BDB38 (isEqual)
+    float m_FogColourG;              // 0x14 [O]; [U] tWPInGameData_Fog_blend (blend) / func_002BDB38 (isEqual)
+    float m_FogColourB;              // 0x18 [O]; [U] tWPInGameData_Fog_blend (blend) / func_002BDB38 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Fog, m_blendData, 0x00);
@@ -160,13 +160,13 @@ CHECK_SIZE(tWPData_Fog, 0x1C);
 
 struct tWPData_LightGlow {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_LightGlowCutoff;         // 0x04 [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
-    float m_LightGlowCutoffScale;    // 0x08 [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
-    float m_LightGlowCopyIntensity;  // 0x0C [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
-    float m_LightGlowSourceIntensity; // 0x10 [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
-    float m_LightGlowFrameIntensity; // 0x14 [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
-    float m_LightGlowBlend2;         // 0x18 [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
-    float m_LightGlowBlend3;         // 0x1C [O]; [U] func_002BD068 (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowCutoff;         // 0x04 [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowCutoffScale;    // 0x08 [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowCopyIntensity;  // 0x0C [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowSourceIntensity; // 0x10 [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowFrameIntensity; // 0x14 [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowBlend2;         // 0x18 [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
+    float m_LightGlowBlend3;         // 0x1C [O]; [U] tWPInGameData_LightGlow_blend (blend) / func_002BDBD0 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_LightGlow, m_blendData, 0x00);
@@ -181,12 +181,12 @@ CHECK_SIZE(tWPData_LightGlow, 0x20);
 
 struct tWPData_ScreenTint {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_ScreenTintScaleR;        // 0x04 [O]; [U] func_002BD1B8 (blend) / func_002BDC78 (isEqual)
-    float m_ScreenTintScaleG;        // 0x08 [O]; [U] func_002BD1B8 (blend) / func_002BDC78 (isEqual)
-    float m_ScreenTintScaleB;        // 0x0C [O]; [U] func_002BD1B8 (blend) / func_002BDC78 (isEqual)
-    float m_ScreenTintOffsetR;       // 0x10 [O]; [U] func_002BD1B8 (blend) / func_002BDC78 (isEqual)
-    float m_ScreenTintOffsetG;       // 0x14 [O]; [U] func_002BD1B8 (blend) / func_002BDC78 (isEqual)
-    float m_ScreenTintOffsetB;       // 0x18 [O]; [U] func_002BD1B8 (blend) / func_002BDC78 (isEqual)
+    float m_ScreenTintScaleR;        // 0x04 [O]; [U] tWPInGameData_ScreenTint_blend (blend) / func_002BDC78 (isEqual)
+    float m_ScreenTintScaleG;        // 0x08 [O]; [U] tWPInGameData_ScreenTint_blend (blend) / func_002BDC78 (isEqual)
+    float m_ScreenTintScaleB;        // 0x0C [O]; [U] tWPInGameData_ScreenTint_blend (blend) / func_002BDC78 (isEqual)
+    float m_ScreenTintOffsetR;       // 0x10 [O]; [U] tWPInGameData_ScreenTint_blend (blend) / func_002BDC78 (isEqual)
+    float m_ScreenTintOffsetG;       // 0x14 [O]; [U] tWPInGameData_ScreenTint_blend (blend) / func_002BDC78 (isEqual)
+    float m_ScreenTintOffsetB;       // 0x18 [O]; [U] tWPInGameData_ScreenTint_blend (blend) / func_002BDC78 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_ScreenTint, m_blendData, 0x00);
@@ -200,7 +200,7 @@ CHECK_SIZE(tWPData_ScreenTint, 0x1C);
 
 struct tWPData_SkyBox {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_SkyBoxRotation;          // 0x04 [O]; [U] func_002BD2E8 (blend) / func_002BDD10 (isEqual)
+    float m_SkyBoxRotation;          // 0x04 [O]; [U] tWPInGameData_SkyBox_blend (blend) / func_002BDD10 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_SkyBox, m_blendData, 0x00);
@@ -209,15 +209,15 @@ CHECK_SIZE(tWPData_SkyBox, 0x08);
 
 struct tWPData_Sun {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_SunPitchOffset;          // 0x04 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_SunYawOffset;            // 0x08 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_SunColorR;               // 0x0C [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_SunColorG;               // 0x10 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_SunColorB;               // 0x14 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_SunIntensity;            // 0x18 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    int m_SunType;                   // 0x1C [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_LensIntensity;           // 0x20 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
-    float m_SunRadius;               // 0x24 [O]; [U] func_002BD378 (blend) / func_002BDD38 (isEqual)
+    float m_SunPitchOffset;          // 0x04 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_SunYawOffset;            // 0x08 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_SunColorR;               // 0x0C [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_SunColorG;               // 0x10 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_SunColorB;               // 0x14 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_SunIntensity;            // 0x18 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    int m_SunType;                   // 0x1C [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_LensIntensity;           // 0x20 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
+    float m_SunRadius;               // 0x24 [O]; [U] tWPInGameData_Sun_blend (blend) / func_002BDD38 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Sun, m_blendData, 0x00);
@@ -234,7 +234,7 @@ CHECK_SIZE(tWPData_Sun, 0x28);
 
 struct tWPData_Surface {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_SnowSparkleDensity;      // 0x04 [O]; [U] func_002BD518 (blend) / func_002BDE08 (isEqual)
+    float m_SnowSparkleDensity;      // 0x04 [O]; [U] tWPInGameData_Surface_blend (blend) / func_002BDE08 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Surface, m_blendData, 0x00);
@@ -243,12 +243,12 @@ CHECK_SIZE(tWPData_Surface, 0x08);
 
 struct tWPData_Lighting {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    tWPNameField m_LightIrradianceName; // 0x04 [O]; [U] func_002BD5A8 (blend) copies it (ldl/ldr)
-    tWPNameField m_ShadowIrradianceName; // 0x0C [O]; [U] func_002BD5A8 (blend) copies it (ldl/ldr)
-    tWPNameField m_TunnelIrradianceName; // 0x14 [O]; [U] func_002BD5A8 (blend) copies it (ldl/ldr)
-    tWPNameField m_ObjectIrradianceName; // 0x1C [O]; [U] func_002BD5A8 (blend) copies it (ldl/ldr)
-    float m_AmbientLightIntensityOffset; // 0x24 [O]; [U] func_002BD5A8 (blend) / func_002BDE30 (isEqual)
-    float m_RimLightIntensityOffset; // 0x28 [O]; [U] func_002BD5A8 (blend) / func_002BDE30 (isEqual)
+    tWPNameField m_LightIrradianceName; // 0x04 [O]; [U] tWPInGameData_Lighting_blend (blend) copies it (ldl/ldr)
+    tWPNameField m_ShadowIrradianceName; // 0x0C [O]; [U] tWPInGameData_Lighting_blend (blend) copies it (ldl/ldr)
+    tWPNameField m_TunnelIrradianceName; // 0x14 [O]; [U] tWPInGameData_Lighting_blend (blend) copies it (ldl/ldr)
+    tWPNameField m_ObjectIrradianceName; // 0x1C [O]; [U] tWPInGameData_Lighting_blend (blend) copies it (ldl/ldr)
+    float m_AmbientLightIntensityOffset; // 0x24 [O]; [U] tWPInGameData_Lighting_blend (blend) / func_002BDE30 (isEqual)
+    float m_RimLightIntensityOffset; // 0x28 [O]; [U] tWPInGameData_Lighting_blend (blend) / func_002BDE30 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Lighting, m_blendData, 0x00);
@@ -262,25 +262,25 @@ CHECK_SIZE(tWPData_Lighting, 0x2C);
 
 struct tWPData_Weather {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    float m_SnowIntensity;           // 0x04 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_FlakeSize;               // 0x08 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_WindIntensity;           // 0x0C [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_WindRotation;            // 0x10 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_PlayerWindIntensity;     // 0x14 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_Temperature;             // 0x18 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFlurries;            // 0x1C [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowGravityMultiplier;   // 0x20 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFluffItensity;       // 0x24 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFluffWindIntensity;  // 0x28 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_LightningChance;         // 0x2C [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFlakeColourA;        // 0x30 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFlakeColourR;        // 0x34 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFlakeColourG;        // 0x38 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFlakeColourB;        // 0x3C [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFluffColourA;        // 0x40 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFluffColourR;        // 0x44 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFluffColourG;        // 0x48 [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
-    float m_SnowFluffColourB;        // 0x4C [O]; [U] func_002BD698 (blend) / func_002BDEE0 (isEqual)
+    float m_SnowIntensity;           // 0x04 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_FlakeSize;               // 0x08 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_WindIntensity;           // 0x0C [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_WindRotation;            // 0x10 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_PlayerWindIntensity;     // 0x14 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_Temperature;             // 0x18 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFlurries;            // 0x1C [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowGravityMultiplier;   // 0x20 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFluffItensity;       // 0x24 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFluffWindIntensity;  // 0x28 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_LightningChance;         // 0x2C [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFlakeColourA;        // 0x30 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFlakeColourR;        // 0x34 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFlakeColourG;        // 0x38 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFlakeColourB;        // 0x3C [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFluffColourA;        // 0x40 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFluffColourR;        // 0x44 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFluffColourG;        // 0x48 [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
+    float m_SnowFluffColourB;        // 0x4C [O]; [U] tWPInGameData_Weather_blend (blend) / func_002BDEE0 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Weather, m_blendData, 0x00);
@@ -307,8 +307,8 @@ CHECK_SIZE(tWPData_Weather, 0x50);
 
 struct tWPData_Danger {
     float m_blendData;               // 0x00 [O] tWPData::m_blendData (no retail reader seen)
-    int m_Level;                     // 0x04 [O]; [U] func_002BD968 (blend) / func_002BE078 (isEqual)
-    float m_PointRate;               // 0x08 [O]; [U] func_002BD968 (blend) / func_002BE078 (isEqual)
+    int m_Level;                     // 0x04 [O]; [U] tWPInGameData_Danger_blend (blend) / func_002BE078 (isEqual)
+    float m_PointRate;               // 0x08 [O]; [U] tWPInGameData_Danger_blend (blend) / func_002BE078 (isEqual)
 };
 
 CHECK_OFFSET(tWPData_Danger, m_blendData, 0x00);
@@ -436,8 +436,8 @@ CHECK_SIZE(tWPInGameData_Fog, 0x38);
 
 struct tWPInGameData_LightGlow {
     // --- tWPInGameData
-    float m_wpTravelDistance;        // 0x00 [O]; [R] func_002BC830 stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] func_002BC830 stores the vtable D_00484DA8
+    float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores -99999.0f
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores the vtable D_00484DA8
     // --- tWPInGameData_LightGlow (alloc tag "tWPIGD_LightGlow", 0x40 bytes)
     float m_LightGlowCutoff;         // 0x08 [O]; [R] ctor default; [U] getter vtable slot 13 (func_002C14F0) returns this + 0x8
     float m_lastLightGlowCutoff;     // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -475,8 +475,8 @@ CHECK_SIZE(tWPInGameData_LightGlow, 0x40);
 
 struct tWPInGameData_ScreenTint {
     // --- tWPInGameData
-    float m_wpTravelDistance;        // 0x00 [O]; [R] func_002BC890 stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] func_002BC890 stores the vtable D_00484B70
+    float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores -99999.0f
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores the vtable D_00484B70
     // --- tWPInGameData_ScreenTint (alloc tag "tWPIGD_ScreenTint", 0x38 bytes)
     float m_ScreenTintScaleR;        // 0x08 [O]; [R] ctor default; [U] getter vtable slot 20 (func_002C1528) returns this + 0x8
     float m_lastScreenTintScaleR;    // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -525,8 +525,8 @@ CHECK_SIZE(tWPInGameData_SkyBox, 0x10);
 
 struct tWPInGameData_Sun {
     // --- tWPInGameData
-    float m_wpTravelDistance;        // 0x00 [O]; [R] func_002BC910 stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] func_002BC910 stores the vtable D_00484700
+    float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Sun_tWPInGameData_Sun stores -99999.0f
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Sun_tWPInGameData_Sun stores the vtable D_00484700
     // --- tWPInGameData_Sun (alloc tag "tWPIGD_Sun", 0x50 bytes)
     float m_SunPitchOffset;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 27 (func_002C1560) returns this + 0x8
     float m_lastSunPitchOffset;      // 0x0C [O]; [R] ctor default; [U] blend stores the target

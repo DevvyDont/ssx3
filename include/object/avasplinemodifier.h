@@ -28,7 +28,7 @@ struct cAvaSplineModifier {
     t4Matrix Transform;             // 0x40 [O]; [U] getRootTransform func_00361B10 returns +0x40; update cAvaSplineModifier_update
                                     //      fills it from the instance
     tInstanceRecord* Instance;      // 0x80 [O]; [R] ctor stores the instance, replay ctor reads it; [U] update,
-                                    //      writeToReplayFrame func_00357848
+                                    //      writeToReplayFrame cAvaSplineModifier_writeToReplayFrame
     char unk_84[0xc];               // 0x84 padding to the 0x90 allocation
 };
 

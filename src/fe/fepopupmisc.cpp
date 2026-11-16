@@ -6839,7 +6839,7 @@ extern void* func_00144BF0_5B80(void* iface) __asm__("func_00144BF0");
 extern void func_002C2540_5B80(unsigned short* dst, const char* src) __asm__("func_002C2540");
 extern void sprintf2_5B80(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf2");
 extern "C" char* func_0014EEC8(void* iface, int a1, int a2);
-extern "C" int func_00238590(sInfo5B80* info, int idx, int which);
+extern "C" int cGameModeMan_getHeatScore(sInfo5B80* info, int idx, int which);
 extern int D_00536730[];
 extern int D_005366D0[];
 extern int D_00536708[];
@@ -6988,7 +6988,7 @@ extern "C" void func_001E5B80(void* self)
                 cUIText_setAsciiString(t, D_004A2160);
                 any = 1;
             } else {
-                sprintf(num, D_004A2138, func_00238590(info, idx, 0));
+                sprintf(num, D_004A2138, cGameModeMan_getHeatScore(info, idx, 0));
                 cUIText_setAsciiString(t, num);
             }
             sprintf(name, D_0046E438, i);
@@ -7001,9 +7001,9 @@ extern "C" void func_001E5B80(void* self)
                     any = 1;
                     b->setVisible(0);
                 } else {
-                    sprintf(num, "%d", func_00238590(info, idx, 1));
+                    sprintf(num, "%d", cGameModeMan_getHeatScore(info, idx, 1));
                     cUIText_setAsciiString(t, num);
-                    int total = func_00238590(info, idx, 0) + func_00238590(info, idx, 1);
+                    int total = cGameModeMan_getHeatScore(info, idx, 0) + cGameModeMan_getHeatScore(info, idx, 1);
                     sprintf(num2, "%d", total);
                     cUIText_setAsciiString((cUIText*)b, num2);
                     if (i - 1 == D_00536730[pl0] && flag) {
@@ -7713,7 +7713,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E7928);
 extern void* D_004A5B64;
 extern int D_004A26FC;
 extern int D_004A2700;
-extern "C" int func_0020A4E0(void* self);
+extern "C" int cOVState_onUpdate_HandleIncomingChat(void* self);
 extern char D_0046E660[];
 extern char D_0046E7F8[];
 extern char D_0046E7C8[];
@@ -7725,7 +7725,7 @@ extern "C" void func_001E7928(void* self)
     cOVState_onUpdate(self);
     if (cGameComm_mGameComm != 0) {
         if (cGameComm_mGameComm->mConnected != 0) {
-            if (func_0020A4E0(self) != 0) {
+            if (cOVState_onUpdate_HandleIncomingChat(self) != 0) {
                 cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E660));
                 if (o != 0) {
                     o->v09(0);

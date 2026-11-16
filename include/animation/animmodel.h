@@ -42,7 +42,7 @@ struct sAnimModelPart {
     int numBones;               // 0x44 = (short)src[0x4A]; loop bound over this part's bones and names
     int unk_48;                 // 0x48 = (short)src[0x4E]
     int unk_4C;                 // 0x4C = (short)src[0x50]
-    int refIndex;               // 0x50 which lods[].refs entry is current (addModelPartLOD, func_0030EC18)
+    int refIndex;               // 0x50 which lods[].refs entry is current (addModelPartLOD, cAnimModel_setModelPartVariant)
     int unk_54;
 };
 
@@ -72,7 +72,7 @@ struct cAnimModel {
     /* 0x02C */ sAnimModelBone* bones;      // numBones of them; streamed as numBones << 5 bytes (cAnimModel_writeToReplayFrame)
     /* 0x030 */ t4Matrix* unk_030;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
     /* 0x034 */ t4Matrix* unk_034;          // numBones, translated with the model (cAnimModel_applyOffset)
-    /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (func_00310948, cAnimModel_render)
+    /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (cAnimModel_rendershadow, cAnimModel_render)
     /* 0x03C */ int unk_03C;
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
     /* 0x060 */ char unk_060[0xE0];

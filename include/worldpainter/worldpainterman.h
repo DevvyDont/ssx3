@@ -23,7 +23,7 @@
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail's constructors cWorldPainterMan_cWorldPainterMan and func_002BB370 (cWorldPainterSection), init
-//       func_002BB1D0, the allocation sizes above;
+//       cWorldPainterMan_init, the allocation sizes above;
 //   [P] the July 2003 preview's assert strings (worldpainterman.h / worldpainterman.cpp);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF (cWorldPainterMan, cWorldPainterSection): same members, same offsets.

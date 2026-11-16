@@ -31,7 +31,7 @@ struct cMultiSplineModifier {
     int OrientType;                 // 0x08 [O]; [R] ctor; [U] updateNodes
     float HeadTweak;                // 0x0C [O]; [R] ctor; [U] updateNodes
     float OffsetDistance;           // 0x10 [O]; [R] ctor; [U] updateNodes advances it
-    float Velocity;                 // 0x14 [O]; [U] func_0035A550 (setSpeed) stores it, updateIntersectInfo reads it
+    float Velocity;                 // 0x14 [O]; [U] cMultiSplineModifier_setSpeed (setSpeed) stores it, updateIntersectInfo reads it
     float Radius;                   // 0x18 [O]; [P]/[U] getRadius/setRadius (lwc1/swc1 0x18), updateOverlapSystem; [R]
                                     //      ctor zeroes it (sw)
     int DrawPath;                   // 0x1C [O] bool; [R] ctor; [U] render tests it

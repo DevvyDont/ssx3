@@ -23,7 +23,7 @@ struct cObjNode;
 struct tInstanceRecord;
 
 struct cInstanceNode {
-    // --- cObjNode (retail 0x10 bytes: bucket-list sentinels are 0x10 apart, cBucketMan_init / func_00354B38) ---
+    // --- cObjNode (retail 0x10 bytes: bucket-list sentinels are 0x10 apart, cBucketMan_init / cBucketMan_purge) ---
     int unk_00;                  // 0x000 never written by any node ctor (retail or preview cObjNode()); no On Tour twin
     cObjNode* Next;              // 0x004 [O] cObjNode::Next; [P] cObjNode() zeroes it; [U] forward link:
                                  //       cBucketMan_first/cBucketMan_next walk +0x4 from the head sentinel

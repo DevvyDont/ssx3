@@ -58,7 +58,7 @@ struct cKeyboardPopup {
     int mbAcceptText;               // 0x05C [O]; [R] ctor zeroes; [U] pressKey sets it on the accept key (55)
     int miMaxCharacters;            // 0x060 [P] getMaxCharacters (preview 0x44, seen); [R] ctor 0x3F; [U] setMaxCharacters
                                     //       (cKeyboardPopup_setMaxCharacters) clamps to 0..0x3F
-    int miMinCharacters;            // 0x064 [O]; [R] ctor zeroes; [U] setMinCharacters (func_001CD0B0); the accept key is
+    int miMinCharacters;            // 0x064 [O]; [R] ctor zeroes; [U] setMinCharacters (cKeyboardPopup_setMinCharacters); the accept key is
                                     //       disabled while the text is shorter
     int mbCapsOn;                   // 0x068 [O]; [R] ctor 1 (or bit 1 of D_004A33F0 + 0x88); [U] key 42 toggles it
     int mbShiftOn;                  // 0x06C [O]; [R] ctor zeroes; [U] key 56 toggles it, other keys clear it

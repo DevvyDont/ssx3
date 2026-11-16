@@ -703,7 +703,7 @@ struct sSmQuad4_359F88 {
 
 extern void* cMultiSplineModifier_vtbl[];
 extern "C" void func_003451C0(void* ref, int id);
-extern "C" void func_0035A550(cMultiSplineModifier* self, float v);
+extern "C" void cMultiSplineModifier_setSpeed(cMultiSplineModifier* self, float v);
 extern "C" void cMultiSplineModifier_allocInstances(cMultiSplineModifier* self);
 extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* self);
 extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* self);
@@ -715,7 +715,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* self);
  * spline.
  *
  * Takes NumModels, Orient, Heading (degrees, stored in radians), DrawSpline and the ARGB colour from @p desc,
- * initialises the spline from SplineId, sets the speed (func_0035A550, On Tour setSpeed) and starts at 0
+ * initialises the spline from SplineId, sets the speed (cMultiSplineModifier_setSpeed, On Tour setSpeed) and starts at 0
  * (Length for a negative Speed) or at a nonzero StartDistance, reset to 0 when outside [0, Length].
  *
  * Then allocates the node arrays and instance copies, copies @p model into them, places them, adds them to
@@ -738,7 +738,7 @@ extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier*
     self->OrientType = *(int*)(desc + 0x8);
     self->HeadTweak = *(float*)(desc + 0x10) * 0.01745329424738884f;
     func_003451C0(((char*)self) + 0x48, *(int*)(desc + 0x4));
-    func_0035A550(self, *(float*)(desc + 0xC));
+    cMultiSplineModifier_setSpeed(self, *(float*)(desc + 0xC));
     if (*(float*)(desc + 0xC) >= 0.0f) {
         self->OffsetDistance = 0.0f;
     } else {
@@ -1014,9 +1014,9 @@ extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* p)
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A550);
+INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setSpeed);
 #ifdef SKIP_ASM
-extern "C" void func_0035A550(cMultiSplineModifier* self, float speed)
+extern "C" void cMultiSplineModifier_setSpeed(cMultiSplineModifier* self, float speed)
 {
     self->Velocity = speed * 27.77777862548828f;
 }

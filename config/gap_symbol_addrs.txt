@@ -240,7 +240,6 @@ lbl_0011C920 = 0x0011C920; //type:label
 lbl_0011D350 = 0x0011D350; //type:label
 func_0011D390 = 0x0011D390; //type:func
 func_0011D660 = 0x0011D660; //type:func
-func_0011DD98 = 0x0011DD98; //type:func
 func_0011EB98 = 0x0011EB98; //type:func
 func_0011F3D8 = 0x0011F3D8; //type:func
 func_0011FE98__FPv = 0x0011FE98; //type:func
@@ -271,7 +270,6 @@ lbl_00123090 = 0x00123090; //type:label
 lbl_0012309C = 0x0012309C; //type:label
 lbl_001230A8 = 0x001230A8; //type:label
 lbl_00123108 = 0x00123108; //type:label
-func_00123168 = 0x00123168; //type:func
 lbl_00123FA4 = 0x00123FA4; //type:label
 lbl_00123FC0 = 0x00123FC0; //type:label
 lbl_00123FDC = 0x00123FDC; //type:label
@@ -417,7 +415,6 @@ func_00135BE0 = 0x00135BE0; //type:func
 // --- src/ai/motion/wipeoutmotion.cpp ---
 func_00136F30 = 0x00136F30; //type:func
 func_00137138 = 0x00137138; //type:func
-func_00137550 = 0x00137550; //type:func
 func_00137750 = 0x00137750; //type:func
 func_00137860 = 0x00137860; //type:func
 func_00137D18 = 0x00137D18; //type:func
@@ -1306,10 +1303,8 @@ func_0016C098 = 0x0016C098; //type:func
 func_0016C5D0__FPv = 0x0016C5D0; //type:func
 
 // --- src/camera/trigger/triggeralgorithms.cpp ---
-func_0016C678 = 0x0016C678; //type:func
 func_0016C6B0 = 0x0016C6B0; //type:func
 func_0016C6E0 = 0x0016C6E0; //type:func
-func_0016C778 = 0x0016C778; //type:func
 func_0016C800 = 0x0016C800; //type:func
 func_0016C888 = 0x0016C888; //type:func
 func_0016C918 = 0x0016C918; //type:func
@@ -1323,7 +1318,6 @@ func_0016CF18 = 0x0016CF18; //type:func
 func_0016CF40__FPv = 0x0016CF40; //type:func
 func_0016CF48 = 0x0016CF48; //type:func
 func_0016D1D8__FPv = 0x0016D1D8; //type:func
-func_0016D210 = 0x0016D210; //type:func
 func_0016D238__FPvi = 0x0016D238; //type:func
 func_0016D260 = 0x0016D260; //type:func
 func_0016D320 = 0x0016D320; //type:func
@@ -2212,7 +2206,6 @@ func_001A34A0__FPv = 0x001A34A0; //type:func
 func_001A34A8__FPv = 0x001A34A8; //type:func
 
 // --- src/fe/feasyncfile.cpp ---
-func_001A3C50 = 0x001A3C50; //type:func
 func_001A3DC8 = 0x001A3DC8; //type:func
 func_001A3E30 = 0x001A3E30; //type:func
 func_001A3EA0 = 0x001A3EA0; //type:func
@@ -2955,11 +2948,8 @@ func_001C5540 = 0x001C5540; //type:func
 func_001C5780__FPvii = 0x001C5780; //type:func
 func_001C57A0__FPvii = 0x001C57A0; //type:func
 func_001C57C0__FPvii = 0x001C57C0; //type:func
-func_001C5800 = 0x001C5800; //type:func
 func_001C5838 = 0x001C5838; //type:func
-func_001C5860 = 0x001C5860; //type:func
 func_001C5878 = 0x001C5878; //type:func
-func_001C58D0 = 0x001C58D0; //type:func
 
 // --- src/fe/fepopup.cpp ---
 func_001C66E8 = 0x001C66E8; //type:func
@@ -2979,7 +2969,6 @@ func_001C9938 = 0x001C9938; //type:func
 func_001C9B28 = 0x001C9B28; //type:func
 func_001C9B68 = 0x001C9B68; //type:func
 func_001C9CD0 = 0x001C9CD0; //type:func
-func_001CA150 = 0x001CA150; //type:func
 lbl_001CA1C8 = 0x001CA1C8; //type:label
 lbl_001CA24C = 0x001CA24C; //type:label
 lbl_001CA254 = 0x001CA254; //type:label
@@ -2996,7 +2985,6 @@ lbl_001CA600 = 0x001CA600; //type:label
 lbl_001CA620 = 0x001CA620; //type:label
 lbl_001CA630 = 0x001CA630; //type:label
 lbl_001CA648 = 0x001CA648; //type:label
-func_001CA8A0 = 0x001CA8A0; //type:func
 func_001CAA18 = 0x001CAA18; //type:func
 lbl_001CAA9C = 0x001CAA9C; //type:label
 lbl_001CAAA8 = 0x001CAAA8; //type:label
@@ -3004,7 +2992,6 @@ lbl_001CAAB4 = 0x001CAAB4; //type:label
 lbl_001CAAC0 = 0x001CAAC0; //type:label
 lbl_001CAACC = 0x001CAACC; //type:label
 lbl_001CAAD8 = 0x001CAAD8; //type:label
-func_001CAFC0 = 0x001CAFC0; //type:func
 lbl_001CC288 = 0x001CC288; //type:label
 lbl_001CC348 = 0x001CC348; //type:label
 lbl_001CC368 = 0x001CC368; //type:label
@@ -3017,11 +3004,7 @@ lbl_001CC498 = 0x001CC498; //type:label
 lbl_001CC4D4 = 0x001CC4D4; //type:label
 lbl_001CC4F0 = 0x001CC4F0; //type:label
 lbl_001CC4FC = 0x001CC4FC; //type:label
-func_001CC620 = 0x001CC620; //type:func
-func_001CC6E8 = 0x001CC6E8; //type:func
-func_001CC7C8 = 0x001CC7C8; //type:func
 func_001CCF00 = 0x001CCF00; //type:func
-func_001CD0B0 = 0x001CD0B0; //type:func
 lbl_001CD15C = 0x001CD15C; //type:label
 lbl_001CD174 = 0x001CD174; //type:label
 lbl_001CD18C = 0x001CD18C; //type:label
@@ -3060,7 +3043,6 @@ lbl_001CE0F8 = 0x001CE0F8; //type:label
 lbl_001CE138 = 0x001CE138; //type:label
 func_001CE408 = 0x001CE408; //type:func
 func_001CE468 = 0x001CE468; //type:func
-func_001CE5E0 = 0x001CE5E0; //type:func
 func_001CE6F0 = 0x001CE6F0; //type:func
 
 // --- src/fe/festaterewards.cpp ---
@@ -3772,7 +3754,6 @@ func_00209370 = 0x00209370; //type:func
 func_002095E8 = 0x002095E8; //type:func
 func_0020A088 = 0x0020A088; //type:func
 func_0020A1A8 = 0x0020A1A8; //type:func
-func_0020A4E0 = 0x0020A4E0; //type:func
 
 // --- src/fe/ovtemplatedialog.cpp ---
 func_0020A8B0 = 0x0020A8B0; //type:func
@@ -3990,7 +3971,6 @@ func_0022C410 = 0x0022C410; //type:func
 func_0022C830 = 0x0022C830; //type:func
 func_0022CEA8 = 0x0022CEA8; //type:func
 func_0022D278 = 0x0022D278; //type:func
-func_0022D390 = 0x0022D390; //type:func
 lbl_0022D430 = 0x0022D430; //type:label
 lbl_0022D444 = 0x0022D444; //type:label
 lbl_0022D45C = 0x0022D45C; //type:label
@@ -4271,7 +4251,6 @@ lbl_00238284 = 0x00238284; //type:label
 lbl_0023828C = 0x0023828C; //type:label
 func_00238348__FPv = 0x00238348; //type:func
 func_00238510 = 0x00238510; //type:func
-func_00238590 = 0x00238590; //type:func
 func_00238B70 = 0x00238B70; //type:func
 func_00238BF8 = 0x00238BF8; //type:func
 func_00238C80 = 0x00238C80; //type:func
@@ -5113,10 +5092,7 @@ func_0026E800 = 0x0026E800; //type:func
 func_0026E838 = 0x0026E838; //type:func
 
 // --- src/replay/frameptr.cpp ---
-func_0026E968 = 0x0026E968; //type:func
 func_0026E9C0__FPv = 0x0026E9C0; //type:func
-func_0026E9D0 = 0x0026E9D0; //type:func
-func_0026EA20 = 0x0026EA20; //type:func
 func_0026EB48 = 0x0026EB48; //type:func
 func_0026EC08 = 0x0026EC08; //type:func
 func_0026ECD8 = 0x0026ECD8; //type:func
@@ -5240,12 +5216,8 @@ func_002724E8 = 0x002724E8; //type:func
 func_00272510__FPv = 0x00272510; //type:func
 func_00272570 = 0x00272570; //type:func
 func_002725B8 = 0x002725B8; //type:func
-func_002728F8 = 0x002728F8; //type:func
 func_00272938 = 0x00272938; //type:func
 func_002729A8 = 0x002729A8; //type:func
-func_00272AD0 = 0x00272AD0; //type:func
-func_00272B58 = 0x00272B58; //type:func
-func_00272CC0 = 0x00272CC0; //type:func
 func_00272D68 = 0x00272D68; //type:func
 func_002730C0 = 0x002730C0; //type:func
 func_00273140 = 0x00273140; //type:func
@@ -6306,7 +6278,6 @@ lbl_002C0600 = 0x002C0600; //type:label
 lbl_002C0628 = 0x002C0628; //type:label
 lbl_002C0650 = 0x002C0650; //type:label
 lbl_002C0678 = 0x002C0678; //type:label
-func_002C0A10 = 0x002C0A10; //type:func
 
 // --- src/worldpainter/worldpaintermanquery.cpp ---
 func_002C0B70 = 0x002C0B70; //type:func
@@ -6379,8 +6350,6 @@ func_002C16B8 = 0x002C16B8; //type:func
 func_002C17C0__FPv = 0x002C17C0; //type:func
 
 // --- src/worldpainter/quadtree.cpp ---
-func_002C1CD8 = 0x002C1CD8; //type:func
-func_002C2088 = 0x002C2088; //type:func
 func_002C2210 = 0x002C2210; //type:func
 func_002C2268 = 0x002C2268; //type:func
 func_002C22C8 = 0x002C22C8; //type:func
@@ -7133,12 +7102,8 @@ func_0030DB90 = 0x0030DB90; //type:func
 func_0030E9E0 = 0x0030E9E0; //type:func
 func_0030EA80 = 0x0030EA80; //type:func
 func_0030EB60 = 0x0030EB60; //type:func
-func_0030EBC0 = 0x0030EBC0; //type:func
-func_0030EC18 = 0x0030EC18; //type:func
 func_0030ECD8 = 0x0030ECD8; //type:func
 func_0030F2B0 = 0x0030F2B0; //type:func
-func_00310120 = 0x00310120; //type:func
-func_00310948 = 0x00310948; //type:func
 func_00311110 = 0x00311110; //type:func
 func_00311220 = 0x00311220; //type:func
 func_00311250 = 0x00311250; //type:func
@@ -7263,7 +7228,6 @@ func_003185C8 = 0x003185C8; //type:func
 func_00318630 = 0x00318630; //type:func
 func_003186D0 = 0x003186D0; //type:func
 func_003189A0 = 0x003189A0; //type:func
-func_00318E68 = 0x00318E68; //type:func
 
 // --- src/bx/memblockman.cpp ---
 func_00319A90 = 0x00319A90; //type:func
@@ -7828,7 +7792,6 @@ func_00351B40 = 0x00351B40; //type:func
 func_00352230 = 0x00352230; //type:func
 
 // --- src/object/modifierblock.cpp ---
-func_00352DD0 = 0x00352DD0; //type:func
 func_003531D0 = 0x003531D0; //type:func
 func_00353228 = 0x00353228; //type:func
 func_00353278 = 0x00353278; //type:func
@@ -7850,41 +7813,26 @@ func_00354850 = 0x00354850; //type:func
 func_003549D0__FPv = 0x003549D0; //type:func
 
 // --- src/object/bucketman.cpp ---
-func_00354B38 = 0x00354B38; //type:func
-func_003550A0 = 0x003550A0; //type:func
 func_003551A8 = 0x003551A8; //type:func
 func_00355260 = 0x00355260; //type:func
 func_00355280 = 0x00355280; //type:func
 
 // --- src/object/movenode.cpp ---
-func_00355550 = 0x00355550; //type:func
-func_003555A8 = 0x003555A8; //type:func
-func_00355600 = 0x00355600; //type:func
 func_00355878__FPvT0 = 0x00355878; //type:func
-func_00355888 = 0x00355888; //type:func
 func_003558B8 = 0x003558B8; //type:func
 func_00355918 = 0x00355918; //type:func
-func_00355978 = 0x00355978; //type:func
-func_003559F8 = 0x003559F8; //type:func
 func_00355A78 = 0x00355A78; //type:func
-func_00355B90 = 0x00355B90; //type:func
-func_00355BF0 = 0x00355BF0; //type:func
-func_00355C50 = 0x00355C50; //type:func
 func_00356DB0 = 0x00356DB0; //type:func
 func_00356E60 = 0x00356E60; //type:func
 func_00356E98__FPv = 0x00356E98; //type:func
 func_00356EB8 = 0x00356EB8; //type:func
 func_00356F10 = 0x00356F10; //type:func
 func_00356F68 = 0x00356F68; //type:func
-func_00357000 = 0x00357000; //type:func
 func_00357038 = 0x00357038; //type:func
-func_00357278 = 0x00357278; //type:func
 func_003572E0 = 0x003572E0; //type:func
 func_00357358 = 0x00357358; //type:func
-func_003576D0 = 0x003576D0; //type:func
 func_00357750 = 0x00357750; //type:func
 func_00357798 = 0x00357798; //type:func
-func_00357848 = 0x00357848; //type:func
 func_003578A8 = 0x003578A8; //type:func
 func_003579C8 = 0x003579C8; //type:func
 func_00357A00 = 0x00357A00; //type:func
@@ -7922,15 +7870,12 @@ func_003593D0 = 0x003593D0; //type:func
 func_00359410 = 0x00359410; //type:func
 
 // --- src/object/splinemodifier.cpp ---
-func_0035A550 = 0x0035A550; //type:func
 func_0035A780 = 0x0035A780; //type:func
 func_0035AAD0__FPv = 0x0035AAD0; //type:func
 func_0035AAE0__FPv = 0x0035AAE0; //type:func
 func_0035B6D0 = 0x0035B6D0; //type:func
 
 // --- src/object/railmodifier.cpp ---
-func_0035C5A0 = 0x0035C5A0; //type:func
-func_0035C698 = 0x0035C698; //type:func
 func_0035CFE8__FPv = 0x0035CFE8; //type:func
 func_0035CFF0 = 0x0035CFF0; //type:func
 func_0035D288 = 0x0035D288; //type:func
@@ -7949,7 +7894,6 @@ func_0035F378 = 0x0035F378; //type:func
 func_0035F3A8 = 0x0035F3A8; //type:func
 func_0035F6E8 = 0x0035F6E8; //type:func
 func_0035F788 = 0x0035F788; //type:func
-func_0035FC20 = 0x0035FC20; //type:func
 func_0035FE10 = 0x0035FE10; //type:func
 func_00360740__FPv = 0x00360740; //type:func
 func_00360748__FPv = 0x00360748; //type:func
@@ -7972,7 +7916,6 @@ func_00360AE0__FPv = 0x00360AE0; //type:func
 func_00360AE8__FPv = 0x00360AE8; //type:func
 func_00360AF0__FPv = 0x00360AF0; //type:func
 func_00360AF8__FPv = 0x00360AF8; //type:func
-func_00360B00 = 0x00360B00; //type:func
 func_00360B30__FPv = 0x00360B30; //type:func
 func_00360B38__FPv = 0x00360B38; //type:func
 func_00360B80__FPv = 0x00360B80; //type:func
@@ -8007,13 +7950,10 @@ func_003615C0 = 0x003615C0; //type:func
 func_00361900__FPv = 0x00361900; //type:func
 func_00361908__FPv = 0x00361908; //type:func
 func_00361910__FPv = 0x00361910; //type:func
-func_00361918 = 0x00361918; //type:func
 func_00361930__FPv = 0x00361930; //type:func
 func_00361938__FPvf = 0x00361938; //type:func
-func_00361940 = 0x00361940; //type:func
 func_003619D0__FPv = 0x003619D0; //type:func
 func_00361A58__FPv = 0x00361A58; //type:func
-func_00361A60 = 0x00361A60; //type:func
 func_00361B08__FPv = 0x00361B08; //type:func
 func_00361B10__FPv = 0x00361B10; //type:func
 func_00361D88__FPv = 0x00361D88; //type:func
@@ -8723,7 +8663,6 @@ func_0039A738 = 0x0039A738; //type:func
 func_0039A768 = 0x0039A768; //type:func
 func_0039A7A8 = 0x0039A7A8; //type:func
 func_0039A8D8 = 0x0039A8D8; //type:func
-func_0039AC48 = 0x0039AC48; //type:func
 
 // --- src/ui/uimenu.cpp ---
 func_0039C428 = 0x0039C428; //type:func
@@ -8811,7 +8750,6 @@ func_0039FEB8 = 0x0039FEB8; //type:func
 func_0039FF50__FPv = 0x0039FF50; //type:func
 
 // --- src/ui/uithing.cpp ---
-func_0039FFA0 = 0x0039FFA0; //type:func
 lbl_003A0074 = 0x003A0074; //type:label
 lbl_003A007C = 0x003A007C; //type:label
 lbl_003A0084 = 0x003A0084; //type:label
@@ -8863,7 +8801,6 @@ func_003A1D30 = 0x003A1D30; //type:func
 func_003A1F18 = 0x003A1F18; //type:func
 func_003A1F90 = 0x003A1F90; //type:func
 func_003A2068 = 0x003A2068; //type:func
-func_003A3280 = 0x003A3280; //type:func
 
 // --- src/ui/uivector.cpp ---
 lbl_003A3758 = 0x003A3758; //type:label

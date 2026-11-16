@@ -32,9 +32,9 @@ void cActiveTriggerList_purge(cActiveTriggerList* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C678);
+INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_clearFlags);
 #ifdef SKIP_ASM
-extern "C" void func_0016C678(cActiveTriggerList* self)
+extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
 {
     sTriggerNode* node = self->head;
     if (node != 0) {
@@ -94,7 +94,7 @@ extern char D_0045BF68[];
  * Adds a camera trigger to the front of the active trigger list.
  *
  * Allocates a 16-byte "Active Camera Trigger" node, stores @p item in its first word (the struct calls it
- * pad) and sets both node flags (+0x8, +0xC; func_0016C678 clears them on every node) to 1.
+ * pad) and sets both node flags (+0x8, +0xC; cActiveTriggerList_clearFlags clears them on every node) to 1.
  *
  * @param item  the trigger to add (On Tour tCameraTrigger*)
  */
@@ -111,9 +111,9 @@ extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C778);
+INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_remove);
 #ifdef SKIP_ASM
-extern "C" sTriggerNode* func_0016C778(cActiveTriggerList* self, sTriggerNode* target)
+extern "C" sTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, sTriggerNode* target)
 {
     sTriggerNode* head = self->head;
     if (target == head) {
@@ -140,7 +140,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C800);
 #ifdef SKIP_ASM
 void* func_0016BEE8(void* self);
 void* func_0016C5D0(void* self);
-extern "C" void* func_0016D210(void* self);
+extern "C" void* cCameraTriggerStack_cCameraTriggerStack(void* self);
 
 extern "C" void* func_0016C800(void* self)
 {
@@ -153,7 +153,7 @@ extern "C" void* func_0016C800(void* self)
     }
     p = (char*)self + 0x1C;
     for (i = 1; i != -1; i--, p += 0x20) {
-        func_0016D210(p);
+        cCameraTriggerStack_cCameraTriggerStack(p);
     }
     return self;
 }

@@ -12,9 +12,9 @@
 //   cPopupInfo_cPopupInfo cPopupInfo() (stores the vptr, calls clear), cPopupInfo_clear clear(), cPopupInfo__cPopupInfo ~cPopupInfo(),
 //   func_001C5780/func_001C57A0/func_001C57C0 setPopupOptionNames(int, const char* / const unsigned short* /
 //   unsigned int) (eType 2/1/3), func_001C57E0 setPopupOptionNames(int, const tPopupElement*),
-//   func_001C5800 getPopupOptionNames(int), func_001C5810/func_001C5838/func_001C5878 setPopupConfirmation(int,
-//   const char* / const unsigned short* / unsigned int, int iDefault) (eType 2/1/3), func_001C5860
-//   clearPopupConfirmation(int), func_001C58A0 setPopupConfirmation(int, const tConfirmElement*), func_001C58D0
+//   cPopupInfo_getPopupOptionNames getPopupOptionNames(int), func_001C5810/func_001C5838/func_001C5878 setPopupConfirmation(int,
+//   const char* / const unsigned short* / unsigned int, int iDefault) (eType 2/1/3), cPopupInfo_clearPopupConfirmation
+//   clearPopupConfirmation(int), func_001C58A0 setPopupConfirmation(int, const tConfirmElement*), cPopupInfo_getPopupConfirmation
 //   getPopupConfirmation(int). The other accessors (setPopupType, setPopupMessage ...) are inlined at every call site.
 //
 // A FLAT layout, like main/game.h. Member names and order are EA's, from SSX On Tour's DWARF (class cPopupInfo, size
@@ -52,7 +52,7 @@ CHECK_SIZE(tPopupElement, 0x8);
 // when this header lands, screenpopup.h should include it and drop its own copy (no src code names its fields yet).
 struct tConfirmElement {
     int eType;                      // 0x0 [O] tPopupElement::eType; [R] setPopupConfirmation stores 1/2/3,
-                                    //     clearPopupConfirmation (func_001C5860) 0; [U] non-zero = ask for confirmation
+                                    //     clearPopupConfirmation (cPopupInfo_clearPopupConfirmation) 0; [U] non-zero = ask for confirmation
     union {                         // 0x4 [O] tPopupElement's union; [R] setPopupConfirmation stores the string / id
         const unsigned short* pustr;
         const char* psz;

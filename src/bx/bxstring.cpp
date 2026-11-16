@@ -667,9 +667,9 @@ extern "C" void cBXString_releaseBuffer(cBXString* self, int len)
 extern "C" char* strchr(char* str, int ch);
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318AF8);
+INCLUDE_ASM("bx/bxstring", cBXString_getBufferSetLength);
 #ifdef SKIP_ASM
-extern "C" char* func_00318AF8(cBXString* self, int len)
+extern "C" char* cBXString_getBufferSetLength(cBXString* self, int len)
 {
     cBXString_getBuffer(self, len);
     *(int*)((int)self->Str - 8) = len;
@@ -678,13 +678,13 @@ extern "C" char* func_00318AF8(cBXString* self, int len)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318B40);
+INCLUDE_ASM("bx/bxstring", cBXString_freeExtra);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
 // Make the string unique (copy-on-write detach) when its two header counts differ.
 // PORT: pointer held in int for the negative header offsets.
-extern "C" void func_00318B40(cBXString* self)
+extern "C" void cBXString_freeExtra(cBXString* self)
 {
     int s = (int)self->Str;
     if (*(int*)(s - 8) != *(int*)(s - 4)) {
@@ -699,9 +699,9 @@ extern "C" void func_00318B40(cBXString* self)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318BC0);
+INCLUDE_ASM("bx/bxstring", cBXString_lockBuffer);
 #ifdef SKIP_ASM
-extern "C" char* func_00318BC0(cBXString* self)
+extern "C" char* cBXString_lockBuffer(cBXString* self)
 {
     char* r = cBXString_getBuffer(self, 0);
     *(int*)((int)self->Str - 0xC) = -1;
@@ -826,13 +826,13 @@ extern "C" void cBXString_makeUpper(cBXString* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318D90);
+INCLUDE_ASM("bx/bxstring", cBXString_makeLower);
 #ifdef SKIP_ASM
 extern unsigned char D_00499C81[];
 static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
 // In-place lower-case; D_00499C81 is the ctype table (+1), bit 1 = upper-case.
 // PORT: pointer held in int to get the target's negative load offset.
-extern "C" void func_00318D90(cBXString* self)
+extern "C" void cBXString_makeLower(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
     char* p = self->Str;
@@ -845,11 +845,11 @@ extern "C" void func_00318D90(cBXString* self)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318DF8);
+INCLUDE_ASM("bx/bxstring", cBXString_substitute);
 #ifdef SKIP_ASM
 // Replace every `from` with `to` in place.
 // PORT: pointer held in int to get the target's negative load offset.
-extern "C" void func_00318DF8(cBXString* self, char from, char to)
+extern "C" void cBXString_substitute(cBXString* self, char from, char to)
 {
     cBXString_copyBeforeWrite(self);
     char* p = self->Str;
@@ -864,11 +864,11 @@ extern "C" void func_00318DF8(cBXString* self, char from, char to)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_00318E68);
+INCLUDE_ASM("bx/bxstring", cBXString_setAt);
 #ifdef SKIP_ASM
 extern "C" void cBXString_copyBeforeWrite(cBXString* self);
 
-extern "C" void func_00318E68(cBXString* self, int idx, char ch)
+extern "C" void cBXString_setAt(cBXString* self, int idx, char ch)
 {
     cBXString_copyBeforeWrite(self);
     self->Str[idx] = ch;
@@ -1014,26 +1014,26 @@ extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, in
 
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00319120);
+INCLUDE_ASM("bx/bxstring", cBXString_spanIncluding);
 #ifdef SKIP_ASM
 // PORT: the unit defines cBXString_cBXString5 returning cBXString*; the caller ignores the result.
 void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
 extern "C" int func_0041AD10(char* str, int ch);
 
-extern "C" cBXString* func_00319120(cBXString* self, cBXString* other, int ch)
+extern "C" cBXString* cBXString_spanIncluding(cBXString* self, cBXString* other, int ch)
 {
     cBXString_cBXString5_v(self, other, func_0041AD10(other->Str, ch));
     return self;
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00319170);
+INCLUDE_ASM("bx/bxstring", cBXString_spanExcluding);
 #ifdef SKIP_ASM
 // PORT: the unit defines cBXString_cBXString5 returning cBXString*; the caller ignores the result.
 void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
 extern "C" int func_0041AB08(char* str, int ch);
 
-extern "C" cBXString* func_00319170(cBXString* self, cBXString* other, int ch)
+extern "C" cBXString* cBXString_spanExcluding(cBXString* self, cBXString* other, int ch)
 {
     cBXString_cBXString5_v(self, other, func_0041AB08(other->Str, ch));
     return self;

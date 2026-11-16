@@ -109,7 +109,7 @@ struct cMonitor {
     volatile int mLastCounter;       // 0x08C [P] MONITOR_Delta (preview 0x80, seen); [R] ctor 0
     volatile int mReEntryCheck;      // 0x090 [O]; [R] ctor 0; [U] MONITOR_Create (func_002ADCA0) ++/-- around the slot search
     int mPaused;                     // 0x094 [P] MONITOR_Paused/Pause/Resume (preview 0x88, seen); [U] cMonitor_MONITOR_Update
-    cMonitorInstance mMonitorInstance[48]; // 0x098 [O]; [R] ctor constructs 48 (func_002AD848), dtor destroys them; [U] cMonitor_MONITOR_GetFreeInstance/func_002ADCA0/func_002ADD78/func_002ADDA0/func_002ADDE0
+    cMonitorInstance mMonitorInstance[48]; // 0x098 [O]; [R] ctor constructs 48 (func_002AD848), dtor destroys them; [U] cMonitor_MONITOR_GetFreeInstance/func_002ADCA0/cMonitor_MONITOR_Destroy/func_002ADDA0/func_002ADDE0
     void** mVtbl;                    // 0x8D8 [R] cMonitor_vtbl (cMonitor ctor/dtor); cBankMonitor_vtbl in a cBankMonitor (shared primary vptr)
 };
 

@@ -73,13 +73,13 @@ extern "C" void cBucketMan_init(cBucketMan* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354B38);
+INCLUDE_ASM("object/bucketman", cBucketMan_purge);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 void cMemMan_free(void*);
 
-extern "C" void func_00354B38(cBucketMan* self)
+extern "C" void cBucketMan_purge(cBucketMan* self)
 {
     int i;
     for (i = 0; i < *(int*)self; i++) {
@@ -412,7 +412,7 @@ extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_003550A0);
+INCLUDE_ASM("object/bucketman", cBucketMan_renderBucket);
 #ifdef SKIP_ASM
 struct sBucketVEntry50A0 {
     short delta;
@@ -420,7 +420,7 @@ struct sBucketVEntry50A0 {
     void (*fn)(void*);
 };
 
-extern "C" void func_003550A0(cBucketMan* self, int index)
+extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);
     while (node != 0) {

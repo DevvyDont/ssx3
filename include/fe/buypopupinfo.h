@@ -8,14 +8,14 @@
 // Size 0x24: SSX On Tour's DWARF (class cBuyPopupInfo, size 0x24: mCost, mMoney, mCreditsLeft and three
 // tPopupElements, no virtuals), and cUIStateBuyPopup's next member (mAccept) sits at 0x6C = 0x48 + 0x24. EA's source:
 // all_in_one_fe.cpp in On Tour; retail keeps the methods in fe/fepopup (0x1CA8A0-0x1CAB10).
-// Methods: func_001CA8A0 clear() (On Tour's first method; the constructor is inlined into cUIStateBuyPopup's),
+// Methods: cBuyPopupInfo_clear clear() (On Tour's first method; the constructor is inlined into cUIStateBuyPopup's),
 // cBuyPopupInfo_initBuySongByCredit (songName, creditsLeft), cBuyPopupInfo_initBuySong (songName, cost, money),
 // func_001CAA18 initBuyReward (rewardType, rewardName, cost, money), cBuyPopupInfo_initBuyBolt (boltName, cost,
 // money). The setters (setCost, setCash, setItemName ...) are inlined at every call site.
 //
 // A FLAT layout. Member names, order and types are EA's (On Tour), every offset checked against retail. Evidence tags:
 //   [O] On Tour's DWARF;
-//   [R] retail clear (func_001CA8A0): MEM_fill(0xC/0x14/0x1C, 0, 8), 0 to 0x0/0x4/0x8;
+//   [R] retail clear (cBuyPopupInfo_clear): MEM_fill(0xC/0x14/0x1C, 0, 8), 0 to 0x0/0x4/0x8;
 //   [U] how retail code uses the field (the init* methods, cUIStateBuyPopup_onWidgetCreate).
 
 #include "layout.h"

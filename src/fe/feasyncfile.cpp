@@ -334,7 +334,7 @@ extern "C" int cFEAsyncManager_GetFreeAsyncFile(cFEAsyncManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3C50);
+INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_FlushFEAsyncTextures);
 #ifdef SKIP_ASM
 struct sFE3C50File {
     char name[0x100];
@@ -359,7 +359,7 @@ struct sVE3C50 {
 
 void cMemMan_free(void* p);
 
-extern "C" void func_001A3C50(cFEAsyncManager* self)
+extern "C" void cFEAsyncManager_FlushFEAsyncTextures(cFEAsyncManager* self)
 {
     sFE3C50Files* m = (sFE3C50Files*)self;
     int i;
@@ -4712,7 +4712,7 @@ extern "C" void sprintf2_1A9CC0(void* dst, const char* fmt, void* a, const char*
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindLastOf(cBXString* self, char ch, int len);
-extern "C" void func_00318E68(cBXString* self, int idx, char ch);
+extern "C" void cBXString_setAt(cBXString* self, int idx, char ch);
 extern "C" void func_00255FA0(void* self);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -5140,10 +5140,10 @@ extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, void
             while ((pos = cBXString_FindLastOf((cBXString*)&str, '\n', 0)) != -1) {
                 int next = pos + 1;
                 if (str.str[next] == '\n') {
-                    func_00318E68((cBXString*)&str, pos, '\r');
-                    func_00318E68((cBXString*)&str, next, '\r');
+                    cBXString_setAt((cBXString*)&str, pos, '\r');
+                    cBXString_setAt((cBXString*)&str, next, '\r');
                 } else {
-                    func_00318E68((cBXString*)&str, pos, ' ');
+                    cBXString_setAt((cBXString*)&str, pos, ' ');
                 }
             }
             *(char**)(sub + 8) = str.str;
@@ -5629,7 +5629,7 @@ extern "C" void func_001AB370(cFEStateNet* self, int a1, int a2)
 INCLUDE_ASM("fe/feasyncfile", func_001AB3D0);
 #ifdef SKIP_ASM
 extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, int a3);
-extern "C" int func_001CA150(void* popup);
+extern "C" int cScreenPopup_getCurrentlySelected(void* popup);
 
 extern "C" void func_001AB3D0(cFEStateNet* self, int a1, int a2)
 {
@@ -5643,7 +5643,7 @@ extern "C" void func_001AB3D0(cFEStateNet* self, int a1, int a2)
                 }
             }
             if ((*(unsigned char*)((char*)popup + 0x1D) & 0x3F) < 6) {
-                func_001AB478(self, self->mpPopup, a1, a2, func_001CA150(popup));
+                func_001AB478(self, self->mpPopup, a1, a2, cScreenPopup_getCurrentlySelected(popup));
             }
         }
     }
@@ -5667,7 +5667,7 @@ extern "C" int func_002623B0(void* self, const char* name);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void func_001C5860(cPopupInfo* self, int a1);
+extern "C" void cPopupInfo_clearPopupConfirmation(cPopupInfo* self, int a1);
 extern "C" void func_001C5838(void* self, int a1, int a2, int a3);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
@@ -5737,7 +5737,7 @@ extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, in
     if (a2) {
         *(int*)(p + 0xBC) = 5;
         *(int*)(p + 0x150) = 0x80B;
-        func_001C5860((cPopupInfo*)sub, n);
+        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
         if (func_00263128(GetSession_001AB478(), name)) {
             func_001C57C0(sub, n, GetHashValue32(D_00462938));
         } else {
@@ -5746,7 +5746,7 @@ extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, in
         n++;
     } else if (stateB != 0 && (stateA != 0 || func_00263128(GetSession_001AB478(), name))) {
         *(int*)sub = 4;
-        func_001C5860((cPopupInfo*)sub, n);
+        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
         if (func_00263128(GetSession_001AB478(), name)) {
             func_001C57C0(sub, n, GetHashValue32(D_00462938));
         } else {
@@ -5759,10 +5759,10 @@ extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, in
         *(int*)(sub + 0x94) = 0x80C;
     }
     if (func_00262A38(GetSession_001AB478(), a1)) {
-        func_001C5860((cPopupInfo*)sub, n);
+        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
         func_001C57C0(sub, n++, GetHashValue32(D_00462970));
     } else {
-        func_001C5860((cPopupInfo*)sub, n);
+        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
         func_001C57C0(sub, n++, GetHashValue32(D_00462988));
     }
     if (func_00262360(GetSession_001AB478(), name)) {
@@ -5792,7 +5792,7 @@ extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, in
         n++;
     }
     if (a2) {
-        func_001C5860((cPopupInfo*)sub, n);
+        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
         func_001C57C0(sub, n, GetHashValue32(D_00462A90));
     }
     *(int*)(sub + 0xAC) = a3;
@@ -23582,7 +23582,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindLastOf(cBXString* self, char ch, int len);
-extern "C" void func_00318E68(cBXString* self, int idx, char ch);
+extern "C" void cBXString_setAt(cBXString* self, int idx, char ch);
 extern "C" void func_003A19F8(cUIText* text, char* str);
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
@@ -23606,10 +23606,10 @@ extern "C" void* func_001C5430(cFEStateNet* self, int msg, int a2)
             while ((pos = cBXString_FindLastOf((cBXString*)&s, '\n', 0)) != -1) {
                 int next = pos + 1;
                 if (s.str[next] == '\n') {
-                    func_00318E68((cBXString*)&s, pos, '\r');
-                    func_00318E68((cBXString*)&s, next, '\r');
+                    cBXString_setAt((cBXString*)&s, pos, '\r');
+                    cBXString_setAt((cBXString*)&s, next, '\r');
                 } else {
-                    func_00318E68((cBXString*)&s, pos, ' ');
+                    cBXString_setAt((cBXString*)&s, pos, ' ');
                 }
             }
             func_003A19F8(text, s.str);
@@ -23772,9 +23772,9 @@ extern "C" void func_001C57E0(void* self, int i, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5800);
+INCLUDE_ASM("fe/feasyncfile", cPopupInfo_getPopupOptionNames);
 #ifdef SKIP_ASM
-extern "C" void* func_001C5800(cPopupInfo* self, int a1)
+extern "C" void* cPopupInfo_getPopupOptionNames(cPopupInfo* self, int a1)
 {
     return (char*)self + ((a1 << 3) + 0x24);
 }
@@ -23827,9 +23827,9 @@ extern "C" void func_001C5838(void* self, int a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5860);
+INCLUDE_ASM("fe/feasyncfile", cPopupInfo_clearPopupConfirmation);
 #ifdef SKIP_ASM
-extern "C" void func_001C5860(cPopupInfo* self, int a1)
+extern "C" void cPopupInfo_clearPopupConfirmation(cPopupInfo* self, int a1)
 {
     char* p = (char*)self + a1 * 0xc;
     *(int*)(p + 0x54) = 0;
@@ -23859,9 +23859,9 @@ extern "C" void func_001C58A0(void* self, int i, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C58D0);
+INCLUDE_ASM("fe/feasyncfile", cPopupInfo_getPopupConfirmation);
 #ifdef SKIP_ASM
-extern "C" void* func_001C58D0(cPopupInfo* self, int a1)
+extern "C" void* cPopupInfo_getPopupConfirmation(cPopupInfo* self, int a1)
 {
     return (char*)self + (a1 * 0xc + 0x54);
 }

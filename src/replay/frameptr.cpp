@@ -48,11 +48,11 @@ extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E968);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_purgeBlock);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
-extern "C" void func_0026E968(cReplayFramePtr* self)
+extern "C" void cReplayFramePtr_purgeBlock(cReplayFramePtr* self)
 {
     void* p = self->Block;
     if (p != 0) {
@@ -88,11 +88,11 @@ int func_0026E9C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E9D0);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_write);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
-extern "C" void func_0026E9D0(cReplayFramePtr* self, void* src, int n)
+extern "C" void cReplayFramePtr_write(cReplayFramePtr* self, void* src, int n)
 {
     MEM_copy(self->WriteData, src, n);
     self->WriteData += n;
@@ -101,11 +101,11 @@ extern "C" void func_0026E9D0(cReplayFramePtr* self, void* src, int n)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EA20);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_read);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
-extern "C" void func_0026EA20(cReplayFramePtr* self, void* dst, int n)
+extern "C" void cReplayFramePtr_read(cReplayFramePtr* self, void* dst, int n)
 {
     MEM_copy(dst, self->ReadData, n);
     self->ReadData += n;
@@ -710,7 +710,7 @@ extern "C" void func_0026F428(cReplay* self)
 {
     int i;
     for (i = 0; i < self->MaxFrames; i++) {
-        func_0026E968((cReplayFramePtr*)(&((sFpEntry26F428*)&self->Frames[0])[i]));
+        cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((sFpEntry26F428*)&self->Frames[0])[i]));
     }
     func_0026E5C0((char*)self + 0x3B0);
     func_0026E5C0((char*)self + 0x3BC);

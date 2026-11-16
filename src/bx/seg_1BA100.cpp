@@ -1367,11 +1367,11 @@ extern "C" void func_002BAEE8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAF08);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterLayer_resolve);
 #ifdef SKIP_ASM
 void func_002C17C0(void *);
 struct E_AF08 { int a; int off; };
-extern "C" void func_002BAF08(cWorldPainterLayer* self) {
+extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
     *(char**)self = ((char*)self) + *(int*)self;
     func_002C17C0(*(char**)self);
     *(char**)(((char*)self) + 8) = ((char*)self) + *(int*)(((char*)self) + 8);
@@ -1391,10 +1391,10 @@ extern "C" void func_002BAF08(cWorldPainterLayer* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAF90);
 #ifdef SKIP_ASM
-extern "C" void *func_002C1CD8(int);
+extern "C" void *cQuadTree_getLeaf(int);
 
 extern "C" int func_002BAF90(int *arg0) {
-    return (*(int *)((char*)(func_002C1CD8(*arg0)) + (4)));
+    return (*(int *)((char*)(cQuadTree_getLeaf(*arg0)) + (4)));
 }
 #endif
 
@@ -1510,20 +1510,20 @@ extern "C" void *cWorldPainterMan_cWorldPainterMan(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB140);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan__cWorldPainterMan);
 #ifdef SKIP_ASM
 void cMemMan_free(void *);
 void operator_delete(int *);
-extern "C" void func_002BB390(cWorldPainterSection*, int);
+extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*, int);
 struct S12_B140 { int a, b, c; };
-extern "C" void func_002BB140(cWorldPainterMan* self, int flags) {
+extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int flags) {
     S12_B140 *arr = (S12_B140*)self->m_pCache;
     if (arr != 0) {
         S12_B140 *p = arr + *(int*)((char*)arr - 0x10);
         if (arr != p) {
             do {
                 p--;
-                func_002BB390((cWorldPainterSection*)p, 0);
+                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)p, 0);
             } while ((S12_B140*)self->m_pCache != p);
         }
         cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
@@ -1535,7 +1535,7 @@ extern "C" void func_002BB140(cWorldPainterMan* self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB1D0);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_002BB370(void *arg0);
@@ -1544,13 +1544,13 @@ extern char D_00483C68[];
 struct sArr_B1D0 { int n; S12_B140 *arr; };
 
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
-extern "C" void func_002BB1D0(cWorldPainterMan* self, int n) {
+extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
     if ((S12_B140*)self->m_pCache != 0) {
         S12_B140 *p = (S12_B140*)self->m_pCache + *(int*)((char*)(S12_B140*)self->m_pCache - 0x10);
         if ((S12_B140*)self->m_pCache != p) {
             do {
                 p--;
-                func_002BB390((cWorldPainterSection*)p, 0);
+                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)p, 0);
             } while ((S12_B140*)self->m_pCache != p);
         }
         cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
@@ -1571,10 +1571,10 @@ extern "C" void func_002BB1D0(cWorldPainterMan* self, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB2B8);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_update);
 #ifdef SKIP_ASM
 extern "C" void func_002BB3F0(cWorldPainterSection*);
-extern "C" void func_002BB2B8(cWorldPainterMan* self) {
+extern "C" void cWorldPainterMan_update(cWorldPainterMan* self) {
     unsigned i;
     for (i = 0; i < *(unsigned*)self; i++) {
         func_002BB3F0((cWorldPainterSection*)((char*)(self->m_pCache) + i * 12));
@@ -1614,11 +1614,11 @@ extern "C" void *func_002BB370(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB390);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection__cWorldPainterSection);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern "C" void func_002BB390(cWorldPainterSection* self, int flags) {
+extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection* self, int flags) {
     void *p = self->m_pWPHeader;
     if (p != 0) {
         if (self->m_iStreamed == 0) {
@@ -1731,7 +1731,7 @@ extern "C" void func_002BB5A8(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BB5F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002BAF08_B5F0(int p) __asm__("func_002BAF08");
+extern "C" void cWorldPainterLayer_resolve_B5F0(int p) __asm__("cWorldPainterLayer_resolve");
 
 struct sReloc_B5F0 {
     int magic;          // 0x0 (0x10 once relocated)
@@ -1768,7 +1768,7 @@ extern "C" void func_002BB5F0(cWorldPainterSection* vself)
                     *p = 0;
                 } else {
                     *p = (int)self->data + *p;
-                    func_002BAF08_B5F0(*p);
+                    cWorldPainterLayer_resolve_B5F0(*p);
                 }
             }
         }
@@ -2799,10 +2799,10 @@ extern "C" void *func_002BC7C8(tWPInGameData_Fog* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC830);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_tWPInGameData_LightGlow);
 #ifdef SKIP_ASM
 extern char D_00484DA8[];
-extern "C" void *func_002BC830(tWPInGameData_LightGlow* self) {
+extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_LightGlow* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
     p[0] = -99999.0f;
@@ -2826,10 +2826,10 @@ extern "C" void *func_002BC830(tWPInGameData_LightGlow* self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC890);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_tWPInGameData_ScreenTint);
 #ifdef SKIP_ASM
 extern char D_00484B70[];
-extern "C" void *func_002BC890(tWPInGameData_ScreenTint* self) {
+extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData_ScreenTint* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
     p[0] = -99999.0f;
@@ -2865,10 +2865,10 @@ extern "C" void *func_002BC8E8(tWPInGameData_SkyBox* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC910);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_tWPInGameData_Sun);
 #ifdef SKIP_ASM
 extern char D_00484700[];
-extern "C" void *func_002BC910(tWPInGameData_Sun* self) {
+extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
     p[0] = -99999.0f;
@@ -3005,10 +3005,10 @@ extern "C" void *func_002BCBD0(tWPInGameData_Danger* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCC00);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_blend);
 #ifdef SKIP_ASM
 class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCC00(tWPInGameData_MusicTrigger* self, void *p, float f) {
+extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, void *p, float f) {
     cCC00 *o = (cCC00*)self;
     o->vt();
     f = f * f;
@@ -3021,10 +3021,10 @@ extern "C" void func_002BCC00(tWPInGameData_MusicTrigger* self, void *p, float f
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCCC8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_blend);
 #ifdef SKIP_ASM
 class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCCC8(tWPInGameData_Mix* self, void *p, float f) {
+extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, void *p, float f) {
     cCCC8 *o = (cCCC8*)self;
     o->vt();
     f = f * f;
@@ -3035,10 +3035,10 @@ extern "C" void func_002BCCC8(tWPInGameData_Mix* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCD68);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_blend);
 #ifdef SKIP_ASM
 class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCD68(tWPInGameData_Ambience* self, void *p, float f) {
+extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, void *p, float f) {
     cCD68 *o = (cCD68*)self;
     o->vt();
     f = f * f;
@@ -3049,10 +3049,10 @@ extern "C" void func_002BCD68(tWPInGameData_Ambience* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCE08);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_blend);
 #ifdef SKIP_ASM
 class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCE08(tWPInGameData_Speech* self, void *p, float f) {
+extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, void *p, float f) {
     cCE08 *o = (cCE08*)self;
     o->vt();
     f = f * f;
@@ -3063,10 +3063,10 @@ extern "C" void func_002BCE08(tWPInGameData_Speech* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCEA8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_blend);
 #ifdef SKIP_ASM
 class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCEA8(tWPInGameData_Camera* self, void *p, float f) {
+extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, void *p, float f) {
     cCEA8 *o = (cCEA8*)self;
     o->vt();
     f = f * f;
@@ -3077,14 +3077,14 @@ extern "C" void func_002BCEA8(tWPInGameData_Camera* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCF38);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_blend);
 #ifdef SKIP_ASM
 struct VEnt_CF38 { short delta; short idx; int (*fn)(void*); };
 struct Pair_CF38 { float cur; float tgt; };
 struct Obj_CF38 { int pad0; char* vt; Pair_CF38 p[6]; };
 struct Src_CF38 { int pad0; float v[6]; };
 
-extern "C" void func_002BCF38(tWPInGameData_Fog* self, Src_CF38* src, float t) {
+extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, Src_CF38* src, float t) {
     VEnt_CF38* e;
     float inv;
     e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
@@ -3109,7 +3109,7 @@ extern "C" void func_002BCF38(tWPInGameData_Fog* self, Src_CF38* src, float t) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD068);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_blend);
 #ifdef SKIP_ASM
 struct VEnt_D068 { short delta; short idx; int (*fn)(void*); };
 struct VEntV_D068 { short delta; short idx; void (*fn)(void*); };
@@ -3117,7 +3117,7 @@ struct Pair_D068 { float cur; float tgt; };
 struct Obj_D068 { int pad0; char* vt; Pair_D068 p[7]; };
 struct Src_D068 { int pad0; float v[7]; };
 
-extern "C" void func_002BD068(tWPInGameData_LightGlow* self, Src_D068* src, float t) {
+extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, Src_D068* src, float t) {
     VEnt_D068* e;
     float inv;
     e = (VEnt_D068*)((char*)self->mVtbl + 0x218);
@@ -3146,14 +3146,14 @@ extern "C" void func_002BD068(tWPInGameData_LightGlow* self, Src_D068* src, floa
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD1B8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_blend);
 #ifdef SKIP_ASM
 struct VEnt_D1B8 { short delta; short idx; int (*fn)(void*); };
 struct Pair_D1B8 { float cur; float tgt; };
 struct Obj_D1B8 { int pad0; char* vt; Pair_D1B8 p[6]; };
 struct Src_D1B8 { int pad0; float v[6]; };
 
-extern "C" void func_002BD1B8(tWPInGameData_ScreenTint* self, Src_D1B8* src, float t) {
+extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, Src_D1B8* src, float t) {
     VEnt_D1B8* e;
     float inv;
     e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
@@ -3178,10 +3178,10 @@ extern "C" void func_002BD1B8(tWPInGameData_ScreenTint* self, Src_D1B8* src, flo
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD2E8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_blend);
 #ifdef SKIP_ASM
 class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD2E8(tWPInGameData_SkyBox* self, void *p, float f) {
+extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, void *p, float f) {
     cD2E8 *o = (cD2E8*)self;
     o->vt();
     f = f * f;
@@ -3192,7 +3192,7 @@ extern "C" void func_002BD2E8(tWPInGameData_SkyBox* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD378);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_blend);
 #ifdef SKIP_ASM
 struct VEnt_D378 { short delta; short idx; int (*fn)(void*); };
 struct Pair_D378 { float cur; float tgt; };
@@ -3200,7 +3200,7 @@ struct IPair_D378 { int cur; int tgt; };
 struct Obj_D378 { int pad0; char* vt; Pair_D378 p[6]; IPair_D378 i6; Pair_D378 q[2]; };
 struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
 
-extern "C" void func_002BD378(tWPInGameData_Sun* self, Src_D378* src, float t) {
+extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, float t) {
     VEnt_D378* e;
     float inv;
     e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
@@ -3231,10 +3231,10 @@ extern "C" void func_002BD378(tWPInGameData_Sun* self, Src_D378* src, float t) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD518);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_blend);
 #ifdef SKIP_ASM
 class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD518(tWPInGameData_Surface* self, void *p, float f) {
+extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, void *p, float f) {
     cD518 *o = (cD518*)self;
     o->vt();
     f = f * f;
@@ -3245,11 +3245,11 @@ extern "C" void func_002BD518(tWPInGameData_Surface* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD5A8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_blend);
 #ifdef SKIP_ASM
 struct sP_D5A8 { float x, y; };
 class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD5A8(tWPInGameData_Lighting* self, void *p, float f) {
+extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, void *p, float f) {
     cD5A8 *o = (cD5A8*)self;
     o->vt();
     f = f * f;
@@ -3266,12 +3266,12 @@ extern "C" void func_002BD5A8(tWPInGameData_Lighting* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD698);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_blend);
 #ifdef SKIP_ASM
 // Environment property blend: w^2 blend of all 19 current values toward the
 // incoming set, which is then stored as the target.
 class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD698(tWPInGameData_Weather* self, void *p, float f) {
+extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *p, float f) {
     cD698 *o = (cD698*)self;
     o->vt();
     f = f * f;
@@ -3318,10 +3318,10 @@ extern "C" void func_002BD698(tWPInGameData_Weather* self, void *p, float f) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BD968);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_blend);
 #ifdef SKIP_ASM
 class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD968(tWPInGameData_Danger* self, void *p, float f) {
+extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, void *p, float f) {
     cD968 *o = (cD968*)self;
     o->vt();
     f = f * f;
@@ -3810,10 +3810,10 @@ extern "C" void func_002BE2C8(tWPInGameData_Danger* p) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE2D8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002BE2D8(tWPInGameData_MusicTrigger* self, char *s) {
+extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, char *s) {
     VE_E2D8 *e = &(*(VE_E2D8 **)s)[2];
     e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_E2D8 **)s)[2];
@@ -3882,7 +3882,7 @@ extern "C" void func_002BE4B0(int arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE518);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_E518 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_E518 { char* vt; };
@@ -3892,7 +3892,7 @@ static inline void Wr_E518(Stream_E518* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BE518(tWPInGameData_Fog* self, Stream_E518* s) {
+extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, Stream_E518* s) {
     Wr_E518(s, ((char*)self) + 0x8, 4);
     Wr_E518(s, ((char*)self), 4);
     Wr_E518(s, ((char*)self) + 0x10, 4);
@@ -3909,7 +3909,7 @@ extern "C" void func_002BE518(tWPInGameData_Fog* self, Stream_E518* s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE698);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_E698 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_E698 { char* vt; };
@@ -3919,7 +3919,7 @@ static inline void Wr_E698(Stream_E698* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BE698(tWPInGameData_LightGlow* self, Stream_E698* s) {
+extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, Stream_E698* s) {
     Wr_E698(s, ((char*)self) + 0x8, 4);
     Wr_E698(s, ((char*)self), 4);
     Wr_E698(s, ((char*)self) + 0x10, 4);
@@ -3938,7 +3938,7 @@ extern "C" void func_002BE698(tWPInGameData_LightGlow* self, Stream_E698* s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE850);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_E850 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_E850 { char* vt; };
@@ -3948,7 +3948,7 @@ static inline void Wr_E850(Stream_E850* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BE850(tWPInGameData_ScreenTint* self, Stream_E850* s) {
+extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, Stream_E850* s) {
     Wr_E850(s, ((char*)self) + 0x8, 4);
     Wr_E850(s, ((char*)self), 4);
     Wr_E850(s, ((char*)self) + 0x10, 4);
@@ -3979,7 +3979,7 @@ extern "C" void func_002BE9D0(int arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BEA38);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_EA38 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_EA38 { char* vt; };
@@ -3989,7 +3989,7 @@ static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BEA38(tWPInGameData_Sun* self, Stream_EA38* s) {
+extern "C" void tWPInGameData_Sun_readFromReplayFrame(tWPInGameData_Sun* self, Stream_EA38* s) {
     Wr_EA38(s, ((char*)self) + 0x8, 4);
     Wr_EA38(s, ((char*)self), 4);
     Wr_EA38(s, ((char*)self) + 0x10, 4);
@@ -4026,7 +4026,7 @@ extern "C" void func_002BEC60(int arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BECC8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_ECC8 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_ECC8 { char* vt; };
@@ -4036,7 +4036,7 @@ static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BECC8(tWPInGameData_Lighting* self, Stream_ECC8* s) {
+extern "C" void tWPInGameData_Lighting_readFromReplayFrame(tWPInGameData_Lighting* self, Stream_ECC8* s) {
     Wr_ECC8(s, ((char*)self) + 0x8, 8);
     Wr_ECC8(s, ((char*)self), 4);
     Wr_ECC8(s, ((char*)self) + 0x18, 8);
@@ -4053,7 +4053,7 @@ extern "C" void func_002BECC8(tWPInGameData_Lighting* self, Stream_ECC8* s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BEE48);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_readFromReplayFrame);
 #ifdef SKIP_ASM
 class cStream_EE48 {
 public:
@@ -4062,7 +4062,7 @@ public:
 };
 
 // Streams 19 words of self (at +0x8 .. +0x98), each followed by the word at +0x0.
-extern "C" void func_002BEE48(tWPInGameData_Weather* self, cStream_EE48* s)
+extern "C" void tWPInGameData_Weather_readFromReplayFrame(tWPInGameData_Weather* self, cStream_EE48* s)
 {
     s->write(((char*)self) + 0x8, 4);
     s->write(((char*)self), 4);
@@ -4106,10 +4106,10 @@ extern "C" void func_002BEE48(tWPInGameData_Weather* self, cStream_EE48* s)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF2A0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002BF2A0(tWPInGameData_Danger* self, char *s) {
+extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, char *s) {
     VE_F2A0 *e = &(*(VE_F2A0 **)s)[2];
     e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_F2A0 **)s)[2];
@@ -4122,10 +4122,10 @@ extern "C" void func_002BF2A0(tWPInGameData_Danger* self, char *s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF340);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002BF340(tWPInGameData_MusicTrigger* self, char *s) {
+extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, char *s) {
     VE_F340 *e = &(*(VE_F340 **)s)[1];
     e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_F340 **)s)[1];
@@ -4194,7 +4194,7 @@ extern "C" void func_002BF518(int arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF580);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_F580 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_F580 { char* vt; };
@@ -4204,7 +4204,7 @@ static inline void Wr_F580(Stream_F580* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BF580(tWPInGameData_Fog* self, Stream_F580* s) {
+extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, Stream_F580* s) {
     Wr_F580(s, ((char*)self) + 0x8, 4);
     Wr_F580(s, ((char*)self), 4);
     Wr_F580(s, ((char*)self) + 0x10, 4);
@@ -4221,7 +4221,7 @@ extern "C" void func_002BF580(tWPInGameData_Fog* self, Stream_F580* s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF700);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_F700 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_F700 { char* vt; };
@@ -4231,7 +4231,7 @@ static inline void Wr_F700(Stream_F700* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BF700(tWPInGameData_LightGlow* self, Stream_F700* s) {
+extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, Stream_F700* s) {
     Wr_F700(s, ((char*)self) + 0x8, 4);
     Wr_F700(s, ((char*)self), 4);
     Wr_F700(s, ((char*)self) + 0x10, 4);
@@ -4250,7 +4250,7 @@ extern "C" void func_002BF700(tWPInGameData_LightGlow* self, Stream_F700* s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF8B8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_F8B8 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_F8B8 { char* vt; };
@@ -4260,7 +4260,7 @@ static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BF8B8(tWPInGameData_ScreenTint* self, Stream_F8B8* s) {
+extern "C" void tWPInGameData_ScreenTint_writeToReplayFrame(tWPInGameData_ScreenTint* self, Stream_F8B8* s) {
     Wr_F8B8(s, ((char*)self) + 0x8, 4);
     Wr_F8B8(s, ((char*)self), 4);
     Wr_F8B8(s, ((char*)self) + 0x10, 4);
@@ -4291,7 +4291,7 @@ extern "C" void func_002BFA38(int arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BFAA0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_FAA0 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_FAA0 { char* vt; };
@@ -4301,7 +4301,7 @@ static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BFAA0(tWPInGameData_Sun* self, Stream_FAA0* s) {
+extern "C" void tWPInGameData_Sun_writeToReplayFrame(tWPInGameData_Sun* self, Stream_FAA0* s) {
     Wr_FAA0(s, ((char*)self) + 0x8, 4);
     Wr_FAA0(s, ((char*)self), 4);
     Wr_FAA0(s, ((char*)self) + 0x10, 4);
@@ -4338,7 +4338,7 @@ extern "C" void func_002BFCC8(int arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BFD30);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_FD30 { short delta; short idx; void (*fn)(void*, void*, int); };
 struct Stream_FD30 { char* vt; };
@@ -4348,7 +4348,7 @@ static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BFD30(tWPInGameData_Lighting* self, Stream_FD30* s) {
+extern "C" void tWPInGameData_Lighting_writeToReplayFrame(tWPInGameData_Lighting* self, Stream_FD30* s) {
     Wr_FD30(s, ((char*)self) + 0x8, 8);
     Wr_FD30(s, ((char*)self), 4);
     Wr_FD30(s, ((char*)self) + 0x18, 8);
@@ -4365,7 +4365,7 @@ extern "C" void func_002BFD30(tWPInGameData_Lighting* self, Stream_FD30* s) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BFEB0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream_FEB0 {
 public:
@@ -4374,8 +4374,8 @@ public:
 };
 
 // Reads 19 words into self (at +0x8 .. +0x98), each followed by one into +0x0
-// (the read-side twin of func_002BEE48).
-extern "C" void func_002BFEB0(tWPInGameData_Weather* self, cStream_FEB0* s)
+// (the read-side twin of tWPInGameData_Weather_readFromReplayFrame).
+extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* self, cStream_FEB0* s)
 {
     s->read(((char*)self) + 0x8, 4);
     s->read(((char*)self), 4);
@@ -4419,10 +4419,10 @@ extern "C" void func_002BFEB0(tWPInGameData_Weather* self, cStream_FEB0* s)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002C0308);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002C0308(tWPInGameData_Danger* self, char *s) {
+extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, char *s) {
     VE_0308 *e = &(*(VE_0308 **)s)[1];
     e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_0308 **)s)[1];

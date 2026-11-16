@@ -429,17 +429,17 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AC48);
+INCLUDE_ASM("ui/uilistbox", cUIMenu_getPrev);
 #ifdef SKIP_ASM
 extern "C" void* func_00397870(void* list, unsigned char i);
 
-struct func_0039AC48_sVEntry {
+struct cUIMenu_getPrev_sVEntry {
     short delta;
     short index;
     int (*fn)(void*, void*, int, unsigned char);
 };
 
-extern "C" unsigned char func_0039AC48(cUIMenu* self)
+extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
 {
     unsigned char n = self->mScrollItemNum;
     unsigned char i = self->mScrollItemCurrent - 1;
@@ -447,7 +447,7 @@ extern "C" unsigned char func_0039AC48(cUIMenu* self)
         if (i != 0xFF) {
             if (*(int*)&self->mAttrMenu & 4) {
                 char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
-                func_0039AC48_sVEntry* vt = *(func_0039AC48_sVEntry**)(mgr + 8);
+                cUIMenu_getPrev_sVEntry* vt = *(cUIMenu_getPrev_sVEntry**)(mgr + 8);
                 if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
                     return i;
                 }

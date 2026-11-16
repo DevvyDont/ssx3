@@ -15,13 +15,13 @@
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
 //   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init (init), func_0022CEA8 (load),
-//     cSectionMan_activate (activate), func_0022D278 (isLoaded), func_0022D390 (isActive), cSectionMan_loadSection (loadSection),
+//     cSectionMan_activate (activate), func_0022D278 (isLoaded), cSectionMan_isActive (isActive), cSectionMan_loadSection (loadSection),
 //     cSectionMan_activateSection (activateSection), cSectionMan_unloadSection (unloadSection), cSectionMan_loadMode (loadMode),
 //     cSectionMan_activateMode (activateMode), cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete (skyLoadComplete),
 //     cSectionMan_skySwap, cSectionMan_preLoadMode (preLoadMode), func_0022DFD0 (isPreLoadModeDone), cSectionMan_changeMode (changeMode),
 //     cSectionMan_isSectionLoaded (isSectionLoaded), cSectionMan_getWorldSectionIDFromBELocationID (getWorldSectionIDFromBELocationID),
 //     cSectionMan_getWorldSectionIDFromBESectionID (getWorldSectionIDFromBESectionID), cSectionMan_getBESectionIDFromWorldSectionID (getBESectionIDFromWorldSectionID),
-//     func_0022E118 (gotoLocation);
+//     cSectionMan_gotoLocation (gotoLocation);
 //   main/sectionman: cSectionMan_setSky, cSectionMan_initEventPool (initEventPool), func_0022E278 (allocEvent),
 //     func_0022E288 (freeEvent), cSectionMan_addActiveEvent (addActiveEvent), cSectionMan_getNextActiveEvent,
 //     cSectionMan_removeActiveEvent (removeActiveEvent).

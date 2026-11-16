@@ -34,7 +34,7 @@ struct cWorld {
     cWScriptCache* m_pWScriptCache;      // 0x04 [O]; [R] cWScriptCache_cWScriptCache(cMemMan_alloc(0x10,
                                          //      "cWScriptCache"), this); [U] the script getters (cWorld_getWScriptHeaderId ...)
     cWorldPainterMan* m_pWorldPainterMan; // 0x08 [O]; [R] cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8,
-                                         //      "cWorldPainterMan")); [U] load sizes it per section (func_002BB1D0)
+                                         //      "cWorldPainterMan")); [U] load sizes it per section (cWorldPainterMan_init)
     char* m_pDataMaster;                 // 0x0C [O] alone: no retail code reads or writes it (the ctor leaves it)
     tSphTreeList* m_pSphTrees;           // 0x10 [O]; [R] ctor = 0
     tPolyModelList* m_pPolyModels;       // 0x14 [O]; [R] ctor = 0

@@ -748,9 +748,9 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314788);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_isPlaying);
 #ifdef SKIP_ASM
-extern "C" int func_00314788(cAnimSequencer *self, int id) {
+extern "C" int cAnimSequencer_isPlaying(cAnimSequencer *self, int id) {
     for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
         if (*(int *)n == id) {
             return 1;
@@ -760,9 +760,9 @@ extern "C" int func_00314788(cAnimSequencer *self, int id) {
 }
 #endif
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003147B8);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getPosition);
 #ifdef SKIP_ASM
-extern "C" int func_003147B8(cAnimSequencer *self, int id) {
+extern "C" int cAnimSequencer_getPosition(cAnimSequencer *self, int id) {
     int index = 0;
     for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
         if (*(int *)n == id) {

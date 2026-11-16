@@ -24,7 +24,7 @@
 //       sh 0xEE8 + PMF 0xEF4, isAboutToRail lw ...), +0x50 in retail for cComputer's block;
 //   [R] retail's constructor/Init and the out-of-line accessors in ai/control/handplantcontrol: func_00144000
 //       setInput (sw 0xF40), func_00144008 getCurrentTarget (lw 0xE70), func_00144010 isAboutToRail (lw 0xE20),
-//       func_00144040 setCruiseLogic (PMF D_0043CF20[i] -> 0xF44, i -> 0xF38);
+//       cComputer_setCruiseLogic setCruiseLogic (PMF D_0043CF20[i] -> 0xF44, i -> 0xF38);
 //   [U] how retail code uses the field (setIndividualRiderDifficulty, updateRiderDifficulty, the four
 //       shouldRider* tests, chooseRandom*Grab, scorePath, checkForBlock ...);
 //   [O] On Tour's member order alone, where the fields on both sides are placed by [P], [R] or [U].
@@ -100,12 +100,12 @@ struct cComputer {
     int TweakHistoryCounter[15]; // 0xEF4 [O]; [U] cComputer_chooseRandomTweakGrab (chooseRandomTweakGrab)
     float mBlockTimer;         // 0xF30 [O]; [R] Init = 0; [U] cComputer_checkForBlock (float)
     int mShouldIBlock;         // 0xF34 [O] (bool); [R] Init = 0; [U] cComputer_checkForBlock
-    short mCruiseLogicID;      // 0xF38 [P] setCruiseLogic (preview sh 0xEE8); [R] Init = 1, func_00144040
+    short mCruiseLogicID;      // 0xF38 [P] setCruiseLogic (preview sh 0xEE8); [R] Init = 1, cComputer_setCruiseLogic
     char pad_F3A[0x6];         // 0xF3A cComputerState is 16-byte aligned (t4Vector members)
     // ---- cComputer ----
     cInput* Input;             // 0xF40 [P] setInput (preview 0xEF0); [R] func_00144000; [O]
     tComputerCruiseLogic cruiseLogic; // 0xF44 [P] setCruiseLogic (preview 0xEF4); [R] Init = mCruiseLogic[1],
-                               //       func_00144040; [U] func_0010A960 calls through it; [O] "void ::* cruiseLogic"
+                               //       cComputer_setCruiseLogic; [U] func_0010A960 calls through it; [O] "void ::* cruiseLogic"
     char pad_F4C[0x4];         // 0xF4C the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xF50-0x1A90) ----
     cRider Rider;              // 0xF50 [R] cComputer_cComputer: cRider_cRider(this + 0xF50) when in charge

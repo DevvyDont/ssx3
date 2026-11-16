@@ -178,11 +178,11 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355550);
+INCLUDE_ASM("object/movenode", cMoveNode_addUVScrollModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remUVScrollModifier(void* block);
 
-extern "C" void func_00355550(cMoveNode* self, void* v)
+extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* v)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
@@ -194,11 +194,11 @@ extern "C" void func_00355550(cMoveNode* self, void* v)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003555A8);
+INCLUDE_ASM("object/movenode", cMoveNode_addTexFlipModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTexFlipModifier(void* block);
 
-extern "C" void func_003555A8(cMoveNode* self, void* v)
+extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* v)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
@@ -210,11 +210,11 @@ extern "C" void func_003555A8(cMoveNode* self, void* v)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355600);
+INCLUDE_ASM("object/movenode", cMoveNode_addPhysicsModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remPhysicsModifier(void* block);
 
-extern "C" void func_00355600(cMoveNode* self, void* v)
+extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* v)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
@@ -390,7 +390,7 @@ float func_00355878(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355888);
+INCLUDE_ASM("object/movenode", cMoveNode_addDebounce);
 #ifdef SKIP_ASM
 struct sMnVEntryF {
     short delta;
@@ -398,7 +398,7 @@ struct sMnVEntryF {
     void (*fn)(void*, float);
 };
 
-extern "C" void func_00355888(cMoveNode* self, void* a1)
+extern "C" void cMoveNode_addDebounce(cMoveNode* self, void* a1)
 {
     sMnVEntryF* vt = (sMnVEntryF*)self->mVtbl;
     vt[41].fn((char*)self + vt[41].delta, *(float*)((char*)a1 + 0x4));
@@ -433,27 +433,27 @@ extern "C" void func_00355918(cMoveNode* self, void* desc)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355978);
+INCLUDE_ASM("object/movenode", cMoveNode_addParent);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char D_0048E8E0[];
 extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_00355978(cMoveNode* self, void* a1, void* a2, sMoveQuad* pos)
+extern "C" void cMoveNode_addParent(cMoveNode* self, void* a1, void* a2, sMoveQuad* pos)
 {
     cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_003559F8);
+INCLUDE_ASM("object/movenode", cMoveNode_addMagnet);
 #ifdef SKIP_ASM
 extern char D_0048E918[];
 extern "C" void* func_003572E0(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_003559F8(cMoveNode* self, void* a1, float f0, float f1)
+extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* a1, float f0, float f1)
 {
     cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
                                       self->Instance, a1, f0, f1));
@@ -517,41 +517,41 @@ extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355B90);
+INCLUDE_ASM("object/movenode", cMoveNode_addUVScroll);
 #ifdef SKIP_ASM
 extern char D_0048E940[];
 extern "C" void* func_0035F6E8(void* mem, void* desc);
-extern "C" void func_00355550(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_00355B90(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 {
-    func_00355550(self, func_0035F6E8(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), desc));
+    cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), desc));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355BF0);
+INCLUDE_ASM("object/movenode", cMoveNode_addTexFlip);
 #ifdef SKIP_ASM
 extern char D_0048E958[];
 extern "C" void* func_0035F0B8(void* mem, void* desc, void* owner);
-extern "C" void func_003555A8(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_00355BF0(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 {
-    func_003555A8(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355C50);
+INCLUDE_ASM("object/movenode", cMoveNode_addBoost);
 #ifdef SKIP_ASM
 extern char D_0048E968[];
 extern "C" void* func_00342768(void* mem, void* desc, void* owner);
-extern "C" void func_00355600(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_00355C50(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 {
-    func_00355600(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -1065,9 +1065,9 @@ typedef sMnMat_6298 (*MnViewFn_6298)(void*);
 typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const sMnMat_6298&);
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
-extern "C" void func_00352DD0(void* self);
+extern "C" void tModifierBlock_render(void* self);
 extern "C" int func_002D2058(void* v);
-extern "C" void* func_0035FC20(void* self, void* m);
+extern "C" void* cUVScrollModifier_getTextureMat(void* self, void* m);
 
 #define OBJ_6298(s) (*(sMnObj_6298**)((char*)(s) + 0x18))
 #define MOD_6298(s) (*(sMnMod_6298**)((char*)(s) + 0x1C))
@@ -1086,7 +1086,7 @@ static inline void* Mat_6298(void* rot, sMnMat_6298* m)
 {
     void* r;
     if (rot) {
-        r = func_0035FC20(rot, m);
+        r = cUVScrollModifier_getTextureMat(rot, m);
     } else {
         r = 0;
     }
@@ -1154,7 +1154,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
     int flags = 0;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     if (MOD_6298(self)) {
-        func_00352DD0(MOD_6298(self));
+        tModifierBlock_render(MOD_6298(self));
         cMnOwner_6298* o = MOD_6298(self)->owner;
         if (o) {
             if (o->v26() == 7) {
@@ -1951,15 +1951,15 @@ extern "C" void cPositionModifier_updateRootTransform(cPositionModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357000);
+INCLUDE_ASM("object/movenode", cPositionModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_00357000_cObj {
+class cPositionModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_00357000(cPositionModifier* self, func_00357000_cObj* obj)
+extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cPositionModifier_writeToReplayFrame_cObj* obj)
 {
     obj->v01((char*)self + 0x10, 0x40);
 }
@@ -2140,7 +2140,7 @@ extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, void*
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357278);
+INCLUDE_ASM("object/movenode", cParentModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sMnVEntry7278a {
     short delta;
@@ -2155,9 +2155,9 @@ struct sMnVEntry7278b {
 };
 
 
-extern "C" void func_00357278(cParentModifier* self, void* stream)
+extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, void* stream)
 {
-    func_00357000((cPositionModifier*)self, (func_00357000_cObj*)stream);
+    cPositionModifier_writeToReplayFrame((cPositionModifier*)self, (cPositionModifier_writeToReplayFrame_cObj*)stream);
     sMnVEntry7278a* vt1 = *(sMnVEntry7278a**)stream;
     vt1[1].fn((char*)stream + vt1[1].delta, (char*)self + 0x90, 4);
     sMnVEntry7278b* vt2 = *(sMnVEntry7278b**)stream;
@@ -2382,7 +2382,7 @@ extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003576D0);
+INCLUDE_ASM("object/movenode", cMagnetModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sMnVEntryPtr76D0 {
     short delta;
@@ -2396,7 +2396,7 @@ struct sMnVEntrySer76D0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_003576D0(cMagnetModifier* self, void* stream)
+extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* stream)
 {
     sMnVEntryPtr76D0* p = &(*(sMnVEntryPtr76D0**)stream)[5];
     p->fn((char*)stream + p->delta, self->Instance);
@@ -2483,7 +2483,7 @@ extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357848);
+INCLUDE_ASM("object/movenode", cAvaSplineModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sMnVEntry7848a {
     short delta;
@@ -2497,7 +2497,7 @@ struct sMnVEntry7848b {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00357848(cAvaSplineModifier* self, void* stream)
+extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, void* stream)
 {
     sMnVEntry7848a* vt1 = *(sMnVEntry7848a**)stream;
     vt1[5].fn((char*)stream + vt1[5].delta, self->Instance);

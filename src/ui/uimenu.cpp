@@ -137,7 +137,7 @@ void* func_0039FF50(void* self);
 extern "C" int func_003A0318(void* self, int a);
 extern char D_004A5A58[4];
 extern "C" unsigned char cUIMenu_getNext(void* self);
-extern "C" unsigned char func_0039AC48(void* self);
+extern "C" unsigned char cUIMenu_getPrev(void* self);
 extern "C" int cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
 
 struct sVE_B000 { short delta; short index; int (*fn)(void*, ...); };
@@ -254,7 +254,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        self->mScrollItemCurrent = func_0039AC48(((char*)self));
+        self->mScrollItemCurrent = cUIMenu_getPrev(((char*)self));
         int moved = cUIMenu_onInputChangeItem(self, old);
         if (!bit_B000(((char*)self), 0x90, 3)) {
             if (moved) {
@@ -433,12 +433,12 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B878);
+INCLUDE_ASM("ui/uimenu", cUIMenu_reverseFindFirstHighlightable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
 
-extern "C" unsigned char func_0039B878(cUIMenu* self, unsigned char idx) {
+extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, unsigned char idx) {
     short i;
     unsigned char cnt;
     char* obj;

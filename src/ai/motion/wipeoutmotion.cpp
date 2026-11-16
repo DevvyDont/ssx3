@@ -523,7 +523,7 @@ struct sSeg_137138 {
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
-extern "C" void func_00137550(cWipeoutMotion* self);
+extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self);
 extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __asm__("func_00336850");
 extern "C" void func_00329B40_137138(void* tree, const t4Vector* d) __asm__("func_00329B40");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
@@ -624,7 +624,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
     cWipeoutMotion* self = vself;
     if (((sBody_137138*)self->mRider)->active == 0)
         return;
-    func_00137550((cWipeoutMotion*)((char*)self));
+    cWipeoutMotion_updateBoardSphereTree((cWipeoutMotion*)((char*)self));
     sHit_137138 hit;
     sSphere_137138 sph;
     func_0032F650(&sph, ((void*)self->BoardSphereTree), 1);
@@ -685,7 +685,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137550);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_updateBoardSphereTree);
 #ifdef SKIP_ASM
 struct sVec4_7550 {
     float x, y, z, w;
@@ -764,7 +764,7 @@ static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
                       0.0f);
 }
 
-extern "C" void func_00137550(cWipeoutMotion* self)
+extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 {
     sVec4_7550 pts[4];
     sRadii_7550 radii = D_00458220;

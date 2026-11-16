@@ -42,7 +42,7 @@ CHECK_SIZE(tQuadTreeLeafNode, 0x8);
 
 // An inner node: four child indices, each stored as (index << 1) | 1 in the first one (the sub-node flag) and
 // (index << 1) | (old bit 0) in the others (setSubNodes, func_002C16B8). Child order: (ux bit, uy bit) =
-// 00, 01, 10, 11 (getLeaf, func_002C1CD8).
+// 00, 01, 10, 11 (getLeaf, cQuadTree_getLeaf).
 struct tQuadTreeSubNode {
     unsigned short m_children[4];   // 0x0 [O]; [R] func_002C16B8 (setSubNodes); [U] getLeaf, exportNode, calcUsedNodes
 };
@@ -52,7 +52,7 @@ CHECK_SIZE(tQuadTreeSubNode, 0x8);
 
 // A free node: the next free index (0 ends the list) in the first short.
 struct tQuadTreeFreeNode {
-    unsigned short m_next;          // 0x0 [O]; [R] getFreeNode chains new nodes through it; setFreeNodes (func_002C18E8)
+    unsigned short m_next;          // 0x0 [O]; [R] getFreeNode chains new nodes through it; setFreeNodes (cQuadTree_setFreeNodes)
     unsigned short pad[3];          // 0x2 [O]
 };
 

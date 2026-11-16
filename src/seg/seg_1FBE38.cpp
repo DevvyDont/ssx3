@@ -1664,7 +1664,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
 extern char *D_004A3DD8_D9F8 __asm__("D_004A3DD8");
 extern char *D_004A28A8_D9F8 __asm__("SSXApp");
 struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
-extern "C" void func_00355978_D9F8(void*, int, int, V4_D9F8*) __asm__("func_00355978");
+extern "C" void cMoveNode_addParent_D9F8(void*, int, int, V4_D9F8*) __asm__("cMoveNode_addParent");
 struct O_D9F8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_D9F8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_D9F8(unsigned i) { if (i == 0) return 0; return refToPtr_D9F8(i); }
@@ -1736,7 +1736,7 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
             if (p && p->v16()) {
                 int k = *(int*)((char*)q + 0x18);
                 V4_D9F8 v(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
-                func_00355978_D9F8(p, k, buf[2], &v);
+                cMoveNode_addParent_D9F8(p, k, buf[2], &v);
             }
         }
     }
@@ -1751,7 +1751,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
 extern char *D_004A3DD8_DC60 __asm__("D_004A3DD8");
 extern char *D_004A28A8_DC60 __asm__("SSXApp");
 struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
-extern "C" void func_00355978_DC60(void*, int, int, V4_DC60*) __asm__("func_00355978");
+extern "C" void cMoveNode_addParent_DC60(void*, int, int, V4_DC60*) __asm__("cMoveNode_addParent");
 struct O_DC60 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DC60(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DC60(unsigned i) { if (i == 0) return 0; return refToPtr_DC60(i); }
@@ -1823,7 +1823,7 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
             if (p && p->v16()) {
                 int k = *(int*)((char*)q + 0x18);
                 V4_DC60 v(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
-                func_00355978_DC60(p, k, buf[2], &v);
+                cMoveNode_addParent_DC60(p, k, buf[2], &v);
             }
         }
     }
@@ -2018,7 +2018,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E2C0 __asm__("D_004A3DD8");
 extern char *D_004A28A8_E2C0 __asm__("SSXApp");
-extern "C" void func_00355B90_E2C0(void*, void*) __asm__("func_00355B90");
+extern "C" void cMoveNode_addUVScroll_E2C0(void*, void*) __asm__("cMoveNode_addUVScroll");
 struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E2C0 { float x, y, z; };
 extern V3_E2C0 D_004C9098_E2C0 __asm__("D_004C9098");
@@ -2076,7 +2076,7 @@ extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
     O_E2C0 *p = *(O_E2C0**)(obj + 0xC);
     if (p) {
         if (p->v16())
-            func_00355B90_E2C0(p, buf);
+            cMoveNode_addUVScroll_E2C0(p, buf);
     }
     return D_004C9098_E2C0;
 }
@@ -2088,7 +2088,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E4A8 __asm__("D_004A3DD8");
 extern char *D_004A28A8_E4A8 __asm__("SSXApp");
-extern "C" void func_00355BF0_E4A8(void*, void*) __asm__("func_00355BF0");
+extern "C" void cMoveNode_addTexFlip_E4A8(void*, void*) __asm__("cMoveNode_addTexFlip");
 struct O_E4A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E4A8 { float x, y, z; };
 extern V3_E4A8 D_004C9098_E4A8 __asm__("D_004C9098");
@@ -2137,7 +2137,7 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
     O_E4A8 *p = *(O_E4A8**)(obj + 0xC);
     if (p) {
         if (p->v16())
-            func_00355BF0_E4A8(p, buf);
+            cMoveNode_addTexFlip_E4A8(p, buf);
     }
     return D_004C9098_E4A8;
 }
@@ -2149,7 +2149,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E668 __asm__("D_004A3DD8");
 extern char *D_004A28A8_E668 __asm__("SSXApp");
-extern "C" void func_00355C50_E668(void*, void*) __asm__("func_00355C50");
+extern "C" void cMoveNode_addBoost_E668(void*, void*) __asm__("cMoveNode_addBoost");
 struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E668 { float x, y, z; };
 extern V3_E668 D_004C9098_E668 __asm__("D_004C9098");
@@ -2203,7 +2203,7 @@ extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
     O_E668 *p = *(O_E668**)(obj + 0xC);
     if (p) {
         if (p->v16())
-            func_00355C50_E668(p, buf);
+            cMoveNode_addBoost_E668(p, buf);
     }
     return D_004C9098_E668;
 }
@@ -6225,7 +6225,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304E38);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4E38 __asm__("D_004A3DD8");
 extern char *D_004A28A8_4E38 __asm__("SSXApp");
-extern "C" void func_00355888_4E38(void*, void*) __asm__("func_00355888");
+extern "C" void cMoveNode_addDebounce_4E38(void*, void*) __asm__("cMoveNode_addDebounce");
 struct O_4E38 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_4E38 { float x, y, z; };
 extern V3_4E38 D_004C9098_4E38 __asm__("D_004C9098");
@@ -6272,7 +6272,7 @@ extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
     if (p == 0)
         return D_004C9098_4E38;
     if (p->v16())
-        func_00355888_4E38(p, buf);
+        cMoveNode_addDebounce_4E38(p, buf);
     return D_004C9098_4E38;
 }
 #endif
@@ -6594,7 +6594,7 @@ extern Rec_5478 D_4FBD58_5478 __asm__("D_004FBD58");
 extern int D_5840_5478 __asm__("D_004A5840");
 extern const int D_004466A0_5478[] __asm__("D_004466A0");
 extern "C" void* MEM_copy_5478(void*, void*, int) __asm__("MEM_copy");
-extern "C" void func_003559F8_5478(O_5478*, void*, float, float) __asm__("func_003559F8");
+extern "C" void cMoveNode_addMagnet_5478(O_5478*, void*, float, float) __asm__("cMoveNode_addMagnet");
 struct Ent_5478 { int idx; int val; int pad; int type; };
 extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
     if (D_5840_5478 == 0) {
@@ -6635,7 +6635,7 @@ extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
         O_5478 *p = *(O_5478**)(obj + 0xC);
         if (p) {
             if (p->v16())
-                func_003559F8_5478(p, p->v24(), buf->a, buf->b);
+                cMoveNode_addMagnet_5478(p, p->v24(), buf->a, buf->b);
         }
     }
     return D_004C9098_5478;

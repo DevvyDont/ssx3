@@ -695,7 +695,7 @@ struct sVec3_6B08 {
     sVec3_6B08(float a, float b, float c) : x(a), y(b), z(c) {}
 };
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self);
-extern "C" sVec3_6B08* func_001C58D0(void* info, int i);
+extern "C" sVec3_6B08* cPopupInfo_getPopupConfirmation(void* info, int i);
 extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* a1);
 extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* a1);
 extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* a1);
@@ -738,7 +738,7 @@ extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* info)
     else
         *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(300.0f, 0.0f, 0.0f);
     for (int i = 0; i < 5; i++)
-        ((sVec3_6B08*)((char*)self + 0x2D0))[i] = *func_001C58D0(info, i);
+        ((sVec3_6B08*)((char*)self + 0x2D0))[i] = *cPopupInfo_getPopupConfirmation(info, i);
     sVec3_6B08 c = *(sVec3_6B08*)((char*)info + 0x9C);
     *(sVec3_6B08*)&self->mvOffset[0] = c;
     cScreenPopup_createTitleBar(self, info);
@@ -1008,7 +1008,7 @@ struct sPopup_7388 {
     cUIObj_7388* items[5];
 };
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* info);
-extern "C" int* func_001C5800(void* info, int i);
+extern "C" int* cPopupInfo_getPopupOptionNames(void* info, int i);
 extern "C" void func_001C8050(void* self, cUIText* text, int* info);
 extern "C" void func_001C8628(void* self, void* obj, void* out);
 extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
@@ -1056,7 +1056,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
         if (t != 0) {
             float size[4];
             float item[4];
-            int* it = func_001C5800(info, j);
+            int* it = cPopupInfo_getPopupOptionNames(info, j);
             func_001C8050(self, (cUIText*)t, it);
             func_001C8628(self, t, size);
             func_001C8320(self, (cUIText*)t, it, item);
@@ -2527,7 +2527,7 @@ extern "C" void func_001C9CD0(void* self, int v)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CA0F0);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_setStatic);
 #ifdef SKIP_ASM
 struct sVEntry_A0F0 {
     short delta;
@@ -2535,7 +2535,7 @@ struct sVEntry_A0F0 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001CA0F0(cScreenPopup* self, int idx, int a)
+extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int a)
 {
     char* o = *(char**)((char*)self + (idx << 2) + 0x90);
     if (o != 0) {
@@ -2548,9 +2548,9 @@ extern "C" void func_001CA0F0(cScreenPopup* self, int idx, int a)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CA150);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getCurrentlySelected);
 #ifdef SKIP_ASM
-extern "C" int func_001CA150(cScreenPopup* self)
+extern "C" int cScreenPopup_getCurrentlySelected(cScreenPopup* self)
 {
     void* p = self->mpMenu;
     if (p == 0) {
@@ -2996,11 +2996,11 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CA8A0);
+INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_clear);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
-extern "C" void func_001CA8A0(cBuyPopupInfo* self)
+extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self)
 {
     MEM_fill((char*)self + 0x14, 0, 8);
     MEM_fill((char*)self + 0xC, 0, 8);
@@ -3167,7 +3167,7 @@ extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_cUIStateBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_001CA8A0(cBuyPopupInfo* self);
+extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern void* cUIStateBuyPopup_vtbl[];
 
@@ -3175,14 +3175,14 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void*
 {
     func_0039E318(self, engine, owner);
     self->mVtbl = cUIStateBuyPopup_vtbl;
-    func_001CA8A0((cBuyPopupInfo*)((char*)self + 0x48));
+    cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)self + 0x48));
     self->mUserNum = idx;
     self->mHashName = 7;
     void* p = *(void**)self->mpEngine;
     if (p != 0) {
         *(char*)&self->mCtrlBits = func_001A1CD0(p, idx);
     }
-    func_001CA8A0((cBuyPopupInfo*)((char*)self + 0x48));
+    cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)self + 0x48));
     return ((void*)self);
 }
 #endif
@@ -3388,13 +3388,13 @@ extern "C" void cUIStateBuyPopup_initBuyTrick(cUIStateBuyPopup* self, int trick,
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CAFC0);
+INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_initBuyAttributes);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_00466368[];
 extern char D_004A1408[];
 
-extern "C" void func_001CAFC0(cUIStateBuyPopup* self, int a1, int a2, int a3)
+extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int a1, int a2, int a3)
 {
     char* s = D_004A1408;
     int two = 2;
@@ -4352,8 +4352,8 @@ extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v,
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self);
 extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* out, int a3);
 extern "C" void cKeyboardPopup_updateEdit(cKeyboardPopup* self, int a1);
-extern "C" void func_001CC7C8(cKeyboardPopup* self);
-extern "C" void func_001CE5E0(cKeyboardPopup* self, int digit);
+extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self);
+extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int digit);
 extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self, int a1);
 // PORT: cKeyboardPopup_allowSelection's third parameter is an int* out-param; the unit declares it (void*, int, int).
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
@@ -4409,7 +4409,7 @@ struct sKeyboard_C1E0 {
  * screen is updated or the key is not selectable, backspace (27) deletes before the cursor, caps (42) and
  * shift (56) toggle, clear (70) empties the text, the arrows (76, 83) move the cursor, enter (55) sets
  * mbAcceptText, pops the state when mbPopOnEnd and tells the parent (event 0xD), ESC (0) pops and sends 0xE,
- * quick keys 4-13 run func_001CE5E0 and other keys add their character (func_001CC7C8). Shift is released
+ * quick keys 4-13 run cKeyboardPopup_handleQuickKeyPress and other keys add their character (cKeyboardPopup_AddCharacterEdit). Shift is released
  * after any other key; the edit field, the space and enter keys' availability and the key labels are
  * refreshed.
  *
@@ -4505,7 +4505,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
             break;
         case 75:
             if (cKeyboardPopup_allowSelection_out(self, 0x4B, 0) != 0)
-                func_001CC7C8((cKeyboardPopup*)self);
+                cKeyboardPopup_AddCharacterEdit((cKeyboardPopup*)self);
             break;
         case 0:
             func_0039F190_r(self->owner + 0x18, 1);
@@ -4521,10 +4521,10 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
         case 11:
         case 12:
         case 13:
-            func_001CE5E0((cKeyboardPopup*)self, self->key - 4);
+            cKeyboardPopup_handleQuickKeyPress((cKeyboardPopup*)self, self->key - 4);
             break;
         default:
-            func_001CC7C8((cKeyboardPopup*)self);
+            cKeyboardPopup_AddCharacterEdit((cKeyboardPopup*)self);
             break;
         }
     }
@@ -4553,11 +4553,11 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CC620);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_AddAsciiEdit);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
-extern "C" void func_001CC620(cKeyboardPopup* self, int value)
+extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value)
 {
     char c = value;
     char* buf = (char*)self + 0x74;
@@ -4584,13 +4584,13 @@ extern "C" void func_001CC620(cKeyboardPopup* self, int value)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CC6E8);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateToAscii);
 #ifdef SKIP_ASM
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 extern signed char D_00441390[];
 extern signed char D_004413E8[];
 
-extern "C" int func_001CC6E8(cKeyboardPopup* self, int value)
+extern "C" int cKeyboardPopup_updateToAscii(cKeyboardPopup* self, int value)
 {
     char c = value;
     int i;
@@ -4613,13 +4613,13 @@ extern "C" int func_001CC6E8(cKeyboardPopup* self, int value)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopup", func_001CC7C8);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_AddCharacterEdit);
 #ifdef SKIP_ASM
-extern "C" void func_001CC620(cKeyboardPopup* self, int value);
+extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value);
 extern signed char D_00441390[];
 extern signed char D_004413E8[];
 
-extern "C" void func_001CC7C8(cKeyboardPopup* self)
+extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self)
 {
     bool b = self->mbCapsOn != 0;
     int flag = self->mbShiftOn;
@@ -4634,9 +4634,9 @@ extern "C" void func_001CC7C8(cKeyboardPopup* self)
         flag = !*(bool*)&self->mbShiftOn;
     }
     if (flag) {
-        func_001CC620(self, D_00441390[idx]);
+        cKeyboardPopup_AddAsciiEdit(self, D_00441390[idx]);
     } else {
-        func_001CC620(self, D_004413E8[idx]);
+        cKeyboardPopup_AddAsciiEdit(self, D_004413E8[idx]);
     }
 }
 #endif
@@ -5008,9 +5008,9 @@ extern "C" void cKeyboardPopup_setMaxCharacters(cKeyboardPopup* self, int v)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CD0B0);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setMinCharacters);
 #ifdef SKIP_ASM
-extern "C" void func_001CD0B0(cKeyboardPopup* self, int v)
+extern "C" void cKeyboardPopup_setMinCharacters(cKeyboardPopup* self, int v)
 {
     if (v < 0) {
         self->miMinCharacters = 0;
@@ -5514,8 +5514,8 @@ extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self, int a1);
-extern "C" void func_001CC620(cKeyboardPopup* self, int value);
-extern "C" bool func_001CC6E8_b(void* self, int value) __asm__("func_001CC6E8");
+extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value);
+extern "C" bool cKeyboardPopup_updateToAscii_b(void* self, int value) __asm__("cKeyboardPopup_updateToAscii");
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 extern "C" void* func_001D9D48(void* mem, void* engine, void* owner);
 void func_001DA510(void* self, int i, int a, int b);
@@ -5704,11 +5704,11 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 default:
                     if (InputK1CDB98(ev, 43) >= 0x20) {
                         char c = InputK1CDB98(ev, 43);
-                        fail = !func_001CC6E8_b(self, c);
+                        fail = !cKeyboardPopup_updateToAscii_b(self, c);
                         if (!fail) {
                             if (cKeyboardPopup_allowSelection(self, self->miCurrentKey, 0)) {
-                                if (c == 0x60) func_001CC620(self, 0x7E);
-                                else func_001CC620(self, c);
+                                if (c == 0x60) cKeyboardPopup_AddAsciiEdit(self, 0x7E);
+                                else cKeyboardPopup_AddAsciiEdit(self, c);
                             } else {
                                 fail = 1;
                             }
@@ -5898,7 +5898,7 @@ extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int idx, int 
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CE5E0);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleQuickKeyPress);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -5916,7 +5916,7 @@ struct sVEntryK1CE5E0 {
     void* (*fn)(void*, int);
 };
 
-extern "C" void func_001CE5E0(cKeyboardPopup* self, int key)
+extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key)
 {
     char buf[0x40];
     int room = self->miMaxCharacters - strlen((char*)self + 0x74);

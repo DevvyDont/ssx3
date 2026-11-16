@@ -552,11 +552,11 @@ void cCameraTriggerStack_init(cCameraTriggerStack* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D210);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_cCameraTriggerStack);
 #ifdef SKIP_ASM
 void cCameraTriggerStack_init(cCameraTriggerStack* self);
 
-extern "C" cCameraTriggerStack* func_0016D210(cCameraTriggerStack* self)
+extern "C" cCameraTriggerStack* cCameraTriggerStack_cCameraTriggerStack(cCameraTriggerStack* self)
 {
     cCameraTriggerStack_init(self);
     return self;
@@ -614,11 +614,11 @@ extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* ou
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D320);
 #ifdef SKIP_ASM
-extern "C" void func_0016C678(void* list);
+extern "C" void cActiveTriggerList_clearFlags(void* list);
 extern "C" void* func_0016C6B0(void* list, void* key);
 extern "C" void* func_0016C6E0(void* list, int key);
 extern "C" void cActiveTriggerList_add(void* list, void* item);
-extern "C" void* func_0016C778(void* list, void* node);
+extern "C" void* cActiveTriggerList_remove(void* list, void* node);
 extern "C" void func_00176890(void* node, void* ctx);
 extern "C" void func_00174848(char* hit, void* ctx, void* ctx2, void* box, void* node, void* root);
 extern "C" int func_00328360(void* root, void* box);
@@ -710,7 +710,7 @@ extern "C" void func_0016D320(char* self, char* rider)
 {
     if (active_D320(rider)) {
         int idx = *(int*)(rider + 0x870);
-        func_0016C678(self + 0x14 + idx * 4);
+        cActiveTriggerList_clearFlags(self + 0x14 + idx * 4);
         sCtx_D320 ctx;
         sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
@@ -755,7 +755,7 @@ extern "C" void func_0016D320(char* self, char* rider)
                         func_0016E1D8_D320(*(void**)(f + 0xC), rider);
                     }
                 }
-                n = (char*)func_0016C778(self + (idx * 4 + 0x14), n);
+                n = (char*)cActiveTriggerList_remove(self + (idx * 4 + 0x14), n);
             } else {
                 n = *(char**)(n + 4);
             }

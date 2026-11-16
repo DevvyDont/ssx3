@@ -30,10 +30,10 @@ extern "C" void* func_002BC750(void* p);
 extern "C" void* func_002BC778(void* p);
 extern "C" void* func_002BC7A0(void* p);
 extern "C" void* func_002BC7C8(void* p);
-extern "C" void* func_002BC830(void* p);
-extern "C" void* func_002BC890(void* p);
+extern "C" void* tWPInGameData_LightGlow_tWPInGameData_LightGlow(void* p);
+extern "C" void* tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(void* p);
 extern "C" void* func_002BC8E8(void* p);
-extern "C" void* func_002BC910(void* p);
+extern "C" void* tWPInGameData_Sun_tWPInGameData_Sun(void* p);
 extern "C" void* func_002BC980(void* p);
 extern "C" void* func_002BC9B0(void* p);
 extern "C" void* func_002BCAF8(void* p);
@@ -95,16 +95,16 @@ extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQue
         self->m_data = (tWPInGameData*)func_002BC7C8(cMemMan_alloc(0x38, D_00483D10, 0, 0));
         break;
     case 6:
-        self->m_data = (tWPInGameData*)func_002BC830(cMemMan_alloc(0x40, D_00483D20, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_LightGlow_tWPInGameData_LightGlow(cMemMan_alloc(0x40, D_00483D20, 0, 0));
         break;
     case 7:
-        self->m_data = (tWPInGameData*)func_002BC890(cMemMan_alloc(0x38, D_00483D38, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(cMemMan_alloc(0x38, D_00483D38, 0, 0));
         break;
     case 8:
         self->m_data = (tWPInGameData*)func_002BC8E8(cMemMan_alloc(0x10, D_00483D50, 0, 0));
         break;
     case 9:
-        self->m_data = (tWPInGameData*)func_002BC910(cMemMan_alloc(0x50, D_00483D60, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_Sun_tWPInGameData_Sun(cMemMan_alloc(0x50, D_00483D60, 0, 0));
         break;
     case 10:
         self->m_data = (tWPInGameData*)func_002BC980(cMemMan_alloc(0x10, D_00483D70, 0, 0));
@@ -181,8 +181,8 @@ struct sHit_0778 {
     float* data;
 };
 
-// PORT: func_002C0A10 takes (self, list); this caller also passes the query point in $f12/$f13.
-extern "C" sHit_0778* func_002C0A10_q(void* self, void* list, float x, float z) __asm__("func_002C0A10");
+// PORT: cWorldPainterQuery_lookupRegion takes (self, list); this caller also passes the query point in $f12/$f13.
+extern "C" sHit_0778* cWorldPainterQuery_lookupRegion_q(void* self, void* list, float x, float z) __asm__("cWorldPainterQuery_lookupRegion");
 
 struct sOutVt_0778 {
     short delta;
@@ -259,7 +259,7 @@ extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float 
             }
             break;
         }
-        sHit_0778* hit = func_002C0A10_q(self, cell, self->x, self->z);
+        sHit_0778* hit = cWorldPainterQuery_lookupRegion_q(self, cell, self->x, self->z);
         if (hit == 0) {
             break;
         }
@@ -294,22 +294,22 @@ extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float 
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0A10);
+INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_lookupRegion);
 #ifdef SKIP_ASM
-struct func_002C0A10_sItem {
+struct cWorldPainterQuery_lookupRegion_sItem {
     int a;
     int b;
 };
 
-struct func_002C0A10_sList {
+struct cWorldPainterQuery_lookupRegion_sList {
     int field_0x0;
     int field_0x4;
-    func_002C0A10_sItem* items;
+    cWorldPainterQuery_lookupRegion_sItem* items;
 };
 
-extern "C" int func_002BAF90(func_002C0A10_sList* list);
+extern "C" int func_002BAF90(cWorldPainterQuery_lookupRegion_sList* list);
 
-extern "C" func_002C0A10_sItem* func_002C0A10(cWorldPainterQuery* self, func_002C0A10_sList* list)
+extern "C" cWorldPainterQuery_lookupRegion_sItem* cWorldPainterQuery_lookupRegion(cWorldPainterQuery* self, cWorldPainterQuery_lookupRegion_sList* list)
 {
     int i = func_002BAF90(list);
     return (i != -1) ? &list->items[i] : 0;

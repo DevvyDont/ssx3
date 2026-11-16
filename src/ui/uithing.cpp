@@ -23,12 +23,12 @@ unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_0039FFA0);
+INCLUDE_ASM("ui/uithing", cUIThing_playKeyframerEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
 // Plays keyframer event idx on the owning screen (0x5C); 0xFFFF = no event.
-extern "C" int func_0039FFA0(cUIThing* self, signed char idx)
+extern "C" int cUIThing_playKeyframerEvent(cUIThing* self, signed char idx)
 {
     if (self->mpEvents != 0 && self->mpEvents[idx] != 0xFFFF) {
         void* scr = self->mpScreen;

@@ -706,7 +706,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" int func_0039FFA0(void* self, int x);
+extern "C" int cUIThing_playKeyframerEvent(void* self, int x);
 extern char D_004A17E0[];
 extern char D_004600A0[];
 extern char D_004A1458[];
@@ -738,7 +738,7 @@ static inline void Show195328(void* self, char* name)
  * item.
  *
  * Only event 0x16 acts. If the popup's getData(0) (slot 23) is nonzero it sets the choice flag (+0x48),
- * restores mCurrentCtrl from +0x50, calls func_0039FFA0(item, 2) and its own onWidgetEvent (slot 19) with the
+ * restores mCurrentCtrl from +0x50, calls cUIThing_playKeyframerEvent(item, 2) and its own onWidgetEvent (slot 19) with the
  * item (+0x4C) and 5. Then "hl", "3 help multi", "btext5" and "ps2sq" are shown again.
  *
  * @param obj  the popup state (On Tour pPopup)
@@ -758,7 +758,7 @@ extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
         *(int*)((char*)self + 0x48) = 1;
         int v = *(signed char*)((char*)self + 0x50);
         *(char*)((char*)self + 0x14) = v;
-        func_0039FFA0(*(void**)((char*)self + 0x4C), 2);
+        cUIThing_playKeyframerEvent(*(void**)((char*)self + 0x4C), 2);
         sVEv_195328* svt = *(sVEv_195328**)((char*)self + 8);
         svt[19].fn((char*)self + svt[19].delta, *(void**)((char*)self + 0x4C), 5);
     }

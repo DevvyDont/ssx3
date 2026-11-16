@@ -1573,9 +1573,9 @@ extern "C" void cReplayFramePtr__cReplayFramePtr(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272200);
+INCLUDE_ASM("replay/replaycache", cReplayFramePtr_clearBlock);
 #ifdef SKIP_ASM
-extern "C" void func_00272200(cReplayFramePtr* self)
+extern "C" void cReplayFramePtr_clearBlock(cReplayFramePtr* self)
 {
     self->WriteData = 0;
     self->ReadData = 0;
@@ -2076,11 +2076,11 @@ extern "C" void cInSeq__cInSeq(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002728F8);
+INCLUDE_ASM("replay/replaycache", cInSeq_UpdateFrame);
 #ifdef SKIP_ASM
 extern "C" void func_00274A30(cScriptPlayerMain* p);
 
-extern "C" void func_002728F8(cInSeq* self)
+extern "C" void cInSeq_UpdateFrame(cInSeq* self)
 {
     char* n = (char*)self->mpScriptUsed;
     while (n != 0) {
@@ -2130,12 +2130,12 @@ extern "C" int func_00272938(sRcList272938* self, void* src)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002729A8);
 #ifdef SKIP_ASM
-extern "C" void func_00272B58(cInSeq* self, int a1);
+extern "C" void cInSeq_Stop(cInSeq* self, int a1);
 extern "C" void func_002746F8(cScriptPlayerMain* p);
 
 extern "C" void func_002729A8(sRcList272938* self, int i)
 {
-    func_00272B58((cInSeq*)self, i);
+    cInSeq_Stop((cInSeq*)self, i);
     char* base = *(char**)((char*)self + 0x14);
     sRcNode272938* n = (sRcNode272938*)(base + i * 0x58);
     func_002746F8((cScriptPlayerMain*)n->data);
@@ -2162,9 +2162,9 @@ extern "C" void func_002729A8(sRcList272938* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272A50);
+INCLUDE_ASM("replay/replaycache", cInSeq_RecycleAll);
 #ifdef SKIP_ASM
-extern "C" void func_00272A50(cInSeq* self)
+extern "C" void cInSeq_RecycleAll(cInSeq* self)
 {
     sRcNode272938* n = (sRcNode272938*)self->mpScriptUsed;
     while (n != 0) {
@@ -2175,26 +2175,26 @@ extern "C" void func_00272A50(cInSeq* self)
 }
 #endif
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272AA0);
+INCLUDE_ASM("replay/replaycache", cInSeq_Preview);
 #ifdef SKIP_ASM
-extern "C" void* func_00272CC0(cInSeq* self, int a1);
+extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag);
 
-extern "C" void func_00272AA0(cInSeq* self, int a1, int flag)
+extern "C" void cInSeq_Preview(cInSeq* self, int a1, int flag)
 {
-    cScriptPlayerMain_Preview((cScriptPlayerMain*)((char*)func_00272CC0(self, a1)), flag);
+    cScriptPlayerMain_Preview((cScriptPlayerMain*)((char*)cInSeq_GetPlayer(self, a1)), flag);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272AD0);
+INCLUDE_ASM("replay/replaycache", cInSeq_Play);
 #ifdef SKIP_ASM
 extern "C" void* func_00274830(void*, int);
-extern "C" void* func_00272CC0(cInSeq* self, int a1);
+extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 
-extern "C" void* func_00272AD0(cInSeq* self, int a1, int a2)
+extern "C" void* cInSeq_Play(cInSeq* self, int a1, int a2)
 {
-    return func_00274830(func_00272CC0(self, a1), a2);
+    return func_00274830(cInSeq_GetPlayer(self, a1), a2);
 }
 #endif
 
@@ -2207,7 +2207,7 @@ extern "C" void func_00272B00(cInSeq* arg0, int arg1) {
     var_16 = ((void*)arg0->mpScriptUsed);
     if (var_16 != 0) {
         do {
-            func_00272AD0(arg0, (*(int *)((char*)(var_16) + (4))), arg1);
+            cInSeq_Play(arg0, (*(int *)((char*)(var_16) + (4))), arg1);
             var_16 = (*(void **)((char*)(var_16) + (0x50)));
         } while (var_16 != 0);
     }
@@ -2215,79 +2215,79 @@ extern "C" void func_00272B00(cInSeq* arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272B58);
+INCLUDE_ASM("replay/replaycache", cInSeq_Stop);
 #ifdef SKIP_ASM
-extern "C" void* func_00272CC0(cInSeq* self, int a1);
+extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* p);
 
-extern "C" void func_00272B58(cInSeq* self, int a1)
+extern "C" void cInSeq_Stop(cInSeq* self, int a1)
 {
-    cScriptPlayerMain_Stop((cScriptPlayerMain*)func_00272CC0(self, a1));
+    cScriptPlayerMain_Stop((cScriptPlayerMain*)cInSeq_GetPlayer(self, a1));
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272B80);
+INCLUDE_ASM("replay/replaycache", cInSeq_StopAll);
 #ifdef SKIP_ASM
-extern "C" void func_00272B80(cInSeq* self)
+extern "C" void cInSeq_StopAll(cInSeq* self)
 {
     sRcNode272938* n;
     for (n = (sRcNode272938*)self->mpScriptUsed; n != 0; n = n->next) {
-        func_00272B58(self, n->id);
+        cInSeq_Stop(self, n->id);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272BD0);
+INCLUDE_ASM("replay/replaycache", cInSeq_Pause);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
-extern "C" void func_00272BD0(cInSeq* self, int a1)
+extern "C" void cInSeq_Pause(cInSeq* self, int a1)
 {
-    cScriptPlayerMain_Pause((cScriptPlayerMain*)func_00272CC0(self, a1));
+    cScriptPlayerMain_Pause((cScriptPlayerMain*)cInSeq_GetPlayer(self, a1));
 }
 #endif
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272BF8);
+INCLUDE_ASM("replay/replaycache", cInSeq_PauseAll);
 #ifdef SKIP_ASM
-extern "C" void func_00272BD0(cInSeq* self, int a1);
+extern "C" void cInSeq_Pause(cInSeq* self, int a1);
 
-extern "C" void func_00272BF8(cInSeq* self)
+extern "C" void cInSeq_PauseAll(cInSeq* self)
 {
     sRcNode272938* n;
     for (n = (sRcNode272938*)self->mpScriptUsed; n != 0; n = n->next) {
-        func_00272BD0(self, n->id);
+        cInSeq_Pause(self, n->id);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272C48);
+INCLUDE_ASM("replay/replaycache", cInSeq_Resume);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Resume(cScriptPlayerMain* self);
 
-extern "C" void func_00272C48(cInSeq* self, int a1)
+extern "C" void cInSeq_Resume(cInSeq* self, int a1)
 {
-    cScriptPlayerMain_Resume((cScriptPlayerMain*)func_00272CC0(self, a1));
+    cScriptPlayerMain_Resume((cScriptPlayerMain*)cInSeq_GetPlayer(self, a1));
 }
 #endif
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272C70);
+INCLUDE_ASM("replay/replaycache", cInSeq_ResumeAll);
 #ifdef SKIP_ASM
-extern "C" void func_00272C48(cInSeq* self, int a1);
+extern "C" void cInSeq_Resume(cInSeq* self, int a1);
 
-extern "C" void func_00272C70(cInSeq* self)
+extern "C" void cInSeq_ResumeAll(cInSeq* self)
 {
     sRcNode272938* n;
     for (n = (sRcNode272938*)self->mpScriptUsed; n != 0; n = n->next) {
-        func_00272C48(self, n->id);
+        cInSeq_Resume(self, n->id);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272CC0);
+INCLUDE_ASM("replay/replaycache", cInSeq_GetPlayer);
 #ifdef SKIP_ASM
-extern "C" void* func_00272CC0(cInSeq* self, int a1)
+extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1)
 {
     char* base = (char*)self->mpScriptHeap;
     char* p = base + a1 * 0x58;

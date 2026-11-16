@@ -29,14 +29,14 @@ struct cMagnetModifier {
     float Speed;                    // 0x48 [O]; [R] ctor ($f13); [U] update
     float Time;                     // 0x4C [O]; [R] ctor zeroes it; [U] update
     int RootTransformDirty;         // 0x50 [O] bool; [R] ctors; [U] cMagnetModifier_isRootTransformDirty (isRootTransformDirty),
-                                    //      getRootTransform func_00361A60, update
+                                    //      getRootTransform cMagnetModifier_getRootTransform, update
     int AllowCollide;               // 0x54 [O] bool; [R] ctor zeroes it; [U] update, runCollide
     char unk_58[0x8];               // 0x58 padding (Transform is 16-byte aligned)
     // --- cMagnetModifier
     t4Matrix Transform;             // 0x60 [O]; [R] ctor copies the matrix arg; [U] getRootTransform returns +0x60,
                                     //      updateRootTransform writes row 3 (sq 0x90)
     tInstanceRecord* Instance;      // 0xA0 [O]; [R] ctor stores the instance arg, the replay ctor reads it; [U]
-                                    //      intersect, writeToReplayFrame func_003576D0
+                                    //      intersect, writeToReplayFrame cMagnetModifier_writeToReplayFrame
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
 };
 

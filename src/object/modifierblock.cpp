@@ -294,7 +294,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352DD0);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_render);
 #ifdef SKIP_ASM
 struct sMbVEntryV2DD0 {
     short delta;
@@ -303,7 +303,7 @@ struct sMbVEntryV2DD0 {
 };
 
 
-extern "C" void func_00352DD0(tModifierBlock* self)
+extern "C" void tModifierBlock_render(tModifierBlock* self)
 {
     if (self->field_0x10 != 0) {
         void* p = (void*)self->field_0x10;
@@ -340,7 +340,7 @@ extern "C" int tModifierBlock_isRootTransformDirty(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352E98);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_updateRootTransform);
 #ifdef SKIP_ASM
 struct sMbVEntryV_2E98 {
     short delta;
@@ -348,7 +348,7 @@ struct sMbVEntryV_2E98 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00352E98(tModifierBlock* self)
+extern "C" void tModifierBlock_updateRootTransform(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {

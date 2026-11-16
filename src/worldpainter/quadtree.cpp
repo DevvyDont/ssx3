@@ -56,9 +56,9 @@ extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C18E8);
+INCLUDE_ASM("worldpainter/quadtree", cQuadTree_setFreeNodes);
 #ifdef SKIP_ASM
-extern "C" void func_002C18E8(cQuadTree* self, unsigned short a, unsigned short b, unsigned short c, unsigned short d) {
+extern "C" void cQuadTree_setFreeNodes(cQuadTree* self, unsigned short a, unsigned short b, unsigned short c, unsigned short d) {
     char *arr = (char*)self->m_nodes;
     *(unsigned short *)(arr + (a << 3)) = b;
     *(unsigned short *)(arr + (b << 3)) = c;
@@ -89,9 +89,9 @@ extern "C" void func_002C1950(cQuadTree* self, int a1, int a2, float fx, float f
 INCLUDE_ASM("worldpainter/quadtree", func_002C1A00);
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C1CD8);
+INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getLeaf);
 #ifdef SKIP_ASM
-extern "C" void* func_002C1CD8(cQuadTree* self, float fx, float fz)
+extern "C" void* cQuadTree_getLeaf(cQuadTree* self, float fx, float fz)
 {
     int x = (int)((fx - self->m_offsetX) * *(float*)self);
     int z = (int)((fz - self->m_offsetY) * *(float*)self);
@@ -122,9 +122,9 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d);
-struct func_002C2088_sOut;
-struct func_002C2088_sNode;
-extern "C" void func_002C2088(cQuadTree* self, func_002C2088_sOut* out, int* count, int* map, func_002C2088_sNode* node);
+struct cQuadTree_exportNode_sOut;
+struct cQuadTree_exportNode_sNode;
+extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node);
 extern char D_00485FB0[];
 extern char D_00485FC8[];
 
@@ -171,7 +171,7 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
     *o = *((sQTHeader_1DA8*)self);
     int cnt = 0;
     unsigned short* p = (unsigned short*)(o + 1);
-    func_002C2088(self, (func_002C2088_sOut*)p, &cnt, map, (func_002C2088_sNode*)((char*)self->m_nodes + self->m_root * 8));
+    cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)p, &cnt, map, (cQuadTree_exportNode_sNode*)((char*)self->m_nodes + self->m_root * 8));
     for (i = 0; i < cnt; i++, p += 4) {
         if (p[0] & 1) {
             func_002C16B8(p, map[p[0] >> 1], map[p[1] >> 1], map[p[2] >> 1], map[p[3] >> 1]);
@@ -196,18 +196,18 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2088);
+INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportNode);
 #ifdef SKIP_ASM
-struct func_002C2088_sNode {
+struct cQuadTree_exportNode_sNode {
     unsigned short child[4];
 };
-struct func_002C2088_sOut {
+struct cQuadTree_exportNode_sOut {
     int f0;
     int f4;
 };
 
 // PORT: node index computed from pointers cast to unsigned int
-extern "C" void func_002C2088(cQuadTree* self, func_002C2088_sOut* out, int* count, int* map, func_002C2088_sNode* node)
+extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node)
 {
     int i;
     unsigned short* p;
@@ -217,16 +217,16 @@ extern "C" void func_002C2088(cQuadTree* self, func_002C2088_sOut* out, int* cou
     if (node->child[0] & 1) {
         p = node->child;
         for (i = 0; i < 4; i++) {
-            func_002C2088(self, out, count, map, (func_002C2088_sNode*)self->m_nodes + (*p++ >> 1));
+            cQuadTree_exportNode(self, out, count, map, (cQuadTree_exportNode_sNode*)self->m_nodes + (*p++ >> 1));
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2178);
+INCLUDE_ASM("worldpainter/quadtree", cQuadTree_calcUsedNodes);
 #ifdef SKIP_ASM
-extern "C" int func_002C2178(cQuadTree* self, unsigned short *node) {
+extern "C" int cQuadTree_calcUsedNodes(cQuadTree* self, unsigned short *node) {
     int count = 1;
     if (node != 0) {
         if (*node & 1) {
@@ -236,7 +236,7 @@ extern "C" int func_002C2178(cQuadTree* self, unsigned short *node) {
                 unsigned short v = *p;
                 p += 1;
                 i -= 1;
-                count += func_002C2178(self, (unsigned short *)((char*)self->m_nodes + ((v >> 1) * 8)));
+                count += cQuadTree_calcUsedNodes(self, (unsigned short *)((char*)self->m_nodes + ((v >> 1) * 8)));
             } while (i >= 0);
         }
     }

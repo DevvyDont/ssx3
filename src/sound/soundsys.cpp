@@ -8144,13 +8144,13 @@ extern "C" int func_0029F2B0_impl(unsigned int idx, int flag)
 INCLUDE_ASM("sound/soundsys", func_0029F330);
 #ifdef SKIP_ASM
 extern "C" int cRider_getIdentity(void*);
-extern "C" int func_00123168(void*);
+extern "C" int cRider_getCheatIdentity(void*);
 extern "C" void func_0029F2B0(int, int);
 
 extern "C" void func_0029F330(void* self)
 {
     int a = cRider_getIdentity(self);
-    func_0029F2B0(a, func_00123168(self));
+    func_0029F2B0(a, cRider_getCheatIdentity(self));
 }
 #endif
 
@@ -8159,7 +8159,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F378);
 #ifdef SKIP_ASM
 extern "C" int func_0029F378(void* self, void* obj)
 {
-    switch (func_00123168(obj)) {
+    switch (cRider_getCheatIdentity(obj)) {
     case 0:
         return cRider_getIdentity(obj);
     case 14:
@@ -8625,7 +8625,7 @@ INCLUDE_ASM("sound/soundsys", func_002A0560);
 #ifdef SKIP_ASM
 extern "C" int func_0029F0A0(void* self);
 extern "C" int func_00288AE0(void* self);
-extern "C" int func_00123168(void*);
+extern "C" int cRider_getCheatIdentity(void*);
 extern "C" int func_00288B40(void* self, int which, float f);
 extern "C" int func_002B0E28(void* self, int i);
 int func_002B1458_f(void* self, int a, int b, int c, int d, float f, int e, int refresh) __asm__("func_002B1458");
@@ -8701,8 +8701,8 @@ void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b)
     if (func_0029F0A0(self) == 0) return;
     if (!sndA30Mode0560(2)) return;
     if (func_00288AE0(self) != 0) return;
-    if (func_00123168(a) != 0) return;
-    if (func_00123168(b) != 0) return;
+    if (cRider_getCheatIdentity(a) != 0) return;
+    if (cRider_getCheatIdentity(b) != 0) return;
     if (*(int*)(*(int*)((char*)func_0028B1C8() + 0xC) + 8) - *(int*)((char*)self + 0x582C) < 0x258) return;
     int posA = a->f470 >= 0.0f;
     if (posA) return;
@@ -8763,7 +8763,7 @@ INCLUDE_ASM("sound/soundsys", func_002A0A30);
 #ifdef SKIP_ASM
 extern "C" int func_0029F0A0(void* self);
 extern "C" int func_00288AE0(void* self);
-extern "C" int func_00123168(void*);
+extern "C" int cRider_getCheatIdentity(void*);
 extern "C" int func_00288B40(void* self, int which, float f);
 extern "C" int func_002B0E28(void* self, int i);
 // func_002B1458 with the float argument in its real position (same registers).
@@ -8811,8 +8811,8 @@ extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* a, sSs0A30Rider* b,
     if (func_0029F0A0(self) == 0) return;
     if (!sndA30Mode(2)) return;
     if (func_00288AE0(self) != 0) return;
-    if (func_00123168(a) != 0) return;
-    if (func_00123168(b) != 0) return;
+    if (cRider_getCheatIdentity(a) != 0) return;
+    if (cRider_getCheatIdentity(b) != 0) return;
     int posA = a->f470 >= 0.0f;
     if (posA) return;
     int posB = b->f470 >= 0.0f;
@@ -9379,13 +9379,13 @@ extern "C" int func_002A1BD8(void* self, int a, int b)
 INCLUDE_ASM("sound/soundsys", func_002A1D48);
 #ifdef SKIP_ASM
 extern "C" int cRider_getIdentity(void*);
-extern "C" int func_00123168(void*);
+extern "C" int cRider_getCheatIdentity(void*);
 extern "C" void func_002A1DA0(void* self, int a, int b);
 
 extern "C" void func_002A1D48(void* self, void* obj)
 {
     int a = cRider_getIdentity(obj);
-    func_002A1DA0(self, a, func_00123168(obj));
+    func_002A1DA0(self, a, cRider_getCheatIdentity(obj));
 }
 #endif
 
@@ -9512,7 +9512,7 @@ INCLUDE_ASM("sound/soundsys", func_002A1FA0);
 #ifdef SKIP_ASM
 extern "C" int func_002A1FA0(void *self, void *obj)
 {
-    if (func_00123168(obj) == 0) {
+    if (cRider_getCheatIdentity(obj) == 0) {
         switch (cRider_getIdentity(obj)) {
         case 1:
         case 2:
@@ -10339,7 +10339,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
         sel = 0;
         rider = (cRider *)func_00285D98_p(((char*)vself), which);
     }
-    if (func_00123168(rider) != 0) {
+    if (cRider_getCheatIdentity(rider) != 0) {
         return 1;
     }
     if (func_002B1458_f(((char*)vself) + 0x5560, 0, 0x20C4, 0, 0xB, 0.0f, 0, 0) == 0) {
@@ -10383,7 +10383,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
 INCLUDE_ASM("sound/soundsys", func_002A3708);
 #ifdef SKIP_ASM
 extern "C" int func_0029F128(void* self);
-extern "C" int func_00123168(void*);
+extern "C" int cRider_getCheatIdentity(void*);
 extern "C" int func_0029F198(void* self);
 extern "C" int func_002A1E68(void* self, void* rider);
 // PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
@@ -10397,7 +10397,7 @@ extern "C" void func_002A3708(cSSXAudio* self, char* rider)
 {
     if (func_0029F128(self) == 0) return;
     if (func_00288AE0(self) != 0) return;
-    if (func_00123168(rider) != 0) return;
+    if (cRider_getCheatIdentity(rider) != 0) return;
     if (func_002A4248_s(self) != 0) {
         char* o = rider + 0x6C0;
         char* p = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;

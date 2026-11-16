@@ -48,7 +48,7 @@ struct sWorldVEntry0 {
 
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
 extern "C" void func_003AC8F0(void* self, int flags);
-extern "C" void func_002BB140(void* self, int flags);
+extern "C" void cWorldPainterMan__cWorldPainterMan(void* self, int flags);
 extern "C" void func_0032DE20(void);
 void operator_delete(int* p);
 
@@ -71,7 +71,7 @@ extern "C" void cWorld__cWorld(void** self, int flags)
         func_003AC8F0(self[1], 3);
     }
     if (self[2] != 0) {
-        func_002BB140(self[2], 3);
+        cWorldPainterMan__cWorldPainterMan(self[2], 3);
     }
     func_0032DE20();
     cWorld_m_pTheWorld = 0;
@@ -297,7 +297,7 @@ extern "C" void cWorldCache_reset(void* cache);
 extern "C" void cWorldCache_init(void* cache, const char* name, int a2);
 int cWorldView_getNumSections(cWorldView* view);
 extern "C" void cWScriptCache_init(void* cache, int n);
-extern "C" void func_002BB1D0(void* p, int n);
+extern "C" void cWorldPainterMan_init(void* p, int n);
 
 struct cWorld_load_sBXString {
     char* str;
@@ -319,7 +319,7 @@ extern "C" void cWorld_load(void** self, const char* name, int nash)
     cWorldCache_reset(self[0]);
     cWorldCache_init(self[0], name, nash);
     cWScriptCache_init(self[1], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
-    func_002BB1D0(self[2], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
+    cWorldPainterMan_init(self[2], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
     cBXString__cBXString(&s, 2);
 }
 #endif

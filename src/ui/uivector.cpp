@@ -1747,7 +1747,7 @@ extern "C" void* cUIGroup_traverseRecurse(void* self, cUIGroup_traverseRecurse_c
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5230);
+INCLUDE_ASM("ui/uivector", cUIMenu_cUIMenu);
 #ifdef SKIP_ASM
 extern void* cUIMenu_vtbl[];
 // PORT: the other ctor in the unit calls this base ctor with (self, 0, 0)
@@ -1755,7 +1755,7 @@ extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_003977E8(void* p);
 extern "C" void* func_003A5338(void* self);
 
-extern "C" void* func_003A5230(cUIMenu* self)
+extern "C" void* cUIMenu_cUIMenu(cUIMenu* self)
 {
     func_0039FB30_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
@@ -1853,9 +1853,9 @@ extern "C" int func_003A5380(cUIMenu* uiMenu) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5390);
+INCLUDE_ASM("ui/uivector", cUIMenu_setDisableDirSound);
 #ifdef SKIP_ASM
-extern "C" void func_003A5390(cUIMenu* self, int enable)
+extern "C" void cUIMenu_setDisableDirSound(cUIMenu* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x90))->bit3 = enable;
 }

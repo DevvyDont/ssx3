@@ -571,7 +571,7 @@ INCLUDE_ASM("main/gameload", cGame_purge);
 extern "C" void cBE_setState(int state);
 extern "C" void cCameraTriggerMan_cleanupOnExit(void* self);
 extern "C" void cCameraTriggerMan_purge(void* self);
-extern "C" void func_001A3C50(void* p);
+extern "C" void cFEAsyncManager_FlushFEAsyncTextures(void* p);
 extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* p);
 extern "C" void func_00397B70(void* p, int flags);
 extern "C" void func_002370A0(void* p, int flags);
@@ -582,7 +582,7 @@ extern "C" void func_0026AF00(void* p);
 extern "C" void func_00334850(void* p);
 extern "C" void func_002CC048(void* p, int flags);
 extern "C" void cBucketMan_mergeBucket(void* mgr, int a);
-extern "C" void func_00354B38(void* mgr);
+extern "C" void cBucketMan_purge(void* mgr);
 extern "C" void func_00229278(void* p, int flags);
 extern "C" void func_00343B28(void* p, int flags);
 extern "C" void func_00357A00(void* p, int flags);
@@ -697,7 +697,7 @@ extern "C" void cGame_purge(char* self)
         sVEnt0_FA98* e = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
         e->fn((char*)be + e->delta);
     }
-    func_001A3C50(SSXApp->mFEAsyncManager);
+    cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
     if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
     if (*(void**)(self + 0x7C) != 0) func_002370A0(*(void**)(self + 0x7C), 3);
@@ -712,7 +712,7 @@ extern "C" void cGame_purge(char* self)
     if (*(void**)(self + 0xA4) != 0) func_002CC048(*(void**)(self + 0xA4), 3);
     void* bm = &D_004A5988_gl;
     cBucketMan_mergeBucket(bm, 1);
-    func_00354B38(bm);
+    cBucketMan_purge(bm);
     VDelete_FA98(*(char**)(self + 0x30), 0x494, 8);
     if (*(void**)(self + 0x38) != 0) func_00229278(*(void**)(self + 0x38), 3);
     if (*(void**)(self + 0x3C) != 0) func_00343B28(*(void**)(self + 0x3C), 3);
@@ -1163,7 +1163,7 @@ extern "C" void func_002305C8(void* self)
 //100%
 INCLUDE_ASM("main/gameload", func_00230640);
 #ifdef SKIP_ASM
-extern "C" void func_003550A0(void* mgr, int id);
+extern "C" void cBucketMan_renderBucket(void* mgr, int id);
 struct sGp2898 { int a, b; };
 extern sGp2898 gBucketMan; // target: raw $gp+0x2898 (splat doesn't symbolize it)
 extern int D_004428D8[];
@@ -1173,7 +1173,7 @@ extern "C" void func_00230640(void)
     int i;
     sGp2898* mgr = &gBucketMan;
     for (i = 0; i < 6; i++) {
-        func_003550A0(mgr, D_004428D8[i]);
+        cBucketMan_renderBucket(mgr, D_004428D8[i]);
     }
 }
 #endif

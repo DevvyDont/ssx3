@@ -1347,7 +1347,7 @@ struct sBox_00334680 {
     sWsVec4 min;
     sWsVec4 max;
 };
-extern "C" void func_0035C698(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void cRailModifier_splineIntersect(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
 extern "C" void func_00348290(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
 extern "C" void func_00335128(void* obj, sBox_00334680* box, sWsVec4* pos, int* cnt, float* dist, int a5);
 
@@ -1398,7 +1398,7 @@ extern "C" int func_00334680(char* self, sWsVec4* pos, int a2, int mask, float r
         char* o = ((char**)(self + 0x214))[i];
         int type = *(int*)(o + 8);
         if (type == 2) {
-            func_0035C698(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
         } else if (type == 3) {
             func_00348290(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
         } else if (type == 1) {
@@ -3040,7 +3040,7 @@ static inline void collect_337A48(sOct_337A48* tree, sQry_337A48* q)
     for (char* o = tree->objs; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            func_0035C698(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
         } else if (type == 3) {
             func_00348290(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
         } else if (type == 1) {
@@ -4193,7 +4193,7 @@ static inline void objs_33ED60(char* o, sQuery_33ED60* q)
     for (; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            func_0035C698(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
         } else if (type == 3) {
             func_00348290(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
         } else if (type == 1) {
@@ -4831,7 +4831,7 @@ extern "C" void func_003411B8(sTree_3411B8* tree, sQuery_3411B8* q)
     for (char* o = tree->objs; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            func_0035C698(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
         } else if (type == 3) {
             func_00348290(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
         } else if (type == 1) {

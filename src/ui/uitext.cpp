@@ -1790,12 +1790,12 @@ extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColo
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A3280);
+INCLUDE_ASM("ui/uitext", cUIVector_cUIVector);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
 extern void* cUIVector_vtbl[];
 
-struct func_003A3280_s {
+struct cUIVector_cUIVector_s {
     char pad0[0x8];
     void** vtbl; // 0x8
     char padC[0x74 - 0xC];
@@ -1811,20 +1811,20 @@ struct func_003A3280_s {
     int unk8C;
 };
 
-extern "C" func_003A3280_s* func_003A3280(cUIVector* self, int a1, int a2)
+extern "C" cUIVector_cUIVector_s* cUIVector_cUIVector(cUIVector* self, int a1, int a2)
 {
-    func_0039FB30(((func_003A3280_s*)self), a1, a2);
+    func_0039FB30(((cUIVector_cUIVector_s*)self), a1, a2);
     self->mVtbl = cUIVector_vtbl;
-    ((func_003A3280_s*)self)->b0 = 0;
-    ((func_003A3280_s*)self)->b1 = 0;
-    ((func_003A3280_s*)self)->hi = 0;
+    ((cUIVector_cUIVector_s*)self)->b0 = 0;
+    ((cUIVector_cUIVector_s*)self)->b1 = 0;
+    ((cUIVector_cUIVector_s*)self)->hi = 0;
     self->mpTriangles = 0;
     self->mpVertexColour = 0;
     self->mpVertexPosition = 0;
     self->mpVertexPositionRender = 0;
     self->mpUV = 0;
     self->mpVertices = 0;
-    return ((func_003A3280_s*)self);
+    return ((cUIVector_cUIVector_s*)self);
 }
 #endif
 

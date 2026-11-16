@@ -194,7 +194,7 @@ struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
-extern "C" void func_001CAFC0(void* self, int a1, int a2, int a3);
+extern "C" void cUIStateBuyPopup_initBuyAttributes(void* self, int a1, int a2, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0046F050[];
@@ -222,7 +222,7 @@ extern sDefObj_4A90 D_004A5A58;
  * Handles accept and back on the buy-attributes screen: opens the buy popup, closes the prompt, or leaves.
  *
  * Event 5 (accept): when the bank (0xA4) covers a positive total cost (0xA0), pushes a 0x70-byte "UITRICKBUY"
- * cUIStateBuyPopup (cUIStateBuyPopup_cUIStateBuyPopup, given the cost and bank by func_001CAFC0) as a popup; otherwise plays UI
+ * cUIStateBuyPopup (cUIStateBuyPopup_cUIStateBuyPopup, given the cost and bank by cUIStateBuyPopup_initBuyAttributes) as a popup; otherwise plays UI
  * sound 4 through the engine's sound interface (+0x14).
  *
  * Event 6 (back): with the prompt flag (0xA8) set, clears it, hides "PopupGroup" and refocuses the attribute
@@ -240,7 +240,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(char* self, char* obj, int msg)
     case 5:
         if (*(int*)(self + 0xA4) >= *(int*)(self + 0xA0) && *(int*)(self + 0xA0) > 0) {
             void* o = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_0046F050, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
-            func_001CAFC0(o, 0, *(int*)(self + 0xA0), *(int*)(self + 0xA4));
+            cUIStateBuyPopup_initBuyAttributes(o, 0, *(int*)(self + 0xA0), *(int*)(self + 0xA4));
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
         } else {
             sDefObj_4A90* p = *(sDefObj_4A90**)(*(char**)(self + 0x10) + 0x14);
