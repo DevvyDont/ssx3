@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/instancenode.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* out);
@@ -734,18 +735,18 @@ extern "C" void func_0034FC78(void* self, void* node);
 extern "C" void func_002D1BF0(void* node);
 extern char D_00491C80[];
 
-extern "C" void* func_0034FB00(void* self, void* a1, int type, void* node)
+extern "C" void* func_0034FB00(cInstanceNode* self, void* a1, int type, void* node)
 {
     func_00354850(self, a1, type);
-    *(void**)((char*)self + 0x18) = node;
-    *(void**)((char*)self + 0xC) = D_00491C80;
+    self->Instance = (tInstanceRecord*)node;
+    self->mVtbl = (void**)D_00491C80;
     func_0034FC78(self, node);
     if ((*(int*)((char*)node + 0x8) & 0x100) == 0) {
         if (type != 6 && type != 0x10 && type != 0x16) {
             func_002D1BF0(node);
         }
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 

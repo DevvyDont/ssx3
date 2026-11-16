@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/instancenode.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -3375,9 +3376,9 @@ public:
     virtual void v50();
 };
 
-extern "C" int cInstanceNode_update(cRailVirt* self)
+extern "C" int cInstanceNode_update(cInstanceNode* self)
 {
-    return self->v15();
+    return ((cRailVirt*)self)->v15();
 }
 #endif
 
@@ -3473,8 +3474,8 @@ int cInstanceNode_getFocusCount(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360968);
 #ifdef SKIP_ASM
-extern "C" int func_00360968(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_00360968(cInstanceNode* arg0) {
+    return ((int)arg0->Instance);
 }
 #endif
 

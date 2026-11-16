@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/instancenode.h"
 
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_cInstanceNode);
@@ -12,13 +13,13 @@ struct sInstNodeCtorVEntry {
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
 extern char D_00491C80[];
 
-extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream)
+extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* a1, void* stream)
 {
     cSortObjNode_cSortObjNode(self, a1, stream);
-    *(void**)((char*)self + 0xC) = D_00491C80;
+    self->mVtbl = (void**)D_00491C80;
     sInstNodeCtorVEntry* vt = *(sInstNodeCtorVEntry**)stream;
-    *(int*)((char*)self + 0x18) = vt[4].fn((char*)stream + vt[4].delta, self);
-    return self;
+    self->Instance = (tInstanceRecord*)vt[4].fn((char*)stream + vt[4].delta, self);
+    return ((void*)self);
 }
 #endif
 
@@ -29,17 +30,17 @@ INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 extern "C" void func_0034FC80(void* self, void* a1);
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags)
+extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
-    *(void***)((char*)self + 0xc) = (void**)D_00491C80;
-    func_0034FC80(self, *(void**)((char*)self + 0x18));
-    *(int*)(*(char**)((char*)self + 0x18) + 8) &= 0xFFFF0300;
+    self->mVtbl = (void**)D_00491C80;
+    func_0034FC80(self, self->Instance);
+    *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
-        char* o = *(char**)((char*)self + 0x18);
+        char* o = (char*)self->Instance;
         int v = *(int*)(o + 8);
         *(int*)(o + 8) = v | (v >> 16);
     }
-    *(int*)(*(char**)((char*)self + 0x18) + 8) |= 2;
+    *(int*)((char*)self->Instance + 8) |= 2;
     cSortObjNode__cSortObjNode_dtor(self, flags);
 }
 #endif
@@ -73,8 +74,8 @@ INCLUDE_ASM("object/instancenode", func_0034FCA0);
 #ifdef SKIP_ASM
 extern "C" void func_002D1A78(int);
 
-extern "C" void func_0034FCA0(void *arg0) {
-    func_002D1A78((*(int *)((char*)(arg0) + (0x18))));
+extern "C" void func_0034FCA0(cInstanceNode* arg0) {
+    func_002D1A78(((int)arg0->Instance));
 }
 #endif
 
@@ -107,20 +108,20 @@ struct sInstNodeVEntryFD00 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cInstanceNode_expire(void* self, int a1)
+extern "C" void cInstanceNode_expire(cInstanceNode* self, int a1)
 {
     if (a1 != 0) {
         if (func_0034FCC0(self) != 0) return;
     }
-    *(int*)(*(char**)((char*)self + 0x18) + 8) &= 0xFFFF0300;
+    *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
-        char* o = *(char**)((char*)self + 0x18);
+        char* o = (char*)self->Instance;
         int v = *(int*)(o + 8);
         *(int*)(o + 8) = v | (v >> 16);
     }
-    *(int*)(*(char**)((char*)self + 0x18) + 8) |= 2;
-    if (self != 0) {
-        sInstNodeVEntryFD00* vt = *(sInstNodeVEntryFD00**)((char*)self + 0xc);
+    *(int*)((char*)self->Instance + 8) |= 2;
+    if (((void*)self) != 0) {
+        sInstNodeVEntryFD00* vt = (sInstNodeVEntryFD00*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
@@ -135,16 +136,16 @@ struct sInstNodeVEntryFD90 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cInstanceNode_loseFocus(void* self)
+extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
 {
-    int* f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
+    int* f = (int*)((char*)self->Instance + 0x8);
     *f &= 0xFFFF0000;
-    f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
+    f = (int*)((char*)self->Instance + 0x8);
     *f |= *f >> 16;
-    f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
+    f = (int*)((char*)self->Instance + 0x8);
     *f |= 2;
-    if (self != 0) {
-        sInstNodeVEntryFD90* vt = *(sInstNodeVEntryFD90**)((char*)self + 0xC);
+    if (((void*)self) != 0) {
+        sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
@@ -174,11 +175,11 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern char D_0048E738[];
 extern "C" void* func_003506D8(void* mem, int v);
 
-extern "C" void func_0034FE28(void* self)
+extern "C" void func_0034FE28(cInstanceNode* self)
 {
-    int v = *(int*)((char*)self + 0x18);
-    if (self != 0) {
-        sInstNodeDtorVEntry* vt = *(sInstNodeDtorVEntry**)((char*)self + 0xC);
+    int v = (int)self->Instance;
+    if (((void*)self) != 0) {
+        sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
     func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), v);
@@ -196,7 +197,7 @@ struct sInstNodeVEntry {
 
 extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, void* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);
     sInstNodeVEntry* vt = *(sInstNodeVEntry**)stream;
@@ -485,9 +486,9 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
     vu0CopyMat_0288(d, &t);
 }
 
-extern "C" void cInstanceNode_makeAnimMats(void* self, sInMat44_0288* parent, sInMat44_0288* out)
+extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* parent, sInMat44_0288* out)
 {
-    char* o = *(char**)((char*)self + 0x18);
+    char* o = (char*)self->Instance;
     sInSkel_0288* sk = *(sInSkel_0288**)(o + 0x80);
     float s = *(float*)(o + 0x84);
     sInBone_0288* b = sk->bones;
@@ -560,19 +561,19 @@ static inline float IbSqrt(float v)
 }
 
 // Writes the model's bounding box (min, max) and the radius of the sphere around its centre that holds every corner.
-extern "C" void cInstanceNode_getBoundBoxInfo(void* self, sIbVec4* box, float* radius)
+extern "C" void cInstanceNode_getBoundBoxInfo(cInstanceNode* self, sIbVec4* box, float* radius)
 {
     sIbVec4 t;
-    t.x = *(float*)(*(char**)((char*)self + 0x18) + 0x60);
-    t.y = *(float*)(*(char**)((char*)self + 0x18) + 0x64);
-    t.z = *(float*)(*(char**)((char*)self + 0x18) + 0x68);
+    t.x = *(float*)((char*)self->Instance + 0x60);
+    t.y = *(float*)((char*)self->Instance + 0x64);
+    t.z = *(float*)((char*)self->Instance + 0x68);
     t.w = 1.0f;
     box[0] = t;
-    t.x = *(float*)(*(char**)((char*)self + 0x18) + 0x6C);
-    t.y = *(float*)(*(char**)((char*)self + 0x18) + 0x70);
-    t.z = *(float*)(*(char**)((char*)self + 0x18) + 0x74);
+    t.x = *(float*)((char*)self->Instance + 0x6C);
+    t.y = *(float*)((char*)self->Instance + 0x70);
+    t.z = *(float*)((char*)self->Instance + 0x74);
     box[1] = t;
-    t = *(sIbVec4*)(*(char**)((char*)self + 0x18) + 0x40);
+    t = *(sIbVec4*)((char*)self->Instance + 0x40);
     sIbVec4* mx = &box[1];
     sIbVec4* ctr = &t;
     float best = 0.0f;
