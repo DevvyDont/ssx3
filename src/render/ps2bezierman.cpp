@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2bezierman.h"
 
 extern "C" void func_00374C90(void* self);
 extern "C" void func_00372B30(void* self);
@@ -44,9 +45,9 @@ INCLUDE_ASM("render/ps2bezierman", func_0038AEB0);
 extern "C" void func_0038B0F8(void* self);
 extern "C" void func_00374CA8(void* self, int flags);
 
-extern "C" void func_0038AEB0(void* self, int flags)
+extern "C" void func_0038AEB0(cPSPBezierMan* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cPSPBezierMan_vtbl;
+    self->mVtbl = cPSPBezierMan_vtbl;
     func_0038B0F8(self);
     func_00374CA8(self, flags);
 }

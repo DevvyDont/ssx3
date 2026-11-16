@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -2478,11 +2479,11 @@ INCLUDE_ASM("render/particle", func_00374C90);
 extern void* D_004A4248;
 extern void* D_00493820[];
 
-extern "C" void* func_00374C90(void* self)
+extern "C" void* func_00374C90(cPSPBezierMan* self)
 {
-    *(void***)((char*)self + 0x4) = D_00493820;
-    D_004A4248 = self;
-    return self;
+    self->mVtbl = D_00493820;
+    D_004A4248 = ((void*)self);
+    return ((void*)self);
 }
 #endif
 
@@ -2493,9 +2494,9 @@ extern void* D_004A4248;
 extern void* D_00493820[];
 void operator_delete(int* ptr);
 
-extern "C" void func_00374CA8(void* self, int flags)
+extern "C" void func_00374CA8(cPSPBezierMan* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00493820;
+    self->mVtbl = D_00493820;
     D_004A4248 = 0;
     if (flags & 1) {
         operator_delete((int*)self);

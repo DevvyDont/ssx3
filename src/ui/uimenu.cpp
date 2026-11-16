@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiprogress.h"
+#include "ui/uipair.h"
 #include "ui/uimenu.h"
 
 //100%
@@ -593,15 +595,15 @@ struct cUIPair_setVisible_sVEntry {
  *
  * @param on  nonzero to show (On Tour visible)
  */
-extern "C" void cUIPair_setVisible(void* self, int on)
+extern "C" void cUIPair_setVisible(cUIPair* self, int on)
 {
     ((cUIPair_setVisible_sFlags*)((char*)self + 0x14))->on = (on != 0);
-    void* a = *(void**)((char*)self + 0x78);
+    void* a = self->mpEntry;
     if (a != 0) {
         cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)a + 8);
         vt[9].fn((char*)a + vt[9].delta, on);
     }
-    void* b = *(void**)((char*)self + 0x7C);
+    void* b = self->mpWidget;
     if (b != 0) {
         cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)b + 8);
         vt[9].fn((char*)b + vt[9].delta, on);
@@ -641,46 +643,46 @@ struct cUIPair_setFocus_sFlags {
  *
  * @param on  nonzero to focus (On Tour focus)
  */
-extern "C" void cUIPair_setFocus(char* self, int on)
+extern "C" void cUIPair_setFocus(cUIPair* self, int on)
 {
-    ((cUIPair_setFocus_sFlags*)(self + 0x14))->on = on != 0;
-    char* a = *(char**)(self + 0x78);
+    ((cUIPair_setFocus_sFlags*)(((char*)self) + 0x14))->on = on != 0;
+    char* a = (char*)self->mpEntry;
     if (a != 0) {
         cUIPair_setFocus_sVEntryA* va = *(cUIPair_setFocus_sVEntryA**)(a + 8);
         va[7].fn(a + va[7].delta, on);
     }
-    char* b = *(char**)(self + 0x7C);
+    char* b = (char*)self->mpWidget;
     if (b == 0) {
         return;
     }
     if (on) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)b, 0);
         if (ev != 0xFFFF) {
-            void* scr = *(void**)(*(char**)(self + 0x7C) + 0x5C);
+            void* scr = *(void**)((char*)self->mpWidget + 0x5C);
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        char* c = *(char**)(self + 0x7C);
+        char* c = (char*)self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = *(cUIPair_setFocus_sVEntryA**)(c + 8);
         vc[7].fn(c + vc[7].delta, 1);
-        char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        char* o = *(char**)((char*)self->mpScreen + 0xD0);
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(o + 8);
-        vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 1);
+        vo[19].fn(o + vo[19].delta, self->mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)b, 1);
         if (ev != 0xFFFF) {
-            void* scr = *(void**)(*(char**)(self + 0x7C) + 0x5C);
+            void* scr = *(void**)((char*)self->mpWidget + 0x5C);
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        char* c = *(char**)(self + 0x7C);
+        char* c = (char*)self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = *(cUIPair_setFocus_sVEntryA**)(c + 8);
         vc[7].fn(c + vc[7].delta, 0);
-        char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+        char* o = *(char**)((char*)self->mpScreen + 0xD0);
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(o + 8);
-        vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 2);
+        vo[19].fn(o + vo[19].delta, self->mpWidget, 2);
     }
 }
 #endif
@@ -705,7 +707,7 @@ public:
  * @param obj  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
-extern "C" int cUIPair_traverseFlat(void* self, cUIPair_traverseFlat_cVirt* obj)
+extern "C" int cUIPair_traverseFlat(cUIPair* self, cUIPair_traverseFlat_cVirt* obj)
 {
     return obj->v02(self);
 }
@@ -736,16 +738,16 @@ public:
  * @param pred  the operator (On Tour cListOperator* pOperator)
  * @return the widget found, or 0
  */
-extern "C" void* cUIPair_traverseRecurse(void* self, cUIPair_traverseRecurse_cPred* pred)
+extern "C" void* cUIPair_traverseRecurse(cUIPair* self, cUIPair_traverseRecurse_cPred* pred)
 {
     if (pred->v02(self)) {
-        return self;
+        return ((void*)self);
     }
-    cUIPair_traverseRecurse_cNode* child = *(cUIPair_traverseRecurse_cNode**)((char*)self + 0x78);
+    cUIPair_traverseRecurse_cNode* child = (cUIPair_traverseRecurse_cNode*)self->mpEntry;
     if (child != 0 && child->v03(pred) != 0) {
-        return *(void**)((char*)self + 0x78);
+        return self->mpEntry;
     }
-    cUIPair_traverseRecurse_cNode* next = *(cUIPair_traverseRecurse_cNode**)((char*)self + 0x7C);
+    cUIPair_traverseRecurse_cNode* next = (cUIPair_traverseRecurse_cNode*)self->mpWidget;
     if (next != 0) {
         return next->v03(pred);
     }
@@ -781,13 +783,13 @@ public:
 /**
  * Refreshes the localized text of both widgets of a pair.
  */
-extern "C" void cUIPair_updateLocale(void* self)
+extern "C" void cUIPair_updateLocale(cUIPair* self)
 {
-    cUIPair_updateLocale_cVirt* a = *(cUIPair_updateLocale_cVirt**)((char*)self + 0x78);
+    cUIPair_updateLocale_cVirt* a = (cUIPair_updateLocale_cVirt*)self->mpEntry;
     if (a != 0) {
         a->v16();
     }
-    cUIPair_updateLocale_cVirt* b = *(cUIPair_updateLocale_cVirt**)((char*)self + 0x7C);
+    cUIPair_updateLocale_cVirt* b = (cUIPair_updateLocale_cVirt*)self->mpWidget;
     if (b != 0) {
         b->v16();
     }
@@ -807,17 +809,17 @@ public:
 /**
  * Deletes both widgets of a pair and clears the pointers.
  */
-extern "C" void cUIPair_destroyPair(void* self)
+extern "C" void cUIPair_destroyPair(cUIPair* self)
 {
-    cUIPair_destroyPair_cVirt* a = *(cUIPair_destroyPair_cVirt**)((char*)self + 0x78);
+    cUIPair_destroyPair_cVirt* a = (cUIPair_destroyPair_cVirt*)self->mpEntry;
     if (a != 0) {
         a->v01(3);
-        *(cUIPair_destroyPair_cVirt**)((char*)self + 0x78) = 0;
+        self->mpEntry = 0;
     }
-    cUIPair_destroyPair_cVirt* b = *(cUIPair_destroyPair_cVirt**)((char*)self + 0x7C);
+    cUIPair_destroyPair_cVirt* b = (cUIPair_destroyPair_cVirt*)self->mpWidget;
     if (b != 0) {
         b->v01(3);
-        *(cUIPair_destroyPair_cVirt**)((char*)self + 0x7C) = 0;
+        self->mpWidget = 0;
     }
 }
 #endif
@@ -864,56 +866,56 @@ static inline int focusMove_BED8(char* self, int dir)
  */
 // Menu input: up/down move the selection (with transition frames and wrap events), accept notifies, else
 // the sub-handler gets the input.
-extern "C" int cUIPair_onInput(char* self, void* in)
+extern "C" int cUIPair_onInput(cUIPair* self, void* in)
 {
     int result = 0;
     char* listener = D_004A5A58;
-    char* owner = (char*)func_0039FF50(self);
+    char* owner = (char*)func_0039FF50(((char*)self));
     if (*(char**)(owner + 0x14) != 0) {
         listener = *(char**)(owner + 0x14);
     }
     int f;
     if (inputIs_BED8(in, 5)) {
-        focusNotify_BED8(self, 5);
-        f = focusMove_BED8(self, 0);
+        focusNotify_BED8(((char*)self), 5);
+        f = focusMove_BED8(((char*)self), 0);
         if (f & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 2);
             if (ev != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
         if (f & 1) {
-            result = func_003A0318(self, 1);
+            result = func_003A0318(((char*)self), 1);
         } else if (f & 0x10) {
-            result = func_003A0318(self, 0);
+            result = func_003A0318(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
             vt[2].fn(listener + vt[2].delta, result);
         }
     } else if (inputIs_BED8(in, 6)) {
-        focusNotify_BED8(self, 6);
-        f = focusMove_BED8(self, 1);
+        focusNotify_BED8(((char*)self), 6);
+        f = focusMove_BED8(((char*)self), 1);
         if (f & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 3);
             if (ev != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
         if (f & 1) {
-            result = func_003A0318(self, 1);
+            result = func_003A0318(((char*)self), 1);
         } else if (f & 0x10) {
-            result = func_003A0318(self, 0);
+            result = func_003A0318(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
             vt[2].fn(listener + vt[2].delta, result);
         }
     } else if (inputIs_BED8(in, 4)) {
-        focusNotify_BED8(self, 4);
+        focusNotify_BED8(((char*)self), 4);
         return 1;
     } else {
-        char* sub = *(char**)(self + 0x7C);
+        char* sub = (char*)self->mpWidget;
         if (sub != 0) {
             sVE_BED8* vt = *(sVE_BED8**)(sub + 8);
             return vt[15].fn(sub + vt[15].delta, in);
@@ -939,17 +941,17 @@ struct cUIPair_render2D_sVEntry {
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIPair_render2D(void* self, float x, float y)
+extern "C" void cUIPair_render2D(cUIPair* self, float x, float y)
 {
-    void* a = *(void**)((char*)self + 0x78);
+    void* a = self->mpEntry;
     if (a != 0) {
         cUIPair_render2D_sVEntry* e = &(*(cUIPair_render2D_sVEntry**)((char*)a + 8))[17];
-        e->fn((char*)a + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
+        e->fn((char*)a + e->delta, x + self->mPosition.x, y + self->mPosition.y);
     }
-    void* b = *(void**)((char*)self + 0x7C);
+    void* b = self->mpWidget;
     if (b != 0) {
         cUIPair_render2D_sVEntry* e = &(*(cUIPair_render2D_sVEntry**)((char*)b + 8))[17];
-        e->fn((char*)b + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
+        e->fn((char*)b + e->delta, x + self->mPosition.x, y + self->mPosition.y);
     }
 }
 #endif
@@ -989,14 +991,14 @@ public:
  *
  * @param ev  the frame number (On Tour FrameNum)
  */
-extern "C" void cUIPair_update(void* self, unsigned short ev)
+extern "C" void cUIPair_update(cUIPair* self, unsigned short ev)
 {
     cUIThing_update(self, ev);
-    cUIPair_update_cVirt* a = *(cUIPair_update_cVirt**)((char*)self + 0x78);
+    cUIPair_update_cVirt* a = (cUIPair_update_cVirt*)self->mpEntry;
     if (a != 0) {
         a->v19(ev);
     }
-    cUIPair_update_cVirt* b = *(cUIPair_update_cVirt**)((char*)self + 0x7C);
+    cUIPair_update_cVirt* b = (cUIPair_update_cVirt*)self->mpWidget;
     if (b != 0) {
         b->v19(ev);
     }
@@ -1020,15 +1022,15 @@ struct cUIProgress__cUIProgress_sVEntry {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cUIProgress__cUIProgress(void* self, int flags)
+extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cUIProgress_vtbl;
-    void* a = *(void**)((char*)self + 0x74);
+    self->mVtbl = cUIProgress_vtbl;
+    void* a = self->mpObjBackground;
     if (a != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)a + 8);
         vt[1].fn((char*)a + vt[1].delta, 3);
     }
-    void* b = *(void**)((char*)self + 0x78);
+    void* b = self->mpObjKnob;
     if (b != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)b + 8);
         vt[1].fn((char*)b + vt[1].delta, 3);
@@ -1047,11 +1049,11 @@ INCLUDE_ASM("ui/uimenu", cUIProgress_setUIData);
  * func_0039C428() divides by) and 100 at 0x84. Only @p self is declared: the UI data pointer reaches
  * cUIThing_setUIData() unchanged in its register.
  */
-extern "C" void cUIProgress_setUIData(void* self)
+extern "C" void cUIProgress_setUIData(cUIProgress* self)
 {
     cUIThing_setUIData(self);
-    *(int*)((char*)self + 0x80) = 10;
-    *(int*)((char*)self + 0x84) = 100;
+    self->mNumValues = 10;
+    self->mBackWidth = 100;
 }
 #endif
 
@@ -1070,15 +1072,15 @@ struct cUIProgress_render2D_sVEntry {
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIProgress_render2D(void* self, float x, float y)
+extern "C" void cUIProgress_render2D(cUIProgress* self, float x, float y)
 {
-    void* a = *(void**)((char*)self + 0x74);
-    if (a != 0 && *(void**)((char*)self + 0x78) != 0) {
-        float px = x + *(float*)((char*)self + 0x44);
-        float py = y + *(float*)((char*)self + 0x48);
+    void* a = self->mpObjBackground;
+    if (a != 0 && self->mpObjKnob != 0) {
+        float px = x + self->mPosition.x;
+        float py = y + self->mPosition.y;
         cUIProgress_render2D_sVEntry* vt = *(cUIProgress_render2D_sVEntry**)((char*)a + 8);
         vt[17].fn((char*)a + vt[17].delta, px, py);
-        void* b = *(void**)((char*)self + 0x78);
+        void* b = self->mpObjKnob;
         cUIProgress_render2D_sVEntry* vt2 = *(cUIProgress_render2D_sVEntry**)((char*)b + 8);
         vt2[17].fn((char*)b + vt2[17].delta, px, py);
     }
@@ -1102,18 +1104,18 @@ struct cUIProgress_update_sVEntry {
  *
  * @param ev  the frame number (On Tour FrameNum)
  */
-extern "C" void cUIProgress_update(void* self, unsigned short ev)
+extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
 {
-    if (*(void**)((char*)self + 0xC) != 0) {
-        cUIAnimation_updateThing(*(void**)((char*)self + 0xC), self, *(unsigned char*)((char*)self + 0x10), ev);
-        cUIAnimation_updateFrame(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+    if (self->mpAnim != 0) {
+        cUIAnimation_updateThing(self->mpAnim, self, self->mAnimPlaybackStatus, ev);
+        cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
     }
-    void* a = *(void**)((char*)self + 0x78);
+    void* a = self->mpObjKnob;
     if (a != 0) {
         cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)a + 8);
         vt[19].fn((char*)a + vt[19].delta, ev);
     }
-    void* b = *(void**)((char*)self + 0x74);
+    void* b = self->mpObjBackground;
     if (b != 0) {
         cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)b + 8);
         vt[19].fn((char*)b + vt[19].delta, ev);
@@ -1158,23 +1160,23 @@ public:
     virtual void v21(func_0039C428_sVec3*);
 };
 
-extern "C" void func_0039C428(void* self, int pos)
+extern "C" void func_0039C428(cUIProgress* self, int pos)
 {
-    *(int*)((char*)self + 0x7C) = pos;
-    func_0039C428_cWidget* a = *(func_0039C428_cWidget**)((char*)self + 0x74);
+    self->mValue = pos;
+    func_0039C428_cWidget* a = (func_0039C428_cWidget*)self->mpObjBackground;
     func_0039C428_sVec3 v = t3vect_Zero;
     if (a != 0) {
         a->v20(&v);
     }
-    if (*(void**)((char*)self + 0x78) != 0) {
-        int n = *(int*)((char*)self + 0x80);
+    if (self->mpObjKnob != 0) {
+        int n = self->mNumValues;
         if (n != 0) {
-            if (!(*(int*)((char*)self + 0x14) & 1)) {
-                v.x *= (float)*(int*)((char*)self + 0x7C) / (float)n;
+            if (!(self->mAttr & 1)) {
+                v.x *= (float)self->mValue / (float)n;
             } else {
-                v.y *= (float)*(int*)((char*)self + 0x7C) / (float)n;
+                v.y *= (float)self->mValue / (float)n;
             }
-            (*(func_0039C428_cWidget**)((char*)self + 0x78))->v21(&v);
+            ((func_0039C428_cWidget*)self->mpObjKnob)->v21(&v);
         }
     }
 }

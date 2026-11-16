@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2lightman.h"
 
 extern void* D_004936D8[16];
 extern void* D_004A5B8C;
@@ -32,7 +33,7 @@ extern void* D_004A5B8C;
 extern void* D_004936D8[];
 void operator_delete(int* ptr);
 
-extern "C" void func_0038AE28(void* self, int flags)
+extern "C" void func_0038AE28(cPS2LightMan* self, int flags)
 {
     *(void***)self = D_004936D8;
     D_004A5B8C = 0;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uilistbox.h"
 #include "ui/uimenu.h"
 
 //100%
@@ -19,14 +20,14 @@ extern char D_00493DD0[];
  * @param data  caller data stored with the entry (On Tour void* pData)
  * @return the new entry's index
  */
-extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data)
+extern "C" unsigned char cUIListBox_addEntryByAsciiString(cUIListBox* self, const char* text, int data)
 {
     unsigned short* u = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, D_00493DD0, 0x100, 0);
     UIAsciiToUnicode(u, text);
-    *(const char**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA0) = text;
-    *(unsigned short**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0x9C) = u;
-    *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA4) = data;
-    return (*(unsigned char*)((char*)self + 0x318))++;
+    *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = text;
+    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
+    *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
+    return (self->mNumEntries)++;
 }
 #endif
 
@@ -39,14 +40,14 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern char D_00493DC0[];
 
-extern "C" unsigned char func_0039A4B0(void* self, unsigned short* str, int data)
+extern "C" unsigned char func_0039A4B0(cUIListBox* self, unsigned short* str, int data)
 {
     unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DC0, 0x100, 0);
     USTR_copy(u, str);
-    *(const char**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA0) = 0;
-    *(unsigned short**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0x9C) = u;
-    *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA4) = data;
-    return (*(unsigned char*)((char*)self + 0x318))++;
+    *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
+    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
+    *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
+    return (self->mNumEntries)++;
 }
 #endif
 
@@ -70,22 +71,22 @@ struct sUIStrVtA568 { short delta; short index; unsigned short* (*fn)(void*, int
  * @param data  caller data stored with the entry (On Tour void* pData)
  * @return the new entry's index
  */
-extern "C" unsigned char cUIListBox_addEntryByStringID(void* self, int id, int data)
+extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id, int data)
 {
-    char* tbl = *(char**)(*(char**)(*(char**)(*(char**)((char*)self + 0x5C) + 0xD0) + 0x10) + 0x10);
+    char* tbl = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
     if (tbl != 0) {
         sUIStrVtA568* vt = *(sUIStrVtA568**)(tbl + 4);
         unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
         if (str != 0) {
             unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DE0, 0x100, 0);
             USTR_copy(u, str);
-            *(const char**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA0) = 0;
-            *(unsigned short**)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0x9C) = u;
-            *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0xA4) = data;
-            *(int*)((char*)self + *(unsigned char*)((char*)self + 0x318) * 0x14 + 0x98) = id;
+            *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
+            *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
+            *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
+            *(int*)((char*)self + self->mNumEntries * 0x14 + 0x98) = id;
         }
     }
-    return (*(unsigned char*)((char*)self + 0x318))++;
+    return (self->mNumEntries)++;
 }
 #endif
 
@@ -121,10 +122,10 @@ extern "C" void func_0039A670(void* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A708);
 #ifdef SKIP_ASM
-extern "C" int func_0039A708(void* self)
+extern "C" int func_0039A708(cUIListBox* self)
 {
-    if (*(unsigned char*)((char*)self + 0x319) < *(unsigned char*)((char*)self + 0x318)) {
-        return *(int*)((char*)self + *(unsigned char*)((char*)self + 0x319) * 0x14 + 0xA0);
+    if (self->mCurrentEntry < self->mNumEntries) {
+        return *(int*)((char*)self + self->mCurrentEntry * 0x14 + 0xA0);
     }
     return 0;
 }
@@ -133,10 +134,10 @@ extern "C" int func_0039A708(void* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A738);
 #ifdef SKIP_ASM
-extern "C" int func_0039A738(void* self)
+extern "C" int func_0039A738(cUIListBox* self)
 {
-    if (*(unsigned char*)((char*)self + 0x319) < *(unsigned char*)((char*)self + 0x318)) {
-        return *(int*)((char*)self + *(unsigned char*)((char*)self + 0x319) * 0x14 + 0xA4);
+    if (self->mCurrentEntry < self->mNumEntries) {
+        return *(int*)((char*)self + self->mCurrentEntry * 0x14 + 0xA4);
     }
     return 0;
 }
@@ -145,10 +146,10 @@ extern "C" int func_0039A738(void* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A768);
 #ifdef SKIP_ASM
-extern "C" int func_0039A768(void* self, int key, unsigned char* out)
+extern "C" int func_0039A768(cUIListBox* self, int key, unsigned char* out)
 {
     int i;
-    for (i = 0; i < *(unsigned char*)((char*)self + 0x318); i++) {
+    for (i = 0; i < self->mNumEntries; i++) {
         if (*(int*)((char*)self + i * 0x14 + 0xA4) == key) {
             *out = i;
             return 1;
@@ -161,11 +162,11 @@ extern "C" int func_0039A768(void* self, int key, unsigned char* out)
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A7A8);
 #ifdef SKIP_ASM
-extern "C" void func_0039A7A8(void* self, int a1)
+extern "C" void func_0039A7A8(cUIListBox* self, int a1)
 {
     unsigned char v = (unsigned char)a1;
-    if (v < *(unsigned char*)((char*)self + 0x318)) {
-        *(char*)((char*)self + 0x319) = v;
+    if (v < self->mNumEntries) {
+        *(char*)&self->mCurrentEntry = v;
     }
 }
 #endif
@@ -173,10 +174,10 @@ extern "C" void func_0039A7A8(void* self, int a1)
 //100%
 INCLUDE_ASM("ui/uilistbox", func_0039A7C8);
 #ifdef SKIP_ASM
-extern "C" void func_0039A7C8(void* self, int a1, int value)
+extern "C" void func_0039A7C8(cUIListBox* self, int a1, int value)
 {
     unsigned char v = (unsigned char)a1;
-    if (v < *(unsigned char*)((char*)self + 0x318)) {
+    if (v < self->mNumEntries) {
         *(int*)((char*)self + v * 0x14 + 0xA4) = value;
     }
 }
@@ -246,12 +247,12 @@ struct sVEntry39A8D8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0039A8D8(void* self, int count)
+extern "C" void func_0039A8D8(cUIListBox* self, int count)
 {
-    *(char*)((char*)self + 0x318) = count;
-    *(char*)((char*)self + 0x319) = 0;
-    *(int*)((char*)self + 0x74) |= 0x10;
-    void* obj = *(void**)(*(char**)((char*)self + 0x5C) + 0xD0);
+    *(char*)&self->mNumEntries = count;
+    *(char*)&self->mCurrentEntry = 0;
+    *(int*)&self->mAttrListBox |= 0x10;
+    void* obj = *(void**)((char*)self->mpScreen + 0xD0);
     sVEntry39A8D8* vt = *(sVEntry39A8D8**)((char*)obj + 8);
     vt[0x13].fn((char*)obj + vt[0x13].delta, self, 9);
 }

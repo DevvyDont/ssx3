@@ -1,16 +1,6 @@
 #include "common.h"
 
-struct cListNode {
-    cListNode* next; // 0x0
-    cListNode* prev; // 0x4
-};
-
-struct cList {
-    char pad_0x00[0x4];
-    cListNode* head; // 0x4
-    char pad_0x08[0x4];
-    cListNode* tail; // 0xC
-};
+#include "util/list.h"
 
 //100%
 INCLUDE_ASM("util/list", cListNode_isSentinel__FP9cListNode);
@@ -19,11 +9,11 @@ INCLUDE_ASM("util/list", cListNode_isSentinel__FP9cListNode);
  * Tells whether a list node is an end marker, i.e. links to itself in either direction.
  *
  * @param node  node to test
- * @return 1 if node->prev or node->next points back at the node, else 0
+ * @return 1 if node->next or node->prev points back at the node, else 0
  */
 int cListNode_isSentinel(cListNode* node)
 {
-    return (node->prev == node) || (node->next == node);
+    return (node->mpNext == node) || (node->mpPrev == node);
 }
 #endif
 
@@ -38,24 +28,24 @@ INCLUDE_ASM("util/list", cListNode_removeFromList);
  */
 extern "C" void cListNode_removeFromList(cListNode* self)
 {
-    cListNode* next = self->next;
-    cListNode* prev = self->prev;
-    if (next != 0 && next != self) {
-        if (prev == self) {
-            next->prev = next;
+    cListNode* prevNode = self->mpPrev;
+    cListNode* nextNode = self->mpNext;
+    if (prevNode != 0 && prevNode != self) {
+        if (nextNode == self) {
+            prevNode->mpNext = prevNode;
         } else {
-            next->prev = prev;
+            prevNode->mpNext = nextNode;
         }
     }
-    if (prev != 0 && prev != self) {
-        if (next == self) {
-            prev->next = prev;
+    if (nextNode != 0 && nextNode != self) {
+        if (prevNode == self) {
+            nextNode->mpPrev = nextNode;
         } else {
-            prev->next = next;
+            nextNode->mpPrev = prevNode;
         }
     }
-    self->prev = self;
-    self->next = self;
+    self->mpNext = self;
+    self->mpPrev = self;
 }
 #endif
 
@@ -120,12 +110,12 @@ INCLUDE_ASM("util/list", cList_first__FP5cList);
  * Returns the list's first node.
  *
  * @param list  list to read
- * @return list->head, or 0 when the head's prev link points at itself (an empty list)
+ * @return the first node (list->mStart.mpNext), or 0 when the head's next link points at itself (an empty list)
  */
 cListNode* cList_first(cList* list)
 {
-    cListNode* head = list->head;
-    return (head->prev == head) ? 0 : head;
+    cListNode* head = list->mStart.mpNext;
+    return (head->mpNext == head) ? 0 : head;
 }
 #endif
 
@@ -153,7 +143,7 @@ extern "C" cListNode* func_00397870(cList* list, int count)
         if (cListNode_isSentinel(n)) {
             break;
         }
-        n = n->prev;
+        n = n->mpNext;
     }
     if (n != 0 && !cListNode_isSentinel(n)) {
         return n;
@@ -174,21 +164,21 @@ extern "C" int func_003978E8(void) {
 INCLUDE_ASM("util/list", cList_addToFront__FP5cListP9cListNode);
 #ifdef SKIP_ASM
 /**
- * Links a node in at the head of the list and makes it list->head.
+ * Links a node in at the head of the list and makes it the first node (list->mStart.mpNext).
  *
- * Sets newNode->prev to the old head, newNode->next to the old head's next, and the old head's next to newNode.
- * In this list, prev links run from the head towards the tail (cList_size() walks them).
+ * Sets newNode->next to the old head, newNode->prev to the old head's prev, and the old head's prev to newNode.
+ * In this list, next links run from the head towards the tail (cList_size() walks them).
  *
  * @param list     list to add to
  * @param newNode  node to insert
  */
 void cList_addToFront(cList* list, cListNode* newNode)
 {
-    cListNode* head = list->head;
-    newNode->prev = head;
-    newNode->next = head->next;
-    head->next = newNode;
-    list->head = newNode;
+    cListNode* head = list->mStart.mpNext;
+    newNode->mpNext = head;
+    newNode->mpPrev = head->mpPrev;
+    head->mpPrev = newNode;
+    list->mStart.mpNext = newNode;
 }
 #endif
 
@@ -196,21 +186,21 @@ void cList_addToFront(cList* list, cListNode* newNode)
 INCLUDE_ASM("util/list", cList_addToEnd__FP5cListP9cListNode);
 #ifdef SKIP_ASM
 /**
- * Links a node in at the tail of the list and makes it list->tail.
+ * Links a node in at the tail of the list and makes it the last node (list->mEnd.mpPrev).
  *
- * Sets newNode->next to the old tail, newNode->prev to the old tail's prev, and the old tail's prev to newNode.
- * In this list, next links run from the tail towards the head.
+ * Sets newNode->prev to the old tail, newNode->next to the old tail's next, and the old tail's next to newNode.
+ * In this list, prev links run from the tail towards the head.
  *
  * @param list     list to add to
  * @param newNode  node to insert
  */
 void cList_addToEnd(cList* list, cListNode* newNode)
 {
-    cListNode* tail = list->tail;
-    newNode->next = tail;
-    newNode->prev = tail->prev;
-    tail->prev = newNode;
-    list->tail = newNode;
+    cListNode* tail = list->mEnd.mpPrev;
+    newNode->mpPrev = tail;
+    newNode->mpNext = tail->mpNext;
+    tail->mpNext = newNode;
+    list->mEnd.mpPrev = newNode;
 }
 #endif
 
@@ -232,8 +222,8 @@ INCLUDE_ASM("util/list", cList_destroyList);
 #ifdef SKIP_ASM
 class cList_destroyList_cVirt {
 public:
-    void* next;                  // 0x0
-    cList_destroyList_cVirt* prev;   // 0x4
+    void* mpPrev;                  // 0x0
+    cList_destroyList_cVirt* mpNext;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01(int);
 };
@@ -241,15 +231,15 @@ public:
 /**
  * Deletes every node in the list through its virtual destructor, then resets the list to empty.
  *
- * Walks from the head (+0x4) along the prev links up to the self-linked end node, calling each node's
+ * Walks from the head (+0x4) along the next links up to the self-linked end node, calling each node's
  * deleting destructor (slot 1, flags 3), then relinks the empty list (func_00397930). The null check on each
- * node comes after its prev link has been read.
+ * node comes after its next link has been read.
  */
 extern "C" void cList_destroyList(void* self)
 {
     cList_destroyList_cVirt* n = *(cList_destroyList_cVirt**)((char*)self + 0x4);
-    while (n->prev != n) {
-        cList_destroyList_cVirt* p = n->prev;
+    while (n->mpNext != n) {
+        cList_destroyList_cVirt* p = n->mpNext;
         if (n != 0) {
             n->v01(3);
         }
@@ -265,17 +255,17 @@ INCLUDE_ASM("util/list", cList_size);
 /**
  * Counts the nodes in the list.
  *
- * Follows prev links from the head until a node whose prev points at itself; that end node is not counted.
+ * Follows next links from the head until a node whose next points at itself; that end node is not counted.
  *
  * @param list  list to count
  * @return the number of nodes
  */
 extern "C" int cList_size(cList* list)
 {
-    cListNode* node = list->head;
+    cListNode* node = list->mStart.mpNext;
     int count = 0;
-    while (node->prev != node) {
-        node = node->prev;
+    while (node->mpNext != node) {
+        node = node->mpNext;
         count++;
     }
     return count;
@@ -287,8 +277,8 @@ INCLUDE_ASM("util/list", cList_traverseFlat);
 #ifdef SKIP_ASM
 class cList_traverseFlat_cVirt {
 public:
-    void* next;                  // 0x0
-    cList_traverseFlat_cVirt* prev;   // 0x4
+    void* mpPrev;                  // 0x0
+    cList_traverseFlat_cVirt* mpNext;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
@@ -306,8 +296,8 @@ public:
 extern "C" int cList_traverseFlat(void* self, void* pOperator)
 {
     cList_traverseFlat_cVirt* n = *(cList_traverseFlat_cVirt**)((char*)self + 0x4);
-    while (n->prev != n) {
-        cList_traverseFlat_cVirt* p = n->prev;
+    while (n->mpNext != n) {
+        cList_traverseFlat_cVirt* p = n->mpNext;
         int r = n->v02(pOperator);
         if (r != 0) {
             return r;
@@ -323,8 +313,8 @@ INCLUDE_ASM("util/list", cList_traverseRecurse);
 #ifdef SKIP_ASM
 class cList_traverseRecurse_cVirt {
 public:
-    void* next;                  // 0x0
-    cList_traverseRecurse_cVirt* prev;   // 0x4
+    void* mpPrev;                  // 0x0
+    cList_traverseRecurse_cVirt* mpNext;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
@@ -342,8 +332,8 @@ public:
 extern "C" int cList_traverseRecurse(void* self, void* pOperator)
 {
     cList_traverseRecurse_cVirt* n = *(cList_traverseRecurse_cVirt**)((char*)self + 0x4);
-    while (n->prev != n) {
-        cList_traverseRecurse_cVirt* p = n->prev;
+    while (n->mpNext != n) {
+        cList_traverseRecurse_cVirt* p = n->mpNext;
         int r = n->v03(pOperator);
         if (r != 0) {
             return r;

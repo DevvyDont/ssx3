@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uislider.h"
+#include "ui/uiscrollbar.h"
 #include "ui/uistate.h"
 #include "ui/uiscreen.h"
 
@@ -1091,15 +1093,15 @@ INCLUDE_ASM("ui/uiscreen", func_0039D8C0);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* D_004944C8[];
 
-extern "C" void func_0039D8C0(void* self, int flags)
+extern "C" void func_0039D8C0(cUIScrollBar* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_004944C8;
-    void* a = *(void**)((char*)self + 0x74);
+    self->mVtbl = D_004944C8;
+    void* a = self->mpObjBackground;
     if (a != 0) {
         sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
         t->fn((char*)a + t->field_0x8, 3);
     }
-    void* b = *(void**)((char*)self + 0x78);
+    void* b = self->mpObjKnob;
     if (b != 0) {
         sDeleteTarget* t = *(sDeleteTarget**)((char*)b + 0x8);
         t->fn((char*)b + t->field_0x8, 3);
@@ -1128,17 +1130,17 @@ struct func_0039D968_sVEntry {
     void (*fn)(void*, float, float);
 };
 
-extern "C" void func_0039D968(void* self, float x, float y)
+extern "C" void func_0039D968(cUIScrollBar* self, float x, float y)
 {
-    char* a = *(char**)((char*)self + 0x74);
-    if (a != 0 && *(void**)((char*)self + 0x78) != 0) {
-        float px = x + *(float*)((char*)self + 0x44);
-        float py = y + *(float*)((char*)self + 0x48);
+    char* a = (char*)self->mpObjBackground;
+    if (a != 0 && self->mpObjKnob != 0) {
+        float px = x + self->mPosition.x;
+        float py = y + self->mPosition.y;
         if ((*(int*)(a + 0x14) >> 6) & 1) {
             func_0039D968_sVEntry* vt = *(func_0039D968_sVEntry**)(a + 8);
             vt[0x11].fn(a + vt[0x11].delta, px, py);
         }
-        char* b = *(char**)((char*)self + 0x78);
+        char* b = (char*)self->mpObjKnob;
         if ((*(int*)(b + 0x14) >> 6) & 1) {
             func_0039D968_sVEntry* vt = *(func_0039D968_sVEntry**)(b + 8);
             vt[0x11].fn(b + vt[0x11].delta, px, py);
@@ -1154,7 +1156,7 @@ extern "C" int strlen(const char*);
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0039DE68(void* self, int a);
+extern "C" void func_0039DE68(cUIScrollBar* self, int a);
 
 struct sV3_DA20 {
     float x, y, z;
@@ -1245,7 +1247,7 @@ extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int tota
         sWidget_DA20* w = self->thumb;
         ((tGet_DA20)w->vt[20].fn)((char*)w + w->vt[20].delta, &nsize);
     }
-    func_0039DE68(self, 1);
+    func_0039DE68((cUIScrollBar*)self, 1);
     if (self->total != 0) {
         if (self->flags & 1) {
             float fp = (float)self->pos / (float)self->total;
@@ -1278,7 +1280,7 @@ extern "C" void func_0039DA20(sScroll_DA20* self, int pos, int visible, int tota
     if (nsize.y == tsize.y) {
         switch (self->mode) {
         case 0:
-            func_0039DE68(self, 0);
+            func_0039DE68((cUIScrollBar*)self, 0);
             break;
         case 1:
             if (self->up != 0)
@@ -1324,22 +1326,22 @@ static inline void func_0039DE68_call(char* o, int a)
     vt[9].fn(o + vt[9].delta, a);
 }
 
-extern "C" void func_0039DE68(void* self, int a)
+extern "C" void func_0039DE68(cUIScrollBar* self, int a)
 {
-    char* o = *(char**)((char*)self + 0x7C);
+    char* o = (char*)self->mpUpArrow;
     if (o != 0) {
         func_0039DE68_call(o, a);
     }
-    o = *(char**)((char*)self + 0x80);
+    o = (char*)self->mpDownArrow;
     if (o != 0) {
         func_0039DE68_call(o, a);
     }
-    o = *(char**)((char*)self + 0x84);
+    o = (char*)self->mpHideOnEmpty;
     if (o != 0) {
         func_0039DE68_call(o, a);
     }
-    func_0039DE68_call(*(char**)((char*)self + 0x78), a);
-    func_0039DE68_call(*(char**)((char*)self + 0x74), a);
+    func_0039DE68_call((char*)self->mpObjKnob, a);
+    func_0039DE68_call((char*)self->mpObjBackground, a);
 }
 #endif
 
@@ -1349,15 +1351,15 @@ INCLUDE_ASM("ui/uiscreen", func_0039DF28);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* D_00494348[];
 
-extern "C" void func_0039DF28(void* self, int flags)
+extern "C" void func_0039DF28(cUISlider* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00494348;
-    void* a = *(void**)((char*)self + 0x88);
+    self->mVtbl = D_00494348;
+    void* a = self->mpObjBackground;
     if (a != 0) {
         sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
         t->fn((char*)a + t->field_0x8, 3);
     }
-    void* b = *(void**)((char*)self + 0x8C);
+    void* b = self->mpObjKnob;
     if (b != 0) {
         sDeleteTarget* t = *(sDeleteTarget**)((char*)b + 0x8);
         t->fn((char*)b + t->field_0x8, 3);
@@ -1369,11 +1371,11 @@ extern "C" void func_0039DF28(void* self, int flags)
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039DFB0);
 #ifdef SKIP_ASM
-extern "C" void func_0039DFB0(void* self)
+extern "C" void func_0039DFB0(cUISlider* self)
 {
     cUIThing_setUIData(self);
-    *(int*)((char*)self + 0x78) = 10;
-    *(int*)((char*)self + 0x80) = 100;
+    self->mNumValues = 10;
+    self->mBackWidth = 100;
 }
 #endif
 
@@ -1402,22 +1404,22 @@ struct func_0039DFE8_sVEntryS {
     void (*fn)(void*, int);
 };
 
-extern "C" int func_0039DFE8(char* self, char* input)
+extern "C" int func_0039DFE8(cUISlider* self, char* input)
 {
-    char* t = *(char**)((char*)func_0039FF50(self) + 0x14);
+    char* t = *(char**)((char*)func_0039FF50(((char*)self)) + 0x14);
     char* snd = &D_004A5A58;
     if (t) snd = t;
     func_0039DFE8_sVEntryI* vi = *(func_0039DFE8_sVEntryI**)(input + 8);
     if (vi[19].fn(input + vi[19].delta)) {
-        if (*(int*)(self + 0x74) > 0) {
+        if (self->mValue > 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
             if (ev != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
-            *(int*)(self + 0x74) = *(int*)(self + 0x74) - 1;
-            char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            self->mValue = self->mValue - 1;
+            char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
             func_0039DFE8_sVEntryM* vm = *(func_0039DFE8_sVEntryM**)(mgr + 8);
-            vm[19].fn(mgr + vm[19].delta, self, 9);
+            vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
             func_0039DFE8_sVEntryS* vs = *(func_0039DFE8_sVEntryS**)snd;
             vs[2].fn(snd + vs[2].delta, 1);
         }
@@ -1425,15 +1427,15 @@ extern "C" int func_0039DFE8(char* self, char* input)
     }
     func_0039DFE8_sVEntryI* vi2 = *(func_0039DFE8_sVEntryI**)(input + 8);
     if (vi2[20].fn(input + vi2[20].delta)) {
-        if (*(int*)(self + 0x74) + 1 < *(int*)(self + 0x78)) {
+        if (self->mValue + 1 < self->mNumValues) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
             if (ev != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
-            *(int*)(self + 0x74) = *(int*)(self + 0x74) + 1;
-            char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+            self->mValue = self->mValue + 1;
+            char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
             func_0039DFE8_sVEntryM* vm = *(func_0039DFE8_sVEntryM**)(mgr + 8);
-            vm[19].fn(mgr + vm[19].delta, self, 9);
+            vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
             func_0039DFE8_sVEntryS* vs = *(func_0039DFE8_sVEntryS**)snd;
             vs[2].fn(snd + vs[2].delta, 1);
         }
@@ -1460,31 +1462,31 @@ struct func_0039E130_sVEntryV {
     void (*fn)(void*, func_0039E130_sVec3*);
 };
 
-extern "C" void func_0039E130(char* self, float dx, float dy)
+extern "C" void func_0039E130(cUISlider* self, float dx, float dy)
 {
-    char* a = *(char**)(self + 0x88);
-    if (a == 0 || *(char**)(self + 0x8C) == 0) {
+    char* a = (char*)self->mpObjBackground;
+    if (a == 0 || (char*)self->mpObjKnob == 0) {
         return;
     }
-    float x = dx + *(float*)(self + 0x44);
-    float y = dy + *(float*)(self + 0x48);
+    float x = dx + self->mPosition.x;
+    float y = dy + self->mPosition.y;
     func_0039E130_sVEntryF* va = *(func_0039E130_sVEntryF**)(a + 8);
     va[17].fn(a + va[17].delta, x, y);
-    char* o = *(char**)(self + 0x88);
+    char* o = (char*)self->mpObjBackground;
     func_0039E130_sVec3 pos = *(func_0039E130_sVec3*)(o + 0x44);
     func_0039E130_sVec3 s1;
     func_0039E130_sVEntryV* vo = *(func_0039E130_sVEntryV**)(o + 8);
     vo[20].fn(o + vo[20].delta, &s1);
-    char* b = *(char**)(self + 0x8C);
+    char* b = (char*)self->mpObjKnob;
     func_0039E130_sVec3 s2;
     func_0039E130_sVEntryV* vb = *(func_0039E130_sVEntryV**)(b + 8);
     vb[20].fn(b + vb[20].delta, &s2);
     float w = s1.x - s2.x;
-    char* b2 = *(char**)(self + 0x8C);
+    char* b2 = (char*)self->mpObjKnob;
     func_0039E130_sVec3 p = *(func_0039E130_sVec3*)(b2 + 0x44);
-    p.x = pos.x + w / ((float)*(int*)(self + 0x78) - 1.0f) * (float)*(int*)(self + 0x74);
+    p.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
     *(func_0039E130_sVec3*)(b2 + 0x44) = p;
-    char* b3 = *(char**)(self + 0x8C);
+    char* b3 = (char*)self->mpObjKnob;
     func_0039E130_sVEntryF* vb3 = *(func_0039E130_sVEntryF**)(b3 + 8);
     vb3[17].fn(b3 + vb3[17].delta, x, y);
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2lightman.h"
 #include "render/font.h"
 #include "render/ps2graphicsman.h"
 
@@ -143,11 +144,11 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
     return sV3_DC70(x, y, z);
 }
 
-extern "C" void func_0038DC70(cLightSrc_DC70* self, sLight_DC70* lights, int n, int base)
+extern "C" void func_0038DC70(cPS2LightMan* self, sLight_DC70* lights, int n, int base)
 {
     int i;
     for (i = 0; i < n; i++) {
-        void** obj = (void**)self->v02(base + i);
+        void** obj = (void**)((cLightSrc_DC70*)self)->v02(base + i);
         obj[0] = &lights[i];
         sCol_DC70 col;
         col.a = 1.0f;
@@ -191,9 +192,9 @@ public:
 // passes (void*, int, float); bind the 3-arg call by asm label.
 void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
 
-extern "C" void func_0038DEE8(cObj0038DEE8* obj, int a, int b, float f)
+extern "C" void func_0038DEE8(cPS2LightMan* obj, int a, int b, float f)
 {
-    func_0038DC50_3(obj->v02(a), b, f);
+    func_0038DC50_3(((cObj0038DEE8*)obj)->v02(a), b, f);
 }
 #endif
 
@@ -211,9 +212,9 @@ public:
 // passes (void*, int, int, float); bind the 4-arg call by asm label.
 void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv");
 
-extern "C" void func_0038DF38(cObj0038DF38* obj, int a, int b, int c, float f)
+extern "C" void func_0038DF38(cPS2LightMan* obj, int a, int b, int c, float f)
 {
-    func_0038DC58_4(obj->v02(a), b, c, f);
+    func_0038DC58_4(((cObj0038DF38*)obj)->v02(a), b, c, f);
 }
 #endif
 
@@ -231,9 +232,9 @@ public:
 // passes (void*, int, int, float, int); bind the 5-arg call by asm label.
 void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC60__FPv");
 
-extern "C" void func_0038DF98(cObj0038DF98* obj, int a, int b, int c, float f, int d)
+extern "C" void func_0038DF98(cPS2LightMan* obj, int a, int b, int c, float f, int d)
 {
-    func_0038DC60_5(obj->v02(a), b, c, f, d);
+    func_0038DC60_5(((cObj0038DF98*)obj)->v02(a), b, c, f, d);
 }
 #endif
 
@@ -251,9 +252,9 @@ public:
 // passes (void*, int, int, int, float, float, int, float); bind the call by asm label.
 void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("func_0038DC68__FPv");
 
-extern "C" void func_0038E008(cObj0038E008* obj, int a, int b, int c, int d, float x, float y, int e, float z)
+extern "C" void func_0038E008(cPS2LightMan* obj, int a, int b, int c, int d, float x, float y, int e, float z)
 {
-    func_0038DC68_8(obj->v02(a), b, c, d, x, y, e, z);
+    func_0038DC68_8(((cObj0038E008*)obj)->v02(a), b, c, d, x, y, e, z);
 }
 #endif
 

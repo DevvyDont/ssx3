@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -47,24 +48,23 @@ struct sUVTables_AF30 {
 
 extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
 
-extern "C" void func_0038AF30(void* self)
+extern "C" void func_0038AF30(cPSPBezierMan* self)
 {
-    char* s = (char*)self;
-    func_00372B78(s + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
-    *(void**)(s + 0x440) = operator_new_tag_AF30(0x38400, D_00492EB0, 0, 0);
-    *(void**)(s + 0x444) = operator_new_tag_AF30(0xDC00, D_00492EC0, 0, 0);
-    *(void**)(s + 0x448) = operator_new_tag_AF30(0x8C00, D_00492ED0, 0, 0);
-    *(void**)(s + 0x44C) = *(void**)(s + 0x440);
-    *(void**)(s + 0x450) = *(void**)(s + 0x444);
-    *(void**)(s + 0x454) = *(void**)(s + 0x448);
-    *(int*)(s + 0x344) = 1;
-    *(int*)(s + 0x348) = 1;
-    *(int*)(s + 0x34C) = 1;
-    *(int*)(s + 0x350) = 1;
-    *(int*)(s + 0x354) = 0;
-    *(float*)(s + 0x358) = 8.0f;
-    *(float*)(s + 0x33C) = 3000.0f;
-    *(float*)(s + 0x340) = 15000.0f;
+    func_00372B78(((char*)self) + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
+    self->mVifCache[0] = operator_new_tag_AF30(0x38400, D_00492EB0, 0, 0);
+    self->mVifCache[1] = operator_new_tag_AF30(0xDC00, D_00492EC0, 0, 0);
+    self->mVifCache[2] = operator_new_tag_AF30(0x8C00, D_00492ED0, 0, 0);
+    self->mVifCachePos[0] = self->mVifCache[0];
+    self->mVifCachePos[1] = self->mVifCache[1];
+    self->mVifCachePos[2] = self->mVifCache[2];
+    self->mWireModeEnabled = 1;
+    self->mBasePassEnabled = 1;
+    self->mLightMapsEnabled = 1;
+    self->mShadowsEnabled = 1;
+    self->mLmapStart = 0;
+    self->unk_0358 = 8.0f;
+    self->mNearLODcm = 3000.0f;
+    self->mFarLODcm = 15000.0f;
     func_0038D638((cBezierVirt*)self);
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 6; j++) {
@@ -91,17 +91,17 @@ INCLUDE_ASM("render/bezierman", func_0038B0F8);
 void func_0038D660(void*);
 void cMemMan_free(void*);
 
-extern "C" void func_0038B0F8(void* self)
+extern "C" void func_0038B0F8(cPSPBezierMan* self)
 {
     func_0038D660(self);
-    if (*(void**)((char*)self + 0x440) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x440));
+    if (self->mVifCache[0] != 0) {
+        cMemMan_free(self->mVifCache[0]);
     }
-    if (*(void**)((char*)self + 0x444) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x444));
+    if (self->mVifCache[1] != 0) {
+        cMemMan_free(self->mVifCache[1]);
     }
-    if (*(void**)((char*)self + 0x448) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x448));
+    if (self->mVifCache[2] != 0) {
+        cMemMan_free(self->mVifCache[2]);
     }
 }
 #endif
@@ -168,13 +168,13 @@ struct sBezObj_B190 {
     unsigned short tex8;    // 0x1AA
 };
 
-extern "C" void func_0038B190(sBezMan_B190* m, sBezObj_B190* o, unsigned char* t, int unused, int extra)
+extern "C" void func_0038B190(cPSPBezierMan* m, sBezObj_B190* o, unsigned char* t, int unused, int extra)
 {
     if (t[0] == t[2] && t[1] == t[3] && t[0] == t[1]) {
         switch (t[0]) {
         case 4:
-            if (m->n4 < 900) {
-                sBezPatch_B190* e = &m->list4[m->n4++];
+            if (m->mNum4x4Patches < 900) {
+                sBezPatch_B190* e = &((sBezPatch_B190*)&m->m4x4Patches[0])[m->mNum4x4Patches++];
                 e->extra = extra;
                 e->obj = o;
                 e->kind = 0;
@@ -182,8 +182,8 @@ extern "C" void func_0038B190(sBezMan_B190* m, sBezObj_B190* o, unsigned char* t
             }
             break;
         case 6:
-            if (m->n6 < 220) {
-                sBezPatch_B190* e = &m->list6[m->n6++];
+            if (m->mNum6x6Patches < 220) {
+                sBezPatch_B190* e = &((sBezPatch_B190*)&m->m6x6Patches[0])[m->mNum6x6Patches++];
                 e->extra = extra;
                 e->kind = 1;
                 e->obj = o;
@@ -191,8 +191,8 @@ extern "C" void func_0038B190(sBezMan_B190* m, sBezObj_B190* o, unsigned char* t
             }
             break;
         case 8:
-            if (m->n8 < 50) {
-                sBezPatch_B190* e = &m->list8[m->n8++];
+            if (m->mNum8x8Patches < 50) {
+                sBezPatch_B190* e = &((sBezPatch_B190*)&m->m8x8Patches[0])[m->mNum8x8Patches++];
                 e->extra = extra;
                 e->kind = 2;
                 e->obj = o;
@@ -202,8 +202,8 @@ extern "C" void func_0038B190(sBezMan_B190* m, sBezObj_B190* o, unsigned char* t
         }
         return;
     }
-    if (m->nMix < 75) {
-        sBezMixPatch_B190* e = &m->mix[m->nMix++];
+    if (m->mNumMixedPatches < 75) {
+        sBezMixPatch_B190* e = &((sBezMixPatch_B190*)&m->mMixedPatches[0])[m->mNumMixedPatches++];
         e->extra = extra;
         e->obj = o;
         int* pk = &e->kind;
@@ -227,10 +227,10 @@ struct sBezVEntry_B338 {
     void (*fn)(void*, void*, void*, void*, void*, int);
 };
 
-extern "C" void func_0038B338(void* self, void* a, void* b, void* c, void* d)
+extern "C" void func_0038B338(cPSPBezierMan* self, void* a, void* b, void* c, void* d)
 {
     if (D_004A44D4 == 0) {
-        sBezVEntry_B338* vt = *(sBezVEntry_B338**)((char*)self + 0x4);
+        sBezVEntry_B338* vt = (sBezVEntry_B338*)self->mVtbl;
         vt[22].fn((char*)self + vt[22].delta, a, b, c, d, 0);
     }
 }
@@ -816,9 +816,9 @@ static inline void Render_B370(sBezMan_B370* self)
     func_0038D968_B370(self, cursor);
 }
 
-extern "C" void func_0038B370(sBezMan_B370* self)
+extern "C" void func_0038B370(cPSPBezierMan* self)
 {
-    Render_B370(self);
+    Render_B370(((sBezMan_B370*)self));
 }
 #endif
 

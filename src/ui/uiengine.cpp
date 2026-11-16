@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uilistbox.h"
+#include "ui/uiicon.h"
+#include "ui/uigroup.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -708,7 +711,7 @@ int cList_traverseFlat_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("cL
  *
  * @param on  nonzero to focus (On Tour focus)
  */
-extern "C" void cUIGroup_setFocus(void* self, int on)
+extern "C" void cUIGroup_setFocus(cUIGroup* self, int on)
 {
     cUIGroup_setFocus_sFunctor f;
     f.vt = cListOperator_vtbl;
@@ -742,10 +745,10 @@ struct cUIGroup_getObjectByHashName_sVEntry {
  * @param id  the name's hash (On Tour hashname)
  * @return the widget, or 0
  */
-extern "C" void* cUIGroup_getObjectByHashName(void* self, int id)
+extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
 {
     if (cUIThing_getObjectByHashName(self, id) != 0) {
-        return self;
+        return ((void*)self);
     }
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
@@ -781,7 +784,7 @@ struct cUIGroup_updateLocale_sVEntry {
  *
  * Calls updateLocale (vtable slot 16) on each child in the group's list.
  */
-extern "C" void cUIGroup_updateLocale(void* self)
+extern "C" void cUIGroup_updateLocale(cUIGroup* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
@@ -814,9 +817,9 @@ extern "C" int cList_traverseFlat(void* list, cUIGroup_onInput_sFunctor* fn);
  * @param pInput  the input (const cUIInput*, passed as int)
  * @return 1 when a child used the input, otherwise 0
  */
-extern "C" int cUIGroup_onInput(void* self, int pInput)
+extern "C" int cUIGroup_onInput(cUIGroup* self, int pInput)
 {
-    if ((*(int*)((char*)self + 0x14) >> 5) & 1) {
+    if ((self->mAttr >> 5) & 1) {
         return 0;
     }
     cUIGroup_onInput_sFunctor f;
@@ -843,7 +846,7 @@ struct cUIGroup_render3D_sVEntry {
  *
  * @param pRenCon  the render context (On Tour cUIRenderContext*, passed as int)
  */
-extern "C" void cUIGroup_render3D(void* self, int pRenCon)
+extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
@@ -871,14 +874,14 @@ struct cUIGroup_render2D_sVEntry {
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIGroup_render2D(void* self, float x, float y)
+extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIGroup_render2D_sVEntry* vt = *(cUIGroup_render2D_sVEntry**)((char*)n + 8);
-                vt[0x11].fn((char*)n + vt[0x11].delta, *(float*)((char*)self + 0x44) + x, *(float*)((char*)self + 0x48) + y);
+                vt[0x11].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -908,7 +911,7 @@ struct cUIGroup_update_sVEntry {
  *
  * @param ev  frame number (On Tour: FrameNum), passed to every update
  */
-extern "C" void cUIGroup_update(void* self, unsigned short ev)
+extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
@@ -963,13 +966,13 @@ struct sUIData8998 {
  * @param data  the icon's record (On Tour tUIBaseObject* pUIBase)
  */
 // Copies the widget's clip/alignment bits, looks up its item and sets its size (stored in 1/100 units).
-extern "C" void cUIIcon_setUIData(sUIObj8998* self, sUIData8998* data)
+extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
 {
-    cUIThing_setUIData_8998(self, data);
-    self->clip = data->clip;
-    self->align = data->align;
-    self->item = func_00398380(*(char**)(*(char**)(self->scene + 0xD0) + 0x10) + 0x58, data->id);
-    self->size = sUISize8998(data->w * 0.01f, data->h * 0.01f);
+    cUIThing_setUIData_8998(((sUIObj8998*)self), data);
+    ((sUIObj8998*)self)->clip = data->clip;
+    ((sUIObj8998*)self)->align = data->align;
+    self->mpTextureElem = (const cTextureElement*)func_00398380(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x58, data->id);
+    (*(sUISize8998*)&self->mTileUV[0]) = sUISize8998(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
 
@@ -1263,12 +1266,12 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", func_00399730);
 #ifdef SKIP_ASM
-extern "C" void func_00399730(void* self, int id)
+extern "C" void func_00399730(cUIIcon* self, int id)
 {
-    void* a = *(void**)((char*)self + 0x5C);
+    void* a = self->mpScreen;
     void* b = *(void**)((char*)a + 0xD0);
     void* c = *(void**)((char*)b + 0x10);
-    *(s398380Item**)((char*)self + 0x7C) = func_00398380((char*)c + 0x58, id);
+    self->mpTextureElem = (const cTextureElement*)func_00398380((char*)c + 0x58, id);
 }
 #endif
 
@@ -1302,12 +1305,12 @@ struct func_00399768_sObj {
     char c319;
 };
 
-extern "C" func_00399768_sObj* func_00399768(func_00399768_sObj* self)
+extern "C" func_00399768_sObj* func_00399768(cUIListBox* self)
 {
-    func_0039FB30(self);
-    *(void***)((char*)self + 8) = D_00494798;
-    self->flags = (self->flags | 4) & 0xC4;
-    func_00399768_sEntry* p = self->entries;
+    func_0039FB30(((func_00399768_sObj*)self));
+    self->mVtbl = D_00494798;
+    *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
+    func_00399768_sEntry* p = ((func_00399768_sEntry*)&self->mpEntries[0]);
     for (int i = 31; i != -1; i--, p++) {
         p->a = 0;
         p->b = 0;
@@ -1315,11 +1318,11 @@ extern "C" func_00399768_sObj* func_00399768(func_00399768_sObj* self)
         p->d = 0;
         p->e = 0;
     }
-    self->c318 = 0;
-    self->c319 = 0;
-    func_00416210(self->entries, 0, 0x280);
-    self->quad = D_004C66C8;
-    return self;
+    *(char*)&self->mNumEntries = 0;
+    *(char*)&self->mCurrentEntry = 0;
+    func_00416210(((func_00399768_sEntry*)&self->mpEntries[0]), 0, 0x280);
+    (*(func_00399768_sQuad*)&self->mStaticColour) = D_004C66C8;
+    return ((func_00399768_sObj*)self);
 }
 #endif
 
@@ -1379,12 +1382,12 @@ struct func_00399920_sEntry {
     int c;
 };
 
-extern "C" int func_00399920(void* self)
+extern "C" int func_00399920(cUIListBox* self)
 {
     void* o = func_0039FF50(self);
     if (o != 0) {
         func_00399920_sEntry* t = *(func_00399920_sEntry**)((char*)o + 0x8);
-        return t[(*(unsigned char*)((char*)self + 0x74) & 3) + 1].a;
+        return t[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
     }
     return 0;
 }
@@ -1431,77 +1434,77 @@ static inline int isClear_9970(int flags)
 
 // List input: up/down move the current item (wrapping when flag 0x80 is set; flag 1 swaps the directions),
 // accept notifies; the listener gets the result.
-extern "C" int func_00399970(char* self, void* in)
+extern "C" int func_00399970(cUIListBox* self, void* in)
 {
-    if (*(unsigned char*)(self + 0x318) == 0)
+    if (self->mNumEntries == 0)
         return 0;
     int result = 0;
     char* listener = D_004A5A58;
-    char* owner = (char*)func_0039FF50(self);
+    char* owner = (char*)func_0039FF50(((char*)self));
     if (*(char**)(owner + 0x14) != 0) {
         listener = *(char**)(owner + 0x14);
     }
     int f;
-    if ((inputIs_9970(in, 19) && isClear_9970(*(int*)(self + 0x14)))
-        || (inputIs_9970(in, 18) && (*(int*)(self + 0x14) & 1))) {
-        int cur = *(unsigned char*)(self + 0x319);
+    if ((inputIs_9970(in, 19) && isClear_9970(self->mAttr))
+        || (inputIs_9970(in, 18) && (self->mAttr & 1))) {
+        int cur = self->mCurrentEntry;
         if (cur != 0) {
-            *(unsigned char*)(self + 0x319) = cur - 1;
-            focusNotify_9970(self, 9);
+            self->mCurrentEntry = cur - 1;
+            focusNotify_9970(((char*)self), 9);
         } else {
-            int f7 = *(int*)(self + 0x14) >> 7;
+            int f7 = self->mAttr >> 7;
             if (f7 & 1) {
-                *(unsigned char*)(self + 0x319) = *(unsigned char*)(self + 0x318) - 1;
-                focusNotify_9970(self, 9);
+                self->mCurrentEntry = self->mNumEntries - 1;
+                focusNotify_9970(((char*)self), 9);
             }
         }
-        if (isClear_9970(*(int*)(self + 0x14)))
-            f = focusMove_9970(self, 0);
+        if (isClear_9970(self->mAttr))
+            f = focusMove_9970(((char*)self), 0);
         else
-            f = focusMove_9970(self, 3);
+            f = focusMove_9970(((char*)self), 3);
         if (f & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
-            if (ev != 0xFFFF && *(void**)(self + 0x5C) != 0) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+            if (ev != 0xFFFF && self->mpScreen != 0) {
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
         if (f & 1) {
             result = 1;
         } else if (f & 0x10) {
-            result = func_003A0318(self, 0);
+            result = func_003A0318(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_9970* vt = *(sVEv_9970**)listener;
             vt[2].fn(listener + vt[2].delta, result);
         }
         return 1;
-    } else if ((inputIs_9970(in, 20) && isClear_9970(*(int*)(self + 0x14)))
-               || (inputIs_9970(in, 17) && (*(int*)(self + 0x14) & 1))) {
-        int next = *(unsigned char*)(self + 0x319) + 1;
-        if (next < *(unsigned char*)(self + 0x318)) {
-            *(unsigned char*)(self + 0x319) = next;
-            focusNotify_9970(self, 9);
+    } else if ((inputIs_9970(in, 20) && isClear_9970(self->mAttr))
+               || (inputIs_9970(in, 17) && (self->mAttr & 1))) {
+        int next = self->mCurrentEntry + 1;
+        if (next < self->mNumEntries) {
+            self->mCurrentEntry = next;
+            focusNotify_9970(((char*)self), 9);
         } else {
-            int f7 = *(int*)(self + 0x14) >> 7;
+            int f7 = self->mAttr >> 7;
             if (f7 & 1) {
-                *(unsigned char*)(self + 0x319) = 0;
-                focusNotify_9970(self, 9);
+                self->mCurrentEntry = 0;
+                focusNotify_9970(((char*)self), 9);
             }
         }
-        if (isClear_9970(*(int*)(self + 0x14)))
-            f = focusMove_9970(self, 1);
+        if (isClear_9970(self->mAttr))
+            f = focusMove_9970(((char*)self), 1);
         else
-            f = focusMove_9970(self, 2);
+            f = focusMove_9970(((char*)self), 2);
         if (f & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
-            if (ev != 0xFFFF && *(void**)(self + 0x5C) != 0) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+            if (ev != 0xFFFF && self->mpScreen != 0) {
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
         if (f & 1) {
             result = 1;
         } else if (f & 0x10) {
-            result = func_003A0318(self, 0);
+            result = func_003A0318(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_9970* vt = *(sVEv_9970**)listener;
@@ -1509,18 +1512,18 @@ extern "C" int func_00399970(char* self, void* in)
         }
         return 1;
     } else if (inputIs_9970(in, 6)) {
-        focusNotify_9970(self, 6);
-        f = focusMove_9970(self, 4);
+        focusNotify_9970(((char*)self), 6);
+        f = focusMove_9970(((char*)self), 4);
         if (f & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 3);
             if (ev != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x5C), ev, 1);
+                cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
         if (f & 1) {
-            result = func_003A0318(self, 1);
+            result = func_003A0318(((char*)self), 1);
         } else if (f & 0x10) {
-            result = func_003A0318(self, 0);
+            result = func_003A0318(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_9970* vt = *(sVEv_9970**)listener;
@@ -1547,9 +1550,9 @@ struct func_00399D80_sEntry {
     int pad[4];
 };
 
-extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str)
+extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
-    void* a = *(void**)((char*)self + 0x5C);
+    void* a = self->mpScreen;
     void* b = *(void**)((char*)a + 0xD0);
     void* c = *(void**)((char*)b + 0x10);
     if (*(void**)((char*)c + 0x10) != 0) {
@@ -1568,7 +1571,7 @@ extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", func_00399E28);
 #ifdef SKIP_ASM
-extern "C" void func_00399D80(void* self, unsigned char idx, unsigned short* str);
+extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned short* str);
 
 struct func_00399E28_sEntry {
     int id;
@@ -1601,7 +1604,7 @@ extern "C" void func_00399E28(func_00399E28_sObj* self)
                 func_00399E28_sVEntry* vt = *(func_00399E28_sVEntry**)(loc + 4);
                 unsigned short* s = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
                 if (s != 0) {
-                    func_00399D80(self, i, s);
+                    func_00399D80((cUIListBox*)self, i, s);
                 }
             }
         }
@@ -1699,58 +1702,58 @@ static inline void setLayer_9F00(sText_9F00* self)
     *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->flags14)->layer + 9) << 5) & 0x3E0);
 }
 
-extern "C" void func_00399F00(sText_9F00* self, float x, float y)
+extern "C" void func_00399F00(cUIListBox* self, float x, float y)
 {
     sFont_9F00* font = (sFont_9F00*)func_00399920(self);
     if (font == 0 || *((unsigned char*)self + 0x318) == 0) {
         return;
     }
-    sV2_9F00 s(self->sx, self->sy);
+    sV2_9F00 s(self->mScale.x, self->mScale.y);
     font->cur.x = font->scale.x * s.x;
     font->cur.y = font->scale.y * s.y;
-    if (((self->flags14 >> 5) & 1) && ((self->flags >> 5) & 1)) {
-        font->color = self->hiColor;
+    if (((self->mAttr >> 5) & 1) && ((*(int*)&self->mAttrListBox >> 5) & 1)) {
+        font->color = (*(sCol_9F00*)&self->mStaticColour);
     } else {
-        font->color = self->color;
+        font->color = (*(sCol_9F00*)&self->mColour);
     }
-    if ((self->flags >> 2) & 1) {
-        sCol_9F00 c = self->shadowColor;
-        c.r = self->color.r;
+    if ((*(int*)&self->mAttrListBox >> 2) & 1) {
+        sCol_9F00 c = (*(sCol_9F00*)&self->mShadowColour);
+        c.r = self->mColour.A;
         font->shadowColor = c;
         font->shadowOfs = sV2_9F00(2.0f, 2.0f);
     } else {
         font->shadowOfs = sV2_9F00(0.0f, 0.0f);
     }
     int str;
-    if (self->flags & 0x10) {
-        str = self->strs[0].str;
+    if (*(int*)&self->mAttrListBox & 0x10) {
+        str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[0].str;
     } else {
-        str = self->strs[*((unsigned char*)self + 0x319)].str;
+        str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[*((unsigned char*)self + 0x319)].str;
     }
-    setLayer_9F00(self);
+    setLayer_9F00(((sText_9F00*)self));
     int over = 0;
-    float* box = &self->w;
+    float* box = &self->mSize.x;
     {
         sRect_9F00 r;
         func_003921F0(font, str, &r, 0, s.x, s.y);
-        if (self->w < r.x1) {
+        if (self->mSize.x < r.x1) {
             over = 1;
         }
-        sV3_9F00 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
-        sV3_9F00 p(self->pos.x + x, self->pos.y + y, 0.0f);
-        func_0039FEB8(self, &p, &size);
+        sV3_9F00 size(r.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
+        sV3_9F00 p(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
+        func_0039FEB8(((sText_9F00*)self), &p, &size);
         func_00391E30(font, p.x, p.y, str);
     }
-    char* loc = *(char**)(*(char**)(*(char**)(self->owner + 0xD0) + 0x10) + 0x10);
+    char* loc = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
     if (loc == 0) {
         return;
     }
     if ((*(int*)loc >> 26) & 1) {
-        sV3_9F00 p = self->pos;
+        sV3_9F00 p = (*(sV3_9F00*)&self->mPosition);
         p.x += x;
         p.y += y;
-        func_0039FEB8(self, &p, box);
-        setLayer_9F00(self);
+        func_0039FEB8(((sText_9F00*)self), &p, box);
+        setLayer_9F00(((sText_9F00*)self));
         sVert_9F00 verts[5];
         unsigned int i;
         if (!over) {
@@ -1769,10 +1772,10 @@ extern "C" void func_00399F00(sText_9F00* self, float x, float y)
                 t.w = 1.0f;
                 verts[i].pos = t;
             }
-            verts[1].pos.x += self->w;
-            verts[2].pos.x += self->w;
-            verts[2].pos.y += self->h;
-            verts[3].pos.y += self->h;
+            verts[1].pos.x += self->mSize.x;
+            verts[2].pos.x += self->mSize.x;
+            verts[2].pos.y += self->mSize.y;
+            verts[3].pos.y += self->mSize.y;
             sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
             vt[73].fn(D_004A289C_9F00 + vt[73].delta, 5, verts, 0);
         } else {
@@ -1792,10 +1795,10 @@ extern "C" void func_00399F00(sText_9F00* self, float x, float y)
                 t.w = 1.0f;
                 verts[i].pos = t;
             }
-            verts[1].pos.x += self->w;
-            verts[2].pos.y += self->h;
-            verts[3].pos.x += self->w;
-            verts[3].pos.y += self->h;
+            verts[1].pos.x += self->mSize.x;
+            verts[2].pos.y += self->mSize.y;
+            verts[3].pos.x += self->mSize.x;
+            verts[3].pos.y += self->mSize.y;
             sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
             vt[71].fn(D_004A289C_9F00 + vt[71].delta, 4, verts, 0);
         }
