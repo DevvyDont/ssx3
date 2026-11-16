@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -99,7 +100,6 @@ extern sStateObj153200* D_004A121C;
 extern sStateObj153200* D_004A1238;
 extern sStateObj153200* D_004A1248;
 extern sStateObj153200* D_004A124C;
-extern sStateObj153200* cBERewardInterface_instance;
 
 extern "C" void func_00153200(void) {
     D_004A120C->f8 = 0;
@@ -110,7 +110,7 @@ extern "C" void func_00153200(void) {
     D_004A1238->f8 = 0;
     D_004A1214->f8 = 0;
     D_004A124C->f8 = 0;
-    cBERewardInterface_instance->f8 = 0;
+    cBERewardInterface_instance->bIsActive = 0;
     D_004A121C->f8 = 0;
 }
 #endif
@@ -125,7 +125,6 @@ extern sStateObj153200* D_004A121C;
 extern sStateObj153200* D_004A1238;
 extern sStateObj153200* D_004A1248;
 extern sStateObj153200* D_004A124C;
-extern sStateObj153200* cBERewardInterface_instance;
 
 extern "C" void func_00153258(void) {
     D_004A120C->f8 = 1;
@@ -134,7 +133,7 @@ extern "C" void func_00153258(void) {
     D_004A1238->f8 = 1;
     D_004A1214->f8 = 1;
     D_004A124C->f8 = 1;
-    cBERewardInterface_instance->f8 = 1;
+    cBERewardInterface_instance->bIsActive = 1;
     D_004A121C->f8 = 1;
 }
 #endif

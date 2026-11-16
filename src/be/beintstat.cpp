@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintreward.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -390,7 +391,6 @@ extern int* D_004A1214;
 extern int* D_004A1238;
 extern int* D_004A1248;
 extern int* D_004A124C;
-extern int* cBERewardInterface_instance;
 
 extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 {
@@ -419,7 +419,7 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     D_004A1214 = 0;
     operator_delete(D_004A124C);
     D_004A124C = 0;
-    operator_delete(cBERewardInterface_instance);
+    operator_delete((int*)cBERewardInterface_instance);
     cBERewardInterface_instance = 0;
     if (flags & 1)
         operator_delete((int*)self);

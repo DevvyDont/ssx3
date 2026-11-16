@@ -5756,6 +5756,11 @@ int cRider_isHuman(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_isComputer);
 #ifdef SKIP_ASM
+/**
+ * Whether this rider is driven by the computer rather than a player.
+ *
+ * @return 1 for an AI rider, 0 for a human one (the inverse of mIsHuman)
+ */
 extern "C" int cRider_isComputer(cRider* self)
 {
     return self->mIsHuman ^ 1;

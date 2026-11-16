@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -94,7 +95,6 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* cBERewardInterface_instance;
 
 struct sBEIface_001564B0
 {
@@ -131,7 +131,6 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* cBERewardInterface_instance;
 
 struct sBEIface_00156510
 {
@@ -242,7 +241,6 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* cBERewardInterface_instance;
 
 struct sBEIface_001566E8
 {
@@ -281,7 +279,6 @@ extern void* D_004A11C8;
 extern void* D_004A1210;
 extern void* D_004A1214;
 extern void* D_004A124C;
-extern void* cBERewardInterface_instance;
 
 struct sBEIface_00156750
 {

@@ -1,15 +1,10 @@
 #include "common.h"
+#include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0045A938[];
 extern void* D_0045AE88[16];
-extern void* cBERewardInterface_instance;
 
-struct cBERewardInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 //99.84%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getThis__Fv);
@@ -18,8 +13,8 @@ void* cBERewardInterface_getThis()
 {
     if (cBERewardInterface_instance == 0) {
         cBERewardInterface* mem = (cBERewardInterface*)cMemMan_alloc(0x18, D_0045A938, 0, 0);
-        mem->field_0x8 = 0;
-        mem->vtable = D_0045AE88;
+        mem->bIsActive = 0;
+        mem->mVtbl = D_0045AE88;
         cBERewardInterface_instance = mem;
     }
     return cBERewardInterface_instance;
@@ -682,9 +677,9 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEScoreInterface_getCurrentHighlightLevel(void* self, int i);
-extern "C" int cBERewardInterface_isPeakConquered(void* self, int a, int b, int i);
+extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int a, int b, int i);
 
-extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b)
+extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -704,9 +699,9 @@ extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b)
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isMountainCompleted);
 #ifdef SKIP_ASM
-extern "C" int cBERewardInterface_isPeakCompleted(void* self, int a, int b, int i);
+extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int a, int b, int i);
 
-extern "C" int cBERewardInterface_isMountainCompleted(void* self, int a, int b)
+extern "C" int cBERewardInterface_isMountainCompleted(cBERewardInterface* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -723,8 +718,8 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isPeakConquered);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char cBERewardInterface_getTrackMedal(void* self, int a, int b, int track, int kind);
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
-extern "C" int cBERewardInterface_getCollectiblesMedal(void* self, int a, int b, int kind);
-extern "C" int cBERewardInterface_getBigChallengesMedal(void* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind);
 
 struct sRewardReq_157920
 {
@@ -733,7 +728,7 @@ struct sRewardReq_157920
 };
 extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("D_0045AAD8");
 
-extern "C" int cBERewardInterface_isPeakConquered(void* self, int a, int b, int k)
+extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int a, int b, int k)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -772,9 +767,9 @@ extern "C" int cBERewardInterface_isPeakConquered(void* self, int a, int b, int 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isPeakCompleted);
 #ifdef SKIP_ASM
-extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
+extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
 
-extern "C" int cBERewardInterface_isPeakCompleted(void* self, int a, int b, int c)
+extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int a, int b, int c)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -833,9 +828,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isTrophyOwned);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e);
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
-extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int medal);
-extern "C" int cBERewardInterface_getCollectiblesMedal(void* self, int a, int b, int kind);
-extern "C" int cBERewardInterface_getBigChallengesMedal(void* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int a, int b, int medal);
+extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind);
 
 struct sRewardReq_157BF0
 {
@@ -844,7 +839,7 @@ struct sRewardReq_157BF0
 };
 extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("D_0045AAD8");
 
-extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int k, int i)
+extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int k, int i)
 {
     switch (i)
     {
@@ -1299,7 +1294,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumSongsInPlayList);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2)
+extern "C" int cBERewardInterface_getNumSongsInPlayList(cBERewardInterface* self, int a1, int a2)
 {
     char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
     return func_00157390(self, 0x40, (signed char*)(p + 0xF78));
@@ -1349,7 +1344,7 @@ extern int D_0045AFE8[];
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
 #ifdef SKIP_ASM
-extern "C" int cBERewardInterface_getCollectibleMedalTarget(void* self, int a1, int a2)
+extern "C" int cBERewardInterface_getCollectibleMedalTarget(cBERewardInterface* self, int a1, int a2)
 {
     return *(int*)((char*)D_0045AFE8 + ((a2 << 2) + (a1 << 4)));
 }
@@ -1360,7 +1355,7 @@ extern int D_0045B018[];
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
 #ifdef SKIP_ASM
-extern "C" int cBERewardInterface_getChallengesMedalTarget(void* self, int a1, int a2)
+extern "C" int cBERewardInterface_getChallengesMedalTarget(cBERewardInterface* self, int a1, int a2)
 {
     return *(int*)((char*)D_0045B018 + ((a2 << 2) + (a1 << 4)));
 }
@@ -1432,7 +1427,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, int a, int b, int c);
 
-extern "C" int cBERewardInterface_getCollectiblesMedal(void* self, int a, int b, int kind)
+extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind)
 {
     int v = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 0xA), a, b, kind);
     int* t = D_0045AFE8 + kind * 4;
@@ -1453,7 +1448,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* iface, int a, int b, int c);
 
-extern "C" int cBERewardInterface_getBigChallengesMedal(void* self, int a, int b, int kind)
+extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind)
 {
     int v = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 0xA), a, b, kind);
     int* t = D_0045B018 + kind * 4;
@@ -1474,7 +1469,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
 
-extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int medal)
+extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int a, int b, int medal)
 {
     unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 0xB), a, b);
     if (earned >= *(unsigned int*)((char*)(void*)D_0045B048 + medal * 4))
@@ -1509,7 +1504,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextEarningsLevel);
 #ifdef SKIP_ASM
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
 
-extern "C" void* cBERewardInterface_calculateNextEarningsLevel(void* self, int a, int b)
+extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -1524,10 +1519,10 @@ extern "C" void* cBERewardInterface_calculateNextEarningsLevel(void* self, int a
 INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextCollectiblesLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cBERewardInterface_getCollectiblesMedal(void* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind);
 extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 
-extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(void* self, int a, int b, int kind)
+extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(cBERewardInterface* self, int a, int b, int kind)
 {
     int medal = cBERewardInterface_getCollectiblesMedal(self, a, b, kind);
     int best = 0;
@@ -1547,10 +1542,10 @@ extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(void* self, int
 INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextBigChallengesLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cBERewardInterface_getBigChallengesMedal(void* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind);
 extern int D_0045B018_2d[][4] __asm__("D_0045B018");
 
-extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(void* self, int a, int b, int kind)
+extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInterface* self, int a, int b, int kind)
 {
     int medal = cBERewardInterface_getBigChallengesMedal(self, a, b, kind);
     int best = 0;
@@ -1576,7 +1571,7 @@ extern int D_00440F58[];
 extern void* D_004C3EF0[];
 extern "C" void cBEUserAwards_clear(void* self);
 
-extern "C" void cBERewardInterface_clearUserAwards(void* self)
+extern "C" void cBERewardInterface_clearUserAwards(cBERewardInterface* self)
 {
     cBEUserAwards_clear(D_004C3EF0);
     int charID = cBELibrary_getCharacterID(cBELibrary_getRiderIndex(0));
@@ -1663,7 +1658,7 @@ extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getAwardTrophyCategory);
 #ifdef SKIP_ASM
-extern "C" int cBERewardInterface_getAwardTrophyCategory(void* self, int a1, int a2, int kind, int tier)
+extern "C" int cBERewardInterface_getAwardTrophyCategory(cBERewardInterface* self, int a1, int a2, int kind, int tier)
 {
     int r = -1;
     switch (tier)
@@ -1709,9 +1704,9 @@ extern "C" int cBERewardInterface_getAwardTrophyCategory(void* self, int a1, int
 INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserTrophy);
 #ifdef SKIP_ASM
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
-extern "C" void cBERewardInterface_awardUser(void* self, int a1, int a2, int bit);
+extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 
-extern "C" void cBERewardInterface_awardUserTrophy(void* self, int a1, int a2, int kind, int tier)
+extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier)
 {
     int bit = cBERewardInterface_getAwardTrophyCategory(self, a1, a2, kind, tier);
     if (func_0015A2E0(self, a1, a2, bit) == 0)
@@ -1730,9 +1725,9 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e);
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
-extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
+extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
 extern "C" void func_00159818(void* self, int a, int b, int c);
-extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b);
+extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int a, int b);
 extern "C" unsigned int func_00151040(void* score, int medal, int event, int mode);
 extern "C" void func_001E1DD0(int group, int mode, int flag);
 extern "C" void func_001E1C10(int group);
@@ -1822,7 +1817,7 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
     }
     if ((unsigned int)medal < 2) {
         if (stats->count == 0)
-            cBERewardInterface_awardUser(self, profile, c, bit);
+            cBERewardInterface_awardUser((cBERewardInterface*)self, profile, c, bit);
     } else if ((unsigned int)(mode - 6) < 6 && D_005305F9[0] == 0) {
         if (medal == 3)
             func_001E1DD0(group, mode, 0);
@@ -1830,18 +1825,18 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
             func_001E1DD0(group, mode, 1);
     }
     if (cBERewardInterface_isBetterMedal(self, oldMedal, medal)) {
-        int had = cBERewardInterface_isTrophyOwned(self, profile, c, group, tier);
+        int had = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, c, group, tier);
         func_00159818(self, profile, c, money);
         func_00152528(pc, event, mode, medal);
-        if (cBERewardInterface_isTrophyOwned(self, profile, c, group, tier) && !had)
-            cBERewardInterface_awardUserTrophy(self, profile, c, group, tier);
+        if (cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, c, group, tier) && !had)
+            cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, profile, c, group, tier);
     } else {
         func_00152528(pc, event, mode, medal);
         money >>= 1;
         func_00159818(self, profile, c, money);
     }
-    if (cBERewardInterface_isMountainConquered(self, profile, c) && func_0015A2E0(self, profile, c, 0) == 0)
-        cBERewardInterface_awardUser(self, profile, c, 0);
+    if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, profile, c) && func_0015A2E0(self, profile, c, 0) == 0)
+        cBERewardInterface_awardUser((cBERewardInterface*)self, profile, c, 0);
     ((sRewardState_1591E8*)cBERewardInterface_instance)->medal = medal;
     ((sRewardState_1591E8*)cBERewardInterface_instance)->money = money;
     if (!cBERewardInterface_isBetterMedal(self, -1, medal))
@@ -1935,10 +1930,10 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
-extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
+extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
 extern "C" void func_00150A90(void* econ, int a, int b, int amount);
-extern "C" void* cBERewardInterface_calculateNextEarningsLevel(void* self, int a, int b);
-extern "C" void cBERewardInterface_awardUserTrophy(void* self, int a1, int a2, int kind, int tier);
+extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int a, int b);
+extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
 extern void* D_004A1260;
 extern void* D_004C3EF0[];
 
@@ -1951,13 +1946,13 @@ extern "C" void func_00159818(void* self, int a, int b, int amount)
         int before[3];
         int i;
         for (i = 0; i < 3; i++)
-            before[i] = cBERewardInterface_isTrophyOwned(self, a, b, i, 3);
+            before[i] = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, a, b, i, 3);
         func_00150A90(econ, a, b, amount);
-        D_004A1260 = cBERewardInterface_calculateNextEarningsLevel(self, a, b);
+        D_004A1260 = cBERewardInterface_calculateNextEarningsLevel((cBERewardInterface*)self, a, b);
         for (i = 0; i < 3; i++)
         {
-            if (before[i] == 0 && cBERewardInterface_isTrophyOwned(self, a, b, i, 3))
-                cBERewardInterface_awardUserTrophy(self, a, b, i, 3);
+            if (before[i] == 0 && cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, a, b, i, 3))
+                cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, a, b, i, 3);
         }
     }
     else
@@ -1976,16 +1971,16 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b);
-extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
-extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(void* self, int a, int b, int kind);
-extern "C" void cBERewardInterface_awardUserTrophy(void* self, int a1, int a2, int kind, int tier);
+extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int a, int b);
+extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
+extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(cBERewardInterface* self, int a, int b, int kind);
+extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
-extern "C" void cBERewardInterface_awardUser(void* self, int a1, int a2, int bit);
+extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 extern int D_00440F48[];
 extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 
-extern "C" void cBERewardInterface_awardUserCollectible(void* self, int rider, int k)
+extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self, int rider, int k)
 {
     int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), rider, k);
     int* p = &D_00440F48[k];
@@ -2016,12 +2011,12 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int owner);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b);
-extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
-extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(void* self, int a, int b, int kind);
-extern "C" void cBERewardInterface_awardUserTrophy(void* self, int a1, int a2, int kind, int tier);
+extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int a, int b);
+extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
+extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInterface* self, int a, int b, int kind);
+extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
-extern "C" void cBERewardInterface_awardUser(void* self, int a1, int a2, int bit);
+extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 extern int D_00440F58[];
 extern int D_0045B018_2d[][4] __asm__("D_0045B018");
 
@@ -2035,14 +2030,14 @@ extern "C" void func_00159B08(void* self, int rider, int k)
         return;
     int prof = cBELibrary_getProfileIndex(rider);
     int ch = cBELibrary_getCharacterID(rider);
-    int was = cBERewardInterface_isTrophyOwned(self, prof, ch, k, 2);
-    *p = cBERewardInterface_calculateNextBigChallengesLevel(self, prof, ch, k);
+    int was = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, prof, ch, k, 2);
+    *p = cBERewardInterface_calculateNextBigChallengesLevel((cBERewardInterface*)self, prof, ch, k);
     if (was && cur == D_0045B018_2d[k][3])
-        cBERewardInterface_awardUserTrophy(self, prof, ch, k, 2);
-    if (cBERewardInterface_isMountainConquered(self, prof, ch))
+        cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, prof, ch, k, 2);
+    if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, prof, ch))
     {
         if (func_0015A2E0(self, prof, ch, 0) == 0)
-            cBERewardInterface_awardUser(self, prof, ch, 0);
+            cBERewardInterface_awardUser((cBERewardInterface*)self, prof, ch, 0);
     }
 }
 #endif
@@ -2056,7 +2051,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" void func_00159C68(void* self, int rider, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    cBERewardInterface_awardUser(self, profile, cBELibrary_getCharacterID(rider), bit);
+    cBERewardInterface_awardUser((cBERewardInterface*)self, profile, cBELibrary_getCharacterID(rider), bit);
 }
 #endif
 
@@ -2080,7 +2075,7 @@ struct sSlots2_00159CD0 {
 extern sSlots4_00159CD0 D_0045AA28;
 extern sSlots2_00159CD0 D_004A1268[];
 
-extern "C" void cBERewardInterface_awardUser(void* self, int profile, int c, int bit)
+extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int c, int bit)
 {
     char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
     sReward_0015A628* q = (sReward_0015A628*)D_004C3EF0;
