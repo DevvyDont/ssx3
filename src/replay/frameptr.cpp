@@ -12,7 +12,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_00481730[];
 
-// same body as func_0026E950 (setBlock), inlined here
+// same body as cReplayFramePtr_setBlock (setBlock), inlined here
 static inline void cReplayFramePtr_setBlockInl(void* self, char* buf, int size)
 {
     *(char**)((char*)self + 0x4) = buf;
@@ -36,9 +36,9 @@ extern "C" void cReplayFramePtr_initBlock(cReplayFramePtr* self, unsigned int si
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E950);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_setBlock);
 #ifdef SKIP_ASM
-extern "C" void func_0026E950(cReplayFramePtr* self, int a1, int a2)
+extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, int a1, int a2)
 {
     self->Block = (char*)a1;
     self->WriteData = (char*)(a1 + a2);
@@ -145,11 +145,11 @@ extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EAB8);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_loadBlock);
 #ifdef SKIP_ASM
 extern "C" int func_002C85A0(void* src, int a, int dst);
 
-extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
+extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, void* src)
 {
     struct {
         int tag;

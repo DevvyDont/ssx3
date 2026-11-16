@@ -312,7 +312,7 @@ extern "C" void cMultiParticle_writeToReplayFrame(sMultiPart_58380* self, void* 
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358468);
 #ifdef SKIP_ASM
-// Same stream-like class as func_003584B8_cObj; v01 sits at vtable offset 8, v02 at 0x10.
+// Same stream-like class as cPhysicsModifier_writeToReplayFrame_cObj; v01 sits at vtable offset 8, v02 at 0x10.
 class func_00358468_cObj {
 public:
     virtual void v01(void* buf, int size);
@@ -330,15 +330,15 @@ extern "C" void* func_00358468(cPhysicsModifier* self, func_00358468_cObj* obj)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_003584B8);
+INCLUDE_ASM("object/multiparticle", cPhysicsModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_003584B8_cObj {
+class cPhysicsModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_003584B8(cPhysicsModifier* self, func_003584B8_cObj* obj)
+extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cPhysicsModifier_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 4);
 }

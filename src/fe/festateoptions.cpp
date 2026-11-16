@@ -83,7 +83,7 @@ struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, int a4);
+extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, int a4);
 extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
 extern "C" void func_001CCF00(void* self, char* s);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
@@ -155,7 +155,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
     case 5:
         if (Is_00188980(*(int*)(widget + 0x38), D_004A1520)) {
             void* p = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
-            void* pop = func_001CB030(p, self->engine, self, 0, self->port);
+            void* pop = cKeyboardPopup_cKeyboardPopup(p, self->engine, self, 0, self->port);
             self->popup = pop;
             cKeyboardPopup_setInputText(pop, D_004A1408);
             func_001CCF00(self->popup, D_004A1408);

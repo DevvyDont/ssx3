@@ -126,7 +126,7 @@ extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQue
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C06C0);
+INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery__cWorldPainterQuery);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 extern char cWorldPainterQuery_vtbl[];
@@ -141,7 +141,7 @@ struct sWPQuery_06C0 {
 
 extern sWPQuery_06C0* D_004A3880;
 
-extern "C" void func_002C06C0(cWorldPainterQuery* self, int flags)
+extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self, int flags)
 {
     self->mVtbl = (void**)cWorldPainterQuery_vtbl;
     operator_delete((int*)self->m_data);

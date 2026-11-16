@@ -2541,7 +2541,7 @@ extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cSmStream_BA8
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035BD70);
+INCLUDE_ASM("object/splinemodifier", cRailModifier__cRailModifier);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void* cObjectInterface_getNash();
@@ -2660,7 +2660,7 @@ struct sSmRef_BD70 {
     }
 };
 
-extern "C" void func_0035BD70(cRailModifier* self, int flags)
+extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
 {
     self->mVtbl = (void**)cRailModifier_vtbl;
     remove_BD70((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BD70*)(((char*)self) + 0x10));

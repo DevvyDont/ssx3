@@ -148,9 +148,9 @@ extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
 INCLUDE_ASM("object/bucketman", cBucketMan_mergeBucket);
 #ifdef SKIP_ASM
 void* cBucketMan_addfirst(cBucketMan* self, int index);
-extern "C" void* func_00354ED0(cBucketMan* self, int index);
-extern "C" void* func_00354F20(cBucketMan* self, void* node, int index);
-extern "C" void* func_00354F70(cBucketMan* self, void* node, int index);
+extern "C" void* cBucketMan_last(cBucketMan* self, int index);
+extern "C" void* cBucketMan_prev(cBucketMan* self, void* node, int index);
+extern "C" void* cBucketMan_addnext(cBucketMan* self, void* node, int index);
 
 struct sSortVE_4C98 {
     short delta;
@@ -200,11 +200,11 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
 {
     sSortNode_4C98* n = (sSortNode_4C98*)cBucketMan_addfirst(self, index);
     while (n) {
-        sSortNode_4C98* nextN = (sSortNode_4C98*)func_00354F70(self, n, index);
+        sSortNode_4C98* nextN = (sSortNode_4C98*)cBucketMan_addnext(self, n, index);
         n->next->prev = n->prev;
         n->prev->next = n->next;
         sSortNode_4C98* m;
-        for (m = (sSortNode_4C98*)func_00354ED0(self, index); m; m = (sSortNode_4C98*)func_00354F20(self, m, index)) {
+        for (m = (sSortNode_4C98*)cBucketMan_last(self, index); m; m = (sSortNode_4C98*)cBucketMan_prev(self, m, index)) {
             if (n->vt[6].fn((char*)n + n->vt[6].delta, m)) {
                 if (n->vt[7].fn((char*)n + n->vt[7].delta, m)) {
                     n->prev = m->prev;
@@ -296,10 +296,10 @@ void* cBucketMan_first(cBucketMan* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354ED0);
+INCLUDE_ASM("object/bucketman", cBucketMan_last);
 #ifdef SKIP_ASM
 // PORT: holds a pointer in an int (same shape as cBucketMan_first); not 64-bit safe.
-extern "C" void* func_00354ED0(cBucketMan* self, int index)
+extern "C" void* cBucketMan_last(cBucketMan* self, int index)
 {
     index *= 0x44;
     index += (int)self->mBuckets;
@@ -329,9 +329,9 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354F20);
+INCLUDE_ASM("object/bucketman", cBucketMan_prev);
 #ifdef SKIP_ASM
-extern "C" void* func_00354F20(cBucketMan* self, void* node, int index)
+extern "C" void* cBucketMan_prev(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x8);
     return (next == (void*)(self->mBuckets + index * 0x44 + 0x4)) ? 0 : next;
@@ -360,9 +360,9 @@ void* cBucketMan_addfirst(cBucketMan* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354F70);
+INCLUDE_ASM("object/bucketman", cBucketMan_addnext);
 #ifdef SKIP_ASM
-extern "C" void* func_00354F70(cBucketMan* self, void* node, int index)
+extern "C" void* cBucketMan_addnext(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x4);
     return (next == (void*)(self->mBuckets + index * 0x44 + 0x34)) ? 0 : next;
@@ -370,7 +370,7 @@ extern "C" void* func_00354F70(cBucketMan* self, void* node, int index)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_00354F98);
+INCLUDE_ASM("object/bucketman", cBucketMan_updateBucket);
 #ifdef SKIP_ASM
 struct sBucketVEntry4F98 {
     short delta;
@@ -378,7 +378,7 @@ struct sBucketVEntry4F98 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00354F98(cBucketMan* self, int index)
+extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
@@ -392,7 +392,7 @@ extern "C" void func_00354F98(cBucketMan* self, int index)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_00355028);
+INCLUDE_ASM("object/bucketman", cBucketMan_applyBucket);
 #ifdef SKIP_ASM
 struct sBucketVEntry5028 {
     short delta;
@@ -400,7 +400,7 @@ struct sBucketVEntry5028 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00355028(cBucketMan* self, int index)
+extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);
     while (node != 0) {

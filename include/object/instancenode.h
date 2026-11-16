@@ -28,7 +28,7 @@ struct cInstanceNode {
     cObjNode* Next;              // 0x004 [O] cObjNode::Next; [P] cObjNode() zeroes it; [U] forward link:
                                  //       cBucketMan_first/cBucketMan_next walk +0x4 from the head sentinel
     cObjNode* Prev;              // 0x008 [O] cObjNode::Prev; [P] cObjNode() zeroes it; [U] back link (cBucketMan_add,
-                                 //       func_00354F20 walk +0x8 towards the head)
+                                 //       cBucketMan_prev walk +0x8 towards the head)
     void** mVtbl;                // 0x00C [R] each ctor's vtable (cInstanceNode_vtbl in func_0034FB00/cInstanceNode_cInstanceNode)
     // --- cTypeObjNode (cTypeObjNodeState) ---
     short ObjNodeType;           // 0x010 [P] getType/isType (lh 0x10); [O] cTypeObjNodeState::ObjNodeType; [R] func_00354720

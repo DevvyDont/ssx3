@@ -4,7 +4,7 @@
 // cPhysicsModifier: the base of the physics modifiers a cMoveNode can own (tModifierBlock::Physics; in SSX 3 only
 // cBoostModifier). Size 0x8: On Tour 0x8; the vptr follows the class's only data member (g++ 2.95 puts it after the data of
 // the class that first declares virtuals): retail ctor func_00360C08 stores Active at 0x0 and cPhysicsModifier_vtbl at 0x4.
-// Methods: ctor func_00360C08 (railmodifier unit), replay ctor func_00358468 and writeToReplayFrame func_003584B8
+// Methods: ctor func_00360C08 (railmodifier unit), replay ctor func_00358468 and writeToReplayFrame cPhysicsModifier_writeToReplayFrame
 // (src/object/multiparticle.cpp), destructor cPhysicsModifier__cPhysicsModifier, update, signal, isActive,
 // getPhysicsType (one-line defaults in src/object/railmodifier.cpp); vtable 0x004913B8 (6 slots). EA's source unknown.
 

@@ -6245,7 +6245,7 @@ typedef int (*Test_00342880)(void*, int);
  *
  * The flag starts as type == 0; the timer (+0x2C) counts down and keeps it set while running. For type 1, or
  * once the timer is out, each being whose slot 3 test accepts the instance at +0x40 sets the flag and is
- * slowed (slot 8, func_003429E0) when the factor (+0x24) is negative, else pushed (slot 7, func_00342A88).
+ * slowed (slot 8, cBoostModifier_applyDrag) when the factor (+0x24) is negative, else pushed (slot 7, cBoostModifier_applyBoost).
  * boostStart (slot 9) and boostEnd (slot 10) bracket the loop.
  */
 extern "C" void cBoostModifier_update(cBoostModifier* self)
@@ -6286,7 +6286,7 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_003429E0);
+INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_applyDrag);
 #ifdef SKIP_ASM
 struct sVec4_3429E0 {
     float x, y, z, w;
@@ -6319,7 +6319,7 @@ public:
 
 extern "C" float func_002D1C70();
 
-extern "C" void func_003429E0(cBoostModifier* self, cMover_3429E0* obj)
+extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cMover_3429E0* obj)
 {
     sVec4_3429E0 u = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), func_002D1C70());
     obj->setVelocity(&u);
@@ -6327,7 +6327,7 @@ extern "C" void func_003429E0(cBoostModifier* self, cMover_3429E0* obj)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00342A88);
+INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_applyBoost);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -6400,7 +6400,7 @@ struct sSelf_342A88 {
     sPlane_342A88 plane;
 };
 
-extern "C" void func_00342A88(cBoostModifier* self, cWsMover* obj)
+extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
 {
     float d = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
     if (d > 0.0f) {
@@ -6430,26 +6430,26 @@ extern "C" void cBoostModifier_signal(cBoostModifier* self, int signal)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00342BA0);
+INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_003584B8(void* self, void* stream);
-struct sVEntry_func_00342BA0 {
+extern "C" void cPhysicsModifier_writeToReplayFrame(void* self, void* stream);
+struct sVEntry_cBoostModifier_writeToReplayFrame {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
-struct sVEntry1_func_00342BA0 {
+struct sVEntry1_cBoostModifier_writeToReplayFrame {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00342BA0(cBoostModifier* self, void* stream)
+extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, void* stream)
 {
-    func_003584B8(self, stream);
-    sVEntry_func_00342BA0* vt = *(sVEntry_func_00342BA0**)stream;
+    cPhysicsModifier_writeToReplayFrame(self, stream);
+    sVEntry_cBoostModifier_writeToReplayFrame* vt = *(sVEntry_cBoostModifier_writeToReplayFrame**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
-    sVEntry1_func_00342BA0* vt1 = *(sVEntry1_func_00342BA0**)stream;
+    sVEntry1_cBoostModifier_writeToReplayFrame* vt1 = *(sVEntry1_cBoostModifier_writeToReplayFrame**)stream;
     vt1[5].fn((char*)stream + vt1[5].delta, (int)self->Instance);
 }
 #endif
@@ -6458,7 +6458,7 @@ extern "C" void func_00342BA0(cBoostModifier* self, void* stream)
 INCLUDE_ASM("intersect/worldsphtree", func_00342C08);
 #ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
-extern "C" void func_00355F10(void* self, void* a1);
+extern "C" void cMoveNode_transferFromOld(void* self, void* a1);
 extern void* cDebounceNode_vtbl[];
 
 struct sNode_342C08 {
@@ -6489,7 +6489,7 @@ extern "C" void* func_00342C08(sSelf_342C08* self, void* a1, void* a2, sDef_342C
     self->vt = cDebounceNode_vtbl;
     self->t2C = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
     self->t30 = def->f08;
-    func_00355F10(self, a4);
+    cMoveNode_transferFromOld(self, a4);
     if (def->mode == 0) {
         self->node->flags &= 0xFFFFFFF0;
     } else if (def->mode == 1) {

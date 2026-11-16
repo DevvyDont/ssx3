@@ -2549,7 +2549,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBD0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E318_DBD0(void *, int, int) __asm__("func_0039E318");
-extern "C" void func_001C55F8_DBD0(void *) __asm__("func_001C55F8");
+extern "C" void cPopupInfo_cPopupInfo_DBD0(void *) __asm__("cPopupInfo_cPopupInfo");
 extern int cScreenPopup_vtbl[];
 extern int D_004A3E90;
 
@@ -2563,7 +2563,7 @@ struct S_DBD0 {
 extern "C" S_DBD0 *func_001DDBD0(S_DBD0 *self) {
     func_0039E318_DBD0(self, 0, 0);
     self->vt = cScreenPopup_vtbl;
-    func_001C55F8_DBD0((char *)self + 0xBC);
+    cPopupInfo_cPopupInfo_DBD0((char *)self + 0xBC);
     self->v2B0 = D_004A3E90;
     self->v2B4 = D_004A3E90;
     return self;

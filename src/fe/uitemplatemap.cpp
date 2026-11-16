@@ -10,7 +10,7 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVStateManager_addPDATemplate();
 extern "C" void cUITemplate_MAP_setShowInfo(void* self, int show);
-extern "C" int func_001A3BF0(void* mgr);
+extern "C" int cFEAsyncManager_GetFreeAsyncFile(void* mgr);
 extern "C" void cUITemplate_MAP_setupPeakUnlock(void* self);
 struct cUITemplate_MAP;
 void cUITemplate_MAP_setupEventUnlock(cUITemplate_MAP* self);
@@ -104,7 +104,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
     cUITemplate_MAP_setShowInfo(self, 0);
     self->popup = 0;
     self->mode = -1;
-    self->file = func_001A3BF0(SSXApp->mFEAsyncManager);
+    self->file = cFEAsyncManager_GetFreeAsyncFile(SSXApp->mFEAsyncManager);
     self->pic = 0;
     cUIObj_200700* o = (cUIObj_200700*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A25A8));
     self->map = o;

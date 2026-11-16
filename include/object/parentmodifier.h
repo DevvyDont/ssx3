@@ -6,9 +6,9 @@
 // func_00361940), identified by the "ParentModifier" tag and On Tour's layout. EA's source:
 // d:/ssx/code/source/object/parentmodifier.cpp (preview assert).
 // Size 0xB0: retail cMemMan_alloc(0xB0, "ParentModifier") in cMoveNode's addParent and the replay loader (type 3); On
-// Tour 0xA0 (ParentInst at 0x94 there; retail puts it at 0xA0: func_00357038 sw 0xA0, the replay ctor func_00357090
+// Tour 0xA0 (ParentInst at 0x94 there; retail puts it at 0xA0: func_00357038 sw 0xA0, the replay ctor cParentModifier_cParentModifier
 // reads 4 bytes into +0x90 and the pointer into +0xA0).
-// Constructors func_00357038 (parent inst, mesh, offset: calls the cPositionModifier ctor func_00356EB8) and func_00357090
+// Constructors func_00357038 (parent inst, mesh, offset: calls the cPositionModifier ctor func_00356EB8) and cParentModifier_cParentModifier
 // (replay; calls func_00356F68); destructor func_00361988.
 // A FLAT layout: cPositionModifier (0x00-0x90, object/positionmodifier.h) + cParentModifierState (Mesh) + ParentInst.
 

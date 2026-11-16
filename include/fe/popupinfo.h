@@ -7,9 +7,9 @@
 // cFEStateNet's createPopup (func_001A9C50) and show the popup with func_001A9BC0.
 //
 // Size 0xCC: the members end at 0xC8 and the vptr follows (retail _vt$10cPopupInfo D_0046CCA8, 1 slot: the destructor
-// func_001C5750), as fe/screenpopup.h records; cScreenPopup's next member starts at 0x188 = 0xBC + 0xCC.
+// cPopupInfo__cPopupInfo), as fe/screenpopup.h records; cScreenPopup's next member starts at 0x188 = 0xBC + 0xCC.
 // Methods (retail fe/feasyncfile 0x1C55F8-0x1C58D0; EA's source: all_in_one_fe.cpp in On Tour):
-//   func_001C55F8 cPopupInfo() (stores the vptr, calls clear), func_001C5630 clear(), func_001C5750 ~cPopupInfo(),
+//   cPopupInfo_cPopupInfo cPopupInfo() (stores the vptr, calls clear), cPopupInfo_clear clear(), cPopupInfo__cPopupInfo ~cPopupInfo(),
 //   func_001C5780/func_001C57A0/func_001C57C0 setPopupOptionNames(int, const char* / const unsigned short* /
 //   unsigned int) (eType 2/1/3), func_001C57E0 setPopupOptionNames(int, const tPopupElement*),
 //   func_001C5800 getPopupOptionNames(int), func_001C5810/func_001C5838/func_001C5878 setPopupConfirmation(int,
@@ -23,7 +23,7 @@
 //   [P] the July 2003 preview's inline accessors (setPopupMessage..setPopupPostPending sw 4..0x50, getLayerOffset lw
 //       0x90, getMiscData lw 0x94, getPassUpdate lw 0x98, getOffset/setOffset 0x9C, getReceivePrevCommand lw 0xA8,
 //       getDefaultOption lw 0xAC, getPopupType lw 0x0); tools/layout_xlate.py measures no shift up to 0xA4;
-//   [R] retail clear (func_001C5630): memsets every tPopupElement / tConfirmElement, stores 0 to 0x0, 0x90, 0x94, 0x98,
+//   [R] retail clear (cPopupInfo_clear): memsets every tPopupElement / tConfirmElement, stores 0 to 0x0, 0x90, 0x94, 0x98,
 //       0xB0, 0xB4, 0xB8, 0xC0, 1 to 0xA8 and 0xBC, -1 to 0xAC and t3vect_Zero to 0x9C (not 0xC4); the constructor
 //       and destructor store the vptr at 0xC8;
 //   [U] how retail code uses the field: cScreenPopup's initScreenPopup/FillOptions copy them (fe/screenpopup.h's
@@ -93,7 +93,7 @@ struct cPopupInfo {
     int meBackgroundType;           // 0x0C0 [O] ePopupBackground (Online 0, Blue 1, Black 2); [R] clear 0;
                                     //       [U] cScreenPopup::meBackgroundType copies it
     int miMaxChars;                 // 0x0C4 [O]; [U] cScreenPopup::miMaxChars copies it (not touched by clear)
-    void** mVtbl;                   // 0x0C8 [R] _vt$10cPopupInfo D_0046CCA8, stored by func_001C55F8 and func_001C5750
+    void** mVtbl;                   // 0x0C8 [R] _vt$10cPopupInfo D_0046CCA8, stored by cPopupInfo_cPopupInfo and cPopupInfo__cPopupInfo
 };
 
 CHECK_OFFSET(cPopupInfo, meType, 0x000);

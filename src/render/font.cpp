@@ -272,7 +272,7 @@ struct sMat00391C48 {
 
 extern sMat00391C48 D_00500CA0;
 extern "C" void func_004186C8(sMat00391C48* m);
-extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m);
+extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m);
 
 /**
  * Formats text into a shared static buffer (D_00500CA0) and draws it at a position.
@@ -286,12 +286,12 @@ extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m);
 extern "C" void cFont_vtextf(cFont* self, float x, float y)
 {
     func_004186C8(&D_00500CA0);
-    func_00391CB0(self, x, y, &D_00500CA0);
+    cFont_text(self, x, y, &D_00500CA0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00391CB0);
+INCLUDE_ASM("render/font", cFont_text);
 #ifdef SKIP_ASM
 
 struct sFontVEntry1CB0 {
@@ -318,7 +318,7 @@ static inline int fontGetTex(void* s)
     return *(int*)((char*)s + 0x60);
 }
 
-extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m)
+extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m)
 {
     cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
     (g->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex(self);
@@ -800,7 +800,7 @@ extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n
 extern "C" void func_00392908(cFont* self, float x, float y, const char* str)
 {
     float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
+    cFont_text(self, x - w * 0.5f, y, (sMat00391C48*)str);
 }
 #endif
 
@@ -851,7 +851,7 @@ extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n
 extern "C" void func_00392A60(cFont* self, const char* str, float x, float y)
 {
     float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    func_00391CB0(self, x - w, y, (sMat00391C48*)str);
+    cFont_text(self, x - w, y, (sMat00391C48*)str);
 }
 #endif
 

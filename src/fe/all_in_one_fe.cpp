@@ -1590,7 +1590,7 @@ extern "C" void func_001E9220(void*, void*, int);
 void func_001E91A8(void*, void*);
 extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
 extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
-extern "C" void func_00391CB0(void*, float, float, char*);
+extern "C" void cFont_text(void*, float, float, char*);
 
 // Inline copy of func_0021E7E0's body (the original helper was inlined here): colour/position/size by pointer, copied locally.
 static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
@@ -1663,7 +1663,7 @@ extern "C" void func_0021ED48(char* self, int elems, char* rider, int mode, int 
     char* t = *(char**)(self + 0x42C);
     *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale[0];
     *(float*)(t + 0x3C) = *(float*)(t + 0x34) * scale[1];
-    func_00391CB0(*(char**)(self + 0x42C), p.x, p.y, str.c);
+    cFont_text(*(char**)(self + 0x42C), p.x, p.y, str.c);
     char* t2 = *(char**)(self + 0x42C);
     *(float*)(t2 + 0x38) = *(float*)(t2 + 0x30) * one.x;
     *(float*)(t2 + 0x3C) = *(float*)(t2 + 0x34) * one.y;
@@ -1869,7 +1869,7 @@ extern "C" int sprintf(char*, const char*, ...);
 extern "C" int func_0022D390(void*, int);
 extern "C" int func_00153520(void*, int, int);
 extern "C" int func_00153350(void*, int);
-extern "C" void func_00391CB0(void*, float, float, char*);
+extern "C" void cFont_text(void*, float, float, char*);
 
 extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t) {
     V2_F9B0 scale;
@@ -1919,7 +1919,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
         *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
         Obj_F9B0* o = (Obj_F9B0*)(rider + 0x6C0);
         sprintf(buf, D_004A2300, func_00153520(iface, o->v07(), id), func_00153350(iface, id));
-        func_00391CB0(*(char**)(self + 0x42C), p.x, p.y, buf);
+        cFont_text(*(char**)(self + 0x42C), p.x, p.y, buf);
         tx = *(char**)(self + 0x42C);
         *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;
         *(float*)(tx + 0x3C) = *(float*)(tx + 0x34) * scale.y;
@@ -2079,7 +2079,7 @@ extern char D_004A2308[];
 extern char D_004A2310[];
 extern char D_004A2138[];
 extern "C" void cFont_textExtent(void* self, const char* str, float* rect, int n, float sx, float sy);
-extern "C" void func_00391CB0(void*, float, float, char*);
+extern "C" void cFont_text(void*, float, float, char*);
 extern "C" void func_00392908(void*, float, float, char*);
 extern "C" unsigned int strlen(const char*);
 void func_001F10F8_00C0(void*, t2Vector*, void*, t2Vector*, const sV2_00C0&, int, int, int) __asm__("func_001F10F8");
@@ -2170,7 +2170,7 @@ extern "C" void func_002200C0(char* self, char* obj, char* rider, int x)
     SetScale_00C0(font_00C0(self), sc);
     TextSize_00C0(font_00C0(self), units, rect, size);
     func_001F10F8_00C0(self, &p, &a, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
-    func_00391CB0(font_00C0(self), p.x, p.y, units);
+    cFont_text(font_00C0(self), p.x, p.y, units);
     char buf[8];
     sprintf(buf, D_004A2138, (int)(speed + 0.5f));
     if (strlen(buf) > 2)

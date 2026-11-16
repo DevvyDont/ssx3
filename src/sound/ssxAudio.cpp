@@ -1243,13 +1243,13 @@ extern "C" void func_002A6F38(void*);
 extern "C" void func_00289DF0(void*, int);
 extern "C" void func_0028BCE8(void*, int);
 extern "C" void func_0028BDE0(void*, int);
-extern "C" void func_0028A230(void*);
+extern "C" void cAsyncSys_ASYNCSYS_DeInit(void*);
 extern "C" void func_0029F5E0(void*);
 
 /**
  * Purges the in-game sound banks: every bank slot 0-16 except 13, then the reserved slots 3 and 12.
  *
- * Also calls func_002A6F38, func_00289DF0 (on the bank manager), func_0028A230 and func_0029F5E0 (all
+ * Also calls func_002A6F38, func_00289DF0 (on the bank manager), cAsyncSys_ASYNCSYS_DeInit and func_0029F5E0 (all
  * unknown).
  */
 extern "C" void cSSXAudio_InGamePurge(cSSXAudio* self)
@@ -1264,7 +1264,7 @@ extern "C" void cSSXAudio_InGamePurge(cSSXAudio* self)
     }
     func_0028BDE0(*(void**)self->MusicSys.mpVStreamSys, 3);
     func_0028BDE0(*(void**)self->MusicSys.mpVStreamSys, 12);
-    func_0028A230(*(void**)self->MusicSys.mpVStreamSys);
+    cAsyncSys_ASYNCSYS_DeInit(*(void**)self->MusicSys.mpVStreamSys);
     func_0029F5E0(self);
 }
 #endif
@@ -3666,7 +3666,7 @@ extern "C" void* func_0028A058(void* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_0028A148);
 #ifdef SKIP_ASM
-extern "C" void func_0028A230(void*);
+extern "C" void cAsyncSys_ASYNCSYS_DeInit(void*);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern char D_00483B10[];
@@ -3688,7 +3688,7 @@ struct sAudioSys_A148 {
 extern "C" void func_0028A148(sAudioSys_A148* self, int flags)
 {
     self->vtbl = D_00483B10;
-    func_0028A230(self);
+    cAsyncSys_ASYNCSYS_DeInit(self);
     D_004A3610 = 0;
     if (self->buf1C0 != 0) {
         cMemMan_free(self->buf1C0);

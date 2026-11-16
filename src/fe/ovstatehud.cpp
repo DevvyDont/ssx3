@@ -1314,7 +1314,7 @@ INCLUDE_ASM("fe/ovstatehud", func_001F14B0);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 struct sGlyphTable_1F14B0;
-extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
+extern "C" void cFont_text(void* self, float x, float y, const char* str);
 
 struct sGlyph_1F14B0 {
     unsigned short code;
@@ -1391,7 +1391,7 @@ extern "C" void func_001F14B0(void* self, const char* str, sGlyphTable_1F14B0* f
         if (neg) {
             ox = -ox;
         }
-        func_00391CB0(font, x + amp * ox, y + amp * oy, buf);
+        cFont_text(font, x + amp * ox, y + amp * oy, buf);
         sGlyph_1F14B0* g = findGlyph_1F14B0(font, buf[0]);
         x += (float)(g->width + g->lead) * sc.x;
     }
@@ -1520,21 +1520,21 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
     float oneW = self->oneW * scale[0];
     if (timeRenderFlags & 6) {
         if (timeRenderFlags & 2)
-            func_00391CB0(self->font, out[0], out[1], D_004A2108);
+            cFont_text(self->font, out[0], out[1], D_004A2108);
         else
-            func_00391CB0(self->font, out[0], out[1], D_004A2100);
+            cFont_text(self->font, out[0], out[1], D_004A2100);
         out[0] += self->f174;
     }
     sprintf(bufs[0], D_004A22F0, hour);
     sprintf(bufs[1], D_004A22F0, minute);
     sprintf(bufs[2], D_004A22F0, sec);
-    func_00391CB0(self->font, out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
+    cFont_text(self->font, out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
     out[0] += sepW;
     for (int i = 1; i < 3; i++) {
-        func_00391CB0(self->font, out[0], out[1], self->sep);
+        cFont_text(self->font, out[0], out[1], self->sep);
         out[0] += digW;
         char* p = bufs[i];
-        func_00391CB0(self->font, out[0] + oneAdj_001F1840(p, oneW), out[1], p);
+        cFont_text(self->font, out[0] + oneAdj_001F1840(p, oneW), out[1], p);
         out[0] += sepW;
     }
     if (timeRenderFlags & 1)
@@ -1609,7 +1609,7 @@ extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F1
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
     font->tint = t;
-    func_00391CB0(font, out[0], out[1], str);
+    cFont_text(font, out[0], out[1], str);
     font->tint = sVec4_001F1B30(1.0f, 0.0f, 0.0f, 0.0f);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
@@ -1621,10 +1621,10 @@ INCLUDE_ASM("fe/ovstatehud", func_001F1E28);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // NOTE w1 2026-10-21: func_001F1E28 best 99.94 (not committed). Only residual: 4 insns at the start of the
-// last block before the jal func_00391CB0: $f0..$f3 numbering of the font->f38/f3C = f30/f34 * resEsc[] loads
+// last block before the jal cFont_text: $f0..$f3 numbering of the font->f38/f3C = f30/f34 * resEsc[] loads
 // is swapped (local alloc; sx regs reports nothing). Tried operand order / statement order / locals (99.78-99.94).
 // Sibling func_001F25E0 is identical except: func_003921F0 instead of cFont_textExtent (str is const unsigned short*),
-// func_00391E30 instead of func_00391CB0. Needs sColor_001F16C0, sHudElemDef_001F16C0 from func_001F16C0's block.
+// func_00391E30 instead of cFont_text. Needs sColor_001F16C0, sHudElemDef_001F16C0 from func_001F16C0's block.
 // Lessons: dead stores of dOutT/dOut land in the frame because arrays are written; col shares the slot of dOutT when
 // dOutT/dOut live in an inner block; nested by-value VU0 helper calls in ONE expression share one temp slot;
 // a 4-float ctor temp + struct copy gives the 'swc1 x4; ldl/ldr/sdl/sdr' colour build.
@@ -1787,7 +1787,7 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
     float g1 = font->f34;
     font->f3C = g1 * q1;
     font->f38 = g0 * q0;
-    func_00391CB0(font, resPos[0], resPos[1], str);
+    cFont_text(font, resPos[0], resPos[1], str);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
 }
@@ -2112,7 +2112,7 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
             x -= w * 0.5f;
         else if (al > 0)
             x -= w;
-        func_00391CB0(font, x, y, line);
+        cFont_text(font, x, y, line);
         if (rect != 0) {
             if (x < rect[0]) rect[0] = x;
             if (rect[2] < w) rect[2] = w;

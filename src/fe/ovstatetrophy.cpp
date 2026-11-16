@@ -1725,20 +1725,20 @@ extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5
 INCLUDE_ASM("fe/ovstatetrophy", func_00210FA0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, int a4);
+extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern "C" void func_001CD088(void* self, int v);
+extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int v);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
 extern char D_0046EFD0[];
 
 extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4)
 {
-    void* w = func_001CB030(cMemMan_alloc(0x444, D_0046EFD0, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
+    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, D_0046EFD0, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
     *(void**)((char*)self + 0xE0) = w;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = a3;
-    func_001CD088(*(void**)((char*)self + 0xE0), a4);
+    cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), a4);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;
     cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
     func_001CE468(*(void**)((char*)self + 0xE0), 1);

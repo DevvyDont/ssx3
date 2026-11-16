@@ -47,7 +47,7 @@ struct tAttrMenu {
     unsigned char mCreateThread : 1;    // bit 0 [U] func_003A53B0/func_003A53C0; passed to cUIMenu_setSelected by onInputChangeItem
     unsigned char mFlipInput : 1;       // bit 1 [P] isFlipInput/setFlipInput (func_003A5350/func_003A5360)
     unsigned char mScrollMenu : 1;      // bit 2 [O]; [U] cUIMenu_setScrollableMenu sets it; getNext / func_0039AC48 /
-                                        //       func_0039B7B0 / func_0039B878 / onInputChangeItem test it
+                                        //       cUIMenu_findFirstHighlightable / func_0039B878 / onInputChangeItem test it
     unsigned char mDisableDirSound : 1; // bit 3 [O]; [U] func_003A5380/func_003A5390; cUIMenu_onInput tests it
 };
 

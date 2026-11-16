@@ -14,7 +14,7 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct sSelf0020A380;
 extern "C" void cOVState_onCreateScreen(cOVState* self);
-extern "C" int func_001A3BF0(void* mgr);
+extern "C" int cFEAsyncManager_GetFreeAsyncFile(void* mgr);
 extern "C" void cOVState_MAP_setupMapPic(void* self);
 extern "C" void cOVState_MAP_setupPopup(void* self);
 extern "C" void cOVState_MAP_setupPlayerIndicator(void* self);
@@ -62,7 +62,7 @@ struct sMap_86A8 {
 /**
  * Creates the session map overlay screen ("38session") and builds its pieces.
  *
- * After cOVState_onCreateScreen it stores func_001A3BF0(FE async manager) at +0xC4, closes the popup (+0xBC =
+ * After cOVState_onCreateScreen it stores cFEAsyncManager_GetFreeAsyncFile(FE async manager) at +0xC4, closes the popup (+0xBC =
  * 0), sets scale 1.0 and speed 0.16, hides "MapPic" (kept at its field), clears the four 8-entry arrays, then
  * runs setupMapPic, setupPopup, setupPlayerIndicator and setupLocalSessionList.
  */
@@ -75,7 +75,7 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen((cOVState*)((sSelf0020A380*)self));
-    self->fC4 = func_001A3BF0(SSXApp->mFEAsyncManager);
+    self->fC4 = cFEAsyncManager_GetFreeAsyncFile(SSXApp->mFEAsyncManager);
     self->fDC = 0;
     self->fBC = 0;
     self->scale = 1.0f;

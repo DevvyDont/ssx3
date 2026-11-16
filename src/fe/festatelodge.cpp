@@ -596,8 +596,8 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetEvent);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
-extern "C" void func_001CD088(void* self, int a1);
+extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int key, int a2, int a3);
 extern "C" void func_001CE408(void* self, int a1);
 extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
@@ -625,7 +625,7 @@ struct sVE_1F4400 {
  * Acts on the rider-details options: renames the rider, picks a cheat character, opens a screen, or leaves.
  *
  * Event 5 (accept), for options enabled in D_00441AF8 (read at 9-15, past its 7 entries): option 14
- * ("Option_6") opens a "cKeyboardPopup" (func_001CB030) limited to 8 characters, with some keys left out and
+ * ("Option_6") opens a "cKeyboardPopup" (cKeyboardPopup_cKeyboardPopup) limited to 8 characters, with some keys left out and
  * the player's name as its text; option 11 ("Option_3") opens a "cFEStateCheatCharSelect" popup
  * (func_00182220) when a cheat character is unlocked; any other plays "TransitionOut" and pushes
  * getNextState's state for the option. Event 6 (back) pushes getPrevState's state.
@@ -646,10 +646,10 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
         }
         if (k == 14) {
             void* p = cMemMan_alloc(0x444, D_0046EFD0, 0x100, 0);
-            char* o = (char*)func_001CB030(p, *(void**)(self + 0x10), self, 0, *(unsigned char*)(self + 0x15));
+            char* o = (char*)cKeyboardPopup_cKeyboardPopup(p, *(void**)(self + 0x10), self, 0, *(unsigned char*)(self + 0x15));
             *(char*)(o + 0x44) = 0;
             *(int*)(o + 0x140) = 0x37;
-            func_001CD088(o, 8);
+            cKeyboardPopup_setMaxCharacters(o, 8);
             cKeyboardPopup_setIncludeKey(o, 0x4B, 1, 2);
             *(int*)(o + 0x58) = 1;
             func_001CE408(o, 1);

@@ -7,7 +7,7 @@
 // Bases (On Tour DWARF): nash Node {next 0x0, prev 0x4} (0x8) -> cTypedSpaceNode {type 0x8, eSpaceNodeType} (0xC) ->
 // cRailSpaceNode {Rail 0xC}. No vptr. The constructor is inline in buildXform: type = 2 (kSNT_Rail), Rail = the modifier.
 // cFlexRailSpaceNode ("FlexRailSpaceNode", type 3, FlexNode at 0xC) has the same shape. EA's header is unknown.
-// Users: cRailModifier_buildXform (alloc + init), func_0035C4E0 (nash_Nash_movenode), the destructor func_0035BD70
+// Users: cRailModifier_buildXform (alloc + init), cRailModifier_update (nash_Nash_movenode), the destructor cRailModifier__cRailModifier
 // (remove + operator delete); the octree code links next/prev.
 
 #include "layout.h"

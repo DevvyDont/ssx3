@@ -1234,8 +1234,8 @@ extern "C" int func_002379C8(void* p);
 extern "C" int func_0026CE50(void* p);
 extern "C" void func_0026F4A8(void* p);
 extern "C" int func_00270280(void* p);
-extern "C" void func_00354F98(void* mgr, int a);
-extern "C" void func_00355028(void* mgr, int a);
+extern "C" void cBucketMan_updateBucket(void* mgr, int a);
+extern "C" void cBucketMan_applyBucket(void* mgr, int a);
 extern "C" void func_00309270(void* p);
 extern "C" void func_002294C8(void* p);
 extern "C" void func_003440C8(void* p);
@@ -1493,12 +1493,12 @@ extern "C" void cGame_update(cGame* self)
             }
             if (!skip) {
                 if (!(D_004A2A50 & 2)) {
-                    func_00354F98(&gBucketMan, 1);
+                    cBucketMan_updateBucket(&gBucketMan, 1);
                 }
-                func_00354F98(&gBucketMan, 5);
-                func_00354F98(&gBucketMan, 6);
+                cBucketMan_updateBucket(&gBucketMan, 5);
+                cBucketMan_updateBucket(&gBucketMan, 6);
                 if (!(D_004A2A50 & 2)) {
-                    func_00355028(&gBucketMan, 1);
+                    cBucketMan_applyBucket(&gBucketMan, 1);
                 }
                 {
                     char* c = (char*)self->AI;
@@ -1506,10 +1506,10 @@ extern "C" void cGame_update(cGame* self)
                     vt[3].fn(c + vt[3].delta);
                 }
                 if (!(D_004A2A50 & 0x10)) {
-                    func_00354F98(&gBucketMan, 2);
+                    cBucketMan_updateBucket(&gBucketMan, 2);
                 }
                 if (!(D_004A2A50 & 4)) {
-                    func_00354F98(&gBucketMan, 3);
+                    cBucketMan_updateBucket(&gBucketMan, 3);
                 }
                 func_00309270((char*)self->WScriptMan);
                 func_002294C8((char*)self->CrowdMan2d);
@@ -1517,12 +1517,12 @@ extern "C" void cGame_update(cGame* self)
                 func_00357BF8((char*)self->MultiParticleMan);
                 cBucketMan_mergeBucket(&gBucketMan, 1);
             } else {
-                func_00354F98(&gBucketMan, 5);
+                cBucketMan_updateBucket(&gBucketMan, 5);
                 if (!(D_004A2A50 & 4)) {
-                    func_00354F98(&gBucketMan, 3);
+                    cBucketMan_updateBucket(&gBucketMan, 3);
                 }
             }
-            func_00354F98(&gBucketMan, 4);
+            cBucketMan_updateBucket(&gBucketMan, 4);
             {
                 int s = *((int*)(char*)self->Replay);
                 if (!inRace_2306B8(s) || notMode3_2306B8(s)) {

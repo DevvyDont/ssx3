@@ -149,7 +149,7 @@ struct sMoveNodeVEntryV54B0 {
     void (*fn)(void*);
 };
 
-extern "C" void func_003530D0(void* block);
+extern "C" void tModifierBlock_remTransformModifier(void* block);
 
 /**
  * Makes a transform modifier the node's root transform, replacing (deleting) any earlier one.
@@ -167,7 +167,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_003530D0(((void*)self->ModifierBlock));
+        tModifierBlock_remTransformModifier(((void*)self->ModifierBlock));
     }
     *(void**)((void*)self->ModifierBlock) = mod;
     e = &((sMoveNodeVEntryV54B0*)self->mVtbl)[48];
@@ -180,14 +180,14 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
 //100%
 INCLUDE_ASM("object/movenode", func_00355550);
 #ifdef SKIP_ASM
-extern "C" void func_00353118(void* block);
+extern "C" void tModifierBlock_remUVScrollModifier(void* block);
 
 extern "C" void func_00355550(cMoveNode* self, void* v)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_00353118(((void*)self->ModifierBlock));
+        tModifierBlock_remUVScrollModifier(((void*)self->ModifierBlock));
     }
     *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = v;
 }
@@ -196,14 +196,14 @@ extern "C" void func_00355550(cMoveNode* self, void* v)
 //100%
 INCLUDE_ASM("object/movenode", func_003555A8);
 #ifdef SKIP_ASM
-extern "C" void func_00353150(void* block);
+extern "C" void tModifierBlock_remTexFlipModifier(void* block);
 
 extern "C" void func_003555A8(cMoveNode* self, void* v)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_00353150(((void*)self->ModifierBlock));
+        tModifierBlock_remTexFlipModifier(((void*)self->ModifierBlock));
     }
     *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = v;
 }
@@ -212,14 +212,14 @@ extern "C" void func_003555A8(cMoveNode* self, void* v)
 //100%
 INCLUDE_ASM("object/movenode", func_00355600);
 #ifdef SKIP_ASM
-extern "C" void func_00353188(void* block);
+extern "C" void tModifierBlock_remPhysicsModifier(void* block);
 
 extern "C" void func_00355600(cMoveNode* self, void* v)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_00353188(((void*)self->ModifierBlock));
+        tModifierBlock_remPhysicsModifier(((void*)self->ModifierBlock));
     }
     *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = v;
 }
@@ -268,8 +268,8 @@ extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_preUpdateModifierBlock);
 #ifdef SKIP_ASM
-extern "C" void func_00352C70(void* block);
-extern "C" int func_00352E50(void* block);
+extern "C" void tModifierBlock_preUpdate(void* block);
+extern "C" int tModifierBlock_isRootTransformDirty(void* block);
 
 /**
  * Runs the modifier block's pre-update and marks the node for update when its root transform asks for it.
@@ -277,8 +277,8 @@ extern "C" int func_00352E50(void* block);
 extern "C" void cMoveNode_preUpdateModifierBlock(cMoveNode* self)
 {
     if (((void*)self->ModifierBlock) != 0) {
-        func_00352C70(((void*)self->ModifierBlock));
-        if (func_00352E50(((void*)self->ModifierBlock)) != 0) {
+        tModifierBlock_preUpdate(((void*)self->ModifierBlock));
+        if (tModifierBlock_isRootTransformDirty(((void*)self->ModifierBlock)) != 0) {
             self->Flags |= 1;
         }
     }
@@ -664,9 +664,9 @@ extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355F10);
+INCLUDE_ASM("object/movenode", cMoveNode_transferFromOld);
 #ifdef SKIP_ASM
-extern "C" void func_00356020(cMoveNode* self, cMoveNode* other);
+extern "C" void cMoveNode_transferEffectModifier(cMoveNode* self, cMoveNode* other);
 
 struct sMat44_355F10 {
     float m[16];
@@ -710,7 +710,7 @@ struct sNodeVEntryV_355F10 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00355F10(cMoveNode* self, void* srcv)
+extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* srcv)
 {
     char* src = (char*)srcv;
     if (src == 0) {
@@ -718,7 +718,7 @@ extern "C" void func_00355F10(cMoveNode* self, void* srcv)
     }
     sNodeVEntryI_355F10* vi = *(sNodeVEntryI_355F10**)(src + 0xC);
     if (vi[16].fn(src + vi[16].delta) != 0) {
-        func_00356020(self, (cMoveNode*)src);
+        cMoveNode_transferEffectModifier(self, (cMoveNode*)src);
     }
     sNodeVEntryP_355F10* vp = *(sNodeVEntryP_355F10**)(src + 0xC);
     char* m = vp[24].fn(src + vp[24].delta);
@@ -741,11 +741,11 @@ extern "C" void func_00355F10(cMoveNode* self, void* srcv)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356020);
+INCLUDE_ASM("object/movenode", cMoveNode_transferEffectModifier);
 #ifdef SKIP_ASM
 extern "C" void func_00353398(void* block, void* other);
 
-extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
+extern "C" void cMoveNode_transferEffectModifier(cMoveNode* self, cMoveNode* other)
 {
     if (((void*)other->ModifierBlock) != 0) {
         if (((void*)self->ModifierBlock) == 0) {
@@ -1372,7 +1372,7 @@ struct sMnVEnt_68B0 {
 };
 
 extern "C" sMnBox_68B0* tModifierBlock_getBoundBox_68B0(void* mb) __asm__("tModifierBlock_getBoundBox");
-extern "C" float func_00352BF8(void* mb);
+extern "C" float tModifierBlock_getRadius(void* mb);
 extern "C" void* cObjectInterface_getNash(void);
 extern "C" void nash_Nash_movenode(void* mgr, int a, void* obj, sMnBox_68B0* box, sMnBox_68B0* old);
 
@@ -1432,7 +1432,7 @@ extern "C" void cMoveNode_updateOverlapSystem(cMoveNode* self)
         return;
     sMnBox_68B0 box;
     sMnBox_68B0 old = *tModifierBlock_getBoundBox_68B0(self->ModifierBlock);
-    float r = func_00352BF8(self->ModifierBlock);
+    float r = tModifierBlock_getRadius(self->ModifierBlock);
     sMnVec4_68B0 rv;
     rv.w = 0.0f;
     rv.x = r;
@@ -1591,10 +1591,10 @@ extern "C" void cMoveNode_updateIntersectInfo(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_signal);
 #ifdef SKIP_ASM
-extern "C" void func_00352F40(void*);
+extern "C" void tModifierBlock_signal(void*);
 
 /**
- * Passes a signal to the node's modifier block (func_00352F40, On Tour tModifierBlock::signal), when it has
+ * Passes a signal to the node's modifier block (tModifierBlock_signal, On Tour tModifierBlock::signal), when it has
  * one.
  *
  * The signal number and argument (On Tour signal(int signal, float arg)) pass through in their registers.
@@ -1602,7 +1602,7 @@ extern "C" void func_00352F40(void*);
 extern "C" void cMoveNode_signal(cMoveNode* self)
 {
     if (((void*)self->ModifierBlock) != 0) {
-        func_00352F40(((void*)self->ModifierBlock));
+        tModifierBlock_signal(((void*)self->ModifierBlock));
     }
 }
 #endif
@@ -1981,7 +1981,7 @@ extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQ
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357090);
+INCLUDE_ASM("object/movenode", cParentModifier_cParentModifier);
 #ifdef SKIP_ASM
 struct sMnVEntrySer7090 {
     short delta;
@@ -1998,7 +1998,7 @@ struct sMnVEntryRd7090 {
 extern "C" void func_00356F68(void* self, void* stream);
 extern char D_0048F508[];
 
-extern "C" void* func_00357090(cParentModifier* self, void* stream)
+extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* stream)
 {
     func_00356F68(self, stream);
     self->mVtbl = (void**)D_0048F508;
@@ -2510,14 +2510,14 @@ extern "C" void func_00357848(cAvaSplineModifier* self, void* stream)
 INCLUDE_ASM("object/movenode", func_003578A8);
 #ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
-extern "C" void func_00355F10(cMoveNode* self, void* a1);
+extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* a1);
 extern void* cParticleNode_vtbl[];
 
 extern "C" void* func_003578A8(cMoveNode* self, void* a1, void* a2, void* particle, void* a4)
 {
     func_00355280(self, a1, 0xD, a2);
     *(void***)((char*)self + 0xC) = cParticleNode_vtbl;
-    func_00355F10(self, a4);
+    cMoveNode_transferFromOld(self, a4);
     cMoveNode_addParticle(self, particle);
     return self;
 }

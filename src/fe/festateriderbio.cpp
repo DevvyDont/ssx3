@@ -230,9 +230,9 @@ extern "C" void* func_00182220(void* mem, void* engine, void* owner, int rider, 
 extern "C" void func_001831D0(void* self, int a1);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
-extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
-extern "C" void func_001CD088(void* self, int v);
+extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int v);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE408(void* self, int v);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
@@ -269,9 +269,9 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
     case 5: {
         int sub = *(int*)(item + 0x18);
         if (sub == 8) {
-            char* w = (char*)func_001CB030(cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
+            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
             *(int*)(w + 0x140) = 0x37;
-            func_001CD088(w, 8);
+            cKeyboardPopup_setMaxCharacters(w, 8);
             cKeyboardPopup_setIncludeKey(w, 0x4B, 1, 2);
             *(int*)(w + 0x58) = 1;
             func_001CE408(w, 1);

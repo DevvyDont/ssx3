@@ -400,24 +400,24 @@ extern "C" void func_0039B7A8(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B7B0);
+INCLUDE_ASM("ui/uimenu", cUIMenu_findFirstHighlightable);
 #ifdef SKIP_ASM
 extern "C" void* func_00397870(void* list, unsigned char i);
 
-struct func_0039B7B0_sVEntry {
+struct cUIMenu_findFirstHighlightable_sVEntry {
     short delta;
     short index;
     int (*fn)(void*, void*, int, unsigned char);
 };
 
-extern "C" unsigned char func_0039B7B0(cUIMenu* self, unsigned char start)
+extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned char start)
 {
     unsigned char i = start == 0xFF ? 0 : start;
     for (; i < self->mScrollItemNum; i++) {
         void* item = func_00397870((char*)self + 0x74, i);
         if (*(int*)&self->mAttrMenu & 4) {
             char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
-            func_0039B7B0_sVEntry* vt = *(func_0039B7B0_sVEntry**)(mgr + 8);
+            cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
             if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
                 return i;
             }
@@ -476,7 +476,7 @@ void* func_00397870_i(void* list, int i) __asm__("func_00397870");
 static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
 {
     char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
-    func_0039B7B0_sVEntry* vt = *(func_0039B7B0_sVEntry**)(mgr + 8);
+    cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
     vt[20].fn(mgr + vt[20].delta, self, ev, v);
 }
 

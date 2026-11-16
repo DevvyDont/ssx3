@@ -175,7 +175,7 @@ extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, in
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void cReplayFrame_clearFrame(void* self);
-extern "C" void func_0026E950(void* self, void* buf, int a2);
+extern "C" void cReplayFramePtr_setBlock(void* self, void* buf, int a2);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" int cBEMissionInterface_getNumberMissions(void* iface);
 extern "C" unsigned int func_00154588(void* iface, int i);
@@ -224,7 +224,7 @@ extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* n
     self->handle = -1;
     self->field_0x4C = operator_new_tag(0x14000, D_00481570, 0, 0);
     cReplayFrame_clearFrame((char*)self + 0x14);
-    func_0026E950((char*)self + 0x14, self->field_0x4C, 0);
+    cReplayFramePtr_setBlock((char*)self + 0x14, self->field_0x4C, 0);
     unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, D_00481580, 0, 0);
     self->hdr = hdr;
     MEM_fill(hdr, 0, 0x1C22C);
@@ -1072,7 +1072,7 @@ struct sPbFrame_D678 {
 };
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern "C" int func_0026EAB8(void* self, char** pp, void* src);
+extern "C" int cReplayFramePtr_loadBlock(void* self, char** pp, void* src);
 // PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
 // argument; bind the 2-arg form to the symbol.
 void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
@@ -1091,7 +1091,7 @@ extern "C" int func_0026D678(sPbFrame_D678* self, char** pp)
     self->field_0x24 = h.field_0x18;
     self->field_0x28 = h.field_0x1c;
     self->field_0x2c = h.field_0x20;
-    func_0026EAB8(self, pp, p + 0x24);
+    cReplayFramePtr_loadBlock(self, pp, p + 0x24);
     func_0026ED88_2(self, 1);
     return 1;
 }

@@ -928,9 +928,9 @@ extern "C" int strlen(const char* s);
 extern "C" void func_00147138(void* player, int idx, char* name);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* player, int idx);
 extern "C" void func_0018FC98(void* p);
-extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, int a4);
+extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
 extern "C" void cKeyboardPopup_setInputText(void* kb, void* name);
-extern "C" void func_001CD088(void* kb, int a1);
+extern "C" void cKeyboardPopup_setMaxCharacters(void* kb, int a1);
 extern "C" void func_001CD0B0(void* kb, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* kb, int key, int a2, int a3);
 extern "C" void func_001CE408(void* kb, int a1);
@@ -1038,10 +1038,10 @@ extern "C" void func_0018FD90(void* vself, char* item, int event)
         case 3:
             if (self->state == 1 && self->f224 != 0) {
                 if (self->keyboard == 0) {
-                    char* kb = (char*)func_001CB030(cMemMan_alloc(0x444, D_0045E2C8, 0x100, 0), self->engine, vself, 0, self->f15);
+                    char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, D_0045E2C8, 0x100, 0), self->engine, vself, 0, self->f15);
                     self->keyboard = kb;
                     *(int*)(kb + 0x140) = 0x37;
-                    func_001CD088(self->keyboard, 8);
+                    cKeyboardPopup_setMaxCharacters(self->keyboard, 8);
                     cKeyboardPopup_setIncludeKey(self->keyboard, 0x4B, 1, 2);
                     *(int*)(self->keyboard + 0x58) = 1;
                     func_001CE408(self->keyboard, 1);

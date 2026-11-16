@@ -1707,7 +1707,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D9258);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_004A1600[];
-extern "C" unsigned char func_0039B7B0(void* menu, unsigned char start);
+extern "C" unsigned char cUIMenu_findFirstHighlightable(void* menu, unsigned char start);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
 extern "C" void func_001D9258(void* self)
@@ -1717,7 +1717,7 @@ extern "C" void func_001D9258(void* self)
         void* item = *(void**)((char*)menu + 0xA0);
         int idx = *(unsigned char*)((char*)menu + 0x95);
         if (item == 0 || ((*(int*)((char*)item + 0x14) >> 5) & 1)) {
-            idx = func_0039B7B0(menu, 0);
+            idx = cUIMenu_findFirstHighlightable(menu, 0);
         }
         if (idx != 0xFF) {
             cUIMenu_setSelectedByIndex(menu, idx);

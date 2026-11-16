@@ -999,3 +999,62 @@ fn_typed_agents	0x003A9770	cWorldView_getTestFocus	func_003A9770	[O] On Tour cWo
 fn_typed_agents	0x003A9820	cWorldView_getSectionName	func_003A9820	[O] On Tour cWorldView::getSectionName(unsigned int); code: bounds check vs header section count, return section record (name) as OT; caller cSectionMan_init name compare; order between getNumSections and isSectionLoaded (anchors) as OT; params 1=1
 fn_typed_agents	0x003A9890	cWorldView_isSectionUnLoaded	func_003A9890	[O] On Tour cWorldView::isSectionUnLoaded(unsigned int); callers cWorldCache_purge (as OT) + cSectionMan_update; code: bounds check, state == 0; order directly after isSectionLoaded(anchor) as OT; params 1=1
 fn_typed_agents	0x003A9A98	cWorldView_getHull	func_003A9A98	[O] On Tour cWorldView::getHull(unsigned int) const; sole caller cWorldCache_updatePages as OT; code: mp_Hulls + idx * sizeof(hull); params 1=1
+fn_held_typed_round2	0x0016C5E0	cActiveTriggerList__cActiveTriggerList	func_0016C5E0	On Tour cActiveTriggerList::~cActiveTriggerList(void) (address-order pair, held); retail typed self cActiveTriggerList*, 2 params
+fn_held_typed_round2	0x001A3BF0	cFEAsyncManager_GetFreeAsyncFile	func_001A3BF0	On Tour cFEAsyncManager::GetFreeAsyncFile(void) (address-order pair, held); retail typed self cFEAsyncManager*, 1 params
+fn_held_typed_round2	0x001C55F8	cPopupInfo_cPopupInfo	func_001C55F8	On Tour cPopupInfo::cPopupInfo(void) (address-order pair, held); retail typed self cPopupInfo*, 1 params
+fn_held_typed_round2	0x001C5630	cPopupInfo_clear	func_001C5630	On Tour cPopupInfo::clear(void) (address-order pair, held); retail typed self cPopupInfo*, 1 params
+fn_held_typed_round2	0x001C5750	cPopupInfo__cPopupInfo	func_001C5750	On Tour cPopupInfo::~cPopupInfo(void) (address-order pair, held); retail typed self cPopupInfo*, 2 params
+fn_held_typed_round2	0x001C7040	cScreenPopup_handlePostPending	func_001C7040	On Tour cScreenPopup::handlePostPending(cPopupInfo *) (address-order pair, held); retail typed self cScreenPopup*, 2 params
+fn_held_typed_round2	0x001C70F0	cScreenPopup_setTextObjectSize	func_001C70F0	On Tour cScreenPopup::setTextObjectSize(t3Vector &) (address-order pair, held); retail typed self cScreenPopup*, 2 params
+fn_held_typed_round2	0x001C7BE0	cScreenPopup_centerOffset	func_001C7BE0	On Tour cScreenPopup::centerOffset(void) (address-order pair, held); retail typed self cScreenPopup*, 1 params
+fn_held_typed_round2	0x001C7EB0	cScreenPopup_FillTextEntryBox	func_001C7EB0	On Tour cScreenPopup::FillTextEntryBox(void) (address-order pair, held); retail typed self cScreenPopup*, 1 params
+fn_held_typed_round2	0x001C8678	cScreenPopup_createTitleBar	func_001C8678	On Tour cScreenPopup::createTitleBar(cPopupInfo *) (address-order pair, held); retail typed self cScreenPopup*, 2 params
+fn_held_typed_round2	0x001C8758	cScreenPopup_adjustMenuPosition	func_001C8758	On Tour cScreenPopup::adjustMenuPosition(void) (address-order pair, held); retail typed self cScreenPopup*, 1 params
+fn_held_typed_round2	0x001C88C8	cScreenPopup_adjustButtonPosition	func_001C88C8	On Tour cScreenPopup::adjustButtonPosition(void) (address-order pair, held); retail typed self cScreenPopup*, 1 params
+fn_held_typed_round2	0x001C97E0	cScreenPopup_getTextBoxWrapSize	func_001C97E0	On Tour cScreenPopup::getTextBoxWrapSize(tPopupElement *, t3Vector &, float, bool) (address-order pair, held); retail typed self cScreenPopup*, 5 params
+fn_held_typed_round2	0x001CB030	cKeyboardPopup_cKeyboardPopup	func_001CB030	On Tour cKeyboardPopup::cKeyboardPopup(cUIEngine *, cUIState *, bool, unsigned char) (address-order pair, held); retail typed self cKeyboardPopup*, 5 params
+fn_held_typed_round2	0x001CB500	cKeyboardPopup_kbMoveLeft	func_001CB500	On Tour cKeyboardPopup::kbMoveLeft(bool) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CB650	cKeyboardPopup_kbMoveRight	func_001CB650	On Tour cKeyboardPopup::kbMoveRight(bool) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CB7F0	cKeyboardPopup_kbMoveUp	func_001CB7F0	On Tour cKeyboardPopup::kbMoveUp(bool) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CBB70	cKeyboardPopup_handleMovementUpFromQuickKeyRow	func_001CBB70	On Tour cKeyboardPopup::handleMovementUpFromQuickKeyRow(bool) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CBDB0	cKeyboardPopup_handleMovementUpFromNumberRow	func_001CBDB0	On Tour cKeyboardPopup::handleMovementUpFromNumberRow(bool) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CBF20	cKeyboardPopup_handleMovementUpFromLast	func_001CBF20	On Tour cKeyboardPopup::handleMovementUpFromLast(bool) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CC0E0	cKeyboardPopup_skipRowToBottom	func_001CC0E0	On Tour cKeyboardPopup::skipRowToBottom(int) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CC140	cKeyboardPopup_moveUpRows	func_001CC140	On Tour cKeyboardPopup::moveUpRows(void) (address-order pair, held); retail typed self cKeyboardPopup*, 1 params
+fn_held_typed_round2	0x001CD088	cKeyboardPopup_setMaxCharacters	func_001CD088	On Tour cKeyboardPopup::setMaxCharacters(int) (address-order pair, held); retail typed self cKeyboardPopup*, 2 params
+fn_held_typed_round2	0x001CE2A8	cKeyboardPopup_fillSelectableKeys	func_001CE2A8	On Tour cKeyboardPopup::fillSelectableKeys(void) (address-order pair, held); retail typed self cKeyboardPopup*, 1 params
+fn_held_typed_round2	0x0026E950	cReplayFramePtr_setBlock	func_0026E950	On Tour cReplayFramePtr::setBlock(char *, int) (address-order pair, held); retail typed self cReplayFramePtr*, 3 params
+fn_held_typed_round2	0x0026EAB8	cReplayFramePtr_loadBlock	func_0026EAB8	On Tour cReplayFramePtr::loadBlock(char **, tFramePtrSave *) (address-order pair, held); retail typed self cReplayFramePtr*, 3 params
+fn_held_typed_round2	0x0028A230	cAsyncSys_ASYNCSYS_DeInit	func_0028A230	On Tour cAsyncSys::ASYNCSYS_DeInit(void) (address-order pair, held); retail typed self cAsyncSys*, 1 params
+fn_held_typed_round2	0x002C06C0	cWorldPainterQuery__cWorldPainterQuery	func_002C06C0	On Tour cWorldPainterQuery::~cWorldPainterQuery(void) (address-order pair, held); retail typed self cWorldPainterQuery*, 2 params
+fn_held_typed_round2	0x003429E0	cBoostModifier_applyDrag	func_003429E0	On Tour cBoostModifier::applyDrag(cBeing *) (address-order pair, held); retail typed self cBoostModifier*, 2 params
+fn_held_typed_round2	0x00342A88	cBoostModifier_applyBoost	func_00342A88	On Tour cBoostModifier::applyBoost(cBeing *) (address-order pair, held); retail typed self cBoostModifier*, 2 params
+fn_held_typed_round2	0x00342BA0	cBoostModifier_writeToReplayFrame	func_00342BA0	On Tour cBoostModifier::writeToReplayFrame(cBxReplayFrame *) (address-order pair, held); retail typed self cBoostModifier*, 2 params
+fn_held_typed_round2	0x00352BF8	tModifierBlock_getRadius	func_00352BF8	On Tour tModifierBlock::getRadius(void) const (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00352C70	tModifierBlock_preUpdate	func_00352C70	On Tour tModifierBlock::preUpdate(void) (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00352E50	tModifierBlock_isRootTransformDirty	func_00352E50	On Tour tModifierBlock::isRootTransformDirty(void) const (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00352F40	tModifierBlock_signal	func_00352F40	On Tour tModifierBlock::signal(int, float) (address-order pair, held); retail typed self tModifierBlock*, 3 params
+fn_held_typed_round2	0x003530D0	tModifierBlock_remTransformModifier	func_003530D0	On Tour tModifierBlock::remTransformModifier(void) (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00353118	tModifierBlock_remUVScrollModifier	func_00353118	On Tour tModifierBlock::remUVScrollModifier(void) (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00353150	tModifierBlock_remTexFlipModifier	func_00353150	On Tour tModifierBlock::remTexFlipModifier(void) (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00353188	tModifierBlock_remPhysicsModifier	func_00353188	On Tour tModifierBlock::remPhysicsModifier(void) (address-order pair, held); retail typed self tModifierBlock*, 1 params
+fn_held_typed_round2	0x00354ED0	cBucketMan_last	func_00354ED0	On Tour cBucketMan::last(const int) (address-order pair, held); retail typed self cBucketMan*, 2 params
+fn_held_typed_round2	0x00354F20	cBucketMan_prev	func_00354F20	On Tour cBucketMan::prev(cObjNode *, const int) (address-order pair, held); retail typed self cBucketMan*, 3 params
+fn_held_typed_round2	0x00354F70	cBucketMan_addnext	func_00354F70	On Tour cBucketMan::addnext(cObjNode *, const int) (address-order pair, held); retail typed self cBucketMan*, 3 params
+fn_held_typed_round2	0x00354F98	cBucketMan_updateBucket	func_00354F98	On Tour cBucketMan::updateBucket(const int) (address-order pair, held); retail typed self cBucketMan*, 2 params
+fn_held_typed_round2	0x00355028	cBucketMan_applyBucket	func_00355028	On Tour cBucketMan::applyBucket(const int) (address-order pair, held); retail typed self cBucketMan*, 2 params
+fn_held_typed_round2	0x00355F10	cMoveNode_transferFromOld	func_00355F10	On Tour cMoveNode::transferFromOld(cInstanceNode *) (address-order pair, held); retail typed self cMoveNode*, 2 params
+fn_held_typed_round2	0x00356020	cMoveNode_transferEffectModifier	func_00356020	On Tour cMoveNode::transferEffectModifier(cMoveNode *) (address-order pair, held); retail typed self cMoveNode*, 2 params
+fn_held_typed_round2	0x00357090	cParentModifier_cParentModifier	func_00357090	On Tour cParentModifier::cParentModifier(cBxReplayFrame *) (address-order pair, held); retail typed self cParentModifier*, 2 params
+fn_held_typed_round2	0x003584B8	cPhysicsModifier_writeToReplayFrame	func_003584B8	On Tour cPhysicsModifier::writeToReplayFrame(cBxReplayFrame *) (address-order pair, held); retail typed self cPhysicsModifier*, 2 params
+fn_held_typed_round2	0x0035BD70	cRailModifier__cRailModifier	func_0035BD70	On Tour cRailModifier::~cRailModifier(void) (address-order pair, held); retail typed self cRailModifier*, 2 params
+fn_held_typed_round2	0x0035C4E0	cRailModifier_update	func_0035C4E0	On Tour cRailModifier::update(void) (address-order pair, held); retail typed self cRailModifier*, 1 params
+fn_held_typed_round2	0x0035C540	cRailModifier_writeToReplayFrame	func_0035C540	On Tour cRailModifier::writeToReplayFrame(cBxReplayFrame *) (address-order pair, held); retail typed self cRailModifier*, 2 params
+fn_held_typed_round2	0x0035F410	cTexFlipModifier_update	func_0035F410	On Tour cTexFlipModifier::update(void) (address-order pair, held); retail typed self cTexFlipModifier*, 1 params
+fn_held_typed_round2	0x0035F598	cTexFlipModifier_signal	func_0035F598	On Tour cTexFlipModifier::signal(int, float) (address-order pair, held); retail typed self cTexFlipModifier*, 3 params
+fn_held_typed_round2	0x0035F688	cTexFlipModifier_writeToReplayFrame	func_0035F688	On Tour cTexFlipModifier::writeToReplayFrame(cBxReplayFrame *) (address-order pair, held); retail typed self cTexFlipModifier*, 2 params
+fn_held_typed_round2	0x0035F7D0	cUVScrollModifier_update	func_0035F7D0	On Tour cUVScrollModifier::update(void) (address-order pair, held); retail typed self cUVScrollModifier*, 1 params
+fn_held_typed_round2	0x0035FB30	cUVScrollModifier_signal	func_0035FB30	On Tour cUVScrollModifier::signal(int, float) (address-order pair, held); retail typed self cUVScrollModifier*, 3 params
+fn_held_typed_round2	0x0035FD98	cUVScrollModifier_writeToReplayFrame	func_0035FD98	On Tour cUVScrollModifier::writeToReplayFrame(cBxReplayFrame *) (address-order pair, held); retail typed self cUVScrollModifier*, 2 params
+fn_held_typed_round2	0x00391CB0	cFont_text	func_00391CB0	On Tour cFont::text(float, float, const char *) (address-order pair, held); retail typed self cFont*, 4 params
+fn_held_typed_round2	0x0039B7B0	cUIMenu_findFirstHighlightable	func_0039B7B0	On Tour cUIMenu::findFirstHighlightable(unsigned char) (address-order pair, held); retail typed self cUIMenu*, 2 params

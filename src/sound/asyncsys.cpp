@@ -38,13 +38,13 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028A230);
+INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_DeInit);
 #ifdef SKIP_ASM
 extern "C" void func_00289DF0(void* self, int a);
 extern "C" void func_003E4FB0(int a);
 void cMemMan_free(void* p);
 
-extern "C" void func_0028A230(cAsyncSys* self)
+extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 {
     func_00289DF0(self, 1);
     while (*(int*)((char*)self + 4) != 0) {

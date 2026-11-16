@@ -264,7 +264,7 @@ struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" unsigned char func_0039B7B0(void* self, int a1);
+extern "C" unsigned char cUIMenu_findFirstHighlightable(void* self, int a1);
 
 struct sVEntry39A928a {
     short delta;
@@ -301,7 +301,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
         }
         char* cur = (char*)self->mpSelected;
         if (cur == 0) {
-            unsigned char idx = func_0039B7B0(((char*)self), 0);
+            unsigned char idx = cUIMenu_findFirstHighlightable(((char*)self), 0);
             if (idx == 0xFF)
                 idx = 0;
             cUIMenu_setSelectedByIndex(((char*)self), idx);

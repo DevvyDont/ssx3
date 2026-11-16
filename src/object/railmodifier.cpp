@@ -284,7 +284,7 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035C4E0);
+INCLUDE_ASM("object/railmodifier", cRailModifier_update);
 #ifdef SKIP_ASM
 struct sBox0035C4E0 {
     float min[4];
@@ -302,7 +302,7 @@ extern "C" void cRailModifier_updateBoundBox(void* self);
 extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox0035C4E0* box, sBox0035C4E0* old);
 
-extern "C" void func_0035C4E0(cRailModifier* self)
+extern "C" void cRailModifier_update(cRailModifier* self)
 {
     sBox0035C4E0* box = &(*(sBox0035C4E0*)&self->BoundBox);
     sBox0035C4E0 old = (*(sBox0035C4E0*)&self->BoundBox);
@@ -312,7 +312,7 @@ extern "C" void func_0035C4E0(cRailModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035C540);
+INCLUDE_ASM("object/railmodifier", cRailModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream0035C540 {
 public:
@@ -324,7 +324,7 @@ public:
     virtual void v05(void* p);
 };
 
-extern "C" void func_0035C540(cRailModifier* self, cStream0035C540* stream)
+extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream0035C540* stream)
 {
     stream->v01((char*)self + 0x10, 0x30);
     stream->v05(self->Instance);
@@ -2463,11 +2463,11 @@ extern "C" void func_0035F3A8(sRailModSelect* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F410);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_update);
 #ifdef SKIP_ASM
 // Advances the rail timer; each whole step moves to the next/previous frame (mode 0), or alternates between a
 // fixed 10-per-second step (mode 1) and a random 25..100% rate (mode 2).
-extern "C" void func_0035F410(cTexFlipModifier* self)
+extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
 {
     if (!(0.0f < self->Speed)) {
         return;
@@ -2508,7 +2508,7 @@ extern "C" void func_0035F410(cTexFlipModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F598);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_signal);
 #ifdef SKIP_ASM
 struct sRailModSelect;
 extern "C" void func_0035F378(sRailModSelect* self, int i);
@@ -2531,7 +2531,7 @@ static inline float fTrunc_F598(float x)
     return r;
 }
 
-extern "C" void func_0035F598(cTexFlipModifier* self, int id, float v)
+extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float v)
 {
     switch (id) {
     case 300:
@@ -2560,7 +2560,7 @@ extern "C" void func_0035F598(cTexFlipModifier* self, int id, float v)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F688);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream0035F688 {
 public:
@@ -2572,7 +2572,7 @@ public:
     virtual void v05(void* p);
 };
 
-extern "C" void func_0035F688(cTexFlipModifier* self, cStream0035F688* stream)
+extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStream0035F688* stream)
 {
     stream->v01((char*)self + 0x0, 0x18);
     stream->v05(self->Instance);
@@ -2656,7 +2656,7 @@ extern "C" void* func_0035F788(cUVScrollModifier* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F7D0);
+INCLUDE_ASM("object/railmodifier", cUVScrollModifier_update);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 
@@ -2687,7 +2687,7 @@ struct sRmState_F7D0 {
     int active;         // 0x40
 };
 
-extern "C" void func_0035F7D0(cUVScrollModifier* self)
+extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
 {
     if (self->TimeOn > 0.0f || self->TimeOff > 0.0f) {
         self->Time += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
@@ -2760,9 +2760,9 @@ extern "C" void func_0035F7D0(cUVScrollModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035FB30);
+INCLUDE_ASM("object/railmodifier", cUVScrollModifier_signal);
 #ifdef SKIP_ASM
-extern "C" void func_0035FB30(cUVScrollModifier* self, int id, float v)
+extern "C" void cUVScrollModifier_signal(cUVScrollModifier* self, int id, float v)
 {
     if (id == 200 || id == 201) {
         if (v >= -1.0f && v <= 1.0f) {
@@ -2867,15 +2867,15 @@ extern "C" sRmMtx_35FC20* func_0035FC20(cUVScrollModifier* self, sRmMtx_35FC20* 
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035FD98);
+INCLUDE_ASM("object/railmodifier", cUVScrollModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_0035FD98_cObj {
+class cUVScrollModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_0035FD98(cUVScrollModifier* self, func_0035FD98_cObj* obj)
+extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cUVScrollModifier_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 0x50);
 }
@@ -4809,56 +4809,56 @@ extern "C" void* func_00360ED0(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360F20);
 #ifdef SKIP_ASM
-extern "C" void func_003530D0(int);
+extern "C" void tModifierBlock_remTransformModifier(int);
 
 extern "C" void func_00360F20(cMoveNode* arg0) {
     int temp_4;
 
     temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
-        func_003530D0(temp_4);
+        tModifierBlock_remTransformModifier(temp_4);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360F48);
 #ifdef SKIP_ASM
-extern "C" void func_00353118(int);
+extern "C" void tModifierBlock_remUVScrollModifier(int);
 
 extern "C" void func_00360F48(cMoveNode* arg0) {
     int temp_4;
 
     temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
-        func_00353118(temp_4);
+        tModifierBlock_remUVScrollModifier(temp_4);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360F70);
 #ifdef SKIP_ASM
-extern "C" void func_00353150(int);
+extern "C" void tModifierBlock_remTexFlipModifier(int);
 
 extern "C" void func_00360F70(cMoveNode* arg0) {
     int temp_4;
 
     temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
-        func_00353150(temp_4);
+        tModifierBlock_remTexFlipModifier(temp_4);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360F98);
 #ifdef SKIP_ASM
-extern "C" void func_00353188(int);
+extern "C" void tModifierBlock_remPhysicsModifier(int);
 
 extern "C" void func_00360F98(cMoveNode* arg0) {
     int temp_4;
 
     temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
-        func_00353188(temp_4);
+        tModifierBlock_remPhysicsModifier(temp_4);
     }
 }
 #endif

@@ -68,8 +68,8 @@ struct cScreenPopup {
     cUIMenu* mpMenu;                // 0x06C [O]; [U] widget "Menu0000"; cUIMenu_setSelectedByIndex in setPrivateDefaultOption
     cUIGroup* mpButtonGroup;        // 0x070 [O]; [U] widget "buttons"
     cUIText* mpMessageText;         // 0x074 [O]; [U] widget "popupText"; cScreenPopup_setPopupMessage
-    cUIText* mpPostText;            // 0x078 [O]; [U] widget "popupPost"; func_001C7040 (handlePostPending)
-    cUIText* mpTitleText;           // 0x07C [O]; [U] widget "popupTitle"; func_001C8678
+    cUIText* mpPostText;            // 0x078 [O]; [U] widget "popupPost"; cScreenPopup_handlePostPending (handlePostPending)
+    cUIText* mpTitleText;           // 0x07C [O]; [U] widget "popupTitle"; cScreenPopup_createTitleBar
     cUIText* mpEnterBox;            // 0x080 [O]; [U] widget "EnterTextBox"; cScreenPopup_handleEntryBox
     cUIText* mpStaticBox;           // 0x084 [O]; [U] widget "StaticTextBoxLabel"
     cUIPair* mpTextBoxPair;         // 0x088 [O]; [U] widget "TextBoxPair"; selecting it opens the keyboard
@@ -80,8 +80,8 @@ struct cScreenPopup {
     float mvAnimateIncrement[3];    // 0x0AC [O] t3Vector; [U] onGainTransition: per-frame scale step (x at 0xAC, y at 0xB0)
     int mbNoEntryOnNext;            // 0x0B8 [O] (On Tour: bool); [U] cScreenPopup_onWidgetEvent sets/clears it,
                                     //       cScreenPopup_onWidgetMenu (case 6) tests it
-    cPopupInfo info;                // 0x0BC [O] cPopupInfo info; [R] constructed by func_001C55F8(self + 0xBC), destroyed by
-                                    //       func_001C5750; getPopupInfo (func_001DDC20) returns self + 0xBC; retail cPopupInfo
+    cPopupInfo info;                // 0x0BC [O] cPopupInfo info; [R] constructed by cPopupInfo_cPopupInfo(self + 0xBC), destroyed by
+                                    //       cPopupInfo__cPopupInfo; getPopupInfo (func_001DDC20) returns self + 0xBC; retail cPopupInfo
                                     //       is 0xCC bytes (data to 0xC4, vptr D_0046CCA8 at 0xC8)
     float mvPosBackWhite[3];        // 0x188 [O]; [U] FillObjectPointers: "whitefg" position
     float mvPosBackRed[3];          // 0x194 [O]; [U] "redbg" position
@@ -105,7 +105,7 @@ struct cScreenPopup {
     float mvOffset[3];              // 0x26C [O]; [U] copied from the popup info's mvOffset (info + 0x9C)
     float mvCurrentScale[3];        // 0x278 [O]; [R] ctor sets (1, 1, 1); [U] passed to scaleBackground
     float mvMenuSize[3];            // 0x284 [O]; [U] setPopupMessage copies mvCurSize into it
-    float mvButtonOffset[3];        // 0x290 [O]; [U] func_001C8758 writes it, func_001C88C8 adds it to mvPosButtons
+    float mvButtonOffset[3];        // 0x290 [O]; [U] cScreenPopup_adjustMenuPosition writes it, cScreenPopup_adjustButtonPosition adds it to mvPosButtons
     float mvLargestOption[3];       // 0x29C [O]; [U] FillOptions keeps the widest option width in x
     cKeyboardPopup* mpKeyboard;     // 0x2A8 [O]; [R] ctor zeroes; [U] onWidgetEvent allocates the cKeyboardPopup into it
     cScreenPopup* mpConfirmPopup;   // 0x2AC [O]; [U] createConfirmationPopup stores the "Confirmation Popup" there
@@ -117,7 +117,7 @@ struct cScreenPopup {
     int mbPassUpdate;               // 0x2C0 [P] getPassUpdate/setPassUpdate (preview 0x178, seen); [U] onUpdate calls
                                     //       the parent's onUpdate when set
     int miDefaultOption;            // 0x2C4 [O]; [R] ctor -1; [U] from the popup info (info + 0xAC)
-    int mbCenterOptions;            // 0x2C8 [O]; [U] from info + 0xB8; func_001C8758 centres the options when set
+    int mbCenterOptions;            // 0x2C8 [O]; [U] from info + 0xB8; cScreenPopup_adjustMenuPosition centres the options when set
     int mbCenterText;               // 0x2CC [O]; [U] from info + 0xBC
     tConfirmElement mtConfirmation[5]; // 0x2D0 [O]; [R] ctor clears 5 x 12 bytes; [U] onWidgetEvent, createConfirmationPopup
     int meType;                     // 0x30C [O] ePopupType; [U] from info + 0x0; -1 = text entry

@@ -163,7 +163,7 @@ extern "C" void* func_0016C800(void* self)
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C888);
 #ifdef SKIP_ASM
 extern "C" void cCameraTriggerMan_purge(void* self);
-extern "C" void func_0016C5E0(void* self, int flags);
+extern "C" void cActiveTriggerList__cActiveTriggerList(void* self, int flags);
 extern "C" void func_0016BEF8(void* self, int flags);
 
 extern "C" void func_0016C888(void* self, int flags)
@@ -173,7 +173,7 @@ extern "C" void func_0016C888(void* self, int flags)
         char* p = (char*)self + 0x14 + 8;
         while ((char*)self + 0x14 != p) {
             p -= 4;
-            func_0016C5E0(p, 0);
+            cActiveTriggerList__cActiveTriggerList(p, 0);
         }
     }
     func_0016BEF8(self, 2);

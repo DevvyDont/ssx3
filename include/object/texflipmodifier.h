@@ -6,8 +6,8 @@
 // On Tour 0xA8 (its tTexFlipMaterialBlockRecord is smaller; the members before it keep On Tour's offsets).
 // EA's source: d:/ssx/code/source/object/texflipmodifier.cpp (preview assert).
 // Methods (src/object/railmodifier.cpp): ctor func_0035F0B8 (tAddTexFlipData, instance), replay ctor func_0035F1A8,
-// setup func_0035F218 (counts materials, fills MaterialBlock), update func_0035F410, signal func_0035F598,
-// writeToReplayFrame func_0035F688.
+// setup func_0035F218 (counts materials, fills MaterialBlock), update cTexFlipModifier_update, signal cTexFlipModifier_signal,
+// writeToReplayFrame cTexFlipModifier_writeToReplayFrame.
 
 #include "layout.h"
 

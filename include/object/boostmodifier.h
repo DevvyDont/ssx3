@@ -5,7 +5,7 @@
 // to MaxSpeed while it touches the instance. Size 0x50: retail cMemMan_alloc(0x50, "BoostModifier") in cMoveNode's addBoost
 // (src/object/movenode.cpp) and the replay loader; On Tour 0x50.
 // Constructors func_00342768 (tAddBoostData, instance) and func_00342808 (replay frame), update cBoostModifier_update,
-// signal cBoostModifier_signal and three vtable slots func_003429E0/func_00342A88/func_00342BA0 (all in the
+// signal cBoostModifier_signal and three vtable slots cBoostModifier_applyDrag/cBoostModifier_applyBoost/cBoostModifier_writeToReplayFrame (all in the
 // intersect/worldsphtree splat unit, 0x342768..0x342C08); destructor and the one-line getPhysicsType/boostStart/boostEnd
 // in src/object/railmodifier.cpp; vtable cBoostModifier_vtbl (0x00490898, 10 slots). EA's source file is unknown.
 // A FLAT layout: cPhysicsModifier (0x0-0x8, object/physicsmodifier.h) + cBoostModifierState (0x10-0x34) + Instance;
@@ -24,9 +24,9 @@ struct cBoostModifier {
                                     //      cBoostModifier_vtbl (0x00490898)
     char unk_08[0x8];               // 0x08 padding (the state is 16-byte aligned)
     // --- cBoostModifierState
-    t4Vector Boost;                 // 0x10 [O]; [R] ctor (sq 0x10); [U] func_00342A88 (lqc2 0x10)
-    float MaxSpeed;                 // 0x20 [O]; [R] ctor; [U] func_00342A88
-    float Drag;                     // 0x24 [O]; [R] ctor; [U] update, func_003429E0
+    t4Vector Boost;                 // 0x10 [O]; [R] ctor (sq 0x10); [U] cBoostModifier_applyBoost (lqc2 0x10)
+    float MaxSpeed;                 // 0x20 [O]; [R] ctor; [U] cBoostModifier_applyBoost
+    float Drag;                     // 0x24 [O]; [R] ctor; [U] update, cBoostModifier_applyDrag
     int BoostTime;                  // 0x28 [O]; [R] ctor; [U] signal
     int Time;                       // 0x2C [O]; [R] ctor; [U] update counts it, signal resets it
     int Type;                       // 0x30 [O]; [R] ctor; [U] update

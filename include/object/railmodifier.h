@@ -7,8 +7,8 @@
 // Size 0x90: retail cMemMan_alloc(0x90, "RailModifier") (src/object/movenode.cpp, src/object/modifierblock.cpp),
 // On Tour 0x90. EA's source path: d:/ssx/code/source/object/railmodifier.cpp (preview assert).
 // Constructors cRailModifier_cRailModifier (tAddRailData, tInstanceRecord*) and cRailModifier_cRailModifier1 (replay
-// frame), destructor func_0035BD70 (all in src/object/splinemodifier.cpp); vtable cRailModifier_vtbl (0x004911D0,
-// 4 slots in this order: ~cRailModifier func_0035BD70, writeToReplayFrame func_0035C540, update func_0035C4E0,
+// frame), destructor cRailModifier__cRailModifier (all in src/object/splinemodifier.cpp); vtable cRailModifier_vtbl (0x004911D0,
+// 4 slots in this order: ~cRailModifier cRailModifier__cRailModifier, writeToReplayFrame cRailModifier_writeToReplayFrame, update cRailModifier_update,
 // render func_0035CFE0); base vtable cRailLink_vtbl (0x00491200: ~cRailLink, writeToReplayFrame).
 // The bases are staged as their own headers: object/raillink.h (cRailLink) and object/railspacenode.h (the Node).
 //
@@ -19,7 +19,7 @@
 //   [U] how retail code uses the field (C bodies and asm);
 //   [O] SSX On Tour's DWARF: cRailLink {Next 0x0, Prev 0x4} (0xC), cRailModifierState {BoundBox 0x0, SplineId 0x20,
 //       Mesh 0x24} (0x30), cRailModifier {Instance 0x40, Node 0x44, XForm 0x50} (0x90); On Tour's
-//       writeToReplayFrame writes 0x30 bytes from +0x10 (the state) and then Instance, as retail's func_0035C540.
+//       writeToReplayFrame writes 0x30 bytes from +0x10 (the state) and then Instance, as retail's cRailModifier_writeToReplayFrame.
 //       Every On Tour offset equals retail.
 // tBoundBox comes from world/worldview.h until it moves to a bx header.
 
@@ -39,11 +39,11 @@ struct cRailModifier {
     void** mVtbl;                 // 0x08 [R] ctors store cRailModifier_vtbl; the destructor stores it, then
                                   //      cRailLink_vtbl before unlinking
     char unk_0C[0x4];             // 0x0C padding (BoundBox is 16-byte aligned)
-    // --- cRailModifierState (On Tour 0x30; [R] cRailModifier_cRailModifier1 reads and func_0035C540 writes these
+    // --- cRailModifierState (On Tour 0x30; [R] cRailModifier_cRailModifier1 reads and cRailModifier_writeToReplayFrame writes these
     //     0x30 bytes from +0x10)
     tBoundBox BoundBox;           // 0x10 [O]; [R] ctor: the spline's box padded by 100 on each side;
                                   //      [U] cRailModifier_updateBoundBox writes it (sq 0x10/0x20), update
-                                  //      (func_0035C4E0) passes old and new box to nash_Nash_movenode
+                                  //      (cRailModifier_update) passes old and new box to nash_Nash_movenode
     unsigned int SplineId;        // 0x30 [O] tResourceID (low 8 bits: resource set, >> 8: index); [R] ctor: -1, then
                                   //      the descriptor's id (+0x4); [U] splineIntersect (func_0035C698) and the
                                   //      ctors/destructor look the spline up through it

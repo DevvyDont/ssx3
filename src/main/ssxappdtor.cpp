@@ -2165,9 +2165,9 @@ extern "C" int func_002379C8(int);
 extern "C" int func_00270280(int);
 extern "C" void func_0026F4A8(int);
 extern "C" int func_0026CE50(int);
-extern "C" void func_00354F98(void*, int);
+extern "C" void cBucketMan_updateBucket(void*, int);
 extern "C" void cBucketMan_mergeBucket(void*, int);
-extern "C" void func_00355028(void*, int);
+extern "C" void cBucketMan_applyBucket(void*, int);
 extern "C" void func_00309270(int);
 extern "C" void func_002294C8(int);
 extern "C" void func_003440C8(int);
@@ -2216,31 +2216,31 @@ extern "C" void func_00244E60(void* self)
     }
     if (!skip) {
         if ((D_004A2A50 & 2) == 0)
-            func_00354F98(obj, 1);
-        func_00354F98(obj, 5);
-        func_00354F98(obj, 6);
+            cBucketMan_updateBucket(obj, 1);
+        cBucketMan_updateBucket(obj, 5);
+        cBucketMan_updateBucket(obj, 6);
         if ((D_004A2A50 & 2) == 0)
-            func_00355028(obj, 1);
+            cBucketMan_applyBucket(obj, 1);
         {
             char* c = *(char**)(s + 0xC);
             sVE_244E60* vt = *(sVE_244E60**)(c + 0xCC);
             ((void (*)(void*))vt[3].fn)(c + vt[3].delta);
         }
         if ((D_004A2A50 & 0x10) == 0)
-            func_00354F98(obj, 2);
+            cBucketMan_updateBucket(obj, 2);
         if ((D_004A2A50 & 4) == 0)
-            func_00354F98(obj, 3);
+            cBucketMan_updateBucket(obj, 3);
         func_00309270(*(int*)(s + 0x30));
         func_002294C8(*(int*)(s + 0x38));
         func_003440C8(*(int*)(s + 0x3C));
         func_00357BF8(*(int*)(s + 0x40));
         cBucketMan_mergeBucket(obj, 1);
     } else {
-        func_00354F98(obj, 5);
+        cBucketMan_updateBucket(obj, 5);
         if ((D_004A2A50 & 4) == 0)
-            func_00354F98(obj, 3);
+            cBucketMan_updateBucket(obj, 3);
     }
-    func_00354F98(obj, 4);
+    cBucketMan_updateBucket(obj, 4);
     {
         int m = **(int**)(s + 0x28);
         int ok = m != 0 && m < 10;

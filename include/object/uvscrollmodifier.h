@@ -6,8 +6,8 @@
 // (src/object/movenode.cpp) and the replay loader (src/object/modifierblock.cpp); On Tour 0x50 (all of it is
 // cUVScrollModifierState, which the replay frame stores whole).
 // Methods (src/object/railmodifier.cpp): ctor func_0035F6E8 (tAddUVScrollData), replay ctor func_0035F788, update
-// func_0035F7D0 (tModifierBlock preUpdate), signal func_0035FB30, getTextureMat func_0035FC20 (cMoveNode_render/
-// renderModel), writeToReplayFrame func_0035FD98. Every On Tour offset equals retail (On: 4-byte bool).
+// cUVScrollModifier_update (tModifierBlock preUpdate), signal cUVScrollModifier_signal, getTextureMat func_0035FC20 (cMoveNode_render/
+// renderModel), writeToReplayFrame cUVScrollModifier_writeToReplayFrame. Every On Tour offset equals retail (On: 4-byte bool).
 
 #include "layout.h"
 #include "bx/math3d.h"

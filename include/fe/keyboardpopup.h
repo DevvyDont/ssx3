@@ -4,11 +4,11 @@
 // cKeyboardPopup: the front end's on-screen keyboard (84 keys in 6 rows of 14, screen "Fullkeyboard"), opened by a
 // cScreenPopup's text box and by the profile/lodge/trophy screens. A cUIState; its methods are in fe/fepopup.cpp.
 // Retail vtable _vt$14cKeyboardPopup = cKeyboardPopup_vtbl. Created with cMemMan_alloc(0x444, "cKeyboardPopup", ...) +
-// cKeyboardPopup(cUIEngine*, cUIState* parent, bool Password, unsigned char CtrlBits) = func_001CB030; destroyed by
+// cKeyboardPopup(cUIEngine*, cUIState* parent, bool Password, unsigned char CtrlBits) = cKeyboardPopup_cKeyboardPopup; destroyed by
 // cKeyboardPopup__cKeyboardPopup.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
-//   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = func_0039E318 (ui/uiscreen.cpp), func_001CB030,
+//   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = func_0039E318 (ui/uiscreen.cpp), cKeyboardPopup_cKeyboardPopup,
 //       the destructor, and the allocation size (0x444 at every site: fepopup, feasyncfile, festateriderbio, ...);
 //   [P] the July 2003 preview's inline accessors, carried to retail by tools/layout_xlate.py;
 //   [U] how matched retail code uses the field (UI object names are strings read from the retail ELF);
@@ -31,12 +31,12 @@ struct cKeyboardPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (func_001CB030, destructor)
+    void** mVtbl;                   // 0x008 [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (cKeyboardPopup_cKeyboardPopup, destructor)
     // --- cUIState (On Tour: size 0x48, same offsets)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] state stack at mpEngine + 0x18
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] func_001CB030 stores its CtrlBits argument (sb)
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] cKeyboardPopup_cKeyboardPopup stores its CtrlBits argument (sb)
     char unk_016[0x2];              // 0x016 padding
     int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218
@@ -54,10 +54,10 @@ struct cKeyboardPopup {
     int mbClearOnFirst;             // 0x054 [O]; [R] ctor zeroes; [U] cKeyboardPopup_pressKey presses "clear" (key 70)
                                     //       before the first key, then resets it
     int mbDisableForFirst;          // 0x058 [O]; [R] ctor zeroes; [U] when set the space key (75) is enabled only once
-                                    //       the text is non-empty (setInputText, pressKey, func_001CE2A8)
+                                    //       the text is non-empty (setInputText, pressKey, cKeyboardPopup_fillSelectableKeys)
     int mbAcceptText;               // 0x05C [O]; [R] ctor zeroes; [U] pressKey sets it on the accept key (55)
     int miMaxCharacters;            // 0x060 [P] getMaxCharacters (preview 0x44, seen); [R] ctor 0x3F; [U] setMaxCharacters
-                                    //       (func_001CD088) clamps to 0..0x3F
+                                    //       (cKeyboardPopup_setMaxCharacters) clamps to 0..0x3F
     int miMinCharacters;            // 0x064 [O]; [R] ctor zeroes; [U] setMinCharacters (func_001CD0B0); the accept key is
                                     //       disabled while the text is shorter
     int mbCapsOn;                   // 0x068 [O]; [R] ctor 1 (or bit 1 of D_004A33F0 + 0x88); [U] key 42 toggles it
