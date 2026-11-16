@@ -93,7 +93,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00147318(void* self, int a1);
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
-extern void* D_0046BFD0[];
+extern void* cFEStateProfileLoad_vtbl[];
 extern int D_004A15E8;
 extern char D_00535BC8[];
 
@@ -101,7 +101,7 @@ extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
 {
     func_001D53B0(self, a1, 0);
     *(int*)((char*)self + 0xC) = 0x23;
-    *(void***)((char*)self + 0x8) = D_0046BFD0;
+    *(void***)((char*)self + 0x8) = cFEStateProfileLoad_vtbl;
     D_004A15E8 = a2;
     *(int*)((char*)self + 0x1CC) = 0;
     *(int*)((char*)self + 0x230) = 0;
@@ -1269,7 +1269,7 @@ extern "C" void func_00190768(void* self)
 //100%
 INCLUDE_ASM("fe/festateprofile", func_00190858);
 #ifdef SKIP_ASM
-extern void* D_0046B160[];
+extern void* cFEStateRiderBio_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
@@ -1277,7 +1277,7 @@ extern "C" void* func_00190858(void* self, int a1, int a2)
 {
     signed char idx = a2;
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_0046B160;
+    *(void***)((char*)self + 0x8) = cFEStateRiderBio_vtbl;
     *(int*)((char*)self + 0xC) = 0xF;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);

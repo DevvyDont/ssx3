@@ -54,7 +54,7 @@ extern "C" void func_001A0420(void* p, int flags);
 extern void* D_004A289C;
 extern void* D_0046D878[];
 extern void* D_0046D970[];
-extern void* D_0045B8B0[];
+extern void* cSimpleCamera_vtbl[];
 
 extern "C" void func_001957D0(void* self, int flags)
 {
@@ -68,7 +68,7 @@ extern "C" void func_001957D0(void* self, int flags)
     }
     func_0019CE20((char*)self + 0x1A70, 2);
     func_001A0420((char*)self + 0xB0, 2);
-    *(void***)((char*)self + 0xA0) = D_0045B8B0;
+    *(void***)((char*)self + 0xA0) = cSimpleCamera_vtbl;
     *(void***)((char*)self + 0x0) = D_0046D970;
     if (flags & 1) {
         operator_delete((int*)self);

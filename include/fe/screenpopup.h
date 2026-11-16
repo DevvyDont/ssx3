@@ -3,7 +3,7 @@
 
 // cScreenPopup: the front end's generic message/confirmation popup (title, message, up to 5 options, an optional
 // text-entry box that opens a cKeyboardPopup). A cUIState; its methods are in fe/fepopup.cpp. Retail vtable
-// D_0046CBD8 (stored by cScreenPopup_cScreenPopup and the default ctor func_001DDBD0). Created with
+// cScreenPopup_vtbl (stored by cScreenPopup_cScreenPopup and the default ctor func_001DDBD0). Created with
 // cMemMan_alloc(0x360, "Confirmation Popup") + cScreenPopup_cScreenPopup (cScreenPopup_createConfirmationPopup,
 // feasyncfile.cpp); cFEPopupConfirm (fememcardcallbacks.cpp) derives from it.
 //
@@ -44,7 +44,7 @@ struct cScreenPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cScreenPopup vtable D_0046CBD8
+    void** mVtbl;                   // 0x008 [R] cScreenPopup vtable cScreenPopup_vtbl
     // --- cUIState (On Tour: size 0x48, same offsets)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName

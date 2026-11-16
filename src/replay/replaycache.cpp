@@ -1873,11 +1873,11 @@ extern "C" float func_00272570(float* p, float t)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002725B8);
 #ifdef SKIP_ASM
-extern void* D_00481A10[];
+extern void* cScriptPlayerChannelSpline_vtbl[];
 
 extern "C" void* func_002725B8(void* self)
 {
-    *(void***)((char*)self + 0x4) = D_00481A10;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelSpline_vtbl;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -2300,11 +2300,11 @@ extern "C" void func_00272D40(void) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272D68);
 #ifdef SKIP_ASM
-extern void* D_004819B0[];
+extern void* cScriptPlayerChannelBlock_vtbl[];
 
 extern "C" void* func_00272D68(void* self)
 {
-    *(void***)((char*)self + 0x4) = D_004819B0;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelBlock_vtbl;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -2322,11 +2322,11 @@ INCLUDE_ASM("replay/replaycache", func_00272DA0);
 #ifdef SKIP_ASM
 extern "C" void func_00272EC0(void* self);
 extern "C" void* func_002724E8(void* self);
-extern void* D_004819B0[];
+extern void* cScriptPlayerChannelBlock_vtbl[];
 
 extern "C" void func_00272DA0(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004819B0;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelBlock_vtbl;
     func_00272EC0(self);
     if (flags & 1) {
         func_002724E8(self);
@@ -2545,11 +2545,11 @@ extern "C" void func_00273140(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00273180);
 #ifdef SKIP_ASM
-extern void* D_00481950[];
+extern void* cScriptPlayerChannelEvent_vtbl[];
 
 extern "C" void* func_00273180(void* self)
 {
-    *(void***)((char*)self + 0x4) = D_00481950;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelEvent_vtbl;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -2567,11 +2567,11 @@ INCLUDE_ASM("replay/replaycache", func_002731B8);
 #ifdef SKIP_ASM
 extern "C" void func_002732C8(void* self);
 extern "C" void* func_002724E8(void* self);
-extern void* D_00481950[];
+extern void* cScriptPlayerChannelEvent_vtbl[];
 
 extern "C" void func_002731B8(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00481950;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelEvent_vtbl;
     func_002732C8(self);
     if (flags & 1) {
         func_002724E8(self);
@@ -2725,11 +2725,11 @@ extern "C" void func_00273468(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002734A8);
 #ifdef SKIP_ASM
-extern void* D_004818F0[];
+extern void* cScriptPlayerChannelObject_vtbl[];
 
 extern "C" void* func_002734A8(void* self)
 {
-    *(void***)((char*)self + 0x4) = D_004818F0;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelObject_vtbl;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -2747,11 +2747,11 @@ INCLUDE_ASM("replay/replaycache", func_002734E0);
 #ifdef SKIP_ASM
 extern "C" void func_00273630(void* self);
 extern "C" void* func_002724E8(void* self);
-extern void* D_004818F0[];
+extern void* cScriptPlayerChannelObject_vtbl[];
 
 extern "C" void func_002734E0(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004818F0;
+    *(void***)((char*)self + 0x4) = cScriptPlayerChannelObject_vtbl;
     func_00273630(self);
     if (flags & 1) {
         func_002724E8(self);

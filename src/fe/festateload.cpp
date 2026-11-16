@@ -241,7 +241,7 @@ INCLUDE_ASM("fe/festateload", func_00186A08);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D53B0(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
-extern void* D_0046B570[];
+extern void* cFEStateMemCard_vtbl[];
 // D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
 extern void* D_004A14B8_K186A08 __asm__("D_004A14B8");
 extern int D_004A14B4;
@@ -302,7 +302,7 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
 {
     func_001D53B0(self, engine, 2);
     int one = 1;
-    self->vtbl = D_0046B570;
+    self->vtbl = cFEStateMemCard_vtbl;
     D_004A14B8_K186A08 = self;
     D_004A14B4 = 0;
     D_004A14BC = 0;
@@ -338,13 +338,13 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
 //100%
 INCLUDE_ASM("fe/festateload", func_00186B18);
 #ifdef SKIP_ASM
-extern void* D_0046B570[];
+extern void* cFEStateMemCard_vtbl[];
 extern int D_004A14B8;
 extern "C" void func_001D5428(void* self, int flags);
 
 extern "C" void func_00186B18(void* self, int flags)
 {
-    *(void***)((char*)self + 8) = D_0046B570;
+    *(void***)((char*)self + 8) = cFEStateMemCard_vtbl;
     D_004A14B8 = 0;
     func_001D5428(self, flags);
 }

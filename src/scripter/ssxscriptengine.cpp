@@ -1599,7 +1599,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027A4A0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* func_002E4D70(void* self);
-extern void* D_004880C0[];
+extern void* cFade_TObj_vtbl[];
 // PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
 extern "C" void* func_002E4CE8_sz(unsigned size) __asm__("func_002E4CE8");
 
@@ -1622,7 +1622,7 @@ extern "C" void* func_002EBE20(void* self, const sColor_27A4A0* col);
 static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
 {
     func_002E4D70(p);
-    p->vt = D_004880C0;
+    p->vt = cFade_TObj_vtbl;
     p->c = col;
     return p;
 }
@@ -2834,14 +2834,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_cScriptObjGS);
 void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
 extern void* D_00482318[];
-extern void* D_004822E0[];
+extern void* cScriptObjGS_vtbl[];
 
 extern "C" void* cScriptObjGS_cScriptObjGS(void* self)
 {
     cScriptEntity_cScriptEntity(self);
     cScriptObject_cScriptObject((char*)self + 0xC, 4);
     *(void***)((char*)self + 0x18) = D_00482318;
-    *(void***)self = D_004822E0;
+    *(void***)self = cScriptObjGS_vtbl;
     return self;
 }
 #endif
@@ -3788,7 +3788,7 @@ extern "C" int func_0027D578(sScriptEng0050* self, int key, int* out, int max)
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D5E8);
 #ifdef SKIP_ASM
 void* cScriptObject_cScriptObject(void*, int);
-extern char D_004820B8[];
+extern char cScriptObjCamera_vtbl[];
 extern char t4mat_Identity[];
 
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
@@ -3796,7 +3796,7 @@ extern char t4mat_Identity[];
 extern "C" void* func_0027D5E8(void* self, int a1)
 {
     cScriptObject_cScriptObject(self, 1);
-    *(void**)((char*)self + 0xC) = D_004820B8;
+    *(void**)((char*)self + 0xC) = cScriptObjCamera_vtbl;
     *(int*)((char*)self + 0x20) = -1;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0;
@@ -4675,7 +4675,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_cScriptObjEvent);
 void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
 extern void* D_00482298[];
-extern void* D_00482260[];
+extern void* cScriptObjEvent_vtbl[];
 
 struct sScrTrig05B8 {
     int id;         // 0x0
@@ -4697,7 +4697,7 @@ extern "C" void* cScriptObjEvent_cScriptObjEvent(sScrObj05B8* self)
     cScriptEntity_cScriptEntity(self);
     cScriptObject_cScriptObject((char*)self + 0xC, 5);
     *(void***)((char*)self + 0x18) = D_00482298;
-    *(void***)self = D_00482260;
+    *(void***)self = cScriptObjEvent_vtbl;
     self->field_0xEC = 0;
     self->field_0xF0 = 0;
     self->field_0xF4 = 0;
@@ -5779,14 +5779,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine_cBXScriptEngine);
 extern "C" void* func_0027CDD0(void* self);
 extern "C" void cBXScriptEngine_ResetInstVars(void* self);
 extern char D_00482450[];
-extern char D_004824B8[];
+extern char cBXScriptEngine_vtbl[];
 extern void* D_004A34E8;
 
 extern "C" void* cBXScriptEngine_cBXScriptEngine(void* self)
 {
     func_0027CDD0(self);
     *(void**)((char*)self + 0x2AC) = D_00482450;
-    *(void**)((char*)self + 0x2A8) = D_004824B8;
+    *(void**)((char*)self + 0x2A8) = cBXScriptEngine_vtbl;
     D_004A34E8 = self;
     *(int*)((char*)self + 0x2B0) = 0;
     *(int*)((char*)self + 0x2B4) = 0;
@@ -5801,13 +5801,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine__cBXScriptEngine);
 extern "C" void func_0027CE58(void* self, int flags);
 extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
 extern char D_00482450[];
-extern char D_004824B8[];
+extern char cBXScriptEngine_vtbl[];
 extern void* D_004A34E8;
 
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags)
 {
     *(void**)((char*)self + 0x2AC) = D_00482450;
-    *(void**)((char*)self + 0x2A8) = D_004824B8;
+    *(void**)((char*)self + 0x2A8) = cBXScriptEngine_vtbl;
     cBXScriptEngine_PurgeBXEngine(self);
     D_004A34E8 = 0;
     func_0027CE58(self, flags);

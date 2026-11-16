@@ -8,7 +8,7 @@
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. The real chain is
 //   cObjNode (0x00-0x10: links + vptr) -> cTypeObjNode (0x10-0x14) -> cSortObjNode (0x14-0x18) -> cInstanceNode
 // (retail ctors chain cObjNode_cObjNode__FP8cObjNodePv -> func_00354720 -> func_00354850 -> func_0034FB00, each
-// storing its own vtable at 0xC: D_00491F00, D_00491E80, D_00491E00, D_00491C80 = _vt$13cInstanceNode).
+// storing its own vtable at 0xC: cObjNode_vtbl, cTypeObjNode_vtbl, cSortObjNode_vtbl, cInstanceNode_vtbl = _vt$13cInstanceNode).
 // Evidence tags:
 //   [P] the July 2003 preview's inline accessors (getInstance lw 0x18, getSortIndex lw 0x14, getType lh 0x10,
 //       is/set/resetRootTransformDirty lhu/sh 0x12 bit 0, cObjNode() zeroing 0x4/0x8); preview == retail here;
@@ -29,7 +29,7 @@ struct cInstanceNode {
                                  //       cBucketMan_first/cBucketMan_next walk +0x4 from the head sentinel
     cObjNode* Prev;              // 0x008 [O] cObjNode::Prev; [P] cObjNode() zeroes it; [U] back link (cBucketMan_add,
                                  //       func_00354F20 walk +0x8 towards the head)
-    void** mVtbl;                // 0x00C [R] each ctor's vtable (D_00491C80 in func_0034FB00/cInstanceNode_cInstanceNode)
+    void** mVtbl;                // 0x00C [R] each ctor's vtable (cInstanceNode_vtbl in func_0034FB00/cInstanceNode_cInstanceNode)
     // --- cTypeObjNode (cTypeObjNodeState) ---
     short ObjNodeType;           // 0x010 [P] getType/isType (lh 0x10); [O] cTypeObjNodeState::ObjNodeType; [R] func_00354720
                                  //       stores the tObjNodeType arg and counts it in D_0044AFF0 (cTypeObjNode::ObjNodeCount)

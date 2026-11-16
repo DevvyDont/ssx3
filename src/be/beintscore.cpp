@@ -41,7 +41,7 @@ void* cBEScoreInterface_getThis()
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_cBEScoreInterface);
 #ifdef SKIP_ASM
 extern "C" void func_001549E8(void* self);
-extern void* D_0045ACA8[];
+extern void* cBEScoreInterface_vtbl[];
 
 // PORT: the unit declares cBEScoreInterface_cBEScoreInterface as returning void (used by getThis);
 // the body returns self, so it is bound to the symbol with an asm label.
@@ -49,7 +49,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 
 void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
 {
-    *(void***)((char*)self + 0xC) = D_0045ACA8;
+    *(void***)((char*)self + 0xC) = cBEScoreInterface_vtbl;
     func_001549E8(self);
     return self;
 }

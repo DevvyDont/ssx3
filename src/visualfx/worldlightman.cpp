@@ -1940,12 +1940,12 @@ void cVisualEffect_deferredRender(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
 #ifdef SKIP_ASM
-extern void* D_00488648[];
+extern void* cAvalanche_vtbl[];
 extern "C" void* func_002D6410(void* self);
 
 extern "C" void* func_002F7C38(void* self)
 {
-    *(void***)self = D_00488648;
+    *(void***)self = cAvalanche_vtbl;
     func_002D6410(self);
     return self;
 }
@@ -2467,13 +2467,13 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8060);
 #ifdef SKIP_ASM
 struct sLightVec_002F8060 { float x, y, z, w; };
 
-extern void* D_004880C0[];
+extern void* cFade_TObj_vtbl[];
 void func_002E4D70(void* self);
 
 extern "C" void* func_002F8060(void* self, sLightVec_002F8060 v)
 {
     func_002E4D70(self);
-    *(void***)self = D_004880C0;
+    *(void***)self = cFade_TObj_vtbl;
     *(sLightVec_002F8060*)((char*)self + 4) = v;
     return self;
 }
@@ -2688,12 +2688,12 @@ extern "C" void func_002F82E0(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8310);
 #ifdef SKIP_ASM
-extern void* D_00487DA0[];
+extern void* cVisualEffectsMan_vtbl[];
 void operator_delete(int*);
 
 extern "C" void func_002F8310(void* self, int flags)
 {
-    *(void***)((char*)self + 0x44) = D_00487DA0;
+    *(void***)((char*)self + 0x44) = cVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

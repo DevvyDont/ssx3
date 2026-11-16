@@ -12,7 +12,7 @@ extern "C" int func_00326CA0(void* pads, int port);
 extern "C" char* func_00326CC8(void* pads, int port);
 extern char* PadCache;
 extern char D_0047B8C8[];
-extern void* D_0047D8F0[];
+extern void* cInitLoadScreen_vtbl[];
 
 struct sModule_232348 {
     void** vt;
@@ -37,7 +37,7 @@ extern "C" void cPreStartScreen_update(sPreStart_232348* self)
     if (*(int*)((char*)SSXApp + 4) == 0) {
         sModule_232348* m = (sModule_232348*)cMemMan_alloc(0xC, D_0047B8C8, 0x100, 0);
         cAppMan* app = (cAppMan*)SSXApp;
-        m->vt = D_0047D8F0;
+        m->vt = cInitLoadScreen_vtbl;
         m->f4 = 0;
         m->f8 = 0;
         self->next = m;
@@ -254,7 +254,7 @@ void func_00232718(void* self)
 }
 #endif
 
-extern void* D_0047D8A8[];
+extern void* cPreGameLoadScreen_vtbl[];
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_cPreGameLoadScreen__FPv);
@@ -262,7 +262,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_cPreGameLoadScreen__
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
-    *(int*)self = (int)(void*)D_0047D8A8;
+    *(int*)self = (int)(void*)cPreGameLoadScreen_vtbl;
     return self;
 }
 #endif
@@ -503,7 +503,7 @@ extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
 
 
 extern char D_004A2AB8[];
-extern void* D_0047D740[];
+extern void* cFELoadScreen_vtbl[];
 
 struct sModule_232A00 {
     void** vt;
@@ -538,7 +538,7 @@ extern "C" void cPreFELoadScreen_update(void* self)
         sModule_232A00* m = (sModule_232A00*)cMemMan_alloc(0x1C, D_004A2AB8, 0x100, 0);
         func_00231CD0_r(m);
         tmp = (unsigned int)m;
-        m->vt = D_0047D740;
+        m->vt = cFELoadScreen_vtbl;
         m->fC = 0;
         m->f10 = 0;
         m->f14 = 0;
@@ -630,7 +630,7 @@ extern char D_0047B9E0[];
 extern char D_0047B9F0[];
 extern char D_0047B978[];
 extern char D_0047BA00[];
-extern char D_0046D1D0[];
+extern char cFEInput_vtbl[];
 extern char D_0047CA18[];
 
 struct sNode_232B28 {
@@ -662,7 +662,7 @@ extern "C" void func_00232B28(void* self)
     (*(sUI_232B28**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
     sNode_232B28* n = (sNode_232B28*)operator new(0x1C, D_0047B9F0, 0x100, 0);
     n->f4 = 0;
-    n->f8 = D_0046D1D0;
+    n->f8 = cFEInput_vtbl;
     n->f18 = 0;
     n->fC = 0;
     n->f10 = 0;
@@ -856,7 +856,7 @@ extern char D_0047B9F0[];
 extern char D_0047BD38[];
 extern char D_0047BD50[];
 extern char D_0047BD68[];
-extern char D_0046D1D0[];
+extern char cFEInput_vtbl[];
 extern char D_0047C878[];
 extern char D_0047C7A8[];
 extern char D_0047C948[];
@@ -931,7 +931,7 @@ extern "C" void func_00232E20(void* self)
     (*(sUI_2E20**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
     sNode_2E20* n = (sNode_2E20*)operator new(0x1C, D_0047B9F0, 0x100, 0);
     n->f4 = 0;
-    n->f8 = D_0046D1D0;
+    n->f8 = cFEInput_vtbl;
     n->f18 = 0;
     n->fC = 0;
     n->f10 = 0;

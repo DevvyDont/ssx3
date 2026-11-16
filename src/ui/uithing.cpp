@@ -246,7 +246,7 @@ extern "C" void func_003A0330(void* self, int a1, int a2)
 INCLUDE_ASM("ui/uithing", func_003A0348);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self);
-extern void* D_00494588[];
+extern void* cUIText_vtbl[];
 
 struct func_003A0348_sQuad {
     int a, b, c, d;
@@ -270,7 +270,7 @@ struct func_003A0348_sObj {
 extern "C" func_003A0348_sObj* func_003A0348(func_003A0348_sObj* self)
 {
     func_0039FB30(self);
-    *(void***)((char*)self + 8) = D_00494588;
+    *(void***)((char*)self + 8) = cUIText_vtbl;
     self->flags = (self->flags | 4) & 0x87;
     self->fA8 = 0;
     self->fAC = 0;

@@ -91,3 +91,243 @@ ps2_addr	name	previous	source	evidence
 004A4600	cScreenTint_m_XNColourG	D_004A4600	On Tour cScreenTint::m_XNColourG (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
 004A4604	cScreenTint_m_XNColourB	D_004A4604	On Tour cScreenTint::m_XNColourB (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
 004A28A4	ScriptEngine	D_004A28A4	On Tour ScriptEngine (cSSXScriptEngine*)	[R] cSSXApp init stores cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, "ScriptEngine")) here; shutdown DeInitOnce + clears it; On Tour votes 10/15 + 3/4
+00458338	cPlayer_vtbl	D_00458338	retail vtable (tools/vtables.py)	[C] stored by cPlayer_cPlayer; g++ 2.95 symbol _vt$7cPlayer
+00458458	cRiderAnim_vtbl	D_00458458	retail vtable (tools/vtables.py)	[M] own method(s) cRiderAnim__cRiderAnim__FPv; g++ 2.95 symbol _vt$10cRiderAnim
+00458488	cAI_vtbl	D_00458488	retail vtable (tools/vtables.py)	[M] own method(s) cAI_InitPlayers, cAI_readFromReplayFrame; g++ 2.95 symbol _vt$3cAI
+004584D8	cShutdownHandler_vtbl	D_004584D8	retail vtable (tools/vtables.py)	[M] own method(s) cShutdownHandler_OnGainState; g++ 2.95 symbol _vt$16cShutdownHandler
+00458528	cAIStateHandler_vtbl	D_00458528	retail vtable (tools/vtables.py)	[M] own method(s) cAIStateHandler_OnLoseState__FPv; g++ 2.95 symbol _vt$15cAIStateHandler
+004585F0	cComputer_vtbl	D_004585F0	retail vtable (tools/vtables.py)	[C] stored by cComputer_cComputer; g++ 2.95 symbol _vt$9cComputer
+00459CC8	cBeing_vtbl	D_00459CC8	retail vtable (tools/vtables.py)	[D] slot 1 cBeing__cBeing; also stored by cRider_cRider; g++ 2.95 symbol _vt$6cBeing
+0045ABB8	cBEPostRaceState_vtbl	D_0045ABB8	retail vtable (tools/vtables.py)	[M] own method(s) cBEPostRaceState_purgeState; g++ 2.95 symbol _vt$16cBEPostRaceState
+0045ABE8	cBERaceState_vtbl	D_0045ABE8	retail vtable (tools/vtables.py)	[M] own method(s) cBERaceState_purgeState; g++ 2.95 symbol _vt$12cBERaceState
+0045AC18	cBEPreRaceState_vtbl	D_0045AC18	retail vtable (tools/vtables.py)	[M] own method(s) cBEPreRaceState_purgeState; g++ 2.95 symbol _vt$15cBEPreRaceState
+0045ACA8	cBEScoreInterface_vtbl	D_0045ACA8	retail vtable (tools/vtables.py)	[C] stored by cBEScoreInterface_cBEScoreInterface; g++ 2.95 symbol _vt$17cBEScoreInterface
+0045AD68	cBEStatInterface_vtbl	D_0045AD68	retail vtable (tools/vtables.py)	[M] own method(s) cBEStatInterface_discard, cBEStatInterface_submit; g++ 2.95 symbol _vt$16cBEStatInterface
+0045AE28	cBENewPlayerInterface_vtbl	D_0045AE28	retail vtable (tools/vtables.py)	[C] stored by cBENewPlayerInterface_cBENewPlayerInterface__FP25cBENewPlayerInterfaceCtor; g++ 2.95 symbol _vt$21cBENewPlayerInterface
+0045B888	cCamera_vtbl	D_0045B888	retail vtable (tools/vtables.py)	[C] stored by cCamera_cCamera; g++ 2.95 symbol _vt$7cCamera
+0045B8B0	cSimpleCamera_vtbl	D_0045B8B0	retail vtable (tools/vtables.py)	[D] slot 1 cSimpleCamera__cSimpleCamera; g++ 2.95 symbol _vt$13cSimpleCamera
+0045B8D8	cManualCameraController_vtbl	D_0045B8D8	retail vtable (tools/vtables.py)	[C] stored by cManualCameraController_cManualCameraController; g++ 2.95 symbol _vt$23cManualCameraController
+0045B908	cChaseCameraController_vtbl	D_0045B908	retail vtable (tools/vtables.py)	[C] stored by cChaseCameraController_cChaseCameraController; g++ 2.95 symbol _vt$22cChaseCameraController
+0045B938	cCameraController_vtbl	D_0045B938	retail vtable (tools/vtables.py)	[D] slot 1 cCameraController__cCameraController; g++ 2.95 symbol _vt$17cCameraController
+0045BCA8	cEditorCameraAlgorithm_vtbl	D_0045BCA8	retail vtable (tools/vtables.py)	[C] stored by cEditorCameraAlgorithm_cEditorCameraAlgorithm; g++ 2.95 symbol _vt$22cEditorCameraAlgorithm
+0045BD10	cManualCameraAlgorithm_vtbl	D_0045BD10	retail vtable (tools/vtables.py)	[C] stored by cManualCameraAlgorithm_cManualCameraAlgorithm; g++ 2.95 symbol _vt$22cManualCameraAlgorithm
+0045C1E8	cCTBoundObjPoint_vtbl	D_0045C1E8	retail vtable (tools/vtables.py)	[M] own method(s) cCTBoundObjPoint_limitPoint; g++ 2.95 symbol _vt$16cCTBoundObjPoint
+0045C428	cScriptCameraController_vtbl	D_0045C428	retail vtable (tools/vtables.py)	[D] slot 1 cScriptCameraController__cScriptCameraController; g++ 2.95 symbol _vt$23cScriptCameraController
+00469178	cFEStateMPCircuit_vtbl	D_00469178	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateMPCircuit_onCreateScreen; g++ 2.95 symbol _vt$17cFEStateMPCircuit
+00469248	cFEStateSelectMultiplayerMode_vtbl	D_00469248	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateSelectMultiplayerMode_onCreateScreen; g++ 2.95 symbol _vt$29cFEStateSelectMultiplayerMode
+00469378	cFEStateRequestLine_vtbl	D_00469378	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateRequestLine__cFEStateRequestLine__FPv, cFEStateRequestLine_onCreateScreen, cFEStateRequestLine_onWidgetCreate; g++ 2.95 symbol _vt$19cFEStateRequestLine
+00469448	cFEStateAudioOptions_vtbl	D_00469448	retail vtable (tools/vtables.py)	[C] stored by cFEStateAudioOptions_cFEStateAudioOptions; g++ 2.95 symbol _vt$20cFEStateAudioOptions
+00469518	cFEPopupSelectMultiplayerMode_vtbl	D_00469518	retail vtable (tools/vtables.py)	[M] own method(s) cFEPopupSelectMultiplayerMode_onCreateScreen, cFEPopupSelectMultiplayerMode_onWidgetCreate; g++ 2.95 symbol _vt$29cFEPopupSelectMultiplayerMode
+004695E8	cFEStateRewardsRoom_vtbl	D_004695E8	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateRewardsRoom_onCreateScreen, cFEStateRewardsRoom_onWidgetCreate; g++ 2.95 symbol _vt$19cFEStateRewardsRoom
+004696B8	cFEStateTrophyRoom_vtbl	D_004696B8	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateTrophyRoom_onCreateScreen, cFEStateTrophyRoom_onWidgetCreate; g++ 2.95 symbol _vt$18cFEStateTrophyRoom
+00469788	cFEStatePeakRoom_vtbl	D_00469788	retail vtable (tools/vtables.py)	[M] own method(s) cFEStatePeakRoom_onCreateScreen, cFEStatePeakRoom_onWidgetCreate; g++ 2.95 symbol _vt$16cFEStatePeakRoom
+00469858	cFEStateMountainRoom_vtbl	D_00469858	retail vtable (tools/vtables.py)	[C] stored by cFEStateMountainRoom_cFEStateMountainRoom; g++ 2.95 symbol _vt$20cFEStateMountainRoom
+004699F8	cFEStatePreviewReward_vtbl	D_004699F8	retail vtable (tools/vtables.py)	[M] own method(s) cFEStatePreviewReward_onCreateScreen, cFEStatePreviewReward_onWidgetCreate; g++ 2.95 symbol _vt$21cFEStatePreviewReward
+0046A548	cFEStateCharEquip_vtbl	D_0046A548	retail vtable (tools/vtables.py)	[C] stored by cFEStateCharEquip_cFEStateCharEquip; g++ 2.95 symbol _vt$17cFEStateCharEquip
+0046A618	cFEStateNetHelpPopup_vtbl	D_0046A618	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateNetHelpPopup_onCreateScreen, cFEStateNetHelpPopup_onWidgetCreate; g++ 2.95 symbol _vt$20cFEStateNetHelpPopup
+0046AF68	cFEStateBraggingRights_vtbl	D_0046AF68	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateBraggingRights_onCreateScreen, cFEStateBraggingRights_onWidgetCreate; g++ 2.95 symbol _vt$22cFEStateBraggingRights
+0046B090	cFEStateRuleSelect_vtbl	D_0046B090	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateRuleSelect_onCreateScreen; g++ 2.95 symbol _vt$18cFEStateRuleSelect
+0046B160	cFEStateRiderBio_vtbl	D_0046B160	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateRiderBio_onCreateScreen; g++ 2.95 symbol _vt$16cFEStateRiderBio
+0046B230	cFEPopupScreenPos_vtbl	D_0046B230	retail vtable (tools/vtables.py)	[M] own method(s) cFEPopupScreenPos_onUpdate; g++ 2.95 symbol _vt$17cFEPopupScreenPos
+0046B300	cFEPopupVideoCalibration_vtbl	D_0046B300	retail vtable (tools/vtables.py)	[M] own method(s) cFEPopupVideoCalibration_onCreateScreen; g++ 2.95 symbol _vt$24cFEPopupVideoCalibration
+0046B4A0	cFEStateLegal_vtbl	D_0046B4A0	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateLegal_onCreateScreen; g++ 2.95 symbol _vt$13cFEStateLegal
+0046B570	cFEStateMemCard_vtbl	D_0046B570	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateMemCard_onCreateScreen; g++ 2.95 symbol _vt$15cFEStateMemCard
+0046B918	cFEStateBonusMaterial_vtbl	D_0046B918	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateBonusMaterial_onCreateScreen; g++ 2.95 symbol _vt$21cFEStateBonusMaterial
+0046B9E8	cFEStateMainMenu_vtbl	D_0046B9E8	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateMainMenu_onCreateScreen, cFEStateMainMenu_onWidgetCreate, cFEStateMainMenu_onWidgetEvent; g++ 2.95 symbol _vt$16cFEStateMainMenu
+0046BAB8	cFEStateTitle_vtbl	D_0046BAB8	retail vtable (tools/vtables.py)	[D] slot 1 cFEStateTitle__cFEStateTitle; g++ 2.95 symbol _vt$13cFEStateTitle
+0046BB88	cFEStateTransition_vtbl	D_0046BB88	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateTransition_onCreateScreen, cFEStateTransition_onScreenEvent; g++ 2.95 symbol _vt$18cFEStateTransition
+0046BC58	cFEStateBackground_vtbl	D_0046BC58	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateBackground_onCreateScreen; g++ 2.95 symbol _vt$18cFEStateBackground
+0046BD28	cFEStateEventSelect_vtbl	D_0046BD28	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateEventSelect_onCreateScreen; g++ 2.95 symbol _vt$19cFEStateEventSelect
+0046BDF8	cFEStateCredits_vtbl	D_0046BDF8	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateCredits_onCreateScreen, cFEStateCredits_onGainFocus; g++ 2.95 symbol _vt$15cFEStateCredits
+0046BEC8	cKeyboardPopup_vtbl	D_0046BEC8	retail vtable (tools/vtables.py)	[D] slot 1 cKeyboardPopup__cKeyboardPopup; g++ 2.95 symbol _vt$14cKeyboardPopup
+0046BFD0	cFEStateProfileLoad_vtbl	D_0046BFD0	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateProfileLoad_onCreateScreen; g++ 2.95 symbol _vt$19cFEStateProfileLoad
+0046C158	cFEStateProfileSelect_vtbl	D_0046C158	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateProfileSelect_onCreateScreen; g++ 2.95 symbol _vt$21cFEStateProfileSelect
+0046C228	cFEStateOptionsDeviceSelect_vtbl	D_0046C228	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateOptionsDeviceSelect_onCreateScreen; g++ 2.95 symbol _vt$27cFEStateOptionsDeviceSelect
+0046C3B0	cFEStateOptionsSaveLoad_vtbl	D_0046C3B0	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateOptionsSaveLoad_onCreateScreen, cFEStateOptionsSaveLoad_onWidgetCreate, cFEStateOptionsSaveLoad_onWidgetEvent; g++ 2.95 symbol _vt$23cFEStateOptionsSaveLoad
+0046C480	cFEStateOptionsController_vtbl	D_0046C480	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateOptionsController_onCreateScreen; g++ 2.95 symbol _vt$25cFEStateOptionsController
+0046C620	cFEStateOptionsSound_vtbl	D_0046C620	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateOptionsSound_onCreateScreen; g++ 2.95 symbol _vt$20cFEStateOptionsSound
+0046C6F0	cFEStateOptionsGame_vtbl	D_0046C6F0	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateOptionsGame_onCreateScreen; g++ 2.95 symbol _vt$19cFEStateOptionsGame
+0046C7C0	cFEStateOptions_vtbl	D_0046C7C0	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateOptions_onCreateScreen; g++ 2.95 symbol _vt$15cFEStateOptions
+0046C890	cFEPopupConfirm_vtbl	D_0046C890	retail vtable (tools/vtables.py)	[D] slot 1 cFEPopupConfirm__cFEPopupConfirm; g++ 2.95 symbol _vt$15cFEPopupConfirm
+0046CB08	cUIStateBuyPopup_vtbl	D_0046CB08	retail vtable (tools/vtables.py)	[D] slot 1 cUIStateBuyPopup__cUIStateBuyPopup; g++ 2.95 symbol _vt$16cUIStateBuyPopup
+0046CBD8	cScreenPopup_vtbl	D_0046CBD8	retail vtable (tools/vtables.py)	[C] stored by cScreenPopup_cScreenPopup; g++ 2.95 symbol _vt$12cScreenPopup
+0046CD90	cFEStateRiderDetail_vtbl	D_0046CD90	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateRiderDetail_onCreateScreen; g++ 2.95 symbol _vt$19cFEStateRiderDetail
+0046CE60	cFEStateCharSetup_vtbl	D_0046CE60	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateCharSetup_onCreateScreen; g++ 2.95 symbol _vt$17cFEStateCharSetup
+0046CF30	cFEStateCheatCharSelect_vtbl	D_0046CF30	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateCheatCharSelect_onWidgetCreate; g++ 2.95 symbol _vt$23cFEStateCheatCharSelect
+0046D000	cFEStateCharSelect_vtbl	D_0046D000	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateCharSelect_onCreateScreen, cFEStateCharSelect_onWidgetCreate; g++ 2.95 symbol _vt$18cFEStateCharSelect
+0046D1D0	cFEInput_vtbl	D_0046D1D0	retail vtable (tools/vtables.py)	[D] slot 1 cFEInput__cFEInput; g++ 2.95 symbol _vt$8cFEInput
+0046D798	cDebugMenuScreen_vtbl	D_0046D798	retail vtable (tools/vtables.py)	[D] slot 1 cDebugMenuScreen__cDebugMenuScreen; g++ 2.95 symbol _vt$16cDebugMenuScreen
+0046D7C0	cRealFE_vtbl	D_0046D7C0	retail vtable (tools/vtables.py)	[M] own method(s) cRealFE_load, cRealFE_loadStartState; g++ 2.95 symbol _vt$7cRealFE
+0046D900	cDebugFE_vtbl	D_0046D900	retail vtable (tools/vtables.py)	[M] own method(s) cDebugFE_load; g++ 2.95 symbol _vt$8cDebugFE
+0046D948	cDebugScreen_vtbl	D_0046D948	retail vtable (tools/vtables.py)	[D] slot 1 cDebugScreen__cDebugScreen; g++ 2.95 symbol _vt$12cDebugScreen
+0046DBA8	cUIInput_vtbl	D_0046DBA8	retail vtable (tools/vtables.py)	[M] own method(s) cUIInput_setPadNum__FPvi; g++ 2.95 symbol _vt$8cUIInput
+00471EA8	cOVStateTrophy_vtbl	D_00471EA8	retail vtable (tools/vtables.py)	[M] own method(s) cOVStateTrophy_onCreateScreen; g++ 2.95 symbol _vt$14cOVStateTrophy
+00471F80	cOVState_AUTOSAVE_vtbl	D_00471F80	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_AUTOSAVE_onCreateScreen; g++ 2.95 symbol _vt$17cOVState_AUTOSAVE
+00472108	cOVState_REWARDS_vtbl	D_00472108	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_REWARDS_onCreateScreen, cOVState_REWARDS_onGainFocus, cOVState_REWARDS_onGainTransition, cOVState_REWARDS_onWid; g++ 2.95 symbol _vt$16cOVState_REWARDS
+004721E0	cOVStateRewardsList_vtbl	D_004721E0	retail vtable (tools/vtables.py)	[M] own method(s) cOVStateRewardsList_onCreateScreen; g++ 2.95 symbol _vt$19cOVStateRewardsList
+00472928	cOVState_PROFILE_vtbl	D_00472928	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_PROFILE_onCreateScreen; g++ 2.95 symbol _vt$16cOVState_PROFILE
+00472AB0	cOVState_PAUSE_ONLINE_ERROR_vtbl	D_00472AB0	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_PAUSE_ONLINE_ERROR_onCreateScreen; g++ 2.95 symbol _vt$27cOVState_PAUSE_ONLINE_ERROR
+00472B88	cOVState_PAUSE_OPTIONS_vtbl	D_00472B88	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_PAUSE_OPTIONS_onCreateScreen, cOVState_PAUSE_OPTIONS_onPreRender2D, cOVState_PAUSE_OPTIONS_onUpdate, cOVState_P; g++ 2.95 symbol _vt$22cOVState_PAUSE_OPTIONS
+00473170	cOVTemplate_PauseMenu_vtbl	D_00473170	retail vtable (tools/vtables.py)	[M] own method(s) cOVTemplate_PauseMenu_onCreateScreen; g++ 2.95 symbol _vt$21cOVTemplate_PauseMenu
+00473320	cOVState_MAP_vtbl	D_00473320	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_MAP_onCreateScreen, cOVState_MAP_onGainTransition, cOVState_MAP_onInputAlways; g++ 2.95 symbol _vt$12cOVState_MAP
+004734D0	cOVState_TOPTIMES_vtbl	D_004734D0	retail vtable (tools/vtables.py)	[M] own method(s) cOVState_TOPTIMES_onGainFocus, cOVState_TOPTIMES_onWidgetCreate, cOVState_TOPTIMES_onWidgetEvent, cOVState_TOPTIMES_onWi; g++ 2.95 symbol _vt$17cOVState_TOPTIMES
+00473688	cOVState_BIGCHALLENGE_START_vtbl	D_00473688	retail vtable (tools/vtables.py)	[D] slot 1 cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START; g++ 2.95 symbol _vt$27cOVState_BIGCHALLENGE_START
+00473760	cOVState_ENTERLODGE_vtbl	D_00473760	retail vtable (tools/vtables.py)	[D] slot 1 cOVState_ENTERLODGE__cOVState_ENTERLODGE; g++ 2.95 symbol _vt$19cOVState_ENTERLODGE
+00473838	cFEStateCareerStats_vtbl	D_00473838	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateCareerStats_onCreateScreen, cFEStateCareerStats_onInputBegin; g++ 2.95 symbol _vt$19cFEStateCareerStats
+00473908	cFEStateBuyAttrib_vtbl	D_00473908	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateBuyAttrib_onCreateScreen, cFEStateBuyAttrib_onWidgetCreate; g++ 2.95 symbol _vt$17cFEStateBuyAttrib
+004739D8	cFEStateLodgeRiderDetail_vtbl	D_004739D8	retail vtable (tools/vtables.py)	[M] own method(s) cFEStateLodgeRiderDetail_onCreateScreen, cFEStateLodgeRiderDetail_onWidgetCreate; g++ 2.95 symbol _vt$24cFEStateLodgeRiderDetail
+00473AA8	cFEStateLodge_vtbl	D_00473AA8	retail vtable (tools/vtables.py)	[D] slot 1 cFEStateLodge__cFEStateLodge; g++ 2.95 symbol _vt$13cFEStateLodge
+00473B78	cOVStateHiScoreList_vtbl	D_00473B78	retail vtable (tools/vtables.py)	[M] own method(s) cOVStateHiScoreList_onCreateScreen; g++ 2.95 symbol _vt$19cOVStateHiScoreList
+00474160	cOVStateHUD1P_vtbl	D_00474160	retail vtable (tools/vtables.py)	[D] slot 1 cOVStateHUD1P__cOVStateHUD1P; g++ 2.95 symbol _vt$13cOVStateHUD1P
+004743F0	cPDATemplate_vtbl	D_004743F0	retail vtable (tools/vtables.py)	[D] slot 1 cPDATemplate__cPDATemplate; g++ 2.95 symbol _vt$12cPDATemplate
+00474AA8	cOVState_REPLAY_vtbl	D_00474AA8	retail vtable (tools/vtables.py)	[D] slot 1 cOVState_REPLAY__cOVState_REPLAY; g++ 2.95 symbol _vt$15cOVState_REPLAY
+0047C538	cFELoadStateInLodge_vtbl	D_0047C538	retail vtable (tools/vtables.py)	[M] own method(s) cFELoadStateInLodge_onCreateScreen; g++ 2.95 symbol _vt$19cFELoadStateInLodge
+0047C608	cFELoadState_vtbl	D_0047C608	retail vtable (tools/vtables.py)	[M] own method(s) cFELoadState_onCreateScreen; g++ 2.95 symbol _vt$12cFELoadState
+0047C6D8	cFELoadHintState_vtbl	D_0047C6D8	retail vtable (tools/vtables.py)	[M] own method(s) cFELoadHintState_onCreateScreen; g++ 2.95 symbol _vt$16cFELoadHintState
+0047CAE8	cSSXStatsObjNode_vtbl	D_0047CAE8	retail vtable (tools/vtables.py)	[D] slot 1 cSSXStatsObjNode__cSSXStatsObjNode; g++ 2.95 symbol _vt$16cSSXStatsObjNode
+0047CBD8	cMCOverlayManager_vtbl	D_0047CBD8	retail vtable (tools/vtables.py)	[C] stored by cMCOverlayManager_cMCOverlayManager; g++ 2.95 symbol _vt$17cMCOverlayManager
+0047D110	cGame_vtbl	D_0047D110	retail vtable (tools/vtables.py)	[D] slot 1 cGame__cGame; g++ 2.95 symbol _vt$5cGame
+0047D168	cGFReplayStartState_vtbl	D_0047D168	retail vtable (tools/vtables.py)	[D] slot 1 cGFReplayStartState__cGFReplayStartState; g++ 2.95 symbol _vt$19cGFReplayStartState
+0047D1C0	cGFPodiumState_vtbl	D_0047D1C0	retail vtable (tools/vtables.py)	[D] slot 1 cGFPodiumState__cGFPodiumState; g++ 2.95 symbol _vt$14cGFPodiumState
+0047D320	cGFUserSelectState_vtbl	D_0047D320	retail vtable (tools/vtables.py)	[D] slot 1 cGFUserSelectState__cGFUserSelectState; g++ 2.95 symbol _vt$18cGFUserSelectState
+0047D378	cGFSessionTeleportState_vtbl	D_0047D378	retail vtable (tools/vtables.py)	[D] slot 1 cGFSessionTeleportState__cGFSessionTeleportState; g++ 2.95 symbol _vt$23cGFSessionTeleportState
+0047D3D0	cGFNextHeatState_vtbl	D_0047D3D0	retail vtable (tools/vtables.py)	[D] slot 1 cGFNextHeatState__cGFNextHeatState; g++ 2.95 symbol _vt$16cGFNextHeatState
+0047D428	cGFTrackStartState_vtbl	D_0047D428	retail vtable (tools/vtables.py)	[D] slot 1 cGFTrackStartState__cGFTrackStartState; g++ 2.95 symbol _vt$18cGFTrackStartState
+0047D4D8	cGFGateState_vtbl	D_0047D4D8	retail vtable (tools/vtables.py)	[D] slot 1 cGFGateState__cGFGateState; g++ 2.95 symbol _vt$12cGFGateState
+0047D530	cGFEventStartState_vtbl	D_0047D530	retail vtable (tools/vtables.py)	[D] slot 1 cGFEventStartState__cGFEventStartState; g++ 2.95 symbol _vt$18cGFEventStartState
+0047D740	cFELoadScreen_vtbl	D_0047D740	retail vtable (tools/vtables.py)	[M] own method(s) cFELoadScreen_load; g++ 2.95 symbol _vt$13cFELoadScreen
+0047D8A8	cPreGameLoadScreen_vtbl	D_0047D8A8	retail vtable (tools/vtables.py)	[C] stored by cPreGameLoadScreen_cPreGameLoadScreen__FPv; g++ 2.95 symbol _vt$18cPreGameLoadScreen
+0047D8F0	cInitLoadScreen_vtbl	D_0047D8F0	retail vtable (tools/vtables.py)	[M] own method(s) cInitLoadScreen_load; g++ 2.95 symbol _vt$15cInitLoadScreen
+0047D9C8	cSSXApp_vtbl	D_0047D9C8	retail vtable (tools/vtables.py)	[D] slot 1 cSSXApp__cSSXApp; g++ 2.95 symbol _vt$7cSSXApp
+0047F6B0	cVisualEffectsMainMenu_vtbl	D_0047F6B0	retail vtable (tools/vtables.py)	[C] stored by cVisualEffectsMainMenu_cVisualEffectsMainMenu; g++ 2.95 symbol _vt$22cVisualEffectsMainMenu
+0047F708	cPathArrowMenu_vtbl	D_0047F708	retail vtable (tools/vtables.py)	[C] stored by cPathArrowMenu_cPathArrowMenu; g++ 2.95 symbol _vt$14cPathArrowMenu
+0047F760	cTubeMenu_vtbl	D_0047F760	retail vtable (tools/vtables.py)	[C] stored by cTubeMenu_cTubeMenu; g++ 2.95 symbol _vt$9cTubeMenu
+0047F7B8	cSplashTogglesMenu_vtbl	D_0047F7B8	retail vtable (tools/vtables.py)	[D] slot 1 cSplashTogglesMenu__cSplashTogglesMenu; g++ 2.95 symbol _vt$18cSplashTogglesMenu
+0047F810	cSnowfallTogglesMenu_vtbl	D_0047F810	retail vtable (tools/vtables.py)	[C] stored by cSnowfallTogglesMenu_cSnowfallTogglesMenu; g++ 2.95 symbol _vt$20cSnowfallTogglesMenu
+0047F868	cPowerUpFXTogglesMenu_vtbl	D_0047F868	retail vtable (tools/vtables.py)	[C] stored by cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu; g++ 2.95 symbol _vt$21cPowerUpFXTogglesMenu
+0047F8C0	cFlagsMenu_vtbl	D_0047F8C0	retail vtable (tools/vtables.py)	[C] stored by cFlagsMenu_cFlagsMenu; g++ 2.95 symbol _vt$10cFlagsMenu
+0047F918	cBoardTrailMenu_vtbl	D_0047F918	retail vtable (tools/vtables.py)	[C] stored by cBoardTrailMenu_cBoardTrailMenu; g++ 2.95 symbol _vt$15cBoardTrailMenu
+0047F970	cSnowSurfaceMenu_vtbl	D_0047F970	retail vtable (tools/vtables.py)	[C] stored by cSnowSurfaceMenu_cSnowSurfaceMenu; g++ 2.95 symbol _vt$16cSnowSurfaceMenu
+0047F9C8	cShadowMenu_vtbl	D_0047F9C8	retail vtable (tools/vtables.py)	[C] stored by cShadowMenu_cShadowMenu; g++ 2.95 symbol _vt$11cShadowMenu
+0047FA20	cScreenTintMenu_vtbl	D_0047FA20	retail vtable (tools/vtables.py)	[C] stored by cScreenTintMenu_cScreenTintMenu; g++ 2.95 symbol _vt$15cScreenTintMenu
+0047FA78	cShellRendererMenu_vtbl	D_0047FA78	retail vtable (tools/vtables.py)	[C] stored by cShellRendererMenu_cShellRendererMenu; g++ 2.95 symbol _vt$18cShellRendererMenu
+0047FAD0	cDetailSystemMenu_vtbl	D_0047FAD0	retail vtable (tools/vtables.py)	[C] stored by cDetailSystemMenu_cDetailSystemMenu; g++ 2.95 symbol _vt$17cDetailSystemMenu
+0047FB28	cHeightFogMenu_vtbl	D_0047FB28	retail vtable (tools/vtables.py)	[C] stored by cHeightFogMenu_cHeightFogMenu; g++ 2.95 symbol _vt$14cHeightFogMenu
+0047FB80	cDepthFogMenu_vtbl	D_0047FB80	retail vtable (tools/vtables.py)	[C] stored by cDepthFogMenu_cDepthFogMenu; g++ 2.95 symbol _vt$13cDepthFogMenu
+0047FBD8	cLightGlowMenu_vtbl	D_0047FBD8	retail vtable (tools/vtables.py)	[C] stored by cLightGlowMenu_cLightGlowMenu; g++ 2.95 symbol _vt$14cLightGlowMenu
+0047FC30	cPlantsMenu_vtbl	D_0047FC30	retail vtable (tools/vtables.py)	[C] stored by cPlantsMenu_cPlantsMenu; g++ 2.95 symbol _vt$11cPlantsMenu
+0047FC88	cVisualEffectsTestMenu_vtbl	D_0047FC88	retail vtable (tools/vtables.py)	[C] stored by cVisualEffectsTestMenu_cVisualEffectsTestMenu; g++ 2.95 symbol _vt$22cVisualEffectsTestMenu
+0047FCE0	cRenderTogglesMenu_vtbl	D_0047FCE0	retail vtable (tools/vtables.py)	[C] stored by cRenderTogglesMenu_cRenderTogglesMenu; g++ 2.95 symbol _vt$18cRenderTogglesMenu
+0047FFE8	cAIVisualEffectsMainMenu_vtbl	D_0047FFE8	retail vtable (tools/vtables.py)	[C] stored by cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu; g++ 2.95 symbol _vt$24cAIVisualEffectsMainMenu
+00480040	cAvalancheMenu_vtbl	D_00480040	retail vtable (tools/vtables.py)	[C] stored by cAvalancheMenu_cAvalancheMenu; g++ 2.95 symbol _vt$14cAvalancheMenu
+004812D0	cDSockChannel_vtbl	D_004812D0	retail vtable (tools/vtables.py)	[M] own method(s) cDSockChannel_getChannelType__FPv, cDSockChannel_isConnected; g++ 2.95 symbol _vt$13cDSockChannel
+00481320	cCommChannel_vtbl	D_00481320	retail vtable (tools/vtables.py)	[M] own method(s) cCommChannel_disconnect__FPv, cCommChannel_getChannelType__FPv, cCommChannel_getLatency, cCommChannel_isConnected__FPv, ; g++ 2.95 symbol _vt$12cCommChannel
+004818F0	cScriptPlayerChannelObject_vtbl	D_004818F0	retail vtable (tools/vtables.py)	[M] own method(s) cScriptPlayerChannelObject_GetCustom__FPv, cScriptPlayerChannelObject_GetOwner__FPv, cScriptPlayerChannelObject_GetType_; g++ 2.95 symbol _vt$26cScriptPlayerChannelObject
+00481950	cScriptPlayerChannelEvent_vtbl	D_00481950	retail vtable (tools/vtables.py)	[M] own method(s) cScriptPlayerChannelEvent_GetCustom__FPv, cScriptPlayerChannelEvent_GetOwner__FPv, cScriptPlayerChannelEvent_GetType__FP; g++ 2.95 symbol _vt$25cScriptPlayerChannelEvent
+004819B0	cScriptPlayerChannelBlock_vtbl	D_004819B0	retail vtable (tools/vtables.py)	[M] own method(s) cScriptPlayerChannelBlock_GetCustom__FPv, cScriptPlayerChannelBlock_GetOwner__FPv, cScriptPlayerChannelBlock_GetType__FP; g++ 2.95 symbol _vt$25cScriptPlayerChannelBlock
+00481A10	cScriptPlayerChannelSpline_vtbl	D_00481A10	retail vtable (tools/vtables.py)	[M] own method(s) cScriptPlayerChannelSpline_GetCustom__FPv, cScriptPlayerChannelSpline_GetNextKeyFrame__FPv, cScriptPlayerChannelSpline_G; g++ 2.95 symbol _vt$26cScriptPlayerChannelSpline
+00482060	cScriptObjTransition_vtbl	D_00482060	retail vtable (tools/vtables.py)	[D] slot 1 cScriptObjTransition__cScriptObjTransition; g++ 2.95 symbol _vt$20cScriptObjTransition
+004820B8	cScriptObjCamera_vtbl	D_004820B8	retail vtable (tools/vtables.py)	[M] own method(s) cScriptObjCamera_OnStartObjectUse; g++ 2.95 symbol _vt$16cScriptObjCamera
+004821B8	cSSXScriptEngine_vtbl	D_004821B8	retail vtable (tools/vtables.py)	[D] slot 1 cSSXScriptEngine__cSSXScriptEngine; g++ 2.95 symbol _vt$16cSSXScriptEngine
+00482228	cVidEngine_vtbl	D_00482228	retail vtable (tools/vtables.py)	[C] stored by cVidEngine_cVidEngine; g++ 2.95 symbol _vt$10cVidEngine
+00482240	cScriptSoundBankManager_vtbl	D_00482240	retail vtable (tools/vtables.py)	[C] stored by cScriptSoundBankManager_cScriptSoundBankManager; g++ 2.95 symbol _vt$23cScriptSoundBankManager
+00482260	cScriptObjEvent_vtbl	D_00482260	retail vtable (tools/vtables.py)	[C] stored by cScriptObjEvent_cScriptObjEvent; g++ 2.95 symbol _vt$15cScriptObjEvent
+004822E0	cScriptObjGS_vtbl	D_004822E0	retail vtable (tools/vtables.py)	[C] stored by cScriptObjGS_cScriptObjGS; g++ 2.95 symbol _vt$12cScriptObjGS
+00482418	cScriptEntity_vtbl	D_00482418	retail vtable (tools/vtables.py)	[C] stored by cScriptEntity_cScriptEntity__FPv; g++ 2.95 symbol _vt$13cScriptEntity
+004824B8	cBXScriptEngine_vtbl	D_004824B8	retail vtable (tools/vtables.py)	[D] slot 1 cBXScriptEngine__cBXScriptEngine; g++ 2.95 symbol _vt$15cBXScriptEngine
+00482558	cScriptObject_vtbl	D_00482558	retail vtable (tools/vtables.py)	[C] stored by cScriptObject_cScriptObject__FPvi; g++ 2.95 symbol _vt$13cScriptObject
+004825A0	cDataManager_vtbl	D_004825A0	retail vtable (tools/vtables.py)	[C] stored by cDataManager_cDataManager; g++ 2.95 symbol _vt$12cDataManager
+004825D8	cScriptAnimBankManager_vtbl	D_004825D8	retail vtable (tools/vtables.py)	[C] stored by cScriptAnimBankManager_cScriptAnimBankManager; g++ 2.95 symbol _vt$22cScriptAnimBankManager
+004836B8	cSSXAudio_vtbl	D_004836B8	retail vtable (tools/vtables.py)	[C] stored by cSSXAudio_cSSXAudio; g++ 2.95 symbol _vt$9cSSXAudio
+00483B48	cBankMonitor_vtbl	D_00483B48	retail vtable (tools/vtables.py)	[C] stored by cBankMonitor_cBankMonitor; also stored by cStreamSys_cStreamSys; g++ 2.95 symbol _vt$12cBankMonitor
+00483BA8	cMonitor_vtbl	D_00483BA8	retail vtable (tools/vtables.py)	[C] stored by cMonitor_cMonitor; g++ 2.95 symbol _vt$8cMonitor
+00483C00	cSoundSys_vtbl	D_00483C00	retail vtable (tools/vtables.py)	[D] slot 1 cSoundSys__cSoundSys; g++ 2.95 symbol _vt$9cSoundSys
+00483E00	cWorldPainterQuery_vtbl	D_00483E00	retail vtable (tools/vtables.py)	[C] stored by cWorldPainterQuery_cWorldPainterQuery; g++ 2.95 symbol _vt$18cWorldPainterQuery
+00486858	cVectorMenuItem_vtbl	D_00486858	retail vtable (tools/vtables.py)	[D] slot 1 cVectorMenuItem__cVectorMenuItem; g++ 2.95 symbol _vt$15cVectorMenuItem
+00486908	cARGBMenuItem_vtbl	D_00486908	retail vtable (tools/vtables.py)	[D] slot 1 cARGBMenuItem__cARGBMenuItem; g++ 2.95 symbol _vt$13cARGBMenuItem
+00486968	cRGBTitleMenuItem_vtbl	D_00486968	retail vtable (tools/vtables.py)	[C] stored by cRGBTitleMenuItem_cRGBTitleMenuItem; g++ 2.95 symbol _vt$17cRGBTitleMenuItem
+004869B8	cExpandMenuItem_vtbl	D_004869B8	retail vtable (tools/vtables.py)	[D] slot 1 cExpandMenuItem__cExpandMenuItem; g++ 2.95 symbol _vt$15cExpandMenuItem
+00486A18	cExpandMenuItemMenu_vtbl	D_00486A18	retail vtable (tools/vtables.py)	[D] slot 1 cExpandMenuItemMenu__cExpandMenuItemMenu; g++ 2.95 symbol _vt$19cExpandMenuItemMenu
+00486A70	cColorMenuItem_vtbl	D_00486A70	retail vtable (tools/vtables.py)	[M] own method(s) cColorMenuItem_preRender, cColorMenuItem_render; g++ 2.95 symbol _vt$14cColorMenuItem
+00486B10	cAngleMenuItem_vtbl	D_00486B10	retail vtable (tools/vtables.py)	[M] own method(s) cAngleMenuItem_render; g++ 2.95 symbol _vt$14cAngleMenuItem
+00486B60	cFloatMenuItem_vtbl	D_00486B60	retail vtable (tools/vtables.py)	[C] stored by cFloatMenuItem_cFloatMenuItem; g++ 2.95 symbol _vt$14cFloatMenuItem
+00486BB0	cIntMenuItem_vtbl	D_00486BB0	retail vtable (tools/vtables.py)	[C] stored by cIntMenuItem_cIntMenuItem; g++ 2.95 symbol _vt$12cIntMenuItem
+00486C50	cSpaceMenuItem_vtbl	D_00486C50	retail vtable (tools/vtables.py)	[C] stored by cSpaceMenuItem_cSpaceMenuItem__FP14cSpaceMenuItemPv; g++ 2.95 symbol _vt$14cSpaceMenuItem
+00486CA0	cNullMenuItem_vtbl	D_00486CA0	retail vtable (tools/vtables.py)	[C] stored by cNullMenuItem_cNullMenuItem__FP13cNullMenuItemPv; g++ 2.95 symbol _vt$13cNullMenuItem
+00486DE0	cSubMenuItem_vtbl	D_00486DE0	retail vtable (tools/vtables.py)	[C] stored by cSubMenuItem_cSubMenuItem; g++ 2.95 symbol _vt$12cSubMenuItem
+00486ED0	cMenu_vtbl	D_00486ED0	retail vtable (tools/vtables.py)	[D] slot 1 cMenu__cMenu; g++ 2.95 symbol _vt$5cMenu
+00486F28	cMenuItem_vtbl	D_00486F28	retail vtable (tools/vtables.py)	[C] stored by cMenuItem_cMenuItem__FP9cMenuItemPv; g++ 2.95 symbol _vt$9cMenuItem
+00487DA0	cVisualEffectsMan_vtbl	D_00487DA0	retail vtable (tools/vtables.py)	[C] stored by cVisualEffectsMan_cVisualEffectsMan; g++ 2.95 symbol _vt$17cVisualEffectsMan
+00487F30	cCutSceneTransitionMan_vtbl	D_00487F30	retail vtable (tools/vtables.py)	[C] stored by cCutSceneTransitionMan_cCutSceneTransitionMan; g++ 2.95 symbol _vt$22cCutSceneTransitionMan
+00487FD8	cSnowFall_vtbl	D_00487FD8	retail vtable (tools/vtables.py)	[D] slot 1 cSnowFall__cSnowFall; g++ 2.95 symbol _vt$9cSnowFall
+00488080	cCircle_TObj_vtbl	D_00488080	retail vtable (tools/vtables.py)	[D] slot 1 cCircle_TObj__cCircle_TObj; g++ 2.95 symbol _vt$12cCircle_TObj
+004880A0	cWipe_TObj_vtbl	D_004880A0	retail vtable (tools/vtables.py)	[D] slot 1 cWipe_TObj__cWipe_TObj; g++ 2.95 symbol _vt$10cWipe_TObj
+004880C0	cFade_TObj_vtbl	D_004880C0	retail vtable (tools/vtables.py)	[D] slot 1 cFade_TObj__cFade_TObj; g++ 2.95 symbol _vt$10cFade_TObj
+00488158	cTransitionMan_vtbl	D_00488158	retail vtable (tools/vtables.py)	[D] slot 1 cTransitionMan__cTransitionMan; g++ 2.95 symbol _vt$14cTransitionMan
+00488230	cSplashManager_vtbl	D_00488230	retail vtable (tools/vtables.py)	[D] slot 1 cSplashManager__cSplashManager; g++ 2.95 symbol _vt$14cSplashManager
+00488648	cAvalanche_vtbl	D_00488648	retail vtable (tools/vtables.py)	[M] own method(s) cAvalanche_render, cAvalanche_update; g++ 2.95 symbol _vt$10cAvalanche
+004886B0	cLensFxMan_vtbl	D_004886B0	retail vtable (tools/vtables.py)	[C] stored by cLensFxMan_cLensFxMan; g++ 2.95 symbol _vt$10cLensFxMan
+00489A30	cWScriptMission_vtbl	D_00489A30	retail vtable (tools/vtables.py)	[C] stored by cWScriptMission_cWScriptMission; g++ 2.95 symbol _vt$15cWScriptMission
+00489AE0	cWScriptTask_vtbl	D_00489AE0	retail vtable (tools/vtables.py)	[D] slot 1 cWScriptTask__cWScriptTask; g++ 2.95 symbol _vt$12cWScriptTask
+00489B70	cWScriptProcess_vtbl	D_00489B70	retail vtable (tools/vtables.py)	[D] slot 1 cWScriptProcess__cWScriptProcess; g++ 2.95 symbol _vt$15cWScriptProcess
+0048D7D8	cRiderAnimBase_vtbl	D_0048D7D8	retail vtable (tools/vtables.py)	[C] stored by cRiderAnimBase_cRiderAnimBase; g++ 2.95 symbol _vt$14cRiderAnimBase
+0048DBE8	cAppMan_vtbl	D_0048DBE8	retail vtable (tools/vtables.py)	[C] stored by cAppMan_cAppMan; g++ 2.95 symbol _vt$7cAppMan
+0048DC30	cExecutionMan_vtbl	D_0048DC30	retail vtable (tools/vtables.py)	[M] own method(s) cExecutionMan__cExecutionMan__FP13cExecutionMani, cExecutionMan_postpause__Fv, cExecutionMan_prepause__Fv; g++ 2.95 symbol _vt$13cExecutionMan
+0048E4B8	cPadDevice_vtbl	D_0048E4B8	retail vtable (tools/vtables.py)	[D] slot 1 cPadDevice__cPadDevice; g++ 2.95 symbol _vt$10cPadDevice
+0048E590	cWorldRider_vtbl	D_0048E590	retail vtable (tools/vtables.py)	[M] own method(s) cWorldRider_GetIdealParam; g++ 2.95 symbol _vt$11cWorldRider
+0048E5F0	cWorldSphTree_vtbl	D_0048E5F0	retail vtable (tools/vtables.py)	[C] stored by cWorldSphTree_cWorldSphTree; g++ 2.95 symbol _vt$13cWorldSphTree
+0048E650	cWorldSphere_vtbl	D_0048E650	retail vtable (tools/vtables.py)	[M] own method(s) cWorldSphere_GetIdealParam; g++ 2.95 symbol _vt$12cWorldSphere
+0048E6A8	cWorldLine_vtbl	D_0048E6A8	retail vtable (tools/vtables.py)	[M] own method(s) cWorldLine_GetIdealParam__FPv; g++ 2.95 symbol _vt$10cWorldLine
+0048EDE0	cRailManNode_vtbl	D_0048EDE0	retail vtable (tools/vtables.py)	[D] slot 1 cRailManNode__cRailManNode; g++ 2.95 symbol _vt$12cRailManNode
+0048EE60	cParticleNode_vtbl	D_0048EE60	retail vtable (tools/vtables.py)	[C] stored by cParticleNode_cParticleNode; g++ 2.95 symbol _vt$13cParticleNode
+0048F008	cSkyBox_vtbl	D_0048F008	retail vtable (tools/vtables.py)	[M] own method(s) cSkyBox__cSkyBox__FPv, cSkyBox_render; g++ 2.95 symbol _vt$7cSkyBox
+0048F080	cRollerModifier_vtbl	D_0048F080	retail vtable (tools/vtables.py)	[D] slot 1 cRollerModifier__cRollerModifier; g++ 2.95 symbol _vt$15cRollerModifier
+0048F168	cMultiSplineModifier_vtbl	D_0048F168	retail vtable (tools/vtables.py)	[D] slot 1 cMultiSplineModifier__cMultiSplineModifier; g++ 2.95 symbol _vt$20cMultiSplineModifier
+0048F250	cSplineModifier_vtbl	D_0048F250	retail vtable (tools/vtables.py)	[D] slot 1 cSplineModifier__cSplineModifier; g++ 2.95 symbol _vt$15cSplineModifier
+0048F6D8	cMeshAnimNode_vtbl	D_0048F6D8	retail vtable (tools/vtables.py)	[C] stored by cMeshAnimNode_cMeshAnimNode; g++ 2.95 symbol _vt$13cMeshAnimNode
+0048F858	cFloatingNode_vtbl	D_0048F858	retail vtable (tools/vtables.py)	[D] slot 1 cFloatingNode__cFloatingNode; g++ 2.95 symbol _vt$13cFloatingNode
+0048FA00	cFenceNode_vtbl	D_0048FA00	retail vtable (tools/vtables.py)	[C] stored by cFenceNode_cFenceNode; g++ 2.95 symbol _vt$10cFenceNode
+0048FB80	cFlagManager_vtbl	D_0048FB80	retail vtable (tools/vtables.py)	[C] stored by cFlagManager_cFlagManager; g++ 2.95 symbol _vt$12cFlagManager
+0048FC10	cFlagNode_vtbl	D_0048FC10	retail vtable (tools/vtables.py)	[C] stored by cFlagNode_cFlagNode; g++ 2.95 symbol _vt$9cFlagNode
+00490270	cFlexBridgeNode_vtbl	D_00490270	retail vtable (tools/vtables.py)	[D] slot 1 cFlexBridgeNode__cFlexBridgeNode; g++ 2.95 symbol _vt$15cFlexBridgeNode
+004903F0	cCounterNode_vtbl	D_004903F0	retail vtable (tools/vtables.py)	[C] stored by cCounterNode_cCounterNode; g++ 2.95 symbol _vt$12cCounterNode
+004906F0	cDebounceNode_vtbl	D_004906F0	retail vtable (tools/vtables.py)	[C] stored by cDebounceNode_cDebounceNode; g++ 2.95 symbol _vt$13cDebounceNode
+00490898	cBoostModifier_vtbl	D_00490898	retail vtable (tools/vtables.py)	[D] slot 1 cBoostModifier__cBoostModifier; g++ 2.95 symbol _vt$14cBoostModifier
+00490AD0	cMeshAnimFrame_vtbl	D_00490AD0	retail vtable (tools/vtables.py)	[D] slot 1 cMeshAnimFrame__cMeshAnimFrame; g++ 2.95 symbol _vt$14cMeshAnimFrame
+00490AF0	cAnimFrame_vtbl	D_00490AF0	retail vtable (tools/vtables.py)	[D] slot 1 cAnimFrame__cAnimFrame; g++ 2.95 symbol _vt$10cAnimFrame
+00491028	cMoveNode_vtbl	D_00491028	retail vtable (tools/vtables.py)	[D] slot 1 cMoveNode__cMoveNode; g++ 2.95 symbol _vt$9cMoveNode
+004911D0	cRailModifier_vtbl	D_004911D0	retail vtable (tools/vtables.py)	[C] stored by cRailModifier_cRailModifier; g++ 2.95 symbol _vt$13cRailModifier
+00491200	cRailLink_vtbl	D_00491200	retail vtable (tools/vtables.py)	[D] slot 1 cRailLink__cRailLink; g++ 2.95 symbol _vt$9cRailLink
+00491220	cHaloModifier_vtbl	D_00491220	retail vtable (tools/vtables.py)	[D] slot 1 cHaloModifier__cHaloModifier; g++ 2.95 symbol _vt$13cHaloModifier
+00491268	cDynamicParticleModifier_vtbl	D_00491268	retail vtable (tools/vtables.py)	[D] slot 1 cDynamicParticleModifier__cDynamicParticleModifier; g++ 2.95 symbol _vt$24cDynamicParticleModifier
+004912B0	cParticleModifier_vtbl	D_004912B0	retail vtable (tools/vtables.py)	[D] slot 1 cParticleModifier__cParticleModifier; g++ 2.95 symbol _vt$17cParticleModifier
+004912F8	cEffectModifier_vtbl	D_004912F8	retail vtable (tools/vtables.py)	[D] slot 1 cEffectModifier__cEffectModifier; g++ 2.95 symbol _vt$15cEffectModifier
+00491340	cEffectLink_vtbl	D_00491340	retail vtable (tools/vtables.py)	[M] own method(s) cEffectLink_writeToReplayFrame__FPv; g++ 2.95 symbol _vt$11cEffectLink
+00491370	cDynamicEmitter_vtbl	D_00491370	retail vtable (tools/vtables.py)	[M] own method(s) cDynamicEmitter__cDynamicEmitter__FPv; g++ 2.95 symbol _vt$15cDynamicEmitter
+004913B8	cPhysicsModifier_vtbl	D_004913B8	retail vtable (tools/vtables.py)	[D] slot 1 cPhysicsModifier__cPhysicsModifier; g++ 2.95 symbol _vt$16cPhysicsModifier
+004914E0	cBoostNode_vtbl	D_004914E0	retail vtable (tools/vtables.py)	[C] stored by cBoostNode_cBoostNode; g++ 2.95 symbol _vt$10cBoostNode
+00491980	cDeadFadeNode_vtbl	D_00491980	retail vtable (tools/vtables.py)	[C] stored by cDeadFadeNode_cDeadFadeNode; g++ 2.95 symbol _vt$13cDeadFadeNode
+00491B00	cDeadNode_vtbl	D_00491B00	retail vtable (tools/vtables.py)	[M] own method(s) cDeadNode__cDeadNode__FPv, cDeadNode_expire__FPv, cDeadNode_loseFocus__FPv, cDeadNode_signal__FPv; g++ 2.95 symbol _vt$9cDeadNode
+00491C80	cInstanceNode_vtbl	D_00491C80	retail vtable (tools/vtables.py)	[D] slot 1 cInstanceNode__cInstanceNode; g++ 2.95 symbol _vt$13cInstanceNode
+00491E00	cSortObjNode_vtbl	D_00491E00	retail vtable (tools/vtables.py)	[C] stored by cSortObjNode_cSortObjNode; g++ 2.95 symbol _vt$12cSortObjNode
+00491E80	cTypeObjNode_vtbl	D_00491E80	retail vtable (tools/vtables.py)	[D] slot 1 cTypeObjNode__cTypeObjNode; g++ 2.95 symbol _vt$12cTypeObjNode
+00491F00	cObjNode_vtbl	D_00491F00	retail vtable (tools/vtables.py)	[D] slot 1 cObjNode__cObjNode; g++ 2.95 symbol _vt$8cObjNode
+004930D0	cDynamicColourEmitter_vtbl	D_004930D0	retail vtable (tools/vtables.py)	[M] own method(s) cDynamicColourEmitter_Allocate, cDynamicColourEmitter__cDynamicColourEmitter, cDynamicColourEmitter_purge, cDynamicColou; g++ 2.95 symbol _vt$21cDynamicColourEmitter
+00493118	cBaseClass_DynamicEmitter_vtbl	D_00493118	retail vtable (tools/vtables.py)	[M] own method(s) cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter; g++ 2.95 symbol _vt$25cBaseClass_DynamicEmitter
+00493760	cPSPBezierMan_vtbl	D_00493760	retail vtable (tools/vtables.py)	[C] stored by cPSPBezierMan_cPSPBezierMan__FPv; g++ 2.95 symbol _vt$13cPSPBezierMan
+004941B8	cUIVector_vtbl	D_004941B8	retail vtable (tools/vtables.py)	[D] slot 1 cUIVector__cUIVector; g++ 2.95 symbol _vt$9cUIVector
+00494408	cUIProgress_vtbl	D_00494408	retail vtable (tools/vtables.py)	[D] slot 1 cUIProgress__cUIProgress; g++ 2.95 symbol _vt$11cUIProgress
+00494588	cUIText_vtbl	D_00494588	retail vtable (tools/vtables.py)	[D] slot 1 cUIText__cUIText; g++ 2.95 symbol _vt$7cUIText
+00494670	cUIScreen_vtbl	D_00494670	retail vtable (tools/vtables.py)	[D] slot 1 cUIScreen__cUIScreen; g++ 2.95 symbol _vt$9cUIScreen
+00494868	cUIPair_vtbl	D_00494868	retail vtable (tools/vtables.py)	[D] slot 1 cUIPair__cUIPair; g++ 2.95 symbol _vt$7cUIPair
+00494928	cUIMenu_vtbl	D_00494928	retail vtable (tools/vtables.py)	[D] slot 1 cUIMenu__cUIMenu; g++ 2.95 symbol _vt$7cUIMenu
+004949E8	cUIGroup_vtbl	D_004949E8	retail vtable (tools/vtables.py)	[D] slot 1 cUIGroup__cUIGroup; g++ 2.95 symbol _vt$8cUIGroup
+00494AA8	cUIIcon_vtbl	D_00494AA8	retail vtable (tools/vtables.py)	[M] own method(s) cUIIcon__cUIIcon__FPv, cUIIcon_getType__FPv, cUIIcon_setUIData; g++ 2.95 symbol _vt$7cUIIcon
+00494B98	cListOpSetFocus_vtbl	D_00494B98	retail vtable (tools/vtables.py)	[D] slot 1 cListOpSetFocus__cListOpSetFocus; g++ 2.95 symbol _vt$15cListOpSetFocus
+00494BB8	cListOpOnInput_vtbl	D_00494BB8	retail vtable (tools/vtables.py)	[D] slot 1 cListOpOnInput__cListOpOnInput; g++ 2.95 symbol _vt$14cListOpOnInput
+00494BD8	cUIThing_vtbl	D_00494BD8	retail vtable (tools/vtables.py)	[D] slot 1 cUIThing__cUIThing; g++ 2.95 symbol _vt$8cUIThing
+00494C98	cList_vtbl	D_00494C98	retail vtable (tools/vtables.py)	[D] slot 1 cList__cList; g++ 2.95 symbol _vt$5cList
+00494CE8	cListOperator_vtbl	D_00494CE8	retail vtable (tools/vtables.py)	[D] slot 1 cListOperator__cListOperator; g++ 2.95 symbol _vt$13cListOperator
+00494D08	cUIAnimation_vtbl	D_00494D08	retail vtable (tools/vtables.py)	[C] stored by cUIAnimation_cUIAnimation; g++ 2.95 symbol _vt$12cUIAnimation
+00495090	cPS2ChunkResolve_vtbl	D_00495090	retail vtable (tools/vtables.py)	[D] slot 1 cPS2ChunkResolve__cPS2ChunkResolve; g++ 2.95 symbol _vt$16cPS2ChunkResolve
+00495150	cChunkResolve_vtbl	D_00495150	retail vtable (tools/vtables.py)	[D] slot 1 cChunkResolve__cChunkResolve; g++ 2.95 symbol _vt$13cChunkResolve

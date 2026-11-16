@@ -7,7 +7,7 @@
 // changeHeadingOffset, changeOrientationOffset, getAIAnimFrame ...).
 //
 // Derived class: cRiderAnim (`cMemMan_alloc(0x70, "RiderAnim")` in func_0019ED80; its ctor func_00144630 calls
-// cRiderAnimBase_cRiderAnimBase, then stores its own vtable D_00458458 at 0x58 and its fields at 0x60 and 0x64).
+// cRiderAnimBase_cRiderAnimBase, then stores its own vtable cRiderAnim_vtbl at 0x58 and its fields at 0x60 and 0x64).
 // cRider holds one at mRiderAnim (0x784).
 //
 // A FLAT layout: every field at its retail offset, no C++ inheritance or virtuals.
@@ -58,10 +58,10 @@ struct cRiderAnimBase {
     cAnimModel* AnimModel;          // 0x054 [O] AnimModel (follows Sequencer in On Tour); [R] the ctor stores 0;
                                     //       [U] func_00312598 passes it to func_0030F2B0 (animation/animmodel.cpp)
                                     //       with the states gathered from the 6 sequencers
-    void** mVtbl;                   // 0x058 [R] the ctor and destructor (func_00311958) store D_0048D7D8 (slot 1 =
+    void** mVtbl;                   // 0x058 [R] the ctor and destructor (func_00311958) store cRiderAnimBase_vtbl (slot 1 =
                                     //       func_00311958; slot 2 = func_00411530, a stub in 5 vtables, likely
                                     //       __pure_virtual); cRiderAnim's ctor overwrites it with
-                                    //       D_00458458; [P] preview vptr at 0x58; [U] slots 2 and 4 called
+                                    //       cRiderAnim_vtbl; [P] preview vptr at 0x58; [U] slots 2 and 4 called
                                     //       (func_003123C0, cRiderAnimBase_play, cRiderAnimBase_getAIAnimFrame)
     char unk_05C[0x4];              // 0x05C tail padding (the class is 16-byte aligned by tPose)
 };

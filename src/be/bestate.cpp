@@ -9,7 +9,7 @@ struct sStateSingleton {
 };
 
 extern const char D_004A1230[];
-extern void* D_0045ABE8[16];
+extern void* cBERaceState_vtbl[16];
 extern void* D_004A122C;
 
 //99.86%
@@ -20,7 +20,7 @@ void* cBERaceState_getState(void* self)
     if (D_004A122C == 0) {
         sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, D_004A1230, 0, 0);
         mem->field_0x0 = self;
-        mem->vtable = D_0045ABE8;
+        mem->vtable = cBERaceState_vtbl;
         D_004A122C = mem;
     }
     return D_004A122C;

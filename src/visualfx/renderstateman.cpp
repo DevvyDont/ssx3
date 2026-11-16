@@ -1197,7 +1197,7 @@ struct sRSMan_002EFF98 {
     int f[17];
     void* vt;
 };
-extern char D_00487DA0[];
+extern char cVisualEffectsMan_vtbl[];
 extern sRSEntry_002EFF98* D_004A5B80;
 struct sShadowCfg_002EFF98 {
     int texIndex;
@@ -1208,7 +1208,7 @@ extern void* D_004A3B78;
 
 extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
 {
-    self->vt = D_00487DA0;
+    self->vt = cVisualEffectsMan_vtbl;
     self->f[0] = 0;
     self->f[1] = 0;
     self->f[2] = 0;
@@ -1439,14 +1439,14 @@ extern "C" void* func_002F0368(void* self);
 extern "C" void func_002D6410(void* self);
 extern char D_00487568[];
 extern void* D_00487D50[];
-extern void* D_00488648[];
+extern void* cAvalanche_vtbl[];
 
 extern "C" void* func_002F03C8(void* self)
 {
     func_002F0368(self);
     *(void***)((char*)self + 0x4) = D_00487D50;
     void** p = (void**)cMemMan_alloc(4, D_00487568, 0, 0);
-    *p = D_00488648;
+    *p = cAvalanche_vtbl;
     func_002D6410(p);
     *(void***)self = p;
     return self;

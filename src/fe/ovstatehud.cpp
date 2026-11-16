@@ -501,7 +501,7 @@ INCLUDE_ASM("fe/ovstatehud", func_001E9A30);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E2A0_9A30(void* self, int a1) __asm__("func_0039E2A0");
 extern "C" void func_0020EAA0(void*);
-extern char D_00474160[];
+extern char cOVStateHUD1P_vtbl[];
 
 struct sElem_9A30 {
     void* operator new[](unsigned int, void* p) { return p; }
@@ -515,7 +515,7 @@ extern "C" void* func_001E9A30(void* arg0, int a1)
 {
     char* self = (char*)arg0;
     func_0039E2A0_9A30(self, a1);
-    *(char**)(self + 8) = D_00474160;
+    *(char**)(self + 8) = cOVStateHUD1P_vtbl;
     new (self + 0x48) sElem_9A30[2];
     *(int*)(self + 0x474) = -1;
     *(int*)(self + 0x3D4) = 0;
@@ -2463,13 +2463,13 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00147318(void* self, int a1);
 extern "C" void func_001A1CB8(void* self, int a1, int val);
-extern void* D_00473AA8[];
+extern void* cFEStateLodge_vtbl[];
 
 extern "C" void* func_001F3700(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x27;
-    *(void***)((char*)self + 0x8) = D_00473AA8;
+    *(void***)((char*)self + 0x8) = cFEStateLodge_vtbl;
     int idx = func_00147318(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     *(signed char*)((char*)self + 0x44) = 0;
     void* p = **(void***)((char*)self + 0x10);

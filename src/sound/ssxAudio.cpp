@@ -68,7 +68,7 @@ extern "C" void func_0028F700(void* self);
 extern char D_00482820[];
 extern char D_004A3568[];
 extern void* D_00483688[];
-extern void* D_004836B8[];
+extern void* cSSXAudio_vtbl[];
 extern void* D_004836D8[];
 
 struct sSaVEntry4C68 {
@@ -161,7 +161,7 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int a2, int a3, int
     }
     *(void***)(S_4C68 + 0x5558) = D_00483688;
     *(void***)(S_4C68 + 0x571C) = D_004836D8;
-    *(void***)(S_4C68 + 0xC) = D_004836B8;
+    *(void***)(S_4C68 + 0xC) = cSSXAudio_vtbl;
     *(int*)(S_4C68 + 0x5728) = 0;
     *(int*)(S_4C68 + 0x572C) = -1;
     *(float*)(S_4C68 + 0x5730) = 1.0f;
@@ -281,7 +281,7 @@ extern "C" void func_002AA648(void* self, int flags);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* D_00483688[];
-extern void* D_004836B8[];
+extern void* cSSXAudio_vtbl[];
 extern void* D_004836D8[];
 
 struct sSaVEntry285210 {
@@ -310,7 +310,7 @@ extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
     char* p5560 = S_285210 + 0x5560;
     *(void***)(S_285210 + 0x5558) = D_00483688;
     *(void***)(S_285210 + 0x571C) = D_004836D8;
-    *(void***)(S_285210 + 0xC) = D_004836B8;
+    *(void***)(S_285210 + 0xC) = cSSXAudio_vtbl;
     *(const sSaVtbl4_285210**)(*(char**)(BM_285210 + 0x1D8) + 4) = &D_00483708_285210;
     *(const sSaVtbl8_285210**)(BM_285210 + 0xAB0) = &D_00483648_285210;
     *(const sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &D_00483728_285210;

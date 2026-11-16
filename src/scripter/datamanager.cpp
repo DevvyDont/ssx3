@@ -9,7 +9,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_cDataManager);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cDataManager_AddToEmptyInstanceList(void* self, void* node);
-extern char D_004825A0[];
+extern char cDataManager_vtbl[];
 extern const char D_00481AB8[];
 
 struct sDataNode5828 {
@@ -25,7 +25,7 @@ struct cDataManager5828 {
 
 extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, int flags, int count)
 {
-    self->vtable = D_004825A0;
+    self->vtable = cDataManager_vtbl;
     self->count = count;
     self->nodes = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), D_00481AB8, flags, 0);
     self->field_0x8 = 0;
@@ -41,11 +41,11 @@ INCLUDE_ASM("scripter/datamanager", func_002758C0);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern char D_004825A0[];
+extern char cDataManager_vtbl[];
 
 extern "C" void func_002758C0(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_004825A0;
+    *(void**)((char*)self + 0xC) = cDataManager_vtbl;
     void* p = *(void**)((char*)self + 0x4);
     if (p != 0) {
         cMemMan_free(p);
@@ -1886,7 +1886,7 @@ void func_00281160(void* self, int i);
 extern void* D_00482100[];
 extern void* D_004821A0[];
 extern void* D_00482168[];
-extern void* D_004821B8[];
+extern void* cSSXScriptEngine_vtbl[];
 extern void* D_004A34B0;
 
 struct sScriptSlot_7F20 {
@@ -1932,7 +1932,7 @@ extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* s
     self->vt2AC = D_00482100;
     self->vt518 = D_004821A0;
     self->vt528 = D_00482168;
-    self->vt2A8 = D_004821B8;
+    self->vt2A8 = cSSXScriptEngine_vtbl;
     new ((char*)self + 0x6D0) sScriptSlot_7F20[2];
     cScriptObjGS_cScriptObjGS((char*)self + 0x910);
     cScriptObjEvent_cScriptObjEvent((char*)self + 0x92C);
@@ -1970,9 +1970,9 @@ extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* s
 //100%
 INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine__cSSXScriptEngine);
 #ifdef SKIP_ASM
-extern void* D_00482260[];
+extern void* cScriptObjEvent_vtbl[];
 extern void* D_00482298[];
-extern void* D_004822E0[];
+extern void* cScriptObjGS_vtbl[];
 extern void* D_00482318[];
 extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void func_00283518(void* self, int flags);
@@ -2000,7 +2000,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     self->mInSeqCommVtbl = D_00482100;
     self->mVidEngineVtbl = D_004821A0;
     self->mDataManagerVtbl = D_00482168;
-    self->mVtbl = D_004821B8;
+    self->mVtbl = cSSXScriptEngine_vtbl;
     if ((int)self->mpMasterTableHeader != 0) {
         cSSXScriptEngine_DeInitOnce(self);
     }
@@ -2008,10 +2008,10 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     func_00283518(((char*)self) + 0xA38, 2);
     func_00275498(((char*)self) + 0xA28, 2);
     *(void***)(((char*)self) + 0x944) = D_00482298;
-    *(void***)(((char*)self) + 0x92C) = D_00482260;
+    *(void***)(((char*)self) + 0x92C) = cScriptObjEvent_vtbl;
     func_00283228(((char*)self) + 0x938, 0);
     *(void***)(((char*)self) + 0x928) = D_00482318;
-    *(void***)(((char*)self) + 0x910) = D_004822E0;
+    *(void***)(((char*)self) + 0x910) = cScriptObjGS_vtbl;
     func_00283228(((char*)self) + 0x91C, 0);
     sSlot_780B8* p = (sSlot_780B8*)(((char*)self) + 0x910);
     sSlot_780B8* begin = (sSlot_780B8*)(((char*)self) + 0x6D0);

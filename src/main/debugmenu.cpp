@@ -13,7 +13,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FCE0[];
+extern void* cRenderTogglesMenu_vtbl[];
 extern char D_0047DBF8[];
 extern char D_0047DC10[];
 extern char D_0047DC30[];
@@ -113,7 +113,7 @@ extern int D_004A4578;
 extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FCE0;
+    *(void***)((char*)self + 0x12C) = cRenderTogglesMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047DBF8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A44C0, 0, 0x3c, D_0047DC10);
@@ -230,7 +230,7 @@ void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, voi
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FC88[];
+extern void* cVisualEffectsTestMenu_vtbl[];
 extern char D_0047E038[];
 extern char D_0047E058[];
 extern char D_0047E070[];
@@ -270,7 +270,7 @@ extern int D_004A44B8;
 extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FC88;
+    *(void***)((char*)self + 0x12C) = cVisualEffectsTestMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E038);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4478, 0, 1, D_0047E058);
@@ -327,7 +327,7 @@ void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, voi
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FC30[];
+extern void* cPlantsMenu_vtbl[];
 extern char D_0047E118[];
 extern char D_0047E128[];
 extern char D_0047E138[];
@@ -357,7 +357,7 @@ extern float D_004A4470;
 extern "C" void* cPlantsMenu_cPlantsMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FC30;
+    *(void***)((char*)self + 0x12C) = cPlantsMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E118);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4444, 0, 2, D_004A2D30);
@@ -402,7 +402,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FBD8[];
+extern void* cLightGlowMenu_vtbl[];
 extern char D_0047E228[];
 extern char D_0047E238[];
 extern char D_0047E250[];
@@ -466,7 +466,7 @@ extern float D_004A4438;
 extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FBD8;
+    *(void***)((char*)self + 0x12C) = cLightGlowMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E228);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A43C8, 0, 1, D_004A2D30);
@@ -547,7 +547,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FB80[];
+extern void* cDepthFogMenu_vtbl[];
 extern char D_0047E460[];
 extern char D_004A2D30[];
 extern char D_0047E238[];
@@ -569,7 +569,7 @@ extern float cDepthFog_m_XBoxDensityScale;
 extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FB80;
+    *(void***)((char*)self + 0x12C) = cDepthFogMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E460);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4324, 0, 1, D_004A2D30);
@@ -605,7 +605,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 extern "C" void* cFloatMenuItem_cFloatMenuItem(void* self, int a1, void* var, void* text, float lo, float hi);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FB28[];
+extern void* cHeightFogMenu_vtbl[];
 extern char D_0047E4C0[];
 extern char D_004A2D30[];
 extern char D_0047E4D0[];
@@ -617,7 +617,7 @@ extern float D_004A43BC;
 extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FB28;
+    *(void***)((char*)self + 0x12C) = cHeightFogMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E4C0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A43B4, 0, 1, D_004A2D30);
@@ -646,7 +646,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FAD0[];
+extern void* cDetailSystemMenu_vtbl[];
 extern char D_0047E4F0[];
 extern char D_0047E508[];
 extern char D_0047E520[];
@@ -672,7 +672,7 @@ extern float D_004A4364;
 extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FAD0;
+    *(void***)((char*)self + 0x12C) = cDetailSystemMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E4F0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4340, 0, 1, D_004A2D30);
@@ -715,7 +715,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FA78[];
+extern void* cShellRendererMenu_vtbl[];
 extern char D_0047E470[];
 extern char D_0047E480[];
 extern char D_0047E5F0[];
@@ -739,7 +739,7 @@ extern int D_004A46D8;
 extern "C" void* cShellRendererMenu_cShellRendererMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FA78;
+    *(void***)((char*)self + 0x12C) = cShellRendererMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E5F0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A46B8, 0, 1, D_004A2D30);
@@ -779,7 +779,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FA20[];
+extern void* cScreenTintMenu_vtbl[];
 extern char D_0047E238[];
 extern char D_0047E680[];
 extern char D_0047E698[];
@@ -865,7 +865,7 @@ extern float D_004A4674;
 extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FA20;
+    *(void***)((char*)self + 0x12C) = cScreenTintMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E680);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cScreenTint_m_Enable, 0, 1, D_004A2D30);
@@ -968,7 +968,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F9C8[];
+extern void* cShadowMenu_vtbl[];
 extern char D_0047E948[];
 extern char D_0047E958[];
 extern char D_0047E970[];
@@ -992,7 +992,7 @@ extern float D_004A41D0;
 extern "C" void* cShadowMenu_cShadowMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F9C8;
+    *(void***)((char*)self + 0x12C) = cShadowMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E948);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41B0, 0, 1, D_004A2D30);
@@ -1030,7 +1030,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 extern "C" void* cFloatMenuItem_cFloatMenuItem(void* self, int a1, void* var, void* text, float lo, float hi);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F970[];
+extern void* cSnowSurfaceMenu_vtbl[];
 extern char D_0047E9C0[];
 extern char D_004A2D30[];
 extern char D_0047E9D8[];
@@ -1050,7 +1050,7 @@ extern float D_004A46F4;
 extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F970;
+    *(void***)((char*)self + 0x12C) = cSnowSurfaceMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E9C0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A46DC, 0, 1, D_004A2D30);
@@ -1085,7 +1085,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F918[];
+extern void* cBoardTrailMenu_vtbl[];
 extern char D_0047EA18[];
 extern char D_0047EA30[];
 extern char D_0047EA48[];
@@ -1138,7 +1138,7 @@ extern float D_004A45C4;
 extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F918;
+    *(void***)((char*)self + 0x12C) = cBoardTrailMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EA18);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A457C, 0, 0x1, D_004A2D30);
@@ -1201,7 +1201,7 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F8C0[];
+extern void* cFlagsMenu_vtbl[];
 extern char D_0047EBB8[];
 extern char D_0047EBC8[];
 extern char D_0047EBD8[];
@@ -1211,7 +1211,7 @@ extern int D_004A4244;
 extern "C" void* cFlagsMenu_cFlagsMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F8C0;
+    *(void***)((char*)self + 0x12C) = cFlagsMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EBB8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4240, 0, 1, D_0047EBC8);
@@ -1238,7 +1238,7 @@ void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, voi
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F868[];
+extern void* cPowerUpFXTogglesMenu_vtbl[];
 extern char D_0047EBE8[];
 extern char D_0047EC00[];
 extern char D_0047EC20[];
@@ -1274,7 +1274,7 @@ extern int cPowerUpFXToggles_m_TestOrangeRibbon;
 extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F868;
+    *(void***)((char*)self + 0x12C) = cPowerUpFXTogglesMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EBE8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cPowerUpFXToggles_m_EnableSpeedBoostStreamers, 0, 1, D_0047EC00);
@@ -1327,7 +1327,7 @@ void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, voi
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F810[];
+extern void* cSnowfallTogglesMenu_vtbl[];
 extern char D_0047EDA0[];
 extern char D_0047EDB8[];
 extern char D_0047EDD0[];
@@ -1357,7 +1357,7 @@ extern int cSnowfallToggles_m_TestAdditive;
 extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F810;
+    *(void***)((char*)self + 0x12C) = cSnowfallTogglesMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EDA0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cSnowfallToggles_m_EnableTest, 0, 1, D_0047EDB8);
@@ -1403,7 +1403,7 @@ extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F7B8[];
+extern void* cSplashTogglesMenu_vtbl[];
 extern char D_0047EEE0[];
 extern char D_0047EEF8[];
 extern char D_0047EF08[];
@@ -1520,7 +1520,7 @@ extern float D_004A4318;
 extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F7B8;
+    *(void***)((char*)self + 0x12C) = cSplashTogglesMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EEE0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A424C, 0, 1, D_004A2D30);
@@ -1652,7 +1652,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 extern "C" void* cFloatMenuItem_cFloatMenuItem(void* self, int a1, void* var, void* text, float lo, float hi);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F760[];
+extern void* cTubeMenu_vtbl[];
 extern char D_0047F4A8[];
 extern char D_004A2D30[];
 extern char D_0047F4B8[];
@@ -1670,7 +1670,7 @@ extern int D_004A41E8;
 extern "C" void* cTubeMenu_cTubeMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F760;
+    *(void***)((char*)self + 0x12C) = cTubeMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F4A8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41D4, 0, 1, D_004A2D30);
@@ -1705,7 +1705,7 @@ void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, voi
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F708[];
+extern void* cPathArrowMenu_vtbl[];
 extern char D_0047F4D8[];
 extern char D_0047F4E8[];
 extern char D_0047F4F8[];
@@ -1743,7 +1743,7 @@ extern int D_004A4228;
 extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F708;
+    *(void***)((char*)self + 0x12C) = cPathArrowMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F4D8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41EC, 0, 1, D_004A2D30);
@@ -1798,7 +1798,7 @@ void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, voi
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, int a1, void* text, void* color);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047F6B0[];
+extern void* cVisualEffectsMainMenu_vtbl[];
 extern char D_0047F578[];
 extern char D_0047F598[];
 extern char D_0047F5A8[];
@@ -1838,7 +1838,7 @@ extern char D_004D1480[];
 extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047F6B0;
+    *(void***)((char*)self + 0x12C) = cVisualEffectsMainMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F578);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cSubMenuItem_cSubMenuItem((char*)self + 0x164, D_004C98E0, D_0047F598);
@@ -3257,7 +3257,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
 void* cFloatMenuItem_ctor(void* self, int a1, void* var, float lo, float hi, void* text) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_00480040[];
+extern void* cAvalancheMenu_vtbl[];
 extern char D_0047FD80[];
 extern char D_0047FD90[];
 extern char D_0047FDA0[];
@@ -3327,7 +3327,7 @@ extern float D_004A3AAC;
 extern "C" void* cAvalancheMenu_cAvalancheMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_00480040;
+    *(void***)((char*)self + 0x12C) = cAvalancheMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047FD80);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A3A30, 0, 1, D_004A2DF0);
@@ -3410,7 +3410,7 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0047FFE8[];
+extern void* cAIVisualEffectsMainMenu_vtbl[];
 extern char D_0047FFB0[];
 extern char D_004D1C88[];
 extern char D_0047FFD0[];
@@ -3418,7 +3418,7 @@ extern char D_0047FFD0[];
 extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0047FFE8;
+    *(void***)((char*)self + 0x12C) = cAIVisualEffectsMainMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047FFB0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
     cSubMenuItem_cSubMenuItem((char*)self + 0x164, D_004D1C88, D_0047FFD0);

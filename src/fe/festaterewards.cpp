@@ -2046,7 +2046,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
-extern void* D_004699F8[];
+extern void* cFEStatePreviewReward_vtbl[];
 struct sRewardState_1AA0 {
     char pad_0x0[0x48];
     int a[3];   // 0x48
@@ -2059,7 +2059,7 @@ extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player
     int i;
     func_0039E318(self, engine, owner);
     *(int*)((char*)self + 0xC) = 0x30;
-    *(void***)((char*)self + 0x8) = D_004699F8;
+    *(void***)((char*)self + 0x8) = cFEStatePreviewReward_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     for (i = 0; i < 3; i++) {
@@ -2086,7 +2086,7 @@ struct sVEntry001D1B68 {
     void (*fn)(void*, int);
 };
 
-extern void* D_004699F8[];
+extern void* cFEStatePreviewReward_vtbl[];
 extern void* D_0046D0D0[];
 extern void* D_004A289C;
 extern "C" void func_0019DC20(void* self, int bank, int i);
@@ -2094,7 +2094,7 @@ extern "C" void func_0039E390(void* self, int flags);
 
 extern "C" void func_001D1B68(void* self, int flags)
 {
-    *(void***)((char*)self + 8) = D_004699F8;
+    *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
     int id = *(int*)((char*)self + 0x70);
     if (id >= 0) {
         char* g = (char*)D_004A289C;

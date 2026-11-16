@@ -10,7 +10,7 @@ extern "C" void* func_002AB9E0(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_00483238[];
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 
 struct sBmVEntryCD08 {
     short delta;
@@ -56,7 +56,7 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
         int d = (char*)self - base;
         vt.e[1].delta = D_00483B88.e[1].delta + d;
     }
-    self->vtbl = D_00483B48;
+    self->vtbl = cBankMonitor_vtbl;
     self->f8DC = 0;
     self->f8E0 = 1;
     self->f8E4 = 1;
@@ -75,7 +75,7 @@ extern "C" void func_002ABA18(void* self, int flags);
 struct sSndPlayerDAC8;
 extern "C" void func_002ADAC8(sSndPlayerDAC8* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 
 struct sBmVEntryE40 {
     short delta;
@@ -101,7 +101,7 @@ struct sBankMonitorE40 {
 
 extern "C" void func_002ACE40(sBankMonitorE40* self, int flags)
 {
-    self->vtbl = D_00483B48;
+    self->vtbl = cBankMonitor_vtbl;
     *(const sBmVtblE40**)(self->vbase + 4) = &D_00483B88_E40;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
@@ -721,11 +721,11 @@ extern "C" void func_002AD998()
 //100%
 INCLUDE_ASM("sound/bankmonitor", cMonitor_cMonitor);
 #ifdef SKIP_ASM
-// FAKEMATCH: a per-function volatile view of fields 0x88/0x8C/0x90 orders the %hi(D_00483BA8) lui after the 0x88 store; plain form 96.88%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// FAKEMATCH: a per-function volatile view of fields 0x88/0x8C/0x90 orders the %hi(cMonitor_vtbl) lui after the 0x88 store; plain form 96.88%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void* cSndPlayOpts_cSndPlayOpts(void* self, int inchrg, int heap);
 extern "C" void* cSoundSys_cSoundSys(void* self, int a);
-extern void* D_00483BA8[];
+extern void* cMonitor_vtbl[];
 
 struct sBmVEntryD9C8 {
     short delta;
@@ -771,7 +771,7 @@ extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, i
     }
     self->f88 = 0;
     self->f8C = 0;
-    self->vtbl = D_00483BA8;
+    self->vtbl = cMonitor_vtbl;
     self->f90 = 0;
     {
         sBmSlotD9C8* p = self->slots;
@@ -789,7 +789,7 @@ void operator_delete(int* ptr);
 extern "C" void func_003B5948(int id);
 extern "C" void func_002A97C0(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern void* D_00483BA8[];
+extern void* cMonitor_vtbl[];
 
 struct sBmVEntryDAC8 {
     short delta;
@@ -815,7 +815,7 @@ struct sSndPlayerDAC8 {
 extern "C" void func_002ADAC8(sSndPlayerDAC8* self, int flags)
 {
     sBmSlotDAC8* end = self->slots + 48;
-    self->vtbl = D_00483BA8;
+    self->vtbl = cMonitor_vtbl;
     *(const sBmVtblDAC8**)(self->vbase + 4) = &D_00483BC0_DAC8;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
@@ -985,12 +985,12 @@ public:
 };
 
 extern "C" cSoundSys_cSoundSys_cObj* func_002A8FA0();
-extern char D_00483C00[];
+extern char cSoundSys_vtbl[];
 extern void* D_004A377C;
 
 extern "C" void* cSoundSys_cSoundSys(void* self, int a)
 {
-    *(void**)((char*)self + 0x4) = D_00483C00;
+    *(void**)((char*)self + 0x4) = cSoundSys_vtbl;
     D_004A377C = self;
     cSoundSys_cSoundSys_cObj* obj = func_002A8FA0();
     *(cSoundSys_cSoundSys_cObj**)self = obj;
@@ -1010,12 +1010,12 @@ public:
 };
 
 void operator_delete(int* ptr);
-extern char D_00483C00[];
+extern char cSoundSys_vtbl[];
 extern void* D_004A377C;
 
 extern "C" void cSoundSys__cSoundSys(void* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = D_00483C00;
+    *(void**)((char*)self + 0x4) = cSoundSys_vtbl;
     (*(cSoundSys__cSoundSys_cObj**)self)->v03(flags);
     operator_delete(*(int**)self);
     D_004A377C = 0;
@@ -2933,7 +2933,7 @@ struct sBankSlots;
 extern "C" void func_002B1428(sBankSlots* self);
 extern char* D_004A37B4;
 extern void* D_00483870[];
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 extern const char D_00483308[];
 
 struct sName17_07F8 { char s[17]; };
@@ -2973,7 +2973,7 @@ extern "C" char* func_002B07F8(char* self, int inchrg, int a2, int a3, int heap)
         cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
     }
     *(const sBmonVtblA07F8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0_07F8;
-    *(void***)(**(char***)self + 0xAB0) = D_00483B48;
+    *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB07F8**)(**(char***)self + 0x1D4) = &D_004838C0_07F8;
     if (inchrg == 0) {
         sBmonVtblA07F8 t1 = D_004838A0_07F8;
@@ -3015,7 +3015,7 @@ extern "C" void func_002AA648(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* D_004A37B4;
 extern void* D_00483870[];
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 
 struct sBmonVEntry0AE8 {
     short delta;
@@ -3036,7 +3036,7 @@ extern "C" void func_002B0AE8(char* self, int flags)
 {
     *(void***)(self + 0x1BC) = D_00483870;
     *(const sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0;
-    *(void***)(**(char***)self + 0xAB0) = D_00483B48;
+    *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &D_004838C0;
     if (flags == 0) {
         sBmonVtblA0AE8 t1 = D_004838A0;
@@ -4482,7 +4482,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
     }
     *(const sSndVtbl4**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_00483928_v;
-    *(void***)(**(char***)self + 0xAB0) = D_00483B48;
+    *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sSndVtbl7**)(**(char***)self + 0x1D4) = &D_00483948_v;
     if (inchrg == 0) {
         sSndVtbl4 t1 = D_00483928_v;
@@ -4648,7 +4648,7 @@ extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void func_002B1F78(void* self, int flags);
 extern void*** D_004A37EC;
 extern void* D_004838F8[];
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 
 struct sBmonVEntry3398 {
     short delta;
@@ -4671,7 +4671,7 @@ extern "C" void func_002B3398(char* self, int flags)
 {
     *(void***)(self + 0x5440) = D_004838F8;
     *(const sBmonVtblA3398**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_00483928;
-    *(void***)(**(char***)self + 0xAB0) = D_00483B48;
+    *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB3398**)(**(char***)self + 0x1D4) = &D_00483948;
     if (flags == 0) {
         sBmonVtblA3398 t1 = D_00483928;

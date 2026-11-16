@@ -1742,7 +1742,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00211088);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00535BC8[];
-extern char D_00472928[];
+extern char cOVState_PROFILE_vtbl[];
 extern "C" void func_001D53B0(void* self, int a, int b);
 extern "C" int func_00147318(void* iface, int i);
 struct sOVTrophy_1088 {
@@ -1762,7 +1762,7 @@ extern "C" sOVTrophy_1088* func_00211088(sOVTrophy_1088* self, int a, unsigned c
     int idx = 0;
     func_001D53B0(self, a, 0);
     self->f0C = 0x24;
-    self->vtable = D_00472928;
+    self->vtable = cOVState_PROFILE_vtbl;
     self->f278 = c;
     self->f1CC = 0;
     self->f22C = 0;

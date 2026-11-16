@@ -10,12 +10,12 @@ struct sDebounceVEntry2D10 {
 };
 
 extern "C" void* cMoveNode_cMoveNode(void* self, void*, void*);
-extern char D_004906F0[];
+extern char cDebounceNode_vtbl[];
 
 extern "C" void* cDebounceNode_cDebounceNode(void* self, void* unused, void* stream)
 {
     cMoveNode_cMoveNode(self, unused, stream);
-    *(void**)((char*)self + 0xC) = D_004906F0;
+    *(void**)((char*)self + 0xC) = cDebounceNode_vtbl;
     sDebounceVEntry2D10* e = &(*(sDebounceVEntry2D10**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
     e = &(*(sDebounceVEntry2D10**)stream)[2];
@@ -687,12 +687,12 @@ extern "C" void func_00343718(void* self, void* stream)
 INCLUDE_ASM("object/debouncenode", func_00343768);
 #ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
-extern char D_004903F0[];
+extern char cCounterNode_vtbl[];
 
 extern "C" void* func_00343768(void* self, void* a1, void* a2, void* a3)
 {
     func_0034FB00(self, a1, 7, a2);
-    *(void**)((char*)self + 0xC) = D_004903F0;
+    *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
     *(int*)((char*)self + 0x1C) = *(short*)((char*)a3 + 0x4);
     *(int*)((char*)self + 0x20) = 0;
     return self;
@@ -709,12 +709,12 @@ struct sDebounceVEntry37C0 {
 };
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
-extern char D_004903F0[];
+extern char cCounterNode_vtbl[];
 
 extern "C" void* cCounterNode_cCounterNode(void* self, void* unused, void* stream)
 {
     cInstanceNode_cInstanceNode(self, unused, stream);
-    *(void**)((char*)self + 0xC) = D_004903F0;
+    *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
     sDebounceVEntry37C0* vt = *(sDebounceVEntry37C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x8);
     return self;
@@ -1260,8 +1260,8 @@ extern "C" void func_00351398(void* self, void* src);
 extern "C" void MEM_fill(void* p, int v, int n);
 extern char D_0048E758[];
 extern char D_0048E768[];
-extern void* D_00490AD0[];
-extern void* D_00490AF0[];
+extern void* cMeshAnimFrame_vtbl[];
+extern void* cAnimFrame_vtbl[];
 
 struct sDbVEntry_43A8 {
     short delta;
@@ -1275,9 +1275,9 @@ struct sDbMesh_43A8 {
     char pad_0x88[0x48];
     sDbMesh_43A8()
     {
-        vtable = D_00490AF0;
+        vtable = cAnimFrame_vtbl;
         func_003513D0(this);
-        vtable = D_00490AD0;
+        vtable = cMeshAnimFrame_vtbl;
         func_003612C0(this);
     }
     void operator delete[](void* p, unsigned int size);

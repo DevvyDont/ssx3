@@ -33,13 +33,13 @@ struct cSplineModifier_95D8 {
     sSmFollow_95D8 follow;  // 0xD8
 };
 
-extern void* D_0048F250[];
+extern void* cSplineModifier_vtbl[];
 extern sSmQuad_95D8 t4vect_Zero;
 extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream);
 
 extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier_95D8* self, cStream003595D8* stream)
 {
-    self->vtable = D_0048F250;
+    self->vtable = cSplineModifier_vtbl;
     sSmFollow_95D8* f = &self->follow;
     self->follow.id = 0xFFFFFFFF;
     self->follow.node = 0;
@@ -632,7 +632,7 @@ struct sSmQuad4_359F88 {
     sSmQuad4_359F88(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-extern void* D_0048F168[];
+extern void* cMultiSplineModifier_vtbl[];
 extern "C" void func_003451C0(void* ref, int id);
 extern "C" void func_0035A550(void* self, float v);
 extern "C" void cMultiSplineModifier_allocInstances(void* self);
@@ -644,7 +644,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(void* self);
 extern "C" void* cMultiSplineModifier_cMultiSplineModifier(char* self, char* desc, char* model)
 {
     *(char**)(self + 0x40) = model;
-    *(void***)self = D_0048F168;
+    *(void***)self = cMultiSplineModifier_vtbl;
     *(unsigned int*)(self + 0x48) = 0xFFFFFFFF;
     *(int*)(self + 0x50) = 0;
     *(int*)(self + 0x4C) = 0;
@@ -713,7 +713,7 @@ struct cMultiSplineModifier_A118 {
     sSmFollow_A118 follow;  // 0x48
 };
 
-extern void* D_0048F168[];
+extern void* cMultiSplineModifier_vtbl[];
 // PORT: same symbol as the unit's cSpline_readFromReplayFrame(void*, cStream003595D8*).
 extern "C" void cSpline_readFromReplayFrame_A118(void* self, cStream0035A118* stream) __asm__("cSpline_readFromReplayFrame");
 extern "C" void cMultiSplineModifier_allocNodes(void* self);
@@ -724,7 +724,7 @@ extern "C" void* cInstanceMan_allocInstance(void* man, unsigned int id);
 
 extern "C" cMultiSplineModifier_A118* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier_A118* self, cStream0035A118* stream)
 {
-    self->vtable = D_0048F168;
+    self->vtable = cMultiSplineModifier_vtbl;
     sSmFollow_A118* f = &self->follow;
     self->follow.id = 0xFFFFFFFF;
     self->follow.node = 0;
@@ -754,7 +754,7 @@ void operator_delete(int*);
 void* cObjectInterface_getInstanceMan();
 void func_00351260(void* man, void* inst);
 extern "C" void func_0035A780(void* self);
-extern void* D_0048F168[];
+extern void* cMultiSplineModifier_vtbl[];
 extern void* D_004913F8[];
 
 struct cMultiSplineModifier_A250 {
@@ -769,7 +769,7 @@ struct cMultiSplineModifier_A250 {
 
 extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier_A250* self, int flags)
 {
-    self->vtable = D_0048F168;
+    self->vtable = cMultiSplineModifier_vtbl;
     func_0035A780(self);
     if (self->nodes != 0) {
         cMemMan_free(self->nodes);
@@ -1903,7 +1903,7 @@ extern "C" void* func_002D1BD8();
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
-extern char D_004911D0[];
+extern char cRailModifier_vtbl[];
 extern "C" void cRailModifier_buildXform(void* self);
 struct sSmMod_C040;
 extern "C" void cRailModifier_updateBoundBox(sSmMod_C040* self);
@@ -2094,7 +2094,7 @@ extern "C" char* cRailModifier_cRailModifier(char* self, sSmDesc_B708* desc, sSm
 {
     sSmBox_B708* box = (sSmBox_B708*)(self + 0x10);
     *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
-    *(void**)(self + 0x8) = D_004911D0;
+    *(void**)(self + 0x8) = cRailModifier_vtbl;
     *(void**)(self + 0x0) = 0;
     *(void**)(self + 0x4) = 0;
     *(sSmModel_B708**)(self + 0x40) = model;
@@ -2204,7 +2204,7 @@ extern "C" void* func_002D1BD8();
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
-extern char D_004911D0[];
+extern char cRailModifier_vtbl[];
 extern "C" void cRailModifier_buildXform(void* self);
 
 class cSmStream_BA88 {
@@ -2273,7 +2273,7 @@ struct sSmRef_BA88 {
 extern "C" char* cRailModifier_cRailModifier1(char* self, cSmStream_BA88* src)
 {
     *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
-    *(void**)(self + 0x8) = D_004911D0;
+    *(void**)(self + 0x8) = cRailModifier_vtbl;
     *(void**)(self + 0x0) = 0;
     *(void**)(self + 0x4) = 0;
     src->v02(self + 0x10, 0x30);
@@ -2360,8 +2360,8 @@ extern "C" void* func_002D1BD8();
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
-extern char D_004911D0[];
-extern char D_00491200[];
+extern char cRailModifier_vtbl[];
+extern char cRailLink_vtbl[];
 
 static inline sSmRoot_BD70* findRoot_BD70(char* w, const sSmCell_BD70& c)
 {
@@ -2421,7 +2421,7 @@ struct sSmRef_BD70 {
 
 extern "C" void func_0035BD70(char* self, int flags)
 {
-    *(void**)(self + 0x8) = D_004911D0;
+    *(void**)(self + 0x8) = cRailModifier_vtbl;
     remove_BD70((char*)cObjectInterface_getNash(), *(void**)(self + 0x44), (sSmBox_BD70*)(self + 0x10));
     operator_delete(*(int**)(self + 0x44));
     sSmTrack_BD70* t = ((sSmRef_BD70*)(self + 0x30))->get();
@@ -2439,7 +2439,7 @@ extern "C" void func_0035BD70(char* self, int flags)
         insert_BD70((char*)cObjectInterface_getNash(), seg, &b);
         seg = seg->next;
     }
-    *(void**)(self + 0x8) = D_00491200;
+    *(void**)(self + 0x8) = cRailLink_vtbl;
     func_0035B6D0((sSplineLink*)self);
     if (flags & 1) {
         operator_delete((int*)self);

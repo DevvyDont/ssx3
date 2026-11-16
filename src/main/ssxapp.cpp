@@ -9,7 +9,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
 extern "C" void* cAppMan_cAppMan(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern int D_004A3E90;
-extern void* D_0047D9C8[];
+extern void* cSSXApp_vtbl[];
 
 struct cSSXApp00226830 {
     char base[0x5C];
@@ -42,7 +42,7 @@ struct cSSXApp00226830 {
 extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp* self)
 {
     cAppMan_cAppMan(((cSSXApp00226830*)self));
-    self->mVtbl = D_0047D9C8;
+    self->mVtbl = cSSXApp_vtbl;
     self->UserName = (char*)D_004A3E90;
     self->Password = (char*)D_004A3E90;
     self->CommandLineTrack = (char*)D_004A3E90;

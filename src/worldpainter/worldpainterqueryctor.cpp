@@ -8,7 +8,7 @@ INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_cWorldPaint
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern char D_00483E00[];
+extern char cWorldPainterQuery_vtbl[];
 extern char D_00483CB8[];
 extern char D_00483CD0[];
 extern char D_00483CE0[];
@@ -59,7 +59,7 @@ extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(sWPQuery_0410* s
 {
     self->type.flags = type;
     self->type.kind = type >> 8;
-    self->vtbl = D_00483E00;
+    self->vtbl = cWorldPainterQuery_vtbl;
     self->minDist = 4286578688.0f;
     self->maxDist = 4286578688.0f;
     switch (self->type.kind) {
@@ -116,7 +116,7 @@ extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(sWPQuery_0410* s
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C06C0);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
-extern char D_00483E00[];
+extern char cWorldPainterQuery_vtbl[];
 extern char D_00485D30[];
 
 struct sWPQuery_06C0 {
@@ -130,7 +130,7 @@ extern sWPQuery_06C0* D_004A3880;
 
 extern "C" void func_002C06C0(sWPQuery_06C0* self, int flags)
 {
-    self->vtbl = D_00483E00;
+    self->vtbl = cWorldPainterQuery_vtbl;
     operator_delete(self->buf);
     sWPQuery_06C0* p = D_004A3880;
     if (p == self) {

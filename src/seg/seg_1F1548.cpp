@@ -81,7 +81,7 @@ struct Obj0820 {
     virtual ~Obj0820();
 };
 extern char D_00487D28[];
-extern char D_00487DA0[];
+extern char cVisualEffectsMan_vtbl[];
 
 struct sMgr_0820 {
     Obj0820* objs[17];
@@ -108,7 +108,7 @@ extern "C" void func_002F0820(sMgr_0820* self, int arg1)
     delete self->objs[14];
     delete self->objs[15];
     delete self->objs[16];
-    self->vptr = D_00487DA0;
+    self->vptr = cVisualEffectsMan_vtbl;
     if (arg1 & 1) {
         operator_delete((int*)self);
     }
@@ -1953,7 +1953,7 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" int* func_002F2588(int* arg0);
 extern "C" void* func_002F2D60(void* arg0);
 extern "C" void func_002F39C8(void* arg0);
-extern char D_00488230[];
+extern char cSplashManager_vtbl[];
 
 // Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
 extern "C" void* cSplashManager_cSplashManager(void* p, void* a1, int a2)
@@ -1962,7 +1962,7 @@ extern "C" void* cSplashManager_cSplashManager(void* p, void* a1, int a2)
     cObjNode_cObjNode1(self, a1);
     *(int*)(self + 0x10) = a2;
     *(int*)(self + 0x14) = 0;
-    *(char**)(self + 0xC) = D_00488230;
+    *(char**)(self + 0xC) = cSplashManager_vtbl;
     *(int*)(self + 0x18) = 0;
     {
         char* e = self + 0x1C;
@@ -1998,10 +1998,10 @@ extern "C" void* cSplashManager_cSplashManager(void* p, void* a1, int a2)
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager__cSplashManager);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void *);
-extern char D_00488230[];
+extern char cSplashManager_vtbl[];
 
 extern "C" void cSplashManager__cSplashManager(void *arg0) {
-    *(char **)((char*)arg0 + 0xC) = D_00488230;
+    *(char **)((char*)arg0 + 0xC) = cSplashManager_vtbl;
     cObjNode__cObjNode(arg0);
 }
 #endif

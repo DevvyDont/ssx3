@@ -2019,7 +2019,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_cFEPopupConfirm);
 #ifdef SKIP_ASM
 extern "C" void* cScreenPopup_cScreenPopup(void* mem, void* engine, void* owner);
 extern "C" void cFEPopupConfirm_initPopup(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern char D_0046C890[];
+extern char cFEPopupConfirm_vtbl[];
 extern int D_004A203C;
 
 struct sMemCardPopupK1D99C8 {
@@ -2034,7 +2034,7 @@ struct sMemCardPopupK1D99C8 {
 extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, void* engine, void* owner, int a3, int a4, int a5, int a6, int a7, int a8)
 {
     cScreenPopup_cScreenPopup(self, engine, owner);
-    self->vtbl = D_0046C890;
+    self->vtbl = cFEPopupConfirm_vtbl;
     if (D_004A203C == 0) {
         self->f17C = 1;
     } else {
@@ -2176,7 +2176,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D48);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void func_001DA4A8(void* self);
-extern char D_0046A618[];
+extern char cFEStateNetHelpPopup_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -2188,7 +2188,7 @@ struct sMcSlot9D48 {
 extern "C" void* func_001D9D48(void* self, void* engine, void* owner)
 {
     func_0039E318(self, engine, owner);
-    *(void**)((char*)self + 0x8) = D_0046A618;
+    *(void**)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;
     new ((char*)self + 0x54) sMcSlot9D48[7];
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x50) = 0;

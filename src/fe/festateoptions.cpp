@@ -329,12 +329,12 @@ extern "C" void func_00188E58(void* self)
 INCLUDE_ASM("fe/festateoptions", func_00188EE8);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern void* D_0046C6F0[];
+extern void* cFEStateOptionsGame_vtbl[];
 
 extern "C" void* func_00188EE8(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_0046C6F0;
+    *(void***)((char*)self + 0x8) = cFEStateOptionsGame_vtbl;
     *(int*)((char*)self + 0xC) = 0x1C;
     return self;
 }
@@ -656,8 +656,8 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0045DD68[];
 extern char D_0045DF88[];
 extern char D_0045DFA0[];
-extern void* D_0046B230[];
-extern void* D_0046B300[];
+extern void* cFEPopupScreenPos_vtbl[];
+extern void* cFEPopupVideoCalibration_vtbl[];
 extern void* D_0046B3D0[];
 extern char D_004A1520[];
 extern char D_004A1528[];
@@ -732,7 +732,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         if (Is_189980(*(int*)(widget + 0x38), D_004A1520)) {
             char* p = (char*)operator new(0x54, D_0045DF88, 0x100, 0);
             func_0039E318(p, self->engine, self);
-            *(void***)(p + 8) = D_0046B230;
+            *(void***)(p + 8) = cFEPopupScreenPos_vtbl;
             *(int*)(p + 0x4C) = 0;
             *(int*)(p + 0x48) = 0;
             p[0x50] = 0;
@@ -740,7 +740,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
             char* p = (char*)operator new(0x4C, D_0045DFA0, 0x100, 0);
             func_0039E318(p, self->engine, self);
-            *(void***)(p + 8) = D_0046B300;
+            *(void***)(p + 8) = cFEPopupVideoCalibration_vtbl;
             *(int*)(p + 0xC) = 0x1B;
             cUIStateStack_pushPopup(self->engine + 0x18, p);
         }
@@ -889,13 +889,13 @@ extern "C" void func_00189D60(void* self_)
 INCLUDE_ASM("fe/festateoptions", func_0018A258);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern void* D_0046C620[];
+extern void* cFEStateOptionsSound_vtbl[];
 extern int D_004A14D4;
 
 extern "C" void* func_0018A258(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 8) = D_0046C620;
+    *(void***)((char*)self + 8) = cFEStateOptionsSound_vtbl;
     *(int*)((char*)self + 0xC) = 0x1D;
     D_004A14D4 = 0;
     return self;
@@ -1705,13 +1705,13 @@ extern "C" void func_0018C478(void* vself)
 INCLUDE_ASM("fe/festateoptions", func_0018C658);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern void* D_0046C480[];
+extern void* cFEStateOptionsController_vtbl[];
 extern int D_004A14DC;
 
 extern "C" void* func_0018C658(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 8) = D_0046C480;
+    *(void***)((char*)self + 8) = cFEStateOptionsController_vtbl;
     *(int*)((char*)self + 0xC) = 0x1F;
     *(char*)((char*)self + 0x50) = 0;
     D_004A14DC = 0;
@@ -2157,13 +2157,13 @@ extern "C" void func_0018D108(void* self, int idx, float x, float y)
 INCLUDE_ASM("fe/festateoptions", func_0018D240);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern void* D_0046C3B0[];
+extern void* cFEStateOptionsSaveLoad_vtbl[];
 
 extern "C" void* func_0018D240(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x20;
-    *(void***)((char*)self + 0x8) = D_0046C3B0;
+    *(void***)((char*)self + 0x8) = cFEStateOptionsSaveLoad_vtbl;
     *(char*)((char*)self + 0x48) = 0;
     return self;
 }
@@ -2420,13 +2420,13 @@ INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
 #ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern void* D_0046C228[];
+extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
 extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
 {
     func_001D53B0(self, a1, a2);
     *(int*)((char*)self + 0x230) = a4;
-    *(void***)((char*)self + 8) = D_0046C228;
+    *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
     *(int*)((char*)self + 0xC) = 0x21;
     *(int*)((char*)self + 0x22C) = a3;
     *(int*)((char*)self + 0x234) = 0;
@@ -3227,12 +3227,12 @@ extern "C" void func_0018E510(cState_18E510* self)
 INCLUDE_ASM("fe/festateoptions", func_0018EA98);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern void* D_0046C158[];
+extern void* cFEStateProfileSelect_vtbl[];
 
 extern "C" void* func_0018EA98(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_0046C158;
+    *(void***)((char*)self + 0x8) = cFEStateProfileSelect_vtbl;
     *(int*)((char*)self + 0xC) = 8;
     return self;
 }

@@ -4554,7 +4554,7 @@ void func_00244870(void*);
 void func_00244878(void*);
 extern "C" void MEM_fill(void* p, int c, int n);
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
-extern void* D_0047CBD8[];
+extern void* cMCOverlayManager_vtbl[];
 extern int cMCOverlayManager_mSaveInProgress;
 
 // cMCOverlayManager constructor body: resets the state, the 45 state handlers (0x00-0xB0) and the device records.
@@ -4567,7 +4567,7 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
     w[0x2F] = 0;
     w[0x30] = 0;
     w[0x31] = 0;
-    w[0x1D2] = (int)D_0047CBD8;
+    w[0x1D2] = (int)cMCOverlayManager_vtbl;
     cMCOverlayManager_SetAction(self, 1);
     w[0x4C] = 0;
     w[0x3E] = 0;
@@ -4666,12 +4666,12 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
 INCLUDE_ASM("movie/movieplayer", func_002424C8);
 #ifdef SKIP_ASM
 extern int cMCOverlayManager_mSaveInProgress;
-extern void* D_0047CBD8[];
+extern void* cMCOverlayManager_vtbl[];
 void operator_delete(int*);
 
 extern "C" void func_002424C8(cMCOverlayManager* self, int flags)
 {
-    self->mVtbl = D_0047CBD8;
+    self->mVtbl = cMCOverlayManager_vtbl;
     cMCOverlayManager_mSaveInProgress = 0;
     if (flags & 1) {
         operator_delete((int*)self);

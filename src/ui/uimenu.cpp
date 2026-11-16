@@ -888,7 +888,7 @@ extern "C" void cUIPair_update(void* self, unsigned short ev)
 INCLUDE_ASM("ui/uimenu", cUIProgress__cUIProgress);
 #ifdef SKIP_ASM
 extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* D_00494408[];
+extern void* cUIProgress_vtbl[];
 
 struct cUIProgress__cUIProgress_sVEntry {
     short delta;
@@ -898,7 +898,7 @@ struct cUIProgress__cUIProgress_sVEntry {
 
 extern "C" void cUIProgress__cUIProgress(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00494408;
+    *(void***)((char*)self + 0x8) = cUIProgress_vtbl;
     void* a = *(void**)((char*)self + 0x74);
     if (a != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)a + 8);

@@ -450,7 +450,7 @@ extern "C" void func_001DCEA0(void* self, int flags);
 extern "C" void func_002CC048(void* self, int flags);
 void operator_delete(int* ptr);
 extern void* D_0046D350[];
-extern void* D_0046D948[];
+extern void* cDebugScreen_vtbl[];
 extern void* D_004A4E90;
 
 struct sVE_17D3B0 {
@@ -534,7 +534,7 @@ extern "C" void func_0017D3B0(char* self, int flags)
     dtorF_17D3B0(self + 0x604);
     func_001DCEA0(self + 0x70, 2);
     func_002CC048(self + 0x8, 2);
-    *(void***)self = D_0046D948;
+    *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -1746,7 +1746,7 @@ INCLUDE_ASM("fe/debugfe", func_0017F7B8);
 #ifdef SKIP_ASM
 extern "C" void func_00231CD0(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern char D_0046D900[];
+extern char cDebugFE_vtbl[];
 
 struct sDbgEntry17F7B8 {
     int a;
@@ -1768,7 +1768,7 @@ struct sDbgList17F7B8 {
 extern "C" void* func_0017F7B8(void* self)
 {
     func_00231CD0(self);
-    *(void**)self = D_0046D900;
+    *(void**)self = cDebugFE_vtbl;
     *(int*)((char*)self + 0x24) = 0;
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x2C) = 0;
@@ -2499,8 +2499,8 @@ extern "C" unsigned short* func_001DD580(unsigned short* p);
 extern "C" int func_003977E8(void* p);
 extern "C" int func_0039FB30(void* p, int a1, int a2);
 extern int D_0046D1A0[];
-extern int D_00494670[];
-extern int D_004949E8[];
+extern int cUIScreen_vtbl[];
+extern int cUIGroup_vtbl[];
 
 extern "C" void* func_00180508(char* self, int a1)
 {
@@ -2508,14 +2508,14 @@ extern "C" void* func_00180508(char* self, int a1)
     *(char**)(self + 0) = self;
     *(int*)(self + 0xC) = 0;
     *(int*)(self + 0x10) = 0;
-    *(int**)(self + 8) = D_00494670;
+    *(int**)(self + 8) = cUIScreen_vtbl;
     func_001DD580((unsigned short*)(self + 0x14));
     func_003977E8(self + 0x18);
     *(int*)(self + 0x34) = 0;
     *(int*)(self + 0x38) = 0;
     *(int*)(self + 0x3C) = 0;
     func_0039FB30(self + 0x40, 0, 0);
-    *(int**)(self + 0x48) = D_004949E8;
+    *(int**)(self + 0x48) = cUIGroup_vtbl;
     func_003977E8(self + 0xB4);
     *(int*)(self + 0xD0) = a1;
     *(int**)(self + 8) = D_0046D1A0;

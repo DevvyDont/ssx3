@@ -603,7 +603,7 @@ INCLUDE_ASM("object/flagset", cFlagManager_cFlagManager);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* func_0034AF38(void* self);
-extern void* D_0048FB80[];
+extern void* cFlagManager_vtbl[];
 
 struct sFlagSetElem_C428 {
     char data[0x188];
@@ -624,7 +624,7 @@ extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* a
     int i;
     sFlagSetElem_C428* p = self->elems;
     cObjNode_cObjNode1(self, a1);
-    self->vtable = D_0048FB80;
+    self->vtable = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, p++) {
         func_0034AF38(p);
     }
@@ -640,7 +640,7 @@ extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* a
 INCLUDE_ASM("object/flagset", func_0034C4B8);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* D_0048FB80[];
+extern void* cFlagManager_vtbl[];
 
 struct sFlagSetVEntry_C4B8 {
     short delta;
@@ -662,7 +662,7 @@ struct sFlagSet_C4B8 {
 
 extern "C" void func_0034C4B8(sFlagSet_C4B8* self, int flags)
 {
-    self->vtable = D_0048FB80;
+    self->vtable = cFlagManager_vtbl;
     if (self->elems != 0) {
         sFlagSetElem_C4B8* p = self->elems + 15;
         while (self->elems != p) {
@@ -995,7 +995,7 @@ static inline float fabs_C8E8(float x)
     return r;
 }
 
-extern void* D_0048FA00[];
+extern void* cFenceNode_vtbl[];
 extern sVec4_C8E8 D_004FF140;
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
 extern "C" void func_0034D1E8(void* self);
@@ -1007,7 +1007,7 @@ extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, voi
     float force;
     func_0034FB00(self, bucket, 9, pInst);
     self->State.w[0] = 0xFFFFFFFF;
-    self->vtable = D_0048FA00;
+    self->vtable = cFenceNode_vtbl;
     new (self->Verts) t3Vector_C8E8[16];
     self->State = *tdata;
     self->field_0x30 = 0;
@@ -1063,7 +1063,7 @@ struct sFlagSet_CAB8 {
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
 extern "C" void func_0034D1E8(void* self);
 extern "C" void func_0034D6F0(void* self, float dt);
-extern void* D_0048FA00[];
+extern void* cFenceNode_vtbl[];
 
 // PORT: the unit declares this as void (callers ignore the result); bound by asm label.
 extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt) __asm__("func_0034CAB8");
@@ -1071,7 +1071,7 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
 {
     func_0034FB00(self, a1, 9, obj);
     self->block.w[0] = 0xFFFFFFFF;
-    self->vtable = D_0048FA00;
+    self->vtable = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CAB8[16];
     self->block = *desc;
     self->field_0x30 = 0;
@@ -1090,7 +1090,7 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
 INCLUDE_ASM("object/flagset", func_0034CB80);
 #ifdef SKIP_ASM
 extern char* D_004A5B80;
-extern void* D_0048FA00[];
+extern void* cFenceNode_vtbl[];
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 struct sFlagSetVEntryCB80 {
@@ -1102,7 +1102,7 @@ struct sFlagSetVEntryCB80 {
 extern "C" void func_0034CB80(void* self, int flags)
 {
     char* s = (char*)self;
-    *(void***)(s + 0xC) = D_0048FA00;
+    *(void***)(s + 0xC) = cFenceNode_vtbl;
     void* h = *(void**)(s + 0x40);
     if (h != 0) {
         char* mgr = D_004A5B80;
@@ -1118,7 +1118,7 @@ INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern "C" void func_0034D1E8(void* self);
-extern void* D_0048FA00[];
+extern void* cFenceNode_vtbl[];
 
 struct sFlagSetVEntry_CBE8 {
     short delta;
@@ -1136,7 +1136,7 @@ extern "C" void* cFenceNode_cFenceNode(void* self, void* a1, void* stream)
 {
     cInstanceNode_cInstanceNode(self, a1, stream);
     *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFF;
-    *(void***)((char*)self + 0xC) = D_0048FA00;
+    *(void***)((char*)self + 0xC) = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CBE8[16];
     sFlagSetVEntry_CBE8* e = &(*(sFlagSetVEntry_CBE8**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x1C, 0x24);

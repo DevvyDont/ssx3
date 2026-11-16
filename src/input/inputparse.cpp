@@ -2792,13 +2792,13 @@ INCLUDE_ASM("input/inputparse", func_00326E50);
 extern "C" int func_003FF8F0(int a, int b);
 void operator_delete(int* ptr);
 extern void* D_0048E488[];
-extern char D_0048E4B8[];
+extern char cPadDevice_vtbl[];
 
 extern "C" void func_00326E50(void* self, int flags)
 {
     *(void***)self = D_0048E488;
     func_003FF8F0(*(int*)((char*)self + 0x4), *(int*)((char*)self + 0x8));
-    *(void**)self = D_0048E4B8;
+    *(void**)self = cPadDevice_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3083,11 +3083,11 @@ extern "C" void func_00327740(void* self, int mode, float v)
 INCLUDE_ASM("input/inputparse", cPadDevice__cPadDevice);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0048E4B8[];
+extern char cPadDevice_vtbl[];
 
 extern "C" void cPadDevice__cPadDevice(void* self, int flags)
 {
-    *(void**)self = D_0048E4B8;
+    *(void**)self = cPadDevice_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

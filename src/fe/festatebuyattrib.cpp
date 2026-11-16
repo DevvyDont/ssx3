@@ -577,14 +577,14 @@ extern "C" void func_001F54A8(void) {
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F54B0);
 #ifdef SKIP_ASM
-extern void* D_00473838[];
+extern void* cFEStateCareerStats_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
 extern "C" void* func_001F54B0(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_00473838;
+    *(void***)((char*)self + 0x8) = cFEStateCareerStats_vtbl;
     *(int*)((char*)self + 0xC) = 0x2A;
     *(char*)((char*)self + 0x44) = 0;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);

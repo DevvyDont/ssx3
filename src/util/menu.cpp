@@ -10,14 +10,14 @@ struct cMenuItem {
     int field_0xC;
     void* vtable; // 0x10
 };
-extern void* D_00486F28[16];
+extern void* cMenuItem_vtbl[16];
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_cMenuItem__FP9cMenuItemPv);
 #ifdef SKIP_ASM
 cMenuItem* cMenuItem_cMenuItem(cMenuItem* self, void* text)
 {
-    self->vtable = D_00486F28;
+    self->vtable = cMenuItem_vtbl;
     self->field_0x4 = 1;
     self->field_0x8 = text;
     self->field_0xC = 0;
@@ -32,7 +32,7 @@ void operator_delete(int* ptr);
 
 extern "C" void func_002CA280(int* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_00486F28;
+    *(void***)((char*)self + 0x10) = cMenuItem_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -384,7 +384,7 @@ void* func_002CA988_5(void* self, int a1, int a2, int a3, void* a4)
 }
 #endif
 
-extern void* D_00486ED0[];
+extern void* cMenu_vtbl[];
 
 //100%
 INCLUDE_ASM("util/menu", cMenu_cMenu__FPv);
@@ -393,7 +393,7 @@ void* cMenu_cMenu(void* self)
 {
     int t0 = 0;
     *(int*)self = t0;
-    *(int*)((char*)self + 0x12c) = (int)(void*)D_00486ED0;
+    *(int*)((char*)self + 0x12c) = (int)(void*)cMenu_vtbl;
     *(int*)((char*)self + 0x4) = t0;
     *(int*)((char*)self + 0x8) = t0;
     *(int*)((char*)self + 0x124) = t0;
@@ -406,11 +406,11 @@ INCLUDE_ASM("util/menu", cMenu__cMenu);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern void* D_00486ED0[];
+extern void* cMenu_vtbl[];
 
 extern "C" void cMenu__cMenu(int* self, int flags)
 {
-    *(void***)((char*)self + 0x12C) = D_00486ED0;
+    *(void***)((char*)self + 0x12C) = cMenu_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2193,7 +2193,7 @@ INCLUDE_ASM("util/menu", cSubMenuItem_cSubMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486DE0[];
+extern void* cSubMenuItem_vtbl[];
 
 struct cSubMenuItem_sItem {
     char pad_0x00[0x10];
@@ -2207,7 +2207,7 @@ extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* sel
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = a2;
     self->field_0x18 = a1;
-    self->vtable = D_00486DE0;
+    self->vtable = cSubMenuItem_vtbl;
     return self;
 }
 #endif
@@ -2547,7 +2547,7 @@ void* func_002CD278(void* self, int a1)
 }
 #endif
 
-extern void* D_00486CA0[16];
+extern void* cNullMenuItem_vtbl[16];
 
 struct cNullMenuItem {
     char pad_0x00[0x10];
@@ -2566,7 +2566,7 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = text;
-    self->vtable = D_00486CA0;
+    self->vtable = cNullMenuItem_vtbl;
     return self;
 }
 #endif
@@ -2605,7 +2605,7 @@ void* func_002CD328(void* self, int a1)
 }
 #endif
 
-extern void* D_00486C50[16];
+extern void* cSpaceMenuItem_vtbl[16];
 
 struct cSpaceMenuItem {
     char pad_0x00[0x10];
@@ -2624,7 +2624,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = text;
-    self->vtable = D_00486C50;
+    self->vtable = cSpaceMenuItem_vtbl;
     return self;
 }
 #endif
@@ -2874,13 +2874,13 @@ INCLUDE_ASM("util/menu", func_002CD850);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
-extern void* D_00486BB0[];
+extern void* cIntMenuItem_vtbl[];
 
 extern "C" void* func_002CD850(void* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486BB0;
+    *(void***)((char*)self + 0x10) = cIntMenuItem_vtbl;
     *(int*)((char*)self + 0x18) = 0;
     *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x20) = 0;
@@ -2893,13 +2893,13 @@ extern "C" void* func_002CD850(void* self)
 //100%
 INCLUDE_ASM("util/menu", func_002CD8A8);
 #ifdef SKIP_ASM
-extern void* D_00486BB0[];
+extern void* cIntMenuItem_vtbl[];
 
 extern "C" void* func_002CD8A8(void* self, void* text)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486BB0;
+    *(void***)((char*)self + 0x10) = cIntMenuItem_vtbl;
     *(int*)((char*)self + 0x18) = 0;
     *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x20) = 0;
@@ -2913,7 +2913,7 @@ extern "C" void* func_002CD8A8(void* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cIntMenuItem_cIntMenuItem);
 #ifdef SKIP_ASM
-extern void* D_00486BB0[];
+extern void* cIntMenuItem_vtbl[];
 
 struct cIntMenuItem_sItem {
     char pad_0x00[0x10];
@@ -2934,7 +2934,7 @@ extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem_sItem* sel
     self->field_0x18 = a2;
     self->field_0x1C = a3;
     self->field_0x20 = a4;
-    self->vtable = D_00486BB0;
+    self->vtable = cIntMenuItem_vtbl;
     self->field_0x28 = 0;
     self->field_0x24 = 0;
     self->field_0x2C = 0;
@@ -3102,12 +3102,12 @@ INCLUDE_ASM("util/menu", func_002CDC88);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
-extern void* D_00486B60[];
+extern void* cFloatMenuItem_vtbl[];
 
 extern "C" void* func_002CDC88(void* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    *(void***)((char*)self + 0x10) = D_00486B60;
+    *(void***)((char*)self + 0x10) = cFloatMenuItem_vtbl;
     *(float*)((char*)self + 0x24) = 1.0f;
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0x18) = 0;
@@ -3123,7 +3123,7 @@ extern "C" void* func_002CDC88(void* self)
 //100%
 INCLUDE_ASM("util/menu", cFloatMenuItem_cFloatMenuItem);
 #ifdef SKIP_ASM
-extern void* D_00486B60[];
+extern void* cFloatMenuItem_vtbl[];
 
 struct cFloatMenuItem_sItem {
     char pad_0x00[0x10];
@@ -3145,7 +3145,7 @@ extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sI
     self->field_0x18 = a2;
     self->field_0x1C = f1;
     self->field_0x20 = f2;
-    self->vtable = D_00486B60;
+    self->vtable = cFloatMenuItem_vtbl;
     self->field_0x24 = 1.0f;
     self->field_0x30 = 0;
     self->field_0x2C = 0;
@@ -3339,7 +3339,7 @@ extern "C" void func_002CE100(void* self, int a1)
 //100%
 INCLUDE_ASM("util/menu", func_002CE170);
 #ifdef SKIP_ASM
-extern void* D_00486B10[];
+extern void* cAngleMenuItem_vtbl[];
 
 extern "C" void* func_002CE170(void* self, void* text, int a2, int a3, float f1, float f2)
 {
@@ -3348,7 +3348,7 @@ extern "C" void* func_002CE170(void* self, void* text, int a2, int a3, float f1,
     *(int*)((char*)self + 0x18) = a2;
     *(float*)((char*)self + 0x1C) = f1;
     *(float*)((char*)self + 0x20) = f2;
-    *(void***)((char*)self + 0x10) = D_00486B10;
+    *(void***)((char*)self + 0x10) = cAngleMenuItem_vtbl;
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x24) = 0;
     return self;
@@ -3788,7 +3788,7 @@ INCLUDE_ASM("util/menu", cColorMenuItem__cColorMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486A70[];
+extern void* cColorMenuItem_vtbl[];
 
 struct cColorMenuItem__cColorMenuItem_sItem {
     char pad_0x00[0x10];
@@ -3802,7 +3802,7 @@ extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = a1;
     self->field_0x18 = a2;
-    self->vtable = D_00486A70;
+    self->vtable = cColorMenuItem_vtbl;
     return self;
 }
 #endif
@@ -4210,8 +4210,8 @@ INCLUDE_ASM("util/menu", func_002CF7E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cMenu_cMenu(void* self);
-extern void* D_004869B8[];
-extern void* D_00486A18[];
+extern void* cExpandMenuItem_vtbl[];
+extern void* cExpandMenuItemMenu_vtbl[];
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
 // Element type of an inline-constructed array; its empty constructor leaves only the loop counters.
@@ -4228,9 +4228,9 @@ extern "C" void* func_002CF7E8(void* self)
     char* s = (char*)self;
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     *(void**)(s + 0x14) = 0;
-    *(void***)(s + 0x10) = D_004869B8;
+    *(void***)(s + 0x10) = cExpandMenuItem_vtbl;
     cMenu_cMenu(s + 0x18);
-    *(void***)(s + 0x144) = D_00486A18;
+    *(void***)(s + 0x144) = cExpandMenuItemMenu_vtbl;
     new (s + 0x24) sMenuSlot_F7E8[70];
     *(void**)(s + 0x148) = self;
     return self;
@@ -4243,8 +4243,8 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_cExpandMenuItem);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 inline void* operator new[](unsigned int, void* p) { return p; }
 void* cMenu_cMenu(void* self);
-extern void* D_004869B8[];
-extern void* D_00486A18[];
+extern void* cExpandMenuItem_vtbl[];
+extern void* cExpandMenuItemMenu_vtbl[];
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
 
 // Element type of an inline-constructed array; its empty constructor leaves only the loop counters.
@@ -4258,9 +4258,9 @@ extern "C" void* cExpandMenuItem_cExpandMenuItem(void* self, void* name, void* p
     char* s = (char*)self;
     cMenuItem_cMenuItem((cMenuItem*)self, name);
     *(void**)(s + 0x14) = parent;
-    *(void***)(s + 0x10) = D_004869B8;
+    *(void***)(s + 0x10) = cExpandMenuItem_vtbl;
     cMenu_cMenu(s + 0x18);
-    *(void***)(s + 0x144) = D_00486A18;
+    *(void***)(s + 0x144) = cExpandMenuItemMenu_vtbl;
     new (s + 0x24) sMenuSlot_F860[70];
     *(void**)(s + 0x148) = self;
     if (*(void**)(s + 0x14) != 0) {
@@ -4595,7 +4595,7 @@ INCLUDE_ASM("util/menu", cRGBTitleMenuItem_cRGBTitleMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486968[];
+extern void* cRGBTitleMenuItem_vtbl[];
 
 struct cRGBTitleMenuItem_sItem {
     char pad_0x00[0x10];
@@ -4609,7 +4609,7 @@ extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitl
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = a2;
     self->field_0x18 = a1;
-    self->vtable = D_00486968;
+    self->vtable = cRGBTitleMenuItem_vtbl;
     return self;
 }
 #endif
@@ -4821,14 +4821,14 @@ INCLUDE_ASM("util/menu", cARGBMenuItem_cARGBMenuItem);
 extern "C" void* cExpandMenuItem_cExpandMenuItem(void* self, void* name, void* title);
 // PORT: cExpandMenuItem_addItem forwards $a2 (insert index) to cMenu_addItem; bound with that third argument.
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
-extern void* D_00486908[];
+extern void* cARGBMenuItem_vtbl[];
 
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title, void* color)
 {
     char* s = (char*)self;
     cExpandMenuItem_cExpandMenuItem(self, name, s + 0x640);
     *(void**)(s + 0x5AC) = color;
-    *(void***)(s + 0x10) = D_00486908;
+    *(void***)(s + 0x10) = cARGBMenuItem_vtbl;
     // PORT: the channel index is passed in the unit's void* parameter
     cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5B0), color, (void*)0);
     cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5D4), color, (void*)1);
@@ -4934,7 +4934,7 @@ extern "C" void* func_002D03F0(void* self, int a1, int a2);
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
 // PORT: the unit's definition types the value pointer and label as int; they are pointers.
 void* cFloatMenuItem_ptr(void* self, int index, float* value, void* label, float f1, float f2) __asm__("cFloatMenuItem_cFloatMenuItem");
-extern void* D_00486858[];
+extern void* cVectorMenuItem_vtbl[];
 extern char D_004A39D8[];
 extern char D_004A39E0[];
 extern char D_004A39E8[];
@@ -4944,7 +4944,7 @@ extern "C" void* func_002D05A8(void* self, void* name, float* values, int a3, fl
     char* s = (char*)self;
     cExpandMenuItem_cExpandMenuItem(self, name, s + 0x654);
     *(float**)(s + 0x5AC) = values;
-    *(void***)(s + 0x10) = D_00486858;
+    *(void***)(s + 0x10) = cVectorMenuItem_vtbl;
     cFloatMenuItem_ptr(s + 0x5B8, 0, values, D_004A39D8, f1, f2);
     cFloatMenuItem_ptr(s + 0x5EC, 1, values + 1, D_004A39E0, f1, f2);
     cFloatMenuItem_ptr(s + 0x620, 2, values + 2, D_004A39E8, f1, f2);

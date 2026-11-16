@@ -8,7 +8,7 @@
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). cUIThing's vtable
-// _vt$8cUIThing (D_00494BD8) keeps cListNode's traverseFlat/traverseRecurse (func_00397788/func_003977B8) in
+// _vt$8cUIThing (cUIThing_vtbl) keeps cListNode's traverseFlat/traverseRecurse (func_00397788/func_003977B8) in
 // slots 2-3. Objects are linked into their group's cList through mpPrev/mpNext.
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIThing), placed at retail offsets by:
@@ -45,7 +45,7 @@ struct tARGB {
 struct cUIThing {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] _vt$8cUIThing (D_00494BD8), stored by func_0039FB30 and func_003A4900
+    void** mVtbl;                    // 0x008 [R] _vt$8cUIThing (cUIThing_vtbl), stored by func_0039FB30 and func_003A4900
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on

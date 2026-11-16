@@ -34,7 +34,7 @@ extern "C" void* func_00176D68(void* self);
 extern "C" void* cManualCameraController_cManualCameraController(void* self, void* cam);
 extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int idx, int a);
 extern "C" void* cScriptCameraController_cScriptCameraController(void* self, int idx, void* cam);
-extern void* D_0045B888[];
+extern void* cCamera_vtbl[];
 extern const char D_0045B748[];
 extern const char D_0045B760[];
 extern const char D_0045B778[];
@@ -45,7 +45,7 @@ extern cQuad128 D_004FF130;
 extern "C" void* cCamera_cCamera(void* self, int idx)
 {
     func_0015D698(self);
-    *(void***)((char*)self + 0x90) = D_0045B888;
+    *(void***)((char*)self + 0x90) = cCamera_vtbl;
     func_00176D68((char*)self + 0xC0);
     *(void**)((char*)self + 0xA4) = cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, D_0045B748, 0, 0), self);
     *(void**)((char*)self + 0xA8) = cChaseCameraController_cChaseCameraController(cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
@@ -69,8 +69,8 @@ extern "C" void* cCamera_cCamera(void* self, int idx)
 INCLUDE_ASM("camera/camera", func_0015DD88);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0045B888[];
-extern void* D_0045B8B0[];
+extern void* cCamera_vtbl[];
+extern void* cSimpleCamera_vtbl[];
 void func_0015CD60(void* p);
 void func_00176DA8_2(void* self, int flags) __asm__("func_00176DA8__FPv");
 
@@ -84,7 +84,7 @@ public:
 // PORT: func_00176DA8__FPv is a destructor taking (self, flags); bind the 2-arg form.
 extern "C" void func_0015DD88(void* self, int flags)
 {
-    *(void***)((char*)self + 0x90) = D_0045B888;
+    *(void***)((char*)self + 0x90) = cCamera_vtbl;
     func_0015CD60(*(cCamPartK2**)((char*)self + 0xA4));
     func_0015CD60(*(cCamPartK2**)((char*)self + 0xA8));
     func_0015CD60(*(cCamPartK2**)((char*)self + 0xAC));
@@ -92,7 +92,7 @@ extern "C" void func_0015DD88(void* self, int flags)
     delete *(cCamPartK2**)((char*)self + 0xA8);
     delete *(cCamPartK2**)((char*)self + 0xAC);
     func_00176DA8_2((char*)self + 0xC0, 2);
-    *(void***)((char*)self + 0x90) = D_0045B8B0;
+    *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
     if (flags & 1)
     {
         operator_delete((int*)self);
@@ -1814,13 +1814,13 @@ extern "C" sPair_15F9B8 func_0015F9B8(char* src)
 INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_cManualCameraAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self);
-extern void* D_0045BD10[];
+extern void* cManualCameraAlgorithm_vtbl[];
 
 extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self)
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
     *(int*)((char*)self + 0xC) = 0x51;
-    *(void***)((char*)self + 0x10) = D_0045BD10;
+    *(void***)((char*)self + 0x10) = cManualCameraAlgorithm_vtbl;
     return self;
 }
 #endif
@@ -1949,13 +1949,13 @@ extern "C" void func_0015FD50(sFreeCam_0015FD50* self)
 INCLUDE_ASM("camera/camera", cEditorCameraAlgorithm_cEditorCameraAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self);
-extern void* D_0045BCA8[];
+extern void* cEditorCameraAlgorithm_vtbl[];
 
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self)
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
     *(int*)((char*)self + 0xC) = 0x50;
-    *(void***)((char*)self + 0x10) = D_0045BCA8;
+    *(void***)((char*)self + 0x10) = cEditorCameraAlgorithm_vtbl;
     return self;
 }
 #endif
@@ -3373,14 +3373,14 @@ extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int i)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/camera", cChaseCameraController_cChaseCameraController);
 #ifdef SKIP_ASM
-extern void* D_0045B908[];
+extern void* cChaseCameraController_vtbl[];
 extern "C" void* cCameraController_cCameraController(void* self, int a);
 extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int idx);
 
 extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int idx, int a)
 {
     cCameraController_cCameraController(self, a);
-    *(void***)((char*)self + 0x14) = D_0045B908;
+    *(void***)((char*)self + 0x14) = cChaseCameraController_vtbl;
     *(int*)((char*)self + 0x0) = 2;
     *(int*)((char*)self + 0x4) = 1;
     *(int*)((char*)self + 0x20) = 0;
@@ -3392,13 +3392,13 @@ extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int i
 //100%
 INCLUDE_ASM("camera/camera", func_00161A10);
 #ifdef SKIP_ASM
-extern void* D_0045B908[];
+extern void* cChaseCameraController_vtbl[];
 void operator_delete(int* ptr);
 extern "C" void cCameraController__cCameraController(void* self, int flags);
 
 extern "C" void func_00161A10(void* self, int flags)
 {
-    *(void***)((char*)self + 0x14) = D_0045B908;
+    *(void***)((char*)self + 0x14) = cChaseCameraController_vtbl;
     operator_delete(*(int**)((char*)self + 0x20));
     cCameraController__cCameraController(self, flags);
 }
@@ -8440,13 +8440,13 @@ extern "C" int func_00168028(void *arg0) {
 //100%
 INCLUDE_ASM("camera/camera", cSimpleCamera__cSimpleCamera);
 #ifdef SKIP_ASM
-extern void* D_0045B8B0[];
+extern void* cSimpleCamera_vtbl[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cSimpleCamera__cSimpleCamera(void* self, int flags)
 {
-    *(void***)((char*)self + 0x90) = D_0045B8B0;
+    *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

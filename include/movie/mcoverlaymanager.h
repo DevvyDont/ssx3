@@ -13,7 +13,7 @@
 // Statics (not in the object): cMCOverlayManager_mSaveInProgress (gp-relative int), the instance D_004A2C74.
 // Evidence tags:
 //   [R] retail's constructor cMCOverlayManager_cMCOverlayManager (word stores, the default callback stubs,
-//       MEM_fill sizes), init func_0023D5A8, SetAction, the vtable D_0047CBD8 and getManager's alloc;
+//       MEM_fill sizes), init func_0023D5A8, SetAction, the vtable cMCOverlayManager_vtbl and getManager's alloc;
 //   [P] the July 2003 preview's cMCOverlayManager::getMemCard (lw 0x330), carried to retail 0x434 by
 //       tools/layout_xlate.py (10 votes);
 //   [U] how matched retail code uses the field (movieplayer.cpp unless another unit is named);
@@ -180,7 +180,7 @@ struct cMCOverlayManager {
     int mLastMountedDevice;     // 0x444 [O]; [R] ctor -1; [U] func_0023FAE0 compares it with mSelectedDevice, then copies
     char unk_448[0x300];        // 0x448 no access in retail; On Tour's mFileListCache[32][6] (ushort, 0x180) sits here,
                                 //       retail's region is twice that
-    void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager D_0047CBD8 (slot 1 func_0023CF38 the state
+    void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (slot 1 func_0023CF38 the state
                                 //       handler, slot 2 the dtor func_002424C8); preview 0x638
 };
 

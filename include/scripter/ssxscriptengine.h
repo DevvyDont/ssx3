@@ -62,7 +62,7 @@ struct cSSXScriptEngine {
     cScriptObject* mpObjectDatabase[20];         // 0x000 [O]; [R] func_0027CDD0 zeroes 20 words
     char mEntityDatabase[30][0x14];              // 0x050 [O] tScriptEntityRecord[30]; [R] func_0027CDD0 sets 30
                                                  //       0x14-byte records to {0, -1, -1, 0, -1}
-    void** mVtbl;                                // 0x2A8 [R] _vt$16cSSXScriptEngine (D_004821B8), stored by the ctor
+    void** mVtbl;                                // 0x2A8 [R] _vt$16cSSXScriptEngine (cSSXScriptEngine_vtbl), stored by the ctor
                                                  //       over _vt$15cBXScriptEngine; [U] func_00278AD0 calls slot 4
     // --- cInSeqComm (second base of cBXScriptEngine: a vptr only)
     void** mInSeqCommVtbl;                       // 0x2AC [R] _vt$16cSSXScriptEngine$10cInSeqComm (D_00482100);

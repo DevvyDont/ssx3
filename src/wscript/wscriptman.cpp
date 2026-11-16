@@ -3464,13 +3464,13 @@ extern "C" void func_0030D400(char* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptTask__cWScriptTask);
 #ifdef SKIP_ASM
-extern void* D_00489AE0[];
+extern void* cWScriptTask_vtbl[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cWScriptTask__cWScriptTask(void* self, int flags)
 {
-    *(void***)((char*)self + 0x40) = D_00489AE0;
+    *(void***)((char*)self + 0x40) = cWScriptTask_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

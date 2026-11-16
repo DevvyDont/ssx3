@@ -732,11 +732,11 @@ extern "C" void func_002565E0(char *self) {
 INCLUDE_ASM("seg/seg_156860", func_00256698);
 #ifdef SKIP_ASM
 void func_002557E0(void *);
-extern char D_004812D0[];
+extern char cDSockChannel_vtbl[];
 
 extern "C" void *func_00256698(void *arg0) {
     func_002557E0(arg0);
-    (*(char **)((char*)(arg0) + (8))) = D_004812D0;
+    (*(char **)((char*)(arg0) + (8))) = cDSockChannel_vtbl;
     (*(float *)((char*)(arg0) + (0x10))) = 0.10000000149011612f;
     (*(int *)((char*)(arg0) + (0xC))) = 0;
     (*(int *)((char*)(arg0) + (0x18))) = 0;
@@ -752,10 +752,10 @@ INCLUDE_ASM("seg/seg_156860", func_002566E8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00255800_66E8(void *, int) __asm__("func_00255800");
 extern "C" void func_00256998(void *);
-extern char D_004812D0[];
+extern char cDSockChannel_vtbl[];
 
 extern "C" void func_002566E8(void *arg0, int arg1) {
-    (*(char **)((char*)(arg0) + (8))) = D_004812D0;
+    (*(char **)((char*)(arg0) + (8))) = cDSockChannel_vtbl;
     func_00256998(arg0);
     func_00255800_66E8(arg0, arg1);
 }

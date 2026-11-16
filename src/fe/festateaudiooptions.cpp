@@ -336,7 +336,7 @@ extern "C" long func_00158728(void* iface, int idx, int ch);
 extern "C" long func_00158750(void* iface, int idx, int ch);
 extern "C" void* func_0028B180();
 extern "C" void func_00197AD8(void* self);
-extern void* D_00469378[];
+extern void* cFEStateRequestLine_vtbl[];
 extern char D_0045DA48[];
 extern char D_0045DA38[];
 extern char D_0045DA58[];
@@ -385,7 +385,7 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
     sAudioState_196B90* self = (sAudioState_196B90*)p;
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x11;
-    *(void***)((char*)self + 0x8) = D_00469378;
+    *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     if (**(void***)((char*)self + 0x10) != 0)
         *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);

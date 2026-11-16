@@ -284,7 +284,7 @@ extern "C" void func_003545D8(void* self, void* stream)
 INCLUDE_ASM("object/spring", cObjNode_cObjNode1);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
-extern void* D_00491F00[16];
+extern void* cObjNode_vtbl[16];
 extern char gBucketMan;
 
 struct cObjNode {
@@ -294,7 +294,7 @@ struct cObjNode {
 
 extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* param2)
 {
-    self->field_0xC = D_00491F00;
+    self->field_0xC = cObjNode_vtbl;
     cBucketMan_add(&gBucketMan, self, param2);
     return self;
 }

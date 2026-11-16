@@ -13,7 +13,7 @@ struct cWScriptTask_initTask_sDef;
 extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* owner, cWScriptTask_initTask_sDef* def);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00489B70[];
+extern char cWScriptProcess_vtbl[];
 extern char D_00489850[];
 
 struct sElem_307598 {
@@ -33,7 +33,7 @@ struct sDef_307598 {
 
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a2, sDef_307598* def)
 {
-    *(void**)((char*)self + 0x5C) = D_00489B70;
+    *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
     MEM_fill((char*)self + 0x28, 0, 0xC);
     *(int*)((char*)self + 0x24) = a2;
     *(void**)((char*)self + 0x10) = man;
@@ -70,12 +70,12 @@ public:
 void cMemMan_free(void* p);
 void operator_delete(int* p);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
-extern char D_00489B70[];
+extern char cWScriptProcess_vtbl[];
 
 // PORT: array cookie arithmetic through int (pointer in int).
 extern "C" void cWScriptProcess__cWScriptProcess(void* self, int flags)
 {
-    *(void**)((char*)self + 0x5C) = D_00489B70;
+    *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
     char* arr = *(char**)((char*)self + 0x14);
     if (arr != 0) {
         char* p = (char*)(*(int*)(arr - 0x10) * 0x44 + (int)arr);
@@ -726,11 +726,11 @@ extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
 INCLUDE_ASM("wscript/wscriptprocess", func_00308228);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern void* D_00489AE0[];
+extern void* cWScriptTask_vtbl[];
 
 extern "C" void* func_00308228(void* self)
 {
-    *(void***)((char*)self + 0x40) = D_00489AE0;
+    *(void***)((char*)self + 0x40) = cWScriptTask_vtbl;
     MEM_fill((char*)self + 8, 0, 0xC);
     *(int*)((char*)self + 0x3C) = 0;
     *(int*)((char*)self + 0x4) = 0;

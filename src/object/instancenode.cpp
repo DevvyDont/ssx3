@@ -11,12 +11,12 @@ struct sInstNodeCtorVEntry {
 };
 
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
-extern char D_00491C80[];
+extern char cInstanceNode_vtbl[];
 
 extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* a1, void* stream)
 {
     cSortObjNode_cSortObjNode(self, a1, stream);
-    self->mVtbl = (void**)D_00491C80;
+    self->mVtbl = (void**)cInstanceNode_vtbl;
     sInstNodeCtorVEntry* vt = *(sInstNodeCtorVEntry**)stream;
     self->Instance = (tInstanceRecord*)vt[4].fn((char*)stream + vt[4].delta, self);
     return ((void*)self);
@@ -32,7 +32,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
 
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
-    self->mVtbl = (void**)D_00491C80;
+    self->mVtbl = (void**)cInstanceNode_vtbl;
     func_0034FC80(self, self->Instance);
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
@@ -629,12 +629,12 @@ extern "C" int func_00350698(void* self)
 INCLUDE_ASM("object/instancenode", func_003506D8);
 #ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, int a1, int type, int a3);
-extern char D_00491B00[];
+extern char cDeadNode_vtbl[];
 
 extern "C" void* func_003506D8(void* self, int v)
 {
     func_0034FB00(self, 8, 6, v);
-    *(void**)((char*)self + 0xC) = D_00491B00;
+    *(void**)((char*)self + 0xC) = cDeadNode_vtbl;
     unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *f &= 0xFFFFFF9F;
     f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);

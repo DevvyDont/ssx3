@@ -226,7 +226,7 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_cDebugMenuScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_0046D798[];
+extern char cDebugMenuScreen_vtbl[];
 extern char D_004A12B0[];
 extern int D_004A29EC;
 extern int D_004A2EB8;
@@ -324,7 +324,7 @@ struct sLS_B1B0 {
 // Load-screen constructor: sets up the race/player interfaces, picks the active entry and the sound entry.
 extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
 {
-    self->vt = D_0046D798;
+    self->vt = cDebugMenuScreen_vtbl;
     func_0017ABC8(self->bg);
     func_0017A638(&self->sub);
     cBackgroundMan_loadImages((sBgMan_17ACC8*)self->bg);

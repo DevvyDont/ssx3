@@ -893,12 +893,12 @@ extern "C" void cOVState_PROFILE_initGeneral(void* self)
 INCLUDE_ASM("fe/ovstateprofile", func_00212138);
 #ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, void* a1, int a2);
-extern void* D_00471F80[];
+extern void* cOVState_AUTOSAVE_vtbl[];
 
 extern "C" void* func_00212138(void* self, void* a1, int a2)
 {
     func_001D53B0(self, a1, 0);
-    *(void***)((char*)self + 0x8) = D_00471F80;
+    *(void***)((char*)self + 0x8) = cOVState_AUTOSAVE_vtbl;
     *(int*)((char*)self + 0xC) = 0x25;
     *(int*)((char*)self + 0x208) = 1;
     *(int*)((char*)self + 0x22C) = a2;

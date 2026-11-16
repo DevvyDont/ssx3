@@ -8,13 +8,13 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cAnimSequencer_init(void* self);
 extern "C" void cRiderAnimBase_reset(cRiderAnimBase* self);
-extern char D_0048D7D8[];
+extern char cRiderAnimBase_vtbl[];
 extern const char D_0048A4E0[];
 
 extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
 {
     self->AnimModel = (cAnimModel*)0;
-    self->mVtbl = (void**)D_0048D7D8;
+    self->mVtbl = (void**)cRiderAnimBase_vtbl;
     self->Sequencer = (cAnimSequencer*)operator_new_tag(0x30, D_0048A4E0, 0, 0);
     for (int i = 0; i < 6; i++)
     {
@@ -31,11 +31,11 @@ INCLUDE_ASM("animation/rideranimbase", func_00311958);
 void cMemMan_free(void* p);
 void operator_delete(int* p);
 extern "C" void cAnimSequencer_expireAll(void* self);
-extern char D_0048D7D8[];
+extern char cRiderAnimBase_vtbl[];
 
 extern "C" void func_00311958(cRiderAnimBase* self, int flags)
 {
-    self->mVtbl = (void**)D_0048D7D8;
+    self->mVtbl = (void**)cRiderAnimBase_vtbl;
     for (int i = 0; i < 6; i++)
     {
         cAnimSequencer_expireAll((char*)self->Sequencer + (i << 3));

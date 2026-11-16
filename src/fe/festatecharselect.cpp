@@ -690,7 +690,7 @@ extern "C" void* func_0015A478();
 extern "C" int func_00398380(void* self, int id);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
-extern void* D_0046CF30[];
+extern void* cFEStateCheatCharSelect_vtbl[];
 extern char* D_00440F78[];
 
 struct sCharEnt_2220 { char* name; char* label; int f8; char pad[3]; signed char id; };
@@ -719,7 +719,7 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
 {
     func_0039E318(self, engine, owner);
     self->fC = 10;
-    self->vt = D_0046CF30;
+    self->vt = cFEStateCheatCharSelect_vtbl;
     self->player = player;
     self->count = 1;
     self->f70 = 0;
@@ -975,13 +975,13 @@ INCLUDE_ASM("fe/festatecharselect", func_001828C0);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
-extern void* D_0046CE60[];
+extern void* cFEStateCharSetup_vtbl[];
 
 extern "C" void* func_001828C0(void* self, void* engine, signed char idx)
 {
     func_0039E2A0(self, engine);
     *(int*)((char*)self + 0xC) = 0xC;
-    *(void***)((char*)self + 0x8) = D_0046CE60;
+    *(void***)((char*)self + 0x8) = cFEStateCharSetup_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = 0;

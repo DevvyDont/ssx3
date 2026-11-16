@@ -924,7 +924,7 @@ extern "C" void func_00192970(sOwner_00192970* self, void* screen)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateruleselect", func_00192D00);
 #ifdef SKIP_ASM
-extern void* D_0046AF68[];
+extern void* cFEStateBraggingRights_vtbl[];
 extern "C" void* func_001A8500(void* self, int a1, int a2);
 
 extern "C" void* func_00192D00(void* self, int a1)
@@ -932,7 +932,7 @@ extern "C" void* func_00192D00(void* self, int a1)
     char* p;
     int i;
     func_001A8500(self, a1, 0);
-    *(void***)((char*)self + 0x8) = D_0046AF68;
+    *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
     p = (char*)self + 0x6D0;
     for (i = 1; i != -1; i--, p += 0x34) {
         func_001926F0(p);

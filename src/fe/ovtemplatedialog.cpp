@@ -195,13 +195,13 @@ inline void* operator new[](unsigned int, void* p) { return p; }
 extern unsigned short D_004A2088[];
 extern char D_00471A30[];
 extern char D_0046E340[];
-extern char D_00472108[];
+extern char cOVState_REWARDS_vtbl[];
 extern char D_004725C8[];
 extern char D_004726A0[];
 extern char D_00472778[];
 extern char D_00472850[];
-extern char D_00472AB0[];
-extern char D_00472B88[];
+extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
+extern char cOVState_PAUSE_OPTIONS_vtbl[];
 extern char D_00472C60[];
 extern char D_00472D38[];
 extern char D_00472E10[];
@@ -209,12 +209,12 @@ extern char D_00472EE8[];
 extern char D_00472FC0[];
 extern char D_00473098[];
 extern char D_00473248[];
-extern char D_00473320[];
+extern char cOVState_MAP_vtbl[];
 extern char D_004733F8[];
-extern char D_004734D0[];
+extern char cOVState_TOPTIMES_vtbl[];
 extern char D_004735B0[];
-extern char D_00473688[];
-extern char D_00473760[];
+extern char cOVState_BIGCHALLENGE_START_vtbl[];
+extern char cOVState_ENTERLODGE_vtbl[];
 extern char D_00473C50[];
 extern char D_00473D28[];
 extern char D_00473E00[];
@@ -228,7 +228,7 @@ extern char D_00474748[];
 extern char D_00474820[];
 extern char D_004748F8[];
 extern char D_004749D0[];
-extern char D_00474AA8[];
+extern char cOVState_REPLAY_vtbl[];
 extern char D_00474B80[];
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 
@@ -311,7 +311,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x7) {
         char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472B88;
+        *(void**)(p + 0x8) = cOVState_PAUSE_OPTIONS_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -403,7 +403,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0xF) {
         char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004734D0;
+        *(void**)(p + 0x8) = cOVState_TOPTIMES_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -414,7 +414,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x10) {
         char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472108;
+        *(void**)(p + 0x8) = cOVState_REWARDS_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -425,7 +425,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x11) {
         char* p = (char*)operator new(0xB8, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474AA8;
+        *(void**)(p + 0x8) = cOVState_REPLAY_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -547,7 +547,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1D) {
         char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473688;
+        *(void**)(p + 0x8) = cOVState_BIGCHALLENGE_START_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -571,7 +571,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1F) {
         char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473760;
+        *(void**)(p + 0x8) = cOVState_ENTERLODGE_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -587,7 +587,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         *(int*)(p + 0x4C) = 0;
         *(int*)(p + 0x54) = 0;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(void**)(p + 0x8) = D_00473320;
+        *(void**)(p + 0x8) = cOVState_MAP_vtbl;
         new (p + 0x9C) sDlgSlot_AB50[8];
         result = p;
     }
@@ -638,7 +638,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x27) {
         char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472AB0;
+        *(void**)(p + 0x8) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0xA0) = 0x1;
         *(int*)(p + 0x98) = type;
@@ -692,13 +692,13 @@ struct sDlgSlot_BAB8 {
 extern unsigned short D_004A2088[];
 extern char D_00471A30[];
 extern char D_0046E340[];
-extern char D_00472108[];
+extern char cOVState_REWARDS_vtbl[];
 extern char D_004725C8[];
 extern char D_004726A0[];
 extern char D_00472778[];
 extern char D_00472850[];
-extern char D_00472AB0[];
-extern char D_00472B88[];
+extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
+extern char cOVState_PAUSE_OPTIONS_vtbl[];
 extern char D_00472C60[];
 extern char D_00472D38[];
 extern char D_00472E10[];
@@ -706,12 +706,12 @@ extern char D_00472EE8[];
 extern char D_00472FC0[];
 extern char D_00473098[];
 extern char D_00473248[];
-extern char D_00473320[];
+extern char cOVState_MAP_vtbl[];
 extern char D_004733F8[];
-extern char D_004734D0[];
+extern char cOVState_TOPTIMES_vtbl[];
 extern char D_004735B0[];
-extern char D_00473688[];
-extern char D_00473760[];
+extern char cOVState_BIGCHALLENGE_START_vtbl[];
+extern char cOVState_ENTERLODGE_vtbl[];
 extern char D_00473C50[];
 extern char D_00473D28[];
 extern char D_00473E00[];
@@ -725,7 +725,7 @@ extern char D_00474748[];
 extern char D_00474820[];
 extern char D_004748F8[];
 extern char D_004749D0[];
-extern char D_00474AA8[];
+extern char cOVState_REPLAY_vtbl[];
 extern char D_00474B80[];
 
 extern "C" void func_0020BAB8(int type)
@@ -808,7 +808,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0x7) {
         char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472B88;
+        *(void**)(p + 0x8) = cOVState_PAUSE_OPTIONS_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -900,7 +900,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0xF) {
         char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004734D0;
+        *(void**)(p + 0x8) = cOVState_TOPTIMES_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -911,7 +911,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0x10) {
         char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472108;
+        *(void**)(p + 0x8) = cOVState_REWARDS_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -922,7 +922,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0x11) {
         char* p = (char*)operator new(0xB8, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474AA8;
+        *(void**)(p + 0x8) = cOVState_REPLAY_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -1044,7 +1044,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0x1D) {
         char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473688;
+        *(void**)(p + 0x8) = cOVState_BIGCHALLENGE_START_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -1068,7 +1068,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0x1F) {
         char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473760;
+        *(void**)(p + 0x8) = cOVState_ENTERLODGE_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0x98) = type;
         *(int*)(p + 0x48) = 0;
@@ -1084,7 +1084,7 @@ extern "C" void func_0020BAB8(int type)
         *(int*)(p + 0x4C) = 0;
         *(int*)(p + 0x54) = 0;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(void**)(p + 0x8) = D_00473320;
+        *(void**)(p + 0x8) = cOVState_MAP_vtbl;
         new (p + 0x9C) sDlgSlot_BAB8[8];
         result = p;
     }
@@ -1135,7 +1135,7 @@ extern "C" void func_0020BAB8(int type)
     if (type == 0x27) {
         char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
         func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472AB0;
+        *(void**)(p + 0x8) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
         *(unsigned short*)(p + 0x58) = D_004A2088[0];
         *(int*)(p + 0xA0) = 0x1;
         *(int*)(p + 0x98) = type;
@@ -1525,7 +1525,7 @@ extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 extern void* cOVStateManager_mpPDATemplate;
 extern char D_00471A10[];
-extern char D_004743F0[];
+extern char cPDATemplate_vtbl[];
 
 extern "C" void cOVStateManager_addPDATemplate(void)
 {
@@ -1533,7 +1533,7 @@ extern "C" void cOVStateManager_addPDATemplate(void)
         char* mgr = (char*)SSXApp->Game->UI;
         void* t = cMemMan_alloc(0x48, D_00471A10, 0x100, 0);
         func_0039E2A0(t, mgr);
-        *(void**)((char*)t + 8) = D_004743F0;
+        *(void**)((char*)t + 8) = cPDATemplate_vtbl;
         cOVStateManager_mpPDATemplate = t;
         cUIStateStack_pushExplicit(mgr + 0x18, t);
     }

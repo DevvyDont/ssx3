@@ -279,7 +279,7 @@ extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char* gpBankManager;
 extern const char D_004829B8[];
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 extern void* D_00483AD8[];
 
 struct sBmVEntry {
@@ -328,7 +328,7 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
         vt.e[1].delta = D_00483AB8.e[1].delta + d;
     }
     self->count = count;
-    self->vtbl2 = D_00483B48;
+    self->vtbl2 = cBankMonitor_vtbl;
     self->vtbl = D_00483AD8;
     sBmBank** slot = &self->banks;
     *slot = new (D_004829B8, 0, 0) sBmBank[count];
@@ -347,7 +347,7 @@ extern "C" void func_0028B278(void* self, int flags);
 extern "C" void func_002ACE40(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* gpBankManager;
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 extern void* D_00483AD8[];
 
 struct sBmVEntryBB10 {
@@ -377,7 +377,7 @@ struct sBankManagerBB10 {
 
 extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
 {
-    self->vtbl2 = D_00483B48;
+    self->vtbl2 = cBankMonitor_vtbl;
     self->vtbl = D_00483AD8;
     *(const sBmVtblBB10**)(self->monitor + 4) = &D_00483AB8_BB10;
     if (flags == 0) {

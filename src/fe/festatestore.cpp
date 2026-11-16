@@ -777,12 +777,12 @@ extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
 INCLUDE_ASM("fe/festatestore", func_00185A18);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern void* D_0046BDF8[];
+extern void* cFEStateCredits_vtbl[];
 
 extern "C" void* func_00185A18(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_0046BDF8;
+    *(void***)((char*)self + 0x8) = cFEStateCredits_vtbl;
     *(int*)((char*)self + 0x60) = -100;
     *(int*)((char*)self + 0x64) = 1;
     *(int*)((char*)self + 0xC) = 0x24;

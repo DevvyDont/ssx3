@@ -14,7 +14,7 @@ extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 extern char D_00460B90[];
 extern void* D_0046D810[];
-extern sVE0720 D_0046BB88[];
+extern sVE0720 cFEStateTransition_vtbl[];
 
 extern "C" void* cFECustom_cFECustom(void* self, void* owner)
 {
@@ -25,10 +25,10 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
     func_0039E2A0(o, *(void**)((char*)self + 0x0));
     *(int*)(o + 0x48) = 0;
     *(int*)(o + 0x4C) = 0;
-    *(sVE0720**)(o + 0x8) = D_0046BB88;
+    *(sVE0720**)(o + 0x8) = cFEStateTransition_vtbl;
     *(void**)((char*)self + 0x10) = o;
     if (o != 0) {
-        D_0046BB88[4].fn(o + D_0046BB88[4].delta);
+        cFEStateTransition_vtbl[4].fn(o + cFEStateTransition_vtbl[4].delta);
         cUIStateStack_pushExplicit((char*)*(void**)((char*)self + 0x0) + 0x18, *(void**)((char*)self + 0x10));
     }
     return self;
@@ -680,12 +680,12 @@ INCLUDE_ASM("fe/fereal", func_001A1CE8);
 extern "C" void* cFE_cFE(void* self);
 void func_00263660(void* p);
 void func_00263998(void* p);
-extern void* D_0046D7C0[];
+extern void* cRealFE_vtbl[];
 
 extern "C" void* func_001A1CE8(void* self)
 {
     cFE_cFE(self);
-    *(void***)self = D_0046D7C0;
+    *(void***)self = cRealFE_vtbl;
     func_00263660((char*)self + 0xB5AB0);
     func_00263998((char*)self + 0xB5ABC);
     *(int*)((char*)self + 0xB5AD4) = 0;
@@ -698,14 +698,14 @@ extern "C" void* func_001A1CE8(void* self)
 //100%
 INCLUDE_ASM("fe/fereal", func_001A1D50);
 #ifdef SKIP_ASM
-extern void* D_0046D7C0[];
+extern void* cRealFE_vtbl[];
 extern "C" void func_002639B0(void* self, int flags);
 extern "C" void func_00263678(void* self, int flags);
 extern "C" void func_001957D0(void* self, int flags);
 
 extern "C" void func_001A1D50(void* self, int flags)
 {
-    *(void***)self = D_0046D7C0;
+    *(void***)self = cRealFE_vtbl;
     func_002639B0((char*)self + 0xB5ABC, 2);
     func_00263678((char*)self + 0xB5AB0, 2);
     func_001957D0(self, flags);
@@ -792,7 +792,7 @@ extern char D_00461278[];
 extern char D_00461288[];
 extern char D_00461298[];
 extern char D_004612A8[];
-extern void* D_0046D1D0[];
+extern void* cFEInput_vtbl[];
 extern char D_005047F8[];
 
 struct sStr11_1E80 { char c[11]; };
@@ -885,7 +885,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     char* in = (char*)cMemMan_alloc(0x1C, D_00461288, 0, 0);
     sUI_1E80* ui2 = self->ui;
     in[4] = 0;
-    *(void***)(in + 8) = D_0046D1D0;
+    *(void***)(in + 8) = cFEInput_vtbl;
     *(int*)(in + 0x18) = 0;
     *(int*)(in + 0xC) = 0;
     *(int*)(in + 0x10) = 0;
@@ -1390,7 +1390,7 @@ extern char D_00461358[];
 extern char D_0045E290[];
 extern char D_00461188[];
 extern char D_00461370[];
-extern void* D_0046BC58[];
+extern void* cFEStateBackground_vtbl[];
 extern int D_004A19C4;
 extern int D_004A19D8;
 extern void* D_004A2EB8;
@@ -1420,7 +1420,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 {
     sStartState_1A2C40* s = new (D_00461358, 0, 0) sStartState_1A2C40;
     func_0039E2A0(s, self->ui);
-    s->vt = (sVEnt_1A2C40*)D_0046BC58;
+    s->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
     s->vt[4].fn((char*)s + s->vt[4].delta);
     cUIStateStack_pushExplicit(self->ui + 0x18, s);
     switch (D_004A19C4) {
@@ -1551,13 +1551,13 @@ extern "C" void func_001A2F70(void* self, int sel)
 //100%
 INCLUDE_ASM("fe/fereal", func_001A3050);
 #ifdef SKIP_ASM
-extern void* D_00469248[];
+extern void* cFEStateSelectMultiplayerMode_vtbl[];
 
 extern "C" void* func_001A3050(void* self, void* owner)
 {
     func_0039E2A0(self, owner);
     *(int*)((char*)self + 0xC) = 0x16;
-    *(void***)((char*)self + 0x8) = D_00469248;
+    *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
     return self;
 }
 #endif

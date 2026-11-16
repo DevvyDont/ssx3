@@ -132,10 +132,10 @@ extern char D_0047B6D8[];
 extern char D_0047B6E8[];
 extern char D_0047B700[];
 extern char D_0047B718[];
-extern void* D_0046D1D0[];
+extern void* cFEInput_vtbl[];
 extern void* D_0047CB60[];
 extern void* D_0047D070[];
-extern void* D_0047CAE8[];
+extern void* cSSXStatsObjNode_vtbl[];
 
 struct sVEntryGL {
     short delta;
@@ -383,7 +383,7 @@ extern "C" void cGame_load(cGame* self)
     cUIEngine_loadFile((sUIGL*)self->UI, D_0047B6A8.c);
     sUIDataGL* data = (sUIDataGL*)operator new(0x1C, D_0047B6B8, 0, 0);
     data->flag = 0;
-    data->vtbl = D_0046D1D0;
+    data->vtbl = cFEInput_vtbl;
     data->f = 0;
     data->c = 0;
     data->d = 0;
@@ -434,7 +434,7 @@ extern "C" void cGame_load(cGame* self)
     o->obj = r;
     o = (sNamedGL*)operator new(0x14, D_0047B718, 0, 0);
     cObjNode_cObjNode1(o, 4);
-    o->vtbl = D_0047CAE8;
+    o->vtbl = cSSXStatsObjNode_vtbl;
     r = func_002D2100();
     o->obj = r;
     self->SSXStatsMan = (cSSXStatsObjNode*)o;

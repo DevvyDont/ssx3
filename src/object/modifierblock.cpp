@@ -28,16 +28,16 @@ struct tModifierBlock {
     void* field_0x24;
 };
 
-extern void* D_00491340[16];
-extern void* D_00491200[16];
+extern void* cEffectLink_vtbl[16];
+extern void* cRailLink_vtbl[16];
 
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_tModifierBlock__FP14tModifierBlock);
 #ifdef SKIP_ASM
 tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self)
 {
-    self->field_0x18 = D_00491340;
-    self->field_0x24 = D_00491200;
+    self->field_0x18 = cEffectLink_vtbl;
+    self->field_0x24 = cRailLink_vtbl;
     self->field_0x10 = 0;
     self->field_0x14 = 0;
     self->field_0x1C = 0;
@@ -71,9 +71,9 @@ extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
     func_00353188(self);
     func_003531D0(self);
     func_00353300(self, 0xFFFFFFFF);
-    self->field_0x24 = D_00491200;
+    self->field_0x24 = cRailLink_vtbl;
     func_0035B6D0(&self->field_0x1C);
-    self->field_0x18 = D_00491340;
+    self->field_0x18 = cEffectLink_vtbl;
     func_00345760(&self->field_0x10);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -910,14 +910,14 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
 }
 #endif
 
-extern void* D_0048F008[];
+extern void* cSkyBox_vtbl[];
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353AC0__FPv);
 #ifdef SKIP_ASM
 void* func_00353AC0(void* self)
 {
-    *(void***)((char*)self + 0xc) = D_0048F008;
+    *(void***)((char*)self + 0xc) = cSkyBox_vtbl;
     *(int*)((char*)self + 0x10) = -1;
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x8) = 0;
@@ -933,7 +933,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
 #ifdef SKIP_ASM
 void* cSkyBox__cSkyBox(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_0048F008;
+    *(int*)((char*)self + 0xc) = (int)(void*)cSkyBox_vtbl;
     return cObjNode__cObjNode(self);
 }
 #endif

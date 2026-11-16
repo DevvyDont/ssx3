@@ -5045,11 +5045,11 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing__cBeing);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern void* D_00459CC8[];
+extern void* cBeing_vtbl[];
 
 extern "C" void cBeing__cBeing(int* self, int flags)
 {
-    *(void***)self = D_00459CC8;
+    *(void***)self = cBeing_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -7144,13 +7144,13 @@ void* cRiderAnim__cRiderAnim(void* self)
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144630);
 #ifdef SKIP_ASM
 extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self);
-extern void* D_00458458[];
+extern void* cRiderAnim_vtbl[];
 
 extern "C" void* func_00144630(char* self)
 {
     cRiderAnimBase_cRiderAnimBase(self);
     *(int*)(self + 0x60) = 0;
-    *(void***)(self + 0x58) = D_00458458;
+    *(void***)(self + 0x58) = cRiderAnim_vtbl;
     *(int*)(self + 0x64) = 0;
     return self;
 }
@@ -7228,7 +7228,7 @@ cHpD_1446F8::~cHpD_1446F8()
 __asm__(".globl cMissionRider__cMissionRider\n.type cMissionRider__cMissionRider,@function\ncMissionRider__cMissionRider = _$_11cHpD_1446F8\n.size cMissionRider__cMissionRider,0x1B0\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
-__asm__("_vt$12cHpD1_1446F8 = D_00458338\n"
+__asm__("_vt$12cHpD1_1446F8 = cPlayer_vtbl\n"
         "_vt$11cHpD_1446F8$13cRiderVbC_hpc = D_00458240\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$11cHpD_1446F8$12cRiderVb_hpc = D_00458288\n"

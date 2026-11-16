@@ -628,14 +628,14 @@ struct func_003AA2F0_sView {
 // splat labels D_00508F50+8 separately
 extern unsigned int D_00508F58[];
 extern int D_004A5A68;
-extern void* D_00495150[];
+extern void* cChunkResolve_vtbl[];
 
 // PORT: the unit declares this `void`, but the body returns self ($2); bound via asm label.
 func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self) __asm__("func_003AA2F0");
 
 func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
 {
-    self->vt = D_00495150;
+    self->vt = cChunkResolve_vtbl;
     self->f00 = 0;
     if (D_004A5A68 == 0) {
         D_00508F50.f08 = 0xFFFFFFFF;
@@ -1235,13 +1235,13 @@ INCLUDE_ASM("world/worldview", cChunkResolve_construct);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_003AA2F0(void* self);
 extern char D_00494F70[];
-extern void* D_00495090[];
+extern void* cPS2ChunkResolve_vtbl[];
 
 extern "C" void* cChunkResolve_construct()
 {
     void* p = cMemMan_alloc(0x14, D_00494F70, 0, 0);
     func_003AA2F0(p);
-    *(void***)((char*)p + 0x8) = D_00495090;
+    *(void***)((char*)p + 0x8) = cPS2ChunkResolve_vtbl;
     return p;
 }
 #endif
@@ -1251,14 +1251,14 @@ INCLUDE_ASM("world/worldview", cPS2ChunkResolve__cPS2ChunkResolve);
 #ifdef SKIP_ASM
 void func_003AAE60(void*);
 void operator_delete(int*);
-extern void* D_00495090[];
-extern void* D_00495150[];
+extern void* cPS2ChunkResolve_vtbl[];
+extern void* cChunkResolve_vtbl[];
 
 extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00495090;
+    *(void***)((char*)self + 0x8) = cPS2ChunkResolve_vtbl;
     func_003AAE60(self);
-    *(void***)((char*)self + 0x8) = D_00495150;
+    *(void***)((char*)self + 0x8) = cChunkResolve_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }

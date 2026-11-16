@@ -510,7 +510,7 @@ extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_00483218[];
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 
 struct sSsVEntryA490 {
     short delta;
@@ -543,7 +543,7 @@ extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchr
         cBankManager_cBankManager(self->vbase, 0, banks, heap);
     }
     *(const sSsVtblAA490**)(*(char**)(self->vbase + 0x1D8) + 4) = &D_00483998;
-    *(void***)(self->vbase + 0xAB0) = D_00483B48;
+    *(void***)(self->vbase + 0xAB0) = cBankMonitor_vtbl;
     *(const sSsVtblBA490**)(self->vbase + 0x1D4) = &D_004839B8;
     if (!inchrg) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-ups (copied vtables on the stack), written out by hand.
@@ -574,7 +574,7 @@ void operator_delete(int* ptr);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void func_002A9DF0(void* e, int a1);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern void* D_00483B48[];
+extern void* cBankMonitor_vtbl[];
 
 struct sSsVEntryA648 {
     short delta;
@@ -596,7 +596,7 @@ extern "C" void func_002AA648(void* p, int flags)
 {
     char* self = (char*)p;
     *(const sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483998_A648;
-    *(void***)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void***)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sSsVtblBA648**)(*(char**)self + 0x1D4) = &D_004839B8_A648;
     if (flags == 0) {
         sSsVtblAA648 t1 = D_00483998_A648;

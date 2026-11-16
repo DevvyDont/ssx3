@@ -295,7 +295,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void func_00312598(void* self, int a1);
 extern "C" void cFERider_initBoneMap(void* self);
 extern char D_00460B28[];
-extern void* D_00458458[];
+extern void* cRiderAnim_vtbl[];
 
 struct sQuadED80 { int x[4]; } __attribute__((aligned(16)));
 struct sHalfED80 {
@@ -323,7 +323,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     cAnimModel_compile(self->model, 1);
     char* anim = (char*)new (D_00460B28, 0, 0) sAnimMemED80;
     cRiderAnimBase_cRiderAnimBase(anim);
-    *(void***)(anim + 0x58) = D_00458458;
+    *(void***)(anim + 0x58) = cRiderAnim_vtbl;
     *(int*)(anim + 0x60) = 0;
     self->anim = anim;
     *(int*)(anim + 0x64) = 0;

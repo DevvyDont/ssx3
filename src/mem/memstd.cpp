@@ -2753,7 +2753,7 @@ void* func_002557C0(void* self)
 }
 #endif
 
-extern void* D_00481320[];
+extern void* cCommChannel_vtbl[];
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002557E0__FPv);
@@ -2762,7 +2762,7 @@ void* func_002557E0(void* self)
 {
     int t0 = 0;
     *(int*)self = t0;
-    *(int*)((char*)self + 0x8) = (int)(void*)D_00481320;
+    *(int*)((char*)self + 0x8) = (int)(void*)cCommChannel_vtbl;
     *(int*)((char*)self + 0x4) = t0;
     return self;
 }
@@ -2775,7 +2775,7 @@ void operator_delete(int*);
 
 extern "C" void func_00255800(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00481320;
+    *(void***)((char*)self + 0x8) = cCommChannel_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -333,7 +333,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int GetHashValue32(char*);
-extern void* D_00469448[];
+extern void* cFEStateAudioOptions_vtbl[];
 extern char D_0045DA48[];
 extern char D_0045DA38[];
 
@@ -342,7 +342,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     char* s = (char*)self;
     func_0039E2A0(self, engine);
     *(int*)(s + 0xC) = 0x10;
-    *(void***)(s + 0x8) = D_00469448;
+    *(void***)(s + 0x8) = cFEStateAudioOptions_vtbl;
     *(signed char*)(s + 0x44) = idx;
     void* p = **(void***)(s + 0x10);
     if (p != 0) {

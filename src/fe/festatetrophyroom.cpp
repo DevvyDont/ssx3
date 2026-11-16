@@ -529,13 +529,13 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern void* D_004695E8[];
+extern void* cFEStateRewardsRoom_vtbl[];
 
 extern "C" void* func_001D4BC8(void* self, int a1, signed char idx, int a3)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x2E;
-    *(void***)((char*)self + 0x8) = D_004695E8;
+    *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = a3;

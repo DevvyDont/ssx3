@@ -3,7 +3,7 @@
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
 #ifdef SKIP_ASM
-extern void* D_0048E5F0[];
+extern void* cWorldSphTree_vtbl[];
 extern char D_0048E550[];
 extern "C" void* func_0032C508(void* p);
 extern "C" float func_0032C590(void* self);
@@ -13,7 +13,7 @@ struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2)
 {
-    *(void***)((char*)self + 0x50) = D_0048E5F0;
+    *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x4) = 0;
     if (a2 != 0) {
@@ -48,11 +48,11 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2)
 INCLUDE_ASM("intersect/worldsphtree", func_003304E8);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0048E5F0[];
+extern void* cWorldSphTree_vtbl[];
 
 extern "C" void func_003304E8(void* self, int flags)
 {
-    *(void***)((char*)self + 0x50) = D_0048E5F0;
+    *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
     operator_delete(*(int**)((char*)self + 0x68));
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4853,7 +4853,7 @@ struct sObj_341388 {
     int type;
 };
 
-extern void* D_004914E0[];
+extern void* cBoostNode_vtbl[];
 extern char* D_004A5B64;
 extern sVec4_341388 D_004FF120_341388[] __asm__("t4vect_Zero");
 extern sVec4_341388 D_004FF150_341388[] __asm__("t4vect_YAxis");
@@ -4921,7 +4921,7 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
 extern "C" sObj_341388* func_00341388(sObj_341388* self, void* a1, int a2, void* a3, sDef_341388* def)
 {
     func_0034FB00(self, a1, a2, a3);
-    self->vt = D_004914E0;
+    self->vt = cBoostNode_vtbl;
     int type = def->type;
     self->type = type;
     self->t38 = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
@@ -4950,7 +4950,7 @@ extern "C" sObj_341388* func_00341388(sObj_341388* self, void* a1, int a2, void*
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_cBoostNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
-extern void* D_004914E0[];
+extern void* cBoostNode_vtbl[];
 struct sVEntry_cBoostNode_cBoostNode {
     short delta;
     short index;
@@ -4960,14 +4960,14 @@ struct sVEntry_cBoostNode_cBoostNode {
 extern "C" void* cBoostNode_cBoostNode(void* self, void* a1, void* stream)
 {
     cInstanceNode_cInstanceNode(self, a1, stream);
-    *(void***)((char*)self + 0xC) = D_004914E0;
+    *(void***)((char*)self + 0xC) = cBoostNode_vtbl;
     sVEntry_cBoostNode_cBoostNode* vt = *(sVEntry_cBoostNode_cBoostNode**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x20, 0x30);
     return self;
 }
 #endif
 
-extern void* D_004914E0[];
+extern void* cBoostNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
@@ -4975,7 +4975,7 @@ INCLUDE_ASM("intersect/worldsphtree", func_003415A8__FPv);
 #ifdef SKIP_ASM
 void* func_003415A8(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_004914E0;
+    *(int*)((char*)self + 0xc) = (int)(void*)cBoostNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -6064,13 +6064,13 @@ struct sSph_342768 {
     int pad34[3];
     int a40;
 };
-extern void* D_00490898[];
+extern void* cBoostModifier_vtbl[];
 extern char* D_004A5B64;
 
 extern "C" void* func_00342768(sSph_342768* self, sSphDef_342768* def, int a2)
 {
     self->refs = 1;
-    self->vt = D_00490898;
+    self->vt = cBoostModifier_vtbl;
     self->a40 = a2;
     int type = def->type;
     self->type = type;
@@ -6101,12 +6101,12 @@ struct sVEntry00342808 {
 typedef void (*ReadFn00342808)(void*, void*, int);
 typedef int (*ReadIntFn00342808)(void*);
 
-extern void* D_00490898[];
+extern void* cBoostModifier_vtbl[];
 
 extern "C" void* func_00342808(void* self, sVEntry00342808** stream)
 {
     *(int*)((char*)self + 0x0) = 1;
-    *(void***)((char*)self + 0x4) = D_00490898;
+    *(void***)((char*)self + 0x4) = cBoostModifier_vtbl;
     ((ReadFn00342808)(*stream)[2].fn)((char*)stream + (*stream)[2].delta, (char*)self + 0x10, 0x30);
     *(int*)((char*)self + 0x40) = ((ReadIntFn00342808)(*stream)[3].fn)((char*)stream + (*stream)[3].delta);
     return self;
@@ -6328,7 +6328,7 @@ INCLUDE_ASM("intersect/worldsphtree", func_00342C08);
 #ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void func_00355F10(void* self, void* a1);
-extern void* D_004906F0[];
+extern void* cDebounceNode_vtbl[];
 
 struct sNode_342C08 {
     int pad00[2];
@@ -6355,7 +6355,7 @@ struct sSelf_342C08 {
 extern "C" void* func_00342C08(sSelf_342C08* self, void* a1, void* a2, sDef_342C08* def, void* a4)
 {
     func_00355280(self, a1, 0, a2);
-    self->vt = D_004906F0;
+    self->vt = cDebounceNode_vtbl;
     self->t2C = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
     self->t30 = def->f08;
     func_00355F10(self, a4);

@@ -1156,11 +1156,11 @@ extern "C" void func_0015C6A0(int arg0) {
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C6B0);
 #ifdef SKIP_ASM
-extern char D_0045AD68[];
+extern char cBEStatInterface_vtbl[];
 
 extern "C" void* func_0015C6B0(void* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045AD68;
+    *(char**)((char*)self + 0xC) = cBEStatInterface_vtbl;
     return self;
 }
 #endif
@@ -1349,11 +1349,11 @@ extern "C" void cBEPreRaceState_purgeState(void)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C858);
 #ifdef SKIP_ASM
-extern char D_0045AC18[];
+extern char cBEPreRaceState_vtbl[];
 
 extern "C" void* func_0015C858(void* self)
 {
-    *(char**)((char*)self + 4) = D_0045AC18;
+    *(char**)((char*)self + 4) = cBEPreRaceState_vtbl;
     return self;
 }
 #endif
@@ -1374,11 +1374,11 @@ extern "C" void cBERaceState_purgeState(void)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C898);
 #ifdef SKIP_ASM
-extern char D_0045ABE8[];
+extern char cBERaceState_vtbl[];
 
 extern "C" void* func_0015C898(void* self)
 {
-    *(char**)((char*)self + 4) = D_0045ABE8;
+    *(char**)((char*)self + 4) = cBERaceState_vtbl;
     return self;
 }
 #endif
@@ -1401,11 +1401,11 @@ extern "C" void* __sti__all_in_one_be_cpp(int, int);
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C8D8);
 #ifdef SKIP_ASM
-extern char D_0045ABB8[];
+extern char cBEPostRaceState_vtbl[];
 
 extern "C" void* func_0015C8D8(void* self)
 {
-    *(char**)((char*)self + 4) = D_0045ABB8;
+    *(char**)((char*)self + 4) = cBEPostRaceState_vtbl;
     return self;
 }
 #endif

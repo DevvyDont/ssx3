@@ -3828,7 +3828,7 @@ struct sWakeMgr2E18 {
     sWakePair2E18 pairs[1];     // 0x60
 };
 
-extern void* D_004886B0[];
+extern void* cLensFxMan_vtbl[];
 extern char* D_004A5B80;
 extern int D_004A3B18;
 void* func_002E2860(void* self);
@@ -3838,7 +3838,7 @@ extern "C" void func_002F4380(void* self);
 // PORT: hand-written g++ 2.95 member-array construction loops (vptr at 0x649C).
 extern "C" void* cLensFxMan_cLensFxMan(void* self)
 {
-    *(void***)((char*)self + 0x649C) = D_004886B0;
+    *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
     {
         char* b1 = (char*)self + 0x68;
         int i1 = 0;
@@ -3949,7 +3949,7 @@ struct sBWVEntry2 {
     void (*fn)(void*, int, int);
 };
 
-extern void* D_004886B0[];
+extern void* cLensFxMan_vtbl[];
 extern char* D_004A5B80;
 extern int D_004A3B18;
 void operator_delete(int* p);
@@ -3957,7 +3957,7 @@ void operator_delete(int* p);
 extern "C" void func_002E3060(void* self, int flags)
 {
     char* obj = D_004A5B80;
-    *(void***)((char*)self + 0x649C) = D_004886B0;
+    *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
     sBWVEntry2* e = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
     e->fn(obj + e->delta, 0, 0);
     D_004A3B18 = 0;
@@ -4762,7 +4762,7 @@ extern "C" void* func_00282CD0(void* self);
 extern "C" void func_00283298(void* self);
 extern "C" void func_002E4CB0(void);
 extern void* D_00488100[];
-extern void* D_00488158[];
+extern void* cTransitionMan_vtbl[];
 
 extern "C" void* func_002E4228(void* self, void* a1, int a2)
 {
@@ -4781,7 +4781,7 @@ extern "C" void* func_002E4228(void* self, void* a1, int a2)
     *(int*)((char*)self + 0x7C) = 0;
     *(int*)((char*)self + 0x80) = 0;
     *(void***)((char*)self + 0x1C) = D_00488100;
-    *(void***)((char*)self + 0xC) = D_00488158;
+    *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
     *(int*)((char*)self + 0x6C) = -1;
     func_002E4CB0();
     func_00283298((char*)self + 0x10);
@@ -4807,7 +4807,7 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x1C) = D_00488100;
-    *(void***)((char*)self + 0xC) = D_00488158;
+    *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
     char* m = (char*)self + 0x10;
     func_002E4578(self);
     if (*(int*)((char*)self + 0x7C) != 0) {
@@ -5926,7 +5926,7 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_cSnowFall);
 #ifdef SKIP_ASM
-extern void* D_00487FD8[];
+extern void* cSnowFall_vtbl[];
 extern "C" void func_00319CC8(void);
 extern char D_004A3B20[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -5948,7 +5948,7 @@ struct sWake5920 {
 extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* a1)
 {
     cObjNode_cObjNode1(self, a1);
-    self->vtbl = D_00487FD8;
+    self->vtbl = cSnowFall_vtbl;
     new (self->v) sVec5920[2];
     func_00319CC8();
     for (int i = 11; i >= 0; i--) {
@@ -5979,14 +5979,14 @@ extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* a1)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall__cSnowFall);
 #ifdef SKIP_ASM
-extern void* D_00487FD8[];
+extern void* cSnowFall_vtbl[];
 extern "C" void func_00319CC8(void);
 extern "C" void func_002E4F28(int* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
 extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_00487FD8;
+    *(void***)((char*)self + 0xC) = cSnowFall_vtbl;
     func_00319CC8();
     int i;
     for (i = 0; i < 12; i++) {

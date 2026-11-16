@@ -135,8 +135,8 @@ extern "C" void cUIScreen_createAllObjects(void* self);
 // PORT: func_0039FB30 really takes (self, a, b); the unit's other caller uses a 1-arg declaration.
 void* func_0039FB30_3(void* self, int a, int b) __asm__("func_0039FB30");
 extern char D_00493D80[];
-extern void* D_00494670[];
-extern void* D_004949E8[];
+extern void* cUIScreen_vtbl[];
+extern void* cUIGroup_vtbl[];
 
 struct sUIScreenD4 {
     sUIScreenD4* next;          // 0x0
@@ -175,7 +175,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
         sUIScreenD4* s = new (D_00493D80, 0x100, 0) sUIScreenD4;
         s->prev = s;
         s->next = s;
-        s->vt = D_00494670;
+        s->vt = cUIScreen_vtbl;
         s->fC = 0;
         s->f10 = 0;
         func_001DD580(s->o14);
@@ -184,7 +184,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
         s->f38 = 0;
         s->f3C = 0;
         func_0039FB30_3(s->o40, 0, 0);
-        s->vt48 = D_004949E8;
+        s->vt48 = cUIGroup_vtbl;
         func_003977E8(s->oB4);
         s->owner = owner;
         screen = s;
@@ -652,8 +652,8 @@ void* cUIGroup_setUIData(void* self)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_setFocus);
 #ifdef SKIP_ASM
-extern void* D_00494B98[];
-extern void* D_00494CE8[];
+extern void* cListOpSetFocus_vtbl[];
+extern void* cListOperator_vtbl[];
 
 struct cUIGroup_setFocus_sFunctor {
     void** vt;
@@ -671,11 +671,11 @@ int func_003979F8_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("func_00
 extern "C" void cUIGroup_setFocus(void* self, int on)
 {
     cUIGroup_setFocus_sFunctor f;
-    f.vt = D_00494CE8;
-    f.vt = D_00494B98;
+    f.vt = cListOperator_vtbl;
+    f.vt = cListOpSetFocus_vtbl;
     f.arg = on;
     func_003979F8_f((char*)self + 0x74, &f);
-    f.vt = D_00494CE8;
+    f.vt = cListOperator_vtbl;
     ((cUIGroup_setFocus_sFlags*)((char*)self + 0x14))->on = (on != 0);
 }
 #endif
@@ -745,8 +745,8 @@ extern "C" void cUIGroup_updateLocale(void* self)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_onInput);
 #ifdef SKIP_ASM
-extern void* D_00494BB8[];
-extern void* D_00494CE8[];
+extern void* cListOpOnInput_vtbl[];
+extern void* cListOperator_vtbl[];
 
 struct cUIGroup_onInput_sFunctor {
     void** vt;
@@ -761,11 +761,11 @@ extern "C" int cUIGroup_onInput(void* self, int a1)
         return 0;
     }
     cUIGroup_onInput_sFunctor f;
-    f.vt = D_00494CE8;
-    f.vt = D_00494BB8;
+    f.vt = cListOperator_vtbl;
+    f.vt = cListOpOnInput_vtbl;
     f.arg = a1;
     int r = func_003979F8((char*)self + 0x74, &f);
-    f.vt = D_00494CE8;
+    f.vt = cListOperator_vtbl;
     return r != 0;
 }
 #endif

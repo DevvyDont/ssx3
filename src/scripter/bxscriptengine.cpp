@@ -902,12 +902,12 @@ extern "C" void* func_00282CB0(void* self, int a1)
 INCLUDE_ASM("scripter/bxscriptengine", func_00282CD0);
 #ifdef SKIP_ASM
 void* cScriptObject_cScriptObject(void* self, int type);
-extern void* D_00482060[];
+extern void* cScriptObjTransition_vtbl[];
 
 extern "C" void* func_00282CD0(void* self)
 {
     cScriptObject_cScriptObject(self, 2);
-    *(void***)((char*)self + 0xC) = D_00482060;
+    *(void***)((char*)self + 0xC) = cScriptObjTransition_vtbl;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x2C) = 0;
     *(int*)((char*)self + 0x14) = -1;
@@ -1047,14 +1047,14 @@ extern "C" void func_00282F30(void* self)
 }
 #endif
 
-extern void* D_00482418[];
+extern void* cScriptEntity_vtbl[];
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_cScriptEntity__FPv);
 #ifdef SKIP_ASM
 void* cScriptEntity_cScriptEntity(void* self)
 {
-    *(void***)self = D_00482418;
+    *(void***)self = cScriptEntity_vtbl;
     *(int*)((char*)self + 0x4) = -1;
     *(int*)((char*)self + 0x8) = 0;
     return self;
@@ -1212,14 +1212,14 @@ extern "C" int func_002831B0(void* self, void* arg, int n)
 }
 #endif
 
-extern void* D_00482558[];
+extern void* cScriptObject_vtbl[];
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 #ifdef SKIP_ASM
 void* cScriptObject_cScriptObject(void* self, int a1)
 {
-    *(void***)((char*)self + 0xc) = D_00482558;
+    *(void***)((char*)self + 0xc) = cScriptObject_vtbl;
     *(int*)self = a1;
     *(int*)((char*)self + 0x4) = -1;
     *(int*)((char*)self + 0x8) = 0;
@@ -1235,7 +1235,7 @@ void operator_delete(int* ptr);
 
 extern "C" void func_00283228(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_00482558;
+    *(void***)((char*)self + 0xC) = cScriptObject_vtbl;
     if (*(int*)((char*)self + 0x4) != -1 && *(int*)((char*)self + 0x4) != 0) {
         cScriptObject_DeInitScriptObject(self);
         *(int*)((char*)self + 0x4) = -1;

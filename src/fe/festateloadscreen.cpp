@@ -24,10 +24,10 @@ extern char D_0047BFC0[];
 extern char D_0047BFD0[];
 extern char D_0047BFE8[];
 extern char D_0047C000[];
-extern void* D_0046D1D0[];
-extern void* D_0047C538[];
-extern void* D_0047C6D8[];
-extern void* D_0047C608[];
+extern void* cFEInput_vtbl[];
+extern void* cFELoadStateInLodge_vtbl[];
+extern void* cFELoadHintState_vtbl[];
+extern void* cFELoadState_vtbl[];
 
 struct sVE_233438 {
     short delta;
@@ -56,7 +56,7 @@ static inline char* newScreenA_233438(void* self)
 {
     char* p = (char*)cMemMan_alloc(0x48, D_0047BFD0, 0, 0);
     func_0039E2A0(p, *(void**)((char*)self + 0xC));
-    *(void***)(p + 8) = D_0047C538;
+    *(void***)(p + 8) = cFELoadStateInLodge_vtbl;
     return p;
 }
 
@@ -65,7 +65,7 @@ static inline char* newScreenB_233438(void* self)
     char* p = (char*)cMemMan_alloc(0x4C, D_0047BFE8, 0, 0);
     func_0039E2A0(p, *(void**)((char*)self + 0xC));
     *(int*)(p + 0x48) = 0;
-    *(void***)(p + 8) = D_0047C6D8;
+    *(void***)(p + 8) = cFELoadHintState_vtbl;
     return p;
 }
 
@@ -74,7 +74,7 @@ static inline char* newScreenC_233438(void* self)
     char* p = (char*)cMemMan_alloc(0x4C, D_0047C000, 0, 0);
     func_0039E2A0(p, *(void**)((char*)self + 0xC));
     *(int*)(p + 0x48) = 0;
-    *(void***)(p + 8) = D_0047C608;
+    *(void***)(p + 8) = cFELoadState_vtbl;
     return p;
 }
 
@@ -95,7 +95,7 @@ extern "C" void cFELoadScreen_load(void* self)
     {
         sObj_233438* o = new (D_0047BFC0, 0x100, 0) sObj_233438;
         o->f4 = 0;
-        o->vt = D_0046D1D0;
+        o->vt = cFEInput_vtbl;
         o->f18 = 0;
         o->fC = 0;
         o->f10 = 0;
@@ -798,7 +798,7 @@ extern "C" void func_00234120(void* self, void* stream)
 INCLUDE_ASM("fe/festateloadscreen", func_00234188);
 #ifdef SKIP_ASM
 extern void* D_0047D6E8[];
-extern void* D_0047D530[];
+extern void* cGFEventStartState_vtbl[];
 extern void* cGameState_mpGame;
 
 extern "C" void* func_00234188(void* self)
@@ -806,7 +806,7 @@ extern "C" void* func_00234188(void* self)
     *(int*)self = 0;
     *(void***)((char*)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
-    *(void***)((char*)self + 0xC) = D_0047D530;
+    *(void***)((char*)self + 0xC) = cGFEventStartState_vtbl;
     *(int*)self = 2;
     *(int*)((char*)self + 0x1C) = 4;
     *(int*)((char*)self + 0x4) = 0;

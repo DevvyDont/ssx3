@@ -15,7 +15,7 @@ extern sPlayerCharEntry D_00534FE0[];
 
 extern "C" void func_00145B20(void* self);
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
-extern void* D_0045AE28[16];
+extern void* cBENewPlayerInterface_vtbl[16];
 
 struct cBENewPlayerInterfaceCtor {
     char pad_0x00[8];
@@ -29,7 +29,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_cBENewPlayerInterface__FP25c
 cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPlayerInterfaceCtor* self)
 {
     self->field_0x8 = 0;
-    self->vtable = D_0045AE28;
+    self->vtable = cBENewPlayerInterface_vtbl;
     func_00145B20(self);
     cBENewPlayerInterface_defaultCtrl(self);
     return self;
@@ -1573,7 +1573,7 @@ struct cBEIface_00147F78
 };
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0045A280[];
-extern sVTablePlayer_00147F78 D_0045AD68;
+extern sVTablePlayer_00147F78 cBEStatInterface_vtbl;
 extern void* D_004A11C4;
 
 extern "C" void* cBEStatInterface_getThis(void)
@@ -1581,7 +1581,7 @@ extern "C" void* cBEStatInterface_getThis(void)
     if (D_004A11C4 == 0) {
         cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
         D_004A11C4 = mem;
-        sVTablePlayer_00147F78* vt = &D_0045AD68;
+        sVTablePlayer_00147F78* vt = &cBEStatInterface_vtbl;
         short d = vt->delta;
         void (*fn)(void*) = vt->fn;
         mem->vtable = vt;

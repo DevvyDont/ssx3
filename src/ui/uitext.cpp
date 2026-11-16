@@ -1715,7 +1715,7 @@ extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColo
 INCLUDE_ASM("ui/uitext", func_003A3280);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
-extern void* D_004941B8[];
+extern void* cUIVector_vtbl[];
 
 struct func_003A3280_s {
     char pad0[0x8];
@@ -1736,7 +1736,7 @@ struct func_003A3280_s {
 extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
 {
     func_0039FB30(self, a1, a2);
-    self->vtbl = D_004941B8;
+    self->vtbl = cUIVector_vtbl;
     self->b0 = 0;
     self->b1 = 0;
     self->hi = 0;
@@ -1754,11 +1754,11 @@ extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
 INCLUDE_ASM("ui/uitext", cUIVector__cUIVector);
 #ifdef SKIP_ASM
 extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* D_004941B8[];
+extern void* cUIVector_vtbl[];
 
 extern "C" void cUIVector__cUIVector(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_004941B8;
+    *(void***)((char*)self + 0x8) = cUIVector_vtbl;
     if (*(void**)((char*)self + 0x7C) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x7C));
     }

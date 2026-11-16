@@ -200,7 +200,7 @@ INCLUDE_ASM("fe/festatedebug", func_00181090);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
-extern void* D_0046D000[];
+extern void* cFEStateCharSelect_vtbl[];
 
 extern "C" void* func_00181090(void* self, void* owner, int count)
 {
@@ -208,7 +208,7 @@ extern "C" void* func_00181090(void* self, void* owner, int count)
     int i = 0;
     unsigned char mask = 0xFF;
     func_0039E2A0(self, owner);
-    *(void***)((char*)self + 0x8) = D_0046D000;
+    *(void***)((char*)self + 0x8) = cFEStateCharSelect_vtbl;
     *(int*)((char*)self + 0xC) = 9;
     *(int*)((char*)self + 0x54) = 1;
     *(signed char*)((char*)self + 0x44) = n;

@@ -9,7 +9,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_cScreenPopup);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void func_001C55F8(void* self);
 extern "C" void func_00416210(void* dst, int c, int n);
-extern void* D_0046CBD8[];
+extern void* cScreenPopup_vtbl[];
 extern int D_004A3E90;
 struct sVec3_58E8 {
     float x, y, z;
@@ -22,7 +22,7 @@ extern sQuad_58E8 D_004C6798;
 extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, void* owner)
 {
     func_0039E318(self, engine, owner);
-    self->mVtbl = D_0046CBD8;
+    self->mVtbl = cScreenPopup_vtbl;
     func_001C55F8((char*)self + 0xBC);
     int d = D_004A3E90;
     self->mszInputText = (char*)d;
@@ -71,14 +71,14 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, voi
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C5A90);
 #ifdef SKIP_ASM
-extern void* D_0046CBD8[];
+extern void* cScreenPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_001C5750(void* self, int flags);
 extern "C" void func_0039E390(void* self, int flags);
 
 extern "C" void func_001C5A90(cScreenPopup* self, int flags)
 {
-    self->mVtbl = D_0046CBD8;
+    self->mVtbl = cScreenPopup_vtbl;
     cBXString__cBXString((char*)self + 0x2B4, 2);
     cBXString__cBXString((char*)self + 0x2B0, 2);
     func_001C5750((char*)self + 0xBC, 2);
@@ -2894,12 +2894,12 @@ INCLUDE_ASM("fe/fepopup", func_001CABA8);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void func_001CA8A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
-extern void* D_0046CB08[];
+extern void* cUIStateBuyPopup_vtbl[];
 
 extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx)
 {
     func_0039E318(self, engine, owner);
-    *(void***)((char*)self + 0x8) = D_0046CB08;
+    *(void***)((char*)self + 0x8) = cUIStateBuyPopup_vtbl;
     func_001CA8A0((char*)self + 0x48);
     *(signed char*)((char*)self + 0x44) = idx;
     *(int*)((char*)self + 0xC) = 7;
@@ -3108,7 +3108,7 @@ extern "C" void cBXString_Reset(void* self);
 extern "C" void func_001CE2A8(void* self);
 extern int D_004A3E90;
 extern void* D_004A33F0;
-extern void* D_0046BEC8[];
+extern void* cKeyboardPopup_vtbl[];
 
 extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4)
 {
@@ -3128,7 +3128,7 @@ extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, un
     *(int*)((char*)self + 0x13C) = 0;
     *(int*)((char*)self + 0x54) = 0;
     *(int*)((char*)self + 0x58) = 0;
-    *(void***)((char*)self + 0x8) = D_0046BEC8;
+    *(void***)((char*)self + 0x8) = cKeyboardPopup_vtbl;
     *(int*)((char*)self + 0x140) = 0x1D;
     *(int*)((char*)self + 0x424) = d;
     *(int*)((char*)self + 0x60) = 0x3F;
@@ -3156,14 +3156,14 @@ extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, un
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup__cKeyboardPopup);
 #ifdef SKIP_ASM
-extern void* D_0046BEC8[];
+extern void* cKeyboardPopup_vtbl[];
 void cMemMan_free(void* ptr);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_0039E390(void* self, int flags);
 
 extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
 {
-    self->mVtbl = D_0046BEC8;
+    self->mVtbl = cKeyboardPopup_vtbl;
     void* p = self->mpustrStatic;
     if (p != 0) {
         cMemMan_free(p);

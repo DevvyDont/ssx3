@@ -221,7 +221,7 @@ extern void* D_0045C3F0[];      // cCTBoundObj vtable
 extern void* D_0045C2A8[];      // ellipse
 extern void* D_0045C268[];      // box
 extern void* D_0045C228[];      // line
-extern void* D_0045C1E8[];      // point
+extern void* cCTBoundObjPoint_vtbl[];      // point
 extern char D_0045C110[];
 extern char D_0045C128[];
 extern char D_0045C140[];
@@ -272,7 +272,7 @@ struct sCTBoundLineG : sCTBoundObjG {
 
 struct sCTBoundPointG : sCTBoundObjG {
     int type;           // 0x28
-    sCTBoundPointG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C1E8) { type = 3; }
+    sCTBoundPointG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTBoundObjPoint_vtbl) { type = 3; }
 };
 
 class cCTBoundObjEllK2;

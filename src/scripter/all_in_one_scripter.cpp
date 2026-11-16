@@ -293,12 +293,12 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002848D8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00283228_48D8(void *, int) __asm__("func_00283228");
 void operator_delete(int *);
-extern char D_004822E0[];
+extern char cScriptObjGS_vtbl[];
 extern char D_00482318[];
 
 extern "C" void func_002848D8(void *arg0, int arg1) {
     *(char **)((char*)arg0 + 0x18) = D_00482318;
-    *(char **)((char*)arg0 + 0x0) = D_004822E0;
+    *(char **)((char*)arg0 + 0x0) = cScriptObjGS_vtbl;
     func_00283228_48D8((char*)arg0 + 0xC, 0);
     if (arg1 & 1) {
         operator_delete((int *)arg0);
@@ -328,12 +328,12 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284950);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00283228_4950(void *, int) __asm__("func_00283228");
 void operator_delete(int *);
-extern char D_00482260[];
+extern char cScriptObjEvent_vtbl[];
 extern char D_00482298[];
 
 extern "C" void func_00284950(void *arg0, int arg1) {
     *(char **)((char*)arg0 + 0x18) = D_00482298;
-    *(char **)((char*)arg0 + 0x0) = D_00482260;
+    *(char **)((char*)arg0 + 0x0) = cScriptObjEvent_vtbl;
     func_00283228_4950((char*)arg0 + 0xC, 0);
     if (arg1 & 1) {
         operator_delete((int *)arg0);

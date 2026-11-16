@@ -93,12 +93,12 @@ void func_00245B50(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245B58);
 #ifdef SKIP_ASM
-extern void* D_0047C608[];
+extern void* cFELoadState_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
 extern "C" void* func_00245B58(void* self)
 {
-    *(void**)((char*)self + 0x8) = D_0047C608;
+    *(void**)((char*)self + 0x8) = cFELoadState_vtbl;
     return func_0039E390(self);
 }
 #endif
@@ -184,12 +184,12 @@ extern "C" void func_00245CD0(void* self, void* widget)
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245D28);
 #ifdef SKIP_ASM
-extern void* D_0047C538[];
+extern void* cFELoadStateInLodge_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
 extern "C" void* func_00245D28(void* self)
 {
-    *(void**)((char*)self + 0x8) = D_0047C538;
+    *(void**)((char*)self + 0x8) = cFELoadStateInLodge_vtbl;
     return func_0039E390(self);
 }
 #endif

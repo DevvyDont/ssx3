@@ -223,7 +223,7 @@ void* func_00234ED8(void* self)
 INCLUDE_ASM("main/gamestate", func_00234EF8);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D428[];
+extern char cGFTrackStartState_vtbl[];
 extern char* cGameState_mpGame;
 
 extern "C" void* func_00234EF8(void* self)
@@ -231,7 +231,7 @@ extern "C" void* func_00234EF8(void* self)
     *(int*)((char*)self + 0x0) = 0;
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
-    *(void**)((char*)self + 0xC) = D_0047D428;
+    *(void**)((char*)self + 0xC) = cGFTrackStartState_vtbl;
     *(int*)((char*)self + 0x0) = 4;
     *(int*)((char*)self + 0x10) = 5;
     *(int*)((char*)self + 0x4) = 0;
@@ -1115,7 +1115,7 @@ void* func_00230698(void* self, int id);
 extern "C" void* func_002E4CE8_sz(int size) __asm__("func_002E4CE8");
 void* func_002E4D70(void* self);
 extern "C" void func_002E4370(void* self, int a1, int a2, void* a3, float f0, float f1, int a4, int a5, float f2);
-extern void* D_004880C0[];
+extern void* cFade_TObj_vtbl[];
 
 struct sColor_236058 {
     float r, g, b, a;
@@ -1139,7 +1139,7 @@ extern "C" void func_00236058(void* self)
     c.b = one;
     c.a = one;
     func_002E4D70(o);
-    *(void***)o = D_004880C0;
+    *(void***)o = cFade_TObj_vtbl;
     *(sColor_236058*)(o + 4) = c;
     func_002E4370(r, 1, 0, o, 0.0f, 0.0f, 0, 0, one);
 }
@@ -1184,7 +1184,7 @@ void* func_002361E8(void* self)
 INCLUDE_ASM("main/gamestate", func_00236208);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D320[];
+extern char cGFUserSelectState_vtbl[];
 extern char* cGameState_mpGame;
 
 extern "C" void* func_00236208(void* self)
@@ -1192,7 +1192,7 @@ extern "C" void* func_00236208(void* self)
     *(int*)((char*)self + 0x0) = 0;
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
-    *(void**)((char*)self + 0xC) = D_0047D320;
+    *(void**)((char*)self + 0xC) = cGFUserSelectState_vtbl;
     *(int*)((char*)self + 0x0) = 4;
     *(int*)((char*)self + 0x18) = 0x17;
     *(int*)((char*)self + 0x4) = 0;

@@ -96,11 +96,11 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void func_00397298(void* self, int val);
 extern char D_00493D60[];
-extern void* D_00494D08[];
+extern void* cUIAnimation_vtbl[];
 
 extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
 {
-    *(void***)((char*)self + 0x10) = D_00494D08;
+    *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
     *(void**)self = data;
     *(int*)((char*)self + 0x4) = 0;
     *(short*)((char*)self + 0x8) = -1;
@@ -133,11 +133,11 @@ INCLUDE_ASM("ui/uianimation", func_003973A8);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern void* D_00494D08[];
+extern void* cUIAnimation_vtbl[];
 
 extern "C" void func_003973A8(void* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_00494D08;
+    *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
     char* base = *(char**)((char*)self + 0x4);
     if (base != 0) {
         char* p = base + *(int*)(base - 0x10) * 4;

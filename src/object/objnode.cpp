@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
-extern void* D_00491F00[16];
+extern void* cObjNode_vtbl[16];
 extern char gBucketMan;
 
 struct cObjNode {
@@ -14,7 +14,7 @@ INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
 #ifdef SKIP_ASM
 cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
 {
-    self->field_0xC = D_00491F00;
+    self->field_0xC = cObjNode_vtbl;
     cBucketMan_add(&gBucketMan, self, param2);
     return self;
 }
@@ -28,7 +28,7 @@ void operator_delete(int*);
 
 extern "C" void cObjNode__cObjNode(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_00491F00;
+    *(void***)((char*)self + 0xC) = cObjNode_vtbl;
     cBucketMan_remove(&gBucketMan, self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -39,14 +39,14 @@ extern "C" void cObjNode__cObjNode(void* self, int flags)
 //100%
 INCLUDE_ASM("object/objnode", func_00354720);
 #ifdef SKIP_ASM
-extern void* D_00491E80[];
+extern void* cTypeObjNode_vtbl[];
 extern int D_0044AFF0[];
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 
 extern "C" void* func_00354720(void* self, void* a1, int type)
 {
     cObjNode_cObjNode1(self, a1);
-    *(void***)((char*)self + 0xC) = D_00491E80;
+    *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
     *(short*)((char*)self + 0x10) = type;
     *(short*)((char*)self + 0x12) = 0;
     D_0044AFF0[*(short*)((char*)self + 0x10)]++;
@@ -63,7 +63,7 @@ struct sObjNodeVEntry4788 {
     void (*fn)(void*, void*, int);
 };
 
-extern void* D_00491E80[];
+extern void* cTypeObjNode_vtbl[];
 extern int D_0044AFF0[];
 // PORT: cObjNode_cObjNode takes (self, param2); this caller also leaves the stream in $6.
 cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm__("cObjNode_cObjNode__FP8cObjNodePv");
@@ -71,7 +71,7 @@ cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm_
 extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream)
 {
     cObjNode_cObjNode_3((cObjNode*)self, a, stream);
-    *(void***)((char*)self + 0xC) = D_00491E80;
+    *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
     sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 4);
     D_0044AFF0[*(short*)((char*)self + 0x10)]++;
@@ -83,7 +83,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream)
 INCLUDE_ASM("object/objnode", cTypeObjNode__cTypeObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* D_00491E80[];
+extern void* cTypeObjNode_vtbl[];
 extern int D_0044AFF0[];
 
 // PORT: the unit declares cTypeObjNode__cTypeObjNode(void*), but this is a deleting
@@ -92,7 +92,7 @@ void cTypeObjNode__cTypeObjNode_impl(void* self, int flags) __asm__("cTypeObjNod
 
 void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_00491E80;
+    *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
     D_0044AFF0[*(short*)((char*)self + 0x10)]--;
     cObjNode__cObjNode(self, flags);
 }
@@ -103,7 +103,7 @@ INCLUDE_ASM("object/objnode", func_00354850);
 #ifdef SKIP_ASM
 extern int D_004A5B78;
 extern int D_004A5B7C;
-extern void* D_00491E00[];
+extern void* cSortObjNode_vtbl[];
 
 static inline int objNextId_4850(int* c)
 {
@@ -114,7 +114,7 @@ extern "C" void* func_00354850(void* self, void* a1, int type)
 {
     int id;
     func_00354720(self, a1, type);
-    *(void***)((char*)self + 0xC) = D_00491E00;
+    *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
     if (type == 6) {
         id = objNextId_4850(&D_004A5B7C);
     } else {
@@ -134,20 +134,20 @@ struct sVEntryCSortObjNode {
     void (*fn)(void*, void*, int);
 };
 
-extern void* D_00491E00[];
+extern void* cSortObjNode_vtbl[];
 extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream);
 
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a, void* stream)
 {
     cTypeObjNode_cTypeObjNode(self, a, stream);
-    *(void***)((char*)self + 0xC) = D_00491E00;
+    *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
     sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x14, 4);
     return self;
 }
 #endif
 
-extern void* D_00491E00[];
+extern void* cSortObjNode_vtbl[];
 extern "C" void* cTypeObjNode__cTypeObjNode(void*);
 
 //99.5%
@@ -155,7 +155,7 @@ INCLUDE_ASM("object/objnode", cSortObjNode__cSortObjNode__FPv);
 #ifdef SKIP_ASM
 void* cSortObjNode__cSortObjNode(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_00491E00;
+    *(int*)((char*)self + 0xc) = (int)(void*)cSortObjNode_vtbl;
     return cTypeObjNode__cTypeObjNode(self);
 }
 #endif

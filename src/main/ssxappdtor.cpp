@@ -228,10 +228,10 @@ void func_00243AB0(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243AB8);
 #ifdef SKIP_ASM
-extern char D_0047D8F0[];
+extern char cInitLoadScreen_vtbl[];
 
 extern "C" void *func_00243AB8(void *self) {
-    *(void **)((char *)self + 0) = D_0047D8F0;
+    *(void **)((char *)self + 0) = cInitLoadScreen_vtbl;
     *(int *)((char *)self + 4) = 0;
     *(int *)((char *)self + 8) = 0;
     return self;
@@ -347,12 +347,12 @@ extern "C" void func_00243C00(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", func_00243C30);
 #ifdef SKIP_ASM
 extern "C" void func_00231CD0(void *);
-extern char D_0047D740[];
+extern char cFELoadScreen_vtbl[];
 
 extern "C" void *func_00243C30(void *self) {
     func_00231CD0(self);
     *(int *)((char *)self + 0xC) = 0;
-    *(void **)((char *)self + 0) = D_0047D740;
+    *(void **)((char *)self + 0) = cFELoadScreen_vtbl;
     *(int *)((char *)self + 0x10) = 0;
     *(int *)((char *)self + 0x14) = 0;
     return self;
@@ -603,7 +603,7 @@ extern "C" void cGFGateState__cGFGateState(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", func_00243E80);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D4D8[];
+extern char cGFGateState_vtbl[];
 extern int cGameState_mpGame;
 
 extern "C" void *func_00243E80(void *self) {
@@ -611,7 +611,7 @@ extern "C" void *func_00243E80(void *self) {
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 4;
-    *(void **)((char *)self + 0xC) = D_0047D4D8;
+    *(void **)((char *)self + 0xC) = cGFGateState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -687,14 +687,14 @@ extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", func_00243F80);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D3D0[];
+extern char cGFNextHeatState_vtbl[];
 extern int cGameState_mpGame;
 
 extern "C" void *func_00243F80(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
-    *(void **)((char *)self + 0xC) = D_0047D3D0;
+    *(void **)((char *)self + 0xC) = cGFNextHeatState_vtbl;
     *(int *)((char *)self + 0) = 1;
     *(int *)((char *)self + 4) = 3;
     *(int *)((char *)self + 0x14) = 0;
@@ -723,7 +723,7 @@ extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int 
 INCLUDE_ASM("main/ssxappdtor", func_00243FF0);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D378[];
+extern char cGFSessionTeleportState_vtbl[];
 extern int cGameState_mpGame;
 
 extern "C" void *func_00243FF0(void *self) {
@@ -731,7 +731,7 @@ extern "C" void *func_00243FF0(void *self) {
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 0xA;
-    *(void **)((char *)self + 0xC) = D_0047D378;
+    *(void **)((char *)self + 0xC) = cGFSessionTeleportState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -865,7 +865,7 @@ extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", func_00244190);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D1C0[];
+extern char cGFPodiumState_vtbl[];
 extern int cGameState_mpGame;
 
 extern "C" void *func_00244190(void *self) {
@@ -873,7 +873,7 @@ extern "C" void *func_00244190(void *self) {
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 7;
-    *(void **)((char *)self + 0xC) = D_0047D1C0;
+    *(void **)((char *)self + 0xC) = cGFPodiumState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -899,7 +899,7 @@ extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", func_002441F8);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
-extern char D_0047D168[];
+extern char cGFReplayStartState_vtbl[];
 extern int cGameState_mpGame;
 
 extern "C" void *func_002441F8(void *self) {
@@ -907,7 +907,7 @@ extern "C" void *func_002441F8(void *self) {
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 4;
-    *(void **)((char *)self + 0xC) = D_0047D168;
+    *(void **)((char *)self + 0xC) = cGFReplayStartState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -1819,11 +1819,11 @@ extern "C" void func_00244978(void* self)
 INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode__cSSXStatsObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* D_0047CAE8[];
+extern void* cSSXStatsObjNode_vtbl[];
 
 extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_0047CAE8;
+    *(void***)((char*)self + 0xC) = cSSXStatsObjNode_vtbl;
     operator_delete(*(int**)((char*)self + 0x10));
     cObjNode__cObjNode(self, flags);
 }
@@ -2620,12 +2620,12 @@ extern "C" int func_002458B8(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245928);
 #ifdef SKIP_ASM
-extern void* D_0047C6D8[];
+extern void* cFELoadHintState_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
 extern "C" void* func_00245928(void* self)
 {
-    *(void**)((char*)self + 0x8) = D_0047C6D8;
+    *(void**)((char*)self + 0x8) = cFELoadHintState_vtbl;
     return func_0039E390(self);
 }
 #endif

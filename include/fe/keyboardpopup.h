@@ -3,7 +3,7 @@
 
 // cKeyboardPopup: the front end's on-screen keyboard (84 keys in 6 rows of 14, screen "Fullkeyboard"), opened by a
 // cScreenPopup's text box and by the profile/lodge/trophy screens. A cUIState; its methods are in fe/fepopup.cpp.
-// Retail vtable _vt$14cKeyboardPopup = D_0046BEC8. Created with cMemMan_alloc(0x444, "cKeyboardPopup", ...) +
+// Retail vtable _vt$14cKeyboardPopup = cKeyboardPopup_vtbl. Created with cMemMan_alloc(0x444, "cKeyboardPopup", ...) +
 // cKeyboardPopup(cUIEngine*, cUIState* parent, bool Password, unsigned char CtrlBits) = func_001CB030; destroyed by
 // cKeyboardPopup__cKeyboardPopup.
 //
@@ -31,7 +31,7 @@ struct cKeyboardPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$14cKeyboardPopup D_0046BEC8 (func_001CB030, destructor)
+    void** mVtbl;                   // 0x008 [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (func_001CB030, destructor)
     // --- cUIState (On Tour: size 0x48, same offsets)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] state stack at mpEngine + 0x18

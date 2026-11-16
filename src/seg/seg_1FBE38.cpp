@@ -7691,7 +7691,7 @@ extern "C" void* func_00307020(void* self, int n, Ent_7020* e) {
 INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_cWScriptMission);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_00489A30_7128[] __asm__("D_00489A30");
+extern char D_00489A30_7128[] __asm__("cWScriptMission_vtbl");
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
 extern "C" int cWScriptMan_getScriptCode_7128(int, int) __asm__("cWScriptMan_getScriptCode");
 extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, char* a2, int a3) {
@@ -7709,7 +7709,7 @@ extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, 
 INCLUDE_ASM("seg/seg_1FBE38", func_003071C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_00489A30_71C8[] __asm__("D_00489A30");
+extern char D_00489A30_71C8[] __asm__("cWScriptMission_vtbl");
 extern "C" void cWScriptProcess__cWScriptProcess_71C8(void*) __asm__("cWScriptProcess__cWScriptProcess");
 extern "C" void func_003071C8(void* self) {
     *(void**)((char*)self + 0x5C) = D_00489A30_71C8;

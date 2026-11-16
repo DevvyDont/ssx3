@@ -833,12 +833,12 @@ void sti_003AD290(int init, int prio)
 //100%
 INCLUDE_ASM("world/wscriptcache", cChunkResolve__cChunkResolve);
 #ifdef SKIP_ASM
-extern void* D_00495150[];
+extern void* cChunkResolve_vtbl[];
 void operator_delete(int*);
 
 extern "C" void cChunkResolve__cChunkResolve(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00495150;
+    *(void***)((char*)self + 0x8) = cChunkResolve_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

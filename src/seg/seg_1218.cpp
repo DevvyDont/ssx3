@@ -6060,7 +6060,7 @@ struct sVtbl22_108C80 { sVEntry_108C80 e[22]; } __attribute__((aligned(8)));
 extern const sVtbl9_108C80 D_00458618;
 extern char D_00459B90[];
 extern const sVtbl22_108C80 D_00458660;
-extern char D_004585F0[];
+extern char cComputer_vtbl[];
 
 // PORT: g++ 2.95 most-derived constructor of a class deriving virtually from cRider (vbase at +0xF50,
 // vbase pointers in every subobject); the not-in-charge vtable fix-up is written out by hand.
@@ -6118,7 +6118,7 @@ extern "C" char* cComputer_cComputer(char* self, int inChrg, int actor)
         t2.e[1].delta = D_00458660.e[1].delta + d;
         t2.e[20].delta = D_00458660.e[20].delta + d;
     }
-    *(void**)(self + 0xDE8) = D_004585F0;
+    *(void**)(self + 0xDE8) = cComputer_vtbl;
     if (actor)
         (*(cRider**)(self + 0x18))->mIsActor = 1;
     func_00108E88_self(self);
@@ -6223,7 +6223,7 @@ __asm__("_$_12cRiderVb_s12 = cRider__cRider\n"
         "_$_15cCompPart30_s12 = func_002F6388\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
-__asm__("_vt$14cRiderE_108C80 = D_004585F0\n"
+__asm__("_vt$14cRiderE_108C80 = cComputer_vtbl\n"
         "_vt$14cRiderE_108C80$13cRiderVbC_s12 = D_00458618\n"
         "_vt$14cRiderE_108C80$12cRiderVb_s12 = D_00458660\n"
         "_vt$9cComp_s12 = D_00458710\n"

@@ -12,10 +12,10 @@ extern char D_004585A0[];
 extern char D_00458550[];
 extern char D_004585C8[];
 extern char D_00458578[];
-extern char D_00458488[];
-extern char D_00458528[];
+extern char cAI_vtbl[];
+extern char cAIStateHandler_vtbl[];
 extern char D_00458500[];
-extern char D_004584D8[];
+extern char cShutdownHandler_vtbl[];
 extern char D_00457F00[];
 extern char D_00457F10[];
 
@@ -42,14 +42,14 @@ struct sAIObj_1286A0 {
 
 extern "C" void* cAI_cAI(void* self)
 {
-    *(void**)((char*)self + 0xCC) = D_00458488;
+    *(void**)((char*)self + 0xCC) = cAI_vtbl;
     *(void**)((char*)self + 0xAC) = D_004585C8;
     *(void**)((char*)self + 0xB0) = D_004585A0;
     *(void**)((char*)self + 0xB4) = D_00458550;
     *(void**)((char*)self + 0xBC) = D_00458578;
-    *(void**)((char*)self + 0xC0) = D_00458528;
+    *(void**)((char*)self + 0xC0) = cAIStateHandler_vtbl;
     *(void**)((char*)self + 0xC4) = D_00458500;
-    *(void**)((char*)self + 0xC8) = D_004584D8;
+    *(void**)((char*)self + 0xC8) = cShutdownHandler_vtbl;
     sAIState_1286A0** slot = (sAIState_1286A0**)((char*)self + 0xA4);
     *slot = new (D_00457F00, 0, 0) sAIState_1286A0;
     *(sAIObj_1286A0**)((char*)self + 0xA8) = new (D_00457F10, 0, 0) sAIObj_1286A0(self);
@@ -63,11 +63,11 @@ INCLUDE_ASM("ai/ai", func_001287B8);
 #ifdef SKIP_ASM
 extern "C" void cAI_shutdown(void*);
 void operator_delete(int*);
-extern char D_00458488[];
+extern char cAI_vtbl[];
 
 extern "C" void func_001287B8(void* self, int flags)
 {
-    *(void**)((char*)self + 0xCC) = D_00458488;
+    *(void**)((char*)self + 0xCC) = cAI_vtbl;
     cAI_shutdown(self);
     operator_delete(*(int**)((char*)self + 0xA4));
     operator_delete(*(int**)((char*)self + 0xA8));
@@ -795,7 +795,7 @@ struct sVtbl22_MR { sVEntry_MR e[22]; } __attribute__((aligned(8)));
 extern const sVtbl9_MR D_00458240;
 extern char D_00459B90[];
 extern const sVtbl22_MR D_00458288;
-extern char D_00458338[];
+extern char cPlayer_vtbl[];
 
 // PORT: g++ 2.95 most-derived constructor of a class deriving virtually from cRider (vbase at +0xE10,
 // vbase pointers in every subobject), inlined here; the not-in-charge vtable fix-up is written out by hand.
@@ -841,7 +841,7 @@ static inline char* cMissionRider_ctor(char* self, int inChrg)
     *(const void**)(*(char**)(self + 0x18) + 0x6E8) = &D_00458240;
     *(void**)(*(char**)(self + 0x18) + 0x6D0) = D_00459B90;
     *(const void**)(*(char**)(self + 0x18) + 0x6C0) = &D_00458288;
-    *(void**)(self + 0xDE8) = D_00458338;
+    *(void**)(self + 0xDE8) = cPlayer_vtbl;
     if (!inChrg)
     {
         sVtbl9_MR t1 = D_00458240;
@@ -4603,7 +4603,7 @@ void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 void* func_002E4D70(void* self);
 extern "C" void func_002E4370(void* self, int a1, void* a2, void* a3, float f0, float f1, float f2, int a4, void* a5);
-extern void* D_004880C0[];
+extern void* cFade_TObj_vtbl[];
 
 struct sColor_12F230
 {
@@ -4624,7 +4624,7 @@ extern "C" void* func_002E4CE8_sz(unsigned size) __asm__("func_002E4CE8");
 static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
 {
     func_002E4D70(p);
-    p->vt = D_004880C0;
+    p->vt = cFade_TObj_vtbl;
     p->c = col;
     return p;
 }

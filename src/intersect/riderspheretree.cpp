@@ -2866,7 +2866,7 @@ extern "C" int func_0032DF28(void* selfp)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E100);
 #ifdef SKIP_ASM
-extern char D_0048E6A8[];
+extern char cWorldLine_vtbl[];
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
 static inline sSphereVec4 sphereCapsuleSub(sSphereVec4* a, sSphereVec4* b)
@@ -2957,7 +2957,7 @@ extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVe
                                              int state, float r)
 {
     self->state = state;
-    self->vtbl = D_0048E6A8;
+    self->vtbl = cWorldLine_vtbl;
     self->f8 = 0;
     self->f4 = 0;
     self->p0b = *p0;
@@ -3599,13 +3599,13 @@ struct sRiderSphere_2F650 {
 
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
 extern "C" void func_00329DC8(void* tree, sVec4_2F650* mn, sVec4_2F650* mx);
-extern void* D_0048E590[];
+extern void* cWorldRider_vtbl[];
 
 extern "C" sRiderSphere_2F650* func_0032F650(sRiderSphere_2F650* self, void* tree, int flag)
 {
     self->f8 = 0;
     self->f4 = 0;
-    self->vtbl = D_0048E590;
+    self->vtbl = cWorldRider_vtbl;
     cRiderSphereTree_cRiderSphereTree(&self->node);
     self->tree2 = tree;
     self->tree = tree;
@@ -3621,11 +3621,11 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032F708);
 #ifdef SKIP_ASM
 extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 void operator_delete(int* ptr);
-extern void* D_0048E590[];
+extern void* cWorldRider_vtbl[];
 
 extern "C" void func_0032F708(void* self, int flags)
 {
-    *(void***)((char*)self + 0x50) = D_0048E590;
+    *(void***)((char*)self + 0x50) = cWorldRider_vtbl;
     cRiderSphereTree__cRiderSphereTree((char*)self + 0x70, 2);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3936,7 +3936,7 @@ extern "C" int func_0032FAC0(void* self, void* a1, void* a2, sSphereHit_32FAC0* 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032FB48);
 #ifdef SKIP_ASM
-extern char D_0048E650[];
+extern char cWorldSphere_vtbl[];
 
 struct sRiderSphere_FB48 {
     int state;              // 0x00
@@ -3958,7 +3958,7 @@ struct sRiderSphere_FB48 {
 extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4* p, int flag, float r)
 {
     sSphereVec4 t;
-    self->vtbl = D_0048E650;
+    self->vtbl = cWorldSphere_vtbl;
     self->f8 = 0;
     self->f4 = 0;
     if (flag != 0) {

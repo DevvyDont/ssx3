@@ -12,7 +12,7 @@ extern "C" void* func_0027D5E8(void* mem, void* script);
 extern "C" void func_00283298(void* p);
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern void* D_0045C428[];
+extern void* cScriptCameraController_vtbl[];
 extern char D_0045BE88[];
 extern char D_0045BEA0[];
 
@@ -20,7 +20,7 @@ extern "C" void* cScriptCameraController_cScriptCameraController(void* self, voi
 {
     int i;
     cCameraController_cCameraController(self, arg);
-    *(void***)((char*)self + 0x14) = D_0045C428;
+    *(void***)((char*)self + 0x14) = cScriptCameraController_vtbl;
     *(int*)self = 3;
     *(void***)((char*)self + 0x1C) = (void**)operator_new_K2(8, D_0045BE88, 0, 0);
     for (i = 0; i < 2; i++) {
@@ -39,7 +39,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController__cScriptCa
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
 extern "C" void cCameraController__cCameraController(void* self, int flags);
 void cMemMan_free(void* p);
-extern void* D_0045C428[];
+extern void* cScriptCameraController_vtbl[];
 
 class cScrCamScriptK2 {
 public:
@@ -51,7 +51,7 @@ public:
 extern "C" void cScriptCameraController__cScriptCameraController(void* self, int flags)
 {
     int i;
-    *(void***)((char*)self + 0x14) = D_0045C428;
+    *(void***)((char*)self + 0x14) = cScriptCameraController_vtbl;
     for (i = 0; i < 2; i++) {
         cScriptObject_DeInitScriptObject((*(cScrCamScriptK2***)((char*)self + 0x1C))[i]);
         delete (*(cScrCamScriptK2***)((char*)self + 0x1C))[i];

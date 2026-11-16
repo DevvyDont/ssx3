@@ -33,23 +33,23 @@ extern "C" void func_003A4868(void*);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern "C" void cMemMan_free__FPv(void* p);
 void operator_delete(int*);
-extern void* D_00494670[];
-extern void* D_004949E8[];
-extern void* D_00494C98[];
+extern void* cUIScreen_vtbl[];
+extern void* cUIGroup_vtbl[];
+extern void* cList_vtbl[];
 extern void* D_00494CC0[];
 
 // Destructor of a UI screen: frees its buffers and tears down the embedded members.
 extern "C" void cUIScreen__cUIScreen(cUIScreen* p, int flags)
 {
-    p->mVtbl = D_00494670;
+    p->mVtbl = cUIScreen_vtbl;
     if ((void*)p->mppObjectList != 0) {
         cMemMan_free__FPv(p->mppObjectList);
     }
     if ((void*)p->mpBuffer != 0 && (p->mAttrScreen & 2)) {
         cMemMan_free__FPv(p->mpBuffer);
     }
-    *(void***)(((char*)p) + 0xCC) = D_00494C98;
-    *(void***)(((char*)p) + 0x48) = D_004949E8;
+    *(void***)(((char*)p) + 0xCC) = cList_vtbl;
+    *(void***)(((char*)p) + 0x48) = cUIGroup_vtbl;
     cList_destroyList_C558(((char*)p) + 0xB4);
     char* m40 = ((char*)p) + 0x40;
     *(void***)(((char*)p) + 0xC8) = D_00494CC0;
@@ -57,7 +57,7 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* p, int flags)
     *(void***)(((char*)p) + 0xBC) = D_00494CC0;
     func_003A4868(((char*)p) + 0xB4);
     cUIThing__cUIThing(m40, 2);
-    *(void***)(((char*)p) + 0x30) = D_00494C98;
+    *(void***)(((char*)p) + 0x30) = cList_vtbl;
     cList_destroyList_C558(((char*)p) + 0x18);
     *(void***)(((char*)p) + 0x2C) = D_00494CC0;
     func_003A4868(((char*)p) + 0x24);
@@ -678,12 +678,12 @@ extern char D_00493F40[];
 extern char D_00493F50[];
 extern char D_00493F60[];
 extern void* D_00494348[];
-extern void* D_00494408[];
+extern void* cUIProgress_vtbl[];
 extern void* D_004944C8[];
-extern void* D_00494868[];
-extern void* D_00494928[];
-extern void* D_004949E8[];
-extern void* D_00494AA8[];
+extern void* cUIPair_vtbl[];
+extern void* cUIMenu_vtbl[];
+extern void* cUIGroup_vtbl[];
+extern void* cUIIcon_vtbl[];
 
 struct sUIVtRec_D078 { short delta; short index; void (*fn)(void*, char*); };
 struct sUIVtDel_D078 { short delta; short index; void (*fn)(void*, int); };
@@ -713,7 +713,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
     case 0x11: {
         char* o = alloc_D078(0x88, D_004A4788);
         func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = D_00494AA8;
+        *(void***)(o + 8) = cUIIcon_vtbl;
         func_0021CCC8(o + 0x74);
         *(int*)(o + 0x78) = -1;
         *(int*)(o + 0x7C) = 0;
@@ -723,7 +723,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
     case 0x10: {
         char* o = alloc_D078(0x90, D_00493F00);
         func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = D_004949E8;
+        *(void***)(o + 8) = cUIGroup_vtbl;
         func_003977E8(o + 0x74);
         int* h = (int*)(rec + 0x24);
         for (unsigned int i = 0; i < *(unsigned int*)(rec + 0x20); i++, h++) {
@@ -745,9 +745,9 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
     case 0x13: {
         char* o = alloc_D078(0xA8, D_004A4790);
         func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = D_004949E8;
+        *(void***)(o + 8) = cUIGroup_vtbl;
         func_003977E8(o + 0x74);
-        *(void***)(o + 8) = D_00494928;
+        *(void***)(o + 8) = cUIMenu_vtbl;
         func_003A5338(o + 0x90);
         *(unsigned char*)(o + 0xA4) = 0xFF;
         *(char*)(o + 0x95) = 0;
@@ -772,7 +772,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         char* o = alloc_D078(0x80, D_004A4798);
         int* h = (int*)(rec + 0x20);
         func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = D_00494868;
+        *(void***)(o + 8) = cUIPair_vtbl;
         func_003A5508(o + 0x74);
         *(int*)(o + 0x14) |= 2;
         *(int*)(o + 0x78) = 0;
@@ -807,7 +807,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         *(int*)(o + 0x7C) = 0;
         *(int*)(o + 0x80) = 0;
         *(int*)(o + 0x84) = 0;
-        *(void***)(o + 8) = D_00494408;
+        *(void***)(o + 8) = cUIProgress_vtbl;
         initFromRec_D078(o, rec);
         {
             char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x20));
@@ -1463,14 +1463,14 @@ extern "C" void cList_destroyList_v(void*) __asm__("cList_destroyList");
 extern "C" void func_003A4868(void*);
 void operator_delete(int*);
 extern void* D_004946C8[];
-extern void* D_00494C98[];
+extern void* cList_vtbl[];
 extern void* D_00494CC0[];
 
 extern "C" void func_0039E390(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_004946C8;
     cList_destroyList_v((char*)self + 0x24);
-    *(void***)((char*)self + 0x3C) = D_00494C98;
+    *(void***)((char*)self + 0x3C) = cList_vtbl;
     cList_destroyList_v((char*)self + 0x24);
     *(void***)((char*)self + 0x38) = D_00494CC0;
     func_003A4868((char*)self + 0x30);

@@ -7,7 +7,7 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_cScriptSoundBankManager
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_00482240[];
+extern char cScriptSoundBankManager_vtbl[];
 extern const char D_00481FB0[];
 
 struct sScSndBank3450 {
@@ -26,7 +26,7 @@ struct cScriptSoundBankManager3450 {
 extern "C" cScriptSoundBankManager3450* cScriptSoundBankManager_cScriptSoundBankManager(
     cScriptSoundBankManager3450* self, int flags, int count, int base)
 {
-    self->vtable = D_00482240;
+    self->vtable = cScriptSoundBankManager_vtbl;
     self->flags = flags;
     self->count = count;
     self->banks = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), D_00481FB0, flags, 0);
@@ -46,11 +46,11 @@ INCLUDE_ASM("scripter/scsndmgr", func_00283518);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self);
-extern char D_00482240[];
+extern char cScriptSoundBankManager_vtbl[];
 
 extern "C" void func_00283518(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_00482240;
+    *(void**)((char*)self + 0xC) = cScriptSoundBankManager_vtbl;
     cScriptSoundBankManager_UnlinkBanksAll(self);
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
@@ -199,7 +199,7 @@ extern "C" sSndEntry* func_00283760(sSndList* self)
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cVidEngine_cVidEngine);
 #ifdef SKIP_ASM
-extern char D_00482228[];
+extern char cVidEngine_vtbl[];
 
 extern "C" void* cVidEngine_cVidEngine(void* self)
 {
@@ -209,7 +209,7 @@ extern "C" void* cVidEngine_cVidEngine(void* self)
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0;
-    *(void**)((char*)self + 0x18) = D_00482228;
+    *(void**)((char*)self + 0x18) = cVidEngine_vtbl;
     return self;
 }
 #endif
@@ -219,11 +219,11 @@ INCLUDE_ASM("scripter/scsndmgr", func_002837C8);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cVidEngine_ResetVideoEngine(void* self);
-extern char D_00482228[];
+extern char cVidEngine_vtbl[];
 
 extern "C" void func_002837C8(void* self, int flags)
 {
-    *(void**)((char*)self + 0x18) = D_00482228;
+    *(void**)((char*)self + 0x18) = cVidEngine_vtbl;
     cVidEngine_ResetVideoEngine(self);
     if (flags & 1) {
         operator_delete((int*)self);

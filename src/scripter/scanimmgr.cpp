@@ -5,7 +5,7 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_cScriptAnimBankManager)
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char D_004825D8[];
+extern char cScriptAnimBankManager_vtbl[];
 extern const char D_00481A80[];
 
 struct sScAnimBank53B8 {
@@ -27,7 +27,7 @@ extern "C" cScriptAnimBankManager53B8* cScriptAnimBankManager_cScriptAnimBankMan
     cScriptAnimBankManager53B8* self, int flags, int count, int base)
 {
     //S
-    self->vtable = D_004825D8;
+    self->vtable = cScriptAnimBankManager_vtbl;
     self->flags = flags;
     self->count = count;
     //E
@@ -50,11 +50,11 @@ INCLUDE_ASM("scripter/scanimmgr", func_00275498);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self);
-extern char D_004825D8[];
+extern char cScriptAnimBankManager_vtbl[];
 
 extern "C" void func_00275498(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_004825D8;
+    *(void**)((char*)self + 0xC) = cScriptAnimBankManager_vtbl;
     cScriptAnimBankManager_UnlinkBanksAll(self);
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {

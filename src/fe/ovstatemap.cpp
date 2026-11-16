@@ -868,7 +868,7 @@ extern "C" void func_0021CCC8(void* p);
 extern "C" void func_00399730(void* obj, int hash);
 extern char D_004718F0[];
 extern char D_00471908[];
-extern void* D_00494AA8[];
+extern void* cUIIcon_vtbl[];
 
 static inline float Absf_96A8(float v)
 {
@@ -894,7 +894,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     int py = (int)(fy * 266.0f);
     char* ind = (char*)cMemMan_alloc(0x88, D_004718F0, 0x20000000, 0);
     func_0039FB30(ind, self->screen, 0);
-    *(void***)(ind + 0x8) = D_00494AA8;
+    *(void***)(ind + 0x8) = cUIIcon_vtbl;
     func_0021CCC8(ind + 0x74);
     *(int*)(ind + 0x78) = -1;
     self->ind = (cFEObj_96A8*)ind;
@@ -945,7 +945,7 @@ struct cUIIcon_9970 {
     cUIIcon_9970(char* screen)
     {
         func_0039FB30(this, screen, 0);
-        *(void***)((char*)this + 0x8) = D_00494AA8;
+        *(void***)((char*)this + 0x8) = cUIIcon_vtbl;
         func_0021CCC8((char*)this + 0x74);
         *(int*)((char*)this + 0x78) = -1;
         *(int*)((char*)this + 0x7C) = 0;

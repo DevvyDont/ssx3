@@ -6,7 +6,7 @@ struct cExecutionMan {
     void* field_0x8;
 };
 
-extern void* D_0048DC30[16];
+extern void* cExecutionMan_vtbl[16];
 void operator_delete(int* ptr);
 
 //100%
@@ -14,7 +14,7 @@ INCLUDE_ASM("bx/execman", cExecutionMan__cExecutionMan__FP13cExecutionMani);
 #ifdef SKIP_ASM
 void cExecutionMan__cExecutionMan(cExecutionMan* self, int flags)
 {
-    self->field_0x8 = D_0048DC30;
+    self->field_0x8 = cExecutionMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -207,7 +207,7 @@ INCLUDE_ASM("bx/execman", func_00320AD8);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_00320AD8(cExecutionMan* self, int flags)
 {
-    self->field_0x8 = D_0048DC30;
+    self->field_0x8 = cExecutionMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

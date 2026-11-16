@@ -24,7 +24,7 @@ struct sSndBsVt7 {
 } __attribute__((aligned(8)));
 
 extern char D_00483A48[];
-extern char D_00483B48[];
+extern char cBankMonitor_vtbl[];
 extern const char D_004A3668[];
 extern const char D_004A3670[];
 extern const sSndBsVt4 D_00483A60_bs __asm__("D_00483A60");
@@ -42,7 +42,7 @@ extern "C" char* cBankSys_cBankSys(char* self, int embedded, int count, int heap
         cBankManager_cBankManager(*(void**)self, 0, count, heap);
     }
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483A60_bs;
-    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483A80_bs;
     if (!embedded) {
         sSndBsVt4 t1 = D_00483A60_bs;
@@ -87,7 +87,7 @@ struct sSndDtVt7 {
 extern char D_00483A48[];
 extern const sSndDtVt4 D_00483A60;
 extern const sSndDtVt7 D_00483A80;
-extern char D_00483B48[];
+extern char cBankMonitor_vtbl[];
 extern int D_004A3664;
 
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
@@ -95,7 +95,7 @@ extern "C" void func_0028FEA0(char* self, int flags)
 {
     *(void**)(self + 0xC) = D_00483A48;
     *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_00483A60;
-    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A80;
     if (flags == 0) {
         sSndDtVt4 t1 = D_00483A60;
@@ -11963,7 +11963,7 @@ struct sSnd69Ent {
 };
 
 extern char D_004837F8[];
-extern char D_00483B48[];
+extern char cBankMonitor_vtbl[];
 extern const sSnd69Vt4 D_00483818_69 __asm__("D_00483818");
 extern const sSnd69Vt7 D_00483838_69 __asm__("D_00483838");
 
@@ -11980,7 +11980,7 @@ extern "C" char* func_002A69A0(char* self, int embedded, int count, int unused, 
     }
     cController_cController(self, 0, count, heap);
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483818_69;
-    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_69;
     if (!embedded) {
         sSnd69Vt4 t1 = D_00483818_69;
@@ -12027,7 +12027,7 @@ struct sSnd6BVt7 {
 } __attribute__((aligned(8)));
 
 extern char D_004837F8[];
-extern char D_00483B48[];
+extern char cBankMonitor_vtbl[];
 extern const sSnd6BVt4 D_00483818_6B __asm__("D_00483818");
 extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
 
@@ -12036,7 +12036,7 @@ extern "C" void func_002A6B50(char* self, int flags)
 {
     *(void**)(self + 0xC) = D_004837F8;
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483818_6B;
-    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_6B;
     if (flags == 0) {
         sSnd6BVt4 t1 = D_00483818_6B;
@@ -12942,7 +12942,7 @@ struct sSndCtVt7 {
 } __attribute__((aligned(8)));
 
 extern char D_00483A48[];
-extern char D_00483B48[];
+extern char cBankMonitor_vtbl[];
 extern const char D_00483148[];
 extern const sSndCtVt4 D_004839F0_ct __asm__("D_004839F0");
 extern const sSndCtVt7 D_00483A10_ct __asm__("D_00483A10");
@@ -12960,7 +12960,7 @@ extern "C" char* cController_cController(char* self, int embedded, int count, in
     }
     cBankSys_cBankSys(self, 0, count, heap);
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_004839F0_ct;
-    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483A10_ct;
     if (!embedded) {
         sSndCtVt4 t1 = D_004839F0_ct;
@@ -13007,7 +13007,7 @@ struct sSndDtBVt7 {
 extern char D_00483A48[];
 extern const sSndDtBVt4 D_004839F0;
 extern const sSndDtBVt7 D_00483A10;
-extern char D_00483B48[];
+extern char cBankMonitor_vtbl[];
 extern int D_004A3744;
 
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
@@ -13015,7 +13015,7 @@ extern "C" void func_002A82D8(char* self, int flags)
 {
     *(void**)(self + 0xC) = D_00483A48;
     *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_004839F0;
-    *(void**)(*(char**)self + 0xAB0) = D_00483B48;
+    *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A10;
     if (flags == 0) {
         sSndDtBVt4 t1 = D_004839F0;

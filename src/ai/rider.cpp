@@ -28,7 +28,7 @@ extern "C" void MEM_fill_v(void* dst, int value, int size) __asm__("MEM_fill");
 extern void* D_00459C18[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
-extern void* D_00459CC8[];
+extern void* cBeing_vtbl[];
 extern const char D_004578A8[];
 extern const char D_004578C8[];
 extern const char D_004578E0[];
@@ -61,7 +61,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     unsigned int none = 0xFFFFFFFF;
     int one = 1;
     func_00140738(self);
-    self->mVtbl = D_00459CC8;
+    self->mVtbl = cBeing_vtbl;
     func_0027F968(&self->mScriptObjRiderVtbl);
     self->mScriptObjectVtbl = D_00459BD0;
     self->mAIIndex = -1;
@@ -162,7 +162,7 @@ extern char D_00459B90[];
 extern void* D_00459BD0[];
 extern void* D_00482018[];
 extern void* D_00481FD8[];
-extern void* D_00459CC8[];
+extern void* cBeing_vtbl[];
 
 static inline void vdel_11B978(char* o, int off)
 {
@@ -213,7 +213,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     self->mScriptObjectVtbl = D_00482018;
     self->mScriptObjRiderVtbl = D_00481FD8;
     func_00283228(self->unk_6DC, 0);
-    self->mVtbl = D_00459CC8;
+    self->mVtbl = cBeing_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -6258,7 +6258,7 @@ struct sVt22_125C70 {
 extern const sVt9_125C70 D_00458360;
 extern const sVt22_125C70 D_004583A8;
 extern char D_00459B90[];
-extern char D_00458338[];
+extern char cPlayer_vtbl[];
 extern "C" void cRider_cRider(void* self);
 extern "C" void cRiderHandler_cRiderHandler(void* self, int inChrg);
 extern "C" void* cReplay_addCache(void* p);
@@ -6326,7 +6326,7 @@ extern "C" void* cPlayer_cPlayer(char* self, int inChrg)
         t2.e[19].delta = D_004583A8.e[19].delta + vc;
         t2.e[20].delta = D_004583A8.e[20].delta + vc;
     }
-    *(void**)(self + 0xDE8) = D_00458338;
+    *(void**)(self + 0xDE8) = cPlayer_vtbl;
     *(int*)(self + 0xDF4) = 0;
     *(int*)(self + 0xDFC) = 0;
     *(int*)(self + 0xE00) = 0;
@@ -6366,7 +6366,7 @@ __asm__("_$_14cRiderVb_rider = cRider__cRider\n"
         "_$_15cVbDtor002F6388 = func_002F6388\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
-__asm__("_vt$13cRider_125EB8 = D_00458338\n"
+__asm__("_vt$13cRider_125EB8 = cPlayer_vtbl\n"
         "_vt$13cRider_125EB8$15cRiderVbC_rider = D_00458360\n"
         "_vt$13cRider_125EB8$14cRiderVb_rider = D_004583A8\n"
         "_vt$17cRiderBase_125EB8 = D_00458710\n"

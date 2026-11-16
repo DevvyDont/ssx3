@@ -64,12 +64,12 @@ INCLUDE_ASM("object/instanceman", func_00351330);
 extern "C" void func_003513D0(void* self);
 extern "C" void func_00351398(void* self, float* src);
 void func_00351538_impl(char* self, float t) __asm__("func_00351538");
-extern char D_00490AF0[];
+extern char cAnimFrame_vtbl[];
 
 extern "C" void* func_00351330_impl(char* self, float* src, float f) __asm__("func_00351330");
 extern "C" void* func_00351330_impl(char* self, float* src, float f)
 {
-    *(void**)(self + 0x84) = D_00490AF0;
+    *(void**)(self + 0x84) = cAnimFrame_vtbl;
     func_003513D0(self);
     func_00351398(self, src);
     func_00351538_impl(self, f);
@@ -149,7 +149,7 @@ static inline void vu0CopyMat_351480(sImMat44_351480* d, const sImMat44_351480* 
         : "memory");
 }
 
-extern void* D_00490AD0[];
+extern void* cMeshAnimFrame_vtbl[];
 extern sImMat44_351480 t4mat_Identity;
 extern "C" void* func_00351330(void* self, float* src, float f);
 // PORT: func_00351800 is defined later in the unit with a typed self; bound by asm label.
@@ -158,7 +158,7 @@ void func_00351800_vf(void* self, float f) __asm__("func_00351800");
 extern "C" void* func_00351480(void* self, float* src, float f)
 {
     func_00351330(self, src, f);
-    *(void***)((char*)self + 0x84) = D_00490AD0;
+    *(void***)((char*)self + 0x84) = cMeshAnimFrame_vtbl;
     vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
     *(float**)((char*)self + 0x40) = src;
     func_00351800_vf(self, f);
@@ -490,7 +490,7 @@ extern "C" void* func_0034FB00(void* self, void* a1, int type, void* def);
 extern "C" float func_002D1C70();
 extern "C" void func_00352230(void* self);
 
-extern void* D_0048F6D8[];
+extern void* cMeshAnimNode_vtbl[];
 
 struct sImV4 {
     float v[4];
@@ -703,7 +703,7 @@ struct sImSrc {
 extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def, sImSrc* src, sImObj* owner)
 {
     func_0034FB00(self, a1, 0xB, a2);
-    self->vt = D_0048F6D8;
+    self->vt = cMeshAnimNode_vtbl;
     new (&self->rot) sImV4[24];
     new (&self->arr1) sImV4[24];
     new (&self->pos) sImV4[24];
@@ -775,7 +775,7 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_cMeshAnimNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
-extern void* D_0048F6D8[];
+extern void* cMeshAnimNode_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -793,7 +793,7 @@ struct sInstElem2168 {
 extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* a1, void* stream)
 {
     cInstanceNode_cInstanceNode(self, a1, stream);
-    *(void***)((char*)self + 0xC) = D_0048F6D8;
+    *(void***)((char*)self + 0xC) = cMeshAnimNode_vtbl;
     new ((char*)self + 0x30) sInstElem2168[24];
     new ((char*)self + 0x1B0) sInstElem2168[24];
     new ((char*)self + 0x330) sInstElem2168[24];
@@ -805,7 +805,7 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* a1, void* stream)
 }
 #endif
 
-extern void* D_0048F6D8[];
+extern void* cMeshAnimNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
@@ -813,7 +813,7 @@ INCLUDE_ASM("object/instanceman", func_00352208__FPv);
 #ifdef SKIP_ASM
 void* func_00352208(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_0048F6D8;
+    *(int*)((char*)self + 0xc) = (int)(void*)cMeshAnimNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif

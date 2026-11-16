@@ -20,7 +20,7 @@ extern "C" int func_00398380(void* self, int id);
 
 int GetHashValue32(char* str);
 
-extern void* D_00469858[];
+extern void* cFEStateMountainRoom_vtbl[];
 
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak);
 int cBELibrary_getRiderIndex(int rider) __asm__("cBELibrary_getRiderIndex__Fi");
@@ -55,7 +55,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     signed char pl = idx;
     func_0039E2A0_Room(self, (int)ui);
     *(int*)((char*)self + 0xC) = 0x2B;
-    *(void***)((char*)self + 0x8) = D_00469858;
+    *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
     sMountainRoomK2678* s = (sMountainRoomK2678*)self;
     s->player = pl;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), pl);
@@ -116,7 +116,7 @@ struct sVEntry001D28F8 {
     void (*fn)(void*, int);
 };
 
-extern void* D_00469858[];
+extern void* cFEStateMountainRoom_vtbl[];
 extern void* D_0046D0D0[];
 extern void* D_004A289C;
 extern "C" void func_0019DC20(void* self, int bank, int i);
@@ -124,7 +124,7 @@ extern "C" void func_0039E390(void* self, int flags);
 
 extern "C" void func_001D28F8(void* self, int flags)
 {
-    *(void***)((char*)self + 8) = D_00469858;
+    *(void***)((char*)self + 8) = cFEStateMountainRoom_vtbl;
     int slot = *(int*)((char*)self + 0xBC);
     if (slot >= 0) {
         func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), slot);
@@ -772,7 +772,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern void* D_00469788[];
+extern void* cFEStatePeakRoom_vtbl[];
 
 struct sLodge_3780 {
     char pad_0x0[0x48];
@@ -789,7 +789,7 @@ extern "C" void* func_001D3780(void* self, int a1, int a2, int a3)
     signed char idx = a2;
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x2C;
-    *(void***)((char*)self + 0x8) = D_00469788;
+    *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     sLodge_3780* s = (sLodge_3780*)self;
@@ -1216,7 +1216,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void func_001D4918(void* self);
-extern void* D_004696B8[];
+extern void* cFEStateTrophyRoom_vtbl[];
 
 struct sVE_4268 {
     short delta;
@@ -1243,7 +1243,7 @@ extern "C" void* func_001D4268(void* self, int a1, int a2, int a3, int a4)
     signed char idx = a2;
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x2D;
-    *(void***)((char*)self + 0x8) = D_004696B8;
+    *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     sTrophy_4268* s = (sTrophy_4268*)self;

@@ -170,7 +170,7 @@ extern "C" void cOVState_REPLAY__cOVState_REPLAY(void *arg0) {
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C898);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_00474AA8[];
+extern char cOVState_REPLAY_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -182,7 +182,7 @@ extern "C" void *func_0021C898(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00474AA8;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_REPLAY_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -324,10 +324,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CAA8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_x(void*) __asm__("func_0039E2A0");
-extern char D_004743F0[];
+extern char cPDATemplate_vtbl[];
 extern "C" void* func_0021CAA8(void *self) {
     func_0039E2A0_x(self);
-    *(char**)((char*)self + 8) = D_004743F0;
+    *(char**)((char*)self + 8) = cPDATemplate_vtbl;
     return self;
 }
 #endif
@@ -418,7 +418,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_CBA0(void*, int) __asm__("func_0039E2A0");
 extern "C" void func_0020EAA0(void*);
-extern char D_00474160[];
+extern char cOVStateHUD1P_vtbl[];
 struct sElem_CBA0 {
     void* operator new[](unsigned int, void* p) { return p; }
     char pad[8];
@@ -429,7 +429,7 @@ struct sElem_CBA0 {
 extern "C" void *func_0021CBA0(void *arg0) {
     char* self = (char*)arg0;
     func_0039E2A0_CBA0(self, 0);
-    *(char**)(self + 8) = D_00474160;
+    *(char**)(self + 8) = cOVStateHUD1P_vtbl;
     new (self + 0x48) sElem_CBA0[2];
     *(int*)(self + 0x474) = -1;
     *(float*)(self + 0x478) = 1.0f;
@@ -447,10 +447,10 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P__cOVStateHUD1P);
 #ifdef SKIP_ASM
 extern "C" void func_0020EB08(void *, int);
 extern "C" void func_0039E390(void *, int);
-extern char D_00474160[];
+extern char cOVStateHUD1P_vtbl[];
 
 extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *arg0, int arg1) {
-    (*(char **)((char*)(arg0) + (8))) = D_00474160;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateHUD1P_vtbl;
     if ((char*)arg0 + 0x48 != 0) {
         char *p = (char*)arg0 + 0x48 + 0x118;
         while ((char*)arg0 + 0x48 != p) {
@@ -697,7 +697,7 @@ extern "C" void *func_0021D008(void *arg0, int arg1, int arg2) {
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D070);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_00473B78[];
+extern char cOVStateHiScoreList_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -709,7 +709,7 @@ extern "C" void *func_0021D070(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473B78;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -720,7 +720,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D0D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_D0D0(void*) __asm__("func_0039E2A0");
-extern char D_00473B78[];
+extern char cOVStateHiScoreList_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -732,7 +732,7 @@ extern "C" void *func_0021D0D0(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473B78;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -2211,10 +2211,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220D38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
-extern char D_00473AA8[];
+extern char cFEStateLodge_vtbl[];
 extern "C" void* func_00220D38(void *self) {
     func_0039E2A0_xi(self, 0);
-    *(char**)((char*)self + 8) = D_00473AA8;
+    *(char**)((char*)self + 8) = cFEStateLodge_vtbl;
     return self;
 }
 #endif
@@ -2237,10 +2237,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220D98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
-extern char D_004739D8[];
+extern char cFEStateLodgeRiderDetail_vtbl[];
 extern "C" void* func_00220D98(void *self) {
     func_0039E2A0_xi(self, 0);
-    *(char**)((char*)self + 8) = D_004739D8;
+    *(char**)((char*)self + 8) = cFEStateLodgeRiderDetail_vtbl;
     return self;
 }
 #endif
@@ -2263,10 +2263,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220DF8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
-extern char D_00473908[];
+extern char cFEStateBuyAttrib_vtbl[];
 extern "C" void* func_00220DF8(void *self) {
     func_0039E2A0_xi(self, 0);
-    *(char**)((char*)self + 8) = D_00473908;
+    *(char**)((char*)self + 8) = cFEStateBuyAttrib_vtbl;
     return self;
 }
 #endif
@@ -2288,11 +2288,11 @@ extern "C" void func_00220E30(void *arg0) {
 INCLUDE_ASM("fe/all_in_one_fe", func_00220E58);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*, ...);
-extern char D_00473838[];
+extern char cFEStateCareerStats_vtbl[];
 
 extern "C" void *func_00220E58(void *arg0) {
     func_0039E2A0(arg0, 0);
-    (*(char **)((char*)(arg0) + (8))) = D_00473838;
+    (*(char **)((char*)(arg0) + (8))) = cFEStateCareerStats_vtbl;
     return arg0;
 }
 #endif
@@ -2328,7 +2328,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220EE0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_0EE0(void*) __asm__("func_0039E2A0");
-extern char D_00473760[];
+extern char cOVState_ENTERLODGE_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2340,7 +2340,7 @@ extern "C" void *func_00220EE0(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473760;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_ENTERLODGE_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -2350,7 +2350,7 @@ extern "C" void *func_00220EE0(void *arg0, int arg1, int arg2) {
 INCLUDE_ASM("fe/all_in_one_fe", func_00220F48);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_00473688[];
+extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2362,7 +2362,7 @@ extern "C" void *func_00220F48(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473688;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -2374,7 +2374,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220FA8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_001F7548(void*);
 extern void *func_0039E2A0_0FA8(void*) __asm__("func_0039E2A0");
-extern char D_00473688[];
+extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2386,7 +2386,7 @@ extern "C" void *func_00220FA8(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473688;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     func_001F7548(arg0);
     return arg0;
@@ -2484,7 +2484,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221160);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_1160(void*) __asm__("func_0039E2A0");
-extern char D_004734D0[];
+extern char cOVState_TOPTIMES_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2496,7 +2496,7 @@ extern "C" void *func_00221160(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004734D0;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_TOPTIMES_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -2569,7 +2569,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002212C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_12C8(void*, int) __asm__("func_0039E2A0");
-extern char D_00473320[];
+extern char cOVState_MAP_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -2583,7 +2583,7 @@ extern "C" void *func_002212C8(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473320;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_MAP_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     new ((char*)arg0 + 0x9C) Elem[8];
     return arg0;
@@ -2595,7 +2595,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221350);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_1350(void*, int) __asm__("func_0039E2A0");
-extern char D_00473320[];
+extern char cOVState_MAP_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2607,7 +2607,7 @@ extern "C" void *func_00221350(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473320;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_MAP_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     new ((char*)arg0 + 0x9C) Elem[8];
     return arg0;
@@ -2690,7 +2690,7 @@ extern "C" void* func_002214D0(void *self) {
 INCLUDE_ASM("fe/all_in_one_fe", func_002214F8);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_00473170[];
+extern char cOVTemplate_PauseMenu_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2702,7 +2702,7 @@ extern "C" void *func_002214F8(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473170;
+    (*(char **)((char*)(arg0) + (8))) = cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -2713,7 +2713,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221558);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_1558(void*) __asm__("func_0039E2A0");
-extern char D_00473170[];
+extern char cOVTemplate_PauseMenu_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -2725,7 +2725,7 @@ extern "C" void *func_00221558(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473170;
+    (*(char **)((char*)(arg0) + (8))) = cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     (*(int *)((char*)(arg0) + (0xC4))) = 0;
     return arg0;
@@ -3115,7 +3115,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221C18);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_1C18(void*) __asm__("func_0039E2A0");
-extern char D_00472B88[];
+extern char cOVState_PAUSE_OPTIONS_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3127,7 +3127,7 @@ extern "C" void *func_00221C18(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472B88;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_PAUSE_OPTIONS_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -3137,7 +3137,7 @@ extern "C" void *func_00221C18(void *arg0, int arg1, int arg2) {
 INCLUDE_ASM("fe/all_in_one_fe", func_00221C80);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_00472AB0[];
+extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3149,7 +3149,7 @@ extern "C" void *func_00221C80(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472AB0;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -3160,7 +3160,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221CE0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_1CE0(void*) __asm__("func_0039E2A0");
-extern char D_00472AB0[];
+extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3172,7 +3172,7 @@ extern "C" void *func_00221CE0(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472AB0;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     (*(int *)((char*)(arg0) + (0xA0))) = 1;
     (*(int *)((char*)(arg0) + (0x9C))) = 0;
@@ -3200,9 +3200,9 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221D88);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D5428_x(void*) __asm__("func_001D5428");
-extern char D_00472928[];
+extern char cOVState_PROFILE_vtbl[];
 extern "C" void* func_00221D88(void *self) {
-    *(char**)((char*)self + 8) = D_00472928;
+    *(char**)((char*)self + 8) = cOVState_PROFILE_vtbl;
     return func_001D5428_x(self);
 }
 #endif
@@ -3211,11 +3211,11 @@ extern "C" void* func_00221D88(void *self) {
 INCLUDE_ASM("fe/all_in_one_fe", func_00221DB0);
 #ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
-extern char D_00472928[];
+extern char cOVState_PROFILE_vtbl[];
 
 extern "C" void *func_00221DB0(void *arg0) {
     func_001D53B0(arg0, 0, 0);
-    (*(char **)((char*)(arg0) + (8))) = D_00472928;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_PROFILE_vtbl;
     return arg0;
 }
 #endif
@@ -3414,7 +3414,7 @@ extern "C" void *func_002220C0(void *arg0) {
 INCLUDE_ASM("fe/all_in_one_fe", func_00222100);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_004721E0[];
+extern char cOVStateRewardsList_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3426,7 +3426,7 @@ extern "C" void *func_00222100(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004721E0;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -3437,7 +3437,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222160);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_2160(void*) __asm__("func_0039E2A0");
-extern char D_004721E0[];
+extern char cOVStateRewardsList_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3449,7 +3449,7 @@ extern "C" void *func_00222160(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004721E0;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -3484,7 +3484,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222218);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_2218(void*) __asm__("func_0039E2A0");
-extern char D_00472108[];
+extern char cOVState_REWARDS_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3496,7 +3496,7 @@ extern "C" void *func_00222218(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472108;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_REWARDS_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -3507,9 +3507,9 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222280);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D5428_x(void*) __asm__("func_001D5428");
-extern char D_00471F80[];
+extern char cOVState_AUTOSAVE_vtbl[];
 extern "C" void* func_00222280(void *self) {
-    *(char**)((char*)self + 8) = D_00471F80;
+    *(char**)((char*)self + 8) = cOVState_AUTOSAVE_vtbl;
     return func_001D5428_x(self);
 }
 #endif
@@ -3524,11 +3524,11 @@ extern "C" void func_002222B0(void) {
 INCLUDE_ASM("fe/all_in_one_fe", func_002222B8);
 #ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
-extern char D_00471F80[];
+extern char cOVState_AUTOSAVE_vtbl[];
 
 extern "C" void *func_002222B8(void *arg0) {
     func_001D53B0(arg0, 0, 0);
-    (*(char **)((char*)(arg0) + (8))) = D_00471F80;
+    (*(char **)((char*)(arg0) + (8))) = cOVState_AUTOSAVE_vtbl;
     return arg0;
 }
 #endif
@@ -3537,7 +3537,7 @@ extern "C" void *func_002222B8(void *arg0) {
 INCLUDE_ASM("fe/all_in_one_fe", func_002222F8);
 #ifdef SKIP_ASM
 extern "C" void *func_0039E2A0(void*, ...);
-extern char D_00471EA8[];
+extern char cOVStateTrophy_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3549,7 +3549,7 @@ extern "C" void *func_002222F8(void *arg0) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00471EA8;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }
@@ -3560,7 +3560,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222358);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_0039E2A0_2358(void*) __asm__("func_0039E2A0");
-extern char D_00471EA8[];
+extern char cOVStateTrophy_vtbl[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
@@ -3572,7 +3572,7 @@ extern "C" void *func_00222358(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0x4C))) = 0;
     (*(int *)((char*)(arg0) + (0x54))) = 0;
     unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00471EA8;
+    (*(char **)((char*)(arg0) + (8))) = cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
     return arg0;
 }

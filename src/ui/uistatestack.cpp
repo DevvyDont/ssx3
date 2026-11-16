@@ -554,7 +554,7 @@ struct func_0039FB30_sVec3 {
 };
 
 extern func_0039FB30_sVec3 t3vect_Zero;
-extern char D_00494BD8[];
+extern char cUIThing_vtbl[];
 
 struct func_0039FB30_sFlags {
     unsigned int b0 : 1;
@@ -592,7 +592,7 @@ struct func_0039FB30_sUIObj {
 
 extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a1, int a2)
 {
-    self->vtbl = D_00494BD8;
+    self->vtbl = cUIThing_vtbl;
     self->flags.b0 = 1;
     self->flags.b7 = 0;
     self->flags.b8 = 0;
@@ -644,7 +644,7 @@ public:
 
 extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
 {
-    self->mVtbl = (void**)D_00494BD8;
+    self->mVtbl = (void**)cUIThing_vtbl;
     cUIThing__cUIThing_cVirt* o = (cUIThing__cUIThing_cVirt*)self->mpAnim;
     if (o != 0) {
         o->v01(3);

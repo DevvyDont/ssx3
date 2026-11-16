@@ -419,12 +419,12 @@ extern "C" void cDynamicEmitter_render(sPtObj1380* self, int blend)
 INCLUDE_ASM("render/particle", func_003714B8);
 #ifdef SKIP_ASM
 extern "C" void* func_00370B60(void* self);
-extern void* D_004930D0[];
+extern void* cDynamicColourEmitter_vtbl[];
 
 extern "C" void* func_003714B8(void* self)
 {
     func_00370B60(self);
-    *(void***)((char*)self + 0x1F8) = D_004930D0;
+    *(void***)((char*)self + 0x1F8) = cDynamicColourEmitter_vtbl;
     *(int*)((char*)self + 0x200) = 0;
     *(int*)((char*)self + 0x204) = 0;
     return self;
@@ -434,13 +434,13 @@ extern "C" void* func_003714B8(void* self)
 //100%
 INCLUDE_ASM("render/particle", cDynamicColourEmitter__cDynamicColourEmitter);
 #ifdef SKIP_ASM
-extern void* D_004930D0[];
+extern void* cDynamicColourEmitter_vtbl[];
 extern "C" void cDynamicColourEmitter_purge(void* self, int a1);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
 
 extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* self, int flags)
 {
-    *(void***)((char*)self + 0x1F8) = D_004930D0;
+    *(void***)((char*)self + 0x1F8) = cDynamicColourEmitter_vtbl;
     cDynamicColourEmitter_purge(self, 0);
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(self, flags);
 }

@@ -2446,7 +2446,7 @@ INCLUDE_ASM("render/graphicsman", func_00370B60);
 #ifdef SKIP_ASM
 void func_002F7A68(void*);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern void* D_00493118[];
+extern void* cBaseClass_DynamicEmitter_vtbl[];
 
 struct sGmView_0B60 {
     char pad_0x0[0xC];
@@ -2473,7 +2473,7 @@ extern "C" sGmView_0B60* func_00370B60(sGmView_0B60* self)
     self->field_0xc = 0;
     self->field_0x10 = 0;
     self->field_0x14 = 0;
-    self->vtable = D_00493118;
+    self->vtable = cBaseClass_DynamicEmitter_vtbl;
     func_002F7A68((char*)self + 0x20);
     self->field_0x170 = 0;
     self->field_0x174 = 1;
@@ -2496,11 +2496,11 @@ INCLUDE_ASM("render/graphicsman", cBaseClass_DynamicEmitter__cBaseClass_DynamicE
 #ifdef SKIP_ASM
 extern "C" void func_00370CF8(void* self, int flag);
 void operator_delete(int* ptr);
-extern void* D_00493118[];
+extern void* cBaseClass_DynamicEmitter_vtbl[];
 
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags)
 {
-    *(void***)((char*)self + 0x1F8) = D_00493118;
+    *(void***)((char*)self + 0x1F8) = cBaseClass_DynamicEmitter_vtbl;
     func_00370CF8(self, 1);
     if (flags & 1) {
         operator_delete((int*)self);

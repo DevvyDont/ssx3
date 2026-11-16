@@ -3,7 +3,7 @@
 
 // cUIText: a text object on a UI screen (object type 0x17: getType, func_003A5DF0, returns 0x17).
 // cUIScreen_createObjectByStruct allocates it with `cMemMan_alloc(0xBC, "UIText", ...)` and runs its constructor
-// func_003A0348, which calls the cUIThing constructor and stores _vt$7cUIText (D_00494588): 0xBC bytes.
+// func_003A0348, which calls the cUIThing constructor and stores _vt$7cUIText (cUIText_vtbl): 0xBC bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cUIThing (0x00-0x74, written out below with the names and evidence of ui/uithing.h; cUIThing's own base
@@ -30,7 +30,7 @@ struct cUIText {
     // --- cUIThing (see ui/uithing.h for the evidence of each member) ---
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext
-    void** mVtbl;                    // 0x008 [R] _vt$7cUIText (D_00494588), stored by func_003A0348/func_003A5D60
+    void** mVtbl;                    // 0x008 [R] _vt$7cUIText (cUIText_vtbl), stored by func_003A0348/func_003A5D60
     cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation
     unsigned char mAnimPlaybackStatus; // 0x010 [O] cUIThing
     char unk_011[0x3];               // 0x011 padding

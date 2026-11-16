@@ -95,7 +95,7 @@ extern "C" int func_003977B8(void* a, func_003977B8_cVirt* obj)
 INCLUDE_ASM("util/list", func_003977E8);
 #ifdef SKIP_ASM
 void func_00397930(void*);
-extern void* D_00494C98[];
+extern void* cList_vtbl[];
 extern void* D_00494CC0[];
 
 extern "C" void* func_003977E8(void* self)
@@ -103,7 +103,7 @@ extern "C" void* func_003977E8(void* self)
     char* s = (char*)self;
     *(void**)(s + 0x4) = s;
     *(void**)(s + 0x0) = s;
-    *(void***)(s + 0x18) = D_00494C98;
+    *(void***)(s + 0x18) = cList_vtbl;
     *(void***)(s + 0x8) = D_00494CC0;
     *(void**)(s + 0x10) = s + 0xC;
     *(void***)(s + 0x14) = D_00494CC0;

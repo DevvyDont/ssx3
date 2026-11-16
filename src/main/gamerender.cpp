@@ -312,15 +312,15 @@ extern "C" int func_0022E920(sRenderList* self)
 //100%
 INCLUDE_ASM("main/gamerender", cGame_cGame);
 #ifdef SKIP_ASM
-extern char D_0047D110[];
-extern char D_0047D168[];
-extern char D_0047D1C0[];
+extern char cGame_vtbl[];
+extern char cGFReplayStartState_vtbl[];
+extern char cGFPodiumState_vtbl[];
 extern char D_0047D218[];
 extern char D_0047D270[];
-extern char D_0047D378[];
-extern char D_0047D3D0[];
+extern char cGFSessionTeleportState_vtbl[];
+extern char cGFNextHeatState_vtbl[];
 extern char D_0047D480[];
-extern char D_0047D4D8[];
+extern char cGFGateState_vtbl[];
 extern char D_0047D588[];
 extern char D_0047D638[];
 extern char D_0047D690[];
@@ -362,7 +362,7 @@ extern "C" char* cGame_cGame(cGame* self)
     func_00231CD0(((char*)self));
     *(int*)&self->AI = 0;
     *(int*)&self->DebugFont = 0;
-    *(void**)&self->mVtbl = D_0047D110;
+    *(void**)&self->mVtbl = cGame_vtbl;
     *(int*)&self->UI = 0;
     *(int*)&self->InputSync = 0;
     D_004A2A54 = 0;
@@ -370,7 +370,7 @@ extern "C" char* cGame_cGame(cGame* self)
     *(int*)&self->ViewMan = 0;
     func_00234188(((char*)self) + 0xB0);
     Init_22E968(((char*)self), 0xD0, D_0047D270, 3);
-    Init_22E968(((char*)self), 0xE0, D_0047D4D8, 4);
+    Init_22E968(((char*)self), 0xE0, cGFGateState_vtbl, 4);
     Init_22E968(((char*)self), 0xF0, D_0047D480, 5);
     func_00233C10(((char*)self) + 0x100);
     Init_22E968(((char*)self), 0x118, D_0047D690, 8);
@@ -379,16 +379,16 @@ extern "C" char* cGame_cGame(cGame* self)
     Init_22E968(((char*)self), 0x148, D_0047D588, 10);
     func_00234EF8(((char*)self) + 0x158);
     func_00236868(((char*)self) + 0x178);
-    Init_22E968(((char*)self), 0x18C, D_0047D1C0, 7);
+    Init_22E968(((char*)self), 0x18C, cGFPodiumState_vtbl, 7);
     Base_22E968(((char*)self), 0x19C);
-    *(void**)(((char*)self) + 0x1A8) = D_0047D3D0;
+    *(void**)(((char*)self) + 0x1A8) = cGFNextHeatState_vtbl;
     *(int*)(((char*)self) + 0x1A0) = 3;
     *(int*)(((char*)self) + 0x1B0) = 0;
     *(int*)(((char*)self) + 0x1B4) = 0;
     *(int*)(((char*)self) + 0x19C) = 1;
     func_00236208(((char*)self) + 0x1B8);
-    Init_22E968(((char*)self), 0x1DC, D_0047D378, 10);
-    Init_22E968(((char*)self), 0x1EC, D_0047D168, 4);
+    Init_22E968(((char*)self), 0x1DC, cGFSessionTeleportState_vtbl, 10);
+    Init_22E968(((char*)self), 0x1EC, cGFReplayStartState_vtbl, 4);
     self->PauseOwner = -1;
     self->ControllerUnplugged = 0;
     for (int i = 0; i < 2; i++) {

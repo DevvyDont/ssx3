@@ -3,7 +3,7 @@
 extern "C" void func_00374C90(void* self);
 extern "C" void func_00372B30(void* self);
 extern "C" void func_0038AF30(void* self);
-extern void* D_00493760[16];
+extern void* cPSPBezierMan_vtbl[16];
 
 //100%
 INCLUDE_ASM("render/ps2bezierman", cPSPBezierMan_cPSPBezierMan__FPv);
@@ -21,7 +21,7 @@ struct sBezSlot_8AE0 {
 void* cPSPBezierMan_cPSPBezierMan(void* self)
 {
     func_00374C90_r(self);
-    *(void**)((char*)self + 0x4) = D_00493760;
+    *(void**)((char*)self + 0x4) = cPSPBezierMan_vtbl;
     func_00372B30((char*)self + 0x10);
     new ((char*)self + 0x8) sBezSlot_8AE0[2];
     func_0038AF30(self);
@@ -37,7 +37,7 @@ extern "C" void func_00374CA8(void* self, int flags);
 
 extern "C" void func_0038AEB0(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00493760;
+    *(void***)((char*)self + 0x4) = cPSPBezierMan_vtbl;
     func_0038B0F8(self);
     func_00374CA8(self, flags);
 }

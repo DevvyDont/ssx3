@@ -14,7 +14,7 @@ void cMoveNode_addModifierBlock(cMoveNode* self);
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
 extern "C" void tModifierBlock_readFromReplayFrame(void* block, void* stream);
 extern "C" void cMoveNode_setupOverlapSystem(void* self);
-extern char D_00491028[];
+extern char cMoveNode_vtbl[];
 
 // PORT: the unit declares cMoveNode_cMoveNode(void*) (1 arg) for its callers; the body reads a1/a2
 // (forwarded to cInstanceNode_cInstanceNode), so the 3-arg body is bound by asm label.
@@ -25,7 +25,7 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
     int flag;
     cInstanceNode_cInstanceNode(self, a, stream);
     *(int*)((char*)self + 0x1C) = 0;
-    *(void**)((char*)self + 0xC) = D_00491028;
+    *(void**)((char*)self + 0xC) = cMoveNode_vtbl;
     sSerVEntry_55298* e = &(*(sSerVEntry_55298**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x20, 4);
     e = &(*(sSerVEntry_55298**)stream)[2];
@@ -47,14 +47,14 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode__cMoveNode);
 #ifdef SKIP_ASM
-extern char D_00491028[];
+extern char cMoveNode_vtbl[];
 extern "C" void cMoveNode_restoreOverlapSystem(void* self);
 extern "C" void tModifierBlock__tModifierBlock(void* block, int flags);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 extern "C" void cMoveNode__cMoveNode(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_00491028;
+    *(void**)((char*)self + 0xC) = cMoveNode_vtbl;
     cMoveNode_restoreOverlapSystem(self);
     void* block = *(void**)((char*)self + 0x1C);
     if (block != 0) {
@@ -2261,12 +2261,12 @@ INCLUDE_ASM("object/movenode", func_003578A8);
 #ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void func_00355F10(cMoveNode* self, void* a1);
-extern void* D_0048EE60[];
+extern void* cParticleNode_vtbl[];
 
 extern "C" void* func_003578A8(cMoveNode* self, void* a1, void* a2, void* particle, void* a4)
 {
     func_00355280(self, a1, 0xD, a2);
-    *(void***)((char*)self + 0xC) = D_0048EE60;
+    *(void***)((char*)self + 0xC) = cParticleNode_vtbl;
     func_00355F10(self, a4);
     cMoveNode_addParticle(self, particle);
     return self;
@@ -2277,12 +2277,12 @@ extern "C" void* func_003578A8(cMoveNode* self, void* a1, void* a2, void* partic
 INCLUDE_ASM("object/movenode", cParticleNode_cParticleNode);
 #ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self);
-extern void* D_0048EE60[];
+extern void* cParticleNode_vtbl[];
 
 extern "C" void* cParticleNode_cParticleNode(void* self)
 {
     cMoveNode_cMoveNode(self);
-    *(void***)((char*)self + 0xC) = D_0048EE60;
+    *(void***)((char*)self + 0xC) = cParticleNode_vtbl;
     return self;
 }
 #endif

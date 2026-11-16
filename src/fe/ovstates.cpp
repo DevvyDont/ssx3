@@ -190,13 +190,13 @@ extern "C" int cFEStateTitle_onWidgetMenu(void* self, int a1, int a2)
 INCLUDE_ASM("fe/ovstates", func_00194A60);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*);
-extern void* D_0046B9E8[];
+extern void* cFEStateMainMenu_vtbl[];
 
 extern "C" void* func_00194A60(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 2;
-    *(void***)((char*)self + 0x8) = D_0046B9E8;
+    *(void***)((char*)self + 0x8) = cFEStateMainMenu_vtbl;
     *(int*)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x4C) = 0;
     return self;
@@ -464,7 +464,7 @@ extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
-extern void* D_00469518[];
+extern void* cFEPopupSelectMultiplayerMode_vtbl[];
 extern char D_00460080[];
 extern char D_0045D698[];
 extern char D_004A17E8[];
@@ -546,7 +546,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
             *(int*)(self + 0x50) = *(signed char*)(self + 0x14);
             char* popup = (char*)operator new(0x4C, D_00460080, 0, 0);
             func_0039E318(popup, *(void**)(self + 0x10), self);
-            *(void***)(popup + 0x8) = D_00469518;
+            *(void***)(popup + 0x8) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
             bit <<= *(int*)(self + 0x50);
             *(char*)(popup + 0x15) = bit;
@@ -665,12 +665,12 @@ extern "C" void func_00195328(void* self, char* obj, int msg)
 INCLUDE_ASM("fe/ovstates", func_00195498);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*);
-extern char D_0046B918[];
+extern char cFEStateBonusMaterial_vtbl[];
 
 extern "C" void* func_00195498(void* self)
 {
     func_0039E2A0(self);
-    *(void**)((char*)self + 0x8) = D_0046B918;
+    *(void**)((char*)self + 0x8) = cFEStateBonusMaterial_vtbl;
     *(int*)((char*)self + 0xC) = 5;
     return self;
 }

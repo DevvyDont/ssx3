@@ -190,13 +190,13 @@ INCLUDE_ASM("camera/cameraalgorithms", func_0015D698);
 #ifdef SKIP_ASM
 struct func_0015D698_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
-extern void* D_0045B8B0[];
+extern void* cSimpleCamera_vtbl[];
 extern func_0015D698_sVec4 D_004FF140;
 
 extern "C" void* func_0015D698(void* self)
 {
     func_0015D698_sVec4 v;
-    *(void***)((char*)self + 0x90) = D_0045B8B0;
+    *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
     v.x = 0; v.y = 0; v.z = 0; v.w = 0;
     *(func_0015D698_sVec4*)((char*)self + 0x20) = v;
     v.w = 1.0f;

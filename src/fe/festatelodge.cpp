@@ -315,14 +315,14 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
 //100%
 INCLUDE_ASM("fe/festatelodge", func_001F3FF8);
 #ifdef SKIP_ASM
-extern void* D_004739D8[];
+extern void* cFEStateLodgeRiderDetail_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
 extern "C" void* func_001F3FF8(void* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_004739D8;
+    *(void***)((char*)self + 0x8) = cFEStateLodgeRiderDetail_vtbl;
     *(int*)((char*)self + 0xC) = 0x28;
     *(char*)((char*)self + 0x44) = 0;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
@@ -602,7 +602,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char func_001A1CD0_4728(void* p, int a1) __asm__("func_001A1CD0");
 extern "C" int func_00148158_4728(void* iface, int a1, int stat) __asm__("func_00148158");
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern void* D_00473908[];
+extern void* cFEStateBuyAttrib_vtbl[];
 extern const int D_004780B0[];
 
 struct sLodgeStats_4728 {
@@ -619,7 +619,7 @@ extern "C" void* func_001F4728(void* p, int a1)
     char* s = (char*)p;
     func_0039E2A0_4728(self, a1);
     *(int*)(s + 0xC) = 0x29;
-    *(void***)(s + 0x8) = D_00473908;
+    *(void***)(s + 0x8) = cFEStateBuyAttrib_vtbl;
     *(signed char*)(s + 0x44) = 0;
     *(unsigned char*)(s + 0x15) = func_001A1CD0_4728(**(void***)(s + 0x10), 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);

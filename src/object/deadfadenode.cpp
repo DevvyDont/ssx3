@@ -7,7 +7,7 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode);
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
 extern "C" float func_002D1C70();
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern char D_00491980[];
+extern char cDeadFadeNode_vtbl[];
 extern char D_0048E8A8[];
 
 // PORT: array new bound to the tagged allocator
@@ -176,7 +176,7 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
 {
     sDfMatElem_0750** pm = &self->mats;
     func_0034FB00(self, a1, 0x16, obj);
-    self->vt = D_00491980;
+    self->vt = cDeadFadeNode_vtbl;
     self->block.w[0] = 0xFFFFFFFF;
     self->block = *(sDfBlock_0750*)desc;
     self->f2C = func_002D1C70() / desc->f8;
@@ -226,12 +226,12 @@ INCLUDE_ASM("object/deadfadenode", func_00350B98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cInstanceNode_ctor_v(void* self) __asm__("cInstanceNode_cInstanceNode");
-extern char D_00491980[];
+extern char cDeadFadeNode_vtbl[];
 
 extern "C" void* func_00350B98(void* self)
 {
     cInstanceNode_ctor_v(self);
-    *(void**)((char*)self + 0xC) = D_00491980;
+    *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
     *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFFU;
     *(int*)((char*)self + 0x38) = 0;
     return self;
@@ -241,13 +241,13 @@ extern "C" void* func_00350B98(void* self)
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350BE0);
 #ifdef SKIP_ASM
-extern char D_00491980[];
+extern char cDeadFadeNode_vtbl[];
 void cMemMan_free(void*);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 extern "C" void func_00350BE0(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_00491980;
+    *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
     void* p = *(void**)((char*)self + 0x38);
     if (p != 0) {
         cMemMan_free(p);

@@ -395,7 +395,7 @@ extern "C" sVec4_6290 func_002D6290(void* self)
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D6378);
 #ifdef SKIP_ASM
-extern void* D_00488648[];
+extern void* cAvalanche_vtbl[];
 extern void* D_00488680[];
 struct func_002D6378_sElem {
     char pad[0x2F0];
@@ -407,7 +407,7 @@ void operator_delete(int* ptr);
 
 extern "C" void func_002D6378(int* self, int flags)
 {
-    *(void***)self = D_00488648;
+    *(void***)self = cAvalanche_vtbl;
     cAvalanche_reset(self);
     int i;
     for (i = 0; i < 64; i++) {

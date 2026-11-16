@@ -450,13 +450,13 @@ INCLUDE_ASM("fe/festatecredits", func_00186610);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_002006B8(void* self);
-extern void* D_0046BD28[];
+extern void* cFEStateEventSelect_vtbl[];
 
 extern "C" void* func_00186610(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x13;
-    *(void***)((char*)self + 0x8) = D_0046BD28;
+    *(void***)((char*)self + 0x8) = cFEStateEventSelect_vtbl;
     func_002006B8((char*)self + 0x48);
     return self;
 }

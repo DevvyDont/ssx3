@@ -6,7 +6,7 @@
 // (the same stores as func_003A5C08, the cUIScreen(cUIState*) constructor): 0xD4 bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
-// Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$9cUIScreen (D_00494670)
+// Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$9cUIScreen (cUIScreen_vtbl)
 // is cListNode's 3 slots with cUIScreen's destructor in slot 1.
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIScreen), placed at retail offsets by:
@@ -37,7 +37,7 @@ struct tUIObjectBlock;
 struct cUIScreen {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] cUIState_updateScreens walks screens by it
-    void** mVtbl;                    // 0x008 [R] _vt$9cUIScreen (D_00494670), stored by func_003A5B98/func_003A5C08/cUIScreen__cUIScreen
+    void** mVtbl;                    // 0x008 [R] _vt$9cUIScreen (cUIScreen_vtbl), stored by func_003A5B98/func_003A5C08/cUIScreen__cUIScreen
     char* mpBuffer;                  // 0x00C [O]; [R] = 0; cUIScreen_setData stores its "UIScreenData" copy of the record here;
                                      //       cUIScreen__cUIScreen frees it when mAttrScreen bit 1 (mBufferAlloc) is set
     tUIScreenHeader* mpScreenHeader; // 0x010 [P] getHashName = mpScreenHeader's first word (preview lw 0x10; retail func_003A5C98);
@@ -54,7 +54,7 @@ struct cUIScreen {
                                      //       cUIScreen_getObjectByHashName searches it; the destructor frees it
     char mRootGroup[0x90];           // 0x040 [P] getRootGroup (preview addiu 0x40; retail func_003A5D10), rootGroupPushBack appends to its
                                      //       list at 0xB4 (preview 0xAC; retail func_003A5CF0); [R] cUIThing ctor + _vt$8cUIGroup
-                                     //       (D_004949E8) at 0x48; [U] cUIScreen_onInput/cUIScreen_update/cUIScreen_parseScreenFocusLose
+                                     //       (cUIGroup_vtbl) at 0x48; [U] cUIScreen_onInput/cUIScreen_update/cUIScreen_parseScreenFocusLose
                                      //       pass it to cUIGroup_onInput/cUIGroup_update/cUIGroup_setFocus
     cUIState* mpState;               // 0x0D0 [P] getParentState (preview lw 0xC8; retail func_003A5D58 lw 0xD0), getEngine = mpState's
                                      //       mpEngine (retail func_003A5D48); [R] = pState (func_003A5C08, cUIEngine_addScreenByHashName)

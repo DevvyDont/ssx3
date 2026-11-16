@@ -984,14 +984,14 @@ extern "C" void func_002EA538(char** trails, int n)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_cCutSceneTransitionMan);
 #ifdef SKIP_ASM
-extern void* D_00487F30[];
+extern void* cCutSceneTransitionMan_vtbl[];
 extern "C" void* cObjNode_cObjNode1(void* self);
 extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
 
 extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* self)
 {
     cObjNode_cObjNode1(self);
-    *(void***)((char*)self + 0xC) = D_00487F30;
+    *(void***)((char*)self + 0xC) = cCutSceneTransitionMan_vtbl;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x1C) = 0;
     cCutSceneTransitionMan_FindTVParameters(self);
@@ -1618,7 +1618,7 @@ extern "C" void func_002EBB10(void* self, float s)
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBBA8);
 #ifdef SKIP_ASM
 void func_002E4D70(void* self);
-extern void* D_004880A0[];
+extern void* cWipe_TObj_vtbl[];
 
 struct func_002EBBA8_sVec4 {
     float x, y, z, w;
@@ -1635,7 +1635,7 @@ extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const fun
 {
     func_002EBBA8_sVec4 t = v;
     func_002E4D70(self);
-    self->vtable = D_004880A0;
+    self->vtable = cWipe_TObj_vtbl;
     self->v = t;
     self->a = a;
     self->b = b;
@@ -1704,12 +1704,12 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EBD88);
 #ifdef SKIP_ASM
 struct sTrailVec_002EBD88 { float x, y, z, w; };
 
-extern void* D_00488080[];
+extern void* cCircle_TObj_vtbl[];
 
 extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 v, float a, float b)
 {
     func_002E4D70(self);
-    *(void***)self = D_00488080;
+    *(void***)self = cCircle_TObj_vtbl;
     *(sTrailVec_002EBD88*)((char*)self + 4) = v;
     *(float*)((char*)self + 0x14) = a;
     *(float*)((char*)self + 0x18) = b;
@@ -1724,14 +1724,14 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EBE20);
 unsigned int BXrand();
 // base ctor returns this; the unit declares it void
 void* func_002E4D70_r(void* self) __asm__("func_002E4D70__FPv");
-extern void* D_00488080[];
+extern void* cCircle_TObj_vtbl[];
 
 struct sBtRectBE20 { float x, y, w, h; };
 
 extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
 {
     func_002E4D70_r(self);
-    *(void***)self = D_00488080;
+    *(void***)self = cCircle_TObj_vtbl;
     *(sBtRectBE20*)((char*)self + 0x4) = rect;
     unsigned int r1 = BXrand() % 1000;
     float* p = (float*)((char*)self + 0x14);

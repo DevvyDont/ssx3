@@ -10,8 +10,8 @@ extern "C" void func_003612C0(void* self);
 extern "C" void func_00351398(void* self, void* src);
 extern char D_0048E860[];
 extern char D_0048E870[];
-extern void* D_00490AD0[];
-extern void* D_00490AF0[];
+extern void* cMeshAnimFrame_vtbl[];
+extern void* cAnimFrame_vtbl[];
 
 struct sMeshInst_E448 {
     char pad_0x0[0x84];
@@ -19,9 +19,9 @@ struct sMeshInst_E448 {
     char pad_0x88[0x48];
     sMeshInst_E448()
     {
-        vtable = D_00490AF0;
+        vtable = cAnimFrame_vtbl;
         func_003513D0(this);
-        vtable = D_00490AD0;
+        vtable = cMeshAnimFrame_vtbl;
         func_003612C0(this);
     }
     void operator delete[](void* p, unsigned int size);
@@ -508,7 +508,7 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a2);
 struct cFloatingNode;
 void cFloatingNode_initInfo(cFloatingNode* self);
 extern char D_0048E880[];
-extern void* D_0048F858[];
+extern void* cFloatingNode_vtbl[];
 
 struct sAnimFrame_EC58 {
     char data[0x40];
@@ -528,7 +528,7 @@ extern "C" void* func_0034EC58(void* self, void* a1, void* a2, sAnimInfo_EC58* i
 {
     char* s = (char*)self;
     func_00355280(self, a1, 0xE, a2);
-    *(void***)(s + 0xC) = D_0048F858;
+    *(void***)(s + 0xC) = cFloatingNode_vtbl;
     *(float*)(s + 0x2C) = info->f4;
     *(float*)(s + 0x30) = info->f8;
     *(float*)(s + 0x34) = info->f14;
@@ -563,7 +563,7 @@ INCLUDE_ASM("object/animnode", func_0034ED88);
 extern "C" void* cMoveNode_cMoveNode(void* self, void* a1, void* stream);
 struct cFloatingNode;
 void cFloatingNode_initInfo(cFloatingNode* self);
-extern void* D_0048F858[];
+extern void* cFloatingNode_vtbl[];
 extern char D_0048E880[];
 
 struct sStreamVE_ED88 {
@@ -584,7 +584,7 @@ extern "C" void* func_0034ED88(void* self, void* a1, void* stream)
     int hasInfo;
     cMoveNode_cMoveNode(self, a1, stream);
     *(int*)(s + 0x78) = 0;
-    *(void***)(s + 0xC) = D_0048F858;
+    *(void***)(s + 0xC) = cFloatingNode_vtbl;
     sStreamVE_ED88* vt = *(sStreamVE_ED88**)stream;
     vt[2].fn((char*)stream + vt[2].delta, &hasInfo, 4);
     if (hasInfo != 0) {
@@ -602,14 +602,14 @@ extern "C" void* func_0034ED88(void* self, void* a1, void* stream)
 //100%
 INCLUDE_ASM("object/animnode", cFloatingNode__cFloatingNode);
 #ifdef SKIP_ASM
-extern void* D_0048F858[];
+extern void* cFloatingNode_vtbl[];
 extern "C" void cFloatingNode_restoreOverlapSystem(void* self);
 extern "C" void cMoveNode__cMoveNode(void* self, int flags);
 void operator_delete(int*);
 
 extern "C" void cFloatingNode__cFloatingNode(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_0048F858;
+    *(void***)((char*)self + 0xC) = cFloatingNode_vtbl;
     cFloatingNode_restoreOverlapSystem(self);
     operator_delete(*(int**)((char*)self + 0x74));
     cMoveNode__cMoveNode(self, flags);

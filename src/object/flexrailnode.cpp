@@ -1567,7 +1567,7 @@ INCLUDE_ASM("object/flexrailnode", func_0034ADD8);
 #ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 extern "C" void* func_002D1CB0(void);
-extern char D_0048FC10[];
+extern char cFlagNode_vtbl[];
 
 struct sFrRailDesc {
     int data[0x58 / 4];
@@ -1580,7 +1580,7 @@ extern "C" void* func_0034ADD8(void* self, void* a1, void* node, void* src)
 {
     sFrRailDesc desc;
     func_0034FB00(self, a1, 0xA, node);
-    *(void**)((char*)self + 0xC) = D_0048FC10;
+    *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
     func_0034AC88(&desc, src);
     func_0034C548(func_002D1CB0(), node, &desc);
@@ -1592,12 +1592,12 @@ extern "C" void* func_0034ADD8(void* self, void* a1, void* node, void* src)
 INCLUDE_ASM("object/flexrailnode", cFlagNode_cFlagNode);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
-extern char D_0048FC10[];
+extern char cFlagNode_vtbl[];
 
 extern "C" void* cFlagNode_cFlagNode(void* self)
 {
     cInstanceNode_cInstanceNode(self);
-    *(void**)((char*)self + 0xC) = D_0048FC10;
+    *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     return self;
 }
 #endif
@@ -1605,14 +1605,14 @@ extern "C" void* cFlagNode_cFlagNode(void* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AEA0);
 #ifdef SKIP_ASM
-extern char D_0048FC10[];
+extern char cFlagNode_vtbl[];
 extern "C" void* func_002D1CB0(void);
 extern "C" void func_0034C600(void* set, void* arg);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 extern "C" void func_0034AEA0(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0048FC10;
+    *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     func_0034C600(func_002D1CB0(), *(void**)((char*)self + 0x18));
     cInstanceNode__cInstanceNode(self, flags);
 }

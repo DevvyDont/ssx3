@@ -288,11 +288,11 @@ public:
     virtual void v02(void* buf, int size);
 };
 
-extern char D_004913B8[];
+extern char cPhysicsModifier_vtbl[];
 
 extern "C" void* func_00358468(void* self, func_00358468_cObj* obj)
 {
-    *(char**)((char*)self + 4) = D_004913B8;
+    *(char**)((char*)self + 4) = cPhysicsModifier_vtbl;
     obj->v02(self, 4);
     return self;
 }
@@ -317,7 +317,7 @@ extern "C" void func_003584B8(void* self, func_003584B8_cObj* obj)
 INCLUDE_ASM("object/multiparticle", func_003584F0);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
-extern void* D_0048EDE0[];
+extern void* cRailManNode_vtbl[];
 extern "C" void* func_00354850(void* self, void* a1, int type);
 
 extern "C" void* func_003584F0(void* self, void* a1)
@@ -325,7 +325,7 @@ extern "C" void* func_003584F0(void* self, void* a1)
     char* s = (char*)self;
     int i;
     func_00354850(self, a1, 0x12);
-    *(void***)(s + 0xC) = D_0048EDE0;
+    *(void***)(s + 0xC) = cRailManNode_vtbl;
     unsigned int* p = (unsigned int*)(s + 0x18);
     for (i = 0x7F; i != -1; i--, p++) {
         *p = 0xFFFFFFFF;
@@ -342,7 +342,7 @@ extern "C" void* func_003584F0(void* self, void* a1)
 INCLUDE_ASM("object/multiparticle", cRailManNode_cRailManNode);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
-extern void* D_0048EDE0[];
+extern void* cRailManNode_vtbl[];
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
 extern "C" void func_00358780(void* self, int idx);
 
@@ -358,7 +358,7 @@ extern "C" void* cRailManNode_cRailManNode(void* self, void* a1, cRailManNode_cR
     int i;
     int j;
     cSortObjNode_cSortObjNode(self, a1, stream);
-    *(void***)(s + 0xC) = D_0048EDE0;
+    *(void***)(s + 0xC) = cRailManNode_vtbl;
     unsigned int* p = (unsigned int*)(s + 0x18);
     for (j = 0x7F; j != -1; j--, p++) {
         *p = 0xFFFFFFFF;
@@ -378,7 +378,7 @@ extern "C" void* cRailManNode_cRailManNode(void* self, void* a1, cRailManNode_cR
 INCLUDE_ASM("object/multiparticle", cRailManNode__cRailManNode);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
-extern void* D_0048EDE0[];
+extern void* cRailManNode_vtbl[];
 extern "C" void func_00358998(void* self, int idx);
 // PORT: cSortObjNode__cSortObjNode__FPv is the ObjNode deleting dtor; it takes (self, flags).
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
@@ -387,7 +387,7 @@ extern "C" void cRailManNode__cRailManNode(void* self, int flags)
 {
     char* s = (char*)self;
     int i;
-    *(void***)(s + 0xC) = D_0048EDE0;
+    *(void***)(s + 0xC) = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
         if (((unsigned int*)(s + 0x18))[i] != 0xFFFFFFFF) {
             func_00358998(self, i);
@@ -1278,14 +1278,14 @@ extern "C" void func_00359410(void* self, void* stream)
 //100%
 INCLUDE_ASM("object/multiparticle", cSplineModifier_cSplineModifier1);
 #ifdef SKIP_ASM
-extern char D_0048F250[];
+extern char cSplineModifier_vtbl[];
 extern "C" void func_003451C0(void* ref, int id);
 extern "C" void cSplineModifier_setSpeed(void* self, float v);
 float AIrandf(float lo, float hi);
 
 extern "C" void* cSplineModifier_cSplineModifier1(char* self, char* desc)
 {
-    *(void**)self = D_0048F250;
+    *(void**)self = cSplineModifier_vtbl;
     *(unsigned int*)(self + 0xD8) = 0xFFFFFFFF;
     *(int*)(self + 0xE0) = 0;
     *(int*)(self + 0xDC) = 0;

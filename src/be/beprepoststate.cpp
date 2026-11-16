@@ -9,7 +9,7 @@ struct sStateSingleton {
 };
 
 extern const char D_0045A8A8[];
-extern void* D_0045ABB8[16];
+extern void* cBEPostRaceState_vtbl[16];
 extern void* D_004A1254;
 
 //99.86%
@@ -20,7 +20,7 @@ void* cBEPostRaceState_getState(void* self)
     if (D_004A1254 == 0) {
         sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, D_0045A8A8, 0, 0);
         mem->field_0x0 = self;
-        mem->vtable = D_0045ABB8;
+        mem->vtable = cBEPostRaceState_vtbl;
         D_004A1254 = mem;
     }
     return D_004A1254;
@@ -154,7 +154,7 @@ extern "C" void func_00156510(void)
 }
 #endif
 
-extern void* D_0045AC18[16];
+extern void* cBEPreRaceState_vtbl[16];
 extern void* D_004A1258;
 
 //99.86%
@@ -165,7 +165,7 @@ void* cBEPreRaceState_getState(void* self)
     if (D_004A1258 == 0) {
         sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, D_0045A8A8, 0, 0);
         mem->field_0x0 = self;
-        mem->vtable = D_0045AC18;
+        mem->vtable = cBEPreRaceState_vtbl;
         D_004A1258 = mem;
     }
     return D_004A1258;

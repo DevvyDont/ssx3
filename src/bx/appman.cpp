@@ -3,12 +3,12 @@
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
 #ifdef SKIP_ASM
-extern void* D_0048DBE8[16];
+extern void* cAppMan_vtbl[16];
 extern void* D_004A5B64;
 
 extern "C" void* cAppMan_cAppMan(void* self)
 {
-    *(void**)((char*)self + 0x5C) = D_0048DBE8;
+    *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
     *(int*)((char*)self + 0x20) = 0xC;
     *(float*)((char*)self + 0x24) = 1.0f;
     *(float*)((char*)self + 0x30) = 0.8999999761581421f;
@@ -25,7 +25,7 @@ extern "C" void* cAppMan_cAppMan(void* self)
 }
 #endif
 
-extern void* D_0048DBE8[16];
+extern void* cAppMan_vtbl[16];
 extern void* D_004A5B64;
 void operator_delete(int* ptr);
 
@@ -34,7 +34,7 @@ INCLUDE_ASM("bx/appman", cAppMan__cAppMan__FPvi);
 #ifdef SKIP_ASM
 void cAppMan__cAppMan(void* self, int flags)
 {
-    *(void**)((char*)self + 0x5C) = D_0048DBE8;
+    *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
     D_004A5B64 = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -349,7 +349,7 @@ struct cExecutionMan {
     void* field_0x8;
 };
 
-extern void* D_0048DC30[16];
+extern void* cExecutionMan_vtbl[16];
 
 //100%
 INCLUDE_ASM("bx/appman", cExecutionMan_halt__FP13cExecutionMan);
@@ -357,7 +357,7 @@ INCLUDE_ASM("bx/appman", cExecutionMan_halt__FP13cExecutionMan);
 cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
 {
     self->field_0x0 = 0;
-    self->field_0x8 = D_0048DC30;
+    self->field_0x8 = cExecutionMan_vtbl;
     self->field_0x4 = 0;
     return self;
 }

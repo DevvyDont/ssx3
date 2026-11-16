@@ -11,7 +11,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_004A4020[];
-extern char D_00491F00[];
+extern char cObjNode_vtbl[];
 
 struct sBucketList_3549E0 {
     int f0;
@@ -28,16 +28,16 @@ struct sBucket_3549E0 {
     sBucketList_3549E0 l3;
     sBucket_3549E0()
     {
-        l0.vt = D_00491F00;
+        l0.vt = cObjNode_vtbl;
         l0.prev = 0;
         l0.next = 0;
-        l1.vt = D_00491F00;
+        l1.vt = cObjNode_vtbl;
         l1.prev = 0;
         l1.next = 0;
-        l2.vt = D_00491F00;
+        l2.vt = cObjNode_vtbl;
         l2.prev = 0;
         l2.next = 0;
-        l3.vt = D_00491F00;
+        l3.vt = cObjNode_vtbl;
         l3.prev = 0;
         l3.next = 0;
     }
@@ -455,13 +455,13 @@ extern "C" void func_00355260(void* self, int a1)
 //100%
 INCLUDE_ASM("object/bucketman", func_00355280);
 #ifdef SKIP_ASM
-extern void* D_00491028[];
+extern void* cMoveNode_vtbl[];
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3)
 {
     func_0034FB00(self, a1, type, a3);
-    *(void***)((char*)self + 0xC) = D_00491028;
+    *(void***)((char*)self + 0xC) = cMoveNode_vtbl;
     *(float*)((char*)self + 0x24) = 1.0f;
     *(unsigned short*)((char*)self + 0x12) |= 1;
     *(int*)((char*)self + 0x1C) = 0;

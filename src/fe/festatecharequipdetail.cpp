@@ -23,7 +23,7 @@ extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 extern "C" void func_0019B180(void* self, int id);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
 extern const int D_004A11D0_c __asm__("D_004A11D0");
-extern void* D_0046A548[];
+extern void* cFEStateCharEquip_vtbl[];
 extern char D_004607A8[];
 extern char D_004607B8[];
 extern char D_0045DA48[];
@@ -111,7 +111,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
 {
     sCharEquip_8DB8* self = (sCharEquip_8DB8*)p;
     func_0039E2A0(self);
-    self->vtbl = D_0046A548;
+    self->vtbl = cFEStateCharEquip_vtbl;
     self->camPos.x = -105.0f;
     self->camPos.y = -100.0f;
     self->camPos.z = -80.0f;
@@ -226,7 +226,7 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 extern "C" void func_0019A498(void* self);
 extern "C" void func_0039E390(void* self, int flags);
 extern void* D_004A289C;
-extern void* D_0046A548[];
+extern void* cFEStateCharEquip_vtbl[];
 extern void* D_0046D0D0[];
 
 struct sVEntryK199148 {
@@ -246,7 +246,7 @@ static inline void releaseK199148(int id)
 
 extern "C" void func_00199148(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_0046A548;
+    *(void***)((char*)self + 0x8) = cFEStateCharEquip_vtbl;
     if (*(int*)((char*)self + 0xA64) >= 0) {
         func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
                       *(int*)((char*)self + 0xA64));
