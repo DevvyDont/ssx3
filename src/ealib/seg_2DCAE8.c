@@ -5998,7 +5998,63 @@ void func_003E44B0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4508);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+#include "fakematch.h"
+extern int func_003E36F8_4508(char *, int) __asm__("func_003E36F8");
+extern unsigned int func_004187E8_4508(int *, int, int, int, void *) __asm__("func_004187E8");
+extern void func_003E3968_4508(void) __asm__("func_003E3968");
+extern int D_00450C58_4508[] __asm__("D_00450C58");
+extern char D_00499C81_4508[] __asm__("D_00499C81");
+extern int D_00519C40_4508[] __asm__("D_00519C40");
+
+int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508");
+// FAKEMATCH: register pin `register int slash FM_REG("$2") = '/'; buf[0] = slash;` (fakematch.h) breaks the
+// local-alloc tie between the '/' constant for buf[0] and the first path char c0 (retail: v0 / v1, ours swapped); plain form 99.62%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_003E4508_4508(char *path, int unused, int *out) {
+    char buf[256];
+    int key;
+    char *d;
+    char *p;
+    unsigned int r;
+    char c;
+    int t;
+    p = path;
+    {
+        char c0 = *p++;
+        if (c0 != '/') p = path;
+    }
+    {
+        register int slash FM_REG("$2") = '/';
+        buf[0] = slash;
+    }
+    d = buf + 1;
+    while (*p != 0) {
+        c = *p;
+        if (c == '\\') {
+            *d = '/';
+        } else {
+            t = c - 0x20;
+            if (!(D_00499C81_4508[c] & 2)) t = c;
+            *d = t;
+        }
+        p++;
+        d++;
+    }
+    *d = 0;
+    key = func_003E36F8_4508(buf, D_00519C40_4508[6]);
+    r = func_004187E8_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, func_003E3968_4508);
+    if (r == 0) {
+        *out = 0;
+        return 0;
+    }
+    *out = (r - D_00519C40_4508[14]) / (unsigned)(D_00450C58_4508[1] + 0xC) + 1;
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4648);
 

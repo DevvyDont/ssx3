@@ -639,7 +639,27 @@ int func_003B42B0(int x, int y, int w) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4338);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+// FAKEMATCH: register pin `register int hx FM_REG("$5") = x >> 7; hx <<= 6;` (fakematch.h) for the swizzle's column term
+// (retail shifts x >> 7 in place in a1 and keeps the quotient's sign bit in a3; unpinned, the allocator also swaps y and y & 2
+// between a3 and a4); plain form 82.27% (honest best, the one-expression `x = (x >> 7) << 6` form, 91.06%).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_003B4338(int x, int y, int w) {
+    int lo = ((x & 0x70) >> 1) + ((x & 7) ^ ((y & 2) << 1) ^ (y & 4));
+    int lx = ((x & 8) << 1) + ((y & 2) << 2);
+    y = ((y >> 6) << 5) + (((y & 0x3C) >> 1) + (y & 1));
+    {
+        register int hx FM_REG("$5") = x >> 7;
+        hx <<= 6;
+        x = hx + lo;
+    }
+    w = (y * w / 2 + x) << 5;
+    return w + lx;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B43C0);
 
@@ -2582,7 +2602,81 @@ int func_003B6BD0(int h, int *chunk) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+#include "fakematch.h"
+typedef struct { int f0; int pad4; unsigned int f8; int offs[1]; } FILE_6EA8;
+typedef struct {
+    unsigned int lo;
+    unsigned int size : 31;
+    unsigned int flag : 1;
+    int f8;
+    char *ptrs[9];
+} REQ_6EA8;
+extern void func_003E13E8_6EA8(int, FILE_6EA8 *) __asm__("func_003E13E8");
+extern int func_003C6AB8_6EA8(int, REQ_6EA8 *) __asm__("func_003C6AB8");
+
+static inline void swap_6EA8(void *dst, unsigned int x) {
+    unsigned char *s = (unsigned char *)&x;
+    unsigned char *d = (unsigned char *)dst;
+
+    d[0] = s[3];
+    d[1] = s[2];
+    d[2] = s[1];
+    d[3] = s[0];
+}
+
+static inline unsigned int reqsize_6EA8(REQ_6EA8 *r) {
+    return r->size;
+}
+
+// FAKEMATCH: per-function volatile view of the stream's current-request pointer, `hdr = *(struct sA0A0Node *volatile *)&own->f134;`
+// (evidence: func_003B6BD0 stores f134 and immediately reloads it), plus the register pin
+// `register FILE_6EA8 **p0 FM_REG("$4") = (FILE_6EA8 **)req.ptrs[0];` (fakematch.h; retail loads ptrs[0] into a0 in the bnez slot
+// and keeps the 0x7FFFFFFF size mask in a2, ours swaps them); plain form 97.43% (volatile view alone 99.70%).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+void func_003B6EA8(struct sA0A0Strm *own, FILE_6EA8 *f) {
+    REQ_6EA8 req;
+    unsigned int tmp;
+    struct sA0A0Node *hdr;
+    char *base;
+    int *offs;
+    int i;
+
+    hdr = *(struct sA0A0Node *volatile *)&own->f134;
+    if (((unsigned char *)hdr->f25)[0]) {
+        swap_6EA8(&tmp, f->f8);
+        req.size = tmp;
+    } else {
+        req.size = f->f8;
+    }
+    offs = f->offs;
+    base = (char *)(offs + own->f14.b[2]);
+    for (i = 0; i < own->f14.b[2]; i++) {
+        if (((unsigned char *)hdr->f25)[0]) {
+            swap_6EA8(&tmp, offs[i]);
+            req.ptrs[i] = base + tmp;
+        } else {
+            req.ptrs[i] = base + offs[i];
+        }
+    }
+    if (!reqsize_6EA8(&req)) {
+        func_003E13E8_6EA8(own->f00, f);
+    } else {
+        {
+            register FILE_6EA8 **p0 FM_REG("$4") = (FILE_6EA8 **)req.ptrs[0];
+            p0[-1] = f;
+        }
+        f->f0 = hdr->f0C;
+        hdr->f1C += req.size;
+        req.flag = hdr->f24;
+        func_003C6AB8_6EA8(own->f08, &req);
+        hdr->f24 = 1;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7080);
@@ -11987,7 +12081,89 @@ void func_003C4AF8(int *arg0, int *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4B70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+#include "fakematch.h"
+struct Blk_4B70 {
+    unsigned short start;
+    unsigned short size;
+};
+struct G_4B70 {
+    char pad0000[0x1A98];
+    unsigned short count;
+    unsigned short base;
+    unsigned short end;
+    char pad1A9E[2];
+    struct Blk_4B70 *list;
+};
+extern struct G_4B70 D_0050AD00_4B70 __asm__("D_0050AD00");
+extern unsigned short D_0050A910_4B70 __asm__("D_0050A910");
+extern void func_003C4AF8_4B70(int *start, int *len) __asm__("func_003C4AF8");
+extern int func_0042ABA0_4B70(int size) __asm__("func_0042ABA0");
+// FAKEMATCH: an empty `do {} while (0);` before the in-loop call (its loop notes act as a sched barrier: retail's unscheduled
+// join block, probably a disabled debug macro), a `do { ... } while (0)` around the insert block (doubles its refs of the
+// GCSE-hoisted %hi(D_0050AD00), so that pseudo outranks its loop copy: retail s5 / s6, ours swapped), and two fakematch.h
+// pins: `register int s FM_REG("$3")` (slot start in the loop) and `register struct G_4B70 *g FM_REG("$4") = &D_0050AD00_4B70;`
+// for the insert block's list access (retail a0, ours v1/a1); plain form 94.61%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_003C4B70(int type, int size) {
+    int start;
+    int len;
+    int i;
+    int j;
+    register int s FM_REG("$3");
+    struct Blk_4B70 *p;
+    struct Blk_4B70 *q;
+
+    i = 0;
+    if (type == 0x100) return func_0042ABA0_4B70(size + 0x40);
+    if (D_0050AD00_4B70.count >= D_0050A910_4B70) return 0;
+    size += 0x3F;
+    size >>= 6;
+    if (D_0050AD00_4B70.count == 0) {
+        start = D_0050AD00_4B70.base;
+        len = D_0050AD00_4B70.end - D_0050AD00_4B70.base;
+        func_003C4AF8_4B70(&start, &len);
+        if (len < size) return 0;
+    } else {
+        for (i = 0; i < D_0050AD00_4B70.count; i++) {
+            p = &D_0050AD00_4B70.list[i];
+            if (i == 0) {
+                s = D_0050AD00_4B70.base;
+            } else {
+                q = &D_0050AD00_4B70.list[i - 1];
+                s = q->start;
+                s += q->size;
+            }
+            start = s;
+            len = p->start - s;
+            do {} while (0);
+            func_003C4AF8_4B70(&start, &len);
+            if (len >= size) {
+                for (j = D_0050AD00_4B70.count; i < j; j--) D_0050AD00_4B70.list[j] = D_0050AD00_4B70.list[j - 1];
+                goto insert;
+            }
+        }
+        q = &D_0050AD00_4B70.list[i - 1];
+        start = q->start + q->size;
+        len = D_0050AD00_4B70.end - start;
+        func_003C4AF8_4B70(&start, &len);
+        if (len >= size) goto insert;
+        return 0;
+    }
+insert:
+    do {
+        register struct G_4B70 *g FM_REG("$4") = &D_0050AD00_4B70;
+        p = &g->list[i];
+        p->start = start;
+        p->size = size;
+        D_0050AD00_4B70.count++;
+        return start << 6;
+    } while (0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4D78);
