@@ -4687,3 +4687,22 @@ cListNode_vtbl = 0x00494CC0;
 gBankSys = 0x004A3664;
 SoundSys = 0x004A377C;
 cBezierMan_TheBezierMan = 0x004A4248;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round7 (docs/ontour_globals.tsv)
+cSplineCamAlgorithm_vtbl = 0x0045B968;
+cRelativeChaseAlgorithm_vtbl = 0x0045B9E0;
+cMatrixChaseAlgorithm_vtbl = 0x0045BA58;
+cManualChaseAlgorithm_vtbl = 0x0045BAD0;
+cIdleChaseAlgorithm_vtbl = 0x0045BB48;
+cMidRightChaseAlgorithm_vtbl = 0x0045C538;
+cMidLeftChaseAlgorithm_vtbl = 0x0045C5B0;
+cLazyChaseAlgorithm_vtbl = 0x0045C628;
+cLookBackChaseAlgorithm_vtbl = 0x0045C6A0;
+cDEFAULT_4ChaseAlgorithm_vtbl = 0x0045C9C0;
+cDEFAULT_3ChaseAlgorithm_vtbl = 0x0045CA38;
+cDEFAULT_2ChaseAlgorithm_vtbl = 0x0045CAB0;
+cDirectionChaseAlgorithm_vtbl = 0x0045CB28;
+cPOST_RACE_1ChaseAlgorithm_vtbl = 0x0045CBD8;
+cSUPERPIPEChaseAlgorithm_vtbl = 0x0045CC50;
+cPS2GraphicsMan_vtbl = 0x00493260;
+cGraphicsMan_vtbl = 0x00493950;

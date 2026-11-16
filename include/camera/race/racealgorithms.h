@@ -21,7 +21,7 @@
 //
 // Retail vtables (13 slots: dtor, getPose, snap, snapCurrent, update, getTargetPos, getRaceCamFinalPhaseData,
 // doRaceCamFinalPhase, updateAlgorithm, <pure>, shouldSnapOnUpdate, setTarget, getRestDrop):
-//   cMatrixChaseAlgorithm D_0045BA58, cRelativeChaseAlgorithm D_0045B9E0, cSplineCamAlgorithm D_0045B968.
+//   cMatrixChaseAlgorithm cMatrixChaseAlgorithm_vtbl, cRelativeChaseAlgorithm cRelativeChaseAlgorithm_vtbl, cSplineCamAlgorithm cSplineCamAlgorithm_vtbl.
 //
 // FLAT layouts, like main/game.h: every field at its retail offset; the 0x390-byte cLookAtChaseAlgorithm base is
 // copied in front of each (its evidence tags are cameraalgorithms.h's); no C++ inheritance. Own members: On Tour's
@@ -34,7 +34,7 @@
 
 struct cRiderCameraTarget;
 
-// cMatrixChaseAlgorithm (0x3A0; On Tour 0x390). Ctor cMatrixChaseAlgorithm_cMatrixChaseAlgorithm (stores vtable D_0045BA58, AlgorithmType),
+// cMatrixChaseAlgorithm (0x3A0; On Tour 0x390). Ctor cMatrixChaseAlgorithm_cMatrixChaseAlgorithm (stores vtable cMatrixChaseAlgorithm_vtbl, AlgorithmType),
 // dtor cMatrixChaseAlgorithm__cMatrixChaseAlgorithm, snap cMatrixChaseAlgorithm_snap, update cMatrixChaseAlgorithm_update, getRaceCamFinalPhaseData func_001607D8,
 // getRestDrop func_001607C8.
 struct cMatrixChaseAlgorithm {
@@ -296,7 +296,7 @@ CHECK_OFFSET(cMatrixChaseAlgorithm, LastAngle, 0x390);
 CHECK_OFFSET(cMatrixChaseAlgorithm, unk_394, 0x394);
 CHECK_SIZE(cMatrixChaseAlgorithm, 0x3A0);
 
-// cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(this, angle) (vtable D_0045B9E0; the factory
+// cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(this, angle) (vtable cRelativeChaseAlgorithm_vtbl; the factory
 // then stores the camera type into AlgorithmType), dtor cRelativeChaseAlgorithm__cRelativeChaseAlgorithm, snap cRelativeChaseAlgorithm_snap, update cRelativeChaseAlgorithm_update,
 // getRaceCamFinalPhaseData func_00160BF0, getRestDrop func_00160BE0.
 struct cRelativeChaseAlgorithm {
@@ -565,7 +565,7 @@ CHECK_OFFSET(cRelativeChaseAlgorithm, LastCamTargetPos, 0x3B0);
 CHECK_SIZE(cRelativeChaseAlgorithm, 0x3C0);
 
 // cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor cSplineCamAlgorithm_cSplineCamAlgorithm(this, point1..point4, time, leadDistance,
-// heightOffset, fov) (vtable D_0045B968; builds the three interpolants with func_0031D5E8 / func_0031D700 /
+// heightOffset, fov) (vtable cSplineCamAlgorithm_vtbl; builds the three interpolants with func_0031D5E8 / func_0031D700 /
 // func_0031D7E0 / func_0031DEE0), dtor cSplineCamAlgorithm__cSplineCamAlgorithm (func_0031D618 on each interpolant), snap cSplineCamAlgorithm_snap,
 // update cSplineCamAlgorithm_update, getRaceCamFinalPhaseData func_001613E8, getRestDrop func_001613D8.
 struct cSplineCamAlgorithm {
@@ -851,7 +851,7 @@ CHECK_SIZE(cSplineCamAlgorithm, 0x3D0);
 
 // cManualChaseAlgorithm (0x390: no fields of its own) - the rider-steered chase camera ("Manual Chase Camera Algorithm").
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Manual Chase Camera Algorithm") then the ctor cManualChaseAlgorithm_cManualChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0xB and vtable D_0045BAD0; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0xB and vtable cManualChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cManualChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_MANUAL = 11.
@@ -865,13 +865,13 @@ CHECK_SIZE(cManualChaseAlgorithm, 0x390);
 
 // cIdleChaseAlgorithm (0x390: no fields of its own) - the idle chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Idle Chase Camera Algorithm") then the ctor cIdleChaseAlgorithm_cIdleChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 7 and vtable D_0045BB48; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 7 and vtable cIdleChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cIdleChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_IDLE = 7.
 // Methods (vtable slot): dtor cIdleChaseAlgorithm__cIdleChaseAlgorithm__FPv (1), snap cIdleChaseAlgorithm_snap (3), update cIdleChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cIdleChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop cIdleChaseAlgorithm_getRestDrop__FPv (13); the other slots are the base's.
-// [P] the preview's _vt$19cIdleChaseAlgorithm matches retail D_0045BB48 (builds/x/v2/vtables_v2.tsv).
+// [P] the preview's _vt$19cIdleChaseAlgorithm matches retail cIdleChaseAlgorithm_vtbl (builds/x/v2/vtables_v2.tsv).
 struct cIdleChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
 };
@@ -880,13 +880,13 @@ CHECK_SIZE(cIdleChaseAlgorithm, 0x390);
 
 // cLazyChaseAlgorithm (0x390: no fields of its own) - the lazy chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Lazy Chase Camera Algorithm") then the ctor cLazyChaseAlgorithm_cLazyChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0xD and vtable D_0045C628; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0xD and vtable cLazyChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cLazyChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_LAZY = 13.
 // Methods (vtable slot): dtor cLazyChaseAlgorithm__cLazyChaseAlgorithm__FPv (1), snap cLazyChaseAlgorithm_snap (3), update cLazyChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cLazyChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop cLazyChaseAlgorithm_getRestDrop__FPv (13); the other slots are the base's.
-// [P] the preview's _vt$19cLazyChaseAlgorithm matches retail D_0045C628.
+// [P] the preview's _vt$19cLazyChaseAlgorithm matches retail cLazyChaseAlgorithm_vtbl.
 struct cLazyChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
 };
@@ -895,13 +895,13 @@ CHECK_SIZE(cLazyChaseAlgorithm, 0x390);
 
 // cLookBackChaseAlgorithm (0x390: no fields of its own) - the look-back chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Look Back Chase Camera Algorithm") then the ctor cLookBackChaseAlgorithm_cLookBackChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x20 and vtable D_0045C6A0; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x20 and vtable cLookBackChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cLookBackChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_LOOKBACK = 32.
 // Methods (vtable slot): dtor cLookBackChaseAlgorithm__cLookBackChaseAlgorithm__FPv (1), snap cLookBackChaseAlgorithm_snap (3), update cLookBackChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cLookBackChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop cLookBackChaseAlgorithm_getRestDrop__FPv (13); the other slots are the base's.
-// [P] the preview's _vt$23cLookBackChaseAlgorithm matches retail D_0045C6A0.
+// [P] the preview's _vt$23cLookBackChaseAlgorithm matches retail cLookBackChaseAlgorithm_vtbl.
 struct cLookBackChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
 };
@@ -910,14 +910,14 @@ CHECK_SIZE(cLookBackChaseAlgorithm, 0x390);
 
 // cMidRightChaseAlgorithm (0x390: no fields of its own) - the mid-distance chase camera shifted to the rider's right.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Mid Right Chase Camera Algorithm") then the ctor cMidRightChaseAlgorithm_cMidRightChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 9 and vtable D_0045C538; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 9 and vtable cMidRightChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cMidRightChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_MID_RIGHT = 9.
 // Methods (vtable slot): dtor cMidRightChaseAlgorithm__cMidRightChaseAlgorithm__FPv (1), snap cMidRightChaseAlgorithm_snap (3), update cMidRightChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cMidRightChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cMidRightChaseAlgorithm_getRestDrop (13); the other slots are the base's.
 // Which mid vtable is Right: (1) [R] the "Mid Right" allocation (createChaseAlgorithmBlend case 9 =
-// CAMERA_ALGORITHM_CHASE_MID_RIGHT) calls cMidRightChaseAlgorithm_cMidRightChaseAlgorithm, which stores D_0045C538; (2) [P] the preview's
+// CAMERA_ALGORITHM_CHASE_MID_RIGHT) calls cMidRightChaseAlgorithm_cMidRightChaseAlgorithm, which stores cMidRightChaseAlgorithm_vtbl; (2) [P] the preview's
 // _vt$23cMidRightChaseAlgorithm update passes -0.29444468 to updateLateralShift, as retail cMidRightChaseAlgorithm_update does;
 // (3) [O] On Tour's cMidRightChaseAlgorithm::update passes -kLateralShift_MIDSIDE (= 0.29444468, set by
 // __sti__all_in_one_camera_cpp). Both mid ctors store type 9 in retail AND in On Tour (EA copy-paste).
@@ -929,7 +929,7 @@ CHECK_SIZE(cMidRightChaseAlgorithm, 0x390);
 
 // cMidLeftChaseAlgorithm (0x390: no fields of its own) - the mid-distance chase camera shifted to the rider's left.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Mid Left Chase Camera Algorithm") then the ctor cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 9 (sic: MidRight's; On Tour's ctor also stores 9) and vtable D_0045C5B0; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 9 (sic: MidRight's; On Tour's ctor also stores 9) and vtable cMidLeftChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cMidLeftChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_MID_RIGHT = 9.

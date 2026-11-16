@@ -40,9 +40,9 @@ CHECK_OFFSET(cSPOKEChaseAlgorithm, LastLookDir, 0x390);
 CHECK_SIZE(cSPOKEChaseAlgorithm, 0x3A0);
 
 // cSUPERPIPEChaseAlgorithm (0x3B0; On Tour 0x3A0). [R] cMemMan_alloc(0x3B0, "SUPERPIPE Chase Camera Algorithm") then
-// the ctor cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(this, point1, point2) (type 0x43 = CAMERA_ALGORITHM_CHASE_SUPERPIPE = 67, vtable D_0045CC50);
+// the ctor cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(this, point1, point2) (type 0x43 = CAMERA_ALGORITHM_CHASE_SUPERPIPE = 67, vtable cSUPERPIPEChaseAlgorithm_vtbl);
 // the factory builds both points on the stack (func_00170240, func_001707B0) from the superpipe it is given.
-// [P] the preview's _vt$24cSUPERPIPEChaseAlgorithm matches D_0045CC50. Methods: dtor cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm__FPv (1), snap
+// [P] the preview's _vt$24cSUPERPIPEChaseAlgorithm matches cSUPERPIPEChaseAlgorithm_vtbl. Methods: dtor cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm__FPv (1), snap
 // cSUPERPIPEChaseAlgorithm_snap (3), update cSUPERPIPEChaseAlgorithm_update (5), getRaceCamFinalPhaseData cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cSUPERPIPEChaseAlgorithm_getRestDrop
 // (13); non-virtual getIdealPosition cSUPERPIPEChaseAlgorithm_getIdealPosition and getIdealTargetPos cSUPERPIPEChaseAlgorithm_getIdealTargetPos (a0 = result, a1 = this).
 struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
@@ -56,7 +56,7 @@ CHECK_OFFSET(cSUPERPIPEChaseAlgorithm, Point2, 0x3A0);
 CHECK_SIZE(cSUPERPIPEChaseAlgorithm, 0x3B0);
 
 // cPOST_RACE_1ChaseAlgorithm (0x3B0; On Tour 0x3A0). [R] cMemMan_alloc(0x3B0, "POST_RACE_1 Chase Camera Algorithm")
-// then the ctor cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(this, target) (type 0x44 = CAMERA_ALGORITHM_CHASE_POST_RACE_1 = 68, vtable D_0045CBD8).
+// then the ctor cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(this, target) (type 0x44 = CAMERA_ALGORITHM_CHASE_POST_RACE_1 = 68, vtable cPOST_RACE_1ChaseAlgorithm_vtbl).
 // [O] On Tour: cPOST_RACE_1ChaseAlgorithm(cRiderCameraTarget* target). Methods: dtor cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm__FPv (1), snap
 // cPOST_RACE_1ChaseAlgorithm_snap (3), update cPOST_RACE_1ChaseAlgorithm_update (5), getRaceCamFinalPhaseData cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop
 // cPOST_RACE_1ChaseAlgorithm_getRestDrop__FPv (13).

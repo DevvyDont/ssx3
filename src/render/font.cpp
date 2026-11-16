@@ -2707,7 +2707,7 @@ void* cPS2GraphicsMan__cPS2GraphicsMan(void* self)
 INCLUDE_ASM("render/font", cPS2GraphicsMan_cPS2GraphicsMan);
 #ifdef SKIP_ASM
 extern "C" void* cGraphicsMan_cGraphicsMan(void* self);
-extern void* D_00493260[];
+extern void* cPS2GraphicsMan_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -2719,7 +2719,7 @@ struct sRenderSlot5288 {
 extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 {
     cGraphicsMan_cGraphicsMan(self);
-    self->mVtbl = D_00493260;
+    self->mVtbl = cPS2GraphicsMan_vtbl;
     new ((char*)self + 0x10E0) sRenderSlot5288[12];
     new ((char*)self + 0x11A0) sRenderSlot5288[8];
     new ((char*)self + 0x1220) sRenderSlot5288[2];

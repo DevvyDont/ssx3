@@ -1233,7 +1233,7 @@ INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_cGraphicsMan);
 #ifdef SKIP_ASM
 extern "C" void func_00416210(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
-extern void* D_00493950[];
+extern void* cGraphicsMan_vtbl[];
 
 inline void* operator new(unsigned int, void* p) { return p; }
 
@@ -1303,7 +1303,7 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
 
 extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
 {
-    *(void***)(self + 0x10D8) = D_00493950;
+    *(void***)(self + 0x10D8) = cGraphicsMan_vtbl;
     new (self + 0xE84) sGfxState_691F8;
     *(int*)(self + 0xF44) = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
@@ -1347,12 +1347,12 @@ extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan__cGraphicsMan);
 #ifdef SKIP_ASM
-extern void* D_00493950[];
+extern void* cGraphicsMan_vtbl[];
 void operator_delete(int* ptr);
 
 extern "C" void cGraphicsMan__cGraphicsMan(cPS2GraphicsMan* self, int flags)
 {
-    self->mVtbl = D_00493950;
+    self->mVtbl = cGraphicsMan_vtbl;
     cGraphicsMan_TheGraphicsMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);

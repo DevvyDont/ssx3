@@ -26,13 +26,13 @@ struct cRiderCameraTarget;
 
 // cDEFAULT_2ChaseAlgorithm (0x390: no fields of its own) - a tuned default chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "DEFAULT_2 Chase Camera Algorithm") then the ctor cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x3C and vtable D_0045CAB0; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x3C and vtable cDEFAULT_2ChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cDEFAULT_2ChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_DEFAULT_2 = 60.
 // Methods (vtable slot): dtor cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm__FPv (1), snap cDEFAULT_2ChaseAlgorithm_snap (3), update cDEFAULT_2ChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cDEFAULT_2ChaseAlgorithm_getRestDrop (13); the other slots are the base's.
-// [P] the preview's _vt$24cDEFAULT_2ChaseAlgorithm matches retail D_0045CAB0.
+// [P] the preview's _vt$24cDEFAULT_2ChaseAlgorithm matches retail cDEFAULT_2ChaseAlgorithm_vtbl.
 struct cDEFAULT_2ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
 };
@@ -41,14 +41,14 @@ CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
 
 // cDEFAULT_3ChaseAlgorithm (0x390: no fields of its own) - the default chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "DEFAULT_3 Chase Camera Algorithm") then the ctor cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x3D and vtable D_0045CA38; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x3D and vtable cDEFAULT_3ChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cDEFAULT_3ChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_DEFAULT_3 = 61.
 // Methods (vtable slot): dtor cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv (1), snap cDEFAULT_3ChaseAlgorithm_snap (3), update cDEFAULT_3ChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cDEFAULT_3ChaseAlgorithm_getRestDrop (13); the other slots are the base's.
 // Also [R] cCamera_cCamera and func_0015E050 construct one in place at cCamera+0xC0 (On Tour: cCamera::
-// ResultAlgorithm is a cDEFAULT_3ChaseAlgorithm at 0xC0). builds/x/v2 pairs D_0045CA38 with the preview's
+// ResultAlgorithm is a cDEFAULT_3ChaseAlgorithm at 0xC0). builds/x/v2 pairs cDEFAULT_3ChaseAlgorithm_vtbl with the preview's
 // _vt$18cMidChaseAlgorithm by body similarity only; the retail tag, type 61 and On Tour say DEFAULT_3.
 struct cDEFAULT_3ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
@@ -58,7 +58,7 @@ CHECK_SIZE(cDEFAULT_3ChaseAlgorithm, 0x390);
 
 // cDEFAULT_4ChaseAlgorithm (0x390: no fields of its own) - a tuned default chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "DEFAULT_4 Chase Camera Algorithm") then the ctor cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm,
-// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x3E and vtable D_0045C9C0; the ctor
+// which calls cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and stores AlgorithmType 0x3E and vtable cDEFAULT_4ChaseAlgorithm_vtbl; the ctor
 // writes nothing past 0x390 and no method of the class touches self+0x390 or later.
 // [O] On Tour: class cDEFAULT_4ChaseAlgorithm, size 0x380 (= its base cLookAtChaseAlgorithm, no members; the retail base is
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_DEFAULT_4 = 62.

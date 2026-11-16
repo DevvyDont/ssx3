@@ -5,8 +5,8 @@
 // the deferred draw list (cPS2DeferManager), the texture manager, the VIF/GIF double buffers and the DMA kick thread
 // that flips the frame. Size 0x75E0: cMemMan_alloc(0x75E0, "PS2GraphicsMan") + cPS2GraphicsMan ctor cPS2GraphicsMan_cPS2GraphicsMan in
 // its create function func_00375A08. Base class cGraphicsMan (ctor cGraphicsMan_cGraphicsMan, dtor cGraphicsMan__cGraphicsMan, vtable
-// D_00493950): its data is 0x0-0x10D8 and it declares the virtuals, so the vptr is at +0x10D8 (cPS2GraphicsMan's
-// vtable D_00493260, 124 slots, stored by cPS2GraphicsMan_cPS2GraphicsMan). EA paths (preview asserts): source/render/graphicsman.cpp,
+// cGraphicsMan_vtbl): its data is 0x0-0x10D8 and it declares the virtuals, so the vptr is at +0x10D8 (cPS2GraphicsMan's
+// vtable cPS2GraphicsMan_vtbl, 124 slots, stored by cPS2GraphicsMan_cPS2GraphicsMan). EA paths (preview asserts): source/render/graphicsman.cpp,
 // source/render/graphicsman.h, source/render/ps2graphicsman.cpp/.h.
 // Instance: cGraphicsMan::TheGraphicsMan = cGraphicsMan_TheGraphicsMan (gp+0x2A90), stored by the cGraphicsMan ctor (cGraphicsMan_cGraphicsMan)
 // and cleared by its dtor (cGraphicsMan__cGraphicsMan); every holder points at this cPS2GraphicsMan.
@@ -146,7 +146,7 @@ struct cPS2GraphicsMan {
     int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (func_003946A0/func_00394698)
     int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (func_003946D0/func_003946C8)
     int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors func_003946A8/func_003946B8
-    void** mVtbl;                   // 0x10D8 [R] cGraphicsMan D_00493950, cPS2GraphicsMan D_00493260
+    void** mVtbl;                   // 0x10D8 [R] cGraphicsMan cGraphicsMan_vtbl, cPS2GraphicsMan cPS2GraphicsMan_vtbl
     // --- cPS2GraphicsMan
     int mViewportDepth;             // 0x10DC [U] index into mViewportStack (cPS2GraphicsMan_PushViewport/cPS2GraphicsMan_PopViewport); [X] viewDepth
     t4Matrix mViewStack[12];        // 0x10E0 [R] ctor's first array loop (12); [U] PushView/PopView step 0x40

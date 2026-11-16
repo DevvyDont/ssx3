@@ -396,3 +396,20 @@ ps2_addr	name	previous	source	evidence
 004A377C	SoundSys	D_004A377C	On Tour global SoundSys (cSoundSys*, all_in_one_sound.cpp)	[R] cSoundSys_cSoundSys stores self, cSoundSys__cSoundSys clears it
 004A5B8C	cLightMan_TheLightMan	D_004A5B8C	On Tour static cLightMan::TheLightMan (cLightMan*)	[R] the light manager ctor (render/ps2lightman) stores self, its dtor clears it
 004A4248	cBezierMan_TheBezierMan	D_004A4248	On Tour static cBezierMan::TheBezierMan (cBezierMan*)	[R] the bezier manager ctor (render/particle) stores self, its dtor clears it
+0045B968	cSplineCamAlgorithm_vtbl	D_0045B968	retail vtable (tools/vtables.py)	[D] slot 1 cSplineCamAlgorithm__cSplineCamAlgorithm; g++ 2.95 symbol _vt$19cSplineCamAlgorithm
+0045B9E0	cRelativeChaseAlgorithm_vtbl	D_0045B9E0	retail vtable (tools/vtables.py)	[C] stored by cRelativeChaseAlgorithm_cRelativeChaseAlgorithm; g++ 2.95 symbol _vt$23cRelativeChaseAlgorithm
+0045BA58	cMatrixChaseAlgorithm_vtbl	D_0045BA58	retail vtable (tools/vtables.py)	[C] stored by cMatrixChaseAlgorithm_cMatrixChaseAlgorithm; g++ 2.95 symbol _vt$21cMatrixChaseAlgorithm
+0045BAD0	cManualChaseAlgorithm_vtbl	D_0045BAD0	retail vtable (tools/vtables.py)	[C] stored by cManualChaseAlgorithm_cManualChaseAlgorithm; g++ 2.95 symbol _vt$21cManualChaseAlgorithm
+0045BB48	cIdleChaseAlgorithm_vtbl	D_0045BB48	retail vtable (tools/vtables.py)	[C] stored by cIdleChaseAlgorithm_cIdleChaseAlgorithm; g++ 2.95 symbol _vt$19cIdleChaseAlgorithm
+0045C538	cMidRightChaseAlgorithm_vtbl	D_0045C538	retail vtable (tools/vtables.py)	[C] stored by cMidRightChaseAlgorithm_cMidRightChaseAlgorithm; g++ 2.95 symbol _vt$23cMidRightChaseAlgorithm
+0045C5B0	cMidLeftChaseAlgorithm_vtbl	D_0045C5B0	retail vtable (tools/vtables.py)	[C] stored by cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm; g++ 2.95 symbol _vt$22cMidLeftChaseAlgorithm
+0045C628	cLazyChaseAlgorithm_vtbl	D_0045C628	retail vtable (tools/vtables.py)	[C] stored by cLazyChaseAlgorithm_cLazyChaseAlgorithm; g++ 2.95 symbol _vt$19cLazyChaseAlgorithm
+0045C6A0	cLookBackChaseAlgorithm_vtbl	D_0045C6A0	retail vtable (tools/vtables.py)	[C] stored by cLookBackChaseAlgorithm_cLookBackChaseAlgorithm; g++ 2.95 symbol _vt$23cLookBackChaseAlgorithm
+0045C9C0	cDEFAULT_4ChaseAlgorithm_vtbl	D_0045C9C0	retail vtable (tools/vtables.py)	[C] stored by cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm; g++ 2.95 symbol _vt$24cDEFAULT_4ChaseAlgorithm
+0045CA38	cDEFAULT_3ChaseAlgorithm_vtbl	D_0045CA38	retail vtable (tools/vtables.py)	[C] stored by cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm; g++ 2.95 symbol _vt$24cDEFAULT_3ChaseAlgorithm
+0045CAB0	cDEFAULT_2ChaseAlgorithm_vtbl	D_0045CAB0	retail vtable (tools/vtables.py)	[C] stored by cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm; g++ 2.95 symbol _vt$24cDEFAULT_2ChaseAlgorithm
+0045CB28	cDirectionChaseAlgorithm_vtbl	D_0045CB28	retail vtable (tools/vtables.py)	[C] stored by cDirectionChaseAlgorithm_cDirectionChaseAlgorithm; g++ 2.95 symbol _vt$24cDirectionChaseAlgorithm
+0045CBD8	cPOST_RACE_1ChaseAlgorithm_vtbl	D_0045CBD8	retail vtable (tools/vtables.py)	[C] stored by cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm; g++ 2.95 symbol _vt$26cPOST_RACE_1ChaseAlgorithm
+0045CC50	cSUPERPIPEChaseAlgorithm_vtbl	D_0045CC50	retail vtable (tools/vtables.py)	[C] stored by cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm; g++ 2.95 symbol _vt$24cSUPERPIPEChaseAlgorithm
+00493260	cPS2GraphicsMan_vtbl	D_00493260	retail vtable (tools/vtables.py)	[C] stored by cPS2GraphicsMan_cPS2GraphicsMan; g++ 2.95 symbol _vt$15cPS2GraphicsMan
+00493950	cGraphicsMan_vtbl	D_00493950	retail vtable (tools/vtables.py)	[D] slot 1 cGraphicsMan__cGraphicsMan; g++ 2.95 symbol _vt$12cGraphicsMan
