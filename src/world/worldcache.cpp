@@ -490,11 +490,6 @@ struct cWorldCache_purge_sObj {
     cWorldCache_purge_sVEntry* vt;
 };
 
-struct cWorldCache_purge_sHdr {
-    int f0;
-    int f4;
-    unsigned int count;
-};
 
 
 extern "C" void cWorldCache_purge(cWorldCache* p)
@@ -510,7 +505,7 @@ extern "C" void cWorldCache_purge(cWorldCache* p)
     }
     if (((void*)self->m_pSectionCacheTable) != 0) {
         unsigned int i;
-        for (i = 0; i < ((cWorldCache_purge_sHdr*)self->mp_DataHeader)->count; i++) {
+        for (i = 0; i < (self->mp_DataHeader)->m_uiNumSections; i++) {
             if (func_003A9890(((char*)&self->m_WorldView), i) == 0) {
                 func_003A8230((cWorldCache*)self, i);
             }
@@ -519,8 +514,8 @@ extern "C" void cWorldCache_purge(cWorldCache* p)
             cMemMan_free(((void*)self->m_pSectionCacheTable));
         }
     }
-    if (((cWorldCache_purge_sHdr*)self->mp_DataHeader) != 0) {
-        cMemMan_free(((cWorldCache_purge_sHdr*)self->mp_DataHeader));
+    if ((self->mp_DataHeader) != 0) {
+        cMemMan_free((self->mp_DataHeader));
     }
     if (((func_003A7AA8_sElem*)self->m_pWorldMemMan) != 0) {
         func_003A7AA8(((func_003A7AA8_sElem*)self->m_pWorldMemMan), 3);

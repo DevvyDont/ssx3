@@ -287,13 +287,6 @@ struct sFlags14_3A39F8 {
     unsigned char layer : 5;
 };
 
-struct sRS_3A39F8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short f10;
-};
 
 struct sVE_3A39F8 { short delta; short index; void* fn; };
 
@@ -320,8 +313,8 @@ extern "C" void cUIVector_render2D(char* self, float x, float y)
         (*(sV3_3A39F8**)(self + 0x84))[i].x *= *(float*)(self + 0x50);
         (*(sV3_3A39F8**)(self + 0x84))[i].y *= *(float*)(self + 0x54);
     }
-    sRS_3A39F8* rs = (sRS_3A39F8*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | (((((sFlags14_3A39F8*)(self + 0x14))->layer) + 9) << 5 & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | (((((sFlags14_3A39F8*)(self + 0x14))->layer) + 9) << 5 & 0x3E0);
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
     if (((sCount_3A39F8*)(self + 0x74))->flag)
     {

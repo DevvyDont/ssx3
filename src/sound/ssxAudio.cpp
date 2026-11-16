@@ -421,20 +421,16 @@ struct sSnd54F8Mgr {
     char pad0[0x1D8];
     sSnd54F8Sub sub;         // 0x1D8
 };
-struct sSnd54F8Sys {
-    char pad0[0x118];
-    sSnd54F8Mgr** p118;      // 0x118
-};
 
 extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, int a4, int a5, int a6, int a7, float f, int a8)
 {
-    sSnd54F8Sys* self = (sSnd54F8Sys*)vself;
+    cSSXAudio* self = vself;
     // PORT: a2 (a name pointer) is passed through func_002AAD78 as an int
-    int r = func_002AAD78(self->p118, a1, a5, (int)a2, a3);
+    int r = func_002AAD78(((sSnd54F8Mgr**)self->mpMusicVStreamSys), a1, a5, (int)a2, a3);
     if (r < 0) {
         return r;
     }
-    sSnd54F8Mgr* m = *self->p118;
+    sSnd54F8Mgr* m = *((sSnd54F8Mgr**)self->mpMusicVStreamSys);
     sSnd54F8Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -458,29 +454,29 @@ extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, i
     s->p7C[m->sub.cur] = 1;
     if (f <= 0.0f) {
         if (a7 != 0) {
-            func_002A9988(&(*self->p118)->sub, 29.997713088989258f, -1.0f);
+            func_002A9988(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, 29.997713088989258f, -1.0f);
         } else {
-            func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
+            func_002A9988(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, 100.0f, -1.0f);
         }
     } else {
-        func_002A9988(&(*self->p118)->sub, f, -1.0f);
+        func_002A9988(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, f, -1.0f);
     }
-    (*self->p118)->sub.p60[(*self->p118)->sub.cur] = a6;
+    (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.p60[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = a6;
     if (a4 != 0) {
-        (*self->p118)->sub.tgt[(*self->p118)->sub.cur] = a4;
-        sSnd54F8Mgr** pp = self->p118;
+        (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.tgt[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = a4;
+        sSnd54F8Mgr** pp = ((sSnd54F8Mgr**)self->mpMusicVStreamSys);
         int v = func_00288940(self, a4);
         (*pp)->sub.p64[(*pp)->sub.cur] = v;
     }
     if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C11[0] == 2 && a7 != 0 && func_00288AE0(self) == 0) {
-        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = a8;
+        (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.p80[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = 1;
+        (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = a8;
     }
-    void* bm = cBankMonitor_BANKMONITOR_Create(&(*self->p118)->sub, r, 0x7F, 3);
+    void* bm = cBankMonitor_BANKMONITOR_Create(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, r, 0x7F, 3);
     if (bm != 0) {
-        func_002ABCF8(bm, func_002AB188(self->p118, a1), a2, a3);
+        func_002ABCF8(bm, func_002AB188(((sSnd54F8Mgr**)self->mpMusicVStreamSys), a1), a2, a3);
     }
-    (*self->p118)->sub.cur--;
+    (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur--;
     return r;
 }
 #endif

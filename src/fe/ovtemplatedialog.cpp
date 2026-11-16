@@ -1340,17 +1340,13 @@ extern signed char D_00535C12[];
 extern unsigned int D_004A2594;
 extern int D_004A2708;
 
-struct sGame_CCF8 {
-    char pad[0x48];
-    char* mgr;
-};
 
 
 // Continues after a result dialog closes, depending on the current overlay state and the pending dialog.
 extern "C" void func_0020CCF8(void)
 {
     D_004A26FC = 0;
-    char* st = (char*)cUIStateStack_getCurrentState(((sGame_CCF8*)(SSXApp)->Game)->mgr + 0x18);
+    char* st = (char*)cUIStateStack_getCurrentState(((char*)((SSXApp)->Game)->UI) + 0x18);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int kind = D_00535C12[0];
     int type = *(int*)SSXApp->GameModeMan;
@@ -1454,21 +1450,11 @@ struct sFlag_CFD0 {
     int f8;
 };
 
-struct sGame_CFD0 {
-    char pad28[0x28];
-    void *replay;
-    char pad2C[0x48 - 0x2C];
-    char *mgr;
-    char pad4C[0x200 - 0x4C];
-    sFlag_CFD0 *f200;
-    char pad204[0x214 - 0x204];
-    int f214;
-};
 
 
 extern "C" void func_0020CFD0(void)
 {
-    char *mgr = ((sGame_CFD0*)(SSXApp)->Game)->mgr;
+    char *mgr = ((char*)((SSXApp)->Game)->UI);
     char *st = 0;
     if (mgr + 0x18) {
         st = (char *)cUIStateStack_getCurrentState(mgr + 0x18);
@@ -1481,9 +1467,9 @@ extern "C" void func_0020CFD0(void)
         break;
     case 2:
         D_004A26FC = 0;
-        cReplay_stopAutoReplay(((sGame_CFD0*)(SSXApp)->Game)->replay);
-        ((sGame_CFD0*)(SSXApp)->Game)->f200->f8 = 1;
-        if (st != 0 && ((sGame_CFD0*)(SSXApp)->Game)->f214 == 2) {
+        cReplay_stopAutoReplay(((void*)((SSXApp)->Game)->Replay));
+        ((sFlag_CFD0*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
+        if (st != 0 && ((SSXApp)->Game)->mCurrentStateID == 2) {
             if (*(int *)(st + 0x98) == 8) {
                 cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
@@ -1495,11 +1481,11 @@ extern "C" void func_0020CFD0(void)
     case 3:
         D_004A26FC = 0;
         cOVStateManager_removePDATemplate();
-        func_0039F840(((sGame_CFD0*)(SSXApp)->Game)->mgr + 0x18);
+        func_0039F840(((char*)((SSXApp)->Game)->UI) + 0x18);
         break;
     case 4:
         D_004A26FC = 0;
-        func_00231250(((sGame_CFD0*)(SSXApp)->Game), 0xE, 2, 0);
+        func_00231250(((SSXApp)->Game), 0xE, 2, 0);
         break;
     }
 }

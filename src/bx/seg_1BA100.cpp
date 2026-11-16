@@ -1789,8 +1789,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB6E0);
 // cWorldPainterMan::render() (On Tour name and locals): draws the active painter layer's quad tree.
 #define MIN_B6E0(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_B6E0(a, b) ((a) > (b) ? (a) : (b))
-struct sDrawState_B6E0 { int m[5]; };
-struct cGraphicsMan_B6E0 { char pad[0xE84]; sDrawState_B6E0* m_pCurrentDrawState; };
+struct cGraphicsMan_B6E0 { char pad[0xE84]; sDrawState* m_pCurrentDrawState; };
 struct tBxVertex_B6E0 {
     tBxVertex_B6E0() {}
     float x, y, z, w;
@@ -1812,7 +1811,7 @@ extern int D_004A44B4;   // cVisualEffectsTest::m_Enable
 extern int D_004A3860;   // cWorldPainterMan::m_iCurrSection
 extern int D_004A44B8;   // cVisualEffectsTest::m_LayerId
 static inline int layerId_B6E0() { return D_004A44B8; }
-extern sDrawState_B6E0 D_00501420;  // sDrawState::s_defaultDrawState
+extern sDrawState D_00501420;  // sDrawState::s_defaultDrawState
 // cWorldPainterMan::render(cQuadTree*, const tQuadTreeNode*, tBxVertex*, t4Vector&, t4Vector&)
 extern "C" void func_002BB928_B6E0(cWorldPainterMan_B6E0*, cQuadTree_B6E0*, char*, tBxVertex_B6E0*, t4Vector_B6E0*, t4Vector_B6E0*) __asm__("func_002BB928");
 
@@ -1829,9 +1828,9 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                     if (tree) {
                         cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
                         // PushDrawState + SetDefaultDrawState
-                        ((sDrawState_B6E0*)gm->m_pCurrentDrawState)[1] = ((sDrawState_B6E0*)gm->m_pCurrentDrawState)[0];
-                        (*(sDrawState_B6E0**)&gm->m_pCurrentDrawState)++;
-                        *((sDrawState_B6E0*)gm->m_pCurrentDrawState) = D_00501420;
+                        (gm->m_pCurrentDrawState)[1] = (gm->m_pCurrentDrawState)[0];
+                        (*(sDrawState**)&gm->m_pCurrentDrawState)++;
+                        *(gm->m_pCurrentDrawState) = D_00501420;
                         tBxVertex_B6E0 vertlist[5];
                         tBxVertex_B6E0* v;
                         int i;
@@ -1850,7 +1849,7 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                         t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
                                                 (float)(int)(32768.0f / tree->scale + tree->miny), 0.0f, 1.0f);
                         func_002BB928_B6E0(self, tree, tree->nodes + tree->root * 8, vertlist, &mincorner, &maxcorner);
-                        (*(sDrawState_B6E0**)&gm->m_pCurrentDrawState)--;  // PopDrawState
+                        (*(sDrawState**)&gm->m_pCurrentDrawState)--;  // PopDrawState
                     }
                 }
             }

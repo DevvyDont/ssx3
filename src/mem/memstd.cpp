@@ -2068,10 +2068,6 @@ struct sVE_4410a {
     short index;
     int (*fn)(void*, char*, char*, int, int, int, int, int, int, int, int, int);
 };
-struct sCtx_4410 {
-    char pad[0x10D8];
-    sVE_4410a* vt;
-};
 // PORT: the unit declares cGraphicsMan_TheGraphicsMan with other types; view bound by asm label
 
 struct sVE_4410b {
@@ -2107,7 +2103,7 @@ struct sTile_4410 {
         h = height;
         cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
         tex = ((sVE_4410a*)g->mVtbl)[47].fn((char*)g + ((sVE_4410a*)g->mVtbl)[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
-        func_0037D090_6((sCtx_4410*)g, tex, 0, 0, 0, 0);
+        func_0037D090_6(g, tex, 0, 0, 0, 0);
     }
 };
 

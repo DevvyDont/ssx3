@@ -1315,13 +1315,9 @@ extern "C" void func_0035E248(void* self);
 
 extern "C" void* cRollerModifier_Collision_DA70(void* self, void* a1, void* a2) __asm__("cRollerModifier_Collision");
 
-struct sXf_DA70 {
-    sRmVec4 pos;
-    sRmVec4 quat;
-};
 
-extern "C" sXf_DA70 func_0031B748(void* m);
-extern "C" sXf_DA70 func_0035E770_DA70(void* self) __asm__("func_0035E770");
+extern "C" tPose func_0031B748(void* m);
+extern "C" tPose func_0035E770_DA70(void* self) __asm__("func_0035E770");
 
 struct sV4c_DA70 {
     float x, y, z, w;
@@ -1475,20 +1471,20 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* a1
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][0] *= 0.5f;
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][1] *= 0.5f;
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][2] *= 0.5f;
-    sXf_DA70 x = func_0031B748((char*)self->m_pInstance + 0x10);
+    tPose x = func_0031B748((char*)self->m_pInstance + 0x10);
     {
         sRmVec4 r1;
-        QuatRotTo_DA70(r1, x.quat, *(sRmVec4*)&self->COMOffset);
+        QuatRotTo_DA70(r1, (*(sRmVec4*)&x.Q), *(sRmVec4*)&self->COMOffset);
         v = r1;
         sRmVec4 b;
         sRmVec4 r2;
-        QuatRotTo_DA70(r2, x.quat, v);
+        QuatRotTo_DA70(r2, (*(sRmVec4*)&x.Q), v);
         b = r2;
-        AddTo_DA70(x.pos, b);
+        AddTo_DA70((*(sRmVec4*)&x.P), b);
     }
-    *(sXf_DA70*)&self->Pose = x;
-    sXf_DA70 y = func_0035E770_DA70(((char*)self));
-    QuatPosToMtx_DA70(((char*)self) + 0x240, y.quat, y.pos);
+    *(&self->Pose) = x;
+    tPose y = func_0035E770_DA70(((char*)self));
+    QuatPosToMtx_DA70(((char*)self) + 0x240, (*(sRmVec4*)&y.Q), (*(sRmVec4*)&y.P));
     func_0035E248(((char*)self));
     func_0035D288((sRmBody*)(((char*)self) + 0x30));
     self->ContactElastic = 0.10000000149011612f;
@@ -1737,8 +1733,8 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
     self->rot.m[6] *= 0.5f;
     self->rot.m[7] *= 0.5f;
     self->rot.m[8] *= 0.5f;
-    sXf_DA70 x = func_0035E770_DA70(self);
-    QuatPosToMtx_DA70(&self->xf, x.quat, x.pos);
+    tPose x = func_0035E770_DA70(self);
+    QuatPosToMtx_DA70(&self->xf, (*(sRmVec4*)&x.Q), (*(sRmVec4*)&x.P));
     func_0032C648(self->mover, &self->xf, 1.0f);
     func_0035E248(self);
     func_0035D288((sRmBody*)self->body);
@@ -2147,46 +2143,35 @@ static inline float vu0LengthEDC8(const sRmVec4& v)
     return r;
 }
 
-struct sRailEDC8 {
-    char pad_0x00[0x14];
-    float f14;          // 0x14
-    float f18;          // 0x18
-    float f1C;          // 0x1C
-    float f20;          // 0x20
-    float pad24;
-    float f28;          // 0x28
-    char pad_0x2C[0x4];
-    sRmBody body;       // 0x30
-};
 
 static inline sRmVec4 toDirEDC8(sRmBody* b, const sRmVec4& v)
 {
     return vu0DivEDC8(v, b->scale);
 }
 
-static inline sRmVec4 xformEDC8(sRailEDC8* r)
+static inline sRmVec4 xformEDC8(cRollerModifier* r)
 {
     sRmVec4 o;
-    float x = r->body.pos.x;
-    float y = r->body.pos.y;
-    float z = r->body.pos.z;
-    o.x = r->body.rot.m[0][0] * x + r->body.rot.m[1][0] * y + r->body.rot.m[2][0] * z;
-    o.y = r->body.rot.m[0][1] * x + r->body.rot.m[1][1] * y + r->body.rot.m[2][1] * z;
-    o.z = r->body.rot.m[0][2] * x + r->body.rot.m[1][2] * y + r->body.rot.m[2][2] * z;
-    o.w = r->body.pos.w;
+    float x = (*(sRmBody*)&r->Pose).pos.x;
+    float y = (*(sRmBody*)&r->Pose).pos.y;
+    float z = (*(sRmBody*)&r->Pose).pos.z;
+    o.x = (*(sRmBody*)&r->Pose).rot.m[0][0] * x + (*(sRmBody*)&r->Pose).rot.m[1][0] * y + (*(sRmBody*)&r->Pose).rot.m[2][0] * z;
+    o.y = (*(sRmBody*)&r->Pose).rot.m[0][1] * x + (*(sRmBody*)&r->Pose).rot.m[1][1] * y + (*(sRmBody*)&r->Pose).rot.m[2][1] * z;
+    o.z = (*(sRmBody*)&r->Pose).rot.m[0][2] * x + (*(sRmBody*)&r->Pose).rot.m[1][2] * y + (*(sRmBody*)&r->Pose).rot.m[2][2] * z;
+    o.w = (*(sRmBody*)&r->Pose).pos.w;
     return o;
 }
 
-static inline void setPosEDC8(sRailEDC8* r, const sRmVec4& v)
+static inline void setPosEDC8(cRollerModifier* r, const sRmVec4& v)
 {
-    r->body.pos = v;
-    r->body.outPos = xformEDC8(r);
+    (*(sRmBody*)&r->Pose).pos = v;
+    (*(sRmBody*)&r->Pose).outPos = xformEDC8(r);
 }
 
-static inline void setOutDirEDC8(sRailEDC8* r, const sRmVec4& v)
+static inline void setOutDirEDC8(cRollerModifier* r, const sRmVec4& v)
 {
-    r->body.dir = toDirEDC8(&r->body, v);
-    r->body.outDir = v;
+    (*(sRmBody*)&r->Pose).dir = toDirEDC8(&(*(sRmBody*)&r->Pose), v);
+    (*(sRmBody*)&r->Pose).outDir = v;
 }
 
 extern "C" void cRollerModifier_collide(cRollerModifier* self)
@@ -2201,8 +2186,8 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
         sRmVec4 push = vu0ScaleEDC8(hit.normal, d + 2.0f);
         func_0035ED90((sRmBody*)self, &push);
         float k = 0.975f;
-        setPosEDC8(((sRailEDC8*)self), vu0ScaleEDC8((*(sRmVec4*)&self->L), k));
-        setOutDirEDC8(((sRailEDC8*)self), vu0ScaleEDC8((*(sRmVec4*)&self->V), k));
+        setPosEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->L), k));
+        setOutDirEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->V), k));
         float dp = vu0DotEDC8(vu0AddEDC8((*(sRmVec4*)&self->V), vu0CrossEDC8((*(sRmVec4*)&self->W), vu0SubEDC8(hit.pos, *(sRmVec4*)&(*(sRmBody*)&self->Pose)))), hit.normal);
         if (dp < zero) {
             float lim = self->StopContactSpeed;

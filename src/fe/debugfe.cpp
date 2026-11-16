@@ -1677,13 +1677,6 @@ INCLUDE_ASM("fe/debugfe", func_0017F500);
 extern void* D_004A28AC;
 extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 
-struct sRS_17F500 {
-    unsigned int w0;
-    unsigned int w1;
-    unsigned int w2;
-    unsigned int w3;
-    short tex;
-};
 
 struct sV2_17F500 {
     float x, y;
@@ -1707,8 +1700,8 @@ void func_0038EC40_r(void* self, const sV2_17F500& p0, const sV2_17F500& p1, con
 
 static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned int v)
 {
-    sRS_17F500* top = *(sRS_17F500**)(m + 0xE84);
-    top->w1 = (top->w1 & ~mask) | ((v << shift) & mask);
+    sDrawState* top = *(sDrawState**)(m + 0xE84);
+    top->unk_00[1] = (top->unk_00[1] & ~mask) | ((v << shift) & mask);
 }
 
 
@@ -1722,7 +1715,7 @@ extern "C" void func_0017F500(void* p_, int tex)
     set1_17F500((char*)m, 0x7C, 2, 5);
     set1_17F500((char*)m, 0x400000, 22, 1);
     sV2_17F500 size(6.0f, 6.0f);
-    ((sRS_17F500*)m->m_pCurrentDrawState)->tex = tex;
+    (m->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     for (int i = 1; i < 64; i++) {
         sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
         float t = (float)i * 0.015625f;

@@ -2384,17 +2384,16 @@ INCLUDE_ASM("seg/seg_156860", func_002588A8);
 #ifdef SKIP_ASM
 
 struct S88A8_4 { int k0; char p[0x14]; int k18; int k1c; };
-struct S88A8_6 { char p0[0xC]; S88A8_4 *c; char p1[0x204]; int k214; };
 struct S88A8_S { int k0; int k4; char p0[0x40]; int k48; char p1[0x24]; int k70; int k74; int k78; char p2[0x380]; int k3fc; };
 
 extern "C" void func_002588A8(cGameComm* self) {
-    S88A8_6 *t6;
+    cGame *t6;
     S88A8_4 *t4;
     self->mUnPauseTimer = 0;
-    t6 = ((S88A8_6*)(SSXApp)->Game);
-    if (t6->k214 != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
+    t6 = ((SSXApp)->Game);
+    if (t6->mCurrentStateID != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
         && self->mState < 0xF
-        && ((t4 = t6->c, t4->k0 != 4) || t4->k1c < 0x97)
+        && ((t4 = ((S88A8_4*)t6->AI), t4->k0 != 4) || t4->k1c < 0x97)
         && t4->k18 <= 0 && self->mPauseMenu[0] == 0 && self->mPauseMenu[1] == 0) {
         self->mUnPauseTimer = 0xB4;
     }

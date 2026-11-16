@@ -1907,7 +1907,7 @@ extern "C" void func_00328C20(void* root, int idx, void* item, const void* targe
 extern char cRailModifier_vtbl[];
 extern "C" void cRailModifier_buildXform(void* self);
 struct sSmMod_C040;
-extern "C" void cRailModifier_updateBoundBox(sSmMod_C040* self);
+extern "C" void cRailModifier_updateBoundBox(cRailModifier* self);
 
 struct sSmVec4_B708 {
     float x, y, z, w;
@@ -2123,7 +2123,7 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
         addEq_B708(((sSmBox_B708*)(((char*)self) + 0x10))->max, pad);
     }
     cRailModifier_buildXform(((char*)self));
-    cRailModifier_updateBoundBox((sSmMod_C040*)self);
+    cRailModifier_updateBoundBox(self);
     insert_B708((char*)cObjectInterface_getNash(), self->Node, box);
     sSmTrack_B708* t = ((sSmRef_B708*)(((char*)self) + 0x30))->get();
     sSmSeg_B708* seg = t->first;
@@ -2488,12 +2488,6 @@ struct sSmOwner_C040 {
     sSmObj_C040* obj;       // 0xC
 };
 
-struct sSmMod_C040 {
-    char pad_0x0[0x10];
-    sSmBox_C040 box;        // 0x10
-    char pad_0x30[0x10];
-    sSmOwner_C040* owner;   // 0x40
-};
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a -= b, 4 floats).
 static inline void vecSubEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
@@ -2527,20 +2521,20 @@ static inline void vecAddEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
         : "memory");
 }
 
-extern "C" void cRailModifier_updateBoundBox(sSmMod_C040* self)
+extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
-    sSmObj_C040* o = self->owner->obj;
+    sSmObj_C040* o = ((sSmOwner_C040*)self->Instance)->obj;
     if (o->vt->v44.fn((char*)o + o->vt->v44.delta) != 0) {
-        o = self->owner->obj;
+        o = ((sSmOwner_C040*)self->Instance)->obj;
         sSmBox_C040* b = o->vt->v45.fn((char*)o + o->vt->v45.delta);
-        self->box = *b;
+        (*(sSmBox_C040*)&self->BoundBox) = *b;
         sSmVec4_C040 pad;
         pad.x = 100.0f;
         pad.y = 100.0f;
         pad.z = 100.0f;
         pad.w = 0.0f;
-        vecSubEq_C040(self->box.min, pad);
-        vecAddEq_C040(self->box.max, pad);
+        vecSubEq_C040((*(sSmBox_C040*)&self->BoundBox).min, pad);
+        vecAddEq_C040((*(sSmBox_C040*)&self->BoundBox).max, pad);
     }
 }
 #endif

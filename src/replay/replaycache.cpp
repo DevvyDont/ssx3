@@ -1390,12 +1390,11 @@ struct sReplayCache1758 {
     int field_0x618;            // 0x618
 };
 
-struct sRcGs1758 { char pad_0x0[0xC]; sRcWorld_0730* world; };
 extern "C" int func_00271758(sReplayCache1758* self, char* buf)
 {
     sRcSave1758* data = (sRcSave1758*)buf;
     char** pp = &buf;
-    if (data->streamCount != ((sRcGs1758*)(SSXApp)->Game)->world->numRiders) {
+    if (data->streamCount != ((sRcWorld_0730*)((SSXApp)->Game)->AI)->numRiders) {
         return 0;
     }
     {

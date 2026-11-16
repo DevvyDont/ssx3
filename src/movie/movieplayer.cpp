@@ -563,16 +563,6 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerLoadSaveUpdate);
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
 #include "vtable.h"
 
-// The overlay manager's 0xE0-byte device records at 0x344 (the unit's sMCDev / sMCOverlayMgr, defined later).
-struct sMCDev_7D8 {
-    int f0;                     // 0x00
-    int f4;                     // 0x04
-    int f8;                     // 0x08
-    int fC;                     // 0x0C
-    int f10;                    // 0x10
-    int f14;                    // 0x14
-    char name[0xE0 - 0x18];     // 0x18
-};
 
 
 // PORT: the unit declares cMCOverlayManager_GatherDeviceInfo1 as returning void*, but it returns nothing; bind the void body by asm label.
@@ -720,7 +710,7 @@ extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self)
         if (canLoad_7D8(((char*)self))) {
             cMCOverlayManager* mgr = self;
             int idx = self->mLastCheckDevice;
-            if (((sMCDev_7D8*)&mgr->mDevices[0])[idx].fC == 0) {
+            if (((&mgr->mDevices[0]))[idx].bPluggedIn == 0) {
                 if (callI_7D8(((char*)self), 52, idx)) {
                     if (self->mLastCheckDevice == self->mSelectedDevice) {
                         sVEntry<void(void*, int)>* avt = (sVEntry<void (void*, int)>*)self->mVtbl;
@@ -729,7 +719,7 @@ extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self)
                         cMCOverlayManager_GatherDeviceInfo1_v(self, self->mLastCheckDevice);
                     }
                 } else {
-                    MEM_fill(&((sMCDev_7D8*)&mgr->mDevices[0])[self->mLastCheckDevice], 0, 0xE0);
+                    MEM_fill(&((&mgr->mDevices[0]))[self->mLastCheckDevice], 0, 0xE0);
                     if (self->mSelectedDevice == self->mLastCheckDevice && !(self->callbackIsDeviceSelected)()
                         && !(self->callbackIsSavePressed)() && !(self->callbackIsLoadPressed)() && !(self->callbackIsDeletePressed)()
                         && !(self->callbackIsFormatPressed)() && self->mSave == 0 && self->mDelete == 0
@@ -738,7 +728,7 @@ extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self)
                 }
             } else {
                 if (!callI_7D8(((char*)self), 52, idx))
-                    MEM_fill(&((sMCDev_7D8*)&mgr->mDevices[0])[self->mLastCheckDevice], 0, 0xE0);
+                    MEM_fill(&((&mgr->mDevices[0]))[self->mLastCheckDevice], 0, 0xE0);
                 else
                     cMCOverlayManager_GatherDeviceInfo1_v(self, self->mLastCheckDevice);
             }
@@ -3924,15 +3914,6 @@ struct sLocVEntry_241710 {
     void* (*fn)(void*, int);
 };
 
-struct sMCDev_241710 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    char name[0xE0 - 0x18];
-};
 
 
 static inline void* Loc_241710(char* key)
@@ -3961,7 +3942,7 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self
         else if (((cMovieSub434_1710*)self->mpMemCard)->v57(idx))
         {
             func_00241DC8(self, buf, idx);
-            char* name = ((sMCDev_241710*)&(self)->mDevices[0])[idx].name;
+            char* name = ((char*)&((&(self)->mDevices[0]))[idx].szName[0]);
             if (strlen1(name) == 0)
                 sprintf1_v(dst, Loc_241710(D_0047C390), buf);
             else

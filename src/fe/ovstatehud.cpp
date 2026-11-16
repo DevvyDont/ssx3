@@ -1496,11 +1496,6 @@ struct sFont_001F1B30 {
     sVec4_001F1B30 tint;   // 0x50
 };
 
-struct sRS_001F1B30 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
@@ -1544,8 +1539,8 @@ extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F1
         col = *color;
     }
     sVec4_001F1B30 t(col.r, 0.0f, 0.0f, 0.0f);
-    sRS_001F1B30* rs = (sRS_001F1B30*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
     font->tint = t;
     func_00391CB0(font, out[0], out[1], str);
@@ -1587,11 +1582,6 @@ struct sFont_001F1E28 {
     sCol_001F1E28 color; // 0x40
 };
 
-struct sRS_001F1E28 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sV4_001F1E28 vu0Sub_1E28(const sV4_001F1E28& a, const sV4_001F1E28& b)
@@ -1722,8 +1712,8 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
         col = *(sCol_001F1E28*)color;
         col.r = col.r * (1.0f - t);
     }
-    sRS_001F1E28* rs = (sRS_001F1E28*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
     font->color = col;
     float g0 = font->f30;
     float q0 = resEsc[0];
@@ -1758,11 +1748,6 @@ struct sFont_001F22E8 {
     sVec4_001F22E8 tint;   // 0x50
 };
 
-struct sRS_001F22E8 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
@@ -1806,8 +1791,8 @@ extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F1
         col = *color;
     }
     sVec4_001F22E8 t(col.r, 0.0f, 0.0f, 0.0f);
-    sRS_001F22E8* rs = (sRS_001F22E8*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
     font->tint = t;
     func_00391E30(font, out[0], out[1], str);
@@ -1840,11 +1825,6 @@ struct sFont_001F25E0 {
     sCol_001F25E0 color; // 0x40
 };
 
-struct sRS_001F25E0 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sV4_001F25E0 vu0Sub_25E0(const sV4_001F25E0& a, const sV4_001F25E0& b)
@@ -1975,8 +1955,8 @@ extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElem
         col = *(sCol_001F25E0*)color;
         col.r = col.r * (1.0f - t);
     }
-    sRS_001F25E0* rs = (sRS_001F25E0*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
     font->color = col;
     float g0 = font->f30;
     float q0 = resEsc[0];
@@ -2007,11 +1987,6 @@ struct sFont_001F2AA0 {
     sColor_001F16C0 color; // 0x40
 };
 
-struct sRS_001F2AA0 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 static inline float alignPos_001F2AA0(float v, int a, float size)
 {
@@ -2046,8 +2021,8 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
     func_001E91A8(&defs[idx], &col);
     font->color = col;
     float fn = (float)n;
-    sRS_001F2AA0* rs = (sRS_001F2AA0*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     float lineH = (float)font->count * font->f34 * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2AA0(pos[1], defs[idx].flags, totalH);
@@ -2103,11 +2078,6 @@ struct sFont_001F2DB0 {
     sColor_001F16C0 color; // 0x40
 };
 
-struct sRS_001F2DB0 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 static inline float alignPos_001F2DB0(float v, int a, float size)
 {
@@ -2142,8 +2112,8 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
     func_001E91A8(&defs[idx], &col);
     font->color = col;
     float fn = (float)n;
-    sRS_001F2DB0* rs = (sRS_001F2DB0*)GrMan->m_pCurrentDrawState;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
+    sDrawState* rs = GrMan->m_pCurrentDrawState;
+    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     float lineH = (float)font->count * font->f34 * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2DB0(pos[1], defs[idx].flags, totalH);

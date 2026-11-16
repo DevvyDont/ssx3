@@ -20,13 +20,6 @@ extern sGameEntry D_00442168[];
 //100%
 INCLUDE_ASM("main/game", cGame_renderModels);
 #ifdef SKIP_ASM
-struct sRState_C078 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-};
 
 struct sRVEntry_C078 {
     short delta;
@@ -38,7 +31,7 @@ struct sRCtx_C078 {
     char pad0[0x24];
     int cur;
     char pad28[0xE84 - 0x28];
-    sRState_C078* top;
+    sDrawState* top;
     char padE88[0xF50 - 0xE88];
     int tbl[(0x10D8 - 0xF50) / 4];
     sRVEntry_C078* vt;
@@ -52,10 +45,10 @@ static inline int curLayer_C078(sRCtx_C078* c)
 
 extern "C" void cGame_renderModels(cGame* self, void* world)
 {
-    *(short*)((char*)(sRState_C078*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
+    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
     cPS2GraphicsMan* ctx = GrMan;
-    ((sRState_C078*)ctx->m_pCurrentDrawState)->f4 = (((sRState_C078*)ctx->m_pCurrentDrawState)->f4 & ~0xF80) | 0x880;
-    ((sRState_C078*)ctx->m_pCurrentDrawState)->f0 |= 0x30;
+    (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~0xF80) | 0x880;
+    (*(int*)&(ctx->m_pCurrentDrawState)->unk_00[0]) |= 0x30;
     int flag = 0xC00;
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         flag = 0x400;

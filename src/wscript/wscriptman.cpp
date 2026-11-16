@@ -3610,10 +3610,6 @@ struct sWSVE_D540 {
     void (*fn)(void*, int);
 };
 
-struct sWSGfx_D540 {
-    char pad[0x10D8];
-    sWSVE_D540* vt;             // 0x10D8
-};
 
 struct sWSRec_D540 {
     int id;
@@ -3645,14 +3641,14 @@ struct sWSMan_D540 {
 
 
 // render context singleton (cGraphicsMan_TheGraphicsMan) accessor
-static inline sWSGfx_D540* GetGfx_D540()
+static inline cPS2GraphicsMan* GetGfx_D540()
 {
-    return (sWSGfx_D540*)cGraphicsMan_TheGraphicsMan;
+    return cGraphicsMan_TheGraphicsMan;
 }
 
 extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
 {
-    sWSGfx_D540* gfx = GetGfx_D540();
+    cPS2GraphicsMan* gfx = GetGfx_D540();
     int i;
     int j;
     int m;
@@ -3670,7 +3666,7 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
                     if (self->grps[j].s[k].arr[m].fC != 0) {
                         cMemMan_free(self->grps[j].s[k].arr[m].fC);
                     }
-                    gfx->vt[0x380 / 8].fn((char*)gfx + gfx->vt[0x380 / 8].delta, (int)self->grps[j].s[k].arr[m].f0);
+                    ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].delta, (int)self->grps[j].s[k].arr[m].f0);
                     if (self->grps[j].s[k].arr[m].f0 != 0) {
                         cMemMan_free(self->grps[j].s[k].arr[m].f0);
                     }
@@ -3685,7 +3681,7 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
         for (i = 0; i < self->f12C; i++) {
             v = self->f130[i].id;
             if (v >= 0) {
-                gfx->vt[0x190 / 8].fn((char*)gfx + gfx->vt[0x190 / 8].delta, v);
+                ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].delta, v);
             }
         }
     }

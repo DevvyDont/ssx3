@@ -544,15 +544,6 @@ struct sReplayBlock_F180 {
     char data[0x38];
 };
 
-struct cReplayFramePtr_F180 {
-    char pad_0x0[0x8];
-    int numBlocks;          // 0x8
-    char pad_0xc[0x8];
-    int blockSize;          // 0x14
-    int field_0x18;         // 0x18
-    char pad_0x1c[0x10];
-    sReplayBlock_F180 blocks[1];    // 0x2C
-};
 
 extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size);
 extern "C" void cReplay_reset(cReplay* self);
@@ -568,7 +559,7 @@ extern "C" void cReplay_init(cReplay* self)
         cReplayFramePtr_initBlock(&((sReplayBlock_F180*)&self->Frames[0])[i], self->FrameBlockSize);
         i++;
     } while (i < self->MaxFrames);
-    cReplay_setReplayState(((cReplayFramePtr_F180*)self), 10);
+    cReplay_setReplayState((self), 10);
     cReplay_reset(self);
 }
 #endif

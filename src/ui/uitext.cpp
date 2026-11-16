@@ -1179,13 +1179,9 @@ struct sRect_20A0 {
 struct sColor_20A0 {
     float a, r, g, b;
 };
-struct sRS_20A0 {
-    char pad[0x10];
-    short tex;              // 0x10
-};
 struct sGfx_20A0 {
     char pad[0xE84];
-    sRS_20A0* top;          // 0xE84
+    sDrawState* top;          // 0xE84
 };
 // One vertex of a submitted quad (stride 0x30).
 struct sQuadVtx_20A0 {
@@ -1214,7 +1210,7 @@ extern "C" void func_003A20A0(sSprite_20A0* o, sRect_20A0 r, sColor_20A0 c, int 
     if (tex < 0) {
         return;
     }
-    ((sRS_20A0*)GrMan->m_pCurrentDrawState)->tex = tex;
+    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     float v0 = o->v0;
     float v1 = o->v1;
     float u0 = o->u0;
@@ -1261,13 +1257,9 @@ struct sRect_2220 {
 struct sColor_2220 {
     float a, r, g, b;
 };
-struct sRS_2220 {
-    char pad[0x10];
-    short tex;              // 0x10
-};
 struct sGfx_2220 {
     char pad[0xE84];
-    sRS_2220* top;          // 0xE84
+    sDrawState* top;          // 0xE84
 };
 // One vertex of a submitted quad (stride 0x30).
 struct sQuadVtx_2220 {
@@ -1294,7 +1286,7 @@ extern "C" void func_003A2220(sSprite_2220* o, sRect_2220 r, sColor_2220 c, int 
 {
     float k = 1.0f - t;
     int tex = o->tex;
-    ((sRS_2220*)GrMan->m_pCurrentDrawState)->tex = tex;
+    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     float v0 = o->v0;
     float v1 = o->v1;
     float u0 = o->u0;
@@ -1338,13 +1330,9 @@ struct sRect_23B8 {
 struct sColor_23B8 {
     float a, r, g, b;
 };
-struct sRS_23B8 {
-    char pad[0x10];
-    short tex;              // 0x10
-};
 struct sGfx_23B8 {
     char pad[0xE84];
-    sRS_23B8* top;          // 0xE84
+    sDrawState* top;          // 0xE84
 };
 // One vertex of a submitted quad (stride 0x30).
 struct sQuadVtx_23B8 {
@@ -1370,7 +1358,7 @@ extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_
 extern "C" void func_003A23B8(sSprite_23B8* o, sRect_23B8 r, sColor_23B8 c, int flags, float tx, float ty)
 {
     int tex = o->tex;
-    ((sRS_23B8*)GrMan->m_pCurrentDrawState)->tex = tex;
+    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     float x0 = r.x;
     float y0 = r.y;
     float v0 = o->v0;
@@ -1486,13 +1474,9 @@ struct sColor_2A00 {
 struct sMat3_2A00 {
     float m[9];
 };
-struct sRS_2A00 {
-    char pad[0x10];
-    short tex;              // 0x10
-};
 struct sGfx_2A00 {
     char pad[0xE84];
-    sRS_2A00* top;          // 0xE84
+    sDrawState* top;          // 0xE84
 };
 // One vertex of a submitted quad (stride 0x30).
 struct sQuadVtx_2A00 {
@@ -1518,7 +1502,7 @@ extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A
 extern "C" void func_003A2A00(sSprite_2A00* o, sRect_2A00 r, sMat3_2A00 m, sColor_2A00 c, int flags)
 {
     int tex = o->tex;
-    ((sRS_2A00*)GrMan->m_pCurrentDrawState)->tex = tex;
+    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     float v0 = o->v0;
     float v1 = o->v1;
     float u0 = o->u0;
@@ -1570,13 +1554,9 @@ struct sColor_2BC8 {
 struct sMat3_2BC8 {
     float m[9];
 };
-struct sRS_2BC8 {
-    char pad[0x10];
-    short tex;              // 0x10
-};
 struct sGfx_2BC8 {
     char pad[0xE84];
-    sRS_2BC8* top;          // 0xE84
+    sDrawState* top;          // 0xE84
 };
 // One vertex of a submitted quad (stride 0x30).
 struct sQuadVtx_2BC8 {
@@ -1604,7 +1584,7 @@ extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColo
     int j;
     float x;
     int tex = o->tex;
-    ((sRS_2BC8*)GrMan->m_pCurrentDrawState)->tex = tex;
+    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     float x0 = r.x;
     float y0 = r.y;
     float v0 = o->v0;

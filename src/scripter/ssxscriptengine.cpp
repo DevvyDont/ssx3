@@ -2251,18 +2251,12 @@ extern "C" void func_0027B4B8(cSSXScriptEngine* self, int i, int a)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B528);
 #ifdef SKIP_ASM
-struct sSlot0628 {
-    int a;
-    int b;
-    int c;
-    int d;
-};
 
 
-static inline int isSlotFree(sSlot0628* s)
+static inline int isSlotFree(tSSXScriptBankInfo* s)
 {
-    if (s->c == 0) {
-        if (s->a == 0) return 1;
+    if (((int)s->asyncHandle) == 0) {
+        if (((int)s->dataBankHandle) == 0) return 1;
     }
     return 0;
 }
@@ -2270,7 +2264,7 @@ static inline int isSlotFree(sSlot0628* s)
 extern "C" int func_0027B528(cSSXScriptEngine* self)
 {
     for (int i = 2; i < 10; i++) {
-        if (isSlotFree(&((sSlot0628*)&self->mScriptDataBanks[0])[i])) {
+        if (isSlotFree(&((&self->mScriptDataBanks[0]))[i])) {
             return i;
         }
     }
@@ -2318,18 +2312,18 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
         int size;
     } r;
     for (int i = 0; i < 10; i++) {
-        sSlot0628* s = &((sSlot0628*)&(self)->mScriptDataBanks[0])[i];
-        if ((void*)s->c == file) {
+        tSSXScriptBankInfo* s = &((&(self)->mScriptDataBanks[0]))[i];
+        if ((void*)((int)s->asyncHandle) == file) {
             ASYNCFILE_release_out(file, &r.data, &r.size);
             self->mNumAsyncs -= 1;
             if (r.size == 0) {
                 tSSXScriptBankInfo_Clear(s);
                 return;
             }
-            sprintf(buf, D_00481EB0, s->b);
-            s->c = 0;
+            sprintf(buf, D_00481EB0, s->dataIdentifier);
+            (*(int*)&s->asyncHandle) = 0;
             self->mCurrAttachingBankNum = i;
-            s->a = func_00275920((char*)self + 0x51C, buf, r.data, r.size);
+            (*(int*)&s->dataBankHandle) = func_00275920((char*)self + 0x51C, buf, r.data, r.size);
             self->mCurrAttachingBankNum = 10;
             return;
         }

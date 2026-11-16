@@ -31,59 +31,50 @@ struct sPad_1788 {
     float x, y;
 };
 
-struct sFont_1788 {
-    int count;              // 0x0
-    sGlyph_1788* table;     // 0x4
-    sGlyph_1788* def;       // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-    int maxH;               // 0x14
-    sPad_1788 pad;          // 0x18
-};
 
 extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
 {
-    sFont_1788* self = (sFont_1788*)vself;
+    cFont* self = vself;
     char* data = (char*)vdata;
     sGlyph_1788* src = (sGlyph_1788*)(data + *(int*)(data + 0x14));
     sPad_1788 p;
     p.x = (float)data[0x10];
     p.y = (float)data[0x11];
-    self->pad = p;
-    self->count = *(short*)(data + 0xA);
-    self->table = (sGlyph_1788*)operator_new_tag(self->count * 12, D_004A46F8, flags, 0);
+    (*(sPad_1788*)&self->Offset[0]) = p;
+    self->NumGlyphs = *(short*)(data + 0xA);
+    (*(sGlyph_1788**)&self->Glyphs) = (sGlyph_1788*)operator_new_tag(self->NumGlyphs * 12, D_004A46F8, flags, 0);
     int space = 0;
-    self->maxH = 0;
-    self->last = self->first = src->code;
-    for (int i = 0; i < self->count; i++) {
-        self->table[i].code = src[i].code;
-        self->table[i].w = src[i].w;
-        self->table[i].h = src[i].h;
-        self->table[i].u = src[i].u;
-        self->table[i].v = src[i].v;
-        self->table[i].adv = src[i].adv;
-        self->table[i].xoff = src[i].xoff;
-        self->table[i].yoff = src[i].yoff;
-        if (i != 0 && self->table[i].code == self->last + 1) {
-            self->last = self->table[i].code;
+    self->MaxCharHeight = 0;
+    self->LastLinearCode = self->FirstCode = src->code;
+    for (int i = 0; i < self->NumGlyphs; i++) {
+        ((sGlyph_1788*)self->Glyphs)[i].code = src[i].code;
+        ((sGlyph_1788*)self->Glyphs)[i].w = src[i].w;
+        ((sGlyph_1788*)self->Glyphs)[i].h = src[i].h;
+        ((sGlyph_1788*)self->Glyphs)[i].u = src[i].u;
+        ((sGlyph_1788*)self->Glyphs)[i].v = src[i].v;
+        ((sGlyph_1788*)self->Glyphs)[i].adv = src[i].adv;
+        ((sGlyph_1788*)self->Glyphs)[i].xoff = src[i].xoff;
+        ((sGlyph_1788*)self->Glyphs)[i].yoff = src[i].yoff;
+        if (i != 0 && ((sGlyph_1788*)self->Glyphs)[i].code == self->LastLinearCode + 1) {
+            self->LastLinearCode = ((sGlyph_1788*)self->Glyphs)[i].code;
         }
-        if (self->table[i].code == ' ') {
+        if (((sGlyph_1788*)self->Glyphs)[i].code == ' ') {
             space = i;
         }
-        if (self->table[i].code == 0xAC) {
-            self->def = &self->table[i];
+        if (((sGlyph_1788*)self->Glyphs)[i].code == 0xAC) {
+            (*(sGlyph_1788**)&self->MissingGlyph) = &((sGlyph_1788*)self->Glyphs)[i];
         }
-        if (self->table[i].code == 0xA0) {
-            self->table[i].w = src[space].w;
-            self->table[i].h = src[space].h;
-            self->table[i].u = src[space].u;
-            self->table[i].v = src[space].v;
-            self->table[i].adv = src[space].adv;
-            self->table[i].xoff = src[space].xoff;
-            self->table[i].yoff = src[space].yoff;
+        if (((sGlyph_1788*)self->Glyphs)[i].code == 0xA0) {
+            ((sGlyph_1788*)self->Glyphs)[i].w = src[space].w;
+            ((sGlyph_1788*)self->Glyphs)[i].h = src[space].h;
+            ((sGlyph_1788*)self->Glyphs)[i].u = src[space].u;
+            ((sGlyph_1788*)self->Glyphs)[i].v = src[space].v;
+            ((sGlyph_1788*)self->Glyphs)[i].adv = src[space].adv;
+            ((sGlyph_1788*)self->Glyphs)[i].xoff = src[space].xoff;
+            ((sGlyph_1788*)self->Glyphs)[i].yoff = src[space].yoff;
         }
-        if (self->maxH < self->table[i].h + self->table[i].yoff) {
-            self->maxH = self->table[i].h + self->table[i].yoff;
+        if (self->MaxCharHeight < ((sGlyph_1788*)self->Glyphs)[i].h + ((sGlyph_1788*)self->Glyphs)[i].yoff) {
+            self->MaxCharHeight = ((sGlyph_1788*)self->Glyphs)[i].h + ((sGlyph_1788*)self->Glyphs)[i].yoff;
         }
     }
     cFont_downloadTexture((cFont*)((char*)self), (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
@@ -270,14 +261,6 @@ extern "C" void func_00391C48(cFont* self, float x, float y)
 //100%
 INCLUDE_ASM("render/font", func_00391CB0);
 #ifdef SKIP_ASM
-struct sFontRS1CB0 {
-    int field_0x0;          // 0x0
-    int field_0x4;          // 0x4
-    int flags;              // 0x8, bits 5..9 = alpha level
-    int field_0xC;          // 0xC
-    short tex;              // 0x10
-    short pad;
-};
 
 struct sFontVEntry1CB0 {
     short delta;
@@ -287,7 +270,7 @@ struct sFontVEntry1CB0 {
 
 struct sFontCtx1CB0 {
     char pad_0x0[0xE84];
-    sFontRS1CB0* top;           // 0xE84
+    sDrawState* top;           // 0xE84
     char pad_0xE88[0x10D8 - 0xE88];
     sFontVEntry1CB0* vtable;    // 0x10D8
 };
@@ -306,21 +289,21 @@ static inline int fontGetTex(void* s)
 extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m)
 {
     cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    ((sFontRS1CB0*)g->m_pCurrentDrawState)->tex = fontGetTex(self);
+    (g->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex(self);
     sFontPos1CB0 pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
-        sFontRS1CB0* top = (sFontRS1CB0*)g->m_pCurrentDrawState;
-        int saved = (unsigned)(top->flags & 0x3E0) >> 5;
+        sDrawState* top = g->m_pCurrentDrawState;
+        int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
         int a = saved - 1;
         if (a < 0) a = 0;
-        top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
+        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
         sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
         vt[80].fn((char*)g + vt[80].delta, self, m, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
-        sFontRS1CB0* top2 = (sFontRS1CB0*)g->m_pCurrentDrawState;
-        top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
+        sDrawState* top2 = g->m_pCurrentDrawState;
+        top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1CB0* vt = (sFontVEntry1CB0*)g->mVtbl;
     vt[80].fn((char*)g + vt[80].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
@@ -331,15 +314,6 @@ extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m)
 //100%
 INCLUDE_ASM("render/font", func_00391E30);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sFontRS1E30 {
-    int field_0x0;          // 0x0
-    int field_0x4;          // 0x4
-    int flags;              // 0x8, bits 5..9 = alpha level
-    int field_0xC;          // 0xC
-    short tex;              // 0x10
-    short pad;
-};
 
 struct sFontVEntry1E30 {
     short delta;
@@ -349,7 +323,7 @@ struct sFontVEntry1E30 {
 
 struct sFontCtx1E30 {
     char pad_0x0[0xE84];
-    sFontRS1E30* top;           // 0xE84
+    sDrawState* top;           // 0xE84
     char pad_0xE88[0x10D8 - 0xE88];
     sFontVEntry1E30* vtable;    // 0x10D8
 };
@@ -368,21 +342,21 @@ static inline int fontGetTex1E30(void* s)
 extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
 {
     cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-    ((sFontRS1E30*)g->m_pCurrentDrawState)->tex = fontGetTex1E30(self);
+    (g->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex1E30(self);
     sFontPos1E30 pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
-        sFontRS1E30* top = (sFontRS1E30*)g->m_pCurrentDrawState;
-        int saved = (unsigned)(top->flags & 0x3E0) >> 5;
+        sDrawState* top = g->m_pCurrentDrawState;
+        int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
         int a = saved - 1;
         if (a < 0) a = 0;
-        top->flags = (top->flags & ~0x3E0) | ((a << 5) & 0x3E0);
+        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
         sFontVEntry1E30* vt = (sFontVEntry1E30*)g->mVtbl;
         vt[81].fn((char*)g + vt[81].delta, self, m, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
-        sFontRS1E30* top2 = (sFontRS1E30*)g->m_pCurrentDrawState;
-        top2->flags = (top2->flags & ~0x3E0) | (saved << 5);
+        sDrawState* top2 = g->m_pCurrentDrawState;
+        top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1E30* vt = (sFontVEntry1E30*)g->mVtbl;
     vt[81].fn((char*)g + vt[81].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
@@ -404,32 +378,22 @@ struct sGlyph1FB0 {
     char pad;
 };
 
-struct sFontRes1FB0 {
-    int count;              // 0x0
-    sGlyph1FB0* table;      // 0x4
-    sGlyph1FB0* def;        // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-    char pad_0x14[0x28 - 0x14];
-    float padX;             // 0x28
-    float padY;             // 0x2C
-};
 
 struct sRect1FB0 {
     float x0, y0, x1, y1;
 };
 
-static inline sGlyph1FB0* sFontRes1FB0_find(sFontRes1FB0* f, int c)
+static inline sGlyph1FB0* sFontRes1FB0_find(cFont* f, int c)
 {
-    if (c < f->first)
+    if (c < f->FirstCode)
         return 0;
-    if (c <= f->last)
-        return f->table + c - f->first;
-    int lo = f->last - f->first;
-    int hi = f->count;
+    if (c <= f->LastLinearCode)
+        return ((sGlyph1FB0*)f->Glyphs) + c - f->FirstCode;
+    int lo = f->LastLinearCode - f->FirstCode;
+    int hi = f->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph1FB0* p = f->table + mid;
+        sGlyph1FB0* p = ((sGlyph1FB0*)f->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -437,13 +401,13 @@ static inline sGlyph1FB0* sFontRes1FB0_find(sFontRes1FB0* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return f->def;
+    return ((sGlyph1FB0*)f->MissingGlyph);
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
 extern "C" float func_00391FB0(cFont* f_, const char* s, void* r_, int mono, float sx, float sy)
 {
-    sFontRes1FB0* f = (sFontRes1FB0*)f_;
+    cFont* f = f_;
     sRect1FB0* r = (sRect1FB0*)r_;
     sRect1FB0 tmp;
     sRect1FB0* rc = r ? r : &tmp;
@@ -473,17 +437,17 @@ extern "C" float func_00391FB0(cFont* f_, const char* s, void* r_, int mono, flo
     }
     rc->x1 = rc->x1 + rc->x0;
     rc->y1 = rc->y1 + rc->y0;
-    if (f->padX < 0.0f) {
-        rc->x0 = rc->x0 - f->padX;
-        rc->x1 = rc->x1 - f->padX;
+    if (f->ShadowOffset[0] < 0.0f) {
+        rc->x0 = rc->x0 - f->ShadowOffset[0];
+        rc->x1 = rc->x1 - f->ShadowOffset[0];
     } else {
-        rc->x1 = rc->x1 + f->padX;
+        rc->x1 = rc->x1 + f->ShadowOffset[0];
     }
-    if (f->padY < 0.0f) {
-        rc->y0 = rc->y0 - f->padY;
-        rc->y1 = rc->y1 - f->padY;
+    if (f->ShadowOffset[1] < 0.0f) {
+        rc->y0 = rc->y0 - f->ShadowOffset[1];
+        rc->y1 = rc->y1 - f->ShadowOffset[1];
     } else {
-        rc->y1 = rc->y1 + f->padY;
+        rc->y1 = rc->y1 + f->ShadowOffset[1];
     }
     return rc->x1;
 }
@@ -503,32 +467,22 @@ struct sGlyph21F0 {
     char pad;
 };
 
-struct sFontRes21F0 {
-    int count;              // 0x0
-    sGlyph21F0* table;      // 0x4
-    sGlyph21F0* def;        // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-    char pad_0x14[0x28 - 0x14];
-    float padX;             // 0x28
-    float padY;             // 0x2C
-};
 
 struct sRect21F0 {
     float x0, y0, x1, y1;
 };
 
-static inline sGlyph21F0* sFontRes21F0_find(sFontRes21F0* f, int c)
+static inline sGlyph21F0* sFontRes21F0_find(cFont* f, int c)
 {
-    if (c < f->first)
+    if (c < f->FirstCode)
         return 0;
-    if (c <= f->last)
-        return f->table + c - f->first;
-    int lo = f->last - f->first;
-    int hi = f->count;
+    if (c <= f->LastLinearCode)
+        return ((sGlyph21F0*)f->Glyphs) + c - f->FirstCode;
+    int lo = f->LastLinearCode - f->FirstCode;
+    int hi = f->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph21F0* p = f->table + mid;
+        sGlyph21F0* p = ((sGlyph21F0*)f->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -536,13 +490,13 @@ static inline sGlyph21F0* sFontRes21F0_find(sFontRes21F0* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return f->def;
+    return ((sGlyph21F0*)f->MissingGlyph);
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
 extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
 {
-    sFontRes21F0* f = (sFontRes21F0*)f_;
+    cFont* f = f_;
     sRect21F0* r = (sRect21F0*)r_;
     sRect21F0 tmp;
     sRect21F0* rc = r ? r : &tmp;
@@ -572,17 +526,17 @@ extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int
     }
     rc->x1 = rc->x1 + rc->x0;
     rc->y1 = rc->y1 + rc->y0;
-    if (f->padX < 0.0f) {
-        rc->x0 = rc->x0 - f->padX;
-        rc->x1 = rc->x1 - f->padX;
+    if (f->ShadowOffset[0] < 0.0f) {
+        rc->x0 = rc->x0 - f->ShadowOffset[0];
+        rc->x1 = rc->x1 - f->ShadowOffset[0];
     } else {
-        rc->x1 = rc->x1 + f->padX;
+        rc->x1 = rc->x1 + f->ShadowOffset[0];
     }
-    if (f->padY < 0.0f) {
-        rc->y0 = rc->y0 - f->padY;
-        rc->y1 = rc->y1 - f->padY;
+    if (f->ShadowOffset[1] < 0.0f) {
+        rc->y0 = rc->y0 - f->ShadowOffset[1];
+        rc->y1 = rc->y1 - f->ShadowOffset[1];
     } else {
-        rc->y1 = rc->y1 + f->padY;
+        rc->y1 = rc->y1 + f->ShadowOffset[1];
     }
     return rc->x1;
 }
@@ -602,28 +556,18 @@ struct sGlyph2430 {
     char pad;
 };
 
-struct sFontRes2430 {
-    int count;              // 0x0
-    sGlyph2430* table;      // 0x4
-    sGlyph2430* def;        // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-    char pad_0x14[0x28 - 0x14];
-    float padX;             // 0x28
-    float padY;             // 0x2C
-};
 
-static inline sGlyph2430* sFontRes2430_find(sFontRes2430* f, int c)
+static inline sGlyph2430* sFontRes2430_find(cFont* f, int c)
 {
-    if (c < f->first)
+    if (c < f->FirstCode)
         return 0;
-    if (c <= f->last)
-        return f->table + c - f->first;
-    int lo = f->last - f->first;
-    int hi = f->count;
+    if (c <= f->LastLinearCode)
+        return ((sGlyph2430*)f->Glyphs) + c - f->FirstCode;
+    int lo = f->LastLinearCode - f->FirstCode;
+    int hi = f->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph2430* p = f->table + mid;
+        sGlyph2430* p = ((sGlyph2430*)f->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -631,7 +575,7 @@ static inline sGlyph2430* sFontRes2430_find(sFontRes2430* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return f->def;
+    return ((sGlyph2430*)f->MissingGlyph);
 }
 
 // PORT: PS2-only abs.s asm helper (fabsf off-PS2).
@@ -645,8 +589,8 @@ static inline float fabs_2430(float x)
 // Copy as much of str into dst as fits in width; returns where the next line starts (0 when done).
 extern "C" char* func_00392430(cFont* f_, const char* str, char* dst, int max, float sx, float width)
 {
-    sFontRes2430* f = (sFontRes2430*)f_;
-    width -= fabs_2430(f->padX);
+    cFont* f = f_;
+    width -= fabs_2430(f->ShadowOffset[0]);
     if (width < 0.0f)
         width = 0.0f;
     const char* start = str;
@@ -715,28 +659,18 @@ struct sGlyph2680 {
     char pad;
 };
 
-struct sFontRes2680 {
-    int count;              // 0x0
-    sGlyph2680* table;      // 0x4
-    sGlyph2680* def;        // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-    char pad_0x14[0x28 - 0x14];
-    float padX;             // 0x28
-    float padY;             // 0x2C
-};
 
-static inline sGlyph2680* sFontRes2680_find(sFontRes2680* f, int c)
+static inline sGlyph2680* sFontRes2680_find(cFont* f, int c)
 {
-    if (c < f->first)
+    if (c < f->FirstCode)
         return 0;
-    if (c <= f->last)
-        return f->table + c - f->first;
-    int lo = f->last - f->first;
-    int hi = f->count;
+    if (c <= f->LastLinearCode)
+        return ((sGlyph2680*)f->Glyphs) + c - f->FirstCode;
+    int lo = f->LastLinearCode - f->FirstCode;
+    int hi = f->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph2680* p = f->table + mid;
+        sGlyph2680* p = ((sGlyph2680*)f->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -744,7 +678,7 @@ static inline sGlyph2680* sFontRes2680_find(sFontRes2680* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return f->def;
+    return ((sGlyph2680*)f->MissingGlyph);
 }
 
 // PORT: PS2-only abs.s asm helper (fabsf off-PS2).
@@ -758,8 +692,8 @@ static inline float fabs_2680(float x)
 // Unicode version of func_00392430: copies as much of str into dst as fits in width; returns the next line start (0 when done).
 extern "C" unsigned short* func_00392680(cFont* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
 {
-    sFontRes2680* f = (sFontRes2680*)f_;
-    width -= fabs_2680(f->padX);
+    cFont* f = f_;
+    width -= fabs_2680(f->ShadowOffset[0]);
     if (width < 0.0f)
         width = 0.0f;
     const unsigned short* start = str;
@@ -910,25 +844,18 @@ struct sGlyph {
     char pad_0x9[3];
 };
 
-struct sGlyphTable {
-    int count;
-    sGlyph* glyphs;
-    sGlyph* fallback;
-    int first;
-    int last;
-};
 
-static inline sGlyph* findGlyph(sGlyphTable* t, int c)
+static inline sGlyph* findGlyph(cFont* t, int c)
 {
-    if (c < t->first)
+    if (c < t->FirstCode)
         return 0;
-    if (c <= t->last)
-        return t->glyphs + c - t->first;
-    int lo = t->last - t->first;
-    int hi = t->count;
+    if (c <= t->LastLinearCode)
+        return ((sGlyph*)t->Glyphs) + c - t->FirstCode;
+    int lo = t->LastLinearCode - t->FirstCode;
+    int hi = t->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph* g = &t->glyphs[mid];
+        sGlyph* g = &((sGlyph*)t->Glyphs)[mid];
         if (c == g->code)
             return g;
         if (c < g->code)
@@ -936,12 +863,12 @@ static inline sGlyph* findGlyph(sGlyphTable* t, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return t->fallback;
+    return ((sGlyph*)t->MissingGlyph);
 }
 
 extern "C" float func_00392BA8(cFont* t, char c)
 {
-    sGlyph* g = findGlyph(((sGlyphTable*)t), c);
+    sGlyph* g = findGlyph((t), c);
     if (g)
         return g->width;
     return 0.0f;
@@ -953,7 +880,7 @@ INCLUDE_ASM("render/font", func_00392C60);
 #ifdef SKIP_ASM
 extern "C" float func_00392C60(cFont* t, unsigned short c)
 {
-    sGlyph* g = findGlyph(((sGlyphTable*)t), c);
+    sGlyph* g = findGlyph((t), c);
     if (g)
         return g->width;
     return 0.0f;
@@ -3108,17 +3035,8 @@ extern "C" float func_003955A8(void *arg0) {
 //100%
 INCLUDE_ASM("render/font", func_003955B0);
 #ifdef SKIP_ASM
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sRS_55B0 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
 struct sEnt_55B0 {
-    sRS_55B0 rs;                    // 0x00
+    sDrawState rs;                    // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -3132,7 +3050,7 @@ struct sRing_55B0 {
 };
 struct sGfx_55B0 {
     char pad_0x0[0xE84];
-    sRS_55B0* top;                  // 0xE84
+    sDrawState* top;                  // 0xE84
     char pad_0xE88[0x18F0 - 0xE88];
     sRing_55B0* ring;               // 0x18F0
 };
@@ -3140,10 +3058,10 @@ struct sGfx_55B0 {
 // Queues a draw entry with the current render state in the uncached ring.
 extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
-    sRS_55B0* rs = (sRS_55B0*)gfx->m_pCurrentDrawState;
+    sDrawState* rs = gfx->m_pCurrentDrawState;
     sRing_55B0* ring = (sRing_55B0*)gfx->mpDeferMan;
     if (ring->count < 0xA28) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_55B0* e = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         e->rs = *rs;

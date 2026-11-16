@@ -33,23 +33,15 @@ void* func_002D1CF0(void* self)
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D1D10);
 #ifdef SKIP_ASM
-struct sRState_1D10 {
-    int f0;                     // 0x00
-    int flagsA;                 // 0x04
-    int flagsB;                 // 0x08
-    int fC;                     // 0x0C
-    short f10;                  // 0x10
-    short f12;                  // 0x12
-};
 
-static inline void setA_1D10(sRState_1D10* r, int v, int mask, int shift)
+static inline void setA_1D10(sDrawState* r, int v, int mask, int shift)
 {
-    r->flagsA = (r->flagsA & ~(mask << shift)) | ((v << shift) & (mask << shift));
+    r->unk_00[1] = (((int)r->unk_00[1]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
-static inline void setB_1D10(sRState_1D10* r, int v, int mask, int shift)
+static inline void setB_1D10(sDrawState* r, int v, int mask, int shift)
 {
-    r->flagsB = (r->flagsB & ~(mask << shift)) | ((v << shift) & (mask << shift));
+    r->unk_00[2] = (((int)r->unk_00[2]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
 // 2D vector (8 bytes, BLKmode: its temporaries share 16-byte frame slots that combine when freed).
@@ -76,7 +68,7 @@ typedef void (*DrawRotFn_1D10)(void*, float, void*, const sVec2_1D10&, const sVe
 
 struct sRCtx_1D10 {
     char pad[0xE84];
-    sRState_1D10* top;          // 0xE84
+    sDrawState* top;          // 0xE84
     char padE88[0xF50 - 0xE88];
     int texs[0x40];             // 0xF50
     char pad1050[0x10D8 - 0x1050];
@@ -88,7 +80,7 @@ static inline int tex_1D10(sRCtx_1D10* c, int i)
     return c->texs[i];
 }
 
-extern sRState_1D10 D_00501420;
+extern sDrawState D_00501420;
 
 extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float angle)
 {
@@ -102,18 +94,18 @@ extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float
     col.g = src[1];
     col.b = src[2];
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    ((sRState_1D10*)ctx->m_pCurrentDrawState)[1] = ((sRState_1D10*)ctx->m_pCurrentDrawState)[0];
-    (*(sRState_1D10**)&ctx->m_pCurrentDrawState)++;
-    *((sRState_1D10*)ctx->m_pCurrentDrawState) = D_00501420;
-    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 1, 1, 22);
-    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0, 3, 0);
-    setB_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0, 0x7FFFF, 10);
-    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 7, 0x1F, 2);
-    setB_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 8, 0x1F, 5);
-    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 1, 3, 23);
-    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0, 3, 20);
-    setA_1D10(((sRState_1D10*)ctx->m_pCurrentDrawState), 0x14, 0xFF, 12);
-    ((sRState_1D10*)ctx->m_pCurrentDrawState)->f10 = tex_1D10((sRCtx_1D10*)ctx, kind + 0x25);
+    (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
+    (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
+    *(ctx->m_pCurrentDrawState) = D_00501420;
+    setA_1D10((ctx->m_pCurrentDrawState), 1, 1, 22);
+    setA_1D10((ctx->m_pCurrentDrawState), 0, 3, 0);
+    setB_1D10((ctx->m_pCurrentDrawState), 0, 0x7FFFF, 10);
+    setA_1D10((ctx->m_pCurrentDrawState), 7, 0x1F, 2);
+    setB_1D10((ctx->m_pCurrentDrawState), 8, 0x1F, 5);
+    setA_1D10((ctx->m_pCurrentDrawState), 1, 3, 23);
+    setA_1D10((ctx->m_pCurrentDrawState), 0, 3, 20);
+    setA_1D10((ctx->m_pCurrentDrawState), 0x14, 0xFF, 12);
+    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex_1D10((sRCtx_1D10*)ctx, kind + 0x25);
     if (angle != 0.0f) {
         ((DrawRotFn_1D10)((sVE_1D10*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         if (kind == 1 || kind == 4) {
@@ -122,7 +114,7 @@ extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float
     } else {
         ((DrawFn_1D10)((sVE_1D10*)ctx->mVtbl)[78].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
     }
-    (*(sRState_1D10**)&ctx->m_pCurrentDrawState)--;
+    (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
 

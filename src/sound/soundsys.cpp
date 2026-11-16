@@ -610,18 +610,11 @@ struct sSnd0CC0Mgr {
     char pad0[0x1D8];
     sSnd0CC0Sub sub;         // 0x1D8
 };
-struct sSnd0CC0Sys {
-    sSnd0CC0Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd0CC0Mgr** p118;      // 0x118
-};
 
 extern "C" int func_00290CC0(cSSXAudio* vself, int a, int b)
 {
-    sSnd0CC0Sys* self = (sSnd0CC0Sys*)vself;
-    sSnd0CC0Mgr* m = self->mgr;
+    cSSXAudio* self = vself;
+    sSnd0CC0Mgr* m = ((sSnd0CC0Mgr*)self->mpVBankManager);
     sSnd0CC0Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -643,9 +636,9 @@ extern "C" int func_00290CC0(cSSXAudio* vself, int a, int b)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
-    sSnd0CC0Mgr** pp = self->p118;
+    self->mBank[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = b;
+    sSnd0CC0Mgr** pp = ((sSnd0CC0Mgr**)self->mpMusicVStreamSys);
     int r = (int)func_00287968(self, 5, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
     return func_002906B8(self);
@@ -4506,13 +4499,6 @@ struct sSnd9368Mgr {
     char pad0[0x1D8];
     sSnd9368Sub sub;         // 0x1D8
 };
-struct sSnd9368Sys {
-    sSnd9368Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd9368Mgr** p118;      // 0x118
-};
 
 struct sSndId299368 {
     long v;
@@ -4526,9 +4512,9 @@ static inline int IsReady299368(char* obj)
     return *(int*)(obj + 0x874) != 0 && *(int*)(obj + 0x87C) != 0;
 }
 
-static inline void AddVoice299368(sSnd9368Sys* self, int a, int bb, int type)
+static inline void AddVoice299368(cSSXAudio* self, int a, int bb, int type)
 {
-    sSnd9368Mgr* m = self->mgr;
+    sSnd9368Mgr* m = ((sSnd9368Mgr*)self->mpVBankManager);
     sSnd9368Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -4550,9 +4536,9 @@ static inline void AddVoice299368(sSnd9368Sys* self, int a, int bb, int type)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = bb;
-    sSnd9368Mgr** pp = self->p118;
+    self->mBank[((sSnd9368Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd9368Mgr*)self->mpVBankManager)->sub.cur] = bb;
+    sSnd9368Mgr** pp = ((sSnd9368Mgr**)self->mpMusicVStreamSys);
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
 }
@@ -4561,15 +4547,15 @@ static inline void AddVoice299368(sSnd9368Sys* self, int a, int bb, int type)
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
 extern "C" void func_00299368(cSSXAudio* self, char* obj)
 {
-    if (func_00288AE0(((sSnd9368Sys*)self)) != 0) {
+    if (func_00288AE0((self)) != 0) {
         return;
     }
     if (!IsReady299368(obj)) {
         return;
     }
     func_002ADDE0(&(*(sSnd9368Mgr**)self->mpMusicVStreamSys)->sub, D_004A36A8_9368[0].v);
-    AddVoice299368(((sSnd9368Sys*)self), 0, 0x6C, 9);
-    func_002906B8(((sSnd9368Sys*)self));
+    AddVoice299368((self), 0, 0x6C, 9);
+    func_002906B8((self));
 }
 #endif
 
@@ -7236,14 +7222,12 @@ extern "C" int func_0029E438(void *, void *);
 extern "C" void func_002DA1C0(void *, float *);
 
 struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
-struct sQuad2_29E4A0 { t4Vector a; t4Vector b; };
-struct sSndCam_29E4A0 { char pad[0x6050]; sQuad2_29E4A0 xf; int idx; };
 
 extern "C" void func_0029E4A0(cSSXAudio* arg0, void *arg1) {
     if (arg0->mpAvalancheRiderIndex < *(int *)((char*)func_0028B1D8() + 0x78)) {
-        sQuad2_29E4A0 q;
+        tAvalanchePositionalData q;
         float v[3];
-        sQuad2_29E4A0* dst = &(*(sQuad2_29E4A0*)&arg0->mAvalancheData);
+        tAvalanchePositionalData* dst = &(*(&arg0->mAvalancheData));
         cRider* rider = *(cRider**)((char*)func_0028B1D8() + (arg0->mpAvalancheRiderIndex << 2) + 0x28);
         char* obj = (char*)&rider->mVtbl;
         sVEntryP_29E4A0* vt = *(sVEntryP_29E4A0**)obj;
@@ -7252,8 +7236,8 @@ extern "C" void func_0029E4A0(cSSXAudio* arg0, void *arg1) {
         v[1] = pos[1];
         v[2] = pos[2];
         func_002DA1C0(&q, v);
-        (*(sQuad2_29E4A0*)&arg0->mAvalancheData) = q;
-        *(int *)((char*)arg1 + 0x64) = func_0029E438(((sSndCam_29E4A0*)arg0), dst);
+        (*(&arg0->mAvalancheData)) = q;
+        *(int *)((char*)arg1 + 0x64) = func_0029E438((arg0), dst);
     }
 }
 #endif

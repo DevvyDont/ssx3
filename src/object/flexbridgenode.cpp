@@ -1412,14 +1412,6 @@ struct sMat_3480C8 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sRS_3480C8 {
-    int f0;
-    int flagsA;
-    int flagsB;
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sVE_3480C8 { short delta; short index; void* fn; };
 typedef sMat_3480C8 (*tGetMat_3480C8)(void*);
@@ -1427,7 +1419,7 @@ typedef int (*tCull_3480C8)(void*, void*, void*, const sMat_3480C8&);
 
 struct sCtx_3480C8 {
     char pad0[0xE84];
-    sRS_3480C8* top;        // 0xE84
+    sDrawState* top;        // 0xE84
     char padE88[0x10D8 - 0xE88];
     sVE_3480C8* vt;         // 0x10D8
 };
@@ -1483,8 +1475,8 @@ extern "C" void func_003480C8(sFlex_3480C8* self)
         D_004FF6C0[7][3] = 1.0f;
         D_004A5980 = 1;
     }
-    ((sRS_3480C8*)ctx->m_pCurrentDrawState)->tex = -1;
-    ((sRS_3480C8*)ctx->m_pCurrentDrawState)->flagsA = (((sRS_3480C8*)ctx->m_pCurrentDrawState)->flagsA & ~0x7C) | 4;
+    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
+    (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
     int n = self->count - 1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < 8; j++) {

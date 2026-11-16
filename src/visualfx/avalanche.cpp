@@ -1251,13 +1251,6 @@ struct sOut_8A00 {
     sRow_8A00 pos;
 };
 
-struct sRS_8A00 {
-    int w0;
-    int w1;
-    int w2;
-    int w3;
-    int w4;
-};
 
 struct sVE_8A00 {
     short delta;
@@ -1267,7 +1260,7 @@ struct sVE_8A00 {
 
 struct sCtx_8A00 {
     char pad[0xE84];
-    sRS_8A00* top;              // 0xE84
+    sDrawState* top;              // 0xE84
     char pad2[0x10D8 - 0xE88];
     sVE_8A00* vt;               // 0x10D8
 };
@@ -1413,7 +1406,7 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
     sMat_8A00 m;
     CopyMat_8A00(&m, &D_004FF1A0_8A00);
     PushRS_8A00((sCtx_8A00*)GrMan);
-    SetBits_8A00(((sRS_8A00*)GrMan->m_pCurrentDrawState)->w1, 0x7C, 2, 1);
+    SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
     if (D_004A3A58 != 0) {
         int i = 0;
         sRow_8A00 pos = node->obj->pos;
@@ -1434,7 +1427,7 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
         }
         ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn((char*)GrMan + ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].delta, (int)node->obj->count, D_004D5B70_8A00, 0);
     }
-    (*(sRS_8A00**)&GrMan->m_pCurrentDrawState)--;
+    (*(sDrawState**)&GrMan->m_pCurrentDrawState)--;
 }
 #endif
 

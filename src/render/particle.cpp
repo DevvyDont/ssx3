@@ -2859,29 +2859,6 @@ struct sPtScis65B8 {
     unsigned short v[4];
 };
 
-struct sPtView65B8 {
-    float x, y, w, h;               // 0x00
-    char pad_0x10[0x14];
-    float f24;                      // 0x24
-    float f28;                      // 0x28
-    float f2C;                      // 0x2C
-    sPtQ65B8 q30;                   // 0x30
-    sPtQ65B8 q40;                   // 0x40
-    sPtQ65B8 q50;                   // 0x50
-    sPtMtx65B8 m60;                 // 0x60
-    sPtMtx65B8 mA0;                 // 0xA0
-    sPtMtx65B8 mE0;                 // 0xE0
-    sPtMtx65B8 m120;                // 0x120
-    sPtQ65B8 q160;                  // 0x160
-    sPtQ65B8 q170;                  // 0x170
-    sPtMtx65B8 m180;                // 0x180
-    sPtMtx65B8 m1C0;                // 0x1C0
-    sPtQ65B8 q200;                  // 0x200
-    sPtQ65B8 q210;                  // 0x210
-    sPtScis65B8 scissor;            // 0x220
-    int key;                        // 0x228
-    int pad_0x22C;
-};
 
 struct sPtGfx65B8 {
     char pad_0x0[0x10DC];
@@ -2910,7 +2887,7 @@ struct sPtGfx65B8 {
     sPtQ65B8 q6B70;                 // 0x6B70
     sPtQ65B8 q6B80;                 // 0x6B80
     char pad_0x6B90[0x6D20 - 0x6B90];
-    sPtView65B8 views[1];           // 0x6D20
+    sViewportStack views[1];           // 0x6D20
 };
 
 // PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
@@ -2930,31 +2907,31 @@ static inline void vu0CopyMtx65B8(sPtMtx65B8* dst, sPtMtx65B8* src)
         : "memory");
 }
 
-extern "C" void func_003950C0(sPtView65B8* dst, sPtView65B8* src);
+extern "C" void func_003950C0(sViewportStack* dst, sViewportStack* src);
 
 extern "C" void func_003765B8(cPS2GraphicsMan* self)
 {
-    sPtView65B8* v = &((sPtView65B8*)&self->mViewportStack[0])[self->mViewportDepth];
-    v->scissor = (*(sPtScis65B8*)&self->mScissor[0]);
-    v->key = *(int*)((char*)self->mpDeferMan + 0x69CC4);
-    v->f24 = self->unk_590C;
-    v->f28 = self->unk_5908;
-    vu0CopyMtx65B8(&v->m60, &(*(sPtMtx65B8*)&self->mScreenMatrix));
-    v->q30 = (*(sPtQ65B8*)&self->unk_6B70);
-    v->q40 = (*(sPtQ65B8*)&self->unk_6B80);
-    vu0CopyMtx65B8(&v->mA0, &(*(sPtMtx65B8*)&self->mWorld));
-    vu0CopyMtx65B8(&v->mE0, &(*(sPtMtx65B8*)&self->mView));
-    vu0CopyMtx65B8(&v->m120, &(*(sPtMtx65B8*)&self->mGuardBandMatrix));
-    v->q160 = (*(sPtQ65B8*)&self->mGuardScale);
-    v->q170 = (*(sPtQ65B8*)&self->mGuardOffset);
-    vu0CopyMtx65B8(&v->m180, &(*(sPtMtx65B8*)&self->mViewProj));
-    vu0CopyMtx65B8(&v->m1C0, &(*(sPtMtx65B8*)&self->mNetMatrix));
-    v->q200 = (*(sPtQ65B8*)&self->mScreenScale);
-    v->q210 = (*(sPtQ65B8*)&self->mScreenOffset);
-    v->f2C = self->unk_5910;
-    v->q50 = (*(sPtQ65B8*)&self->unk_5920);
+    sViewportStack* v = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    (*(sPtScis65B8*)&v->mScissor[0]) = (*(sPtScis65B8*)&self->mScissor[0]);
+    v->mDeferScissorIndex = *(int*)((char*)self->mpDeferMan + 0x69CC4);
+    v->unk_024 = self->unk_590C;
+    v->unk_028 = self->unk_5908;
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mScreenMatrix), &(*(sPtMtx65B8*)&self->mScreenMatrix));
+    (*(sPtQ65B8*)&v->unk_030) = (*(sPtQ65B8*)&self->unk_6B70);
+    (*(sPtQ65B8*)&v->unk_040) = (*(sPtQ65B8*)&self->unk_6B80);
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mWorld), &(*(sPtMtx65B8*)&self->mWorld));
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mView), &(*(sPtMtx65B8*)&self->mView));
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mGuardBandMatrix), &(*(sPtMtx65B8*)&self->mGuardBandMatrix));
+    (*(sPtQ65B8*)&v->mGuardScale) = (*(sPtQ65B8*)&self->mGuardScale);
+    (*(sPtQ65B8*)&v->mGuardOffset) = (*(sPtQ65B8*)&self->mGuardOffset);
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mViewProj), &(*(sPtMtx65B8*)&self->mViewProj));
+    vu0CopyMtx65B8(&(*(sPtMtx65B8*)&v->mNetMatrix), &(*(sPtMtx65B8*)&self->mNetMatrix));
+    (*(sPtQ65B8*)&v->mScreenScale) = (*(sPtQ65B8*)&self->mScreenScale);
+    (*(sPtQ65B8*)&v->mScreenOffset) = (*(sPtQ65B8*)&self->mScreenOffset);
+    v->unk_02C = self->unk_5910;
+    (*(sPtQ65B8*)&v->unk_050) = (*(sPtQ65B8*)&self->unk_5920);
     self->mViewportDepth++;
-    func_003950C0(&((sPtView65B8*)&self->mViewportStack[0])[self->mViewportDepth], v);
+    func_003950C0(&((&self->mViewportStack[0]))[self->mViewportDepth], v);
 }
 #endif
 
@@ -2973,29 +2950,6 @@ struct sPtScis6768 {
     unsigned short v[4];
 };
 
-struct sPtView6768 {
-    float x, y, w, h;               // 0x00
-    char pad_0x10[0x14];
-    float f24;                      // 0x24
-    float f28;                      // 0x28
-    float f2C;                      // 0x2C
-    sPtQ6768 q30;                   // 0x30
-    sPtQ6768 q40;                   // 0x40
-    sPtQ6768 q50;                   // 0x50
-    sPtMtx6768 m60;                 // 0x60
-    sPtMtx6768 mA0;                 // 0xA0
-    sPtMtx6768 mE0;                 // 0xE0
-    sPtMtx6768 m120;                // 0x120
-    sPtQ6768 q160;                  // 0x160
-    sPtQ6768 q170;                  // 0x170
-    sPtMtx6768 m180;                // 0x180
-    sPtMtx6768 m1C0;                // 0x1C0
-    sPtQ6768 q200;                  // 0x200
-    sPtQ6768 q210;                  // 0x210
-    sPtScis6768 scissor;            // 0x220
-    int key;                        // 0x228
-    int pad_0x22C;
-};
 
 struct sPtGfx6768 {
     char pad_0x0[0x10DC];
@@ -3025,7 +2979,7 @@ struct sPtGfx6768 {
     sPtQ6768 q6B80;                 // 0x6B80
     int i6B90;                      // 0x6B90
     char pad_0x6B94[0x6D20 - 0x6B94];
-    sPtView6768 views[1];           // 0x6D20
+    sViewportStack views[1];           // 0x6D20
 };
 
 // PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
@@ -3050,29 +3004,29 @@ extern "C" void func_00364B88(void* table, void* key);
 extern "C" void func_00376768(cPS2GraphicsMan* self)
 {
     self->mViewportDepth--;
-    sPtView6768* v = &((sPtView6768*)&self->mViewportStack[0])[self->mViewportDepth];
-    (*(sPtScis6768*)&self->mScissor[0]) = v->scissor;
-    if (v->key == -1) {
+    sViewportStack* v = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    (*(sPtScis6768*)&self->mScissor[0]) = (*(sPtScis6768*)&v->mScissor[0]);
+    if (v->mDeferScissorIndex == -1) {
         func_00364B88((char*)self->mpDeferMan, &(*(sPtScis6768*)&self->mScissor[0]));
     } else {
-        *(int*)((char*)self->mpDeferMan + 0x69CC4) = v->key;
+        *(int*)((char*)self->mpDeferMan + 0x69CC4) = v->mDeferScissorIndex;
     }
-    self->unk_590C = v->f24;
-    self->unk_5908 = v->f28;
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mScreenMatrix), &v->m60);
-    (*(sPtQ6768*)&self->unk_6B70) = v->q30;
-    (*(sPtQ6768*)&self->unk_6B80) = v->q40;
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mWorld), &v->mA0);
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mView), &v->mE0);
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mGuardBandMatrix), &v->m120);
-    (*(sPtQ6768*)&self->mGuardScale) = v->q160;
-    (*(sPtQ6768*)&self->mGuardOffset) = v->q170;
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mViewProj), &v->m180);
-    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mNetMatrix), &v->m1C0);
-    (*(sPtQ6768*)&self->mScreenScale) = v->q200;
-    (*(sPtQ6768*)&self->mScreenOffset) = v->q210;
-    self->unk_5910 = v->f2C;
-    (*(sPtQ6768*)&self->unk_5920) = v->q50;
+    self->unk_590C = v->unk_024;
+    self->unk_5908 = v->unk_028;
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mScreenMatrix), &(*(sPtMtx6768*)&v->mScreenMatrix));
+    (*(sPtQ6768*)&self->unk_6B70) = (*(sPtQ6768*)&v->unk_030);
+    (*(sPtQ6768*)&self->unk_6B80) = (*(sPtQ6768*)&v->unk_040);
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mWorld), &(*(sPtMtx6768*)&v->mWorld));
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mView), &(*(sPtMtx6768*)&v->mView));
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mGuardBandMatrix), &(*(sPtMtx6768*)&v->mGuardBandMatrix));
+    (*(sPtQ6768*)&self->mGuardScale) = (*(sPtQ6768*)&v->mGuardScale);
+    (*(sPtQ6768*)&self->mGuardOffset) = (*(sPtQ6768*)&v->mGuardOffset);
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mViewProj), &(*(sPtMtx6768*)&v->mViewProj));
+    vu0CopyMtx6768(&(*(sPtMtx6768*)&self->mNetMatrix), &(*(sPtMtx6768*)&v->mNetMatrix));
+    (*(sPtQ6768*)&self->mScreenScale) = (*(sPtQ6768*)&v->mScreenScale);
+    (*(sPtQ6768*)&self->mScreenOffset) = (*(sPtQ6768*)&v->mScreenOffset);
+    self->unk_5910 = v->unk_02C;
+    (*(sPtQ6768*)&self->unk_5920) = (*(sPtQ6768*)&v->unk_050);
     self->mMatricesValid = 0;
 }
 #endif
@@ -3086,20 +3040,14 @@ struct sPtVEntryI6938 {
     int (*fn)(void*);
 };
 
-struct sPtGfx6938 {
-    char pad_0x0[0x10D8];
-    sPtVEntryI6938* vtable;         // 0x10D8
-    char pad_0x10DC[0x5900 - 0x10DC];
-    unsigned short scissor[4];      // 0x5900: x, y, w, h
-};
 
 // Clips the rectangle to the screen (negative origins shrink the size) and stores it as the scissor box.
 extern "C" void func_00376938(cPS2GraphicsMan* p, float x, float y, float w, float h)
 {
-    sPtGfx6938* self = (sPtGfx6938*)p;
-    sPtVEntryI6938* e = &self->vtable[10];
+    cPS2GraphicsMan* self = p;
+    sPtVEntryI6938* e = &((sPtVEntryI6938*)self->mVtbl)[10];
     int width = e->fn((char*)self + e->delta);
-    e = &self->vtable[11];
+    e = &((sPtVEntryI6938*)self->mVtbl)[11];
     int height = e->fn((char*)self + e->delta);
     if (x < 0.0f) {
         w += x;
@@ -3110,27 +3058,27 @@ extern "C" void func_00376938(cPS2GraphicsMan* p, float x, float y, float w, flo
         y = 0.0f;
     }
     int ix = (int)x;
-    self->scissor[0] = ix < width - 1 ? ix : width - 1;
+    self->mScissor[0] = ix < width - 1 ? ix : width - 1;
     int iy = (int)y;
-    self->scissor[1] = iy < height - 1 ? iy : height - 1;
+    self->mScissor[1] = iy < height - 1 ? iy : height - 1;
     int iw = (int)w;
-    int maxw = width - self->scissor[0];
+    int maxw = width - self->mScissor[0];
     int rw;
     if (iw >= 0) {
         rw = maxw < iw ? maxw : iw;
     } else {
         rw = 0;
     }
-    self->scissor[2] = rw;
+    self->mScissor[2] = rw;
     int ih = (int)h;
-    int maxh = height - self->scissor[1];
+    int maxh = height - self->mScissor[1];
     int rh;
     if (ih >= 0) {
         rh = maxh < ih ? maxh : ih;
     } else {
         rh = 0;
     }
-    self->scissor[3] = rh;
+    self->mScissor[3] = rh;
 }
 #endif
 
@@ -3231,27 +3179,20 @@ extern "C" float func_00376C10(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/particle", func_00376C28);
 #ifdef SKIP_ASM
-struct sPartEmitter {
-    char pad[0x10];
-    float x;
-    float y;
-    float z;
-    char pad2[0x230 - 0x1C];
-};
 
 struct sPartSys {
     char pad[0x10dc];
     int cur;
     char pad2[0x6d20 - 0x10e0];
-    sPartEmitter emitters[1];
+    sViewportStack emitters[1];
 };
 
 extern "C" void func_00376C28(cPS2GraphicsMan* self, float* a, float* b, float* c)
 {
-    sPartEmitter* e = &((sPartEmitter*)&self->mViewportStack[0])[self->mViewportDepth];
-    *a = e->z;
-    *b = e->x;
-    *c = e->y;
+    sViewportStack* e = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    *a = e->unk_010[2];
+    *b = e->unk_010[0];
+    *c = e->unk_010[1];
 }
 #endif
 
@@ -3809,13 +3750,10 @@ extern "C" void func_00377950(cPS2GraphicsMan* self, int mode)
 //100%
 INCLUDE_ASM("render/particle", func_003779E0);
 #ifdef SKIP_ASM
-struct sPart20 {
-    int v[5];
-};
 
-extern "C" void func_003779E0(cPS2GraphicsMan* self, sPart20* src)
+extern "C" void func_003779E0(cPS2GraphicsMan* self, tTVDisplayFormat* src)
 {
-    *(sPart20*)&self->mTVDisplayFormat = *src;
+    *(&self->mTVDisplayFormat) = *src;
 }
 #endif
 
@@ -6683,10 +6621,6 @@ struct sVE_D0B0 {
     void (*fn)(void*, int, void*, int, int, unsigned int, int, int, void*, int);
 };
 
-struct sGfxView_D0B0 {
-    char pad[0x10D8];
-    sVE_D0B0* vt;                   // 0x10D8
-};
 
 extern char D_004A4390[];
 void* operator_new_D0B0(unsigned int, char*, unsigned int, int) __asm__("operator_new__FUi");
@@ -6696,7 +6630,7 @@ extern "C" void* MEM_free(void* p);
 
 extern "C" void func_0037D0B0(cPS2GraphicsMan* selfp, int a1, void* objp, int a3)
 {
-    sGfxView_D0B0* self = (sGfxView_D0B0*)selfp;
+    cPS2GraphicsMan* self = selfp;
     sTexSrc_D0B0* obj = (sTexSrc_D0B0*)objp;
     int mode = 0;
     char* extra = 0;
@@ -6764,7 +6698,7 @@ extern "C" void func_0037D0B0(cPS2GraphicsMan* selfp, int a1, void* objp, int a3
             data = p10;
         fC = obj->fC;
     }
-    sVE_D0B0* e = &self->vt[0x188 / 8];
+    sVE_D0B0* e = &((sVE_D0B0*)self->mVtbl)[0x188 / 8];
     e->fn((char*)self + e->delta, a1, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, a3);
     if (allocated) {
         MEM_free(tmp);
@@ -7003,18 +6937,11 @@ struct sPartMtx {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPartDrawEntry {
-    sPartQ16 q;          // 0x00
-    sPartMtx m0;         // 0x10
-    sPartMtx m1;         // 0x50
-    float f;             // 0x90
-    int i;               // 0x94
-};
 
 struct sPartDrawList {
     char pad_0x0[0x13EC];
     int count;                    // 0x13EC
-    sPartDrawEntry entries[1];    // 0x13F0
+    tProjTexInfo entries[1];    // 0x13F0
 };
 
 // PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
@@ -7036,11 +6963,11 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
 
 extern "C" void func_0037D758(cPS2GraphicsMan* self, sPartQ16* q, sPartMtx* m0, sPartMtx* m1, float f, int i)
 {
-    ((sPartDrawEntry*)&self->mProjTextures[0])[self->mNumProjTextures].q = *q;
-    vu0CopyMtxP(&((sPartDrawEntry*)&self->mProjTextures[0])[self->mNumProjTextures].m0, m0);
-    vu0CopyMtxP(&((sPartDrawEntry*)&self->mProjTextures[0])[self->mNumProjTextures].m1, m1);
-    ((sPartDrawEntry*)&self->mProjTextures[0])[self->mNumProjTextures].f = f;
-    ((sPartDrawEntry*)&self->mProjTextures[0])[self->mNumProjTextures].i = i;
+    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_00) = *q;
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_10), m0);
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_50), m1);
+    ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_90 = f;
+    ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_94 = i;
     self->mNumProjTextures++;
 }
 #endif
@@ -7224,13 +7151,10 @@ struct sPtVecDBE8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sPtMtxDBE8 {
-    sPtVecDBE8 r[4];
-};
 
 struct sPtGfxDBE8 {
     char pad_0x0[0x6B30];
-    sPtMtxDBE8 clipMtx;         // 0x6B30
+    t4Matrix clipMtx;         // 0x6B30
     float minX;                 // 0x6B70
     float minY;                 // 0x6B74
     float maxZ;                 // 0x6B78
@@ -7245,7 +7169,7 @@ struct sPtGfxDBE8 {
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sPtVecDBE8 mtxApplyDBE8(sPtMtxDBE8* m, const sPtVecDBE8& v)
+static inline sPtVecDBE8 mtxApplyDBE8(t4Matrix* m, const sPtVecDBE8& v)
 {
     sPtVecDBE8 out;
     __asm__(
@@ -7273,7 +7197,7 @@ extern "C" int func_0037DBE8(cPS2GraphicsMan* self, const sPtVecDBE8* p)
     if (self->mMatricesValid == 0) {
         func_0037D968(self);
     }
-    sPtVecDBE8 v = mtxApplyDBE8(&(*(sPtMtxDBE8*)&self->mScreenWorld), *p);
+    sPtVecDBE8 v = mtxApplyDBE8(&(*(&self->mScreenWorld)), *p);
     int code = 0;
     float w = 1.0f / v.w;
     v.x *= w;
@@ -8815,14 +8739,6 @@ struct sVtx2170 {
     sVtx2170() {}
 };
 
-struct sRS2170 {
-    int field_0x0;
-    int flagsA;             // 0x4, bits 2..6 = layer
-    int flagsB;             // 0x8
-    int field_0xC;
-    short tex;              // 0x10
-    short pad;
-};
 
 struct cRMgr2170 {
     char pad_0x0[0x10D8];
@@ -9062,8 +8978,8 @@ extern "C" void func_00382170(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, fl
         D_004FFBC0[15].w = 0.0f;
         D_004A59A0 = 1;
     }
-    ((sRS2170*)mgr->m_pCurrentDrawState)->tex = -1;
-    ((sRS2170*)mgr->m_pCurrentDrawState)->flagsA = (((sRS2170*)mgr->m_pCurrentDrawState)->flagsA & ~0x7C) | 4;
+    (mgr->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
+    (mgr->m_pCurrentDrawState)->unk_00[1] = (((int)(mgr->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
     ((cRMgr2170*)mgr)->v31();
     ((cRMgr2170*)mgr)->v37();
 
@@ -9086,7 +9002,7 @@ extern "C" void func_00382170(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, fl
     verts[i].pos = p;
     i++;
     ((cRMgr2170*)mgr)->v73(i, verts, 0);
-    ((sRS2170*)mgr->m_pCurrentDrawState)->flagsA = (((sRS2170*)mgr->m_pCurrentDrawState)->flagsA & ~0x7C) | 4;
+    (mgr->m_pCurrentDrawState)->unk_00[1] = (((int)(mgr->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
     ((cRMgr2170*)mgr)->v32();
 }
 #endif
