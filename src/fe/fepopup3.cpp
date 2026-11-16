@@ -28,11 +28,11 @@ INCLUDE_ASM("fe/fepopup3", func_001DF5C0);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF630);
+INCLUDE_ASM("fe/fepopup3", cFEStateOnlineAgreement_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF6A0);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetQuickPlayPopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetSSXWorld__cFEStateNetSSXWorld);
 
@@ -42,7 +42,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateLobbyMenu__cFEStateLobbyMenu);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF8E0);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetCreateRoomPopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetHelpPopup__cFEStateNetHelpPopup);
 
@@ -184,11 +184,11 @@ INCLUDE_ASM("fe/fepopup3", func_001E0948);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateChallengePopup__cFEStateChallengePopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0A00);
+INCLUDE_ASM("fe/fepopup3", cFEStateChallengePopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0AB8);
+INCLUDE_ASM("fe/fepopup3", cFEStateChallengeReceivedPopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect);
 
@@ -196,15 +196,15 @@ INCLUDE_ASM("fe/fepopup3", func_001E0BA0);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0BA8);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C10);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNAS_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C18);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNAS_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0C20);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0C28);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C78);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNASError_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0C80);
 
@@ -236,7 +236,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E0EC0);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetNews__cFEStateNetNews);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0EF0);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetNews_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0F30);
 
@@ -246,7 +246,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E0FB8);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0FC0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1040);
+INCLUDE_ASM("fe/fepopup3", cFEStateReadMessagePopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", func_001E1048);
 

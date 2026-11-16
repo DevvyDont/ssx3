@@ -4,10 +4,10 @@
 // cFEStateStats: the online high-score / stats screen ("249Stats": overall, race and freestyle rankings per event
 // and course, ten result rows). A cFEStateNet (fe/festatenet.h, 0x6D0). EA's name from the preview's linkonce
 // sections (_$_13cFEStateStats, onMenuGainFocus__13cFEStateStatsP8cUIGroup). EA's source file is not known: no
-// preview assert falls in its methods (link order puts it after cFEStateOnlineMainMenu, whose func_001BFCC0 asserts
+// preview assert falls in its methods (link order puts it after cFEStateOnlineMainMenu, whose cFEStateOnlineMainMenu_onWidgetCreate asserts
 // in festatenetmainmenu.cpp), so the header is named after the class.
 //
-// Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + cFEStateStats_cFEStateStats(mem, pEngine) (func_001BFE70); the
+// Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + cFEStateStats_cFEStateStats(mem, pEngine) (cFEStateOnlineMainMenu_onWidgetEvent); the
 // constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and func_001C2D90 (the default one), destructor
 // cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable cFEStateStats_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen cFEStateStats_onCreateScreen, 7 onGainTransition cFEStateStats_onGainTransition, 9 onInputAlways cFEStateStats_onInputAlways, 12 onUpdate

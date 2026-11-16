@@ -7,13 +7,13 @@
 // source file is not known (its code follows cFEStateOnlineMainMenu's, festatenetmainmenu.cpp, in both builds).
 //
 // Size 0x6DC: cMemMan_alloc(0x6DC, "cFEStateOnlineAgreement") + cFEStateOnlineAgreement_cFEStateOnlineAgreement(mem, pEngine) at all 4 sites
-// (cFEStateCreateStep1/2's onWidgetEvent, func_001BF758, func_001C1EA8). Constructors cFEStateOnlineAgreement_cFEStateOnlineAgreement
+// (cFEStateCreateStep1/2's onWidgetEvent, func_001BF758, cFEStateNetSSXWorld_onWidgetEvent). Constructors cFEStateOnlineAgreement_cFEStateOnlineAgreement
 // (cFEStateNet(pEngine,
 // 0), vtable cFEStateOnlineAgreement_vtbl, mHashName 0x43), func_001C03D0 (cFEStateNet(pEngine, pParent), the same stores; no caller
 // found) and the default func_001C0460 (cFEStateNet(0, 0), no mHashName); destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement (slot 1: frees
-// mpTOSLines). Retail vtable cFEStateOnlineAgreement_vtbl (32 slots: 4 onCreateScreen func_001C04A8, 7 func_001C0B20, 10 func_001DF630
-// (onLoseTransition), 12 onUpdate func_001C0A80, 18 onWidgetCreate func_001C0CE0, 19 onWidgetEvent func_001C0D28, 20
-// func_001C0B08, 25 func_001C0EA8 (help), 31 func_001C0E88). Methods: fe/feasyncfile 0x1C03D0-0x1C0EA8.
+// mpTOSLines). Retail vtable cFEStateOnlineAgreement_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineAgreement_onCreateScreen, 7 cFEStateOnlineAgreement_onGainTransition, 10 cFEStateOnlineAgreement_onLoseTransition
+// (onLoseTransition), 12 onUpdate cFEStateOnlineAgreement_onUpdate, 18 onWidgetCreate cFEStateOnlineAgreement_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineAgreement_onWidgetEvent, 20
+// cFEStateOnlineAgreement_onWidgetMenu, 25 func_001C0EA8 (help), 31 func_001C0E88). Methods: fe/feasyncfile 0x1C03D0-0x1C0EA8.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
@@ -111,11 +111,11 @@ struct cFEStateOnlineAgreement {
     int* mpTOSLines;                // 0x6D0 [R] 0 (all three ctors); [U] func_001C0540 frees it and stores
                                     //       operator_new_tag(miNumTOSLines * 4, "cFEStateOnlineAgreement") filled
                                     //       with the hashes of "kT_TOS000".."kT_TOS165" (with the a/b/.. variants);
-                                    //       onUpdate func_001C0A80 hands mpTOSLines[miNextTOSLine++] to
+                                    //       onUpdate cFEStateOnlineAgreement_onUpdate hands mpTOSLines[miNextTOSLine++] to
                                     //       "AgTextScroll" (func_003A1F18); the destructor frees it
     unsigned int miNumTOSLines;     // 0x6D4 [U] func_001C0540 stores 0xB2; onUpdate compares miNextTOSLine with it
                                     //       (sltu)
-    unsigned int miNextTOSLine;     // 0x6D8 [R] 0 (all three ctors); [U] onUpdate func_001C0A80 post-increments it
+    unsigned int miNextTOSLine;     // 0x6D8 [R] 0 (all three ctors); [U] onUpdate cFEStateOnlineAgreement_onUpdate post-increments it
                                     //       per line added
 };
 

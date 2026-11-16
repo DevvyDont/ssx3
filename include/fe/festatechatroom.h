@@ -12,9 +12,9 @@
 // func_001B15D8, func_001BD738; fe/festatebigradio func_001941B0); the constructor's last store is the 16-byte
 // mChatColour at 0x72C. Constructors cFEStateChatRoom_cFEStateChatRoom (cFEStateNet(pEngine, 0), vtable cFEStateChatRoom_vtbl, mHashName 0x3D) and
 // the default func_001DF580 (fe/fepopupmisc); destructor cFEStateChatRoom__cFEStateChatRoom (slot 1; the preview's _$_16cFEStateChatRoom).
-// Retail vtable cFEStateChatRoom_vtbl (32 slots: 4 onCreateScreen func_001B2070, 6 onGainFocus func_001B3528, 7 func_001B3490,
-// 8 func_001B38D0, 12 onUpdate func_001B2320, 13 func_001DF5C0, 17 onPopupEvent func_001B3850, 18 onWidgetCreate
-// func_001B2EB8, 19 onWidgetEvent func_001B31A0, 20 onWidgetMenu func_001B3568, 25 func_001B2DA0 (help), 31
+// Retail vtable cFEStateChatRoom_vtbl (32 slots: 4 onCreateScreen cFEStateChatRoom_onCreateScreen, 6 onGainFocus cFEStateChatRoom_onGainFocus, 7 cFEStateChatRoom_onGainTransition,
+// 8 cFEStateChatRoom_onInputBegin, 12 onUpdate cFEStateChatRoom_onUpdate, 13 func_001DF5C0, 17 onPopupEvent cFEStateChatRoom_onPopupEvent, 18 onWidgetCreate
+// cFEStateChatRoom_onWidgetCreate, 19 onWidgetEvent cFEStateChatRoom_onWidgetEvent, 20 onWidgetMenu cFEStateChatRoom_onWidgetMenu, 25 func_001B2DA0 (help), 31
 // func_001B3A30 (net events), 32 func_001B22A0). Methods: fe/feasyncfile 0x1B1F88-0x1B3D20.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -114,13 +114,13 @@ struct cFEStateChatRoom {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateChatRoom
-    cUIThing* mpQualityIcon[6];     // 0x6D0 [U] onWidgetCreate func_001B2EB8: widgets "quality1".."quality6" (sprintf
+    cUIThing* mpQualityIcon[6];     // 0x6D0 [U] onWidgetCreate cFEStateChatRoom_onWidgetCreate: widgets "quality1".."quality6" (sprintf
                                     //       "quality%d"); func_001B3BF0 shows / hides icon i for the visible player
                                     //       row i and sets its quality (func_001AAD50)
     cUIText* mpTextRoomName;        // 0x6E8 [U] onWidgetCreate: widget "TextRoomName"; func_001B2378 sets the room
                                     //       name text on it
     cUIThing* mpSlider1;            // 0x6EC [R] 0; [U] onWidgetCreate: widget "slider1" (the player list's scroll
-                                    //       bar; attr bit 0 set); onCreateScreen func_001B2070 stores its arrows /
+                                    //       bar; attr bit 0 set); onCreateScreen cFEStateChatRoom_onCreateScreen stores its arrows /
                                     //       outline at + 0x7C/0x80/0x84 and 2 at + 0x88; func_001B3D20 updates it
                                     //       from miMenuScroll[0] (func_0039DA20)
     cUIText* mpTextScrollChat;      // 0x6F0 [R] 0; [U] onWidgetCreate: widget "TextScrollChat" (the chat history);
@@ -129,14 +129,14 @@ struct cFEStateChatRoom {
                                     //       func_001A83D8)
     cUIThing* mpSlider2;            // 0x6F4 [R] 0; [U] onWidgetCreate: widget "slider2" (the chat history's scroll
                                     //       bar); onCreateScreen sets it up like mpSlider1
-    int mbExiting;                  // 0x6F8 [R] 0 (both ctors); [U] onWidgetEvent func_001B31A0 (back) sets 1 and
+    int mbExiting;                  // 0x6F8 [R] 0 (both ctors); [U] onWidgetEvent cFEStateChatRoom_onWidgetEvent (back) sets 1 and
                                     //       opens "kT_POPUP231ExitingRoom"; the net-event handler func_001B3A30 drops
                                     //       chat messages (0xDE) while it is set
     cUIMenu* mpMenu[2];             // 0x6FC [R] 0 (cFEStateChatRoom_cFEStateChatRoom clears both in a loop with miMenuScroll); [U]
-                                    //       onWidgetCreate: [0] = "PlayerListMenu", [1] = "MenuChat"; func_001B3490
-                                    //       enables both (slot 7); onWidgetMenu func_001B3568 compares the sender
+                                    //       onWidgetCreate: [0] = "PlayerListMenu", [1] = "MenuChat"; cFEStateChatRoom_onGainTransition
+                                    //       enables both (slot 7); onWidgetMenu cFEStateChatRoom_onWidgetMenu compares the sender
                                     //       with them
-    int miMenuScroll[2];            // 0x704 [R] 0; [U] onWidgetMenu func_001B3568 (event 4) stores the menu's scroll
+    int miMenuScroll[2];            // 0x704 [R] 0; [U] onWidgetMenu cFEStateChatRoom_onWidgetMenu (event 4) stores the menu's scroll
                                     //       value: [0] = the first visible player row (func_001B2378, func_001B3BF0,
                                     //       func_001B3D20 read it; func_001B2378 clears it with fewer than 7
                                     //       players), [1] for "MenuChat"

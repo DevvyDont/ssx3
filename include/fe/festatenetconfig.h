@@ -2,7 +2,7 @@
 #define FE_FESTATENETCONFIG_H
 
 // The online network-configuration screens (EA's d:/ssx/code/source/fe/festatenetconfig.cpp: the preview's asserts
-// at lines 554 and 641 sit between retail func_001B0F28 and func_001B63E8 (cFEStateNetConfig / cFEStateAuthDNAS),
+// at lines 554 and 641 sit between retail func_001B0F28 and cFEStateAuthDNAS_onCreateScreen (cFEStateNetConfig / cFEStateAuthDNAS),
 // those at 1381-1394 between cFEStateNetAccountMem_onUpdate and func_001B8860, both cFEStateNetAccountMem methods). Two classes
 // live here, both cFEStateNet states (fe/festatenet.h, 0x6D0):
 //
@@ -14,7 +14,7 @@
 // (32 slots: 1 dtor, 4 onCreateScreen cFEStateNetConfig_onCreateScreen, 5 onDestroyScreen cFEStateNetConfig_onDestroyScreen, 12 onUpdate cFEStateNetConfig_onUpdate,
 // 17 onPopupEvent cFEStateNetConfig_onPopupEvent, 18 onWidgetCreate cFEStateNetConfig_onWidgetCreate, 19 onWidgetEvent cFEStateNetConfig_onWidgetEvent, 21 cFEStateNetConfig_onWidgetPair,
 // 22 cFEStateNetConfig_onWidgetListBox, 25 func_001B54B8 (help), 29 func_001E0BA8, 31 func_001B5E28, 32 func_001E0BA0). Methods:
-// fe/feasyncfile 0x1B3F78-0x1B60A8. The DNAS popup cFEStateAuthDNAS (func_001B6798) writes mpustrAuthError
+// fe/feasyncfile 0x1B3F78-0x1B60A8. The DNAS popup cFEStateAuthDNAS (cFEStateAuthDNAS_onUpdate) writes mpustrAuthError
 // through its mpParentState.
 //
 // cFEStateNetAccountMem: the memory-card popup that loads / saves / deletes the online account (name and password)
@@ -147,7 +147,7 @@ struct cFEStateNetConfig {
                                     //       func_001B43A8 / func_001B4470 / func_001B45E8 / func_001B4C40 / func_001B4CD8 / func_001B5268 advance it
     int miResult;                   // 0x70C [U] func_001B4470 / func_001B4C40 / func_001B4CD8 / func_001B5268: the last connect result
                                     //       (1, -200, the number of configurations)
-    unsigned short* mpustrAuthError[3]; // 0x710 [R] 0; [U] cFEStateAuthDNAS func_001B6798 stores three heap unicode
+    unsigned short* mpustrAuthError[3]; // 0x710 [R] 0; [U] cFEStateAuthDNAS cFEStateAuthDNAS_onUpdate stores three heap unicode
                                     //       copies of the DNAS error texts here (through its mpParentState); func_001B5830 passes [1], [2], [0] to
                                     //       cFEStateAuthDNASError's constructor cFEStateAuthDNASError_cFEStateAuthDNASError; the destructor frees them
     unsigned short mustrPopupText[0x100]; // 0x71C [U] sprintf1 (unicode) target of func_001B45E8 / func_001B47C0 /

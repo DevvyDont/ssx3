@@ -13,8 +13,8 @@
 // mHashName 0x4F, unk_6A8 = 0) and the default func_001E0DD8 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
 // (fe/fepopupmisc;
 // slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable cFEStateCreateDuplicate_vtbl (32 slots: 4 onCreateScreen
-// func_001BBD60, 12 onUpdate func_001BBDE0, 17 onPopupEvent func_001BC6A0, 18 onWidgetCreate func_001BBE00,
-// 19 onWidgetEvent func_001BBF18, 25 func_001BC190 (help), 29 func_001E0E40, 31 func_001BC4F0 (net events)).
+// cFEStateCreateDuplicate_onCreateScreen, 12 onUpdate cFEStateCreateDuplicate_onUpdate, 17 onPopupEvent cFEStateCreateDuplicate_onPopupEvent, 18 onWidgetCreate cFEStateCreateDuplicate_onWidgetCreate,
+// 19 onWidgetEvent cFEStateCreateDuplicate_onWidgetEvent, 25 func_001BC190 (help), 29 func_001E0E40, 31 func_001BC4F0 (net events)).
 // Methods: fe/feasyncfile 0x1BBD08-0x1BC990.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -114,13 +114,13 @@ struct cFEStateCreateDuplicate {
     // --- cFEStateCreateDuplicate
     int mbAccount;                  // 0x6D0 [R] the ctor's 3rd argument (0 from cFEStateSelectPersona func_001ADC30:
                                     //       a persona name; func_001BAC90: the account name); [U] onWidgetCreate
-                                    //       func_001BBE00 / onWidgetEvent func_001BBF18 / help func_001BC190 pick the
+                                    //       cFEStateCreateDuplicate_onWidgetCreate / onWidgetEvent cFEStateCreateDuplicate_onWidgetEvent / help func_001BC190 pick the
                                     //       account or persona texts and actions by it
     int mbAskSave;                  // 0x6D4 [U] func_001BC990 (popup 0x82C, the cFEStateNetAccountMem result): 1 on
                                     //       0x11, 0 on 0xF/0x10/0x14; on 0x16 it opens "kT_POPUP204SaveAccount"
                                     //       (0x81F) when set, else verifies the account (func_0025C610); then clears
                                     //       it
-    tLobbyAccount* mpAccount;       // 0x6D8 [U] onCreateScreen func_001BBD60 stores (char*)LobbyMan_mLobbyMan + 0x260
+    tLobbyAccount* mpAccount;       // 0x6D8 [U] onCreateScreen cFEStateCreateDuplicate_onCreateScreen stores (char*)LobbyMan_mLobbyMan + 0x260
                                     //       (the new-account form, online/lobbyman.h); func_001BC400 shows its
                                     //       mNameOptions[0..mNumNameOptions) in "SelectName0".."3"; onWidgetEvent
                                     //       assigns the chosen option or the typed name to its mName; func_001BC818 /

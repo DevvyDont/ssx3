@@ -6,12 +6,12 @@
 // cFEStateNet state (fe/festatenet.h, 0x6D0). EA's name: the allocation tag only (the preview keeps no inline of it).
 // EA's source file is not known (its code follows cFEStateNetSSXWorld's and precedes cFEStateStats', in both builds).
 //
-// Size 0x6FC: cMemMan_alloc(0x6FC, "cFEStateNetQuickMessages") + cFEStateNetQuickMessages_cFEStateNetQuickMessages(mem, pEngine) (func_001C1EA8, the only
+// Size 0x6FC: cMemMan_alloc(0x6FC, "cFEStateNetQuickMessages") + cFEStateNetQuickMessages_cFEStateNetQuickMessages(mem, pEngine) (cFEStateNetSSXWorld_onWidgetEvent, the only
 // site); mpMessage[9] ends at 0x6FC. Constructors cFEStateNetQuickMessages_cFEStateNetQuickMessages (cFEStateNet(pEngine, 0), vtable cFEStateNetQuickMessages_vtbl,
 // mHashName
 // 0x4B) and the default func_001DF710 (fe/fepopupmisc); destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages (fe/fepopupmisc; slot 1). Retail
-// vtable cFEStateNetQuickMessages_vtbl (32 slots: 4 onCreateScreen func_001C2138, 7 func_001C23C0, 12 onUpdate func_001C21A0, 17
-// onPopupEvent func_001C2B48, 18 onWidgetCreate func_001C2298, 19 onWidgetEvent func_001C2740, 25 func_001C21C0
+// vtable cFEStateNetQuickMessages_vtbl (32 slots: 4 onCreateScreen cFEStateNetQuickMessages_onCreateScreen, 7 cFEStateNetQuickMessages_onGainTransition, 12 onUpdate cFEStateNetQuickMessages_onUpdate, 17
+// onPopupEvent cFEStateNetQuickMessages_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate, 19 onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent, 25 func_001C21C0
 // (help), 31 cFEStateNet's func_001A8E40). Methods: fe/feasyncfile 0x1C20F8-0x1C2C50.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -107,12 +107,12 @@ struct cFEStateNetQuickMessages {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateNetQuickMessages
-    int mbChanged;                  // 0x6D0 [U] onCreateScreen func_001C2138 clears it; func_001C2A18 (a message
+    int mbChanged;                  // 0x6D0 [U] onCreateScreen cFEStateNetQuickMessages_onCreateScreen clears it; func_001C2A18 (a message
                                     //       edited) and func_001C2BA8 (popup 0xF: defaults restored, func_0014F758)
-                                    //       set 1; onWidgetEvent func_001C2740 on "back" asks
+                                    //       set 1; onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent on "back" asks
                                     //       "kT_POPUP206SaveQuickMessage" when set, else returns to
                                     //       cFEStateNetSSXWorld
-    cUIText* mpMessage[10];         // 0x6D4 [U] onWidgetCreate func_001C2298: widgets "message00".."message09"
+    cUIText* mpMessage[10];         // 0x6D4 [U] onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate: widgets "message00".."message09"
                                     //       (miMiscData = i); func_001C2468 writes "Q<i+1>: " + message i into
                                     //       mpMessage[i] (func_001C2578)
 };

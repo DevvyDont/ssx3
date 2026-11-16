@@ -12,8 +12,8 @@
 // pEngine) (func_001BF758, the only site). Constructors cFEUseExistingAccount_cFEUseExistingAccount (cFEStateNet(pEngine, 0), vtable cFEUseExistingAccount_vtbl,
 // mHashName 0x35) and the default func_001E0880 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
 // mszEmail, then cFEStateNet's func_001A85D0). Retail vtable cFEUseExistingAccount_vtbl (32 slots: 1 dtor, 4 onCreateScreen
-// func_001AC0B8, 12 onUpdate func_001AC150, 17 onPopupEvent func_001AC920, 18 onWidgetCreate func_001AC170,
-// 19 onWidgetEvent func_001AC5C0, 20 func_001AC5A8, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
+// cFEUseExistingAccount_onCreateScreen, 12 onUpdate cFEUseExistingAccount_onUpdate, 17 onPopupEvent cFEUseExistingAccount_onPopupEvent, 18 onWidgetCreate cFEUseExistingAccount_onWidgetCreate,
+// 19 onWidgetEvent cFEUseExistingAccount_onWidgetEvent, 20 cFEUseExistingAccount_onWidgetMenu, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
 // 31 func_001ACEF8 (net events 0xC9/0xCF/0xD2/0xD4)). Methods: fe/feasyncfile 0x1AC010-0x1ACEF8.
 //
 // cFEStateSelectPersona: screen "220select_persona": the account's persona list ("PersonaMenu"), create / delete
@@ -21,8 +21,8 @@
 // cMemMan_alloc(0x6D8, "cFEStateSelectPersona") + cFEStateSelectPersona_cFEStateSelectPersona(mem, pEngine) at all 10 sites (fe/feasyncfile).
 // Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable cFEStateSelectPersona_vtbl, mHashName 0x38) and the default func_001E08D8 (fe/fepopupmisc);
 // destructor cFEStateSelectPersona__cFEStateSelectPersona (fe/fepopupmisc; slot 1; the preview's _$_21cFEStateSelectPersona). Retail vtable
-// cFEStateSelectPersona_vtbl (33 slots: 4 onCreateScreen func_001AD178, 12 onUpdate func_001AD1E8, 17 onPopupEvent func_001AD8C0,
-// 18 onWidgetCreate func_001AD308, 19 onWidgetEvent func_001AD5E8, 25 func_001AD4F0 (help), 29 func_001E0940,
+// cFEStateSelectPersona_vtbl (33 slots: 4 onCreateScreen cFEStateSelectPersona_onCreateScreen, 12 onUpdate cFEStateSelectPersona_onUpdate, 17 onPopupEvent cFEStateSelectPersona_onPopupEvent,
+// 18 onWidgetCreate cFEStateSelectPersona_onWidgetCreate, 19 onWidgetEvent cFEStateSelectPersona_onWidgetEvent, 25 func_001AD4F0 (help), 29 func_001E0940,
 // 31 func_001ADA30 (net events), 32 func_001E0948, 33 func_001AD9C8). Methods: fe/feasyncfile 0x1AD130-0x1ADC30.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -125,7 +125,7 @@ struct cFEUseExistingAccount {
                                     //       0x11 (option 2), 0 on 0xF/0x10 (then pushes cFEStateSelectPersona); on
                                     //       0x16 it opens the "kT_POPUP204SaveAccount" yes/no popup (0x81E) when set,
                                     //       then clears it
-    int miRequest;                  // 0x6D8 [U] the pending LobbyMan request: onWidgetEvent func_001AC5C0 stores 4
+    int miRequest;                  // 0x6D8 [U] the pending LobbyMan request: onWidgetEvent cFEUseExistingAccount_onWidgetEvent stores 4
                                     //       (verify, "kT_POPUP201Verify") and 2 (forgotten password), func_001AC9C0
                                     //       stores 3 (forgotten account name); the net-event handler func_001ACEF8 on
                                     //       0xC9 sends it: 2 -> func_0025C3F8(mUserName), 3 ->
@@ -136,7 +136,7 @@ struct cFEUseExistingAccount {
                                     //       cBXString_cBXString4); func_001AC448 opens "kT_POPUP204RequestAccount"
                                     //       when its length (the word before the text) is 0; func_001ACEF8 passes it
                                     //       to func_0025C1E0
-    cUIThing* mpTextForgotPassword; // 0x6E0 [R] 0; [U] onWidgetCreate func_001AC170: widget "TextForgotPassword"
+    cUIThing* mpTextForgotPassword; // 0x6E0 [R] 0; [U] onWidgetCreate cFEUseExistingAccount_onWidgetCreate: widget "TextForgotPassword"
                                     //       (miMiscData 2), then its slots 25 and 8 with 1; func_001ACDD0 calls its
                                     //       slot 8 with 0 once an account name is entered, 1 when the name is empty
 };
@@ -263,11 +263,11 @@ struct cFEStateSelectPersona {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateSelectPersona
     int mbExistingPersona;          // 0x6D0 [R] 0 (cFEStateSelectPersona_cFEStateSelectPersona; not set by the default ctor); [U] onWidgetEvent
-                                    //       func_001AD5E8: 1 when an existing persona row is chosen (func_0025CD28
+                                    //       cFEStateSelectPersona_onWidgetEvent: 1 when an existing persona row is chosen (func_0025CD28
                                     //       selects it), 0 when the "create new persona" row opens the keyboard; the
                                     //       net-event handler func_001ADC30 picks "kT_POPUPCMNProfanity" (set) or
                                     //       "kT_POPUPCMNProfanityPersona" (clear) on the "filt" reply
-    int miDeletePersona;            // 0x6D4 [U] onWidgetEvent func_001AD5E8 (message 8, the delete key) stores the
+    int miDeletePersona;            // 0x6D4 [U] onWidgetEvent cFEStateSelectPersona_onWidgetEvent (message 8, the delete key) stores the
                                     //       persona row and opens "kT_POPUP220DeleteInitial"; func_001AD9C8 (popup
                                     //       0x816, option 0xF) deletes it: func_0025D428(LobbyMan, it) (the C body
                                     //       reads it as a void*)

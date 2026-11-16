@@ -12,8 +12,8 @@
 // cFEStateLogin_cFEStateLogin(mem, pEngine) at 4 sites (feasyncfile 4248, 4398, 12745, 20767); mpustrDisconnect ends at 0x6D4.
 // Constructors cFEStateLogin_cFEStateLogin (cFEStateNet(pEngine, 0), vtable cFEStateLogin_vtbl, mHashName 0x33, unk_6A8 = 0) and the
 // default func_001E0E48 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
-// cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen func_001BEED0, 12 onUpdate func_001BEF40, 17
-// onPopupEvent func_001BF6C0, 18 onWidgetCreate func_001BEF60, 19 onWidgetEvent func_001BF758, 25 func_001BFAE0
+// cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateLogin_onCreateScreen, 12 onUpdate func_001BEF40, 17
+// onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent func_001BF758, 25 func_001BFAE0
 // (help), 29 func_001E0E90, 31 func_001BF228 (net events), 32 func_001E0E88, 33 func_001BF378). Methods:
 // fe/feasyncfile 0x1BEE30-0x1BFAE0.
 //

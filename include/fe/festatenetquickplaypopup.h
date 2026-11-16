@@ -9,13 +9,13 @@
 // cFEStateOnlineAgreement's, after cFEStateOnlineMainMenu's festatenetmainmenu.cpp, in both builds).
 //
 // Size 0x734: cMemMan_alloc(0x734, "cFEStateNetQuickPlayPopup") + cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(mem, pEngine, pParent)
-// (func_001BFE70,
+// (cFEStateOnlineMainMenu_onWidgetEvent,
 // cFEStateOnlineMainMenu's onWidgetEvent; the only site); the constructor zeroes up to 0x730. Constructors
 // cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup (cFEStateNet(pEngine, pParent), vtable cFEStateNetQuickPlayPopup_vtbl, mHashName 0x48) and the default func_001DF638
 // (fe/fepopupmisc); destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup (fe/fepopupmisc; slot 1; the preview's _$_25cFEStateNetQuickPlayPopup).
-// Retail vtable cFEStateNetQuickPlayPopup_vtbl (32 slots: 4 onCreateScreen func_001C0FC0, 10 func_001DF6A0 (onLoseTransition), 12
-// onUpdate func_001C1038, 17 onPopupEvent func_001C1B48, 18 onWidgetCreate func_001C1080, 19 onWidgetEvent
-// func_001C1560, 20 func_001C17E0, 21 func_001C17D8, 25 func_001C1488 (help), 31 func_001C19C8 (net events)).
+// Retail vtable cFEStateNetQuickPlayPopup_vtbl (32 slots: 4 onCreateScreen cFEStateNetQuickPlayPopup_onCreateScreen, 10 cFEStateNetQuickPlayPopup_onLoseTransition (onLoseTransition), 12
+// onUpdate cFEStateNetQuickPlayPopup_onUpdate, 17 onPopupEvent cFEStateNetQuickPlayPopup_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickPlayPopup_onWidgetCreate, 19 onWidgetEvent
+// cFEStateNetQuickPlayPopup_onWidgetEvent, 20 cFEStateNetQuickPlayPopup_onWidgetMenu, 21 cFEStateNetQuickPlayPopup_onWidgetPair, 25 func_001C1488 (help), 31 func_001C19C8 (net events)).
 // Methods: fe/feasyncfile 0x1C0F40-0x1C1B88.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -115,13 +115,13 @@ struct cFEStateNetQuickPlayPopup {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateNetQuickPlayPopup
-    int miSearchOptions[5];         // 0x6D0 [U] onWidgetEvent func_001C1560 stores the five list boxes' values ([0]
+    int miSearchOptions[5];         // 0x6D0 [U] onWidgetEvent cFEStateNetQuickPlayPopup_onWidgetEvent stores the five list boxes' values ([0]
                                     //       mpLBRanked .. [4] mpLBSlopeStyle) when the search starts and passes the
                                     //       array to func_0025EE20(LobbyMan, miSearchOptions, mCurrentCtrl)
-    cUIText* mpTextSearching;       // 0x6E4 [U] onWidgetCreate func_001C1080: widget "TextSearching" (hidden); shown
+    cUIText* mpTextSearching;       // 0x6E4 [U] onWidgetCreate cFEStateNetQuickPlayPopup_onWidgetCreate: widget "TextSearching" (hidden); shown
                                     //       while searching, "kT_233AbortingQuickmatch" on abort; func_001C1B88 hides
                                     //       it
-    int miBlinkFrames;              // 0x6E8 [U] onWidgetEvent sets 30 when the search starts; onUpdate func_001C1038
+    int miBlinkFrames;              // 0x6E8 [U] onWidgetEvent sets 30 when the search starts; onUpdate cFEStateNetQuickPlayPopup_onUpdate
                                     //       counts it down while mbSearching and wraps to 30
     int mbSearching;                // 0x6EC [R] 0 (both ctors); [U] onWidgetEvent: 1 when OK starts the search, the
                                     //       OK button then aborts it (func_0025EED8); func_001C1B88 (popup 0xF/0x14)

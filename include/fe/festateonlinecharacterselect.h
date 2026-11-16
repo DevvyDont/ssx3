@@ -11,9 +11,9 @@
 // (func_001A9268, func_001AF470, func_001B0708, func_001B3760, func_001B37D8, func_001C0358, func_001C19C8).
 // Constructors cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect (cFEStateNet(pEngine, 0), vtable cFEStateOnlineCharacterSelect_vtbl, mHashName 0x41) and the default
 // func_001E0AC0 (fe/fepopupmisc); destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect (fe/fepopupmisc; slot 1; the preview's
-// _$_29cFEStateOnlineCharacterSelect). Retail vtable cFEStateOnlineCharacterSelect_vtbl (32 slots: 4 onCreateScreen func_001B0FB0, 7
-// func_001B1068, 8 func_001B1590 (input filter), 12 onUpdate func_001B1048, 17 onPopupEvent func_001B1EC0,
-// 18 onWidgetCreate func_001B10F8, 19 onWidgetEvent func_001B1280, 25 func_001B14D8 (help), 31 func_001B15D8 (net
+// _$_29cFEStateOnlineCharacterSelect). Retail vtable cFEStateOnlineCharacterSelect_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen, 7
+// cFEStateOnlineCharacterSelect_onGainTransition, 8 cFEStateOnlineCharacterSelect_onInputBegin (input filter), 12 onUpdate cFEStateOnlineCharacterSelect_onUpdate, 17 onPopupEvent cFEStateOnlineCharacterSelect_onPopupEvent,
+// 18 onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent, 25 func_001B14D8 (help), 31 func_001B15D8 (net
 // events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object D_004A33CC (func_00264F88 /
 // func_00265018 / func_00265140) receives the picks.
 //
@@ -112,18 +112,18 @@ struct cFEStateOnlineCharacterSelect {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateOnlineCharacterSelect
-    cUIListBox* mpLBChallengerSelect; // 0x6D0 [U] onWidgetCreate func_001B10F8: widget "LBChallengerSelect" (10 rider
+    cUIListBox* mpLBChallengerSelect; // 0x6D0 [U] onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate: widget "LBChallengerSelect" (10 rider
                                     //       names from D_00440F68), preset to the current rider; its value
-                                    //       (func_0039A738) is the picked rider in func_001B1068 / onWidgetEvent
-                                    //       func_001B1280
+                                    //       (func_0039A738) is the picked rider in cFEStateOnlineCharacterSelect_onGainTransition / onWidgetEvent
+                                    //       cFEStateOnlineCharacterSelect_onWidgetEvent
     int unk_6D4;                    // 0x6D4 no access seen
-    int miConfirmCtrl;              // 0x6D8 [R] 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect); [U] onWidgetEvent func_001B1280 stores
+    int miConfirmCtrl;              // 0x6D8 [R] 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect); [U] onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent stores
                                     //       mCurrentCtrl (lb 0x14) when the pick is confirmed; no read seen
-    int mbConfirmed;                // 0x6DC [R] 1 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect), 0 (func_001E0AC0); [U] func_001B1068 (slot 7)
+    int mbConfirmed;                // 0x6DC [R] 1 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect), 0 (func_001E0AC0); [U] cFEStateOnlineCharacterSelect_onGainTransition (slot 7)
                                     //       clears it; onWidgetEvent sets 1 when the pick is sent (func_00265018) and
                                     //       clears it on "back" (func_00265140), or asks "kT_POPUPCMNCancelChallenge"
-                                    //       when clear; the input filter func_001B1590 blocks input while it is set
-    int miCharID;                   // 0x6E0 [U] onCreateScreen func_001B0FB0 clears it; onWidgetCreate stores the
+                                    //       when clear; the input filter cFEStateOnlineCharacterSelect_onInputBegin blocks input while it is set
+    int miCharID;                   // 0x6E0 [U] onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen clears it; onWidgetCreate stores the
                                     //       player's rider (cBENewPlayerInterface_getPlayerCharID); onWidgetEvent
                                     //       resets the player interface (func_001474A8) when the pick differs from it
 };

@@ -870,7 +870,7 @@ extern "C" int func_001D5138(void* self, int msg)
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5240);
 #ifdef SKIP_ASM
 extern "C" int func_001A9668(void* self, void* a1, int a2);
-extern "C" int func_001BF6C0(void* self, void* a1, int a2);
+extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
 
 extern "C" int func_001D5240(void* self, void* a1, int a2)
 {
@@ -878,7 +878,7 @@ extern "C" int func_001D5240(void* self, void* a1, int a2)
     if (*(int*)((char*)a1 + 0x18) == 0x102) {
         r = func_001A9668(self, a1, a2);
     } else {
-        r = func_001BF6C0(self, a1, a2);
+        r = cFEStateLogin_onPopupEvent(self, a1, a2);
     }
     return r;
 }

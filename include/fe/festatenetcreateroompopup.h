@@ -15,8 +15,8 @@
 // (cFEStateLobbyMenu's onWidgetEvent, the only site); mszPassword ends at 0x6E8. Constructors cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup
 // (cFEStateNet(pEngine, pParent), vtable cFEStateNetCreateRoomPopup_vtbl, mHashName 0x47) and the default func_001DF828 (fe/fepopupmisc);
 // destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable cFEStateNetCreateRoomPopup_vtbl (32 slots;
-// vtables.tsv lists 24: 4 onCreateScreen func_001BE828, 10 func_001DF8E0 (onLoseTransition), 12 onUpdate
-// func_001BE890, 18 onWidgetCreate func_001BE8B0, 19 onWidgetEvent func_001BEA38, 21 func_001BEA30, 25
+// vtables.tsv lists 24: 4 onCreateScreen cFEStateNetCreateRoomPopup_onCreateScreen, 10 cFEStateNetCreateRoomPopup_onLoseTransition (onLoseTransition), 12 onUpdate
+// cFEStateNetCreateRoomPopup_onUpdate, 18 onWidgetCreate cFEStateNetCreateRoomPopup_onWidgetCreate, 19 onWidgetEvent cFEStateNetCreateRoomPopup_onWidgetEvent, 21 cFEStateNetCreateRoomPopup_onWidgetPair, 25
 // func_001BED58 (help), 31 func_001BED28). Methods: fe/feasyncfile 0x1BE7D8-0x1BED58.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -113,8 +113,8 @@ struct cFEStateNetCreateRoomPopup {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateNetCreateRoomPopup
-    cUIText* mpTextRoomName;        // 0x6D0 [U] onWidgetCreate func_001BE8B0: widget "EnterRoomName"; onWidgetEvent
-                                    //       func_001BEA38 edits it with the keyboard (func_001A9150,
+    cUIText* mpTextRoomName;        // 0x6D0 [U] onWidgetCreate cFEStateNetCreateRoomPopup_onWidgetCreate: widget "EnterRoomName"; onWidgetEvent
+                                    //       cFEStateNetCreateRoomPopup_onWidgetEvent edits it with the keyboard (func_001A9150,
                                     //       "kT_POPUP231NewRoom") and shows mszRoomName in it
     cUIText* mpTextPassword;        // 0x6D4 [U] onWidgetCreate: widget "EnterPassword"; onWidgetEvent edits it
                                     //       ("kT_POPUP231AddPassword") and shows mszPassword in it

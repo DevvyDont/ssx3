@@ -2,7 +2,7 @@
 #define FE_FESTATENETCHALLENGE_H
 
 // The online challenge popups (EA's d:/ssx/code/source/fe/festatenetchallenge.cpp: the preview's assert sits in
-// cFEStateChallengePopup's onWidgetEvent, retail func_001AE7A0; cFEStateChallengeReceivedPopup's code follows it in
+// cFEStateChallengePopup's onWidgetEvent, retail cFEStateChallengePopup_onWidgetEvent; cFEStateChallengeReceivedPopup's code follows it in
 // both builds, so it is placed here too). Both are cFEStateNet states (fe/festatenet.h, 0x6D0) pushed by the
 // cFEStateNet method func_001ABCD0 (a challenge from / to LobbyMan's mOpponent):
 //
@@ -14,9 +14,9 @@
 // cFEStateChallengePopup_cFEStateChallengePopup (cFEStateNet(pEngine, pParent), vtable cFEStateChallengePopup_vtbl, mHashName 0x3F; resets the new-race interface) and
 // the default func_001E0950 (fe/fepopupmisc); destructor cFEStateChallengePopup__cFEStateChallengePopup (fe/fepopupmisc; slot 1: calls mpParentState's
 // slot 32, then cFEStateNet's func_001A85D0). Retail vtable cFEStateChallengePopup_vtbl (33 slots; vtables.tsv lists 24: 4
-// onCreateScreen func_001ADE88,
-// 6 onGainFocus func_001ADFE8, 7 func_001ADFB8, 10 func_001E0A00, 12 onUpdate func_001AE0E0, 17 onPopupEvent
-// func_001AF428, 18 onWidgetCreate func_001AE128, 19 onWidgetEvent func_001AE7A0, 20 func_001AE100, 31 func_001AF470
+// onCreateScreen cFEStateChallengePopup_onCreateScreen,
+// 6 onGainFocus cFEStateChallengePopup_onGainFocus, 7 cFEStateChallengePopup_onGainTransition, 10 cFEStateChallengePopup_onLoseTransition, 12 onUpdate cFEStateChallengePopup_onUpdate, 17 onPopupEvent
+// cFEStateChallengePopup_onPopupEvent, 18 onWidgetCreate cFEStateChallengePopup_onWidgetCreate, 19 onWidgetEvent cFEStateChallengePopup_onWidgetEvent, 20 cFEStateChallengePopup_onWidgetMenu, 31 func_001AF470
 // (net events), 32 func_001AEBF0, 33 func_001AF3E0).
 // Methods: fe/feasyncfile 0x1ADDD0-0x1AFD88.
 //
@@ -29,8 +29,8 @@
 // mHashName 0x40) and the default func_001E0A08 (fe/fepopupmisc); destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup (fe/fepopupmisc; slot 1:
 // mpParentState's slot 32, destroys mszChallenger, cFEStateNet's dtor). Retail vtable cFEStateChallengeReceivedPopup_vtbl (33 slots;
 // vtables.tsv lists 24: 4
-// onCreateScreen func_001AFE68, 7 func_001B0670, 10 func_001E0AB8, 12 onUpdate func_001B0130, 17 onPopupEvent
-// func_001B05E0, 18 onWidgetCreate func_001B0150, 19 onWidgetEvent func_001B0538, 20 func_001B06E0, 24 handleEvent
+// onCreateScreen cFEStateChallengeReceivedPopup_onCreateScreen, 7 cFEStateChallengeReceivedPopup_onGainTransition, 10 cFEStateChallengeReceivedPopup_onLoseTransition, 12 onUpdate cFEStateChallengeReceivedPopup_onUpdate, 17 onPopupEvent
+// cFEStateChallengeReceivedPopup_onPopupEvent, 18 onWidgetCreate cFEStateChallengeReceivedPopup_onWidgetCreate, 19 onWidgetEvent cFEStateChallengeReceivedPopup_onWidgetEvent, 20 cFEStateChallengeReceivedPopup_onWidgetMenu, 24 handleEvent
 // func_001A8B88, 31 func_001B0708 (net events), 32 func_001B00B8, 33 func_001B0628). Methods: fe/feasyncfile
 // 0x1AFE08-0x1B0F28.
 //
@@ -131,17 +131,17 @@ struct cFEStateChallengePopup {
     int mbChallengeSent;            // 0x6D0 [R] 0 (both ctors); [U] func_001AF568 sets 1 when the challenge goes out
                                     //       ("staticTextSetchallenge" = "kT_240WaitingChallenge", options locked:
                                     //       func_001AEC60(self, 1)), func_001AF688 sets 0
-                                    //       ("kT_241SetChallengeOptions"); onWidgetEvent func_001AE7A0 ignores
+                                    //       ("kT_241SetChallengeOptions"); onWidgetEvent cFEStateChallengePopup_onWidgetEvent ignores
                                     //       "submit" (9) while it is set and passes it to func_0025F628 (cancel);
-                                    //       onGainFocus func_001ADFE8 re-locks the options with it
+                                    //       onGainFocus cFEStateChallengePopup_onGainFocus re-locks the options with it
     int mbFirstCreate;              // 0x6D4 [R] 1 (cFEStateChallengePopup_cFEStateChallengePopup, after resetting the race interface); [U]
-                                    //       onCreateScreen func_001ADE88 clears it on the first screen, and selects
+                                    //       onCreateScreen cFEStateChallengePopup_onCreateScreen clears it on the first screen, and selects
                                     //       "MenuChallenge" row 6 when it is already 0
-    int* mpEventOptions;            // 0x6D8 [R] D_00441268 (both ctors); [U] onGainFocus func_001ADFE8 points it at
+    int* mpEventOptions;            // 0x6D8 [R] D_00441268 (both ctors); [U] onGainFocus cFEStateChallengePopup_onGainFocus points it at
                                     //       one of six 4-word tables (D_00441268 .. D_004412B8) by the event kind
                                     //       D_00535C12: [0] CPU riders, [1] power-ups, [2] point icons, [3]
                                     //       multipliers allowed (func_001AEC60, func_001AF098)
-    cUIListBox* mpLBRankedGame;     // 0x6DC [R] 0 (cFEStateChallengePopup_cFEStateChallengePopup); [U] onWidgetCreate func_001AE128: widget
+    cUIListBox* mpLBRankedGame;     // 0x6DC [R] 0 (cFEStateChallengePopup_cFEStateChallengePopup); [U] onWidgetCreate cFEStateChallengePopup_onWidgetCreate: widget
                                     //       "ListBoxRankedGame" (yes / no); func_001AE680 / onWidgetEvent read its
                                     //       value (func_0039A738) into D_00534B34; onGainFocus sets it
                                     //       (func_0039A7A8)
@@ -281,13 +281,13 @@ struct cFEStateChallengeReceivedPopup {
     // --- cFEStateChallengeReceivedPopup
     char* mszChallenger;            // 0x6D0 [R] cBXString: built from the ctor's 4th argument (cBXString_cBXString2),
                                     //       the empty rep D_004A3E90 in the default ctor, destroyed by cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup;
-                                    //       [U] onCreateScreen func_001AFE68 looks the challenge up by it
+                                    //       [U] onCreateScreen cFEStateChallengeReceivedPopup_onCreateScreen looks the challenge up by it
                                     //       (func_00263270(BuddyMan, ..)) and copies it to LobbyMan (+ 0x98);
                                     //       func_001B00B8 (func_00262768) and func_001B0708 (net event 0xEF,
                                     //       func_00263018) pass its text
     int mbAccepted;                 // 0x6D4 [R] 0 (cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup; not set by the default ctor); [U] func_001B0C08
                                     //       sets 1 when the challenge is accepted ("TextAccept" enabled,
-                                    //       "kT_OVRCMNWaitPlayer"), func_001B0D30 sets 0; onWidgetEvent func_001B0538
+                                    //       "kT_OVRCMNWaitPlayer"), func_001B0D30 sets 0; onWidgetEvent cFEStateChallengeReceivedPopup_onWidgetEvent
                                     //       accepts (row 0xB) only while it is 0; func_001B0E10 (decline) cancels the
                                     //       accepted game (func_0025F740) when it is set
 };

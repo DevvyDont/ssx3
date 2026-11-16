@@ -12,9 +12,9 @@
 // (func_001ABB30, the only site); the constructor's last store is the 16-byte mTextColour at 0x6EC. Constructors
 // cFEStateReadMessagePopup_cFEStateReadMessagePopup (cFEStateNet(pEngine, pParent), vtable cFEStateReadMessagePopup_vtbl, mHashName 0x49) and the default func_001E0FF0
 // (fe/fepopupmisc); destructor cFEStateReadMessagePopup__cFEStateReadMessagePopup (slot 1: deletes every message, frees the vector, destroys mszSender).
-// Retail vtable cFEStateReadMessagePopup_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001A7970, 7 func_001A7D90, 10
-// func_001E1040 (onLoseTransition), 12 onUpdate func_001A7B20, 18 onWidgetCreate func_001A7BB0, 19 onWidgetEvent
-// func_001A7BB8, 20 func_001A7D10, 24 handleEvent func_001A8B88, 31 func_001A7D40 (net events), 32 func_001A7B40).
+// Retail vtable cFEStateReadMessagePopup_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateReadMessagePopup_onCreateScreen, 7 cFEStateReadMessagePopup_onGainTransition, 10
+// cFEStateReadMessagePopup_onLoseTransition (onLoseTransition), 12 onUpdate cFEStateReadMessagePopup_onUpdate, 18 onWidgetCreate cFEStateReadMessagePopup_onWidgetCreate, 19 onWidgetEvent
+// cFEStateReadMessagePopup_onWidgetEvent, 20 cFEStateReadMessagePopup_onWidgetMenu, 24 handleEvent func_001A8B88, 31 func_001A7D40 (net events), 32 func_001A7B40).
 // Methods: fe/feasyncfile 0x1A77A0-0x1A81F0.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -134,10 +134,10 @@ struct cFEStateReadMessagePopup {
     // --- cFEStateReadMessagePopup
     char* mszSender;                // 0x6D0 [R] cBXString built from the ctor's 4th argument (cBXString_cBXString2),
                                     //       the empty rep D_004A3E90 in the default ctor, destroyed by cFEStateReadMessagePopup__cFEStateReadMessagePopup;
-                                    //       [U] func_001A7BB8 sends the typed reply to it (func_00262690) and titles
+                                    //       [U] cFEStateReadMessagePopup_onWidgetEvent sends the typed reply to it (func_00262690) and titles
                                     //       the keyboard with it; func_001A7F78 moves BuddyMan's messages from it
                                     //       into mMessages; func_001A81F0 shows it ("kT_POPUP242PlayerID")
-    int unk_6D4;                    // 0x6D4 [R] 0; [U] func_001A7D10 (slot 20, event 4: the text scroller moved)
+    int unk_6D4;                    // 0x6D4 [R] 0; [U] cFEStateReadMessagePopup_onWidgetMenu (slot 20, event 4: the text scroller moved)
                                     //       stores the value, then refreshes; no read seen
     tFEPrivateMessageVector mMessages; // 0x6D8 [R] see tFEPrivateMessageVector (the default ctor zeroes
                                     //       0x6DC..0x6E4); [U] func_001A81F0 lists "sender: text" for each message in
@@ -145,7 +145,7 @@ struct cFEStateReadMessagePopup {
     int mbResetScroll;              // 0x6E8 [R] 1 (cFEStateReadMessagePopup_cFEStateReadMessagePopup); [U] func_001A81F0 passes it to the text-scroll
                                     //       helper func_001A83D8 (as func_001B2CD0 passes "first fill") and clears it
     tARGB mTextColour;              // 0x6EC [R] 1.0, 1.0, 1.0, 1.0 (an unaligned 16-byte copy: sdl/sdr); [U]
-                                    //       onCreateScreen func_001A7970 copies it to "textScrollChat" + 0xA8
+                                    //       onCreateScreen cFEStateReadMessagePopup_onCreateScreen copies it to "textScrollChat" + 0xA8
                                     //       (ldl/ldr)
 };
 

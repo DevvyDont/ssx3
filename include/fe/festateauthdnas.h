@@ -2,7 +2,7 @@
 #define FE_FESTATEAUTHDNAS_H
 
 // The DNAS authentication popups of the network configuration (EA's d:/ssx/code/source/fe/festatenetconfig.cpp: the
-// preview's assert at line 641 sits in cFEStateAuthDNAS's onCreateScreen, retail func_001B63E8, and
+// preview's assert at line 641 sits in cFEStateAuthDNAS's onCreateScreen, retail cFEStateAuthDNAS_onCreateScreen, and
 // cFEStateAuthDNASError's code lies between it and cFEStateNetAccountMem's, whose asserts name the same file). Both
 // are cFEStateNet states (fe/festatenet.h, 0x6D0) pushed by cFEStateNetConfig (fe/festatenetconfig.h); this header
 // could also be merged into fe/festatenetconfig.h.
@@ -13,10 +13,10 @@
 // Size 0x700: cMemMan_alloc(0x700, "NetConfigAuthPopup") + cFEStateAuthDNAS_cFEStateAuthDNAS(mem, pEngine, pParent) (func_001B55B0, the
 // only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable cFEStateAuthDNAS_vtbl, mHashName 0x44, unk_6A8 =
 // 0) and the default func_001E0BB0 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
-// mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B63E8, 7
-// func_001E0C10
-// (onGainTransition), 8 func_001B66B8, 10 func_001E0C18 (onLoseTransition), 12 onUpdate func_001B6798, 18
-// onWidgetCreate func_001B65C0, 19 onWidgetEvent func_001B6770, 20 func_001B6A90, 24 handleEvent func_001B6740, 29
+// mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNAS_onCreateScreen, 7
+// cFEStateAuthDNAS_onGainTransition
+// (onGainTransition), 8 cFEStateAuthDNAS_onInputBegin, 10 cFEStateAuthDNAS_onLoseTransition (onLoseTransition), 12 onUpdate cFEStateAuthDNAS_onUpdate, 18
+// onWidgetCreate cFEStateAuthDNAS_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNAS_onWidgetEvent, 20 cFEStateAuthDNAS_onWidgetMenu, 24 handleEvent func_001B6740, 29
 // func_001E0C28, 32 func_001E0C20).
 // Methods: fe/feasyncfile 0x1B6288-0x1B6A90.
 //
@@ -26,8 +26,8 @@
 // [2], [0]) (cFEStateNetConfig's func_001B5830, the only site). Constructors cFEStateAuthDNASError_cFEStateAuthDNASError (vtable cFEStateAuthDNASError_vtbl,
 // mHashName
 // 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable cFEStateAuthDNASError_vtbl
-// (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B6B50, 7 func_001B6C98, 10 func_001E0C78, 12 onUpdate
-// cFEStateNet's func_001A8770, 18 onWidgetCreate func_001B6BB8, 19 onWidgetEvent func_001B6E40, 20 func_001B6EA8, 24
+// (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNASError_onCreateScreen, 7 cFEStateAuthDNASError_onGainTransition, 10 cFEStateAuthDNASError_onLoseTransition, 12 onUpdate
+// cFEStateNet's func_001A8770, 18 onWidgetCreate cFEStateAuthDNASError_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNASError_onWidgetEvent, 20 cFEStateAuthDNASError_onWidgetMenu, 24
 // handleEvent func_001B6E10, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -124,22 +124,22 @@ struct cFEStateAuthDNAS {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateAuthDNAS
-    void* mpAuth;                   // 0x6D0 [R] 0; [U] onCreateScreen func_001B63E8 stores
+    void* mpAuth;                   // 0x6D0 [R] 0; [U] onCreateScreen cFEStateAuthDNAS_onCreateScreen stores
                                     //       func_002561B8(cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")) (the DNAS
                                     //       authentication object, class not named) and starts it in the mode of the
-                                    //       profile bits D_00535610; onUpdate func_001B6798 polls it (its first word:
+                                    //       profile bits D_00535610; onUpdate cFEStateAuthDNAS_onUpdate polls it (its first word:
                                     //       >= 3 ready, 5 done; + 0x1C error; error texts at + 0x450/0x650/0x850),
-                                    //       func_001B66B8 cancels it (+ 0x14 = 1); the destructor shuts it down
+                                    //       cFEStateAuthDNAS_onInputBegin cancels it (+ 0x14 = 1); the destructor shuts it down
                                     //       (func_002563A8) and deletes it
-    cUIText* mpTextAuth;            // 0x6D4 [R] 0; [U] onWidgetCreate func_001B65C0: widget "TextAuth"
+    cUIText* mpTextAuth;            // 0x6D4 [R] 0; [U] onWidgetCreate cFEStateAuthDNAS_onWidgetCreate: widget "TextAuth"
                                     //       ("kT_ovrcmnloading", then "kT_205Authenticating" in onUpdate)
     cUIText* mpTextCancel;          // 0x6D8 [U] onWidgetCreate: widget "TextCancel" (hidden; onUpdate shows it with
                                     //       the next two once the object is ready)
     cUIThing* mpXButton;            // 0x6DC [U] onWidgetCreate: widget "XButton" (hidden)
     cUIThing* mpSubmitRect;         // 0x6E0 [U] onWidgetCreate: widget "submitrect" (hidden)
-    int miState;                    // 0x6E4 [R] 0; [U] onCreateScreen sets 1; onUpdate func_001B6798: 1 -> 2 when the
+    int miState;                    // 0x6E4 [R] 0; [U] onCreateScreen sets 1; onUpdate cFEStateAuthDNAS_onUpdate: 1 -> 2 when the
                                     //       object is ready (starts it), 2 -> 3 when done, 3 reports ok / error to
-                                    //       mpParentState, 4 (cancelled by func_001B66B8 in state 2) reports 0x14
+                                    //       mpParentState, 4 (cancelled by cFEStateAuthDNAS_onInputBegin in state 2) reports 0x14
                                     //       when done
     char unk_6E8[0xC];              // 0x6E8 no access seen
     int unk_6F4;                    // 0x6F4 [R] 2 (both ctors); no other access seen
@@ -275,14 +275,14 @@ struct cFEStateAuthDNASError {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateAuthDNASError
     unsigned short* mpustrBody;     // 0x6D0 [R] the ctor's 4th argument (cFEStateNetConfig's mpustrAuthError[1]), 0
-                                    //       in the default ctor; [U] func_001B6C98 (slot 7) wraps it into mpBody, or
+                                    //       in the default ctor; [U] cFEStateAuthDNASError_onGainTransition (slot 7) wraps it into mpBody, or
                                     //       hides mpBody when empty (strlen1)
-    unsigned short* mpustrFooter;   // 0x6D4 [R] the 5th argument (mpustrAuthError[2]), 0; [U] func_001B6C98 plays
+    unsigned short* mpustrFooter;   // 0x6D4 [R] the 5th argument (mpustrAuthError[2]), 0; [U] cFEStateAuthDNASError_onGainTransition plays
                                     //       frame "full" and wraps it into mpFooter, or plays "short" and hides
                                     //       mpFooter when empty
-    unsigned short* mpustrTitle;    // 0x6D8 [R] the 6th argument (mpustrAuthError[0]), 0; [U] func_001B6C98 wraps it
+    unsigned short* mpustrTitle;    // 0x6D8 [R] the 6th argument (mpustrAuthError[0]), 0; [U] cFEStateAuthDNASError_onGainTransition wraps it
                                     //       into mpTitle, or hides mpTitle when empty
-    cUIText* mpFooter;              // 0x6DC [U] onWidgetCreate func_001B6BB8: widget "Footer"
+    cUIText* mpFooter;              // 0x6DC [U] onWidgetCreate cFEStateAuthDNASError_onWidgetCreate: widget "Footer"
     cUIText* mpBody;                // 0x6E0 [U] onWidgetCreate: widget "Body"
     cUIText* mpTitle;               // 0x6E4 [U] onWidgetCreate: widget "Title"
 };

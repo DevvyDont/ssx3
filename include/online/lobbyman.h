@@ -78,7 +78,7 @@ CHECK_OFFSET(tLobbyAccount, mChangeSpam, 0x48);
 CHECK_OFFSET(tLobbyAccount, mChangeMail, 0x4C);
 CHECK_SIZE(tLobbyAccount, 0x50);
 
-// A player's lobby stats (0x14 bytes, copied as a whole: func_001AFE68 / the setup manager func_002642B8 store
+// A player's lobby stats (0x14 bytes, copied as a whole: cFEStateChallengeReceivedPopup_onCreateScreen / the setup manager func_002642B8 store
 // the opponent's into mOpponentStats with one block copy). Filled from the "onln" reply (func_0025D048).
 struct tLobbyStats {
     int mRank;              // 0x00 [U] tag "R"; the setup manager sends it to the opponent (func_00264CB8)
@@ -141,7 +141,7 @@ struct LobbyMan {
     char* mRoomName;                // 0x084 [U] onroomselected ("move" reply) stores "NAME", resets on error;
                                     //       func_0025DA90 returns it when connected and non-empty
     char* mGameName;                // 0x088 [U] onplaymsg: "NAME" of the game session
-    char* unk_08C;                  // 0x08C [U] func_001AFE68 copies the buddy race setup's name into it;
+    char* unk_08C;                  // 0x08C [U] cFEStateChallengeReceivedPopup_onCreateScreen copies the buddy race setup's name into it;
                                     //       func_00263CF0 hands the word to the setup manager
     char* mHostName;                // 0x090 [U] onplaymsg: "HOST"
     char* mOppoName;                // 0x094 [U] onplaymsg: "OPPO"
@@ -156,7 +156,7 @@ struct LobbyMan {
     int mSeed;                      // 0x0B0 [U] onplaymsg: "SEED"
     int mIsHost;                    // 0x0B4 [U] onplaymsg: "SELF" == "HOST"; challenge sets 1
     tLobbyStats mStats;             // 0x0B8 [U] "onln" reply (func_0025D048); challenge sends them
-    tLobbyStats mOpponentStats;     // 0x0CC [U] block-copied in by func_001AFE68 / func_002642B8
+    tLobbyStats mOpponentStats;     // 0x0CC [U] block-copied in by cFEStateChallengeReceivedPopup_onCreateScreen / func_002642B8
     float mTimeout;                 // 0x0E0 [U] func_0025B608 stores the request timeout (20.0), connect 30.0;
                                     //       update subtracts the frame time and gives up when it goes negative
     float unk_0E4;                  // 0x0E4 [U] update subtracts the frame time (no other writer seen)

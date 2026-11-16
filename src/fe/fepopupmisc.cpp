@@ -612,9 +612,9 @@ void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF630__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineAgreement_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001DF630(void* self)
+int cFEStateOnlineAgreement_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -647,9 +647,9 @@ void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF6A0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001DF6A0(void* self)
+int cFEStateNetQuickPlayPopup_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -793,9 +793,9 @@ extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateN
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF8E0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001DF8E0(void* self)
+int cFEStateNetCreateRoomPopup_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -2434,9 +2434,9 @@ extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallenge
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0A00__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0A00(void* self)
+int cFEStateChallengePopup_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -2484,9 +2484,9 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0AB8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0AB8(void* self)
+int cFEStateChallengeReceivedPopup_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -2585,18 +2585,18 @@ extern "C" void* func_001E0BB0(cFEStateAuthDNAS* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C10__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onGainTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0C10(void* self)
+int cFEStateAuthDNAS_onGainTransition(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C18__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0C18(void* self)
+int cFEStateAuthDNAS_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -2637,9 +2637,9 @@ extern "C" void* func_001E0C30(cFEStateAuthDNASError* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C78__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0C78(void* self)
+int cFEStateAuthDNASError_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -2898,9 +2898,9 @@ void* cFEStateNetNews__cFEStateNetNews(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0EF0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E0EF0(void* self)
+int cFEStateNetNews_onLoseTransition(void* self)
 {
     return 0x1;
 }
@@ -3067,9 +3067,9 @@ extern "C" void* func_001E0FF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1040__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateReadMessagePopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_001E1040(void* self)
+int cFEStateReadMessagePopup_onLoseTransition(void* self)
 {
     return 0x1;
 }

@@ -8,7 +8,7 @@
 // assert at line 518 sits between the methods paired with retail func_001BD738 and func_001BD8C8).
 //
 // Size 0xB84: cMemMan_alloc(0xB84, "cFEStateLobbyMenu") + cFEStateLobbyMenu_cFEStateLobbyMenu(mem, pEngine) (func_001A8E40,
-// func_001B2378, func_001B3A30, func_001BFE70); its last member, the cBXString at 0xB80, ends there. Constructors
+// func_001B2378, func_001B3A30, cFEStateOnlineMainMenu_onWidgetEvent); its last member, the cBXString at 0xB80, ends there. Constructors
 // cFEStateLobbyMenu_cFEStateLobbyMenu and the default func_001DF780 (fe/fepopupmisc), destructor cFEStateLobbyMenu__cFEStateLobbyMenu (fe/fepopupmisc; the
 // preview's _$_17cFEStateLobbyMenu). Retail vtable cFEStateLobbyMenu_vtbl (32 slots: 1 dtor, 4 onCreateScreen cFEStateLobbyMenu_onCreateScreen,
 // 7 onGainTransition cFEStateLobbyMenu_onGainTransition, 12 onUpdate cFEStateLobbyMenu_onUpdate, 17 onPopupEvent cFEStateLobbyMenu_onPopupEvent, 18 onWidgetCreate

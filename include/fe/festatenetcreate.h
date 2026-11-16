@@ -8,7 +8,7 @@
 //
 // cFEStateCreateStep1: screen "210create_step1": account name, password, confirmation, e-mail and the two
 // "inform me" / "share info" yes-no boxes. Size 0x6F4: cFEStateCreateStep1 is allocated with
-// cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (func_001AD5E8, cFEStateCreateStep2_onWidgetEvent, func_001BF758, func_001C0D28) and
+// cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (cFEStateSelectPersona_onWidgetEvent, cFEStateCreateStep2_onWidgetEvent, func_001BF758, cFEStateOnlineAgreement_onWidgetEvent) and
 // constructed by cFEStateCreateStep1_cFEStateCreateStep1(mem, pEngine, bEdit); every own field ends below 0x6F4. Constructors cFEStateCreateStep1_cFEStateCreateStep1
 // and the default func_001E0CA0 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
 // (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable cFEStateCreateStep1_vtbl (32 slots: 1 dtor, 4
@@ -17,7 +17,7 @@
 // 29 func_001E0D60, 31 func_001B9488 (net event 0xCE)). Methods: fe/feasyncfile 0x1B88F0-0x1BA358.
 //
 // cFEStateCreateStep2: screen "211create_step2": birth date, gender and the spam option of the same form. Size
-// 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + cFEStateCreateStep2_cFEStateCreateStep2(mem, pEngine) (cFEStateCreateStep1_onWidgetEvent, func_001C0D28);
+// 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + cFEStateCreateStep2_cFEStateCreateStep2(mem, pEngine) (cFEStateCreateStep1_onWidgetEvent, cFEStateOnlineAgreement_onWidgetEvent);
 // own fields end below 0x6E0. Constructors cFEStateCreateStep2_cFEStateCreateStep2 and the default func_001E0D68 (fe/fepopupmisc),
 // destructor cFEStateCreateStep2__cFEStateCreateStep2 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable cFEStateCreateStep2_vtbl
 // (slots 4 onCreateScreen cFEStateCreateStep2_onCreateScreen, 12 onUpdate cFEStateCreateStep2_onUpdate, 17 onPopupEvent cFEStateCreateStep2_onPopupEvent, 18
