@@ -2058,10 +2058,6 @@ struct sGame_DB88 {
     char pad[0x200];
     sPauseMgr_DB88* mgr;
 };
-struct sApp_DB88 {
-    char pad[0x84];
-    sGame_DB88* game;
-};
 
 extern "C" void func_002872A8(void* snd);
 
@@ -2069,7 +2065,7 @@ extern "C" void func_001FDB88(void* self, int a1, int a2)
 {
     if (a1 != 0 && a2 == 5) {
         D_004A26FC = 3;
-        ((sApp_DB88*)SSXApp)->game->mgr->f8 = 1;
+        ((sGame_DB88*)(SSXApp)->Game)->mgr->f8 = 1;
         func_002872A8(func_0028B180());
         func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
     }

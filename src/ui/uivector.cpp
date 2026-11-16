@@ -1126,25 +1126,19 @@ extern "C" int func_003A4C88(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_getSize);
 #ifdef SKIP_ASM
-// 12 bytes, 4-byte aligned (copied with ldl/ldr + lw). Float fields are a guess.
-struct sVec3 {
-    float x;
-    float y;
-    float z;
-};
 
-extern "C" void cUIThing_getSize(cUIThing* self, sVec3* out)
+extern "C" void cUIThing_getSize(cUIThing* self, t3Vector* out)
 {
-    *out = *(sVec3*)&self->mSize;
+    *out = *(&self->mSize);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setSize);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setSize(cUIThing* self, sVec3* in)
+extern "C" void cUIThing_setSize(cUIThing* self, t3Vector* in)
 {
-    *(sVec3*)&self->mSize = *in;
+    *(&self->mSize) = *in;
 }
 #endif
 

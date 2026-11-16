@@ -693,13 +693,6 @@ public:
     virtual void setEnabled(int v);
     virtual void setVisible(int v);
 };
-struct sPopup_6D30 {
-    char pad[0x80];
-    cUIObj_6D30* o80;
-    cUIObj_6D30* o84;
-    cUIObj_6D30* o88;
-    cUIObj_6D30* o8C;
-};
 extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info);
 extern "C" void func_001C8050(void* self, cUIText* text, int* info);
@@ -710,57 +703,57 @@ extern "C" void func_001C9B68(void* self, float* size, float* item);
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
 {
     int* info = (int*)infop;
-    sPopup_6D30* p = (sPopup_6D30*)self;
+    cScreenPopup* p = self;
     float size[4];
     if (info[0] == -1) {
         sVec3_6D30 pos = D_004FF0D8_6D30;
         float w = 0.0f;
-        if (p->o84 != 0) {
+        if (((cUIObj_6D30*)p->mpStaticBox) != 0) {
             float item[4];
             int* it = info + 5;
-            func_001C8050(self, (cUIText*)p->o84, it);
-            func_001C8628(self, p->o84, size);
-            func_001C8320(self, (cUIText*)p->o84, it, item);
+            func_001C8050(self, (cUIText*)((cUIObj_6D30*)p->mpStaticBox), it);
+            func_001C8628(self, ((cUIObj_6D30*)p->mpStaticBox), size);
+            func_001C8320(self, (cUIText*)((cUIObj_6D30*)p->mpStaticBox), it, item);
             w = item[2];
-            pos = *(sVec3_6D30*)((char*)p->o84 + 0x44);
-            p->o84->setEnabled(0);
-            p->o84->setVisible(1);
+            pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)p->mpStaticBox) + 0x44);
+            ((cUIObj_6D30*)p->mpStaticBox)->setEnabled(0);
+            ((cUIObj_6D30*)p->mpStaticBox)->setVisible(1);
         }
-        if (p->o80 != 0) {
+        if (((cUIObj_6D30*)p->mpEnterBox) != 0) {
             cScreenPopup_setTextString1(self, (char*)self + 0x2B0, info + 7);
             sVec3_6D30 v = pos;
             v.x = v.x + w + 10.0f;
-            *(sVec3_6D30*)((char*)p->o80 + 0x44) = v;
+            *(sVec3_6D30*)((char*)((cUIObj_6D30*)p->mpEnterBox) + 0x44) = v;
             func_001C9B68(self, (float*)((char*)self + 0x260), size);
-            p->o80->setEnabled(0);
-            p->o80->setVisible(1);
+            ((cUIObj_6D30*)p->mpEnterBox)->setEnabled(0);
+            ((cUIObj_6D30*)p->mpEnterBox)->setVisible(1);
         }
-        if (p->o88 != 0) {
-            p->o88->setEnabled(0);
-            p->o88->setVisible(1);
+        if (((cUIObj_6D30*)p->mpTextBoxPair) != 0) {
+            ((cUIObj_6D30*)p->mpTextBoxPair)->setEnabled(0);
+            ((cUIObj_6D30*)p->mpTextBoxPair)->setVisible(1);
         }
-        if (p->o8C != 0) {
-            p->o8C->setVisible(1);
+        if (((cUIObj_6D30*)p->mpEnterBoxBackground) != 0) {
+            ((cUIObj_6D30*)p->mpEnterBoxBackground)->setVisible(1);
         }
         info[0] = 1;
         return 1;
     }
-    if (p->o88 != 0) {
-        p->o88->setEnabled(1);
-        p->o88->setVisible(0);
+    if (((cUIObj_6D30*)p->mpTextBoxPair) != 0) {
+        ((cUIObj_6D30*)p->mpTextBoxPair)->setEnabled(1);
+        ((cUIObj_6D30*)p->mpTextBoxPair)->setVisible(0);
     }
-    if (p->o84 != 0) {
-        p->o84->setEnabled(1);
-        p->o84->setVisible(0);
+    if (((cUIObj_6D30*)p->mpStaticBox) != 0) {
+        ((cUIObj_6D30*)p->mpStaticBox)->setEnabled(1);
+        ((cUIObj_6D30*)p->mpStaticBox)->setVisible(0);
     }
-    if (p->o80 != 0) {
-        p->o80->setEnabled(1);
-        p->o80->setVisible(0);
+    if (((cUIObj_6D30*)p->mpEnterBox) != 0) {
+        ((cUIObj_6D30*)p->mpEnterBox)->setEnabled(1);
+        ((cUIObj_6D30*)p->mpEnterBox)->setVisible(0);
     }
-    if (p->o8C != 0) {
-        p->o8C->setVisible(0);
+    if (((cUIObj_6D30*)p->mpEnterBoxBackground) != 0) {
+        ((cUIObj_6D30*)p->mpEnterBoxBackground)->setVisible(0);
     }
-    func_001C8628(self, p->o80, size);
+    func_001C8628(self, ((cUIObj_6D30*)p->mpEnterBox), size);
     func_001C9B68(self, (float*)((char*)self + 0x260), size);
     return 0;
 }
@@ -4290,23 +4283,6 @@ public:
     virtual void setVisible(int on);
 };
 
-struct cKeyboardPopup_CC8D8 {
-    char pad0[0x40];
-    void* mpScreen;                 // 0x40
-    char pad44[0x60 - 0x44];
-    int miMaxCharacters;            // 0x60
-    char pad64[0x74 - 0x64];
-    char mszEditString[64];         // 0x74
-    char mszViewableString[64];     // 0xB4
-    char padF4[0x134 - 0xF4];
-    int miCursorPos;                // 0x134
-    int miViewStart;                // 0x138
-    int miViewEnd;                  // 0x13C
-    char pad140[0x3F4 - 0x140];
-    float mfViewWidth;              // 0x3F4
-    char pad3F8[0x400 - 0x3F8];
-    float mfCursorWidth;            // 0x400
-};
 
 // The body uses the incoming pointer directly (as `this` would be): a
 // separate `self` local leaves a copy in the entry block that changes
@@ -4314,55 +4290,55 @@ struct cKeyboardPopup_CC8D8 {
 extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int bDropFromRight)
 {
     cUIThing_CC8D8* pCursor;
-    if (strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString) != 0) {
+    if (strlen((self)->mszEditString) != 0) {
         float fAllowableLength;
-        void* pText = cUIScreen_getObjectByHashName(((cKeyboardPopup_CC8D8*)self)->mpScreen, GetHashValue32(D_00466530));
+        void* pText = cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(D_00466530));
         tRect_CC8D8 rectString;
-        int iCutLength = ((cKeyboardPopup_CC8D8*)self)->miViewEnd - ((cKeyboardPopup_CC8D8*)self)->miViewStart;
-        strncpy(((cKeyboardPopup_CC8D8*)self)->mszViewableString, ((cKeyboardPopup_CC8D8*)self)->mszEditString + ((cKeyboardPopup_CC8D8*)self)->miViewStart, iCutLength);
-        ((cKeyboardPopup_CC8D8*)self)->mszViewableString[iCutLength] = 0;
+        int iCutLength = (self)->miViewableEndIndex - (self)->miViewableStartIndex;
+        strncpy((self)->mszViewableString, (self)->mszEditString + (self)->miViewableStartIndex, iCutLength);
+        (self)->mszViewableString[iCutLength] = 0;
         cKeyboardPopup_setScale(self, pText);
-        ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent(((cKeyboardPopup_CC8D8*)self)->mszViewableString, &rectString, false);
-        fAllowableLength = ((cKeyboardPopup_CC8D8*)self)->mfViewWidth;
-        if (((cKeyboardPopup_CC8D8*)self)->miCursorPos == strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString)) {
-            fAllowableLength -= ((cKeyboardPopup_CC8D8*)self)->mfCursorWidth;
+        ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent((self)->mszViewableString, &rectString, false);
+        fAllowableLength = (self)->mvSizeEnter[0];
+        if ((self)->miCursorPos == strlen((self)->mszEditString)) {
+            fAllowableLength -= (self)->mvSizeCursor[0];
             if (fAllowableLength < rectString.w) {
                 if (bDropFromRight) {
-                    fAllowableLength += ((cKeyboardPopup_CC8D8*)self)->mfCursorWidth;
+                    fAllowableLength += (self)->mvSizeCursor[0];
                 }
             }
         }
         while (fAllowableLength < rectString.w) {
             if (bDropFromRight) {
-                ((cKeyboardPopup_CC8D8*)self)->miViewEnd -= 1;
+                (self)->miViewableEndIndex -= 1;
             } else {
-                ((cKeyboardPopup_CC8D8*)self)->miViewStart += 1;
+                (self)->miViewableStartIndex += 1;
             }
-            iCutLength = ((cKeyboardPopup_CC8D8*)self)->miViewEnd - ((cKeyboardPopup_CC8D8*)self)->miViewStart;
-            strncpy(((cKeyboardPopup_CC8D8*)self)->mszViewableString, ((cKeyboardPopup_CC8D8*)self)->mszEditString + ((cKeyboardPopup_CC8D8*)self)->miViewStart, iCutLength);
-            ((cKeyboardPopup_CC8D8*)self)->mszViewableString[iCutLength] = 0;
+            iCutLength = (self)->miViewableEndIndex - (self)->miViewableStartIndex;
+            strncpy((self)->mszViewableString, (self)->mszEditString + (self)->miViewableStartIndex, iCutLength);
+            (self)->mszViewableString[iCutLength] = 0;
             cKeyboardPopup_setScale(self, pText);
-            ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent(((cKeyboardPopup_CC8D8*)self)->mszViewableString, &rectString, false);
+            ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent((self)->mszViewableString, &rectString, false);
         }
-        while (rectString.w < ((cKeyboardPopup_CC8D8*)self)->mfViewWidth - ((cKeyboardPopup_CC8D8*)self)->mfCursorWidth) {
-            if (((cKeyboardPopup_CC8D8*)self)->miViewEnd >= ((cKeyboardPopup_CC8D8*)self)->miMaxCharacters)
+        while (rectString.w < (self)->mvSizeEnter[0] - (self)->mvSizeCursor[0]) {
+            if ((self)->miViewableEndIndex >= (self)->miMaxCharacters)
                 break;
-            iCutLength = ++((cKeyboardPopup_CC8D8*)self)->miViewEnd - ((cKeyboardPopup_CC8D8*)self)->miViewStart;
-            strncpy(((cKeyboardPopup_CC8D8*)self)->mszViewableString, ((cKeyboardPopup_CC8D8*)self)->mszEditString + ((cKeyboardPopup_CC8D8*)self)->miViewStart, iCutLength);
-            ((cKeyboardPopup_CC8D8*)self)->mszViewableString[iCutLength] = 0;
+            iCutLength = ++(self)->miViewableEndIndex - (self)->miViewableStartIndex;
+            strncpy((self)->mszViewableString, (self)->mszEditString + (self)->miViewableStartIndex, iCutLength);
+            (self)->mszViewableString[iCutLength] = 0;
             cKeyboardPopup_setScale(self, pText);
-            ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent(((cKeyboardPopup_CC8D8*)self)->mszViewableString, &rectString, false);
+            ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent((self)->mszViewableString, &rectString, false);
         }
     } else {
-        ((cKeyboardPopup_CC8D8*)self)->mszViewableString[0] = 0;
+        (self)->mszViewableString[0] = 0;
     }
-    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((cKeyboardPopup_CC8D8*)self)->mpScreen, GetHashValue32(D_00466540));
-    pCursor->setVisible(((cKeyboardPopup_CC8D8*)self)->miViewStart != 0);
-    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((cKeyboardPopup_CC8D8*)self)->mpScreen, GetHashValue32(D_00466558));
-    if (strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString) != 0) {
+    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(D_00466540));
+    pCursor->setVisible((self)->miViewableStartIndex != 0);
+    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(D_00466558));
+    if (strlen((self)->mszEditString) != 0) {
         sVEntry_CC8D8* vt = *(sVEntry_CC8D8**)((char*)pCursor + 8);
         char* thisp = (char*)pCursor + vt[9].delta;
-        vt[9].fn(thisp, ((cKeyboardPopup_CC8D8*)self)->miViewEnd < (unsigned int)strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString));
+        vt[9].fn(thisp, (self)->miViewableEndIndex < (unsigned int)strlen((self)->mszEditString));
     } else {
         pCursor->setVisible(0);
     }
@@ -4702,12 +4678,6 @@ struct sVEp_D348 {
     void (*fn)(void*, void*);
 };
 
-struct sKbd_D348 {
-    char pad_0x0[0x68];
-    int f68;            // 0x68
-    char pad_0x6C[0x41C - 0x6C];
-    int f41C;           // 0x41C
-};
 
 static inline void SetVis_D348(char* o, int on)
 {
@@ -4719,10 +4689,10 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* s, int first)
 {
     if (first) {
         char buf[16];
-        ((sKbd_D348*)s)->f41C = 1;
-        ((sKbd_D348*)s)->f68 = 1;
+        (s)->mbTransistionDone = 1;
+        (s)->mbCapsOn = 1;
         if (D_004A33F0 != 0) {
-            ((sKbd_D348*)s)->f68 = (*(unsigned int*)((char*)D_004A33F0 + 0x88) >> 1) & 1;
+            (s)->mbCapsOn = (*(unsigned int*)((char*)D_004A33F0 + 0x88) >> 1) & 1;
         }
         s->mbShiftOn = 0;
         if (s->mbSetInputText == 0) {
@@ -5341,8 +5311,6 @@ extern "C" void cKeyboardPopup_checkAndFixConflict(cKeyboardPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_allowSelection);
 #ifdef SKIP_ASM
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sPopupK1CE560 { char p[0x148]; int a[84]; int b[84]; };
 // PORT: out is an int* out-param (the unit declares it int)
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int idx, int out)
 {
@@ -5360,12 +5328,12 @@ extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int idx, int 
     }
     if (flag) {
         if (out)
-            *(int*)out = ((sPopupK1CE560*)self)->b[idx];
-        return ((sPopupK1CE560*)self)->a[idx];
+            *(int*)out = (self)->mbAlternate[idx];
+        return (self)->mbRegular[idx];
     } else {
         if (out)
-            *(int*)out = ((sPopupK1CE560*)self)->a[idx];
-        return ((sPopupK1CE560*)self)->b[idx];
+            *(int*)out = (self)->mbRegular[idx];
+        return (self)->mbAlternate[idx];
     }
 }
 #endif

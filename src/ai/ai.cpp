@@ -299,26 +299,6 @@ extern "C" void func_00120E88(void* rider);
 extern "C" void func_00101B60(void* p);
 extern "C" void func_001013A8(void* p);
 
-struct sAiObjAF0
-{
-    char pad0[0x8];
-    int mFrame;
-    char padC[0x8];
-    int mHaveComputers;
-    char pad18[0x28];
-    char* mPlayers[2];
-    char* mComputers[5];
-    char* mOthers[5];
-    char pad70[0xC];
-    int mNumPlayers;
-    int mNumComputers;
-    int mNumOthers;
-    int mNumMission;
-    int mHaveOthers;
-    char pad90[0x14];
-    void* fA4;
-    void* fA8;
-};
 
 // Derived rider object -> its cRider virtual base (stored at +0x18).
 static inline char* Rider_AF0(char* obj)
@@ -333,9 +313,9 @@ extern "C" void func_00128AF0(cAI* self)
     char* m[8];
     int n = 0;
     int i;
-    func_0012BB20_AF0(((sAiObjAF0*)self));
-    func_00113C20(((sAiObjAF0*)self));
-    func_0010F560(((sAiObjAF0*)self));
+    func_0012BB20_AF0((self));
+    func_00113C20((self));
+    func_0010F560((self));
     if (self->NumberOfMissionRidersLoaded > 0 && self->NumberOfPlayersAllocated > 0) {
         char* x = (char*)SSXApp->Game->PlaybackMan;
         if (x != 0 && *(int*)(x + 0x70) == 0) {
@@ -2108,17 +2088,6 @@ extern "C" void func_002EF248(void* frame);
 struct sVEntryWF { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVEntryWF2 { short delta; short index; void (*fn)(void*, void*); };
 
-struct sAiObj12B7F0
-{
-    char pad0[0x40];
-    char* mPlayers[2];
-    char* mMission[5];
-    char* mActors[7];
-    int mCount;
-    int mNumPlayers;
-    int mNumMission;
-    int mNumActors;
-};
 
 static inline void replayWriteObj(char* obj, void* frame)
 {
@@ -2130,7 +2099,7 @@ static inline void replayWriteObj(char* obj, void* frame)
 extern "C" void func_0012B7F0(cAI* self, void* frame)
 {
     sVEntryWF* vt = *(sVEntryWF**)frame;
-    vt[1].fn((char*)frame + vt[1].delta, ((sAiObj12B7F0*)self), 0x28);
+    vt[1].fn((char*)frame + vt[1].delta, (self), 0x28);
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
         replayWriteObj(((char**)&self->Players[0])[i], frame);
@@ -2156,22 +2125,6 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame);
 struct sVEntryRF { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVEntryRF2 { short delta; short index; void (*fn)(void*, void*); };
 
-struct sAiObj12B948
-{
-    int mState;
-    int mPrevState;
-    char pad8[0x38];
-    char* mPlayers[2];
-    char* mMission[5];
-    char* mActors[7];
-    int mCount;
-    int mNumPlayers;
-    int mNumMission;
-    int mNumActors;
-    char pad88[0x10];
-    int f98;
-    int f9C;
-};
 
 static inline void replayReadObj(char* obj, void* frame)
 {
@@ -2183,11 +2136,11 @@ static inline void replayReadObj(char* obj, void* frame)
 extern "C" void cAI_readFromReplayFrame(cAI* self, void* frame)
 {
     sVEntryRF* vt = *(sVEntryRF**)frame;
-    vt[2].fn((char*)frame + vt[2].delta, ((sAiObj12B948*)self), 0x28);
+    vt[2].fn((char*)frame + vt[2].delta, (self), 0x28);
     int state = self->CurrentAIState;
-    cAI_forceAIState(((sAiObj12B948*)self), self->PreviousAIState);
+    cAI_forceAIState((self), self->PreviousAIState);
     self->PreviousAIStateHandler = (cAIStateHandler*)(int)self->CurrentAIStateHandler;
-    cAI_forceAIState(((sAiObj12B948*)self), state);
+    cAI_forceAIState((self), state);
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
         replayReadObj(((char**)&self->Players[0])[i], frame);

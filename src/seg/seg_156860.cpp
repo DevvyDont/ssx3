@@ -1781,23 +1781,8 @@ struct PacketQueue_7BD8 {
     Packet_7BD8* slots[32];         // 0x8
 };
 
-struct Conn_7BD8 {
-    char pad0[4];
-    int busy;                       // 0x4
-    char pad8[0x5C - 0x8];
-    int unk5C;                      // 0x5C
-    int unk60;                      // 0x60
-    char pad64[0x84 - 0x64];
-    int unk84;                      // 0x84
-    char pad88[0x94 - 0x88];
-    int unk94;                      // 0x94
-    char pad98[0xA8 - 0x98];
-    int unkA8;                      // 0xA8
-    char padAC[0x144 - 0xAC];
-    PacketQueue_7BD8 queues[2];     // 0x144
-};
 
-extern "C" void func_00257CD8(Conn_7BD8* c);
+extern "C" void func_00257CD8(cGameComm* c);
 extern "C" void func_002581B8(cGameComm* arg0, int *arg1);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_copy");
@@ -1805,22 +1790,22 @@ extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_co
 // PORT: the unit declares this as (void*, int, int, int); dst is a pointer passed as int
 extern "C" int func_00257BD8(cGameComm* self, int ch, int dst, int unused)
 {
-    Conn_7BD8* c = (Conn_7BD8*)self;
-    if (c->busy != 0) return 0;
+    cGameComm* c = self;
+    if (c->mError != 0) return 0;
     func_00257CD8(c);
-    PacketQueue_7BD8* q = &c->queues[ch];
+    PacketQueue_7BD8* q = &((PacketQueue_7BD8*)&c->mReadQueue[0])[ch];
     if (q->rd != q->wr) {
         Packet_7BD8* p = q->slots[q->rd++ % 32];
         int len = p->size - 4;
         MEM_copy_7BD8((void*)dst, p->data, len);
         func_002581B8((cGameComm*)c, (int*)p);
         if (ch == 0) {
-            c->unk5C = 0;
-            c->unk60 = 0;
-            c->unkA8 = 0;
-            c->unk84 = 0;
+            c->unk_05C = 0;
+            c->unk_060 = 0;
+            c->mStallThreshold = 0;
+            c->mWaitingMessage = 0;
         }
-        if (c->unk94 > 0) func_00258870((cGameComm*)c, 0x708, 0);
+        if (c->unk_094 > 0) func_00258870((cGameComm*)c, 0x708, 0);
         return len;
     }
     return 0;
@@ -2400,14 +2385,13 @@ INCLUDE_ASM("seg/seg_156860", func_002588A8);
 
 struct S88A8_4 { int k0; char p[0x14]; int k18; int k1c; };
 struct S88A8_6 { char p0[0xC]; S88A8_4 *c; char p1[0x204]; int k214; };
-struct S88A8_G { char p[0x84]; S88A8_6 *g84; };
 struct S88A8_S { int k0; int k4; char p0[0x40]; int k48; char p1[0x24]; int k70; int k74; int k78; char p2[0x380]; int k3fc; };
 
 extern "C" void func_002588A8(cGameComm* self) {
     S88A8_6 *t6;
     S88A8_4 *t4;
     self->mUnPauseTimer = 0;
-    t6 = ((S88A8_G *)SSXApp)->g84;
+    t6 = ((S88A8_6*)(SSXApp)->Game);
     if (t6->k214 != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
         && self->mState < 0xF
         && ((t4 = t6->c, t4->k0 != 4) || t4->k1c < 0x97)

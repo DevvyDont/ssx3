@@ -318,17 +318,6 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadUpdate);
 // Virtual calls in this unit go through these by hand.
 #include "vtable.h"
 
-// Race settings (cBENewRaceInterface_newRace; ai/ai's sRaceSettings). D_00535C10 / D_00535C11 are splat symbols for its
-// fields at 0x48 / 0x49.
-struct sRaceSettings {
-    char pad0[0x30];
-    int count;                  // 0x30
-    int numberOfHumanRiders;    // 0x34
-    char pad38[0x10];
-    signed char mode48;         // 0x48
-    signed char flag49;         // 0x49
-    signed char f4A;            // 0x4A
-};
 
 
 // The race (seg/seg_1FBE38 / main/gamemode layout). It is a class with its vtable pointer at 0xCC.
@@ -484,9 +473,9 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             break;
         char* newRace = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         char* newPlayer = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        sRaceSettings* r = &(*(sRaceSettings*)&cBENewRaceInterface_newRace);
+        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
         cGameModeMan* gm = D_004A28A8_date->gm;
-        int mode = r->f4A;
+        int mode = r->cGameEvent;
         if (mode < first || mode > last)
             cGameModeMan_initGameMode(gm, mode);
         int numAI = gm->iNumberAI - gm->iSimAI;
@@ -505,15 +494,15 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(newPlayer + 0xC);
             vt[1].fn(newPlayer + vt[1].delta);
         }
-        sRaceSettings* r2 = &(*(sRaceSettings*)&cBENewRaceInterface_newRace);
+        cBERaceDB* r2 = &(*(&cBENewRaceInterface_newRace));
         int quick = 0;
         cAI_cleanupAfterRace(D_004A2C68_date->race);
         cAI_cleanupActors(D_004A2C68_date->race);
-        if (r2->mode48 == 0)
-            quick = r2->flag49 == 0;
+        if (r2->cGameMode == 0)
+            quick = r2->cGamePath == 0;
         cAI_initAIRiders(D_004A2C68_date->race);
         if (numAI == 0 && quick) {
-            if (r2->mode48 == 0)
+            if (r2->cGameMode == 0)
                 cAI_initAIActors(D_004A2C68_date->race, 0);
             else
                 cAI_initAIActors(D_004A2C68_date->race, 2);
@@ -524,8 +513,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
     case 3: {
         if (func_0012A180(D_004A2C68_date->race)) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            sRaceSettings* r = &(*(sRaceSettings*)&cBENewRaceInterface_newRace);
-            int m = r->mode48;
+            cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+            int m = r->cGameMode;
             if (m == 0) {
                 func_001289F0(D_004A2C68_date->race);
                 if (D_004A2C68_date->race->f80 > 0)
@@ -534,8 +523,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
                     D_004A2C68_date->race->f8C = 1;
             }
             if (m == 5) {
-                sRaceSettings* r2 = &(*(sRaceSettings*)&cBENewRaceInterface_newRace);
-                if (r2->flag49 == 0)
+                cBERaceDB* r2 = &(*(&cBENewRaceInterface_newRace));
+                if (r2->cGamePath == 0)
                     func_00128A10(D_004A2C68_date->race);
             }
             *(int*)((char*)self + 0x10) = 4;
@@ -601,11 +590,6 @@ extern "C" void func_002A4B68(void* p);
 extern char* cGameState_mpGame;
 extern void* D_004A3DD8;
 
-struct sRace_2355C0 {
-    char pad0[0x48];
-    signed char mode48;
-    signed char flag49;
-};
 
 struct sRaceMan_2355C0 {
     char pad0[0x14];
@@ -635,9 +619,9 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
         *(int*)((char*)self + 0x1C) = 1;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 0xD));
-    sRace_2355C0* r = &(*(sRace_2355C0*)&cBENewRaceInterface_newRace);
-    int flag = r->flag49;
-    int mode = r->mode48;
+    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+    int flag = r->cGamePath;
+    int mode = r->cGameMode;
     if (flag == 0 && !inRange_2355C0(*(int*)((char*)SSXApp->Game->SectionMan + 0x1BC))) {
         *(int*)((char*)self + 0x4) = 0;
         *(int*)((char*)self + 0x0) = 4;
@@ -704,11 +688,6 @@ extern "C" void cReplay_startRace(void* p);
 extern "C" void func_00145DD0(void* iface, int a1, int a2, int a3);
 extern "C" void func_00238510(void* gm, int a1, int a2);
 
-struct sRace_235868 {
-    char pad0[0x48];
-    signed char mode48;
-    signed char flag49;
-};
 
 struct sSlot_235868 {
     char pad[0x50];
@@ -731,12 +710,12 @@ extern "C" void cGFTrackStartState_loseFocus(void* self)
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
     cReplay_startRace(*(void**)(cGameState_mpGame + 0x28));
     *(int*)((char*)self + 0x14) = 0;
-    sRace_235868* r = &(*(sRace_235868*)&cBENewRaceInterface_newRace);
-    if (r->flag49 == 0) {
+    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+    if (r->cGamePath == 0) {
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         func_00145DD0(player, 0, 0, *cBENewRaceInterface_getLocation(race));
     }
-    int m = r->mode48;
+    int m = r->cGameMode;
     if (m == 5) {
         goto restart;
     }
@@ -825,11 +804,6 @@ extern "C" void func_001473D0(void* player, int i, int v);
 extern char* cGameState_mpGame;
 extern void* D_004A3DD8;
 
-struct sRace_235AA0 {
-    char pad0[0x48];
-    signed char mode48;
-    signed char flag49;
-};
 
 struct sVE_235AA0 {
     short delta;
@@ -837,13 +811,6 @@ struct sVE_235AA0 {
     void (*fn)(void*);
 };
 
-struct sGM_235AA0 {
-    char pad0[0x10];
-    int total;      // 0x10
-    int humans;     // 0x14
-    int chars[10];  // 0x18
-    int boards[10]; // 0x40
-};
 
 extern "C" void cGFNextHeatState_gainFocus(void* self)
 {
@@ -851,21 +818,21 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     func_0030B7F8(D_004A3DD8);
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    sGM_235AA0* gm = (sGM_235AA0*)SSXApp->GameModeMan;
+    cGameModeMan* gm = SSXApp->GameModeMan;
     cGameModeMan_restartHeat(gm);
     cGame_partialRestart(SSXApp->Game);
-    sRace_235AA0* r = &(*(sRace_235AA0*)&cBENewRaceInterface_newRace);
-    int m = r->mode48;
+    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+    int m = r->cGameMode;
     if (m == 5)
         goto bail;
     if (m == 6)
         goto bail;
-    if (r->flag49 != 0) {
+    if (r->cGamePath != 0) {
     bail:
         *(int*)((char*)self + 0x10) = 3;
         return;
     }
-    int n = gm->total - gm->humans;
+    int n = gm->iNumberAI - gm->iSimAI;
     int base = *(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x7C);
     int i = 0;
     cBENewRaceInterface_setNumberAI(race, n);
@@ -874,8 +841,8 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
         vt[1].fn(race + vt[1].delta);
     }
     for (; i < n; i++) {
-        cBENewPlayerInterface_setRiderCharID(player, i + base, gm->chars[base + i]);
-        func_001473D0(player, i + base, gm->boards[base + i]);
+        cBENewPlayerInterface_setRiderCharID(player, i + base, gm->iCharacters[base + i]);
+        func_001473D0(player, i + base, gm->iCheatCharacters[base + i]);
     }
     {
         sVE_235AA0* vt = *(sVE_235AA0**)(player + 0xC);
@@ -885,8 +852,8 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     if (n >= 2)
         func_0012AC48(SSXApp->Game->AI);
     *(int*)((char*)self + 0x18) = 0;
-    sRace_235AA0* r2 = &(*(sRace_235AA0*)&cBENewRaceInterface_newRace);
-    if (r2->mode48 == 0) {
+    cBERaceDB* r2 = &(*(&cBENewRaceInterface_newRace));
+    if (r2->cGameMode == 0) {
         void* sc = ScriptEngine;
         *(int*)((char*)self + 0x18) = 1;
         func_0027A860(sc, 1, 0);

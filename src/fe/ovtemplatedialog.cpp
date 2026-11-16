@@ -1345,16 +1345,12 @@ struct sGame_CCF8 {
     char* mgr;
 };
 
-struct sGlobals_CCF8 {
-    char pad[0x84];
-    sGame_CCF8* game;
-};
 
 // Continues after a result dialog closes, depending on the current overlay state and the pending dialog.
 extern "C" void func_0020CCF8(void)
 {
     D_004A26FC = 0;
-    char* st = (char*)cUIStateStack_getCurrentState(((sGlobals_CCF8*)SSXApp)->game->mgr + 0x18);
+    char* st = (char*)cUIStateStack_getCurrentState(((sGame_CCF8*)(SSXApp)->Game)->mgr + 0x18);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int kind = D_00535C12[0];
     int type = *(int*)SSXApp->GameModeMan;
@@ -1469,16 +1465,10 @@ struct sGame_CFD0 {
     int f214;
 };
 
-struct sGlobals_CFD0 {
-    char pad[0x78];
-    void *be;
-    char pad7C[0x84 - 0x7C];
-    sGame_CFD0 *game;
-};
 
 extern "C" void func_0020CFD0(void)
 {
-    char *mgr = ((sGlobals_CFD0 *)SSXApp)->game->mgr;
+    char *mgr = ((sGame_CFD0*)(SSXApp)->Game)->mgr;
     char *st = 0;
     if (mgr + 0x18) {
         st = (char *)cUIStateStack_getCurrentState(mgr + 0x18);
@@ -1491,11 +1481,11 @@ extern "C" void func_0020CFD0(void)
         break;
     case 2:
         D_004A26FC = 0;
-        cReplay_stopAutoReplay(((sGlobals_CFD0 *)SSXApp)->game->replay);
-        ((sGlobals_CFD0 *)SSXApp)->game->f200->f8 = 1;
-        if (st != 0 && ((sGlobals_CFD0 *)SSXApp)->game->f214 == 2) {
+        cReplay_stopAutoReplay(((sGame_CFD0*)(SSXApp)->Game)->replay);
+        ((sGame_CFD0*)(SSXApp)->Game)->f200->f8 = 1;
+        if (st != 0 && ((sGame_CFD0*)(SSXApp)->Game)->f214 == 2) {
             if (*(int *)(st + 0x98) == 8) {
-                cBE_getInterface_Fv(((sGlobals_CFD0 *)SSXApp)->be, 7);
+                cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     func_0039F840(mgr + 0x18);
                 }
@@ -1505,11 +1495,11 @@ extern "C" void func_0020CFD0(void)
     case 3:
         D_004A26FC = 0;
         cOVStateManager_removePDATemplate();
-        func_0039F840(((sGlobals_CFD0 *)SSXApp)->game->mgr + 0x18);
+        func_0039F840(((sGame_CFD0*)(SSXApp)->Game)->mgr + 0x18);
         break;
     case 4:
         D_004A26FC = 0;
-        func_00231250(((sGlobals_CFD0 *)SSXApp)->game, 0xE, 2, 0);
+        func_00231250(((sGame_CFD0*)(SSXApp)->Game), 0xE, 2, 0);
         break;
     }
 }
@@ -1791,10 +1781,9 @@ struct sSelf_D5A8 { char pad[0x54]; int f54; };
 // Same vtable entry; the void/int return only changes v0/v1 choice around the call.
 struct sVV_D5A8 { short delta; short index; void (*fn)(void*); };
 struct sGame_D5A8 { char pad[0xC]; char* f0C; };
-struct sApp_D5A8 { char pad[0x84]; char* game; };
 struct sP40_D5A8 { char pad[0x40]; char* f40; };
 struct sP18_D5A8 { char pad[0x18]; char* f18; };
-static inline char* Game_D5A8() { return ((sApp_D5A8*)SSXApp)->game; }
+static inline char* Game_D5A8() { return ((char*)(SSXApp)->Game); }
 static inline char* Rider_D5A8() { return ((sP18_D5A8*)((sP40_D5A8*)((sGame_D5A8*)Game_D5A8())->f0C)->f40)->f18; }
 struct sVE_20D5A8 { short delta; short index; int (*fn)(void*); };
 struct sStFlags_20D5A8 { char pad[0x1C]; unsigned int lo : 8; unsigned int mode : 6; };

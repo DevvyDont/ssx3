@@ -452,10 +452,6 @@ extern char D_0045CE60[];
 extern signed char D_00535C11[];
 extern int cCommSystem_mNumNetConn;
 
-struct sComm_B4E0 {
-    char pad[0x20];
-    int state;                   // 0x20
-};
 
 struct sTime_B4E0 {
     char pad[0x10];
@@ -475,15 +471,6 @@ struct sApp_B4E0 {
 };
 extern sApp_B4E0* D_004A28A8_b4 __asm__("SSXApp");
 
-struct sRace_B4E0 {
-    char pad[0x3C];
-    int numAI;                   // 0x3C
-    int kind;                    // 0x40
-    char pad44[0x4];
-    signed char mode;            // 0x48
-    signed char quick;           // 0x49
-    signed char event;           // 0x4A
-};
 
 struct sVE_B4E0 {
     short delta;
@@ -509,14 +496,14 @@ static inline void update_B4E0(void* iface)
     vt[1].fn((char*)iface + vt[1].delta);
 }
 
-static inline bool commIdle_B4E0(sComm_B4E0* c)
+static inline bool commIdle_B4E0(cCommSystem* c)
 {
-    return c->state == 1;
+    return c->mNetConnState == 1;
 }
 
-static inline bool commBusy_B4E0(sComm_B4E0* c)
+static inline bool commBusy_B4E0(cCommSystem* c)
 {
-    return c->state == 3 || c->state == 4;
+    return c->mNetConnState == 3 || c->mNetConnState == 4;
 }
 
 static inline bool netOn_B4E0(int mode)
@@ -578,8 +565,8 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     switch (self->f8C1C) {
     case 0: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
-        int quick = r->quick;
+        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+        int quick = r->cGamePath;
         if (dir == 3) {
             quick = (quick + 1) % 3;
             if (quick == 0) {
@@ -589,7 +576,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
                     }
                     int kind = self->sub.e[self->f8C20].kind;
                     D_004A11B8 = 1;
-                    r->kind = kind;
+                    r->iLocationIdx = kind;
                 } else {
                     quick = (quick + 1) % 3;
                 }
@@ -604,7 +591,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
                     }
                     int kind = self->sub.e[self->f8C20].kind;
                     D_004A11B8 = 1;
-                    r->kind = kind;
+                    r->iLocationIdx = kind;
                 } else {
                     quick = (quick + 2) % 3;
                 }
@@ -652,14 +639,14 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     }
     case 1: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
-        if (r->quick == 0) {
+        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+        if (r->cGamePath == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
             cBENewRaceInterface_setNumberAI(race, 0);
             update_B4E0(race);
             break;
         }
-        int mode = r->mode;
+        int mode = r->cGameMode;
         if (dir != 2 && dir != 3) {
             return;
         }
@@ -707,9 +694,9 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     }
     case 2: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
-        int ev = r->event;
-        if (r->quick == 0) {
+        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+        int ev = r->cGameEvent;
+        if (r->cGamePath == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
             cBENewRaceInterface_setNumberAI(race, 0);
         } else if (dir == 2 || dir == 3) {
@@ -755,15 +742,15 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (dir != 2 && dir != 3) {
             return;
         }
-        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
-        if (r->quick == 0) {
+        cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+        if (r->cGamePath == 0) {
             if (dir == 3) {
                 self->f8C20 = func_0017A028_b4(&self->sub, self->f8C20);
             } else if (dir == 2) {
                 self->f8C20 = func_0017A0B8(&self->sub, self->f8C20);
             }
         } else {
-            int mode = r->mode;
+            int mode = r->cGameMode;
             do {
                 if (dir == 3) {
                     self->f8C20 = func_0017A220(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
@@ -904,18 +891,18 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         update_B4E0(net);
         if (self->f8C44 != 0) {
             if (self->f8C44 != 3) {
-                if (commIdle_B4E0((sComm_B4E0*)cCommSystem_mCommSystem)) {
-                    func_00255F50((sComm_B4E0*)cCommSystem_mCommSystem, 0);
-                    while (commBusy_B4E0((sComm_B4E0*)cCommSystem_mCommSystem)) {
-                        func_00255A20((sComm_B4E0*)cCommSystem_mCommSystem);
+                if (commIdle_B4E0(cCommSystem_mCommSystem)) {
+                    func_00255F50(cCommSystem_mCommSystem, 0);
+                    while (commBusy_B4E0(cCommSystem_mCommSystem)) {
+                        func_00255A20(cCommSystem_mCommSystem);
                         SYNCTASK_run(0);
                         THREAD_yieldticks(1);
                     }
                 }
             }
         } else {
-            if (!commIdle_B4E0((sComm_B4E0*)cCommSystem_mCommSystem)) {
-                func_00255FA0((sComm_B4E0*)cCommSystem_mCommSystem);
+            if (!commIdle_B4E0(cCommSystem_mCommSystem)) {
+                func_00255FA0(cCommSystem_mCommSystem);
             }
         }
         break;

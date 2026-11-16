@@ -358,38 +358,25 @@ static inline int riderV7_10CBE0(char* rider)
     return vt[7].fn(obj + vt[7].delta);
 }
 
-struct sComputer_0010CBE0
-{
-    char pad0[0x18];
-    char* mRider;       // 0x18
-    char pad1C[0xE24 - 0x1C];
-    int fE24;           // 0xE24
-    int fE28;           // 0xE28
-    float fE2C;         // 0xE2C
-    float fE30;         // 0xE30
-    float fE34;         // 0xE34
-    char padE38[0xE7C - 0xE38];
-    int a[15];          // 0xE7C
-};
 
 extern "C" int func_0010CBE0(cComputer* p, float t)
 {
-    sComputer_0010CBE0* self = (sComputer_0010CBE0*)p;
-    self->fE24 = 0;
-    self->fE28 = 0;
-    self->fE30 = t;
+    cComputer* self = p;
+    self->mIsUber = 0;
+    self->mIsTweak = 0;
+    self->mGrabStartTime = t;
     int idx = AIrand() % 15;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    int anim = func_001500D8(iface, riderV7_10CBE0(self->mRider), idx);
-    float spd = func_00120038(self->mRider);
-    float a = func_00312820(*(char**)(self->mRider + 0x784), anim, 2) / spd;
-    float b = func_00312820(*(char**)(self->mRider + 0x784), anim, 1) / spd;
+    int anim = func_001500D8(iface, riderV7_10CBE0(((char*)self->mRider)), idx);
+    float spd = func_00120038(((char*)self->mRider));
+    float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
+    float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
     if (t < a) return -1;
-    self->fE34 = t - a;
-    self->fE2C = a - b;
+    self->mGrabEndTime = t - a;
+    self->mHoldToLandTime = a - b;
     if (idx != -1 && idx < 15)
     {
-        self->a[idx]++;
+        self->GrabHistoryCounter[idx]++;
     }
     return idx;
 }
@@ -416,55 +403,42 @@ static inline int riderV7_10CD20(char* rider)
     return vt[7].fn(obj + vt[7].delta);
 }
 
-struct sComputer_0010CD20
-{
-    char pad0[0x18];
-    char* mRider;       // 0x18
-    char pad1C[0xE24 - 0x1C];
-    int fE24;           // 0xE24
-    int fE28;           // 0xE28
-    float fE2C;         // 0xE2C
-    float fE30;         // 0xE30
-    float fE34;         // 0xE34
-    char padE38[0xEF4 - 0xE38];
-    int c[15];          // 0xEF4
-};
 
 extern "C" int func_0010CD20(cComputer* p, float t)
 {
-    sComputer_0010CD20* self = (sComputer_0010CD20*)p;
-    self->fE24 = 0;
-    self->fE30 = t;
+    cComputer* self = p;
+    self->mIsUber = 0;
+    self->mGrabStartTime = t;
     int found = -1;
     int best = 10000;
     int i = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    float spd = func_00120038(self->mRider);
+    float spd = func_00120038(((char*)self->mRider));
     for (; i < 15; i++)
     {
-        int anim = func_00150138(iface, riderV7_10CD20(self->mRider), i);
+        int anim = func_00150138(iface, riderV7_10CD20(((char*)self->mRider)), i);
         if (anim == 0x1B6)
             continue;
-        int alt = (*(int*)(self->mRider + 0xB2C) & 1) ? func_00150198(iface, riderV7_10CD20(self->mRider), i, *(int*)(self->mRider + 0x2F4) >= 5) : 0x1B6;
-        if (0.0f < *(float*)(self->mRider + 0x2F0) && alt != 0x1B6)
+        int alt = (*(int*)(((char*)self->mRider) + 0xB2C) & 1) ? func_00150198(iface, riderV7_10CD20(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5) : 0x1B6;
+        if (0.0f < *(float*)(((char*)self->mRider) + 0x2F0) && alt != 0x1B6)
             continue;
-        int anim2 = func_001500D8(iface, riderV7_10CD20(self->mRider), i);
-        float a = func_00312820(*(char**)(self->mRider + 0x784), anim2, 1) / spd;
-        float b = func_00312820(*(char**)(self->mRider + 0x784), anim, 1) / spd;
-        float c = func_00312820(*(char**)(self->mRider + 0x784), anim, 2) / spd;
+        int anim2 = func_001500D8(iface, riderV7_10CD20(((char*)self->mRider)), i);
+        float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
+        float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
+        float c = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
         float sum = c + a;
-        if (sum < t && self->c[i] < best)
+        if (sum < t && self->TweakHistoryCounter[i] < best)
         {
-            self->fE28 = 1;
+            self->mIsTweak = 1;
             found = i;
-            self->fE2C = c - b;
-            self->fE34 = t - sum;
-            best = self->c[i];
+            self->mHoldToLandTime = c - b;
+            self->mGrabEndTime = t - sum;
+            best = self->TweakHistoryCounter[i];
         }
     }
     if (found != -1 && found < 15)
     {
-        self->c[found]++;
+        self->TweakHistoryCounter[found]++;
     }
     return found;
 }
@@ -490,54 +464,41 @@ static inline int riderV7_10CF68(char* rider)
     return vt[7].fn(obj + vt[7].delta);
 }
 
-struct sComputer_0010CF68
-{
-    char pad0[0x18];
-    char* mRider;       // 0x18
-    char pad1C[0xE24 - 0x1C];
-    int fE24;           // 0xE24
-    int fE28;           // 0xE28
-    float fE2C;         // 0xE2C
-    float fE30;         // 0xE30
-    float fE34;         // 0xE34
-    char padE38[0xEB8 - 0xE38];
-    int b[15];          // 0xEB8
-};
 
 extern "C" int func_0010CF68(cComputer* p, float t)
 {
-    sComputer_0010CF68* self = (sComputer_0010CF68*)p;
-    self->fE28 = 0;
-    if (*(float*)(self->mRider + 0x2F0) <= 0.0f)
+    cComputer* self = p;
+    self->mIsTweak = 0;
+    if (*(float*)(((char*)self->mRider) + 0x2F0) <= 0.0f)
         return -1;
-    self->fE30 = t;
+    self->mGrabStartTime = t;
     int found = -1;
     int best = 10000;
     int i = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    float spd = func_00120038(self->mRider);
+    float spd = func_00120038(((char*)self->mRider));
     for (; i < 15; i++)
     {
-        int anim = func_00150198(iface, riderV7_10CF68(self->mRider), i, *(int*)(self->mRider + 0x2F4) >= 5);
+        int anim = func_00150198(iface, riderV7_10CF68(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5);
         if (anim == 0x1B6)
             continue;
-        int anim2 = func_001500D8(iface, riderV7_10CF68(self->mRider), i);
-        float a = func_00312820(*(char**)(self->mRider + 0x784), anim2, 1) / spd;
-        float b = func_00312820(*(char**)(self->mRider + 0x784), anim, 1) / spd;
-        float c = func_00312820(*(char**)(self->mRider + 0x784), anim, 2) / spd;
+        int anim2 = func_001500D8(iface, riderV7_10CF68(((char*)self->mRider)), i);
+        float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
+        float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
+        float c = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
         float sum = c + a;
-        if (sum < t && self->b[i] < best)
+        if (sum < t && self->UberHistoryCounter[i] < best)
         {
-            self->fE24 = 1;
+            self->mIsUber = 1;
             found = i;
-            self->fE2C = c - b;
-            self->fE34 = t - sum;
-            best = self->b[i];
+            self->mHoldToLandTime = c - b;
+            self->mGrabEndTime = t - sum;
+            best = self->UberHistoryCounter[i];
         }
     }
     if (found != -1 && found < 15)
     {
-        self->b[found]++;
+        self->UberHistoryCounter[found]++;
     }
     return found;
 }

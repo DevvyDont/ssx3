@@ -147,11 +147,6 @@ extern char* D_00442928[];
 extern int D_004A2B38;
 extern int D_004A2B3C;
 
-struct sLsOpt_3640 {
-    int on;         // 0x0
-    int f4;
-    int alt;        // 0x8
-};
 
 struct sVE_3640 {
     short delta;
@@ -176,9 +171,9 @@ extern "C" void func_00233640(void* self, int type)
     if (type == 1) {
         const char* fmt = D_0047BD90;
         cBE_getInterface_3438(SSXApp->BE, 7);
-        sLsOpt_3640* opt = ((sLsOpt_3640*)&cBENetworkInterface_networkOpt);
-        if (opt->on != 0) {
-            if (opt->alt != 0) {
+        tBENetworkDB* opt = ((&cBENetworkInterface_networkOpt));
+        if (opt->bIsNetworkGame != 0) {
+            if (opt->bIsHost != 0) {
                 sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 0)], D_004A2B38);
             } else {
                 sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 1)], D_004A2B38);
@@ -1079,11 +1074,6 @@ extern "C" void func_00155E58(void* p);
 extern void* cGameState_mpGame;
 extern void* D_004A3DD8;
 
-struct sRace_234750 {
-    char pad0[0x48];
-    signed char mode48;
-    signed char flag49;
-};
 
 struct sRaceMan_234750 {
     char pad0[0x8C];
@@ -1110,8 +1100,8 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
     cBE_getInterface_4750(cBE_getBE(), 0);
-    sRace_234750* r = &(*(sRace_234750*)&cBENewRaceInterface_newRace);
-    int mode = r->mode48;
+    cBERaceDB* r = &(*(&cBENewRaceInterface_newRace));
+    int mode = r->cGameMode;
     if (mode == 0) {
         cAI_initAIRiders(*(void**)((char*)cGameState_mpGame + 0xC));
         func_001289F0(*(void**)((char*)cGameState_mpGame + 0xC));
@@ -1136,8 +1126,8 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBE_setState(1);
     func_00129160(*(void**)((char*)cGameState_mpGame + 0xC));
-    sRace_234750* r2 = &(*(sRace_234750*)&cBENewRaceInterface_newRace);
-    if (r2->flag49 != 0)
+    cBERaceDB* r2 = &(*(&cBENewRaceInterface_newRace));
+    if (r2->cGamePath != 0)
         func_00155E58(cBEAggressionInterface_getThis());
     *(int*)((char*)self + 0x14) = 0;
     char* g = (char*)SSXApp->Game;

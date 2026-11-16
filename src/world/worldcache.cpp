@@ -495,42 +495,34 @@ struct cWorldCache_purge_sHdr {
     unsigned int count;
 };
 
-struct cWorldCache_purge_sCache {
-    cWorldCache_purge_sHdr* hdr;
-    int* f04;
-    void* f08;
-    func_003A7AA8_sElem* f0C;
-    char view[0x3D8];
-    cWorldCache_purge_sObj* obj;
-};
 
 extern "C" void cWorldCache_purge(cWorldCache* p)
 {
-    cWorldCache_purge_sCache* self = (cWorldCache_purge_sCache*)p;
+    cWorldCache* self = p;
     func_003A8330((cWorldCache*)self);
-    cWorldCache_purge_sObj* o = self->obj;
+    cWorldCache_purge_sObj* o = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
     if (o != 0) {
         o->vt[1].fn((char*)o + o->vt[1].delta, 3);
     }
-    if (self->f04 != 0) {
-        func_003A7D80(self->f04, 3);
+    if (((int*)self->m_pSharedCacheTable) != 0) {
+        func_003A7D80(((int*)self->m_pSharedCacheTable), 3);
     }
-    if (self->f08 != 0) {
+    if (((void*)self->m_pSectionCacheTable) != 0) {
         unsigned int i;
-        for (i = 0; i < self->hdr->count; i++) {
-            if (func_003A9890(self->view, i) == 0) {
+        for (i = 0; i < ((cWorldCache_purge_sHdr*)self->mp_DataHeader)->count; i++) {
+            if (func_003A9890(((char*)&self->m_WorldView), i) == 0) {
                 func_003A8230((cWorldCache*)self, i);
             }
         }
-        if (self->f08 != 0) {
-            cMemMan_free(self->f08);
+        if (((void*)self->m_pSectionCacheTable) != 0) {
+            cMemMan_free(((void*)self->m_pSectionCacheTable));
         }
     }
-    if (self->hdr != 0) {
-        cMemMan_free(self->hdr);
+    if (((cWorldCache_purge_sHdr*)self->mp_DataHeader) != 0) {
+        cMemMan_free(((cWorldCache_purge_sHdr*)self->mp_DataHeader));
     }
-    if (self->f0C != 0) {
-        func_003A7AA8(self->f0C, 3);
+    if (((func_003A7AA8_sElem*)self->m_pWorldMemMan) != 0) {
+        func_003A7AA8(((func_003A7AA8_sElem*)self->m_pWorldMemMan), 3);
     }
 }
 #endif

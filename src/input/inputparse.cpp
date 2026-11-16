@@ -1053,10 +1053,6 @@ struct sTermNode_3BD8 {
     int b;
 };
 
-struct sTermVar_3BD8 {
-    char name[0x40];
-    sTermNode_3BD8* expr;       // 0x40
-};
 
 extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
 {
@@ -1066,7 +1062,7 @@ extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
     int input;
     int mod;
     int cfg;
-    sTermVar_3BD8* var;
+    tIdentifier* var;
     int type;
 
 again:
@@ -1104,7 +1100,7 @@ again:
             node->index = cfg;
             return node;
         }
-        var = (sTermVar_3BD8*)cInputMapParser_lookupIdentifierName(self, name);
+        var = cInputMapParser_lookupIdentifierName(self, name);
         if (var != 0) {
             int mod2;
             cInputMapParser_readToken(self);
@@ -1126,11 +1122,11 @@ again:
                 }
                 cInputMapParser_readToken(self);
             }
-            type = var->expr->type;
+            type = ((sTermNode_3BD8*)var->Expression)->type;
             if (type == 4) {
                 node = (sTermNode_3BD8*)func_003215F8(self);
                 node->type = type;
-                node->value = var->expr->value;
+                node->value = ((sTermNode_3BD8*)var->Expression)->value;
                 return node;
             }
             node = (sTermNode_3BD8*)func_003215F8(self);

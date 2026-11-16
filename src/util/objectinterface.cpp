@@ -2,10 +2,6 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 
-struct cObjectInterface_Impl {
-    char pad_0x00[0x88];
-    void* mInstanceMan; // offset 0x88
-};
 
 
 //100%
@@ -18,7 +14,7 @@ INCLUDE_ASM("util/objectinterface", cObjectInterface_getInstanceMan__Fv);
  */
 void* cObjectInterface_getInstanceMan()
 {
-    return ((cObjectInterface_Impl*)SSXApp->Game)->mInstanceMan;
+    return ((void*)(SSXApp->Game)->InstanceMan);
 }
 #endif
 

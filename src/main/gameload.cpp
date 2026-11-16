@@ -200,57 +200,6 @@ struct sUIGL {
     char stack[1];
 };
 
-struct cGameGL {
-    char pad_000[0xC];
-    char* ai; // 0xC
-    void* world; // 0x10
-    char pad_014[0xC];
-    sGridGL* grid; // 0x20
-    void* m24; // 0x24
-    void* m28; // 0x28
-    void* m2C; // 0x2C
-    void* m30; // 0x30
-    void* m34; // 0x34
-    void* m38; // 0x38
-    void* m3C; // 0x3C
-    void* m40; // 0x40
-    char pad_044[0x4];
-    sUIGL* ui; // 0x48
-    char pad_04C[0x4];
-    void* m50; // 0x50
-    void* m54; // 0x54
-    void* m58; // 0x58
-    void* m5C[2]; // 0x5C
-    void* m64; // 0x64
-    void* m68[2]; // 0x68
-    void* m70; // 0x70
-    void* m74; // 0x74
-    char pad_078[0x4];
-    void* m7C; // 0x7C
-    char pad_080[0x4];
-    void* m84; // 0x84
-    void* m88; // 0x88
-    void* m8C; // 0x8C
-    void* m90; // 0x90
-    void* m94; // 0x94
-    void* m98; // 0x98
-    int m9C; // 0x9C
-    int mA0; // 0xA0
-    char* hud; // 0xA4
-    void* mA8; // 0xA8
-    int mAC; // 0xAC
-    char pad_0B0[0x14C];
-    int m1FC; // 0x1FC
-    int m200; // 0x200
-    int m204; // 0x204
-    int m208; // 0x208
-    int m20C; // 0x20C
-    int m210; // 0x210
-    int m214; // 0x214
-    int m218; // 0x218
-    int m21C; // 0x21C
-    int m220; // 0x220
-};
 
 extern "C" void cGame_load(cGame* self)
 {
@@ -405,22 +354,22 @@ extern "C" void cGame_load(cGame* self)
     self->mCurrentStateID = 0;
     self->mPendingStateID = 0;
     self->mPendingStateStartupFlag = 0;
-    cGameState_mpGame = ((cGameGL*)self);
+    cGameState_mpGame = (self);
     if (replay != 0) {
         func_0026F898(self->Replay, D_004A3484);
-        func_00231250(((cGameGL*)self), 0x10, 0, 0);
+        func_00231250((self), 0x10, 0, 0);
     } else {
-        func_00231278(((cGameGL*)self), 0xA);
+        func_00231278((self), 0xA);
         do {
-            func_00230F40(((cGameGL*)self));
+            func_00230F40((self));
             func_003E5398(0);
-        } while (!func_002312D8(((cGameGL*)self)));
+        } while (!func_002312D8((self)));
         if (cGameComm_mGameComm != 0)
             func_002586B0(cGameComm_mGameComm);
         if (cBENewRaceInterface_newRace[0x49] == 0)
-            func_00231250(((cGameGL*)self), 0xA, 0, 0);
+            func_00231250((self), 0xA, 0, 0);
         else
-            func_00231250(((cGameGL*)self), 0xA, 0, 0);
+            func_00231250((self), 0xA, 0, 0);
     }
     sNamedGL* o = (sNamedGL*)operator new(0x14, D_0047B6E8, 0, 0);
     cObjNode_cObjNode1(o, 6);
@@ -1263,42 +1212,6 @@ struct sObj48_2306B8 {
     sObjC_2306B8* fC;
 };
 
-// cGame (this unit: cGame_loadTrack/cGame_restart/cGame_exit). Field accesses through this struct
-// (not raw casts) matter: gcc 2.95 lets struct-field loads skip the dependence on fixed-scalar stores.
-struct cGame_2306B8 {
-    char pad0[0x8];
-    int f8;
-    char* fC;
-    char* f10;
-    char pad14[0x28 - 0x14];
-    char* f28;
-    char pad2C[0x30 - 0x2C];
-    char* f30;
-    char* mPlaybackMan;
-    char* f38;
-    char* f3C;
-    char* f40;
-    char pad44[0x48 - 0x44];
-    char* f48;
-    char* f4C;
-    char pad50[0x78 - 0x50];
-    char* f78;
-    char* f7C;
-    char pad80[0x84 - 0x80];
-    char* mGameViewMan;
-    char pad88[0x94 - 0x88];
-    char* f94;
-    char pad98[0x9C - 0x98];
-    int f9C;
-    int fA0;
-    char* fA4;
-    char padA8[0xAC - 0xA8];
-    int fAC;
-    char padB0[0x214 - 0xB0];
-    int f214;
-    char pad218[0x228 - 0x218];
-    unsigned char f228;
-};
 
 static inline void pushState_2306B8(int state)
 {
@@ -1352,51 +1265,51 @@ struct sRiderList_2306B8 {
     char* getRider(int i) { return riders[i]; }
 };
 
-static inline int canUpdate_2306B8(cGame_2306B8* self)
+static inline int canUpdate_2306B8(cGame* self)
 {
     if (*(int*)((char*)SSXApp + 0x4) != 0) {
-        self->f8 = 1;
+        self->unk_08 = 1;
         return 0;
     }
     return 1;
 }
 
-static inline int updatePause_2306B8(cGame_2306B8* self)
+static inline int updatePause_2306B8(cGame* self)
 {
-    if (func_0022E920(self->mGameViewMan) == 0 || *(int*)(self->f78 + 0x1D0) == 0) {
-        *(int*)(*((char**)self->f10) + 0x3D4) = 0;
-        func_003A6928(self->f10);
-        cGameViewMan_updateAll(self->mGameViewMan);
-        if (*(int*)(self->f78 + 0x1D0) == 0) {
+    if (func_0022E920(((char*)self->ViewMan)) == 0 || *(int*)(((char*)self->SectionMan) + 0x1D0) == 0) {
+        *(int*)(*((char**)((char*)self->World)) + 0x3D4) = 0;
+        func_003A6928(((char*)self->World));
+        cGameViewMan_updateAll(((char*)self->ViewMan));
+        if (*(int*)(((char*)self->SectionMan) + 0x1D0) == 0) {
             func_00230F40(self);
-            cSectionMan_update(self->f78);
+            cSectionMan_update(((char*)self->SectionMan));
         }
-        if (self->f9C == 0 && func_0022E920(self->mGameViewMan) == 0) {
-            self->fA0 = 1;
+        if (self->IsStreamPaused == 0 && func_0022E920(((char*)self->ViewMan)) == 0) {
+            self->m_bFlushStreamer = 1;
         }
-        self->f9C = 1;
-        if (self->fA0 != 0) {
+        self->IsStreamPaused = 1;
+        if (self->m_bFlushStreamer != 0) {
             char* r = (char*)D_004A289C;
             sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x10D8);
             vt[19].fn(r + vt[19].delta);
-            func_0022E8B8(self->mGameViewMan);
-            func_003A88A8(*((void**)self->f10));
-            self->fA0 = 0;
+            func_0022E8B8(((char*)self->ViewMan));
+            func_003A88A8(*((void**)((char*)self->World)));
+            self->m_bFlushStreamer = 0;
         }
         return 0;
     }
-    *(int*)(*((char**)self->f10) + 0x3D4) = 1;
-    self->f9C = 0;
-    self->fA0 = 0;
-    func_003A6928(self->f10);
-    cSectionMan_update(self->f78);
+    *(int*)(*((char**)((char*)self->World)) + 0x3D4) = 1;
+    self->IsStreamPaused = 0;
+    self->m_bFlushStreamer = 0;
+    func_003A6928(((char*)self->World));
+    cSectionMan_update(((char*)self->SectionMan));
     return 1;
 }
 
-static inline int updateState_2306B8(cGame_2306B8* self)
+static inline int updateState_2306B8(cGame* self)
 {
-    if (func_002CC098(self->fA4) == 0) {
-        char* q = self->f30;
+    if (func_002CC098(((char*)self->MenuSys)) == 0) {
+        char* q = ((char*)self->WScriptMan);
         char* list = q + 0x1C4;
         if (*(int*)(q + 0x1C4) != *(int*)(q + 0x1C8)) {
             int* e = func_0030C870(list);
@@ -1407,11 +1320,11 @@ static inline int updateState_2306B8(cGame_2306B8* self)
                 return 0;
             }
             if (e[1] == 9) {
-                cWScriptMan_doMissionCmd(self->f30, e[0], 5, e[2]);
-                if (cUIStateStack_findState(self->f48 + 0x18, GetHashValue32(D_0047B798)) == 0) {
+                cWScriptMan_doMissionCmd(((char*)self->WScriptMan), e[0], 5, e[2]);
+                if (cUIStateStack_findState(((char*)self->UI) + 0x18, GetHashValue32(D_0047B798)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     pushState_2306B8(3);
-                    func_00398038(self->f48);
+                    func_00398038(((char*)self->UI));
                 } else {
                     func_0030C820((char*)D_004A3DD8 + 0x1C4);
                 }
@@ -1426,20 +1339,20 @@ static inline int updateState_2306B8(cGame_2306B8* self)
         func_0029ED18(func_0028B180());
         return 0;
     }
-    if (func_002CC098(self->fA4) != 0) {
-        func_00398038(self->f48);
-        func_002CC0C0(self->fA4);
+    if (func_002CC098(((char*)self->MenuSys)) != 0) {
+        func_00398038(((char*)self->UI));
+        func_002CC0C0(((char*)self->MenuSys));
         return 0;
     }
-    if (func_00231840_pi(self, 0) != 0 && !inRace_2306B8(*((int*)self->f28))
-        && notPlaying_2306B8(self->mPlaybackMan) && func_0020CBE8() != 0) {
+    if (func_00231840_pi(self, 0) != 0 && !inRace_2306B8(*((int*)((char*)self->Replay)))
+        && notPlaying_2306B8(((char*)self->PlaybackMan)) && func_0020CBE8() != 0) {
         func_00326AE0(PadCache);
         func_0020CA10();
         pushState_2306B8(2);
         {
-            sObjC_2306B8* o = ((sObj48_2306B8*)self->f48)->fC;
+            sObjC_2306B8* o = ((sObj48_2306B8*)((char*)self->UI))->fC;
             sVEntryI_2306B8* vt = o->vtbl;
-            vt[44].fn((char*)o + vt[44].delta, self->f228);
+            vt[44].fn((char*)o + vt[44].delta, (*(unsigned char*)&self->PauseOwner));
         }
         func_00289B70(func_0028B180());
         func_00294F48(func_0028B180());
@@ -1447,10 +1360,10 @@ static inline int updateState_2306B8(cGame_2306B8* self)
     }
     {
         int wasPaused = paused_2306B8();
-        func_00398038(self->f48);
+        func_00398038(((char*)self->UI));
         if (func_0020CBA0() == 0) {
-            cPlaybackMan_update(self->mPlaybackMan);
-            if (func_002CC098(self->fA4) != 0) {
+            cPlaybackMan_update(((char*)self->PlaybackMan));
+            if (func_002CC098(((char*)self->MenuSys)) != 0) {
                 return 0;
             }
             if (wasPaused && !paused_2306B8()) {
@@ -1473,20 +1386,20 @@ extern "C" void func_002306B8(cGame* self)
         func_002570D8(cGameComm_mGameComm);
     }
     func_00278918(ScriptEngine);
-    func_00231D18_v(((cGame_2306B8*)self));
-    if (canUpdate_2306B8(((cGame_2306B8*)self)) && updatePause_2306B8(((cGame_2306B8*)self))) {
+    func_00231D18_v((self));
+    if (canUpdate_2306B8((self)) && updatePause_2306B8((self))) {
         if ((char*)self->InputSync != 0) {
             func_002373B8((char*)self->InputSync);
         }
         func_0020CFD0();
-        if (updateState_2306B8(((cGame_2306B8*)self))) {
+        if (updateState_2306B8((self))) {
             int skip;
             if ((char*)self->InputSync == 0 || func_00237950((char*)self->InputSync) != 0) {
                 if (self->mCurrentStateID == 3) {
-                    func_00230F40(((cGame_2306B8*)self));
+                    func_00230F40((self));
                     cBucketMan_mergeBucket(&gBucketMan, 1);
                 } else {
-                    func_00230F40(((cGame_2306B8*)self));
+                    func_00230F40((self));
                 }
                 if (!paused_2306B8()) {
                     func_0026F4A8((char*)self->Replay);
@@ -2029,30 +1942,17 @@ public:
     virtual void load(cStream_14D0* stream);
 };
 
-struct sGameLoad_14D0 {
-    char pad0[0x70];
-    cLoadable_14D0* a;              // 0x70
-    cLoadable_14D0* b;              // 0x74
-    char pad78[0x184];
-    cGameState_14D0* prev;          // 0x1FC
-    cGameState_14D0* cur;           // 0x200
-    char pad204[0xC];
-    int nextId;                     // 0x210
-    int curId;                      // 0x214
-    int prevId;                     // 0x218
-    int nextArg;                    // 0x21C
-};
 
 // Game load state machine: restores the state ids and every state from a save stream.
 extern "C" void func_002314D0(cGame* self_, cStream_14D0* stream)
 {
-    sGameLoad_14D0* self = (sGameLoad_14D0*)self_;
-    self->a->load(stream);
-    self->b->load(stream);
-    stream->read(&self->curId, 4);
-    stream->read(&self->prevId, 4);
-    stream->read(&self->nextId, 4);
-    stream->read(&self->nextArg, 4);
+    cGame* self = self_;
+    ((cLoadable_14D0*)self->FlagManager)->load(stream);
+    ((cLoadable_14D0*)self->SnowFall)->load(stream);
+    stream->read(&self->mCurrentStateID, 4);
+    stream->read(&self->mPrevStateID, 4);
+    stream->read(&self->mPendingStateID, 4);
+    stream->read(&self->mPendingStateStartupFlag, 4);
     func_00234A30((char*)self + 0xB0, stream);
     func_00236D80_14D0((char*)self + 0xD0, stream);
     func_00234E00_14D0((char*)self + 0xE0, stream);
@@ -2068,116 +1968,116 @@ extern "C" void func_002314D0(cGame* self_, cStream_14D0* stream)
     func_00235FD0((char*)self + 0x19C, stream);
     func_002367C8((char*)self + 0x1B8, stream);
     func_002361E8_14D0((char*)self + 0x1DC, stream);
-    switch (self->curId) {
+    switch (self->mCurrentStateID) {
     case 0:
-        self->cur = 0;
+        (*(cGameState_14D0**)&self->mCurrentState) = 0;
         break;
     case 1:
-        self->cur = (cGameState_14D0*)((char*)self + 0xB0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xB0);
         break;
     case 2:
-        self->cur = (cGameState_14D0*)((char*)self + 0xD0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xD0);
         break;
     case 3:
-        self->cur = (cGameState_14D0*)((char*)self + 0xE0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xE0);
         break;
     case 4:
-        self->cur = (cGameState_14D0*)((char*)self + 0xF0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xF0);
         break;
     case 5:
-        self->cur = (cGameState_14D0*)((char*)self + 0x100);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x100);
         break;
     case 6:
-        self->cur = (cGameState_14D0*)((char*)self + 0x118);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x118);
         break;
     case 7:
-        self->cur = (cGameState_14D0*)((char*)self + 0x128);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x128);
         break;
     case 8:
-        self->cur = (cGameState_14D0*)((char*)self + 0x138);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x138);
         break;
     case 9:
-        self->cur = (cGameState_14D0*)((char*)self + 0x148);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x148);
         break;
     case 10:
-        self->cur = (cGameState_14D0*)((char*)self + 0x158);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x158);
         break;
     case 11:
-        self->cur = (cGameState_14D0*)((char*)self + 0x178);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x178);
         break;
     case 12:
-        self->cur = (cGameState_14D0*)((char*)self + 0x18C);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x18C);
         break;
     case 13:
-        self->cur = (cGameState_14D0*)((char*)self + 0x19C);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x19C);
         break;
     case 14:
-        self->cur = (cGameState_14D0*)((char*)self + 0x1B8);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x1B8);
         break;
     case 15:
-        self->cur = (cGameState_14D0*)((char*)self + 0x1DC);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x1DC);
         break;
     case 16:
-        self->cur = (cGameState_14D0*)((char*)self + 0x1EC);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x1EC);
         break;
     default:
-        self->cur = 0;
-        self->curId = 0;
+        (*(cGameState_14D0**)&self->mCurrentState) = 0;
+        self->mCurrentStateID = 0;
         break;
     }
-    switch (self->prevId) {
+    switch (self->mPrevStateID) {
     case 1:
-        self->prev = (cGameState_14D0*)((char*)self + 0xB0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xB0);
         break;
     case 2:
-        self->prev = (cGameState_14D0*)((char*)self + 0xD0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xD0);
         break;
     case 3:
-        self->prev = (cGameState_14D0*)((char*)self + 0xE0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xE0);
         break;
     case 4:
-        self->prev = (cGameState_14D0*)((char*)self + 0xF0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xF0);
         break;
     case 5:
-        self->prev = (cGameState_14D0*)((char*)self + 0x100);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x100);
         break;
     case 6:
-        self->prev = (cGameState_14D0*)((char*)self + 0x118);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x118);
         break;
     case 7:
-        self->prev = (cGameState_14D0*)((char*)self + 0x128);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x128);
         break;
     case 8:
-        self->prev = (cGameState_14D0*)((char*)self + 0x138);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x138);
         break;
     case 9:
-        self->prev = (cGameState_14D0*)((char*)self + 0x148);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x148);
         break;
     case 10:
-        self->prev = (cGameState_14D0*)((char*)self + 0x158);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x158);
         break;
     case 11:
-        self->prev = (cGameState_14D0*)((char*)self + 0x178);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x178);
         break;
     case 12:
-        self->prev = (cGameState_14D0*)((char*)self + 0x18C);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x18C);
         break;
     case 13:
-        self->prev = (cGameState_14D0*)((char*)self + 0x19C);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x19C);
         break;
     case 14:
-        self->prev = (cGameState_14D0*)((char*)self + 0x1B8);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x1B8);
         break;
     case 15:
-        self->prev = (cGameState_14D0*)((char*)self + 0x1DC);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x1DC);
         break;
     case 16:
-        self->prev = (cGameState_14D0*)((char*)self + 0x1EC);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x1EC);
         break;
     default:
-        self->prevId = 0;
+        self->mPrevStateID = 0;
     case 0:
-        self->prev = 0;
+        (*(cGameState_14D0**)&self->mPrevState) = 0;
         break;
     }
 }

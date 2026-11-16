@@ -283,7 +283,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00278918);
 #ifdef SKIP_ASM
 struct sScrRelocOwner6B0;
 extern "C" int ASYNCFILE_getstatus(void*);
-extern "C" void func_0027B6B0(sScrRelocOwner6B0* self, void* file);
+extern "C" void func_0027B6B0(cSSXScriptEngine* self, void* file);
 extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEngine* self, void* file);
 
 struct sScrSlot8918 {
@@ -296,7 +296,7 @@ extern "C" void func_00278918(cSSXScriptEngine* self)
     if (self->mNumAsyncs == 0) return;
     void* f = self->mFilterTableAsyncHandle;
     if (f != 0 && ASYNCFILE_getstatus(f) != 0) {
-        func_0027B6B0((sScrRelocOwner6B0*)self, self->mFilterTableAsyncHandle);
+        func_0027B6B0(self, self->mFilterTableAsyncHandle);
     }
     sScrSlot8918* slots = (sScrSlot8918*)((char*)self + 0x630);
     for (int i = 0; i < 10; i++) {
@@ -1014,7 +1014,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnDataUnavailable);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct sScriptEng0628;
-extern "C" int func_0027B528(sScriptEng0628* self);
+extern "C" int func_0027B528(cSSXScriptEngine* self);
 extern "C" void func_0027B370(cSSXScriptEngine* self, int slot, const char* name, int flags, int key, int a, int b);
 extern const char D_00481C68[];
 extern const char D_00481C78[];
@@ -1023,7 +1023,7 @@ extern "C" int cSSXScriptEngine_OnDataUnavailable(cSSXScriptEngine* self, int ke
 {
     char buf[128];
     sprintf(buf, D_00481C68, D_00481C78, key);
-    func_0027B370(self, func_0027B528((sScriptEng0628*)self), buf, 0x100, key, 0, 0);
+    func_0027B370(self, func_0027B528(self), buf, 0x100, key, 0, 0);
     return 1;
 }
 #endif
@@ -1236,14 +1236,10 @@ struct sScrSlot9D00 {
     char pad[0x120];
 };
 
-struct sSsxEngine9D00 {
-    char pad[0x6D0];
-    sScrSlot9D00 slots[2];
-};
 
 extern "C" int func_00279D00(cSSXScriptEngine* self, cScriptOwner9D00* obj)
 {
-    int r = func_0027CEA8(((sSsxEngine9D00*)self), obj);
+    int r = func_0027CEA8((self), obj);
     if (obj->state == 1) {
         func_00281190(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
     } else if (obj->state == 2) {
@@ -1282,21 +1278,17 @@ struct sScrSlot9DA8 {
     char pad[0x120];
 };
 
-struct sSsxEngine9DA8 {
-    char pad[0x6D0];
-    sScrSlot9DA8 slots[2];
-};
 
 extern "C" void func_00279DA8(cSSXScriptEngine* self, int idx)
 {
     // PORT: func_0027D320 returns a table pointer as int
-    cScriptOwner9DA8* obj = (cScriptOwner9DA8*)func_0027D320(((sSsxEngine9DA8*)self), idx);
+    cScriptOwner9DA8* obj = (cScriptOwner9DA8*)func_0027D320((self), idx);
     if (obj->state == 1) {
         func_002811E8(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
     } else if (obj->state == 2) {
         func_002812E0(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[obj->v09()], 0);
     }
-    func_0027CF88(((sSsxEngine9DA8*)self), idx);
+    func_0027CF88((self), idx);
 }
 #endif
 
@@ -1919,11 +1911,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" signed char cBELibrary_getCheatCharacterID(int index);
 int cBENewPlayerInterface_getRiderCharID(void* self, int index);
 
-struct sScGame_AC60 {
-    char pad_0x0[0x48];
-    signed char mode;               // 0x48
-    signed char lock;               // 0x49
-};
 
 struct sScVt_AC60 {
     short delta;
@@ -1982,8 +1969,8 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
 extern "C" void func_0027AC60(cSSXScriptEngine* self)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScGame_AC60* g = &(*(sScGame_AC60*)&cBENewRaceInterface_newRace);
-    int mode = g->mode;
+    cBERaceDB* g = &(*(&cBENewRaceInterface_newRace));
+    int mode = g->cGameMode;
     if (mode == 4) {
         return;
     }
@@ -1996,7 +1983,7 @@ extern "C" void func_0027AC60(cSSXScriptEngine* self)
     }
     int found = 0;
     sScList_AC60* list = *(sScList_AC60**)(x + 0xC);
-    if (g->lock == 0) {
+    if (g->cGamePath == 0) {
         for (int i = 0; i < list->nslots; i++) {
             if (D_00536730[Call_AC60(list->slots[i]->rider, 7)] < 3) {
                 found = 1;
@@ -2090,31 +2077,23 @@ struct sPri_27B0C0
     int b;
 };
 
-struct sEngine_27B0C0
-{
-    char pad0[0x530];
-    sPri_27B0C0* pris;
-    char pad534[0x8];
-    int numCategories;
-    sCategory_27B0C0* categories;
-};
 
 extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* p, int cat)
 {
-    sEngine_27B0C0* self = (sEngine_27B0C0*)p;
-    if (self->numCategories == 0 || self->categories[cat].count == 0)
+    cSSXScriptEngine* self = p;
+    if (((int)self->mpFilterTableHeader) == 0 || ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count == 0)
         return 0;
     int flags[21];
     func_0027BDB8(self, flags);
     int best = 0xFFFF;
     int n = 0;
     sScript_27B0C0** list = new (D_00481EA0, 0x100, 0) sScript_27B0C0*[100];
-    int count = self->categories[cat].count;
-    sScript_27B0C0* scripts = self->categories[cat].scripts;
+    int count = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count;
+    sScript_27B0C0* scripts = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].scripts;
     for (int i = 0; i < count; i++)
     {
         sScript_27B0C0* s = &scripts[i];
-        int pri = self->pris[s->id].pri;
+        int pri = ((sPri_27B0C0*)self->mpMasterTable)[s->id].pri;
         if (pri <= best)
         {
             int fail = 0;
@@ -2279,10 +2258,6 @@ struct sSlot0628 {
     int d;
 };
 
-struct sScriptEng0628 {
-    char pad[0x628];
-    sSlot0628 slots[10];
-};
 
 static inline int isSlotFree(sSlot0628* s)
 {
@@ -2292,10 +2267,10 @@ static inline int isSlotFree(sSlot0628* s)
     return 0;
 }
 
-extern "C" int func_0027B528(sScriptEng0628* self)
+extern "C" int func_0027B528(cSSXScriptEngine* self)
 {
     for (int i = 2; i < 10; i++) {
-        if (isSlotFree(&self->slots[i])) {
+        if (isSlotFree(&((sSlot0628*)&self->mScriptDataBanks[0])[i])) {
             return i;
         }
     }
@@ -2343,7 +2318,7 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
         int size;
     } r;
     for (int i = 0; i < 10; i++) {
-        sSlot0628* s = &((sScriptEng0628*)self)->slots[i];
+        sSlot0628* s = &((sSlot0628*)&(self)->mScriptDataBanks[0])[i];
         if ((void*)s->c == file) {
             ASYNCFILE_release_out(file, &r.data, &r.size);
             self->mNumAsyncs -= 1;
@@ -2374,31 +2349,23 @@ struct sScrReloc6B0 {
     int offset;
 };
 
-struct sScrRelocOwner6B0 {
-    char pad_0x000[0x538];
-    void* file;                 // 0x538
-    int* header;                // 0x53C
-    sScrReloc6B0* entries;      // 0x540
-    char pad_0x544[0x620 - 0x544];
-    int pending;                // 0x620
-};
 
-extern "C" void func_0027B6B0(sScrRelocOwner6B0* self, void* file)
+extern "C" void func_0027B6B0(cSSXScriptEngine* self, void* file)
 {
     struct {
         int* data;
         int size;
     } r;
-    self->file = 0;
+    self->mFilterTableAsyncHandle = 0;
     ASYNCFILE_release_out(file, &r.data, &r.size);
-    self->pending -= 1;
+    self->mNumAsyncs -= 1;
     if (r.size != 0) {
-        self->header = r.data;
-        self->entries = (sScrReloc6B0*)(r.data + 1);
-        for (int i = 0; i < *self->header; i++) {
-            if (self->entries[i].used != 0) {
+        (*(int**)&self->mpFilterTableHeader) = r.data;
+        (*(sScrReloc6B0**)&self->mpCategoryFilterTable) = (sScrReloc6B0*)(r.data + 1);
+        for (int i = 0; i < *((int*)self->mpFilterTableHeader); i++) {
+            if (((sScrReloc6B0*)self->mpCategoryFilterTable)[i].used != 0) {
                 // PORT: offset relocated to an absolute pointer held in int
-                self->entries[i].offset = (int)r.data + self->entries[i].offset;
+                ((sScrReloc6B0*)self->mpCategoryFilterTable)[i].offset = (int)r.data + ((sScrReloc6B0*)self->mpCategoryFilterTable)[i].offset;
             }
         }
     }

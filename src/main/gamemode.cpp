@@ -819,30 +819,6 @@ extern int D_005366A8[];
 extern int D_00536730[];
 extern signed char D_00535C11[];
 
-struct sGM_239230 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int a18[10];
-    int a40[10];
-    int f68;
-    int f6C;
-    int f70;
-    int f74;
-    int f78;
-    int f7C;
-    int f80;
-    int f84;
-    int f88;
-    int f8C;
-    int f90;
-    int f94;
-    int f98;
-    int f9C;
-};
 
 struct sScore_239230 {
     void* vt;
@@ -890,10 +866,10 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
     }
     if (func_0012A250(Race_239230()) == 0)
         return;
-    sGM_239230* gm = (sGM_239230*)cGameModeHandler_pManager;
-    switch (gm->f0) {
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    switch (gm->iHeatNum) {
     case 1:
-        gm->f74 = gm->f70;
+        gm->iRestoreHeat = gm->iNextHeat;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
         func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
@@ -918,22 +894,22 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[1][i];
-        gm = (sGM_239230*)cGameModeHandler_pManager;
-        gm->f74 = gm->f70;
+        gm = cGameModeHandler_pManager;
+        gm->iRestoreHeat = gm->iNextHeat;
         if (D_00536730[idx] < 3) {
-            gm->f70 = 3;
+            gm->iNextHeat = 3;
             Rider_239230(idx)->unk_100 = 1;
             if (quick == 0 && D_00536730[idx] == 0)
                 func_00147D20(player, 0);
         } else {
-            gm->f70 = 1;
+            gm->iNextHeat = 1;
             Rider_239230(idx)->unk_100 = 0;
             if (quick == 0)
                 func_00147E18(player, 0);
         }
         break;
     case 3: {
-        gm->f9C = 1;
+        gm->bAreResultsLocked = 1;
         int last = Race_239230()->f80;
         for (int i = 0; i < last + 1; i++) {
             cRider* r = Rider_239230(i);
@@ -944,14 +920,14 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[2][i];
         func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
-        gm = (sGM_239230*)cGameModeHandler_pManager;
-        gm->f74 = gm->f70;
+        gm = cGameModeHandler_pManager;
+        gm->iRestoreHeat = gm->iNextHeat;
         int lost = !(D_00536730[idx] < 3);
         if (quick == 0 && !lost) {
-            gm->f70 = 0;
-            gm->f74 = 0;
+            gm->iNextHeat = 0;
+            gm->iRestoreHeat = 0;
         } else {
-            gm->f70 = 3;
+            gm->iNextHeat = 3;
         }
         if (lost) {
             Rider_239230(idx)->unk_100 = 0;
@@ -1252,7 +1228,7 @@ extern "C" void func_00239EC8(void* self, int idx)
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bIsEventDone = 1;
         gm->bAreResultsLocked = 1;
-        func_00238B70((sGM_239230*)gm, 2);
+        func_00238B70(gm, 2);
         if (D_00536730[idx] > 0) {
             Rider_239230(idx)->unk_100 = 0;
         }
@@ -2387,30 +2363,6 @@ extern int D_005366A8[];
 extern int D_00536730[];
 extern signed char D_00535C11[];
 
-struct sGM_23B8C8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int a18[10];
-    int a40[10];
-    int f68;
-    int f6C;
-    int f70;
-    int f74;
-    int f78;
-    int f7C;
-    int f80;
-    int f84;
-    int f88;
-    int f8C;
-    int f90;
-    int f94;
-    int f98;
-    int f9C;
-};
 
 class cRiderState_23B8C8 {
 public:
@@ -2477,7 +2429,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
         int n = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bAreResultsLocked = 1;
-        func_00238BF8((sGM_23B8C8*)gm, 10);
+        func_00238BF8(gm, 10);
         if (D_00536730[n] == 0 && *(int*)(Rider_23B8C8(idx) + 0x480) == 0) {
             *(int*)(Rider_23B8C8(idx) + 0x100) = 1;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
@@ -2596,30 +2548,6 @@ extern int D_005366A8[];
 extern int D_00536730[];
 extern signed char D_00535C11[];
 
-struct sGM_23BDB8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int a18[10];
-    int a40[10];
-    int f68;
-    int f6C;
-    int f70;
-    int f74;
-    int f78;
-    int f7C;
-    int f80;
-    int f84;
-    int f88;
-    int f8C;
-    int f90;
-    int f94;
-    int f98;
-    int f9C;
-};
 
 struct sStats_23BDB8 {
     int v[0x9C / 4];
@@ -2675,7 +2603,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
         int n = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bAreResultsLocked = 1;
-        func_00238B70((sGM_23BDB8*)gm, 2);
+        func_00238B70(gm, 2);
         if (D_00536730[n] == 0 && *(int*)(Rider_23BDB8(idx) + 0x480) == 0) {
             *(int*)(Rider_23BDB8(idx) + 0x100) = 1;
             cGameModeMan* gm2 = cGameModeHandler_pManager;

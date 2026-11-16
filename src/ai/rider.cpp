@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "be/beintnewrace.h"
 #include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
@@ -2300,19 +2301,14 @@ extern "C" void func_0011FF18(cRider* self, void* out)
 //100%
 INCLUDE_ASM("ai/rider", cRider_getHipPosition);
 #ifdef SKIP_ASM
-// 0x20-byte elements with the quadword at offset 0
-struct sRiderXform {
-    cQuad128 q;
-    char pad_0x10[0x10];
-};
 
 // Copies the quadword of the anim model's transform unk_89C into dst.
 extern "C" void* cRider_getHipPosition(cRider* dst, cRider* self)
 {
     cAnimModel* q = self->mAnimModel;
     int i = self->mBoneHips;
-    sRiderXform* b = (sRiderXform*)q->bones;
-    *(cQuad128*)dst = b[i].q;
+    sAnimModelBone* b = q->bones;
+    *(cQuad128*)dst = (*(cQuad128*)&b[i].pos);
     return ((void*)dst);
 }
 #endif
@@ -2331,8 +2327,8 @@ extern "C" void* func_0011FF70(void* dst, cRider* self)
 {
     cAnimModel* q = self->mAnimModel;
     int i = self->mBoneHead;
-    sRiderXform* b = (sRiderXform*)q->bones;
-    *(cQuad128*)dst = b[i].q;
+    sAnimModelBone* b = q->bones;
+    *(cQuad128*)dst = (*(cQuad128*)&b[i].pos);
     return dst;
 }
 #endif

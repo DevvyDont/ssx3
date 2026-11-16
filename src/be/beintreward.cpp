@@ -1765,11 +1765,6 @@ struct sRaceSettings_1591E8 {
 extern sRaceSettings_1591E8 D_005305B0_1591E8 __asm__("D_005305B0");
 extern signed char D_005305F9[];
 
-struct sRewardState_1591E8 {
-    char pad_0x00[0x10];
-    unsigned int money; // 0x10
-    int medal;          // 0x14
-};
 
 extern "C" void func_001591E8(void* self, int profile, int c, int mode, int event, int medal)
 {
@@ -1837,8 +1832,8 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
     }
     if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, profile, c) && func_0015A2E0(self, profile, c, 0) == 0)
         cBERewardInterface_awardUser((cBERewardInterface*)self, profile, c, 0);
-    ((sRewardState_1591E8*)cBERewardInterface_instance)->medal = medal;
-    ((sRewardState_1591E8*)cBERewardInterface_instance)->money = money;
+    (cBERewardInterface_instance)->mLastEventMedal = medal;
+    (cBERewardInterface_instance)->mLastEventCashReward = money;
     if (!cBERewardInterface_isBetterMedal(self, -1, medal))
         return;
     int any = 0;

@@ -12,14 +12,6 @@ struct cBENewRaceInterface {
     void* vtable;
 };
 
-struct sRaceInterfaceGlobal {
-    int arr1[6]; // 0x0
-    int arr2[6]; // 0x18
-    int field_0x30;
-    int field_0x34;
-    int field_0x38;
-    int field_0x3C;
-};
 
 // padded past the 8-byte gp-relative threshold so the compiler emits
 // absolute lui/lo addressing like the target, instead of assuming small data
@@ -131,7 +123,7 @@ extern char D_0043E6EC[];
 extern "C" void func_00144B20(void* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
-    char* g = (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
+    char* g = (char*)&(*(&cBENewRaceInterface_newRace));
     strcpy(base + *(int*)(g + 0x40) * 0x64, name);
     char* p1 = base + 0x10;
     strcpy(p1 + *(int*)(g + 0x40) * 0x64, name);
@@ -288,9 +280,9 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
 #ifdef SKIP_ASM
 void* cBENewRaceInterface_assignPlayer(void* self, int a1, int a2)
 {
-    *(int*)((char*)(void*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace) + a1 * 4) = a2;
-    *(int*)((char*)((char*)(void*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace) + a2 * 4) + 0x18) = a1;
-    return ((char*)(void*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace) + a1 * 4);
+    *(int*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + a1 * 4) = a2;
+    *(int*)((char*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + a2 * 4) + 0x18) = a1;
+    return ((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + a1 * 4);
 }
 #endif
 
@@ -334,7 +326,7 @@ struct sVE_144DF0 {
 
 static inline char* Race_144DF0()
 {
-    return (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
+    return (char*)&(*(&cBENewRaceInterface_newRace));
 }
 
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
@@ -402,7 +394,7 @@ INCLUDE_ASM("be/beintnewrace", func_00145108);
 #ifdef SKIP_ASM
 extern "C" void func_00145108(void* self, int mode)
 {
-    sRaceInterfaceGlobal* g = &(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
+    cBERaceDB* g = &(*(&cBENewRaceInterface_newRace));
     *((char*)g + 0x49) = mode;
     switch (mode)
     {
@@ -412,9 +404,9 @@ extern "C" void func_00145108(void* self, int mode)
         break;
     case 1:
         cBENewRaceInterface_setNumberHumans(self, 1);
-        if (g->field_0x3C < 0)
+        if (g->iNumberAI < 0)
             cBENewRaceInterface_setNumberAI(self, 0);
-        if (g->field_0x3C >= 6)
+        if (g->iNumberAI >= 6)
             cBENewRaceInterface_setNumberAI(self, 5);
         break;
     case 2:
@@ -439,7 +431,7 @@ extern sGameEvent_001451E8 D_0043E978[];
 
 static inline char* Race_1451E8()
 {
-    return (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
+    return (char*)&(*(&cBENewRaceInterface_newRace));
 }
 
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
@@ -569,7 +561,7 @@ extern sRaceLookup_00440B38 D_00440B38[];
 
 extern "C" int func_001454F8(void* self, int kind)
 {
-    char* g = (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
+    char* g = (char*)&(*(&cBENewRaceInterface_newRace));
     unsigned char mode = *(unsigned char*)(g + 0x4A);
     if (mode >= 6 && mode < 12)
     {

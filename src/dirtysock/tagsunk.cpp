@@ -713,7 +713,6 @@ static inline void post_A1D0(char* self, void* msg)
     sMsgListA1D0_insert(*(sMsgListNodeA1D0**)(self + 0xF0), mp);
 }
 
-struct sAppA1D0 { char pad[0x78]; void* mBE; };
 
 struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
 
@@ -786,7 +785,7 @@ extern "C" void func_0025A1D0(char* self, char* msg)
         cBENewRaceInterface_setGameEvent(ri, kind);
         D_00535C08[0] = ev;
         D_004A11B8 = 1;
-        cBE_getInterface_Fv(((sAppA1D0*)SSXApp)->mBE, 7);
+        cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
         if (D_00534B34[0] != 0)
         {
             char* cfg = D_005308B8;
@@ -4853,29 +4852,6 @@ struct sRaceStats {
     int fA8;                        // 0xA8
 };
 
-// The race-result state cGameComm_mGameComm (rider 0 / rider 1 fields side by side).
-struct sRaceResult {
-    char pad_0x00[0xC];
-    int f0C;                        // 0x0C
-    int f10;                        // 0x10
-    int f14;                        // 0x14
-    int f18;                        // 0x18
-    int f1C;                        // 0x1C
-    int f20;                        // 0x20
-    int f24;                        // 0x24
-    int f28;                        // 0x28
-    int pad_0x2C;
-    int f30;                        // 0x30
-    int f34;                        // 0x34
-    int f38;                        // 0x38
-    int f3C;                        // 0x3C
-    char pad_0x40[0x9C - 0x40];
-    int f9C;                        // 0x9C
-    int fA0;                        // 0xA0
-    int fA4;                        // 0xA4
-    char pad_0xA8[0xB4 - 0xA8];
-    int fB4;                        // 0xB4
-};
 
 extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name, unsigned int epoch);
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
@@ -4987,7 +4963,7 @@ extern char D_00480E00[];
 extern char D_004A32E0[];
 extern char D_004A3310[];
 
-static inline sRaceResult* Race() { return (sRaceResult*)cGameComm_mGameComm; }
+static inline cGameComm* Race() { return cGameComm_mGameComm; }
 
 // 1 when the value is set.
 static inline int IsSet(int v)
@@ -5003,7 +4979,7 @@ static inline int RaceTime(int end)
 {
     int t = 0;
     if (end != 0)
-        t = end - Race()->f34;
+        t = end - Race()->unk_034;
     return t;
 }
 
@@ -5018,17 +4994,17 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     char* prof = (char*)SSXApp->GameModeMan;
     int quitA = 0;
     int quitB = 0;
-    if (Race()->f18 != 0) {
-        if (Race()->f9C == 0)
+    if (Race()->mCommErrorWasSignificant != 0) {
+        if (Race()->unk_09C == 0)
             quitA = 1;
         else
             quitB = 1;
     }
     int finA = 0;
     int finB = 0;
-    if (Race()->fA0 == 0)
+    if (Race()->mLocalFinishedRace == 0)
         finA = 1;
-    if (Race()->fA4 == 0)
+    if (Race()->mRemoteFinishedRace == 0)
         finB = 1;
     int myIdx;
     char* myName;
@@ -5049,52 +5025,52 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     if (cBENetworkInterface_networkOpt.bIsHost != 0) {
         myIdx = idxA;
         myName = *(char**)(self + 0x90);
-        myTime = finA ? RaceTime(Race()->f38) : 0;
-        myQuitTime = quitA ? RaceTime(Race()->f38) : 0;
+        myTime = finA ? RaceTime(Race()->unk_038) : 0;
+        myQuitTime = quitA ? RaceTime(Race()->unk_038) : 0;
         myDone = 0;
-        if (Race()->f10 != 0)
+        if (Race()->mLocalDisconnected != 0)
             myDone = 1;
         myOut = 0;
-        if (Race()->fA0 != 0)
+        if (Race()->mLocalFinishedRace != 0)
             myOut = 1;
         mine = statsA;
-        myScore = Race()->f24;
+        myScore = Race()->mCheating[0];
         oppIdx = idxB;
         oppChar = cBENetworkInterface_networkOpt.OpponentCharacterID;
-        oppTime = finB ? RaceTime(Race()->f3C) : 0;
-        oppQuitTime = quitB ? RaceTime(Race()->f3C) : 0;
+        oppTime = finB ? RaceTime(Race()->unk_03C) : 0;
+        oppQuitTime = quitB ? RaceTime(Race()->unk_03C) : 0;
         oppDone = 0;
-        if (Race()->f14 != 0)
+        if (Race()->mRemoteDisconnected != 0)
             oppDone = 1;
         opp = statsB;
-        oppScore = Race()->f28;
+        oppScore = Race()->mCheating[1];
         oppOut = 0;
-        if (Race()->fA4 != 0)
+        if (Race()->mRemoteFinishedRace != 0)
             oppOut = 1;
     } else {
         myIdx = idxB;
         myName = *(char**)(self + 0x94);
-        myTime = finB ? RaceTime(Race()->f3C) : 0;
-        myQuitTime = quitB ? RaceTime(Race()->f3C) : 0;
+        myTime = finB ? RaceTime(Race()->unk_03C) : 0;
+        myQuitTime = quitB ? RaceTime(Race()->unk_03C) : 0;
         myDone = 0;
-        if (Race()->f14 != 0)
+        if (Race()->mRemoteDisconnected != 0)
             myDone = 1;
         myOut = 0;
-        if (Race()->fA4 != 0)
+        if (Race()->mRemoteFinishedRace != 0)
             myOut = 1;
         mine = statsB;
-        myScore = Race()->f28;
+        myScore = Race()->mCheating[1];
         oppIdx = idxA;
         oppChar = cBENetworkInterface_networkOpt.MyCharacterID;
-        oppTime = finA ? RaceTime(Race()->f38) : 0;
-        oppQuitTime = quitA ? RaceTime(Race()->f38) : 0;
+        oppTime = finA ? RaceTime(Race()->unk_038) : 0;
+        oppQuitTime = quitA ? RaceTime(Race()->unk_038) : 0;
         oppDone = 0;
-        if (Race()->f10 != 0)
+        if (Race()->mLocalDisconnected != 0)
             oppDone = 1;
         opp = statsA;
-        oppScore = Race()->f24;
+        oppScore = Race()->mCheating[0];
         oppOut = 0;
-        if (Race()->fA0 != 0)
+        if (Race()->mLocalFinishedRace != 0)
             oppOut = 1;
     }
     buf[0] = 0;
@@ -5102,12 +5078,12 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetString(buf, 0x800, D_004A3278, myName);
     if (sendName != 0)
         cDirtysock_tag_TagFieldSetString(buf, 0x800, D_004A2F78, *(const char**)(self + 0x9C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A3280, Race()->f30);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A3288, Race()->f18);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480920, Race()->f9C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480930, Race()->fB4);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480940, Race()->f1C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480950, Race()->f20);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A3280, Race()->mCommError);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A3288, Race()->mCommErrorWasSignificant);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480920, Race()->unk_09C);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480930, Race()->mStallCount);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480940, Race()->mStateOnCommError);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480950, ((int)Race()->mFlagsOnCommError));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480960, myDone);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_00480970, oppDone);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A3290, myOut);
@@ -5125,7 +5101,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
             ranked = 1;
     }
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004809A0, ranked);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32B0, Race()->f0C);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32B0, Race()->mDesync);
     cDirtysock_tag_TagFieldSetString(buf, 0x800, D_004A32B8, *(const char**)(self + 0x90));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32C0, myTime);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, D_004A32C8, myScore);

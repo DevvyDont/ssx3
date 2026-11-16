@@ -6707,12 +6707,11 @@ extern "C" int func_00144010(cComputer* arg0, float fparg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144040);
 #ifdef SKIP_ASM
-struct sPair8_4040 { int a; int b; };
-extern sPair8_4040 D_0043CF20[];
+extern tComputerCruiseLogic D_0043CF20[];
 
 extern "C" void func_00144040(cComputer* self, int idx)
 {
-    *(sPair8_4040*)&self->cruiseLogic = D_0043CF20[idx];
+    *(&self->cruiseLogic) = D_0043CF20[idx];
     self->mCruiseLogicID = idx;
 }
 #endif

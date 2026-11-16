@@ -120,12 +120,6 @@ extern "C" void* func_001D1790(void* self, void* owner, int a, int b);
 extern "C" void* func_001D1928(void* self, void* owner, int a, int b);
 extern char D_004A4E80;
 extern signed char D_00535C11[];
-struct sRaceGNS {
-    char pad0[0x40];
-    int event;
-    char pad44[5];
-    signed char mode;
-};
 extern int D_00535C08[];
 extern int D_004A19D8;
 extern int D_004A19D4;
@@ -254,8 +248,8 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             int one = 1;
             void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
-            sRaceGNS* g = &(*(sRaceGNS*)&cBENewRaceInterface_newRace);
-            switch (g->mode) {
+            cBERaceDB* g = &(*(&cBENewRaceInterface_newRace));
+            switch (g->cGamePath) {
             case 1:
                 return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 0);
             case 0: {
@@ -263,9 +257,9 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
                 cBENewRaceInterface_setGameEvent(nr, 12);
                 if (func_00145C38(pl, 0)) {
                     D_004A11B8 = one;
-                    g->event = 14;
+                    g->iLocationIdx = 14;
                 } else {
-                    g->event = cBENewPlayerInterface_getLastHub(pl, 0);
+                    g->iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
                     D_004A11B8 = one;
                 }
                 sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
@@ -817,10 +811,6 @@ public:
     virtual void update();
 };
 
-struct sCam_1E80 {
-    char pad0[0x10];
-    cCamObj_1E80 obj;               // 0x10 (vptr at 0xA0)
-};
 
 struct sUI_1E80 {
     void* custom;                   // 0x0
@@ -866,7 +856,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     cRealFE_loadCharAnimations_1(self);
     func_0019CE68((char*)self + 0x1A70);
     func_001A0498((char*)self + 0xB0);
-    sCam_1E80* cam = (sCam_1E80*)SSXApp->RealFE;
+    cFE* cam = SSXApp->RealFE;
     sV4_1E80 pos;
     sV4_1E80 up;
     sV4_1E80 t;

@@ -13,37 +13,10 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern int D_004A3E90;
 extern void* cSSXApp_vtbl[];
 
-struct cSSXApp00226830 {
-    char base[0x5C];
-    void** vt;
-    int f60;
-    int f64;
-    int f68;
-    int f6C;
-    int f70;
-    int f74;
-    char pad78[0xA8 - 0x78];
-    char fA8[8];
-    char fB0[8];
-    char fB8[8];
-    int fC0;
-    int fC4;
-    int fC8;
-    int fCC;
-    int fD0;
-    int fD4;
-    int fD8;
-    int fDC;
-    int fE0;
-    int fE4;
-    int fE8;
-    int arr[11];
-    int f118;
-};
 
-extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp* self)
+extern "C" cSSXApp* cSSXApp_cSSXApp(cSSXApp* self)
 {
-    cAppMan_cAppMan(((cSSXApp00226830*)self));
+    cAppMan_cAppMan((self));
     self->mVtbl = cSSXApp_vtbl;
     self->UserName = (char*)D_004A3E90;
     self->Password = (char*)D_004A3E90;
@@ -68,7 +41,7 @@ extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp* self)
     MEM_fill(((char*)&self->InputPads[0]), 0, 8);
     MEM_fill(((char*)&self->InputMaps[0]), 0, 8);
     MEM_fill(((char*)&self->Inputs[0]), 0, 8);
-    return ((cSSXApp00226830*)self);
+    return (self);
 }
 #endif
 
