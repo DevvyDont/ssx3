@@ -701,11 +701,11 @@ extern "C" void cListOperator__cListOperator(int* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", cListNode_cListNode);
 #ifdef SKIP_ASM
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 extern "C" void *cListNode_cListNode(cListNode* arg0) {
     ((void*)arg0->mpNext) = ((void*)arg0);
-    ((int*)arg0->mVtbl) = &(*(int*)&D_00494CC0);
+    ((int*)arg0->mVtbl) = &(*(int*)&cListNode_vtbl);
     ((void*)arg0->mpPrev) = ((void*)arg0);
     return ((void*)arg0);
 }
@@ -717,11 +717,11 @@ INCLUDE_ASM("ui/uivector", cListNode__cListNode);
 void operator_delete(int* ptr);
 extern "C" void func_003A4868(cListNode* self);
 
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 extern "C" void cListNode__cListNode(int* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00494CC0;
+    *(void***)((char*)self + 0x8) = cListNode_vtbl;
     func_003A4868((cListNode*)self);
     if (flags & 1) {
         operator_delete(self);
@@ -774,7 +774,7 @@ INCLUDE_ASM("ui/uivector", cList__cList);
 #ifdef SKIP_ASM
 extern "C" void* cList_destroyList(void*);
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 /**
  * Destroys a list: restores cList's vtable, destroys its nodes, then unlinks its end and start sentinel
@@ -786,9 +786,9 @@ extern "C" void cList__cList(cList* self, int flags)
 {
     self->mVtbl = cList_vtbl;
     cList_destroyList(self);
-    self->mEnd.mVtbl = D_00494CC0;
+    self->mEnd.mVtbl = cListNode_vtbl;
     func_003A4868((cListNode*)((char*)self + 0xC));
-    self->mStart.mVtbl = D_00494CC0;
+    self->mStart.mVtbl = cListNode_vtbl;
     func_003A4868((cListNode*)self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1615,7 +1615,7 @@ INCLUDE_ASM("ui/uivector", cUIGroup__cUIGroup);
 #ifdef SKIP_ASM
 extern void* cUIGroup_vtbl[];
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 // PORT: called here for its side effect only; declared void so the scheduling matches.
 extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
 extern "C" void func_003A4868(cListNode* p);
@@ -1633,9 +1633,9 @@ extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
     self->mVtbl = cUIGroup_vtbl;
     self->mList.mVtbl = cList_vtbl;
     cList_destroyList_v(((char*)self) + 0x74);
-    self->mList.mEnd.mVtbl = D_00494CC0;
+    self->mList.mEnd.mVtbl = cListNode_vtbl;
     func_003A4868((cListNode*)(((char*)self) + 0x80));
-    self->mList.mStart.mVtbl = D_00494CC0;
+    self->mList.mStart.mVtbl = cListNode_vtbl;
     func_003A4868((cListNode*)(((char*)self) + 0x74));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
@@ -1789,7 +1789,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu__cUIMenu);
 #ifdef SKIP_ASM
 extern void* cUIGroup_vtbl[];
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 // PORT: called here for its side effect only; declared void so the scheduling matches.
 extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
 extern "C" void func_003A4868(cListNode* p);
@@ -1809,9 +1809,9 @@ extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
     self->mVtbl = cUIGroup_vtbl;
     *(void***)(((char*)self) + 0x8C) = cList_vtbl;
     cList_destroyList_v(((char*)self) + 0x74);
-    *(void***)(((char*)self) + 0x88) = D_00494CC0;
+    *(void***)(((char*)self) + 0x88) = cListNode_vtbl;
     func_003A4868((cListNode*)(((char*)self) + 0x80));
-    *(void***)(((char*)self) + 0x7C) = D_00494CC0;
+    *(void***)(((char*)self) + 0x7C) = cListNode_vtbl;
     func_003A4868((cListNode*)(((char*)self) + 0x74));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
@@ -2083,13 +2083,13 @@ INCLUDE_ASM("ui/uivector", func_003A55D8);
 extern "C" void* func_0039FB30(void* self, int a, int b);
 extern "C" unsigned char *func_003A65A0(unsigned char *arg0);
 extern "C" void *func_003A65B8(void *arg0);
-extern void* D_00494798[];
+extern void* cUIListBox_vtbl[];
 
 extern "C" void* func_003A55D8(cUIListBox* self)
 {
     int i;
     func_0039FB30(((char*)self), 0, 0);
-    self->mVtbl = D_00494798;
+    self->mVtbl = cUIListBox_vtbl;
     func_003A65A0((unsigned char*)(((char*)self) + 0x74));
     char* p = ((char*)self) + 0x98;
     for (i = 0x1F; i != -1; i--) {
@@ -2103,7 +2103,7 @@ extern "C" void* func_003A55D8(cUIListBox* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIListBox__cUIListBox);
 #ifdef SKIP_ASM
-extern void* D_00494798[];
+extern void* cUIListBox_vtbl[];
 extern "C" void func_0039A670(void* self);
 // PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
@@ -2111,7 +2111,7 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
 
 extern "C" void cUIListBox__cUIListBox(cUIListBox* self, int flags)
 {
-    self->mVtbl = D_00494798;
+    self->mVtbl = cUIListBox_vtbl;
     func_0039A670(self);
     cUIThing__cUIThing_dtor(self, flags);
 }
@@ -2659,11 +2659,11 @@ INCLUDE_ASM("ui/uivector", func_003A5B48);
 void operator_delete(int* ptr);
 extern "C" void func_003A4868(cListNode* self);
 
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 extern "C" void func_003A5B48(int* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00494CC0;
+    *(void***)((char*)self + 0x8) = cListNode_vtbl;
     func_003A4868((cListNode*)self);
     if (flags & 1) {
         operator_delete(self);
@@ -2986,19 +2986,19 @@ extern "C" int func_003A5F58(cUIText* arg0) {
 INCLUDE_ASM("ui/uivector", func_003A5F60);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a, int b);
-extern void* D_004944C8[];
+extern void* cUIScrollBar_vtbl[];
 
 extern "C" void* func_003A5F60(cUIScrollBar* self)
 {
     func_0039FB30(((char*)self), 0, 0);
-    self->mVtbl = D_004944C8;
+    self->mVtbl = cUIScrollBar_vtbl;
     return ((char*)self);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5FA0);
 #ifdef SKIP_ASM
-extern void* D_004944C8[];
+extern void* cUIScrollBar_vtbl[];
 // PORT: the other ctors in the unit call this base ctor with (self, 0, 0)
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 
@@ -3006,7 +3006,7 @@ extern "C" void* func_003A5FA0(cUIScrollBar* self)
 {
     func_0039FB30_self(((char*)self));
     self->mpObjBackground = 0;
-    self->mVtbl = D_004944C8;
+    self->mVtbl = cUIScrollBar_vtbl;
     self->mpObjKnob = 0;
     self->mpUpArrow = 0;
     self->mpDownArrow = 0;
@@ -3188,12 +3188,12 @@ extern "C" void func_003A6188(cUIProgress* arg0, int arg1) {
 INCLUDE_ASM("ui/uivector", func_003A6190);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a, int b);
-extern void* D_00494348[];
+extern void* cUISlider_vtbl[];
 
 extern "C" void* func_003A6190(cUISlider* self)
 {
     func_0039FB30(((char*)self), 0, 0);
-    self->mVtbl = D_00494348;
+    self->mVtbl = cUISlider_vtbl;
     return ((char*)self);
 }
 #endif
@@ -3202,12 +3202,12 @@ INCLUDE_ASM("ui/uivector", func_003A61D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
-extern void* D_00494348[];
+extern void* cUISlider_vtbl[];
 
 extern "C" void* func_003A61D0(cUISlider* self)
 {
     func_0039FB30_self(((char*)self));
-    self->mVtbl = D_00494348;
+    self->mVtbl = cUISlider_vtbl;
     self->mValue = 0;
     self->mNumValues = 0;
     self->mStartPixel = 0;
@@ -3268,12 +3268,12 @@ INCLUDE_ASM("ui/uivector", func_003A6250);
 extern "C" void* func_0039FB30(void* self, int a, int b);
 extern "C" void* func_003977E8(void* p);
 extern "C" unsigned char* func_003A6600(unsigned char* p);
-extern void* D_00494278[];
+extern void* cUITextScroll_vtbl[];
 
 extern "C" void* func_003A6250(cUITextScroll* self)
 {
     func_0039FB30(((char*)self), 0, 0);
-    self->mVtbl = D_00494278;
+    self->mVtbl = cUITextScroll_vtbl;
     func_003A6600((unsigned char*)(((char*)self) + 0x74));
     func_003977E8(((char*)self) + 0x8C);
     return ((char*)self);
@@ -3283,9 +3283,9 @@ extern "C" void* func_003A6250(cUITextScroll* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUITextScroll__cUITextScroll);
 #ifdef SKIP_ASM
-extern void* D_00494278[];
+extern void* cUITextScroll_vtbl[];
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 extern "C" void func_003A4868(cListNode* self);
 extern "C" void func_003A18C0(void* self);
 // PORT: the unit declares cList_destroyList as returning void*; its body (util/list) is void.
@@ -3296,13 +3296,13 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
 
 extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
 {
-    self->mVtbl = D_00494278;
+    self->mVtbl = cUITextScroll_vtbl;
     func_003A18C0(self);
     self->mList.mVtbl = cList_vtbl;
     cList_destroyList_v((char*)self + 0x8C);
-    self->mList.mEnd.mVtbl = D_00494CC0;
+    self->mList.mEnd.mVtbl = cListNode_vtbl;
     func_003A4868((cListNode*)((char*)self + 0x98));
-    self->mList.mStart.mVtbl = D_00494CC0;
+    self->mList.mStart.mVtbl = cListNode_vtbl;
     func_003A4868((cListNode*)((char*)self + 0x8C));
     cUIThing__cUIThing_dtor(self, flags);
 }

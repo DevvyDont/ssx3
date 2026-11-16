@@ -3,12 +3,12 @@
 
 // cUIListBox: a list of up to 32 text entries (ASCII, Unicode or string-table id, each with a user data pointer), one of
 // them current (record type 0x12). Size 0x31C: cUIScreen_createObjectByStruct does operator new(0x31C, "UIListBox"...)
-// + the ctor cUIListBox_cUIListBox (cUIThing ctor func_0039FB30, vtable D_00494798, clears the entries, mNumEntries,
+// + the ctor cUIListBox_cUIListBox (cUIThing ctor func_0039FB30, vtable cUIListBox_vtbl, clears the entries, mNumEntries,
 // mCurrentEntry, mStaticColour = D_004C66C8); default ctor func_003A55D8 (ui/uivector). Base: cUIThing (ui/uithing.h,
 // 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/uilistbox.cpp (preview assert path);
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
-// Methods: vtable D_00494798 slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (func_00399820), 14 onInput
+// Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (func_00399820), 14 onInput
 // (func_00399970), 15 updateLocale (func_00399E28), 16 render2D (func_00399F00), 21 getType (func_003A56A0),
 // 22 setShadow (func_003A56D8), 23 setUseStaticColour (func_003A5708); cUIListBox_addEntryByAsciiString,
 // func_0039A4B0 (addEntryByUnicodeString), cUIListBox_addEntryByStringID, func_0039A670 (clear; the dtor calls it),
@@ -58,7 +58,7 @@ struct cUIListBox {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_00494798 (the ctor cUIListBox_cUIListBox, func_003A55D8, the dtor cUIListBox__cUIListBox)
+    void** mVtbl;                    // 0x008 [R] cUIListBox_vtbl (the ctor cUIListBox_cUIListBox, func_003A55D8, the dtor cUIListBox__cUIListBox)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on

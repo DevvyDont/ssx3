@@ -1729,7 +1729,7 @@ void* func_0015F928(void* self)
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_cBasicCameraAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
-extern void* D_0045BD78[];
+extern void* cBasicCameraAlgorithm_vtbl[];
 // PORT: cQuad128 (the unit's 128-bit TImode typedef) is a 16-byte register copy.
 extern cQuad128 D_004FF130;
 extern "C" float func_00167E30(cCameraAlgorithm* self);
@@ -1748,7 +1748,7 @@ extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorit
     self->AlgorithmType = 0x4E;
     self->Near = 10.0f;
     self->Far = 30000.0f;
-    self->mVtbl = D_0045BD78;
+    self->mVtbl = cBasicCameraAlgorithm_vtbl;
     *(int*)&self->Pitch = 0;
     *(int*)&self->Heading = 0;
     cQuad128 v = D_004FF130;
@@ -4089,7 +4089,7 @@ void* func_00162290(void* self)
 INCLUDE_ASM("camera/camera", cChaseAlgorithm_cChaseAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
-extern void* D_0045BC38[];
+extern void* cChaseAlgorithm_vtbl[];
 extern "C" float func_00167E30(cCameraAlgorithm* self);
 
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
@@ -4099,7 +4099,7 @@ extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
     self->AlgorithmType = 0x4E;
     self->Near = 10.0f;
     self->Far = 30000.0f;
-    self->mVtbl = D_0045BC38;
+    self->mVtbl = cChaseAlgorithm_vtbl;
     self->AlgorithmType = 0x53;
     return ((void*)self);
 }
@@ -4118,7 +4118,7 @@ void func_00162310(void* self, int val)
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_cLookAtChaseAlgorithm);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void* D_0045BBC0[];
+extern void* cLookAtChaseAlgorithm_vtbl[];
 extern cQuad128 D_004FF120_q162318 __asm__("t4vect_Zero");
 extern "C" float func_00167D88(void);
 // PORT: these take an unused self; they are called here with none.
@@ -4132,7 +4132,7 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
 {
     cChaseAlgorithm_cChaseAlgorithm((cChaseAlgorithm*)self);
     sCamFilter* filter = (sCamFilter*)(((char*)self) + 0x340);
-    self->mVtbl = D_0045BBC0;
+    self->mVtbl = cLookAtChaseAlgorithm_vtbl;
     func_0031D5E8(((char*)self) + 0x304);
     func_0031D5E8(((char*)self) + 0x310);
     func_0031D5E8(((char*)self) + 0x31C);
@@ -4171,14 +4171,14 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm__cLookAtChaseAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BBC0[];
+extern void* cLookAtChaseAlgorithm_vtbl[];
 extern void* D_0045BDE0[];
 
 // PORT: cLookAtChaseAlgorithm__cLookAtChaseAlgorithm is the base deleting dtor (self, flags); the unit declares it with one arg
 // (cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor is declared earlier in the unit with this asm label).
 void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BBC0;
+    *(void***)((char*)self + 0x10) = cLookAtChaseAlgorithm_vtbl;
     func_0031D618((char*)self + 0x334, 2);
     func_0031D618((char*)self + 0x328, 2);
     func_0031D618((char*)self + 0x31C, 2);

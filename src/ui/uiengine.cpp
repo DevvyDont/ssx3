@@ -1280,7 +1280,7 @@ INCLUDE_ASM("ui/uiengine", cUIListBox_cUIListBox);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern void* D_00494798[];
+extern void* cUIListBox_vtbl[];
 
 struct cUIListBox_cUIListBox_sQuad {
     int a, b, c, d;
@@ -1308,7 +1308,7 @@ struct cUIListBox_cUIListBox_sObj {
 extern "C" cUIListBox_cUIListBox_sObj* cUIListBox_cUIListBox(cUIListBox* self)
 {
     func_0039FB30(((cUIListBox_cUIListBox_sObj*)self));
-    self->mVtbl = D_00494798;
+    self->mVtbl = cUIListBox_vtbl;
     *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
     cUIListBox_cUIListBox_sEntry* p = ((cUIListBox_cUIListBox_sEntry*)&self->mpEntries[0]);
     for (int i = 31; i != -1; i--, p++) {

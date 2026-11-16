@@ -91,22 +91,22 @@ extern "C" void cList_destroyList(void*);
 extern "C" void func_003A4868(void* self);
 void operator_delete(int*);
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 extern "C" void func_0039E9D8(void* self, int flags)
 {
     func_0039F8C8(self);
     *(void***)((char*)self + 0x34) = cList_vtbl;
     cList_destroyList((char*)self + 0x1C);
-    *(void***)((char*)self + 0x30) = D_00494CC0;
+    *(void***)((char*)self + 0x30) = cListNode_vtbl;
     func_003A4868((char*)self + 0x28);
-    *(void***)((char*)self + 0x24) = D_00494CC0;
+    *(void***)((char*)self + 0x24) = cListNode_vtbl;
     func_003A4868((char*)self + 0x1C);
     *(void***)((char*)self + 0x18) = cList_vtbl;
     cList_destroyList(self);
-    *(void***)((char*)self + 0x14) = D_00494CC0;
+    *(void***)((char*)self + 0x14) = cListNode_vtbl;
     func_003A4868((char*)self + 0xC);
-    *(void***)((char*)self + 0x8) = D_00494CC0;
+    *(void***)((char*)self + 0x8) = cListNode_vtbl;
     func_003A4868(self);
     if (flags & 1) {
         operator_delete((int*)self);

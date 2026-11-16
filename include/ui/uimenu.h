@@ -79,7 +79,7 @@ struct cUIMenu {
     // --- cUIGroup (0x90)
     char mList[0x1C];                // 0x074 [O] cList mList (cListNode mStart 0x74, mEnd 0x80, the list's vptr 0x8C): the menu
                                      //       items; [R] constructed by func_003977E8(this + 0x74); the destructor stores
-                                     //       cList's vtable at 0x8C and cListNode's (D_00494CC0) at 0x88 / 0x7C;
+                                     //       cList's vtable at 0x8C and cListNode's (cListNode_vtbl) at 0x88 / 0x7C;
                                      //       [U] cList_size(this + 0x74) in cUIMenu_setScrollableMenu / setUIData
     // --- cUIMenu
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;

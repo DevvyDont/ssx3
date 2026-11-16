@@ -41,7 +41,7 @@ void operator_delete(int*);
 extern void* cUIScreen_vtbl[];
 extern void* cUIGroup_vtbl[];
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 /**
  * Destroys a UI screen: frees its object table and its own copy of the screen data, then the embedded lists
@@ -63,18 +63,18 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
     cList_destroyList_C558(((char*)self) + 0xB4);
     char* m40 = ((char*)self) + 0x40;
-    *(void***)(((char*)self) + 0xC8) = D_00494CC0;
+    *(void***)(((char*)self) + 0xC8) = cListNode_vtbl;
     func_003A4868(((char*)self) + 0xC0);
-    *(void***)(((char*)self) + 0xBC) = D_00494CC0;
+    *(void***)(((char*)self) + 0xBC) = cListNode_vtbl;
     func_003A4868(((char*)self) + 0xB4);
     cUIThing__cUIThing(m40, 2);
     *(void***)(((char*)self) + 0x30) = cList_vtbl;
     cList_destroyList_C558(((char*)self) + 0x18);
-    *(void***)(((char*)self) + 0x2C) = D_00494CC0;
+    *(void***)(((char*)self) + 0x2C) = cListNode_vtbl;
     func_003A4868(((char*)self) + 0x24);
-    *(void***)(((char*)self) + 0x20) = D_00494CC0;
+    *(void***)(((char*)self) + 0x20) = cListNode_vtbl;
     func_003A4868(((char*)self) + 0x18);
-    self->mVtbl = D_00494CC0;
+    self->mVtbl = cListNode_vtbl;
     func_003A4868(((char*)self));
     if (flags & 1) {
         operator_delete((int*)self);
@@ -748,9 +748,9 @@ extern char D_00493F30[];
 extern char D_00493F40[];
 extern char D_00493F50[];
 extern char D_00493F60[];
-extern void* D_00494348[];
+extern void* cUISlider_vtbl[];
 extern void* cUIProgress_vtbl[];
-extern void* D_004944C8[];
+extern void* cUIScrollBar_vtbl[];
 extern void* cUIPair_vtbl[];
 extern void* cUIMenu_vtbl[];
 extern void* cUIGroup_vtbl[];
@@ -922,7 +922,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         *(int*)(o + 0xC8) = 0;
         *(char*)(o + 0x8C) = 0;
         *(char*)(o + 0xA5) = 0;
-        *(void***)(o + 8) = D_004944C8;
+        *(void***)(o + 8) = cUIScrollBar_vtbl;
         initFromRec_D078(o, rec);
         {
             char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x20));
@@ -951,7 +951,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         *(int*)(o + 0x80) = 0;
         *(int*)(o + 0x88) = 0;
         *(int*)(o + 0x8C) = 0;
-        *(void***)(o + 8) = D_00494348;
+        *(void***)(o + 8) = cUISlider_vtbl;
         initFromRec_D078(o, rec);
         {
             char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
@@ -1091,11 +1091,11 @@ extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
 INCLUDE_ASM("ui/uiscreen", cUIScrollBar__cUIScrollBar);
 #ifdef SKIP_ASM
 extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* D_004944C8[];
+extern void* cUIScrollBar_vtbl[];
 
 extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
-    self->mVtbl = D_004944C8;
+    self->mVtbl = cUIScrollBar_vtbl;
     void* a = self->mpObjBackground;
     if (a != 0) {
         sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
@@ -1349,11 +1349,11 @@ extern "C" void func_0039DE68(cUIScrollBar* self, int a)
 INCLUDE_ASM("ui/uiscreen", cUISlider__cUISlider);
 #ifdef SKIP_ASM
 extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* D_00494348[];
+extern void* cUISlider_vtbl[];
 
 extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
-    self->mVtbl = D_00494348;
+    self->mVtbl = cUISlider_vtbl;
     void* a = self->mpObjBackground;
     if (a != 0) {
         sDeleteTarget* t = *(sDeleteTarget**)((char*)a + 0x8);
@@ -1563,7 +1563,7 @@ extern "C" void func_003A4868(void*);
 void operator_delete(int*);
 extern void* D_004946C8[];
 extern void* cList_vtbl[];
-extern void* D_00494CC0[];
+extern void* cListNode_vtbl[];
 
 extern "C" void func_0039E390(void* self, int flags)
 {
@@ -1571,11 +1571,11 @@ extern "C" void func_0039E390(void* self, int flags)
     cList_destroyList_v((char*)self + 0x24);
     *(void***)((char*)self + 0x3C) = cList_vtbl;
     cList_destroyList_v((char*)self + 0x24);
-    *(void***)((char*)self + 0x38) = D_00494CC0;
+    *(void***)((char*)self + 0x38) = cListNode_vtbl;
     func_003A4868((char*)self + 0x30);
-    *(void***)((char*)self + 0x2C) = D_00494CC0;
+    *(void***)((char*)self + 0x2C) = cListNode_vtbl;
     func_003A4868((char*)self + 0x24);
-    *(void***)((char*)self + 0x8) = D_00494CC0;
+    *(void***)((char*)self + 0x8) = cListNode_vtbl;
     func_003A4868(self);
     if (flags & 1) {
         operator_delete((int*)self);

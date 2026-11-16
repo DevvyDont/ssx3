@@ -4,11 +4,11 @@
 // cUIScrollBar: a scroll bar (record type 0x21): background, knob, up/down arrows and an object hidden when the list
 // is empty; cUITextScroll points at one (mpScrollBar). Size 0xCC: cUIScreen_createObjectByStruct does
 // operator new(0xCC, "UIScroll"...) + the cUIThing ctor func_0039FB30, zeroes 0x74..0x88 and 0xC0..0xC8, clears the
-// two animation names, stores its vtable D_004944C8 and adopts the children named at rec+0x20 / rec+0x24.
+// two animation names, stores its vtable cUIScrollBar_vtbl and adopts the children named at rec+0x20 / rec+0x24.
 // Default ctors func_003A5F60 / func_003A5FA0 (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode,
 // written out flat below. Class name: SSX On Tour's DWARF (class cUIScrollBar 0xE0, the only On Tour widget with these
 // members); the preview keeps no name for it. EA's source file is not known; ui/uiscrollbar.h is our name.
-// Methods: vtable D_004944C8 slots 0 ~cUIScrollBar (cUIScrollBar__cUIScrollBar), 9 setUIData (func_0039D948), 16 render2D
+// Methods: vtable cUIScrollBar_vtbl slots 0 ~cUIScrollBar (cUIScrollBar__cUIScrollBar), 9 setUIData (func_0039D948), 16 render2D
 // (func_0039D968), 21 getType (func_003A6000); func_0039DA20 (update position: pos, visible, total), func_0039DE68
 // (show/hide arrows); accessors func_003A6008..func_003A60D8 (ui/uivector). Retail methods: ui/uiscreen 0x39D8C0-0x39DF28.
 //
@@ -22,7 +22,7 @@ struct cUIScrollBar {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_004944C8 (createObjectByStruct, func_003A5F60, func_003A5FA0, the dtor cUIScrollBar__cUIScrollBar)
+    void** mVtbl;                    // 0x008 [R] cUIScrollBar_vtbl (createObjectByStruct, func_003A5F60, func_003A5FA0, the dtor cUIScrollBar__cUIScrollBar)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on

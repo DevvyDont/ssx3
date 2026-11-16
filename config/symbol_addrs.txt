@@ -4346,3 +4346,13 @@ cFEStateOnlineAgreement_vtbl = 0x0046AC38;
 cFEStateOnlineMainMenu_vtbl = 0x0046AD48;
 cFEStateChatRoom_vtbl = 0x0046AE58;
 cTransformModifier_vtbl = 0x004913F8;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round6 (docs/ontour_globals.tsv)
+cLookAtChaseAlgorithm_vtbl = 0x0045BBC0;
+cChaseAlgorithm_vtbl = 0x0045BC38;
+cBasicCameraAlgorithm_vtbl = 0x0045BD78;
+cUITextScroll_vtbl = 0x00494278;
+cUISlider_vtbl = 0x00494348;
+cUIScrollBar_vtbl = 0x004944C8;
+cUIListBox_vtbl = 0x00494798;
+cListNode_vtbl = 0x00494CC0;

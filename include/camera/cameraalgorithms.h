@@ -14,8 +14,8 @@
 //                                           Algorithm. Bigger ones add fields after 0x390: Matrix/Direction/SPOKE
 //                                           (0x3A0), SUPERPIPE/POST_RACE_1 (0x3B0), Relative (0x3C0), Spline (0x3D0).
 //                                           cCamera embeds a cDEFAULT_3ChaseAlgorithm (0x390) at 0xC0.
-// Retail vtables: cCameraAlgorithm D_0045BDE0, cBasicCameraAlgorithm D_0045BD78, cChaseAlgorithm D_0045BC38,
-// cLookAtChaseAlgorithm D_0045BBC0 (stored by its ctor cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and dtor cLookAtChaseAlgorithm__cLookAtChaseAlgorithm).
+// Retail vtables: cCameraAlgorithm D_0045BDE0, cBasicCameraAlgorithm cBasicCameraAlgorithm_vtbl, cChaseAlgorithm cChaseAlgorithm_vtbl,
+// cLookAtChaseAlgorithm cLookAtChaseAlgorithm_vtbl (stored by its ctor cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and dtor cLookAtChaseAlgorithm__cLookAtChaseAlgorithm).
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
 // Evidence tags:
@@ -81,7 +81,7 @@ struct cBasicCameraAlgorithm {
     float Near;                 // 0x04 [O]; [R]
     float Far;                  // 0x08 [O]; [R]
     int AlgorithmType;          // 0x0C [O]; [R] 0x4F
-    void** mVtbl;               // 0x10 [R] D_0045BD78 (cManual: D_0045BD10, cEditor: D_0045BCA8)
+    void** mVtbl;               // 0x10 [R] cBasicCameraAlgorithm_vtbl (cManual: D_0045BD10, cEditor: D_0045BCA8)
     char unk_14[0xC];           // 0x14 alignment gap before the 16-byte-aligned t4Vector
     // --- cBasicCameraAlgorithm
     t4Vector Position;          // 0x20 [O]; [R] = D_004FF130; [U] func_00167ED0 setPosition (sq), func_00167EF0
@@ -110,7 +110,7 @@ struct cChaseAlgorithm {
     float Near;                 // 0x04 [O]; [R]
     float Far;                  // 0x08 [O]; [R]
     int AlgorithmType;          // 0x0C [O]; [R] 0x53
-    void** mVtbl;               // 0x10 [R] D_0045BC38
+    void** mVtbl;               // 0x10 [R] cChaseAlgorithm_vtbl
     char unk_14[0xC];           // 0x14 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;      // 0x20 [O]; [U] cChaseAlgorithm_getTargetPos returns it (lq); the chase algorithms
@@ -135,7 +135,7 @@ struct cLookAtChaseAlgorithm {
     float Near;                     // 0x004 [O]; [R] 10.0f
     float Far;                      // 0x008 [O]; [R] 30000.0f
     int AlgorithmType;              // 0x00C [O]; [R] 0x54; subclass ctors store their own
-    void** mVtbl;                   // 0x010 [R] D_0045BBC0; [U] the virtual calls (updateAlgorithm func_001624E8 ...)
+    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm func_001624E8 ...)
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions

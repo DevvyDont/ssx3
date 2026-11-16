@@ -597,12 +597,12 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_cUITextScroll);
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
 extern "C" void* func_003977E8(void* self);
 extern "C" void func_003A1310(cUITextScroll* self, char a1);
-extern void* D_00494278[];
+extern void* cUITextScroll_vtbl[];
 
 extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int a1, int a2)
 {
     func_0039FB30(self, a1, a2);
-    self->mVtbl = D_00494278;
+    self->mVtbl = cUITextScroll_vtbl;
     *(unsigned char*)&self->mAttrTextScroll &= 0xC6;
     func_003977E8(((char*)self) + 0x8C);
     self->mpScrollBar = 0;

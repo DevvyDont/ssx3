@@ -3,12 +3,12 @@
 
 // cUITextScroll: a scrolling multi-line text box (record type 0x20), word-wrapped into lines and optionally driven by
 // a cUIScrollBar. Size 0xD0: cUIScreen_createObjectByStruct does operator new(0xD0, D_00493F50) + the ctor
-// cUITextScroll_cUITextScroll (cUIThing ctor func_0039FB30, vtable D_00494278, mList ctor func_003977E8, zeroes 0xB8..0xCC,
+// cUITextScroll_cUITextScroll (cUIThing ctor func_0039FB30, vtable cUITextScroll_vtbl, mList ctor func_003977E8, zeroes 0xB8..0xCC,
 // func_003A1310 fills mInputMap), then moves the record's children into mList. Default ctor func_003A6250
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:
 // d:/ssx/code/source/ui/uitextscroll.cpp (preview assert path); retail keeps its methods in ui/uitext
 // (0x3A1148-0x3A2068) and its inline accessors in ui/uivector (0x3A6250-0x3A64F8).
-// Methods: vtable D_00494278 slots 0 ~cUITextScroll (cUITextScroll__cUITextScroll), 9 setUIData (func_003A11B8), 14 onInput
+// Methods: vtable cUITextScroll_vtbl slots 0 ~cUITextScroll (cUITextScroll__cUITextScroll), 9 setUIData (func_003A11B8), 14 onInput
 // (func_003A13E0), 15 updateLocale (func_003A1360), 16 render2D (func_003A1588), 21 getType (func_003A6330); line
 // buffer helpers func_003A12D0, func_003A18C0 (free lines), cUITextScroll_allocLine, func_003A1F90; text setters
 // func_003A19F8 / func_003A1C80 (ASCII), cUITextScroll_addUnicodeString, func_003A1CF0 / func_003A1D30 (Unicode),
@@ -38,7 +38,7 @@ struct cUITextScroll {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_00494278 (the ctor cUITextScroll_cUITextScroll, func_003A6250, the dtor cUITextScroll__cUITextScroll)
+    void** mVtbl;                    // 0x008 [R] cUITextScroll_vtbl (the ctor cUITextScroll_cUITextScroll, func_003A6250, the dtor cUITextScroll__cUITextScroll)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on

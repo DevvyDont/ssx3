@@ -6,10 +6,10 @@
 // Every UI object (cUIThing and all widgets) is a cListNode; cUIGroup, cUIMenu, cUITextScroll and cUIScreen own a
 // cList of their children. EA's source file is not known (On Tour: ui/all_in_one_ui.cpp); util/list.h names the unit.
 //
-//   cListNode (0xC)       mpPrev 0x0, mpNext 0x4, vptr 0x8 (_vt$9cListNode D_00494CC0: ~cListNode cListNode__cListNode,
+//   cListNode (0xC)       mpPrev 0x0, mpNext 0x4, vptr 0x8 (_vt$9cListNode cListNode_vtbl: ~cListNode cListNode__cListNode,
 //                         traverseFlat func_00397788, traverseRecurse func_003977B8). Ctor cListNode_cListNode self-links it.
 //   cList (0x1C)          two sentinel nodes mStart (0x0) and mEnd (0xC), vptr 0x18 (cList_vtbl D_00494C98).
-//                         Ctor func_003977E8 (also points both sentinels' vptrs at D_00494CC0), clear() func_00397930.
+//                         Ctor func_003977E8 (also points both sentinels' vptrs at cListNode_vtbl), clear() func_00397930.
 //   cListOperator (0x4)   vptr only (cListOperator_vtbl D_00494CE8): the functor cList/cListNode traverse* call per node.
 //   cListOpOnInput (0x8)  + mpInput;  cListOpSetFocus (0x8) + mbState.
 // Sizes: [R] cList is embedded in cUIGroup at 0x74 (alloc 0x90 = 0x74 + 0x1C) and cUITextScroll at 0x8C; their
@@ -31,7 +31,7 @@ struct cListNode {
                                 //     func_00397930; func_003A4848 prev() (lw 0x0), func_003A4858 setPrev() (sw 0x0)
     cListNode* mpNext;          // 0x4 [O]; [R] self-linked; [U] func_003A4850 next() (lw 0x4), func_003A4860 setNext()
                                 //     (sw 0x4); cList_first reads mStart.mpNext
-    void** mVtbl;               // 0x8 [R] _vt$9cListNode D_00494CC0 (ctor cListNode_cListNode, dtor cListNode__cListNode)
+    void** mVtbl;               // 0x8 [R] _vt$9cListNode cListNode_vtbl (ctor cListNode_cListNode, dtor cListNode__cListNode)
 };
 
 CHECK_OFFSET(cListNode, mpPrev, 0x0);
