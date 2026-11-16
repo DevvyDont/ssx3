@@ -897,6 +897,14 @@ INCLUDE_ASM("main/game", cSectionMan_isActive);
 #ifdef SKIP_ASM
 extern "C" int func_0022D278(void* self);
 
+/**
+ * Says whether a location is loaded and activated: func_0022D278 (all its sections loaded) and mbLocationIsActivated.
+ *
+ * On Tour's isActive takes the location (eBELocationID LocationID). The C prototype here declares only @p self: the
+ * location stays in $a1 and reaches func_0022D278, which reads it as its second argument.
+ *
+ * @return 1 when the location's sections are loaded and mbLocationIsActivated is set, else 0
+ */
 extern "C" int cSectionMan_isActive(cSectionMan* self)
 {
     int r = 0;
@@ -1592,11 +1600,19 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSectionMan_activate(cSectionMan* self, int a1, int a2);
 extern signed char D_00535C11[];
 
-extern "C" void cSectionMan_gotoLocation(cSectionMan* self, int a1)
+/**
+ * Activates a location (cSectionMan_activate(.., 1)) and sets mModeReset, but only off the career path.
+ *
+ * Does nothing unless the new-race game path (D_00535C11, cBENewRaceInterface cGamePath) is 0. The new-race interface
+ * is fetched but not used.
+ *
+ * @param location  the location id (On Tour eBELocationID location)
+ */
+extern "C" void cSectionMan_gotoLocation(cSectionMan* self, int location)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 0) {
-        cSectionMan_activate(self, a1, 1);
+        cSectionMan_activate(self, location, 1);
         self->mModeReset = 1;
     }
 }

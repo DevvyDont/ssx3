@@ -7264,6 +7264,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cComputer_setCruiseLogic);
 #ifdef SKIP_ASM
 extern tComputerCruiseLogic D_0043CF20[];
 
+/**
+ * Selects a computer rider's cruise logic: copies entry @p idx of the cruise-logic table (D_0043CF20) into
+ * cruiseLogic.
+ *
+ * Also records the index in mCruiseLogicID.
+ *
+ * @param idx  the cruise-logic index (On Tour logic)
+ */
 extern "C" void cComputer_setCruiseLogic(cComputer* self, int idx)
 {
     *(&self->cruiseLogic) = D_0043CF20[idx];

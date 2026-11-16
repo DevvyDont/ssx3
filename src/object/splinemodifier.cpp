@@ -1016,6 +1016,11 @@ extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* p)
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setSpeed);
 #ifdef SKIP_ASM
+/**
+ * Sets the multi-spline's Velocity to @p speed * 27.7777786 (1000 / 36, as from km/h).
+ *
+ * @param speed  the new speed
+ */
 extern "C" void cMultiSplineModifier_setSpeed(cMultiSplineModifier* self, float speed)
 {
     self->Velocity = speed * 27.77777862548828f;

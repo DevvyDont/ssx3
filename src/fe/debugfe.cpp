@@ -2098,6 +2098,14 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getState);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
 
+/**
+ * Reads one of the eight front-end input states: maps @p k 0-7 to input ids 0x72-0x79 for cInput_getState(mpInput).
+ *
+ * Any other @p k reads id 0. The result is left in the return register although the function is declared void here
+ * (On Tour's getState returns bool).
+ *
+ * @param k  the state index, 0-7 (On Tour char state)
+ */
 extern "C" void cFEInput_getState(void* self, signed char k)
 {
     int id = 0;
@@ -2205,6 +2213,11 @@ void* cFEInput_isMisc(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isNextHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "next" button is held on the front-end input: cInput_getState(mpInput, 0x97).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isNextHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x97);
@@ -2214,6 +2227,11 @@ void* cFEInput_isNextHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "previous" button is held on the front-end input: cInput_getState(mpInput, 0x98).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isPreviousHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x98);
@@ -2223,6 +2241,11 @@ void* cFEInput_isPreviousHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isOptionHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "option" button is held on the front-end input: cInput_getState(mpInput, 0x99).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isOptionHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x99);
@@ -2232,6 +2255,11 @@ void* cFEInput_isOptionHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isMiscHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "misc" button is held on the front-end input: cInput_getState(mpInput, 0x9A).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isMiscHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9a);
@@ -2241,6 +2269,11 @@ void* cFEInput_isMiscHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isNextReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "next" button was just released on the front-end input: cInput_getState(mpInput, 0x9B).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isNextReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9b);
@@ -2250,6 +2283,11 @@ void* cFEInput_isNextReleased(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "previous" button was just released on the front-end input: cInput_getState(mpInput, 0x9C).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isPreviousReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9c);
@@ -2259,6 +2297,11 @@ void* cFEInput_isPreviousReleased(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isOptionReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "option" button was just released on the front-end input: cInput_getState(mpInput, 0x9D).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isOptionReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9d);
@@ -2268,6 +2311,11 @@ void* cFEInput_isOptionReleased(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isMiscReleased__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the "misc" button was just released on the front-end input: cInput_getState(mpInput, 0x9E).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isMiscReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9e);
@@ -2319,6 +2367,11 @@ void* cFEInput_isLeft(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isRight__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether right was pressed on the front-end input: cInput_getState(mpInput, 0x75), getState's index 3.
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isRight(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x75);
@@ -2328,6 +2381,11 @@ void* cFEInput_isRight(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isUpHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether up is held on the front-end input: cInput_getState(mpInput, 0x93).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isUpHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x93);
@@ -2337,6 +2395,11 @@ void* cFEInput_isUpHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isDownHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether down is held on the front-end input: cInput_getState(mpInput, 0x94).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isDownHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x94);
@@ -2346,6 +2409,11 @@ void* cFEInput_isDownHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isLeftHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether left is held on the front-end input: cInput_getState(mpInput, 0x95).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isLeftHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x95);
@@ -2355,6 +2423,11 @@ void* cFEInput_isLeftHeld(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isRightHeld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether right is held on the front-end input: cInput_getState(mpInput, 0x96).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isRightHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x96);
@@ -2462,6 +2535,11 @@ void* cFEInput_isLShift1Held(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2Held__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether L2 is held on the front-end input: cInput_getState(mpInput, 0x85).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isLShift2Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x85);
@@ -2471,6 +2549,11 @@ void* cFEInput_isLShift2Held(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isCamZoom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the camera-zoom control is active on the front-end input: cInput_getState(mpInput, 0x90).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isCamZoom(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x90);
@@ -2480,6 +2563,11 @@ void* cFEInput_isCamZoom(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isCamPan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the camera-pan control is active on the front-end input: cInput_getState(mpInput, 0x92).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isCamPan(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x92);
@@ -2489,6 +2577,11 @@ void* cFEInput_isCamPan(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isCamRotate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the camera-rotate control is active on the front-end input: cInput_getState(mpInput, 0x91).
+ *
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cFEInput_isCamRotate(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x91);
@@ -2500,6 +2593,11 @@ extern "C" void* cInput_getValue(int, int);
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the camera-zoom control's analogue value: cInput_getValue(mpInput, 0x90).
+ *
+ * @return cInput_getValue's result (On Tour returns float; declared void* here)
+ */
 void* cFEInput_getCamZoom(void* self)
 {
     return cInput_getValue(*(int*)((char*)self + 0x18), 0x90);
@@ -2509,6 +2607,11 @@ void* cFEInput_getCamZoom(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_getCamPan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the camera-pan control's analogue value: cInput_getValue(mpInput, 0x92).
+ *
+ * @return cInput_getValue's result (On Tour returns float; declared void* here)
+ */
 void* cFEInput_getCamPan(void* self)
 {
     return cInput_getValue(*(int*)((char*)self + 0x18), 0x92);
@@ -2518,6 +2621,11 @@ void* cFEInput_getCamPan(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_getCamRotate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the camera-rotate control's analogue value: cInput_getValue(mpInput, 0x91).
+ *
+ * @return cInput_getValue's result (On Tour returns float; declared void* here)
+ */
 void* cFEInput_getCamRotate(void* self)
 {
     return cInput_getValue(*(int*)((char*)self + 0x18), 0x91);

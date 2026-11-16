@@ -4181,6 +4181,14 @@ extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a SPOKE chase camera algorithm: stores cSPOKEChaseAlgorithm_vtbl and chains to the chase destructor.
+ *
+ * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
+ * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
+ *
+ * @return the base destructor's result (declared void*)
+ */
 void* cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm(void* self)
 {
     *(int*)((char*)self + 0x10) = (int)(void*)cSPOKEChaseAlgorithm_vtbl;

@@ -60,6 +60,9 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_purgeBlock);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
+/**
+ * Frees the frame's data block, when it has one, and resets the block and its cursors to empty (size 0).
+ */
 extern "C" void cReplayFramePtr_purgeBlock(cReplayFramePtr* self)
 {
     void* p = self->Block;
@@ -100,6 +103,12 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_write);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
+/**
+ * Appends @p n bytes to the frame: copies them to WriteData, then advances WriteData and grows Size by @p n.
+ *
+ * @param src  the bytes to write (On Tour const char* data)
+ * @param n  how many (On Tour len)
+ */
 extern "C" void cReplayFramePtr_write(cReplayFramePtr* self, void* src, int n)
 {
     MEM_copy(self->WriteData, src, n);
@@ -113,6 +122,12 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_read);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
+/**
+ * Reads the next @p n bytes of the frame into @p dst and advances ReadData.
+ *
+ * @param dst  receives the bytes (On Tour char* data)
+ * @param n  how many (On Tour len)
+ */
 extern "C" void cReplayFramePtr_read(cReplayFramePtr* self, void* dst, int n)
 {
     MEM_copy(dst, self->ReadData, n);
@@ -384,6 +399,9 @@ INCLUDE_ASM("replay/frameptr", cReplay_cycleReplayCameraAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
 
+/**
+ * Steps the replay camera to the next of the 9 (CurrentReplayCamIndex + 1, mod 9) and applies it to every view.
+ */
 extern "C" void cReplay_cycleReplayCameraAlgorithm(cReplay* self)
 {
     self->CurrentReplayCamIndex = (self->CurrentReplayCamIndex + 1) % 9;
@@ -402,6 +420,11 @@ struct sRiderList_EDD8 {
     char* riders[1];
 };
 
+/**
+ * Switches every view's chase camera (rider + 0xA8) to replay camera D_00445438[CurrentReplayCamIndex].
+ *
+ * The views are the game's ViewMan list; each switch is cChaseCameraController_switchCamera_ReplayToggle.
+ */
 extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
 {
     sRiderList_EDD8* list = (sRiderList_EDD8*)SSXApp->Game->ViewMan;
@@ -420,6 +443,10 @@ void* func_0016D1D8(void* p);
 extern void* D_004C5830[];
 extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
 
+/**
+ * Puts the cameras into replay mode: the camera triggers' replay set (func_0016D1D8, setReplayTriggers), then the
+ * current replay camera.
+ */
 extern "C" void cReplay_setupReplayCameras(cReplay* self)
 {
     func_0016D1D8(D_004C5830);
@@ -440,6 +467,12 @@ struct sRiderList_EEA0 {
     char* riders[1];
 };
 
+/**
+ * Gives the cameras back to the game after a replay.
+ *
+ * Restores the in-game camera triggers, sets each view's current controller to 2 and ends its replay camera
+ * (cChaseCameraController_switchCamera_EndReplay), and resets CurrentReplayCamIndex to 0.
+ */
 extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
 {
     cCameraTriggerMan_setInGameTriggers(D_004C5830);
@@ -488,6 +521,14 @@ void* func_0026E5A8(void* self);
 extern "C" void* func_00272288(void* self);
 void cReplay_setReplayState(void* self, int state);
 
+/**
+ * Constructs the replay manager.
+ *
+ * Constructs the 16 frames (func_0026D5E8, cReplayFrame), FrameList and FreeFrameList (func_0026E5A8) and the two
+ * Highlight records (func_00272288), sets the state to 15 (kReplayInit) and clears both InputCache pointers.
+ *
+ * @return @p self
+ */
 extern "C" void* cReplay_cReplay(cReplay* self)
 {
     char* p = (char*)self + 0x2C;
@@ -725,6 +766,9 @@ struct sFpOwner26F428 {
     sFpEntry26F428 entries[1];
 };
 
+/**
+ * Frees the data block of each of the MaxFrames frames and empties FrameList and FreeFrameList.
+ */
 extern "C" void cReplay_purge(cReplay* self)
 {
     int i;
@@ -946,6 +990,12 @@ extern "C" void* cReplay_saveReplayFrame(void* self, sFrameDesc26F7F8* desc);
 // with (self, block); bind the 2-arg form to the symbol.
 void func_0026D740_2(void* self, void* block) __asm__("func_0026D740__FPv");
 
+/**
+ * Saves the live game into SaveFrame (a full, type 1 frame) so it can be restored after a replay; does nothing when
+ * one is already saved.
+ *
+ * The frame is also added to the replay (func_0026D740, addReplayFrame).
+ */
 extern "C" void cReplay_pushReplaySaveFrame(cReplay* self)
 {
     if (self->SaveFrame == 0) {
@@ -966,6 +1016,9 @@ INCLUDE_ASM("replay/frameptr", cReplay_popReplaySaveFrame);
 extern "C" void cReplay_restoreReplayFrame(void* self, void* p);
 extern "C" void cReplay_freeReplayFrame(void* self, void* p);
 
+/**
+ * Restores the live game from SaveFrame and frees that frame, when one was saved.
+ */
 extern "C" void cReplay_popReplaySaveFrame(cReplay* self)
 {
     void* p = self->SaveFrame;
@@ -1008,6 +1061,19 @@ struct cReplayFramePtr_F8A0 {
     int field_0x620;        // 0x620
 };
 
+/**
+ * Starts playing back the replay from @p frame, unless the replay is paused (14) or not set up (15).
+ *
+ * Saves the live game first unless a loaded replay is playing (cReplay_pushReplaySaveFrame), sets state 7
+ * (kPlaybackStart), clears Cmd and AutoReplay, stores @p instantReplay, rewinds to @p frame and steps one frame. An
+ * instant replay sets up its cameras with cReplay_setupInstantReplayCameras, any other with cReplay_setupReplayCameras. A replay that is
+ * neither instant nor automatic also calls the sound bank manager's func_0028F200. AutoReplay is cleared even when @p
+ * autoReplay is set.
+ *
+ * @param frame  the frame to start from (On Tour cReplayFrame*)
+ * @param instantReplay  nonzero for an instant replay
+ * @param autoReplay  nonzero for an automatic (attract) replay; only decides the sound call
+ */
 extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantReplay, int autoReplay)
 {
     int ok = !(self->State == 14 || self->State == 15);
@@ -1055,6 +1121,15 @@ struct cReplayFramePtr_F980 {
     int field_0x624;        // 0x624
 };
 
+/**
+ * Stops playback, unless the replay is paused (14) or not set up (15).
+ *
+ * Cancels a marked instant replay, calls the sound bank manager's func_0028F2C0 unless the replay was automatic or
+ * instant, and clears AutoReplay, InstantReplay and StartInstantReplay. Unless a loaded replay is playing, restores
+ * the live game (cReplay_popReplaySaveFrame), gives the cameras back and sets state 13 (kReplayEnd) when EndReplay is
+ * set, else 0 (kGameRecording). InstantReplay is cleared before it is tested, so func_0026EF80 (the instant-replay
+ * camera exit) runs only if restoring the save frame sets InstantReplay again.
+ */
 extern "C" void cReplay_stopReplay(cReplay* self)
 {
     int ok = !(self->State == 14 || self->State == 15);

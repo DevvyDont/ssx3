@@ -143,15 +143,20 @@ struct sBucketVEntryDE58 {
     void (*fn)(void*);
 };
 
+/**
+ * Calls slot 3 (cMoveNode_apply for move nodes) on every node in one bucket of the global bucket manager.
+ *
+ * @param bucket  the bucket (On Tour const int bucket)
+ */
 // Calls virtual slot 3 on every object in the given bucket of the global bucket manager.
-extern "C" void cReplay_applyBucket(cReplay* self, int a)
+extern "C" void cReplay_applyBucket(cReplay* self, int bucket)
 {
-    void* node = cBucketMan_first((cBucketMan*)&gBucketMan, a);
+    void* node = cBucketMan_first((cBucketMan*)&gBucketMan, bucket);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
     while (node != 0) {
         sBucketVEntryDE58* vt = *(sBucketVEntryDE58**)((char*)node + 0xC);
         vt[3].fn((char*)node + vt[3].delta);
-        node = cBucketMan_next(bm, node, a);
+        node = cBucketMan_next(bm, node, bucket);
     }
 }
 #endif

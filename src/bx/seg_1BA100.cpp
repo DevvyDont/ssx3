@@ -790,18 +790,18 @@ extern "C" int func_002B9F88(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FB8);
 #ifdef SKIP_ASM
-extern "C" void func_002B9FB8(cBankSys* arg0, int arg1) {
-    int *base = arg0->mBank;
-    base[*(int *)(*(char **)arg0 + 0x1F4)] = arg1;
+extern "C" void func_002B9FB8(cBankSys* bankSys, int arg1) {
+    int *base = bankSys->mBank;
+    base[*(int *)(*(char **)bankSys + 0x1F4)] = arg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9FD8);
 #ifdef SKIP_ASM
-extern "C" void func_002B9FD8(cBankSys* arg0, int arg1) {
-    int *base = arg0->mPatch;
-    base[*(int *)(*(char **)arg0 + 0x1F4)] = arg1;
+extern "C" void func_002B9FD8(cBankSys* bankSys, int arg1) {
+    int *base = bankSys->mPatch;
+    base[*(int *)(*(char **)bankSys + 0x1F4)] = arg1;
 }
 #endif
 
@@ -1194,9 +1194,9 @@ extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD18);
 #ifdef SKIP_ASM
-extern "C" char* func_002BAD18(cCrowdSys* p, int i) {
+extern "C" char* func_002BAD18(cCrowdSys* crowdSys, int i) {
     int off = i * 0x54 + 0x1C;
-    return ((char*)p) + off;
+    return ((char*)crowdSys) + off;
 }
 #endif
 
@@ -1373,6 +1373,13 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterLayer_resolve);
 #ifdef SKIP_ASM
 void func_002C17C0(void *);
 struct E_AF08 { int a; int off; };
+/**
+ * Relocates a loaded world-painter layer in place: turns its file offsets into pointers.
+ *
+ * m_iQuadTreeOffset becomes m_pQuadTree (this + offset), which func_002C17C0 then resolves; m_iRegionOffset becomes
+ * the region array pointer; each of the m_iNumRegions regions' m_iDataOffset becomes m_pData (this + offset), or 0
+ * when the offset is -1.
+ */
 extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
     *(char**)self = ((char*)self) + *(int*)self;
     func_002C17C0(*(char**)self);
@@ -1486,11 +1493,11 @@ extern "C" void func_002BB0E0(void) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
 #ifdef SKIP_ASM
-extern "C" int func_002BB100(tWPNameField* arg0, void *arg1) {
+extern "C" int func_002BB100(tWPNameField* wpNameField, void *arg1) {
     int var_6;
 
     var_6 = 0;
-    if (((arg0->m_nameId[0]) != (*(int *)((char*)(arg1) + (0)))) || ((arg0->m_nameId[1]) != (*(int *)((char*)(arg1) + (4))))) {
+    if (((wpNameField->m_nameId[0]) != (*(int *)((char*)(arg1) + (0)))) || ((wpNameField->m_nameId[1]) != (*(int *)((char*)(arg1) + (4))))) {
         var_6 = 1;
     }
     return var_6;
@@ -1518,6 +1525,14 @@ void cMemMan_free(void *);
 void operator_delete(int *);
 extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*, int);
 struct S12_B140 { int a, b, c; };
+/**
+ * Destroys the world-painter manager: destroys and frees its section cache.
+ *
+ * Runs cWorldPainterSection__cWorldPainterSection (flags 0) on each element of m_pCache, last first, using the new[]
+ * count cookie 0x10 bytes before the array, then frees the block with cMemMan_free.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object itself (operator delete)
+ */
 extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int flags) {
     S12_B140 *arr = (S12_B140*)self->m_pCache;
     if (arr != 0) {
@@ -1545,6 +1560,15 @@ int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi"
 extern char D_00483C68[];
 struct sArr_B1D0 { int n; S12_B140 *arr; };
 
+/**
+ * Sizes the section cache for a world: frees any old array and allocates @p n fresh sections.
+ *
+ * Destroys and frees the old m_pCache as the destructor does, stores @p n in m_uiNumSections and allocates n * 12 +
+ * 0x10 bytes tagged "cWorldPainterMan" (count cookie in the first word), constructing each 12-byte section with
+ * func_002BB370 (the cWorldPainterSection constructor).
+ *
+ * @param n  the number of sections (On Tour iNumSections)
+ */
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
 extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
     if ((S12_B140*)self->m_pCache != 0) {
@@ -1576,6 +1600,9 @@ extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_update);
 #ifdef SKIP_ASM
 extern "C" void func_002BB3F0(cWorldPainterSection*);
+/**
+ * Updates every world-painter section: calls func_002BB3F0 on each of the m_uiNumSections entries of m_pCache.
+ */
 extern "C" void cWorldPainterMan_update(cWorldPainterMan* self) {
     unsigned i;
     for (i = 0; i < *(unsigned*)self; i++) {
@@ -1589,8 +1616,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB318);
 #ifdef SKIP_ASM
 extern "C" void func_002BB4D8(int, int);
 
-extern "C" void func_002BB318(cWorldPainterMan* arg0, int arg1, int arg2) {
-    func_002BB4D8(((int)arg0->m_pCache) + (arg1 * 0xC), arg2);
+extern "C" void func_002BB318(cWorldPainterMan* worldPainterMan, int arg1, int arg2) {
+    func_002BB4D8(((int)worldPainterMan->m_pCache) + (arg1 * 0xC), arg2);
 }
 #endif
 
@@ -1598,8 +1625,8 @@ extern "C" void func_002BB318(cWorldPainterMan* arg0, int arg1, int arg2) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BB348);
 #ifdef SKIP_ASM
 extern "C" void func_002BB570(void*, int, int);
-extern "C" void func_002BB348(cWorldPainterMan* arg0, int arg1, int arg2) {
-    func_002BB570((char*)arg0->m_pCache + arg1 * 12, arg1, arg2);
+extern "C" void func_002BB348(cWorldPainterMan* worldPainterMan, int arg1, int arg2) {
+    func_002BB570((char*)worldPainterMan->m_pCache + arg1 * 12, arg1, arg2);
 }
 #endif
 
@@ -1620,6 +1647,11 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection__cWorldPainterSection);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
+/**
+ * Destroys a world-painter section: frees m_pWPHeader unless it is null or streamed data (m_iStreamed set).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object itself (operator delete)
+ */
 extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection* self, int flags) {
     void *p = self->m_pWPHeader;
     if (p != 0) {
@@ -2804,6 +2836,14 @@ extern "C" void *func_002BC7C8(tWPInGameData_Fog* arg0) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_tWPInGameData_LightGlow);
 #ifdef SKIP_ASM
 extern char D_00484DA8[];
+/**
+ * Constructs the blended light-glow values with their defaults.
+ *
+ * Stores the vtable D_00484DA8 and -99999 in m_wpTravelDistance; sets the cutoff, cutoff scale, copy, source and
+ * frame intensities (and their m_last copies) to 1, and m_LightGlowBlend2 / m_LightGlowBlend3 (and lasts) to 0.
+ *
+ * @return @p self
+ */
 extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_LightGlow* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
@@ -2831,6 +2871,13 @@ extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_L
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_tWPInGameData_ScreenTint);
 #ifdef SKIP_ASM
 extern char D_00484B70[];
+/**
+ * Constructs the blended screen-tint values with their defaults: scale RGB 1, offset RGB 0.
+ *
+ * Stores the vtable D_00484B70 and -99999 in m_wpTravelDistance; each m_last copy gets the same default.
+ *
+ * @return @p self
+ */
 extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData_ScreenTint* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
@@ -2870,6 +2917,14 @@ extern "C" void *func_002BC8E8(tWPInGameData_SkyBox* arg0) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_tWPInGameData_Sun);
 #ifdef SKIP_ASM
 extern char D_00484700[];
+/**
+ * Constructs the blended sun values with their defaults.
+ *
+ * Stores the vtable D_00484700 and -99999 in m_wpTravelDistance; pitch and yaw offsets 0, colour RGB and intensity 1,
+ * m_SunType 0, lens intensity and radius 1, each m_last copy the same.
+ *
+ * @return @p self
+ */
 extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
@@ -3010,14 +3065,24 @@ extern "C" void *func_002BCBD0(tWPInGameData_Danger* arg0) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_blend);
 #ifdef SKIP_ASM
 class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, void *p, float f) {
+/**
+ * Blends the music-trigger values towards a region's data.
+ *
+ * Squares the blend factor b, then m_Type = b * rhs.m_Type + (1 - b) * m_Type, likewise m_Value (both ints, computed
+ * in float and truncated), and stores the targets in m_lastType / m_lastValue. Calls the empty virtual at vtable
+ * +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_MusicTrigger (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, void *rhs, float blendFactor) {
     cCC00 *o = (cCC00*)self;
     o->vt();
-    f = f * f;
-    self->m_Type = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_Type);
-    self->m_lastType = *(int*)((char*)p + 4);
-    self->m_Value = (int)(f * (float)*(int*)((char*)p + 8) + (1.0f - f) * (float)self->m_Value);
-    self->m_lastValue = *(int*)((char*)p + 8);
+    blendFactor = blendFactor * blendFactor;
+    self->m_Type = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_Type);
+    self->m_lastType = *(int*)((char*)rhs + 4);
+    self->m_Value = (int)(blendFactor * (float)*(int*)((char*)rhs + 8) + (1.0f - blendFactor) * (float)self->m_Value);
+    self->m_lastValue = *(int*)((char*)rhs + 8);
     o->vt();
 }
 #endif
@@ -3026,12 +3091,22 @@ extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* sel
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_blend);
 #ifdef SKIP_ASM
 class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, void *p, float f) {
+/**
+ * Blends the mix preset towards a region's data: with b = factor squared, m_MixPreset = b * target + (1 - b) *
+ * current.
+ *
+ * The int is computed in float and truncated; the target is stored in m_lastMixPreset. Calls the empty virtual at
+ * vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_Mix (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, void *rhs, float blendFactor) {
     cCCC8 *o = (cCCC8*)self;
     o->vt();
-    f = f * f;
-    self->m_MixPreset = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_MixPreset);
-    self->m_lastMixPreset = *(int*)((char*)p + 4);
+    blendFactor = blendFactor * blendFactor;
+    self->m_MixPreset = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_MixPreset);
+    self->m_lastMixPreset = *(int*)((char*)rhs + 4);
     o->vt();
 }
 #endif
@@ -3040,12 +3115,21 @@ extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, void *p, float 
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_blend);
 #ifdef SKIP_ASM
 class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, void *p, float f) {
+/**
+ * Blends the ambience bank id towards a region's data: with b = factor squared, m_BankID = b * target + (1 - b) * it.
+ *
+ * The int is computed in float and truncated, so a bank id is interpolated like a number; the target is stored in
+ * m_lastBankID. Calls the empty virtual at vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_Ambience (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, void *rhs, float blendFactor) {
     cCD68 *o = (cCD68*)self;
     o->vt();
-    f = f * f;
-    self->m_BankID = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_BankID);
-    self->m_lastBankID = *(int*)((char*)p + 4);
+    blendFactor = blendFactor * blendFactor;
+    self->m_BankID = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_BankID);
+    self->m_lastBankID = *(int*)((char*)rhs + 4);
     o->vt();
 }
 #endif
@@ -3054,12 +3138,21 @@ extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, void 
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_blend);
 #ifdef SKIP_ASM
 class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, void *p, float f) {
+/**
+ * Blends the speech id towards a region's data: with b = factor squared, m_SpeechID = b * target + (1 - b) * it.
+ *
+ * The int is computed in float and truncated; the target is stored in m_lastSpeechID. Calls the empty virtual at
+ * vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_Speech (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, void *rhs, float blendFactor) {
     cCE08 *o = (cCE08*)self;
     o->vt();
-    f = f * f;
-    self->m_SpeechID = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_SpeechID);
-    self->m_lastSpeechID = *(int*)((char*)p + 4);
+    blendFactor = blendFactor * blendFactor;
+    self->m_SpeechID = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_SpeechID);
+    self->m_lastSpeechID = *(int*)((char*)rhs + 4);
     o->vt();
 }
 #endif
@@ -3068,12 +3161,20 @@ extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, void *p, 
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_blend);
 #ifdef SKIP_ASM
 class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, void *p, float f) {
+/**
+ * Blends the camera draw distance towards a region's data: with b = factor squared, b * target + (1 - b) * current.
+ *
+ * The target is stored in m_lastDrawDistance. Calls the empty virtual at vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_Camera (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, void *rhs, float blendFactor) {
     cCEA8 *o = (cCEA8*)self;
     o->vt();
-    f = f * f;
-    self->m_DrawDistance = f * *(float*)((char*)p + 4) + (1.0f - f) * self->m_DrawDistance;
-    self->m_lastDrawDistance = *(float*)((char*)p + 4);
+    blendFactor = blendFactor * blendFactor;
+    self->m_DrawDistance = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_DrawDistance;
+    self->m_lastDrawDistance = *(float*)((char*)rhs + 4);
     o->vt();
 }
 #endif
@@ -3086,24 +3187,33 @@ struct Pair_CF38 { float cur; float tgt; };
 struct Obj_CF38 { int pad0; char* vt; Pair_CF38 p[6]; };
 struct Src_CF38 { int pad0; float v[6]; };
 
-extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, Src_CF38* src, float t) {
+/**
+ * Blends the six fog values towards a region's data.
+ *
+ * With b = @p blendFactor squared, each of density, near, far and colour R/G/B becomes b * target + (1 - b) * current and its
+ * m_last copy takes the target. Calls the empty virtual at vtable +0x218 before and after.
+ *
+ * @param src  the region's tWPData_Fog values (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, Src_CF38* src, float blendFactor) {
     VEnt_CF38* e;
     float inv;
     e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
-    t = t * t;
-    inv = 1.0f - t;
-    ((Pair_CF38*)&self->m_FogDensity)[0].cur = t * src->v[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
+    blendFactor = blendFactor * blendFactor;
+    inv = 1.0f - blendFactor;
+    ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * src->v[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
     ((Pair_CF38*)&self->m_FogDensity)[0].tgt = src->v[0];
-    ((Pair_CF38*)&self->m_FogDensity)[1].cur = t * src->v[1] + inv * ((Pair_CF38*)&self->m_FogDensity)[1].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[1].cur = blendFactor * src->v[1] + inv * ((Pair_CF38*)&self->m_FogDensity)[1].cur;
     ((Pair_CF38*)&self->m_FogDensity)[1].tgt = src->v[1];
-    ((Pair_CF38*)&self->m_FogDensity)[2].cur = t * src->v[2] + inv * ((Pair_CF38*)&self->m_FogDensity)[2].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[2].cur = blendFactor * src->v[2] + inv * ((Pair_CF38*)&self->m_FogDensity)[2].cur;
     ((Pair_CF38*)&self->m_FogDensity)[2].tgt = src->v[2];
-    ((Pair_CF38*)&self->m_FogDensity)[3].cur = t * src->v[3] + inv * ((Pair_CF38*)&self->m_FogDensity)[3].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[3].cur = blendFactor * src->v[3] + inv * ((Pair_CF38*)&self->m_FogDensity)[3].cur;
     ((Pair_CF38*)&self->m_FogDensity)[3].tgt = src->v[3];
-    ((Pair_CF38*)&self->m_FogDensity)[4].cur = t * src->v[4] + inv * ((Pair_CF38*)&self->m_FogDensity)[4].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[4].cur = blendFactor * src->v[4] + inv * ((Pair_CF38*)&self->m_FogDensity)[4].cur;
     ((Pair_CF38*)&self->m_FogDensity)[4].tgt = src->v[4];
-    ((Pair_CF38*)&self->m_FogDensity)[5].cur = t * src->v[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * src->v[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
     ((Pair_CF38*)&self->m_FogDensity)[5].tgt = src->v[5];
     e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
@@ -3119,26 +3229,36 @@ struct Pair_D068 { float cur; float tgt; };
 struct Obj_D068 { int pad0; char* vt; Pair_D068 p[7]; };
 struct Src_D068 { int pad0; float v[7]; };
 
-extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, Src_D068* src, float t) {
+/**
+ * Blends the seven light-glow values towards a region's data.
+ *
+ * With b = @p blendFactor squared, cutoff, cutoff scale, copy, source and frame intensity, m_LightGlowBlend2 and
+ * m_LightGlowBlend3 each become b * target + (1 - b) * current, and each m_last copy takes the target. Calls the
+ * empty virtual at vtable +0x218 before and after.
+ *
+ * @param src  the region's light-glow values (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, Src_D068* src, float blendFactor) {
     VEnt_D068* e;
     float inv;
     e = (VEnt_D068*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
-    t = t * t;
-    inv = 1.0f - t;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = t * src->v[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
+    blendFactor = blendFactor * blendFactor;
+    inv = 1.0f - blendFactor;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[0].tgt = src->v[0];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur = t * src->v[1] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur = blendFactor * src->v[1] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[1].tgt = src->v[1];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur = t * src->v[2] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur = blendFactor * src->v[2] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[2].tgt = src->v[2];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur = t * src->v[3] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur = blendFactor * src->v[3] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[3].tgt = src->v[3];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur = t * src->v[4] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur = blendFactor * src->v[4] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[4].tgt = src->v[4];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur = t * src->v[5] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[5].tgt = src->v[5];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = t * src->v[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * src->v[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = src->v[6];
     {
         VEntV_D068* e2 = (VEntV_D068*)((char*)self->mVtbl + 0x218);
@@ -3155,24 +3275,33 @@ struct Pair_D1B8 { float cur; float tgt; };
 struct Obj_D1B8 { int pad0; char* vt; Pair_D1B8 p[6]; };
 struct Src_D1B8 { int pad0; float v[6]; };
 
-extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, Src_D1B8* src, float t) {
+/**
+ * Blends the six screen-tint values (scale RGB, offset RGB) towards a region's data.
+ *
+ * With b = @p blendFactor squared, each becomes b * target + (1 - b) * current and its m_last copy takes the target. Calls the
+ * empty virtual at vtable +0x218 before and after.
+ *
+ * @param src  the region's tWPData_ScreenTint values (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, Src_D1B8* src, float blendFactor) {
     VEnt_D1B8* e;
     float inv;
     e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
-    t = t * t;
-    inv = 1.0f - t;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = t * src->v[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
+    blendFactor = blendFactor * blendFactor;
+    inv = 1.0f - blendFactor;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].tgt = src->v[0];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur = t * src->v[1] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur = blendFactor * src->v[1] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].tgt = src->v[1];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur = t * src->v[2] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur = blendFactor * src->v[2] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].tgt = src->v[2];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur = t * src->v[3] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur = blendFactor * src->v[3] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].tgt = src->v[3];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur = t * src->v[4] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur = blendFactor * src->v[4] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = src->v[4];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = t * src->v[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = src->v[5];
     e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
@@ -3183,12 +3312,20 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, S
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_blend);
 #ifdef SKIP_ASM
 class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, void *p, float f) {
+/**
+ * Blends the sky-box rotation towards a region's data: with b = factor squared, b * target + (1 - b) * current.
+ *
+ * The target is stored in m_lastSkyBoxRotation. Calls the empty virtual at vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_SkyBox (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, void *rhs, float blendFactor) {
     cD2E8 *o = (cD2E8*)self;
     o->vt();
-    f = f * f;
-    self->m_SkyBoxRotation = f * *(float*)((char*)p + 4) + (1.0f - f) * self->m_SkyBoxRotation;
-    self->m_lastSkyBoxRotation = *(float*)((char*)p + 4);
+    blendFactor = blendFactor * blendFactor;
+    self->m_SkyBoxRotation = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_SkyBoxRotation;
+    self->m_lastSkyBoxRotation = *(float*)((char*)rhs + 4);
     o->vt();
 }
 #endif
@@ -3202,30 +3339,40 @@ struct IPair_D378 { int cur; int tgt; };
 struct Obj_D378 { int pad0; char* vt; Pair_D378 p[6]; IPair_D378 i6; Pair_D378 q[2]; };
 struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
 
-extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, float t) {
+/**
+ * Blends the sun values towards a region's data.
+ *
+ * With b = @p blendFactor squared, pitch and yaw offsets, colour R/G/B, intensity, m_SunType (an int, computed in float and
+ * truncated), lens intensity and radius each become b * target + (1 - b) * current, and each m_last copy takes the
+ * target. Calls the empty virtual at vtable +0x218 before and after.
+ *
+ * @param src  the region's tWPData_Sun values (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, float blendFactor) {
     VEnt_D378* e;
     float inv;
     e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
-    t = t * t;
-    inv = 1.0f - t;
-    ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = t * src->v[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
+    blendFactor = blendFactor * blendFactor;
+    inv = 1.0f - blendFactor;
+    ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
     ((Pair_D378*)&self->m_SunPitchOffset)[0].tgt = src->v[0];
-    ((Pair_D378*)&self->m_SunPitchOffset)[1].cur = t * src->v[1] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[1].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[1].cur = blendFactor * src->v[1] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[1].cur;
     ((Pair_D378*)&self->m_SunPitchOffset)[1].tgt = src->v[1];
-    ((Pair_D378*)&self->m_SunPitchOffset)[2].cur = t * src->v[2] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[2].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[2].cur = blendFactor * src->v[2] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[2].cur;
     ((Pair_D378*)&self->m_SunPitchOffset)[2].tgt = src->v[2];
-    ((Pair_D378*)&self->m_SunPitchOffset)[3].cur = t * src->v[3] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[3].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[3].cur = blendFactor * src->v[3] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[3].cur;
     ((Pair_D378*)&self->m_SunPitchOffset)[3].tgt = src->v[3];
-    ((Pair_D378*)&self->m_SunPitchOffset)[4].cur = t * src->v[4] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[4].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[4].cur = blendFactor * src->v[4] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[4].cur;
     ((Pair_D378*)&self->m_SunPitchOffset)[4].tgt = src->v[4];
-    ((Pair_D378*)&self->m_SunPitchOffset)[5].cur = t * src->v[5] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[5].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[5].cur;
     ((Pair_D378*)&self->m_SunPitchOffset)[5].tgt = src->v[5];
-    self->m_SunType = (int)(t * src->i6 + inv * self->m_SunType);
+    self->m_SunType = (int)(blendFactor * src->i6 + inv * self->m_SunType);
     self->m_lastSunType = src->i6;
-    ((Pair_D378*)&self->m_LensIntensity)[0].cur = t * src->w[0] + inv * ((Pair_D378*)&self->m_LensIntensity)[0].cur;
+    ((Pair_D378*)&self->m_LensIntensity)[0].cur = blendFactor * src->w[0] + inv * ((Pair_D378*)&self->m_LensIntensity)[0].cur;
     ((Pair_D378*)&self->m_LensIntensity)[0].tgt = src->w[0];
-    ((Pair_D378*)&self->m_LensIntensity)[1].cur = t * src->w[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
+    ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * src->w[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
     ((Pair_D378*)&self->m_LensIntensity)[1].tgt = src->w[1];
     e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
@@ -3236,12 +3383,20 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, 
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_blend);
 #ifdef SKIP_ASM
 class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, void *p, float f) {
+/**
+ * Blends the snow sparkle density towards a region's data: with b = factor squared, b * target + (1 - b) * current.
+ *
+ * The target is stored in m_lastSnowSparkleDensity. Calls the empty virtual at vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_Surface (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, void *rhs, float blendFactor) {
     cD518 *o = (cD518*)self;
     o->vt();
-    f = f * f;
-    self->m_SnowSparkleDensity = f * *(float*)((char*)p + 4) + (1.0f - f) * self->m_SnowSparkleDensity;
-    self->m_lastSnowSparkleDensity = *(float*)((char*)p + 4);
+    blendFactor = blendFactor * blendFactor;
+    self->m_SnowSparkleDensity = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_SnowSparkleDensity;
+    self->m_lastSnowSparkleDensity = *(float*)((char*)rhs + 4);
     o->vt();
 }
 #endif
@@ -3251,18 +3406,29 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_blend);
 #ifdef SKIP_ASM
 struct sP_D5A8 { float x, y; };
 class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, void *p, float f) {
+/**
+ * Blends the lighting values towards a region's data.
+ *
+ * The four irradiance names (light, shadow, tunnel, object) are copied from the region as they are, not blended, and
+ * their m_last copies are left alone. With b = factor squared, the ambient and rim light intensity offsets become b *
+ * target + (1 - b) * current and their m_last copies take the targets. Calls the empty virtual at vtable +0x218
+ * before and after.
+ *
+ * @param rhs  the region's tWPData_Lighting (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, void *rhs, float blendFactor) {
     cD5A8 *o = (cD5A8*)self;
     o->vt();
-    f = f * f;
-    *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)((char*)p + 4);
-    *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)((char*)p + 0xC);
-    *(sP_D5A8*)&self->m_TunnelIrradianceName = *(sP_D5A8*)((char*)p + 0x14);
-    *(sP_D5A8*)&self->m_ObjectIrradianceName = *(sP_D5A8*)((char*)p + 0x1C);
-    self->m_AmbientLightIntensityOffset = f * *(float*)((char*)p + 0x24) + (1.0f - f) * self->m_AmbientLightIntensityOffset;
-    self->m_lastAmbientLightIntensityOffset = *(float*)((char*)p + 0x24);
-    self->m_RimLightIntensityOffset = f * *(float*)((char*)p + 0x28) + (1.0f - f) * self->m_RimLightIntensityOffset;
-    self->m_lastRimLightIntensityOffset = *(float*)((char*)p + 0x28);
+    blendFactor = blendFactor * blendFactor;
+    *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)((char*)rhs + 4);
+    *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)((char*)rhs + 0xC);
+    *(sP_D5A8*)&self->m_TunnelIrradianceName = *(sP_D5A8*)((char*)rhs + 0x14);
+    *(sP_D5A8*)&self->m_ObjectIrradianceName = *(sP_D5A8*)((char*)rhs + 0x1C);
+    self->m_AmbientLightIntensityOffset = blendFactor * *(float*)((char*)rhs + 0x24) + (1.0f - blendFactor) * self->m_AmbientLightIntensityOffset;
+    self->m_lastAmbientLightIntensityOffset = *(float*)((char*)rhs + 0x24);
+    self->m_RimLightIntensityOffset = blendFactor * *(float*)((char*)rhs + 0x28) + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
+    self->m_lastRimLightIntensityOffset = *(float*)((char*)rhs + 0x28);
     o->vt();
 }
 #endif
@@ -3273,48 +3439,59 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_blend);
 // Environment property blend: w^2 blend of all 19 current values toward the
 // incoming set, which is then stored as the target.
 class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *p, float f) {
+/**
+ * Blends the 19 weather values towards a region's data.
+ *
+ * With b = factor squared, snow intensity, flake size, wind intensity and rotation, player wind, temperature,
+ * flurries, snow gravity, fluff intensity and fluff wind, lightning chance and the snow-flake and fluff ARGB colours
+ * each become b * target + (1 - b) * current, and each m_last copy takes the target. Calls the empty virtual at
+ * vtable +0x218 before and after.
+ *
+ * @param rhs  the region's tWPData_Weather (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *rhs, float blendFactor) {
     cD698 *o = (cD698*)self;
     o->vt();
-    f = f * f;
-    self->m_SnowIntensity = f * *(float*)((char*)p + 0x4) + (1.0f - f) * self->m_SnowIntensity;
-    self->m_lastSnowIntensity = *(float*)((char*)p + 0x4);
-    self->m_FlakeSize = f * *(float*)((char*)p + 0x8) + (1.0f - f) * self->m_FlakeSize;
-    self->m_lastFlakeSize = *(float*)((char*)p + 0x8);
-    self->m_WindIntensity = f * *(float*)((char*)p + 0xC) + (1.0f - f) * self->m_WindIntensity;
-    self->m_lastWindIntensity = *(float*)((char*)p + 0xC);
-    self->m_WindRotation = f * *(float*)((char*)p + 0x10) + (1.0f - f) * self->m_WindRotation;
-    self->m_lastWindRotation = *(float*)((char*)p + 0x10);
-    self->m_PlayerWindIntensity = f * *(float*)((char*)p + 0x14) + (1.0f - f) * self->m_PlayerWindIntensity;
-    self->m_lastPlayerWindIntensity = *(float*)((char*)p + 0x14);
-    self->m_Temperature = f * *(float*)((char*)p + 0x18) + (1.0f - f) * self->m_Temperature;
-    self->m_lastTemperature = *(float*)((char*)p + 0x18);
-    self->m_SnowFlurries = f * *(float*)((char*)p + 0x1C) + (1.0f - f) * self->m_SnowFlurries;
-    self->m_lastSnowFlurries = *(float*)((char*)p + 0x1C);
-    self->m_SnowGravityMultiplier = f * *(float*)((char*)p + 0x20) + (1.0f - f) * self->m_SnowGravityMultiplier;
-    self->m_lastSnowGravityMultiplier = *(float*)((char*)p + 0x20);
-    self->m_SnowFluffItensity = f * *(float*)((char*)p + 0x24) + (1.0f - f) * self->m_SnowFluffItensity;
-    self->m_lastSnowFluffItensity = *(float*)((char*)p + 0x24);
-    self->m_SnowFluffWindIntensity = f * *(float*)((char*)p + 0x28) + (1.0f - f) * self->m_SnowFluffWindIntensity;
-    self->m_lastSnowFluffWindIntensity = *(float*)((char*)p + 0x28);
-    self->m_LightningChance = f * *(float*)((char*)p + 0x2C) + (1.0f - f) * self->m_LightningChance;
-    self->m_lastLightningChance = *(float*)((char*)p + 0x2C);
-    self->m_SnowFlakeColourA = f * *(float*)((char*)p + 0x30) + (1.0f - f) * self->m_SnowFlakeColourA;
-    self->m_lastSnowFlakeColourA = *(float*)((char*)p + 0x30);
-    self->m_SnowFlakeColourR = f * *(float*)((char*)p + 0x34) + (1.0f - f) * self->m_SnowFlakeColourR;
-    self->m_lastSnowFlakeColourR = *(float*)((char*)p + 0x34);
-    self->m_SnowFlakeColourG = f * *(float*)((char*)p + 0x38) + (1.0f - f) * self->m_SnowFlakeColourG;
-    self->m_lastSnowFlakeColourG = *(float*)((char*)p + 0x38);
-    self->m_SnowFlakeColourB = f * *(float*)((char*)p + 0x3C) + (1.0f - f) * self->m_SnowFlakeColourB;
-    self->m_lastSnowFlakeColourB = *(float*)((char*)p + 0x3C);
-    self->m_SnowFluffColourA = f * *(float*)((char*)p + 0x40) + (1.0f - f) * self->m_SnowFluffColourA;
-    self->m_lastSnowFluffColourA = *(float*)((char*)p + 0x40);
-    self->m_SnowFluffColourR = f * *(float*)((char*)p + 0x44) + (1.0f - f) * self->m_SnowFluffColourR;
-    self->m_lastSnowFluffColourR = *(float*)((char*)p + 0x44);
-    self->m_SnowFluffColourG = f * *(float*)((char*)p + 0x48) + (1.0f - f) * self->m_SnowFluffColourG;
-    self->m_lastSnowFluffColourG = *(float*)((char*)p + 0x48);
-    self->m_SnowFluffColourB = f * *(float*)((char*)p + 0x4C) + (1.0f - f) * self->m_SnowFluffColourB;
-    self->m_lastSnowFluffColourB = *(float*)((char*)p + 0x4C);
+    blendFactor = blendFactor * blendFactor;
+    self->m_SnowIntensity = blendFactor * *(float*)((char*)rhs + 0x4) + (1.0f - blendFactor) * self->m_SnowIntensity;
+    self->m_lastSnowIntensity = *(float*)((char*)rhs + 0x4);
+    self->m_FlakeSize = blendFactor * *(float*)((char*)rhs + 0x8) + (1.0f - blendFactor) * self->m_FlakeSize;
+    self->m_lastFlakeSize = *(float*)((char*)rhs + 0x8);
+    self->m_WindIntensity = blendFactor * *(float*)((char*)rhs + 0xC) + (1.0f - blendFactor) * self->m_WindIntensity;
+    self->m_lastWindIntensity = *(float*)((char*)rhs + 0xC);
+    self->m_WindRotation = blendFactor * *(float*)((char*)rhs + 0x10) + (1.0f - blendFactor) * self->m_WindRotation;
+    self->m_lastWindRotation = *(float*)((char*)rhs + 0x10);
+    self->m_PlayerWindIntensity = blendFactor * *(float*)((char*)rhs + 0x14) + (1.0f - blendFactor) * self->m_PlayerWindIntensity;
+    self->m_lastPlayerWindIntensity = *(float*)((char*)rhs + 0x14);
+    self->m_Temperature = blendFactor * *(float*)((char*)rhs + 0x18) + (1.0f - blendFactor) * self->m_Temperature;
+    self->m_lastTemperature = *(float*)((char*)rhs + 0x18);
+    self->m_SnowFlurries = blendFactor * *(float*)((char*)rhs + 0x1C) + (1.0f - blendFactor) * self->m_SnowFlurries;
+    self->m_lastSnowFlurries = *(float*)((char*)rhs + 0x1C);
+    self->m_SnowGravityMultiplier = blendFactor * *(float*)((char*)rhs + 0x20) + (1.0f - blendFactor) * self->m_SnowGravityMultiplier;
+    self->m_lastSnowGravityMultiplier = *(float*)((char*)rhs + 0x20);
+    self->m_SnowFluffItensity = blendFactor * *(float*)((char*)rhs + 0x24) + (1.0f - blendFactor) * self->m_SnowFluffItensity;
+    self->m_lastSnowFluffItensity = *(float*)((char*)rhs + 0x24);
+    self->m_SnowFluffWindIntensity = blendFactor * *(float*)((char*)rhs + 0x28) + (1.0f - blendFactor) * self->m_SnowFluffWindIntensity;
+    self->m_lastSnowFluffWindIntensity = *(float*)((char*)rhs + 0x28);
+    self->m_LightningChance = blendFactor * *(float*)((char*)rhs + 0x2C) + (1.0f - blendFactor) * self->m_LightningChance;
+    self->m_lastLightningChance = *(float*)((char*)rhs + 0x2C);
+    self->m_SnowFlakeColourA = blendFactor * *(float*)((char*)rhs + 0x30) + (1.0f - blendFactor) * self->m_SnowFlakeColourA;
+    self->m_lastSnowFlakeColourA = *(float*)((char*)rhs + 0x30);
+    self->m_SnowFlakeColourR = blendFactor * *(float*)((char*)rhs + 0x34) + (1.0f - blendFactor) * self->m_SnowFlakeColourR;
+    self->m_lastSnowFlakeColourR = *(float*)((char*)rhs + 0x34);
+    self->m_SnowFlakeColourG = blendFactor * *(float*)((char*)rhs + 0x38) + (1.0f - blendFactor) * self->m_SnowFlakeColourG;
+    self->m_lastSnowFlakeColourG = *(float*)((char*)rhs + 0x38);
+    self->m_SnowFlakeColourB = blendFactor * *(float*)((char*)rhs + 0x3C) + (1.0f - blendFactor) * self->m_SnowFlakeColourB;
+    self->m_lastSnowFlakeColourB = *(float*)((char*)rhs + 0x3C);
+    self->m_SnowFluffColourA = blendFactor * *(float*)((char*)rhs + 0x40) + (1.0f - blendFactor) * self->m_SnowFluffColourA;
+    self->m_lastSnowFluffColourA = *(float*)((char*)rhs + 0x40);
+    self->m_SnowFluffColourR = blendFactor * *(float*)((char*)rhs + 0x44) + (1.0f - blendFactor) * self->m_SnowFluffColourR;
+    self->m_lastSnowFluffColourR = *(float*)((char*)rhs + 0x44);
+    self->m_SnowFluffColourG = blendFactor * *(float*)((char*)rhs + 0x48) + (1.0f - blendFactor) * self->m_SnowFluffColourG;
+    self->m_lastSnowFluffColourG = *(float*)((char*)rhs + 0x48);
+    self->m_SnowFluffColourB = blendFactor * *(float*)((char*)rhs + 0x4C) + (1.0f - blendFactor) * self->m_SnowFluffColourB;
+    self->m_lastSnowFluffColourB = *(float*)((char*)rhs + 0x4C);
     o->vt();
 }
 #endif
@@ -3323,14 +3500,24 @@ extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *p
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_blend);
 #ifdef SKIP_ASM
 class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, void *p, float f) {
+/**
+ * Blends the danger values towards a region's data.
+ *
+ * With b = factor squared, m_Level (an int, computed in float and truncated) and m_PointRate become b * target + (1 -
+ * b) * current, and m_lastLevel / m_lastPointRate take the targets. Calls the empty virtual at vtable +0x218 before
+ * and after.
+ *
+ * @param rhs  the region's tWPData_Danger (On Tour const tWPData* rhs)
+ * @param blendFactor  the blend factor, squared before use (On Tour blend)
+ */
+extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, void *rhs, float blendFactor) {
     cD968 *o = (cD968*)self;
     o->vt();
-    f = f * f;
-    self->m_Level = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_Level);
-    self->m_lastLevel = *(int*)((char*)p + 4);
-    self->m_PointRate = f * *(float*)((char*)p + 8) + (1.0f - f) * self->m_PointRate;
-    self->m_lastPointRate = *(float*)((char*)p + 8);
+    blendFactor = blendFactor * blendFactor;
+    self->m_Level = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_Level);
+    self->m_lastLevel = *(int*)((char*)rhs + 4);
+    self->m_PointRate = blendFactor * *(float*)((char*)rhs + 8) + (1.0f - blendFactor) * self->m_PointRate;
+    self->m_lastPointRate = *(float*)((char*)rhs + 8);
     o->vt();
 }
 #endif
@@ -3815,15 +4002,24 @@ extern "C" void func_002BE2C8(tWPInGameData_Danger* p) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, char *s) {
-    VE_E2D8 *e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, ((char*)self), 4);
-    e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, ((char*)self), 4);
+/**
+ * Restores the music-trigger values from a replay frame.
+ *
+ * Reads 4 bytes into m_Type, then 4 into m_wpTravelDistance (+0x0), then m_Value and m_wpTravelDistance again,
+ * through the frame's slot 2 (read). The m_last targets are not restored; the writer stores the travel distance in
+ * their place.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, char *frame) {
+    VE_E2D8 *e = &(*(VE_E2D8 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self) + 8, 4);
+    e = &(*(VE_E2D8 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self), 4);
+    e = &(*(VE_E2D8 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
+    e = &(*(VE_E2D8 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self), 4);
 }
 #endif
 
@@ -3894,19 +4090,27 @@ static inline void Wr_E518(Stream_E518* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, Stream_E518* s) {
-    Wr_E518(s, ((char*)self) + 0x8, 4);
-    Wr_E518(s, ((char*)self), 4);
-    Wr_E518(s, ((char*)self) + 0x10, 4);
-    Wr_E518(s, ((char*)self), 4);
-    Wr_E518(s, ((char*)self) + 0x18, 4);
-    Wr_E518(s, ((char*)self), 4);
-    Wr_E518(s, ((char*)self) + 0x20, 4);
-    Wr_E518(s, ((char*)self), 4);
-    Wr_E518(s, ((char*)self) + 0x28, 4);
-    Wr_E518(s, ((char*)self), 4);
-    Wr_E518(s, ((char*)self) + 0x30, 4);
-    Wr_E518(s, ((char*)self), 4);
+/**
+ * Restores the six fog values from a replay frame.
+ *
+ * For density, near, far and colour R/G/B in turn, reads 4 bytes into the value and 4 into m_wpTravelDistance (+0x0),
+ * through the frame's slot 2 (read); the m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, Stream_E518* frame) {
+    Wr_E518(frame, ((char*)self) + 0x8, 4);
+    Wr_E518(frame, ((char*)self), 4);
+    Wr_E518(frame, ((char*)self) + 0x10, 4);
+    Wr_E518(frame, ((char*)self), 4);
+    Wr_E518(frame, ((char*)self) + 0x18, 4);
+    Wr_E518(frame, ((char*)self), 4);
+    Wr_E518(frame, ((char*)self) + 0x20, 4);
+    Wr_E518(frame, ((char*)self), 4);
+    Wr_E518(frame, ((char*)self) + 0x28, 4);
+    Wr_E518(frame, ((char*)self), 4);
+    Wr_E518(frame, ((char*)self) + 0x30, 4);
+    Wr_E518(frame, ((char*)self), 4);
 }
 #endif
 
@@ -3921,21 +4125,29 @@ static inline void Wr_E698(Stream_E698* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, Stream_E698* s) {
-    Wr_E698(s, ((char*)self) + 0x8, 4);
-    Wr_E698(s, ((char*)self), 4);
-    Wr_E698(s, ((char*)self) + 0x10, 4);
-    Wr_E698(s, ((char*)self), 4);
-    Wr_E698(s, ((char*)self) + 0x18, 4);
-    Wr_E698(s, ((char*)self), 4);
-    Wr_E698(s, ((char*)self) + 0x20, 4);
-    Wr_E698(s, ((char*)self), 4);
-    Wr_E698(s, ((char*)self) + 0x28, 4);
-    Wr_E698(s, ((char*)self), 4);
-    Wr_E698(s, ((char*)self) + 0x30, 4);
-    Wr_E698(s, ((char*)self), 4);
-    Wr_E698(s, ((char*)self) + 0x38, 4);
-    Wr_E698(s, ((char*)self), 4);
+/**
+ * Restores the seven light-glow values from a replay frame.
+ *
+ * For each value (+0x8 to +0x38 in steps of 8) reads 4 bytes into it and 4 into m_wpTravelDistance (+0x0), through
+ * the frame's slot 2 (read); the m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, Stream_E698* frame) {
+    Wr_E698(frame, ((char*)self) + 0x8, 4);
+    Wr_E698(frame, ((char*)self), 4);
+    Wr_E698(frame, ((char*)self) + 0x10, 4);
+    Wr_E698(frame, ((char*)self), 4);
+    Wr_E698(frame, ((char*)self) + 0x18, 4);
+    Wr_E698(frame, ((char*)self), 4);
+    Wr_E698(frame, ((char*)self) + 0x20, 4);
+    Wr_E698(frame, ((char*)self), 4);
+    Wr_E698(frame, ((char*)self) + 0x28, 4);
+    Wr_E698(frame, ((char*)self), 4);
+    Wr_E698(frame, ((char*)self) + 0x30, 4);
+    Wr_E698(frame, ((char*)self), 4);
+    Wr_E698(frame, ((char*)self) + 0x38, 4);
+    Wr_E698(frame, ((char*)self), 4);
 }
 #endif
 
@@ -3950,19 +4162,27 @@ static inline void Wr_E850(Stream_E850* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, Stream_E850* s) {
-    Wr_E850(s, ((char*)self) + 0x8, 4);
-    Wr_E850(s, ((char*)self), 4);
-    Wr_E850(s, ((char*)self) + 0x10, 4);
-    Wr_E850(s, ((char*)self), 4);
-    Wr_E850(s, ((char*)self) + 0x18, 4);
-    Wr_E850(s, ((char*)self), 4);
-    Wr_E850(s, ((char*)self) + 0x20, 4);
-    Wr_E850(s, ((char*)self), 4);
-    Wr_E850(s, ((char*)self) + 0x28, 4);
-    Wr_E850(s, ((char*)self), 4);
-    Wr_E850(s, ((char*)self) + 0x30, 4);
-    Wr_E850(s, ((char*)self), 4);
+/**
+ * Restores the six screen-tint values from a replay frame.
+ *
+ * For scale R/G/B and offset R/G/B in turn, reads 4 bytes into the value and 4 into m_wpTravelDistance (+0x0),
+ * through the frame's slot 2 (read); the m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, Stream_E850* frame) {
+    Wr_E850(frame, ((char*)self) + 0x8, 4);
+    Wr_E850(frame, ((char*)self), 4);
+    Wr_E850(frame, ((char*)self) + 0x10, 4);
+    Wr_E850(frame, ((char*)self), 4);
+    Wr_E850(frame, ((char*)self) + 0x18, 4);
+    Wr_E850(frame, ((char*)self), 4);
+    Wr_E850(frame, ((char*)self) + 0x20, 4);
+    Wr_E850(frame, ((char*)self), 4);
+    Wr_E850(frame, ((char*)self) + 0x28, 4);
+    Wr_E850(frame, ((char*)self), 4);
+    Wr_E850(frame, ((char*)self) + 0x30, 4);
+    Wr_E850(frame, ((char*)self), 4);
 }
 #endif
 
@@ -3991,25 +4211,33 @@ static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_Sun_readFromReplayFrame(tWPInGameData_Sun* self, Stream_EA38* s) {
-    Wr_EA38(s, ((char*)self) + 0x8, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x10, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x18, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x20, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x28, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x30, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x38, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x40, 4);
-    Wr_EA38(s, ((char*)self), 4);
-    Wr_EA38(s, ((char*)self) + 0x48, 4);
-    Wr_EA38(s, ((char*)self), 4);
+/**
+ * Restores the nine sun values from a replay frame.
+ *
+ * For pitch, yaw, colour R/G/B, intensity, type, lens intensity and radius in turn, reads 4 bytes into the value and
+ * 4 into m_wpTravelDistance (+0x0), through the frame's slot 2 (read); the m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Sun_readFromReplayFrame(tWPInGameData_Sun* self, Stream_EA38* frame) {
+    Wr_EA38(frame, ((char*)self) + 0x8, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x10, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x18, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x20, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x28, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x30, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x38, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x40, 4);
+    Wr_EA38(frame, ((char*)self), 4);
+    Wr_EA38(frame, ((char*)self) + 0x48, 4);
+    Wr_EA38(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4038,19 +4266,28 @@ static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_Lighting_readFromReplayFrame(tWPInGameData_Lighting* self, Stream_ECC8* s) {
-    Wr_ECC8(s, ((char*)self) + 0x8, 8);
-    Wr_ECC8(s, ((char*)self), 4);
-    Wr_ECC8(s, ((char*)self) + 0x18, 8);
-    Wr_ECC8(s, ((char*)self), 4);
-    Wr_ECC8(s, ((char*)self) + 0x28, 8);
-    Wr_ECC8(s, ((char*)self), 4);
-    Wr_ECC8(s, ((char*)self) + 0x38, 8);
-    Wr_ECC8(s, ((char*)self), 4);
-    Wr_ECC8(s, ((char*)self) + 0x48, 4);
-    Wr_ECC8(s, ((char*)self), 4);
-    Wr_ECC8(s, ((char*)self) + 0x50, 4);
-    Wr_ECC8(s, ((char*)self), 4);
+/**
+ * Restores the lighting values from a replay frame.
+ *
+ * Reads the four 8-byte irradiance names (+0x8, +0x18, +0x28, +0x38) and the ambient and rim intensity offsets
+ * (+0x48, +0x50), each followed by 4 bytes into m_wpTravelDistance (+0x0), through the frame's slot 2 (read); the
+ * m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Lighting_readFromReplayFrame(tWPInGameData_Lighting* self, Stream_ECC8* frame) {
+    Wr_ECC8(frame, ((char*)self) + 0x8, 8);
+    Wr_ECC8(frame, ((char*)self), 4);
+    Wr_ECC8(frame, ((char*)self) + 0x18, 8);
+    Wr_ECC8(frame, ((char*)self), 4);
+    Wr_ECC8(frame, ((char*)self) + 0x28, 8);
+    Wr_ECC8(frame, ((char*)self), 4);
+    Wr_ECC8(frame, ((char*)self) + 0x38, 8);
+    Wr_ECC8(frame, ((char*)self), 4);
+    Wr_ECC8(frame, ((char*)self) + 0x48, 4);
+    Wr_ECC8(frame, ((char*)self), 4);
+    Wr_ECC8(frame, ((char*)self) + 0x50, 4);
+    Wr_ECC8(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4063,47 +4300,55 @@ public:
     virtual int write(void* p, int n);
 };
 
+/**
+ * Restores the 19 weather values from a replay frame.
+ *
+ * For each value (+0x8 to +0x98 in steps of 8) reads 4 bytes into it and 4 into m_wpTravelDistance (+0x0), through
+ * the frame's slot 2 (read; the local class calls that slot "write"); the m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
 // Streams 19 words of self (at +0x8 .. +0x98), each followed by the word at +0x0.
-extern "C" void tWPInGameData_Weather_readFromReplayFrame(tWPInGameData_Weather* self, cStream_EE48* s)
+extern "C" void tWPInGameData_Weather_readFromReplayFrame(tWPInGameData_Weather* self, cStream_EE48* frame)
 {
-    s->write(((char*)self) + 0x8, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x10, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x18, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x20, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x28, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x30, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x38, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x40, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x48, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x50, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x58, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x60, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x68, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x70, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x78, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x80, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x88, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x90, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 0x98, 4);
-    s->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x8, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x10, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x18, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x20, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x28, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x30, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x38, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x40, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x48, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x50, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x58, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x60, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x68, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x70, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x78, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x80, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x88, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x90, 4);
+    frame->write(((char*)self), 4);
+    frame->write(((char*)self) + 0x98, 4);
+    frame->write(((char*)self), 4);
 }
 #endif
 
@@ -4111,15 +4356,23 @@ extern "C" void tWPInGameData_Weather_readFromReplayFrame(tWPInGameData_Weather*
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, char *s) {
-    VE_F2A0 *e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, ((char*)self), 4);
-    e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, ((char*)self), 4);
+/**
+ * Restores the danger values from a replay frame.
+ *
+ * Reads 4 bytes into m_Level, 4 into m_wpTravelDistance (+0x0), then m_PointRate and m_wpTravelDistance again,
+ * through the frame's slot 2 (read); the m_last targets are not restored.
+ *
+ * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, char *frame) {
+    VE_F2A0 *e = &(*(VE_F2A0 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self) + 8, 4);
+    e = &(*(VE_F2A0 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self), 4);
+    e = &(*(VE_F2A0 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
+    e = &(*(VE_F2A0 **)frame)[2];
+    e->fn(frame + e->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4127,15 +4380,23 @@ extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* s
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, char *s) {
-    VE_F340 *e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, ((char*)self), 4);
-    e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, ((char*)self), 4);
+/**
+ * Saves the music-trigger values to a replay frame.
+ *
+ * Writes m_Type, m_wpTravelDistance (+0x0), m_Value and m_wpTravelDistance again, 4 bytes each, through the frame's
+ * slot 1 (write). The m_last targets are not saved: the second word of each pair is always the travel distance.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, char *frame) {
+    VE_F340 *e = &(*(VE_F340 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self) + 8, 4);
+    e = &(*(VE_F340 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self), 4);
+    e = &(*(VE_F340 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
+    e = &(*(VE_F340 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4206,19 +4467,27 @@ static inline void Wr_F580(Stream_F580* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, Stream_F580* s) {
-    Wr_F580(s, ((char*)self) + 0x8, 4);
-    Wr_F580(s, ((char*)self), 4);
-    Wr_F580(s, ((char*)self) + 0x10, 4);
-    Wr_F580(s, ((char*)self), 4);
-    Wr_F580(s, ((char*)self) + 0x18, 4);
-    Wr_F580(s, ((char*)self), 4);
-    Wr_F580(s, ((char*)self) + 0x20, 4);
-    Wr_F580(s, ((char*)self), 4);
-    Wr_F580(s, ((char*)self) + 0x28, 4);
-    Wr_F580(s, ((char*)self), 4);
-    Wr_F580(s, ((char*)self) + 0x30, 4);
-    Wr_F580(s, ((char*)self), 4);
+/**
+ * Saves the six fog values to a replay frame.
+ *
+ * For density, near, far and colour R/G/B in turn, writes the value and then m_wpTravelDistance (+0x0), 4 bytes each,
+ * through the frame's slot 1 (write); the m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, Stream_F580* frame) {
+    Wr_F580(frame, ((char*)self) + 0x8, 4);
+    Wr_F580(frame, ((char*)self), 4);
+    Wr_F580(frame, ((char*)self) + 0x10, 4);
+    Wr_F580(frame, ((char*)self), 4);
+    Wr_F580(frame, ((char*)self) + 0x18, 4);
+    Wr_F580(frame, ((char*)self), 4);
+    Wr_F580(frame, ((char*)self) + 0x20, 4);
+    Wr_F580(frame, ((char*)self), 4);
+    Wr_F580(frame, ((char*)self) + 0x28, 4);
+    Wr_F580(frame, ((char*)self), 4);
+    Wr_F580(frame, ((char*)self) + 0x30, 4);
+    Wr_F580(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4233,21 +4502,29 @@ static inline void Wr_F700(Stream_F700* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, Stream_F700* s) {
-    Wr_F700(s, ((char*)self) + 0x8, 4);
-    Wr_F700(s, ((char*)self), 4);
-    Wr_F700(s, ((char*)self) + 0x10, 4);
-    Wr_F700(s, ((char*)self), 4);
-    Wr_F700(s, ((char*)self) + 0x18, 4);
-    Wr_F700(s, ((char*)self), 4);
-    Wr_F700(s, ((char*)self) + 0x20, 4);
-    Wr_F700(s, ((char*)self), 4);
-    Wr_F700(s, ((char*)self) + 0x28, 4);
-    Wr_F700(s, ((char*)self), 4);
-    Wr_F700(s, ((char*)self) + 0x30, 4);
-    Wr_F700(s, ((char*)self), 4);
-    Wr_F700(s, ((char*)self) + 0x38, 4);
-    Wr_F700(s, ((char*)self), 4);
+/**
+ * Saves the seven light-glow values to a replay frame.
+ *
+ * For each value (+0x8 to +0x38 in steps of 8) writes it and then m_wpTravelDistance (+0x0), 4 bytes each, through
+ * the frame's slot 1 (write); the m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, Stream_F700* frame) {
+    Wr_F700(frame, ((char*)self) + 0x8, 4);
+    Wr_F700(frame, ((char*)self), 4);
+    Wr_F700(frame, ((char*)self) + 0x10, 4);
+    Wr_F700(frame, ((char*)self), 4);
+    Wr_F700(frame, ((char*)self) + 0x18, 4);
+    Wr_F700(frame, ((char*)self), 4);
+    Wr_F700(frame, ((char*)self) + 0x20, 4);
+    Wr_F700(frame, ((char*)self), 4);
+    Wr_F700(frame, ((char*)self) + 0x28, 4);
+    Wr_F700(frame, ((char*)self), 4);
+    Wr_F700(frame, ((char*)self) + 0x30, 4);
+    Wr_F700(frame, ((char*)self), 4);
+    Wr_F700(frame, ((char*)self) + 0x38, 4);
+    Wr_F700(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4262,19 +4539,27 @@ static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_ScreenTint_writeToReplayFrame(tWPInGameData_ScreenTint* self, Stream_F8B8* s) {
-    Wr_F8B8(s, ((char*)self) + 0x8, 4);
-    Wr_F8B8(s, ((char*)self), 4);
-    Wr_F8B8(s, ((char*)self) + 0x10, 4);
-    Wr_F8B8(s, ((char*)self), 4);
-    Wr_F8B8(s, ((char*)self) + 0x18, 4);
-    Wr_F8B8(s, ((char*)self), 4);
-    Wr_F8B8(s, ((char*)self) + 0x20, 4);
-    Wr_F8B8(s, ((char*)self), 4);
-    Wr_F8B8(s, ((char*)self) + 0x28, 4);
-    Wr_F8B8(s, ((char*)self), 4);
-    Wr_F8B8(s, ((char*)self) + 0x30, 4);
-    Wr_F8B8(s, ((char*)self), 4);
+/**
+ * Saves the six screen-tint values to a replay frame.
+ *
+ * For scale R/G/B and offset R/G/B in turn, writes the value and then m_wpTravelDistance (+0x0), 4 bytes each,
+ * through the frame's slot 1 (write); the m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_ScreenTint_writeToReplayFrame(tWPInGameData_ScreenTint* self, Stream_F8B8* frame) {
+    Wr_F8B8(frame, ((char*)self) + 0x8, 4);
+    Wr_F8B8(frame, ((char*)self), 4);
+    Wr_F8B8(frame, ((char*)self) + 0x10, 4);
+    Wr_F8B8(frame, ((char*)self), 4);
+    Wr_F8B8(frame, ((char*)self) + 0x18, 4);
+    Wr_F8B8(frame, ((char*)self), 4);
+    Wr_F8B8(frame, ((char*)self) + 0x20, 4);
+    Wr_F8B8(frame, ((char*)self), 4);
+    Wr_F8B8(frame, ((char*)self) + 0x28, 4);
+    Wr_F8B8(frame, ((char*)self), 4);
+    Wr_F8B8(frame, ((char*)self) + 0x30, 4);
+    Wr_F8B8(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4303,25 +4588,33 @@ static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_Sun_writeToReplayFrame(tWPInGameData_Sun* self, Stream_FAA0* s) {
-    Wr_FAA0(s, ((char*)self) + 0x8, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x10, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x18, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x20, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x28, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x30, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x38, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x40, 4);
-    Wr_FAA0(s, ((char*)self), 4);
-    Wr_FAA0(s, ((char*)self) + 0x48, 4);
-    Wr_FAA0(s, ((char*)self), 4);
+/**
+ * Saves the nine sun values to a replay frame.
+ *
+ * For pitch, yaw, colour R/G/B, intensity, type, lens intensity and radius in turn, writes the value and then
+ * m_wpTravelDistance (+0x0), 4 bytes each, through the frame's slot 1 (write); the m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Sun_writeToReplayFrame(tWPInGameData_Sun* self, Stream_FAA0* frame) {
+    Wr_FAA0(frame, ((char*)self) + 0x8, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x10, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x18, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x20, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x28, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x30, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x38, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x40, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
+    Wr_FAA0(frame, ((char*)self) + 0x48, 4);
+    Wr_FAA0(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4350,19 +4643,28 @@ static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void tWPInGameData_Lighting_writeToReplayFrame(tWPInGameData_Lighting* self, Stream_FD30* s) {
-    Wr_FD30(s, ((char*)self) + 0x8, 8);
-    Wr_FD30(s, ((char*)self), 4);
-    Wr_FD30(s, ((char*)self) + 0x18, 8);
-    Wr_FD30(s, ((char*)self), 4);
-    Wr_FD30(s, ((char*)self) + 0x28, 8);
-    Wr_FD30(s, ((char*)self), 4);
-    Wr_FD30(s, ((char*)self) + 0x38, 8);
-    Wr_FD30(s, ((char*)self), 4);
-    Wr_FD30(s, ((char*)self) + 0x48, 4);
-    Wr_FD30(s, ((char*)self), 4);
-    Wr_FD30(s, ((char*)self) + 0x50, 4);
-    Wr_FD30(s, ((char*)self), 4);
+/**
+ * Saves the lighting values to a replay frame.
+ *
+ * Writes the four 8-byte irradiance names (+0x8, +0x18, +0x28, +0x38) and the ambient and rim intensity offsets
+ * (+0x48, +0x50), each followed by the 4-byte m_wpTravelDistance (+0x0), through the frame's slot 1 (write); the
+ * m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Lighting_writeToReplayFrame(tWPInGameData_Lighting* self, Stream_FD30* frame) {
+    Wr_FD30(frame, ((char*)self) + 0x8, 8);
+    Wr_FD30(frame, ((char*)self), 4);
+    Wr_FD30(frame, ((char*)self) + 0x18, 8);
+    Wr_FD30(frame, ((char*)self), 4);
+    Wr_FD30(frame, ((char*)self) + 0x28, 8);
+    Wr_FD30(frame, ((char*)self), 4);
+    Wr_FD30(frame, ((char*)self) + 0x38, 8);
+    Wr_FD30(frame, ((char*)self), 4);
+    Wr_FD30(frame, ((char*)self) + 0x48, 4);
+    Wr_FD30(frame, ((char*)self), 4);
+    Wr_FD30(frame, ((char*)self) + 0x50, 4);
+    Wr_FD30(frame, ((char*)self), 4);
 }
 #endif
 
@@ -4375,48 +4677,57 @@ public:
     virtual int write(void* p, int n);
 };
 
+/**
+ * Saves the 19 weather values to a replay frame.
+ *
+ * For each value (+0x8 to +0x98 in steps of 8) writes it and then m_wpTravelDistance (+0x0), 4 bytes each, through
+ * the frame's slot 1 (write). The local class names that slot "read" and the comment above says "Reads"; slot 1 of
+ * cReplayFramePtr is write. The m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
 // Reads 19 words into self (at +0x8 .. +0x98), each followed by one into +0x0
 // (the read-side twin of tWPInGameData_Weather_readFromReplayFrame).
-extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* self, cStream_FEB0* s)
+extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* self, cStream_FEB0* frame)
 {
-    s->read(((char*)self) + 0x8, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x10, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x18, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x20, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x28, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x30, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x38, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x40, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x48, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x50, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x58, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x60, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x68, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x70, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x78, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x80, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x88, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x90, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 0x98, 4);
-    s->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x8, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x10, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x18, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x20, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x28, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x30, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x38, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x40, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x48, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x50, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x58, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x60, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x68, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x70, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x78, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x80, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x88, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x90, 4);
+    frame->read(((char*)self), 4);
+    frame->read(((char*)self) + 0x98, 4);
+    frame->read(((char*)self), 4);
 }
 #endif
 
@@ -4424,14 +4735,22 @@ extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* 
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, char *s) {
-    VE_0308 *e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, ((char*)self), 4);
-    e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, ((char*)self), 4);
+/**
+ * Saves the danger values to a replay frame.
+ *
+ * Writes m_Level, m_wpTravelDistance (+0x0), m_PointRate and m_wpTravelDistance again, 4 bytes each, through the
+ * frame's slot 1 (write); the m_last targets are not saved.
+ *
+ * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, char *frame) {
+    VE_0308 *e = &(*(VE_0308 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self) + 8, 4);
+    e = &(*(VE_0308 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self), 4);
+    e = &(*(VE_0308 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
+    e = &(*(VE_0308 **)frame)[1];
+    e->fn(frame + e->delta, ((char*)self), 4);
 }
 #endif

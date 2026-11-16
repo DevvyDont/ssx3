@@ -182,14 +182,22 @@ INCLUDE_ASM("object/movenode", cMoveNode_addUVScrollModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remUVScrollModifier(void* block);
 
-extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* v)
+/**
+ * Gives the node a UV-scroll modifier, replacing any it had.
+ *
+ * Creates the modifier block when the node has none (cMoveNode_addModifierBlock), else removes the old UV-scroll
+ * modifier (tModifierBlock_remUVScrollModifier), then stores @p modifier at block + 0x4.
+ *
+ * @param modifier  the new modifier (On Tour cUVScrollModifier* modifier)
+ */
+extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* modifier)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
         tModifierBlock_remUVScrollModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = v;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = modifier;
 }
 #endif
 
@@ -198,14 +206,22 @@ INCLUDE_ASM("object/movenode", cMoveNode_addTexFlipModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTexFlipModifier(void* block);
 
-extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* v)
+/**
+ * Gives the node a texture-flip modifier, replacing any it had.
+ *
+ * Creates the modifier block when the node has none, else removes the old one (tModifierBlock_remTexFlipModifier),
+ * then stores @p modifier at block + 0x8.
+ *
+ * @param modifier  the new modifier (On Tour cTexFlipModifier* modifier)
+ */
+extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* modifier)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
         tModifierBlock_remTexFlipModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = v;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = modifier;
 }
 #endif
 
@@ -214,14 +230,22 @@ INCLUDE_ASM("object/movenode", cMoveNode_addPhysicsModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remPhysicsModifier(void* block);
 
-extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* v)
+/**
+ * Gives the node a physics modifier, replacing any it had.
+ *
+ * Creates the modifier block when the node has none, else removes the old one (tModifierBlock_remPhysicsModifier),
+ * then stores @p modifier at block + 0xC.
+ *
+ * @param modifier  the new modifier (On Tour cPhysicsModifier* modifier)
+ */
+extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* modifier)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
         tModifierBlock_remPhysicsModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = v;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = modifier;
 }
 #endif
 
@@ -398,10 +422,15 @@ struct sMnVEntryF {
     void (*fn)(void*, float);
 };
 
-extern "C" void cMoveNode_addDebounce(cMoveNode* self, void* a1)
+/**
+ * Sets the node's debounce time from a placement record: setDebounce (slot 41) with the record's float at +0x4.
+ *
+ * @param data  the debounce data (On Tour const tAddDebounceData& data); +0x4 holds the time in seconds
+ */
+extern "C" void cMoveNode_addDebounce(cMoveNode* self, void* data)
 {
     sMnVEntryF* vt = (sMnVEntryF*)self->mVtbl;
-    vt[41].fn((char*)self + vt[41].delta, *(float*)((char*)a1 + 0x4));
+    vt[41].fn((char*)self + vt[41].delta, *(float*)((char*)data + 0x4));
 }
 #endif
 
@@ -440,9 +469,17 @@ extern char D_0048E8E0[];
 extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void cMoveNode_addParent(cMoveNode* self, void* a1, void* a2, sMoveQuad* pos)
+/**
+ * Attaches the node to a parent instance: a new cParentModifier ("ParentModifier", func_00357038) as its transform
+ * modifier.
+ *
+ * @param parentinst  the parent instance (On Tour tInstanceRecord* parentinst)
+ * @param mesh  the parent's mesh index (On Tour int mesh)
+ * @param pos  the offset from the parent (On Tour const t4Vector& offset)
+ */
+extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mesh, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
+    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), parentinst, mesh, pos));
 }
 #endif
 
@@ -453,10 +490,18 @@ extern char D_0048E918[];
 extern "C" void* func_003572E0(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* a1, float f0, float f1)
+/**
+ * Makes the node a magnet: a new cMagnetModifier ("MagnetModifier", func_003572E0) on its instance as its transform
+ * modifier.
+ *
+ * @param mat  the magnet's matrix (On Tour const t4Matrix& mat)
+ * @param radius  the radius (On Tour radius)
+ * @param magnetSpeed  the speed (On Tour speed)
+ */
+extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, float magnetSpeed)
 {
     cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
-                                      self->Instance, a1, f0, f1));
+                                      self->Instance, mat, radius, magnetSpeed));
 }
 #endif
 
@@ -523,6 +568,11 @@ extern char D_0048E940[];
 extern "C" void* func_0035F6E8(void* mem, void* desc);
 extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
 
+/**
+ * Adds a UV-scroll modifier built from a placement record: a new "UVScrollModifier" (func_0035F6E8) on the node.
+ *
+ * @param desc  the UV-scroll data (On Tour const tAddUVScrollData& udata)
+ */
 extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 {
     cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(0x50, D_0048E940, 0x20000000, 0), desc));
@@ -536,6 +586,12 @@ extern char D_0048E958[];
 extern "C" void* func_0035F0B8(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
 
+/**
+ * Adds a texture-flip modifier built from a placement record: a new "TexFlipModifier" (func_0035F0B8, with the node's
+ * instance) on the node.
+ *
+ * @param desc  the texture-flip data (On Tour const tAddTexFlipData& tdata)
+ */
 extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 {
     cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, self->Instance));
@@ -549,6 +605,12 @@ extern char D_0048E968[];
 extern "C" void* func_00342768(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
 
+/**
+ * Adds a boost modifier built from a placement record: a new "BoostModifier" (func_00342768, with the node's
+ * instance) as the node's physics modifier.
+ *
+ * @param desc  the boost data (On Tour const tAddBoostData& adata)
+ */
 extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 {
     cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, self->Instance));
@@ -1980,6 +2042,12 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Saves a position modifier to a replay frame: the 0x40 bytes from +0x10 (BoundBox, Offset, Radius,
+ * RootTransformDirty) through the frame's write (slot 1).
+ *
+ * @param obj  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cPositionModifier_writeToReplayFrame_cObj* obj)
 {
     obj->v01((char*)self + 0x10, 0x40);
@@ -2201,6 +2269,12 @@ struct sMnVEntry7278b {
 };
 
 
+/**
+ * Saves a parent modifier to a replay frame: the position-modifier state, Mesh (+0x90) and ParentInst
+ * (writeReplayInstance, slot 5).
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, void* stream)
 {
     cPositionModifier_writeToReplayFrame((cPositionModifier*)self, (cPositionModifier_writeToReplayFrame_cObj*)stream);
@@ -2462,6 +2536,12 @@ struct sMnVEntrySer76D0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Saves a magnet modifier to a replay frame: Instance (writeReplayInstance, slot 5), the 0x50 bytes from +0x10
+ * (Offset through AllowCollide) and Transform (0x40 bytes from +0x60).
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* stream)
 {
     sMnVEntryPtr76D0* p = &(*(sMnVEntryPtr76D0**)stream)[5];
@@ -2567,6 +2647,12 @@ struct sMnVEntry7848b {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Saves an avalanche-spline modifier to a replay frame: Instance (writeReplayInstance, slot 5), then the 0x30 bytes
+ * from +0x10 (BoundBox, Radius).
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, void* stream)
 {
     sMnVEntry7848a* vt1 = *(sMnVEntry7848a**)stream;

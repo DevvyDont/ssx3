@@ -334,6 +334,15 @@ struct cWorldPainterQuery_lookupRegion_sList {
 
 extern "C" int func_002BAF90(cWorldPainterQuery_lookupRegion_sList* list);
 
+/**
+ * Returns the region a layer paints at a position: m_pRegions[i] for the index its quad tree's leaf holds.
+ *
+ * On Tour's lookupRegion takes (pWPLayer, fx, fy); here the position is not declared and stays in $f12/$f13 for
+ * func_002BAF90, which reads the leaf's second word.
+ *
+ * @param list  the world-painter layer (On Tour cWorldPainterLayer* pWPLayer)
+ * @return the region (On Tour const tWPRegion*), or 0 when the index is -1
+ */
 extern "C" cWorldPainterQuery_lookupRegion_sItem* cWorldPainterQuery_lookupRegion(cWorldPainterQuery* self, cWorldPainterQuery_lookupRegion_sList* list)
 {
     int i = func_002BAF90(list);

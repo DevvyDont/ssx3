@@ -1255,10 +1255,19 @@ extern "C" void func_00112180(void* rider, int v);
 extern "C" void func_0026AF00(void* self);
 extern "C" void func_0026ADA8(void*, int);
 extern char D_004D33A0[];
-extern "C" void cAI_swaploadPathFile(cAI* self, int arg1) {
+/**
+ * Swaps in a different AI path file: purges the loaded paths, loads the new file and re-initialises every rider's
+ * path.
+ *
+ * Calls func_0026AF00 (On Tour cPathSys::purgePaths) and func_0026ADA8 on PathSys (D_004D33A0) with the file, then
+ * func_00112180 (cRider::initPath(false)) on each of the NumberOfRidersAllocated riders (+0x28 table).
+ *
+ * @param filename  the path file name, passed as an int (On Tour const char* filename)
+ */
+extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
     int i;
     func_0026AF00(D_004D33A0);
-    func_0026ADA8(D_004D33A0, arg1);
+    func_0026ADA8(D_004D33A0, filename);
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
         func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
@@ -1797,6 +1806,12 @@ extern "C" int cAI_isReadyToPurgeComputerActors(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_prepareToPurgeMissionRiders);
 #ifdef SKIP_ASM
+/**
+ * Stops drawing the loaded mission riders so they can be deleted safely.
+ *
+ * For each of the NumberOfMissionRidersLoaded entries (+0x70 table), takes the cRider virtual-base pointer (+0x18)
+ * and, when its mRenderFlag is set, clears it and resets mSafeRenderTick to -1.
+ */
 // self is a cAI (no header yet); +0x70 is its list of rider objects (count at +0x88),
 // each holding its cRider virtual-base pointer at +0x18.
 extern "C" void cAI_prepareToPurgeMissionRiders(cAI* self)
@@ -1816,6 +1831,14 @@ extern "C" void cAI_prepareToPurgeMissionRiders(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeMissionRiders);
 #ifdef SKIP_ASM
+/**
+ * Tells whether every loaded mission rider may now be deleted.
+ *
+ * Asks cRider_isSafeToDelete for each of the NumberOfMissionRidersLoaded entries (+0x70 table, cRider at +0x18) and
+ * does not stop early at the first refusal.
+ *
+ * @return 1 when all mission riders are safe to delete, else 0
+ */
 extern "C" int cAI_isReadyToPurgeMissionRiders(cAI* self) {
     int i;
     int ok = 1;
@@ -1983,6 +2006,10 @@ extern "C" void cAI_cleanupAfterRace(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_cleanupAfterFreeride);
 #ifdef SKIP_ASM
+/**
+ * Cleans up the AI manager after free ride: purges the mission riders, refreshes the group AI and clears
+ * IsAIReadyToRace.
+ */
 extern "C" void cAI_cleanupAfterFreeride(cAI* self)
 {
     cAI_purgeMissionRiders(self);

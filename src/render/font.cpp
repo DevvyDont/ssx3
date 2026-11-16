@@ -926,6 +926,9 @@ struct sFontQuad {
 } __attribute__((aligned(16)));
 
 
+/**
+ * Clears the player lights: no directional lights, no extra ambient light, neither rider nor board additive.
+ */
 extern "C" void cPlayerLights_Clear(cPlayerLights* self)
 {
     tRGB t;

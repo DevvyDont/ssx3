@@ -34,6 +34,9 @@ void cActiveTriggerList_purge(cActiveTriggerList* self)
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_clearFlags);
 #ifdef SKIP_ASM
+/**
+ * Clears the two flag words (+0x8 and +0xC) of every node in the active trigger list.
+ */
 extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
 {
     sTriggerNode* node = self->head;
@@ -113,6 +116,12 @@ extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_remove);
 #ifdef SKIP_ASM
+/**
+ * Unlinks a node from the active trigger list and frees it.
+ *
+ * @param target  the node to remove
+ * @return the node that followed it (the new head when it was the head), or 0 when it was last or not in the list
+ */
 extern "C" sTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, sTriggerNode* target)
 {
     sTriggerNode* head = self->head;

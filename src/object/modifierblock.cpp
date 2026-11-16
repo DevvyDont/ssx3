@@ -315,6 +315,9 @@ struct sMbVEntryV2DD0 {
 };
 
 
+/**
+ * Renders a modifier block: slot 6 of each effect link in the list at +0x10, then slot 11 of the transform modifier.
+ */
 extern "C" void tModifierBlock_render(tModifierBlock* self)
 {
     if (self->field_0x10 != 0) {
@@ -365,6 +368,9 @@ struct sMbVEntryV_2E98 {
     void (*fn)(void*);
 };
 
+/**
+ * Updates the block's root transform: slot 3 of its transform modifier (+0x0), when it has one.
+ */
 extern "C" void tModifierBlock_updateRootTransform(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;

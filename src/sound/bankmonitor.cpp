@@ -432,11 +432,19 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_FadeOut);
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int a2);
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
-extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, int key, float v)
+/**
+ * Fades out one playing bank sound: cBankMonitorInstance::Fade(@p type, -1, 0) on the voice that
+ * cBankMonitor_BANKMONITOR_GetHandle finds, when there is one.
+ *
+ * @param idx  the sound's handle (On Tour int Handle)
+ * @param key  passed to GetHandle (On Tour eMonitorType type)
+ * @param type  the fade time (On Tour float FadeTime)
+ */
+extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, int key, float type)
 {
     void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, key);
     if (voice != 0) {
-        func_002ACB80(voice, -1, 0, v);
+        func_002ACB80(voice, -1, 0, type);
     }
 }
 #endif
@@ -631,6 +639,11 @@ struct sVoiceAD730 {
     char pad[0xC0 - 0xC];
 };
 
+/**
+ * Counts the bank monitor's busy instances (of 64, 0xC0 bytes each) whose active word is set.
+ *
+ * @return the number of active instances
+ */
 extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
 {
     int count = 0;
@@ -651,6 +664,11 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Used);
 #ifdef SKIP_ASM
 extern "C" int func_002ABB80(void*);
 
+/**
+ * Counts the bank monitor's busy instances (of 64): those cBankMonitorInstance::IsFree reports in use.
+ *
+ * @return the number of instances in use
+ */
 extern "C" int cBankMonitor_BANKMONITOR_Used(cBankMonitor* self)
 {
     int count = 0;
@@ -1040,6 +1058,11 @@ extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b
 //100%
 INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Destroy);
 #ifdef SKIP_ASM
+/**
+ * Resets monitor instance @p idx (0x2C bytes each from +0x98) with cMonitorInstance_Reset.
+ *
+ * @param idx  the instance (On Tour int Index)
+ */
 extern "C" void cMonitor_MONITOR_Destroy(cMonitor* self, int idx)
 {
     int off = idx * 0x2C + 0x98;
@@ -2823,7 +2846,7 @@ extern char D_004A36E0[];
 struct sBankList_0348;
 extern "C" void func_002B0348(sBankList_0348* self, int a, int b, int c);
 
-extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
+extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, int a3)
 {
     char parser[0x810];
     char value[0x100];
@@ -2840,26 +2863,26 @@ extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
             if (func_0041AA88(D_004A37C8, key) == 0)
             {
                 FileParser_AssignString(parser, D_004A37C8, v40);
-                func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, p->unk_004, v40);
+                func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, speechInstance->unk_004, v40);
             }
             if (func_0041AA88(D_004828C0, key) == 0)
             {
-                FileParser_AssignString(parser, D_004828C0, ((char*)p) + 0x6C);
-                sprintf(value, D_004832D8, ((char*)p) + 0x6C);
-                if (func_002AFD40(p, 1, value, a1, a2) == 0)
+                FileParser_AssignString(parser, D_004828C0, ((char*)speechInstance) + 0x6C);
+                sprintf(value, D_004832D8, ((char*)speechInstance) + 0x6C);
+                if (func_002AFD40(speechInstance, 1, value, a1, a2) == 0)
                     break;
                 if (a3)
                 {
-                    sprintf(value, D_004832E8, ((char*)p) + 0x6C);
-                    func_002AFD40(p, 0, value, a1, a2);
+                    sprintf(value, D_004832E8, ((char*)speechInstance) + 0x6C);
+                    func_002AFD40(speechInstance, 0, value, a1, a2);
                 }
-                p->unk_0EC += 1;
+                speechInstance->unk_0EC += 1;
             }
             if (func_0041AA88(D_004A37D0, key) == 0)
             {
                 FileParser_AssignString(parser, D_004A37D0, value);
-                sprintf(path, D_004A36E0, ((char*)p) + 0x6C, name);
-                func_002B0348((sBankList_0348*)p, (int)path, (int)name, 0);
+                sprintf(path, D_004A36E0, ((char*)speechInstance) + 0x6C, name);
+                func_002B0348((sBankList_0348*)speechInstance, (int)path, (int)name, 0);
             }
         }
     }
@@ -2874,19 +2897,19 @@ extern "C" int func_002AAE08(void* self, int i);
 extern "C" float func_002AAE78(void* self, int i);
 extern "C" int func_002AB028(void* self, int i);
 
-extern "C" int func_002B0290(cSpeechInstance* p)
+extern "C" int func_002B0290(cSpeechInstance* speechInstance)
 {
-    int state = func_002AAE08(D_004A37B4->mpVStreamSys, p->unk_004);
+    int state = func_002AAE08(D_004A37B4->mpVStreamSys, speechInstance->unk_004);
     if (state == 0) {
         return 1;
     }
     if (state != 1) {
         return 0;
     }
-    if (func_002AB028(D_004A37B4->mpVStreamSys, p->unk_004) == 0) {
+    if (func_002AB028(D_004A37B4->mpVStreamSys, speechInstance->unk_004) == 0) {
         return 0;
     }
-    int ok = (int)func_002AAE78(D_004A37B4->mpVStreamSys, p->unk_004) < 500;
+    int ok = (int)func_002AAE78(D_004A37B4->mpVStreamSys, speechInstance->unk_004) < 500;
     int r = 0;
     if (ok) {
         r = state;
@@ -2900,9 +2923,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0320);
 #ifdef SKIP_ASM
 extern "C" void func_002AAE40(void* self, int i);
 
-extern "C" void func_002B0320(cSpeechInstance* p)
+extern "C" void func_002B0320(cSpeechInstance* speechInstance)
 {
-    func_002AAE40(D_004A37B4->mpVStreamSys, p->unk_004);
+    func_002AAE40(D_004A37B4->mpVStreamSys, speechInstance->unk_004);
 }
 #endif
 
@@ -3050,15 +3073,15 @@ extern "C" void func_002B07C0(cSpeechInstance* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B07E8);
 #ifdef SKIP_ASM
-extern "C" void func_002B07E8(cSpeechInstance* arg0, int arg1) {
-    (arg0->unk_8C4) = arg1;
+extern "C" void func_002B07E8(cSpeechInstance* speechInstance, int arg1) {
+    (speechInstance->unk_8C4) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B07F0);
 #ifdef SKIP_ASM
-extern "C" void func_002B07F0(cSpeechInstance* arg0, int arg1) {
-    (arg0->unk_8C8) = arg1;
+extern "C" void func_002B07F0(cSpeechInstance* speechInstance, int arg1) {
+    (speechInstance->unk_8C8) = arg1;
 }
 #endif
 
@@ -4247,9 +4270,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B24C0);
 // PORT: func_002ADF60 is defined () but this caller passes the monitor.
 unsigned int func_002ADF60_p(void* p) __asm__("func_002ADF60");
 
-extern "C" int func_002B24C0(cSongInstance* p)
+extern "C" int func_002B24C0(cSongInstance* songInstance)
 {
-    return func_002ADF60_p(SoundSys) % *(unsigned int*)(*(char**)p + 0x40);
+    return func_002ADF60_p(SoundSys) % *(unsigned int*)(*(char**)songInstance + 0x40);
 }
 #endif
 

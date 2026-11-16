@@ -1430,6 +1430,17 @@ static inline void show_A4E0(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
+/**
+ * Prints an incoming in-race chat message on an in-game state's screen.
+ *
+ * Only online (the first word of cBENetworkInterface_networkOpt set) with a screen and a connected cGameComm. When a
+ * chat packet is queued (func_00258160 into mszChatBuff), hides "helptext" and "helptexts" and shows "textScrollChat"
+ * with "<opponent's name>: <message>" (the name from the network options + 0x498), scrolled by func_001A83D8 from the
+ * scroll's counters at +0xC4/+0xC6/+0xC8. The 0x41 size passed for the 0x40-byte buffer is not checked by
+ * cGameComm_readPacket, which copies the whole payload (up to 236 bytes).
+ *
+ * @return 1 when a chat message was shown, else 0 (On Tour returns bool)
+ */
 // PORT: the session pointer is passed through func_00258160's int parameter.
 extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
 {

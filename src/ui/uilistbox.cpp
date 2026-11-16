@@ -440,6 +440,15 @@ struct cUIMenu_getPrev_sVEntry {
     int (*fn)(void*, void*, int, unsigned char);
 };
 
+/**
+ * Finds the selectable item before the current one (mScrollItemCurrent), wrapping to the last when mWrap is set.
+ *
+ * An item is selectable when the screen's state accepts it (onWidgetMenu(self, 1, i), slot 20) for a scrollable menu
+ * (mScrollMenu), else when its mStatic bit is clear. Without mWrap, running off the start returns the current index.
+ * Gives up after mScrollItemNum + 1 tries.
+ *
+ * @return the item index, the current index (start reached without wrap), or 0 when none is selectable
+ */
 extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
 {
     unsigned char n = self->mScrollItemNum;

@@ -12869,6 +12869,16 @@ struct sSndFileBuf {
     char* cur;
 };
 
+/**
+ * Loads a whole file into memory for parsing, with a terminating 0 after it.
+ *
+ * Takes the size (BXFILE_size); when nonzero, allocates size + 1 bytes tagged with the file name, loads the file
+ * there (FILE_loadat) and points mPtr at its start. An empty or missing file leaves mBasePtr and mPtr 0.
+ *
+ * @param name  the file (On Tour Filename)
+ * @param flags  the allocation flags (On Tour int MemType)
+ * @return @p self
+ */
 extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name, int flags)
 {
     self->mBasePtr = 0;
@@ -12890,6 +12900,11 @@ INCLUDE_ASM("sound/soundsys", FileParser__FileParser);
 void cMemMan_free(void*);
 void operator_delete(int*);
 
+/**
+ * Destroys a file parser: frees the loaded file (mBasePtr), then the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void FileParser__FileParser(FileParser* self, int flags)
 {
     void* p = self->mBasePtr;

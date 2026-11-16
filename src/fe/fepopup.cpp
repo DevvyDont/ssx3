@@ -2600,6 +2600,14 @@ struct sVEntry_A0F0 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Greys out or re-enables one popup option: setStatic(@p bStatic) and setUseStaticColour(1) on mpOptions[idx].
+ *
+ * Does nothing when that option widget does not exist.
+ *
+ * @param idx  the option index (On Tour iEntryNum)
+ * @param bStatic  nonzero to make the option static (unselectable)
+ */
 extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
 {
     char* o = *(char**)((char*)self + (idx << 2) + 0x90);
@@ -2615,6 +2623,14 @@ extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getCurrentlySelected);
 #ifdef SKIP_ASM
+/**
+ * Returns the popup's selected option.
+ *
+ * Without a menu, returns info.miDefaultOption. Otherwise returns the menu's mScrollItemCurrent, less 1 unless the
+ * popup is a text-entry popup (meType -1).
+ *
+ * @return the selected option index
+ */
 extern "C" int cScreenPopup_getCurrentlySelected(cScreenPopup* self)
 {
     void* p = self->mpMenu;
@@ -3065,6 +3081,9 @@ INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_clear);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
+/**
+ * Clears a buy popup's description: the item-name, item-type and question elements, mCost, mMoney and mCreditsLeft.
+ */
 extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self)
 {
     MEM_fill((char*)self + 0x14, 0, 8);
@@ -3471,6 +3490,16 @@ int GetHashValue32(char* str);
 extern char D_00466368[];
 extern char D_004A1408[];
 
+/**
+ * Sets up the buy popup for buying attribute points.
+ *
+ * Stores @p cost and @p money, the item type as the text id "kT_OVRCMNBuyAttributesColon", and both the item name and
+ * the question as the empty ascii string. @p pAttrName is never read.
+ *
+ * @param pAttrName  the attribute's name (unused)
+ * @param cost  the price
+ * @param money  the player's money
+ */
 extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int pAttrName, int cost, int money)
 {
     char* s = D_004A1408;
@@ -4714,6 +4743,16 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_AddAsciiEdit);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
+/**
+ * Types one character into the keyboard's edit string at the cursor.
+ *
+ * Overwrites mszEditString[miCursorPos]. At the end of the string, the string grows: on the last allowed position
+ * (miMaxCharacters - 1) it is cut at miMaxCharacters and miViewableEndIndex becomes cursor + 1; otherwise the cursor
+ * advances, the string is terminated after it and miViewableEndIndex grows by 1. Inside the string the character is
+ * overwritten and the cursor advances (not past miMaxCharacters - 1).
+ *
+ * @param value  the character (On Tour char c)
+ */
 extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value)
 {
     char c = value;
@@ -4747,6 +4786,16 @@ extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 extern signed char D_00441390[];
 extern signed char D_004413E8[];
 
+/**
+ * Moves the on-screen keyboard's cursor to the key that types a given character.
+ *
+ * '`' selects key 0xE. Otherwise the first of the 0x54 keys whose upper (D_00441390) or lower (D_004413E8) character
+ * matches is taken, skipping '*' keys and keys that are '@' in both tables; it becomes miCurrentKey when
+ * cKeyboardPopup_allowSelection allows it.
+ *
+ * @param value  the character (On Tour char c)
+ * @return 1 when a key was selected, else 0
+ */
 extern "C" int cKeyboardPopup_updateToAscii(cKeyboardPopup* self, int value)
 {
     char c = value;
@@ -4776,6 +4825,12 @@ extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value);
 extern signed char D_00441390[];
 extern signed char D_004413E8[];
 
+/**
+ * Types the current key's character into the edit string (cKeyboardPopup_AddAsciiEdit).
+ *
+ * Uses the first table (D_00441390: digits, upper case) when shift and caps lock differ, else the second (D_004413E8:
+ * symbols, lower case); keys 15-26 (the number row) follow shift alone.
+ */
 extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self)
 {
     bool b = self->mbCapsOn != 0;
@@ -5172,6 +5227,11 @@ extern "C" void cKeyboardPopup_setMaxCharacters(cKeyboardPopup* self, int iMaxCh
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setMinCharacters);
 #ifdef SKIP_ASM
+/**
+ * Sets miMinCharacters, clamped to 0-63.
+ *
+ * @param iMinCharacters  the minimum length the entry must have
+ */
 extern "C" void cKeyboardPopup_setMinCharacters(cKeyboardPopup* self, int iMinCharacters)
 {
     if (iMinCharacters < 0) {
@@ -6085,6 +6145,15 @@ struct sVEntryK1CE5E0 {
     void* (*fn)(void*, int);
 };
 
+/**
+ * Appends a quick message to the edit string, cut to the room left, and moves the cursor to its end.
+ *
+ * The text is the player's message @p key from the option interface (func_0014F6A8) or, when unset, its localised
+ * default (cBEOptionInterface_getDefaultQuickKeyMessageHashValue). The cursor ends on the last character when the
+ * string is full, else just after it.
+ *
+ * @param key  the quick-message index (On Tour iKeyIndex)
+ */
 extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key)
 {
     char buf[0x40];

@@ -750,6 +750,12 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_isPlaying);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a sequence with the given id is in the sequencer's list (mFirstSequence chain).
+ *
+ * @param id  the sequence id (the node's first word)
+ * @return 1 when found, else 0
+ */
 extern "C" int cAnimSequencer_isPlaying(cAnimSequencer *self, int id) {
     for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
         if (*(int *)n == id) {
@@ -762,6 +768,12 @@ extern "C" int cAnimSequencer_isPlaying(cAnimSequencer *self, int id) {
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getPosition);
 #ifdef SKIP_ASM
+/**
+ * Returns where a sequence sits in the sequencer's list.
+ *
+ * @param id  the sequence id (the node's first word; On Tour sequenceID)
+ * @return the sequence's zero-based position from mFirstSequence, or -1 when it is not queued
+ */
 extern "C" int cAnimSequencer_getPosition(cAnimSequencer *self, int id) {
     int index = 0;
     for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {

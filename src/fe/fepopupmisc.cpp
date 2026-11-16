@@ -604,6 +604,14 @@ extern "C" void *func_001DF5C8(cFEStateNet* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the online main-menu state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateOnlineMainMenu_vtbl;
@@ -614,6 +622,11 @@ void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineAgreement_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the terms-of-service state: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateOnlineAgreement_onLoseTransition(void* self)
 {
     return 0x1;
@@ -639,6 +652,14 @@ extern "C" void *func_001DF638(cFEStateNetQuickPlayPopup* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the quick-match popup state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetQuickPlayPopup_vtbl;
@@ -649,6 +670,11 @@ void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the quick-match popup: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateNetQuickPlayPopup_onLoseTransition(void* self)
 {
     return 0x1;
@@ -673,6 +699,14 @@ extern "C" void *func_001DF6A8(cFEStateNet* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the SSX World hub state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetSSXWorld_vtbl;
@@ -698,6 +732,14 @@ extern "C" void *func_001DF710(cFEStateNetQuickMessages* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages__cFEStateNetQuickMessages__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the quick-messages editor state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetQuickMessages_vtbl;
@@ -782,6 +824,12 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
+/**
+ * Destroys the create-room popup: frees its three strings (mszPassword, mszChannelName, mszRoomName), then runs the
+ * cFEStateNet destructor (func_001A85D0).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ */
 extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int flags)
 {
     self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
@@ -795,6 +843,11 @@ extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateN
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the create-room popup: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateNetCreateRoomPopup_onLoseTransition(void* self)
 {
     return 0x1;
@@ -2369,6 +2422,14 @@ extern "C" void *func_001E08D8(cFEStateSelectPersona* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona__cFEStateSelectPersona__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the persona-selection state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateSelectPersona__cFEStateSelectPersona(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateSelectPersona_vtbl;
@@ -2423,6 +2484,14 @@ extern void* cFEStateChallengePopup_vtbl[];
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
+/**
+ * Destroys the challenge popup: calls its parent state's slot 32, then runs the cFEStateNet destructor.
+ *
+ * Slot 32 is the same hook the popup's own onGainTransition calls on itself, so the parent refreshes as the popup
+ * goes away.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ */
 extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallengePopup* self, int flags)
 {
     self->mVtbl = cFEStateChallengePopup_vtbl;
@@ -2436,6 +2505,11 @@ extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallenge
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the challenge popup: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateChallengePopup_onLoseTransition(void* self)
 {
     return 0x1;
@@ -2472,6 +2546,12 @@ struct sVEntry001E0A50 {
     void (*fn)(void*);
 };
 
+/**
+ * Destroys the challenge-received popup: calls its parent state's slot 32, frees the string at +0x6D0, then runs the
+ * cFEStateNet destructor.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ */
 extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int flags)
 {
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
@@ -2486,6 +2566,11 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the challenge-received popup: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateChallengeReceivedPopup_onLoseTransition(void* self)
 {
     return 0x1;
@@ -2511,6 +2596,15 @@ extern "C" void *func_001E0AC0(cFEStateOnlineCharacterSelect* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the online character-select state: restores its vtable and runs the cFEStateNet destructor
+ * (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateOnlineCharacterSelect_vtbl;
@@ -2587,6 +2681,11 @@ extern "C" void* func_001E0BB0(cFEStateAuthDNAS* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Opening transition of the DNAS authentication state: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateAuthDNAS_onGainTransition(void* self)
 {
     return 0x1;
@@ -2596,6 +2695,11 @@ int cFEStateAuthDNAS_onGainTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the DNAS authentication state: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateAuthDNAS_onLoseTransition(void* self)
 {
     return 0x1;
@@ -2639,6 +2743,11 @@ extern "C" void* func_001E0C30(cFEStateAuthDNASError* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the DNAS error state: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateAuthDNASError_onLoseTransition(void* self)
 {
     return 0x1;
@@ -2807,6 +2916,14 @@ extern "C" void *func_001E0DD8(cFEStateCreateDuplicate* self) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate__cFEStateCreateDuplicate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the duplicate-account state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateDuplicate_vtbl;
@@ -2890,6 +3007,14 @@ extern "C" void* func_001A85D0(void*);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews__cFEStateNetNews__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the server-news state: restores its vtable and runs the cFEStateNet destructor (func_001A85D0).
+ *
+ * The g++ destructor flags are not declared here: they stay in $a1 and reach func_001A85D0 unchanged, which frees the
+ * object when bit 0 is set.
+ *
+ * @return func_001A85D0()'s result (declared void* here)
+ */
 void* cFEStateNetNews__cFEStateNetNews(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetNews_vtbl;
@@ -2900,6 +3025,11 @@ void* cFEStateNetNews__cFEStateNetNews(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the server-news state: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateNetNews_onLoseTransition(void* self)
 {
     return 0x1;
@@ -3069,6 +3199,11 @@ extern "C" void* func_001E0FF0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateReadMessagePopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaving transition of the read-message popup: nothing to animate, so it reports the transition done at once.
+ *
+ * @return 1 (done)
+ */
 int cFEStateReadMessagePopup_onLoseTransition(void* self)
 {
     return 0x1;

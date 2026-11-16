@@ -79,6 +79,12 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 void cMemMan_free(void*);
 
+/**
+ * Empties every bucket and frees the bucket array.
+ *
+ * Purges buckets 0 .. count - 1 (cBucketMan_purgeBucket), then destroys the 0x44-byte buckets in reverse (their four
+ * cObjNode list heads), frees the array (with its new[] header) and clears mBuckets and the count.
+ */
 extern "C" void cBucketMan_purge(cBucketMan* self)
 {
     int i;
@@ -456,6 +462,11 @@ struct sBucketVEntry50A0 {
     void (*fn)(void*);
 };
 
+/**
+ * Renders every node in one bucket: calls slot 4 (render) of each node from cBucketMan_first / cBucketMan_next.
+ *
+ * @param index  the bucket (On Tour const int bucket)
+ */
 extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);

@@ -27,6 +27,14 @@ INCLUDE_ASM("ui/uithing", cUIThing_playKeyframerEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Plays the object's keyframer event @p idx on its screen (cUIScreen_playFrame(.., event, 1)).
+ *
+ * Nothing happens when the object has no event table, the event is 0xFFFF (none) or there is no screen.
+ *
+ * @param idx  the event index (On Tour char e)
+ * @return 1 when the event was played, else 0 (On Tour returns bool)
+ */
 // Plays keyframer event idx on the owning screen (0x5C); 0xFFFF = no event.
 extern "C" int cUIThing_playKeyframerEvent(cUIThing* self, signed char idx)
 {

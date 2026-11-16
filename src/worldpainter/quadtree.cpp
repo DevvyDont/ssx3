@@ -58,13 +58,22 @@ extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_setFreeNodes);
 #ifdef SKIP_ASM
-extern "C" void cQuadTree_setFreeNodes(cQuadTree* self, unsigned short a, unsigned short b, unsigned short c, unsigned short d) {
+/**
+ * Returns four sibling nodes to the free chain: chains @p nodeid0, @p nodeid1, @p nodeid2, @p nodeid3 in front of the old head (the first
+ * short of *m_freeNodes), makes @p nodeid0 the head and lowers m_numUsedNodes by 4.
+ *
+ * @param nodeid0  the first node index (On Tour nodeid0)
+ * @param nodeid1  the second (On Tour nodeid1)
+ * @param nodeid2  the third (On Tour nodeid2)
+ * @param nodeid3  the fourth (On Tour nodeid3)
+ */
+extern "C" void cQuadTree_setFreeNodes(cQuadTree* self, unsigned short nodeid0, unsigned short nodeid1, unsigned short nodeid2, unsigned short nodeid3) {
     char *arr = (char*)self->m_nodes;
-    *(unsigned short *)(arr + (a << 3)) = b;
-    *(unsigned short *)(arr + (b << 3)) = c;
-    *(unsigned short *)(arr + (c << 3)) = d;
-    *(unsigned short *)(arr + (d << 3)) = *(unsigned short*)self->m_freeNodes;
-    *(unsigned short*)self->m_freeNodes = a;
+    *(unsigned short *)(arr + (nodeid0 << 3)) = nodeid1;
+    *(unsigned short *)(arr + (nodeid1 << 3)) = nodeid2;
+    *(unsigned short *)(arr + (nodeid2 << 3)) = nodeid3;
+    *(unsigned short *)(arr + (nodeid3 << 3)) = *(unsigned short*)self->m_freeNodes;
+    *(unsigned short*)self->m_freeNodes = nodeid0;
     self->m_numUsedNodes = self->m_numUsedNodes - 4;
 }
 #endif
@@ -91,6 +100,18 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C1A00);
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getLeaf);
 #ifdef SKIP_ASM
+/**
+ * Returns the leaf covering a world position: m_defaultNode (+0x18) outside the grid, else the leaf found from
+ * m_root.
+ *
+ * The position becomes 15-bit grid coordinates ((p - offset) * m_scale); each branch level (bit 0 of the node's first
+ * short set) takes the child picked by the next x and z bits. The final `return 0` for a branch node cannot be
+ * reached.
+ *
+ * @param fx  the world x (On Tour x)
+ * @param fz  the world z (On Tour y)
+ * @return the leaf node (On Tour const tQuadTreeLeafNode*)
+ */
 extern "C" void* cQuadTree_getLeaf(cQuadTree* self, float fx, float fz)
 {
     int x = (int)((fx - self->m_offsetX) * *(float*)self);
@@ -206,6 +227,18 @@ struct cQuadTree_exportNode_sOut {
     int f4;
 };
 
+/**
+ * Copies a node and, for a branch, its four subtrees depth first into an export list, recording each node's new
+ * index.
+ *
+ * out[*count] gets the node's two words, map[the node's index in m_nodes] gets *count, and *count grows by one per
+ * node.
+ *
+ * @param out  the export node list (On Tour filenodelist)
+ * @param count  in/out: nodes exported so far (On Tour int& numexportednodes)
+ * @param map  the old-to-new index table (On Tour remaptable)
+ * @param node  the node to export
+ */
 // PORT: node index computed from pointers cast to unsigned int
 extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node)
 {
@@ -226,6 +259,14 @@ extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut*
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_calcUsedNodes);
 #ifdef SKIP_ASM
+/**
+ * Counts the nodes in a subtree: 1 for @p node plus, for a branch, its four children's counts.
+ *
+ * A null @p node also counts 1.
+ *
+ * @param node  the subtree's root
+ * @return the node count
+ */
 extern "C" int cQuadTree_calcUsedNodes(cQuadTree* self, unsigned short *node) {
     int count = 1;
     if (node != 0) {
@@ -2959,9 +3000,9 @@ extern "C" void func_0040A360(int a0, int a1, int* out);
 extern "C" void func_002C5278(cPS2MemCard* self);
 extern int D_004A3940;
 
-extern "C" void func_002C6360(cPS2MemCard* p)
+extern "C" void func_002C6360(cPS2MemCard* pS2MemCard)
 {
-    sQTState* self = (sQTState*)p;
+    sQTState* self = (sQTState*)pS2MemCard;
     if (*(int*)((char*)self + 0x40) != 0) {
         D_004A3940 = 0;
         func_0040A360(0, 0, &D_004A3940);

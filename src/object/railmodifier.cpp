@@ -400,6 +400,12 @@ static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
 
 extern "C" void func_0034FED8(void* model, int bone, sRmMat44C5A0* out);
 
+/**
+ * Builds the rail's inverse transform: the instance's mesh matrix (func_0034FED8, cInstanceNode::buildMeshMat with
+ * Instance and Mesh) multiplied with XForm (+0x50), into @p mat.
+ *
+ * @param mat  receives the matrix (On Tour t4Matrix& mat)
+ */
 extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
 {
     func_0034FED8(self->Instance, self->Mesh, mat);
@@ -746,6 +752,24 @@ static inline void resetHit_C698(sRmHit_C698* h)
     h->v = 0;
 }
 
+/**
+ * Finds the point of the rail's spline nearest to a position and records it as a hit when it beats the best so far.
+ *
+ * Skipped when the spline (SplineId, looked up in the world) shares no bit with @p mask. Each segment's cubic is
+ * taken into world space with cRailModifier_getInvMat, sampled at t = 0, 0.25 .. 1 (distance to the nearest point on
+ * each chord), and the bracket round the best sample (D_0048E7D8 / D_0048E7F0) is narrowed by up to 24 golden-section
+ * steps (until it is within 0.0005). When nothing was found yet or the distance is below
+ * @p bestDist, sets @p found and @p bestDist and fills @p out: position, tangent direction (normalised), spline id,
+ * Instance, Mesh, t, the spline record and no object. @p box and @p box2 are never read.
+ *
+ * @param box  the probe's minimum corner (On Tour minBpos); unused
+ * @param box2  the probe's maximum corner (On Tour maxBpos); unused
+ * @param point  the position to match (On Tour bpos)
+ * @param mask  the spline filter mask (On Tour splineFilterMask)
+ * @param found  in/out: set to 1 when a hit is recorded (On Tour bool& hit)
+ * @param bestDist  in/out: the best distance so far (On Tour float& dist)
+ * @param out  receives the hit (On Tour tIntersectInfo* intInfo)
+ */
 extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
                               int* found, float* bestDist, sRmHit_C698* out)
 {
@@ -2859,6 +2883,13 @@ struct sRmMtx_35FC20 {
 
 extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
 
+/**
+ * Builds the texture matrix of a UV-scroll modifier: a rotation by Angle about Axis (identity when Angle is 0) whose
+ * row 3 holds the UV offset (UV[0], UV[1]).
+ *
+ * @param m  receives the matrix (On Tour t4Matrix& mat)
+ * @return @p m
+ */
 extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, sRmMtx_35FC20* m)
 {
     float zero = 0.0f;
@@ -4089,6 +4120,12 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier__cTransformModifier);
 extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys the transform-modifier base: restores cTransformModifier_vtbl and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cTransformModifier__cTransformModifier(cTransformModifier* self, int flags)
 {
     *(void***)self = cTransformModifier_vtbl;
@@ -4101,6 +4138,9 @@ extern "C" void cTransformModifier__cTransformModifier(cTransformModifier* self,
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base cTransformModifier::update: does nothing.
+ */
 void cTransformModifier_update(void* self)
 {
 }
@@ -4214,6 +4254,11 @@ void cTransformModifier_render(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base cTransformModifier::getBoundBox: no bound box.
+ *
+ * @return 0 (On Tour returns const tBoundBox*)
+ */
 int cTransformModifier_getBoundBox(void* self)
 {
     return 0;
@@ -4223,6 +4268,9 @@ int cTransformModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_setBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base cTransformModifier::setBoundBox: does nothing (On Tour takes const tBoundBox& boundbox, not declared here).
+ */
 void cTransformModifier_setBoundBox(void* self)
 {
 }
@@ -4231,6 +4279,11 @@ void cTransformModifier_setBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base cTransformModifier::getRadius: no radius.
+ *
+ * @return 0.0
+ */
 float cTransformModifier_getRadius(void* self)
 {
     return 0.0f;
@@ -4240,6 +4293,9 @@ float cTransformModifier_getRadius(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_setRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Base cTransformModifier::setRadius: does nothing (On Tour takes float radius, not declared here).
+ */
 void cTransformModifier_setRadius(void* self)
 {
 }
@@ -4776,6 +4832,11 @@ extern "C" int func_00360DE8(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_getTransformModifier);
 #ifdef SKIP_ASM
+/**
+ * Returns the node's transform modifier: the first word of its modifier block.
+ *
+ * @return the transform modifier, or 0 when the node has no modifier block
+ */
 extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
 {
     int* p = (int*)self->ModifierBlock;
@@ -4818,6 +4879,12 @@ extern "C" int func_00360E70(cMoveNode* moveNode) {
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_getMaterialBlock);
 #ifdef SKIP_ASM
+/**
+ * Returns the node's material block: the texture-flip modifier's MaterialBlock (+0x24) when it has one, else its
+ * instance's (+0x94).
+ *
+ * @return the material block record (On Tour const tMaterialBlockRecord*)
+ */
 extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
 {
     int cond;
@@ -4843,6 +4910,13 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getTextureMat);
 // the unit declares cUVScrollModifier_getTextureMat with two parameters; this caller passes one
 void* cUVScrollModifier_getTextureMat_1arg(void*) __asm__("cUVScrollModifier_getTextureMat");
 
+/**
+ * Returns the node's texture matrix from its UV-scroll modifier (cUVScrollModifier_getTextureMat), when it has one.
+ *
+ * On Tour takes the destination (t4Matrix& mat); here it is not declared and stays in $a1 for the call.
+ *
+ * @return the matrix, or 0 when the node has no UV-scroll modifier
+ */
 extern "C" void* cMoveNode_getTextureMat(cMoveNode* self)
 {
     char* p = (char*)self->ModifierBlock;
@@ -5956,6 +6030,11 @@ void* func_00361910(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cPositionModifier_setBoundBox);
 #ifdef SKIP_ASM
+/**
+ * Copies a bound box (minimum and maximum points) into the position modifier's BoundBox.
+ *
+ * @param boundbox  the new bound box
+ */
 extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* boundbox)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
@@ -5990,6 +6069,12 @@ struct sRailVEntry1940 {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the position modifier's root transform (Transform, +0x50), first rebuilding it (slot 3,
+ * updateRootTransform) when RootTransformDirty is set.
+ *
+ * @return the transform matrix
+ */
 extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
 {
     if (self->RootTransformDirty != 0) {
@@ -6187,6 +6272,12 @@ struct sRailVEntry1A60 {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the magnet modifier's root transform (Transform, +0x60), first rebuilding it (slot 3, updateRootTransform)
+ * when RootTransformDirty is set.
+ *
+ * @return the transform matrix
+ */
 extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
 {
     if (self->RootTransformDirty != 0) {

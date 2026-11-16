@@ -1219,6 +1219,13 @@ static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Places the rider at its backcountry drop-off point.
+ *
+ * Gets startpoint type 2 for the rider's mAIIndex from PathSys (func_0026B5E0, On Tour cPathSys::getStartpoint),
+ * moves the point forward along its direction (floats 5-7) by func_00115B08(self), and calls cRider::putAt
+ * (func_0011D660) with that position and direction, anim id 0x11F and 2999.94.
+ */
 extern "C" void cRider_putAtDropOffBC(cRider* self)
 {
     float* p = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
@@ -2407,6 +2414,11 @@ struct sVEntry0011FF18 {
     void (*fn)(void*, void*);
 };
 
+/**
+ * Fetches the rider's current control command from its rider handler (slot 1 of the handler's vtable at +0xDE8).
+ *
+ * @param out  receives the command (On Tour tControlCmd& i_Cmd)
+ */
 // Forwards its second argument to vtable slot 1 of the rider handler.
 extern "C" void cRider_getControlCmd(cRider* self, void* out)
 {
@@ -4620,6 +4632,14 @@ extern "C" int func_00147410(void* iface, int riderIndex);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+/**
+ * Returns the cheat character chosen for this rider's player.
+ *
+ * Asks the new-player interface (cBE interface kind 1) through func_00147410 for the rider's mAIIndex; game mode code
+ * stores the same value in iCheatCharacters.
+ *
+ * @return the cheat character id for the rider's player
+ */
 extern "C" int cRider_getCheatIdentity(cRider* self)
 {
     return func_00147410(cBE_getInterface_Fv(cBE_getBE(), 1), self->mAIIndex);

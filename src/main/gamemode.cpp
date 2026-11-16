@@ -413,11 +413,19 @@ struct sVEntry_00238590 {
 
 extern void* D_00536668[];
 
-extern "C" void cGameModeMan_getHeatScore(cGameModeMan* self, int a, int b)
+/**
+ * Asks the current game-mode handler (aHandler[iCurrModeHandler], slot 9) for a rider's score in one heat.
+ *
+ * Declared void here, but the handler's result is left in $v0 (On Tour returns unsigned int).
+ *
+ * @param iRider  the rider index (On Tour iRider)
+ * @param iHeat  the heat (On Tour iHeat)
+ */
+extern "C" void cGameModeMan_getHeatScore(cGameModeMan* self, int iRider, int iHeat)
 {
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238590* vt = *(sVEntry_00238590**)obj;
-    vt[9].fn((char*)obj + vt[9].delta, a, b);
+    vt[9].fn((char*)obj + vt[9].delta, iRider, iHeat);
 }
 #endif
 
@@ -448,31 +456,40 @@ public:
 
 extern int D_00536708[];
 
-extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cGmStream_385D0* s)
+/**
+ * Saves the game-mode manager to a replay frame, then lets the current handler save itself (its save virtual).
+ *
+ * Writes iCurrModeHandler, iHeatNum, iCurrentGameEvent, iNumberAI, iSimAI, iCharacters, iLocation, iNextLocation,
+ * iNextHeat, the score tables D_00536730 and D_00536708, uiTimeLimit, uiPointTarget, unk_80, the table D_00536640,
+ * then bIsEventDone through bAreResultsLocked. iCurrentGamePath, iCheatCharacters and iRestoreHeat are not saved.
+ *
+ * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cGmStream_385D0* data)
 {
-    s->write(((char*)self) + 4, 4);
-    s->write(((char*)self), 4);
-    s->write(((char*)self) + 8, 4);
-    s->write(((char*)self) + 0x10, 4);
-    s->write(((char*)self) + 0x14, 4);
-    s->write(((char*)self) + 0x18, 0x28);
-    s->write(((char*)self) + 0x68, 4);
-    s->write(((char*)self) + 0x6C, 4);
-    s->write(((char*)self) + 0x70, 4);
-    s->write(D_00536730, 0x28);
-    s->write(D_00536708, 0x28);
-    s->write(((char*)self) + 0x78, 4);
-    s->write(((char*)self) + 0x7C, 4);
-    s->write(((char*)self) + 0x80, 4);
-    s->write(D_00536640, 0x28);
-    s->write(((char*)self) + 0x84, 4);
-    s->write(((char*)self) + 0x88, 4);
-    s->write(((char*)self) + 0x8C, 4);
-    s->write(((char*)self) + 0x90, 4);
-    s->write(((char*)self) + 0x94, 4);
-    s->write(((char*)self) + 0x98, 4);
-    s->write(((char*)self) + 0x9C, 4);
-    ((cGameModeObj_2385D0*)D_00536668[self->iCurrModeHandler])->save(s);
+    data->write(((char*)self) + 4, 4);
+    data->write(((char*)self), 4);
+    data->write(((char*)self) + 8, 4);
+    data->write(((char*)self) + 0x10, 4);
+    data->write(((char*)self) + 0x14, 4);
+    data->write(((char*)self) + 0x18, 0x28);
+    data->write(((char*)self) + 0x68, 4);
+    data->write(((char*)self) + 0x6C, 4);
+    data->write(((char*)self) + 0x70, 4);
+    data->write(D_00536730, 0x28);
+    data->write(D_00536708, 0x28);
+    data->write(((char*)self) + 0x78, 4);
+    data->write(((char*)self) + 0x7C, 4);
+    data->write(((char*)self) + 0x80, 4);
+    data->write(D_00536640, 0x28);
+    data->write(((char*)self) + 0x84, 4);
+    data->write(((char*)self) + 0x88, 4);
+    data->write(((char*)self) + 0x8C, 4);
+    data->write(((char*)self) + 0x90, 4);
+    data->write(((char*)self) + 0x94, 4);
+    data->write(((char*)self) + 0x98, 4);
+    data->write(((char*)self) + 0x9C, 4);
+    ((cGameModeObj_2385D0*)D_00536668[self->iCurrModeHandler])->save(data);
 }
 #endif
 //100%
@@ -494,31 +511,38 @@ public:
     virtual void load(cGmStream_385D0* s);
 };
 
-extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_385D0* s)
+/**
+ * Restores the game-mode manager from a replay frame in cGameModeMan_writeToReplayFrame's order, then the handler.
+ *
+ * The handler is aHandler[iCurrModeHandler] after iCurrModeHandler has been read back (its load virtual).
+ *
+ * @param data  the replay frame read from (On Tour cReplayFramePtr* data)
+ */
+extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_385D0* data)
 {
-    s->read(((char*)self) + 4, 4);
-    s->read(((char*)self), 4);
-    s->read(((char*)self) + 8, 4);
-    s->read(((char*)self) + 0x10, 4);
-    s->read(((char*)self) + 0x14, 4);
-    s->read(((char*)self) + 0x18, 0x28);
-    s->read(((char*)self) + 0x68, 4);
-    s->read(((char*)self) + 0x6C, 4);
-    s->read(((char*)self) + 0x70, 4);
-    s->read(D_00536730, 0x28);
-    s->read(D_00536708, 0x28);
-    s->read(((char*)self) + 0x78, 4);
-    s->read(((char*)self) + 0x7C, 4);
-    s->read(((char*)self) + 0x80, 4);
-    s->read(D_00536640, 0x28);
-    s->read(((char*)self) + 0x84, 4);
-    s->read(((char*)self) + 0x88, 4);
-    s->read(((char*)self) + 0x8C, 4);
-    s->read(((char*)self) + 0x90, 4);
-    s->read(((char*)self) + 0x94, 4);
-    s->read(((char*)self) + 0x98, 4);
-    s->read(((char*)self) + 0x9C, 4);
-    ((cGameModeObj_2388A0*)D_00536668[self->iCurrModeHandler])->load(s);
+    data->read(((char*)self) + 4, 4);
+    data->read(((char*)self), 4);
+    data->read(((char*)self) + 8, 4);
+    data->read(((char*)self) + 0x10, 4);
+    data->read(((char*)self) + 0x14, 4);
+    data->read(((char*)self) + 0x18, 0x28);
+    data->read(((char*)self) + 0x68, 4);
+    data->read(((char*)self) + 0x6C, 4);
+    data->read(((char*)self) + 0x70, 4);
+    data->read(D_00536730, 0x28);
+    data->read(D_00536708, 0x28);
+    data->read(((char*)self) + 0x78, 4);
+    data->read(((char*)self) + 0x7C, 4);
+    data->read(((char*)self) + 0x80, 4);
+    data->read(D_00536640, 0x28);
+    data->read(((char*)self) + 0x84, 4);
+    data->read(((char*)self) + 0x88, 4);
+    data->read(((char*)self) + 0x8C, 4);
+    data->read(((char*)self) + 0x90, 4);
+    data->read(((char*)self) + 0x94, 4);
+    data->read(((char*)self) + 0x98, 4);
+    data->read(((char*)self) + 0x9C, 4);
+    ((cGameModeObj_2388A0*)D_00536668[self->iCurrModeHandler])->load(data);
 }
 #endif
 

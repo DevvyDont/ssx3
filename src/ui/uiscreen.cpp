@@ -1093,6 +1093,12 @@ INCLUDE_ASM("ui/uiscreen", cUIScrollBar__cUIScrollBar);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* cUIScrollBar_vtbl[];
 
+/**
+ * Destroys a scroll bar: deletes mpObjBackground and mpObjKnob (deleting destructor, flags 3), then runs the cUIThing
+ * destructor.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the cUIThing destructor)
+ */
 extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
     self->mVtbl = cUIScrollBar_vtbl;
@@ -1115,6 +1121,13 @@ extern "C" void* cUIThing_setUIData(void* self);
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScrollBar_setUIData__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets a scroll bar up from its screen record: only cUIThing's setUIData.
+ *
+ * The record (On Tour tUIBaseObject* pUIBase) is not declared here; it stays in $a1 for the call.
+ *
+ * @return cUIThing_setUIData's result (declared void* here)
+ */
 void* cUIScrollBar_setUIData(void* self)
 {
     return cUIThing_setUIData(self);
@@ -1130,6 +1143,13 @@ struct cUIScrollBar_render2D_sVEntry {
     void (*fn)(void*, float, float);
 };
 
+/**
+ * Draws the scroll bar's background and knob (each when visible, slot 17 render2D) at its position plus (@p x, @p y);
+ * nothing unless both exist.
+ *
+ * @param x  the parent's x offset
+ * @param y  the parent's y offset
+ */
 extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
 {
     char* a = (char*)self->mpObjBackground;
@@ -1326,22 +1346,28 @@ static inline void cUIScrollBar_setScrollVisibile_call(char* o, int a)
     vt[9].fn(o + vt[9].delta, a);
 }
 
-extern "C" void cUIScrollBar_setScrollVisibile(cUIScrollBar* self, int a)
+/**
+ * Shows or hides the whole scroll bar: setVisible (slot 9) on the up and down arrows and mpHideOnEmpty when they
+ * exist, then on the knob and the background (not null-checked).
+ *
+ * @param bVisible  nonzero to show (On Tour bool bVisible)
+ */
+extern "C" void cUIScrollBar_setScrollVisibile(cUIScrollBar* self, int bVisible)
 {
     char* o = (char*)self->mpUpArrow;
     if (o != 0) {
-        cUIScrollBar_setScrollVisibile_call(o, a);
+        cUIScrollBar_setScrollVisibile_call(o, bVisible);
     }
     o = (char*)self->mpDownArrow;
     if (o != 0) {
-        cUIScrollBar_setScrollVisibile_call(o, a);
+        cUIScrollBar_setScrollVisibile_call(o, bVisible);
     }
     o = (char*)self->mpHideOnEmpty;
     if (o != 0) {
-        cUIScrollBar_setScrollVisibile_call(o, a);
+        cUIScrollBar_setScrollVisibile_call(o, bVisible);
     }
-    cUIScrollBar_setScrollVisibile_call((char*)self->mpObjKnob, a);
-    cUIScrollBar_setScrollVisibile_call((char*)self->mpObjBackground, a);
+    cUIScrollBar_setScrollVisibile_call((char*)self->mpObjKnob, bVisible);
+    cUIScrollBar_setScrollVisibile_call((char*)self->mpObjBackground, bVisible);
 }
 #endif
 
@@ -1351,6 +1377,12 @@ INCLUDE_ASM("ui/uiscreen", cUISlider__cUISlider);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* cUISlider_vtbl[];
 
+/**
+ * Destroys a slider: deletes mpObjBackground and mpObjKnob (deleting destructor, flags 3), then runs the cUIThing
+ * destructor.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the cUIThing destructor)
+ */
 extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
     self->mVtbl = cUISlider_vtbl;
@@ -1371,6 +1403,11 @@ extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUISlider_setUIData);
 #ifdef SKIP_ASM
+/**
+ * Sets a slider up from its screen record: cUIThing's setUIData, then mNumValues 10 and mBackWidth 100.
+ *
+ * The record (On Tour tUIBaseObject* pUIBase) is not declared here; it stays in $a1 for the cUIThing call.
+ */
 extern "C" void cUISlider_setUIData(cUISlider* self)
 {
     cUIThing_setUIData(self);
@@ -1404,6 +1441,16 @@ struct cUISlider_onInput_sVEntryS {
     void (*fn)(void*, int);
 };
 
+/**
+ * Moves the slider's value one step on left / right and reports it.
+ *
+ * Left lowers mValue while above 0 (keyframer event 8), right raises it while below mNumValues - 1 (event 9); a
+ * change is reported to the screen's state as widget event 9 (onWidgetEvent) and to slot 2 of the engine's +0x14
+ * listener (D_004A5A58 when none) with 1.
+ *
+ * @param input  the input (On Tour const cUIInput* pInput)
+ * @return 1 for left or right (even at the end of the range), else 0 (On Tour returns bool)
+ */
 extern "C" int cUISlider_onInput(cUISlider* self, char* input)
 {
     char* t = *(char**)((char*)func_0039FF50(((char*)self)) + 0x14);
@@ -1462,6 +1509,16 @@ struct cUISlider_render2D_sVEntryV {
     void (*fn)(void*, cUISlider_render2D_sVec3*);
 };
 
+/**
+ * Draws the slider's background, then its knob moved along it by the value.
+ *
+ * The knob's x becomes the background's x + (background width - knob width) / (mNumValues - 1) * mValue (stored in
+ * the knob's mPosition); both are drawn at the slider's position plus (@p dx, @p dy), with no visibility check.
+ * Nothing is drawn unless both exist.
+ *
+ * @param dx  the parent's x offset (On Tour x)
+ * @param dy  the parent's y offset (On Tour y)
+ */
 extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
 {
     char* a = (char*)self->mpObjBackground;

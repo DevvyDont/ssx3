@@ -71,6 +71,14 @@ struct sFrameDesc270130 {
     char b;
 };
 
+/**
+ * Takes a frame off FreeFrameList, first freeing a recorded one (cReplay_freeOneReplayFrame) when the free list is empty.
+ *
+ * The frame (func_0026E670, the free list's oldest) gets frame type 0, -1 in the words at +0x20, +0x24 and +0x34, and
+ * FrameStartTick (+0x30) 0.
+ *
+ * @return the frame (On Tour cReplayFrame*)
+ */
 extern "C" void* cReplay_allocReplayFrame(cReplay* self)
 {
     void* list = (char*)self + 0x3BC;
@@ -133,6 +141,12 @@ extern "C" void func_0026E608(void* list, void* node);
 extern "C" void cReplayFrame_clearFrame(void* node);
 extern "C" void func_0026E5D0(void* list, void* node);
 
+/**
+ * Gives a frame back: unlinks it from FrameList (func_0026E608), clears it (cReplayFrame_clearFrame) and adds it to
+ * FreeFrameList (func_0026E5D0).
+ *
+ * @param node  the frame (On Tour cReplayFrame*)
+ */
 extern "C" void cReplay_freeReplayFrame(cReplay* self, void* node)
 {
     func_0026E608((char*)self + 0x3B0, node);
@@ -154,6 +168,14 @@ struct sS270280 {
     char pad488[0x604 - 0x488];
     int f604;
 };
+/**
+ * Says whether the AI should hold still for the current replay state.
+ *
+ * Never while recording or in states 2 and 10-15. Always in 3, 5, 6, 8 and 9. In 1 and 7 when NextFrame is clear or
+ * playback has reached EndRecordTick; in 4 only at EndRecordTick.
+ *
+ * @return 1 to pause the AI, else 0 (On Tour returns bool)
+ */
 extern "C" int cReplay_isPauseAI(cReplay* self)
 {
     int r = 0;
@@ -194,6 +216,14 @@ struct sReplay002702F8 {
     int unk_0x604;
 };
 
+/**
+ * Moves playback to the start of @p frame, or of the oldest recorded frame when it is null.
+ *
+ * Clears NextFrame, sets PlaybackFrame, takes PlaybackTick from the frame's FrameStartTick and moves each input cache
+ * to it (func_0026D4D8, cReplayCache::moveTo).
+ *
+ * @param frame  the frame to start from, or 0 for the first
+ */
 extern "C" void cReplay_rewind(cReplay* self, void* frame)
 {
     int i;
@@ -253,6 +283,17 @@ struct sRcVEntry03F0 {
 };
 
 
+/**
+ * Advances playback by one tick, or (@p reset) jumps to the frame holding PlaybackTick and restores it.
+ *
+ * With @p reset, PlaybackFrame becomes the frame for PlaybackTick (func_0026E448); SaveFrame is skipped (its +0x18
+ * link); PlaybackTick moves to that frame's start, the input caches follow and the frame is restored. Otherwise the
+ * tick advances until EndRecordTick: there an automatic replay rewinds, steps, switches the first view's chase camera
+ * to its chapter camera (slot 4 of its controller) and updates every view; any other replay stops at EndRecordTick in
+ * state 3 (kPlaybackInput).
+ *
+ * @param reset  nonzero to jump to and restore the frame for PlaybackTick (On Tour bool setframe)
+ */
 extern "C" void cReplay_stepFrame(cReplay* self, int reset)
 {
     int i;
@@ -366,6 +407,9 @@ extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int obj, int alt)
 INCLUDE_ASM("replay/replaycache", cReplay_cancelMarkInstantReplay);
 #ifdef SKIP_ASM
 
+/**
+ * Drops a marked instant replay (InstantReplayFrame) when the AI manager's +0x7C word is 1.
+ */
 // FAKEMATCH: the clear is written as three identical arms on the sign of v (`if (v > 0) {*on = 0;} else if (v < 0)
 // {*on = 0;} else {*on = 0;}`), which keeps v a global pseudo with priority over self; plain form 97.92%.
 // Byte-identical and behaves like the plain form; landed marked under
@@ -421,6 +465,9 @@ INCLUDE_ASM("replay/replaycache", cReplay_startAutoReplay);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cReplay_setReplayState_cpp(void* self, int arg) __asm__("cReplay_setReplayState__FPvi");
 
+/**
+ * Switches to state 9 (kStartAutoReplay) unless an automatic replay is already on or the state is already 9.
+ */
 extern "C" void cReplay_startAutoReplay(cReplay* self)
 {
     if (self->AutoReplay == 0 && *(int*)self != 9) {
@@ -566,6 +613,14 @@ struct sRcSlots;
 extern "C" void cReplay_cancelMarkHighlight(cReplay* self, int i);
 extern "C" void cReplay_cancelMarkInstantReplay(cReplay* self);
 
+/**
+ * Records a rider's reset during live recording: cancels that rider's marked highlight and any marked instant replay.
+ *
+ * Only while recording (state 0) outside automatic and instant replays, and when func_00270730 (findPlayerId) finds
+ * the rider.
+ *
+ * @param key  the rider (On Tour int rider)
+ */
 extern "C" void cReplay_eventReset(cReplay* self, int key)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
@@ -618,6 +673,16 @@ static inline int cReplay_eventChapter_isClear(int v, int bit)
     return !((v >> bit) & 1);
 }
 
+/**
+ * Marks a chapter (a race checkpoint) for a rider during live recording.
+ *
+ * Only while recording (state 0) with no automatic or instant replay, ReplayError or EndReplay. When the rider is
+ * found (func_00270730) and @p bit is below MaxChapters and not yet set in Chapters[player], sets the player's bit in
+ * the newest frame's byte +0x1F and the chapter bit in Chapters[player].
+ *
+ * @param key  the rider (On Tour int rider)
+ * @param bit  the chapter (On Tour int pos)
+ */
 extern "C" void cReplay_eventChapter(cReplay* self, int key, int bit)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
@@ -783,6 +848,11 @@ struct sRcSlots {
     cReplayHighlight slots[1];
 };
 
+/**
+ * Cancels a player's marked highlight (func_0026E800 on Highlight[i]), only while recording (state 0).
+ *
+ * @param i  the player (On Tour int playerId)
+ */
 extern "C" void cReplay_cancelMarkHighlight(cReplay* self, int i)
 {
     if (self->State == 0) {
@@ -1342,6 +1412,17 @@ struct sReplayCache1758 {
     int field_0x618;            // 0x618
 };
 
+/**
+ * Loads a saved replay from a memory-card buffer and starts playing it.
+ *
+ * Fails unless its rider count matches the race's AI manager. Sets Loaded, SaveFrameTicks, ReplayError (+0xC != 0),
+ * RecordTick and EndRecordTick from the header, clears SaveFrame and PlaybackTick, empties FrameList, then loads each
+ * frame (cReplayFrame::loadFrame, from offset 0x28) into a fresh frame added to FrameList and each input cache
+ * (cReplayCache::load). Ends in state 8 (kPlaybackLoad) with Cmd 1.
+ *
+ * @param buf  the saved replay (On Tour char* data)
+ * @return 1 when loaded, 0 when the rider count differs (On Tour returns bool)
+ */
 extern "C" int cReplay_load(cReplay* self, char* buf)
 {
     sRcSave1758* data = (sRcSave1758*)buf;
@@ -1512,6 +1593,9 @@ extern "C" void cReplayFramePtr__cReplayFramePtr(int* self, int flags)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplayFramePtr_clearBlock);
 #ifdef SKIP_ASM
+/**
+ * Empties the frame without freeing its block: clears WriteData, ReadData and Size.
+ */
 extern "C" void cReplayFramePtr_clearBlock(cReplayFramePtr* self)
 {
     self->WriteData = 0;
@@ -1832,6 +1916,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_cScriptPlayerChanne
 #ifdef SKIP_ASM
 extern void* cScriptPlayerChannelSpline_vtbl[];
 
+/**
+ * Constructs a spline channel: stores its vtable and clears the data, owner, header, current-key and next-key fields.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptPlayerChannelSpline_cScriptPlayerChannelSpline(cScriptPlayerChannelSpline* self)
 {
     self->mVtbl = cScriptPlayerChannelSpline_vtbl;
@@ -2042,6 +2131,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_UpdateFrame);
 #ifdef SKIP_ASM
 extern "C" void func_00274A30(cScriptPlayerMain* p);
 
+/**
+ * Updates every playing script: cScriptPlayerMain::UpdateFrame (func_00274A30) on each node of mpScriptUsed.
+ */
 extern "C" void cInSeq_UpdateFrame(cInSeq* self)
 {
     char* n = (char*)self->mpScriptUsed;
@@ -2121,6 +2213,9 @@ extern "C" void func_002729A8(cInSeq* self, int i)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_RecycleAll);
 #ifdef SKIP_ASM
+/**
+ * Gives every playing script's player back to the free pool (func_002729A8, RecyclePlayer, on each used node).
+ */
 extern "C" void cInSeq_RecycleAll(cInSeq* self)
 {
     sRcNode272938* n = (sRcNode272938*)self->mpScriptUsed;
@@ -2137,6 +2232,15 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Preview);
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag);
 
+/**
+ * Previews one script player (cScriptPlayerMain_Preview).
+ *
+ * On Tour's Preview takes a cInSeqComm* (pPreviewCommInterface) as its last argument; here it is an int, passed
+ * through unchanged.
+ *
+ * @param playerID  the script player
+ * @param flag  the preview argument (On Tour cInSeqComm* pPreviewCommInterface)
+ */
 extern "C" void cInSeq_Preview(cInSeq* self, int playerID, int flag)
 {
     cScriptPlayerMain_Preview((cScriptPlayerMain*)((char*)cInSeq_GetPlayer(self, playerID)), flag);
@@ -2149,6 +2253,13 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Play);
 extern "C" void* func_00274830(void*, int);
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 
+/**
+ * Plays one script player (func_00274830, cScriptPlayerMain::Play).
+ *
+ * @param playerID  the script player
+ * @param loopScript  nonzero to loop the script
+ * @return func_00274830's result (On Tour's Play returns void)
+ */
 extern "C" void* cInSeq_Play(cInSeq* self, int playerID, int loopScript)
 {
     return func_00274830(cInSeq_GetPlayer(self, playerID), loopScript);
@@ -2177,6 +2288,11 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Stop);
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* p);
 
+/**
+ * Stops one script player (cScriptPlayerMain_Stop).
+ *
+ * @param playerID  the script player
+ */
 extern "C" void cInSeq_Stop(cInSeq* self, int playerID)
 {
     cScriptPlayerMain_Stop((cScriptPlayerMain*)cInSeq_GetPlayer(self, playerID));
@@ -2186,6 +2302,9 @@ extern "C" void cInSeq_Stop(cInSeq* self, int playerID)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_StopAll);
 #ifdef SKIP_ASM
+/**
+ * Stops every playing script player (cInSeq_Stop on each node of mpScriptUsed).
+ */
 extern "C" void cInSeq_StopAll(cInSeq* self)
 {
     sRcNode272938* n;
@@ -2199,6 +2318,11 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Pause);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
+/**
+ * Pauses one script player (cScriptPlayerMain_Pause).
+ *
+ * @param playerID  the script player
+ */
 extern "C" void cInSeq_Pause(cInSeq* self, int playerID)
 {
     cScriptPlayerMain_Pause((cScriptPlayerMain*)cInSeq_GetPlayer(self, playerID));
@@ -2209,6 +2333,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_PauseAll);
 #ifdef SKIP_ASM
 extern "C" void cInSeq_Pause(cInSeq* self, int a1);
 
+/**
+ * Pauses every playing script player (cInSeq_Pause on each node of mpScriptUsed).
+ */
 extern "C" void cInSeq_PauseAll(cInSeq* self)
 {
     sRcNode272938* n;
@@ -2222,6 +2349,11 @@ INCLUDE_ASM("replay/replaycache", cInSeq_Resume);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Resume(cScriptPlayerMain* self);
 
+/**
+ * Resumes one script player (cScriptPlayerMain_Resume).
+ *
+ * @param playerID  the script player
+ */
 extern "C" void cInSeq_Resume(cInSeq* self, int playerID)
 {
     cScriptPlayerMain_Resume((cScriptPlayerMain*)cInSeq_GetPlayer(self, playerID));
@@ -2232,6 +2364,9 @@ INCLUDE_ASM("replay/replaycache", cInSeq_ResumeAll);
 #ifdef SKIP_ASM
 extern "C" void cInSeq_Resume(cInSeq* self, int a1);
 
+/**
+ * Resumes every playing script player (cInSeq_Resume on each node of mpScriptUsed).
+ */
 extern "C" void cInSeq_ResumeAll(cInSeq* self)
 {
     sRcNode272938* n;
@@ -2244,6 +2379,13 @@ extern "C" void cInSeq_ResumeAll(cInSeq* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_GetPlayer);
 #ifdef SKIP_ASM
+/**
+ * Returns the script player of pool slot @p playerID (node + 8 in mpScriptHeap, 0x58 per node) when its node's word
+ * at +0xC is set.
+ *
+ * @param playerID  the slot
+ * @return the cScriptPlayerMain, or 0 when that slot's player is not set up
+ */
 extern "C" void* cInSeq_GetPlayer(cInSeq* self, int playerID)
 {
     char* base = (char*)self->mpScriptHeap;
@@ -2295,6 +2437,12 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_cScriptPlayerChannel
 #ifdef SKIP_ASM
 extern void* cScriptPlayerChannelBlock_vtbl[];
 
+/**
+ * Constructs a block channel: stores its vtable and clears the data, owner, header, next-key, block-array and
+ * active-block fields.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptPlayerChannelBlock_cScriptPlayerChannelBlock(cScriptPlayerChannelBlock* self)
 {
     self->mVtbl = cScriptPlayerChannelBlock_vtbl;
@@ -2539,6 +2687,15 @@ struct sCacheEntry {
     sCacheEntry* next;
 };
 
+/**
+ * Starts a block key: fills mpBlockArray[key id] from the key and pushes it on mpActiveBlockList.
+ *
+ * Copies the key's fields, points the entry's data at the bytes after the key's 0x10-byte header when the key is
+ * larger, and counts mNumActiveBlocks up.
+ *
+ * @param rec  the key (On Tour tInSeqBlockChannelKey* pKey)
+ * @return the entry (On Tour tBlockEntry*)
+ */
 extern "C" sCacheEntry* cScriptPlayerChannelBlock_AddActiveKey(cScriptPlayerChannelBlock* self, sCacheRecord* rec)
 {
     sCacheEntry* e = (sCacheEntry*)((char*)self->mpBlockArray + rec->id * 0x1C);
@@ -2561,6 +2718,9 @@ extern "C" sCacheEntry* cScriptPlayerChannelBlock_AddActiveKey(cScriptPlayerChan
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_LoadNextScriptKey);
 #ifdef SKIP_ASM
+/**
+ * Steps mpNextKey to the following key (each key starts with its size), or to 0 after the header's last key.
+ */
 extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannelBlock* self)
 {
     int idx = self->mNextKeyIndex;
@@ -2579,6 +2739,12 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_cScriptPlayerChannel
 #ifdef SKIP_ASM
 extern void* cScriptPlayerChannelEvent_vtbl[];
 
+/**
+ * Constructs an event channel: stores its vtable and clears the data, owner, header, next-key, event-array fields,
+ * mNumActiveEvents and mEventFrame.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptPlayerChannelEvent_cScriptPlayerChannelEvent(cScriptPlayerChannelEvent* self)
 {
     self->mVtbl = cScriptPlayerChannelEvent_vtbl;
@@ -2763,6 +2929,13 @@ struct sCacheRec {
     int key;
 };
 
+/**
+ * Fires an event key: fills mpEventArray[mNumActiveEvents] with the key's id and its payload (the bytes after the
+ * 8-byte header, when any), and counts mNumActiveEvents up.
+ *
+ * @param rec  the key (On Tour tInSeqEventChannelKey* pKey)
+ * @return the entry (On Tour tEventEntry*)
+ */
 extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec)
 {
     sCacheRef* e = &((sCacheRef*)self->mpEventArray)[self->mNumActiveEvents];
@@ -2779,6 +2952,9 @@ extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChanne
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_LoadNextScriptKey);
 #ifdef SKIP_ASM
+/**
+ * Steps mpNextKey to the following key (each key starts with its size), or to 0 after the header's last key.
+ */
 extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannelEvent* self)
 {
     int idx = self->mNextKeyIndex;
@@ -2797,6 +2973,12 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_cScriptPlayerChanne
 #ifdef SKIP_ASM
 extern void* cScriptPlayerChannelObject_vtbl[];
 
+/**
+ * Constructs an object channel: stores its vtable and clears the data, owner, header, next-key, object-array and
+ * active-object fields.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptPlayerChannelObject_cScriptPlayerChannelObject(cScriptPlayerChannelObject* self)
 {
     self->mVtbl = cScriptPlayerChannelObject_vtbl;
@@ -3058,6 +3240,15 @@ struct sCacheEntry2 {
     sCacheEntry2* next;
 };
 
+/**
+ * Starts an object key: fills mpObjectArray[key id] from the key and pushes it on mpActiveObjectList.
+ *
+ * Copies the key's fields, points the entry's data at the bytes after the key's 0x18-byte header when the key is
+ * larger, and counts mNumActiveObjects up.
+ *
+ * @param rec  the key (On Tour tInSeqObjectChannelKey* pKey)
+ * @return the entry (On Tour tObjectEntry*)
+ */
 extern "C" sCacheEntry2* cScriptPlayerChannelObject_AddActiveKey(cScriptPlayerChannelObject* self, sCacheRecord2* rec)
 {
     sCacheEntry2* e = (sCacheEntry2*)((char*)self->mpObjectArray + rec->id * 0x24);
@@ -3082,6 +3273,9 @@ extern "C" sCacheEntry2* cScriptPlayerChannelObject_AddActiveKey(cScriptPlayerCh
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_LoadNextScriptKey);
 #ifdef SKIP_ASM
+/**
+ * Steps mpNextKey to the following key (each key starts with its size), or to 0 after the header's last key.
+ */
 extern "C" void cScriptPlayerChannelObject_LoadNextScriptKey(cScriptPlayerChannelObject* self)
 {
     int idx = self->mNextKeyIndex;

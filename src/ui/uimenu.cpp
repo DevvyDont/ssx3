@@ -449,6 +449,15 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_reverseFindFirstHighlightable);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
 
+/**
+ * Finds the last selectable item at or before @p idx (clamped to mScrollItemNum - 1), searching down to 0.
+ *
+ * Selectable as in cUIMenu_getPrev: accepted by the state's onWidgetMenu(self, 1, i) for a scrollable menu, else its
+ * mStatic bit is clear.
+ *
+ * @param idx  the index to start from (On Tour startIndex)
+ * @return the item index, or 0xFF when none is selectable
+ */
 extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, unsigned char idx) {
     short i;
     unsigned char cnt;

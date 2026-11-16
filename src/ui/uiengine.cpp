@@ -1267,6 +1267,14 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", cUIIcon_setTextureByHashValue);
 #ifdef SKIP_ASM
+/**
+ * Points the icon at a texture by name hash: mpTextureElem from the engine's texture bank (engine + 0x58,
+ * cUITextureBank::getElementByHashname).
+ *
+ * The engine is the one of the screen's state. mTextureID is left as it was.
+ *
+ * @param id  the texture's name hash (On Tour int hashVal)
+ */
 extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 {
     void* a = self->mpScreen;
@@ -1287,6 +1295,15 @@ extern tARGB D_004C66C8;
 
 
 
+/**
+ * Constructs an empty list box.
+ *
+ * Runs the cUIThing constructor (func_0039FB30; the screen and parent, On Tour pState / pParent, are not declared
+ * here and stay in $a1/$a2), stores cUIListBox_vtbl, sets mShadow and clears mUnicode and mCallback, clears the 32
+ * entries (and memsets them), mNumEntries and mCurrentEntry, and sets mStaticColour from D_004C66C8.
+ *
+ * @return @p self
+ */
 extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
 {
     func_0039FB30((self));
@@ -1339,6 +1356,15 @@ struct sUIData9820 {
     unsigned char r, g, b, a;   // 0x24
 };
 
+/**
+ * Sets a list box up from its screen record.
+ *
+ * Runs cUIThing's setUIData, takes the font (mFont) from the record's +0x20 byte, calls slot 23 (cUIListBox_setShadow) with
+ * bit 0 of its +0x22 word and, when mShadow is then set, takes mShadowColour from its RGBA bytes (+0x24, scaled by
+ * 1/255). Always sets mWrap (bit 7 of mAttr).
+ *
+ * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
+ */
 extern "C" void cUIListBox_setUIData(sUIObj9820* self, sUIData9820* data)
 {
     cUIThing_setUIData_2(self, data);
@@ -1414,6 +1440,19 @@ static inline int isClear_9970(int flags)
     return (flags & 1) == 0;
 }
 
+/**
+ * Moves the list box's current entry on left / right (or down / up when vertical) and reports it to the state.
+ *
+ * Does nothing without entries. Left (horizontal) or down (vertical, mOrientation set) selects the previous entry,
+ * right or up the next, wrapping when mWrap is set; a change is reported to the screen's state as widget event 9
+ * (onWidgetEvent). The state's onWidgetListBox then gets the direction (0 / 3 back, 1 / 2 forward): result bit 0x100
+ * plays keyframer event 8 or 9, bit 1 gives 1 and bit 0x10 the widget's mSound[0]. Previous (back) reports event 6
+ * and direction 4 (keyframer event 3; bit 1 gives mSound[1]). The result goes to slot 2 of the engine's +0x14
+ * listener (D_004A5A58 when none).
+ *
+ * @param in  the input (On Tour const cUIInput* pInput)
+ * @return 1 when the input was used, else 0 (On Tour returns bool)
+ */
 // List input: up/down move the current item (wrapping when flag 0x80 is set; flag 1 swaps the directions),
 // accept notifies; the listener gets the result.
 extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
@@ -1573,6 +1612,12 @@ struct cUIListBox_updateLocale_sVEntry {
     void* fn;
 };
 
+/**
+ * Re-reads every entry's localised text after a language change.
+ *
+ * For each entry with a string id, looks the text up in the engine's locale (slot 4) and stores it (cUIListBox_setUnicodePrivate);
+ * then sets the box cached (slot 5, setCached(1)). Does nothing without a locale.
+ */
 extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
 {
     void* a = *(void**)((char*)self + 0x5C);
@@ -1661,6 +1706,17 @@ static inline void setLayer_9F00(cUIListBox* self)
     *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
 }
 
+/**
+ * Draws the list box's current entry (entry 0 when mCallback is set) at its position plus (@p x, @p y).
+ *
+ * Returns when the box has no font or no entries. Uses the font at mScale, mStaticColour when both mStatic and
+ * mUseStaticColour are set (else mColour) and, with mShadow, mShadowColour (its first component from mColour.A) at
+ * offset (2, 2). When the locale's bit 26 is set (a debug outline), also draws mSize as a red outline, or as a
+ * translucent red box when the text is wider than mSize.x.
+ *
+ * @param x  the parent's x offset
+ * @param y  the parent's y offset
+ */
 extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
 {
     sFont_9F00* font = (sFont_9F00*)cUIListBox_getFont(self);

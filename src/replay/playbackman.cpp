@@ -1130,6 +1130,15 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 // argument; bind the 2-arg form to the symbol.
 void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
 
+/**
+ * Takes a free frame, stores its type, saves the game into it and closes its block.
+ *
+ * Copies the 4-byte frame type from @p src to FrameType (+0x1C), saves (cReplay_saveFrame), stores RecordTick as
+ * FrameStartTick (+0x30) and calls func_0026ED88(frame, 0) (putFrameBlock).
+ *
+ * @param src  the frame type, passed by address here (On Tour tReplayFrameType type)
+ * @return the saved frame
+ */
 extern "C" void* cReplay_saveReplayFrame(cReplay* self, sPbBytes4D760* src)
 {
     void* out = cReplay_allocReplayFrame(self);
@@ -1292,8 +1301,14 @@ public:
     virtual void save(cPbStream* s);
 };
 
+/**
+ * Writes the node count of one bucket (an 8-byte header) and then each node's saved state (its save virtual).
+ *
+ * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
+ * @param bucket  the bucket
+ */
 // Writes the bucket's node count (8-byte header) and then each node's serialised form to the stream.
-extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* s, int bucket)
+extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* data, int bucket)
 {
     int hdr[2];
     void* node;
@@ -1303,10 +1318,10 @@ extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* s, int bucket)
     for (node = cBucketMan_first(bucketMan_D988(), bucket); node != 0; node = cBucketMan_next(bucketMan_D988(), node, bucket)) {
         hdr[0]++;
     }
-    s->write(hdr, 8);
+    data->write(hdr, 8);
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_D988(), bucket); node != 0; node = cBucketMan_next(bucketMan_D988(), node, bucket)) {
-            ((cPbBucketNodeD988*)node)->save(s);
+            ((cPbBucketNodeD988*)node)->save(data);
         }
     }
 }
@@ -1326,7 +1341,13 @@ struct sVEntryDA88 {
     void (*fn)(void* self, ...);
 };
 static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
-extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* s)
+/**
+ * Writes the dead-object bucket (8): its node count (an 8-byte header), then each node's instance id (instance +
+ * 0x78, 4 bytes).
+ *
+ * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
+ */
+extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* data)
 {
     int hdr[2];
     void* node;
@@ -1337,15 +1358,15 @@ extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* s)
         hdr[0]++;
     }
     {
-        sVEntryDA88* vt = *(sVEntryDA88**)s;
-        vt[1].fn((char*)s + vt[1].delta, hdr, 8);
+        sVEntryDA88* vt = *(sVEntryDA88**)data;
+        vt[1].fn((char*)data + vt[1].delta, hdr, 8);
     }
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_DA88(), 8); node != 0; node = cBucketMan_next(bucketMan_DA88(), node, 8)) {
             int id[1];
             id[0] = *(int*)(*(char**)((char*)node + 0x18) + 0x78);
-            sVEntryDA88* vt = *(sVEntryDA88**)s;
-            vt[1].fn((char*)s + vt[1].delta, id, 4);
+            sVEntryDA88* vt = *(sVEntryDA88**)data;
+            vt[1].fn((char*)data + vt[1].delta, id, 4);
         }
     }
 }
@@ -1359,6 +1380,12 @@ INCLUDE_ASM("replay/playbackman", cReplay_restoreReplayFrame);
 void cReplayFramePtr_getFrameBlock_2(void* frame, int n) __asm__("cReplayFramePtr_getFrameBlock__Fv");
 extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cReplay_restoreFrame1");
 
+/**
+ * Restores the game from a saved frame: opens its block for reading (func_0026ED88-style getFrameBlock(1)), then
+ * cReplay_restoreFrame1.
+ *
+ * @param frame  the frame to restore (On Tour cReplayFrame*)
+ */
 extern "C" void cReplay_restoreReplayFrame(cReplay* self, void* frame)
 {
     cReplayFramePtr_getFrameBlock_2(frame, 1);

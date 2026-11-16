@@ -669,6 +669,14 @@ extern "C" char* strchr(char* str, int ch);
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_getBufferSetLength);
 #ifdef SKIP_ASM
+/**
+ * Returns a writable buffer of at least @p len characters and sets the string's length to exactly @p len.
+ *
+ * Calls cBXString_getBuffer, stores @p len in the length header (Str - 8) and terminates the string at it.
+ *
+ * @param len  the new length (On Tour newlen)
+ * @return the string's character buffer
+ */
 extern "C" char* cBXString_getBufferSetLength(cBXString* self, int len)
 {
     cBXString_getBuffer(self, len);
@@ -682,6 +690,12 @@ INCLUDE_ASM("bx/bxstring", cBXString_freeExtra);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
+/**
+ * Shrinks the string's buffer to its length when the allocation is larger.
+ *
+ * When the length (Str - 8) and capacity (Str - 4) headers differ, copies the string, resets and reallocates this one
+ * to the exact length and copies the characters back (func_0041605C, memcpy).
+ */
 // Make the string unique (copy-on-write detach) when its two header counts differ.
 // PORT: pointer held in int for the negative header offsets.
 extern "C" void cBXString_freeExtra(cBXString* self)
@@ -701,6 +715,11 @@ extern "C" void cBXString_freeExtra(cBXString* self)
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_lockBuffer);
 #ifdef SKIP_ASM
+/**
+ * Returns a writable buffer and locks it by setting the reference count (Str - 0xC) to -1, so it is never shared.
+ *
+ * @return the string's character buffer
+ */
 extern "C" char* cBXString_lockBuffer(cBXString* self)
 {
     char* r = cBXString_getBuffer(self, 0);
@@ -830,6 +849,9 @@ INCLUDE_ASM("bx/bxstring", cBXString_makeLower);
 #ifdef SKIP_ASM
 extern unsigned char D_00499C81[];
 static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
+/**
+ * Converts the string to lower case in place, after detaching it from any shared copy (cBXString_copyBeforeWrite).
+ */
 // In-place lower-case; D_00499C81 is the ctype table (+1), bit 1 = upper-case.
 // PORT: pointer held in int to get the target's negative load offset.
 extern "C" void cBXString_makeLower(cBXString* self)
@@ -847,6 +869,12 @@ extern "C" void cBXString_makeLower(cBXString* self)
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_substitute);
 #ifdef SKIP_ASM
+/**
+ * Replaces every occurrence of one character with another, in place, after detaching shared copies.
+ *
+ * @param from  the character to replace
+ * @param to  its replacement
+ */
 // Replace every `from` with `to` in place.
 // PORT: pointer held in int to get the target's negative load offset.
 extern "C" void cBXString_substitute(cBXString* self, char from, char to)
@@ -868,6 +896,14 @@ INCLUDE_ASM("bx/bxstring", cBXString_setAt);
 #ifdef SKIP_ASM
 extern "C" void cBXString_copyBeforeWrite(cBXString* self);
 
+/**
+ * Sets one character of the string, after detaching it from any shared copy (cBXString_copyBeforeWrite).
+ *
+ * The index is not range-checked.
+ *
+ * @param idx  the character index
+ * @param ch  the new character
+ */
 extern "C" void cBXString_setAt(cBXString* self, int idx, char ch)
 {
     cBXString_copyBeforeWrite(self);
@@ -1020,6 +1056,15 @@ INCLUDE_ASM("bx/bxstring", cBXString_spanIncluding);
 void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
 extern "C" int func_0041AD10(char* str, int ch);
 
+/**
+ * Returns the leading run of a string made of characters from a set (MFC CString::SpanIncluding).
+ *
+ * Constructs @p self from the first func_0041AD10(other->Str, ch) characters of @p other (cBXString_cBXString5).
+ *
+ * @param other  the source string (On Tour this)
+ * @param ch  the character set (On Tour const char* set; declared int here)
+ * @return @p self, the result string
+ */
 extern "C" cBXString* cBXString_spanIncluding(cBXString* self, cBXString* other, int ch)
 {
     cBXString_cBXString5_v(self, other, func_0041AD10(other->Str, ch));
@@ -1033,6 +1078,15 @@ INCLUDE_ASM("bx/bxstring", cBXString_spanExcluding);
 void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
 extern "C" int func_0041AB08(char* str, int ch);
 
+/**
+ * Returns the leading run of a string that contains no character from a set (MFC CString::SpanExcluding).
+ *
+ * Constructs @p self from the first func_0041AB08(other->Str, ch) characters of @p other (cBXString_cBXString5).
+ *
+ * @param other  the source string (On Tour this)
+ * @param ch  the character set (declared int here)
+ * @return @p self, the result string
+ */
 extern "C" cBXString* cBXString_spanExcluding(cBXString* self, cBXString* other, int ch)
 {
     cBXString_cBXString5_v(self, other, func_0041AB08(other->Str, ch));

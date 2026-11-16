@@ -599,9 +599,20 @@ extern "C" void* func_003977E8(void* self);
 extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char a1);
 extern void* cUITextScroll_vtbl[];
 
-extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int a1, int a2)
+/**
+ * Constructs an empty text scroll.
+ *
+ * Runs the cUIThing constructor (func_0039FB30) with the screen and parent, stores cUITextScroll_vtbl, clears mMode,
+ * mShadow, mUnicode and mStaticColour, constructs mList and clears mpScrollBar, mpLineOffset, mStringID,
+ * mSelectedIndex, mLinesOffset, mLineSize and mPixelOffset; then cUITextScroll_setInputMap(self, 0).
+ *
+ * @param pState  the screen (On Tour cUIScreen* pState)
+ * @param pParent  the parent object (On Tour cUIThing* pParent)
+ * @return @p self
+ */
+extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int pState, int pParent)
 {
-    func_0039FB30(self, a1, a2);
+    func_0039FB30(self, pState, pParent);
     self->mVtbl = cUITextScroll_vtbl;
     *(unsigned char*)&self->mAttrTextScroll &= 0xC6;
     func_003977E8(((char*)self) + 0x8C);
@@ -650,6 +661,15 @@ struct sUIData11B8 {
     unsigned char r, g, b, a;   // 0x28
 };
 
+/**
+ * Sets a text scroll up from its screen record.
+ *
+ * Runs cUIThing's setUIData, takes mFont from the record's +0x20 byte, calls slot 23 (cUITextScroll_setShadow) with bit 0 of
+ * its +0x21 byte, and loads the record's text id (+0x24) when nonzero (clear, cUITextScroll_clearBuffer; add, cUITextScroll_addUnicodeStringByID).
+ * When mShadow is then set, takes mShadowColour from its RGBA bytes (+0x28, scaled by 1/255).
+ *
+ * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
+ */
 extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
 {
     cUIThing_setUIData_2(self, data);
@@ -683,9 +703,9 @@ extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_setInputMap);
 #ifdef SKIP_ASM
-extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char a1)
+extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char value)
 {
-    if (a1 == 0) {
+    if (value == 0) {
         *(char*)((char*)self + 0x88) = 0;
         *(char*)((char*)self + 0x89) = 1;
         *(char*)((char*)self + 0x8A) = 2;
@@ -725,6 +745,11 @@ public:
     virtual void v05(int);
 };
 
+/**
+ * Reloads the text scroll's string (mStringID) in the engine's current language and sets it cached (slot 5).
+ *
+ * Does nothing without a string id or a locale; the text is replaced (cUITextScroll_setUnicodeStringWrap) only when the locale has it.
+ */
 extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
 {
     int id = (int)self->mStringID;
@@ -779,6 +804,17 @@ static inline int pressed13E0(char* input, int key)
     return e->fn(input + e->delta, key);
 }
 
+/**
+ * Scrolls the text, or moves the selection in a selectable list (mMode), on the keys in mInputMap.
+ *
+ * Rows that fit = mSize.y / (line height + 3). Selection mode: up / down (mInputMap[0] / [1], getState) move
+ * mSelectedIndex within the lines and return 1; with neither key, mLinesOffset is moved to keep the selection in view
+ * (0 is returned). Plain mode: up / down move mLinesOffset within 0 .. lines - rows and return 1. Nothing happens
+ * without a font.
+ *
+ * @param input  the input (On Tour const cUIInput* pInput)
+ * @return 1 when a key was used, else 0 (On Tour returns bool)
+ */
 extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
 {
     sUIFont13E0* font = (sUIFont13E0*)cUITextScroll_getFont((cUITextScroll*)self);
@@ -902,6 +938,17 @@ struct sText_1588 {
     float yofs;             // 0xCC
 };
 
+/**
+ * Draws the visible lines of the text scroll from mLinesOffset, then updates its scroll bar.
+ *
+ * Calls slot 16 (cUITextScroll_updateLocale) first unless mCached is set; needs a font. Uses mScale, mShadow (mShadowColour with
+ * its first component from mColour, at (2, 2)) and draw layer mLayer + 9. Each line that fits in mSize.y is drawn at
+ * the position plus (@p x, @p y), mPixelOffset lower, in mColour (mSelectedColour for the selected line in mMode);
+ * then mpScrollBar gets the offset, the rows and the line count (cUIScrollBar::setValues).
+ *
+ * @param x  the parent's x offset
+ * @param y  the parent's y offset
+ */
 extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
 {
     if (((self->flags14 >> 2) & 1) == 0) {
@@ -1129,10 +1176,10 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_setUnicodeStringWrap);
 extern "C" void cUITextScroll_clearBuffer(cUITextScroll*, void*);
 extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll*, void*);
 
-extern "C" void cUITextScroll_setUnicodeStringWrap(cUITextScroll* self, void* a1)
+extern "C" void cUITextScroll_setUnicodeStringWrap(cUITextScroll* self, void* pString)
 {
-    cUITextScroll_clearBuffer(self, a1);
-    cUITextScroll_addUnicodeStringWrap(self, a1);
+    cUITextScroll_clearBuffer(self, pString);
+    cUITextScroll_addUnicodeStringWrap(self, pString);
 }
 #endif
 
@@ -1811,9 +1858,17 @@ struct cUIVector_cUIVector_s {
     int unk8C;
 };
 
-extern "C" cUIVector_cUIVector_s* cUIVector_cUIVector(cUIVector* self, int a1, int a2)
+/**
+ * Constructs an empty vector shape: the cUIThing constructor with the screen and parent, cUIVector_vtbl, mFill, mLoop
+ * and mNumVertices clear and no triangle, colour, position, render-position, UV or vertex arrays.
+ *
+ * @param pScreen  the screen (On Tour cUIScreen* pScreen)
+ * @param pParent  the parent object (On Tour cUIThing* pParent)
+ * @return @p self
+ */
+extern "C" cUIVector_cUIVector_s* cUIVector_cUIVector(cUIVector* self, int pScreen, int pParent)
 {
-    func_0039FB30(((cUIVector_cUIVector_s*)self), a1, a2);
+    func_0039FB30(((cUIVector_cUIVector_s*)self), pScreen, pParent);
     self->mVtbl = cUIVector_vtbl;
     ((cUIVector_cUIVector_s*)self)->b0 = 0;
     ((cUIVector_cUIVector_s*)self)->b1 = 0;

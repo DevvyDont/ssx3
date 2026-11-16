@@ -201,6 +201,14 @@ extern "C" void func_0030EB60(cAnimModel* self)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_isPartEnabled);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a model part is drawn at a given level of detail.
+ *
+ * @param i  the part id, looked up through partIndex (On Tour partID)
+ * @param channel  the level of detail, 0-3 (On Tour lod)
+ * @return the part's lods[channel].used flag, or 0 when the id is above maxPartIndex, there is no partIndex table or
+ *         the id maps to no part
+ */
 extern "C" int cAnimModel_isPartEnabled(cAnimModel* self, int i, int channel)
 {
     int idx;
@@ -215,8 +223,17 @@ extern "C" int cAnimModel_isPartEnabled(cAnimModel* self, int i, int channel)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_setModelPartVariant);
 #ifdef SKIP_ASM
+/**
+ * Picks which variant a model part shows and enables it at every level of detail.
+ *
+ * Ignores ids above maxPartIndex, a missing partIndex table or an unmapped id. Otherwise stores the variant in the
+ * part's refIndex, ORs the part's mask into the model's mask and sets used on all four lods.
+ *
+ * @param i  the part id, looked up through partIndex (On Tour partID)
+ * @param variant  the variant index (On Tour variant)
+ */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimModel_setModelPartVariant(cAnimModel* self, int i, int param)
+extern "C" void cAnimModel_setModelPartVariant(cAnimModel* self, int i, int variant)
 {
     if (i > self->maxPartIndex)
     {
@@ -232,7 +249,7 @@ extern "C" void cAnimModel_setModelPartVariant(cAnimModel* self, int i, int para
         return;
     }
     sAnimModelPart* e = &self->parts[idx];
-    e->refIndex = param;
+    e->refIndex = variant;
     self->mask |= e->mask;
     for (int k = 0; k < 4; k++)
     {
@@ -267,6 +284,16 @@ INCLUDE_ASM("animation/animmodel", func_0030F2B0);
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_setSkelMatrix);
 #ifdef SKIP_ASM
+/**
+ * Builds one bone's skeleton matrices from its pose with VU0 macro code.
+ *
+ * Converts the pose's rotation quaternion (+0x00) into rows 0-2 and its position (+0x10) into row 3 of unk_030[@p i],
+ * then writes unk_034[@p i] as that matrix with each row scaled by the matching component of the model's +0x140 scale
+ * vector.
+ *
+ * @param i  the bone index (On Tour boneidx)
+ * @param animModelBone  the bone's pose: rotation quaternion then position (On Tour const tPose& pose)
+ */
 // PORT: PS2-only VU0 macro-mode asm. Builds bone matrix unk_030[i] from the bone's quaternion
 // (rot, rows 0-2) and position (pos, row 3), then unk_034[i] = unk_030[i] with each row scaled
 // by the matching component of unk_140.
@@ -863,6 +890,18 @@ typedef void (*tDraw_0948)(void*, char*, char*, int);
 extern int D_004A594C;
 extern sAmMat_0948 D_004FD420[];
 
+/**
+ * Draws the model's shadow pass with one colour for board parts and another for the rest.
+ *
+ * First builds D_004FD420 (64 matrices, constructed once) as unk_030[i] * unk_038[i] for each bone. With unk_018 set,
+ * each part used at @p lod uploads the matrices for its selected variant (graphics manager slot 111) and draws it
+ * (slot 100); otherwise the lod's matrices from lodInfo are uploaded once and every used part's first variant is
+ * drawn. Parts with id 1 or 2 are drawn with @p x, the others with @p y.
+ *
+ * @param lod  the level of detail to draw
+ * @param x  colour for parts with id 1 or 2 (On Tour const tARGB& boardcol)
+ * @param y  colour for all other parts (On Tour const tARGB& shdwcol)
+ */
 extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
 {
     if (D_004A594C == 0) {

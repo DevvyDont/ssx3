@@ -556,6 +556,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_cCameraTrigge
 #ifdef SKIP_ASM
 void cCameraTriggerStack_init(cCameraTriggerStack* self);
 
+/**
+ * Constructs a camera trigger stack: runs cCameraTriggerStack_init on it.
+ *
+ * @return @p self
+ */
 extern "C" cCameraTriggerStack* cCameraTriggerStack_cCameraTriggerStack(cCameraTriggerStack* self)
 {
     cCameraTriggerStack_init(self);

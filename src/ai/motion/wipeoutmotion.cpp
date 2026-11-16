@@ -764,6 +764,13 @@ static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
                       0.0f);
 }
 
+/**
+ * Rebuilds the wiping-out rider's board collision spheres along the board bone.
+ *
+ * Takes the rider's mAnimModel bone mBoneBoardChild (+0x8A4) and the model's scale (+0x140), and places four sphere
+ * centres along the bone's x axis at +70, +30, -30 and -70 scaled units from the bone position, with radii from
+ * D_00458220. func_00329A90 then refits BoardSphereTree around them, centred on the bone with radius scale * 90.
+ */
 extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 {
     sVec4_7550 pts[4];
