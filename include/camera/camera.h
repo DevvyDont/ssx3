@@ -110,7 +110,7 @@ struct cCamera {
                                     //       [U] cCamera_updateStreamFocus sets it, func_00168130 returns it
     char unk_0B8[0x8];              // 0x0B8 alignment gap
     cLookAtChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] a cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
-                                    //       by func_00176D68, destroyed by func_00176DA8__FPv; [U] cCamera_init sets its
+                                    //       by cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm, destroyed by cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv; [U] cCamera_init sets its
                                     //       Target (func_00162310), func_0015E030 snaps it (cLookAtChaseAlgorithm_snapCurrent)
     int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] cCamera_shakeCamera (shakeCamera) sw,
                                     //       cCamera_applyCameraShake (applyCameraShake) lw

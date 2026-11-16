@@ -25,24 +25,24 @@ public:
 extern "C" void func_00170240(sCamTmp_D0A0* out, void* target);
 extern "C" void func_001707B0(sCamTmp_D0A0* out, void* target);
 extern "C" void func_00170D20(sCamTmp_D0A0* out, void* target, int corner);
-extern "C" cCamAlgo_D0A0* func_00178520(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b);
+extern "C" cCamAlgo_D0A0* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b);
 extern "C" cCamAlgo_D0A0* func_00174190(void* mem);
 extern "C" cCamAlgo_D0A0* cSplineCamAlgorithm_cSplineCamAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b, sCamTmp_D0A0* c, sCamTmp_D0A0* d,
                                float f0, float f1, float f2, float f3);
-extern "C" cCamAlgo_D0A0* func_001616A8(void* mem);
-extern "C" cCamAlgo_D0A0* func_001689C8(void* mem);
-extern "C" cCamAlgo_D0A0* func_00168CD8(void* mem);
-extern "C" cCamAlgo_D0A0* func_00160438(void* mem);
-extern "C" cCamAlgo_D0A0* func_001682B8(void* mem);
-extern "C" cCamAlgo_D0A0* func_001774C0(void* mem, int index);
-extern "C" cCamAlgo_D0A0* func_00168650(void* mem);
+extern "C" cCamAlgo_D0A0* cIdleChaseAlgorithm_cIdleChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cManualChaseAlgorithm_cManualChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cLazyChaseAlgorithm_cLazyChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(void* mem, int index);
+extern "C" cCamAlgo_D0A0* cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(void* mem);
 extern "C" cCamAlgo_D0A0* cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(void* mem);
 extern "C" cCamAlgo_D0A0* cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(void* mem, float angle);
-extern "C" cCamAlgo_D0A0* func_00176A68(void* mem);
-extern "C" cCamAlgo_D0A0* func_00177068(void* mem);
-extern "C" cCamAlgo_D0A0* func_00176D68(void* mem);
-extern "C" cCamAlgo_D0A0* func_00177E50(void* mem);
-extern "C" cCamAlgo_D0A0* func_001789E8(void* mem, void* target);
+extern "C" cCamAlgo_D0A0* cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(void* mem, void* target);
 extern "C" void cChaseCameraController_addAlgorithm(char* self, cCamAlgo_D0A0* algo, float blend);
 
 static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
@@ -79,7 +79,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
                 func_00170240(&a, target);
                 sCamTmp_D0A0 c;
                 func_001707B0(&c, target);
-                r = func_00178520(mem, &a, &c);
+                r = cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(mem, &a, &c);
                 break;
             }
         }
@@ -103,46 +103,46 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         break;
     }
     case 7:
-        r = func_001616A8(cMemMan_alloc(0x390, D_0045B328, 0x20000000, 0));
+        r = cIdleChaseAlgorithm_cIdleChaseAlgorithm(cMemMan_alloc(0x390, D_0045B328, 0x20000000, 0));
         break;
     case 9:
-        r = func_001689C8(cMemMan_alloc(0x390, D_0045B348, 0x20000000, 0));
+        r = cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(cMemMan_alloc(0x390, D_0045B348, 0x20000000, 0));
         break;
     case 10:
-        r = func_00168CD8(cMemMan_alloc(0x390, D_0045B370, 0x20000000, 0));
+        r = cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm(cMemMan_alloc(0x390, D_0045B370, 0x20000000, 0));
         break;
     case 11:
-        r = func_00160438(cMemMan_alloc(0x390, D_0045B390, 0x20000000, 0));
+        r = cManualChaseAlgorithm_cManualChaseAlgorithm(cMemMan_alloc(0x390, D_0045B390, 0x20000000, 0));
         break;
     case 13:
-        r = func_001682B8(cMemMan_alloc(0x390, D_0045B3B0, 0x20000000, 0));
+        r = cLazyChaseAlgorithm_cLazyChaseAlgorithm(cMemMan_alloc(0x390, D_0045B3B0, 0x20000000, 0));
         break;
     case 18:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B3D0, 0x20000000, 0), 0);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3D0, 0x20000000, 0), 0);
         break;
     case 19:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B3F8, 0x20000000, 0), 1);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3F8, 0x20000000, 0), 1);
         break;
     case 20:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B420, 0x20000000, 0), 2);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B420, 0x20000000, 0), 2);
         break;
     case 21:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B448, 0x20000000, 0), 3);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B448, 0x20000000, 0), 3);
         break;
     case 22:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B470, 0x20000000, 0), 4);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B470, 0x20000000, 0), 4);
         break;
     case 23:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B498, 0x20000000, 0), 5);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B498, 0x20000000, 0), 5);
         break;
     case 24:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B4C0, 0x20000000, 0), 6);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4C0, 0x20000000, 0), 6);
         break;
     case 25:
-        r = func_001774C0(cMemMan_alloc(0x3A0, D_0045B4E8, 0x20000000, 0), 7);
+        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4E8, 0x20000000, 0), 7);
         break;
     case 32:
-        r = func_00168650(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
+        r = cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
         break;
     case 41:
         r = cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B538, 0x20000000, 0));
@@ -154,26 +154,26 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         break;
     }
     case 2: case 60:
-        r = func_00176A68(cMemMan_alloc(0x390, D_0045B2D8, 0x20000000, 0));
+        r = cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2D8, 0x20000000, 0));
         break;
     case 1: case 62:
-        r = func_00177068(cMemMan_alloc(0x390, D_0045B300, 0x20000000, 0));
+        r = cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B300, 0x20000000, 0));
         break;
     case 0: case 3: case 4: case 5: case 6: case 8: case 12: case 14: case 15: case 16: case 17:
     case 26: case 27: case 28: case 29: case 30: case 31:
     case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
     case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59:
     case 61: case 63: case 64: case 65: case 74:
-        r = func_00176D68(cMemMan_alloc(0x390, D_0045B2B0, 0x20000000, 0));
+        r = cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2B0, 0x20000000, 0));
         break;
     case 66:
-        r = func_00177E50(cMemMan_alloc(0x3A0, D_0045B578, 0x20000000, 0));
+        r = cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B578, 0x20000000, 0));
         break;
     case 67:
         r = 0;
         break;
     case 68:
-        r = func_001789E8(cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(void**)(self + 0x20));
+        r = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(void**)(self + 0x20));
         break;
     case 94:
         r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
