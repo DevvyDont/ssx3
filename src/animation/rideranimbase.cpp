@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/rideranimbase.h"
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
@@ -6,21 +7,21 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cAnimSequencer_init(void* self);
-extern "C" void cRiderAnimBase_reset(void* self);
+extern "C" void cRiderAnimBase_reset(cRiderAnimBase* self);
 extern char D_0048D7D8[];
 extern const char D_0048A4E0[];
 
-extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self)
+extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
 {
-    *(int*)((char*)self + 0x54) = 0;
-    *(void**)((char*)self + 0x58) = D_0048D7D8;
-    *(void**)((char*)self + 0x50) = operator_new_tag(0x30, D_0048A4E0, 0, 0);
+    self->AnimModel = (cAnimModel*)0;
+    self->mVtbl = (void**)D_0048D7D8;
+    self->Sequencer = (cAnimSequencer*)operator_new_tag(0x30, D_0048A4E0, 0, 0);
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequencer_init(*(char**)((char*)self + 0x50) + (i << 3));
+        cAnimSequencer_init((char*)self->Sequencer + (i << 3));
     }
     cRiderAnimBase_reset(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -32,14 +33,14 @@ void operator_delete(int* p);
 extern "C" void cAnimSequencer_expireAll(void* self);
 extern char D_0048D7D8[];
 
-extern "C" void func_00311958(void* self, int flags)
+extern "C" void func_00311958(cRiderAnimBase* self, int flags)
 {
-    *(void**)((char*)self + 0x58) = D_0048D7D8;
+    self->mVtbl = (void**)D_0048D7D8;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequencer_expireAll(*(char**)((char*)self + 0x50) + (i << 3));
+        cAnimSequencer_expireAll((char*)self->Sequencer + (i << 3));
     }
-    void* p = *(void**)((char*)self + 0x50);
+    void* p = self->Sequencer;
     if (p)
         cMemMan_free(p);
     if (flags & 1)
@@ -100,7 +101,7 @@ struct sRiderAnimBase {
     char* mSequencers;  // 0x50
 };
 
-extern "C" void cRiderAnimBase_reset(void* p)
+extern "C" void cRiderAnimBase_reset(cRiderAnimBase* p)
 {
     sRiderAnimBase* self = (sRiderAnimBase*)p;
     for (int i = 0; i < 6; i++)
@@ -171,7 +172,7 @@ struct sRabXform_00311B48
 
 extern sRabQuat_00311B48 D_004FF130;
 extern sRabQuat_00311B48 D_004FF160;
-extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_00311B48* xf);
+extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRabXform_00311B48* xf);
 
 static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis, float angle)
 {
@@ -180,7 +181,7 @@ static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis
     return sRabQuat_00311B48(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle)
+extern "C" void cRiderAnimBase_changeHeadingOffset(cRiderAnimBase* self, float angle)
 {
     sRabXform_00311B48 xf;
     xf.pos = D_004FF130;
@@ -277,17 +278,17 @@ static inline sRabXform_00311B48 Combine_00311BF0(const sRabXform_00311B48& a, c
     return r;
 }
 
-extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, sRabXform_00311B48* xf)
+extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRabXform_00311B48* xf)
 {
     for (int i = 0; i < 6; i++) {
         int j = 0;
-        if (j < (*(cAnimSequencer**)((char*)self + 0x50))[i].mCount) {
+        if (j < (self->Sequencer)[i].mCount) {
             do {
-            sRabXform_00311B48* src = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(*(cAnimSequencer**)((char*)self + 0x50))[i], j) + 0x60);
-            sRabXform_00311B48* dst = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(*(cAnimSequencer**)((char*)self + 0x50))[i], j) + 0x60);
+            sRabXform_00311B48* src = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(self->Sequencer)[i], j) + 0x60);
+            sRabXform_00311B48* dst = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(self->Sequencer)[i], j) + 0x60);
             *dst = Combine_00311BF0(*xf, *src);
                 j++;
-            } while (j < (*(cAnimSequencer**)((char*)self + 0x50))[i].mCount);
+            } while (j < (self->Sequencer)[i].mCount);
         }
     }
 }
@@ -602,17 +603,17 @@ struct sAnimState_00312660
 } __attribute__((aligned(16)));
 
 // Samples anim at time t on a scratch sequencer and returns the first resulting state.
-extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(char* self, int anim, int h, float t)
+extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, int anim, int h, float t)
 {
     sAnimState_00312660 states[0x40];
     cAnimSequencer seq;
     cAnimSequencer_init(&seq);
     if (h == D_004A5950)
     {
-        sVEntry00312660* vt = *(sVEntry00312660**)(self + 0x58);
-        h = *(int*)(vt[4].fn(self + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
+        sVEntry00312660* vt = (sVEntry00312660*)self->mVtbl;
+        h = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
     }
-    func_00311F00(self, &seq, anim, h, 1, 0, 0.0f);
+    func_00311F00(((char*)self), &seq, anim, h, 1, 0, 0.0f);
     func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, t);
     func_00314418(&seq, (sAnimState_00312598*)states, 0x40);
     cAnimSequencer_expireAll(&seq);
