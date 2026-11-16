@@ -144,7 +144,7 @@ extern "C" int* cGameModeMan_getGM(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_002380E8);
+INCLUDE_ASM("main/gamemode", cGameModeMan_purgeGM);
 #ifdef SKIP_ASM
 class cMode2380E8 {
 public:
@@ -153,7 +153,7 @@ public:
 void operator_delete(int*);
 extern void* D_00536668[];
 
-extern "C" void func_002380E8(void)
+extern "C" void cGameModeMan_purgeGM(void)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -305,7 +305,7 @@ extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void func_00154AB8(void* self, int idx, int a2, unsigned int v);
 extern "C" void func_00154EE8(void* self, int idx, int a2, unsigned int v);
 extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b);
-extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
+extern "C" int cBERewardInterface_isAwardReceived(void* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(void* self, int a1, int a2, int bit);
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
@@ -322,7 +322,7 @@ struct sVEntry_00238358 {
  *
  * The result (with the rider's time or score, D_00536640) is only recorded at locations below 17 and when the
  * replay state is not 1-9. For rider 0, a conquered mountain leads to cBERewardInterface_awardUser() when
- * func_0015A2E0 returns 0 (probably: not yet awarded). Locked results also record the rider's place
+ * cBERewardInterface_isAwardReceived returns 0 (probably: not yet awarded). Locked results also record the rider's place
  * (D_00536730).
  *
  * @param idx  rider index (On Tour iRider)
@@ -345,7 +345,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
                 int ch = cBELibrary_getCharacterID(0);
                 void* rewardInt = cBE_getInterface_Fv(cBE_getBE(), 0xD);
                 if (cBERewardInterface_isMountainConquered(rewardInt, prof, ch)) {
-                    if (func_0015A2E0(rewardInt, prof, prof, 0) == 0) {
+                    if (cBERewardInterface_isAwardReceived(rewardInt, prof, prof, 0) == 0) {
                         cBERewardInterface_awardUser(rewardInt, prof, ch, 0);
                     }
                 }
@@ -359,7 +359,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238510);
+INCLUDE_ASM("main/gamemode", cGameModeMan_riderCheckpointHit);
 #ifdef SKIP_ASM
 struct sVEntry_00238510 {
     short delta;
@@ -369,7 +369,7 @@ struct sVEntry_00238510 {
 
 extern void* D_00536668[];
 
-extern "C" void func_00238510(void* self, int a, int b)
+extern "C" void cGameModeMan_riderCheckpointHit(void* self, int a, int b)
 {
     void* obj = D_00536668[*(int*)((char*)self + 0x4)];
     sVEntry_00238510* vt = *(sVEntry_00238510**)obj;
@@ -1546,7 +1546,7 @@ extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int func_00145750(void* iface);
-extern "C" unsigned int func_00237CD8(void);
+extern "C" unsigned int GMrand(void);
 extern "C" void func_0023C770(int* arr, unsigned int n);
 
 extern "C" void func_0023A4F0(void* self)
@@ -1556,8 +1556,8 @@ extern "C" void func_0023A4F0(void* self)
     int charA = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
     int charB = func_00145750(race);
     int arr[10];
-    arr[0] = func_00237CD8() % 7 + 10;
-    unsigned int cheatRoll = func_00237CD8() % 6;
+    arr[0] = GMrand() % 7 + 10;
+    unsigned int cheatRoll = GMrand() % 6;
     arr[1] = cheatRoll + 10;
     if (arr[1] >= arr[0]) {
         arr[1] = cheatRoll + 11;
@@ -2998,14 +2998,14 @@ extern "C" void func_0023C618(void* self)
 //100%
 INCLUDE_ASM("main/gamemode", func_0023C770);
 #ifdef SKIP_ASM
-extern "C" unsigned int func_00237CD8(void);
+extern "C" unsigned int GMrand(void);
 
 extern "C" void func_0023C770(int* arr, unsigned int n)
 {
     int i;
     for (i = 0; i < 25; i++) {
-        unsigned int firstIndex = func_00237CD8() % n;
-        unsigned int secondIndex = func_00237CD8() % n;
+        unsigned int firstIndex = GMrand() % n;
+        unsigned int secondIndex = GMrand() % n;
         int swapValue = arr[firstIndex];
         arr[firstIndex] = arr[secondIndex];
         arr[secondIndex] = swapValue;

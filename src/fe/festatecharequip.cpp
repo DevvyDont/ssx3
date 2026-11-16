@@ -7,7 +7,7 @@ INCLUDE_ASM("fe/festatecharequip", cFE_cFE);
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* func_00231CD0(void* self);
-extern "C" void* func_0015D698(void* self);
+extern "C" void* cSimpleCamera_cSimpleCamera(void* self);
 extern "C" void* func_001A03C0(void* self);
 extern "C" void* func_0019CDF0(void* self);
 // PORT: called with an extra int in $a1 here; func_0015D700's body is (self, x, y, z). Bound by asm label.
@@ -25,7 +25,7 @@ public:
 };
 class cFEObjK1956F8_1 {
 public:
-    cFEObjK1956F8_1(int a) __asm__("func_002DBD10");
+    cFEObjK1956F8_1(int a) __asm__("cFXLoader_cFXLoader");
 };
 
 /**
@@ -42,7 +42,7 @@ extern "C" void* cFE_cFE(void* self)
 {
     func_00231CD0(self);
     *(void***)((char*)self + 0x0) = D_0046D878;
-    func_0015D698((char*)self + 0x10);
+    cSimpleCamera_cSimpleCamera((char*)self + 0x10);
     *(void***)((char*)self + 0xA0) = D_0046D8D8;
     func_001A03C0((char*)self + 0xB0);
     func_0019CDF0((char*)self + 0x1A70);
@@ -59,7 +59,7 @@ INCLUDE_ASM("fe/festatecharequip", func_001957D0);
 void operator_delete(int* p);
 extern "C" void func_00397B70(void* p, int flags);
 extern "C" void cGraphicsMan_PurgeTextures(void* p);
-extern "C" void func_002DBEE0(void* p, int flags);
+extern "C" void cFXLoader__cFXLoader(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
 extern "C" void func_001A0420(void* p, int flags);
 extern void* D_0046D878[];
@@ -74,7 +74,7 @@ extern "C" void func_001957D0(void* self, int flags)
     }
     cGraphicsMan_PurgeTextures(GrMan);
     if (*(void**)((char*)self + 0xB5AA0) != 0) {
-        func_002DBEE0(*(void**)((char*)self + 0xB5AA0), 3);
+        cFXLoader__cFXLoader(*(void**)((char*)self + 0xB5AA0), 3);
     }
     func_0019CE20((char*)self + 0x1A70, 2);
     func_001A0420((char*)self + 0xB0, 2);
@@ -91,14 +91,14 @@ INCLUDE_ASM("fe/festatecharequip", cFELocale_cFELocale);
 #ifdef SKIP_ASM
 extern void* D_0046BF98[];
 extern void* D_0046D848[];
-extern "C" void* func_001DCC40(void* p);
+extern "C" void* tAttrLocale_tAttrLocale(void* p);
 extern "C" void func_00416210(void* dst, int value, int size);
 
 /**
  * Constructs the front-end locale with no string files loaded.
  *
  * Zeroes the base's first three bytes, stores the base vtable, clears the low 5 bits of byte 3
- * (func_001DCC40) and byte 0x58, then stores the cFELocale vtable, sets byte 2 to 4 and zeroes the 20 file
+ * (tAttrLocale_tAttrLocale) and byte 0x58, then stores the cFELocale vtable, sets byte 2 to 4 and zeroes the 20 file
  * slots at +0x8.
  *
  * @return @p self
@@ -109,7 +109,7 @@ extern "C" void* cFELocale_cFELocale(void* self)
     *(char*)((char*)self + 0x1) = 0;
     *(char*)((char*)self + 0x2) = 0;
     *(void***)((char*)self + 0x4) = D_0046D848;
-    func_001DCC40((char*)self + 3);
+    tAttrLocale_tAttrLocale((char*)self + 3);
     *(char*)((char*)self + 0x58) = 0;
     *(void***)((char*)self + 0x4) = D_0046BF98;
     *(char*)((char*)self + 0x2) = 4;

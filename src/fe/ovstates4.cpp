@@ -30,5 +30,5 @@ INCLUDE_ASM("fe/ovstates4", func_001F9018);
 
 INCLUDE_ASM("fe/ovstates4", func_001F9080);
 
-INCLUDE_ASM("fe/ovstates4", func_001F90E8);
+INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_ONLINE_onCreateScreen);
 

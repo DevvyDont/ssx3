@@ -610,12 +610,12 @@ extern "C" int func_00153DD0(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153E28);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
-extern "C" int func_00153E28(void* self, int id)
+extern "C" int cBEMissionInterface_isMissionLocked(void* self, int id)
 {
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
@@ -1059,23 +1059,23 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154588);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionID);
 #ifdef SKIP_ASM
-extern "C" int func_001545B0(void* self, int a, int group);
+extern "C" int cBEMissionInterface_getMissionIDOnTrack(void* self, int a, int group);
 extern int D_005305F0[];
 
-extern "C" int func_00154588(void* self, int a)
+extern "C" int cBEMissionInterface_getMissionID(void* self, int a)
 {
-    return func_001545B0(self, a, D_005305F0[0]);
+    return cBEMissionInterface_getMissionIDOnTrack(self, a, D_005305F0[0]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001545B0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionIDOnTrack);
 #ifdef SKIP_ASM
 extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
-extern "C" int func_001545B0(void* self, int index, int group)
+extern "C" int cBEMissionInterface_getMissionIDOnTrack(void* self, int index, int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
@@ -1122,9 +1122,9 @@ extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154630);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isSessionPoint);
 #ifdef SKIP_ASM
-extern "C" int func_00154630(void* self, int value, int id)
+extern "C" int cBEMissionInterface_isSessionPoint(void* self, int value, int id)
 {
     for (int i = 0; i < 22; i++) {
         if (cBELibrary_pictureDB[i].id == id && cBELibrary_pictureDB[i].value >= value) {
@@ -1136,9 +1136,9 @@ extern "C" int func_00154630(void* self, int value, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154678);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureDBRecord);
 #ifdef SKIP_ASM
-extern "C" sMissionEntry func_00154678(void* self, int id)
+extern "C" sMissionEntry cBEMissionInterface_getPictureDBRecord(void* self, int id)
 {
     for (int i = 0; i < 22; i++)
     {

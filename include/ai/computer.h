@@ -11,7 +11,7 @@
 //   0x000-0xDF0  cRiderHandler, exactly as in cPlayer (ai/player.h): 31 rider parts deriving virtually from cRider
 //                (raw bytes here; ai/computer_classes.h models them), then MotionState, ControlState and the vptr.
 //   0xDF0-0xF40  cComputerState (On Tour: size 0xD0, no vptr). Retail's is 0x150: its bools are words and the three
-//                history tables have 15 entries (On Tour 7). Placed as a block: [R] cComputer::Init (func_00108E88)
+//                history tables have 15 entries (On Tour 7). Placed as a block: [R] cComputer::Init (cComputer_Init)
 //                stores mGrabID = -1 at 0xE0C, mStartJumpPos/mEndJumpPos (t4Vector, sq) at 0xE50/0xE60, mTargetID = -1
 //                at 0xE70, clears the three 0x3C tables at 0xE7C/0xEB8/0xEF4 and mCruiseLogicID (sh) at 0xF38 - every
 //                one at On Tour's offset re-computed with 4-byte bools and 15-entry tables from 0xDF0.

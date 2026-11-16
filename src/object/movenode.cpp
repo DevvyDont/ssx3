@@ -332,7 +332,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
 extern "C" int func_002D1B30(int);
-void func_0034FE00(void*, int, int, int);
+void cInstanceNode_runCollideScript(void*, int, int, int);
 
 struct cMN_355770_Obj {
     virtual void v01();
@@ -359,7 +359,7 @@ struct cMN_355770_VEnt {
  *
  * When the root transform's slot-9 test rejects the colliding being, nothing more happens. Otherwise, once
  * the
- * debounce has run out it is re-armed to half a second and func_0034FE00 forwards the collision (probably to
+ * debounce has run out it is re-armed to half a second and cInstanceNode_runCollideScript forwards the collision (probably to
  * the
  * script system, cWScriptMan_TheWScriptMan).
  *
@@ -383,7 +383,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
     }
     if (self->Debounce <= 0) {
         self->Debounce = *(int*)(cAppMan_TheAppMan + 0x10) / 2;
-        func_0034FE00(self, tc, ti, pBeing);
+        cInstanceNode_runCollideScript(self, tc, ti, pBeing);
     }
 }
 #endif
@@ -817,12 +817,12 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* srcv)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_transferEffectModifier);
 #ifdef SKIP_ASM
-extern "C" void func_00353398(void* block, void* other);
+extern "C" void tModifierBlock_transferEffectModifier(void* block, void* other);
 
 /**
  * Moves another node's effect links into this node's modifier block, creating the block when needed.
  *
- * Uses func_00353398 (On Tour tModifierBlock::transferEffectModifier) on the other block's effect link (+0x10).
+ * Uses tModifierBlock_transferEffectModifier (On Tour tModifierBlock::transferEffectModifier) on the other block's effect link (+0x10).
  *
  * @param other  the node giving up its effects (On Tour oldNode)
  */
@@ -832,7 +832,7 @@ extern "C" void cMoveNode_transferEffectModifier(cMoveNode* self, cMoveNode* oth
         if (((void*)self->ModifierBlock) == 0) {
             cMoveNode_addModifierBlock(self);
         }
-        func_00353398(((void*)self->ModifierBlock), (char*)((void*)other->ModifierBlock) + 0x10);
+        tModifierBlock_transferEffectModifier(((void*)self->ModifierBlock), (char*)((void*)other->ModifierBlock) + 0x10);
     }
 }
 #endif
@@ -2121,7 +2121,7 @@ struct sMnMtx_357108 {
     sMnVec4_357108 r[4];
 };
 
-extern "C" void func_0034FED8(void* model, int bone, sMnMtx_357108* out);
+extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sMnMtx_357108* out);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMtx_357108(void* dst, void* src)
@@ -2199,7 +2199,7 @@ struct sMnVEntryM_357108 {
  * Follows the parent instance: copies the parent mesh's matrix and places the offset in its space.
  *
  * With the parent's node set (+0xC), Transform is the node's mesh matrix for Mesh (slot 29) when its slot 26 is
- * nonzero, else func_0034FED8 (On Tour cInstanceNode::buildMeshMat) builds it; row 3 becomes that position plus the
+ * nonzero, else cInstanceNode_buildMeshMat (On Tour cInstanceNode::buildMeshMat) builds it; row 3 becomes that position plus the
  * matrix applied to Offset (the local view's vel_357108 is Transform row 3, +0x80). Clears RootTransformDirty in
  * any case.
  */
@@ -2212,7 +2212,7 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
             sMnVEntryM_357108* vm = *(sMnVEntryM_357108**)(parentNode + 0xC);
             vu0CopyMtx_357108(((char*)self) + 0x50, vm[29].fn(parentNode + vm[29].delta, self->Mesh));
         } else {
-            func_0034FED8(self->ParentInst, self->Mesh, (sMnMtx_357108*)(((char*)self) + 0x50));
+            cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, (sMnMtx_357108*)(((char*)self) + 0x50));
         }
         *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108((sMnMtx_357108*)(((char*)self) + 0x50), (sMnVec4_357108*)(((char*)self) + 0x30)));
     }
@@ -2358,7 +2358,7 @@ extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
 //100%
 INCLUDE_ASM("object/movenode", cMagnetModifier_update);
 #ifdef SKIP_ASM
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void* func_002D1B58(int id);
 
 struct sMnVec4_3573F8 {
@@ -2451,7 +2451,7 @@ extern "C" void cMagnetModifier_update(cMagnetModifier* self)
     if (self->Being < 0) {
         return;
     }
-    self->Time += func_002D1C70();
+    self->Time += cObjectInterface_getUpdateTime();
     sMnVec4_3573F8 delta = vu0Sub_3573F8(*(sMnVec4_3573F8*)func_002D1B58(self->Being), (*(sMnVec4_3573F8*)&self->Offset));
     float len = vu0Length_3573F8(delta);
     if (len < 50.0f) {
@@ -2842,11 +2842,11 @@ void* func_00357B10(void* self, int particleIndex, int instId)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357B38);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_reset);
 #ifdef SKIP_ASM
 extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
 
-extern "C" void func_00357B38(void** self)
+extern "C" void cMultiParticleMan_reset(void** self)
 {
     int i;
     for (i = 0; i < 4; i++) {
@@ -2875,11 +2875,11 @@ extern "C" void func_00357B90(void** self, void* sectionId)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357BF8);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_update);
 #ifdef SKIP_ASM
 extern "C" void cMultiParticle_update(void* p);
 
-extern "C" void func_00357BF8(void** self)
+extern "C" void cMultiParticleMan_update(void** self)
 {
     int i;
     for (i = 0; i < 4; i++) {
@@ -2940,7 +2940,7 @@ extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, void* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357D28);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sMnVEntrySer7D28 {
     short delta;
@@ -2950,10 +2950,10 @@ struct sMnVEntrySer7D28 {
 
 extern "C" void* func_00357E80(cMultiParticle* mem, void* stream);
 
-extern "C" void func_00357D28(void** self, void* stream)
+extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
 {
     int i;
-    func_00357B38(self);
+    cMultiParticleMan_reset(self);
     for (i = 0; i < 4; i++) {
         int has;
         sMnVEntrySer7D28* e = &(*(sMnVEntrySer7D28**)stream)[2];

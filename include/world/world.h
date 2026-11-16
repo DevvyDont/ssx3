@@ -7,12 +7,12 @@
 // over 100 retail functions read. The cWorld itself only owns three sub-objects; the streaming lives in cWorldCache
 // (world/worldcache.h). No vtable, no base class. EA's source: d:/ssx/code/source/world/world.cpp (preview assert
 // strings). Methods (world/world, 0x003A6688-0x003A6D50; names from On Tour's cWorld methods):
-//   cWorld_cWorld, cWorld__cWorld, cWorld_init, cWorld_resetMap, func_003A6928 (update), cWorld_load,
+//   cWorld_cWorld, cWorld__cWorld, cWorld_init, cWorld_resetMap, cWorld_update (update), cWorld_load,
 //   cWorld_getWScriptHeaderId (getWScriptHeaderId), cWorld_getNumGlobalScripts (getNumGlobalScripts), cWorld_getGlobalScripts (getGlobalScripts),
 //   cWorld_getNumProcessScripts, cWorld_getProcessScripts, cWorld_getNumMissionScripts (getNumMissionScripts),
 //   cWorld_getMissionScripts (getMissionScripts), func_003A6CC8 (getSphereTreeInfo), func_003A6CD8 (getPolyModelInfo),
 //   cWorld_getWScriptScript (getWScriptScript). Not methods: func_003A6948 (a static .sdb section-name check: path, count,
-//   names), func_003A6CE8 and func_003A6D00 (their first argument is a tPolyModelList / tSphTreeList).
+//   names), tSphTreeList_getMeshTree and tPolyModelList_getMeshPolyModel (their first argument is a tPolyModelList / tSphTreeList).
 //
 // Size 0x18 [R] (the allocation; On Tour 0x18 with the same six members).
 // A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF (class cWorld), placed by:

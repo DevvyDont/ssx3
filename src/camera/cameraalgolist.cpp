@@ -120,7 +120,7 @@ extern "C" sAlgoNodeK2b* func_0015CA50(sAlgoListK2b* list, sAlgoNodeK2b* n)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgolist", func_0015CB08);
+INCLUDE_ASM("camera/cameraalgolist", cCameraAlgoList_removeAll);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -156,7 +156,7 @@ static inline void sAlgoNode_delete(sAlgoNode* n)
     }
 }
 
-extern "C" void func_0015CB08(sAlgoList* list)
+extern "C" void cCameraAlgoList_removeAll(sAlgoList* list)
 {
     sAlgoNode* n = list->head;
     while (n != 0) {

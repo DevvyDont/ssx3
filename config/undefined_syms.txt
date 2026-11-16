@@ -21,7 +21,7 @@ D_004C5100 = 0x4C5100;
 /* Named only by config/reloc_addrs.txt (2026-11-10): func_003150F8 / func_00315A20 (animation/gameanimmap). */
 D_004FEED0 = 0x4FEED0;
 D_004FEF50 = 0x4FEF50;
-/* Also reloc-only (2026-11-10): func_003AD290 / func_002F6B88 / func_0013FB20 / func_003150F8 / func_00315A20 / func_001DBC98. */
+/* Also reloc-only (2026-11-10): func_003AD290 / func_002F6B88 / __sti__all_in_one_ai_cpp / func_003150F8 / func_00315A20 / func_001DBC98. */
 D_004A5FC0 = 0x4A5FC0;
 D_004A5FE0 = 0x4A5FE0;
 D_004A6080 = 0x4A6080;

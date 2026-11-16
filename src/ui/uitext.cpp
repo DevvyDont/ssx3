@@ -14,8 +14,8 @@ extern "C" float func_00392BA8(void* font, int ch);
 // The unit declares these with the string as int; bind pointer-typed views.
 extern "C" float func_003921F0_s(void* font, unsigned short* str, void* out, int flags, float sx, float sy) __asm__("func_003921F0");
 extern "C" void func_00391E30_s(void* font, float x, float y, unsigned short* str) __asm__("func_00391E30");
-extern "C" void func_0039FEB8(void* self, void* pos, void* size);
-extern "C" void func_002C2718(unsigned short* dst, unsigned short* fmt, unsigned short* str);
+extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
+extern "C" void usprintf(unsigned short* dst, unsigned short* fmt, unsigned short* str);
 extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
@@ -95,7 +95,7 @@ struct sText_05E8 {
  * Refreshes the string through updateLocale (slot 16) when there is none or the cached bit is clear. Picks
  * the static colour (static thing with use-static-colour set), the disabled colour (disabled thing with
  * use-disabled-colour set) or the normal colour, and adds a drop shadow when the shadow bit is set. Each line
- * is measured, placed by func_0039FEB8 and drawn 3 pixels below the last; with ellipses on and several lines,
+ * is measured, placed by cUIThing_applyPivot and drawn 3 pixels below the last; with ellipses on and several lines,
  * only the first line is drawn, followed by "...". When a flag word reached through the screen's engine has
  * bit 27 set (probably a debug option), every line is replaced by a row of 'W's as wide as the object.
  *
@@ -163,12 +163,12 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         }
         if (((self->flags >> 6) & 1) && self->numLines >= 2) {
             unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, str_UITEXTTEMP_b, 0x100, 0);
-            func_002C2718(buf, D_004A47B0, str);
+            usprintf(buf, D_004A47B0, str);
             sRect_05E8 textBounds;
             func_003921F0_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
             sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
             sV3_05E8 drawPos = pos;
-            func_0039FEB8(self, &drawPos, &size);
+            cUIThing_applyPivot(self, &drawPos, &size);
             pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
             func_00391E30_s(font, drawPos.x, drawPos.y, buf);
             if (buf != 0) {
@@ -181,7 +181,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         i++;
         sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
         sV3_05E8 drawPos = pos;
-        func_0039FEB8(self, &drawPos, &size);
+        cUIThing_applyPivot(self, &drawPos, &size);
         pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
         func_00391E30_s(font, drawPos.x, drawPos.y, str);
     } while (i < self->numLines);
@@ -594,15 +594,15 @@ extern "C" int func_003A10F0(void* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_cUITextScroll);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a1, int a2);
-extern "C" void* func_003977E8(void* self);
+extern "C" void* cUIThing_cUIThing(void* self, int a1, int a2);
+extern "C" void* cList_cList(void* self);
 extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char a1);
 extern void* cUITextScroll_vtbl[];
 
 /**
  * Constructs an empty text scroll.
  *
- * Runs the cUIThing constructor (func_0039FB30) with the screen and parent, stores cUITextScroll_vtbl, clears mMode,
+ * Runs the cUIThing constructor (cUIThing_cUIThing) with the screen and parent, stores cUITextScroll_vtbl, clears mMode,
  * mShadow, mUnicode and mStaticColour, constructs mList and clears mpScrollBar, mpLineOffset, mStringID,
  * mSelectedIndex, mLinesOffset, mLineSize and mPixelOffset; then cUITextScroll_setInputMap(self, 0).
  *
@@ -612,10 +612,10 @@ extern void* cUITextScroll_vtbl[];
  */
 extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int pState, int pParent)
 {
-    func_0039FB30(self, pState, pParent);
+    cUIThing_cUIThing(self, pState, pParent);
     self->mVtbl = cUITextScroll_vtbl;
     *(unsigned char*)&self->mAttrTextScroll &= 0xC6;
-    func_003977E8(((char*)self) + 0x8C);
+    cList_cList(((char*)self) + 0x8C);
     self->mpScrollBar = 0;
     self->mpLineOffset = 0;
     self->mStringID = (unsigned int)0;
@@ -876,9 +876,9 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_render2D);
 #ifdef SKIP_ASM
 extern "C" int cUITextScroll_getFont(cUITextScroll* self);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
-extern "C" void func_0039FEB8(void* self, void* pos, void* size);
+extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
 extern "C" void func_00391E30(void* font, float x, float y, int str);
-extern "C" void func_0039DA20(void* sb, int top, int rows, int count);
+extern "C" void cUIScrollBar_setValues(void* sb, int top, int rows, int count);
 
 struct sV2_1588 {
     float x, y;
@@ -1002,12 +1002,12 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
         func_003921F0(font, str, &textBounds, 0, self->sx, self->sy);
         sV3_1588 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
         sV3_1588 drawPos = pos;
-        func_0039FEB8(self, &drawPos, &size);
+        cUIThing_applyPivot(self, &drawPos, &size);
         pos.y += lineH;
         func_00391E30(font, drawPos.x, drawPos.y + self->yofs, str);
     } while (i < rows);
     if (self->scroll != 0) {
-        func_0039DA20(self->scroll, self->top, rows, self->count);
+        cUIScrollBar_setValues(self->scroll, self->top, rows, self->count);
     }
 }
 #endif
@@ -1906,7 +1906,7 @@ extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColo
 //100%
 INCLUDE_ASM("ui/uitext", cUIVector_cUIVector);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a1, int a2);
+extern "C" void* cUIThing_cUIThing(void* self, int a1, int a2);
 extern void* cUIVector_vtbl[];
 
 struct cUIVector_cUIVector_s {
@@ -1935,7 +1935,7 @@ struct cUIVector_cUIVector_s {
  */
 extern "C" cUIVector_cUIVector_s* cUIVector_cUIVector(cUIVector* self, int pScreen, int pParent)
 {
-    func_0039FB30(((cUIVector_cUIVector_s*)self), pScreen, pParent);
+    cUIThing_cUIThing(((cUIVector_cUIVector_s*)self), pScreen, pParent);
     self->mVtbl = cUIVector_vtbl;
     ((cUIVector_cUIVector_s*)self)->b0 = 0;
     ((cUIVector_cUIVector_s*)self)->b1 = 0;

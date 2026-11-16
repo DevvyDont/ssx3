@@ -82,7 +82,7 @@ extern "C" int cFEStateTitle_onGainTransition(void* self)
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_0039E510(void* self);
+extern "C" void cUIState_onUpdate(void* self);
 extern int cRealFE_mMovieList;
 
 struct sItem_1948A8 {
@@ -115,13 +115,13 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
 /**
  * Counts idle frames on the title screen and requests the attract movie after 1800 of them.
  *
- * After the UI update (func_0039E510), an active entry in either controller's input list resets the timer
+ * After the UI update (cUIState_onUpdate), an active entry in either controller's input list resets the timer
  * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of cRealFE_mMovieList is set, which
  * func_001A27A0 plays as a skippable movie.
  */
 extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 {
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     self->timer += 1;
     if (self->timer > 0x708) {
         self->timer = 0;
@@ -312,7 +312,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00194498(void* obj);
+extern "C" void DisableTextWidget(void* obj);
 extern int D_004A29EC;
 extern char str_3multi_play[];
 extern char str_5online[];
@@ -354,7 +354,7 @@ public:
 /**
  * Greys out Multi Play without two controllers and Online without online support, every frame.
  *
- * "3multi play" is greyed out (func_00194498) with fewer than two active pads (+0x55); otherwise, while the
+ * "3multi play" is greyed out (DisableTextWidget) with fewer than two active pads (+0x55); otherwise, while the
  * state's mode is 5, it is restored: slot 25 (declared setSelected) and slot 8 (cUIThing_setStatic, declared
  * setEnabled) cleared, alpha 1. "5online" is greyed out while D_004A29EC (set by initOnline) is 0.
  */
@@ -363,7 +363,7 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
     cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3multi_play));
     if (obj != 0) {
         if (*(signed char*)((char*)self + 0x55) < 2) {
-            func_00194498(obj);
+            DisableTextWidget(obj);
         } else if ((*(unsigned char*)((char*)self + 0x1D) & 0x3F) == 5) {
             obj->setSelected(0);
             obj->setEnabled(0);
@@ -375,7 +375,7 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
     if (D_004A29EC == 0) {
         void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_5online));
         if (uiObj != 0) {
-            func_00194498(uiObj);
+            DisableTextWidget(uiObj);
         }
     }
 }
@@ -431,7 +431,7 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_0039E510(void* self);
+extern "C" void cUIState_onUpdate(void* self);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
 extern char str_Menu[];
@@ -497,7 +497,7 @@ public:
 extern "C" void cFEStateMainMenu_onUpdate(void* self)
 {
     int i = 0;
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)((char*)*(void**)((char*)self + 0x10) + 0xC);
     *(signed char*)((char*)self + 0x55) = 0;
     for (; i < 2; i++) {
@@ -523,7 +523,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetEvent);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 extern "C" void func_001A86E8(int a);
-extern "C" void func_00145108(void* iface, int mode);
+extern "C" void cBENewRaceInterface_setGamePath(void* iface, int mode);
 extern "C" void cCommSystem_construct();
 extern "C" void func_0025B650();
 extern "C" void func_00260F80();
@@ -604,22 +604,22 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (*(int*)(item + 0x18)) {
         case 11:
-            func_00145108(iface, 0);
+            cBENewRaceInterface_setGamePath(iface, 0);
             *(int*)(self + 0x48) = 1;
             break;
         case 9:
-            func_00145108(iface, 1);
+            cBENewRaceInterface_setGamePath(iface, 1);
             *(int*)(self + 0x48) = 1;
             // both arms set the flag; the leftover compare on the cheat counter is in the target too
             if (*(signed char*)(self + 0x54) >= 7)
                 *(int*)(self + 0x48) = 1;
             break;
         case 22:
-            func_00145108(iface, 2);
+            cBENewRaceInterface_setGamePath(iface, 2);
             *(int*)(self + 0x48) = 1;
             break;
         case 49:
-            func_00145108(iface, 2);
+            cBENewRaceInterface_setGamePath(iface, 2);
             cCommSystem_construct();
             func_0025B650();
             func_00260F80();

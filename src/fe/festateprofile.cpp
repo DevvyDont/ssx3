@@ -99,19 +99,19 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, char* menu, unsi
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018ECA0);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_cFEStateProfileLoad);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00147318(void* self, int a1);
-extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern void* cFEStateProfileLoad_vtbl[];
 extern int cFEStateProfileLoad_mScreenAction;
 
-extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
+extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, int a1, int a2, unsigned char flags)
 {
-    func_001D53B0(self, a1, 0);
+    cFEMemCard_cFEMemCard(self, a1, 0);
     *(int*)((char*)self + 0xC) = 0x23;
     *(void***)((char*)self + 0x8) = cFEStateProfileLoad_vtbl;
     cFEStateProfileLoad_mScreenAction = a2;
@@ -136,7 +136,7 @@ extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
         n = 2;
     }
     for (int j = 0; j < n; j++) {
-        if (func_00147318(pi, j) == *(int*)((char*)self + 0x22C)) {
+        if (cBENewPlayerInterface_getPlayerCtrlID(pi, j) == *(int*)((char*)self + 0x22C)) {
             *(int*)((char*)self + 0x1CC) = j;
             break;
         }
@@ -189,14 +189,14 @@ extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
 }
 #endif
 
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 
 //100%
 INCLUDE_ASM("fe/festateprofile", func_0018EE98__FPv);
 #ifdef SKIP_ASM
 void* func_0018EE98(void* self)
 {
-    return func_0039E6B8(self);
+    return cUIState_onRender2D(self);
 }
 #endif
 
@@ -773,7 +773,7 @@ void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* func_00194738(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* self, void* state);
-extern "C" void func_0039F4C0(void* self, void* state);
+extern "C" void cUIStateStack_pushCheck(void* self, void* state);
 extern int D_004A11B8;
 extern int D_004A19D8;
 extern int D_00535C08[];
@@ -800,7 +800,7 @@ extern "C" void func_0018FAF0(void* self)
             sVEK18FAF0a* vt = *(sVEK18FAF0a**)(g + 4);
             void* r = vt[5].fn(g + vt[5].delta, self, *(int*)((char*)self + 0x1BC));
             if (r != 0)
-                func_0039F4C0(*(char**)((char*)self + 0x10) + 0x18, r);
+                cUIStateStack_pushCheck(*(char**)((char*)self + 0x10) + 0x18, r);
         } else if (sel == 1) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -822,7 +822,7 @@ extern "C" void func_0018FAF0(void* self)
 }
 #endif
 
-extern "C" void* func_001D58B8(void*);
+extern "C" void* cFEMemCard_onDestroyScreen(void*);
 
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onDestroyScreen__FPv);
@@ -830,12 +830,12 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onDestroyScreen__FPv);
 /**
  * Destroys the profile-load screen: runs the shared profile screen teardown, then clears the word at +0x1A4.
  *
- * The teardown, func_001D58B8(), calls helpers of back-end interface 5, runs three memory card manager calls
+ * The teardown, cFEMemCard_onDestroyScreen(), calls helpers of back-end interface 5, runs three memory card manager calls
  * when its word at +0x434 is set, and frees the buffer at +0x1D4 when one is held.
  */
 void cFEStateProfileLoad_onDestroyScreen(void* self)
 {
-    func_001D58B8(self);
+    cFEMemCard_onDestroyScreen(self);
     *(int*)((char*)self + 0x1a4) = 0;
 }
 #endif
@@ -845,7 +845,7 @@ INCLUDE_ASM("fe/festateprofile", func_0018FC98);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
-extern "C" void func_00241E18(void*, unsigned short*, int);
+extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 void cMemMan_free(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -903,7 +903,7 @@ extern "C" void func_0018FC98(void* vself)
         if (*(int*)((char*)self + 0x210) == 0 && *(int*)((char*)self + 0x204) == 0) {
             *(int*)((char*)self + 0x19C) = 0x16;
             unsigned short* buf = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
-            func_00241E18(cSSXApp_getMCManager(SSXApp), buf, 0x320);
+            cMCOverlayManager_GetMessage(cSSXApp_getMCManager(SSXApp), buf, 0x320);
             self->showMessage(buf, 1, 1, 0, 0, 1);
             *(int*)((char*)self + 0x210) = 1;
             if (buf != 0) {

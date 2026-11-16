@@ -249,21 +249,21 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_001D4A20(void* self);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the trophy room, first finishing any of its pending trophy picture loads.
  *
  * While the pending count at 0x5C is positive, func_001D4A20() hands each of the five slots that has finished
  * loading to GrMan under the name "trph", releases it and decrements the count. Then runs the base UI-state
- * update func_0039E510().
+ * update cUIState_onUpdate().
  */
 extern "C" void cFEStateTrophyRoom_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x5C) > 0) {
         func_001D4A20(self);
     }
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 
@@ -937,7 +937,7 @@ extern "C" void* func_001D5330(void* self, int a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D53B0);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_001D5488(void* self, int a1);
@@ -945,7 +945,7 @@ extern void* D_00474E08[];
 extern void* D_0046C980[];
 extern unsigned short D_004A1390[];
 
-extern "C" void* func_001D53B0(void* self, int a1, int a2)
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0x98) = 0;
@@ -1001,9 +1001,9 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5488);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_00152948__FPv ignores its argument; this caller passes none.
-int func_00152948_r() __asm__("func_00152948__FPv");
-extern "C" int func_00152BA8();
+// PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
+int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
+extern "C" int cBESaveInterface_getSaveProfileSize();
 // PORT: func_0023CC58__FPv really takes a second argument.
 void func_0023CC58_2(void* app, int n) __asm__("func_0023CC58__FPv");
 extern "C" void func_0023CAA0(void* app, int n);
@@ -1016,13 +1016,13 @@ extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
 extern void* cFEMemCard_mInstance;
 extern char str_pct_s_pct_s_c[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
-extern char func_001D59A0_a5488[] __asm__("func_001D59A0");
+extern char cFEMemCard_writeStart_a5488[] __asm__("cFEMemCard_writeStart");
 extern char func_001D5D78_a5488[] __asm__("func_001D5D78");
 extern char func_001D5F38_a5488[] __asm__("func_001D5F38__FPv");
 extern char cFEMemCard_callbackSaveSuccess_a5488[] __asm__("cFEMemCard_callbackSaveSuccess");
 extern char func_001D6C28_a5488[] __asm__("func_001D6C28");
-extern char func_001D5DF0_a5488[] __asm__("func_001D5DF0");
-extern char func_001D5C28_a5488[] __asm__("func_001D5C28");
+extern char cFEMemCard_readStart_a5488[] __asm__("cFEMemCard_readStart");
+extern char cFEMemCard_callbackReadUpdate_a5488[] __asm__("cFEMemCard_callbackReadUpdate");
 extern char func_001D5F40_a5488[] __asm__("func_001D5F40");
 extern char func_001D6AD0_a5488[] __asm__("func_001D6AD0");
 extern char cFEMemCard_callbackReadSuccess_a5488[] __asm__("cFEMemCard_callbackReadSuccess");
@@ -1065,8 +1065,8 @@ extern "C" void func_001D5488(void* self_, int mode)
     *(int*)(self + 0x1C0) = 0;
     *(int*)(self + 0x214) = 0;
     char* app = (char*)cSSXApp_getMCManager(gapp);
-    *(void**)(app + 0x0) = func_001D59A0_a5488;
-    *(void**)(app + 0x18) = func_001D5DF0_a5488;
+    *(void**)(app + 0x0) = cFEMemCard_writeStart_a5488;
+    *(void**)(app + 0x18) = cFEMemCard_readStart_a5488;
     *(void**)(app + 0x8) = func_001D5F38_a5488;
     *(void**)(app + 0x20) = func_001D5F40_a5488;
     *(void**)(app + 0x6C) = func_001DDD58_a5488;
@@ -1081,7 +1081,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     *(void**)(app + 0x4) = func_001D5D78_a5488;
     *(void**)(app + 0x44) = func_001D68E8_a5488;
     *(void**)(app + 0x40) = func_001D7010_a5488;
-    *(void**)(app + 0x1C) = func_001D5C28_a5488;
+    *(void**)(app + 0x1C) = cFEMemCard_callbackReadUpdate_a5488;
     *(void**)(app + 0x88) = func_001DDDA8_a5488;
     *(void**)(app + 0x48) = func_001D7318_a5488;
     *(void**)(app + 0x50) = cFEMemCard_callbackConfirmFormatDone_a5488;
@@ -1144,7 +1144,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     cBE_getInterface_Fv(cBE_getBE(), 5);
     if (*(int*)(self + 0x1BC) == 2)
     {
-        int n = func_00152948_r();
+        int n = cBESaveInterface_getSaveGameSize_r();
         func_0023CC58_2(app, n);
         func_0023CAA0(app, n);
         func_0023C8F0(app, 2);
@@ -1157,7 +1157,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     }
     else
     {
-        int n = func_00152BA8();
+        int n = cBESaveInterface_getSaveProfileSize();
         func_0023CC58_2(app, n);
         func_0023CAA0(app, n);
         func_0023C8F0(app, 1);
@@ -1173,35 +1173,35 @@ extern "C" void func_001D5488(void* self_, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D58B8);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cMemMan_free(void* p);
-extern "C" void func_00152700(void* iface);
-extern "C" void func_00152728(void* iface);
+extern "C" void cBESaveInterface_releaseBuffer(void* iface);
+extern "C" void cBESaveInterface_releaseReplayBuffer(void* iface);
 extern "C" void cOVState_onDestroyScreen(void* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" void func_0023C860(void* self);
-extern "C" void func_0023D5E8(void* self);
-extern "C" void func_002410A0(void* self);
+extern "C" void cMCOverlayManager_purge(void* self);
+extern "C" void cMCOverlayManager_ManagerLoseState(void* self);
+extern "C" void cMCOverlayManager_cleanUp(void* self);
 
-extern "C" void func_001D58B8(void* self)
+extern "C" void cFEMemCard_onDestroyScreen(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     if (*(int*)((char*)self + 0x1BC) == 1 && *(int*)((char*)self + 0x228) == 2 && *(int*)((char*)self + 0x1B4) == 0) {
-        func_00152728(iface);
+        cBESaveInterface_releaseReplayBuffer(iface);
         *(int*)((char*)self + 0x1D4) = 0;
         *(int*)((char*)self + 0x1D0) = 0;
         *(int*)((char*)self + 0x228) = 0;
     }
-    func_00152700(iface);
+    cBESaveInterface_releaseBuffer(iface);
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     if (*(int*)(app + 0x434) != 0) {
-        func_002410A0(app);
-        func_0023D5E8(app);
-        func_0023C860(app);
+        cMCOverlayManager_cleanUp(app);
+        cMCOverlayManager_ManagerLoseState(app);
+        cMCOverlayManager_purge(app);
     }
     if (*(int*)((char*)self + 0x228) == 1) {
         *(int*)((char*)self + 0x228) = 0;
@@ -1216,25 +1216,25 @@ extern "C" void func_001D58B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D59A0);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_writeStart);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002412A0(void* app);
 extern "C" void cReplay_initSave(void* p);
-extern "C" int func_0014E048(void* be);
+extern "C" int cBE_getDataSize(void* be);
 extern "C" void cFEMemCard_createReadBuffer_59A0(void* self, int size) __asm__("cFEMemCard_createReadBuffer");
 extern "C" void func_0014E050(void* be, int a);
-extern "C" int func_00152950(void* iface, int a);
-extern "C" int func_00152BA8();
+extern "C" int cBESaveInterface_generateSaveProfile(void* iface, int a);
+extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void func_00241D40(void* app, int a, char* buf, int n);
 extern "C" void func_00241AA0(char* buf, int n);
 // PORT: the unit declares func_002C2540 as void; it returns dst (bound by asm label so the call is a call_value).
 extern "C" unsigned short* func_002C2540_59A0(char* buf, const char* s) __asm__("func_002C2540");
 extern "C" void sprintf1_59A0(char* dst, char* fmt, char* a, char* b, int n) __asm__("sprintf1");
 extern "C" void func_00241000(void* app, char* name, int a, int b);
-extern "C" void func_00241E18(void* app, char* buf, int n);
+extern "C" void cMCOverlayManager_GetMessage(void* app, char* buf, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
 extern void* cFEMemCard_mInstance;
@@ -1248,7 +1248,7 @@ struct sVE_59A0 {
 };
 
 // Memory-card "save" step: builds the save-file title for the current mode and starts the save; on first entry shows the saving dialog.
-extern "C" void func_001D59A0(void)
+extern "C" void cFEMemCard_writeStart(void)
 {
     char name[0x90];
     char title[0x90];
@@ -1263,7 +1263,7 @@ extern "C" void func_001D59A0(void)
         void* replay = SSXApp->Game->Replay;
         *(int*)((char*)cFEMemCard_mInstance + 0x1C8) = mode;
         cReplay_initSave(replay);
-        int size = func_0014E048(cBE_getBE());
+        int size = cBE_getDataSize(cBE_getBE());
         cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
         func_0014E050(cBE_getBE(), *(int*)((char*)cFEMemCard_mInstance + 0x1D4));
         func_00241D40(app, 0, name, 0x41);
@@ -1274,8 +1274,8 @@ extern "C" void func_001D59A0(void)
     } else {
         char* app2 = (char*)cSSXApp_getMCManager(SSXApp);
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-        int a = func_00152950(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
-        int b = func_00152BA8();
+        int a = cBESaveInterface_generateSaveProfile(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
+        int b = cBESaveInterface_getSaveProfileSize();
         func_00241D40(app2, 1, name, 0x41);
         func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
@@ -1286,7 +1286,7 @@ extern "C" void func_001D59A0(void)
     if (*(int*)(fe + 0x210) == 0 && *(int*)(fe + 0x208) == 0) {
         *(int*)(fe + 0x19C) = 0x16;
         char* buf = (char*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
-        func_00241E18(app, buf, 0x320);
+        cMCOverlayManager_GetMessage(app, buf, 0x320);
         sVE_59A0* vt = *(sVE_59A0**)((char*)cFEMemCard_mInstance + 8);
         vt[36].fn((char*)cFEMemCard_mInstance + vt[36].delta, buf, 1, 1, 0, 0, 1);
         *(int*)((char*)cFEMemCard_mInstance + 0x210) = 1;
@@ -1298,17 +1298,17 @@ extern "C" void func_001D59A0(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5C28);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_callbackReadUpdate);
 #ifdef SKIP_ASM
 extern int gWeHaveToClearTheBackEnd;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00152728(void* iface);
+extern "C" void cBESaveInterface_releaseReplayBuffer(void* iface);
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" int func_0014E048(void* be);
-void* func_0014E0C0(void* self, int a1);
-extern "C" void func_00241200(void* self, char* a, int n);
+extern "C" int cBE_getDataSize(void* be);
+void* cBE_readFromData(void* self, int a1);
+extern "C" void cMCOverlayManager_ReadData(void* self, char* a, int n);
 extern "C" int func_003E62D0(void* buf, int size, int seed);
 extern "C" void* memcpy(void*, const void*, unsigned int);
 
@@ -1326,7 +1326,7 @@ struct sTrophyRoom_001D5C28 {
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
 extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("cFEMemCard_mInstance");
 
-extern "C" int func_001D5C28(int size)
+extern "C" int cFEMemCard_callbackReadUpdate(int size)
 {
     sTrophyRoom_001D5C28* g = D_004A2028_tr;
     int mode = g->mode;
@@ -1336,26 +1336,26 @@ extern "C" int func_001D5C28(int size)
     if (g->pending != 0) {
         g->pending = 0;
         char* base = g->cur;
-        int crc = func_003E62D0(g->cur, func_0014E048(cBE_getBE()) - 4, 0xFBEA);
-        D_004A2028_tr->cur += func_0014E048(cBE_getBE()) - 4;
+        int crc = func_003E62D0(g->cur, cBE_getDataSize(cBE_getBE()) - 4, 0xFBEA);
+        D_004A2028_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
         int stored = 0;
         memcpy(&stored, D_004A2028_tr->cur, 4);
         D_004A2028_tr->cur += 4;
         if (crc != stored) {
-            func_00152728(cBE_getInterface_Fv(cBE_getBE(), 5));
+            cBESaveInterface_releaseReplayBuffer(cBE_getInterface_Fv(cBE_getBE(), 5));
             D_004A2028_tr->buf = 0;
             D_004A2028_tr->cur = 0;
             D_004A2028_tr->state = 0;
             return 0;
         }
         gWeHaveToClearTheBackEnd = mode;
-        func_0014E0C0(cBE_getBE(), (int)base);
+        cBE_readFromData(cBE_getBE(), (int)base);
     }
     if (size > 0) {
         if (size > 0x4000) {
             size = 0x4000;
         }
-        func_00241200(cSSXApp_getMCManager(SSXApp), D_004A2028_tr->cur, size);
+        cMCOverlayManager_ReadData(cSSXApp_getMCManager(SSXApp), D_004A2028_tr->cur, size);
         D_004A2028_tr->cur += size;
     }
     return 1;
@@ -1392,17 +1392,17 @@ extern "C" int func_001D5D78(int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5DF0);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_readStart);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" int func_0014E048(void* be);
-// PORT: func_00152948__FPv ignores its argument; this caller passes none.
-int func_00152948_r() __asm__("func_00152948__FPv");
-extern "C" int func_00152BA8();
-extern "C" void func_0023CA28(void* self, int a, int b, int c);
+extern "C" int cBE_getDataSize(void* be);
+// PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
+int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
+extern "C" int cBESaveInterface_getSaveProfileSize();
+extern "C" void cMCOverlayManager_readFile(void* self, int a, int b, int c);
 
 struct sMoviePlayer_001D5DF0 {
     char pad0[0xF8];
@@ -1427,10 +1427,10 @@ struct sTrophyRoom_001D5DF0 {
 };
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
 extern sTrophyRoom_001D5DF0* D_004A2028_tr5 __asm__("cFEMemCard_mInstance");
-extern "C" int func_00152688(void* iface);
+extern "C" int cBESaveInterface_getReplayBuffer(void* iface);
 extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size);
 
-extern "C" void func_001D5DF0()
+extern "C" void cFEMemCard_readStart()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     sMoviePlayer_001D5DF0* app = (sMoviePlayer_001D5DF0*)cSSXApp_getMCManager(SSXApp);
@@ -1441,24 +1441,24 @@ extern "C" void func_001D5DF0()
     int mode = g->mode;
     switch (mode) {
     case 2: {
-        int n = func_00152948_r();
+        int n = cBESaveInterface_getSaveGameSize_r();
         cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
-        func_0023CA28(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
+        cMCOverlayManager_readFile(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
         break;
     }
     case 1: {
         D_004A2028_tr5->state = 2;
-        int b = func_00152688(iface);
+        int b = cBESaveInterface_getReplayBuffer(iface);
         sTrophyRoom_001D5DF0* t = D_004A2028_tr5;
         t->buf = t->cur = b;
-        func_0023CA28(app, t->size, t->cur, func_0014E048(cBE_getBE()));
+        cMCOverlayManager_readFile(app, t->size, t->cur, cBE_getDataSize(cBE_getBE()));
         D_004A2028_tr5->pending = mode;
         break;
     }
     case 0: {
-        int n = func_00152BA8();
+        int n = cBESaveInterface_getSaveProfileSize();
         cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
-        func_0023CA28(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
+        cMCOverlayManager_readFile(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
         break;
     }
     }
@@ -1483,7 +1483,7 @@ extern "C" void func_001D64C0(unsigned int mode);
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void func_00287488(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
-extern "C" void func_00287558(void* opt, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
 void cMemMan_free(void*);
 extern void* cFEMemCard_mInstance;
@@ -1532,7 +1532,7 @@ extern "C" int func_001D5F40()
             func_00287410(func_0028B180(), Cfg_1D5F40().sfxVol);
             func_00287488(func_0028B180(), Cfg_1D5F40().speechVol);
             func_00287520(func_0028B180(), Cfg_1D5F40().musicVol);
-            func_00287558(func_0028B180(), Cfg_1D5F40().f17 != 0);
+            cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_1D5F40().f17 != 0);
             func_002875D0(func_0028B180(), Cfg_1D5F40().f16 != 0);
         }
         break;
@@ -1567,7 +1567,7 @@ extern "C" void SSXAUDIO_Init(int lang);
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void func_00287488(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
-extern "C" void func_00287558(void* opt, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
 extern "C" void func_00285FB0(void* opt);
 
@@ -1625,7 +1625,7 @@ extern "C" void func_001D64C0(unsigned int mode)
         func_00287410(func_0028B180(), (int)a);
         func_00287488(func_0028B180(), (int)b);
         func_00287520(func_0028B180(), (int)c);
-        func_00287558(func_0028B180(), x);
+        cSSXAudio_SetArcadeSFX(func_0028B180(), x);
         func_002875D0(func_0028B180(), y);
         func_00285FB0(func_0028B180());
         sOpt_001D64C0* o = (sOpt_001D64C0*)func_0028B180();

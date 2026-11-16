@@ -45,10 +45,10 @@ struct sDrawState {
     sTextureState m_textureState;   // 0x10 [O]
 };
 
-// [O] tTextureRef: a texture loaded by its 4-character name (func_003696C8 looks up / caches them).
+// [O] tTextureRef: a texture loaded by its 4-character name (cGraphicsMan_GetTextureID looks up / caches them).
 struct tTextureRef {
-    int TextureID;                  // 0x0 [O]; [U] func_003696C8 returns it
-    char Name[8];                   // 0x4 [O]; [U] strcpy target in func_003696C8
+    int TextureID;                  // 0x0 [O]; [U] cGraphicsMan_GetTextureID returns it
+    char Name[8];                   // 0x4 [O]; [U] strcpy target in cGraphicsMan_GetTextureID
 };
 
 // [O] tTVDisplayFormat (0x14 in On Tour too). [P] GetTVDisplayFormat returns &self->mTVDisplayFormat.
@@ -109,8 +109,8 @@ struct cPS2GraphicsMan {
     int m_PatchSpecularTextureId[8]; // 0x02C [O]; [U] cVisualEffectsMan ctor stores [6]
     int m_SnowSparkleTextureId[8];  // 0x04C [O]; [U] ditto
     int m_RimTextureId[8];          // 0x06C [O]; [U] ditto
-    int m_isInNIS[8];               // 0x08C [O]; [U] func_002F00A0 stores [i]
-    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] func_002F00A0 stores [i]
+    int m_isInNIS[8];               // 0x08C [O]; [U] cVisualEffectsMan_commonUpdate stores [i]
+    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] cVisualEffectsMan_commonUpdate stores [i]
     float m_DrawDistance[8];        // 0x0CC [O]; [U] ditto; func_0038D690 reads [6]
     float m_FogDensity[8];          // 0x0EC [O]; [U] ditto
     float m_FogColourR[8];          // 0x10C [O]; [U] ditto
@@ -127,9 +127,9 @@ struct cPS2GraphicsMan {
     float mFarPlane;                // 0x26C [O]; [R] ctor stores 0
     int mNumViews;                  // 0x270 [O]; [R] ctor stores 1; accessors func_00394020/func_00394028
     int mViewIndex;                 // 0x274 [O]; [R] ctor stores 0; accessors func_00394030/func_00394038
-    int mNumTextureFiles;           // 0x278 [O]; [U] func_00369890 / func_003696C8
-    void** mTextureFiles;           // 0x27C [O] const char**; [U] func_003696C8 passes each to SHAPE_locatez
-    tTextureRef mTexRefs[256];      // 0x280 [O]; [U] func_003696C8
+    int mNumTextureFiles;           // 0x278 [O]; [U] func_00369890 / cGraphicsMan_GetTextureID
+    void** mTextureFiles;           // 0x27C [O] const char**; [U] cGraphicsMan_GetTextureID passes each to SHAPE_locatez
+    tTextureRef mTexRefs[256];      // 0x280 [O]; [U] cGraphicsMan_GetTextureID
     int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (func_003945F0)
     sDrawState* m_pCurrentDrawState; // 0xE84 [O]; [P] CurrentDrawState; [R] ctor points it at the stack
     sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (sDrawState_s_defaultDrawState)

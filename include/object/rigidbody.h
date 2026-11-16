@@ -3,15 +3,15 @@
 
 // cRigidBody: a rigid body's integrator state (pose, linear/angular momentum, inverse mass and inertia, the derived
 // velocities). In SSX 3 its only user is cRollerModifier, which has it as a base at +0x30 (object/rollermodifier.h);
-// the methods are in src/object/railmodifier.cpp: func_0035CFE8 (ctor, empty), func_0035CFF0 (setW), func_0035D288
+// the methods are in src/object/railmodifier.cpp: cRigidBody_cRigidBody (ctor, empty), func_0035CFF0 (setW), cRigidBody_updateImplicit
 // (updateImplicit), func_0035D340 (stepMotion), func_0035D4A0 (rigidImpact), func_0035D908 (applyImpulse),
-// cRigidBody_writeToReplayFrame, func_0035DA38 (readFromReplayFrame). Size 0xA0: On Tour's DWARF, and in retail
+// cRigidBody_writeToReplayFrame, cRigidBody_readFromReplayFrame (readFromReplayFrame). Size 0xA0: On Tour's DWARF, and in retail
 // cRollerModifier's next field (m_pInstance) is at 0x30 + 0xA0. EA's header path is unknown (On Tour builds it in
 // all_in_one_object.cpp); the preview keeps the RTTI names cRigidBody and cRigidBodyState.
 //
 // A FLAT layout, like main/game.h: no C++ inheritance yet. The real chain is cRigidBodyState (0x00-0x50: what the
 // replay frame stores) -> cRigidBody. Evidence tags:
-//   [R] retail: cRigidBody_writeToReplayFrame / func_0035DA38 copy 0x50 bytes (the cRigidBodyState part);
+//   [R] retail: cRigidBody_writeToReplayFrame / cRigidBody_readFromReplayFrame copy 0x50 bytes (the cRigidBodyState part);
 //   [U] how retail code uses the field (all eight methods above, asm and C, plus cRollerModifier's methods);
 //   [O] SSX On Tour's DWARF: cRigidBodyState {Pose 0x0, P 0x20, L 0x30, InvM 0x40} (0x50) and cRigidBody
 //       {InvMOI 0x50, V 0x80, W 0x90} (0xA0); every offset equals retail.

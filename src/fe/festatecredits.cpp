@@ -172,7 +172,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onRender2D);
 #ifdef SKIP_ASM
 extern "C" void func_00391E30(void* self, float x, float y, void* m);
 extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy);
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 extern "C" char* cUITextScroll_getFont(void* self);
 extern "C" unsigned short* func_003A2068(void* self, int idx);
 
@@ -238,7 +238,7 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
  * Line spacing is the text scroll's font height x scale + 3; the first line and pixel offset come from the
  * scroll position (0x60). A line starting with '~' places the Dolby icon (0x58) there instead; '^' draws in
  * white at the scroll's scale, other lines in its colour at a scale 0.1 smaller. The position wraps from one
- * end to the other in the scroll direction (0x64). Ends with the base state render func_0039E6B8().
+ * end to the other in the scroll direction (0x64). Ends with the base state render cUIState_onRender2D().
  */
 extern "C" void cFEStateCredits_onRender2D(char* self)
 {
@@ -330,25 +330,25 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                 *(int*)(self + 0x60) = -total;
         }
     }
-    func_0039E6B8(self);
+    cUIState_onRender2D(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Scrolls the credits by one step, then runs the base UI state update.
  *
  * Adds the scroll speed (+0x64, which input moves between -8 and 8) to the scroll position (+0x60), then calls
- * func_0039E510().
+ * cUIState_onUpdate().
  */
 extern "C" void cFEStateCredits_onUpdate(void* self)
 {
     *(int*)((char*)self + 0x60) += *(int*)((char*)self + 0x64);
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 
@@ -485,7 +485,7 @@ extern "C" void cFEState_onGainFocus(void* self, void* pPrevState)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001865A8);
+INCLUDE_ASM("fe/festatecredits", cFEState_onLoseFocus);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
@@ -496,7 +496,7 @@ extern "C" void func_001A0708(void* self, int a1, int a2);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 extern sFlowState_865A8 D_004A4E80;
 
-extern "C" void func_001865A8(void* self)
+extern "C" void cFEState_onLoseFocus(void* self)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {

@@ -342,7 +342,7 @@ extern "C" int HUFF_minrep(HS_8970* self, unsigned remaining, unsigned n)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8A78);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_writenum);
 #ifdef SKIP_ASM
 struct HuffState_8A78 {
     char pad0[0xD44];
@@ -355,8 +355,8 @@ struct HuffOut_8A78;
 extern "C" void HUFF_writebits_8A78(HuffState_8A78* s, HuffOut_8A78* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
 
 // PORT: the unit declares this with other parameter types; defined under an asm label
-extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v) __asm__("func_002C8A78");
-extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v)
+extern "C" void HUFF_writenum_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v) __asm__("HUFF_writenum");
+extern "C" void HUFF_writenum_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v)
 {
     unsigned int base;
     unsigned int bits;
@@ -409,31 +409,31 @@ extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigne
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1C9348", func_002C8C30);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_writeexp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct HS_8C30 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
 extern void HUFF_writebits_8C30(HS_8C30 *, int, int, int) __asm__("HUFF_writebits");
-extern "C" void func_002C8A78(HS_8C30 *, int, int);
+extern "C" void HUFF_writenum(HS_8C30 *, int, int);
 
-extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) __asm__("func_002C8C30");
-extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) {
+extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) __asm__("HUFF_writeexp");
+extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) {
     HUFF_writebits_8C30(self, x, self->b[self->cur], self->a[self->cur]);
-    func_002C8A78(self, x, 0);
+    HUFF_writenum(self, x, 0);
     HUFF_writebits_8C30(self, x, y, 9);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1C9348", func_002C8CA8);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_writecode);
 #ifdef SKIP_ASM
 struct HS_8CA8 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
 extern "C" void HUFF_writebits(HS_8CA8 *, int, int, int);
-extern "C" void func_002C8C30(HS_8CA8 *, int, int);
+extern "C" void HUFF_writeexp(HS_8CA8 *, int, int);
 
-extern "C" void func_002C8CA8(HS_8CA8 *self, int x, int idx) {
+extern "C" void HUFF_writecode(HS_8CA8 *self, int x, int idx) {
     if (idx == self->cur) {
-        func_002C8C30(self, x, idx);
+        HUFF_writeexp(self, x, idx);
         return;
     }
     HUFF_writebits(self, x, self->b[idx], self->a[idx]);
@@ -522,8 +522,8 @@ struct HS2_9A48 {
 };
 
 extern "C" void huffBits_9A48(void* s, void* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
-extern "C" void huffNum_9A48(void* s, void* out, unsigned int v) __asm__("func_002C8A78");
-extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("func_002C8CA8");
+extern "C" void huffNum_9A48(void* s, void* out, unsigned int v) __asm__("HUFF_writenum");
+extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("HUFF_writecode");
 
 /**
  * Writes the packed stream: code table, symbol order, then the data as literals, clue-coded runs and byte

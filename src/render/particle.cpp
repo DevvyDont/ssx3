@@ -94,7 +94,7 @@ extern "C" void cBaseClass_DynamicEmitter_reset(cBaseClass_DynamicEmitter* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00370DC8);
+INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_setupEmitter);
 #ifdef SKIP_ASM
 int BXrand();
 
@@ -187,7 +187,7 @@ static inline float start_00370DC8(char* def)
     return t + *(float*)(def + 0x14) + *(float*)(def + 0x1C) * 0.5f;
 }
 
-extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
+extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, char* def, float f)
 {
     int n = *(int*)(def + 0xD0);
     self->fC = n;
@@ -615,7 +615,7 @@ extern "C" void func_00371688(cDynamicColourEmitter* self, int blend)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/particle", func_003717C0);
+INCLUDE_ASM("render/particle", cDynamicColourEmitter_update);
 #ifdef SKIP_ASM
 struct sPtCol17C0 {
     float r, g, b, a;
@@ -645,7 +645,7 @@ static inline float clamp17C0(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_003717C0(sPtObj17C0* self, int a1, int a2, sPtCol17C0* col, int a4)
+extern "C" void cDynamicColourEmitter_update(sPtObj17C0* self, int a1, int a2, sPtCol17C0* col, int a4)
 {
     if (col != 0) {
         self->col = *col;
@@ -2485,9 +2485,9 @@ extern "C" void func_00374CA8(cPSPBezierMan* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00374CE0);
+INCLUDE_ASM("render/particle", cPlayerShadow_InitBones);
 #ifdef SKIP_ASM
-extern "C" void func_00374CE0(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+extern "C" void cPlayerShadow_InitBones(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
 {
     *(int*)((char*)self + 0x17c) = a1;
     *(int*)((char*)self + 0x180) = a2;
@@ -2591,9 +2591,9 @@ extern "C" void func_00375890(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003758F8__FPv);
+INCLUDE_ASM("render/particle", cPlayerShadow_cPlayerShadow__FPv);
 #ifdef SKIP_ASM
-void* func_003758F8(void* self)
+void* cPlayerShadow_cPlayerShadow(void* self)
 {
     *(int*)((char*)self + 0x170) = -1;
     *(int*)((char*)self + 0x174) = 0x80;
@@ -2603,7 +2603,7 @@ void* func_003758F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00375918);
+INCLUDE_ASM("render/particle", cPlayerShadow__cPlayerShadow);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_00367B60(void* mgr, int id);
@@ -2615,7 +2615,7 @@ struct sPtVEntry_5918 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00375918(void* self, int flags)
+extern "C" void cPlayerShadow__cPlayerShadow(void* self, int flags)
 {
     char* s = (char*)self;
     int tex = *(int*)(s + 0x170);
@@ -6736,7 +6736,7 @@ struct sVE_D0B0 {
 extern char str_unpack[];
 void* operator_new_D0B0(unsigned int, char*, unsigned int, int) __asm__("operator_new__FUi");
 extern "C" int MEM_move(void* dst, void* src, int n);
-extern "C" unsigned int func_003B47F8(void* src, void* dst);
+extern "C" unsigned int unpack(void* src, void* dst);
 extern "C" void* MEM_free(void* p);
 
 extern "C" void func_0037D0B0(cPS2GraphicsMan* selfp, int a1, void* objp, int a3)
@@ -6793,7 +6793,7 @@ extern "C" void func_0037D0B0(cPS2GraphicsMan* selfp, int a1, void* objp, int a3
         tmp = (char*)operator_new_D0B0(size, str_unpack, 0x80000100, 0);
         MEM_move(tmp, obj, 0x10);
         char* payload = tmp + 0x10;
-        func_003B47F8(p10, payload);
+        unpack(p10, payload);
         *(unsigned char*)tmp &= 0x7F;
         if (((sTexSrc_D0B0*)tmp)->fC & 0x1000) {
             data = tmp + *(int*)(tmp + 0x10);
@@ -10885,9 +10885,9 @@ void func_003866E0(void* self, int callback, int callbackArg)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003866F0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_ResolveCharModel);
 #ifdef SKIP_ASM
-extern "C" int func_003696C8(void* self, const char* name);
+extern "C" int cGraphicsMan_GetTextureID(void* self, const char* name);
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 extern "C" void cGraphicsMan_AddBlendedMatrix(void* gfx, void* m);
 extern "C" int func_00369A78(void* m, void* slot, int a, int b, int c);
@@ -10946,7 +10946,7 @@ struct sMdl_66F0 {
     short nmats;
 };
 
-extern "C" void func_003866F0(cPS2GraphicsMan* gfx, sMdl_66F0* m, char* base, int* tbl, int* count, sSlot_66F0* slots, int x)
+extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* m, char* base, int* tbl, int* count, sSlot_66F0* slots, int x)
 {
     m->blends = (sBlend_66F0*)(base + m->o34);
     m->refs = (sRef_66F0*)(base + m->o30);
@@ -10980,7 +10980,7 @@ extern "C" void func_003866F0(cPS2GraphicsMan* gfx, sMdl_66F0* m, char* base, in
                     env = (char)c - '0';
             }
         }
-        bones[i].name = func_003696C8(gfx, s);
+        bones[i].name = cGraphicsMan_GetTextureID(gfx, s);
         bones[i].env = env;
     }
     for (int i = 0; i < m->nmats; i++) {
@@ -12913,20 +12913,20 @@ extern "C" sParticleEntryA0* func_0038ABF8(void* self, int i)
 //100%
 INCLUDE_ASM("render/particle", func_0038AC20);
 #ifdef SKIP_ASM
-extern "C" int func_0038AC50(void* self, const char* name);
+extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
 
 extern "C" sParticleEntryA0* func_0038AC20(void* self, const char* name)
 {
-    return func_0038ABF8(self, func_0038AC50(self, name));
+    return func_0038ABF8(self, cIrradianceDataBase_GetIDByName(self, name));
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0038AC50);
+INCLUDE_ASM("render/particle", cIrradianceDataBase_GetIDByName);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
-extern "C" int func_0038AC50(void* self, const char* name)
+extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {

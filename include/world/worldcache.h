@@ -93,7 +93,7 @@ CHECK_SIZE(cSectionBlockAllocator, 0x14);
 
 // cWorldMemoryMan: the world's memory manager (one instance: cWorldCache::m_pWorldMemMan, cWorldCache_init:
 // cMemMan_alloc(0x13C, "WORLD MEMMAN")). On Tour 0x13C, same layout. Methods: cWorldMemoryMan_cWorldMemoryMan,
-// func_003A7AA8 (dtor: destroys the three pools), cWorldMemoryMan_activateSectionMem, func_003A7B98
+// cWorldMemoryMan__cWorldMemoryMan (dtor: destroys the three pools), cWorldMemoryMan_activateSectionMem, func_003A7B98
 // (deactivateSectionMem); allocate() is inline (cWorldCache_addBxStreamDataTest: m_pSectionAllocator[section]).
 struct cWorldMemoryMan {
     cWorldBlockAllocator m_BlockAllocator[3]; // 0x000 [O]; [R] ctor inits the three from m_BlockMemType;

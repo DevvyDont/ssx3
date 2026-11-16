@@ -14,11 +14,11 @@
 // mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = D_00442150 = {256000, 460800, 819200, 819200, 819200}.
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
-//   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init (init), func_0022CEA8 (load),
-//     cSectionMan_activate (activate), func_0022D278 (isLoaded), cSectionMan_isActive (isActive), cSectionMan_loadSection (loadSection),
+//   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init (init), cSectionMan_load (load),
+//     cSectionMan_activate (activate), cSectionMan_isLoaded (isLoaded), cSectionMan_isActive (isActive), cSectionMan_loadSection (loadSection),
 //     cSectionMan_activateSection (activateSection), cSectionMan_unloadSection (unloadSection), cSectionMan_loadMode (loadMode),
 //     cSectionMan_activateMode (activateMode), cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete (skyLoadComplete),
-//     cSectionMan_skySwap, cSectionMan_preLoadMode (preLoadMode), func_0022DFD0 (isPreLoadModeDone), cSectionMan_changeMode (changeMode),
+//     cSectionMan_skySwap, cSectionMan_preLoadMode (preLoadMode), cSectionMan_isPreLoadModeDone (isPreLoadModeDone), cSectionMan_changeMode (changeMode),
 //     cSectionMan_isSectionLoaded (isSectionLoaded), cSectionMan_getWorldSectionIDFromBELocationID (getWorldSectionIDFromBELocationID),
 //     cSectionMan_getWorldSectionIDFromBESectionID (getWorldSectionIDFromBESectionID), cSectionMan_getBESectionIDFromWorldSectionID (getBESectionIDFromWorldSectionID),
 //     cSectionMan_gotoLocation (gotoLocation);
@@ -63,7 +63,7 @@ struct cSectionMan {
     int m_iNumActiveEvent;                 // 0x1A0 [O]; [R] = 0; [U] addActiveEvent +1, removeActiveEvent -1
     int m_bTriggerSkySwap;                 // 0x1A4 [O] (a bool); [R] init = 0; [U] skySwap needs it set (then clears it);
                                            //       tiggerskyswap() = 1 in cGame_loadTrack, cGFTrackStartState_update,
-                                           //       func_00302210; load clears it
+                                           //       SectionFunc; load clears it
     int m_bSkySwapPending;                 // 0x1A8 [O] (a bool); [R] init = 0; [U] skyLoadComplete = 1; update calls
                                            //       skySwap while it is set; skySwap clears it
     int m_iNextSkySectionID;               // 0x1AC [O]; [R] init = -1; [U] skyLoadComplete stores the sky section,

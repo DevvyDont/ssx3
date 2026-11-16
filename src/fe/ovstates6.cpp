@@ -2,9 +2,9 @@
 
 INCLUDE_ASM("fe/ovstates6", cPDATemplate_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates6", func_0020A8B0);
+INCLUDE_ASM("fe/ovstates6", cOVStateManager_getResultsOverlay);
 
-INCLUDE_ASM("fe/ovstates6", func_0020A8F8);
+INCLUDE_ASM("fe/ovstates6", cOVStateManager_gotoOverlay);
 
 INCLUDE_ASM("fe/ovstates6", cOVStateManager_triggerOverlay);
 
@@ -16,9 +16,9 @@ INCLUDE_ASM("fe/ovstates6", func_0020CBE8);
 
 INCLUDE_ASM("fe/ovstates6", func_0020CC60);
 
-INCLUDE_ASM("fe/ovstates6", func_0020CCF8);
+INCLUDE_ASM("fe/ovstates6", cOVStateManager_gotoNextOverlay);
 
-INCLUDE_ASM("fe/ovstates6", func_0020CFD0);
+INCLUDE_ASM("fe/ovstates6", cOVStateManager_update);
 
 INCLUDE_ASM("fe/ovstates6", cOVStateManager_addPDATemplate);
 

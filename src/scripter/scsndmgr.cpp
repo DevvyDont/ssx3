@@ -294,7 +294,7 @@ INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 extern "C" void func_00253418(void* p, int flags);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
-extern "C" void func_002EA860(void* p);
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* p);
 extern int D_004A2A54;
 extern int cPauseState_Flags;
 extern int D_005366E8[];
@@ -352,7 +352,7 @@ public:
  * When a player exists it is destroyed (func_00253418, flags 3). If it was playing (+0x4), the pause-mode
  * stack (D_005366E8, top D_004A2A54) is popped and cPauseState_Flags reloaded from D_004428F0, sound effects resume,
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
- * and func_002EA860() is called on the cutscene transition manager. The first four words are then cleared.
+ * and cCutSceneTransitionMan_ForceToCutSceneMode() is called on the cutscene transition manager. The first four words are then cleared.
  */
 extern "C" void cVidEngine_ResetVideoEngine(void* self)
 {
@@ -365,7 +365,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
             ((cWorld_3818*)GrMan)->v40(*(int*)(vidEngine + 0x10));
             if (*(int*)(vidEngine + 0x14) != 0) {
                 *(int*)(vidEngine + 0x14) = 0;
-                func_002EA860(SSXApp->Game->CutSceneTransitionMan);
+                cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);
             }
         }
     }

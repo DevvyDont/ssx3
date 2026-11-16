@@ -122,7 +122,7 @@ struct cMCOverlayManager {
     int mGetDir;                // 0x0E0 [O] (bool); [U] OnHighlightNext/PrevDevice clear it
     int mSavedSize;             // 0x0E4 [O]; [U] func_00241138 adds to it; UpdateSaveFile / UpdateSaveProgress set
                                 //       mProgress = mSavedSize / mSize; the state handler zeroes it when the save starts
-    int mLoadedSize;            // 0x0E8 [O]; [U] func_00241200 adds to it; UpdateLoadProgress divides it by mSize
+    int mLoadedSize;            // 0x0E8 [O]; [U] cMCOverlayManager_ReadData adds to it; UpdateLoadProgress divides it by mSize
     int mMaxFiles;              // 0x0EC [O]; [U] func_0023C8F0 / func_0023CAE8 store 4 / 6 / 1 by file type
     int mSize;                  // 0x0F0 [O]; [U] the divisor of both progress ratios
     int mCheckSize;             // 0x0F4 [O]; [R] ctor zeroes it
@@ -170,14 +170,14 @@ struct cMCOverlayManager {
                                 //       preview 0x328
     int mCurrCheckDevice;       // 0x42C [O]; [U] checkDevice stores its arg; getDeviceState compares it with mSelectedDevice
     int mLastCheckDevice;       // 0x430 [O]; [U] ManagerLoadSaveUpdate's device poll index (MEM_fill(&mDevices[it]))
-    cMemCard* mpMemCard;        // 0x434 [P] getMemCard; [O]; [R] func_0023D5A8 stores func_002C22C8(), func_0023D5E8
+    cMemCard* mpMemCard;        // 0x434 [P] getMemCard; [O]; [R] func_0023D5A8 stores func_002C22C8(), cMCOverlayManager_ManagerLoseState
                                 //       frees and zeroes it; [U] every card call goes through its vtable
     int mCurrDeleteFile;        // 0x438 [O]; [R] ctor 0; [U] UpdateInitDeleteProgress
     int mCurrDeviceStateLast;   // 0x43C [O] sDeviceState (bits: 1 / 2 / 4 full / 8 no card / 0x10 unformatted);
                                 //       [U] getDeviceState returns it while mCurrCheckDevice != mSelectedDevice
-    int mCurrDeviceStateAck;    // 0x440 [O] (bool); [U] func_0023FAE0 clears it with mCurrDeviceStateLast on a
+    int mCurrDeviceStateAck;    // 0x440 [O] (bool); [U] cMCOverlayManager_setSelectedDevice clears it with mCurrDeviceStateLast on a
                                 //       device change; CancelCardOp sets 1
-    int mLastMountedDevice;     // 0x444 [O]; [R] ctor -1; [U] func_0023FAE0 compares it with mSelectedDevice, then copies
+    int mLastMountedDevice;     // 0x444 [O]; [R] ctor -1; [U] cMCOverlayManager_setSelectedDevice compares it with mSelectedDevice, then copies
     char unk_448[0x300];        // 0x448 no access in retail; On Tour's mFileListCache[32][6] (ushort, 0x180) sits here,
                                 //       retail's region is twice that
     void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (slot 1 cMCOverlayManager_SetState the state

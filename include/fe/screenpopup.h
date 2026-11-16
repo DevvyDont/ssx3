@@ -51,7 +51,7 @@ struct cScreenPopup {
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218
     cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] receives onPopupEvent (slot 17)
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C);
-                                    //       [R] constructed by func_003977E8(self + 0x24)
+                                    //       [R] constructed by cList_cList(self + 0x24)
     cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] cScreenPopup_onCreateScreen stores the "popup" screen
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding
@@ -101,7 +101,7 @@ struct cScreenPopup {
     float mvPosBackSmall[3];        // 0x23C [O]; [U] "Small shape" position
     float mvPosBackSmallOutline[3]; // 0x248 [O]; [U] "Small outline" position
     float mvPosBackShadow[3];       // 0x254 [O]; [U] "Shadow" position
-    float mvCurSize[3];             // 0x260 [O]; [U] grown by every text line (func_001C9B68 calls)
+    float mvCurSize[3];             // 0x260 [O]; [U] grown by every text line (cScreenPopup_increaseBoxSize calls)
     float mvOffset[3];              // 0x26C [O]; [U] copied from the popup info's mvOffset (info + 0x9C)
     float mvCurrentScale[3];        // 0x278 [O]; [R] ctor sets (1, 1, 1); [U] passed to scaleBackground
     float mvMenuSize[3];            // 0x284 [O]; [U] setPopupMessage copies mvCurSize into it
@@ -122,7 +122,7 @@ struct cScreenPopup {
     tConfirmElement mtConfirmation[5]; // 0x2D0 [O]; [R] ctor clears 5 x 12 bytes; [U] onWidgetEvent, createConfirmationPopup
     int meType;                     // 0x30C [O] ePopupType; [U] from info + 0x0; -1 = text entry
     int mbReceivePrev;              // 0x310 [O]; [R] ctor 1; [U] from info + 0xA8; onWidgetMenu case 7
-    int miLayerOffset;              // 0x314 [O]; [U] from info + 0x90; func_001C9CD0 shifts the widgets' layers by it
+    int miLayerOffset;              // 0x314 [O]; [U] from info + 0x90; cScreenPopup_adjustLayer shifts the widgets' layers by it
     float mfMinSize;                // 0x318 [O]; [U] from info + 0xB0 (minimum width)
     int meBackgroundType;           // 0x31C [O] ePopupBackground; [U] from info + 0xC0; switch 0/1/2 in scaleBackground
     int miConfimationReturnCode;    // 0x320 [O] (EA's spelling); [U] onPopupEvent sets it and reports it to the parent

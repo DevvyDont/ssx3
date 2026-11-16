@@ -7,7 +7,7 @@
 
 // A real C++ ctor: g++ stores the secondary vptr (+0x10) before the primary (+0xC), with the target's registers.
 // PORT: the ctors are bound to their retail symbol names by asm labels.
-extern "C" void func_00281A50(void* self);
+extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 
 class cScriptObject_1018 {
 public:
@@ -42,7 +42,7 @@ public:
     int fD8;
     char padDC[0x1C];
     int fF8;
-    cScriptEngine_1018() __asm__("func_00281018");
+    cScriptEngine_1018() __asm__("cScriptObjCameraManager_cScriptObjCameraManager");
     virtual void so01();
     virtual void se01();
 };

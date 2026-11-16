@@ -209,7 +209,7 @@ extern "C" void func_0022E550(cGameViewMan22E550* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E730);
+INCLUDE_ASM("main/gamerender", cGameViewMan__cGameViewMan);
 #ifdef SKIP_ASM
 struct sVEntry0022E730 {
     short delta;
@@ -227,7 +227,7 @@ struct sList0022E730 {
 };
 void operator_delete(int* p);
 
-extern "C" void func_0022E730(sList0022E730* self, int flags)
+extern "C" void cGameViewMan__cGameViewMan(sList0022E730* self, int flags)
 {
     unsigned int i;
     for (i = 0; i < self->count; i++) {

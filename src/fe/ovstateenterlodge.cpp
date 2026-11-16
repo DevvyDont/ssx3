@@ -293,9 +293,9 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 extern "C" void* func_0028B180();
 void func_0029D6D0(void* self);
 extern "C" void func_0030B540(void* self);
-extern "C" void func_0030B658(void* self);
-extern "C" void func_0030B6F8(void* self);
-extern "C" int func_0030B8C0(void* self);
+extern "C" void cWScriptMan_cancelLocalMission(void* self);
+extern "C" void cWScriptMan_restartLocalMission(void* self);
+extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 extern int cOVStateManager_mStatus;
 extern int D_004A2A54;
@@ -312,10 +312,10 @@ struct sMgr_75A0 {
  * Answers the Big Challenge offer: Yes starts the challenge, No or Triangle declines it, and the overlay
  * closes.
  *
- * Yes (Cross on choice 0) queues WScriptMan operation 2 (func_0030B6F8, probably a restart) when a challenge
- * already runs (func_0030B8C0), else stores the offer's mission id (+0x9C) in cWScriptMan_TheWScriptMan +0x2A0 and queues
+ * Yes (Cross on choice 0) queues WScriptMan operation 2 (cWScriptMan_restartLocalMission, probably a restart) when a challenge
+ * already runs (cWScriptMan_isLocalMissionActive), else stores the offer's mission id (+0x9C) in cWScriptMan_TheWScriptMan +0x2A0 and queues
  * operation 1 (start, func_0030B540); it also sets the audio's mBigChallengeStarting (func_0029D6D0). No
- * falls through to Triangle: store the id, queue operation 3 (decline, func_0030B658).
+ * falls through to Triangle: store the id, queue operation 3 (decline, cWScriptMan_cancelLocalMission).
  * Both set the pending overlay action cOVStateManager_mStatus to 3 (close) and pop the pause-mode stack D_005366E8,
  * restoring the pause mask cPauseState_Flags.
  *
@@ -330,8 +330,8 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
     switch (msg) {
     case 5:
         if (*(int*)((char*)item + 0x18) == 0) {
-            if (func_0030B8C0(cWScriptMan_TheWScriptMan) != 0) {
-                func_0030B6F8(cWScriptMan_TheWScriptMan);
+            if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
+                cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             } else {
                 ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
                 func_0030B540(cWScriptMan_TheWScriptMan);
@@ -343,7 +343,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
         }
     case 6:
         ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
-        func_0030B658(cWScriptMan_TheWScriptMan);
+        cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
         cOVStateManager_mStatus = 3;
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         break;
@@ -443,7 +443,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
         int v = *(int*)((char*)item + 0x18);
         if (v == 0) {
             ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
-            func_0030B6F8(cWScriptMan_TheWScriptMan);
+            cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_0029D6D0(func_0028B180());
@@ -465,7 +465,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
     default:
         return;
     }
-    func_0030B658(cWScriptMan_TheWScriptMan);
+    cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
     func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
@@ -494,7 +494,7 @@ extern "C" int func_001FD190();
 extern "C" char* func_0020A1A8(char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void* p, int id);
+extern "C" void cSSXAudio_MenuSound(void* p, int id);
 extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
@@ -645,7 +645,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
         }
         cUIText_setAsciiString_i(timeText, line);
     }
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 

@@ -19,8 +19,8 @@ extern char D_004956E8_3578[] __asm__("D_004956E8");
 extern int f_4478_3578(SHAPE_3578 *) __asm__("SHAPE_clonesize");
 extern int f_3BB0_3578(SHAPE_3578 *) __asm__("SHAPE_size");
 extern void memcpy_3578(void *, void *, int) __asm__("MEM_copy");
-// func_003B47F8 returns func_003B4740's decoded length (int).
-extern int f_47F8_3578(void *, void *) __asm__("func_003B47F8");
+// unpack returns unpackz's decoded length (int).
+extern int f_47F8_3578(void *, void *) __asm__("unpack");
 extern SHAPE_3578 *f_4690_3578(SHAPE_3578 *) __asm__("SHAPE_clone");
 extern char *f_4010_3578(SHAPE_3578 *, int, int, int) __asm__("func_003B4010");
 extern void f_33B0_3578(char *, char *, int, int, int) __asm__("undxtpack");
@@ -124,9 +124,9 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B38B8);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cluttype);
 #ifdef SKIP_ASM
-int func_003B38B8(int arg0) {
+int SHAPE_cluttype(int arg0) {
     int var_5;
 
     var_5 = 0;
@@ -931,11 +931,11 @@ int SHAPE_isclut(int shptype) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4740);
+INCLUDE_ASM("ealib/seg_2B4578", unpackz);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003B49D0(unsigned char *dst, unsigned char *src, int *used);
-int f_4740(unsigned char *src, unsigned char *dst) __asm__("func_003B4740");
+int REF_decode(unsigned char *dst, unsigned char *src, int *used);
+int f_4740(unsigned char *src, unsigned char *dst) __asm__("unpackz");
 
 int f_4740(unsigned char *src, unsigned char *dst) {
     int len = 0;
@@ -943,7 +943,7 @@ int f_4740(unsigned char *src, unsigned char *dst) {
         switch (src[0] & 0xFE) {
         case 0x10:
         case 0x90:
-            len = func_003B49D0(dst, src, 0);
+            len = REF_decode(dst, src, 0);
             break;
         case 0x18: case 0x1A: case 0x1C: case 0x1E:
         case 0x30: case 0x32: case 0x34: case 0x46:
@@ -957,20 +957,20 @@ int f_4740(unsigned char *src, unsigned char *dst) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B47F8);
+INCLUDE_ASM("ealib/seg_2B4578", unpack);
 #ifdef SKIP_ASM
-extern void func_003B4740();
+extern void unpackz();
 
-void func_003B47F8(void) {
-    func_003B4740();
+void unpack(void) {
+    unpackz();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4818);
+INCLUDE_ASM("ealib/seg_2B4578", unpacksizez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int f_4818(unsigned char *p) __asm__("func_003B4818");
+int f_4818(unsigned char *p) __asm__("unpacksizez");
 static __inline__ int get24_4818(unsigned char *q) { return (q[0] << 16) | (q[1] << 8) | q[2]; }
 static __inline__ int get32_4818(unsigned char *q) { return (q[0] << 24) | (q[1] << 16) | (q[2] << 8) | q[3]; }
 int f_4818(unsigned char *p) {
@@ -996,18 +996,18 @@ int f_4818(unsigned char *p) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B49B0);
 #ifdef SKIP_ASM
-extern void func_003B4818();
+extern void unpacksizez();
 
 void func_003B49B0(void) {
-    func_003B4818();
+    unpacksizez();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B49D0);
+INCLUDE_ASM("ealib/seg_2B4578", REF_decode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003B49D0(unsigned char *dst, unsigned char *src, int *used) {
+int REF_decode(unsigned char *dst, unsigned char *src, int *used) {
     unsigned char *s = src;
     unsigned char *ref;
     unsigned int t;
@@ -2962,7 +2962,7 @@ void func_003B71D8_7450(void) __asm__("func_003B71D8");
 
 extern void f_6210_7450(void *, int, int) __asm__("func_00416210");
 extern int f_6620_7450(void (*)(void *), void (*)(struct sA0A0Node *, unsigned, struct sA0A0Strm *), struct sA0A0Strm *, void *, int) __asm__("func_003C6620");
-extern int func_003E06D8(int, int, int, void *, int);
+extern int STREAM_create(int, int, int, void *, int);
 extern int func_003E1580(int);
 extern int func_003C65F0_7450(int) __asm__("func_003C65F0");
 extern void func_003C6278_7450(void *) __asm__("func_003C6278");
@@ -3008,7 +3008,7 @@ found:
         s->f11 = 1;
         s->f00 = h;
     } else {
-        r = func_003E06D8(n + 2, 1, 1, buf, size);
+        r = STREAM_create(n + 2, 1, 1, buf, size);
         if (r == 0) {
             func_003C6DA0_7450(s->f08);
             return -9;
@@ -3039,7 +3039,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B76E8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern int f_0C88_76E8(int, int, int, int) __asm__("func_003E0C88");
+extern int f_0C88_76E8(int, int, int, int) __asm__("STREAM_queuefile");
 extern int f_0D80_76E8(int, int, int, int) __asm__("func_003E0D80");
 extern struct sA0A0Node *f_62E8_76E8(struct sA0A0List *) __asm__("func_003C62E8");
 extern void f_6210_76E8(void *, int, int) __asm__("func_00416210");
@@ -3098,7 +3098,7 @@ extern int func_003B7410(void);
 extern int func_003B78F8(int);
 extern void func_003C6040_7838(void (*)(void)) __asm__("func_003C6040");
 extern int func_003C6DA0(int);
-extern void func_003E0A28(int);
+extern void STREAM_destroy(int);
 
 extern void func_003B71D8_7838(void) __asm__("func_003B71D8");
 extern struct sA0A0Strm *func_003B6A38_7838(int) __asm__("func_003B6A38");
@@ -3118,7 +3118,7 @@ int func_003B7838_7838(int h) {
     c = o->f11;
     D_0050A0A0_7838[h] = 0;
     if (c == 0)
-        func_003E0A28(w);
+        STREAM_destroy(w);
     return 0;
 }
 #endif
@@ -3225,13 +3225,13 @@ int func_003B7AC8_7AC8(int maxRequests, int maxChunks) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7B00);
 #ifdef SKIP_ASM
 extern int func_003B7AC8();
-extern int func_003E06B0(int, int, int);
+extern int STREAM_overhead(int, int, int);
 
 int func_003B7B00(int maxRequests) {
     int overhead;
 
     overhead = func_003B7AC8();
-    return overhead + func_003E06B0(maxRequests + 2, 1, 1);
+    return overhead + STREAM_overhead(maxRequests + 2, 1, 1);
 }
 #endif
 

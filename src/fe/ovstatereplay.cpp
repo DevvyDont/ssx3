@@ -102,7 +102,7 @@ extern "C" void cReplay_stopReplay(void* replay);
 extern "C" void cReplay_startAutoReplay(void* replay);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cGame_exit(void* game, int a1);
-extern "C" int func_0026FB88(void* replay, int a1);
+extern "C" int cReplay_updateInput(void* replay, int a1);
 extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -185,7 +185,7 @@ static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game +
  * hidden Save item is never reached.
  *
  * @param pInput  the UI input (pad port at +0x4)
- * @return 1 when handled here, 0 while the menu is open (the menu handles it), else func_0026FB88()'s result
+ * @return 1 when handled here, 0 while the menu is open (the menu handles it), else cReplay_updateInput()'s result
  */
 extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* pInput)
 {
@@ -288,7 +288,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
     if (self->paused != 0) {
         return 0;
     }
-    return func_0026FB88(replay_20DF38(), 0);
+    return cReplay_updateInput(replay_20DF38(), 0);
 }
 #endif
 
@@ -300,7 +300,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onUpdate(cOVState* self);
-extern "C" void func_0026FA78(void* p);
+extern "C" void cReplay_updateCameraSelect(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
 extern char str_hidehelp[];
@@ -330,7 +330,7 @@ struct sReplay_0020E530 {
  *
  * After cOVState_onUpdate() the panel position (+0xA4) moves by the speed and stops at its ends (+0xAC /
  * +0xB0); "hidehelp" shows at the start, "showhelp" at the end, and "bottom" takes the position as its y.
- * "ReplayMenuPopup" shows while the menu is open, else the replay advances (func_0026FA78).
+ * "ReplayMenuPopup" shows while the menu is open, else the replay advances (cReplay_updateCameraSelect).
  *
  * @param vself  the replay overlay state (this)
  */
@@ -366,7 +366,7 @@ extern "C" void cOVState_REPLAY_onUpdate(void* vself)
         cUIState_hideObjSafe(self, str_ReplayMenuPopup);
     }
     if (self->paused == 0) {
-        func_0026FA78(SSXApp->Game->Replay);
+        cReplay_updateCameraSelect(SSXApp->Game->Replay);
     }
     cOVState_REPLAY_setupCameraName(self);
     cOVState_REPLAY_setupTicker(self);
@@ -383,7 +383,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onUpdate(cOVState* self);
-extern "C" void func_0026FA78(void* p);
+extern "C" void cReplay_updateCameraSelect(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
 extern char str_hidehelp[];
@@ -473,35 +473,35 @@ extern "C" void cOVState_REPLAY_setupTicker(void* self)
 }
 #endif
 
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
- * Renders the overlay state's 2D layer with the shared UI-screen render routine func_0039E6B8().
+ * Renders the overlay state's 2D layer with the shared UI-screen render routine cUIState_onRender2D().
  *
- * @return no meaningful value (func_0039E6B8() returns nothing)
+ * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
 void* cOVState_onRender2D(void* self)
 {
-    return func_0039E6B8(self);
+    return cUIState_onRender2D(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_00231840(void* game, int a);
-extern "C" void func_0039E510(void* self);
+extern "C" void cGame_activatePauseMenu(void* game, int a);
+extern "C" void cUIState_onUpdate(void* self);
 
 /**
- * Updates the overlay state: calls func_00231840(SSXApp->Game, 1), then the UI-screen update func_0039E510().
+ * Updates the overlay state: calls cGame_activatePauseMenu(SSXApp->Game, 1), then the UI-screen update cUIState_onUpdate().
  */
 extern "C" void cOVState_onUpdate(cOVState* self)
 {
-    func_00231840(SSXApp->Game, 1);
-    func_0039E510(self);
+    cGame_activatePauseMenu(SSXApp->Game, 1);
+    cUIState_onUpdate(self);
 }
 #endif
 

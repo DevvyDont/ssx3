@@ -450,7 +450,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 extern char str_Title_b[];
 extern char str_yes_c[];
 extern char str_no_c[];
@@ -494,7 +494,7 @@ extern "C" void func_00246098(void* self)
             }
         }
     }
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 

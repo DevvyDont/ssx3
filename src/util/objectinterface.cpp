@@ -31,7 +31,7 @@ void* func_002D1CF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D1D10);
+INCLUDE_ASM("util/objectinterface", cObjectInterface_renderSimpleLightHalo);
 #ifdef SKIP_ASM
 
 static inline void setA_1D10(sDrawState* drawState, int v, int mask, int shift)
@@ -82,7 +82,7 @@ static inline int tex_1D10(sRCtx_1D10* c, int i)
 
 extern sDrawState sDrawState_s_defaultDrawState;
 
-extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float angle)
+extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, int kind, float size, float angle)
 {
     cPS2GraphicsMan* g = GrMan;
     if (((IsHiddenFn_1D10)((sVE_1D10*)g->mVtbl)[91].fn)((char*)g + ((sVE_1D10*)g->mVtbl)[91].delta, obj) != 0) {
@@ -248,17 +248,17 @@ extern "C" float func_002D21A0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D21B0__FPv);
+INCLUDE_ASM("util/objectinterface", cSSXStatsMan_update__FPv);
 #ifdef SKIP_ASM
-void func_002D21B0(void* self)
+void cSSXStatsMan_update(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D21B8__FPv);
+INCLUDE_ASM("util/objectinterface", cSSXStatsMan_render__FPv);
 #ifdef SKIP_ASM
-void func_002D21B8(void* self)
+void cSSXStatsMan_render(void* self)
 {
 }
 #endif

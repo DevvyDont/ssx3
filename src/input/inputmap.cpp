@@ -274,7 +274,7 @@ extern "C" int func_00321188(void* self, void* a1, int a2, int a3, float f0, flo
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321298);
+INCLUDE_ASM("input/inputmap", cInputPad_update);
 #ifdef SKIP_ASM
 struct sBtn_00321298 {
     float value;    // 0x00
@@ -290,7 +290,7 @@ struct sBtnSet_00321298 {
     sBtn_00321298 b[1];
 };
 
-extern "C" void func_00321298(sBtnSet_00321298* self, int n, float* vals)
+extern "C" void cInputPad_update(sBtnSet_00321298* self, int n, float* vals)
 {
     if (self->count < n) {
         MEM_fill(&self->b[self->count], 0, (n - self->count) * sizeof(sBtn_00321298));
@@ -529,7 +529,7 @@ extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, sMapNode_16
 //100%
 INCLUDE_ASM("input/inputmap", cInputMapParser_lookupButtonName);
 #ifdef SKIP_ASM
-extern "C" int func_0041AB78(const char* a, const char* b, int n);
+extern "C" int strncasecmp(const char* a, const char* b, int n);
 extern char str_button[];
 
 /**
@@ -543,7 +543,7 @@ extern char str_button[];
  */
 extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* name)
 {
-    if (func_0041AB78(name, str_button, 6) != 0) {
+    if (strncasecmp(name, str_button, 6) != 0) {
         return -1;
     }
     int firstDigit = name[6] - '0';

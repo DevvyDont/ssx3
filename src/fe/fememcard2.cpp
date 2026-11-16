@@ -62,7 +62,7 @@ INCLUDE_ASM("fe/fememcard2", func_001D8700);
 
 INCLUDE_ASM("fe/fememcard2", func_001D8BE0);
 
-INCLUDE_ASM("fe/fememcard2", func_001D8C38);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_exitSave);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_onInputBegin);
 
@@ -70,9 +70,9 @@ INCLUDE_ASM("fe/fememcard2", func_001D8D68);
 
 INCLUDE_ASM("fe/fememcard2", func_001D8DE0);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9258);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_setMenuHighlight);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9308);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_SetLoadPressed);
 
 INCLUDE_ASM("fe/fememcard2", func_001D9368);
 

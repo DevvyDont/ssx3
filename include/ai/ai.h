@@ -40,7 +40,7 @@ struct cDangerMan;
 
 // cAIStateHandler and its subclasses (cGameInitHandler, cFreerideHandler, cCountdownHandler, cRaceHandler,
 // cEndRaceHandler, cShutdownHandler): no data, only a vptr (On Tour size 0x4). Their methods take (this, cAI& ai):
-// OnGainState / OnLoseState / OnUpdate (e.g. func_00113DB0, cRaceHandler: ai.EventTimerTick++).
+// OnGainState / OnLoseState / OnUpdate (e.g. cRaceHandler_OnUpdate, cRaceHandler: ai.EventTimerTick++).
 struct cAIStateHandler {
     void** mVtbl; // 0x0 [R] stored by cAI_cAI
 };

@@ -37,7 +37,7 @@ extern "C" int func_0023C850(void) {
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C860);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_purge);
 #ifdef SKIP_ASM
 struct sMovieObj_23C860 {
     char pad[0x748];
@@ -45,7 +45,7 @@ struct sMovieObj_23C860 {
     virtual ~sMovieObj_23C860();
 };
 
-extern "C" void func_0023C860()
+extern "C" void cMCOverlayManager_purge()
 {
     delete (sMovieObj_23C860*)cMCOverlayManager_instance;
     cMCOverlayManager_instance = 0;
@@ -53,9 +53,9 @@ extern "C" void func_0023C860()
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C898);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerDone);
 #ifdef SKIP_ASM
-extern "C" int func_0023C898(void* self)
+extern "C" int cMCOverlayManager_isManagerDone(void* self)
 {
     return *(int*)((char*)self + 0x130) == 1;
 }
@@ -86,9 +86,9 @@ extern "C" int func_0023C8C0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C8D0);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasCardStatusCriticalError);
 #ifdef SKIP_ASM
-extern "C" int func_0023C8D0(void* self)
+extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* self)
 {
     // masks applied as separate statements; folding them into one
     // expression collapses the two `and` instructions into one
@@ -105,9 +105,9 @@ INCLUDE_ASM("movie/movieplayer", func_0023C8F0);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_00152948__FPv ignores its argument; this caller passes none.
-int func_00152948_r() __asm__("func_00152948__FPv");
-extern "C" int func_00152BA8();
+// PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
+int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
+extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
@@ -141,14 +141,14 @@ extern "C" void func_0023C8F0(void* self, int mode)
     } else if (fileType == 1) {
         *(int*)(manager + 0xEC) = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int fileSize = func_00152BA8();
+        int fileSize = cBESaveInterface_getSaveProfileSize();
         char* memCard = *(char**)(manager + 0x434);
         sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)memCard;
         vt[19].fn(memCard + vt[19].delta, fileSize);
     } else {
         *(int*)(manager + 0xEC) = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int fileSize = func_00152948_r();
+        int fileSize = cBESaveInterface_getSaveGameSize_r();
         char* memCard = *(char**)(manager + 0x434);
         sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)memCard;
         vt[19].fn(memCard + vt[19].delta, fileSize);
@@ -161,7 +161,7 @@ extern "C" void func_0023C8F0(void* self, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023CA28);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readFile);
 #ifdef SKIP_ASM
 struct sMovieVEntryCA28 {
     short delta;
@@ -169,7 +169,7 @@ struct sMovieVEntryCA28 {
     void (*fn)(void*, int, int, int);
 };
 
-extern "C" void func_0023CA28(void* self, int a, int b, int c)
+extern "C" void cMCOverlayManager_readFile(void* self, int a, int b, int c)
 {
     void* obj = *(void**)((char*)self + 0x434);
     sMovieVEntryCA28* vt = *(sMovieVEntryCA28**)obj;
@@ -223,9 +223,9 @@ INCLUDE_ASM("movie/movieplayer", func_0023CAE8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_00152948__FPv ignores its argument; this caller passes none.
-int func_00152948_r() __asm__("func_00152948__FPv");
-extern "C" int func_00152BA8();
+// PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
+int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
+extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
@@ -259,14 +259,14 @@ extern "C" void func_0023CAE8(void* self, int mode, int profileId)
     } else if (fileType == 1) {
         *(int*)(manager + 0xEC) = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int fileSize = func_00152BA8();
+        int fileSize = cBESaveInterface_getSaveProfileSize();
         char* memCard = *(char**)(manager + 0x434);
         sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)memCard;
         vt[19].fn(memCard + vt[19].delta, fileSize);
     } else {
         *(int*)(manager + 0xEC) = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int fileSize = func_00152948_r();
+        int fileSize = cBESaveInterface_getSaveGameSize_r();
         char* memCard = *(char**)(manager + 0x434);
         sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)memCard;
         vt[19].fn(memCard + vt[19].delta, fileSize);
@@ -472,13 +472,13 @@ extern "C" void func_0023D5A8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023D5E8);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerLoseState);
 #ifdef SKIP_ASM
-extern "C" void func_002C2300(void*);
+extern "C" void cMemCard_DeleteInstance(void*);
 
-extern "C" void func_0023D5E8(void* self)
+extern "C" void cMCOverlayManager_ManagerLoseState(void* self)
 {
-    func_002C2300(*(void**)((char*)self + 0x434));
+    cMemCard_DeleteInstance(*(void**)((char*)self + 0x434));
     *(void**)((char*)self + 0x434) = 0;
 }
 #endif
@@ -655,7 +655,7 @@ void* cMCOverlayManager_UpdateCardUnusable(void* self);
 extern "C" void cMCOverlayManager_UpdateCardDamaged(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_UpdateFileExists(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_UpdateCardChanged(cMCOverlayManager* self);
-extern "C" void func_00241400(char* self);
+extern "C" void cMCOverlayManager_OnHighlightNextDevice(char* self);
 extern "C" void cMCOverlayManager_OnHighlightPrevDevice(cMCOverlayManager* self);
 
 // The player's decoder at 0x434, called through its vtable slots by hand (re-read for every call).
@@ -767,7 +767,7 @@ extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self)
                         && !(self->callbackIsSavePressed)() && !(self->callbackIsLoadPressed)() && !(self->callbackIsDeletePressed)()
                         && !(self->callbackIsFormatPressed)() && self->mSave == 0 && self->mDelete == 0
                         && !(self->callbackIsLoadPressed)())
-                        func_00241400(((char*)self));
+                        cMCOverlayManager_OnHighlightNextDevice(((char*)self));
                 }
             } else {
                 if (!callI_7D8(((char*)self), 52, idx))
@@ -786,7 +786,7 @@ extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self)
         if (st == 7 || st == 0x1D) {
             if ((self->callbackIsNextDevicePressed)()) {
                 int old = self->mSelectedDevice;
-                func_00241400(((char*)self));
+                cMCOverlayManager_OnHighlightNextDevice(((char*)self));
                 if (old != self->mSelectedDevice)
                     cMCOverlayManager_InitiateFileCheck(self);
             } else if ((self->callbackIsPrevDevicePressed)()) {
@@ -1471,8 +1471,8 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int show
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_RetryCardOp);
 #ifdef SKIP_ASM
-extern "C" int func_0023C8D0(void* self);
-extern "C" void func_0023FAE0(void* self);
+extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* self);
+extern "C" void cMCOverlayManager_setSelectedDevice(void* self);
 void func_0023FB18(void* self, int val);
 extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
@@ -1496,7 +1496,7 @@ struct sMovieVEntryEA90b {
  * set it
  * reselects device 0 and returns to InitCardsCheck (49); else it restarts the file check when the device
  * state
- * shows no problem besides a full card (func_0023C8D0()), or rechecks the card.
+ * shows no problem besides a full card (cMCOverlayManager_hasCardStatusCriticalError()), or rechecks the card.
  */
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self)
 {
@@ -1514,10 +1514,10 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self)
         self->mCurrDeviceStateAck = 0;
         if (self->mRetryToInit != 0) {
             func_0023FB18(self, 0);
-            func_0023FAE0(self);
+            cMCOverlayManager_setSelectedDevice(self);
             sMovieVEntryEA90* vt = (sMovieVEntryEA90*)self->mVtbl;
             vt[1].fn(((char*)self) + vt[1].delta, 0x31);
-        } else if (func_0023C8D0(self) == 0) {
+        } else if (cMCOverlayManager_hasCardStatusCriticalError(self) == 0) {
             cMCOverlayManager_InitiateFileCheck(self);
         } else {
             cMCOverlayManager_RecheckCard(self);
@@ -2381,11 +2381,11 @@ extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023FAE0);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_setSelectedDevice);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
 
-extern "C" void func_0023FAE0(void* self)
+extern "C" void cMCOverlayManager_setSelectedDevice(void* self)
 {
     int cur = *(int*)((char*)self + 0x428);
     if (*(int*)((char*)self + 0x444) != cur) {
@@ -3741,9 +3741,9 @@ extern "C" void func_00241050(void* self, int a, int data, int size)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_002410A0);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_cleanUp);
 #ifdef SKIP_ASM
-extern "C" void func_002410A0(void* self)
+extern "C" void cMCOverlayManager_cleanUp(void* self)
 {
     void* obj = *(void**)((char*)self + 0x434);
     sMovieVEntry* vt = *(sMovieVEntry**)obj;
@@ -3841,7 +3841,7 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int showW
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241200);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ReadData);
 #ifdef SKIP_ASM
 struct sMovieVEntry3 {
     short delta;
@@ -3849,7 +3849,7 @@ struct sMovieVEntry3 {
     void (*fn)(void*, int, int);
 };
 
-extern "C" void func_00241200(void* self, int a, int n)
+extern "C" void cMCOverlayManager_ReadData(void* self, int a, int n)
 {
     *(int*)((char*)self + 0xE8) += n;
     void* obj = *(void**)((char*)self + 0x434);
@@ -3891,8 +3891,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00152758(void* iface);
-// PORT: func_00152948__FPv ignores its argument; this caller passes none.
-int func_00152948_r() __asm__("func_00152948__FPv");
+// PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
+int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm__("func_00241D40");
@@ -3910,7 +3910,7 @@ extern "C" void func_002412A0(void* self)
     char fmt[0x200];
     cMCOverlayManager_mSaveInProgress = 1;
     int saveData = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
-    int saveSize = func_00152948_r();
+    int saveSize = cBESaveInterface_getSaveGameSize_r();
     func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
     func_00241D40_r(self, 2, name, 0x82);
     func_00241AA0_r(desc, 0x200);
@@ -3941,7 +3941,7 @@ extern "C" void func_00241380(void* self)
     *(int*)((char*)self + 0xFC) = -1;
     *(int*)((char*)self + 0x444) = -1;
     func_0023FB18(self, 0);
-    func_0023FAE0(self);
+    cMCOverlayManager_setSelectedDevice(self);
     *(int*)((char*)self + 0x338) = one;
     *(int*)((char*)self + 0x130) = 2;
     memCard = *(void**)((char*)self + 0x434);
@@ -3951,7 +3951,7 @@ extern "C" void func_00241380(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241400);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_OnHighlightNextDevice);
 #ifdef SKIP_ASM
 class cMovieDecoder_241400 {
 public:
@@ -4009,7 +4009,7 @@ public:
     virtual int hasChapter(int i);  // slot 52 (0x1A0)
 };
 
-extern "C" void func_0023FAE0(void* self);
+extern "C" void cMCOverlayManager_setSelectedDevice(void* self);
 void func_0023FB18(void* self, int val);
 
 static inline int nextChapter_241400(char* self, int i)
@@ -4023,7 +4023,7 @@ static inline int nextChapter_241400(char* self, int i)
     return i;
 }
 
-extern "C" void func_00241400(char* self)
+extern "C" void cMCOverlayManager_OnHighlightNextDevice(char* self)
 {
     int i = *(int*)(self + 0x428);
     if (*(int*)(self + 0x424) == -1) {
@@ -4047,7 +4047,7 @@ extern "C" void func_00241400(char* self)
     }
     if (*(int*)(self + 0x428) != i) {
         func_0023FB18(self, i);
-        func_0023FAE0(self);
+        cMCOverlayManager_setSelectedDevice(self);
     }
     *(int*)(self + 0xE0) = 0;
 }
@@ -4112,7 +4112,7 @@ public:
     virtual int hasChapter(int i);  // slot 52 (0x1A0)
 };
 
-extern "C" void func_0023FAE0(void* self);
+extern "C" void cMCOverlayManager_setSelectedDevice(void* self);
 void func_0023FB18(void* self, int val);
 
 static inline int prevChapter_241540(char* self, int i)
@@ -4132,7 +4132,7 @@ static inline int prevChapter_241540(char* self, int i)
  * Does nothing while mMaxDevices is -1. Steps mSelectedDevice down, wrapping to mMaxDevices - 1 when mWrapItems
  * is set, until the card object's virtual slot 52 accepts the device or the search gives up. Without wrapping,
  * an unavailable device 0 keeps the current device (or 0 if that one is unavailable too). A new selection goes
- * through func_0023FB18() and func_0023FAE0(), which resets the device state monitor. Always clears mGetDir.
+ * through func_0023FB18() and cMCOverlayManager_setSelectedDevice(), which resets the device state monitor. Always clears mGetDir.
  */
 extern "C" void cMCOverlayManager_OnHighlightPrevDevice(cMCOverlayManager* self)
 {
@@ -4158,7 +4158,7 @@ extern "C" void cMCOverlayManager_OnHighlightPrevDevice(cMCOverlayManager* self)
     }
     if (self->mSelectedDevice != i) {
         func_0023FB18(((char*)self), i);
-        func_0023FAE0(((char*)self));
+        cMCOverlayManager_setSelectedDevice(((char*)self));
     }
     self->mGetDir = 0;
 }
@@ -4199,7 +4199,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceDisplayString);
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" int strlen1(void* s);
-extern "C" void func_00241DC8(void* self, void* dst, int n);
+extern "C" void cMCOverlayManager_getDeviceNumberString(void* self, void* dst, int n);
 int GetHashValue32(char* s);
 extern char str_kT_MEMOVNotDetectedPS2_b[];
 extern char str_kT_MEMOVNotFormattedPS2_b[];
@@ -4304,17 +4304,17 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self
     {
         if (((cMovieSub434_1710*)self->mpMemCard)->v48(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v50(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v60(idx))
         {
-            func_00241DC8(self, buf, idx);
+            cMCOverlayManager_getDeviceNumberString(self, buf, idx);
             sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
         }
         else if (!((cMovieSub434_1710*)self->mpMemCard)->v56(idx))
         {
-            func_00241DC8(self, buf, idx);
+            cMCOverlayManager_getDeviceNumberString(self, buf, idx);
             sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotFormattedPS2_b), buf);
         }
         else if (((cMovieSub434_1710*)self->mpMemCard)->v57(idx))
         {
-            func_00241DC8(self, buf, idx);
+            cMCOverlayManager_getDeviceNumberString(self, buf, idx);
             char* name = ((char*)&((&(self)->mDevices[0]))[idx].szName[0]);
             if (strlen1(name) == 0)
                 sprintf1_v(dst, Loc_241710(str_kT_MEMMemDevicePS2), buf);
@@ -4324,7 +4324,7 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self
     }
     else
     {
-        func_00241DC8(self, buf, idx);
+        cMCOverlayManager_getDeviceNumberString(self, buf, idx);
         sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
     }
 }
@@ -4635,12 +4635,12 @@ extern "C" int func_00241DC0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241DC8);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getDeviceNumberString);
 #ifdef SKIP_ASM
 extern "C" void sprintf1(void* dst, void* src, int n);
 extern char str_pct_d_g[];
 
-extern "C" void func_00241DC8(void* self, void* dst, int n)
+extern "C" void cMCOverlayManager_getDeviceNumberString(void* self, void* dst, int n)
 {
     unsigned short buf[256];
     func_002C2540(buf, str_pct_d_g);
@@ -4649,11 +4649,11 @@ extern "C" void func_00241DC8(void* self, void* dst, int n)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241E18);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetMessage);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
-extern "C" void func_00241DC8(void* self, void* dst, int n);
+extern "C" void cMCOverlayManager_getDeviceNumberString(void* self, void* dst, int n);
 extern "C" void* strcpy1(void* dst, void* src);
 extern char D_004A29E8[];
 extern char str_kT_MEMFECheckingCardPS2_b[];
@@ -4682,19 +4682,19 @@ static inline void SetText_00241E18(void* out, char* key, void* arg)
     sprintf1_v(out, (void*)str, arg);
 }
 
-extern "C" void func_00241E18(char* self, void* out)
+extern "C" void cMCOverlayManager_GetMessage(char* self, void* out)
 {
     unsigned short num[256];
     unsigned short num2[256];
     func_002C2540(out, D_004A29E8);
-    func_00241DC8(self, num, *(int*)(self + 0x428));
+    cMCOverlayManager_getDeviceNumberString(self, num, *(int*)(self + 0x428));
     switch (*(int*)(self + 0x130)) {
     case 0: case 2: case 3: case 6: case 7: case 13: case 29:
     case 49: case 50: case 51: case 52: case 53: case 54:
         SetText_00241E18(out, str_kT_MEMFECheckingCardPS2_b, num);
         break;
     case 4:
-        func_00241DC8(self, num2, *(int*)(self + 0x428));
+        cMCOverlayManager_getDeviceNumberString(self, num2, *(int*)(self + 0x428));
         SetText_00241E18(out, str_kT_MEMOVNotDetectedPS2_b, num2);
         break;
     case 10: case 11: case 39: case 40:

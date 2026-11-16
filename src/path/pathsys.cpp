@@ -7,7 +7,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_resolvePaths);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" int func_0026A180(void* path, char* data);
 extern char str_TrackPaths[];
 extern void* D_00481448[];
@@ -39,7 +39,7 @@ extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* data)
     int count;
     sPathB310** slot = &self->paths;
     char* start = data;
-    func_0026BA68(&count, data);
+    pathREAD_tInt32(&count, data);
     data += 4;
     self->count = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB310), str_TrackPaths, 0, 0)) sPathB310[count];
@@ -55,7 +55,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_loadAIPaths);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" int func_0026A180(void* path, char* data);
 extern char str_AIPaths[];
 extern void* D_00481478[];
@@ -86,7 +86,7 @@ extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* data)
     int count;
     sPathB410** slot = &self->paths;
     char* start = data;
-    func_0026BA68(&count, data);
+    pathREAD_tInt32(&count, data);
     data += 4;
     self->count = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB410), str_AIPaths, 0, 0)) sPathB410[count];
@@ -155,9 +155,9 @@ extern "C" int func_0026B550(sPathSys* self, sPathEntry40* entry)
 #endif
 
 //100%
-INCLUDE_ASM("path/pathsys", func_0026B598);
+INCLUDE_ASM("path/pathsys", cPathSys_isStartpoint);
 #ifdef SKIP_ASM
-extern "C" int func_0026B598(sPathSys* self, int a, int b)
+extern "C" int cPathSys_isStartpoint(sPathSys* self, int a, int b)
 {
     int i;
     int count = self->count28;
@@ -171,7 +171,7 @@ extern "C" int func_0026B598(sPathSys* self, int a, int b)
 #endif
 
 //100%
-INCLUDE_ASM("path/pathsys", func_0026B5E0);
+INCLUDE_ASM("path/pathsys", cPathSys_getStartpoint);
 #ifdef SKIP_ASM
 struct sPathEntry {
     int id;                 // 0x0
@@ -184,7 +184,7 @@ struct sPathEntryList {
     sPathEntry* entries;    // 0x4
 };
 
-extern "C" sPathEntry* func_0026B5E0(sPathEntryList* list, int type, int id)
+extern "C" sPathEntry* cPathSys_getStartpoint(sPathEntryList* list, int type, int id)
 {
     int i;
     for (i = 0; i < list->count; i++) {
@@ -214,7 +214,7 @@ extern "C" int func_0026B648(void *list, int index) {
 #endif
 
 //100%
-INCLUDE_ASM("path/pathsys", func_0026B680);
+INCLUDE_ASM("path/pathsys", cPathSys_getNearestSessionPoint);
 #ifdef SKIP_ASM
 struct sPathVec3 {
     float x, y, z;
@@ -242,7 +242,7 @@ struct sPathNearList {
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00154630(void* self, int value, int id);
+extern "C" int cBEMissionInterface_isSessionPoint(void* self, int value, int id);
 
 // PORT: sqrt.s helper
 static inline float pathSqrt(float x)
@@ -257,14 +257,14 @@ static inline float pathLen(const sPathVec3& v)
     return pathSqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-extern "C" int func_0026B680(sPathNearList* list, sPathVec3* pos)
+extern "C" int cPathSys_getNearestSessionPoint(sPathNearList* list, sPathVec3* pos)
 {
     int i;
     float best = 10000000.0f;
     int bestId = -1;
     for (i = 0; i < list->count; i++) {
         if (list->entries[i].type == 2 && list->entries[i].id != 0) {
-            if (func_00154630(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
+            if (cBEMissionInterface_isSessionPoint(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
                               *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC)) != 0) {
                 sPathVec3 d = list->entries[i].pos - *pos;
                 float dist = pathLen(d);
@@ -282,7 +282,7 @@ extern "C" int func_0026B680(sPathNearList* list, sPathVec3* pos)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B7D8);
 #ifdef SKIP_ASM
-extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" void func_0026BA88(void* dst, void* src);
 
 struct sPathPair_B7D8 {
@@ -299,12 +299,12 @@ extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* cursor)
 {
     int count;
     char* start = cursor;
-    func_0026BA68(&count, cursor);
+    pathREAD_tInt32(&count, cursor);
     cursor += 4;
     for (int i = 0; i < count; i++) {
         func_0026BA88(&self->pairs[i].b, cursor);
         cursor += 4;
-        func_0026BA68(&self->pairs[i].a, cursor);
+        pathREAD_tInt32(&self->pairs[i].a, cursor);
         cursor += 4;
     }
     return cursor - start;
@@ -314,7 +314,7 @@ extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* cursor)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B880);
 #ifdef SKIP_ASM
-extern "C" void func_0026BA68(void* dst, void* src);
+extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" void func_0026BA48(void* dst, void* src);
 
 extern int D_00445428[];
@@ -343,22 +343,22 @@ extern "C" int func_0026B880(sPathSys_B880* self, char* p)
     int a;
     int b;
     char* start = p;
-    func_0026BA68(&tmp, p);
+    pathREAD_tInt32(&tmp, p);
     p += 4;
     self->nodes = (sPathNode_B880*)p;
     self->count = tmp;
     for (int i = 0; i < self->count; i++) {
-        func_0026BA68(&self->nodes[i].id, p);
+        pathREAD_tInt32(&self->nodes[i].id, p);
         p += 4;
-        func_0026BA68(&tmp, p);
+        pathREAD_tInt32(&tmp, p);
         p += 4;
         func_0026BA48(self->nodes[i].pos, p);
         p += 0xC;
         func_0026BA48(self->nodes[i].dir, p);
         p += 0xC;
-        func_0026BA68(&a, p);
+        pathREAD_tInt32(&a, p);
         p += 4;
-        func_0026BA68(&b, p);
+        pathREAD_tInt32(&b, p);
         p += 4;
         self->nodes[i].type = 0;
         for (int j = 0; j < 3; j++) {
@@ -388,9 +388,9 @@ extern "C" void func_0026BA48(void* dst, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("path/pathsys", func_0026BA68);
+INCLUDE_ASM("path/pathsys", pathREAD_tInt32);
 #ifdef SKIP_ASM
-extern "C" void func_0026BA68(void* dst, void* src)
+extern "C" void pathREAD_tInt32(void* dst, void* src)
 {
     if (dst != src) {
         MEM_copy(dst, src, 0x4);

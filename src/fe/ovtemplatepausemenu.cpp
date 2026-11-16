@@ -38,7 +38,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 
-extern "C" int func_00231AB8(void* game);
+extern "C" int cGame_canUserActivatePauseMenu(void* game);
 
 extern "C" void* func_0028B180();
 
@@ -83,7 +83,7 @@ struct sPauseMenu_PM {
  * give up,
  * challenge and competition quits, session, transport, messages. In game state 0xB give up is disabled;
  * offline,
- * when func_00231AB8() fails or a controller is unplugged, only return stays enabled. Restores the last
+ * when cGame_canUserActivatePauseMenu() fails or a controller is unplugged, only return stays enabled. Restores the last
  * selection.
  *
  * @param state  the pause menu state
@@ -136,7 +136,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0) {
         void* game = SSXApp->Game;
-        if (func_00231AB8(game) == 0 || SSXApp->Game->ControllerUnplugged != 0) {
+        if (cGame_canUserActivatePauseMenu(game) == 0 || SSXApp->Game->ControllerUnplugged != 0) {
             for (i = 0; i < 14; i++) {
                 self->aD8[i] = 0;
                 if (i == 1) {
@@ -752,18 +752,18 @@ extern "C" void func_001F9080(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F90E8);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_ONLINE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
-extern "C" int func_00231AB8(void* game);
+extern "C" int cGame_canUserActivatePauseMenu(void* game);
 extern int D_004781C0[];
 extern int D_004A2868[2];
 
-extern "C" void func_001F90E8(void* self)
+extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(void* self)
 {
     int* items = D_004781C0;
     *(int*)((char*)self + 0xBC) = 3;
-    if (func_00231AB8(SSXApp->Game) == 0) {
+    if (cGame_canUserActivatePauseMenu(SSXApp->Game) == 0) {
         items = D_004A2868;
         *(int*)((char*)self + 0xBC) = 2;
     }

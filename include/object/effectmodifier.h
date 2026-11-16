@@ -33,7 +33,7 @@ struct tParticleData;
 struct cEffectModifier {
     // --- cEffectLink (object/effectlink.h)
     cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] ctors zero it; [U] cEffectLink_add, unlink
-                                    //       (func_00345760)
+                                    //       (cEffectLink_unlink)
     cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
     void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
                                     //       cEffectModifier_vtbl, ...)
@@ -54,7 +54,7 @@ CHECK_SIZE(cEffectModifier, 0x10);
 struct cParticleModifier {
     // --- cEffectLink (object/effectlink.h)
     cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] ctors zero it; [U] cEffectLink_add, unlink
-                                    //       (func_00345760)
+                                    //       (cEffectLink_unlink)
     cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
     void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
                                     //       cEffectModifier_vtbl, ...)
@@ -67,7 +67,7 @@ struct cParticleModifier {
     t4Matrix Transform;             // 0x010 [O]; [R] ctor copies the instance's root transform (VU0 matrix copy), the
                                     //       replay ctor reads 0x40 bytes; [U] setupEmitter's transform,
                                     //       writeToReplayFrame
-    cStaticEmitter Emitter;         // 0x050 [O]; [R] ctor cStaticEmitter_cStaticEmitter(this + 0x50), dtor func_00370758(this + 0x50,
+    cStaticEmitter Emitter;         // 0x050 [O]; [R] ctor cStaticEmitter_cStaticEmitter(this + 0x50), dtor cStaticEmitter__cStaticEmitter(this + 0x50,
                                     //       2); [U] update/render/writeToReplayFrame
     tParticleData* ParticleData;    // 0x1E0 [O]; [R] ctor stores pdata (owned), the replay ctor allocates 0xD8; dtor
                                     //       deletes it; [U] writeToReplayFrame writes 0xD8 bytes
@@ -91,7 +91,7 @@ CHECK_SIZE(cParticleModifier, 0x1F0);
 struct cDynamicParticleModifier {
     // --- cEffectLink (object/effectlink.h)
     cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] ctors zero it; [U] cEffectLink_add, unlink
-                                    //       (func_00345760)
+                                    //       (cEffectLink_unlink)
     cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
     void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
                                     //       cEffectModifier_vtbl, ...)
@@ -102,7 +102,7 @@ struct cDynamicParticleModifier {
                                     //       transform), updatePosition
     // --- cDynamicParticleModifierState (On Tour second base, 0x50)
     int Mesh;                       // 0x010 [O] cDynamicParticleModifierState::Mesh; [R] ctor stores the mesh index;
-                                    //       [U] updatePosition passes it to func_0034FED8 (the mesh's matrix)
+                                    //       [U] updatePosition passes it to cInstanceNode_buildMeshMat (the mesh's matrix)
     int Fade;                       // 0x014 [O] (state); [R] ctor 0; [U] fadeEffect sets 1, update then stops emitting
     int Complete;                   // 0x018 [O] (state); [R] ctor 0, replay ctor tests it; [U] update sets 1, render
                                     //       and writeToReplayFrame test it

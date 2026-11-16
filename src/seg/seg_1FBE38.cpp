@@ -741,7 +741,7 @@ extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC2C0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int, void*, int, int);
-extern "C" void func_003506D8(void*, void*);
+extern "C" void cDeadNode_cDeadNode(void*, void*);
 extern "C" void func_00350F60(void*, void*);
 extern char str_DeadNode[];
 extern char str_RestoreNode[];
@@ -774,7 +774,7 @@ extern "C" void func_002FC2C0(char* self, char* ev) {
                 break;
             del_obj(curNode);
         }
-        func_003506D8(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), self);
+        cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), self);
         break;
     }
     case 3: {
@@ -940,7 +940,7 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FC7D0);
+INCLUDE_ASM("seg/seg_1FBE38", MakeDebounceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C7D0 __asm__("cWScriptMan_TheWScriptMan");
@@ -958,7 +958,7 @@ extern int D_004A55EC;
 extern const int D_00445FB0[];
 extern "C" void* MEM_copy_C7D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C7D0 { int idx; int val; int pad; int type; };
-extern "C" V3_C7D0 func_002FC7D0(int n, Ent_C7D0 *e) {
+extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *e) {
     if (D_004A55EC == 0) {
         D_C7D0[0] = 0xFFFFFFFF;
         *(float*)&D_C7D0[1] = 1.0f;
@@ -1255,7 +1255,7 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FCFF0);
+INCLUDE_ASM("seg/seg_1FBE38", MakeMeshAnimFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_CFF0 __asm__("cWScriptMan_TheWScriptMan");
@@ -1273,7 +1273,7 @@ extern int D_004A55FC;
 extern const int D_00446060[];
 extern "C" void* MEM_copy_CFF0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CFF0 { int idx; int val; int pad; int type; };
-extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
+extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *e) {
     if (D_004A55FC == 0) {
         D_CFF0[0] = 0xFFFFFFFF;
         ((int*)D_CFF0)[1] = 0;
@@ -3720,7 +3720,7 @@ extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301120);
+INCLUDE_ASM("seg/seg_1FBE38", CollectFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -3747,7 +3747,7 @@ static inline bool isIdle_1120(int slot) {
     }
     return false;
 }
-extern "C" void* func_00301120(void* self, int n, Ent_1120* e) {
+extern "C" void* CollectFunc(void* self, int n, Ent_1120* e) {
     int slot = *(int*)D_004A3DD8_1120;
     if (isIdle_1120(slot)) {
         if (D_004A56B4_1120 == 0) {
@@ -4380,13 +4380,13 @@ extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302048);
+INCLUDE_ASM("seg/seg_1FBE38", SetGameModeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *D_004A3DD8_2048 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_2048 __asm__("SSXApp");
 extern int D_00445E40_2048[] __asm__("D_00445E40");
-extern "C" void func_0030B7F8_2048(int*, int) __asm__("func_0030B7F8");
+extern "C" void cWScriptMan_failActiveLocalMission_2048(int*, int) __asm__("cWScriptMan_failActiveLocalMission");
 extern "C" void cSectionMan_eventbegin_2048(int, int) __asm__("cSectionMan_eventbegin");
 struct Sh_2048 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual int v09(); };
 struct V3_2048 { float x, y, z; };
@@ -4397,7 +4397,7 @@ extern int D_004A572C;
 extern int D_004A3CC0;
 extern "C" void* MEM_copy_2048(void*, void*, int) __asm__("MEM_copy");
 struct Ent_2048 { int idx; int val; int pad; int type; };
-extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
+extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *e) {
     if (D_004A572C == 0) {
         ((int*)D_2048)[0] = -1;
         ((int*)D_2048)[1] = -1;
@@ -4439,7 +4439,7 @@ extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
             v16 = D_00445E40_2048[id];
         if (b1 == 0) {
             if (v16 != 1)
-                func_0030B7F8_2048(D_004A3DD8_2048, id);
+                cWScriptMan_failActiveLocalMission_2048(D_004A3DD8_2048, id);
             cSectionMan_eventbegin_2048(w, v16);
         }
     }
@@ -4448,7 +4448,7 @@ extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302210);
+INCLUDE_ASM("seg/seg_1FBE38", SectionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -4466,9 +4466,9 @@ extern V3_2210 D_004C9098_2210 __asm__("luno_gLunoNil");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
 extern "C" void* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00144CE0_2210(void* iface, int id) __asm__("func_00144CE0");
-extern "C" void func_0022CEA8_2210(void* self, int hash, char* name) __asm__("func_0022CEA8");
+extern "C" void cSectionMan_load_2210(void* self, int hash, char* name) __asm__("cSectionMan_load");
 extern "C" void cSectionMan_activate_2210(void* self, int hash, char* name) __asm__("cSectionMan_activate");
-extern "C" void func_00231250_2210(void* self, int a, int b, int refresh) __asm__("func_00231250");
+extern "C" void cGame_setState_2210(void* self, int a, int b, int refresh) __asm__("cGame_setState");
 extern "C" void* func_0028B180_2210() __asm__("func_0028B180");
 extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
 
@@ -4481,7 +4481,7 @@ public:
     virtual bool isBusy();
 };
 
-extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
+extern "C" V3_2210 SectionFunc(int n, Ent_2210* e)
 {
     if (D_004A5730_2210 == 0) {
         D_004FBC20_2210.v[0] = -1;
@@ -4527,7 +4527,7 @@ extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
         int hash = func_00144CE0_2210(iface, id);
         switch ((unsigned int)action) {
         case 0:
-            func_0022CEA8_2210(ui, hash, name);
+            cSectionMan_load_2210(ui, hash, name);
             break;
         case 1:
             break;
@@ -4535,11 +4535,11 @@ extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
             cSectionMan_activate_2210(ui, hash, name);
             break;
         case 3:
-            func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 2, 0);
+            cGame_setState_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 2, 0);
             func_002A49E8_2210(func_0028B180_2210());
             break;
         case 4:
-            func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 0, 0);
+            cGame_setState_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 0, 0);
             break;
         case 5:
             *(int*)(ui + 0x1A4) = 1;
@@ -4846,7 +4846,7 @@ struct R12_2AC0 { int a; int b; int c; };
 extern R12_2AC0 D_004C9098_2AC0 __asm__("luno_gLunoNil");
 
 extern int D_004A3CF0_2AC0[2] __asm__("D_004A3CF0");
-extern "C" void func_0030A728(int, int, int);
+extern "C" void cWScriptMan_doProcessCmd(int, int, int);
 extern int D_004A3DD8_2AC0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5774_2AC0 __asm__("D_004A5774");
 struct T12_2AC0 { unsigned a; int b; Flag_2AC0 f; };
@@ -4871,7 +4871,7 @@ extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* e) {
         else
             *d = p->val;
     }
-    func_0030A728(D_004A3DD8_2AC0, vp[0], vp[1]);
+    cWScriptMan_doProcessCmd(D_004A3DD8_2AC0, vp[0], vp[1]);
     return D_004C9098_2AC0;
 }
 #endif
@@ -4929,7 +4929,7 @@ struct R12_2CE8 { int a; int b; int c; };
 extern R12_2CE8 D_004C9098_2CE8 __asm__("luno_gLunoNil");
 
 extern int D_004A3D00_2CE8[2] __asm__("D_004A3D00");
-extern "C" void func_0030A728(int, int, int);
+extern "C" void cWScriptMan_doProcessCmd(int, int, int);
 extern int D_004A3DD8_2CE8 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5790_2CE8 __asm__("D_004A5790");
 extern unsigned D_004A5788_2CE8 __asm__("D_004A5788");
@@ -4953,7 +4953,7 @@ extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* e) {
         else
             *d = p->val;
     }
-    func_0030A728(D_004A3DD8_2CE8, vp[0], 0);
+    cWScriptMan_doProcessCmd(D_004A3DD8_2CE8, vp[0], 0);
     return D_004C9098_2CE8;
 }
 #endif
@@ -4970,7 +4970,7 @@ struct R12_2DF0 { int a; int b; int c; };
 extern R12_2DF0 D_004C9098_2DF0 __asm__("luno_gLunoNil");
 
 extern int D_004A3D08_2DF0[2] __asm__("D_004A3D08");
-extern "C" void func_0030A728(int, int, int);
+extern "C" void cWScriptMan_doProcessCmd(int, int, int);
 extern int D_004A3DD8_2DF0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57A0_2DF0 __asm__("D_004A57A0");
 extern unsigned D_004A5798_2DF0 __asm__("D_004A5798");
@@ -4994,7 +4994,7 @@ extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* e) {
         else
             *d = p->val;
     }
-    func_0030A728(D_004A3DD8_2DF0, vp[0], 2);
+    cWScriptMan_doProcessCmd(D_004A3DD8_2DF0, vp[0], 2);
     return D_004C9098_2DF0;
 }
 #endif
@@ -7441,7 +7441,7 @@ extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306A90);
+INCLUDE_ASM("seg/seg_1FBE38", MultiParticleFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V3_6A90 { float x, y, z; };
@@ -7461,7 +7461,7 @@ extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
 extern int D_004A4028_6A90 __asm__("cMultiParticleMan_TheMultiParticleMan");
 extern "C" void cMultiParticleMan_addParticle_6A90(int, int, Rec_6A90*, int) __asm__("cMultiParticleMan_addParticle");
 struct Ent_6A90 { int idx; int val; int pad; int type; };
-extern "C" V3_6A90 func_00306A90(int n, Ent_6A90 *e) {
+extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *e) {
     if (D_58B4_6A90 == 0) {
         Rec_6A90 &r = D_4FBF68_6A90;
         float zero = 0.0f;
@@ -7783,7 +7783,7 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processComplete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_7240 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); };
-int func_0030B898_7240(void*, void*) __asm__("func_0030B898__FPvT0");
+int cWScriptMan_isProcessActive_7240(void*, void*) __asm__("cWScriptMan_isProcessActive__FPvT0");
 extern "C" void *func_0028B180_7240(void) __asm__("func_0028B180");
 extern "C" void func_0029D8E0_7240(void*) __asm__("func_0029D8E0");
 /**
@@ -7791,7 +7791,7 @@ extern "C" void func_0029D8E0_7240(void*) __asm__("func_0029D8E0");
  * func_0029D8E0 on the sound system.
  */
 extern "C" void cWScriptMission_processComplete(P_7240* self) {
-    if (func_0030B898_7240(*(void**)((char*)self + 0x10), self)) {
+    if (cWScriptMan_isProcessActive_7240(*(void**)((char*)self + 0x10), self)) {
         self->v06();
         self->v18();
         func_0029D8E0_7240(func_0028B180_7240());
@@ -7800,10 +7800,10 @@ extern "C" void cWScriptMission_processComplete(P_7240* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003072B0);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionRestart);
 #ifdef SKIP_ASM
 struct P_72B0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); };
-extern "C" void func_003072B0(P_72B0* self) {
+extern "C" void cWScriptMission_missionRestart(P_72B0* self) {
     if (self->state == 2)
         self->v06();
     self->v04();
@@ -7811,7 +7811,7 @@ extern "C" void func_003072B0(P_72B0* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00307308);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionPass);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -7822,15 +7822,15 @@ extern "C" void func_00154160(void* missions, int id, int done);
 extern "C" int func_00153FA0(void* missions, int id);
 extern "C" int func_001511B0(void* econ, int reward);
 extern "C" int func_00144C98(void* iface);
-extern "C" void func_0010F2D8(void* rider, int player, int money);
+extern "C" void cRider_flagEventMissionSuccess(void* rider, int player, int money);
 extern "C" unsigned int cBEMissionInterface_getNextMissionID(void* missions, int id);
 extern "C" void func_001541D0(void* missions, int id, int active);
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
-extern "C" int func_00153E28(void* missions, int id);
+extern "C" int cBEMissionInterface_isMissionLocked(void* missions, int id);
 extern "C" void func_00154010(void* missions, int id, int a);
 extern "C" void func_00154080(void* missions, int id, int a);
-extern "C" void func_00308DB8(int script);
-extern "C" void func_00309B00(int script, void* self);
+extern "C" void cWScriptMan_updateWorld(int script);
+extern "C" void cWScriptMan_processPass(int script, void* self);
 extern "C" void cReplay_reset(void* replay);
 extern "C" void cReplay_startRace(void* replay);
 
@@ -7840,7 +7840,7 @@ struct sGame_7308 {
 };
 
 // Mission completed: pays the reward the first time, unlocks the follow-up mission and resets the script.
-extern "C" void func_00307308(char* self)
+extern "C" void cWScriptMission_missionPass(char* self)
 {
     int money = 0;
     void* missions = cBE_getInterface_Fv(cBE_getBE(), 0xA);
@@ -7851,14 +7851,14 @@ extern "C" void func_00307308(char* self)
     }
     int pl = func_00144C98(cBE_getInterface_Fv(cBE_getBE(), 0));
     sGame_7308* game = *(sGame_7308**)(*(char**)(D_004A28A8_7308 + 0x84) + 0xC);
-    func_0010F2D8(game->riders[**(int**)(self + 0x10)], pl, money);
+    cRider_flagEventMissionSuccess(game->riders[**(int**)(self + 0x10)], pl, money);
     unsigned int next = cBEMissionInterface_getNextMissionID(missions, *(int*)(self + 0x20));
     if (next != 0xFFFFFFFF) {
         func_001541D0(missions, *(int*)(self + 0x20), 0);
         if (*(int*)(self + 0x6C) != 0) {
             cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
         }
-        if (func_00153E28(missions, next) != 0) {
+        if (cBEMissionInterface_isMissionLocked(missions, next) != 0) {
             func_00154010(missions, next, 0);
             func_00154080(missions, next, 1);
             func_001541D0(missions, next, 1);
@@ -7866,15 +7866,15 @@ extern "C" void func_00307308(char* self)
     } else if (*(int*)(self + 0x6C) != 0) {
         cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
     }
-    func_00308DB8(*(int*)(self + 0x10));
-    func_00309B00(*(int*)(self + 0x10), self);
+    cWScriptMan_updateWorld(*(int*)(self + 0x10));
+    cWScriptMan_processPass(*(int*)(self + 0x10), self);
     cReplay_reset(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
     cReplay_startRace(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003074C0);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionFail);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_74C0(void) __asm__("cBE_getBE");
@@ -7884,7 +7884,7 @@ extern "C" void func_001540F0_74C0(int, int, int) __asm__("func_001540F0");
 extern "C" void cWScriptProcess_end_74C0(void*) __asm__("cWScriptProcess_end");
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); };
-extern "C" void func_003074C0(P_74C0* self) {
+extern "C" void cWScriptMission_missionFail(P_74C0* self) {
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
     if (!cBEMissionInterface_isMissionAvailable_74C0(iface, *(int*)((char*)self + 0x20)))
         func_001540F0_74C0(iface, *(int*)((char*)self + 0x20), 1);
@@ -7899,11 +7899,11 @@ extern "C" void func_003074C0(P_74C0* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00307568);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionUpdateWorld);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 
-extern "C" void func_00307568(void *arg0) {
+extern "C" void cWScriptMission_missionUpdateWorld(void *arg0) {
     int temp_6;
 
     temp_6 = (*(int *)((char*)(arg0) + (0x74)));

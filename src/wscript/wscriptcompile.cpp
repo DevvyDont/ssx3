@@ -63,12 +63,12 @@ extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* s
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_00351120);
+INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan__cInstanceMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
 
-extern "C" void func_00351120(void* self, int flags)
+extern "C" void cInstanceMan__cInstanceMan(void* self, int flags)
 {
     void* p = *(void**)((char*)self + 0xC);
     if (p != 0) {

@@ -139,12 +139,12 @@ void cBENewRaceInterface_setNumberMission(void* self, int mission)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144B20);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setDebugLocationFile);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char*, const char*);
 extern char str_dbg[];
 
-extern "C" void func_00144B20(void* self, const char* name)
+extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
     char* g = (char*)&(*(&cBENewRaceInterface_newRace));
@@ -267,9 +267,9 @@ extern "C" int func_00144C98()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144CC0);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationType);
 #ifdef SKIP_ASM
-extern "C" int func_00144CC0(void* self, int a1)
+extern "C" int cBENewRaceInterface_getLocationType(void* self, int a1)
 {
     return cBELibrary_locationDB[a1].field_0x58;
 }
@@ -307,18 +307,18 @@ extern "C" int func_00144D18(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D38);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionFile);
 #ifdef SKIP_ASM
-extern "C" void* func_00144D38(void* self, int a1)
+extern "C" void* cBENewRaceInterface_getSectionFile(void* self, int a1)
 {
     return (char*)&D_0043E254 + a1 * 0x18;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D50);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionType);
 #ifdef SKIP_ASM
-extern "C" int func_00144D50(void* self, int a1)
+extern "C" int cBENewRaceInterface_getSectionType(void* self, int a1)
 {
     return D_0043E250[a1].field_0x14;
 }
@@ -373,7 +373,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int a1);
-extern "C" void func_00147828(int a0);
+extern "C" void cBENewPlayerInterface_setToMissionMan(int a0);
 int cBENewPlayerInterface_isMissionMan(int a0);
 void* cBENewPlayerInterface_getThis();
 
@@ -398,7 +398,7 @@ static inline char* Race_144DF0()
  * Sets the race's game mode and the matching numbers of human, AI and mission riders.
  *
  * Refused when the mode is not allowed on the current game path (D_0043E700). Mode 4 gets 1 human and 1
- * mission rider and makes player 1 the mission man with player 0's character (func_00147828), then submits;
+ * mission rider and makes player 1 the mission man with player 0's character (cBENewPlayerInterface_setToMissionMan), then submits;
  * leaving mode 4 restores the humans (2 on path 2) and resets player 1. Modes 0 (5 AI, 4 on path 2), 1 (1 AI)
  * and 3, 5, 6 (1 AI for events 4-5 off path 2) set the counts; mode 5 also sets event 4.
  *
@@ -423,7 +423,7 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
         cBENewRaceInterface_setNumberAI(self, 0);
         cBENewRaceInterface_setNumberMission(self, 1);
         char* playerInterface = (char*)cBENewPlayerInterface_getThis();
-        func_00147828(1);
+        cBENewPlayerInterface_setToMissionMan(1);
         sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
         vt[1].fn(playerInterface + vt[1].delta);
     } else if (*((signed char*)Race_144DF0() + 0x48) == 4) {
@@ -466,9 +466,9 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00145108);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGamePath);
 #ifdef SKIP_ASM
-extern "C" void func_00145108(void* self, int mode)
+extern "C" void cBENewRaceInterface_setGamePath(void* self, int mode)
 {
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     *((char*)beRaceDB + 0x49) = mode;
@@ -591,7 +591,7 @@ extern "C" void* func_001453B8(void* self, int a1)
 INCLUDE_ASM("be/beintnewrace", func_001453D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" unsigned int func_00237CD8(void);
+extern "C" unsigned int GMrand(void);
 
 struct sPrizeRow_1453D0
 {
@@ -617,7 +617,7 @@ extern "C" int func_001453D0(void* self, int kind, int place, int mode)
         if (D_00440B38_1453D0[i].key == key && D_00440B38_1453D0[i].kind == k)
         {
             int base = (int)(D_00440B38_1453D0[i].prize[place] * 100 * m);
-            int r = func_00237CD8() % 200;
+            int r = GMrand() % 200;
             base += (int)(base * (r - 100) * 0.0005000000237487257f);
             return base - base % 20;
         }

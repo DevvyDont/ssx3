@@ -166,7 +166,7 @@ struct sMPWorld {
     sMPModelSet** sets;     // 0x8
 };
 
-extern "C" sMPWorld** func_002D1BD8();
+extern "C" sMPWorld** cObjectInterface_getWorld();
 extern "C" void cStaticEmitter_render(void* desc, sMPBox* box, const sMPVec4& center);
 
 static inline void* refToPtr58260(unsigned int p)
@@ -250,7 +250,7 @@ struct sMultiPart58260 {
 extern "C" void cMultiParticle_render(sMultiPart58260* self)
 {
     for (int i = 0; i < self->count; i++) {
-        sMPModel* model = (sMPModel*)self->refs[i].get(*func_002D1BD8());
+        sMPModel* model = (sMPModel*)self->refs[i].get(*cObjectInterface_getWorld());
         if (model != 0) {
             sMPBox bounds = self->box;
             vu0AddTo58260(bounds.min, model->pos);
@@ -527,10 +527,10 @@ struct sMpMgr_8780 {
     sMpTable_8780** tables; // 0x8
 };
 
-extern "C" sMpMgr_8780** func_002D1BD8_8780(void) __asm__("func_002D1BD8");
+extern "C" sMpMgr_8780** cObjectInterface_getWorld_8780(void) __asm__("cObjectInterface_getWorld");
 extern "C" char* cObjectInterface_getNash(void);
-extern "C" void func_00328F28(void* out, const void* box);
-extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void nash_Nash_findkey(void* out, const void* box);
+extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
 void operator_delete(int*);
 
 static inline void* refToPtr_8780(unsigned int p)
@@ -573,9 +573,9 @@ static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
 {
     (*(int*)(w + 0xA0))++;
     sMpCell_8780 c;
-    func_00328F28(&c, box);
+    nash_Nash_findkey(&c, box);
     sMpRoot_8780* r = findRoot_8780(w, c.x, c.y, c.z);
-    func_003284B8(r->node, 2, item, &c, &r->cell);
+    nash_Cell_remnode(r->node, 2, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
         r->node = 0;
@@ -586,7 +586,7 @@ static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
 extern "C" void func_00358780(void* self, int idx)
 {
     sMpRef_8780 ref = ((sMpRef_8780*)((char*)self + 0x18))[idx];
-    sMpPart_8780* part = (sMpPart_8780*)ref.get(*func_002D1BD8_8780());
+    sMpPart_8780* part = (sMpPart_8780*)ref.get(*cObjectInterface_getWorld_8780());
     char* node = part->first;
     for (int i = 0; i < part->count; i++) {
         sMpBox_8780 box;
@@ -637,10 +637,10 @@ struct sMpMgr_8998 {
     sMpTable_8998** tables; // 0x8
 };
 
-extern "C" sMpMgr_8998** func_002D1BD8_8998(void) __asm__("func_002D1BD8");
+extern "C" sMpMgr_8998** cObjectInterface_getWorld_8998(void) __asm__("cObjectInterface_getWorld");
 extern "C" char* cObjectInterface_getNash(void);
-extern "C" void func_00328F28(void* out, const void* box);
-extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern "C" void nash_Nash_findkey(void* out, const void* box);
+extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
 
 static inline void* refToPtr_8998(unsigned int p)
 {
@@ -681,15 +681,15 @@ static inline sMpRoot_8998* findRoot_8998(char* w, int x, int y, int z)
 static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
 {
     sMpCell_8998 c;
-    func_00328F28(&c, box);
-    func_00328C20(findRoot_8998(w, c.x, c.y, c.z), 2, item, &c);
+    nash_Nash_findkey(&c, box);
+    nash_Octant_addnode(findRoot_8998(w, c.x, c.y, c.z), 2, item, &c);
 }
 
 // Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
 extern "C" void func_00358998(void* self, int idx)
 {
     sMpRef_8998 ref = ((sMpRef_8998*)((char*)self + 0x18))[idx];
-    sMpPart_8998* part = (sMpPart_8998*)ref.get(*func_002D1BD8_8998());
+    sMpPart_8998* part = (sMpPart_8998*)ref.get(*cObjectInterface_getWorld_8998());
     char* node = part->first;
     for (int i = 0; i < part->count; i++) {
         sMpBox_8998 box;
@@ -992,7 +992,7 @@ extern "C" int func_00358EB8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358F90);
+INCLUDE_ASM("object/multiparticle", cAnimComboNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 struct sMpQuad {
     float v[4];
@@ -1001,7 +1001,7 @@ struct sMpQuad {
 extern sMpQuad t4vect_Zero;
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
 
-extern "C" void func_00358F90(void* self, void* out)
+extern "C" void cAnimComboNode_updateIntersectInfo(void* self, void* out)
 {
     cMoveNode_updateIntersectInfo((char*)self + 0x48, out);
     *(sMpQuad*)((char*)out + 0x20) = t4vect_Zero;
@@ -1150,7 +1150,7 @@ extern "C" void func_003590F0(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00359140);
+INCLUDE_ASM("object/multiparticle", cAnimComboNode_cacheFrame);
 #ifdef SKIP_ASM
 struct sMpItem_9140 {
     char data[0xD0];
@@ -1197,12 +1197,12 @@ struct sMp_9140 {
     sMpMtx_9140* mtx;       // 0x84
 };
 
-extern "C" void func_0034E348(void* self);
-extern "C" void func_00351948(sMpItem_9140* item, sMpMtx_9140* mtx);
+extern "C" void cAnimNode_cacheFrame(void* self);
+extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, sMpMtx_9140* mtx);
 
-extern "C" void func_00359140(sMp_9140* self)
+extern "C" void cAnimComboNode_cacheFrame(sMp_9140* self)
 {
-    func_0034E348((char*)self + 0x34);
+    cAnimNode_cacheFrame((char*)self + 0x34);
     if (self->items == 0) {
         return;
     }
@@ -1219,7 +1219,7 @@ extern "C" void func_00359140(sMp_9140* self)
     sMpPart_9140* p = model->parts;
     for (int i = 0; i < model->count; i++, p++) {
         if (p->info->active != 0) {
-            func_00351948(&self->items[n], (sMpMtx_9140*)((char*)self->mtx + (n << 6)));
+            cMeshAnimFrame_transform(&self->items[n], (sMpMtx_9140*)((char*)self->mtx + (n << 6)));
             n++;
         }
     }

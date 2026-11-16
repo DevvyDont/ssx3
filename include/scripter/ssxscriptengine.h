@@ -75,13 +75,13 @@ struct cSSXScriptEngine {
     char mScriptRequests[16][0x24];              // 0x2C0 [O] tScriptRequestInfo[16]; [R] ResetInstVars: 16 x 0x24
     // --- cVidEngine (ctor cVidEngine_cVidEngine(self+0x500), which zeroes 0x0-0x14 and sets the vptr at 0x18)
     cMoviePlayer* mpPlayer;                      // 0x500 [O]; [R] cVidEngine_ReadyVideo allocates the 0x44-byte player
-    int mIsPlaying;                              // 0x504 [O] (a bool in On Tour); [U] func_002839A8 (PlayVideo) sets 1;
+    int mIsPlaying;                              // 0x504 [O] (a bool in On Tour); [U] cVidEngine_PlayVideo (PlayVideo) sets 1;
                                                  //       tested by ssxapp.cpp and all_in_one_fe.cpp
-    int mFrameUpdated;                           // 0x508 [O] (a bool in On Tour); [U] func_00283AA0 sets 1 while
+    int mFrameUpdated;                           // 0x508 [O] (a bool in On Tour); [U] cVidEngine_UpdateVideo sets 1 while
                                                  //       playing and not paused
     int mNumPause;                               // 0x50C [O]; [U] func_00283B78 (PauseVideo) counts it up and down
-    int unk_510;                                 // 0x510 [U] func_002839A8 saves a GrMan virtual-call result
-    int unk_514;                                 // 0x514 [U] func_002839A8: 1 unless the game's state object is 0 or 2
+    int unk_510;                                 // 0x510 [U] cVidEngine_PlayVideo saves a GrMan virtual-call result
+    int unk_514;                                 // 0x514 [U] cVidEngine_PlayVideo: 1 unless the game's state object is 0 or 2
     void** mVidEngineVtbl;                       // 0x518 [R] _vt$16cSSXScriptEngine$10cVidEngine (D_004821A0)
     // --- cDataManager (ctor cDataManager_cDataManager(self+0x51C, 0, 0x100))
     int mMaxDataInstances;                       // 0x51C [O]; [R] the ctor stores 0x100
@@ -120,7 +120,7 @@ struct cSSXScriptEngine {
     char unk_6C8[0x8];                           // 0x6C8 untouched; likely alignment (On Tour has the same gap
                                                  //       before its 16-byte-aligned camera managers)
     char mObjectCameraManager[2][0x120];         // 0x6D0 [O] cScriptObjCameraManager (4 in On Tour); [R] the ctor
-                                                 //       builds 2 x 0x120 (func_00281018); vptr at +0xC (dtor)
+                                                 //       builds 2 x 0x120 (cScriptObjCameraManager_cScriptObjCameraManager); vptr at +0xC (dtor)
     char mObjectGameState[0x1C];                 // 0x910 [O] cScriptObjGS; [R] cScriptObjGS_cScriptObjGS(self+0x910);
                                                  //       vptrs at +0x0 and +0x18, cScriptObject part at +0xC (dtor)
     char mObjectEvent[0xFC];                     // 0x92C [O] cScriptObjEvent (0xF8 in On Tour); [R]

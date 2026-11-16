@@ -29,7 +29,7 @@ void UIAsciiToUnicode(unsigned short* dst, const char* src)
 //100%
 INCLUDE_ASM("ui/uiengine", func_00397B08);
 #ifdef SKIP_ASM
-extern "C" void* func_003977E8(void* self);
+extern "C" void* cList_cList(void* self);
 
 extern "C" void* func_00397B08(void* self)
 {
@@ -39,8 +39,8 @@ extern "C" void* func_00397B08(void* self)
     *(int*)((char*)self + 0xC) = 0;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0;
-    func_003977E8((char*)self + 0x18);
-    func_003977E8((char*)self + 0x34);
+    cList_cList((char*)self + 0x18);
+    cList_cList((char*)self + 0x34);
     *(int*)((char*)self + 0x58) = 0;
     *(int*)((char*)self + 0x5C) = 0;
     *(int*)((char*)self + 0x60) = 0;
@@ -109,7 +109,7 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_loadFile);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* FILE_load(const char* name, int flags);
-void func_00397138(void* self, int val);
+void cUIAnimationBank_setData(void* self, int val);
 extern "C" void cUITextureBank_setData(void* bank, int id, void* data);
 extern const char str_pct_s_lui[];
 
@@ -129,7 +129,7 @@ extern "C" int cUIEngine_loadFile(void* self, int id)
     char* file = (char*)FILE_load(name, 0);
     *(char**)((char*)self + 0x4) = file;
     // PORT: the font setter stores the data pointer in an int.
-    func_00397138((char*)self + 0x50, (int)(file + *(int*)(file + 0x8)));
+    cUIAnimationBank_setData((char*)self + 0x50, (int)(file + *(int*)(file + 0x8)));
     file = *(char**)((char*)self + 0x4);
     cUITextureBank_setData((char*)self + 0x58, id, file + *(int*)(file + 0x10));
     return 1;
@@ -141,13 +141,13 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_addScreenByHashName);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void* func_003977E8(void* self);
+extern "C" void* cList_cList(void* self);
 extern "C" void func_001DD580(void* self);
 extern "C" void cUIScreen_setData(void* self, char* data);
 extern "C" void cUIState_addScreen(void* self, void* node);
 extern "C" void cUIScreen_createAllObjects(void* self);
-// PORT: func_0039FB30 really takes (self, a, b); the unit's other caller uses a 1-arg declaration.
-void* func_0039FB30_3(void* self, int a, int b) __asm__("func_0039FB30");
+// PORT: cUIThing_cUIThing really takes (self, a, b); the unit's other caller uses a 1-arg declaration.
+void* cUIThing_cUIThing_3(void* self, int a, int b) __asm__("cUIThing_cUIThing");
 extern char str_UIScreen[];
 extern void* cUIScreen_vtbl[];
 extern void* cUIGroup_vtbl[];
@@ -205,13 +205,13 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
         newScreen->fC = 0;
         newScreen->f10 = 0;
         func_001DD580(newScreen->o14);
-        func_003977E8(newScreen->o18);
+        cList_cList(newScreen->o18);
         newScreen->f34 = 0;
         newScreen->f38 = 0;
         newScreen->f3C = 0;
-        func_0039FB30_3(newScreen->o40, 0, 0);
+        cUIThing_cUIThing_3(newScreen->o40, 0, 0);
         newScreen->vt48 = cUIGroup_vtbl;
-        func_003977E8(newScreen->oB4);
+        cList_cList(newScreen->oB4);
         newScreen->owner = owner;
         screen = newScreen;
     }
@@ -451,7 +451,7 @@ extern char str_UITextureIDs[];
 extern char str_UITextureELs[];
 extern char str_UITPage[];
 extern char* D_004A289C_8138 __asm__("GrMan");
-extern "C" sUIFsh8138* func_003E22F0(char* name, int flags);
+extern "C" sUIFsh8138* FILE_loadpack(char* name, int flags);
 extern "C" void MEM_free(void* p);
 extern "C" void* func_00416210(void* dst, int c, int n);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -475,7 +475,7 @@ extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
     char name[0x70];
     int i = 0;
     sprintf(name, str_pct_s_1_ssh, id);
-    sUIFsh8138* fsh = func_003E22F0(name, 0x3000100);
+    sUIFsh8138* fsh = FILE_loadpack(name, 0x3000100);
     self->texCount = fsh->count;
     self->texIds = (int*)operator_new_tag(self->texCount * 4, str_UITextureIDs, 0, 0);
     func_00416210(self->texIds, 0xFF, self->texCount * 4);
@@ -507,14 +507,14 @@ extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398380);
+INCLUDE_ASM("ui/uiengine", cUITextureBank_getElementByHashname);
 #ifdef SKIP_ASM
 struct s398380Item {
     char pad[0x1C];
     int id;
 };
 
-extern "C" s398380Item* func_00398380(void* self, int id)
+extern "C" s398380Item* cUITextureBank_getElementByHashname(void* self, int id)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x10); i++) {
@@ -972,7 +972,7 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
     cUIThing_setUIData_8998(((sUIObj8998*)self), data);
     ((sUIObj8998*)self)->clip = data->clip;
     ((sUIObj8998*)self)->align = data->align;
-    self->mpTextureElem = (const cTextureElement*)func_00398380(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x58, data->id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x58, data->id);
     (*(sUISize8998*)&self->mTileUV[0]) = sUISize8998(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
@@ -992,7 +992,7 @@ void func_00398A60(void* a, void* b)
 INCLUDE_ASM("ui/uiengine", cUIIcon_render2D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0039FEB8(void* self, void* a, void* b);
+extern "C" void cUIThing_applyPivot(void* self, void* a, void* b);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 struct sV3_8A78 {
@@ -1213,7 +1213,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     self->vt[20].fn((char*)self + self->vt[20].delta, &size);
     size.x *= scale.x;
     size.y *= scale.y;
-    func_0039FEB8(self, &pos, &size);
+    cUIThing_applyPivot(self, &pos, &size);
     pos.x += x;
     pos.y += y;
     sM33_8A78 rotMat = D_004FF170_8a78;
@@ -1280,14 +1280,14 @@ extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
     void* screen = self->mpScreen;
     void* state = *(void**)((char*)screen + 0xD0);
     void* engine = *(void**)((char*)state + 0x10);
-    self->mpTextureElem = (const cTextureElement*)func_00398380((char*)engine + 0x58, id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((char*)engine + 0x58, id);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", cUIListBox_cUIListBox);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self);
+extern "C" void* cUIThing_cUIThing(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cUIListBox_vtbl[];
 
@@ -1298,7 +1298,7 @@ extern tARGB D_004C66C8;
 /**
  * Constructs an empty list box.
  *
- * Runs the cUIThing constructor (func_0039FB30; the screen and parent, On Tour pState / pParent, are not declared
+ * Runs the cUIThing constructor (cUIThing_cUIThing; the screen and parent, On Tour pState / pParent, are not declared
  * here and stay in $a1/$a2), stores cUIListBox_vtbl, sets mShadow and clears mUnicode and mCallback, clears the 32
  * entries (and memsets them), mNumEntries and mCurrentEntry, and sets mStaticColour from D_004C66C8.
  *
@@ -1306,7 +1306,7 @@ extern tARGB D_004C66C8;
  */
 extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
 {
-    func_0039FB30((self));
+    cUIThing_cUIThing((self));
     self->mVtbl = cUIListBox_vtbl;
     *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
     tListBoxEntry* listBoxEntry = ((&self->mpEntries[0]));
@@ -1382,7 +1382,7 @@ extern "C" void cUIListBox_setUIData(sUIObj9820* self, sUIData9820* data)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIListBox_getFont);
 #ifdef SKIP_ASM
-void* func_0039FF50(void*);
+void* cUIThing_getEngine(void*);
 
 struct cUIListBox_getFont_sEntry {
     int a;
@@ -1392,13 +1392,13 @@ struct cUIListBox_getFont_sEntry {
 
 /**
  * Returns the list box's font: entry mFont + 1 of the UI engine's font table (engine + 8, 12-byte entries), found
- * through getEngine (func_0039FF50).
+ * through getEngine (cUIThing_getEngine).
  *
  * @return the cFont (as an int), or 0 without an engine
  */
 extern "C" int cUIListBox_getFont(cUIListBox* self)
 {
-    void* o = func_0039FF50(self);
+    void* o = cUIThing_getEngine(self);
     if (o != 0) {
         cUIListBox_getFont_sEntry* t = *(cUIListBox_getFont_sEntry**)((char*)o + 0x8);
         return t[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
@@ -1414,7 +1414,7 @@ INCLUDE_ASM("ui/uiengine", cUIListBox_onInput);
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-void* func_0039FF50(void* self);
+void* cUIThing_getEngine(void* self);
 extern "C" int func_003A0318(void* self, int a);
 extern char gUISoundNull[4];
 
@@ -1467,7 +1467,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
         return 0;
     int result = 0;
     char* listener = gUISoundNull;
-    char* owner = (char*)func_0039FF50(((char*)self));
+    char* owner = (char*)cUIThing_getEngine(((char*)self));
     if (*(char**)(owner + 0x14) != 0) {
         listener = *(char**)(owner + 0x14);
     }
@@ -1661,7 +1661,7 @@ INCLUDE_ASM("ui/uiengine", cUIListBox_render2D);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
-extern "C" void func_0039FEB8(void* self, void* pos, void* size);
+extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
 extern "C" void func_00391E30(void* font, float x, float y, int str);
 extern char* D_004A289C_9F00 __asm__("GrMan");
 
@@ -1771,7 +1771,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
         }
         sV3_9F00 size(textRect.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
         sV3_9F00 position(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
-        func_0039FEB8((self), &position, &size);
+        cUIThing_applyPivot((self), &position, &size);
         func_00391E30(font, position.x, position.y, str);
     }
     char* loc = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
@@ -1782,7 +1782,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
         sV3_9F00 position = (*(sV3_9F00*)&self->mPosition);
         position.x += x;
         position.y += y;
-        func_0039FEB8((self), &position, box);
+        cUIThing_applyPivot((self), &position, box);
         setLayer_9F00((self));
         sVert_9F00 verts[5];
         unsigned int i;

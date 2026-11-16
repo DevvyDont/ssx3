@@ -8,7 +8,7 @@
 // and the out-of-line inline accessors func_003A5338 .. func_003A5418).
 //
 // Size 0xA8: cUIScreen_createObjectByStruct (record type 0x13) does operator new(0xA8, "UIMenu") and builds it inline
-// (cUIThing ctor func_0039FB30, cUIGroup's vtable, cList ctor func_003977E8 at 0x74, cUIMenu's vtable, tAttrMenu ctor
+// (cUIThing ctor cUIThing_cUIThing, cUIGroup's vtable, cList ctor cList_cList at 0x74, cUIMenu's vtable, tAttrMenu ctor
 // func_003A5338 at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
 // _vt$7cUIMenu = D_00494928 (cUIMenu_vtbl).
 // Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uithing.h, tag "cUIGroup" 0x90) <- cUIThing <-
@@ -78,7 +78,7 @@ struct cUIMenu {
     int mSound[2];                   // 0x06C [O]; [R] = {4, 6} (cUIThing ctor)
     // --- cUIGroup (0x90)
     char mList[0x1C];                // 0x074 [O] cList mList (cListNode mStart 0x74, mEnd 0x80, the list's vptr 0x8C): the menu
-                                     //       items; [R] constructed by func_003977E8(this + 0x74); the destructor stores
+                                     //       items; [R] constructed by cList_cList(this + 0x74); the destructor stores
                                      //       cList's vtable at 0x8C and cListNode's (cListNode_vtbl) at 0x88 / 0x7C;
                                      //       [U] cList_size(this + 0x74) in cUIMenu_setScrollableMenu / setUIData
     // --- cUIMenu

@@ -3,7 +3,7 @@
 
 // cUITextScroll: a scrolling multi-line text box (record type 0x20), word-wrapped into lines and optionally driven by
 // a cUIScrollBar. Size 0xD0: cUIScreen_createObjectByStruct does operator new(0xD0, str_cUITextScroll) + the ctor
-// cUITextScroll_cUITextScroll (cUIThing ctor func_0039FB30, vtable cUITextScroll_vtbl, mList ctor func_003977E8, zeroes 0xB8..0xCC,
+// cUITextScroll_cUITextScroll (cUIThing ctor cUIThing_cUIThing, vtable cUITextScroll_vtbl, mList ctor cList_cList, zeroes 0xB8..0xCC,
 // cUITextScroll_setInputMap fills mInputMap), then moves the record's children into mList. Default ctor func_003A6250
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:
 // d:/ssx/code/source/ui/uitextscroll.cpp (preview assert path); retail keeps its methods in ui/uitext
@@ -69,7 +69,7 @@ struct cUITextScroll {
     tARGB mShadowColour;             // 0x078 [O]; [U] setUIData cUITextScroll_setUIData copies it (ldl/ldr); cUITextScroll_setShadowColour (set)
     char mInputMap[4];               // 0x088 [O]; [R] cUITextScroll_setInputMap (called by the ctor) fills the four bytes; [U] onInput
                                      //       cUITextScroll_onInput (lb 0x88 / 0x89)
-    cList mList;                     // 0x08C [O] the text lines' child objects (util/list.h); [R] ctor func_003977E8 on
+    cList mList;                     // 0x08C [O] the text lines' child objects (util/list.h); [R] ctor cList_cList on
                                      //       this + 0x8C, dtor cUITextScroll__cUITextScroll (cList_destroyList, vptrs 0xA4 / 0xA0 / 0x94);
                                      //       createObjectByStruct adds the record's children (cList_addToEnd on o + 0x8C);
                                      //       [U] func_003A63E0..func_003A6460 (first/last/getByIndex/addToFront/addToEnd)

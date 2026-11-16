@@ -1633,9 +1633,9 @@ void* func_00269EA0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269EC0__FPv);
+INCLUDE_ASM("bx/bxstringctor", cAIPath_populateDataWithDefaults__FPv);
 #ifdef SKIP_ASM
-int func_00269EC0(void* self)
+int cAIPath_populateDataWithDefaults(void* self)
 {
     int t0 = 0x2e;
     *(int*)((char*)self + 0x38) = t0;
@@ -1645,29 +1645,29 @@ int func_00269EC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269ED8);
+INCLUDE_ASM("bx/bxstringctor", cAIPath_populateData);
 #ifdef SKIP_ASM
-extern "C" void func_0026BA68(void* p);
+extern "C" void pathREAD_tInt32(void* p);
 
-extern "C" void func_00269ED8(void* self, int a1, int id)
+extern "C" void cAIPath_populateData(void* self, int a1, int id)
 {
     if (id == 0x64) {
-        func_0026BA68((char*)self + 0x38);
+        pathREAD_tInt32((char*)self + 0x38);
     } else if (id == 0x65) {
-        func_0026BA68((char*)self + 0x3C);
+        pathREAD_tInt32((char*)self + 0x3C);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269F18);
+INCLUDE_ASM("bx/bxstringctor", cAIPath_getResetPos);
 #ifdef SKIP_ASM
 struct sBXVec4K2 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 struct sBXPath;
 // sBXVec4 (defined later in the unit) has this layout.
-sBXVec4K2 func_0026AB20_K2(sBXPath* self, int* inRange, float t) __asm__("func_0026AB20");
+sBXVec4K2 cPath_getPathPos_K2(sBXPath* self, int* inRange, float t) __asm__("cPath_getPathPos");
 
 struct sBXRangeK2 {
     int type;   // 0x0
@@ -1682,7 +1682,7 @@ struct sBXRangeListK2 {
 };
 
 // PORT: >? and <? (g++ min/max operators).
-extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
+extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* t)
 {
     sBXRangeListK2* list = (sBXRangeListK2*)path;
     float hi = *t + 50.0f;
@@ -1705,7 +1705,7 @@ extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
         *t = lo;
     else
         *t = hi;
-    return func_0026AB20_K2(path, 0, *t);
+    return cPath_getPathPos_K2(path, 0, *t);
 }
 #endif
 
@@ -1735,9 +1735,9 @@ extern "C" int func_0026A000(sTable_0026A000* table, float x) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A068__FPv);
+INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateDataWithDefaults__FPv);
 #ifdef SKIP_ASM
-void func_0026A068(void* self)
+void cTrackPath_populateDataWithDefaults(void* self)
 {
     *(int*)((char*)self + 0x38) = 0;
 }
@@ -1746,9 +1746,9 @@ void func_0026A068(void* self)
 extern "C" void func_0026BA88(void*);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A070);
+INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
 #ifdef SKIP_ASM
-extern "C" void func_0026A070(void* self, int a1, int a2)
+extern "C" void cTrackPath_populateData(void* self, int a1, int a2)
 {
     if (a2 == 0) {
         func_0026BA88((char*)self + 0x38);
@@ -1757,7 +1757,7 @@ extern "C" void func_0026A070(void* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A090);
+INCLUDE_ASM("bx/bxstringctor", cTrackPath_getEventsInRange);
 #ifdef SKIP_ASM
 struct sBXRange {
     int field_0x0;
@@ -1773,22 +1773,22 @@ struct sBXRangeList {
     float field_0x38;   // 0x38
 };
 
-extern "C" int func_0026AA80(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi);
+extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi);
 
-extern "C" int func_0026A090(sBXRangeList* self, sBXRange* out, int maxOut, float a, float b)
+extern "C" int cTrackPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float a, float b)
 {
     float base = self->field_0x38;
-    return func_0026AA80(self, out, maxOut, base - a, base - b);
+    return cPath_getEventsInRange(self, out, maxOut, base - a, base - b);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A0B8);
+INCLUDE_ASM("bx/bxstringctor", cTrackPath_isForkInPath);
 #ifdef SKIP_ASM
-extern "C" float func_0026AC48(void* self);
-extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi);
+extern "C" float cPath_getLength(void* self);
+extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi);
 
-extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
+extern "C" int cTrackPath_isForkInPath(sBXRangeList* self, float a, float b)
 {
     float lo;
     float hi;
@@ -1797,10 +1797,10 @@ extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
     else
         lo = 0.0f;
     if (b < 0.0f)
-        hi = func_0026AC48(self);
+        hi = cPath_getLength(self);
     else
         hi = self->field_0x38 - b;
-    return func_0026AC88(self, lo, hi);
+    return cPath_isForkInPath(self, lo, hi);
 }
 #endif
 
@@ -1833,8 +1833,8 @@ extern "C" float func_0026A138(sTable_0026A138* table)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A180);
 #ifdef SKIP_ASM
-// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
-void func_0026BA68_A180(void* dst, void* src) __asm__("func_0026BA68");
+// PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
+void pathREAD_tInt32_A180(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" void func_0026BA48(void* p, void* q);
 extern "C" void func_0026A338(void* self, void* src, void* dst);
 extern "C" void func_0026A378(void* self, char* src, int* dst);
@@ -1863,22 +1863,22 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
     int itemCount;
     sVE0_26A180* vt0 = (sVE0_26A180*)self->vt;
     vt0[3].fn((char*)self + vt0[3].delta);
-    func_0026BA68_A180(&n, src);
+    pathREAD_tInt32_A180(&n, src);
     src += 4;
     for (int i = 0; i < n; i++)
     {
-        func_0026BA68_A180(&a, src);
+        pathREAD_tInt32_A180(&a, src);
         src += 4;
-        func_0026BA68_A180(&itemSize, src);
+        pathREAD_tInt32_A180(&itemSize, src);
         src += 4;
         sVE1_26A180* vt1 = (sVE1_26A180*)self->vt;
         vt1[4].fn((char*)self + vt1[4].delta, src, a, itemSize);
         src += itemSize;
     }
-    func_0026BA68_A180(&itemCount, src);
+    pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
     self->count1 = itemCount;
-    func_0026BA68_A180(&itemCount, src);
+    pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
     self->count2 = itemCount;
     func_0026BA48(self->vecA, src);
@@ -1920,15 +1920,15 @@ extern "C" void func_0026A338(void* self, void* src, void* dst)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A378);
 #ifdef SKIP_ASM
-// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
-void func_0026BA68_K2(void* dst, void* src) __asm__("func_0026BA68");
+// PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
+void pathREAD_tInt32_K2(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern int D_004453D0[];
 
 extern "C" void func_0026A378(void* self, char* src, int* dst)
 {
     int key;
     int i;
-    func_0026BA68_K2(&key, src);
+    pathREAD_tInt32_K2(&key, src);
     src += 4;
     *dst = 0;
     for (i = 0; i < 21; i++) {
@@ -1937,7 +1937,7 @@ extern "C" void func_0026A378(void* self, char* src, int* dst)
             break;
         }
     }
-    func_0026BA68_K2(dst + 1, src);
+    pathREAD_tInt32_K2(dst + 1, src);
     src += 4;
     func_0026BA88_2(dst + 2, src);
     func_0026BA88_2(dst + 3, src + 4);
@@ -2292,7 +2292,7 @@ extern "C" float func_0026A638(sBXPath_A638* self, const sBXVec4_A638& p, sBXVec
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A8B8);
+INCLUDE_ASM("bx/bxstringctor", cPath_getPathHeading);
 #ifdef SKIP_ASM
 struct sBXSeg16 {
     float f0;
@@ -2301,7 +2301,7 @@ struct sBXSeg16 {
     float fC;
 };
 
-extern "C" sBXSeg16* func_0026A8B8(sBXSeg16* out, void* self, float t)
+extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, void* self, float t)
 {
     int i = 0;
     for (;;) {
@@ -2417,9 +2417,9 @@ extern "C" float func_0026A9B0(sBXBox* self, float* point)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AA80);
+INCLUDE_ASM("bx/bxstringctor", cPath_getEventsInRange);
 #ifdef SKIP_ASM
-extern "C" int func_0026AA80(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi)
+extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi)
 {
     int n;
     int i;
@@ -2442,7 +2442,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AB20);
+INCLUDE_ASM("bx/bxstringctor", cPath_getPathPos);
 #ifdef SKIP_ASM
 struct sBXVec4 {
     float x, y, z, w;
@@ -2508,7 +2508,7 @@ static inline sBXVec4 bxVu0Add(const sBXVec4& a, sBXVec4 b)
     return r;
 }
 
-extern "C" sBXVec4 func_0026AB20(sBXPath* self, int* inRange, float t)
+extern "C" sBXVec4 cPath_getPathPos(sBXPath* self, int* inRange, float t)
 {
     sBXVec4 pos;
     pos.x = self->x;
@@ -2538,7 +2538,7 @@ extern "C" sBXVec4 func_0026AB20(sBXPath* self, int* inRange, float t)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AC48);
+INCLUDE_ASM("bx/bxstringctor", cPath_getLength);
 #ifdef SKIP_ASM
 struct sBXElem16 {
     float f0;
@@ -2547,7 +2547,7 @@ struct sBXElem16 {
     float fC;
 };
 
-extern "C" float func_0026AC48(void* self)
+extern "C" float cPath_getLength(void* self)
 {
     int n = *(int*)((char*)self + 0x8);
     float sum = 0.0f;
@@ -2560,9 +2560,9 @@ extern "C" float func_0026AC48(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AC88);
+INCLUDE_ASM("bx/bxstringctor", cPath_isForkInPath);
 #ifdef SKIP_ASM
-extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
+extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -2626,10 +2626,10 @@ void func_0026ADA0(void* self)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
 #ifdef SKIP_ASM
-extern "C" int func_003E22F0(int, int);
+extern "C" int FILE_loadpack(int, int);
 
 extern "C" void func_0026ADA8(void *pathSys, int name) {
-    (*(int *)((char*)(pathSys) + (0x48))) = func_003E22F0(name, 0);
+    (*(int *)((char*)(pathSys) + (0x48))) = FILE_loadpack(name, 0);
     (*(int *)((char*)(pathSys) + (0x4C))) = 1;
     func_0026ADF0(pathSys);
 }
@@ -2645,8 +2645,8 @@ extern "C" int func_0026ADE8(void *pathSys) {
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
 #ifdef SKIP_ASM
-// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
-void func_0026BA68_2(void* dst, void* src) __asm__("func_0026BA68");
+// PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
+void pathREAD_tInt32_2(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_resolvePaths(void* self, char* p);
 extern "C" int func_0026B7D8(void* self, char* p);
@@ -2659,7 +2659,7 @@ extern "C" void func_0026ADF0(void* self)
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x0) = 0;
-    func_0026BA68_2(&header, cursor);
+    pathREAD_tInt32_2(&header, cursor);
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
     cursor += cPathSys_resolvePaths(self, cursor);
@@ -2673,9 +2673,9 @@ INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void func_0026ADA8(void* self, int arg1);
-extern "C" int func_003E22F0(int, int);
-// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
-void func_0026BA68_3(void* dst, void* src) __asm__("func_0026BA68");
+extern "C" int FILE_loadpack(int, int);
+// PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
+void pathREAD_tInt32_3(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_resolvePaths(void* self, char* p);
 
@@ -2689,9 +2689,9 @@ extern "C" void func_0026AE70(void* self, int name)
         func_0026ADA8(self, name);
     }
     *(int*)((char*)self + 0x48) = 0;
-    char* cursor = (char*)func_003E22F0(name, 0);
+    char* cursor = (char*)FILE_loadpack(name, 0);
     *(char**)((char*)self + 0x48) = cursor;
-    func_0026BA68_3(&header, cursor);
+    pathREAD_tInt32_3(&header, cursor);
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
     cPathSys_resolvePaths(self, cursor);
@@ -2699,11 +2699,11 @@ extern "C" void func_0026AE70(void* self, int name)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF00);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_purgePaths);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-extern "C" void func_0026AF00(void* self)
+extern "C" void cPathSys_purgePaths(void* self)
 {
     if (*(void**)((char*)self + 0xC) != 0)
         cMemMan_free(*(void**)((char*)self + 0xC));
@@ -2736,29 +2736,29 @@ extern "C" int func_0026AF88(void* self, int index)
 }
 #endif
 
-extern "C" void* func_0026AFB8(void*);
+extern "C" void* cPathSys_getNearAIPaths(void*);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF98__FPv);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_getNearResetPaths__FPv);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_0026AFB8(void*) and this symbol's mangling says (void*),
+// PORT: the unit declares cPathSys_getNearAIPaths(void*) and this symbol's mangling says (void*),
 // but both really take more arguments (callers pass $5-$7, and this passes a 5th arg in $8).
 // Bind the real signatures to the existing symbol names with asm labels.
-int func_0026AFB8_impl(void* self, void* a1, void** out, int maxOut, int flag) __asm__("func_0026AFB8");
-int func_0026AF98_impl(void* self, void* a1, void** out, int maxOut) __asm__("func_0026AF98__FPv");
+int cPathSys_getNearAIPaths_impl(void* self, void* a1, void** out, int maxOut, int flag) __asm__("cPathSys_getNearAIPaths");
+int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut) __asm__("cPathSys_getNearResetPaths__FPv");
 
-int func_0026AF98_impl(void* self, void* a1, void** out, int maxOut)
+int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut)
 {
-    return func_0026AFB8_impl(self, a1, out, maxOut, 1);
+    return cPathSys_getNearAIPaths_impl(self, a1, out, maxOut, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AFB8);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_getNearAIPaths);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_0026AFB8(void*) and this symbol's mangling says (void*),
-// but it really takes five arguments; bound by asm label (same as func_0026AF98).
-int func_0026AFB8_impl(void* self, float* pos, void** pathList, int maxListLen, int onlyResetPaths) __asm__("func_0026AFB8");
+// PORT: the unit declares cPathSys_getNearAIPaths(void*) and this symbol's mangling says (void*),
+// but it really takes five arguments; bound by asm label (same as cPathSys_getNearResetPaths).
+int cPathSys_getNearAIPaths_impl(void* self, float* pos, void** pathList, int maxListLen, int onlyResetPaths) __asm__("cPathSys_getNearAIPaths");
 
 // cAIPath (On Tour name): 0x40-byte path record
 struct cAIPath_AFB8 {
@@ -2776,7 +2776,7 @@ struct cPathSys_AFB8 {
 
 // cPathSys::getNearAIPaths (On Tour name): up to maxListLen AI paths nearest to pos
 // (paths containing it first), nearest first; returns how many.
-int func_0026AFB8_impl(void* vself, float* pos, void** pathList, int maxListLen, int onlyResetPaths)
+int cPathSys_getNearAIPaths_impl(void* vself, float* pos, void** pathList, int maxListLen, int onlyResetPaths)
 {
     cPathSys_AFB8* self = (cPathSys_AFB8*)vself;
     int i;

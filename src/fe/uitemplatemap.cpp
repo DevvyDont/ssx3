@@ -258,24 +258,24 @@ extern "C" void func_00200AF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00200B50);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_isMapEventCompleted);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 int cBERewardInterface_getTrackMedal(void* self, int player, int charID, int mode, int track);
-// PORT: the unit declares func_00146A70 as returning int; its result is negated as a bool here.
-bool func_00146A70_b(void* iface, int player, int charID, int x) __asm__("func_00146A70");
+// PORT: the unit declares cBENewPlayerInterface_isEventLocked as returning int; its result is negated as a bool here.
+bool cBENewPlayerInterface_isEventLocked_b(void* iface, int player, int charID, int x) __asm__("cBENewPlayerInterface_isEventLocked");
 
 // The unit's sPeakGoal (0x6C bytes), defined further down; only the leading fields are read here.
 struct sMapEvent_0B50 { int track; int f4; int kind; int rest[0x6C / 4 - 3]; };
 
-// PORT: the unit declares func_00200B50(void*, sPeakGoal*, int) further down; the goal is really taken by value
+// PORT: the unit declares cUITemplate_MAP_isMapEventCompleted(void*, sPeakGoal*, int) further down; the goal is really taken by value
 // (the callee copies it), so this definition binds the by-value form to the symbol. Each kind returns through its
 // own call; g++ merges the two identical tails.
-extern "C" int func_00200B50_byval(void* self, sMapEvent_0B50 ev, int peak) __asm__("func_00200B50");
-extern "C" int func_00200B50_byval(void* self, sMapEvent_0B50 ev, int peak)
+extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
+extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* rw = cBE_getInterface_Fv(cBE_getBE(), 13);
@@ -288,30 +288,30 @@ extern "C" int func_00200B50_byval(void* self, sMapEvent_0B50 ev, int peak)
             x = 7;
         if (peak == 2)
             x = 8;
-        return !func_00146A70_b(np, 0, cBELibrary_getCharacterID(0), x);
+        return !cBENewPlayerInterface_isEventLocked_b(np, 0, cBELibrary_getCharacterID(0), x);
     } else if (ev.kind == 5) {
         int x = 9;
         if (peak == 1)
             x = 10;
         if (peak == 2)
             x = 11;
-        return !func_00146A70_b(np, 0, cBELibrary_getCharacterID(0), x);
+        return !cBENewPlayerInterface_isEventLocked_b(np, 0, cBELibrary_getCharacterID(0), x);
     }
     return cBERewardInterface_getTrackMedal(rw, 0, cid, ev.kind, ev.track) != -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00200D00);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_isMapEventLocked);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 extern "C" int func_001464D0(void* iface, int player, int charID, int x, int flag);
-extern "C" int func_00146A70(void* iface, int player, int charID, int x);
+extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int charID, int x);
 
-extern "C" int func_00200D00(void* self, int kind, int x)
+extern "C" int cUITemplate_MAP_isMapEventLocked(void* self, int kind, int x)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (cUITemplate_MAP_mMapStyle < 2) {
@@ -324,7 +324,7 @@ extern "C" int func_00200D00(void* self, int kind, int x)
         return func_001464D0(iface, 0, cBELibrary_getCharacterID(0), x, 0);
     }
     if (kind >= 6 && kind <= 11) {
-        return func_00146A70(iface, 0, cBELibrary_getCharacterID(0), kind);
+        return cBENewPlayerInterface_isEventLocked(iface, 0, cBELibrary_getCharacterID(0), kind);
     }
     return 0;
 }
@@ -387,8 +387,8 @@ extern sPeakGoal D_004786E0_enus[3][5] __asm__("D_004786E0");
 extern sPeakGoal D_00478D38_enus[3][8] __asm__("D_00478D38");
 
 extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor_enus(void* self, void* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
-extern "C" int func_00200B50(void* self, sPeakGoal* loc, int peak);
-extern "C" int func_00200D00_enus(void* self, int kind, int x) __asm__("func_00200D00");
+extern "C" int cUITemplate_MAP_isMapEventCompleted(void* self, sPeakGoal* loc, int peak);
+extern "C" int cUITemplate_MAP_isMapEventLocked_enus(void* self, int kind, int x) __asm__("cUITemplate_MAP_isMapEventLocked");
 extern "C" int func_004165A8(const char*, const char*);
 extern "C" const char* cBENewRaceInterface_getLocationName_enus(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
 extern "C" unsigned short* func_002C2540_enus(unsigned short* dst, const char* s) __asm__("func_002C2540");
@@ -526,7 +526,7 @@ extern "C" void cUITemplate_MAP_setupMenus(void* tmpl)
                 if (mode == 2)
                     goal = D_00478D38_enus[peak][j];
                 if (mode == 0 || mode == 1)
-                    self->f140[peak][mode][j] = func_00200B50(self, &goal, peak);
+                    self->f140[peak][mode][j] = cUITemplate_MAP_isMapEventCompleted(self, &goal, peak);
                 sprintf(buf, fmt, peak + 1, j);
                 menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
                 if (cUITemplate_MAP_mMapStyle < 2 && goal.f0C != 0) {
@@ -536,7 +536,7 @@ extern "C" void cUITemplate_MAP_setupMenus(void* tmpl)
                         menuObj->setStatic(1);
                     }
                 } else {
-                    self->available[peak][mode][j] = func_00200D00_enus(self, goal.kind, peak) ^ 1;
+                    self->available[peak][mode][j] = cUITemplate_MAP_isMapEventLocked_enus(self, goal.kind, peak) ^ 1;
                 }
                 if (hasEvent(goal.track))
                     cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->available[peak][mode][j]);
@@ -2860,9 +2860,9 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_002083D8);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setWidgetHiliteColor);
 #ifdef SKIP_ASM
-struct sVEntry_func_002083D8 {
+struct sVEntry_cUITemplate_MAP_setWidgetHiliteColor {
     short delta;
     short index;
     void (*fn)(void*, void*);
@@ -2870,14 +2870,14 @@ struct sVEntry_func_002083D8 {
 extern char kMAPCOLOR_HIGHLIGHTED[];
 extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 
-extern "C" void func_002083D8(void* self, void* obj, int on)
+extern "C" void cUITemplate_MAP_setWidgetHiliteColor(void* self, void* obj, int on)
 {
     if (obj != 0) {
         if (on != 0) {
-            sVEntry_func_002083D8* vt = *(sVEntry_func_002083D8**)((char*)obj + 0x8);
+            sVEntry_cUITemplate_MAP_setWidgetHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
             vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED);
         } else {
-            sVEntry_func_002083D8* vt = *(sVEntry_func_002083D8**)((char*)obj + 0x8);
+            sVEntry_cUITemplate_MAP_setWidgetHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
             vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED_LOCKED);
         }
     }

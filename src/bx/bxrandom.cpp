@@ -88,18 +88,18 @@ float func_00317890(float param_1, float param_2)
 extern "C" void* MEM_copy(void*, void*, int);
 
 //100%
-INCLUDE_ASM("bx/bxrandom", func_003178E0__FPv);
+INCLUDE_ASM("bx/bxrandom", AIgetseed__FPv);
 #ifdef SKIP_ASM
-void* func_003178E0(void* self)
+void* AIgetseed(void* self)
 {
     return MEM_copy(self, (void*)AIrandom, 0x18);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxrandom", func_00317908__FPv);
+INCLUDE_ASM("bx/bxrandom", AIsetseed__FPv);
 #ifdef SKIP_ASM
-void* func_00317908(void* self)
+void* AIsetseed(void* self)
 {
     return MEM_copy((void*)AIrandom, self, 0x18);
 }

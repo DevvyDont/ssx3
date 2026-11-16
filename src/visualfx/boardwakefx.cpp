@@ -2049,7 +2049,7 @@ struct sMtxF920 {
 
 int func_0011FE98(void*);
 int func_0011FEE8(void*);
-int func_00312AA0(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void*, int);
 extern "C" void func_002DF448_F920(void*) __asm__("func_002DF448");
 extern "C" void func_002DF4D0_F920(void*) __asm__("func_002DF4D0");
 extern "C" void func_002E23E0_F920(void*, void*, void*, int, int, float) __asm__("func_002E23E0");
@@ -2147,7 +2147,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->f12C = 0.0f;
     char* obj = self->obj;
     if (*(int*)(obj + 0x330) != 0) {
-        int s = func_00312AA0(*(void**)(obj + 0x784), 2);
+        int s = cRiderAnimBase_getCurrentAnimID(*(void**)(obj + 0x784), 2);
         if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
             self->f12C = *(int*)(self->obj + 0x320) ? -1.0f : 1.0f;
         } else {
@@ -2240,7 +2240,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DFE88);
 // FAKEMATCH: identical if/else arms `if (self) { m = k; } else { m = k; }` inside the `k < 1.0f` arm of the m clamp (the extra branch changes
 // cse1's path, so the clamps' 1.0 keeps its own copy instead of being folded into fs0); plain form 99.53%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
 struct sWakeFxFE88 {
     char* obj;                  // 0x00
@@ -2388,11 +2388,11 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
                             wakeScaleFE88(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0x394))),
                 wakeScaleFE88(wakeScaleFE88(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0x398)), self->fBC)),
             wakeScaleFE88(wakeScaleFE88(side, *(float*)(self->p2C + 0x39C)), self->fBC));
-        func_003717C0(em, &pos, &vel, &self->col, alive, dt);
+        cDynamicColourEmitter_update(em, &pos, &vel, &self->col, alive, dt);
         return;
         }
     }
-    func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
+    cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
 }
 #endif
 
@@ -2423,7 +2423,7 @@ struct sWakeVt0EE8 {
     sWakeVecE398* (*fn)(void*);
 };
 
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline sWakeVecE398 wakeScale0EE8(const sWakeVecE398& v, float s)
@@ -2476,9 +2476,9 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
             wakeAdd0EE8(wakeScale0EE8(*v, *(float*)(self->p2C + 0xD8)),
                         wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xDC))),
             wakeScale0EE8(wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xE0)), self->fBC));
-        func_003717C0(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
     } else {
-        func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
 #endif
@@ -2514,8 +2514,8 @@ extern "C" void func_002E10B8(sWake10B8* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
 #ifdef SKIP_ASM
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
-extern "C" int func_00311AE8(void* self, int i);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i);
 extern "C" float func_002EE6F0(int i);
 
 struct sVec1120 {
@@ -2670,11 +2670,11 @@ extern "C" void func_002E1120(sWakeFx1120* self)
     sVec1120 pos = wakeMulMat1120(&mat, sVec1120(back, 0.0f, up, one));
     if (1111.111083984375f < self->fBC) {
         self->rate = 0.0f;
-        func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
         return;
     } else {
         float target = 0.0f;
-        if (func_00311AE8(*(void**)(self->obj + 0x784), 2) == 30) {
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->obj + 0x784), 2) == 30) {
             target = 1.0f;
         }
         if (self->glow <= target) {
@@ -2717,16 +2717,16 @@ extern "C" void func_002E1120(sWakeFx1120* self)
                                 wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x47C))),
                     wakeScale1120(wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x480)), self->fBC));
                 wakeAddEq1120(vel, wakeMulMat1120(&mat, sVec1120(zero, zero, 150.0f, one2)));
-                func_003717C0(em, &pos, &vel, pcol, 1, dt);
+                cDynamicColourEmitter_update(em, &pos, &vel, pcol, 1, dt);
                 return;
             }
         }
     }
-    func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+    cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     return;
 off:
     self->rate = 0.0f;
-    func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+    cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
 }
 #endif
 
@@ -2893,8 +2893,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         }
         sWakeVecE398 col = self->col;
         col.w = self->f120;
-        func_003717C0(self->p28 + a * 0x210, &pos, &vel, &col, 1, 0.01666666753590107f);
-        func_003717C0(self->p28 + b * 0x210, &self->vF0, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + a * 0x210, &pos, &vel, &col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + b * 0x210, &self->vF0, 0, 0, 0, 0.01666666753590107f);
         if (self->fE0 < 83.33333587646484f) {
             self->fE0 = 0.0f;
         } else {
@@ -2905,8 +2905,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
             self->fE0 = self->fE0 * m;
         }
     } else {
-        func_003717C0(self->p28 + 0xC60, &self->pos, 0, 0, 0, 0.01666666753590107f);
-        func_003717C0(self->p28 + 0xA50, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + 0xC60, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + 0xA50, &self->pos, 0, 0, 0, 0.01666666753590107f);
         self->fE0 = 0.0f;
     }
 }
@@ -3019,7 +3019,7 @@ static inline float vu0Dot_1A80(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
 struct sWakeFx1A80 {
     char* obj;                  // 0x00
@@ -3106,9 +3106,9 @@ extern "C" void func_002E1A80(sWakeFx1A80* self)
                           vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x734))),
                    vu0Scale_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x738)), self->fBC)),
             w);
-        func_003717C0(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
     } else {
-        func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
 #endif
@@ -3192,9 +3192,9 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
                         wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
             wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
         func_002DE398((char*)self, &pos);
-        func_003717C0(em, &pos, &vel, &col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, 0.01666666753590107f);
     } else {
-        func_003717C0(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
 #endif
@@ -3223,7 +3223,7 @@ struct sWakeFx2260 {
     int iD4;                    // 0xD4
 };
 
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
 // PORT: g++ minimum operator (<?).
 static inline float wakeClamp2260(float v, float lo, float hi)
@@ -3264,7 +3264,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         pos = ((sWakeMtx2260*)((char*)m + (k << 6)))->row[3];
         wakeScaleE398(tmp, *(sWakeVecE398*)(obj + 0x1E0), *(float*)(self->p2C + 0x900));
         vel = tmp;
-        func_003717C0(em, &pos, &vel, &col, 1, dt);
+        cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, dt);
         self->i78++;
         if (self->i78 >= 30) {
             self->i78 = 0;
@@ -3277,7 +3277,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         int k = *(int*)(obj + 0x89C);
         sWakeMtx2260* m = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
         sWakeVecE398 pos = ((sWakeMtx2260*)((char*)m + (k << 6)))->row[3];
-        func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
 #endif
@@ -3891,15 +3891,15 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern int cLensFxMan_mbDrawSun;
 void* func_002E2860(void* self);
 void func_002E3110(void* self);
-extern "C" void func_002F4380(void* self);
+extern "C" void cSunHalo_cSunHalo(void* self);
 
 /**
  * Constructs the lens effects manager base: its element arrays, then registers its callback with the graphics
  * manager.
  *
  * It builds 2 x 256 elements of 0x30 bytes at +0x68 (func_002E2860) and two 0x210-byte objects at +0x6070
- * (func_002F4380), sets +0x6494 to 1 and clears the pair at +0x60. It then passes func_002E3110 and itself to
- * graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor (func_002EC418) calls this.
+ * (cSunHalo_cSunHalo), sets +0x6494 to 1 and clears the pair at +0x60. It then passes func_002E3110 and itself to
+ * graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor (cPS2LensFxMan_cPS2LensFxMan) calls this.
  *
  * @return self
  */
@@ -3932,7 +3932,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
             char* colPtr = rowPtr;
             int colsLeft = 1;
             do {
-                func_002F4380(colPtr);
+                cSunHalo_cSunHalo(colPtr);
                 colPtr += 0x210;
             } while (--colsLeft != -1);
             rowPtr += 0x420;
@@ -4279,7 +4279,7 @@ extern "C" void func_002E3478(void* selfv, int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3578);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_beginDrawFrame);
 #ifdef SKIP_ASM
 struct sWakeRState {
     int f0;
@@ -4310,7 +4310,7 @@ static inline void setB10_3578(sWakeRCtx* c, int v) { c->top->b10 = v; }
 static inline void setA2_3578(sWakeRCtx* c, int v) { c->top->a2 = v; }
 static inline void setB5_3578(sWakeRCtx* c, int v) { c->top->b5 = v; }
 
-extern "C" void func_002E3578(void)
+extern "C" void cLensFxMan_beginDrawFrame(void)
 {
     sWakeRCtx* ctx = (sWakeRCtx*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     ctx->top[1] = ctx->top[0];
@@ -4325,11 +4325,11 @@ extern "C" void func_002E3578(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3668);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_endDrawFrame);
 #ifdef SKIP_ASM
 extern char* GrMan_boardwakefx __asm__("GrMan");
 
-extern "C" void func_002E3668(void)
+extern "C" void cLensFxMan_endDrawFrame(void)
 {
     *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
 }
@@ -4858,16 +4858,16 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4228);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_cTransitionMan);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* func_00282CD0(void* self);
-extern "C" void func_00283298(void* self);
-extern "C" void func_002E4CB0(void);
+extern "C" void cScriptObject_InitScriptObject(void* self);
+extern "C" void cTransitionObj_InitializeBuffers(void);
 extern void* D_00488100[];
 extern void* cTransitionMan_vtbl[];
 
-extern "C" void* func_002E4228(void* self, void* a1, int a2)
+extern "C" void* cTransitionMan_cTransitionMan(void* self, void* a1, int a2)
 {
     cObjNode_cObjNode1(self, a1);
     func_00282CD0((char*)self + 0x10);
@@ -4886,8 +4886,8 @@ extern "C" void* func_002E4228(void* self, void* a1, int a2)
     *(void***)((char*)self + 0x1C) = D_00488100;
     *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
     *(int*)((char*)self + 0x6C) = -1;
-    func_002E4CB0();
-    func_00283298((char*)self + 0x10);
+    cTransitionObj_InitializeBuffers();
+    cScriptObject_InitScriptObject((char*)self + 0x10);
     return self;
 }
 #endif
@@ -4935,7 +4935,7 @@ extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4370);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransition);
 #ifdef SKIP_ASM
 struct sBWVEntry4370 {
     short delta;
@@ -4953,9 +4953,9 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern "C" void func_002E4578(void* self);
 
 // PORT: later callers declare this as void (and an int alias); the body returns int.
-extern "C" int func_002E4370_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5) __asm__("func_002E4370");
+extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
 
-extern "C" int func_002E4370_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5)
+extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5)
 {
     if (*(int*)((char*)self + 0x44) != 0) {
         func_002E4578(self);
@@ -5002,24 +5002,24 @@ extern "C" int func_002E4370_def(void* self, int a1, void* o1, void* o2, float f
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E44C8);
 #ifdef SKIP_ASM
-extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
+extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 
 extern "C" void func_002E44C8(void* self, int a1, int a2, float f0, float f1)
 {
-    func_002E4370(self, a1, a2, 0, f0, f1, 0, 0, 0.0f);
+    cTransitionMan_StartTransition(self, a1, a2, 0, f0, f1, 0, 0, 0.0f);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E44F0);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionOut);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_002E4370 as void; this caller returns its int result.
-extern "C" int func_002E4370_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2) __asm__("func_002E4370");
+// PORT: the unit declares cTransitionMan_StartTransition as void; this caller returns its int result.
+extern "C" int cTransitionMan_StartTransition_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2) __asm__("cTransitionMan_StartTransition");
 
-extern "C" int func_002E44F0(void* self, int a1, int a2, float f)
+extern "C" int cTransitionMan_StartTransitionOut(void* self, int a1, int a2, float f)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
-        return func_002E4370_i(self, a1, 0, a2, 0.0f, 0.0f, 0, 0, f);
+        return cTransitionMan_StartTransition_i(self, a1, 0, a2, 0.0f, 0.0f, 0, 0, f);
     }
     *(int*)((char*)self + 0x50) = a2;
     *(float*)((char*)self + 0x5C) = f;
@@ -5028,13 +5028,13 @@ extern "C" int func_002E44F0(void* self, int a1, int a2, float f)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4540);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionScreenGrab);
 #ifdef SKIP_ASM
-extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
+extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 
-extern "C" void func_002E4540(void* self, int a1, int a3, int a5, float f2)
+extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int a3, int a5, float f2)
 {
-    func_002E4370(self, a1, 0, a3, 0.0f, 0.0f, 1, a5, f2);
+    cTransitionMan_StartTransition(self, a1, 0, a3, 0.0f, 0.0f, 1, a5, f2);
 }
 #endif
 
@@ -5324,7 +5324,7 @@ extern "C" void cTransitionMan_render(sFade47E8* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4B98);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_OnStartObjectUse);
 #ifdef SKIP_ASM
 struct sWakeParams_4B98 {
     int mode;
@@ -5335,21 +5335,21 @@ struct sWakeParams_4B98 {
     float level;
 };
 
-void func_00283430(void* self);
+void cScriptObject_OnStartObjectUse(void* self);
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id);
-extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
-extern "C" void func_002E4540(void* self, int a1, int a3, int a5, float f2);
+extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
+extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int a3, int a5, float f2);
 
-extern "C" void func_002E4B98(void* self)
+extern "C" void cTransitionMan_OnStartObjectUse(void* self)
 {
     sWakeParams_4B98* p = (sWakeParams_4B98*)((char*)self + 0x28);
-    func_00283430((char*)self + 0x10);
+    cScriptObject_OnStartObjectUse((char*)self + 0x10);
     if (*(int*)((char*)self + 0x28) != 7) {
         int r1 = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
         int r2 = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        func_002E4370(self, 2, r1, r2, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
+        cTransitionMan_StartTransition(self, 2, r1, r2, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
     } else {
-        func_002E4540(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
+        cTransitionMan_StartTransitionScreenGrab(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
     }
     *(float*)((char*)self + 0x48) = p->level;
 }
@@ -5382,11 +5382,11 @@ extern "C" int func_002E4C90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4CB0);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_InitializeBuffers);
 #ifdef SKIP_ASM
 extern int D_00538850[];
 
-extern "C" void func_002E4CB0(void)
+extern "C" void cTransitionObj_InitializeBuffers(void)
 {
     int i;
     for (i = 0; i < 4; i++) {
@@ -5396,7 +5396,7 @@ extern "C" void func_002E4CB0(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4CE8);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_operator_new);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sWakePoolEntry {
@@ -5408,7 +5408,7 @@ extern int D_00538850[];
 extern sWakePoolEntry D_wakePool[] __asm__("D_005382C0");
 extern sWakePoolEntry* D_004A3B1C;
 
-extern "C" sWakePoolEntry* func_002E4CE8(void)
+extern "C" sWakePoolEntry* cTransitionObj_operator_new(void)
 {
     for (int i = 0; i < 4; i++) {
         if (D_00538850[i] == 0) {
@@ -5421,7 +5421,7 @@ extern "C" sWakePoolEntry* func_002E4CE8(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4D30);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_operator_delete);
 #ifdef SKIP_ASM
 struct sWakeSlot {
     char pad[0x64];
@@ -5430,7 +5430,7 @@ struct sWakeSlot {
 extern sWakeSlot D_005382C0[];
 extern int D_00538850[];
 
-extern "C" void func_002E4D30(void* p)
+extern "C" void cTransitionObj_operator_delete(void* p)
 {
     int i;
     if (p == 0) {
@@ -5458,7 +5458,7 @@ void* func_002E4D70(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4D88);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_cSnowBox);
 #ifdef SKIP_ASM
 struct sVec4D88 {
     float x, y, z, w;
@@ -5510,7 +5510,7 @@ static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const sVec4
         : "memory");
 }
 
-extern "C" void* func_002E4D88(char* self, int a1, int a2, float f0, float f1, float f2, float f3)
+extern "C" void* cSnowBox_cSnowBox(char* self, int a1, int a2, float f0, float f1, float f2, float f3)
 {
     *(int*)(self + 0x8) = 0;
     *(int*)(self + 0x10) = 0;
@@ -5567,9 +5567,9 @@ extern "C" void* func_002E4D88(char* self, int a1, int a2, float f0, float f1, f
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4F10__FPv);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_resetWind__FPv);
 #ifdef SKIP_ASM
-void func_002E4F10(void* self)
+void cSnowBox_resetWind(void* self)
 {
     *(int*)((char*)self + 0x94) = 0;
     *(int*)((char*)self + 0xb0) = 1;
@@ -5578,11 +5578,11 @@ void func_002E4F10(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4F28);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowBox__cSnowBox);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
-extern "C" void func_002E4F28(int* self, int flags)
+extern "C" void cSnowBox__cSnowBox(int* self, int flags)
 {
     if (flags & 1) {
         operator_delete(self);
@@ -6054,7 +6054,7 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_cSnowFall);
 #ifdef SKIP_ASM
 extern void* cSnowFall_vtbl[];
-extern "C" void func_00319CC8(void);
+extern "C" void cMemMan_validate(void);
 extern char str_SnowBox[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -6076,7 +6076,7 @@ struct sWake5920 {
  * Constructs the falling snow: six snow boxes ("SnowBox") per view, the second set only for two players.
  *
  * Each view gets four boxes of one kind (sizes probably 1500, 1500, 2000 and 3000) and two of another kind
- * (probably the fluff). func_00319CC8 (unknown) is called before and after.
+ * (probably the fluff). cMemMan_validate (unknown) is called before and after.
  *
  * @param bucket  update bucket (On Tour const int bucket)
  * @return self
@@ -6086,28 +6086,28 @@ extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* bucket)
     cObjNode_cObjNode1(self, bucket);
     self->vtbl = cSnowFall_vtbl;
     new (self->v) sVec5920[2];
-    func_00319CC8();
+    cMemMan_validate();
     for (int i = 11; i >= 0; i--) {
         self->fx[i] = 0;
     }
     for (int j = 0; j < 2; j++) {
         self->v[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
     }
-    self->fx[0] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[1] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[2] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[3] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[4] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    self->fx[5] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    self->fx[0] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    self->fx[1] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    self->fx[2] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+    self->fx[3] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+    self->fx[4] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    self->fx[5] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     if (*(int*)((char*)SSXApp->Game->AI + 0x7C) >= 2) {
-        self->fx[6] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[7] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[8] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[9] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[10] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-        self->fx[11] = func_002E4D88((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        self->fx[6] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        self->fx[7] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        self->fx[8] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+        self->fx[9] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+        self->fx[10] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        self->fx[11] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     }
-    func_00319CC8();
+    cMemMan_validate();
     return self;
 }
 #endif
@@ -6116,8 +6116,8 @@ extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* bucket)
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall__cSnowFall);
 #ifdef SKIP_ASM
 extern void* cSnowFall_vtbl[];
-extern "C" void func_00319CC8(void);
-extern "C" void func_002E4F28(int* self, int flags);
+extern "C" void cMemMan_validate(void);
+extern "C" void cSnowBox__cSnowBox(int* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
 /**
@@ -6129,15 +6129,15 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cSnowFall_vtbl;
-    func_00319CC8();
+    cMemMan_validate();
     int i;
     for (i = 0; i < 12; i++) {
         int* snowBox = ((int**)((char*)self + 0x10))[i];
         if (snowBox != 0) {
-            func_002E4F28(snowBox, 3);
+            cSnowBox__cSnowBox(snowBox, 3);
         }
     }
-    func_00319CC8();
+    cMemMan_validate();
     cObjNode__cObjNode(self, flags);
 }
 #endif
@@ -6403,10 +6403,10 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_readFromReplayFrame);
 #ifdef SKIP_ASM
-void func_002E4F10(void*);
+void cSnowBox_resetWind(void*);
 
 /**
- * Resets every snow box (func_002E4F10); despite the name it reads no replay data (it takes no frame).
+ * Resets every snow box (cSnowBox_resetWind); despite the name it reads no replay data (it takes no frame).
  *
  * @param self  the snowfall node
  */
@@ -6416,7 +6416,7 @@ extern "C" void cSnowFall_readFromReplayFrame(void* self)
     void** snowBoxes = (void**)((char*)self + 0x10);
     for (i = 0; i < 12; i++) {
         if (snowBoxes[i] != 0) {
-            func_002E4F10(snowBoxes[i]);
+            cSnowBox_resetWind(snowBoxes[i]);
         }
     }
 }
@@ -6859,7 +6859,7 @@ struct sVtE6C08 {
     t4Vector* (*fn)(void*);
 };
 
-int func_00312AA0(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void*, int);
 
 #define WAKE_MAX_E6C08(a, b) ((a) > (b) ? (a) : (b))
 
@@ -7038,7 +7038,7 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
             t4Vector c3 = wakeAddE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
             float lean = 0.0f;
             if (self->rider->mPressType != 0) {
-                int s = func_00312AA0(self->rider->mRiderAnim, 2);
+                int s = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
                 if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
                     lean = 1.0f;
                 } else {

@@ -46,5 +46,5 @@ INCLUDE_ASM("fe/ovstates7", func_00210F40);
 
 INCLUDE_ASM("fe/ovstates7", func_00210FA0);
 
-INCLUDE_ASM("fe/ovstates7", func_00211088);
+INCLUDE_ASM("fe/ovstates7", cOVState_PROFILE_cOVState_PROFILE);
 

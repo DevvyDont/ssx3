@@ -2,7 +2,7 @@
 #define UI_UIPAIR_H
 
 // cUIPair: a UI object that pairs a label ("entry") with a widget (record type 0x15; menus use it for option rows).
-// Size 0x80: cUIScreen_createObjectByStruct does operator new(0x80, "UIPair") + the cUIThing ctor func_0039FB30, stores
+// Size 0x80: cUIScreen_createObjectByStruct does operator new(0x80, "UIPair") + the cUIThing ctor cUIThing_cUIThing, stores
 // cUIPair_vtbl (D_00494868), constructs mAttrPair (func_003A5508 on this + 0x74), sets cUIThing::mAttr bit 1, zeroes
 // mpEntry / mpWidget, then adopts the two children the record names. Default ctors func_003A5420 / cUIPair_cUIPair
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:

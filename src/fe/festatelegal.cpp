@@ -31,7 +31,7 @@ extern char str_TransitionOut[];
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0039E510(void* self);
+extern "C" void cUIState_onUpdate(void* self);
 extern "C" void func_0039F190(void* list, int a1);
 
 /**
@@ -39,7 +39,7 @@ extern "C" void func_0039F190(void* list, int a1);
  */
 extern "C" void cFEStateLegal_onUpdate(void* self)
 {
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     if (++*(int*)((char*)self + 0x48) == 0xF0) {
         int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {

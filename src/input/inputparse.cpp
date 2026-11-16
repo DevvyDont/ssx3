@@ -4,7 +4,7 @@
 //100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupModifierName);
 #ifdef SKIP_ASM
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern char str_value[];
 extern char str_held[];
 extern char str_pressed[];
@@ -14,7 +14,7 @@ extern char str_repeat[];
 /**
  * Maps a button modifier name to its modifier code.
  *
- * Compared case-insensitively (func_0041AA88): "value" 0, "held" 1, "pressed" 2, "released" 3, "repeat" 4. Any
+ * Compared case-insensitively (strcasecmp): "value" 0, "held" 1, "pressed" 2, "released" 3, "repeat" 4. Any
  * other name gives 6 rather than an error value.
  *
  * @param name  modifier name
@@ -22,19 +22,19 @@ extern char str_repeat[];
  */
 extern "C" int cInputMapParser_lookupModifierName(cInputMapParser* self, const char* name)
 {
-    if (func_0041AA88(name, str_value) == 0) {
+    if (strcasecmp(name, str_value) == 0) {
         return 0;
     }
-    if (func_0041AA88(name, str_held) == 0) {
+    if (strcasecmp(name, str_held) == 0) {
         return 1;
     }
-    if (func_0041AA88(name, str_pressed) == 0) {
+    if (strcasecmp(name, str_pressed) == 0) {
         return 2;
     }
-    if (func_0041AA88(name, str_released) == 0) {
+    if (strcasecmp(name, str_released) == 0) {
         return 3;
     }
-    int cmpResult = func_0041AA88(name, str_repeat);
+    int cmpResult = strcasecmp(name, str_repeat);
     int modifier = 4;
     if (cmpResult != 0) {
         modifier = 6;
@@ -46,8 +46,8 @@ extern "C" int cInputMapParser_lookupModifierName(cInputMapParser* self, const c
 //100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupConfigName);
 #ifdef SKIP_ASM
-extern "C" int func_0041AA88(const char* a, const char* b);
-extern "C" int func_0041AB78(const char* a, const char* b, int n);
+extern "C" int strcasecmp(const char* a, const char* b);
+extern "C" int strncasecmp(const char* a, const char* b, int n);
 extern char str_padtype[];
 extern char str_arg[];
 extern char str_config[];
@@ -57,16 +57,16 @@ extern char str_config[];
  *
  * "padtype" (case-insensitive) is 0; "arg" followed by a decimal N below 8 is N + 1; "config" followed by a
  * decimal N below 23 is N + 9. The number must not be followed by a letter or '_'. The prefixes are compared
- * with func_0041AB78 over 3 and 6 characters.
+ * with strncasecmp over 3 and 6 characters.
  *
  * @param name  identifier text to look up
  * @return the config index (0 to 31), or -1 if @p name is not a config name
  */
 extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* name)
 {
-    if (func_0041AA88(name, str_padtype) == 0)
+    if (strcasecmp(name, str_padtype) == 0)
         return 0;
-    if (func_0041AB78(name, str_arg, 3) == 0) {
+    if (strncasecmp(name, str_arg, 3) == 0) {
         int digit = name[3] - '0';
         if ((unsigned char)digit < 10) {
             int n = digit;
@@ -85,7 +85,7 @@ extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* nam
             }
         }
     }
-    if (func_0041AB78(name, str_config, 6) != 0) {
+    if (strncasecmp(name, str_config, 6) != 0) {
         return -1;
     }
     int digit = name[6] - '0';
@@ -114,12 +114,12 @@ extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* nam
 //100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_lookupIdentifierName);
 #ifdef SKIP_ASM
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 
 /**
  * Finds an identifier already defined by the input-map script.
  *
- * Scans the first NumIdentifiers entries of Identifiers and compares names case-insensitively (func_0041AA88
+ * Scans the first NumIdentifiers entries of Identifiers and compares names case-insensitively (strcasecmp
  * lowercases both characters before comparing).
  *
  * @param name  identifier name to look for
@@ -129,7 +129,7 @@ extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* se
 {
     int i;
     for (i = 0; i < self->NumIdentifiers; i++) {
-        if (func_0041AA88(name, self->Identifiers[i].Name) == 0) {
+        if (strcasecmp(name, self->Identifiers[i].Name) == 0) {
             return &self->Identifiers[i];
         }
     }
@@ -164,7 +164,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_readToken);
 // helpers that each re-test the end of the buffer. In the number branch the lookahead character is kept in `c`:
 // every advance is followed by a peek (also after the optional 'f' float suffix, whose re-read value is unused).
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int func_004178B0(const char* a, const char* b, ...);
 extern char str_malformed_pre_processor_line[];
 extern char str_Operator_plus_plus_not_defined[];
@@ -477,33 +477,33 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             }
         }
         *p = 0;
-        if (func_0041AA88(text, str_max) == 0) {
+        if (strcasecmp(text, str_max) == 0) {
             s->tok = 0x19;
-        } else if (func_0041AA88(text, str_min) == 0) {
+        } else if (strcasecmp(text, str_min) == 0) {
             s->tok = 0x1A;
-        } else if (func_0041AA88(text, str_pow) == 0) {
+        } else if (strcasecmp(text, str_pow) == 0) {
             s->tok = 0x1B;
-        } else if (func_0041AA88(text, str_atan2) == 0) {
+        } else if (strcasecmp(text, str_atan2) == 0) {
             s->tok = 0x1C;
-        } else if (func_0041AA88(text, str_atan) == 0) {
+        } else if (strcasecmp(text, str_atan) == 0) {
             s->tok = 0x1D;
-        } else if (func_0041AA88(text, str_sin) == 0) {
+        } else if (strcasecmp(text, str_sin) == 0) {
             s->tok = 0x1E;
-        } else if (func_0041AA88(text, str_cos) == 0) {
+        } else if (strcasecmp(text, str_cos) == 0) {
             s->tok = 0x1F;
-        } else if (func_0041AA88(text, str_exp) == 0) {
+        } else if (strcasecmp(text, str_exp) == 0) {
             s->tok = 0x20;
-        } else if (func_0041AA88(text, str_log_b) == 0) {
+        } else if (strcasecmp(text, str_log_b) == 0) {
             s->tok = 0x21;
-        } else if (func_0041AA88(text, str_floor) == 0) {
+        } else if (strcasecmp(text, str_floor) == 0) {
             s->tok = 0x22;
-        } else if (func_0041AA88(text, str_ceil) == 0) {
+        } else if (strcasecmp(text, str_ceil) == 0) {
             s->tok = 0x23;
-        } else if (func_0041AA88(text, str_abs) == 0) {
+        } else if (strcasecmp(text, str_abs) == 0) {
             s->tok = 0x24;
-        } else if (func_0041AA88(text, str_sqrt) == 0) {
+        } else if (strcasecmp(text, str_sqrt) == 0) {
             s->tok = 0x25;
-        } else if (func_0041AA88(text, str_minradian) == 0) {
+        } else if (strcasecmp(text, str_minradian) == 0) {
             s->tok = 0x26;
         } else {
             s->tok = 2;
@@ -2404,8 +2404,8 @@ struct sParseStream;
 extern "C" void cInputPreProcessor_writeChar(void* self, char c);
 extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
 extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* s, int a2, int a3);
-extern "C" void func_003264B0(void* self, sParseStream* s, int a2, int a3);
-extern "C" void func_003265C0(void* self, sParseStream* s, int a2, int a3);
+extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* s, int a2, int a3);
+extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* s, int a2, int a3);
 
 static inline int isWS_326150(int c)
 {
@@ -2415,7 +2415,7 @@ static inline int isWS_326150(int c)
 /**
  * Copies one line of the source to the output, handling a "#" directive or a comment at the line start.
  *
- * Leading blanks are copied; line and block comments are passed to func_003265C0() and func_003264B0().
+ * Leading blanks are copied; line and block comments are passed to cInputPreProcessor_skipCppComment() and cInputPreProcessor_skipCComment().
  *
  * @param isrc  the input source (On Tour tInputSource&)
  * @param path  directory of the file, for includes and messages
@@ -2443,12 +2443,12 @@ extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* isrc, int p
         cInputPreProcessor_readChar(self, isrc);
         int nextChar = *(int*)((char*)self + 0xC);
         if (nextChar == '/') {
-            func_003265C0(self, isrc, path, fn);
+            cInputPreProcessor_skipCppComment(self, isrc, path, fn);
             return *(int*)((char*)self + 0xC) >= 0;
         }
         if (nextChar == '*') {
             cInputPreProcessor_readChar(self, isrc);
-            func_003264B0(self, isrc, path, fn);
+            cInputPreProcessor_skipCComment(self, isrc, path, fn);
             return *(int*)((char*)self + 0xC) >= 0;
         }
         cInputPreProcessor_writeChar(self, '/');
@@ -2571,14 +2571,14 @@ extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* isrc)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003264B0);
+INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipCComment);
 #ifdef SKIP_ASM
 // PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
 void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
 extern char str_unexpected_EOF_in_comment[];
 
 // Skips a /* */ comment; newlines inside it are kept, otherwise it becomes one space.
-extern "C" void func_003264B0(void* self, sParseStream* s, int a2, int a3)
+extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* s, int a2, int a3)
 {
     int single = 1;
     int run = 1;
@@ -2608,7 +2608,7 @@ error:
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003265C0);
+INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipCppComment);
 #ifdef SKIP_ASM
 struct sParseStream;
 extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
@@ -2616,7 +2616,7 @@ extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
 void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
 extern char str_unexpected_EOF_in_comment[];
 
-extern "C" void func_003265C0(void* self, sParseStream* s, int a2, int a3)
+extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* s, int a2, int a3)
 {
     for (;;) {
         int ch = *(int*)((char*)self + 0xC);

@@ -2,7 +2,7 @@
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_0014F418(void* self);
+extern "C" void cBEOptionInterface_revert(void* self);
 extern const char str_BEOptionInt[];
 extern void* D_0045ADC8[16];
 extern void* cBEOptionInterface_instance;
@@ -20,7 +20,7 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
  * Returns the back end's option interface singleton, creating it on first use.
  *
  * The first call allocates 0x10 bytes tagged "BEOptionInt", stores the vtable, clears the word at +0x8 and runs
- * func_0014F418(), which calls four setup helpers on it (probably resetting the options to their defaults).
+ * cBEOptionInterface_revert(), which calls four setup helpers on it (probably resetting the options to their defaults).
  *
  * @return the option interface
  */
@@ -31,7 +31,7 @@ void* cBEOptionInterface_getThis()
         mem->vtable = D_0045ADC8;
         cBEOptionInterface_instance = mem;
         mem->field_0x8 = 0;
-        func_0014F418(mem);
+        cBEOptionInterface_revert(mem);
     }
     return cBEOptionInterface_instance;
 }
@@ -67,14 +67,14 @@ extern "C" void func_0014F360(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F418);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_revert);
 #ifdef SKIP_ASM
 extern "C" void func_0014F648(void* self);
 extern "C" void func_0014F600(void* self);
 extern "C" void func_0014F4F8(void* self);
 extern "C" void func_0014F458(void* self);
 
-extern "C" void func_0014F418(void* self)
+extern "C" void cBEOptionInterface_revert(void* self)
 {
     func_0014F648(self);
     func_0014F600(self);

@@ -1030,7 +1030,7 @@ static inline float fabs_C8E8(float x)
 extern void* cFenceNode_vtbl[];
 extern sVec4_C8E8 t4vect_XAxis;
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
-extern "C" void func_0034D1E8(void* self);
+extern "C" void cFenceNode_setupFence(void* self);
 extern "C" void func_0034D6F0(void* self, float dt);
 extern "C" void func_0034CC80(char* self, char* obj, int flag);
 
@@ -1046,7 +1046,7 @@ extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, voi
     self->field_0x2c = 0;
     self->field_0x34 = 0;
     self->State.w[0] = 0xFFFFFFFF;
-    func_0034D1E8(self);
+    cFenceNode_setupFence(self);
     self->field_0x38 = 0;
     self->field_0x3c = 0;
     if (self->GridMesh != 0) {
@@ -1093,7 +1093,7 @@ struct sFlagSet_CAB8 {
 };
 
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
-extern "C" void func_0034D1E8(void* self);
+extern "C" void cFenceNode_setupFence(void* self);
 extern "C" void func_0034D6F0(void* self, float dt);
 extern void* cFenceNode_vtbl[];
 
@@ -1110,7 +1110,7 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
     self->field_0x2c = 0;
     self->field_0x34 = 0;
     self->block.w[0] = 0xFFFFFFFF;
-    func_0034D1E8(self);
+    cFenceNode_setupFence(self);
     func_0034D6F0(self, dt);
     self->field_0x38 = 4;
     self->field_0x3c = 4;
@@ -1154,7 +1154,7 @@ extern "C" void cFenceNode__cFenceNode(void* self, int flags)
 INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
-extern "C" void func_0034D1E8(void* self);
+extern "C" void cFenceNode_setupFence(void* self);
 extern void* cFenceNode_vtbl[];
 
 struct sFlagSetVEntry_CBE8 {
@@ -1185,7 +1185,7 @@ extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
     new ((char*)self + 0x40) sFlagElem_CBE8[16];
     sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
     vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 0x24);
-    func_0034D1E8(self);
+    cFenceNode_setupFence(self);
     return self;
 }
 #endif
@@ -1468,7 +1468,7 @@ extern "C" void func_0034CF98(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D1E8);
+INCLUDE_ASM("object/flagset", cFenceNode_setupFence);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void func_0034CF98(void* self);
@@ -1536,7 +1536,7 @@ struct sFlagSet_D1E8 {
     void* obj108;           // 0x108
 };
 
-extern "C" void func_0034D1E8(void* p)
+extern "C" void cFenceNode_setupFence(void* p)
 {
     sFlagSet_D1E8* self = (sFlagSet_D1E8*)p;
     self->obj104 = 0;
@@ -1736,9 +1736,9 @@ INCLUDE_ASM("object/flagset", func_0034D9B0);
 #ifdef SKIP_ASM
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void cAnimNode_setAnimMeshCache(void* self);
-extern "C" float func_00351508(void* p);
+extern "C" float cAnimFrame_getStartTime(void* p);
 struct sFlagOwner_E348;
-extern "C" void func_0034E348(sFlagOwner_E348* self);
+extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern void* D_00490CC8[];
@@ -1759,7 +1759,7 @@ extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force
     cAnimNode_setAnimMeshCache(self);
     float f = 0.0f;
     if (*(void**)(self + 0x48) != 0) {
-        f = func_00351508(*(void**)(self + 0x48));
+        f = cAnimFrame_getStartTime(*(void**)(self + 0x48));
     }
     *(float*)(self + 0x0) = f;
     *(float*)(self + 0x8) = 10000000000.0f;
@@ -1771,7 +1771,7 @@ extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force
         char* n = *(char**)(sub + 0x18);
         *(unsigned int*)(n + 8) = (*(unsigned int*)(n + 8) & ~2u) | 4;
     }
-    func_0034E348((sFlagOwner_E348*)self);
+    cAnimNode_cacheFrame((sFlagOwner_E348*)self);
     return self;
 }
 #endif
@@ -1807,7 +1807,7 @@ extern "C" void* func_0034DAC8(char* self, void* a1, void* stream)
     vt[2].fn((char*)stream + vt[2].delta, self, 0x14);
     sStreamVE_DAC8* vt2 = *(sStreamVE_DAC8**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, &unusedFlag, 4);
-    func_0034E348((sFlagOwner_E348*)self);
+    cAnimNode_cacheFrame((sFlagOwner_E348*)self);
     return self;
 }
 #endif
@@ -1868,7 +1868,7 @@ extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034DC90);
+INCLUDE_ASM("object/flagset", cAnimNode_updateRootTransform);
 #ifdef SKIP_ASM
 struct sFlagSetVEntry_DC90a {
     short delta;
@@ -1888,7 +1888,7 @@ struct sFlagSetVEntry_DC90c {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034DC90(void* self)
+extern "C" void cAnimNode_updateRootTransform(void* self)
 {
     sFlagSetVEntry_DC90a* vt = *(sFlagSetVEntry_DC90a**)((char*)self + 0x20);
     vt[52].fn((char*)self + vt[52].delta);
@@ -2078,7 +2078,7 @@ extern "C" void* func_0034E320(void* self, int i) {
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034E348);
+INCLUDE_ASM("object/flagset", cAnimNode_cacheFrame);
 #ifdef SKIP_ASM
 struct sFlagSetVEntry_E348 {
     short delta;
@@ -2103,7 +2103,7 @@ struct sFlagOwner_E348 {
     sFlagItem_E348* items;      // 0x48
 };
 
-extern "C" void func_0034E348(sFlagOwner_E348* self)
+extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self)
 {
     int i;
     if (self->items != 0) {

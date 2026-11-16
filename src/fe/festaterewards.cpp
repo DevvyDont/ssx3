@@ -97,13 +97,13 @@ INCLUDE_ASM("fe/festaterewards", func_001CF238);
 #ifdef SKIP_ASM
 extern "C" void func_001D0238(void* self);
 extern "C" void func_001CFF10(void* self);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 extern "C" void func_001CF238(void* self)
 {
     func_001D0238(self);
     func_001CFF10(self);
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 
@@ -294,7 +294,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onWidgetCreate);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" void* func_00398380(void* self, int id);
+extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_helptext[];
 extern char str_arrow_up[];
@@ -436,7 +436,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
             {
                 char* ui = self->ui;
                 int texHash = GetHashValue32(str_poster_icon);
-                w->tex = func_00398380(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
@@ -444,7 +444,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
             {
                 char* ui = self->ui;
                 int texHash = GetHashValue32(str_trading_card_icon);
-                w->tex = func_00398380(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
@@ -452,7 +452,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
             {
                 char* ui = self->ui;
                 int texHash = GetHashValue32(str_art_icon);
-                w->tex = func_00398380(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
@@ -460,7 +460,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
             {
                 char* ui = self->ui;
                 int texHash = GetHashValue32(str_video_icon);
-                w->tex = func_00398380(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
@@ -468,7 +468,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
             {
                 char* ui = self->ui;
                 int texHash = GetHashValue32(str_toys_icon);
-                w->tex = func_00398380(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
             }
             w->reward = -1;
             break;
@@ -1180,7 +1180,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRow);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* func_00398380(void* self, int id);
+extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern char str_dollar_sign[];
 extern char str_questmark[];
 extern char D_004C6818[];
@@ -1267,11 +1267,11 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
                 if (self->selected >= 0 && self->vt[36].fn((char*)self + self->vt[36].delta, rewardItem) == self->selected) {
                     char* ui = self->ui;
                     int iconHash = GetHashValue32(str_dollar_sign);
-                    icon = func_00398380(ui + 0x58, iconHash);
+                    icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
                 } else {
                     char* ui = self->ui;
                     int iconHash = GetHashValue32(str_questmark);
-                    icon = func_00398380(ui + 0x58, iconHash);
+                    icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
                 }
                 sGalCell_08A0* cell = self->cells[row][col];
                 cell->tex = icon;
@@ -1629,7 +1629,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_001572B0(void* self);
-extern "C" void* func_0015A478();
+extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_11F8 {
     char pad_0x0[0x68];
@@ -1643,7 +1643,7 @@ extern "C" void func_001D11F8(sRewardList_11F8* self)
 {
     int n = func_001572B0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
     self->count = 0;
-    self->base = *(int*)((char*)func_0015A478() + 0x14);
+    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x14);
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -1716,7 +1716,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_001572D0(void* self);
-extern "C" void* func_0015A478();
+extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1390 {
     char pad_0x0[0x68];
@@ -1730,7 +1730,7 @@ extern "C" void func_001D1390(sRewardList_1390* self)
 {
     int n = func_001572D0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
     self->count = 0;
-    self->base = *(int*)((char*)func_0015A478() + 0x18);
+    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x18);
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -1803,7 +1803,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_001572F0(void* self);
-extern "C" void* func_0015A478();
+extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1528 {
     char pad_0x0[0x68];
@@ -1817,7 +1817,7 @@ extern "C" void func_001D1528(sRewardList_1528* self)
 {
     int n = func_001572F0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
     self->count = 0;
-    self->base = *(int*)((char*)func_0015A478() + 0x1C);
+    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x1C);
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -1890,7 +1890,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_00157330(void* self);
-extern "C" void* func_0015A478();
+extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_16C0 {
     char pad_0x0[0x68];
@@ -1904,7 +1904,7 @@ extern "C" void func_001D16C0(sRewardList_16C0* self)
 {
     int n = func_00157330(cBE_getInterface_Fv(cBE_getBE(), 0xD));
     self->count = 0;
-    self->base = *(int*)((char*)func_0015A478() + 0x24);
+    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x24);
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -1977,7 +1977,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_00157310(void* self);
-extern "C" void* func_0015A478();
+extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1858 {
     char pad_0x0[0x68];
@@ -1991,7 +1991,7 @@ extern "C" void func_001D1858(sRewardList_1858* self)
 {
     int n = func_00157310(cBE_getInterface_Fv(cBE_getBE(), 0xD));
     self->count = 0;
-    self->base = *(int*)((char*)func_0015A478() + 0x20);
+    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x20);
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -2037,7 +2037,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_00157370(void* self);
-extern "C" void* func_0015A478();
+extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1990 {
     char pad_0x0[0x68];
@@ -2051,7 +2051,7 @@ extern "C" void func_001D1990(sRewardList_1990* self)
 {
     int n = func_00157370(cBE_getInterface_Fv(cBE_getBE(), 0xD));
     self->count = 0;
-    self->base = *(int*)((char*)func_0015A478() + 0x28);
+    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x28);
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -2076,14 +2076,14 @@ extern "C" void func_001D1A28(void* self)
 INCLUDE_ASM("fe/festaterewards", func_001D1A60);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* func_00398380(void* self, int id);
+extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 
 extern "C" void func_001D1A60(void* self, int i)
 {
     char* obj = *(char**)((char*)self + 0x10);
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
-    func_00398380(obj + 0x58, textureHash);
+    cUITextureBank_getElementByHashname(obj + 0x58, textureHash);
 }
 #endif
 
@@ -2269,7 +2269,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 char* ui = self->ui;
                 int iconHash = GetHashValue32(str_poster_icon);
-                w->f7C = func_00398380(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
@@ -2277,7 +2277,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 char* ui = self->ui;
                 int iconHash = GetHashValue32(str_trading_card_icon);
-                w->f7C = func_00398380(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
@@ -2285,7 +2285,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 char* ui = self->ui;
                 int iconHash = GetHashValue32(str_art_icon);
-                w->f7C = func_00398380(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
@@ -2293,7 +2293,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 char* ui = self->ui;
                 int iconHash = GetHashValue32(str_toys_icon);
-                w->f7C = func_00398380(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
@@ -2384,21 +2384,21 @@ extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int menu, unsigned
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_001D2198(void* self);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the reward preview, first finishing its preview picture load while one is pending.
  *
  * While the async slot at 0x6C is not negative, func_001D2198() checks the load; once it has loaded, the shape
  * is handed to GrMan, the slot is released and set to -1 and the preview widget shows it. Then runs the base
- * UI-state update func_0039E510().
+ * UI-state update cUIState_onUpdate().
  */
 extern "C" void cFEStatePreviewReward_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x6C) >= 0) {
         func_001D2198(self);
     }
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 
@@ -2638,7 +2638,7 @@ extern "C" void func_001D2430(void* self)
 INCLUDE_ASM("fe/festaterewards", func_001D2468);
 #ifdef SKIP_ASM
 extern "C" void func_00253890(void* p, int a1);
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 
 extern "C" void func_001D2468(void* self)
 {
@@ -2647,29 +2647,29 @@ extern "C" void func_001D2468(void* self)
         *(int*)((char*)self + 0x278) = 1;
         func_00253890(moviePlayer, 0);
     }
-    func_0039E6B8(self);
+    cUIState_onRender2D(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D24A8);
 #ifdef SKIP_ASM
-extern "C" void func_00253938(void* p);
+extern "C" void cMoviePlayer_asyncUpdate(void* p);
 extern "C" void func_001D2638(void* self);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 extern "C" void func_001D24A8(void* self)
 {
     void* moviePlayer = *(void**)((char*)self + 0x248);
     if (moviePlayer != 0) {
         *(int*)((char*)self + 0x274) = 1;
-        func_00253938(moviePlayer);
+        cMoviePlayer_asyncUpdate(moviePlayer);
         if ((*(int*)((char*)self + 0x27C) != 0 && *(int*)((char*)self + 0x278) != 0)
             || **(int**)((char*)self + 0x248) != 0) {
             func_001D2638(self);
         }
     }
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 

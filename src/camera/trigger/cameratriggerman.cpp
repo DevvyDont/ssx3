@@ -41,9 +41,9 @@ extern "C" void func_0016CA08(void) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA10__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_loadTriggersIfNotStreaming__FPv);
 #ifdef SKIP_ASM
-void func_0016CA10(void* self)
+void cCameraTriggerMan_loadTriggersIfNotStreaming(void* self)
 {
 }
 #endif
@@ -86,8 +86,8 @@ struct sCtRoot_CA18 {
     sCtNode_CA18* node;             // 0x10
 };
 
-extern "C" void func_00328F28_CA18(void* out, const void* box) __asm__("func_00328F28");
-extern "C" void func_003284B8_CA18(void* node, int idx, void* item, const void* target, const void* cur) __asm__("func_003284B8");
+extern "C" void nash_Nash_findkey_CA18(void* out, const void* box) __asm__("nash_Nash_findkey");
+extern "C" void nash_Cell_remnode_CA18(void* node, int idx, void* item, const void* target, const void* cur) __asm__("nash_Cell_remnode");
 
 class cCtShape_CA18 {
 public:
@@ -118,13 +118,13 @@ static inline void remove_CA18(char* w, void* item, const sCtBox_CA18* box)
 {
     (*(int*)(w + 0xA0))++;
     sCtCell_CA18 c;
-    func_00328F28_CA18(&c, box);
+    nash_Nash_findkey_CA18(&c, box);
     sCtRoot_CA18* r = (sCtRoot_CA18*)w;
     sCtRoot_CA18* rx = c.x < 0 ? r + 4 : r;
     sCtRoot_CA18* ry = c.y < 0 ? rx + 2 : rx;
     sCtRoot_CA18* rz = c.z < 0 ? ry + 1 : ry;
     sCtRoot_CA18* q = rz;
-    func_003284B8_CA18(q->node, 2, item, &c, q);
+    nash_Cell_remnode_CA18(q->node, 2, item, &c, q);
     if (q->node->empty()) {
         operator_delete((int*)q->node);
         q->node = 0;
@@ -153,7 +153,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
-extern "C" void func_0016C098(void** self);
+extern "C" void cCameraTriggerList_purge(void** self);
 
 struct sCtVec4_P {
     float x, y, z, w;
@@ -186,8 +186,8 @@ struct sCtRoot_P {
     sCtNode_P* node;                // 0x10
 };
 
-extern "C" void func_00328F28_P(void* out, const void* box) __asm__("func_00328F28");
-extern "C" void func_003284B8_P(void* node, int idx, void* item, const void* target, const void* cur) __asm__("func_003284B8");
+extern "C" void nash_Nash_findkey_P(void* out, const void* box) __asm__("nash_Nash_findkey");
+extern "C" void nash_Cell_remnode_P(void* node, int idx, void* item, const void* target, const void* cur) __asm__("nash_Cell_remnode");
 
 class cCtShape_P {
 public:
@@ -218,13 +218,13 @@ static inline void remove_P(char* w, void* item, const sCtBox_P* box)
 {
     (*(int*)(w + 0xA0))++;
     sCtCell_P c;
-    func_00328F28_P(&c, box);
+    nash_Nash_findkey_P(&c, box);
     sCtRoot_P* r = (sCtRoot_P*)w;
     sCtRoot_P* rx = c.x < 0 ? r + 4 : r;
     sCtRoot_P* ry = c.y < 0 ? rx + 2 : rx;
     sCtRoot_P* rz = c.z < 0 ? ry + 1 : ry;
     sCtRoot_P* q = rz;
-    func_003284B8_P(q->node, 2, item, &c, q);
+    nash_Cell_remnode_P(q->node, 2, item, &c, q);
     if (q->node->empty()) {
         operator_delete((int*)q->node);
         q->node = 0;
@@ -237,7 +237,7 @@ static inline void remove_P(char* w, void* item, const sCtBox_P* box)
  *
  * Each trigger with a registration (+0x20) is removed, with its shape's bounds, from SSXApp->Game->BXNash;
  * the registration word is left as it was. Then both trigger stacks (+0x1C, +0x3C) are reset, the trigger
- * list is reset and its array freed (func_0016C098), both active lists (+0x14, +0x18) are purged and the
+ * list is reset and its array freed (cCameraTriggerList_purge), both active lists (+0x14, +0x18) are purged and the
  * chase controller switches are reset.
  *
  * @param vself  the camera trigger manager (this)
@@ -256,7 +256,7 @@ extern "C" void cCameraTriggerMan_purge(void* vself)
     }
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
-    func_0016C098((void**)vself);
+    cCameraTriggerList_purge((void**)vself);
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)vself + 0x14));
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)vself + 0x18));
     cCamera_resetChaseControllerSwitches();
@@ -322,7 +322,7 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 #endif
 
 extern void* gCamTriggerMan[];
-extern "C" void* func_0016CEF0(void*, void*, int);
+extern "C" void* cCameraTriggerMan_resolve(void*, void*, int);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEA8);
@@ -335,24 +335,24 @@ extern "C" void func_0016CEA8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);
+INCLUDE_ASM("camera/trigger/cameratriggerman", gCamTriggerMan_resolve__FPvi);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_0016CEF0 as returning void*; this caller treats it as void.
-void func_0016CEF0_CEC8(void*, void*, int) __asm__("func_0016CEF0");
-void func_0016CEC8(void* self, int a1)
+// PORT: the unit declares cCameraTriggerMan_resolve as returning void*; this caller treats it as void.
+void cCameraTriggerMan_resolve_CEC8(void*, void*, int) __asm__("cCameraTriggerMan_resolve");
+void gCamTriggerMan_resolve(void* self, int a1)
 {
-    func_0016CEF0_CEC8((void*)gCamTriggerMan, self, a1);
+    cCameraTriggerMan_resolve_CEC8((void*)gCamTriggerMan, self, a1);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEF0);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_resolve);
 #ifdef SKIP_ASM
 extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);
 
-// PORT: the unit declares func_0016CEF0 as returning void*, but the body returns nothing.
-void func_0016CEF0_impl(void* self, void* unused, void* stream) __asm__("func_0016CEF0");
-void func_0016CEF0_impl(void* self, void* unused, void* stream)
+// PORT: the unit declares cCameraTriggerMan_resolve as returning void*, but the body returns nothing.
+void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __asm__("cCameraTriggerMan_resolve");
+void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream)
 {
     if (stream != 0) {
         cCameraTriggerMan_streamIn(self, stream);
@@ -381,7 +381,7 @@ void func_0016CF40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF48);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setTriggers);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
@@ -416,9 +416,9 @@ struct sCtRoot_CF48 {
     sCtNode_CF48* node;             // 0x10
 };
 
-extern "C" void func_00328F28(void* out, const void* box);
-extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
-extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern "C" void nash_Nash_findkey(void* out, const void* box);
+extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
 
 class cCtShape_CF48 {
 public:
@@ -458,9 +458,9 @@ static inline void remove_CF48(char* w, void* item, const sCtBox_CF48* box)
 {
     (*(int*)(w + 0xA0))++;
     sCtCell_CF48 c;
-    func_00328F28(&c, box);
+    nash_Nash_findkey(&c, box);
     sCtRoot_CF48* r = findRoot_CF48(w, c.x, c.y, c.z);
-    func_003284B8(r->node, 2, item, &c, &r->cell);
+    nash_Cell_remnode(r->node, 2, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
         r->node = 0;
@@ -470,14 +470,14 @@ static inline void remove_CF48(char* w, void* item, const sCtBox_CF48* box)
 static inline void insert_CF48(char* w, void* item, const sCtBox_CF48* box)
 {
     sCtCell_CF48 c;
-    func_00328F28(&c, box);
-    func_00328C20(findRoot_CF48(w, c.x, c.y, c.z), 2, item, &c);
+    nash_Nash_findkey(&c, box);
+    nash_Octant_addnode(findRoot_CF48(w, c.x, c.y, c.z), 2, item, &c);
 }
 
-// PORT: the unit declares func_0016CF48 as returning void*; it returns nothing.
-extern "C" void func_0016CF48_impl(void* vself, int mask) __asm__("func_0016CF48");
+// PORT: the unit declares cCameraTriggerMan_setTriggers as returning void*; it returns nothing.
+extern "C" void cCameraTriggerMan_setTriggers_impl(void* vself, int mask) __asm__("cCameraTriggerMan_setTriggers");
 
-extern "C" void func_0016CF48_impl(void* vself, int mask)
+extern "C" void cCameraTriggerMan_setTriggers_impl(void* vself, int mask)
 {
     sCtMan_CF48* self = (sCtMan_CF48*)vself;
     for (int i = 0; i < self->count; i++) {
@@ -499,7 +499,7 @@ extern "C" void func_0016CF48_impl(void* vself, int mask)
 }
 #endif
 
-extern "C" void* func_0016CF48(void* self, int type);
+extern "C" void* cCameraTriggerMan_setTriggers(void* self, int type);
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setInGameTriggers__FPv);
@@ -507,21 +507,21 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setInGameTrigge
 /**
  * Activates the in-game camera triggers.
  *
- * Calls func_0016CF48(self, 2): every trigger whose mask has bit 1 set is registered with its bounds in
+ * Calls cCameraTriggerMan_setTriggers(self, 2): every trigger whose mask has bit 1 set is registered with its bounds in
  * SSXApp->Game->BXNash (if it is not already), and every other registered trigger is removed from it.
  */
 void cCameraTriggerMan_setInGameTriggers(void* self)
 {
-    func_0016CF48(self, 2);
+    cCameraTriggerMan_setTriggers(self, 2);
 }
 #endif
 
 //99.29%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D1D8__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setReplayTriggers__FPv);
 #ifdef SKIP_ASM
-void* func_0016D1D8(void* self)
+void* cCameraTriggerMan_setReplayTriggers(void* self)
 {
-    return func_0016CF48(self, 1);
+    return cCameraTriggerMan_setTriggers(self, 1);
 }
 #endif
 

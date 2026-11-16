@@ -399,7 +399,7 @@ extern char* strchr(const char* s, int c);
 extern char* strncpy(char* d, const char* s, int n);
 extern char* strcpy(char* d, const char* s);
 extern int strlen(const char* s);
-extern char* func_004162D0(char*, const char*);
+extern char* strcat(char*, const char*);
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int func_003F3A98(int, int);
@@ -430,7 +430,7 @@ int func_003F08E8(char* self, int serverName, int port, int ms, char* host, char
             cDirtysock_tag_TagFieldDupl(tag, 0x100, loginCopy);
             sep++;
             if ((unsigned int)(strlen(tag) + strlen(nick)) < 0x100) {
-                func_004162D0(tag, nick);
+                strcat(tag, nick);
             }
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, tag);
             if (*sep == '$') {

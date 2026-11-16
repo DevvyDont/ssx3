@@ -93,7 +93,7 @@ extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034E600);
+INCLUDE_ASM("object/animnode", cAnimNode_calcPosition);
 #ifdef SKIP_ASM
 struct sVec4_E600 {
     float x, y, z, w;
@@ -116,7 +116,7 @@ struct sVEntry_E600b {
     void (*fn)(void*, int, sMat_E600*);
 };
 
-extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out)
+extern "C" void cAnimNode_calcPosition(void* self, int id, int idx, sVec4_E600* out)
 {
     void* obj = (char*)self + 0x14;
     if (id == *(int*)((char*)self + 0x2C)) {
@@ -134,7 +134,7 @@ extern "C" void func_0034E600(void* self, int id, int idx, sVec4_E600* out)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034E698);
+INCLUDE_ASM("object/animnode", cAnimNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 struct sVec4_E698 {
     float x, y, z, w;
@@ -159,8 +159,8 @@ struct sBody_E698 {
 
 // Takes the body as a second (out) argument, as in multiparticle.cpp.
 extern "C" void cMoveNode_updateIntersectInfo(void* self, sBody_E698* body);
-extern "C" void func_0034E798(char* self);
-extern "C" void func_0034E600_E698(void* self, int id, int idx, sVec4_E698* out) __asm__("func_0034E600");
+extern "C" void cAnimNode_updateMeshVelocity(char* self);
+extern "C" void cAnimNode_calcPosition_E698(void* self, int id, int idx, sVec4_E698* out) __asm__("cAnimNode_calcPosition");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sVec4_E698 vu0Sub_E698(const sVec4_E698& a, const sVec4_E698& b)
@@ -223,16 +223,16 @@ static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
 }
 
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
-extern "C" void func_0034E698(char* self, sBody_E698* body)
+extern "C" void cAnimNode_updateIntersectInfo(char* self, sBody_E698* body)
 {
     cMoveNode_updateIntersectInfo(self + 0x14, body);
     int bone = body->bone;
     if (bone < 0)
         return;
     if (*(int*)(self + 0x10) != 0)
-        func_0034E798(self);
+        cAnimNode_updateMeshVelocity(self);
     sVec4_E698 p;
-    func_0034E600_E698(self, body->anim, bone, &p);
+    cAnimNode_calcPosition_E698(self, body->anim, bone, &p);
     sVec4_E698 d = vu0Sub_E698(body->pos, p);
     sVec4_E698 rot = ((sDelta_E698*)*(char**)(self + 0x4C))[bone].rot;
     vu0AddEq_E698(body->vel, vu0Add_E698(((sDelta_E698*)*(char**)(self + 0x4C))[bone].pos,
@@ -242,7 +242,7 @@ extern "C" void func_0034E698(char* self, sBody_E698* body)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034E798);
+INCLUDE_ASM("object/animnode", cAnimNode_updateMeshVelocity);
 #ifdef SKIP_ASM
 struct sVec4_E798 {
     float x, y, z, w;
@@ -283,7 +283,7 @@ struct sVE_E798 {
 extern sVec4_E798 t4vect_Zero;
 extern char* cAppMan_TheAppMan;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void func_00351660(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
+extern "C" void cAnimFrame_getDeriv(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
 
 // PORT: PS2-only VU0 inline asm (vector times-assign scalar).
 static inline void vu0ScaleEq_E798(sVec4_E798& v, float s)
@@ -386,7 +386,7 @@ static inline sVec4_E798 boneE798Pos(char* self, int i)
     return *(sVec4_E798*)&(*(sMat_E798**)(self + 0x44))[i].r[3];
 }
 
-extern "C" void func_0034E798(char* self)
+extern "C" void cAnimNode_updateMeshVelocity(char* self)
 {
     char* obj = self + 0x14;
     if (*(unsigned short*)(self + 0x26) & 1) {
@@ -407,7 +407,7 @@ extern "C" void func_0034E798(char* self)
         float t = ((float (*)(void*))vt[53].fn)(self + vt[53].delta);
         sVec4_E798 pos;
         sVec4_E798 rotv;
-        func_00351660(node, &pos, &rotv, *(float*)(self + 4));
+        cAnimFrame_getDeriv(node, &pos, &rotv, *(float*)(self + 4));
         sVec4_E798 rot;
         rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
         vu0ScaleEq_E798(pos, t * (float)*(int*)(cAppMan_TheAppMan + 0x10));

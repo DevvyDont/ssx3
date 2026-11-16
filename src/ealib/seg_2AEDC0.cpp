@@ -68,11 +68,11 @@ extern "C" void func_003E62B0();
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_003E0AD8(int h, int a, int b);
 extern "C" int func_003E0D80(int h, int a, int b, int c);
-extern "C" int func_003DF690(int a, int flags);
-extern "C" int func_003E06D8(int a, int b, int c, void* buf, int size);
+extern "C" int ASYNCFILE_load(int a, int flags);
+extern "C" int STREAM_create(int a, int b, int c, void* buf, int size);
 extern "C" void func_003E0948(int h, int a, int b, int c, int d);
 extern "C" int func_003E0BF8(int h, int a);
-extern "C" int func_003E0C88(int h, int a, int b, int c);
+extern "C" int STREAM_queuefile(int h, int a, int b, int c);
 
 static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
 {
@@ -108,8 +108,8 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         *(int*)(self + 0x14) = 1;
         *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, a3, 0, 0, D_00509430_ADEC8.flags);
         *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, a6, 0, 0, D_00509430_ADEC8.flags);
-        *(int*)(self + 0x30) = func_003E06D8(2, 2, 1, *(void**)(self + 0x4), a3);
-        *(int*)(self + 0x34) = func_003E06D8(2, 2, 1, *(void**)(self + 0x8), a6);
+        *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), a3);
+        *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), a6);
         func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
         func_003E0AD8(*(int*)(self + 0x30), 0x98, 0x34);
         func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 0x4D, 1);
@@ -122,11 +122,11 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         func_003E0948(*(int*)(self + 0x34), 2, 0, 0, -2);
         int type = *(int*)(self + 0x18);
         if (type == 1) {
-            *(int*)(self + 0x2C) = func_003DF690(a4, D_00509430_ADEC8.flags);
-            *(int*)(self + 0x24) = func_003DF690(a1, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x2C) = ASYNCFILE_load(a4, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x24) = ASYNCFILE_load(a1, D_00509430_ADEC8.flags);
         } else if (type == 0) {
-            *(int*)(self + 0x3C) = func_003E0C88(*(int*)(self + 0x34), a4, 0, 0);
-            *(int*)(self + 0x38) = func_003E0C88(*(int*)(self + 0x30), a1, 0, 0);
+            *(int*)(self + 0x3C) = STREAM_queuefile(*(int*)(self + 0x34), a4, 0, 0);
+            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), a1, 0, 0);
         } else if (type == 2) {
             *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), a2, 0);
             *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x10), a5, 0);
@@ -135,7 +135,7 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         *(int*)(self + 0x14) = 0;
         *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, a3, 0, 0, D_00509430_ADEC8.flags);
         *(void**)(self + 0x8) = 0;
-        *(int*)(self + 0x30) = func_003E06D8(2, 3, 2, *(void**)(self + 0x4), a3);
+        *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), a3);
         *(int*)(self + 0x34) = func_003E0BF8(*(int*)(self + 0x30), 2);
         func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
         func_003E0AD8(*(int*)(self + 0x30), 0x98, 0x34);
@@ -148,9 +148,9 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         }
         int type = *(int*)(self + 0x18);
         if (type == 1) {
-            *(int*)(self + 0x24) = func_003DF690(a1, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x24) = ASYNCFILE_load(a1, D_00509430_ADEC8.flags);
         } else if (type == 0) {
-            *(int*)(self + 0x38) = func_003E0C88(*(int*)(self + 0x30), a1, 0, 0);
+            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), a1, 0, 0);
         } else if (type == 2) {
             *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), a2, 0);
         }
@@ -186,7 +186,7 @@ struct sWSMemIfE300 {
 extern void* (*D_00509434[])(void*);
 extern "C" void func_003AEE30(void* self, int flags);
 extern "C" int func_003DE928(sWSMemIfE300* mi);
-extern "C" void func_003E0A28(void* p);
+extern "C" void STREAM_destroy(void* p);
 
 extern "C" void func_003AE300(char* self, int flags)
 {
@@ -204,10 +204,10 @@ extern "C" void func_003AE300(char* self, int flags)
         D_00509434[0](*(void**)(self + 0x5C));
         *(void**)(self + 0x5C) = 0;
     }
-    func_003E0A28(*(void**)(self + 0x30));
+    STREAM_destroy(*(void**)(self + 0x30));
     *(void**)(self + 0x30) = 0;
     if (*(int*)(self + 0x14) != 0) {
-        func_003E0A28(*(void**)(self + 0x34));
+        STREAM_destroy(*(void**)(self + 0x34));
         *(void**)(self + 0x34) = 0;
     }
     {
@@ -3117,7 +3117,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void MEM_fill_u(void* dst, unsigned int value, int size) __asm__("MEM_fill");
 extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
 extern "C" int GetNumberOfColours(int v);
-extern "C" unsigned char func_003B38B8(int clut);
+extern "C" unsigned char SHAPE_cluttype(int clut);
 
 struct sTexHdr_27C8 {
     unsigned type : 8;          // 0x0
@@ -3172,7 +3172,7 @@ extern "C" void SHAPE_createat(void* tex, int w, int height, int fmt, int clut, 
     unsigned char* cursor = (unsigned char*)hdr + (SHAPE_imagesize(w, height, bpp, levels) + 0x10);
     if (bpp < 9 && clut != 0) {
         int n = GetNumberOfColours(bpp);
-        unsigned char cfmt = func_003B38B8(clut);
+        unsigned char cfmt = SHAPE_cluttype(clut);
         int off = ((cursor - (unsigned char*)hdr) + 0xF) & ~0xF;
         cursor = (unsigned char*)hdr + off;
         int cbits = 0x10;

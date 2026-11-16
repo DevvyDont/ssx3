@@ -3,7 +3,7 @@
 
 // cUIProgress: a progress bar (record type 0x19): a background object and a knob moved along it by value / number of
 // values. Size 0x88: cUIScreen_createObjectByStruct does operator new(0x88, "UIProgress") + the cUIThing ctor
-// func_0039FB30, zeroes 0x74..0x84, stores cUIProgress_vtbl (D_00494408) and adopts the two children the record names
+// cUIThing_cUIThing, zeroes 0x74..0x84, stores cUIProgress_vtbl (D_00494408) and adopts the two children the record names
 // (rec+0x20 -> mpObjBackground, rec+0x24 -> mpObjKnob). Default ctors func_003A60E0 / cUIProgress_cUIProgress (ui/uivector).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/
 // uiprogress.cpp (preview assert path); retail keeps its methods in ui/uimenu (cUIProgress__cUIProgress ..

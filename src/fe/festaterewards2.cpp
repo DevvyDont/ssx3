@@ -48,7 +48,7 @@ INCLUDE_ASM("fe/festaterewards2", func_001D5280);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5330);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D53B0);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5428);
 
@@ -56,15 +56,15 @@ INCLUDE_ASM("fe/festaterewards2", func_001D5460);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5488);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D58B8);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_onDestroyScreen);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D59A0);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_writeStart);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5C28);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_callbackReadUpdate);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5D78);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5DF0);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_readStart);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5F38);
 

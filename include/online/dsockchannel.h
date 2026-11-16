@@ -9,10 +9,10 @@
 // EA's source: d:/ssx/code/source/online/dsockchannel.cpp (the preview build's assert string).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor func_00256698 / destructor func_002566E8 and the allocation;
+//   [R] retail's constructor func_00256698 / destructor cDSockChannel__cDSockChannel and the allocation;
 //   [P] the July 2003 preview's inline accessors (cCommChannel's and isConnected__C13cDSockChannel = lw 0xC == 2;
 //       same offsets as retail);
-//   [U] how retail code uses the field (the methods func_00256698..func_00256BA8 in seg_156860 and the two inline
+//   [U] how retail code uses the field (the methods func_00256698..cDSockChannel_getLatency in seg_156860 and the two inline
 //       virtuals cDSockChannel_isConnected / cDSockChannel_getChannelType in tagsunk);
 //   [O] SSX On Tour's DWARF (class cDSockChannel, size 0x1C): the same five members in the same order, 4 bytes
 //       earlier (its base is 8 bytes: 1-byte bools); its mPacketError is a 1-byte bool.
@@ -34,7 +34,7 @@ struct cDSockChannel {
                                     //      (connect/listen), 2 connected (updateConnecting), 3 timed out and 4 packet
                                     //      error (updateConnected); update (cDSockChannel_update) switches on it
     float mLatency;                 // 0x10 [O]; [R] 0.1; [U] updateConnected smooths the link's ping into it
-                                    //      ((4 * old + new) / 5, capped at 1 s); getLatency (func_00256BA8) returns it
+                                    //      ((4 * old + new) / 5, capped at 1 s); getLatency (cDSockChannel_getLatency) returns it
     int mPacketError;               // 0x14 [O] (On Tour: bool); [R] 0; [U] readPacket (cDSockChannel_readPacket) sets 1 on a
                                     //      packet of the wrong kind; updateConnected turns it into state 4
     NetGameUtilRefT* mGameUtil;     // 0x18 [O]; [R] 0; [U] connect/listen store the NetGameUtil (func_003E6E08) and

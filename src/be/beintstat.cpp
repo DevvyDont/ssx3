@@ -49,25 +49,25 @@ extern "C" float cBEStatInterface_getCollisionAttrib(void* self, int rider, int 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149038);
+INCLUDE_ASM("be/beintstat", cBEStatInterface_getStrikingAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 int cBENewPlayerInterface_isMissionMan(int index);
 
-struct sPlayerStatRow_func_00149038
+struct sPlayerStatRow_cBEStatInterface_getStrikingAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_func_00149038
+struct sCharStat_cBEStatInterface_getStrikingAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_func_00149038 D_00535538_func_00149038[] __asm__("D_00535538");
-extern sCharStat_func_00149038 D_005308D8_func_00149038[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib D_00535538_cBEStatInterface_getStrikingAttrib[] __asm__("D_00535538");
+extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_getStrikingAttrib[] __asm__("D_005308D8");
 
-extern "C" float func_00149038(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getStrikingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
@@ -77,31 +77,31 @@ extern "C" float func_00149038(void* self, int rider, int value)
     if (value > 0)
         v = value;
     else
-        v = D_00535538_func_00149038[profile].e[c][5] / 5;
-    return (float)v / (float)D_005308D8_func_00149038[c].v[0xD];
+        v = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[c][5] / 5;
+    return (float)v / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[c].v[0xD];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149120);
+INCLUDE_ASM("be/beintstat", cBEStatInterface_getLandingAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 int cBENewPlayerInterface_isMissionMan(int index);
 
-struct sPlayerStatRow_func_00149120
+struct sPlayerStatRow_cBEStatInterface_getLandingAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_func_00149120
+struct sCharStat_cBEStatInterface_getLandingAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_func_00149120 D_00535538_func_00149120[] __asm__("D_00535538");
-extern sCharStat_func_00149120 D_005308D8_func_00149120[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getLandingAttrib D_00535538_cBEStatInterface_getLandingAttrib[] __asm__("D_00535538");
+extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_getLandingAttrib[] __asm__("D_005308D8");
 
-extern "C" float func_00149120(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getLandingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
@@ -111,8 +111,8 @@ extern "C" float func_00149120(void* self, int rider, int value)
     if (value > 0)
         v = value;
     else
-        v = D_00535538_func_00149120[profile].e[c][6] / 5;
-    return (float)v / (float)D_005308D8_func_00149120[c].v[0xE];
+        v = D_00535538_cBEStatInterface_getLandingAttrib[profile].e[c][6] / 5;
+    return (float)v / (float)D_005308D8_cBEStatInterface_getLandingAttrib[c].v[0xE];
 }
 #endif
 
@@ -163,8 +163,8 @@ extern "C" float func_001492F0(void* self, int rider, int value)
     if (value > 0)
         v = value;
     else
-        v = D_00535538_func_00149038[profile].e[c][6] / 5;
-    return (float)v / (float)D_005308D8_func_00149038[c].v[0xE];
+        v = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[c][6] / 5;
+    return (float)v / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[c].v[0xE];
 }
 #endif
 
@@ -237,25 +237,25 @@ extern "C" float func_001494C0(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_001495A8);
+INCLUDE_ASM("be/beintstat", cBEStatInterface_getSpinAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 int cBENewPlayerInterface_isMissionMan(int index);
 
-struct sPlayerStatRow_func_001495A8
+struct sPlayerStatRow_cBEStatInterface_getSpinAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_func_001495A8
+struct sCharStat_cBEStatInterface_getSpinAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_func_001495A8 D_00535538_func_001495A8[] __asm__("D_00535538");
-extern sCharStat_func_001495A8 D_005308D8_func_001495A8[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getSpinAttrib D_00535538_cBEStatInterface_getSpinAttrib[] __asm__("D_00535538");
+extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getSpinAttrib[] __asm__("D_005308D8");
 
-extern "C" float func_001495A8(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
@@ -265,31 +265,31 @@ extern "C" float func_001495A8(void* self, int rider, int value)
     if (value > 0)
         v = value;
     else
-        v = D_00535538_func_001495A8[profile].e[c][4] / 5;
-    return (float)v / (float)D_005308D8_func_001495A8[c].v[0xC];
+        v = D_00535538_cBEStatInterface_getSpinAttrib[profile].e[c][4] / 5;
+    return (float)v / (float)D_005308D8_cBEStatInterface_getSpinAttrib[c].v[0xC];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149690);
+INCLUDE_ASM("be/beintstat", cBEStatInterface_getTrickAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 int cBENewPlayerInterface_isMissionMan(int index);
 
-struct sPlayerStatRow_func_00149690
+struct sPlayerStatRow_cBEStatInterface_getTrickAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_func_00149690
+struct sCharStat_cBEStatInterface_getTrickAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_func_00149690 D_00535538_func_00149690[] __asm__("D_00535538");
-extern sCharStat_func_00149690 D_005308D8_func_00149690[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getTrickAttrib D_00535538_cBEStatInterface_getTrickAttrib[] __asm__("D_00535538");
+extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_getTrickAttrib[] __asm__("D_005308D8");
 
-extern "C" float func_00149690(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getTrickAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
@@ -299,13 +299,13 @@ extern "C" float func_00149690(void* self, int rider, int value)
     if (value > 0)
         v = value;
     else
-        v = D_00535538_func_00149690[profile].e[c][2] / 5;
-    return (float)v / (float)D_005308D8_func_00149690[c].v[0xA];
+        v = D_00535538_cBEStatInterface_getTrickAttrib[profile].e[c][2] / 5;
+    return (float)v / (float)D_005308D8_cBEStatInterface_getTrickAttrib[c].v[0xA];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149778);
+INCLUDE_ASM("be/beintstat", cBEStatInterface_shouldCelebrateTrick);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_isMissionMan(int index);
 extern "C" int func_00148950(void* iface, int id);
@@ -318,7 +318,7 @@ struct sLevelTable_00149778
 };
 extern const sLevelTable_00149778 D_0045A2B0;
 
-extern "C" int func_00149778(void* self, int rider, int value)
+extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int value)
 {
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0;
@@ -341,7 +341,7 @@ extern "C" int func_00149778(void* self, int rider, int value)
 //100%
 INCLUDE_ASM("be/beintstat", cBELibrary_cBELibrary);
 #ifdef SKIP_ASM
-extern "C" void func_00149BB8();
+extern "C" void cBELibrary_loadData();
 extern "C" void* cBECharacterInterface_getThis();
 extern "C" void* cBEStatInterface_getThis(void);
 extern "C" void* func_0014ABE0();
@@ -367,7 +367,7 @@ extern sStatDefaults_149860 D_0043FB28;
 /**
  * Constructs the BE library: resets its data tables and creates every BE interface singleton.
  *
- * Calls func_00149BB8() (resets the character, player and profile tables), copies the default score tables (26
+ * Calls cBELibrary_loadData() (resets the character, player and profile tables), copies the default score tables (26
  * entries of 0x64 bytes, D_0043FB28) into D_00535C18, then calls each interface's getThis(): new race, new
  * player, character, stat, option, save, BAGT, network, score, bolt (func_0014ABE0), mission, econ, aggression
  * and reward.
@@ -376,7 +376,7 @@ extern sStatDefaults_149860 D_0043FB28;
  */
 extern "C" void* cBELibrary_cBELibrary(void* self)
 {
-    func_00149BB8();
+    cBELibrary_loadData();
     D_00535C18 = D_0043FB28;
     cBENewRaceInterface_getThis();
     cBENewPlayerInterface_getThis();
@@ -400,7 +400,7 @@ extern "C" void* cBELibrary_cBELibrary(void* self)
 INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern "C" void func_00153050(void);
+extern "C" void cBESaveInterface_purgeInterface(void);
 extern int* cBENewRaceInterface_instance;
 extern int* cBENewPlayerInterface_instance;
 extern int* cBEStatInterface_instance;
@@ -416,7 +416,7 @@ extern int* cBEAggressionInterface_instance;
 /**
  * Destroys the BE library: frees every BE interface singleton, then the object itself when asked to.
  *
- * Each interface goes to operator delete (no destructor runs) and its pointer is cleared; func_00153050() does
+ * Each interface goes to operator delete (no destructor runs) and its pointer is cleared; cBESaveInterface_purgeInterface() does
  * the save interface and frees its save buffer.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -433,7 +433,7 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     cBEStatInterface_instance = 0;
     operator_delete(cBEOptionInterface_instance);
     cBEOptionInterface_instance = 0;
-    func_00153050();
+    cBESaveInterface_purgeInterface();
     operator_delete(cBEBAGTInterface_instance);
     cBEBAGTInterface_instance = 0;
     operator_delete((int*)cBENetworkInterface_instance);
@@ -461,7 +461,7 @@ INCLUDE_ASM("be/beintstat", func_00149A88);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* strcpy2(char* buf, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001567B8(void* p, int v);
+extern "C" void cBEProfileLib_init(void* p, int v);
 extern "C" void* cBEStatInterface_getThis(void);
 int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
@@ -503,7 +503,7 @@ extern "C" void func_00149A88(void* self, signed char idx)
     sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
     strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)));
     sprintf((char*)e, buf, idx + 1);
-    func_001567B8(cBELibrary_profileLib + idx * 0x9B50, 1);
+    cBEProfileLib_init(cBELibrary_profileLib + idx * 0x9B50, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
     vreset_149A88((char*)cBEStatInterface_getThis());
     vreset_149A88((char*)cBEBAGTInterface_getThis());
@@ -511,7 +511,7 @@ extern "C" void func_00149A88(void* self, signed char idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149BB8);
+INCLUDE_ASM("be/beintstat", cBELibrary_loadData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0014C6A0(void*);
@@ -520,7 +520,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void func_0041605C(void* dst, void* src, int n);
 void cMemMan_free(void*);
-extern "C" void func_001567B8(void* p, int v);
+extern "C" void cBEProfileLib_init(void* p, int v);
 
 struct sCharSlot_149BB8
 {
@@ -561,7 +561,7 @@ extern char D_00535898[];
 
 extern int cBELibrary_grabPointsDB[0x2A8 / 4];
 
-extern "C" void func_00149BB8(void)
+extern "C" void cBELibrary_loadData(void)
 {
     int i;
     void* buf;
@@ -604,7 +604,7 @@ extern "C" void func_00149BB8(void)
     }
     func_00416210(D_00535898, 0, 0x288);
     for (i = 0; i < 3; i++) {
-        func_001567B8(cBELibrary_profileLib + i * 0x9B50, 1);
+        cBEProfileLib_init(cBELibrary_profileLib + i * 0x9B50, 1);
     }
     p = cBELibrary_grabPointsDB;
     p[0x0 / 4] = 0;

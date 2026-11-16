@@ -253,12 +253,12 @@ extern "C" void cFEStateEventSelect_onInputAlways(void* self, int pInput)
 //100%
 INCLUDE_ASM("fe/festateload", func_001869D8);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void cUITemplate_MAP_onUpdate(void* tmpl);
 
 extern "C" void func_001869D8(void* self)
 {
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     cUITemplate_MAP_onUpdate((char*)self + 0x48);
 }
 #endif
@@ -267,7 +267,7 @@ extern "C" void func_001869D8(void* self)
 INCLUDE_ASM("fe/festateload", func_00186A08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_001D53B0(void* self, void* a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern void* cFEStateMemCard_vtbl[];
 // D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
@@ -328,7 +328,7 @@ struct sMemCardK186A08 {
 
 extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* engine)
 {
-    func_001D53B0(self, engine, 2);
+    cFEMemCard_cFEMemCard(self, engine, 2);
     int one = 1;
     self->vtbl = cFEStateMemCard_vtbl;
     D_004A14B8_K186A08 = self;

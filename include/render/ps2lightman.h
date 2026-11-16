@@ -5,13 +5,13 @@
 // world's light records) followed by 50 dynamic slots handed out per frame. Size 0x14: [R] cLightMan_construct__Fv
 // (render/lightman) does cMemMan_alloc(0x14, "LightMan") + cPSPLightMan_cPSPLightMan__FP12cPSPLightMan (vtable
 // D_004936D8, stores TheLightMan), then stores D_00493650. Destructors cPS2LightMan__cPS2LightMan__FPv (slot 0) ->
-// func_0038AE28 (restores D_004936D8, clears TheLightMan).
+// cLightMan__cLightMan (restores D_004936D8, clears TheLightMan).
 // Bases: cLightMan (On Tour 0x4: vptr only) <- cPSPLightMan (retail class name kept from On Tour, render/ps2lightman)
 // <- cPS2LightMan. The vptr is at 0x0 because cLightMan has no data.
 // Methods (D_00493650, On Tour's cPSPLightMan order): 0 ~cPS2LightMan, 1 GetLightObj(i) func_00394C88__FPvi,
-// 2 Init(n) func_00394C98, 3 Purge cPS2LightMan_Purge, 4 CreateLights func_0038DC70, 5 ResetDynamicLights,
-// 6 GetDynamicLight func_00394D18, 7 SetAmbient (empty), 8-11 CreateAmbient/Directional/Point/Spot func_0038DEE8,
-// func_0038DF38, func_0038DF98, func_0038E008 (render/lightman), 12-14 func_00394D38/40/48 (empty).
+// 2 Init(n) func_00394C98, 3 Purge cPS2LightMan_Purge, 4 CreateLights cPS2LightMan_CreateLights, 5 ResetDynamicLights,
+// 6 GetDynamicLight func_00394D18, 7 SetAmbient (empty), 8-11 CreateAmbient/Directional/Point/Spot cPS2LightMan_CreateAmbient,
+// cPS2LightMan_CreateDirectional, cPS2LightMan_CreatePoint, cPS2LightMan_CreateSpot (render/lightman), 12-14 func_00394D38/40/48 (empty).
 // Instance global: cLightMan_TheLightMan (gp+0x2A9C) = cLightMan::TheLightMan, returned by func_00394C40 (getTheLightMan).
 //
 // FLAT layout. Members: [O] On Tour's cPSPLightMan (0x18: m_iStartDynLight 4, m_iDynLight 8, m_iMaxLights 0xC,

@@ -57,7 +57,7 @@ extern "C" void cCameraController__cCameraController(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015CC70);
+INCLUDE_ASM("camera/cameracontroller", cCameraController_snap);
 #ifdef SKIP_ASM
 struct sCamCtrlNode {
     void* obj;          // 0x0
@@ -71,14 +71,14 @@ struct sCamCtrlVE {
     void (*fn)(void*, int);
 };
 
-void* func_0015E030(void* self);
-extern "C" void func_002F41A8(void* p);
+void* cCamera_snapResultAlgorithm(void* self);
+extern "C" void cSplashManager_CameraSnapped(void* p);
 
-// PORT: the unit declares func_0015CC70(void* self), but the body takes a
+// PORT: the unit declares cCameraController_snap(void* self), but the body takes a
 // second argument (callers pass it in $5); the real body is bound by asm label.
-void func_0015CC70_impl(void* self, int a) __asm__("func_0015CC70");
+void cCameraController_snap_impl(void* self, int a) __asm__("cCameraController_snap");
 
-void func_0015CC70_impl(void* self, int a)
+void cCameraController_snap_impl(void* self, int a)
 {
     for (sCamCtrlNode* n = **(sCamCtrlNode***)((char*)self + 0x8); n != 0; n = n->next)
     {
@@ -86,13 +86,13 @@ void func_0015CC70_impl(void* self, int a)
         sCamCtrlVE* vt = *(sCamCtrlVE**)((char*)obj + 0x10);
         vt[3].fn((char*)obj + vt[3].delta, a);
     }
-    func_0015E030(*(void**)((char*)self + 0x10));
-    func_002F41A8(*(void**)((char*)self + 0x10));
+    cCamera_snapResultAlgorithm(*(void**)((char*)self + 0x10));
+    cSplashManager_CameraSnapped(*(void**)((char*)self + 0x10));
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015CCF0);
+INCLUDE_ASM("camera/cameracontroller", cCameraController_snapCurrent);
 #ifdef SKIP_ASM
 struct sCamCtrlNodeB {
     void* obj;           // 0x0
@@ -106,10 +106,10 @@ struct sCamCtrlVE0 {
     void (*fn)(void*);
 };
 
-void* func_0015E030(void* self);
-extern "C" void func_002F41A8(void* p);
+void* cCamera_snapResultAlgorithm(void* self);
+extern "C" void cSplashManager_CameraSnapped(void* p);
 
-extern "C" void func_0015CCF0(void* self)
+extern "C" void cCameraController_snapCurrent(void* self)
 {
     for (sCamCtrlNodeB* n = **(sCamCtrlNodeB***)((char*)self + 0x8); n != 0; n = n->next)
     {
@@ -117,19 +117,19 @@ extern "C" void func_0015CCF0(void* self)
         sCamCtrlVE0* vt = *(sCamCtrlVE0**)((char*)obj + 0x10);
         vt[4].fn((char*)obj + vt[4].delta);
     }
-    func_0015E030(*(void**)((char*)self + 0x10));
-    func_002F41A8(*(void**)((char*)self + 0x10));
+    cCamera_snapResultAlgorithm(*(void**)((char*)self + 0x10));
+    cSplashManager_CameraSnapped(*(void**)((char*)self + 0x10));
 }
 #endif
 
-extern "C" void* func_0015CB08(int);
+extern "C" void* cCameraAlgoList_removeAll(int);
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015CD60__FPv);
+INCLUDE_ASM("camera/cameracontroller", cCameraController_clearAlgorithms__FPv);
 #ifdef SKIP_ASM
-void* func_0015CD60(void* self)
+void* cCameraController_clearAlgorithms(void* self)
 {
-    return func_0015CB08(*(int*)((char*)self + 0x8));
+    return cCameraAlgoList_removeAll(*(int*)((char*)self + 0x8));
 }
 #endif
 
@@ -217,18 +217,18 @@ public:
     virtual void v03(int a);
 };
 
-extern "C" void func_0015CC70(void* self);
+extern "C" void cCameraController_snap(void* self);
 
 /**
  * Snaps the camera to a subject: the base controller's snap, then the manual algorithm's.
  *
- * Calls func_0015CC70 (On Tour cCameraController::snap) and the snap virtual (slot 3) of ManualAlgo (+0x18).
+ * Calls cCameraController_snap (On Tour cCameraController::snap) and the snap virtual (slot 3) of ManualAlgo (+0x18).
  *
  * @param subjectID  the subject to snap to (On Tour subjectID), passed only to the manual algorithm
  */
 extern "C" void cManualCameraController_snap(void* self, int subjectID)
 {
-    func_0015CC70(self);
+    cCameraController_snap(self);
     (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->v03(subjectID);
 }
 #endif
@@ -247,29 +247,29 @@ public:
     virtual void v05();
 };
 
-extern "C" void func_0015CCF0(void* self);
+extern "C" void cCameraController_snapCurrent(void* self);
 
 /**
  * Snaps the camera to its current subject: the base controller's snapCurrent, then the manual algorithm's.
  *
- * Calls func_0015CCF0 (On Tour cCameraController::snapCurrent) and the snapCurrent virtual (slot 4) of ManualAlgo
+ * Calls cCameraController_snapCurrent (On Tour cCameraController::snapCurrent) and the snapCurrent virtual (slot 4) of ManualAlgo
  * (+0x18).
  */
 extern "C" void cManualCameraController_snapCurrent(void* self)
 {
-    func_0015CCF0(self);
+    cCameraController_snapCurrent(self);
     (*(cCamCtrlVObj**)((char*)self + 0x18))->v04();
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/cameracontroller", func_0015CF28);
+INCLUDE_ASM("camera/cameracontroller", cManualCameraController_addAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void cCameraAlgoList_insert(void* list, int a, int b, float w);
 
-extern "C" void func_0015CF28(void* self, int a, int b)
+extern "C" void cManualCameraController_addAlgorithm(void* self, int a, int b)
 {
-    func_0015CD60(self);
+    cCameraController_clearAlgorithms(self);
     cCameraAlgoList_insert(*(void**)((char*)self + 0x8), a, b, 1.0f);
 }
 #endif
@@ -277,13 +277,13 @@ extern "C" void func_0015CF28(void* self, int a, int b)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", cManualCameraController_setCurrentAlgorithmType);
 #ifdef SKIP_ASM
-extern "C" void func_0015CF28(void* self, int a, int b);
+extern "C" void cManualCameraController_addAlgorithm(void* self, int a, int b);
 
 /**
  * Switches the manual camera controller to its editor or its manual algorithm.
  *
  * Type 0x50 selects the editor algorithm (+0x1C) and 0x51 the manual one (+0x18); other types are ignored.
- * func_0015CF28 empties the algorithm list and inserts the chosen algorithm at weight 1.0.
+ * cManualCameraController_addAlgorithm empties the algorithm list and inserts the chosen algorithm at weight 1.0.
  *
  * @param msg  the eCamAlgoType to select (On Tour type): 0x50 editor, 0x51 manual
  */
@@ -291,10 +291,10 @@ extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int 
 {
     switch (msg) {
     case 0x50:
-        func_0015CF28(self, *(int*)((char*)self + 0x1C), 0);
+        cManualCameraController_addAlgorithm(self, *(int*)((char*)self + 0x1C), 0);
         break;
     case 0x51:
-        func_0015CF28(self, *(int*)((char*)self + 0x18), 0);
+        cManualCameraController_addAlgorithm(self, *(int*)((char*)self + 0x18), 0);
         break;
     }
 }
@@ -339,11 +339,11 @@ extern "C" int func_0015D020(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015D050);
+INCLUDE_ASM("camera/cameracontroller", cChaseCameraController_createChaseAlgorithmCut);
 #ifdef SKIP_ASM
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
-extern "C" void* func_0015D050(void* self, int a1, int a2)
+extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void* self, int a1, int a2)
 {
     return cChaseCameraController_createChaseAlgorithmBlend(self, a1, a2, 1.0f);
 }

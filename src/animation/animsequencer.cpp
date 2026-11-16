@@ -27,9 +27,9 @@ void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313A20);
+INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeOutAndExpire);
 #ifdef SKIP_ASM
-extern "C" void func_00313A20(void* self, float v)
+extern "C" void cAnimSequence_fadeOutAndExpire(void* self, float v)
 {
     if (*(float*)((char*)self + 0x98) != 0.0f || *(float*)((char*)self + 0x9C) == 0.0f || v < *(float*)((char*)self + 0x9C))
     {
@@ -41,7 +41,7 @@ extern "C" void func_00313A20(void* self, float v)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313A70);
+INCLUDE_ASM("animation/animsequencer", cAnimSequence_addTrigger);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_AnimTrigger[];
@@ -54,7 +54,7 @@ struct sSeqNode313A70
     sSeqNode313A70* next;
 };
 
-extern "C" void func_00313A70(void* self, int key, float weight)
+extern "C" void cAnimSequence_addTrigger(void* self, int key, float weight)
 {
     sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
     sSeqNode313A70* old = *(sSeqNode313A70**)((char*)self + 0xAC);
@@ -67,7 +67,7 @@ extern "C" void func_00313A70(void* self, int key, float weight)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313AD8);
+INCLUDE_ASM("animation/animsequencer", cAnimSequence_addEndTrigger);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_AnimTrigger[];
@@ -80,7 +80,7 @@ struct sSeqNode313AD8
     sSeqNode313AD8* next;
 };
 
-extern "C" void func_00313AD8(void* self, int key)
+extern "C" void cAnimSequence_addEndTrigger(void* self, int key)
 {
     sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
     sSeqNode313AD8* old = *(sSeqNode313AD8**)((char*)self + 0xAC);
@@ -117,7 +117,7 @@ extern "C" void func_00313B38(char* self, int id, float time) {
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313BA8);
+INCLUDE_ASM("animation/animsequencer", cAnimSequence_removeEndTrigger);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 struct sSeqNode313BA8
@@ -128,7 +128,7 @@ struct sSeqNode313BA8
     sSeqNode313BA8* next;
 };
 
-extern "C" void func_00313BA8(void* self, int key)
+extern "C" void cAnimSequence_removeEndTrigger(void* self, int key)
 {
     sSeqNode313BA8** pp;
     for (pp = (sSeqNode313BA8**)((char*)self + 0xAC); *pp != 0; pp = &(*pp)->next)
@@ -148,11 +148,11 @@ extern "C" void func_00313BA8(void* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313C08);
+INCLUDE_ASM("animation/animsequencer", cAnimSequence_removeAllTriggers);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_00313C08(char* self)
+extern "C" void cAnimSequence_removeAllTriggers(char* self)
 {
     while (*(char**)(self + 0xAC) != 0)
     {
@@ -164,7 +164,7 @@ extern "C" void func_00313C08(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00313C50);
+INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnim);
 #ifdef SKIP_ASM
 extern void** cAnimDataBase_TheAnimDataBase;
 
@@ -187,7 +187,7 @@ struct sSeq_00313C50
     int dirty;
 };
 
-extern "C" void func_00313C50(void* self, int i, int anim)
+extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim)
 {
     sSeq_00313C50* s = (sSeq_00313C50*)self;
     (s->e + i)->anim = anim;
@@ -418,7 +418,7 @@ void cAnimSequencer_init(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003142F8);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_newSequence);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_AnimSequence[];
@@ -435,7 +435,7 @@ struct sSequencer_003142F8 {
 
 extern "C" void* func_00313508(void* mem, int arg);
 
-extern "C" void* func_003142F8(void* seq, int arg)
+extern "C" void* cAnimSequencer_newSequence(void* seq, int arg)
 {
     sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
     sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, str_AnimSequence, 0x20000000, 0), arg);
@@ -514,7 +514,7 @@ extern "C" void func_003143C8(sSequencer_003143C8* self, sSeqNode_003143C8* node
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314418);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getAnimBlendFrames);
 #ifdef SKIP_ASM
 struct sSeq_00314418;
 extern "C" float func_00313D70_314418(sSeq_00314418* self, int i) __asm__("func_00313D70");
@@ -561,7 +561,7 @@ struct sSeqState_314418
 };
 
 // PORT: `long` field is 64-bit (ld/sd).
-extern "C" int func_00314418(void* self, sSeqState_314418* out)
+extern "C" int cAnimSequencer_getAnimBlendFrames(void* self, sSeqState_314418* out)
 {
     int count = 0;
     sSeq_00314418* n = *(sSeq_00314418**)((char*)self + 0x4);
@@ -590,15 +590,15 @@ extern "C" int func_00314418(void* self, sSeqState_314418* out)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314518);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndHold);
 #ifdef SKIP_ASM
-extern "C" void* func_003142F8(void* seq, int arg);
-extern "C" void func_00313C50(void* self, int i, int anim);
+extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
+extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 
-extern "C" void* func_00314518(void* self, int arg, int anim, float val)
+extern "C" void* cAnimSequencer_playAndHold(void* self, int arg, int anim, float val)
 {
-    void* node = func_003142F8(self, arg);
-    func_00313C50(node, 0, anim);
+    void* node = cAnimSequencer_newSequence(self, arg);
+    cAnimSequence_setSubAnim(node, 0, anim);
     func_00313CF0(node, 0, val);
     func_00313D40(node, 0, 0);
     return node;
@@ -606,15 +606,15 @@ extern "C" void* func_00314518(void* self, int arg, int anim, float val)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314588);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndLoop);
 #ifdef SKIP_ASM
-extern "C" void* func_003142F8(void* seq, int arg);
-extern "C" void func_00313C50(void* self, int i, int anim);
+extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
+extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 
-extern "C" void* func_00314588(void* self, int arg, int anim, float val)
+extern "C" void* cAnimSequencer_playAndLoop(void* self, int arg, int anim, float val)
 {
-    void* node = func_003142F8(self, arg);
-    func_00313C50(node, 0, anim);
+    void* node = cAnimSequencer_newSequence(self, arg);
+    cAnimSequence_setSubAnim(node, 0, anim);
     func_00313CF0(node, 0, val);
     func_00313D40(node, 0, 1);
     return node;
@@ -622,7 +622,7 @@ extern "C" void* func_00314588(void* self, int arg, int anim, float val)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003145F8);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_expire);
 #ifdef SKIP_ASM
 struct sSeqNode_003145F8 {
     char pad_0x00[0xC8];
@@ -634,7 +634,7 @@ struct sSequencer_003145F8 {
     sSeqNode_003145F8* mFirstSequence; // 0x4
 };
 
-extern "C" void func_003145F8(sSequencer_003145F8* self, sSeqNode_003145F8* node)
+extern "C" void cAnimSequencer_expire(sSequencer_003145F8* self, sSeqNode_003145F8* node)
 {
     sSeqNode_003145F8** pp;
     for (pp = &self->mFirstSequence; *pp != 0; pp = &(*pp)->next)
@@ -645,7 +645,7 @@ extern "C" void func_003145F8(sSequencer_003145F8* self, sSeqNode_003145F8* node
             *pp = n->next;
             if (n != 0)
             {
-                func_00313C08((char*)n);
+                cAnimSequence_removeAllTriggers((char*)n);
                 operator_delete((int*)n);
             }
             self->mCount--;
@@ -671,7 +671,7 @@ struct sSequencer_00314668 {
 /**
  * Removes and deletes every sequence in the animation sequencer.
  *
- * Each sequence is unlinked from the list head, has its triggers removed (func_00313C08, On Tour
+ * Each sequence is unlinked from the list head, has its triggers removed (cAnimSequence_removeAllTriggers, On Tour
  * cAnimSequence::removeAllTriggers) and is freed with operator delete; the count drops by one for each.
  */
 extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
@@ -682,7 +682,7 @@ extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
         self->mFirstSequence = n->next;
         if (n != 0)
         {
-            func_00313C08((char*)n);
+            cAnimSequence_removeAllTriggers((char*)n);
             operator_delete((int*)n);
         }
         self->mCount--;
@@ -691,27 +691,27 @@ extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003146D0);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_fadeOutAndExpireAll);
 #ifdef SKIP_ASM
-extern "C" void func_003146D0(void* self, float v)
+extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float v)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
     {
-        func_00313A20(node, v);
+        cAnimSequence_fadeOutAndExpire(node, v);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/animsequencer", func_00314718);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_removeAllEndTriggers);
 #ifdef SKIP_ASM
-extern "C" void func_00313BA8(void* self, int v);
+extern "C" void cAnimSequence_removeEndTrigger(void* self, int v);
 
-extern "C" void func_00314718(void* self, int v)
+extern "C" void cAnimSequencer_removeAllEndTriggers(void* self, int v)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
     {
-        func_00313BA8(node, v);
+        cAnimSequence_removeEndTrigger(node, v);
     }
 }
 #endif
@@ -932,10 +932,10 @@ INCLUDE_ASM("animation/animsequencer", func_00314A60);
 #ifdef SKIP_ASM
 // PORT: asm label (same two-argument binding func_00314A18 uses for func_00314AA0).
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
-extern "C" char *func_003E22F0(int, int);
+extern "C" char *FILE_loadpack(int, int);
 
 extern "C" void func_00314A60(void *self, int name, int flags) {
-    char *data = func_003E22F0(name, flags);
+    char *data = FILE_loadpack(name, flags);
     *(char **)self = data;
     func_00314AA0_impl(self, data);
 }
@@ -972,12 +972,12 @@ extern "C" short func_00314AC0(void *self) {
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314AE0);
 #ifdef SKIP_ASM
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 
 extern "C" int func_00314AE0(char* self, const char* name) {
     int i;
     for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
-        if (func_0041AA88(name, *(char**)(self + 8) + i * 0x60) == 0)
+        if (strcasecmp(name, *(char**)(self + 8) + i * 0x60) == 0)
             return 1;
     }
     return 0;
@@ -986,12 +986,12 @@ extern "C" int func_00314AE0(char* self, const char* name) {
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314B70);
 #ifdef SKIP_ASM
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 
 extern "C" char* func_00314B70(char* self, const char* name) {
     int i;
     for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
-        if (func_0041AA88(name, *(char**)(self + 8) + i * 0x60) == 0)
+        if (strcasecmp(name, *(char**)(self + 8) + i * 0x60) == 0)
             return *(char**)(self + 8) + i * 0x60;
     }
     return 0;
@@ -1001,7 +1001,7 @@ extern "C" char* func_00314B70(char* self, const char* name) {
 //100%
 INCLUDE_ASM("animation/animsequencer", cMdfArchive_getModelPart);
 #ifdef SKIP_ASM
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
 
 struct sMdfPart60 {
@@ -1022,7 +1022,7 @@ struct sMdfArchive {
 /**
  * Finds a model part in the MDF archive by name.
  *
- * Compares @p name against each part's name case-insensitively (func_0041AA88) and returns the first match
+ * Compares @p name against each part's name case-insensitively (strcasecmp) and returns the first match
  * through cMdfArchive_getModelPartByIndex().
  *
  * @param name  part name to look for
@@ -1032,7 +1032,7 @@ extern "C" void* cMdfArchive_getModelPart(sMdfArchive* self, const char* name)
 {
     for (int i = 0; i < self->header->count; i++)
     {
-        if (func_0041AA88(name, self->parts[i].name) == 0)
+        if (strcasecmp(name, self->parts[i].name) == 0)
             return cMdfArchive_getModelPartByIndex(self, i);
     }
     return 0;

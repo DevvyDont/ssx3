@@ -8,8 +8,8 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_cScriptCam
 #ifdef SKIP_ASM
 extern "C" void* cCameraController_cCameraController(void* self, void* arg);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_0027D5E8(void* mem, void* script);
-extern "C" void func_00283298(void* p);
+extern "C" void* cScriptObjCamera_cScriptObjCamera(void* mem, void* script);
+extern "C" void cScriptObject_InitScriptObject(void* p);
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern void* cScriptCameraController_vtbl[];
@@ -20,7 +20,7 @@ extern char str_ScriptObjCam[];
  * Constructs the script camera controller with its two ScriptObjCam objects.
  *
  * The second argument is really the view index (cCamera_cCamera passes it; On Tour: viewIndex): it goes to
- * each ScriptObjCam (func_0027D5E8, 0x80 bytes), which is then set up by func_00283298. Type 3, not active
+ * each ScriptObjCam (cScriptObjCamera_cScriptObjCamera, 0x80 bytes), which is then set up by cScriptObject_InitScriptObject. Type 3, not active
  * (+0x18 = 0).
  *
  * @param script  the view index (misnamed)
@@ -36,8 +36,8 @@ extern "C" void* cScriptCameraController_cScriptCameraController(void* self, voi
     *(void***)((char*)self + 0x1C) = (void**)operator_new_K2(8, str_ScriptObjCamArray, 0, 0);
     for (i = 0; i < 2; i++) {
         void** slot = (void**)((i << 2) + *(int*)((char*)self + 0x1C));
-        *slot = func_0027D5E8(cMemMan_alloc(0x80, str_ScriptObjCam, 0, 0), script);
-        func_00283298((*(void***)((char*)self + 0x1C))[i]);
+        *slot = cScriptObjCamera_cScriptObjCamera(cMemMan_alloc(0x80, str_ScriptObjCam, 0, 0), script);
+        cScriptObject_InitScriptObject((*(void***)((char*)self + 0x1C))[i]);
     }
     *(int*)((char*)self + 0x18) = 0;
     return self;
@@ -86,13 +86,13 @@ extern "C" void cScriptCameraController__cScriptCameraController(void* self, int
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addCamera);
 #ifdef SKIP_ASM
 int func_002743C8(void* self);
-void func_001694A8(void* self, int val);
-extern "C" void* func_001694B8(void* self);
-extern "C" void* func_00169CF8(void* self);
-extern "C" void* func_0016A458(void* self);
-extern "C" void* func_0016AD38(void* self);
-// PORT: func_00169340 is defined with (self, algo); this caller passes a third int argument.
-extern "C" void func_00169340_3(void* self, void* algo, int a) __asm__("func_00169340");
+void cScriptAlgorithm_setScriptObj(void* self, int val);
+extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self);
+extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self);
+extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self);
+extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self);
+// PORT: cScriptCameraController_addAlgorithm is defined with (self, algo); this caller passes a third int argument.
+extern "C" void cScriptCameraController_addAlgorithm_3(void* self, void* algo, int a) __asm__("cScriptCameraController_addAlgorithm");
 extern char str_Manual_Script_Camera_Algo[];
 extern char str_Target_Script_Camera_Algo[];
 extern char str_Subject_Script_Camera_Algo[];
@@ -103,7 +103,7 @@ extern char str_Algorithmic_Script_Camera_Algo[];
  *
  * The kind (func_002743C8 on the object's data) picks a manual (0), target (1), subject (2) or algorithmic
  * (3) script camera algorithm; other kinds are ignored. The algorithm is bound to the object, stored at its
- * +0x1C, added as owned (func_00169340, probably addAlgorithm) and the controller becomes active (+0x18 = 1).
+ * +0x1C, added as owned (cScriptCameraController_addAlgorithm, probably addAlgorithm) and the controller becomes active (+0x18 = 1).
  *
  * @param cam  the script camera object (cScriptObjCamera)
  */
@@ -113,24 +113,24 @@ extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
     switch (func_002743C8(*(void**)(*(char**)(cam + 0x14) + 8)))
     {
     case 0:
-        ctl = func_001694B8(cMemMan_alloc(0xB0, str_Manual_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptManualAlgorithm_cScriptManualAlgorithm(cMemMan_alloc(0xB0, str_Manual_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 1:
-        ctl = func_00169CF8(cMemMan_alloc(0xB0, str_Target_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptPointAlgorithm_cScriptPointAlgorithm(cMemMan_alloc(0xB0, str_Target_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 2:
-        ctl = func_0016A458(cMemMan_alloc(0xA0, str_Subject_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptTargetAlgorithm_cScriptTargetAlgorithm(cMemMan_alloc(0xA0, str_Subject_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 3:
-        ctl = func_0016AD38(cMemMan_alloc(0xA0, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cMemMan_alloc(0xA0, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
         break;
     default:
         return;
     }
     // PORT: the camera pointer is passed through an int parameter.
-    func_001694A8(ctl, (int)cam);
+    cScriptAlgorithm_setScriptObj(ctl, (int)cam);
     *(void**)(cam + 0x1C) = ctl;
-    func_00169340_3(self, ctl, 1);
+    cScriptCameraController_addAlgorithm_3(self, ctl, 1);
     *(int*)(self + 0x18) = 1;
 }
 #endif
@@ -169,11 +169,11 @@ extern "C" void func_001692D8(void* self, void* algo)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169340);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void cCameraAlgoList_insert(void*, void*, float);
 
-extern "C" void func_00169340(void* self, void* algo)
+extern "C" void cScriptCameraController_addAlgorithm(void* self, void* algo)
 {
     cCameraAlgoList_insert(*(void**)((char*)self + 0x8), algo, 1.0f);
 }
@@ -230,13 +230,13 @@ extern "C" void cScriptCameraController_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169418);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_cScriptAlgorithm);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_0045BDE0[];
 extern void* D_0045C8B8[];
 struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
-// Same object as the unit's later `extern func_001694B8_sVec4 t4vect_Origin;` (that type is defined below this point).
+// Same object as the unit's later `extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;` (that type is defined below this point).
 extern sVec4K9418 D_004FF130_K9418 __asm__("t4vect_Origin");
 extern "C" float cCameraAlgorithm_getDefaultView(void* self);
 
@@ -252,7 +252,7 @@ struct sCamCtlK9418 {
     sVec4K9418 v20; // 0x20
 };
 
-extern "C" void* func_00169418(void* p)
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* p)
 {
     sCamCtlK9418* self = (sCamCtlK9418*)p;
     self->vtbl = D_0045BDE0;
@@ -273,9 +273,9 @@ extern "C" void* func_00169418(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001694A8__FPvi);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_setScriptObj__FPvi);
 #ifdef SKIP_ASM
-void func_001694A8(void* self, int val)
+void cScriptAlgorithm_setScriptObj(void* self, int val)
 {
     *(int*)((char*)self + 0x14) = val;
 }
@@ -291,21 +291,21 @@ int func_001694B0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_001694B8);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_cScriptManualAlgorithm);
 #ifdef SKIP_ASM
-struct func_001694B8_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
+struct cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* D_0045C850[];
-extern func_001694B8_sVec4 t4vect_Origin;
-extern "C" void* func_00169418(void* self);
+extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
-extern "C" void* func_001694B8(void* self)
+extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self)
 {
-    func_00169418(self);
+    cScriptAlgorithm_cScriptAlgorithm(self);
     *(void***)((char*)self + 0x10) = D_0045C850;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x56;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x48) = 0;
@@ -657,19 +657,19 @@ extern "C" sPair_9828 func_00169828(char* p)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169CF8);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_cScriptPointAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045C7E8[];
-extern func_001694B8_sVec4 t4vect_Origin;
-extern "C" void* func_00169418(void* self);
+extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
-extern "C" void* func_00169CF8(void* self)
+extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self)
 {
-    func_00169418(self);
+    cScriptAlgorithm_cScriptAlgorithm(self);
     *(void***)((char*)self + 0x10) = D_0045C7E8;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x57;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
@@ -985,19 +985,19 @@ extern "C" sPair_9F88 func_00169F88(char* p)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A458);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045C780[];
-extern func_001694B8_sVec4 t4vect_Origin;
-extern "C" void* func_00169418(void* self);
+extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
-extern "C" void* func_0016A458(void* self)
+extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self)
 {
-    func_00169418(self);
+    cScriptAlgorithm_cScriptAlgorithm(self);
     *(void***)((char*)self + 0x10) = D_0045C780;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x58;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
@@ -1378,19 +1378,19 @@ extern "C" sPair_A868 func_0016A868(char* p)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD38);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045C718[];
-extern func_001694B8_sVec4 t4vect_Origin;
-extern "C" void* func_00169418(void* self);
+extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
-extern "C" void* func_0016AD38(void* self)
+extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self)
 {
-    func_00169418(self);
+    cScriptAlgorithm_cScriptAlgorithm(self);
     *(void***)((char*)self + 0x10) = D_0045C718;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x59;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;

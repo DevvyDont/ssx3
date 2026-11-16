@@ -238,9 +238,9 @@ extern "C" void cAI_initAIActors(cAI* self, int n)
 extern "C" void* cAI_commonInit(cAI*, int);
 
 //100%
-INCLUDE_ASM("ai/ai", func_001289F0__FPv);
+INCLUDE_ASM("ai/ai", cAI_resolveRace__FPv);
 #ifdef SKIP_ASM
-void* func_001289F0(void* self)
+void* cAI_resolveRace(void* self)
 {
     return cAI_commonInit((cAI*)self, 0);
 }
@@ -326,10 +326,10 @@ INCLUDE_ASM("ai/ai", cAI_update);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int cPauseState_Flags;
-// PORT: func_0012BB20 is defined below with its own self type; bound by asm label.
-extern "C" void func_0012BB20_AF0(void* self) __asm__("func_0012BB20");
+// PORT: cAI_onlineAICheck is defined below with its own self type; bound by asm label.
+extern "C" void cAI_onlineAICheck_AF0(void* self) __asm__("cAI_onlineAICheck");
 extern "C" void cAI_AIStateUpdate(void* self);
-extern "C" void func_0010F560(void* self);
+extern "C" void cAI_UpdateGroupAI(void* self);
 extern "C" void cRider_updateFocus(void* rider);
 extern "C" void cRider_updateSplitPaused(void* rider);
 extern "C" void cRider_updateSplit1(void* rider);
@@ -340,7 +340,7 @@ void* func_001216E0(void* self);
 extern "C" void cRider_updateSplit6(void* rider);
 extern "C" void cRider_updateSplit7(void* rider);
 extern "C" void cRider_updateSplit8(void* rider);
-void* func_001217F8(void* self);
+void* cRider_updateSplit9(void* self);
 extern "C" void cRider_updateSplit10(void* rider);
 extern "C" void cRider_updateSplit11(void* rider);
 extern "C" void cRider_updateSplit12(void* rider);
@@ -369,7 +369,7 @@ static inline char* Rider_AF0(char* obj)
 /**
  * Runs one AI tick: the online check, the state machine, the group AI and every active rider's update passes.
  *
- * Calls func_0012BB20 (onlineAICheck), cAI_AIStateUpdate() and func_0010F560 (group AI), then gathers the
+ * Calls cAI_onlineAICheck (onlineAICheck), cAI_AIStateUpdate() and cAI_UpdateGroupAI (group AI), then gathers the
  * riders: with a mission rider loaded, player 0 and, unless PlaybackMan's mode (+0x70) is 0, the mission
  * rider; otherwise the players, the computers (if ComputerRidersActive) and the actors (if
  * ComputerActorsActive). Each pass (cRider_updateSplit1..12, then the rider handler's FX parts) runs over all
@@ -383,9 +383,9 @@ extern "C" void cAI_update(cAI* self)
     char* handlers[8];
     int n = 0;
     int i;
-    func_0012BB20_AF0((self));
+    cAI_onlineAICheck_AF0((self));
     cAI_AIStateUpdate((self));
-    func_0010F560((self));
+    cAI_UpdateGroupAI((self));
     if (self->NumberOfMissionRidersLoaded > 0 && self->NumberOfPlayersAllocated > 0) {
         char* x = (char*)SSXApp->Game->PlaybackMan;
         if (x != 0 && *(int*)(x + 0x70) == 0) {
@@ -427,7 +427,7 @@ extern "C" void cAI_update(cAI* self)
         for (i = 0; i < n; i++) cRider_updateSplit6(riders[i]);
         for (i = 0; i < n; i++) cRider_updateSplit7(riders[i]);
         for (i = 0; i < n; i++) cRider_updateSplit8(riders[i]);
-        for (i = 0; i < n; i++) func_001217F8(riders[i]);
+        for (i = 0; i < n; i++) cRider_updateSplit9(riders[i]);
         for (i = 0; i < n; i++) cRider_updateSplit10(riders[i]);
         for (i = 0; i < n; i++) cRider_updateSplit11(riders[i]);
         for (i = 0; i < n; i++) cRider_updateSplit12(riders[i]);
@@ -451,18 +451,18 @@ extern "C" void cAI_update(cAI* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00129160);
+INCLUDE_ASM("ai/ai", cAI_updateAnimation);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateAnimation(void* self, float value);
-extern "C" void func_0011EB98(void* self);
+extern "C" void cRider_updateSkeleton(void* self);
 extern "C" void cAnimModel_buildSkelMatrices(void*);
 
-extern "C" void func_00129160(sAiObj128A48* self)
+extern "C" void cAI_updateAnimation(sAiObj128A48* self)
 {
     for (int i = 0; i < self->mCount; i++)
     {
         cRider_updateAnimation(self->mRiders[i], 1.0f);
-        func_0011EB98(self->mRiders[i]);
+        cRider_updateSkeleton(self->mRiders[i]);
         cAnimModel_buildSkelMatrices(*(void**)(self->mRiders[i] + 0x780));
     }
 }
@@ -665,7 +665,7 @@ INCLUDE_ASM("ai/ai", cAI_commonInit);
 #ifdef SKIP_ASM
 void* func_0010F398(void* self);
 extern "C" void func_00154A58(int rider, int a);
-extern "C" void func_0011D390(void* rider);
+extern "C" void cRider_initAlways(void* rider);
 
 struct sVEntry1297C8 { short delta; short index; int (*fn)(void*); };
 
@@ -691,7 +691,7 @@ struct sAiObj1297C8
  * Calls func_0010F398 (cAI_RefreshGroupAI), zeroes AITick and CountdownTicksLeft, sets EndOfRaceTimer to -1
  * and zeroes EventTimerTick only when @p flag is set. Each computer rider (cRider vtable slot 9), or every
  * rider when @p flag is set, has its stats (metrix + 0xFC) recorded by func_00154A58 and is reset
- * (func_0011D390); the mission riders are always reset.
+ * (cRider_initAlways); the mission riders are always reset.
  *
  * @param aiManager  the AI manager (cAI), viewed through a local layout
  * @param flag  On Tour's shouldInitHuman: also reset the human riders and the event timer
@@ -715,21 +715,21 @@ extern "C" void* cAI_commonInit(cAI* aiManager, int flag)
         if (vt[9].fn(obj + vt[9].delta) != 0 || flag != 0)
         {
             func_00154A58(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
-            func_0011D390(self->mRiders[i]);
+            cRider_initAlways(self->mRiders[i]);
         }
     }
     for (int i = 0; i < self->mCount2; i++)
     {
-        func_0011D390(*(void**)(self->mList[i] + 0x18));
+        cRider_initAlways(*(void**)(self->mList[i] + 0x18));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001298C8);
+INCLUDE_ASM("ai/ai", AITick);
 #ifdef SKIP_ASM
 
-extern "C" int func_001298C8()
+extern "C" int AITick()
 {
     return SSXApp->Game->AI->AITick;
 }
@@ -741,10 +741,10 @@ INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* PadCache;
 extern char str_Player[];
-extern "C" int func_00147290(void* iface, int i);
-extern "C" int func_00147618(void* iface, int i);
-extern "C" int func_00237140(void* a, void* b);
-extern "C" int func_00237280(void* a, void* b);
+extern "C" int cBENewPlayerInterface_getRiderCtrlID(void* iface, int i);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int i);
+extern "C" int cInputSync_createlocalinput(void* a, void* b);
+extern "C" int cInputSync_createremoteinput(void* a, void* b);
 extern "C" void cAI_applyPlayerRulesCustom(cAI* self, void* obj, int i);
 // PORT: cPlayer_cPlayer returns self here (declared void elsewhere in this unit); bound by asm label.
 extern "C" char* cPlayer_cPlayer_IP(void* self, int inChrg) __asm__("cPlayer_cPlayer");
@@ -794,8 +794,8 @@ extern "C" void* cMemMan_alloc_IP(unsigned int size, const char* tag, int flags,
  *
  * Per human (newRace.iNumberHumans) allocates a "Player" (0x1950): Players[i] = it, Riders[i] = its cRider
  * with mAIIndex = mViewIndex = i. Its Input is SSXApp->Inputs[c] (c = the player's controller ID), bound to
- * the input map that func_00147618 names, and its Pad the PadCache pad c. Online the remote player (host: 1,
- * guest: 0) gets a remote InputSync input (func_00237280), no pad, mIsLocal = 0 and finally mViewIndex -2;
+ * the input map that cBENewPlayerInterface_getControllerMapping names, and its Pad the PadCache pad c. Online the remote player (host: 1,
+ * guest: 0) gets a remote InputSync input (cInputSync_createremoteinput), no pad, mIsLocal = 0 and finally mViewIndex -2;
  * the local one a synced input. Also applies the custom rules, cRider_initOnce() and assignPlayer(i, i); both
  * counts become the player count.
  *
@@ -815,12 +815,12 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int n = *(int*)(Cfg_IP() + 0x34);
     for (; i < n; i++) {
-        int ch = func_00147290(iface, i);
+        int ch = cBENewPlayerInterface_getRiderCtrlID(iface, i);
         char* obj = cPlayer_cPlayer_IP(cMemMan_alloc_IP(0x1950, str_Player, 0x80000000, 0), 1);
         self->mRiders[i] = obj ? *(sRiderIP**)(obj + 0x18) : 0;
         self->mRiders[i]->mIndex = idx;
         self->mRiders[i]->mCtrl = idx;
-        int ctrl = func_00147618(iface, idx);
+        int ctrl = cBENewPlayerInterface_getControllerMapping(iface, idx);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
             if ((cBENetworkInterface_networkOpt.bIsHost != 0 && i != 1) || (cBENetworkInterface_networkOpt.bIsHost == 0 && i != 0)) {
                 char* app = (char*)SSXApp;
@@ -829,13 +829,13 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
                 int* inputBase = (int*)app;
                 inputBase += ctrl;
                 *(int*)(*box + 4) = inputBase[46];
-                SetHud_IP(obj, func_00237140(*(void**)(*(char**)(app + 0x84) + 0x7C), *box), HudTab_IP(ch));
+                SetHud_IP(obj, cInputSync_createlocalinput(*(void**)(*(char**)(app + 0x84) + 0x7C), *box), HudTab_IP(ch));
             } else {
                 char* app = (char*)SSXApp;
                 (*(sRiderIP**)(obj + 0x18))->f87C = 0;
                 int* inputBase = (int*)app;
                 inputBase += ctrl;
-                SetHud_IP(obj, func_00237280(*(void**)(*(char**)(app + 0x84) + 0x7C), (void*)inputBase[46]), 0);
+                SetHud_IP(obj, cInputSync_createremoteinput(*(void**)(*(char**)(app + 0x84) + 0x7C), (void*)inputBase[46]), 0);
             }
         } else {
             char* app = (char*)SSXApp;
@@ -881,7 +881,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cRider_cRider(void* self);
 extern "C" void cPlayer_cPlayer(void* self, int inChrg);
 extern "C" void cAnimModel_setScale(void* self, float a, float b);
-extern "C" void func_00148AA8(void* self, int rider, int value);
+extern "C" void cBEStatInterface_setStatLevel(void* self, int rider, int value);
 extern "C" void cRider_addFocusBox(void* self);
 extern "C" void cRider_initOnce(void* self, int immediate);
 struct cRider;
@@ -974,7 +974,7 @@ struct sAiObjMR
  *
  * Does nothing when a mission rider is loaded. Builds a cMissionRider ("MissionRider", 0x1950, constructor
  * inlined) with Input = PlaybackMan +0x6C and no pad, scales its anim model by 0.5, sets its seven stats to
- * 25 (func_00148AA8(.., 5)), gives it the next slot (mAIIndex; mViewIndex 0), a focus box and metrics, and
+ * 25 (cBEStatInterface_setStatLevel(.., 5)), gives it the next slot (mAIIndex; mViewIndex 0), a focus box and metrics, and
  * adds one to NumberOfRidersAllocated and NumberOfMissionRidersLoaded.
  *
  * @param aiManager  the AI manager (cAI), viewed through a local layout
@@ -991,7 +991,7 @@ extern "C" void cAI_initMissionRiders(cAI* aiManager)
     *(int*)(obj + 0xDF0) = *(int*)(playbackMan + 0x6C);
     *(int*)(obj + 0xDF4) = 0;
     cAnimModel_setScale(*(void**)(*(char**)(obj + 0x18) + 0x780), 0.5f, 0.5f);
-    func_00148AA8(cBE_getInterface_Fv(cBE_getBE(), 3), idx, 5);
+    cBEStatInterface_setStatLevel(cBE_getInterface_Fv(cBE_getBE(), 3), idx, 5);
     self->mRiders[idx] = obj ? *(sRiderMR**)(obj + 0x18) : 0;
     self->mRiders[idx]->mIndex = idx;
     self->mRiders[idx]->mCtrl = 0;
@@ -1098,7 +1098,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cComputer_cComputer(void* mem, int a, int b);
 extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* iface, int rider, int ctrl);
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
-extern "C" void func_001473D0(void* iface, int rider, int v);
+extern "C" void cBENewPlayerInterface_setRiderCheatCharID(void* iface, int rider, int v);
 struct cRider;
 void cRider_addRiderMetrix(cRider* rider);
 extern char str_ComputerActorRider[];
@@ -1125,7 +1125,7 @@ struct sAiObj129FF8
  *
  * Actor k uses the character PodiumActorList[k] and the next rider slot: a "ComputerActorRider" cComputer
  * (0x1A90, actor) with mAIIndex = slot, mViewIndex -1, controller -1, player-record byte 0x12 = 0
- * (func_001473D0) and metrics. PodiumActorList has 2 entries, so a third actor would read Riders[0]. Updates
+ * (cBENewPlayerInterface_setRiderCheatCharID) and metrics. PodiumActorList has 2 entries, so a third actor would read Riders[0]. Updates
  * NumberOfRidersAllocated.
  *
  * @param aiManager  the AI manager (cAI), viewed through a local layout
@@ -1145,7 +1145,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         rider->mIndex = idx;
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
-        func_001473D0(iface, idx, 0);
+        cBENewPlayerInterface_setRiderCheatCharID(iface, idx, 0);
         sVEntryCA* vt = *(sVEntryCA**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         sRiderCA* slotRider = self->mRiders[idx];
@@ -1251,25 +1251,25 @@ extern "C" int cAI_isRaceFinished(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_swaploadPathFile);
 #ifdef SKIP_ASM
-extern "C" void func_00112180(void* rider, int v);
-extern "C" void func_0026AF00(void* self);
+extern "C" void cRider_initPath(void* rider, int v);
+extern "C" void cPathSys_purgePaths(void* self);
 extern "C" void func_0026ADA8(void*, int);
 extern char gPaths[];
 /**
  * Swaps in a different AI path file: purges the loaded paths, loads the new file and re-initialises every rider's
  * path.
  *
- * Calls func_0026AF00 (On Tour cPathSys::purgePaths) and func_0026ADA8 on PathSys (gPaths) with the file, then
- * func_00112180 (cRider::initPath(false)) on each of the NumberOfRidersAllocated riders (+0x28 table).
+ * Calls cPathSys_purgePaths (On Tour cPathSys::purgePaths) and func_0026ADA8 on PathSys (gPaths) with the file, then
+ * cRider_initPath (cRider::initPath(false)) on each of the NumberOfRidersAllocated riders (+0x28 table).
  *
  * @param filename  the path file name, passed as an int (On Tour const char* filename)
  */
 extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
     int i;
-    func_0026AF00(gPaths);
+    cPathSys_purgePaths(gPaths);
     func_0026ADA8(gPaths, filename);
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
+        cRider_initPath(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
 }
 #endif
@@ -1281,9 +1281,9 @@ INCLUDE_ASM("ai/ai", cAI_swaploadInjectedPathFile);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
 extern char gPaths[];
-extern "C" void func_0026AF00(void* self);
+extern "C" void cPathSys_purgePaths(void* self);
 extern "C" int func_0026AD70(void* self, int v);
-extern "C" void func_00112180(void* rider, int v);
+extern "C" void cRider_initPath(void* rider, int v);
 
 struct sAiObj12A340
 {
@@ -1299,7 +1299,7 @@ struct sAiObj12A340
  * In BE sections 0x11-0x15, game mode 5 or game event 0xB takes only UID 1 and game mode 6 only UID 2; every
  * other case refuses UIDs 1 and 2, and sections 0x16 and up refuse all files. On acceptance frees the old
  * data of the path object gPaths, loads the file into it and re-attaches each rider's path state
- * (func_00112180) if there is an AI.
+ * (cRider_initPath) if there is an AI.
  *
  * @param uiSectionID  the section ID (On Tour uiSectionID); not read, the section comes from Game->SectionMan
  * @param mode  the file's UID (On Tour uiUID); 1 and 2 are the game-mode-specific variants
@@ -1331,13 +1331,13 @@ extern "C" int cAI_swaploadInjectedPathFile(cAI* self, int uiSectionID, int mode
 ok:
     if (lvl < 0x16)
     {
-        func_0026AF00(gPaths);
+        cPathSys_purgePaths(gPaths);
         func_0026AD70(gPaths, data);
         if ((void*)SSXApp->Game->AI == 0)
             return 1;
         for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            func_00112180(((char**)&self->Riders[0])[i], 0);
+            cRider_initPath(((char**)&self->Riders[0])[i], 0);
         }
         return 1;
     }
@@ -1376,7 +1376,7 @@ INCLUDE_ASM("ai/ai", func_0012A4F0);
 extern "C" void func_0012A4F0(cAI* self) {
     int i;
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
+        cRider_initPath(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
 }
 #endif
@@ -1392,10 +1392,10 @@ INCLUDE_ASM("ai/ai", func_0012A560);
 #ifdef SKIP_ASM
 extern "C" void* func_0026AF70(void* tree, int id);
 extern "C" float func_0026A138(void* node);
-t4Vector func_0026AB20_A560(void* path, int* inRange, float t) __asm__("func_0026AB20");
-void func_0011D660_A560(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("func_0011D660");
-// PORT: prototype mismatch. func_0011FEC8/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+t4Vector cPath_getPathPos_A560(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
+void cRider_putAt_A560(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("cRider_putAt");
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -1470,11 +1470,11 @@ extern "C" void func_0012A560(sAiObj12A340* self, int which)
             float back = markerDist - 1000.0f;
             if (back < 0.0f)
                 back = 0.0f;
-            t4Vector ahead = func_0026AB20_A560(node, 0, markerDist);
-            t4Vector pos = func_0026AB20_A560(node, 0, back);
+            t4Vector ahead = cPath_getPathPos_A560(node, 0, markerDist);
+            t4Vector pos = cPath_getPathPos_A560(node, 0, back);
             for (int j = 0; j < self->mCount; j++) {
                 if (which == -1 || which == j) {
-                    func_0011FEC8_impl(self->mRiders[j], 0);
+                    cRider_setControlState_impl(self->mRiders[j], 0);
                     cRider_setMotionState_impl(self->mRiders[j], 0);
                     t4Vector dir = vSub_A560(ahead, pos);
                     float len = vLen_A560(dir);
@@ -1482,7 +1482,7 @@ extern "C" void func_0012A560(sAiObj12A340* self, int which)
                         vDivEq_A560(dir, len);
                     else
                         dir = Front_A560((cRider*)self->mRiders[j]);
-                    func_0011D660_A560((cRider*)self->mRiders[j], &pos, &dir, 5, 0.0f);
+                    cRider_putAt_A560((cRider*)self->mRiders[j], &pos, &dir, 5, 0.0f);
                 }
             }
             return;
@@ -1497,10 +1497,10 @@ extern "C" void* func_0026AF70(void* tree, int id);
 extern "C" float func_0026A138(void* node);
 // NOTE: float before the flags pointer. EABI numbers int and float args separately, so this is the same ABI as
 // the (self, int*, float) definition; this caller's arg-load order needs it (every other landed user is order-neutral).
-t4Vector func_0026AB20_A768(void* path, float t, int* inRange) __asm__("func_0026AB20");
-void func_0011D660_A768(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("func_0011D660");
-// PORT: prototype mismatch. func_0011FEC8/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+t4Vector cPath_getPathPos_A768(void* path, float t, int* inRange) __asm__("cPath_getPathPos");
+void cRider_putAt_A768(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("cRider_putAt");
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -1579,9 +1579,9 @@ extern "C" void func_0012A768(sAiObj12A340* self, int n)
                 float back = markerDist - (float)n-- * 1000.0f;
                 if (back < 0.0f)
                     back = 0.0f;
-                t4Vector ahead = func_0026AB20_A768(node, markerDist, 0);
-                t4Vector pos = func_0026AB20_A768(node, back, 0);
-                func_0011FEC8_impl(self->mRiders[j], 0);
+                t4Vector ahead = cPath_getPathPos_A768(node, markerDist, 0);
+                t4Vector pos = cPath_getPathPos_A768(node, back, 0);
+                cRider_setControlState_impl(self->mRiders[j], 0);
                 cRider_setMotionState_impl(self->mRiders[j], 0);
                 ((cRider*)self->mRiders[j])->mPenaltyTicks = n * 3600 + 3600;
                 t4Vector dir = vSub_A768(ahead, pos);
@@ -1590,7 +1590,7 @@ extern "C" void func_0012A768(sAiObj12A340* self, int n)
                     vDivEq_A768(dir, len);
                 else
                     dir = Front_A768((cRider*)self->mRiders[j]);
-                func_0011D660_A768((cRider*)self->mRiders[j], &pos, &dir, 5, 0.0f);
+                cRider_putAt_A768((cRider*)self->mRiders[j], &pos, &dir, 5, 0.0f);
             }
             return;
         }
@@ -1668,7 +1668,7 @@ extern "C" int func_0012AA78(sOwner_0012AA78* self) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012AB20);
+INCLUDE_ASM("ai/ai", cAI_prepareToPurgeComputerRiders);
 #ifdef SKIP_ASM
 struct sAiObj12AB20
 {
@@ -1682,7 +1682,7 @@ struct sAiObj12AB20
 struct sVEntry0012AB20 { short delta; short index; int (*fn)(void*); };
 
 
-extern "C" void func_0012AB20(sAiObj12AB20* self)
+extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
 {
     self->m14 = 0;
     for (int i = 0; i < self->mCount; i++)
@@ -1736,7 +1736,7 @@ extern "C" int cAI_isReadyToPurgeComputerRiders(cAI* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012AC48);
+INCLUDE_ASM("ai/ai", cAI_prepareToPurgeComputerActors);
 #ifdef SKIP_ASM
 struct sAiObj12AC48
 {
@@ -1750,7 +1750,7 @@ struct sAiObj12AC48
 struct sVEntry0012AC48 { short delta; short index; int (*fn)(void*); };
 
 
-extern "C" void func_0012AC48(sAiObj12AC48* self)
+extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
 {
     self->m8C = 0;
     for (int i = 0; i < self->mCount; i++)
@@ -2218,7 +2218,7 @@ extern "C" int cRider_syncCheckSum(void* self);
 /**
  * Builds the online sync checksum: one AIrand() draw plus every rider's cRider_syncCheckSum().
  *
- * The AIrand() call advances the shared AI random generator. func_0012BB20 (onlineAICheck) calls this every
+ * The AIrand() call advances the shared AI random generator. cAI_onlineAICheck (onlineAICheck) calls this every
  * 60 ticks of an online race.
  *
  * @return the sum (wrapping)
@@ -2240,7 +2240,7 @@ INCLUDE_ASM("ai/ai", cAI_applyPlayerRulesCustom);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRider_initBoost(void* self);
 extern "C" void cRider_setUbersAllowed(void* self, int a1);
-extern "C" void func_00117520(void* self, int a1);
+extern "C" void cRiderMetrix_setInitialPointsTotal(void* self, int a1);
 extern "C" int func_0014F7A8(int i);
 
 struct sRider_12B498
@@ -2316,7 +2316,7 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, void* obj, int i)
     char* riderMetrix = *(char**)(*(char**)((char*)obj + 0x18) + 0x790);
     if ((D_005308B8_12B498.e[i].f0 >> 2) & 1)
         *(float*)(riderMetrix + 0x1C4) = 0.5f;
-    func_00117520(riderMetrix, D_005308B8_12B498.e[i].x);
+    cRiderMetrix_setInitialPointsTotal(riderMetrix, D_005308B8_12B498.e[i].x);
 }
 #endif
 
@@ -2399,7 +2399,7 @@ extern "C" void cAI_updateOverlapList(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_002EF248(void* frame);
+extern "C" void cRenderStateMan_writeToReplayFrame(void* frame);
 
 struct sVEntryWF { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVEntryWF2 { short delta; short index; void (*fn)(void*, void*); };
@@ -2417,7 +2417,7 @@ static inline void replayWriteObj(char* obj, void* frame)
  *
  * The block (states, ticks, timers, podium list) goes through the frame's virtual write (slot 1); then each
  * player's, computer's and actor's rider handler writes itself (handler vtable slot 2; mission riders are
- * skipped), and func_002EF248, probably the render-state manager's counterpart of
+ * skipped), and cRenderStateMan_writeToReplayFrame, probably the render-state manager's counterpart of
  * cRenderStateMan_readFromReplayFrame.
  *
  * @param frame  the replay frame (On Tour cReplayFramePtr)
@@ -2438,7 +2438,7 @@ extern "C" void cAI_writeToReplayFrame(cAI* self, void* frame)
     {
         replayWriteObj(((char**)&self->Actors[0])[i], frame);
     }
-    func_002EF248(frame);
+    cRenderStateMan_writeToReplayFrame(frame);
 }
 #endif
 
@@ -2530,7 +2530,7 @@ extern "C" void cAI_getPodiumActorList(cAI* self, int* dst)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012BB20);
+INCLUDE_ASM("ai/ai", cAI_onlineAICheck);
 #ifdef SKIP_ASM
 extern signed char D_00535C12[];
 extern "C" void func_00258F20(void* self, int t, int seed);
@@ -2552,7 +2552,7 @@ static inline bool riderOk_12BB20(char* rider)
     return *(float*)(*(char**)(rider + 0x18) + 0x470) >= 0.0f;
 }
 
-extern "C" void func_0012BB20(sAi_12BB20* self)
+extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0)
@@ -2686,7 +2686,7 @@ extern "C" void cGateControl_gainFocus(cGateControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cGateControl_update);
 #ifdef SKIP_ASM
-extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 extern "C" void cGateControl_doSit(cGateControl* self, void* a1);
 extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* a1);
 extern "C" void cGateControl_doGateRock(cGateControl* self, void* a1);
@@ -2695,14 +2695,14 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* a1);
 /**
  * Runs the start gate for one tick: stops any boost, then runs the handler of the current gate state.
  *
- * Calls func_00114130(rider, 0, 0), then by GateState: 0 doGateRock, 1 doGateLaunch, 2 doSit, 3
+ * Calls cRider_setupBoostWarp(rider, 0, 0), then by GateState: 0 doGateRock, 1 doGateLaunch, 2 doSit, 3
  * doGetupFromSit.
  *
  * @param cmd  the gate command (On Tour tGateCmd), passed on to the state handler
  */
 extern "C" void cGateControl_update(cGateControl* self, void* cmd)
 {
-    func_00114130(self->mRider, 0, 0);
+    cRider_setupBoostWarp(self->mRider, 0, 0);
     switch (*(int*)self)
     {
     case 0:
@@ -2798,12 +2798,12 @@ extern "C" void cGateControl_doSit(cGateControl* self, void* cmd)
 //100%
 INCLUDE_ASM("ai/ai", cGateControl_doGetupFromSit);
 #ifdef SKIP_ASM
-extern "C" void func_00113F88(void* rider, float a, float b);
-int func_00312AA0(void* self, int i);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float func_00312AB0(void* self, int i);
 int func_0011FE98(void* self);
-// PORT: prototype mismatch. func_0011FEC8/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 struct sVec4_12C130
@@ -2831,7 +2831,7 @@ static inline sVec4_12C130 vu0Scale_12C130(const sVec4_12C130& in, float s)
 /**
  * Getup-from-sit gate state: launches the rider at a fixed speed once the get-up animation is half done.
  *
- * Holds func_00113F88(rider, 1, 0). While anim slot 2 still plays anim 2: if Static (motion state 3) and past
+ * Holds cRider_setupCrouchBrake(rider, 1, 0). While anim slot 2 still plays anim 2: if Static (motion state 3) and past
  * 50%, sets mVelocity = the matrix's front row * 555.56 and switches to motion state Ground. Once that anim
  * is over: control state NaturalAir (4) if airborne, else Cruise (0), and GateState 0.
  *
@@ -2839,8 +2839,8 @@ static inline sVec4_12C130 vu0Scale_12C130(const sVec4_12C130& in, float s)
  */
 extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* cmd)
 {
-    func_00113F88(self->mRider, 1.0f, 0.0f);
-    if (func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2) == 2)
+    cRider_setupCrouchBrake(self->mRider, 1.0f, 0.0f);
+    if (cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2) == 2)
     {
         if (func_0011FE98(self->mRider) == 3)
         {
@@ -2856,11 +2856,11 @@ extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* cmd)
     {
         if (func_0011FE98(self->mRider) == 1)
         {
-            func_0011FEC8_impl(self->mRider, 4);
+            cRider_setControlState_impl(self->mRider, 4);
         }
         else
         {
-            func_0011FEC8_impl(self->mRider, 0);
+            cRider_setControlState_impl(self->mRider, 0);
         }
         *(int*)self = 0;
     }
@@ -2960,7 +2960,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Gate launch state: pushes the rider out of the gate at the launch speed chosen by doGateRock.
  *
- * Moves GateAnticipate toward 1.0 by 0.015 per tick and holds func_00113F88(rider, 1, 0). While Static
+ * Moves GateAnticipate toward 1.0 by 0.015 per tick and holds cRider_setupCrouchBrake(rider, 1, 0). While Static
  * (motion state 3) with GateAnticipate >= 0.62, sets mVelocity = the front row * CurThrustMax and switches to
  * Ground. At 1.0 plays anim 6 and leaves the gate: control state NaturalAir (4) if airborne, else Cruise (0).
  *
@@ -2987,7 +2987,7 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* cmd)
             n = anticipate + anticipateStep;
     }
     self->GateAnticipate = n;
-    func_00113F88(self->mRider, 1.0f, 0.0f);
+    cRider_setupCrouchBrake(self->mRider, 1.0f, 0.0f);
     if (func_0011FE98(self->mRider) == 3 && self->GateAnticipate >= 0.6200000047683716f)
     {
         char* rider = (char*)self->mRider;
@@ -2999,11 +2999,11 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* cmd)
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 6, 0, -1.0f);
         if (func_0011FE98(self->mRider) == 1)
         {
-            func_0011FEC8_impl(self->mRider, 4);
+            cRider_setControlState_impl(self->mRider, 4);
         }
         else
         {
-            func_0011FEC8_impl(self->mRider, 0);
+            cRider_setControlState_impl(self->mRider, 0);
         }
     }
 }
@@ -3054,7 +3054,7 @@ extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, void* obj)
 //100%
 INCLUDE_ASM("ai/ai", cFinishLineControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" float func_00119368(void* self, int a1);
+extern "C" float cRiderMetrix_evReset(void* self, int a1);
 extern float nFinishLineControl_kFinishStopThreshCPS;
 
 struct sAiVec4_12C5C8 {
@@ -3091,13 +3091,13 @@ struct sAiObj12C5C8
 /**
  * Enters the finish-line control: closes the rider's trick scoring and picks the first finish state.
  *
- * Ends the current trick and combo (func_00119368(metrix, 1)). FinishState is 0 (Brake) when the rider moves
+ * Ends the current trick and combo (cRiderMetrix_evReset(metrix, 1)). FinishState is 0 (Brake) when the rider moves
  * faster than nFinishLineControl_kFinishStopThreshCPS (277.78, set by a static initializer), is spinning (mSpinRate) or stands on a slope
  * (mGroundNormal.z < 0.8); otherwise 1 (IntoStance).
  */
 extern "C" void cFinishLineControl_gainFocus(cFinishLineControl* self)
 {
-    func_00119368(*(void**)((char*)self->mRider + 0x790), 1);
+    cRiderMetrix_evReset(*(void**)((char*)self->mRider + 0x790), 1);
     char* rider = (char*)self->mRider;
     if (nFinishLineControl_kFinishStopThreshCPS < aiLength_12C5C8(*(sAiVec4_12C5C8*)(rider + 0x1E0)))
     {
@@ -3122,15 +3122,15 @@ extern "C" void cFinishLineControl_gainFocus(cFinishLineControl* self)
 INCLUDE_ASM("ai/ai", cFinishLineControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void func_0010E028(void* self, int mode, float t);
-extern "C" void func_00113E80(void*, float);
-extern "C" void func_00113F88(void* rider, float a, float b);
-extern "C" void func_00114130(void* rider, int a, int b);
-extern "C" int func_00114CC0(void* rider);
-extern "C" void func_00115B58(void*);
+extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
+extern "C" void cRider_setupLean(void*, float);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
+extern "C" int cRider_isChangeFakieGround(void* rider);
+extern "C" void cRider_checkForReaction(void*);
 int func_0011FE98(void* self);
-extern "C" int func_00311AE8(void*, int);
-int func_00312AA0(void* self, int i);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern float nFinishLineControl_kFinishStopThreshCPS;
 extern char t4vect_Zero[];
 
@@ -3195,12 +3195,12 @@ struct sAiObj12C678
  * a small lean and no boost or spin, and on flat ground velocity * 0.97 until the speed drops under 277.78 or
  * channel 3 (+0x214) reaches +-1 (then 1). IntoStance (1): velocity * 0.93 until lean and channel 3 settle,
  * then 2 with anim 4 and a queued reaction (kind 1 when rider +0x100 is 1, else 4). Reaction (2): holds the
- * rider still and plays it (func_00115B58) at anim speed 0.75; once func_00311AE8(mRiderAnim, 1) is 0
+ * rider still and plays it (cRider_checkForReaction) at anim speed 0.75; once cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) is 0
  * (probably the reaction is over), mFinishTime = max(mFinishTime, 10) and state 3 (Done).
  */
 extern "C" void cFinishLineControl_update(cFinishLineControl* self)
 {
-    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int anim = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     int prev = anim;
     char* rider = (char*)self->mRider;
     *(float*)(rider + 0x200) = 0.03333333507180214f;
@@ -3208,10 +3208,10 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
     switch (self->FinishState)
     {
     case 0:
-        if (anim == 0x15 || (*(float*)((char*)self->mRider + 0x2DC) == 0.0f && func_00114CC0((char*)self->mRider)))
+        if (anim == 0x15 || (*(float*)((char*)self->mRider + 0x2DC) == 0.0f && cRider_isChangeFakieGround((char*)self->mRider)))
         {
             anim = 0x15;
-            func_00113F88((char*)self->mRider, 0.0f, 0.0f);
+            cRider_setupCrouchBrake((char*)self->mRider, 0.0f, 0.0f);
         }
         else
         {
@@ -3222,12 +3222,12 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
             if (floatZero < *(float*)((char*)self->mRider + 0x1F0))
                 turn = 0.10000000149011612f;
             anim = 0xB;
-            func_00113E80((char*)self->mRider, turn);
-            func_00114130((char*)self->mRider, 0, 0);
+            cRider_setupLean((char*)self->mRider, turn);
+            cRider_setupBoostWarp((char*)self->mRider, 0, 0);
             *(float*)((char*)self->mRider + 0x2DC) = floatZero;
             if (*(float*)((char*)self->mRider + 0x378) < 0.800000011920929f)
             {
-                func_00113F88((char*)self->mRider, floatZero, floatZero);
+                cRider_setupCrouchBrake((char*)self->mRider, floatZero, floatZero);
             }
             else
             {
@@ -3239,7 +3239,7 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
                 }
                 else
                 {
-                    func_00113F88((char*)self->mRider, floatZero, 1.0f);
+                    cRider_setupCrouchBrake((char*)self->mRider, floatZero, 1.0f);
                 }
             }
         }
@@ -3247,8 +3247,8 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
     case 1:
     {
         float floatZero = 0.0f;
-        func_00113F88((char*)self->mRider, floatZero, floatZero);
-        func_00113E80((char*)self->mRider, floatZero);
+        cRider_setupCrouchBrake((char*)self->mRider, floatZero, floatZero);
+        cRider_setupLean((char*)self->mRider, floatZero);
         vu0ScaleEq_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0), 0.9300000071525574f);
         if (aiAbs_12C678(*(float*)((char*)self->mRider + 0x214)) < 0.20000000298023224f &&
             *(float*)((char*)self->mRider + 0x1F0) == floatZero)
@@ -3256,18 +3256,18 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
             self->FinishState = 2;
             anim = 4;
             if (*(int*)((char*)self->mRider + 0x100) == 1)
-                func_0010E028((char*)self->mRider, 1, floatZero);
+                cRider_flagEventReaction((char*)self->mRider, 1, floatZero);
             else
-                func_0010E028((char*)self->mRider, 4, floatZero);
+                cRider_flagEventReaction((char*)self->mRider, 4, floatZero);
         }
         break;
     }
     case 2:
         *(sVec4_12C678*)((char*)self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
         *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = 0.75f;
-        func_00115B58((char*)self->mRider);
+        cRider_checkForReaction((char*)self->mRider);
         *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = 1.0f;
-        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 1) == 0)
         {
             *(float*)((char*)self->mRider + 0x470) = *(float*)((char*)self->mRider + 0x470) >? 10.0f;
             self->FinishState = 3;
@@ -3329,7 +3329,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_0029E578(void* self, void* a1);
-extern "C" int func_00311AE8(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cReplay_eventWipeout(void* self, int key, int id);
 extern "C" void func_00309990(void* self);
 extern void* cWScriptMan_TheWScriptMan;
@@ -3374,7 +3374,7 @@ struct sAiObj12CA30
  *
  * Zeroes mPowerUpBoostTimer, mPowerUpTrickTimer, IsNewImpact and RecoverPercent, clears the audio word of the
  * rider's view (func_0029E578), copies the hip and board-child bone poses (plus mModelOffset) into
- * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When func_00311AE8(mRiderAnim, 2) is 0x16
+ * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) is 0x16
  * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears unk_318. Then
  * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (func_00309990).
  */
@@ -3392,7 +3392,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     vu0AddEq_12CA30((*(sVec4_12CA30*)&self->RiderPrevPose), *(sVec4_12CA30*)((char*)self->mRider + 0x9D0));
     vu0AddEq_12CA30((*(sVec4_12CA30*)&self->BoardPrevPose), *(sVec4_12CA30*)((char*)self->mRider + 0x9D0));
     self->RiderState = 0;
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x16)
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x16)
     {
         cWipeoutMotion_throwItem(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)((char*)self->mRider + 0x1E0), (sVec4_12CA30*)t4vect_Zero, boardPrevPose);
         *(int*)((char*)self->mRider + 0x318) = 0;
@@ -3407,7 +3407,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 extern "C" int cRider_checkForReset_CB68(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PlayWipeoutRecoverFull(void* snd, void* rider);
@@ -3432,7 +3432,7 @@ extern "C" void cWipeoutControl_updateStuck(cWipeoutControl* self);
 // Decays or charges the AI's 0x70 meter (updating its sound), then runs the current state's handler.
 extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
 {
-    func_00114130((char*)self->mRider, 0, 0);
+    cRider_setupBoostWarp((char*)self->mRider, 0, 0);
     if (cRider_checkForReset_CB68((char*)self->mRider, (*input >> 12) & 1, 0)) {
         return;
     }
@@ -3490,14 +3490,14 @@ extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_updateLaunch);
 #ifdef SKIP_ASM
-extern "C" int func_00312AE8(void* self, int i);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float func_00312AB0(void* self, int i);
-extern "C" int func_00311AE8(void*, int);
-extern "C" int func_00312AE8(void* self, int i);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float func_00312AB0(void* self, int i);
-extern "C" int func_00311AE8(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cWipeoutControl_playWipeoutHitTransitionAnim(cWipeoutControl* self);
 extern "C" void cWipeoutMotion_throwRider(char* self, void* vel, void* angvel);
 extern "C" void func_00296868(void* mgr, void* self);
@@ -3599,9 +3599,9 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
     tPose* pose = &nodes[*(int*)(rider + 0x89C)];
     tPose* boardPose = &nodes[*(int*)(rider + 0x8A4)];
     float framePercent = func_00312AB0(*(void**)(rider + 0x784), 2);
-    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
+    if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2))
     {
-        char* an = func_00311B20(*(void**)((char*)self->mRider + 0x784), 2);
+        char* an = cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2);
         float rate = *(float*)(an + 0x90);
         float invDeltaTime = rate / ((framePercent - self->PrevFramePercent) * *(float*)(an + 0x10));
         sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&pose->P), (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), invDeltaTime);
@@ -3610,7 +3610,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
         sV_12CD20 angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*pose));
         sV_12CD20 angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
         cWipeoutMotion_throwRider(*(char**)((char*)self->mRider + 0x77C) + 0x30, (char*)self->mRider + 0x1E0, &angvel);
-        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x17)
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x17)
         {
             vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&boardPose->P), (*(sV_12CD20*)&self->BoardPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), invDeltaTime);
             deltaQuat = Sub_12CD20((*(sV_12CD20*)&boardPose->Q), (*(sV_12CD20*)&self->BoardPrevPose.Q));
@@ -3627,8 +3627,8 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
         {
             self->RiderState = 2;
             cWipeoutControl_playWipeoutHitTransitionAnim(self);
-            if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
-                func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
+            if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+                cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
                 func_00296868(func_0028B180(), (self));
             else
                 func_00296E80(func_0028B180(), (self));
@@ -3659,8 +3659,8 @@ extern "C" void* func_0028B180();
 extern "C" void func_00296E20(void* mgr, void* rider);
 extern "C" void func_00297438(void* mgr, void* rider);
 extern "C" void cSSXAudio_PlayGrunt(void* mgr, void* rider, int a, int b);
-extern "C" int func_00311AE8(void*, int);
-extern "C" int func_00312AE8(void* self, int i);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
 struct sVEntry12D160 { short delta; short index; void (*fn)(void*, float); };
 
@@ -3741,12 +3741,12 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
         aiTail_12D160(self);
         return;
     }
-    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0 &&
-        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0x1D &&
-        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0x19)
+    if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) == 0 &&
+        cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) != 0x1D &&
+        cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) != 0x19)
         return;
     float lim = 694.4444580078125f;
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1C)
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x1C)
         lim = 1666.666748046875f;
     int fast = self->RecoverPercent >= 1.0f || aiOk_12D160(self);
     if ((!aiIsOne_12D160((char*)self->mRider) && speed < lim) || fast)
@@ -3767,7 +3767,7 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
         else
         {
             func_0010F280((char*)self->mRider, fast);
-            if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1C)
+            if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x1C)
                 cSSXAudio_PlayGrunt(func_0028B180(), (char*)self->mRider, 1, 0);
             cWipeoutControl_playWipeoutGroundRecoverAnim(self);
             *(int*)self = 3;
@@ -3782,7 +3782,7 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
     }
     else
     {
-        if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0)
+        if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) != 0)
             cWipeoutControl_playWipeoutGroundAnim(self);
     }
 }
@@ -3803,10 +3803,10 @@ extern "C" void* func_0028B180();
 extern "C" void func_00296310(void* mgr, void* rider);
 extern "C" void func_00296868(void* mgr, void* self);
 extern "C" void func_00296E80(void* mgr, void* self);
-extern "C" int func_00311AE8(void*, int);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float func_00312AB0(void* self, int i);
-extern "C" int func_00312AE8(void* self, int i);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" void func_00313CF0(void* self, int idx, float v);
 
 struct sAiVec4_12D4E8
@@ -3895,8 +3895,8 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
             }
             else
             {
-                if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
-                    func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
+                if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+                    cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
                 {
                     cWipeoutControl_playWipeoutGroundImpactAnim(self);
                     func_00296868(func_0028B180(), self);
@@ -3905,8 +3905,8 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                 {
                     float framePercent = func_00312AB0(*(void**)((char*)self->mRider + 0x784), 2);
                     cWipeoutControl_playWipeoutGroundAnim(self);
-                    float animDuration = *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x10);
-                    func_00313CF0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2), 0, animDuration * framePercent);
+                    float animDuration = *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x10);
+                    func_00313CF0(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2), 0, animDuration * framePercent);
                     func_00296E80(func_0028B180(), self);
                 }
                 *(int*)self = 2;
@@ -3919,9 +3919,9 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         vt[17].fn(rider3 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
         return;
     }
-    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0 ||
-        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
-        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
+    if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) != 0 ||
+        cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+        cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
     {
         int fast = self->RecoverPercent >= 1.0f || aiOk_12D4E8(self);
         if (fast)
@@ -3943,7 +3943,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
             cWipeoutControl_playWipeoutGroundAnim(self);
             *(int*)self = 2;
         }
-        else if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0)
+        else if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) != 0)
         {
             cWipeoutControl_playWipeoutAirAnim(self);
         }
@@ -3954,9 +3954,9 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_updateRecover);
 #ifdef SKIP_ASM
-extern "C" int func_00312AE8(void* self, int i);
-extern "C" void func_002948D0(void* mgr, void* rider, float v);
-extern "C" void func_00119E38(void* p, int flip, int c);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
+extern "C" void cSSXAudio_Land(void* mgr, void* rider, float v);
+extern "C" void cRiderMetrix_evTakeoff(void* p, int flip, int c);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 struct sVEntry12D848 { short delta; short index; void (*fn)(void*, float); };
@@ -3965,10 +3965,10 @@ struct sVEntry12D848 { short delta; short index; void (*fn)(void*, float); };
  * Runs the get-up phase of a wipeout (RS_Recover) and hands the rider back to normal control when the
  * recovery clip ends.
  *
- * A new impact gives a vibration bump and the landing sound (func_002948D0, 0 boost). While the wipeout
+ * A new impact gives a vibration bump and the landing sound (cSSXAudio_Land, 0 boost). While the wipeout
  * motion is on the ground the rumble is 2 * (1 - clip progress). When the main clip completes, on the ground
  * it plays semantic 5 and requests CS_Cruise and MS_Ground; in the air it starts a new takeoff in the trick
- * score (func_00119E38, flag: unk_320 differs from mNaturalStance), plays the air cycle 0x11F and requests
+ * score (cRiderMetrix_evTakeoff, flag: unk_320 differs from mNaturalStance), plays the air cycle 0x11F and requests
  * CS_Spin and MS_Air.
  */
 extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
@@ -3979,7 +3979,7 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
         char* rider = (char*)self->mRider;
         sVEntry12D848* vt = *(sVEntry12D848**)(rider + 0x6C0);
         vt[17].fn(rider + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
-        func_002948D0(func_0028B180(), self->mRider, 0.0f);
+        cSSXAudio_Land(func_0028B180(), self->mRider, 0.0f);
     }
     char* rider = (char*)self->mRider;
     if (*(int*)(*(char**)(rider + 0x77C) + 0x30) == 0)
@@ -3989,20 +3989,20 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
         float percentLeft = 1.0f - func_00312AB0(*(void**)(rider + 0x784), 2);
         vt[18].fn(thisp, percentLeft + percentLeft);
     }
-    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0)
+    if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) != 0)
     {
         char* rider2 = (char*)self->mRider;
         if (*(int*)(*(char**)(rider2 + 0x77C) + 0x30) == 0)
         {
             cRiderAnimBase_play(*(void**)(rider2 + 0x784), 5, 0, -1.0f);
-            func_0011FEC8_impl(self->mRider, 0);
+            cRider_setControlState_impl(self->mRider, 0);
             cRider_setMotionState_impl(self->mRider, 0);
         }
         else
         {
-            func_00119E38(*(void**)(rider2 + 0x790), *(int*)(rider2 + 0x320) != *(int*)(rider2 + 0x324), 0);
+            cRiderMetrix_evTakeoff(*(void**)(rider2 + 0x790), *(int*)(rider2 + 0x320) != *(int*)(rider2 + 0x324), 0);
             cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x11F, 0, -1.0f);
-            func_0011FEC8_impl(self->mRider, 5);
+            cRider_setControlState_impl(self->mRider, 5);
             cRider_setMotionState_impl(self->mRider, 1);
         }
     }
@@ -4014,7 +4014,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_updateStuck);
 #ifdef SKIP_ASM
 extern "C" void func_0010F280(void* rider, int flag);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
-extern "C" int func_00312AE8(void* self, int i);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
 static inline int AiCheck_0012D9D8(char* rider)
 {
@@ -4036,7 +4036,7 @@ extern "C" void cWipeoutControl_updateStuck(cWipeoutControl* self)
     {
         flag = 1;
     }
-    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) || flag)
+    if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) || flag)
     {
         func_0010F280(self->mRider, flag);
         cRider_checkForReset(self->mRider, 0, 2);
@@ -4048,7 +4048,7 @@ extern "C" void cWipeoutControl_updateStuck(cWipeoutControl* self)
 INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutHitTransitionAnim);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_00312AA0(void* anim, int layer);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 /**
  * Swaps the crash clip on the main channel for the matching tumble clip, the air or the ground variant.
@@ -4061,7 +4061,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void cWipeoutControl_playWipeoutHitTransitionAnim(cWipeoutControl* self)
 {
     bool isAir = *(int*)self == 1;
-    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     switch (cur) {
     case 0x148:
@@ -4175,7 +4175,7 @@ extern "C" void cWipeoutControl_playWipeoutHitTransitionAnim(cWipeoutControl* se
 INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutAirAnim);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_00312AA0(void* anim, int layer);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 /**
  * Switches the main channel to the airborne tumble clip that matches the current ground clip.
@@ -4187,7 +4187,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 // Picks the rider's layer-2 follow-up animation and replays it.
 extern "C" void cWipeoutControl_playWipeoutAirAnim(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     bool useRootPose = *(int*)((char*)self->mRider + 0x150) == 1;
     if (!useRootPose) {
@@ -4230,7 +4230,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutGroundAnim);
 // Reverse of cWipeoutControl_playWipeoutAirAnim: maps follow-up animations back to their base.
 extern "C" void cWipeoutControl_playWipeoutGroundAnim(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     bool useRootPose = *(int*)((char*)self->mRider + 0x150) == 1;
     if (!useRootPose) {
@@ -4262,7 +4262,7 @@ extern "C" void cWipeoutControl_playWipeoutGroundAnim(cWipeoutControl* self)
 INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutAirRecoverAnim);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_00312AA0(void* anim, int layer);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 /**
  * Plays the in-air recovery clip that matches the current air tumble.
@@ -4273,7 +4273,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 // Remaps the rider's current layer-2 animation to its follow-up and plays it.
 extern "C" void cWipeoutControl_playWipeoutAirRecoverAnim(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     switch (cur) {
     case 0x175:
@@ -4317,7 +4317,7 @@ extern "C" void cWipeoutControl_playWipeoutAirRecoverAnim(cWipeoutControl* self)
 INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutGroundRecoverAnim);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_00312AA0(void* anim, int layer);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 /**
  * Plays the get-up clip that matches the current ground tumble.
@@ -4328,7 +4328,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 // Remaps the rider's current layer-2 animation to its follow-up and plays it.
 extern "C" void cWipeoutControl_playWipeoutGroundRecoverAnim(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     switch (cur) {
     case 0x16A:
@@ -4552,7 +4552,7 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self)
 INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutGroundImpactAnim);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_00312AA0(void* anim, int layer);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 /**
@@ -4563,7 +4563,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  */
 extern "C" void cWipeoutControl_playWipeoutGroundImpactAnim(cWipeoutControl* self)
 {
-    switch (func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2)) {
+    switch (cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2)) {
     case 0x17B:
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x180, 0, -1.0f);
         break;
@@ -4586,8 +4586,8 @@ extern "C" void cWipeoutControl_playWipeoutGroundImpactAnim(cWipeoutControl* sel
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_chooseTumbleAnimRate);
 #ifdef SKIP_ASM
-extern "C" int func_00311AE8(void*, int);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 
 static inline bool aiOk_12E528(void* self)
 {
@@ -4615,22 +4615,22 @@ extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self)
 {
     char* rider = (char*)self->mRider;
     char* handler = *(char**)(rider + 0x77C);
-    char* animSeq = func_00311B20(*(void**)(rider + 0x784), 2);
+    char* animSeq = cRiderAnimBase_getCurrentAnimSequence(*(void**)(rider + 0x784), 2);
     float rawRate = aiLength_12C5C8(*(sAiVec4_12C5C8*)(handler + 0x60)) * *(float*)(animSeq + 0x10) * 0.15915493667125702f;
     float res = aiClamp_12E528(rawRate, 0.5f, 2.0f);
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
-        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+        cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
     {
-        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+        *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
     }
     else if (self->RecoverPercent >= 1.0f || aiOk_12E528(self))
     {
         // PORT: g++ `>?` (max) operator.
-        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = res >? 2.0f;
+        *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = res >? 2.0f;
     }
     else
     {
-        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = res;
+        *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = res;
     }
     return res;
 }
@@ -4645,27 +4645,27 @@ struct sVEntry0012E690 {
     int (*fn)(void*);
 };
 
-extern "C" int func_001298C8();
-extern "C" void func_0010E028(void* self, int mode, float t);
+extern "C" int AITick();
+extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
 extern "C" void* func_0028B180();
 extern "C" void func_002A02D8(void*, void*);
 
 /**
  * Leaves the wipeout control: on even logic ticks, asks for a negative rider reaction and the wipeout speech.
  *
- * Only when the logic tick (func_001298C8) is even: a human rider (rider vtable slot 8, isHuman) gets
- * reaction kREACT_Neg (func_0010E028, kind 4, no delay), then func_002A02D8 requests the Wipeout_* speech. On
+ * Only when the logic tick (AITick) is even: a human rider (rider vtable slot 8, isHuman) gets
+ * reaction kREACT_Neg (cRider_flagEventReaction, kind 4, no delay), then func_002A02D8 requests the Wipeout_* speech. On
  * Tour's loseFocus also takes the next control state; this body has no such parameter.
  */
 extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
 {
-    if ((func_001298C8() & 1) == 0)
+    if ((AITick() & 1) == 0)
     {
         char* sub = (char*)self->mRider + 0x6C0;
         sVEntry0012E690* vt = *(sVEntry0012E690**)sub;
         if (vt[8].fn(sub + vt[8].delta))
         {
-            func_0010E028(self->mRider, 4, 0.0f);
+            cRider_flagEventReaction(self->mRider, 4, 0.0f);
         }
         func_002A02D8(func_0028B180(), self->mRider);
     }
@@ -4728,14 +4728,14 @@ extern "C" int func_00116378(void*);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cRider_checkRailBoardCollisions(void*);
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-extern "C" void func_00114130(void* rider, int a, int b);
-extern "C" void func_00113E80(void*, float);
-extern "C" void func_00113F38(void*, float);
-extern "C" void func_00113F88(void* rider, float a, float b);
-extern "C" int func_00312AE8(void* self, int i);
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
+extern "C" void cRider_setupLean(void*, float);
+extern "C" void cRider_setupRailBalance(void*, float);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
-extern "C" void func_00115640(void* rider);
+extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
 struct sAiVec4_12E778
 {
@@ -4780,11 +4780,11 @@ static inline float aiDot_12E778(const sAiVec4_12E778& a, const sAiVec4_12E778& 
  *
  * The finish check (func_00116378), the reset check (ResetPath, bit 12) and the rail attach
  * (cRider_checkRailBoardCollisions) may each end the tick. In the air it stops boosting and zeroes the turn
- * target; otherwise it passes BoostHeld/BoostPressed (bits 14/13) to func_00114130 and sets the rail balance
+ * target; otherwise it passes BoostHeld/BoostPressed (bits 14/13) to cRider_setupBoostWarp and sets the rail balance
  * (bits 21-26) in rail motion or the turn target from CruiseTurn (bits 15-20, negated when moving against
  * mGroundForward). Crouch, brake and animation-turn targets go to 0. When the main clip completes, on a rail
  * it plays the rail cycle (cRailslideControl_playGainFocusAnim) and requests CS_Railslide; else it restores
- * the stance (func_00115640) and requests CS_NaturalAir in the air or CS_Cruise.
+ * the stance (cRider_undoRailslideModeOrientation) and requests CS_NaturalAir in the air or CS_Cruise.
  *
  * @param in  the command words (On Tour tBumpCmd)
  */
@@ -4798,16 +4798,16 @@ extern "C" void cBumpControl_update(cBumpControl* self, void* in)
         return;
     if (func_0011FE98(*(void**)self) == 1)
     {
-        func_00114130(*(void**)self, 0, 0);
-        func_00113E80(*(void**)self, 0.0f);
+        cRider_setupBoostWarp(*(void**)self, 0, 0);
+        cRider_setupLean(*(void**)self, 0.0f);
     }
     else
     {
         int w = *(int*)in;
-        func_00114130(*(void**)self, (w >> 14) & 1, (w >> 13) & 1);
+        cRider_setupBoostWarp(*(void**)self, (w >> 14) & 1, (w >> 13) & 1);
         if (func_0011FE98(*(void**)self) == 4)
         {
-            func_00113F38(*(void**)self, ((sAiBitsA_12E778*)in)->v * 0.032258063554763794f);
+            cRider_setupRailBalance(*(void**)self, ((sAiBitsA_12E778*)in)->v * 0.032258063554763794f);
         }
         else
         {
@@ -4815,28 +4815,28 @@ extern "C" void cBumpControl_update(cBumpControl* self, void* in)
             float turn = ((sAiBitsB_12E778*)in)->v * 0.032258063554763794f;
             if (aiDot_12E778(*(sAiVec4_12E778*)(rider + 0x1E0), *(sAiVec4_12E778*)(rider + 0x3A0)) < 0.0f)
                 turn = -turn;
-            func_00113E80(rider, turn);
+            cRider_setupLean(rider, turn);
         }
     }
     float z = 0.0f;
-    func_00113F88(*(void**)self, z, z);
+    cRider_setupCrouchBrake(*(void**)self, z, z);
     char* rider2 = *(char**)self;
     *(float*)(rider2 + 0x204) = z;
     *(float*)(rider2 + 0x200) = 0.03333333507180214f;
-    if (func_00312AE8(*(void**)(*(char**)self + 0x784), 2) == 0)
+    if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)(*(char**)self + 0x784), 2) == 0)
         return;
     if (func_0011FE98(*(void**)self) == 4)
     {
         cRailslideControl_playGainFocusAnim((cRailslideControl*)(*(char**)(*(char**)self + 0x77C) + 0x2B0), 0);
-        func_0011FEC8_impl(*(void**)self, 7);
+        cRider_setControlState_impl(*(void**)self, 7);
     }
     else
     {
-        func_00115640(*(void**)self);
+        cRider_undoRailslideModeOrientation(*(void**)self);
         if (func_0011FE98(*(void**)self) == 1)
-            func_0011FEC8_impl(*(void**)self, 4);
+            cRider_setControlState_impl(*(void**)self, 4);
         else
-            func_0011FEC8_impl(*(void**)self, 0);
+            cRider_setControlState_impl(*(void**)self, 0);
     }
 }
 #endif
@@ -4879,23 +4879,23 @@ INCLUDE_ASM("ai/ai", cPrewindControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int cRider_checkRailBoardCollisions(void*);
-extern "C" void func_00113E80(void*, float);
-extern "C" void func_00113F38(void*, float);
-extern "C" void func_00113F88(void* rider, float a, float b);
-extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" void cRider_setupLean(void*, float);
+extern "C" void cRider_setupRailBalance(void*, float);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 extern "C" void func_00114298(void* rider, float v);
-extern "C" int func_00114CC0(void* rider);
-extern "C" void func_001158B8(void* rider, void* a, void* b, float c, float d);
+extern "C" int cRider_isChangeFakieGround(void* rider);
+extern "C" void cRider_snapAxisIncrement(void* rider, void* a, void* b, float c, float d);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int func_00116378(void*);
 extern "C" void func_00116930(void* rider);
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" void cPrewindControl_playFromTable(cPrewindControl*, void*);
 extern "C" void cSSXAudio_Lift(void* self, void* rider);
-extern "C" int func_00311AE8(void*, int);
-int func_00312AA0(void* self, int i);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern char D_0043D840[];
 extern char D_0043D788[];
 
@@ -4931,14 +4931,14 @@ static inline float aiAbs_12E9B8(float x)
  * on release.
  *
  * The finish, reset (ResetPath) and rail-attach checks may end the tick. On release (JumpHeld, bit 13, clear)
- * it snaps the prewind pair to pi/4 steps (func_001158B8), resets the orientation offset for rail styles 3/4,
+ * it snaps the prewind pair to pi/4 steps (cRider_snapAxisIncrement), resets the orientation offset for rail styles 3/4,
  * plays the release clip from D_0043D840, clears the rail style, takes off unless airborne (func_00114298
  * with the crouch value, MS_Air, cSSXAudio_Lift), zeroes the turn, crouch and brake targets and requests
  * CS_Spin.
  *
  * While held: boost from BoostHeld and a full crouch target. A class-10 (landing) clip sets the turn
  * (PrewindTurn) or rail balance (word 1, clamped to +-0.5) and zeroes the prewind targets; semantic 0x15
- * zeroes the turn and prewind targets. Else, with no rail style and no spin, func_00114CC0 may start a
+ * zeroes the turn and prewind targets. Else, with no rail style and no spin, cRider_isChangeFakieGround may start a
  * reverse turn (semantic 0x15). Otherwise PrewindSpin and PrewindFlip (bits 15-20, 21-26), snapped to -1, 0
  * or 1, become the targets of the prewind channels (rider + 0x2A4, + 0x2B0), the turn or rail balance is set,
  * and the prewind clip is picked from D_0043D788.
@@ -4957,7 +4957,7 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
     if ((w & 0x2000) == 0)
     {
         char* rider0 = *(char**)self;
-        func_001158B8(rider0, rider0 + 0x2B0, rider0 + 0x2A4, 0.7853982448577881f, 0.20000000298023224f);
+        cRider_snapAxisIncrement(rider0, rider0 + 0x2B0, rider0 + 0x2A4, 0.7853982448577881f, 0.20000000298023224f);
         char* rider = *(char**)self;
         if (*(int*)(rider + 0x328) == 3 || *(int*)(rider + 0x328) == 4)
         {
@@ -4976,23 +4976,23 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
             cSSXAudio_Lift(gSSXAudio, *(void**)self);
         }
         float z = 0.0f;
-        func_00113E80(*(void**)self, z);
-        func_00113F88(*(void**)self, z, z);
-        func_0011FEC8_impl(*(void**)self, 5);
+        cRider_setupLean(*(void**)self, z);
+        cRider_setupCrouchBrake(*(void**)self, z, z);
+        cRider_setControlState_impl(*(void**)self, 5);
         return;
     }
-    func_00114130(*(void**)self, (w >> 14) & 1, 0);
+    cRider_setupBoostWarp(*(void**)self, (w >> 14) & 1, 0);
     float zero = 0.0f;
-    func_00113F88(*(void**)self, 1.0f, zero);
+    cRider_setupCrouchBrake(*(void**)self, 1.0f, zero);
     float sx = aiClamp_12E9B8(((sAiBits0_12E9B8*)((char*)in + 4))->v * 0.032258063554763794f, -0.5f, 0.5f);
     float sy = aiClamp_12E9B8(((sAiBits6_12E9B8*)((char*)in + 4))->v * 0.032258063554763794f, -0.5f, 0.5f);
-    if (func_00311AE8(*(void**)(*(char**)self + 0x784), 2) == 10)
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 2) == 10)
     {
         char* rider = *(char**)self;
         if (*(int*)(rider + 0x328) == 0)
-            func_00113E80(rider, sx);
+            cRider_setupLean(rider, sx);
         else
-            func_00113F38(rider, sy);
+            cRider_setupRailBalance(rider, sy);
         char* rider1 = *(char**)self;
         *(float*)(rider1 + 0x2AC) = 0.0f;
         *(float*)(rider1 + 0x2A8) = 0.08333379030227661f;
@@ -5001,9 +5001,9 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
         *(float*)(rider2 + 0x2B8) = 0.0f;
         return;
     }
-    if (func_00312AA0(*(void**)(*(char**)self + 0x784), 2) == 0x15)
+    if (cRiderAnimBase_getCurrentAnimID(*(void**)(*(char**)self + 0x784), 2) == 0x15)
     {
-        func_00113E80(*(void**)self, zero);
+        cRider_setupLean(*(void**)self, zero);
         char* rider1 = *(char**)self;
         *(float*)(rider1 + 0x2AC) = zero;
         *(float*)(rider1 + 0x2A8) = 0.08333379030227661f;
@@ -5013,7 +5013,7 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
         return;
     }
     char* rider = *(char**)self;
-    if (*(int*)(rider + 0x328) == 0 && *(float*)(rider + 0x2DC) == zero && func_00114CC0(rider))
+    if (*(int*)(rider + 0x328) == 0 && *(float*)(rider + 0x2DC) == zero && cRider_isChangeFakieGround(rider))
     {
         cRiderAnimBase_play(*(void**)(*(char**)self + 0x784), 0x15, 0, -1.0f);
         return;
@@ -5046,9 +5046,9 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
     *(float*)(rider4 + 0x2B4) = rate * aiAbs_12E9B8(uy - *(float*)(rider4 + 0x2B0)) * 0.01666666753590107f;
     char* rider5 = *(char**)self;
     if (*(int*)(rider5 + 0x328) == 0)
-        func_00113E80(rider5, sx);
+        cRider_setupLean(rider5, sx);
     else
-        func_00113F38(rider5, sy);
+        cRider_setupRailBalance(rider5, sy);
     cPrewindControl_playFromTable(self, D_0043D788);
 }
 #endif
@@ -5057,7 +5057,7 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
 INCLUDE_ASM("ai/ai", cPrewindControl_playFromTable);
 #ifdef SKIP_ASM
 extern "C" float func_0031C228(float x);
-int func_00312AA0(void* self, int i);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 static inline float aiAtan2_12EE30(float y, float x)
@@ -5108,7 +5108,7 @@ extern "C" void cPrewindControl_playFromTable(cPrewindControl* self, void* tbl_)
         angle = aiAtan2_12EE30(-y, -x);
     else
         angle = aiAtan2_12EE30(-y, x);
-    int cur = func_00312AA0(*(void**)(*(char**)self + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)(*(char**)self + 0x784), 2);
     int anim;
     if (mag == 0.0f)
         anim = ((int (*)[5])tbl_)[0][*(int*)(*(char**)self + 0x328)];
@@ -5167,7 +5167,7 @@ static inline float aiAtan2_12F118(float y, float x)
  * Returns the direction of the prewind input, the angle of (spin, flip), or reports that there is none.
  *
  * Reads the prewind spin and flip values (rider + 0x2A4, + 0x2B0) with a 0.1 dead zone. Called by the trick
- * scoring (func_00117FE0).
+ * scoring (cRiderMetrix_updateStaticHUD).
  *
  * @param out  set to 1 when both values are inside the dead zone, else 0 (On Tour bool& isNull)
  * @return atan2(flip, spin) in radians, or 0 when there is no input
@@ -5190,12 +5190,12 @@ extern "C" float cPrewindControl_getFlipSpinInputAng(cPrewindControl* self, int*
 //100%
 INCLUDE_ASM("ai/ai", cResetControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" char* func_00311B20(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
 void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 void* func_002E4D70(void* self);
-extern "C" void func_002E4370(void* self, int a1, void* a2, void* a3, float f0, float f1, float f2, int a4, void* a5);
+extern "C" void cTransitionMan_StartTransition(void* self, int a1, void* a2, void* a3, float f0, float f1, float f2, int a4, void* a5);
 extern void* cFade_TObj_vtbl[];
 
 struct sColor_12F230
@@ -5212,7 +5212,7 @@ struct sFx_12F230
 };
 
 // PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
-extern "C" void* func_002E4CE8_sz(unsigned size) __asm__("func_002E4CE8");
+extern "C" void* cTransitionObj_operator_new_sz(unsigned size) __asm__("cTransitionObj_operator_new");
 
 static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
 {
@@ -5228,34 +5228,34 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
  *
  * FadePercent and the main-channel sequence rate (+0x90) are cleared (stored as integer 0). When
  * cResetControl_shouldTransition() allows it, a running effect on the rider's view (func_00230698 with
- * mViewIndex) is stopped (func_002E4578), then two white cFade_TObj fades go to func_002E4370 (times 0.5, 0,
+ * mViewIndex) is stopped (func_002E4578), then two white cFade_TObj fades go to cTransitionMan_StartTransition (times 0.5, 0,
  * 0.5) with a pointer to FadePercent, which drives the fade.
  */
 extern "C" void cResetControl_gainFocus(cResetControl* self)
 {
     int* flag = (int*)((char*)self + 4);
     *flag = 0;
-    *(int*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 0;
+    *(int*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 0;
     if (cResetControl_shouldTransition(self))
     {
         char* obj = (char*)func_00230698(SSXApp->Game, *(int*)((char*)self->mRider + 0x870));
         if (*(int*)(obj + 0x44))
             func_002E4578(obj);
-        sFx_12F230* firstFade = (sFx_12F230*)func_002E4CE8_sz(0x14);
+        sFx_12F230* firstFade = (sFx_12F230*)cTransitionObj_operator_new_sz(0x14);
         sColor_12F230 ca;
         ca.r = 1.0f;
         ca.g = 1.0f;
         ca.b = 1.0f;
         ca.a = 1.0f;
         initFx_12F230(firstFade, ca);
-        sFx_12F230* secondFade = (sFx_12F230*)func_002E4CE8_sz(0x14);
+        sFx_12F230* secondFade = (sFx_12F230*)cTransitionObj_operator_new_sz(0x14);
         sColor_12F230 cb;
         cb.r = 1.0f;
         cb.g = 1.0f;
         cb.b = 1.0f;
         cb.a = 1.0f;
         initFx_12F230(secondFade, cb);
-        func_002E4370(obj, 1, firstFade, secondFade, 0.5f, 0.0f, 0.5f, 0, flag);
+        cTransitionMan_StartTransition(obj, 1, firstFade, secondFade, 0.5f, 0.0f, 0.5f, 0, flag);
     }
 }
 #endif
@@ -5265,16 +5265,16 @@ INCLUDE_ASM("ai/ai", cResetControl_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-extern "C" char* func_00311B20(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
 void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" float func_00119368(void* self, int a1);
-extern "C" void func_00119E38(void* p, int flip, int c);
-extern "C" void func_00112D58(void*);
+extern "C" float cRiderMetrix_evReset(void* self, int a1);
+extern "C" void cRiderMetrix_evTakeoff(void* p, int flip, int c);
+extern "C" void cRider_switchToResetPath(void*);
 extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 extern signed char D_00535C12[];
 
@@ -5283,19 +5283,19 @@ struct sVec4_12F398
     float x, y, z, w;
 };
 
-extern "C" sVec4_12F398 func_0026A8B8(void* self, float t);
-extern "C" void func_0011D660_12F398(void* self, void* a, sVec4_12F398* b, int n, float t) __asm__("func_0011D660");
+extern "C" sVec4_12F398 cPath_getPathHeading(void* self, float t);
+extern "C" void cRider_putAt_12F398(void* self, void* a, sVec4_12F398* b, int n, float t) __asm__("cRider_putAt");
 
 /**
  * Advances the reset fade, moves the rider back onto the course halfway through, and hands over to natural
  * air at the end.
  *
  * FadePercent approaches 1 by mTimeScale * 0.025 per tick. On crossing 0.5 it picks a reset route
- * (func_00112D58), places the rider along the path direction (func_0026A8B8, func_0011D660 with semantic
+ * (cRider_switchToResetPath), places the rider along the path direction (cPath_getPathHeading, cRider_putAt with semantic
  * 0x11F and 200 cm clearance, 1000 when cGameEvent (D_00535C12) is 2), calls cRider_cleanupAfterPutAt() and
- * takes boost through func_00119368 (which also counts the reset): 10% of the boost meter (rider + 0x2F8) for
+ * takes boost through cRiderMetrix_evReset (which also counts the reset): 10% of the boost meter (rider + 0x2F8) for
  * an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when shouldTransition), starts a
- * new score takeoff (func_00119E38), restores the main sequence rate to 1 and requests CS_NaturalAir and
+ * new score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and requests CS_NaturalAir and
  * MS_Air.
  */
 extern "C" void cResetControl_update(cResetControl* self)
@@ -5313,25 +5313,25 @@ extern "C" void cResetControl_update(cResetControl* self)
     if (prevFadePercent <= 0.5f && n > 0.5f)
     {
         float range = 200.0f;
-        func_00112D58(self->mRider);
+        cRider_switchToResetPath(self->mRider);
         char* rider = (char*)self->mRider;
-        const sVec4_12F398& dir = func_0026A8B8(*(void**)(rider + 0xAB8), *(float*)(rider + 0x4C4));
+        const sVec4_12F398& dir = cPath_getPathHeading(*(void**)(rider + 0xAB8), *(float*)(rider + 0x4C4));
         if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C12[0] == 2)
             range = 1000.0f;
-        func_0011D660_12F398(self->mRider, (char*)self->mRider + 0x490, (sVec4_12F398*)&dir, 0x11F, range);
+        cRider_putAt_12F398(self->mRider, (char*)self->mRider + 0x490, (sVec4_12F398*)&dir, 0x11F, range);
         cRider_cleanupAfterPutAt(self->mRider, 1);
         if (*(int*)self != 0)
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119368(*(void**)((char*)self->mRider + 0x790), 0));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReset(*(void**)((char*)self->mRider + 0x790), 0));
         else
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119368(*(void**)((char*)self->mRider + 0x790), 1));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReset(*(void**)((char*)self->mRider + 0x790), 1));
     }
     if (self->FadePercent == 1.0f)
     {
         if (cResetControl_shouldTransition(self))
             func_002E4578(func_00230698(SSXApp->Game, *(int*)((char*)self->mRider + 0x870)));
-        func_00119E38(*(void**)((char*)self->mRider + 0x790), 0, 0);
-        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
-        func_0011FEC8_impl(self->mRider, 4);
+        cRiderMetrix_evTakeoff(*(void**)((char*)self->mRider + 0x790), 0, 0);
+        *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+        cRider_setControlState_impl(self->mRider, 4);
         cRider_setMotionState_impl(self->mRider, 1);
     }
 }
@@ -5462,13 +5462,13 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int cRider_checkRailBoardCollisions(void*);
-extern "C" int func_00107578(void* rider, int on);
-extern "C" void func_00114130(void* rider, int a, int b);
+extern "C" int cRider_checkHandplantCollisions(void* rider, int on);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cRider_checkForPunch(void* rider, int a, int b);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-extern "C" int func_00311AE8(void*, int);
-int func_00312AA0(void* self, int i);
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float func_0031C228(float x);
 
 struct sAiBitsX_12F730
@@ -5571,13 +5571,13 @@ extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, void* in)
     float y = ((sAiBitsY_12F730*)((char*)in + 4))->v * 0.032258063554763794f;
     if (w & 0x2000)
     {
-        if (func_00107578((char*)self->mRider, y > 0.5f))
+        if (cRider_checkHandplantCollisions((char*)self->mRider, y > 0.5f))
             return;
         y = 1.0f;
     }
     if (cRider_checkRailBoardCollisions((char*)self->mRider))
         return;
-    func_00114130((char*)self->mRider, 0, 0);
+    cRider_setupBoostWarp((char*)self->mRider, 0, 0);
     if (self->IsGrabHeld != 0 && self->InitGrabHeld == -1)
         self->InitGrabHeld = *((signed char*)in + 2);
     if (*((signed char*)in + 2) != self->InitGrabHeld || *((signed char*)in + 2) == -1)
@@ -5608,19 +5608,19 @@ extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, void* in)
     char* rider4 = (char*)self->mRider;
     *(float*)(rider4 + 0x218) = 0.05000000447034836f;
     *(int*)(rider4 + 0x21C) = 0;
-    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int anim = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     char* rider5 = (char*)self->mRider;
     if (*(float*)(rider5 + 0x220) == 0.0f && *(float*)(rider5 + 0x214) == 0.0f && *(float*)(rider5 + 0x1F0) == 0.0f && self->IsGrabHeld == 0)
     {
         if (anim != 0x11F)
         {
-            if (func_00311AE8(*(void**)(rider5 + 0x784), 2) != 9)
+            if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(rider5 + 0x784), 2) != 9)
                 cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x11F, 0, -1.0f);
         }
-        func_0011FEC8_impl((char*)self->mRider, 5);
+        cRider_setControlState_impl((char*)self->mRider, 5);
         return;
     }
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 9)
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 9)
         return;
     int desAnim = 10;
     char* rider6 = (char*)self->mRider;
@@ -5634,16 +5634,16 @@ extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, void* in)
 //100%
 INCLUDE_ASM("ai/ai", cNaturalAirControl_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int func_00311AE8(void*, int);
-extern "C" void func_00311E88(void*, int, float);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 
 /**
  * Leaves the natural air control: when going anywhere but cruise, ends an attack still playing on the upper
  * body.
  *
  * If @p next is not CS_Cruise and the channel-1 clip is a block or punch (class 3 or 13), fades channel 0
- * (the attack's held cycle) out over 0.1 s (func_00311E88) and restores channel 1's sequence rate to 1, so an
+ * (the attack's held cycle) out over 0.1 s (cRiderAnimBase_blendOutAll) and restores channel 1's sequence rate to 1, so an
  * attack survives a landing only.
  *
  * @param next  control state being entered (eControlState)
@@ -5652,11 +5652,11 @@ extern "C" void cNaturalAirControl_loseFocus(cNaturalAirControl* self, int next)
 {
     if (next)
     {
-        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 1) == 3 ||
-            func_00311AE8(*(void**)((char*)self->mRider + 0x784), 1) == 0xD)
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 1) == 3 ||
+            cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 1) == 0xD)
         {
-            func_00311E88(*(void**)((char*)self->mRider + 0x784), 0, 0.10000000149011612f);
-            *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 1) + 0x90) = 1.0f;
+            cRiderAnimBase_blendOutAll(*(void**)((char*)self->mRider + 0x784), 0, 0.10000000149011612f);
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 1) + 0x90) = 1.0f;
         }
     }
 }
@@ -5736,12 +5736,12 @@ extern "C" int func_00116378(void*);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cRider_checkRailBoardCollisions(void*);
 extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl*);
-extern "C" int func_001162C8(void*, int, int);
-extern "C" void func_00114130(void* rider, int a, int b);
-extern "C" void func_00113E80(void*, float);
-extern "C" void func_00113F38(void*, float);
-extern "C" void func_00113F88(void* rider, float a, float b);
-extern "C" void func_00115B58(void*);
+extern "C" int cRider_checkForPrewind(void*, int, int);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
+extern "C" void cRider_setupLean(void*, float);
+extern "C" void cRider_setupRailBalance(void*, float);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+extern "C" void cRider_checkForReaction(void*);
 extern "C" void cRider_checkForProximityAction(void*);
 struct sPadIn_130228;
 extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, sPadIn_130228* in);
@@ -5782,11 +5782,11 @@ static inline float aiClamp_12FC80(float v, float lo, float hi)
  * Updates the board-press control (CS_BoardPress): steering, boost and the handler for the current press
  * phase.
  *
- * The finish, reset (bit 12), rail-attach, airborne (checkAirMotion) and jump (func_001162C8 with
+ * The finish, reset (bit 12), rail-attach, airborne (checkAirMotion) and jump (cRider_checkForPrewind with
  * JumpHeld/JumpPressed, bits 15/16) checks may each end the tick. Then boost from BoostHeld/BoostPressed
  * (bits 14/13), crouch and brake targets 0, and either the rail balance (bits 24-29, clamped to +-0.5) with a
  * rail style or the turn from CruiseTurn (bits 18-23) clamped to +-||pivot| - 0.5|. After the reaction and
- * proximity updates (func_00115B58, cRider_checkForProximityAction) it runs the State handler:
+ * proximity updates (cRider_checkForReaction, cRider_checkForProximityAction) it runs the State handler:
  * handleIntoState, handleBalanceState, func_001304D0 (BP_IntoAir, which only sets BP_Balance) or
  * handleExitState.
  *
@@ -5803,15 +5803,15 @@ extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
     if (cBoardPressControl_checkAirMotion(self))
         return;
     int w = *(int*)in;
-    if (func_001162C8(self->mRider, (w >> 15) & 1, (w >> 16) & 1))
+    if (cRider_checkForPrewind(self->mRider, (w >> 15) & 1, (w >> 16) & 1))
         return;
     int w2 = *(int*)in;
-    func_00114130(self->mRider, (w2 >> 14) & 1, (w2 >> 13) & 1);
-    func_00113F88(self->mRider, 0.0f, 0.0f);
+    cRider_setupBoostWarp(self->mRider, (w2 >> 14) & 1, (w2 >> 13) & 1);
+    cRider_setupCrouchBrake(self->mRider, 0.0f, 0.0f);
     char* rider = (char*)self->mRider;
     if (*(int*)(rider + 0x328) != 0)
     {
-        func_00113F38(rider, aiClamp_12FC80(((sAiBitsC_12FC80*)in)->v * 0.032258063554763794f, -0.5f, 0.5f));
+        cRider_setupRailBalance(rider, aiClamp_12FC80(((sAiBitsC_12FC80*)in)->v * 0.032258063554763794f, -0.5f, 0.5f));
     }
     else
     {
@@ -5821,9 +5821,9 @@ extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
             maxTurn = absPivot - 0.5f;
         else
             maxTurn = 0.5f - absPivot;
-        func_00113E80(self->mRider, aiClamp_12FC80(((sAiBitsD_12FC80*)in)->v * 0.032258063554763794f, -maxTurn, maxTurn));
+        cRider_setupLean(self->mRider, aiClamp_12FC80(((sAiBitsD_12FC80*)in)->v * 0.032258063554763794f, -maxTurn, maxTurn));
     }
-    func_00115B58(self->mRider);
+    cRider_checkForReaction(self->mRider);
     cRider_checkForProximityAction(self->mRider);
     switch (*(int*)self)
     {
@@ -5924,14 +5924,14 @@ extern "C" void cBoardPressControl_changeFakieBoardPress(cBoardPressControl* sel
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_checkAirMotion);
 #ifdef SKIP_ASM
-int func_00312AA0(void* self, int i);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" void func_00116930(void* rider);
-extern "C" float func_00119A38(void*);
-extern "C" float func_00119AD8(void* p, int v);
+extern "C" float cRiderMetrix_evPressEnd(void*);
+extern "C" float cRiderMetrix_evPressPivot(void* p, int v);
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_12FFF8(float x)
@@ -5946,7 +5946,7 @@ static inline float aiAbs_12FFF8(float x)
  *
  * Acts only in MS_Air and clears any rail style. In BP_IntoAir it sends the pivot (rider + 0x280) to 0 (clips
  * 0x25/0x26) or to +-1 (clips 0x1D/0x1E) and waits until it is within 0.15 of that; then it scores the pivot
- * and the press (func_00119AD8, func_00119A38), plays 0x11F and requests CS_Spin. Otherwise a playing pivot
+ * and the press (cRiderMetrix_evPressPivot, cRiderMetrix_evPressEnd), plays 0x11F and requests CS_Spin. Otherwise a playing pivot
  * clip first sets BP_IntoAir, and any other clip gives the ollie clip 0x1B (nose) or 0x23 and CS_Spin.
  *
  * @return 1 when the rider is airborne (the caller's tick ends), 0 on the ground
@@ -5962,7 +5962,7 @@ extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl* self)
         *(int*)(rider + 0x328) = 0;
         func_00116930(self->mRider);
     }
-    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int anim = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     if (*(int*)self == 2)
     {
         int ok = 0;
@@ -5991,10 +5991,10 @@ extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl* self)
         if (ok == 0)
             return 1;
         char* rider3 = (char*)self->mRider;
-        cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119AD8(*(void**)(rider3 + 0x790), *(int*)(rider3 + 0x330)));
-        cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119A38(*(void**)((char*)self->mRider + 0x790)));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressPivot(*(void**)(rider3 + 0x790), *(int*)(rider3 + 0x330)));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(*(void**)((char*)self->mRider + 0x790)));
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x11F, 0, -1.0f);
-        func_0011FEC8_impl(self->mRider, 5);
+        cRider_setControlState_impl(self->mRider, 5);
         return 1;
     }
     if (anim == 0x25 || anim == 0x26 || anim == 0x1D || anim == 0x1E)
@@ -6008,7 +6008,7 @@ extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl* self)
             cRiderAnimBase_play(*(void**)(rider4 + 0x784), 0x1B, 0, -1.0f);
         else
             cRiderAnimBase_play(*(void**)(rider4 + 0x784), 0x23, 0, -1.0f);
-        func_0011FEC8_impl(self->mRider, 5);
+        cRider_setControlState_impl(self->mRider, 5);
     }
     return 1;
 }
@@ -6019,7 +6019,7 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_handleIntoState);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" float func_001199F8(void*, int);
+extern "C" float cRiderMetrix_evPressStart(void*, int);
 
 // PORT: abs.s via inline asm (use fabsf off-PS2).
 static inline float Abs_130228(float x)
@@ -6043,7 +6043,7 @@ struct sPadIn_130228
  * Letting go (BoardPress exactly 0 and |BoardPivot| < 0.5, word 1 bits 0-5 and 6-11) sends the press depth
  * (rider + 0x268) to 0 at 2 * mTimeScale / 60, plays the release clip 0x21 (tail) or 0x19 and enters BP_Exit.
  * Otherwise the board depth (rider + 0x274) approaches 0.5 at mTimeScale / 60 and the press depth 1 at twice
- * that; at exactly 1 it scores the press (func_001199F8), enters BP_Balance and plays 0x24 with the pivot at
+ * that; at exactly 1 it scores the press (cRiderMetrix_evPressStart), enters BP_Balance and plays 0x24 with the pivot at
  * 1 (tail) or 0x1C with it at 0.
  *
  * @param in  the command (On Tour tBoardPressCmd)
@@ -6078,7 +6078,7 @@ extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, sPa
     char* rider3 = (char*)self->mRider;
     if (*(float*)(rider3 + 0x268) == 1.0f)
     {
-        cRider_flagEventBoostPowerUp(self->mRider, 1, func_001199F8(*(void**)(rider3 + 0x790), *(int*)(rider3 + 0x330)));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressStart(*(void**)(rider3 + 0x790), *(int*)(rider3 + 0x330)));
         *(int*)self = 1;
         char* rider4 = (char*)self->mRider;
         if (*(int*)(rider4 + 0x330) == 2)
@@ -6159,13 +6159,13 @@ void func_001304D0(void* self)
 INCLUDE_ASM("ai/ai", cBoardPressControl_handleExitState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_00312AA0(void* self, int i);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" void func_00115640(void* rider);
-extern "C" float func_00119A38(void*);
+extern "C" void cRider_undoRailslideModeOrientation(void* rider);
+extern "C" float cRiderMetrix_evPressEnd(void*);
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
 
 struct sPadIn_1304E0
@@ -6181,15 +6181,15 @@ struct sPadIn_1304E0
  *
  * While a release clip (0x21 or 0x19) plays and the press depth (rider + 0x268) is above 0, pushing
  * BoardPress past 0.5 the same way again re-presses: clip 0x20 (tail) or 0x18 (nose), mPressType to match,
- * depth target 1 and BP_Into. Otherwise it scores the end of a nose or tail press (func_00119A38) and goes
+ * depth target 1 and BP_Into. Otherwise it scores the end of a nose or tail press (cRiderMetrix_evPressEnd) and goes
  * back to the rail (rail cycle clip, CS_Railslide) in rail motion, else to CS_Cruise after restoring the
- * stance (func_00115640).
+ * stance (cRider_undoRailslideModeOrientation).
  *
  * @param in  the command (On Tour tBoardPressCmd)
  */
 extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, sPadIn_1304E0* in)
 {
-    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int anim = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     char* rider;
     if ((anim == 0x21 || anim == 0x19) && 0.0f < *(float*)((rider = (char*)self->mRider) + 0x268))
     {
@@ -6216,17 +6216,17 @@ extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, sPa
     rider = (char*)self->mRider;
     if (*(int*)(rider + 0x330) == 1 || *(int*)(rider + 0x330) == 2)
     {
-        cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119A38(*(void**)(rider + 0x790)));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(*(void**)(rider + 0x790)));
     }
     if (func_0011FE98(self->mRider) == 4)
     {
         cRailslideControl_playGainFocusAnim((cRailslideControl*)(*(char**)((char*)self->mRider + 0x77C) + 0x2B0), 0);
-        func_0011FEC8_impl(self->mRider, 7);
+        cRider_setControlState_impl(self->mRider, 7);
     }
     else
     {
-        func_00115640(self->mRider);
-        func_0011FEC8_impl(self->mRider, 0);
+        cRider_undoRailslideModeOrientation(self->mRider);
+        cRider_setControlState_impl(self->mRider, 0);
     }
 }
 #endif
@@ -6234,9 +6234,9 @@ extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, sPa
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_checkForFakie);
 #ifdef SKIP_ASM
-int func_00312AA0(void* self, int i);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 int func_0011FE98(void* self);
-extern "C" int func_00114CC0(void* rider);
+extern "C" int cRider_isChangeFakieGround(void* rider);
 // PORT: cRiderAnimBase_play returns a value (the unit declares it void); int-returning view bound by asm label.
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 
@@ -6244,20 +6244,20 @@ extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blen
  * Tries a reverse turn during a balanced board press, which swaps the press between nose and tail.
  *
  * Returns 1 at once while a reverse clip (0x17 or 0x1F) plays. Nothing is tried while a pivot clip plays, off
- * the ground (motion not MS_Ground) or with a spin rate (mSpinRate) set; otherwise, when func_00114CC0 starts
+ * the ground (motion not MS_Ground) or with a spin rate (mSpinRate) set; otherwise, when cRider_isChangeFakieGround starts
  * a reverse turn, it plays 0x17 and makes a nose press a tail press, or plays 0x1F and makes it a nose press.
  *
  * @return 1 when a reverse is playing or was started, otherwise 0
  */
 extern "C" int cBoardPressControl_checkForFakie(cBoardPressControl* self)
 {
-    int curAnimId = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int curAnimId = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     if (curAnimId == 0x17 || curAnimId == 0x1F) return 1;
     if (curAnimId == 0x25 || curAnimId == 0x26 || curAnimId == 0x1D || curAnimId == 0x1E) return 0;
     if (func_0011FE98(self->mRider) != 0) return 0;
     char* rider = (char*)self->mRider;
     if (*(float*)(rider + 0x2DC) != 0.0f) return 0;
-    if (func_00114CC0(rider) != 0)
+    if (cRider_isChangeFakieGround(rider) != 0)
     {
         char* rider2 = (char*)self->mRider;
         if (*(int*)(rider2 + 0x330) == 1)
@@ -6283,8 +6283,8 @@ extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl*);
 extern "C" void func_00116930(void* rider);
 extern "C" void func_00114298(void* rider, float v);
 extern "C" void cSSXAudio_Lift(void* self, void* rider);
-// PORT: prototype mismatch. func_0011FEC8/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
@@ -6329,7 +6329,7 @@ extern "C" int cBoardPressControl_checkForOllie(cBoardPressControl* self, void* 
     }
     func_00114298(self->mRider, 1.0f);
     cRider_setMotionState_impl(self->mRider, 1);
-    func_0011FEC8_impl(self->mRider, 5);
+    cRider_setControlState_impl(self->mRider, 5);
     cSSXAudio_Lift(gSSXAudio, self->mRider);
     return 1;
 }
@@ -6342,7 +6342,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void cBoardPressControl_changeFakieBoardPress(cBoardPressControl* self);
 extern "C" void cBoardPressControl_autoCompletePivot(cBoardPressControl*);
 extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl*);
-int func_00312AA0(void* self, int i);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float func_0031C228(float x);
 
 struct sAiVec4_08D8
@@ -6468,7 +6468,7 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
     float ang = aiAtan2_08D8(stickY, stickX);
     float curAngle = *(float*)(((char*)self->mRider) + 0x280) * 3.1415927410125732f;
     float deltaAngle = aiWrap_08D8(ang - curAngle);
-    int anim = func_00312AA0(*(void**)(((char*)self->mRider) + 0x784), 2);
+    int anim = cRiderAnimBase_getCurrentAnimID(*(void**)(((char*)self->mRider) + 0x784), 2);
     int special = anim == 0x25 || anim == 0x26 || anim == 0x1D || anim == 0x1E;
     if (!special && aiAbs_08D8(deltaAngle) >= 0.4712389409542084f)
     {
@@ -6530,7 +6530,7 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_checkForWipeout);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_002A1560(void* mgr, void* rider);
-extern "C" void func_0010EB30(void* rider, int id, int a, int b, void* info);
+extern "C" void cRider_flagEventWipeout(void* rider, int id, int a, int b, void* info);
 
 struct sAiBitsA_130DD0
 {
@@ -6638,7 +6638,7 @@ static inline float Curve_130DD0(const sCurve_130DD0* c, float x)
  * target is the press (word 1 bits 0-5, negated for a tail press, at least 0), capped at 0.5 + BalanceSec / 2
  * in the first second and then snapped to 0 or 1 (1 when it or |BoardPivot| exceeds 0.5). The rate is 1 when
  * crossing 0.5, else a blend over 5 s of the curves D_004A1114 and D_004A111C, with the Whooh speech
- * (func_002A1560) above depth 0.8. After 1 s at full depth it calls the hard crash func_0010EB30 with
+ * (func_002A1560) above depth 0.8. After 1 s at full depth it calls the hard crash cRider_flagEventWipeout with
  * semantic 0x167 (tail) or 0x166 (nose).
  *
  * @param in  the command (On Tour tBoardPressCmd)
@@ -6701,9 +6701,9 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, void
             info.dir = t4vect_ZAxis;
         char* rider5 = (char*)self->mRider;
         if (*(int*)(rider5 + 0x330) == 2)
-            func_0010EB30(rider5, 0x167, 0, *(int*)(rider5 + 0x438), &info);
+            cRider_flagEventWipeout(rider5, 0x167, 0, *(int*)(rider5 + 0x438), &info);
         else
-            func_0010EB30(rider5, 0x166, 0, *(int*)(rider5 + 0x438), &info);
+            cRider_flagEventWipeout(rider5, 0x166, 0, *(int*)(rider5 + 0x438), &info);
         return 1;
     }
     return 0;
@@ -6770,15 +6770,15 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_forceExit);
 #ifdef SKIP_ASM
 extern "C" void cBoardPressControl_autoCompletePivot(cBoardPressControl*);
 extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl*);
-extern "C" float func_00119A38(void*);
+extern "C" float cRiderMetrix_evPressEnd(void*);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 
 /**
  * Ends a board press early: settles the pivot and scores the press.
  *
  * Runs cBoardPressControl_autoCompletePivot() and cBoardPressControl_blendOutOfPivot(), then scores the end
- * of a nose or tail press (func_00119A38 through cRider_flagEventBoostPowerUp). Called by the jump request
- * func_001162C8 and the soft-collision handler func_00108388.
+ * of a nose or tail press (cRiderMetrix_evPressEnd through cRider_flagEventBoostPowerUp). Called by the jump request
+ * cRider_checkForPrewind and the soft-collision handler cRider_doBump.
  */
 extern "C" void cBoardPressControl_forceExit(cBoardPressControl* self)
 {
@@ -6788,7 +6788,7 @@ extern "C" void cBoardPressControl_forceExit(cBoardPressControl* self)
     int pressType = *(int*)((char*)rider + 0x330);
     if (pressType >= 1 && pressType <= 2)
     {
-        cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119A38(*(void**)((char*)rider + 0x790)));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(*(void**)((char*)rider + 0x790)));
     }
 }
 #endif
@@ -6827,25 +6827,25 @@ extern "C" void cBoardPressControl_autoCompletePivot(cBoardPressControl* self)
 INCLUDE_ASM("ai/ai", cBoardPressControl_blendOutOfPivot);
 #ifdef SKIP_ASM
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" float func_00119AD8(void* p, int v);
+extern "C" float cRiderMetrix_evPressPivot(void* p, int v);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 /**
  * Ends a board-press pivot: completes it into the other press or turns back to the press it started from.
  *
- * For pivot anims 0x25/0x26 a pivot (mSlewed[12]) of at most 0.5 scores a half turn (func_00119AD8), plays
+ * For pivot anims 0x25/0x26 a pivot (mSlewed[12]) of at most 0.5 scores a half turn (cRiderMetrix_evPressPivot), plays
  * press anim 0x1C and sets mPressType 1; otherwise it calls changeFakieBoardPress() (probably undoing the
  * stance swap checkForPivot made) and plays 0x24. Pivots 0x1D/0x1E mirror this but complete at 0.5 or more.
  */
 extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl* self)
 {
-    int curAnimId = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int curAnimId = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     if (curAnimId >= 0x25 && curAnimId <= 0x26)
     {
         char* rider = (char*)self->mRider;
         if (aiAbs_12F118(*(float*)(rider + 0x280)) <= 0.5f)
         {
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119AD8(*(void**)(rider + 0x790), *(int*)(rider + 0x330)));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressPivot(*(void**)(rider + 0x790), *(int*)(rider + 0x330)));
             cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x1C, 0, -1.0f);
             *(int*)((char*)self->mRider + 0x330) = 1;
         }
@@ -6860,7 +6860,7 @@ extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl* self)
         char* rider = (char*)self->mRider;
         if (aiAbs_12F118(*(float*)(rider + 0x280)) >= 0.5f)
         {
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119AD8(*(void**)(rider + 0x790), *(int*)(rider + 0x330)));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressPivot(*(void**)(rider + 0x790), *(int*)(rider + 0x330)));
             cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x24, 0, -1.0f);
             *(int*)((char*)self->mRider + 0x330) = 2;
         }
@@ -6925,7 +6925,7 @@ INCLUDE_ASM("ai/ai", cCruiseControl_gainFocus__FPv);
 /**
  * Prepares cruising: clears the rider's proximity timer and its prewind gate.
  *
- * Zeroes unk_35C (counted up by cRider_checkForProximityAction) and the word at +0x360, which func_001162C8
+ * Zeroes unk_35C (counted up by cRider_checkForProximityAction) and the word at +0x360, which cRider_checkForPrewind
  * reads as a float: while it is 0 a held prewind button starts a prewind straight away.
  */
 void cCruiseControl_gainFocus(void* self)
@@ -6943,18 +6943,18 @@ extern "C" int func_00116378(void*);
 extern "C" int cRider_checkForReset_1620(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cCruiseControl_checkAirMotion(cCruiseControl* self);
 extern "C" int cRider_checkRailBoardCollisions(void*);
-extern "C" int func_00107578(void* rider, int on);
-extern "C" int func_001162C8(void*, int, int);
-extern "C" int func_001161D0(void* rider, float v);
+extern "C" int cRider_checkHandplantCollisions(void* rider, int on);
+extern "C" int cRider_checkForPrewind(void*, int, int);
+extern "C" int cRider_checkForBoardPress(void* rider, float v);
 extern "C" int cRider_checkForPunch(void* rider, int a, int b);
-extern "C" void func_00114130(void* rider, int a, int b);
-extern "C" void func_00113E80(void*, float);
-extern "C" void func_00113F88(void* rider, float a, float b);
-extern "C" void func_00115B58(void*);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
+extern "C" void cRider_setupLean(void*, float);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+extern "C" void cRider_checkForReaction(void*);
 extern "C" void cRider_checkForProximityAction(void*);
-extern "C" int func_00114CC0(void* rider);
-extern "C" int func_00311AE8(void*, int);
-int func_00312AA0(void* self, int i);
+extern "C" int cRider_isChangeFakieGround(void* rider);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 unsigned int AIrand();
 
 struct sAiVec4_1620
@@ -7071,7 +7071,7 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, void* in)
         return;
     if (*(int*)in & 0x2000)
     {
-        if (func_00107578(*(void**)self, y > 0.5f))
+        if (cRider_checkHandplantCollisions(*(void**)self, y > 0.5f))
             return;
         x = aiClamp_1620(x, -0.5f, 0.5f);
         y = 1.0f;
@@ -7083,25 +7083,25 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, void* in)
             return;
     }
     int w = *(int*)in;
-    if (func_001162C8(*(void**)self, (w >> 15) & 1, (w >> 14) & 1))
+    if (cRider_checkForPrewind(*(void**)self, (w >> 15) & 1, (w >> 14) & 1))
         return;
     if (*(int*)in & 0x8000)
     {
         y = 1.0f;
         desBrake = 0.0f;
     }
-    if (func_001161D0(*(void**)self, ((sAiBitsD_1620*)((char*)in + 4))->v * 0.032258063554763794f))
+    if (cRider_checkForBoardPress(*(void**)self, ((sAiBitsD_1620*)((char*)in + 4))->v * 0.032258063554763794f))
         return;
     int w2 = *(int*)in;
     if (cRider_checkForPunch(*(void**)self, (w2 >> 18) & 1, (w2 >> 19) & 1))
         x = aiClamp_1620(x, -0.5f, 0.5f);
     int w3 = *(int*)in;
-    func_00114130(*(void**)self, (w3 >> 17) & 1, (w3 >> 16) & 1);
-    func_00113E80(*(void**)self, x);
-    func_00113F88(*(void**)self, y, desBrake);
-    func_00115B58(*(void**)self);
+    cRider_setupBoostWarp(*(void**)self, (w3 >> 17) & 1, (w3 >> 16) & 1);
+    cRider_setupLean(*(void**)self, x);
+    cRider_setupCrouchBrake(*(void**)self, y, desBrake);
+    cRider_checkForReaction(*(void**)self);
     cRider_checkForProximityAction(*(void**)self);
-    int cur = func_00312AA0(*(void**)(*(char**)self + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)(*(char**)self + 0x784), 2);
     int anim = cur;
     if (cur == 0x16)
     {
@@ -7115,7 +7115,7 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, void* in)
         *(float*)(rider3 + 0x224) = 0.03333333507180214f;
         *(int*)(rider3 + 0x228) = 0;
     }
-    else if (cur == 0x15 || (*(float*)(*(char**)self + 0x2DC) == 0.0f && func_00114CC0(*(void**)self)))
+    else if (cur == 0x15 || (*(float*)(*(char**)self + 0x2DC) == 0.0f && cRider_isChangeFakieGround(*(void**)self)))
     {
         anim = 0x15;
         char* rider1 = *(char**)self;
@@ -7125,13 +7125,13 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, void* in)
         *(float*)(rider2 + 0x218) = 0.03333333507180214f;
         *(int*)(rider2 + 0x21C) = 0;
     }
-    else if (func_00311AE8(*(void**)(*(char**)self + 0x784), 2) == 10)
+    else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 2) == 10)
     {
         char* rider1 = *(char**)self;
         *(int*)(rider1 + 0x204) = 0;
         *(float*)(rider1 + 0x200) = 0.03333333507180214f;
     }
-    else if (func_00311AE8(*(void**)(*(char**)self + 0x784), 2) == 5)
+    else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 2) == 5)
     {
         char* rider1 = *(char**)self;
         *(float*)(rider1 + 0x200) = 0.03333333507180214f;
@@ -7221,15 +7221,15 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, void* in)
 //100%
 INCLUDE_ASM("ai/ai", cCruiseControl_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int func_00311AE8(void*, int);
-extern "C" void func_00311E88(void*, int, float);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 
 /**
  * Leaves cruising; unless natural air follows, it fades out anim layer 0 while a punch plays on layer 1.
  *
  * A punch is a layer-1 anim of type 3 or 0xD (see cRider_checkForPunch); layer 0 fades over 0.1 s
- * (func_00311E88) and layer 1's playback rate (+0x90) is set back to 1.
+ * (cRiderAnimBase_blendOutAll) and layer 1's playback rate (+0x90) is set back to 1.
  *
  * @param next  the control state being entered (eControlState; CS_NaturalAir, 4, skips this)
  */
@@ -7237,11 +7237,11 @@ extern "C" void cCruiseControl_loseFocus(cCruiseControl* self, int next)
 {
     if (next != 4)
     {
-        if (func_00311AE8(*(void**)(*(char**)self + 0x784), 1) == 3 ||
-            func_00311AE8(*(void**)(*(char**)self + 0x784), 1) == 0xD)
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 1) == 3 ||
+            cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 1) == 0xD)
         {
-            func_00311E88(*(void**)(*(char**)self + 0x784), 0, 0.10000000149011612f);
-            *(float*)(func_00311B20(*(void**)(*(char**)self + 0x784), 1) + 0x90) = 1.0f;
+            cRiderAnimBase_blendOutAll(*(void**)(*(char**)self + 0x784), 0, 0.10000000149011612f);
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(*(char**)self + 0x784), 1) + 0x90) = 1.0f;
         }
     }
 }
@@ -7252,7 +7252,7 @@ INCLUDE_ASM("ai/ai", cCruiseControl_checkAirMotion);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 
 /**
  * Switches to natural-air control once the rider has left the ground.
@@ -7263,7 +7263,7 @@ extern "C" int cCruiseControl_checkAirMotion(cCruiseControl* self)
 {
     if (func_0011FE98(*(void**)self) == 1)
     {
-        func_0011FEC8_impl(*(void**)self, 4);
+        cRider_setControlState_impl(*(void**)self, 4);
         return 1;
     }
     return 0;
@@ -7297,7 +7297,7 @@ INCLUDE_ASM("ai/ai", cRailslideControl_update);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" bool func_001446A0(void* self, int bit);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
-extern "C" int func_001161D0(void* rider, float v);
+extern "C" int cRider_checkForBoardPress(void* rider, float v);
 extern "C" void cRailslideControl_chooseRailSpin(cRailslideControl* self, int neg);
 extern "C" int cRailslideControl_checkForUberGrind(cRailslideControl* self, int id);
 extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, void* a1);
@@ -7345,23 +7345,23 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, void* in)
     if (cRailslideControl_checkAirMotion(self, in))
         return;
     int w = *(int*)in;
-    if (func_001162C8(self->mRider, (w >> 14) & 1, (w >> 13) & 1))
+    if (cRider_checkForPrewind(self->mRider, (w >> 14) & 1, (w >> 13) & 1))
         return;
     if (cRailslideControl_checkForUberGrind(self, ((sPadA_131D30*)in)->id))
         return;
     int w2 = *(int*)in;
     float k = 0.032258063554763794f;
     float floatZero = 0.0f;
-    func_00114130(self->mRider, (w2 >> 16) & 1, (w2 >> 15) & 1);
-    func_00113F38(self->mRider, ((sPadB_131D30*)in)->v * k);
-    func_00113F88(self->mRider, floatZero, floatZero);
-    func_00115B58(self->mRider);
+    cRider_setupBoostWarp(self->mRider, (w2 >> 16) & 1, (w2 >> 15) & 1);
+    cRider_setupRailBalance(self->mRider, ((sPadB_131D30*)in)->v * k);
+    cRider_setupCrouchBrake(self->mRider, floatZero, floatZero);
+    cRider_checkForReaction(self->mRider);
     cRider_checkForProximityAction(self->mRider);
     sPadC_131D30* in2 = (sPadC_131D30*)((char*)in + 4);
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0xE) {
-        if (!func_001446A0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0xE) {
+        if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
             return;
-        if (func_001161D0(self->mRider, in2->y * k))
+        if (cRider_checkForBoardPress(self->mRider, in2->y * k))
             return;
         float fy = in2->x * k;
         if (fy == floatZero)
@@ -7369,7 +7369,7 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, void* in)
         cRailslideControl_chooseRailSpin(self, fy < floatZero);
         return;
     }
-    if (func_001161D0(self->mRider, in2->y * k))
+    if (cRider_checkForBoardPress(self->mRider, in2->y * k))
         return;
     float fx = in2->y * k;
     float fy = in2->x * k;
@@ -7383,7 +7383,7 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, void* in)
         cRailslideControl_chooseRailSpin(self, desRailSpin < 0.0f);
         return;
     }
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0xA) {
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0xA) {
         char* rider = (char*)self->mRider;
         *(float*)(rider + 0x240) = 0.0f;
         *(float*)(rider + 0x23C) = 0.06666667014360428f;
@@ -7392,7 +7392,7 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, void* in)
     char* rider = (char*)self->mRider;
     *(float*)(rider + 0x240) = clamp_131D30(*(float*)(*(char**)(rider + 0x77C) + 0xC8) * 1.2000000476837158f, -1.0f, 1.0f);
     *(float*)(rider + 0x23C) = 0.06666667014360428f;
-    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
     char* rider2 = (char*)self->mRider;
     int railStyle = *(int*)(rider2 + 0x328);
     int anim;
@@ -7429,7 +7429,7 @@ extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" int cRiderAnimBase_play_2060(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" void func_00116930(void* rider);
-float func_00119918_2060(void* p, int st, float h) __asm__("func_00119918__FPvi");
+float cRiderMetrix_evRailSpin_2060(void* p, int st, float h) __asm__("cRiderMetrix_evRailSpin__FPvi");
 
 struct sQuat_2060
 {
@@ -7468,7 +7468,7 @@ static inline void flip_2060(void* self, int f)
  *
  * With @p dir set RSpinAngle drops by pi/2 and the stance goes 1->3->2->4->1, else it grows by pi/2 and goes
  * 1->4->2->3->1. Entering stance 2 sets the switch flag unk_320 and the anim mirror, leaving it clears them;
- * the anim heading offset follows the stance (anims 0x31-0x36). The spin is scored with func_00119918().
+ * the anim heading offset follows the stance (anims 0x31-0x36). The spin is scored with cRiderMetrix_evRailSpin().
  *
  * @param dir  nonzero for one direction (On Tour isCCW), zero for the other
  */
@@ -7527,7 +7527,7 @@ extern "C" void cRailslideControl_chooseRailSpin(cRailslideControl* self, int di
         break;
         }
     }
-    cRider_flagEventBoostPowerUp(RIDER_2060, 1, func_00119918_2060(*(void**)(RIDER_2060 + 0x790), *(int*)(RIDER_2060 + 0x328), *(float*)self));
+    cRider_flagEventBoostPowerUp(RIDER_2060, 1, cRiderMetrix_evRailSpin_2060(*(void**)(RIDER_2060 + 0x790), *(int*)(RIDER_2060 + 0x328), *(float*)self));
     func_00116930(RIDER_2060);
 }
 #undef RIDER_2060
@@ -7536,9 +7536,9 @@ extern "C" void cRailslideControl_chooseRailSpin(cRailslideControl* self, int di
 //100%
 INCLUDE_ASM("ai/ai", cRailslideControl_checkForUberGrind);
 #ifdef SKIP_ASM
-// PORT: prototype mismatch. func_0011FEC8 is defined with one param, but its body
+// PORT: prototype mismatch. cRider_setControlState is defined with one param, but its body
 // forwards $5 to cRiderHandler__setControlState.
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_UberRailDeny(void* snd, void* rider);
 
@@ -7560,7 +7560,7 @@ extern "C" int cRailslideControl_checkForUberGrind(cRailslideControl* self, int 
         if (*(float*)(rider + 0x2F0) > 0.0f && ((*(int*)(rider + 0xB2C) >> 1) & 1))
         {
             *(int*)(*(char**)(rider + 0x77C) + 0x394) = id;
-            func_0011FEC8_impl(self->mRider, 0xC);
+            cRider_setControlState_impl(self->mRider, 0xC);
             return 1;
         }
         if (id != self->PrevGrindHeld)
@@ -7618,13 +7618,13 @@ extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl* self, int
 INCLUDE_ASM("ai/ai", cRailslideControl_checkAirMotion);
 #ifdef SKIP_ASM
 int func_0011FE98(void* self);
-// PORT: prototype mismatch. func_0011FEC8 is defined with one param, but its body
+// PORT: prototype mismatch. cRider_setControlState is defined with one param, but its body
 // forwards $5 to cRiderHandler__setControlState.
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-extern "C" int func_00311AE8(void*, int);
-extern "C" char* func_00311B20(void*, int);
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" bool func_001446A0(void* self, int bit);
-extern "C" void func_00115640(void* rider);
+extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
 struct sAiBits00132770
 {
@@ -7635,7 +7635,7 @@ struct sAiBits00132770
  * Hands control to the air states when the rider has come off the rail into the air.
  *
  * Waits while a rail spin anim (type 0xE) has not reached its event 0, then leaves the rail stance
- * (func_00115640) and switches to CS_Spin when the rail spin input (word 1 bits 0-5) is nonzero, else to
+ * (cRider_undoRailslideModeOrientation) and switches to CS_Spin when the rail spin input (word 1 bits 0-5) is nonzero, else to
  * CS_NaturalAir.
  *
  * @param cmd  the rail slide command (On Tour tRailslideCmd)
@@ -7647,21 +7647,21 @@ extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, void* c
     {
         return 0;
     }
-    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0xE)
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0xE)
     {
-        if (!func_001446A0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
+        if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
         {
             return 0;
         }
     }
-    func_00115640(self->mRider);
+    cRider_undoRailslideModeOrientation(self->mRider);
     if (((sAiBits00132770*)((char*)cmd + 4))->v * 0.032258063554763794f != 0.0f)
     {
-        func_0011FEC8_impl(self->mRider, 5);
+        cRider_setControlState_impl(self->mRider, 5);
     }
     else
     {
-        func_0011FEC8_impl(self->mRider, 4);
+        cRider_setControlState_impl(self->mRider, 4);
     }
     return 1;
 }
@@ -7718,9 +7718,9 @@ INCLUDE_ASM("ai/ai", cHandplantControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_HandPlantSound(void* self, void* rider);
-extern "C" float func_00312790(char* self, int a1);
+extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1);
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int a1, int a2);
-extern "C" void func_00311E88(void*, int, float);
+extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
 extern char D_00459FC8[];
 
 /**
@@ -7743,18 +7743,18 @@ extern "C" void cHandplantControl_gainFocus(cHandplantControl* self)
     *(int*)((char*)self->mRider + 0x32C) = 1;
     cSSXAudio_HandPlantSound(func_0028B180(), self->mRider);
     char* rider3 = (char*)self->mRider;
-    float enterAnimSec = func_00312790(*(char**)(rider3 + 0x784), *(int*)(D_00459FC8 + self->HandplantType * 8 + *(int*)(rider3 + 0x32C) * 16));
+    float enterAnimSec = cRiderAnimBase_getAIAnimDuration(*(char**)(rider3 + 0x784), *(int*)(D_00459FC8 + self->HandplantType * 8 + *(int*)(rider3 + 0x32C) * 16));
     *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = enterAnimSec / *(float*)self;
     cHandplantControl_playHandplantAnim(self, *(int*)((char*)self->mRider + 0x32C), self->HandplantType);
     *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = 1.0f;
     *(int*)&self->CurBalance = 0;
-    func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, blend);
-    func_00311E88(*(void**)((char*)self->mRider + 0x784), 0, blend);
+    cRiderAnimBase_blendOutAll(*(void**)((char*)self->mRider + 0x784), 1, blend);
+    cRiderAnimBase_blendOutAll(*(void**)((char*)self->mRider + 0x784), 0, blend);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001329B0);
+INCLUDE_ASM("ai/ai", cHandplantControl_init);
 #ifdef SKIP_ASM
 struct sV4_29B0 {
     float x, y, z, w;
@@ -7805,7 +7805,7 @@ struct sState_29B0 {
     sRider_29B0* rider; // 0x14
 };
 
-extern "C" void func_001329B0(sState_29B0* s, sOwner_29B0* o, int flag, float t)
+extern "C" void cHandplantControl_init(sState_29B0* s, sOwner_29B0* o, int flag, float t)
 {
     int on = 1;
     s->t = t;
@@ -7823,11 +7823,11 @@ extern "C" void func_001329B0(sState_29B0* s, sOwner_29B0* o, int flag, float t)
 INCLUDE_ASM("ai/ai", cHandplantControl_update);
 #ifdef SKIP_ASM
 extern "C" int cRider_checkForReset_2A30(void* rider, int a, int b) __asm__("cRider_checkForReset");
-extern "C" int func_00312AE8(void* self, int i);
-extern "C" char* func_00311B20(void*, int);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" float func_00119BF0(void* self, int a1);
-extern "C" float func_00119C38(void* self);
+extern "C" float cRiderMetrix_evHandplantStart(void* self, int a1);
+extern "C" float cRiderMetrix_evHandplantEnd(void* self);
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int a1, int a2);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* p);
 extern "C" void cRider_updateOrientationImplicit(void*);
@@ -7835,7 +7835,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" int cRider_checkRailBoardCollisions(void*);
 extern "C" bool func_001446A0(void* self, int bit);
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 struct sPad_2A30 {
@@ -7885,15 +7885,15 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
     cRider* rider = self->mRider;
     int st = rider->unk_32C;
     if (st == 1) {
-        if (func_00312AE8(rider->mRiderAnim, 2) == 0) {
+        if (cRiderAnimBase_isCurrentAnimEndFlag(rider->mRiderAnim, 2) == 0) {
             return;
         }
         if ((in->flags & 0x2000) && self->IsMissedHandplant == 0) {
             self->mRider->unk_32C = 2;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119BF0(self->mRider->mMetrix, 1));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantStart(self->mRider->mMetrix, 1));
         } else {
             self->mRider->unk_32C = 3;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119BF0(self->mRider->mMetrix, 2));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantStart(self->mRider->mMetrix, 2));
         }
         cHandplantControl_playHandplantAnim(self, self->mRider->unk_32C, self->HandplantType);
         self->EnterSec = 0.0f;
@@ -7963,16 +7963,16 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         return;
     }
     if (func_0011FE98(rider) == 5) {
-        cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119C38(self->mRider->mMetrix));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantEnd(self->mRider->mMetrix));
         cRider_setMotionState_impl(self->mRider, 1);
     }
-    if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+    if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
         if (cRider_checkRailBoardCollisions(self->mRider)) {
             return;
         }
         if (func_0011FE98(self->mRider) == 0) {
             cRiderAnimBase_play(self->mRider->mRiderAnim, 0x3D, 0, -1.0f);
-            func_0011FEC8_impl(self->mRider, 0);
+            cRider_setControlState_impl(self->mRider, 0);
             return;
         }
     } else {
@@ -7983,22 +7983,22 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
                 char* airPredictor = (char*)self->mRider->mAirPredictor;
                 float airTimeLeft = *(float*)(airPredictor + 0x98) - *(float*)(airPredictor + 0xA0);
                 if (airTimeLeft > 0.0f) {
-                    char* seq = func_00311B20(self->mRider->mRiderAnim, 2);
+                    char* seq = cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
                     float animRate = (*(float*)(seq + 0x10) - *(float*)(seq + 0x8)) / airTimeLeft;
                     *(float*)(seq + 0x90) = clamp_2A30(animRate, 0.5f, 2.0f);
                 }
             }
         }
     }
-    if (func_00312AE8(self->mRider->mRiderAnim, 2) == 0) {
+    if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) == 0) {
         return;
     }
     if (func_0011FE98(self->mRider) == 1) {
         cRiderAnimBase_play(self->mRider->mRiderAnim, 0x11F, 0, -1.0f);
-        func_0011FEC8_impl(self->mRider, 4);
+        cRider_setControlState_impl(self->mRider, 4);
     } else {
         cRiderAnimBase_play(self->mRider->mRiderAnim, 0x3D, 0, -1.0f);
-        func_0011FEC8_impl(self->mRider, 0);
+        cRider_setControlState_impl(self->mRider, 0);
     }
 }
 #endif
@@ -8150,8 +8150,8 @@ INCLUDE_ASM("ai/ai", cSpinControl_gainFocus);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" float func_001495A8(void* self, int rider, int value);
-extern "C" char* func_00311B20(void*, int);
+extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cSpinControl_calcFlipAxisWeight(cSpinControl* self);
 extern "C" void cSpinControl_initDesSpin(cSpinControl* self, float a, float b);
 
@@ -8215,10 +8215,10 @@ extern "C" void cSpinControl_gainFocus(cSpinControl* self)
         self->FlipAxisWeight = cSpinControl_calcFlipAxisWeight(self);
         char* rider2 = (char*)self->mRider;
         cSpinControl_initDesSpin(self, *(float*)(rider2 + 0x2B0), *(float*)(rider2 + 0x2A4));
-        float spinAttrib = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
+        float spinAttrib = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
         char* rider3 = (char*)self->mRider;
         float animRate = (spinAttrib * 0.5002591609954834f + 1.0f) * (*(float*)(rider3 + 0x2E0) >? *(float*)(rider3 + 0x2DC)) * 0.14284929633140564f;
-        *(float*)(func_00311B20(*(void**)(rider3 + 0x784), 2) + 0x90) = animRate;
+        *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(rider3 + 0x784), 2) + 0x90) = animRate;
         *(int*)self = 1;
     }
     else
@@ -8235,29 +8235,29 @@ INCLUDE_ASM("ai/ai", cSpinControl_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares cRider_checkForReset earlier with a void return; same symbol.
 extern "C" int cRider_checkForReset_3308(void* rider, int a, int b) __asm__("cRider_checkForReset");
-extern "C" int func_00107578(void* rider, int on);
+extern "C" int cRider_checkHandplantCollisions(void* rider, int on);
 extern "C" int cRider_checkRailBoardCollisions(void*);
 extern "C" int cSpinControl_isGrabPlaying(cSpinControl* self, int c, int flag);
-extern "C" void func_00114130(void* rider, int a, int b);
-int func_00312AA0(void* self, int i);
-extern "C" int func_00135BE0(void* self);
-extern "C" void func_001158B8(void* rider, void* a, void* b, float c, float d);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
+extern "C" int cSpinControl_checkChangeFakieAir(void* self);
+extern "C" void cRider_snapAxisIncrement(void* rider, void* a, void* b, float c, float d);
 extern "C" void cSpinControl_initDesSpin(cSpinControl* self, float a, float b);
-extern "C" float func_00119C98(void* self, int v);
+extern "C" float cRiderMetrix_evLateSpin(void* self, int v);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" float func_001495A8(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 extern "C" float func_0031C228(float x);
-extern "C" float func_00119898(void* self, float x);
-extern "C" float func_001198D8(void* self, float x);
-extern "C" int func_00311AE8(void*, int);
-extern "C" int func_00312AE8(void* self, int i);
-extern "C" float func_00312790(char* self, int a1);
+extern "C" float cRiderMetrix_evSpin(void* self, float x);
+extern "C" float cRiderMetrix_evFlip(void* self, float x);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
+extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1);
 extern float D_004A4C90;
 extern float D_004A4C94;
-// Max spin/flip rates: computed once by the static initialiser (func_0013FB20) and read as
+// Max spin/flip rates: computed once by the static initialiser (__sti__all_in_one_ai_cpp) and read as
 // unchanging memory here (the reciprocal loads float above the channel stores).
 extern const float D_004A4C98;
 extern const float D_004A4C9C;
@@ -8422,7 +8422,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     if (cRider_checkForReset_3308(self->rider, (*input >> 12) & 1, 0))
         return;
     if ((*input & 0x2000) && self->state == 3 &&
-        func_00107578(self->rider, ((input[1] << 20) >> 26) * 0.032258063554763794f > 0.5f))
+        cRider_checkHandplantCollisions(self->rider, ((input[1] << 20) >> 26) * 0.032258063554763794f > 0.5f))
         return;
     if (cRider_checkRailBoardCollisions(self->rider))
         return;
@@ -8492,7 +8492,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         else
             self->rider->mPressType = 1;
     }
-    func_00114130(self->rider, 0, 0);
+    cRider_setupBoostWarp(self->rider, 0, 0);
 
     int state0 = self->state;
     if (busy)
@@ -8503,10 +8503,10 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     }
     else if (state0 == 3)
     {
-        if (func_00312AA0(self->rider->mRiderAnim, 2) != 0x120 && !func_00135BE0(self) &&
+        if (cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != 0x120 && !cSpinControl_checkChangeFakieAir(self) &&
             (spin != 0.0f || flip != 0.0f))
         {
-            func_001158B8(self->rider, &flip, &spin, 0.7853982448577881f, 0.0f);
+            cRider_snapAxisIncrement(self->rider, &flip, &spin, 0.7853982448577881f, 0.0f);
             cSpinControl_initDesSpin((cSpinControl*)self, flip, spin);
             self->spinAcc = 0.0f;
             self->flipAcc = 0.0f;
@@ -8516,7 +8516,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             FLIPRATE_133308(self->rider) = 2.99977445602417f;
             self->state = 0;
             cRider_flagEventBoostPowerUp(self->rider, 1,
-                          func_00119C98(self->rider->mMetrix, self->rider->unk_320 != self->rider->mNaturalStance));
+                          cRiderMetrix_evLateSpin(self->rider->mMetrix, self->rider->unk_320 != self->rider->mNaturalStance));
         }
     }
 
@@ -8643,9 +8643,9 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             self->desFlip = 0.0f;
             self->f44 = 0;
         }
-        else if (!busy && func_00312AA0(self->rider->mRiderAnim, 2) != 0x120)
+        else if (!busy && cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != 0x120)
         {
-            func_00135BE0(self);
+            cSpinControl_checkChangeFakieAir(self);
         }
         else if (self->desFlip != self->curFlip)
         {
@@ -8654,9 +8654,9 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         }
     }
 
-    float invSpinAttribScale = 1.0f / (func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
+    float invSpinAttribScale = 1.0f / (cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
                                      self->rider->mStatsIndex) * 0.349495530128479f + 1.0f);
-    float spinAttribScale = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
+    float spinAttribScale = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
                              self->rider->mStatsIndex) * 0.5002591609954834f + 1.0f;
     if (flip == 0.0f && spin == 0.0f)
         self->stickAngle = 1.0000000150474662e+30f;
@@ -8767,10 +8767,10 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     float stanceSpin = self->spinAcc;
     if (self->rider->mNaturalStance)
         stanceSpin = -stanceSpin;
-    cRider_flagEventBoostPowerUp(self->rider, 1, func_00119898(self->rider->mMetrix, stanceSpin));
-    cRider_flagEventBoostPowerUp(self->rider, 1, func_001198D8(self->rider->mMetrix, self->flipAcc));
+    cRider_flagEventBoostPowerUp(self->rider, 1, cRiderMetrix_evSpin(self->rider->mMetrix, stanceSpin));
+    cRider_flagEventBoostPowerUp(self->rider, 1, cRiderMetrix_evFlip(self->rider->mMetrix, self->flipAcc));
 
-    int cur = func_00312AA0(self->rider->mRiderAnim, 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
     int anim = cur;
     aiSetChannel_133308(self->rider, 14, 0.1666666716337204f, self->spinVel * (1.0f / D_004A4C98));
     aiSetChannel_133308(self->rider, 13, 0.1666666716337204f, self->flipVel * (1.0f / D_004A4C9C));
@@ -8779,7 +8779,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     {
         if (self->spinVel != 0.0f || self->flipVel != 0.0f)
         {
-            if (func_00311AE8(self->rider->mRiderAnim, 2) != 9)
+            if (cRiderAnimBase_getCurrentAnimCategory(self->rider->mRiderAnim, 2) != 9)
             {
                 cRider* rd = self->rider;
                 float x = rd->mSlewed[14].cur;
@@ -8797,7 +8797,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             else
                 ang = aiAtan2_133308(flip, spin);
             anim = aiDir8_133308(ang, 0x10E, 0x112, 0x110, 0x111, 0x114, 0x10F, 0x113, 0x10D);
-            float spinAttrib = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
+            float spinAttrib = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
                                     self->rider->mStatsIndex);
             cRider* rd = self->rider;
             float t = (spinAttrib * 0.5002591609954834f + 1.0f) * (FLIPRATE_133308(rd) >? SPINRATE_133308(rd)) *
@@ -8810,9 +8810,9 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         }
         else if (self->state == 1)
         {
-            if (self->f44 && func_00311AE8(self->rider->mRiderAnim, 2) == 2 &&
+            if (self->f44 && cRiderAnimBase_getCurrentAnimCategory(self->rider->mRiderAnim, 2) == 2 &&
                 !(self->curSpin == self->desSpin && self->curFlip == self->desFlip) &&
-                (func_00312AE8(self->rider->mRiderAnim, 2) || anim == 0x11F))
+                (cRiderAnimBase_isCurrentAnimEndFlag(self->rider->mRiderAnim, 2) || anim == 0x11F))
             {
                 float y = aiSign_133308(self->desFlip, self->curFlip);
                 float x = aiSign_133308(self->desSpin, self->curSpin);
@@ -8874,7 +8874,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             }
             if (anim == cur)
                 return;
-            float len = func_00312790((char*)self->rider->mRiderAnim, anim);
+            float len = cRiderAnimBase_getAIAnimDuration((char*)self->rider->mRiderAnim, anim);
             float dS = aiAbs_133308(self->curSpin - self->desSpin);
             float dF = aiAbs_133308(self->curFlip - self->desFlip);
             float t = dS / aiSpeed_133308(dS, self->spinSpeed);
@@ -8883,7 +8883,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
                 t = tF;
             if (self->rider->mPowerUpTrickTimer > 0.0f)
                 t *= 0.5000624656677246f;
-            t *= 1.0f / (func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
+            t *= 1.0f / (cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->rider->mAIIndex,
                                       self->rider->mStatsIndex) * 0.5002591609954834f + 1.0f);
             float rate = 2.0f;
             if (t > 0.0010000000474974513f)
@@ -8895,7 +8895,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             if (aiIsGrinding_133308(self->rider))
             {
                 float dur = *(float*)((char*)self->rider->mAirPredictor + 0x98) - *(float*)((char*)self->rider->mAirPredictor + 0xA0);
-                float len = func_00312790((char*)self->rider->mRiderAnim, 0x131);
+                float len = cRiderAnimBase_getAIAnimDuration((char*)self->rider->mRiderAnim, 0x131);
                 if (anim == 0x11F && len >= dur)
                 {
                     float ratio = 1.0f;
@@ -8922,20 +8922,20 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
 //100%
 INCLUDE_ASM("ai/ai", cSpinControl_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_00311E88(void*, int, float);
+extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
 extern "C" void cRider_updateOrientationImplicit(void*);
-extern "C" void func_00134DD0(void* self, void* pos);
+extern "C" void cSpinControl_applyFlipSpinAngle(void* self, void* pos);
 
 /**
  * Ends spin control: bakes the spin and flip into the rider's pose and leaves a bucketed spin rate behind.
  *
  * Fades out anim layer 1, clears the prewind channels mSlewed[15]/[16], relaxes [13]/[14], applies the
- * rotation to mPosition/mRotation (func_00134DD0), then sets mSpinRate to 3/4 of itself bucketed to pi/2,
+ * rotation to mPosition/mRotation (cSpinControl_applyFlipSpinAngle), then sets mSpinRate to 3/4 of itself bucketed to pi/2,
  * 3pi/2 or 5pi/2 (0 if not positive), negated when CurSpin > DesSpin, and clears mFlipRate.
  */
 extern "C" void cSpinControl_loseFocus(cSpinControl* self)
 {
-    func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, 0.33000001311302185f);
+    cRiderAnimBase_blendOutAll(*(void**)((char*)self->mRider + 0x784), 1, 0.33000001311302185f);
     char* rider = (char*)self->mRider;
     *(int*)(rider + 0x2AC) = 0;
     *(int*)(rider + 0x2A4) = 0;
@@ -8950,7 +8950,7 @@ extern "C" void cSpinControl_loseFocus(cSpinControl* self)
     char* rider4 = (char*)self->mRider;
     *(float*)(rider4 + 0x29C) = 0.01666666753590107f;
     *(int*)(rider4 + 0x2A0) = 0;
-    func_00134DD0(self, (char*)self->mRider + 0x110);
+    cSpinControl_applyFlipSpinAngle(self, (char*)self->mRider + 0x110);
     cRider_updateOrientationImplicit(self->mRider);
     *(float*)((char*)self->mRider + 0x2DC) *= 0.7500380277633667f;
     char* rider5 = (char*)self->mRider;
@@ -8972,7 +8972,7 @@ extern "C" void cSpinControl_loseFocus(cSpinControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00134DD0);
+INCLUDE_ASM("ai/ai", cSpinControl_applyFlipSpinAngle);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // 16-byte vector with inline constructors (a non-POD sibling of t4Vector); stores x, y, z, w.
@@ -9222,8 +9222,8 @@ static inline sVec4 operator*=(sVec4& a, const sVec4& b)
     a = QuatMul_12E010_4DD0(a, b);
 }
 
-extern "C" void func_00134DD0_x(void* self, sXf* xf) __asm__("func_00134DD0");
-extern "C" void func_00134DD0_x(void* self, sXf* xf)
+extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf) __asm__("cSpinControl_applyFlipSpinAngle");
+extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
 {
     char* rd = *(char**)((char*)self + 0x58);
     char* trk = *(char**)(rd + 0x780);
@@ -9308,7 +9308,7 @@ static inline float aiClamp_135180(float v, float lo, float hi)
 }
 
 /**
- * Computes the flip-axis weight (FlipAxisWeight, which tilts the flip axis in func_00134DD0) from the rates.
+ * Computes the flip-axis weight (FlipAxisWeight, which tilts the flip axis in cSpinControl_applyFlipSpinAngle) from the rates.
  *
  * The weight grows with the combined rate sqrt(mSpinRate^2 + mFlipRate^2) / 7 beyond 0.3 (full at 1.0) and
  * peaks when the two rates are equal, falling to 0 for a pure spin or a pure flip.
@@ -9342,8 +9342,8 @@ extern "C" unsigned short func_00150178(void* self, int a1, int a2);
 extern "C" int func_00150198(void* self, int rider, int idx, int second);
 extern "C" int func_001502C8(void* self, int rider, int idx, int second);
 extern "C" int func_001503F8(void* self, int rider, int idx, int second);
-extern "C" float func_00119708(void* metrix, int id);
-extern "C" float func_001197D8(void* metrix, int id);
+extern "C" float cRiderMetrix_evGrabHold(void* metrix, int id);
+extern "C" float cRiderMetrix_evReleaseGrab(void* metrix, int id);
 extern "C" void cSSXAudio_Tweak(void* self, void* obj);
 
 
@@ -9351,8 +9351,8 @@ extern "C" void cSSXAudio_Tweak(void* self, void* obj);
  * Advances the grab state machine (GrabState) for this frame and tells whether a grab anim is on layer 2.
  *
  * Anims and trick ids come from BE interface 6 (func_001500D8 .. func_001503F8). A new @p trick starts its
- * grab; anim events 0 and 1 reach the held pose (scored by func_00119708); @p held plays the tweak, or the
- * uber variant while the uber timer runs; letting go ends the trick (func_001197D8) and returns to GS_Start.
+ * grab; anim events 0 and 1 reach the held pose (scored by cRiderMetrix_evGrabHold); @p held plays the tweak, or the
+ * uber variant while the uber timer runs; letting go ends the trick (cRiderMetrix_evReleaseGrab) and returns to GS_Start.
  *
  * @param vself  the spin control
  * @param trick  the grab held this frame (-1 for none; On Tour grabHeld)
@@ -9370,33 +9370,33 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 0) {
         if (trick == -1) {
             if (self->CurrentGrab != trick) {
-                *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = -1.0f;
+                *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = -1.0f;
                 cRiderAnimBase_play(self->mRider->mRiderAnim, 0x11F, 0, -1.0f);
                 self->CurrentGrab = trick;
             }
         } else if (self->CurrentGrab != trick) {
             self->CurrentGrab = trick;
-            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x12) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0x12) {
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play(rider->mRiderAnim, func_001500D8(iface, rider->mAIIndex, self->CurrentGrab), 1, -1.0f);
             } else {
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play(rider->mRiderAnim, func_001500D8(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             }
-            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
-        } else if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+        } else if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
             self->GrabState = 1;
         }
     }
     if (self->GrabState == 1) {
-        if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+        if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
             cRider* rider = self->mRider;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
-            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
             if (func_001500F8(iface, self->mRider->mAIIndex, self->CurrentGrab) != 0x1B6) {
                 cRider* rider2 = self->mRider;
                 cRiderAnimBase_play_i(rider2->mRiderAnim, func_001500F8(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
-                *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
+                *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
             }
             self->GrabState = 2;
         }
@@ -9404,13 +9404,13 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 2) {
         if (trick != self->CurrentGrab) {
             cRider* rider = self->mRider;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
-            func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
-            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
+            cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
             self->GrabState = 5;
         } else if (held != 0) {
-            func_00311E88(self->mRider->mRiderAnim, 1, 0.10000000149011612f);
-            func_00311E88(self->mRider->mRiderAnim, 2, 0.10000000149011612f);
+            cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.10000000149011612f);
+            cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 2, 0.10000000149011612f);
             if (self->mRider->mUberTimer == 0.0f || (self->mRider->mUberFlags & 1) == 0
                 || func_00150198(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == 0x1B6) {
                 cRider* rider = self->mRider;
@@ -9420,73 +9420,73 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 cRiderAnimBase_play(rider->mRiderAnim, func_00150198(iface, rider->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
             }
             cSSXAudio_Tweak(func_0028B180(), self->mRider);
-            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
             self->GrabState = 3;
         }
     }
     if (self->GrabState == 3) {
         if (trick == self->CurrentGrab && held != 0
-            && func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
-            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
-            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
+            && func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0x13) {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
                 if (func_00150158(iface, self->mRider->mAIIndex, self->CurrentGrab) != 0x1B6) {
                     cRider* rider2 = self->mRider;
                     cRiderAnimBase_play_i(rider2->mRiderAnim, func_00150158(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
-                    *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
+                    *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             } else {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
                 if (func_001502C8(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 0x1B6) {
                     cRider* rider2 = self->mRider;
                     cRiderAnimBase_play_i(rider2->mRiderAnim, func_001502C8(iface, rider2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
-                    *(float*)(func_00311B20(self->mRider->mRiderAnim, 1) + 0x90) = speed;
+                    *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             }
             self->GrabState = 4;
-        } else if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)
-                   || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 3)
-                   || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
-            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
+        } else if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)
+                   || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)
+                   || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0x13) {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
                 cRider* rider2 = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider2->mMetrix, func_00150178(iface, rider2->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, func_00150178(iface, rider2->mAIIndex, self->CurrentGrab)));
             } else {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119708(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
                 cRider* rider2 = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider2->mMetrix, func_001503F8(iface, rider2->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, func_001503F8(iface, rider2->mAIIndex, self->CurrentGrab, hi)));
             }
             self->GrabState = 5;
         }
     }
     if (self->GrabState == 4) {
         if (trick != self->CurrentGrab || held == 0) {
-            if (func_00311AE8(self->mRider->mRiderAnim, 2) == 0x13) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0x13) {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
             } else {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, func_001197D8(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
             }
-            func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
-            *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
             self->GrabState = 5;
         }
     }
-    anim = func_00311AE8(self->mRider->mRiderAnim, 2);
+    anim = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
     if (self->GrabState == 5) {
-        if (anim == 2 || func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
+        if (anim == 2 || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
             if (anim == 0x14 && held != 0 && trick != -1
                 && func_00150198(iface, self->mRider->mAIIndex, trick, hi) != 0x1B6) {
                 self->CurrentGrab = trick;
-                func_00311E88(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
+                cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play_i(rider->mRiderAnim, func_00150198(iface, rider->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
-                *(float*)(func_00311B20(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+                *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
                 self->GrabState = 3;
             } else {
                 self->GrabState = 0;
@@ -9534,9 +9534,9 @@ extern "C" void cSpinControl_initDesSpin(cSpinControl* self, float flip, float s
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00135BE0);
+INCLUDE_ASM("ai/ai", cSpinControl_checkChangeFakieAir);
 #ifdef SKIP_ASM
-extern "C" int func_00114DB8(void* rider);
+extern "C" int cRider_isChangeFakieAir(void* rider);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
@@ -9556,10 +9556,10 @@ static inline float aiWrap_135BE0(float x)
     return x - aiFloor_135BE0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
-extern "C" int func_00135BE0(void* self)
+extern "C" int cSpinControl_checkChangeFakieAir(void* self)
 {
     char* s = (char*)self;
-    if (func_00114DB8(*(void**)(s + 0x58)) != 0)
+    if (cRider_isChangeFakieAir(*(void**)(s + 0x58)) != 0)
     {
     *(float*)(s + 0x20) = aiWrap_135BE0(*(float*)(s + 0x20) + 3.1415927410125732f);
     *(float*)(s + 0x24) = -*(float*)(s + 0x24);
@@ -9579,7 +9579,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_predictSpinSec);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" float func_001495A8(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_135CB0(float x)
@@ -9593,7 +9593,7 @@ static inline float aiAbs_135CB0(float x)
  * Predicts the time left in the current spin and the time one more half turn would take.
  *
  * Divides |CurSpin - DesSpin| (less pi when above pi) and pi by MaxSpinAngVel; both are halved while
- * mPowerUpTrickTimer runs and divided by 1 + 0.5 * a rider stat (func_001495A8, BE interface 3).
+ * mPowerUpTrickTimer runs and divided by 1 + 0.5 * a rider stat (cBEStatInterface_getSpinAttrib, BE interface 3).
  *
  * @param cur  receives the seconds left in the current spin
  * @param next  receives the seconds a further half turn would take
@@ -9610,7 +9610,7 @@ extern "C" void cSpinControl_predictSpinSec(cSpinControl* self, float* cur, floa
         *next *= 0.5000624656677246f;
         *cur *= 0.5000624656677246f;
     }
-    float airFactor = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
+    float airFactor = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
     float invAirFactor = 1.0f / (airFactor * 0.5002591609954834f + 1.0f);
     *next *= invAirFactor;
     *cur *= invAirFactor;
@@ -9623,7 +9623,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_predictFlipSec);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" float func_001495A8(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_135DB0(float x)
@@ -9637,7 +9637,7 @@ static inline float aiAbs_135DB0(float x)
  * Predicts the time left in the current flip and the time one more full flip would take.
  *
  * Divides |CurFlip - DesFlip| (less 2pi when above 2pi) and 2pi by MaxFlipAngVel; both are halved while
- * mPowerUpTrickTimer runs and divided by 1 + 0.5 * a rider stat (func_001495A8, BE interface 3).
+ * mPowerUpTrickTimer runs and divided by 1 + 0.5 * a rider stat (cBEStatInterface_getSpinAttrib, BE interface 3).
  *
  * @param cur  receives the seconds left in the current flip
  * @param next  receives the seconds a further full flip would take
@@ -9654,7 +9654,7 @@ extern "C" void cSpinControl_predictFlipSec(cSpinControl* self, float* cur, floa
         *next *= 0.5000624656677246f;
         *cur *= 0.5000624656677246f;
     }
-    float airFactor = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
+    float airFactor = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
     float invAirFactor = 1.0f / (airFactor * 0.5002591609954834f + 1.0f);
     *next *= invAirFactor;
     *cur *= invAirFactor;
@@ -9664,7 +9664,7 @@ extern "C" void cSpinControl_predictFlipSec(cSpinControl* self, float* cur, floa
 //100%
 INCLUDE_ASM("ai/ai", cSpinControl_isGrabHeld);
 #ifdef SKIP_ASM
-extern "C" int func_00311AE8(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 
 /**
  * Tells whether the rider is holding a grab: GrabState 2 with a grab anim (type 0x12) on layer 2.
@@ -9676,7 +9676,7 @@ extern "C" int cSpinControl_isGrabHeld(cSpinControl* self)
     int held = 0;
     if (self->GrabState == 2)
     {
-        held = func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x12;
+        held = cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x12;
     }
     return held;
 }
@@ -9685,7 +9685,7 @@ extern "C" int cSpinControl_isGrabHeld(cSpinControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cSpinControl_isTweakHeld);
 #ifdef SKIP_ASM
-extern "C" int func_00311AE8(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 
 /**
  * Tells whether the rider is holding a tweak: GrabState 4 with a tweak anim (type 0x13) on layer 2.
@@ -9697,7 +9697,7 @@ extern "C" int cSpinControl_isTweakHeld(cSpinControl* self)
     int held = 0;
     if (self->GrabState == 4)
     {
-        held = func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x13;
+        held = cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x13;
     }
     return held;
 }
@@ -9706,7 +9706,7 @@ extern "C" int cSpinControl_isTweakHeld(cSpinControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cSpinControl_isUberHeld);
 #ifdef SKIP_ASM
-extern "C" int func_00311AE8(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 
 /**
  * Tells whether the rider is holding an uber trick: GrabState 4 with an uber anim (type 0x14) on layer 2.
@@ -9718,7 +9718,7 @@ extern "C" int cSpinControl_isUberHeld(cSpinControl* self)
     int held = 0;
     if (self->GrabState == 4)
     {
-        held = func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x14;
+        held = cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x14;
     }
     return held;
 }
@@ -9865,7 +9865,7 @@ extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, void* obj)
 //100%
 INCLUDE_ASM("ai/ai", cUberGrindControl_gainFocus);
 #ifdef SKIP_ASM
-float func_00119938(void* self, int a1, int a2);
+float cRiderMetrix_evUberGrindStart(void* self, int a1, int a2);
 
 struct sAnimSet_00136268 {
     int anims[4];       // 0x00
@@ -9879,7 +9879,7 @@ extern sAnimSet_00136268 D_0045A038[];
  *
  * Picks the entry anim from D_0045A038[CurrentGrind] (0x24 bytes each) by mRailStyle (4, 3, 2, other), turns
  * the anim heading offset a quarter turn (not from stance 3; stance 2 also clears the switch flag), reports
- * the grind (func_00119938) for boost, then sets mRailStyle 3, GrindState 0 and fades anim layers 1 and 0.
+ * the grind (cRiderMetrix_evUberGrindStart) for boost, then sets mRailStyle 3, GrindState 0 and fades anim layers 1 and 0.
  */
 extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
 {
@@ -9907,12 +9907,12 @@ extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), grind->anims[3], 0, -1.0f);
     }
     float k = 0.33000001311302185f;
-    cRider_flagEventBoostPowerUp(self->mRider, 1, func_00119938(*(void**)((char*)self->mRider + 0x790), grind->x20, *(int*)((char*)self->mRider + 0x328)));
+    cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evUberGrindStart(*(void**)((char*)self->mRider + 0x790), grind->x20, *(int*)((char*)self->mRider + 0x328)));
     *(int*)((char*)self->mRider + 0x328) = 3;
     *(int*)self = 0;
     func_00116930(self->mRider);
-    func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, k);
-    func_00311E88(*(void**)((char*)self->mRider + 0x784), 0, k);
+    cRiderAnimBase_blendOutAll(*(void**)((char*)self->mRider + 0x784), 1, k);
+    cRiderAnimBase_blendOutAll(*(void**)((char*)self->mRider + 0x784), 0, k);
 }
 #endif
 
@@ -9923,20 +9923,20 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_update);
 extern "C" int cRiderAnimBase_play_i136508(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 extern "C" int cRider_checkRailBoardCollisions(void*);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" void func_00113F38(void*, float);
-extern "C" void func_00113F88(void* rider, float a, float b);
-extern "C" void func_00114130(void* rider, int a, int b);
-extern "C" void func_00115640(void* rider);
+extern "C" void cRider_setupRailBalance(void*, float);
+extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
+extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
+extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
-extern "C" float func_00119958(void* p, int v);
+extern "C" float cRiderMetrix_evUberGrindEnd(void* p, int v);
 int func_0011FE98(void* self);
-void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
 extern "C" bool func_001446A0(void* self, int bit);
-extern "C" int func_00311AE8(void*, int);
-extern "C" char* func_00311B20(void*, int);
-int func_00312AA0(void* self, int i);
-extern "C" int func_00312AE8(void* self, int i);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
+extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
 
 struct sAiBitsA_136508
@@ -9989,18 +9989,18 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
     }
     int w = *(int*)in;
     float floatZero = 0.0f;
-    func_00114130((char*)self->mRider, (w >> 14) & 1, (w >> 13) & 1);
-    func_00113F38((char*)self->mRider, ((sAiBitsA_136508*)in)->v * 0.032258063554763794f);
-    func_00113F88((char*)self->mRider, floatZero, floatZero);
+    cRider_setupBoostWarp((char*)self->mRider, (w >> 14) & 1, (w >> 13) & 1);
+    cRider_setupRailBalance((char*)self->mRider, ((sAiBitsA_136508*)in)->v * 0.032258063554763794f);
+    cRider_setupCrouchBrake((char*)self->mRider, floatZero, floatZero);
     if (self->GrindState == 0)
     {
         char* rider0 = (char*)self->mRider;
         *(float*)(rider0 + 0x240) = floatZero;
         *(float*)(rider0 + 0x23C) = 0.05833333730697632f;
-        if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
+        if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2))
         {
             cRiderAnimBase_play_i136508(*(void**)((char*)self->mRider + 0x784), *(int*)(tbl + 0x10), 0, -1.0f);
-            *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
             self->GrindState = 1;
         }
     }
@@ -10009,11 +10009,11 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
         if (((sAiBitsB_136508*)in)->v != self->CurrentGrind || func_0011FE98((char*)self->mRider) == 0)
         {
             cRiderAnimBase_play_i136508(*(void**)((char*)self->mRider + 0x784), *(int*)(tbl + 0x1C), 0, -1.0f);
-            *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+            *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
             self->GrindState = 2;
         }
-        else if (func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2) != *(int*)(tbl + 0x18) ||
-                 func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
+        else if (cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2) != *(int*)(tbl + 0x18) ||
+                 cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2))
         {
             if (func_0011FE98((char*)self->mRider) != 4)
             {
@@ -10027,7 +10027,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
                 *(float*)(rider + 0x240) = *(float*)(*(char**)(rider + 0x77C) + 0xC8);
                 *(float*)(rider + 0x23C) = 0.05833333730697632f;
             }
-            int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+            int cur = cRiderAnimBase_getCurrentAnimID(*(void**)((char*)self->mRider + 0x784), 2);
             int desAnim;
             if (aiAbs_136508(*(float*)((char*)self->mRider + 0x238)) < 0.10000000149011612f)
                 desAnim = *(int*)(tbl + 0x10);
@@ -10042,24 +10042,24 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
         char* rider2 = (char*)self->mRider;
         *(float*)(rider2 + 0x240) = 0.0f;
         *(float*)(rider2 + 0x23C) = 0.05833333730697632f;
-        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x15 &&
-            !func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) &&
-            !func_001446A0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) == 0x15 &&
+            !cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) &&
+            !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
             return;
         if (func_0011FE98((char*)self->mRider) == 4)
         {
             cRailslideControl_playGainFocusAnim((cRailslideControl*)(*(char**)((char*)self->mRider + 0x77C) + 0x2B0), 0);
-            func_0011FEC8_impl((char*)self->mRider, 7);
+            cRider_setControlState_impl((char*)self->mRider, 7);
         }
         else
         {
-            func_00115640((char*)self->mRider);
+            cRider_undoRailslideModeOrientation((char*)self->mRider);
             if (func_0011FE98((char*)self->mRider) == 1)
-                func_0011FEC8_impl((char*)self->mRider, 5);
+                cRider_setControlState_impl((char*)self->mRider, 5);
             else
-                func_0011FEC8_impl((char*)self->mRider, 0);
+                cRider_setControlState_impl((char*)self->mRider, 0);
         }
-        cRider_flagEventBoostPowerUp((char*)self->mRider, 1, func_00119958(*(void**)((char*)self->mRider + 0x790), *(int*)((char*)self->mRider + 0x328)));
+        cRider_flagEventBoostPowerUp((char*)self->mRider, 1, cRiderMetrix_evUberGrindEnd(*(void**)((char*)self->mRider + 0x790), *(int*)((char*)self->mRider + 0x328)));
         char* rider = (char*)self->mRider;
         if (*(int*)(rider + 0x2F4) < 10)
         {

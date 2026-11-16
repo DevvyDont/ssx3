@@ -258,7 +258,7 @@ INCLUDE_ASM("dirtysock/tags", func_003EB840);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* cDirtysock_tag_TagFieldFind_B840(char* record, char* name) __asm__("cDirtysock_tag_TagFieldFind");
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" void func_004162D0_EB840(char* dst, const char* src) __asm__("func_004162D0");
+extern "C" void strcat_EB840(char* dst, const char* src) __asm__("strcat");
 
 extern "C" char* func_003EB840(char* record, char* prefix, char* name)
 {
@@ -270,7 +270,7 @@ extern "C" char* func_003EB840(char* record, char* prefix, char* name)
         field = cDirtysock_tag_TagFieldFind_B840(record, prefix);
     } else {
         strcpy(buf, prefix);
-        func_004162D0_EB840(buf, name);
+        strcat_EB840(buf, name);
         field = cDirtysock_tag_TagFieldFind_B840(record, buf);
     }
     return field;

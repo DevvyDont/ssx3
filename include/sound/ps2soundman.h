@@ -15,7 +15,7 @@
 // cSoundManager method order). The preview's offsets agree with retail (asserts at preview 0x27A37C..0x27AD4C).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructor func_002A8C20, Init func_002A8CB0 (allocation tag), the destructor func_002A8C50;
+//   [R] the constructor func_002A8C20, Init cPS2SoundManager_Init (allocation tag), the destructor cPS2SoundManager__cPS2SoundManager;
 //   [P] the preview's assert strings next to the field they test;
 //   [O] SSX On Tour's DWARF (cSoundManager / cPSPSoundManager: method names only);
 //   [U] how the retail methods use the field.
@@ -42,7 +42,7 @@ struct cPS2SoundManager {
     int unk_310;                      // 0x310 [R] ctor -1, Init 31; [U] head of the unused-node chain (func_002A92B8 pops, func_002A92F8 pushes)
     char unk_314[0x4];                // 0x314 no access
     int unk_318;                      // 0x318 [R] ctor -1; Init -1; [U] head of the free-block list (sorted by address: AllocSoundMem / DeallocSoundMem)
-    int unk_31C;                      // 0x31C [R] ctor 0; [U] SetSoundMemLoadLimits (func_002A9250) 1, RestoreSoundMemLoadLimits (func_002A9288) 0; AllocSoundMem returns -2 while set (preview lw 796)
+    int unk_31C;                      // 0x31C [R] ctor 0; [U] SetSoundMemLoadLimits (cPS2SoundManager_SetSoundMemLoadLimits) 1, RestoreSoundMemLoadLimits (cPS2SoundManager_RestoreSoundMemLoadLimits) 0; AllocSoundMem returns -2 while set (preview lw 796)
 };
 
 CHECK_OFFSET(tPS2SoundMemNode, index, 0x00);

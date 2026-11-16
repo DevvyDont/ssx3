@@ -414,7 +414,7 @@ extern char cRenderStateMan_m_state[];
 
 extern "C" void func_0036D428(void* self, float val);
 int func_0011FE98(void* self);
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern "C" void func_0036D318(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
 extern "C" void func_0036D1F0(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d);
 extern "C" void func_0036CEF8(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c);
@@ -590,9 +590,9 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
                                 Scale_ABC8(sideways, Rand_ABC8() * 2.0f));
         float chance = MIN_ABC8(bspeed / 1666.666748046875f * 0.10000000149011612f, maxChance);
         bool active = Rand_ABC8() < chance;
-        func_003717C0(self->emitter, &particlePosition, &particleVelocity, &groundColour, active, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->emitter, &particlePosition, &particleVelocity, &groundColour, active, 0.01666666753590107f);
     } else {
-        func_003717C0(self->emitter, &particlePosition, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->emitter, &particlePosition, 0, 0, 0, 0.01666666753590107f);
     }
     if (self->f70) {
         char* riderObj = self->rider;

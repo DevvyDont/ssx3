@@ -1671,8 +1671,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB3F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void ASYNCFILE_release_B3F0(int, int *, int *) __asm__("ASYNCFILE_release");
 extern "C" void MEM_free_B3F0(int) __asm__("MEM_free");
-extern "C" void func_003B47F8_B3F0(int, int) __asm__("func_003B47F8");
-extern "C" int func_003B4818_B3F0(int) __asm__("func_003B4818");
+extern "C" void unpack_B3F0(int, int) __asm__("unpack");
+extern "C" int unpacksizez_B3F0(int) __asm__("unpacksizez");
 extern "C" int ASYNCFILE_getstatus_B3F0(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void MEM_copy_B3F0(int, int, int) __asm__("MEM_copy");
 int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
@@ -1685,11 +1685,11 @@ extern "C" void func_002BB3F0(cWorldPainterSection* self_) {
         ASYNCFILE_release_B3F0(self_->m_iAsyncHandle, &packData, &packSize);
         if (packData != 0) {
             if (packSize > 0) {
-                int unpackedSize = func_003B4818_B3F0(packData);
+                int unpackedSize = unpacksizez_B3F0(packData);
                 if (unpackedSize > 0) {
                     int header = operator_new_B3F0(unpackedSize, str_WPFile, 0x20000000, 0);
                     self_->m_pWPHeader = (tWPHeader*)header;
-                    func_003B47F8_B3F0(packData, header);
+                    unpack_B3F0(packData, header);
                 } else {
                     int header = operator_new_B3F0(packSize, str_WPFile, 0x20000000, 0);
                     self_->m_pWPHeader = (tWPHeader*)header;
@@ -1710,7 +1710,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB4D8);
 struct sBXStr_B4D8 { char *p; int pad[3]; sBXStr_B4D8() {} };
 extern "C" void func_003186D0_B4D8(sBXStr_B4D8*, const char*, int) __asm__("func_003186D0");
 extern "C" void func_00318630_B4D8(sBXStr_B4D8*, sBXStr_B4D8*, const char*) __asm__("func_00318630");
-extern "C" int func_003DF690_B4D8(const char*, int) __asm__("func_003DF690");
+extern "C" int ASYNCFILE_load_B4D8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
 extern char D_004A3870[];
 extern char str_swp[];
@@ -1721,7 +1721,7 @@ extern "C" void func_002BB4D8_B4D8(void *self, int arg) {
     *(short*)((char*)self + 2) = 0;
     func_003186D0_B4D8(&b, D_004A3870, arg);
     func_00318630_B4D8(&a, &b, str_swp);
-    *(int*)((char*)self + 4) = func_003DF690_B4D8(a.p, 0);
+    *(int*)((char*)self + 4) = ASYNCFILE_load_B4D8(a.p, 0);
     cBXString_dt_B4D8(&a, 2);
     cBXString_dt_B4D8(&b, 2);
     int n = *(int*)((char*)self + 4);
@@ -1806,11 +1806,11 @@ extern "C" void func_002BB5F0(cWorldPainterSection* vself)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB6B8);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterManRender);
 #ifdef SKIP_ASM
 extern "C" void func_002BB6E0(int, void *);
 
-extern "C" void func_002BB6B8(void) {
+extern "C" void cWorldPainterManRender(void) {
     void *temp_5;
 
     temp_5 = ((void*)SSXApp->Game->World);

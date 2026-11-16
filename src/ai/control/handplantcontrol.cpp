@@ -418,7 +418,7 @@ extern t4Vector D_004FF120_91A8 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_91A8 __asm__("t4vect_ZAxis");
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
-extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
+extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 extern "C" int func_00139548(void* self);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
@@ -565,7 +565,7 @@ static inline int landed_91A8(char* ap)
  * SplinePos (InitPos + (InitPos - SplinePos) * u(u - 2), u = ElapsedSec / EnterSec) and the orientation turns
  * about SnapRotationAxis at SnapRotationRate. After that the rider sits at SplinePos with zero velocity.
  * While ExitVel is still zero it calls func_00139548() (calcExitVel); once that succeeds it launches the air
- * predictor from 5 units above SplinePos with ExitVel and steps it (func_00113648, 1/60 s) at least 8 times
+ * predictor from 5 units above SplinePos with ExitVel and steps it (cAirPredictor_updateFlightPath, 1/60 s) at least 8 times
  * and until it has a landing. Later frames keep stepping the prediction until it has a landing, then, if the
  * landing normal faces ExitVel, turn the rider toward it (cRider_alignRiderAxis, at most 380 degrees/s).
  */
@@ -595,7 +595,7 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
                 cAirPredictor_startLaunchIntoAir(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel),
                                                  3333.33349609375f);
                 for (int i = 0; i < 8 || !landed_91A8(*(char**)((char*)self->mRider + 0x788)); i++)
-                    func_00113648(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
+                    cAirPredictor_updateFlightPath(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
             }
         } else {
             if (landed_91A8(*(char**)((char*)self->mRider + 0x788))) {
@@ -604,7 +604,7 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
                     cRider_alignRiderAxis((char*)self->mRider, ap + 0x20, ap + 0x10, *(float*)((char*)self->mRider + 0x300) + *(float*)((char*)self->mRider + 0x300),
                                   *(float*)((char*)self->mRider + 0x300) * 6.632251739501953f);
             } else {
-                func_00113648(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
+                cAirPredictor_updateFlightPath(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
             }
         }
     }
@@ -922,7 +922,7 @@ void cAirMotion_loseFocus(void* self)
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_step);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
-extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
+extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 extern "C" void cRider_updateWind(char* self);
 int func_0011FEE8(void* rider);
@@ -973,7 +973,7 @@ static inline float absf_139A20(float x)
 /**
  * Moves the rider one frame along the air predictor's path and turns it to meet the predicted landing.
  *
- * Applies wind (cRider_updateWind), steps position and velocity with func_00113648() by mTimeScale / 60, sets
+ * Applies wind (cRider_updateWind), steps position and velocity with cAirPredictor_updateFlightPath() by mTimeScale / 60, sets
  * mGroundNormal to the rider's posed up vector (+0x180) and the ground velocity (+0x3D0) to zero. When the
  * predictor has a landing (state 1 or 3) on a triangle with flag 0x8, on a surface that is neither type 0x12
  * nor a reset surface (+0x44), it turns the rider's up toward the landing normal, paced to finish around
@@ -985,7 +985,7 @@ extern "C" void cAirMotion_step(cAirMotion* self)
 {
     cRider_updateWind((char*)self->mRider);
     char* rider = (char*)self->mRider;
-    func_00113648(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, *(float*)(rider + 0x300) * 0.01666666753590107f);
+    cAirPredictor_updateFlightPath(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, *(float*)(rider + 0x300) * 0.01666666753590107f);
     char* rider1 = (char*)self->mRider;
     {
         sVec4HP up = *(sVec4HP*)(rider1 + 0x180);
@@ -1076,18 +1076,18 @@ extern "C" float cAirMotion_intersectBoard_9C88(void* self, sHit_139C88* hit) __
 extern "C" void cRider_updateBoundBox_9C88(void* rider, int a) __asm__("cRider_updateBoundBox");
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void func_00106538(void* rider, void* v);
-extern "C" void func_00105398(void* rider, int a1);
-extern "C" void func_00105398_p(void* rider, void* v) __asm__("func_00105398");
+extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
+extern "C" void cRider_checkObjectCollisions_p(void* rider, void* v) __asm__("cRider_checkObjectCollisions");
 extern "C" void cRider_checkOpponentCollisions(void* rider);
-extern "C" void func_0010EB30_9C88(void* rider, int anim, int a2, int a3, sInfo_139C88* info) __asm__("func_0010EB30");
-extern "C" void func_0010E910(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
-extern "C" int func_00311AE8(void* ra, int layer);
-extern "C" char* func_00311B20(void* ra, int layer);
+extern "C" void cRider_flagEventWipeout_9C88(void* rider, int anim, int a2, int a3, sInfo_139C88* info) __asm__("cRider_flagEventWipeout");
+extern "C" void cRider_flagEventLand(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* ra, int layer);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* ra, int layer);
 extern "C" bool func_001446A0(void* self, int bit);
 extern "C" int func_001446A0_i(void* self, int bit) __asm__("func_001446A0");
-extern "C" float func_00149120(void* be, int idx, int stat);
-extern "C" void func_00115640(void* rider);
-extern "C" int func_00114CC0(void* rider);
+extern "C" float cBEStatInterface_getLandingAttrib(void* be, int idx, int stat);
+extern "C" void cRider_undoRailslideModeOrientation(void* rider);
+extern "C" int cRider_isChangeFakieGround(void* rider);
 extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float v);
 extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float v);
 extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* out);
@@ -1096,7 +1096,7 @@ extern "C" void* cBE_getBE();
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_0011FEE8(void* rider);
-void func_0011FEC8_9C88(void* rider, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setControlState_9C88(void* rider, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_9C88(void* rider, int v) __asm__("cRider_setMotionState__FPv");
 void func_00113998_9C88(void* ap, void* pos, void* vel) __asm__("func_00113998__FPv");
 int AIrand();
@@ -1276,11 +1276,11 @@ static inline sVec4HP row_139C88(char* r, int k)
  * relative to the surface heading into it; CS_Spin then drops to CS_Void. Reset surfaces (+0x44) and
  * triangles with flag 0x2 force an auto reset. Otherwise the rider is pushed out, its ground frame and
  * contact data come from the hit, the inward velocity is cancelled times the surface factor +0x3C (the rest
- * capped at +0x40) and the hit object gets the impulse (handler slot 43). A crash (func_0010EB30) follows a
+ * capped at +0x40) and the hit object gets the impulse (handler slot 43). A crash (cRider_flagEventWipeout) follows a
  * layer-2 animation of category 0x12-0x15 whose sequence flags say so (probably an unfinished trick), an
- * upside-down board, or too much fore/aft tilt for a stat-scaled limit; otherwise func_0010E910() takes the
+ * upside-down board, or too much fore/aft tilt for a stat-scaled limit; otherwise cRider_flagEventLand() takes the
  * landing, the motion becomes MS_Ground, and the control state and landing animation follow the press type
- * and current control. Terrain (cAirMotion_checkTerrainCollisions), func_00105398() and opponents are checked
+ * and current control. Terrain (cAirMotion_checkTerrainCollisions), cRider_checkObjectCollisions() and opponents are checked
  * every frame.
  */
 extern "C" void cAirMotion_resolve(cAirMotion* self)
@@ -1294,7 +1294,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
     if (intParam >= 0.5f && vn < 0.0f) {
         float spd = vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0));
         if (func_0011FEE8(RIDER_139C88) == 5) {
-            func_0011FEC8_9C88(RIDER_139C88, 0xD);
+            cRider_setControlState_9C88(RIDER_139C88, 0xD);
         }
         func_00113998_9C88(*(void**)(RIDER_139C88 + 0x788), RIDER_139C88 + 0x110, RIDER_139C88 + 0x1E0);
         char* surf = (char*)SSXApp->Game->SurfPropCache + hit.surface * 0xB0;
@@ -1341,17 +1341,17 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         *(int*)(RIDER_139C88 + 0x438) = hit.surface;
         V4_139C88(RIDER_139C88, 0x460) = hit.pos;
         *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x110), hit.pos), V4_139C88(RIDER_139C88, 0x370));
-        if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x14) {
-            if (!func_001446A0(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) anim = 0x169;
-        } else if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x15) {
-            if (!func_001446A0(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 3)) anim = 0x169;
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x14) {
+            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) anim = 0x169;
+        } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x15) {
+            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 3)) anim = 0x169;
         } else {
             int flip = 0;
-            if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x13) {
-                flip = func_001446A0_i(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
-            } else if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x12 &&
-                       !func_001446A0(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) {
-                flip = func_001446A0_i(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
+            if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x13) {
+                flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
+            } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x12 &&
+                       !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) {
+                flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
             }
             char* r4 = RIDER_139C88;
             if (vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370)) < 0.0f) {
@@ -1384,7 +1384,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                 }
             } else if (*(int*)(r4 + 0x330) == 0) {
                 float tiltDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x3A0));
-                float k = func_00149120(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER_139C88 + 0x86C), *(int*)(RIDER_139C88 + 0xB34)) * 0.29999101161956787f + 1.0f;
+                float k = cBEStatInterface_getLandingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER_139C88 + 0x86C), *(int*)(RIDER_139C88 + 0xB34)) * 0.29999101161956787f + 1.0f;
                 if (k * 0.699962317943573f < tiltDot) {
                     anim = 0x15C;
                 } else if (tiltDot < k * -0.699962317943573f) {
@@ -1398,14 +1398,14 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             info.dir = vu0Normalize_139C88(V4_139C88(RIDER_139C88, 0x1E0));
             info.up = hit.normal;
             info.speed = absf_139C88(vn);
-            func_0010EB30_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
+            cRider_flagEventWipeout_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
         } else {
             char* rider5 = RIDER_139C88;
-            func_0010E910(rider5, *(float*)(rider5 + 0x378) < 0.699999988079071f, 0, *(int*)(rider5 + 0x330), &hit, spd);
+            cRider_flagEventLand(rider5, *(float*)(rider5 + 0x378) < 0.699999988079071f, 0, *(int*)(rider5 + 0x330), &hit, spd);
             cRider_setMotionState_9C88(RIDER_139C88, 0);
             if (func_0011FEE8(RIDER_139C88) != 0xC) {
                 if (func_0011FEE8(RIDER_139C88) == 2) {
-                    func_00115640(RIDER_139C88);
+                    cRider_undoRailslideModeOrientation(RIDER_139C88);
                     if (vn < -1388.888916015625f) {
                         cAirMotion_chooseLandAnim(self, vn);
                     }
@@ -1416,12 +1416,12 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                         } else {
                             cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 0x22, 0, -1.0f);
                         }
-                        func_0011FEC8_9C88(RIDER_139C88, 1);
+                        cRider_setControlState_9C88(RIDER_139C88, 1);
                     }
                 } else {
-                    func_00115640(RIDER_139C88);
-                    func_0011FEC8_9C88(RIDER_139C88, 0);
-                    if (func_00114CC0(RIDER_139C88)) {
+                    cRider_undoRailslideModeOrientation(RIDER_139C88);
+                    cRider_setControlState_9C88(RIDER_139C88, 0);
+                    if (cRider_isChangeFakieGround(RIDER_139C88)) {
                         cAirMotion_chooseFakieLandAnim(self, vn);
                     } else {
                         cAirMotion_chooseLandAnim(self, vn);
@@ -1440,9 +1440,9 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
     int got = cAirMotion_checkTerrainCollisions(self, &out);
     *(unsigned int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     if (got) {
-        func_00105398_p(RIDER_139C88, &out);
+        cRider_checkObjectCollisions_p(RIDER_139C88, &out);
     } else {
-        func_00105398_p(RIDER_139C88, 0);
+        cRider_checkObjectCollisions_p(RIDER_139C88, 0);
     }
     cRider_checkOpponentCollisions(RIDER_139C88);
 }
@@ -1607,8 +1607,8 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 int func_0011FEE8(void* rider);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
-extern "C" void func_00105D98(void* rider, void* info, int id);
-extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
+extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 struct sHit_AA48 {
@@ -1733,10 +1733,10 @@ static inline t4Vector riderVec_AA48(char* r, int off)
 /**
  * Pushes the airborne rider out of terrain and deflects its velocity off the surface.
  *
- * Skipped in CS_Reset. A world query built from the rider's sphere tree (func_0032F650) runs with its posed
+ * Skipped in CS_Reset. A world query built from the rider's sphere tree (cWorldRider_cWorldRider) runs with its posed
  * up vector (+0x180) against the overlap list with the wall hint (mWallHint). On a hit the rider moves out by
  * 1.1 times the depth; if it is moving into the surface, the inward velocity is removed plus a bounce of
- * max(5% of it, 27.78) and the impact goes to func_00105D98() (rumble, possible crash or reset). The query is
+ * max(5% of it, 27.78) and the impact goes to cRider_reactToCollision() (rumble, possible crash or reset). The query is
  * destroyed with cWorldRider__cWorldRider().
  *
  * @param outp  receives the surface normal when the function returns 1
@@ -1749,7 +1749,7 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
     sHit_AA48 hit;
     sSphere_AA48 sph;
     char* rider = RIDER_AA48;
-    func_0032F650(&sph, *(void**)(rider + 0xAA0), !riderFlag_AA48(rider));
+    cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_AA48(rider));
     sph.dir = riderVec_AA48(RIDER_AA48, 0x180);
     sph.f8 = 1;
     float penetration = func_003342D0(*(void**)(RIDER_AA48 + 0x860), &sph, &hit, *(int*)(RIDER_AA48 + 0x868));
@@ -1770,7 +1770,7 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
         info.dir = n;
         info.normal = hit.normal;
         info.depth = dot2;
-        func_00105D98(RIDER_AA48, &info, hit.m4C);
+        cRider_reactToCollision(RIDER_AA48, &info, hit.m4C);
         *(t4Vector*)outp = hit.normal;
     }
     cWorldRider__cWorldRider(&sph, 2);
@@ -1968,7 +1968,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_step);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 #include "vtable.h"
-extern "C" int func_00334680(void* world, t4Vector* from, void* hit, int flags, float radius);
+extern "C" int cOverlapList_splineIntersect(void* world, t4Vector* from, void* hit, int flags, float radius);
 extern "C" int func_001086B8(void* rider, t4Vector* tgt, t4Vector* dir);
 extern "C" void* cBE_getBE();
 extern "C" void* cBE_getInterface__Fv(void* be, int kind);
@@ -1992,7 +1992,7 @@ struct sSurf_AF28 {
     int flags;                  // 0x1C
 };
 
-// World ray/sphere hit record filled by func_00334680 (0x80 bytes).
+// World ray/sphere hit record filled by cOverlapList_splineIntersect (0x80 bytes).
 struct sHit_AF28 {
     t4Vector pos;               // 0x00
     t4Vector nrm;               // 0x10
@@ -2242,7 +2242,7 @@ static inline float ScaleAtLeast_AF28(float v, float k, float lo)
  * Advances the rider one frame on a rail: keeps it on the rail, moves it along and leans it into the pose.
  *
  * Caps the speed at rider +0x2E4, sets ForceNaturalAir (cleared while the rail holds) and looks for the rail
- * near the board-root bone (func_00334680, radius 300), recording SplineID, the contact data and the rail
+ * near the board-root bone (cOverlapList_splineIntersect, radius 300), recording SplineID, the contact data and the rail
  * object's answer to handler slot 46 (rider +0x5AC). While func_001086B8() accepts the contact, RailNorm
  * becomes the rail direction of travel, the height snaps toward the rail, the velocity turns onto the rail
  * and gains gravity (0, 0, -980) along it plus a boost push (mBoostStrength * 2450). The sideways offset gets
@@ -2266,7 +2266,7 @@ extern "C" void cRailslideMotion_step(char* self)
     char* rider2 = RIDER_AF28;
     t4Vector* pt = (t4Vector*)(*(char**)(*(char**)(rider2 + 0x780) + 0x2C) + (*(int*)(rider2 + 0x8A0) << 5));
     sHit_AF28 hit;
-    if (func_00334680(*(void**)(rider2 + 0x860), pt, &hit, 1, 300.0f)) {
+    if (cOverlapList_splineIntersect(*(void**)(rider2 + 0x860), pt, &hit, 1, 300.0f)) {
         if (hit.obj) {
             char* handler = *(char**)(hit.obj + 0xC);
             if (handler) {
@@ -2580,7 +2580,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_resolve);
 extern "C" void func_00114298(void* rider, float v);
 // PORT: cRider_updateBoundBox is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void cRider_updateBoundBox_v(void* rider, int a1) __asm__("cRider_updateBoundBox");
-extern "C" void func_00105398(void* rider, int a1);
+extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self);
 extern "C" void cSSXAudio_Lift(void* snd, void* rider);
@@ -2639,7 +2639,7 @@ static inline void vu0ScaleEq_BFA8(sVec4_BFA8& v, float s)
  * Resolves the rail motion: pops the rider off a lost rail, runs the collision checks and caps the speed.
  *
  * With ForceNaturalAir set it eases slewed channel 5 to 0 and pops the rider with func_00114298(rider, -1).
- * func_00105398() runs with the sphere tree's filter word (+0x28) set to the current uber grind's entry of
+ * cRider_checkObjectCollisions() runs with the sphere tree's filter word (+0x28) set to the current uber grind's entry of
  * D_00458230 in CS_UberGrind (0x16 otherwise), cRailslideMotion_checkTerrainCollisions() with 3, then the
  * filter is reset to -1 and opponents are checked. A rider that lost the rail switches to MS_Air with the
  * lift sound (cSSXAudio_Lift), and the speed is capped at rider +0x2E4.
@@ -2660,7 +2660,7 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
     } else {
         *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0x16;
     }
-    func_00105398(RIDER_BFA8, 0);
+    cRider_checkObjectCollisions(RIDER_BFA8, 0);
     *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 3;
     cRailslideMotion_checkTerrainCollisions(self);
     *(unsigned int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0xFFFFFFFF;
@@ -2683,8 +2683,8 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 int func_0011FEE8(void* rider);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
-extern "C" void func_00105D98(void* rider, void* info, int id);
-extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
+extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 struct sHit_13C140 {
@@ -2848,7 +2848,7 @@ static inline bool riderFlag_13C140(char* r)
  * mGroundNormal part. The rider moves out by 1.1 times the depth. When it has moved no more than 2 units
  * since the previous hit for over 0.5 s (StuckSec, counted at 1/60 per call, and PrevPos), its velocity
  * becomes 1111.11 along its front, less the part into the surface. Inward velocity is then removed plus a
- * bounce of max(half of it, 27.78), and the impact goes to func_00105D98() with that bounce as its speed.
+ * bounce of max(half of it, 27.78), and the impact goes to cRider_reactToCollision() with that bounce as its speed.
  */
 extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
 {
@@ -2857,7 +2857,7 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
     sHit_13C140 hit;
     sSphere_13C140 sph;
     char* rider = RIDER;
-    func_0032F650(&sph, *(void**)(rider + 0xAA0), !riderFlag_13C140(rider));
+    cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13C140(rider));
     float penetration = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
@@ -2899,7 +2899,7 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
         info.dir = n;
         info.normal = hit.normal;
         info.depth = newNormVel;
-        func_00105D98(RIDER, &info, hit.m4C);
+        cRider_reactToCollision(RIDER, &info, hit.m4C);
     }
     cWorldRider__cWorldRider(&sph, 2);
 }
@@ -3034,7 +3034,7 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_gainFocus);
 #ifdef SKIP_ASM
-extern "C" int func_001298C8();
+extern "C" int AITick();
 
 struct sHpVec4_13C7A8 {
     float x, y, z, w;
@@ -3091,7 +3091,7 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
     self->m8 = k * snow->m18;
     *(sHpVec4_13C7A8*)(rider + 0x390) = *(sHpVec4_13C7A8*)(rider + 0x370);
     self->mC = 0;
-    int aiTick = func_001298C8();
+    int aiTick = AITick();
     self->m10 = aiTick;
     int ticksOutOfGround = aiTick - self->m14;
     float penaltyFraction;
@@ -3155,7 +3155,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" float func_001493D8(void* self, int rider, int value);
 extern "C" float func_0031C228(float x);
-int func_00312AA0(void* anim, int n);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int n);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float hpAbs_13C948(float x)
@@ -3286,7 +3286,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
     if (0.0f < boostDelta)
     {
         func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
-        float getGoingFactor = func_00312AA0(*(void**)(RIDER + 0x784), 2) == 0x16 ? 0.20000000298023224f : 0.0f;
+        float getGoingFactor = cRiderAnimBase_getCurrentAnimID(*(void**)(RIDER + 0x784), 2) == 0x16 ? 0.20000000298023224f : 0.0f;
         int st = *(int*)(RIDER + 0x434);
         if (st == 11 || st == 12 || st == 13)
             boostDelta *= hpAbs_13C948(*(float*)(RIDER + 0x378));
@@ -3836,7 +3836,7 @@ extern "C" float func_00148E68_f(void* iface, int rider, int b) __asm__("func_00
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
 extern "C" float func_0031C040(float a);
 extern "C" float func_0031C128(float x);
-int func_00312AA0(void* anim, int layer);
+int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 
 extern t4Vector D_004FF120_13D818 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_13D818 __asm__("t4vect_ZAxis");
@@ -4267,8 +4267,8 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float ch = self->mRider->mSlewed[18].cur + (heightBefore - heightAfter) * 10.0f;
     ch *= 1.0f - dt * 20.0f;
     ch = clamp_13D818(ch, lo2, hi2);
-    if (func_00311AE8(self->mRider->mRiderAnim, 2) == 10 || func_00311AE8(self->mRider->mRiderAnim, 2) == 4 ||
-        func_00311AE8(self->mRider->mRiderAnim, 2) == 5 || func_00312AA0(self->mRider->mRiderAnim, 2) == 0x16)
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 10 || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 4 ||
+        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 5 || cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 0x16)
         ch = 0.0f;
     cRider* rider = self->mRider;
     rider->mSlewed[18].target = ch * scale;
@@ -4405,8 +4405,8 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
                 cRider_rotateOrientation(self->mRider, axis, tilt);
             }
         }
-        int layer = func_00311AE8(self->mRider->mRiderAnim, 2);
-        int anim = func_00312AA0(self->mRider->mRiderAnim, 2);
+        int layer = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
+        int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
         int onSlope = func_0011FEE8(self->mRider) != 1 && (self->mRider->mSurfaceType == 2 || self->mRider->mSurfaceType == 3);
         int brace = !onSlope && layer != 10 && layer != 5 && anim != 0x16 && anim != 2;
         if (onSlope) {
@@ -4448,7 +4448,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_resolve);
 extern "C" void func_00114298(void* rider, float v);
 // PORT: cRider_updateBoundBox is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void cRider_updateBoundBox_v13F178(void* rider, int a1) __asm__("cRider_updateBoundBox");
-extern "C" void func_00105398(void* rider, int a1);
+extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self);
@@ -4465,7 +4465,7 @@ struct sInfo_13F178 {
     int f30;
 } __attribute__((aligned(16)));
 
-extern "C" void func_0010EB30(void* rider, int a1, int a2, int a3, sInfo_13F178* info);
+extern "C" void cRider_flagEventWipeout(void* rider, int a1, int a2, int a3, sInfo_13F178* info);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4HP vu0Scale_13F178(const sVec4HP& v, float s)
@@ -4571,7 +4571,7 @@ static inline float absf_13F178(float x)
  * With ForceNaturalAir set it pops the rider with func_00114298(rider, -1) and, while still in MS_Ground
  * after the checks, switches to MS_Air with the lift sound. Otherwise surface type 0x12 starts a wipeout
  * (anim 0x168) and reset surfaces (+0x44) or triangles with flag 0x2 force an auto reset. Walls
- * (cGroundMotion_checkWallCollisions, sphere-tree filter kOnGroundSphereMask), func_00105398() and opponents are
+ * (cGroundMotion_checkWallCollisions, sphere-tree filter kOnGroundSphereMask), cRider_checkObjectCollisions() and opponents are
  * checked; rider +0x390 is blended toward mGroundNormal, the speed is capped at rider +0x2E4, and mAudioSpeed
  * (speed / 3333.33, at most 1), mAudioEdging (|channel 0|) and mAudioBraking (|channel 2|) are set.
  */
@@ -4590,7 +4590,7 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
             info.dir = vu0Normalize_13F178(*(sVec4HP*)(rider + 0x1E0));
             info.up = *(sVec4HP*)(RIDER_13F178 + 0x370);
             info.f30 = 0;
-            func_0010EB30(RIDER_13F178, 0x168, 0, *(int*)(RIDER_13F178 + 0x438), &info);
+            cRider_flagEventWipeout(RIDER_13F178, 0x168, 0, *(int*)(RIDER_13F178 + 0x438), &info);
         } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)(rider + 0x2D4), (fl & 2) != 0)) {
             cRider_checkForReset(rider, 0, 1);
         }
@@ -4599,7 +4599,7 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
     *(int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = kOnGroundSphereMask;
     cGroundMotion_checkWallCollisions(self);
     *(unsigned int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = 0xFFFFFFFF;
-    func_00105398(RIDER_13F178, 0);
+    cRider_checkObjectCollisions(RIDER_13F178, 0);
     cRider_checkOpponentCollisions(RIDER_13F178);
     if (self->ForceNaturalAir != 0 && func_0011FE98(RIDER_13F178) == 0) {
         cRider_setMotionState_impl_13F178(RIDER_13F178, 1);
@@ -4631,7 +4631,7 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int func_001298C8();
+extern "C" int AITick();
 
 /**
  * Ends the ground motion: eases slewed channels 2, 17 and 18 back to 0 and records the AI tick.
@@ -4652,9 +4652,9 @@ extern "C" void cGroundMotion_loseFocus(cGroundMotion* self)
     *(float*)(rider3 + 0x2CC) = 1.6666667461395264f;
     *(int*)(rider3 + 0x2D0) = 0;
     if (self->AITickOnLoseFocus == -1)
-        self->AITickOnLoseFocus = func_001298C8() - 500;
+        self->AITickOnLoseFocus = AITick() - 500;
     else
-        self->AITickOnLoseFocus = func_001298C8();
+        self->AITickOnLoseFocus = AITick();
 }
 #endif
 
@@ -4666,10 +4666,10 @@ int func_0011FEE8(void* rider);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_001065B0(void* rider, void* hit);
-extern "C" void func_00105D98(void* rider, void* info, int id);
+extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_WallCollision(void* snd, void* rider);
-extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 struct sHit_13F488 {
@@ -4818,7 +4818,7 @@ static inline bool riderFlag_13F488(char* r)
  * hit object (handler slot 42); hits straight against mGroundNormal are ignored and downward ones lose their
  * mGroundNormal part. The rider moves out by 1.1 times the depth; when moving into the wall (relative to the
  * wall's velocity) the inward velocity is removed plus a bounce of max(5% of it, 27.78), then
- * func_001065B0(), func_00105D98() and the wall sound (cSSXAudio_WallCollision) follow.
+ * func_001065B0(), cRider_reactToCollision() and the wall sound (cSSXAudio_WallCollision) follow.
  */
 extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
 {
@@ -4832,7 +4832,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     sHit_13F488 hit;
     sSphere_13F488 sph;
     char* rider = RIDER;
-    func_0032F650(&sph, *(void**)(rider + 0xAA0), !riderFlag_13F488(rider));
+    cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13F488(rider));
     sph.f8 = 1;
     sph.dir = RV(0x370);
     float penetration = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
@@ -4871,7 +4871,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         info.dir = n;
         info.normal = hit.normal;
         info.depth = dot2;
-        func_00105D98(RIDER, &info, hit.m4C);
+        cRider_reactToCollision(RIDER, &info, hit.m4C);
         cSSXAudio_WallCollision(func_0028B180(), RIDER);
     }
     cWorldRider__cWorldRider(&sph, 2);
@@ -5004,7 +5004,7 @@ extern "C" void func_0013FAD8(sSortObj_FAD8** first, sSortObj_FAD8** last, sSort
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013FB20);
+INCLUDE_ASM("ai/control/handplantcontrol", __sti__all_in_one_ai_cpp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -5026,7 +5026,7 @@ extern float D_004A4CA0;
 extern float D_004A4CA4;
 extern float D_004A4CA8;
 extern float D_004A4CAC;
-extern "C" void func_0011B2C0(void);
+extern "C" void InitTerminalVelocityTable(void);
 extern sIdx D_004A4C18;
 extern sIdx D_004A4C20;
 extern sIdx D_004A4C28;
@@ -5107,7 +5107,7 @@ extern float D_004A6290[8];
 extern float D_004A62B0[8];
 extern float D_004A62D0[8];
 extern float D_004A62F0[8];
-void sti_0013FB20(int init, int prio) __asm__("func_0013FB20");
+void sti_0013FB20(int init, int prio) __asm__("__sti__all_in_one_ai_cpp");
 void sti_0013FB20(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
@@ -5354,7 +5354,7 @@ void sti_0013FB20(int init, int prio)
         InitIdx(&D_004A4C78, 12);
         InitIdx(&D_004A4C80, 13);
         D_004A4C84 = 2222.22217f;
-        func_0011B2C0();
+        InitTerminalVelocityTable();
         nFinishLineControl_kFinishStopThreshCPS = 277.777771f;
         SetKeys8(D_004A61F0, 0.0f, 0.200000003f, 0.400000006f, 0.400000006f, 0.600000024f, 0.400000006f, 1.0f, 0.200000003f);
         SetKeys8(D_004A6210, 0.0f, 0.300000012f, 0.400000006f, 1.20000005f, 0.600000024f, 1.20000005f, 1.0f, 0.300000012f);
@@ -5754,9 +5754,9 @@ extern "C" long long *func_00140900(long long *outRotation, void *rider) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140910__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVelocity__FPv);
 #ifdef SKIP_ASM
-void* func_00140910(void* self)
+void* cRider_getVelocity(void* self)
 {
     return (char*)self + 0x1E0;
 }
@@ -7776,9 +7776,9 @@ extern "C" int func_001446E0(cPlayer* player) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446E8__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_scorePath__FPv);
 #ifdef SKIP_ASM
-float func_001446E8(void* self)
+float cPlayer_scorePath(void* self)
 {
     return 0.0f;
 }
@@ -7793,7 +7793,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cMissionRider__cMissionRider);
 /**
  * Destroys a mission rider; the source body is empty, so all the work is compiler-generated.
  *
- * The generated code restores the vtables, runs the base destructor func_00125EB8(), destroys the virtual
+ * The generated code restores the vtables, runs the base destructor cPlayer__cPlayer(), destroys the virtual
  * cRider base with cRider__cRider() when in charge, and frees the object when bit 0 of the destructor flags is set.
  */
 cHpD_1446F8::~cHpD_1446F8()
@@ -7808,7 +7808,7 @@ __asm__("_vt$12cHpD1_1446F8 = cPlayer_vtbl\n"
         "_vt$11cHpD_1446F8$13cRiderVbC_hpc = D_00458240\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$11cHpD_1446F8$12cRiderVb_hpc = D_00458288\n"
-        "_$_12cHpD1_1446F8 = func_00125EB8\n"
+        "_$_12cHpD1_1446F8 = cPlayer__cPlayer\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
@@ -7821,14 +7821,14 @@ extern "C" int func_001448A8(void* self)
 }
 #endif
 
-extern "C" void* func_0013FB20(int, int);
+extern "C" void* __sti__all_in_one_ai_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001448B8__FPv);
 #ifdef SKIP_ASM
 void* func_001448B8(void* self)
 {
-    return func_0013FB20(1, 0xffff);
+    return __sti__all_in_one_ai_cpp(1, 0xffff);
 }
 #endif
 

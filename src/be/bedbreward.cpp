@@ -8,7 +8,7 @@ INCLUDE_ASM("be/bedbreward", cBERewardDB_init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int BXFILE_sizez(int file);
-extern "C" void func_003E1BB8(int file, void* data, int size);
+extern "C" void FILE_loadatz(int file, void* data, int size);
 extern void func_0015A818_s(void* self, void* data) __asm__("func_0015A818");
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 extern int gRewardsFileName;
@@ -28,7 +28,7 @@ extern "C" void cBERewardDB_init(int* self, int async)
     {
         int size = BXFILE_sizez(gRewardsFileName);
         void* data = operator_new_tag(size, str_Rewards_File, 0, 0);
-        func_003E1BB8(gRewardsFileName, data, size);
+        FILE_loadatz(gRewardsFileName, data, size);
         func_0015A818_s(self, data);
         *self = -1;
     }
@@ -1474,18 +1474,18 @@ void* cCameraAlgoList_cCameraAlgoList(void* self)
 INCLUDE_ASM("be/bedbreward", cCameraAlgoList__cCameraAlgoList);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_0015CB08(void* self);
+extern "C" void cCameraAlgoList_removeAll(void* self);
 
 /**
  * Destroys a camera algorithm list: frees its nodes, then the object itself when asked to.
  *
- * func_0015CB08() deletes every node and the algorithms the list owns.
+ * cCameraAlgoList_removeAll() deletes every node and the algorithms the list owns.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cCameraAlgoList__cCameraAlgoList(int* self, int flags)
 {
-    func_0015CB08(self);
+    cCameraAlgoList_removeAll(self);
     if (flags & 1)
     {
         operator_delete(self);

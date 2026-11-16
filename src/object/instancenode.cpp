@@ -193,14 +193,14 @@ extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
 }
 #endif
 
-extern "C" void* func_002D19B8(int, int, int);
+extern "C" void* cObjectInterface_runCollideScript(int, int, int);
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FE00__FPviii);
+INCLUDE_ASM("object/instancenode", cInstanceNode_runCollideScript__FPviii);
 #ifdef SKIP_ASM
-void* func_0034FE00(void* self, int a1, int a2, int a3)
+void* cInstanceNode_runCollideScript(void* self, int a1, int a2, int a3)
 {
-    return func_002D19B8(a1, a2, a3);
+    return cObjectInterface_runCollideScript(a1, a2, a3);
 }
 #endif
 
@@ -215,13 +215,13 @@ struct sInstNodeDtorVEntry {
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_DeadNode_b[];
-extern "C" void* func_003506D8(void* mem, int v);
+extern "C" void* cDeadNode_cDeadNode(void* mem, int v);
 
 /**
  * Replaces an instance node by a dead node: deletes this node and creates a cDeadNode for the same record.
  *
  * The node deletes itself through its virtual destructor (slot 1, flags 3), then a 0x1C-byte block
- * ("DeadNode") is constructed as a cDeadNode for the saved instance record by func_003506D8. The record's
+ * ("DeadNode") is constructed as a cDeadNode for the saved instance record by cDeadNode_cDeadNode. The record's
  * flags are not touched.
  */
 extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
@@ -231,7 +231,7 @@ extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
         sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
-    func_003506D8(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
+    cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
 #endif
 
@@ -262,7 +262,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, void* stre
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FED8);
+INCLUDE_ASM("object/instancenode", cInstanceNode_buildMeshMat);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Prototype asserts: assert(inst); assert((mesh >= -1) && (mesh < pModel->m_iNumMeshes)); assert((int(a) & 15) == 0) (bx/math3d.h).
@@ -403,7 +403,7 @@ static inline void mulScaled_FED8(sInMat_FED8* dst, const sInMat_FED8* local, co
 }
 
 // Builds the world matrix of mesh `mesh` by walking its parent chain.
-extern "C" void func_0034FED8(sInInst_FED8* self, int mesh, sInMat_FED8* out)
+extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_FED8* out)
 {
     sInMat_FED8* base = &self->world;
     sInModel_FED8* pModel = self->pModel;
@@ -702,12 +702,12 @@ extern "C" int func_00350698(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_003506D8);
+INCLUDE_ASM("object/instancenode", cDeadNode_cDeadNode);
 #ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, int a1, int type, int a3);
 extern char cDeadNode_vtbl[];
 
-extern "C" void* func_003506D8(void* self, int v)
+extern "C" void* cDeadNode_cDeadNode(void* self, int v)
 {
     func_0034FB00(self, 8, 6, v);
     *(void**)((char*)self + 0xC) = cDeadNode_vtbl;

@@ -372,8 +372,8 @@ extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit lo
 extern "C" void* func_0031E818(void* ms, unsigned int bytes);
 struct sMState_31EEE8;
 extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
-// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
-extern "C" void func_0031ED60_E2D8(void* ms, void* mem) __asm__("func_0031ED60");
+// PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
+extern "C" void cDynamicMemMan_dlfree_E2D8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 extern "C" int* func_00415FB8();
 
 struct sMChunk_31E2D8
@@ -496,7 +496,7 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
                     if (old_size >= 16) {
                         unsigned int tt = av->trim_threshold;
                         av->trim_threshold = 0xFFFFFFFF;
-                        func_0031ED60_E2D8(ms, (char*)old_top + 8);
+                        cDynamicMemMan_dlfree_E2D8(ms, (char*)old_top + 8);
                         av->trim_threshold = tt;
                     }
                 }
@@ -815,7 +815,7 @@ use_top:
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031ED60);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlfree);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 free()
 struct sMChunk_31ED60
@@ -847,10 +847,10 @@ struct sMState_31E6D8;
 extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
 extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
 
-// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
-extern "C" void func_0031ED60_free(sMalloc_31ED60* ms, void* mem) __asm__("func_0031ED60");
+// PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
+extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 
-extern "C" void func_0031ED60_free(sMalloc_31ED60* ms, void* mem)
+extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
 {
     sMState_31ED60* av = ms->av;
     sMChunk_31ED60* p;
@@ -1119,7 +1119,7 @@ extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
                     }
                 }
             }
-            func_0031ED60_E2D8(ms, oldmem);
+            cDynamicMemMan_dlfree_E2D8(ms, oldmem);
             return (char*)newp + 8;
         }
     }
@@ -1134,7 +1134,7 @@ split:
         newp->size = (newp->size & 1) | nb;
         remainder->size = remainder_size | 1;
         ((sMChunk_31F018*)((char*)remainder + remainder_size))->size |= 1;
-        func_0031ED60_E2D8(ms, (char*)remainder + 8);
+        cDynamicMemMan_dlfree_E2D8(ms, (char*)remainder + 8);
     }
     return (char*)newp + 8;
 
@@ -1149,8 +1149,8 @@ INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 mEMALIGn()
 extern "C" void* func_0031E818(void* ms, unsigned int bytes);
-// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
-extern "C" void func_0031ED60_F2C8(void* ms, void* mem) __asm__("func_0031ED60");
+// PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
+extern "C" void cDynamicMemMan_dlfree_F2C8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 extern "C" int* func_00415FB8();
 
 struct sMChunk_31F2C8
@@ -1210,7 +1210,7 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
         newp->size = newsize | 1;
         ((sMChunk_31F2C8*)((char*)newp + newsize))->size |= 1;
         ((sMChunk_31F2C8*)((int)m - 8))->size = (((sMChunk_31F2C8*)((int)m - 8))->size & 1) | leadsize;
-        func_0031ED60_F2C8(ms, (char*)p + 8);
+        cDynamicMemMan_dlfree_F2C8(ms, (char*)p + 8);
         p = newp;
     }
     if (!(p->size & 2)) {
@@ -1220,7 +1220,7 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
             remainder = (sMChunk_31F2C8*)((char*)p + nb);
             remainder->size = remainder_size | 1;
             p->size = (p->size & 1) | nb;
-            func_0031ED60_F2C8(ms, (char*)remainder + 8);
+            cDynamicMemMan_dlfree_F2C8(ms, (char*)remainder + 8);
         }
     }
     return (char*)p + 8;
@@ -1232,8 +1232,8 @@ INCLUDE_ASM("bx/cubicspline", func_0031F4E8);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 mEMALIGn() variant: aligns the address mem + offset instead of mem
 extern "C" void* func_0031E818(void* ms, unsigned int bytes);
-// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
-extern "C" void func_0031ED60_F4E8(void* ms, void* mem) __asm__("func_0031ED60");
+// PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
+extern "C" void cDynamicMemMan_dlfree_F4E8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 extern "C" int* func_00415FB8();
 
 struct sMChunk_31F4E8
@@ -1294,7 +1294,7 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
         newp->size = newsize | 1;
         ((sMChunk_31F4E8*)((char*)newp + newsize))->size |= 1;
         ((sMChunk_31F4E8*)((int)m - 8))->size = (((sMChunk_31F4E8*)((int)m - 8))->size & 1) | leadsize;
-        func_0031ED60_F4E8(ms, (char*)p + 8);
+        cDynamicMemMan_dlfree_F4E8(ms, (char*)p + 8);
         p = newp;
     }
     if (!(p->size & 2)) {
@@ -1304,7 +1304,7 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
             remainder = (sMChunk_31F4E8*)((char*)p + nb);
             remainder->size = remainder_size | 1;
             p->size = (p->size & 1) | nb;
-            func_0031ED60_F4E8(ms, (char*)remainder + 8);
+            cDynamicMemMan_dlfree_F4E8(ms, (char*)remainder + 8);
         }
     }
     return (char*)p + 8;
@@ -1356,12 +1356,12 @@ extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031F7F0);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
-extern "C" void func_0031ED60_F7F0(void* ms, void* mem) __asm__("func_0031ED60");
+// PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
+extern "C" void cDynamicMemMan_dlfree_F7F0(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 
 extern "C" void func_0031F7F0(void* ms, void* mem)
 {
-    func_0031ED60_F7F0(ms, mem);
+    cDynamicMemMan_dlfree_F7F0(ms, mem);
 }
 #endif
 //100%
@@ -1740,11 +1740,11 @@ void func_0031FF38(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FF60);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_init);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
-extern "C" void func_0031FF60(void* self, unsigned int base, unsigned int size)
+extern "C" void cDynamicMemMan_init(void* self, unsigned int base, unsigned int size)
 {
     unsigned int start = (base + 0xF) & 0xFFFFFFF0;
     *(unsigned int*)((char*)self + 0x4) = start;
@@ -1809,7 +1809,7 @@ int func_00320078(void* self)
 }
 #endif
 
-extern "C" int func_0031ED60(void* self);
+extern "C" int cDynamicMemMan_dlfree(void* self);
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320098);
@@ -1823,11 +1823,11 @@ extern "C" int func_00320098(char* self, unsigned int addr)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003200C0__FPv);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_free__FPv);
 #ifdef SKIP_ASM
-int func_003200C0(void* self)
+int cDynamicMemMan_free(void* self)
 {
-    return func_0031ED60(self);
+    return cDynamicMemMan_dlfree(self);
 }
 #endif
 
@@ -1969,7 +1969,7 @@ void* func_00320270(void* self)
 }
 #endif
 
-extern "C" void* func_00319E48(int size);
+extern "C" void* cMemBlockMan_alloc(int size);
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003202C0__FPv);
@@ -1982,7 +1982,7 @@ void* func_003202C0(void* self)
         *(void**)((char*)self + 0x800) = next;
         return node;
     }
-    return func_00319E48(0xC);
+    return cMemBlockMan_alloc(0xC);
 }
 #endif
 
@@ -1997,7 +1997,7 @@ void* func_003202F8(void* self)
         *(void**)((char*)self + 0x2000) = next;
         return node;
     }
-    return func_00319E48(0x14);
+    return cMemBlockMan_alloc(0x14);
 }
 #endif
 
@@ -2012,7 +2012,7 @@ void* func_00320330(void* self)
         *(void**)((char*)self + 0x6000) = next;
         return node;
     }
-    return func_00319E48(0x24);
+    return cMemBlockMan_alloc(0x24);
 }
 #endif
 
@@ -2031,7 +2031,7 @@ void* func_00320368(void* self)
     if (*(void**)((char*)self + 0x32000) != 0) {
         return popFreeNode((void**)((char*)self + 0x32000));
     }
-    return func_00319E48(0x44);
+    return cMemBlockMan_alloc(0x44);
 }
 #endif
 
@@ -2043,7 +2043,7 @@ void* func_003203B8(void* self)
     if (*(void**)((char*)self + 0x25800) != 0) {
         return popFreeNode((void**)((char*)self + 0x25800));
     }
-    return func_00319E48(0x84);
+    return cMemBlockMan_alloc(0x84);
 }
 #endif
 
@@ -2051,7 +2051,7 @@ void* func_003203B8(void* self)
 INCLUDE_ASM("bx/cubicspline", func_00320408__FPv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00319E48_0408(unsigned int size, unsigned int align) __asm__("func_00319E48");
+extern "C" void* cMemBlockMan_alloc_0408(unsigned int size, unsigned int align) __asm__("cMemBlockMan_alloc");
 
 // TMemContainer<TMemBlock<0x100>, 512> (On Tour names): a free list threaded through the blocks.
 struct TMemBlock_0408 {
@@ -2077,7 +2077,7 @@ void* func_00320408(TMemContainer_0408* self, unsigned int align)
     if (self->m_freeList != 0) {
         return reserveBlock_0408(&self->m_freeList);
     }
-    return func_00319E48_0408(0x104, align);
+    return cMemBlockMan_alloc_0408(0x104, align);
 }
 #endif
 
@@ -2085,7 +2085,7 @@ void* func_00320408(TMemContainer_0408* self, unsigned int align)
 INCLUDE_ASM("bx/cubicspline", func_00320448__FPv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00319E48_0448(unsigned int size, unsigned int align) __asm__("func_00319E48");
+extern "C" void* cMemBlockMan_alloc_0448(unsigned int size, unsigned int align) __asm__("cMemBlockMan_alloc");
 
 // TMemContainer<TMemBlock<0x200>, 256> (On Tour names): a free list threaded through the blocks.
 struct TMemBlock_0448 {
@@ -2111,7 +2111,7 @@ void* func_00320448(TMemContainer_0448* self, unsigned int align)
     if (self->m_freeList != 0) {
         return reserveBlock_0448(&self->m_freeList);
     }
-    return func_00319E48_0448(0x204, align);
+    return cMemBlockMan_alloc_0448(0x204, align);
 }
 #endif
 
@@ -2242,7 +2242,7 @@ void func_00320548(void)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320550);
+INCLUDE_ASM("bx/cubicspline", __sti__all_in_one_bx_cpp);
 #ifdef SKIP_ASM
 void* func_00316A00(void* self);
 void* func_00317930(void* self);
@@ -2309,7 +2309,7 @@ extern char t3vect_Zero[], D_004FF0E8[], D_004FF0F8[], D_004FF108[];
 extern char t4vect_Zero[], t4vect_Origin[], t4vect_XAxis[], t4vect_YAxis[], t4vect_ZAxis[];
 extern char t3mat_Identity[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], tPose_Identity[], TheDynamicMemMan[];
 
-extern "C" void func_00320550(int init, int prio)
+extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {

@@ -286,19 +286,19 @@ extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A7AA8);
+INCLUDE_ASM("world/worldcache", cWorldMemoryMan__cWorldMemoryMan);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_003A76C0(void* self, int flags);
 
-struct func_003A7AA8_sElem {
+struct cWorldMemoryMan__cWorldMemoryMan_sElem {
     char pad[0x14];
 };
 
-extern "C" void func_003A7AA8(func_003A7AA8_sElem* self, int flags)
+extern "C" void cWorldMemoryMan__cWorldMemoryMan(cWorldMemoryMan__cWorldMemoryMan_sElem* self, int flags)
 {
     if (self != 0) {
-        func_003A7AA8_sElem* p = self + 3;
+        cWorldMemoryMan__cWorldMemoryMan_sElem* p = self + 3;
         while (self != p) {
             p--;
             func_003A76C0(p, 0);
@@ -579,8 +579,8 @@ extern "C" void cWorldCache_purge(cWorldCache* worldCache)
     if ((self->mp_DataHeader) != 0) {
         cMemMan_free((self->mp_DataHeader));
     }
-    if (((func_003A7AA8_sElem*)self->m_pWorldMemMan) != 0) {
-        func_003A7AA8(((func_003A7AA8_sElem*)self->m_pWorldMemMan), 3);
+    if (((cWorldMemoryMan__cWorldMemoryMan_sElem*)self->m_pWorldMemMan) != 0) {
+        cWorldMemoryMan__cWorldMemoryMan(((cWorldMemoryMan__cWorldMemoryMan_sElem*)self->m_pWorldMemMan), 3);
     }
 }
 #endif
@@ -731,19 +731,19 @@ INCLUDE_ASM("world/worldcache", cWorldCache_update);
 #ifdef SKIP_ASM
 extern "C" void cWorldView_update(cWorldView* p);
 extern "C" void cWorldCache_updatePages(cWorldCache* self);
-extern "C" void func_003A7098(void* p);
+extern "C" void cStreamMan_update(void* p);
 
 /**
  * Runs the world cache's per-frame update.
  *
  * Updates the world view (offset 0x10), the cache pages, then the stream manager (offset 0x300) with
- * func_003A7098().
+ * cStreamMan_update().
  */
 extern "C" void cWorldCache_update(cWorldCache* self)
 {
     cWorldView_update((cWorldView*)((char*)self + 0x10));
     cWorldCache_updatePages(self);
-    func_003A7098((char*)self + 0x300);
+    cStreamMan_update((char*)self + 0x300);
 }
 #endif
 
@@ -1525,14 +1525,14 @@ struct sCacheHead_3A8F80 {
     int v;
     sCacheHead_3A8F80() {}
 };
-extern "C" void func_003A9188_8F80(void* self) __asm__("func_003A9188");
+extern "C" void cWorldView_reset_8F80(void* self) __asm__("cWorldView_reset");
 
 // PORT: the unit declares this as void(void*); defined under an asm label with its real type
 extern "C" void* cWorldView_cWorldView_impl(void* self) __asm__("cWorldView_cWorldView");
 /**
  * Constructs a world view by clearing its state.
  *
- * func_003A9188() zeroes the view's counters and its 64 entry pairs, and sets both of its view slots and its two
+ * cWorldView_reset() zeroes the view's counters and its 64 entry pairs, and sets both of its view slots and its two
  * position vectors to t4vect_Origin.
  *
  * @return @p self
@@ -1540,7 +1540,7 @@ extern "C" void* cWorldView_cWorldView_impl(void* self) __asm__("cWorldView_cWor
 extern "C" void* cWorldView_cWorldView_impl(void* self)
 {
     new (self) sCacheHead_3A8F80[2];
-    func_003A9188_8F80(self);
+    cWorldView_reset_8F80(self);
     return self;
 }
 #endif
@@ -1682,41 +1682,41 @@ void cWorldView_purge(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9188);
+INCLUDE_ASM("world/worldcache", cWorldView_reset);
 #ifdef SKIP_ASM
-struct func_003A9188_sVec4 {
+struct cWorldView_reset_sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
-extern func_003A9188_sVec4 t4vect_Origin;
+extern cWorldView_reset_sVec4 t4vect_Origin;
 
-extern "C" void func_003A9658(void* self, unsigned int i, func_003A9188_sVec4* v, float f);
+extern "C" void cWorldView_setFocus(void* self, unsigned int i, cWorldView_reset_sVec4* v, float f);
 
-struct func_003A9188_sPair {
+struct cWorldView_reset_sPair {
     int a;
     int b;
 };
 
-struct func_003A9188_sSlot {
+struct cWorldView_reset_sSlot {
     int f0;
     char pad[0x4C];
 };
 
-struct func_003A9188_sCache {
+struct cWorldView_reset_sCache {
     int f0;
     int f4;
     int f8;
     int fC;
     int f10;
-    func_003A9188_sPair pairs[64];
+    cWorldView_reset_sPair pairs[64];
     char pad214[0x220 - 0x214];
-    func_003A9188_sVec4 v220;
-    func_003A9188_sVec4 v230;
-    func_003A9188_sSlot slots[2];
+    cWorldView_reset_sVec4 v220;
+    cWorldView_reset_sVec4 v230;
+    cWorldView_reset_sSlot slots[2];
     int f2E0;
     int f2E4;
 };
 
-extern "C" void func_003A9188(func_003A9188_sCache* self)
+extern "C" void cWorldView_reset(cWorldView_reset_sCache* self)
 {
     unsigned int i;
     self->f0 = 0;
@@ -1732,7 +1732,7 @@ extern "C" void func_003A9188(func_003A9188_sCache* self)
     }
     for (i = 0; i < 2; i++) {
         self->slots[i].f0 = 0;
-        func_003A9658(self, i, &t4vect_Origin, 0.0f);
+        cWorldView_setFocus(self, i, &t4vect_Origin, 0.0f);
     }
     self->f2E0 = 0;
     self->f2E4 = 0;
@@ -1913,7 +1913,7 @@ extern "C" void func_003A95C0(void** self, void* node, int* ok)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9658);
+INCLUDE_ASM("world/worldcache", cWorldView_setFocus);
 #ifdef SKIP_ASM
 struct sWCVec4 {
     float x, y, z, w;
@@ -1970,8 +1970,8 @@ struct cWorldView_9658 {
 };
 
 // cWorldView::setFocus
-extern "C" void func_003A9658_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius) __asm__("func_003A9658");
-extern "C" void func_003A9658_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius)
+extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius) __asm__("cWorldView_setFocus");
+extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius)
 {
     self->m_StreamFocus[id].m_v4LoadPos = pos;
     self->m_StreamFocus[id].m_fLoadRadius = fRadius >? 0.0f;

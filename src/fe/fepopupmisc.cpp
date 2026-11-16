@@ -5741,7 +5741,7 @@ extern "C" void func_001E3AC8(int idx, float x, float y)
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
-extern "C" int func_00398380(void* self, int hash);
+extern "C" int cUITextureBank_getElementByHashname(void* self, int hash);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 int GetHashValue32(char* str);
@@ -5773,7 +5773,7 @@ struct sObj_3C00 {
  * mDoneTransition, mAllowPauseMenu and mRemovePDA 0, chat buffer " "), stores D_00474318, zeroes the eight-row
  * widget tables (unread mail, FAQ icon, from, subject, number) and the labels, menu, buttons and arrows (not
  * mpNoMessage), and looks up the "folder", "minus folder" and "questmark" textures in the engine's texture bank
- * (+0x58, func_00398380). miMiscData becomes the opening mode: 2 when D_004A20CC is -1, else 0 or 1 by whether
+ * (+0x58, cUITextureBank_getElementByHashname). miMiscData becomes the opening mode: 2 when D_004A20CC is -1, else 0 or 1 by whether
  * new-player hint 7 is set (func_001E3A30), which it then sets (func_001E3A78(7, 1)).
  *
  * @param engine  the UI engine (On Tour pEngine)
@@ -5811,17 +5811,17 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     {
         char* eng = (char*)self->mpEngine;
         int nameHash = GetHashValue32(str_folder);
-        stateView->h164 = func_00398380(eng + 0x58, nameHash);
+        stateView->h164 = cUITextureBank_getElementByHashname(eng + 0x58, nameHash);
     }
     {
         char* eng = (char*)self->mpEngine;
         int nameHash = GetHashValue32(str_minus_folder);
-        stateView->h168 = func_00398380(eng + 0x58, nameHash);
+        stateView->h168 = cUITextureBank_getElementByHashname(eng + 0x58, nameHash);
     }
     {
         char* eng = (char*)self->mpEngine;
         int nameHash = GetHashValue32(str_questmark_b);
-        stateView->h16C = func_00398380(eng + 0x58, nameHash);
+        stateView->h16C = cUITextureBank_getElementByHashname(eng + 0x58, nameHash);
     }
     if (~D_004A20CC != 0) {
         if (func_001E3A30((void*)7) != 0)
@@ -6849,19 +6849,19 @@ extern "C" void cOVState_ViewPopup_onCreateScreen(cOVState_ViewPopup* self)
 }
 #endif
 
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs one frame of the message view popup: only the cUIState update (func_0039E510).
+ * Runs one frame of the message view popup: only the cUIState update (cUIState_onUpdate).
  *
- * @return func_0039E510()'s result (not meaningful; declared void* by the unit)
+ * @return cUIState_onUpdate()'s result (not meaningful; declared void* by the unit)
  */
 void* cOVState_ViewPopup_onUpdate(void* self)
 {
-    return func_0039E510(self);
+    return cUIState_onUpdate(self);
 }
 #endif
 
@@ -7554,7 +7554,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E64C8);
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -7581,7 +7581,7 @@ extern "C" void func_001E64C8(void* self)
     cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     sprintf(buf, str_run_pct_d_pct_d, x, n);
     cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -8088,7 +8088,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E75D0);
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -8162,7 +8162,7 @@ extern "C" void func_001E75D0(void* self)
         cUITextScroll_setInputMap(p, 1);
         ((cUIObjK1DEB90*)p)->v09(0);
     }
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -8297,7 +8297,7 @@ extern "C" int func_004139F8(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern int D_004A213C;
 extern int D_00536730[];
 extern unsigned int D_00536640[];
@@ -8409,7 +8409,7 @@ extern "C" void func_001E7BB0(void* self)
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
     } else {
-        func_00294F78(func_0028B180(), 0xE);
+        cSSXAudio_MenuSound(func_0028B180(), 0xE);
     }
 }
 #endif
@@ -8418,7 +8418,7 @@ extern "C" void func_001E7BB0(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8098);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_0039F840(void* list);
+extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void func_00231320(void* self);
 
 extern "C" void func_001E8098(void* self)
@@ -8433,7 +8433,7 @@ extern "C" void func_001E8098(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        func_0039F840((char*)SSXApp->Game->UI + 0x18);
+        cUIStateStack_purgeNormalStates((char*)SSXApp->Game->UI + 0x18);
         func_00231320(SSXApp->Game);
     }
 }
@@ -8442,7 +8442,7 @@ extern "C" void func_001E8098(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8160);
 #ifdef SKIP_ASM
-extern "C" void func_0039F840(void* list);
+extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void func_00231320(void* self);
 
 extern "C" void func_001E8160(void* self, void* popup, int event)
@@ -8450,7 +8450,7 @@ extern "C" void func_001E8160(void* self, void* popup, int event)
     if (popup != 0) {
         if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
             char* game = (char*)SSXApp->Game;
-            func_0039F840(*(char**)(game + 0x48) + 0x18);
+            cUIStateStack_purgeNormalStates(*(char**)(game + 0x48) + 0x18);
             func_00231320(game);
         }
     }
@@ -8628,7 +8628,7 @@ extern "C" void func_001E8200(void* self)
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
     }
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -8636,7 +8636,7 @@ extern "C" void func_001E8200(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E87B8);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_0039F840(void* list);
+extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void func_00231320(void* self);
 
 extern "C" void func_001E87B8(void* self)
@@ -8651,7 +8651,7 @@ extern "C" void func_001E87B8(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        func_0039F840((char*)SSXApp->Game->UI + 0x18);
+        cUIStateStack_purgeNormalStates((char*)SSXApp->Game->UI + 0x18);
         func_00231320(SSXApp->Game);
     }
 }
@@ -8660,7 +8660,7 @@ extern "C" void func_001E87B8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8880);
 #ifdef SKIP_ASM
-extern "C" void func_0039F840(void* list);
+extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void func_00231320(void* self);
 
 extern "C" void func_001E8880(void* self, void* popup, int event)
@@ -8668,7 +8668,7 @@ extern "C" void func_001E8880(void* self, void* popup, int event)
     if (popup != 0) {
         if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
             char* game = (char*)SSXApp->Game;
-            func_0039F840(*(char**)(game + 0x48) + 0x18);
+            cUIStateStack_purgeNormalStates(*(char**)(game + 0x48) + 0x18);
             func_00231320(game);
         }
     }
@@ -8915,12 +8915,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8ED0);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onGainFocus(void* self);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 
 extern "C" void func_001E8ED0(void* self)
 {
     cUIState_onGainFocus(self);
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -8935,7 +8935,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cOVState_onCreateScreen(void* self);
 void func_001E8FC0(void* self);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 
 extern "C" void func_001E8F00(void* self)
 {
@@ -8952,7 +8952,7 @@ extern "C" void func_001E8F00(void* self)
     }
     func_001E8FC0(self);
     cOVState_onCreateScreen(self);
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 

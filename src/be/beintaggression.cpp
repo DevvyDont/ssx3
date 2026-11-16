@@ -102,14 +102,14 @@ extern "C" int func_00155B50(void* self, int targetRider, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155BF0);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_applyAggression);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_001E2A08(int charID, int level);
 extern signed char D_005305F9[];
 
-extern "C" void func_00155BF0(void* self, int a, int b, int event)
+extern "C" void cBEAggressionInterface_applyAggression(void* self, int a, int b, int event)
 {
     int profile = cBELibrary_getProfileIndex(a);
     int ca = cBELibrary_getCharacterID(a);

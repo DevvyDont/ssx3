@@ -759,7 +759,7 @@ typedef sFM_7268* (*GetMtxFn_7268)(void*);
 typedef void (*SetXformFn_7268)(void*, sFM_7268*, float);
 typedef void (*VoidFn_7268)(void*);
 
-extern "C" int func_0032C0F8(sFTester_7268* t, sFMesh_7268* mesh, int flag, sFHit_7268* out, int cap);
+extern "C" int cWorldIntersectType_IsMeshInt(sFTester_7268* t, sFMesh_7268* mesh, int flag, sFHit_7268* out, int cap);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
 static inline void Copy_7268(sFM_7268* d, const sFM_7268* s)
@@ -861,7 +861,7 @@ static inline void TransposeInverse_7268(sFM_7268* t)
  * Tests a world query against a flexible bridge's current strip and returns the hits.
  *
  * Only runs when bit 1 of @p flags is set. Moves the tester into the bridge's local space (inverse transform
- * and 1 / scale), tests the strip's triangles (func_0032C0F8), then turns each hit's position and normal back
+ * and 1 / scale), tests the strip's triangles (cWorldIntersectType_IsMeshInt), then turns each hit's position and normal back
  * into world space and fills in its type (1), owner and other fields.
  *
  * @param tester  the query (On Tour cWorldIntersectType)
@@ -886,7 +886,7 @@ extern "C" int cFlexBridgeNode_intersect(sFNode_7268* self, sFTester_7268* teste
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
     ((SetXformFn_7268)tester->vt[1].fn)((char*)tester + tester->vt[1].delta, &inv, 1.0f / self->data->scale);
-    int n = func_0032C0F8(tester, &mesh, 1, out, cap);
+    int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
     ((VoidFn_7268)tester->vt[2].fn)((char*)tester + tester->vt[2].delta);
     for (int i = 0; i < n; i++) {
         sFHit_7268* hit = &out[i];
@@ -1300,13 +1300,13 @@ struct sFlexBridgeVEntry7D38 {
 };
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
-extern "C" void func_003545D8(void* p, void* stream);
+extern "C" void cSpring_writeToReplayFrame(void* p, void* stream);
 
 /**
  * Writes a flexible bridge to a replay frame: the cInstanceNode data, its spring mesh, then 0x30 bytes from
  * +0x20.
  *
- * The spring (+0x50) is written by func_003545D8 (On Tour cSpring::writeToReplayFrame); the last block goes
+ * The spring (+0x50) is written by cSpring_writeToReplayFrame (On Tour cSpring::writeToReplayFrame); the last block goes
  * through the stream's virtual write (slot 1).
  *
  * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
@@ -1314,7 +1314,7 @@ extern "C" void func_003545D8(void* p, void* stream);
 extern "C" void cFlexBridgeNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    func_003545D8((char*)self + 0x50, stream);
+    cSpring_writeToReplayFrame((char*)self + 0x50, stream);
     sFlexBridgeVEntry7D38* vt = *(sFlexBridgeVEntry7D38**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
 }

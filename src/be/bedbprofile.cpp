@@ -55,9 +55,9 @@ extern "C" int func_001523E8(void* self, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbprofile", func_00152430);
+INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_setLocationVisited);
 #ifdef SKIP_ASM
-extern "C" void func_00152430(void* self, int bit, int on)
+extern "C" void cBECharProfileDB_setLocationVisited(void* self, int bit, int on)
 {
     int mask = 1 << bit;
     if (on)

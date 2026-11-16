@@ -153,9 +153,9 @@ extern "C" void func_002A9ED8(void* self, int a, int b)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9F30__FPvi);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBaseVolume__FPvi);
 #ifdef SKIP_ASM
-void func_002A9F30(void* self, int val)
+void cStreamInstance_SetBaseVolume(void* self, int val)
 {
     *(char*)((char*)self + 0xC) = (char)val;
 }
@@ -180,7 +180,7 @@ extern "C" void func_002A9F38(void* self, int v)
 INCLUDE_ASM("sound/streamsys", func_002A9F80);
 #ifdef SKIP_ASM
 int func_0028B240(void* self);
-void* func_002AA408(void* self);
+void* cStreamInstance_Purge(void* self);
 extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 extern "C" void func_003B7E70(int h, int vol);
@@ -188,7 +188,7 @@ extern "C" void func_003B7E70(int h, int vol);
 extern "C" void func_002A9F80(void* self)
 {
     if (func_0028B240(self) * 2 < *(int*)((char*)self + 0x80)) {
-        func_002AA408(self);
+        cStreamInstance_Purge(self);
         *(int*)((char*)self + 0x80) = 0;
         return;
     }
@@ -476,9 +476,9 @@ extern "C" int func_002AA398(void* self, int a, int b, int off)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA408__FPv);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Purge__FPv);
 #ifdef SKIP_ASM
-void* func_002AA408(void* self)
+void* cStreamInstance_Purge(void* self)
 {
     return func_003B78F8(*(int*)((char*)self + 0x8));
 }
@@ -594,7 +594,7 @@ INCLUDE_ASM("sound/streamsys", func_002AA648);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void func_002A9DF0(void* e, int a1);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* cBankMonitor_vtbl[];
@@ -643,7 +643,7 @@ extern "C" void func_002AA648(void* p, int flags)
         cMemMan_free(*(void**)(self + 8));
     }
     if (flags & 2) {
-        func_0028BB10(*(void**)self, 0);
+        cBankManager__cBankManager(*(void**)self, 0);
         cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
     }
     if (flags & 1) {
@@ -883,7 +883,7 @@ extern "C" void func_002AAE40(void* self, int i)
 {
     void* e = (*(void***)((char*)self + 0x8))[i];
     if (e != 0) {
-        func_002AA408(e);
+        cStreamInstance_Purge(e);
     }
 }
 #endif
@@ -1033,7 +1033,7 @@ extern "C" void func_002AB0F0(void* self, int idx, int val)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        func_002A9F30(stream, val);
+        cStreamInstance_SetBaseVolume(stream, val);
     }
 }
 #endif
@@ -1171,10 +1171,10 @@ extern "C" char* func_002AB200(char* self, int embedded, int a2, int a3, int hea
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB478);
+INCLUDE_ASM("sound/streamsys", cController__cController);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void func_002A6B50(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
@@ -1203,7 +1203,7 @@ extern const sSsVtblBB478 D_00483760;
 extern const sSsVtblCB478 D_004837A0;
 
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void func_002AB478(char* self, int flags)
+extern "C" void cController__cController(char* self, int flags)
 {
     char* mon = self + 0x118;
     char* bank = self + 0x5560;
@@ -1234,7 +1234,7 @@ extern "C" void func_002AB478(char* self, int flags)
     func_002A6B50(self, 0);
     if (flags & 2) {
         func_002AA648(*(void**)(self + 0x118), 0);
-        func_0028BB10(**(void***)(self + 0x118), 0);
+        cBankManager__cBankManager(**(void***)(self + 0x118), 0);
         cSoundSys__cSoundSys(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
     }
     if (flags & 1) {
@@ -1244,10 +1244,10 @@ extern "C" void func_002AB478(char* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB6B0);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Update);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void* self);
-extern "C" void func_002AC868(void* voice, void* bm, float v);
+extern "C" int cBankMonitorInstance_IsFree(void* self);
+extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float v);
 
 class cStrmCbOwner {
 public:
@@ -1259,9 +1259,9 @@ struct sStrmVoiceCb {
     void (cStrmCbOwner::*cb)(void* voice, float v);
 };
 
-extern "C" void func_002AB6B0(void* voice, void* self, float v)
+extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v)
 {
-    if (func_002ABB80(voice) == 0 && v > 0.0f) {
+    if (cBankMonitorInstance_IsFree(voice) == 0 && v > 0.0f) {
         sStrmVoiceCb* sv = (sStrmVoiceCb*)voice;
         if (sv->cb) {
             (((cStrmCbOwner*)self)->*(sv->cb))(voice, v);
@@ -1274,23 +1274,23 @@ extern "C" void func_002AB6B0(void* voice, void* self, float v)
                 bm += 0x1D8;
             }
         }
-        func_002AC868(voice, bm, v);
+        cBankMonitorInstance_Update3D(voice, bm, v);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AB7A0);
+INCLUDE_ASM("sound/streamsys", cController_BANKMONITOR_Update);
 #ifdef SKIP_ASM
-extern "C" void func_002AB6B0(void* voice, void* self, float v);
+extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v);
 
-extern "C" void func_002AB7A0(void* self, float v)
+extern "C" void cController_BANKMONITOR_Update(void* self, float v)
 {
     if (*(int*)(**(char***)((char*)self + 0x118) + 0xAC0) != 0) {
         v = 0.0f;
     }
     for (int i = 0; i < 64; i++) {
-        func_002AB6B0(*(char**)(**(char***)((char*)self + 0x118) + 0xAC4) + i * 0xC0, self, v);
+        cBankMonitorInstance_Update(*(char**)(**(char***)((char*)self + 0x118) + 0xAC4) + i * 0xC0, self, v);
     }
 }
 #endif
@@ -1402,14 +1402,14 @@ extern "C" void func_002ABA18(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABA40);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_DonePlaying);
 #ifdef SKIP_ASM
 extern "C" int func_003B8AB8(int h);
 extern "C" int func_003B9FC8(int h);
 // PORT: the unit declares func_003B7C40(int, int); its second argument is a status buffer here.
 int func_003B7C40_st(int h, int* st) __asm__("func_003B7C40");
 
-extern "C" int func_002ABA40(void* self)
+extern "C" int cBankMonitorInstance_DonePlaying(void* self)
 {
     int type = *(int*)self;
     switch (type) {
@@ -1441,13 +1441,13 @@ extern "C" int func_002ABA40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABB38);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Reset);
 #ifdef SKIP_ASM
-extern "C" void func_002AC180(void*);
+extern "C" void cBankMonitorInstance_StopSound(void*);
 
-extern "C" void func_002ABB38(void* self)
+extern "C" void cBankMonitorInstance_Reset(void* self)
 {
-    func_002AC180(self);
+    cBankMonitorInstance_StopSound(self);
     *(int*)((char*)self + 0xB0) = 0x8000;
     *(int*)((char*)self + 0xB4) = -1;
     *(int*)((char*)self + 0x0) = 0;
@@ -1458,12 +1458,12 @@ extern "C" void func_002ABB38(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002ABB80);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_IsFree);
 #ifdef SKIP_ASM
-extern "C" int func_002ABA40(void* self);
-extern "C" void func_002ABB38(void* self);
+extern "C" int cBankMonitorInstance_DonePlaying(void* self);
+extern "C" void cBankMonitorInstance_Reset(void* self);
 
-extern "C" int func_002ABB80(void* self)
+extern "C" int cBankMonitorInstance_IsFree(void* self)
 {
     if (*(int*)self == 0) {
         return 1;
@@ -1471,10 +1471,10 @@ extern "C" int func_002ABB80(void* self)
     if (*(int*)((char*)self + 0x9C) == 0) {
         return 0;
     }
-    if (func_002ABA40(self) == 0) {
+    if (cBankMonitorInstance_DonePlaying(self) == 0) {
         return 0;
     }
-    func_002ABB38(self);
+    cBankMonitorInstance_Reset(self);
     return 1;
 }
 #endif
@@ -1492,12 +1492,12 @@ extern "C" float func_002ABBD8(void* self, float* a, float* b)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABC18);
+INCLUDE_ASM("sound/streamsys", ExpScale);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_002ABC18 as void*(int); the body takes (int, float, float).
-int func_002ABC18_impl(int vol, float dist, float range) __asm__("func_002ABC18");
+// PORT: the unit declares ExpScale as void*(int); the body takes (int, float, float).
+int ExpScale_impl(int vol, float dist, float range) __asm__("ExpScale");
 
-int func_002ABC18_impl(int vol, float dist, float range)
+int ExpScale_impl(int vol, float dist, float range)
 {
     dist = dist - 0.5f;
     if (dist < 0.0f) {
@@ -1512,21 +1512,21 @@ int func_002ABC18_impl(int vol, float dist, float range)
 }
 #endif
 
-extern "C" void* func_002ABC18(int);
+extern "C" void* ExpScale(int);
 
 //99.29%
-INCLUDE_ASM("sound/streamsys", func_002ABC80__FPvi);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Dist2Vol__FPvi);
 #ifdef SKIP_ASM
-void* func_002ABC80(void* self, int a1)
+void* cBankMonitorInstance_Dist2Vol(void* self, int a1)
 {
-    return func_002ABC18(a1);
+    return ExpScale(a1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABCA0);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Doppler);
 #ifdef SKIP_ASM
-extern "C" float func_002ABCA0(float a, float b)
+extern "C" float cBankMonitorInstance_Doppler(float a, float b)
 {
     float f = a / b;
     if (f < -894.0799560546875f) {
@@ -1598,7 +1598,7 @@ extern "C" void func_002ABD48(void* self, func_002ABD48_cObj* obj)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002ABD90);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_PosUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_002A9ED8(void* s, int pos, int a2);
 extern "C" void func_003B58A0();
@@ -1606,7 +1606,7 @@ extern "C" void func_003B58D8();
 extern "C" void func_003B8C00(int h, int pos, int a2);
 extern "C" void func_003B9C20(int h, int pos);
 
-extern "C" void func_002ABD90(void* self, int pos, int a2)
+extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2)
 {
     int d = pos - *(int*)((char*)self + 0xB8);
     if (d >= -0x1FF && d <= 0x1FF) {
@@ -1632,7 +1632,7 @@ extern "C" void func_002ABD90(void* self, int pos, int a2)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002ABE78);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_PitchUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_002A9F38(void* s, int vol);
 extern "C" void func_003B58A0();
@@ -1640,7 +1640,7 @@ extern "C" void func_003B58D8();
 extern "C" void func_003B8790(int h, int vol);
 extern "C" void func_003B9B68(int h, int vol);
 
-extern "C" void func_002ABE78(void* self, int vol)
+extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
 {
     if (vol > 0x3FFF) {
         vol = 0x3FFF;
@@ -1672,10 +1672,10 @@ extern "C" void func_002ABE78(void* self, int vol)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABF60);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_VolUpdate);
 #ifdef SKIP_ASM
-void func_002A9F30(void* self, int val);
-void* func_002AA408(void* self);
+void cStreamInstance_SetBaseVolume(void* self, int val);
+void* cStreamInstance_Purge(void* self);
 extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 extern "C" void func_003B85F0(int h, int a);
@@ -1683,7 +1683,7 @@ extern "C" void func_003B89E0(int h);
 extern "C" void func_003B9920(int h);
 extern "C" void func_003B9E48(int h, int a);
 
-extern "C" void func_002ABF60(void* self, int vol)
+extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
 {
     int orig = vol;
     switch (*(int*)self) {
@@ -1746,9 +1746,9 @@ extern "C" void func_002ABF60(void* self, int vol)
         }
         *(int*)((char*)self + 0xB4) = vol;
         if (orig == none)
-            func_002AA408(*(void**)((char*)self + 0xC));
+            cStreamInstance_Purge(*(void**)((char*)self + 0xC));
         else
-            func_002A9F30(*(void**)((char*)self + 0xC), vol);
+            cStreamInstance_SetBaseVolume(*(void**)((char*)self + 0xC), vol);
         break;
     }
     }
@@ -1756,14 +1756,14 @@ extern "C" void func_002ABF60(void* self, int vol)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AC180);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_StopSound);
 #ifdef SKIP_ASM
 extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 extern "C" void func_003B8530(int h, int a, int b);
 extern "C" void func_003B9F38(int h, int a, int b);
 
-extern "C" void func_002AC180(void* self)
+extern "C" void cBankMonitorInstance_StopSound(void* self)
 {
     if (*(int*)((char*)self + 0x54) != 0) {
         return;
@@ -1902,12 +1902,12 @@ extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AC7F0);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_CheckActive);
 #ifdef SKIP_ASM
-extern "C" void func_002AC180(void*);
+extern "C" void cBankMonitorInstance_StopSound(void*);
 extern "C" void func_002AC220(void*);
 
-extern "C" int func_002AC7F0(void* self, float t)
+extern "C" int cBankMonitorInstance_CheckActive(void* self, float t)
 {
     float th = *(float*)((char*)self + 0x8C);
     if (th == 0.0f) {
@@ -1915,7 +1915,7 @@ extern "C" int func_002AC7F0(void* self, float t)
     }
     if (*(int*)((char*)self + 0x8) != 0) {
         if (th < t) {
-            func_002AC180(self);
+            cBankMonitorInstance_StopSound(self);
             return 0;
         }
         return 1;
@@ -1929,7 +1929,7 @@ extern "C" int func_002AC7F0(void* self, float t)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AC868);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Update3D);
 #ifdef SKIP_ASM
 class cStreamBM_C868 {
 public:
@@ -1953,14 +1953,14 @@ extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 // PORT: the unit declares func_003B7C40(int, int); its second argument is a status buffer here.
 int func_003B7C40_st(int h, int* st) __asm__("func_003B7C40");
-extern "C" int func_002ABA40(void* self);
-extern "C" void func_002ABD90(void* self, int pos, int a2);
-extern "C" void func_002ABE78(void* self, int a1);
-extern "C" void func_002ABF60(void* self, int a1);
+extern "C" int cBankMonitorInstance_DonePlaying(void* self);
+extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2);
+extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
+extern "C" void cBankMonitorInstance_VolUpdate(void* self, int a1);
 // PORT: these callees are declared with fewer parameters elsewhere in the unit; the caller passes the extra registers.
-int func_002ABC80_4(void* self, int vol, float dist, float range) __asm__("func_002ABC80__FPvi");
-float func_002ABCA0_3(void* self, float a, float b) __asm__("func_002ABCA0");
-int func_002AC7F0_3(void* self, void* bm, float t) __asm__("func_002AC7F0");
+int cBankMonitorInstance_Dist2Vol_4(void* self, int vol, float dist, float range) __asm__("cBankMonitorInstance_Dist2Vol__FPvi");
+float cBankMonitorInstance_Doppler_3(void* self, float a, float b) __asm__("cBankMonitorInstance_Doppler");
+int cBankMonitorInstance_CheckActive_3(void* self, void* bm, float t) __asm__("cBankMonitorInstance_CheckActive");
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_C868(float x)
@@ -1970,7 +1970,7 @@ static inline float Sqrt_C868(float x)
     return r;
 }
 
-extern "C" void func_002AC868(void* voice, void* bm, float v)
+extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float v)
 {
     char* s = (char*)voice;
     char* b = (char*)bm;
@@ -1990,23 +1990,23 @@ extern "C" void func_002AC868(void* voice, void* bm, float v)
     }
     if (*(int*)(b + 0x8E4) != 0 && *(int*)(s + 0x68) != 0) {
         float d = Sqrt_C868(((cStreamBM_C868*)bm)->v06(voice, &pos));
-        if (*(int*)(s + 0x94) != 0 || func_002AC7F0_3(voice, bm, d) != 0) {
+        if (*(int*)(s + 0x94) != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, d) != 0) {
             float f = *(float*)(s + 0x5C);
             if (f != -1.0f && *(int*)(b + 0x8E0) != 0) {
-                v = func_002ABCA0_3(voice, f - d, v);
+                v = cBankMonitorInstance_Doppler_3(voice, f - d, v);
             } else {
                 v = 1.0f;
             }
-            func_002ABD90(voice, pos.pos, pos.pos2);
-            func_002ABE78(voice, (int)(v * 4096.0f));
+            cBankMonitorInstance_PosUpdate(voice, pos.pos, pos.pos2);
+            cBankMonitorInstance_PitchUpdate(voice, (int)(v * 4096.0f));
             if (*(int*)(s + 0x94) != 0) {
                 vol = *(int*)(s + 0x64);
             } else {
                 float range = *(float*)(s + 0x88);
                 if (range == 0.0f) {
-                    vol = func_002ABC80_4(voice, *(int*)(s + 0x64), d, 30.0f);
+                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(s + 0x64), d, 30.0f);
                 } else {
-                    vol = func_002ABC80_4(voice, *(int*)(s + 0x64), d, range);
+                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(s + 0x64), d, range);
                 }
                 int m = *(int*)(s + 0x98);
                 if (m != 0x7F) {
@@ -2035,10 +2035,10 @@ extern "C" void func_002AC868(void* voice, void* bm, float v)
         if (p != 0) {
             vol = (int)((float)vol * *p);
         }
-        func_002ABF60(voice, vol);
+        cBankMonitorInstance_VolUpdate(voice, vol);
         return;
     }
-    if (func_002ABA40(voice) != 0) {
+    if (cBankMonitorInstance_DonePlaying(voice) != 0) {
         *(int*)(s + 0x8) = 0;
         *(int*)(s + 0x54) = 0;
         *(int*)(s + 0x4) = -1;
@@ -2047,18 +2047,18 @@ extern "C" void func_002AC868(void* voice, void* bm, float v)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002ACAC8);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Pause);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void* self);
-extern "C" void func_002ABE78(void* self, int a1);
-extern "C" void func_002ABF60(void* self, int a1);
+extern "C" int cBankMonitorInstance_IsFree(void* self);
+extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
+extern "C" void cBankMonitorInstance_VolUpdate(void* self, int a1);
 extern "C" void func_003B9D00(int h);
 
-extern "C" void func_002ACAC8(void* self)
+extern "C" void cBankMonitorInstance_Pause(void* self)
 {
-    if (func_002ABB80(self) == 0 && *(int*)((char*)self + 0x54) == 0) {
-        func_002ABE78(self, 0);
-        func_002ABF60(self, 0);
+    if (cBankMonitorInstance_IsFree(self) == 0 && *(int*)((char*)self + 0x54) == 0) {
+        cBankMonitorInstance_PitchUpdate(self, 0);
+        cBankMonitorInstance_VolUpdate(self, 0);
         if (*(int*)((char*)self + 0x0) == 2) {
             func_003B9D00(*(int*)((char*)self + 0x4));
         }
@@ -2069,14 +2069,14 @@ extern "C" void func_002ACAC8(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002ACB30);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void* self);
-extern "C" void func_002ABE78(void* self, int a1);
+extern "C" int cBankMonitorInstance_IsFree(void* self);
+extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
 extern "C" void func_003B9DC8(int h);
 
 extern "C" void func_002ACB30(void* self)
 {
-    if (func_002ABB80(self) == 0) {
-        func_002ABE78(self, 0x1000);
+    if (cBankMonitorInstance_IsFree(self) == 0) {
+        cBankMonitorInstance_PitchUpdate(self, 0x1000);
         if (*(int*)self == 2) {
             func_003B9DC8(*(int*)((char*)self + 0x4));
         }
@@ -2085,7 +2085,7 @@ extern "C" void func_002ACB30(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ACB80);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Fade);
 #ifdef SKIP_ASM
 extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
@@ -2093,10 +2093,10 @@ extern "C" void func_003B8530(int h, int a, int b);
 extern "C" void func_003B85F0(int h, int a);
 extern "C" void func_003B9E48(int h, int a);
 extern "C" void func_003B9F38(int h, int a, int b);
-void* func_002AA408(void* self);
-void func_002A9F30(void* self, int val);
+void* cStreamInstance_Purge(void* self);
+void cStreamInstance_SetBaseVolume(void* self, int val);
 
-extern "C" void func_002ACB80(void* self, int n, int a2, float t)
+extern "C" void cBankMonitorInstance_Fade(void* self, int n, int a2, float t)
 {
     if (a2) {
         *(int*)((char*)self + 0x58) = 1;
@@ -2136,9 +2136,9 @@ extern "C" void func_002ACB80(void* self, int n, int a2, float t)
         break;
     case 3:
         if (*(int*)((char*)self + 0x54) != 0) {
-            func_002AA408(*(void**)((char*)self + 0xC));
+            cStreamInstance_Purge(*(void**)((char*)self + 0xC));
         } else {
-            func_002A9F30(*(void**)((char*)self + 0xC), n);
+            cStreamInstance_SetBaseVolume(*(void**)((char*)self + 0xC), n);
         }
         break;
     }

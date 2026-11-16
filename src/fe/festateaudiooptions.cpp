@@ -362,7 +362,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int GetHashValue32(char* str);
 extern "C" void MEM_fill(void* p, int c, int n);
-extern "C" int func_00398380(void* list, int hash);
+extern "C" int cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 // PORT: 64-bit results (long is 8 bytes on the EE).
 extern "C" long func_00158728(void* iface, int idx, int ch);
@@ -410,7 +410,7 @@ struct sAudioState_196B90
 
 static inline int Find_196B90(char* mgr, int hash)
 {
-    return func_00398380(mgr + 0x58, hash);
+    return cUITextureBank_getElementByHashname(mgr + 0x58, hash);
 }
 
 extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)

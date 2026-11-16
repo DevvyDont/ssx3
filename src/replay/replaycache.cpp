@@ -153,11 +153,11 @@ INCLUDE_ASM("replay/replaycache", cReplay_freeReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void func_0026E608(void* list, void* node);
 extern "C" void cReplayFrame_clearFrame(void* node);
-extern "C" void func_0026E5D0(void* list, void* node);
+extern "C" void cReplayFrameList_addFrame(void* list, void* node);
 
 /**
  * Gives a frame back: unlinks it from FrameList (func_0026E608), clears it (cReplayFrame_clearFrame) and adds it to
- * FreeFrameList (func_0026E5D0).
+ * FreeFrameList (cReplayFrameList_addFrame).
  *
  * @param node  the frame (On Tour cReplayFrame*)
  */
@@ -165,7 +165,7 @@ extern "C" void cReplay_freeReplayFrame(cReplay* self, void* node)
 {
     func_0026E608((char*)self + 0x3B0, node);
     cReplayFrame_clearFrame(node);
-    func_0026E5D0((char*)self + 0x3BC, node);
+    cReplayFrameList_addFrame((char*)self + 0x3BC, node);
 }
 #endif
 
@@ -217,7 +217,7 @@ extern "C" int cReplay_isPauseAI(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_rewind);
 #ifdef SKIP_ASM
-extern "C" int func_0026D4D8(void* stream, unsigned int pos);
+extern "C" int cReplayCache_moveTo(void* stream, unsigned int pos);
 
 struct sReplay002702F8 {
     char pad_0x000[0x3B0];
@@ -234,7 +234,7 @@ struct sReplay002702F8 {
  * Moves playback to the start of @p frame, or of the oldest recorded frame when it is null.
  *
  * Clears NextFrame, sets PlaybackFrame, takes PlaybackTick from the frame's FrameStartTick and moves each input cache
- * to it (func_0026D4D8, cReplayCache::moveTo).
+ * to it (cReplayCache_moveTo, cReplayCache::moveTo).
  *
  * @param frame  the frame to start from, or 0 for the first
  */
@@ -250,7 +250,7 @@ extern "C" void cReplay_rewind(cReplay* self, void* frame)
     self->PlaybackTick = *(int*)((char*)self->PlaybackFrame + 0x30);
     for (i = 0; i < 2; i++) {
         if (((void**)&self->InputCache[0])[i] != 0) {
-            func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+            cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
         }
     }
 }
@@ -259,7 +259,7 @@ extern "C" void cReplay_rewind(cReplay* self, void* frame)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_lastFrame);
 #ifdef SKIP_ASM
-extern "C" int func_0026D4D8(void* stream, unsigned int pos);
+extern "C" int cReplayCache_moveTo(void* stream, unsigned int pos);
 // PORT: func_0026E448 is declared elsewhere with one parameter, but this caller
 // passes (self, pos); bind the 2-arg form to the symbol.
 void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
@@ -267,7 +267,7 @@ void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
 
 /**
  * Moves the playback cursor to the newest recorded frame: clears NextFrame, PlaybackFrame = the frame containing tick
- * 100000000, PlaybackTick = its FrameStartTick, and every input cache moves there (func_0026D4D8,
+ * 100000000, PlaybackTick = its FrameStartTick, and every input cache moves there (cReplayCache_moveTo,
  * cReplayCache::moveTo).
  */
 extern "C" void cReplay_lastFrame(cReplay* self)
@@ -279,7 +279,7 @@ extern "C" void cReplay_lastFrame(cReplay* self)
     self->PlaybackTick = *(int*)((char*)frame + 0x30);
     for (i = 0; i < 2; i++) {
         if (((void**)&self->InputCache[0])[i] != 0) {
-            func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+            cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
         }
     }
 }
@@ -327,7 +327,7 @@ extern "C" void cReplay_stepFrame(cReplay* self, int reset)
         self->PlaybackTick = *(int*)((char*)self->PlaybackFrame + 0x30);
         for (i = 0; i < 2; i++) {
             if (((void**)&self->InputCache[0])[i] != 0) {
-                func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+                cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
             }
         }
         cReplay_restoreReplayFrame((self), self->PlaybackFrame);
@@ -542,7 +542,7 @@ void cReplay_stopAutoReplay(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00270730);
+INCLUDE_ASM("replay/replaycache", findPlayerId);
 #ifdef SKIP_ASM
 
 class cRcIdObj_0730 {
@@ -573,7 +573,7 @@ static inline sRcWorld_0730* world_0730()
     return (sRcWorld_0730*)SSXApp->Game->AI;
 }
 
-extern "C" int func_00270730(int id)
+extern "C" int findPlayerId(int id)
 {
     int i;
     for (i = 0; i < world_0730()->numRiders; i++) {
@@ -588,7 +588,7 @@ extern "C" int func_00270730(int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cReplay_eventJump);
 #ifdef SKIP_ASM
-extern "C" int func_00270730(int id);
+extern "C" int findPlayerId(int id);
 extern "C" void func_00270B88(cReplay* self, int slot, int id);
 // PORT: the unit defines func_002705A8(void*) (an empty stub), but this caller
 // passes (self, id); bind the 2-arg call by asm label.
@@ -598,7 +598,7 @@ void func_002705A8_2(void* self, int id) __asm__("func_002705A8__FPv");
  * Records a rider's jump while recording (On Tour eventJump(int rider, const tRiderStats& stats)).
  *
  * Ignored during auto or instant replays, after ReplayError or EndReplay, or outside kGameRecording. Otherwise, for a
- * rider that is a player (func_00270730, findPlayerId), begins a highlight mark for that player (func_00270B88) and
+ * rider that is a player (findPlayerId, findPlayerId), begins a highlight mark for that player (func_00270B88) and
  * an instant-replay mark (func_002705A8).
  *
  * @param key  the rider index (On Tour rider)
@@ -609,7 +609,7 @@ extern "C" void cReplay_eventJump(cReplay* self, int key, int id)
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
         self->ReplayError == 0 && self->EndReplay == 0 &&
         self->State == 0) {
-        int slot = func_00270730(key);
+        int slot = findPlayerId(key);
         if (slot >= 0) {
             func_00270B88(self, slot, id);
             func_002705A8_2(self, id);
@@ -621,7 +621,7 @@ extern "C" void cReplay_eventJump(cReplay* self, int key, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cReplay_eventLand);
 #ifdef SKIP_ASM
-extern "C" int func_00270730(int id);
+extern "C" int findPlayerId(int id);
 extern "C" void func_00270CE8(cReplay* self, int slot, int id, int flag);
 extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int id, int flag);
 
@@ -639,7 +639,7 @@ extern "C" void cReplay_eventLand(cReplay* self, int key, int id)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
         self->State == 0) {
-        int slot = func_00270730(key);
+        int slot = findPlayerId(key);
         if (slot >= 0) {
             func_00270CE8(self, slot, id, 1);
             cReplay_endMarkInstantReplay(self, id, 1);
@@ -651,7 +651,7 @@ extern "C" void cReplay_eventLand(cReplay* self, int key, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cReplay_eventWipeout);
 #ifdef SKIP_ASM
-extern "C" int func_00270730(int id);
+extern "C" int findPlayerId(int id);
 extern "C" void func_00270CE8(cReplay* self, int slot, int id, int flag);
 extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int id, int flag);
 
@@ -669,7 +669,7 @@ extern "C" void cReplay_eventWipeout(cReplay* self, int key, int id)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
         self->State == 0) {
-        int slot = func_00270730(key);
+        int slot = findPlayerId(key);
         if (slot >= 0) {
             func_00270CE8(self, slot, id, 0);
             cReplay_endMarkInstantReplay(self, id, 0);
@@ -681,7 +681,7 @@ extern "C" void cReplay_eventWipeout(cReplay* self, int key, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cReplay_eventReset);
 #ifdef SKIP_ASM
-extern "C" int func_00270730(int id);
+extern "C" int findPlayerId(int id);
 struct sRcSlots;
 extern "C" void cReplay_cancelMarkHighlight(cReplay* self, int i);
 extern "C" void cReplay_cancelMarkInstantReplay(cReplay* self);
@@ -689,7 +689,7 @@ extern "C" void cReplay_cancelMarkInstantReplay(cReplay* self);
 /**
  * Records a rider's reset during live recording: cancels that rider's marked highlight and any marked instant replay.
  *
- * Only while recording (state 0) outside automatic and instant replays, and when func_00270730 (findPlayerId) finds
+ * Only while recording (state 0) outside automatic and instant replays, and when findPlayerId (findPlayerId) finds
  * the rider.
  *
  * @param key  the rider (On Tour int rider)
@@ -698,7 +698,7 @@ extern "C" void cReplay_eventReset(cReplay* self, int key)
 {
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
         self->State == 0) {
-        int slot = func_00270730(key);
+        int slot = findPlayerId(key);
         if (slot >= 0) {
             cReplay_cancelMarkHighlight(self, slot);
             cReplay_cancelMarkInstantReplay(self);
@@ -710,7 +710,7 @@ extern "C" void cReplay_eventReset(cReplay* self, int key)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_eventWScript);
 #ifdef SKIP_ASM
-extern "C" int func_00270730(int id);
+extern "C" int findPlayerId(int id);
 extern "C" void func_00270B88(cReplay* self, int slot, int id);
 // PORT: the unit defines func_002705A8(void*) (an empty stub), but this caller
 // passes (self, id); bind the 2-arg call by asm label.
@@ -732,7 +732,7 @@ extern "C" void cReplay_eventWScript(cReplay* self, int key, int mode)
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
         self->ReplayError == 0 && self->EndReplay == 0 &&
         self->State == 0) {
-        int slot = func_00270730(key);
+        int slot = findPlayerId(key);
         if (slot >= 0) {
             char* world = (char*)SSXApp->Game->AI;
             char* rider = *(char**)(world + (key << 2) + 0x28);
@@ -761,7 +761,7 @@ static inline int cReplay_eventChapter_isClear(int v, int bit)
  * Marks a chapter (a race checkpoint) for a rider during live recording.
  *
  * Only while recording (state 0) with no automatic or instant replay, ReplayError or EndReplay. When the rider is
- * found (func_00270730) and @p bit is below MaxChapters and not yet set in Chapters[player], sets the player's bit in
+ * found (findPlayerId) and @p bit is below MaxChapters and not yet set in Chapters[player], sets the player's bit in
  * the newest frame's byte +0x1F and the chapter bit in Chapters[player].
  *
  * @param key  the rider (On Tour int rider)
@@ -772,7 +772,7 @@ extern "C" void cReplay_eventChapter(cReplay* self, int key, int bit)
     if (self->AutoReplay == 0 && self->InstantReplay == 0 &&
         self->ReplayError == 0 && self->EndReplay == 0 &&
         self->State == 0) {
-        int slot = func_00270730(key);
+        int slot = findPlayerId(key);
         if (slot >= 0 && bit >= 0 && bit < self->MaxChapters) {
             int off = slot << 2;
             char* base = (char*)self + 0x5FC;
@@ -1034,18 +1034,18 @@ void* func_00270ED8(void* self)
 extern "C" void* cReplay_reset(void* self);
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00270EF8__FPv);
+INCLUDE_ASM("replay/replaycache", cReplay_initLoad__FPv);
 #ifdef SKIP_ASM
-void* func_00270EF8(void* self)
+void* cReplay_initLoad(void* self)
 {
     return cReplay_reset(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00270F18__FPv);
+INCLUDE_ASM("replay/replaycache", cReplay_purgeLoad__FPv);
 #ifdef SKIP_ASM
-void func_00270F18(void* self)
+void cReplay_purgeLoad(void* self)
 {
 }
 #endif
@@ -1499,7 +1499,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_writePadStart);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBE_getBE();
-extern "C" int func_0014E048(void* be);
+extern "C" int cBE_getDataSize(void* be);
 
 /**
  * Starts the padding: clears WriteTmp and sets WriteRemaining so the save fills 0x7FFF8 bytes (minus the BE data size
@@ -1508,7 +1508,7 @@ extern "C" int func_0014E048(void* be);
 extern "C" void cReplay_writePadStart(cReplay* self)
 {
     MEM_fill(self->WriteTmp, 0, 0xC800);
-    int used = func_0014E048(cBE_getBE()) + self->WriteSaveSize;
+    int used = cBE_getDataSize(cBE_getBE()) + self->WriteSaveSize;
     self->WriteRemaining = 0x7FFF8 - used;
     self->WriteState += 1;
 }
@@ -1574,10 +1574,10 @@ extern "C" void cReplay_writeCheckSum(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_load);
 #ifdef SKIP_ASM
-extern "C" int func_0026D558(void* self, char** pp);
-extern "C" int func_0026D678(void* self, char** pp);
-void func_0026E5C0(void* self);
-extern "C" void func_0026E5D0(void* list, void* node);
+extern "C" int cReplayCache_load(void* self, char** pp);
+extern "C" int cReplayFrame_loadFrame(void* self, char** pp);
+void cReplayFrameList_reset(void* self);
+extern "C" void cReplayFrameList_addFrame(void* list, void* node);
 
 struct sRcSave1758 {
     int field_0x0;
@@ -1636,16 +1636,16 @@ extern "C" int cReplay_load(cReplay* self, char* buf)
         self->EndRecordTick = data->f14;
         self->SaveFrame = 0;
         self->PlaybackTick = 0;
-        func_0026E5C0(((char*)&self->FrameList));
+        cReplayFrameList_reset(((char*)&self->FrameList));
         *pp = (char*)data + 0x28;
         for (int i = 0; i < data->frameCount; i++) {
             void* node = cReplay_allocReplayFrame(self);
-            func_0026D678(node, pp);
-            func_0026E5D0(((char*)&self->FrameList), node);
+            cReplayFrame_loadFrame(node, pp);
+            cReplayFrameList_addFrame(((char*)&self->FrameList), node);
         }
         for (int i = 0; i < data->streamCount; i++) {
             if (((void**)&self->InputCache[0])[i] != 0) {
-                func_0026D558(((void**)&self->InputCache[0])[i], pp);
+                cReplayCache_load(((void**)&self->InputCache[0])[i], pp);
             }
         }
         self->State = 8;
@@ -1890,9 +1890,9 @@ void* func_002722C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002722E0__FPvN20);
+INCLUDE_ASM("replay/replaycache", cScriptHeap_cScriptHeap__FPvN20);
 #ifdef SKIP_ASM
-void* func_002722E0(void* self, void* a1, void* a2)
+void* cScriptHeap_cScriptHeap(void* self, void* a1, void* a2)
 {
     *(int*)((char*)self + 0x8) = (int)a1;
     *(int*)self = (int)a1;
@@ -1904,7 +1904,7 @@ void* func_002722E0(void* self, void* a1, void* a2)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272308);
+INCLUDE_ASM("replay/replaycache", cScriptHeap_AllocMem);
 #ifdef SKIP_ASM
 struct sBlk_2308 {
     unsigned int size;
@@ -1918,8 +1918,8 @@ struct sHeap_2308 {
 
 // First-fit allocation from the heap's free list (8-byte block headers); splits a block that has room to spare.
 // PORT: the unit declares it as void*(void*, int); defined under its own name bound to the symbol.
-extern "C" void* func_00272308_impl(sHeap_2308* h, unsigned int size) __asm__("func_00272308");
-extern "C" void* func_00272308_impl(sHeap_2308* h, unsigned int size)
+extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size) __asm__("cScriptHeap_AllocMem");
+extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size)
 {
     size = (size + 3) & ~3;
     sBlk_2308* prev = 0;
@@ -1953,7 +1953,7 @@ extern "C" void* func_00272308_impl(sHeap_2308* h, unsigned int size)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002723A8);
+INCLUDE_ASM("replay/replaycache", cScriptHeap_FreeMem);
 #ifdef SKIP_ASM
 struct sRcBlock {
     int size;
@@ -1966,7 +1966,7 @@ struct sRcHeap {
     sRcBlock* freeList;
 };
 
-extern "C" void func_002723A8(cScriptHeap* scriptHeap, void* p)
+extern "C" void cScriptHeap_FreeMem(cScriptHeap* scriptHeap, void* p)
 {
     if (p) {
         sRcBlock* b = (sRcBlock*)((char*)p - 8);
@@ -2026,14 +2026,14 @@ extern "C" void func_002723A8(cScriptHeap* scriptHeap, void* p)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00272488);
 #ifdef SKIP_ASM
-extern "C" void* func_00272308(void* heap, int size);
+extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
 extern int kScriptHeapPointerSize;
 
 // PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
 extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
 extern "C" void* func_00272488_impl(int size, void* heap)
 {
-    void** p = (void**)func_00272308(heap, size + kScriptHeapPointerSize);
+    void** p = (void**)cScriptHeap_AllocMem(heap, size + kScriptHeapPointerSize);
     *p = heap;
     return (char*)p + kScriptHeapPointerSize;
 }
@@ -2060,7 +2060,7 @@ extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
 extern "C" void func_002724E8_impl(void* p)
 {
     char* h = (char*)p - kScriptHeapPointerSize;
-    func_002723A8((cScriptHeap*)(*(sRcHeap**)h), h);
+    cScriptHeap_FreeMem((cScriptHeap*)(*(sRcHeap**)h), h);
 }
 #endif
 
@@ -2091,10 +2091,10 @@ extern "C" void func_00272550(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272570);
+INCLUDE_ASM("replay/replaycache", GetCubicSplineValue);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" float func_00272570(float* p, float t)
+extern "C" float GetCubicSplineValue(float* p, float t)
 {
     float r;
     if (t != 0.0f) {
@@ -2137,7 +2137,7 @@ extern "C" void* cScriptPlayerChannelSpline_cScriptPlayerChannelSpline(cScriptPl
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Play);
 #ifdef SKIP_ASM
-extern "C" float func_00272570(float* coef, float t);
+extern "C" float GetCubicSplineValue(float* coef, float t);
 
 struct sRcTrack25F0 {
     char pad_0x00[0x8];
@@ -2156,7 +2156,7 @@ struct sRcTrack25F0 {
  *
  * Stores the data and owner, the header (key count in its first word) and the first key (data + 4), resets the key
  * index (+0x18) and points the next key at the first key plus its size (u16 at +0) when there are at least two
- * keys. The value is GetCubicSplineValue (func_00272570) of the key's coefficients at 0; keys larger than 0x14
+ * keys. The value is GetCubicSplineValue (GetCubicSplineValue) of the key's coefficients at 0; keys larger than 0x14
  * bytes carry custom data at +0x14.
  *
  * @param data  the channel's script data (On Tour pScriptData)
@@ -2176,7 +2176,7 @@ extern "C" int cScriptPlayerChannelSpline_Play(sRcTrack25F0* self, unsigned int*
     } else {
         self->next = 0;
     }
-    self->value = func_00272570((float*)(self->body + 4), 0.0f);
+    self->value = GetCubicSplineValue((float*)(self->body + 4), 0.0f);
     char* keyLoc = self->body;
     if (*(unsigned short*)keyLoc >= 0x15) {
         self->extra = keyLoc + 0x14;
@@ -2214,7 +2214,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Update);
  *
  * When the next key's start frame (u16 at +2) has been reached it becomes the current key (with its custom data)
  * and the index grows; at the last key the value is evaluated at the key's start and 0 is returned. Otherwise the
- * value is GetCubicSplineValue (func_00272570) at @p currFrameNum minus the current key's start frame.
+ * value is GetCubicSplineValue (GetCubicSplineValue) at @p currFrameNum minus the current key's start frame.
  *
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
  * @return 1 while the channel runs, 0 once it reached its last key (or has none to reach)
@@ -2230,13 +2230,13 @@ extern "C" int cScriptPlayerChannelSpline_Update(sRcTrack25F0* self, float currF
         if (*(unsigned short*)n >= 0x15) self->extra = n + 0x14;
         if (self->field_0x18 == self->cur[0] - 1) {
             self->next = 0;
-            self->value = func_00272570((float*)(self->body + 4), 0.0f);
+            self->value = GetCubicSplineValue((float*)(self->body + 4), 0.0f);
             return 0;
         }
         self->next = self->body + *(unsigned short*)self->body;
     }
     char* keyLoc = self->body;
-    self->value = func_00272570((float*)(keyLoc + 4), currFrameNum - (float)*(unsigned short*)(keyLoc + 2));
+    self->value = GetCubicSplineValue((float*)(keyLoc + 4), currFrameNum - (float)*(unsigned short*)(keyLoc + 2));
     return 1;
 }
 #endif
@@ -2271,7 +2271,7 @@ struct sRcPool2788 {
  * Constructs the in-game sequence (InSeq) manager: a heap over the caller's buffer and a pool of script
  * players.
  *
- * Sets up the heap at +0x8 over @p pHeap (func_002722E0), stores @p tag at +0x0 and @p count at +0x4, then
+ * Sets up the heap at +0x8 over @p pHeap (cScriptHeap_cScriptHeap), stores @p tag at +0x0 and @p count at +0x4, then
  * allocates @p count 0x58-byte script nodes from that heap (each runs cScriptPlayerMain_cScriptPlayerMain()
  * on node + 8), numbers them and links them all into the free list (+0x18); the active list (+0x1C) starts
  * empty.
@@ -2285,7 +2285,7 @@ struct sRcPool2788 {
  */
 extern "C" sRcPool2788* cInSeq_cInSeq(sRcPool2788* self, void* pHeap, void* heapSize, unsigned int count, int tag)
 {
-    func_002722E0(self->heap, pHeap, heapSize);
+    cScriptHeap_cScriptHeap(self->heap, pHeap, heapSize);
     self->tag = tag;
     self->count = count;
     self->items = 0;
@@ -2327,16 +2327,16 @@ extern "C" void cInSeq__cInSeq(int* self, int flags)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_UpdateFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00274A30(cScriptPlayerMain* p);
+extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* p);
 
 /**
- * Updates every playing script: cScriptPlayerMain::UpdateFrame (func_00274A30) on each node of mpScriptUsed.
+ * Updates every playing script: cScriptPlayerMain::UpdateFrame (cScriptPlayerMain_UpdateFrame) on each node of mpScriptUsed.
  */
 extern "C" void cInSeq_UpdateFrame(cInSeq* self)
 {
     char* n = (char*)self->mpScriptUsed;
     while (n != 0) {
-        func_00274A30((cScriptPlayerMain*)(n + 8));
+        cScriptPlayerMain_UpdateFrame((cScriptPlayerMain*)(n + 8));
         n = *(char**)(n + 0x50);
     }
 }
@@ -2345,7 +2345,7 @@ extern "C" void cInSeq_UpdateFrame(cInSeq* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_ReadyPlayer);
 #ifdef SKIP_ASM
-extern "C" void* func_002745C0(void* data, void* src, void* owner, int id);
+extern "C" void* cScriptPlayerMain_Init(void* data, void* src, void* owner, int id);
 
 struct sRcNode272938 {
     int unk_0x0;
@@ -2360,7 +2360,7 @@ struct sRcNode272938 {
  * Readies a script player for a script (On Tour ReadyPlayer(const char* pScriptData)).
  *
  * Pops the first node of the unused list (mpScriptUnused), initialises its cScriptPlayerMain with the script, the
- * sequencer and the node's id (func_002745C0, cScriptPlayerMain::Init) and pushes it on the used list (mpScriptUsed).
+ * sequencer and the node's id (cScriptPlayerMain_Init, cScriptPlayerMain::Init) and pushes it on the used list (mpScriptUsed).
  * There is no check for an empty unused list.
  *
  * @param src  the script data (On Tour pScriptData)
@@ -2374,7 +2374,7 @@ extern "C" int cInSeq_ReadyPlayer(cInSeq* self, void* src)
     if (((sRcNode272938*)self->mpScriptUnused) != 0) {
         ((sRcNode272938*)self->mpScriptUnused)->prev = 0;
     }
-    func_002745C0(n->data, src, self, n->id);
+    cScriptPlayerMain_Init(n->data, src, self, n->id);
     n->next = ((sRcNode272938*)self->mpScriptUsed);
     if (((sRcNode272938*)self->mpScriptUsed) != 0) {
         ((sRcNode272938*)self->mpScriptUsed)->prev = n;
@@ -2694,7 +2694,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Play);
 #ifdef SKIP_ASM
 struct sCacheRecord;
 struct sCacheEntry;
-extern "C" void* func_00272308(void* heap, int size);
+extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
 extern "C" sCacheEntry* cScriptPlayerChannelBlock_AddActiveKey(cScriptPlayerChannelBlock* self, sCacheRecord* rec);
 extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannelBlock* self);
 
@@ -2702,7 +2702,7 @@ extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannel
  * Starts a block channel of an in-game script sequence and activates every key that starts at frame 0.
  *
  * Stores the data and owner; when the channel has keys it allocates data[1] active-key records of 0x1C bytes from
- * the owner's script heap (func_00272308, On Tour cScriptHeap::AllocMem), resets the index and starts at the first
+ * the owner's script heap (cScriptHeap_AllocMem, On Tour cScriptHeap::AllocMem), resets the index and starts at the first
  * key (data + 4). Each key whose start frame (+4) is 0 sets 0x4 in @p flags and is activated (cScriptPlayerChannelBlock_AddActiveKey
  * AddActiveKey, cScriptPlayerChannelBlock_LoadNextScriptKey LoadNextScriptKey).
  *
@@ -2718,7 +2718,7 @@ extern "C" int cScriptPlayerChannelBlock_Play(void* self, unsigned short* data, 
     *(unsigned short**)((char*)self + 0x10) = data;
     if (data[0] != 0) {
         char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
-        *(void**)((char*)self + 0x20) = func_00272308(heap + 8, data[1] * 0x1C);
+        *(void**)((char*)self + 0x20) = cScriptHeap_AllocMem(heap + 8, data[1] * 0x1C);
         *(int*)((char*)self + 0x18) = 0;
         char* base = *(char**)((char*)self + 0x10);
         *(char**)((char*)self + 0x14) = base + 4;
@@ -2746,7 +2746,7 @@ extern "C" void cScriptPlayerChannelBlock_Stop(void* self)
     if (owner != 0) {
         void* heapBlock = *(void**)((char*)self + 0x20);
         if (heapBlock != 0) {
-            func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
         }
         *(int*)((char*)self + 0x8) = 0;
         *(int*)((char*)self + 0xC) = 0;
@@ -2996,7 +2996,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Play);
 #ifdef SKIP_ASM
 struct sCacheRec;
 struct sCacheRef;
-extern "C" void* func_00272308(void* heap, int size);
+extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
 extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec);
 extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannelEvent* self);
 
@@ -3004,7 +3004,7 @@ extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannel
  * Starts an event channel of an in-game script sequence and fires every event key at frame 0.
  *
  * Stores the data and owner; when the channel has keys it allocates data[1] records of 8 bytes from the owner's
- * script heap (func_00272308), resets the index and starts at the first key (data + 4). Each key whose frame (+2)
+ * script heap (cScriptHeap_AllocMem), resets the index and starts at the first key (data + 4). Each key whose frame (+2)
  * is 0 sets 0x10 in @p flags and is fired (cScriptPlayerChannelEvent_AddActiveKey AddActiveKey, cScriptPlayerChannelEvent_LoadNextScriptKey LoadNextScriptKey); the
  * last-fired frame (+0x24) is reset each time.
  *
@@ -3020,7 +3020,7 @@ extern "C" int cScriptPlayerChannelEvent_Play(void* self, unsigned short* data, 
     *(unsigned short**)((char*)self + 0x10) = data;
     if (data[0] != 0) {
         char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
-        *(void**)((char*)self + 0x1C) = func_00272308(heap + 8, data[1] * 8);
+        *(void**)((char*)self + 0x1C) = cScriptHeap_AllocMem(heap + 8, data[1] * 8);
         *(int*)((char*)self + 0x18) = 0;
         char* base = *(char**)((char*)self + 0x10);
         *(char**)((char*)self + 0x14) = base + 4;
@@ -3049,7 +3049,7 @@ extern "C" void cScriptPlayerChannelEvent_Stop(void* self)
     if (owner != 0) {
         void* heapBlock = *(void**)((char*)self + 0x1C);
         if (heapBlock != 0) {
-            func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
         }
         *(int*)((char*)self + 0x8) = 0;
         *(int*)((char*)self + 0xC) = 0;
@@ -3228,7 +3228,7 @@ extern "C" void cScriptPlayerChannelObject__cScriptPlayerChannelObject(void* sel
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Play);
 #ifdef SKIP_ASM
-extern "C" void* func_00272308(void* heap, int size);
+extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
 struct sCacheRecord2;
 struct sCacheEntry2;
 extern "C" sCacheEntry2* cScriptPlayerChannelObject_AddActiveKey(cScriptPlayerChannelObject* self, sCacheRecord2* rec);
@@ -3238,7 +3238,7 @@ extern "C" void cScriptPlayerChannelObject_LoadNextScriptKey(cScriptPlayerChanne
  * Starts an object channel of an in-game script sequence and activates every key that starts at frame 0.
  *
  * Stores the data and owner; when the channel has keys it allocates data[1] active-key records of 0x24 bytes from
- * the owner's script heap (func_00272308; an empty loop over them follows), resets the index and starts at the
+ * the owner's script heap (cScriptHeap_AllocMem; an empty loop over them follows), resets the index and starts at the
  * first key. Each key whose start frame (+4) is 0 sets 0x1 in @p flags and is activated (cScriptPlayerChannelObject_AddActiveKey
  * AddActiveKey, cScriptPlayerChannelObject_LoadNextScriptKey LoadNextScriptKey).
  *
@@ -3254,7 +3254,7 @@ extern "C" int cScriptPlayerChannelObject_Play(void* self, unsigned short* data,
     *(unsigned short**)((char*)self + 0x10) = data;
     if (data[0] != 0) {
         char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
-        *(void**)((char*)self + 0x1C) = func_00272308(heap + 8, data[1] * 0x24);
+        *(void**)((char*)self + 0x1C) = cScriptHeap_AllocMem(heap + 8, data[1] * 0x24);
         for (int i = 0; i < (*(unsigned short**)((char*)self + 0x10))[1]; i++) {
         }
         *(int*)((char*)self + 0x18) = 0;
@@ -3284,7 +3284,7 @@ extern "C" void cScriptPlayerChannelObject_Stop(void* self)
     if (owner != 0) {
         void* heapBlock = *(void**)((char*)self + 0x1C);
         if (heapBlock != 0) {
-            func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
         }
         *(int*)((char*)self + 0x8) = 0;
         *(int*)((char*)self + 0xC) = 0;
@@ -3634,9 +3634,9 @@ extern "C" void cScriptPlayerEntity_SetEntityVariation(cScriptPlayerEntity* self
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00273AA8);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_SetupPlay);
 #ifdef SKIP_ASM
-extern "C" void* func_00272308(void* heap, int size);
+extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
 // PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
 extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
 extern "C" void* cScriptPlayerChannelSpline_cScriptPlayerChannelSpline(cScriptPlayerChannelSpline* self);
@@ -3693,13 +3693,13 @@ struct sRcCache_273AA8 {
     int started;            // 0x38
 };
 
-extern "C" int func_00273AA8(sRcCache_273AA8* self)
+extern "C" int cScriptPlayerEntity_SetupPlay(sRcCache_273AA8* self)
 {
     self->done = 0;
     self->flags = 0;
     if (self->hdr->count) {
         void* heap = *(char**)(self->owner + 8) + 8;
-        self->objs = (sRcObj_273AA8**)func_00272308(heap, self->hdr->count * 4);
+        self->objs = (sRcObj_273AA8**)cScriptHeap_AllocMem(heap, self->hdr->count * 4);
         char* p = (char*)self->hdr + self->hdr->first;
         for (int i = 0; i < self->hdr->count; i++) {
             sRcRec_273AA8* e = (sRcRec_273AA8*)p;
@@ -3800,7 +3800,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_Stop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
-extern "C" void func_002723A8(cScriptHeap* h, void* p);
+extern "C" void cScriptHeap_FreeMem(cScriptHeap* h, void* p);
 
 class cRcObj_3DC0 {
 public:
@@ -3831,7 +3831,7 @@ public:
  * Does nothing unless mIsPlaying. Calls the comm interface's OnInSeqRelease (slot 2) and clears mpEntityComm;
  * each channel then gets Stop (slot 2) and is deleted by type: spline channels (no destructor) through
  * func_002724E8, the others through their virtual destructor (slot 10, flags 3). The channel array goes back
- * to the owner's cInSeq heap (func_002723A8) and mIsPlaying is cleared.
+ * to the owner's cInSeq heap (cScriptHeap_FreeMem) and mIsPlaying is cleared.
  */
 extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
 {
@@ -3875,7 +3875,7 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
             }
             }
         }
-        func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)((char*)self->mpOwner + 0x8) + 8)), self->mpChannelPlayers);
+        cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)((char*)self->mpOwner + 0x8) + 8)), self->mpChannelPlayers);
         self->mpChannelPlayers = 0;
     }
     self->mIsPlaying = 0;
@@ -3940,7 +3940,7 @@ extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00274100);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_Update);
 #ifdef SKIP_ASM
 extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* self, float t, float dt);
 
@@ -3958,7 +3958,7 @@ public:
 
 
 // Plays the track from prev to time; when jumping, stops at every channel event in between.
-extern "C" int func_00274100(cScriptPlayerEntity* self_, float prev, float time, float speed, int jump)
+extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* self_, float prev, float time, float speed, int jump)
 {
     cScriptPlayerEntity* self = self_;
     if (self->mIsPlaying == 0) {
@@ -4033,9 +4033,9 @@ extern "C" cRcListener4240* cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntit
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002742C8__FPvi);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetChannel__FPvi);
 #ifdef SKIP_ASM
-int func_002742C8(void* self, int a1)
+int cScriptPlayerEntity_GetChannel(void* self, int a1)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x24) + a1 * 4);
 }
@@ -4253,7 +4253,7 @@ extern "C" void func_00274578(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002745C0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Init);
 #ifdef SKIP_ASM
 // PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
 void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv");
@@ -4287,9 +4287,9 @@ struct sRcStream45C0 {
 };
 
 // PORT: cScriptPlayerEntity_Init's third argument receives the owning stream pointer as an int.
-// PORT: the unit declares func_002745C0 as returning void*; it returns the header word.
-extern "C" int func_002745C0_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3) __asm__("func_002745C0");
-extern "C" int func_002745C0_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3)
+// PORT: the unit declares cScriptPlayerMain_Init as returning void*; it returns the header word.
+extern "C" int cScriptPlayerMain_Init_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3) __asm__("cScriptPlayerMain_Init");
+extern "C" int cScriptPlayerMain_Init_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3)
 {
     self->field_0x0 = a3;
     self->owner = owner;
@@ -4413,14 +4413,14 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Preview);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00274830_v(void*, int) __asm__("func_00274830");
-extern "C" void func_00274A30(cScriptPlayerMain* p);
+extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* p);
 
 /**
  * Runs the whole script at once through a preview comm interface, then restores the player's speed and loop
  * setting.
  *
  * Sets mpPreviewCommInterface, starts playback without looping (func_00274830, which only starts a stopped
- * player) and calls the frame update func_00274A30 at speed 1.0 until the play state is back to stopped; then
+ * player) and calls the frame update cScriptPlayerMain_UpdateFrame at speed 1.0 until the play state is back to stopped; then
  * restores mPlaySpeed and mLoopScript and clears the preview interface.
  *
  * @param flag  despite the name, the comm interface to preview through (On Tour pPreviewCommInterface)
@@ -4434,7 +4434,7 @@ extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag)
     func_00274830_v(((char*)self), 0);
     while (self->mPlayState != 0) {
         self->mPlaySpeed = 1.0f;
-        func_00274A30(self);
+        cScriptPlayerMain_UpdateFrame(self);
     }
     self->mPlaySpeed = savedScale;
     self->mLoopScript = savedIdx;
@@ -4539,16 +4539,16 @@ extern "C" void cScriptPlayerMain_Resume(cScriptPlayerMain* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00274A30);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_UpdateFrame);
 #ifdef SKIP_ASM
 extern "C" int cScriptPlayerMain_GetScriptLength(cScriptPlayerMain* self);
 extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* p);
 void* func_00274810(void* self);
-extern "C" void func_00274DE0(void* self);
+extern "C" void cScriptPlayerMain_DoUpdateFrame(void* self);
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
 
-extern "C" void func_00274A30(cScriptPlayerMain* scriptPlayerMain)
+extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* scriptPlayerMain)
 {
     cScriptPlayerMain* self = scriptPlayerMain;
     int need = 1;
@@ -4563,14 +4563,14 @@ extern "C" void func_00274A30(cScriptPlayerMain* scriptPlayerMain)
             target = target % len;
         float ft = (float)target;
         if (self->mPlayState == 1)
-            func_00274DE0(self);
+            cScriptPlayerMain_DoUpdateFrame(self);
         if (ft != self->mCurrFrame)
         {
             if (ft < self->mCurrFrame)
             {
                 cScriptPlayerMain_Stop((cScriptPlayerMain*)self);
                 func_00274810(self);
-                func_00274DE0(self);
+                cScriptPlayerMain_DoUpdateFrame(self);
             }
             float one = 1.0f;
             float pos = self->mCurrFrame;
@@ -4579,11 +4579,11 @@ extern "C" void func_00274A30(cScriptPlayerMain* scriptPlayerMain)
             if (frac < one)
             {
                 self->mPlaySpeed = frac;
-                func_00274DE0(self);
+                cScriptPlayerMain_DoUpdateFrame(self);
             }
             self->mPlaySpeed = one;
             while (self->mPlayState != 0 && self->mCurrFrame < ft)
-                func_00274DE0(self);
+                cScriptPlayerMain_DoUpdateFrame(self);
             self->mPlaySpeed = speed;
         }
         if (self->mPlayState != 0)
@@ -4600,7 +4600,7 @@ extern "C" void func_00274A30(cScriptPlayerMain* scriptPlayerMain)
         {
             do
             {
-                func_00274DE0(self);
+                cScriptPlayerMain_DoUpdateFrame(self);
                 steps--;
                 if (self->mPlayState == 0)
                     goto skip;
@@ -4613,7 +4613,7 @@ extern "C" void func_00274A30(cScriptPlayerMain* scriptPlayerMain)
         need = 0;
     }
     if (need)
-        func_00274DE0(self);
+        cScriptPlayerMain_DoUpdateFrame(self);
 }
 #endif
 
@@ -4786,16 +4786,16 @@ extern "C" char* func_00274D90_impl(char* self, int count)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00274DE0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_DoUpdateFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Advances playback by one step: plays tracks up to the new time, handles looping and stop/finish events.
-// Like func_002751A0, it collects the tracks' "changed" results; this build never reads them.
-extern "C" void func_00273AA8_4DE0(void* p) __asm__("func_00273AA8");
+// Like cScriptPlayerMain_DoUpdate, it collects the tracks' "changed" results; this build never reads them.
+extern "C" void cScriptPlayerEntity_SetupPlay_4DE0(void* p) __asm__("cScriptPlayerEntity_SetupPlay");
 extern "C" int cScriptPlayerEntity_ExecutePlay_4DE0(void* p) __asm__("cScriptPlayerEntity_ExecutePlay");
 extern "C" int cScriptPlayerEntity_Restart_4DE0(void* p) __asm__("cScriptPlayerEntity_Restart");
-extern "C" int func_002751A0_4DE0(void* self, float a, float b, float c) __asm__("func_002751A0");
+extern "C" int cScriptPlayerMain_DoUpdate_4DE0(void* self, float a, float b, float c) __asm__("cScriptPlayerMain_DoUpdate");
 extern "C" int cScriptPlayerMain_GetScriptLength_4DE0(void* self) __asm__("cScriptPlayerMain_GetScriptLength");
 extern "C" void cScriptPlayerMain_Stop_4DE0(void* p) __asm__("cScriptPlayerMain_Stop");
 extern "C" void* cScriptPlayerMain_GetInSeqCommInterface_p(void) __asm__("cScriptPlayerMain_GetInSeqCommInterface");
@@ -4814,8 +4814,8 @@ struct sRcPlayHdr_4DE0 {
     unsigned char count;
 };
 
-extern "C" void func_00274DE0_impl(char* self) __asm__("func_00274DE0");
-extern "C" void func_00274DE0_impl(char* self)
+extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self) __asm__("cScriptPlayerMain_DoUpdateFrame");
+extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
 {
     if (*(int*)(self + 0x20) == 0 || *(int*)(self + 0x2C) > 0) {
         return;
@@ -4853,7 +4853,7 @@ extern "C" void func_00274DE0_impl(char* self)
             rem = c - a;
         }
         *(int*)(self + 0x3C) = 1;
-        changed = func_002751A0_4DE0(self, lim, b, a);
+        changed = cScriptPlayerMain_DoUpdate_4DE0(self, lim, b, a);
         *(int*)(self + 0x3C) = 0;
     } else {
         if (t == 0.0f) {
@@ -4861,7 +4861,7 @@ extern "C" void func_00274DE0_impl(char* self)
         }
         *(int*)(self + 0x3C) = 1;
         for (int i = 0; i < (*(sRcPlayHdr_4DE0**)(self + 0x10))->count; i++) {
-            func_00273AA8_4DE0(*(char**)(self + 0x18) + i * 0x3C);
+            cScriptPlayerEntity_SetupPlay_4DE0(*(char**)(self + 0x18) + i * 0x3C);
         }
         for (int i = 0; i < (*(sRcPlayHdr_4DE0**)(self + 0x10))->count; i++) {
             int r = 0;
@@ -4895,7 +4895,7 @@ extern "C" void func_00274DE0_impl(char* self)
         }
         if (rem != 0.0f) {
             *(int*)(self + 0x3C) = 1;
-            changed2 = func_002751A0_4DE0(self, *(float*)(self + 0x28) + rem, *(float*)(self + 0x28), rem);
+            changed2 = cScriptPlayerMain_DoUpdate_4DE0(self, *(float*)(self + 0x28) + rem, *(float*)(self + 0x28), rem);
             *(int*)(self + 0x3C) = 0;
         }
         if (*(int*)(self + 0x40) != 0) {
@@ -4922,9 +4922,9 @@ extern "C" void func_00274DE0_impl(char* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_002751A0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_DoUpdate);
 #ifdef SKIP_ASM
-extern "C" int func_00274100(cScriptPlayerEntity* track, float prev, float time, float speed, int jump);
+extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* track, float prev, float time, float speed, int jump);
 extern "C" int cScriptPlayerMain_GetInSeqCommInterface(cScriptPlayerMain* self);
 
 class cRcListener51A0 {
@@ -4942,7 +4942,7 @@ struct sRcAnim51A0 {
     float time;             // 0x28
 };
 
-extern "C" int func_002751A0(sRcAnim51A0* self, float time, float prev, float speed)
+extern "C" int cScriptPlayerMain_DoUpdate(sRcAnim51A0* self, float time, float prev, float speed)
 {
     int changed = 0;
     int jump = 0;
@@ -4958,7 +4958,7 @@ extern "C" int func_002751A0(sRcAnim51A0* self, float time, float prev, float sp
     }
     for (int i = 0; i < self->hdr[1]; i++) {
         int c = 0;
-        if (func_00274100((cScriptPlayerEntity*)(self->tracks + i * 0x3C), prev, self->time, speed, jump) != 0 || changed != 0) {
+        if (cScriptPlayerEntity_Update((cScriptPlayerEntity*)(self->tracks + i * 0x3C), prev, self->time, speed, jump) != 0 || changed != 0) {
             c = 1;
         }
         changed = c;

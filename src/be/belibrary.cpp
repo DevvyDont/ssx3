@@ -158,7 +158,7 @@ extern "C" void func_0014A188(char* p)
 #endif
 
 //100%
-INCLUDE_ASM("be/belibrary", func_0014A5E0);
+INCLUDE_ASM("be/belibrary", cBELibrary_readFromData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cBEIface_14A5E0 {
@@ -185,7 +185,7 @@ extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
 extern sBlk20_14A5E0 D_005308B8;
 
-extern "C" void func_0014A5E0(char* p)
+extern "C" void cBELibrary_readFromData(char* p)
 {
     cBEIface_14A5E0* o;
     int idx;
@@ -1061,7 +1061,7 @@ extern "C" void func_0014BE38(int arg0, int arg1, int arg2) {
 INCLUDE_ASM("be/belibrary", func_0014BE70);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_sizez(const char* name);
-extern "C" int func_003E1BB8(const char* name, void* buf, int size);
+extern "C" int FILE_loadatz(const char* name, void* buf, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char* D_004A11CC;
@@ -1098,7 +1098,7 @@ extern "C" void func_0014BE70(void* vself)
     int size = BXFILE_sizez(D_004A11CC);
     char* buf = new (str_BoltsFile, 0, 0) char[size];
     self->buf = buf;
-    func_003E1BB8(D_004A11CC, buf, size);
+    FILE_loadatz(D_004A11CC, buf, size);
     char* d = self->buf;
     D_004A11E8 = *(int*)d;
     int n0 = *(int*)(d + 4);

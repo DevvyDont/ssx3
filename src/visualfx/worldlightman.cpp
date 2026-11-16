@@ -41,7 +41,7 @@ struct sWLCNode {
 };
 
 // Light slot view based at self+0x40*i: id/f14 at +0x10/+0x14; slot i's cache buffer
-// lives at +0x40 (func_002F53B0 views it as slots[i].buf at self+0x40).
+// lives at +0x40 (cWorldLightMan_purgeLightCache views it as slots[i].buf at self+0x40).
 struct sWLCLightHdr {
     char pad00[0x10];
     unsigned int id;
@@ -95,21 +95,21 @@ extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F53B0);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_purgeLightCache);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
-struct func_002F53B0_sSlot {
+struct cWorldLightMan_purgeLightCache_sSlot {
     int* buf;
     char pad04[0x3C];
 };
 
-struct func_002F53B0_sMan {
+struct cWorldLightMan_purgeLightCache_sMan {
     char pad00[0x40];
-    func_002F53B0_sSlot slots[8];
+    cWorldLightMan_purgeLightCache_sSlot slots[8];
 };
 
-extern "C" void func_002F53B0(func_002F53B0_sMan* self)
+extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan_purgeLightCache_sMan* self)
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
@@ -205,10 +205,10 @@ struct sVEr_5400 {
 extern "C" sNode_5400* func_002F59D0_n(sMan_5400* self, int priority) __asm__("func_002F59D0");
 extern "C" sBox_5400* func_002F5A70(sMan_5400* self, int priority);
 extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int count);
-extern "C" void func_0034FED8(void* obj, int a1, sMat_5400* out);
+extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, sMat_5400* out);
 extern "C" void func_00331450(void* cell, sAABox_5400* box);
 extern "C" sLightSet_5400* func_002EE2F8(void);
-extern "C" int func_0038AC50(void*, void*);
+extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 extern "C" sLightSet_5400* func_0038ABF8(void* self, int i);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -273,7 +273,7 @@ static inline sVec_5400 ObjPos_5400(char* obj)
 static inline sLightSet_5400* Resolve_5400(sLightRef_5400* ref)
 {
     if (ref->magic != 0x123400) {
-        ref->handle = func_0038AC50(D_005047F8, ref);
+        ref->handle = cIrradianceDataBase_GetIDByName(D_005047F8, ref);
         ref->magic = 0x123400;
     }
     return func_0038ABF8(D_005047F8, ref->handle);
@@ -330,7 +330,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
         moved = 1;
         if (*(int*)(obj + 0xC) != 0) {
             sMat_5400 m;
-            func_0034FED8(obj, 0, &m);
+            cInstanceNode_buildMeshMat(obj, 0, &m);
             pos = Trans_5400(m);
         } else {
             pos = ObjPos_5400(obj);
@@ -338,7 +338,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
     } else if (force) {
         if (*(int*)(obj + 0xC) != 0) {
             sMat_5400 m;
-            func_0034FED8(obj, 0, &m);
+            cInstanceNode_buildMeshMat(obj, 0, &m);
             pos = Trans_5400(m);
         } else {
             pos = ObjPos_5400(obj);
@@ -2493,16 +2493,16 @@ extern "C" int func_002F7FF8(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8000);
+INCLUDE_ASM("visualfx/worldlightman", cTransitionObj__cTransitionObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
-extern "C" void func_002E4D30(void* p);
+extern "C" void cTransitionObj_operator_delete(void* p);
 
-extern "C" void func_002F8000(void* self, int flags)
+extern "C" void cTransitionObj__cTransitionObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
-        func_002E4D30(self);
+        cTransitionObj_operator_delete(self);
     }
 }
 #endif
@@ -2511,12 +2511,12 @@ extern "C" void func_002F8000(void* self, int flags)
 INCLUDE_ASM("visualfx/worldlightman", cFade_TObj__cFade_TObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
-extern "C" void func_002E4D30(void* p);
+extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
  * Destroys a fade transition object: stores the base vtable (D_004880E0), then releases its slot when asked to.
  *
- * Release goes through func_002E4D30(), which clears the in-use flag of the matching slot in a 4-entry static
+ * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
  * pool (D_005382C0) instead of freeing heap memory.
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
@@ -2525,7 +2525,7 @@ extern "C" void cFade_TObj__cFade_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
-        func_002E4D30(self);
+        cTransitionObj_operator_delete(self);
     }
 }
 #endif
@@ -2551,12 +2551,12 @@ extern "C" void* func_002F8060(void* self, sLightVec_002F8060 v)
 INCLUDE_ASM("visualfx/worldlightman", cWipe_TObj__cWipe_TObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
-extern "C" void func_002E4D30(void* p);
+extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
  * Destroys a wipe transition object: stores the base vtable (D_004880E0), then releases its slot when asked to.
  *
- * Release goes through func_002E4D30(), which clears the in-use flag of the matching slot in a 4-entry static
+ * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
  * pool (D_005382C0) instead of freeing heap memory.
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
@@ -2565,7 +2565,7 @@ extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
-        func_002E4D30(self);
+        cTransitionObj_operator_delete(self);
     }
 }
 #endif
@@ -2574,13 +2574,13 @@ extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
 INCLUDE_ASM("visualfx/worldlightman", cCircle_TObj__cCircle_TObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
-extern "C" void func_002E4D30(void* p);
+extern "C" void cTransitionObj_operator_delete(void* p);
 
 /**
  * Destroys a circle transition object: stores the base vtable (D_004880E0), then releases its slot when asked
  * to.
  *
- * Release goes through func_002E4D30(), which clears the in-use flag of the matching slot in a 4-entry static
+ * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
  * pool (D_005382C0) instead of freeing heap memory.
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
@@ -2589,7 +2589,7 @@ extern "C" void cCircle_TObj__cCircle_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
-        func_002E4D30(self);
+        cTransitionObj_operator_delete(self);
     }
 }
 #endif

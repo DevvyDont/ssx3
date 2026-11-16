@@ -7,8 +7,8 @@
 // 1..7 = write (cReplayFramePtr_write), read (cReplayFramePtr_read), readReplayInstance() (func_0026EB48),
 // readReplayInstance(cInstanceNode*) (func_0026EC08), writeReplayInstance(const tInstanceRecord*) (func_0026ECD8),
 // writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
-// cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable D_00481850, ctor func_0026D5E8) derives from it;
-// cPlaybackMan embeds one at +0x14 (its destructor func_0026C588 stores cReplayFramePtr_vtbl there).
+// cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable D_00481850, ctor cReplayFrame_cReplayFrame) derives from it;
+// cPlaybackMan embeds one at +0x14 (its destructor cPlaybackMan__cPlaybackMan stores cReplayFramePtr_vtbl there).
 // Size 0x14 [R]: the constructor cReplayFramePtr_cReplayFramePtr stores the vptr and zeroes 0x4..0x10, and cReplayFrame's first own
 // member (Next) is at 0x14 (On Tour cReplayFrame, same offsets as here). Same size, order and offsets as On Tour's
 // class cReplayFramePtr.

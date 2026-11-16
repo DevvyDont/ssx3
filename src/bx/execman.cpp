@@ -230,34 +230,34 @@ void* func_00320B08(void* self)
 }
 #endif
 
-extern "C" void* func_00320550(int, int);
+extern "C" void* __sti__all_in_one_bx_cpp(int, int);
 
 //100%
 INCLUDE_ASM("bx/execman", func_00320B28__FPv);
 #ifdef SKIP_ASM
 void* func_00320B28(void* self)
 {
-    return func_00320550(1, 0xffff);
+    return __sti__all_in_one_bx_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_00320550(int, int);
+extern "C" void* __sti__all_in_one_bx_cpp(int, int);
 
 //100%
 INCLUDE_ASM("bx/execman", func_00320B48__FPv);
 #ifdef SKIP_ASM
 void* func_00320B48(void* self)
 {
-    return func_00320550(0, 0xffff);
+    return __sti__all_in_one_bx_cpp(0, 0xffff);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/execman", func_00320B68);
+INCLUDE_ASM("bx/execman", memlog2);
 #ifdef SKIP_ASM
 // Branchless ceil(log2(x)): count leading zeros by halving the search
 // window (16/8/4/2 bits), then subtract one more if x isn't a power of two.
-extern "C" int func_00320B68(int x)
+extern "C" int memlog2(int x)
 {
     int n, m, y;
     n = ((x - 0x10000) >> 31) & 16;

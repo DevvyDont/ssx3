@@ -9,13 +9,13 @@
 // (world/streamman):
 //   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init (init), cStreamMan_reset (reset),
 //   cStreamMan_purge (purge), cStreamMan_addStreamRequest (addStreamRequest), cStreamMan_cancelStreamRequest (cancelStreamRequest),
-//   cStreamMan_setBandWidthLimit (setBandWidthLimit), func_003A7098 (update), func_003A7218 (decompressChunk),
-//   func_003A7238 (processChunk). The static _NULLCHUNK is cStreamMan_NULLCHUNK.
+//   cStreamMan_setBandWidthLimit (setBandWidthLimit), cStreamMan_update (update), func_003A7218 (decompressChunk),
+//   cStreamMan_processChunk (processChunk). The static _NULLCHUNK is cStreamMan_NULLCHUNK.
 //
 // Size 0xE8: cWorldCache's next member, mp_ChunkResolve, is at 0x3E8 = 0x300 + 0xE8 (cWorldCache_init stores
-// cChunkResolve_construct() there), and the last field written is 0xE4 (cStreamMan_addStreamRequest, func_003A7098).
+// cChunkResolve_construct() there), and the last field written is 0xE4 (cStreamMan_addStreamRequest, cStreamMan_update).
 // On Tour's cStreamMan is 0xE4: its bools m_bBxNullChunk/m_bBxChunkWriteEnable share one word at 0xC4/0xC5; retail
-// stores each as a 4-byte word (func_003A7238 sw 0xC4 and 0xC8), so retail = On Tour + 4 from m_bBxChunkWriteEnable on.
+// stores each as a 4-byte word (cStreamMan_processChunk sw 0xC4 and 0xC8), so retail = On Tour + 4 from m_bBxChunkWriteEnable on.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Member names are EA's, from SSX On Tour's PSP
 // DWARF (class cStreamMan), placed by:
@@ -35,9 +35,9 @@ struct cStreamMan {
     cWorldCache* mp_WorldCache;     // 0x000 [O]; [R] init(baseFileName, pWorldCache) stores its third argument
                                     //       (the view stores it as int); [U] processChunk/update pass it to the cache
     char m_filename[128];           // 0x004 [O]; [R] init: sprintf(m_filename, "|%s%s", name, ".ssb"); reset clears [0];
-                                    //       [U] addStreamRequest passes it to the async open (func_003E0C88)
+                                    //       [U] addStreamRequest passes it to the async open (STREAM_queuefile)
     char* m_streamBuffer;           // 0x084 [O]; [R] new(min(0x80000, ...), "cStreamMan CDBUFFER"); freed by purge
-    int m_streamHandle;             // 0x088 [O]; [R] = func_003E06D8(2, 1, 1, buffer, size) (the ctor's view stores a
+    int m_streamHandle;             // 0x088 [O]; [R] = STREAM_create(2, 1, 1, buffer, size) (the ctor's view stores a
                                     //       void*); [U] the async read/poll/cancel calls take it
     char* m_pDecompressBuffer;      // 0x08C [O]; [R] new(0x14000, "cStreamMan DECOMPRESS"); [U] update decompresses into it
     int m_bActive;                  // 0x090 [O] (a bool); [R] reset = 0; [U] addStreamRequest sets 1 (one read in flight),

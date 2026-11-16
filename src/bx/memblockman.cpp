@@ -9,14 +9,14 @@ extern unsigned int cMemMan_m_heap;
 extern unsigned int cMemMan_m_heapSize;
 extern int cMemMan_m_initialized;
 extern "C" void MUTEX_create(void* mutex);
-extern "C" void func_0031FF60(void* heap, unsigned int base, unsigned int size);
+extern "C" void cDynamicMemMan_init(void* heap, unsigned int base, unsigned int size);
 extern "C" void cMemBlockMan_initialize(void);
 
 /**
  * Sets up the memory manager on a heap region.
  *
  * Creates the manager mutex, records the heap base and size, initialises TheDynamicMemMan over the region
- * (func_0031FF60, which 16-byte aligns it and reserves a 0x380-byte header), marks the manager initialised and
+ * (cDynamicMemMan_init, which 16-byte aligns it and reserves a 0x380-byte header), marks the manager initialised and
  * then initialises the block manager.
  *
  * @param base  start address of the heap
@@ -27,27 +27,27 @@ extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
     MUTEX_create(cMemMan_m_mutex);
     cMemMan_m_heap = base;
     cMemMan_m_heapSize = size;
-    func_0031FF60(TheDynamicMemMan, base, size);
+    cDynamicMemMan_init(TheDynamicMemMan, base, size);
     cMemMan_m_initialized = 1;
     cMemBlockMan_initialize();
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319A90);
+INCLUDE_ASM("bx/memblockman", cMemMan_internalAlloc);
 #ifdef SKIP_ASM
-extern "C" void* func_00319E48(unsigned int size);
-extern "C" void func_003E6220(void* p, unsigned int n);
+extern "C" void* cMemBlockMan_alloc(unsigned int size);
+extern "C" void MEM_clear(void* p, unsigned int n);
 extern char TheDynamicMemMan[];
 // PORT: func_00320058__FPv / func_00320078__FPv take (heap, align, size); the defining unit declares 1 arg.
 void* func_00320058_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320058__FPv");
 void* func_00320078_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320078__FPv");
 
-extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top)
+extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, int flags, int top)
 {
     void* p;
     if (top == 0 && size != 0 && size <= 0x200) {
-        p = func_00319E48(size);
+        p = cMemBlockMan_alloc(size);
     } else {
         if (align <= 15)
             align = 16;
@@ -57,31 +57,31 @@ extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags,
             p = func_00320058_K2(TheDynamicMemMan, align, size);
     }
     if (p != 0 && flags < 0)
-        func_003E6220(p, size);
+        MEM_clear(p, size);
     return p;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319B48);
+INCLUDE_ASM("bx/memblockman", cMemMan_internalFree);
 #ifdef SKIP_ASM
-extern "C" int func_0031A088(void* p);
-extern "C" void func_00319F68(void* p);
+extern "C" int cMemBlockMan_isMemBlock(void* p);
+extern "C" void cMemBlockMan_free(void* p);
 extern char TheDynamicMemMan[];
-// PORT: func_003200C0__FPv is called with (list, item) here; bind the 2-arg form to that symbol.
-int func_003200C0_2(void* list, void* item) __asm__("func_003200C0__FPv");
+// PORT: cDynamicMemMan_free__FPv is called with (list, item) here; bind the 2-arg form to that symbol.
+int cDynamicMemMan_free_2(void* list, void* item) __asm__("cDynamicMemMan_free__FPv");
 
-extern "C" void func_00319B48(void* p)
+extern "C" void cMemMan_internalFree(void* p)
 {
     if (p != 0)
     {
-        if (func_0031A088(p) != 0)
+        if (cMemBlockMan_isMemBlock(p) != 0)
         {
-            func_00319F68(p);
+            cMemBlockMan_free(p);
         }
         else
         {
-            func_003200C0_2(TheDynamicMemMan, p);
+            cDynamicMemMan_free_2(TheDynamicMemMan, p);
         }
     }
 }
@@ -126,7 +126,7 @@ static inline unsigned int cMemMan_blockSizeK2(void* p)
 static inline void cMemMan_freeBlockK2(void* p)
 {
     MUTEX_lock(cMemMan_m_mutex);
-    func_00319B48(p);
+    cMemMan_internalFree(p);
     MUTEX_unlock(cMemMan_m_mutex);
 }
 
@@ -151,17 +151,17 @@ extern "C" void* cMemMan_internalResizeBlock(void* old, unsigned int size)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319CC8);
+INCLUDE_ASM("bx/memblockman", cMemMan_validate);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
-extern "C" void func_0031A200(void);
+extern "C" void cMemBlockMan_validate(void);
 extern void* cMemMan_m_mutex[16];
 
-extern "C" void func_00319CC8(void)
+extern "C" void cMemMan_validate(void)
 {
     MUTEX_lock(cMemMan_m_mutex);
-    func_0031A200();
+    cMemBlockMan_validate();
     MUTEX_unlock(cMemMan_m_mutex);
 }
 #endif
@@ -236,9 +236,9 @@ extern "C" void cMemBlockMan_initialize(void)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319E48);
+INCLUDE_ASM("bx/memblockman", cMemBlockMan_alloc);
 #ifdef SKIP_ASM
-extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top);
+extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, int flags, int top);
 // PORT: the pool allocators are bound with their real (pool, align) arity; the
 // symbols are named __FPv upstream.
 void* func_003202C0_impl(void* pool, unsigned int align) __asm__("func_003202C0__FPv");
@@ -258,8 +258,8 @@ extern void* cMemBlockMan_m_container512;
 extern int cMemBlockMan_m_initialized;
 
 // PORT: binds the real 2-arg body; the unit declares a 1-arg prototype used by callers
-extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align) __asm__("func_00319E48");
-extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align)
+extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align) __asm__("cMemBlockMan_alloc");
+extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align)
 {
     size = size > align ? size : align;
     if (cMemBlockMan_m_initialized) {
@@ -280,12 +280,12 @@ extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align)
             return func_00320448_impl(cMemBlockMan_m_container512, align);
     } else
         size = 0x201;
-    return func_00319A90(size, align > 7 ? align : 8, 0, 0);
+    return cMemMan_internalAlloc(size, align > 7 ? align : 8, 0, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319F68);
+INCLUDE_ASM("bx/memblockman", cMemBlockMan_free);
 #ifdef SKIP_ASM
 void func_00320488(void* pool, void** p);
 void func_00320498(void* pool, void** p);
@@ -308,7 +308,7 @@ inline bool inPool_319F68(void* pool, void* p)
     return (unsigned int)((char*)p - (char*)pool) < N;
 }
 
-extern "C" void func_00319F68(void* p)
+extern "C" void cMemBlockMan_free(void* p)
 {
     if (inPool_319F68<0x800>(cMemBlockMan_m_container8, p))
         func_00320488(cMemBlockMan_m_container8, (void**)p);
@@ -328,7 +328,7 @@ extern "C" void func_00319F68(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A088);
+INCLUDE_ASM("bx/memblockman", cMemBlockMan_isMemBlock);
 #ifdef SKIP_ASM
 extern void* cMemBlockMan_m_container16;
 extern void* cMemBlockMan_m_container512;
@@ -338,26 +338,26 @@ extern void* cMemBlockMan_m_container256;
 extern void* cMemBlockMan_m_container64;
 extern void* cMemBlockMan_m_container128;
 
-static inline int func_0031A088_in(void* p, void* base, unsigned int size)
+static inline int cMemBlockMan_isMemBlock_in(void* p, void* base, unsigned int size)
 {
     return (unsigned int)((char*)p - (char*)base) <= size - 1;
 }
 
-extern "C" int func_0031A088(void* p)
+extern "C" int cMemBlockMan_isMemBlock(void* p)
 {
-    if (func_0031A088_in(p, cMemBlockMan_m_container8, 0x800))
+    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container8, 0x800))
         return 1;
-    if (func_0031A088_in(p, cMemBlockMan_m_container16, 0x2000))
+    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container16, 0x2000))
         return 1;
-    if (func_0031A088_in(p, cMemBlockMan_m_container32, 0x6000))
+    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container32, 0x6000))
         return 1;
-    if (func_0031A088_in(p, cMemBlockMan_m_container64, 0x32000))
+    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container64, 0x32000))
         return 1;
-    if (func_0031A088_in(p, cMemBlockMan_m_container128, 0x25800))
+    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container128, 0x25800))
         return 1;
-    if (func_0031A088_in(p, cMemBlockMan_m_container256, 0x20000))
+    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container256, 0x20000))
         return 1;
-    return func_0031A088_in(p, cMemBlockMan_m_container512, 0x20000);
+    return cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container512, 0x20000);
 }
 #endif
 
@@ -398,7 +398,7 @@ extern "C" int func_0031A130(void* addr)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A200);
+INCLUDE_ASM("bx/memblockman", cMemBlockMan_validate);
 #ifdef SKIP_ASM
 extern int cMemBlockMan_m_initialized;
 extern void* cMemBlockMan_m_container16;
@@ -417,7 +417,7 @@ void func_00320538_1(void*) __asm__("func_00320538__Fv");
 void func_00320540_1(void*) __asm__("func_00320540__Fv");
 void func_00320548_1(void*) __asm__("func_00320548__Fv");
 
-extern "C" void func_0031A200(void)
+extern "C" void cMemBlockMan_validate(void)
 {
     if (cMemBlockMan_m_initialized != 0) {
         func_00320518_1(cMemBlockMan_m_container8);

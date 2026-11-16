@@ -95,12 +95,12 @@ extern "C" void cCameraTriggerList_reset(void* self_)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C098);
+INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_purge);
 #ifdef SKIP_ASM
 extern "C" void cCameraTriggerList_reset(void*);
 void cMemMan_free(void*);
 
-extern "C" void func_0016C098(void** self)
+extern "C" void cCameraTriggerList_purge(void** self)
 {
     cCameraTriggerList_reset(self);
     if (*self != 0) {

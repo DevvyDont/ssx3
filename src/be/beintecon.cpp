@@ -647,7 +647,7 @@ extern "C" void func_001515B8(sEconItems_001515B8* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151600);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_init);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -758,7 +758,7 @@ extern "C" void func_00150558(int kind, void* dst);
 extern sEconDef_1600 D_0043EE10_v1600[] __asm__("cBELibrary_missionInfo");
 extern sEconColRec_1600 D_005308D9[];
 
-extern "C" void func_00151600(sEcon_1600* self, int k, int reload)
+extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
 {
     if (reload) {
         func_00151A88((sEconItems_151A88*)self, k);

@@ -152,19 +152,19 @@ extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
 }
 #endif
 
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
- * Renders the character-select state's 2D layer with the shared UI-state render routine func_0039E6B8().
+ * Renders the character-select state's 2D layer with the shared UI-state render routine cUIState_onRender2D().
  *
- * @return no meaningful value (func_0039E6B8() returns nothing)
+ * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
 void* cFEStateCharSelect_onRender2D(void* self)
 {
-    return func_0039E6B8(self);
+    return cUIState_onRender2D(self);
 }
 #endif
 
@@ -172,19 +172,19 @@ void* cFEStateCharSelect_onRender2D(void* self)
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_00181EF0(void* self);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the character-select state: poses the front-end rider model, then runs the base UI-state update.
  *
  * func_00181EF0() places and turns the rider model once it is loaded and restarts its animation when the state
- * asks for it. func_0039E510() is the base UI-state update, which dispatches controller input to the state and
+ * asks for it. cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and
  * its screens.
  */
 extern "C" void cFEStateCharSelect_onUpdate(void* self)
 {
     func_00181EF0(self);
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 
@@ -374,13 +374,13 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
-extern "C" void* func_0018ECA0(void* mem, void* owner, int a2, unsigned char a3);
+extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* mem, void* owner, int a2, unsigned char a3);
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
 extern "C" void func_001A1CB8(void* self, int rider, unsigned char mask);
 extern "C" void func_00181BD0(void* self, int index, signed char charID);
-extern "C" void func_001472C8(void* iface, int rider, int idx);
-extern "C" void func_00147448(void* iface, int rider, int id);
+extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int rider, int idx);
+extern "C" void cBENewPlayerInterface_setPlayerCharID(void* iface, int rider, int id);
 extern "C" void func_001474A8(void* iface, int rider, int id);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern signed char D_00440F68[];
@@ -475,8 +475,8 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         int ch = D_00440F68[widget->id];
         int board = self->board;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_001472C8(iface, rider, player);
-        func_00147448(iface, rider, ch);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
+        cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
         func_001474A8(iface, rider, board);
         refresh_17E8(iface);
         unsigned char mask = on << self->player;
@@ -505,8 +505,8 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         int ch = D_00440F68[widget->id];
         int board = self->board;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_001472C8(iface, rider, player);
-        func_00147448(iface, rider, ch);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
+        cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
         func_001474A8(iface, rider, board);
         refresh_17E8(iface);
         break;
@@ -519,7 +519,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         break;
     case 7: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_001472C8(iface, self->rider, self->player);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, self->rider, self->player);
         refresh_17E8(iface);
         char* st = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), self->engine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
@@ -530,9 +530,9 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
     }
     case 8: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_001472C8(iface, self->rider, self->player);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, self->rider, self->player);
         refresh_17E8(iface);
-        void* st = func_0018ECA0(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0x100, 0), self->engine, 2, 1 << self->player);
+        void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0x100, 0), self->engine, 2, 1 << self->player);
         cUIStateStack_push(self->engine + 0x18, st);
         char* top = *(char**)self->engine;
         if (top != 0)
@@ -759,8 +759,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern "C" int func_00157EE0(void* iface, int a1, int a2, int a3);
-extern "C" void* func_0015A478();
-extern "C" int func_00398380(void* self, int id);
+extern "C" void* cBERewardInterface_getDB();
+extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern void* cFEStateCheatCharSelect_vtbl[];
@@ -799,9 +799,9 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
     self->ids[0] = 0;
     char* o = self->owner;
     int h = GetHashValue32(D_00440F78[slot]);
-    self->hashes[0] = func_00398380(o + 0x58, h);
+    self->hashes[0] = cUITextureBank_getElementByHashname(o + 0x58, h);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-    sCharList_2220* list = (sCharList_2220*)func_0015A478();
+    sCharList_2220* list = (sCharList_2220*)cBERewardInterface_getDB();
     int n = list->count;
     for (int i = 0; i < n; i++) {
         sCharEnt_2220* e = &list->ents[i];
@@ -810,7 +810,7 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
             self->ids[self->count] = e->id;
             char* o2 = self->owner;
             int h2 = GetHashValue32(lbl);
-            self->hashes[self->count] = func_00398380(o2 + 0x58, h2);
+            self->hashes[self->count] = cUITextureBank_getElementByHashname(o2 + 0x58, h2);
             self->names[self->count] = e->name;
             self->count++;
         }

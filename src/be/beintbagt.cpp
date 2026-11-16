@@ -455,16 +455,16 @@ extern "C" int func_001503F8(void* self, int rider, int idx, int second)
 extern void* cBELibrary_grabPointsDB[];
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150528__FPvi);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabPoints__FPvi);
 #ifdef SKIP_ASM
-int func_00150528(void* self, int a1)
+int cBEBAGTInterface_getGrabPoints(void* self, int a1)
 {
     return *(int*)((char*)(void*)cBELibrary_grabPointsDB + a1 * 8);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150540__FPvi);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabPointsPerSec__FPvi);
 #ifdef SKIP_ASM
 struct sBAGTEntry {
     int key;
@@ -475,7 +475,7 @@ struct sBAGTTable {
     sBAGTEntry entries[1];
 };
 
-int func_00150540(void* self, int a1)
+int cBEBAGTInterface_getGrabPointsPerSec(void* self, int a1)
 {
     return ((sBAGTTable*)cBELibrary_grabPointsDB)->entries[a1].value;
 }

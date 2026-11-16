@@ -89,7 +89,7 @@ void func_0038DC68(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC70);
+INCLUDE_ASM("render/lightman", cPS2LightMan_CreateLights);
 #ifdef SKIP_ASM
 struct sV3_DC70 {
     float x, y, z;
@@ -144,7 +144,7 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
     return sV3_DC70(x, y, z);
 }
 
-extern "C" void func_0038DC70(cPS2LightMan* self, sLight_DC70* lights, int n, int base)
+extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, sLight_DC70* lights, int n, int base)
 {
     int i;
     for (i = 0; i < n; i++) {
@@ -179,7 +179,7 @@ extern "C" void func_0038DC70(cPS2LightMan* self, sLight_DC70* lights, int n, in
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DEE8);
+INCLUDE_ASM("render/lightman", cPS2LightMan_CreateAmbient);
 #ifdef SKIP_ASM
 class cObj0038DEE8 {
 public:
@@ -192,14 +192,14 @@ public:
 // passes (void*, int, float); bind the 3-arg call by asm label.
 void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
 
-extern "C" void func_0038DEE8(cPS2LightMan* obj, int a, int b, float f)
+extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int a, int b, float f)
 {
     func_0038DC50_3(((cObj0038DEE8*)obj)->v02(a), b, f);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DF38);
+INCLUDE_ASM("render/lightman", cPS2LightMan_CreateDirectional);
 #ifdef SKIP_ASM
 class cObj0038DF38 {
 public:
@@ -212,14 +212,14 @@ public:
 // passes (void*, int, int, float); bind the 4-arg call by asm label.
 void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv");
 
-extern "C" void func_0038DF38(cPS2LightMan* obj, int a, int b, int c, float f)
+extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int a, int b, int c, float f)
 {
     func_0038DC58_4(((cObj0038DF38*)obj)->v02(a), b, c, f);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DF98);
+INCLUDE_ASM("render/lightman", cPS2LightMan_CreatePoint);
 #ifdef SKIP_ASM
 class cObj0038DF98 {
 public:
@@ -232,14 +232,14 @@ public:
 // passes (void*, int, int, float, int); bind the 5-arg call by asm label.
 void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC60__FPv");
 
-extern "C" void func_0038DF98(cPS2LightMan* obj, int a, int b, int c, float f, int d)
+extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int a, int b, int c, float f, int d)
 {
     func_0038DC60_5(((cObj0038DF98*)obj)->v02(a), b, c, f, d);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038E008);
+INCLUDE_ASM("render/lightman", cPS2LightMan_CreateSpot);
 #ifdef SKIP_ASM
 class cObj0038E008 {
 public:
@@ -252,7 +252,7 @@ public:
 // passes (void*, int, int, int, float, float, int, float); bind the call by asm label.
 void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("func_0038DC68__FPv");
 
-extern "C" void func_0038E008(cPS2LightMan* obj, int a, int b, int c, int d, float x, float y, int e, float z)
+extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int a, int b, int c, int d, float x, float y, int e, float z)
 {
     func_0038DC68_8(((cObj0038E008*)obj)->v02(a), b, c, d, x, y, e, z);
 }
@@ -1098,21 +1098,21 @@ extern "C" void func_0038F7B0(void)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F7F8__FPv);
+INCLUDE_ASM("render/lightman", cVisualEffectsTest_update__FPv);
 #ifdef SKIP_ASM
-void func_0038F7F8(void* self)
+void cVisualEffectsTest_update(void* self)
 {
 }
 #endif
 
-extern "C" void* func_002BB6B8(void* self);
+extern "C" void* cWorldPainterManRender(void* self);
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F800__FPv);
+INCLUDE_ASM("render/lightman", cVisualEffectsTest_render__FPv);
 #ifdef SKIP_ASM
-void* func_0038F800(void* self)
+void* cVisualEffectsTest_render(void* self)
 {
-    return func_002BB6B8(self);
+    return cWorldPainterManRender(self);
 }
 #endif
 

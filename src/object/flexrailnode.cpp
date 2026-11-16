@@ -23,8 +23,8 @@ struct sHashNode_8B90 {
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cObjectInterface_getNash();
-extern "C" void func_00328F28(sHashKey_8B90* out, void* box);
-extern "C" void func_00328C20(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
+extern "C" void nash_Nash_findkey(sHashKey_8B90* out, void* box);
+extern "C" void nash_Octant_addnode(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
 extern const char str_FlexRailSpaceNode[];
 
 /**
@@ -42,11 +42,11 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self)
     sHashCell_8B90* cell = (sHashCell_8B90*)cObjectInterface_getNash();
     sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
     sHashKey_8B90 key;
-    func_00328F28(&key, (char*)self + 0x30);
+    nash_Nash_findkey(&key, (char*)self + 0x30);
     sHashCell_8B90* cellX = key.x < 0 ? cell + 4 : cell;
     sHashCell_8B90* cellXY = key.y < 0 ? cellX + 2 : cellX;
     sHashCell_8B90* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
-    func_00328C20(cellXYZ, 2, node, &key);
+    nash_Octant_addnode(cellXYZ, 2, node, &key);
 }
 #endif
 
@@ -64,7 +64,7 @@ struct sHashCellR_8C48 {
     sOctCell_8C48* oct;   // 0x10
 };
 
-extern "C" void func_003284B8(sOctCell_8C48* oct, int type, sHashNode_8B90* node, sHashKey_8B90* key, sHashCellR_8C48* cell);
+extern "C" void nash_Cell_remnode(sOctCell_8C48* oct, int type, sHashNode_8B90* node, sHashKey_8B90* key, sHashCellR_8C48* cell);
 
 static inline int octEmpty_8C48(sOctCell_8C48* o)
 {
@@ -86,12 +86,12 @@ extern "C" void func_00348C48(void* self)
     sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
     (*(int*)((char*)cell + 0xA0))++;
     sHashKey_8B90 key;
-    func_00328F28(&key, (char*)self + 0x30);
+    nash_Nash_findkey(&key, (char*)self + 0x30);
     sHashCellR_8C48* cellX = key.x < 0 ? cell + 4 : cell;
     sHashCellR_8C48* cellXY = key.y < 0 ? cellX + 2 : cellX;
     sHashCellR_8C48* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
     sHashCellR_8C48* octant = cellXYZ;
-    func_003284B8(octant->oct, 2, node, &key, octant);
+    nash_Cell_remnode(octant->oct, 2, node, &key, octant);
     if (octEmpty_8C48(octant->oct)) {
         operator_delete((int*)octant->oct);
         octant->oct = 0;
@@ -343,8 +343,8 @@ struct sFrWorld9220 {
     sFrModelSet9220** sets; // 0x8
 };
 
-extern "C" sFrWorld9220** func_002D1BD8();
-extern "C" void func_0034FED8(void* model, int bone, sFrNodeMtx* out);
+extern "C" sFrWorld9220** cObjectInterface_getWorld();
+extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* out);
 
 static inline void* refToPtr9220(unsigned int p)
 {
@@ -356,7 +356,7 @@ struct sFrModelRef9220 {
 
     void* get()
     {
-        sFrModelSet9220* set = (*func_002D1BD8())->sets[id & 0xFF];
+        sFrModelSet9220* set = (*cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -379,7 +379,7 @@ struct sFrNode9220 {
 extern "C" void func_00349220(void* self, sFrNode9220* node)
 {
     sFrNodeMtx boneMat;
-    func_0034FED8(node->model.get(), node->bone, &boneMat);
+    cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
     sFrNodeVec4 bonePos = boneMat.r[3];
     node->posB = bonePos;
     node->posA = bonePos;
@@ -592,7 +592,7 @@ struct sFrN_98E8 {
     char pad48[8];
 };
 
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void func_00349220(void* self, sFrNode9220* node);
 // View (func_00348D98 earlier in this unit declares it with its own type).
 extern sFrV_98E8 D_004FF120_98E8 __asm__("t4vect_Zero");
@@ -658,7 +658,7 @@ static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
 
 extern "C" void func_003498E8(char* self)
 {
-    float dt = func_002D1C70();
+    float dt = cObjectInterface_getUpdateTime();
     sFrN_98E8* n = *(sFrN_98E8**)(self + 0x70);
     for (int i = 0; i < *(int*)(self + 0x20); i++, n++) {
         if (*(int*)((char*)n->model.get() + 0xC))
@@ -903,8 +903,8 @@ extern "C" void func_00349F18(sFrBoxRail60* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034A028);
 #ifdef SKIP_ASM
-extern "C" sFrWorld9220** func_002D1BD8();
-extern "C" void func_0034FED8(void* model, int bone, sFrNodeMtx* out);
+extern "C" sFrWorld9220** cObjectInterface_getWorld();
+extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* out);
 
 struct sFrNodeA028 {
     sFrNodeVec4 pos;        // 0x0
@@ -916,7 +916,7 @@ struct sFrNodeA028 {
 extern "C" void func_0034A028(void* self, sFrNodeA028* node)
 {
     sFrNodeMtx boneMat;
-    func_0034FED8(node->model.get(), node->bone, &boneMat);
+    cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
     sFrNodeVec4 bonePos = boneMat.r[3];
     node->pos = bonePos;
 }
@@ -1301,7 +1301,7 @@ extern "C" void func_0034A838(sFrR_A838* self, sFrN_A838* node)
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034A8C8);
 #ifdef SKIP_ASM
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 struct sV4_A8C8 {
     float x, y, z, w;
@@ -1438,7 +1438,7 @@ static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
 
 extern "C" void func_0034A8C8(sFrRailA8C8* self)
 {
-    float dt = func_002D1C70();
+    float dt = cObjectInterface_getUpdateTime();
     sV4Slot_A8C8 f[8];
     for (int i = 0; i < self->count - 1; i++) {
         f[i].v = vu0Scale_A8C8(self->elems[i].posA, -self->k[0]);

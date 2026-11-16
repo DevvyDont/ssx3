@@ -242,7 +242,7 @@ extern "C" int cFEStateOptions_onInputBegin(void* self, void* pInput)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onWidgetMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* func_00397870(void* list, int index);
+extern "C" void* cList_getByIndex(void* list, int index);
 extern char D_004A1530[];
 
 /**
@@ -264,7 +264,7 @@ extern "C" int cFEStateOptions_onWidgetMenu(void* self, void* menu, unsigned int
         }
     }
     if (key == 6) {
-        int itemHash = *(int*)((char*)func_00397870((char*)menu + 0x74, index) + 0x38);
+        int itemHash = *(int*)((char*)cList_getByIndex((char*)menu + 0x74, index) + 0x38);
         if (itemHash == GetHashValue32(D_004A1530)) {
             goto check;
         }
@@ -1061,7 +1061,7 @@ extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
-extern "C" void func_00287558(void* snd, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern "C" void cFEStateOptionsSound_updateWidget(void* self);
 extern char str_111resetopts[];
@@ -1117,7 +1117,7 @@ extern "C" void func_0018A3D8(void* self, char* popup, int event)
                 func_00287410(func_0028B180(), Cfg_18A3D8().sfxVol);
                 func_00287488(func_0028B180(), Cfg_18A3D8().speechVol);
                 func_00287520(func_0028B180(), Cfg_18A3D8().musicVol);
-                func_00287558(func_0028B180(), Cfg_18A3D8().f17 != 0);
+                cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18A3D8().f17 != 0);
                 func_002875D0(func_0028B180(), Cfg_18A3D8().f16 != 0);
                 cFEStateOptionsSound_updateWidget(self);
             }
@@ -1183,7 +1183,7 @@ extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
-extern "C" void func_00287558(void* snd, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
@@ -1264,7 +1264,7 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
         func_00287410(func_0028B180(), Cfg_18A8D0().sfxVol);
         func_00287488(func_0028B180(), Cfg_18A8D0().speechVol);
         func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
-        func_00287558(func_0028B180(), Cfg_18A8D0().f17 != 0);
+        cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18A8D0().f17 != 0);
         func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
         char* eng = *(char**)self->engine;
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
@@ -1295,7 +1295,7 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_5lb)) {
             D_00535610_18A8D0.f17 = cUIListBox_getCurrentEntryData(widget) != 0;
-            func_00287558(func_0028B180(), Cfg_18A8D0().f17 != 0);
+            cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18A8D0().f17 != 0);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_6lb)) {
             D_00535610_18A8D0.f16 = cUIListBox_getCurrentEntryData(widget) != 0;
@@ -1326,7 +1326,7 @@ int func_00289DC0(void* snd);
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
-extern "C" void func_00287558(void* snd, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern char str_kT_CMNOff[];
 extern char str_kT_20SpeakerStereo[];
@@ -1453,7 +1453,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         unsigned char sel;
         if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
-        func_00287558(func_0028B180(), Cfg_18B380().f17 != 0);
+        cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18B380().f17 != 0);
     }
     }
     {
@@ -1496,7 +1496,7 @@ extern "C" void SSXAUDIO_Init(int mode);
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
-extern "C" void func_00287558(void* snd, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00285FB0(void* snd);
 
@@ -1545,7 +1545,7 @@ extern "C" void func_0018BEF8(void* self, unsigned int mode)
         func_00287410(func_0028B180(), (int)sfxVolume);
         func_00287488(func_0028B180(), (int)speechVolume);
         func_00287520(func_0028B180(), (int)musicVolume);
-        func_00287558(func_0028B180(), s0);
+        cSSXAudio_SetArcadeSFX(func_0028B180(), s0);
         func_002875D0(func_0028B180(), arcadeSfx);
         func_00285FB0(func_0028B180());
         char* snd = (char*)func_0028B180();
@@ -2080,7 +2080,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018CCE0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00147618(void* player, int which);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* player, int which);
 // func_0018CF50 returns void; declaring it int ($v0 set by the call) reproduces the original argument scheduling.
 extern "C" int func_0018CF50_CCE0(void* self, int on) __asm__("func_0018CF50");
 
@@ -2103,7 +2103,7 @@ extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
         default:
             return 0x101;
         }
-        func_0018CF50_CCE0(self, func_00147618(player, which) == 0);
+        func_0018CF50_CCE0(self, cBENewPlayerInterface_getControllerMapping(player, which) == 0);
         return 0x101;
     }
     case 6:
@@ -2131,7 +2131,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_001474E8(void* iface, int a1);
-extern "C" int func_00147618(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_0018CF50(void* self, int on);
@@ -2156,13 +2156,13 @@ extern "C" void func_0018CDC0(void* self)
     }
     listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
     if (listBox != 0) {
-        cUIListBox_getEntryByData(listBox, func_00147618(np, 0), &vals[2]);
+        cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 0), &vals[2]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[2]);
-        func_0018CF50(self, func_00147618(np, 0) == 0);
+        func_0018CF50(self, cBENewPlayerInterface_getControllerMapping(np, 0) == 0);
     }
     listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
     if (listBox != 0) {
-        cUIListBox_getEntryByData(listBox, func_00147618(np, 1), &vals[3]);
+        cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 1), &vals[3]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[3]);
     }
 }
@@ -2216,12 +2216,12 @@ extern "C" void func_0018CF50(void* self, int on)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018D058);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 
 extern "C" void func_0018D058(void* self)
 {
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     if (*(unsigned char*)((char*)self + 0x50) & 1) {
         if (*(int*)((char*)self + 0x48) > 0) {
             *(int*)((char*)self + 0x48) -= 1;
@@ -2359,26 +2359,26 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00194498(void* obj);
+extern "C" void DisableTextWidget(void* obj);
 extern int D_004A19D8;
 extern char str_3loadreplay[];
 extern char str_4new_game[];
 
 /**
- * Applies func_00194498 to the load-replay and new-game entries while D_004A19D8 is set.
+ * Applies DisableTextWidget to the load-replay and new-game entries while D_004A19D8 is set.
  *
- * func_00194498 and D_004A19D8 are not identified (probably greys the two entries out).
+ * DisableTextWidget and D_004A19D8 are not identified (probably greys the two entries out).
  */
 extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(void* self)
 {
     if (D_004A19D8 != 0) {
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3loadreplay));
         if (obj != 0) {
-            func_00194498(obj);
+            DisableTextWidget(obj);
         }
         obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4new_game));
         if (obj != 0) {
-            func_00194498(obj);
+            DisableTextWidget(obj);
         }
     }
 }
@@ -2592,13 +2592,13 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
 #ifdef SKIP_ASM
-extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
 extern "C" void* func_0018D7F0(void* self, int engine, int cardMode, int isSave, int a4)
 {
-    func_001D53B0(self, engine, cardMode);
+    cFEMemCard_cFEMemCard(self, engine, cardMode);
     *(int*)((char*)self + 0x230) = a4;
     *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
     *(int*)((char*)self + 0xC) = 0x21;
@@ -3158,7 +3158,7 @@ extern "C" void func_0018E368(void* self, bool loadBlocked, bool saveBlocked)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018E478);
 #ifdef SKIP_ASM
-extern "C" void func_0039F4C0(void* list, void* item);
+extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 
 struct sVEntry0018E478 {
     short delta;
@@ -3183,7 +3183,7 @@ extern "C" void func_0018E478(void* self)
         sVEntry0018E478* vt = *(sVEntry0018E478**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, mode);
         if (nextState != 0) {
-            func_0039F4C0(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_pushCheck(*(char**)((char*)self + 0x10) + 0x18, nextState);
         }
     }
     *(int*)((char*)self + 0x1AC) = 1;

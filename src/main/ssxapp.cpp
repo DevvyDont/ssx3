@@ -114,7 +114,7 @@ void cBezierMan_construct();
 extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv);
 extern "C" void* SHAPE_locate(const char* name, void* list);
 extern "C" void cGraphicsMan_UploadTextures(void* gfx);
-void* func_00232328(void* p);
+void* cPreStartScreen_cPreStartScreen(void* p);
 extern "C" void* cFEAsyncManager_cFEAsyncManager(void* p);
 extern "C" void cFEAsyncManager_Init(void* p);
 extern "C" void* cGameModeMan_getGM();
@@ -171,7 +171,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(gfxThis, loadShape, str_loadicon, 0, 1, -1);
     cGraphicsMan_UploadTextures(GrMan);
     *(sTint_6900**)&self->LoadIndicator = new (str_LoadIndicator, 0, 0) sTint_6900;
-    cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, str_PreStartScreen, 0x100, 0)));
+    cAppMan_setNextModule((cAppMan*)self, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC, str_PreStartScreen, 0x100, 0)));
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
     void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(0x590, str_FEAsyncManager, 0, 0));
     *(void**)&self->mFEAsyncManager = feAsyncManager;
@@ -644,7 +644,7 @@ extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindFirstOf(cBXString* self, char ch);
 int cBXString_FindLastOf(cBXString* self, char ch, int len);
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern int cRenderToggles_m_DisableHUD;
 extern char str_track[];
 extern char str_realfe[];
@@ -675,7 +675,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
     while (i < argc) {
         if (argv[i][0] == '-') {
             char* opt = argv[i] + 1;
-            if (func_0041AA88(opt, str_track) == 0) {
+            if (strcasecmp(opt, str_track) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
@@ -701,23 +701,23 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 }
                 cBXString_operatorE(((char*)self) + 0xCC, &track);
                 cBXString__cBXString(&track, 2);
-            } else if (func_0041AA88(opt, str_username_b) == 0) {
+            } else if (strcasecmp(opt, str_username_b) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
                 cBXString_cBXString4(((char*)self) + 0xC4, argv[i]);
-            } else if (func_0041AA88(opt, str_password) == 0) {
+            } else if (strcasecmp(opt, str_password) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
                 cBXString_cBXString4(((char*)self) + 0xC8, argv[i]);
-            } else if (func_0041AA88(opt, str_realfe) == 0) {
+            } else if (strcasecmp(opt, str_realfe) == 0) {
                 self->unk_60 = 1;
-            } else if (func_0041AA88(opt, str_nohud) == 0) {
+            } else if (strcasecmp(opt, str_nohud) == 0) {
                 self->unk_64 = 0;
-            } else if (func_0041AA88(opt, str_autolobby) == 0) {
+            } else if (strcasecmp(opt, str_autolobby) == 0) {
                 self->unk_74 = 1;
             }
         }
@@ -755,7 +755,7 @@ extern "C" void func_00255A20(void* p);
 extern "C" void func_002668E8(void* p);
 extern "C" int func_00326CA0(void* self, int i);
 extern "C" void* func_00326CC8(void* self, int i);
-extern "C" void func_00321298(void* target, int a, void* data);
+extern "C" void cInputPad_update(void* target, int a, void* data);
 extern void* PadCache;
 extern void* D_004A33F0;
 
@@ -765,7 +765,7 @@ extern void* D_004A33F0;
  *
  * Advances the pad cache's read position (func_00326B48); on success it updates cCommSystem_mCommSystem and
  * the keyboard object D_004A33F0 when they exist, and passes each of the two sample slots (value count and
- * values) to InputPads[i] through func_00321298().
+ * values) to InputPads[i] through cInputPad_update().
  *
  * @return 1 when a new input sample was taken, 0 when none was ready
  */
@@ -782,7 +782,7 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         for (i = 0; i < 2; i++) {
             int valueCount = func_00326CA0(PadCache, i);
             void* values = func_00326CC8(PadCache, i);
-            func_00321298(((void**)((char*)self + 0xA8))[i], valueCount, values);
+            cInputPad_update(((void**)((char*)self + 0xA8))[i], valueCount, values);
         }
         return 1;
     }
@@ -844,7 +844,7 @@ extern "C" void func_003DEDC0(void* handle, int arg);
 extern "C" void WORLDTRIGGERMANAGER_DeInit_noarg() __asm__("WORLDTRIGGERMANAGER_DeInit");
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void cBE_purgeBE(void* p);
-extern "C" void func_002380E8(void* p);
+extern "C" void cGameModeMan_purgeGM(void* p);
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
 extern void* PadCache;
 
@@ -946,7 +946,7 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     if (self->fDC) func_003DEDC0(self->fDC, 100);
     if (self->fE0) func_003DEDC0(self->fE0, 100);
     if (self->f78) cBE_purgeBE(self->f78);
-    func_002380E8(self->fC0);
+    cGameModeMan_purgeGM(self->fC0);
     if (self->f11C) cFEAsyncManager__cFEAsyncManager(self->f11C, 3);
     {
         char* consoleConfig = self->f9C;
@@ -1045,7 +1045,7 @@ extern "C" void func_0031A6B8();
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void func_00287488(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
-extern "C" void func_00287558(void* opt, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
 void WORLDTRIGGERMANAGER_Init();
 extern "C" int func_004165A8(const void* a, const void* b);
@@ -1190,7 +1190,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     func_00287410(func_0028B180(), Cfg_82D0().sfxVol);
     func_00287488(func_0028B180(), Cfg_82D0().speechVol);
     func_00287520(func_0028B180(), Cfg_82D0().musicVol);
-    func_00287558(func_0028B180(), Cfg_82D0().f17 != 0);
+    cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_82D0().f17 != 0);
     func_002875D0(func_0028B180(), Cfg_82D0().f16 != 0);
     WORLDTRIGGERMANAGER_Init();
     if (func_004165A8(self->fCC, D_004A29E8)) {
@@ -1207,7 +1207,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cFELocale_cFELocale(void* self);
-extern "C" void func_00195B70(void* self);
+extern "C" void cFELocale_loadCommon(void* self);
 extern char str_FELocale[];
 
 struct sOptions_228A78 {
@@ -1233,7 +1233,7 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
  * Creates the front-end locale if needed and sets it to the language chosen in the options.
  *
  * Allocates the 0xC0-byte "FELocale" on first use, passes the options' language field (bits 22-24 of
- * cBEOptionInterface_mOption) to its vtable slot 3, then calls func_00195B70() on it. BE interface 4 is fetched and unused.
+ * cBEOptionInterface_mOption) to its vtable slot 3, then calls cFELocale_loadCommon() on it. BE interface 4 is fetched and unused.
  */
 extern "C" void cSSXApp_initLocale(cSSXApp* self)
 {
@@ -1246,7 +1246,7 @@ extern "C" void cSSXApp_initLocale(cSSXApp* self)
     char* thisp = loc + vt[3].delta;
     void (**pfn)(void*, int) = &vt[3].fn;
     (*pfn)(thisp, optLanguage_228A78(D_00535610_228A78));
-    func_00195B70(self->FELocale);
+    cFELocale_loadCommon(self->FELocale);
 }
 #endif
 
@@ -1866,7 +1866,7 @@ struct sHMgr_229820 {
     sHTable_229820** tables;    // 0x8
 };
 
-extern "C" sHMgr_229820** func_002D1BD8(void);
+extern "C" sHMgr_229820** cObjectInterface_getWorld(void);
 
 struct sPart_229820 {
     char pad[0x1C];
@@ -1914,7 +1914,7 @@ static inline sModel_229820* lookup_229820(sHTable_229820* t, unsigned int idx)
 
 static inline sModel_229820* HandleToModel_229820(unsigned int h)
 {
-    sHTable_229820* t = (*func_002D1BD8())->tables[h & 0xFF];
+    sHTable_229820* t = (*cObjectInterface_getWorld())->tables[h & 0xFF];
     if (t == 0) {
         return 0;
     }
@@ -3421,7 +3421,7 @@ extern "C" void cGame_renderModels(void* self, void* world);
 extern "C" void cGame_renderFogVolumes(void* self, void* world);
 extern "C" void cGame_renderLightHalos(void* self, void* world, int view);
 extern "C" void cGame_renderPatches(void* self, void* world);
-extern "C" int func_002CC098(void* menu);
+extern "C" int cMenuSys_isActive(void* menu);
 extern "C" void func_002CC350(void* menu);
 extern "C" void func_00397DF8(void* p);
 void func_0030B4B8(void* p);
@@ -3866,7 +3866,7 @@ extern "C" int cGame_render(sGame_22B008* self)
     hud->f3C = hud->f34 * 0.8f;
     self->hud->scale = sScale_22B008(2.0f, 2.0f);
     self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
-    if (func_002CC098(self->menu) != 0) {
+    if (cMenuSys_isActive(self->menu) != 0) {
         func_002CC350(self->menu);
         self->hud->scale = sScale_22B008(2.0f, 2.0f);
         self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);

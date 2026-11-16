@@ -274,7 +274,7 @@ extern "C" void cSpring_update(sSpring_53FC0* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/spring", func_003545D8);
+INCLUDE_ASM("object/spring", cSpring_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSpringVEntry45D8 {
     short delta;
@@ -282,7 +282,7 @@ struct sSpringVEntry45D8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_003545D8(void* self, void* stream)
+extern "C" void cSpring_writeToReplayFrame(void* self, void* stream)
 {
     sSpringVEntry45D8* e = &(*(sSpringVEntry45D8**)stream)[1];
     e->fn((char*)stream + e->delta, self, 0x24);

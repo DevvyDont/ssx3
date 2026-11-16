@@ -1418,7 +1418,7 @@ extern "C" void func_00369690(void* self, int count, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003696C8);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_GetTextureID);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" void* SHAPE_locatez(void* src, const char* name);
@@ -1445,7 +1445,7 @@ struct sGfx_96C8 {
 };
 
 // Look up (or load and cache) a texture by its 4-character name.
-extern "C" int func_003696C8(cPS2GraphicsMan* self_, const char* name)
+extern "C" int cGraphicsMan_GetTextureID(cPS2GraphicsMan* self_, const char* name)
 {
     sGfx_96C8* self = (sGfx_96C8*)self_;
     char buf[0x10];

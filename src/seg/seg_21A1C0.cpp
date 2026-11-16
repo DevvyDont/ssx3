@@ -448,7 +448,7 @@ extern "C" void func_00319930(void)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_003199D0);
+INCLUDE_ASM("seg/seg_21A1C0", cMemMan_totalUnused);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sMallinfo_99D0 {
@@ -471,7 +471,7 @@ extern char TheDynamicMemMan[];
 extern unsigned int cMemMan_m_heapSize;
 
 // Free heap bytes: heap size minus the bytes dlmalloc has handed out.
-extern "C" int func_003199D0(void)
+extern "C" int cMemMan_totalUnused(void)
 {
     MUTEX_lock(cMemMan_m_mutex);
     sMallinfo_99D0 mi = func_0031FC20(TheDynamicMemMan);

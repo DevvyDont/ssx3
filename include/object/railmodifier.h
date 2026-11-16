@@ -33,7 +33,7 @@ struct tInstanceRecord;
 
 struct cRailModifier {
     // --- cRailLink (On Tour 0xC)
-    cRailLink* Next;              // 0x00 [O]; [R] both ctors zero it; [U] cRailLink_append / func_0035B6D0 (unlink,
+    cRailLink* Next;              // 0x00 [O]; [R] both ctors zero it; [U] cRailLink_append / cRailLink_unlink (unlink,
                                   //      called by the destructor) walk it
     cRailLink* Prev;              // 0x04 [O]; [R] both ctors zero it
     void** mVtbl;                 // 0x08 [R] ctors store cRailModifier_vtbl; the destructor stores it, then

@@ -140,13 +140,13 @@ __asm__(
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004162D0);
+INCLUDE_ASM("seg/seg_316FB8", strcat);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_004162D0\n.ent func_004162D0\nfunc_004162D0:\n"
+    ".text\n.align 3\n.globl strcat\n.ent strcat\nstrcat:\n"
     "addiu $29, $29, -0x20\n"
     "sq $16, 0x0($29)\n"
     "daddu $16, $4, $0\n"
@@ -228,7 +228,7 @@ __asm__(
     "lq $16, 0x0($29)\n"
     "jr $31\n"
     "addiu $29, $29, 0x20\n"
-    ".end func_004162D0\n"
+    ".end strcat\n"
     ".set at\n.set reorder\n");
 #endif
 
@@ -3681,9 +3681,9 @@ void func_0041AA50(int a, int b, int c) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041AA88);
+INCLUDE_ASM("seg/seg_316FB8", strcasecmp);
 #ifdef SKIP_ASM
-int func_0041AA88(char *a, char *b) {
+int strcasecmp(char *a, char *b) {
     while (*a && func_0041EA18(*a) == func_0041EA18(*b)) {
         a++;
         b++;
@@ -3711,10 +3711,10 @@ int func_0041AB08(char *s1, char *s2) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041AB78);
+INCLUDE_ASM("seg/seg_316FB8", strncasecmp);
 #ifdef SKIP_ASM
 extern int func_0041EA18(int);
-int func_0041AB78(char *s1, char *s2, unsigned n) {
+int strncasecmp(char *s1, char *s2, unsigned n) {
     if (n == 0)
         return 0;
     while (n-- != 0 && func_0041EA18(*s1) == func_0041EA18(*s2)) {

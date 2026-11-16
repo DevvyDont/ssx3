@@ -521,7 +521,7 @@ void func_003F41B8(int n) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4210);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F030: the periodic callbacks run by func_003F42A0 (fn 0 = free slot). */
+/* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 struct sTick { void (*fn)(int, int); int arg; };
 
 extern struct sTick D_0051F030[16];
@@ -545,7 +545,7 @@ int func_003F4210(void (*fn)(int, int), int arg) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4250);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F030: the periodic callbacks run by func_003F42A0 (fn 0 = free slot). */
+/* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 extern struct sTick D_0051F030[16];
 
 int func_003F4250(void (*fn)(int, int), int arg) {
@@ -564,10 +564,10 @@ int func_003F4250(void (*fn)(int, int), int arg) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F42A0);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnIdle);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F030: the periodic callbacks run by func_003F42A0 (fn 0 = free slot). */
+/* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 extern struct sTick D_0051F030[16];
 
 extern int D_004A4BA0;
@@ -576,7 +576,7 @@ extern int func_003F4DE8(void);
 
 extern unsigned D_004A4BAC;
 extern int func_003F4A78(void);
-void func_003F42A0(void) {
+void NetConnIdle(void) {
     int i;
     struct sTick *p;
     if (D_004A4BA0 != 0) {
@@ -1594,7 +1594,7 @@ struct sKb {
 extern struct sKb D_00525F80;
 
 extern char *strcpy(char *, const char *);
-extern char* func_004162D0(char *, const char *);
+extern char* strcat(char *, const char *);
 extern int fBA68(char *, int, const char *) __asm__("func_0042BA68");
 extern char D_00497038[], str_USBKB_IRX_b[];
 int func_003F5DA8(char *name, char *str) {
@@ -1606,11 +1606,11 @@ int func_003F5DA8(char *name, char *str) {
     }
     if (str == 0) goto fail;
     strcpy(path, name);
-    func_004162D0(path, D_00497038);
+    strcat(path, D_00497038);
     D_00525F80.fd[0] = fBA68(path, 0, 0);
     if (D_00525F80.fd[0] < 0) goto fail;
     strcpy(path, name);
-    func_004162D0(path, str_USBKB_IRX_b);
+    strcat(path, str_USBKB_IRX_b);
     D_00525F80.fd[1] = fBA68(path, strlen(str) + 1, str); if (D_00525F80.fd[1] < 0) return -1; return 0;
 fail:
     return -1;

@@ -199,25 +199,25 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D698);
+INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_cSimpleCamera);
 #ifdef SKIP_ASM
-struct func_0015D698_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
+struct cSimpleCamera_cSimpleCamera_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* cSimpleCamera_vtbl[];
-extern func_0015D698_sVec4 t4vect_XAxis;
+extern cSimpleCamera_cSimpleCamera_sVec4 t4vect_XAxis;
 
-extern "C" void* func_0015D698(void* self)
+extern "C" void* cSimpleCamera_cSimpleCamera(void* self)
 {
-    func_0015D698_sVec4 v;
+    cSimpleCamera_cSimpleCamera_sVec4 v;
     *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
     v.x = 0; v.y = 0; v.z = 0; v.w = 0;
-    *(func_0015D698_sVec4*)((char*)self + 0x20) = v;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x20) = v;
     v.w = 1.0f;
     v.x = 0;
     v.y = 1.0f;
     v.z = 0;
-    *(func_0015D698_sVec4*)((char*)self + 0x30) = v;
-    *(func_0015D698_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = v;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
     return self;
 }
 #endif
@@ -229,7 +229,7 @@ extern "C" void* func_0015D928(void* self);
 
 extern "C" void func_0015D700(void* self, float x, float y, float z)
 {
-    func_0015D698_sVec4 poseVec;
+    cSimpleCamera_cSimpleCamera_sVec4 poseVec;
     *(float*)((char*)self + 0xC) = x;
     *(float*)((char*)self + 0x10) = y;
     *(float*)((char*)self + 0x14) = z;
@@ -237,13 +237,13 @@ extern "C" void func_0015D700(void* self, float x, float y, float z)
     *(float*)((char*)self + 0x4) = y;
     *(float*)((char*)self + 0x8) = z;
     poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
-    *(func_0015D698_sVec4*)((char*)self + 0x20) = poseVec;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x20) = poseVec;
     poseVec.w = 1.0f;
     poseVec.x = 0;
     poseVec.y = 1.0f;
     poseVec.z = 0;
-    *(func_0015D698_sVec4*)((char*)self + 0x30) = poseVec;
-    *(func_0015D698_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = poseVec;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
     func_0015D928(self);
 }
 #endif
@@ -486,10 +486,10 @@ extern "C" void func_0015D928_impl(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015DAC0);
+INCLUDE_ASM("camera/cameraalgorithms", cCamera_invalidateSafePosition);
 #ifdef SKIP_ASM
 
-extern "C" void func_0015DAC0(void)
+extern "C" void cCamera_invalidateSafePosition(void)
 {
     void* cam = SSXApp->Game;
     void* chase = *(void**)((char*)cam + 0x84);
@@ -520,9 +520,9 @@ extern "C" void func_0015DAE0(void)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015DB58);
+INCLUDE_ASM("camera/cameraalgorithms", cCamera_onRestart);
 #ifdef SKIP_ASM
-extern "C" void func_0016C968(void* self);
+extern "C" void cCameraTriggerMan_initOnRestart(void* self);
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cChaseCameraController_switchCamera_Restart(void* cam);
 extern char gCamTriggerMan[];
@@ -533,9 +533,9 @@ struct sCamVE_0015DB58 {
     void (*fn)(void*);
 };
 
-extern "C" void func_0015DB58(void)
+extern "C" void cCamera_onRestart(void)
 {
-    func_0016C968(gCamTriggerMan);
+    cCameraTriggerMan_initOnRestart(gCamTriggerMan);
     cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
     char* riders = (char*)SSXApp->Game->ViewMan;
     int n = *(int*)riders;

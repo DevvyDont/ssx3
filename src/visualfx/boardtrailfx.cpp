@@ -297,8 +297,8 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002E87E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_0011FE98(void* self);
-int func_00312AA0(void* self, int a1);
-extern "C" char* func_00311B20(void* self, int a1);
+int cRiderAnimBase_getCurrentAnimID(void* self, int a1);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* self, int a1);
 extern "C" int func_001446A0(void* self, int a1);
 extern float D_004A4590;
 extern float D_004A4594;
@@ -322,9 +322,9 @@ extern "C" int func_002E87E8(char** self)
         if (!boardTrailCanDraw(self[0])) return 0;
         if (*(int*)(self[0] + 0xB00) == 0) return 0;
     }
-    if (func_00312AA0(*(void**)(self[0] + 0x784), 2) == 0x16) {
-        if (func_001446A0(func_00311B20(*(void**)(self[0] + 0x784), 2) + 0xB0, 0)) {
-            if (!func_001446A0(func_00311B20(*(void**)(self[0] + 0x784), 2) + 0xB0, 1)) {
+    if (cRiderAnimBase_getCurrentAnimID(*(void**)(self[0] + 0x784), 2) == 0x16) {
+        if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 0)) {
+            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 1)) {
                 return 0;
             }
         }
@@ -720,7 +720,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         float sideSign = 0.0f;
         sBTV4_8938 right = btAdd(pos, halfLengthVec);
         if (*(int*)(self->rider + 0x330) != 0) {
-            int k = func_00312AA0(*(void**)(self->rider + 0x784), 2);
+            int k = cRiderAnimBase_getCurrentAnimID(*(void**)(self->rider + 0x784), 2);
             if (k >= 0x17 && k <= 0x1E) {
                 sideSign = -1.0f;
                 if (*(int*)(self->rider + 0x320) != 0) sideSign = 1.0f;
@@ -1048,18 +1048,18 @@ extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA6B8);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_StartCutScene);
 #ifdef SKIP_ASM
 extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
 
-struct func_002EA6B8_sFade {
+struct cCutSceneTransitionMan_StartCutScene_sFade {
     char pad[0x10];
     int state;
     float t;
     float dur;
 };
 
-extern "C" void func_002EA6B8(func_002EA6B8_sFade* self, float dur)
+extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan_StartCutScene_sFade* self, float dur)
 {
     switch (self->state) {
     case 0:
@@ -1119,7 +1119,7 @@ extern "C" void func_002EA780(sTrailFade* self, float t)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA820);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToRegularMode);
 #ifdef SKIP_ASM
 struct sBTVEntry {
     short delta;
@@ -1128,7 +1128,7 @@ struct sBTVEntry {
 };
 
 
-extern "C" void func_002EA820(void* self)
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self)
 {
     if (*(int*)((char*)self + 0x10) != 0) {
         *(int*)((char*)self + 0x10) = 0;
@@ -1140,10 +1140,10 @@ extern "C" void func_002EA820(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA860);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToCutSceneMode);
 #ifdef SKIP_ASM
 
-extern "C" void func_002EA860(void* self)
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self)
 {
     if (*(int*)((char*)self + 0x10) == 0) {
         cCutSceneTransitionMan_FindTVParameters(self);
@@ -1179,8 +1179,8 @@ extern "C" void func_002EA8B8(void* self, int up)
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002EA820(void* self);
-extern "C" void func_002EA860(void* self);
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self);
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self);
 
 struct sFadeCol_A900 {
     int id;
@@ -1207,8 +1207,8 @@ extern char* D_004A5B64_A900 __asm__("cAppMan_TheAppMan");
  * Blends the TV display format between regular and cut-scene mode.
  *
  * Only while not paused (+0x1C) and in state 2 (to regular) or 3 (to cut-scene): advances the time by 1 / the
- * app manager's word at +0x10 and, at the end, forces regular (func_002EA820) or cut-scene mode
- * (func_002EA860). Otherwise it lerps the four floats of the regular (+0x20) and cut-scene (+0x34) formats
+ * app manager's word at +0x10 and, at the end, forces regular (cCutSceneTransitionMan_ForceToRegularMode) or cut-scene mode
+ * (cCutSceneTransitionMan_ForceToCutSceneMode). Otherwise it lerps the four floats of the regular (+0x20) and cut-scene (+0x34) formats
  * and applies them through the graphics manager's virtual slot 41.
  */
 extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
@@ -1221,9 +1221,9 @@ extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
     self->t += 1.0f / (float)*(int*)(D_004A5B64_A900 + 0x10);
     if (self->dur < self->t) {
         if (mode == 2)
-            func_002EA820(self);
+            cCutSceneTransitionMan_ForceToRegularMode(self);
         else
-            func_002EA860(self);
+            cCutSceneTransitionMan_ForceToCutSceneMode(self);
         return;
     }
     float k = self->t / self->dur;
@@ -1849,7 +1849,7 @@ extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBF48);
+INCLUDE_ASM("visualfx/boardtrailfx", InitVertex);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sBTQuad_BF48 {
@@ -1862,7 +1862,7 @@ struct sBTVtx_BF48 {
     sBTQuad_BF48 st;
 };
 
-extern "C" void func_002EBF48(sBTVtx_BF48* o, float* c, float x, float y)
+extern "C" void InitVertex(sBTVtx_BF48* o, float* c, float x, float y)
 {
     if (*(short*)((char*)cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState + 0x10) != -1) {
         o->r = (int)(c[1] * 128.0f);
@@ -1904,9 +1904,9 @@ extern float D_004A3B3C;
 
 extern float D_004A3B44;
 
-// func_002EBF48 = On Tour InitVertex(tBxVertex&, float x, float y, const tARGB&); float view of its vertex, same
+// InitVertex = On Tour InitVertex(tBxVertex&, float x, float y, const tARGB&); float view of its vertex, same
 // parameter order as its definition in this unit (EABI gives the same registers for any interleaving).
-extern "C" void func_002EBF48_C060(float* out, float* col, float x, float y) __asm__("func_002EBF48");
+extern "C" void InitVertex_C060(float* out, float* col, float x, float y) __asm__("InitVertex");
 
 extern float D_00504FB8[];
 
@@ -1988,15 +1988,15 @@ extern "C" void cCircle_TObj_Draw(char* self, float amount)
     sBTVert_C060 bot[80];
     for (int i = 0; i < 40; i++) {
         sBTVert_C060* topVert = top + i * 2;
-        func_002EBF48_C060(topVert->f, (float*)(self + 4), xs[i], 0.0f);
+        InitVertex_C060(topVert->f, (float*)(self + 4), xs[i], 0.0f);
         sBTVert_C060* topArcVert = top + i * 2 + 1;
         float y0 = clampBT(*(float*)(self + 0x18) - ys[i], 0.0f, 480.0f);
-        func_002EBF48_C060(topArcVert->f, (float*)(self + 4), xs[i], y0);
+        InitVertex_C060(topArcVert->f, (float*)(self + 4), xs[i], y0);
         float y1 = clampBT(*(float*)(self + 0x18) + ys[i], 0.0f, 480.0f);
         sBTVert_C060* botArcVert = bot + i * 2;
-        func_002EBF48_C060(botArcVert->f, (float*)(self + 4), xs[i], y1);
+        InitVertex_C060(botArcVert->f, (float*)(self + 4), xs[i], y1);
         sBTVert_C060* botBaseVert = bot + i * 2 + 1;
-        func_002EBF48_C060(botBaseVert->f, (float*)(self + 4), xs[i], 480.0f);
+        InitVertex_C060(botBaseVert->f, (float*)(self + 4), xs[i], 480.0f);
     }
 
     char* obj = (char*)cGraphicsMan_TheGraphicsMan;

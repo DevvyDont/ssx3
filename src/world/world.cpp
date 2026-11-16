@@ -47,15 +47,15 @@ struct sWorldVEntry0 {
 };
 
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
-extern "C" void func_003AC8F0(void* self, int flags);
+extern "C" void cWScriptCache__cWScriptCache(void* self, int flags);
 extern "C" void cWorldPainterMan__cWorldPainterMan(void* self, int flags);
-extern "C" void func_0032DE20(void);
+extern "C" void SphereTree_purgeCache(void);
 void operator_delete(int* p);
 
 /**
  * Destroys the world: graphics manager slot 107, then deletes its caches and the world painter manager.
  *
- * Also calls func_0032DE20() and clears cWorld_m_pTheWorld.
+ * Also calls SphereTree_purgeCache() and clears cWorld_m_pTheWorld.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -68,12 +68,12 @@ extern "C" void cWorld__cWorld(void** self, int flags)
         cWorldCache__cWorldCache((int*)self[0], 3);
     }
     if (self[1] != 0) {
-        func_003AC8F0(self[1], 3);
+        cWScriptCache__cWScriptCache(self[1], 3);
     }
     if (self[2] != 0) {
         cWorldPainterMan__cWorldPainterMan(self[2], 3);
     }
-    func_0032DE20();
+    SphereTree_purgeCache();
     cWorld_m_pTheWorld = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -193,9 +193,9 @@ extern "C" void cWorld_resetMap(cWorld* selfp)
 extern "C" void* cWorldCache_update(int);
 
 //100%
-INCLUDE_ASM("world/world", func_003A6928__FPv);
+INCLUDE_ASM("world/world", cWorld_update__FPv);
 #ifdef SKIP_ASM
-void* func_003A6928(void* self)
+void* cWorld_update(void* self)
 {
     return cWorldCache_update(*(int*)self);
 }
@@ -402,7 +402,7 @@ extern "C" int cWorld_getGlobalScripts(cWorld* self, int i)
 //100%
 INCLUDE_ASM("world/world", cWorld_getNumProcessScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADCE0(cWorld_getNumGlobalScripts_sEntry* e);
+extern "C" int cWScriptCacheEntry_getNumProcessScripts(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns how many process scripts a world-script cache entry holds.
@@ -413,14 +413,14 @@ extern "C" int func_003ADCE0(cWorld_getNumGlobalScripts_sEntry* e);
  */
 extern "C" int cWorld_getNumProcessScripts(cWorld* self, int i)
 {
-    return func_003ADCE0(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getNumProcessScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getProcessScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD10(cWorld_getNumGlobalScripts_sEntry* e);
+extern "C" int cWScriptCacheEntry_getProcessScripts(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns the process-script list of a world-script cache entry.
@@ -431,7 +431,7 @@ extern "C" int func_003ADD10(cWorld_getNumGlobalScripts_sEntry* e);
  */
 extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
 {
-    return func_003ADD10(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getProcessScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -488,18 +488,18 @@ int func_003A6CD8(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6CE8);
+INCLUDE_ASM("world/world", tSphTreeList_getMeshTree);
 #ifdef SKIP_ASM
-extern "C" void* func_003A6CE8(void* self, int a1)
+extern "C" void* tSphTreeList_getMeshTree(void* self, int a1)
 {
     return (char*)(*(void**)self) + a1 * 0x140;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6D00__FPvi);
+INCLUDE_ASM("world/world", tPolyModelList_getMeshPolyModel__FPvi);
 #ifdef SKIP_ASM
-int func_003A6D00(void* self, int a1)
+int tPolyModelList_getMeshPolyModel(void* self, int a1)
 {
     return *(int*)((char*)*(void**)self + a1 * 4);
 }

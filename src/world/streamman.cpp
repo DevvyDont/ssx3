@@ -6,8 +6,8 @@ INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" int func_003E06B0(int a, int b, int c);
-extern "C" void* func_003E06D8(int a, int b, int c, void* buf, int size);
+extern "C" int STREAM_overhead(int a, int b, int c);
+extern "C" void* STREAM_create(int a, int b, int c, void* buf, int size);
 extern "C" void cStreamMan_reset(cStreamMan* self);
 extern char str_cStreamMan_CDBUFFER[];
 extern char str_cStreamMan_DECOMPRESS[];
@@ -21,7 +21,7 @@ static inline int cStreamMan_min(int a, int b)
  * Constructs the world stream manager and allocates its disc and decompression buffers.
  *
  * Sizes the stream buffer as the EA stream bookkeeping for 2 slots, 1 queue and 1 request plus 0x68000 bytes,
- * capped at 0x80000; allocates it as "cStreamMan CDBUFFER" and creates the stream in it (func_003E06D8). Then
+ * capped at 0x80000; allocates it as "cStreamMan CDBUFFER" and creates the stream in it (STREAM_create). Then
  * allocates the 0x14000-byte "cStreamMan DECOMPRESS" buffer and calls cStreamMan_reset().
  *
  * @return @p self
@@ -29,13 +29,13 @@ static inline int cStreamMan_min(int a, int b)
 extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
 {
     self->m_BxChunkResourceID = 0xFFFFFFFF;
-    int size = func_003E06B0(2, 1, 1);
+    int size = STREAM_overhead(2, 1, 1);
     size += 0x18000;
     size += 0x50000;
     size = cStreamMan_min(0x80000, size);
     void* buf = operator_new_tag(size, str_cStreamMan_CDBUFFER, 0, 0);
     self->m_streamBuffer = (char*)buf;
-    self->m_streamHandle = (int)func_003E06D8(2, 1, 1, buf, size);
+    self->m_streamHandle = (int)STREAM_create(2, 1, 1, buf, size);
     self->m_streamRequest = 0;
     self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, str_cStreamMan_DECOMPRESS, 0, 0);
     cStreamMan_reset(self);
@@ -135,17 +135,17 @@ extern "C" void cStreamMan_reset(cStreamMan* self)
 INCLUDE_ASM("world/streamman", cStreamMan_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void func_003E0A28(int h);
+extern "C" void STREAM_destroy(int h);
 
 /**
  * Releases the streamer's EA stream and frees its disc and decompression buffers.
  *
- * func_003E0A28() waits while the stream is busy and then shuts it down; m_streamBuffer and
+ * STREAM_destroy() waits while the stream is busy and then shuts it down; m_streamBuffer and
  * m_pDecompressBuffer are freed when set. The pointers are not cleared afterwards.
  */
 extern "C" void cStreamMan_purge(cStreamMan* self)
 {
-    func_003E0A28(self->m_streamHandle);
+    STREAM_destroy(self->m_streamHandle);
     if (self->m_streamBuffer != 0) {
         cMemMan_free(self->m_streamBuffer);
     }
@@ -158,13 +158,13 @@ extern "C" void cStreamMan_purge(cStreamMan* self)
 //100%
 INCLUDE_ASM("world/streamman", cStreamMan_addStreamRequest);
 #ifdef SKIP_ASM
-extern "C" int func_003E0C88(int h, void* p, int a, int tag);
+extern "C" int STREAM_queuefile(int h, void* p, int a, int tag);
 
 /**
  * Starts loading a hull page by queuing a read of the track's stream file, unless a request is already
  * active.
  *
- * Queues m_filename at @p uiFileOffset on the EA stream (func_003E0C88, chunk tag 0x444E4543, "CEND"). On
+ * Queues m_filename at @p uiFileOffset on the EA stream (STREAM_queuefile, chunk tag 0x444E4543, "CEND"). On
  * success it records the hull and its chunk count, sets m_bActive and clears m_iCarrySize, m_bBxNullChunk,
  * m_iLastTimerTick and m_fTicksLeft.
  *
@@ -177,7 +177,7 @@ extern "C" int func_003E0C88(int h, void* p, int a, int tag);
 extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int uiNumHullChunk, int uiFileOffset)
 {
     if (self->m_bActive == 0) {
-        int streamReq = func_003E0C88(self->m_streamHandle, (char*)self + 0x4, uiFileOffset, 0x444E4543);
+        int streamReq = STREAM_queuefile(self->m_streamHandle, (char*)self + 0x4, uiFileOffset, 0x444E4543);
         self->m_streamRequest = streamReq;
         if (streamReq != 0) {
             self->m_ActiveHull = uiHullID;
@@ -243,7 +243,7 @@ extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7098);
+INCLUDE_ASM("world/streamman", cStreamMan_update);
 #ifdef SKIP_ASM
 struct sStreamMan7098 {
     void* f0;                   // 0x00
@@ -266,20 +266,20 @@ struct sStreamMan7098 {
 
 extern char* cAppMan_TheAppMan;
 void* func_003A7218(void* self, int a1, int a2, int a3);
-extern "C" int func_003A7238(void* self, void* a, void* b);
+extern "C" int cStreamMan_processChunk(void* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
 extern "C" unsigned char* func_003E12E0(void* cache);
 extern "C" void func_003E13E8(void* cache, void* p);
 extern "C" int func_003E1530(void* cache);
 
-extern "C" void func_003A7098(sStreamMan7098* self)
+extern "C" void cStreamMan_update(sStreamMan7098* self)
 {
     unsigned char* p;
     if (self->active == 0) {
         return;
     }
     if (self->pending != 0) {
-        if (func_003A7238(self, &self->fB0, &self->fB4) == 0) {
+        if (cStreamMan_processChunk(self, &self->fB0, &self->fB4) == 0) {
             return;
         }
     }
@@ -302,7 +302,7 @@ extern "C" void func_003A7098(sStreamMan7098* self)
         self->fB0 = func_003A7218(self, self->f8C, size - 8, (int)(p + 8));
         func_003E13E8(self->cache, p);
         self->fB4 = self->f8C;
-        if (func_003A7238(self, &self->fB0, &self->fB4) == 0) {
+        if (cStreamMan_processChunk(self, &self->fB0, &self->fB4) == 0) {
             self->pending = 1;
             return;
         }
@@ -320,19 +320,19 @@ extern "C" void func_003A7098(sStreamMan7098* self)
 }
 #endif
 
-extern "C" void* func_003B47F8(int);
+extern "C" void* unpack(int);
 
 //100%
 INCLUDE_ASM("world/streamman", func_003A7218__FPviii);
 #ifdef SKIP_ASM
 void* func_003A7218(void* self, int a1, int a2, int a3)
 {
-    return func_003B47F8(a3);
+    return unpack(a3);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7238);
+INCLUDE_ASM("world/streamman", cStreamMan_processChunk);
 #ifdef SKIP_ASM
 extern "C" unsigned int cWorldCache_addBxStreamDataTest(void* cache, int group, int id, int key, int size);
 extern "C" void func_003A8CD0_s(void* self, int group, int id, unsigned int key, int a4) __asm__("func_003A8CD0");
@@ -360,7 +360,7 @@ struct sStreamMan7238 {
 
 
 // PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.
-extern "C" int func_003A7238(void* self_, void* pcount_, void* pdata_)
+extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
 {
     sStreamMan7238* self = (sStreamMan7238*)self_;
     int* pcount = (int*)pcount_;

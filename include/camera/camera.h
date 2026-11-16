@@ -5,7 +5,7 @@
 // assert strings; camera.h asserts "maxFar>MinNear" / "minNear<MaxFar" are cSimpleCamera's setters).
 //
 // cSimpleCamera (0xA0): a view (FOV, near/far planes and their limits), a pose and the camera matrix. Retail vtable
-// cSimpleCamera_vtbl (D_0045B8B0), stored by its ctor func_0015D698 and dtor cSimpleCamera__cSimpleCamera. It is also
+// cSimpleCamera_vtbl (D_0045B8B0), stored by its ctor cSimpleCamera_cSimpleCamera and dtor cSimpleCamera__cSimpleCamera. It is also
 // the base of the front end's cFECamera (fe/festatecharequip.cpp constructs one at +0x10 of its state).
 //
 // cCamera (0x4B0): one rider's game camera: cSimpleCamera + three controllers (manual, chase, script; the current
@@ -17,7 +17,7 @@
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
 // Evidence tags:
-//   [R] retail constructors cCamera_cCamera, func_0015D698 (cSimpleCamera ctor), cCamera_init, and the allocation;
+//   [R] retail constructors cCamera_cCamera, cSimpleCamera_cSimpleCamera (cSimpleCamera ctor), cCamera_init, and the allocation;
 //   [P] the preview's inline accessors via tools/layout_xlate.py (cSimpleCamera getFOV/getNear/getFar/setMaxFOV at
 //       0x0/0x4/0x8/0xC; cCamera getCurrentController/get*Controller/isStreamReady, preview 0xC0..0xD4 = retail
 //       0xA0..0xB4: the preview's cSimpleCamera was 0x20 bigger);
@@ -39,8 +39,8 @@ struct cRider;
 // cRiderCameraTarget (0x8): what the chase algorithms follow: a cCameraTarget (On Tour: 0x4, only the vptr) bound to a
 // rider. Created by cCamera_init: operator new(8, "RiderCameraTarget") + vtable D_0045B7A8 (26 slots, all in
 // camera/camera.cpp 0x15F568-0x15F938: getPosition, getRotation, getVelocity ... each reads Rider), then handed to
-// the chase controller (cChaseCameraController_setTarget) and the result algorithm (func_00162310).
-// NOTE: its t4Vector-returning slots (func_0015F568 .. func_0015F668, except func_0015F640) take the hidden return
+// the chase controller (cChaseCameraController_setTarget) and the result algorithm (cChaseAlgorithm_setTarget).
+// NOTE: its t4Vector-returning slots (cRiderCameraTarget_getPosition .. cRiderCameraTarget_getLastGroundNormal, except cRiderCameraTarget_getLean) take the hidden return
 // slot in a0 and `this` in a1.
 struct cRiderCameraTarget {
     void** mVtbl;               // 0x0 [R] D_0045B7A8 (cCamera_init); cCameraTarget declares the virtuals
@@ -111,7 +111,7 @@ struct cCamera {
     char unk_0B8[0x8];              // 0x0B8 alignment gap
     cLookAtChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] a cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
                                     //       by cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm, destroyed by cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv; [U] cCamera_init sets its
-                                    //       Target (func_00162310), func_0015E030 snaps it (cLookAtChaseAlgorithm_snapCurrent)
+                                    //       Target (cChaseAlgorithm_setTarget), cCamera_snapResultAlgorithm snaps it (cLookAtChaseAlgorithm_snapCurrent)
     int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] cCamera_shakeCamera (shakeCamera) sw,
                                     //       cCamera_applyCameraShake (applyCameraShake) lw
     float MaxShakeVariance;         // 0x454 [O]; [R] 0; [U] cCamera_shakeCamera lwc1/swc1, cCamera_applyCameraShake lwc1

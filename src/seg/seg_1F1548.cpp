@@ -87,7 +87,7 @@ extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0820);
+INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan__cPSPVisualEffectsMan);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 struct Obj0820 {
@@ -101,7 +101,7 @@ struct sMgr_0820 {
     char* vptr;
 };
 
-extern "C" void func_002F0820(sMgr_0820* self, int arg1)
+extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int arg1)
 {
     self->vptr = D_00487D28;
     delete self->objs[0];
@@ -129,7 +129,7 @@ extern "C" void func_002F0820(sMgr_0820* self, int arg1)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0A98);
+INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_update);
 #ifdef SKIP_ASM
 class cObj_0A98 {
 public:
@@ -262,9 +262,9 @@ struct sMgr_0A98 {
 };
 
 extern int D_004A3BA8;
-extern "C" void func_002F00A0(void*, int);
+extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
 
-extern "C" void func_002F0A98(sMgr_0A98* self)
+extern "C" void cPSPVisualEffectsMan_update(sMgr_0A98* self)
 {
     self->objs[0]->Reset();
     self->objs[1]->Reset();
@@ -284,14 +284,14 @@ extern "C" void func_002F0A98(sMgr_0A98* self)
     self->objs[15]->Reset();
     self->objs[16]->Reset();
     for (int i = 0; i < *(int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
-        func_002F00A0(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
+        cVisualEffectsMan_commonUpdate(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
         ((cWorld_0A98*)GrMan)->ResetSlot(i);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0CD0);
+INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_render);
 #ifdef SKIP_ASM
 class cObj_0CD0 {
 public:
@@ -304,7 +304,7 @@ struct sMgr_0CD0 {
     cObj_0CD0* objs[17];
 };
 
-extern "C" void func_002F0CD0(sMgr_0CD0* self)
+extern "C" void cPSPVisualEffectsMan_render(sMgr_0CD0* self)
 {
     self->objs[0]->Update();
     self->objs[1]->Update();
@@ -397,9 +397,9 @@ extern "C" void cPunchFX_readFromReplayFrame(cPunchFX* self) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cPunchFX_update);
 #ifdef SKIP_ASM
-int func_00312AA0(void* self, int i);
-extern "C" int func_00311AE8(void*, int);
-extern "C" char* func_00311B20(void*, int);
+int cRiderAnimBase_getCurrentAnimID(void* self, int i);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
+extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int func_001446A0(void*, int);
 extern int D_004A3AFC;
 
@@ -508,11 +508,11 @@ extern "C" void cPunchFX_update(sFx_1150* self)
         return;
     int bone = *(int*)(self->owner + 0x8B0);
     int flag = 0;
-    int a = func_00312AA0(*(void**)(self->owner + 0x784), 0);
-    int layer1Anim = func_00312AA0(*(void**)(self->owner + 0x784), 1);
-    if (func_00311AE8(*(void**)(self->owner + 0x784), 1) == 0xD) {
-        if (func_001446A0(func_00311B20(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
-            flag = func_001446A0(func_00311B20(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
+    int a = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
+    int layer1Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 1);
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 0xD) {
+        if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
+            flag = func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
         }
     }
     if (a == 0x146 || (layer1Anim == 0x143 && flag)) {
@@ -1995,7 +1995,7 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_cSplashManager);
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" int* func_002F2588(int* arg0);
 extern "C" void* func_002F2D60(void* arg0);
-extern "C" void func_002F39C8(void* arg0);
+extern "C" void cSplashManager_reset(void* arg0);
 extern char cSplashManager_vtbl[];
 
 /**
@@ -2003,7 +2003,7 @@ extern char cSplashManager_vtbl[];
  *
  * Runs the cObjNode constructor with @p bucket, stores @p viewIndex (+0x10) and the vtable (+0xC), builds 30
  * drops (0x3C bytes from +0x1C) and 30 ice crystals (0x4C bytes from +0x724), clears the rest of the state
- * (+0x101C = 1.0) and resets it (func_002F39C8). Drop and crystal are the SplashToggles debug menu's words.
+ * (+0x101C = 1.0) and resets it (cSplashManager_reset). Drop and crystal are the SplashToggles debug menu's words.
  *
  * @param splashManager          the object to construct (this)
  * @param bucket     passed to the cObjNode constructor (On Tour: const int bucket)
@@ -2044,7 +2044,7 @@ extern "C" void* cSplashManager_cSplashManager(void* splashManager, void* bucket
     *(float*)(self + 0x101C) = 1.0f;
     *(int*)(self + 0x1020) = 0;
     *(int*)(self + 0x1024) = 0;
-    func_002F39C8(self);
+    cSplashManager_reset(self);
     return self;
 }
 #endif
@@ -2193,9 +2193,9 @@ extern "C" void func_002F3810(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F39C8);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_reset);
 #ifdef SKIP_ASM
-extern "C" void func_002F39C8(void *arg0) {
+extern "C" void cSplashManager_reset(void *arg0) {
     *(int *)((char*)arg0 + 0x100C) = 0;
     *(int *)((char*)arg0 + 0x1024) = 0;
     *(int *)((char*)arg0 + 0x14) = 0;
@@ -2538,7 +2538,7 @@ extern "C" void func_002F4118(void *position, float speed) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F41A8);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_CameraSnapped);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Base41A8 { int pad[3]; };
@@ -2551,7 +2551,7 @@ struct Obj41A8 : Base41A8 {
 Obj41A8 *func_002306A8_41A8(void *, int) __asm__("func_002306A8__FPvi");
 #define F84(p) (*(char **)((char*)(p) + 0x84))
 
-extern "C" void func_002F41A8(int arg0) {
+extern "C" void cSplashManager_CameraSnapped(int arg0) {
     unsigned int i = 0;
     if (*(unsigned int *)(F84(F84(SSXApp)) + 0x10) != 0) {
         do {
@@ -2643,26 +2643,26 @@ extern "C" void func_002F4330(void *arg0, float arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4380);
+INCLUDE_ASM("seg/seg_1F1548", cSunHalo_cSunHalo);
 #ifdef SKIP_ASM
 extern void func_002E2860(void *);
-extern "C" void func_002F43E0(void *);
+extern "C" void cSunHalo_InitLens(void *);
 inline void* operator new[](unsigned int, void* p) { return p; }
 struct Elem4380 { Elem4380() {} };
 
-extern "C" void *func_002F4380(void *arg0) {
+extern "C" void *cSunHalo_cSunHalo(void *arg0) {
     func_002E2860(arg0);
     new ((char*)arg0 + 0x40) Elem4380[16];
     *(int *)((char*)arg0 + 0x204) = 0;
     *(short *)((char*)arg0 + 0x2E) = 0;
     *(short *)((char*)arg0 + 0x2C) = 0;
-    func_002F43E0(arg0);
+    cSunHalo_InitLens(arg0);
     return arg0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F43E0);
+INCLUDE_ASM("seg/seg_1F1548", cSunHalo_InitLens);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sCol_43E0 {
@@ -2693,8 +2693,8 @@ struct sLightSet_43E0 {
     int count;
 };
 
-extern "C" void func_002F43E0_43E0(sLightSet_43E0* self) __asm__("func_002F43E0");
-extern "C" void func_002F43E0_43E0(sLightSet_43E0* self)
+extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self) __asm__("cSunHalo_InitLens");
+extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self)
 {
     self->count = 0;
     self->lights[0].type = 1;
@@ -3239,19 +3239,19 @@ extern "C" void *cWorldLightMan_cWorldLightMan(void *self, int pNash) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F5230);
+INCLUDE_ASM("seg/seg_1F1548", cWorldLightMan__cWorldLightMan);
 #ifdef SKIP_ASM
-extern "C" void func_002F53B0(void *);
+extern "C" void cWorldLightMan_purgeLightCache(void *);
 void operator_delete(int *);
 struct Base5230 { int pad; };
 struct Inner5230 : Base5230 { virtual ~Inner5230(); };
 struct Outer5230 { int pad; Inner5230 *p; };
 
-extern "C" void func_002F5230(Outer5230 *arg0, int arg1) {
+extern "C" void cWorldLightMan__cWorldLightMan(Outer5230 *arg0, int arg1) {
     if (arg0->p != 0) {
         delete arg0->p;
     }
-    func_002F53B0(arg0);
+    cWorldLightMan_purgeLightCache(arg0);
     if (arg1 & 1) {
         operator_delete((int *)arg0);
     }

@@ -146,7 +146,7 @@ struct cBigFile {
 cBigFile* cBigFile_cBigFile1_3640(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
 void cMemMan_free(void*);
-extern "C" char* func_003E2190(const char* name, int flags);
+extern "C" char* FILE_loadpackz(const char* name, int flags);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_data_ui_charpic_big[];
 extern char str_pct_spct_s_ssh[];
@@ -189,7 +189,7 @@ extern "C" void func_00233640(void* self, int type)
         } else {
             sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, cBENewPlayerInterface_getHumanRider(plr, 0))], D_004A2B38);
         }
-        char* data = func_003E2190(name, 0x3000100);
+        char* data = FILE_loadpackz(name, 0x3000100);
         *(int*)((char*)self + 0x10) = loadTex_3640(data, str_CharaPics);
         if (data != 0)
             cMemMan_free(data);
@@ -197,7 +197,7 @@ extern "C" void func_00233640(void* self, int type)
         int* slot = (int*)((char*)self + 0x10);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
-            char* data = func_003E2190(name, 0x3000100);
+            char* data = FILE_loadpackz(name, 0x3000100);
             *slot = loadTex_3640(data, str_CharaPics);
             if (data != 0)
                 cMemMan_free(data);
@@ -378,7 +378,7 @@ extern "C" void func_00233A70(void* self)
 INCLUDE_ASM("fe/festateloadscreen", cGameState_gotoNextState);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
-extern "C" void func_00231250(void* self, int a, int b, int refresh);
+extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 
 /**
  * Switches the game to the state's next state (mNextState) with its startup flag, when one is set.
@@ -387,7 +387,7 @@ extern "C" void cGameState_gotoNextState(void* self)
 {
     int nextState = *(int*)self;
     if (nextState != 0) {
-        func_00231250(cGameState_mpGame, nextState, *(int*)((char*)self + 4), 0);
+        cGame_setState(cGameState_mpGame, nextState, *(int*)((char*)self + 4), 0);
     }
 }
 #endif
@@ -403,41 +403,41 @@ extern "C" void func_00233AD0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233AF0);
+INCLUDE_ASM("fe/festateloadscreen", cGameState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_func_00233AF0 {
+struct sVEntry_cGameState_writeToReplayFrame {
     short delta;
     short index;
     void* (*fn)(void*, void*, int);
 };
 
-// PORT: the unit declares func_00233AF0 as `void* (void*)`; the body also uses $a1 (obj).
+// PORT: the unit declares cGameState_writeToReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
 // Bound by asm label.
-void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
+void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
-void* func_00233AF0_2(void* self, void* obj)
+void* cGameState_writeToReplayFrame_2(void* self, void* obj)
 {
-    sVEntry_func_00233AF0* vt = *(sVEntry_func_00233AF0**)obj;
+    sVEntry_cGameState_writeToReplayFrame* vt = *(sVEntry_cGameState_writeToReplayFrame**)obj;
     return vt[1].fn((char*)obj + vt[1].delta, self, 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B28);
+INCLUDE_ASM("fe/festateloadscreen", cGameState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_func_00233B28 {
+struct sVEntry_cGameState_readFromReplayFrame {
     short delta;
     short index;
     void* (*fn)(void*, void*, int);
 };
 
-// PORT: the unit declares func_00233B28 as `void* (void*)`; the body also uses $a1 (obj).
+// PORT: the unit declares cGameState_readFromReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
 // Bound by asm label.
-void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
-void* func_00233B28_2(void* self, void* obj)
+void* cGameState_readFromReplayFrame_2(void* self, void* obj)
 {
-    sVEntry_func_00233B28* vt = *(sVEntry_func_00233B28**)obj;
+    sVEntry_cGameState_readFromReplayFrame* vt = *(sVEntry_cGameState_readFromReplayFrame**)obj;
     return vt[2].fn((char*)obj + vt[2].delta, self, 4);
 }
 #endif
@@ -446,11 +446,11 @@ void* func_00233B28_2(void* self, void* obj)
 INCLUDE_ASM("fe/festateloadscreen", func_00233B60);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
-extern "C" void func_00231250(void* self, int a, int b, int refresh);
+extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 
 extern "C" void func_00233B60(void)
 {
-    func_00231250(cGameState_mpGame, 0xA, 0, 0);
+    cGame_setState(cGameState_mpGame, 0xA, 0, 0);
 }
 #endif
 
@@ -462,43 +462,43 @@ void func_00233B88(void* self)
 }
 #endif
 
-extern "C" void* func_00233AF0(void* self);
+extern "C" void* cGameState_writeToReplayFrame(void* self);
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B90__FPv);
+INCLUDE_ASM("fe/festateloadscreen", cGFEndState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_00233B90(void* self)
+void* cGFEndState_writeToReplayFrame(void* self)
 {
-    return func_00233AF0(self);
+    return cGameState_writeToReplayFrame(self);
 }
 #endif
 
-extern "C" void* func_00233B28(void* self);
+extern "C" void* cGameState_readFromReplayFrame(void* self);
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233BB0__FPv);
+INCLUDE_ASM("fe/festateloadscreen", cGFEndState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_00233BB0(void* self)
+void* cGFEndState_readFromReplayFrame(void* self)
 {
-    return func_00233B28(self);
-}
-#endif
-
-//99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233BD0__FPv);
-#ifdef SKIP_ASM
-void* func_00233BD0(void* self)
-{
-    return func_00233AF0(self);
+    return cGameState_readFromReplayFrame(self);
 }
 #endif
 
 //99.29%
-INCLUDE_ASM("fe/festateloadscreen", func_00233BF0__FPv);
+INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_00233BF0(void* self)
+void* cGFEndWaitState_writeToReplayFrame(void* self)
 {
-    return func_00233B28(self);
+    return cGameState_writeToReplayFrame(self);
+}
+#endif
+
+//99.29%
+INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_readFromReplayFrame__FPv);
+#ifdef SKIP_ASM
+void* cGFEndWaitState_readFromReplayFrame(void* self)
+{
+    return cGameState_readFromReplayFrame(self);
 }
 #endif
 
@@ -528,19 +528,19 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
 extern "C" void cReplay_endReplay(void* self);
-extern "C" void func_0039F840(void* list);
+extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
-extern "C" void func_001F36C0(void* self, int bit);
+extern "C" void cBXLoadIndicator_Show(void* self, int bit);
 void func_00244880(void* self);
 
 extern "C" void func_00233C50(void* self)
 {
     cReplay_endReplay(*(void**)((char*)cGameState_mpGame + 0x28));
-    func_0039F840(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
+    cUIStateStack_purgeNormalStates(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
-    func_001F36C0(SSXApp->Game->LoadIndicator, 4);
+    cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 4);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         func_00244880(gameComm);
@@ -761,39 +761,39 @@ extern "C" void func_00234008(sLoadScreen00234008* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_002340B8);
+INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_func_002340B8 {
+struct sVEntry_cGFFinishlineState_writeToReplayFrame {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_002340B8(void* self, void* stream)
+extern "C" void cGFFinishlineState_writeToReplayFrame(void* self, void* stream)
 {
-    func_00233AF0_2(self, stream);
-    sVEntry_func_002340B8* e = &(*(sVEntry_func_002340B8**)stream)[1];
+    cGameState_writeToReplayFrame_2(self, stream);
+    sVEntry_cGFFinishlineState_writeToReplayFrame* e = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_func_002340B8**)stream)[1];
+    e = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_00234120);
+INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_func_00234120 {
+struct sVEntry_cGFFinishlineState_readFromReplayFrame {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00234120(void* self, void* stream)
+extern "C" void cGFFinishlineState_readFromReplayFrame(void* self, void* stream)
 {
-    func_00233B28_2(self, stream);
-    sVEntry_func_00234120* e = &(*(sVEntry_func_00234120**)stream)[2];
+    cGameState_readFromReplayFrame_2(self, stream);
+    sVEntry_cGFFinishlineState_readFromReplayFrame* e = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_func_00234120**)stream)[2];
+    e = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
 }
 #endif
@@ -833,7 +833,7 @@ extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" void cReplay_reset(void* p);
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id);
-extern "C" void func_001473D0(void* player, int i, int v);
+extern "C" void cBENewPlayerInterface_setRiderCheatCharID(void* player, int i, int v);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
 // PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
@@ -866,7 +866,7 @@ static inline int isMode4_2341D0()
  *
  * Sets the AI state to 3, hides the load indicator, sets BE state 0 and resets the replay. The AI count is the
  * game mode manager's rider total minus its humans; each AI rider from the AI's first index (its word at 0x7C)
- * gets the mode's character id and a second per-rider value (func_001473D0, probably the board), and both
+ * gets the mode's character id and a second per-rider value (cBENewPlayerInterface_setRiderCheatCharID, probably the board), and both
  * interfaces are submitted. Mode 2 queues start sequence 1, mode 1 sequence 0 (not when the race mode byte
  * D_00535C10 is 4), mode 0 none. Finally clears the word at 0x1C.
  *
@@ -891,7 +891,7 @@ extern "C" void cGFEventStartState_gainFocus(void* self, int mode)
     }
     for (; i < n; i++) {
         cBENewPlayerInterface_setRiderCharID(player, i + base, gm->chars[base + i]);
-        func_001473D0(player, i + base, gm->boards[base + i]);
+        cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->boards[base + i]);
     }
     {
         sVE_2341D0* vt = *(sVE_2341D0**)(player + 0xC);
@@ -924,7 +924,7 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001F36C0(void* self, int bit);
+extern "C" void cBXLoadIndicator_Show(void* self, int bit);
 extern "C" void cBXLoadIndicator_Hide(void* self, int bit);
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* snd, int a1);
 extern "C" void cSSXScriptEngine_PauseNISList(void* snd, int a1, int a2);
@@ -934,14 +934,14 @@ extern "C" int cSSXScriptEngine_PlayNISList(void* snd, int a1, int a2, int a3);
 extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* snd, int a1, int a2);
 extern "C" void func_00234910(void* self);
 extern "C" void cGameState_gotoNextState(void* self);
-extern "C" void func_0012AB20(void* o);
-extern "C" void func_0012AC48(void* o);
+extern "C" void cAI_prepareToPurgeComputerRiders(void* o);
+extern "C" void cAI_prepareToPurgeComputerActors(void* o);
 extern "C" void cAI_initAIRiders(void* o);
 extern "C" void cAI_initAIActors(void* o, int a1);
 extern "C" void cAI_setRaceRankType(void* o, int a1);
 extern "C" int cAI_isAILoadedAndReady(void* o);
 extern "C" void cAI_loadRiders(void* o);
-void func_001289F0(void* o);
+void cAI_resolveRace(void* o);
 extern "C" int cAI_isReadyToPurgeComputerRiders(void* o);
 extern "C" int cAI_isReadyToPurgeComputerActors(void* o);
 extern "C" void cAI_cleanupAfterRace(void* o);
@@ -992,7 +992,7 @@ static inline void* hud_43B0()
 extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
 {
     if (self->state < 3) {
-        func_001F36C0(hud_43B0(), 2);
+        cBXLoadIndicator_Show(hud_43B0(), 2);
         if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0) == 4)
             cSSXScriptEngine_PauseNISList(ScriptEngine, 0, 1);
     } else {
@@ -1013,8 +1013,8 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
         int skip = cfg[0x49];
         int sub = cfg[0x4A];
         if (mode == 4 || (mode == 5 && sub != 4) || (mode == 6 && sub != 5)) {
-            func_0012AB20(MGR_43B0->obj);
-            func_0012AC48(MGR_43B0->obj);
+            cAI_prepareToPurgeComputerRiders(MGR_43B0->obj);
+            cAI_prepareToPurgeComputerActors(MGR_43B0->obj);
             self->pending = 1;
         } else if (skip == 0) {
             cAI_initAIRiders(MGR_43B0->obj);
@@ -1059,7 +1059,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
             break;
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C10[0] != 4) {
-            func_001289F0(MGR_43B0->obj);
+            cAI_resolveRace(MGR_43B0->obj);
             if (MGR_43B0->obj->f80 > 0)
                 MGR_43B0->obj->f14 = 1;
         }
@@ -1093,13 +1093,13 @@ extern "C" void cAI_setAIState(void*, int);
 void* cBEAggressionInterface_getThis();
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" void cAI_initAIRiders(void* p);
-void func_001289F0(void* p);
+void cAI_resolveRace(void* p);
 extern "C" void cAI_initFreeride(void* p);
 extern "C" void cReplay_startRace(void* p);
 extern "C" void cAI_setRaceRankType(void* p, int a);
-extern "C" void func_00308F38(void* a);
+extern "C" void cWScriptMan_purgeMissions(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
-extern "C" void func_00129160(void* p);
+extern "C" void cAI_updateAnimation(void* p);
 extern "C" void func_00155E58(void* p);
 extern void* cGameState_mpGame;
 extern void* cWScriptMan_TheWScriptMan;
@@ -1143,7 +1143,7 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
     int mode = beRaceDB->cGameMode;
     if (mode == 0) {
         cAI_initAIRiders(*(void**)((char*)cGameState_mpGame + 0xC));
-        func_001289F0(*(void**)((char*)cGameState_mpGame + 0xC));
+        cAI_resolveRace(*(void**)((char*)cGameState_mpGame + 0xC));
     } else {
         cAI_initFreeride(*(void**)((char*)cGameState_mpGame + 0xC));
         cReplay_startRace(*(void**)((char*)cGameState_mpGame + 0x28));
@@ -1159,12 +1159,12 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
         cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 1);
     else if (mode != 4)
         cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 2);
-    func_00308F38(cWScriptMan_TheWScriptMan);
+    cWScriptMan_purgeMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
     (*(sRaceMan_234750**)((char*)cGameState_mpGame + 0xC))->f8C = 0;
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBE_setState(1);
-    func_00129160(*(void**)((char*)cGameState_mpGame + 0xC));
+    cAI_updateAnimation(*(void**)((char*)cGameState_mpGame + 0xC));
     cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
     if (raceDB->cGamePath != 0)
         func_00155E58(cBEAggressionInterface_getThis());
@@ -1204,53 +1204,53 @@ extern "C" void func_00234910(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_00234990);
+INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_writeToReplayFrame);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_00233AF0 as `void* (void*)`; the body also uses $a1 (obj).
-void* func_00233AF0_2(void* self, void* obj) __asm__("func_00233AF0");
+// PORT: the unit declares cGameState_writeToReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
+void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
-struct sVEntry_func_00234990 {
+struct sVEntry_cGFEventStartState_writeToReplayFrame {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00234990(void* self, void* stream)
+extern "C" void cGFEventStartState_writeToReplayFrame(void* self, void* stream)
 {
-    func_00233AF0_2(self, stream);
-    sVEntry_func_00234990* e = &(*(sVEntry_func_00234990**)stream)[1];
+    cGameState_writeToReplayFrame_2(self, stream);
+    sVEntry_cGFEventStartState_writeToReplayFrame* e = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_func_00234990**)stream)[1];
+    e = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_func_00234990**)stream)[1];
+    e = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x1C, 4);
-    e = &(*(sVEntry_func_00234990**)stream)[1];
+    e = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateloadscreen", func_00234A30);
+INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_readFromReplayFrame);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_00233B28 as `void* (void*)`; the body also uses $a1 (obj).
-void* func_00233B28_2(void* self, void* obj) __asm__("func_00233B28");
+// PORT: the unit declares cGameState_readFromReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
+void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
-struct sVEntry_func_00234A30 {
+struct sVEntry_cGFEventStartState_readFromReplayFrame {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00234A30(void* self, void* stream)
+extern "C" void cGFEventStartState_readFromReplayFrame(void* self, void* stream)
 {
-    func_00233B28_2(self, stream);
-    sVEntry_func_00234A30* e = &(*(sVEntry_func_00234A30**)stream)[2];
+    cGameState_readFromReplayFrame_2(self, stream);
+    sVEntry_cGFEventStartState_readFromReplayFrame* e = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x1C, 4);
-    e = &(*(sVEntry_func_00234A30**)stream)[2];
+    e = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
 }
 #endif

@@ -3,7 +3,7 @@
 
 // cUISlider: a slider widget (record type 0x16): a knob moved along a background by value / number of values, stepped
 // by input. Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "UISlider") + the cUIThing ctor
-// func_0039FB30, zeroes 0x74..0x80 and 0x88/0x8C, stores its vtable cUISlider_vtbl and adopts the children named at
+// cUIThing_cUIThing, zeroes 0x74..0x80 and 0x88/0x8C, stores its vtable cUISlider_vtbl and adopts the children named at
 // rec+0x24 (mpObjBackground) and rec+0x28 (mpObjKnob). Default ctors func_003A6190 / cUISlider_cUISlider (ui/uivector).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source: ../source/ui/uislider.h
 // (preview assert path); retail keeps its methods in ui/uiscreen (0x39DF28-0x39E288).

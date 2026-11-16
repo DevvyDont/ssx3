@@ -201,13 +201,13 @@ extern "C" void func_002C73C0(void* self) {
 INCLUDE_ASM("util/statemachine", cConsoleConfig_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002C7478(void* self);
+extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self);
 extern char str_cPS2ConsoleConfig[];
 
 /**
  * Allocates and constructs the console configuration object.
  *
- * Allocates 0x38 bytes named "cPS2ConsoleConfig" and runs func_002C7478() on them, which fills the object from
+ * Allocates 0x38 bytes named "cPS2ConsoleConfig" and runs cPS2ConsoleConfig_cPS2ConsoleConfig() on them, which fills the object from
  * the console's system settings (probably the PS2 system configuration and clock). The app keeps the result in
  * ConsoleConfig.
  *
@@ -215,12 +215,12 @@ extern char str_cPS2ConsoleConfig[];
  */
 extern "C" void* cConsoleConfig_construct(void)
 {
-    return func_002C7478(cMemMan_alloc(0x38, str_cPS2ConsoleConfig, 0, 0));
+    return cPS2ConsoleConfig_cPS2ConsoleConfig(cMemMan_alloc(0x38, str_cPS2ConsoleConfig, 0, 0));
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/statemachine", func_002C7478);
+INCLUDE_ASM("util/statemachine", cPS2ConsoleConfig_cPS2ConsoleConfig);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -233,7 +233,7 @@ extern "C" void func_0040BFE0(unsigned char* clock);
 extern char D_00486798[];
 extern void* D_004A28A8_7478 __asm__("SSXApp");
 
-extern "C" void* func_002C7478(void* self_)
+extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
 {
     int* self = (int*)self_;
     unsigned char clock[8];

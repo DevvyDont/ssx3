@@ -179,10 +179,10 @@ extern "C" void* func_00351480(void* self, float* src, float time)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351508);
+INCLUDE_ASM("object/instanceman", cAnimFrame_getStartTime);
 #ifdef SKIP_ASM
 // PORT: the original reads *a before checking a for null.
-extern "C" float func_00351508(void* self)
+extern "C" float cAnimFrame_getStartTime(void* self)
 {
     float r = 0.0f;
     char** a = *(char***)(*(char**)((char*)self + 0x40) + 0x20);
@@ -202,7 +202,7 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_update);
 #ifdef SKIP_ASM
 struct sImRange;
 struct sImRangeTable;
-extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x);
+extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x);
 
 struct sImSeg_351538 {
     float a, b, c, d;
@@ -228,7 +228,7 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
  *
  * For each of the 16 channels whose bit is set in the anim record's mask (+0x18) it takes the channel's current
  * cubic segment (the record's curve table at +0x20, the frame's segment index per channel at +0x0), moves to the
- * segment holding @p time when needed (func_00351A80, On Tour cAnimChannel::nextSegment) and stores ((a t + b) t + c)
+ * segment holding @p time when needed (cAnimChannel_nextSegment, On Tour cAnimChannel::nextSegment) and stores ((a t + b) t + c)
  * t + d in Vals[i] (+0x44). Channels whose bit is clear keep their value.
  *
  * @param time  the time to evaluate at (On Tour time)
@@ -244,7 +244,7 @@ void cAnimFrame_update_impl(char* self, float time)
         if (*(unsigned int*)(*(char**)(self + 0x40) + 0x18) & mask) {
             sImSeg_351538* segment = &curve->segs[*cur];
             if (!inRange_351538(segment, time)) {
-                segment = (sImSeg_351538*)func_00351A80((sImRangeTable*)curve, cur, time);
+                segment = (sImSeg_351538*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);
             }
             *out = ((segment->a * time + segment->b) * time + segment->c) * time + segment->d;
             curves++;
@@ -257,9 +257,9 @@ void cAnimFrame_update_impl(char* self, float time)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351660);
+INCLUDE_ASM("object/instanceman", cAnimFrame_getDeriv);
 #ifdef SKIP_ASM
-extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x);
+extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x);
 
 struct sImSeg_351660 {
     float a, b, c, d;
@@ -283,7 +283,7 @@ static inline bool inRange_351660(sImSeg_351660* e, float x)
     return e->lo <= x && x < e->hi;
 }
 
-extern "C" void func_00351660(char* self, sImV4_351660* vel, sImV4_351660* rotVel, float t)
+extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660* rotVel, float t)
 {
     float out[16];
     sImCurve_351660** curves = *(sImCurve_351660***)(*(char**)(self + 0x40) + 0x20);
@@ -295,7 +295,7 @@ extern "C" void func_00351660(char* self, sImV4_351660* vel, sImV4_351660* rotVe
         if (*(int*)(*(char**)(self + 0x40) + 0x18) & mask) {
             sImSeg_351660* e = &c->segs[*cur];
             if (!inRange_351660(e, t)) {
-                e = (sImSeg_351660*)func_00351A80((sImRangeTable*)c, cur, t);
+                e = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)c, cur, t);
             }
             curves++;
             cur++;
@@ -370,7 +370,7 @@ extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351948);
+INCLUDE_ASM("object/instanceman", cMeshAnimFrame_transform);
 #ifdef SKIP_ASM
 struct sImMat44 {
     float m[4][4];
@@ -430,7 +430,7 @@ static inline void vu0CopyMatIM(sImMat44* d, const sImMat44* s)
         : "memory");
 }
 
-extern "C" void func_00351948(void* self, sImMat44* m)
+extern "C" void cMeshAnimFrame_transform(void* self, sImMat44* m)
 {
     sImMat44* dst = (sImMat44*)((char*)self + 0x90);
     sImMat44 t2;
@@ -469,7 +469,7 @@ void* func_00351A60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351A80);
+INCLUDE_ASM("object/instanceman", cAnimChannel_nextSegment);
 #ifdef SKIP_ASM
 struct sImRange {
     char pad_0x00[0x10];
@@ -492,7 +492,7 @@ static inline bool sImRange_below(sImRange* self, float x)
     return x < self->hi;
 }
 
-extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x)
+extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x)
 {
     sImRange* e;
     int i = ++*cur;
@@ -516,7 +516,7 @@ extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x)
 INCLUDE_ASM("object/instanceman", func_00351B40);
 #ifdef SKIP_ASM
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* def);
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void func_00352230(void* self);
 
 extern void* cMeshAnimNode_vtbl[];
@@ -658,7 +658,7 @@ struct sImWorld3 {
     unsigned int** sets;  // 0x8
 };
 
-extern "C" sImWorld3** func_002D1BD8();
+extern "C" sImWorld3** cObjectInterface_getWorld();
 
 static inline void* refToPtrIM(unsigned int p)
 {
@@ -669,7 +669,7 @@ struct sImRef {
     unsigned int id;
     void* get()
     {
-        unsigned int* set = (*func_002D1BD8())->sets[id & 0xFF];
+        unsigned int* set = (*cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -742,7 +742,7 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
     self->f24 = def->f30;
     self->f6B4 = def->f8;
     float rot = def->angle * 0.01745329424738884f;
-    self->f20 = rot * func_002D1C70();
+    self->f20 = rot * cObjectInterface_getUpdateTime();
     sImSkel* skel = self->model->skel;
     sImMtx local[24];
     sImMtx* mats = local;

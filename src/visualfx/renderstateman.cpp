@@ -570,7 +570,7 @@ extern "C" void* func_002EF1F0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF248);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cRSMObjWF {
 public:
@@ -642,7 +642,7 @@ public:
     virtual void v64(void* frame);
 };
 
-extern "C" void func_002EF248(void* frame)
+extern "C" void cRenderStateMan_writeToReplayFrame(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
@@ -747,12 +747,12 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF368);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_setInNIS);
 #ifdef SKIP_ASM
 extern void* cRenderStateMan_m_inNIS;
 extern int cPlants_m_Enable;
 
-extern "C" void func_002EF368(void* p)
+extern "C" void cRenderStateMan_setInNIS(void* p)
 {
     cRenderStateMan_m_inNIS = p;
     cPlants_m_Enable = p != 0;
@@ -760,13 +760,13 @@ extern "C" void func_002EF368(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF378);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_setCustomIrradiance);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern int D_004A3B64;
 extern int D_004A55B0;
 
-extern "C" void func_002EF378(const char* name)
+extern "C" void cRenderStateMan_setCustomIrradiance(const char* name)
 {
     if (name == 0) {
         D_004A3B64 = 0;
@@ -858,7 +858,7 @@ extern "C" void cAirStreamerFX_readFromReplayFrame(cAirStreamerFX* self)
 INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_update);
 #ifdef SKIP_ASM
 int func_0011FE98(void*);
-extern "C" int func_001298C8();
+extern "C" int AITick();
 
 struct sRsVec4_EF6D0 {
     float x, y, z, w;
@@ -969,7 +969,7 @@ extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
         sRsVec4_EF6D0 streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
         self->ring[self->head].p0 = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         self->ring[self->head].p1 = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
-        if ((func_001298C8() & 1) == 0) {
+        if ((AITick() & 1) == 0) {
             int old = self->head;
             self->head = old + 1;
             self->head %= 25;
@@ -1337,7 +1337,7 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F00A0);
+INCLUDE_ASM("visualfx/renderstateman", cVisualEffectsMan_commonUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float func_002EE3B8(int i);
@@ -1413,7 +1413,7 @@ struct sRsCtx_F00A0 {
 };
 extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
 
-extern "C" void func_002F00A0(void* self, int i)
+extern "C" void cVisualEffectsMan_commonUpdate(void* self, int i)
 {
     sRsCtx_F00A0* ctx = D_ctx_F00A0;
     if (cDepthFog_m_OverrideWP == 0) {
@@ -1479,12 +1479,12 @@ extern "C" int func_002F0360(void) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F0368);
+INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_cAIVisualEffectsMan);
 #ifdef SKIP_ASM
 extern void* D_00487D78[];
 extern void* D_004A3B80;
 
-extern "C" void* func_002F0368(void* self)
+extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self)
 {
     *(int*)self = 0;
     *(void***)((char*)self + 0x4) = D_00487D78;
@@ -1502,31 +1502,31 @@ extern "C" void func_002F0388(void) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F0390);
+INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002F03C8(void* self);
+extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self);
 extern char str_PS2AIVisualEffectsMan[];
 
-extern "C" void* func_002F0390(void)
+extern "C" void* cAIVisualEffectsMan_construct(void)
 {
-    return func_002F03C8(cMemMan_alloc(8, str_PS2AIVisualEffectsMan, 0, 0));
+    return cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(cMemMan_alloc(8, str_PS2AIVisualEffectsMan, 0, 0));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/renderstateman", func_002F03C8);
+INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002F0368(void* self);
+extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self);
 extern "C" void cAvalanche_init(void* self);
 extern char str_Avalanche[];
 extern void* D_00487D50[];
 extern void* cAvalanche_vtbl[];
 
-extern "C" void* func_002F03C8(void* self)
+extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self)
 {
-    func_002F0368(self);
+    cAIVisualEffectsMan_cAIVisualEffectsMan(self);
     *(void***)((char*)self + 0x4) = D_00487D50;
     void** p = (void**)cMemMan_alloc(4, str_Avalanche, 0, 0);
     *p = cAvalanche_vtbl;
@@ -1537,22 +1537,22 @@ extern "C" void* func_002F03C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F0438);
+INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_00487D50[];
 extern void* D_00487D78[];
 
-class func_002F0438_cVirt {
+class cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(int);
 };
 
-extern "C" void func_002F0438(void* self, int flags)
+extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_00487D50;
-    func_002F0438_cVirt* o = *(func_002F0438_cVirt**)self;
+    cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt* o = *(cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt**)self;
     if (o != 0) {
         o->v01(3);
     }
@@ -1564,9 +1564,9 @@ extern "C" void func_002F0438(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F04B0);
+INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan_update);
 #ifdef SKIP_ASM
-class func_002F04B0_cObj {
+class cPS2AIVisualEffectsMan_update_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
@@ -1574,16 +1574,16 @@ public:
     virtual void v03();
 };
 
-extern "C" void func_002F04B0(func_002F04B0_cObj** self)
+extern "C" void cPS2AIVisualEffectsMan_update(cPS2AIVisualEffectsMan_update_cObj** self)
 {
     (*self)->v02();
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F04E0);
+INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan_render);
 #ifdef SKIP_ASM
-extern "C" void func_002F04E0(func_002F04B0_cObj** self)
+extern "C" void cPS2AIVisualEffectsMan_render(cPS2AIVisualEffectsMan_update_cObj** self)
 {
     (*self)->v03();
 }

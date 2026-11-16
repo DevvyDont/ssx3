@@ -150,7 +150,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
-extern "C" int func_00398380(void* bank, int name);
+extern "C" int cUITextureBank_getElementByHashname(void* bank, int name);
 extern "C" int func_003983F0(void* bank, int hash);
 extern int D_004A2764;
 extern int D_004A2768;
@@ -169,7 +169,7 @@ extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
         char* res = (char*)SSXApp->Game->UI;
         int i;
         for (i = 0; i < 11; i++) {
-            D_004C8C58[i].handle = func_00398380(res + 0x58, D_004C8C58[i].name);
+            D_004C8C58[i].handle = cUITextureBank_getElementByHashname(res + 0x58, D_004C8C58[i].name);
         }
         void* bank = *(void**)(res + 8);
         D_004A2764 = func_003983F0(bank, GetHashValue32(str_fefont));
@@ -1296,7 +1296,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* D_004A2750;
 extern char* D_004A2754;
-float func_00113128(void* rider);
+float cRider_getDistanceLeft(void* rider);
 extern "C" float func_00210820(int i);
 
 struct sTrophyEntry_210618 {
@@ -1324,7 +1324,7 @@ extern "C" void func_00210618(int i)
     char* race = (char*)SSXApp->Game->AI;
     if (i >= *(int*)(race + 0x78))
         return;
-    float d = *(float*)(course + 0x10) - func_00113128(*(void**)(race + (i << 2) + 0x28));
+    float d = *(float*)(course + 0x10) - cRider_getDistanceLeft(*(void**)(race + (i << 2) + 0x28));
     if (D_004C8BC8_210618[i].active == 0)
     {
         float prev = D_004C8BC8_210618[i].dist;
@@ -1748,13 +1748,13 @@ extern "C" void func_00210FA0(void* self, int a1, int password, int miscData, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00211088);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PROFILE_cOVState_PROFILE);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char cBENewRaceInterface_newRace[];
 extern char cOVState_PROFILE_vtbl[];
-extern "C" void func_001D53B0(void* self, int a, int b);
-extern "C" int func_00147318(void* iface, int i);
+extern "C" void cFEMemCard_cFEMemCard(void* self, int a, int b);
+extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int i);
 struct sOVTrophy_1088 {
     char pad_0x0[8];
     void* vtable;           // 0x8
@@ -1767,10 +1767,10 @@ struct sOVTrophy_1088 {
     char pad_0x234[0x278 - 0x234];
     int f278;               // 0x278
 };
-extern "C" sOVTrophy_1088* func_00211088(sOVTrophy_1088* self, int a, unsigned char b, int c)
+extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* self, int a, unsigned char b, int c)
 {
     int idx = 0;
-    func_001D53B0(self, a, 0);
+    cFEMemCard_cFEMemCard(self, a, 0);
     self->f0C = 0x24;
     self->vtable = cOVState_PROFILE_vtbl;
     self->f278 = c;
@@ -1790,7 +1790,7 @@ extern "C" sOVTrophy_1088* func_00211088(sOVTrophy_1088* self, int a, unsigned c
     int lim = 1;
     if (cBENewRaceInterface_newRace[0x49] == 2) lim = 2;
     for (int n = 0; n < lim; n++) {
-        if (func_00147318(iface, n) == idx) {
+        if (cBENewPlayerInterface_getPlayerCtrlID(iface, n) == idx) {
             self->f1CC = n;
             break;
         }

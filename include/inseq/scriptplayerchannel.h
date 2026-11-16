@@ -2,7 +2,7 @@
 #define INSEQ_SCRIPTPLAYERCHANNEL_H
 
 // The in-game sequence (InSeq) script player's channels: one per animated channel of a script entity, created by the
-// entity's Play (func_00273AA8) by channel type from the entity's heap: 0 spline, 1 object, 2 block, 3 event
+// entity's Play (cScriptPlayerEntity_SetupPlay) by channel type from the entity's heap: 0 spline, 1 object, 2 block, 3 event
 // (func_00272488(size, heap) + constructor). Each channel has a vtable (slots 1..10: Play, Stop, Update, GetValue,
 // GetCustom, GetNextKeyFrame, GetType, GetOwner, IsPlaying, destructor; the spline channel has no destructor slot).
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
@@ -11,8 +11,8 @@
 //
 // Base cScriptPlayerChannel (abstract; no retail vtable of its own seen). On Tour's base is only a vptr (size 4) and
 // every derived member there is 4 bytes lower than here: retail's base has one more word at 0x0 and the vptr at 0x4
-// [R] (every constructor stores its vtable at +4, and the virtual calls in func_00273AA8/cScriptPlayerEntity_Stop/cScriptPlayerEntity_Restart
-// load it from +4). Sizes [R]: func_00273AA8 allocates 0x28 (spline), 0x28 (object), 0x2C (block), 0x28 (event);
+// [R] (every constructor stores its vtable at +4, and the virtual calls in cScriptPlayerEntity_SetupPlay/cScriptPlayerEntity_Stop/cScriptPlayerEntity_Restart
+// load it from +4). Sizes [R]: cScriptPlayerEntity_SetupPlay allocates 0x28 (spline), 0x28 (object), 0x2C (block), 0x28 (event);
 // On Tour 0x24/0x24/0x28/0x24.
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, the base fields written out in each class.
@@ -53,7 +53,7 @@ struct cScriptPlayerChannel {
                                    //       IsPlaying, destructor
 };
 
-// cScriptPlayerChannelSpline: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 0;
+// cScriptPlayerChannelSpline: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 0;
 // vtable cScriptPlayerChannelSpline_vtbl (0x00481A10), constructor cScriptPlayerChannelSpline_cScriptPlayerChannelSpline, no destructor.
 struct cScriptPlayerChannelSpline {
     // --- cScriptPlayerChannel (see above)
@@ -69,7 +69,7 @@ struct cScriptPlayerChannelSpline {
     tInSeqSplineChannelKey* mpCurrKey; // 0x014 [O]; [U] Play: data + 4; Update (cScriptPlayerChannelSpline_Update) advances it to
                                    //       mpNextKey
     unsigned int mCurrKeyIndex;    // 0x018 [O]; [U] Play 0; Update ++ it, compares it with header[0] - 1
-    float mCurrKeyValue;           // 0x01C [O]; [U] Play/Update store the evaluated cubic (func_00272570) with swc1;
+    float mCurrKeyValue;           // 0x01C [O]; [U] Play/Update store the evaluated cubic (GetCubicSplineValue) with swc1;
                                    //       GetValue returns its address
     const char* mpCurrKeyCustom;   // 0x020 [O]; [U] key + 0x14 when the key is longer than 0x14 bytes, else 0;
                                    //       GetCustom returns it
@@ -77,7 +77,7 @@ struct cScriptPlayerChannelSpline {
                                    //       when it is 0
 };
 
-// cScriptPlayerChannelObject: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 1;
+// cScriptPlayerChannelObject: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 1;
 // vtable cScriptPlayerChannelObject_vtbl (0x004818F0), constructor cScriptPlayerChannelObject_cScriptPlayerChannelObject, destructor cScriptPlayerChannelObject__cScriptPlayerChannelObject.
 struct cScriptPlayerChannelObject {
     // --- cScriptPlayerChannel (see above)
@@ -100,7 +100,7 @@ struct cScriptPlayerChannelObject {
     int mNumActiveObjects;         // 0x024 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
 
-// cScriptPlayerChannelBlock: size 0x2C [R] (func_00273AA8 allocates 0x2C); GetType() = 2;
+// cScriptPlayerChannelBlock: size 0x2C [R] (cScriptPlayerEntity_SetupPlay allocates 0x2C); GetType() = 2;
 // vtable cScriptPlayerChannelBlock_vtbl (0x004819B0), constructor cScriptPlayerChannelBlock_cScriptPlayerChannelBlock, destructor cScriptPlayerChannelBlock__cScriptPlayerChannelBlock.
 struct cScriptPlayerChannelBlock {
     // --- cScriptPlayerChannel (see above)
@@ -126,7 +126,7 @@ struct cScriptPlayerChannelBlock {
     int mNumActiveBlocks;          // 0x028 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
 
-// cScriptPlayerChannelEvent: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 3;
+// cScriptPlayerChannelEvent: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 3;
 // vtable cScriptPlayerChannelEvent_vtbl (0x00481950), constructor cScriptPlayerChannelEvent_cScriptPlayerChannelEvent, destructor cScriptPlayerChannelEvent__cScriptPlayerChannelEvent.
 struct cScriptPlayerChannelEvent {
     // --- cScriptPlayerChannel (see above)

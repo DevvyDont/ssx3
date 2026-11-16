@@ -1164,14 +1164,14 @@ extern int D_004A4E98;
 extern float D_004A5B28;
 extern float D_004A5B2C;
 extern sColour D_004C8668;
-extern "C" int func_00147618(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern "C" void func_001F1338(void* self, void* pos, void* size, void* scale, void* col);
 
 // Horizontal gauge: cap icon, start piece, middle, end piece, then the fill bar on top.
 extern "C" void func_0021D9A0(float fill, float alpha, char* self, char* elems, sGaugeBar* bar, int idx,
                               int icon, float* scale)
 {
-    int alt = func_00147618(cBE_getInterface_Fv(cBE_getBE(), 1), ((sHudRoot_D9A0*)self)->players[idx].rider);
+    int alt = cBENewPlayerInterface_getControllerMapping(cBE_getInterface_Fv(cBE_getBE(), 1), ((sHudRoot_D9A0*)self)->players[idx].rider);
     t2Vector a;
     t2Vector sc;
     sVtxPos t;     // icon colour first, then reused for the bar size
@@ -3351,11 +3351,11 @@ extern "C" void* cOVState_PROFILE__cOVState_PROFILE(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221DB0);
 #ifdef SKIP_ASM
-extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern char cOVState_PROFILE_vtbl[];
 
 extern "C" void *func_00221DB0(void *state) {
-    func_001D53B0(state, 0, 0);
+    cFEMemCard_cFEMemCard(state, 0, 0);
     (*(char **)((char*)(state) + (8))) = cOVState_PROFILE_vtbl;
     return state;
 }
@@ -3516,11 +3516,11 @@ extern "C" void* func_00222030(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222058);
 #ifdef SKIP_ASM
-extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern char D_00472440[];
 
 extern "C" void *func_00222058(void *arg0) {
-    func_001D53B0(arg0, 0, 0);
+    cFEMemCard_cFEMemCard(arg0, 0, 0);
     (*(char **)((char*)(arg0) + (8))) = D_00472440;
     return arg0;
 }
@@ -3541,11 +3541,11 @@ extern "C" void* func_00222098(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002220C0);
 #ifdef SKIP_ASM
-extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern char D_004722B8[];
 
 extern "C" void *func_002220C0(void *arg0) {
-    func_001D53B0(arg0, 0, 0);
+    cFEMemCard_cFEMemCard(arg0, 0, 0);
     (*(char **)((char*)(arg0) + (8))) = D_004722B8;
     return arg0;
 }
@@ -3691,11 +3691,11 @@ extern "C" void func_002222B0(void) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002222B8);
 #ifdef SKIP_ASM
-extern "C" void* func_001D53B0(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern char cOVState_AUTOSAVE_vtbl[];
 
 extern "C" void *func_002222B8(void *state) {
-    func_001D53B0(state, 0, 0);
+    cFEMemCard_cFEMemCard(state, 0, 0);
     (*(char **)((char*)(state) + (8))) = cOVState_AUTOSAVE_vtbl;
     return state;
 }

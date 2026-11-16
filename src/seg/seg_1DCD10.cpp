@@ -3,7 +3,7 @@
 #include "render/ps2graphicsman.h"
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBD10);
+INCLUDE_ASM("seg/seg_1DCD10", cFXLoader_cFXLoader);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -72,7 +72,7 @@ extern char str_data_textures_particle_ssh[];
 extern char str_data_textures_effects_ssh[];
 struct sFXShape_BD10 { char name[8]; int tex; };
 extern sFXShape_BD10 gFXShape_BD10[] __asm__("D_004891B0");
-extern "C" int func_002DBD10(int a0, long a1) {
+extern "C" int cFXLoader_cFXLoader(int a0, long a1) {
     int files[2];
     int v;
     long r;
@@ -111,7 +111,7 @@ extern "C" int func_002DBD10(int a0, long a1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBEE0);
+INCLUDE_ASM("seg/seg_1DCD10", cFXLoader__cFXLoader);
 #ifdef SKIP_ASM
 struct Pre_BEE0 { char pad[0x10D8]; };
 class Mgr_BEE0 : Pre_BEE0 {
@@ -169,7 +169,7 @@ public:
 };
 extern Mgr_BEE0 *cGraphicsMan_TheGraphicsMan_seg_1DCD10 __asm__("cGraphicsMan_TheGraphicsMan");
 void operator_delete(int *);
-extern "C" void func_002DBEE0(int *self, int flags) {
+extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
     Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan_seg_1DCD10;
     int i;
     for (i = 0; i < 0x51; i++) {

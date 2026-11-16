@@ -376,9 +376,9 @@ extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ED88__FPv);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_putFrameBlock__FPv);
 #ifdef SKIP_ASM
-void func_0026ED88(void* self)
+void cReplayFramePtr_putFrameBlock(void* self)
 {
 }
 #endif
@@ -439,17 +439,17 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setupReplayCameras);
 #ifdef SKIP_ASM
-void* func_0016D1D8(void* p);
+void* cCameraTriggerMan_setReplayTriggers(void* p);
 extern void* gCamTriggerMan[];
 extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
 
 /**
- * Puts the cameras into replay mode: the camera triggers' replay set (func_0016D1D8, setReplayTriggers), then the
+ * Puts the cameras into replay mode: the camera triggers' replay set (cCameraTriggerMan_setReplayTriggers, setReplayTriggers), then the
  * current replay camera.
  */
 extern "C" void cReplay_setupReplayCameras(cReplay* self)
 {
-    func_0016D1D8(gCamTriggerMan);
+    cCameraTriggerMan_setReplayTriggers(gCamTriggerMan);
     cReplay_setCurrentReplayCamera(self);
 }
 #endif
@@ -493,12 +493,12 @@ extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
 INCLUDE_ASM("replay/frameptr", cReplay_setupInstantReplayCameras);
 #ifdef SKIP_ASM
 /**
- * Sets up the instant-replay cameras: installs the replay camera triggers (func_0016D1D8, cCameraTriggerMan::
+ * Sets up the instant-replay cameras: installs the replay camera triggers (cCameraTriggerMan_setReplayTriggers, cCameraTriggerMan::
  * setReplayTriggers, on gCamTriggerMan) and steps CurrentInstantReplayCamIndex to the next of 9.
  */
 extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 {
-    func_0016D1D8(gCamTriggerMan);
+    cCameraTriggerMan_setReplayTriggers(gCamTriggerMan);
     self->CurrentInstantReplayCamIndex = (self->CurrentInstantReplayCamIndex + 1) % 9;
 }
 #endif
@@ -520,7 +520,7 @@ extern "C" void func_0026EF80()
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_cReplay);
 #ifdef SKIP_ASM
-extern "C" void* func_0026D5E8(void* self);
+extern "C" void* cReplayFrame_cReplayFrame(void* self);
 void* func_0026E5A8(void* self);
 extern "C" void* func_00272288(void* self);
 void cReplay_setReplayState(void* self, int state);
@@ -528,7 +528,7 @@ void cReplay_setReplayState(void* self, int state);
 /**
  * Constructs the replay manager.
  *
- * Constructs the 16 frames (func_0026D5E8, cReplayFrame), FrameList and FreeFrameList (func_0026E5A8) and the two
+ * Constructs the 16 frames (cReplayFrame_cReplayFrame, cReplayFrame), FrameList and FreeFrameList (func_0026E5A8) and the two
  * Highlight records (func_00272288), sets the state to 15 (kReplayInit) and clears both InputCache pointers.
  *
  * @return @p self
@@ -537,7 +537,7 @@ extern "C" void* cReplay_cReplay(cReplay* self)
 {
     char* frame = (char*)self + 0x2C;
     for (int i = 15; i != -1; i--, frame += 0x38) {
-        func_0026D5E8(frame);
+        cReplayFrame_cReplayFrame(frame);
     }
     char* highlight = (char*)self + 0x494;
     func_0026E5A8((char*)self + 0x3B0);
@@ -555,13 +555,13 @@ extern "C" void* cReplay_cReplay(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F088);
+INCLUDE_ASM("replay/frameptr", cReplay__cReplay);
 #ifdef SKIP_ASM
 struct sFpOwner26F428;
 struct cReplayFramePtr_F980;
 extern "C" void cReplay_purge(cReplay* self);
 extern "C" void cReplay_stopReplay(cReplay* self);
-void func_0026F498(void* self);
+void cReplay_frameSync(void* self);
 void operator_delete(int* ptr);
 
 struct sFpVEntryF088 {
@@ -580,7 +580,7 @@ struct sFpKeyF088 {
     ~sFpKeyF088() {}
 };
 
-extern "C" void func_0026F088(int* self, int flags)
+extern "C" void cReplay__cReplay(int* self, int flags)
 {
     char* s = (char*)self;
     int ok = 0;
@@ -592,7 +592,7 @@ extern "C" void func_0026F088(int* self, int flags)
     if (ok) {
         cReplay_stopReplay((cReplay*)((cReplayFramePtr_F980*)self));
     }
-    func_0026F498(self);
+    cReplay_frameSync(self);
     cReplay_purge((cReplay*)((sFpOwner26F428*)self));
     if (s + 0x494 != 0) {
         char* p = s + 0x494 + 0x168;
@@ -653,8 +653,8 @@ INCLUDE_ASM("replay/frameptr", cReplay_reset);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 void func_0026D168(void* self);
-void func_0026E5C0(void* self);
-extern "C" void func_0026E5D0(void* list, void* block);
+void cReplayFrameList_reset(void* self);
+extern "C" void cReplayFrameList_addFrame(void* list, void* block);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 struct sFpSlot_F228 {
@@ -678,7 +678,7 @@ extern "C" void cReplay_reset(cReplay* self)
     unsigned int st = self->State - 14;
     bool resettable = !(st < 2);
     if (!resettable) return;
-    func_0026F498(self);
+    cReplay_frameSync(self);
     int i = 0;
     char* frameList = ((char*)self) + 0x3B0;
     char* freeList = ((char*)self) + 0x3BC;
@@ -736,10 +736,10 @@ extern "C" void cReplay_reset(cReplay* self)
         i++;
         highlight++;
     } while (i < 2);
-    func_0026E5C0(frameList);
-    func_0026E5C0(freeList);
+    cReplayFrameList_reset(frameList);
+    cReplayFrameList_reset(freeList);
     for (i = 0; i < self->MaxFrames; i++) {
-        func_0026E5D0(freeList, ((char*)self) + 0x2C + i * 0x38);
+        cReplayFrameList_addFrame(freeList, ((char*)self) + 0x2C + i * 0x38);
     }
     int three = 3;
     self->CurrentReplayCamIndex = 0;
@@ -757,7 +757,7 @@ extern "C" void cReplay_reset(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_purge);
 #ifdef SKIP_ASM
-void func_0026E5C0(void* self);
+void cReplayFrameList_reset(void* self);
 
 struct sFpEntry26F428 {
     char pad[0x38];
@@ -779,15 +779,15 @@ extern "C" void cReplay_purge(cReplay* self)
     for (i = 0; i < self->MaxFrames; i++) {
         cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((sFpEntry26F428*)&self->Frames[0])[i]));
     }
-    func_0026E5C0((char*)self + 0x3B0);
-    func_0026E5C0((char*)self + 0x3BC);
+    cReplayFrameList_reset((char*)self + 0x3B0);
+    cReplayFrameList_reset((char*)self + 0x3BC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F498__FPv);
+INCLUDE_ASM("replay/frameptr", cReplay_frameSync__FPv);
 #ifdef SKIP_ASM
-void func_0026F498(void* self)
+void cReplay_frameSync(void* self)
 {
 }
 #endif
@@ -818,11 +818,11 @@ struct sFrameDesc_F4A8 {
 };
 // PORT: local views of callees declared with other parameter types later in the unit
 extern "C" void* cReplay_saveReplayFrame_F4A8(void* self, sFrameDesc_F4A8* desc) __asm__("cReplay_saveReplayFrame");
-// PORT: func_0026D740 is mangled with one parameter (__FPv) but is called here
+// PORT: cReplay_addReplayFrame is mangled with one parameter (__FPv) but is called here
 // with (self, block); bind the 2-arg form to the symbol.
-void func_0026D740_F4A8(void* self, void* block) __asm__("func_0026D740__FPv");
+void cReplay_addReplayFrame_F4A8(void* self, void* block) __asm__("cReplay_addReplayFrame__FPv");
 extern "C" void cReplay_startReplay_F4A8(void* self, int a1, int a2, int a3) __asm__("cReplay_startReplay");
-extern "C" void func_0026FB88(void* self, int a1);
+extern "C" void cReplay_updateInput(void* self, int a1);
 extern "C" void cReplay_processInput(cReplay* self);
 extern "C" void cReplay_purgeIdleFrames(void* self);
 extern "C" void cReplay_cancelMarkInstantReplay(void* self);
@@ -843,7 +843,7 @@ static inline void addFrame_F4A8(cReplay* self, short type)
     desc.type = type;
     desc.a = 0;
     desc.b = 0;
-    func_0026D740_F4A8(self, cReplay_saveReplayFrame_F4A8(self, &desc));
+    cReplay_addReplayFrame_F4A8(self, cReplay_saveReplayFrame_F4A8(self, &desc));
 }
 
 /**
@@ -858,7 +858,7 @@ static inline void addFrame_F4A8(cReplay* self, short type)
  *   kInstantPlayback (2). Otherwise every 60 ticks without ReplayError it purges idle frames and saves a frame, a
  *   full one (type 1) at tick 0 and every SaveFrameTicks ticks; EndRecordTick (without ReplayError) and RecordTick
  *   advance.
- * - 2 (instant replay) reads input (func_0026FB88, updateInput) and runs processInput until PlaybackTick reaches
+ * - 2 (instant replay) reads input (cReplay_updateInput, updateInput) and runs processInput until PlaybackTick reaches
  *   RecordTick minus 1, then stops the instant replay and falls into recording.
  * - 3 (kPlaybackInput) reads input when the replay pad (PadNum) has button state 0x6B, then processInput.
  * - 9 starts an auto replay (startReplay(0, 0, 1)), enters kGamePlayback (1) and sets AutoReplay; 8 starts a replay
@@ -885,7 +885,7 @@ extern "C" void cReplay_update(cReplay* self)
         return;
     case 2:
         if (self->PlaybackTick < self->RecordTick - 1) {
-            func_0026FB88((self), 0);
+            cReplay_updateInput((self), 0);
             cReplay_processInput(self);
             return;
         }
@@ -925,7 +925,7 @@ extern "C" void cReplay_update(cReplay* self)
     case 3: {
         void* o = D_004A28A8_F4A8->players[self->PadNum];
         if (o != 0 && cInput_getState(o, 0x6B))
-            func_0026FB88((self), 0);
+            cReplay_updateInput((self), 0);
         cReplay_processInput(self);
         return;
     }
@@ -983,15 +983,15 @@ struct sFrameDesc26F7F8 {
 };
 
 extern "C" void* cReplay_saveReplayFrame(void* self, sFrameDesc26F7F8* desc);
-// PORT: func_0026D740 is mangled with one parameter (__FPv) but is called here
+// PORT: cReplay_addReplayFrame is mangled with one parameter (__FPv) but is called here
 // with (self, block); bind the 2-arg form to the symbol.
-void func_0026D740_2(void* self, void* block) __asm__("func_0026D740__FPv");
+void cReplay_addReplayFrame_2(void* self, void* block) __asm__("cReplay_addReplayFrame__FPv");
 
 /**
  * Saves the live game into SaveFrame (a full, type 1 frame) so it can be restored after a replay; does nothing when
  * one is already saved.
  *
- * The frame is also added to the replay (func_0026D740, addReplayFrame).
+ * The frame is also added to the replay (cReplay_addReplayFrame, addReplayFrame).
  */
 extern "C" void cReplay_pushReplaySaveFrame(cReplay* self)
 {
@@ -1002,7 +1002,7 @@ extern "C" void cReplay_pushReplaySaveFrame(cReplay* self)
         desc.b = 0;
         void* block = cReplay_saveReplayFrame(self, &desc);
         self->SaveFrame = (cReplayFrame*)block;
-        func_0026D740_2(self, block);
+        cReplay_addReplayFrame_2(self, block);
     }
 }
 #endif
@@ -1164,7 +1164,7 @@ extern "C" void cReplay_endReplay(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026FA78);
+INCLUDE_ASM("replay/frameptr", cReplay_updateCameraSelect);
 #ifdef SKIP_ASM
 extern int D_00445438[];
 int cInput_getState(void* pad, int button);
@@ -1177,7 +1177,7 @@ static inline bool isStateFA78(int* self, int s)
     return *self == s;
 }
 
-extern "C" void func_0026FA78(int* self)
+extern "C" void cReplay_updateCameraSelect(int* self)
 {
     if (!isStateFA78(self, 3)) {
         return;
@@ -1197,11 +1197,11 @@ extern "C" void func_0026FA78(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026FB88);
+INCLUDE_ASM("replay/frameptr", cReplay_updateInput);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern char gUISoundNull;
-extern "C" void func_002305C8(void* self);
+extern "C" void cGame_stopReplay(void* self);
 
 struct sFpViewVEntry_FB88 {
     short delta;
@@ -1240,9 +1240,9 @@ static inline bool isIdleNoCamFB88(char* s)
 
 // PORT: returns whether a menu action was queued; the unit declares it
 // void earlier, so the definition goes through an asm label.
-extern "C" int func_0026FB88_FB88(void* self, int a1) __asm__("func_0026FB88");
-extern "C" int func_0026FB88_impl(void* self, int a1) __asm__("func_0026FB88");
-extern "C" int func_0026FB88_impl(void* self, int a1)
+extern "C" int cReplay_updateInput_FB88(void* self, int a1) __asm__("cReplay_updateInput");
+extern "C" int cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_updateInput");
+extern "C" int cReplay_updateInput_impl(void* self, int a1)
 {
     char* s = (char*)self;
     char* g = (char*)SSXApp;
@@ -1270,7 +1270,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
             else r = isIdleFB88(s) ? 0 : 6;
         } else if (cInput_getState(pad, 0x66)) {
             if (a1) {
-                func_002305C8(SSXApp->Game);
+                cGame_stopReplay(SSXApp->Game);
                 *(int*)(s + 0x618) = 8;
             } else if (!isStateFB88(s, 3)) {
                 *(int*)(s + 0x618) = 7;

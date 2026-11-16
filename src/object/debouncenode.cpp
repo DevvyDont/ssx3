@@ -73,7 +73,7 @@ extern "C" int cDebounceNode_updateNode(void* self)
 INCLUDE_ASM("object/debouncenode", cDebounceNode_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_003506D8(void* self, void* parent);
+extern "C" void* cDeadNode_cDeadNode(void* self, void* parent);
 extern const char str_DeadNode_b[];
 
 struct sDebounceVEntry2DD8 {
@@ -96,7 +96,7 @@ extern "C" void cDebounceNode_loseFocus(void* self)
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
-            func_003506D8(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
+            cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
             if (self != 0) {
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
@@ -155,7 +155,7 @@ extern "C" void cDebounceNode_expire(void* self, int check)
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
-            func_003506D8(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
+            cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == 3) {
             void* parent = *(void**)((char*)self + 0x18);
             if (self != 0) {
@@ -1037,7 +1037,7 @@ INCLUDE_ASM("object/debouncenode", func_00343F38);
 // deletes the cycle); plain form 92.09% (the earlier `id == ents[j].ref.id` spelling scores 96.46%). Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
 extern "C" void* func_00344800(void* self);
@@ -1075,7 +1075,7 @@ struct sWorld3F38 {
 
 static inline sModel3F38* getModel3F38(unsigned int id)
 {
-    sModelSet3F38* set = (*(sWorld3F38**)func_002D1BD8())->sets[id & 0xFF];
+    sModelSet3F38* set = (*(sWorld3F38**)cObjectInterface_getWorld())->sets[id & 0xFF];
     if (set == 0) {
         return 0;
     }
@@ -1336,7 +1336,7 @@ INCLUDE_ASM("object/debouncenode", func_003443A8);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 extern "C" void func_003513D0(void* self);
 extern "C" void func_003612C0(void* self);
 extern "C" void func_00351398(void* self, void* src);
@@ -1440,7 +1440,7 @@ struct sDbModelRef_43A8 {
 
     sDbModel_43A8* get()
     {
-        sDbModelSet_43A8* set = (*(sDbWorld_43A8**)func_002D1BD8())->sets[id & 0xFF];
+        sDbModelSet_43A8* set = (*(sDbWorld_43A8**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -1535,7 +1535,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 INCLUDE_ASM("object/debouncenode", func_00344730);
 #ifdef SKIP_ASM
 struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 
 struct sItem4730 {
     char pad_0x0[0x10];
@@ -1582,7 +1582,7 @@ struct sModelRef4730 {
 
     sModel4730* get()
     {
-        sModelSet4730* set = (*(sWorld4730**)func_002D1BD8())->sets[id & 0xFF];
+        sModelSet4730* set = (*(sWorld4730**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -1715,7 +1715,7 @@ INCLUDE_ASM("object/debouncenode", func_00344AA0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 
 struct sDbV4_4AA0 {
     float x, y, z, w;
@@ -1772,7 +1772,7 @@ struct sDbModelRef_4AA0 {
 
     sDbInst_4AA0* get()
     {
-        sDbModelSet_4AA0* set = (*(sDbWorld_4AA0**)func_002D1BD8())->sets[id & 0xFF];
+        sDbModelSet_4AA0* set = (*(sDbWorld_4AA0**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -1929,7 +1929,7 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
 INCLUDE_ASM("object/debouncenode", func_00344E18);
 #ifdef SKIP_ASM
 struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 extern "C" void func_00344730(sDebounce4730* self, int index);
 
 struct sModel_44E18 {
@@ -2022,7 +2022,7 @@ extern "C" void func_00344FF8(void* self, cDebounceStream* s)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345048);
+INCLUDE_ASM("object/debouncenode", cSplineSegment_getPos);
 #ifdef SKIP_ASM
 struct sDebVec4 {
     float x, y, z, w;
@@ -2085,7 +2085,7 @@ struct sDebCurve {
 };
 
 // Evaluate the curve at time t: position, velocity and acceleration.
-extern "C" void func_00345048(sDebCurve* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+extern "C" void cSplineSegment_getPos(sDebCurve* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
 {
     t -= self->t0;
     float u = ((self->coef[0] * t + self->coef[1]) * t + self->coef[2]) * t + self->coef[3];
@@ -2132,7 +2132,7 @@ struct sTrackWorld51C0 {
     sTrackSet51C0** sets;   // 0x8
 };
 
-extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 
 static inline sTrackNode51C0* refToNode51C0(unsigned int p)
 {
@@ -2144,7 +2144,7 @@ struct sTrackRef51C0 {
 
     sTrackNode51C0* get()
     {
-        sTrackSet51C0* set = (*func_002D1BD8())->sets[id & 0xFF];
+        sTrackSet51C0* set = (*cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set != 0) {
             unsigned int p = set->refs[id >> 8] >> 8;
             if (p != 0) {
@@ -2173,7 +2173,7 @@ extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345248);
+INCLUDE_ASM("object/debouncenode", cSpline_getPos);
 #ifdef SKIP_ASM
 struct sDebKey5248 {
     char pad_0x00[0x60];
@@ -2211,7 +2211,7 @@ static inline float ftrunc_00345248(float x)
     return t;
 }
 
-extern "C" void func_00345248(sDebTrack5248* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+extern "C" void cSpline_getPos(sDebTrack5248* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
 {
     float len = self->length;
     float q = t / len;
@@ -2228,7 +2228,7 @@ extern "C" void func_00345248(sDebTrack5248* self, float t, sDebVec4* pos, sDebV
         self->forward();
         next = self->key->next;
     }
-    func_00345048((sDebCurve*)self->key, t, pos, vel, acc);
+    cSplineSegment_getPos((sDebCurve*)self->key, t, pos, vel, acc);
 }
 #endif
 

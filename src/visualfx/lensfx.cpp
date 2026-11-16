@@ -5,34 +5,34 @@
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002EC418(void* self);
+extern "C" void* cPS2LensFxMan_cPS2LensFxMan(void* self);
 extern const char str_LensFX[];
 
 //99.23%
 INCLUDE_ASM("visualfx/lensfx", cLensFxMan_construct__Fv);
 #ifdef SKIP_ASM
 /**
- * Creates the lens effects manager ("LensFX", 0x6820 bytes) through the PS2 constructor func_002EC418.
+ * Creates the lens effects manager ("LensFX", 0x6820 bytes) through the PS2 constructor cPS2LensFxMan_cPS2LensFxMan.
  *
  * @return the new manager
  */
 void* cLensFxMan_construct()
 {
     void* mem = cMemMan_alloc(0x6820, str_LensFX, 0, 0);
-    return func_002EC418(mem);
+    return cPS2LensFxMan_cPS2LensFxMan(mem);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EC418);
+INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan_cPS2LensFxMan);
 #ifdef SKIP_ASM
 extern "C" void cLensFxMan_cLensFxMan(void* self);
 extern void* D_00487F00[];
 
 // PORT: asm label because the unit's forward declaration above has C++ linkage;
 // fix that declaration to extern "C" and this can be a plain extern "C" definition.
-void* func_002EC418_impl(void* self) __asm__("func_002EC418");
-void* func_002EC418_impl(void* self)
+void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self) __asm__("cPS2LensFxMan_cPS2LensFxMan");
+void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self)
 {
     cLensFxMan_cLensFxMan(self);
     *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
@@ -44,9 +44,9 @@ extern void* D_00487F00[];
 extern "C" void* cLensFxMan__cLensFxMan(void*);
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EC450__FPv);
+INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan__cPS2LensFxMan__FPv);
 #ifdef SKIP_ASM
-void* func_002EC450(void* self)
+void* cPS2LensFxMan__cPS2LensFxMan(void* self)
 {
     *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
     return cLensFxMan__cLensFxMan(self);
@@ -327,7 +327,7 @@ extern "C" void func_002ECF78(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ECFA0);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sLensRow_CFA0 {
@@ -345,7 +345,7 @@ struct sLensVE_CFA0 {
 extern sLensRow_CFA0 D_lensRows_CFA0[] __asm__("cRenderStateMan_m_state");
 extern int cRenderStateMan_m_initialized;
 
-extern "C" void func_002ECFA0(void)
+extern "C" void cRenderStateMan_purge(void)
 {
     if (cRenderStateMan_m_initialized != 0) {
         int i;
@@ -365,7 +365,7 @@ extern "C" void func_002ECFA0(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ED048);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cWorldPainterManArg {
@@ -406,7 +406,7 @@ static inline void lensVecOneED048(sLensVec_ED048* v)
     v->w = 1.0f;
 }
 
-extern "C" void func_002ED048(void)
+extern "C" void cRenderStateMan_init(void)
 {
     void* pm = *(void**)((char*)SSXApp->Game->World + 0x8);
     int i;
@@ -508,7 +508,7 @@ extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* a, const sLerpV4* 
 }
 #endif
 
-INCLUDE_ASM("visualfx/lensfx", func_002ED490);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_update);
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EDB20);
@@ -670,11 +670,11 @@ extern "C" void* func_002EDFB8(int a0)
 INCLUDE_ASM("visualfx/lensfx", func_002EDFD0);
 #ifdef SKIP_ASM
 extern char D_005047F8[];
-extern "C" int func_0038AC50(void*, void*);
+extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 
 extern "C" void func_002EDFD0(void* self)
 {
-    *(int*)self = func_0038AC50(D_005047F8, self);
+    *(int*)self = cIrradianceDataBase_GetIDByName(D_005047F8, self);
     *(int*)((char*)self + 4) = 0x123400;
 }
 #endif

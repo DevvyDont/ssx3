@@ -70,9 +70,9 @@ extern "C" void cPDATemplate_onCreateScreen(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8B0);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_getResultsOverlay);
 #ifdef SKIP_ASM
-extern "C" int func_0020A8B0(int a0, int a1)
+extern "C" int cOVStateManager_getResultsOverlay(int a0, int a1)
 {
     if ((unsigned int)(a0 - 6) < 6) {
         return 0x16;
@@ -85,13 +85,13 @@ extern "C" int func_0020A8B0(int a0, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020A8F8);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_gotoOverlay);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
-int func_00158F30(void* self);
+int cBERewardInterface_getTotalNumUserAwards(void* self);
 extern "C" void cReplay_startAutoReplay(void* p);
 extern char cBENewRaceInterface_newRace[];
 extern int cOVStateManager_mStatus;
@@ -104,7 +104,7 @@ static inline bool isKind_A8F8(int k, int v)
     return k == v;
 }
 
-extern "C" void func_0020A8F8(int mode)
+extern "C" void cOVStateManager_gotoOverlay(int mode)
 {
     int v = *(int*)SSXApp->Game->Replay;
     int busy = v != 0 && v < 10;
@@ -148,16 +148,16 @@ extern "C" void func_0020A8F8(int mode)
         if (*(int*)(a + 0x18) >= 0 || *(int*)(a + 0x1C) >= 0) any = 1;
         if (any) {
             if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-                state = func_0020A8B0(kind, type);
+                state = cOVStateManager_getResultsOverlay(kind, type);
             } else {
                 cOVStateManager_mMiscData = 0;
                 state = 0xF;
             }
         } else {
-            if (func_00158F30(b) > 0 || *(int*)(b + 0x10) != 0) {
+            if (cBERewardInterface_getTotalNumUserAwards(b) > 0 || *(int*)(b + 0x10) != 0) {
                 state = 0x10;
             } else {
-                state = func_0020A8B0(kind, type);
+                state = cOVStateManager_getResultsOverlay(kind, type);
             }
         }
         int z = !isKind_A8F8(kind, 6) && !isKind_A8F8(kind, 7) && !isKind_A8F8(kind, 8) && !isKind_A8F8(kind, 9) &&
@@ -188,8 +188,8 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
 extern "C" void* func_001FE968(void* self, void* mgr, int type);
 extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(void* self, void* mgr, int type);
-extern "C" void* func_00211088(void* self, void* mgr, int type, int a3);
-extern "C" void* func_00212138(void* self, void* mgr, int type);
+extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* mgr, int type, int a3);
+extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* mgr, int type);
 extern "C" void func_001F7548(void* self);
 extern "C" void func_001F7738(void* self);
 extern "C" void func_002006B8(void* self);
@@ -634,10 +634,10 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         result = overlay;
     }
     if (type == 0x24) {
-        result = (char*)func_00211088(operator new(0x27C, str_cOVStateOverlay, 0, 0), mgr, 0x24, 0x2A);
+        result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(0x27C, str_cOVStateOverlay, 0, 0), mgr, 0x24, 0x2A);
     }
     if (type == 0x25) {
-        result = (char*)func_00212138(operator new(0x234, str_cOVStateOverlay, 0, 0), mgr, 0x25);
+        result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(0x234, str_cOVStateOverlay, 0, 0), mgr, 0x25);
     }
     if (type == 0x26) {
         char* overlay = (char*)operator new(0xA0, str_cOVStateOverlay, 0, 0);
@@ -695,8 +695,8 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
 extern "C" void* func_001FE968(void* self, void* mgr, int type);
 extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(void* self, void* mgr, int type);
-extern "C" void* func_00211088(void* self, void* mgr, int type, int a3);
-extern "C" void* func_00212138(void* self, void* mgr, int type);
+extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* mgr, int type, int a3);
+extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* mgr, int type);
 extern "C" void func_001F7548(void* self);
 extern "C" void func_001F7738(void* self);
 extern "C" void func_002006B8(void* self);
@@ -1131,10 +1131,10 @@ extern "C" void func_0020BAB8(int type)
         result = p;
     }
     if (type == 0x24) {
-        result = (char*)func_00211088(operator new(0x27C, str_cOVStateOverlay, 0, 0), mgr, 0x24, 0x2A);
+        result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(0x27C, str_cOVStateOverlay, 0, 0), mgr, 0x24, 0x2A);
     }
     if (type == 0x25) {
-        result = (char*)func_00212138(operator new(0x234, str_cOVStateOverlay, 0, 0), mgr, 0x25);
+        result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(0x234, str_cOVStateOverlay, 0, 0), mgr, 0x25);
     }
     if (type == 0x26) {
         char* p = (char*)operator new(0xA0, str_cOVStateOverlay, 0, 0);
@@ -1187,7 +1187,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void func_00258C00(void* net);
 extern "C" void cGameComm_sendPauseCmd(void* net, int a1);
-extern "C" int func_0030B8C0(void* self);
+extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 extern char D_004A2468;
 extern char cBENewRaceInterface_newRace[];
@@ -1214,7 +1214,7 @@ extern "C" void func_0020CA10(void)
             n->mOverlayTimeout = 0x708;
         }
         cOVStateManager_triggerOverlay(6);
-    } else if (func_0030B8C0(cWScriptMan_TheWScriptMan) != 0) {
+    } else if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
         cOVStateManager_triggerOverlay(2);
     } else {
         signed char* g = (signed char*)cBENewRaceInterface_newRace;
@@ -1344,12 +1344,12 @@ extern "C" void func_0020CC60(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CCF8);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_gotoNextOverlay);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void cReplay_stopAutoReplay(void* self);
-extern "C" void func_00231250(void* self, int a, int b, int refresh);
-extern "C" void func_00257610(void* self, int a1);
+extern "C" void cGame_setState(void* self, int a, int b, int refresh);
+extern "C" void cGameComm_localDisconnected(void* self, int a1);
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 extern signed char D_00535C12[];
@@ -1359,7 +1359,7 @@ extern int D_004A2708;
 
 
 // Continues after a result dialog closes, depending on the current overlay state and the pending dialog.
-extern "C" void func_0020CCF8(void)
+extern "C" void cOVStateManager_gotoNextOverlay(void)
 {
     cOVStateManager_mStatus = 0;
     char* st = (char*)cUIStateStack_getCurrentState(((char*)((SSXApp)->Game)->UI) + 0x18);
@@ -1377,7 +1377,7 @@ extern "C" void func_0020CCF8(void)
             break;
         case 1:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
-            func_00231250(SSXApp->Game, 0xD, 0, 1);
+            cGame_setState(SSXApp->Game, 0xD, 0, 1);
             break;
         case 2:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
@@ -1403,7 +1403,7 @@ extern "C" void func_0020CCF8(void)
             cBE_getInterface_Fv(SSXApp->BE, 7);
             if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                 if (cGameComm_mGameComm != 0) {
-                    func_00257610((char*)cGameComm_mGameComm, 0);
+                    cGameComm_localDisconnected((char*)cGameComm_mGameComm, 0);
                 }
                 cGame_exit(SSXApp->Game, 0);
             } else {
@@ -1417,15 +1417,15 @@ extern "C" void func_0020CCF8(void)
             cOVStateManager_triggerOverlay(0x13);
         } else {
             char* b = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
-            if (func_00158F30(b) > 0 || *(int*)(b + 0x10) != 0) {
+            if (cBERewardInterface_getTotalNumUserAwards(b) > 0 || *(int*)(b + 0x10) != 0) {
                 cOVStateManager_triggerOverlay(0x10);
             } else {
-                cOVStateManager_triggerOverlay(func_0020A8B0(kind, type));
+                cOVStateManager_triggerOverlay(cOVStateManager_getResultsOverlay(kind, type));
             }
         }
         break;
     case 16:
-        cOVStateManager_triggerOverlay(func_0020A8B0(kind, type));
+        cOVStateManager_triggerOverlay(cOVStateManager_getResultsOverlay(kind, type));
         break;
     case 8:
     case 9:
@@ -1455,10 +1455,10 @@ extern "C" void func_0020CCF8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CFD0);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_update);
 #ifdef SKIP_ASM
 extern "C" void cOVStateManager_removePDATemplate(void);
-extern "C" void func_0039F840(void *);
+extern "C" void cUIStateStack_purgeNormalStates(void *);
 
 struct sFlag_CFD0 {
     int f0;
@@ -1468,7 +1468,7 @@ struct sFlag_CFD0 {
 
 
 
-extern "C" void func_0020CFD0(void)
+extern "C" void cOVStateManager_update(void)
 {
     char *mgr = ((char*)((SSXApp)->Game)->UI);
     char *st = 0;
@@ -1479,7 +1479,7 @@ extern "C" void func_0020CFD0(void)
     case 0:
         break;
     case 1:
-        func_0020CCF8();
+        cOVStateManager_gotoNextOverlay();
         break;
     case 2:
         cOVStateManager_mStatus = 0;
@@ -1489,7 +1489,7 @@ extern "C" void func_0020CFD0(void)
             if (*(int *)(st + 0x98) == 8) {
                 cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-                    func_0039F840(mgr + 0x18);
+                    cUIStateStack_purgeNormalStates(mgr + 0x18);
                 }
             }
         }
@@ -1497,11 +1497,11 @@ extern "C" void func_0020CFD0(void)
     case 3:
         cOVStateManager_mStatus = 0;
         cOVStateManager_removePDATemplate();
-        func_0039F840(((char*)((SSXApp)->Game)->UI) + 0x18);
+        cUIStateStack_purgeNormalStates(((char*)((SSXApp)->Game)->UI) + 0x18);
         break;
     case 4:
         cOVStateManager_mStatus = 0;
-        func_00231250(((SSXApp)->Game), 0xE, 2, 0);
+        cGame_setState(((SSXApp)->Game), 0xE, 2, 0);
         break;
     }
 }
@@ -1768,20 +1768,20 @@ extern "C" void cGame_exit(void* game, int toFrontEnd);
 extern "C" void cGame_restart(void* self);
 void cReplay_stopAutoReplay(void* self);
 extern "C" void cRider_quitEvent(char* self);
-extern "C" void func_00231250(void* self, int a, int b, int refresh);
+extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 extern "C" void cGameModeMan_initGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" void cBE_setState(int state);
-extern "C" void* func_00212138(void* self, void* a1, int a2);
-extern "C" void* func_00211088(void* self, void* a1, int a2, int a3);
-extern "C" void func_0030B758(void* self);
+extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* a1, int a2);
+extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* a1, int a2, int a3);
+extern "C" void cWScriptMan_quitLocalMission(void* self);
 extern "C" void cAI_initFreeride(void* self);
 extern "C" void cRider_putAtStartpoint(void* self, int a1, int a2);
 extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 extern "C" void cGame_partialRestart(void* self);
 void func_00238348(void* self);
-extern "C" void func_00257610(void* self, int a1);
+extern "C" void cGameComm_localDisconnected(void* self, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
 extern int D_004A2708;
@@ -1879,7 +1879,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 } else {
                     cReplay_stopAutoReplay(SSXApp->Game->Replay);
                     func_00238348(SSXApp->GameModeMan);
-                    func_00231250(SSXApp->Game, 0xD, 0, 1);
+                    cGame_setState(SSXApp->Game, 0xD, 0, 1);
                     cOVStateManager_mStatus = 3;
                 }
                 break;
@@ -1889,7 +1889,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 *(int*)(self + 0x54) = 0;
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (cGameComm_mGameComm) {
-                    func_00257610((char*)cGameComm_mGameComm, 0);
+                    cGameComm_localDisconnected((char*)cGameComm_mGameComm, 0);
                 }
                 int any = 0;
                 int z = 0;
@@ -1901,7 +1901,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 chk:
                 if (any) {
                     char* ui = (char*)SSXApp->Game->UI;
-                    sStFlags_20D5A8* st = (sStFlags_20D5A8*)func_00212138(cMemMan_alloc(0x234, str_Save_Profile, 0x100, 0), *(void**)(self + 0x10), 1);
+                    sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(cMemMan_alloc(0x234, str_Save_Profile, 0x100, 0), *(void**)(self + 0x10), 1);
                     st->mode = 1;
                     cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
                 } else {
@@ -1919,7 +1919,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 break;
             case 3:
                 Pop_20D5A8();
-                func_0030B758(cWScriptMan_TheWScriptMan);
+                cWScriptMan_quitLocalMission(cWScriptMan_TheWScriptMan);
                 break;
             case 4: {
                 cReplay_stopAutoReplay(SSXApp->Game->Replay);
@@ -1934,7 +1934,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
                 cAI_initFreeride(SSXApp->Game->AI);
                 ((sI10_D5A8*)missionIface)->f10 = 1;
-                func_00231250(SSXApp->Game, 1, 1, 0);
+                cGame_setState(SSXApp->Game, 1, 1, 0);
                 cGame_partialRestart(SSXApp->Game);
                 cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1, 2);
                 cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
@@ -1947,7 +1947,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
             case 6: {
                 ((sSelf_D5A8*)self)->f54 = 0;
                 char* ui = (char*)SSXApp->Game->UI;
-                sStFlags_20D5A8* st = (sStFlags_20D5A8*)func_00211088(cMemMan_alloc(0x27C, str_Save_Profile, 0x100, 0), *(void**)(self + 0x10), *(unsigned char*)(self + 0x14), 0x18);
+                sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(0x27C, str_Save_Profile, 0x100, 0), *(void**)(self + 0x10), *(unsigned char*)(self + 0x14), 0x18);
                 st->mode = 1;
                 cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
                 break;

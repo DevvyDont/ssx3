@@ -309,7 +309,7 @@ struct sAnimMemED80 { char d[0x70]; };
 extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self);
 extern "C" void func_00104D50(void* anim, void* rider);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void func_00312598(void* self, int a1);
+extern "C" void cRiderAnimBase_setupAnimation(void* self, int a1);
 extern "C" void cFERider_initBoneMap(void* self);
 extern char str_RiderAnim[];
 extern void* cRiderAnim_vtbl[];
@@ -346,7 +346,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     *(int*)(anim + 0x64) = 0;
     func_00104D50(anim, self);
     cRiderAnimBase_play(self->anim, 0x1B2, 0, -1.0f);
-    func_00312598(self->anim, 0);
+    cRiderAnimBase_setupAnimation(self->anim, 0);
     sHalfED80 p[2];
     p[1] = tPose_Identity;
     p[0] = tPose_Identity;
@@ -503,8 +503,8 @@ extern "C" int func_001A0100(int* self);
 extern "C" int func_0019FD58(int* self);
 extern "C" void func_0019F780(int* self);
 extern "C" void func_0019F2D0(void* self);
-extern "C" void func_003123C0(void* anim, int a1, float blend);
-extern "C" void func_00312490(void* anim);
+extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
+extern "C" void cRiderAnimBase_expireAnimation(void* anim);
 extern "C" void func_002F1A08(void* p);
 extern "C" void func_002ECF78(void* p);
 
@@ -569,8 +569,8 @@ extern "C" void func_0019F138(void* selfp)
     }
     if (self->fCC8 != 0) {
         if (self->anim != 0) {
-            func_003123C0(self->anim, 0, 1.0f);
-            func_00312490(self->anim);
+            cRiderAnimBase_updateAnimation(self->anim, 0, 1.0f);
+            cRiderAnimBase_expireAnimation(self->anim);
         }
         func_0019F2D0(self);
         func_002F1A08(self->fC70);
@@ -916,10 +916,10 @@ extern "C" void func_0019F718(void* self, int slot, cQuad128* src)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F740);
 #ifdef SKIP_ASM
-extern "C" void func_00312AA0__FPvi(int, int);
+extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(int, int);
 
 extern "C" void func_0019F740(void *riderSlot) {
-    func_00312AA0__FPvi((*(int *)((char*)(riderSlot) + (0xC))), 2);
+    cRiderAnimBase_getCurrentAnimID__FPvi((*(int *)((char*)(riderSlot) + (0xC))), 2);
 }
 #endif
 //100%

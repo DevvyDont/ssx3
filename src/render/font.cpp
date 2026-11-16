@@ -1090,7 +1090,7 @@ extern "C" void* func_00393008(void* self, ...)
 }
 #endif
 
-INCLUDE_ASM("render/font", func_00393048);
+INCLUDE_ASM("render/font", __sti__all_in_one_render_cpp);
 
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetDTV__FPv);
@@ -2437,22 +2437,22 @@ void func_00394C60(void* self)
 }
 #endif
 
-extern "C" void* func_0038AE28(void* self);
+extern "C" void* cLightMan__cLightMan(void* self);
 
 //100%
 INCLUDE_ASM("render/font", cPS2LightMan__cPS2LightMan__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the PS2 light manager through the light-manager destructor func_0038AE28().
+ * Destroys the PS2 light manager through the light-manager destructor cLightMan__cLightMan().
  *
  * That destructor clears the global cLightMan_TheLightMan and frees the object when bit 0 of the destructor flags is set.
- * Only @p self is declared here: the flags reach func_0038AE28() unchanged in their register.
+ * Only @p self is declared here: the flags reach cLightMan__cLightMan() unchanged in their register.
  *
- * @return no meaningful value (func_0038AE28() returns nothing)
+ * @return no meaningful value (cLightMan__cLightMan() returns nothing)
  */
 void* cPS2LightMan__cPS2LightMan(void* self)
 {
-    return func_0038AE28(self);
+    return cLightMan__cLightMan(self);
 }
 #endif
 
@@ -4898,13 +4898,13 @@ extern "C" int *func_003969F0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396A00);
+INCLUDE_ASM("render/font", cVisualEffectsTest__cVisualEffectsTest);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
-extern "C" void func_00396A00(int* self, int flags)
+extern "C" void cVisualEffectsTest__cVisualEffectsTest(int* self, int flags)
 {
     *(void**)self = D_00488680;
     if (flags & 1) {
@@ -5178,7 +5178,7 @@ extern "C" void func_00396D30(int* self, int flags)
 }
 #endif
 
-extern "C" void* func_00393048(int, int);
+extern "C" void* __sti__all_in_one_render_cpp(int, int);
 
 //100%
 INCLUDE_ASM("render/font", func_00396D60);
@@ -5673,25 +5673,25 @@ INCLUDE_ASM("render/font", func_003970F8__FPv);
 #ifdef SKIP_ASM
 void* func_003970F8(void* self)
 {
-    return func_00393048(1, 0xffff);
+    return __sti__all_in_one_render_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_00393048(int, int);
+extern "C" void* __sti__all_in_one_render_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("render/font", func_00397118__FPv);
 #ifdef SKIP_ASM
 void* func_00397118(void* self)
 {
-    return func_00393048(0, 0xffff);
+    return __sti__all_in_one_render_cpp(0, 0xffff);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00397138__FPvi);
+INCLUDE_ASM("render/font", cUIAnimationBank_setData__FPvi);
 #ifdef SKIP_ASM
-void func_00397138(void* self, int val)
+void cUIAnimationBank_setData(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }

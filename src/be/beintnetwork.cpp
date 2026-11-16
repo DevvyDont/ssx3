@@ -51,9 +51,9 @@ extern "C" void func_0014E1F8(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E2C0__FPv);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getSyncDataSize__FPv);
 #ifdef SKIP_ASM
-int func_0014E2C0(void* self)
+int cBENetworkInterface_getSyncDataSize(void* self)
 {
     return 0xC44;
 }
@@ -168,7 +168,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setSyncData);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00151600(void* p, int i, int arg);
+extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
 extern "C" void func_00156810(void* self);
 extern sNetTrip_E2C8 D_005308B8_E5C8[] __asm__("D_005308B8");
 
@@ -190,7 +190,7 @@ public:
  *
  * Restores the race settings and reloads NewRace (BE interface 0); on the client it also takes records 2-5
  * and the shared option pair. It stores the player's record and option record, re-initialises that
- * character's profile (func_00151600, func_00156810), copies the profile pieces back and reloads NewPlayer
+ * character's profile (cBECharProfileDB_init, func_00156810), copies the profile pieces back and reloads NewPlayer
  * (1) and BAGT (6), each reload being the interface's virtual discard (slot 2).
  *
  * @param player  the player slot the data belongs to (0 host, 1 client)
@@ -213,7 +213,7 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
     D_005308B8_E5C8[player] = (&in->t0)[player];
-    func_00151600(&D_004A6CA8_E5C8[player][characterId], characterId, 1);
+    cBECharProfileDB_init(&D_004A6CA8_E5C8[player][characterId], characterId, 1);
     func_00156810(D_004A6CA8_E5C8[player]);
     for (int k = 0; k < 0x20D; k++)
         ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
@@ -255,7 +255,7 @@ extern "C" void cBENetworkInterface_copyProfile(cBENetworkInterface* self, int s
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_preInitBE);
 #ifdef SKIP_ASM
-extern "C" void func_001567B8(void* self, int arg);
+extern "C" void cBEProfileLib_init(void* self, int arg);
 // PORT: func_0014EB08 is defined (void) in this unit but called with self here.
 void func_0014EB08_self(void* self) __asm__("func_0014EB08");
 
@@ -270,13 +270,13 @@ extern sRiderEntry_0014E9F8 D_00535B3C;
 /**
  * Prepares the back end before the online handshake exchanges sync data.
  *
- * Re-initialises profile 2's ten character records (func_001567B8(D_004BA348, 0)); on the client it copies
+ * Re-initialises profile 2's ten character records (cBEProfileLib_init(D_004BA348, 0)); on the client it copies
  * player record 0 into record 1 and profile 0 into profile 1 (the client is player 1 online). Then it swaps
  * the two players' option records (func_0014EB08), which postInitBE swaps back.
  */
 extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
 {
-    func_001567B8(D_004BA348, 0);
+    cBEProfileLib_init(D_004BA348, 0);
     if (D_00534B38[0] == 0)
     {
         sRiderEntry_0014E9F8* riderEntry = &D_00535B3C;

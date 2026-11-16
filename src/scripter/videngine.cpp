@@ -58,12 +58,12 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/videngine", func_002839A8);
+INCLUDE_ASM("scripter/videngine", cVidEngine_PlayVideo);
 #ifdef SKIP_ASM
 extern "C" int func_00253860(void*);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PauseSFX(void*);
-extern "C" void func_002EA820(void*);
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);
 extern int D_004A2A54;
 extern int cPauseState_Flags;
 extern int D_005366E8[];
@@ -75,7 +75,7 @@ struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
 struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
 struct sVtEnt { short delta; short index; void* fn; };
 
-extern "C" int func_002839A8(sVidPlayer* self)
+extern "C" int cVidEngine_PlayVideo(sVidPlayer* self)
 {
     void* p = self->p;
     if (p == 0) return 0;
@@ -90,7 +90,7 @@ extern "C" int func_002839A8(sVidPlayer* self)
     self->f14 = 0;
     int s = q->state;
     if (s != 0 && s != 2) self->f14 = 1;
-    func_002EA820(q);
+    cCutSceneTransitionMan_ForceToRegularMode(q);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
@@ -107,15 +107,15 @@ extern "C" int func_002839A8(sVidPlayer* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/videngine", func_00283AA0);
+INCLUDE_ASM("scripter/videngine", cVidEngine_UpdateVideo);
 #ifdef SKIP_ASM
-extern "C" void func_00253938(void* self);
+extern "C" void cMoviePlayer_asyncUpdate(void* self);
 
-extern "C" void func_00283AA0(void* self)
+extern "C" void cVidEngine_UpdateVideo(void* self)
 {
     void* p = *(void**)self;
     if (p != 0 && *(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) == 0) {
-        func_00253938(p);
+        cMoviePlayer_asyncUpdate(p);
         *(int*)((char*)self + 0x8) = 1;
     }
 }

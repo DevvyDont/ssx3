@@ -66,17 +66,17 @@ extern "C" void tModifierBlock_remTransformModifier(tModifierBlock* self);
 extern "C" void tModifierBlock_remUVScrollModifier(tModifierBlock* self);
 extern "C" void tModifierBlock_remTexFlipModifier(tModifierBlock* self);
 extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self);
-extern "C" void func_003531D0(void* self);
-extern "C" void func_00353300(void* self, unsigned int mask);
-extern "C" void func_0035B6D0(void* self);
-extern "C" void func_00345760(void* self);
+extern "C" void tModifierBlock_remEffectModifier(void* self);
+extern "C" void tModifierBlock_remRailModifier(void* self, unsigned int mask);
+extern "C" void cRailLink_unlink(void* self);
+extern "C" void cEffectLink_unlink(void* self);
 void operator_delete(int* ptr);
 
 /**
  * Destroys a modifier block and everything it owns.
  *
  * Deletes the node, frees the two buffers at offsets 4 and 8, deletes the object at offset 0xC, every effect
- * link and every rail link (func_00353300 with id ~0), then tears down the two list heads.
+ * link and every rail link (tModifierBlock_remRailModifier with id ~0), then tears down the two list heads.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -86,12 +86,12 @@ extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
     tModifierBlock_remUVScrollModifier(self);
     tModifierBlock_remTexFlipModifier(self);
     tModifierBlock_remPhysicsModifier(self);
-    func_003531D0(self);
-    func_00353300(self, 0xFFFFFFFF);
+    tModifierBlock_remEffectModifier(self);
+    tModifierBlock_remRailModifier(self, 0xFFFFFFFF);
     self->field_0x24 = cRailLink_vtbl;
-    func_0035B6D0(&self->field_0x1C);
+    cRailLink_unlink(&self->field_0x1C);
     self->field_0x18 = cEffectLink_vtbl;
-    func_00345760(&self->field_0x10);
+    cEffectLink_unlink(&self->field_0x10);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -633,7 +633,7 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_003531D0);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_remEffectModifier);
 #ifdef SKIP_ASM
 struct sModBlockDtorVEntry {
     short delta;
@@ -647,7 +647,7 @@ struct sModBlockLink {
     sModBlockDtorVEntry* vt;      // 0x8
 };
 
-extern "C" void func_003531D0(void* self)
+extern "C" void tModifierBlock_remEffectModifier(void* self)
 {
     sModBlockLink* head = *(sModBlockLink**)((char*)self + 0x10);
     if (head != 0) {
@@ -726,7 +726,7 @@ extern "C" void func_00353278(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353300);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_remRailModifier);
 #ifdef SKIP_ASM
 struct sModBlockDtorVEntry3300 {
     short delta;
@@ -742,7 +742,7 @@ struct sModBlockLink3300 {
     unsigned int id;                       // 0x30
 };
 
-extern "C" void func_00353300(void* self, unsigned int id)
+extern "C" void tModifierBlock_remRailModifier(void* self, unsigned int id)
 {
     sModBlockLink3300* head = *(sModBlockLink3300**)((char*)self + 0x1C);
     if (head == 0) return;
@@ -769,7 +769,7 @@ extern "C" void func_00353300(void* self, unsigned int id)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353398);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_transferEffectModifier);
 #ifdef SKIP_ASM
 struct sMbVEntryV3398 {
     short delta;
@@ -777,16 +777,16 @@ struct sMbVEntryV3398 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00345720(void* pool, void* item);
+extern "C" void cEffectLink_append(void* pool, void* item);
 
-extern "C" void func_00353398(void* self, void* list)
+extern "C" void tModifierBlock_transferEffectModifier(void* self, void* list)
 {
     void* p = *(void**)list;
     while (p != 0) {
         void* next = *(void**)p;
         sMbVEntryV3398* vt = *(sMbVEntryV3398**)((char*)p + 0x8);
         vt[3].fn((char*)p + vt[3].delta);
-        func_00345720((char*)self + 0x10, p);
+        cEffectLink_append((char*)self + 0x10, p);
         p = next;
     }
     *(void**)list = 0;
@@ -973,7 +973,7 @@ extern "C" void* func_003459A8(void* self, sMbStream36D8* s);
 extern "C" void* cDynamicParticleModifier_cDynamicParticleModifier(void* self, sMbStream36D8* s);
 extern "C" void* func_003461C0(void* self, sMbStream36D8* s);
 extern "C" void* cRailModifier_cRailModifier1(void* self, sMbStream36D8* s);
-extern "C" void func_00345720(void* pool, void* item);
+extern "C" void cEffectLink_append(void* pool, void* item);
 extern "C" void cRailLink_append(void* list, void* item);
 
 extern const char str_SplineModifier[];
@@ -996,7 +996,7 @@ extern const char str_RailModifier[];
  * The root transform is built by type: 1 spline, 2 multi-spline, 3 position, 4 parent, 5 roller, 6 magnet, 7
  * AvaSpline modifier; UV scroll, tex flip and (physics type 1) boost modifiers follow their flags. Effects
  * are rebuilt by type (1 particle, 2 dynamic particle, 3 halo) and appended to Effect (+0x10), rails to Rail
- * (+0x1C). An unknown effect type appends a null pointer, which func_00345720 writes through.
+ * (+0x1C). An unknown effect type appends a null pointer, which cEffectLink_append writes through.
  *
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  */
@@ -1048,7 +1048,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         } else {
             effect = 0;
         }
-        func_00345720((char*)self + 0x10, effect);
+        cEffectLink_append((char*)self + 0x10, effect);
     }
     for (i = 0; i < hdr.numB; i++) {
         cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(0x90, str_RailModifier, 0x20000000, 0), stream));
@@ -1059,9 +1059,9 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
 extern void* cSkyBox_vtbl[];
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353AC0__FPv);
+INCLUDE_ASM("object/modifierblock", cSkyBox_cSkyBox__FPv);
 #ifdef SKIP_ASM
-void* func_00353AC0(void* self)
+void* cSkyBox_cSkyBox(void* self)
 {
     *(void***)((char*)self + 0xc) = cSkyBox_vtbl;
     *(int*)((char*)self + 0x10) = -1;
@@ -1228,7 +1228,7 @@ struct sMbWorld3CF0 {
     sMbModelSet3CF0** sets;     // 0x8
 };
 
-extern "C" sMbWorld3CF0** func_002D1BD8();
+extern "C" sMbWorld3CF0** cObjectInterface_getWorld();
 int func_00353D98(void* self);
 
 static inline void* refToPtr3CF0(unsigned int p)
@@ -1266,7 +1266,7 @@ extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
         func_00353D98(self);
         return;
     }
-    sMbWorld3CF0* w = *func_002D1BD8();
+    sMbWorld3CF0* w = *cObjectInterface_getWorld();
     if (w->table->entries[id].count > 0) {
         sMbModelRef3CF0 ref;
         ref.id = id & 0xFF;
@@ -1322,7 +1322,7 @@ extern "C" void cSpring__cSpring(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353E08);
+INCLUDE_ASM("object/modifierblock", cSpring_setupSpring);
 #ifdef SKIP_ASM
 extern "C" void cSpring_setupNodes(void* self);
 
@@ -1337,7 +1337,7 @@ struct sSpring_3E08 {
     float seg;      // 0x20
 };
 
-extern "C" void func_00353E08(void* self, sSpringDesc_3E08* d, float len)
+extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* d, float len)
 {
     sSpring_3E08* s = (sSpring_3E08*)self;
     int n = d->count;

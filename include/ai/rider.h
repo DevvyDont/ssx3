@@ -78,14 +78,14 @@ struct sRiderPair {
 
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
-    /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (func_0011D390)
-    /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in cComputer_isFarBehind, func_0010DEF0
-    /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in cComputer_isFarAhead
+    /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)
+    /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, func_0010DEF0
+    /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarAhead
     /* 0x0E4 */ char unk_0E4[0x8];
     /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
-    /* 0x0F0 */ int mHasRival; // [X] cleared on reset (func_0011D390)
-    /* 0x0F4 */ int mLastShoveFrame; // [X] cleared on reset (func_0011D390)
-    /* 0x0F8 */ int mRivalIndex; // [X] set to -1 on reset (func_0011D390)
+    /* 0x0F0 */ int mHasRival; // [X] cleared on reset (cRider_initAlways)
+    /* 0x0F4 */ int mLastShoveFrame; // [X] cleared on reset (cRider_initAlways)
+    /* 0x0F8 */ int mRivalIndex; // [X] set to -1 on reset (cRider_initAlways)
     /* 0x0FC */ char unk_0FC[0x4];
     /* 0x100 */ int unk_100; // cleared when the rider quits (cRider_doFinishEvent)
     /* 0x104 */ char unk_104[0xC];
@@ -95,18 +95,18 @@ struct cRider {
     /* 0x140 */ char unk_140[0x10];
     /* 0x150 */ int mUseRootPoseOverride; // [X]
     /* 0x154 */ char unk_154[0x1C];
-    /* 0x170 */ t4Vector unk_170; // dotted with mVelocity (rejected above 277.78) and the launch dir (func_00114DB8)
-    /* 0x180 */ t4Vector unk_180; // facing-like: dotted with the wall/contact normal (func_001057B8); its dot with the launch dir must be >= 0 (func_00114DB8)
+    /* 0x170 */ t4Vector unk_170; // dotted with mVelocity (rejected above 277.78) and the launch dir (cRider_isChangeFakieAir)
+    /* 0x180 */ t4Vector unk_180; // facing-like: dotted with the wall/contact normal (cRider_doObjectCollision); its dot with the launch dir must be >= 0 (cRider_isChangeFakieAir)
     /* 0x190 */ char unk_190[0x10];
     /* 0x1A0 */ t4Matrix mMatrix; // [P] rows getSide/getFront/getUp (unshifted) + position; built from mRotation/mPosition
-    /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (func_00140910); [P] setVelocity
+    /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (cRider_getVelocity); [P] setVelocity
     /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by cRider_OnStartObjectUse; .cur of [0],[2],[3],[8] read as lean input
     /* 0x2D4 */ unsigned short unk_2D4; // = hit object +0xA (func_001242B0)
     /* 0x2D6 */ char unk_2D6[0x2];
     /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (cRider_OnStartObjectUse)
-    /* 0x2DC */ float mSpinRate; // [X] cleared on transport (func_0011D660)
-    /* 0x2E0 */ float mFlipRate; // [X] cleared on transport (func_0011D660)
-    /* 0x2E4 */ float unk_2E4; // 4th arg of cAirPredictor_startLaunchIntoAir after a bounce (func_001057B8)
+    /* 0x2DC */ float mSpinRate; // [X] cleared on transport (cRider_putAt)
+    /* 0x2E0 */ float mFlipRate; // [X] cleared on transport (cRider_putAt)
+    /* 0x2E4 */ float unk_2E4; // 4th arg of cAirPredictor_startLaunchIntoAir after a bounce (cRider_doObjectCollision)
     /* 0x2E8 */ float mPowerUpBoostTimer; // [X] decays each frame (cRider_updateBoost)
     /* 0x2EC */ float mPowerUpTrickTimer; // [X]
     /* 0x2F0 */ float mUberTimer; // [X]
@@ -120,22 +120,22 @@ struct cRider {
     /* 0x310 */ float mCheatSteerAlign; // [X] = 0.18 (ctor)
     /* 0x314 */ float mCheatSpeedLerp; // [X] = 0.015 (ctor)
     /* 0x318 */ float unk_318;
-    /* 0x31C */ float unk_31C; // cleared on transport (func_0011D660); lwc1, compared > 0.0f, scales mGroundNormal (func_0011EB98)
+    /* 0x31C */ float unk_31C; // cleared on transport (cRider_putAt); lwc1, compared > 0.0f, scales mGroundNormal (cRider_updateSkeleton)
     /* 0x320 */ int unk_320; // copied into unk_2D8 (cRider_OnStartObjectUse)
-    /* 0x324 */ int mNaturalStance; // [X] = func_0014EF70(interface 2, mAIIndex) (func_0011D390)
-    /* 0x328 */ int mRailStyle; // [X] landing state 1..4 from the board-vs-ground angle (cRider_checkRailBoardCollisions); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (func_0010EB30)
-    /* 0x32C */ int unk_32C; // cleared on transport (func_0011D660)
+    /* 0x324 */ int mNaturalStance; // [X] = cBECharacterInterface_getIsGoofyFoot(interface 2, mAIIndex) (cRider_initAlways)
+    /* 0x328 */ int mRailStyle; // [X] landing state 1..4 from the board-vs-ground angle (cRider_checkRailBoardCollisions); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (cRider_flagEventWipeout)
+    /* 0x32C */ int unk_32C; // cleared on transport (cRider_putAt)
     /* 0x330 */ int mPressType; // [X] landing kind: 0 handler path, 1 anim 0x1A, else anim 0x22 (cRider_checkRailBoardCollisions)
     /* 0x334 */ char unk_334[0xC];
     /* 0x340 */ t4Vector mAttackDir; // [X] zeroed on transport; dot with the direction to another rider must be > 0 to shove (cRider_checkOpponentCollisions)
     /* 0x350 */ float mAttackBlend; // [X] shove-strength factor (cRider_checkOpponentCollisions)
-    /* 0x354 */ int mHudMsgExpire; // [X] = -1 on transport (func_0011D660)
-    /* 0x358 */ int mHudMsgId; // [X] cleared on transport (func_0011D660)
-    /* 0x35C */ float unk_35C; // cleared on transport (func_0011D660); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
+    /* 0x354 */ int mHudMsgExpire; // [X] = -1 on transport (cRider_putAt)
+    /* 0x358 */ int mHudMsgId; // [X] cleared on transport (cRider_putAt)
+    /* 0x35C */ float unk_35C; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
     /* 0x360 */ char unk_360[0x10];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
     /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (func_001242B0)
-    /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (func_0011EB98)
+    /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (cRider_updateSkeleton)
     /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (func_001242B0)
     /* 0x3B0 */ t4Vector mGroundSide; // [X] Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, func_001242B0)
     /* 0x3C0 */ char unk_3C0[0x10];
@@ -164,11 +164,11 @@ struct cRider {
     /* 0x484 */ char unk_484[0x4C];
     /* 0x4D0 */ float mDistToFinish; // [X]
     /* 0x4D4 */ char unk_4D4[0xC8];
-    /* 0x59C */ int mOverlapCount; // [X] cleared on reset (func_0011D390)
-    /* 0x5A0 */ int unk_5A0; // cleared on reset (func_0011D390)
-    /* 0x5A4 */ int unk_5A4; // cleared on reset (func_0011D390)
-    /* 0x5A8 */ int unk_5A8; // cleared on reset (func_0011D390)
-    /* 0x5AC */ int unk_5AC; // cleared on reset (func_0011D390)
+    /* 0x59C */ int mOverlapCount; // [X] cleared on reset (cRider_initAlways)
+    /* 0x5A0 */ int unk_5A0; // cleared on reset (cRider_initAlways)
+    /* 0x5A4 */ int unk_5A4; // cleared on reset (cRider_initAlways)
+    /* 0x5A8 */ int unk_5A8; // cleared on reset (cRider_initAlways)
+    /* 0x5AC */ int unk_5AC; // cleared on reset (cRider_initAlways)
     /* 0x5B0 */ int unk_5B0;
     /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (cRider_updateSplit12)
     /* 0x5B8 */ unsigned int mVisitedIds; // [X]
@@ -193,9 +193,9 @@ struct cRider {
     /* 0x75C */ float mAudioSpeed; // [P] getAudioSpeed_0_to_1
     /* 0x760 */ int unk_760; // sound state = func_0011FE98(rider), written when it changes (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
     /* 0x764 */ int unk_764; // written with the same value as 0x760 (cSSXAudio_BeginRiderSound)
-    /* 0x768 */ int unk_768; // sound id from func_00291710(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
+    /* 0x768 */ int unk_768; // sound id from cSSXAudio_Surface(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
     /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one func_002934D0 result (cSSXAudio_HandleCarve)
-    /* 0x770 */ float unk_770; // fed to curve D_00482D30 for the sound volume (func_002948D0)
+    /* 0x770 */ float unk_770; // fed to curve D_00482D30 for the sound volume (cSSXAudio_Land)
     /* 0x774 */ int mWipeoutSlideHandle; // [P] GetWipeoutSlideHandle (bracketed +0x40)
     /* 0x778 */ int mWipeoutTumbleHandle; // [P] GetWipeoutTumbleHandle
     /* 0x77C */ cRiderHandler* mRiderHandler; // [P] getRiderHandler (bracketed +0x40)
@@ -224,7 +224,7 @@ struct cRider {
     /* 0x898 */ int mLOD; // [U] 0-2 from camera distance (func_00121F30)
     /* 0x89C */ int mBoneHips; // [X] index into mAnimModel's 0x20-byte transform array
     /* 0x8A0 */ int mBoneBoardRoot; // [X] same array
-    /* 0x8A4 */ int mBoneBoardChild; // [X] second bone index into mAnimModel localPos/localRot/bones, like unk_8A0 (func_0011EB98)
+    /* 0x8A4 */ int mBoneBoardChild; // [X] second bone index into mAnimModel localPos/localRot/bones, like unk_8A0 (cRider_updateSkeleton)
     /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (cPlayerIndicatorFX_render, func_002D5048)
     /* 0x8AC */ char unk_8AC[0x14];
     /* 0x8C0 */ long mUpperBodyBoneMask; // [X] 64-bit (PORT: long is 64-bit on the EE); copied to mRiderAnim+0x20 before each cRiderAnimBase_play, then reset to -1 (cRider_checkForPunch, cRider_checkForProximityAction)

@@ -3,13 +3,13 @@
 
 // cUIScrollBar: a scroll bar (record type 0x21): background, knob, up/down arrows and an object hidden when the list
 // is empty; cUITextScroll points at one (mpScrollBar). Size 0xCC: cUIScreen_createObjectByStruct does
-// operator new(0xCC, "UIScroll"...) + the cUIThing ctor func_0039FB30, zeroes 0x74..0x88 and 0xC0..0xC8, clears the
+// operator new(0xCC, "UIScroll"...) + the cUIThing ctor cUIThing_cUIThing, zeroes 0x74..0x88 and 0xC0..0xC8, clears the
 // two animation names, stores its vtable cUIScrollBar_vtbl and adopts the children named at rec+0x20 / rec+0x24.
 // Default ctors func_003A5F60 / cUIScrollBar_cUIScrollBar (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode,
 // written out flat below. Class name: SSX On Tour's DWARF (class cUIScrollBar 0xE0, the only On Tour widget with these
 // members); the preview keeps no name for it. EA's source file is not known; ui/uiscrollbar.h is our name.
 // Methods: vtable cUIScrollBar_vtbl slots 0 ~cUIScrollBar (cUIScrollBar__cUIScrollBar), 9 setUIData (cUIScrollBar_setUIData), 16 render2D
-// (cUIScrollBar_render2D), 21 getType (func_003A6000); func_0039DA20 (update position: pos, visible, total), cUIScrollBar_setScrollVisibile
+// (cUIScrollBar_render2D), 21 getType (func_003A6000); cUIScrollBar_setValues (update position: pos, visible, total), cUIScrollBar_setScrollVisibile
 // (show/hide arrows); accessors func_003A6008..func_003A60D8 (ui/uivector). Retail methods: ui/uiscreen 0x39D8C0-0x39DF28.
 //
 // A FLAT layout, like main/game.h. Members: On Tour's (each 0xC later there), placed by [R] the ctors and [U] the
@@ -48,20 +48,20 @@ struct cUIScrollBar {
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUIScrollBar
     cUIThing* mpObjBackground;       // 0x074 [O]; [R] = 0, then the record's child (hash rec+0x20); [U] func_003A6008 (sw);
-                                     //       the dtor cUIScrollBar__cUIScrollBar deletes it; render2D cUIScrollBar_render2D; func_0039DA20
+                                     //       the dtor cUIScrollBar__cUIScrollBar deletes it; render2D cUIScrollBar_render2D; cUIScrollBar_setValues
     cUIThing* mpObjKnob;             // 0x078 [O]; [R] = 0, then the child named at rec+0x24; [U] func_003A6010; the dtor
-                                     //       deletes it; func_0039DA20 / cUIScrollBar_setScrollVisibile move it
+                                     //       deletes it; cUIScrollBar_setValues / cUIScrollBar_setScrollVisibile move it
     cUIThing* mpUpArrow;             // 0x07C [O]; [R] = 0; [U] func_003A6018 (sw); cUIScrollBar_setScrollVisibile
     cUIThing* mpDownArrow;           // 0x080 [O]; [R] = 0; [U] func_003A6020 (sw); cUIScrollBar_setScrollVisibile
     cUIThing* mpHideOnEmpty;         // 0x084 [O]; [R] = 0; [U] func_003A6028 (sw); cUIScrollBar_setScrollVisibile
     int meHideState;                 // 0x088 [O] eScrollBarHide; [R] = 0; [U] func_003A6030 (sw)
-    char mszUpAnimation[25];         // 0x08C [O]; [R] [0] = 0 (sb); [U] func_003A6038 strcpy()s the name in; func_0039DA20
+    char mszUpAnimation[25];         // 0x08C [O]; [R] [0] = 0 (sb); [U] func_003A6038 strcpy()s the name in; cUIScrollBar_setValues
                                      //       plays the frame it labels
-    char mszDownAnimation[25];       // 0x0A5 [O]; [R] [0] = 0 (sb); [U] func_003A6088 strcpy; func_0039DA20
+    char mszDownAnimation[25];       // 0x0A5 [O]; [R] [0] = 0 (sb); [U] func_003A6088 strcpy; cUIScrollBar_setValues
     char unk_0BE[0x2];               // 0x0BE padding
-    int mValue;                      // 0x0C0 [O]; [R] = 0; [U] func_003A60D8 getValue (lw); func_0039DA20 stores the position
-    int mNumValues;                  // 0x0C4 [O]; [R] = 0; [U] func_0039DA20 (sw)
-    int mPage;                       // 0x0C8 [O]; [R] = 0; [U] func_0039DA20 (sw)
+    int mValue;                      // 0x0C0 [O]; [R] = 0; [U] func_003A60D8 getValue (lw); cUIScrollBar_setValues stores the position
+    int mNumValues;                  // 0x0C4 [O]; [R] = 0; [U] cUIScrollBar_setValues (sw)
+    int mPage;                       // 0x0C8 [O]; [R] = 0; [U] cUIScrollBar_setValues (sw)
 };
 
 CHECK_OFFSET(cUIScrollBar, mpPrev, 0x000);

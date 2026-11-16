@@ -338,7 +338,7 @@ void cAirPredictor_initLaunch(char* self, sQuad* launchPos, sQuad* launchVel)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/airpredictor", func_00113648);
+INCLUDE_ASM("ai/airpredictor", cAirPredictor_updateFlightPath);
 #ifdef SKIP_ASM
 extern sQuadR t4vect_Origin;
 extern sQuadR t4vect_XAxis;
@@ -385,7 +385,7 @@ static inline sVec4_3648 vu0Add_3648(const sVec4_3648& a, const sVec4_3648& b)
     return r;
 }
 
-extern "C" void func_00113648(char* self, sQuad* a, sQuad* b, float dt)
+extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* a, sQuad* b, float dt)
 {
     if (*(float*)(self + 0x98) > 60.0f) {
         if (*(int*)(self + 0xAC) == 2) {

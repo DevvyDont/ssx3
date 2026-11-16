@@ -280,11 +280,11 @@ extern "C" void func_00307A10(cWScriptProcList* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307A60);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnCollide);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307A60(void* self)
+extern "C" void cWScriptProcess_eventOnCollide(void* self)
 {
     void* script = *(void**)((char*)self + 0x34);
     if (script != 0) {
@@ -294,11 +294,11 @@ extern "C" void func_00307A60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307A90);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnJump);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307A90(void* self)
+extern "C" void cWScriptProcess_eventOnJump(void* self)
 {
     void* script = *(void**)((char*)self + 0x38);
     if (script != 0) {
@@ -308,11 +308,11 @@ extern "C" void func_00307A90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307AC0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnLand);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307AC0(void* self)
+extern "C" void cWScriptProcess_eventOnLand(void* self)
 {
     void* script = *(void**)((char*)self + 0x3c);
     if (script != 0) {
@@ -322,11 +322,11 @@ extern "C" void func_00307AC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307AF0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnTrick);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307AF0(void* self)
+extern "C" void cWScriptProcess_eventOnTrick(void* self)
 {
     void* script = *(void**)((char*)self + 0x40);
     if (script != 0) {
@@ -336,11 +336,11 @@ extern "C" void func_00307AF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307B20);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnWipeout);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307B20(void* self)
+extern "C" void cWScriptProcess_eventOnWipeout(void* self)
 {
     void* script = *(void**)((char*)self + 0x44);
     if (script != 0) {
@@ -350,11 +350,11 @@ extern "C" void func_00307B20(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307B50);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnReset);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307B50(void* self)
+extern "C" void cWScriptProcess_eventOnReset(void* self)
 {
     void* script = *(void**)((char*)self + 0x48);
     if (script != 0) {
@@ -364,11 +364,11 @@ extern "C" void func_00307B50(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307B80);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnCollect);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307B80(void* self)
+extern "C" void cWScriptProcess_eventOnCollect(void* self)
 {
     void* script = *(void**)((char*)self + 0x4c);
     if (script != 0) {
@@ -378,11 +378,11 @@ extern "C" void func_00307B80(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307BB0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnEvent1);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307BB0(void* self)
+extern "C" void cWScriptProcess_eventOnEvent1(void* self)
 {
     void* script = *(void**)((char*)self + 0x50);
     if (script != 0) {
@@ -392,11 +392,11 @@ extern "C" void func_00307BB0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307BE0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnEvent2);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307BE0(void* self)
+extern "C" void cWScriptProcess_eventOnEvent2(void* self)
 {
     void* script = *(void**)((char*)self + 0x54);
     if (script != 0) {
@@ -406,11 +406,11 @@ extern "C" void func_00307BE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307C10);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnEvent3);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307C10(void* self)
+extern "C" void cWScriptProcess_eventOnEvent3(void* self)
 {
     void* script = *(void**)((char*)self + 0x58);
     if (script != 0) {
@@ -480,11 +480,11 @@ extern "C" void cWScriptProcess_processStart(cWScriptProcess_processStart_sProc*
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307D00);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processUpdate);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
-extern "C" void func_00307D00(void* self)
+extern "C" void cWScriptProcess_processUpdate(void* self)
 {
     void* script = *(void**)((char*)self + 0x2c);
     if (script != 0) {
@@ -494,12 +494,12 @@ extern "C" void func_00307D00(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307D30);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processEnd);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 extern "C" void cWScriptProcess_end(void* self);
 
-extern "C" void func_00307D30(void* self)
+extern "C" void cWScriptProcess_processEnd(void* self)
 {
     *(int*)self = 3;
     void* script = *(void**)((char*)self + 0x30);
@@ -538,7 +538,7 @@ extern "C" void cWScriptProcess_end(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processComplete);
 #ifdef SKIP_ASM
-int func_0030B898(void* man, void* proc);
+int cWScriptMan_isProcessActive(void* man, void* proc);
 
 struct sVEntry00307DC8 {
     short delta;
@@ -549,13 +549,13 @@ struct sVEntry00307DC8 {
 /**
  * Completes a world-script process if its manager still has it on the running list.
  *
- * func_0030B898() looks for a process with the same id (+0x20) on the running list; when there is one, this
- * calls its own virtual slot 6, which for cWScriptProcess (func_00307D30) sets the state to 3, runs the script
- * at +0x30 and calls cWScriptProcess_end(). The task stepper func_00307E10 calls it after the last task.
+ * cWScriptMan_isProcessActive() looks for a process with the same id (+0x20) on the running list; when there is one, this
+ * calls its own virtual slot 6, which for cWScriptProcess (cWScriptProcess_processEnd) sets the state to 3, runs the script
+ * at +0x30 and calls cWScriptProcess_end(). The task stepper cWScriptProcess_endTask calls it after the last task.
  */
 extern "C" void cWScriptProcess_processComplete(void* self)
 {
-    if (func_0030B898(*(void**)((char*)self + 0x10), self) != 0) {
+    if (cWScriptMan_isProcessActive(*(void**)((char*)self + 0x10), self) != 0) {
         sVEntry00307DC8* vt = *(sVEntry00307DC8**)((char*)self + 0x5C);
         vt[6].fn((char*)self + vt[6].delta);
     }
@@ -563,9 +563,9 @@ extern "C" void cWScriptProcess_processComplete(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307E10);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_endTask);
 #ifdef SKIP_ASM
-class func_00307E10_cElem {
+class cWScriptProcess_endTask_cElem {
 public:
     char pad00[0x40];
     // vptr at 0x40
@@ -577,20 +577,20 @@ public:
     virtual void v06();
 };
 
-class func_00307E10_cProc {
+class cWScriptProcess_endTask_cProc {
 public:
     int state;
     int count;
     int cur;
     char pad0C[0x8];
-    func_00307E10_cElem* elems;
+    cWScriptProcess_endTask_cElem* elems;
     char pad18[0x44];
     // vptr at 0x5C
     virtual void v01();
     virtual void v02();
 };
 
-extern "C" void func_00307E10(func_00307E10_cProc* self)
+extern "C" void cWScriptProcess_endTask(cWScriptProcess_endTask_cProc* self)
 {
     if (self->state == 3) {
         return;
@@ -599,7 +599,7 @@ extern "C" void func_00307E10(func_00307E10_cProc* self)
     int next = self->cur + 1;
     if (next < self->count) {
         self->cur = next;
-        func_00307E10_cElem* e = &self->elems[next];
+        cWScriptProcess_endTask_cElem* e = &self->elems[next];
         e->v04();
     } else {
         self->v02();
@@ -691,9 +691,9 @@ extern "C" void func_00307F58(func_00307F58_sProc* self, int id)
 extern "C" void* cWScriptMan_getScriptCode(int);
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308018__FPv);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getScriptCode__FPv);
 #ifdef SKIP_ASM
-void* func_00308018(void* self)
+void* cWScriptProcess_getScriptCode(void* self)
 {
     return cWScriptMan_getScriptCode(*(int*)((char*)self + 0x10));
 }
@@ -789,8 +789,8 @@ extern "C" void* func_00308228(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_initTask);
 #ifdef SKIP_ASM
-// PORT: func_00308018 is declared (void*) but takes (self, id) and forwards id; bound by asm label
-void* func_00308018_2(void* self, int id) __asm__("func_00308018__FPv");
+// PORT: cWScriptProcess_getScriptCode is declared (void*) but takes (self, id) and forwards id; bound by asm label
+void* cWScriptProcess_getScriptCode_2(void* self, int id) __asm__("cWScriptProcess_getScriptCode__FPv");
 
 struct cWScriptTask_initTask_sDef {
     int f0;
@@ -811,7 +811,7 @@ struct cWScriptTask_initTask_sObj {
  *
  * Stores @p owner, copies the task id from the data's first word to +0x4 (func_00307EC0 finds tasks by it), and
  * turns the data's 3 + 10 script resource ids into code pointers with cWScriptMan_getScriptCode() through the
- * owner's manager (func_00308018).
+ * owner's manager (cWScriptProcess_getScriptCode).
  *
  * @param owner  the cWScriptProcess the task belongs to
  * @param def    the task's data record (On Tour: tWScriptTaskData)
@@ -823,10 +823,10 @@ extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* ow
     self->owner = owner;
     self->f4 = def->f0;
     for (i = 0; i < 3; i++) {
-        self->a[i] = func_00308018_2(self->owner, def->a[i]);
+        self->a[i] = cWScriptProcess_getScriptCode_2(self->owner, def->a[i]);
     }
     for (j = 0; j < 10; j++) {
-        self->b[j] = func_00308018_2(self->owner, def->b[j]);
+        self->b[j] = cWScriptProcess_getScriptCode_2(self->owner, def->b[j]);
     }
 }
 #endif
@@ -1208,22 +1208,22 @@ extern "C" int func_00308798(void* a, func_00308798_cObj* obj)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003087D0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_cWScriptMan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0030C738(void* p);
+extern "C" void tMissionMenuQueue_tMissionMenuQueue(void* p);
 void func_0030B058(void* p);
-extern "C" void func_0030C390(void* p);
+extern "C" void cCollectPool_init(void* p);
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern "C" void func_00308988(void* self);
+extern "C" void cWScriptMan_init(void* self);
 extern char D_00489C00[];
 // cWScriptMan_TheWScriptMan is declared `int` later in the unit; it holds the current process.
-extern void* func_003087D0_current __asm__("cWScriptMan_TheWScriptMan");
+extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan");
 
-extern "C" void* func_003087D0(void* self)
+extern "C" void* cWScriptMan_cWScriptMan(void* self)
 {
     *(unsigned int*)((char*)self + 0x2C) = 0xFFFFFFFF;
-    func_0030C738((char*)self + 0x1C4);
+    tMissionMenuQueue_tMissionMenuQueue((char*)self + 0x1C4);
     *(void**)((char*)self + 0x494) = D_00489C00;
     func_0030B058((char*)self + 0x2B4);
     func_0030B058((char*)self + 0x2B8);
@@ -1237,30 +1237,30 @@ extern "C" void* func_003087D0(void* self)
         for (j = 63; j != -1; j--) {
             *q++ = 0xFFFFFFFF;
         }
-        func_0030C390(p);
+        cCollectPool_init(p);
         p = next;
     }
-    func_003087D0_current = self;
+    cWScriptMan_cWScriptMan_current = self;
     *(char**)((char*)self + 0x28C) = (char*)cWorld_m_pTheWorld;
     MEM_fill((char*)self + 0x3CC, 0, 0xC8);
-    func_00308988(self);
+    cWScriptMan_init(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003088D8);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan__cWScriptMan);
 #ifdef SKIP_ASM
-extern "C" void func_00308A48(void* self);
-extern "C" void func_0030B068(void* self, int flags);
+extern "C" void cWScriptMan_purgeGlobalTables(void* self);
+extern "C" void cProcessList__cProcessList(void* self, int flags);
 void operator_delete(int* p);
 extern char D_00489C00[];
 extern int cWScriptMan_TheWScriptMan;
 
-extern "C" void func_003088D8(void* self, int flags)
+extern "C" void cWScriptMan__cWScriptMan(void* self, int flags)
 {
     *(void**)((char*)self + 0x494) = D_00489C00;
-    func_00308A48(self);
+    cWScriptMan_purgeGlobalTables(self);
     cWScriptMan_TheWScriptMan = 0;
     if ((char*)self + 0x2C0 != 0) {
         char* p = (char*)self + 0x2C0 + 0x10C;
@@ -1268,9 +1268,9 @@ extern "C" void func_003088D8(void* self, int flags)
             p -= 0x10C;
         }
     }
-    func_0030B068((char*)self + 0x2BC, 2);
-    func_0030B068((char*)self + 0x2B8, 2);
-    func_0030B068((char*)self + 0x2B4, 2);
+    cProcessList__cProcessList((char*)self + 0x2BC, 2);
+    cProcessList__cProcessList((char*)self + 0x2B8, 2);
+    cProcessList__cProcessList((char*)self + 0x2B4, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1278,16 +1278,16 @@ extern "C" void func_003088D8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308988);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_init);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern "C" void func_0030C760(void* p);
-extern "C" void func_00308AA0(void* self);
+extern "C" void tMissionMenuQueue_init(void* p);
+extern "C" void cWScriptMan_rebuildGlobalTables(void* self);
 
 #define WSP308988_I(off) (*(int*)((char*)self + (off)))
 #define WSP308988_U(off) (*(unsigned int*)((char*)self + (off)))
 
-extern "C" void func_00308988(void* self)
+extern "C" void cWScriptMan_init(void* self)
 {
     WSP308988_I(0x290) = 0;
     WSP308988_I(0x0) = 0;
@@ -1313,10 +1313,10 @@ extern "C" void func_00308988(void* self)
     WSP308988_I(0x24) = -1;
     WSP308988_U(0x2C) = 0xFFFFFFFF;
     MEM_fill((char*)self + 0x38, 0, 8);
-    func_0030C760((char*)self + 0x1C4);
+    tMissionMenuQueue_init((char*)self + 0x1C4);
     WSP308988_I(0x40) = 0;
     MEM_fill((char*)self + 0x44, 0, 0x180);
-    func_00308AA0(self);
+    cWScriptMan_rebuildGlobalTables(self);
 }
 
 #undef WSP308988_I
@@ -1324,11 +1324,11 @@ extern "C" void func_00308988(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308A48);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_purgeGlobalTables);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
-extern "C" void func_00308A48(void* self)
+extern "C" void cWScriptMan_purgeGlobalTables(void* self)
 {
     void** objs = (void**)((char*)self + 0x3CC);
     int i;
@@ -1342,28 +1342,28 @@ extern "C" void func_00308A48(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308AA0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_rebuildGlobalTables);
 #ifdef SKIP_ASM
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
-extern "C" void func_00308A48(void* self);
+extern "C" void cWScriptMan_purgeGlobalTables(void* self);
 // PORT: the unit declares func_00308B78 as (void* self); the body also takes the slot index
 void* func_00308B78_impl(void* self, int i) __asm__("func_00308B78");
 
-struct func_00308AA0_sSection {
+struct cWScriptMan_rebuildGlobalTables_sSection {
     short type;
     short pad2;
     int f4;
     int f8;
 };
 
-extern "C" void func_00308AA0(void* self)
+extern "C" void cWScriptMan_rebuildGlobalTables(void* self)
 {
     int i = 0;
-    func_00308A48(self);
+    cWScriptMan_purgeGlobalTables(self);
     int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
     for (; i < n; i++) {
-        func_00308AA0_sSection* tbl = *(func_00308AA0_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        cWScriptMan_rebuildGlobalTables_sSection* tbl = *(cWScriptMan_rebuildGlobalTables_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             func_00308B78_impl(self, i);
@@ -1446,13 +1446,13 @@ extern signed char D_00535C10[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0026C898(void* pb);
+extern "C" void cPlaybackMan_purgeLocation(void* pb);
 extern "C" int cWorld_getNumMissionScripts(void* world, int i);
 extern "C" void* cWorld_getMissionScripts(void* world, int i);
 extern "C" void cWScriptMan_addProcess1(void* self, int section, void* def, int id, int flags);
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cPlaybackMan_initLocation(void* pb, void* loc);
-extern "C" void func_00308DB8(void* self);
+extern "C" void cWScriptMan_updateWorld(void* self);
 
 static inline void* wsPlayback8C60()
 {
@@ -1463,16 +1463,16 @@ static inline void* wsPlayback8C60()
  * Sets up the world's missions: in game mode 4 with one player, creates a mission process for every mission
  * script of every world section.
  *
- * First releases the playback manager's loaded data (func_0026C898). When cGameMode (D_00535C10) is 4 and the
+ * First releases the playback manager's loaded data (cPlaybackMan_purgeLocation). When cGameMode (D_00535C10) is 4 and the
  * AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1) per 0x54-byte
  * mission script, keyed (section << 16) + section, and calls cPlaybackMan_initLocation() for the race
- * location's data (+0x34). func_00308DB8() always runs last: it runs each mission script's code at +0x4C and
+ * location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs each mission script's code at +0x4C and
  * clears the manager's mission state.
  */
 extern "C" void cWScriptMan_setupMissions(void* self)
 {
     void* iface;
-    func_0026C898(wsPlayback8C60());
+    cPlaybackMan_purgeLocation(wsPlayback8C60());
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C10[0] == 4 && *(int*)((char*)SSXApp->Game->AI + 0x7C) == 1) {
         int i = 0;
@@ -1487,12 +1487,12 @@ extern "C" void cWScriptMan_setupMissions(void* self)
         }
         cPlaybackMan_initLocation(wsPlayback8C60(), cBENewRaceInterface_getLocation(iface) + 0x34);
     }
-    func_00308DB8(self);
+    cWScriptMan_updateWorld(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308DB8);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_updateWorld);
 #ifdef SKIP_ASM
 // cLunoValue: { word0, word1, type }
 struct sWSPValue8DB8 {
@@ -1512,7 +1512,7 @@ struct sWSPDef8DB8 {
     char pad50[0x4];
 };
 
-struct func_00309DD0_sValue;
+struct cWScriptMan_isFunc_sValue;
 extern const char str_SetupLocalTable[];
 extern "C" int cWorld_getNumMissionScripts(void* world, int i);
 extern "C" void* cWorld_getMissionScripts(void* world, int i);
@@ -1521,9 +1521,9 @@ extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScript
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 
-extern "C" void func_00308DB8(void* self)
+extern "C" void cWScriptMan_updateWorld(void* self)
 {
     int i = 0;
     int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
@@ -1544,7 +1544,7 @@ extern "C" void func_00308DB8(void* self)
                     ret.word0 = 0;
                     func_002224A8(&call);
                     func_002224B8(&call, &arg, table, &ret);
-                    luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
+                    luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
                 }
                 if (table != 0) {
                     luno_cLunoTable__cLunoTable(table, 3);
@@ -1561,15 +1561,15 @@ extern "C" void func_00308DB8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308F38);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_purgeMissions);
 #ifdef SKIP_ASM
-extern "C" void func_0030B1B8(void*);
+extern "C" void cProcessList_deleteAll(void*);
 
-extern "C" void func_00308F38(void* self)
+extern "C" void cWScriptMan_purgeMissions(void* self)
 {
-    func_0030B1B8((char*)self + 0x2B8);
-    func_0030B1B8((char*)self + 0x2BC);
-    func_0030B1B8((char*)self + 0x2B4);
+    cProcessList_deleteAll((char*)self + 0x2B8);
+    cProcessList_deleteAll((char*)self + 0x2BC);
+    cProcessList_deleteAll((char*)self + 0x2B4);
 }
 #endif
 
@@ -1635,8 +1635,8 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_initMissions);
 #ifdef SKIP_ASM
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
-extern "C" void func_0030B1B8(void*);
-extern "C" void func_00308988(void* self);
+extern "C" void cProcessList_deleteAll(void*);
+extern "C" void cWScriptMan_init(void* self);
 extern "C" void cWScriptMan_activeSection(void* self, int section);
 extern "C" void cWScriptMan_purgeSection(void* self, int section);
 
@@ -1651,18 +1651,18 @@ struct cWScriptMan_initMissions_sSection {
  * Rebuilds the world-script processes: deletes every process, resets the manager and re-adds the processes of
  * each ready world section.
  *
- * Deletes the processes on the three lists (+0x2B8, +0x2BC, +0x2B4; func_0030B1B8), resets the manager's
- * state (func_00308988), then for each world section calls cWScriptMan_activeSection() when the section's
+ * Deletes the processes on the three lists (+0x2B8, +0x2BC, +0x2B4; cProcessList_deleteAll), resets the manager's
+ * state (cWScriptMan_init), then for each world section calls cWScriptMan_activeSection() when the section's
  * entry in the world's cWScriptCache has a state of 2 or more and a data word (+0x8), otherwise
  * cWScriptMan_purgeSection().
  */
 extern "C" void cWScriptMan_initMissions(void* self)
 {
     int i = 0;
-    func_0030B1B8((char*)self + 0x2B8);
-    func_0030B1B8((char*)self + 0x2BC);
-    func_0030B1B8((char*)self + 0x2B4);
-    func_00308988(self);
+    cProcessList_deleteAll((char*)self + 0x2B8);
+    cProcessList_deleteAll((char*)self + 0x2BC);
+    cProcessList_deleteAll((char*)self + 0x2B4);
+    cWScriptMan_init(self);
     int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
     for (; i < n; i++) {
         cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
@@ -1677,24 +1677,24 @@ extern "C" void cWScriptMan_initMissions(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00309118);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_processLocalMissionCmd);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00308DB8(void* self);
+extern "C" void cWScriptMan_updateWorld(void* self);
 extern "C" void cWScriptMan_doMissionCmd(void* self, int id, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_0029D6E0(void* snd, int a1);
-extern "C" void func_0029DBB0(void* snd, int a1);
+extern "C" void cSSXAudio_BigChallengeFailed(void* snd, int a1);
 extern "C" void cReplay_startRace(void* p);
-extern "C" void func_0026CC48(void* p);
+extern "C" void cPlaybackMan_startPreview(void* p);
 
 // Runs the pending gate action (replay, sounds, camera) and clears it.
-extern "C" void func_00309118(void* vself)
+extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
 {
     char* self = (char*)vself;
     switch (*(int*)(self + 0x2AC)) {
     case 1:
-        func_00308DB8(self);
+        cWScriptMan_updateWorld(self);
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 0);
         func_0029D6E0(func_0028B180(), *(int*)(self + 0x2A0));
         cReplay_startRace(SSXApp->Game->Replay);
@@ -1704,22 +1704,22 @@ extern "C" void func_00309118(void* vself)
         break;
     case 3:
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 0x12, 0);
-        func_00308DB8(self);
-        func_0029DBB0(func_0028B180(), 1);
+        cWScriptMan_updateWorld(self);
+        cSSXAudio_BigChallengeFailed(func_0028B180(), 1);
         break;
     case 4:
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 5, 0);
-        func_00308DB8(self);
-        func_0029DBB0(func_0028B180(), 1);
+        cWScriptMan_updateWorld(self);
+        cSSXAudio_BigChallengeFailed(func_0028B180(), 1);
         break;
     case 5:
-        func_0026CC48(SSXApp->Game->PlaybackMan);
+        cPlaybackMan_startPreview(SSXApp->Game->PlaybackMan);
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 1);
-        func_00308DB8(self);
+        cWScriptMan_updateWorld(self);
         break;
     case 6:
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 0x12, 0);
-        func_00308DB8(self);
+        cWScriptMan_updateWorld(self);
         break;
     }
     *(int*)(self + 0x2AC) = 0;
@@ -1728,16 +1728,16 @@ extern "C" void func_00309118(void* vself)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptprocess", func_00309270);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_update);
 #ifdef SKIP_ASM
 class func_003077F8_cProc;
 struct cWScriptProcList;
 extern "C" void func_003077F8(func_003077F8_cProc* self);
 extern "C" void func_003078C0(void* proc, void* cmd);
 extern "C" void func_00307A10(cWScriptProcList* self, int a1);
-extern "C" void func_00309118(void* self);
-extern "C" void func_00309750(void* self, void* p);
-extern "C" void* func_0030B208(void* self);
+extern "C" void cWScriptMan_processLocalMissionCmd(void* self);
+extern "C" void cWScriptMan_startProcess(void* self, void* p);
+extern "C" void* cProcessList_removeHead(void* self);
 int func_0030B260(void* self, void* a1);
 
 struct sRefSet_309270 {
@@ -1780,18 +1780,18 @@ static inline void* lookup_309270(sRefWorld_309270* w, unsigned int id)
     return toObj_309270(set->refs[id >> 8] >> 8);
 }
 
-extern "C" void func_00309270(void* self)
+extern "C" void cWScriptMan_update(void* self)
 {
-    func_00309118(self);
+    cWScriptMan_processLocalMissionCmd(self);
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x34) = 0;
     void* p;
-    while ((p = func_0030B208((char*)self + 0x2BC)) != 0) {
+    while ((p = cProcessList_removeHead((char*)self + 0x2BC)) != 0) {
         func_0030B260((char*)self + 0x2B4, p);
-        func_00309750(self, p);
+        cWScriptMan_startProcess(self, p);
     }
     sCmdList_309270 list = *(sCmdList_309270*)((char*)self + 0x40);
     *(int*)((char*)self + 0x40) = 0;

@@ -34,7 +34,7 @@ struct tScriptMainNode {
                                       //      PlayAll/StopAll/PauseAll/ResumeAll/RecycleAll pass it back by ID
     cScriptPlayerMain script;         // 0x08 [O]; [R] new[]'s element ctor runs on node + 8; [U] GetPlayer returns
                                       //      &script when script.mpData != 0 (lw node + 0xC); UpdateFrame calls
-                                      //      cScriptPlayerMain UpdateFrame (func_00274A30) on it
+                                      //      cScriptPlayerMain UpdateFrame (cScriptPlayerMain_UpdateFrame) on it
     tScriptMainNode* pNext;           // 0x50 [O]; [R] ctor &node[i + 1], last 0; [U] the lists' forward link
     tScriptMainNode* pPrev;           // 0x54 [O]; [R] ctor &node[i - 1], first 0; [U] RecyclePlayer unlinks by it
 };
@@ -45,7 +45,7 @@ struct cInSeq {
                                       //      mpManager->mpCommInterface
     unsigned int mMaxScripts;         // 0x04 [O]; [R] ctor stores maxScripts, sizes the pool by it and loops to it
                                       //      (sltu)
-    cScriptHeap mHeap;                // 0x08 [O]; [R] ctor runs cScriptHeap's constructor func_002722E0 on this +
+    cScriptHeap mHeap;                // 0x08 [O]; [R] ctor runs cScriptHeap's constructor cScriptHeap_cScriptHeap on this +
                                       //      8 and allocates the pool from it; [U] the players, entities and
                                       //      channels allocate from mpManager + 8
     tScriptMainNode* mpScriptHeap;    // 0x14 [O]; [R] ctor: the new[]'d pool; [U] GetPlayer / RecyclePlayer index it

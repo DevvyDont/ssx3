@@ -78,14 +78,14 @@ void func_00259390(void* self)
 }
 #endif
 
-extern "C" void* func_0041AA88(void*, void*);
+extern "C" void* strcasecmp(void*, void*);
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00259398__FPviT0T0);
 #ifdef SKIP_ASM
 void* func_00259398(void* self, int a1, void* lhs, void* rhs)
 {
-    return func_0041AA88((char*)lhs + 0x1c, (char*)rhs + 0x1c);
+    return strcasecmp((char*)lhs + 0x1c, (char*)rhs + 0x1c);
 }
 #endif
 
@@ -94,7 +94,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002593B8__FPviT0T0);
 #ifdef SKIP_ASM
 void* func_002593B8(void* self, int a1, void* lhs, void* rhs)
 {
-    return func_0041AA88((char*)lhs + 0x8, (char*)rhs + 0x8);
+    return strcasecmp((char*)lhs + 0x8, (char*)rhs + 0x8);
 }
 #endif
 
@@ -456,7 +456,7 @@ extern "C" void cDirtysock_tag_TagFieldGetUnk4(const char* tag, char* dst, int s
 extern "C" int func_004178B0(const char* str, const char* fmt, ...);
 extern "C" int func_004165A8(void*, void*);
 extern "C" char* cCommSystem_getSignature(void* comm);
-extern "C" void* func_0041AA88(void*, void*);
+extern "C" void* strcasecmp(void*, void*);
 extern "C" void func_00260F80(void);
 extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(BuddyMan* p);
@@ -593,7 +593,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
         } else if (func_004165A8(cmd, str_abortChal) == 0) {
             if (func_00263128((BuddyMan*)((char*)Mgr_9B10()), name) != 0)
                 func_00263018((BuddyMan*)Mgr_9B10(), name);
-            int gone = func_0041AA88(self->mOpponent, name) == 0;
+            int gone = strcasecmp(self->mOpponent, name) == 0;
             int send = 0;
             if (*(int*)self == 0x18) {
                 if (gone) {
@@ -843,13 +843,13 @@ extern "C" void func_0025A650(LobbyMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025A6F8);
 #ifdef SKIP_ASM
-extern "C" void func_003E6E70(void*);
+extern "C" void NetGameUtilDestroy(void*);
 
 extern "C" void func_0025A6F8(LobbyMan* self)
 {
     void* config = self->mpConfig;
     if (config != 0) {
-        func_003E6E70(config);
+        NetGameUtilDestroy(config);
         self->mpConfig = 0;
     }
 }
@@ -3583,7 +3583,7 @@ static inline sMsgListIterE6D0 sMsgListE6D0_insert(sMsgListIterE6D0 pos, void* c
 extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
 {
     if (*(int*)self != 0) {
-        if (func_0041AA88(self->mPersona, (void*)name) == 0) {
+        if (strcasecmp(self->mPersona, (void*)name) == 0) {
             int type = 0x10E;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
@@ -5865,7 +5865,7 @@ extern "C" void func_00261CD0(BuddyMan* self, char* name, char* text, char* date
 extern "C" int func_00262A08(BuddyMan* self, int name);
 extern "C" void func_002635A8(BuddyMan* self, int i);
 extern "C" int func_003EDD70(const char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset);
-extern "C" char* func_004162D0(char* d, const char* s);
+extern "C" char* strcat(char* d, const char* s);
 extern char str_TYPE[];
 extern char str_USER[];
 extern char str_SUBJ[];
@@ -5932,7 +5932,7 @@ extern "C" void func_00261A28(BuddyMan* self, char* msg)
         return;
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 0x8CF, D_004A2ED0);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BODY), raw, 0x800, str_Not_Present);
-    func_004162D0(text, raw);
+    strcat(text, raw);
     func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TIME), &t0, &t1, &t2, &t3, &t4, &t5, 0);
     sprintf(date, str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d, t1, t2, t0, t3, t4);
     func_00261CD0(self, name, text, date);
@@ -6140,7 +6140,7 @@ struct sTagsUnkReq20D8 {
 extern "C" int func_002620D8(BuddyMan* self, char* name, int kind, int* err, char* other)
 {
     sTagsUnkReq20D8 rec;
-    if (func_0041AA88(LobbyMan_mLobbyMan->mPersona, name) == 0) {
+    if (strcasecmp(LobbyMan_mLobbyMan->mPersona, name) == 0) {
         *err = 3;
         return 0;
     }
@@ -6334,7 +6334,7 @@ extern "C" int func_002624F8(BuddyMan* self, void** key)
     n = func_00262598(self);
     for (i = 0; i < n; i++) {
         void* rosterEntry = func_002625C8(self, i);
-        if (rosterEntry != 0 && func_0041AA88(*key, rosterEntry) == 0) {
+        if (rosterEntry != 0 && strcasecmp(*key, rosterEntry) == 0) {
             return i;
         }
     }
@@ -6603,7 +6603,7 @@ extern "C" int func_00262598(BuddyMan* self);
 extern "C" void func_00262EC0(BuddyMan* self, int idx);
 extern "C" void func_00263018(BuddyMan* self, void* name);
 extern "C" int func_00263128(BuddyMan* self, char* name);
-extern "C" void* func_0041AA88(void*, void*);
+extern "C" void* strcasecmp(void*, void*);
 struct sPtrVec72C8;
 extern "C" void func_002672C8(sPtrVec72C8* self, void** pos, void* const& x);
 extern char str_NetEvent[];
@@ -6672,7 +6672,7 @@ static inline void push_back_262AF0(char* o, sObjVec_262AF0* v, void* const& x)
 extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4, int a5, int a6, int a7,
                               int s0, int s1, char* s2, int s3, int s4, int s5, int s6)
 {
-    if (func_0041AA88(LobbyMan_mLobbyMan->mPersona, name) == 0)
+    if (strcasecmp(LobbyMan_mLobbyMan->mPersona, name) == 0)
         return;
     while (func_00263128(self, name))
         func_00263018(self, name);
@@ -6748,7 +6748,7 @@ extern "C" int func_00262E20(BuddyMan* self, void* name)
 {
     for (unsigned int i = 0; i < func_00262E20_count(self); i++) {
         void** challenger = func_00262E20_at(self, i);
-        if (challenger != 0 && func_0041AA88(*challenger, name) == 0) {
+        if (challenger != 0 && strcasecmp(*challenger, name) == 0) {
             return i;
         }
     }
@@ -6773,7 +6773,7 @@ extern "C" void func_002635A8(BuddyMan* self, int i);
 extern "C" void* func_00263630(BuddyMan* self, unsigned int i);
 extern "C" void func_003F11F8(void* h, void* e, void* cb, void* user, int timeout);
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
-extern "C" void* func_0041AA88(void*, void*);
+extern "C" void* strcasecmp(void*, void*);
 extern "C" void func_00268F90(void* self, void* a1, int a2);
 
 struct sBXStr_262EC0 {
@@ -6807,7 +6807,7 @@ extern "C" void func_00262EC0(BuddyMan* self, int idx)
         for (int i = func_00262938(self) - 1; i >= 0; i--)
         {
             void** message = (void**)func_00263630(self, i);
-            if (message != 0 && func_0041AA88(*message, nameStr.p) == 0)
+            if (message != 0 && strcasecmp(*message, nameStr.p) == 0)
                 func_002635A8(self, i);
         }
     }
@@ -7056,8 +7056,8 @@ extern "C" int func_002634C0(void* self, int a1, void* lhs, void* rhs)
     if (rhs == 0) {
         return -1;
     }
-    // PORT: func_0041AA88 (strcmp-like) is declared void* in this unit but returns int
-    return (int)func_0041AA88(lhs, rhs);
+    // PORT: strcasecmp (strcmp-like) is declared void* in this unit but returns int
+    return (int)strcasecmp(lhs, rhs);
 }
 #endif
 
@@ -7378,7 +7378,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002639E0);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cBENewRaceInterface_setNumberHumans(void* self, int n);
-extern "C" void func_001472C8(void* self, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsigned short port, int a3);
 extern "C" void func_00266D58(void* self, void* ip);
 extern "C" void func_00266E30(void* self);
@@ -7416,8 +7416,8 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int 
     sIf_002639E0* q = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_setNumberHumans(q, 2);
     q->vt[1].fn((char*)q + q->vt[1].delta);
-    func_001472C8(p, 0, a3);
-    func_001472C8(p, 1, 0);
+    cBENewPlayerInterface_setPlayerCtrlID(p, 0, a3);
+    cBENewPlayerInterface_setPlayerCtrlID(p, 1, 0);
     p->vt[1].fn((char*)p + p->vt[1].delta);
     sIf_002639E0* r = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = one;
@@ -8192,7 +8192,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264CF0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00147448(void* self, int a1, int charID);
+extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
 extern int D_00534E58[];
 
 struct sVE264CF0 {
@@ -8209,7 +8209,7 @@ struct sIf264CF0 {
 extern "C" void func_00264CF0(void* self, int charID)
 {
     sIf264CF0* p = (sIf264CF0*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    func_00147448(p, 0, charID);
+    cBENewPlayerInterface_setPlayerCharID(p, 0, charID);
     p->vt[1].fn((char*)p + p->vt[1].delta);
     sIf264CF0* q = (sIf264CF0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     D_00534E58[0] = charID;
@@ -8223,7 +8223,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264D80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00147448(void* self, int a1, int charID);
+extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
 
 struct sVE_00264D80 {
     short delta;
@@ -8251,7 +8251,7 @@ struct sNetState_00264D80 {
 extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name)
 {
     sIf_00264D80* playerIface = (sIf_00264D80*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    func_00147448(playerIface, 1, charID);
+    cBENewPlayerInterface_setPlayerCharID(playerIface, 1, charID);
     playerIface->vt[1].fn((char*)playerIface + playerIface->vt[1].delta);
     sIf_00264D80* networkIface = (sIf_00264D80*)cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.OpponentCharacterID = charID;
@@ -8938,13 +8938,13 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002659C0);
 #ifdef SKIP_ASM
 extern void* D_004A33D8;
 extern "C" void func_003F7F18();
-extern "C" void func_002C2300(void* h);
+extern "C" void cMemCard_DeleteInstance(void* h);
 
 extern "C" void func_002659C0(void* self)
 {
     *(int*)self = 0;
     func_003F7F18();
-    func_002C2300(D_004A33D8);
+    cMemCard_DeleteInstance(D_004A33D8);
 }
 #endif
 

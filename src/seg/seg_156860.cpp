@@ -148,7 +148,7 @@ INCLUDE_ASM("seg/seg_156860", func_00255A20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_003F42A0(void);
+extern "C" void NetConnIdle(void);
 extern "C" int func_003F3CC0_5A20(int sel, int a, int b) __asm__("func_003F3CC0");
 extern "C" int func_003F3C50(void* params, int a);
 extern "C" void func_00255FE8(void* self, int reason);
@@ -181,7 +181,7 @@ struct sComm_5A20 {
 extern "C" void func_00255A20(sComm_5A20* self)
 {
     int i;
-    func_003F42A0();
+    NetConnIdle();
     switch (self->state) {
     case 0:
     case 1:
@@ -793,16 +793,16 @@ extern "C" void *func_00256698(void *channel) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002566E8);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel__cDSockChannel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cCommChannel__cCommChannel_66E8(void *, int) __asm__("cCommChannel__cCommChannel");
-extern "C" void func_00256998(void *);
+extern "C" void cDSockChannel_disconnect(void *);
 extern char cDSockChannel_vtbl[];
 
-extern "C" void func_002566E8(cDSockChannel* dSockChannel, int arg1) {
+extern "C" void cDSockChannel__cDSockChannel(cDSockChannel* dSockChannel, int arg1) {
     ((char*)dSockChannel->mVtbl) = cDSockChannel_vtbl;
-    func_00256998(dSockChannel);
+    cDSockChannel_disconnect(dSockChannel);
     cCommChannel__cCommChannel_66E8(dSockChannel, arg1);
 }
 #endif
@@ -951,13 +951,13 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256998);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_disconnect);
 #ifdef SKIP_ASM
 extern "C" void cCommChannel_channelClose();
-extern "C" void func_003E67F8(int);
-extern "C" void func_003E6E70(int);
+extern "C" void NetGameLinkDestroy(int);
+extern "C" void NetGameUtilDestroy(int);
 
-extern "C" void func_00256998(void *arg0) {
+extern "C" void cDSockChannel_disconnect(void *arg0) {
     int temp_4;
     int temp_4_2;
 
@@ -965,12 +965,12 @@ extern "C" void func_00256998(void *arg0) {
         cCommChannel_channelClose();
         temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
         if (temp_4 != 0) {
-            func_003E67F8(temp_4);
+            NetGameLinkDestroy(temp_4);
             (*(int *)((char*)(arg0) + (0x1C))) = 0;
         }
         temp_4_2 = (*(int *)((char*)(arg0) + (0x18)));
         if (temp_4_2 != 0) {
-            func_003E6E70(temp_4_2);
+            NetGameUtilDestroy(temp_4_2);
             (*(int *)((char*)(arg0) + (0x18))) = 0;
         }
         (*(int *)((char*)(arg0) + (0xC))) = 0;
@@ -1077,9 +1077,9 @@ extern "C" void cDSockChannel_updateConnected(cDSockChannel* dSockChannel)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256BA8);
+INCLUDE_ASM("seg/seg_156860", cDSockChannel_getLatency);
 #ifdef SKIP_ASM
-extern "C" float func_00256BA8(cDSockChannel* dSockChannel) {
+extern "C" float cDSockChannel_getLatency(cDSockChannel* dSockChannel) {
     return (dSockChannel->mLatency);
 }
 #endif
@@ -1120,11 +1120,11 @@ extern "C" void func_00256BD8(int buffer) {
 INCLUDE_ASM("seg/seg_156860", cGameComm_construct);
 #ifdef SKIP_ASM
 extern "C" int cMemMan_alloc(int, int *, int, int);
-extern "C" int func_00256C78(int, int, int);
+extern "C" int cGameComm_cGameComm(int, int, int);
 extern int D_004804B8[];
 
 /**
- * Creates the game comm singleton: 0x5F0 bytes tagged "cGameComm", constructed by func_00256C78.
+ * Creates the game comm singleton: 0x5F0 bytes tagged "cGameComm", constructed by cGameComm_cGameComm.
  *
  * Stores the result in cGameComm_mGameComm; func_00256C50 destroys it.
  *
@@ -1132,7 +1132,7 @@ extern int D_004804B8[];
  * @param isServer  nonzero to run the server side of the handshake (mServer)
  */
 extern "C" void cGameComm_construct(int channel, int isServer) {
-    cGameComm_mGameComm = (cGameComm*)(func_00256C78(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), channel, isServer));
+    cGameComm_mGameComm = (cGameComm*)(cGameComm_cGameComm(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), channel, isServer));
 }
 #endif
 
@@ -1150,10 +1150,10 @@ extern "C" void func_00256C50(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256C78);
+INCLUDE_ASM("seg/seg_156860", cGameComm_cGameComm);
 #ifdef SKIP_ASM
 void* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_0014E2C0(void* iface);
+int cBENetworkInterface_getSyncDataSize(void* iface);
 extern "C" void cGameComm_setState_6C78(void* self, int mode) __asm__("cGameComm_setState");
 extern "C" void MEM_fill_6C78(void* p, int c, int n) __asm__("MEM_fill");
 extern "C" int func_003E7340();
@@ -1216,7 +1216,7 @@ struct sGameComm_6C78 {
     int unk_BC;         // 0xBC
     int unk_C0;         // 0xC0
     int unk_C4[4];          // 0xC4 (cleared high to low)
-    char unk_D4[0x18];      // 0xD4 (random state; func_003178E0 / func_00317908)
+    char unk_D4[0x18];      // 0xD4 (random state; AIgetseed / AIsetseed)
     int unk_EC;         // 0xEC
     char unk_F0[0x10];      // 0xF0 (name, host side)
     int unk_100;        // 0x100
@@ -1260,13 +1260,13 @@ extern sGcGlobals_6C78* D_004A28A8_6C78 __asm__("SSXApp");
 // cGameComm setup (called by cGameComm_construct on a fresh 0x5F0-byte block): clears the session state,
 // the five packet queues and the two message buffers, and returns self.
 // PORT: the unit declares this as (int, int, int) returning int.
-extern "C" int func_00256C78(int vself, int port, int b)
+extern "C" int cGameComm_cGameComm(int vself, int port, int b)
 {
     sGameComm_6C78* self = (sGameComm_6C78*)vself;
     self->unk_6C = port;
     self->unk_44 = b;
     cGameComm_setState_6C78(self, 0);
-    self->bufSize = func_0014E2C0(cBE_getInterface_6C78(D_004A28A8_6C78->be, 7));
+    self->bufSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(D_004A28A8_6C78->be, 7));
     self->unk_60 = 30;
     self->unk_0 = 1;
     self->buf = 0;
@@ -1435,7 +1435,7 @@ extern "C" void cGameComm_setState(cGameComm* self, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002570D8);
+INCLUDE_ASM("seg/seg_156860", cGameComm_update);
 #ifdef SKIP_ASM
 // PORT: several callees are defined later in the unit with their own parameter types; bind local views by asm label
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1462,8 +1462,8 @@ extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __as
 extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
 extern char str_SSXPingServer[];
 
-// PORT: the unit declares func_002570D8 as (void*)
-extern "C" void func_002570D8(cGameComm* vs)
+// PORT: the unit declares cGameComm_update as (void*)
+extern "C" void cGameComm_update(cGameComm* vs)
 {
     if (vs->unk_138 > 0) {
         char msg[0x100];
@@ -1669,10 +1669,10 @@ extern "C" void func_002570D8(cGameComm* vs)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00257610);
+INCLUDE_ASM("seg/seg_156860", cGameComm_localDisconnected);
 #ifdef SKIP_ASM
 
-extern "C" void func_00257610(cGameComm* gameComm, int arg1) {
+extern "C" void cGameComm_localDisconnected(cGameComm* gameComm, int arg1) {
     if (((arg1 != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
         (gameComm->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
     }
@@ -2395,13 +2395,13 @@ extern "C" void cBENetworkInterface_setSyncData_8448(void* iface, int which, voi
 extern "C" void MEM_fill_8448(char* p, int c, int n) __asm__("MEM_fill");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void* cBE_getBE();
-extern "C" int func_00147318(void* iface, int a1);
-extern "C" void func_001472C8(void* iface, int a1, int a2);
-extern "C" void func_00237CB0(unsigned int seed);
+extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int a1);
+extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int a1, int a2);
+extern "C" void GMsrand(unsigned int seed);
 extern "C" void THREAD_yieldticks(int);
 unsigned int AIrand();
-void func_003178E0_8448(void* self) __asm__("func_003178E0__FPv");
-void* func_00317908(void* self);
+void AIgetseed_8448(void* self) __asm__("AIgetseed__FPv");
+void* AIsetseed(void* self);
 
 struct sVEnt_8448 {
     short delta;
@@ -2422,7 +2422,7 @@ static inline int ggDropped_8448(char* s) { return *(int*)(s + 4); }
  *
  * Packs this side's BE sync data into mBEBuffer (player 0 on the host; the client first swaps the option
  * records and gives player 1 player 0's controller), saves the AI random state and pumps update
- * (func_002570D8) until GameActive or an error. Then it runs postInitBE, restores the AI random state from
+ * (cGameComm_update) until GameActive or an error. Then it runs postInitBE, restores the AI random state from
  * mServerSettings, stores mLatency in networkOpt.fLatency, uses 2 input samples per packet when both sides
  * are broadband, and raises a comm error when the two build signatures differ.
  */
@@ -2447,13 +2447,13 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         cBENetworkInterface_getSyncData_8448(iface, 1, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 1, self->mBEBuffer);
         void* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_001472C8(ui, 1, func_00147318(ui, 0));
+        cBENewPlayerInterface_setPlayerCtrlID(ui, 1, cBENewPlayerInterface_getPlayerCtrlID(ui, 0));
         sVEnt_8448* vt = *(sVEnt_8448**)((char*)ui + 0xC);
         vt[1].fn((char*)ui + vt[1].delta);
     }
-    func_003178E0_8448(((char*)self) + 0xD4);
+    AIgetseed_8448(((char*)self) + 0xD4);
     while (!ggSynced_8448(((char*)self)) && ggDropped_8448(((char*)self)) == 0) {
-        func_002570D8(self);
+        cGameComm_update(self);
         THREAD_yieldticks(1);
     }
     if (self->mBEBuffer) {
@@ -2463,8 +2463,8 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
     self->mBEBuffer = 0;
     if (self->mError == 0) {
         cBENetworkInterface_postInitBE(iface);
-        func_00317908(((char*)self) + 0xD4);
-        func_00237CB0(AIrand());
+        AIsetseed(((char*)self) + 0xD4);
+        GMsrand(AIrand());
         ggSetTime_8448(((char*)&cBENetworkInterface_networkOpt), self->mLatency);
         if (self->mServerSettings.unk_18 != 0 && self->unk_100 != 0) {
             self->mNumSamples = 2;
@@ -2484,14 +2484,14 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_syncWait);
 void* cBE_getInterface_86B0(int, int) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(cGameComm*, int, int);
-extern "C" void func_002570D8(cGameComm*);
+extern "C" void cGameComm_update(cGameComm*);
 extern "C" void THREAD_yieldticks(int);
 static inline int rd8(char *p) { return *(int*)(p + 8); }
 /**
  * Waits for the peer at the end of loading by exchanging the sync-wait command (3).
  *
  * The host sends command 3 first and then waits; the client waits for the host's and then answers. While
- * waiting it pumps update (func_002570D8) with a 3600-frame link timeout armed, until mSyncWaitComplete or an
+ * waiting it pumps update (cGameComm_update) with a 3600-frame link timeout armed, until mSyncWaitComplete or an
  * error. Afterwards it disarms the timeout (unk_094) and clears mLoading.
  */
 extern "C" void cGameComm_syncWait(cGameComm* self) {
@@ -2503,7 +2503,7 @@ extern "C" void cGameComm_syncWait(cGameComm* self) {
     }
     func_00258870(self, 0xE10, 0);
     while (self->mSyncWaitComplete == 0 && self->mError == 0) {
-        func_002570D8(self);
+        cGameComm_update(self);
         THREAD_yieldticks(1);
     }
     self->unk_094 = 0;
@@ -2613,9 +2613,9 @@ extern "C" void func_00258950(cGameComm* gameComm) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00258968);
+INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartGate);
 #ifdef SKIP_ASM
-extern "C" void func_00258968(cGameComm* gameComm) {
+extern "C" void cGameComm_gameStartGate(cGameComm* gameComm) {
     if ((gameComm->mState) < 0xF) {
         (gameComm->unk_094) = 0;
         (gameComm->mGameStartGate) = 1;
@@ -2663,12 +2663,12 @@ extern "C" void cGameComm_gameStartRace(cGameComm* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00258A48);
+INCLUDE_ASM("seg/seg_156860", cGameComm_gameEnded);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGameComm_setState_8A48(void *, int) __asm__("cGameComm_setState");
 
-extern "C" void func_00258A48(cGameComm* gameComm) {
+extern "C" void cGameComm_gameEnded(cGameComm* gameComm) {
     (gameComm->mRaceInProgress) = 0;
     (gameComm->mSyncInput) = 0;
     if ((gameComm->mState) < 0xF) {
@@ -2695,7 +2695,7 @@ extern "C" void func_002613C8(int);
 extern "C" void func_0025B800(int);
 extern "C" void func_00262768(int, int, int, int, int, int);
 extern "C" void func_00258BC8(cGameComm*);
-extern "C" void func_00258A48(cGameComm*);
+extern "C" void cGameComm_gameEnded(cGameComm*);
 extern "C" void cBENetworkInterface_copyProfile(void *, int, int);
 extern "C" void* cBE_getBE();
 extern int D_00534B38[];
@@ -2703,7 +2703,7 @@ extern int D_00534B38[];
  * Leaves the online game: resets the buddy presence, tells the peer and ends the game locally.
  *
  * Makes sure BuddyMan exists and is connected, as gameStartRace does, and sets presence LOCID 0. Sends the
- * exit-game command (func_00258BC8) and runs gameEnded (func_00258A48). On the client it then copies profile
+ * exit-game command (func_00258BC8) and runs gameEnded (cGameComm_gameEnded). On the client it then copies profile
  * 1 into profile 0 and reloads the Stat interface (BE interface 3, virtual discard).
  */
 extern "C" void cGameComm_gameExit(cGameComm* self) {
@@ -2721,7 +2721,7 @@ extern "C" void cGameComm_gameExit(cGameComm* self) {
         func_00262768((int)buddyMan, 1, 0, 0, 0, 0);
     }
     func_00258BC8(self);
-    func_00258A48(self);
+    cGameComm_gameEnded(self);
     void *i = cBE_getInterface_8AE0((int)SSXApp->BE, 7);
     if (D_00534B38[0] == 0) {
         cBENetworkInterface_copyProfile(i, 1, 0);

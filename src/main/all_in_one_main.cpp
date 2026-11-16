@@ -1316,9 +1316,9 @@ extern "C" void func_001DCC38(void *arg0, signed char arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCC40);
+INCLUDE_ASM("main/all_in_one_main", tAttrLocale_tAttrLocale);
 #ifdef SKIP_ASM
-extern "C" unsigned char *func_001DCC40(unsigned char *arg0) {
+extern "C" unsigned char *tAttrLocale_tAttrLocale(unsigned char *arg0) {
     *arg0 &= 0xE0;
     return arg0;
 }
@@ -1417,9 +1417,9 @@ extern "C" int func_001DCCE8(int realFe) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCF8);
+INCLUDE_ASM("main/all_in_one_main", cUIInput_setKey);
 #ifdef SKIP_ASM
-extern "C" void func_001DCCF8(int *arg0, int arg1) {
+extern "C" void cUIInput_setKey(int *arg0, int arg1) {
     *arg0 = arg1;
 }
 #endif
@@ -1428,7 +1428,7 @@ extern "C" void func_001DCCF8(int *arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", cDebugMenuScreen__cDebugMenuScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017ABE0_CD00(void *, int) __asm__("func_0017ABE0");
+extern "C" void cBackgroundMan__cBackgroundMan_CD00(void *, int) __asm__("cBackgroundMan__cBackgroundMan");
 void operator_delete(int*);
 extern void* cDebugScreen_vtbl[];
 
@@ -1436,13 +1436,13 @@ extern void* cDebugScreen_vtbl[];
 /**
  * Destroys a debug menu screen: tears down its id list member, then runs the cDebugScreen part.
  *
- * func_0017ABE0(self + 0x8C10, 2) releases each non-negative id in that list through the graphics manager's
+ * cBackgroundMan__cBackgroundMan(self + 0x8C10, 2) releases each non-negative id in that list through the graphics manager's
  * virtual slot 50 and frees the array; then cDebugScreen's vtable is stored at +0x0.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cDebugMenuScreen__cDebugMenuScreen(void *self, int flags) {
-    func_0017ABE0_CD00((char *)self + 0x8C10, 2);
+    cBackgroundMan__cBackgroundMan_CD00((char *)self + 0x8C10, 2);
     *(void ***)self = cDebugScreen_vtbl;
     if (flags & 1) {
         operator_delete((int *)self);
@@ -1772,25 +1772,25 @@ extern "C" void cFEInput__cFEInput(void *self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD560);
+INCLUDE_ASM("main/all_in_one_main", cFEInput_getKeyReady);
 #ifdef SKIP_ASM
-extern "C" int func_001DD560(void *arg0) {
+extern "C" int cFEInput_getKeyReady(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xC)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD568);
+INCLUDE_ASM("main/all_in_one_main", cFEInput_getVKey);
 #ifdef SKIP_ASM
-extern "C" int func_001DD568(void *arg0) {
+extern "C" int cFEInput_getVKey(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x10)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD570);
+INCLUDE_ASM("main/all_in_one_main", cFEInput_getAsciiKey);
 #ifdef SKIP_ASM
-extern "C" int func_001DD570(void *arg0) {
+extern "C" int cFEInput_getAsciiKey(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x14)));
 }
 #endif
@@ -1825,8 +1825,8 @@ extern "C" void func_001DD598(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD5B8);
 #ifdef SKIP_ASM
-extern "C" void func_003977E8(void *);
-extern "C" int func_0039FB30(void *, int, int);
+extern "C" void cList_cList(void *);
+extern "C" int cUIThing_cUIThing(void *, int, int);
 extern int D_0046D1A0[];
 extern int cUIScreen_vtbl[];
 extern int cUIGroup_vtbl[];
@@ -1838,13 +1838,13 @@ extern "C" void *func_001DD5B8(char *self) {
     *(int *)(self + 0x10) = 0;
     *(int **)(self + 8) = cUIScreen_vtbl;
     func_001DD580((unsigned short*)(self + 0x14));
-    func_003977E8(self + 0x18);
+    cList_cList(self + 0x18);
     *(int *)(self + 0x34) = 0;
     *(int *)(self + 0x38) = 0;
     *(int *)(self + 0x3C) = 0;
-    func_0039FB30(self + 0x40, 0, 0);
+    cUIThing_cUIThing(self + 0x40, 0, 0);
     *(int **)(self + 0x48) = cUIGroup_vtbl;
-    func_003977E8(self + 0xB4);
+    cList_cList(self + 0xB4);
     *(int *)(self + 0xD0) = 0;
     *(int **)(self + 8) = D_0046D1A0;
     return self;
@@ -3144,11 +3144,11 @@ extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(void *
 INCLUDE_ASM("main/all_in_one_main", func_001DE178);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_001D53B0_E178(void *, int, int) __asm__("func_001D53B0");
+extern "C" void *cFEMemCard_cFEMemCard_E178(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
 extern int D_0046C228_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
 
 extern "C" void *func_001DE178(void *self) {
-    func_001D53B0_E178(self, 0, 0);
+    cFEMemCard_cFEMemCard_E178(self, 0, 0);
     *(int **)((char *)self + 8) = D_0046C228_E178;
     return self;
 }
@@ -3215,11 +3215,11 @@ extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(void *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE240);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_001D53B0_E240(void *, int, int) __asm__("func_001D53B0");
+extern "C" void *cFEMemCard_cFEMemCard_E240(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
 extern int D_0046BFD0_E240[] __asm__("cFEStateProfileLoad_vtbl");
 
 extern "C" void *func_001DE240(void *self) {
-    func_001D53B0_E240(self, 0, 0);
+    cFEMemCard_cFEMemCard_E240(self, 0, 0);
     *(int **)((char *)self + 8) = D_0046BFD0_E240;
     return self;
 }
@@ -3926,11 +3926,11 @@ extern "C" void func_001DE948(void) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE950);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_001D53B0_E950(void *, int, int) __asm__("func_001D53B0");
+extern "C" void *cFEMemCard_cFEMemCard_E950(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
 extern int cFEStateMemCard_vtbl[];
 
 extern "C" void *func_001DE950(void *self) {
-    func_001D53B0_E950(self, 0, 0);
+    cFEMemCard_cFEMemCard_E950(self, 0, 0);
     *(int **)((char *)self + 8) = cFEStateMemCard_vtbl;
     return self;
 }

@@ -24,7 +24,7 @@ INCLUDE_ASM("fe/ovstatemission2", func_00211BC8);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_initGeneral);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00212138);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_cOVState_AUTOSAVE);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_onCreateScreen);
 

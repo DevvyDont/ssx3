@@ -33,16 +33,16 @@ struct tInstanceRecord;
 struct tSphTreeInfo;
 
 // EA's sphere tree of one mesh, placed in world space (On Tour: bxSphereTree 0x140 = SphereTree 0xC0 + staticInfo).
-// Retail methods in src/intersect/riderspheretree.cpp: func_0032C508 (ctor), func_0032C540 (reset), func_0032C5A8
-// (radius), func_0032C630 (translate), func_0032C648 (set transform); func_00327CC8 is operator=.
+// Retail methods in src/intersect/riderspheretree.cpp: SphereTree_SphereTree (ctor), SphereTree_init (reset), SphereTree_GetResolution
+// (radius), SphereTree_MoveOffset (translate), SphereTree_TransformAbs (set transform); func_00327CC8 is operator=.
 struct bxSphereTree {
     // --- SphereTree (On Tour 0xC0)
-    t4Vector axis[8];      // 0x000 [O]; [U] func_0032C540 fills 8 qwords from D_004FF640, operator= copies them
-    t4Vector transCenter;  // 0x080 [O]; [U] func_0032C630 adds the offset (lqc2/sqc2 0x80); reset stores t4vect_Origin
-    float scale;           // 0x090 [O]; [U] func_0032C540 stores 1.0f, func_0032C5A8 multiplies the radius by it
+    t4Vector axis[8];      // 0x000 [O]; [U] SphereTree_init fills 8 qwords from D_004FF640, operator= copies them
+    t4Vector transCenter;  // 0x080 [O]; [U] SphereTree_MoveOffset adds the offset (lqc2/sqc2 0x80); reset stores t4vect_Origin
+    float scale;           // 0x090 [O]; [U] SphereTree_init stores 1.0f, SphereTree_GetResolution multiplies the radius by it
     float worstCase;       // 0x094 [O]; [U] the riderspheretree.cpp queries keep the deepest penetration here
-    tSphTreeInfo* treeInfo; // 0x098 [O]; [R] func_0032C508 zeroes it; [U] cRollerModifier's ctors read the centre
-                           //       (+0x2C) and body inertia (+0x5C) from it; func_0032C5A8 reads it
+    tSphTreeInfo* treeInfo; // 0x098 [O]; [R] SphereTree_SphereTree zeroes it; [U] cRollerModifier's ctors read the centre
+                           //       (+0x2C) and body inertia (+0x5C) from it; SphereTree_GetResolution reads it
     int sortAxis[8];       // 0x09C [O]; [U] riderspheretree.cpp's views ("order[8]", child visiting order)
     char unk_0BC[0x4];     // 0x0BC padding
     // --- bxSphereTree
@@ -76,15 +76,15 @@ struct cRollerModifier {
     float Radius;                 // 0x024 [O]; [P] getRadius/setRadius (lwc1/swc1 0x24, preview == retail)
     float HitFrequency;           // 0x028 [O]; [U] Collision zeroes it (sw $0), collide adds 1/60, update reads/writes it
     char unk_02C[0x4];            // 0x02C padding (cRigidBody is 16-byte aligned)
-    // --- cRigidBody (object/rigidbody.h; [R] ctor func_0035CFE8(self + 0x30), writeToReplayFrame passes self + 0x30)
+    // --- cRigidBody (object/rigidbody.h; [R] ctor cRigidBody_cRigidBody(self + 0x30), writeToReplayFrame passes self + 0x30)
     tPose Pose;                   // 0x030 [O] cRigidBodyState::Pose; [R] ctor stores the start pose (sq 0x30/0x40);
-                                  //       [U] getBodyPose (func_0035E770) reads it, translateMe (func_0035ED90) adds to
+                                  //       [U] getBodyPose (cRollerModifier_getBodyPose) reads it, translateMe (cRollerModifier_translateMe) adds to
                                   //       Pose.P, updateMOI reads Pose.Q (lqc2 0x40)
     t4Vector P;                   // 0x050 [O] linear momentum; [U] Collision/collide/update (lqc2/sq 0x50)
     t4Vector L;                   // 0x060 [O] angular momentum; [U] update/collide (lqc2/sq 0x60, lwc1 0x60-0x6C)
     float InvM;                   // 0x070 [O]; [R] ctor: 1.0f / mMass; [U] Collision, update, collide (lwc1 0x70)
     char unk_074[0xC];            // 0x074 padding (cRigidBodyState ends at 0x80)
-    float InvMOI[3][3];           // 0x080 [O] t3Matrix; [U] updateMOI (func_0035E248) writes the world-space inverse
+    float InvMOI[3][3];           // 0x080 [O] t3Matrix; [U] updateMOI (cRollerModifier_updateMOI) writes the world-space inverse
                                   //       inertia (sdl/sdr 0x80-0x9F + sw 0xA0); update/collide read 0x80-0xA0
     char unk_0A4[0xC];            // 0x0A4 padding
     t4Vector V;                   // 0x0B0 [O] velocity; [U] Collision/update/collide (lqc2/sq 0xB0)
@@ -93,7 +93,7 @@ struct cRollerModifier {
     tInstanceRecord* m_pInstance; // 0x0D0 [O]; [R] ctor: the intersect info's instance (ii + 0x50), then sets flag bits
                                   //       in its word +0x8; func_0035DF70 reads it from the frame; [U] writeToReplayFrame
     char unk_0D4[0xC];            // 0x0D4 padding (SphTree is 16-byte aligned)
-    bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor func_0032C508(self + 0xE0), then operator= (func_00327CC8) from
+    bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor SphereTree_SphereTree(self + 0xE0), then operator= (func_00327CC8) from
                                   //       ii + 0x48; ctors read SphTree.treeInfo (lw 0x178); [U] collide, translateMe
     tBoundBox boundbox;           // 0x220 [O]; [U] setBoundBox (sq 0x220, 0x230), getBoundBox returns its address
     t4Matrix Transform;           // 0x240 [O]; [U] ctors/update build it from the body pose (sqc2 0x240-0x270);

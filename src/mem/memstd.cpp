@@ -304,7 +304,7 @@ struct sMemClass_251C38 {
 };
 
 int func_00252658(void* self);
-extern "C" int func_0041AA88(int, int);
+extern "C" int strcasecmp(int, int);
 
 extern "C" void* func_00251C38(int name)
 {
@@ -316,7 +316,7 @@ extern "C" void* func_00251C38(int name)
             void* data = (char*)n + 0x10;
             do {
                 int s = func_00252658(data);
-                if (s != 0 && func_0041AA88(s, name) == 0) {
+                if (s != 0 && strcasecmp(s, name) == 0) {
                     return data;
                 }
                 n = n->next;
@@ -460,22 +460,22 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00251F68);
+INCLUDE_ASM("mem/memstd", DEBUG_trace);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-typedef char* func_00251F68_va_list;
-#define func_00251F68_va_start(ap)                                       \
+typedef char* DEBUG_trace_va_list;
+#define DEBUG_trace_va_start(ap)                                       \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
 extern "C" void PRINT_string(int, char*);
 
-extern "C" void func_00251F68(const char* fmt, ...)
+extern "C" void DEBUG_trace(const char* fmt, ...)
 {
     char buf[0x200];
-    func_00251F68_va_list ap;
-    func_00251F68_va_start(ap);
+    DEBUG_trace_va_list ap;
+    DEBUG_trace_va_start(ap);
     func_004186C8(buf, fmt, ap);
     PRINT_string(2, buf);
 }
@@ -491,13 +491,13 @@ INCLUDE_ASM("mem/memstd", MEM_printclass__FPv);
  * Prints a report of a memory class's blocks to the debug output.
  *
  * Calls MEM_printclassf() with the row format "%-12s %-24.24s %08lx %11lu %11lu %04x %04x %3s %s" and
- * func_00251F68(), a printf that writes through PRINT_string(2, ...).
+ * DEBUG_trace(), a printf that writes through PRINT_string(2, ...).
  *
  * @param thing  the memory class to report
  */
 void MEM_printclass(void* thing)
 {
-    MEM_printclassf(thing, str_pct_12s_pct_24_24s_pct_08lx_pct_11lu_pct, func_00251F68);
+    MEM_printclassf(thing, str_pct_12s_pct_24_24s_pct_08lx_pct_11lu_pct, DEBUG_trace);
 }
 #endif
 
@@ -1039,23 +1039,23 @@ extern "C" int func_00252960(int unused, int id)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252980);
+INCLUDE_ASM("mem/memstd", MEM_allocaligna);
 #ifdef SKIP_ASM
-extern "C" int func_00320B68(int);
+extern "C" int memlog2(int);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
-// PORT: the unit declares func_00252980 as `void* (void*)`; existing callers bind the
+// PORT: the unit declares MEM_allocaligna as `void* (void*)`; existing callers bind the
 // 6-argument form below by asm label (the 6th argument is unused).
-void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
+void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna");
 
-void* func_00252980_6(void* tag, int size, int align, int d, int flags, int unused)
+void* MEM_allocaligna_6(void* tag, int size, int align, int d, int flags, int unused)
 {
-    int lvl = func_00320B68(align) - 2 < 0 ? 0 : func_00320B68(align) - 2;
+    int lvl = memlog2(align) - 2 < 0 ? 0 : memlog2(align) - 2;
     return operator_new_tag(size, (const char*)tag, flags | (lvl << 24) | 0x10000000, d);
 }
 #endif
 
-extern "C" void* func_00252980(void*);
+extern "C" void* MEM_allocaligna(void*);
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00252A10);
@@ -1270,7 +1270,7 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252F60__FPv);
 #ifdef SKIP_ASM
-void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
+void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna");
 
 // PORT: the project's symbol name says (void*), but callers pass and this
 // forwards 5 args (see func_00253AD0); the real body is bound by asm label.
@@ -1278,7 +1278,7 @@ void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("func
 
 void* func_00252F60_impl(void* name, int size, int alignment, int hdrSize, int memType)
 {
-    return func_00252980_6(name, size, alignment, hdrSize, memType, 1);
+    return MEM_allocaligna_6(name, size, alignment, hdrSize, memType, 1);
 }
 #endif
 
@@ -1293,14 +1293,14 @@ extern "C" void func_00252F80(int name, int size, int alignment, int hdrSize, in
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00252FA0);
+INCLUDE_ASM("mem/memstd", MEM_alloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
+void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna");
 
-extern "C" void* func_00252FA0(void* a0, int a1, int a2)
+extern "C" void* MEM_alloc(void* a0, int a1, int a2)
 {
-    return func_00252980_6(a0, a1, 0x80, 0, a2, 1);
+    return MEM_allocaligna_6(a0, a1, 0x80, 0, a2, 1);
 }
 #endif
 
@@ -1317,7 +1317,7 @@ INCLUDE_ASM("mem/memstd", func_00252FF0);
 #ifdef SKIP_ASM
 extern "C" void func_00252FF0(void* name, int size, int memType)
 {
-    func_00252980_6(name, size, 0, 0, memType, 0);
+    MEM_allocaligna_6(name, size, 0, 0, memType, 0);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1334,7 +1334,7 @@ INCLUDE_ASM("mem/memstd", func_00253040);
 #ifdef SKIP_ASM
 extern "C" void func_00253040(int size)
 {
-    func_00252980_6(0, size, 0, 0, 0, 1);
+    MEM_allocaligna_6(0, size, 0, 0, 0, 1);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1351,7 +1351,7 @@ INCLUDE_ASM("mem/memstd", func_002530A0);
 #ifdef SKIP_ASM
 extern "C" void func_002530A0(int size)
 {
-    func_00252980_6(0, size, 0, 0, 0, 0);
+    MEM_allocaligna_6(0, size, 0, 0, 0, 0);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1841,7 +1841,7 @@ extern "C" void func_00253890(void* self, int force)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253938);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncUpdate);
 #ifdef SKIP_ASM
 extern "C" int func_003AE780(void* p);
 extern "C" int func_003AE6C8(void* p, float f);
@@ -1859,7 +1859,7 @@ public:
     virtual void v06();
 };
 
-extern "C" void func_00253938(void* self)
+extern "C" void cMoviePlayer_asyncUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x40) == 0 && func_003AE780(*(void**)((char*)self + 0x38)) != 0) {
         (*(cMemObj_253938**)((char*)self + 0x3C))->v06();

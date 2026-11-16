@@ -338,12 +338,12 @@ extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282450);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ForcePlayUpdate);
 #ifdef SKIP_ASM
 extern "C" void* func_00282CB0(void* self, int a1);
-extern "C" void func_00274A30(void* p);
+extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
 
-extern "C" int func_00282450(void* self, int a1)
+extern "C" int cBXScriptEngine_ForcePlayUpdate(void* self, int a1)
 {
     void* t = func_00282CB0(self, a1);
     if (t == 0) {
@@ -351,7 +351,7 @@ extern "C" int func_00282450(void* self, int a1)
     }
     int type = *(int*)((char*)t + 0x4);
     if (type == 3 || type == 4) {
-        func_00274A30(*(void**)t);
+        cScriptPlayerMain_UpdateFrame(*(void**)t);
         return 1;
     }
     return 0;
@@ -713,7 +713,7 @@ extern "C" void func_00282908(void* self, void* script)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_002829D0);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqPlay);
 #ifdef SKIP_ASM
 struct sBxsVEntry10 {
     short delta;
@@ -721,7 +721,7 @@ struct sBxsVEntry10 {
     void (*fn)(void*, void*, int, int);
 };
 
-extern "C" void func_002829D0(void* self, void* a1)
+extern "C" void cBXScriptEngine_OnInSeqPlay(void* self, void* a1)
 {
     char* t = *(char**)((char*)a1 + 0xC);
     sBxsVEntry10* vt = *(sBxsVEntry10**)((char*)self + 0x2A8);
@@ -731,7 +731,7 @@ extern "C" void func_002829D0(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282A18);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqStop);
 #ifdef SKIP_ASM
 struct sVEntry282A18 {
     short delta;
@@ -741,7 +741,7 @@ struct sVEntry282A18 {
 
 extern "C" void func_00282540(void* self, int id);
 
-extern "C" void func_00282A18(void* self, void* msg)
+extern "C" void cBXScriptEngine_OnInSeqStop(void* self, void* msg)
 {
     char* s = *(char**)((char*)msg + 0xC);
     sVEntry282A18* vt = *(sVEntry282A18**)((char*)self + 0x2A8);
@@ -848,11 +848,11 @@ int func_00282BE0(void* self, void* player)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282BF0);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByReqHandle);
 #ifdef SKIP_ASM
 extern "C" void* func_00282CB0(void* self, int a1);
 
-extern "C" int func_00282BF0(void* self, int a1)
+extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1)
 {
     int* p = (int*)func_00282CB0(self, a1);
     if (p == 0) {
@@ -865,9 +865,9 @@ extern "C" int func_00282BF0(void* self, int a1)
 extern "C" void* cInSeq_GetPlayer(int);
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282C18__FPv);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByPlayerID__FPv);
 #ifdef SKIP_ASM
-void* func_00282C18(void* self)
+void* cBXScriptEngine_GetRequestPlayerByPlayerID(void* self)
 {
     return cInSeq_GetPlayer(*(int*)((char*)self + 0x2b8));
 }
@@ -1318,7 +1318,7 @@ extern "C" void cScriptObject__cScriptObject(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00283298);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_InitScriptObject);
 #ifdef SKIP_ASM
 struct sBxsVEntryA {
     short delta;
@@ -1326,7 +1326,7 @@ struct sBxsVEntryA {
     int (*fn)(void*, void*);
 };
 
-extern "C" void func_00283298(void* self)
+extern "C" void cScriptObject_InitScriptObject(void* self)
 {
     char* mgr = (char*)func_0027D2E8();
     sBxsVEntryA* vt = *(sBxsVEntryA**)(mgr + 0x2A8);
@@ -1360,7 +1360,7 @@ extern "C" void cScriptObject_DeInitScriptObject(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/bxscriptengine", func_00283320);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_PauseObjScript);
 #ifdef SKIP_ASM
 class cScriptOwner3320 {
 public:
@@ -1377,7 +1377,7 @@ public:
     virtual void* v07(int i);
 };
 
-extern "C" void func_00283320(cScriptOwner3320* self)
+extern "C" void cScriptObject_PauseObjScript(cScriptOwner3320* self)
 {
     int i = 0;
     int n = self->v06();
@@ -1388,7 +1388,7 @@ extern "C" void func_00283320(cScriptOwner3320* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/bxscriptengine", func_002833A8);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_ResumeObjScript);
 #ifdef SKIP_ASM
 class cScriptOwner33A8 {
 public:
@@ -1405,7 +1405,7 @@ public:
     virtual void* v07(int i);
 };
 
-extern "C" void func_002833A8(cScriptOwner33A8* self)
+extern "C" void cScriptObject_ResumeObjScript(cScriptOwner33A8* self)
 {
     int i = 0;
     int n = self->v06();
@@ -1416,9 +1416,9 @@ extern "C" void func_002833A8(cScriptOwner33A8* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00283430__FPv);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnStartObjectUse__FPv);
 #ifdef SKIP_ASM
-void* func_00283430(void* self)
+void* cScriptObject_OnStartObjectUse(void* self)
 {
     void* t0 = (char*)*(void**)((char*)self + 0x8) + 0x1;
     *(int*)((char*)self + 0x8) = (int)t0;

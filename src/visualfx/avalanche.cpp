@@ -206,7 +206,7 @@ extern "C" void tActiveAvalancheNode_calculateScale_Data(void* self, float t) __
 // PORT: sine/cosine; the angle is set up first at both calls here (other units declare it (s, c, angle),
 // which uses the same registers), so it is declared angle-first under its own name.
 extern "C" void func_0031BE50_5778(float angle, float* s, float* c) __asm__("func_0031BE50");
-extern "C" void func_003717C0_Data(float dt, void* emitter, sV4_5778* pos, sV4_5778* vel, sV4_5778* col, int on) __asm__("func_003717C0");
+extern "C" void cDynamicColourEmitter_update_Data(float dt, void* emitter, sV4_5778* pos, sV4_5778* vel, sV4_5778* col, int on) __asm__("cDynamicColourEmitter_update");
 
 // Rotates obj->mat by ANGLE about AXIS, keeping its translation (used on the active node and on the
 // returned frame data, which both keep their matrix in `mat`).
@@ -324,7 +324,7 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
                                                             self->fB4),
                                                    D_004A3AA8);
                         self->f1FC = self->fB4;
-                        func_003717C0_Data(1.0f / 60.0f, self->emitter, &pos, &D_004FF120_5778, &col, ft < self->data->length);
+                        cDynamicColourEmitter_update_Data(1.0f / 60.0f, self->emitter, &pos, &D_004FF120_5778, &col, ft < self->data->length);
                     }
                 }
                 vAddEq_5778(self->pos, sV4_5778(self->data->frames[self->frame * kAvFrameSize_5778 + kAvVel_5778] * 2.0f,
@@ -635,7 +635,7 @@ extern "C" void tActiveAvalancheNode_calculateScale(void* self, float currTime)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D7CA8);
+INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_update);
 #ifdef SKIP_ASM
 struct sAvVec4CA8 {
     float x, y, z, w;
@@ -673,7 +673,7 @@ struct sAvNodeCA8 {
 };
 
 extern "C" void tActiveAvalancheNode_end(void* self, int force);
-extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern sAvVec4CA8 D_004FF120_7CA8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
@@ -693,7 +693,7 @@ static inline void vu0CopyMatrixCA8(sAvMatrixCA8* dst, sAvMatrixCA8* src)
         : "memory");
 }
 
-extern "C" int func_002D7CA8(sAvNodeCA8* self, float t)
+extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float t)
 {
     if (self->data == 0) return 0;
     t *= self->data->speed;
@@ -710,7 +710,7 @@ extern "C" int func_002D7CA8(sAvNodeCA8* self, float t)
             void* em = self->emitter;
             self->f1FC = self->fB4;
             int alive = t < d->duration;
-            func_003717C0(em, pos, org, vel, alive, 0.01666666753590107f);
+            cDynamicColourEmitter_update(em, pos, org, vel, alive, 0.01666666753590107f);
         }
         return 1;
     }
@@ -799,7 +799,7 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D7EF8);
+INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sAvV4_7EF8 {
@@ -876,9 +876,9 @@ extern sAvFloatDef_7EF8 D_004D5770;
 extern char str_AnimObject_b[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00341AA0(void* self, int a, int type, void* b, void* c);
-extern "C" bool func_002D7CA8_7EF8(void* node, float t) __asm__("func_002D7CA8");
+extern "C" bool tActiveAvalancheNode_update_7EF8(void* node, float t) __asm__("tActiveAvalancheNode_update");
 extern "C" void* func_0028B180();
-extern "C" void func_002D81B0_7EF8(void* self) __asm__("func_002D81B0");
+extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
 void func_0029E560_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("func_0029E560__FPv");
 
 static inline unsigned short soundFrame_7EF8(const sAvActive_7EF8* a)
@@ -896,8 +896,8 @@ static inline sAvV4_7EF8 pos_7EF8(const sAvObj_7EF8* o)
     return o->pos;
 }
 
-extern "C" void func_002D7EF8_7EF8(sAvActive_7EF8* self) __asm__("func_002D7EF8");
-extern "C" void func_002D7EF8_7EF8(sAvActive_7EF8* self)
+extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self) __asm__("tActiveAvalanche_update");
+extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
 {
     if (self->data == 0) {
         return;
@@ -906,7 +906,7 @@ extern "C" void func_002D7EF8_7EF8(sAvActive_7EF8* self)
     self->time += cAvalanche_m_UpdateTimeStep;
     int i = 0;
     for (sAvNode_7EF8* n = self->nodes; n != 0; n = n->next, i++) {
-        bool ok = func_002D7CA8_7EF8(n, self->time);
+        bool ok = tActiveAvalancheNode_update_7EF8(n, self->time);
         alive = ok | alive;
         if (!ok) {
             self->objs[i] = 0;
@@ -932,19 +932,19 @@ extern "C" void func_002D7EF8_7EF8(sAvActive_7EF8* self)
         self->nextSound++;
     }
     if (!alive) {
-        func_002D81B0_7EF8(self);
+        tActiveAvalanche_end_7EF8(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D81B0);
+INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_end);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void* func_0028B180();
 extern "C" void func_0029DEF0(void* self, int a1);
 
-extern "C" void func_002D81B0(void* self)
+extern "C" void tActiveAvalanche_end(void* self)
 {
     if (*(void**)((char*)self + 0x8) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x8));
@@ -992,7 +992,7 @@ extern "C" void cAvalanche_SaveData(void)
 INCLUDE_ASM("visualfx/avalanche", func_002D82A0);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void func_003DEC80(void* a, void* b, void* data, int size, int prio);
+extern "C" void FILESYS_writesync(void* a, void* b, void* data, int size, int prio);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_buffer[];
@@ -1000,7 +1000,7 @@ extern char str_buffer[];
 extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows)
 {
     if (direct) {
-        func_003DEC80(a, b, src, stride * rows, 100);
+        FILESYS_writesync(a, b, src, stride * rows, 100);
     } else {
         char* buf = (char*)operator_new_tag(stride * rows, str_buffer, 0, 0);
         char* d = buf;
@@ -1012,7 +1012,7 @@ extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride
             }
             src = end;
         }
-        func_003DEC80(a, b, buf, stride * rows, 100);
+        FILESYS_writesync(a, b, buf, stride * rows, 100);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1034,7 +1034,7 @@ extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_003DEBF0(char* name, int mode, int prio, int* fd);
-extern "C" void func_003DECA0(int fd, int prio);
+extern "C" void FILESYS_closesync(int fd, int prio);
 extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows);
 
 struct sAvPart_83B8 {
@@ -1133,7 +1133,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
                 off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].a, 2, 1);
             }
         }
-        func_003DECA0(fd, 0x64);
+        FILESYS_closesync(fd, 0x64);
     }
     D_004A3A48 = 0;
 }
@@ -1148,8 +1148,8 @@ extern int cAvalanche_m_resolved;
 extern int cAvalanche_m_badCookie;
 extern int D_004A3A4C;
 extern char str_sav[];
-// PORT: the read call returns func_003DEB50's result (bytes read); the ealib unit declares it void.
-extern "C" int func_003DEC60_i(int fd, int off, void* data, int size, int prio) __asm__("func_003DEC60");
+// PORT: the read call returns syncblockio's result (bytes read); the ealib unit declares it void.
+extern "C" int FILESYS_readsync_i(int fd, int off, void* data, int size, int prio) __asm__("FILESYS_readsync");
 extern "C" void cAvalanche_end(void);
 extern "C" void cAvalanche_resolveDataPointers(void);
 
@@ -1175,7 +1175,7 @@ extern "C" void cAvalanche_LoadData(void)
             cMemMan_free(cAvalanche_m_filedata);
         }
         int* hdr = (int*)operator_new_tag(8, buf, 0, 0);
-        func_003DEC60_i(fd, 0, hdr, 8, 0x64);
+        FILESYS_readsync_i(fd, 0, hdr, 8, 0x64);
         if (hdr[0] != 0x2BEEF00) {
             if (hdr != 0) {
                 cMemMan_free(hdr);
@@ -1190,8 +1190,8 @@ extern "C" void cAvalanche_LoadData(void)
             void* data = operator_new_tag(size, buf, 0, 0);
             cAvalanche_m_fileDataDeleteable = 1;
             cAvalanche_m_filedata = data;
-            func_003DEC60_i(fd, 0, data, size + 8, 0x64);
-            func_003DECA0(fd, 0x64);
+            FILESYS_readsync_i(fd, 0, data, size + 8, 0x64);
+            FILESYS_closesync(fd, 0x64);
             cAvalanche_m_badCookie = 0;
         }
     }
@@ -1218,7 +1218,7 @@ extern sAvalancheSlot cAvalanche_m_activeAvalanches[];
 extern "C" void cAvalanche_calculate(void);
 extern "C" void cAvalanche_resolveDataPointers(void);
 extern "C" int cAvalanche_triggerAvalanche(int a);
-extern "C" void func_002D7EF8(void* self);
+extern "C" void tActiveAvalanche_update(void* self);
 
 /**
  * Runs the avalanche system for one frame while it is enabled.
@@ -1226,7 +1226,7 @@ extern "C" void func_002D7EF8(void* self);
  * When enabled (cAvalanche_m_Enable, On Tour m_Enable): recalculates everything when the recalc flag (cAvalanche_m_Recalc) is set
  * and clears it and cAvalanche_m_badCookie; resolves the data pointers; while the trigger flag (cAvalanche_m_Trigger) is set,
  * triggers avalanche cAvalanche_m_AvalancheId (On Tour m_AvalancheId; a negative flag fires once); once pointers are resolved
- * and the update flag (cAvalanche_m_Update) is set, updates all 16 active avalanches (func_002D7EF8, On Tour
+ * and the update flag (cAvalanche_m_Update) is set, updates all 16 active avalanches (tActiveAvalanche_update, On Tour
  * tActiveAvalanche::update), a negative update flag again counting as one-shot.
  */
 extern "C" void cAvalanche_update(void)
@@ -1247,7 +1247,7 @@ extern "C" void cAvalanche_update(void)
         if (cAvalanche_m_Enable != 0 && cAvalanche_m_resolved != 0 && cAvalanche_m_Update != 0) {
             int i;
             for (i = 0; i < 16; i++) {
-                func_002D7EF8(&cAvalanche_m_activeAvalanches[i]);
+                tActiveAvalanche_update(&cAvalanche_m_activeAvalanches[i]);
             }
             if (cAvalanche_m_Update < 0) {
                 cAvalanche_m_Update = 0;
@@ -2045,7 +2045,7 @@ INCLUDE_ASM("visualfx/avalanche", cAvalanche_triggerAvalanche);
 extern "C" float cRenderStateMan_SnowFlakeColourR(int a);
 extern "C" float cRenderStateMan_SnowFlakeColourG(int a);
 extern "C" float cRenderStateMan_SnowFlakeColourB(int a);
-extern "C" void func_00370DC8(void* self, void* node, float k);
+extern "C" void cBaseClass_DynamicEmitter_setupEmitter(void* self, void* node, float k);
 extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
 
 extern "C" void func_0029DEF0(void* self, int a1);
@@ -2182,7 +2182,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                         tActiveAvalancheNode_calculateScale(act, 0.0f);
                         if (n->emit) {
                             cDynamicColourEmitter_reset(act->emitter);
-                            func_00370DC8(act->emitter, n, 2.0f);
+                            cBaseClass_DynamicEmitter_setupEmitter(act->emitter, n, 2.0f);
                             act->f2D0 = 1;
                             float flakeRed = cRenderStateMan_SnowFlakeColourR(0);
                             float gg = cRenderStateMan_SnowFlakeColourG(0);
@@ -2224,12 +2224,12 @@ struct cAvalanche_end_sSlot {
 extern cAvalanche_end_sSlot D_slots_9A80[] __asm__("cAvalanche_m_activeAvalanches");
 extern int cAvalanche_m_fileDataDeleteable;
 void cMemMan_free(void*);
-extern "C" void func_002D81B0(void* self);
+extern "C" void tActiveAvalanche_end(void* self);
 
 static inline void freeSlot_9A80(cAvalanche_end_sSlot* s)
 {
     if (s->active != 0) {
-        func_002D81B0(s);
+        tActiveAvalanche_end(s);
     }
 }
 
@@ -2454,7 +2454,7 @@ struct sSlotRR {
 };
 extern sSlotRR D_slots_RR[] __asm__("cAvalanche_m_activeAvalanches");
 extern "C" int cAvalanche_triggerAvalanche(int id);
-extern "C" void func_002D81B0(void* slot);
+extern "C" void tActiveAvalanche_end(void* slot);
 extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
 sFrame_RR getFrameData_RR(void* self, float t) __asm__("tActiveAvalancheNode_getFrameData");
 
@@ -2466,7 +2466,7 @@ static inline sSlotRR* slots_RR()
 static inline void clearSlot_RR(sSlotRR* s)
 {
     if (s->group != 0) {
-        func_002D81B0(s);
+        tActiveAvalanche_end(s);
     }
 }
 
@@ -2522,7 +2522,7 @@ extern "C" void cAvalanche_readFromReplayFrame(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9FB8);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_resolve);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void cAvalanche_resolveDataPointers(void);
@@ -2530,7 +2530,7 @@ extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_badCookie;
 
-extern "C" void func_002D9FB8(void* data)
+extern "C" void cAvalanche_resolve(void* data)
 {
     cAvalanche_reset(data);
     if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {

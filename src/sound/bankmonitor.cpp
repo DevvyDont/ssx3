@@ -155,7 +155,7 @@ extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_FindFreeInstance);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void*);
+extern "C" int cBankMonitorInstance_IsFree(void*);
 
 /**
  * Finds a free bank-sound instance, skipping some free ones.
@@ -166,7 +166,7 @@ extern "C" int func_002ABB80(void*);
 extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n)
 {
     for (int i = 0; i < 64; i++) {
-        if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) != 0) {
+        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) != 0) {
             if (--n == 0) {
                 return i;
             }
@@ -311,7 +311,7 @@ struct sBankMonitorView : public cSndPlayOpts {  // this unit's model of cBankMo
     sBmVoice* voices;           // 0x8EC
     char vb[0x4];               // 0x8F0
 };
-extern "C" void func_002ABB38(void*);
+extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void bxLogPrint(const char* fmt, ...);
 extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n);
 extern "C" void func_002ABD48(void* voice, void* mon);
@@ -333,7 +333,7 @@ static inline void setCallback_Create(sBmVoice* v, sSndCallback k)
 /**
  * Starts monitoring a playing sound in a free bank monitor voice, using the current play options.
  *
- * The voice is reset (func_002ABB38) and gets the handle, kind and volume, plus the current option slot's
+ * The voice is reset (cBankMonitorInstance_Reset) and gets the handle, kind and volume, plus the current option slot's
  * target position, callback and other settings; the target is copied into the voice when the options ask for
  * that. With no free voice it logs "Out of BankMonitor instances" and releases the handle with func_003B89E0()
  * (kind 1) or func_003B9920() (kind 2). The busy counter (+0x8DC) is raised for the duration.
@@ -350,7 +350,7 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
     int idx = cBankMonitor_FindFreeInstance((cBankMonitor*)self, self->busy);
     if (idx >= 0) {
         instance = &self->voices[idx];
-        func_002ABB38(instance);
+        cBankMonitorInstance_Reset(instance);
         instance->kind = kind;
         instance->id = id;
         instance->f60 = self->p3C[self->cur];
@@ -395,7 +395,7 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Pause);
 #ifdef SKIP_ASM
-extern "C" void func_002ACAC8(void*);
+extern "C" void cBankMonitorInstance_Pause(void*);
 
 /**
  * Pauses every bank-sound instance and marks the monitor paused (+0x8E8).
@@ -404,7 +404,7 @@ extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
 {
     self->mBankMonitorPaused = 1;
     for (int i = 0; i < 64; i++) {
-        func_002ACAC8((char*)self->mBankMonitorInstance + i * 0xC0);
+        cBankMonitorInstance_Pause((char*)self->mBankMonitorInstance + i * 0xC0);
     }
 }
 #endif
@@ -430,7 +430,7 @@ extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_FadeOut);
 #ifdef SKIP_ASM
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int a2);
-extern "C" void func_002ACB80(void* voice, int a, int b, float v);
+extern "C" void cBankMonitorInstance_Fade(void* voice, int a, int b, float v);
 
 /**
  * Fades out one playing bank sound: cBankMonitorInstance::Fade(@p FadeTime, -1, 0) on the voice that
@@ -444,7 +444,7 @@ extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, in
 {
     void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, type);
     if (voice != 0) {
-        func_002ACB80(voice, -1, 0, FadeTime);
+        cBankMonitorInstance_Fade(voice, -1, 0, FadeTime);
     }
 }
 #endif
@@ -452,16 +452,16 @@ extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, in
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Destroy);
 #ifdef SKIP_ASM
-extern "C" void func_002ABB38(void*);
+extern "C" void cBankMonitorInstance_Reset(void*);
 
 /**
- * Destroys one bank-sound instance (func_002ABB38).
+ * Destroys one bank-sound instance (cBankMonitorInstance_Reset).
  *
  * @param i  the instance index (On Tour Index)
  */
 extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i)
 {
-    func_002ABB38((char*)self->mBankMonitorInstance + i * 0xC0);
+    cBankMonitorInstance_Reset((char*)self->mBankMonitorInstance + i * 0xC0);
 }
 #endif
 
@@ -482,7 +482,7 @@ extern "C" void func_002AD3C0(cBankMonitor* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD410);
 #ifdef SKIP_ASM
-extern "C" void func_002ABB38(void*);
+extern "C" void cBankMonitorInstance_Reset(void*);
 
 struct sBmKeyD410 {
     short a;
@@ -508,7 +508,7 @@ extern "C" void func_002AD410(cBankMonitor* self, sBmKeyD410 key)
 {
     for (int i = 0; i < 64; i++) {
         if (func_002AD410_match((char*)self->mBankMonitorInstance + i * 0xC0, key)) {
-            func_002ABB38((char*)self->mBankMonitorInstance + i * 0xC0);
+            cBankMonitorInstance_Reset((char*)self->mBankMonitorInstance + i * 0xC0);
         }
     }
 }
@@ -526,7 +526,7 @@ extern "C" void cBankMonitor_BANKMONITOR_DestroyAllWithPtr(cBankMonitor* self, i
 {
     for (int i = 0; i < 64; i++) {
         if (*(int*)((char*)self->mBankMonitorInstance + i * 0xC0 + 0x80) == id) {
-            func_002ABB38((char*)self->mBankMonitorInstance + i * 0xC0);
+            cBankMonitorInstance_Reset((char*)self->mBankMonitorInstance + i * 0xC0);
         }
     }
 }
@@ -547,7 +547,7 @@ struct sVoiceC0 { int key; int idx; char pad[0xC0 - 8]; };
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int key)
 {
     for (int i = 0; i < 64; i++) {
-        if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0
+        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0
             && ((sVoiceC0*)self->mBankMonitorInstance)[i].key == key
             && ((sVoiceC0*)self->mBankMonitorInstance)[i].idx == idx) {
             return &((sVoiceC0*)self->mBankMonitorInstance)[i];
@@ -561,8 +561,8 @@ extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx,
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_StopHandle);
 #ifdef SKIP_ASM
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int a2);
-extern "C" void func_002ABB38(void*);
-extern "C" void func_002ACB80(void* voice, int a, int b, float v);
+extern "C" void cBankMonitorInstance_Reset(void*);
+extern "C" void cBankMonitorInstance_Fade(void* voice, int a, int b, float v);
 
 /**
  * Stops the bank sound with a given handle and type, at once or with a fade.
@@ -578,9 +578,9 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx,
     void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, type);
     if (voice != 0) {
         if (FadeTime != 0.0f) {
-            func_002ACB80(voice, -1, 1, FadeTime);
+            cBankMonitorInstance_Fade(voice, -1, 1, FadeTime);
         } else {
-            func_002ABB38(voice);
+            cBankMonitorInstance_Reset(voice);
         }
     }
 }
@@ -589,11 +589,11 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx,
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_StopBank);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void*);
-extern "C" void func_002ABB38(void*);
-// PORT: same ABI as the unit's func_002ACB80(void*, int, int, float); the float is
+extern "C" int cBankMonitorInstance_IsFree(void*);
+extern "C" void cBankMonitorInstance_Reset(void*);
+// PORT: same ABI as the unit's cBankMonitorInstance_Fade(void*, int, int, float); the float is
 // the 2nd parameter in the original, which orders the argument moves.
-void func_002ACB80_f(void* voice, float v, int a, int b) __asm__("func_002ACB80");
+void cBankMonitorInstance_Fade_f(void* voice, float v, int a, int b) __asm__("cBankMonitorInstance_Fade");
 
 struct sVoiceD650 {
     int state;      // 0x0
@@ -613,14 +613,14 @@ struct sVoiceD650 {
 extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, float FadeTime)
 {
     for (int i = 0; i < 64; i++) {
-        if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
+        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
             // PORT: pointer arithmetic through int
             sVoiceD650* instance = (sVoiceD650*)(i * 0xC0 + (int)self->mBankMonitorInstance);
             if (instance->state == 1 && instance->id == id) {
                 if (FadeTime != 0.0f) {
-                    func_002ACB80_f(instance, FadeTime, -1, 1);
+                    cBankMonitorInstance_Fade_f(instance, FadeTime, -1, 1);
                 } else {
-                    func_002ABB38(instance);
+                    cBankMonitorInstance_Reset(instance);
                 }
             }
         }
@@ -631,7 +631,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, fl
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Active);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void*);
+extern "C" int cBankMonitorInstance_IsFree(void*);
 
 struct sVoiceAD730 {
     int pad_0[2];
@@ -648,7 +648,7 @@ extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
+        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
             // PORT: pointer arithmetic through int
             sVoiceAD730* instance = (sVoiceAD730*)(i * 0xC0 + (int)self->mBankMonitorInstance);
             if (instance->active != 0) {
@@ -662,7 +662,7 @@ extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Used);
 #ifdef SKIP_ASM
-extern "C" int func_002ABB80(void*);
+extern "C" int cBankMonitorInstance_IsFree(void*);
 
 /**
  * Counts the bank monitor's busy instances (of 64): those cBankMonitorInstance::IsFree reports in use.
@@ -673,7 +673,7 @@ extern "C" int cBankMonitor_BANKMONITOR_Used(cBankMonitor* self)
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
+        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
             count++;
         }
     }
@@ -989,9 +989,9 @@ extern "C" void func_002AD998();
 extern "C" void* func_003B5910(void*);
 
 //98.75%
-INCLUDE_ASM("sound/bankmonitor", func_002ADBF0__FPv);
+INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_BeginMonitoring__FPv);
 #ifdef SKIP_ASM
-void* func_002ADBF0(void* self)
+void* cMonitor_MONITOR_BeginMonitoring(void* self)
 {
     return func_003B5910((void*)func_002AD998);
 }
@@ -1214,20 +1214,20 @@ extern "C" int func_002ADF60()
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADF80);
+INCLUDE_ASM("sound/bankmonitor", cSoundSys_SetMode);
 #ifdef SKIP_ASM
-class func_002ADF80_cObj {
+class cSoundSys_SetMode_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(int a);
 };
 
-struct func_002ADF80_sHolder {
-    func_002ADF80_cObj* obj;
+struct cSoundSys_SetMode_sHolder {
+    cSoundSys_SetMode_cObj* obj;
 };
 
-extern "C" int func_002ADF80(func_002ADF80_sHolder* self, int a)
+extern "C" int cSoundSys_SetMode(cSoundSys_SetMode_sHolder* self, int a)
 {
     return self->obj->v02(a);
 }
@@ -1291,7 +1291,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE048);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void REAL_abortmessage();
 extern "C" void func_004175C8();
-extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void* func_002526B8(void* block, int size);
 extern "C" void SYNCTASK_add(int (*fn)(), int a, int b);
 extern int D_004A379C;
@@ -1331,7 +1331,7 @@ extern "C" void func_002AE048(void (*cb)(), int id)
     SYNCTASK_add(func_002AE020, 5, 100);
     D_004A3780 = REAL_abortmessage;
     D_004A3784 = func_004175C8;
-    D_004A378C = func_00252FA0;
+    D_004A378C = MEM_alloc;
     D_004A3790 = func_002526B8;
     D_004A3794 = func_002AE000;
 }
@@ -2835,7 +2835,7 @@ extern "C" int FileParser_IsEOF(void* parser);
 extern "C" int FileParser_AssignString(void* parser, const char* key, char* out);
 void func_002AAB98_2B0088(void* self, int i, char* val) __asm__("func_002AAB98");
 extern "C" int func_002AFD40(cSpeechInstance* self, int a, char* name, int b, int c);
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern void* D_004A37B0;
 extern char str_BIGFILE[];
 extern char str_BASEPATH[];
@@ -2860,12 +2860,12 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, i
         while (FileParser_IsEOF(parser) == 0)
         {
             char* key = FileParser_GetName(parser);
-            if (func_0041AA88(str_BIGFILE, key) == 0)
+            if (strcasecmp(str_BIGFILE, key) == 0)
             {
                 FileParser_AssignString(parser, str_BIGFILE, v40);
                 func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, speechInstance->unk_004, v40);
             }
-            if (func_0041AA88(str_BASEPATH, key) == 0)
+            if (strcasecmp(str_BASEPATH, key) == 0)
             {
                 FileParser_AssignString(parser, str_BASEPATH, ((char*)speechInstance) + 0x6C);
                 sprintf(value, str_pct_sheaders_big, ((char*)speechInstance) + 0x6C);
@@ -2878,7 +2878,7 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, i
                 }
                 speechInstance->unk_0EC += 1;
             }
-            if (func_0041AA88(str_BANK, key) == 0)
+            if (strcasecmp(str_BANK, key) == 0)
             {
                 FileParser_AssignString(parser, str_BANK, value);
                 sprintf(path, str_pct_spct_s_c, ((char*)speechInstance) + 0x6C, name);
@@ -3170,7 +3170,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0AE8);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
 extern void* D_00483870[];
@@ -3215,7 +3215,7 @@ extern "C" void func_002B0AE8(cSpeechSys* self, int flags)
     D_004A37B4 = 0;
     if (flags & 2) {
         func_002AA648(*(void**)self, 0);
-        func_0028BB10(**(void***)self, 0);
+        cBankManager__cBankManager(**(void***)self, 0);
         cSoundSys__cSoundSys((cSoundSys*)(*(void**)(**(char***)self + 0x1D8)), 0);
     }
     if (flags & 1) {
@@ -3252,7 +3252,7 @@ int func_002ADF60_a(int seed) __asm__("func_002ADF60");
 extern "C" void bxLogPrint(const char* fmt, ...);
 extern "C" void func_003D6840(void* fn, int seed, int buf);
 extern "C" int func_003D6C58(int n);
-extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void func_003D6C60(int n, void* p);
 extern "C" void* func_003D6768();
 extern "C" void func_002AF8A8();
@@ -3274,7 +3274,7 @@ extern "C" void SPCH_Init(cSpeechSys* self)
     bxLogPrint(D_00483390, seed);
     func_003D6840((void*)func_002AF8A8, seed, buf);
     int n = func_003D6C58(500);
-    void* workMem = func_00252FA0(str_bank_mem, n, 0);
+    void* workMem = MEM_alloc(str_bank_mem, n, 0);
     self->unk_008 = workMem;
     func_003D6C60(500, workMem);
     *(void**)((char*)func_003D6768() + 0x8) = (void*)func_003E4E98;
@@ -4690,7 +4690,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         char* tok = FileParser_FindNextSection(L.parser);
         if (tok == 0)
             break;
-        if (func_0041AA88(tok, str_GLOBAL) == 0)
+        if (strcasecmp(tok, str_GLOBAL) == 0)
             continue;
         // The song's bit is built in a variable: the target keeps its li 1 in the loop while the
         // other constants (100) are hoisted.
@@ -4701,79 +4701,79 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(0xAC, str_cSongConfiguration, 0, 0));
         while (FileParser_IsEOF(L.parser) == 0) {
             char* key = FileParser_GetName(L.parser);
-            if (func_0041AA88(key, str_TITLE) == 0) {
+            if (strcasecmp(key, str_TITLE) == 0) {
                 FileParser_AssignString(L.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
-            } else if (func_0041AA88(key, str_ARTIST) == 0) {
+            } else if (strcasecmp(key, str_ARTIST) == 0) {
                 FileParser_AssignString(L.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 0x2234));
-            } else if (func_0041AA88(key, str_ALBUM) == 0) {
+            } else if (strcasecmp(key, str_ALBUM) == 0) {
                 FileParser_AssignString(L.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 0x3B34));
-            } else if (func_0041AA88(key, str_ADDTOFE) == 0) {
+            } else if (strcasecmp(key, str_ADDTOFE) == 0) {
                 FileParser_AssignInt(L.parser, str_ADDTOFE, &L.iA);
                 if (L.iA == 1)
                     *(int*)(self + 0x3EC) += 1;
-            } else if (func_0041AA88(key, str_CATEGORY) == 0) {
+            } else if (strcasecmp(key, str_CATEGORY) == 0) {
                 FileParser_AssignInt(L.parser, str_CATEGORY, &L.iB);
                 if (L.iB < 5)
                     ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][L.iB] = 1;
-            } else if (func_0041AA88(key, str_PATHDATA) == 0) {
+            } else if (strcasecmp(key, str_PATHDATA) == 0) {
                 FileParser_AssignString(L.parser, str_PATHDATA, L.buf);
                 strcpy(sv->ents[*(int*)(self + 0x3E4)], L.buf);
-            } else if (func_0041AA88(key, str_MUSDATA) == 0) {
+            } else if (strcasecmp(key, str_MUSDATA) == 0) {
                 FileParser_AssignString(L.parser, str_MUSDATA, L.buf);
                 strcpy(sv->ents[*(int*)(self + 0x3E4)] + 0x20, L.buf);
-            } else if (func_0041AA88(key, str_LOOPDATA) == 0) {
+            } else if (strcasecmp(key, str_LOOPDATA) == 0) {
                 FileParser_AssignString(L.parser, str_LOOPDATA, L.buf);
                 strcpy(((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->bankData[((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData], L.buf);
                 ((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData++;
-            } else if (func_0041AA88(key, str_BeatsPerMeasure) == 0) {
+            } else if (strcasecmp(key, str_BeatsPerMeasure) == 0) {
                 FileParser_AssignInt(L.parser, str_BeatsPerMeasure, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x64) = L.iC;
-            } else if (func_0041AA88(key, str_MeasuresPerBar) == 0) {
+            } else if (strcasecmp(key, str_MeasuresPerBar) == 0) {
                 FileParser_AssignInt(L.parser, str_MeasuresPerBar, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x68) = L.iC;
-            } else if (func_0041AA88(key, str_PhrasesPerBank) == 0) {
+            } else if (strcasecmp(key, str_PhrasesPerBank) == 0) {
                 FileParser_AssignInt(L.parser, str_PhrasesPerBank, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x6C) = L.iC;
-            } else if (func_0041AA88(key, str_BeatsPerPhrase) == 0) {
+            } else if (strcasecmp(key, str_BeatsPerPhrase) == 0) {
                 FileParser_AssignInt(L.parser, str_BeatsPerPhrase, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x70) = L.iC;
-            } else if (func_0041AA88(key, str_PhraseAlign) == 0) {
+            } else if (strcasecmp(key, str_PhraseAlign) == 0) {
                 FileParser_AssignInt(L.parser, str_PhraseAlign, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x74) = L.iC;
-            } else if (func_0041AA88(key, str_DelayCount) == 0) {
+            } else if (strcasecmp(key, str_DelayCount) == 0) {
                 FileParser_AssignInt(L.parser, str_DelayCount, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x78) = L.iC;
-            } else if (func_0041AA88(key, str_DelayFeedback) == 0) {
+            } else if (strcasecmp(key, str_DelayFeedback) == 0) {
                 FileParser_AssignInt(L.parser, str_DelayFeedback, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x7C) = L.iC;
-            } else if (func_0041AA88(key, str_DelayTime) == 0) {
+            } else if (strcasecmp(key, str_DelayTime) == 0) {
                 FileParser_AssignInt(L.parser, str_DelayTime, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x80) = L.iC;
-            } else if (func_0041AA88(key, str_DelayLevel) == 0) {
+            } else if (strcasecmp(key, str_DelayLevel) == 0) {
                 FileParser_AssignInt(L.parser, str_DelayLevel, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x84) = L.iC;
-            } else if (func_0041AA88(key, str_Pathlevel) == 0) {
+            } else if (strcasecmp(key, str_Pathlevel) == 0) {
                 FileParser_AssignInt(L.parser, str_Pathlevel, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x88) = L.iC;
-            } else if (func_0041AA88(key, str_Asynclevel) == 0) {
+            } else if (strcasecmp(key, str_Asynclevel) == 0) {
                 FileParser_AssignInt(L.parser, str_Asynclevel, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x8C) = L.iC;
-            } else if (func_0041AA88(key, str_BPM) == 0) {
+            } else if (strcasecmp(key, str_BPM) == 0) {
                 FileParser_AssignFloat(L.parser, str_BPM, &L.fD);
                 *(float*)(sv->ents[*(int*)(self + 0x3E4)] + 0x90) = L.fD;
-            } else if (func_0041AA88(key, str_SEDVALUE) == 0) {
+            } else if (strcasecmp(key, str_SEDVALUE) == 0) {
                 FileParser_AssignInt(L.parser, str_SEDVALUE, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x98) = L.iC;
-            } else if (func_0041AA88(key, str_LOWPASS) == 0) {
+            } else if (strcasecmp(key, str_LOWPASS) == 0) {
                 FileParser_AssignInt(L.parser, str_LOWPASS, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x9C) = L.iC;
-            } else if (func_0041AA88(key, str_DUCKTOLOOPS) == 0) {
+            } else if (strcasecmp(key, str_DUCKTOLOOPS) == 0) {
                 FileParser_AssignInt(L.parser, str_DUCKTOLOOPS, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x94) = L.iC;
-            } else if (func_0041AA88(key, str_PREVIEW) == 0) {
+            } else if (strcasecmp(key, str_PREVIEW) == 0) {
                 FileParser_AssignInt(L.parser, str_PREVIEW, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA0) = L.iC;
-            } else if (func_0041AA88(key, str_SONGBIG) == 0) {
+            } else if (strcasecmp(key, str_SONGBIG) == 0) {
                 FileParser_AssignInt(L.parser, str_SONGBIG, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA4) = L.iC;
             }
@@ -4790,7 +4790,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3398);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_0028BB10(void* self, int flags);
+extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
 extern "C" void func_002B1F78(cSongInstance* self, int flags);
@@ -4848,7 +4848,7 @@ extern "C" void func_002B3398(char* self, int flags)
     gMusicSys = 0;
     if (flags & 2) {
         func_002AA648(*(void**)self, 0);
-        func_0028BB10(**(void***)self, 0);
+        cBankManager__cBankManager(**(void***)self, 0);
         cSoundSys__cSoundSys((cSoundSys*)(*(void**)(**(char***)self + 0x1D8)), 0);
     }
     if (flags & 1) {
@@ -5943,7 +5943,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4A20);
 extern "C" void ASYNCFILE_cancel(void* f);
 extern "C" void ASYNCFILE_release(void* f, int a, int b);
 extern "C" void* func_003DF748(void* name, void* buf, int size);
-extern "C" void func_003E1B68(void* name, void* buf, int size);
+extern "C" void FILE_loadat(void* name, void* buf, int size);
 
 extern "C" void func_002B4A20(void* self, void* name, int sync)
 {
@@ -5954,7 +5954,7 @@ extern "C" void func_002B4A20(void* self, void* name, int sync)
     if (sync == 0) {
         *(void**)((char*)self + 0x5438) = func_003DF748(name, *(void**)((char*)self + 0x5434), 0x6400);
     } else {
-        func_003E1B68(name, *(void**)((char*)self + 0x5434), 0x6400);
+        FILE_loadat(name, *(void**)((char*)self + 0x5434), 0x6400);
     }
 }
 #endif

@@ -3,7 +3,7 @@
 
 // cUIListBox: a list of up to 32 text entries (ASCII, Unicode or string-table id, each with a user data pointer), one of
 // them current (record type 0x12). Size 0x31C: cUIScreen_createObjectByStruct does operator new(0x31C, "UIListBox"...)
-// + the ctor cUIListBox_cUIListBox (cUIThing ctor func_0039FB30, vtable cUIListBox_vtbl, clears the entries, mNumEntries,
+// + the ctor cUIListBox_cUIListBox (cUIThing ctor cUIThing_cUIThing, vtable cUIListBox_vtbl, clears the entries, mNumEntries,
 // mCurrentEntry, mStaticColour = D_004C66C8); default ctor func_003A55D8 (ui/uivector). Base: cUIThing (ui/uithing.h,
 // 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/uilistbox.cpp (preview assert path);
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline

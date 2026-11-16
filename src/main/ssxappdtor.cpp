@@ -1895,31 +1895,31 @@ extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(void* self, int flags)
 }
 #endif
 
-void func_002D21B0(void*);
+void cSSXStatsMan_update(void*);
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_update);
 #ifdef SKIP_ASM
 /**
- * Updates the stats node by calling func_002D21B0() on the object it holds (+0x10); that function is empty.
+ * Updates the stats node by calling cSSXStatsMan_update() on the object it holds (+0x10); that function is empty.
  */
 extern "C" void cSSXStatsObjNode_update(void* self)
 {
-    func_002D21B0(*(void**)((char*)self + 0x10));
+    cSSXStatsMan_update(*(void**)((char*)self + 0x10));
 }
 #endif
 
-void func_002D21B8(void*);
+void cSSXStatsMan_render(void*);
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_render);
 #ifdef SKIP_ASM
 /**
- * Renders the stats node by calling func_002D21B8() on the object it holds (+0x10); that function is empty.
+ * Renders the stats node by calling cSSXStatsMan_render() on the object it holds (+0x10); that function is empty.
  */
 extern "C" void cSSXStatsObjNode_render(void* self)
 {
-    func_002D21B8(*(void**)((char*)self + 0x10));
+    cSSXStatsMan_render(*(void**)((char*)self + 0x10));
 }
 #endif
 
@@ -1939,8 +1939,8 @@ extern "C" void cGameViewMan_updateAll(int);
 extern "C" void cSectionMan_update(void *);
 extern "C" void func_0022E8B8(int);
 extern "C" int func_0022E920(int);
-extern "C" void func_00230F40(void *);
-void func_003A6928(void *);
+extern "C" void cGame_updateState(void *);
+void cWorld_update(void *);
 extern "C" void func_003A88A8(void *);
 
 extern "C" int func_00244A40(void *self) {
@@ -1948,10 +1948,10 @@ extern "C" int func_00244A40(void *self) {
 
     if ((func_0022E920(*(int *)((char*)self + 0x84)) == 0) || (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0)) {
         *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 0;
-        func_003A6928(*(void **)((char*)self + 0x10));
+        cWorld_update(*(void **)((char*)self + 0x10));
         cGameViewMan_updateAll(*(int *)((char*)self + 0x84));
         if (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0) {
-            func_00230F40(self);
+            cGame_updateState(self);
             cSectionMan_update(*(void **)((char*)self + 0x78));
         }
         if ((*(int *)((char*)self + 0x9C) == 0) && (func_0022E920(*(int *)((char*)self + 0x84)) == 0)) {
@@ -1970,7 +1970,7 @@ extern "C" int func_00244A40(void *self) {
     *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 1;
     *(int *)((char*)self + 0x9C) = 0;
     *(int *)((char*)self + 0xA0) = 0;
-    func_003A6928(*(void **)((char*)self + 0x10));
+    cWorld_update(*(void **)((char*)self + 0x10));
     cSectionMan_update(*(void **)((char*)self + 0x78));
     return 1;
 }
@@ -1980,8 +1980,8 @@ INCLUDE_ASM("main/ssxappdtor", func_00244B48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0020CFD0(void);
-extern "C" int func_002CC098(void* p);
+extern "C" void cOVStateManager_update(void);
+extern "C" int cMenuSys_isActive(void* p);
 extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void* func_0028B180(void);
 extern "C" void cSSXAudio_PlayIconSound(void* snd, int a, int b, float f);
@@ -1989,7 +1989,7 @@ extern "C" void cWScriptMan_doMissionCmd(void* mgr, int a, int b, int c);
 extern "C" void func_00398038(void* p);
 extern "C" void func_0029ED18(void* snd);
 extern "C" void func_002CC0C0(void* p);
-extern "C" int func_00231840(char* self, int a);
+extern "C" int cGame_activatePauseMenu(char* self, int a);
 extern "C" int func_0020CBE8(void);
 extern "C" void func_00326AE0(void* p);
 extern "C" void func_0020CA10(void);
@@ -2021,7 +2021,7 @@ struct sQueue_4B48 {
     sMsg_4B48 entries[16];
 };
 
-extern "C" sMsg_4B48* func_0030C870(sQueue_4B48* self);
+extern "C" sMsg_4B48* tMissionMenuQueue_getEntry(sQueue_4B48* self);
 extern "C" sMsg_4B48* func_0030C820(sQueue_4B48* self);
 
 // The script manager (cWScriptMan_TheWScriptMan); hasMessage / popMessage are inline here
@@ -2089,12 +2089,12 @@ static inline bool playing_4B48(char* pb)
 // Handles script messages and pause requests; returns true when the race should run this frame.
 extern "C" bool func_00244B48(sApp_4B48* self)
 {
-    func_0020CFD0();
-    if (func_002CC098(self->fA4) == 0) {
+    cOVStateManager_update();
+    if (cMenuSys_isActive(self->fA4) == 0) {
         sScript_4B48* sm = self->script;
         sQueue_4B48* q = &sm->queue;
         if (sm->hasMessage()) {
-            sMsg_4B48* msg = func_0030C870(q);
+            sMsg_4B48* msg = tMissionMenuQueue_getEntry(q);
             if (msg->type == 8) {
                 cOVStateManager_triggerOverlay(0x1D);
                 D_005366E8[++D_004A2A54] = 3;
@@ -2124,12 +2124,12 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         func_0029ED18(func_0028B180());
         return false;
     }
-    if (func_002CC098(self->fA4) != 0) {
+    if (cMenuSys_isActive(self->fA4) != 0) {
         func_00398038(self->ui);
         func_002CC0C0(self->fA4);
         return false;
     }
-    if (func_00231840((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && func_0020CBE8() != 0) {
+    if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && func_0020CBE8() != 0) {
         func_00326AE0(PadCache);
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
@@ -2146,7 +2146,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         return false;
     }
     cPlaybackMan_update(self->playback);
-    if (func_002CC098(self->fA4) != 0) {
+    if (cMenuSys_isActive(self->fA4) != 0) {
         return false;
     }
     if (wasPaused && (cPauseState_Flags & 1) == 0) {
@@ -2161,20 +2161,20 @@ INCLUDE_ASM("main/ssxappdtor", func_00244E60);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVE_244E60 { short delta; short index; void* fn; };
 extern "C" int func_00237950(int);
-extern "C" int func_002379C8(int);
+extern "C" int cInputSync_aiupdate(int);
 extern "C" int cReplay_isPauseAI(int);
 extern "C" void cReplay_update(int);
-extern "C" int func_0026CE50(int);
+extern "C" int cPlaybackMan_isPauseAI(int);
 extern "C" void cBucketMan_updateBucket(void*, int);
 extern "C" void cBucketMan_mergeBucket(void*, int);
 extern "C" void cBucketMan_applyBucket(void*, int);
-extern "C" void func_00309270(int);
+extern "C" void cWScriptMan_update(int);
 extern "C" void func_002294C8(int);
 extern "C" void func_003440C8(int);
-extern "C" void func_00357BF8(int);
-extern "C" void func_002B7848(int, int, int);
+extern "C" void cMultiParticleMan_update(int);
+extern "C" void cWorldSound_TriggerWorldAudio(int, int, int);
 extern "C" void cGameViewMan_updateAll(int);
-extern "C" void func_00230F40(void*);
+extern "C" void cGame_updateState(void*);
 extern char gBucketMan[8];
 extern int cPauseState_Flags;
 struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
@@ -2188,11 +2188,11 @@ extern "C" void func_00244E60(void* self)
     if (*(int*)(game + 0x7C) == 0 || func_00237950(*(int*)(game + 0x7C)) != 0) {
         if (*(int*)(game + 0x214) == 3) {
             obj = gBucketMan;
-            func_00230F40(self);
+            cGame_updateState(self);
             cBucketMan_mergeBucket(obj, 1);
         } else {
             obj = gBucketMan;
-            func_00230F40(self);
+            cGame_updateState(self);
         }
         if ((cPauseState_Flags & 1) == 0)
             cReplay_update(*(int*)(game + 0x28));
@@ -2206,8 +2206,8 @@ extern "C" void func_00244E60(void* self)
     if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI(*(int*)(game + 0x28)) != 0)
         skip = 1;
     if (skip == 0) {
-        if (*(int*)(game + 0x7C) == 0 || func_002379C8(*(int*)(game + 0x7C)) != 0) {
-            if (func_0026CE50(*(int*)(game + 0x34)) != 0)
+        if (*(int*)(game + 0x7C) == 0 || cInputSync_aiupdate(*(int*)(game + 0x7C)) != 0) {
+            if (cPlaybackMan_isPauseAI(*(int*)(game + 0x34)) != 0)
                 goto setskip;
         } else {
             setskip:
@@ -2230,10 +2230,10 @@ extern "C" void func_00244E60(void* self)
             cBucketMan_updateBucket(obj, 2);
         if ((cPauseState_Flags & 4) == 0)
             cBucketMan_updateBucket(obj, 3);
-        func_00309270(*(int*)(game + 0x30));
+        cWScriptMan_update(*(int*)(game + 0x30));
         func_002294C8(*(int*)(game + 0x38));
         func_003440C8(*(int*)(game + 0x3C));
-        func_00357BF8(*(int*)(game + 0x40));
+        cMultiParticleMan_update(*(int*)(game + 0x40));
         cBucketMan_mergeBucket(obj, 1);
     } else {
         cBucketMan_updateBucket(obj, 5);
@@ -2254,7 +2254,7 @@ extern "C" void func_00244E60(void* self)
         if (viewMan->count != 0) {
             unsigned int i = 0;
             do {
-                func_002B7848(*(int*)(game + 0x4C), ((sApp_244E60*)game)->list->items[i] + 0x20, i);
+                cWorldSound_TriggerWorldAudio(*(int*)(game + 0x4C), ((sApp_244E60*)game)->list->items[i] + 0x20, i);
                 i++;
             } while (i < ((sList_244E60*)*(char**)(game + 0x84))->count);
         }
@@ -2264,32 +2264,32 @@ extern "C" void func_00244E60(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245118);
 #ifdef SKIP_ASM
-extern "C" void func_002570D8(int);
+extern "C" void cGameComm_update(int);
 
 extern "C" void func_00245118(void) {
     if (cGameComm_mGameComm != 0) {
-        func_002570D8((int)cGameComm_mGameComm);
+        cGameComm_update((int)cGameComm_mGameComm);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245140);
 #ifdef SKIP_ASM
-extern "C" void func_003F42A0();
+extern "C" void NetConnIdle();
 
 extern "C" void func_00245140(void) {
     if (cCommSystem_mCommSystem != 0) {
-        func_003F42A0();
+        NetConnIdle();
     }
 }
 #endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245168);
 #ifdef SKIP_ASM
-extern "C" void func_00231D18(void *);
+extern "C" void cFadeScreen_update(void *);
 
 extern "C" int func_00245168(void *self) {
-    func_00231D18(self);
+    cFadeScreen_update(self);
     if (*(int *)((char*)SSXApp + 4) != 0) {
         *(int *)((char *)self + 8) = 1;
         return 0;
@@ -2603,7 +2603,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00245730);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_00147618(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern char str_110ctrl_load[];
 extern char str_CtrlPS2_default[];
 extern char str_CtrlPS2_pro[];
@@ -2635,7 +2635,7 @@ extern "C" void func_00245730(void* self)
     }
     char* ctrlDefault = str_CtrlPS2_default;
     char* ctrlPro = str_CtrlPS2_pro;
-    int controlConfig = func_00147618(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    int controlConfig = cBENewPlayerInterface_getControllerMapping(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     cUIObj_245730* widget;
     widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ctrlDefault));
     if (widget != 0) {

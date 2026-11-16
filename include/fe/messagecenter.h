@@ -47,7 +47,7 @@ struct cOVState_MESSAGECENTER {
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
-                                    //       (func_001E3D58), func_00398380(mpEngine + 0x58, hash) in the ctor
+                                    //       (func_001E3D58), cUITextureBank_getElementByHashname(mpEngine + 0x58, hash) in the ctor
     signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
     unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
     char unk_016[0x2];              // 0x016 padding
@@ -56,7 +56,7 @@ struct cOVState_MESSAGECENTER {
                                     //       onCreateScreen/onDestroyScreen/onGainFocus switch on it
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218
     cUIState* mpParentState;        // 0x020 [O]; [R] 0 (1-argument cUIState ctor)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by func_003977E8(self + 0x24)
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
     cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding
@@ -92,9 +92,9 @@ struct cOVState_MESSAGECENTER {
                                     //       Collapse
     cUIThing* mpArrowUp;            // 0x15C [R] zeroed; [U] widget "arr_up"; func_001E4658 shows it when mScrollOffset != 0
     cUIThing* mpArrowDown;          // 0x160 [R] zeroed; [U] widget "arr_down"; func_001E4658 shows it while rows remain below
-    int miFolderTex;                // 0x164 [R] = func_00398380(mpEngine + 0x58, hash("folder")); [U] func_001E4C78
-    int miMinusFolderTex;           // 0x168 [R] = func_00398380(mpEngine + 0x58, hash("minus folder")); [U] func_001E4C78
-    int miQuestionMarkTex;          // 0x16C [R] = func_00398380(mpEngine + 0x58, hash("questmark")); [U] func_001E4C78
+    int miFolderTex;                // 0x164 [R] = cUITextureBank_getElementByHashname(mpEngine + 0x58, hash("folder")); [U] func_001E4C78
+    int miMinusFolderTex;           // 0x168 [R] = cUITextureBank_getElementByHashname(mpEngine + 0x58, hash("minus folder")); [U] func_001E4C78
+    int miQuestionMarkTex;          // 0x16C [R] = cUITextureBank_getElementByHashname(mpEngine + 0x58, hash("questmark")); [U] func_001E4C78
     int mbMessageDeleted;           // 0x170 [U] onWidgetEvent (func_001E4200) event 7 stores 0, then 1 once func_001E5148
                                     //       has removed the selected message (func_001E31B8); onWidgetMenu (func_001E4578)
                                     //       event 8 returns it != 0; not set by the ctor (name is a guess from that use)
@@ -169,7 +169,7 @@ struct cOVState_ViewPopup {
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218
     cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument (the cOVState_MESSAGECENTER);
                                     //       [U] cOVState_ViewPopup_onWidgetEvent / func_001E58E0 send it onPopupEvent(this, 0x14)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by func_003977E8(self + 0x24)
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
     cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen (cOVState_ViewPopup_onCreateScreen) stores the "113ViewMessage" screen
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding

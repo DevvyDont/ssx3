@@ -64,12 +64,12 @@ extern "C" void func_002758C0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275920);
+INCLUDE_ASM("scripter/datamanager", cDataManager_AttachData);
 #ifdef SKIP_ASM
 void* func_00275CF8(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 struct sDmNode5B98;
-extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev);
+extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big, sDmNode5B98* prev);
 extern int REALabortflag[];
 
 struct sDmVEntry5920 {
@@ -86,7 +86,7 @@ struct sDmNode5920 {
     int refs;               // 0x10
 };
 
-extern "C" sDmNode5920* func_00275920(void* self, int a1, void* data, int size)
+extern "C" sDmNode5920* cDataManager_AttachData(void* self, int a1, void* data, int size)
 {
     sDmNode5920* n = (sDmNode5920*)func_00275CF8(self);
     int saved = REALabortflag[0];
@@ -99,7 +99,7 @@ extern "C" sDmNode5920* func_00275920(void* self, int a1, void* data, int size)
     if (big != 0) {
         sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
         vt[4].fn((char*)self + vt[4].delta, a1, data, size, n, &n->field_0x4);
-        func_00275B98(self, (char*)data, (sDmNode5B98*)n);
+        cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
     } else {
         sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
         vt[2].fn((char*)self + vt[2].delta, a1, data, size, n, &n->field_0x4);
@@ -218,7 +218,7 @@ extern "C" void func_00275B80(void* self, char* dataHandle, int* out0, int* out1
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275B98);
+INCLUDE_ASM("scripter/datamanager", cDataManager_AttachDataFromBigfile);
 #ifdef SKIP_ASM
 void* func_00275CF8(void* self);
 extern "C" int BIG_sizeofheader(void* data);
@@ -240,7 +240,7 @@ struct sDmNode5B98 {
     sDmNode5B98* next;      // 0x14
 };
 
-extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
+extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big, sDmNode5B98* prev)
 {
     int ent[2];
     ent[0] = 0;
@@ -254,7 +254,7 @@ extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
         int r = BIG_sizeofheader(sub);
         REALabortflag[0] = saved;
         if (r != 0) {
-            prev = func_00275B98(self, sub, prev);
+            prev = cDataManager_AttachDataFromBigfile(self, sub, prev);
         } else {
             sDmNode5B98* n = (sDmNode5B98*)func_00275CF8(self);
             n->data = sub;
@@ -356,7 +356,7 @@ INCLUDE_ASM("scripter/datamanager", func_00275DD8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
-extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 int func_00283C58(void* self);
 extern "C" int func_00283C80(void* list, void* cmd);
 extern "C" void* func_00283D70(void* list, int i);
@@ -398,7 +398,7 @@ extern "C" int func_00275DD8(char* self, int a1, int a2)
     }
     *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
     if (*(int*)(self + 0xA4) == 3) {
-        int ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+        int ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
         if (ok)
             func_002776E0(self);
     }
@@ -414,7 +414,7 @@ extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int cSSXScriptEngine_SelectScriptFromCategory(void* eng, int a1, int a2, int a3, int a4);
-extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 extern "C" int func_00283BB8(void* self);
 int func_00283C58(void* self);
 extern "C" int func_00283C80(void* list, void* cmd);
@@ -464,7 +464,7 @@ extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int
     if (*(int*)(self + 0xA4) == 3) {
         int ok;
         if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
-            ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+            ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
         } else {
             ok = func_00283BB8((char*)*(void**)self + 0x500);
         }
@@ -483,7 +483,7 @@ INCLUDE_ASM("scripter/datamanager", func_00276048);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 extern "C" int func_00283BB8(void* self);
 int func_00283C58(void* self);
 extern "C" int func_00283C80(void* list, void* cmd);
@@ -519,7 +519,7 @@ extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
         if (*(int*)(self + 0xA4) == 3) {
             int ok;
             if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
-                ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+                ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
             } else {
                 ok = func_00283BB8((char*)*(void**)self + 0x500);
             }
@@ -616,7 +616,7 @@ extern "C" int func_00276270(char* self, int playOnReady)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276388);
+INCLUDE_ASM("scripter/datamanager", tNISList_Play);
 #ifdef SKIP_ASM
 extern char str_hud_e[];
 int GetHashValue32(char* s);
@@ -628,17 +628,17 @@ extern "C" int func_00277DD8(void* self, void* a1);
 int cSSXScriptEngine_PlayRequestScript_i(void* self, int val, int key, int b, int c) __asm__("cSSXScriptEngine_PlayRequestScript");
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
 extern "C" void func_002826D8(void* self, int a1);
-extern "C" void* func_00282BF0(void* self, int a1);
-extern "C" int func_002839A8(void* self);
-extern "C" void func_00283AA0(void* self);
+extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
+extern "C" int cVidEngine_PlayVideo(void* self);
+extern "C" void cVidEngine_UpdateVideo(void* self);
 extern "C" void* func_00283D70(void* list, int i);
-extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
-// PORT: real parameter order of func_002E4370 has the floats before the two trailing ints (cf. boardwakefx).
-void func_002E4370_f(void* snd, int a1, int h, int h2, float t0, float t1, float t2, int a4, int a5) __asm__("func_002E4370");
-extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
+extern "C" void cTransitionMan_StartTransition(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
+// PORT: real parameter order of cTransitionMan_StartTransition has the floats before the two trailing ints (cf. boardwakefx).
+void cTransitionMan_StartTransition_f(void* snd, int a1, int h, int h2, float t0, float t1, float t2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
+extern "C" void cTransitionMan_StartTransitionScreenGrab(void* snd, int a1, int h, int a3, float t);
 extern "C" void func_002E4578(void* p);
-extern "C" void func_002EA6B8(void* gm, float t);
-extern "C" void func_002EA860(void* gm);
+extern "C" void cCutSceneTransitionMan_StartCutScene(void* gm, float t);
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* gm);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
 
 struct sDmVEntry_6388 {
@@ -682,10 +682,10 @@ struct sDmItem_6388 {
     int id;                 // 0xC
 };
 
-// The unit declares func_00276388 as void; it returns the state at 0xA4.
-int func_00276388_impl(char* self, int fade, int notify) __asm__("func_00276388");
+// The unit declares tNISList_Play as void; it returns the state at 0xA4.
+int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play");
 
-int func_00276388_impl(char* self, int fade, int notify)
+int tNISList_Play_impl(char* self, int fade, int notify)
 {
     sDm_6388* dm = (sDm_6388*)self;
     if (*(int*)(self + 0xA4) == 1) {
@@ -712,7 +712,7 @@ int func_00276388_impl(char* self, int fade, int notify)
             int tIn = 0;
             int tHold = 0;
             float t = 0.0f;
-            sDmFade_6388* f = (sDmFade_6388*)func_0027C070(func_00282BF0(*(void**)self, item->id));
+            sDmFade_6388* f = (sDmFade_6388*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->id));
             if (fade) {
                 tIn = f->tIn;
                 tHold = f->tHold;
@@ -724,14 +724,14 @@ int func_00276388_impl(char* self, int fade, int notify)
                     if (h != 0) {
                         int h2 = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
                         float tt = (float)tIn * 0.01666666753590107f;
-                        func_002E4370_f(snd, 2, h, h2, tt, (float)tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f, 0, 0);
+                        cTransitionMan_StartTransition_f(snd, 2, h, h2, tt, (float)tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f, 0, 0);
                         t = tt;
                         *(int*)(self + 0xB8) = tIn + tHold;
                     }
                 } else if (tIn) {
                     int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, f->key);
                     float tt = (float)tIn * 0.01666666753590107f;
-                    func_002E4540(snd, 2, h, 0, tt);
+                    cTransitionMan_StartTransitionScreenGrab(snd, 2, h, 0, tt);
                     t = tt;
                 }
                 if (*(int*)(self + 0xB8) > 0) {
@@ -744,7 +744,7 @@ int func_00276388_impl(char* self, int fade, int notify)
             if (t <= 0.0f) {
                 t = 0.5f;
             }
-            func_002EA6B8(SSXApp->Game->CutSceneTransitionMan, t);
+            cCutSceneTransitionMan_StartCutScene(SSXApp->Game->CutSceneTransitionMan, t);
         }
         if (notify) {
             char* eng = *(char**)self;
@@ -753,11 +753,11 @@ int func_00276388_impl(char* self, int fade, int notify)
         }
     } else {
         if (*(int*)(self + 0x4) != 0) {
-            func_002EA860(SSXApp->Game->CutSceneTransitionMan);
+            cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);
         }
-        func_002839A8(*(char**)self + 0x500);
+        cVidEngine_PlayVideo(*(char**)self + 0x500);
         if (notify) {
-            func_00283AA0(*(char**)self + 0x500);
+            cVidEngine_UpdateVideo(*(char**)self + 0x500);
         }
     }
     return *(int*)(self + 0xA4);
@@ -784,8 +784,8 @@ extern "C" void func_00276868(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
 extern "C" void func_00277800(void* self);
-// The unit declares func_00277980 as void; it returns whether it handled the update.
-extern "C" int func_00277980_r(void* self) __asm__("func_00277980");
+// The unit declares tNISList_DoTransitionToNext as void; it returns whether it handled the update.
+extern "C" int tNISList_DoTransitionToNext_r(void* self) __asm__("tNISList_DoTransitionToNext");
 extern "C" void* func_00277C08(void*, int, int);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282540(void* self, int id);
@@ -852,7 +852,7 @@ extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
         self->cur = tNISList_SetupNextScript(self, pos, 0);
     }
     if (self->fA8 == 0) {
-        if (force == 0 || func_00277980_r(self) == 0) {
+        if (force == 0 || tNISList_DoTransitionToNext_r(self) == 0) {
             if (self->cur < 0) {
                 goto reset;
             }
@@ -873,7 +873,7 @@ extern char str_hud_e[];
 int GetHashValue32(char* s);
 void* func_00230698(void* self, int a1);
 extern "C" void func_002E4578(void* p);
-extern "C" void func_002EA820(void* p);
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
 extern "C" void func_00277598(void* self, int index);
 extern "C" void* func_00277C08(void*, int, int);
@@ -897,7 +897,7 @@ extern "C" void func_00276868(void* nisList, int resetTransition)
     if (*(int*)(self + 0x4) != 0 && *(int*)(self + 0xA4) == 3) {
         void* gm = SSXApp->Game->CutSceneTransitionMan;
         if (resetTransition != 0) {
-            func_002EA820(gm);
+            cCutSceneTransitionMan_ForceToRegularMode(gm);
             if (*(int*)(self + 0xB0) != 0) {
                 func_002E4578(func_00230698(SSXApp->Game, 0));
             }
@@ -1002,7 +1002,7 @@ extern "C" void* func_00276B08(void* self, int i)
         if (func_00277DD8(self, item) == 0) {
             int id = *(int*)((char*)item + 0xC);
             if (id >= 0) {
-                return func_00282BF0(*(void**)self, id);
+                return cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, id);
             }
         }
     }
@@ -1011,11 +1011,11 @@ extern "C" void* func_00276B08(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276B98);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetState);
 #ifdef SKIP_ASM
 extern "C" void func_00277778(void* self);
 
-extern "C" int func_00276B98(void* self)
+extern "C" int tNISList_GetState(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
         func_00277778(self);
@@ -1025,12 +1025,12 @@ extern "C" int func_00276B98(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276BD8);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetPlayState);
 #ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00282838(void* self, int a1);
 
-extern "C" int func_00276BD8(void* self)
+extern "C" int tNISList_GetPlayState(void* self)
 {
     if (*(int*)((char*)self + 0xA4) != 3) return 0;
     if (*(int*)((char*)self + 0xC4) != 0) return 3;
@@ -1062,16 +1062,16 @@ void* func_00276CA8(void* self)
 INCLUDE_ASM("scripter/datamanager", func_00276CC8);
 #ifdef SKIP_ASM
 void* func_00230698(void* self, int a1);
-extern "C" void func_00276388(void* self, int a1, int a2);
+extern "C" void tNISList_Play(void* self, int a1, int a2);
 extern "C" void func_00277778(void* self);
 extern "C" void func_00277800(void* self);
 extern "C" void func_00277838(void* self);
-extern "C" void func_00277980(void* self);
+extern "C" void tNISList_DoTransitionToNext(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void func_00282720(void* self, int a1);
 extern "C" int func_00282798(void* self, int a1);
 extern "C" int func_00282838(void* self, int a1);
-extern "C" int func_002839A8(void* self);
+extern "C" int cVidEngine_PlayVideo(void* self);
 extern "C" int func_00283BB8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" void func_002E4578(void* p);
@@ -1085,7 +1085,7 @@ extern "C" void func_00276CC8(char* self)
     if (*(int*)(self + 0xA4) == 2) {
         int playOnReady = *(int*)(self + 0xB4);
         if (playOnReady != 0) {
-            func_00276388(self, playOnReady == 1, 0);
+            tNISList_Play(self, playOnReady == 1, 0);
             *(int*)(self + 0xB4) = 0;
         }
     }
@@ -1107,7 +1107,7 @@ extern "C" void func_00276CC8(char* self)
                 if (func_00277DD8(self, item) == 0) {
                     func_00282720(*(void**)self, *(int*)(item + 0xC));
                 } else {
-                    func_002839A8(*(char**)self + 0x500);
+                    cVidEngine_PlayVideo(*(char**)self + 0x500);
                 }
             }
         }
@@ -1150,7 +1150,7 @@ extern "C" void func_00276CC8(char* self)
             done = 1;
         }
     } else if (func_00283BB8(*(char**)self + 0x500) != 0) {
-        func_00277980(self);
+        tNISList_DoTransitionToNext(self);
         done = 1;
     }
     if (done) {
@@ -1205,11 +1205,11 @@ extern "C" void func_00276F48(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277060);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsSkipAllowed);
 #ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 
-extern "C" int func_00277060(void* self)
+extern "C" int tNISList_IsSkipAllowed(void* self)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 0;
@@ -1273,7 +1273,7 @@ INCLUDE_ASM("scripter/datamanager", func_002771C8);
 #ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 
 extern "C" int func_002771C8(void* self, void* obj)
 {
@@ -1284,7 +1284,7 @@ extern "C" int func_002771C8(void* self, void* obj)
     if (func_00277DD8(self, headEntry) != 0) {
         return 0;
     }
-    return obj == func_00282BF0(ScriptEngine, *(int*)((char*)headEntry + 0xC));
+    return obj == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)((char*)headEntry + 0xC));
 }
 #endif
 
@@ -1304,9 +1304,9 @@ extern "C" int func_00277248(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277298);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsPausedPendingNextScript);
 #ifdef SKIP_ASM
-extern "C" int func_00277298(void* self)
+extern "C" int tNISList_IsPausedPendingNextScript(void* self)
 {
     int r = 0;
     if (*(int*)((char*)self + 0xa4) == 3) {
@@ -1335,14 +1335,14 @@ INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptPlay);
 #ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
-extern "C" void func_002EF378(int a0);
+extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 extern char str_TRANSP[];
 
 /**
  * Reacts to a script starting to play: for a script this NIS list owns, switches the custom irradiance.
  *
  * When func_002771C8 (On Tour IsPlayingScriptOwner) accepts the player and the script header from func_0027C070
- * (GetSSXScriptHeader) starts with a non-zero byte, calls func_002EF378 (On Tour
+ * (GetSSXScriptHeader) starts with a non-zero byte, calls cRenderStateMan_setCustomIrradiance (On Tour
  * cRenderStateMan::setCustomIrradiance) with "TRANSP".
  *
  * @param requestHandle   the play request handle (On Tour requestHandle); unused
@@ -1354,27 +1354,27 @@ extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
         char* name = func_0027C070(obj);
         char* msg = str_TRANSP;
         if (*name != 0) {
-            func_002EF378((int)msg); // PORT: string pointer passed as int (unit declares func_002EF378(int))
+            cRenderStateMan_setCustomIrradiance((int)msg); // PORT: string pointer passed as int (unit declares cRenderStateMan_setCustomIrradiance(int))
         }
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00277310);
+INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptUpdate);
 #ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(void* obj);
-extern "C" void func_00277980(void* self);
+extern "C" void tNISList_DoTransitionToNext(void* self);
 
-extern "C" void func_00277310(void* self, int a1, void* obj)
+extern "C" void tNISList_OnScriptUpdate(void* self, int a1, void* obj)
 {
     if (func_002771C8(self, obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
         *(int*)((char*)obj + 0x1C) == 0) {
         char* name = func_0027C070(obj);
         if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= *(short*)(name + 0x12)) {
-            func_00277980(self);
+            tNISList_DoTransitionToNext(self);
         }
     }
 }
@@ -1399,17 +1399,17 @@ extern "C" void func_002773A0(void* self, int requestHandle, void* obj)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00277400);
+INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptStop);
 #ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
-extern "C" void func_002EF378(int a0);
+extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 
-extern "C" void func_00277400(void* self, int a1, void* obj)
+extern "C" void tNISList_OnScriptStop(void* self, int a1, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
         if (*func_0027C070(obj) != 0) {
-            func_002EF378(0);
+            cRenderStateMan_setCustomIrradiance(0);
         }
     }
 }
@@ -1622,7 +1622,7 @@ extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void cSSXScriptEngine_PlayRequestScript(void* self, int val, int key, int b, int c);
-extern "C" int func_002839A8(void* self);
+extern "C" int cVidEngine_PlayVideo(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" float func_002E4678(void* self);
 extern "C" void func_002EA780(void* self, float t);
@@ -1655,7 +1655,7 @@ extern "C" void func_00277838(void* selfp)
             sDmEngVEntry7838* vt = *(sDmEngVEntry7838**)(eng + 0x2A8);
             vt[6].fn(eng + vt[6].delta, cmd->id);
         } else {
-            func_002839A8(*(char**)self + 0x500);
+            cVidEngine_PlayVideo(*(char**)self + 0x500);
         }
         if (*(int*)(self + 0xB0) != 0) {
             *(int*)(self + 0xAC) = 1;
@@ -1679,7 +1679,7 @@ extern "C" void func_00277838(void* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277980);
+INCLUDE_ASM("scripter/datamanager", tNISList_DoTransitionToNext);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* func_00230698(void* self, int a1);
@@ -1687,13 +1687,13 @@ char* func_0027C070(void* obj);
 extern "C" int func_00277DD8(void* self, void* a1);
 struct sDmEnt7DE8;
 extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
-extern "C" void* func_00282BF0(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" void func_002E4578(void* p);
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
-extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
-extern "C" void func_002E44F0(void* snd, int a1, int h, float t);
-extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
+extern "C" void cTransitionMan_StartTransition(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
+extern "C" void cTransitionMan_StartTransitionOut(void* snd, int a1, int h, float t);
+extern "C" void cTransitionMan_StartTransitionScreenGrab(void* snd, int a1, int h, int a3, float t);
 
 struct sDmFade_7980 {
     char pad_0x0[0x10];
@@ -1711,10 +1711,10 @@ struct sDmEnt_7980 {
     float t;                // 0xC
 };
 
-// The unit declares func_00277980 as void; it returns whether it handled the update.
-int func_00277980_impl(char* self) __asm__("func_00277980");
+// The unit declares tNISList_DoTransitionToNext as void; it returns whether it handled the update.
+int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionToNext");
 
-int func_00277980_impl(char* self)
+int tNISList_DoTransitionToNext_impl(char* self)
 {
     if (*(int*)(self + 0xB0) != 0) {
         if (*(int*)(self + 0xAC) != 0) {
@@ -1725,7 +1725,7 @@ int func_00277980_impl(char* self)
     }
     char* item = (char*)func_00283D70(self + 0xC, 0);
     if (func_00277DD8(self, item) == 0) {
-        sDmFade_7980* f = (sDmFade_7980*)func_0027C070(func_00282BF0(ScriptEngine, *(int*)(item + 0xC)));
+        sDmFade_7980* f = (sDmFade_7980*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
         void* snd = func_00230698(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
@@ -1737,11 +1737,11 @@ int func_00277980_impl(char* self)
                     return 0;
                 }
                 int h2 = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
-                func_002E4370(snd, 2, h, h2, 0, 0, (float)f->tIn * 0.01666666753590107f, (float)f->tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f);
+                cTransitionMan_StartTransition(snd, 2, h, h2, 0, 0, (float)f->tIn * 0.01666666753590107f, (float)f->tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = f->tIn + f->tHold;
             } else {
                 int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, f->key);
-                func_002E4540(snd, 2, h, 0, (float)f->tIn * 0.01666666753590107f);
+                cTransitionMan_StartTransitionScreenGrab(snd, 2, h, 0, (float)f->tIn * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = 0;
             }
             if (*(int*)(self + 0xB8) > 0) {
@@ -1758,11 +1758,11 @@ int func_00277980_impl(char* self)
         if (0.0f < e->t) {
             if (e->cat != 7) {
                 int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, e->cat, e->key);
-                func_002E44F0(snd, 2, h, e->t);
+                cTransitionMan_StartTransitionOut(snd, 2, h, e->t);
                 *(int*)(self + 0xB8) = 0;
             } else {
                 int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, e->key);
-                func_002E4540(snd, 2, h, 0, e->t);
+                cTransitionMan_StartTransitionScreenGrab(snd, 2, h, 0, e->t);
                 *(int*)(self + 0xB8) = 0;
             }
         }
@@ -1935,7 +1935,7 @@ INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_cSSXScriptEngine);
 #ifdef SKIP_ASM
 extern "C" void cBXScriptEngine_cBXScriptEngine(void* self);
 extern "C" void cVidEngine_cVidEngine(void* self);
-extern "C" void func_00281018(void* self);
+extern "C" void cScriptObjCameraManager_cScriptObjCameraManager(void* self);
 extern "C" void cScriptObjGS_cScriptObjGS(void* self);
 extern "C" void cScriptObjEvent_cScriptObjEvent(void* self);
 extern "C" void cScriptAnimBankManager_cScriptAnimBankManager(void* self, int flags, int a2, int a3);
@@ -1949,7 +1949,7 @@ extern void* D_004A34B0;
 
 struct sScriptSlot_7F20 {
     char data[0x120];
-    sScriptSlot_7F20() { func_00281018(this); }
+    sScriptSlot_7F20() { cScriptObjCameraManager_cScriptObjCameraManager(this); }
     void* operator new[](unsigned int, void* p) { return p; }
 };
 

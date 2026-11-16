@@ -14,7 +14,7 @@
 //       setStaticColour 0x80). Retail keeps their out-of-line copies in the same order (func_003A5DF0 getType ...
 //       func_003A5F58 in ui/uivector), which places each one: retail = preview + 8 (cUIThing grew from 0x6C to 0x74),
 //       and + 0x18 after mStaticColour (retail added mDisabledColour, as On Tour has);
-//   [R] retail's constructor func_0039FB30 + func_003A0348;
+//   [R] retail's constructor cUIThing_cUIThing + func_003A0348;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [P] or [R].
 // Retail = On Tour - 0xC (mAttrText) / - 0x18 (the rest): On Tour aligns tARGB to 16 bytes.

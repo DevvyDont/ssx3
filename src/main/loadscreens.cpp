@@ -244,10 +244,10 @@ extern int D_004A11B8;
 extern float D_0049D5D0;
 void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" void* func_0017ABC8(void*) __asm__("func_0017ABC8__FPv");
-extern "C" void func_0017A638(void*);
+extern "C" void* cBackgroundMan_cBackgroundMan(void*) __asm__("cBackgroundMan_cBackgroundMan__FPv");
+extern "C" void cTrackFileMan_scanLocations(void*);
 extern "C" void cBENewRaceInterface_setNumberHumans(void* self, int n) __asm__("cBENewRaceInterface_setNumberHumans__FPvi");
-extern "C" void func_00145108(void* iface, int mode);
+extern "C" void cBENewRaceInterface_setGamePath(void* iface, int mode);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
 extern "C" void func_00266CD8();
@@ -259,12 +259,12 @@ extern "C" void func_00255F20_ls(int a, const char* b) __asm__("func_00255F20");
 extern "C" void func_0025B650();
 extern "C" void func_00260F80();
 extern "C" void func_00266CA0();
-extern "C" void func_0017D008(void* self, int idx);
-extern "C" int func_0017A028_ls(void* self, int i) __asm__("func_0017A028");
-extern "C" void func_00144B20(void* self, const char* name);
-extern "C" void func_001472C8(void* self, int a1, int a2);
-extern "C" void func_00147448(void* self, int a1, int a2);
-extern "C" int func_00147618(void* self, int a1);
+extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx);
+extern "C" int cTrackFileMan_getNextWCBAMStartLocation_ls(void* self, int i) __asm__("cTrackFileMan_getNextWCBAMStartLocation");
+extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name);
+extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* self, int a1);
 extern "C" void* func_0028B180();
 extern "C" void func_00289520(void* snd, void* entry);
 
@@ -288,7 +288,7 @@ struct sVE_B1B0 {
     void (*fn)(void*);
 };
 
-// Load-screen entry table (see func_0017A028: `count` at 0, entries' `active` flag).
+// Load-screen entry table (see cTrackFileMan_getNextWCBAMStartLocation: `count` at 0, entries' `active` flag).
 struct sLSEntry_B1B0 {
     char name[0x80];
     int kind;                    // 0x80
@@ -344,8 +344,8 @@ struct sLS_B1B0 {
 extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
 {
     self->vt = cDebugMenuScreen_vtbl;
-    func_0017ABC8(self->bg);
-    func_0017A638(&self->sub);
+    cBackgroundMan_cBackgroundMan(self->bg);
+    cTrackFileMan_scanLocations(&self->sub);
     cBackgroundMan_loadImages((sBgMan_17ACC8*)self->bg);
     void* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
     void* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
@@ -356,7 +356,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     for (int i = 0; i < 3; i++) {
         self->arr[i] = 4;
     }
-    func_00145108(iface0, 0);
+    cBENewRaceInterface_setGamePath(iface0, 0);
     cBENewRaceInterface_setGameMode(iface0, 4);
     cBENewRaceInterface_setGameEvent(iface0, 0xC);
     self->f8C20 = 0;
@@ -374,10 +374,10 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     }
     if (lsSubLoaded_B1B0(&self->sub) != 0) {
         if (self->sub.e[self->f8C20].active == 0) {
-            self->f8C20 = func_0017A028_ls(&self->sub, self->f8C20);
+            self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_ls(&self->sub, self->f8C20);
         }
     } else {
-        func_0017D008(self, 1);
+        cDebugMenuScreen_setGamePath(self, 1);
     }
     int idx = self->f8C20;
     int kind = self->sub.e[idx].kind;
@@ -387,7 +387,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
         D_004A11B8 = 0;
     }
     if (kind == 0x16) {
-        func_00144B20(iface0, lsEntryName_B1B0(&self->sub, self->f8C20));
+        cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&self->sub, self->f8C20));
     }
     self->f8C1C = 4;
     cBENetworkInterface_networkOpt.fLatency = 0.016666668f;
@@ -399,11 +399,11 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     self->f8C34 = 0;
     self->f8C30 = -1;
     void* iface1 = cBE_getInterface_B1B0(cBE_getBE(), 1);
-    func_001472C8(iface1, 0, 0);
-    func_001472C8(iface1, 1, 1);
+    cBENewPlayerInterface_setPlayerCtrlID(iface1, 0, 0);
+    cBENewPlayerInterface_setPlayerCtrlID(iface1, 1, 1);
     self->f8C28 = 2;
-    func_00147448(iface1, 0, 2);
-    self->f8C2C = func_00147618(iface1, 0);
+    cBENewPlayerInterface_setPlayerCharID(iface1, 0, 2);
+    self->f8C2C = cBENewPlayerInterface_getControllerMapping(iface1, 0);
     void* snd = func_0028B180();
     func_00289520(snd, (char*)func_0028B180() + (self->f8C34 * 0x14 + 0x60A4));
     sVE_B1B0* vt1 = *(sVE_B1B0**)((char*)iface1 + 0xC);
@@ -425,11 +425,11 @@ void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" void* cBE_getBE();
 
-extern "C" void func_0017D008(void* self, int idx);
+extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx);
 
-extern "C" void func_00144B20(void* self, const char* name);
+extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name);
 
-extern "C" void func_00147448(void* self, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
 
 extern "C" void* func_0028B180();
 
@@ -444,18 +444,18 @@ void* func_00232738(void* self);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void func_0017D0A8(sLS_B1B0* self);
-extern "C" int func_0017D1B8(sLS_B1B0* self, int quick, int mode, int event);
-extern "C" int func_0017A0B8(sLSSub_B1B0* s, int i);
-extern "C" int func_0017A158(sLSSub_B1B0* s, int i, int mode);
-extern "C" int func_0017A220(sLSSub_B1B0* s, int i, int mode);
-extern "C" int func_0017A2C8(sLSSub_B1B0* s, int i, int mode);
-extern "C" int func_0017A028_b4(sLSSub_B1B0* s, int i) __asm__("func_0017A028");
+extern "C" int cDebugMenuScreen_getMaxAIRiders(sLS_B1B0* self, int quick, int mode, int event);
+extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(sLSSub_B1B0* s, int i);
+extern "C" int cTrackFileMan_legalTrackMode(sLSSub_B1B0* s, int i, int mode);
+extern "C" int cTrackFileMan_getNextLocation(sLSSub_B1B0* s, int i, int mode);
+extern "C" int cTrackFileMan_getPrevLocation(sLSSub_B1B0* s, int i, int mode);
+extern "C" int cTrackFileMan_getNextWCBAMStartLocation_b4(sLSSub_B1B0* s, int i) __asm__("cTrackFileMan_getNextWCBAMStartLocation");
 extern "C" int cBENewRaceInterface_setGameMode_b4(void* self, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_b4(void* self, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 extern "C" int func_00145C38(void* self, int a1);
 extern "C" void func_00145CB0(void* self, int a1, int a2);
-extern "C" void func_00145DD0(void* self, int a1, int a2, int a3);
+extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, int a1, int a2, int a3);
 extern "C" void func_00147658(void* self, int a1, int a2);
 extern "C" void func_0017AC98(void* bg, int idx);
 extern "C" void func_00256088();
@@ -604,7 +604,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             if (quick == 0) {
                 if (lsSubLoaded_B1B0(&self->sub) != 0) {
                     if (self->sub.e[self->f8C20].active == 0) {
-                        self->f8C20 = func_0017A028_b4(&self->sub, self->f8C20);
+                        self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
                     }
                     int kind = self->sub.e[self->f8C20].kind;
                     D_004A11B8 = 1;
@@ -613,13 +613,13 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                     quick = (quick + 1) % 3;
                 }
             }
-            func_0017D008(self, quick);
+            cDebugMenuScreen_setGamePath(self, quick);
         } else if (dir == 2) {
             quick = (quick + 2) % 3;
             if (quick == 0) {
                 if (lsSubLoaded_B1B0(&self->sub) != 0) {
                     if (self->sub.e[self->f8C20].active == 0) {
-                        self->f8C20 = func_0017A028_b4(&self->sub, self->f8C20);
+                        self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
                     }
                     int kind = self->sub.e[self->f8C20].kind;
                     D_004A11B8 = 1;
@@ -628,7 +628,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                     quick = (quick + 2) % 3;
                 }
             }
-            func_0017D008(self, quick);
+            cDebugMenuScreen_setGamePath(self, quick);
         }
         int changed = 0;
         int mode = cBENewRaceInterface_newRace.cGameMode;
@@ -636,9 +636,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             while (!cBENewRaceInterface_setGameMode_b4(race, mode)) {
                 mode = (mode + 1) % 7;
             }
-            if (!func_0017A158(&self->sub, self->f8C20, mode)) {
+            if (!cTrackFileMan_legalTrackMode(&self->sub, self->f8C20, mode)) {
                 changed = 1;
-                self->f8C20 = func_0017A220(&self->sub, self->f8C20, mode);
+                self->f8C20 = cTrackFileMan_getNextLocation(&self->sub, self->f8C20, mode);
             }
         } while (self->f8C20 < 0);
         if (changed) {
@@ -649,7 +649,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                 D_004A11B8 = 0;
             }
             if (kind == 0x16) {
-                func_00144B20(race, lsEntryName_B1B0(&self->sub, self->f8C20));
+                cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
             }
         }
         update_B4E0(race);
@@ -662,7 +662,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             update_B4E0(race);
         }
         int numAI = cBENewRaceInterface_newRace.iNumberAI;
-        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
+        int maxAI = cDebugMenuScreen_getMaxAIRiders(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             cBENewRaceInterface_setNumberAI(race, maxAI);
             update_B4E0(race);
@@ -691,9 +691,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                     mode = (mode + 6) % 7;
                 }
             } while (!cBENewRaceInterface_setGameMode_b4(race, mode));
-            if (!func_0017A158(&self->sub, self->f8C20, mode)) {
+            if (!cTrackFileMan_legalTrackMode(&self->sub, self->f8C20, mode)) {
                 changed = 1;
-                self->f8C20 = func_0017A220(&self->sub, self->f8C20, mode);
+                self->f8C20 = cTrackFileMan_getNextLocation(&self->sub, self->f8C20, mode);
             }
         } while (self->f8C20 < 0);
         if (changed) {
@@ -704,7 +704,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                 D_004A11B8 = 0;
             }
             if (kind == 0x16) {
-                func_00144B20(race, lsEntryName_B1B0(&self->sub, self->f8C20));
+                cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
             }
         }
         update_B4E0(race);
@@ -717,7 +717,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             update_B4E0(race);
         }
         int numAI = cBENewRaceInterface_newRace.iNumberAI;
-        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
+        int maxAI = cDebugMenuScreen_getMaxAIRiders(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             cBENewRaceInterface_setNumberAI(race, maxAI);
             update_B4E0(race);
@@ -742,7 +742,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         }
         update_B4E0(race);
         int numAI = cBENewRaceInterface_newRace.iNumberAI;
-        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
+        int maxAI = cDebugMenuScreen_getMaxAIRiders(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             cBENewRaceInterface_setNumberAI(race, maxAI);
             update_B4E0(race);
@@ -765,7 +765,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             firstTimeOnTrack = 0;
         }
         func_00145CB0(player, 0, firstTimeOnTrack);
-        func_00145DD0(player, firstTimeOnTrack, 0, 14);
+        cBENewPlayerInterface_setFirstTimeOnTrack(player, firstTimeOnTrack, 0, 14);
         update_B4E0(player);
         break;
     }
@@ -777,17 +777,17 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         if (beRaceDB->cGamePath == 0) {
             if (dir == 3) {
-                self->f8C20 = func_0017A028_b4(&self->sub, self->f8C20);
+                self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
             } else if (dir == 2) {
-                self->f8C20 = func_0017A0B8(&self->sub, self->f8C20);
+                self->f8C20 = cTrackFileMan_getPrevWCBAMStartLocation(&self->sub, self->f8C20);
             }
         } else {
             int mode = beRaceDB->cGameMode;
             do {
                 if (dir == 3) {
-                    self->f8C20 = func_0017A220(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
+                    self->f8C20 = cTrackFileMan_getNextLocation(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
                 } else {
-                    self->f8C20 = func_0017A2C8(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
+                    self->f8C20 = cTrackFileMan_getPrevLocation(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
                 }
                 if (self->f8C20 < 0) {
                     do {
@@ -805,7 +805,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             D_004A11B8 = 0;
         }
         if (kind == 0x16) {
-            func_00144B20(race, lsEntryName_B1B0(sub, self->f8C20));
+            cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(sub, self->f8C20));
         }
         update_B4E0(race);
         break;
@@ -826,7 +826,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } else if (dir == 2) {
             self->f8C28 = (self->f8C28 + 9) % 10;
         }
-        func_00147448(player, 0, self->f8C28);
+        cBENewPlayerInterface_setPlayerCharID(player, 0, self->f8C28);
         update_B4E0(player);
         break;
     }
@@ -842,7 +842,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     case 8: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
         int numAI = cBENewRaceInterface_newRace.iNumberAI;
-        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
+        int maxAI = cDebugMenuScreen_getMaxAIRiders(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             numAI = maxAI;
         }

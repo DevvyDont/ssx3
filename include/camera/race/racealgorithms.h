@@ -49,7 +49,7 @@ struct cMatrixChaseAlgorithm {
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
-    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget func_00162310; 15 functions read it
+    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
@@ -311,7 +311,7 @@ struct cRelativeChaseAlgorithm {
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
-    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget func_00162310; 15 functions read it
+    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
@@ -580,7 +580,7 @@ struct cSplineCamAlgorithm {
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
-    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget func_00162310; 15 functions read it
+    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1

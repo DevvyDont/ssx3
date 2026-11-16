@@ -27,7 +27,7 @@ extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
-extern "C" void func_00287558(void* snd, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266E88(void* self);
@@ -276,7 +276,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             unsigned char sel2;
             if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel2))
                 cUIListBox_setCurrentEntryByIndex(w, sel2);
-            func_00287558(func_0028B180(), Cfg_PO().f17 != 0);
+            cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_PO().f17 != 0);
         }
     }
     {
@@ -338,7 +338,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00194498(void* obj);
+extern "C" void DisableTextWidget(void* obj);
 extern char cBENewRaceInterface_newRace[];
 extern char D_004A24E0[];
 extern char str_camera_2_select[];
@@ -368,7 +368,7 @@ static inline bool isField_FA100(signed char* g, int off, int v)
  * Greys out the in-game options that do not apply to the current game, every frame before the 2D render.
  *
  * Outside a local two-player game (a network game, or newRace cGamePath != 2) object "2" is made static (slot
- * 8, declared setEnabled) and "camera 2 select" / "2lb" are greyed out (func_00194498: static, alpha at most
+ * 8, declared setEnabled) and "camera 2 select" / "2lb" are greyed out (DisableTextWidget: static, alpha at most
  * 0.5). "save" is greyed out unless cGameMode is 4 (free ride in the game-flow notes).
  */
 extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
@@ -382,17 +382,17 @@ extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
         }
         void* camSelect2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_camera_2_select));
         if (camSelect2 != 0) {
-            func_00194498(camSelect2);
+            DisableTextWidget(camSelect2);
         }
         void* label2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb_b));
         if (label2 != 0) {
-            func_00194498(label2);
+            DisableTextWidget(label2);
         }
     }
     if (!isField_FA100((signed char*)cBENewRaceInterface_newRace, 0x48, 4)) {
         void* saveItem = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_save));
         if (saveItem != 0) {
-            func_00194498(saveItem);
+            DisableTextWidget(saveItem);
         }
     }
 }
@@ -406,7 +406,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00211088(void* self, void* engine, unsigned char a2, int a3);
+extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* engine, unsigned char a2, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" int cUIListBox_getCurrentEntryData(void* obj);
@@ -415,7 +415,7 @@ extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
-extern "C" void func_00287558(void* snd, int v);
+extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266F58(void* self, int a, int b);
@@ -481,7 +481,7 @@ static inline void* Sound_A238(int slot)
  * Handles the in-game options widgets: Save opens the profile save, Triangle closes the screen, and a changed
  * value is stored and applied at once.
  *
- * Cross (5) on "save" pushes a new 0x27C-byte "Save Profile" state (func_00211088, kind 0x2A) as a special
+ * Cross (5) on "save" pushes a new 0x27C-byte "Save Profile" state (cOVState_PROFILE_cOVState_PROFILE, kind 0x2A) as a special
  * state; Triangle (6) closes this state (func_0039F190).
  * A value change (9) writes the widget's value into the settings word cBEOptionInterface_mOption and applies it: HUD mode,
  * player 1 / 2 camera (cChaseCameraController_switchCamera_UserChange on game view 1 / 2), music / effects /
@@ -502,7 +502,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
     case 5:
         if (IsId_A238(obj, str_save)) {
             char* stack = (char*)SSXApp->Game->UI;
-            char* st = (char*)func_00211088(cMemMan_alloc(0x27C, str_Save_Profile, 0x100, 0), *(void**)((char*)self + 0x10),
+            char* st = (char*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(0x27C, str_Save_Profile, 0x100, 0), *(void**)((char*)self + 0x10),
                                             *(unsigned char*)((char*)self + 0x14), 0x2A);
             *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(stack + 0x18, st, 0, 0);
@@ -533,7 +533,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             func_00287520(func_0028B180(), iface->getOptions().f4);
         } else if (IsId_A238(obj, str_7lb_b)) {
             D_00535610_A238.f17 = cUIListBox_getCurrentEntryData(obj) != 0;
-            func_00287558(func_0028B180(), iface->getOptions().f17 != 0);
+            cSSXAudio_SetArcadeSFX(func_0028B180(), iface->getOptions().f17 != 0);
         } else if (IsId_A238(obj, str_8lb)) {
             D_00535610_A238.f16 = cUIListBox_getCurrentEntryData(obj) != 0;
             func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
@@ -595,7 +595,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* func_00397870(void* list, int index);
+extern "C" void* cList_getByIndex(void* list, int index);
 extern char str_save[];
 
 /**
@@ -615,7 +615,7 @@ extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsig
 {
     switch (key) {
     case 6: {
-        int id = *(int*)((char*)func_00397870((char*)menu + 0x74, index) + 0x38);
+        int id = *(int*)((char*)cList_getByIndex((char*)menu + 0x74, index) + 0x38);
         if (id == GetHashValue32(str_save)) {
             break;
         }
@@ -919,34 +919,34 @@ extern "C" void func_001FAFF8(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FB0C0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void func_001FB2B8(void* self, void* item, int msg);
-extern "C" void func_001FB458(void* self, int on);
-extern "C" void func_001FB588(void* self, int on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(void* self, void* item, int msg);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(void* self, int on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int on);
 extern char str_Text_CancelGame[];
 extern char str_Text_ContinueGame[];
 
-extern "C" void func_001FB0C0(void* self, void* item, int msg)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;
     }
     switch (msg) {
     case 5:
-        func_001FB2B8(self, item, msg);
+        cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(self, item, msg);
         break;
     case 1: {
         int id = *(int*)((char*)item + 0x38);
         if (id == GetHashValue32(str_Text_CancelGame)) {
-            func_001FB588(self, 1);
-            func_001FB458(self, 0);
+            cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(self, 1);
+            cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(self, 0);
         } else {
             int id2 = *(int*)((char*)item + 0x38);
             if (id2 == GetHashValue32(str_Text_ContinueGame)) {
-                func_001FB458(self, 1);
-                func_001FB588(self, 0);
+                cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(self, 1);
+                cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(self, 0);
             }
         }
         break;
@@ -1028,7 +1028,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FB2B8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_doContinueCancel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGame_exit(void* game, int a);
@@ -1040,7 +1040,7 @@ extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
-extern "C" void func_001FB2B8(void* self, void* item, int msg)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(void* self, void* item, int msg)
 {
     func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
     *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
@@ -1083,7 +1083,7 @@ public:
  * Shows or hides the "continue racing" choice of the online-error screen.
  *
  * Text_ContinueGame gets kT_OVRContinueRacing, is static while hidden (slot 8, declared setEnabled), takes
- * visibility @p visible and choice 4, which func_001FB2B8 answers with cAI_finishRemotePlayer. When shown,
+ * visibility @p visible and choice 4, which cOVState_PAUSE_ONLINE_ERROR_doContinueCancel answers with cAI_finishRemotePlayer. When shown,
  * "Menu" selects row 0.
  *
  * @param visible  nonzero to show the option (On Tour bVisible)
@@ -1105,7 +1105,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self,
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FB458);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1134,7 +1134,7 @@ public:
     virtual int setColor(const sColor_FB458& c);
 };
 
-extern "C" void func_001FB458(void* self, int on)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(void* self, int on)
 {
     cUIObj_FB458* t = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
     cUIObj_FB458* a = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Continueps2X));
@@ -1150,7 +1150,7 @@ extern "C" void func_001FB458(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FB588);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1179,7 +1179,7 @@ public:
     virtual int setColor(const sColor_FB588& c);
 };
 
-extern "C" void func_001FB588(void* self, int on)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int on)
 {
     cUIObj_FB588* t = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
     cUIObj_FB588* a = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Cancelps2X));
@@ -1586,7 +1586,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void func_002A31C0(void* self);
 extern signed char D_00535C11[];
 extern char str_at_TextPulseWhiteOrange[];
@@ -1611,7 +1611,7 @@ extern "C" void func_001FC768(void* self)
         cOVState_triggerTextFade(self, str_p1rider, str_at_TextPulseWhiteOrange);
         cOVState_triggerTextFade(self, str_p1dashes, str_at_TextPulseWhiteOrange);
     }
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
     func_002A31C0(func_0028B180());
 }
 #endif
@@ -1867,7 +1867,7 @@ extern "C" int func_001FCEC0(void* self, void* msg)
 INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void cUIState_onGainFocus(void* self);
 
 extern "C" void func_001FD0D8(void* self)
@@ -1877,7 +1877,7 @@ extern "C" void func_001FD0D8(void* self)
     if (gameComm != 0) {
         gameComm->mOverlayTimeout = 0x4B0;
     }
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -1955,7 +1955,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern char str_68rival_pre[];
 extern char str_OV_darkblue[];
 
@@ -1973,7 +1973,7 @@ extern "C" void func_001FD268(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -1985,7 +1985,7 @@ int cBELibrary_getCharacterID(int idx);
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int func_00145750(void* iface);
 extern "C" char* func_0014EEC8(void* iface, int id, int a2);
-extern "C" int func_00146A70(void* iface, int a1, int charId, int item);
+extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int a1, int charId, int item);
 extern "C" int func_00157B08(void* iface, int a1, int a2);
 extern "C" void* func_004139F8(float x);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
@@ -2090,9 +2090,9 @@ extern "C" int func_001FD320(void* self, void* msg)
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPFirstToBottom));
             cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatChallengePeakRace));
             if (getField_1FD320((signed char*)cBENewRaceInterface_newRace, 0x49) == 1
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 6))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 7))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 6))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 7))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
                 cUIState_hideObjSafe(self, str_obj2);
                 cUIState_hideObjSafe(self, str_bullet2);
             }
@@ -2102,9 +2102,9 @@ extern "C" int func_001FD320(void* self, void* msg)
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPGetToBottomPoints));
             cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatChallPeakJam));
             if (getField_1FD320((signed char*)cBENewRaceInterface_newRace, 0x49) == 1
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 9))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 10))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 9))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 10))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
                 cUIState_hideObjSafe(self, str_obj2);
                 cUIState_hideObjSafe(self, str_bullet2);
             }
@@ -2283,7 +2283,7 @@ extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 void func_00270ED8(void* self);
-extern "C" void* func_001D58B8(void* self);
+extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 
 extern "C" void func_001FDE60(void* self)
@@ -2293,7 +2293,7 @@ extern "C" void func_001FDE60(void* self)
         *(int*)((char*)self + 0x1C8) = 0;
     }
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-    func_001D58B8(self);
+    cFEMemCard_onDestroyScreen(self);
     cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
 }
 #endif
@@ -2934,14 +2934,14 @@ extern "C" void func_001FE9A8(char* self)
 }
 #endif
 
-extern "C" void* func_001D58B8(void* self);
+extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FEC40__FPv);
 #ifdef SKIP_ASM
 void* func_001FEC40(void* self)
 {
-    return func_001D58B8(self);
+    return cFEMemCard_onDestroyScreen(self);
 }
 #endif
 
@@ -3537,7 +3537,7 @@ extern "C" void cBERewardInterface_clearUserAwards(void* iface);
 /**
  * On Cross, clears the player's new-award list and lets the overlay manager move on.
  *
- * Sets the pending overlay action cOVStateManager_mStatus to 1 (func_0020CFD0 then calls func_0020CCF8, which probably
+ * Sets the pending overlay action cOVStateManager_mStatus to 1 (cOVStateManager_update then calls cOVStateManager_gotoNextOverlay, which probably
  * triggers the next end-of-event overlay) and calls cBERewardInterface_clearUserAwards() on the reward
  * interface (0xD).
  *

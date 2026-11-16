@@ -18,7 +18,7 @@ extern "C" int func_0014FEA8(void* iface, int player, int slot, int a3);
 extern "C" int func_00150048(void* iface, int player, int slot, int idx);
 extern "C" int func_0014FFB8(void* iface, int player, int slot, int idx);
 extern "C" const char* func_00116938(unsigned short id);
-extern "C" int func_00398380(void* self, int id);
+extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void func_00183D08(void* obj, int colour, float a);
 extern "C" void func_003A1030(void* obj, void* out);
 extern "C" void func_003A0290(void* obj, void* out);
@@ -61,7 +61,7 @@ static inline int lookup_3DE0(char* self, char* name)
 {
     char* mgr = *(char**)(self + 0x10);
     int h = GetHashValue32(name);
-    return func_00398380(mgr + 0x58, h);
+    return cUITextureBank_getElementByHashname(mgr + 0x58, h);
 }
 
 static inline char* getObj_3DE0(void* screen, char* name)

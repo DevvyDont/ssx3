@@ -8,12 +8,12 @@
 // EA's source: d:/ssx/code/source/online/gamecomm.cpp and online/gamecomm.h (the preview build's assert strings).
 //
 // One instance: cGameComm_construct(channel, server) does `cMemMan_alloc(0x5F0, "cGameComm", ...)` + the constructor
-// func_00256C78 into cGameComm::mGameComm (retail cGameComm_mGameComm); func_00256C50 (destroy) runs the destructor
+// cGameComm_cGameComm into cGameComm::mGameComm (retail cGameComm_mGameComm); func_00256C50 (destroy) runs the destructor
 // func_00256EE0. Size 0x5F0 [R]. No base class and no virtuals (the constructor stores no vtable; On Tour has none).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor func_00256C78 (initial values below) and the allocation size;
-//   [U] how retail code uses the field: the class's own methods (func_00256C78..func_00258F20 in seg_156860) and the
+//   [R] retail's constructor cGameComm_cGameComm (initial values below) and the allocation size;
+//   [U] how retail code uses the field: the class's own methods (cGameComm_cGameComm..func_00258F20 in seg_156860) and the
 //       ~50 users of cGameComm_mGameComm (ovstatepause, ovtemplatepausemenu, gamestate's cInputSync, ai, gameload, ...). The
 //       results reporter func_0025FD50 (tagsunk) sends many fields under DirtySock tags, quoted as "TAG";
 //   [O] SSX On Tour's DWARF (class cGameComm, size 0x101C): same member order where both games have the member. On
@@ -25,7 +25,7 @@
 #include "layout.h"
 
 // tGameComm: the handshake/race state machine, cGameComm::mState (On Tour enum tGameComm, same values; retail's
-// update func_002570D8 walks them on the server and, with each Send/Recv pair swapped, on the client).
+// update cGameComm_update walks them on the server and, with each Send/Recv pair swapped, on the client).
 enum tGameComm {
     kGameComm_Init = 0,
     kGameComm_SendSettings = 1,
@@ -42,7 +42,7 @@ enum tGameComm {
     kGameComm_RecvLatencyWait = 12,
     kGameComm_InitGameActive = 13,
     kGameComm_GameActive = 14,     // cGameComm_syncGame loops until this state
-    kGameComm_GameOver = 15        // gameEnded (func_00258A48)
+    kGameComm_GameOver = 15        // gameEnded (cGameComm_gameEnded)
 };
 
 // tGameCommPacket: one queued packet, 0xF0 bytes ([R] func_00258188: cMemMan_alloc(0xF0, "tGameCommPacket")).
@@ -76,18 +76,18 @@ struct tGameCommQueue {
     tGameCommPacket* mQueue[32]; // 0x08 [O]; [R] the constructor clears them
 };
 
-// tServerSettings: what the server sends in kGameComm_SendSettings (0x2C bytes, func_002570D8). On Tour's version
+// tServerSettings: what the server sends in kGameComm_SendSettings (0x2C bytes, cGameComm_update). On Tour's version
 // (0x1C) is AIRandSeed[6] + NumPlayers; retail has the server's link info instead of NumPlayers.
 struct tServerSettings {
     unsigned int AIRandSeed[6];  // 0x00 [O]; [U] cGameComm_syncGame saves the AI random state into it
-                                 //      (func_003178E0, bx/bxrandom) on the server and restores it (func_00317908) once synced
+                                 //      (AIgetseed, bx/bxrandom) on the server and restores it (AIsetseed) once synced
     int unk_18;                  // 0x18 [U] the server's cCommSystem::mBroadBand (syncGame)
     char unk_1C[0x10];           // 0x1C [U] the server's build signature "NA_R_F004" (strncpy 0xF in syncGame);
                                  //      compared with the client's (9 chars) after the handshake
 };
 
 struct cGameComm {
-    int mConnected;              // 0x000 [O]; [R] 1; [U] cleared by localDisconnected (func_00257610), displayError
+    int mConnected;              // 0x000 [O]; [R] 1; [U] cleared by localDisconnected (cGameComm_localDisconnected), displayError
                                  //       (cGameComm_displayError) and the remote exit command; senders require it
     int mError;                  // 0x004 [O]; [R] 0; [U] displayError sets 1; nearly every method returns early on it
     int mDisplayError;           // 0x008 [O] (int); [U] displayError sets 1; updateDisplayError (cGameComm_updateDisplayError) counts it
@@ -106,7 +106,7 @@ struct cGameComm {
     int mCommError;              // 0x030 [O]; [U] setCommError sets 1 (once: it guards the other fields); "COMMERR"
     int unk_034;                 // 0x034 [R] the time at construction; [U] gameStartRace (cGameComm_gameStartRace) stores the race
                                  //       start time (SSXApp +0x18 / +0x10); the reporter subtracts it from unk_038/unk_03C
-    int unk_038;                 // 0x038 [U] this machine's end time (localDisconnected, gameEnded func_00258A48)
+    int unk_038;                 // 0x038 [U] this machine's end time (localDisconnected, gameEnded cGameComm_gameEnded)
     int unk_03C;                 // 0x03C [U] the peer's end time (exit-game command, gameEnded)
     int mSyncInput;              // 0x040 [O] (just before mServer in both games); [R] 1; [U] cInputSync (gamestate
                                  //       func_002373B8 / func_00237A98) exchanges pads only while it is set;
@@ -115,7 +115,7 @@ struct cGameComm {
     int mServer;                 // 0x044 [O]; [R] the constructor's second argument; [U] update/syncGame take the
                                  //       server side of the handshake when set
     int mAlone;                  // 0x048 [O] (On Tour's next member after mServer that retail has); [U] setFinishRaceAlone
-                                 //       (func_00258950, from ai cAI_finishRemotePlayer) sets 1; ai func_0012BB20 and the timeouts test it
+                                 //       (func_00258950, from ai cAI_finishRemotePlayer) sets 1; ai cAI_onlineAICheck and the timeouts test it
     int mPauseCount[2];          // 0x04C [O] (On Tour [4]); [U] [0] counted by sendPauseCmd(true), [1] by the pause
                                  //       command; 6+ means cheating 2
     int unk_054;                 // 0x054 [U] this machine's controller-unplug count (sendUnplugCmd); 3+ means cheating 3
@@ -133,7 +133,7 @@ struct cGameComm {
     int mState;                  // 0x070 [O] tGameComm; [U] setState (cGameComm_setState) stores it; cInputSync waits for >= 14
     int mPauseMenu[2];           // 0x074 [O] (On Tour [4]); [U] [0] this machine paused (sendPauseCmd), [1] the peer
                                  //       (commands 0/1)
-    int mGameStartGate;          // 0x07C [O]; [U] gameStartGate (func_00258968, from cGFGateState_gainFocus) sets 1
+    int mGameStartGate;          // 0x07C [O]; [U] gameStartGate (cGameComm_gameStartGate, from cGFGateState_gainFocus) sets 1
     int mRaceInProgress;         // 0x080 [O]; [U] gameStartRace sets 1, gameEnded clears it
     int mWaitingMessage;         // 0x084 [O]; [U] set when the peer goes quiet (unk_060 == 60); updateMessageDisplay
                                  //       (cGameComm_updateMessageDisplay) then shows "kT_OVRCMNWaitPlayer"
@@ -154,7 +154,7 @@ struct cGameComm {
     int mLoading;                // 0x0AC [O]; [R] 1; [U] syncWait clears it; updateDisplayError waits while it is set
     float mStallTimer;           // 0x0B0 [O] (On Tour [4]); [U] +1.0 per stalled frame, -0.15 per update; 3600 = error
     int mStallCount;             // 0x0B4 [O] (On Tour [4]); [U] "STALLCNT"
-    int unk_0B8;                 // 0x0B8 [U] ping server (func_002570D8 / func_002583A8): number of pings sent (max 4)
+    int unk_0B8;                 // 0x0B8 [U] ping server (cGameComm_update / func_002583A8): number of pings sent (max 4)
     int unk_0BC;                 // 0x0BC [U] ping: frames until the next ping
     int unk_0C0;                 // 0x0C0 [U] ping: the address being pinged (func_002583A8's argument)
     int unk_0C4[4];              // 0x0C4 [U] ping: the id of each ping sent (matched against replies); [R] cleared

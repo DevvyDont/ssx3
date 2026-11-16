@@ -29,9 +29,9 @@ void cEffectLink_add(cEffectLink* link, cEffectLink* other)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345720);
+INCLUDE_ASM("object/effectlink", cEffectLink_append);
 #ifdef SKIP_ASM
-extern "C" void func_00345720(cEffectLink* link, cEffectLink* other)
+extern "C" void cEffectLink_append(cEffectLink* link, cEffectLink* other)
 {
     while (link->Next != 0) {
         link = link->Next;
@@ -43,9 +43,9 @@ extern "C" void func_00345720(cEffectLink* link, cEffectLink* other)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345760);
+INCLUDE_ASM("object/effectlink", cEffectLink_unlink);
 #ifdef SKIP_ASM
-extern "C" void func_00345760(cEffectLink* link)
+extern "C" void cEffectLink_unlink(cEffectLink* link)
 {
     if (link->Next != 0) {
         link->Next->Prev = link->Prev;
@@ -143,7 +143,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
     effectLink->mVtbl = cEffectModifier_vtbl;
     D_004A3FF4--;
     effectLink->mVtbl = cEffectLink_vtbl;
-    func_00345760((cEffectLink*)&(*(sEffectLinkView*)&effectLink->Next));
+    cEffectLink_unlink((cEffectLink*)&(*(sEffectLinkView*)&effectLink->Next));
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -287,7 +287,7 @@ INCLUDE_ASM("object/effectlink", cParticleModifier__cParticleModifier);
 extern int D_004A3FF8;
 extern void* cParticleModifier_vtbl[];
 void operator_delete(int*);
-extern "C" void func_00370758(int* self, int flags);
+extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags);
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
 /**
@@ -304,7 +304,7 @@ extern "C" void cParticleModifier__cParticleModifier(cParticleModifier* self, in
         operator_delete(buf);
     }
     D_004A3FF8--;
-    func_00370758((int*)(((char*)self) + 0x50), 2);
+    cStaticEmitter__cStaticEmitter((int*)(((char*)self) + 0x50), 2);
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
@@ -394,7 +394,7 @@ INCLUDE_ASM("object/effectlink", func_00345C90);
 #ifdef SKIP_ASM
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 extern "C" void* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(void* self);
-extern "C" void func_00370DC8(void* self, void* target, float t);
+extern "C" void cBaseClass_DynamicEmitter_setupEmitter(void* self, void* target, float t);
 struct sEffectLink5EF8;
 extern "C" void func_00345EF8(cDynamicParticleModifier* self);
 extern int D_004A3FFC;
@@ -428,7 +428,7 @@ extern "C" cDynamicParticleModifier* func_00345C90(cDynamicParticleModifier* sel
     t->x = 0.0f;
     t->y = 0.0f;
     t->z = 0.0f;
-    func_00370DC8(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
+    cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
     func_00345EF8(self);
     D_004A3FFC++;
     self->Complete = 0;
@@ -458,7 +458,7 @@ struct sEffectLinkVEntry_345D80 {
  * embedded emitter (cBaseClass_DynamicEmitter constructor, then cDynamicEmitter_vtbl) and reads the 0x50-byte state
  * block starting at Mesh through the stream's read (slot 2). If the effect is not Complete it allocates a 0xD8-byte
  * tParticleData with operator_new1, reads it from the stream, sets the emitter up from it with a random seed
- * (func_00370DC8, cBaseClass_DynamicEmitter::setupEmitter, seed -1), restores the emitter's own replay state and
+ * (cBaseClass_DynamicEmitter_setupEmitter, cBaseClass_DynamicEmitter::setupEmitter, seed -1), restores the emitter's own replay state and
  * steps it once at Pos/Vel for 1/60 s (func_003710D0). A Complete effect gets no ParticleData. Increments D_004A3FFC
  * (the dynamic particle count).
  *
@@ -479,7 +479,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
         self->ParticleData = (tParticleData*)((sTarget00345C90*)t);
         sEffectLinkVEntry_345D80* vt2 = *(sEffectLinkVEntry_345D80**)stream;
         vt2[2].fn((char*)stream + vt2[2].delta, t, 0xD8);
-        func_00370DC8(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
+        cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
         func_003710D0(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);
     } else {
@@ -530,7 +530,7 @@ struct sEffMtx_5EF8 {
 };
 
 struct sEffMtx_62A0;
-extern "C" void func_0034FED8(void* a, int b, sEffMtx_62A0* out);
+extern "C" void cInstanceNode_buildMeshMat(void* a, int b, sEffMtx_62A0* out);
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
 static inline sEffVec4_5EF8 effMtxApply5EF8(sEffMtx_5EF8* m, sEffVec4_5EF8* v)
@@ -570,7 +570,7 @@ struct sEffectLink5EF8 {
 extern "C" void func_00345EF8(cDynamicParticleModifier* self)
 {
     sEffMtx_5EF8 meshMat;
-    func_0034FED8(self->Instance, self->Mesh, (sEffMtx_62A0*)&meshMat);
+    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (sEffMtx_62A0*)&meshMat);
     (*(sEffVec4_5EF8*)&self->Pos) = effMtxApply5EF8(&meshMat, &(*(sEffVec4_5EF8*)&self->Offset));
     (*(sEffVec4_5EF8*)&self->Vel) = effMtxApply5EF8(&meshMat, &(*(sEffVec4_5EF8*)&self->InitVel));
 }
@@ -812,22 +812,22 @@ struct sEffMtx_62A0 {
     sEffVec4_62A0 r[4];
 };
 
-extern "C" void func_0034FED8(void* a, int b, sEffMtx_62A0* out);
-extern "C" void func_002D1D10(sEffVec4_62A0* pos, void* p, int n, float a, float b);
+extern "C" void cInstanceNode_buildMeshMat(void* a, int b, sEffMtx_62A0* out);
+extern "C" void cObjectInterface_renderSimpleLightHalo(sEffVec4_62A0* pos, void* p, int n, float a, float b);
 
 /**
  * Draws a halo at the position of its instance's mesh.
  *
  * Gets the world matrix of mesh +0x28 of the instance (+0xC) and draws the halo sprite there with
- * func_002D1D10(), passing the halo data (+0x10), +0x24, the size (+0x20) and the current angle (+0x30).
+ * cObjectInterface_renderSimpleLightHalo(), passing the halo data (+0x10), +0x24, the size (+0x20) and the current angle (+0x30).
  */
 extern "C" void cHaloModifier_render(void* self)
 {
     sEffMtx_62A0 matrix;
     void* colour = (char*)self + 0x10;
-    func_0034FED8(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &matrix);
+    cInstanceNode_buildMeshMat(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &matrix);
     sEffVec4_62A0 origin = matrix.r[3];
-    func_002D1D10(&origin, colour, *(int*)((char*)self + 0x24),
+    cObjectInterface_renderSimpleLightHalo(&origin, colour, *(int*)((char*)self + 0x24),
                   *(float*)((char*)self + 0x20), *(float*)((char*)self + 0x30));
 }
 #endif
@@ -883,7 +883,7 @@ struct sEffVE_346350 {
 
 extern "C" void* func_0034FB00(void* self, int a1, int a2, int a3);
 void func_00353DA8(void* self);
-extern "C" void func_00353E08(void* self, int a1, float len);
+extern "C" void cSpring_setupSpring(void* self, int a1, float len);
 extern "C" void cFlexBridgeNode_initSpringNodes(void* self);
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
 extern "C" void cFlexBridgeNode_updateGrid(void*);
@@ -935,7 +935,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pIn
     span.x = pts[1].x - pts[0].x;
     span.y = pts[1].y - pts[0].y;
     span.z = pts[1].z - pts[0].z;
-    func_00353E08((char*)self + 0x50, tdata, sqrtf_346350(span.x * span.x + span.y * span.y + span.z * span.z));
+    cSpring_setupSpring((char*)self + 0x50, tdata, sqrtf_346350(span.x * span.x + span.y * span.y + span.z * span.z));
     cFlexBridgeNode_setupGrid(self);
     cFlexBridgeNode_initSpringNodes(self);
     cFlexBridgeNode_updateGrid(self);

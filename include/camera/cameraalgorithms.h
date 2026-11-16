@@ -115,7 +115,7 @@ struct cChaseAlgorithm {
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;      // 0x20 [O]; [U] cChaseAlgorithm_getTargetPos returns it (lq); the chase algorithms
                                 //      write it (sq) and read it (lqc2)
-    cRiderCameraTarget* Target; // 0x30 [O]; [P] (preview verify reads 0x30); [U] func_00162310 setTarget (sw; cCamera_init
+    cRiderCameraTarget* Target; // 0x30 [O]; [P] (preview verify reads 0x30); [U] cChaseAlgorithm_setTarget setTarget (sw; cCamera_init
                                 //      passes the "RiderCameraTarget"); the algorithms call its virtuals
     char unk_34[0xC];           // 0x34 padding to the 16-byte class alignment
 };
@@ -139,7 +139,7 @@ struct cLookAtChaseAlgorithm {
     char unk_014[0xC];              // 0x014 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
-    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget func_00162310; 15 functions read it
+    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1

@@ -21,7 +21,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getThis__Fv);
  *
  * The first call allocates 0x10 bytes tagged "BESaveInt", clears the word at 0x8, stores the vtable D_0045AD08,
  * keeps the object in cBESaveInterface_instance and clears cBESaveInterface_bDoReplay (the flag set while the 512 KB save buffer from
- * func_00152688() exists).
+ * cBESaveInterface_getReplayBuffer() exists).
  *
  * @return the save interface
  */
@@ -39,14 +39,14 @@ void* cBESaveInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152688);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getReplayBuffer);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_save_file_buffer[];
 extern char* cBESaveInterface_replayBuffer;
 
-extern "C" char* func_00152688(void)
+extern "C" char* cBESaveInterface_getReplayBuffer(void)
 {
     cBESaveInterface_bDoReplay = 1;
     if (cBESaveInterface_replayBuffer == 0)
@@ -56,25 +56,25 @@ extern "C" char* func_00152688(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_001526D0);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getGameReplayBuffer);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-extern "C" int func_0014E048(void* be);
+extern "C" int cBE_getDataSize(void* be);
 extern char* cBESaveInterface_replayBuffer;
 
-extern "C" char* func_001526D0(void)
+extern "C" char* cBESaveInterface_getGameReplayBuffer(void)
 {
-    return cBESaveInterface_replayBuffer + func_0014E048(cBE_getBE());
+    return cBESaveInterface_replayBuffer + cBE_getDataSize(cBE_getBE());
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152700);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_releaseBuffer);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern void* cBESaveInterface_buffer;
 
-extern "C" void func_00152700(void)
+extern "C" void cBESaveInterface_releaseBuffer(void)
 {
     if (cBESaveInterface_buffer)
         cMemMan_free(cBESaveInterface_buffer);
@@ -83,12 +83,12 @@ extern "C" void func_00152700(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152728);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_releaseReplayBuffer);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern char* cBESaveInterface_replayBuffer;
 
-extern "C" void func_00152728(void)
+extern "C" void cBESaveInterface_releaseReplayBuffer(void)
 {
     if (cBESaveInterface_replayBuffer)
         cMemMan_free(cBESaveInterface_replayBuffer);
@@ -100,9 +100,9 @@ extern "C" void func_00152728(void)
 //100%
 INCLUDE_ASM("be/beintsavefile", func_00152758);
 #ifdef SKIP_ASM
-int func_00152948(void* self);
-// PORT: the unit defines func_00152700(void); this caller passes self in $a0.
-void func_00152700_s(void* self) __asm__("func_00152700");
+int cBESaveInterface_getSaveGameSize(void* self);
+// PORT: the unit defines cBESaveInterface_releaseBuffer(void); this caller passes self in $a0.
+void cBESaveInterface_releaseBuffer_s(void* self) __asm__("cBESaveInterface_releaseBuffer");
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 extern "C" int func_003E62D0(void* buf, int n, int seed);
 extern void* cBESaveInterface_buffer;
@@ -116,8 +116,8 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
 
 extern "C" void* func_00152758(void* self)
 {
-    int size = func_00152948(self);
-    func_00152700_s(self);
+    int size = cBESaveInterface_getSaveGameSize(self);
+    cBESaveInterface_releaseBuffer_s(self);
     cBESaveInterface_buffer = operator_new_tag(size, str_save_file_buffer, 0x100, 0);
     char* p = (char*)cBESaveInterface_buffer;
     *(sSaveHdr_2758*)p = D_00535898;
@@ -138,22 +138,22 @@ extern "C" void* func_00152758(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152948__FPv);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveGameSize__FPv);
 #ifdef SKIP_ASM
-int func_00152948(void* self)
+int cBESaveInterface_getSaveGameSize(void* self)
 {
     return 0xCCC;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152950);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_generateSaveProfile);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern const char str_save_file_buffer[];
 
-// PORT: the unit defines func_00152700_2950(void); this caller passes self in $a0.
-void func_00152700_2950(void* self) __asm__("func_00152700");
+// PORT: the unit defines cBESaveInterface_releaseBuffer_2950(void); this caller passes self in $a0.
+void cBESaveInterface_releaseBuffer_2950(void* self) __asm__("cBESaveInterface_releaseBuffer");
 
 extern "C" int func_003E62D0(void* buf, int n, int seed);
 
@@ -161,7 +161,7 @@ extern void* cBESaveInterface_buffer;
 
 extern sCharTbl_2758 cBELibrary_playerDB[];
 
-extern "C" int func_00152BA8_2950() __asm__("func_00152BA8");
+extern "C" int cBESaveInterface_getSaveProfileSize_2950() __asm__("cBESaveInterface_getSaveProfileSize");
 class cBEIface_2950 {
 public:
     char pad[0xC];
@@ -182,11 +182,11 @@ extern sCharFlag_2950 D_00535B31_2950[] __asm__("D_00535B31");
 
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 // Builds the save block of rider profile 'idx': name, profile, character flag, CRC.
-extern "C" void* func_00152950(void* self, int idx)
+extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
 {
     cBEIface_2950* o;
-    int size = func_00152BA8_2950();
-    func_00152700_2950(self);
+    int size = cBESaveInterface_getSaveProfileSize_2950();
+    cBESaveInterface_releaseBuffer_2950(self);
     cBESaveInterface_buffer = new (str_save_file_buffer, 0x100, 0) char[size];
     char* p = (char*)cBESaveInterface_buffer;
     strncpy(p, (char*)&cBELibrary_playerDB[idx], 0xC);
@@ -211,9 +211,9 @@ extern "C" void* func_00152950(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152BA8);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveProfileSize);
 #ifdef SKIP_ASM
-extern "C" int func_00152BA8()
+extern "C" int cBESaveInterface_getSaveProfileSize()
 {
     return 0x9B61;
 }
@@ -237,7 +237,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
 // Restores the save block written by func_00152758 after checking its CRC; returns 0 when the CRC is wrong.
 extern "C" int func_00152BB0(void* self, char* buf)
 {
-    int size = func_00152948(self) - 4;
+    int size = cBESaveInterface_getSaveGameSize(self) - 4;
     int crc = func_003E62D0(buf, size, 0xFBEA);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
@@ -285,7 +285,7 @@ extern sCharFlag_2DE0 D_00535B31[];
 // Loads rider profile 'idx' from a save block after checking its CRC; the per-sub-profile 'keep' values survive the load.
 extern "C" int func_00152DE0(void* self, char* buf, int idx)
 {
-    int size = func_00152BA8() - 4;
+    int size = cBESaveInterface_getSaveProfileSize() - 4;
     int crc = func_003E62D0(buf, size, 0xFBEA);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
@@ -314,13 +314,13 @@ extern "C" int func_00152DE0(void* self, char* buf, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00153050);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_purgeInterface);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void*);
 extern void* cBESaveInterface_buffer;
 
-extern "C" void func_00153050(void)
+extern "C" void cBESaveInterface_purgeInterface(void)
 {
     operator_delete((int*)cBESaveInterface_instance);
     cBESaveInterface_instance = 0;

@@ -27,13 +27,13 @@ cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2lightman", func_0038AE28);
+INCLUDE_ASM("render/ps2lightman", cLightMan__cLightMan);
 #ifdef SKIP_ASM
 extern void* cLightMan_TheLightMan;
 extern void* D_004936D8[];
 void operator_delete(int* ptr);
 
-extern "C" void func_0038AE28(cPS2LightMan* self, int flags)
+extern "C" void cLightMan__cLightMan(cPS2LightMan* self, int flags)
 {
     *(void***)self = D_004936D8;
     cLightMan_TheLightMan = 0;

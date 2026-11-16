@@ -2002,7 +2002,7 @@ extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D500);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_calcBoundBox);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2067,8 +2067,8 @@ static inline void boxInit_D500(sGmBox_D500& b, const sGfxVec4& p)
 #define TURN_TIME_D500(v, b) (((v) / ((b) - (v)) - DRAG_B_D500) * (1.0f / (2.0f * DRAG_A_D500)))
 
 // Bounding box of every particle the emitter can produce over its lifetime.
-extern "C" void func_0036D500_D500(sGmEmit_D500* e, sGmBox_D500* out) __asm__("func_0036D500");
-extern "C" void func_0036D500_D500(sGmEmit_D500* e, sGmBox_D500* out)
+extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500* out) __asm__("tParticleEmitter_calcBoundBox");
+extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500* out)
 {
     float lifeA = e->f1C + e->f14;
     float lifeB = e->f1C + e->f14 * 2.0f;
@@ -2164,7 +2164,7 @@ extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float a, float 
 extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float a, float b);
 extern "C" void func_0036CCB8(tParticleEmitter* self);
 extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self);
-extern "C" void func_0036D500(void* a, void* b);
+extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
 struct sGmV4_0058 {
     float x, y, z, w;
     sGmV4_0058() {}
@@ -2275,7 +2275,7 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
  * w 1) and Xr0 / Xr1 the transformed position spreads R0 / R1, with X0 moved back by 1.5 * (Xr0 + Xr1); V0 and
  * Vr0..Vr2 are the transformed velocity and its three spreads divided by Damp, V0 moved back by 1.5 * (Vr0 + Vr1 +
  * Vr2). The start, end and two random colours (scaled by 128) go to func_0036D318 with the maximum life, then
- * setTime(Duration < 0 ? maximum life : 0) and calcBoundBox (func_0036D500) into @p boundBox.
+ * setTime(Duration < 0 ? maximum life : 0) and calcBoundBox (tParticleEmitter_calcBoundBox) into @p boundBox.
  *
  * The source comment above the function ("camera parameters ... frustum planes") does not describe this code.
  *
@@ -2312,7 +2312,7 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* tran
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0xB8), *(float*)((char*)particleData + 0xBC), *(float*)((char*)particleData + 0xC0), *(float*)((char*)particleData + 0xB4)), 128.0f),
                        *(float*)((char*)particleData + 0x14) + *(float*)((char*)particleData + 0x1C) * 0.5f);
     tParticleEmitter_setTime(self, *(float*)((char*)particleData + 0x8) < 0.0f ? *(float*)((char*)particleData + 0x14) + *(float*)((char*)particleData + 0x1C) * 0.5f : 0.0f);
-    func_0036D500(self, boundBox);
+    tParticleEmitter_calcBoundBox(self, boundBox);
 }
 #endif
 
@@ -2375,13 +2375,13 @@ extern "C" void func_00370708(float *self, float duration)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370758);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter__cStaticEmitter);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_00493160[];
 
-extern "C" void func_00370758(int* self, int flags)
+extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags)
 {
     *(void**)((char*)self + 0x18C) = D_00493160;
     if (flags & 1) {
@@ -2581,11 +2581,11 @@ public:
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void func_0036D500(void* a, void* b);
+extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
 
 /**
  * Restores a static emitter from a replay frame: reads 12 bytes (Duration, the emitter's EndTime, m_initialized) with
- * the stream's slot 2 and recomputes the bounding box at +0x160 (func_0036D500, calcBoundBox).
+ * the stream's slot 2 and recomputes the bounding box at +0x160 (tParticleEmitter_calcBoundBox, calcBoundBox).
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
@@ -2599,7 +2599,7 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream
     stream->v02(&buf, 0xC);
     self->Duration = buf.a;
     self->Emitter.EndTime = buf.b;
-    func_0036D500((char*)self + 0x10, (char*)self + 0x160);
+    tParticleEmitter_calcBoundBox((char*)self + 0x10, (char*)self + 0x160);
     self->m_initialized = buf.c;
 }
 #endif

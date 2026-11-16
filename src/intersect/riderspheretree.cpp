@@ -84,7 +84,7 @@ extern "C" void func_00329998(void* self, float radius)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_003299C8);
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Init);
 #ifdef SKIP_ASM
 struct sSphereLeaf_99C8 {
     int type;                       // 0x00
@@ -95,7 +95,7 @@ struct sSphereLeaf_99C8 {
     int count;                      // 0x2C
 };
 
-extern "C" void func_003299C8(sSphereLeaf_99C8* s, int type, int n, int* ids, float* radii,
+extern "C" void cRiderSphereTree_Init(sSphereLeaf_99C8* s, int type, int n, int* ids, float* radii,
                               int user, float radius)
 {
     s->parent = 0xFFFFFFFF;
@@ -329,7 +329,7 @@ extern "C" void func_00329CE0(sSphereTreeNode* self, sSphereBox_9CE0* box)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_00329DC8);
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_GetMaskBoundBox);
 #ifdef SKIP_ASM
 struct sSphereV4_9DC8 {
     float x, y, z, w;
@@ -385,7 +385,7 @@ static inline sSphereV4_9DC8 Add_9DC8(const sSphereV4_9DC8& a, const sSphereV4_9
 
 struct sVec4_2F650;
 
-extern "C" void func_00329DC8(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
+extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
 {
     sSphereBox_9DC8* node = (sSphereBox_9DC8*)tree;
     sSphereV4_9DC8* mn = (sSphereV4_9DC8*)mnp;
@@ -551,7 +551,7 @@ extern "C" int func_00329F98(sNode_9F98* nodeA, sNode_9F98* nodeB, sSphereVec4* 
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032A1C0);
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_IsTriCollision);
 #ifdef SKIP_ASM
 typedef sSphereVec4 sV_A1C0;
 
@@ -698,8 +698,8 @@ static inline int Touch_A1C0(const sV_A1C0& c, float r, sV_A1C0* p, sV_A1C0* a, 
 }
 
 // PORT: the unit declares it later as (void*, int, int, int, int, sSphereVec4*, int); defined under its own name bound to the symbol.
-extern "C" int func_0032A1C0_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint) __asm__("func_0032A1C0");
-extern "C" int func_0032A1C0_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint)
+extern "C" int cRiderSphereTree_IsTriCollision_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint) __asm__("cRiderSphereTree_IsTriCollision");
+extern "C" int cRiderSphereTree_IsTriCollision_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint)
 {
     float dist = Dot_A1C0(*n, Sub_A1C0(self->center, *p));
     float r = self->radius;
@@ -735,7 +735,7 @@ extern "C" int func_0032A1C0_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032AA28);
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Is2SidedTriCollision);
 #ifdef SKIP_ASM
 typedef sSphereVec4 sV_AA28;
 
@@ -882,8 +882,8 @@ static inline int Touch_AA28(const sV_AA28& c, float r, sV_AA28* p, sV_AA28* a, 
 }
 
 // PORT: the unit declares it later as (void*, int, int, int, int, sSphereVec4*, int); defined under its own name bound to the symbol.
-extern "C" int func_0032AA28_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint) __asm__("func_0032AA28");
-extern "C" int func_0032AA28_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint)
+extern "C" int cRiderSphereTree_Is2SidedTriCollision_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint) __asm__("cRiderSphereTree_Is2SidedTriCollision");
+extern "C" int cRiderSphereTree_Is2SidedTriCollision_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint)
 {
     sV_AA28 n = *np;
     float dist = Dot_AA28(n, Sub_AA28(self->center, *p));
@@ -1391,7 +1391,7 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* p
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C0F8);
+INCLUDE_ASM("intersect/riderspheretree", cWorldIntersectType_IsMeshInt);
 #ifdef SKIP_ASM
 struct sV4_C0F8 {
     float x, y, z, w;
@@ -1474,7 +1474,7 @@ struct sTriTester_C0F8 {
     sVE_C0F8a* vt;          // 0x50
 };
 
-extern "C" int func_0032C0F8(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, sTriHit_C0F8* out)
+extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, sTriHit_C0F8* out)
 {
     sV4_C0F8 pos;
     sV4_C0F8 hn;
@@ -1575,31 +1575,31 @@ extern "C" int func_0032C0F8(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int fla
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C508);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_SphereTree);
 #ifdef SKIP_ASM
 // Eight-entry member array with an empty constructor (only the dead loop setup remains).
 struct sTreeSlot_32C508 {
     int v;
     sTreeSlot_32C508() {}
 };
-extern "C" void func_0032C540(void* self);
+extern "C" void SphereTree_init(void* self);
 
-extern "C" void* func_0032C508(void* self)
+extern "C" void* SphereTree_SphereTree(void* self)
 {
     new (self) sTreeSlot_32C508[8];
     *(int*)((char*)self + 0x98) = 0;
-    func_0032C540(self);
+    SphereTree_init(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C540);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_init);
 #ifdef SKIP_ASM
 extern sSphereVec4 D_004FF640[8];
 extern sSphereVec4 t4vect_Origin;
 
-extern "C" void func_0032C540(void* self)
+extern "C" void SphereTree_init(void* self)
 {
     sSphereVec4* dst = (sSphereVec4*)self;
     for (int i = 0; i < 8; i++) {
@@ -1622,14 +1622,14 @@ extern "C" float func_0032C590(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C5A8);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_GetResolution);
 #ifdef SKIP_ASM
 struct sSphereRadius12 {
     float value;
     int pad[2];
 };
 
-extern "C" float func_0032C5A8(void* self)
+extern "C" float SphereTree_GetResolution(void* self)
 {
     void* p = *(void**)((char*)self + 0x98);
     int idx = *(int*)((char*)p + 0xc);
@@ -1671,11 +1671,11 @@ extern "C" void func_0032C5E0(void* self, sSphereVec4_C5E0* offset)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C630);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_MoveOffset);
 #ifdef SKIP_ASM
 // self->(0x80) += *v  (4-wide VU0 add, macro mode)
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-extern "C" void func_0032C630(void* self, void* v)
+extern "C" void SphereTree_MoveOffset(void* self, void* v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1691,7 +1691,7 @@ extern "C" void func_0032C630(void* self, void* v)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C648);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformAbs);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
@@ -1745,7 +1745,7 @@ struct sVec4_C648 : sSphereVec4 {
 
 extern sSphereVec4 D_004FF640[8];
 
-extern "C" void func_0032C648(void* self, sSphereVec4* m, float scale)
+extern "C" void SphereTree_TransformAbs(void* self, sSphereVec4* m, float scale)
 {
     sSphereVec4* pos = (sSphereVec4*)self;
     sSphereVec4* neg = (sSphereVec4*)((char*)self + 0x70);
@@ -1806,14 +1806,14 @@ extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* mat, flo
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C898);
 #ifdef SKIP_ASM
-extern "C" int func_0032DF28(void* self);
+extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032CDB0(void* self, void* a1, float f, void* pos, int a4, int a5, void* a6, void* a7);
 
 extern "C" int func_0032C898(void* self, void* spherePos, float sphereRadius, void* outPush, void* outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
     return func_0032CDB0(self, spherePos, sphereRadius, (char*)self + 0x80, 0, 0, outPush, outContact);
 }
@@ -1822,14 +1822,14 @@ extern "C" int func_0032C898(void* self, void* spherePos, float sphereRadius, vo
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C928);
 #ifdef SKIP_ASM
-extern "C" int func_0032DF28(void* self);
+extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032D028(void* self, void* a1, void* a2, void* pos, int a4, int a5, void* a6, void* a7);
 
 extern "C" int func_0032C928(void* self, void* boxMin, void* boxMax, void* outPos, void* outNormal)
 {
     void* tree = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
     return func_0032D028(self, boxMin, boxMax, (char*)self + 0x80, 0, 0, outPos, outNormal);
 }
@@ -1853,16 +1853,16 @@ static inline sVecArg_C9B8 zeroW_C9B8(const sVecArg_C9B8& in)
     return r;
 }
 
-extern "C" void func_0032DB40_v(void* self, sVecArg_C9B8 v) __asm__("func_0032DB40");
+extern "C" void SphereTree_populateSortAxis_v(void* self, sVecArg_C9B8 v) __asm__("SphereTree_populateSortAxis");
 extern "C" void func_0032D208(void* self, void* a1, void* pos, int a3, int a4, void* a5, void* a6);
 
 extern "C" int func_0032C9B8(void* self, sVecArg_C9B8* plane, void* outPush, void* outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
-    func_0032DB40_v(self, zeroW_C9B8(*plane));
+    SphereTree_populateSortAxis_v(self, zeroW_C9B8(*plane));
     *(float*)((char*)self + 0x94) = 0.0f;
     func_0032D208(self, plane, (char*)self + 0x80, 0, 0, outPush, outContact);
     if (*(float*)((char*)self + 0x94) < 0.0f) {
@@ -1873,21 +1873,21 @@ extern "C" int func_0032C9B8(void* self, sVecArg_C9B8* plane, void* outPush, voi
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032CA78);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsTriCollision);
 #ifdef SKIP_ASM
-extern "C" int func_0032DF28(void* self);
-extern "C" void func_0032DB40(void* self, void* v);
-extern "C" int func_0032D470(void* self, void* a1, void* a2, void* a3, void* v, void* pos, int a6, int a7, void* a8, void* a9);
+extern "C" int SphereTree_AllocBuf(void* self);
+extern "C" void SphereTree_populateSortAxis(void* self, void* v);
+extern "C" int SphereTree_checkTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* pos, int a6, int a7, void* a8, void* a9);
 
-extern "C" int func_0032CA78(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6)
+extern "C" int SphereTree_IsTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6)
 {
     void* t = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(t);
     }
-    func_0032DB40(self, v);
+    SphereTree_populateSortAxis(self, v);
     *(float*)((char*)self + 0x94) = 0.0f;
-    func_0032D470(self, a1, a2, a3, v, (char*)self + 0x80, 0, 0, a5, a6);
+    SphereTree_checkTriCollision(self, a1, a2, a3, v, (char*)self + 0x80, 0, 0, a5, a6);
     if (*(float*)((char*)self + 0x94) < 0.0f) {
         return 1;
     }
@@ -1898,18 +1898,18 @@ extern "C" int func_0032CA78(void* self, void* a1, void* a2, void* a3, void* v, 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032CB58);
 #ifdef SKIP_ASM
-extern "C" int func_0032DF28(void* self);
+extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032CBF8(void* self, void* other, void* pos, int a3, int a4, void* a5, void* a6);
 
 extern "C" int func_0032CB58(void* self, void* other, void* outPush, void* outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
     tree = *(void**)((char*)other + 0x98);
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = func_0032DF28(tree);
+        *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
     return func_0032CBF8(self, other, (char*)self + 0x80, 0, 0, outPush, outContact);
 }
@@ -2390,7 +2390,7 @@ extern "C" int func_0032D440(void* self, sSphereVec4* a, sSphereVec4* b, sSphere
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032D470);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_checkTriCollision);
 #ifdef SKIP_ASM
 struct sSphereLevel_D470 {
     float radius;   // 0x0
@@ -2532,12 +2532,12 @@ static inline bool SegHit_D470(const sSphereVec4& e, const sSphereVec4& g, float
 
 // PORT: the unit's 5-arg func_0032D440 also receives the radius in $f12 here.
 extern "C" int func_0032D440_r(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float r) __asm__("func_0032D440");
-// PORT: the unit declares func_0032D470 as returning int; it returns nothing.
-extern "C" void func_0032D470_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB) __asm__("func_0032D470");
+// PORT: the unit declares SphereTree_checkTriCollision as returning int; it returns nothing.
+extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB) __asm__("SphereTree_checkTriCollision");
 
 // Sphere tree against the triangle (a1, a2, a3) moving along v: records the deepest
 // penetration below self->best (*outA = push-out vector, *outB = contact point).
-extern "C" void func_0032D470_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB)
+extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB)
 {
     sSphereOct_D470* self = (sSphereOct_D470*)selfp;
     float d = Dot_D470(*v, Sub_D470(*pos, *a1));
@@ -2588,7 +2588,7 @@ extern "C" void func_0032D470_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, s
             int k = self->order[i];
             if ((mask >> k) & 1) {
                 sSphereVec4 q = Add_D470(*pos, Scale_D470(self->dirs[k], f));
-                func_0032D470_v(self, a1, a2, a3, v, &q, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+                SphereTree_checkTriCollision_v(self, a1, a2, a3, v, &q, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
             }
         }
         return;
@@ -2604,12 +2604,12 @@ extern "C" void func_0032D470_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, s
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032DA40);
+INCLUDE_ASM("intersect/riderspheretree", BXSORT_shell);
 #ifdef SKIP_ASM
 extern int D_0044AF98[];
 
 // Shell sort of keys[] (descending) carrying vals[] along, gap table D_0044AF98.
-extern "C" void func_0032DA40(int n, int* keys, int* vals)
+extern "C" void BXSORT_shell(int n, int* keys, int* vals)
 {
     int k = 1;
     while (D_0044AF98[k] < n) {
@@ -2641,7 +2641,7 @@ extern "C" void func_0032DA40(int n, int* keys, int* vals)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032DB40);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_populateSortAxis);
 #ifdef SKIP_ASM
 struct sV4_DB40 {
     float x, y, z, w;
@@ -2683,7 +2683,7 @@ static inline sV4_DB40 vu0Scale_DB40(const sV4_DB40& v, float s)
     return r;
 }
 
-extern "C" void func_0032DA40(int n, int* keys, int* idx);
+extern "C" void BXSORT_shell(int n, int* keys, int* idx);
 
 struct sBox_DB40 {
     sV4_DB40 axes[4];   // 0x00
@@ -2691,7 +2691,7 @@ struct sBox_DB40 {
     int order[8];       // 0x9C
 };
 
-extern "C" void func_0032DB40(void* vself, void* vdir)
+extern "C" void SphereTree_populateSortAxis(void* vself, void* vdir)
 {
     sBox_DB40* self = (sBox_DB40*)vself;
     sV4_DB40* dir = (sV4_DB40*)vdir;
@@ -2705,7 +2705,7 @@ extern "C" void func_0032DB40(void* vself, void* vdir)
         self->order[i] = i;
         self->order[7 - i] = 7 - i;
     }
-    func_0032DA40(8, keys, self->order);
+    BXSORT_shell(8, keys, self->order);
 }
 #endif
 
@@ -2783,7 +2783,7 @@ extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int t
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032DE20);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_purgeCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 extern void** SphereTree_buffers;
@@ -2793,7 +2793,7 @@ extern void** SphereTree_bigBuffers;
 extern void* SphereTree_bigBufID;
 extern int SphereTree_bigBufNum;
 
-extern "C" void func_0032DE20(void)
+extern "C" void SphereTree_purgeCache(void)
 {
     if (SphereTree_buffers != 0) {
         for (int i = 0; i < SphereTree_bufNum; i++) {
@@ -2829,7 +2829,7 @@ extern "C" void func_0032DE20(void)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032DF28);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_AllocBuf);
 #ifdef SKIP_ASM
 extern void** SphereTree_buffers;
 extern void* SphereTree_bufID;
@@ -2852,7 +2852,7 @@ struct sSphereData_DF28 {
 };
 
 // PORT: returns the cached buffer pointer as int (the unit declares it int-returning).
-extern "C" int func_0032DF28(void* selfp)
+extern "C" int SphereTree_AllocBuf(void* selfp)
 {
     sSphereData_DF28* self = (sSphereData_DF28*)selfp;
     int key = self->key;
@@ -3652,7 +3652,7 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032F650);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_cWorldRider);
 #ifdef SKIP_ASM
 struct sVec4_2F650 {
     float x, y, z, w;
@@ -3713,10 +3713,10 @@ struct sRiderSphere_2F650 {
 };
 
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
-extern "C" void func_00329DC8(void* tree, sVec4_2F650* mn, sVec4_2F650* mx);
+extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, sVec4_2F650* mn, sVec4_2F650* mx);
 extern void* cWorldRider_vtbl[];
 
-extern "C" sRiderSphere_2F650* func_0032F650(sRiderSphere_2F650* self, void* tree, int flag)
+extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(sRiderSphere_2F650* self, void* tree, int flag)
 {
     self->f8 = 0;
     self->f4 = 0;
@@ -3725,7 +3725,7 @@ extern "C" sRiderSphere_2F650* func_0032F650(sRiderSphere_2F650* self, void* tre
     self->tree2 = tree;
     self->tree = tree;
     self->state = flag == 0;
-    func_00329DC8(tree, &self->min, &self->max);
+    cRiderSphereTree_GetMaskBoundBox(tree, &self->min, &self->max);
     self->center = vecScale_2F650(vecAdd_2F650(&self->min, &self->max), 0.5f);
     return self;
 }
@@ -3911,12 +3911,12 @@ static inline float sphereLength_32F8F0(const sSphereVec4& v)
     return r;
 }
 
-extern "C" int func_0032A1C0(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
+extern "C" int cRiderSphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
 
 /**
  * Collides the rider's sphere tree with a triangle and returns the push-out direction and depth.
  *
- * Calls func_0032A1C0 (On Tour cRiderSphereTree::IsTriCollision) on the current tree; on a hit the penetration
+ * Calls cRiderSphereTree_IsTriCollision (On Tour cRiderSphereTree::IsTriCollision) on the current tree; on a hit the penetration
  * vector is split into its length and unit direction.
  *
  * @param vertA  the triangle's first corner (On Tour a)
@@ -3931,7 +3931,7 @@ extern "C" int func_0032A1C0(void* tree, int a1, int a2, int a3, int a4, sSphere
 extern "C" int cWorldRider_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 overlap;
-    int result = func_0032A1C0(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
+    int result = cRiderSphereTree_IsTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
     if (result != 0) {
         float len = sphereLength_32F8F0(overlap);
         *outLen = len;
@@ -3963,12 +3963,12 @@ static inline float sphereLength_32F990(const sSphereVec4& v)
     return r;
 }
 
-extern "C" int func_0032AA28(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
+extern "C" int cRiderSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
 
 /**
  * Collides the rider's sphere tree with a two-sided triangle and returns the push-out direction and depth.
  *
- * As cWorldRider_IsTriInt with func_0032AA28 (On Tour cRiderSphereTree::Is2SidedTriCollision).
+ * As cWorldRider_IsTriInt with cRiderSphereTree_Is2SidedTriCollision (On Tour cRiderSphereTree::Is2SidedTriCollision).
  *
  * @param vertA  the triangle's first corner (On Tour a)
  * @param vertB  the second corner (On Tour b)
@@ -3982,7 +3982,7 @@ extern "C" int func_0032AA28(void* tree, int a1, int a2, int a3, int a4, sSphere
 extern "C" int cWorldRider_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 overlap;
-    int result = func_0032AA28(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
+    int result = cRiderSphereTree_Is2SidedTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
     if (result != 0) {
         float len = sphereLength_32F990(overlap);
         *outLen = len;

@@ -90,7 +90,7 @@ struct sTrackWorld5570 {
     sTrackSet5570** sets;   // 0x8
 };
 
-extern "C" sTrackWorld5570** func_002D1BD8();
+extern "C" sTrackWorld5570** cObjectInterface_getWorld();
 
 static inline sTrackNode5570* refToNode5570(unsigned int p)
 {
@@ -102,7 +102,7 @@ struct sTrackRef5570 {
 
     sTrackNode5570* get()
     {
-        sTrackSet5570* set = (*func_002D1BD8())->sets[id & 0xFF];
+        sTrackSet5570* set = (*cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set != 0) {
             unsigned int p = set->refs[id >> 8] >> 8;
             if (p != 0) {

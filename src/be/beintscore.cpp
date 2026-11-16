@@ -49,7 +49,7 @@ void* cBEScoreInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_cBEScoreInterface);
 #ifdef SKIP_ASM
-extern "C" void func_001549E8(void* self);
+extern "C" void cBEScoreInterface_discard(void* self);
 extern void* cBEScoreInterface_vtbl[];
 
 // PORT: the unit declares cBEScoreInterface_cBEScoreInterface as returning void (used by getThis);
@@ -59,7 +59,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 /**
  * Constructs the back end's score interface: stores its vtable at +0xC and resets its score state.
  *
- * The reset, func_001549E8(), zeroes the words at +0x10 and +0x14, sets +0x18 and +0x1C to -1, and clears both
+ * The reset, cBEScoreInterface_discard(), zeroes the words at +0x10 and +0x14, sets +0x18 and +0x1C to -1, and clears both
  * 0xB0-byte slots at +0x20, setting each slot's last word to -1.
  *
  * @return @p self
@@ -67,7 +67,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
 {
     *(void***)((char*)self + 0xC) = cBEScoreInterface_vtbl;
-    func_001549E8(self);
+    cBEScoreInterface_discard(self);
     return self;
 }
 #endif
@@ -81,7 +81,7 @@ void func_001549E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001549E8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_discard);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
@@ -99,7 +99,7 @@ struct sScore_001549E8 {
     sScoreSlot_001549E8 slots[2]; // 0x20
 };
 
-extern "C" void func_001549E8(void* p)
+extern "C" void cBEScoreInterface_discard(void* p)
 {
     sScore_001549E8* self = (sScore_001549E8*)p;
     self->a = 0;

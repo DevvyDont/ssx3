@@ -9,7 +9,7 @@
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$8cUIState (D_004946C8)
-// keeps cListNode's traverseFlat/traverseRecurse (func_00397788/func_003977B8) in slots 2-3.
+// keeps cListNode's traverseFlat/traverseRecurse (cListNode_traverseFlat/cListNode_traverseRecurse) in slots 2-3.
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIState, size 0x48: the same offsets as retail),
 // placed at retail offsets by:
@@ -38,10 +38,10 @@ struct cUIState {
     void** mVtbl;                    // 0x008 [R] _vt$8cUIState (D_004946C8), stored by func_0039E2A0/func_0039E318/func_003A57B8
     int mHashName;                   // 0x00C [P] getHashName/setHashName (retail func_003A5808/func_003A5800); [R] = 0
                                      //       (derived states store their state id here, e.g. 9 in func_00181090)
-    cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail func_003A5810); [R] = pEngine; [U] func_0039E510 reads the
+    cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail func_003A5810); [R] = pEngine; [U] cUIState_onUpdate reads the
                                      //       engine's input object through it
     signed char mCurrentCtrl;        // 0x014 [P] getCurrentCtrl/setCurrentCtrl (lb/sb; retail func_003A5820/func_003A5818);
-                                     //       [R] = -1; [U] controller loop counter in func_0039E510 (On Tour: char)
+                                     //       [R] = -1; [U] controller loop counter in cUIState_onUpdate (On Tour: char)
     unsigned char mCtrlBits;         // 0x015 [P] getCtrlBitMask/setAllCtrlBits (lbu/sb; retail func_003A5830/func_003A5828);
                                      //       [R] = 0xF; [U] setCtrlBitsByCtrlIndex/clearCtrlBits (func_0039E438/func_0039E470)
     char unk_016[0x2];               // 0x016 padding

@@ -424,11 +424,11 @@ extern "C" int func_002849F8(sEngine_49F8* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A28);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera__cScriptObjCamera);
 #ifdef SKIP_ASM
 extern "C" void cScriptObject__cScriptObject();
 
-extern "C" void func_00284A28(void) {
+extern "C" void cScriptObjCamera__cScriptObjCamera(void) {
     cScriptObject__cScriptObject();
 }
 #endif
@@ -498,17 +498,17 @@ extern "C" int func_00284A80(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A88);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetNumScriptEntities);
 #ifdef SKIP_ASM
-extern "C" int func_00284A88(void) {
+extern "C" int cScriptObjCamera_GetNumScriptEntities(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A90);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetScriptEntity);
 #ifdef SKIP_ASM
-extern "C" int func_00284A90(void) {
+extern "C" int cScriptObjCamera_GetScriptEntity(void) {
     return 0;
 }
 #endif

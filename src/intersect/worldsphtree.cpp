@@ -7,7 +7,7 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
 #ifdef SKIP_ASM
 extern void* cWorldSphTree_vtbl[];
 extern char str_SphereTree[];
-extern "C" void* func_0032C508(void* p);
+extern "C" void* SphereTree_SphereTree(void* p);
 extern "C" float func_0032C590(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -19,7 +19,7 @@ struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
  * Stores cWorldSphTree's vtable at +0x50, clears +0x4 and +0x8, sets +0x0 to 1 unless @p isLow and keeps @p
  * ast at +0x60 and +0x64. Copies the tree's transCenter to +0x40 and stores centre + r and centre - r (w = 1)
  * at +0x20 and +0x30, r being func_0032C590()'s radius. Also allocates a fresh 0x140-byte "SphereTree"
- * (func_0032C508) at +0x68, which the destructor cWorldSphTree__cWorldSphTree frees.
+ * (SphereTree_SphereTree) at +0x68, which the destructor cWorldSphTree__cWorldSphTree frees.
  *
  * @param ast    the bxSphereTree to wrap
  * @param isLow  nonzero for a low-detail wrapper: +0x0 is then 0 and cWorldSphTree_GetIdealParam() returns -1
@@ -52,7 +52,7 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     corner.w = 1.0f;
     *(sSphV4*)((char*)self + 0x30) = corner;
     void* localTree = cMemMan_alloc(0x140, str_SphereTree, 0, 0);
-    func_0032C508(localTree);
+    SphereTree_SphereTree(localTree);
     *(void**)((char*)self + 0x68) = localTree;
     return self;
 }
@@ -272,12 +272,12 @@ static inline sWsVec4 wsDiv_330788(const sWsVec4& v, float s)
     return r;
 }
 
-extern "C" int func_0032CA78(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
+extern "C" int SphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
 
 /**
  * Collides the sphere tree with a triangle and returns the push-out direction and depth.
  *
- * Calls func_0032CA78 (On Tour SphereTree::IsTriCollision) on the current tree; on a hit the penetration vector is
+ * Calls SphereTree_IsTriCollision (On Tour SphereTree::IsTriCollision) on the current tree; on a hit the penetration vector is
  * split into its length and unit direction.
  *
  * @param vertA  the triangle's first corner (On Tour a)
@@ -292,7 +292,7 @@ extern "C" int func_0032CA78(void* tree, int a1, int a2, int a3, int a4, sWsVec4
 extern "C" int cWorldSphTree_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 hitDir;
-    int hit = func_0032CA78(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
+    int hit = SphereTree_IsTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330788(hitDir);
         *outLen = len;
@@ -346,12 +346,12 @@ static inline sWsVec4 wsDiv_330828(const sWsVec4& v, float s)
     return r;
 }
 
-extern "C" int func_00328030(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
+extern "C" int bxSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
 
 /**
  * Collides the sphere tree with a two-sided triangle and returns the push-out direction and depth.
  *
- * As cWorldSphTree_IsTriInt with func_00328030 (On Tour bxSphereTree::Is2SidedTriCollision).
+ * As cWorldSphTree_IsTriInt with bxSphereTree_Is2SidedTriCollision (On Tour bxSphereTree::Is2SidedTriCollision).
  *
  * @param vertA  the triangle's first corner (On Tour a)
  * @param vertB  the second corner (On Tour b)
@@ -365,7 +365,7 @@ extern "C" int func_00328030(void* tree, int a1, int a2, int a3, int a4, sWsVec4
 extern "C" int cWorldSphTree_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 hitDir;
-    int hit = func_00328030(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
+    int hit = bxSphereTree_Is2SidedTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330828(hitDir);
         *outLen = len;
@@ -1147,7 +1147,7 @@ extern "C" void func_003279D0(void* cache, void* src, void** out);
 struct sVec4_335960;
 struct sHit_003342D0;
 extern "C" int func_0032B6E0(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
-extern "C" int func_00334888(void* q, void* node, void* buf, int cap, int mode);
+extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
 static inline int overlapTri_333EF8(const sQuery_333EF8* q, const sTriObj_333EF8* n)
 {
@@ -1240,7 +1240,7 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
         int flags = node->flags;
         if (flags & 0x20) {
             if (overlapNode_333EF8(query, node)) {
-                n += func_00334888(query, node, (char*)hits + n * 0x80, cap - n, 2);
+                n += intersect_instanceIntersect(query, node, (char*)hits + n * 0x80, cap - n, 2);
             }
         } else if (flags & 0x40) {
             if (node->obj == 0) {
@@ -1251,7 +1251,7 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
                 sVEnt_333EF8* vt2 = node->obj->vt;
                 sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
                 if (overlapBox_333EF8(query, objBox)) {
-                    n += func_00334888(query, node, (char*)hits + n * 0x80, cap - n, 2);
+                    n += intersect_instanceIntersect(query, node, (char*)hits + n * 0x80, cap - n, 2);
                 }
             }
         }
@@ -1365,7 +1365,7 @@ struct sList_334458 {
     sNode_334458* items[1];
 };
 
-extern "C" int func_00334888(void* q, void* node, void* buf, int cap, int mode);
+extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
 static inline int overlapNode_334458(const sQuery_334458* q, const sNode_334458* n)
 {
@@ -1399,7 +1399,7 @@ extern "C" int func_00334458(sList_334458* self, sQuery_334458* query, char* buf
         int flags = node->flags;
         if (flags & 0x20) {
             if (overlapNode_334458(query, node)) {
-                n += func_00334888(query, node, buf + n * 0x80, cap - n, mode);
+                n += intersect_instanceIntersect(query, node, buf + n * 0x80, cap - n, mode);
             }
         } else if (flags & 0x40) {
             sVEnt_334458* vt = node->obj->vt;
@@ -1407,7 +1407,7 @@ extern "C" int func_00334458(sList_334458* self, sQuery_334458* query, char* buf
                 sVEnt_334458* vt2 = node->obj->vt;
                 sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)node->obj + vt2[45].delta);
                 if (overlapBox_334458(query, objBox)) {
-                    n += func_00334888(query, node, buf + n * 0x80, cap - n, mode);
+                    n += intersect_instanceIntersect(query, node, buf + n * 0x80, cap - n, mode);
                 }
             }
         }
@@ -1417,7 +1417,7 @@ extern "C" int func_00334458(sList_334458* self, sQuery_334458* query, char* buf
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00334680);
+INCLUDE_ASM("intersect/worldsphtree", cOverlapList_splineIntersect);
 #ifdef SKIP_ASM
 struct sBox_00334680 {
     sWsVec4 min;
@@ -1453,7 +1453,7 @@ static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
         : "memory");
 }
 
-extern "C" int func_00334680(char* self, sWsVec4* pos, int a2, int mask, float r)
+extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int a2, int mask, float r)
 {
     sBox_00334680 box;
     sWsVec4 ext;
@@ -1510,11 +1510,11 @@ extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00334850);
+INCLUDE_ASM("intersect/worldsphtree", cBXNash_purgeTheAIFwdDiffCache);
 #ifdef SKIP_ASM
 extern "C" void func_00327828(void* p, int flags);
 
-extern "C" void func_00334850(void* self)
+extern "C" void cBXNash_purgeTheAIFwdDiffCache(void* self)
 {
     void* p = *(void**)((char*)self + 0xA4);
     if (p != 0) {
@@ -1525,7 +1525,7 @@ extern "C" void func_00334850(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00334888);
+INCLUDE_ASM("intersect/worldsphtree", intersect_instanceIntersect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -1640,10 +1640,10 @@ typedef int (*Mesh_4888)(void*, void*, sWsHit_4888*, int);
 
 void* func_003A6CC8_4888(void* self, void* a1) __asm__("func_003A6CC8__FPvT0");
 void* func_003A6CD8_4888(void* self, void* a1) __asm__("func_003A6CD8__FPvT0");
-extern "C" void* func_003A6CE8(void* self, int a1);
-void* func_003A6D00_4888(void* self, int a1) __asm__("func_003A6D00__FPvi");
+extern "C" void* tSphTreeList_getMeshTree(void* self, int a1);
+void* tPolyModelList_getMeshPolyModel_4888(void* self, int a1) __asm__("tPolyModelList_getMeshPolyModel__FPvi");
 // PORT: callers pass the hit capacity as a fifth argument the function never reads.
-extern "C" int func_0032C0F8_cap(void* self, void* mesh, int flag, sWsHit_4888* out, int cap) __asm__("func_0032C0F8");
+extern "C" int cWorldIntersectType_IsMeshInt_cap(void* self, void* mesh, int flag, sWsHit_4888* out, int cap) __asm__("cWorldIntersectType_IsMeshInt");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
 static inline void vu0MulMat_4888(sWsMat_4888* d, const sWsMat_4888* a, const sWsMat_4888* b)
@@ -1799,7 +1799,7 @@ static inline sWsPart_4888* GetPart_4888(sWsInstDef_4888* def, int i)
 
 // Collects the triangle hits of instance `node` against query q into buf (mode 1: unnamed parts only, mode 2: named
 // parts only); bone matrices come from the instance's animated object or are built here from the skeleton.
-extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode) __asm__("func_00334888");
+extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode) __asm__("intersect_instanceIntersect");
 extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode)
 {
     if (node->obj != 0) {
@@ -1917,10 +1917,10 @@ extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf,
         } else {
             if (((Hit_4888)q->vt[9].fn)((char*)q + q->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
-                    tri = func_003A6CE8(func_003A6CD8_4888(cWorld_m_pTheWorld, node), k);
+                    tri = tSphTreeList_getMeshTree(func_003A6CD8_4888(cWorld_m_pTheWorld, node), k);
                     inum = ((Mesh_4888)q->vt[6].fn)((char*)q + q->vt[6].delta, tri, ii, 64);
                 } else {
-                    inum = func_0032C0F8_cap(q, func_003A6D00_4888(func_003A6CC8_4888(cWorld_m_pTheWorld, node), k),
+                    inum = cWorldIntersectType_IsMeshInt_cap(q, tPolyModelList_getMeshPolyModel_4888(func_003A6CC8_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
                 }
             }
@@ -2434,7 +2434,7 @@ struct sCtx_335B90 {
     int* count;
 };
 
-extern "C" int func_00334888(void* q, void* node, void* buf, int cap, int mode);
+extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
 static inline int overlapNode_335B90(const sQuery_335B90* q, const sNode_335B90* n)
 {
@@ -2461,7 +2461,7 @@ static inline int overlapBox_335B90(const sQuery_335B90* q, const sBox_335B90* o
 static inline void collect_335B90(sCtx_335B90* ctx, sNode_335B90* node)
 {
     int n = *ctx->count;
-    *ctx->count += func_00334888(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, 2);
+    *ctx->count += intersect_instanceIntersect(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, 2);
 }
 
 extern "C" void func_00335B90(void* vctx, void* vnode)
@@ -2855,7 +2855,7 @@ struct sCtx_336D40 {
     int full;
 };
 
-extern "C" int func_00334888(void* q, void* node, void* buf, int cap, int mode);
+extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
 static inline int overlapNode_336D40(const sQuery_336D40* q, const sNode_336D40* n)
 {
@@ -2882,7 +2882,7 @@ static inline int overlapBox_336D40(const sQuery_336D40* q, const sBox_336D40* o
 static inline void collect_336D40(sCtx_336D40* ctx, sNode_336D40* node, int mode)
 {
     int n = *ctx->count;
-    *ctx->count += func_00334888(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, mode);
+    *ctx->count += intersect_instanceIntersect(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, mode);
 }
 
 extern "C" void func_00336D40(void* vctx, void* vnode)
@@ -5228,11 +5228,11 @@ public:
     virtual void setVelocity(sVec4_341770* v);
 };
 
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 extern "C" void func_00341770(void* self, cMover_341770* obj)
 {
-    sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), func_002D1C70());
+    sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), cObjectInterface_getUpdateTime());
     obj->setVelocity(&newVel);
 }
 #endif
@@ -5310,7 +5310,7 @@ public:
     virtual void setVelocity(sVec4_341818* v);
 };
 
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 struct sParams_341818 {
     sVec4_341818 dir;
@@ -5326,7 +5326,7 @@ struct sSph_341818 {
 
 static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec4_341818& dir, float amount)
 {
-    sVec4_341818 u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->scale), func_002D1C70());
+    sVec4_341818 u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->scale), cObjectInterface_getUpdateTime());
     obj->setVelocity(&u);
 }
 
@@ -5342,11 +5342,11 @@ extern "C" void func_00341818(sSph_341818* self, cMover_341818* obj)
     sParams_341818* boostParams = &self->params;
     if (self->type == 2) {
         if (alongSpeed >= 0.0f) {
-            sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), func_002D1C70());
+            sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
             obj->setVelocity(&newVel);
         }
     } else if (diff > 0.0f) {
-        sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), func_002D1C70());
+        sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), cObjectInterface_getUpdateTime());
         obj->setVelocity(&newVel);
     }
 }
@@ -5404,7 +5404,7 @@ INCLUDE_ASM("intersect/worldsphtree", func_00341AA0);
 extern char* cAppMan_TheAppMan;
 extern void* D_00490B10[];
 extern "C" void func_0034D9B0(void* p, int a1, int a2, void* obj, int a4);
-extern "C" float func_00351508(void* inst);
+extern "C" float cAnimFrame_getStartTime(void* inst);
 float AIrandf(float lo, float hi);
 float func_00317890(float a, float b);
 
@@ -5475,7 +5475,7 @@ extern "C" void* func_00341AA0(sSphFloat_1AA0* self, int a1, int a2, char* obj, 
     float v = 0.0f;
     char* info = *(char**)(obj + 0x80);
     if (self->inst != 0) {
-        v = func_00351508(self->inst);
+        v = cAnimFrame_getStartTime(self->inst);
     }
     self->id = def->id;
     setRate_1AA0((sFloat_1AA0*)&self->min, def->min, v);
@@ -5820,7 +5820,7 @@ INCLUDE_ASM("intersect/worldsphtree", func_003421A0);
 extern char* cAppMan_TheAppMan;
 extern void* D_004908F8[];
 extern "C" void func_0034D9B0(void* p, int a1, int a2, void* obj, int a4);
-extern "C" float func_00351508(void* inst);
+extern "C" float cAnimFrame_getStartTime(void* inst);
 
 struct sSphCtl_003421A0 {
     int f00;            // 0x00
@@ -5876,7 +5876,7 @@ extern "C" void* func_003421A0(sSphCtl_003421A0* self, int a1, char* obj, char* 
     float t = 0.0f;
     char* info = *(char**)(obj + 0x80);
     if (self->inst != 0) {
-        t = func_00351508(self->inst);
+        t = cAnimFrame_getStartTime(self->inst);
     }
     setRate_003421A0((sFloat_003421A0*)&self->f10, *(float*)(def + 0x20), t);
     setRateMax_003421A0((sFloat_003421A0*)&self->f14, *(float*)(def + 0x24), info);
@@ -5931,7 +5931,7 @@ extern "C" void* cAnimTeeterNode_cAnimTeeterNode(void* self, int bucket, sVEntry
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342358);
 #ifdef SKIP_ASM
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 extern "C" int func_0034EBA0(void* p);
 
 struct sSphCtl_00342358 {
@@ -5966,7 +5966,7 @@ static inline float absf_00342358(float x)
 extern "C" int func_00342358(sSphCtl_00342358* spring)
 {
     spring->prev = spring->pos;
-    float dt = func_002D1C70();
+    float dt = cObjectInterface_getUpdateTime();
     float force = spring->gain * spring->force;
     if (spring->gain < 0.0f) {
         force = -force;
@@ -6380,7 +6380,7 @@ public:
     virtual void setVelocity(sVec4_3429E0* v);
 };
 
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 /**
  * Applies the boost zone's drag to a rider: an impulse of velocity * (Drag + 1) * the frame time.
@@ -6392,7 +6392,7 @@ extern "C" float func_002D1C70();
  */
 extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cMover_3429E0* obj)
 {
-    sVec4_3429E0 newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), func_002D1C70());
+    sVec4_3429E0 newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
     obj->setVelocity(&newVelocity);
 }
 #endif
@@ -6449,7 +6449,7 @@ static inline float vu0Dot(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 struct t4Vector;
 
@@ -6486,7 +6486,7 @@ extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
     if (speedDeficit > 0.0f) {
         // PORT: takes the address of a temporary (g++ 2.95 accepts it).
         sPlane_342A88* pl = &(*(sPlane_342A88*)&self->Boost);
-        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, speedDeficit), pl->k), func_002D1C70()));
+        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, speedDeficit), pl->k), cObjectInterface_getUpdateTime()));
     }
 }
 #endif

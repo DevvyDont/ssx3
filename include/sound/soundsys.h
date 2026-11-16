@@ -20,7 +20,7 @@
 struct cPS2SoundManager;
 
 struct cSoundSys {
-    cPS2SoundManager* pManager; // 0x0 [O] cSoundSys::pManager (On Tour type cSoundManager*); [R] ctor = cSoundManager::Construct() (func_002A8FA0, a cPS2SoundManager) and calls its Init; dtor calls its Shutdown and deletes it; [U] SetMode (func_002ADF80) calls its slot 2
+    cPS2SoundManager* pManager; // 0x0 [O] cSoundSys::pManager (On Tour type cSoundManager*); [R] ctor = cSoundManager::Construct() (func_002A8FA0, a cPS2SoundManager) and calls its Init; dtor calls its Shutdown and deletes it; [U] SetMode (cSoundSys_SetMode) calls its slot 2
     void** mVtbl;               // 0x4 [R] cSoundSys_vtbl (ctor/dtor); the classes that have it as a virtual base point it at their own copies (e.g. D_00483A60 in cBankSys)
 };
 

@@ -10,9 +10,9 @@ INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onGainFocus);
 
 INCLUDE_ASM("fe/ovstates5", func_00200AF0);
 
-INCLUDE_ASM("fe/ovstates5", func_00200B50);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_isMapEventCompleted);
 
-INCLUDE_ASM("fe/ovstates5", func_00200D00);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_isMapEventLocked);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setupMenus);
 
@@ -52,7 +52,7 @@ INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_showEventPath);
 
 INCLUDE_ASM("fe/ovstates5", func_00207430);
 
-INCLUDE_ASM("fe/ovstates5", func_002083D8);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setWidgetHiliteColor);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setWidgetUnHiliteColor);
 

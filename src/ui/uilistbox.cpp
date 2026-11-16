@@ -436,7 +436,7 @@ extern "C" void cUIMenu_setInputMap(cUIMenu* self, char value)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIMenu_getNext);
 #ifdef SKIP_ASM
-extern "C" void* func_00397870(void* list, unsigned char i);
+extern "C" void* cList_getByIndex(void* list, unsigned char i);
 
 struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
 
@@ -459,7 +459,7 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
                 sUIVtAB50* vt = *(sUIVtAB50**)(owner + 8);
                 if (vt[20].fn(owner + vt[20].delta, self, 1, i) != 0) return i;
             } else {
-                char* item = (char*)func_00397870((char*)self + 0x74, i);
+                char* item = (char*)cList_getByIndex((char*)self + 0x74, i);
                 int bits = *(int*)(item + 0x14) >> 5;
                 if ((bits & 1) == 0) return i;
             }
@@ -477,7 +477,7 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIMenu_getPrev);
 #ifdef SKIP_ASM
-extern "C" void* func_00397870(void* list, unsigned char i);
+extern "C" void* cList_getByIndex(void* list, unsigned char i);
 
 struct cUIMenu_getPrev_sVEntry {
     short delta;
@@ -507,7 +507,7 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
                     return i;
                 }
             } else {
-                void* item = func_00397870((char*)self + 0x74, i);
+                void* item = cList_getByIndex((char*)self + 0x74, i);
                 int bits = *(int*)((char*)item + 0x14);
                 if (((bits >> 5) & 1) == 0) {
                     return i;

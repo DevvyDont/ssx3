@@ -20,19 +20,19 @@ extern "C" void cBucketMan_mergeBucket(void* mgr, void* bucket);
 extern "C" void cBucketMan_purgeBucket(void* mgr, int bucket);
 extern "C" void cWorld_resetMap(void* world);
 void cReplayFramePtr_readRewind(cReplayFramePtr* p);
-void func_00317908(void* buf);
+void AIsetseed(void* buf);
 // PORT: cWorldPainterMan_reset__FPv is called without loading $a0 here.
 void cWorldPainterMan_reset_0() __asm__("cWorldPainterMan_reset__FPv");
 extern "C" void* cBE_getBE();
 extern "C" void cBE_readFromReplayFrame(void* be, void* stream);
 extern "C" void cAvalanche_readFromReplayFrame(char* stream);
-extern "C" void func_0030BD20(void* self, void* stream);
+extern "C" void cWScriptMan_readFromReplayFrame(void* self, void* stream);
 extern "C" void func_00229E58(void* self, void* stream);
 extern "C" void func_00344240(void* self, void* stream);
-extern "C" void func_00357D28(void* self, void* stream);
+extern "C" void cMultiParticleMan_readFromReplayFrame(void* self, void* stream);
 extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream);
 extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream);
-extern "C" void func_00103578(void* self, void* stream);
+extern "C" void cFocusMan_readFromReplayFrame(void* self, void* stream);
 extern "C" void cReplay_applyBucket(cReplay* self, int a);
 extern "C" void cAI_updateOverlapList(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
@@ -65,7 +65,7 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     cReplayFramePtr_readRewind((cReplayFramePtr*)stream);
     char buf[0x18];
     stream->v02(buf, 0x18);
-    func_00317908(buf);
+    AIsetseed(buf);
     int savedValue;
     stream->v02(&savedValue, 4);
     cSortObjNode_ObjNodeSortIndex = savedValue;
@@ -80,13 +80,13 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     sVtS_DBF0* vt2 = *(sVtS_DBF0**)(aiObj + 0xCC);
     vt2[8].fn(aiObj + vt2[8].delta, stream);
     cAvalanche_readFromReplayFrame((char*)stream);
-    func_0030BD20(cWScriptMan_TheWScriptMan, stream);
+    cWScriptMan_readFromReplayFrame(cWScriptMan_TheWScriptMan, stream);
     func_00229E58(D_004A2A00, stream);
     func_00344240(D_004A3FF0, stream);
-    func_00357D28(cMultiParticleMan_TheMultiParticleMan, stream);
+    cMultiParticleMan_readFromReplayFrame(cMultiParticleMan_TheMultiParticleMan, stream);
     cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
-    func_00103578(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);
+    cFocusMan_readFromReplayFrame(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);
     cReplay_applyBucket(self, 1);
     cAI_updateOverlapList(SSXApp->Game->AI);
     cGameViewMan_updateAll(SSXApp->Game->ViewMan);
@@ -321,7 +321,7 @@ struct sRdbWorld {
 
 extern char str_Dead_Object[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern "C" void* func_003506D8(void* self, void* model);
+extern "C" void* cDeadNode_cDeadNode(void* self, void* model);
 
 static inline void* refToPtrRDB(unsigned int p)
 {
@@ -350,7 +350,7 @@ struct sRdbRef {
  * Recreates the dead (removed) objects recorded in a replay stream.
  *
  * Reads an 8-byte header with the count, then for each a 4-byte world cache reference (low byte model set,
- * upper bits index); allocates a 0x1C-byte "Dead Object" and builds a cDeadNode (func_003506D8) for the
+ * upper bits index); allocates a 0x1C-byte "Dead Object" and builds a cDeadNode (cDeadNode_cDeadNode) for the
  * referenced instance.
  *
  * @param stream  the replay stream to read from
@@ -366,7 +366,7 @@ extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
     for (int i = 0; i < hdr.count; i++) {
         stream->v02(&ref, 4);
         void* mem = cMemMan_alloc(0x1C, str_Dead_Object, 0x20000000, 0);
-        func_003506D8(mem, ref.get());
+        cDeadNode_cDeadNode(mem, ref.get());
     }
 }
 #endif
@@ -434,12 +434,12 @@ INCLUDE_ASM("replay/replay", cReplay_rewindFrame);
 // PORT: func_0026E448 is declared in this unit with one parameter, but this caller
 // passes (self, index); bind the 2-arg form to the symbol.
 void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
-extern "C" int func_0026D4D8(void* stream, unsigned int pos);
+extern "C" int cReplayCache_moveTo(void* stream, unsigned int pos);
 
 
 /**
  * Moves the playback cursor back to the start of its frame: PlaybackFrame = the frame containing PlaybackTick,
- * PlaybackTick = its FrameStartTick (+0x30), and each rider input cache moves there (func_0026D4D8,
+ * PlaybackTick = its FrameStartTick (+0x30), and each rider input cache moves there (cReplayCache_moveTo,
  * cReplayCache::moveTo).
  *
  * @param self_  the replay (this; copied into a local self)
@@ -453,7 +453,7 @@ extern "C" void cReplay_rewindFrame(cReplay* self_)
     self->PlaybackTick = *(int*)((char*)frame + 0x30);
     for (i = 0; i < 2; i++) {
         if (((void**)&self->InputCache[0])[i] != 0) {
-            func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+            cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
         }
     }
 }
@@ -513,9 +513,9 @@ void* func_0026E5A8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E5C0__FPv);
+INCLUDE_ASM("replay/replay", cReplayFrameList_reset__FPv);
 #ifdef SKIP_ASM
-void func_0026E5C0(void* self)
+void cReplayFrameList_reset(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x0) = 0;
@@ -524,7 +524,7 @@ void func_0026E5C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E5D0);
+INCLUDE_ASM("replay/replay", cReplayFrameList_addFrame);
 #ifdef SKIP_ASM
 struct sReplayNode {
     char pad[0x14];
@@ -538,7 +538,7 @@ struct sReplayList {
     int count;
 };
 
-extern "C" void func_0026E5D0(sReplayList* list, sReplayNode* node)
+extern "C" void cReplayFrameList_addFrame(sReplayList* list, sReplayNode* node)
 {
     node->prev = list->tail;
     node->next = 0;

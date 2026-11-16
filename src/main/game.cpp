@@ -536,7 +536,7 @@ extern "C" void cBucketMan_renderBucket(void* self, int index);
 void func_002789C0(void* p);
 extern "C" void func_00397DF8(void* p);
 extern "C" void func_001F31E0(void* p);
-extern "C" int func_002CC098(void* p);
+extern "C" int cMenuSys_isActive(void* p);
 extern "C" void func_002CC350(void* p);
 extern "C" void func_00285BF8(void* self, int a, float dt);
 extern "C" void func_002B5D78(void* p);
@@ -580,7 +580,7 @@ extern "C" void func_0022C830(sGame_C830* self)
     func_002789C0(ScriptEngine);
     func_00397DF8(self->f48);
     func_001F31E0(self->hudTimer);
-    if (func_002CC098(self->fA4) != 0) {
+    if (cMenuSys_isActive(self->fA4) != 0) {
         func_002CC350(self->fA4);
         self->font->scale = sV2_C830(2.0f, 2.0f);
         self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
@@ -645,7 +645,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cWorldView_getNumSections(cWorldView* view);
 extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i);
 extern "C" int func_004165A8(const void* a, const void* b);
-extern "C" void* func_00144D38(void* iface, int i);
+extern "C" void* cBENewRaceInterface_getSectionFile(void* iface, int i);
 extern "C" void cSectionMan_initEventPool(void* self);
 
 static inline cWorldView* gameWorldView_22CD40(void* self)
@@ -673,7 +673,7 @@ extern "C" void cSectionMan_init(cSectionMan* self)
     cSectionMan_mSectionMap[49].field_0x4 = 0;
     for (i = 0; i < 50; i++) {
         for (j = 0; j < (unsigned int)cWorldView_getNumSections(gameWorldView_22CD40(self)); j++) {
-            void* name = func_00144D38(iface, i);
+            void* name = cBENewRaceInterface_getSectionFile(iface, i);
             if (func_004165A8(name, cWorldView_getSectionName(gameWorldView_22CD40(self), j)) == 0) {
                 cSectionMan_mSectionMap[i].field_0x4 = j;
             }
@@ -695,7 +695,7 @@ extern "C" void cSectionMan_init(cSectionMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022CEA8);
+INCLUDE_ASM("main/game", cSectionMan_load);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sGroup_CEA8 {
@@ -716,7 +716,7 @@ extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx);
 extern "C" void cSectionMan_loadMode(cSectionMan* self, int a1);
 
 // PORT: the unit's other callers declare (void*, int, char*); the body reads three ints, bound by asm label
-extern "C" void func_0022CEA8_impl(void* self, int idx, int mode) __asm__("func_0022CEA8");
+extern "C" void cSectionMan_load_impl(void* self, int idx, int mode) __asm__("cSectionMan_load");
 
 // Shared with cSectionMan_activate: true for a real section id (0x31 = no section).
 static inline bool IsSection(const int& id)
@@ -724,7 +724,7 @@ static inline bool IsSection(const int& id)
     return id != 0x31;
 }
 
-extern "C" void func_0022CEA8_impl(void* self, int idx, int mode)
+extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
 {
     int v;
     if (mode == 7) {
@@ -852,7 +852,7 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022D278);
+INCLUDE_ASM("main/game", cSectionMan_isLoaded);
 #ifdef SKIP_ASM
 struct sGroup_D278 {
     int f0;
@@ -864,10 +864,10 @@ struct sGroup_D278 {
 extern sGroup_D278 D_00442488_D278[] __asm__("D_00442488");
 extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int id);
 
-// PORT: the unit declares func_0022D278(void*) for its callers; the body reads a1, bound by asm label
-int func_0022D278_impl(void* self, int idx) __asm__("func_0022D278");
+// PORT: the unit declares cSectionMan_isLoaded(void*) for its callers; the body reads a1, bound by asm label
+int cSectionMan_isLoaded_impl(void* self, int idx) __asm__("cSectionMan_isLoaded");
 
-int func_0022D278_impl(void* self, int idx)
+int cSectionMan_isLoaded_impl(void* self, int idx)
 {
     int ok = 1;
     for (int i = 0; i < D_00442488_D278[idx].count; i++) {
@@ -895,20 +895,20 @@ int func_0022D278_impl(void* self, int idx)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", cSectionMan_isActive);
 #ifdef SKIP_ASM
-extern "C" int func_0022D278(void* self);
+extern "C" int cSectionMan_isLoaded(void* self);
 
 /**
- * Says whether a location is loaded and activated: func_0022D278 (all its sections loaded) and mbLocationIsActivated.
+ * Says whether a location is loaded and activated: cSectionMan_isLoaded (all its sections loaded) and mbLocationIsActivated.
  *
  * On Tour's isActive takes the location (eBELocationID LocationID). The C prototype here declares only @p self: the
- * location stays in $a1 and reaches func_0022D278, which reads it as its second argument.
+ * location stays in $a1 and reaches cSectionMan_isLoaded, which reads it as its second argument.
  *
  * @return 1 when the location's sections are loaded and mbLocationIsActivated is set, else 0
  */
 extern "C" int cSectionMan_isActive(cSectionMan* self)
 {
     int active = 0;
-    if (func_0022D278(self) != 0) {
+    if (cSectionMan_isLoaded(self) != 0) {
         active = self->mbLocationIsActivated != 0;
     }
     return active;
@@ -1100,7 +1100,7 @@ extern "C" void cAI_resetRidersStatTotals(void* p);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cGameModeMan_initGameMode(void* self, unsigned int type);
-extern "C" void func_00231250(void* gm, int state, int a, int b);
+extern "C" void cGame_setState(void* gm, int state, int a, int b);
 
 struct sVE_22D6C8 {
     short delta;
@@ -1171,7 +1171,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
     sVE_22D6C8* vt = *(sVE_22D6C8**)(race + 0xC);
     vt[1].fn(race + vt[1].delta);
     cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace.cGameEvent);
-    func_00231250(self->mpGame, 1, 1, 0);
+    cGame_setState(self->mpGame, 1, 1, 0);
 }
 #endif
 
@@ -1184,20 +1184,20 @@ struct cWorldView;
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 unsigned int cWorldView_getNumSections_u(cWorldView* view) __asm__("cWorldView_getNumSections__FP10cWorldView");
 int cWorldView_isSectionLoaded(cWorldView* view, int section);
-extern "C" void* func_00144D38(void* iface, int i);
-extern "C" int func_00144D50(void* iface, int i);
+extern "C" void* cBENewRaceInterface_getSectionFile(void* iface, int i);
+extern "C" int cBENewRaceInterface_getSectionType(void* iface, int i);
 extern "C" void cSectionMan_skyLoadComplete(cSectionMan* self, int v);
 extern "C" void cSectionMan_skySwap(cSectionMan* self);
 extern "C" void cSectionMan_preLoadMode(cSectionMan* self);
-void* func_0022DFD0(void* self);
+void* cSectionMan_isPreLoadModeDone(void* self);
 extern "C" void cSectionMan_changeMode(cSectionMan* self);
 extern "C" int* cSectionMan_getNextActiveEvent(void* self, int* node);
 extern "C" void cSectionMan_removeActiveEvent(void* self, int* prev, int* node);
-extern "C" void func_00230338(void* game, int section);
+extern "C" void cGame_sectionLoaded(void* game, int section);
 extern "C" void cGame_sectionUnloading(void* game, int section);
 extern "C" void cStreamMan_setBandWidthLimit(void* p, int v);
 extern "C" int cWorldView_isSectionUnLoaded(cWorldView* view, int section);
-extern "C" int func_003A98C8(cWorldView* view, int section, float f);
+extern "C" int cWorldView_loadSection(cWorldView* view, int section, float f);
 extern "C" int func_003A9958(cWorldView* view, int section);
 extern "C" void cWorldView_activateSection(cWorldView* view, int section);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -1258,7 +1258,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
         case 6:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
                 cSectionMan_mSectionMap[idx].field_0x8 = 1;
-                func_00230338(self->mpGame, section);
+                cGame_sectionLoaded(self->mpGame, section);
             } else {
                 changed = 1;
             }
@@ -1266,7 +1266,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
         case 8:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
                 cSectionMan_mSectionMap[idx].field_0x8 = 2;
-                func_00230338(self->mpGame, section);
+                cGame_sectionLoaded(self->mpGame, section);
                 cWorldView_activateSection(gameWorldView_22D8D8(self), section);
             } else {
                 changed = 1;
@@ -1281,13 +1281,13 @@ extern "C" void cSectionMan_update(cSectionMan* self)
             forceOff = 1;
             break;
         case 1:
-            if (func_00144D50(iface, idx) == 4) {
+            if (cBENewRaceInterface_getSectionType(iface, idx) == 4) {
                 cSectionMan_skyLoadComplete(self, idx);
             }
             remove = 1;
             break;
         case 2:
-            if (func_00144D50(iface, idx) == 4) {
+            if (cBENewRaceInterface_getSectionType(iface, idx) == 4) {
                 cSectionMan_skyLoadComplete(self, idx);
             }
             if (self->m_bSkySwapPending != 0) {
@@ -1312,15 +1312,15 @@ extern "C" void cSectionMan_update(cSectionMan* self)
         for (; n != 0; n = cSectionMan_getNextActiveEvent(self, n)) {
             int idx = *n;
             int section = cSectionMan_mSectionMap[idx].field_0x4;
-            sprintf(buf, str_pct_spct_s_b, fmt, func_00144D38(iface, idx));
+            sprintf(buf, str_pct_spct_s_b, fmt, cBENewRaceInterface_getSectionFile(iface, idx));
             int* state = &cSectionMan_mSectionMap[idx].field_0x8;
             if (*state == 3) {
-                if (func_003A98C8(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].field_0xc])) {
+                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].field_0xc])) {
                     changed = 1;
                     *state = 6;
                 }
             } else if (*state == 4) {
-                if (func_003A98C8(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].field_0xc])) {
+                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].field_0xc])) {
                     *state = 8;
                     changed = 1;
                     forceOff = 1;
@@ -1358,7 +1358,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     case 4:
         if (forceOff) {
             hold = 1;
-        } else if (func_0022DFD0(self) != 0) {
+        } else if (cSectionMan_isPreLoadModeDone(self) != 0) {
             cSectionMan_changeMode(self);
             self->mModeState = 0;
             self->mMode = 0;
@@ -1445,7 +1445,7 @@ public:
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00231250(void* gm, int state, int a, int b);
+extern "C" void cGame_setState(void* gm, int state, int a, int b);
 void func_00231278(void* gm, int state);
 extern int D_00535C08[];
 extern int D_004A11B8;
@@ -1456,7 +1456,7 @@ extern int D_004A11B8;
  */
 extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
 {
-    func_00231250(self->mpGame, 0xB, 0, 1);
+    cGame_setState(self->mpGame, 0xB, 0, 1);
     cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
     D_00535C08[0] = self->mBELocationID;
     D_004A11B8 = 1;
@@ -1465,14 +1465,14 @@ extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
 }
 #endif
 
-extern "C" void* func_002312D8(int);
+extern "C" void* cGame_isPreloadedStateReady(int);
 
 //100%
-INCLUDE_ASM("main/game", func_0022DFD0__FPv);
+INCLUDE_ASM("main/game", cSectionMan_isPreLoadModeDone__FPv);
 #ifdef SKIP_ASM
-void* func_0022DFD0(void* self)
+void* cSectionMan_isPreLoadModeDone(void* self)
 {
-    return func_002312D8(*(int*)((char*)self + 0x1b0));
+    return cGame_isPreloadedStateReady(*(int*)((char*)self + 0x1b0));
 }
 #endif
 
@@ -1493,7 +1493,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cSectionMan_setSky(void* self, int sky);
-extern "C" void func_00231250(void* gm, int state, int a, int b);
+extern "C" void cGame_setState(void* gm, int state, int a, int b);
 
 /**
  * Finishes an event-mode switch: sets the location's sky, resets the AI if requested (mModeReset), notifies
@@ -1506,7 +1506,7 @@ extern "C" void cSectionMan_changeMode(cSectionMan* self)
         self->mModeReset = 0;
         ((cRace22DFF0*)SSXApp->Game->AI)->v05(3);
     }
-    func_00231250(self->mpGame, 0xA, 0, 0);
+    cGame_setState(self->mpGame, 0xA, 0, 0);
 }
 #endif
 

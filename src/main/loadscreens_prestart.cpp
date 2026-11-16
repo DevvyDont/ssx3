@@ -9,7 +9,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_update);
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_00231F80(void* fade);
+extern "C" void cLoadIndicator_update(void* fade);
 extern "C" int func_00326CA0(void* pads, int port);
 extern "C" char* func_00326CC8(void* pads, int port);
 extern char* PadCache;
@@ -31,7 +31,7 @@ struct sPreStart_232348 {
 /**
  * Updates the pre-start screen: animates and fades in the load indicator and queues the init load screen.
  *
- * Steps the indicator's phase (func_00231F80) and raises its fade level (+0x4) by 1/12 per frame up to 1.
+ * Steps the indicator's phase (cLoadIndicator_update) and raises its fade level (+0x4) by 1/12 per frame up to 1.
  * When no next module is queued it creates a cInitLoadScreen ("InitLoadScreen"), keeps it at +0x8 and queues
  * it.
  *
@@ -41,7 +41,7 @@ struct sPreStart_232348 {
  */
 extern "C" void cPreStartScreen_update(sPreStart_232348* self)
 {
-    func_00231F80(SSXApp->LoadIndicator);
+    cLoadIndicator_update(SSXApp->LoadIndicator);
     float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
     *fade += 0.0833333358168602f;
     if (*fade > 1.0f) {
@@ -161,13 +161,13 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232588);
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_00231F80(void* fade);
+extern "C" void cLoadIndicator_update(void* fade);
 extern "C" void* func_00232AE0(void* self, int arg);
 extern char str_StartScreen[];
 
 extern "C" void func_00232588(void* self)
 {
-    func_00231F80(SSXApp->LoadIndicator);
+    cLoadIndicator_update(SSXApp->LoadIndicator);
     if (*(int*)((char*)self + 8) != 0) {
         float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
         *fade -= 0.0833333358168602f;
@@ -454,7 +454,7 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232930);
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_00231F80(void* fade);
+extern "C" void cLoadIndicator_update(void* fade);
 extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
 extern char str_cGameLoadScreen[];
 extern void* D_0047D788[];
@@ -474,7 +474,7 @@ struct sModule_232930 {
 extern "C" void func_00232930(void* self)
 {
     int tmp;
-    func_00231F80(SSXApp->LoadIndicator);
+    cLoadIndicator_update(SSXApp->LoadIndicator);
     tmp = *(int*)((char*)self + 4) != 0;
     if (tmp) {
         float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
@@ -511,7 +511,7 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-extern "C" void func_00231F80(void* fade);
+extern "C" void cLoadIndicator_update(void* fade);
 
 extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
 
@@ -532,7 +532,7 @@ struct sModule_232A00 {
 /**
  * Updates the pre-front-end load screen: animates and fades the load indicator and queues the front-end load.
  *
- * Steps the indicator's phase (func_00231F80); its fade level (+0x4) falls by 1/12 per frame while the word
+ * Steps the indicator's phase (cLoadIndicator_update); its fade level (+0x4) falls by 1/12 per frame while the word
  * at +0x4 is set and rises otherwise. When no next module is queued it creates a cFELoadScreen ("FELoad",
  * 0x1C bytes) and queues it.
  */
@@ -540,7 +540,7 @@ struct sModule_232A00 {
 extern "C" void cPreFELoadScreen_update(void* self)
 {
     int tmp;
-    func_00231F80(SSXApp->LoadIndicator);
+    cLoadIndicator_update(SSXApp->LoadIndicator);
     tmp = *(int*)((char*)self + 4) != 0;
     if (tmp) {
         float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
@@ -1005,7 +1005,7 @@ cBigFile* cBigFile_cBigFile1_3048(cBigFile* self, const char* path, int flags) _
 void cBigFile__cBigFile(cBigFile* self, int flags);
 void cMemMan_free(void*);
 extern "C" int cBENewRaceInterface_getLocationID(void* self);
-extern "C" char* func_003E2190(const char* name, int flags);
+extern "C" char* FILE_loadpackz(const char* name, int flags);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern signed char D_00535C11[];
 extern char str_data_ui_charpic_big[];
@@ -1053,7 +1053,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
         int* slot = (int*)(self + 0x10);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
-            char* data = func_003E2190(name, 0x3000100);
+            char* data = FILE_loadpackz(name, 0x3000100);
             *slot = loadTex_3048(data, str_CharaPics);
             if (data != 0)
                 cMemMan_free(data);
@@ -1066,7 +1066,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
         if (n > 16)
             n = 0;
         sprintf(name, str_pct_s_ssh, str_at_plus_J[n]);
-        char* data = func_003E2190(name, 0x3000100);
+        char* data = FILE_loadpackz(name, 0x3000100);
         *(int*)(self + 0x10) = loadTex_3048(data, str_coursePics);
         if (data != 0)
             cMemMan_free(data);

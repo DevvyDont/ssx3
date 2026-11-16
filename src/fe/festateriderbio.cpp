@@ -104,57 +104,57 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00194498(void* obj);
+extern "C" void DisableTextWidget(void* obj);
 extern char str_Option_2[];
 
 /**
  * Greys out "Option_2" (the cheat characters) when the character has none unlocked (+0x50 is 0).
  *
- * func_00194498 disables the widget and caps its alpha at 0.5.
+ * DisableTextWidget disables the widget and caps its alpha at 0.5.
  */
 extern "C" void cFEStateRiderDetail_onPreRender2D(void* self)
 {
     if (*(int*)((char*)self + 0x50) == 0) {
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Option_2));
         if (obj != 0) {
-            func_00194498(obj);
+            DisableTextWidget(obj);
         }
     }
 }
 #endif
 
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 
 //100%
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
- * Renders the rider-detail state's 2D layer with the shared UI-state render routine func_0039E6B8().
+ * Renders the rider-detail state's 2D layer with the shared UI-state render routine cUIState_onRender2D().
  *
- * @return no meaningful value (func_0039E6B8() returns nothing)
+ * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
 void* cFEStateRiderDetail_onRender2D(void* self)
 {
-    return func_0039E6B8(self);
+    return cUIState_onRender2D(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_0039E510(void*);
+extern "C" void cUIState_onUpdate(void*);
 extern "C" void func_00182EC0(void*);
 
 /**
  * Updates the rider-detail state: runs the base UI-state update, then poses the front-end rider model.
  *
- * func_0039E510() is the base UI-state update, which dispatches controller input to the state and its screens.
+ * cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and its screens.
  * func_00182EC0() (shared with the character-setup state) places the loaded rider model and, when the state asks
  * for it, restarts its animation.
  */
 extern "C" void cFEStateRiderDetail_onUpdate(void* self)
 {
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     func_00182EC0(self);
 }
 #endif

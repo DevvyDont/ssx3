@@ -236,7 +236,7 @@ extern "C" void func_0039F190(void* list, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* engine, int a, int b);
 extern "C" void cUIStateStack_push(void* list, void* item);
-int func_00198AE8(void* self, int idx) __asm__("func_00198AE8__FPv");
+int cFEStateRequestLine_getSongCost(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern const char str_cFEStateAudioOptions[];
 
 struct sReqLine_7500 {
@@ -313,7 +313,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
         int idx = self->list[k];
         if (!isSet_7500(self->sel, idx)) {
             if (self->f16C != 0) {
-                if (self->limit >= func_00198AE8(self, idx) || countSel_7500(self) < 6) {
+                if (self->limit >= cFEStateRequestLine_getSongCost(self, idx) || countSel_7500(self) < 6) {
                     cFEStateRequestLine_showBuyPopup_7500(self, idx);
                 }
             }
@@ -411,7 +411,7 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, u
             if (isSet_7500(self->sel, idx))
                 return 0x101;
         } else {
-            if (self->limit < func_00198AE8(self, idx)) {
+            if (self->limit < cFEStateRequestLine_getSongCost(self, idx)) {
                 if (countSel_7500(self) >= 6)
                     goto ret10;
             }
@@ -886,7 +886,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-int func_00198AE8(void* self);
+int cFEStateRequestLine_getSongCost(void* self);
 extern char str_kT_HELPAudio1SongMin[];
 extern char str_kT_HELPAUDIOAddRem[];
 extern char str_kT_HELPAUDIOAvailBuy[];
@@ -941,7 +941,7 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* requestLine, int idx)
             cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_HELPAUDIOAddRem));
         }
     } else if (self->f16C != 0) {
-        if (self->count >= func_00198AE8(self) || countSel_001981F8(self) < 6) {
+        if (self->count >= cFEStateRequestLine_getSongCost(self) || countSel_001981F8(self) < 6) {
             cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_HELPAUDIOAvailBuy));
         } else {
             cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_16SaveMoreCarsh));
@@ -966,7 +966,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-int func_00198AE8_UBT(void* self, int idx) __asm__("func_00198AE8__FPv");
+int cFEStateRequestLine_getSongCost_UBT(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern char D_004A1390[];
 extern char str_kT_BTNRemSong[];
 extern char str_kT_BTNAddSong[];
@@ -1051,7 +1051,7 @@ extern "C" void cFEStateRequestLine_updateButtonsText(void* requestLine, int idx
                 cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(str_kT_BTNAddSong));
             }
         } else if (self->f16C != 0) {
-            if (self->count >= func_00198AE8_UBT(self, idx) || countSel_UBT(self) < 6) {
+            if (self->count >= cFEStateRequestLine_getSongCost_UBT(self, idx) || countSel_UBT(self) < 6) {
                 shown = 1;
                 cUIText_setUnicodeStringByID((cUIText*)self->text, GetHashValue32(str_kT_16BuyMusicTracks));
             }
@@ -1153,8 +1153,8 @@ extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_00198AB8(void* self, int i);
-// PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
-int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
+// PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
+int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern "C" const char* getDollarString(void* a0);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -1200,7 +1200,7 @@ struct sReqLine_1986D0 {
  * Shows the highlighted song's artist line and its price.
  *
  * "song by" gets kT_OVRCMNSongBy with the artist (func_00198AB8). The cost text is empty for an owned song,
- * kT_OVRCMNFree while fewer than 6 are owned, else the price (func_00198AE8, always $5000); the cost icon
+ * kT_OVRCMNFree while fewer than 6 are owned, else the price (cFEStateRequestLine_getSongCost, always $5000); the cost icon
  * shows only in the store.
  *
  * @param vself  the cFEStateRequestLine
@@ -1243,7 +1243,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
             self->icon->show(1);
         }
     } else {
-        cUIText_setAsciiString(self->info, getDollarString((void*)func_00198AE8_2(self, idx)));
+        cUIText_setAsciiString(self->info, getDollarString((void*)cFEStateRequestLine_getSongCost_2(self, idx)));
         if (self->enabled) {
             self->icon->show(1);
         }
@@ -1293,8 +1293,8 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_showBuyPopup);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
 extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i);
-// PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
-int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
+// PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
+int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3);
 extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int credit);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
@@ -1314,7 +1314,7 @@ struct sMsgCenter_98988 {
 /**
  * Opens the buy popup (cUIStateBuyPopup) for a song.
  *
- * With 6 or more songs owned it is a cash purchase (price from func_00198AE8, cash +0x168); otherwise it uses
+ * With 6 or more songs owned it is a cash purchase (price from cFEStateRequestLine_getSongCost, cash +0x168); otherwise it uses
  * one of the remaining free credits (6 - owned).
  *
  * @param idx  song index
@@ -1328,7 +1328,7 @@ extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx
     }
     int song = (int)cFEStateRequestLine_getSongTitle(self, idx);
     if (n >= 6) {
-        int cost = func_00198AE8_2(self, idx);
+        int cost = cFEStateRequestLine_getSongCost_2(self, idx);
         cBuyPopupInfo_initBuySong((int*)(popup + 0x48), song, cost, self->price);
     } else {
         cBuyPopupInfo_initBuySongByCredit(popup + 0x48, song, 6 - n);
@@ -1368,9 +1368,9 @@ extern "C" void* func_00198AB8(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198AE8__FPv);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongCost__FPv);
 #ifdef SKIP_ASM
-int func_00198AE8(void* self)
+int cFEStateRequestLine_getSongCost(void* self)
 {
     return 0x1388;
 }

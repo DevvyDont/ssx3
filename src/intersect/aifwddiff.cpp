@@ -285,11 +285,11 @@ extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* s
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327DA8);
+INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_Load);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 
-extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
+extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int a2)
 {
     if (buf == 0) {
         return 0;
@@ -334,7 +334,7 @@ extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327F18);
 #ifdef SKIP_ASM
-extern "C" int func_0032DF28(void* self);
+extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032CDB0(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
 
 struct sSphere_27F18 {
@@ -355,7 +355,7 @@ extern "C" int func_00327F18(void* self, sShape_27F18* shape, int outPush, int o
 {
     void* tree = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)tree + 8) != 0) {
-        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
+        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
     if (func_0032CDB0(self, shape->pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->radius) == 0) {
         return 0;
@@ -373,10 +373,10 @@ extern "C" int func_00327F18(void* self, sShape_27F18* shape, int outPush, int o
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328030);
+INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_Is2SidedTriCollision);
 #ifdef SKIP_ASM
 extern "C" float func_0032C590(void* self);
-extern "C" int func_0032CA78(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6);
+extern "C" int SphereTree_IsTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6);
 
 struct sVec4_28030 {
     float x, y, z, w;
@@ -432,7 +432,7 @@ static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
     return r;
 }
 
-extern "C" int func_00328030(void* self, sVec4_28030* p, void* a2, void* a3, sVec4_28030* dir, void* a5, void* a6)
+extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* p, void* a2, void* a3, sVec4_28030* dir, void* a5, void* a6)
 {
     float dot;
     {
@@ -444,9 +444,9 @@ extern "C" int func_00328030(void* self, sVec4_28030* p, void* a2, void* a3, sVe
     }
     if (dot < 0.0f) {
         sVec4_28030 nd = vu0Scale_28030(*dir, -1.0f);
-        return func_0032CA78(self, p, a2, a3, &nd, a5, a6);
+        return SphereTree_IsTriCollision(self, p, a2, a3, &nd, a5, a6);
     }
-    return func_0032CA78(self, p, a2, a3, dir, a5, a6);
+    return SphereTree_IsTriCollision(self, p, a2, a3, dir, a5, a6);
 }
 #endif
 
@@ -460,7 +460,7 @@ extern "C" void func_00328170(void *octree) {
 
     temp_4 = (*(void **)((char*)(octree) + (0x98)));
     if ((*(int *)((char*)(temp_4) + (8))) != 0) {
-        (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0x28))) = func_0032DF28(temp_4);
+        (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0x28))) = SphereTree_AllocBuf(temp_4);
     }
     func_003281D0(octree, (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0xC))), (char*)octree + 0x80, 0, 0);
 }
@@ -622,7 +622,7 @@ extern "C" int func_00328360(sCell_00328360* cell, sBox_00328360* box)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_003284B8);
+INCLUDE_ASM("intersect/aifwddiff", nash_Cell_remnode);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
@@ -662,7 +662,7 @@ struct sCell_003284B8 {
     int x, y, z;
 };
 
-extern "C" void func_003284B8(sNode_003284B8* node, int idx, sItem_003284B8* item, const sCell_003284B8* target,
+extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8* item, const sCell_003284B8* target,
                               const sCell_003284B8* cur)
 {
     int lv = cur->level;
@@ -680,7 +680,7 @@ extern "C" void func_003284B8(sNode_003284B8* node, int idx, sItem_003284B8* ite
     c.y = cur->y * 2 + dy;
     c.z = cur->z * 2 + dz;
     sNode_003284B8** ch = &node->child[dx][dy][dz];
-    func_003284B8(*ch, idx, item, target, &c);
+    nash_Cell_remnode(*ch, idx, item, target, &c);
     if ((*ch)->empty()) {
         operator_delete((int*)*ch);
         *ch = 0;
@@ -689,7 +689,7 @@ extern "C" void func_003284B8(sNode_003284B8* node, int idx, sItem_003284B8* ite
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328660);
+INCLUDE_ASM("intersect/aifwddiff", nash_Cell_addnode);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -721,7 +721,7 @@ struct sCell_00328660 {
     int x, y, z;
 };
 
-extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* at)
+extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* at)
 {
     sCell_00328660 cur = *at;
     while (cur.level != target->level) {
@@ -744,19 +744,19 @@ extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* ite
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328808);
+INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
 #ifdef SKIP_ASM
-extern "C" void func_00328808(sNode_003284B8* node, int type, sItem_00328660* item, sCell_00328660* oldkey,
+extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_00328660* item, sCell_00328660* oldkey,
                               sCell_00328660* newkey, sCell_00328660* mykey)
 {
     if (newkey->level == mykey->level) {
-        func_003284B8(node, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)mykey);
+        nash_Cell_remnode(node, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)mykey);
         ((sList_00328660*)&node->lists[type])->push(item);
         return;
     }
     if (oldkey->level == mykey->level) {
         node->lists[type].remove((sItem_003284B8*)item);
-        func_00328660((sNode_00328660*)node, type, item, newkey, mykey);
+        nash_Cell_addnode((sNode_00328660*)node, type, item, newkey, mykey);
         return;
     }
     int olds = mykey->level - oldkey->level - 1;
@@ -774,7 +774,7 @@ extern "C" void func_00328808(sNode_003284B8* node, int type, sItem_00328660* it
         childkey.y = mykey->y * 2 + newcy;
         childkey.z = mykey->z * 2 + newcz;
         sNode_003284B8*& child = node->child[newcx][newcy][newcz];
-        func_00328808(child, type, item, oldkey, newkey, &childkey);
+        nash_Cell_movenode(child, type, item, oldkey, newkey, &childkey);
         return;
     }
     sCell_00328660 oldchildkey;
@@ -783,7 +783,7 @@ extern "C" void func_00328808(sNode_003284B8* node, int type, sItem_00328660* it
     oldchildkey.y = mykey->y * 2 + oldcy;
     oldchildkey.z = mykey->z * 2 + oldcz;
     sNode_003284B8*& oldchild = node->child[oldcx][oldcy][oldcz];
-    func_003284B8(oldchild, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)&oldchildkey);
+    nash_Cell_remnode(oldchild, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)&oldchildkey);
     if (oldchild->empty()) {
         operator_delete((int*)oldchild);
         oldchild = 0;
@@ -797,12 +797,12 @@ extern "C" void func_00328808(sNode_003284B8* node, int type, sItem_00328660* it
     if (newchild == 0) {
         newchild = (sNode_003284B8*)new (str_Cell, 0x20000000, 0) sNode_00328660;
     }
-    func_00328660((sNode_00328660*)newchild, type, item, newkey, &newchildkey);
+    nash_Cell_addnode((sNode_00328660*)newchild, type, item, newkey, &newchildkey);
 }
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328C20);
+INCLUDE_ASM("intersect/aifwddiff", nash_Octant_addnode);
 #ifdef SKIP_ASM
 struct sNode_8C20 {
     sNode_8C20* child[2][2][2];         // 0x00
@@ -845,7 +845,7 @@ static inline sCell_00328660 Parent_8C20(const sCell_00328660& c)
     return r;
 }
 
-extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_00328660* cell)
+extern "C" void nash_Octant_addnode(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_00328660* cell)
 {
     sNode_8C20** pn = &root->node;
     if (root->node == 0) {
@@ -862,12 +862,12 @@ extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, s
         root->cell = nc;
         root->node = n;
     }
-    func_00328660((sNode_00328660*)root->node, idx, item, cell, &root->cell);
+    nash_Cell_addnode((sNode_00328660*)root->node, idx, item, cell, &root->cell);
 }
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328F28);
+INCLUDE_ASM("intersect/aifwddiff", nash_Nash_findkey);
 #ifdef SKIP_ASM
 struct sVec4_8F28 {
     float x, y, z, w;
@@ -949,7 +949,7 @@ static inline sCell_8F28 Parent_8F28(const sCell_8F28& c)
     return r;
 }
 
-extern "C" void func_00328F28(sCell_8F28* c, sBox_8F28* b)
+extern "C" void nash_Nash_findkey(sCell_8F28* c, sBox_8F28* b)
 {
     sVec4_8F28 size = vu0Sub_8F28(b->max, b->min);
     sVec4_8F28 center = vu0Add_8F28(b->min, vu0Scale_8F28(size, 0.5f));
@@ -998,8 +998,8 @@ extern "C" void func_00328F28(sCell_8F28* c, sBox_8F28* b)
 INCLUDE_ASM("intersect/aifwddiff", nash_Nash_movenode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00328808_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, sCell_00328660* from,
-                              sCell_00328660* to, sRoot_8C20* root) __asm__("func_00328808");
+extern "C" void nash_Cell_movenode_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, sCell_00328660* from,
+                              sCell_00328660* to, sRoot_8C20* root) __asm__("nash_Cell_movenode");
 
 static inline int Equal_91E0(const sCell_8F28& a, const sCell_8F28& b)
 {
@@ -1008,7 +1008,7 @@ static inline int Equal_91E0(const sCell_8F28& a, const sCell_8F28& b)
 
 static inline void Remove_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_8F28* from)
 {
-    func_003284B8((sNode_003284B8*)root->node, idx, (sItem_003284B8*)item, (sCell_003284B8*)from,
+    nash_Cell_remnode((sNode_003284B8*)root->node, idx, (sItem_003284B8*)item, (sCell_003284B8*)from,
                   (sCell_003284B8*)root);
     if (((sNode_003284B8*)root->node)->empty()) {
         operator_delete((int*)root->node);
@@ -1020,9 +1020,9 @@ static inline void Move_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sC
 {
     if (!Contains_8C20(root->cell, *(sCell_00328660*)to)) {
         Remove_91E0(root, idx, item, from);
-        func_00328C20(root, idx, item, (sCell_00328660*)to);
+        nash_Octant_addnode(root, idx, item, (sCell_00328660*)to);
     } else {
-        func_00328808_91E0((sNode_003284B8*)root->node, idx, item, (sCell_00328660*)from, (sCell_00328660*)to, root);
+        nash_Cell_movenode_91E0((sNode_003284B8*)root->node, idx, item, (sCell_00328660*)from, (sCell_00328660*)to, root);
     }
 }
 
@@ -1044,8 +1044,8 @@ extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_003
 {
     sCell_8F28 oc;
     sCell_8F28 nc;
-    func_00328F28(&oc, oldBox);
-    func_00328F28(&nc, box);
+    nash_Nash_findkey(&oc, oldBox);
+    nash_Nash_findkey(&nc, box);
     if (Equal_91E0(nc, oc)) {
         return;
     }
@@ -1057,7 +1057,7 @@ extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_003
     unsigned int oz = (unsigned int)oc.z >> 31;
     if (nx != ox || ny != oy || nz != oz) {
         Remove_91E0(&roots[ox][oy][oz], idx, item, &oc);
-        func_00328C20(&roots[nx][ny][nz], idx, item, (sCell_00328660*)&nc);
+        nash_Octant_addnode(&roots[nx][ny][nz], idx, item, (sCell_00328660*)&nc);
     } else {
         Move_91E0(&roots[nx][ny][nz], idx, item, &oc, &nc);
     }

@@ -126,7 +126,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
-extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
+extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, void* engine, int a2, unsigned char mask);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 struct cUIScreen;
@@ -155,7 +155,7 @@ struct sVE_1F3A38p {
  *
  * Only event 5, and only for options enabled in D_00441AF8. Until bToNextState (0x4C) is set, option 0 and
  * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path 0x10 or 6 at
- * 0x50). Option 8 sets the custom interface's +0xC to 0x27 and pushes a cFEStateProfileLoad (func_0018ECA0,
+ * 0x50). Option 8 sets the custom interface's +0xC to 0x27 and pushes a cFEStateProfileLoad (cFEStateProfileLoad_cFEStateProfileLoad,
  * mode 3); any other plays "TransitionOut" and pushes the custom interface's getNextState for the option. BE
  * interface 4 is fetched first and its result ignored.
  *
@@ -198,7 +198,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
     if (k == 8) {
         *(int*)(**(char***)(self + 0x10) + 0xC) = 0x27;
         void* mem = cMemMan_alloc(0x280, str_cFEStateProfileLoad_b, 0, 0);
-        void* newState = func_0018ECA0(mem, *(void**)(self + 0x10), 3, 1 << *(signed char*)(self + 0x14));
+        void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, *(void**)(self + 0x10), 3, 1 << *(signed char*)(self + 0x14));
         cUIStateStack_push(*(char**)(self + 0x10) + 0x18, newState);
         return;
     }
@@ -246,10 +246,10 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
-extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
+extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, void* engine, int a2, unsigned char mask);
 extern "C" void func_0039F190(void* list, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern "C" void func_0039F4C0(void* list, void* item);
+extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 extern "C" void cUIStateStack_pushSpecial(void* list, void* item, int a2, int a3);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIScreen;
@@ -316,7 +316,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
             sVE_1F3CF0p* vt = *(sVE_1F3CF0p**)(obj + 4);
             void* nextState = vt[4].fn(obj + vt[4].delta, self, 6);
             if (nextState != 0) {
-                func_0039F4C0(*(char**)(self + 0x10) + 0x18, nextState);
+                cUIStateStack_pushCheck(*(char**)(self + 0x10) + 0x18, nextState);
             }
             break;
         }
@@ -334,7 +334,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
         switch (*(int*)(self + 0x50)) {
         case 0x10: {
             void* mem = cMemMan_alloc(0x280, str_cFEStateProfileLoad_b, 0x100, 0);
-            char* newState = (char*)func_0018ECA0(mem, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
+            char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
             *(int*)(newState + 0x27C) = 1;
             *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, newState, 0, 1);
@@ -342,7 +342,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
         }
         case 0x11: {
             void* mem = cMemMan_alloc(0x280, str_cFEStateProfileLoad_b, 0x100, 0);
-            char* newState = (char*)func_0018ECA0(mem, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
+            char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
             *(int*)(newState + 0x27C) = 2;
             *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, newState, 0, 1);
@@ -540,13 +540,13 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00194498(void* obj);
+extern "C" void DisableTextWidget(void* obj);
 extern char str_Option_3_b[];
 
 /**
  * Greys out "Option_3" (the cheat-character option) before each draw when no cheat character is unlocked.
  *
- * When 0x48 (On Tour mbCheatCharEnable) is 0, func_00194498() makes the widget static and caps its alpha at
+ * When 0x48 (On Tour mbCheatCharEnable) is 0, DisableTextWidget() makes the widget static and caps its alpha at
  * 0.5.
  */
 extern "C" void cFEStateLodgeRiderDetail_onPreRender2D(void* self)
@@ -554,7 +554,7 @@ extern "C" void cFEStateLodgeRiderDetail_onPreRender2D(void* self)
     if (*(int*)((char*)self + 0x48) == 0) {
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Option_3_b));
         if (obj != 0) {
-            func_00194498(obj);
+            DisableTextWidget(obj);
         }
     }
 }

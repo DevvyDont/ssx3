@@ -118,7 +118,7 @@ extern "C" void* func_0018C0E8(void* self, void* owner);
 extern "C" void* func_0018C658(void* self, void* owner);
 extern "C" void* func_00185A18(void* self, void* owner);
 extern "C" void* func_0018D7F0(void* self, void* owner, int a, int b, int c);
-extern "C" void* func_0018ECA0(void* self, void* owner, int a, int b);
+extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, void* owner, int a, int b);
 extern "C" void* func_001F4728(void* self, void* owner);
 extern "C" void* func_00183A98(void* self, void* owner, int a);
 extern "C" void* func_001F54B0(void* self, void* owner);
@@ -397,7 +397,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         {
             int hi = pData >> 8;
             int lo = pData & 0xFF;
-            return func_0018ECA0(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0, 0), *self, hi, lo);
+            return cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0, 0), *self, hi, lo);
         }
     case 8:
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1197,7 +1197,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_00231D18(void* self);
+extern "C" void cFadeScreen_update(void* self);
 extern "C" void* func_002533C8(void* mem);
 extern "C" void* func_0028B180();
 extern "C" void func_002B3A70(void* p);
@@ -1205,7 +1205,7 @@ extern "C" void func_002B3A98(void* p);
 extern "C" void func_00253390(void* self);
 extern "C" int func_002534A8(void* p, void* q);
 extern "C" int func_00253860(void* self);
-extern "C" void func_00253938(void* self);
+extern "C" void cMoviePlayer_asyncUpdate(void* self);
 extern "C" void func_00253418(void* p, int a1);
 int func_00289DE0(void* self);
 void* cInput_getState(void* self, int a1);
@@ -1243,7 +1243,7 @@ struct sVE_27A0 {
 extern "C" void func_001A27A0(char* self)
 {
     if (*(int*)(self + 0xB5ADC) != 0) return;
-    func_00231D18(self);
+    cFadeScreen_update(self);
     if (*(void**)(self + 0xB5AD4) == 0) {
         if (cRealFE_mMovieList != 0) {
             *(void**)(self + 0xB5AD4) = func_002533C8(cMemMan_alloc(0x44, str_MoviePlayer, 0x100, 0));
@@ -1282,7 +1282,7 @@ extern "C" void func_001A27A0(char* self)
     {
     int done = **(int**)(self + 0xB5AD4);
     if (done == 0) {
-        func_00253938(*(void**)(self + 0xB5AD4));
+        cMoviePlayer_asyncUpdate(*(void**)(self + 0xB5AD4));
         if (*(int*)(self + 0xB5AD8) != 0) {
             for (int i = 0; i < 2; i++) {
                 void** p = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
@@ -1513,39 +1513,39 @@ INCLUDE_ASM("fe/fereal", func_001A2E58);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void* snd, int a1);
+extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
 extern "C" void func_001A2E58(void* self, int sel)
 {
     switch (sel) {
     case 1:
-        func_00294F78(func_0028B180(), 2);
+        cSSXAudio_MenuSound(func_0028B180(), 2);
         break;
     case 2:
-        func_00294F78(func_0028B180(), 3);
+        cSSXAudio_MenuSound(func_0028B180(), 3);
         break;
     case 3:
-        func_00294F78(func_0028B180(), 1);
+        cSSXAudio_MenuSound(func_0028B180(), 1);
         break;
     case 4:
-        func_00294F78(func_0028B180(), 4);
+        cSSXAudio_MenuSound(func_0028B180(), 4);
         break;
     case 5:
-        func_00294F78(func_0028B180(), 0);
+        cSSXAudio_MenuSound(func_0028B180(), 0);
         break;
     case 6:
-        func_00294F78(func_0028B180(), 0);
+        cSSXAudio_MenuSound(func_0028B180(), 0);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2F38);
+INCLUDE_ASM("fe/fereal", cOVSound_cOVSound);
 #ifdef SKIP_ASM
 void* func_0039E288(void* self);
 extern void* D_00469318[];
 
-extern "C" void* func_001A2F38(void* self)
+extern "C" void* cOVSound_cOVSound(void* self)
 {
     func_0039E288(self);
     *(void***)self = D_00469318;
@@ -1559,27 +1559,27 @@ INCLUDE_ASM("fe/fereal", func_001A2F70);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void* snd, int a1);
+extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
 extern "C" void func_001A2F70(void* self, int sel)
 {
     switch (sel) {
     case 1:
-        func_00294F78(func_0028B180(), 11);
+        cSSXAudio_MenuSound(func_0028B180(), 11);
         break;
     case 2:
-        func_00294F78(func_0028B180(), 12);
+        cSSXAudio_MenuSound(func_0028B180(), 12);
         break;
     case 3:
-        func_00294F78(func_0028B180(), 10);
+        cSSXAudio_MenuSound(func_0028B180(), 10);
         break;
     case 4:
-        func_00294F78(func_0028B180(), 13);
+        cSSXAudio_MenuSound(func_0028B180(), 13);
         break;
     case 5:
-        func_00294F78(func_0028B180(), 9);
+        cSSXAudio_MenuSound(func_0028B180(), 9);
         break;
     case 6:
-        func_00294F78(func_0028B180(), 9);
+        cSSXAudio_MenuSound(func_0028B180(), 9);
         break;
     }
 }

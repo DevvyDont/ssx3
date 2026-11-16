@@ -275,14 +275,14 @@ extern "C" void cWipeoutMotion_step(int* self)
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolve);
 #ifdef SKIP_ASM
 extern "C" void func_00137138();
-extern "C" void func_00138640(void*);
-extern "C" void func_00137860(void*);
+extern "C" void cWipeoutMotion_resolveGroundMotion(void*);
+extern "C" void cWipeoutMotion_resolveAirMotion(void*);
 
 /**
  * Resolves the wipeout's collisions for this tick: the thrown board, then the rider on the ground or in the
  * air.
  *
- * Calls func_00137138 (the board against the world), then func_00138640 for WMS_Ground or func_00137860 for
+ * Calls func_00137138 (the board against the world), then cWipeoutMotion_resolveGroundMotion for WMS_Ground or cWipeoutMotion_resolveAirMotion for
  * WMS_Air. func_00137138 is declared without arguments here but still receives self.
  */
 extern "C" void cWipeoutMotion_resolve(int* self)
@@ -290,11 +290,11 @@ extern "C" void cWipeoutMotion_resolve(int* self)
     func_00137138();
     if (*self == 0)
     {
-        func_00138640(self);
+        cWipeoutMotion_resolveGroundMotion(self);
     }
     else
     {
-        func_00137860(self);
+        cWipeoutMotion_resolveAirMotion(self);
     }
 }
 #endif
@@ -514,7 +514,7 @@ struct sSeg_137138 {
 };
 
 
-extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self);
@@ -621,7 +621,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
     cWipeoutMotion_updateBoardSphereTree((cWipeoutMotion*)((char*)self));
     sHit_137138 hit;
     sSphere_137138 sph;
-    func_0032F650(&sph, ((void*)self->BoardSphereTree), 1);
+    cWorldRider_cWorldRider(&sph, ((void*)self->BoardSphereTree), 1);
     sSeg_137138 seg(sph.v30, sph.v20);
     (*(sSeg_137138*)&self->BoardIntersectBox) = seg;
     float d = func_00336850_137138(SSXApp->Game->BXNash, &sph, &hit, 0);
@@ -787,7 +787,7 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137750);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
-extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
+extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 
 struct sVec4W7 {
@@ -812,7 +812,7 @@ extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
 {
     char* rider = (char*)wipeoutMotion->mRider;
     float dt = *(float*)(rider + 0x300) * 0.01666666753590107f;
-    func_00113648(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, dt);
+    cAirPredictor_updateFlightPath(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, dt);
     int st = *(int*)(*(char**)((char*)wipeoutMotion->mRider + 0x788) + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
@@ -836,7 +836,7 @@ extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137860);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolveAirMotion);
 #ifdef SKIP_ASM
 // self is a cWipeoutMotion (no header yet); +0x40 is its cRider virtual-base pointer, +0x0 its state.
 struct sHit_137860 {
@@ -856,7 +856,7 @@ struct sSphere_137860 {
 struct sVEntR_137860 { short delta; short index; bool (*fn)(void*); };
 struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
-extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
@@ -865,7 +865,7 @@ void func_00113998_137860(void* ap, void* pos, void* vel) __asm__("func_00113998
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void cRider_updateBoundBox(void* rider, int a1);
-extern "C" void func_00105398(void* rider, int a1);
+extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -953,14 +953,14 @@ static inline bool isHuman_137860(cRider* rider)
 
 #define RIDER (*(cRider**)(self + 0x40))
 
-extern "C" void func_00137860(void* vself)
+extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
 {
     char* self = (char*)vself;
     sHit_137860 hitA;
     sSphere_137860 sph;
     sHit_137860 hitB;
     cRider* rider = RIDER;
-    func_0032F650(&sph, rider->mSphereTree, !isHuman_137860(rider));
+    cWorldRider_cWorldRider(&sph, rider->mSphereTree, !isHuman_137860(rider));
     float d = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (d >= 0.0f)
     {
@@ -1020,7 +1020,7 @@ extern "C" void func_00137860(void* vself)
         }
     }
     cRider_updateBoundBox(RIDER, 0);
-    func_00105398(RIDER, 0);
+    cRider_checkObjectCollisions(RIDER, 0);
     cRider_checkOpponentCollisions(RIDER);
     cWorldRider__cWorldRider(&sph, 2);
 }
@@ -1059,7 +1059,7 @@ struct sMat_137D18 {
 struct sVEntH_137D18 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
 extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
-extern "C" int func_00311AE8(void*, int);
+extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" int cRider_checkForReset(void* rider, int a, int b);
@@ -1297,8 +1297,8 @@ extern "C" void func_00137D18(void* vself)
     float tl = vu0Length_137D18(tang);
     float fric = curve_137D18(mat, tl * 0.035999998450279236f) * 3.0f + 1.5f;
     if (tl < 1111.111083984375f
-        && (RIDER->mUseRootPoseOverride != 0 || func_00311AE8(RIDER->mRiderAnim, 2) == 0x1D
-            || func_00311AE8(RIDER->mRiderAnim, 2) == 0x19)) {
+        && (RIDER->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 0x1D
+            || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 0x19)) {
         float q = 1.0f - tl * 0.0009000000427477062f;
         q *= q;
         q *= q;
@@ -1367,7 +1367,7 @@ extern "C" void func_00137D18(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138640);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolveGroundMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sHit_138640 {
@@ -1391,11 +1391,11 @@ struct sSphere_138640 {
 
 struct sVEntH_138640 { short delta; short index; void (*fn)(void*, void*); };
 
-extern "C" void* func_0032F650(void* self, void* tree, int flag);
+extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, const t4Vector& v);
-extern "C" void func_00105398(void* rider, int a1);
+extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern t4Vector D_004FF120_138640 __asm__("t4vect_Zero");
 
@@ -1513,12 +1513,12 @@ static inline float clamp_138640(float v, float lo, float hi)
 
 #define RIDER (*(cRider**)(self + 0x40))
 
-extern "C" void func_00138640(void* vself)
+extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
 {
     char* self = (char*)vself;
     sHit_138640 hit;
     sSphere_138640 sph;
-    func_0032F650(&sph, RIDER->mSphereTree, 1);
+    cWorldRider_cWorldRider(&sph, RIDER->mSphereTree, 1);
     sph.f8 = 1;
     sph.dir = RIDER->mGroundNormal;
     float d = func_003342D0(RIDER->mOverlapList, &sph, &hit, (int)RIDER->mWallHint);
@@ -1545,7 +1545,7 @@ extern "C" void func_00138640(void* vself)
         }
     }
     cRider_updateBoundBox(RIDER, 0);
-    func_00105398(RIDER, 0);
+    cRider_checkObjectCollisions(RIDER, 0);
     cRider_checkOpponentCollisions(RIDER);
     if (*(int*)(self + 0x4) != 0) {
         *(int*)(self + 0x4) = 0;

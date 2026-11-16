@@ -8,11 +8,11 @@
 // No vtable, no base class. EA's source: d:/ssx/code/source/world/worldview.cpp and ../source/world/worldview.h
 // (preview assert strings). Retail splits it over two units:
 //   world/worldcache (0x003A8F80-0x003A9800): cWorldView_cWorldView, cWorldView__cWorldView, cWorldView_init,
-//     cWorldView_purge, func_003A9188 (reset), cWorldView_update, func_003A9558 (recursiveFlushPages),
-//     func_003A95C0 (recursiveIsEmptyPages), func_003A9658 (setFocus), cWorldView_getFocus (getFocus),
+//     cWorldView_purge, cWorldView_reset (reset), cWorldView_update, func_003A9558 (recursiveFlushPages),
+//     func_003A95C0 (recursiveIsEmptyPages), cWorldView_setFocus (setFocus), cWorldView_getFocus (getFocus),
 //     cWorldView_getTestFocus (getTestFocus);
 //   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, cWorldView_getSectionName (getSectionName),
-//     cWorldView_isSectionLoaded, cWorldView_isSectionUnLoaded (isSectionUnLoaded), func_003A98C8 (loadSection),
+//     cWorldView_isSectionLoaded, cWorldView_isSectionUnLoaded (isSectionUnLoaded), cWorldView_loadSection (loadSection),
 //     func_003A9958 (unloadSection), cWorldView_activateSection (activateSection), func_003A9A48 (deactivateSection),
 //     func_003A9A90 (getWorldBoundBox), cWorldView_getHull (getHull), func_003A9AB0 (getNumHull),
 //     func_003A9AC0 (isBoxValid), func_003A9BB8 (recursiveIsValid), func_003A9D60 (refreshStreamFocus),
@@ -28,7 +28,7 @@
 //   [P] the July 2003 preview's assert strings in worldview.cpp/worldview.h ("mp_Hdr && (id <
 //       mp_Hdr->m_uiNumSections)", "mp_WorldCache->isPageEmpty(mp_Section[i].m_BSP.m_iGlobalHull)",
 //       "mp_Hdr && (uiIdx<mp_Hdr->m_uiNumBSPHulls)");
-//   [R] retail's init (cWorldView_init) and reset (func_003A9188);
+//   [R] retail's init (cWorldView_init) and reset (cWorldView_reset);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [P], [R] or [U].
 // Section states (On Tour eSectionState): 0 Empty, 1 LoadQueue, 2 Loading, 3 UnLoadQueue, 4 UnLoading, 5 Loaded,
@@ -130,7 +130,7 @@ CHECK_OFFSET(tBoundBox, MaxPoint, 0x10);
 CHECK_SIZE(tBoundBox, 0x20);
 
 // One stream focus (On Tour tStreamFocusInfo). On Tour packs m_bActive/m_bFocusUpdate into bytes 0/1 and puts
-// m_iFocusTick at 4; retail keeps each bool a word: reset (func_003A9188) clears 0x0, setFocus stores 1 to 0x4 and
+// m_iFocusTick at 4; retail keeps each bool a word: reset (cWorldView_reset) clears 0x0, setFocus stores 1 to 0x4 and
 // 0 to 0x8, refreshStreamFocus stores the frame to 0x8 and 0 to 0x4.
 struct tStreamFocusInfo {
     int m_bActive;                  // 0x00 [O] (a bool); [R] reset = 0; [U] getFocus/getTestFocus/refreshStreamFocus

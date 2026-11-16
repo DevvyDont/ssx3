@@ -257,9 +257,9 @@ extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* data)
 #endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014E048);
+INCLUDE_ASM("be/be", cBE_getDataSize);
 #ifdef SKIP_ASM
-extern "C" int func_0014E048()
+extern "C" int cBE_getDataSize()
 {
     return 0xBB78;
 }
@@ -269,28 +269,28 @@ extern "C" int func_0014E048()
 INCLUDE_ASM("be/be", func_0014E050);
 #ifdef SKIP_ASM
 extern "C" void func_0014A188(void* buf);
-// PORT: func_0014E048 is declared () in this unit but called with the BE object here.
-int func_0014E048_self(void* be) __asm__("func_0014E048");
+// PORT: cBE_getDataSize is declared () in this unit but called with the BE object here.
+int cBE_getDataSize_self(void* be) __asm__("cBE_getDataSize");
 extern "C" int func_003E62D0(void* buf, int size, int seed);
 extern "C" void* memcpy(void*, const void*, unsigned int);
 
 extern "C" void func_0014E050(void* self, char* buf)
 {
     func_0014A188(buf);
-    int crc = func_003E62D0(buf, func_0014E048_self(self) - 4, 0xFBEA);
-    char* crcSlot = buf + (func_0014E048_self(self) - 4);
+    int crc = func_003E62D0(buf, cBE_getDataSize_self(self) - 4, 0xFBEA);
+    char* crcSlot = buf + (cBE_getDataSize_self(self) - 4);
     memcpy(crcSlot, &crc, 4);
 }
 #endif
 
-extern "C" void* func_0014A5E0(int);
+extern "C" void* cBELibrary_readFromData(int);
 
 //100%
-INCLUDE_ASM("be/be", func_0014E0C0__FPvi);
+INCLUDE_ASM("be/be", cBE_readFromData__FPvi);
 #ifdef SKIP_ASM
-void* func_0014E0C0(void* self, int a1)
+void* cBE_readFromData(void* self, int a1)
 {
-    return func_0014A5E0(a1);
+    return cBELibrary_readFromData(a1);
 }
 #endif
 

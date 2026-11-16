@@ -50,7 +50,7 @@ extern "C" void cWScriptCache_init(void* self, int count)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AC8F0);
+INCLUDE_ASM("world/wscriptcache", cWScriptCache__cWScriptCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int*);
@@ -58,7 +58,7 @@ extern "C" void func_003ACA70(int* self, int flags);
 extern int cWScriptCache_mpWScriptCache;
 
 // PORT: array cookie arithmetic through int (pointer in int).
-extern "C" void func_003AC8F0(int* self, int flags)
+extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
 {
     char* old = *(char**)((char*)self + 0x4);
     if (old != 0) {
@@ -168,8 +168,8 @@ INCLUDE_ASM("world/wscriptcache", func_003ACAD0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void ASYNCFILE_release_CAD0(int, int *, int *) __asm__("ASYNCFILE_release");
 extern "C" void MEM_free_CAD0(int) __asm__("MEM_free");
-extern "C" void func_003B47F8_CAD0(int, int) __asm__("func_003B47F8");
-extern "C" int func_003B4818_CAD0(int) __asm__("func_003B4818");
+extern "C" void unpack_CAD0(int, int) __asm__("unpack");
+extern "C" int unpacksizez_CAD0(int) __asm__("unpacksizez");
 extern "C" int ASYNCFILE_getstatus_CAD0(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void MEM_copy_CAD0(int, int, int) __asm__("MEM_copy");
 int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
@@ -184,11 +184,11 @@ extern "C" void func_003ACAD0_impl(void *self_) {
         ASYNCFILE_release_CAD0(*(int*)(self + 4), &sp0, &sp4);
         if (sp0 != 0) {
             if (sp4 > 0) {
-                int t = func_003B4818_CAD0(sp0);
+                int t = unpacksizez_CAD0(sp0);
                 if (t > 0) {
                     int r = operator_new_CAD0(t, str_WScriptFile, 0x20000000, 0);
                     *(int*)(self + 8) = r;
-                    func_003B47F8_CAD0(sp0, r);
+                    unpack_CAD0(sp0, r);
                 } else {
                     int r = operator_new_CAD0(sp4, str_WScriptFile, 0x20000000, 0);
                     *(int*)(self + 8) = r;
@@ -208,7 +208,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ACBB8);
 struct sBXStr_CBB8 { char *p; int pad[3]; sBXStr_CBB8() {} };
 extern "C" void func_003186D0_CBB8(sBXStr_CBB8*, const char*, int) __asm__("func_003186D0");
 extern "C" void func_00318630_CBB8(sBXStr_CBB8*, sBXStr_CBB8*, const char*) __asm__("func_00318630");
-extern "C" int func_003DF690_CBB8(const char*, int) __asm__("func_003DF690");
+extern "C" int ASYNCFILE_load_CBB8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
 extern char D_004A47C0[];
 extern char str_ssf[];
@@ -219,7 +219,7 @@ extern "C" void func_003ACBB8_impl(void *self, int arg) {
     *(short*)((char*)self + 2) = 0;
     func_003186D0_CBB8(&b, D_004A47C0, arg);
     func_00318630_CBB8(&a, &b, str_ssf);
-    *(int*)((char*)self + 4) = func_003DF690_CBB8(a.p, 0x100);
+    *(int*)((char*)self + 4) = ASYNCFILE_load_CBB8(a.p, 0x100);
     cBXString_dt_CBB8(&a, 2);
     cBXString_dt_CBB8(&b, 2);
     int n = *(int*)((char*)self + 4);
@@ -912,9 +912,9 @@ extern "C" int func_003ADCB0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADCE0);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumProcessScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADCE0(void* self)
+extern "C" int cWScriptCacheEntry_getNumProcessScripts(void* self)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);
@@ -927,9 +927,9 @@ extern "C" int func_003ADCE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADD10);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getProcessScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD10(void* self)
+extern "C" int cWScriptCacheEntry_getProcessScripts(void* self)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);

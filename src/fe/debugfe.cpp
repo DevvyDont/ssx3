@@ -50,7 +50,7 @@ extern "C" char* func_00145340(void* iface);
 extern "C" char* func_00145378(void* iface);
 extern "C" char* func_00145398(void* iface);
 extern "C" int func_00145C38(void* iface, int i);
-extern "C" int func_00147618(void* iface, int i);
+extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int i);
 extern "C" char* func_0014EE28(void* iface, int i);
 extern "C" void func_0017AE00(void* self);
 extern "C" void func_001DC990(void* self, float x, float y, const char* fmt, ...);
@@ -170,7 +170,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 6 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Control_Map);
-    func_001DCA80(font, 580.0f, y, str_pct_d_b, func_00147618(intPlayer, 0));
+    func_001DCA80(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_getControllerMapping(intPlayer, 0));
     y += lineheight;
     font->setColor(self->cursor == 7 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Board);
@@ -234,7 +234,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D008);
+INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_setGamePath);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -252,14 +252,14 @@ struct sDbgFE17D008 {
     char pad_0x0000[0x8C38];
     int modes[8]; // 0x8C38
 };
-extern "C" void func_00145108(void* iface, int idx);
+extern "C" void cBENewRaceInterface_setGamePath(void* iface, int idx);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 
-extern "C" void func_0017D008(void* self, int idx)
+extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx)
 {
     cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
     ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
-    func_00145108(iface, idx);
+    cBENewRaceInterface_setGamePath(iface, idx);
     cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
     iface->v01();
 }
@@ -324,10 +324,10 @@ extern "C" void func_0017D0A8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D1B8);
+INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_0017D1B8(void* self, int a, int b)
+extern "C" int cDebugMenuScreen_getMaxAIRiders(void* self, int a, int b)
 {
     int r = (a == 2) ? 4 : 5;
     switch (b) {
@@ -382,7 +382,7 @@ INCLUDE_ASM("fe/debugfe", func_0017D298);
 extern void* D_0046D350[];
 extern int cBXString_EmptyString;
 extern void* D_004A4E90;
-extern "C" void* func_002CC018(void* self);
+extern "C" void* cMenuSys_cMenuSys(void* self);
 extern "C" void* func_001DA988(void* self, void* a, void* b);
 extern "C" void* func_001DACB8(void* self, void* a, void* b, void* c);
 extern "C" void* func_001DAE20(void* self, void* a);
@@ -400,7 +400,7 @@ extern "C" void* func_0017D298(char* self)
 {
     *(void***)self = D_0046D350;
     *(int*)(self + 0x4) = 0;
-    func_002CC018(self + 0x8);
+    cMenuSys_cMenuSys(self + 0x8);
     sDbgOwner17D298 o0;
     o0.owner = self;
     sDbgOwner17D298 o1;
@@ -454,7 +454,7 @@ extern "C" void cMenuItem__cMenuItem(void* self, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 extern "C" void func_001DD0C8(void* self, int flags);
 extern "C" void func_001DCEA0(void* self, int flags);
-extern "C" void func_002CC048(void* self, int flags);
+extern "C" void cMenuSys__cMenuSys(void* self, int flags);
 void operator_delete(int* ptr);
 extern void* D_0046D350[];
 extern void* cDebugScreen_vtbl[];
@@ -540,7 +540,7 @@ extern "C" void func_0017D3B0(char* self, int flags)
     func_001DD0C8(self + 0x74C, 2);
     dtorF_17D3B0(self + 0x604);
     func_001DCEA0(self + 0x70, 2);
-    func_002CC048(self + 0x8, 2);
+    cMenuSys__cMenuSys(self + 0x8, 2);
     *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
@@ -801,7 +801,7 @@ extern void* D_004A33F4;
 extern char str_cPreGameLoadScreen[];
 struct cAppMan;
 extern "C" void func_002CC3B8(void* menu, void* items);
-extern "C" int func_002CC098(void* menu);
+extern "C" int cMenuSys_isActive(void* menu);
 extern "C" void func_00255F50(void* comm, int a1);
 extern "C" void func_0025B6D8(void* net, int a1);
 extern "C" void func_001DB418(void* items, void* net);
@@ -854,49 +854,49 @@ extern "C" void func_0017DB18(void* vself)
             }
             break;
         case 13:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 func_002CC3B8(self->menu, self->items1AAC);
             }
             break;
         case 17:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 0xC;
                 func_002CC3B8(self->menu, self->items1044);
             }
             break;
         case 24:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 func_002CC3B8(self->menu, self->items1044);
                 self->state = 0xC;
             }
             break;
         case 21:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 3;
                 func_002CC3B8(self->menu, self->items70);
             }
             break;
         case 20:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 3;
                 func_002CC3B8(self->menu, self->items70);
             }
             break;
         case 18:
         case 19:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 0;
             }
             break;
         case 22:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 func_001DB418(self->items74C, LobbyMan_mLobbyMan);
                 func_002CC3B8(self->menu, self->items74C);
                 self->state = 6;
             }
             break;
         case 23:
-            if (func_002CC098(self->menu) == 0) {
+            if (cMenuSys_isActive(self->menu) == 0) {
                 func_002CC3B8(self->menu, self->itemsD2C);
                 self->state = 0xA;
             }
@@ -968,12 +968,12 @@ INCLUDE_ASM("fe/debugfe", func_0017DE70);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" void func_00145108(void* iface, int idx);
+extern "C" void cBENewRaceInterface_setGamePath(void* iface, int idx);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" int cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* iface, int rider, int ctrl);
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int id);
-extern "C" void func_001472C8(void* iface, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int a1, int a2);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
 extern int D_004A11B8;
@@ -999,7 +999,7 @@ static inline void vcall1_17DE70(void* obj)
 extern "C" void func_0017DE70(char* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    func_00145108(race, 1);
+    cBENewRaceInterface_setGamePath(race, 1);
     cBENewRaceInterface_setGameMode(race, 4);
     cBENewRaceInterface_setNumberAI(race, 0);
     D_00535C08[0] = 0;
@@ -1010,8 +1010,8 @@ extern "C" void func_0017DE70(char* self)
         cBENewPlayerInterface_setRiderCtrlID(player, i, -1);
         cBENewPlayerInterface_setRiderCharID(player, i, 0);
     }
-    func_001472C8(player, 0, 0);
-    func_001472C8(player, 1, -1);
+    cBENewPlayerInterface_setPlayerCtrlID(player, 0, 0);
+    cBENewPlayerInterface_setPlayerCtrlID(player, 1, -1);
     vcall1_17DE70(player);
     void* net = cBE_getInterface_Fv(SSXApp->BE, 7);
     sNetCfg_17DE70* cfg = &D_00534B30_cfg;
@@ -1584,7 +1584,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017F2D0);
+INCLUDE_ASM("fe/debugfe", cHeartBeat_update);
 #ifdef SKIP_ASM
 extern "C" float func_0031BF60(float x);
 
@@ -1635,7 +1635,7 @@ static inline float wrap_17F2D0(float x)
     return x - ffloor_17F2D0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
-extern "C" void func_0017F2D0(void* p)
+extern "C" void cHeartBeat_update(void* p)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)p;
     for (int i = 0; i < 2; i++) {
@@ -1976,21 +1976,21 @@ public:
     virtual void v01();
     virtual void v02();
 };
-extern "C" void func_00231D18(void* self);
-extern "C" void func_0017F2D0(void* p);
+extern "C" void cFadeScreen_update(void* self);
+extern "C" void cHeartBeat_update(void* p);
 
 /**
  * Runs one frame of the debug front end: the fade, the active screen and the heartbeat.
  *
- * Calls func_00231D18 (On Tour cFadeScreen::update); while the app's word +0x4 is 0 it updates the active screen
- * (+0x14, virtual slot 2); then func_0017F2D0 (On Tour cHeartBeat::update) on the heartbeat at +0x24.
+ * Calls cFadeScreen_update (On Tour cFadeScreen::update); while the app's word +0x4 is 0 it updates the active screen
+ * (+0x14, virtual slot 2); then cHeartBeat_update (On Tour cHeartBeat::update) on the heartbeat at +0x24.
  */
 extern "C" void cDebugFE_update(void* self)
 {
-    func_00231D18(self);
+    cFadeScreen_update(self);
     if (*(int*)((char*)SSXApp + 4) == 0)
         (*(cFEObjK17FB98**)((char*)self + 0x14))->v02();
-    func_0017F2D0((char*)self + 0x24);
+    cHeartBeat_update((char*)self + 0x24);
 }
 #endif
 
@@ -2633,9 +2633,9 @@ void* cFEInput_getCamRotate(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180300);
+INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
 #ifdef SKIP_ASM
-extern "C" int func_00180300(void* self)
+extern "C" int cFEInput_keyPressed(void* self)
 {
     int r = 0;
     if (cInput_getState(*(int*)((char*)self + 0x18), 0x72) || cInput_getState(*(int*)((char*)self + 0x18), 0x73) ||
@@ -2652,10 +2652,10 @@ extern "C" int func_00180300(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180478);
+INCLUDE_ASM("fe/debugfe", cFEInput_setPadNum);
 #ifdef SKIP_ASM
 
-extern "C" void func_00180478(void* self, unsigned char idx)
+extern "C" void cFEInput_setPadNum(void* self, unsigned char idx)
 {
     int v = *(int*)((char*)SSXApp + (idx << 2) + 0xB0);
     *(unsigned char*)((char*)self + 0x4) = idx;
@@ -2711,8 +2711,8 @@ INCLUDE_ASM("fe/debugfe", func_00180508);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" unsigned short* func_001DD580(unsigned short* p);
-extern "C" int func_003977E8(void* p);
-extern "C" int func_0039FB30(void* p, int a1, int a2);
+extern "C" int cList_cList(void* p);
+extern "C" int cUIThing_cUIThing(void* p, int a1, int a2);
 extern int D_0046D1A0[];
 extern int cUIScreen_vtbl[];
 extern int cUIGroup_vtbl[];
@@ -2725,13 +2725,13 @@ extern "C" void* func_00180508(char* self, int a1)
     *(int*)(self + 0x10) = 0;
     *(int**)(self + 8) = cUIScreen_vtbl;
     func_001DD580((unsigned short*)(self + 0x14));
-    func_003977E8(self + 0x18);
+    cList_cList(self + 0x18);
     *(int*)(self + 0x34) = 0;
     *(int*)(self + 0x38) = 0;
     *(int*)(self + 0x3C) = 0;
-    func_0039FB30(self + 0x40, 0, 0);
+    cUIThing_cUIThing(self + 0x40, 0, 0);
     *(int**)(self + 0x48) = cUIGroup_vtbl;
-    func_003977E8(self + 0xB4);
+    cList_cList(self + 0xB4);
     *(int*)(self + 0xD0) = a1;
     *(int**)(self + 8) = D_0046D1A0;
     *(int*)(self + 0xD8) = 0;
@@ -2951,7 +2951,7 @@ extern char str_arrLeft[];
 extern char str_arrRight[];
 extern char str_spc[];
 extern char str_end[];
-extern "C" char* func_004162D0(char*, const char*);
+extern "C" char* strcat(char*, const char*);
 
 extern "C" void func_001809B0(void* self, int c, char* dst)
 {
@@ -2960,19 +2960,19 @@ extern "C" void func_001809B0(void* self, int c, char* dst)
     if (c < 10) {
         buf[0] = c + '0';
         buf[1] = 0;
-        func_004162D0(dst, buf);
+        strcat(dst, buf);
     } else if (c < 36) {
         buf[0] = c + 'A' - 10;
         buf[1] = 0;
-        func_004162D0(dst, buf);
+        strcat(dst, buf);
     } else if (c == 36) {
-        func_004162D0(dst, str_arrLeft);
+        strcat(dst, str_arrLeft);
     } else if (c == 37) {
-        func_004162D0(dst, str_arrRight);
+        strcat(dst, str_arrRight);
     } else if (c == 38) {
-        func_004162D0(dst, str_spc);
+        strcat(dst, str_spc);
     } else if (c == 39) {
-        func_004162D0(dst, str_end);
+        strcat(dst, str_end);
     }
 }
 #endif
@@ -2986,7 +2986,7 @@ extern char str_arrLeft[];
 extern char str_arrRight[];
 extern char str_spc[];
 extern char str_end[];
-extern "C" char* func_004162D0(char*, const char*);
+extern "C" char* strcat(char*, const char*);
 
 extern "C" void func_00180A90(void* self, int keyIndex, char* dst)
 {
@@ -2995,19 +2995,19 @@ extern "C" void func_00180A90(void* self, int keyIndex, char* dst)
     if (keyIndex < 10) {
         buf[0] = keyIndex + '0';
         buf[1] = 0;
-        func_004162D0(dst, buf);
+        strcat(dst, buf);
     } else if (keyIndex < 36) {
         buf[0] = keyIndex + 'A' - 10;
         buf[1] = 0;
-        func_004162D0(dst, buf);
+        strcat(dst, buf);
     } else if (keyIndex == 36) {
-        func_004162D0(dst, str_arrLeft);
+        strcat(dst, str_arrLeft);
     } else if (keyIndex == 37) {
-        func_004162D0(dst, str_arrRight);
+        strcat(dst, str_arrRight);
     } else if (keyIndex == 38) {
-        func_004162D0(dst, str_spc);
+        strcat(dst, str_spc);
     } else if (keyIndex == 39) {
-        func_004162D0(dst, str_end);
+        strcat(dst, str_end);
     }
 }
 #endif

@@ -50,45 +50,45 @@ extern "C" void cListNode_removeFromList(cListNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_00397788);
+INCLUDE_ASM("util/list", cListNode_traverseFlat);
 #ifdef SKIP_ASM
-class func_00397788_cVirt {
+class cListNode_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-extern "C" int func_00397788(void* a, func_00397788_cVirt* obj)
+extern "C" int cListNode_traverseFlat(void* a, cListNode_traverseFlat_cVirt* obj)
 {
     return obj->v02(a);
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_003977B8);
+INCLUDE_ASM("util/list", cListNode_traverseRecurse);
 #ifdef SKIP_ASM
-class func_003977B8_cVirt {
+class cListNode_traverseRecurse_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-extern "C" int func_003977B8(void* a, func_003977B8_cVirt* obj)
+extern "C" int cListNode_traverseRecurse(void* a, cListNode_traverseRecurse_cVirt* obj)
 {
     return obj->v02(a);
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_003977E8);
+INCLUDE_ASM("util/list", cList_cList);
 #ifdef SKIP_ASM
-void func_00397930(void*);
+void cList_clear(void*);
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 
-extern "C" void* func_003977E8(void* self)
+extern "C" void* cList_cList(void* self)
 {
     char* s = (char*)self;
     *(void**)(s + 0x4) = s;
@@ -98,7 +98,7 @@ extern "C" void* func_003977E8(void* self)
     *(void**)(s + 0x10) = s + 0xC;
     *(void***)(s + 0x14) = cListNode_vtbl;
     *(void**)(s + 0xC) = s + 0xC;
-    func_00397930(s);
+    cList_clear(s);
     return self;
 }
 #endif
@@ -131,9 +131,9 @@ extern "C" int *func_00397858(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_00397870);
+INCLUDE_ASM("util/list", cList_getByIndex);
 #ifdef SKIP_ASM
-extern "C" cListNode* func_00397870(cList* list, int count)
+extern "C" cListNode* cList_getByIndex(cList* list, int count)
 {
     cListNode* n = cList_first(list);
     for (; count > 0; count--) {
@@ -205,9 +205,9 @@ void cList_addToEnd(cList* list, cListNode* newNode)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_00397930__FPv);
+INCLUDE_ASM("util/list", cList_clear__FPv);
 #ifdef SKIP_ASM
-void func_00397930(void* self)
+void cList_clear(void* self)
 {
     void* t0 = (char*)self + 0xc;
     *(void**)((char*)self + 0x4) = t0;
@@ -232,7 +232,7 @@ public:
  * Deletes every node in the list through its virtual destructor, then resets the list to empty.
  *
  * Walks from the head (+0x4) along the next links up to the self-linked end node, calling each node's
- * deleting destructor (slot 1, flags 3), then relinks the empty list (func_00397930). The null check on each
+ * deleting destructor (slot 1, flags 3), then relinks the empty list (cList_clear). The null check on each
  * node comes after its next link has been read.
  */
 extern "C" void cList_destroyList(void* self)
@@ -245,7 +245,7 @@ extern "C" void cList_destroyList(void* self)
         }
         n = nextNode;
     }
-    func_00397930(self);
+    cList_clear(self);
 }
 #endif
 

@@ -1239,12 +1239,12 @@ extern "C" void func_00311110(void)
 //100%
 INCLUDE_ASM("animation/animmodel", func_00311220);
 #ifdef SKIP_ASM
-extern "C" void func_00311290(void* self, char* data);
+extern "C" void cAdfDataSource_populateFromData(void* self, char* data);
 
 extern "C" void* func_00311220(void* self, char* data)
 {
     *(int*)self = 0;
-    func_00311290(self, data);
+    cAdfDataSource_populateFromData(self, data);
     return self;
 }
 #endif
@@ -1252,21 +1252,21 @@ extern "C" void* func_00311220(void* self, char* data)
 //100%
 INCLUDE_ASM("animation/animmodel", func_00311250);
 #ifdef SKIP_ASM
-extern "C" char* func_003E22F0(void* src, int flags);
+extern "C" char* FILE_loadpack(void* src, int flags);
 
 extern "C" void* func_00311250(char** self, void* src)
 {
-    char* data = func_003E22F0(src, 0);
+    char* data = FILE_loadpack(src, 0);
     *self = data;
-    func_00311290(self, data);
+    cAdfDataSource_populateFromData(self, data);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311290);
+INCLUDE_ASM("animation/animmodel", cAdfDataSource_populateFromData);
 #ifdef SKIP_ASM
-extern "C" void func_00311290(void* self, char* data)
+extern "C" void cAdfDataSource_populateFromData(void* self, char* data)
 {
     *(char**)((char*)self + 0x4) = data;
     *(char**)((char*)self + 0x8) = data + 0x10;

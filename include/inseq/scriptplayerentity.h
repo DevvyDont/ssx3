@@ -4,7 +4,7 @@
 // cScriptPlayerEntity: one entity (actor, camera, game-state track...) of an in-game sequence (InSeq) script. A
 // cScriptPlayerMain owns an array of them, one per entity block of the script data, and an entity owns one
 // cScriptPlayerChannel per animated channel (inseq/scriptplayerchannel.h). No virtual functions, no base class.
-// Size 0x3C [R]: cScriptPlayerMain's Init (func_002745C0) allocates numEntities x 0x3C (+ the 0x10 array cookie) from
+// Size 0x3C [R]: cScriptPlayerMain's Init (cScriptPlayerMain_Init) allocates numEntities x 0x3C (+ the 0x10 array cookie) from
 // the cInSeq heap with func_002724C8 and runs the constructor cScriptPlayerEntity_cScriptPlayerEntity on each 0x3C stride; the destructor loop
 // in func_002746F8 walks the same stride. On Tour's class is 0x38.
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
@@ -13,11 +13,11 @@
 //
 // Retail has one more word than On Tour at 0x0 (as in the channel classes and cInSeq's tScriptMainNode): every On
 // Tour member is 4 bytes higher here, placed by [R] the constructor (zeroes 0x4..0x2C = On Tour's 0x0..0x28) and
-// [U] Init (cScriptPlayerEntity_Init), DeInit (cScriptPlayerEntity_DeInit), SetEntityVariation (cScriptPlayerEntity_SetEntityVariation), SetupPlay (func_00273AA8),
+// [U] Init (cScriptPlayerEntity_Init), DeInit (cScriptPlayerEntity_DeInit), SetEntityVariation (cScriptPlayerEntity_SetEntityVariation), SetupPlay (cScriptPlayerEntity_SetupPlay),
 // ExecutePlay (cScriptPlayerEntity_ExecutePlay) and the accessors. On Tour's bools are 1 byte; retail's are words.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:
-//   [R] the constructor cScriptPlayerEntity_cScriptPlayerEntity and the allocation in func_002745C0;
+//   [R] the constructor cScriptPlayerEntity_cScriptPlayerEntity and the allocation in cScriptPlayerMain_Init;
 //   [U] how retail code uses the field (asm of the 22 methods listed in methods.txt);
 //   [O] SSX On Tour's DWARF (class cScriptPlayerEntity: same member order, +4).
 
@@ -63,8 +63,8 @@ struct cScriptPlayerEntity {
     const char* mpHeader;                         // 0x20 [O]; [U] &mpSystemHeader->nextSectionStart when headerSize > 8,
                                                   //      else 0
     cScriptPlayerChannel** mpChannelPlayers;      // 0x24 [O]; [U] SetupPlay allocates numChannels x 4 from the cInSeq
-                                                  //      heap (func_00272308) and creates each channel; GetChannel
-                                                  //      (func_002742C8); Stop frees it (func_002723A8)
+                                                  //      heap (cScriptHeap_AllocMem) and creates each channel; GetChannel
+                                                  //      (cScriptPlayerEntity_GetChannel); Stop frees it (cScriptHeap_FreeMem)
     int mIsPlaying;                               // 0x28 [O] (On Tour bool); [U] SetupPlay 1 (and returns it); Stop,
                                                   //      Restart, Update test it; Stop clears it
     cInSeqCommEntity* mpEntityComm;               // 0x2C [O]; [U] SetupPlay: GetInSeqCommInterface() ->

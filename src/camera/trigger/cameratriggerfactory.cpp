@@ -2768,7 +2768,7 @@ extern float D_004C5800[4];
 extern float D_004C5810[4];
 extern float D_004C5820[4];
 extern "C" void* func_0016C800(void*);
-extern "C" void func_0016C888(void*, int);
+extern "C" void cCameraTriggerMan__cCameraTriggerMan(void*, int);
 extern char gCamTriggerMan[];
 extern int D_004A4DF0;
 void sti_00175A20(int init, int prio) __asm__("func_00175A20");
@@ -3004,7 +3004,7 @@ void sti_00175A20(int init, int prio)
             D_004A4DF0 = (D_004A4DF0 & 0xFF) | 0xFFFFFF00u;
             func_0016C800(gCamTriggerMan);
         } else {
-            func_0016C888(gCamTriggerMan, 2);
+            cCameraTriggerMan__cCameraTriggerMan(gCamTriggerMan, 2);
         }
     }
 }
@@ -6163,16 +6163,16 @@ void* func_00179FA8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179FC8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_testWCBAMStartLocation);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00144CC0(void* iface, int id);
+extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
-extern "C" int func_00179FC8(void* self, int id)
+extern "C" int cTrackFileMan_testWCBAMStartLocation(void* self, int id)
 {
-    if (func_00144CC0(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
+    if (cBENewRaceInterface_getLocationType(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
         return 1;
     }
     if (id >= 0xE && id <= 0x10) {
@@ -6183,20 +6183,20 @@ extern "C" int func_00179FC8(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A028);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getNextWCBAMStartLocation);
 #ifdef SKIP_ASM
-struct func_0017A028_sEntry {
+struct cTrackFileMan_getNextWCBAMStartLocation_sEntry {
     int active;
     char pad_0x4[0x88];
 };
 
-struct func_0017A028_sMgr {
+struct cTrackFileMan_getNextWCBAMStartLocation_sMgr {
     int count;
     char pad_0x4[0x88];
-    func_0017A028_sEntry entries[1];
+    cTrackFileMan_getNextWCBAMStartLocation_sEntry entries[1];
 };
 
-extern "C" int func_0017A028(func_0017A028_sMgr* self, int i)
+extern "C" int cTrackFileMan_getNextWCBAMStartLocation(cTrackFileMan_getNextWCBAMStartLocation_sMgr* self, int i)
 {
     if (*(int*)((char*)self + 0x8C08) == 0) {
         return -1;
@@ -6210,9 +6210,9 @@ extern "C" int func_0017A028(func_0017A028_sMgr* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A0B8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevWCBAMStartLocation);
 #ifdef SKIP_ASM
-extern "C" int func_0017A0B8(func_0017A028_sMgr* self, int i)
+extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(cTrackFileMan_getNextWCBAMStartLocation_sMgr* self, int i)
 {
     if (*(int*)((char*)self + 0x8C08) == 0) {
         return -1;
@@ -6226,16 +6226,16 @@ extern "C" int func_0017A0B8(func_0017A028_sMgr* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A158);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_legalTrackMode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_A158(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00144CC0(void* iface, int id);
+extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 // PORT: the unit also declares this with a pointer third argument; defined under an asm label with its real type
-extern "C" int func_0017A158_impl(int* list, int idx, int kind) __asm__("func_0017A158");
-extern "C" int func_0017A158_impl(int* list, int idx, int kind)
+extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind) __asm__("cTrackFileMan_legalTrackMode");
+extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind)
 {
     if (idx >= 0 && idx < list[0]) {
         unsigned int v = *(unsigned int*)((char*)list + idx * 0x8C + 0x84);
@@ -6257,7 +6257,7 @@ extern "C" int func_0017A158_impl(int* list, int idx, int kind)
             if (v >= 14 && v < 17) return 1;
             break;
         case 4:
-            if (!func_00144CC0(cBE_getInterface_A158(cBE_getBE(), 0), v)) return 1;
+            if (!cBENewRaceInterface_getLocationType(cBE_getInterface_A158(cBE_getBE(), 0), v)) return 1;
             break;
         }
     }
@@ -6266,17 +6266,17 @@ extern "C" int func_0017A158_impl(int* list, int idx, int kind)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A220);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getNextLocation);
 #ifdef SKIP_ASM
-extern "C" int func_0017A158(int* self, int i, void* key);
+extern "C" int cTrackFileMan_legalTrackMode(int* self, int i, void* key);
 
-// Circular search: first index after `start` for which func_0017A158 matches.
-extern "C" int func_0017A220(int* self, int start, void* key)
+// Circular search: first index after `start` for which cTrackFileMan_legalTrackMode matches.
+extern "C" int cTrackFileMan_getNextLocation(int* self, int start, void* key)
 {
     int n;
     int i = (start + 1) % self[0];
     for (n = 0; n < self[0]; n++) {
-        if (func_0017A158(self, i, key))
+        if (cTrackFileMan_legalTrackMode(self, i, key))
             return i;
         i = (i + 1) % self[0];
     }
@@ -6285,17 +6285,17 @@ extern "C" int func_0017A220(int* self, int start, void* key)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A2C8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevLocation);
 #ifdef SKIP_ASM
-extern "C" int func_0017A158(int* self, int i, void* key);
+extern "C" int cTrackFileMan_legalTrackMode(int* self, int i, void* key);
 
-// Circular search backwards: first index before `start` for which func_0017A158 matches.
-extern "C" int func_0017A2C8(int* self, int start, void* key)
+// Circular search backwards: first index before `start` for which cTrackFileMan_legalTrackMode matches.
+extern "C" int cTrackFileMan_getPrevLocation(int* self, int start, void* key)
 {
     int n;
     int i = (start + self[0] - 1) % self[0];
     for (n = 0; n < self[0]; n++) {
-        if (func_0017A158(self, i, key))
+        if (cTrackFileMan_legalTrackMode(self, i, key))
             return i;
         i = (i + self[0] - 1) % self[0];
     }
@@ -6406,11 +6406,11 @@ extern "C" void func_0017A378(void* selfp, const char* file)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_scanLocations);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// The camera list (0x8C0C bytes): up to 0x100 named cameras with their tag, index and flags; func_0017A638
-// builds it, func_0017A028 / func_0017A0B8 step through the valid ones.
+// The camera list (0x8C0C bytes): up to 0x100 named cameras with their tag, index and flags; cTrackFileMan_scanLocations
+// builds it, cTrackFileMan_getNextWCBAMStartLocation / cTrackFileMan_getPrevWCBAMStartLocation step through the valid ones.
 struct sCamEntry {
     char name[0x40];    // 0x00
     char tag[4];        // 0x40
@@ -6439,11 +6439,11 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_17A638(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int id);
 extern "C" int func_0017A978_A638(void* self, int n, void* names, char* tag) __asm__("func_0017A978");
-extern "C" int func_00179FC8_A638(void* self, int id) __asm__("func_00179FC8");
+extern "C" int cTrackFileMan_testWCBAMStartLocation_A638(void* self, int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
 extern "C" char* strcpy(char* d, const char* s);
 extern char* str_BAM_b[];
 
-extern "C" void func_0017A638(sCamMgr* self)
+extern "C" void cTrackFileMan_scanLocations(sCamMgr* self)
 {
     sCamName names[0x18];
     int i;
@@ -6465,7 +6465,7 @@ extern "C" void func_0017A638(sCamMgr* self)
                 ip[self->count * 35] = j;
                 ap[self->count * 35] = 1;
                 self->numActive++;
-                if (func_00179FC8_A638(self, ip[self->count * 35])) {
+                if (cTrackFileMan_testWCBAMStartLocation_A638(self, ip[self->count * 35])) {
                     *(int*)((char*)self + 0x8C + self->count * 0x8C) = 1;
                     self->numValid++;
                 }
@@ -6488,7 +6488,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 // PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
 cBigFile* cBigFile_cBigFile1_A830(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int func_003A6948(const char* path, int n, void* names);
 extern char str_data_worlds[];
 extern char str_big[];
@@ -6528,8 +6528,8 @@ extern "C" int func_0017A830(sCamMgr_A830* self, char* name, char* tag)
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        if (func_0041AA88(name, self->entries[i].name) == 0 &&
-            func_0041AA88(tag, self->entries[i].tag) == 0) {
+        if (strcasecmp(name, self->entries[i].name) == 0 &&
+            strcasecmp(tag, self->entries[i].tag) == 0) {
             return 0;
         }
     }
@@ -6566,7 +6566,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 // PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
 cBigFile* cBigFile_cBigFile1_17A978(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int func_003A6948(const char* path, int n, void* names);
 extern char str_data_worlds[];
 extern char str_big[];
@@ -6611,8 +6611,8 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
     for (i = 0; i < n; i++) {
         int found = 0;
         for (j = 0; j < self->count; j++) {
-            if (func_0041AA88(names[i].name, self->entries[j].name) == 0 &&
-                func_0041AA88(tag, self->entries[j].tag) == 0) {
+            if (strcasecmp(names[i].name, self->entries[j].name) == 0 &&
+                strcasecmp(tag, self->entries[j].tag) == 0) {
                 found = 1;
                 break;
             }
@@ -6645,8 +6645,8 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
     for (int k = 0; k < n; k++) {
         if (names[k].ok) {
             for (int entryIndex = 0; entryIndex < self->count; entryIndex++) {
-                if (func_0041AA88(names[k].name, self->entries[entryIndex].name) == 0 &&
-                    func_0041AA88(tag, self->entries[entryIndex].tag) == 0) {
+                if (strcasecmp(names[k].name, self->entries[entryIndex].name) == 0 &&
+                    strcasecmp(tag, self->entries[entryIndex].tag) == 0) {
                     names[k].ok = 0;
                     break;
                 }
@@ -6660,9 +6660,9 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABC8__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_cBackgroundMan__FPv);
 #ifdef SKIP_ASM
-void* func_0017ABC8(void* self)
+void* cBackgroundMan_cBackgroundMan(void* self)
 {
     int t0 = 0;
     *(int*)((char*)self + 0x4) = t0;
@@ -6673,7 +6673,7 @@ void* func_0017ABC8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABE0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan__cBackgroundMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
@@ -6689,7 +6689,7 @@ struct sIdList_0017ABE0 {
     int count;
 };
 
-extern "C" void func_0017ABE0(sIdList_0017ABE0* self, int flags)
+extern "C" void cBackgroundMan__cBackgroundMan(sIdList_0017ABE0* self, int flags)
 {
     if (self->ids != 0)
     {

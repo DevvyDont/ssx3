@@ -79,7 +79,7 @@ extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed)
 //100%
 INCLUDE_ASM("object/splinemodifier", cSplineModifier_update);
 #ifdef SKIP_ASM
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 struct cSplineModifier_9698 {
     char pad_0x0[0x30];
@@ -113,8 +113,8 @@ extern "C" void cSplineModifier_update(cSplineModifier* self)
 {
     float zeroF = 0.0f;
     if (zeroF < self->ForceTime) {
-        self->ForceTime -= func_002D1C70();
-        self->Velocity += self->Force * func_002D1C70();
+        self->ForceTime -= cObjectInterface_getUpdateTime();
+        self->Velocity += self->Force * cObjectInterface_getUpdateTime();
     }
     if (self->Start == 0) {
         return;
@@ -122,7 +122,7 @@ extern "C" void cSplineModifier_update(cSplineModifier* self)
     if (self->Complete != 0) {
         return;
     }
-    float pos = self->OffsetDistance + self->Velocity * func_002D1C70();
+    float pos = self->OffsetDistance + self->Velocity * cObjectInterface_getUpdateTime();
     self->OffsetDistance = pos;
     if (pos < zeroF) {
         int mode = self->SequenceType;
@@ -202,7 +202,7 @@ static inline t4Vector vu0Normalize(const t4Vector& v)
 
 extern "C" float func_0031C228(float);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void func_00345248(void* follow, float t, void* pos, void* vel, void* acc);
+extern "C" void cSpline_getPos(void* follow, float t, void* pos, void* vel, void* acc);
 
 
 struct sSmV3_9830 {
@@ -320,7 +320,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
     float rx = 0.0f;
     float ry = 0.0f;
     float rz = 0.0f;
-    func_00345248(self->follow, self->pos, &self->origin, &self->dir, &self->q);
+    cSpline_getPos(self->follow, self->pos, &self->origin, &self->dir, &self->q);
     self->fD0 = self->dir.x * self->dir.x;
     self->fD4 = self->dir.y * self->dir.y;
     t4Vector n = vu0Normalize(self->dir);
@@ -980,7 +980,7 @@ extern "C" void cMultiSplineModifier_setSpeed(cMultiSplineModifier* self, float 
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_update);
 #ifdef SKIP_ASM
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 
 /**
  * Advances a multi-spline modifier's distance along its looping spline and marks its transforms dirty.
@@ -990,7 +990,7 @@ extern "C" float func_002D1C70();
  */
 extern "C" void cMultiSplineModifier_update(cMultiSplineModifier* self)
 {
-    float newOffset = self->OffsetDistance + self->Velocity * func_002D1C70();
+    float newOffset = self->OffsetDistance + self->Velocity * cObjectInterface_getUpdateTime();
     self->OffsetDistance = newOffset;
     if (newOffset < 0.0f) {
         self->OffsetDistance = newOffset + self->Spline.Length;
@@ -1036,9 +1036,9 @@ struct sSmElem {
 // An octree hash-cell key: depth level and integer cell coordinates.
 struct sSmCell { int level; int x, y, z; };
 
-extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void nash_Nash_findkey(void* out, const void* box);
 
-extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
 
 // An overlap-octree node: 2x2x2 children and three item lists.
 struct sSmNode {
@@ -1139,8 +1139,8 @@ static inline t4Vector instPos_A5F8(cMultiSplineModifier* self, int i)
 static inline void insert_A5F8(char* w, void* item, const void* box)
 {
     sSmCell c;
-    func_00328F28(&c, box);
-    func_00328C20(findRoot(w, c.x, c.y, c.z), 0, item, &c);
+    nash_Nash_findkey(&c, box);
+    nash_Octant_addnode(findRoot(w, c.x, c.y, c.z), 0, item, &c);
 }
 
 /**
@@ -1201,9 +1201,9 @@ struct sHashCellR_A780 {
     sOctCell_A780* oct;   // 0x10
 };
 
-extern "C" void func_00328F28_A780(sHashKey_A780* out, void* box) __asm__("func_00328F28");
-extern "C" void func_003284B8_A780(sOctCell_A780* oct, int type, void* node, sHashKey_A780* key,
-                                   sHashCellR_A780* cell) __asm__("func_003284B8");
+extern "C" void nash_Nash_findkey_A780(sHashKey_A780* out, void* box) __asm__("nash_Nash_findkey");
+extern "C" void nash_Cell_remnode_A780(sOctCell_A780* oct, int type, void* node, sHashKey_A780* key,
+                                   sHashCellR_A780* cell) __asm__("nash_Cell_remnode");
 
 static inline int octEmpty_A780(sOctCell_A780* o)
 {
@@ -1229,12 +1229,12 @@ extern "C" void func_0035A780(cMultiSplineModifier* vself)
         char* box = (char*)(i * 0x60 + (int)vself->Nodes) + 0x30;
         (*(int*)((char*)cell + 0xA0))++;
         sHashKey_A780 key;
-        func_00328F28_A780(&key, box);
+        nash_Nash_findkey_A780(&key, box);
         sHashCellR_A780* cellX = key.x < 0 ? cell + 4 : cell;
         sHashCellR_A780* cellXY = key.y < 0 ? cellX + 2 : cellX;
         sHashCellR_A780* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
         sHashCellR_A780* octant = cellXYZ;
-        func_003284B8_A780(octant->oct, 0, node, &key, octant);
+        nash_Cell_remnode_A780(octant->oct, 0, node, &key, octant);
         if (octEmpty_A780(octant->oct)) {
             operator_delete((int*)octant->oct);
             octant->oct = 0;
@@ -1606,7 +1606,7 @@ struct sSmMat_AC20 {
 } __attribute__((aligned(16)));
 
 extern sSmVec4_AC20 D_004FF160_AC20 __asm__("t4vect_ZAxis");
-extern void func_00345248_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("func_00345248");
+extern void cSpline_getPos_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("cSpline_getPos");
 extern "C" float func_0031C228(float);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
@@ -1799,7 +1799,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         float rx = 0.0f;
         float ry = rx;
         float rz = rx;
-        func_00345248_AC20((char*)self + 0x48, &pt->pos, &pt->dir, &pt->f20, offsets[i]);
+        cSpline_getPos_AC20((char*)self + 0x48, &pt->pos, &pt->dir, &pt->f20, offsets[i]);
         pt->f50 = pt->dir.x * pt->dir.x;
         pt->f54 = pt->dir.y * pt->dir.y;
         if (self->OrientType == 2 || self->OrientType == 3) {
@@ -2028,9 +2028,9 @@ extern "C" void cRailLink_append(sSplineLink* link, sSplineLink* other)
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035B6D0);
+INCLUDE_ASM("object/splinemodifier", cRailLink_unlink);
 #ifdef SKIP_ASM
-extern "C" void func_0035B6D0(sSplineLink* link)
+extern "C" void cRailLink_unlink(sSplineLink* link)
 {
     if (link->next != 0) {
         link->next->prev = link->prev;
@@ -2048,10 +2048,10 @@ INCLUDE_ASM("object/splinemodifier", cRailModifier_cRailModifier);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void* cObjectInterface_getNash();
-extern "C" void* func_002D1BD8();
-extern "C" void func_00328F28(void* out, const void* box);
-extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
-extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern "C" void* cObjectInterface_getWorld();
+extern "C" void nash_Nash_findkey(void* out, const void* box);
+extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
 extern char cRailModifier_vtbl[];
 extern "C" void cRailModifier_buildXform(void* self);
 struct sSmMod_C040;
@@ -2142,9 +2142,9 @@ static inline void remove_B708(char* w, void* item, const sSmBox_B708* box)
 {
     (*(int*)(w + 0xA0))++;
     sSmCell_B708 c;
-    func_00328F28(&c, box);
+    nash_Nash_findkey(&c, box);
     sSmRoot_B708* r = findRoot_B708(w, c.x, c.y, c.z);
-    func_003284B8(r->node, 2, item, &c, &r->cell);
+    nash_Cell_remnode(r->node, 2, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
         r->node = 0;
@@ -2154,8 +2154,8 @@ static inline void remove_B708(char* w, void* item, const sSmBox_B708* box)
 static inline void insert_B708(char* w, void* item, const sSmBox_B708* box)
 {
     sSmCell_B708 c;
-    func_00328F28(&c, box);
-    func_00328C20(findRoot_B708(w, c.x, c.y, c.z), 2, item, &c);
+    nash_Nash_findkey(&c, box);
+    nash_Octant_addnode(findRoot_B708(w, c.x, c.y, c.z), 2, item, &c);
 }
 
 static inline sSmTrack_B708* toTrack_B708(unsigned int p)
@@ -2177,7 +2177,7 @@ struct sSmRef_B708 {
 
     sSmTrack_B708* get()
     {
-        sSmSet_B708* set = (*(sSmWorld_B708**)func_002D1BD8())->sets[id & 0xFF];
+        sSmSet_B708* set = (*(sSmWorld_B708**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -2362,10 +2362,10 @@ struct sSmWorld_BA88 {
     sSmSet_BA88** sets;             // 0x8
 };
 
-extern "C" void* func_002D1BD8();
-extern "C" void func_00328F28(void* out, const void* box);
-extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
-extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern "C" void* cObjectInterface_getWorld();
+extern "C" void nash_Nash_findkey(void* out, const void* box);
+extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
 extern char cRailModifier_vtbl[];
 extern "C" void cRailModifier_buildXform(void* self);
 
@@ -2389,9 +2389,9 @@ static inline void remove_BA88(char* w, void* item, const sSmBox_BA88* box)
 {
     (*(int*)(w + 0xA0))++;
     sSmCell_BA88 c;
-    func_00328F28(&c, box);
+    nash_Nash_findkey(&c, box);
     sSmRoot_BA88* r = findRoot_BA88(w, c);
-    func_003284B8(r->node, 2, item, &c, &r->cell);
+    nash_Cell_remnode(r->node, 2, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
         r->node = 0;
@@ -2401,8 +2401,8 @@ static inline void remove_BA88(char* w, void* item, const sSmBox_BA88* box)
 static inline void insert_BA88(char* w, void* item, const sSmBox_BA88* box)
 {
     sSmCell_BA88 c;
-    func_00328F28(&c, box);
-    func_00328C20(findRoot_BA88(w, c), 2, item, &c);
+    nash_Nash_findkey(&c, box);
+    nash_Octant_addnode(findRoot_BA88(w, c), 2, item, &c);
 }
 
 static inline sSmTrack_BA88* toTrack_BA88(unsigned int p)
@@ -2424,7 +2424,7 @@ struct sSmRef_BA88 {
 
     sSmTrack_BA88* get()
     {
-        sSmSet_BA88* set = (*(sSmWorld_BA88**)func_002D1BD8())->sets[id & 0xFF];
+        sSmSet_BA88* set = (*(sSmWorld_BA88**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -2529,10 +2529,10 @@ struct sSmWorld_BD70 {
     sSmSet_BD70** sets;             // 0x8
 };
 
-extern "C" void* func_002D1BD8();
-extern "C" void func_00328F28(void* out, const void* box);
-extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
-extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
+extern "C" void* cObjectInterface_getWorld();
+extern "C" void nash_Nash_findkey(void* out, const void* box);
+extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
 extern char cRailModifier_vtbl[];
 extern char cRailLink_vtbl[];
 
@@ -2549,9 +2549,9 @@ static inline void remove_BD70(char* w, void* item, const sSmBox_BD70* box)
 {
     (*(int*)(w + 0xA0))++;
     sSmCell_BD70 c;
-    func_00328F28(&c, box);
+    nash_Nash_findkey(&c, box);
     sSmRoot_BD70* r = findRoot_BD70(w, c);
-    func_003284B8(r->node, 2, item, &c, &r->cell);
+    nash_Cell_remnode(r->node, 2, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
         r->node = 0;
@@ -2561,8 +2561,8 @@ static inline void remove_BD70(char* w, void* item, const sSmBox_BD70* box)
 static inline void insert_BD70(char* w, void* item, const sSmBox_BD70* box)
 {
     sSmCell_BD70 c;
-    func_00328F28(&c, box);
-    func_00328C20(findRoot_BD70(w, c), 2, item, &c);
+    nash_Nash_findkey(&c, box);
+    nash_Octant_addnode(findRoot_BD70(w, c), 2, item, &c);
 }
 
 static inline sSmTrack_BD70* toTrack_BD70(unsigned int p)
@@ -2584,7 +2584,7 @@ struct sSmRef_BD70 {
 
     sSmTrack_BD70* get()
     {
-        sSmSet_BD70* set = (*(sSmWorld_BD70**)func_002D1BD8())->sets[id & 0xFF];
+        sSmSet_BD70* set = (*(sSmWorld_BD70**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
             return 0;
         }
@@ -2598,7 +2598,7 @@ struct sSmRef_BD70 {
  *
  * Removes Node from Nash with the rail's bound box (+0x10) and frees it, then inserts every segment of the rail's
  * spline (the reference at +0x30) back into Nash with its own segment box (w = 1.0). Restores the cRailLink_vtbl
- * base, unlinks the rail from its list (func_0035B6D0, On Tour cRailLink::unlink) and frees the object when bit 0
+ * base, unlinks the rail from its list (cRailLink_unlink, On Tour cRailLink::unlink) and frees the object when bit 0
  * of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -2624,7 +2624,7 @@ extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
         seg = seg->next;
     }
     self->mVtbl = (void**)cRailLink_vtbl;
-    func_0035B6D0((sSplineLink*)self);
+    cRailLink_unlink((sSplineLink*)self);
     if (flags & 1) {
         operator_delete((int*)self);
     }

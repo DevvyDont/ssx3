@@ -7,7 +7,7 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
-extern "C" float func_002D1C70();
+extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern char cDeadFadeNode_vtbl[];
 extern char str_DeadFadeAnimMats[];
@@ -196,8 +196,8 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
     self->vt = cDeadFadeNode_vtbl;
     self->block.w[0] = 0xFFFFFFFF;
     self->block = *(sDfBlock_0750*)desc;
-    self->f2C = func_002D1C70() / desc->f8;
-    self->f34 = desc->fC * func_002D1C70();
+    self->f2C = cObjectInterface_getUpdateTime() / desc->f8;
+    self->f34 = desc->fC * cObjectInterface_getUpdateTime();
     self->f30 = 0.0f;
     self->f28 = 1.0f;
     sDfModel_0750* model = self->inst->model;

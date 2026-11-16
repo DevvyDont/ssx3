@@ -2,7 +2,7 @@
 #define UI_UIICON_H
 
 // cUIIcon: a UI object drawn as a textured sprite (record type 0x11). Size 0x88: cUIScreen_createObjectByStruct does
-// operator new(0x88, "UIIcon") + the cUIThing ctor func_0039FB30, stores cUIIcon_vtbl (D_00494AA8), constructs mAttrIcon
+// operator new(0x88, "UIIcon") + the cUIThing ctor cUIThing_cUIThing, stores cUIIcon_vtbl (D_00494AA8), constructs mAttrIcon
 // (func_0021CCC8 on this + 0x74), mTextureID = -1, mpTextureElem = 0. Default ctors func_003A4DF0 / cUIIcon_cUIIcon
 // (ui/uivector) do the same. Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below.
 // Methods: vtable slots 0 ~cUIIcon (cUIIcon__cUIIcon__FPv), 9 setUIData (cUIIcon_setUIData, ui/uiengine), 16 render2D

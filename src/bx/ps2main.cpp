@@ -33,7 +33,7 @@ extern "C" void func_0031AD20(void);
 extern "C" void SYNCTASK_del(void (*fn)(void));
 extern "C" void SYNCTASK_add(void (*fn)(void), int a, int b);
 extern "C" void func_003DDE78(void* p);
-extern "C" void func_00252FA0(void);
+extern "C" void MEM_alloc(void);
 extern "C" void MEM_free(void);
 
 struct sIoCfg_SysInit {
@@ -49,7 +49,7 @@ struct sIoCfg_SysInit {
  *
  * Loads SIO2MAN, PADMAN, LIBSD, SNDDRV, MCMAN and MCSERV.IRX, seeds BXsrand() from a clock reading, hands the
  * memory from just past a 64-byte-aligned scratch block (+0x800) up to func_00423D80() to
- * cMemMan_initialize(), installs func_00252FA0/MEM_free as the file system's allocator, runs FILESYS_init(48,
+ * cMemMan_initialize(), installs MEM_alloc/MEM_free as the file system's allocator, runs FILESYS_init(48,
  * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task func_003E4000 for func_0031AD20 and finally passes
  * "cd:" to func_003DDE78() (probably selecting the default file device).
  */
@@ -78,7 +78,7 @@ extern "C" void systemInit(void)
     sIoCfg_SysInit cfg;
     cfg.size = 0x24;
     func_003DE928(&cfg);
-    cfg.fnA = func_00252FA0;
+    cfg.fnA = MEM_alloc;
     cfg.fnB = MEM_free;
     cfg.mode = 2;
     func_003DE9B8(&cfg);

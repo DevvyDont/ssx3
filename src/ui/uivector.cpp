@@ -1428,13 +1428,13 @@ extern "C" void func_003A4DE8(void) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4DF0);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* func_0021CCC8(void* p);
 extern void* cUIIcon_vtbl[];
 
 extern "C" void* func_003A4DF0(cUIIcon* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIIcon_vtbl;
     func_0021CCC8(((char*)self) + 0x74);
     return ((char*)self);
@@ -1444,12 +1444,12 @@ extern "C" void* func_003A4DF0(cUIIcon* self)
 INCLUDE_ASM("ui/uivector", cUIIcon_cUIIcon);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 extern "C" void* func_0021CCC8(void* p);
 extern void* cUIIcon_vtbl[];
 
 /**
- * Constructs a UI icon: the cUIThing constructor (func_0039FB30, declared with only self, so the screen and parent
+ * Constructs a UI icon: the cUIThing constructor (cUIThing_cUIThing, declared with only self, so the screen and parent
  * pass through in $a1 / $a2), cUIIcon_vtbl, the icon attributes at +0x74 (func_0021CCC8), mTextureID -1 and
  * mpTextureElem 0.
  *
@@ -1457,7 +1457,7 @@ extern void* cUIIcon_vtbl[];
  */
 extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIIcon_vtbl;
     func_0021CCC8(((char*)self) + 0x74);
     self->mTextureID = -1;
@@ -1617,15 +1617,15 @@ extern "C" void func_003A4FB8(cUIIcon* self, float x, float y)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4FE0);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
-extern "C" void* func_003977E8(void* p);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
+extern "C" void* cList_cList(void* p);
 extern void* cUIGroup_vtbl[];
 
 extern "C" void* func_003A4FE0(cUIGroup* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIGroup_vtbl;
-    func_003977E8(((char*)self) + 0x74);
+    cList_cList(((char*)self) + 0x74);
     return ((char*)self);
 }
 #endif
@@ -1633,21 +1633,21 @@ extern "C" void* func_003A4FE0(cUIGroup* self)
 INCLUDE_ASM("ui/uivector", cUIGroup_cUIGroup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
-extern "C" void* func_003977E8(void* p);
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
+extern "C" void* cList_cList(void* p);
 extern void* cUIGroup_vtbl[];
 
 /**
- * Constructs a UI group: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 / $a2),
+ * Constructs a UI group: the cUIThing constructor (cUIThing_cUIThing; the screen and parent pass through in $a1 / $a2),
  * cUIGroup_vtbl and its child list at +0x74 (cList::cList).
  *
  * @return @p self
  */
 extern "C" void* cUIGroup_cUIGroup(cUIGroup* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
-    func_003977E8(((char*)self) + 0x74);
+    cList_cList(((char*)self) + 0x74);
     return ((char*)self);
 }
 #endif
@@ -1718,10 +1718,10 @@ extern "C" void func_003A5120(int arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5140);
 #ifdef SKIP_ASM
-extern "C" void func_00397870(int);
+extern "C" void cList_getByIndex(int);
 
 extern "C" void func_003A5140(int arg0) {
-    func_00397870(arg0 + 0x74);
+    cList_getByIndex(arg0 + 0x74);
 }
 #endif
 //100%
@@ -1804,14 +1804,14 @@ INCLUDE_ASM("ui/uivector", cUIMenu_cUIMenu);
 #ifdef SKIP_ASM
 extern void* cUIMenu_vtbl[];
 // PORT: the other ctor in the unit calls this base ctor with (self, 0, 0)
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
-extern "C" void* func_003977E8(void* p);
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
+extern "C" void* cList_cList(void* p);
 extern "C" void* func_003A5338(void* self);
 
 /**
  * Constructs an empty menu.
  *
- * Runs the cUIThing constructor (func_0039FB30; the screen and parent, On Tour pScreen / parent, are not declared
+ * Runs the cUIThing constructor (cUIThing_cUIThing; the screen and parent, On Tour pScreen / parent, are not declared
  * here and stay in $a1/$a2), stores cUIGroup_vtbl and constructs the item list (+0x74), then stores cUIMenu_vtbl,
  * constructs mAttrMenu (func_003A5338), sets mStoredIndex 0xFF and clears mScrollItemCurrent, mScrollItemNum,
  * mScrollItemNumVisible, mScrollItemOffset, mpScrollBar and mpSelected.
@@ -1820,9 +1820,9 @@ extern "C" void* func_003A5338(void* self);
  */
 extern "C" void* cUIMenu_cUIMenu(cUIMenu* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
-    func_003977E8(((char*)self) + 0x74);
+    cList_cList(((char*)self) + 0x74);
     self->mVtbl = cUIMenu_vtbl;
     func_003A5338(((char*)self) + 0x90);
     self->mStoredIndex = 0xFF;
@@ -2001,13 +2001,13 @@ extern "C" unsigned char func_003A5418(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5420);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* func_003A5508(void* p);
 extern void* cUIPair_vtbl[];
 
 extern "C" void* func_003A5420(cUIPair* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIPair_vtbl;
     func_003A5508(((char*)self) + 0x74);
     return ((char*)self);
@@ -2017,19 +2017,19 @@ extern "C" void* func_003A5420(cUIPair* self)
 INCLUDE_ASM("ui/uivector", cUIPair_cUIPair);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 extern "C" void* func_003A5508(void* self);
 extern void* cUIPair_vtbl[];
 
 /**
- * Constructs a UI pair: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 / $a2),
+ * Constructs a UI pair: the cUIThing constructor (cUIThing_cUIThing; the screen and parent pass through in $a1 / $a2),
  * cUIPair_vtbl, its tAttrPair (func_003A5508), no entry or widget, and sets mActive (bit 1 of mAttr).
  *
  * @return @p self
  */
 extern "C" void* cUIPair_cUIPair(cUIPair* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIPair_vtbl;
     func_003A5508(((char*)self) + 0x74);
     self->mpEntry = 0;
@@ -2155,7 +2155,7 @@ extern "C" void cUIPair_setWidget(cUIPair* self, void* obj)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A55D8);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" unsigned char *func_003A65A0(unsigned char *arg0);
 extern "C" void *func_003A65B8(void *arg0);
 extern void* cUIListBox_vtbl[];
@@ -2163,7 +2163,7 @@ extern void* cUIListBox_vtbl[];
 extern "C" void* func_003A55D8(cUIListBox* self)
 {
     int i;
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIListBox_vtbl;
     func_003A65A0((unsigned char*)(((char*)self) + 0x74));
     char* p = ((char*)self) + 0x98;
@@ -2316,7 +2316,7 @@ extern "C" unsigned char func_003A57B0(cUIListBox* uiListBox) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A57B8);
 #ifdef SKIP_ASM
-extern "C" void* func_003977E8(void* p);
+extern "C" void* cList_cList(void* p);
 extern "C" void* func_003A65D8(void* p);
 extern void* D_004946C8[];
 
@@ -2326,7 +2326,7 @@ extern "C" void* func_003A57B8(cUIState* self)
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = D_004946C8;
     func_003A65D8(((char*)self) + 0x1C);
-    func_003977E8(((char*)self) + 0x24);
+    cList_cList(((char*)self) + 0x24);
     return ((char*)self);
 }
 #endif
@@ -2594,43 +2594,43 @@ int cUIState_onGainTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5AB8__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onInputBegin__FPv);
 #ifdef SKIP_ASM
-int func_003A5AB8(void* self)
+int cUIState_onInputBegin(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5AC0__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onLoseTransition__FPv);
 #ifdef SKIP_ASM
-int func_003A5AC0(void* self)
+int cUIState_onLoseTransition(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5AC8__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void func_003A5AC8(void* self)
+void cUIState_onLoseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5AD0__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onPreRender2D__FPv);
 #ifdef SKIP_ASM
-void func_003A5AD0(void* self)
+void cUIState_onPreRender2D(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5AD8__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onScreenEvent__FPv);
 #ifdef SKIP_ASM
-int func_003A5AD8(void* self)
+int cUIState_onScreenEvent(void* self)
 {
     return 0;
 }
@@ -2706,27 +2706,27 @@ void cUIState_onWidgetEvent(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B20__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onWidgetMenu__FPv);
 #ifdef SKIP_ASM
-int func_003A5B20(void* self)
+int cUIState_onWidgetMenu(void* self)
 {
     return 0x101;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B28__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onWidgetPair__FPv);
 #ifdef SKIP_ASM
-int func_003A5B28(void* self)
+int cUIState_onWidgetPair(void* self)
 {
     return 0x101;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B30__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onWidgetListBox__FPv);
 #ifdef SKIP_ASM
-int func_003A5B30(void* self)
+int cUIState_onWidgetListBox(void* self)
 {
     return 0x101;
 }
@@ -2782,8 +2782,8 @@ extern "C" void func_003A5B48(int* self, int flags)
 INCLUDE_ASM("ui/uivector", func_003A5B98);
 #ifdef SKIP_ASM
 extern "C" void* func_001DD580(void* self);
-extern "C" void* func_003977E8(void* p);
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cList_cList(void* p);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
 
 extern "C" void* func_003A5B98(cUIScreen* self)
@@ -2792,10 +2792,10 @@ extern "C" void* func_003A5B98(cUIScreen* self)
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = cUIScreen_vtbl;
     func_001DD580(((char*)self) + 0x14);
-    func_003977E8(((char*)self) + 0x18);
-    func_0039FB30(((char*)self) + 0x40, 0, 0);
+    cList_cList(((char*)self) + 0x18);
+    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
     *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
-    func_003977E8(((char*)self) + 0xB4);
+    cList_cList(((char*)self) + 0xB4);
     return ((char*)self);
 }
 #endif
@@ -2803,8 +2803,8 @@ extern "C" void* func_003A5B98(cUIScreen* self)
 INCLUDE_ASM("ui/uivector", cUIScreen_cUIScreen);
 #ifdef SKIP_ASM
 extern "C" void* func_001DD580(void* self);
-extern "C" void* func_003977E8(void* p);
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cList_cList(void* p);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
 
 /**
@@ -2826,13 +2826,13 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
     self->mpScreenHeader = 0;
     self->mVtbl = cUIScreen_vtbl;
     func_001DD580(((char*)self) + 0x14);
-    func_003977E8(((char*)self) + 0x18);
+    cList_cList(((char*)self) + 0x18);
     self->mpKeyframeBlock = 0;
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
-    func_0039FB30(((char*)self) + 0x40, 0, 0);
+    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
     *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
-    func_003977E8(((char*)self) + 0xB4);
+    cList_cList(((char*)self) + 0xB4);
     self->mpState = (cUIState*)pState;
     return ((char*)self);
 }
@@ -2919,13 +2919,13 @@ extern "C" int func_003A5D58(cUIScreen* uiScreen) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5D60);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" unsigned char* func_003A65E8(unsigned char* p);
 extern void* cUIText_vtbl[];
 
 extern "C" void* func_003A5D60(cUIText* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIText_vtbl;
     func_003A65E8((unsigned char*)(((char*)self) + 0x74));
     return ((char*)self);
@@ -3118,12 +3118,12 @@ extern "C" int func_003A5F58(cUIText* uiText) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5F60);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScrollBar_vtbl[];
 
 extern "C" void* func_003A5F60(cUIScrollBar* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIScrollBar_vtbl;
     return ((char*)self);
 }
@@ -3133,10 +3133,10 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_cUIScrollBar);
 #ifdef SKIP_ASM
 extern void* cUIScrollBar_vtbl[];
 // PORT: the other ctors in the unit call this base ctor with (self, 0, 0)
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 
 /**
- * Constructs a UI scroll bar: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 /
+ * Constructs a UI scroll bar: the cUIThing constructor (cUIThing_cUIThing; the screen and parent pass through in $a1 /
  * $a2), cUIScrollBar_vtbl, no background, knob, arrows or hide-on-empty object, meHideState, mValue, mNumValues and
  * mPage 0, and empty up / down animation names.
  *
@@ -3144,7 +3144,7 @@ extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
  */
 extern "C" void* cUIScrollBar_cUIScrollBar(cUIScrollBar* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mpObjBackground = 0;
     self->mVtbl = cUIScrollBar_vtbl;
     self->mpObjKnob = 0;
@@ -3252,12 +3252,12 @@ extern "C" int func_003A60D8(cUIScrollBar* uiScrollBar) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A60E0);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIProgress_vtbl[];
 
 extern "C" void* func_003A60E0(cUIProgress* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIProgress_vtbl;
     return ((char*)self);
 }
@@ -3266,18 +3266,18 @@ extern "C" void* func_003A60E0(cUIProgress* self)
 INCLUDE_ASM("ui/uivector", cUIProgress_cUIProgress);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 extern void* cUIProgress_vtbl[];
 
 /**
- * Constructs a UI progress bar: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 /
+ * Constructs a UI progress bar: the cUIThing constructor (cUIThing_cUIThing; the screen and parent pass through in $a1 /
  * $a2), cUIProgress_vtbl, no background or knob, mValue, mNumValues and mBackWidth 0.
  *
  * @return @p self
  */
 extern "C" void* cUIProgress_cUIProgress(cUIProgress* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIProgress_vtbl;
     self->mpObjBackground = 0;
     self->mpObjKnob = 0;
@@ -3333,12 +3333,12 @@ extern "C" void func_003A6188(cUIProgress* uiProgress, int arg1) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6190);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUISlider_vtbl[];
 
 extern "C" void* func_003A6190(cUISlider* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUISlider_vtbl;
     return ((char*)self);
 }
@@ -3347,18 +3347,18 @@ extern "C" void* func_003A6190(cUISlider* self)
 INCLUDE_ASM("ui/uivector", cUISlider_cUISlider);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
+extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 extern void* cUISlider_vtbl[];
 
 /**
- * Constructs a UI slider: the cUIThing constructor (func_0039FB30; the screen and parent pass through in $a1 / $a2),
+ * Constructs a UI slider: the cUIThing constructor (cUIThing_cUIThing; the screen and parent pass through in $a1 / $a2),
  * cUISlider_vtbl, mValue, mNumValues, mStartPixel and mBackWidth 0, no background or knob.
  *
  * @return @p self
  */
 extern "C" void* cUISlider_cUISlider(cUISlider* self)
 {
-    func_0039FB30_self(((char*)self));
+    cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUISlider_vtbl;
     self->mValue = 0;
     self->mNumValues = 0;
@@ -3417,17 +3417,17 @@ extern "C" void func_003A6248(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6250);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
-extern "C" void* func_003977E8(void* p);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
+extern "C" void* cList_cList(void* p);
 extern "C" unsigned char* func_003A6600(unsigned char* p);
 extern void* cUITextScroll_vtbl[];
 
 extern "C" void* func_003A6250(cUITextScroll* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUITextScroll_vtbl;
     func_003A6600((unsigned char*)(((char*)self) + 0x74));
-    func_003977E8(((char*)self) + 0x8C);
+    cList_cList(((char*)self) + 0x8C);
     return ((char*)self);
 }
 #endif
@@ -3559,10 +3559,10 @@ extern "C" void func_003A6400(int arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6420);
 #ifdef SKIP_ASM
-extern "C" void func_00397870(int);
+extern "C" void cList_getByIndex(int);
 
 extern "C" void func_003A6420(int arg0) {
-    func_00397870(arg0 + 0x8C);
+    cList_getByIndex(arg0 + 0x8C);
 }
 #endif
 //100%
@@ -3650,13 +3650,13 @@ extern "C" unsigned short func_003A64F0(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64F8);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FB30(void* self, int a, int b);
+extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* func_003A6618(void* p);
 extern void* cUIVector_vtbl[];
 
 extern "C" void* func_003A64F8(cUIVector* self)
 {
-    func_0039FB30(((char*)self), 0, 0);
+    cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIVector_vtbl;
     func_003A6618(((char*)self) + 0x74);
     return ((char*)self);

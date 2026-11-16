@@ -2,7 +2,7 @@
 #define UTIL_BXPS2MEMCARD_H
 
 // cPS2MemCard: the PS2 memory-card driver behind the abstract cMemCard interface (util/bxmemcard.cpp:
-// cMemCard::CreateInstance func_002C22C8 = new cPS2MemCard, DeleteInstance func_002C2300). It wraps libmc as an
+// cMemCard::CreateInstance func_002C22C8 = new cPS2MemCard, DeleteInstance cMemCard_DeleteInstance). It wraps libmc as an
 // asynchronous state machine: the public calls store their arguments and call SetState (func_002C48C0), which
 // issues the sceMc* request; Update (vtable slot 3, func_002C55D8) polls sceMcSync and moves to the next state.
 // Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
@@ -153,7 +153,7 @@ struct cPS2MemCard {
                                     //       &unk_030, &unk_034)), written with sceMcWrite, MEM_free'd; dtor frees it
     int unk_034;                    // 0x0034 [R] Reset 0; [U] the icon file's size (see unk_030)
     int mIconFileHandle;            // 0x0038 [P] "mIconFileHandle != 0"; [R] Reset -1; [U] SetState(0x28/0x2C/0x30) =
-                                    //       func_003DF690(icon path, 0x100) (async open); Update polls and releases it
+                                    //       ASYNCFILE_load(icon path, 0x100) (async open); Update polls and releases it
     int unk_03C;                    // 0x003C [R] Reset 0; [U] Update sets 0/1 (operation outcome); func_002C42B0,
                                     //       func_002C4410, SetState(0xB) clear it; retail slot 75 func_002D39B0 returns it
     int unk_040;                    // 0x0040 [R] Reset 0; [U] nonzero while a sceMcSync is pending ([X] Rust); slot 11

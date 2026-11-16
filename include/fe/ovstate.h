@@ -39,7 +39,7 @@ struct cOVState {
     int mAttrState;             // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218
     cUIState* mpParentState;    // 0x020 [O]; [R] the 2-argument ctor's parent argument (func_0039E318)
     char mScreens[0x1C];        // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C);
-                                //       [R] constructed by func_003977E8(self + 0x24), destroyed in func_0039E390
+                                //       [R] constructed by cList_cList(self + 0x24), destroyed in func_0039E390
     cUIScreen* mpScreen;        // 0x040 [O]; [R] ctor zeroes it; [U] cUIScreen_getObjectByHashName(mpScreen, ...)
     signed char mUserNum;       // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];          // 0x045 padding
@@ -48,7 +48,7 @@ struct cOVState {
     int mAllowPauseMenu;        // 0x04C [P] allowPauseMenu (preview 0x48); [R] func_0021C678 zeroes it;
                                 //       [U] cOVState_allowPauseMenu returns it
     int mRestoreCutSceneMode;   // 0x050 [O]; [U] cOVState_onCreateScreen sets it when Game->CutSceneTransitionMan's
-                                //       mode is 1 or 3 (after func_002EA820), onDestroyScreen undoes it (func_002EA860)
+                                //       mode is 1 or 3 (after cCutSceneTransitionMan_ForceToRegularMode), onDestroyScreen undoes it (cCutSceneTransitionMan_ForceToCutSceneMode)
     int mRemovePDA;             // 0x054 [O]; [R] zeroed by func_0021C678; [U] cOVState_onDestroyScreen calls
                                 //       cOVStateManager_removePDATemplate when it is set
     char mszChatBuff[0x40];     // 0x058 [O] (On Tour: char[63]); [R] func_0021C678 copies " " into it (sh);

@@ -3,7 +3,7 @@
 
 // cUIGroup: a UI object that owns child objects (record type 0x10; also the root group of every cUIScreen and the base
 // of cUIMenu). Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "cUIGroup") + the cUIThing ctor
-// func_0039FB30, stores cUIGroup_vtbl (D_004949E8) and constructs mList (func_003977E8 on this + 0x74); the default
+// cUIThing_cUIThing, stores cUIGroup_vtbl (D_004949E8) and constructs mList (cList_cList on this + 0x74); the default
 // ctors func_003A4FE0 / cUIGroup_cUIGroup (ui/uivector) do the same. Base: cUIThing (ui/uithing.h, 0x74) <- cListNode,
 // written out flat below.
 // Methods: vtable slots 0 ~cUIGroup (cUIGroup__cUIGroup), 1-2 traverseFlat/traverseRecurse, 6 setFocus, 9 setUIData,
@@ -49,7 +49,7 @@ struct cUIGroup {
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUIGroup
-    cList mList;                     // 0x074 [O] the children (util/list.h, 0x1C); [R] ctor func_003977E8 on this + 0x74
+    cList mList;                     // 0x074 [O] the children (util/list.h, 0x1C); [R] ctor cList_cList on this + 0x74
                                      //       (createObjectByStruct, func_003A4FE0, cUIGroup_cUIGroup), dtor cUIGroup__cUIGroup
                                      //       (cList_destroyList on this + 0x74, vptrs 0x8C / 0x88 / 0x7C);
                                      //       [U] func_003A5100..func_003A5180 (first/last/getByIndex/addToFront/addToEnd

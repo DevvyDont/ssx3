@@ -14,7 +14,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int cBELibrary_getRiderIndex(int index);
 int GetHashValue32(char* str);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
-extern "C" int func_00398380(void* list, int hash);
+extern "C" int cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" void func_001A0508(void* mgr, int idx, int ch, int a3);
 extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 extern "C" void func_0014AEA8(void* self, int a1, int a2);
@@ -105,7 +105,7 @@ static inline int BoardClass_8DB8(int kind)
 
 static inline int Find_8DB8(char* mgr, int hash)
 {
-    return func_00398380(mgr + 0x58, hash);
+    return cUITextureBank_getElementByHashname(mgr + 0x58, hash);
 }
 
 /**
@@ -670,7 +670,7 @@ struct sEquipTable;
 int GetHashValue32(char* str);
 void* cList_first(cList* list);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0039E510(void* self);
+extern "C" void cUIState_onUpdate(void* self);
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(void* self);
 extern "C" void func_0019A638(void* self);
@@ -687,14 +687,14 @@ struct sVEntryK199938 {
 /**
  * Updates the equip-gear state each frame: the icon file's arrival, the "loading text" and the preview loads.
  *
- * Runs the base update func_0039E510(); once the icon file (0xA64) is ready in the FE file cache, marks it
+ * Runs the base update cUIState_onUpdate(); once the icon file (0xA64) is ready in the FE file cache, marks it
  * (0xA60) and refreshes the selected item's preview (func_0019A9B8). "loading text" shows in store mode while
  * a large preview is pending (0xA6C, 0x95C), otherwise until the FE rider's model is shown (+0xCC8). Then
  * func_0019A638() advances the preview load and func_0019BFE8() places the camera and models.
  */
 extern "C" void cFEStateCharEquip_onUpdate(void* self)
 {
-    func_0039E510(self);
+    cUIState_onUpdate(self);
     if (*(int*)((char*)self + 0xA60) == 0
         && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
                          *(int*)((char*)self + 0xA64))) {
@@ -3278,8 +3278,8 @@ struct sEquipSlot_DC20;
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* ptr);
-extern "C" int func_003B4818(void* data);
-extern "C" void func_003B47F8(void* src, void* dst);
+extern "C" int unpacksizez(void* data);
+extern "C" void unpack(void* src, void* dst);
 extern "C" void func_0019D578(sEquipTable_DC20* self, int bank, int size);
 extern "C" void func_0019D738(sEquipTable_DC20* self, int bank, int size);
 extern "C" void MUTEX_lock(void* mutex);
@@ -3305,7 +3305,7 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
         return;
     if (slot->data == 0)
         return;
-    int size = func_003B4818(slot->data);
+    int size = unpacksizez(slot->data);
     if (size <= 0)
         return;
     func_0019D578(self, bank, size);
@@ -3316,7 +3316,7 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
         func_0019D738(self, bank, size);
         buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     }
-    func_003B47F8(slot->data, buf);
+    unpack(slot->data, buf);
     if (slot->data != 0)
         cMemMan_free(slot->data);
     slot->data = buf;
@@ -3680,7 +3680,7 @@ struct sEquipTable_DC20;
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int BXFILE_sizez(const char* name);
 extern "C" int func_003DF748(const char* name, void* data, int size);
-extern "C" int func_003E1BB8(const char* name, void* data, int size);
+extern "C" int FILE_loadatz(const char* name, void* data, int size);
 extern "C" void func_0019D578(sEquipTable_DC20* self, int bank, int size);
 extern "C" void func_0019D738(sEquipTable_DC20* self, int bank, int size);
 extern "C" void MUTEX_lock(void* mutex);
@@ -3720,7 +3720,7 @@ extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i)
         *(int*)((char*)self + 0xB4004) += 1;
     } else {
         slot->size = size;
-        func_003E1BB8(slot->name, slot->data, size);
+        FILE_loadatz(slot->name, slot->data, size);
         slot->state = 1;
     }
 }
@@ -3862,7 +3862,7 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DD10);
 #ifdef SKIP_ASM
 extern void* D_004A196C;
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 
 struct sSlotK19DD10 {
     int state;
@@ -3884,12 +3884,12 @@ extern "C" int func_0019DD10(const int* a, const int* b)
     sSlotK19DD10* sb = &row->slots[*b & 0xFFFF];
     if (sa->state == 3 && sa->type == 8 && sa->f11C == 0) {
         if (sb->state == 3 && sb->type == 8 && sb->f11C == 0)
-            return func_0041AA88(sa->name, sb->name);
+            return strcasecmp(sa->name, sb->name);
         return -1;
     }
     if (sb->state == 3 && sb->type == 8 && sb->f11C == 0) {
         if (sa->state == 3 && sa->type == 8 && sa->f11C == 0)
-            return func_0041AA88(sa->name, sb->name);
+            return strcasecmp(sa->name, sb->name);
         return 1;
     }
     return 0;
@@ -3900,7 +3900,7 @@ extern "C" int func_0019DD10(const int* a, const int* b)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DE18);
 #ifdef SKIP_ASM
 extern void* D_004A196C;
-extern "C" int func_0041AA88(const char* a, const char* b);
+extern "C" int strcasecmp(const char* a, const char* b);
 
 struct sSlotK19DE18 {
     int state;
@@ -3922,12 +3922,12 @@ extern "C" int func_0019DE18(const int* a, const int* b)
     sSlotK19DE18* sb = &row->slots[*b & 0xFFFF];
     if (sa->state == 3 && sa->type == 0xB && sa->f11C == 0) {
         if (sb->state == 3 && sb->type == 0xB && sb->f11C == 0)
-            return func_0041AA88(sa->name, sb->name);
+            return strcasecmp(sa->name, sb->name);
         return -1;
     }
     if (sb->state == 3 && sb->type == 0xB && sb->f11C == 0) {
         if (sa->state == 3 && sa->type == 0xB && sa->f11C == 0)
-            return func_0041AA88(sa->name, sb->name);
+            return strcasecmp(sa->name, sb->name);
         return 1;
     }
     return 0;

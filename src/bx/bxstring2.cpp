@@ -120,19 +120,19 @@ INCLUDE_ASM("bx/bxstring2", func_00269E40);
 
 INCLUDE_ASM("bx/bxstring2", func_00269EA0);
 
-INCLUDE_ASM("bx/bxstring2", func_00269EC0);
+INCLUDE_ASM("bx/bxstring2", cAIPath_populateDataWithDefaults);
 
-INCLUDE_ASM("bx/bxstring2", func_00269ED8);
+INCLUDE_ASM("bx/bxstring2", cAIPath_populateData);
 
-INCLUDE_ASM("bx/bxstring2", func_00269F18);
+INCLUDE_ASM("bx/bxstring2", cAIPath_getResetPos);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A068);
+INCLUDE_ASM("bx/bxstring2", cTrackPath_populateDataWithDefaults);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A070);
+INCLUDE_ASM("bx/bxstring2", cTrackPath_populateData);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A090);
+INCLUDE_ASM("bx/bxstring2", cTrackPath_getEventsInRange);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A0B8);
+INCLUDE_ASM("bx/bxstring2", cTrackPath_isForkInPath);
 
 INCLUDE_ASM("bx/bxstring2", func_0026A180);
 
@@ -144,17 +144,17 @@ INCLUDE_ASM("bx/bxstring2", func_0026A428);
 
 INCLUDE_ASM("bx/bxstring2", func_0026A638);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A8B8);
+INCLUDE_ASM("bx/bxstring2", cPath_getPathHeading);
 
 INCLUDE_ASM("bx/bxstring2", func_0026A9B0);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AA80);
+INCLUDE_ASM("bx/bxstring2", cPath_getEventsInRange);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AB20);
+INCLUDE_ASM("bx/bxstring2", cPath_getPathPos);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AC48);
+INCLUDE_ASM("bx/bxstring2", cPath_getLength);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AC88);
+INCLUDE_ASM("bx/bxstring2", cPath_isForkInPath);
 
 INCLUDE_ASM("bx/bxstring2", func_0026AD70);
 
@@ -162,15 +162,15 @@ INCLUDE_ASM("bx/bxstring2", func_0026ADA0);
 
 INCLUDE_ASM("bx/bxstring2", func_0026ADF0);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AF00);
+INCLUDE_ASM("bx/bxstring2", cPathSys_purgePaths);
 
 INCLUDE_ASM("bx/bxstring2", func_0026AF70);
 
 INCLUDE_ASM("bx/bxstring2", func_0026AF88);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AF98);
+INCLUDE_ASM("bx/bxstring2", cPathSys_getNearResetPaths);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AFB8);
+INCLUDE_ASM("bx/bxstring2", cPathSys_getNearAIPaths);
 
 INCLUDE_ASM("bx/bxstring2", func_0026B178);
 

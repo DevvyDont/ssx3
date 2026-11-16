@@ -168,7 +168,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
 extern "C" void sprintf2(void* buf, const char* fmt, void* str, int n);
 extern "C" void cUIText_setUnicodeString(void* t, void* str);
-extern "C" int func_0026B680(void* tbl, sV3_87F0* pos);
+extern "C" int cPathSys_getNearestSessionPoint(void* tbl, sV3_87F0* pos);
 extern char str_SessionPointpct_d[];
 extern char str_kT_MAPSessionPt[];
 extern char str_kT_CMNTopOfRun[];
@@ -185,7 +185,7 @@ extern char gPaths[];
  * For the 8 "SessionPoint%d" texts: points below the location's session count are enabled and labelled
  * kT_CMNTopOfRun (first), kT_CMNBottomOfRun (last, unless there are exactly 2) or "<kT_MAPSessionPt> n", with
  * misc data n; the rest are hidden and disabled. Then selects in "SessionViewPoints" the point nearest the
- * player's rider (func_0026B680 on gPaths, minus 1), shows the indicators and gives the confirm Yes/No
+ * player's rider (cPathSys_getNearestSessionPoint on gPaths, minus 1), shows the indicators and gives the confirm Yes/No
  * entries misc data 0/1 and the regular colour.
  *
  * @param selfp  the cOVState_MAP (raw pointer)
@@ -241,7 +241,7 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
             riderPos3.x = riderPos.x;
             riderPos3.y = riderPos.y;
             riderPos3.z = riderPos.z;
-            int nearestPointId = func_0026B680(gPaths, &riderPos3);
+            int nearestPointId = cPathSys_getNearestSessionPoint(gPaths, &riderPos3);
             int idx = nearestPointId - 1;
             if (nearestPointId == 0) {
                 idx = 0;
@@ -306,25 +306,25 @@ extern "C" void cOVState_MAP_onGainFocus(void* self, int pPrevState)
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
-extern "C" void func_0020A088(void* self);
+extern "C" void cOVState_MAP_cleanupIndicators(void* self);
 extern "C" void cOVState_onDestroyScreen(cOVState* self);
 
 /**
  * Tears down the map overlay: unloads its map picture, deletes its marker widgets, then runs the base teardown.
  *
- * Unloads the async file slot kept at 0xC4, deletes the cursor and the two sets of 8 widgets (func_0020A088()),
+ * Unloads the async file slot kept at 0xC4, deletes the cursor and the two sets of 8 widgets (cOVState_MAP_cleanupIndicators()),
  * then calls cOVState_onDestroyScreen().
  */
 extern "C" void cOVState_MAP_onDestroyScreen(void* self)
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, *(int*)((char*)self + 0xC4));
-    func_0020A088(self);
+    cOVState_MAP_cleanupIndicators(self);
     cOVState_onDestroyScreen((cOVState*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208BB8);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupScreenExit);
 #ifdef SKIP_ASM
 struct sVEntry00208BB8 {
     short delta;
@@ -337,7 +337,7 @@ struct sObj00208BB8 {
     sVEntry00208BB8* vt;
 };
 
-extern "C" void func_00208BB8(void* self)
+extern "C" void cOVState_MAP_setupScreenExit(void* self)
 {
     sObj00208BB8* o;
     *(int*)((char*)self + 0xDC) = 1;
@@ -360,8 +360,8 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetEvent);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0028B180();
 extern "C" void func_0028FAE0(void* self);
-extern "C" void func_00231250(void* self, int a, int b, int refresh);
-extern "C" void func_002095E8(void* self, void* obj, int on);
+extern "C" void cGame_setState(void* self, int a, int b, int refresh);
+extern "C" void cOVState_MAP_setWidgetHiliteColor(void* self, void* obj, int on);
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(void* self, void* obj, int on);
 void* func_0039F190_8C28(void* self, int a1) __asm__("func_0039F190");
 extern "C" void cUIState_showObjSafe(void* self, char* name);
@@ -396,8 +396,8 @@ public:
  *
  * Event 5 with the popup closed opens it for the picked session (misc data into +0xD8). With it open, "No"
  * closes it; "Yes" stores the session in mission interface (10) + 0x10, sets cOVStateManager_mStatus = 3, pops the
- * pause-mode stack (D_005366E8/D_004A2A54 into cPauseState_Flags), calls func_00231250(game, 0xF, 0, 0) and closes
- * the overlay (func_0020A088, func_00208BB8).
+ * pause-mode stack (D_005366E8/D_004A2A54 into cPauseState_Flags), calls cGame_setState(game, 0xF, 0, 0) and closes
+ * the overlay (cOVState_MAP_cleanupIndicators, cOVState_MAP_setupScreenExit).
  *
  * Event 6 closes the popup, or else closes the overlay, pops the state stack and marks this state pending
  * delete with mode 7. Events 1 and 2 (highlight on/off) recolour the popup's Yes/No buttons.
@@ -427,9 +427,9 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
             void* game = SSXApp->Game;
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_00231250(game, 0xF, 0, 0);
-            func_0020A088(self);
-            func_00208BB8(self);
+            cGame_setState(game, 0xF, 0, 0);
+            cOVState_MAP_cleanupIndicators(self);
+            cOVState_MAP_setupScreenExit(self);
         } else {
             *(int*)(self + 0xBC) = 1;
             *(int*)(self + 0xD8) = *(int*)((char*)pWidget + 0x18);
@@ -443,15 +443,15 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
             *(int*)(self + 0xBC) = 0;
             cOVState_MAP_setupPopup(self);
         } else {
-            func_0020A088(self);
-            func_00208BB8(self);
+            cOVState_MAP_cleanupIndicators(self);
+            cOVState_MAP_setupScreenExit(self);
             func_0039F190_8C28(*(char**)(self + 0x10) + 0x18, 1);
             *(int*)(self + 0x1C) = (*(int*)(self + 0x1C) & ~0x3F00) | 0x780;
         }
         break;
     case 1:
         if (*(int*)(self + 0xBC) != 0) {
-            func_002095E8(self, pWidget, 1);
+            cOVState_MAP_setWidgetHiliteColor(self, pWidget, 1);
             if (*(int*)((char*)pWidget + 0x18) == 0) {
                 cUIState_showObjSafe(self, str_ConfirmMenu_Yes_x);
                 cUIState_hideObjSafe(self, str_ConfirmMenu_No_x);
@@ -813,9 +813,9 @@ extern "C" void func_00209370(sMap_9370* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_002095E8);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setWidgetHiliteColor);
 #ifdef SKIP_ASM
-struct sVEntry_func_002095E8 {
+struct sVEntry_cOVState_MAP_setWidgetHiliteColor {
     short delta;
     short index;
     void (*fn)(void*, void*);
@@ -823,13 +823,13 @@ struct sVEntry_func_002095E8 {
 extern char kMAPCOLOR_HIGHLIGHTED[];
 extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 
-extern "C" void func_002095E8(void* self, void* obj, int on)
+extern "C" void cOVState_MAP_setWidgetHiliteColor(void* self, void* obj, int on)
 {
     if (on != 0) {
-        sVEntry_func_002095E8* vt = *(sVEntry_func_002095E8**)((char*)obj + 0x8);
+        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
         vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED);
     } else {
-        sVEntry_func_002095E8* vt = *(sVEntry_func_002095E8**)((char*)obj + 0x8);
+        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
         vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED_LOCKED);
     }
 }
@@ -943,8 +943,8 @@ struct cList;
 struct cListNode;
 void cList_addToEnd(cList* list, cListNode* node);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_00154678(sBounds_96A8* out, void* iface, int id);
-extern "C" void* func_0039FB30(void* self, void* parent, int a2);
+extern "C" void cBEMissionInterface_getPictureDBRecord(sBounds_96A8* out, void* iface, int id);
+extern "C" void* cUIThing_cUIThing(void* self, void* parent, int a2);
 extern "C" void func_0021CCC8(void* p);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern char str_Player_Indicator_Icon[];
@@ -962,7 +962,7 @@ static inline float Absf_96A8(float v)
 /**
  * Creates the hidden map icon that marks the player's position.
  *
- * Maps the player's rider position into the location's map bounds (func_00154678) as a 356 x 266 picture,
+ * Maps the player's rider position into the location's map bounds (cBEMissionInterface_getPictureDBRecord) as a 356 x 266 picture,
  * then adds a cUIIcon ("location" texture, 17 x 17, offset to the map at 252, 97) to the screen's object
  * list.
  *
@@ -977,13 +977,13 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     char* rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
     sBounds_96A8 bounds;
-    func_00154678(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));
+    cBEMissionInterface_getPictureDBRecord(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));
     float fx = Absf_96A8((pp.x - bounds.minX) / (bounds.maxX - bounds.minX));
     int px = (int)(fx * 356.0f);
     float fy = Absf_96A8((pp.y - bounds.minY) / (bounds.maxY - bounds.minY));
     int py = (int)(fy * 266.0f);
     char* ind = (char*)cMemMan_alloc(0x88, str_Player_Indicator_Icon, 0x20000000, 0);
-    func_0039FB30(ind, self->screen, 0);
+    cUIThing_cUIThing(ind, self->screen, 0);
     *(void***)(ind + 0x8) = cUIIcon_vtbl;
     func_0021CCC8(ind + 0x74);
     *(int*)(ind + 0x78) = -1;
@@ -1007,8 +1007,8 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
-extern "C" int func_0026B598(void* tbl, int kind, int idx);
-extern "C" char* func_0026B5E0(void* tbl, int kind, int idx);
+extern "C" int cPathSys_isStartpoint(void* tbl, int kind, int idx);
+extern "C" char* cPathSys_getStartpoint(void* tbl, int kind, int idx);
 extern char gPaths[];
 extern char str_Map_Indicator_Icon[];
 extern char str_dot_visited[];
@@ -1034,7 +1034,7 @@ struct cUIIcon_9970 {
     char d[0x88];
     cUIIcon_9970(char* screen)
     {
-        func_0039FB30(this, screen, 0);
+        cUIThing_cUIThing(this, screen, 0);
         *(void***)((char*)this + 0x8) = cUIIcon_vtbl;
         func_0021CCC8((char*)this + 0x74);
         *(int*)((char*)this + 0x78) = -1;
@@ -1052,7 +1052,7 @@ struct sIconPos_9970 {
 /**
  * Creates the hidden map icons for every session point on the current location.
  *
- * For each point that exists (func_0026B598/func_0026B5E0 on gPaths), maps its position into the 356 x
+ * For each point that exists (cPathSys_isStartpoint/cPathSys_getStartpoint on gPaths), maps its position into the 356 x
  * 266 picture and adds two cUIIcons: a "dot_visited" dot and an "indicator" highlight (18 x 18), keeping the
  * highlight's position too.
  *
@@ -1066,11 +1066,11 @@ extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
     self->nSessions = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
     sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
     for (int i = 0; i < self->nSessions; i++) {
-        if (func_0026B598(gPaths, 2, i + 1) != 0) {
-        const char* sp = (const char*)func_0026B5E0(gPaths, 2, i + 1);
+        if (cPathSys_isStartpoint(gPaths, 2, i + 1) != 0) {
+        const char* sp = (const char*)cPathSys_getStartpoint(gPaths, 2, i + 1);
         sV3_96A8 spPos = *(sV3_96A8*)(sp + 0x8);
         sBounds_96A8 pictureRecord;
-        func_00154678(&pictureRecord, ifMap, *cBENewRaceInterface_getLocation(ifGame));
+        cBEMissionInterface_getPictureDBRecord(&pictureRecord, ifMap, *cBENewRaceInterface_getLocation(ifGame));
         unsigned int sessionPoint_x;
         {
             float across = Absf_96A8((spPos.x - pictureRecord.minX) / (pictureRecord.maxX - pictureRecord.minX));
@@ -1219,7 +1219,7 @@ extern "C" void func_00209FD0(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A088);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_cleanupIndicators);
 #ifdef SKIP_ASM
 class cUIObj_A088 {
 public:
@@ -1242,7 +1242,7 @@ struct sMap_A088 {
     cUIObj_A088* b[8];      // 0x104
 };
 
-extern "C" void func_0020A088(void* p)
+extern "C" void cOVState_MAP_cleanupIndicators(void* p)
 {
     sMap_A088* self = (sMap_A088*)p;
     if (self->cursor != 0) {
@@ -1309,7 +1309,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_hud_b[];
-extern "C" void func_002EA820(void* self);
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 struct sVEntry0020A380 {
     short delta;
@@ -1328,7 +1328,7 @@ struct sSelf0020A380 {
  * Common overlay set-up: leaves cut-scene TV mode and tells the HUD an overlay opened.
  *
  * If the game's cut-scene transition manager (+0x64) is not in regular mode, forces regular mode
- * (func_002EA820) and sets mRestoreCutSceneMode when it was in, or going to, cut-scene mode. Then calls
+ * (cCutSceneTransitionMan_ForceToRegularMode) and sets mRestoreCutSceneMode when it was in, or going to, cut-scene mode. Then calls
  * virtual slot 24 of the "hud" state with (3, 0).
  */
 extern "C" void cOVState_onCreateScreen(cOVState* self)
@@ -1339,7 +1339,7 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
         char* cutSceneMan = *(char**)(game + 0x64);
         int mode = *(int*)(cutSceneMan + 0x10);
         if (mode != 0) {
-            func_002EA820(cutSceneMan);
+            cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
             if (mode == 1 || mode == 3) {
                 self->mRestoreCutSceneMode = 1;
             }
@@ -1358,7 +1358,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onDestroyScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_hud_b[];
-extern "C" void func_002EA860(void* self);
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void cOVStateManager_removePDATemplate();
 void* cUIState_onDestroyScreen(void* self);
@@ -1371,7 +1371,7 @@ struct sVEntry0020A430 {
 /**
  * Common overlay tear-down: restores cut-scene TV mode, tells the HUD, removes the PDA template.
  *
- * Undoes cOVState_onCreateScreen (func_002EA860 when mRestoreCutSceneMode is set; "hud" slot 24 with (4, 0)),
+ * Undoes cOVState_onCreateScreen (cCutSceneTransitionMan_ForceToCutSceneMode when mRestoreCutSceneMode is set; "hud" slot 24 with (4, 0)),
  * calls cOVStateManager_removePDATemplate when mRemovePDA is set, then cUIState_onDestroyScreen.
  */
 extern "C" void cOVState_onDestroyScreen(cOVState* self)
@@ -1379,7 +1379,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
     if (self->mRestoreCutSceneMode != 0) {
         char* game = (char*)SSXApp->Game;
         if (game != 0) {
-            func_002EA860(*(void**)(game + 0x64));
+            cCutSceneTransitionMan_ForceToCutSceneMode(*(void**)(game + 0x64));
             self->mRestoreCutSceneMode = 0;
         }
     }

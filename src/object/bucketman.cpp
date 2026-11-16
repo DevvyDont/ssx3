@@ -548,9 +548,9 @@ struct sBucketEntry {
 };
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00355260);
+INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
 #ifdef SKIP_ASM
-extern "C" void func_00355260(void* self, int a1)
+extern "C" void cBucketMan_setsortflag(void* self, int a1)
 {
     sBucketEntry* p = *(sBucketEntry**)((char*)self + 0x4);
     p[a1].flags |= 1;

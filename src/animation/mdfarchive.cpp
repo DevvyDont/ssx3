@@ -5,7 +5,7 @@ INCLUDE_ASM("animation/mdfarchive", cMdfArchive_getModelPartByIndex);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void MEM_copy(void*, void*, int);
-extern "C" void func_003B47F8(void* src, void* dst);
+extern "C" void unpack(void* src, void* dst);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_MdfModel_pct_s[];
@@ -30,7 +30,7 @@ struct sMdfArchive_00314CB0
  * Returns a new heap copy of one archive part: its 0x60-byte header followed by the unpacked data.
  *
  * The block is dataSize + 0x60 bytes, tagged "MdfModel <part name>" with flags 0x3000000. When dataSize is
- * not 0, the part's packed data at data + dataOffset is unpacked behind the header with func_003B47F8 (EA's
+ * not 0, the part's packed data at data + dataOffset is unpacked behind the header with unpack (EA's
  * packed-data decoder).
  *
  * @param i  part index in the archive
@@ -44,18 +44,18 @@ extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int
     MEM_copy(model, &self->parts[i], 0x60);
     if (self->parts[i].dataSize)
     {
-        func_003B47F8(self->data + self->parts[i].dataOffset, model + 0x60);
+        unpack(self->data + self->parts[i].dataOffset, model + 0x60);
     }
     return model;
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314D60);
+INCLUDE_ASM("animation/mdfarchive", gameanimcmp);
 #ifdef SKIP_ASM
 extern unsigned int* gameanimcmphack;
 
-extern "C" int func_00314D60(int* a, int* b)
+extern "C" int gameanimcmp(int* a, int* b)
 {
     return gameanimcmphack[*a] < gameanimcmphack[*b] ? -1 : 1;
 }
@@ -101,7 +101,7 @@ INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_initMap);
 int GetHashValue32(char* str);
 extern char* D_0048CFC0[];
 extern unsigned int* gameanimcmphack;
-extern "C" int func_00314D60(int* a, int* b);
+extern "C" int gameanimcmp(int* a, int* b);
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(int*, int*));
 extern "C" void* func_00416210(void* dst, int c, int n);
 
@@ -116,7 +116,7 @@ struct sMdfHashTable_00314DD8
  * Builds the game-animation hash index and marks every game animation as unmapped.
  *
  * Hashes the 518 names of D_0048CFC0 ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
- * sorts order[] by hash with qsort (func_00418EF8; the comparator func_00314D60 reads the hashes through
+ * sorts order[] by hash with qsort (func_00418EF8; the comparator gameanimcmp reads the hashes through
  * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (func_00416210). func_00314E88
  * (On Tour lookupGAD) binary-searches this index.
  */
@@ -129,7 +129,7 @@ extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
         self->hash[i] = hashValue;
     }
     gameanimcmphack = self->hash;
-    func_00418EF8(self->order, 0x206, 4, func_00314D60);
+    func_00418EF8(self->order, 0x206, 4, gameanimcmp);
     gameanimcmphack = 0;
     func_00416210(self->map, -1, 0x818);
 }

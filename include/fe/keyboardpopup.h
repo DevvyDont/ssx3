@@ -43,7 +43,7 @@ struct cKeyboardPopup {
     cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument; [U] receives onWidgetEvent (slot 19),
                                     //       handleEvent (slot 24) and onUpdate (slot 12) calls
     char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C);
-                                    //       [R] constructed by func_003977E8(self + 0x24)
+                                    //       [R] constructed by cList_cList(self + 0x24)
     cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] cKeyboardPopup_onCreateScreen stores "Fullkeyboard"
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding

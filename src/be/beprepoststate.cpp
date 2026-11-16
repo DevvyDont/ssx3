@@ -362,15 +362,15 @@ extern "C" void cBEPreRaceState_onEnter(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_001567B8);
+INCLUDE_ASM("be/beprepoststate", cBEProfileLib_init);
 #ifdef SKIP_ASM
-extern "C" void func_00151600(void* p, int i, int arg);
+extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
 
-extern "C" void func_001567B8(void* self, int arg)
+extern "C" void cBEProfileLib_init(void* self, int arg)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        func_00151600((char*)self + i * 0xF88, i, arg);
+        cBECharProfileDB_init((char*)self + i * 0xF88, i, arg);
     }
 }
 #endif

@@ -28,7 +28,7 @@ int cBECharacterInterface_getWeight(void* self, int riderIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014EF70);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getIsGoofyFoot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // sCharWeightEntry (declared above in the unit) has no field at 0x44 yet;
@@ -41,7 +41,7 @@ struct sCharWeightEntryView {
 };
 extern sCharWeightEntryView D_00530970_view[] __asm__("D_00530970");
 
-extern "C" bool func_0014EF70(void* self, int riderIndex)
+extern "C" bool cBECharacterInterface_getIsGoofyFoot(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
     return D_00530970_view[charID].field_0x44 != 0;
@@ -49,7 +49,7 @@ extern "C" bool func_0014EF70(void* self, int riderIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014EFA8);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getScale);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -69,7 +69,7 @@ extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
 
 // Model scale for a rider: fixed values for the cheat characters,
 // 0.8 for mission men, otherwise the character table's percentage.
-extern "C" float func_0014EFA8(void* self, int riderIndex)
+extern "C" float cBECharacterInterface_getScale(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
     int cheat = cBELibrary_getCheatCharacterID(riderIndex);

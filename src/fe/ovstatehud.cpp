@@ -28,7 +28,7 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void* func_0028B180();
-extern "C" void func_00294F78(void*, int);
+extern "C" void cSSXAudio_MenuSound(void*, int);
 extern signed char D_00535C10[];
 extern char str_hiscorelist[];
 extern char str_helptext02[];
@@ -73,7 +73,7 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
         cUIState_hideObjSafe(self, str_helptxt01);
         cUIState_hideObjSafe(self, str_helptxt02);
     }
-    func_00294F78(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(func_0028B180(), 0xE);
 }
 #endif
 
@@ -511,7 +511,7 @@ extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sC
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E9A30);
+INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_cOVStateHUD1P);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E2A0_9A30(void* self, int a1) __asm__("func_0039E2A0");
@@ -526,7 +526,7 @@ struct sElem_9A30 {
 };
 
 // HUD overlay state constructor: base state, vtable, the two sub-panels and default scales.
-extern "C" void* func_001E9A30(void* arg0, int a1)
+extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* arg0, int a1)
 {
     char* self = (char*)arg0;
     func_0039E2A0_9A30(self, a1);
@@ -567,12 +567,12 @@ extern "C" void func_001E94E0_reen(void* self, char* str, int a2, sVec2f* pos) _
 // (prototype from their definition at line 328)
 extern "C" void func_001E9540_reen(void* self, unsigned short* str, int a2, sVec2f* pos) __asm__("func_001E9540");
 
-extern "C" void* func_00398380(void* self, int id);
+extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int func_003983F0(void* self, int key);
 extern "C" void func_001F10F8_reen(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags) __asm__("func_001F10F8");
 extern "C" void func_0020EB50(void* self, void* screen, void* rect);
 extern "C" void func_003DCA40(unsigned short* dst, const char* src);
-extern "C" void func_003DC9F8(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void USTR_sprintf(unsigned short* dst, const unsigned short* fmt, ...);
 unsigned int BXrand();
 extern char D_004A2108[];
 extern char str_fefont[];
@@ -783,7 +783,7 @@ public:
 static inline void* findElem_9AD0(char* engine, char* name)
 {
     int hash = GetHashValue32(name);
-    return func_00398380(engine + 0x58, hash);
+    return cUITextureBank_getElementByHashname(engine + 0x58, hash);
 }
 static inline int findFont_9AD0(void* bank, char* name) { return func_003983F0(bank, GetHashValue32(name)); }
 
@@ -845,7 +845,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     self->hash = GetHashValue32(str_hud_b);
     sTok_9AD0* entry = D_004C8980_9AD0;
     while (entry->hash != 0) {
-        sUIItem_9AD0* it = (sUIItem_9AD0*)func_00398380(self->engine + 0x58, entry->name);
+        sUIItem_9AD0* it = (sUIItem_9AD0*)cUITextureBank_getElementByHashname(self->engine + 0x58, entry->name);
         entry->tex = it->handle;
         entry->uv0 = t2Vector(it->getX0(), it->getY0());
         entry->uv1 = t2Vector(it->getX1(), it->getY1());
@@ -965,7 +965,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     self->w434 = findElem_9AD0(self->engine, str_go);
     self->w470 = findElem_9AD0(self->engine, str_switch);
     for (int i = 0; i < 26; i++) {
-        self->icons[i] = func_00398380(self->engine + 0x58, D_004C88D8[i]);
+        self->icons[i] = cUITextureBank_getElementByHashname(self->engine + 0x58, D_004C88D8[i]);
     }
     cPS2GraphicsMan* gfx = GrMan;
     self->mode = gfx->_EffectTexMap[0];
@@ -991,7 +991,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     self->w444[10] = findElem_9AD0(self->engine, str_slash_b);
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 3; j++) {
-            self->boost[i][j] = func_00398380(self->engine + 0x58, D_004C8940[i][j]);
+            self->boost[i][j] = cUITextureBank_getElementByHashname(self->engine + 0x58, D_004C8940[i][j]);
         }
     }
     self->w538 = findElem_9AD0(self->engine, str_Sphere);
@@ -1049,7 +1049,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     unsigned short* name = getLocString_9AD0(str_kT_OVRCMNPress);
     unsigned short* skip = getLocString_9AD0(str_kT_OVRCMNToSkip);
     unsigned short buf[32];
-    func_003DC9F8(buf, fmt, name, skip);
+    USTR_sprintf(buf, fmt, name, skip);
     func_001E9540_reen(self->boxB48, buf, self->bank428, &D_004A4F58);
 }
 #endif
@@ -2275,9 +2275,9 @@ extern "C" void func_001F30D8(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F3170__FPv);
+INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_DeInit__FPv);
 #ifdef SKIP_ASM
-void func_001F3170(void* self)
+void cBXLoadIndicator_DeInit(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
     int t0 = 0;
@@ -2289,9 +2289,9 @@ void func_001F3170(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F3188);
+INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Update);
 #ifdef SKIP_ASM
-extern "C" void func_001F3188(void* self)
+extern "C" void cBXLoadIndicator_Update(void* self)
 {
     if (*(int*)((char*)self + 4) != 0) {
         float* t = (float*)((char*)self + 8);
@@ -2473,9 +2473,9 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F36C0);
+INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Show);
 #ifdef SKIP_ASM
-extern "C" void func_001F36C0(void* self, int bit)
+extern "C" void cBXLoadIndicator_Show(void* self, int bit)
 {
     *(int*)((char*)self + 0x4) |= (1 << bit);
 }
@@ -2508,7 +2508,7 @@ extern "C" void* func_0039E2A0(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00147318(void* self, int a1);
+extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
 extern "C" void func_001A1CB8(void* self, int a1, int val);
 extern void* cFEStateLodge_vtbl[];
 
@@ -2517,7 +2517,7 @@ extern "C" void* func_001F3700(void* self)
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x27;
     *(void***)((char*)self + 0x8) = cFEStateLodge_vtbl;
-    int idx = func_00147318(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    int idx = cBENewPlayerInterface_getPlayerCtrlID(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     *(signed char*)((char*)self + 0x44) = 0;
     void* factory = **(void***)((char*)self + 0x10);
     if (factory != 0) {

@@ -160,7 +160,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void func_001A0508(void* self, int a1, int a2, int a3);
 extern "C" void func_001A0570(void* self, int a1, int a2);
 extern "C" void func_0015E050(void* cam, void* a, void* b);
-extern "C" void* func_00398380(void* list, int hash);
+extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* p, int a);
 extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
@@ -214,17 +214,17 @@ extern "C" void func_001849B0(void* self)
     {
         char* uiEngine = *(char**)((char*)self + 0x10);
         int iconHash = GetHashValue32(str_empty_box);
-        *(void**)((char*)self + 0x58) = func_00398380(uiEngine + 0x58, iconHash);
+        *(void**)((char*)self + 0x58) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
     {
         char* uiEngine = *(char**)((char*)self + 0x10);
         int iconHash = GetHashValue32(str_checkbox);
-        *(void**)((char*)self + 0x54) = func_00398380(uiEngine + 0x58, iconHash);
+        *(void**)((char*)self + 0x54) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
     {
         char* uiEngine = *(char**)((char*)self + 0x10);
         int iconHash = GetHashValue32(str_yell_dollar_sign);
-        *(void**)((char*)self + 0x5C) = func_00398380(uiEngine + 0x58, iconHash);
+        *(void**)((char*)self + 0x5C) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
     func_0028F140(func_0028B180(), 5);
     cFEStateUberTrick_costVisible(self, 0);
@@ -302,7 +302,7 @@ extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void* func_001A0548(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
-extern "C" void func_0039E510(void* self);
+extern "C" void cUIState_onUpdate(void* self);
 
 struct sQuat_184C60
 {
@@ -390,7 +390,7 @@ extern "C" void func_00184C60(char* self)
             func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44), 1);
         }
     }
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 

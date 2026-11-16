@@ -77,7 +77,7 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_onInputChangeItem);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
-void* func_00397870_i_AE98(void* list, int i) __asm__("func_00397870");
+void* cList_getByIndex_i_AE98(void* list, int i) __asm__("cList_getByIndex");
 
 struct cUIMenu_onInputChangeItem_sVEntry {
     short delta;
@@ -121,7 +121,7 @@ extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScroll
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 3, selfp->mScrollItemOffset);
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
         }
-        char* pNextSelected = (char*)func_00397870_i_AE98(((char*)selfp) + 0x74, MenuEntryIndex);
+        char* pNextSelected = (char*)cList_getByIndex_i_AE98(((char*)selfp) + 0x74, MenuEntryIndex);
         cUIMenu_setSelected(selfp, pNextSelected, *(int*)&selfp->mAttrMenu & 1);
         cUIMenu_onInputChangeItem_notify(((char*)selfp), 5, selfp->mScrollItemOffset);
         return 1;
@@ -134,8 +134,8 @@ extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScroll
 INCLUDE_ASM("ui/uimenu", cUIMenu_onInput);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
-void* func_0039FF50(void* self);
+extern "C" void* cList_getByIndex_i(void*, int) __asm__("cList_getByIndex");
+void* cUIThing_getEngine(void* self);
 extern "C" int func_003A0318(void* self, int a);
 extern char gUISoundNull[4];
 extern "C" unsigned char cUIMenu_getNext(void* self);
@@ -266,7 +266,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             }
         }
     } else if (inputIs_B000(in, 5)) {
-        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 5);
         moveResult = focusMove_B000(((char*)self), 6, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -278,7 +278,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 6)) {
-        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 6);
         moveResult = focusMove_B000(((char*)self), 7, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -290,7 +290,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 8)) {
-        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 8);
         moveResult = focusMove_B000(((char*)self), 9, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -302,7 +302,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 7)) {
-        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 7);
         moveResult = focusMove_B000(((char*)self), 8, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -314,12 +314,12 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             result = func_003A0318(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 4)) {
-        char* item = (char*)func_00397870_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 4);
     } else {
         return 0;
     }
-    char* owner = (char*)func_0039FF50(((char*)self));
+    char* owner = (char*)cUIThing_getEngine(((char*)self));
     char* listener = *(char**)(owner + 0x14);
     if (listener == 0) {
         listener = gUISoundNull;
@@ -339,7 +339,7 @@ struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
-extern "C" void func_0039DA20(void* p, unsigned char a, unsigned char b, unsigned char c);
+extern "C" void cUIScrollBar_setValues(void* p, unsigned char a, unsigned char b, unsigned char c);
 
 struct cUIMenu_render2D_sVEntry {
     short delta;
@@ -357,7 +357,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
 {
     void* scrollBar = self->mpScrollBar;
     if (scrollBar != 0) {
-        func_0039DA20(scrollBar, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
+        cUIScrollBar_setValues(scrollBar, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
     }
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
@@ -404,7 +404,7 @@ extern "C" void func_0039B7A8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_findFirstHighlightable);
 #ifdef SKIP_ASM
-extern "C" void* func_00397870(void* list, unsigned char i);
+extern "C" void* cList_getByIndex(void* list, unsigned char i);
 
 struct cUIMenu_findFirstHighlightable_sVEntry {
     short delta;
@@ -425,7 +425,7 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
 {
     unsigned char i = start == 0xFF ? 0 : start;
     for (; i < self->mScrollItemNum; i++) {
-        void* item = func_00397870((char*)self + 0x74, i);
+        void* item = cList_getByIndex((char*)self + 0x74, i);
         if (*(int*)&self->mAttrMenu & 4) {
             char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
             cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
@@ -447,7 +447,7 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
 INCLUDE_ASM("ui/uimenu", cUIMenu_reverseFindFirstHighlightable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
+extern "C" void* cList_getByIndex_i(void*, int) __asm__("cList_getByIndex");
 
 /**
  * Finds the last selectable item at or before @p idx (clamped to mScrollItemNum - 1), searching down to 0.
@@ -471,7 +471,7 @@ extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, un
     }
     i = idx;
     for (; i >= 0; i--) {
-        item = (char*)func_00397870_i(((char*)self) + 0x74, i);
+        item = (char*)cList_getByIndex_i(((char*)self) + 0x74, i);
         if (*(int*)&self->mAttrMenu & 4) {
             obj = *(char**)((char*)self->mpScreen + 0xD0);
             vtbl = *(char**)(obj + 8);
@@ -491,7 +491,7 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setSelectedByIndex);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
-void* func_00397870_i(void* list, int i) __asm__("func_00397870");
+void* cList_getByIndex_i(void* list, int i) __asm__("cList_getByIndex");
 
 static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
 {
@@ -524,7 +524,7 @@ extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
         cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
         cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (char*)func_00397870_i(((char*)self) + 0x74, idx - self->mScrollItemOffset), 1);
+    cUIMenu_setSelected(self, (char*)cList_getByIndex_i(((char*)self) + 0x74, idx - self->mScrollItemOffset), 1);
 }
 #endif
 
@@ -839,7 +839,7 @@ INCLUDE_ASM("ui/uimenu", cUIPair_onInput);
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-void* func_0039FF50(void* self);
+void* cUIThing_getEngine(void* self);
 extern "C" int func_003A0318(void* self, int a);
 extern char gUISoundNull[4];
 
@@ -879,7 +879,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, void* in)
 {
     int result = 0;
     char* listener = gUISoundNull;
-    char* owner = (char*)func_0039FF50(((char*)self));
+    char* owner = (char*)cUIThing_getEngine(((char*)self));
     if (*(char**)(owner + 0x14) != 0) {
         listener = *(char**)(owner + 0x14);
     }

@@ -40,7 +40,7 @@ struct tSpeechRequest { // member names are ours, from use
 struct cSpeechSys {
     cStreamSys* mpVStreamSys;           // 0x000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0xC98 in a complete object; cSSXAudio + 0x7768); [U] methods reach cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
     void** mSpeechInstance;             // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] func_002B0E60 fills slot i with cMemMan_alloc(0x904, "SpeechInstance") + ctor func_002AFA68; the dtor frees the array
-    void* unk_008;                      // 0x008 [U] SPCH_Init: func_00252FA0("bank mem", n, 0) (the speech bank buffer); func_002B0DA0 MEM_free()s and clears it
+    void* unk_008;                      // 0x008 [U] SPCH_Init: MEM_alloc("bank mem", n, 0) (the speech bank buffer); func_002B0DA0 MEM_free()s and clears it
     void (*mCallback)(int);             // 0x00C (our name) [R] ctor 0; [U] func_002B0F48 calls it with the started speech's handle (result unused); func_002B1058/func_002B1520 store it (as int)
     int mCallbackInstance;              // 0x010 (our name) [R] ctor -1; [U] the speech instance index mCallback is armed for (func_002B0F48 compares, func_002B1058 sets/clears)
     char unk_014[0x4];                  // 0x014 no access found

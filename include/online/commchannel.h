@@ -21,11 +21,11 @@
 // Names from the preview's slot functions (disconnect__12cCommChannel ... writePacket__12cCommChannelPCvi); a call
 // through slot N reads the delta at vtbl + 8*N and the function at vtbl + 8*N + 4.
 enum {
-    kCommChannelVt_dtor = 1,            // cCommChannel__cCommChannel (cDSockChannel: func_002566E8)
-    kCommChannelVt_disconnect = 2,      // cCommChannel_disconnect (cDSockChannel: func_00256998)
+    kCommChannelVt_dtor = 1,            // cCommChannel__cCommChannel (cDSockChannel: cDSockChannel__cDSockChannel)
+    kCommChannelVt_disconnect = 2,      // cCommChannel_disconnect (cDSockChannel: cDSockChannel_disconnect)
     kCommChannelVt_update = 3,          // cCommChannel_update (cDSockChannel: cDSockChannel_update)
     kCommChannelVt_isConnected = 4,     // cCommChannel_isConnected (cDSockChannel_isConnected)
-    kCommChannelVt_getLatency = 5,      // cCommChannel_getLatency (cDSockChannel: func_00256BA8)
+    kCommChannelVt_getLatency = 5,      // cCommChannel_getLatency (cDSockChannel: cDSockChannel_getLatency)
     kCommChannelVt_getChannelType = 6,  // cCommChannel_getChannelType (cDSockChannel_getChannelType: 1)
     kCommChannelVt_readPacket = 7,      // cCommChannel_readPacket (cDSockChannel: cDSockChannel_readPacket)
     kCommChannelVt_writePacket = 8      // cCommChannel_writePacket (cDSockChannel: cDSockChannel_writePacket)

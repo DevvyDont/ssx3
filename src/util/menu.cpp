@@ -77,12 +77,12 @@ extern "C" int func_002CA2B0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CA320);
+INCLUDE_ASM("util/menu", cMenuItem_canHaveFocus);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_isActive(void* self);
 extern "C" int cMenuItem_isLocked(void* self);
 
-extern "C" int func_002CA320(void* self)
+extern "C" int cMenuItem_canHaveFocus(void* self)
 {
     int r = 0;
     if (cMenuItem_isActive(self) != 0) {
@@ -582,9 +582,9 @@ extern "C" void cMenu_prevFocus(cMenu* menu)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CACC0);
+INCLUDE_ASM("util/menu", cMenu_input);
 #ifdef SKIP_ASM
-class func_002CACC0_cItem {
+class cMenu_input_cItem {
 public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
@@ -594,10 +594,10 @@ public:
 
 extern "C" void cMenu_prevFocus(cMenu* self);
 
-extern "C" int func_002CACC0(void* self)
+extern "C" int cMenu_input(void* self)
 {
     cMenu_checkFocus((cMenu*)self);
-    func_002CACC0_cItem* item = *(func_002CACC0_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
+    cMenu_input_cItem* item = *(cMenu_input_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
     int r = item->v02();
     switch (r) {
     case 3:
@@ -626,15 +626,15 @@ int cMenu_onCommand(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CAD50__FPv);
+INCLUDE_ASM("util/menu", cMenu_onChange__FPv);
 #ifdef SKIP_ASM
-void func_002CAD50(void* self)
+void cMenu_onChange(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CAD58);
+INCLUDE_ASM("util/menu", cMenu_render);
 #ifdef SKIP_ASM
 struct sRect_2CAD58 {
     float x, y, w, h;
@@ -681,7 +681,7 @@ void func_002CB8C8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CB8C8")
 void func_002CBAC8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CBAC8");
 
 // cMenu::render(void) (On Tour name)
-extern "C" void func_002CAD58(sMenu_2CAD58* self)
+extern "C" void cMenu_render(sMenu_2CAD58* self)
 {
     sRect_2CAD58 total;
     sRect_2CAD58 item[70];
@@ -1656,24 +1656,24 @@ extern "C" void cMenu_onLoseFocus(cMenu* menu)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CC018);
+INCLUDE_ASM("util/menu", cMenuSys_cMenuSys);
 #ifdef SKIP_ASM
-void func_002CC070(void* self);
+void cMenuSys_init(void* self);
 
-extern "C" void* func_002CC018(void* self)
+extern "C" void* cMenuSys_cMenuSys(void* self)
 {
     *(int*)self = 0;
-    func_002CC070(self);
+    cMenuSys_init(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CC048);
+INCLUDE_ASM("util/menu", cMenuSys__cMenuSys);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_002CC048(int* self, int flags)
+extern "C" void cMenuSys__cMenuSys(int* self, int flags)
 {
     if (flags & 1) {
         operator_delete(self);
@@ -1682,9 +1682,9 @@ extern "C" void func_002CC048(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CC070__FPv);
+INCLUDE_ASM("util/menu", cMenuSys_init__FPv);
 #ifdef SKIP_ASM
-void func_002CC070(void* self)
+void cMenuSys_init(void* self)
 {
     *(int*)((char*)self + 0x58) = 0;
     *(int*)((char*)self + 0x54) = 0;
@@ -1697,9 +1697,9 @@ void func_002CC070(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CC098);
+INCLUDE_ASM("util/menu", cMenuSys_isActive);
 #ifdef SKIP_ASM
-extern "C" int func_002CC098(void* self)
+extern "C" int cMenuSys_isActive(void* self)
 {
     int r = 0;
     if (*(int*)self != 0) {
@@ -3887,7 +3887,7 @@ extern "C" void* cMenu_getFocusItem(cMenu* self);
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern "C" char* func_004162D0(char* dst, const char* src);
+extern "C" char* strcat(char* dst, const char* src);
 extern char D_004A39D0[];
 
 struct func_002CE820_sResult {
@@ -3912,7 +3912,7 @@ extern "C" func_002CE820_sResult func_002CE820(void* item)
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && *(int*)((char*)item + 0x28) == len && *(int*)((char*)item + 0x28) < 15) {
-        func_004162D0(buf, D_004A39D0);
+        strcat(buf, D_004A39D0);
     }
     func_002CE820_sResult r = func_002CE820_make(item, *(int*)((char*)item + 0x14), buf);
     return r;
@@ -4039,7 +4039,7 @@ extern "C" void func_002CE910(void* self, float* rect)
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && *(int*)((char*)self + 0x28) == len && *(int*)((char*)self + 0x28) < 15) {
-        func_004162D0(buf, D_004A39D0);
+        strcat(buf, D_004A39D0);
     }
     {
         char* menu = *(char**)self;
@@ -4668,9 +4668,9 @@ extern "C" void* cExpandMenuItem_cExpandMenuItem(void* self, void* name, void* p
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CF8D8);
+INCLUDE_ASM("util/menu", cExpandMenuItem_zeroValue);
 #ifdef SKIP_ASM
-class func_002CF8D8_cItem {
+class cExpandMenuItem_zeroValue_cItem {
 public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
@@ -4686,9 +4686,9 @@ public:
 
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 
-extern "C" void func_002CF8D8(void* self)
+extern "C" void cExpandMenuItem_zeroValue(void* self)
 {
-    ((func_002CF8D8_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->v08();
+    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->v08();
 }
 #endif
 
@@ -4816,9 +4816,9 @@ extern "C" void* cExpandMenuItem_input(void* expandItem)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CFAF8);
+INCLUDE_ASM("util/menu", cExpandMenuItem_onCommand);
 #ifdef SKIP_ASM
-class func_002CFAF8_cMenu {
+class cExpandMenuItem_onCommand_cMenu {
 public:
     char pad[0x12C];
     // vptr at 0x12C; slot N at vtable offset N*8
@@ -4827,16 +4827,16 @@ public:
     virtual int v03(int a, int b);
 };
 
-extern "C" int func_002CFAF8(func_002CFAF8_cMenu** self, int a, int b)
+extern "C" int cExpandMenuItem_onCommand(cExpandMenuItem_onCommand_cMenu** self, int a, int b)
 {
     return (*self)->v03(a, b);
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CFB28);
+INCLUDE_ASM("util/menu", cExpandMenuItem_onChange);
 #ifdef SKIP_ASM
-class func_002CFB28_cMenu {
+class cExpandMenuItem_onChange_cMenu {
 public:
     char pad[0x12C];
     // vptr at 0x12C; slot N at vtable offset N*8
@@ -4846,14 +4846,14 @@ public:
     virtual void v04(void*);
 };
 
-extern "C" void func_002CFB28(func_002CFB28_cMenu** self)
+extern "C" void cExpandMenuItem_onChange(cExpandMenuItem_onChange_cMenu** self)
 {
     (*self)->v04(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CFB58);
+INCLUDE_ASM("util/menu", cExpandMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_isActive(void* self);
 extern "C" void* cMenu_getFocusItem(cMenu* self);
@@ -4879,7 +4879,7 @@ struct sMenu_2CFB58 {
     sMenuRect_2CFB58 rects[1];
 };
 
-extern "C" sMenuRect_2CFB58* func_002CFB58(sMenuRect_2CFB58* ret, sMenu_2CFB58* self)
+extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sMenu_2CFB58* self)
 {
     sMenuRect_2CFB58 r;
     float zero = 0.0f;
@@ -4917,16 +4917,16 @@ extern "C" sMenuRect_2CFB58* func_002CFB58(sMenuRect_2CFB58* ret, sMenu_2CFB58* 
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CFD28);
+INCLUDE_ASM("util/menu", cExpandMenuItem_render);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_isActive(void* self);
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 
-struct func_002CFD28_sRect {
+struct cExpandMenuItem_render_sRect {
     float x, y, w, h;
 };
 
-class func_002CFD28_cItem {
+class cExpandMenuItem_render_cItem {
 public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
@@ -4934,25 +4934,25 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(func_002CFD28_sRect* r);
+    virtual void v05(cExpandMenuItem_render_sRect* r);
 };
 
-struct func_002CFD28_sOwner {
+struct cExpandMenuItem_render_sOwner {
     void* menu;                         // 0x0
     char pad4[0x10];
-    func_002CFD28_cItem* cur;           // 0x14
+    cExpandMenuItem_render_cItem* cur;           // 0x14
     int count;                          // 0x18
     int selected;                       // 0x1C
     int unk20;                          // 0x20
-    func_002CFD28_cItem* items[70];     // 0x24
+    cExpandMenuItem_render_cItem* items[70];     // 0x24
     int wrap;                           // 0x13C
     char pad140[0xC];
-    func_002CFD28_sRect rects[70];      // 0x14C
+    cExpandMenuItem_render_sRect rects[70];      // 0x14C
 };
 
-extern "C" void func_002CFD28(func_002CFD28_sOwner* self, func_002CFD28_sRect* r)
+extern "C" void cExpandMenuItem_render(cExpandMenuItem_render_sOwner* self, cExpandMenuItem_render_sRect* r)
 {
-    func_002CFD28_sRect pos = *r;
+    cExpandMenuItem_render_sRect pos = *r;
     for (int i = 0; i < self->count; i++) {
         if (cMenuItem_isActive(self->items[i]) == 0) {
             continue;
@@ -4970,13 +4970,13 @@ extern "C" void func_002CFD28(func_002CFD28_sOwner* self, func_002CFD28_sRect* r
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CFE78);
+INCLUDE_ASM("util/menu", cExpandMenuItem_gainFocus);
 #ifdef SKIP_ASM
 // PORT: the target leaves mode in $a1 for cMenuItem_gainFocus; bind a 2-arg form to that symbol.
 void cMenuItem_gainFocus_2(void* self, int a1) __asm__("cMenuItem_gainFocus__FPv");
 extern "C" void cMenu_setFocus_v(void* self, int index) __asm__("cMenu_setFocus");
 
-extern "C" void func_002CFE78(void* self, int mode)
+extern "C" void cExpandMenuItem_gainFocus(void* self, int mode)
 {
     cMenuItem_gainFocus_2(self, mode);
     switch (mode) {
@@ -4992,11 +4992,11 @@ extern "C" void func_002CFE78(void* self, int mode)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CFEF8);
+INCLUDE_ASM("util/menu", cExpandMenuItem_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cMenu_onLoseFocus(cMenu* p);
 
-extern "C" void func_002CFEF8(void* self)
+extern "C" void cExpandMenuItem_loseFocus(void* self)
 {
     func_002CA370(self);
     cMenu_onLoseFocus((cMenu*)((char*)self + 0x18));
@@ -5386,7 +5386,7 @@ extern "C" void func_002D0500(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D05A8);
+INCLUDE_ASM("util/menu", cVectorMenuItem_cVectorMenuItem);
 #ifdef SKIP_ASM
 extern "C" void* func_002D03F0(void* self, int a1, int a2);
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
@@ -5397,7 +5397,7 @@ extern char D_004A39D8[];
 extern char D_004A39E0[];
 extern char D_004A39E8[];
 
-extern "C" void* func_002D05A8(void* self, void* name, float* values, int a3, float f1, float f2)
+extern "C" void* cVectorMenuItem_cVectorMenuItem(void* self, void* name, float* values, int a3, float f1, float f2)
 {
     char* s = (char*)self;
     cExpandMenuItem_cExpandMenuItem(self, name, s + 0x654);
@@ -6133,14 +6133,14 @@ extern "C" float func_002D1928(int n, float x)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D19B8);
+INCLUDE_ASM("util/menu", cObjectInterface_runCollideScript);
 #ifdef SKIP_ASM
-extern "C" int func_0030A060(void* self, int a, int b, int c);
+extern "C" int cWScriptMan_doOnCollideScript(void* self, int a, int b, int c);
 extern void* cWScriptMan_TheWScriptMan;
 
-extern "C" int func_002D19B8(int a, int b, int c)
+extern "C" int cObjectInterface_runCollideScript(int a, int b, int c)
 {
-    return func_0030A060(cWScriptMan_TheWScriptMan, a, b, c);
+    return cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, a, b, c);
 }
 #endif
 
@@ -6165,14 +6165,14 @@ extern "C" int func_002D19E8(int id)
 INCLUDE_ASM("util/menu", cObjectInterface_runOnLoseFocusScript);
 #ifdef SKIP_ASM
 extern "C" int func_0030A2E8(void* self, int id);
-extern "C" void func_0030A548(void* self, int id);
+extern "C" void cWScriptMan_doOnLoseFocusScript(void* self, int id);
 extern void* cWScriptMan_TheWScriptMan;
 
 /**
  * Runs a world instance's on-lose-focus script, when it has one.
  *
  * Asks the world script manager (TheWScriptMan) whether the instance has an on-lose-focus script
- * (func_0030A2E8) and runs it (func_0030A548).
+ * (func_0030A2E8) and runs it (cWScriptMan_doOnLoseFocusScript).
  *
  * @param id  the instance record (On Tour tInstanceRecord*)
  * @return 1 when a script was run, otherwise 0
@@ -6180,7 +6180,7 @@ extern void* cWScriptMan_TheWScriptMan;
 extern "C" int cObjectInterface_runOnLoseFocusScript(int id)
 {
     if (func_0030A2E8(cWScriptMan_TheWScriptMan, id) != 0) {
-        func_0030A548(cWScriptMan_TheWScriptMan, id);
+        cWScriptMan_doOnLoseFocusScript(cWScriptMan_TheWScriptMan, id);
         return 1;
     }
     return 0;
@@ -6306,10 +6306,10 @@ extern "C" int func_002D1BA0()
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D1BD8);
+INCLUDE_ASM("util/menu", cObjectInterface_getWorld);
 #ifdef SKIP_ASM
 
-extern "C" void* func_002D1BD8()
+extern "C" void* cObjectInterface_getWorld()
 {
     return cWorld_m_pTheWorld;
 }
@@ -6371,10 +6371,10 @@ extern "C" void* func_002D1C58()
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D1C70);
+INCLUDE_ASM("util/menu", cObjectInterface_getUpdateTime);
 #ifdef SKIP_ASM
 
-extern "C" float func_002D1C70()
+extern "C" float cObjectInterface_getUpdateTime()
 {
     return *(float*)((char*)SSXApp + 0x14);
 }

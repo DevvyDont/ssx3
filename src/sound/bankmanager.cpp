@@ -6,7 +6,7 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 #ifdef SKIP_ASM
 extern char* gpBankManager;
 extern char str_StaticSoundMem[];
-extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 
 class cSndStream_B588 {
 public:
@@ -45,7 +45,7 @@ extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag
             }
         }
         *(int*)((char*)self + 0x14) = size;
-        *(void**)((char*)self + 0x10) = func_00252FA0(str_StaticSoundMem, size, tag);
+        *(void**)((char*)self + 0x10) = MEM_alloc(str_StaticSoundMem, size, tag);
     }
 }
 #endif
@@ -196,7 +196,7 @@ extern "C" int func_0028B830(void* self, void* name)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmanager", func_0028B878);
+INCLUDE_ASM("sound/bankmanager", cBankInstance_OnBeginAsyncLoad);
 #ifdef SKIP_ASM
 extern "C" void func_0028B528(void*);
 extern "C" void func_0028B2D0(void* self);
@@ -212,7 +212,7 @@ public:
     virtual void v6(int id);
 };
 
-extern "C" void func_0028B878(void* self)
+extern "C" void cBankInstance_OnBeginAsyncLoad(void* self)
 {
     func_0028B528(self);
     func_0028B2D0(self);
@@ -226,7 +226,7 @@ extern "C" void func_0028B878(void* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemAlloc);
 #ifdef SKIP_ASM
-extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern char str_DynamicSoundMem[];
 
 // PORT: real body returns the buffer; a later caller in this unit declares it void(void*, int, int)
@@ -243,7 +243,7 @@ void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __
 void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
-        *(void**)((char*)self + 0x10) = func_00252FA0(str_DynamicSoundMem, size, flags);
+        *(void**)((char*)self + 0x10) = MEM_alloc(str_DynamicSoundMem, size, flags);
         *(int*)((char*)self + 0x14) = size;
     }
     return *(void**)((char*)self + 0x10);
@@ -251,16 +251,16 @@ void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmanager", func_0028B928__FPv);
+INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemSize__FPv);
 #ifdef SKIP_ASM
-int func_0028B928(void* self)
+int cBankInstance_OnAsyncMainMemSize(void* self)
 {
     return *(int*)((char*)self + 0x14);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmanager", func_0028B930);
+INCLUDE_ASM("sound/bankmanager", cBankInstance_OnEndAsyncLoad);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern char* gpBankManager;
@@ -277,7 +277,7 @@ public:
 };
 
 // PORT: name is passed as int (matches the unit's 6-int caller declaration); d, e unused.
-extern "C" void func_0028B930(void* self, int id, int flag, int name, int d, int e)
+extern "C" void cBankInstance_OnEndAsyncLoad(void* self, int id, int flag, int name, int d, int e)
 {
     (**(cSndStream_B930***)(gpBankManager + 0x1D8))->v7();
     *(int*)((char*)self + 0x4) = id;
@@ -294,7 +294,7 @@ extern "C" void func_0028B930(void* self, int id, int flag, int name, int d, int
 INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
 #ifdef SKIP_ASM
 extern "C" void* cBankMonitor_cBankMonitor(void* self, int a1, int heap);
-extern "C" void* func_0028A058(void* self);
+extern "C" void* cAsyncSys_cAsyncSys(void* self);
 extern "C" void* func_0028B248(void* self);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -350,7 +350,7 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
         self->monitor = self->embedded;
         cSoundSys_cSoundSys(self->embedded, heap);
     }
-    func_0028A058(self);
+    cAsyncSys_cAsyncSys(self);
     cBankMonitor_cBankMonitor(&self->monitor, 0, heap);
     *(const sBmVtbl**)(self->monitor + 4) = &D_00483AB8;
     if (!embedded) {
@@ -372,11 +372,11 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmanager", func_0028BB10);
+INCLUDE_ASM("sound/bankmanager", cBankManager__cBankManager);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_0028A148(void* self, int flags);
+extern "C" void cAsyncSys__cAsyncSys(void* self, int flags);
 extern "C" void func_0028B278(void* self, int flags);
 extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
@@ -409,7 +409,7 @@ struct sBankManagerBB10 {
     sBmBankBB10* banks;         // 0xACC
 };
 
-extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
+extern "C" void cBankManager__cBankManager(sBankManagerBB10* self, int flags)
 {
     self->vtbl2 = cBankMonitor_vtbl;
     self->vtbl = cBankManager_vtbl;
@@ -432,7 +432,7 @@ extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
         cMemMan_free((char*)self->banks - 0x10);
     }
     cBankMonitor__cBankMonitor(&self->monitor, 0);
-    func_0028A148(self, 0);
+    cAsyncSys__cAsyncSys(self, 0);
     if (flags & 2) {
         cSoundSys__cSoundSys(self->monitor, 0);
     }
@@ -550,46 +550,46 @@ extern "C" void func_0028BE90(void* self, int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/bankmanager", func_0028BEB8);
+INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnBeginAsyncLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0028B878(void*);
+extern "C" void cBankInstance_OnBeginAsyncLoad(void*);
 
-extern "C" void func_0028BEB8(void* self, int i)
+extern "C" void cBankManager_ASYNCSYS_OnBeginAsyncLoad(void* self, int i)
 {
-    func_0028B878((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_OnBeginAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/bankmanager", func_0028BEE0);
+INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnAsyncMainMemAlloc);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_OnAsyncMainMemAlloc(void* inst, int a, int b);
 
-extern "C" void func_0028BEE0(void* self, int i, int a, int b)
+extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(void* self, int i, int a, int b)
 {
     cBankInstance_OnAsyncMainMemAlloc((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/bankmanager", func_0028BF10);
+INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnAsyncMainMemSize);
 #ifdef SKIP_ASM
-int func_0028B928(void*);
+int cBankInstance_OnAsyncMainMemSize(void*);
 
-extern "C" void func_0028BF10(void* self, int i)
+extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemSize(void* self, int i)
 {
-    func_0028B928((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_OnAsyncMainMemSize((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/bankmanager", func_0028BF38);
+INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnEndAsyncLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0028B930(void* inst, int a, int b, int c, int d, int e);
+extern "C" void cBankInstance_OnEndAsyncLoad(void* inst, int a, int b, int c, int d, int e);
 
-extern "C" void func_0028BF38(void* self, int i, int a, int b, int c, int d, int e)
+extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(void* self, int i, int a, int b, int c, int d, int e)
 {
-    func_0028B930((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b, c, d, e);
+    cBankInstance_OnEndAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b, c, d, e);
 }
 #endif
 
@@ -599,12 +599,12 @@ INCLUDE_ASM("sound/bankmanager", func_0028BF78);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_0028B1B0(void);
+extern "C" int cAudioInterface_isInGame(void);
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
 extern "C" int func_002B49E0(void* monitor);
 extern "C" int func_002B4AF0(void* monitor);
-extern "C" void func_00287558(void* self, int on);
+extern "C" void cSSXAudio_SetArcadeSFX(void* self, int on);
 // PORT: func_002B4070 takes the 64-bit bank mask as a second argument (64-bit `long`).
 extern "C" void func_002B4070_BF78(void* monitor, long mask) __asm__("func_002B4070");
 
@@ -624,8 +624,8 @@ extern "C" void func_0028BF78(char* self, int state)
         func_002B4070_BF78(self + 0x118, *(long*)(self + 0x518));
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = D_00535610_BF78;
-        func_00287558(self, (cfg.flags >> 17) & 1);
-        if (func_0028B1B0() == 0)
+        cSSXAudio_SetArcadeSFX(self, (cfg.flags >> 17) & 1);
+        if (cAudioInterface_isInGame() == 0)
             return;
         if (*(int*)(self + 0x530) == 0)
             return;
@@ -640,10 +640,10 @@ extern "C" void func_0028BF78(char* self, int state)
         func_002B4070_BF78(self + 0x118, *(long*)(self + 0x6098));
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = D_00535610_BF78;
-        func_00287558(self, (cfg.flags >> 17) & 1);
+        cSSXAudio_SetArcadeSFX(self, (cfg.flags >> 17) & 1);
         if (*(long*)(self + 0x6098) == 0)
             return;
-        if (func_0028B1B0() == 0)
+        if (cAudioInterface_isInGame() == 0)
             return;
         if (*(int*)(self + 0x530) == 0)
             return;
@@ -657,8 +657,8 @@ extern "C" void func_0028BF78(char* self, int state)
         break;
     }
     case 2:
-        func_00287558(self, 0);
-        if (func_0028B1B0() == 0)
+        cSSXAudio_SetArcadeSFX(self, 0);
+        if (cAudioInterface_isInGame() == 0)
             return;
         if ((unsigned int)(func_002B49E0(self + 0x118) - 101) < 3)
             return;
@@ -673,7 +673,7 @@ extern "C" void func_0028BF78(char* self, int state)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028C2D0);
 #ifdef SKIP_ASM
-extern "C" int func_0028B1B0(void);
+extern "C" int cAudioInterface_isInGame(void);
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
 extern "C" void func_002B4070(void* monitor);
@@ -682,7 +682,7 @@ extern "C" int func_002B4AF0(void* monitor);
 
 static inline void bmRestartC2D0(char* self)
 {
-    if (func_0028B1B0() == 0) {
+    if (cAudioInterface_isInGame() == 0) {
         return;
     }
     if (*(int*)(self + 0x530) == 0) {
@@ -866,13 +866,13 @@ INCLUDE_ASM("sound/bankmanager", func_0028C8C8);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// func_00285D98 returns a rider pointer here (the unit declares it int).
+// cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 struct sRiderC8C8;
-extern "C" sRiderC8C8* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+extern "C" sRiderC8C8* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 int func_0011FE98(void* rider);
 int func_0028D898(void* self);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_00288AE0(void* self);
+extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int func_0028D960(void* self);
 extern "C" void func_002910E0(void* self);
 extern "C" void cSSXAudio_EndWind(void* self);
@@ -941,7 +941,7 @@ extern "C" void func_0028C8C8(sBmC8C8* self)
 {
     if (self->f6250 > 0)
         self->f6250--;
-    sRiderC8C8* rider = func_00285D98_p(self, -1);
+    sRiderC8C8* rider = cSSXAudio_GetFocusRider_p(self, -1);
     float spd;
     if (func_0011FE98(rider) == 1) {
         int s = rider->ap->state;
@@ -976,7 +976,7 @@ have:
                 play = r;
         }
     }
-    if (func_00288AE0(self) == 0) {
+    if (cSSXAudio_ReplayMode(self) == 0) {
         if (2.0f < spd) {
             D_004A361C = 1;
             float lo = rider->ap->fA0;
@@ -1094,7 +1094,7 @@ struct sRace_28CDF8 {
 
 extern "C" void func_0028CDF8(char* self)
 {
-    if (func_00288AE0(self) != 0) {
+    if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
     if (*(int*)(self + 0x608C) == 2) {
@@ -1140,8 +1140,8 @@ INCLUDE_ASM("sound/bankmanager", func_0028CF98);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_00285D98(void* self, int which);
-extern "C" int func_00288AE0(void* self);
+extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
+extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void* func_0028B1E8();
 extern "C" void func_0028F108(void* self, int a1);
 extern "C" int func_002A1E20(void* self, int id);
@@ -1173,7 +1173,7 @@ static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
 // Starts the menu / in-game music bank for the current state.
 extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
 {
-    if (func_00288AE0(self) != 0 && *(int*)((char*)self + 0x6294) == 0) {
+    if (cSSXAudio_ReplayMode(self) != 0 && *(int*)((char*)self + 0x6294) == 0) {
         return;
     }
     *(int*)((char*)self + 0x6280) = 0;
@@ -1223,7 +1223,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     }
     sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, a1);
-    func_0028F108(self, func_00285D98(self, -1));
+    func_0028F108(self, cSSXAudio_GetFocusRider(self, -1));
 }
 #endif
 
@@ -1286,7 +1286,7 @@ extern "C" void func_0028D5A0(void* self, int id)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D630);
 #ifdef SKIP_ASM
-extern "C" int func_00285D98(void* self, int which);
+extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 
 struct sBmVt630 { short delta; short index; int (*fn)(void*); };
 struct sBmVt630b { short delta; short index; int (*fn)(void*, int); };
@@ -1299,8 +1299,8 @@ extern "C" void func_0028D630(void* self, int id, void* obj)
     if (*(int*)((char*)self + 0x623C) == id) return;
     ok = 0;
     if (*(int*)((char*)self + 0x62A0) == -1) {
-        // PORT: func_00285D98 returns an object pointer as int
-        if ((int)obj == func_00285D98(self, -1)) {
+        // PORT: cSSXAudio_GetFocusRider returns an object pointer as int
+        if ((int)obj == cSSXAudio_GetFocusRider(self, -1)) {
             char* o = (char*)obj + 0x6C0;
             sBmVt630* e = &(*(sBmVt630**)o)[7];
             ok = 1;
@@ -1800,7 +1800,7 @@ extern "C" int func_002A40E8(void* self);
 extern "C" void func_002A4550(void* self);
 extern "C" int func_002A4718(void* self);
 extern "C" int func_002A4A38(void* self);
-extern "C" char* func_0028B1D8();
+extern "C" char* cAudioInterface_getAI();
 extern "C" void func_0028D5A0(void* self, int id);
 extern "C" void func_00296E20(void* self, int id);
 extern "C" void func_00297438(void* self, int id);
@@ -1886,8 +1886,8 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_E8C0->v);
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658_E8C0->v);
             cSSXAudio_StopTone(self, 5.029983997344971f);
-            func_00296E20(self, *(int*)(func_0028B1D8() + 0x28));
-            func_00297438(self, *(int*)(func_0028B1D8() + 0x28));
+            func_00296E20(self, *(int*)(cAudioInterface_getAI() + 0x28));
+            func_00297438(self, *(int*)(cAudioInterface_getAI() + 0x28));
             cSSXAudio_EndUberSpin(self, 0);
             if (func_0028D960(self)) {
                 int flag = 1;
@@ -1977,7 +1977,7 @@ extern "C" void func_0028EF90(void* self)
 INCLUDE_ASM("sound/bankmanager", func_0028F000);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
-extern "C" int func_00285D98(void* self, int which);
+extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 extern "C" int func_00289C18(void* self, int rider);
 
 extern "C" void func_0028F000(void* self)
@@ -1993,7 +1993,7 @@ extern "C" void func_0028F000(void* self)
         *(int*)((char*)self + 0x628C) = 0;
     }
     int max = 800;
-    int r = func_00289C18(self, func_00285D98(self, -1));
+    int r = func_00289C18(self, cSSXAudio_GetFocusRider(self, -1));
     if (r == 1) {
         max = 1000;
     } else if (r == 2) {
@@ -2262,9 +2262,9 @@ extern "C" void func_0028F558(void* self, int id)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F5B8);
 #ifdef SKIP_ASM
-extern "C" int func_0028B1B0(void);
+extern "C" int cAudioInterface_isInGame(void);
 extern "C" void cSSXAudio_PauseSFX(void* self);
-extern "C" void func_00294F78(void* self, int a1);
+extern "C" void cSSXAudio_MenuSound(void* self, int a1);
 extern "C" void func_002B3D48(void* self, float v);
 extern "C" void func_0028F768(void* self);
 extern "C" void func_002B3C28(void* self, int a1);
@@ -2279,12 +2279,12 @@ extern "C" void func_0028F5B8(void* self)
 {
     *(int*)((char*)self + 0x6088) = 0;
     if (*(int*)((char*)self + 0x5FB4) != 0) return;
-    if (func_0028B1B0() == 0) return;
+    if (cAudioInterface_isInGame() == 0) return;
     if (*(int*)((char*)self + 0x5818) == 0) {
         cSSXAudio_PauseSFX(self);
         *(int*)((char*)self + 0x6088) = 1;
     }
-    func_00294F78(self, 9);
+    cSSXAudio_MenuSound(self, 9);
     if (*(int*)((char*)self + 0x608C) != 2) {
         char* mon = (char*)self + 0x118;
         func_002B3D48(mon, 1.0f);

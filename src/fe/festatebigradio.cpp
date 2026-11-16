@@ -234,19 +234,19 @@ int cFEStateBraggingRights_onGainTransition(void* self)
 }
 #endif
 
-extern "C" void* func_0039E6B8(void* self);
+extern "C" void* cUIState_onRender2D(void* self);
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
- * Renders the bragging-rights state's 2D layer with the shared UI-state render routine func_0039E6B8().
+ * Renders the bragging-rights state's 2D layer with the shared UI-state render routine cUIState_onRender2D().
  *
- * @return no meaningful value (func_0039E6B8() returns nothing)
+ * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
 void* cFEStateBraggingRights_onRender2D(void* self)
 {
-    return func_0039E6B8(self);
+    return cUIState_onRender2D(self);
 }
 #endif
 
@@ -279,7 +279,7 @@ extern "C" void func_00192740(void* panel, int on);
 
 extern "C" void func_00192970_2DB0(void* panel, void* screen) __asm__("func_00192970");
 
-extern "C" int func_00147318(void* iface, int idx);
+extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int idx);
 extern "C" void cUIMenu_setSelectedByIndex_3338(void* menu, int idx) __asm__("cUIMenu_setSelectedByIndex");
 extern "C" void func_00416210_3338(void* dst, int c, int n) __asm__("func_00416210");
 extern "C" void func_00265700(void* snd);
@@ -310,10 +310,10 @@ extern "C" void cFEStateBraggingRights_onUpdate(sBragging_2DB0* self)
         int panelIdx;
         char id;
         if (isNet_2DB0()) {
-            id = func_00147318(iface, 0);
+            id = cBENewPlayerInterface_getPlayerCtrlID(iface, 0);
             panelIdx = 0;
         } else {
-            id = func_00147318(iface, i);
+            id = cBENewPlayerInterface_getPlayerCtrlID(iface, i);
             panelIdx = i;
         }
         sVESet_3338* vt = *(sVESet_3338**)((char*)obj + 8);
@@ -1002,7 +1002,7 @@ extern "C" void func_00194440(void* self, void* a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00194498);
+INCLUDE_ASM("fe/festatebigradio", DisableTextWidget);
 #ifdef SKIP_ASM
 struct sColor4_4498 {
     float x, y, z, w;
@@ -1020,7 +1020,7 @@ struct sVEntry00194498b {
     void (*fn)(void*, sColor4_4498*);
 };
 
-extern "C" void func_00194498(void* self)
+extern "C" void DisableTextWidget(void* self)
 {
     sVEntry00194498a* vt = *(sVEntry00194498a**)((char*)self + 8);
     vt[8].fn((char*)self + vt[8].delta, 1);

@@ -8,7 +8,7 @@
 // Created by cCamera_cCamera: cMemMan_alloc(0x44, "Chase Cam Controller") +
 // cChaseCameraController_cChaseCameraController(p, viewIndex, camera). Retail vtable cChaseCameraController_vtbl
 // (D_0045B908: deleting dtor cChaseCameraController__cChaseCameraController, update cChaseCameraController_update,
-// then cCameraController's func_0015CC70 / func_0015CCF0).
+// then cCameraController's cCameraController_snap / cCameraController_snapCurrent).
 // Base class cCameraController (0x18; camera/cameracontroller.cpp: cCameraController_cCameraController), written out
 // inline; cManualCameraController and cScriptCameraController (0x20 each) derive from it too.
 //

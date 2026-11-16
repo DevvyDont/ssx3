@@ -69,7 +69,7 @@ extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 INCLUDE_ASM("sound/asyncsys", func_0028A298);
 #ifdef SKIP_ASM
 extern "C" int func_003DF748(char* name, int a1, int a2);
-extern "C" int func_003DF690(char* name, int a1);
+extern "C" int ASYNCFILE_load(char* name, int a1);
 
 struct sRing_A298 {
     int size;
@@ -198,7 +198,7 @@ extern "C" void func_0028A298(void* self)
             } else {
                 d = q3->data[q3->tail];
             }
-            s->result = func_003DF690(name, d);
+            s->result = ASYNCFILE_load(name, d);
         }
         break;
     }
@@ -817,10 +817,10 @@ extern "C" int func_0028B188(void) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1B0);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_isInGame);
 #ifdef SKIP_ASM
 
-extern "C" int func_0028B1B0()
+extern "C" int cAudioInterface_isInGame()
 {
     return (void*)SSXApp->Game != 0;
 }
@@ -837,20 +837,20 @@ extern "C" void* func_0028B1C0()
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1C8);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getGame);
 #ifdef SKIP_ASM
 
-extern "C" void* func_0028B1C8()
+extern "C" void* cAudioInterface_getGame()
 {
     return SSXApp->Game;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1D8);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getAI);
 #ifdef SKIP_ASM
 
-extern "C" void* func_0028B1D8()
+extern "C" void* cAudioInterface_getAI()
 {
     return SSXApp->Game->AI;
 }
@@ -962,13 +962,13 @@ INCLUDE_ASM("sound/asyncsys", func_0028B320);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void* MEM_free(void* self);
-extern "C" void* func_00252FA0(void* a0, int a1, int a2);
+extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void func_0028B2D0(void* self);
 extern "C" void func_0028B528(void* self);
 extern "C" int func_003B6098(void* sema, int a1);
 extern "C" int func_003B6528(int id);
 extern "C" void func_003B6548(void* data, int id);
-extern "C" int func_003E1BB8(const char* name, void* data, int size);
+extern "C" int FILE_loadatz(const char* name, void* data, int size);
 extern char* gpBankManager;
 
 class cSndStream_B320 {
@@ -1003,7 +1003,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
         }
         break;
     case 1:
-        if (func_003E1BB8(file, *(void**)((char*)self + 0x10), *(int*)((char*)self + 0x14)) == 0) {
+        if (FILE_loadatz(file, *(void**)((char*)self + 0x10), *(int*)((char*)self + 0x14)) == 0) {
             return;
         }
         size = *(int*)((char*)self + 0x14);
@@ -1019,7 +1019,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
         if (*(int*)((char*)self + 0x8) == 2) {
             func_003B6548(*(void**)((char*)self + 0x10), *(int*)((char*)self + 0x4));
         } else {
-            void* m = func_00252FA0((void*)file, h, 0);
+            void* m = MEM_alloc((void*)file, h, 0);
             *(void**)((char*)self + 0x10) = m;
             func_003B6548(m, *(int*)((char*)self + 0x4));
             MEM_free(data);

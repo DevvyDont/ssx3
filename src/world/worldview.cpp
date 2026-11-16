@@ -86,12 +86,12 @@ extern "C" int cWorldView_isSectionUnLoaded(cWorldView* self, unsigned int i)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A98C8);
+INCLUDE_ASM("world/worldview", cWorldView_loadSection);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sViewEnt_3A98C8 { int state; float value; };
 struct sView_3A98C8 { int f0; char* info; char pad8[0xC]; sViewEnt_3A98C8 ents[1]; };
-extern "C" int func_003A98C8(sView_3A98C8* self, unsigned int idx, float value)
+extern "C" int cWorldView_loadSection(sView_3A98C8* self, unsigned int idx, float value)
 {
     if (self->info != 0 && idx < *(unsigned int*)(self->info + 8)) {
         self->ents[idx].value = value;
@@ -623,30 +623,30 @@ extern "C" void* func_003AA2D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA2F0);
+INCLUDE_ASM("world/worldview", cChunkResolve_cChunkResolve);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
-struct func_003AA2F0_sEntry {
+struct cChunkResolve_cChunkResolve_sEntry {
     float dist;
     float scale;
     short a;
     short b;
 };
 
-struct func_003AA2F0_sState {
+struct cChunkResolve_cChunkResolve_sState {
     int f00;
     unsigned int flags;
     unsigned int f08;
     int f0C;
-    func_003AA2F0_sEntry entries[24];
+    cChunkResolve_cChunkResolve_sEntry entries[24];
 };
 
-extern func_003AA2F0_sState D_00508F50;
+extern cChunkResolve_cChunkResolve_sState D_00508F50;
 
-struct func_003AA2F0_sView {
+struct cChunkResolve_cChunkResolve_sView {
     int f00;
-    func_003AA2F0_sState* state;
+    cChunkResolve_cChunkResolve_sState* state;
     void** vt;
 };
 // splat labels D_00508F50+8 separately
@@ -655,9 +655,9 @@ extern int D_004A5A68;
 extern void* cChunkResolve_vtbl[];
 
 // PORT: the unit declares this `void`, but the body returns self ($2); bound via asm label.
-func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self) __asm__("func_003AA2F0");
+cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolve_cChunkResolve_sView* self) __asm__("cChunkResolve_cChunkResolve");
 
-func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
+cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolve_cChunkResolve_sView* self)
 {
     self->vt = cChunkResolve_vtbl;
     self->f00 = 0;
@@ -665,9 +665,9 @@ func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
         D_00508F50.f08 = 0xFFFFFFFF;
         D_004A5A68 = 1;
     }
-    func_003AA2F0_sState* s = &D_00508F50;
+    cChunkResolve_cChunkResolve_sState* s = &D_00508F50;
     self->state = s;
-    MEM_fill(s, 0, sizeof(func_003AA2F0_sState));
+    MEM_fill(s, 0, sizeof(cChunkResolve_cChunkResolve_sState));
     D_00508F58[0] = 0xFFFFFFFF;
     s->f0C = -1;
     D_00508F50.f00 = 0;
@@ -716,9 +716,9 @@ extern "C" int cChunkResolve_resolveModel(cChunkResolve_resolveModel_cObj* self,
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA438);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveModelHeirarchy);
 #ifdef SKIP_ASM
-class func_003AA438_cObj {
+class cChunkResolve_resolveModelHeirarchy_cObj {
 public:
     char pad00[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -735,7 +735,7 @@ public:
     virtual int v11(void* p, void* base);
 };
 
-struct func_003AA438_sEnt {
+struct cChunkResolve_resolveModelHeirarchy_sEnt {
     int f0;
     int f4;
     int f8;
@@ -745,10 +745,10 @@ struct func_003AA438_sEnt {
 extern char t4mat_Identity[];
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AA438(func_003AA438_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHeirarchy_cObj* self, void* a1)
 {
     int n = *(int*)((char*)a1 + 0x4);
-    func_003AA438_sEnt* e = *(func_003AA438_sEnt**)((char*)a1 + 0x8);
+    cChunkResolve_resolveModelHeirarchy_sEnt* e = *(cChunkResolve_resolveModelHeirarchy_sEnt**)((char*)a1 + 0x8);
     int i;
     for (i = 0; i < n; i++, e++) {
         if (e->f4 != 0) {
@@ -770,9 +770,9 @@ extern "C" int func_003AA438(func_003AA438_cObj* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA520);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveMesh);
 #ifdef SKIP_ASM
-class func_003AA520_cObj {
+class cChunkResolve_resolveMesh_cObj {
 public:
     char pad00[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -787,7 +787,7 @@ public:
 };
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AA520(func_003AA520_cObj* self, void* a1, int base)
+extern "C" int cChunkResolve_resolveMesh(cChunkResolve_resolveMesh_cObj* self, void* a1, int base)
 {
     int i = 0;
     int* p = (int*)(*(int*)((char*)a1 + 0x20) += base);
@@ -800,9 +800,9 @@ extern "C" int func_003AA520(func_003AA520_cObj* self, void* a1, int base)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA5C8);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleModel);
 #ifdef SKIP_ASM
-class func_003AA5C8_cObj {
+class cChunkResolve_resolveParticleModel_cObj {
 public:
     char pad00[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -824,7 +824,7 @@ public:
 };
 
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AA5C8(func_003AA5C8_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve_resolveParticleModel_cObj* self, void* a1)
 {
     *(int*)((char*)a1 + 0x8) += (int)a1;
     self->v15(a1);
@@ -833,9 +833,9 @@ extern "C" int func_003AA5C8(func_003AA5C8_cObj* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA608);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleModelHeirarchy);
 #ifdef SKIP_ASM
-class func_003AA608_cObj {
+class cChunkResolve_resolveParticleModelHeirarchy_cObj {
 public:
     char pad00[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -857,7 +857,7 @@ public:
     virtual int v16(void* p);
 };
 
-struct func_003AA608_sEnt {
+struct cChunkResolve_resolveParticleModelHeirarchy_sEnt {
     int f0;
     int f4;
     int f8;
@@ -867,10 +867,10 @@ struct func_003AA608_sEnt {
 extern char t4mat_Identity[];
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AA608(func_003AA608_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolveParticleModelHeirarchy_cObj* self, void* a1)
 {
     int n = *(int*)((char*)a1 + 0x4);
-    func_003AA608_sEnt* e = *(func_003AA608_sEnt**)((char*)a1 + 0x8);
+    cChunkResolve_resolveParticleModelHeirarchy_sEnt* e = *(cChunkResolve_resolveParticleModelHeirarchy_sEnt**)((char*)a1 + 0x8);
     int i;
     for (i = 0; i < n; i++, e++) {
         if (e->f4 != 0) {
@@ -892,9 +892,9 @@ extern "C" int func_003AA608(func_003AA608_cObj* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA6E8);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleMesh);
 #ifdef SKIP_ASM
-extern "C" int func_003AA6E8(void* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleMesh(void* self, void* a1)
 {
     *(int*)((char*)a1 + 0x20) += (int)a1;
     return 1;
@@ -902,10 +902,10 @@ extern "C" int func_003AA6E8(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA700);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleInstance);
 #ifdef SKIP_ASM
 // PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
-extern "C" int func_003AA700(void* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* a1)
 {
     unsigned int h = *(unsigned int*)((char*)a1 + 0x64);
     char* sec = (*(char***)(**(char***)self + 8))[h & 0xFF];
@@ -923,10 +923,10 @@ extern "C" int func_003AA700(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA758);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterial);
 #ifdef SKIP_ASM
 // PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
-extern "C" int func_003AA758(void* self, void* a1)
+extern "C" int cChunkResolve_resolveMaterial(void* self, void* a1)
 {
     if (*(int*)((char*)a1 + 0x10) == -1) {
         *(int*)((char*)a1 + 0x10) = 0;
@@ -938,10 +938,10 @@ extern "C" int func_003AA758(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA780);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterialBlocks);
 #ifdef SKIP_ASM
 // PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
-extern "C" int func_003AA780(void* self, int n, int* data)
+extern "C" int cChunkResolve_resolveMaterialBlocks(void* self, int n, int* data)
 {
     int g;
     for (g = 0; g < n; g++) {
@@ -966,9 +966,9 @@ extern "C" int func_003AA780(void* self, int n, int* data)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA830);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveAnimation);
 #ifdef SKIP_ASM
-class func_003AA830_cObj {
+class cChunkResolve_resolveAnimation_cObj {
 public:
     char pad00[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -987,7 +987,7 @@ public:
 };
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AA830(func_003AA830_cObj* self, void* a1, int base)
+extern "C" int cChunkResolve_resolveAnimation(cChunkResolve_resolveAnimation_cObj* self, void* a1, int base)
 {
     int i = 0;
     int* p = (int*)(*(int*)((char*)a1 + 0x20) += base);
@@ -1000,9 +1000,9 @@ extern "C" int func_003AA830(func_003AA830_cObj* self, void* a1, int base)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA8D8);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveChannel);
 #ifdef SKIP_ASM
-extern "C" int func_003AA8D8(void* self, void* a1, int a2)
+extern "C" int cChunkResolve_resolveChannel(void* self, void* a1, int a2)
 {
     *(int*)((char*)a1 + 0x4) += a2;
     return 1;
@@ -1046,9 +1046,9 @@ extern "C" int cChunkResolve_resolveInstance(char** self, char* node)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA960);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveSpline);
 #ifdef SKIP_ASM
-struct func_003AA960_sNode {
+struct cChunkResolve_resolveSpline_sNode {
     char pad[0x60];
     int prev;       // 0x60 (index fixed up into a pointer)
     int next;       // 0x64
@@ -1057,13 +1057,13 @@ struct func_003AA960_sNode {
 };
 
 // PORT: stores pointers in int fields (int typing needed to match); not 64-bit safe.
-extern "C" int func_003AA960(void* self, void* list)
+extern "C" int cChunkResolve_resolveSpline(void* self, void* list)
 {
     int i;
     int count = *(int*)((char*)list + 0x20);
-    func_003AA960_sNode* nodes = (func_003AA960_sNode*)((char*)list + 0x30);
+    cChunkResolve_resolveSpline_sNode* nodes = (cChunkResolve_resolveSpline_sNode*)((char*)list + 0x30);
     int next = 1;
-    *(func_003AA960_sNode**)((char*)list + 0x24) = nodes;
+    *(cChunkResolve_resolveSpline_sNode**)((char*)list + 0x24) = nodes;
     int prev = count - 1;
     for (i = 0; i < *(int*)((char*)list + 0x20); i++) {
         if (nodes[i].prev != -1) {
@@ -1091,10 +1091,10 @@ extern "C" int func_003AA960(void* self, void* list)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAA08);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveCollideModel);
 #ifdef SKIP_ASM
-extern "C" void func_0032C540(void* self);
-extern "C" int func_00327DA8(void* self, char* data, void* ctx);
+extern "C" void SphereTree_init(void* self);
+extern "C" int bxSphereTree_Load(void* self, char* data, void* ctx);
 
 struct sList_3AAA08 {
     char* items;
@@ -1118,7 +1118,7 @@ struct sChunk_3AAA08 {
     char* items;            // 0xC
 };
 
-extern "C" int func_003AAA08(void* self, void* ctx, sChunk_3AAA08* c)
+extern "C" int cChunkResolve_resolveCollideModel(void* self, void* ctx, sChunk_3AAA08* c)
 {
     if ((int)c->data == -1) {
         c->data = 0;
@@ -1142,11 +1142,11 @@ extern "C" int func_003AAA08(void* self, void* ctx, sChunk_3AAA08* c)
         l->count = c->n;
         l->items = c->items;
         for (int i = 0; i < l->count; i++) {
-            func_0032C540(l->items + i * 0x140);
+            SphereTree_init(l->items + i * 0x140);
         }
         char* data = c->data;
         for (int i = 0; i < l->count; i++) {
-            data += func_00327DA8(l->items + i * 0x140, data, ctx);
+            data += bxSphereTree_Load(l->items + i * 0x140, data, ctx);
         }
     } else if (c->type == 1) {
         sList_3AAA08* l = c->list;
@@ -1169,12 +1169,12 @@ extern "C" int func_003AAA08(void* self, void* ctx, sChunk_3AAA08* c)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AABD8);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveHalo);
 #ifdef SKIP_ASM
 // PORT: func_003AD230__FPv is declared (void*) but takes a flags int and returns a float.
 float func_003AD230_f(int flags) __asm__("func_003AD230__FPv");
 
-struct func_003AABD8_sObj {
+struct cChunkResolve_resolveHalo_sObj {
     char pad_0x00[0xC];
     int flags;          // 0xC
     char pad_0x10[0xC];
@@ -1185,7 +1185,7 @@ struct func_003AABD8_sObj {
     int field_0x44;
 };
 
-extern "C" int func_003AABD8(void* self, func_003AABD8_sObj* obj)
+extern "C" int cChunkResolve_resolveHalo(void* self, cChunkResolve_resolveHalo_sObj* obj)
 {
     float r = func_003AD230_f(obj->flags & 0x70);
     obj->field_0x44 = 0;
@@ -1201,9 +1201,9 @@ extern "C" int func_003AABD8(void* self, func_003AABD8_sObj* obj)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAC50);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveLight);
 #ifdef SKIP_ASM
-extern "C" int func_003AAC50(void* self, void* obj)
+extern "C" int cChunkResolve_resolveLight(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0xC) & 0x100) {
         return 0;
@@ -1222,9 +1222,9 @@ extern "C" int func_003AAC50(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AACA8);
+INCLUDE_ASM("world/worldview", cChunkResolve_unresolveLight);
 #ifdef SKIP_ASM
-extern "C" int func_003AACA8(void* self, void* a1)
+extern "C" int cChunkResolve_unresolveLight(void* self, void* a1)
 {
     if (*(int*)((char*)a1 + 0xC) & 0x100) {
         return 0;
@@ -1273,7 +1273,7 @@ extern "C" float func_003AACE0(void* self, void* p, float arg)
 INCLUDE_ASM("world/worldview", cChunkResolve_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_003AA2F0(void* self);
+extern "C" void cChunkResolve_cChunkResolve(void* self);
 extern char str_cPS2ChunkResolve[];
 extern void* cPS2ChunkResolve_vtbl[];
 
@@ -1286,7 +1286,7 @@ extern void* cPS2ChunkResolve_vtbl[];
 extern "C" void* cChunkResolve_construct()
 {
     void* chunkResolve = cMemMan_alloc(0x14, str_cPS2ChunkResolve, 0, 0);
-    func_003AA2F0(chunkResolve);
+    cChunkResolve_cChunkResolve(chunkResolve);
     *(void***)((char*)chunkResolve + 0x8) = cPS2ChunkResolve_vtbl;
     return chunkResolve;
 }
@@ -1295,7 +1295,7 @@ extern "C" void* cChunkResolve_construct()
 //100%
 INCLUDE_ASM("world/worldview", cPS2ChunkResolve__cPS2ChunkResolve);
 #ifdef SKIP_ASM
-void func_003AAE60(void*);
+void cPS2ChunkResolve_purge(void*);
 void operator_delete(int*);
 extern void* cPS2ChunkResolve_vtbl[];
 extern void* cChunkResolve_vtbl[];
@@ -1303,7 +1303,7 @@ extern void* cChunkResolve_vtbl[];
 /**
  * Destroys a PS2 chunk resolver: runs its empty cleanup, restores the base cChunkResolve vtable, then frees it.
  *
- * Stores cPS2ChunkResolve's vtable at +0x8 and calls func_003AAE60(), whose body is empty. On Tour calls this
+ * Stores cPS2ChunkResolve's vtable at +0x8 and calls cPS2ChunkResolve_purge(), whose body is empty. On Tour calls this
  * destructor cPspChunkResolve::~cPspChunkResolve.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -1311,7 +1311,7 @@ extern void* cChunkResolve_vtbl[];
 extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cPS2ChunkResolve_vtbl;
-    func_003AAE60(self);
+    cPS2ChunkResolve_purge(self);
     *(void***)((char*)self + 0x8) = cChunkResolve_vtbl;
     if (flags & 1) {
         operator_delete(self);
@@ -1333,9 +1333,9 @@ extern "C" void func_003AAE40(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAE60__FPv);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_purge__FPv);
 #ifdef SKIP_ASM
-void func_003AAE60(void* self)
+void cPS2ChunkResolve_purge(void* self)
 {
 }
 #endif
@@ -1367,15 +1367,15 @@ struct sBox_AE68 {
     float x1, y1, z1, w1;
 };
 
-// func_00328F28 is declared again further down with the removal helper's types; bind this one by symbol.
-void func_00328F28_AE68(sHashKey_AE68* out, sBox_AE68* box) __asm__("func_00328F28");
-extern "C" void func_00328C20(sHashCell_AE68* cell, int type, void* node, sHashKey_AE68* key);
+// nash_Nash_findkey is declared again further down with the removal helper's types; bind this one by symbol.
+void nash_Nash_findkey_AE68(sHashKey_AE68* out, sBox_AE68* box) __asm__("nash_Nash_findkey");
+extern "C" void nash_Octant_addnode(sHashCell_AE68* cell, int type, void* node, sHashKey_AE68* key);
 extern char str_strm_tex[];
 extern char str_strm_lpg[];
 extern "C" void* func_003AD198();
 extern "C" void func_00242540(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
-char* func_0028B1C8_AE68() __asm__("func_0028B1C8");
+char* cAudioInterface_getGame_AE68() __asm__("cAudioInterface_getGame");
 extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
 extern char* D_004A28A8_AE68 __asm__("SSXApp");
 extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
@@ -1384,7 +1384,7 @@ extern "C" void func_002BB348(void* self, int a, void* obj);
 extern "C" void func_003ACA10(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
 extern "C" void func_00230430(void* self, int a);
-void func_0016CEC8(void* a, int b);
+void gCamTriggerMan_resolve(void* a, int b);
 extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* obj);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1392,7 +1392,7 @@ void func_001547D8_AE68(void* self, int a, void* p, int v) __asm__("func_001547D
 extern "C" void* func_0028B180();
 extern "C" void func_00286CA8(void* self, unsigned int arg, void* obj);
 extern "C" void func_002105D0(void* obj);
-extern "C" void func_002D9FB8(void* obj);
+extern "C" void cAvalanche_resolve(void* obj);
 
 // Puts obj into the space hash; the box is the 6 floats at obj+off.
 static inline void insert_AE68(void* self, int type, char* obj, int off)
@@ -1409,11 +1409,11 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
     b.z1 = *(float*)(obj + off + 20);
     b.w1 = one;
     sHashCell_AE68* r = *(sHashCell_AE68**)((char*)self + 0xC);
-    func_00328F28_AE68(&k, &b);
+    nash_Nash_findkey_AE68(&k, &b);
     sHashCell_AE68* c1 = k.x < 0 ? r + 4 : r;
     sHashCell_AE68* c2 = k.y < 0 ? c1 + 2 : c1;
     sHashCell_AE68* c3 = k.z < 0 ? c2 + 1 : c2;
-    func_00328C20(c3, type, obj, &k);
+    nash_Octant_addnode(c3, type, obj, &k);
 }
 
 #define VT_AE68(self, off) ((sVEntry_AE68*)(*(char**)((char*)(self) + 8) + (off)))
@@ -1495,10 +1495,10 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         ((tMsg2_AE68)VT_AE68(self, 0x98)->fn)((char*)self + VT_AE68(self, 0x98)->delta, RID, obj);
         break;
     case 13:
-        func_002B6B08(*(void**)(func_0028B1C8_AE68() + 0x4C), obj, RID);
+        func_002B6B08(*(void**)(cAudioInterface_getGame_AE68() + 0x4C), obj, RID);
         break;
     case 17:
-        func_0016CEC8((void*)RID, (int)obj);
+        gCamTriggerMan_resolve((void*)RID, (int)obj);
         break;
     case 15:
         if (cWorld_m_pTheWorld) {
@@ -1535,7 +1535,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         }
         break;
     case 22:
-        func_002D9FB8(obj);
+        cAvalanche_resolve(obj);
         break;
     }
     return obj;
@@ -1543,7 +1543,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AB498);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_unresolve);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1558,12 +1558,12 @@ extern "C" void func_00242570(void* p, void* data);
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
 extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
 extern "C" void* func_0028B180();
-extern "C" void* func_0028B1C8();
+extern "C" void* cAudioInterface_getGame();
 extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
 extern "C" void func_002BB5A8(void* entry);
 extern "C" void cAvalanche_reset();
-extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
-extern "C" void func_00328F28(void* out, const void* box);
+extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
+extern "C" void nash_Nash_findkey(void* out, const void* box);
 extern "C" void* func_003AD198();
 
 struct sWVVec4_B498 {
@@ -1625,16 +1625,16 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
 {
     (*(int*)(w + 0xA0))++;
     sWVCell_B498 c;
-    func_00328F28(&c, box);
+    nash_Nash_findkey(&c, box);
     sWVRoot_B498* r = findRoot_B498(w, c.x, c.y, c.z);
-    func_003284B8(r->node, idx, item, &c, &r->cell);
+    nash_Cell_remnode(r->node, idx, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
         r->node = 0;
     }
 }
 
-extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param, char* data)
+extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsigned int param, char* data)
 {
     switch (msg) {
     case 0:
@@ -1704,7 +1704,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     }
     case 13:
-        func_002B6B30(*(void**)((char*)func_0028B1C8() + 0x4C), data, param);
+        func_002B6B30(*(void**)((char*)cAudioInterface_getGame() + 0x4C), data, param);
         break;
     case 17:
         func_0016CF18(param);

@@ -45,7 +45,7 @@ struct cGameModeMan {
                                 //      iNumberAI - iSimAI (the AI riders that really ride; On Tour getNumberAIToSim)
     int iCharacters[10];        // 0x18 [O] (On Tour [62]); [R] purge clears 0x28 bytes, freeride fills -1;
                                 //      [U] the AI riders' character IDs (cBENewPlayerInterface_setRiderCharID)
-    int iCheatCharacters[10];   // 0x40 [O]; [R] purge clears 0x28 bytes; [U] gamestate passes them to func_001473D0
+    int iCheatCharacters[10];   // 0x40 [O]; [R] purge clears 0x28 bytes; [U] gamestate passes them to cBENewPlayerInterface_setRiderCheatCharID
     int iLocation;              // 0x68 [R] purge = -1 (On Tour purge: iLocation = -1); [U] handlers read/write it
     int iNextLocation;          // 0x6C [R] purge = -1, freeride init = -1 (On Tour: iNextLocation = -1)
     int iNextHeat;              // 0x70 [R] restorePreviousHeat: iNextHeat = iRestoreHeat; freeride = 1

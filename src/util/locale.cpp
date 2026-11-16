@@ -119,11 +119,11 @@ extern "C" void func_00195AA0(void* self, signed char lang)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195B70);
+INCLUDE_ASM("util/locale", cFELocale_loadCommon);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
-extern "C" void func_00195B70(void* self)
+extern "C" void cFELocale_loadCommon(void* self)
 {
     int lang = -1;
     switch (*(signed char*)((char*)self + 0x1)) {
@@ -333,7 +333,7 @@ INCLUDE_ASM("util/locale", cFEStateAudioOptions_cFEStateAudioOptions);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
-extern "C" void* func_00398380(void* self, int id);
+extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int func_00158700(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2);
 extern "C" void* cBE_getBE();
@@ -348,7 +348,7 @@ extern char str_empty_box[];
 /**
  * Constructs the audio options state for one player.
  *
- * Clears the widget pointers, looks up the "checkbox" and "empty box" entries (func_00398380 on the engine's
+ * Clears the widget pointers, looks up the "checkbox" and "empty box" entries (cUITextureBank_getElementByHashname on the engine's
  * +0x58 table) shown in the mode boxes, and reads the player's character, the selected music mode
  * (func_00158700; going by the menu items' ids, probably 0 radio big, 1 request line, 2 big mountain, 3
  * playlist) and whether the playlist has any songs.
@@ -379,10 +379,10 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     *(int*)(selfBytes + 0x74) = inStore;
     char* engineObj = *(char**)(selfBytes + 0x10);
     int hash = GetHashValue32(str_checkbox);
-    *(void**)(selfBytes + 0x5C) = func_00398380(engineObj + 0x58, hash);
+    *(void**)(selfBytes + 0x5C) = cUITextureBank_getElementByHashname(engineObj + 0x58, hash);
     char* engineObj2 = *(char**)(selfBytes + 0x10);
     int emptyBoxHash = GetHashValue32(str_empty_box);
-    *(void**)(selfBytes + 0x60) = func_00398380(engineObj2 + 0x58, emptyBoxHash);
+    *(void**)(selfBytes + 0x60) = cUITextureBank_getElementByHashname(engineObj2 + 0x58, emptyBoxHash);
     *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
     *(int*)(selfBytes + 0x78) = func_00158700(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));

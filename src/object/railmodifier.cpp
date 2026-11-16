@@ -398,17 +398,17 @@ static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
         : "memory");
 }
 
-extern "C" void func_0034FED8(void* model, int bone, sRmMat44C5A0* out);
+extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sRmMat44C5A0* out);
 
 /**
- * Builds the rail's inverse transform: the instance's mesh matrix (func_0034FED8, cInstanceNode::buildMeshMat with
+ * Builds the rail's inverse transform: the instance's mesh matrix (cInstanceNode_buildMeshMat, cInstanceNode::buildMeshMat with
  * Instance and Mesh) multiplied with XForm (+0x50), into @p mat.
  *
  * @param mat  receives the matrix (On Tour t4Matrix& mat)
  */
 extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
 {
-    func_0034FED8(self->Instance, self->Mesh, mat);
+    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, mat);
     sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)self + 0x50);
     sRmMat44C5A0 copy;
     sRmMat44C5A0 product;
@@ -534,7 +534,7 @@ struct sRmF5_C698 {
     float v[5];
 };
 
-extern "C" sRmWorld_C698** func_002D1BD8();
+extern "C" sRmWorld_C698** cObjectInterface_getWorld();
 extern "C" void cRailModifier_getInvMat_C698(void* self, sRmMat44* m) __asm__("cRailModifier_getInvMat");
 extern t4Vector D_004FF120_C698 __asm__("t4vect_Zero");
 extern const sRmF5_C698 D_0048E7D8;
@@ -773,7 +773,7 @@ static inline void resetHit_C698(sRmHit_C698* h)
 extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
                               int* found, float* bestDist, sRmHit_C698* out)
 {
-    sRmSpline_C698* spline = (sRmSpline_C698*)(*(sRmRef_C698*)&self->SplineId).get(*func_002D1BD8());
+    sRmSpline_C698* spline = (sRmSpline_C698*)(*(sRmRef_C698*)&self->SplineId).get(*cObjectInterface_getWorld());
     if ((spline->mask & mask) == 0) {
         return;
     }
@@ -882,9 +882,9 @@ void cRailModifier_render(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035CFE8__FPv);
+INCLUDE_ASM("object/railmodifier", cRigidBody_cRigidBody__FPv);
 #ifdef SKIP_ASM
-void* func_0035CFE8(void* self)
+void* cRigidBody_cRigidBody(void* self)
 {
     return self;
 }
@@ -965,7 +965,7 @@ extern "C" void func_0035CFF0(sBodyCFF0* self, const sVec4CFF0* newPos)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035D288);
+INCLUDE_ASM("object/railmodifier", cRigidBody_updateImplicit);
 #ifdef SKIP_ASM
 struct sRmVec4 {
     float x, y, z, w;
@@ -1016,7 +1016,7 @@ static inline sRmVec4 xformRM(sRmBody* b)
     return r;
 }
 
-extern "C" void func_0035D288(sRmBody* self)
+extern "C" void cRigidBody_updateImplicit(sRmBody* self)
 {
     self->outDir = vu0ScaleRM(self->dir, self->scale);
     self->outPos = xformRM(self);
@@ -1343,16 +1343,16 @@ extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cRigidBody_write
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035DA38);
+INCLUDE_ASM("object/railmodifier", cRigidBody_readFromReplayFrame);
 #ifdef SKIP_ASM
-class func_0035DA38_cObj {
+class cRigidBody_readFromReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void func_0035DA38(void* self, func_0035DA38_cObj* obj)
+extern "C" void cRigidBody_readFromReplayFrame(void* self, cRigidBody_readFromReplayFrame_cObj* obj)
 {
     obj->v02(self, 0x50);
 }
@@ -1363,16 +1363,16 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_cRollerModifier);
 #ifdef SKIP_ASM
 extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
-void* func_0035CFE8(void* self);
-extern "C" void func_0032C508(void* p);
+void* cRigidBody_cRigidBody(void* self);
+extern "C" void SphereTree_SphereTree(void* p);
 extern "C" void* func_00327CC8(void* self, void* src);
-extern "C" void func_0035E248(void* self);
+extern "C" void cRollerModifier_updateMOI(void* self);
 
 extern "C" void* cRollerModifier_Collision_DA70(void* self, void* a1, void* a2) __asm__("cRollerModifier_Collision");
 
 
 extern "C" tPose func_0031B748(void* m);
-extern "C" tPose func_0035E770_DA70(void* self) __asm__("func_0035E770");
+extern "C" tPose cRollerModifier_getBodyPose_DA70(void* self) __asm__("cRollerModifier_getBodyPose");
 
 struct sV4c_DA70 {
     float x, y, z, w;
@@ -1513,9 +1513,9 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
 {
     float* timing = (float*)(((char*)self) + 0x4);
     *(void***)self = cTransformModifier_vtbl;
-    func_0035CFE8(((char*)self) + 0x30);
+    cRigidBody_cRigidBody(((char*)self) + 0x30);
     *(void***)self = cRollerModifier_vtbl;
-    func_0032C508(((char*)self) + 0xE0);
+    SphereTree_SphereTree(((char*)self) + 0xE0);
     *(int*)&self->Life = 0;
     self->m_pInstance = (tInstanceRecord*)(*(int*)(ii + 0x50));
     func_00327CC8(((char*)self) + 0xE0, *(void**)(ii + 0x48));
@@ -1551,10 +1551,10 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
         AddTo_DA70((*(sRmVec4*)&x.P), shift);
     }
     *(&self->Pose) = x;
-    tPose y = func_0035E770_DA70(((char*)self));
+    tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
     QuatPosToMtx_DA70(((char*)self) + 0x240, (*(sRmVec4*)&y.Q), (*(sRmVec4*)&y.P));
-    func_0035E248(((char*)self));
-    func_0035D288((sRmBody*)(((char*)self) + 0x30));
+    cRollerModifier_updateMOI(((char*)self));
+    cRigidBody_updateImplicit((sRmBody*)(((char*)self) + 0x30));
     self->ContactElastic = 0.10000000149011612f;
     self->ContactFriction = 0.4000000059604645f;
     self->StopContactSpeed = 277.77777099609375f;
@@ -1734,13 +1734,13 @@ INCLUDE_ASM("object/railmodifier", func_0035DF70);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
-void* func_0035CFE8(void* self);
-extern "C" void func_0032C508(void* self);
-extern void* func_002D1BD8_DF70() __asm__("func_002D1BD8");
+void* cRigidBody_cRigidBody(void* self);
+extern "C" void SphereTree_SphereTree(void* self);
+extern void* cObjectInterface_getWorld_DF70() __asm__("cObjectInterface_getWorld");
 void* func_003A6CD8(void* a, void* b);
-extern "C" void* func_003A6CE8(void* a, int b);
-extern "C" void func_0032C648(void* self, void* m, float scale);
-extern "C" void func_0035E248(void* self);
+extern "C" void* tSphTreeList_getMeshTree(void* a, int b);
+extern "C" void SphereTree_TransformAbs(void* self, void* m, float scale);
+extern "C" void cRollerModifier_updateMOI(void* self);
 
 
 
@@ -1785,13 +1785,13 @@ struct sRailDF70 {
 extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
 {
     self->vt = cTransformModifier_vtbl;
-    func_0035CFE8(self->body);
+    cRigidBody_cRigidBody(self->body);
     self->vt = cRollerModifier_vtbl;
-    func_0032C508(self->mover);
-    func_0035DA38(self->body, (func_0035DA38_cObj*)stream);
+    SphereTree_SphereTree(self->mover);
+    cRigidBody_readFromReplayFrame(self->body, (cRigidBody_readFromReplayFrame_cObj*)stream);
     stream->v02(self->data, 0x28);
     self->id = stream->v03();
-    void* r = func_003A6CE8(func_003A6CD8(func_002D1BD8_DF70(), (void*)self->id), 0);
+    void* r = tSphTreeList_getMeshTree(func_003A6CD8(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
     func_00327CC8(self->mover, r);
     sRmSrcDF70* src = self->src;
     sRmVec4 off;
@@ -1810,11 +1810,11 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
     self->rot.m[6] *= 0.5f;
     self->rot.m[7] *= 0.5f;
     self->rot.m[8] *= 0.5f;
-    tPose x = func_0035E770_DA70(self);
+    tPose x = cRollerModifier_getBodyPose_DA70(self);
     QuatPosToMtx_DA70(&self->xf, (*(sRmVec4*)&x.Q), (*(sRmVec4*)&x.P));
-    func_0032C648(self->mover, &self->xf, 1.0f);
-    func_0035E248(self);
-    func_0035D288((sRmBody*)self->body);
+    SphereTree_TransformAbs(self->mover, &self->xf, 1.0f);
+    cRollerModifier_updateMOI(self);
+    cRigidBody_updateImplicit((sRmBody*)self->body);
     return self;
 }
 #endif
@@ -1850,7 +1850,7 @@ extern "C" void cRollerModifier_writeToReplayFrame(void* self, cRollerModifier_w
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035E248);
+INCLUDE_ASM("object/railmodifier", cRollerModifier_updateMOI);
 #ifdef SKIP_ASM
 struct sM44_E248 {
     float m[4][4];
@@ -1959,7 +1959,7 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* 
 }
 
 // World-space inertia: rotT * inertia * rot, with rot from the body quaternion (self + 0x40).
-extern "C" void func_0035E248(void* self)
+extern "C" void cRollerModifier_updateMOI(void* self)
 {
     sM44_E248 m;
     QuatToMtx_E248(m, *(sRmVec4*)((char*)self + 0x40));
@@ -1973,7 +1973,7 @@ extern "C" void func_0035E248(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035E770);
+INCLUDE_ASM("object/railmodifier", cRollerModifier_getBodyPose);
 #ifdef SKIP_ASM
 struct sRmXform {
     sRmVec4 pos;    // 0x00
@@ -2027,7 +2027,7 @@ static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
         : "m"(dst), "m"(b));
 }
 
-extern "C" sRmXform func_0035E770(void* self)
+extern "C" sRmXform cRollerModifier_getBodyPose(void* self)
 {
     sRmXform r = *(sRmXform*)((char*)self + 0x30);
     sRmVec4 c;
@@ -2060,9 +2060,9 @@ void cRollerModifier_updateRootTransform(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035ED90);
+INCLUDE_ASM("object/railmodifier", cRollerModifier_translateMe);
 #ifdef SKIP_ASM
-extern "C" void func_0032C630(void* p, const sRmVec4* d);
+extern "C" void SphereTree_MoveOffset(void* p, const sRmVec4* d);
 
 // PORT: PS2-only VU0 inline asm (dst += b).
 static inline void vu0AddED90(sRmVec4& dst, const sRmVec4& b)
@@ -2079,10 +2079,10 @@ static inline void vu0AddED90(sRmVec4& dst, const sRmVec4& b)
         : "m"(dst), "m"(b));
 }
 
-extern "C" void func_0035ED90(sRmBody* self, const sRmVec4* b)
+extern "C" void cRollerModifier_translateMe(sRmBody* self, const sRmVec4* b)
 {
     vu0AddED90(self->pos, *b);
-    func_0032C630((char*)self + 0xE0, b);
+    SphereTree_MoveOffset((char*)self + 0xE0, b);
 }
 #endif
 
@@ -2092,7 +2092,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_collide);
 extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2);
 extern "C" void cWorldSphTree__cWorldSphTree(void* self, int flags);
 extern "C" void* cObjectInterface_getNash();
-extern "C" float func_0032C5A8(void* self);
+extern "C" float SphereTree_GetResolution(void* self);
 extern void func_0035D4A0_EDC8(void* self, void* hit, void* normal, float a, float b) __asm__("func_0035D4A0");
 
 struct sHitEDC8 {
@@ -2275,10 +2275,10 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     cWorldSphTree_cWorldSphTree(tree, (char*)self + 0xE0, 1);
     float zeroF = 0.0f;
     float overlap = func_00336850_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
-    overlap -= func_0032C5A8((char*)self + 0xE0);
+    overlap -= SphereTree_GetResolution((char*)self + 0xE0);
     if (zeroF < overlap) {
         sRmVec4 push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
-        func_0035ED90((sRmBody*)self, &push);
+        cRollerModifier_translateMe((sRmBody*)self, &push);
         float k = 0.975f;
         setPosEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->L), k));
         setOutDirEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->V), k));
@@ -2305,7 +2305,7 @@ INCLUDE_ASM("object/railmodifier", func_0035F0B8);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
 int BXrand();
-extern "C" void func_0035F218(cTexFlipModifier* self);
+extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
 
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
@@ -2343,7 +2343,7 @@ extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, vo
     } else {
         self->TexIndex = n;
     }
-    func_0035F218(self);
+    cTexFlipModifier_setupTexFlip(self);
     return (self);
 }
 #endif
@@ -2359,19 +2359,19 @@ public:
     virtual void* v03();
 };
 
-extern "C" void func_0035F218(cTexFlipModifier* self);
+extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
 
 extern "C" void* func_0035F1A8(cTexFlipModifier* self, func_0035F1A8_cObj* obj)
 {
     obj->v02(self, 0x18);
     self->Instance = (tInstanceRecord*)obj->v03();
-    func_0035F218(self);
+    cTexFlipModifier_setupTexFlip(self);
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F218);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setupTexFlip);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2400,10 +2400,10 @@ struct sRailSelF218 {
     sRailOutF218 out[1];    // 0x48
 };
 
-extern void sel_F218(sRailSelF218* self, int i) __asm__("func_0035F378");
+extern void sel_F218(sRailSelF218* self, int i) __asm__("cTexFlipModifier_setTexIndex");
 extern void ms_F218(void* p, int v, int n) __asm__("MEM_fill");
 
-extern "C" void func_0035F218(cTexFlipModifier* selfv)
+extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
 {
     sRailSelF218* self = (sRailSelF218*)selfv;
     int i;
@@ -2439,12 +2439,12 @@ extern "C" void func_0035F218(cTexFlipModifier* selfv)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F378);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setTexIndex);
 #ifdef SKIP_ASM
 struct sRailModSelect;
 extern "C" void func_0035F3A8(sRailModSelect* self);
 
-extern "C" void func_0035F378(sRailModSelect* self, int i)
+extern "C" void cTexFlipModifier_setTexIndex(sRailModSelect* self, int i)
 {
     int n = *(int*)((char*)self + 0x20);
     if (i >= n) {
@@ -2495,7 +2495,7 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_update);
  * Time grows by Speed per frame (nothing happens while Speed <= 0); when it reaches 1.0 it drops by 1.0 and Type
  * decides: 0 steps TexIndex forward or, with Dir set, backward, wrapping at NumTexFlipMaterials; 1 sets Speed to 10
  * / the frame rate (cAppMan_TheAppMan + 0x10), switches to type 2 and steps forward; 2 sets Speed to BaseSpeed times a
- * random 0.25..1.0 (BXrand mantissa trick), switches to type 1 and steps forward. Ends with func_0035F378 (On Tour
+ * random 0.25..1.0 (BXrand mantissa trick), switches to type 1 and steps forward. Ends with cTexFlipModifier_setTexIndex (On Tour
  * setTexIndex). The comment above the definition calls the timer a rail timer; it is the tex-flip one.
  */
 // Advances the rail timer; each whole step moves to the next/previous frame (mode 0), or alternates between a
@@ -2536,7 +2536,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
             self->TexIndex = 0;
         }
     }
-    func_0035F378((sRailModSelect*)self, self->TexIndex);
+    cTexFlipModifier_setTexIndex((sRailModSelect*)self, self->TexIndex);
 }
 #endif
 
@@ -2544,7 +2544,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_signal);
 #ifdef SKIP_ASM
 struct sRailModSelect;
-extern "C" void func_0035F378(sRailModSelect* self, int i);
+extern "C" void cTexFlipModifier_setTexIndex(sRailModSelect* self, int i);
 
 struct sRailModSel_F598 {
     int field_0x0;
@@ -2568,7 +2568,7 @@ static inline float fTrunc_F598(float x)
  * Handles a script signal for the tex-flip modifier: set its speed, pick a texture or step to the next one.
  *
  * Signal 300 sets Speed to @p value; 301 with 0 <= @p value < 9 sets TexIndex to @p value rounded up and applies it
- * (func_0035F378, On Tour setTexIndex); 302 steps TexIndex forward, wrapping to 1 (not 0 as cTexFlipModifier_update
+ * (cTexFlipModifier_setTexIndex, On Tour setTexIndex); 302 steps TexIndex forward, wrapping to 1 (not 0 as cTexFlipModifier_update
  * does), and applies it. Other ids are ignored.
  *
  * @param id  the signal id (On Tour signal)
@@ -2588,7 +2588,7 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
             }
             int n = (int)ceilVal;
             self->TexIndex = n;
-            func_0035F378((sRailModSelect*)self, n);
+            cTexFlipModifier_setTexIndex((sRailModSelect*)self, n);
         }
         break;
     case 302:
@@ -2596,7 +2596,7 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
         if (self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 1;
         }
-        func_0035F378((sRailModSelect*)self, self->TexIndex);
+        cTexFlipModifier_setTexIndex((sRailModSelect*)self, self->TexIndex);
         break;
     }
 }
@@ -4551,21 +4551,21 @@ void* cDynamicEmitter__cDynamicEmitter(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectLink__cEffectLink);
 #ifdef SKIP_ASM
-extern "C" void func_00345760(void* self);
+extern "C" void cEffectLink_unlink(void* self);
 void operator_delete(int*);
 extern void* cEffectLink_vtbl[];
 
 /**
  * Destroys an effect link: restores its vtable at +0x8, unlinks it from its list, then frees it when asked to.
  *
- * func_00345760() joins the link's neighbours and clears its next/prev pointers.
+ * cEffectLink_unlink() joins the link's neighbours and clears its next/prev pointers.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cEffectLink__cEffectLink(cEffectLink* self, int flags)
 {
     self->mVtbl = cEffectLink_vtbl;
-    func_00345760(self);
+    cEffectLink_unlink(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4701,21 +4701,21 @@ int cHaloModifier_getType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRailLink__cRailLink);
 #ifdef SKIP_ASM
-extern "C" void func_0035B6D0(void* self);
+extern "C" void cRailLink_unlink(void* self);
 void operator_delete(int*);
 extern void* cRailLink_vtbl[];
 
 /**
  * Destroys a rail link: restores its vtable at +0x8, unlinks it from its list, then frees it when asked to.
  *
- * func_0035B6D0() joins the link's neighbours and clears its next/prev pointers.
+ * cRailLink_unlink() joins the link's neighbours and clears its next/prev pointers.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cRailLink__cRailLink(cRailLink* self, int flags)
 {
     self->mVtbl = cRailLink_vtbl;
-    func_0035B6D0(self);
+    cRailLink_unlink(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5006,14 +5006,14 @@ extern "C" void func_00360FC0(cMoveNode* moveNode) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360FE8);
 #ifdef SKIP_ASM
-extern "C" void func_003531D0(int);
+extern "C" void tModifierBlock_remEffectModifier(int);
 
 extern "C" void func_00360FE8(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
-        func_003531D0(temp_4);
+        tModifierBlock_remEffectModifier(temp_4);
     }
 }
 #endif

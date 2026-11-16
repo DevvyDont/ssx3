@@ -596,7 +596,7 @@ extern "C" void func_00211AA8(void* self)
 }
 #endif
 
-extern "C" void* func_001D58B8(void*);
+extern "C" void* cFEMemCard_onDestroyScreen(void*);
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onDestroyScreen__FPv);
@@ -605,12 +605,12 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onDestroyScreen__FPv);
  * Destroys the profile overlay's screens: runs the shared profile screen teardown, then clears the word at
  * +0x1A4.
  *
- * The teardown, func_001D58B8(), calls helpers of back-end interface 5, runs three memory card manager calls
+ * The teardown, cFEMemCard_onDestroyScreen(), calls helpers of back-end interface 5, runs three memory card manager calls
  * when its word at +0x434 is set, and frees the buffer at +0x1D4 when one is held.
  */
 void cOVState_PROFILE_onDestroyScreen(void* self)
 {
-    func_001D58B8(self);
+    cFEMemCard_onDestroyScreen(self);
     *(int*)((char*)self + 0x1a4) = 0;
 }
 #endif
@@ -908,14 +908,14 @@ extern "C" void cOVState_PROFILE_initGeneral(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212138);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_cOVState_AUTOSAVE);
 #ifdef SKIP_ASM
-extern "C" void* func_001D53B0(void* self, void* a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, void* a1, int a2);
 extern void* cOVState_AUTOSAVE_vtbl[];
 
-extern "C" void* func_00212138(void* self, void* a1, int a2)
+extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* a1, int a2)
 {
-    func_001D53B0(self, a1, 0);
+    cFEMemCard_cFEMemCard(self, a1, 0);
     *(void***)((char*)self + 0x8) = cOVState_AUTOSAVE_vtbl;
     *(int*)((char*)self + 0xC) = 0x25;
     *(int*)((char*)self + 0x208) = 1;
@@ -1004,7 +1004,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onInputBegin__FPv);
 /**
  * Leaves controller input to the autosave overlay's screens.
  *
- * The base UI update func_0039E510() hands the input on to the state's screens when this returns 0.
+ * The base UI update cUIState_onUpdate() hands the input on to the state's screens when this returns 0.
  *
  * @return always 0 (input not consumed)
  */
@@ -1055,7 +1055,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" int func_0023C898(void* mp);
+extern "C" int cMCOverlayManager_isManagerDone(void* mp);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a2, int a3, int a4);
 extern "C" void cUIThing_deleteAnimation(void* obj);
@@ -1083,7 +1083,7 @@ public:
  * Updates the autosave icon and text when the processing flag changes.
  *
  * Compares the processing flag (+0x1A8) with its last shown value (+0x230). While processing, with
- * func_0023C898(memory card manager) 0 and state not 6, it pulses "exclam" ("@pulsingicon") and shows
+ * cMCOverlayManager_isManagerDone(memory card manager) 0 and state not 6, it pulses "exclam" ("@pulsingicon") and shows
  * kT_MEMAutosaving; otherwise it stops the animation and hides the text.
  */
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
@@ -1098,7 +1098,7 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
     if (obj == 0) {
         return;
     }
-    if (*(int*)((char*)self + 0x1A8) != 0 && func_0023C898(mp) == 0 && *(int*)((char*)self + 0x1C0) != 6) {
+    if (*(int*)((char*)self + 0x1A8) != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && *(int*)((char*)self + 0x1C0) != 6) {
         void* bank = *(char**)((char*)self + 0x10) + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_pulsingicon));
         if (anim != 0) {
@@ -1156,13 +1156,13 @@ struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
 /**
  * Tears down the autosave overlay and moves on to where the save was started from.
  *
- * After func_001D58B8 (the shared memory card teardown) it switches on +0x22C (the constructor's parent
+ * After cFEMemCard_onDestroyScreen (the shared memory card teardown) it switches on +0x22C (the constructor's parent
  * code): 1 exits the game, 6 pushes cFEStateTitle, 7 pushes cFEStateLodge, 0 sets up a new race (game mode 4,
  * event 0xC, the last hub into D_00535C08, D_004A11B8 = 1) and makes cPreGameLoadScreen the next module.
  */
 extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
 {
-    func_001D58B8(self);
+    cFEMemCard_onDestroyScreen(self);
     int parentScreen = *(int*)((char*)self + 0x22C);
     if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);

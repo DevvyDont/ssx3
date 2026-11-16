@@ -17,7 +17,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 
-extern "C" int func_00398380(void* self, int id);
+extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 
 int GetHashValue32(char* str);
 
@@ -114,8 +114,8 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     room->fBC = -1;
     room->fC4 = -1;
     room->fC0 = item;
-    room->fAC = func_00398380((char*)ui + 0x58, GetHashValue32(str_dot_loc_arrow));
-    room->fA8 = func_00398380((char*)ui + 0x58, GetHashValue32(str_dot_visit_arrow));
+    room->fAC = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_loc_arrow));
+    room->fA8 = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_visit_arrow));
     func_001D3160_Room(self);
     return self;
 }
@@ -234,7 +234,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetCreate);
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" int func_00398380(void* self, int id);
+extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 // The array-initializer clear (memset) is a void libcall here.
 extern "C" void func_00416210(void* dst, int c, int n);
 
@@ -336,7 +336,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         char* eng = *(char**)(state + 0x10);
         buf[2] = *(unsigned char*)(state + 0xB8) + '0';
         int hash = GetHashValue32(buf);
-        int texElem = func_00398380(eng + 0x58, hash);
+        int texElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
         w->f78 = -1;
         w->f7C = texElem;
         return;
@@ -624,21 +624,21 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_001D31C0(void* self);
-extern "C" void* func_0039E510(void* self);
+extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the mountain room, first finishing its picture load while one is pending.
  *
  * While the async slot at 0xBC is not -1, func_001D31C0() checks the load; once it has loaded, the data is
  * handed to GrMan under the name "pass" and attached to the widget at 0x50, and the slot is released. Then runs
- * the base UI-state update func_0039E510().
+ * the base UI-state update cUIState_onUpdate().
  */
 extern "C" void cFEStateMountainRoom_onUpdate(void* self)
 {
     if (~*(int*)((char*)self + 0xBC) != 0) {
         func_001D31C0(self);
     }
-    func_0039E510(self);
+    cUIState_onUpdate(self);
 }
 #endif
 
@@ -917,7 +917,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* func_00156A90(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" int func_00398380(void* self, int id);
+extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern char str_screentitle[];
 extern char str_kT_Peak3name[];
 extern char str_kT_Peak2name[];
@@ -1009,7 +1009,7 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
                 char* info = func_00156A90(iface, self->mode, i);
                 char* eng = self->engine;
                 int hash = GetHashValue32(*(char**)(info + 8));
-                int texElem = func_00398380(eng + 0x58, hash);
+                int texElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
                 sWidget_38F8* sw = self->slots[i];
                 sw->f78 = -1;
                 sw->f7C = texElem;
@@ -1152,7 +1152,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" void* func_00397870(void* list, int id);
+extern "C" void* cList_getByIndex(void* list, int id);
 
 /**
  * Filters the peak room's menu events: swallows 8 and 9 and refuses event 6 on a trophy not yet owned.
@@ -1172,7 +1172,7 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned in
         return 0x100;
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-        void* entry = func_00397870((char*)item + 0x74, id);
+        void* entry = cList_getByIndex((char*)item + 0x74, id);
         if (cBERewardInterface_isTrophyOwned(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
                           *(int*)((char*)self + 0xE0), *(int*)((char*)entry + 0x18)) == 0) {
             return 0x10;
@@ -1241,7 +1241,7 @@ extern "C" int func_001CE6F0(int mountain);
 extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
 extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
 extern "C" char* func_00156AE0(void* iface, int peak, int ch);
-extern "C" int func_00398380(void* self, int id);
+extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 
 class cWidget_3F80 {
 public:
@@ -1306,7 +1306,7 @@ extern "C" void func_001D3F80(void* vself, int peak)
             char* trophyRec = func_00156AE0(iface, peak, ch);
             char* eng = self->engine;
             int hash = GetHashValue32(*(char**)(trophyRec + 8));
-            int textureElem = func_00398380(eng + 0x58, hash);
+            int textureElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
             cWidget_3F80* w = icon[i];
             *(int*)((char*)w + 0x7C) = textureElem;
             *(int*)((char*)w + 0x78) = -1;
