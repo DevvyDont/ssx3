@@ -1,4 +1,16 @@
 #include "common.h"
+#include "fe/festatelogin.h"
+#include "fe/festatenetcreateroompopup.h"
+#include "fe/festateauthdnas.h"
+#include "fe/festatenetquickmessages.h"
+#include "fe/festateonlineagreement.h"
+#include "fe/festatereadmessagepopup.h"
+#include "fe/festatenetquickplaypopup.h"
+#include "fe/festateonlinecharacterselect.h"
+#include "fe/festatecreateduplicate.h"
+#include "fe/festatechatroom.h"
+#include "fe/festatenetchallenge.h"
+#include "fe/festatenetaccount.h"
 #include "fe/popupinfo.h"
 #include "fe/festatestats.h"
 #include "fe/festatenetlobby.h"
@@ -2739,24 +2751,24 @@ public:
     virtual void v11(const sCol1A7970& c);
 };
 
-extern "C" void func_001A7970(void* self)
+extern "C" void func_001A7970(cFEStateReadMessagePopup* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004619A0), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619B8));
+    char* a = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
     *(int*)(a + 0x14) |= 1;
-    void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619C8));
-    void* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619D8));
-    void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619E8));
+    void* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
+    void* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
+    void* d = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
     *(void**)(a + 0x7C) = b;
     *(void**)(a + 0x80) = c;
     *(void**)(a + 0x84) = d;
     *(int*)(a + 0x88) = 2;
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619F8));
+    char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619F8));
     if (o != 0) {
         cFEVObj_001A7970* obj = (cFEVObj_001A7970*)o;
         *(int*)(o + 0x74) |= 1;
@@ -2764,7 +2776,7 @@ extern "C" void func_001A7970(void* self)
         obj->v09(1);
         *(int*)(o + 0x14) |= 0x80;
         obj->v11(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
-        *(sBlk1A7970*)(o + 0xA8) = *(sBlk1A7970*)((char*)self + 0x6EC);
+        *(sBlk1A7970*)(o + 0xA8) = *(sBlk1A7970*)&self->mTextColour;
         *(char**)(o + 0xB8) = a;
     }
 }
@@ -2823,9 +2835,9 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_00262690(void* self, int a1, void* a2);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
-extern "C" void func_001A81F0(void* self);
+extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
-extern "C" void func_001A7ED8(void* self, const char* name);
+extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name);
 extern "C" void func_001A9090(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern char D_004A1408[];
 
@@ -2851,23 +2863,23 @@ struct cFEObj_001A7BB8 {
     virtual void v17(void* a1, int a2);
 };
 
-extern "C" void func_001A7BB8(void* self, int a1, unsigned int msg)
+extern "C" void func_001A7BB8(cFEStateReadMessagePopup* self, int a1, unsigned int msg)
 {
     switch (msg) {
     case 6:
-        (*(cFEObj_001A7BB8**)((char*)self + 0x20))->v17(self, 0x14);
+        ((cFEObj_001A7BB8*)self->mpParentState)->v17(self, 0x14);
         break;
     case 5:
-        func_001A9090((cFEStateNet*)self, 0, *(int*)((char*)self + 0x6D0), (int)D_004A1408, 0, 0, 0x3F);
-        *(int*)(*(char**)((char*)self + 0x69C) + 0x43C) = 0;
-        cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
-        func_001CE468(*(void**)((char*)self + 0x69C), 1);
-        *(int*)(*(char**)((char*)self + 0x69C) + 0x438) = 1;
+        func_001A9090((cFEStateNet*)self, 0, (int)self->mszSender, (int)D_004A1408, 0, 0, 0x3F);
+        *(int*)((char*)self->mpKeyboard + 0x43C) = 0;
+        cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
+        func_001CE468(self->mpKeyboard, 1);
+        *(int*)((char*)self->mpKeyboard + 0x438) = 1;
         break;
     case 7:
         break;
     case 13:
-        func_001A7ED8(self, *(char**)((char*)self + 0x69C) + 0x74);
+        func_001A7ED8(self, (char*)self->mpKeyboard + 0x74);
         if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
@@ -2877,7 +2889,7 @@ extern "C" void func_001A7BB8(void* self, int a1, unsigned int msg)
         if (BuddyMan_mBuddyMan == 0) {
             func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00262690(BuddyMan_mBuddyMan, *(int*)((char*)self + 0x6D0), *(char**)((char*)self + 0x69C) + 0x74);
+        func_00262690(BuddyMan_mBuddyMan, (int)self->mszSender, (char*)self->mpKeyboard + 0x74);
         func_001A81F0(self);
         break;
     default:
@@ -2890,12 +2902,12 @@ extern "C" void func_001A7BB8(void* self, int a1, unsigned int msg)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A7D10);
 #ifdef SKIP_ASM
-extern "C" void func_001A81F0(void* self);
+extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 
-extern "C" int func_001A7D10(void* self, int a1, int a2, int a3)
+extern "C" int func_001A7D10(cFEStateReadMessagePopup* self, int a1, int a2, int a3)
 {
     if (a2 == 4) {
-        *(int*)((char*)self + 0x6D4) = a3;
+        self->unk_6D4 = a3;
         func_001A81F0(self);
         return 0;
     }
@@ -2906,10 +2918,10 @@ extern "C" int func_001A7D10(void* self, int a1, int a2, int a3)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A7D40);
 #ifdef SKIP_ASM
-extern "C" void func_001A7F78(void* self);
-extern "C" void func_001A81F0(void* self);
+extern "C" void func_001A7F78(cFEStateReadMessagePopup* self);
+extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 extern "C" void* func_001A8E40(void* self);
-extern "C" void* func_001A7D40(void* self, int msg)
+extern "C" void* func_001A7D40(cFEStateReadMessagePopup* self, int msg)
 {
     if (msg == 0x109) {
         func_001A7F78(self);
@@ -2961,14 +2973,14 @@ public:
     virtual void v32();
 };
 
-extern "C" void func_001A7F78(void* self);
-extern "C" void func_001A81F0(void* self);
+extern "C" void func_001A7F78(cFEStateReadMessagePopup* self);
+extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 
-extern "C" int func_001A7D90(cFEStateNet* self)
+extern "C" int func_001A7D90(cFEStateReadMessagePopup* self)
 {
     ((cFEVObj_001A7D90*)self)->v32();
-    func_001A7F78(((cFEVObj_001A7D90*)self));
-    func_001A81F0(((cFEVObj_001A7D90*)self));
+    func_001A7F78(self);
+    func_001A81F0(self);
     return 1;
 }
 #endif
@@ -3009,7 +3021,7 @@ struct sOwner1A7DD8 {
     sObjVec1A7DD8 mVec;
 };
 
-extern "C" void func_001A7DD8(void* selfp, void* item)
+extern "C" void func_001A7DD8(cFEStateReadMessagePopup* selfp, void* item)
 {
     sOwner1A7DD8* self = (sOwner1A7DD8*)selfp;
     sObj1A7DD8* x = (sObj1A7DD8*)item;
@@ -3042,7 +3054,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A7ED8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
-extern "C" void func_001A7DD8(void* self, void* item);
+extern "C" void func_001A7DD8(cFEStateReadMessagePopup* self, void* item);
 extern char D_00461A08[];
 extern void* D_0046D8C0[];
 extern char D_004A1408[];
@@ -3056,7 +3068,7 @@ static inline void* Init_001A7ED8(char* p, const char* a, const char* b, const c
     return p;
 }
 
-extern "C" void func_001A7ED8(void* self, const char* name)
+extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name)
 {
     func_001A7DD8(self, Init_001A7ED8((char*)cMemMan_alloc(0x10, D_00461A08, 0x20000000, 0),
                                       ((const char*)LobbyMan_mLobbyMan->mPersona), name, D_004A1408));
@@ -3069,7 +3081,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A7F78);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
-extern "C" void func_001A7DD8(void* self, void* item);
+extern "C" void func_001A7DD8(cFEStateReadMessagePopup* self, void* item);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00260F80();
 extern "C" void func_002613C8(void* self);
@@ -3105,17 +3117,17 @@ static inline void* Init_001A7F78(char* p, char* src)
     return p;
 }
 
-extern "C" void func_001A7F78(void* self)
+extern "C" void func_001A7F78(cFEStateReadMessagePopup* self)
 {
     for (int i = 0; i < func_00262938(GetSession_001A7F78()); i++) {
         char* item = (char*)func_00263630(GetSession_001A7F78(), i);
-        if (item != 0 && func_0041AA88(*(const char**)item, *(const char**)((char*)self + 0x6D0)) == 0) {
+        if (item != 0 && func_0041AA88(*(const char**)item, (const char*)self->mszSender) == 0) {
             func_001A7DD8(self, Init_001A7F78((char*)operator new(0x10, D_00461A08, 0x20000000, 0), item));
         }
     }
     for (int i = func_00262938(GetSession_001A7F78()) - 1; i >= 0; i--) {
         char* item = (char*)func_00263630(GetSession_001A7F78(), i);
-        if (item != 0 && func_0041AA88(*(const char**)item, *(const char**)((char*)self + 0x6D0)) == 0) {
+        if (item != 0 && func_0041AA88(*(const char**)item, (const char*)self->mszSender) == 0) {
             func_002635A8(GetSession_001A7F78(), i);
         }
     }
@@ -3185,21 +3197,21 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001A81F0(void* self)
+extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
 {
     char buf[0x100];
-    if (*(void**)((char*)self + 0x40) == 0) {
+    if (self->mpScreen == 0) {
         return;
     }
-    cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00461A18));
+    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00461A18));
     if (text != 0 && Count1A81F0((sOwner1A81F0*)self) != 0) {
         sEntry1A81F0* e = ((sOwner1A81F0*)self)->mBegin[0];
-        char* who = *(char**)((char*)self + 0x6D0);
+        char* who = self->mszSender;
         sprintf1_1A81F0(buf, Loc1A81F0(D_00461A28), who, e->desc, D_004A1408);
         cUIText_setUnicodeString(text, buf);
         ((cFEVObj_001A81F0*)text)->v09(1);
     }
-    cUIText* list = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619F8));
+    cUIText* list = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619F8));
     if (list == 0) {
         return;
     }
@@ -3215,8 +3227,8 @@ extern "C" void func_001A81F0(void* self)
         func_004162D0(buf, e->ext);
         func_003A19F8(list, buf);
     }
-    func_001A83D8((sList1A83D8*)list, 0x28, 8, count, top, sel, *(int*)((char*)self + 0x6E8), 0);
-    *(int*)((char*)self + 0x6E8) = 0;
+    func_001A83D8((sList1A83D8*)list, 0x28, 8, count, top, sel, self->mbResetScroll, 0);
+    self->mbResetScroll = 0;
 }
 #endif
 
@@ -4109,7 +4121,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9268);
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern const char D_00461C60[];
 
@@ -4117,7 +4129,7 @@ extern "C" void func_001A9268(cFEStateNet* self, int a1, int a2)
 {
     if (a2 == 0xF) {
         func_001A93D0_3(self, a1, 0xF);
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
     } else {
         func_001A93D0_3(self, a1, a2);
     }
@@ -4242,7 +4254,7 @@ public:
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001BEE30(void* mem, int a1);
+extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern const char D_00461CA0[];
 
@@ -4250,7 +4262,7 @@ extern "C" void func_001A9438(cFEStateNet* self, int a1, int a2)
 {
     if (a2 == 0x16) {
         ((cFEVObj_001A9438*)self)->v32();
-        func_001A8A40(self, func_001BEE30(cMemMan_alloc(0x6D4, D_00461CA0, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CA0, 0, 0), (int)self->mpEngine));
         func_001A93D0_3(self, a1, 0x16);
     } else {
         func_001A93D0_3(self, a1, a2);
@@ -4386,7 +4398,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9668);
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001BEE30(void* mem, int a1);
+extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0039F698(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
@@ -4400,7 +4412,7 @@ extern "C" void func_001A9668(cFEStateNet* self, int a1, int a2)
         self->unk_058 = 1;
         void* st = cUIStateStack_getCurrentState((char*)self->mpEngine + 0x18);
         *(int*)((char*)st + 0x1C) |= 0x80;
-        func_001A8A40(self, func_001BEE30(cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
         self->unk_6AC = 0;
     } else {
         func_001A93D0_3(self, a1, a2);
@@ -5890,7 +5902,7 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00263128(void* self, const char* name);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001AFE08(void* self, int a1, int a2, const char* name);
+extern "C" void* func_001AFE08(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name);
 extern void* func_001ADDD0_BCD0(void* self, int a1, int a2) __asm__("func_001ADDD0");
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -5916,7 +5928,7 @@ extern "C" void func_001ABCD0(cFEStateNet* self, int a1, void* a2, int a3, int a
         func_0025B800(LobbyMan_mLobbyMan);
     }
     if (func_00263128(BuddyMan_mBuddyMan, (const char*)a1)) {
-        void* p = func_001AFE08(cMemMan_alloc(0x6D8, D_00462AC8, 0x100, 0), (int)self->mpEngine, (int)self, (const char*)a1);
+        void* p = func_001AFE08((cFEStateChallengeReceivedPopup*)cMemMan_alloc(0x6D8, D_00462AC8, 0x100, 0), (int)self->mpEngine, (int)self, (const char*)a1);
         if (a4) {
             *(int*)((char*)p + 0x18) = 0x834;
         } else {
@@ -6040,17 +6052,17 @@ extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001AC010(void* self, int a1)
+extern "C" void* func_001AC010(cFEUseExistingAccount* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     int d = D_004A3E90;
-    *(void***)((char*)self + 0x8) = D_00469068;
-    *(int*)((char*)self + 0x6DC) = d;
-    *(int*)((char*)self + 0xC) = 0x35;
-    *(int*)((char*)self + 0x6D0) = 0;
-    *(int*)((char*)self + 0x6E0) = 0;
-    *(int*)((char*)self + 0x6A8) = 0;
-    return self;
+    self->mVtbl = D_00469068;
+    self->mszEmail = (char*)d;
+    self->mHashName = 0x35;
+    self->unk_6D0 = 0;
+    self->mpTextForgotPassword = 0;
+    self->unk_6A8 = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -6062,9 +6074,9 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001AC068(void* self, int flags)
+extern "C" void func_001AC068(cFEUseExistingAccount* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00469068;
+    self->mVtbl = D_00469068;
     cBXString__cBXString((char*)self + 0x6DC, 2);
     func_001A85D0_dtor(self, flags);
 }
@@ -6081,17 +6093,17 @@ void func_001A8768(void* self);
 extern char D_00462B20[];
 extern char D_004A1408[];
 
-extern "C" void func_001AC0B8(cFEStateNet* self)
+extern "C" void func_001AC0B8(cFEUseExistingAccount* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00462B20), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_00462B20), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, D_004A1408);
     cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, D_004A1408);
-    func_001A8768(self);
+    func_001A8768(((cFEStateNet*)self));
 }
 #endif
 
@@ -6151,17 +6163,17 @@ struct cFEVObj_001AC170 {
 
 static inline int IsHash_001AC170(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001AC170(void* self, cUIText* text)
+extern "C" void func_001AC170(cFEUseExistingAccount* self, cUIText* text)
 {
     if (IsHash_001AC170(*(int*)((char*)text + 0x38), D_00462B38)) {
         *(int*)((char*)text + 0x18) = 0;
     } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), D_00462B48)) {
         *(int*)((char*)text + 0x18) = 1;
     } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), D_00462B58)) {
-        *(cUIText**)((char*)self + 0x6E0) = text;
+        self->mpTextForgotPassword = (cUIThing*)text;
         *(int*)((char*)text + 0x18) = 2;
-        (*(cFEVObj_001AC170**)((char*)self + 0x6E0))->v25(1);
-        (*(cFEVObj_001AC170**)((char*)self + 0x6E0))->v08(1);
+        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->v25(1);
+        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->v08(1);
     } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), D_00462B70)) {
         *(int*)((char*)text + 0x18) = 3;
     } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), D_00462B88) || IsHash_001AC170(*(int*)((char*)text + 0x38), D_00462BA0)) {
@@ -6183,7 +6195,7 @@ void func_001C57C0(void* self, int a1, int a2);
 extern char D_00462BB0[];
 extern char D_00461618[];
 
-extern "C" int func_001AC2B8(void* self)
+extern "C" int func_001AC2B8(cFEUseExistingAccount* self)
 {
     if (strlen(((const char*)LobbyMan_mLobbyMan->mPassword)) == 0) {
     void* p = func_001A9C50((cFEStateNet*)self);
@@ -6211,7 +6223,7 @@ void func_001C57C0(void* self, int a1, int a2);
 extern char D_00462BD0[];
 extern char D_00461618[];
 
-extern "C" int func_001AC360(void* self)
+extern "C" int func_001AC360(cFEUseExistingAccount* self)
 {
     if (strlen(((const char*)LobbyMan_mLobbyMan->mUserName)) == 0) {
     void* p = func_001A9C50((cFEStateNet*)self);
@@ -6231,10 +6243,10 @@ extern "C" int func_001AC360(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AC408);
 #ifdef SKIP_ASM
-extern "C" int func_001AC360(void* self);
-extern "C" int func_001AC2B8(void* self);
+extern "C" int func_001AC360(cFEUseExistingAccount* self);
+extern "C" int func_001AC2B8(cFEUseExistingAccount* self);
 
-extern "C" int func_001AC408(void* self)
+extern "C" int func_001AC408(cFEUseExistingAccount* self)
 {
     bool ok = true;
     ok = ok && func_001AC360(self);
@@ -6253,10 +6265,10 @@ void func_001C57C0(void* self, int a1, int a2);
 extern char D_00462BF0[];
 extern char D_00461618[];
 
-extern "C" int func_001AC448(void* self)
+extern "C" int func_001AC448(cFEUseExistingAccount* self)
 {
     // PORT: string header read through a pointer held in an int
-    if (*(int*)(*(int*)((char*)self + 0x6DC) - 8) == 0) {
+    if (*(int*)((int)self->mszEmail - 8) == 0) {
         void* p = func_001A9C50((cFEStateNet*)self);
         char* sub = (char*)p + 0xBC;
         *(int*)((char*)p + 0xBC) = 1;
@@ -6284,7 +6296,7 @@ extern char D_0045FE60[];
 extern char D_00462C50[];
 extern char D_004614E8[];
 
-extern "C" void func_001AC4F0(void* self, void* popup)
+extern "C" void func_001AC4F0(cFEUseExistingAccount* self, void* popup)
 {
     func_001DA528(popup, 3);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00462C08);
@@ -6298,7 +6310,7 @@ extern "C" void func_001AC4F0(void* self, void* popup)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AC5A8);
 #ifdef SKIP_ASM
-extern "C" int func_001AC5A8(void* self, int a1, int a2)
+extern "C" int func_001AC5A8(cFEUseExistingAccount* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
@@ -6342,13 +6354,13 @@ struct sState_C5C0 {
 };
 
 // Message handler for the network-config menu.
-extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
+extern "C" void func_001AC5C0(cFEUseExistingAccount* self, void* a1, unsigned int msg)
 {
     switch (msg) {
     case 5:
         switch (*(unsigned int*)((char*)a1 + 0x18)) {
         case 4: {
-            if (!func_001AC408_C5C0(self)) {
+            if (!func_001AC408_C5C0(((char*)self))) {
                 break;
             }
             void* p = func_001A9C50((cFEStateNet*)self);
@@ -6364,7 +6376,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             break;
         }
         case 2: {
-            if (!func_001AC360_C5C0(self)) {
+            if (!func_001AC360_C5C0(((char*)self))) {
                 break;
             }
             void* p = func_001A9C50((cFEStateNet*)self);
@@ -6393,37 +6405,37 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             break;
         }
         case 0: {
-            void* obj = cUIScreen_getObjectByHashName_C5C0(*(void**)(self + 0x40), GetHashValue32(D_00462B88));
+            void* obj = cUIScreen_getObjectByHashName_C5C0(self->mpScreen, GetHashValue32(D_00462B88));
             if (obj == 0) {
                 break;
             }
             int v = (int)LobbyMan_mLobbyMan->mUserName;
             func_001A9150((cFEStateNet*)self, (int)obj, GetHashValue32(D_00462CE8), v, 0, 6, 0x10);
-            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
-            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
-            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
+            *(int*)((char*)self->mpKeyboard + 0x58) = 1;
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             break;
         }
         case 1: {
-            void* obj = cUIScreen_getObjectByHashName_C5C0(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
+            void* obj = cUIScreen_getObjectByHashName_C5C0(self->mpScreen, GetHashValue32(D_00462BA0));
             if (obj == 0) {
                 break;
             }
             int v = (int)LobbyMan_mLobbyMan->mPassword;
             func_001A9150((cFEStateNet*)self, (int)obj, GetHashValue32(D_00462D00), v, 1, 7, 0x10);
-            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             break;
         }
         }
         break;
     case 6: {
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, ((char*)self), 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 13:
-        func_001ACDD0_C5C0(self);
+        func_001ACDD0_C5C0(((char*)self));
         break;
     default:
         func_001A8918((cFEStateNet*)self, (int)a1, msg);
@@ -6436,12 +6448,12 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
 INCLUDE_ASM("fe/feasyncfile", func_001AC920);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001AC9C0(void* self, void* a1, int a2);
-extern "C" void func_001ACA88(void* self, void* a1, int a2);
-extern "C" void func_001ACB48(void* self, void* a1, int a2);
-extern "C" void func_001ACCD0(cFEStateNet* self, void* a1, int a2);
+extern "C" void func_001AC9C0(cFEUseExistingAccount* self, void* a1, int a2);
+extern "C" void func_001ACA88(cFEUseExistingAccount* self, void* a1, int a2);
+extern "C" void func_001ACB48(cFEUseExistingAccount* self, void* a1, int a2);
+extern "C" void func_001ACCD0(cFEUseExistingAccount* self, void* a1, int a2);
 
-extern "C" void func_001AC920(void* self, void* a1, int a2)
+extern "C" void func_001AC920(cFEUseExistingAccount* self, void* a1, int a2)
 {
     switch (*(unsigned int*)((char*)a1 + 0x18)) {
     case 0x80E:
@@ -6454,7 +6466,7 @@ extern "C" void func_001AC920(void* self, void* a1, int a2)
         func_001ACB48(self, a1, a2);
         break;
     case 0x81E:
-        func_001ACCD0((cFEStateNet*)self, a1, a2);
+        func_001ACCD0(self, a1, a2);
         break;
     default:
         func_001A97B8(self, a1, a2);
@@ -6471,11 +6483,11 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
-extern "C" int func_001AC448(void* self);
+extern "C" int func_001AC448(cFEUseExistingAccount* self);
 extern "C" void func_0025B6D8(void* self, int a1);
 extern char D_00462D48[];
 
-extern "C" void func_001AC9C0(void* self, void* a1, int a2)
+extern "C" void func_001AC9C0(cFEUseExistingAccount* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         int three = 3;
@@ -6489,7 +6501,7 @@ extern "C" void func_001AC9C0(void* self, void* a1, int a2)
         *(int*)((char*)p + 0x150) = 0x810;
         func_001A9BC0((cFEStateNet*)self, p);
         if (func_001AC448(self) != 0) {
-            *(int*)((char*)self + 0x6D8) = three;
+            self->miRequest = three;
             func_0025B6D8(LobbyMan_mLobbyMan, 0);
         }
     } else {
@@ -6522,7 +6534,7 @@ static inline void* GetSession_001ACA88()
     return BuddyMan_mBuddyMan;
 }
 
-extern "C" void func_001ACA88(void* self, void* a1, int a2)
+extern "C" void func_001ACA88(cFEUseExistingAccount* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         func_00261408(GetSession_001ACA88());
@@ -6542,28 +6554,28 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern const char D_00462D68[];
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 extern char D_00462D80[];
 
-extern "C" void func_001ACB48(void* self, void* a1, int kind)
+extern "C" void func_001ACB48(cFEUseExistingAccount* self, void* a1, int kind)
 {
     switch ((unsigned int)kind) {
     case 15:
     case 16:
-        *(int*)((char*)self + 0x6D4) = 0;
+        self->mbAskSave = 0;
         func_001A97B8(self, a1, kind);
-        func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)((char*)self + 0x10)));
+        func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     case 17:
-        *(int*)((char*)self + 0x6D4) = 1;
+        self->mbAskSave = 1;
         func_001A97B8(self, a1, 17);
         break;
     case 22:
-        if (*(int*)((char*)self + 0x6D4) != 0) {
+        if (self->mbAskSave != 0) {
             void* p = func_001A9C50((cFEStateNet*)self);
             *(int*)((char*)p + 0xBC) = 2;
             char* sub = (char*)p + 0xBC;
@@ -6576,7 +6588,7 @@ extern "C" void func_001ACB48(void* self, void* a1, int kind)
             *(int*)((char*)p + 0x164) = 0;
             func_001A9BC0((cFEStateNet*)self, p);
         }
-        *(int*)((char*)self + 0x6D4) = 0;
+        self->mbAskSave = 0;
         func_001A97B8(self, a1, 22);
         break;
     default:
@@ -6591,18 +6603,18 @@ INCLUDE_ASM("fe/feasyncfile", func_001ACCD0);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 extern const char D_00462D68[];
 
-extern "C" void func_001ACCD0(cFEStateNet* self, void* a1, int kind)
+extern "C" void func_001ACCD0(cFEUseExistingAccount* self, void* a1, int kind)
 {
     switch ((unsigned int)kind) {
     case 15: {
-        func_001A97B8(self, a1, 15);
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 1,
+        func_001A97B8(((cFEStateNet*)self), a1, 15);
+        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, ((cFEStateNet*)self), 1,
                                 ((int)LobbyMan_mLobbyMan->mUserName), ((int)LobbyMan_mLobbyMan->mPassword));
         *(int*)((char*)p + 0x18) = 0x82C;
         cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
@@ -6610,10 +6622,10 @@ extern "C" void func_001ACCD0(cFEStateNet* self, void* a1, int kind)
     }
     case 16:
     case 20:
-        func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     default:
-        func_001A97B8(self, a1, kind);
+        func_001A97B8(((cFEStateNet*)self), a1, kind);
         break;
     }
 }
@@ -6644,29 +6656,29 @@ static inline void Show1ACDD0(char* o, int on)
     vt[8].fn(o + vt[8].delta, on);
 }
 
-extern "C" void func_001ACDD0(void* self)
+extern "C" void func_001ACDD0(cFEUseExistingAccount* self)
 {
-    char* p = *(char**)((char*)self + 0x69C);
+    char* p = (char*)self->mpKeyboard;
     switch (*(int*)(p + 0x18)) {
     case 6: {
         const char* name = p + 0x74;
-        cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00462B88));
+        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00462B88));
         if (text != 0) {
             cUIText_setAsciiString(text, name);
         }
         if (strlen(name) != 0) {
-            Show1ACDD0(*(char**)((char*)self + 0x6E0), 0);
+            Show1ACDD0((char*)self->mpTextForgotPassword, 0);
         } else {
-            Show1ACDD0(*(char**)((char*)self + 0x6E0), 1);
+            Show1ACDD0((char*)self->mpTextForgotPassword, 1);
         }
         cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, name);
         break;
     }
     case 7: {
         const char* name = p + 0x74;
-        if (cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00462BA0)) != 0) {
+        if (cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00462BA0)) != 0) {
             func_001A98B8((cFEStateNet*)self, name);
-            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x6A4), (char*)self + 0x5C);
+            cUIText_setAsciiString(self->mpKeyboardText, (char*)self + 0x5C);
         }
         cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, name);
         break;
@@ -6694,16 +6706,16 @@ extern char D_00461618[];
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 
-extern "C" int func_001ACEF8(void* self, int id, int a2)
+extern "C" int func_001ACEF8(cFEUseExistingAccount* self, int id, int a2)
 {
     switch (id) {
     case 0xC9:
-        switch (*(int*)((char*)self + 0x6D8)) {
+        switch (self->miRequest) {
         case 2:
             func_0025C3F8(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mUserName));
             break;
         case 3:
-            func_0025C1E0(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x6DC));
+            func_0025C1E0(LobbyMan_mLobbyMan, (int)self->mszEmail);
             break;
         case 4:
             func_0025C610(LobbyMan_mLobbyMan);
@@ -6760,13 +6772,13 @@ extern void* D_00468F50[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001AD130(void* self, int a1)
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
-    *(int*)((char*)self + 0xC) = 0x38;
-    *(void***)((char*)self + 0x8) = D_00468F50;
-    *(int*)((char*)self + 0x6D0) = 0;
-    return self;
+    self->mHashName = 0x38;
+    self->mVtbl = D_00468F50;
+    self->mbExistingPersona = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -6779,15 +6791,15 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 void func_001A8768(void* self);
 extern char D_00462DC8[];
 
-extern "C" void func_001AD178(cFEStateNet* self)
+extern "C" void func_001AD178(cFEStateSelectPersona* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00462DC8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_00462DC8), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_001A8768(self);
+    func_001A8768(((cFEStateNet*)self));
 }
 #endif
 
@@ -6813,7 +6825,7 @@ extern char D_004615F8[];
 extern char D_00461618[];
 extern char D_00462DE0[];
 
-extern "C" void func_001AD208(void* self, const char* name)
+extern "C" void func_001AD208(cFEStateSelectPersona* self, const char* name)
 {
     if (strlen(name) < 3) {
         void* p = func_001A9C50((cFEStateNet*)self);
@@ -6844,7 +6856,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" void func_001AD3E8(void* self, cUIText* text);
+extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text);
 extern char D_00462E00[];
 extern char D_00462E10[];
 extern char D_00462E20[];
@@ -6853,7 +6865,7 @@ extern char D_00462E40[];
 
 static inline int IsHash1AD308(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001AD308(void* self, cUIText* text)
+extern "C" void func_001AD308(cFEStateSelectPersona* self, cUIText* text)
 {
     LobbyMan* g = LobbyMan_mLobbyMan;
     if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E00)) {
@@ -6900,7 +6912,7 @@ struct sFEGlobals1AD3E8 {
     const char* names[4];
 };
 
-extern "C" void func_001AD3E8(void* self, cUIText* text)
+extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text)
 {
     LobbyMan* g = LobbyMan_mLobbyMan;
     int i = 0;
@@ -6934,7 +6946,7 @@ extern char D_00462EB8[];
 extern char D_00462C50[];
 extern char D_004614E8[];
 
-extern "C" void func_001AD4F0(void* self, void* menu)
+extern "C" void func_001AD4F0(cFEStateSelectPersona* self, void* menu)
 {
     func_001DA528(menu, 4);
     *(int*)((char*)menu + 0x54) = GetHashValue32(D_00462E70);
@@ -6964,25 +6976,24 @@ extern char D_00462F08[];
 extern char D_00462F18[];
 
 // Message handler for the persona-select screen.
-extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
+extern "C" void func_001AD5E8(cFEStateSelectPersona* selfp, void* a1, int a2)
 {
-    char* self = (char*)selfp;
     switch (a2) {
     case 5: {
         int idx = *(int*)((char*)a1 + 0x18);
         if (idx == -1) {
-            func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1_D5E8(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)(self + 0x10), 0));
+            func_001A8A40(((char*)selfp), cFEStateCreateStep1_cFEStateCreateStep1_D5E8(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)selfp->mpEngine, 0));
             break;
         }
         if (idx >= LobbyMan_mLobbyMan->mNumPersonas) {
-            func_001A9150((cFEStateNet*)self, (int)a1, GetHashValue32(D_00462E58), (int)D_004A1408, 0, -1, 0xC);
-            *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
-            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
-            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
-            *(int*)(self + 0x6D0) = 0;
+            func_001A9150((cFEStateNet*)selfp, (int)a1, GetHashValue32(D_00462E58), (int)D_004A1408, 0, -1, 0xC);
+            *(int*)((char*)selfp->mpKeyboard + 0x58) = 1;
+            cKeyboardPopup_setIncludeKey(selfp->mpKeyboard, 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(selfp->mpKeyboard, 0x35, 0, 2);
+            selfp->mbExistingPersona = 0;
         } else {
             func_0025CD28(LobbyMan_mLobbyMan, idx);
-            *(int*)(self + 0x6D0) = 1;
+            selfp->mbExistingPersona = 1;
         }
         break;
     }
@@ -6998,9 +7009,9 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
         }
         func_00261408(BuddyMan_mBuddyMan);
         func_0025B800(LobbyMan_mLobbyMan);
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
+        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)selfp->mpEngine, ((char*)selfp), 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)selfp->mpScreen + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 8: {
@@ -7009,8 +7020,8 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
             break;
         }
         if (idx < LobbyMan_mLobbyMan->mNumPersonas) {
-            *(int*)(self + 0x6D4) = idx;
-            void* p = func_001A9C50((cFEStateNet*)self);
+            selfp->miDeletePersona = idx;
+            void* p = func_001A9C50((cFEStateNet*)selfp);
             char* sub = (char*)p + 0xBC;
             *(int*)((char*)p + 0xBC) = 2;
             *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462EE8);
@@ -7020,17 +7031,17 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
             func_001C5878_D5E8(sub, 0, GetHashValue32(D_00462F18), 1);
             *(int*)((char*)p + 0x168) = 1;
             *(int*)((char*)p + 0x150) = 0x816;
-            func_001A9BC0((cFEStateNet*)self, p);
+            func_001A9BC0((cFEStateNet*)selfp, p);
         }
         break;
     }
     case 13:
-        func_001AD208_D5E8(self, *(char**)(self + 0x69C) + 0x74);
+        func_001AD208_D5E8(((char*)selfp), (char*)selfp->mpKeyboard + 0x74);
         break;
     case 14:
         break;
     default:
-        func_001A8918((cFEStateNet*)self, (int)a1, a2);
+        func_001A8918((cFEStateNet*)selfp, (int)a1, a2);
         break;
     }
 }
@@ -7079,9 +7090,9 @@ public:
 };
 
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001AD930(cFEStateNet* self, void* a1, int a2);
+extern "C" void func_001AD930(cFEStateSelectPersona* self, void* a1, int a2);
 
-extern "C" void func_001AD8C0(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001AD8C0(cFEStateSelectPersona* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x816:
@@ -7106,15 +7117,15 @@ extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountM
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 
-extern "C" void func_001AD930(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001AD930(cFEStateSelectPersona* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
-        func_001A97B8(self, a1, 0xF);
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 0, 0, 0);
+        func_001A97B8(((cFEStateNet*)self), a1, 0xF);
+        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, ((cFEStateNet*)self), 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
         cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
     } else {
-        func_001A97B8(self, a1, a2);
+        func_001A97B8(((cFEStateNet*)self), a1, a2);
     }
 }
 #endif
@@ -7149,7 +7160,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001BFBB8(cFEStateNet* mem, int a1);
 extern "C" void func_0039F190(void* self, int a1);
-extern "C" void func_001ADC30(void* self, int a2);
+extern "C" void func_001ADC30(cFEStateSelectPersona* self, int a2);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
@@ -7171,17 +7182,17 @@ struct sVE1ADA30 {
 };
 
 // Message handler for the network-settings screen; returns -1 when handled.
-extern "C" int func_001ADA30(cFEStateNet* self, int a1, int a2)
+extern "C" int func_001ADA30(cFEStateSelectPersona* self, int a1, int a2)
 {
     switch (a1) {
     case 0xD9: {
-        void* p = func_001A9C50(self);
+        void* p = func_001A9C50(((cFEStateNet*)self));
         *(int*)((char*)p + 0xBC) = 0;
         *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462F58);
         *(int*)((char*)p + 0xC0) = 3;
         *(int*)((char*)p + 0x150) = 0x817;
         *(int*)((char*)p + 0x164) = 0;
-        func_001A9BC0(self, p);
+        func_001A9BC0(((cFEStateNet*)self), p);
         break;
     }
     case 0x104: {
@@ -7196,7 +7207,7 @@ extern "C" int func_001ADA30(cFEStateNet* self, int a1, int a2)
         }
         func_00261408(BuddyMan_mBuddyMan);
         func_0025B800(LobbyMan_mLobbyMan);
-        void* p = func_001A9C50(self);
+        void* p = func_001A9C50(((cFEStateNet*)self));
         char* sub = (char*)p + 0xBC;
         *(int*)((char*)p + 0xBC) = 1;
         *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462F78);
@@ -7204,7 +7215,7 @@ extern "C" int func_001ADA30(cFEStateNet* self, int a1, int a2)
         func_001C57C0(sub, 0, GetHashValue32(D_00461618));
         *(int*)((char*)p + 0x164) = 0;
         *(int*)((char*)p + 0x150) = 0x819;
-        func_001A9BC0(self, p);
+        func_001A9BC0(((cFEStateNet*)self), p);
     }
     case 0xD6:
         func_0039F190((char*)self->mpEngine + 0x18, 1);
@@ -7218,10 +7229,10 @@ extern "C" int func_001ADA30(cFEStateNet* self, int a1, int a2)
         func_001ADC30(self, a2);
         break;
     case 0x111:
-        func_001A8A40(self, func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine));
         break;
     default:
-        return (int)func_001A8E40_3(self, a1, a2);
+        return (int)func_001A8E40_3(((cFEStateNet*)self), a1, a2);
     case 0xE1:
         break;
     }
@@ -7237,7 +7248,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001BBD08(void* self, int a1, int a2);
+extern "C" void* func_001BBD08(cFEStateCreateDuplicate* self, int a1, int a2);
 void func_001C57C0(void* self, int a1, int a2);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_1ADC30(void* self, int id, void* msg) __asm__("func_001A8E40");
@@ -7248,12 +7259,12 @@ extern char D_00463090[];
 extern char D_004630A8[];
 
 // PORT: the message pointer arrives as int
-extern "C" void func_001ADC30(void* self, int a2)
+extern "C" void func_001ADC30(cFEStateSelectPersona* self, int a2)
 {
     void* msg = (void*)a2;
     switch (*(unsigned int*)((char*)msg + 8)) {
     case 0x6475706C:
-        func_001A8A40(self, func_001BBD08(cMemMan_alloc(0x6E0, D_00463090, 0, 0), *(int*)((char*)self + 0x10), 0));
+        func_001A8A40(self, func_001BBD08((cFEStateCreateDuplicate*)cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 0));
         break;
     case 0x696E616D:
         {
@@ -7272,7 +7283,7 @@ extern "C" void func_001ADC30(void* self, int a2)
             void* p = func_001A9C50((cFEStateNet*)self);
             *(int*)((char*)p + 0xBC) = 1;
             char* sub = (char*)p + 0xBC;
-            if (*(int*)((char*)self + 0x6D0) == 0) {
+            if (self->mbExistingPersona == 0) {
                 *(int*)((char*)p + 0xC4) = GetHashValue32(D_004630A8);
                 *(int*)((char*)p + 0xC0) = 3;
                 *(int*)((char*)p + 0x150) = 0x818;
@@ -7314,15 +7325,14 @@ public:
 };
 
 // Derived state constructor: sets the vtable and defaults, then resets the new-race interface (mode 0, event 0).
-extern "C" void* func_001ADDD0(void* self, void* engine, void* owner)
+extern "C" void* func_001ADDD0(cFEStateChallengePopup* self, void* engine, void* owner)
 {
-    char* s = (char*)self;
     func_001A8500_DDD0(self, engine, owner);
-    *(void***)(s + 0x8) = D_00468E38;
-    *(char**)(s + 0x6D8) = D_00441268;
-    *(int*)(s + 0xC) = 0x3F;
-    *(int*)(s + 0x6D0) = 0;
-    *(int*)(s + 0x6DC) = 0;
+    self->mVtbl = D_00468E38;
+    self->mpEventOptions = (int*)D_00441268;
+    self->mHashName = 0x3F;
+    self->mbChallengeSent = 0;
+    self->mpLBRankedGame = 0;
     D_004A4E88 = 0;
     cRace_DDD0* race = (cRace_DDD0*)cBE_getInterface_Fv(cBE_getBE(), 0);
     D_004A11B8 = 1;
@@ -7330,8 +7340,8 @@ extern "C" void* func_001ADDD0(void* self, void* engine, void* owner)
     cBENewRaceInterface_setGameMode_DDD0(race, 0);
     cBENewRaceInterface_setGameEvent_DDD0(race, 0);
     race->reset();
-    *(int*)(s + 0x6D4) = 1;
-    return self;
+    self->mbFirstCreate = 1;
+    return ((void*)self);
 }
 #endif
 
@@ -7348,8 +7358,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
-extern "C" void func_001AF728(void* self, void* iface, void* screen);
-extern "C" void func_001AF688(void* self);
+extern "C" void func_001AF728(cFEStateChallengePopup* self, void* iface, void* screen);
+extern "C" void func_001AF688(cFEStateChallengePopup* self);
 extern "C" void func_001AF930(void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001A9930(cFEStateNet* self);
@@ -7370,27 +7380,27 @@ struct sVE1ADE88i {
     int (*fn)(void*);
 };
 
-extern "C" void func_001ADE88(void* self)
+extern "C" void func_001ADE88(cFEStateChallengePopup* self)
 {
-    sVE1ADE88* vt = *(sVE1ADE88**)((char*)self + 0x8);
+    sVE1ADE88* vt = (sVE1ADE88*)self->mVtbl;
     vt[32].fn((char*)self + vt[32].delta);
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004630C8), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
         ivt[1].fn(iface + ivt[1].delta);
-        func_001AF728(self, iface, *(void**)((char*)self + 0x40));
+        func_001AF728(self, iface, self->mpScreen);
         func_001AF688(self);
         func_0025E6D0(LobbyMan_mLobbyMan, ((const char*)LobbyMan_mLobbyMan->mOpponent));
-        func_001AF930(*(void**)((char*)self + 0x40));
-        if (*(int*)((char*)self + 0x6D4) == 0) {
-            cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004630E0)), 6);
+        func_001AF930(self->mpScreen);
+        if (self->mbFirstCreate == 0) {
+            cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004630E0)), 6);
         } else {
-            *(int*)((char*)self + 0x6D4) = 0;
+            self->mbFirstCreate = 0;
         }
     }
     if (LobbyMan_mLobbyMan->mState == 0) {
@@ -7439,7 +7449,7 @@ public:
     virtual void v32();
 };
 
-extern "C" int func_001ADFB8(cFEStateNet* self)
+extern "C" int func_001ADFB8(cFEStateChallengePopup* self)
 {
     ((func_001ADFB8_cObj*)self)->v32();
     return 1;
@@ -7455,8 +7465,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001A87D0(cFEStateNet* self, int a1);
 extern "C" void func_0039A7A8(void* self, int a1);
-extern "C" void func_001AF098(void* self, int a1);
-extern "C" void func_001AEC60(void* self, int a1);
+extern "C" void func_001AF098(cFEStateChallengePopup* self, int a1);
+extern "C" void func_001AEC60(cFEStateChallengePopup* self, int a1);
 extern signed char D_00535C12[];
 extern char D_00441268[];
 extern char D_00441278[];
@@ -7466,35 +7476,35 @@ extern char D_004412A8[];
 extern char D_004412B8[];
 
 // Refreshes the race-options screen and picks the mode title for the current game mode.
-extern "C" void func_001ADFE8(void* self, int a1)
+extern "C" void func_001ADFE8(cFEStateChallengePopup* self, int a1)
 {
     func_001A87D0((cFEStateNet*)self, a1);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    func_0039A7A8(*(void**)((char*)self + 0x6DC), cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
+    func_0039A7A8(self->mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (D_00535C12[0]) {
     case 3:
-        *(char**)((char*)self + 0x6D8) = D_00441288;
+        self->mpEventOptions = (int*)D_00441288;
         break;
     case 1:
-        *(char**)((char*)self + 0x6D8) = D_00441278;
+        self->mpEventOptions = (int*)D_00441278;
         break;
     case 2:
-        *(char**)((char*)self + 0x6D8) = D_00441298;
+        self->mpEventOptions = (int*)D_00441298;
         break;
     case 5:
-        *(char**)((char*)self + 0x6D8) = D_004412A8;
+        self->mpEventOptions = (int*)D_004412A8;
         break;
     case 4:
-        *(char**)((char*)self + 0x6D8) = D_004412B8;
+        self->mpEventOptions = (int*)D_004412B8;
         break;
     case 0:
     default:
-        *(char**)((char*)self + 0x6D8) = D_00441268;
+        self->mpEventOptions = (int*)D_00441268;
         break;
     }
     func_001AF098(self, cBENetworkInterface_networkOpt.bIsRankedGame);
-    func_001AEC60(self, *(int*)((char*)self + 0x6D0));
+    func_001AEC60(self, self->mbChallengeSent);
 }
 #endif
 
@@ -7511,7 +7521,7 @@ void* func_001AE0E0(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001AE100);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001AE100(void* self, int a1, unsigned int key)
+extern "C" int func_001AE100(cFEStateChallengePopup* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -7599,7 +7609,7 @@ public:
 
 static inline int IsHash1AE128(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001AE128(void* self, cUIText* item)
+extern "C" void func_001AE128(cFEStateChallengePopup* self, cUIText* item)
 {
     cFEVObj_001AE128* obj = (cFEVObj_001AE128*)item;
     if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00461520)) {
@@ -7638,7 +7648,7 @@ extern "C" void func_001AE128(void* self, cUIText* item)
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 0);
         obj->v09(1);
         obj->v24(1);
-        *(cUIText**)((char*)self + 0x6DC) = item;
+        self->mpLBRankedGame = (cUIListBox*)item;
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463210)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_00463228), 0);
         cUIListBox_addEntryByAsciiString(item, D_004A14F8, 1);
@@ -7647,26 +7657,26 @@ extern "C" void func_001AE128(void* self, cUIText* item)
         cUIListBox_addEntryByAsciiString(item, D_004A1510, 4);
         obj->v09(1);
         obj->v24(1);
-        *(cUIText**)((char*)self + 0x6E0) = item;
+        self->mpLBCPURiders = (cUIListBox*)item;
         func_0039A7A8(item, D_004A4E88_E128[4]);
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463238)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
         obj->v09(1);
         obj->v24(1);
-        *(cUIText**)((char*)self + 0x6E4) = item;
+        self->mpLBPowerUps = (cUIListBox*)item;
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463248)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
         obj->v09(1);
         obj->v24(1);
-        *(cUIText**)((char*)self + 0x6E8) = item;
+        self->mpLBMultipliers = (cUIListBox*)item;
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463260)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
         obj->v09(1);
         obj->v24(1);
-        *(cUIText**)((char*)self + 0x6EC) = item;
+        self->mpLBPointIcons = (cUIListBox*)item;
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_004630E0)) {
         *(int*)((char*)item + 0x14) |= 0x80;
     }
@@ -7705,20 +7715,20 @@ struct sOpts1AE680 {
     unsigned int b8 : 1;
 };
 
-extern "C" void func_001AE680(void* self)
+extern "C" void func_001AE680(cFEStateChallengePopup* self)
 {
-    if (*(void**)((char*)self + 0x40) != 0) {
+    if (self->mpScreen != 0) {
         char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-        D_00534B34[0] = func_0039A738(*(void**)((char*)self + 0x6DC)) != 0;
+        D_00534B34[0] = func_0039A738(self->mpLBRankedGame) != 0;
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
-        int v = func_0039A738(*(void**)((char*)self + 0x6E8));
+        int v = func_0039A738(self->mpLBMultipliers);
         sOpts1AE680* o = (sOpts1AE680*)D_005308B8;
         o->b6 = v;
-        o->b8 = func_0039A738(*(void**)((char*)self + 0x6E4));
-        o->b7 = func_0039A738(*(void**)((char*)self + 0x6EC));
+        o->b8 = func_0039A738(self->mpLBPowerUps);
+        o->b7 = func_0039A738(self->mpLBPointIcons);
         char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-        cBENewRaceInterface_setNumberAI(nr, func_0039A738(*(void**)((char*)self + 0x6E0)));
+        cBENewRaceInterface_setNumberAI(nr, func_0039A738(self->mpLBCPURiders));
         sVE1AE680i* nvt = *(sVE1AE680i**)(nr + 0xC);
         nvt[1].fn(nr + nvt[1].delta);
     }
@@ -7785,7 +7795,7 @@ struct cState_E7A0 {
 };
 
 // Message handler for the race-options screen.
-extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
+extern "C" void func_001AE7A0(cFEStateChallengePopup* self, void* a1, int msg)
 {
     if (a1 == 0) {
         return;
@@ -7794,25 +7804,25 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
     case 5:
         switch (*(int*)((char*)a1 + 0x18)) {
         case 7: {
-            func_001AE680_E7A0(self);
+            func_001AE680_E7A0(((cState_E7A0*)self));
             cUITemplate_MAP_mPeak = 1;
             D_004A2594 = 0;
             D_004A2598 = 0;
-            char* p = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(int*)&self->engine, 1);
+            char* p = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
             *(int*)(p + 0x1C) = (*(int*)(p + 0x1C) & ~0x3F00) | 0x100;
-            cUIStateStack_pushSpecial_E7A0(self->engine + 0x18, p, 0, 0);
+            cUIStateStack_pushSpecial_E7A0((char*)self->mpEngine + 0x18, p, 0, 0);
             break;
         }
         case 9: {
-            if (self->f6D0) {
+            if (self->mbChallengeSent) {
                 break;
             }
-            func_001AE680_E7A0(self);
-            func_001AF568_E7A0(self);
+            func_001AE680_E7A0(((cState_E7A0*)self));
+            func_001AF568_E7A0(((cState_E7A0*)self));
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-            D_00534B34[0] = func_0039A738_E7A0(self->aiOn) != 0;
+            D_00534B34[0] = func_0039A738_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
-            if (func_0039A738_E7A0(self->aiOn)) {
+            if (func_0039A738_E7A0(self->mpLBRankedGame)) {
                 D_005308B8_E7A0.bit6 = 1;
                 D_005308B8_E7A0.bit7 = 1;
                 D_005308B8_E7A0.bit8 = 1;
@@ -7820,53 +7830,53 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
                 cBENewRaceInterface_setNumberAI_E7A0(race, 0);
                 commit_E7A0(race);
             } else {
-                D_005308B8_E7A0.bit6 = func_0039A738_E7A0(self->opt6);
-                D_005308B8_E7A0.bit8 = func_0039A738_E7A0(self->opt8);
-                D_005308B8_E7A0.bit7 = func_0039A738_E7A0(self->opt7);
+                D_005308B8_E7A0.bit6 = func_0039A738_E7A0(self->mpLBMultipliers);
+                D_005308B8_E7A0.bit8 = func_0039A738_E7A0(self->mpLBPowerUps);
+                D_005308B8_E7A0.bit7 = func_0039A738_E7A0(self->mpLBPointIcons);
                 char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-                cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->numAI));
+                cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->mpLBCPURiders));
                 commit_E7A0(race);
             }
-            func_0025F4C0_E7A0(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), self->f14);
+            func_0025F4C0_E7A0(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), self->mCurrentCtrl);
             break;
         }
         case 10:
-            if (self->f6D0) {
+            if (self->mbChallengeSent) {
                 func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, 1);
             }
-            func_0039F600_E7A0(self->engine + 0x18);
+            func_0039F600_E7A0((char*)self->mpEngine + 0x18);
             break;
         }
         break;
     case 6:
-        func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, self->f6D0);
-        func_0039F600_E7A0(self->engine + 0x18);
+        func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, self->mbChallengeSent);
+        func_0039F600_E7A0((char*)self->mpEngine + 0x18);
         break;
     case 9:
-        if (a1 == self->aiOn) {
+        if (a1 == (void*)self->mpLBRankedGame) {
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-            D_00534B34[0] = func_0039A738_E7A0(self->aiOn) != 0;
+            D_00534B34[0] = func_0039A738_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
-            func_001AF098_E7A0(self, func_0039A738_E7A0(self->aiOn) != 0);
-            func_001AEC60_E7A0(self, self->f6D0);
-        } else if (a1 == self->opt6) {
+            func_001AF098_E7A0(((cState_E7A0*)self), func_0039A738_E7A0(self->mpLBRankedGame) != 0);
+            func_001AEC60_E7A0(((cState_E7A0*)self), self->mbChallengeSent);
+        } else if (a1 == (void*)self->mpLBMultipliers) {
             D_005308B8_E7A0.bit6 = func_0039A738_E7A0(a1);
-        } else if (a1 == self->opt8) {
+        } else if (a1 == (void*)self->mpLBPowerUps) {
             D_005308B8_E7A0.bit8 = func_0039A738_E7A0(a1);
-        } else if (a1 == self->opt7) {
+        } else if (a1 == (void*)self->mpLBPointIcons) {
             D_005308B8_E7A0.bit7 = func_0039A738_E7A0(a1);
-        } else if (a1 == self->numAI) {
+        } else if (a1 == (void*)self->mpLBCPURiders) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-            cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->numAI));
-            D_004A4E88_w[1] = func_0039A738_E7A0(self->numAI);
+            cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->mpLBCPURiders));
+            D_004A4E88_w[1] = func_0039A738_E7A0(self->mpLBCPURiders);
             commit_E7A0(race);
         }
         break;
     case 1:
-        func_001AF208_E7A0(self, a1, 1);
+        func_001AF208_E7A0(((cState_E7A0*)self), a1, 1);
         break;
     case 2:
-        func_001AF208_E7A0(self, a1, 0);
+        func_001AF208_E7A0(((cState_E7A0*)self), a1, 0);
         break;
     case 7:
         break;
@@ -7937,91 +7947,90 @@ struct sVE_001AEC60 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001AEC60(void* self, int on)
+extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
 {
-    char* s = (char*)self;
-    if (*(void**)(s + 0x40) == 0) {
+    if (self->mpScreen == 0) {
         return;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int locked = D_00534B34[0];
-    cFEVObj_001AEC60* o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632A8));
+    cFEVObj_001AEC60* o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004632A8));
     if (o != 0) {
         o->v08(on);
     }
-    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632B8));
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004632B8));
     if (o != 0) {
-        (*(cFEVObj_001AEC60**)(s + 0x6E0))->v08(on);
+        ((cFEVObj_001AEC60*)self->mpLBCPURiders)->v08(on);
         o->v08(on);
         if (on == 0) {
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[0] == 0 || locked != 0);
+            (*pf)((char*)o + vt[8].delta, (self->mpEventOptions)[0] == 0 || locked != 0);
         }
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E0)) + 8);
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBCPURiders) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E0)) + vt[8].delta, (*(int**)(s + 0x6D8))[0] == 0 || locked != 0);
+            (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBCPURiders) + vt[8].delta, (self->mpEventOptions)[0] == 0 || locked != 0);
         }
         }
     }
-    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632D0));
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004632D0));
     if (o != 0) {
         o->v08(on);
-        (*(cFEVObj_001AEC60**)(s + 0x6E4))->v08(on);
+        ((cFEVObj_001AEC60*)self->mpLBPowerUps)->v08(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E4)) + 8);
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBPowerUps) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E4)) + vt[8].delta, (*(int**)(s + 0x6D8))[1] == 0 || locked != 0);
+            (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBPowerUps) + vt[8].delta, (self->mpEventOptions)[1] == 0 || locked != 0);
         }
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[1] == 0 || locked != 0);
+            (*pf)((char*)o + vt[8].delta, (self->mpEventOptions)[1] == 0 || locked != 0);
         }
         }
     }
-    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632E0));
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004632E0));
     if (o != 0) {
         o->v08(on);
-        (*(cFEVObj_001AEC60**)(s + 0x6E8))->v08(on);
+        ((cFEVObj_001AEC60*)self->mpLBMultipliers)->v08(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E8)) + 8);
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBMultipliers) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6E8)) + vt[8].delta, (*(int**)(s + 0x6D8))[3] == 0 || locked != 0);
+            (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBMultipliers) + vt[8].delta, (self->mpEventOptions)[3] == 0 || locked != 0);
         }
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[3] == 0 || locked != 0);
+            (*pf)((char*)o + vt[8].delta, (self->mpEventOptions)[3] == 0 || locked != 0);
         }
         }
     }
-    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632F0));
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004632F0));
     if (o != 0) {
         o->v08(on);
-        (*(cFEVObj_001AEC60**)(s + 0x6EC))->v08(on);
+        ((cFEVObj_001AEC60*)self->mpLBPointIcons)->v08(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)(*(cFEVObj_001AEC60**)(s + 0x6EC)) + 8);
+            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBPointIcons) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)(*(cFEVObj_001AEC60**)(s + 0x6EC)) + vt[8].delta, (*(int**)(s + 0x6D8))[2] == 0 || locked != 0);
+            (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBPointIcons) + vt[8].delta, (self->mpEventOptions)[2] == 0 || locked != 0);
         }
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)o + 8);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)((char*)o + vt[8].delta, (*(int**)(s + 0x6D8))[2] == 0 || locked != 0);
+            (*pf)((char*)o + vt[8].delta, (self->mpEventOptions)[2] == 0 || locked != 0);
         }
         }
     }
-    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00463130));
+    o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463130));
     if (o != 0) {
         o->v08(on);
     }
-    (*(cFEVObj_001AEC60**)(s + 0x6DC))->v08(on);
+    ((cFEVObj_001AEC60*)self->mpLBRankedGame)->v08(on);
 }
 #endif
 
@@ -8036,39 +8045,39 @@ extern signed char D_00535C12[];
 extern unsigned char D_004A4E88_AF098[8] __asm__("D_004A4E88");
 extern "C" void func_0039A7A8(void* self, int a1);
 
-extern "C" void func_001AF098(void* self, int all)
+extern "C" void func_001AF098(cFEStateChallengePopup* self, int all)
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     if (all) {
-        func_0039A7A8(*(void**)((char*)self + 0x6E4), 1);
-        func_0039A7A8(*(void**)((char*)self + 0x6E8), 1);
-        func_0039A7A8(*(void**)((char*)self + 0x6EC), 1);
-        func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
+        func_0039A7A8(self->mpLBPowerUps, 1);
+        func_0039A7A8(self->mpLBMultipliers, 1);
+        func_0039A7A8(self->mpLBPointIcons, 1);
+        func_0039A7A8(self->mpLBCPURiders, 0);
         return;
     }
-    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0x4) != 0) {
-        func_0039A7A8(*(void**)((char*)self + 0x6E4), (D_005308D0[0] >> 8) & 1);
+    if (*(int*)((char*)self->mpEventOptions + 0x4) != 0) {
+        func_0039A7A8(self->mpLBPowerUps, (D_005308D0[0] >> 8) & 1);
     } else {
-        func_0039A7A8(*(void**)((char*)self + 0x6E4), 1);
+        func_0039A7A8(self->mpLBPowerUps, 1);
     }
-    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0xC) != 0) {
-        func_0039A7A8(*(void**)((char*)self + 0x6E8), (D_005308D0[0] >> 6) & 1);
+    if (*(int*)((char*)self->mpEventOptions + 0xC) != 0) {
+        func_0039A7A8(self->mpLBMultipliers, (D_005308D0[0] >> 6) & 1);
     } else {
-        func_0039A7A8(*(void**)((char*)self + 0x6E8), 1);
+        func_0039A7A8(self->mpLBMultipliers, 1);
     }
-    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0x8) != 0) {
+    if (*(int*)((char*)self->mpEventOptions + 0x8) != 0) {
         int f = D_005308D0[0] >> 7;
-        func_0039A7A8(*(void**)((char*)self + 0x6EC), f & 1);
+        func_0039A7A8(self->mpLBPointIcons, f & 1);
     } else {
-        func_0039A7A8(*(void**)((char*)self + 0x6EC), 1);
+        func_0039A7A8(self->mpLBPointIcons, 1);
     }
     if (D_00535C12[0] != 0) {
         cBENewRaceInterface_setNumberAI(iface, 0);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
         ivt[1].fn(iface + ivt[1].delta);
-        func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
+        func_0039A7A8(self->mpLBCPURiders, 0);
     } else {
-        func_0039A7A8(*(void**)((char*)self + 0x6E0), D_004A4E88_AF098[4]);
+        func_0039A7A8(self->mpLBCPURiders, D_004A4E88_AF098[4]);
     }
 }
 #endif
@@ -8117,7 +8126,7 @@ static inline cFEVObj_001AF208* Get1AF208(void* self, char* name)
     return (cFEVObj_001AF208*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
-extern "C" void func_001AF208(cFEStateNet* self, cUIText* item, int on)
+extern "C" void func_001AF208(cFEStateChallengePopup* self, cUIText* item, int on)
 {
     if (item == 0) {
         return;
@@ -8125,20 +8134,20 @@ extern "C" void func_001AF208(cFEStateNet* self, cUIText* item, int on)
     cFEVObj_001AF208* a = 0;
     cFEVObj_001AF208* b = 0;
     if (IsHash1AF208(*(int*)((char*)item + 0x38), D_004631F8)) {
-        a = Get1AF208(self, D_00463300);
-        b = Get1AF208(self, D_00463310);
+        a = Get1AF208(((cFEStateNet*)self), D_00463300);
+        b = Get1AF208(((cFEStateNet*)self), D_00463310);
     } else if (IsHash1AF208(*(int*)((char*)item + 0x38), D_00463210)) {
-        a = Get1AF208(self, D_00463320);
-        b = Get1AF208(self, D_00463330);
+        a = Get1AF208(((cFEStateNet*)self), D_00463320);
+        b = Get1AF208(((cFEStateNet*)self), D_00463330);
     } else if (IsHash1AF208(*(int*)((char*)item + 0x38), D_00463238)) {
-        a = Get1AF208(self, D_00463340);
-        b = Get1AF208(self, D_00463350);
+        a = Get1AF208(((cFEStateNet*)self), D_00463340);
+        b = Get1AF208(((cFEStateNet*)self), D_00463350);
     } else if (IsHash1AF208(*(int*)((char*)item + 0x38), D_00463248)) {
-        a = Get1AF208(self, D_00463360);
-        b = Get1AF208(self, D_00463370);
+        a = Get1AF208(((cFEStateNet*)self), D_00463360);
+        b = Get1AF208(((cFEStateNet*)self), D_00463370);
     } else if (IsHash1AF208(*(int*)((char*)item + 0x38), D_00463260)) {
-        a = Get1AF208(self, D_00463380);
-        b = Get1AF208(self, D_00463390);
+        a = Get1AF208(((cFEStateNet*)self), D_00463380);
+        b = Get1AF208(((cFEStateNet*)self), D_00463390);
     }
     if (a != 0) {
         a->v09(on);
@@ -8155,12 +8164,12 @@ INCLUDE_ASM("fe/feasyncfile", func_001AF3E0);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_0039F698(void* p);
 
-extern "C" int func_001AF3E0(cFEStateNet* self, void* a1, int a2)
+extern "C" int func_001AF3E0(cFEStateChallengePopup* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         return func_0039F698((char*)self->mpEngine + 0x18);
     }
-    return func_001A97B8(self, a1, a2);
+    return func_001A97B8(((cFEStateNet*)self), a1, a2);
 }
 #endif
 
@@ -8208,7 +8217,7 @@ public:
 
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
-extern "C" void func_001AF428(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001AF428(cFEStateChallengePopup* self, void* a1, int a2)
 {
     if (*(int*)((char*)a1 + 0x18) == 0x835) {
         ((cFEVObj_001AF428*)self)->v33(a1, a2);
@@ -8225,9 +8234,9 @@ INCLUDE_ASM("fe/feasyncfile", func_001AF470);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void func_001AF688(void* self);
+extern "C" void func_001AF688(cFEStateChallengePopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" void func_001AB108(cFEStateNet* self);
 extern "C" void func_001AFA60(void* screen, char* msg);
@@ -8235,18 +8244,18 @@ extern "C" void func_001AFD88(void* self, void* a1);
 extern const char D_00461C60[];
 
 // Message handler: opens the next screen, shows error popups, or forwards to the base handler.
-extern "C" void* func_001AF470(cFEStateNet* self, int a1, int a2)
+extern "C" void* func_001AF470(cFEStateChallengePopup* self, int a1, int a2)
 {
     switch (a1) {
     case 0xF3:
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     case 0xED: case 0xEE: case 0xF0: case 0xF1: case 0xF2: case 0x10C: case 0x112: case 0x113:
         func_001AF688(self);
-        func_001AB178(self, a1);
+        func_001AB178(((cFEStateNet*)self), a1);
         break;
     case 0x110:
-        func_001AB108(self);
+        func_001AB108(((cFEStateNet*)self));
         break;
     case 0xE3:
         func_001AFA60(self->mpScreen, (char*)a2);
@@ -8255,7 +8264,7 @@ extern "C" void* func_001AF470(cFEStateNet* self, int a1, int a2)
         func_001AFD88(self->mpScreen, (void*)a2);
         break;
     default:
-        return func_001A8E40_3(self, a1, a2);
+        return func_001A8E40_3(((cFEStateNet*)self), a1, a2);
     case 0xEF:
         break;
     }
@@ -8270,7 +8279,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" void func_001AEC60(void* self, int a1);
+extern "C" void func_001AEC60(cFEStateChallengePopup* self, int a1);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern char D_00463468[];
@@ -8290,11 +8299,11 @@ struct sVE_001AF568b {
     void (*fn)(void* self, int on);
 };
 
-extern "C" void func_001AF568(void* self)
+extern "C" void func_001AF568(cFEStateChallengePopup* self)
 {
     char buf[0x400];
-    *(int*)((char*)self + 0x6D0) = 1;
-    cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
+    self->mbChallengeSent = 1;
+    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463468));
     if (text != 0) {
         char* name = LobbyMan_mLobbyMan->mOpponent;
         char* o = (char*)SSXApp->FELocale;
@@ -8302,10 +8311,10 @@ extern "C" void func_001AF568(void* self)
         char* obj = o + vt[4].delta;
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(D_00463480)), name);
         cUIText_setUnicodeString(text, buf);
-        char* o2 = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004631C8));
+        char* o2 = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004631C8));
         sVE_001AF568b* vt2 = *(sVE_001AF568b**)(o2 + 8);
         vt2[8].fn(o2 + vt2[8].delta, 1);
-        cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004630E0)), 7);
+        cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004630E0)), 7);
         func_001AEC60(self, 1);
     }
 }
@@ -8331,18 +8340,18 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" void func_001AEC60(void* self, int a1);
+extern "C" void func_001AEC60(cFEStateChallengePopup* self, int a1);
 extern char D_00463468[];
 extern char D_00463498[];
 extern char D_004631C8[];
 
-extern "C" void func_001AF688(void* self)
+extern "C" void func_001AF688(cFEStateChallengePopup* self)
 {
-    *(int*)((char*)self + 0x6D0) = 0;
-    cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
+    self->mbChallengeSent = 0;
+    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463468));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00463498));
-        ((cUIObj_001AF688*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004631C8)))->v08(0);
+        ((cUIObj_001AF688*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004631C8)))->v08(0);
         func_001AEC60(self, 0);
     }
 }
@@ -8395,7 +8404,7 @@ public:
     virtual void v08(int on);
 };
 
-extern "C" void func_001AF728(void* self, void* track, void* screen)
+extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* screen)
 {
     if (screen == 0) {
         return;
@@ -8424,8 +8433,8 @@ extern "C" void func_001AF728(void* self, void* track, void* screen)
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI(iface, 0);
             iface->v01();
-            func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
-            (*(cFEVObj_001AF728**)((char*)self + 0x6E0))->v08(1);
+            func_0039A7A8(self->mpLBCPURiders, 0);
+            ((cFEVObj_001AF728*)self->mpLBCPURiders)->v08(1);
         }
         cUIText_setAsciiString(t, func_00145340(track));
     }
@@ -8606,15 +8615,15 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001AFE08(void* self, int a1, int a2, const char* name)
+extern "C" void* func_001AFE08(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name)
 {
     func_001A8500_3(self, a1, a2);
-    *(void***)((char*)self + 0x8) = D_00468D20;
+    self->mVtbl = D_00468D20;
     cBXString_cBXString2((char*)self + 0x6D0, name);
-    *(int*)((char*)self + 0x6D4) = 0;
-    *(int*)((char*)self + 0xC) = 0x40;
+    self->mbAccepted = 0;
+    self->mHashName = 0x40;
     D_004A4E88 = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -8638,7 +8647,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" int cBENewRaceInterface_setGameMode_FE68(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_FE68(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
-extern "C" void func_001B0850(void* self, void* iface, void* screen);
+extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001AF930(void* screen);
 extern int D_004A11B8;
@@ -8688,13 +8697,13 @@ static inline void vcall_FE68(void* p)
 }
 
 // Creates the race-setup screen and applies the selected online race settings.
-extern "C" void func_001AFE68(char* self)
+extern "C" void func_001AFE68(cFEStateChallengeReceivedPopup* self)
 {
-    sVE_FE68* vt = *(sVE_FE68**)(self + 0x8);
-    vt[32].fn(self + vt[32].delta);
-    void* engine = *(void**)(self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004635D8), 0);
-    *(void**)(self + 0x40) = screen;
+    sVE_FE68* vt = (sVE_FE68*)self->mVtbl;
+    vt[32].fn(((char*)self) + vt[32].delta);
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(D_004635D8), 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen == 0)
         return;
     cUIScreen_playFrame(screen, 0, 0);
@@ -8704,7 +8713,7 @@ extern "C" void func_001AFE68(char* self)
         func_002613C8(BuddyMan_mBuddyMan);
     if (BuddyMan_mBuddyMan == 0)
         func_0025B800((char*)LobbyMan_mLobbyMan);
-    char* name = self + 0x6D0;
+    char* name = ((char*)self) + 0x6D0;
     sRaceSetup_FE68* r = (sRaceSetup_FE68*)func_00263270(BuddyMan_mBuddyMan, *(int*)name);
     cBXString_operatorE((char*)LobbyMan_mLobbyMan + 0x98, name);
     (*(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sInfo_FE68*)r->info;
@@ -8725,9 +8734,9 @@ extern "C" void func_001AFE68(char* self)
     void* net = cBE_getInterface_Fv_FE68(SSXApp->BE, 7);
     D_00534B34[0] = r->f14;
     vcall_FE68(net);
-    func_001B0850(self, be, *(void**)(self + 0x40));
+    func_001B0850(self, be, self->mpScreen);
     func_0025E6D0((char*)LobbyMan_mLobbyMan, LobbyMan_mLobbyMan->mOpponent);
-    func_001AF930(*(void**)(self + 0x40));
+    func_001AF930(self->mpScreen);
 }
 #endif
 
@@ -8740,7 +8749,7 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
 
-extern "C" void func_001B00B8(void* self)
+extern "C" void func_001B00B8(cFEStateChallengeReceivedPopup* self)
 {
     if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
@@ -8751,7 +8760,7 @@ extern "C" void func_001B00B8(void* self)
     if (BuddyMan_mBuddyMan == 0) {
         func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(BuddyMan_mBuddyMan, 1, 8, *(int*)((char*)self + 0x6D0), 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 8, (int)self->mszChallenger, 0, 0);
 }
 #endif
 
@@ -8821,7 +8830,7 @@ public:
 
 static inline int IsHash_001B0150(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001B0150(void* self, cFEVObj_001B0150* obj)
+extern "C" void func_001B0150(cFEStateChallengeReceivedPopup* self, cFEVObj_001B0150* obj)
 {
     char buf[16];
     char* o = (char*)obj;
@@ -8902,11 +8911,11 @@ extern "C" void func_001B0150(void* self, cFEVObj_001B0150* obj)
 INCLUDE_ASM("fe/feasyncfile", func_001B0538);
 #ifdef SKIP_ASM
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
-extern "C" void func_001B0C08(void* self);
-extern "C" void func_001B0E10(void* self);
+extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
+extern "C" void func_001B0E10(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_0025FB58(void* self, int a1, int a2);
 
-extern "C" void func_001B0538(void* self, void* obj, int msg)
+extern "C" void func_001B0538(cFEStateChallengeReceivedPopup* self, void* obj, int msg)
 {
     if (obj == 0) {
         return;
@@ -8915,9 +8924,9 @@ extern "C" void func_001B0538(void* self, void* obj, int msg)
     case 5:
         switch (*(int*)((char*)obj + 0x18)) {
         case 0xB:
-            if (*(int*)((char*)self + 0x6D4) == 0) {
+            if (self->mbAccepted == 0) {
                 func_001B0C08(self);
-                func_0025FB58(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), *(signed char*)((char*)self + 0x14));
+                func_0025FB58(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), self->mCurrentCtrl);
             }
             break;
         case 0xC:
@@ -8979,7 +8988,7 @@ public:
 
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
-extern "C" void func_001B05E0(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001B05E0(cFEStateChallengeReceivedPopup* self, void* a1, int a2)
 {
     if (*(int*)((char*)a1 + 0x18) == 0x835) {
         ((cFEVObj_001B05E0*)self)->v33(a1, a2);
@@ -8995,12 +9004,12 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0628);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int func_0039F698(void* p);
 
-extern "C" int func_001B0628(cFEStateNet* self, void* a1, int a2)
+extern "C" int func_001B0628(cFEStateChallengeReceivedPopup* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         return func_0039F698((char*)self->mpEngine + 0x18);
     }
-    return func_001A97B8(self, a1, a2);
+    return func_001A97B8(((cFEStateNet*)self), a1, a2);
 }
 #endif
 
@@ -9048,13 +9057,13 @@ public:
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001B0850(void* self, void* iface, void* screen);
+extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen);
 
-extern "C" int func_001B0670(cFEStateNet* self, int a1)
+extern "C" int func_001B0670(cFEStateChallengeReceivedPopup* self, int a1)
 {
     ((cFEVObj_001B0670*)self)->v32();
     if (a1 != 0) {
-        func_001B0850(((cFEVObj_001B0670*)self), cBE_getInterface_Fv(cBE_getBE(), 0), self->mpScreen);
+        func_001B0850(self, cBE_getInterface_Fv(cBE_getBE(), 0), self->mpScreen);
     }
     return 1;
 }
@@ -9064,7 +9073,7 @@ extern "C" int func_001B0670(cFEStateNet* self, int a1)
 INCLUDE_ASM("fe/feasyncfile", func_001B06E0);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001B06E0(void* self, int a1, unsigned int key)
+extern "C" int func_001B06E0(cFEStateChallengeReceivedPopup* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -9085,9 +9094,9 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0708);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void func_001B0C08(void* self);
+extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" void func_001AB108(cFEStateNet* self);
 extern "C" void func_001AFA60(void* screen, char* msg);
@@ -9100,7 +9109,7 @@ extern "C" void func_00263018(void* self, void* a1);
 extern const char D_00461C60[];
 
 // Message handler: starts the memory-card task, shows error popups, or forwards to the base handler.
-extern "C" void* func_001B0708(void* self, int a1, int a2)
+extern "C" void* func_001B0708(cFEStateChallengeReceivedPopup* self, int a1, int a2)
 {
     switch (a1) {
     case 0xEF:
@@ -9113,7 +9122,7 @@ extern "C" void* func_001B0708(void* self, int a1, int a2)
         if (BuddyMan_mBuddyMan == 0) {
             func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00263018(BuddyMan_mBuddyMan, *(void**)((char*)self + 0x6D0));
+        func_00263018(BuddyMan_mBuddyMan, self->mszChallenger);
         break;
     case 0x110:
         func_001AB108((cFEStateNet*)self);
@@ -9123,13 +9132,13 @@ extern "C" void* func_001B0708(void* self, int a1, int a2)
         func_001AB178((cFEStateNet*)self, a1);
         break;
     case 0xF3:
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)((char*)self + 0x10)));
+        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     case 0xE3:
-        func_001AFA60(*(void**)((char*)self + 0x40), (char*)a2);
+        func_001AFA60(self->mpScreen, (char*)a2);
         break;
     case 0xE5:
-        func_001AFD88(*(void**)((char*)self + 0x40), (void*)a2);
+        func_001AFD88(self->mpScreen, (void*)a2);
         break;
     default:
         return func_001A8E40_3(self, a1, a2);
@@ -9168,7 +9177,7 @@ extern char D_00463228[];
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 
-extern "C" void func_001B0850(void* self, void* iface, void* screen)
+extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen)
 {
     char buf[16];
     if (screen == 0) {
@@ -9288,24 +9297,24 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001B0C08(void* self)
+extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self)
 {
-    *(int*)((char*)self + 0x6D4) = 1;
-    if (*(void**)((char*)self + 0x40) != 0) {
-        cFEVObj_001B0C08* o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463618));
+    self->mbAccepted = 1;
+    if (self->mpScreen != 0) {
+        cFEVObj_001B0C08* o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463618));
         if (o != 0) {
             o->v07(1);
         }
-        cUIText* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004630E0));
+        cUIText* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004630E0));
         if (menu != 0) {
             cUIMenu_setSelectedByIndex(menu, 1);
         }
-        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463468));
         if (o != 0) {
             o->v09(1);
             cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00462750));
         }
-        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004635F8));
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004635F8));
         if (o != 0) {
             o->v08(1);
         }
@@ -9318,19 +9327,19 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0D30);
 #ifdef SKIP_ASM
 extern char D_004637B0[];
 
-extern "C" void func_001B0D30(void* self)
+extern "C" void func_001B0D30(cFEStateChallengeReceivedPopup* self)
 {
-    *(int*)((char*)self + 0x6D4) = 0;
-    if (*(void**)((char*)self + 0x40) != 0) {
-        cFEVObj_001B0C08* o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004635F8));
+    self->mbAccepted = 0;
+    if (self->mpScreen != 0) {
+        cFEVObj_001B0C08* o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004635F8));
         if (o != 0) {
             o->v08(0);
         }
-        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463468));
         if (o != 0) {
             o->v09(0);
         }
-        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463618));
+        o = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463618));
         if (o != 0) {
             cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_004637B0));
         }
@@ -9341,7 +9350,7 @@ extern "C" void func_001B0D30(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B0E10);
 #ifdef SKIP_ASM
-extern "C" void func_001B0C08(void* self);
+extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -9371,17 +9380,17 @@ struct sVE1B0E10 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001B0E10(void* self)
+extern "C" void func_001B0E10(cFEStateChallengeReceivedPopup* self)
 {
     func_001B0C08(self);
-    if (*(int*)((char*)self + 0x6D4) != 0) {
+    if (self->mbAccepted != 0) {
         func_0025F740(LobbyMan_mLobbyMan, 0);
         func_00263018(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
         func_00263BA8(func_002591D0(), 2);
     } else {
         func_00263018(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
     }
-    char* obj = *(char**)((char*)self + 0x20);
+    char* obj = (char*)self->mpParentState;
     sVE1B0E10* vt = *(sVE1B0E10**)(obj + 0x8);
     vt[17].fn(obj + vt[17].delta, self, 0x14);
 }
@@ -9411,14 +9420,14 @@ extern void* D_00468C10[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001B0F60(void* self, int a1)
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
-    *(void***)((char*)self + 0x8) = D_00468C10;
-    *(int*)((char*)self + 0x6DC) = 1;
-    *(int*)((char*)self + 0xC) = 0x41;
-    *(int*)((char*)self + 0x6D8) = 0;
-    return self;
+    self->mVtbl = D_00468C10;
+    self->mbConfirmed = 1;
+    self->mHashName = 0x41;
+    self->miConfirmCtrl = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -9428,21 +9437,21 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0FB0);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_001B1B98(cFEStateNet* self, int index, int a2, int a3);
+extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, int a2, int a3);
 extern char D_00463800[];
 
-extern "C" void func_001B0FB0(void* self)
+extern "C" void func_001B0FB0(cFEStateOnlineCharacterSelect* self)
 {
     int i;
-    *(int*)((char*)self + 0x6E0) = 0;
-    void* engine = *(void**)((char*)self + 0x10);
+    self->miCharID = 0;
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00463800), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     for (i = 0; i < 30; i++) {
-        func_001B1B98((cFEStateNet*)self, i, 1, 0);
+        func_001B1B98(self, i, 1, 0);
     }
 }
 #endif
@@ -9462,22 +9471,22 @@ INCLUDE_ASM("fe/feasyncfile", func_001B1068);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_0039A738(void* a);
-extern "C" void func_001B1B10(void* self, int sel, int flag);
-extern "C" void func_001B1760(cFEStateNet* self, int index);
-extern "C" void func_001B1808(cFEStateNet* self);
+extern "C" void func_001B1B10(cFEStateOnlineCharacterSelect* self, int sel, int flag);
+extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int index);
+extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self);
 
-extern "C" int func_001B1068(void* self, int a1)
+extern "C" int func_001B1068(cFEStateOnlineCharacterSelect* self, int a1)
 {
     if (a1 != 0) {
-        func_001B1B10(self, func_0039A738(*(void**)((char*)self + 0x6D0)), 0);
+        func_001B1B10(self, func_0039A738(self->mpLBChallengerSelect), 0);
         cBE_getInterface_Fv(SSXApp->BE, 7);
         char* net = ((char*)&cBENetworkInterface_networkOpt);
         if (*(int*)(net + 0x32C) >= 0) {
-            func_001B1760((cFEStateNet*)self, *(int*)(net + 0x32C));
+            func_001B1760(self, *(int*)(net + 0x32C));
             func_001B1B10(self, *(int*)(net + 0x32C), 1);
         }
-        func_001B1808((cFEStateNet*)self);
-        *(int*)((char*)self + 0x6DC) = 0;
+        func_001B1808(self);
+        self->mbConfirmed = 0;
     }
     return 0;
 }
@@ -9537,7 +9546,7 @@ public:
 
 static inline int IsHash_001B10F8(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001B10F8(void* self, cUIText* text)
+extern "C" void func_001B10F8(cFEStateOnlineCharacterSelect* self, cUIText* text)
 {
     cFEVObj_001B10F8* box = (cFEVObj_001B10F8*)text;
     if (IsHash_001B10F8(*(int*)((char*)text + 0x38), D_00463818)) {
@@ -9549,9 +9558,9 @@ extern "C" void func_001B10F8(void* self, cUIText* text)
         *(int*)((char*)text + 0x14) &= ~1;
         box->v09(1);
         int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0);
-        *(int*)((char*)self + 0x6E0) = id;
+        self->miCharID = id;
         func_0039A7A8(text, (unsigned char)func_001B0F28(id));
-        *(cUIText**)((char*)self + 0x6D0) = text;
+        self->mpLBChallengerSelect = (cUIListBox*)text;
         box->v24(1);
     } else if (IsHash_001B10F8(*(int*)((char*)text + 0x38), D_00463830)) {
         cUIText_setAsciiString(text, D_004A1390);
@@ -9570,8 +9579,8 @@ extern "C" void func_001474A8(void* iface, int a1, int a2);
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void func_001B1A08(cFEStateNet* self, int on, int a2);
-extern "C" void func_001B1B10(void* self, int sel, int flag);
+extern "C" void func_001B1A08(cFEStateOnlineCharacterSelect* self, int on, int a2);
+extern "C" void func_001B1B10(cFEStateOnlineCharacterSelect* self, int sel, int flag);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_00264F88(void* self, int a1);
 extern "C" void func_00265018(void* self, int a1);
@@ -9606,7 +9615,7 @@ public:
 static inline int IsHash1B1280(int id, char* name) { return id == GetHashValue32(name); }
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
-extern "C" void func_001B1280(void* self, int a1, unsigned int msg)
+extern "C" void func_001B1280(cFEStateOnlineCharacterSelect* self, int a1, unsigned int msg)
 {
     char* obj = (char*)a1;
     if (obj == 0) {
@@ -9614,13 +9623,13 @@ extern "C" void func_001B1280(void* self, int a1, unsigned int msg)
     }
     switch (msg) {
     case 5:
-        if (*(int*)((char*)self + 0x6DC) != 0) {
+        if (self->mbConfirmed != 0) {
             return;
         }
         if (D_004A33CC == 0) {
             return;
         }
-        if (*(int*)((char*)self + 0x6E0) != func_0039A738(*(void**)((char*)self + 0x6D0))) {
+        if (self->miCharID != func_0039A738(self->mpLBChallengerSelect)) {
             char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             func_001474A8(iface, 0, 0);
             sVE1B1280* vt = *(sVE1B1280**)(iface + 0xC);
@@ -9628,15 +9637,15 @@ extern "C" void func_001B1280(void* self, int a1, unsigned int msg)
         }
         {
             void* mgr = D_004A33CC;
-            func_00265018(mgr, func_0039A738(*(void**)((char*)self + 0x6D0)));
+            func_00265018(mgr, func_0039A738(self->mpLBChallengerSelect));
         }
-        *(int*)((char*)self + 0x6D8) = *(signed char*)((char*)self + 0x14);
+        self->miConfirmCtrl = self->mCurrentCtrl;
         ((cFEVObj_001B1280*)obj)->v08(1);
-        func_001B1A08((cFEStateNet*)self, 1, 0);
-        *(int*)((char*)self + 0x6DC) = 1;
+        func_001B1A08(self, 1, 0);
+        self->mbConfirmed = 1;
         break;
     case 6:
-        if (*(int*)((char*)self + 0x6DC) == 0) {
+        if (self->mbConfirmed == 0) {
             void* p = func_001A9C50((cFEStateNet*)self);
             *(int*)((char*)p + 0xBC) = 2;
             char* sub = (char*)p + 0xBC;
@@ -9650,15 +9659,15 @@ extern "C" void func_001B1280(void* self, int a1, unsigned int msg)
         } else {
             func_00265140(D_004A33CC);
             ((cFEVObj_001B1280*)obj)->v08(0);
-            func_001B1A08((cFEStateNet*)self, 0, 0);
-            *(int*)((char*)self + 0x6DC) = 0;
+            func_001B1A08(self, 0, 0);
+            self->mbConfirmed = 0;
         }
         break;
     case 9:
         if (IsHash1B1280(*(int*)(obj + 0x38), D_00463818)) {
             void* mgr = D_004A33CC;
-            func_00264F88(mgr, func_0039A738(*(void**)((char*)self + 0x6D0)));
-            func_001B1B10(self, func_0039A738(*(void**)((char*)self + 0x6D0)), 0);
+            func_00264F88(mgr, func_0039A738(self->mpLBChallengerSelect));
+            func_001B1B10(self, func_0039A738(self->mpLBChallengerSelect), 0);
         }
     default:
         func_001A8918((cFEStateNet*)self, a1, msg);
@@ -9680,7 +9689,7 @@ extern char D_00463890[];
 extern char D_004638B0[];
 extern char D_004614E8[];
 
-extern "C" void func_001B14D8(void* self, void* popup)
+extern "C" void func_001B14D8(cFEStateOnlineCharacterSelect* self, void* popup)
 {
     func_001DA528(popup, 3);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00463848);
@@ -9708,9 +9717,9 @@ public:
 
 extern void* D_004A33CC;
 
-extern "C" bool func_001B1590(void* self, cFEVObj_001B1590* obj)
+extern "C" bool func_001B1590(cFEStateOnlineCharacterSelect* self, cFEVObj_001B1590* obj)
 {
-    if (*(int*)((char*)self + 0x6DC) != 0 || D_004A33CC == 0) {
+    if (self->mbConfirmed != 0 || D_004A33CC == 0) {
         return !obj->v06();
     }
     return 0;
@@ -9731,9 +9740,9 @@ extern "C" void* func_001BFBB8(cFEStateNet* mem, int a1);
 extern "C" void* func_00192D00(void* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0025DA90(void* self);
-extern "C" void func_001B1760(cFEStateNet* self, int index);
-extern "C" void func_001B1B10(void* self, int sel, int flag);
-extern "C" void func_001B1A08(cFEStateNet* self, int on, int a2);
+extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int index);
+extern "C" void func_001B1B10(cFEStateOnlineCharacterSelect* self, int sel, int flag);
+extern "C" void func_001B1A08(cFEStateOnlineCharacterSelect* self, int on, int a2);
 extern "C" void func_001AB288(cFEStateNet* self, int err);
 extern int D_004A4E88;
 extern const char D_0045FF10[];
@@ -9741,7 +9750,7 @@ extern const char D_0045FF28[];
 extern const char D_00460CC8[];
 
 // Message handler for the profile list: select/scroll, error popups, and opening the follow-up screens.
-extern "C" void* func_001B15D8(cFEStateNet* self, int a1, int a2)
+extern "C" void* func_001B15D8(cFEStateOnlineCharacterSelect* self, int a1, int a2)
 {
     void* obj;
     switch (a1) {
@@ -9759,10 +9768,10 @@ extern "C" void* func_001B15D8(cFEStateNet* self, int a1, int a2)
         func_001B1A08(self, 0, 1);
         break;
     case 0xEE: case 0xF1: case 0xF8: case 0xFA: case 0x112: case 0x113:
-        func_001AB288(self, a1);
+        func_001AB288(((cFEStateNet*)self), a1);
         break;
     case 0xF6:
-        func_001A8A40(self, func_00192D00(cMemMan_alloc(0x73C, D_00460CC8, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_00192D00(cMemMan_alloc(0x73C, D_00460CC8, 0, 0), (int)self->mpEngine));
         break;
     case 0x10C:
         if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
@@ -9770,10 +9779,10 @@ extern "C" void* func_001B15D8(cFEStateNet* self, int a1, int a2)
         } else {
             obj = func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine);
         }
-        func_001A8A40(self, obj);
+        func_001A8A40(((cFEStateNet*)self), obj);
         break;
     default:
-        return func_001A8E40_3(self, a1, a2);
+        return func_001A8E40_3(((cFEStateNet*)self), a1, a2);
     case 0xE0:
         break;
     }
@@ -9808,7 +9817,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern char D_00463830[];
 
-extern "C" void func_001B1760(cFEStateNet* self, int player)
+extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int player)
 {
     if (self->mpScreen != 0) {
         const char* str = (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), player, 0);
@@ -9864,7 +9873,7 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001B1808(cFEStateNet* self)
+extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self)
 {
     char buf[0x100];
     if (self->mpScreen == 0) {
@@ -9939,7 +9948,7 @@ struct sText1B1A08 {
     unsigned int size : 5;
 };
 
-extern "C" void func_001B1A08(cFEStateNet* self, int up, int highlight)
+extern "C" void func_001B1A08(cFEStateOnlineCharacterSelect* self, int up, int highlight)
 {
     if (self->mpScreen != 0) {
         sText1B1A08* t;
@@ -9966,17 +9975,17 @@ extern "C" void func_001B1A08(cFEStateNet* self, int up, int highlight)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B1B10);
 #ifdef SKIP_ASM
-extern "C" void func_001B1760(cFEStateNet* self, int index);
-extern "C" void func_001B1B98(cFEStateNet* self, int index, int a2, int a3);
+extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int index);
+extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, int a2, int a3);
 
-extern "C" void func_001B1B10(void* self, int sel, int flag)
+extern "C" void func_001B1B10(cFEStateOnlineCharacterSelect* self, int sel, int flag)
 {
     int i;
     for (i = 0; i < 30; i++) {
         if (i == sel && flag) {
-            func_001B1760((cFEStateNet*)self, i);
+            func_001B1760(self, i);
         }
-        func_001B1B98((cFEStateNet*)self, i, flag, i == sel);
+        func_001B1B98(self, i, flag, i == sel);
     }
 }
 #endif
@@ -10027,7 +10036,7 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001B1B98(cFEStateNet* self, int index, int a2, int a3)
+extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, int a2, int a3)
 {
     char buf[0x30];
     int stats[7];
@@ -10098,9 +10107,9 @@ extern "C" void func_001B1B98(cFEStateNet* self, int index, int a2, int a3)
 INCLUDE_ASM("fe/feasyncfile", func_001B1EC0);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001B1F18(void* self, void* a1, int a2);
+extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, void* a1, int a2);
 
-extern "C" void func_001B1EC0(void* self, void* a1, int a2)
+extern "C" void func_001B1EC0(cFEStateOnlineCharacterSelect* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x838:
@@ -10123,7 +10132,7 @@ extern void* D_004A33CC;
 extern "C" void func_00265768(void* self, int a1);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
-extern "C" void func_001B1F18(void* self, void* a1, int a2)
+extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         if (D_004A33CC != 0) {
@@ -10208,8 +10217,8 @@ struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_001B2378(void* self, int a1);
-extern "C" void func_001B3978(cFEStateNet* self, void* a1);
+extern "C" void func_001B2378(cFEStateChatRoom* self, int a1);
+extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
 extern "C" void func_003A1310(void* self, int a1);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
@@ -10227,28 +10236,28 @@ struct sBlk1B2070 {
     int v[4];
 };
 
-extern "C" void func_001B2070(void* self)
+extern "C" void func_001B2070(cFEStateChatRoom* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00463A08), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen == 0) {
         return;
     }
     cUIScreen_playFrame(screen, 0, 0);
     func_001B2378(self, 1);
-    func_001B3978((cFEStateNet*)self, LobbyMan_mLobbyMan->mPersona);
-    *(int*)(*(char**)((char*)self + 0x6F0) + 0x74) |= 1;
-    func_003A1310(*(void**)((char*)self + 0x6F0), 1);
-    *(sBlk1B2070*)(*(char**)((char*)self + 0x6F0) + 0xA8) = *(sBlk1B2070*)((char*)self + 0x72C);
-    *(void**)(*(char**)((char*)self + 0x6F0) + 0xB8) = *(void**)((char*)self + 0x6F4);
-    cUIText* a = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619C8));
-    cUIText* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619D8));
-    cUIText* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619E8));
-    *(cUIText**)(*(char**)((char*)self + 0x6F4) + 0x7C) = a;
-    *(cUIText**)(*(char**)((char*)self + 0x6F4) + 0x80) = b;
+    func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
+    *(int*)((char*)self->mpTextScrollChat + 0x74) |= 1;
+    func_003A1310(self->mpTextScrollChat, 1);
+    *(sBlk1B2070*)((char*)self->mpTextScrollChat + 0xA8) = *(sBlk1B2070*)&self->mChatColour;
+    *(void**)((char*)self->mpTextScrollChat + 0xB8) = (void*)self->mpSlider2;
+    cUIText* a = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
+    cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
+    cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
+    *(cUIText**)((char*)self->mpSlider2 + 0x7C) = a;
+    *(cUIText**)((char*)self->mpSlider2 + 0x80) = b;
     {
-        char* o = *(char**)((char*)self + 0x6F4);
+        char* o = (char*)self->mpSlider2;
         if ((unsigned int)strlen(D_004A1B48) > 24) {
             o[0x8C] = 0;
         } else {
@@ -10256,7 +10265,7 @@ extern "C" void func_001B2070(void* self)
         }
     }
     {
-        char* o = *(char**)((char*)self + 0x6F4);
+        char* o = (char*)self->mpSlider2;
         if ((unsigned int)strlen(D_004A1B50) > 24) {
             o[0xA5] = 0;
         } else {
@@ -10264,15 +10273,15 @@ extern "C" void func_001B2070(void* self)
         }
     }
     int two = 2;
-    *(cUIText**)(*(char**)((char*)self + 0x6F4) + 0x84) = c;
-    *(int*)(*(char**)((char*)self + 0x6F4) + 0x88) = two;
-    cUIText* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1B58));
-    cUIText* e = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463A18));
-    cUIText* f = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463A28));
-    *(cUIText**)(*(char**)((char*)self + 0x6EC) + 0x7C) = d;
-    *(cUIText**)(*(char**)((char*)self + 0x6EC) + 0x80) = e;
-    *(cUIText**)(*(char**)((char*)self + 0x6EC) + 0x84) = f;
-    *(int*)(*(char**)((char*)self + 0x6EC) + 0x88) = two;
+    *(cUIText**)((char*)self->mpSlider2 + 0x84) = c;
+    *(int*)((char*)self->mpSlider2 + 0x88) = two;
+    cUIText* d = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1B58));
+    cUIText* e = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463A18));
+    cUIText* f = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463A28));
+    *(cUIText**)((char*)self->mpSlider1 + 0x7C) = d;
+    *(cUIText**)((char*)self->mpSlider1 + 0x80) = e;
+    *(cUIText**)((char*)self->mpSlider1 + 0x84) = f;
+    *(int*)((char*)self->mpSlider1 + 0x88) = two;
 }
 #endif
 
@@ -10310,10 +10319,10 @@ extern "C" void func_001B22A0()
 INCLUDE_ASM("fe/feasyncfile", func_001B2320);
 #ifdef SKIP_ASM
 extern void* D_004A5B64;
-extern "C" void func_001B3BF0(void* self);
+extern "C" void func_001B3BF0(cFEStateChatRoom* self);
 extern "C" void* func_001A8770(cFEStateNet* self);
 
-extern "C" void func_001B2320(void* self)
+extern "C" void func_001B2320(cFEStateChatRoom* self)
 {
     if (*(int*)((char*)D_004A5B64 + 0x18) % 10000 == 0) {
         func_001B3BF0(self);
@@ -10335,8 +10344,8 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void func_001B3978(cFEStateNet* self, void* a1);
-extern "C" void func_001B3BF0(void* self);
+extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
+extern "C" void func_001B3BF0(cFEStateChatRoom* self);
 extern "C" void func_001B3D20(void* self, int idx, int on);
 extern "C" void func_001B25E0(const char* src, void* out);
 extern "C" int func_0025F1B0(void* self);
@@ -10383,28 +10392,27 @@ public:
     virtual void v11(const sCol_001B2378& c);
 };
 
-extern "C" void func_001B2378(void* vself, int a1)
+extern "C" void func_001B2378(cFEStateChatRoom* vself, int a1)
 {
-    char* self = (char*)vself;
-    if (*(void**)(self + 0x40) == 0) {
+    if (vself->mpScreen == 0) {
         return;
     }
     int n = func_0025F1B0(LobbyMan_mLobbyMan);
-    func_001B3D20(self, -1, 0);
-    cUIText* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463A38));
+    func_001B3D20(((char*)vself), -1, 0);
+    cUIText* menu = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463A38));
     if (*(unsigned char*)((char*)menu + 0x96) != n) {
         cUIMenu_setScrollableMenu(menu, n);
     }
     if (n < 7) {
-        *(int*)(self + 0x704) = 0;
+        vself->miMenuScroll[0] = 0;
     }
     sName_001B2378 name = D_00463A48;
     sBXString_001B2378 s;
     int flag = 0;
     for (int i = 5; i >= 0; i--) {
-        int idx = *(int*)(self + 0x704) + i;
+        int idx = vself->miMenuScroll[0] + i;
         sprintf(name.c, D_00463A60, i);
-        cFEVObj_001B2378* t = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name.c));
+        cFEVObj_001B2378* t = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(name.c));
         t->v11(sCol_001B2378(1.0f, 0.0f, 0.0f, 0.0f));
         if (idx < n) {
             cBXString_cBXString4(&s, func_0025F1E0_p(LobbyMan_mLobbyMan, idx, &flag));
@@ -10412,9 +10420,9 @@ extern "C" void func_001B2378(void* vself, int a1)
                 char buf[256];
                 func_001B25E0(func_0025DA90_s(LobbyMan_mLobbyMan), buf);
                 if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
-                    func_001A8A40(self, cFEStateLobbyMenu_cFEStateLobbyMenu((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(self + 0x10)));
+                    func_001A8A40(((char*)vself), cFEStateLobbyMenu_cFEStateLobbyMenu((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), (int)vself->mpEngine));
                 }
-                cUIText_setUnicodeString(*(cUIText**)(self + 0x6E8), buf);
+                cUIText_setUnicodeString(vself->mpTextRoomName, buf);
             }
         } else {
             cBXString_cBXString4(&s, D_004A1390);
@@ -10423,9 +10431,9 @@ extern "C" void func_001B2378(void* vself, int a1)
         *(int*)((char*)t + 0x18) = idx;
     }
     if (a1 != 0) {
-        func_001B3978((cFEStateNet*)self, self + 0x70C);
+        func_001B3978(vself, ((char*)vself) + 0x70C);
     }
-    func_001B3BF0(self);
+    func_001B3BF0(vself);
     cBXString__cBXString(&s, 2);
 }
 #endif
@@ -10549,16 +10557,15 @@ struct sInfo_1B27B0 {
     int e;
 };
 
-extern "C" void func_001B27B0(void* vself, int idx)
+extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
 {
-    char* self = (char*)vself;
     sBXString_1B27B0 s;
     char buf[0x400];
     sInfo_1B27B0 info;
     int flag = 0;
     cBXString_cBXString2(&s, func_0025F1E0_p(LobbyMan_mLobbyMan, idx, &flag));
-    strcpy(self + 0x70C, s.str);
-    if (*(void**)(self + 0x40) == 0) {
+    strcpy(((char*)vself) + 0x70C, s.str);
+    if (vself->mpScreen == 0) {
         cBXString__cBXString(&s, 2);
         return;
     }
@@ -10566,10 +10573,10 @@ extern "C" void func_001B27B0(void* vself, int idx)
     if (func_0025F1B0(LobbyMan_mLobbyMan) > 0) {
         valid = idx < func_0025F1B0(LobbyMan_mLobbyMan);
     }
-    cUIText* title = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463108));
+    cUIText* title = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463108));
     if (title != 0) {
-        cFEVObj_001B2378* a = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463AD8));
-        cFEVObj_001B2378* b = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1B60));
+        cFEVObj_001B2378* a = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463AD8));
+        cFEVObj_001B2378* b = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_004A1B60));
         if (a != 0 && b != 0) {
             if (flag != 0) {
                 b->v09(0);
@@ -10586,7 +10593,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
         }
     }
     func_0025F288(LobbyMan_mLobbyMan, idx, &info);
-    cUIText* t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463AE8));
+    cUIText* t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463AE8));
     if (t != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B30, Loc1B25E0(D_00463AF8), info.a);
@@ -10595,7 +10602,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
             cUIText_setAsciiString(t, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B10));
+    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B10));
     if (t != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B34, Loc1B25E0(D_00463568), info.c);
@@ -10604,7 +10611,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
             cUIText_setAsciiString(t, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B20));
+    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B20));
     if (t != 0) {
         if (valid) {
             int done = info.b;
@@ -10621,7 +10628,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
             cUIText_setAsciiString(t, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B30));
+    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B30));
     if (t != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B3C, Loc1B25E0(D_004635A8), info.d);
@@ -10630,7 +10637,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
             cUIText_setAsciiString(t, D_004A1408);
         }
     }
-    t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B40));
+    t = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(D_00463B40));
     if (t != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B40, Loc1B25E0(D_00463B58), info.a);
@@ -10670,14 +10677,13 @@ struct sListInfo1B2CD0 {
 
 // Shows the item's name and value text in the list and refreshes it.
 // PORT: the unit declares the info argument as int.
-extern "C" void func_001B2CD0(void* self, int infov)
+extern "C" void func_001B2CD0(cFEStateChatRoom* self, int infov)
 {
     char* info = (char*)infov;
-    char* s = (char*)self;
-    if (*(int*)(s + 0x40) == 0) {
+    if ((int)self->mpScreen == 0) {
         return;
     }
-    sListInfo1B2CD0* list = *(sListInfo1B2CD0**)(s + 0x6F0);
+    sListInfo1B2CD0* list = (sListInfo1B2CD0*)self->mpTextScrollChat;
     if (list == 0) {
         return;
     }
@@ -10689,8 +10695,8 @@ extern "C" void func_001B2CD0(void* self, int infov)
     cBXString_cBXString1(&text, info + 0x8);
     cBXString_Concat(&text, D_004A1A50);
     func_003189A0((cBXString*)&text, (char**)(info + 0xC));
-    func_003A19F8(*(cUIText**)(s + 0x6F0), text.str);
-    func_001A83D8(*(sList1A83D8**)(s + 0x6F0), 0x40, 6, a3, pos, a5, first, 1);
+    func_003A19F8(self->mpTextScrollChat, text.str);
+    func_001A83D8((sList1A83D8*)self->mpTextScrollChat, 0x40, 6, a3, pos, a5, first, 1);
     cBXString__cBXString(&text, 2);
 }
 #endif
@@ -10711,7 +10717,7 @@ extern char D_00461458[];
 extern char D_004614E8[];
 extern char D_00463BF0[];
 
-extern "C" void func_001B2DA0(void* self, void* menu)
+extern "C" void func_001B2DA0(cFEStateChatRoom* self, void* menu)
 {
     func_001DA528(menu, 6);
     *(int*)((char*)menu + 0x54) = GetHashValue32(D_00463B70);
@@ -10771,14 +10777,13 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
+extern "C" void func_001B2EB8(cFEStateChatRoom* self, cFEVObj_001B2EB8* obj)
 {
     char buf[32];
-    char* s = (char*)self;
     char* o = (char*)obj;
     int id = *(int*)(o + 0x38);
     if (id == GetHashValue32(D_00463C08)) {
-        *(void**)(s + 0x6E8) = obj;
+        self->mpTextRoomName = (cUIText*)obj;
         obj->v09(1);
     } else if (id == GetHashValue32(D_00463C18)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(D_00463C30));
@@ -10798,10 +10803,10 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
         } else {
             cUIMenu_setScrollableMenu(obj, n);
         }
-        *(void**)(s + 0x6FC) = obj;
+        self->mpMenu[0] = (cUIMenu*)obj;
     } else if (id == GetHashValue32(D_00463C80)) {
         obj->v07(1);
-        *(void**)(s + 0x700) = obj;
+        self->mpMenu[1] = (cUIMenu*)obj;
     } else if (id == GetHashValue32(D_00463AD8)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(D_00463C90));
     } else if (id == GetHashValue32(D_00463CA0)) {
@@ -10811,15 +10816,15 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
     } else if (id == GetHashValue32(D_00463CE0)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(D_00463CF0));
     } else if (id == GetHashValue32(D_004A1B68)) {
-        *(void**)(s + 0x6EC) = obj;
+        self->mpSlider1 = (cUIThing*)obj;
         *(int*)(o + 0x14) |= 1;
     } else if (id == GetHashValue32(D_00463D00)) {
-        *(void**)(s + 0x6F0) = obj;
+        self->mpTextScrollChat = (cUIText*)obj;
     } else if (id == GetHashValue32(D_004A1B70)) {
-        *(void**)(s + 0x6F4) = obj;
+        self->mpSlider2 = (cUIThing*)obj;
         *(int*)(o + 0x14) |= 1;
     }
-    void** slots = (void**)(s + 0x6D0);
+    void** slots = (void**)(((char*)self) + 0x6D0);
     for (int i = 0; i < 6; i++) {
         sprintf(buf, D_00463D10, i + 1);
         if (id == GetHashValue32(buf)) {
@@ -10837,11 +10842,11 @@ INCLUDE_ASM("fe/feasyncfile", func_001B31A0);
 extern "C" int func_0025F248(void* self, int idx);
 extern "C" void func_0025D800(void* a, int b, const char* c);
 extern "C" void func_001A9B58(cFEStateNet* self);
-extern "C" void func_001B33D8(cFEStateNet* self);
+extern "C" void func_001B33D8(cFEStateChatRoom* self);
 extern char D_00463A60[];
 extern char D_00463D20[];
 
-extern "C" void func_001B31A0(char* self, char* msg, int ev)
+extern "C" void func_001B31A0(cFEStateChatRoom* self, char* msg, int ev)
 {
     char buf[32];
     int i;
@@ -10852,7 +10857,7 @@ extern "C" void func_001B31A0(char* self, char* msg, int ev)
             return;
         }
         func_001A9890((cFEStateNet*)self, func_0025F1E0_p(LobbyMan_mLobbyMan, id, 0));
-        func_001AB370((cFEStateNet*)self, func_001A98B0(self), 1);
+        func_001AB370((cFEStateNet*)self, func_001A98B0(((char*)self)), 1);
         return;
     }
     case 1:
@@ -10860,7 +10865,7 @@ extern "C" void func_001B31A0(char* self, char* msg, int ev)
             sprintf(buf, D_00463A60, i);
             int h = *(int*)(msg + 0x38);
             if (h == GetHashValue32(buf)) {
-                func_001B3D20(self, i, 1);
+                func_001B3D20(((char*)self), i, 1);
                 return;
             }
         }
@@ -10871,14 +10876,14 @@ extern "C" void func_001B31A0(char* self, char* msg, int ev)
             sprintf(buf, D_00463A60, i);
             int h = *(int*)(msg + 0x38);
             if (h == GetHashValue32(buf)) {
-                func_001B3D20(self, i, 0);
+                func_001B3D20(((char*)self), i, 0);
                 return;
             }
         }
         func_001A8918((cFEStateNet*)self, (int)msg, ev);
         return;
     case 6: {
-        *(int*)(self + 0x6F8) = 1;
+        self->mbExiting = 1;
         char* p = (char*)func_001A9C50((cFEStateNet*)self);
         *(int*)(p + 0xBC) = 0;
         int h = GetHashValue32(D_00463D20);
@@ -10891,12 +10896,12 @@ extern "C" void func_001B31A0(char* self, char* msg, int ev)
         return;
     }
     case 8:
-        if ((*(int*)(self + 0x1C) & 6) == 0) {
+        if ((self->mAttrState & 6) == 0) {
             func_001A9B58((cFEStateNet*)self);
         }
         return;
     case 13:
-        func_001B33D8((cFEStateNet*)self);
+        func_001B33D8(self);
         return;
     }
     func_001A8918((cFEStateNet*)self, (int)msg, ev);
@@ -10928,7 +10933,7 @@ static inline void* GetSession_001B33D8()
     return BuddyMan_mBuddyMan;
 }
 
-extern "C" void func_001B33D8(cFEStateNet* self)
+extern "C" void func_001B33D8(cFEStateChatRoom* self)
 {
     char* p = (char*)self->mpKeyboard;
     switch (*(int*)(p + 0x18)) {
@@ -10936,7 +10941,7 @@ extern "C" void func_001B33D8(cFEStateNet* self)
         func_0025AAE0(LobbyMan_mLobbyMan, p + 0x74);
         break;
     case 2:
-        func_00262690(GetSession_001B33D8(), func_001A98B0(self), (char*)self->mpKeyboard + 0x74);
+        func_00262690(GetSession_001B33D8(), func_001A98B0(((cFEStateNet*)self)), (char*)self->mpKeyboard + 0x74);
         break;
     }
 }
@@ -10968,20 +10973,20 @@ struct sFEObj_001B3490 {
 };
 
 extern "C" void func_0039DE68(void* a, int b);
-extern "C" void func_001B3978(cFEStateNet* self, void* a1);
+extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
 
-extern "C" int func_001B3490(sFEObj_001B3490* self, int a1)
+extern "C" int func_001B3490(cFEStateChatRoom* self, int a1)
 {
     if (a1 != 0) {
         int i;
-        func_0039DE68(self->f6EC, 0);
-        func_0039DE68(self->f6F4, 0);
+        func_0039DE68(self->mpSlider1, 0);
+        func_0039DE68(self->mpSlider2, 0);
         for (i = 0; i < 2; i++) {
-            if (self->items[i] != 0) {
-                self->items[i]->v07(1);
+            if (((cFEVObj_001B3490**)&self->mpMenu[0])[i] != 0) {
+                ((cFEVObj_001B3490**)&self->mpMenu[0])[i]->v07(1);
             }
         }
-        func_001B3978((cFEStateNet*)self, LobbyMan_mLobbyMan->mPersona);
+        func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
     }
     return 0;
 }
@@ -10990,10 +10995,10 @@ extern "C" int func_001B3490(sFEObj_001B3490* self, int a1)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B3528);
 #ifdef SKIP_ASM
-extern "C" void func_001B3BF0(void* self);
+extern "C" void func_001B3BF0(cFEStateChatRoom* self);
 extern "C" void func_001A87D0(cFEStateNet* self, int a1);
 
-extern "C" void func_001B3528(void* self, int a1)
+extern "C" void func_001B3528(cFEStateChatRoom* self, int a1)
 {
     func_001B3BF0(self);
     func_001A87D0((cFEStateNet*)self, a1);
@@ -11003,18 +11008,18 @@ extern "C" void func_001B3528(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B3568);
 #ifdef SKIP_ASM
-extern "C" void func_001B2378(void* self, int a1);
+extern "C" void func_001B2378(cFEStateChatRoom* self, int a1);
 
-extern "C" int func_001B3568(void* self, void* sender, int event, int value)
+extern "C" int func_001B3568(cFEStateChatRoom* self, void* sender, int event, int value)
 {
     if (event == 4) {
-        if (sender == *(void**)((char*)self + 0x6FC)) {
-            *(int*)((char*)self + 0x704) = value;
+        if (sender == (void*)self->mpMenu[0]) {
+            self->miMenuScroll[0] = value;
             func_001B2378(self, 0);
             return 0x101;
         }
-        if (sender == *(void**)((char*)self + 0x700)) {
-            *(int*)((char*)self + 0x708) = value;
+        if (sender == (void*)self->mpMenu[1]) {
+            self->miMenuScroll[1] = value;
         }
     }
     return 0x101;
@@ -11040,48 +11045,48 @@ extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern char D_00463D78[];
 
 // Memory-card result handler: runs the follow-up for each result; on 19 shows the failure popup.
-extern "C" void func_001B35B0(cFEStateNet* self, void* a1, int kind)
+extern "C" void func_001B35B0(cFEStateChatRoom* self, void* a1, int kind)
 {
     int r17;
     int r18;
     switch (kind) {
     case 15:
-        func_001ABCD0(self, func_001A98B0(self), a1, kind, 0);
+        func_001ABCD0(((cFEStateNet*)self), func_001A98B0(((cFEStateNet*)self)), a1, kind, 0);
         break;
     case 16:
-        func_001A97B8(self, a1, kind);
-        func_001ABB30(self, func_001A98B0(self), a1, kind);
+        func_001A97B8(((cFEStateNet*)self), a1, kind);
+        func_001ABB30(((cFEStateNet*)self), func_001A98B0(((cFEStateNet*)self)), a1, kind);
         break;
     case 17:
-        func_001A4B20_ABE58(self, func_001A98B0(self), &r17);
+        func_001A4B20_ABE58(((cFEStateNet*)self), func_001A98B0(((cFEStateNet*)self)), &r17);
         if (r17 == 1) {
-            func_001ABED8(self);
+            func_001ABED8(((cFEStateNet*)self));
         } else {
-            func_001A97B8(self, a1, kind);
+            func_001A97B8(((cFEStateNet*)self), a1, kind);
         }
         break;
     case 18:
-        func_001A4B20_ABC50(self, func_001A98B0(self), &r18);
+        func_001A4B20_ABC50(((cFEStateNet*)self), func_001A98B0(((cFEStateNet*)self)), &r18);
         if (r18 == 1) {
-            func_001ABED8(self);
+            func_001ABED8(((cFEStateNet*)self));
         } else {
-            func_001A97B8(self, a1, kind);
+            func_001A97B8(((cFEStateNet*)self), a1, kind);
         }
         break;
     case 19: {
         self->unk_6C4 = 0;
         LobbyMan* mc = LobbyMan_mLobbyMan;
-        func_0025DF00(mc, func_001A98B0(self));
-        void* p = func_001A9C50(self);
+        func_0025DF00(mc, func_001A98B0(((cFEStateNet*)self)));
+        void* p = func_001A9C50(((cFEStateNet*)self));
         *(int*)((char*)p + 0xBC) = 0;
         *(int*)((char*)p + 0xC4) = GetHashValue32(D_00463D78);
         *(int*)((char*)p + 0xC0) = 3;
         *(int*)((char*)p + 0x150) = 0x805;
         *(int*)((char*)p + 0x164) = 0;
-        func_001A9BC0(self, p);
+        func_001A9BC0(((cFEStateNet*)self), p);
     }
     default:
-        func_001A97B8(self, a1, kind);
+        func_001A97B8(((cFEStateNet*)self), a1, kind);
         break;
     }
 }
@@ -11092,18 +11097,18 @@ INCLUDE_ASM("fe/feasyncfile", func_001B3760);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_0039F600(void* p);
 extern const char D_00461C60[];
 
-extern "C" void func_001B3760(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001B3760(cFEStateChatRoom* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         func_0039F600((char*)self->mpEngine + 0x18);
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
     } else {
-        func_001A97B8(self, a1, a2);
+        func_001A97B8(((cFEStateNet*)self), a1, a2);
     }
 }
 #endif
@@ -11113,18 +11118,18 @@ INCLUDE_ASM("fe/feasyncfile", func_001B37D8);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_0039F600(void* p);
 extern const char D_00461C60[];
 
-extern "C" void func_001B37D8(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001B37D8(cFEStateChatRoom* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         func_0039F600((char*)self->mpEngine + 0x18);
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
     } else {
-        func_001A97B8(self, a1, a2);
+        func_001A97B8(((cFEStateNet*)self), a1, a2);
     }
 }
 #endif
@@ -11133,21 +11138,21 @@ extern "C" void func_001B37D8(cFEStateNet* self, void* a1, int a2)
 INCLUDE_ASM("fe/feasyncfile", func_001B3850);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001B35B0(cFEStateNet* self, void* a1, int a2);
-extern "C" void func_001B3760(cFEStateNet* self, void* a1, int a2);
-extern "C" void func_001B37D8(cFEStateNet* self, void* a1, int a2);
+extern "C" void func_001B35B0(cFEStateChatRoom* self, void* a1, int a2);
+extern "C" void func_001B3760(cFEStateChatRoom* self, void* a1, int a2);
+extern "C" void func_001B37D8(cFEStateChatRoom* self, void* a1, int a2);
 
-extern "C" void func_001B3850(void* self, void* a1, int a2)
+extern "C" void func_001B3850(cFEStateChatRoom* self, void* a1, int a2)
 {
     switch (*(unsigned int*)((char*)a1 + 0x18)) {
     case 0x80B:
-        func_001B35B0((cFEStateNet*)self, a1, a2);
+        func_001B35B0(self, a1, a2);
         break;
     case 0x800:
-        func_001B3760((cFEStateNet*)self, a1, a2);
+        func_001B3760(self, a1, a2);
         break;
     case 0x801:
-        func_001B37D8((cFEStateNet*)self, a1, a2);
+        func_001B37D8(self, a1, a2);
         break;
     default:
         func_001A97B8(self, a1, a2);
@@ -11166,12 +11171,12 @@ extern "C" void func_001CE468(void* self, int v);
 extern char D_00463DB8[];
 extern char D_004A1408[];
 
-extern "C" int func_001B38D0(cFEStateNet* self, void* obj)
+extern "C" int func_001B38D0(cFEStateChatRoom* self, void* obj)
 {
     sVE1A4170* vt = *(sVE1A4170**)((char*)obj + 0x8);
     if (vt[27].fn((char*)obj + vt[27].delta) != 0) {
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
-        func_001A9150(self, 0, GetHashValue32(D_00463DB8), (int)D_004A1408, 0, 4, 0x3F);
+        func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(D_00463DB8), (int)D_004A1408, 0, 4, 0x3F);
         *(int*)((char*)self->mpKeyboard + 0x43C) = 0;
         func_001CE468(self->mpKeyboard, 1);
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
@@ -11194,7 +11199,7 @@ extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
 extern "C" int func_004165A8(const char* a, const char* b);
 extern char D_00463A38[];
 
-extern "C" void func_001B3978(cFEStateNet* self, void* name)
+extern "C" void func_001B3978(cFEStateChatRoom* self, void* name)
 {
     if (self->mpScreen != 0) {
         int sel = -1;
@@ -11223,11 +11228,11 @@ extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" void func_001B2378(void* self, int a1);
-extern "C" void func_001B3978(cFEStateNet* self, void* a1);
+extern "C" void func_001B2378(cFEStateChatRoom* self, int a1);
+extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
 struct sFEObj_001BCB58;
 extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58* self, int a1);
-extern "C" void func_001B2CD0(void* self, int a1);
+extern "C" void func_001B2CD0(cFEStateChatRoom* self, int a1);
 extern "C" int func_0025DA90(void* self);
 int func_001A98B0(void* self);
 extern "C" void func_001AB3D0(cFEStateNet* self, int a1, int a2);
@@ -11239,19 +11244,19 @@ extern char D_00463DC8[];
 extern char D_00461618[];
 
 // Message handler for the save/load screen; unknown ids refresh the list and go to the base handler.
-extern "C" void* func_001B3A30(void* self, int a1, int a2)
+extern "C" void* func_001B3A30(cFEStateChatRoom* self, int a1, int a2)
 {
     switch (a1) {
     case 0xE0: {
         char buf[32];
         strcpy(buf, (char*)self + 0x70C);
         func_001B2378(self, 1);
-        func_001B3978((cFEStateNet*)self, buf);
+        func_001B3978(self, buf);
         break;
     }
     case 0xDC:
         if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
-            func_001A8A40(self, cFEStateLobbyMenu_cFEStateLobbyMenu((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)((char*)self + 0x10)));
+            func_001A8A40(self, cFEStateLobbyMenu_cFEStateLobbyMenu((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), (int)self->mpEngine));
             break;
         }
         func_001B2378(self, 1);
@@ -11268,7 +11273,7 @@ extern "C" void* func_001B3A30(void* self, int a1, int a2)
         break;
     }
     case 0xDE:
-        if (*(int*)((char*)self + 0x6F8) == 0) {
+        if (self->mbExiting == 0) {
             func_001B2CD0(self, a2);
         }
         break;
@@ -11331,7 +11336,7 @@ struct sOwner1B3BF0 {
     int first;
 };
 
-extern "C" void func_001B3BF0(void* p)
+extern "C" void func_001B3BF0(cFEStateChatRoom* p)
 {
     sOwner1B3BF0* self = (sOwner1B3BF0*)p;
     char buf[32];
@@ -11364,7 +11369,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001B27B0(void* self, int a1);
+extern "C" void func_001B27B0(cFEStateChatRoom* self, int a1);
 extern "C" int func_0025F1B0(void* self);
 extern "C" void func_0039DA20(void* a0, void* a1, int a2, int a3);
 extern "C" void func_003A0290(void* text, void* out);
@@ -11444,7 +11449,7 @@ extern "C" void func_001B3D20(void* self, int idx, int on)
     pos.g += 3.0f;
     *(sVec3_1B3D20*)((char*)hl + 0x44) = *(sVec3_1B3D20*)&pos;
     hl->v09(1);
-    func_001B27B0(self, *(int*)((char*)sel + 0x18));
+    func_001B27B0((cFEStateChatRoom*)self, *(int*)((char*)sel + 0x18));
     sel->v11(sCol1B3D20(1.0f, 1.0f, 1.0f, 1.0f));
 }
 #endif
@@ -12540,7 +12545,7 @@ extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 struct sFEObj_001B6288;
-extern "C" sFEObj_001B6288* func_001B6288(sFEObj_001B6288* self, int a1, int a2);
+extern "C" sFEObj_001B6288* func_001B6288(cFEStateAuthDNAS* self, int a1, int a2);
 extern char D_00464080[];
 
 class cFEVObj_001B55B0 {
@@ -12587,7 +12592,7 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, void* a1, unsigned int ki
     }
     case 22:
         if (self->unk_6D8 == 0) {
-            char* p = (char*)func_001B6288((sFEObj_001B6288*)cMemMan_alloc(0x700, D_00464080, 0, 0), (int)self->mpEngine, (int)self);
+            char* p = (char*)func_001B6288((cFEStateAuthDNAS*)((sFEObj_001B6288*)cMemMan_alloc(0x700, D_00464080, 0, 0)), (int)self->mpEngine, (int)self);
             *(int*)(p + 0x18) = 0x81A;
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         }
@@ -12662,7 +12667,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // func_001A97B8 returns void (its asm never sets $2); the unit declares it int
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
 // PORT: func_001B6AB8 is declared later in the unit with an int owner parameter
-extern "C" void* func_001B6AB8(void* mem, int a1, int a2, int a3, int a4, int a5);
+extern "C" void* func_001B6AB8(cFEStateAuthDNASError* mem, int a1, int a2, int a3, int a4, int a5);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
@@ -12725,7 +12730,7 @@ extern "C" void func_001B5830(cFEStateNetConfig* self, void* a1, unsigned int ki
     case 22:
         func_001A97B8_v(self, a1, 22);
         if (self->unk_700 != 0) {
-            void* p = func_001B6AB8(cMemMan_alloc(0x6E8, D_00464098, 0, 0), (int)self->mpEngine, (int)self,
+            void* p = func_001B6AB8((cFEStateAuthDNASError*)cMemMan_alloc(0x6E8, D_00464098, 0, 0), (int)self->mpEngine, (int)self,
                                     (int)self->mpustrAuthError[1], (int)self->mpustrAuthError[2], (int)self->mpustrAuthError[0]);
             *(int*)((char*)p + 0x18) = 0x81B;
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
@@ -12752,7 +12757,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 // PORT: the unit declares func_001A97B8 as returning int; this caller ignores the result.
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
-extern "C" void* func_001BEE30(void* mem, int a1);
+extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -12801,7 +12806,7 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* a1, int a2)
     }
     case 0x16:
         if (self->unk_6DC != 0) {
-            func_001A8A40(self, func_001BEE30(cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
         }
         func_001A97B8_v(self, a1, a2);
         break;
@@ -13228,27 +13233,27 @@ struct sFEObj_001B6288 {
     void* f6FC;         // 0x6FC
 };
 
-extern "C" sFEObj_001B6288* func_001B6288(sFEObj_001B6288* self, int a1, int a2)
+extern "C" sFEObj_001B6288* func_001B6288(cFEStateAuthDNAS* self, int a1, int a2)
 {
-    func_001A8500_3(self, a1, a2);
-    self->f6F4 = 2;
-    self->vt = D_004689F0;
-    self->f6F8 = 0x1E;
-    self->fC = 0x44;
-    self->f6D0 = 0;
-    self->f6D4 = 0;
-    self->f6E4 = 0;
-    self->f6FC = 0;
+    func_001A8500_3(((sFEObj_001B6288*)self), a1, a2);
+    self->unk_6F4 = 2;
+    self->mVtbl = D_004689F0;
+    self->unk_6F8 = 0x1E;
+    self->mHashName = 0x44;
+    self->mpAuth = 0;
+    self->mpTextAuth = 0;
+    self->miState = 0;
+    self->mpustrText = 0;
     char* o = (char*)SSXApp->FELocale;
     sVE_001B6288* vt = *(sVE_001B6288**)(o + 4);
     int n = USTR_length(vt[4].fn(o + vt[4].delta, GetHashValue32(D_00464208)));
-    if (self->f6FC != 0) {
-        cMemMan_free(self->f6FC);
-        self->f6FC = 0;
+    if (self->mpustrText != 0) {
+        cMemMan_free(self->mpustrText);
+        self->mpustrText = 0;
     }
-    self->f6FC = operator_new_tag((n + 5) * 2, D_00464220, 0x100, 0);
-    self->f6A8 = 0;
-    return self;
+    self->mpustrText = (unsigned short*)operator_new_tag((n + 5) * 2, D_00464220, 0x100, 0);
+    self->unk_6A8 = 0;
+    return ((sFEObj_001B6288*)self);
 }
 #endif
 
@@ -13262,18 +13267,18 @@ extern "C" void func_002561E0(void* p, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001B6368(void* self, int flags)
+extern "C" void func_001B6368(cFEStateAuthDNAS* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_004689F0;
-    if (*(void**)((char*)self + 0x6D0) != 0) {
-        func_002563A8(*(void**)((char*)self + 0x6D0));
-        if (*(void**)((char*)self + 0x6D0) != 0) {
-            func_002561E0(*(void**)((char*)self + 0x6D0), 3);
+    self->mVtbl = D_004689F0;
+    if (self->mpAuth != 0) {
+        func_002563A8(self->mpAuth);
+        if (self->mpAuth != 0) {
+            func_002561E0(self->mpAuth, 3);
         }
     }
-    if (*(void**)((char*)self + 0x6FC) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x6FC));
-        *(void**)((char*)self + 0x6FC) = 0;
+    if (self->mpustrText != 0) {
+        cMemMan_free(self->mpustrText);
+        self->mpustrText = 0;
     }
     func_001A85D0_dtor(self, flags);
 }
@@ -13318,20 +13323,20 @@ public:
     virtual void v09(int on);
 };
 
-extern "C" void func_001B63E8(void* self)
+extern "C" void func_001B63E8(cFEStateAuthDNAS* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00464238), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        cFEVObj_001B63E8* o = (cFEVObj_001B63E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00464250));
+        cFEVObj_001B63E8* o = (cFEVObj_001B63E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464250));
         if (o != 0) {
             o->v09(0);
         }
     }
-    *(void**)((char*)self + 0x6D0) = func_002561B8(cMemMan_alloc(0xA50, D_00464260, 0x100, 0));
-    *(int*)((char*)self + 0x6E4) = 1;
+    self->mpAuth = func_002561B8(cMemMan_alloc(0xA50, D_00464260, 0x100, 0));
+    self->miState = 1;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int mode = 0;
     sProfile1B63E8 prof = D_00535610;
@@ -13349,7 +13354,7 @@ extern "C" void func_001B63E8(void* self)
         mode = 3;
         break;
     }
-    func_00256258(*(void**)((char*)self + 0x6D0), mode);
+    func_00256258(self->mpAuth, mode);
 }
 #endif
 
@@ -13383,20 +13388,20 @@ public:
 
 static inline int IsHash1B65C0(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001B65C0(void* self, cUIText* text)
+extern "C" void func_001B65C0(cFEStateAuthDNAS* self, cUIText* text)
 {
     cFEVObj_001B65C0* obj = (cFEVObj_001B65C0*)text;
     if (IsHash1B65C0(*(int*)((char*)text + 0x38), D_004631E8)) {
-        *(cUIText**)((char*)self + 0x6D8) = text;
+        self->mpTextCancel = text;
         obj->v09(0);
     } else if (IsHash1B65C0(*(int*)((char*)text + 0x38), D_00464278)) {
-        *(cUIText**)((char*)self + 0x6D4) = text;
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x6D4), GetHashValue32(D_00464288));
+        self->mpTextAuth = text;
+        cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(D_00464288));
     } else if (IsHash1B65C0(*(int*)((char*)text + 0x38), D_004A1BA0)) {
-        *(cUIText**)((char*)self + 0x6DC) = text;
+        self->mpXButton = (cUIThing*)text;
         obj->v09(0);
     } else if (IsHash1B65C0(*(int*)((char*)text + 0x38), D_004642A0)) {
-        *(cUIText**)((char*)self + 0x6E0) = text;
+        self->mpSubmitRect = (cUIThing*)text;
         obj->v09(0);
     }
 }
@@ -13416,12 +13421,12 @@ public:
     virtual int v06();
 };
 
-extern "C" int func_001B66B8(void* self, cFEVObj_001B66B8* obj)
+extern "C" int func_001B66B8(cFEStateAuthDNAS* self, cFEVObj_001B66B8* obj)
 {
-    if (*(int*)((char*)self + 0x6E4) == 2) {
+    if (self->miState == 2) {
         if (obj->v05() || obj->v06()) {
-            *(int*)(*(char**)((char*)self + 0x6D0) + 0x14) = 1;
-            *(int*)((char*)self + 0x6E4) = 4;
+            *(int*)((char*)self->mpAuth + 0x14) = 1;
+            self->miState = 4;
         }
     }
     return 1;
@@ -13460,7 +13465,7 @@ public:
     virtual int v24(int, int);
 };
 
-extern "C" int func_001B6740(cFEStateNet* self, int a1, int a2)
+extern "C" int func_001B6740(cFEStateAuthDNAS* self, int a1, int a2)
 {
     return ((func_001B6740_cObj*)self->mpParentState)->v24(a1, a2);
 }
@@ -13471,7 +13476,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B6770);
 #ifdef SKIP_ASM
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 
-extern "C" void func_001B6770(void* self, int a1, int msg)
+extern "C" void func_001B6770(cFEStateAuthDNAS* self, int a1, int msg)
 {
     if (msg != 0xD) {
         func_001A8918((cFEStateNet*)self, a1, msg);
@@ -13523,34 +13528,33 @@ public:
 static inline int IsReady_001B6798(int* d) { return *d >= 3; }
 static inline int IsDone_001B6798(int* d) { return *d == 5; }
 
-extern "C" void func_001B6798(void* self)
+extern "C" void func_001B6798(cFEStateAuthDNAS* self)
 {
-    char* s = (char*)self;
-    switch (*(int*)(s + 0x6E4)) {
+    switch (self->miState) {
     case 1:
-        if (IsReady_001B6798(*(int**)(s + 0x6D0))) {
-            (*(cFEVObj_001B6798**)(s + 0x6D8))->v09(1);
-            (*(cFEVObj_001B6798**)(s + 0x6DC))->v09(1);
-            (*(cFEVObj_001B6798**)(s + 0x6E0))->v09(1);
-            (*(cFEVObj_001B6798**)(s + 0x6D4))->v09(1);
-            cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6D4), GetHashValue32(D_00464208));
-            cFEVObj_001B6798* g = (cFEVObj_001B6798*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00464250));
+        if (IsReady_001B6798((int*)self->mpAuth)) {
+            ((cFEVObj_001B6798*)self->mpTextCancel)->v09(1);
+            ((cFEVObj_001B6798*)self->mpXButton)->v09(1);
+            ((cFEVObj_001B6798*)self->mpSubmitRect)->v09(1);
+            ((cFEVObj_001B6798*)self->mpTextAuth)->v09(1);
+            cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(D_00464208));
+            cFEVObj_001B6798* g = (cFEVObj_001B6798*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464250));
             if (g != 0) {
                 g->v09(1);
             }
-            *(int*)(s + 0x6E4) = 2;
-            func_002562D0(*(void**)(s + 0x6D0));
+            self->miState = 2;
+            func_002562D0(self->mpAuth);
         }
         break;
     case 2:
-        if (IsDone_001B6798(*(int**)(s + 0x6D0))) {
-            *(int*)(s + 0x6E4) = 3;
+        if (IsDone_001B6798((int*)self->mpAuth)) {
+            self->miState = 3;
         }
         break;
     case 3: {
-        char* d = *(char**)(s + 0x6D0);
+        char* d = (char*)self->mpAuth;
         if (*(int*)(d + 0x1C) != 0) {
-            char* o = *(char**)(s + 0x20);
+            char* o = (char*)self->mpParentState;
             char* a = d + 0x450;
             char* b = d + 0x650;
             char* c = d + 0x850;
@@ -13572,19 +13576,19 @@ extern "C" void func_001B6798(void* self)
             USTR_copy(*(void**)(o + 0x710), a);
             USTR_copy(*(void**)(o + 0x714), b);
             USTR_copy(*(void**)(o + 0x718), c);
-            (*(cFEVObj_001B6798**)(s + 0x20))->v17(self, 0x10);
+            ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0x10);
         } else {
-            (*(cFEVObj_001B6798**)(s + 0x20))->v17(self, 0xF);
+            ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0xF);
         }
         break;
     }
     case 4:
-        if (IsDone_001B6798(*(int**)(s + 0x6D0))) {
-            (*(cFEVObj_001B6798**)(s + 0x20))->v17(self, 0x14);
+        if (IsDone_001B6798((int*)self->mpAuth)) {
+            ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0x14);
         }
         break;
     }
-    func_002563F8(*(void**)(s + 0x6D0));
+    func_002563F8(self->mpAuth);
     func_001A8770((cFEStateNet*)self);
 }
 #endif
@@ -13593,7 +13597,7 @@ extern "C" void func_001B6798(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001B6A90);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001B6A90(void* self, int a1, unsigned int key)
+extern "C" int func_001B6A90(cFEStateAuthDNAS* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -13614,15 +13618,15 @@ extern void* D_004688E0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001B6AB8(void* self, int a1, int a2, int a3, int a4, int a5)
+extern "C" void* func_001B6AB8(cFEStateAuthDNASError* self, int a1, int a2, int a3, int a4, int a5)
 {
     func_001A8500_3(self, a1, a2);
-    *(int*)((char*)self + 0x6D0) = a3;
-    *(int*)((char*)self + 0x6D4) = a4;
-    *(int*)((char*)self + 0x6D8) = a5;
-    *(void***)((char*)self + 0x8) = D_004688E0;
-    *(int*)((char*)self + 0xC) = 0x45;
-    return self;
+    self->mpustrBody = (unsigned short*)a3;
+    self->mpustrFooter = (unsigned short*)a4;
+    self->mpustrTitle = (unsigned short*)a5;
+    self->mVtbl = D_004688E0;
+    self->mHashName = 0x45;
+    return ((void*)self);
 }
 #endif
 
@@ -13647,10 +13651,10 @@ extern char D_004642B0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-extern "C" void* func_001B6B50(cFEStateNet* self)
+extern "C" void* func_001B6B50(cFEStateAuthDNASError* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004642B0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_004642B0), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         screen = cUIScreen_playFrame(screen, 0, 0);
@@ -13685,14 +13689,14 @@ extern char D_004642C0[];
 
 static inline int IsHash1B6BB8(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001B6BB8(void* self, void* obj)
+extern "C" void func_001B6BB8(cFEStateAuthDNASError* self, void* obj)
 {
     if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), D_004A1BA8)) {
-        *(void**)((char*)self + 0x6DC) = obj;
+        self->mpFooter = (cUIText*)obj;
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), D_004A1BB0)) {
-        *(void**)((char*)self + 0x6E0) = obj;
+        self->mpBody = (cUIText*)obj;
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), D_004A1BB8)) {
-        *(void**)((char*)self + 0x6E4) = obj;
+        self->mpTitle = (cUIText*)obj;
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), D_00464250)) {
         ((cFEVText_001B6BB8*)obj)->v09(1);
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), D_004642C0)) {
@@ -13737,25 +13741,25 @@ static inline void PlayLabel_001B6C98(void* self, char* label)
     }
 }
 
-extern "C" int func_001B6C98(void* self, int on)
+extern "C" int func_001B6C98(cFEStateAuthDNASError* self, int on)
 {
     if (on) {
-        if (strlen1(*(void**)((char*)self + 0x6D4)) == 0) {
+        if (strlen1(self->mpustrFooter) == 0) {
             PlayLabel_001B6C98(self, D_004A1BC0);
-            (*(cFEVObj_001B6C98**)((char*)self + 0x6DC))->v09(0);
+            ((cFEVObj_001B6C98*)self->mpFooter)->v09(0);
         } else {
             PlayLabel_001B6C98(self, D_004A1BC8);
-            cUIText_setUnicodeStringWrap(*(void**)((char*)self + 0x6DC), *(void**)((char*)self + 0x6D4));
+            cUIText_setUnicodeStringWrap(self->mpFooter, self->mpustrFooter);
         }
-        if (strlen1(*(void**)((char*)self + 0x6D0)) == 0) {
-            (*(cFEVObj_001B6C98**)((char*)self + 0x6E0))->v09(0);
+        if (strlen1(self->mpustrBody) == 0) {
+            ((cFEVObj_001B6C98*)self->mpBody)->v09(0);
         } else {
-            cUIText_setUnicodeStringWrap(*(void**)((char*)self + 0x6E0), *(void**)((char*)self + 0x6D0));
+            cUIText_setUnicodeStringWrap(self->mpBody, self->mpustrBody);
         }
-        if (strlen1(*(void**)((char*)self + 0x6D8)) == 0) {
-            (*(cFEVObj_001B6C98**)((char*)self + 0x6E4))->v09(0);
+        if (strlen1(self->mpustrTitle) == 0) {
+            ((cFEVObj_001B6C98*)self->mpTitle)->v09(0);
         } else {
-            cUIText_setUnicodeStringWrap(*(void**)((char*)self + 0x6E4), *(void**)((char*)self + 0x6D8));
+            cUIText_setUnicodeStringWrap(self->mpTitle, self->mpustrTitle);
         }
         PlayLabel_001B6C98(self, D_004642D0);
     }
@@ -13795,7 +13799,7 @@ public:
     virtual int v24(int, int);
 };
 
-extern "C" int func_001B6E10(cFEStateNet* self, int a1, int a2)
+extern "C" int func_001B6E10(cFEStateAuthDNASError* self, int a1, int a2)
 {
     return ((func_001B6E10_cObj*)self->mpParentState)->v24(a1, a2);
 }
@@ -13829,18 +13833,18 @@ public:
 
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 
-extern "C" void func_001B6E40(cFEStateNet* self, int a1, unsigned int msg)
+extern "C" void func_001B6E40(cFEStateAuthDNASError* self, int a1, unsigned int msg)
 {
     switch (msg) {
     case 5:
     case 6:
-        ((cFEVObj_001B6E40*)self->mpParentState)->v17(self, 0xF);
+        ((cFEVObj_001B6E40*)self->mpParentState)->v17(((cFEStateNet*)self), 0xF);
         break;
     case 7:
     case 8:
         break;
     default:
-        func_001A8918(self, a1, msg);
+        func_001A8918(((cFEStateNet*)self), a1, msg);
         break;
     }
 }
@@ -13850,7 +13854,7 @@ extern "C" void func_001B6E40(cFEStateNet* self, int a1, unsigned int msg)
 INCLUDE_ASM("fe/feasyncfile", func_001B6EA8);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001B6EA8(void* self, int a1, unsigned int key)
+extern "C" int func_001B6EA8(cFEStateAuthDNASError* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -15397,7 +15401,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" bool func_001B9558(cFEStateCreateStep1* self);
 extern "C" void func_001B9820(cFEStateCreateStep1* self);
@@ -15405,7 +15409,7 @@ extern "C" int func_001BA110(cFEStateCreateStep1* self);
 extern "C" void func_001BA218(cFEStateCreateStep1* self);
 extern "C" void func_001BA280(cFEStateCreateStep1* self);
 extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, int a1);
-extern "C" void* func_001C0418(void* self, int a1);
+extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" int func_0039A738(void* a);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
@@ -15511,7 +15515,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         } else {
             func_001BA218(self);
-            func_001A8A40(((char*)self), func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+            func_001A8A40(((char*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
         break;
     case 13: {
@@ -15524,7 +15528,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
         break;
     }
     case 8: {
-        void* p = func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+        void* p = func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
         if (self->mbEditAccount != 0) {
             *(int*)((char*)p + 0x18) = 0x14;
         } else {
@@ -15581,7 +15585,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B91C8);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
@@ -15600,7 +15604,7 @@ extern "C" void func_001B91C8(cFEStateCreateStep1* self, void* a1, int kind)
     }
     case 16:
     case 20:
-        func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     default:
         func_001A97B8(self, a1, kind);
@@ -15620,7 +15624,7 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void* func_001AD130(void* mem, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* mem, int a1);
 extern const char D_00462D68[];
 extern char D_00462D80[];
 extern char D_0045DCC8[];
@@ -15653,7 +15657,7 @@ extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* a1, int a2)
             *(int*)((char*)p + 0x164) = 0;
             func_001A9BC0((cFEStateNet*)self, p);
         } else {
-            func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
         self->unk_6E8 = 0;
         break;
@@ -16312,7 +16316,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 extern "C" void func_001BA358(cFEStateCreateStep1* self);
 extern "C" void func_0025BF18(void* self, void* a1);
 extern const char D_00462D68[];
@@ -16323,7 +16327,7 @@ extern "C" void func_001BA280(cFEStateCreateStep1* self)
     func_001BA358(self);
     char* p = (char*)self->mpAccount;
     if (*(int*)(p + 0x4C) == 0 && *(int*)(p + 0x44) == 0 && *(int*)(p + 0x48) == 0) {
-        func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
     } else {
         void* pp = func_001A9C50((cFEStateNet*)self);
         *(int*)((char*)pp + 0xBC) = 0;
@@ -16498,7 +16502,7 @@ extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* se
 extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int a1);
 extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int a2, int a3, int a4);
 int func_001BBAA8(void* self);
-extern "C" void* func_001C0418(void* self, int a1);
+extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1);
 extern "C" int func_0039A738(void* a);
 extern char D_004A1BD8[];
 extern char D_004A1BE0[];
@@ -16574,7 +16578,7 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
         func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)self->mpEngine, 1));
         break;
     case 8: {
-        char* p = (char*)func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+        char* p = (char*)func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
         *(int*)(p + 0x18) = 0x16;
         func_001A8A40(self, p);
         break;
@@ -16700,7 +16704,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B9C8(void* self, void* a1);
 extern "C" void func_00260F10(void* self);
@@ -16732,7 +16736,7 @@ extern "C" int func_001BAB28(cFEStateCreateStep2* self, int id, int a2)
     }
     case 0xD4:
         func_00260F10(LobbyMan_mLobbyMan);
-        func_001A8A40(((cFEStateNet*)self), func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     case 0x102:
         func_001BAC90(self, (void*)a2);
@@ -16754,7 +16758,7 @@ extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_001BBAC8(void* self, int state);
-extern "C" void* func_001BBD08(void* self, int a1, int a2);
+extern "C" void* func_001BBD08(cFEStateCreateDuplicate* self, int a1, int a2);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_msg(void* self, int id, void* msg) __asm__("func_001A8E40");
 extern char D_00463090[];
@@ -16765,7 +16769,7 @@ extern "C" void func_001BAC90(cFEStateCreateStep2* self, void* msg)
 {
     switch (*(unsigned int*)((char*)msg + 8)) {
     case 0x6475706C:
-        func_001A8A40(self, func_001BBD08(cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 1));
+        func_001A8A40(self, func_001BBD08((cFEStateCreateDuplicate*)cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 1));
         break;
     case 0x746F6F79:
         func_001BBAC8(self, *(int*)((char*)msg + 0xC));
@@ -17446,14 +17450,14 @@ extern void* D_004684A0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BBD08(void* self, int a1, int a2)
+extern "C" void* func_001BBD08(cFEStateCreateDuplicate* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, 0);
-    *(int*)((char*)self + 0x6D0) = a2;
-    *(void***)((char*)self + 0x8) = D_004684A0;
-    *(int*)((char*)self + 0xC) = 0x4F;
-    *(int*)((char*)self + 0x6A8) = 0;
-    return self;
+    self->mbAccount = a2;
+    self->mVtbl = D_004684A0;
+    self->mHashName = 0x4F;
+    self->unk_6A8 = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -17464,15 +17468,15 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void func_001A8768(void* self);
-extern "C" void func_001BC400(void* self);
+extern "C" void func_001BC400(cFEStateCreateDuplicate* self);
 extern char D_00464C50[];
 
-extern "C" void func_001BBD60(void* self)
+extern "C" void func_001BBD60(cFEStateCreateDuplicate* self)
 {
-    *(char**)((char*)self + 0x6D8) = (char*)LobbyMan_mLobbyMan + 0x260;
-    void* engine = *(void**)((char*)self + 0x10);
+    self->mpAccount = (tLobbyAccount*)((char*)LobbyMan_mLobbyMan + 0x260);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00464C50), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -17507,14 +17511,14 @@ extern char D_00464CB8[];
 
 static inline int IsHash1BBE00(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001BBE00(void* self, cUIText* text)
+extern "C" void func_001BBE00(cFEStateCreateDuplicate* self, cUIText* text)
 {
     char buf[0x40];
     if (IsHash1BBE00(*(int*)((char*)text + 0x38), D_00464C68)) {
         *(int*)((char*)text + 0x18) = 4;
-    } else if (*(int*)((char*)self + 0x6D0) == 0 && IsHash1BBE00(*(int*)((char*)text + 0x38), D_00461520)) {
+    } else if (self->mbAccount == 0 && IsHash1BBE00(*(int*)((char*)text + 0x38), D_00461520)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00464C78));
-    } else if (*(int*)((char*)self + 0x6D0) == 0 && IsHash1BBE00(*(int*)((char*)text + 0x38), D_00464C90)) {
+    } else if (self->mbAccount == 0 && IsHash1BBE00(*(int*)((char*)text + 0x38), D_00464C90)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00464CA0));
     } else {
         int i;
@@ -17540,10 +17544,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_001BC290(void* self);
-extern "C" void func_001BC300(void* self, const char* name);
+extern "C" void func_001BC290(cFEStateCreateDuplicate* self);
+extern "C" void func_001BC300(cFEStateCreateDuplicate* self, const char* name);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00260F80();
@@ -17577,50 +17581,50 @@ static inline void* GetSession_001BBF18()
 }
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
-extern "C" void func_001BBF18(void* self, int a1, unsigned int msg)
+extern "C" void func_001BBF18(cFEStateCreateDuplicate* self, int a1, unsigned int msg)
 {
     switch (msg) {
     case 5: {
         a1 = *(int*)((char*)a1 + 0x18);
         if (a1 == 4) {
-            if (*(int*)((char*)self + 0x6D0) != 0) {
+            if (self->mbAccount != 0) {
                 // PORT: string pointer passed through an int parameter (func_001A9150's a3)
                 func_001A9150((cFEStateNet*)self, 0, GetHashValue32(D_00464CC8), (int)D_004A1408, 0, -1, 0x10);
-                *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x58) = 1;
-                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
-                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+                *(int*)((char*)self->mpKeyboard + 0x58) = 1;
+                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             } else {
                 func_001A9150((cFEStateNet*)self, 0, GetHashValue32(D_00464C78), (int)D_004A1408, 0, -1, 0xC);
-                *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x58) = 1;
-                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
-                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+                *(int*)((char*)self->mpKeyboard + 0x58) = 1;
+                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
-        } else if (*(int*)((char*)self + 0x6D0) != 0) {
-            sStrs_001BBF18* s = *(sStrs_001BBF18**)((char*)self + 0x6D8);
+        } else if (self->mbAccount != 0) {
+            sStrs_001BBF18* s = (sStrs_001BBF18*)self->mpAccount;
             cBXString_operatorE(s, &s->strs[a1]);
             func_001BC290(self);
         } else {
-            func_001BC300(self, ((char**)(*(char**)((char*)self + 0x6D8) + 0x14))[a1]);
+            func_001BC300(self, ((char**)((char*)self->mpAccount + 0x14))[a1]);
         }
         break;
     }
     case 6:
-        if (*(int*)((char*)self + 0x6D0) != 0) {
+        if (self->mbAccount != 0) {
             func_00261408(GetSession_001BBF18());
             func_0025B800(LobbyMan_mLobbyMan);
-            void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
+            void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 0, 0, 0);
             *(int*)((char*)p + 0x18) = 0x832;
-            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         } else {
-            func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)((char*)self + 0x10)));
+            func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
         break;
     case 13:
-        if (*(int*)((char*)self + 0x6D0) != 0) {
-            cBXString_cBXString4(*(void**)((char*)self + 0x6D8), (char*)*(void**)((char*)self + 0x69C) + 0x74);
+        if (self->mbAccount != 0) {
+            cBXString_cBXString4(self->mpAccount, (char*)self->mpKeyboard + 0x74);
             func_001BC290(self);
         } else {
-            func_001BC300(self, (char*)*(void**)((char*)self + 0x69C) + 0x74);
+            func_001BC300(self, (char*)self->mpKeyboard + 0x74);
         }
         break;
     default:
@@ -17645,10 +17649,10 @@ extern char D_0045FE60[];
 extern char D_00462C50[];
 extern char D_004614E8[];
 
-extern "C" void func_001BC190(void* self, void* menu)
+extern "C" void func_001BC190(cFEStateCreateDuplicate* self, void* menu)
 {
     func_001DA528(menu, 3);
-    if (*(int*)((char*)self + 0x6D0) != 0) {
+    if (self->mbAccount != 0) {
         *(int*)((char*)menu + 0x54) = GetHashValue32(D_00464CE8);
         func_001DA530(menu, 0, GetHashValue32(D_00464D08));
     } else {
@@ -17670,7 +17674,7 @@ extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void func_0025B9C8(void* self, void* a1);
 extern char D_00464A38[];
 
-extern "C" void func_001BC290(void* self)
+extern "C" void func_001BC290(cFEStateCreateDuplicate* self)
 {
     void* p = func_001A9C50((cFEStateNet*)self);
     *(int*)((char*)p + 0xBC) = 0;
@@ -17696,7 +17700,7 @@ extern char D_004615F8[];
 extern char D_00461618[];
 extern char D_00462DE0[];
 
-extern "C" void func_001BC300(void* self, const char* name)
+extern "C" void func_001BC300(cFEStateCreateDuplicate* self, const char* name)
 {
     if (strlen(name) < 3) {
         void* p = func_001A9C50((cFEStateNet*)self);
@@ -17750,15 +17754,15 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern char D_00464CB8[];
 extern char D_004A1408[];
 
-extern "C" void func_001BC400(void* self)
+extern "C" void func_001BC400(cFEStateCreateDuplicate* self)
 {
     char buf[64];
     int i;
     for (i = 0; i < 4; i++) {
         sprintf(buf, D_00464CB8, i);
-        cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (text != 0) {
-            sNames1BC400* names = *(sNames1BC400**)((char*)self + 0x6D8);
+            sNames1BC400* names = (sNames1BC400*)self->mpAccount;
             if (i < names->mCount) {
                 cUIText_setAsciiString(text, ((char**)((char*)names + 0x14))[i]);
                 ((cFEVText_001BC400*)text)->v08(0);
@@ -17779,8 +17783,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(void* self, int a1);
-extern "C" void func_001BC400(void* self);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void func_001BC400(cFEStateCreateDuplicate* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_00260F10(void* self);
 extern "C" void func_0039F190(void* self, int a1);
@@ -17791,11 +17795,11 @@ extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 
 // PORT: a2 is a message pointer passed as int
-extern "C" int func_001BC4F0(cFEStateNet* self, int id, int a2)
+extern "C" int func_001BC4F0(cFEStateCreateDuplicate* self, int id, int a2)
 {
     switch (id) {
     case 0xCB: {
-        void* p = func_001A9C50(self);
+        void* p = func_001A9C50(((cFEStateNet*)self));
         *(int*)((char*)p + 0xBC) = 2;
         char* sub = (char*)p + 0xBC;
         *(int*)((char*)p + 0xC4) = GetHashValue32(D_00464AD0);
@@ -17804,13 +17808,13 @@ extern "C" int func_001BC4F0(cFEStateNet* self, int id, int a2)
         func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
         *(int*)((char*)p + 0x164) = 0;
         *(int*)((char*)p + 0x150) = 0x81F;
-        func_001A9BC0(self, p);
+        func_001A9BC0(((cFEStateNet*)self), p);
         break;
     }
     case 0xD4:
         func_00260F10(LobbyMan_mLobbyMan);
     case 0xD6:
-        func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     case 0x102:
         if (*(unsigned int*)((char*)a2 + 8) == 0x6475706C) {
@@ -17823,11 +17827,11 @@ extern "C" int func_001BC4F0(cFEStateNet* self, int id, int a2)
             }
             func_001BC400(self);
         } else {
-            func_001A8E40_3i(self, id, a2);
+            func_001A8E40_3i(((cFEStateNet*)self), id, a2);
         }
         break;
     default:
-        return func_001A8E40_3i(self, id, a2);
+        return func_001A8E40_3i(((cFEStateNet*)self), id, a2);
     }
     return -1;
 }
@@ -17837,18 +17841,18 @@ extern "C" int func_001BC4F0(cFEStateNet* self, int id, int a2)
 INCLUDE_ASM("fe/feasyncfile", func_001BC6A0);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001BC728(cFEStateNet* self, void* a1, int a2);
-extern "C" void func_001BC818(void* self, void* a1, int a2);
-extern "C" void func_001BC990(void* self, void* a1, int a2);
+extern "C" void func_001BC728(cFEStateCreateDuplicate* self, void* a1, int a2);
+extern "C" void func_001BC818(cFEStateCreateDuplicate* self, void* a1, int a2);
+extern "C" void func_001BC990(cFEStateCreateDuplicate* self, void* a1, int a2);
 
-extern "C" void func_001BC6A0(void* self, void* a1, int a2)
+extern "C" void func_001BC6A0(cFEStateCreateDuplicate* self, void* a1, int a2)
 {
     switch (*(unsigned int*)((char*)a1 + 0x18)) {
     case 0x81F:
         func_001BC818(self, a1, a2);
         break;
     case 0x80E:
-        func_001BC728((cFEStateNet*)self, a1, a2);
+        func_001BC728(self, a1, a2);
         break;
     case 0x82C:
         func_001BC990(self, a1, a2);
@@ -17890,17 +17894,17 @@ static inline void* GetSession_001BC728()
     return BuddyMan_mBuddyMan;
 }
 
-extern "C" void func_001BC728(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001BC728(cFEStateCreateDuplicate* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
-        func_001A97B8_v(self, a1, a2);
+        func_001A97B8_v(((cFEStateNet*)self), a1, a2);
         func_00261408(GetSession_001BC728());
         func_0025B800(LobbyMan_mLobbyMan);
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 0, 0, 0);
+        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, ((cFEStateNet*)self), 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
         cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
     } else {
-        func_001A97B8_v(self, a1, a2);
+        func_001A97B8_v(((cFEStateNet*)self), a1, a2);
     }
 }
 #endif
@@ -17921,15 +17925,15 @@ extern char D_00462D10[];
 extern char D_00462C70[];
 extern char D_00462C88[];
 
-extern "C" void func_001BC818(void* self, void* a1, int kind)
+extern "C" void func_001BC818(cFEStateCreateDuplicate* self, void* a1, int kind)
 {
     switch ((unsigned int)kind) {
     case 15: {
         func_001A97B8(self, a1, 15);
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 1,
-                                **(int**)((char*)self + 0x6D8), *(int*)(*(char**)((char*)self + 0x6D8) + 4));
+        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 1,
+                                *(int*)self->mpAccount, *(int*)((char*)self->mpAccount + 4));
         *(int*)((char*)p + 0x18) = 0x82C;
-        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 16:
@@ -17943,8 +17947,8 @@ extern "C" void func_001BC818(void* self, void* a1, int kind)
         func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
         *(int*)((char*)p + 0x150) = 0x80E;
         func_001A9BC0((cFEStateNet*)self, p);
-        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, **(const char***)((char*)self + 0x6D8));
-        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, *(const char**)(*(char**)((char*)self + 0x6D8) + 4));
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, *(const char**)self->mpAccount);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, *(const char**)((char*)self->mpAccount + 4));
         func_0025C610(LobbyMan_mLobbyMan);
         break;
     }
@@ -17974,20 +17978,20 @@ extern char D_00462C70[];
 extern char D_00462C88[];
 
 // Tracks a pending flag; on 0x16 shows either the confirm popup or the network-connect popup.
-extern "C" void func_001BC990(void* self, void* a1, int a2)
+extern "C" void func_001BC990(cFEStateCreateDuplicate* self, void* a1, int a2)
 {
     switch (a2) {
     case 0xF: case 0x10: case 0x14:
-        *(int*)((char*)self + 0x6D4) = 0;
+        self->mbAskSave = 0;
         func_001A97B8_v(self, a1, a2);
         break;
     case 0x11:
-        *(int*)((char*)self + 0x6D4) = 1;
+        self->mbAskSave = 1;
         func_001A97B8_v(self, a1, a2);
         break;
     case 0x16:
         func_001A97B8_v(self, a1, a2);
-        if (*(int*)((char*)self + 0x6D4) != 0) {
+        if (self->mbAskSave != 0) {
             void* p = func_001A9C50((cFEStateNet*)self);
             char* sub = (char*)p + 0xBC;
             *(int*)((char*)p + 0xBC) = 2;
@@ -18008,11 +18012,11 @@ extern "C" void func_001BC990(void* self, void* a1, int a2)
             func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
             *(int*)((char*)p + 0x150) = 0x80E;
             func_001A9BC0((cFEStateNet*)self, p);
-            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, **(char***)((char*)self + 0x6D8));
-            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, (*(char***)((char*)self + 0x6D8))[1]);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, *(char**)self->mpAccount);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, ((char**)self->mpAccount)[1]);
             func_0025C610(LobbyMan_mLobbyMan);
         }
-        *(int*)((char*)self + 0x6D4) = 0;
+        self->mbAskSave = 0;
         break;
     default:
         func_001A97B8_v(self, a1, a2);
@@ -19504,16 +19508,16 @@ extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BE7D8(void* self, int a1, int a2)
+extern "C" void* func_001BE7D8(cFEStateNetCreateRoomPopup* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, a2);
     int d = D_004A3E90;
-    *(void***)((char*)self + 0x8) = D_0046A6E8;
-    *(int*)((char*)self + 0x6DC) = d;
-    *(int*)((char*)self + 0x6E0) = d;
-    *(int*)((char*)self + 0x6E4) = d;
-    *(int*)((char*)self + 0xC) = 0x47;
-    return self;
+    self->mVtbl = D_0046A6E8;
+    self->mszRoomName = (char*)d;
+    self->mszChannelName = (char*)d;
+    self->mszPassword = (char*)d;
+    self->mHashName = 0x47;
+    return ((void*)self);
 }
 #endif
 
@@ -19568,7 +19572,7 @@ extern char D_00463A78[];
 extern char D_00463AA8[];
 extern char D_004A1408[];
 
-extern "C" void func_001BE8B0(void* self, cUIText* text)
+extern "C" void func_001BE8B0(cFEStateNetCreateRoomPopup* self, cUIText* text)
 {
     int id = *(int*)((char*)text + 0x38);
     if (id == GetHashValue32(D_004651F8)) {
@@ -19577,13 +19581,13 @@ extern "C" void func_001BE8B0(void* self, cUIText* text)
         cUIListBox_addEntryByStringID(text, GetHashValue32(D_00463A78), 0);
         cUIListBox_addEntryByStringID(text, GetHashValue32(D_00463AA8), 3);
         cBXString_cBXString4((char*)self + 0x6E0, D_004A1A6C);
-        *(cUIText**)((char*)self + 0x6D8) = text;
+        self->mpLBChannelName = (cUIListBox*)text;
     } else if (id == GetHashValue32(D_00465208)) {
         cUIText_setAsciiString(text, D_004A1408);
-        *(cUIText**)((char*)self + 0x6D0) = text;
+        self->mpTextRoomName = text;
     } else if (id == GetHashValue32(D_00462BA0)) {
         cUIText_setAsciiString(text, D_004A1408);
-        *(cUIText**)((char*)self + 0x6D4) = text;
+        self->mpTextPassword = text;
     } else if (id == GetHashValue32(D_00465218)) {
         *(int*)((char*)text + 0x18) = 0;
     } else if (id == GetHashValue32(D_00465228)) {
@@ -19614,7 +19618,7 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" int func_001BEC78(void* self);
+extern "C" int func_001BEC78(cFEStateNetCreateRoomPopup* self);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" int func_0039A738(void* a);
 extern const char* D_004A1A60;
@@ -19648,32 +19652,32 @@ public:
 };
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
-extern "C" void func_001BEA38(void* self, int a1, unsigned int msg)
+extern "C" void func_001BEA38(cFEStateNetCreateRoomPopup* self, int a1, unsigned int msg)
 {
     char* obj = (char*)a1;
     switch (msg) {
     case 5:
         switch (*(int*)(obj + 0x18)) {
         case 1:
-            func_001A9150((cFEStateNet*)self, *(int*)((char*)self + 0x6D0), GetHashValue32(D_00465248), *(int*)((char*)self + 0x6DC), 0, 1, 8);
-            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+            func_001A9150((cFEStateNet*)self, (int)self->mpTextRoomName, GetHashValue32(D_00465248), (int)self->mszRoomName, 0, 1, 8);
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             break;
         case 2:
-            func_001A9150((cFEStateNet*)self, *(int*)((char*)self + 0x6D4), GetHashValue32(D_00465260), *(int*)((char*)self + 0x6E4), 0, 2, 8);
-            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+            func_001A9150((cFEStateNet*)self, (int)self->mpTextPassword, GetHashValue32(D_00465260), (int)self->mszPassword, 0, 2, 8);
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             break;
         case 3:
             if (func_001BEC78(self)) {
-                (*(cFEVObj_001BEA38**)((char*)self + 0x20))->v17(self, 0xF);
+                ((cFEVObj_001BEA38*)self->mpParentState)->v17(self, 0xF);
             }
             break;
         }
         break;
     case 6:
-        (*(cFEVObj_001BEA38**)((char*)self + 0x20))->v17(self, 0x14);
+        ((cFEVObj_001BEA38*)self->mpParentState)->v17(self, 0x14);
         break;
     case 9:
-        if (obj == *(char**)((char*)self + 0x6D8)) {
+        if (obj == (char*)self->mpLBChannelName) {
             switch (func_0039A738(obj)) {
             case 0:
                 cBXString_cBXString4((char*)self + 0x6E0, D_004A1A60);
@@ -19691,15 +19695,15 @@ extern "C" void func_001BEA38(void* self, int a1, unsigned int msg)
         }
         break;
     case 13: {
-        char* p = *(char**)((char*)self + 0x69C);
+        char* p = (char*)self->mpKeyboard;
         switch (*(int*)(p + 0x18)) {
         case 1:
             cBXString_cBXString4((char*)self + 0x6DC, p + 0x74);
-            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x6D0), *(const char**)((char*)self + 0x6DC));
+            cUIText_setAsciiString(self->mpTextRoomName, (const char*)self->mszRoomName);
             break;
         case 2:
             cBXString_cBXString4((char*)self + 0x6E4, p + 0x74);
-            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x6D4), *(const char**)((char*)self + 0x6E4));
+            cUIText_setAsciiString(self->mpTextPassword, (const char*)self->mszPassword);
             break;
         }
     }
@@ -19721,9 +19725,9 @@ extern "C" int strlen(const char* s);
 extern char D_00464FC0[];
 extern char D_00461618[];
 
-extern "C" int func_001BEC78(void* self)
+extern "C" int func_001BEC78(cFEStateNetCreateRoomPopup* self)
 {
-    if (strlen(*(const char**)((char*)self + 0x6DC)) == 0) {
+    if (strlen((const char*)self->mszRoomName) == 0) {
         int three = 3;
         void* p = func_001A9C50((cFEStateNet*)self);
         char* sub = (char*)p + 0xBC;
@@ -19792,7 +19796,7 @@ extern char D_0045FE40[];
 extern char D_00462C50[];
 extern char D_004614E8[];
 
-extern "C" void func_001BED58(void* self, void* popup)
+extern "C" void func_001BED58(cFEStateNetCreateRoomPopup* self, void* popup)
 {
     func_001DA528(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465278);
@@ -19811,14 +19815,14 @@ extern void* D_00468388[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BEE30(void* self, int a1)
+extern "C" void* func_001BEE30(cFEStateLogin* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
-    *(int*)((char*)self + 0xC) = 0x33;
-    *(void***)((char*)self + 0x8) = D_00468388;
-    *(int*)((char*)self + 0x6D0) = 0;
-    *(int*)((char*)self + 0x6A8) = 0;
-    return self;
+    self->mHashName = 0x33;
+    self->mVtbl = D_00468388;
+    self->mpustrDisconnect = 0;
+    self->unk_6A8 = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -19830,12 +19834,12 @@ void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001BEE78(void* self, int flags)
+extern "C" void func_001BEE78(cFEStateLogin* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_00468388;
-    if (*(void**)((char*)self + 0x6D0) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x6D0));
-        *(void**)((char*)self + 0x6D0) = 0;
+    self->mVtbl = D_00468388;
+    if (self->mpustrDisconnect != 0) {
+        cMemMan_free(self->mpustrDisconnect);
+        self->mpustrDisconnect = 0;
     }
     func_001A85D0_dtor(self, flags);
 }
@@ -19850,15 +19854,15 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 void func_001A8768(void* self);
 extern char D_004652B0[];
 
-extern "C" void func_001BEED0(cFEStateNet* self)
+extern "C" void func_001BEED0(cFEStateLogin* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004652B0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_004652B0), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_001A8768(self);
+    func_001A8768(((cFEStateNet*)self));
 }
 #endif
 
@@ -19943,7 +19947,7 @@ public:
     virtual void v25(int on);
 };
 
-extern "C" void func_001BEF60(void* self, cFEVObj_001BEF60* t)
+extern "C" void func_001BEF60(cFEStateLogin* self, cFEVObj_001BEF60* t)
 {
     unsigned short buf[64];
     sItem_001BEF60* o = (sItem_001BEF60*)t;
@@ -20001,7 +20005,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(void* self, int a1);
+extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
@@ -20010,18 +20014,18 @@ extern char D_00462C70[];
 extern char D_00462C88[];
 extern char D_00536760[];
 
-extern "C" int func_001BF228(cFEStateNet* self, int id, int a2)
+extern "C" int func_001BF228(cFEStateLogin* self, int id, int a2)
 {
     switch (id) {
     case 0xC8: {
-        void* p = func_001A9C50(self);
+        void* p = func_001A9C50(((cFEStateNet*)self));
         *(int*)((char*)p + 0xBC) = 1;
         char* sub = (char*)p + 0xBC;
         *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C70);
         *(int*)((char*)p + 0xC0) = 3;
         func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
         *(int*)((char*)p + 0x150) = 0x80E;
-        func_001A9BC0(self, p);
+        func_001A9BC0(((cFEStateNet*)self), p);
         break;
     }
     case 0xC9: {
@@ -20032,10 +20036,10 @@ extern "C" int func_001BF228(cFEStateNet* self, int id, int a2)
         break;
     }
     case 0xD4:
-        func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     default:
-        return func_001A8E40_3i(self, id, a2);
+        return func_001A8E40_3i(((cFEStateNet*)self), id, a2);
     }
     return 0;
 }
@@ -20065,7 +20069,7 @@ static inline void* GetSession_001BF378()
     return BuddyMan_mBuddyMan;
 }
 
-extern "C" void func_001BF378(void* self, void* a1, int a2)
+extern "C" void func_001BF378(cFEStateLogin* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         func_00261408(GetSession_001BF378());
@@ -20114,10 +20118,10 @@ public:
     virtual void v18(void* obj);
 };
 
-extern "C" void func_001BF438(cFEStateNet* self, void* a1, int kind)
+extern "C" void func_001BF438(cFEStateLogin* self, void* a1, int kind)
 {
     if (kind == 15) {
-        func_001A97B8(self, a1, 15);
+        func_001A97B8(((cFEStateNet*)self), a1, 15);
         {
             void* o = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004652C0));
             if (o) {
@@ -20150,7 +20154,7 @@ extern "C" void func_001BF438(cFEStateNet* self, void* a1, int kind)
             }
         }
     } else {
-        func_001A97B8(self, a1, kind);
+        func_001A97B8(((cFEStateNet*)self), a1, kind);
     }
 }
 #endif
@@ -20185,12 +20189,12 @@ static inline void* GetSession_001BF5A8()
     return BuddyMan_mBuddyMan;
 }
 
-extern "C" void func_001BF5A8(cFEStateNet* self, void* a1, int kind)
+extern "C" void func_001BF5A8(cFEStateLogin* self, void* a1, int kind)
 {
     switch ((unsigned int)kind) {
     case 15:
         self->unk_6B0 = 1;
-        if (func_001A8A40_r(self, cFEStateNetConfig_cFEStateNetConfig((cFEStateNetConfig*)cMemMan_alloc(0x91C, D_00460BF0, 0, 0), (int)self->mpEngine)) != 0) {
+        if (func_001A8A40_r(((cFEStateNet*)self), cFEStateNetConfig_cFEStateNetConfig((cFEStateNetConfig*)cMemMan_alloc(0x91C, D_00460BF0, 0, 0), (int)self->mpEngine)) != 0) {
             func_00261408(GetSession_001BF5A8());
             func_0025B800(LobbyMan_mLobbyMan);
             func_002636F0(func_002591B8(), 0);
@@ -20198,10 +20202,10 @@ extern "C" void func_001BF5A8(cFEStateNet* self, void* a1, int kind)
         break;
     case 16:
     case 20:
-        func_001A97B8(self, a1, kind);
+        func_001A97B8(((cFEStateNet*)self), a1, kind);
         break;
     default:
-        func_001A97B8(self, a1, kind);
+        func_001A97B8(((cFEStateNet*)self), a1, kind);
         break;
     }
 }
@@ -20250,10 +20254,10 @@ public:
 };
 
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001BF438(cFEStateNet* self, void* a1, int a2);
-extern "C" void func_001BF5A8(cFEStateNet* self, void* a1, int a2);
+extern "C" void func_001BF438(cFEStateLogin* self, void* a1, int a2);
+extern "C" void func_001BF5A8(cFEStateLogin* self, void* a1, int a2);
 
-extern "C" void func_001BF6C0(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001BF6C0(cFEStateLogin* self, void* a1, int a2)
 {
     switch (*(unsigned int*)((char*)a1 + 0x18)) {
     case 0x80E:
@@ -20287,10 +20291,10 @@ extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AC010(void* self, int a1);
+extern "C" void* func_001AC010(cFEUseExistingAccount* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
-extern "C" void* func_001C0418(void* self, int a1);
+extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B6D8(void* self, int a1);
 extern "C" void sprintf2(void* dst, const char* fmt, int a, int b);
@@ -20319,7 +20323,7 @@ static inline int Loc1BF758(char* name)
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
 
-extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
+extern "C" void func_001BF758(cFEStateLogin* self, void* a1, unsigned int kind)
 {
     if (a1 == 0) {
         return;
@@ -20333,35 +20337,35 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
             func_0025B6D8(LobbyMan_mLobbyMan, 0);
             break;
         case 2:
-            func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)((char*)self + 0x10), 1));
+            func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)self->mpEngine, 1));
             break;
         case 1:
-            func_001A8A40(self, func_001AC010(cMemMan_alloc(0x6E4, D_00465348, 0, 0), *(int*)((char*)self + 0x10)));
+            func_001A8A40(self, func_001AC010((cFEUseExistingAccount*)cMemMan_alloc(0x6E4, D_00465348, 0, 0), (int)self->mpEngine));
             break;
         case 3: {
-            void* o = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 3, 0, 0);
+            void* o = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 3, 0, 0);
             *(int*)((char*)o + 0x18) = 0x82C;
-            cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, o);
+            cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, o);
             break;
         }
         }
         break;
     case 6: {
-        if (*(void**)((char*)self + 0x6D0) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0x6D0));
-            *(void**)((char*)self + 0x6D0) = 0;
+        if (self->mpustrDisconnect != 0) {
+            cMemMan_free(self->mpustrDisconnect);
+            self->mpustrDisconnect = 0;
         }
         int a = Loc1BF758(D_00465360);
         char* title = D_00465380;
         int b = Loc1BF758(title);
         char* sep = D_00465398;
         int len = USTR_length((void*)a) + USTR_length((void*)b) + strlen(sep) + 1;
-        *(void**)((char*)self + 0x6D0) = operator_new_tag(len * 2, D_00461CD8, 0x100, 0);
+        self->mpustrDisconnect = (unsigned short*)operator_new_tag(len * 2, D_00461CD8, 0x100, 0);
         void* p = func_001A9C50((cFEStateNet*)self);
         char* sub = (char*)p + 0xBC;
-        if (*(void**)((char*)self + 0x6D0) != 0) {
-            sprintf2(*(void**)((char*)self + 0x6D0), sep, a, b);
-            *(void**)((char*)p + 0xC4) = *(void**)((char*)self + 0x6D0);
+        if (self->mpustrDisconnect != 0) {
+            sprintf2(self->mpustrDisconnect, sep, a, b);
+            *(void**)((char*)p + 0xC4) = (void*)self->mpustrDisconnect;
             *(int*)((char*)p + 0xC0) = 1;
         } else {
             *(int*)((char*)p + 0xC4) = GetHashValue32(title);
@@ -20376,7 +20380,7 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
         break;
     }
     case 8: {
-        void* o = func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), *(int*)((char*)self + 0x10));
+        void* o = func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
         *(int*)((char*)o + 0x18) = 0x12;
         func_001A8A40(self, o);
         break;
@@ -20402,7 +20406,7 @@ extern char D_00462C50[];
 extern char D_004614E8[];
 extern char D_00464910[];
 
-extern "C" void func_001BFAE0(void* self, void* popup)
+extern "C" void func_001BFAE0(cFEStateLogin* self, void* popup)
 {
     func_001DA528(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_004653A8);
@@ -20482,7 +20486,7 @@ extern char D_00465470[];
 
 static inline int IsHash1BFCC0(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001BFCC0(void* self, void* obj)
+extern "C" void func_001BFCC0(cFEStateNet* self, void* obj)
 {
     if (IsHash1BFCC0(*(int*)((char*)obj + 0x38), D_00465408)) {
         *(int*)((char*)obj + 0x18) = 1;
@@ -20514,7 +20518,7 @@ extern char D_00462C50[];
 extern char D_00461458[];
 extern char D_004654C0[];
 
-extern "C" void func_001BFD98(void* self, void* popup)
+extern "C" void func_001BFD98(cFEStateNet* self, void* popup)
 {
     func_001DA528(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465480);
@@ -20674,7 +20678,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0218);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
-extern "C" void func_001C0218(void* self, void* a1, int kind)
+extern "C" void func_001C0218(cFEStateNet* self, void* a1, int kind)
 {
     if (kind != 15) {
         func_001A97B8(self, a1, kind);
@@ -20721,7 +20725,7 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001C0138(cFEStateNet* self, void* a1, int a2);
 extern "C" void func_001C0240(cFEStateNet* self, void* a1, int a2);
 
-extern "C" void func_001C02F8(void* self, void* a1, int a2)
+extern "C" void func_001C02F8(cFEStateNet* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x82D:
@@ -20743,7 +20747,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0358);
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern const char D_00461C60[];
 
@@ -20753,7 +20757,7 @@ extern "C" void* func_001C0358(cFEStateNet* self, int a1, int a2)
     default:
         return func_001A8E40_3(self, a1, a2);
     case 0xF3:
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     case 0xEF:
         break;
@@ -20768,14 +20772,14 @@ INCLUDE_ASM("fe/feasyncfile", func_001C03D0);
 extern void* D_0046AC38[];
 extern "C" void* func_001A8500(void* self);
 
-extern "C" void* func_001C03D0(void* self)
+extern "C" void* func_001C03D0(cFEStateOnlineAgreement* self)
 {
     func_001A8500(self);
-    *(int*)((char*)self + 0xC) = 0x43;
-    *(void***)((char*)self + 0x8) = D_0046AC38;
-    *(int*)((char*)self + 0x6D0) = 0;
-    *(int*)((char*)self + 0x6D8) = 0;
-    return self;
+    self->mHashName = 0x43;
+    self->mVtbl = D_0046AC38;
+    self->mpTOSLines = 0;
+    self->miNextTOSLine = (unsigned int)0;
+    return ((void*)self);
 }
 #endif
 
@@ -20786,14 +20790,14 @@ extern void* D_0046AC38[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C0418(void* self, int a1)
+extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
-    *(int*)((char*)self + 0xC) = 0x43;
-    *(void***)((char*)self + 0x8) = D_0046AC38;
-    *(int*)((char*)self + 0x6D0) = 0;
-    *(int*)((char*)self + 0x6D8) = 0;
-    return self;
+    self->mHashName = 0x43;
+    self->mVtbl = D_0046AC38;
+    self->mpTOSLines = 0;
+    self->miNextTOSLine = (unsigned int)0;
+    return ((void*)self);
 }
 #endif
 
@@ -20804,13 +20808,13 @@ extern void* D_0046AC38[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C0460(void* self)
+extern "C" void* func_001C0460(cFEStateOnlineAgreement* self)
 {
     func_001A8500_3(self, 0, 0);
-    *(int*)((char*)self + 0x6D0) = 0;
-    *(void***)((char*)self + 0x8) = D_0046AC38;
-    *(int*)((char*)self + 0x6D8) = 0;
-    return self;
+    self->mpTOSLines = 0;
+    self->mVtbl = D_0046AC38;
+    self->miNextTOSLine = (unsigned int)0;
+    return ((void*)self);
 }
 #endif
 
@@ -20822,14 +20826,14 @@ struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" void func_001C0540(void* self);
+extern "C" void func_001C0540(cFEStateOnlineAgreement* self);
 extern char D_00465568[];
 extern char D_00465580[];
 
-extern "C" void func_001C04A8(cFEStateNet* self)
+extern "C" void func_001C04A8(cFEStateOnlineAgreement* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00465568), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_00465568), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -20875,65 +20879,65 @@ extern char D_004656E0[];
 extern char D_004656F0[];
 extern char D_00465700[];
 
-extern "C" void func_001C0540(void* self)
+extern "C" void func_001C0540(cFEStateOnlineAgreement* self)
 {
-    *(unsigned int*)((char*)self + 0x6D4) = 0xB2;
-    if (*(int**)((char*)self + 0x6D0) != 0) {
-        cMemMan_free(*(int**)((char*)self + 0x6D0));
-        *(int**)((char*)self + 0x6D0) = 0;
+    self->miNumTOSLines = 0xB2;
+    if (self->mpTOSLines != 0) {
+        cMemMan_free(self->mpTOSLines);
+        self->mpTOSLines = 0;
     }
-    if (*(unsigned int*)((char*)self + 0x6D4) != 0) {
+    if (self->miNumTOSLines != 0) {
         char buf[32];
         int i;
         int n;
-        *(int**)((char*)self + 0x6D0) = (int*)operator_new_tag(*(unsigned int*)((char*)self + 0x6D4) * 4, D_00464860, 0x100, 0);
+        self->mpTOSLines = (int*)operator_new_tag(self->miNumTOSLines * 4, D_00464860, 0x100, 0);
         n = 0;
         for (i = 0x0; i < 0x74; i++) {
             sprintf(buf, D_00465590, i);
-            (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(buf);
+            (self->mpTOSLines)[n++] = GetHashValue32(buf);
         }
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004655A0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004655A0);
         for (i = 0x74; i < 0x76; i++) {
             sprintf(buf, D_00465590, i);
-            (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(buf);
+            (self->mpTOSLines)[n++] = GetHashValue32(buf);
         }
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004655B0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004655C0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004655D0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004655E0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004655F0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004655B0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004655C0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004655D0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004655E0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004655F0);
         for (i = 0x7A; i < 0x7D; i++) {
             sprintf(buf, D_00465590, i);
-            (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(buf);
+            (self->mpTOSLines)[n++] = GetHashValue32(buf);
         }
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465600);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465610);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465620);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465630);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465600);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465610);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465620);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465630);
         for (i = 0x7E; i < 0x81; i++) {
             sprintf(buf, D_00465590, i);
-            (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(buf);
+            (self->mpTOSLines)[n++] = GetHashValue32(buf);
         }
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465640);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465650);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465660);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465670);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465680);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465690);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004656A0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004656B0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004656C0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004656D0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004656E0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465640);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465650);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465660);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465670);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465680);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465690);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004656A0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004656B0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004656C0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004656D0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004656E0);
         for (i = 0x83; i < 0x9A; i++) {
             sprintf(buf, D_00465590, i);
-            (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(buf);
+            (self->mpTOSLines)[n++] = GetHashValue32(buf);
         }
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_004656F0);
-        (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(D_00465700);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_004656F0);
+        (self->mpTOSLines)[n++] = GetHashValue32(D_00465700);
         for (i = 0x9E; i < 0xA6; i++) {
             sprintf(buf, D_00465590, i);
-            (*(int**)((char*)self + 0x6D0))[n++] = GetHashValue32(buf);
+            (self->mpTOSLines)[n++] = GetHashValue32(buf);
         }
     }
 }
@@ -20947,12 +20951,12 @@ void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001C0A28(void* self, int flags)
+extern "C" void func_001C0A28(cFEStateOnlineAgreement* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_0046AC38;
-    if (*(void**)((char*)self + 0x6D0) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x6D0));
-        *(void**)((char*)self + 0x6D0) = 0;
+    self->mVtbl = D_0046AC38;
+    if (self->mpTOSLines != 0) {
+        cMemMan_free(self->mpTOSLines);
+        self->mpTOSLines = 0;
     }
     func_001A85D0_dtor(self, flags);
 }
@@ -20968,12 +20972,12 @@ extern "C" void* func_001A8770(cFEStateNet* self);
 extern "C" void func_003A1F18(cUIText* text, int a1);
 extern char D_00465710[];
 
-extern "C" void func_001C0A80(void* self)
+extern "C" void func_001C0A80(cFEStateOnlineAgreement* self)
 {
-    if (*(unsigned int*)((char*)self + 0x6D8) < *(unsigned int*)((char*)self + 0x6D4) && *(int**)((char*)self + 0x6D0) != 0) {
-        cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00465710));
+    if (self->miNextTOSLine < self->miNumTOSLines && self->mpTOSLines != 0) {
+        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465710));
         if (text != 0) {
-            func_003A1F18(text, (*(int**)((char*)self + 0x6D0))[(*(unsigned int*)((char*)self + 0x6D8))++]);
+            func_003A1F18(text, (self->mpTOSLines)[(self->miNextTOSLine)++]);
         }
     }
     func_001A8770((cFEStateNet*)self);
@@ -20983,7 +20987,7 @@ extern "C" void func_001C0A80(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C0B08);
 #ifdef SKIP_ASM
-extern "C" int func_001C0B08(void* self, int a1, int a2)
+extern "C" int func_001C0B08(cFEStateOnlineAgreement* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
@@ -21044,7 +21048,7 @@ public:
     virtual void v32();
 };
 
-extern "C" int func_001C0B20(cFEStateNet* self)
+extern "C" int func_001C0B20(cFEStateOnlineAgreement* self)
 {
     ((cFEVObj_001C0B20*)self)->v32();
     char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
@@ -21086,7 +21090,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0CE0);
 extern char D_004619B8[];
 int GetHashValue32(char* str);
 
-extern "C" void func_001C0CE0(void* self, void* item)
+extern "C" void func_001C0CE0(cFEStateOnlineAgreement* self, void* item)
 {
     int hash = *(int*)((char*)item + 0x38);
     if (hash == GetHashValue32(D_004619B8)) {
@@ -21102,7 +21106,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0D28);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
-extern "C" void* func_001BEE30(void* mem, int a1);
+extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
 extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, int a1);
 extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
@@ -21112,7 +21116,7 @@ extern char D_00464848[];
 extern const char D_004611A8[];
 
 // On confirm (msg 5/6), opens the screen that matches this menu's id; other messages go to the base handler.
-extern "C" void func_001C0D28(cFEStateNet* self, int a1, unsigned int msg)
+extern "C" void func_001C0D28(cFEStateOnlineAgreement* self, int a1, unsigned int msg)
 {
     void* obj;
     if (a1 == 0) {
@@ -21123,7 +21127,7 @@ extern "C" void func_001C0D28(cFEStateNet* self, int a1, unsigned int msg)
     case 6:
         switch (self->miMiscData) {
         case 0x12:
-            obj = func_001BEE30(cMemMan_alloc(0x6D4, D_00465740, 0, 0), (int)self->mpEngine);
+            obj = func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00465740, 0, 0), (int)self->mpEngine);
             break;
         case 0x14:
             obj = cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)self->mpEngine, 1);
@@ -21139,10 +21143,10 @@ extern "C" void func_001C0D28(cFEStateNet* self, int a1, unsigned int msg)
             obj = func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine);
             break;
         }
-        func_001A8A40(self, obj);
+        func_001A8A40(((cFEStateNet*)self), obj);
         break;
     default:
-        func_001A8918(self, a1, msg);
+        func_001A8918(((cFEStateNet*)self), a1, msg);
         break;
     }
 }
@@ -21171,7 +21175,7 @@ extern char D_00465798[];
 extern char D_004657C0[];
 extern char D_004614E8[];
 
-extern "C" void func_001C0EA8(void* self, void* popup)
+extern "C" void func_001C0EA8(cFEStateOnlineAgreement* self, void* popup)
 {
     func_001DA528(popup, 2);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465778);
@@ -21188,28 +21192,28 @@ extern void* D_0046AB28[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C0F40(void* self, int a1, int a2)
+extern "C" void* func_001C0F40(cFEStateNetQuickPlayPopup* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, a2);
-    *(void***)((char*)self + 0x8) = D_0046AB28;
-    *(int*)((char*)self + 0xC) = 0x48;
-    *(int*)((char*)self + 0x6EC) = 0;
-    *(int*)((char*)self + 0x720) = 0;
-    *(int*)((char*)self + 0x724) = 0;
-    *(int*)((char*)self + 0x728) = 0;
-    *(int*)((char*)self + 0x72C) = 0;
-    *(int*)((char*)self + 0x730) = 0;
-    *(int*)((char*)self + 0x6F8) = 0;
-    *(int*)((char*)self + 0x6FC) = 0;
-    *(int*)((char*)self + 0x700) = 0;
-    *(int*)((char*)self + 0x704) = 0;
-    *(int*)((char*)self + 0x708) = 0;
-    *(int*)((char*)self + 0x70C) = 0;
-    *(int*)((char*)self + 0x710) = 0;
-    *(int*)((char*)self + 0x714) = 0;
-    *(int*)((char*)self + 0x718) = 0;
-    *(int*)((char*)self + 0x71C) = 0;
-    return self;
+    self->mVtbl = D_0046AB28;
+    self->mHashName = 0x48;
+    self->mbSearching = 0;
+    self->mpRankedPair = 0;
+    self->mpRacePair = 0;
+    self->mpBigAirPair = 0;
+    self->mpSuperpipePair = 0;
+    self->mpSlopestylePair = 0;
+    self->mpStaticRanked = 0;
+    self->mpStaticRace = 0;
+    self->mpStaticBigAir = 0;
+    self->mpStaticSuperpipe = 0;
+    self->mpStaticSlopeStyle = 0;
+    self->mpLBRanked = 0;
+    self->mpLBRace = 0;
+    self->mpLBBigAir = 0;
+    self->mpLBSuperpipe = 0;
+    self->mpLBSlopeStyle = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -21223,10 +21227,10 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_004657E0[];
 extern char D_005308B8[];
 
-extern "C" void func_001C0FC0(cFEStateNet* self)
+extern "C" void func_001C0FC0(cFEStateNetQuickPlayPopup* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004657E0), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(D_004657E0), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -21239,12 +21243,12 @@ extern "C" void func_001C0FC0(cFEStateNet* self)
 INCLUDE_ASM("fe/feasyncfile", func_001C1038);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8770(cFEStateNet* self);
-extern "C" void* func_001C1038(void* self)
+extern "C" void* func_001C1038(cFEStateNetQuickPlayPopup* self)
 {
-    if (*(int*)((char*)self + 0x6EC) != 0) {
-        int t = (*(int*)((char*)self + 0x6E8))--;
+    if (self->mbSearching != 0) {
+        int t = (self->miBlinkFrames)--;
         if (t == 0) {
-            *(int*)((char*)self + 0x6E8) = 30;
+            self->miBlinkFrames = 30;
         }
     }
     return func_001A8770((cFEStateNet*)self);
@@ -21304,61 +21308,60 @@ public:
     virtual void v25(int on);
 };
 
-extern "C" void func_001C1080(void* self, cFEVObj_001C1080* obj)
+extern "C" void func_001C1080(cFEStateNetQuickPlayPopup* self, cFEVObj_001C1080* obj)
 {
-    char* s = (char*)self;
     int id = *(int*)((char*)obj + 0x38);
     obj->v09(1);
     if (id == GetHashValue32(D_004A1A80)) {
-        *(void**)(s + 0x6F4) = obj;
+        self->mpTextOK = (cUIText*)obj;
         obj->v25(1);
     } else if (id == GetHashValue32(D_004657F8)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox_001A9AB8*)obj, 1);
         obj->v24(1);
-        *(void**)(s + 0x70C) = obj;
+        self->mpLBRanked = (cUIListBox*)obj;
     } else if (id == GetHashValue32(D_004A1C00)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox_001A9AB8*)obj, 1);
         obj->v24(1);
-        *(void**)(s + 0x710) = obj;
+        self->mpLBRace = (cUIListBox*)obj;
     } else if (id == GetHashValue32(D_00465808)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox_001A9AB8*)obj, 1);
         obj->v24(1);
-        *(void**)(s + 0x714) = obj;
+        self->mpLBBigAir = (cUIListBox*)obj;
     } else if (id == GetHashValue32(D_00465818)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox_001A9AB8*)obj, 1);
         obj->v24(1);
-        *(void**)(s + 0x718) = obj;
+        self->mpLBSuperpipe = (cUIListBox*)obj;
     } else if (id == GetHashValue32(D_00465828)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox_001A9AB8*)obj, 1);
         obj->v24(1);
-        *(void**)(s + 0x71C) = obj;
+        self->mpLBSlopeStyle = (cUIListBox*)obj;
     } else if (id == GetHashValue32(D_00465838)) {
         obj->v25(1);
-        *(void**)(s + 0x6F8) = obj;
+        self->mpStaticRanked = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_00465848)) {
         obj->v25(1);
-        *(void**)(s + 0x6FC) = obj;
+        self->mpStaticRace = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_00465858)) {
         obj->v25(1);
-        *(void**)(s + 0x700) = obj;
+        self->mpStaticBigAir = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_00465868)) {
         obj->v25(1);
-        *(void**)(s + 0x704) = obj;
+        self->mpStaticSuperpipe = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_00465878)) {
         obj->v25(1);
-        *(void**)(s + 0x708) = obj;
+        self->mpStaticSlopeStyle = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_00465890)) {
-        *(void**)(s + 0x720) = obj;
+        self->mpRankedPair = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_004658A0)) {
-        *(void**)(s + 0x724) = obj;
+        self->mpRacePair = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_004658B0)) {
-        *(void**)(s + 0x728) = obj;
+        self->mpBigAirPair = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_004658C0)) {
-        *(void**)(s + 0x72C) = obj;
+        self->mpSuperpipePair = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_004658D0)) {
-        *(void**)(s + 0x730) = obj;
+        self->mpSlopestylePair = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_004658E0)) {
-        *(void**)(s + 0x6E4) = obj;
+        self->mpTextSearching = (cUIText*)obj;
         obj->v09(0);
     }
 }
@@ -21387,7 +21390,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern char D_00463CA0[];
 extern char D_004658F0[];
 
-extern "C" void func_001C13E0(cFEStateNet* self, int show)
+extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show)
 {
     if (self->mpScreen != 0) {
         cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463CA0));
@@ -21416,7 +21419,7 @@ extern char D_0045FE40[];
 extern char D_00462C50[];
 extern char D_004614E8[];
 
-extern "C" void func_001C1488(void* self, void* popup)
+extern "C" void func_001C1488(cFEStateNetQuickPlayPopup* self, void* popup)
 {
     func_001DA528(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465900);
@@ -21438,8 +21441,8 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
-extern "C" void func_001C13E0(cFEStateNet* self, int show);
-extern "C" void func_001C17F8(void* self, int a1);
+extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show);
+extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int a1);
 extern "C" void func_0025EE20(void* self, void* ids, int a2);
 extern "C" void func_0025EED8(void* self);
 extern "C" int func_0039A738(void* a);
@@ -21482,54 +21485,53 @@ public:
 };
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
-extern "C" void func_001C1560(void* self, int a1, unsigned int msg)
+extern "C" void func_001C1560(cFEStateNetQuickPlayPopup* self, int a1, unsigned int msg)
 {
-    char* s = (char*)self;
     switch (msg) {
     case 7:
-        if (*(int*)(s + 0x6EC) == 0) {
+        if (self->mbSearching == 0) {
             func_001A8918((cFEStateNet*)self, a1, 7);
         }
         break;
     case 5:
-        if (*(int*)(s + 0x6F4) == a1) {
-            if (*(int*)(s + 0x6EC) != 0) {
-                cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6E4), GetHashValue32(D_00465938));
-                (*(cFEVObj_001C1560**)(s + 0x6F4))->v08(1);
-                func_001C13E0((cFEStateNet*)self, *(int*)(s + 0x6EC) ^ 1);
+        if ((int)self->mpTextOK == a1) {
+            if (self->mbSearching != 0) {
+                cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(D_00465938));
+                ((cFEVObj_001C1560*)self->mpTextOK)->v08(1);
+                func_001C13E0(self, self->mbSearching ^ 1);
                 func_0025EED8(LobbyMan_mLobbyMan);
             } else {
-                *(int*)(s + 0x6F0) = 0;
-                *(int*)(s + 0x6EC) = 1;
-                sSelf_001C1560* o = (sSelf_001C1560*)s;
+                self->unk_6F0 = 0;
+                self->mbSearching = 1;
+                sSelf_001C1560* o = (sSelf_001C1560*)self;
                 int* ids = o->ids;
-                func_001C13E0((cFEStateNet*)self, 0);
+                func_001C13E0(self, 0);
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-                D_00534B34[0] = func_0039A738(*(void**)(s + 0x70C)) != 0;
+                D_00534B34[0] = func_0039A738(self->mpLBRanked) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
-                o->ids[0] = func_0039A738(*(void**)(s + 0x70C));
-                o->ids[1] = func_0039A738(*(void**)(s + 0x710));
-                o->ids[2] = func_0039A738(*(void**)(s + 0x714));
-                o->ids[3] = func_0039A738(*(void**)(s + 0x718));
-                o->ids[4] = func_0039A738(*(void**)(s + 0x71C));
-                func_0025EE20(LobbyMan_mLobbyMan, ids, *(signed char*)(s + 0x14));
-                (*(cFEVObj_001C1560**)(s + 0x6E4))->v09(1);
-                cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6F4), GetHashValue32(D_00462C88));
-                *(int*)(s + 0x6E8) = 0x1E;
+                o->ids[0] = func_0039A738(self->mpLBRanked);
+                o->ids[1] = func_0039A738(self->mpLBRace);
+                o->ids[2] = func_0039A738(self->mpLBBigAir);
+                o->ids[3] = func_0039A738(self->mpLBSuperpipe);
+                o->ids[4] = func_0039A738(self->mpLBSlopeStyle);
+                func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
+                ((cFEVObj_001C1560*)self->mpTextSearching)->v09(1);
+                cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(D_00462C88));
+                self->miBlinkFrames = 0x1E;
                 func_001C17F8(self, 1);
             }
         }
         break;
     case 6:
-        func_001C13E0((cFEStateNet*)self, *(int*)(s + 0x6EC) ^ 1);
-        if (*(int*)(s + 0x6EC) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6E4), GetHashValue32(D_00465938));
-            (*(cFEVObj_001C1560**)(s + 0x6F4))->v08(1);
+        func_001C13E0(self, self->mbSearching ^ 1);
+        if (self->mbSearching != 0) {
+            cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(D_00465938));
+            ((cFEVObj_001C1560*)self->mpTextOK)->v08(1);
             func_0025EED8(LobbyMan_mLobbyMan);
         } else {
-            (*(cFEVObj_001C1560**)(s + 0x20))->v17(self, 0x14);
+            ((cFEVObj_001C1560*)self->mpParentState)->v17(self, 0x14);
         }
         break;
     default:
@@ -21551,7 +21553,7 @@ int func_001C17D8(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C17E0);
 #ifdef SKIP_ASM
-extern "C" int func_001C17E0(void* self, int a1, int a2)
+extern "C" int func_001C17E0(cFEStateNetQuickPlayPopup* self, int a1, int a2)
 {
     return a2 != 9 ? 0x101 : 0x100;
 }
@@ -21574,23 +21576,23 @@ public:
     virtual void v08(int on);
 };
 
-extern "C" void func_001C17F8(void* self, int on)
+extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int on)
 {
-    (*(cFEVObj_001C17F8**)((char*)self + 0x6F8))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x6FC))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x700))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x704))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x708))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x70C))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x710))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x714))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x718))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x71C))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x720))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x724))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x728))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x72C))->v08(on);
-    (*(cFEVObj_001C17F8**)((char*)self + 0x730))->v08(on);
+    ((cFEVObj_001C17F8*)self->mpStaticRanked)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpStaticRace)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpStaticBigAir)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpStaticSuperpipe)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpStaticSlopeStyle)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpLBRanked)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpLBRace)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpLBBigAir)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpLBSuperpipe)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpLBSlopeStyle)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpRankedPair)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpRacePair)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpBigAirPair)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpSuperpipePair)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpSlopestylePair)->v08(on);
 }
 #endif
 
@@ -21602,7 +21604,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C19C8);
 int GetHashValue32(char* str);
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" int func_0039F698(void* p);
@@ -21636,18 +21638,18 @@ struct cFEObj_001C19C8 {
 };
 
 // Message handler: on 0xE7 confirms (if armed) or closes the screen; other ids as in the sibling handlers.
-extern "C" void* func_001C19C8(void* self, int a1, int a2)
+extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int a1, int a2)
 {
     switch (a1) {
     case 0xE6:
-        *(int*)((char*)self + 0x6F0) = 1;
+        self->unk_6F0 = 1;
         break;
     case 0x10C: case 0x112:
-        func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+        func_0039F698((char*)self->mpEngine + 0x18);
         func_001AB178((cFEStateNet*)self, a1);
         break;
     case 0xE7:
-        if (*(int*)((char*)self + 0x6F0) != 0) {
+        if (self->unk_6F0 != 0) {
             void* p = func_001A9C50((cFEStateNet*)self);
             char* sub = (char*)p + 0xBC;
             *(int*)((char*)p + 0xBC) = 1;
@@ -21658,12 +21660,12 @@ extern "C" void* func_001C19C8(void* self, int a1, int a2)
             *(int*)((char*)p + 0x14C) = 6;
             func_001A9BC0((cFEStateNet*)self, p);
         } else {
-            *(int*)((char*)self + 0x6EC) = 0;
-            (*(cFEObj_001C19C8**)((char*)self + 0x20))->v17(self, 0x14);
+            self->mbSearching = 0;
+            ((cFEObj_001C19C8*)self->mpParentState)->v17(self, 0x14);
         }
         break;
     case 0xF3:
-        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)((char*)self + 0x10)));
+        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     default:
         return func_001A8E40_3(self, a1, a2);
@@ -21677,10 +21679,10 @@ extern "C" void* func_001C19C8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1B48);
 #ifdef SKIP_ASM
-extern "C" int func_001C1B88(void* self, void* a1, int a2);
+extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* a1, int a2);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
-extern "C" int func_001C1B48(void* self, void* a1, int a2)
+extern "C" int func_001C1B48(cFEStateNetQuickPlayPopup* self, void* a1, int a2)
 {
     int r;
     if (*(int*)((char*)a1 + 0x18) == 0x82F) {
@@ -21713,18 +21715,18 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001C13E0(cFEStateNet* self, int show);
-extern "C" void func_001C17F8(void* self, int a1);
+extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show);
+extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int a1);
 extern char D_00461618[];
 
-extern "C" int func_001C1B88(void* self, void* a1, int a2)
+extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* a1, int a2)
 {
     int r;
     if (a2 == 0xF || a2 == 0x14) {
-        *(int*)((char*)self + 0x6EC) = 0;
-        (*(cFEVText_001C1B88**)((char*)self + 0x6E4))->v09(0);
-        func_001C13E0((cFEStateNet*)self, *(int*)((char*)self + 0x6EC) ^ 1);
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x6F4), GetHashValue32(D_00461618));
+        self->mbSearching = 0;
+        ((cFEVText_001C1B88*)self->mpTextSearching)->v09(0);
+        func_001C13E0(self, self->mbSearching ^ 1);
+        cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(D_00461618));
         func_001C17F8(self, 0);
         r = func_001A97B8(self, a1, a2);
     } else {
@@ -21796,7 +21798,7 @@ extern char D_00462C50[];
 extern char D_00461458[];
 extern char D_004614E8[];
 
-extern "C" void func_001C1D30(void* self, void* popup)
+extern "C" void func_001C1D30(cFEStateNet* self, void* popup)
 {
     func_001DA528(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465A48);
@@ -21819,7 +21821,7 @@ extern char D_00465AC0[];
 
 static inline int IsHash1C1E08(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001C1E08(void* self, void* obj)
+extern "C" void func_001C1E08(cFEStateNet* self, void* obj)
 {
     if (IsHash1C1E08(*(int*)((char*)obj + 0x38), D_00465A80)) {
         *(int*)((char*)obj + 0x18) = 0;
@@ -21838,7 +21840,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C1EA8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_001C5018(cFEStateNet* self, int a1);
-extern "C" void* func_001C20F8(cFEStateNet* self, int a1);
+extern "C" void* func_001C20F8(cFEStateNetQuickMessages* self, int a1);
 extern "C" void* func_001887A0(void* self, int engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
 extern const char D_00465AD0[];
@@ -21868,10 +21870,10 @@ extern "C" void func_001C1EA8(cFEStateNet* self, char* msg, int ev)
             func_001A8A40(((char*)self), func_001C5018((cFEStateNet*)cMemMan_alloc(0x6D0, D_00465AD0, 0, 0), (int)self->mpEngine));
             break;
         case 1:
-            func_001A8A40(((char*)self), func_001C20F8((cFEStateNet*)cMemMan_alloc(0x6FC, D_00465AE0, 0, 0), (int)self->mpEngine));
+            func_001A8A40(((char*)self), func_001C20F8((cFEStateNetQuickMessages*)((cFEStateNet*)cMemMan_alloc(0x6FC, D_00465AE0, 0, 0)), (int)self->mpEngine));
             break;
         case 2: {
-            char* p = (char*)func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+            char* p = (char*)func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
             *(int*)(p + 0x18) = 0x13;
             func_001A8A40(((char*)self), p);
             break;
@@ -21929,9 +21931,9 @@ extern void* D_0046A908[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C20F8(cFEStateNet* self, int a1)
+extern "C" void* func_001C20F8(cFEStateNetQuickMessages* self, int a1)
 {
-    func_001A8500_3(self, a1, 0);
+    func_001A8500_3(((cFEStateNet*)self), a1, 0);
     self->mHashName = 0x4B;
     self->mVtbl = D_0046A908;
     return ((void*)self);
@@ -21946,15 +21948,15 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern char D_00465B20[];
 
-extern "C" void func_001C2138(void* self)
+extern "C" void func_001C2138(cFEStateNetQuickMessages* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00465B20), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    *(int*)((char*)self + 0x6D0) = 0;
+    self->mbChanged = 0;
 }
 #endif
 
@@ -21981,7 +21983,7 @@ extern char D_00465B70[];
 extern char D_004614E8[];
 extern char D_00465B88[];
 
-extern "C" void func_001C21C0(void* self, void* popup)
+extern "C" void func_001C21C0(cFEStateNetQuickMessages* self, void* popup)
 {
     func_001DA528(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465B38);
@@ -22028,7 +22030,7 @@ struct sOwner1C2298 {
     cUIText* slots[10];
 };
 
-extern "C" void func_001C2298(sOwner1C2298* self, cUIText* text)
+extern "C" void func_001C2298(cFEStateNetQuickMessages* self, cUIText* text)
 {
     char buf[32];
     if (IsHash1C2298(*(int*)((char*)text + 0x38), D_00465BA0)) {
@@ -22044,7 +22046,7 @@ extern "C" void func_001C2298(sOwner1C2298* self, cUIText* text)
                 cUIText_setAsciiString(text, D_004A1390);
                 ((cFEVObj_001C2298*)text)->v09(1);
                 *(int*)((char*)text + 0x18) = i;
-                self->slots[i] = text;
+                self->mpMessage[i] = text;
             }
         }
     }
@@ -22092,13 +22094,13 @@ public:
     virtual void v32();
 };
 
-extern "C" void func_001C2418(void* self);
+extern "C" void func_001C2418(cFEStateNetQuickMessages* self);
 
-extern "C" int func_001C23C0(cFEStateNet* self, int a1)
+extern "C" int func_001C23C0(cFEStateNetQuickMessages* self, int a1)
 {
     ((cFEVObj_001C23C0*)self)->v32();
     if (a1 != 0) {
-        func_001C2418(((cFEVObj_001C23C0*)self));
+        func_001C2418(self);
     }
     return 0;
 }
@@ -22107,9 +22109,9 @@ extern "C" int func_001C23C0(cFEStateNet* self, int a1)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C2418);
 #ifdef SKIP_ASM
-extern "C" void func_001C2468(void* self, int i);
+extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int i);
 
-extern "C" void func_001C2418(void* self)
+extern "C" void func_001C2418(cFEStateNetQuickMessages* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -22131,7 +22133,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" char* func_0014F6A8(void* self, int i);
 extern "C" void USTR_strcpyW(char* dst, void* src);
-extern "C" void func_001C2578(void* self, void* text, char* str);
+extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* text, char* str);
 extern char D_004A1C08[];
 
 struct sBXString1C2468 {
@@ -22146,7 +22148,7 @@ struct sVE_001C2468 {
     void* (*fn)(void* self, int hash);
 };
 
-extern "C" void func_001C2468(void* self, int idx)
+extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
 {
     char buf[16];
     sBXString1C2468 s;
@@ -22227,7 +22229,7 @@ static inline void Measure1C2578(cUIText* text, const char* s, sRect1C2578* out)
     cFont_textExtent(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
-extern "C" void func_001C2578(void* self, void* vtext, char* str)
+extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char* str)
 {
     cUIText* text = (cUIText*)vtext;
     int cut = 0;
@@ -22278,7 +22280,7 @@ extern "C" void func_001A9B58(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
-extern "C" void func_001C2A18(void* self);
+extern "C" void func_001C2A18(cFEStateNetQuickMessages* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void USTR_strcpyW(char* dst, void* src);
@@ -22295,9 +22297,8 @@ struct sVE_001C2740 {
     void* (*fn)(void* self, int hash);
 };
 
-extern "C" void func_001C2740(void* self, void* w, int msg)
+extern "C" void func_001C2740(cFEStateNetQuickMessages* self, void* w, int msg)
 {
-    char* s = (char*)self;
     switch (msg) {
     case 5: {
         unsigned int idx = *(unsigned int*)((char*)w + 0x18);
@@ -22315,12 +22316,12 @@ extern "C" void func_001C2740(void* self, void* w, int msg)
             } else {
                 func_001A9150((cFEStateNet*)self, 0, GetHashValue32(D_00465BC0), (int)name, 0, idx, 0x3F);
             }
-            cKeyboardPopup_setIncludeKey(*(void**)(s + 0x69C), 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x4B, 1, 2);
         }
         break;
     }
     case 6:
-        if (*(int*)(s + 0x6D0) != 0) {
+        if (self->mbChanged != 0) {
             void* p = func_001A9C50((cFEStateNet*)self);
             *(int*)((char*)p + 0xBC) = 2;
             char* sub = (char*)p + 0xBC;
@@ -22333,11 +22334,11 @@ extern "C" void func_001C2740(void* self, void* w, int msg)
             *(int*)((char*)p + 0x150) = 0x83A;
             func_001A9BC0((cFEStateNet*)self, p);
         } else {
-            func_001A8A40(self, func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *(int*)(s + 0x10)));
+            func_001A8A40(self, func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
         }
         break;
     case 8:
-        if (!(*(int*)(s + 0x1C) & 6)) {
+        if (!(self->mAttrState & 6)) {
             func_001A9B58((cFEStateNet*)self);
         }
         break;
@@ -22378,7 +22379,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0014F6E8(void* iface, int i);
-extern "C" void func_001C2468(void* self, int i);
+extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int i);
 extern char D_00465C48[];
 extern char D_00461618[];
 extern char D_00535617[];
@@ -22389,9 +22390,9 @@ struct sVE1C2A18 {
     int (*fn)(void*);
 };
 
-extern "C" void func_001C2A18(void* self)
+extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
 {
-    char* p = *(char**)((char*)self + 0x69C);
+    char* p = (char*)self->mpKeyboard;
     unsigned int idx = *(unsigned int*)(p + 0x18);
     char* name = p + 0x74;
     if (idx < 10) {
@@ -22407,10 +22408,10 @@ extern "C" void func_001C2A18(void* self)
             func_001A9BC0((cFEStateNet*)self, pop);
             func_0014F6E8(iface, idx);
         } else {
-            char* src = *(char**)((char*)self + 0x69C) + 0x74;
+            char* src = (char*)self->mpKeyboard + 0x74;
             strcpy(D_00535617 + (idx << 6), src);
         }
-        *(int*)((char*)self + 0x6D0) = 1;
+        self->mbChanged = 1;
         sVE1C2A18* vt = *(sVE1C2A18**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         func_001C2468(self, idx);
@@ -22422,14 +22423,14 @@ extern "C" void func_001C2A18(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001C2B48);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001C2C50(cFEStateNet* self, void* a1, int a2);
-extern "C" void func_001C2BA8(void* self, void* a1, int a2);
+extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, void* a1, int a2);
+extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, void* a1, int a2);
 
-extern "C" void func_001C2B48(void* self, void* a1, int a2)
+extern "C" void func_001C2B48(cFEStateNetQuickMessages* self, void* a1, int a2)
 {
     switch (*(int*)((char*)a1 + 0x18)) {
     case 0x83A:
-        func_001C2C50((cFEStateNet*)self, a1, a2);
+        func_001C2C50(self, a1, a2);
         break;
     case 0x83B:
         func_001C2BA8(self, a1, a2);
@@ -22457,14 +22458,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0014F758(void* self);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void func_001C2418(void* self);
+extern "C" void func_001C2418(cFEStateNetQuickMessages* self);
 
-extern "C" void func_001C2BA8(void* self, void* a1, int a2)
+extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         cBEVIface_001C2BA8* iface = (cBEVIface_001C2BA8*)cBE_getInterface_Fv(cBE_getBE(), 4);
         func_0014F758(iface);
-        *(int*)((char*)self + 0x6D0) = 1;
+        self->mbChanged = 1;
         iface->v01();
         func_001C2418(self);
         func_001A97B8(self, a1, 0xF);
@@ -22485,19 +22486,19 @@ extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
 extern const char D_00460D90[];
 extern const char D_004611A8[];
 
-extern "C" void func_001C2C50(cFEStateNet* self, void* a1, int a2)
+extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, void* a1, int a2)
 {
     switch (a2) {
     case 0xF:
-        func_001A97B8(self, a1, 0xF);
-        func_001A8A40(self, func_0018D7F0(cMemMan_alloc(0x23C, D_00460D90, 0, 0), (int)self->mpEngine, 2, 1, 1));
+        func_001A97B8(((cFEStateNet*)self), a1, 0xF);
+        func_001A8A40(((cFEStateNet*)self), func_0018D7F0(cMemMan_alloc(0x23C, D_00460D90, 0, 0), (int)self->mpEngine, 2, 1, 1));
         break;
     case 0x10:
-        func_001A97B8(self, a1, 0x10);
-        func_001A8A40(self, func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
+        func_001A97B8(((cFEStateNet*)self), a1, 0x10);
+        func_001A8A40(((cFEStateNet*)self), func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
         break;
     default:
-        func_001A97B8(self, a1, a2);
+        func_001A97B8(((cFEStateNet*)self), a1, a2);
         break;
     }
 }
@@ -23951,7 +23952,7 @@ public:
     virtual void v07(int a1);
 };
 
-extern "C" void func_001C5310(void* self, cFEVObj_001C5310* item)
+extern "C" void func_001C5310(cFEStateNet* self, cFEVObj_001C5310* item)
 {
     int hash = *(int*)((char*)item + 0x38);
     if (hash == GetHashValue32(D_00465F48)) {
@@ -23995,7 +23996,7 @@ extern "C" void func_001C5368(cFEStateNet* self, int a1, unsigned int msg)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5420);
 #ifdef SKIP_ASM
-extern "C" int func_001C5420(void* self, void* a1, int a2)
+extern "C" int func_001C5420(cFEStateNet* self, void* a1, int a2)
 {
     return a2 == 4 ? 0 : 0x101;
 }
@@ -24065,7 +24066,7 @@ extern char D_00465F90[];
 extern char D_004614E8[];
 extern char D_00461458[];
 
-extern "C" void func_001C5540(void* self, void* popup)
+extern "C" void func_001C5540(cFEStateNet* self, void* popup)
 {
     func_001DA528(popup, 3);
     *(int*)((char*)popup + 0x54) = GetHashValue32(D_00465F58);
