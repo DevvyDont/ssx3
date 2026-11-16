@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitext.h"
 #include "ui/uithing.h"
 
 
@@ -332,11 +333,11 @@ extern "C" void func_003A03F0(sUIThing03F0* self, sUIData03F0* data)
 //100%
 INCLUDE_ASM("ui/uithing", cUIText_getFont);
 #ifdef SKIP_ASM
-extern "C" int cUIText_getFont(void* self)
+extern "C" int cUIText_getFont(cUIText* self)
 {
-    void* p = *(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
+    void* p = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
     if (p != 0) {
-        return *(int*)((char*)*(void**)((char*)p + 0x8) + (*(unsigned char*)((char*)self + 0x74) & 3) * 12 + 0xC);
+        return *(int*)((char*)*(void**)((char*)p + 0x8) + (*(unsigned char*)&self->mAttrText & 3) * 12 + 0xC);
     }
     return 0;
 }
@@ -354,11 +355,11 @@ struct cUIText_updateLocale_sVEntry {
     void* fn;
 };
 
-extern "C" void cUIText_updateLocale(void* self)
+extern "C" void cUIText_updateLocale(cUIText* self)
 {
-    int id = *(int*)((char*)self + 0xB0);
+    int id = self->mStringID;
     if (id != 0) {
-        void* a = *(void**)((char*)self + 0x5C);
+        void* a = self->mpScreen;
         void* b = *(void**)((char*)a + 0xD0);
         void* c = *(void**)((char*)b + 0x10);
         char* loc = *(char**)((char*)c + 0x10);
@@ -366,14 +367,14 @@ extern "C" void cUIText_updateLocale(void* self)
             cUIText_updateLocale_sVEntry* vt = *(cUIText_updateLocale_sVEntry**)(loc + 4);
             unsigned short* str = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
             if (str != 0) {
-                int f14 = *(int*)((char*)self + 0x14) >> 7;
-                if ((f14 & 1) || ((*(int*)((char*)self + 0x74) >> 6) & 1)) {
+                int f14 = self->mAttr >> 7;
+                if ((f14 & 1) || ((self->mAttrText >> 6) & 1)) {
                     cUIText_setUnicodeStringWrap(self, str);
                 } else {
                     cUIText_setUnicodeStringPrivate(self, str);
                 }
             }
-            cUIText_updateLocale_sVEntry* vt2 = *(cUIText_updateLocale_sVEntry**)((char*)self + 8);
+            cUIText_updateLocale_sVEntry* vt2 = (cUIText_updateLocale_sVEntry*)self->mVtbl;
             ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
         }
     }

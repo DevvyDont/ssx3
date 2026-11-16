@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitext.h"
 #include "ui/uithing.h"
 
 // Flag words at cUIVector + 0x14 and + 0x74. The setters take an int and store it into a
@@ -2621,9 +2622,9 @@ extern "C" void cUIText_deleteText(void* self);
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
 extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
-extern "C" void cUIText__cUIText(void* self, int flags)
+extern "C" void cUIText__cUIText(cUIText* self, int flags)
 {
-    *(void***)((char*)self + 8) = D_00494588;
+    self->mVtbl = D_00494588;
     cUIText_deleteText(self);
     cUIThing__cUIThing_dtor(self, flags);
 }
@@ -2684,7 +2685,7 @@ extern "C" int func_003A5E58(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E68);
 #ifdef SKIP_ASM
-extern "C" void func_003A5E68(void* self, int enable)
+extern "C" void func_003A5E68(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
 }
@@ -2693,7 +2694,7 @@ extern "C" void func_003A5E68(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E88);
 #ifdef SKIP_ASM
-extern "C" void func_003A5E88(void* self, int enable)
+extern "C" void func_003A5E88(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
 }
@@ -2702,7 +2703,7 @@ extern "C" void func_003A5E88(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5EA8);
 #ifdef SKIP_ASM
-extern "C" void func_003A5EA8(void* self, int enable)
+extern "C" void func_003A5EA8(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
 }
@@ -2711,7 +2712,7 @@ extern "C" void func_003A5EA8(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5EC8);
 #ifdef SKIP_ASM
-extern "C" void func_003A5EC8(void* self, int enable)
+extern "C" void func_003A5EC8(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
 }
@@ -2720,7 +2721,7 @@ extern "C" void func_003A5EC8(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5EE8);
 #ifdef SKIP_ASM
-extern "C" void func_003A5EE8(void* self, int enable)
+extern "C" void func_003A5EE8(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit6 = enable;
 }

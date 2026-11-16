@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 
 //100%
 INCLUDE_ASM("ui/uistate", cUIState_hideObjSafe);
@@ -16,7 +17,7 @@ struct sVEntry39E8B8 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cUIState_hideObjSafe(void* self, char* name)
+extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
 {
     cListNode* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
@@ -49,7 +50,7 @@ struct sVEntry39E948 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cUIState_showObjSafe(void* self, char* name)
+extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
 {
     cListNode* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {

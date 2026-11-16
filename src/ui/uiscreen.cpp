@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uiscreen.h"
 
 extern "C" void cListNode_removeFromList(void* self);
 
@@ -37,35 +39,34 @@ extern void* D_00494C98[];
 extern void* D_00494CC0[];
 
 // Destructor of a UI screen: frees its buffers and tears down the embedded members.
-extern "C" void cUIScreen__cUIScreen(void* p, int flags)
+extern "C" void cUIScreen__cUIScreen(cUIScreen* p, int flags)
 {
-    char* self = (char*)p;
-    *(void***)(self + 0x8) = D_00494670;
-    if (*(void**)(self + 0x3C) != 0) {
-        cMemMan_free__FPv(*(void**)(self + 0x3C));
+    p->mVtbl = D_00494670;
+    if ((void*)p->mppObjectList != 0) {
+        cMemMan_free__FPv(p->mppObjectList);
     }
-    if (*(void**)(self + 0xC) != 0 && (*(int*)(self + 0x14) & 2)) {
-        cMemMan_free__FPv(*(void**)(self + 0xC));
+    if ((void*)p->mpBuffer != 0 && (p->mAttrScreen & 2)) {
+        cMemMan_free__FPv(p->mpBuffer);
     }
-    *(void***)(self + 0xCC) = D_00494C98;
-    *(void***)(self + 0x48) = D_004949E8;
-    cList_destroyList_C558(self + 0xB4);
-    char* m40 = self + 0x40;
-    *(void***)(self + 0xC8) = D_00494CC0;
-    func_003A4868(self + 0xC0);
-    *(void***)(self + 0xBC) = D_00494CC0;
-    func_003A4868(self + 0xB4);
+    *(void***)(((char*)p) + 0xCC) = D_00494C98;
+    *(void***)(((char*)p) + 0x48) = D_004949E8;
+    cList_destroyList_C558(((char*)p) + 0xB4);
+    char* m40 = ((char*)p) + 0x40;
+    *(void***)(((char*)p) + 0xC8) = D_00494CC0;
+    func_003A4868(((char*)p) + 0xC0);
+    *(void***)(((char*)p) + 0xBC) = D_00494CC0;
+    func_003A4868(((char*)p) + 0xB4);
     cUIThing__cUIThing(m40, 2);
-    *(void***)(self + 0x30) = D_00494C98;
-    cList_destroyList_C558(self + 0x18);
-    *(void***)(self + 0x2C) = D_00494CC0;
-    func_003A4868(self + 0x24);
-    *(void***)(self + 0x20) = D_00494CC0;
-    func_003A4868(self + 0x18);
-    *(void***)(self + 0x8) = D_00494CC0;
-    func_003A4868(self);
+    *(void***)(((char*)p) + 0x30) = D_00494C98;
+    cList_destroyList_C558(((char*)p) + 0x18);
+    *(void***)(((char*)p) + 0x2C) = D_00494CC0;
+    func_003A4868(((char*)p) + 0x24);
+    *(void***)(((char*)p) + 0x20) = D_00494CC0;
+    func_003A4868(((char*)p) + 0x18);
+    p->mVtbl = D_00494CC0;
+    func_003A4868(((char*)p));
     if (flags & 1) {
-        operator_delete((int*)self);
+        operator_delete((int*)p);
     }
 }
 #endif
@@ -79,22 +80,22 @@ extern "C" void* func_003B47F8(void* src, void* dst);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00493E00[];
 
-extern "C" void cUIScreen_setData(void* self, char* data)
+extern "C" void cUIScreen_setData(cUIScreen* self, char* data)
 {
     int size = func_003B4818(data);
     if (size != 0) {
         char* buf = (char*)operator_new_tag(size, D_00493E00, 0x100, 0);
-        *(char**)((char*)self + 0xC) = buf;
+        self->mpBuffer = buf;
         char* old = data;
         data = buf;
         func_003B47F8(old, data);
-        *(int*)((char*)self + 0x14) |= 2;
+        self->mAttrScreen |= 2;
     } else {
-        *(int*)((char*)self + 0x14) &= ~2;
+        self->mAttrScreen &= ~2;
     }
-    *(char**)((char*)self + 0x10) = data;
-    *(char**)((char*)self + 0x34) = data + *(int*)(data + 8);
-    *(char**)((char*)self + 0x38) = data + *(int*)(data + 4);
+    self->mpScreenHeader = (tUIScreenHeader*)data;
+    self->mpKeyframeBlock = (tUIKeyframeBlock*)(data + *(int*)(data + 8));
+    self->mpObjectBlock = (tUIObjectBlock*)(data + *(int*)(data + 4));
 }
 #endif
 
@@ -126,17 +127,13 @@ struct sFrameList {
     int count; // 0x0
 };
 
-struct cUIScreen {
-    char pad_0x00[0x34];
-    sFrameList* list; // 0x34
-};
 
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
 #ifdef SKIP_ASM
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
-    sFrameList* list = self->list;
+    sFrameList* list = (sFrameList*)self->mpKeyframeBlock;
     sFrameEntry* e = (sFrameEntry*)((char*)list + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)list->count; i++) {
@@ -157,7 +154,7 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-extern "C" void* cUIScreen_getPrimaryThread(void* self)
+extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x18));
     if (n != 0) {
@@ -171,7 +168,7 @@ extern "C" void* cUIScreen_getPrimaryThread(void* self)
 }
 #endif
 
-extern "C" void* cUIScreen_getPrimaryThread(void* self);
+extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self);
 void cUIThread_deleteThread(void* self);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -187,7 +184,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_jumpToFrame__FPvUs);
  */
 void cUIScreen_jumpToFrame(void* self, unsigned short frame)
 {
-    void* thread = cUIScreen_getPrimaryThread(self);
+    void* thread = cUIScreen_getPrimaryThread((cUIScreen*)self);
     if (thread != 0) {
         cUIThread_deleteThread(thread);
     }
@@ -203,7 +200,7 @@ struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void* cUIScreen_getPrimaryThread(void* self);
+extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self);
 void cUIThread_deleteThread(void* self);
 extern char D_00493E10[];
 extern void* D_004946A0[];
@@ -237,7 +234,7 @@ void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
 void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
 {
     if (ThreadType == 0) {
-        void* pPrimary = cUIScreen_getPrimaryThread(self);
+        void* pPrimary = cUIScreen_getPrimaryThread((cUIScreen*)self);
         if (pPrimary != 0) {
             cUIThread_deleteThread(pPrimary);
         }
@@ -298,7 +295,7 @@ struct sCmdList_C978 {
 
 // cUIScreen::playFrameByThread: advances the thread one frame toward its stop frame, then runs the commands of
 // the frame it was on.
-extern "C" void cUIScreen_playFrameByThread(void *self, void *thread)
+extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
 {
     cUIThread_C870 *s = (cUIThread_C870 *)thread;
     sCmdList_C978 *list;
@@ -385,9 +382,9 @@ INCLUDE_ASM("ui/uiscreen", func_0039CBE0);
 #ifdef SKIP_ASM
 extern "C" void func_0039CBE0(cUIScreen* self, void* p1, void* p2, void* p3)
 {
-    sFrameEntry* e = (sFrameEntry*)((char*)self->list + 4);
+    sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
-    for (i = 0; i < (unsigned int)self->list->count; i++) {
+    for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
         if (e->label == *(int*)((char*)p2 + 4)) {
             *(unsigned short*)((char*)p3 + 0xC) = e->field_0x8;
             return;
@@ -402,9 +399,9 @@ INCLUDE_ASM("ui/uiscreen", func_0039CC38);
 #ifdef SKIP_ASM
 extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
 {
-    sFrameEntry* e = (sFrameEntry*)((char*)self->list + 4);
+    sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
-    for (i = 0; i < (unsigned int)self->list->count; i++) {
+    for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
         if (e->label == *(int*)((char*)p2 + 4)) {
             cUIScreen_playFrame(self, e->field_0x8, 1);
             return;
@@ -417,14 +414,14 @@ extern "C" void func_0039CC38(cUIScreen* self, void* p1, void* p2)
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CCA8);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 // PORT: callers pass a 5th arg (0) that cUIThing_playAnimation never reads
 extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mode, unsigned short v, int x);
 
 extern "C" void func_0039CCA8(void* self, void* p1, void* msg)
 {
-    void* obj = cUIScreen_getObjectByHashName(self, *(int*)((char*)msg + 8));
+    void* obj = cUIScreen_getObjectByHashName((cUIScreen*)self, *(int*)((char*)msg + 8));
     if (obj != 0) {
         void* anim = cUIAnimationBank_getAnimationByHashName(
             (char*)*(void**)((char*)*(void**)((char*)self + 0xD0) + 0x10) + 0x50,
@@ -439,7 +436,7 @@ extern "C" void func_0039CCA8(void* self, void* p1, void* msg)
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CD30);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash);
 extern "C" void cUIThing_deleteAnimation(void* self);
 
 class func_0039CD30_cVirt {
@@ -463,7 +460,7 @@ public:
 
 extern "C" void func_0039CD30(void* self, int a1, int* msg)
 {
-    func_0039CD30_cVirt* obj = (func_0039CD30_cVirt*)cUIScreen_getObjectByHashName(self, msg[1]);
+    func_0039CD30_cVirt* obj = (func_0039CD30_cVirt*)cUIScreen_getObjectByHashName((cUIScreen*)self, msg[1]);
     if (obj != 0) {
         cUIThing_deleteAnimation(obj);
         obj->v13(msg[2], msg + 3);
@@ -555,10 +552,10 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenFocusLose);
 #ifdef SKIP_ASM
 extern "C" void cUIGroup_setFocus(void*, int);
 
-extern "C" void cUIScreen_parseScreenFocusLose(void* self)
+extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
 {
     cUIGroup_setFocus((char*)self + 0x40, 0);
-    void* p = *(void**)((char*)self + 0xd0);
+    void* p = self->mpState;
     if (p != 0) {
         ((sUIFlags1C*)((char*)p + 0x1c))->mode = 6;
     }
@@ -594,22 +591,22 @@ struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" char* cUIScreen_createObjectByStruct(void* self, char* rec);
+extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec);
 extern "C" void* MEM_fill(void* dst, int c, int n);
 extern char D_00493EF0[];
 
 struct sUIVtCED0 { short delta; short index; void (*fn)(void*, void*); };
 
-extern "C" void cUIScreen_createAllObjects(void* self)
+extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
 {
-    char* data = *(char**)((char*)self + 0x38);
+    char* data = (char*)self->mpObjectBlock;
     char* rec = data + 4;
     if (*(unsigned int*)data != 0) {
-        *(void***)((char*)self + 0x3C) = (void**)operator_new_tag(*(unsigned int*)data * 4, D_00493EF0, 0x20000000, 0);
-        MEM_fill(*(void***)((char*)self + 0x3C), 0, **(unsigned int**)((char*)self + 0x38) * 4);
+        self->mppObjectList = (cUIThing**)((void**)operator_new_tag(*(unsigned int*)data * 4, D_00493EF0, 0x20000000, 0));
+        MEM_fill((void**)self->mppObjectList, 0, *(unsigned int*)self->mpObjectBlock * 4);
     }
-    void** out = *(void***)((char*)self + 0x3C);
-    for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
+    void** out = (void**)self->mppObjectList;
+    for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
         char* obj = cUIScreen_createObjectByStruct(self, rec);
         if (obj != 0) {
             *out++ = obj;
@@ -618,10 +615,10 @@ extern "C" void cUIScreen_createAllObjects(void* self)
         }
         rec += *(unsigned short*)(rec + 2);
     }
-    for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
-        void* o = (*(void***)((char*)self + 0x3C))[i];
+    for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
+        void* o = ((void**)self->mppObjectList)[i];
         if (o != 0) {
-            char* d = *(char**)((char*)self + 0xD0);
+            char* d = (char*)self->mpState;
             sUIVtCED0* vt = *(sUIVtCED0**)(d + 8);
             vt[18].fn(d + vt[18].delta, o);
         }
@@ -644,7 +641,7 @@ extern "C" void* func_0039D008(void* self, int key)
     unsigned int i;
     for (i = 0; i < *(*(unsigned int**)((char*)self + 0x38)); i++) {
         if (e->key == key) {
-            char* obj = cUIScreen_createObjectByStruct(self, (char*)e);
+            char* obj = cUIScreen_createObjectByStruct((cUIScreen*)self, (char*)e);
             *(int*)(obj + 0x38) = key;
             return obj;
         }
@@ -710,7 +707,7 @@ static inline char* alloc_D078(unsigned int size, const char* tag)
     return (char*)operator new(size, tag, 0x20000000, 0);
 }
 
-extern "C" char* cUIScreen_createObjectByStruct(void* self, char* rec)
+extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
 {
     switch (*(unsigned short*)rec) {
     case 0x11: {
@@ -936,10 +933,10 @@ void* cUIScreen_onInput(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiscreen", cUIScreen_update);
 #ifdef SKIP_ASM
-extern "C" void cUIScreen_playFrameByThread(void* self, void* thread);
+extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void* thread);
 extern "C" void cUIGroup_update(void* list, unsigned short frame);
 
-extern "C" void cUIScreen_update(void* self)
+extern "C" void cUIScreen_update(cUIScreen* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x18));
     if (n != 0) {
@@ -976,11 +973,11 @@ extern "C" void cUIScreen_update(void* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash)
+extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
 {
-    void** objs = *(void***)((char*)self + 0x3C);
+    void** objs = (void**)self->mppObjectList;
     if (objs != 0) {
-        for (unsigned int i = 0; i < **(unsigned int**)((char*)self + 0x38); i++) {
+        for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
             void* o = objs[i];
             if (o != 0 && *(int*)((char*)o + 0x38) == hash) {
                 return o;
@@ -1531,11 +1528,11 @@ struct sVEntry39E4C0 {
     void (*fn)(void*, void*);
 };
 
-extern "C" void cUIState_onGainFocus(void* self)
+extern "C" void cUIState_onGainFocus(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
-        sVEntry39E4C0* vt = *(sVEntry39E4C0**)((char*)self + 8);
+        sVEntry39E4C0* vt = (sVEntry39E4C0*)self->mVtbl;
         vt[0xD].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
     }
 }
@@ -1687,7 +1684,7 @@ void cList_addToEnd(cList*, cListNode*);
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIState_addScreen);
 #ifdef SKIP_ASM
-extern "C" void cUIState_addScreen(void* self, cListNode* node)
+extern "C" void cUIState_addScreen(cUIState* self, cListNode* node)
 {
     cList_addToEnd((cList*)((char*)self + 0x24), node);
 }
@@ -1759,14 +1756,14 @@ struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
-extern "C" void cUIScreen_update(void*);
+extern "C" void cUIScreen_update(cUIScreen*);
 
-extern "C" void cUIState_updateScreens(void* self)
+extern "C" void cUIState_updateScreens(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
         do {
-            cUIScreen_update(n);
+            cUIScreen_update((cUIScreen*)n);
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
     }

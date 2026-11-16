@@ -1,4 +1,6 @@
 #include "common.h"
+#include "vtable.h"
+#include "ui/uitext.h"
 
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_render2D);
@@ -175,16 +177,16 @@ INCLUDE_ASM("ui/uitext", cUIText_deleteText);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-extern "C" void cUIText_deleteText(void* self)
+extern "C" void cUIText_deleteText(cUIText* self)
 {
-    *(int*)((char*)self + 0xA8) = 0;
-    if (*(void**)((char*)self + 0xAC) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0xAC));
-        *(void**)((char*)self + 0xAC) = 0;
+    self->mNumLines = 0;
+    if ((void*)self->mpLineOffset != 0) {
+        cMemMan_free(self->mpLineOffset);
+        self->mpLineOffset = (unsigned short**)0;
     }
-    if (*(void**)((char*)self + 0xB4) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0xB4));
-        *(void**)((char*)self + 0xB4) = 0;
+    if ((void*)self->mpString != 0) {
+        cMemMan_free(self->mpString);
+        self->mpString = (unsigned short*)0;
     }
 }
 #endif
@@ -222,10 +224,10 @@ extern "C" char cUIText_getNumTextLines_(void* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_getAsciiString);
 #ifdef SKIP_ASM
-extern "C" int cUIText_getAsciiString(void* self)
+extern "C" int cUIText_getAsciiString(cUIText* self)
 {
-    if (((*(int*)((char*)self + 0x74) >> 3) & 1) == 0) {
-        return *(int*)((char*)self + 0xb4);
+    if (((self->mAttrText >> 3) & 1) == 0) {
+        return (int)self->mpString;
     }
     return 0;
 }
@@ -234,37 +236,23 @@ extern "C" int cUIText_getAsciiString(void* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_getUnicodeString);
 #ifdef SKIP_ASM
-extern "C" int cUIText_getUnicodeString(void* self)
+extern "C" int cUIText_getUnicodeString(cUIText* self)
 {
-    if (((*(int*)((char*)self + 0x74) >> 3) & 1) != 0) {
-        return *(int*)((char*)self + 0xb4);
+    if (((self->mAttrText >> 3) & 1) != 0) {
+        return (int)self->mpString;
     }
     return 0;
 }
 #endif
 
-struct cUITextManager {
-    char pad_0x00[0x28];
-    short field_0x28;
-    char pad_0x2A[2];
-    void (*fn)(void*, int); // 0x2C
-};
-
-struct cUIText {
-    char pad_0x00[0x8];
-    cUITextManager* mMgr; // 0x8
-    char pad_0xC[0xB0 - 0xC];
-    int field_0xB0;
-};
-
-extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str);
+extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str);
 
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_setAsciiString__FP7cUITextPCc);
 #ifdef SKIP_ASM
 void cUIText_setAsciiString(cUIText* self, const char* str)
 {
-    self->field_0xB0 = 0;
+    self->mStringID = 0;
     cUIText_setAsciiStringPrivate(self, str);
 }
 #endif
@@ -274,7 +262,7 @@ INCLUDE_ASM("ui/uitext", cUIText_setAsciiStringPrivate);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
-extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
+extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned short* str);
 
 class cUIText_3A0C70 {
 public:
@@ -305,7 +293,7 @@ public:
     virtual void v24(int);
 };
 
-extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str)
+extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str)
 {
     unsigned short buf[0x200];
     ((cUIText_3A0C70*)self)->v05(1);
@@ -324,14 +312,14 @@ extern "C" void* cUIText_getFont(void* self);
 extern "C" float func_00392C60(void* font, unsigned short ch);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
-extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
+extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned short* str);
 void cMemMan_free(void*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494078[];
 extern unsigned short gUSTRBackSlash;
 
-extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str)
+extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
 {
     ((cUIText_3A0C70*)self)->v05(1);
     void* font = cUIText_getFont(self);
@@ -350,11 +338,11 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str)
             w = 0.0f;
             i += 2;
         } else {
-            w += func_00392C60(font, buf[i]) * *(float*)((char*)self + 0x50);
+            w += func_00392C60(font, buf[i]) * self->mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
-            if (w > *(float*)((char*)self + 0x60) && last >= 0) {
+            if (w > self->mSize.x && last >= 0) {
                 buf[last] = 0xD;
                 i = last;
                 w = 0.0f;
@@ -373,11 +361,11 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str)
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_setUnicodeString);
 #ifdef SKIP_ASM
-extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
+extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned short* str);
 
-extern "C" void cUIText_setUnicodeString(void* self, const unsigned short* str)
+extern "C" void cUIText_setUnicodeString(cUIText* self, const unsigned short* str)
 {
-    *(int*)((char*)self + 0xB0) = 0;
+    self->mStringID = 0;
     cUIText_setUnicodeStringPrivate(self, str);
 }
 #endif
@@ -388,7 +376,7 @@ INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringPrivate);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
-extern "C" void cUIText_deleteText(void* self);
+extern "C" void cUIText_deleteText(cUIText* self);
 extern "C" int cUIText_getNumTextLines(void* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494088[];
@@ -396,24 +384,23 @@ extern char D_00494098[];
 extern unsigned short gUSTRBackSlash;
 
 // Stores a copy of the string and splits it into lines at CR and at doubled line-break markers.
-extern "C" void cUIText_setUnicodeStringPrivate(void* self_, const unsigned short* str)
+extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned short* str)
 {
-    char* self = (char*)self_;
-    ((cUIText_3A0C70*)self)->v05(1);
-    ((cUIText_3A0C70*)self)->v24(1);
-    cUIText_deleteText(self);
+    ((cUIText_3A0C70*)self_)->v05(1);
+    ((cUIText_3A0C70*)self_)->v24(1);
+    cUIText_deleteText(self_);
     int len = USTR_length((unsigned short*)str);
     if (len < 0x321) {
-        *(short*)(self + 0xB8) = len + 1;
-        *(unsigned short**)(self + 0xB4) = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494088, 0x100, 0);
-        USTR_copy(*(unsigned short**)(self + 0xB4), (unsigned short*)str);
-        int n = cUIText_getNumTextLines(self);
-        *(int*)(self + 0xA8) = n;
+        *(short*)&self_->mStringSize = len + 1;
+        self_->mpString = (unsigned short*)operator_new_tag((len + 1) * 2, D_00494088, 0x100, 0);
+        USTR_copy(self_->mpString, (unsigned short*)str);
+        int n = cUIText_getNumTextLines(((char*)self_));
+        self_->mNumLines = n;
         if (n >= 2) {
             unsigned short** lines = (unsigned short**)operator_new_tag(n * 4, D_00494098, 0x100, 0);
-            unsigned short* text = *(unsigned short**)(self + 0xB4);
-            *(unsigned short***)(self + 0xAC) = lines;
-            *(short*)(self + 0xBA) = *(unsigned short*)(self + 0xA8);
+            unsigned short* text = self_->mpString;
+            self_->mpLineOffset = lines;
+            *(short*)&self_->mLineSize = *(unsigned short*)&self_->mNumLines;
             lines[0] = text;
             int k = 1;
             unsigned short* p = text;
@@ -442,9 +429,9 @@ INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringByID__FP7cUITexti);
 #ifdef SKIP_ASM
 void cUIText_setUnicodeStringByID(cUIText* self, int id)
 {
-    self->field_0xB0 = id;
-    cUITextManager* mgr = self->mMgr;
-    mgr->fn((char*)self + mgr->field_0x28, 0);
+    self->mStringID = id;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+    vt[5].fn((char*)self + vt[5].delta, 0);  // virtual cUIThing::setCached(false)
 }
 #endif
 
