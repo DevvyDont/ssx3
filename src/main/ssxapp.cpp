@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/bxstring.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -627,12 +628,6 @@ extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_parseCommandLine);
 #ifdef SKIP_ASM
-struct cBXString {
-    char* str;
-    cBXString() {}
-    cBXString(const cBXString& o);
-};
-
 extern "C" void* cBXString_cBXString2(cBXString* self, const char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n);
@@ -672,7 +667,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 int p = MAX_7BF0(a, MAX_7BF0(b, c));
                 if (p >= 0) {
                     cBXString t;
-                    func_00319028(&t, &s, *(int*)((int)s.str - 8) - p - 1);
+                    func_00319028(&t, &s, *(int*)((int)s.Str - 8) - p - 1);
                     cBXString_operatorE(&s, &t);
                     cBXString__cBXString(&t, 2);
                 }
