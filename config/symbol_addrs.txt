@@ -4579,6 +4579,16 @@ cGraphicsMan_ResolveCharModel__FPv = 0x00394650; //type:func
 cWorldTriggerManager_TriggerToPatch = 0x002B63D0; //type:func
 cWorldTriggerManager_AdvancedTriggerToPatch = 0x002B6550; //type:func
 
+// cls_b_out: names by evidence (docs/function_names.tsv)
+cFEStateMemCard_onUpdate = 0x00186BF0; //type:func
+cFEStateAuthDNAS_handleEvent = 0x001B6740; //type:func
+cFEStateAuthDNASError_handleEvent = 0x001B6E10; //type:func
+cFEStateNetAccountMem_handleEvent = 0x001B8860; //type:func
+cFEStateLogin_onWidgetEvent = 0x001BF758; //type:func
+cOVSound__cOVSound = 0x001E0780; //type:func
+cOVSound_soundInitialize__FPv = 0x001E07B0; //type:func
+cOVSound_soundShutdown__FPv = 0x001E07B8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

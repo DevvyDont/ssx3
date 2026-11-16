@@ -2280,12 +2280,21 @@ void func_001E0778(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0780);
+INCLUDE_ASM("fe/fepopupmisc", cOVSound__cOVSound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046DD60[];
 
-extern "C" void func_001E0780(void* self, int flags)
+/**
+ * Destroys the overlay sound interface, freeing it when asked.
+ *
+ * Puts back D_0046DD60, the base sound-interface vtable (On Tour cUISoundInterface; its own destructor func_001E1048
+ * stores the same table), and calls operator_delete when bit 0 of flags is set. cOVSound owns nothing to release
+ * (On Tour: only mDummyVar at +0x4).
+ *
+ * @param flags  g++ 2.95 destructor flags; bit 0 = free the object
+ */
+extern "C" void cOVSound__cOVSound(void* self, int flags)
 {
     *(void***)self = D_0046DD60;
     if (flags & 1) {
@@ -2295,17 +2304,28 @@ extern "C" void func_001E0780(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E07B0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVSound_soundInitialize__FPv);
 #ifdef SKIP_ASM
-void func_001E07B0(void* self)
+/**
+ * Does nothing: the overlay sound interface needs no set-up.
+ *
+ * Empty, like On Tour's cOVSound::soundInitialize. Vtable slot 3 of cOVSound_vtbl, after func_001A2F70 (slot 2, which
+ * plays the menu sounds) and before cOVSound_soundShutdown.
+ */
+void cOVSound_soundInitialize(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E07B8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVSound_soundShutdown__FPv);
 #ifdef SKIP_ASM
-void func_001E07B8(void* self)
+/**
+ * Does nothing: the overlay sound interface has nothing to shut down.
+ *
+ * Empty, like On Tour's cOVSound::soundShutdown. Vtable slot 4 of cOVSound_vtbl, the last one.
+ */
+void cOVSound_soundShutdown(void* self)
 {
 }
 #endif

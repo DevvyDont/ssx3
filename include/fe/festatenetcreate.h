@@ -8,7 +8,7 @@
 //
 // cFEStateCreateStep1: screen "210create_step1": account name, password, confirmation, e-mail and the two
 // "inform me" / "share info" yes-no boxes. Size 0x6F4: cFEStateCreateStep1 is allocated with
-// cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (cFEStateSelectPersona_onWidgetEvent, cFEStateCreateStep2_onWidgetEvent, func_001BF758, cFEStateOnlineAgreement_onWidgetEvent) and
+// cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (cFEStateSelectPersona_onWidgetEvent, cFEStateCreateStep2_onWidgetEvent, cFEStateLogin_onWidgetEvent, cFEStateOnlineAgreement_onWidgetEvent) and
 // constructed by cFEStateCreateStep1_cFEStateCreateStep1(mem, pEngine, bEdit); every own field ends below 0x6F4. Constructors cFEStateCreateStep1_cFEStateCreateStep1
 // and the default func_001E0CA0 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
 // (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable cFEStateCreateStep1_vtbl (32 slots: 1 dtor, 4

@@ -16,7 +16,7 @@
 // mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNAS_onCreateScreen, 7
 // cFEStateAuthDNAS_onGainTransition
 // (onGainTransition), 8 cFEStateAuthDNAS_onInputBegin, 10 cFEStateAuthDNAS_onLoseTransition (onLoseTransition), 12 onUpdate cFEStateAuthDNAS_onUpdate, 18
-// onWidgetCreate cFEStateAuthDNAS_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNAS_onWidgetEvent, 20 cFEStateAuthDNAS_onWidgetMenu, 24 handleEvent func_001B6740, 29
+// onWidgetCreate cFEStateAuthDNAS_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNAS_onWidgetEvent, 20 cFEStateAuthDNAS_onWidgetMenu, 24 handleEvent cFEStateAuthDNAS_handleEvent, 29
 // func_001E0C28, 32 func_001E0C20).
 // Methods: fe/feasyncfile 0x1B6288-0x1B6A90.
 //
@@ -28,7 +28,7 @@
 // 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable cFEStateAuthDNASError_vtbl
 // (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNASError_onCreateScreen, 7 cFEStateAuthDNASError_onGainTransition, 10 cFEStateAuthDNASError_onLoseTransition, 12 onUpdate
 // cFEStateNet's func_001A8770, 18 onWidgetCreate cFEStateAuthDNASError_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNASError_onWidgetEvent, 20 cFEStateAuthDNASError_onWidgetMenu, 24
-// handleEvent func_001B6E10, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
+// handleEvent cFEStateAuthDNASError_handleEvent, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for

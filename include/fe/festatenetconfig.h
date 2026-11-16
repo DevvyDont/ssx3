@@ -3,7 +3,7 @@
 
 // The online network-configuration screens (EA's d:/ssx/code/source/fe/festatenetconfig.cpp: the preview's asserts
 // at lines 554 and 641 sit between retail func_001B0F28 and cFEStateAuthDNAS_onCreateScreen (cFEStateNetConfig / cFEStateAuthDNAS),
-// those at 1381-1394 between cFEStateNetAccountMem_onUpdate and func_001B8860, both cFEStateNetAccountMem methods). Two classes
+// those at 1381-1394 between cFEStateNetAccountMem_onUpdate and cFEStateNetAccountMem_handleEvent, both cFEStateNetAccountMem methods). Two classes
 // live here, both cFEStateNet states (fe/festatenet.h, 0x6D0):
 //
 // cFEStateNetConfig: screen "200net_config": picks a network adapter and a saved network configuration, connects
@@ -24,7 +24,7 @@
 // cFEStateNetAccountMem_cFEStateNetAccountMem(mem, pEngine, pParent, mode, szName, szPassword) (14 sites); the constructor stores 0xB0C last.
 // Destructor cFEStateNetAccountMem__cFEStateNetAccountMem. Retail vtable cFEStateNetAccountMem_vtbl (24 slots: 1 dtor, 4 onCreateScreen cFEStateNetAccountMem_onCreateScreen, 7
 // onGainTransition cFEStateNetAccountMem_onGainTransition, 10 onLoseTransition cFEStateNetAccountMem_onLoseTransition, 12 onUpdate cFEStateNetAccountMem_onUpdate, 17 onPopupEvent
-// cFEStateNetAccountMem_onPopupEvent, 24 handleEvent func_001B8860). Methods: fe/feasyncfile 0x1B6ED0-0x1B8890.
+// cFEStateNetAccountMem_onPopupEvent, 24 handleEvent cFEStateNetAccountMem_handleEvent). Methods: fe/feasyncfile 0x1B6ED0-0x1B8890.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for

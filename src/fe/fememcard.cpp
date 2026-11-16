@@ -46,7 +46,7 @@ extern "C" void cFEStateMemCard_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186BF0);
+INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onUpdate);
 #ifdef SKIP_ASM
 extern char str_exclam[];
 extern "C" void func_001D8DE0(void* self);
@@ -67,7 +67,14 @@ public:
     virtual void v09(int);
 };
 
-extern "C" void func_00186BF0(void* self)
+/**
+ * Runs the memory-card screen's per-frame update, then clears its busy markers once the card work is over.
+ *
+ * Calls the cFEMemCard update func_001D8DE0 first. When the memory-card overlay manager (cSSXApp_getMCManager) is
+ * done (cMCOverlayManager_isManagerDone) or the state word at +0x1C0 is 6, it deletes the animation of the "!"
+ * object, when there is one, and hides "mc messages" (slot 9 with 0). "mc messages" is used without a null check.
+ */
+extern "C" void cFEStateMemCard_onUpdate(void* self)
 {
     func_001D8DE0(self);
     if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || *(int*)((char*)self + 0x1C0) == 6) {

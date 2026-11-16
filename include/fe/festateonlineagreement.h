@@ -7,7 +7,7 @@
 // source file is not known (its code follows cFEStateOnlineMainMenu's, festatenetmainmenu.cpp, in both builds).
 //
 // Size 0x6DC: cMemMan_alloc(0x6DC, "cFEStateOnlineAgreement") + cFEStateOnlineAgreement_cFEStateOnlineAgreement(mem, pEngine) at all 4 sites
-// (cFEStateCreateStep1/2's onWidgetEvent, func_001BF758, cFEStateNetSSXWorld_onWidgetEvent). Constructors cFEStateOnlineAgreement_cFEStateOnlineAgreement
+// (cFEStateCreateStep1/2's onWidgetEvent, cFEStateLogin_onWidgetEvent, cFEStateNetSSXWorld_onWidgetEvent). Constructors cFEStateOnlineAgreement_cFEStateOnlineAgreement
 // (cFEStateNet(pEngine,
 // 0), vtable cFEStateOnlineAgreement_vtbl, mHashName 0x43), func_001C03D0 (cFEStateNet(pEngine, pParent), the same stores; no caller
 // found) and the default func_001C0460 (cFEStateNet(0, 0), no mHashName); destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement (slot 1: frees

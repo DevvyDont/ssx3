@@ -164,11 +164,11 @@ INCLUDE_ASM("fe/fepopup3", func_001E0770);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0778);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0780);
+INCLUDE_ASM("fe/fepopup3", cOVSound__cOVSound);
 
-INCLUDE_ASM("fe/fepopup3", func_001E07B0);
+INCLUDE_ASM("fe/fepopup3", cOVSound_soundInitialize);
 
-INCLUDE_ASM("fe/fepopup3", func_001E07B8);
+INCLUDE_ASM("fe/fepopup3", cOVSound_soundShutdown);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode);
 

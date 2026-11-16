@@ -13952,9 +13952,9 @@ extern "C" int cFEStateAuthDNAS_onInputBegin(cFEStateAuthDNAS* self, cFEVObj_001
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6740);
+INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS_handleEvent);
 #ifdef SKIP_ASM
-class func_001B6740_cObj {
+class cFEStateAuthDNAS_handleEvent_cObj {
 public:
     char pad[0x8];
     virtual int v01(int, int);
@@ -13983,9 +13983,20 @@ public:
     virtual int v24(int, int);
 };
 
-extern "C" int func_001B6740(cFEStateAuthDNAS* self, int a1, int a2)
+/**
+ * Passes an event on to the DNAS popup's parent state instead of handling it.
+ *
+ * Calls handleEvent (vtable slot 24) on mpParentState, the cFEStateNetConfig that pushed the popup (func_001B55B0),
+ * with both arguments unchanged, the same body as cScreenPopup_handleEvent. The cFEStateNet handler func_001A8B88,
+ * which the other online states keep in this slot, never runs for the popup.
+ *
+ * @param msg  event message (On Tour: msg)
+ * @param pParam  event parameter (On Tour: pParam)
+ * @return the parent state's handleEvent result
+ */
+extern "C" int cFEStateAuthDNAS_handleEvent(cFEStateAuthDNAS* self, int msg, int pParam)
 {
-    return ((func_001B6740_cObj*)self->mpParentState)->v24(a1, a2);
+    return ((cFEStateAuthDNAS_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
 }
 #endif
 
@@ -14350,9 +14361,9 @@ extern "C" int cFEStateAuthDNASError_onGainTransition(cFEStateAuthDNASError* sel
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6E10);
+INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_handleEvent);
 #ifdef SKIP_ASM
-class func_001B6E10_cObj {
+class cFEStateAuthDNASError_handleEvent_cObj {
 public:
     char pad[0x8];
     virtual int v01(int, int);
@@ -14381,9 +14392,20 @@ public:
     virtual int v24(int, int);
 };
 
-extern "C" int func_001B6E10(cFEStateAuthDNASError* self, int a1, int a2)
+/**
+ * Passes an event on to the DNAS error popup's parent state instead of handling it.
+ *
+ * Calls handleEvent (vtable slot 24) on mpParentState, the cFEStateNetConfig that pushed the popup when
+ * authentication failed (func_001B5830), with both arguments unchanged, the same body as cScreenPopup_handleEvent and
+ * cFEStateAuthDNAS_handleEvent; the cFEStateNet handler func_001A8B88 never runs for the popup.
+ *
+ * @param msg  event message (On Tour: msg)
+ * @param pParam  event parameter (On Tour: pParam)
+ * @return the parent state's handleEvent result
+ */
+extern "C" int cFEStateAuthDNASError_handleEvent(cFEStateAuthDNASError* self, int msg, int pParam)
 {
-    return ((func_001B6E10_cObj*)self->mpParentState)->v24(a1, a2);
+    return ((cFEStateAuthDNASError_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
 }
 #endif
 
@@ -15708,9 +15730,9 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B8860);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_handleEvent);
 #ifdef SKIP_ASM
-class func_001B8860_cObj {
+class cFEStateNetAccountMem_handleEvent_cObj {
 public:
     char pad[0x8];
     virtual int v01(int, int);
@@ -15739,9 +15761,20 @@ public:
     virtual int v24(int, int);
 };
 
-extern "C" int func_001B8860(cFEStateNetAccountMem* self, int a1, int a2)
+/**
+ * Passes an event on to the account memory-card popup's parent state instead of handling it.
+ *
+ * Calls handleEvent (vtable slot 24) on mpParentState, the state that pushed the popup (cFEStateLogin,
+ * cFEStateNetConfig, cFEStateCreateStep1 ...), with both arguments unchanged, the same body as
+ * cScreenPopup_handleEvent; the cFEStateNet handler func_001A8B88 never runs for the popup.
+ *
+ * @param msg  event message (On Tour: msg)
+ * @param pParam  event parameter (On Tour: pParam)
+ * @return the parent state's handleEvent result
+ */
+extern "C" int cFEStateNetAccountMem_handleEvent(cFEStateNetAccountMem* self, int msg, int pParam)
 {
-    return ((func_001B8860_cObj*)self->mpParentState)->v24(a1, a2);
+    return ((cFEStateNetAccountMem_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
 }
 #endif
 
@@ -15778,7 +15811,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
  * Runs the cFEStateNet constructor (func_001A8500, no parent), stores cFEStateCreateStep1_vtbl, clears
  * mpStaticContinue and unk_6A8, points the saved password, confirmation and mail texts at cBXString_EmptyString (an empty
  * string), stores @p bNewAccount in mbEditAccount and mHashName 0x4D when it is set, else 0x50. Despite the field's name a
- * nonzero flag means a new account: the callers pass 1 from "create account" (func_001BF758,
+ * nonzero flag means a new account: the callers pass 1 from "create account" (cFEStateLogin_onWidgetEvent,
  * cFEStateOnlineAgreement id 0x14, Step2's back) and the screen then uses LobbyMan's mNewAccount form.
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
@@ -21000,7 +21033,7 @@ extern "C" void cFEStateLogin_onPopupEvent(cFEStateLogin* self, void* pPopup, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BF758);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(void* s);
@@ -21046,7 +21079,23 @@ static inline int Loc1BF758(char* name)
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
 
-extern "C" void func_001BF758(cFEStateLogin* self, void* popup, unsigned int kind)
+/**
+ * Handles the online login screen: logs in with the saved account, creates or links one, manages it on the card, or
+ * offers to disconnect.
+ *
+ * A null widget is ignored. Event 5 by the widget's id (+0x18): 0 copies SSXApp->UserName and Password into
+ * LobbyMan_mLobbyMan's strings at +0x48 / +0x4C and calls func_0025B6D8(LobbyMan_mLobbyMan, 0); 2 switches
+ * (func_001A8A40) to a new cFEStateCreateStep1 (mode 1); 1 to a new cFEUseExistingAccount; 3 pushes a
+ * cFEStateNetAccountMem popup (mode 3, miMiscData 0x82C). Event 6 (back) frees mpustrDisconnect and rebuilds it as
+ * "kT_POPUPCMNDisconnecting" + "kT_POPUPCMNDisconnect" ("%s%s"), then asks it with yes / no (id 0x848, default
+ * no); when the allocation fails the popup shows "kT_POPUPCMNDisconnect" by id instead. Event 8 switches to a new
+ * cFEStateOnlineAgreement (miMiscData 18); the rest go to the cFEStateNet handler func_001A8918. The subclass vtable
+ * D_00468050 uses this handler too.
+ *
+ * @param popup  the widget (On Tour pWidget; not a popup despite the name); null is ignored
+ * @param kind  the widget event (On Tour Event)
+ */
+extern "C" void cFEStateLogin_onWidgetEvent(cFEStateLogin* self, void* popup, unsigned int kind)
 {
     if (popup == 0) {
         return;

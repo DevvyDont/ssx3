@@ -13,7 +13,7 @@
 // Constructors cFEStateLogin_cFEStateLogin (cFEStateNet(pEngine, 0), vtable cFEStateLogin_vtbl, mHashName 0x33, unk_6A8 = 0) and the
 // default func_001E0E48 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
 // cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateLogin_onCreateScreen, 12 onUpdate func_001BEF40, 17
-// onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent func_001BF758, 25 func_001BFAE0
+// onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent cFEStateLogin_onWidgetEvent, 25 func_001BFAE0
 // (help), 29 func_001E0E90, 31 func_001BF228 (net events), 32 func_001E0E88, 33 func_001BF378). Methods:
 // fe/feasyncfile 0x1BEE30-0x1BFAE0.
 //
@@ -109,7 +109,7 @@ struct cFEStateLogin {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateLogin
-    unsigned short* mpustrDisconnect; // 0x6D0 [R] 0 (both ctors); [U] onWidgetEvent func_001BF758 (back): frees it
+    unsigned short* mpustrDisconnect; // 0x6D0 [R] 0 (both ctors); [U] onWidgetEvent cFEStateLogin_onWidgetEvent (back): frees it
                                     //       and stores operator_new_tag(.., "cFEStateLogin") holding
                                     //       "kT_POPUPCMNDisconnecting" + "kT_POPUPCMNDisconnect" (sprintf2), then
                                     //       hands it to the question popup (popup + 0xC4, text type 1); the
