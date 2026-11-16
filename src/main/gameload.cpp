@@ -585,7 +585,7 @@ extern "C" void cBucketMan_mergeBucket(void* mgr, int a);
 extern "C" void cBucketMan_purge(void* mgr);
 extern "C" void func_00229278(void* p, int flags);
 extern "C" void func_00343B28(void* p, int flags);
-extern "C" void func_00357A00(void* p, int flags);
+extern "C" void cMultiParticleMan__cMultiParticleMan(void* p, int flags);
 extern "C" void func_0026C588(void* p, int flags);
 extern "C" void func_00351120(void* p, int flags);
 extern "C" void func_002ECFA0(void);
@@ -733,7 +733,7 @@ extern "C" void cGame_purge(char* self)
     VDelete_FA98(*(char**)(self + 0x30), 0x494, 8);
     if (*(void**)(self + 0x38) != 0) func_00229278(*(void**)(self + 0x38), 3);
     if (*(void**)(self + 0x3C) != 0) func_00343B28(*(void**)(self + 0x3C), 3);
-    if (*(void**)(self + 0x40) != 0) func_00357A00(*(void**)(self + 0x40), 3);
+    if (*(void**)(self + 0x40) != 0) cMultiParticleMan__cMultiParticleMan(*(void**)(self + 0x40), 3);
     if (*(void**)(self + 0x34) != 0) func_0026C588(*(void**)(self + 0x34), 3);
     if (*(void**)(self + 0x88) != 0) func_00351120(*(void**)(self + 0x88), 3);
     cCameraTriggerMan_purge(D_004C5830);

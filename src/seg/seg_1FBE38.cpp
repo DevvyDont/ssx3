@@ -7459,7 +7459,7 @@ extern int D_58B4_6A90 __asm__("D_004A58B4");
 extern const int D_00446890_6A90[] __asm__("D_00446890");
 extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
 extern int D_004A4028_6A90 __asm__("D_004A4028");
-extern "C" void func_00357A78_6A90(int, int, Rec_6A90*, int) __asm__("func_00357A78");
+extern "C" void cMultiParticleMan_addParticle_6A90(int, int, Rec_6A90*, int) __asm__("cMultiParticleMan_addParticle");
 struct Ent_6A90 { int idx; int val; int pad; int type; };
 extern "C" V3_6A90 func_00306A90(int n, Ent_6A90 *e) {
     if (D_58B4_6A90 == 0) {
@@ -7539,7 +7539,7 @@ extern "C" V3_6A90 func_00306A90(int n, Ent_6A90 *e) {
         else
             *d = x->val;
     }
-    func_00357A78_6A90(D_004A4028_6A90, buf->q, buf, buf->w);
+    cMultiParticleMan_addParticle_6A90(D_004A4028_6A90, buf->q, buf, buf->w);
     return D_004C9098_6A90;
 }
 #endif

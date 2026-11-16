@@ -1085,9 +1085,9 @@ extern "C" void* func_00393008(void* self, ...)
 INCLUDE_ASM("render/font", func_00393048);
 
 //100%
-INCLUDE_ASM("render/font", func_00393FA8__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_SetDTV__FPv);
 #ifdef SKIP_ASM
-void func_00393FA8(void* self)
+void cGraphicsMan_SetDTV(void* self)
 {
 }
 #endif
@@ -1464,9 +1464,9 @@ extern "C" void* func_003942A0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003942C0__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_RemoveScreenGrabTexture__FPv);
 #ifdef SKIP_ASM
-void func_003942C0(void* self)
+void cGraphicsMan_RemoveScreenGrabTexture(void* self)
 {
 }
 #endif
@@ -1667,9 +1667,9 @@ void func_003945B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003945C0__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_AddProjectiveTexture__FPv);
 #ifdef SKIP_ASM
-void func_003945C0(void* self)
+void cGraphicsMan_AddProjectiveTexture(void* self)
 {
 }
 #endif
@@ -1811,9 +1811,9 @@ void func_00394658(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394660__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_GenerateBlendedMatrices__FPv);
 #ifdef SKIP_ASM
-void func_00394660(void* self)
+void cGraphicsMan_GenerateBlendedMatrices(void* self)
 {
 }
 #endif

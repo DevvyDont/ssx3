@@ -9,8 +9,8 @@ INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern "C" void* func_00370018(void* p);
-extern "C" void func_003705E0(void* sys, void* data, int n);
+extern "C" void* cStaticEmitter_cStaticEmitter(void* p);
+extern "C" void cStaticEmitter_setupEmitter(void* sys, void* data, int n);
 extern char D_004A4030[];
 extern char D_004A4038[];
 extern char t4mat_Identity[];
@@ -35,18 +35,18 @@ struct sMultiParticle {
  * Allocates a multi-particle effect's instance-id table and its static emitter, and sets the emitter up.
  *
  * InstIds (+0xC) becomes MaxInst (+0x0) ids ("InstIds"), all -1; Emitter (+0x10) a 0x190-byte cStaticEmitter
- * ("Emitter", constructed by func_00370018), set up by func_003705E0 (On Tour setupEmitter) with an identity
+ * ("Emitter", constructed by cStaticEmitter_cStaticEmitter), set up by cStaticEmitter_setupEmitter (On Tour setupEmitter) with an identity
  * transform and the particle data (+0x8).
  */
 extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
 {
     sMPRef** slot = &self->refs;
     *slot = new (D_004A4030, 0x20000000, 0) sMPRef[self->count];
-    self->sys = func_00370018(cMemMan_alloc(0x190, D_004A4038, 0x20000000, 0));
+    self->sys = cStaticEmitter_cStaticEmitter(cMemMan_alloc(0x190, D_004A4038, 0x20000000, 0));
     for (int i = 0; i < self->count; i++) {
         self->refs[i].id = 0xFFFFFFFF;
     }
-    func_003705E0(self->sys, t4mat_Identity, self->field_0x8);
+    cStaticEmitter_setupEmitter(self->sys, t4mat_Identity, self->field_0x8);
 }
 #endif
 

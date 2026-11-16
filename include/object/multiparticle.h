@@ -6,8 +6,8 @@
 // src/object/movenode.cpp (0x3579C8-0x357FA0), the rest in src/object/multiparticle.cpp (0x358020-0x358380). No EA
 // path in the preview (On Tour: all_in_one_object.cpp), so the header takes the retail unit name.
 //   cMultiParticle    0x50: cMemMan_alloc(0x50, "MultiParticle") + ctor func_00357DD8(pdata, maxInst) in
-//                     cMultiParticleMan::addParticle (func_00357A78) and + func_00357E80(replay) in its
-//                     readFromReplayFrame. No vtable (dtor func_00357FA0 is called directly).
+//                     cMultiParticleMan::addParticle (cMultiParticleMan_addParticle) and + func_00357E80(replay) in its
+//                     readFromReplayFrame. No vtable (dtor cMultiParticle__cMultiParticle is called directly).
 //   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor func_003579C8 in cGame (main/gameload.cpp;
 //                     cGame::MultiParticleMan, main/game.h +0x40). Instance cMultiParticleMan::TheMultiParticleMan =
 //                     D_004A4028 (gp-relative; the ctor stores it, the dtor clears it; playbackman reads it).
@@ -33,7 +33,7 @@ struct cMultiParticle {
                                     //       with -1; unloadSection compares each id's low byte (section); dtor
                                     //       cMemMan_free
     cStaticEmitter* Emitter;        // 0x010 [O]; [U] setupMultiParticle: cMemMan_alloc(0x190, "Emitter") +
-                                    //       func_00370018; update/render/replay; dtor calls its virtual dtor (slot 1,
+                                    //       cStaticEmitter_cStaticEmitter; update/render/replay; dtor calls its virtual dtor (slot 1,
                                     //       flags 3)
     char unk_014[0xC];              // 0x014 padding (BoundBox is 16-aligned)
     tBoundBox BoundBox;             // 0x020 [O]; [R] ctor copies Emitter->BoundBox; [U] render offsets it by each

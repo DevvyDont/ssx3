@@ -1102,7 +1102,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_cDynamicSprayFX);
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sEmitterE4A8 {
     char data[0x210];
-    sEmitterE4A8() __asm__("func_003714B8");
+    sEmitterE4A8() __asm__("cDynamicColourEmitter_cDynamicColourEmitter");
     ~sEmitterE4A8();
 };
 

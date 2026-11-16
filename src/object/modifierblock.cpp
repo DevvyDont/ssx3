@@ -970,7 +970,7 @@ extern "C" void* func_0035F788(void* self, sMbStream36D8* s);
 extern "C" void* func_0035F1A8(void* self, sMbStream36D8* s);
 extern "C" void* func_00342808(void* self, sMbStream36D8* s);
 extern "C" void* func_003459A8(void* self, sMbStream36D8* s);
-extern "C" void* func_00345D80(void* self, sMbStream36D8* s);
+extern "C" void* cDynamicParticleModifier_cDynamicParticleModifier(void* self, sMbStream36D8* s);
 extern "C" void* func_003461C0(void* self, sMbStream36D8* s);
 extern "C" void* cRailModifier_cRailModifier1(void* self, sMbStream36D8* s);
 extern "C" void func_00345720(void* pool, void* item);
@@ -1042,7 +1042,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         if (hdr.typesA[i] == 1) {
             p = func_003459A8(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 2) {
-            p = func_00345D80(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), stream);
+            p = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 3) {
             p = func_003461C0(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), stream);
         } else {

@@ -2603,9 +2603,9 @@ float func_001607C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001607D8__FPvT0);
+INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0);
 #ifdef SKIP_ASM
-void func_001607D8(void* self, void* other)
+void cMatrixChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
 {
     *(int*)((char*)other + 0x10) = 0;
 }
@@ -2840,9 +2840,9 @@ float func_00160BE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160BF0__FPvT0);
+INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0);
 #ifdef SKIP_ASM
-void func_00160BF0(void* self, void* other)
+void cRelativeChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
 {
     *(int*)((char*)other + 0x10) = 0;
 }
@@ -3056,18 +3056,18 @@ extern "C" void cSplineCamAlgorithm__cSplineCamAlgorithm(cSplineCamAlgorithm* se
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001613D8__FPv);
+INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_getRestDrop__FPv);
 #ifdef SKIP_ASM
-float func_001613D8(void* self)
+float cSplineCamAlgorithm_getRestDrop(void* self)
 {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001613E8__FPvT0);
+INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_getRaceCamFinalPhaseData__FPvT0);
 #ifdef SKIP_ASM
-void func_001613E8(void* self, void* other)
+void cSplineCamAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
 {
     *(int*)((char*)other + 0x10) = 0;
 }

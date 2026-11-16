@@ -38,11 +38,11 @@ extern "C" void cBaseClass_DynamicEmitter_Allocate(cBaseClass_DynamicEmitter* se
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00370CF8);
+INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
-extern "C" void func_00370CF8(cBaseClass_DynamicEmitter* self, int reset)
+extern "C" void cBaseClass_DynamicEmitter_purge(cBaseClass_DynamicEmitter* self, int reset)
 {
     if (self->m_positions != 0) {
         cMemMan_free(self->m_positions);
@@ -92,8 +92,8 @@ INCLUDE_ASM("render/particle", func_00370DC8);
 #ifdef SKIP_ASM
 int BXrand();
 
-extern "C" void func_0036CBF8(void* sys, int count, int a2, sVec4A* v, float a, float b, float c);
-extern "C" void func_00370058(void* sys, void* a1, void* def, void* a3, float f);
+extern "C" void tParticleEmitter_init(void* sys, int count, int a2, sVec4A* v, float a, float b, float c);
+extern "C" void tParticleEmitter_setupEmitter(void* sys, void* a1, void* def, void* a3, float f);
 extern char t4mat_Identity[];
 
 struct sGsState_00370DC8 {
@@ -210,9 +210,9 @@ extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
     v.y = *(float*)(def + 0x7C);
     v.z = *(float*)(def + 0x80);
     v.w = 0.0f;
-    func_0036CBF8(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &v, l,
+    tParticleEmitter_init(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &v, l,
                   *(float*)(def + 0x20), *(float*)(def + 0xC));
-    func_00370058(self->sys, t4mat_Identity, def, self->f180, f);
+    tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, f);
     if (changed) {
         self->v01(0);
         self->v05();
@@ -292,21 +292,21 @@ extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int
 //100%
 INCLUDE_ASM("render/particle", func_00371268);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3D8(void* p, float v);
+extern "C" void tParticleEmitter_setTime(void* p, float v);
 
 extern "C" void func_00371268(cBaseClass_DynamicEmitter* self, float v)
 {
     if (v == 0.0f) {
-        func_0036D3D8(((char*)self) + 0x20, 0.0f);
+        tParticleEmitter_setTime(((char*)self) + 0x20, 0.0f);
         return;
     }
     *(float*)self = v;
-    func_0036D3D8(((char*)self) + 0x20, v);
+    tParticleEmitter_setTime(((char*)self) + 0x20, v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003712B8);
+INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream003712B8 {
 public:
@@ -314,7 +314,7 @@ public:
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_003712B8(cBaseClass_DynamicEmitter* self, cStream003712B8* stream)
+extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicEmitter* self, cStream003712B8* stream)
 {
     struct {
         float a;
@@ -333,7 +333,7 @@ extern "C" void func_003712B8(cBaseClass_DynamicEmitter* self, cStream003712B8* 
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00371318);
+INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_readFromReplayFrame);
 #ifdef SKIP_ASM
 class cStream00371318 {
 public:
@@ -342,7 +342,7 @@ public:
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void func_00371318(cBaseClass_DynamicEmitter* self, cStream00371318* stream)
+extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_DynamicEmitter* self, cStream00371318* stream)
 {
     struct {
         float a;
@@ -441,14 +441,14 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003714B8);
+INCLUDE_ASM("render/particle", cDynamicColourEmitter_cDynamicColourEmitter);
 #ifdef SKIP_ASM
-extern "C" void* func_00370B60(void* self);
+extern "C" void* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(void* self);
 extern void* cDynamicColourEmitter_vtbl[];
 
-extern "C" void* func_003714B8(cDynamicColourEmitter* self)
+extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(cDynamicColourEmitter* self)
 {
-    func_00370B60(self);
+    cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(self);
     self->mVtbl = cDynamicColourEmitter_vtbl;
     self->m_IsAvalanche = 0;
     self->m_colours = 0;
@@ -506,12 +506,12 @@ extern "C" void cDynamicColourEmitter_Allocate(cDynamicColourEmitter* self)
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern "C" void func_00370CF8(cBaseClass_DynamicEmitter* self, int a1);
+extern "C" void cBaseClass_DynamicEmitter_purge(cBaseClass_DynamicEmitter* self, int a1);
 
 /**
  * Frees a colour emitter's colour array, then its base arrays.
  *
- * The base purge (func_00370CF8) frees the position and velocity arrays and, when @p resetEmitter is set,
+ * The base purge (cBaseClass_DynamicEmitter_purge) frees the position and velocity arrays and, when @p resetEmitter is set,
  * zeroes +0x170 and sets the count at +0x178 to -1.
  *
  * @param resetEmitter  nonzero to also reset the emitter's count and state word
@@ -523,7 +523,7 @@ extern "C" void cDynamicColourEmitter_purge(cDynamicColourEmitter* self, int res
         cMemMan_free(colours);
         self->m_colours = 0;
     }
-    func_00370CF8((cBaseClass_DynamicEmitter*)self, resetEmitter);
+    cBaseClass_DynamicEmitter_purge((cBaseClass_DynamicEmitter*)self, resetEmitter);
 }
 #endif
 
@@ -4967,7 +4967,7 @@ extern "C" void func_00379860(sPtGfx_9860* self, int n, sVtx_9860* src)
 }
 #endif
 
-INCLUDE_ASM("render/particle", func_00379BD0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderIndexedTriList);
 
 //100%
 INCLUDE_ASM("render/particle", func_0037A260);
@@ -8662,7 +8662,7 @@ extern "C" void func_00381AD0(cPS2GraphicsMan* self, int n, sVtx1AD0* vtx)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00381F10);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSpline);
 #ifdef SKIP_ASM
 struct sPtRS_1F10 {
     int f0;                         // bits 6..9 = layer
@@ -8725,7 +8725,7 @@ static inline void CopyMat_1F10(sMat_1F10* dst, const sMat_1F10* src)
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
 // PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `unsigned long`.
-extern "C" void func_00381F10(sPtGfx_1F10* self, sMat_1F10* m, float* col, int n)
+extern "C" void cPS2GraphicsMan_RenderSpline(sPtGfx_1F10* self, sMat_1F10* m, float* col, int n)
 {
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
     self->top->fC &= 0xC0000000;

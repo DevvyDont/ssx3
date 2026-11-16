@@ -391,9 +391,9 @@ void* func_0036A190(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A1B0__FPvT0);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
 #ifdef SKIP_ASM
-int func_0036A1B0(void* self, void* a1)
+int cGraphicsMan_CreateScreenGrabTexture(void* self, void* a1)
 {
     int t0 = -1;
     *(int*)a1 = 0;
@@ -1304,7 +1304,7 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CBF8);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_init);
 #ifdef SKIP_ASM
 struct sGfxVec4 {
     float x, y, z, w;
@@ -1331,7 +1331,7 @@ static inline sGfxVec4 vu0DivGM(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CBF8(tParticleEmitter* self, int w, int h, float x, float y, float s, sGfxVec4* v)
+extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int h, float x, float y, float s, sGfxVec4* v)
 {
     self->NumParticles = w;
     self->NumBlur = h;
@@ -1377,9 +1377,9 @@ extern "C" void func_0036CCB8(tParticleEmitter* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE00);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setSize);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE00(tParticleEmitter* self, float a, float b, float c)
+extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float a, float b, float c)
 {
     self->SizeR = c;
     self->SizeFinalDelta = b - a;
@@ -1388,9 +1388,9 @@ extern "C" void func_0036CE00(tParticleEmitter* self, float a, float b, float c)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE28);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setLife);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE28(tParticleEmitter* self, float a, float b)
+extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float a, float b)
 {
     float d = b - a;
     float s = self->Damp;
@@ -1532,9 +1532,9 @@ extern "C" void func_0036CFA8(tParticleEmitter* self, sGfxVec4* v, float s)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D008);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_stopMotion);
 #ifdef SKIP_ASM
-extern "C" void func_0036D008(tParticleEmitter* self)
+extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self)
 {
     *(cQuad128*)&self->Xi = t4vect_Zero;
 }
@@ -1811,9 +1811,9 @@ extern "C" void func_0036D318(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b, 
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D3D8);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setTime);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3D8(tParticleEmitter* self, float val)
+extern "C" void tParticleEmitter_setTime(tParticleEmitter* self, float val)
 {
     self->EndTime = val * self->Damp;
 }
@@ -2049,12 +2049,12 @@ extern "C" void func_0036D500_D500(sGmEmit_D500* e, sGmBox_D500* out)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370018);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_cStaticEmitter);
 #ifdef SKIP_ASM
 extern char D_00493160[];
 void func_002F7A68(void*);
 
-extern "C" void* func_00370018(cStaticEmitter* self)
+extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
 {
     self->mVtbl = (void**)D_00493160;
     func_002F7A68((char*)self + 0x10);
@@ -2065,12 +2065,12 @@ extern "C" void* func_00370018(cStaticEmitter* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_00370058);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setupEmitter);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE00(tParticleEmitter* self, float a, float b, float c);
-extern "C" void func_0036CE28(tParticleEmitter* self, float a, float b);
+extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float a, float b, float c);
+extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float a, float b);
 extern "C" void func_0036CCB8(tParticleEmitter* self);
-extern "C" void func_0036D008(tParticleEmitter* self);
+extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self);
 extern "C" void func_0036D500(void* a, void* b);
 struct sGmV4_0058 {
     float x, y, z, w;
@@ -2174,17 +2174,17 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
 }
 
 // Sets up the view from the camera parameters p (frustum planes transformed by m).
-extern "C" void func_00370058(tParticleEmitter* self, void* m, void* p, void* a3, float t)
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* m, void* p, void* a3, float t)
 {
-    func_0036CE00(self, *(float*)((char*)p + 0x10), *(float*)((char*)p + 0xCC), *(float*)((char*)p + 0x18));
+    tParticleEmitter_setSize(self, *(float*)((char*)p + 0x10), *(float*)((char*)p + 0xCC), *(float*)((char*)p + 0x18));
     float h = *(float*)((char*)p + 0x1C) * 0.5f;
-    func_0036CE28(self, *(float*)((char*)p + 0x14) - h, *(float*)((char*)p + 0x14) + h);
+    tParticleEmitter_setLife(self, *(float*)((char*)p + 0x14) - h, *(float*)((char*)p + 0x14) + h);
     if (t < 0.0f) {
         func_0036CCB8(self);
     } else {
         self->SeedX0 = t;
     }
-    func_0036D008(self);
+    tParticleEmitter_stopMotion(self);
     *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x24), *(float*)((char*)p + 0x28), *(float*)((char*)p + 0x2C), 1.0f));
     *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x30), *(float*)((char*)p + 0x34), *(float*)((char*)p + 0x38), 0.0f));
     *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x3C), *(float*)((char*)p + 0x40), *(float*)((char*)p + 0x44), 0.0f));
@@ -2200,17 +2200,17 @@ extern "C" void func_00370058(tParticleEmitter* self, void* m, void* p, void* a3
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0xA8), *(float*)((char*)p + 0xAC), *(float*)((char*)p + 0xB0), *(float*)((char*)p + 0xA4)), 128.0f),
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0xB8), *(float*)((char*)p + 0xBC), *(float*)((char*)p + 0xC0), *(float*)((char*)p + 0xB4)), 128.0f),
                        *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f);
-    func_0036D3D8(self, *(float*)((char*)p + 0x8) < 0.0f ? *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f : 0.0f);
+    tParticleEmitter_setTime(self, *(float*)((char*)p + 0x8) < 0.0f ? *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f : 0.0f);
     func_0036D500(self, a3);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_003705E0);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_setupEmitter);
 #ifdef SKIP_ASM
-extern "C" void func_00370058(tParticleEmitter* gfx, void* a1, void* desc, void* out, float f);
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, void* a1, void* desc, void* out, float f);
 
-extern "C" void func_003705E0(cStaticEmitter* self, void* a1, char* d)
+extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* a1, char* d)
 {
     self->mNumFlipTextures = *(int*)(d + 0xD0);
     self->mFlipTextureRate = *(float*)(d + 0xD4);
@@ -2230,24 +2230,24 @@ extern "C" void func_003705E0(cStaticEmitter* self, void* a1, char* d)
     v.y = *(float*)(d + 0x7C);
     v.z = *(float*)(d + 0x80);
     v.w = 0.0f;
-    func_0036CBF8((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
-    func_00370058((tParticleEmitter*)(((char*)self) + 0x10), a1, d, ((char*)self) + 0x160, -1.0f);
+    tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
+    tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), a1, d, ((char*)self) + 0x160, -1.0f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370708);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3D8(tParticleEmitter*, float);
+extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
 
 extern "C" void func_00370708(float *self, float f)
 {
     if (f == 0.0f) {
-        func_0036D3D8((tParticleEmitter*)((char *)self + 0x10), 0.0f);
+        tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), 0.0f);
         return;
     }
     *self = f;
-    func_0036D3D8((tParticleEmitter*)((char *)self + 0x10), f);
+    tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), f);
 }
 #endif
 
@@ -2459,7 +2459,7 @@ extern "C" void cStaticEmitter_writeToReplayFrame(cStaticEmitter* self, sGmSerOb
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_00370AF8);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_readFromReplayFrame);
 #ifdef SKIP_ASM
 class cStream00370AF8 {
 public:
@@ -2470,7 +2470,7 @@ public:
 
 extern "C" void func_0036D500(void* a, void* b);
 
-extern "C" void func_00370AF8(cStaticEmitter* self, cStream00370AF8* stream)
+extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream00370AF8* stream)
 {
     struct {
         float a;
@@ -2486,7 +2486,7 @@ extern "C" void func_00370AF8(cStaticEmitter* self, cStream00370AF8* stream)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370B60);
+INCLUDE_ASM("render/graphicsman", cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter);
 #ifdef SKIP_ASM
 void func_002F7A68(void*);
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -2512,7 +2512,7 @@ struct sGmView_0B60 {
     void** vtable;          // 0x1F8
 };
 
-extern "C" sGmView_0B60* func_00370B60(cBaseClass_DynamicEmitter* self)
+extern "C" sGmView_0B60* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self)
 {
     self->mNumFlipTextures = 0;
     *(int*)&self->mCurrentFlipTexture = 0;
@@ -2538,21 +2538,21 @@ extern "C" sGmView_0B60* func_00370B60(cBaseClass_DynamicEmitter* self)
 //100%
 INCLUDE_ASM("render/graphicsman", cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter);
 #ifdef SKIP_ASM
-extern "C" void func_00370CF8(void* self, int flag);
+extern "C" void cBaseClass_DynamicEmitter_purge(void* self, int flag);
 void operator_delete(int* ptr);
 extern void* cBaseClass_DynamicEmitter_vtbl[];
 
 /**
  * Destroys a dynamic emitter: restores its base vtable and releases its particle buffers.
  *
- * func_00370CF8(self, 1) frees the two blocks at offsets 0x1A0 and 0x1A4 and resets the emitter.
+ * cBaseClass_DynamicEmitter_purge(self, 1) frees the two blocks at offsets 0x1A0 and 0x1A4 and resets the emitter.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self, int flags)
 {
     self->mVtbl = cBaseClass_DynamicEmitter_vtbl;
-    func_00370CF8(self, 1);
+    cBaseClass_DynamicEmitter_purge(self, 1);
     if (flags & 1) {
         operator_delete((int*)self);
     }

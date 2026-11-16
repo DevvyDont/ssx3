@@ -8,7 +8,7 @@
 //                             Emitter") +
 //                             ctor func_002F7A68 (empty) in cBoardSparkFX's ctor; embedded at +0x10 / +0x20 below.
 //   cStaticEmitter            a fixed emitter (cParticleModifier, cMultiParticle). Size 0x190: cMemMan_alloc(0x190,
-//                             "Emitter") + ctor func_00370018 in cMultiParticle_setupMultiParticle. Vtable D_00493160.
+//                             "Emitter") + ctor cStaticEmitter_cStaticEmitter in cMultiParticle_setupMultiParticle. Vtable D_00493160.
 //   cBaseClass_DynamicEmitter an emitter that follows a moving source and keeps a ring of sub-emitter positions.
 //                             Size 0x200: embedded at cDynamicParticleModifier +0x60 with ParticleData at +0x260, and
 //                             cDynamicColourEmitter's own fields start at +0x200. Vtable cBaseClass_DynamicEmitter_vtbl
@@ -17,14 +17,14 @@
 //   cDynamicEmitter           : cBaseClass_DynamicEmitter, no members (size 0x200, On Tour too); vtable
 //                             cDynamicEmitter_vtbl (own dtor in slot 4); constructed inline by func_00345C90.
 //   cDynamicColourEmitter     : cBaseClass_DynamicEmitter + a colour per sub-emitter. Size 0x210: cMemMan_alloc(0x210,
-//                             "mEmitter") + ctor func_003714B8 in cBoardSparkFX's ctor. Vtable
+//                             "mEmitter") + ctor cDynamicColourEmitter_cDynamicColourEmitter in cBoardSparkFX's ctor. Vtable
 //                             cDynamicColourEmitter_vtbl.
 // (cDynamicParticleModifier/cParticleModifier are in object/effectmodifier.h; another 0x210-byte subclass with vtable
 // D_004881E8 is built by func_002F1768 in seg/seg_1F1548.)
 //
 // Methods: tParticleEmitter and cStaticEmitter are in src/render/graphicsman.cpp (0x36CBF8-0x370AF8; EA's particle.cpp
 // starts there: the preview pairs cStaticEmitter::render with particle.cpp line 410), the dynamic emitters in
-// src/render/graphicsman.cpp (ctor func_00370B60, dtor) and src/render/particle.cpp (0x370C60-0x3717C0); see each
+// src/render/graphicsman.cpp (ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter, dtor) and src/render/particle.cpp (0x370C60-0x3717C0); see each
 // class's methods.txt. The draw calls are cPS2GraphicsMan virtuals: slot 82 RenderParticleEmitter(const
 // tParticleEmitter&) func_00380518, slot 83 (cDynamicEmitter*) func_003807A0, slot 84 (cDynamicColourEmitter*)
 // func_00380CE0.
@@ -143,14 +143,14 @@ CHECK_SIZE(tParticleEmitter, 0x150);
 
 // A fixed emitter (On Tour class cStaticEmitter, 0x190).
 struct cStaticEmitter {
-    float Duration;                 // 0x000 [O]; [R] setupEmitter (func_003705E0); [U] update counts it down by one app
+    float Duration;                 // 0x000 [O]; [R] setupEmitter (cStaticEmitter_setupEmitter); [U] update counts it down by one app
                                     //       tick (negative = endless, 0 = stopped), setTime func_00370708, replay
                                     //       record; cParticleModifier_update watches it
     int TextureId;                  // 0x004 [O]; [R] setupEmitter (particle data +0xC4); [U] render: the effect texture
                                     //       is TheGraphicsMan->texIds[TextureId + (int)mCurrentFlipTexture]
     int BlendMode;                  // 0x008 [O]; [R] setupEmitter (data +0xC8); [U] render maps it through D_0044B420
                                     //       to the draw layer
-    int m_initialized;              // 0x00C [O] bool (retail 4 bytes); [R] ctor func_00370018 zeroes it; [U] update
+    int m_initialized;              // 0x00C [O] bool (retail 4 bytes); [R] ctor cStaticEmitter_cStaticEmitter zeroes it; [U] update
                                     //       sets 1, render returns while 0, replay record
     tParticleEmitter Emitter;       // 0x010 [O]; [R] ctor func_002F7A68(this + 0x10); [U] setupEmitter (init +
                                     //       setupEmitter), update (step / stepContinous), render (cPS2GraphicsMan slot
@@ -160,7 +160,7 @@ struct cStaticEmitter {
     int mNumFlipTextures;           // 0x180 [O]; [R] setupEmitter (data +0xD0); [U] update wraps the frame at it
     float mCurrentFlipTexture;      // 0x184 [O]; [R] ctor zeroes it (sw); [U] update, render
     float mFlipTextureRate;         // 0x188 [O]; [R] setupEmitter (data +0xD4); [U] update
-    void** mVtbl;                   // 0x18C [R] ctor func_00370018 and dtor func_00370758 store D_00493160 (1 slot: the
+    void** mVtbl;                   // 0x18C [R] ctor cStaticEmitter_cStaticEmitter and dtor func_00370758 store D_00493160 (1 slot: the
                                     //       dtor); [P] the preview's cStaticEmitter slot-1 pair touches 0x18C (On Tour
                                     //       has no virtuals here)
 };
@@ -184,7 +184,7 @@ struct cBaseClass_DynamicEmitter {
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
     int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through D_0044B420
-    int mNumFlipTextures;           // 0x00C [O]; [R] ctor func_00370B60 zeroes it; [U] setupEmitter (data +0xD0),
+    int mNumFlipTextures;           // 0x00C [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter zeroes it; [U] setupEmitter (data +0xD0),
                                     //       updateBASE wraps the frame at it
     float mCurrentFlipTexture;      // 0x010 [O]; [R] ctor (sw 0); [U] setupEmitter (random start frame), updateBASE,
                                     //       render
@@ -257,7 +257,7 @@ struct cDynamicEmitter {
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
     int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through D_0044B420
-    int mNumFlipTextures;           // 0x00C [O]; [R] ctor func_00370B60 zeroes it; [U] setupEmitter (data +0xD0),
+    int mNumFlipTextures;           // 0x00C [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter zeroes it; [U] setupEmitter (data +0xD0),
                                     //       updateBASE wraps the frame at it
     float mCurrentFlipTexture;      // 0x010 [O]; [R] ctor (sw 0); [U] setupEmitter (random start frame), updateBASE,
                                     //       render
@@ -330,7 +330,7 @@ struct cDynamicColourEmitter {
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
     int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through D_0044B420
-    int mNumFlipTextures;           // 0x00C [O]; [R] ctor func_00370B60 zeroes it; [U] setupEmitter (data +0xD0),
+    int mNumFlipTextures;           // 0x00C [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter zeroes it; [U] setupEmitter (data +0xD0),
                                     //       updateBASE wraps the frame at it
     float mCurrentFlipTexture;      // 0x010 [O]; [R] ctor (sw 0); [U] setupEmitter (random start frame), updateBASE,
                                     //       render
@@ -371,7 +371,7 @@ struct cDynamicColourEmitter {
                                     //       pairs touch 0x1F8
     // --- cDynamicColourEmitter
     char unk_1FC[0x4];              // 0x1FC the base's tail padding (cBaseClass_DynamicEmitter is 0x200)
-    int m_IsAvalanche;              // 0x200 [O] bool (retail 4 bytes); [R] ctor func_003714B8 zeroes it; [U]
+    int m_IsAvalanche;              // 0x200 [O] bool (retail 4 bytes); [R] ctor cDynamicColourEmitter_cDynamicColourEmitter zeroes it; [U]
                                     //       cPS2GraphicsMan slot 84 (func_00380CE0) reads it
     tPackedRGBA* m_colours;         // 0x204 [O] (On Tour t4Vector*; retail 4 bytes per entry: Allocate "DynEmitterData
                                     //       Colours", the preview's getSubEmitterPositionVelocityColour(int, ...,

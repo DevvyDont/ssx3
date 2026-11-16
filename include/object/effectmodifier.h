@@ -5,12 +5,12 @@
 // effectmodifier.cpp, header ../source/object/effectmodifier.h: preview asserts; retail unit object/effectlink,
 // 0x345798-0x3460A0, plus the one-line virtuals in object/railmodifier 0x360D00-0x360D28). Chain:
 //   cEffectLink (object/effectlink.h: Next, Prev, vptr) -> cEffectModifier (+ Instance; 0x10, On Tour 0x10; ctors
-//   func_00345798(inst) / func_003457C8(replay), dtor cEffectModifier__cEffectModifier, vtable cEffectModifier_vtbl;
+//   cEffectModifier_cEffectModifier(inst) / func_003457C8(replay), dtor cEffectModifier__cEffectModifier, vtable cEffectModifier_vtbl;
 //   live count cEffectModifier::EffectCount = D_004A3FF4)
 //     -> cParticleModifier (0x1F0: cMemMan_alloc(0x1F0, "ParticleModifier") in cMoveNode_addParticle; ctors
-//        func_003458C0(pdata, inst) / func_003459A8(replay); vtable cParticleModifier_vtbl; ParticleCount D_004A3FF8)
+//        cParticleModifier_cParticleModifier(pdata, inst) / func_003459A8(replay); vtable cParticleModifier_vtbl; ParticleCount D_004A3FF8)
 //     -> cDynamicParticleModifier (0x270: cMemMan_alloc(0x270, "DynamicParticleModifier") in
-//        cMoveNode_addDynamicParticle; ctors func_00345C90(pdata, inst, mesh, offset) / func_00345D80(replay); vtable
+//        cMoveNode_addDynamicParticle; ctors func_00345C90(pdata, inst, mesh, offset) / cDynamicParticleModifier_cDynamicParticleModifier(replay); vtable
 //        cDynamicParticleModifier_vtbl; DynamicParticleCount D_004A3FFC). Its second base cDynamicParticleModifierState
 //        (On Tour, 0x50) occupies 0x10-0x60: the replay record writes/reads it as one 0x50 block at +0x10.
 //     (cHaloModifier, 0x40, is EA's fourth class here; not laid out yet.)
@@ -38,7 +38,7 @@ struct cEffectModifier {
     void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
                                     //       cEffectModifier_vtbl, ...)
     // --- cEffectModifier
-    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor func_00345798 stores its inst
+    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
                                     //       argument, the replay ctor func_003457C8 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
@@ -59,7 +59,7 @@ struct cParticleModifier {
     void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
                                     //       cEffectModifier_vtbl, ...)
     // --- cEffectModifier
-    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor func_00345798 stores its inst
+    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
                                     //       argument, the replay ctor func_003457C8 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
@@ -67,7 +67,7 @@ struct cParticleModifier {
     t4Matrix Transform;             // 0x010 [O]; [R] ctor copies the instance's root transform (VU0 matrix copy), the
                                     //       replay ctor reads 0x40 bytes; [U] setupEmitter's transform,
                                     //       writeToReplayFrame
-    cStaticEmitter Emitter;         // 0x050 [O]; [R] ctor func_00370018(this + 0x50), dtor func_00370758(this + 0x50,
+    cStaticEmitter Emitter;         // 0x050 [O]; [R] ctor cStaticEmitter_cStaticEmitter(this + 0x50), dtor func_00370758(this + 0x50,
                                     //       2); [U] update/render/writeToReplayFrame
     tParticleData* ParticleData;    // 0x1E0 [O]; [R] ctor stores pdata (owned), the replay ctor allocates 0xD8; dtor
                                     //       deletes it; [U] writeToReplayFrame writes 0xD8 bytes
@@ -96,7 +96,7 @@ struct cDynamicParticleModifier {
     void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
                                     //       cEffectModifier_vtbl, ...)
     // --- cEffectModifier
-    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor func_00345798 stores its inst
+    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
                                     //       argument, the replay ctor func_003457C8 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
@@ -114,7 +114,7 @@ struct cDynamicParticleModifier {
     t4Vector InitVel;               // 0x050 [O] (state); [R] ctor takes the particle data's +0x48 vector (w = 0) and
                                     //       zeroes it in the data
     // --- cDynamicParticleModifier
-    cDynamicEmitter Emitter;        // 0x060 [O]; [R] ctor func_00370B60(this + 0x60) + cDynamicEmitter_vtbl at +0x258;
+    cDynamicEmitter Emitter;        // 0x060 [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(this + 0x60) + cDynamicEmitter_vtbl at +0x258;
                                     //       dtor cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(this + 0x60, 2)
     tParticleData* ParticleData;    // 0x260 [O]; [R] ctor stores pdata (owned), the replay ctor allocates 0xD8; dtor
                                     //       deletes it; [U] setupEmitter, writeToReplayFrame

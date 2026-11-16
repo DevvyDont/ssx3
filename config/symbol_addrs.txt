@@ -3478,6 +3478,39 @@ cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 = 0x00178BA8; //type:
 cPOST_RACE_1ChaseAlgorithm_update = 0x00178BB0; //type:func
 cPOST_RACE_1ChaseAlgorithm_snap = 0x00178E90; //type:func
 
+// fn_cascade5: names by evidence (docs/function_names.tsv)
+cMatrixChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 = 0x001607D8; //type:func
+cRelativeChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 = 0x00160BF0; //type:func
+cSplineCamAlgorithm_getRestDrop__FPv = 0x001613D8; //type:func
+cSplineCamAlgorithm_getRaceCamFinalPhaseData__FPvT0 = 0x001613E8; //type:func
+cEffectModifier_cEffectModifier = 0x00345798; //type:func
+cParticleModifier_cParticleModifier = 0x003458C0; //type:func
+cDynamicParticleModifier_cDynamicParticleModifier = 0x00345D80; //type:func
+cMultiParticleMan__cMultiParticleMan = 0x00357A00; //type:func
+cMultiParticleMan_addParticle = 0x00357A78; //type:func
+cMultiParticle__cMultiParticle = 0x00357FA0; //type:func
+cGraphicsMan_CreateScreenGrabTexture__FPvT0 = 0x0036A1B0; //type:func
+tParticleEmitter_init = 0x0036CBF8; //type:func
+tParticleEmitter_setSize = 0x0036CE00; //type:func
+tParticleEmitter_setLife = 0x0036CE28; //type:func
+tParticleEmitter_stopMotion = 0x0036D008; //type:func
+tParticleEmitter_setTime = 0x0036D3D8; //type:func
+cStaticEmitter_cStaticEmitter = 0x00370018; //type:func
+tParticleEmitter_setupEmitter = 0x00370058; //type:func
+cStaticEmitter_setupEmitter = 0x003705E0; //type:func
+cStaticEmitter_readFromReplayFrame = 0x00370AF8; //type:func
+cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter = 0x00370B60; //type:func
+cBaseClass_DynamicEmitter_purge = 0x00370CF8; //type:func
+cBaseClass_DynamicEmitter_writeToReplayFrame = 0x003712B8; //type:func
+cBaseClass_DynamicEmitter_readFromReplayFrame = 0x00371318; //type:func
+cDynamicColourEmitter_cDynamicColourEmitter = 0x003714B8; //type:func
+cPS2GraphicsMan_RenderIndexedTriList = 0x00379BD0; //type:func
+cPS2GraphicsMan_RenderSpline = 0x00381F10; //type:func
+cGraphicsMan_SetDTV__FPv = 0x00393FA8; //type:func
+cGraphicsMan_RemoveScreenGrabTexture__FPv = 0x003942C0; //type:func
+cGraphicsMan_AddProjectiveTexture__FPv = 0x003945C0; //type:func
+cGraphicsMan_GenerateBlendedMatrices__FPv = 0x00394660; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

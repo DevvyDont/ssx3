@@ -1394,12 +1394,12 @@ struct sWlAvElem {
     char pad[0x30];
     sWlAvElem() {}
 };
-extern "C" void* func_003714B8(void* self);
+extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(void* self);
 extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(void* self, int flags);
 struct sWlFx {
     char pad[0xD0];
     char emitter[0x2F0 - 0xD0];
-    sWlFx() { func_003714B8(emitter); }
+    sWlFx() { cDynamicColourEmitter_cDynamicColourEmitter(emitter); }
 };
 struct sWlRsm {
     char pad[0xF0];

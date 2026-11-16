@@ -31,13 +31,13 @@ extern char D_004875A8[];
 
 extern "C" void cRider_cRider(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_003714B8(void* self);
+extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(void* self);
 void* func_002F7A68(void* self);
 extern "C" void func_0036CCB8(void* self);
-extern "C" void func_0036CE00(void* self, float a, float b, float c);
-extern "C" void func_0036CE28(void* self, float a, float b);
-extern "C" void func_0036D008(void* self);
-extern "C" void func_0036D3D8(void* self, float val);
+extern "C" void tParticleEmitter_setSize(void* self, float a, float b, float c);
+extern "C" void tParticleEmitter_setLife(void* self, float a, float b);
+extern "C" void tParticleEmitter_stopMotion(void* self);
+extern "C" void tParticleEmitter_setTime(void* self, float val);
 extern "C" void func_00416210(void* dst, int c, int n);
 extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* self);
 
@@ -46,7 +46,7 @@ struct sBsVec4 {
     sBsVec4() {}
 };
 
-extern "C" void func_0036CBF8(void* sys, int w, int h, float x, float y, float s, sBsVec4* v);
+extern "C" void tParticleEmitter_init(void* sys, int w, int h, float x, float y, float s, sBsVec4* v);
 
 struct sBsIds {
     short id[2];
@@ -142,7 +142,7 @@ struct sBoardSparkFXView {  // this unit's view of cBoardSparkFX (ai/riderhandle
  * (the g++ 2.95 this-adjust fix-ups when not in charge).
  *
  * It creates the emitter (0x210 bytes), its particle settings (0xD8 bytes: brown grit, probably with gravity
- * -800) and the glow object (0x150 bytes, set up through func_0036CBF8 and related calls). It hands the
+ * -800) and the glow object (0x150 bytes, set up through tParticleEmitter_init and related calls). It hands the
  * settings to the emitter, then resets the render states (cBoardSparkFX_readFromReplayFrame).
  *
  * @param inChrg  nonzero when this object is complete and must construct its virtual base
@@ -179,7 +179,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     new (&self->slotA) sBsSlot;
     new (&self->slotB) sBsSlot;
     float zeroF = 0.0f;
-    self->emitter = (sBsEmitter*)func_003714B8(cMemMan_alloc(0x210, D_00487588, 0, 0));
+    self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(0x210, D_00487588, 0, 0));
     self->params = (sBsParams*)cMemMan_alloc(0xD8, D_00487598, 0, 0);
     self->gfx = func_002F7A68(cMemMan_alloc(0x150, D_004875A8, 0, 0));
     func_0036CCB8(self->gfx);
@@ -188,11 +188,11 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     v.y = zeroF;
     v.z = -3000.0f;
     v.w = zeroF;
-    func_0036CBF8(self->gfx, 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &v);
-    func_0036CE00(self->gfx, 7.5f, zeroF, 7.5f);
-    func_0036CE28(self->gfx, 0.10000000149011612f, 0.1940000057220459f);
-    func_0036D008(self->gfx);
-    func_0036D3D8(self->gfx, zeroF);
+    tParticleEmitter_init(self->gfx, 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &v);
+    tParticleEmitter_setSize(self->gfx, 7.5f, zeroF, 7.5f);
+    tParticleEmitter_setLife(self->gfx, 0.10000000149011612f, 0.1940000057220459f);
+    tParticleEmitter_stopMotion(self->gfx);
+    tParticleEmitter_setTime(self->gfx, zeroF);
     self->params->mode = 1;
     self->params->f04 = 0;
     self->params->f08 = -1.0f;

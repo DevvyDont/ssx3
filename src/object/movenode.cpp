@@ -623,7 +623,7 @@ extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addParticle);
 #ifdef SKIP_ASM
 extern char D_0048E978[];
-extern "C" void* func_003458C0(void* mem, void* desc, void* owner);
+extern "C" void* cParticleModifier_cParticleModifier(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 
 /**
@@ -633,7 +633,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
 {
-    cMoveNode_addEffectModifier(self, func_003458C0(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), desc,
+    cMoveNode_addEffectModifier(self, cParticleModifier_cParticleModifier(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), desc,
                                                     self->Instance));
 }
 #endif
@@ -2765,19 +2765,19 @@ extern "C" void* func_003579C8(cMultiParticleMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357A00);
+INCLUDE_ASM("object/movenode", cMultiParticleMan__cMultiParticleMan);
 #ifdef SKIP_ASM
 extern void* D_004A4028;
-extern "C" void func_00357FA0(cMultiParticle* p, int flags);
+extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
 void operator_delete(int* ptr);
 
-extern "C" void func_00357A00(cMultiParticleMan* self, int flags)
+extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, int flags)
 {
     int i;
     for (i = 0; i < 4; i++) {
         void* p = ((void**)self)[i];
         if (p != 0) {
-            func_00357FA0((cMultiParticle*)p, 3);
+            cMultiParticle__cMultiParticle((cMultiParticle*)p, 3);
         }
     }
     D_004A4028 = 0;
@@ -2788,12 +2788,12 @@ extern "C" void func_00357A00(cMultiParticleMan* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357A78);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_addParticle);
 #ifdef SKIP_ASM
 extern char D_0048EA00[];
 extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2);
 
-extern "C" void func_00357A78(cMultiParticleMan* self, int i, void* a2, void* a3)
+extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, void* a2, void* a3)
 {
     void** slot = (void**)((char*)self + (i << 2));
     if (*slot == 0) {
@@ -2827,14 +2827,14 @@ void* func_00357B10(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("object/movenode", func_00357B38);
 #ifdef SKIP_ASM
-extern "C" void func_00357FA0(cMultiParticle* p, int flags);
+extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
 
 extern "C" void func_00357B38(void** self)
 {
     int i;
     for (i = 0; i < 4; i++) {
         if (self[i] != 0) {
-            func_00357FA0((cMultiParticle*)self[i], 3);
+            cMultiParticle__cMultiParticle((cMultiParticle*)self[i], 3);
         }
         self[i] = 0;
     }
@@ -3010,7 +3010,7 @@ extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
 //100%
 INCLUDE_ASM("object/movenode", func_00357E80);
 #ifdef SKIP_ASM
-extern "C" void func_00370AF8(void* self, void* stream);
+extern "C" void cStaticEmitter_readFromReplayFrame(void* self, void* stream);
 
 struct sMnSerVEntry_357E80 {
     short delta;
@@ -3034,7 +3034,7 @@ extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
     self->data = buf;
     read_357E80(stream, buf, 0xD8);
     cMultiParticle_setupMultiParticle(self);
-    func_00370AF8(self->desc, stream);
+    cStaticEmitter_readFromReplayFrame(self->desc, stream);
     read_357E80(stream, &self->pos, 0x10);
     read_357E80(stream, ab, 0x20);
     if (self->field_0x4 > 0) {
@@ -3045,7 +3045,7 @@ extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357FA0);
+INCLUDE_ASM("object/movenode", cMultiParticle__cMultiParticle);
 #ifdef SKIP_ASM
 struct sMnDtorVEntry7FA0 {
     short delta;
@@ -3056,7 +3056,7 @@ struct sMnDtorVEntry7FA0 {
 void operator_delete(int* ptr);
 void cMemMan_free(void*);
 
-extern "C" void func_00357FA0(cMultiParticle* self, int flags)
+extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* self, int flags)
 {
     operator_delete((int*)self->Particle);
     void* buf = self->InstIds;
