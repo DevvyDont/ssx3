@@ -187,7 +187,7 @@ int cListNode_isSentinel(cListNode*);
  */
 extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x18));
+    void* n = cList_first(&self->mThreads);
     if (n != 0) {
         for (; !cListNode_isSentinel((cListNode*)n); n = *(void**)((char*)n + 4)) {
             if ((*(int*)((char*)n + 0x10) >> 25) & 1) {
@@ -618,7 +618,7 @@ extern "C" void cUIGroup_setFocus(void*, int);
  */
 extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
 {
-    cUIGroup_setFocus((char*)self + 0x40, 0);
+    cUIGroup_setFocus(&self->mRootGroup, 0);
     void* p = self->mpState;
     if (p != 0) {
         ((sUIFlags1C*)((char*)p + 0x1c))->mode = 6;
@@ -682,7 +682,7 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
         if (obj != 0) {
             *out++ = obj;
             *(int*)(obj + 0x38) = *(int*)(rec + 4);
-            cList_addToEnd((cList*)((char*)self + 0xB4), (cListNode*)obj);
+            cList_addToEnd(&self->mRootGroup.mList, (cListNode*)obj);
         }
         rec += *(unsigned short*)(rec + 2);
     }
@@ -1031,7 +1031,7 @@ extern "C" void cUIGroup_update(void* list, unsigned short frame);
  */
 extern "C" void cUIScreen_update(cUIScreen* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x18));
+    void* n = cList_first(&self->mThreads);
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             void* next = *(void**)((char*)n + 4);

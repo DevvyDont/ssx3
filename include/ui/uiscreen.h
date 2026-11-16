@@ -26,6 +26,8 @@
 //                mList at 0xB4-0xD0). getRootGroup returns &mRootGroup; isVisible/setVisible are bit 6 of 0x54.
 
 #include "layout.h"
+#include "ui/uigroup.h"
+#include "util/list.h"
 
 struct cListNode;
 struct cUIState;
@@ -44,7 +46,7 @@ struct cUIScreen {
                                      //       [R] = 0; cUIScreen_setData stores the record
     int mAttrScreen;                 // 0x014 [P] tAttrScreen: hasFocus/setFocus (bit 0, lw/sw 0x14; retail func_003A5CC0/func_003A5CD0);
                                      //       [R] tAttrScreen ctor func_001DD580(this + 0x14); [U] bit 1 set/cleared by cUIScreen_setData
-    char mThreads[0x1C];             // 0x018 [O] cList of cUIThread; [U] cUIScreen_playFrame appends a "UIThread",
+    cList mThreads;                  // 0x018 [O] cList of cUIThread; [U] cUIScreen_playFrame appends a "UIThread",
                                      //       cUIScreen_getPrimaryThread walks it; [R] the destructor tears down its vptrs (0x20/0x2C/0x30)
     tUIKeyframeBlock* mpKeyframeBlock; // 0x034 [O]; [R] = 0; cUIScreen_setData = record + record[2]; [U] the frame list searched by
                                      //       cUIScreen_getFrameByLabel and func_0039C728 (getFrameByIndex)
@@ -52,7 +54,7 @@ struct cUIScreen {
                                      //       cUIScreen_createAllObjects, func_0039D008, cUIScreen_getObjectByHashName
     cUIThing** mppObjectList;        // 0x03C [O]; [R] = 0; [U] cUIScreen_createAllObjects allocates count * 4 ("UIScreenObjs");
                                      //       cUIScreen_getObjectByHashName searches it; the destructor frees it
-    char mRootGroup[0x90];           // 0x040 [P] getRootGroup (preview addiu 0x40; retail func_003A5D10), rootGroupPushBack appends to its
+    cUIGroup mRootGroup;             // 0x040 [P] getRootGroup (preview addiu 0x40; retail func_003A5D10), rootGroupPushBack appends to its
                                      //       list at 0xB4 (preview 0xAC; retail func_003A5CF0); [R] cUIThing ctor + _vt$8cUIGroup
                                      //       (cUIGroup_vtbl) at 0x48; [U] cUIScreen_onInput/cUIScreen_update/cUIScreen_parseScreenFocusLose
                                      //       pass it to cUIGroup_onInput/cUIGroup_update/cUIGroup_setFocus
