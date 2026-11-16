@@ -3642,12 +3642,12 @@ struct sWSMan_D540 {
     sWSRec_D540* f130;          // 0x130
 };
 
-extern sWSGfx_D540* D_004A5B80;
+extern sWSGfx_D540* cGraphicsMan_TheGraphicsMan;
 
-// render context singleton (D_004A5B80) accessor
+// render context singleton (cGraphicsMan_TheGraphicsMan) accessor
 static inline sWSGfx_D540* GetGfx_D540()
 {
-    return D_004A5B80;
+    return cGraphicsMan_TheGraphicsMan;
 }
 
 extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)

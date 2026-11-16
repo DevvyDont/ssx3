@@ -118,7 +118,7 @@ struct sVEntry001D28F8 {
 
 extern void* cFEStateMountainRoom_vtbl[];
 extern void* D_0046D0D0[];
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
@@ -132,7 +132,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(void* self, int flags
     }
     int id = *(int*)((char*)self + 0xC4);
     if (id >= 0) {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEntry001D28F8* vt = *(sVEntry001D28F8**)(g + 0x10D8);
         vt[50].fn(g + vt[50].delta, id);
     }
@@ -621,7 +621,7 @@ extern "C" void func_001D31C0(void* p)
         return;
     }
     char* e = (char*)func_0019E2B0(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_31C0* vt = *(sVE_31C0**)(g + 0x10D8);
     int id = vt[46].fn(g + vt[46].delta, e + *(int*)(e + 0x14), D_004A1F40, 0, 1, -1);
     char* snd = *(char**)(self + 0x50);

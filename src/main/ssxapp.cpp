@@ -86,7 +86,7 @@ struct sTint_6900 {
 };
 
 extern void* PadCache;
-extern void* D_004A289C;
+extern void* GrMan;
 extern void* D_004A28AC;
 extern char D_00479A40[];
 extern char D_00479A50[];
@@ -123,7 +123,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     func_00326A28(pm);
     PadCache = pm;
     char* g = (char*)func_00375A08();
-    D_004A289C = g;
+    GrMan = g;
     sVE_6900* vt = ((sGfx_6900*)g)->vt;
     ((V0Fn_6900)vt[2].fn)(g + vt[2].delta);
     cLightMan_construct();
@@ -139,15 +139,15 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(int*)&self->DebugFE = 0;
     *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
-    char* g2 = (char*)D_004A289C;
+    char* g2 = (char*)GrMan;
     sVE_6900* vt2 = ((sGfx_6900*)g2)->vt;
     ((V1Fn_6900)vt2[44].fn)(g2 + vt2[44].delta, 0x100);
-    char* g3 = (char*)D_004A289C;
+    char* g3 = (char*)GrMan;
     sVE_6900* vt3 = ((sGfx_6900*)g3)->vt;
     char* o = g3 + vt3[46].delta;
     void* r = SHAPE_locate(D_0047AB40, D_004A28B0);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(o, r, D_00479A70, 0, 1, -1);
-    func_00369FF8(D_004A289C);
+    func_00369FF8(GrMan);
     *(sTint_6900**)&self->LoadIndicator = new (D_00479A80, 0, 0) sTint_6900;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, D_00479A90, 0x100, 0)));
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
@@ -792,7 +792,7 @@ extern "C" void cBE_purgeBE(void* p);
 extern "C" void func_002380E8(void* p);
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
 extern void* PadCache;
-extern void* D_004A289C;
+extern void* GrMan;
 
 struct sVEPurge0 {
     short delta;
@@ -856,18 +856,18 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         ScriptEngine = 0;
     }
     {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEPurge0* vt = *(sVEPurge0**)(g + 0x10D8);
         vt[3].fn(g + vt[3].delta);
     }
     {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         if (g) {
             sVEPurge* vt = *(sVEPurge**)(g + 0x10D8);
             vt[1].fn(g + vt[1].delta, 3);
         }
     }
-    D_004A289C = 0;
+    GrMan = 0;
     if (self->fE4) func_003DEDC0(self->fE4, 100);
     if (self->fE8) func_003DEDC0(self->fE8, 100);
     for (i = 0; i < 11; i++) {
@@ -1174,7 +1174,7 @@ struct sExecPurgeMgr {
     sExecPurgeVTable* vtable;
 };
 
-extern sExecPurgeMgr* D_004A5B80;
+extern sExecPurgeMgr* cGraphicsMan_TheGraphicsMan;
 
 //99.95%
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
@@ -1184,8 +1184,8 @@ void cSSXApp_loadexecpurge(void* self)
     WORLDTRIGGERMANAGER_DeInit(self);
     SSXAUDIO_DeInit();
     cAppMan_loadexecpurge(self);
-    sExecPurgeVTable* vt = D_004A5B80->vtable;
-    vt->fn((char*)D_004A5B80 + vt->field_0x3B8);
+    sExecPurgeVTable* vt = cGraphicsMan_TheGraphicsMan->vtable;
+    vt->fn((char*)cGraphicsMan_TheGraphicsMan + vt->field_0x3B8);
 }
 #endif
 
@@ -1261,7 +1261,7 @@ struct sVE_228C08 {
     void (*fn)(void*, int, int);
 };
 
-extern cGfx_228C08* D_004A5B80_228C08 __asm__("D_004A5B80");
+extern cGfx_228C08* D_004A5B80_228C08 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void cSSXApp_activateBEOptions()
 {
@@ -1873,7 +1873,7 @@ struct sGfx_229910 {
     sVEntry_229910* vt;         // 0x10D8
 };
 
-extern sGfx_229910* D_004A5B80_229910 __asm__("D_004A5B80");
+extern sGfx_229910* D_004A5B80_229910 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline sModel_229910* refToPtr_229910(unsigned int p)
 {
@@ -2123,7 +2123,7 @@ static inline void set2_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
     g->top->f8 = (g->top->f8 & ~mask) | ((v << shift) & mask);
 }
 
-extern cGfx_229BA8* D_004A5B80_229BA8 __asm__("D_004A5B80");
+extern cGfx_229BA8* D_004A5B80_229BA8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sMarker_229BA8 {
     sV4_229BA8 pos;     // 0x0
@@ -3157,7 +3157,7 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022ADD8);
 #ifdef SKIP_ASM
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_002425C0(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
 void func_00229F80(void* p);
@@ -3260,12 +3260,12 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
     w->f78B0 = 0;
     w->f7AB8 = 0;
     {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEMat_22ADD8* vt = *(sVEMat_22ADD8**)(g + 0x10D8);
         sMat_22ADD8 m = vt[43].fn(g + vt[43].delta);
         MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &m);
     }
-    MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)D_004A289C + 0x5800));
+    MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)GrMan + 0x5800));
     func_002425C0(*(void**)(self + 0x0), *(void**)(self + 0x4));
     func_00229F30(self + 0x10, self + 0x50);
     func_00229F80(*(void**)(self + 0x4));
@@ -3421,7 +3421,7 @@ public:
     virtual void v116(int view);
 };
 
-extern cGfx_22B008* D_004A289C_22B008 __asm__("D_004A289C");
+extern cGfx_22B008* D_004A289C_22B008 __asm__("GrMan");
 
 static inline int CurLayer_22B008(cGfx_22B008* g)
 {

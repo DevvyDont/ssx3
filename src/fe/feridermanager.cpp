@@ -282,7 +282,7 @@ extern "C" void func_0019EC68(void* p)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019ED80);
 #ifdef SKIP_ASM
-extern void* D_004A289C;
+extern void* GrMan;
 void func_00369890(void* self, int a1, int a2);
 extern "C" void func_00369690(void* self, int count, void* src);
 extern "C" void cAnimModel_compile(void* self, int a1);
@@ -318,8 +318,8 @@ struct sFERiderED80 {
 extern "C" void func_0019ED80(sFERiderED80* self)
 {
     self->fCB4 = 1;
-    func_00369890(D_004A289C, 0, 0);
-    func_00369690(D_004A289C, self->count, self->bones);
+    func_00369890(GrMan, 0, 0);
+    func_00369690(GrMan, self->count, self->bones);
     cAnimModel_compile(self->model, 1);
     char* anim = (char*)new (D_00460B28, 0, 0) sAnimMemED80;
     cRiderAnimBase_cRiderAnimBase(anim);
@@ -341,7 +341,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019EE88);
 #ifdef SKIP_ASM
-extern void* D_004A289C;
+extern void* GrMan;
 extern char D_005047F8[];
 extern char D_00504810[];
 extern char D_004A1620[];
@@ -464,17 +464,17 @@ extern "C" void func_0019EE88(void* selfp)
     pos = self->model->bones[idx * 2];
     func_00389CB8(&m, &pos, 1.0f);
     {
-        char* o = (char*)D_004A289C;
+        char* o = (char*)GrMan;
         sVE_EE88* vt = *(sVE_EE88**)(o + 0x10D8);
         vt[69].fn(o + vt[69].delta, &m, 1);
     }
-    int* fl = (int*)(*(char**)((char*)D_004A289C + 0xE84) + 8);
+    int* fl = (int*)(*(char**)((char*)GrMan + 0xE84) + 8);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
     if (self->layer >= 0)
         *fl = (*fl & ~0x3E0) | ((self->layer << 5) & 0x3E0);
     func_00310640(self->model, 0, 0, 0);
     func_002F2088(self->fC70);
-    fl = (int*)(*(char**)((char*)D_004A289C + 0xE84) + 8);
+    fl = (int*)(*(char**)((char*)GrMan + 0xE84) + 8);
     *fl = (*fl & ~0x3E0) | (old << 5);
 }
 #endif
@@ -482,7 +482,7 @@ extern "C" void func_0019EE88(void* selfp)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feridermanager", func_0019F138);
 #ifdef SKIP_ASM
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int func_001A0100(int* self);
 extern "C" int func_0019FD58(int* self);
@@ -525,7 +525,7 @@ extern "C" void func_0019F138(void* selfp)
 {
     sFERiderF138* self = (sFERiderF138*)selfp;
     if (self->pending >= 0) {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEF138* vt = *(sVEF138**)(g + 0x10D8);
         if (self->pending < vt[114].fn(g + vt[114].delta)) {
             self->pending = -1;
@@ -1012,7 +1012,7 @@ INCLUDE_ASM("fe/feridermanager", func_0019F908);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
-extern void* D_004A289C;
+extern void* GrMan;
 extern char D_004A19A8[];
 extern char D_004A19B0[];
 
@@ -1054,13 +1054,13 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
         int id = func_0019F878(self, name);
         if (id >= 0) {
             if (replace) {
-                char* o = (char*)D_004A289C;
+                char* o = (char*)GrMan;
                 sVE_F908b* vt = *(sVE_F908b**)(o + 0x10D8);
                 vt[48].fn(o + vt[48].delta, id, data, 1);
             }
         } else {
             strcpy(self->entries[self->count].name, name);
-            char* o = (char*)D_004A289C;
+            char* o = (char*)GrMan;
             sVE_F908a* vt = *(sVE_F908a**)(o + 0x10D8);
             self->entries[self->count].id = vt[46].fn(o + vt[46].delta, data, D_004A19B0, 0, 1, -1);
             self->count++;
@@ -1632,7 +1632,7 @@ extern "C" void func_0019EE88(void* rider);
 // Resets the world's rider camera indices and updates both active riders.
 extern "C" void func_001A0598(char* self)
 {
-    char* p = (char*)D_004A289C;
+    char* p = (char*)GrMan;
     *(int*)(p + 0x24) = 0x2E;
     *(int*)(p + 0x84) = 0x2F;
     *(int*)(p + 0x10A8) = *(int*)(p + 0x1008);

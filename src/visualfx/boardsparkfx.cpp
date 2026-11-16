@@ -279,7 +279,7 @@ struct sRS_AA78 {
 };
 extern sV4_AA78 D_004FF130;
 extern sRS_AA78 D_00501420_AA78 __asm__("D_00501420");
-extern char* D_004A289C_AA78 __asm__("D_004A289C");
+extern char* D_004A289C_AA78 __asm__("GrMan");
 
 // Render-state field setters (mask, shift, value), as the unit's other effects write them.
 #define RS_SETA_AA78(rs, mask, shift, v) ((rs).flagsA = ((rs).flagsA & ~(mask)) | (((v) << (shift)) & (mask)))
@@ -622,8 +622,8 @@ struct sRenderCtx_B478 {
     char pad[0xE84];
     sRS_B478* top;
 };
-extern sRenderCtx_B478* D_004A289C;
-extern char* D_004A5B80;
+extern sRenderCtx_B478* GrMan;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sVec2_B478 {
     float x, y;
@@ -674,16 +674,16 @@ extern "C" void func_002DB478(char* self)
         func_00371688(o, 7);
     }
     if (*(int*)(self + 0x70) != 0) {
-        push_B478(D_004A289C);
-        *D_004A289C->top = *(sRS_B478*)(self + 0x7C);
-        char* ctx = (char*)D_004A289C;
+        push_B478(GrMan);
+        *GrMan->top = *(sRS_B478*)(self + 0x7C);
+        char* ctx = (char*)GrMan;
         sVE_B478a* vt = *(sVE_B478a**)(ctx + 0x10D8);
         vt[82].fn(ctx + vt[82].delta, *(int*)(self + 0x28));
-        pop_B478(D_004A289C);
+        pop_B478(GrMan);
     }
     if (*(int*)(self + 0x74) != 0) {
-        push_B478(D_004A289C);
-        *D_004A289C->top = *(sRS_B478*)(self + 0x90);
+        push_B478(GrMan);
+        *GrMan->top = *(sRS_B478*)(self + 0x90);
         if (D_004A54D8 == 0) {
             D_004A54D8 = 1;
             D_004A54D0 = 0.0f;
@@ -705,11 +705,11 @@ extern "C" void func_002DB478(char* self)
         sVec2_B478* uv1 = (sVec2_B478*)&D_004A54E0;
         for (int i = 0; i < 3; i++) {
             sVec2_B478 size(((float*)(self + 0x60))[i], ((float*)(self + 0x60))[i]);
-            char* ctx = D_004A5B80;
+            char* ctx = cGraphicsMan_TheGraphicsMan;
             sVE_B478b* vt = *(sVE_B478b**)(ctx + 0x10D8);
             vt[78].fn(ctx + vt[78].delta, self + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
         }
-        pop_B478(D_004A289C);
+        pop_B478(GrMan);
     }
 }
 #endif

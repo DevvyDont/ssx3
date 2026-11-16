@@ -159,7 +159,7 @@ extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int 
 extern "C" void* func_0039E6B8(void* self);
 extern "C" char* func_003A12D0(void* self);
 extern "C" unsigned short* func_003A2068(void* self, int idx);
-extern void* D_004A289C;
+extern void* GrMan;
 
 struct sV3_185F40 {
     float x, y, z;
@@ -239,7 +239,7 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
             float h = size.y * lineH;
             float bh = box.y;
             sV4_185F40 save = *(sV4_185F40*)(*(char**)(self + 0x5C) + 0x1C);
-            (*(sRS_185F40**)((char*)D_004A289C + 0xE84))->mode = 21;
+            (*(sRS_185F40**)((char*)GrMan + 0xE84))->mode = 21;
             signed char rows = (int)h + 3;
             int scroll = *(int*)(self + 0x60);
             int first = scroll / rows;

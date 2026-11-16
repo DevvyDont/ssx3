@@ -988,7 +988,7 @@ struct sTrail_EF950 {
     int len;                    // 0x14
 };
 
-extern sRsCtx_EF950* D_004A289C;
+extern sRsCtx_EF950* GrMan;
 extern sRsState_EF950 D_00501420[];
 extern int cPowerUpFXToggles_m_TestTrickBoost;
 extern float D_004A3B74;
@@ -1093,23 +1093,23 @@ extern "C" void func_002EF950(sTrail_EF950* self)
     if (self->count < 2) {
         return;
     }
-    rsPush_EF950(D_004A289C);
-    *D_004A289C->top = D_00501420[0];
+    rsPush_EF950(GrMan);
+    *GrMan->top = D_00501420[0];
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
     if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < *(float*)(self->rider + 0x2EC)) {
         glow = 1;
         alpha = 1.0f;
-        *(short*)((char*)D_004A289C->top + 0x10) = rsTex1044_EF950(D_004A289C);
-        D_004A289C->top->f0 &= ~0xC;
+        *(short*)((char*)GrMan->top + 0x10) = rsTex1044_EF950(GrMan);
+        GrMan->top->f0 &= ~0xC;
         start = self->start;
     } else {
-        sRsCtx_EF950* c = D_004A289C;
+        sRsCtx_EF950* c = GrMan;
         c->top->f0 |= 0xC;
         *(short*)((char*)c->top + 0x10) = rsTex104C_EF950(c);
     }
-    sRsCtx_EF950* ctx = D_004A289C;
+    sRsCtx_EF950* ctx = GrMan;
     rsSetA_EF950(ctx, 0x400000, 22, 1);
     rsSetA_EF950(ctx, 0x1800000, 23, 0);
     rsSetA_EF950(ctx, 0x300000, 20, 0);
@@ -1166,11 +1166,11 @@ extern "C" void func_002EF950(sTrail_EF950* self)
         j--;
         t += 1.0f;
     }
-    sRsCtx_EF950* o = D_004A289C;
+    sRsCtx_EF950* o = GrMan;
     o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v1, 0);
-    o = D_004A289C;
+    o = GrMan;
     o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v2, 0);
-    rsPop_EF950(D_004A289C);
+    rsPop_EF950(GrMan);
 }
 #endif
 
@@ -1198,7 +1198,7 @@ struct sRSMan_002EFF98 {
     void* vt;
 };
 extern char cVisualEffectsMan_vtbl[];
-extern sRSEntry_002EFF98* D_004A5B80;
+extern sRSEntry_002EFF98* cGraphicsMan_TheGraphicsMan;
 struct sShadowCfg_002EFF98 {
     int texIndex;
 };
@@ -1229,7 +1229,7 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
     D_004A45D4.texIndex = 0x37;
     D_004A443C = 0x30;
     D_004A3B78 = self;
-    sRSEntry_002EFF98* e = D_004A5B80;
+    sRSEntry_002EFF98* e = cGraphicsMan_TheGraphicsMan;
     e[1].f4 = 0x2E;
     e[2].f4 = 0x31;
     e[4].f4 = 0x2F;
@@ -1328,7 +1328,7 @@ struct sRsCtx_F00A0 {
     float a22C[8];      // 0x22C
     float a24C[8];      // 0x24C
 };
-extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("D_004A5B80");
+extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void func_002F00A0(void* self, int i)
 {

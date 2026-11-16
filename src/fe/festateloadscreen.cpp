@@ -18,7 +18,7 @@ extern "C" void cUIEngine_loadFile(void* engine, const char* name);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
-extern void* D_004A289C;
+extern void* GrMan;
 extern int D_004A19C4;
 extern signed char D_00535C11[];
 extern char D_0047B698[];
@@ -86,7 +86,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cFELoadScreen_load(void* self)
 {
     {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVE_233438* vt = *(sVE_233438**)(g + 0x10D8);
         vt[44].fn(g + vt[44].delta, 0x100);
     }
@@ -156,7 +156,7 @@ struct sVE_3640 {
 
 static inline int loadTex_3640(char* data, const char* name)
 {
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_3640* vt = *(sVE_3640**)(g + 0x10D8);
     return vt[46].fn(g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
@@ -222,12 +222,12 @@ struct sVE_38C8 {
 
 extern "C" void func_002338C8(void)
 {
-    func_00369FF8(D_004A289C);
+    func_00369FF8(GrMan);
     cSSXApp_startFELoad(SSXApp);
-    // Storing through a pointer keeps the store ahead of the reload of D_004A289C.
+    // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     *p = 0;
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_38C8* vt = *(sVE_38C8**)(g + 0x10D8);
     vt[15].fn(g + vt[15].delta, sVec3i_38C8(0, 0, 0));
     func_0028F768(func_0028B180());
@@ -291,7 +291,7 @@ struct cGame00233930 {
     virtual void v50(int id);
 };
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_00397B70(void* self, int a1);
 extern "C" void func_0036A020(void* self);
 extern "C" void* func_0028B180();
@@ -299,10 +299,10 @@ extern "C" void func_0028FA98(void* self, float f);
 
 extern "C" void func_00233930(void* self)
 {
-    ((cGame00233930*)D_004A289C)->v19();
+    ((cGame00233930*)GrMan)->v19();
     int id = *(int*)((char*)self + 0x18);
     if (id >= 0) {
-        ((cGame00233930*)D_004A289C)->v50(id);
+        ((cGame00233930*)GrMan)->v50(id);
     }
     void* o = *(void**)((char*)self + 0xC);
     if (o != 0) {
@@ -312,10 +312,10 @@ extern "C" void func_00233930(void* self)
     for (i = 0; i < 2; i++) {
         int h = *(int*)((char*)self + 0x10 + i * 4);
         if (h != 0) {
-            ((cGame00233930*)D_004A289C)->v50(h);
+            ((cGame00233930*)GrMan)->v50(h);
         }
     }
-    func_0036A020(D_004A289C);
+    func_0036A020(GrMan);
     func_0028FA98(func_0028B180(), 1.0f);
 }
 #endif
@@ -334,13 +334,13 @@ struct sVEntryV002339F8 {
     void (*fn)(void*);
 };
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* engine);
 
 extern "C" int func_002339F8(void* self)
 {
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVEntryI002339F8* vt = *(sVEntryI002339F8**)(g + 0x10D8);
     if (vt[17].fn(g + vt[17].delta) == 0) {
         return 0;
@@ -348,7 +348,7 @@ extern "C" int func_002339F8(void* self)
     if (func_00231D60(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
-    g = (char*)D_004A289C;
+    g = (char*)GrMan;
     sVEntryV002339F8* vt2 = *(sVEntryV002339F8**)(g + 0x10D8);
     vt2[20].fn(g + vt2[20].delta);
     return 1;

@@ -568,7 +568,7 @@ struct sDefer2_B370 {
     sSortKey_B370 keys[1];          // 0x67CA8
 };
 
-extern sGfx_B370* D_004A5B80_B370 __asm__("D_004A5B80");
+extern sGfx_B370* D_004A5B80_B370 __asm__("cGraphicsMan_TheGraphicsMan");
 extern float D_004A4344;
 extern float D_004A434C;
 extern float D_004A4350;
@@ -845,7 +845,7 @@ struct sGmVE_C590 {
     void (*fn)(void*, int, sBezVert_C590*, int);
 };
 
-extern char* D_004A5B80_C590 __asm__("D_004A5B80");
+extern char* D_004A5B80_C590 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline void setVert_C590(sBezVert_C590* v, const sV3_C590& p, const sUV_C590& uv)
 {
@@ -966,7 +966,7 @@ extern "C" void func_0038C788(void* self, int type, int idx)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038CA08);
 #ifdef SKIP_ASM
-extern void* D_004A5B80;
+extern void* cGraphicsMan_TheGraphicsMan;
 extern "C" unsigned int func_0037DF88(void* self, void* a1, void* a2);
 
 struct sBezVec4_CA08 {
@@ -986,7 +986,7 @@ extern "C" void func_0038CA08(void* self, void* obj)
     b.y = *(float*)(o + 0x168);
     b.z = *(float*)(o + 0x16C);
     b.w = 1.0f;
-    func_0037DF88(D_004A5B80, &a, &b);
+    func_0037DF88(cGraphicsMan_TheGraphicsMan, &a, &b);
 }
 #endif
 
@@ -1038,7 +1038,7 @@ struct sBezMan_CA70 {
     int nDefer;                     // 0x5364
     sDefer_CA70 defer[1];           // 0x5368
 };
-extern sGfx_CA70* D_004A5B80_CA70 __asm__("D_004A5B80");
+extern sGfx_CA70* D_004A5B80_CA70 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A44D8;
 extern int D_004A44DC;
 extern char* D_0044B9D0[];
@@ -1175,7 +1175,7 @@ struct sBezMan_CE20 {
     int base28[(0x44C - 0x28) / 4]; // 0x28
     unsigned int base44C[(0x5364 - 0x44C) / 4]; // 0x44C
 };
-extern sGfx_CE20* D_004A5B80_CE20 __asm__("D_004A5B80");
+extern sGfx_CE20* D_004A5B80_CE20 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A44D8;
 extern int D_004A44DC;
 struct sTex_CE20 {
@@ -1318,7 +1318,7 @@ static inline void CopyMat_D168(void* d, const void* src)
 
 struct sProg_D168 { int addr; int size; };
 struct sPatch_D168 { void* obj; int extra; };
-extern sGfx_D168* D_004A5B80_D168 __asm__("D_004A5B80");
+extern sGfx_D168* D_004A5B80_D168 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline void QueueRecord_D168(sGfx_D168* gfx, unsigned int buf, unsigned int next, int flag)
 {
@@ -1457,7 +1457,7 @@ struct sTex_D448 {
     int addr;
     int pad;
 };
-extern sGfx_D448* D_004A5B80_D448 __asm__("D_004A5B80");
+extern sGfx_D448* D_004A5B80_D448 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void CopyMat_D448(void* d, const void* s)
@@ -1625,7 +1625,7 @@ struct sGfx_D690 {
 };
 extern float D_004A4348;
 extern void* D_004A4474;
-extern sGfx_D690* D_004A5B80_D690 __asm__("D_004A5B80");
+extern sGfx_D690* D_004A5B80_D690 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char D_1460[];
 extern "C" char* func_0038F460(void* self, unsigned int addr, int size, int flags);
 extern "C" unsigned int func_0038F668(void* self, char* end, int arg);
@@ -1736,7 +1736,7 @@ struct sBezMan_D968 {
     sBezMixPatch_D968 mix[75];      // 0x4D88
 };
 extern int D_004A44E0;
-extern sCtx_D968* D_004A5B80_D968 __asm__("D_004A5B80");
+extern sCtx_D968* D_004A5B80_D968 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_0037D968(sCtx_D968* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle);

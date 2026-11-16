@@ -905,7 +905,7 @@ extern "C" void* func_003A9A98(void* self, int i);
 extern "C" void func_003A6F88(void* self, int i, int a, int b);
 extern "C" void func_003A8528(cWorldCache* self, int i);
 extern char* D_004A5B64;
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern char D_00494E88[];
 
 // PORT: g++ 2.95 new-expression; the ctor and the tagged allocator are bound to their symbols by asm label.
@@ -937,7 +937,7 @@ struct sVE_8668 { short delta; short index; int (*fn)(void*); };
 
 static inline int Frame_8668()
 {
-    char* o = D_004A5B80;
+    char* o = cGraphicsMan_TheGraphicsMan;
     sVE_8668* vt = *(sVE_8668**)(o + 0x10D8);
     return vt[114].fn(o + vt[114].delta);
 }
@@ -1651,7 +1651,7 @@ extern "C" void cWorldView_update(cWorldView* p)
         case 2:
             if (func_003A8618((cWorldCache*)self->cache, self->sections[i].id)) {
                 self->entries[i].state = 5;
-                char* o = D_004A5B80;
+                char* o = cGraphicsMan_TheGraphicsMan;
                 sVE_9258* vt = *(sVE_9258**)(o + 0x10D8);
                 vt[102].fn(o + vt[102].delta, i);
             }

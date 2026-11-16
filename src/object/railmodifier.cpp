@@ -7044,7 +7044,7 @@ struct sRmBatch_29B8 {
     sRmSaved_29B8* c;               // 0x57490
 };
 
-extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("D_004A5B80");
+extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sRmState_29B8 D_00501420_29B8 __asm__("D_00501420");
 
 static inline void set0_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
@@ -7311,7 +7311,7 @@ extern "C" void func_00362DE8(void* vself)
 INCLUDE_ASM("object/railmodifier", func_00363490);
 #ifdef SKIP_ASM
 extern void* D_004A4474;
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern const int D_004A4058[];
 extern "C" void func_00362DE8(void* self);
 extern "C" void func_00364360(void* self, ulong** pp);
@@ -7388,7 +7388,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
     void* ring = D_004A4474;
     int saved = *(int*)ring;
     func_0038F300(ring, 5);
-    char* gs = D_004A5B80;
+    char* gs = cGraphicsMan_TheGraphicsMan;
     void* obj = *(void**)(gs + 0x18F4);
     func_00396128(obj);
     func_00365F68((char*)obj + 0x1F60);
@@ -7533,7 +7533,7 @@ INCLUDE_ASM("object/railmodifier", func_00363C20);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
 extern "C" void func_00364CD0(void* self, int a, int b, unsigned int c, ulong** pp);
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sRmGs3C20 {
     unsigned int w0;
@@ -7612,7 +7612,7 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, u
         }
     }
     if (((State3C20(self)->w1 & 0x400000) >> 22) != ((st->w1 & 0x400000) >> 22)) {
-        char* gs = D_004A5B80;
+        char* gs = cGraphicsMan_TheGraphicsMan;
         func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40),
                       (st->w1 & 0x400000) >> 22, 0);
         func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40),
@@ -7752,7 +7752,7 @@ extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
 extern "C" void func_00364CD0(void* self, int a, int b, unsigned int c, ulong** pp);
 // PORT: bound by asm label so this caller's packet type doesn't conflict with the definition.
 extern "C" void func_003627A8_4360(void* pkt, ulong** pp, int mode) __asm__("func_003627A8");
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sRmGsState4360 {
     unsigned int w0;
@@ -7779,7 +7779,7 @@ struct sRmPkt4360 {
 // PORT: 64-bit DMA/GIF tag writes (ulong).
 extern "C" void func_00364360(void* self, ulong** pp)
 {
-    char* gs = D_004A5B80;
+    char* gs = cGraphicsMan_TheGraphicsMan;
     sRmGsState4360 st;
     sRmPkt4360 pkt;
     st = *(sRmGsState4360*)&D_00501420;

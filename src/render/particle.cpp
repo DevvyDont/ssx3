@@ -373,8 +373,8 @@ struct sPtCtx1380 {
     sPtVEntry1380* vtable;      // 0x10D8
 };
 
-extern char* D_004A5B80;
-extern sPtCtx1380* D_004A5B80_ctx __asm__("D_004A5B80");
+extern char* cGraphicsMan_TheGraphicsMan;
+extern sPtCtx1380* D_004A5B80_ctx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_0044B420[];
 
 struct sPtObj1380 {
@@ -542,8 +542,8 @@ struct sPtCtx1688 {
     sPtVEntry1688* vtable;      // 0x10D8
 };
 
-extern char* D_004A5B80;
-extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("D_004A5B80");
+extern char* cGraphicsMan_TheGraphicsMan;
+extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_0044B420[];
 
 struct sPtObj1688 {
@@ -1210,7 +1210,7 @@ extern float D_004A41DC;
 extern sPtV4_26C8 D_004FF160;
 extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("D_00501440");
 extern sPtRS_26C8 D_00501420_rs26C8 __asm__("D_00501420");
-extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("D_004A5B80");
+extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sPtV4_26C8 Sub_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
@@ -2473,7 +2473,7 @@ INCLUDE_ASM("render/particle", func_00374D00);
 //100%
 INCLUDE_ASM("render/particle", func_00375890);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sPtVec4_5890 {
     float x, y, z, w;
@@ -2555,7 +2555,7 @@ public:
 extern "C" void func_00375890(void* self)
 {
     char* s = (char*)self;
-    ((cGfxMan_5890*)D_004A5B80)->v67(sPtVec4_5890(*(float*)(s + 0xC), *(float*)(s + 0x10), *(float*)(s + 0x14), 1.0f),
+    ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan)->v67(sPtVec4_5890(*(float*)(s + 0xC), *(float*)(s + 0x10), *(float*)(s + 0x14), 1.0f),
                                      s + 0x90, s + 0xD0, *(int*)(s + 0x170), 1.0f);
 }
 #endif
@@ -2575,7 +2575,7 @@ void* func_003758F8(void* self)
 //100%
 INCLUDE_ASM("render/particle", func_00375918);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void func_00367B60(void* mgr, int id);
 void operator_delete(int* ptr);
 
@@ -2590,8 +2590,8 @@ extern "C" void func_00375918(void* self, int flags)
     char* s = (char*)self;
     int tex = *(int*)(s + 0x170);
     if (tex >= 0) {
-        func_00367B60(*(void**)(D_004A5B80 + 0x18F4), tex);
-        char* mgr = D_004A5B80;
+        func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan + 0x18F4), tex);
+        char* mgr = cGraphicsMan_TheGraphicsMan;
         sPtVEntry_5918* vt = *(sPtVEntry_5918**)(mgr + 0x10D8);
         vt[50].fn(mgr + vt[50].delta, *(int*)(s + 0x170));
         *(int*)(s + 0x170) = -1;
@@ -2605,7 +2605,7 @@ extern "C" void func_00375918(void* self, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00375990);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sPtVEntry_5990 {
     short delta;
@@ -2617,7 +2617,7 @@ extern "C" void func_00375990(void* self)
 {
     char* s = (char*)self;
     if (*(int*)(s + 0x170) < 0) {
-        char* mgr = D_004A5B80;
+        char* mgr = cGraphicsMan_TheGraphicsMan;
         sPtVEntry_5990* vt = *(sPtVEntry_5990**)(mgr + 0x10D8);
         *(int*)(s + 0x170) = vt[52].fn(mgr + vt[52].delta, *(int*)(s + 0x174), *(int*)(s + 0x178), 2);
     }
@@ -9927,7 +9927,7 @@ struct sPktBuilder_4E50 {
     int open;                       // 0xC
 };
 
-extern sPtGfx_4E50* D_004A5B80_4E50 __asm__("D_004A5B80");
+extern sPtGfx_4E50* D_004A5B80_4E50 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_00384DC0(void* self);
 void operator_delete(int*);
 
@@ -12170,7 +12170,7 @@ struct sVEnt_9CB8 {
 
 extern float D_004A43C0[];
 extern int D_004A59A4;
-extern char* D_004A5B80_9CB8 __asm__("D_004A5B80");
+extern char* D_004A5B80_9CB8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sV_9CB8 D_004FF130;
 extern sV_9CB8 D_004FF140_9CB8 __asm__("D_004FF140");
 extern sV_9CB8 D_004FF150_9CB8 __asm__("t4vect_YAxis");

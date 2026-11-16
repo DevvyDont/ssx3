@@ -119,11 +119,11 @@ struct sFlexGrid {
     sGridBox box;         // 0x90
 };
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
 {
-    char* world = D_004A5B80;
+    char* world = cGraphicsMan_TheGraphicsMan;
     int n = self->count;
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
@@ -1150,7 +1150,7 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_render);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sRS_7B80 {
     unsigned int f0_0 : 12;
@@ -1201,7 +1201,7 @@ extern "C" void cFlexBridgeNode_render(char* self)
     if (!IsLoaded_7B80(m)) {
         return;
     }
-    char* ctx = D_004A5B80;
+    char* ctx = cGraphicsMan_TheGraphicsMan;
     {
         sVE93_7B80* vt = *(sVE93_7B80**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
@@ -1432,7 +1432,7 @@ struct sCtx_3480C8 {
     char padE88[0x10D8 - 0xE88];
     sVE_3480C8* vt;         // 0x10D8
 };
-extern sCtx_3480C8* D_004A5B80_3480C8 __asm__("D_004A5B80");
+extern sCtx_3480C8* D_004A5B80_3480C8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_004A5980;
 extern float D_004FF6C0[8][4];
 

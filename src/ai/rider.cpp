@@ -474,13 +474,13 @@ struct sRiderVE_0011C0E0
     short index;
     int (*fn)(void*);
 };
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_0011C0E0(cRider* self)
 {
     if (self->mSafeRenderTick != -1)
     {
-        void* g = D_004A289C;
+        void* g = GrMan;
         sRiderVE_0011C0E0* vt = *(sRiderVE_0011C0E0**)((char*)g + 0x10D8);
         return self->mSafeRenderTick < vt[114].fn((char*)g + vt[114].delta);
     }
@@ -3345,7 +3345,7 @@ have_axis:
 //100%
 INCLUDE_ASM("ai/rider", func_00121F30);
 #ifdef SKIP_ASM
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 struct sVec4_121F30
@@ -3382,7 +3382,7 @@ static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
 
 extern "C" void func_00121F30(cRider* self)
 {
-    void* g = D_004A289C;
+    void* g = GrMan;
     sVEntryP_121F30* gvt = *(sVEntryP_121F30**)((char*)g + 0x10D8);
     sVec4_121F30* m = (sVec4_121F30*)gvt[35].fn((char*)g + gvt[35].delta);
     char* obj = (char*)&self->mVtbl;
@@ -3390,7 +3390,7 @@ extern "C" void func_00121F30(cRider* self)
     sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
     sVec4_121F30 v = mtxMulVec_121F30(m, pos);
     float z = v.z;
-    void* g2 = D_004A289C;
+    void* g2 = GrMan;
     sVEntryF_121F30* gvt2 = *(sVEntryF_121F30**)((char*)g2 + 0x10D8);
     float fov = gvt2[29].fn((char*)g2 + gvt2[29].delta);
     float s, c;
@@ -3414,7 +3414,7 @@ extern "C" void func_00121F30(cRider* self)
 INCLUDE_ASM("ai/rider", func_00122048);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Builds a 0xA0-byte record with func_00389C38 and passes it to virtual slot 69 of the object at D_004A289C.
+// Builds a 0xA0-byte record with func_00389C38 and passes it to virtual slot 69 of the object at GrMan.
 class cRiderSys_122048
 {
 public:
@@ -3495,7 +3495,7 @@ extern "C" void func_00122048()
 {
     char rec[0xA0];
     func_00389C38(rec, 0);
-    ((cRiderSys_122048*)D_004A289C)->v69(rec, 0);
+    ((cRiderSys_122048*)GrMan)->v69(rec, 0);
 }
 #endif
 
@@ -3587,7 +3587,7 @@ extern "C" void func_001220D8(cRider* self)
 INCLUDE_ASM("ai/rider", func_00122278);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C version.
-extern void* D_004A289C;
+extern void* GrMan;
 extern char D_828[];
 
 struct sMat_122278 { float m[16]; };
@@ -3637,7 +3637,7 @@ static inline int inFrustum_122278(sQ128_122278* v)
 
 static inline int test_122278(void* a, void* b)
 {
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_122278* vt = *(sVE_122278**)(g + 0x10D8);
     char* obj = g + vt[93].delta;
     sMat_122278 m = ((GetMatFn_122278)vt[43].fn)(g + vt[43].delta);
@@ -3669,7 +3669,7 @@ extern "C" int func_00122278(cRider* self)
 INCLUDE_ASM("ai/rider", func_00122448);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_00121F30(cRider* self);
 extern "C" void func_00310640(void* model, int lod, int a, int b);
 
@@ -3692,16 +3692,16 @@ extern "C" void func_00122448(cRider* self)
         if (*(int*)(q + 0xA4) || self->mUberLevel >= 11)
             a = 1;
         func_00121F30(self);
-        void* g = D_004A289C;
+        void* g = GrMan;
         sVEntryI_122448* vt = *(sVEntryI_122448**)((char*)g + 0x10D8);
         vt[69].fn((char*)g + vt[69].delta, self->unk_7C0, 1);
-        void* g2 = D_004A289C;
+        void* g2 = GrMan;
         int* rs = *(int**)((char*)g2 + 0xE84);
         rs[1] = (rs[1] & ~0x7C) | 0x14;
         sVEntryF_122448* vt2 = *(sVEntryF_122448**)((char*)g2 + 0x10D8);
         vt2[27].fn((char*)g2 + vt2[27].delta, 0.0f, &self->mPosition);
         func_00310640(self->mAnimModel, self->mLOD, a, b);
-        void* g3 = D_004A289C;
+        void* g3 = GrMan;
         sVEntryF_122448* vt3 = *(sVEntryF_122448**)((char*)g3 + 0x10D8);
         vt3[27].fn((char*)g3 + vt3[27].delta, 0.0f, &D_004FF120_v122448);
     }
@@ -3825,7 +3825,7 @@ public:
     virtual void SetTexture(void*);
 };
 
-extern cGraphicsMan_2680* D_004A289C_2680 __asm__("D_004A289C");
+extern cGraphicsMan_2680* D_004A289C_2680 __asm__("GrMan");
 
 
 struct sV2_2680 {
@@ -3920,7 +3920,7 @@ struct sVE2_2898 { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVE3_2898 { short delta; short index; void (*fn)(void*, void*, void*); };
 struct sVE4_2898 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern int D_004A4C00;
 extern sV3_2898 D_004A5E40;
 
@@ -3998,7 +3998,7 @@ extern "C" void func_00122898(cRider* self)
 {
     if (self->unk_AA4 == 0) {
         self->unk_AA4 = 1;
-        void* g = D_004A289C;
+        void* g = GrMan;
         top_2898(g)[1] = top_2898(g)[0];
         top_2898(g)++;
         sV3_2898 a;
@@ -4021,7 +4021,7 @@ extern "C" void func_00122898(cRider* self)
         }
         float k = 0.3f;
         func_00374D00(Shadow_2898(self), &a, &b, &D_004A5E40, (sMat_2898*)Model_2898(self)->unk_030, 0);
-        void* g2 = D_004A289C;
+        void* g2 = GrMan;
         top_2898(g2)->f8 = (top_2898(g2)->f8 & ~0x3E0) | 0x20;
         top_2898(g2)->f4 = (top_2898(g2)->f4 & 0xFE7FFFFF) | 0x1000000;
         top_2898(g2)->f4 = top_2898(g2)->f4 & 0xFFCFFFFF;
@@ -4030,10 +4030,10 @@ extern "C" void func_00122898(cRider* self)
         top_2898(g2)->f4 = (top_2898(g2)->f4 & ~0x7C) | 4;
         sVE0_2898* vt = *(sVE0_2898**)((char*)g2 + 0x10D8);
         vt[31].fn((char*)g2 + vt[31].delta);
-        void* g3 = D_004A289C;
+        void* g3 = GrMan;
         sVE2_2898* vt3 = *(sVE2_2898**)((char*)g3 + 0x10D8);
         vt3[53].fn((char*)g3 + vt3[53].delta, Shadow_2898(self)->f170, 1);
-        void* g4 = D_004A289C;
+        void* g4 = GrMan;
         sVEI3_2898* vt4 = *(sVEI3_2898**)((char*)g4 + 0x10D8);
         vt4[55].fn((char*)g4 + vt4[55].delta, Tex_2898(Shadow_2898(self)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
         if (func_0011FE98(self) == 0) {
@@ -4043,7 +4043,7 @@ extern "C" void func_00122898(cRider* self)
         CopyMat_2898(&mat, &Shadow_2898(self)->mat);
         sV4_2898 p0 = Shadow_2898(self)->f150;
         sV4_2898 p1 = Shadow_2898(self)->f160;
-        void* g5 = D_004A289C;
+        void* g5 = GrMan;
         sVE4_2898* vt5 = *(sVE4_2898**)((char*)g5 + 0x10D8);
         vt5[101].fn((char*)g5 + vt5[101].delta, &mat, &p0, &p1);
         sV4_2898 c1;
@@ -4057,13 +4057,13 @@ extern "C" void func_00122898(cRider* self)
         c2.z = 0.3f;
         c2.w = 0.3f;
         func_00310948(Model_2898(self), 3, &c1, &c2);
-        void* g6 = D_004A289C;
+        void* g6 = GrMan;
         sVEI_2898* vt6 = *(sVEI_2898**)((char*)g6 + 0x10D8);
         vt6[54].fn((char*)g6 + vt6[54].delta);
-        void* g7 = D_004A289C;
+        void* g7 = GrMan;
         sVE0_2898* vt7 = *(sVE0_2898**)((char*)g7 + 0x10D8);
         vt7[32].fn((char*)g7 + vt7[32].delta);
-        void* g8 = D_004A289C;
+        void* g8 = GrMan;
         top_2898(g8)--;
     }
     func_00375890(Shadow_2898(self));

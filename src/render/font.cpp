@@ -150,7 +150,7 @@ public:
     virtual void v50(int);
 };
 
-extern sFontGfx_19E8* D_004A5B80_19E8 __asm__("D_004A5B80");
+extern sFontGfx_19E8* D_004A5B80_19E8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sFont_19E8 {
     int f0;
@@ -195,7 +195,7 @@ struct sFontCtxDL {
     sFontVEntryDL* vtable;      // 0x10D8
 };
 
-extern sFontCtxDL* D_004A5B80_DL __asm__("D_004A5B80");
+extern sFontCtxDL* D_004A5B80_DL __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sFontTexHdr {
     int f0;
@@ -292,7 +292,7 @@ struct sFontCtx1CB0 {
     sFontVEntry1CB0* vtable;    // 0x10D8
 };
 
-extern sFontCtx1CB0* D_004A5B80;
+extern sFontCtx1CB0* cGraphicsMan_TheGraphicsMan;
 
 struct sFontPos1CB0 {
     float x, y, z, w;
@@ -306,7 +306,7 @@ static inline int fontGetTex(void* s)
 
 extern "C" void func_00391CB0(void* self, float x, float y, sMat00391C48* m)
 {
-    sFontCtx1CB0* g = D_004A5B80;
+    sFontCtx1CB0* g = cGraphicsMan_TheGraphicsMan;
     char* s = (char*)self;
     g->top->tex = fontGetTex(self);
     sFontPos1CB0 pos(x + *(float*)(s + 0x18) * *(float*)(s + 0x38),
@@ -356,7 +356,7 @@ struct sFontCtx1E30 {
     sFontVEntry1E30* vtable;    // 0x10D8
 };
 
-extern sFontCtx1E30* D_004A5B80_1E30 __asm__("D_004A5B80");
+extern sFontCtx1E30* D_004A5B80_1E30 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sFontPos1E30 {
     float x, y, z, w;
@@ -1924,7 +1924,7 @@ void func_00394688(void* self)
 INCLUDE_ASM("render/font", func_00394690);
 #ifdef SKIP_ASM
 extern "C" int func_00394690(void) {
-    return (*(int*)&D_004A5B80);
+    return (*(int*)&cGraphicsMan_TheGraphicsMan);
 }
 #endif
 //100%

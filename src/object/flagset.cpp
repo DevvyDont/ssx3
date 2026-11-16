@@ -4,7 +4,7 @@
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern char D_0048E850[];
 unsigned int BXrand();
 extern "C" void func_0034BCA0(void* self, void* verts);
@@ -93,7 +93,7 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     }
     self->u = 0.0f;
     self->v = 0.0f;
-    char* mgr = D_004A5B80;
+    char* mgr = cGraphicsMan_TheGraphicsMan;
     sFsV2_CM quv[4];
     sFsCol_CM qcol[4];
     sFsV3_CM pos[4];
@@ -142,7 +142,7 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
 //100%
 INCLUDE_ASM("object/flagset", func_0034B7B8);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 void cMemMan_free(void*);
 
 struct sFlagSetVEntryB7B8 {
@@ -156,7 +156,7 @@ extern "C" void func_0034B7B8(void* self)
     char* s = (char*)self;
     void* h = *(void**)(s + 0x60);
     if (h != 0) {
-        char* mgr = D_004A5B80;
+        char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryB7B8* vt = *(sFlagSetVEntryB7B8**)(mgr + 0x10D8);
         vt[77].fn(mgr + vt[77].delta, h);
         *(void**)(s + 0x60) = 0;
@@ -255,7 +255,7 @@ extern "C" void func_0034B818(void* elem)
 //100%
 INCLUDE_ASM("object/flagset", func_0034B9B0);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern int D_004A4244;
 // PORT: 128-bit integer mode for VU0 asm memory operands
 typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
@@ -344,12 +344,12 @@ extern "C" void func_0034B9B0(sFlagSetEntry* e)
     if (D_004A4244 == 0) {
         return;
     }
-    char* ctx = D_004A5B80;
+    char* ctx = cGraphicsMan_TheGraphicsMan;
     TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
     *++TOP_34B9B0(ctx) = D_00501420;
     if (*(signed char*)(self + 3) != 0) {
-        SetF0_12_34B9B0(TOP_34B9B0(D_004A5B80), 0xFF);
-        SetF4_2_34B9B0(TOP_34B9B0(D_004A5B80), 11);
+        SetF0_12_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 0xFF);
+        SetF4_2_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 11);
     } else {
         SetF4_2_34B9B0(TOP_34B9B0(ctx), 5);
     }
@@ -1089,7 +1089,7 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode__cFenceNode);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern void* cFenceNode_vtbl[];
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
@@ -1105,7 +1105,7 @@ extern "C" void cFenceNode__cFenceNode(void* self, int flags)
     *(void***)(s + 0xC) = cFenceNode_vtbl;
     void* h = *(void**)(s + 0x40);
     if (h != 0) {
-        char* mgr = D_004A5B80;
+        char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
         vt[77].fn(mgr + vt[77].delta, h);
     }
@@ -1417,7 +1417,7 @@ extern "C" void func_0034CF98(void* p)
 //100%
 INCLUDE_ASM("object/flagset", func_0034D1E8);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void func_0034CF98(void* self);
 
 struct sFsV3_D1E8 {
@@ -1489,7 +1489,7 @@ extern "C" void func_0034D1E8(void* p)
     self->obj104 = 0;
     self->obj108 = 0;
     self->node->flags = (self->node->flags & ~2u) | 4;
-    char* mgr = D_004A5B80;
+    char* mgr = cGraphicsMan_TheGraphicsMan;
     sFsVE_D1E8* e = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
     self->mesh = (sFsMesh_D1E8*)e->fn(mgr + e->delta, 8, 2, 0x60000000u);
     sFsV3_D1E8 pos[4];
@@ -1609,7 +1609,7 @@ extern "C" void cFenceNode_render(char* self)
     if (!IsLoaded_34B9B0(*(sModel_34B9B0**)(self + 0x18))) {
         return;
     }
-    char* ctx = D_004A5B80;
+    char* ctx = cGraphicsMan_TheGraphicsMan;
     float one = 1.0f;
     {
         sModel_34B9B0* m = *(sModel_34B9B0**)(self + 0x18);

@@ -1271,7 +1271,7 @@ struct sCtx_8A00 {
     sVE_8A00* vt;               // 0x10D8
 };
 
-extern sCtx_8A00* D_004A289C_8A00 __asm__("D_004A289C");
+extern sCtx_8A00* D_004A289C_8A00 __asm__("GrMan");
 extern int D_004A3A58;
 extern sOut_8A00 D_004D5B70_8A00[] __asm__("D_004D5B70");
 extern sMat_8A00 D_004FF1A0_8A00 __asm__("t4mat_Identity");
@@ -1566,7 +1566,7 @@ public:
     virtual void v72();
     virtual void drawLines(int n, sAvVert_D8EA8* v, int f);
 };
-extern cRCtx_D8EA8* D_ctx_D8EA8 __asm__("D_004A5B80");
+extern cRCtx_D8EA8* D_ctx_D8EA8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 class cRiderPos_D8EA8 {
 public:
@@ -1671,7 +1671,7 @@ struct sCam_9130 {
     int cur;                    // 0x14
     float mats[4][4];           // 0x18
 };
-extern sRCtx_9130* D_004A5B80;
+extern sRCtx_9130* cGraphicsMan_TheGraphicsMan;
 extern int D_004A41EC;
 extern sRState_9130 D_00501420;
 extern "C" void tActiveAvalanche_render(void* slot);
@@ -1684,7 +1684,7 @@ extern "C" void cAvalanche_render(void)
 {
     if ((D_004A3A30 != 0 && cAvalanche_m_resolved != 0) || D_004A41EC != 0)
     {
-        sRCtx_9130* ctx = D_004A5B80;
+        sRCtx_9130* ctx = cGraphicsMan_TheGraphicsMan;
         float* view = getCam_9130()->views[getCam_9130()->cur];
         ctx->top[1] = ctx->top[0];
         ctx->top++;

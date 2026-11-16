@@ -802,7 +802,7 @@ struct sRenderCtx {
     char* e84;              // 0xE84
 };
 
-extern sRenderCtx* D_004A289C_D1A0 __asm__("D_004A289C");
+extern sRenderCtx* D_004A289C_D1A0 __asm__("GrMan");
 
 // A HUD sprite: texture id and UV rectangle.
 struct sHudSprite {
@@ -1046,7 +1046,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D9A0);
 // draws a vertex list).
 
 
-extern sRenderCtx* D_004A289C_D9A0 __asm__("D_004A289C");
+extern sRenderCtx* D_004A289C_D9A0 __asm__("GrMan");
 
 // An RGBA colour as the element colour getter func_001E91A8 writes it and func_001F1190 takes it (the first component
 // is the one the fades scale).
@@ -1260,7 +1260,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021E1B0);
 // EA's 2-float vector (prototype name, e.g. setTileUV__7cUIIconG8t2Vector).
 // The render context D_004A289C_E1B0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
 // draws a vertex list).
-extern sRenderCtx* D_004A289C_E1B0 __asm__("D_004A289C");
+extern sRenderCtx* D_004A289C_E1B0 __asm__("GrMan");
 
 // An RGBA colour as the element colour getter func_001E91A8 writes it and func_001F1190 takes it (the first component
 // is the one the fades scale).
@@ -1420,7 +1420,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021E7E0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Col_E7E0 { float r, g, b, a; };
 struct Ctx_E7E0 { char pad[0xE84]; char* e84; };
-extern Ctx_E7E0* D_004A289C;
+extern Ctx_E7E0* GrMan;
 extern "C" void func_0021EA00_E7E0(void* self, Col_E7E0* col, float* pos, float w, float h, float u0, float v0, float u1, float v1) __asm__("func_0021EA00");
 
 extern "C" void func_0021E7E0(char* self, Col_E7E0* colp, float* pos, float* size,
@@ -1437,7 +1437,7 @@ extern "C" void func_0021E7E0(char* self, Col_E7E0* colp, float* pos, float* siz
     size[0] += dw;
     size[1] += dh;
     int id = *(int*)(self + 0x474);
-    *(short*)(D_004A289C->e84 + 0x10) = id;
+    *(short*)(GrMan->e84 + 0x10) = id;
     if (size[0] > 72.0f) {
         float mid = (*(float*)(self + 0x484) + *(float*)(self + 0x488)) * 0.5f;
         func_0021EA00_E7E0(self, c, pos, 36.0f, size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
@@ -1471,7 +1471,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
 // draws a vertex list).
 
 
-extern sRenderCtx* D_004A289C_EA00 __asm__("D_004A289C");
+extern sRenderCtx* D_004A289C_EA00 __asm__("GrMan");
 
 // An RGBA colour as the element colour getter func_001E91A8 writes it and func_001F1190 takes it (the first component
 // is the one the fades scale).
@@ -1580,7 +1580,7 @@ static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* po
     size.y += dh;
     float* pp = &pos.x;
     int id = *(int*)(self + 0x474);
-    *(short*)(D_004A289C->e84 + 0x10) = id;
+    *(short*)(GrMan->e84 + 0x10) = id;
     if (size.x > 72.0f) {
         float cap = 36.0f;  // width of each end cap: left cap, stretched middle (size.x - 2 caps), right cap
         float mid = (*(float*)(self + 0x484) + *(float*)(self + 0x488)) * 0.5f;
@@ -1628,7 +1628,7 @@ extern "C" void func_0021ED48(char* self, int elems, char* rider, int mode, int 
     func_001F10F8(self, &p, &a, &size, scale, E[0x20], E[0x21], mode);
     scale[0] = scale[0] * 0.0555555559694767f * size.x;
     scale[1] = scale[1] * 0.0555555559694767f * size.y;
-    int* w = (int*)(D_004A289C->e84 + 8);
+    int* w = (int*)(GrMan->e84 + 8);
     *w = (*w & ~0x3E0) | (((E[0x22] + layer) << 5) & 0x3E0);
     *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
     char* t = *(char**)(self + 0x42C);
@@ -1647,12 +1647,12 @@ extern "C" void func_0021ED48(char* self, int elems, char* rider, int mode, int 
         func_001F10F8(self, &p, &a, &size, &one, E[0x20], E[0x21], mode);
         func_001E91A8(E2, cp);
         *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
-        w = (int*)(D_004A289C->e84 + 8);
+        w = (int*)(GrMan->e84 + 8);
         *w = (*w & ~0x3E0) | (((E2[0x22] + layer) << 5) & 0x3E0);
         func_001F1190(self, *(int*)(self + 0x494), &p, &size, &one, cp);
         if (kind == 2 && *(float*)(rider + 0x64) >= 0.0f) {
             int under = layer - 1;
-            w = (int*)(D_004A289C->e84 + 8);
+            w = (int*)(GrMan->e84 + 8);
             *w = (*w & ~0x3E0) | (((E2[0x22] + under) << 5) & 0x3E0);
             draw_ED48(self, (Col_E7E0*)(rider + 0x54), &p, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
         }
@@ -1708,7 +1708,7 @@ extern "C" void func_0021F338(char* self, char* obj, int n, int x, V2_F338* pos,
             p.x -= (size.x * n + (n - 1) * 2.0f) * sc.x * 0.5f;
             p.y -= size.y * sc.y * 0.5f;
         }
-        int* w = (int*)(D_004A289C->e84 + 8);
+        int* w = (int*)(GrMan->e84 + 8);
         *w = (*w & ~0x3E0) | ((obj[0x262] << 5) & 0x3E0);
         step = (size.x + 2.0f) * sc.x;
         col = cols[n - 1];
@@ -1777,7 +1777,7 @@ extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag
     size.y *= sc.y;
     func_001F10F8(self, &p, &a, &size, &scale, e[0x20], e[0x21], x);
     func_001E91A8(e, &c);
-    int* w = (int*)(D_004A289C->e84 + 8);
+    int* w = (int*)(GrMan->e84 + 8);
     *w = (*w & ~0x3E0) | ((e[0x22] << 5) & 0x3E0);
     func_001F1190(self, sz, &p, &size, &scale, &c);
     if (flag == 0) {
@@ -1869,7 +1869,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
         sc.x *= s;
         sc.y *= s;
         func_001F10F8(self, &p, &a, &size, &scale, obj[0x824], obj[0x825], x);
-        int* w = (int*)(D_004A289C->e84 + 8);
+        int* w = (int*)(GrMan->e84 + 8);
         *w = (*w & ~0x3E0) | ((obj[0x826] << 5) & 0x3E0);
         col.x = 1.0f;
         col.y = 1.0f;
@@ -1959,7 +1959,7 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     func_001E9220(obj + 0x9B4, &size, *(int*)(self + 0x4CC));
     func_001F10F8(self, &half, &a, &size, scaleP(), obj[0x9D4], obj[0x9D5], 0);
     func_001E91A8(obj + 0x9B4, &col);
-    int* w = (int*)(D_004A289C->e84 + 8);
+    int* w = (int*)(GrMan->e84 + 8);
     *w = (*w & ~0x3E0) | ((c << 5) & 0x3E0);
     func_001F1190(self, *(int*)(self + 0x4CC), &half, &size, scaleP(), &col);
     void* be = cBE_getInterface_Fv(cBE_getBE(), 10);
@@ -1970,7 +1970,7 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     }
     p2.x = half.x + D_004A5B30;
     p2.y = half.x + D_004A5B34;
-    w = (int*)(D_004A289C->e84 + 8);
+    w = (int*)(GrMan->e84 + 8);
     *w = (*w & ~0x3E0) | (((++c) << 5) & 0x3E0);
     func_001F1190(self, *(int*)(self + 0x4D0), &p2, &D_004A5B40, scaleP(), &col);
     float f = (float)*(int*)(*(char**)(self + 0x42C) + 0x14) * *(float*)(*(char**)(self + 0x42C) + 0x34) * 0.38805678486824036f;
@@ -1980,7 +1980,7 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     char* t = *(char**)(self + 0x42C);
     *(float*)(t + 0x38) = *(float*)(t + 0x30) * 0.7761135697364807f;
     *(float*)(t + 0x3C) = *(float*)(t + 0x34) * 0.7761135697364807f;
-    w = (int*)(D_004A289C->e84 + 8);
+    w = (int*)(GrMan->e84 + 8);
     *w = (*w & ~0x3E0) | (((c += 2) << 5) & 0x3E0);
     PrintAt_FD38(*(char**)(self + 0x42C), q.x, q.y, half, f, n + 1);
     char* t2 = *(char**)(self + 0x42C);
@@ -2199,7 +2199,7 @@ extern "C" void func_00220AD0(char* self, char* obj, float t) {
     d.x = 2.0f;
     d.y = 2.0f;
     *(V2_0AD0*)(*(char**)(self + 0xB50) + 0x28) = d;
-    int* w = (int*)(D_004A289C->e84 + 8);
+    int* w = (int*)(GrMan->e84 + 8);
     *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
     e = a;
     func_001E95A0(self + 0xB48, &e, &b, &c, obj[0xAF4], obj[0xAF5]);

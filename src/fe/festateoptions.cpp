@@ -531,7 +531,7 @@ extern "C" void func_0029ED90(void* p, int a);
 extern char D_0045DD20[];
 extern char D_0045DDD8[];
 extern int D_004A14D0;
-extern void* D_004A289C;
+extern void* GrMan;
 
 struct sGameCfg_189610 {
     unsigned int flags;     // 0x0
@@ -598,7 +598,7 @@ extern "C" void func_00189610(void* self, char* popup, int event)
                 c->f6 = a;
                 c->f5 = b;
             } else {
-                char* g = (char*)D_004A289C;
+                char* g = (char*)GrMan;
                 sVE_189610b* vt = *(sVE_189610b**)(g + 0x10D8);
                 char* thisp = g + vt[12].delta;
                 void (**pf)(void*, int, int) = &vt[12].fn;
@@ -800,7 +800,7 @@ extern "C" void func_0039A7A8(void* self, int v);
 extern "C" int func_0039A738(void* self);
 extern "C" void cSSXApp_activateBEOptions(void* p);
 extern char* D_00440FD8[];
-extern void* D_004A289C;
+extern void* GrMan;
 
 struct sGameCfg_189D60 {
     unsigned int pad0 : 19;
@@ -876,7 +876,7 @@ extern "C" void func_00189D60(void* self_)
         if (w != 0)
             func_0039A7A8(w, iface->getOptions().f20);
     }
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_189D60c* vt = *(sVE_189D60c**)(g + 0x10D8);
     char* thisp = g + vt[12].delta;
     void (**pf)(void*, int, int) = &vt[12].fn;

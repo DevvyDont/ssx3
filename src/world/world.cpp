@@ -37,7 +37,7 @@ struct sWorldVEntry0 {
     void (*fn)(void*);
 };
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
 extern "C" void func_003AC8F0(void* self, int flags);
 extern "C" void func_002BB140(void* self, int flags);
@@ -46,7 +46,7 @@ void operator_delete(int* p);
 
 extern "C" void cWorld__cWorld(void** self, int flags)
 {
-    char* obj = D_004A5B80;
+    char* obj = cGraphicsMan_TheGraphicsMan;
     sWorldVEntry0* e = &(*(sWorldVEntry0**)(obj + 0x10D8))[107];
     e->fn(obj + e->delta);
     if (self[0] != 0) {

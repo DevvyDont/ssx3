@@ -8,7 +8,7 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cCamera_cCamera(void* self, int idx);
 extern "C" void func_0015DFD8(void* self, int mode);
-extern char* D_004A289C;
+extern char* GrMan;
 extern char D_0047B538[];
 
 struct sVECam22E3B8 {
@@ -79,8 +79,8 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
     self->fC = 0;
     self->f10 = 1;
     self->f14 = 0;
-    float w = (float)((cDisp22E3B8*)D_004A289C)->v10();
-    float h = (float)((cDisp22E3B8*)D_004A289C)->v11();
+    float w = (float)((cDisp22E3B8*)GrMan)->v10();
+    float h = (float)((cDisp22E3B8*)GrMan)->v11();
     self->width = w;
     self->height = h;
     self->f18 = 0;
@@ -92,7 +92,7 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
 //100%
 INCLUDE_ASM("main/gamerender", func_0022E550);
 #ifdef SKIP_ASM
-extern char* D_004A289C;
+extern char* GrMan;
 
 class cDisp22E550 {
 public:
@@ -157,8 +157,8 @@ extern "C" void func_0022E550(cGameViewMan22E550* self)
     if (self->count == 1) {
         return;
     }
-    float w = (float)((cDisp22E550*)D_004A289C)->v10();
-    float h = (float)((cDisp22E550*)D_004A289C)->v11();
+    float w = (float)((cDisp22E550*)GrMan)->v10();
+    float h = (float)((cDisp22E550*)GrMan)->v11();
     switch (self->mode) {
     case 3:
     case 4:

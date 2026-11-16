@@ -355,7 +355,7 @@ extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_001D47A0(void* self, int index);
-extern void* D_004A289C;
+extern void* GrMan;
 extern char D_004A1FF8[];
 
 struct cGame_4A20 {
@@ -427,7 +427,7 @@ extern "C" void func_001D4A20(void* p)
     for (i = 0; i < 5; i++) {
         if (self->tex[i] >= 0 && func_0019E238(mgr, self->bank, self->tex[i]) != 0) {
             char* d = func_0019E2B0(mgr, self->bank, self->tex[i]);
-            self->snd[i] = ((cGame_4A20*)D_004A289C)->playSound(d + *(int*)(d + 0x14), D_004A1FF8, 0, 1, -1);
+            self->snd[i] = ((cGame_4A20*)GrMan)->playSound(d + *(int*)(d + 0x14), D_004A1FF8, 0, 1, -1);
             func_0019DC20(mgr, self->bank, self->tex[i]);
             self->tex[i] = -1;
             self->count--;
@@ -494,7 +494,7 @@ struct cGame001D4B20 {
     virtual void v50(int id);
 };
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sSelf001D4B20 {
     char pad[0x50];
@@ -510,7 +510,7 @@ extern "C" void func_001D4B20(sSelf001D4B20* self)
     int i;
     for (i = 0; i < 5; i++) {
         if (self->snd[i] >= 0) {
-            ((cGame001D4B20*)D_004A289C)->v50(self->snd[i]);
+            ((cGame001D4B20*)GrMan)->v50(self->snd[i]);
         }
         self->snd[i] = -1;
         if (self->tex[i] >= 0) {

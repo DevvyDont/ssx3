@@ -80,7 +80,7 @@ struct cSSXScriptEngine {
     int mFrameUpdated;                           // 0x508 [O] (a bool in On Tour); [U] func_00283AA0 sets 1 while
                                                  //       playing and not paused
     int mNumPause;                               // 0x50C [O]; [U] func_00283B78 (PauseVideo) counts it up and down
-    int unk_510;                                 // 0x510 [U] func_002839A8 saves a D_004A289C virtual-call result
+    int unk_510;                                 // 0x510 [U] func_002839A8 saves a GrMan virtual-call result
     int unk_514;                                 // 0x514 [U] func_002839A8: 1 unless the game's state object is 0 or 2
     void** mVidEngineVtbl;                       // 0x518 [R] _vt$16cSSXScriptEngine$10cVidEngine (D_004821A0)
     // --- cDataManager (ctor cDataManager_cDataManager(self+0x51C, 0, 0x100))

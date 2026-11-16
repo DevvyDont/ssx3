@@ -1775,7 +1775,7 @@ struct cMultiSpline_35B418 {
     char** insts;           // 0x44
 };
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void func_00345430(void* a, void* b);
 
 extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
@@ -1784,7 +1784,7 @@ extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
         self->vtable[3].fn((char*)self + self->vtable[3].delta);
     }
     char* model = *(char**)(self->model + 0xC);
-    char* w = D_004A5B80;
+    char* w = cGraphicsMan_TheGraphicsMan;
     for (int i = 1; i < self->count; i++) {
         sSmVE93_35B418* vt = *(sSmVE93_35B418**)(w + 0x10D8);
         char* thisp = w + vt[93].delta;

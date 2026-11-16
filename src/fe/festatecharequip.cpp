@@ -51,7 +51,7 @@ extern "C" void func_0036A020(void* p);
 extern "C" void func_002DBEE0(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
 extern "C" void func_001A0420(void* p, int flags);
-extern void* D_004A289C;
+extern void* GrMan;
 extern void* D_0046D878[];
 extern void* D_0046D970[];
 extern void* cSimpleCamera_vtbl[];
@@ -62,7 +62,7 @@ extern "C" void func_001957D0(void* self, int flags)
     if (*(void**)((char*)self + 0xC) != 0) {
         func_00397B70(*(void**)((char*)self + 0xC), 3);
     }
-    func_0036A020(D_004A289C);
+    func_0036A020(GrMan);
     if (*(void**)((char*)self + 0xB5AA0) != 0) {
         func_002DBEE0(*(void**)((char*)self + 0xB5AA0), 3);
     }

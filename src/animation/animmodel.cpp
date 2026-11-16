@@ -659,7 +659,7 @@ typedef void (*tSetMats_0640)(void*, sAmMat_0640*, int, int, int, int);
 typedef void (*tDraw_0640)(void*, char*, char*, int, int, float);
 
 extern int D_004A5948;
-extern sAmCtx_0640* D_004A5B80_0640 __asm__("D_004A5B80");
+extern sAmCtx_0640* D_004A5B80_0640 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sAmMat_0640 D_004FC420[];
 
 extern "C" void func_00310640(cAnimModel* self, int lod, int x, int y)
@@ -796,7 +796,7 @@ typedef void (*tSetMats_0948)(void*, sAmMat_0948*, int, int, int, int);
 typedef void (*tDraw_0948)(void*, char*, char*, int);
 
 extern int D_004A594C;
-extern sAmCtx_0948* D_004A5B80_0948 __asm__("D_004A5B80");
+extern sAmCtx_0948* D_004A5B80_0948 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sAmMat_0948 D_004FD420[];
 
 extern "C" void func_00310948(cAnimModel* self, int lod, int x, int y)

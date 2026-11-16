@@ -42,7 +42,7 @@ struct sRCtx_C078 {
     sRVEntry_C078* vt;
 };
 
-extern sRCtx_C078* D_004A289C;
+extern sRCtx_C078* GrMan;
 
 static inline int curLayer_C078(sRCtx_C078* c)
 {
@@ -51,8 +51,8 @@ static inline int curLayer_C078(sRCtx_C078* c)
 
 extern "C" void cGame_renderModels(cGame* self, void* world)
 {
-    *(short*)((char*)D_004A289C->top + 0x12) = curLayer_C078(D_004A289C);
-    sRCtx_C078* ctx = D_004A289C;
+    *(short*)((char*)GrMan->top + 0x12) = curLayer_C078(GrMan);
+    sRCtx_C078* ctx = GrMan;
     ctx->top->f4 = (ctx->top->f4 & ~0xF80) | 0x880;
     ctx->top->f0 |= 0x30;
     int flag = 0xC00;
@@ -62,12 +62,12 @@ extern "C" void cGame_renderModels(cGame* self, void* world)
     int n = *(int*)((char*)world + 0x209C);
     int* items = (int*)((char*)world + 0x20A0);
     for (int i = 0; i < n; i++) {
-        D_004A289C->vt[0x60].fn((char*)D_004A289C + D_004A289C->vt[0x60].delta, items[i], 0, 0, flag);
+        GrMan->vt[0x60].fn((char*)GrMan + GrMan->vt[0x60].delta, items[i], 0, 0, flag);
     }
     int n2 = *(int*)((char*)world + 0x40A0);
     items = (int*)((char*)world + 0x40A4);
     for (int i = 0; i < n2; i++) {
-        D_004A289C->vt[0x60].fn((char*)D_004A289C + D_004A289C->vt[0x60].delta, items[i], 0, 0, flag | 0x20);
+        GrMan->vt[0x60].fn((char*)GrMan + GrMan->vt[0x60].delta, items[i], 0, 0, flag | 0x20);
     }
 }
 #endif
@@ -95,7 +95,7 @@ struct sRCtx_C1B0 {
     char pad0[0x10D8];
     sVEm_C1B0* vt;      // 0x10D8
 };
-extern sRCtx_C1B0* D_004A289C_C1B0 __asm__("D_004A289C");
+extern sRCtx_C1B0* D_004A289C_C1B0 __asm__("GrMan");
 
 struct sCamObj_C1B0 {
     char pad0[4];
@@ -386,7 +386,7 @@ INCLUDE_ASM("main/game", func_0022C830);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: the save / zero / restore of D_004A4324 through a pointer local `p` (keeps the store ahead of the D_004A289C reload), and `pfn`, a pointer to vtable slot 23's fn field taken before the arguments; plain form 97.19% (97.20% / 99.99% without each alone). Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: the save / zero / restore of D_004A4324 through a pointer local `p` (keeps the store ahead of the GrMan reload), and `pfn`, a pointer to vtable slot 23's fn field taken before the arguments; plain form 97.19% (97.20% / 99.99% without each alone). Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sV2_C830 {
     float x, y;
@@ -443,7 +443,7 @@ public:
     virtual void SetTexture(void*);
 };
 
-extern cGfx_C830* D_004A289C_C830 __asm__("D_004A289C");
+extern cGfx_C830* D_004A289C_C830 __asm__("GrMan");
 
 static inline void SetBits_C830(int* p, int mask, int bits) { *p = (*p & ~mask) | bits; }
 
@@ -566,7 +566,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     }
     D_004A289C_C830->v14(sV3_C830(0.0f, 0.0f, 0.0f));
-    // Storing through a pointer keeps the store ahead of the reload of D_004A289C.
+    // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     int saved = *p;
     *p = 0;

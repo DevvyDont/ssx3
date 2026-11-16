@@ -342,7 +342,7 @@ typedef sDfMat_350CB8 (*DfViewFn_350CB8)(void*);
 typedef int (*DfCullFn_350CB8)(void*, sDfVec_350CB8*, sDfVec_350CB8*, const sDfMat_350CB8&);
 typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*, int);
 
-extern cDfGfx_350CB8* D_004A5B80_350CB8 __asm__("D_004A5B80");
+extern cDfGfx_350CB8* D_004A5B80_350CB8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sDfMat_350CB8 D_004FF1A0_350CB8 __asm__("t4mat_Identity");
 
 #define OBJ_350CB8(s) (*(sDfObj_350CB8**)((char*)(s) + 0x18))

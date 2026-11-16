@@ -552,7 +552,7 @@ struct sLensSrc_DB20 {
     short tex[3];           // 0x1A0
 };
 
-extern char* D_004A289C;
+extern char* GrMan;
 extern sV4_DB20 D_004FAB00;
 
 static inline int IsLoaded_DB20(sLensSrc_DB20* s)
@@ -577,8 +577,8 @@ static inline float Lerp_DB20(float a, float b, float t)
 
 static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
 {
-    sVE57_DB20* vt = *(sVE57_DB20**)(D_004A289C + 0x10D8);
-    return vt[58].fn(D_004A289C + vt[58].delta, u, v, tex, 1);
+    sVE57_DB20* vt = *(sVE57_DB20**)(GrMan + 0x10D8);
+    return vt[58].fn(GrMan + vt[58].delta, u, v, tex, 1);
 }
 
 extern "C" void func_002EDB20(sLensSrc_DB20* self, float tx, float ty, sV4_DB20* o4, sV4_DB20* o5)

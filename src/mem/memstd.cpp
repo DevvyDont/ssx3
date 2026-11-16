@@ -1589,7 +1589,7 @@ public:
     virtual void v18();
     virtual void v19();
 };
-extern cWorld002535F8* D_004A5B80_w __asm__("D_004A5B80");
+extern cWorld002535F8* D_004A5B80_w __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sVEntry002535F8 {
     short delta;
@@ -1642,7 +1642,7 @@ INCLUDE_ASM("mem/memstd", func_002536C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2E9C;
-extern int D_004A5B80;
+extern int cGraphicsMan_TheGraphicsMan;
 extern "C" int func_003AE450(void* p, int a, int b);
 extern "C" void* func_00254368(void* a0, int a1, int a2, int a3);
 int func_003AE938(void*);
@@ -1657,7 +1657,7 @@ extern "C" void func_002536C8(void* self)
     *(int*)(s + 0xC) = func_003AE450(*(void**)(s + 0x38), 1, 0x21);
     *(int*)(s + 0x40) = 1;
     func_003AE938(*(void**)(s + 0x38));
-    *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), D_004A5B80, *(int*)(s + 0x30));
+    *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), cGraphicsMan_TheGraphicsMan, *(int*)(s + 0x30));
     func_003AE958_i(*(void**)(s + 0x38));
     D_004A2E9C++;
 }
@@ -1689,7 +1689,7 @@ struct sWorld_253748 {
     char pad[0x10D8];
     sVE0_253748* vt;            // 0x10D8
 };
-extern sWorld_253748* D_004A5B80_253748 __asm__("D_004A5B80");
+extern sWorld_253748* D_004A5B80_253748 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void func_00253748(void* self)
 {
@@ -2074,8 +2074,8 @@ struct sCtx_4410 {
     char pad[0x10D8];
     sVE_4410a* vt;
 };
-// PORT: the unit declares D_004A5B80 with other types; view bound by asm label
-extern sCtx_4410* D_004A5B80_4410 __asm__("D_004A5B80");
+// PORT: the unit declares cGraphicsMan_TheGraphicsMan with other types; view bound by asm label
+extern sCtx_4410* D_004A5B80_4410 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sVE_4410b {
     short delta;
@@ -2198,7 +2198,7 @@ struct sRCtx_2547B8 {
     char pad[0x10D8];
     sRVEntry_2547B8* vt;
 };
-extern sRCtx_2547B8* D_004A5B80_2547B8 __asm__("D_004A5B80");
+extern sRCtx_2547B8* D_004A5B80_2547B8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sTexCache_2547B8 {
     void* owner;
@@ -2338,7 +2338,7 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cWorld_2548D0* D_004A5B80_2548D0 __asm__("D_004A5B80");
+extern cWorld_2548D0* D_004A5B80_2548D0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char t4mat_Identity[];
 
 struct sMesh_2548D0 {
@@ -2480,7 +2480,7 @@ public:
     virtual void v49(int a, char* p, int b, int c, int d, int e, int f, int g, int h);
 };
 extern "C" void* func_002548D0(void* self);
-extern cWorld_254C48* D_004A5B80_254C48 __asm__("D_004A5B80");
+extern cWorld_254C48* D_004A5B80_254C48 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sMesh_254C48 {
     int f0;

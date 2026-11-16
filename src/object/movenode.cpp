@@ -917,7 +917,7 @@ typedef sMnMat_6298 (*MnViewFn_6298)(void*);
 typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const sMnMat_6298&);
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
-extern cMnGfx_6298* D_004A5B80_6298 __asm__("D_004A5B80");
+extern cMnGfx_6298* D_004A5B80_6298 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_00352DD0(void* self);
 extern "C" int func_002D2058(void* v);
 extern "C" void* func_0035FC20(void* self, void* m);

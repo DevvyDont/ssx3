@@ -248,7 +248,7 @@ struct sMgr_0A98 {
     cObj_0A98* objs[17];
 };
 
-extern char* D_004A289C;
+extern char* GrMan;
 extern int D_004A3BA8;
 extern "C" void func_002F00A0(void*, int);
 
@@ -273,7 +273,7 @@ extern "C" void func_002F0A98(sMgr_0A98* self)
     self->objs[16]->Reset();
     for (int i = 0; i < *(int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
         func_002F00A0(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
-        ((cWorld_0A98*)D_004A289C)->ResetSlot(i);
+        ((cWorld_0A98*)GrMan)->ResetSlot(i);
     }
 }
 #endif
@@ -595,24 +595,24 @@ extern "C" void func_002F1510(sFx_1150* self)
 {
     if (self->active == 0)
         return;
-    ((cGfx_1510*)D_004A289C)->PushState();
-    *((cGfx_1510*)D_004A289C)->stateTop = D_00501420_1510;
+    ((cGfx_1510*)GrMan)->PushState();
+    *((cGfx_1510*)GrMan)->stateTop = D_00501420_1510;
     // Raw char** read of the stack top (as in ovstatehud) so the global is re-read afterwards.
-    *(short*)(*(char**)(D_004A289C + 0xE84) + 0x10) = ((cGfx_1510*)D_004A289C)->GetFB0();
-    ((cGfx_1510*)D_004A289C)->stateTop->w0 |= 0xC;
-    ((cGfx_1510*)D_004A289C)->stateTop->f4_23 = 0;
-    ((cGfx_1510*)D_004A289C)->stateTop->f4_20 = 0;
-    ((cGfx_1510*)D_004A289C)->stateTop->f4_12 = 0x14;
-    ((cGfx_1510*)D_004A289C)->stateTop->f4_0 = 2;
-    ((cGfx_1510*)D_004A289C)->stateTop->f8_10 = 0;
-    ((cGfx_1510*)D_004A289C)->stateTop->f8_5 = 7;
-    ((cGfx_1510*)D_004A289C)->stateTop->f4_2 = 7;
-    ((cGfx_1510*)D_004A289C)->stateTop->SetF22(1);
+    *(short*)(*(char**)(GrMan + 0xE84) + 0x10) = ((cGfx_1510*)GrMan)->GetFB0();
+    ((cGfx_1510*)GrMan)->stateTop->w0 |= 0xC;
+    ((cGfx_1510*)GrMan)->stateTop->f4_23 = 0;
+    ((cGfx_1510*)GrMan)->stateTop->f4_20 = 0;
+    ((cGfx_1510*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_1510*)GrMan)->stateTop->f4_0 = 2;
+    ((cGfx_1510*)GrMan)->stateTop->f8_10 = 0;
+    ((cGfx_1510*)GrMan)->stateTop->f8_5 = 7;
+    ((cGfx_1510*)GrMan)->stateTop->f4_2 = 7;
+    ((cGfx_1510*)GrMan)->stateTop->SetF22(1);
     for (int i = 0; i < 4; i++) {
-        ((cGfx_1510*)D_004A289C)->DrawSprite(self->pos[i], sV2_1510(self->size[i], self->size[i]),
+        ((cGfx_1510*)GrMan)->DrawSprite(self->pos[i], sV2_1510(self->size[i], self->size[i]),
                                             sV2_1510(0.0f, 0.0f), sV2_1510(1.0f, 1.0f), self->col[i]);
     }
-    ((cGfx_1510*)D_004A289C)->stateTop--;
+    ((cGfx_1510*)GrMan)->stateTop--;
 }
 #endif
 
@@ -1558,9 +1558,9 @@ extern int D_004A54F8;
 extern float D_004A5500;
 extern float D_004A5504;
 extern int D_004A5508;
-extern char* D_004A289C;
-// PORT: the unit declares D_004A5B80 later as cGfx_3E28*; this view is bound by asm label.
-extern cRender_2C30* D_004A5B80_2C30 __asm__("D_004A5B80");
+extern char* GrMan;
+// PORT: the unit declares cGraphicsMan_TheGraphicsMan later as cGfx_3E28*; this view is bound by asm label.
+extern cRender_2C30* D_004A5B80_2C30 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline void setId_2C30(char* p, int v)
 {
@@ -1594,8 +1594,8 @@ extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
     fade = 1.0f - fade * fade;
     c.x *= fade;
     float ang = lerp_2C30(*(float*)(obj + 0x34), *(float*)(obj + 0x38), *(float*)(obj + 0x1C) / *(float*)(obj + 0x20));
-    int id = *(int*)(D_004A289C + 0x1058);
-    setId_2C30(*(char**)(D_004A289C + 0xE84), id);
+    int id = *(int*)(GrMan + 0x1058);
+    setId_2C30(*(char**)(GrMan + 0xE84), id);
     D_004A5B80_2C30->DrawSprite(sVec4_2C30(sVec2_2C30(*(float*)(obj + 4) + off->x, *(float*)(obj + 8) + off->y), 0.0f, 1.0f), obj + 0xC, &D_004A54F0, &D_004A5500, &c, 1, ang * 0.01745329424738884f);
 }
 #endif
@@ -1916,8 +1916,8 @@ struct sEm_3418 {
     float f38, f3C;
 };
 
-extern sWorld_3418* D_004A289C_3418 __asm__("D_004A289C");
-extern cGfx_3418* D_004A5B80_3418 __asm__("D_004A5B80");
+extern sWorld_3418* D_004A289C_3418 __asm__("GrMan");
+extern cGfx_3418* D_004A5B80_3418 __asm__("cGraphicsMan_TheGraphicsMan");
 extern float D_004A5510_3418 __asm__("D_004A5510");
 extern float D_004A5514_3418 __asm__("D_004A5514");
 extern int D_004A5518_3418 __asm__("D_004A5518");
@@ -2378,7 +2378,7 @@ public:
     virtual void SetTexture(void*);
 };
 
-extern cGfx_3E28* D_004A5B80;
+extern cGfx_3E28* cGraphicsMan_TheGraphicsMan;
 
 struct sBase_3E28 {
     int pad[3];
@@ -2414,7 +2414,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
         self->Reset();
         return;
     }
-    cGfx_3E28* g = D_004A5B80;
+    cGfx_3E28* g = cGraphicsMan_TheGraphicsMan;
     int i = 0;
     g->BeginScene();
     const sV2_3E28& screen = g->GetScreenSize();
@@ -2761,16 +2761,16 @@ public:
     virtual void DrawSprite(const sV4_4690&, const sV2_4690&, const sV2_4690&, const sV2_4690&, const sCol_4690&);
 };
 
-extern char* D_004A289C;
+extern char* GrMan;
 
 extern "C" void func_002F4690(sFlare_4690* self)
 {
-    float cx = (float)((cWorld_4690*)D_004A289C)->GetWidth() * 0.5f;
-    float cy = (float)((cWorld_4690*)D_004A289C)->GetHeight() * 0.5f;
+    float cx = (float)((cWorld_4690*)GrMan)->GetWidth() * 0.5f;
+    float cy = (float)((cWorld_4690*)GrMan)->GetHeight() * 0.5f;
     sV2_4690 center(cx, cy);
     sV2_4690 sun(self->sunX, self->sunY);
     sV2_4690 dir = sun - center;
-    cWorld_4690* w = (cWorld_4690*)D_004A289C;
+    cWorld_4690* w = (cWorld_4690*)GrMan;
     w->stateTop->SetF10(w->GetF1004());
     for (int i = 0; i < self->count; i++) {
         sV2_4690 pos = center + dir * self->lights[i].dist;
@@ -2802,7 +2802,7 @@ extern "C" void func_002F4690(sFlare_4690* self)
         }
         float s = self->lights[i].size * 300.0f;
         sV2_4690 sz(s, s);
-        ((cWorld_4690*)D_004A289C)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
+        ((cWorld_4690*)GrMan)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
     }
 }
 #endif
@@ -2888,7 +2888,7 @@ public:
     virtual void DrawSprite(const sV4_4A08&, const sV2_4A08&, const sV2_4A08&, const sV2_4A08&, const sV4_4A08&);
 };
 
-extern cGfx_4A08* D_004A5B80_4A08 __asm__("D_004A5B80");
+extern cGfx_4A08* D_004A5B80_4A08 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sSun_4A08 {
     char pad[0x2C];
@@ -3021,7 +3021,7 @@ public:
     virtual sV4_4DB8 Project(const sV4_4DB8&);
 };
 
-extern cGfx_4DB8* D_004A5B80_4DB8 __asm__("D_004A5B80");
+extern cGfx_4DB8* D_004A5B80_4DB8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (in-place vector * scalar).
 static inline void ScaleEq_4DB8(sV4_4DB8& v, float s)

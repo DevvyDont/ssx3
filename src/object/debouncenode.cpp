@@ -593,7 +593,7 @@ typedef sDfMat_343588 (*DfViewFn_343588)(void*);
 typedef int (*DfCullFn_343588)(void*, sDfVec_343588*, sDfVec_343588*, const sDfMat_343588&);
 typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
-extern cDfGfx_343588* D_004A5B80_343588 __asm__("D_004A5B80");
+extern cDfGfx_343588* D_004A5B80_343588 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
 
 #define OBJ_343588(s) (*(sDfObj_343588**)((char*)(s) + 0x18))
@@ -1848,7 +1848,7 @@ INCLUDE_ASM("object/debouncenode", func_00344E18);
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** func_002D1BD8();
 extern "C" void func_00344730(sDebounce4730* self, int index);
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sModel_44E18 {
     char pad_0x0[0x7D];
@@ -1885,7 +1885,7 @@ struct sVE5_44E18 { short delta; short index; void (*fn)(void*, void*, void*, in
 
 extern "C" void func_00344E18(void* self)
 {
-    char* r = D_004A5B80;
+    char* r = cGraphicsMan_TheGraphicsMan;
     unsigned int* ref = (unsigned int*)((char*)self + 0xC);
     int off = 0;
     for (int i = 0; i < 32; ref += 2, i++, off += 8)
@@ -2258,7 +2258,7 @@ public:
     virtual void v74();
     virtual void v75(void* a, int b, int c);
 };
-extern cWorld00345430* D_004A5B80_w345430 __asm__("D_004A5B80");
+extern cWorld00345430* D_004A5B80_w345430 __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sCtl00345430 {
     int f0;

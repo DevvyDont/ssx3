@@ -514,7 +514,7 @@ static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec
         : "memory");
 }
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("func_003281D0");
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off)
@@ -535,7 +535,7 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
             }
         }
     } else {
-        char* w = D_004A5B80;
+        char* w = cGraphicsMan_TheGraphicsMan;
         sVE87_281D0* vt = &(*(sVE87_281D0**)(w + 0x10D8))[87];
         char* thisp = w + vt->delta;
         sVec4_281D0 v;

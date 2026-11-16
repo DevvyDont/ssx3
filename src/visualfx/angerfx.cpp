@@ -254,7 +254,7 @@ struct sViews_2D5048 {
     int cur;                // 0x14
 };
 
-extern char* D_004A289C;
+extern char* GrMan;
 extern sRState_2D5048 D_00501420_2D5048 __asm__("D_00501420");
 
 static inline sViews_2D5048* views_2D5048()
@@ -355,7 +355,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     if (st->level == 0.0f) {
         return;
     }
-    sGfx_2D5048* g = (sGfx_2D5048*)D_004A289C;
+    sGfx_2D5048* g = (sGfx_2D5048*)GrMan;
     sM4_2D5048* m = ((sM4_2D5048* (*)(void*))g->vtable[35].fn)((char*)g + g->vtable[35].delta);
     sM4_2D5048* bm = &(*(sBones_2D5048**)(self->rider + 0x780))->mats[*(int*)(self->rider + 0x8A8)];
     sV4_2D5048 p = bm->v[3];
@@ -376,11 +376,11 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     sV4_2D5048 c1 = Add_2D5048(c0, Scale_2D5048(up, a * 18.0f));
     sV4_2D5048 rr = Scale_2D5048(right, b * 9.0f);
 
-    sGfx_2D5048* gx = (sGfx_2D5048*)D_004A289C;
+    sGfx_2D5048* gx = (sGfx_2D5048*)GrMan;
     gx->top[1] = gx->top[0];
     gx->top++;
-    *((sGfx_2D5048*)D_004A289C)->top = D_00501420_2D5048;
-    sGfx_2D5048* gs = (sGfx_2D5048*)D_004A289C;
+    *((sGfx_2D5048*)GrMan)->top = D_00501420_2D5048;
+    sGfx_2D5048* gs = (sGfx_2D5048*)GrMan;
     rsSetA_2D5048(gs, 0x400000, 22, 1);
     rsSetA_2D5048(gs, 0x3, 0, 2);
     rsSetB_2D5048(gs, 0x1FFFFC00, 10, 0);
@@ -422,9 +422,9 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
         vtx[3].u = 1.0f;
         vtx[3].v = 0.0f;
     }
-    sGfx_2D5048* gd = (sGfx_2D5048*)D_004A289C;
+    sGfx_2D5048* gd = (sGfx_2D5048*)GrMan;
     ((void (*)(void*, int, sVtx_2D5048*, int))gd->vtable[71].fn)((char*)gd + gd->vtable[71].delta, 4, vtx, 0);
-    ((sGfx_2D5048*)D_004A289C)->top--;
+    ((sGfx_2D5048*)GrMan)->top--;
 }
 #endif
 

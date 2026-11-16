@@ -25,17 +25,6 @@
 struct cAnimSequencer;
 struct cAnimModel;
 
-// EA's pose type (On Tour: struct tPose {t4Vector P; tQuaternion Q;}, size 0x20; the preview mangles
-// setOrientationOffset__14cRiderAnimBaseRC5tPose). PORT/TODO: belongs in bx/math3d.h once a second class needs it.
-struct tPose {
-    t4Vector P;         // 0x000 [O] position
-    t4Vector Q;         // 0x010 [O] rotation quaternion (tQuaternion in On Tour; x, y, z, w as in t4Vector)
-};
-
-CHECK_OFFSET(tPose, P, 0x00);
-CHECK_OFFSET(tPose, Q, 0x10);
-CHECK_SIZE(tPose, 0x20);
-
 struct cRiderAnimBase {
     int CurrentAnimID[6];           // 0x000 [O] (cRiderAnimState::CurrentAnimID[6]); [R] reset stores 0x1B6 (no anim)
                                     //       in each; [U] cRiderAnimBase_play stores the started id at [slot],

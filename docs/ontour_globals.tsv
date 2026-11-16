@@ -341,3 +341,5 @@ ps2_addr	name	previous	source	evidence
 004A2C6C	cGameModeMan_instance	D_004A2C6C	On Tour cGameModeMan::instance	[R] getGM stores cMemMan_alloc(0xA0, "GameModeMan")
 004A2C70	cGameModeHandler_pManager	D_004A2C70	On Tour cGameModeHandler::pManager	[U] the game-mode handlers reach the manager through it (set by func_00244520)
 00535BC8	cBENewRaceInterface_newRace	D_00535BC8	On Tour cBENewRaceInterface::newRace (cBERaceDB)	[R] func_00144928/func_001449E8 save and restore it whole (0x4C); 424 accesses fit be/beintnewrace.h
+004A289C	GrMan	D_004A289C	On Tour global GrMan (cGraphicsMan*)	[R] cSSXApp_init stores func_00375A08's result (cGraphicsMan::construct: cMemMan_alloc(0x75E0, "PS2GraphicsMan")) and calls slot 2 on it, as On Tour's cSSXApp::init does with GrMan; cSSXApp_purge clears it
+004A5B80	cGraphicsMan_TheGraphicsMan	D_004A5B80	On Tour cGraphicsMan::TheGraphicsMan	[R] the cGraphicsMan constructor func_003691F8 stores this and the destructor func_003695D8 clears it

@@ -90,7 +90,7 @@ extern "C" void* func_002F0390();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
-extern void* D_004A289C;
+extern void* GrMan;
 extern void* gSSXAudio;
 extern int D_004A1228;
 extern int D_004A3484;
@@ -211,7 +211,7 @@ extern "C" void cGame_load(cGame* self)
     func_00317550(D_004A5B64 + 0x38, 43.5f);
     func_00195DE0(SSXApp->FELocale);
     {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEntryVoidGL* vt = *(sVEntryVoidGL**)(g + 0x10D8);
         vt[44].fn(g + vt[44].delta, 0);
     }
@@ -308,7 +308,7 @@ extern "C" void cGame_load(cGame* self)
     *(void**)((char*)self->MenuSys + 0x5C) = (void*)SSXApp->Inputs[0];
     char* file = FILE_load(D_0047B628, 0x100);
     {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEntryGL* vt = *(sVEntryGL**)(g + 0x10D8);
         int r = vt[46].fn(g + vt[46].delta, file + *(int*)(file + 0x14), D_004A2A88, 0, 1, -1);
         self->mBoxTextureID = r;
@@ -588,7 +588,7 @@ extern "C" void func_00286C00(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void func_0036A290(void);
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern void* gWorldTriggerManager;
 extern void* gSSXAudio;
 extern int D_004A2A54;
@@ -675,7 +675,7 @@ extern "C" void func_0022FA98(char* self)
     }
     cCameraTriggerMan_cleanupOnExit(D_004C5830);
     {
-        char* be = (char*)D_004A289C;
+        char* be = (char*)GrMan;
         sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x98);
         e->fn(be + e->delta);
     }
@@ -723,16 +723,16 @@ extern "C" void func_0022FA98(char* self)
         }
     }
     {
-        char* be = (char*)D_004A289C;
+        char* be = (char*)GrMan;
         sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x388);
         e->fn(be + e->delta);
     }
     {
-        char* be = (char*)D_004A289C;
+        char* be = (char*)GrMan;
         sVEnt1_FA98* e = (sVEnt1_FA98*)(*(char**)(be + 0x10D8) + 0x190);
         e->fn(be + e->delta, *(void**)(self + 0x220));
     }
-    func_0036A020(D_004A289C);
+    func_0036A020(GrMan);
     func_0038ADB0(D_005047F8);
     *(void**)&SSXApp->Game = 0;
     if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
@@ -777,7 +777,7 @@ extern "C" void func_00369FF8(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
-extern void* D_004A289C;
+extern void* GrMan;
 extern void* gWorldTriggerManager;
 extern void* gSSXAudio;
 extern void* cOVStateManager_mpPDATemplate;
@@ -795,7 +795,7 @@ extern "C" void func_00230050(cGame* self)
     func_00278710(ScriptEngine);
     D_004A4248->v17();
     D_004A4248->v04();
-    func_00369FF8(D_004A289C);
+    func_00369FF8(GrMan);
     cWorld_init(self->World);
     func_002B68D0(gWorldTriggerManager);
     func_002867E8(gSSXAudio);
@@ -1289,7 +1289,7 @@ static inline int updatePause_2306B8(cGame* self)
         }
         self->IsStreamPaused = 1;
         if (self->m_bFlushStreamer != 0) {
-            char* r = (char*)D_004A289C;
+            char* r = (char*)GrMan;
             sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x10D8);
             vt[19].fn(r + vt[19].delta);
             func_0022E8B8(((char*)self->ViewMan));
@@ -1544,9 +1544,9 @@ extern "C" int func_00230E98(cGame* self)
     if (cFadeScreen_loseFocus(self) == 0) {
         return 0;
     }
-    cMgr00230E98* mgr = (cMgr00230E98*)D_004A289C;
+    cMgr00230E98* mgr = (cMgr00230E98*)GrMan;
     mgr->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
-    ((cMgr00230E98*)D_004A289C)->f270 = 1;
+    ((cMgr00230E98*)GrMan)->f270 = 1;
     D_004A4324 = 0;
     cScreenTint_m_Enable = 0;
     D_004A43C8 = 0;
@@ -2239,9 +2239,9 @@ extern "C" void func_00231B50(void* self, int value) {
     verts[1].u = 1.0f; verts[1].v = 0.0f;
     verts[2].u = 0.0f; verts[2].v = 1.0f;
     verts[3].u = 1.0f; verts[3].v = 1.0f;
-    *(short*)(*(char**)((char*)D_004A289C + 0xE84) + 0x10) = value;
-    obj = *(char**)((char*)D_004A289C + 0x10D8);
-    (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)D_004A289C + *(short*)(obj + 0x238), 4, verts, 0);
+    *(short*)(*(char**)((char*)GrMan + 0xE84) + 0x10) = value;
+    obj = *(char**)((char*)GrMan + 0x10D8);
+    (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)GrMan + *(short*)(obj + 0x238), 4, verts, 0);
 }
 #endif
 
@@ -2379,8 +2379,8 @@ public:
     virtual void v34(void* p);
 };
 
-// Typed view of the render context (the unit declares D_004A289C as void*).
-extern cCtx231D60* D_004A289C_231D60 __asm__("D_004A289C");
+// Typed view of the render context (the unit declares GrMan as void*).
+extern cCtx231D60* D_004A289C_231D60 __asm__("GrMan");
 
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp231D60(float v, float lo, float hi)
@@ -2540,7 +2540,7 @@ struct sVE_1FC0 {
     void (*fn)(void*, float, float, float, float, int);
 };
 
-extern cGfx_1FC0* D_004A289C_1FC0 __asm__("D_004A289C");
+extern cGfx_1FC0* D_004A289C_1FC0 __asm__("GrMan");
 extern char* D_004A28A8_1FC0 __asm__("SSXApp");
 
 extern "C" void func_00231FC0(sFade_1FC0* self)

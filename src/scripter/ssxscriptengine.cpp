@@ -1772,7 +1772,7 @@ struct sSseGame_A860 {
     char pad_0x0[0xF44];
     int field_0xF44;        // 0xF44
 };
-extern sSseGame_A860* D_004A289C_A860 __asm__("D_004A289C");
+extern sSseGame_A860* D_004A289C_A860 __asm__("GrMan");
 
 static inline int sseWorldMode_A860()
 {

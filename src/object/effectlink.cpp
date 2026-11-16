@@ -783,7 +783,7 @@ extern "C" void* func_0034FB00(void* self, int a1, int a2, int a3);
 void func_00353DA8(void* self);
 extern "C" void func_00353E08(void* self, int a1, float len);
 extern "C" void cFlexBridgeNode_initSpringNodes(void* self);
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
 extern "C" void cFlexBridgeNode_updateGrid(void*);
 extern void* cFlexBridgeNode_vtbl[];
@@ -816,8 +816,8 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int a1, int a2, int
     sEffV3_346350 pts[4];
     sEffV2_346350 uv[4];
     sEffV4_346350 col[4];
-    sEffVE_346350* vt = *(sEffVE_346350**)(D_004A5B80 + 0x10D8);
-    vt[97].fn(D_004A5B80 + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
+    sEffVE_346350* vt = *(sEffVE_346350**)(cGraphicsMan_TheGraphicsMan + 0x10D8);
+    vt[97].fn(cGraphicsMan_TheGraphicsMan + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
     sEffV3_346350 d;
     d.x = pts[1].x - pts[0].x;
     d.y = pts[1].y - pts[0].y;
@@ -898,7 +898,7 @@ struct sRCtx_346568 {
     char pad[0x10D8];
     sRVEntry_346568* vt;
 };
-extern sRCtx_346568* D_004A5B80_346568 __asm__("D_004A5B80");
+extern sRCtx_346568* D_004A5B80_346568 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
 {

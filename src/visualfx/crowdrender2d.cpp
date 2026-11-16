@@ -61,7 +61,7 @@ typedef int (*tRegister_B6D0)(void*, char*, char*, int, int, int);
 typedef void (*tRelease_B6D0)(void*, int);
 
 extern sCrowdAnimDef_B6D0 D_00445D38_B6D0[] __asm__("D_00445D38");
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern char D_004875C0[];
 extern "C" int FILE_load(const char* name, int flags);
 extern "C" char* SHAPE_locate(int file, const char* name);
@@ -78,8 +78,8 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
         for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
             char* shape = SHAPE_locate(self[0], D_00445D38_B6D0[i].names[j]);
             D_00445D38_B6D0[i].shapes[j] = shape;
-            sVEnt_B6D0* vt = *(sVEnt_B6D0**)(D_004A5B80 + 0x10D8);
-            D_00445D38_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(D_004A5B80 + vt[46].delta, shape, D_00445D38_B6D0[i].names[j], 0, 0, -1);
+            sVEnt_B6D0* vt = *(sVEnt_B6D0**)(cGraphicsMan_TheGraphicsMan + 0x10D8);
+            D_00445D38_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(cGraphicsMan_TheGraphicsMan + vt[46].delta, shape, D_00445D38_B6D0[i].names[j], 0, 0, -1);
         }
     }
     char* first = D_00445D38_B6D0[0].shapes[0];
@@ -104,7 +104,7 @@ int cCrowdRender2D_purge(int* param_1)
     for (i = 0; i < 1; i++) {
         int j;
         for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
-            char* obj = D_004A5B80;
+            char* obj = cGraphicsMan_TheGraphicsMan;
             sCrowdVEntry2D* vt = *(sCrowdVEntry2D**)(obj + 0x10D8);
             vt[0x32].fn(obj + vt[0x32].delta, D_00445D38_B6D0[i].handles[j]);
         }

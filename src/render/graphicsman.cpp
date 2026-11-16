@@ -2337,7 +2337,7 @@ struct sGfxCtx_708C0 {
     sGfxVEntry_708C0* vtable;   // 0x10D8
 };
 
-extern sGfxCtx_708C0* D_004A5B80_708C0 __asm__("D_004A5B80");
+extern sGfxCtx_708C0* D_004A5B80_708C0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int D_0044B420[];
 
 typedef sGfxMat_708C0 (*tGetMat_708C0)(void*);

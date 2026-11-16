@@ -89,16 +89,16 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_00232488(void)
 {
-    if (((cWorld232488*)D_004A289C)->v17() == 0) {
+    if (((cWorld232488*)GrMan)->v17() == 0) {
         return 0;
     }
-    ((cWorld232488*)D_004A289C)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
+    ((cWorld232488*)GrMan)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
     func_00231FC0(SSXApp->LoadIndicator);
-    ((cWorld232488*)D_004A289C)->v20();
+    ((cWorld232488*)GrMan)->v20();
     return 1;
 }
 #endif
@@ -209,16 +209,16 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_00232650(void)
 {
-    if (((cWorld232650*)D_004A289C)->v17() == 0) {
+    if (((cWorld232650*)GrMan)->v17() == 0) {
         return 0;
     }
-    ((cWorld232650*)D_004A289C)->v15(sVec3_232650(0.0f, 0.0f, 0.0f));
+    ((cWorld232650*)GrMan)->v15(sVec3_232650(0.0f, 0.0f, 0.0f));
     func_00231FC0(SSXApp->LoadIndicator);
-    ((cWorld232650*)D_004A289C)->v20();
+    ((cWorld232650*)GrMan)->v20();
     return 1;
 }
 #endif
@@ -373,16 +373,16 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_00232820(void)
 {
-    if (((cWorld232820*)D_004A289C)->v17() == 0) {
+    if (((cWorld232820*)GrMan)->v17() == 0) {
         return 0;
     }
-    ((cWorld232820*)D_004A289C)->v15(sVec3_232820(0.0f, 0.0f, 0.0f));
+    ((cWorld232820*)GrMan)->v15(sVec3_232820(0.0f, 0.0f, 0.0f));
     func_00231FC0(SSXApp->LoadIndicator);
-    ((cWorld232820*)D_004A289C)->v20();
+    ((cWorld232820*)GrMan)->v20();
     return 1;
 }
 #endif
@@ -419,16 +419,16 @@ public:
     virtual void v20();
 };
 extern "C" void func_00231FC0(void* a);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_002328A8(void)
 {
-    if (((cWorld2328A8*)D_004A289C)->v17() == 0) {
+    if (((cWorld2328A8*)GrMan)->v17() == 0) {
         return 0;
     }
-    ((cWorld2328A8*)D_004A289C)->v15(sVec3_2328A8(0.0f, 0.0f, 0.0f));
+    ((cWorld2328A8*)GrMan)->v15(sVec3_2328A8(0.0f, 0.0f, 0.0f));
     func_00231FC0(SSXApp->LoadIndicator);
-    ((cWorld2328A8*)D_004A289C)->v20();
+    ((cWorld2328A8*)GrMan)->v20();
     return 1;
 }
 #endif
@@ -625,7 +625,7 @@ extern "C" int cUIEngine_loadFile(void* ui, const char* name);
 extern "C" void* func_00186A08(void* p, void* ui);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern void* D_004A289C;
+extern void* GrMan;
 extern char D_0047B698[];
 extern char D_0047B9E0[];
 extern char D_0047B9F0[];
@@ -656,7 +656,7 @@ struct sUI_232B28 {
 
 extern "C" void func_00232B28(void* self)
 {
-    ((cWorld_232B28*)D_004A289C)->v44(0x100);
+    ((cWorld_232B28*)GrMan)->v44(0x100);
     void* ui = func_00397B08(operator new(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
     cUIEngine_loadFile(ui, D_0047B9E0);
@@ -702,7 +702,7 @@ struct sVE_2C98 {
     void (*fn)(void*, sVec3i_2C98);
 };
 
-// Clearing through a pointer keeps the stores ahead of the reload of D_004A289C.
+// Clearing through a pointer keeps the stores ahead of the reload of GrMan.
 static inline void clear_2C98(int* p)
 {
     *p = 0;
@@ -710,12 +710,12 @@ static inline void clear_2C98(int* p)
 
 extern "C" void func_00232C98(void* self)
 {
-    func_00369FF8(D_004A289C);
+    func_00369FF8(GrMan);
     *(int*)((char*)self + 0x14) = 0;
     clear_2C98(&D_004A4324);
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&D_004A43C8);
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_2C98* vt = *(sVE_2C98**)(g + 0x10D8);
     vt[15].fn(g + vt[15].delta, sVec3i_2C98(0, 0, 0));
 }
@@ -774,17 +774,17 @@ public:
 };
 extern "C" void func_00397B70(void* obj, int a);
 extern "C" void func_0036A020(void* world);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" void func_00232D50(void* self)
 {
-    ((cWorld232D50*)D_004A289C)->v19();
+    ((cWorld232D50*)GrMan)->v19();
     void* p = *(void**)((char*)self + 0xC);
     if (p != 0) {
         func_00397B70(p, 3);
     }
     *(void**)((char*)self + 0xC) = 0;
-    func_0036A020(D_004A289C);
+    func_0036A020(GrMan);
 }
 #endif
 
@@ -817,17 +817,17 @@ public:
 };
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* obj);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_00232DA8(void* self)
 {
-    if (((cWorld232DA8*)D_004A289C)->v17() == 0) {
+    if (((cWorld232DA8*)GrMan)->v17() == 0) {
         return 0;
     }
     if (func_00231D60(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
-    ((cWorld232DA8*)D_004A289C)->v20();
+    ((cWorld232DA8*)GrMan)->v20();
     return 1;
 }
 #endif
@@ -847,7 +847,7 @@ extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 // PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
-extern void* D_004A289C;
+extern void* GrMan;
 extern int D_004A19D8;
 extern int D_004A19DC;
 extern char D_0047B698[];
@@ -920,7 +920,7 @@ struct cLoadItemC_2E20 {
 
 extern "C" void func_00232E20(void* self)
 {
-    char* w = (char*)D_004A289C;
+    char* w = (char*)GrMan;
     sVE_2E20* vt = *(sVE_2E20**)(w + 0x10D8);
     vt[44].fn(w + vt[44].delta, 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1001,7 +1001,7 @@ extern char D_004A2C30[];
 extern char* D_00442928[];
 extern char* D_00442950[];
 extern int D_004A2B3C;
-extern char* D_004A289C_3048 __asm__("D_004A289C");
+extern char* D_004A289C_3048 __asm__("GrMan");
 
 struct sVE_3048 {
     short delta;
@@ -1052,7 +1052,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
 #ifdef SKIP_ASM
-extern void* D_004A289C;
+extern void* GrMan;
 extern int D_004A4324;
 extern "C" void func_00369FF8(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
@@ -1072,12 +1072,12 @@ struct sVE_3260 {
 
 extern "C" void func_00233260(void)
 {
-    func_00369FF8(D_004A289C);
+    func_00369FF8(GrMan);
     cSSXApp_startGameLoad(SSXApp);
-    // Storing through a pointer keeps the store ahead of the reload of D_004A289C.
+    // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* p = &D_004A4324;
     *p = 0;
-    char* g = (char*)D_004A289C;
+    char* g = (char*)GrMan;
     sVE_3260* vt = *(sVE_3260**)(g + 0x10D8);
     vt[15].fn(g + vt[15].delta, sVec3i_3260(0, 0, 0));
     func_0028F768(func_0028B180());
@@ -1102,7 +1102,7 @@ extern "C" void func_0036A020(void* world);
 extern "C" void func_00397B70(void* obj, int a);
 extern "C" void* func_0028B180(void);
 extern "C" void func_0028FA98(void* self, float v);
-extern void* D_004A289C;
+extern void* GrMan;
 
 class cWorld002332E8 {
 public:
@@ -1161,7 +1161,7 @@ public:
 
 extern "C" void func_002332E8(void* self)
 {
-    ((cWorld002332E8*)D_004A289C)->v19();
+    ((cWorld002332E8*)GrMan)->v19();
     void* o = *(void**)((char*)self + 0xC);
     if (o != 0) {
         func_00397B70(o, 3);
@@ -1170,10 +1170,10 @@ extern "C" void func_002332E8(void* self)
     for (i = 0; i < 2; i++) {
         void* p = ((void**)((char*)self + 0x10))[i];
         if (p != 0) {
-            ((cWorld002332E8*)D_004A289C)->v50(p);
+            ((cWorld002332E8*)GrMan)->v50(p);
         }
     }
-    func_0036A020(D_004A289C);
+    func_0036A020(GrMan);
     func_0028FA98(func_0028B180(), 1.0f);
 }
 #endif
@@ -1207,17 +1207,17 @@ public:
 };
 extern "C" int func_00231D60(void* self);
 extern "C" void func_00397DF8(void* obj);
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" int func_00233390(void* self)
 {
-    if (((cWorld233390*)D_004A289C)->v17() == 0) {
+    if (((cWorld233390*)GrMan)->v17() == 0) {
         return 0;
     }
     if (func_00231D60(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
-    ((cWorld233390*)D_004A289C)->v20();
+    ((cWorld233390*)GrMan)->v20();
     return 1;
 }
 #endif

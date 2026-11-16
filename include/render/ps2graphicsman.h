@@ -1,0 +1,481 @@
+#ifndef RENDER_PS2GRAPHICSMAN_H
+#define RENDER_PS2GRAPHICSMAN_H
+
+// cPS2GraphicsMan: the PS2 renderer (one instance). It owns the matrix/viewport stacks, the projective textures,
+// the deferred draw list (cPS2DeferManager), the texture manager, the VIF/GIF double buffers and the DMA kick thread
+// that flips the frame. Size 0x75E0: cMemMan_alloc(0x75E0, "PS2GraphicsMan") + cPS2GraphicsMan ctor func_00395288 in
+// its create function func_00375A08. Base class cGraphicsMan (ctor func_003691F8, dtor func_003695D8, vtable
+// D_00493950): its data is 0x0-0x10D8 and it declares the virtuals, so the vptr is at +0x10D8 (cPS2GraphicsMan's
+// vtable D_00493260, 124 slots, stored by func_00395288). EA paths (preview asserts): source/render/graphicsman.cpp,
+// source/render/graphicsman.h, source/render/ps2graphicsman.cpp/.h.
+// Instance: cGraphicsMan::TheGraphicsMan = cGraphicsMan_TheGraphicsMan (gp+0x2A90), stored by the cGraphicsMan ctor (func_003691F8)
+// and cleared by its dtor (func_003695D8); every holder points at this cPS2GraphicsMan.
+//
+// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
+//   [R] retail's constructors (func_003691F8, func_00395288), Init (vtable slot 2, func_00375A40) and the allocation;
+//   [P] the July 2003 preview's out-of-line accessors (GetView, GetDeferMan, GetTextureMan, GetNumProjTextures,
+//       GetGuardBandMatrix, GetNetMatrix, GetTVDisplayFormat, GetIrradiance, Get/SetSpecID, SkipNextPageFlip,
+//       ActiveDrawState, CurrentDrawState, GetCurrentFBFormat ...), matched to retail's own accessors in render/font
+//       (0x394020-0x3946D8, 0x395318-0x3956E0) by body shape and order; the preview->retail shift is +0xB54 for the
+//       cGraphicsMan block, +0xBD0 up to 0x5930, +0xC2C/+0xC30 for the frame-buffer block, +0xC40 from 0x6B90;
+//   [U] how retail code uses the field;
+//   [O] SSX On Tour's DWARF: cGraphicsMan (same member order as retail's base, minus m_senseOfSpeed; retail's
+//       tARGBs are 4-aligned, its sDrawState carries 2 texture ids) and cPSPGraphicsMan (a different platform class:
+//       only DisplayModes/NumDisplayModes/CurrentDisplayMode carry over);
+//   [X] refs/ssx3-rust docs/investigation/structs/render.md (names are guesses; used where retail code agrees).
+
+#include "layout.h"
+#include "bx/math3d.h"
+
+struct cPS2DeferManager;
+struct cTextureMan;
+struct tDisplayMode;
+struct tMdfBlendedMatrix;
+
+// [O] sTextureState: one texture id per GS context (On Tour's PSP build has 1); -1 = none.
+struct sTextureState {
+    short m_texid[2];               // 0x0 [O]; [R] ctor fills -1; [X] texture ids for context 1/2
+};
+
+// [O][P] sDrawState, 0x14 bytes (the preview's SetDrawState copies 16 + 4 bytes). The first 16 bytes are On Tour's
+// anonymous union of packed GS/VU1 state bits (decoded in [X] "RenderState"); the cGraphicsMan_Set* accessors
+// mask them in place.
+struct sDrawState {
+    unsigned int unk_00[4];         // 0x00 [O] anonymous union (bit fields); [P] SetFixAlpha/SetVifCodeState/...
+    sTextureState m_textureState;   // 0x10 [O]
+};
+
+// [O] tTextureRef: a texture loaded by its 4-character name (func_003696C8 looks up / caches them).
+struct tTextureRef {
+    int TextureID;                  // 0x0 [O]; [U] func_003696C8 returns it
+    char Name[8];                   // 0x4 [O]; [U] strcpy target in func_003696C8
+};
+
+// [O] tTVDisplayFormat (0x14 in On Tour too). [P] GetTVDisplayFormat returns &self->mTVDisplayFormat.
+struct tTVDisplayFormat {
+    int mDisplayFormat;             // 0x00 [O] GMDisplayFormat
+    float mfTVYOffset;              // 0x04 [O]
+    float mfTVYScale;               // 0x08 [O]
+    float mfXAspectAdjust;          // 0x0C [O]
+    float mfYAspectAdjust;          // 0x10 [O]
+};
+
+// One projective texture (0xA0). [P] GetProjTexInfo(i) = self + 0x13F0 + i * 0xA0; the members follow
+// cGraphicsMan::AddProjectiveTexture(const t4Vector&, const t4Matrix&, const t4Matrix&, float, int), which
+// func_0037D758 (cPS2GraphicsMan's override) copies in order. EA's type name is not known.
+struct tProjTexInfo {
+    t4Vector unk_00;                // 0x00 [U] func_0037D758 (first argument)
+    t4Matrix unk_10;                // 0x10 [U] func_0037D758 (second argument); passed to slot 93 by func_0037DF88
+    t4Matrix unk_50;                // 0x50 [U] func_0037D758 (third argument)
+    float unk_90;                   // 0x90 [U] func_0037D758 (float argument)
+    int unk_94;                     // 0x94 [U] func_0037D758 (int argument)
+    char unk_98[0x8];               // 0x98 padding to 16
+};
+
+// [P] cPS2GraphicsMan::sViewportStack (the preview's __as__Q215cPS2GraphicsMan14sViewportStack = func_003950C0):
+// one pushed viewport/projection state, 0x230 bytes. PushViewport (func_003765B8) saves the live members listed
+// below into it, PopViewport (func_00376768) restores them.
+struct sViewportStack {
+    float unk_000[4];               // 0x000 [U] func_00376A70 (SetViewportWindow); [X] viewport x, y, w, h
+    float unk_010[3];               // 0x010 [U] func_00376C58 / func_00377458 store, func_00376C28 reads; [X] near?, 1.0, fov
+    float unk_01C;                  // 0x01C [U] func_00376C58 / func_00377278 read; [R] Init zeroes entry 0
+    int unk_020;                    // 0x020 [U] func_00376C58 / func_00377458 store; [X] projection type
+    float unk_024;                  // 0x024 [U] copy of unk_590C
+    float unk_028;                  // 0x028 [U] copy of unk_5908
+    float unk_02C;                  // 0x02C [U] copy of mFar? (0x5910)
+    t4Vector unk_030;               // 0x030 [U] copy of unk_6B70
+    t4Vector unk_040;               // 0x040 [U] copy of unk_6B80
+    t4Vector unk_050;               // 0x050 [U] copy of unk_5920
+    t4Matrix mScreenMatrix;         // 0x060 [U] copy of mScreenMatrix
+    t4Matrix mWorld;                // 0x0A0 [U] copy of mWorld
+    t4Matrix mView;                 // 0x0E0 [U] copy of mView
+    t4Matrix mGuardBandMatrix;      // 0x120 [U] copy of mGuardBandMatrix
+    t4Vector mGuardScale;           // 0x160 [U] copy of mGuardScale
+    t4Vector mGuardOffset;          // 0x170 [U] copy of mGuardOffset
+    t4Matrix mViewProj;             // 0x180 [U] copy of mViewProj
+    t4Matrix mNetMatrix;            // 0x1C0 [U] copy of mNetMatrix
+    t4Vector mScreenScale;          // 0x200 [U] copy of mScreenScale
+    t4Vector mScreenOffset;         // 0x210 [U] copy of mScreenOffset
+    unsigned short mScissor[4];     // 0x220 [U] copy of mScissor
+    int mDeferScissorIndex;         // 0x228 [U] the DeferMan's scissor index (+0x69CC4); -1 = re-register
+    char unk_22C[0x4];              // 0x22C padding to 16
+};
+
+struct cPS2GraphicsMan {
+    // --- cGraphicsMan (On Tour: size 0x10D0; retail's ends at 0x10DC with the vptr)
+    float m_screenOffset[2];        // 0x000 [O] t2Vector; [P] Get/SetScreenOffset (func_00393FB8/FD8/FF0)
+    int m_AIUpdatesPerRender;       // 0x008 [O]; [R] ctor zeroes it
+    int m_SpecularTextureId[8];     // 0x00C [O]; [P] get/setSpecularTextureId (preview: one int); [U] cVisualEffectsMan ctor
+    int m_PatchSpecularTextureId[8]; // 0x02C [O]; [U] cVisualEffectsMan ctor stores [6]
+    int m_SnowSparkleTextureId[8];  // 0x04C [O]; [U] ditto
+    int m_RimTextureId[8];          // 0x06C [O]; [U] ditto
+    int m_isInNIS[8];               // 0x08C [O]; [U] func_002F00A0 stores [i]
+    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] func_002F00A0 stores [i]
+    float m_DrawDistance[8];        // 0x0CC [O]; [U] ditto; func_0038D690 reads [6]
+    float m_FogDensity[8];          // 0x0EC [O]; [U] ditto
+    float m_FogColourR[8];          // 0x10C [O]; [U] ditto
+    float m_FogColourG[8];          // 0x12C [O]; [U] ditto
+    float m_FogColourB[8];          // 0x14C [O]; [U] ditto
+    float m_FogNear[8];             // 0x16C [O]; [U] ditto
+    float m_FogFar[8];              // 0x18C [O]; [U] ditto
+    float m_ScreenTintScaleR[8];    // 0x1AC [O]; [U] ditto
+    float m_ScreenTintScaleG[8];    // 0x1CC [O]; [U] ditto
+    float m_ScreenTintScaleB[8];    // 0x1EC [O]; [U] ditto
+    float m_ScreenTintOffsetR[8];   // 0x20C [O]; [U] ditto
+    float m_ScreenTintOffsetG[8];   // 0x22C [O]; [U] ditto
+    float m_ScreenTintOffsetB[8];   // 0x24C [O]; [U] ditto
+    float mFarPlane;                // 0x26C [O]; [R] ctor stores 0
+    int mNumViews;                  // 0x270 [O]; [R] ctor stores 1; accessors func_00394020/func_00394028
+    int mViewIndex;                 // 0x274 [O]; [R] ctor stores 0; accessors func_00394030/func_00394038
+    int mNumTextureFiles;           // 0x278 [O]; [U] func_00369890 / func_003696C8
+    void** mTextureFiles;           // 0x27C [O] const char**; [U] func_003696C8 passes each to SHAPE_locatez
+    tTextureRef mTexRefs[256];      // 0x280 [O]; [U] func_003696C8
+    int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (func_003945F0)
+    sDrawState* m_pCurrentDrawState; // 0xE84 [O]; [P] CurrentDrawState; [R] ctor points it at the stack
+    sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (D_00501420)
+    sDrawState m_activeDrawState;   // 0xED8 [O]; [P] ActiveDrawState returns its address; [U] func_00369610
+    sTextureState* m_pCurrentTextureState; // 0xEEC [O]
+    sTextureState m_textureStateStack[4]; // 0xEF0 [O]; [R] ctor fills -1
+    sTextureState m_activeTextureState; // 0xF00 [O]
+    float m_constantColours[2][4];  // 0xF04 [O] tARGB[2] (4-aligned in retail)
+    float m_lastConstantColours[2][4]; // 0xF24 [O] tARGB[2]
+    int mSkipNextPageFlip;          // 0xF44 [O] bool; [P] SkipNextPageFlip stores 1 (func_003946D8); [X] forceDisplayFlip
+    tMdfBlendedMatrix* m_blendedMatrixHistory; // 0xF48 [O]; [R] ctor zeroes; [U] cGraphicsMan_AddBlendedMatrix
+    int m_blendedMatrixHistorySize; // 0xF4C [O]; [U] cGraphicsMan_AddBlendedMatrix
+    int _EffectTexMap[86];          // 0xF50 [O]; [R] ctor fills -1 (MEM_fill 0x158); [P] getEffectTexMap(i)
+    int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (func_003946A0/func_00394698)
+    int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (func_003946D0/func_003946C8)
+    int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors func_003946A8/func_003946B8
+    void** mVtbl;                   // 0x10D8 [R] cGraphicsMan D_00493950, cPS2GraphicsMan D_00493260
+    // --- cPS2GraphicsMan
+    int mViewportDepth;             // 0x10DC [U] index into mViewportStack (func_003765B8/func_00376768); [X] viewDepth
+    t4Matrix mViewStack[12];        // 0x10E0 [R] ctor's first array loop (12); [U] PushView/PopView step 0x40
+    int mViewDepth;                 // 0x13E0 [U] PushView (func_003956E8) +1, PopView -1; [X] matrixDepth
+    t4Matrix* mCurrentView;         // 0x13E4 [P] GetView; [R] Init points it at mViewStack
+    void* mpScratchpad;             // 0x13E8 [R] Init stores 0x70000000; [X] spad
+    int mNumProjTextures;           // 0x13EC [P] GetNumProjTextures / ClearProjTextures
+    tProjTexInfo mProjTextures[8];  // 0x13F0 [P] GetProjTexInfo; [R] ctor's second array loop (8)
+    cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (func_00395658); [X] "DEFER MAN" (0x6B100)
+    cTextureMan* mpTextureMan;      // 0x18F4 [P] GetTextureMan (func_00395538); [X] "TEX MAN" (0x6740)
+    int unk_18F8[2000];             // 0x18F8 [U] per texture id: func_0037C830 frees each non-zero one, func_0037CB50 clears it
+    int unk_3838[2000];             // 0x3838 [U] per texture id: func_0037CAF8 sets 1 after creating it
+    char unk_5778[0x8];             // 0x5778 padding to 16
+    t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] func_00376768 restores it
+    t4Matrix mView;                 // 0x57C0 [X] view; [U] func_00376C58 / func_00377458 build it
+    t4Matrix mGuardBandMatrix;      // 0x5800 [P] GetGuardBandMatrix returns its address (func_00395418)
+    t4Vector mGuardScale;           // 0x5840 [X] guardScale (uploaded to VU1)
+    t4Vector mGuardOffset;          // 0x5850 [X] guardOffset
+    t4Matrix mViewProj;             // 0x5860 [X] viewProj
+    t4Matrix mNetMatrix;            // 0x58A0 [P] GetNetMatrix copies it after updateNetMat (func_003953B8)
+    t4Vector mScreenScale;          // 0x58E0 [X] screenScale
+    t4Vector mScreenOffset;         // 0x58F0 [X] screenOffset
+    unsigned short mScissor[4];     // 0x5900 [X] scissor x, y, w, h; [U] func_00376938, func_0036B158
+    float unk_5908;                 // 0x5908 [U] saved by func_003765B8; [X] fovOrAspect?
+    float unk_590C;                 // 0x590C [U] saved by func_003765B8
+    float unk_5910;                 // 0x5910 [U] saved by func_003765B8; [X] far
+    char unk_5914[0xC];             // 0x5914 padding to 16
+    t4Vector unk_5920;              // 0x5920 [U] saved by func_003765B8; func_00395ED8
+    t4Matrix unk_5930[2];           // 0x5930 [R] ctor's third array loop (2); [U] per view, func_0036A428; [X] viewMatrices
+    unsigned short unk_59B0[2][4];  // 0x59B0 [R] ctor's fourth array loop (2); [U] per-view scissor, func_0036B158/func_0036C790
+    int unk_59C0;                   // 0x59C0 [U] accessor func_003956D8; func_00363490 loop count; [X] numViews (split screen)
+    int NumDisplayModes;            // 0x59C4 [O] cPSPGraphicsMan; [P] GetNumDisplayModes (func_00395318)
+    int CurrentDisplayMode;         // 0x59C8 [O]; [P] GetDisplayMode (func_00395328); [R] Init stores -1
+    tDisplayMode* DisplayModes;     // 0x59CC [O]; [P] GetScreenWidth/Height read [CurrentDisplayMode] (0xA4 each)
+    int unk_59D0;                   // 0x59D0 [R] Init; [U] func_0037BD98; [X] dither (DTHE)
+    char unk_59D4[0xC];             // 0x59D4
+    unsigned long unk_59E0;         // 0x59E0 (64-bit: EE long) [U] func_0037C198 ld/sd; [X] dimx (DIMX)
+    int mFilterEnabled;             // 0x59E8 [P] EnableFilter/DisableFilter (func_00395568/func_00395578); [X] blitToDisplay
+    int unk_59EC[3];                // 0x59EC [U] func_0037C570; [X] brightness r, g, b
+    int unk_59F8;                   // 0x59F8 [U] func_0037C720 / func_0037C770; [X] alpha
+    float mScreenBrightness;        // 0x59FC [P] Get/SetScreenBrightness (func_003955A8/func_00395580)
+    unsigned int mVifCursor;        // 0x5A00 [X] vifCursor; [U] draw slots append packets here
+    unsigned int mVifHalfStart;     // 0x5A04 [X]; [R] Init
+    void* mpVifBuffRaw;             // 0x5A08 [X]; [R] Init: operator new(0x199940, "VifBuff")
+    unsigned int mVifBuffBase;      // 0x5A0C [X]; [R] Init: raw rounded up to 128
+    int mBuildIndex;                // 0x5A10 [X]; [U] func_003826E0
+    unsigned int mGifCursor;        // 0x5A14 [X]
+    unsigned int mGifHalfStart;     // 0x5A18 [X]
+    void* mpGifBuffRaw;             // 0x5A1C [X]; [R] Init: operator new(0x4CC40, "GifBuff")
+    unsigned int mGifBuffBase;      // 0x5A20 [X]
+    int mGifBuildIndex;             // 0x5A24 [X]
+    unsigned int unk_5A28;          // 0x5A28 [U] func_0037A260 / func_0037A430
+    unsigned long* unk_5A2C;        // 0x5A2C [U] func_0037A260 / func_0037A430
+    int mFBWidth;                   // 0x5A30 [X] fbWidth; [U] func_0037BD98 (SetDisplayMode)
+    int mFBHeight;                  // 0x5A34 [X] fbHeight
+    int unk_5A38;                   // 0x5A38 [U] func_0037BD98; [X] displayPsm
+    int mCurrentFBFormat;           // 0x5A3C [P] GetCurrentFBFormat / GetPSMFormat (func_00395528, func_00395560)
+    int mCurrentZBFormat;           // 0x5A40 [P] GetCurrentZBFormat (func_00395530; layout_xlate "seen")
+    short unk_5A44;                 // 0x5A44 [U] func_0037BD98 / func_00382AF0; [X] interlace
+    short unk_5A46;                 // 0x5A46 [X] ffmd
+    short unk_5A48;                 // 0x5A48 [X] omode
+    char unk_5A4A[0x2];             // 0x5A4A padding
+    int unk_5A4C;                   // 0x5A4C [U] accessor func_00395320; [X] progressive
+    int mFrameBufferWidth;          // 0x5A50 [P] GetFrameBufferWidth (func_00395558, by position; shift +0xC30); [X] fbw
+    int unk_5A54;                   // 0x5A54 [X] dispWidth
+    int unk_5A58;                   // 0x5A58 [X] dispHeight
+    int unk_5A5C;                   // 0x5A5C [U] accessor func_00395550; [X] dispFbw
+    int unk_5A60;                   // 0x5A60 [X] magv
+    int unk_5A64;                   // 0x5A64 [X] magh
+    int unk_5A68;                   // 0x5A68 [X] displayPages
+    int unk_5A6C;                   // 0x5A6C [X] drawPages
+    int unk_5A70;                   // 0x5A70 [X] zPages
+    int mCurrentFrameCount;         // 0x5A74 [P] getCurrentFrameCount (func_00395510); [X] vsyncFlipCount
+    int unk_5A78;                   // 0x5A78 [X] fbp0
+    int unk_5A7C;                   // 0x5A7C [X] fbp1
+    int mCurrentZBufferPage;        // 0x5A80 [P] GetCurrentZBufferPage (func_00395520)
+    int mCurrentFrameBufferPage;    // 0x5A84 [P] GetCurrentFrameBufferPage (func_00395518)
+    int mDisplayBufferAddress;      // 0x5A88 [P] GetDisplayBufferAddress (func_00395548)
+    volatile int mKickState;        // 0x5A8C [X] kickState; [U] the DMA kick thread and IRQ handlers
+    volatile int mBufState[2];      // 0x5A90 [X] bufState
+    volatile int mInFlightIndex;    // 0x5A98 [X]
+    int mInFlightVif2;              // 0x5A9C [X]
+    int mInFlightGif2;              // 0x5AA0 [X]
+    volatile int mQueuedIndex;      // 0x5AA4 [X]
+    int mQueuedVif1;                // 0x5AA8 [X]
+    int mQueuedVif2;                // 0x5AAC [X]
+    int mQueuedGif1;                // 0x5AB0 [X]
+    int mQueuedGif2;                // 0x5AB4 [X]
+    int mMinFlipWait;               // 0x5AB8 [P] SetMinFlipWait (func_00395540; layout_xlate "seen"); [X] vblanksPerFlip
+    int mVblankCounter;             // 0x5ABC [X]; [U] func_003825F8
+    int mIntcHandlerId;             // 0x5AC0 [X]; [U] Shutdown (func_00376268) removes it
+    int mDmacHandlerId;             // 0x5AC4 [X]; [U] ditto
+    int mKickSema;                  // 0x5AC8 [X]; [U] ditto
+    int mQueueMutex;                // 0x5ACC [X]; [U] ditto
+    int mKickThreadId;              // 0x5AD0 [X]; [U] ditto
+    char unk_5AD4[0xC];             // 0x5AD4 padding to 16
+    char mKickThreadStack[0x1000];  // 0x5AE0 [X]; [R] Init passes self + 0x5AE0
+    unsigned int mClearColour;      // 0x6AE0 [U] func_00389098 (slot 15, [X] SetClearColor) stores it
+    char unk_6AE4[0xC];             // 0x6AE4 padding to 16
+    t4Matrix mScreenMatrix;         // 0x6AF0 [X] screenMatrix (clip -> GS coordinates)
+    t4Matrix mScreenWorld;          // 0x6B30 [X] screenWorld; [U] the draw slots load it
+    t4Vector unk_6B70;              // 0x6B70 [U] saved by func_003765B8; func_00395FA8; [X] screenOffset4
+    t4Vector unk_6B80;              // 0x6B80 [U] saved by func_003765B8
+    int mMatricesValid;             // 0x6B90 [P] updateNetMat recomputes when 0; [U] PopView clears it; [X] matricesValid
+    tTVDisplayFormat mTVDisplayFormat; // 0x6B94 [P] GetTVDisplayFormat returns its address (func_003953B0)
+    char unk_6BA8[0x8];             // 0x6BA8 padding to 16
+    char mIrradianceInfo[0xA0];     // 0x6BB0 [P] Get/SetIrradiance (tIrradianceInfo, copied as 10 qwords)
+    int unk_6C50;                   // 0x6C50 [R] Init zeroes it
+    int unk_6C54[4];                // 0x6C54 [R] Init zeroes them
+    char unk_6C64[0x70];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (func_0036ABA0, func_0036A428)
+    float unk_6CD4[2][7];           // 0x6CD4 [U] per-view bloom parameters (func_0036C740, func_0036C790)
+    void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] func_003866E0 sets, func_00382760 calls
+    int mPhase2CallbackArg;         // 0x6D10 [X]
+    int mShinyBoarder;              // 0x6D14 [P] SetShinyBoarder (func_003956E0) bool
+    char unk_6D18[0x8];             // 0x6D18 padding to 16
+    sViewportStack mViewportStack[4]; // 0x6D20 [P] sViewportStack; [R] ctor's fifth array loop (4); [U] mViewportDepth
+};
+
+// --- layout checks
+CHECK_OFFSET(sTextureState, m_texid, 0x0);
+CHECK_SIZE(sTextureState, 0x4);
+
+CHECK_OFFSET(sDrawState, unk_00, 0x00);
+CHECK_OFFSET(sDrawState, m_textureState, 0x10);
+CHECK_SIZE(sDrawState, 0x14);
+
+CHECK_OFFSET(tTextureRef, TextureID, 0x0);
+CHECK_OFFSET(tTextureRef, Name, 0x4);
+CHECK_SIZE(tTextureRef, 0xC);
+
+CHECK_OFFSET(tTVDisplayFormat, mDisplayFormat, 0x00);
+CHECK_OFFSET(tTVDisplayFormat, mfTVYOffset, 0x04);
+CHECK_OFFSET(tTVDisplayFormat, mfTVYScale, 0x08);
+CHECK_OFFSET(tTVDisplayFormat, mfXAspectAdjust, 0x0C);
+CHECK_OFFSET(tTVDisplayFormat, mfYAspectAdjust, 0x10);
+CHECK_SIZE(tTVDisplayFormat, 0x14);
+
+CHECK_OFFSET(tProjTexInfo, unk_00, 0x00);
+CHECK_OFFSET(tProjTexInfo, unk_10, 0x10);
+CHECK_OFFSET(tProjTexInfo, unk_50, 0x50);
+CHECK_OFFSET(tProjTexInfo, unk_90, 0x90);
+CHECK_OFFSET(tProjTexInfo, unk_94, 0x94);
+CHECK_OFFSET(tProjTexInfo, unk_98, 0x98);
+CHECK_SIZE(tProjTexInfo, 0xA0);
+
+CHECK_OFFSET(sViewportStack, unk_000, 0x000);
+CHECK_OFFSET(sViewportStack, unk_010, 0x010);
+CHECK_OFFSET(sViewportStack, unk_01C, 0x01C);
+CHECK_OFFSET(sViewportStack, unk_020, 0x020);
+CHECK_OFFSET(sViewportStack, unk_024, 0x024);
+CHECK_OFFSET(sViewportStack, unk_028, 0x028);
+CHECK_OFFSET(sViewportStack, unk_02C, 0x02C);
+CHECK_OFFSET(sViewportStack, unk_030, 0x030);
+CHECK_OFFSET(sViewportStack, unk_040, 0x040);
+CHECK_OFFSET(sViewportStack, unk_050, 0x050);
+CHECK_OFFSET(sViewportStack, mScreenMatrix, 0x060);
+CHECK_OFFSET(sViewportStack, mWorld, 0x0A0);
+CHECK_OFFSET(sViewportStack, mView, 0x0E0);
+CHECK_OFFSET(sViewportStack, mGuardBandMatrix, 0x120);
+CHECK_OFFSET(sViewportStack, mGuardScale, 0x160);
+CHECK_OFFSET(sViewportStack, mGuardOffset, 0x170);
+CHECK_OFFSET(sViewportStack, mViewProj, 0x180);
+CHECK_OFFSET(sViewportStack, mNetMatrix, 0x1C0);
+CHECK_OFFSET(sViewportStack, mScreenScale, 0x200);
+CHECK_OFFSET(sViewportStack, mScreenOffset, 0x210);
+CHECK_OFFSET(sViewportStack, mScissor, 0x220);
+CHECK_OFFSET(sViewportStack, mDeferScissorIndex, 0x228);
+CHECK_OFFSET(sViewportStack, unk_22C, 0x22C);
+CHECK_SIZE(sViewportStack, 0x230);
+
+CHECK_OFFSET(cPS2GraphicsMan, m_screenOffset, 0x000);
+CHECK_OFFSET(cPS2GraphicsMan, m_AIUpdatesPerRender, 0x008);
+CHECK_OFFSET(cPS2GraphicsMan, m_SpecularTextureId, 0x00C);
+CHECK_OFFSET(cPS2GraphicsMan, m_PatchSpecularTextureId, 0x02C);
+CHECK_OFFSET(cPS2GraphicsMan, m_SnowSparkleTextureId, 0x04C);
+CHECK_OFFSET(cPS2GraphicsMan, m_RimTextureId, 0x06C);
+CHECK_OFFSET(cPS2GraphicsMan, m_isInNIS, 0x08C);
+CHECK_OFFSET(cPS2GraphicsMan, m_SnowSparkleDensity, 0x0AC);
+CHECK_OFFSET(cPS2GraphicsMan, m_DrawDistance, 0x0CC);
+CHECK_OFFSET(cPS2GraphicsMan, m_FogDensity, 0x0EC);
+CHECK_OFFSET(cPS2GraphicsMan, m_FogColourR, 0x10C);
+CHECK_OFFSET(cPS2GraphicsMan, m_FogColourG, 0x12C);
+CHECK_OFFSET(cPS2GraphicsMan, m_FogColourB, 0x14C);
+CHECK_OFFSET(cPS2GraphicsMan, m_FogNear, 0x16C);
+CHECK_OFFSET(cPS2GraphicsMan, m_FogFar, 0x18C);
+CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintScaleR, 0x1AC);
+CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintScaleG, 0x1CC);
+CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintScaleB, 0x1EC);
+CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintOffsetR, 0x20C);
+CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintOffsetG, 0x22C);
+CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintOffsetB, 0x24C);
+CHECK_OFFSET(cPS2GraphicsMan, mFarPlane, 0x26C);
+CHECK_OFFSET(cPS2GraphicsMan, mNumViews, 0x270);
+CHECK_OFFSET(cPS2GraphicsMan, mViewIndex, 0x274);
+CHECK_OFFSET(cPS2GraphicsMan, mNumTextureFiles, 0x278);
+CHECK_OFFSET(cPS2GraphicsMan, mTextureFiles, 0x27C);
+CHECK_OFFSET(cPS2GraphicsMan, mTexRefs, 0x280);
+CHECK_OFFSET(cPS2GraphicsMan, mNumTexRefs, 0xE80);
+CHECK_OFFSET(cPS2GraphicsMan, m_pCurrentDrawState, 0xE84);
+CHECK_OFFSET(cPS2GraphicsMan, m_drawStateStack, 0xE88);
+CHECK_OFFSET(cPS2GraphicsMan, m_activeDrawState, 0xED8);
+CHECK_OFFSET(cPS2GraphicsMan, m_pCurrentTextureState, 0xEEC);
+CHECK_OFFSET(cPS2GraphicsMan, m_textureStateStack, 0xEF0);
+CHECK_OFFSET(cPS2GraphicsMan, m_activeTextureState, 0xF00);
+CHECK_OFFSET(cPS2GraphicsMan, m_constantColours, 0xF04);
+CHECK_OFFSET(cPS2GraphicsMan, m_lastConstantColours, 0xF24);
+CHECK_OFFSET(cPS2GraphicsMan, mSkipNextPageFlip, 0xF44);
+CHECK_OFFSET(cPS2GraphicsMan, m_blendedMatrixHistory, 0xF48);
+CHECK_OFFSET(cPS2GraphicsMan, m_blendedMatrixHistorySize, 0xF4C);
+CHECK_OFFSET(cPS2GraphicsMan, _EffectTexMap, 0xF50);
+CHECK_OFFSET(cPS2GraphicsMan, mSpecTexID, 0x10A8);
+CHECK_OFFSET(cPS2GraphicsMan, mPatchSpecTexID, 0x10AC);
+CHECK_OFFSET(cPS2GraphicsMan, mCharSpecTexID, 0x10B0);
+CHECK_OFFSET(cPS2GraphicsMan, mVtbl, 0x10D8);
+CHECK_OFFSET(cPS2GraphicsMan, mViewportDepth, 0x10DC);
+CHECK_OFFSET(cPS2GraphicsMan, mViewStack, 0x10E0);
+CHECK_OFFSET(cPS2GraphicsMan, mViewDepth, 0x13E0);
+CHECK_OFFSET(cPS2GraphicsMan, mCurrentView, 0x13E4);
+CHECK_OFFSET(cPS2GraphicsMan, mpScratchpad, 0x13E8);
+CHECK_OFFSET(cPS2GraphicsMan, mNumProjTextures, 0x13EC);
+CHECK_OFFSET(cPS2GraphicsMan, mProjTextures, 0x13F0);
+CHECK_OFFSET(cPS2GraphicsMan, mpDeferMan, 0x18F0);
+CHECK_OFFSET(cPS2GraphicsMan, mpTextureMan, 0x18F4);
+CHECK_OFFSET(cPS2GraphicsMan, unk_18F8, 0x18F8);
+CHECK_OFFSET(cPS2GraphicsMan, unk_3838, 0x3838);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5778, 0x5778);
+CHECK_OFFSET(cPS2GraphicsMan, mWorld, 0x5780);
+CHECK_OFFSET(cPS2GraphicsMan, mView, 0x57C0);
+CHECK_OFFSET(cPS2GraphicsMan, mGuardBandMatrix, 0x5800);
+CHECK_OFFSET(cPS2GraphicsMan, mGuardScale, 0x5840);
+CHECK_OFFSET(cPS2GraphicsMan, mGuardOffset, 0x5850);
+CHECK_OFFSET(cPS2GraphicsMan, mViewProj, 0x5860);
+CHECK_OFFSET(cPS2GraphicsMan, mNetMatrix, 0x58A0);
+CHECK_OFFSET(cPS2GraphicsMan, mScreenScale, 0x58E0);
+CHECK_OFFSET(cPS2GraphicsMan, mScreenOffset, 0x58F0);
+CHECK_OFFSET(cPS2GraphicsMan, mScissor, 0x5900);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5908, 0x5908);
+CHECK_OFFSET(cPS2GraphicsMan, unk_590C, 0x590C);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5910, 0x5910);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5914, 0x5914);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5920, 0x5920);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5930, 0x5930);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59B0, 0x59B0);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59C0, 0x59C0);
+CHECK_OFFSET(cPS2GraphicsMan, NumDisplayModes, 0x59C4);
+CHECK_OFFSET(cPS2GraphicsMan, CurrentDisplayMode, 0x59C8);
+CHECK_OFFSET(cPS2GraphicsMan, DisplayModes, 0x59CC);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59D0, 0x59D0);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59D4, 0x59D4);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59E0, 0x59E0);
+CHECK_OFFSET(cPS2GraphicsMan, mFilterEnabled, 0x59E8);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59EC, 0x59EC);
+CHECK_OFFSET(cPS2GraphicsMan, unk_59F8, 0x59F8);
+CHECK_OFFSET(cPS2GraphicsMan, mScreenBrightness, 0x59FC);
+CHECK_OFFSET(cPS2GraphicsMan, mVifCursor, 0x5A00);
+CHECK_OFFSET(cPS2GraphicsMan, mVifHalfStart, 0x5A04);
+CHECK_OFFSET(cPS2GraphicsMan, mpVifBuffRaw, 0x5A08);
+CHECK_OFFSET(cPS2GraphicsMan, mVifBuffBase, 0x5A0C);
+CHECK_OFFSET(cPS2GraphicsMan, mBuildIndex, 0x5A10);
+CHECK_OFFSET(cPS2GraphicsMan, mGifCursor, 0x5A14);
+CHECK_OFFSET(cPS2GraphicsMan, mGifHalfStart, 0x5A18);
+CHECK_OFFSET(cPS2GraphicsMan, mpGifBuffRaw, 0x5A1C);
+CHECK_OFFSET(cPS2GraphicsMan, mGifBuffBase, 0x5A20);
+CHECK_OFFSET(cPS2GraphicsMan, mGifBuildIndex, 0x5A24);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A28, 0x5A28);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A2C, 0x5A2C);
+CHECK_OFFSET(cPS2GraphicsMan, mFBWidth, 0x5A30);
+CHECK_OFFSET(cPS2GraphicsMan, mFBHeight, 0x5A34);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A38, 0x5A38);
+CHECK_OFFSET(cPS2GraphicsMan, mCurrentFBFormat, 0x5A3C);
+CHECK_OFFSET(cPS2GraphicsMan, mCurrentZBFormat, 0x5A40);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A44, 0x5A44);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A46, 0x5A46);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A48, 0x5A48);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A4A, 0x5A4A);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A4C, 0x5A4C);
+CHECK_OFFSET(cPS2GraphicsMan, mFrameBufferWidth, 0x5A50);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A54, 0x5A54);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A58, 0x5A58);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A5C, 0x5A5C);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A60, 0x5A60);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A64, 0x5A64);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A68, 0x5A68);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A6C, 0x5A6C);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A70, 0x5A70);
+CHECK_OFFSET(cPS2GraphicsMan, mCurrentFrameCount, 0x5A74);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A78, 0x5A78);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5A7C, 0x5A7C);
+CHECK_OFFSET(cPS2GraphicsMan, mCurrentZBufferPage, 0x5A80);
+CHECK_OFFSET(cPS2GraphicsMan, mCurrentFrameBufferPage, 0x5A84);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayBufferAddress, 0x5A88);
+CHECK_OFFSET(cPS2GraphicsMan, mKickState, 0x5A8C);
+CHECK_OFFSET(cPS2GraphicsMan, mBufState, 0x5A90);
+CHECK_OFFSET(cPS2GraphicsMan, mInFlightIndex, 0x5A98);
+CHECK_OFFSET(cPS2GraphicsMan, mInFlightVif2, 0x5A9C);
+CHECK_OFFSET(cPS2GraphicsMan, mInFlightGif2, 0x5AA0);
+CHECK_OFFSET(cPS2GraphicsMan, mQueuedIndex, 0x5AA4);
+CHECK_OFFSET(cPS2GraphicsMan, mQueuedVif1, 0x5AA8);
+CHECK_OFFSET(cPS2GraphicsMan, mQueuedVif2, 0x5AAC);
+CHECK_OFFSET(cPS2GraphicsMan, mQueuedGif1, 0x5AB0);
+CHECK_OFFSET(cPS2GraphicsMan, mQueuedGif2, 0x5AB4);
+CHECK_OFFSET(cPS2GraphicsMan, mMinFlipWait, 0x5AB8);
+CHECK_OFFSET(cPS2GraphicsMan, mVblankCounter, 0x5ABC);
+CHECK_OFFSET(cPS2GraphicsMan, mIntcHandlerId, 0x5AC0);
+CHECK_OFFSET(cPS2GraphicsMan, mDmacHandlerId, 0x5AC4);
+CHECK_OFFSET(cPS2GraphicsMan, mKickSema, 0x5AC8);
+CHECK_OFFSET(cPS2GraphicsMan, mQueueMutex, 0x5ACC);
+CHECK_OFFSET(cPS2GraphicsMan, mKickThreadId, 0x5AD0);
+CHECK_OFFSET(cPS2GraphicsMan, unk_5AD4, 0x5AD4);
+CHECK_OFFSET(cPS2GraphicsMan, mKickThreadStack, 0x5AE0);
+CHECK_OFFSET(cPS2GraphicsMan, mClearColour, 0x6AE0);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6AE4, 0x6AE4);
+CHECK_OFFSET(cPS2GraphicsMan, mScreenMatrix, 0x6AF0);
+CHECK_OFFSET(cPS2GraphicsMan, mScreenWorld, 0x6B30);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6B70, 0x6B70);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6B80, 0x6B80);
+CHECK_OFFSET(cPS2GraphicsMan, mMatricesValid, 0x6B90);
+CHECK_OFFSET(cPS2GraphicsMan, mTVDisplayFormat, 0x6B94);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6BA8, 0x6BA8);
+CHECK_OFFSET(cPS2GraphicsMan, mIrradianceInfo, 0x6BB0);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6C50, 0x6C50);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6C54, 0x6C54);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6C64, 0x6C64);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6CD4, 0x6CD4);
+CHECK_OFFSET(cPS2GraphicsMan, mPhase2Callback, 0x6D0C);
+CHECK_OFFSET(cPS2GraphicsMan, mPhase2CallbackArg, 0x6D10);
+CHECK_OFFSET(cPS2GraphicsMan, mShinyBoarder, 0x6D14);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6D18, 0x6D18);
+CHECK_OFFSET(cPS2GraphicsMan, mViewportStack, 0x6D20);
+CHECK_SIZE(cPS2GraphicsMan, 0x75E0);
+
+#endif /* RENDER_PS2GRAPHICSMAN_H */

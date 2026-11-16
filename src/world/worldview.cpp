@@ -1307,7 +1307,7 @@ struct sBox_AE68 {
 // func_00328F28 is declared again further down with the removal helper's types; bind this one by symbol.
 void func_00328F28_AE68(sHashKey_AE68* out, sBox_AE68* box) __asm__("func_00328F28");
 extern "C" void func_00328C20(sHashCell_AE68* cell, int type, void* node, sHashKey_AE68* key);
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern char D_00494F88[];
 extern char D_00494F98[];
 extern "C" void* func_003AD198();
@@ -1366,13 +1366,13 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg,
         insert_AE68(self, 1, obj, 0x158);
         break;
     case 9: {
-        char* w = D_004A5B80;
+        char* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* e = (sVEntry_AE68*)(*(char**)(w + 0x10D8) + 0x170);
         ((tMsgS_AE68)e->fn)(w + e->delta, obj, D_00494F88, 0, 0, arg >> 8);
         break;
     }
     case 10: {
-        char* w = D_004A5B80;
+        char* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* e = (sVEntry_AE68*)(*(char**)(w + 0x10D8) + 0x170);
         ((tMsgS_AE68)e->fn)(w + e->delta, obj, D_00494F98, 0, 0, (arg >> 8) + *(int*)((char*)self + 0x10));
         break;
@@ -1490,7 +1490,7 @@ extern "C" void cAvalanche_reset();
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void* func_003AD198();
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 struct sWVVec4_B498 {
     float x, y, z, w;
@@ -1572,13 +1572,13 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     }
     case 9: {
-        char* o = D_004A5B80;
+        char* o = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = *(sWVEntry_B498**)(o + 0x10D8);
         ((void (*)(void*, unsigned int))vt[50].fn)(o + vt[50].delta, param >> 8);
         break;
     }
     case 10: {
-        char* o = D_004A5B80;
+        char* o = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = *(sWVEntry_B498**)(o + 0x10D8);
         ((void (*)(void*, unsigned int))vt[50].fn)(o + vt[50].delta, (param >> 8) + *(int*)(self + 0x10));
         break;

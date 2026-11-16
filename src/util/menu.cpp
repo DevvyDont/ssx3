@@ -747,8 +747,8 @@ public:
     virtual void v34(void* p);
 };
 
-// Typed view of the render context (the unit declares D_004A289C with another class later).
-extern func_002CB180_cCtx* D_004A289C_cb180 __asm__("D_004A289C");
+// Typed view of the render context (the unit declares GrMan with another class later).
+extern func_002CB180_cCtx* D_004A289C_cb180 __asm__("GrMan");
 extern char t4mat_Identity[];
 
 static inline void func_002CB180_setF8_5(func_002CB180_sRS* rs, int v) { rs->f8_5 = v; }
@@ -814,13 +814,13 @@ public:
     virtual void v32();
 };
 
-extern func_002CB2F8_cObj* D_004A289C;
+extern func_002CB2F8_cObj* GrMan;
 
 extern "C" void func_002CB2F8()
 {
-    D_004A289C->v32();
-    D_004A289C->v22();
-    *(int*)((char*)D_004A289C + 0xE84) = *(int*)((char*)D_004A289C + 0xE84) - 0x14;
+    GrMan->v32();
+    GrMan->v22();
+    *(int*)((char*)GrMan + 0xE84) = *(int*)((char*)GrMan + 0xE84) - 0x14;
 }
 #endif
 
@@ -915,8 +915,8 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-// Typed view of the render context (the unit declares D_004A289C with another class later).
-extern func_002CB350_cCtx* D_004A289C_cb350 __asm__("D_004A289C");
+// Typed view of the render context (the unit declares GrMan with another class later).
+extern func_002CB350_cCtx* D_004A289C_cb350 __asm__("GrMan");
 
 extern "C" void func_002CB350(func_002CB350_sVtx* v, float* r, float* t)
 {
@@ -964,7 +964,7 @@ public:
     sRS_2CB498* top;
 };
 
-extern cCtx_2CB498* D_004A289C_cb498 __asm__("D_004A289C");
+extern cCtx_2CB498* D_004A289C_cb498 __asm__("GrMan");
 
 static inline int func_002CB498_getF8_5(sRS_2CB498* rs)
 {
@@ -1160,7 +1160,7 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CB8C8* D_004A289C_cb8c8 __asm__("D_004A289C");
+extern cCtx_2CB8C8* D_004A289C_cb8c8 __asm__("GrMan");
 
 extern "C" void func_002CB8C8(void* self, float* rect)
 {
@@ -1307,7 +1307,7 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CBAC8* D_004A289C_cbac8 __asm__("D_004A289C");
+extern cCtx_2CBAC8* D_004A289C_cbac8 __asm__("GrMan");
 
 extern "C" void func_002CBAC8(void* self, float* rect)
 {
@@ -3709,7 +3709,7 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CE910* D_004A289C_ce910 __asm__("D_004A289C");
+extern cCtx_2CE910* D_004A289C_ce910 __asm__("GrMan");
 
 extern "C" void func_002CE910(void* self, float* rect)
 {
@@ -4049,7 +4049,7 @@ public:
     virtual void v71(int n, void* verts, int flags);
 };
 
-extern cCtx_2CF1C8* D_004A289C_cf1c8 __asm__("D_004A289C");
+extern cCtx_2CF1C8* D_004A289C_cf1c8 __asm__("GrMan");
 
 extern "C" void cColorMenuItem_render(void* self, float* rect)
 {
@@ -4757,7 +4757,7 @@ public:
     virtual void v71(int prim, void* verts, int n);
 };
 
-extern cCtx_2D0008* D_004A289C_2d0008 __asm__("D_004A289C");
+extern cCtx_2D0008* D_004A289C_2d0008 __asm__("GrMan");
 
 // PORT: rect pointer passed through func_002CA988's int parameter
 extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
@@ -5350,7 +5350,7 @@ public:
     virtual void v73(int n, void* verts, int flags);
 };
 
-extern cRenderCtx* D_004A289C_0EF8 __asm__("D_004A289C");
+extern cRenderCtx* D_004A289C_0EF8 __asm__("GrMan");
 
 // 16-byte vector for the menu's vertices (built with the constructor or with Set).
 struct sVec4 {
@@ -5419,7 +5419,7 @@ extern sColor D_004D53D0;
 extern sColor D_004D53E0;
 // The focused-row style passed to the menu's frame draw is the line colour of the graph's axis.
 extern sColor D_004D5380_c __asm__("D_004D5380");
-extern cRenderCtx* D_004A5B80;
+extern cRenderCtx* cGraphicsMan_TheGraphicsMan;
 
 // The font scale (font + 0x28), built from references like sVec4_2D0008: with the unit's by-value sVec2 the
 // second store keeps the temporary's address in a register (the target stores both straight to the frame).
@@ -5530,7 +5530,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
         p.z = 0.0f;
         p.w = 1.0f;
         *(sVec4*)v[1].pos = p;
-        D_004A5B80->v73(2, v, 0);
+        cGraphicsMan_TheGraphicsMan->v73(2, v, 0);
     }
     SetDepth_D0EF8(D_004A289C_0EF8->top, old, 2);
     for (i = 0; i < 2; i++) {
@@ -5555,7 +5555,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
         p.z = 0.0f;
         p.w = 1.0f;
         *(sVec4*)v[1].pos = p;
-        D_004A5B80->v73(2, v, 0);
+        cGraphicsMan_TheGraphicsMan->v73(2, v, 0);
     }
     if (self->showCur) {
         SetDepth_D0EF8(D_004A289C_0EF8->top, old, 3);

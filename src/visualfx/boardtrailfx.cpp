@@ -882,7 +882,7 @@ struct sRenderCtx_A480 {
     char pad[0xE84];
     sMtxEntry_A480* top;
 };
-extern sRenderCtx_A480* D_004A289C;
+extern sRenderCtx_A480* GrMan;
 
 class func_002EA480_cObj {
 public:
@@ -922,8 +922,8 @@ extern "C" void func_002EA480(void* self)
     if (*(int*)((char*)self + 0x90) < 2) {
         return;
     }
-    push_A480(D_004A289C);
-    pop_A480(D_004A289C);
+    push_A480(GrMan);
+    pop_A480(GrMan);
 }
 #endif
 
@@ -945,7 +945,7 @@ extern "C" void func_002EA538(char** trails, int n)
 {
     sTrailStripA538 strips[16];
     int count = 0;
-    push_A480(D_004A289C);
+    push_A480(GrMan);
     if (n > 0) {
     do {
         char* t = *trails;
@@ -973,11 +973,11 @@ extern "C" void func_002EA538(char** trails, int n)
     } while (trails++, --n > 0);
     }
     {
-        char* ctx = (char*)D_004A289C;
+        char* ctx = (char*)GrMan;
         sRctxVtA538* vt = *(sRctxVtA538**)(ctx + 0x10D8);
         vt[89].fn(ctx + vt[89].delta, strips, count);
     }
-    pop_A480(D_004A289C);
+    pop_A480(GrMan);
 }
 #endif
 
@@ -1079,13 +1079,13 @@ struct sBTVEntry {
     void (*fn)(void*, void*);
 };
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void func_002EA820(void* self)
 {
     if (*(int*)((char*)self + 0x10) != 0) {
         *(int*)((char*)self + 0x10) = 0;
-        char* obj = D_004A5B80;
+        char* obj = cGraphicsMan_TheGraphicsMan;
         sBTVEntry* e = &(*(sBTVEntry**)(obj + 0x10D8))[41];
         e->fn(obj + e->delta, (char*)self + 0x20);
     }
@@ -1095,14 +1095,14 @@ extern "C" void func_002EA820(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA860);
 #ifdef SKIP_ASM
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void func_002EA860(void* self)
 {
     if (*(int*)((char*)self + 0x10) == 0) {
         cCutSceneTransitionMan_FindTVParameters(self);
     }
-    char* obj = D_004A5B80;
+    char* obj = cGraphicsMan_TheGraphicsMan;
     *(int*)((char*)self + 0x10) = 1;
     sBTVEntry* e = &(*(sBTVEntry**)(obj + 0x10D8))[41];
     e->fn(obj + e->delta, (char*)self + 0x34);
@@ -1156,7 +1156,7 @@ struct sFade_A900 {
 };
 
 extern char* D_004A5B64_A900 __asm__("D_004A5B64");
-extern char* D_004A5B80_A900 __asm__("D_004A5B80");
+extern char* D_004A5B80_A900 __asm__("cGraphicsMan_TheGraphicsMan");
 
 extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
 {
@@ -1211,12 +1211,12 @@ struct sBTVEntryGet {
     sBTState* (*fn)(void*);
 };
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self)
 {
     sBTFx* s = (sBTFx*)self;
-    char* obj = D_004A5B80;
+    char* obj = cGraphicsMan_TheGraphicsMan;
     sBTVEntryGet* e = &(*(sBTVEntryGet**)(obj + 0x10D8))[42];
     s->saved = *e->fn(obj + e->delta);
     float c = 0.75f;
@@ -1454,7 +1454,7 @@ struct sRctx_B198 {
     sRctxVE_B198* vtable;       // 0x10D8
 };
 
-extern sRctx_B198* D_004A289C_B198 __asm__("D_004A289C");
+extern sRctx_B198* D_004A289C_B198 __asm__("GrMan");
 extern sRS_B198 D_00501420_B198 __asm__("D_00501420");
 
 // One strip vertex: texture coords, 0..255 colour (alpha 0..128), position.
@@ -1561,14 +1561,14 @@ struct sBTVEntryR {
     float* (*fn)(void*);
 };
 
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 extern float D_004A3B3C;
 extern float D_004A3B40;
 extern float D_004A3B44;
 
 extern "C" void func_002EB8F0(void)
 {
-    char* obj = D_004A5B80;
+    char* obj = cGraphicsMan_TheGraphicsMan;
     sBTVEntryR* e = &(*(sBTVEntryR**)(obj + 0x10D8))[42];
     float* r = e->fn(obj + e->delta);
     float a = r[1];
@@ -1759,7 +1759,7 @@ struct sBTVtx_BF48 {
 
 extern "C" void func_002EBF48(sBTVtx_BF48* o, float* c, float x, float y)
 {
-    if (*(short*)(*(char**)(D_004A5B80 + 0xE84) + 0x10) != -1) {
+    if (*(short*)(*(char**)(cGraphicsMan_TheGraphicsMan + 0xE84) + 0x10) != -1) {
         o->r = (int)(c[1] * 128.0f);
         o->g = (int)(c[2] * 128.0f);
         o->b = (int)(c[3] * 128.0f);
@@ -1788,7 +1788,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EC060);
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char* D_004A5B80;
+extern char* cGraphicsMan_TheGraphicsMan;
 
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
@@ -1886,10 +1886,10 @@ extern "C" void func_002EC060(char* self, float t)
         func_002EBF48_C060(b1->f, (float*)(self + 4), xs[i], 480.0f);
     }
 
-    char* obj = D_004A5B80;
+    char* obj = cGraphicsMan_TheGraphicsMan;
     sBTVEntryDraw* e = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
     e->fn(obj + e->delta, 0x50, top, 0);
-    obj = D_004A5B80;
+    obj = cGraphicsMan_TheGraphicsMan;
     e = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
     e->fn(obj + e->delta, 0x50, bot, 0);
 }

@@ -6148,7 +6148,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017ABE0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
-extern char* D_004A289C;
+extern char* GrMan;
 
 struct sVE_0017ABE0 {
     short delta;
@@ -6170,7 +6170,7 @@ extern "C" void func_0017ABE0(sIdList_0017ABE0* self, int flags)
             int id = self->ids[i];
             if (id >= 0)
             {
-                char* obj = D_004A289C;
+                char* obj = GrMan;
                 sVE_0017ABE0* vt = *(sVE_0017ABE0**)(obj + 0x10D8);
                 vt[50].fn(obj + vt[50].delta, id);
             }

@@ -1183,7 +1183,7 @@ struct sRCtx_352810 {
     char pad0[0x10D8];
     sVE_352810* vt;         // 0x10D8
 };
-extern sRCtx_352810* D_004A5B80;
+extern sRCtx_352810* cGraphicsMan_TheGraphicsMan;
 extern char D_004FF1A0_2810[] __asm__("t4mat_Identity");
 
 // cMeshAnimNode (On Tour: cMeshAnimNode::render).
@@ -1269,7 +1269,7 @@ extern "C" void cMeshAnimNode_render(sDebris_352810* self)
     if (self->fade >= 0.0f && self->timer <= self->fade) {
         fade = self->timer;
     }
-    sRCtx_352810* c = D_004A5B80;
+    sRCtx_352810* c = cGraphicsMan_TheGraphicsMan;
     c->vt[95].fn((char*)c + c->vt[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 0x420, fade);
 }
 #endif

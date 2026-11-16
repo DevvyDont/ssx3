@@ -258,8 +258,8 @@ public:
     virtual void v34(void* p);
 };
 
-// Typed view of the render context (the unit declares D_004A289C as void* later).
-extern cUICtx_7DF8* D_004A289C_7df8 __asm__("D_004A289C");
+// Typed view of the render context (the unit declares GrMan as void* later).
+extern cUICtx_7DF8* D_004A289C_7df8 __asm__("GrMan");
 extern char t4mat_Identity[];
 extern sUIRS_7DF8 D_00501420_7df8 __asm__("D_00501420");
 extern "C" void func_0039EBE0(void* p);
@@ -332,13 +332,13 @@ struct sVEntry398078 {
     short index;
     void (*fn)(void*, int);
 };
-extern void* D_004A289C;
+extern void* GrMan;
 
 extern "C" void func_00398078(void* self, int flags)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x8); i++) {
-        char* obj = (char*)D_004A289C;
+        char* obj = (char*)GrMan;
         sVEntry398078* vt = *(sVEntry398078**)(obj + 0x10D8);
         vt[0x32].fn(obj + vt[0x32].delta, (*(int**)((char*)self + 0x4))[i]);
     }
@@ -424,7 +424,7 @@ extern char D_00493D90[];
 extern char D_00493DA0[];
 extern char D_00493DB0[];
 extern char D_004A4778[];
-extern char* D_004A289C_8138 __asm__("D_004A289C");
+extern char* D_004A289C_8138 __asm__("GrMan");
 extern "C" sUIFsh8138* func_003E22F0(char* name, int flags);
 extern "C" void MEM_free(void* p);
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -973,7 +973,7 @@ struct cUIIcon_8A78 {
     int texId;               // 0x78
     sUITex_8A78* tex;        // 0x7C
 };
-extern cUICtx_8A78* D_004A289C_8a78 __asm__("D_004A289C");
+extern cUICtx_8A78* D_004A289C_8a78 __asm__("GrMan");
 extern sM33_8A78 D_004FF170_8a78 __asm__("D_004FF170");
 
 // PORT: PS2-only VU0 inline asm (a += b).
@@ -1524,7 +1524,7 @@ INCLUDE_ASM("ui/uiengine", func_00399F00);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
 extern "C" void func_0039FEB8(void* self, void* pos, void* size);
 extern "C" void func_00391E30(void* font, float x, float y, int str);
-extern char* D_004A289C_9F00 __asm__("D_004A289C");
+extern char* D_004A289C_9F00 __asm__("GrMan");
 
 struct sV2_9F00 {
     float x, y;

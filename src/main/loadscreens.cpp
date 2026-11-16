@@ -26,7 +26,7 @@ struct sRCtx_17ACC8 {
     char pad[0x10D8];
     sRVEntry_17ACC8* vt;
 };
-extern sRCtx_17ACC8* D_004A289C;
+extern sRCtx_17ACC8* GrMan;
 
 struct sBgFile_17ACC8 {
     int f0;
@@ -57,7 +57,7 @@ extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
     for (int i = 0; i < self->count; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->images[i] = D_004A289C->vt[46].fn((char*)D_004A289C + D_004A289C->vt[46].delta, img, D_004A12A8, 0, 1, -1);
+        self->images[i] = GrMan->vt[46].fn((char*)GrMan + GrMan->vt[46].delta, img, D_004A12A8, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }
@@ -127,7 +127,7 @@ typedef void (*fnV_AE00)(void*);
 typedef void (*fnRect_AE00)(void*, int, int, float, float, float, float, float, float);
 typedef void (*fnP_AE00)(void*, void*);
 
-static inline sCtx_AE00* ctx_AE00() { return (sCtx_AE00*)D_004A289C; }
+static inline sCtx_AE00* ctx_AE00() { return (sCtx_AE00*)GrMan; }
 
 static inline void call0_AE00(int slot)
 {
@@ -488,7 +488,7 @@ struct sGfx_B4E0 {
     char pad[0x10D8];
     sGfxVE_B4E0* vt;
 };
-extern sGfx_B4E0* D_004A289C_b4 __asm__("D_004A289C");
+extern sGfx_B4E0* D_004A289C_b4 __asm__("GrMan");
 
 static inline void update_B4E0(void* iface)
 {

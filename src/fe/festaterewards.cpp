@@ -698,7 +698,7 @@ struct cGame001CFFF8 {
     virtual int v46(void* name, void* entry, int a, int b, int c);
 };
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void SHAPE_name(void* data, int i, void* entry);
 struct sEntry001CFFF8 {
     char name[5];
@@ -733,7 +733,7 @@ extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data)
     for (i = 0; i < self->count; i++) {
         SHAPE_name(data, i, &self->entries[i]);
         self->entries[i].name[4] = 0;
-        self->entries[i].handle = ((cGame001CFFF8*)D_004A289C)->v46((char*)data + data->tbl[i].off, &self->entries[i], 0, 1, -1);
+        self->entries[i].handle = ((cGame001CFFF8*)GrMan)->v46((char*)data + data->tbl[i].off, &self->entries[i], 0, 1, -1);
     }
 }
 #endif
@@ -795,7 +795,7 @@ struct cGame001D00C0 {
     virtual void v50(int id);
 };
 
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sEntry001D00C0 {
     char name[5];
@@ -812,7 +812,7 @@ extern "C" void func_001D00C0(sSelf001D00C0* self)
     int i;
     for (i = 0; i < self->count; i++) {
         if (self->entries[i].handle >= 0) {
-            ((cGame001D00C0*)D_004A289C)->v50(self->entries[i].handle);
+            ((cGame001D00C0*)GrMan)->v50(self->entries[i].handle);
         }
         self->entries[i].handle = -1;
         self->entries[i].name[0] = 0;
@@ -2088,7 +2088,7 @@ struct sVEntry001D1B68 {
 
 extern void* cFEStatePreviewReward_vtbl[];
 extern void* D_0046D0D0[];
-extern void* D_004A289C;
+extern void* GrMan;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
@@ -2097,7 +2097,7 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int fla
     *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
     int id = *(int*)((char*)self + 0x70);
     if (id >= 0) {
-        char* g = (char*)D_004A289C;
+        char* g = (char*)GrMan;
         sVEntry001D1B68* vt = *(sVEntry001D1B68**)(g + 0x10D8);
         vt[50].fn(g + vt[50].delta, id);
     }
@@ -2450,7 +2450,7 @@ extern "C" void func_001D2198(void* self)
     sEntry001CFFF8 ent;
     SHAPE_name(data, 0, &ent);
     ent.name[4] = 0;
-    *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)D_004A289C)->v46(e, &ent, 0, 1, -1);
+    *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)GrMan)->v46(e, &ent, 0, 1, -1);
     func_0019DC20(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
     *(int*)((char*)self + 0x6C) = -1;
     sSelfK1D2198* s = (sSelfK1D2198*)self;

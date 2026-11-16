@@ -979,7 +979,7 @@ struct sCtx_53B10 {
     sVE_53B10* vtable;          // 0x10D8
 };
 
-extern sCtx_53B10* D_004A5B80_53B10 __asm__("D_004A5B80");
+extern sCtx_53B10* D_004A5B80_53B10 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrix_53B10(sMat_53B10* dst, void* src)

@@ -303,7 +303,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void DrawPrims(int n, sVert_EDA0* v, int flags);
 };
-extern cGfx_EDA0* D_004A289C_EDA0 __asm__("D_004A289C");
+extern cGfx_EDA0* D_004A289C_EDA0 __asm__("GrMan");
 extern sGs_EDA0 D_00501420_EDA0 __asm__("D_00501420");
 extern char t4mat_Identity[];
 
@@ -849,7 +849,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void DrawPrims(int n, sVert_FB40* v, int flags);
 };
-extern cGfx_FB40* D_004A289C_FB40 __asm__("D_004A289C");
+extern cGfx_FB40* D_004A289C_FB40 __asm__("GrMan");
 extern sGs_FB40 D_00501420_FB40 __asm__("D_00501420");
 extern char t4mat_Identity[];
 

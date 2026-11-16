@@ -62,7 +62,7 @@ public:
   virtual void v45();
   virtual int v46(long, char*, int, int, long);
 };
-extern Mgr_BD10 *D_BD10 __asm__("D_004A5B80");
+extern Mgr_BD10 *D_BD10 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" int FILE_load(char*, int);
 extern "C" long SHAPE_locatez(int, char*);
 extern "C" void MEM_free(int);
@@ -165,10 +165,10 @@ public:
   virtual void v48b();
   virtual void v50(int);
 };
-extern Mgr_BEE0 *D_004A5B80;
+extern Mgr_BEE0 *cGraphicsMan_TheGraphicsMan;
 void operator_delete(int *);
 extern "C" void func_002DBEE0(int *self, int flags) {
-    Mgr_BEE0 *m = D_004A5B80;
+    Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan;
     int i;
     for (i = 0; i < 0x51; i++) {
         int *slot = (int*)((char*)m + 0xF50) + i;
@@ -218,21 +218,21 @@ struct RS_BF98 {
     int w4;
 };
 struct Ctx_BF98 { char pad[0xE84]; RS_BF98* top; char pad2[0xF60 - 0xE88]; int f60; };
-extern Ctx_BF98* D_004A289C;
+extern Ctx_BF98* GrMan;
 extern char D_00537AC0[];
 struct VEnt_BF98 { short delta; short idx; void (*fn)(void*); };
 struct Obj_BF98 { int n; char* vt; };
 
 static inline void Push_BF98() {
-    Ctx_BF98* ctx = D_004A289C;
+    Ctx_BF98* ctx = GrMan;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
 }
 static inline void Pop_BF98() {
-    D_004A289C->top--;
+    GrMan->top--;
 }
 static inline void G3_BF98(int c, int f, int g, int e, int d) {
-    Ctx_BF98* ctx = D_004A289C;
+    Ctx_BF98* ctx = GrMan;
     ctx->top->c = c;
     ctx->top->f = f;
     ctx->top->g = g;
@@ -245,7 +245,7 @@ extern "C" void func_002DBF98(Obj_BF98* self) {
         func_00418EF8_BF98(D_00537AC0, self->n, 8, func_002DC168);
         Push_BF98();
         {
-            Ctx_BF98* ctx = D_004A289C;
+            Ctx_BF98* ctx = GrMan;
             int v = ctx->f60;
             ctx->top->h = 7;
             ctx->top->b = 2;
@@ -253,7 +253,7 @@ extern "C" void func_002DBF98(Obj_BF98* self) {
             *(short*)((char*)ctx->top + 0x10) = v;
         }
         {
-            Ctx_BF98* ctx = D_004A289C;
+            Ctx_BF98* ctx = GrMan;
             ctx->top->a = 3;
             *(short*)((char*)ctx->top + 0x12) = -1;
         }
@@ -436,7 +436,7 @@ struct sKey_C190 {
     int depth;
 };
 
-extern sCtx_C190* D_C190 __asm__("D_004A5B80");
+extern sCtx_C190* D_C190 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sKey_C190 D_00537AC0_C190[] __asm__("D_00537AC0");
 extern "C" void func_0037D968(void* self);
 
@@ -636,7 +636,7 @@ struct sSort_C7B0 { int idx; int key; };
 // PORT: asm-label aliases; these globals and calls are declared with other types elsewhere.
 // GS packet words are 64-bit `unsigned long`, and uncached (0x30000000) pointers are held in int.
 extern sDma_C7B0* D_004A4474_C7B0 __asm__("D_004A4474");
-extern sGfx_C7B0* D_004A5B80_C7B0 __asm__("D_004A5B80");
+extern sGfx_C7B0* D_004A5B80_C7B0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" unsigned long* func_0038F460_C7B0(sDma_C7B0* dma, unsigned int buf, int a2, int a3) __asm__("func_0038F460");
 extern "C" unsigned int func_0038F668_C7B0(sDma_C7B0* dma, unsigned long* p, int a2) __asm__("func_0038F668");
 

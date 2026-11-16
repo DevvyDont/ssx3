@@ -229,7 +229,7 @@ public:
     virtual void v93();
 };
 
-extern cWorld_5638* D_004A5B80;
+extern cWorld_5638* cGraphicsMan_TheGraphicsMan;
 
 struct sVEnt_5638 {
     short delta;
@@ -240,7 +240,7 @@ struct sVEnt_5638 {
 extern "C" int func_00345638(void* self)
 {
     char* s = (char*)self;
-    cWorld_5638* w = D_004A5B80;
+    cWorld_5638* w = cGraphicsMan_TheGraphicsMan;
     sVEnt_5638* vt = *(sVEnt_5638**)((char*)w + 0x10D8);
     return vt[93].fn((char*)w + vt[93].delta, sV4_5638(*(float*)(s + 0x6C), *(float*)(s + 0x70), *(float*)(s + 0x74), 1.0f),
                   sV4_5638(*(float*)(s + 0x78), *(float*)(s + 0x7C), *(float*)(s + 0x80), 1.0f),

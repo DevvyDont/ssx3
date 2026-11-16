@@ -87,13 +87,13 @@ static inline int tex_1D10(sRCtx_1D10* c, int i)
     return c->texs[i];
 }
 
-extern sRCtx_1D10* D_004A289C;
-extern sRCtx_1D10* D_004A5B80;
+extern sRCtx_1D10* GrMan;
+extern sRCtx_1D10* cGraphicsMan_TheGraphicsMan;
 extern sRState_1D10 D_00501420;
 
 extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float angle)
 {
-    sRCtx_1D10* g = D_004A289C;
+    sRCtx_1D10* g = GrMan;
     if (((IsHiddenFn_1D10)g->vt[91].fn)((char*)g + g->vt[91].delta, obj) != 0) {
         return;
     }
@@ -102,7 +102,7 @@ extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float
     col.r = src[0];
     col.g = src[1];
     col.b = src[2];
-    sRCtx_1D10* ctx = D_004A5B80;
+    sRCtx_1D10* ctx = cGraphicsMan_TheGraphicsMan;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *ctx->top = D_00501420;
