@@ -7370,9 +7370,8 @@ void func_003BF4C0(V4_F4C0 *a, V4_F4C0 *b, V4_F4C0 *out) {
         : "$7", "$8", "$9", "$10", "$11", "$12", "memory");
 }
 
-// Original file boundary: the next object file's .text starts 16-byte aligned, which leaves two nops after this
-// function in retail. The directive restores them when this body replaces the asm (no-op where the asm is used).
-__asm__(".align 4");
+// Retail pads two nops after this function (the next EA object file's .text starts 16-byte aligned);
+// tools/gen/hybrid_src.py keeps it as asm in the hybrid build, whose .s carries the pad.
 #endif
 
 //100%
@@ -7568,9 +7567,8 @@ void func_003BF6B0(V4_F6B0 *a, V4_F6B0 *b, V4_F6B0 *out) {
         : "$7", "$8", "$9", "$10", "$11", "$12", "memory");
 }
 
-// Original file boundary: the next object file's .text starts 16-byte aligned, which leaves two nops after this
-// function in retail. The directive restores them when this body replaces the asm (no-op where the asm is used).
-__asm__(".align 4");
+// Retail pads two nops after this function (the next EA object file's .text starts 16-byte aligned);
+// tools/gen/hybrid_src.py keeps it as asm in the hybrid build, whose .s carries the pad.
 #endif
 
 //100%
