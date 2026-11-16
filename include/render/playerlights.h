@@ -3,7 +3,7 @@
 
 // cPlayerLights: the extra lights applied to one rider (an ambient term plus up to 5 directional lights, and two
 // additive-blend flags). Embedded in cRiderHandler at 0xD30 (ai/riderhandler.h); the trick-boost FX adds its
-// directional light to it (cTrickBoostFX update, func_002EADD0) and the rider clears it (ai/rider.cpp, func_00392D18).
+// directional light to it (cTrickBoostFX update, cTrickBoostFX_update) and the rider clears it (ai/rider.cpp, func_00392D18).
 // EA's source: d:/ssx/code/source/render/playerlights.cpp (preview assert path). Its methods sit in the render/font
 // unit (On Tour: render/all_in_one_render.cpp), in On Tour's declaration order:
 //   func_00392D18 Clear, func_00392D58 AddAmbient (out of line in retail), func_00392D90 AddDirectional(dir, colour),

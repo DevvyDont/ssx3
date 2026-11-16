@@ -316,18 +316,18 @@ extern "C" void func_002F0CD0(sMgr_0CD0* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0E88);
+INCLUDE_ASM("seg/seg_1F1548", cPunchFX_cPunchFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1F1548_classes.h"
 
 cSeg_2F0E88::cSeg_2F0E88()
 {
-    func_002F1148_0E88(this);
+    cPunchFX_readFromReplayFrame_0E88(this);
 }
 
 // PORT: the compiler names this ctor __11cSeg_2F0E88i; expose it under the address-derived name.
-__asm__(".globl func_002F0E88\n.type func_002F0E88,@function\nfunc_002F0E88 = __11cSeg_2F0E88i\n.size func_002F0E88,0x160\n");
+__asm__(".globl cPunchFX_cPunchFX\n.type cPunchFX_cPunchFX,@function\ncPunchFX_cPunchFX = __11cSeg_2F0E88i\n.size cPunchFX_cPunchFX,0x160\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("__12cRiderVb_s1f = cRider_cRider\n"
@@ -337,7 +337,7 @@ __asm__("__12cRiderVb_s1f = cRider_cRider\n"
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F0FE8);
+INCLUDE_ASM("seg/seg_1F1548", cPunchFX__cPunchFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1F1548_classes.h"
@@ -347,7 +347,7 @@ cVbDtor002F0FE8::~cVbDtor002F0FE8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002F0FE8; expose it under the address-derived name.
-__asm__(".globl func_002F0FE8\n.type func_002F0FE8,@function\nfunc_002F0FE8 = _$_15cVbDtor002F0FE8\n.size func_002F0FE8,0x15C\n");
+__asm__(".globl cPunchFX__cPunchFX\n.type cPunchFX__cPunchFX,@function\ncPunchFX__cPunchFX = _$_15cVbDtor002F0FE8\n.size cPunchFX__cPunchFX,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
@@ -357,15 +357,15 @@ __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1148);
+INCLUDE_ASM("seg/seg_1F1548", cPunchFX_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_002F1148(cPunchFX* arg0) {
+extern "C" void cPunchFX_readFromReplayFrame(cPunchFX* arg0) {
     (*(int *)((char*)(arg0) + (0xA0))) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1150);
+INCLUDE_ASM("seg/seg_1F1548", cPunchFX_update);
 #ifdef SKIP_ASM
 int func_00312AA0(void* self, int i);
 extern "C" int func_00311AE8(void*, int);
@@ -461,7 +461,7 @@ static inline float randRange_1150(float lo, float hi)
     return lo + (hi - lo) * randf_1150();
 }
 
-extern "C" void func_002F1150(sFx_1150* self)
+extern "C" void cPunchFX_update(sFx_1150* self)
 {
     int active = 0.0f < *(float*)(self->owner + 0x350);
     self->active = active;
@@ -530,7 +530,7 @@ extern "C" void func_002F1150(sFx_1150* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1510);
+INCLUDE_ASM("seg/seg_1F1548", cPunchFX_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sV2_1510 {
@@ -592,7 +592,7 @@ public:
     virtual void DrawSprite(const sVec4_1150&, const sV2_1510&, const sV2_1510&, const sV2_1510&, const sCol_1150&);
 };
 
-extern "C" void func_002F1510(sFx_1150* self)
+extern "C" void cPunchFX_render(sFx_1150* self)
 {
     if (self->active == 0)
         return;

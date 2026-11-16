@@ -422,14 +422,14 @@ extern "C" void func_00113F88(char *self, float a, float b) {
 INCLUDE_ASM("seg/seg_14B10", func_00114130);
 #ifdef SKIP_ASM
 extern "C" int func_0028B180();
-extern "C" void func_002F6AC8(char *, int);
+extern "C" void cCheatFX_setCheatInput(char *, int);
 extern "C" void func_00298D90(int mgr, char* rider, int b);
 extern "C" void func_00299368(int mgr, char* rider);
 extern "C" void func_002992D8(int mgr, char* rider);
 
 extern "C" void func_00114130(char* s, int a, int b)
 {
-    if (b) func_002F6AC8(*(char**)(s + 0x77C) + 0xD20, 0);
+    if (b) cCheatFX_setCheatInput(*(char**)(s + 0x77C) + 0xD20, 0);
     if (a) {
         if (*(float*)(s + 0x2F8) > 0.0f) {
             if (*(float*)(s + 0x2FC) == 0.0f) {
@@ -1643,11 +1643,11 @@ INCLUDE_ASM("seg/seg_14B10", func_001162C8);
 extern "C" void func_0011FEC8_62C8(void *, int) __asm__("func_0011FEC8__FPv");
 extern "C" int func_0011FEE8_62C8(void *) __asm__("func_0011FEE8__FPv");
 extern "C" void func_00131348(char *);
-extern "C" void func_002F6AC8(char *, int);
+extern "C" void cCheatFX_setCheatInput(char *, int);
 
 extern "C" int func_001162C8(char *self, int arg1, int arg2) {
     if (arg2 != 0)
-        func_002F6AC8(*(char **)(self + 0x77C) + 0xD20, 1);
+        cCheatFX_setCheatInput(*(char **)(self + 0x77C) + 0xD20, 1);
     if ((*(float *)(self + 0x360) == 0.0f && arg1 != 0) || arg2 != 0) {
         if (func_0011FEE8_62C8(self) == 1)
             func_00131348(*(char **)(self + 0x77C) + 0x1D0);

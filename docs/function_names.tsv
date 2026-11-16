@@ -349,3 +349,179 @@ func_vtslots1	0x00398A78	cUIIcon_render2D	func_00398A78	vtable cUIIcon_vtbl (004
 func_vtslots1	0x003A03F0	cUIText_setUIData	func_003A03F0	vtable cUIText_vtbl (00494588) slot 10; follows cUIGroup_setUIData__FPv, cUIIcon_setUIData, cUIMenu_setUIData, cUIPair_setUIData__FPv (+3)
 func_vtslots1	0x003ABE40	cPS2ChunkResolve_resolveModel	func_003ABE40	vtable cPS2ChunkResolve_vtbl (00495090) slot 5; follows cChunkResolve_resolveModel
 func_vtslots1	0x003AC2A8	cPS2ChunkResolve_resolveInstance	func_003AC2A8	vtable cPS2ChunkResolve_vtbl (00495090) slot 13; follows cChunkResolve_resolveInstance
+fn_riderhandler	0x001112F8	cRiderHandler_loseMotionState	func_001112F8	[O] On Tour cRiderHandler::loseMotionState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111408	cRiderHandler_stepMotion	func_00111408	[O] On Tour cRiderHandler::stepMotion, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001114A0	cRiderHandler_resolveMotion	func_001114A0	[O] On Tour cRiderHandler::resolveMotion, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111538	cRiderHandler__setControlState	func_00111538	[O] On Tour cRiderHandler::_setControlState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111578	cRiderHandler_loseControlState	func_00111578	[O] On Tour cRiderHandler::loseControlState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111630	cRiderHandler_gainControlState	func_00111630	[O] On Tour cRiderHandler::gainControlState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111728	cRiderHandler_updateControl	func_00111728	[O] On Tour cRiderHandler::updateControl, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111830	cRiderHandler__getMotionStateName	func_00111830	[O] On Tour cRiderHandler::_getMotionStateName, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111860	cRiderHandler__getControlStateName	func_00111860	[O] On Tour cRiderHandler::_getControlStateName, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111890	cRiderHandler_resetRiderFX	func_00111890	[O] On Tour cRiderHandler::resetRiderFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111948	cRiderHandler_updateRiderFX	func_00111948	[O] On Tour cRiderHandler::updateRiderFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001119F8	cRiderHandler_renderRiderFX	func_001119F8	[O] On Tour cRiderHandler::renderRiderFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111AC0	cRiderHandler_writeToReplayFrame	func_00111AC0	[O] On Tour cRiderHandler::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00111D98	cRiderHandler_readFromReplayFrame	func_00111D98	[O] On Tour cRiderHandler::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012BE20	cGateControl_gainFocus	func_0012BE20	[O] On Tour cGateControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012BF68	cGateControl_update	func_0012BF68	[O] On Tour cGateControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012C558	cGateControl_writeToReplayFrame	func_0012C558	[O] On Tour cGateControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012C590	cGateControl_readFromReplayFrame	func_0012C590	[O] On Tour cGateControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012C5C8	cFinishLineControl_gainFocus	func_0012C5C8	[O] On Tour cFinishLineControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012C678	cFinishLineControl_update	func_0012C678	[O] On Tour cFinishLineControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012C9C0	cFinishLineControl_writeToReplayFrame	func_0012C9C0	[O] On Tour cFinishLineControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012C9F8	cFinishLineControl_readFromReplayFrame	func_0012C9F8	[O] On Tour cFinishLineControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012CA30	cWipeoutControl_gainFocus	func_0012CA30	[O] On Tour cWipeoutControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012CB68	cWipeoutControl_update	func_0012CB68	[O] On Tour cWipeoutControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E690	cWipeoutControl_loseFocus	func_0012E690	[O] On Tour cWipeoutControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E708	cWipeoutControl_writeToReplayFrame	func_0012E708	[O] On Tour cWipeoutControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E740	cWipeoutControl_readFromReplayFrame	func_0012E740	[O] On Tour cWipeoutControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E778	cBumpControl_update	func_0012E778	[O] On Tour cBumpControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E980	cPrewindControl_gainFocus	func_0012E980	[O] On Tour cPrewindControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E9B0	cPrewindControl_loseFocus__FPv	func_0012E9B0__FPv	[O] On Tour cPrewindControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012E9B8	cPrewindControl_update	func_0012E9B8	[O] On Tour cPrewindControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012F230	cResetControl_gainFocus	func_0012F230	[O] On Tour cResetControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012F398	cResetControl_update	func_0012F398	[O] On Tour cResetControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012F5B0	cResetControl_writeToReplayFrame	func_0012F5B0	[O] On Tour cResetControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012F5E8	cResetControl_readFromReplayFrame	func_0012F5E8	[O] On Tour cResetControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012F620	cNaturalAirControl_gainFocus	func_0012F620	[O] On Tour cNaturalAirControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012F730	cNaturalAirControl_update	func_0012F730	[O] On Tour cNaturalAirControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012FB68	cNaturalAirControl_loseFocus	func_0012FB68	[O] On Tour cNaturalAirControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012FBF0	cNaturalAirControl_writeToReplayFrame	func_0012FBF0	[O] On Tour cNaturalAirControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012FC28	cNaturalAirControl_readFromReplayFrame	func_0012FC28	[O] On Tour cNaturalAirControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012FC60	cBoardPressControl_gainFocus__FPv	func_0012FC60__FPv	[O] On Tour cBoardPressControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012FC80	cBoardPressControl_update	func_0012FC80	[O] On Tour cBoardPressControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0012FE98	cBoardPressControl_loseFocus	func_0012FE98	[O] On Tour cBoardPressControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00131598	cBoardPressControl_writeToReplayFrame	func_00131598	[O] On Tour cBoardPressControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001315D0	cBoardPressControl_readFromReplayFrame	func_001315D0	[O] On Tour cBoardPressControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00131608	cCruiseControl_gainFocus__FPv	func_00131608__FPv	[O] On Tour cCruiseControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00131620	cCruiseControl_update	func_00131620	[O] On Tour cCruiseControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00131C30	cCruiseControl_loseFocus	func_00131C30	[O] On Tour cCruiseControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00131D08	cRailslideControl_gainFocus	func_00131D08	[O] On Tour cRailslideControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00131D30	cRailslideControl_update	func_00131D30	[O] On Tour cRailslideControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00132048	cRailslideControl_loseFocus	func_00132048	[O] On Tour cRailslideControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00132840	cRailslideControl_writeToReplayFrame	func_00132840	[O] On Tour cRailslideControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00132878	cRailslideControl_readFromReplayFrame	func_00132878	[O] On Tour cRailslideControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001328B0	cHandplantControl_gainFocus	func_001328B0	[O] On Tour cHandplantControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00132A30	cHandplantControl_update	func_00132A30	[O] On Tour cHandplantControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00132F98	cHandplantControl_loseFocus	func_00132F98	[O] On Tour cHandplantControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001330B8	cHandplantControl_writeToReplayFrame	func_001330B8	[O] On Tour cHandplantControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001330F0	cHandplantControl_readFromReplayFrame	func_001330F0	[O] On Tour cHandplantControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00133128	cSpinControl_gainFocus	func_00133128	[O] On Tour cSpinControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00133308	cSpinControl_update	func_00133308	[O] On Tour cSpinControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00134CB0	cSpinControl_loseFocus	func_00134CB0	[O] On Tour cSpinControl::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00135CB0	cSpinControl_predictSpinSec	func_00135CB0	[O] On Tour cSpinControl::predictSpinSec, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00135DB0	cSpinControl_predictFlipSec	func_00135DB0	[O] On Tour cSpinControl::predictFlipSec, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00135EB0	cSpinControl_isGrabHeld	func_00135EB0	[O] On Tour cSpinControl::isGrabHeld, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00135EF0	cSpinControl_isTweakHeld	func_00135EF0	[O] On Tour cSpinControl::isTweakHeld, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00135F30	cSpinControl_isUberHeld	func_00135F30	[O] On Tour cSpinControl::isUberHeld, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001360C8	cSpinControl_getFlipSpinInputAng	func_001360C8	[O] On Tour cSpinControl::getFlipSpinInputAng, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001361F8	cSpinControl_writeToReplayFrame	func_001361F8	[O] On Tour cSpinControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136230	cSpinControl_readFromReplayFrame	func_00136230	[O] On Tour cSpinControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136268	cUberGrindControl_gainFocus	func_00136268	[O] On Tour cUberGrindControl::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136508	cUberGrindControl_update	func_00136508	[O] On Tour cUberGrindControl::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001368E8	cUberGrindControl_writeToReplayFrame	func_001368E8	[O] On Tour cUberGrindControl::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136920	cUberGrindControl_readFromReplayFrame	func_00136920	[O] On Tour cUberGrindControl::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136958	cStaticMotion_step	func_00136958	[O] On Tour cStaticMotion::step, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136978	cStaticMotion_resolve__FPv	func_00136978__FPv	[O] On Tour cStaticMotion::resolve, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136980	cWipeoutMotion_cWipeoutMotion	func_00136980	[R] constructor; [O] On Tour cWipeoutMotion::cWipeoutMotion, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136AD0	cWipeoutMotion__cWipeoutMotion	func_00136AD0	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cWipeoutMotion::~cWipeoutMotion, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136E98	cWipeoutMotion_step	func_00136E98	[O] On Tour cWipeoutMotion::step, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136EE0	cWipeoutMotion_resolve	func_00136EE0	[O] On Tour cWipeoutMotion::resolve, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00136F28	cWipeoutMotion_loseFocus__FPv	func_00136F28__FPv	[O] On Tour cWipeoutMotion::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00138AD8	cWipeoutMotion_writeToReplayFrame	func_00138AD8	[O] On Tour cWipeoutMotion::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00138B10	cWipeoutMotion_readFromReplayFrame	func_00138B10	[O] On Tour cWipeoutMotion::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00139178	cHandplantMotion_loseFocus	func_00139178	[O] On Tour cHandplantMotion::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001391A8	cHandplantMotion_step	func_001391A8	[O] On Tour cHandplantMotion::step, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00139528	cHandplantMotion_resolve__FPv	func_00139528__FPv	[O] On Tour cHandplantMotion::resolve, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00139970	cHandplantMotion_writeToReplayFrame	func_00139970	[O] On Tour cHandplantMotion::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001399A8	cHandplantMotion_readFromReplayFrame	func_001399A8	[O] On Tour cHandplantMotion::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00139A18	cAirMotion_loseFocus__FPv	func_00139A18__FPv	[O] On Tour cAirMotion::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00139A20	cAirMotion_step	func_00139A20	[O] On Tour cAirMotion::step, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00139C88	cAirMotion_resolve	func_00139C88	[O] On Tour cAirMotion::resolve, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013ACB0	cAirMotion_writeToReplayFrame	func_0013ACB0	[O] On Tour cAirMotion::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013ACE8	cAirMotion_readFromReplayFrame	func_0013ACE8	[O] On Tour cAirMotion::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013AD20	cRailslideMotion_gainFocus	func_0013AD20	[O] On Tour cRailslideMotion::gainFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013AF28	cRailslideMotion_step	func_0013AF28	[O] On Tour cRailslideMotion::step, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013BFA8	cRailslideMotion_resolve	func_0013BFA8	[O] On Tour cRailslideMotion::resolve, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013C5A0	cRailslideMotion_loseFocus	func_0013C5A0	[O] On Tour cRailslideMotion::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013C5E0	cRailslideMotion_writeToReplayFrame	func_0013C5E0	[O] On Tour cRailslideMotion::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013C618	cRailslideMotion_readFromReplayFrame	func_0013C618	[O] On Tour cRailslideMotion::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013C650	cGroundMotion_cGroundMotion	func_0013C650	[R] constructor; [O] On Tour cGroundMotion::cGroundMotion, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013D818	cGroundMotion_step	func_0013D818	[O] On Tour cGroundMotion::step, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013F178	cGroundMotion_resolve	func_0013F178	[O] On Tour cGroundMotion::resolve, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013F410	cGroundMotion_loseFocus	func_0013F410	[O] On Tour cGroundMotion::loseFocus, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013F848	cGroundMotion_writeToReplayFrame	func_0013F848	[O] On Tour cGroundMotion::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x0013F880	cGroundMotion_readFromReplayFrame	func_0013F880	[O] On Tour cGroundMotion::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00140D80	cGroundMotion__cGroundMotion	func_00140D80	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00140EE0	cAirMotion__cAirMotion	func_00140EE0	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141040	cRailslideMotion__cRailslideMotion	func_00141040	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x001411B0	cWipeoutMotion_getWipeoutMotionState	func_001411B0	[O] On Tour cWipeoutMotion::getWipeoutMotionState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001411B8	cWipeoutMotion_getRiderAngVel	func_001411B8	[O] On Tour cWipeoutMotion::getRiderAngVel, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x001411C0	cStaticMotion__cStaticMotion	func_001411C0	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141320	cHandplantMotion__cHandplantMotion	func_00141320	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141480	cHandplantMotion_cHandplantMotion	func_00141480	[R] constructor
+fn_riderhandler	0x001415C8	cCruiseControl__cCruiseControl	func_001415C8	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141728	cBoardPressControl__cBoardPressControl	func_00141728	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141888	cPrewindControl__cPrewindControl	func_00141888	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x001419E8	cBumpControl__cBumpControl	func_001419E8	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141B48	cNaturalAirControl__cNaturalAirControl	func_00141B48	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141CA8	cSpinControl__cSpinControl	func_00141CA8	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141E08	cGateControl__cGateControl	func_00141E08	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00141F68	cRailslideControl__cRailslideControl	func_00141F68	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x001420C8	cUberGrindControl__cUberGrindControl	func_001420C8	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00142228	cWipeoutControl__cWipeoutControl	func_00142228	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00142388	cWipeoutControl_cWipeoutControl	func_00142388	[R] constructor
+fn_riderhandler	0x001424D0	cFinishLineControl__cFinishLineControl	func_001424D0	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00142630	cResetControl__cResetControl	func_00142630	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00142790	cVoidControl__cVoidControl	func_00142790	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x001428F0	cHandplantControl__cHandplantControl	func_001428F0	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00142A50	cRiderHandler__cRiderHandler	func_00142A50	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x00143FF0	cRiderHandler__getMotionState	func_00143FF0	[O] On Tour cRiderHandler::_getMotionState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x00143FF8	cRiderHandler__getControlState	func_00143FF8	[O] On Tour cRiderHandler::_getControlState, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002D4A70	cAngerFX__cAngerFX	func_002D4A70	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x002DA8E8	cBoardSparkFX__cBoardSparkFX	func_002DA8E8	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cBoardSparkFX::~cBoardSparkFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DAA78	cBoardSparkFX_readFromReplayFrame	func_002DAA78	[O] On Tour cBoardSparkFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DABC8	cBoardSparkFX_update	func_002DABC8	[O] On Tour cBoardSparkFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DB478	cBoardSparkFX_render	func_002DB478	[O] On Tour cBoardSparkFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DCDA0	cBoardWakeFX__cBoardWakeFX	func_002DCDA0	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cBoardWakeFX::~cBoardWakeFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DCF28	cBoardWakeFX_readFromReplayFrame	func_002DCF28	[O] On Tour cBoardWakeFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DD0B8	cBoardWakeFX_update	func_002DD0B8	[O] On Tour cBoardWakeFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DDAB8	cBoardWakeFX_render	func_002DDAB8	[O] On Tour cBoardWakeFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002DE4A8	cDynamicSprayFX_cDynamicSprayFX	func_002DE4A8	[R] constructor
+fn_riderhandler	0x002DF1C8	cDynamicSprayFX__cDynamicSprayFX	func_002DF1C8	[R] destructor (vtable slot 1, operator delete on flags & 1)
+fn_riderhandler	0x002E3680	cPlayerIndicatorFX_cPlayerIndicatorFX	func_002E3680	[R] constructor; [O] On Tour cPlayerIndicatorFX::cPlayerIndicatorFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E37D0	cPlayerIndicatorFX__cPlayerIndicatorFX	func_002E37D0	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cPlayerIndicatorFX::~cPlayerIndicatorFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E3930	cPlayerIndicatorFX_readFromReplayFrame	func_002E3930	[O] On Tour cPlayerIndicatorFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E39D8	cPlayerIndicatorFX_update	func_002E39D8	[O] On Tour cPlayerIndicatorFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E3AF8	cPlayerIndicatorFX_render	func_002E3AF8	[O] On Tour cPlayerIndicatorFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E64C0	cSpeedBoostFX__cSpeedBoostFX	func_002E64C0	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cSpeedBoostFX::~cSpeedBoostFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E6640	cSpeedBoostFX_readFromReplayFrame	func_002E6640	[O] On Tour cSpeedBoostFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E66B8	cSpeedBoostFX_update	func_002E66B8	[O] On Tour cSpeedBoostFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E7A10	cSpeedBoostFX_render	func_002E7A10	[O] On Tour cSpeedBoostFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E83F0	cBoardTrailFX__cBoardTrailFX	func_002E83F0	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cBoardTrailFX::~cBoardTrailFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002E8938	cBoardTrailFX_update	func_002E8938	[O] On Tour cBoardTrailFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EA480	cBoardTrailFX_render	func_002EA480	[O] On Tour cBoardTrailFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EAAE0	cTrickBoostFX_cTrickBoostFX	func_002EAAE0	[R] constructor; [O] On Tour cTrickBoostFX::cTrickBoostFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EAC60	cTrickBoostFX__cTrickBoostFX	func_002EAC60	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cTrickBoostFX::~cTrickBoostFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EADC0	cTrickBoostFX_readFromReplayFrame__FPv	func_002EADC0__FPv	[O] On Tour cTrickBoostFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EADD0	cTrickBoostFX_update	func_002EADD0	[O] On Tour cTrickBoostFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EB198	cTrickBoostFX_render	func_002EB198	[O] On Tour cTrickBoostFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EF530	cAirStreamerFX__cAirStreamerFX	func_002EF530	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cAirStreamerFX::~cAirStreamerFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EF6A0	cAirStreamerFX_readFromReplayFrame	func_002EF6A0	[O] On Tour cAirStreamerFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EF6D0	cAirStreamerFX_update	func_002EF6D0	[O] On Tour cAirStreamerFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002EF950	cAirStreamerFX_render	func_002EF950	[O] On Tour cAirStreamerFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F0E88	cPunchFX_cPunchFX	func_002F0E88	[R] constructor; [O] On Tour cPunchFX::cPunchFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F0FE8	cPunchFX__cPunchFX	func_002F0FE8	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cPunchFX::~cPunchFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F1148	cPunchFX_readFromReplayFrame	func_002F1148	[O] On Tour cPunchFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F1150	cPunchFX_update	func_002F1150	[O] On Tour cPunchFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F1510	cPunchFX_render	func_002F1510	[O] On Tour cPunchFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6238	cCheatFX_cCheatFX	func_002F6238	[R] constructor; [O] On Tour cCheatFX::cCheatFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6388	cCheatFX__cCheatFX	func_002F6388	[R] destructor (vtable slot 1, operator delete on flags & 1); [O] On Tour cCheatFX::~cCheatFX, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F64E8	cCheatFX_reset__FPv	func_002F64E8__FPv	[O] On Tour cCheatFX::reset, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F64F0	cCheatFX_resetStates__FPv	func_002F64F0__FPv	[O] On Tour cCheatFX::resetStates, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6518	cCheatFX_update	func_002F6518	[O] On Tour cCheatFX::update, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6908	cCheatFX_render__FPv	func_002F6908__FPv	[O] On Tour cCheatFX::render, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6A58	cCheatFX_writeToReplayFrame	func_002F6A58	[O] On Tour cCheatFX::writeToReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6A90	cCheatFX_readFromReplayFrame	func_002F6A90	[O] On Tour cCheatFX::readFromReplayFrame, matched by method order with retail dispatch/accessor checks
+fn_riderhandler	0x002F6AC8	cCheatFX_setCheatInput	func_002F6AC8	[O] On Tour cCheatFX::setCheatInput, matched by method order with retail dispatch/accessor checks

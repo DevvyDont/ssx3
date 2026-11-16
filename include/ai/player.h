@@ -24,7 +24,7 @@
 // cRiderHandler::_getMotionState lw 0xDA0, _getControlState lw 0xDA4), which retail moved by +0x40 (tools/
 // layout_xlate.py: 62 aligned observations 0xDB0 -> 0xDF0), and by [R] retail's constructor cPlayer_cPlayer and the
 // out-of-line accessors in ai/control/handplantcontrol (func_001446D0 setInput, func_001446E0 getInput,
-// func_00143FF0 _getMotionState, func_00143FF8 _getControlState); [U] how retail code uses the field.
+// cRiderHandler__getMotionState _getMotionState, cRiderHandler__getControlState _getControlState); [U] how retail code uses the field.
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
@@ -44,8 +44,8 @@ struct cPlayer {
                                //       0x070, 0x0A0, 0x100, 0x1B0, 0x1C0, 0x1E4, 0x1F0, 0x200, 0x224, 0x288, 0x2A4,
                                //       0x2B8, 0x340, 0x358, 0x364, 0x384, 0x398, 0x3A0, 0x3B0, 0x470, 0x520, 0x610,
                                //       0x9C0, 0xAD0, 0xAF0, 0xB00, 0xB40, 0xC70, 0xD20 (cPlayer_cPlayer)
-    int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState (preview 0xDA0); [R] func_00143FF0; [O]
-    int ControlState;          // 0xDE4 [P] _getControlState (preview 0xDA4); [R] func_00143FF8; [O]
+    int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState (preview 0xDA0); [R] cRiderHandler__getMotionState; [O]
+    int ControlState;          // 0xDE4 [P] _getControlState (preview 0xDA4); [R] cRiderHandler__getControlState; [O]
     void** mVtbl;              // 0xDE8 [R] _vt$7cPlayer (D_00458338, 3 slots: func_00127998, func_00128660)
     char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned (the parts hold t4Vectors)
     // ---- cPlayer ----
@@ -64,7 +64,7 @@ struct cPlayer {
 // Virtual slots of _vt$7cPlayer (D_00458338); names from the preview vtable where known.
 enum {
     kPlayerVt_getControlCmd = 1,    // func_00127998 (reads Input; [O] cPlayer::getControlCmd)
-    kPlayerVt_slot2 = 2             // func_00128660 (tail-calls func_00111AC0)
+    kPlayerVt_slot2 = 2             // func_00128660 (tail-calls cRiderHandler_writeToReplayFrame)
 };
 
 CHECK_OFFSET(cPlayer, unk_000, 0x000);

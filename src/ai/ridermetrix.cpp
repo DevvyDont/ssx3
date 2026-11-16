@@ -705,7 +705,7 @@ int func_0011FEE8(void* rider);
 extern "C" int func_001298C8();
 extern "C" float func_0031C040(float a);
 extern "C" float func_0012F118(void* p, int* fail);
-extern "C" float func_001360C8(void* p, int* fail);
+extern "C" float cSpinControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float func_00135F70(void* p, int* fail);
 extern "C" float func_00136100(void* p);
 extern "C" float func_00136168(void* p);
@@ -853,7 +853,7 @@ extern "C" void func_00117FE0(void* vself)
         if (func_0011FEE8(self->rider) == 2)
             angle = func_0012F118((char*)self->rider->sub + 0x1F0, &fail);
         else
-            angle = func_001360C8((char*)self->rider->sub + 0x230, &fail);
+            angle = cSpinControl_getFlipSpinInputAng((char*)self->rider->sub + 0x230, &fail);
         if (fail != 0) {
             cRiderMetrix_removeHUDfx(self, 0xD);
         } else {

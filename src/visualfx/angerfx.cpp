@@ -29,7 +29,7 @@ __asm__("__12cRiderVb_agf = cRider_cRider\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D4A70);
+INCLUDE_ASM("visualfx/angerfx", cAngerFX__cAngerFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/angerfx_classes.h"
@@ -40,7 +40,7 @@ cVbDtor002D4A70::~cVbDtor002D4A70()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002D4A70; expose it under the address-derived name.
-__asm__(".globl func_002D4A70\n.type func_002D4A70,@function\nfunc_002D4A70 = _$_15cVbDtor002D4A70\n.size func_002D4A70,0x170\n");
+__asm__(".globl cAngerFX__cAngerFX\n.type cAngerFX__cAngerFX,@function\ncAngerFX__cAngerFX = _$_15cVbDtor002D4A70\n.size cAngerFX__cAngerFX,0x170\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002D4A70$13cRiderVbC_agf = D_00488AC0\n"

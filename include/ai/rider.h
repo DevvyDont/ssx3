@@ -225,7 +225,7 @@ struct cRider {
     /* 0x89C */ int mBoneHips; // [X] index into mAnimModel's 0x20-byte transform array
     /* 0x8A0 */ int mBoneBoardRoot; // [X] same array
     /* 0x8A4 */ int mBoneBoardChild; // [X] second bone index into mAnimModel localPos/localRot/bones, like unk_8A0 (func_0011EB98)
-    /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (func_002E3AF8, func_002D5048)
+    /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (cPlayerIndicatorFX_render, func_002D5048)
     /* 0x8AC */ char unk_8AC[0x14];
     /* 0x8C0 */ long mUpperBodyBoneMask; // [X] 64-bit (PORT: long is 64-bit on the EE); copied to mRiderAnim+0x20 before each cRiderAnimBase_play, then reset to -1 (func_001163B0, func_00115D48)
     /* 0x8C8 */ char unk_8C8[0x8];

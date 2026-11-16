@@ -752,7 +752,7 @@ cRsm_2EF3B0::cRsm_2EF3B0()
 {
     cRsmItem_2EF3B0** slot = &items;
     *slot = new (D_00487B78, 0, 0) cRsmItem_2EF3B0[25];
-    func_002EF6A0_F3B0(this);
+    cAirStreamerFX_readFromReplayFrame_F3B0(this);
 }
 
 // PORT: the compiler names this ctor __11cRsm_2EF3B0i; expose it under the address-derived name.
@@ -766,7 +766,7 @@ __asm__("__12cRiderVb_rsm = cRider_cRider\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF530);
+INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX__cAirStreamerFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/renderstateman_classes.h"
@@ -777,7 +777,7 @@ cVbDtor002EF530::~cVbDtor002EF530()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002EF530; expose it under the address-derived name.
-__asm__(".globl func_002EF530\n.type func_002EF530,@function\nfunc_002EF530 = _$_15cVbDtor002EF530\n.size func_002EF530,0x170\n");
+__asm__(".globl cAirStreamerFX__cAirStreamerFX\n.type cAirStreamerFX__cAirStreamerFX,@function\ncAirStreamerFX__cAirStreamerFX = _$_15cVbDtor002EF530\n.size cAirStreamerFX__cAirStreamerFX,0x170\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
@@ -787,9 +787,9 @@ __asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF6A0);
+INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_002EF6A0(cAirStreamerFX* self)
+extern "C" void cAirStreamerFX_readFromReplayFrame(cAirStreamerFX* self)
 {
     int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x19 : 0x12;
     *(int*)((char*)self + 0x10) = 0;
@@ -800,7 +800,7 @@ extern "C" void func_002EF6A0(cAirStreamerFX* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF6D0);
+INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_update);
 #ifdef SKIP_ASM
 int func_0011FE98(void*);
 extern "C" int func_001298C8();
@@ -896,7 +896,7 @@ static inline int Approach_EF6D0(int n, int step)
     return n > step ? n - step : (n > -step - 1 ? 0 : n + step);
 }
 
-extern "C" void func_002EF6D0(sTrail_EF6D0* self)
+extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
 {
     if (func_0011FE98(self->rider) == 1) {
         char* r = self->rider;
@@ -927,7 +927,7 @@ extern "C" void func_002EF6D0(sTrail_EF6D0* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF950);
+INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_render);
 #ifdef SKIP_ASM
 struct sRsVec4_EF950 {
     float x, y, z, w;
@@ -1090,7 +1090,7 @@ static inline void rsVert_EF950(sRsVert_EF950* v, float u, float w, const sRsCol
     v->uv.y = w;
 }
 
-extern "C" void func_002EF950(sTrail_EF950* self)
+extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
 {
     if (self->count < 2) {
         return;

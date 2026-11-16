@@ -365,7 +365,7 @@ extern "C" void func_00138BA0(cHandplantMotion* self, sHit_8BA0* hit, float dur)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139178);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_loseFocus);
 #ifdef SKIP_ASM
 // func_00139548 returns a value in $2 that is unused here; declaring it int keeps $2 free as the target has it.
 extern "C" int func_00139548(void* self);
@@ -375,7 +375,7 @@ struct sVec4_9178 {
 } __attribute__((aligned(16)));
 
 // Updates the hand plant and copies its position into the rider's hand target.
-extern "C" void func_00139178(cHandplantMotion* self)
+extern "C" void cHandplantMotion_loseFocus(cHandplantMotion* self)
 {
     func_00139548(self);
     *(sVec4_9178*)((char*)self->mRider + 0x1E0) = *(sVec4_9178*)&self->ExitVel;
@@ -383,7 +383,7 @@ extern "C" void func_00139178(cHandplantMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001391A8);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_step);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -546,7 +546,7 @@ static inline int landed_91A8(char* ap)
     return ok;
 }
 
-extern "C" void func_001391A8(cHandplantMotion* self)
+extern "C" void cHandplantMotion_step(cHandplantMotion* self)
 {
     float step = *(float*)((char*)self->mRider + 0x300) * 0.01666666753590107f;
     self->ElapsedSec += step;
@@ -592,9 +592,9 @@ extern "C" void func_001391A8(cHandplantMotion* self)
 extern "C" void* func_0011E150(int, int);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139528__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_resolve__FPv);
 #ifdef SKIP_ASM
-void* func_00139528(void* self)
+void* cHandplantMotion_resolve(void* self)
 {
     return func_0011E150(*(int*)((char*)self + 0xa0), 0);
 }
@@ -812,7 +812,7 @@ extern "C" int func_00139548_x(sHP_9548* s)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139970);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00139970 {
     short delta;
@@ -820,7 +820,7 @@ struct sVEntry00139970 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00139970(cHandplantMotion* self, void* obj)
+extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, void* obj)
 {
     sVEntry00139970* vt = *(sVEntry00139970**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0xA0);
@@ -828,7 +828,7 @@ extern "C" void func_00139970(cHandplantMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001399A8);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001399A8 {
     short delta;
@@ -836,7 +836,7 @@ struct sVEntry001399A8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001399A8(cHandplantMotion* self, void* obj)
+extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, void* obj)
 {
     sVEntry001399A8* vt = *(sVEntry001399A8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0xA0);
@@ -857,15 +857,15 @@ extern "C" void cAirMotion_gainFocus(cAirMotion* self, int state)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139A18__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_loseFocus__FPv);
 #ifdef SKIP_ASM
-void func_00139A18(void* self)
+void cAirMotion_loseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139A20);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_step);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
@@ -916,7 +916,7 @@ static inline float absf_139A20(float x)
     return r;
 }
 
-extern "C" void func_00139A20(cAirMotion* p)
+extern "C" void cAirMotion_step(cAirMotion* p)
 {
     func_00125970((char*)p->mRider);
     char* r = (char*)p->mRider;
@@ -980,7 +980,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00139C88);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_resolve);
 #ifdef SKIP_ASM
 struct sHit_139C88 {
     sVec4HP pos;                // 0x00
@@ -1204,7 +1204,7 @@ static inline sVec4HP row_139C88(char* r, int k)
 #define RIDER_139C88 (*(char**)((char*)self + 0x4))
 #define V4_139C88(p, off) (*(sVec4HP*)((p) + (off)))
 
-extern "C" void func_00139C88(cAirMotion* self)
+extern "C" void cAirMotion_resolve(cAirMotion* self)
 {
     sHit_139C88 hit;
     float d = func_0013A7B0_9C88(self, &hit);
@@ -1662,7 +1662,7 @@ extern "C" int func_0013AA48(cAirMotion* self, void* outp)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013ACB0);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0013ACB0 {
     short delta;
@@ -1670,7 +1670,7 @@ struct sVEntry0013ACB0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0013ACB0(cAirMotion* self, void* obj)
+extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, void* obj)
 {
     sVEntry0013ACB0* vt = *(sVEntry0013ACB0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
@@ -1678,7 +1678,7 @@ extern "C" void func_0013ACB0(cAirMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013ACE8);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0013ACE8 {
     short delta;
@@ -1686,7 +1686,7 @@ struct sVEntry0013ACE8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0013ACE8(cAirMotion* self, void* obj)
+extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, void* obj)
 {
     sVEntry0013ACE8* vt = *(sVEntry0013ACE8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
@@ -1694,13 +1694,13 @@ extern "C" void func_0013ACE8(cAirMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013AD20);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* q);
 struct sQuadHP_0013AD20 { float x, y, z, w; } __attribute__((aligned(16)));
 
-extern "C" void func_0013AD20(cRailslideMotion* self)
+extern "C" void cRailslideMotion_gainFocus(cRailslideMotion* self)
 {
     char* r = (char*)self->mRider;
     cRider_doLeanPoseAdjust(r, r + 0x110);
@@ -1816,7 +1816,7 @@ extern "C" void func_0013ADC0(cRailslideMotion* self, sVec4HP* p)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013AF28);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_step);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -2091,7 +2091,7 @@ static inline float ScaleAtLeast_AF28(float v, float k, float lo)
 }
 #define RIDER_AF28 (*(char**)(self + 0x50))
 
-extern "C" void func_0013AF28(char* self)
+extern "C" void cRailslideMotion_step(char* self)
 {
     if (func_0011FEE8(RIDER_AF28) == 0xC)
         *(float*)(self + 0x1C) = 0.0f;
@@ -2414,7 +2414,7 @@ extern "C" t4Vector func_0013BD80_BD80(char* p, const t4Vector& n)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013BFA8);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_resolve);
 #ifdef SKIP_ASM
 extern "C" void func_00114298(void* rider, float v);
 // PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
@@ -2474,7 +2474,7 @@ static inline void vu0ScaleEq_BFA8(sVec4_BFA8& v, float s)
 
 #define RIDER_BFA8 (*(char**)((char*)self + 0x50))
 
-extern "C" void func_0013BFA8(cRailslideMotion* self)
+extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
 {
     func_0011E150_v(RIDER_BFA8, 0);
     if (self->ForceNaturalAir != 0) {
@@ -2729,9 +2729,9 @@ extern "C" void func_0013C140(cRailslideMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C5A0);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_0013C5A0(cRailslideMotion* self)
+extern "C" void cRailslideMotion_loseFocus(cRailslideMotion* self)
 {
     char* a = (char*)self->mRider;
     *(float*)(a + 0x25C) = *(float*)(a + 0x264) = -0.25f;
@@ -2744,7 +2744,7 @@ extern "C" void func_0013C5A0(cRailslideMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C5E0);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0013C5E0 {
     short delta;
@@ -2752,7 +2752,7 @@ struct sVEntry0013C5E0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0013C5E0(cRailslideMotion* self, void* obj)
+extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, void* obj)
 {
     sVEntry0013C5E0* vt = *(sVEntry0013C5E0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x50);
@@ -2760,7 +2760,7 @@ extern "C" void func_0013C5E0(cRailslideMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C618);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0013C618 {
     short delta;
@@ -2768,7 +2768,7 @@ struct sVEntry0013C618 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0013C618(cRailslideMotion* self, void* obj)
+extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, void* obj)
 {
     sVEntry0013C618* vt = *(sVEntry0013C618**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x50);
@@ -2776,7 +2776,7 @@ extern "C" void func_0013C618(cRailslideMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C650);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_cGroundMotion);
 #ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
@@ -2791,7 +2791,7 @@ extern const sVtbl22_13C650 D_00459AE0;
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0x18, vbase at +0x20); when not most-derived, g++ copies cRider's overridden vtables to the stack and
 // fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
-extern "C" void* func_0013C650(cGroundMotion* self, int inChrg)
+extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
 {
     if (inChrg)
     {
@@ -3506,7 +3506,7 @@ extern "C" int func_0013D1B8(cGroundMotion* self, sHit_13D1B8* out, float* dist)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013D818);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_step);
 #ifdef SKIP_ASM
 #include "ai/rider.h"
 
@@ -3887,7 +3887,7 @@ static inline float atan2_13D818(float y, float x)
     return r;
 }
 
-extern "C" void func_0013D818(cGroundMotion* self)
+extern "C" void cGroundMotion_step(cGroundMotion* self)
 {
     func_00125970((char*)self->mRider);
     float spd = vu0Len_13D818(self->mRider->mVelocity);
@@ -4147,7 +4147,7 @@ extern "C" void func_0013D818(cGroundMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F178);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_resolve);
 #ifdef SKIP_ASM
 extern "C" void func_00114298(void* rider, float v);
 // PORT: func_0011E150 is declared void* in this unit; this caller ignores the result (void call).
@@ -4269,7 +4269,7 @@ static inline float absf_13F178(float x)
 
 #define RIDER_13F178 (*(char**)((char*)self + 0x18))
 
-extern "C" void func_0013F178(cGroundMotion* self)
+extern "C" void cGroundMotion_resolve(cGroundMotion* self)
 {
     if (self->ForceNaturalAir != 0) {
         func_00114298(RIDER_13F178, -1.0f);
@@ -4323,11 +4323,11 @@ extern "C" void func_0013F178(cGroundMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F410);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int func_001298C8();
 
-extern "C" void func_0013F410(cGroundMotion* self)
+extern "C" void cGroundMotion_loseFocus(cGroundMotion* self)
 {
     char* a = (char*)self->mRider;
     *(int*)(a + 0x2C4) = 0;
@@ -4558,7 +4558,7 @@ extern "C" void func_0013F488(cGroundMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F848);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0013F848 {
     short delta;
@@ -4566,7 +4566,7 @@ struct sVEntry0013F848 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0013F848(cGroundMotion* self, void* obj)
+extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, void* obj)
 {
     sVEntry0013F848* vt = *(sVEntry0013F848**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
@@ -4574,7 +4574,7 @@ extern "C" void func_0013F848(cGroundMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F880);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0013F880 {
     short delta;
@@ -4582,7 +4582,7 @@ struct sVEntry0013F880 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0013F880(cGroundMotion* self, void* obj)
+extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, void* obj)
 {
     sVEntry0013F880* vt = *(sVEntry0013F880**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x18);
@@ -6099,7 +6099,7 @@ extern "C" int func_00140D78(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D80);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion__cGroundMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6109,7 +6109,7 @@ cVbDtor00140D80::~cVbDtor00140D80()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00140D80; expose it under the address-derived name.
-__asm__(".globl func_00140D80\n.type func_00140D80,@function\nfunc_00140D80 = _$_15cVbDtor00140D80\n.size func_00140D80,0x15C\n");
+__asm__(".globl cGroundMotion__cGroundMotion\n.type cGroundMotion__cGroundMotion,@function\ncGroundMotion__cGroundMotion = _$_15cVbDtor00140D80\n.size cGroundMotion__cGroundMotion,0x15C\n");
 
 // PORT: cRiderVb_hpc's dtor is cRider's (cRider__cRider).
 __asm__("_$_12cRiderVb_hpc = cRider__cRider\n");
@@ -6123,7 +6123,7 @@ __asm__("_vt$15cVbDtor00140D80$13cRiderVbC_hpc = D_00459A98\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140EE0);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion__cAirMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6133,7 +6133,7 @@ cVbDtor00140EE0::~cVbDtor00140EE0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00140EE0; expose it under the address-derived name.
-__asm__(".globl func_00140EE0\n.type func_00140EE0,@function\nfunc_00140EE0 = _$_15cVbDtor00140EE0\n.size func_00140EE0,0x15C\n");
+__asm__(".globl cAirMotion__cAirMotion\n.type cAirMotion__cAirMotion,@function\ncAirMotion__cAirMotion = _$_15cVbDtor00140EE0\n.size cAirMotion__cAirMotion,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00140EE0$13cRiderVbC_hpc = D_004599A0\n"
@@ -6143,7 +6143,7 @@ __asm__("_vt$15cVbDtor00140EE0$13cRiderVbC_hpc = D_004599A0\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141040);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion__cRailslideMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6153,7 +6153,7 @@ cVbDtor00141040::~cVbDtor00141040()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141040; expose it under the address-derived name.
-__asm__(".globl func_00141040\n.type func_00141040,@function\nfunc_00141040 = _$_15cVbDtor00141040\n.size func_00141040,0x15C\n");
+__asm__(".globl cRailslideMotion__cRailslideMotion\n.type cRailslideMotion__cRailslideMotion,@function\ncRailslideMotion__cRailslideMotion = _$_15cVbDtor00141040\n.size cRailslideMotion__cRailslideMotion,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141040$13cRiderVbC_hpc = D_004598A8\n"
@@ -6177,22 +6177,22 @@ extern "C" int func_001411A8(int arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411B0);
+INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getWipeoutMotionState);
 #ifdef SKIP_ASM
-extern "C" int func_001411B0(int *arg0) {
+extern "C" int cWipeoutMotion_getWipeoutMotionState(int *arg0) {
     return *arg0;
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411B8);
+INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getRiderAngVel);
 #ifdef SKIP_ASM
-extern "C" int func_001411B8(int arg0) {
+extern "C" int cWipeoutMotion_getRiderAngVel(int arg0) {
     return arg0 + 0x30;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001411C0);
+INCLUDE_ASM("ai/control/handplantcontrol", cStaticMotion__cStaticMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6202,7 +6202,7 @@ cHandPlant11C0::~cHandPlant11C0()
 }
 
 // PORT: the compiler names this dtor _$_14cHandPlant11C0; expose it under the address-derived name.
-__asm__(".globl func_001411C0\n.type func_001411C0,@function\nfunc_001411C0 = _$_14cHandPlant11C0\n.size func_001411C0,0x15C\n");
+__asm__(".globl cStaticMotion__cStaticMotion\n.type cStaticMotion__cStaticMotion,@function\ncStaticMotion__cStaticMotion = _$_14cHandPlant11C0\n.size cStaticMotion__cStaticMotion,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$14cHandPlant11C0$13cRiderVbC_hpc = D_004596B8\n"
@@ -6212,7 +6212,7 @@ __asm__("_vt$14cHandPlant11C0$13cRiderVbC_hpc = D_004596B8\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141320);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion__cHandplantMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6222,7 +6222,7 @@ cVbDtor00141320::~cVbDtor00141320()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141320; expose it under the address-derived name.
-__asm__(".globl func_00141320\n.type func_00141320,@function\nfunc_00141320 = _$_15cVbDtor00141320\n.size func_00141320,0x15C\n");
+__asm__(".globl cHandplantMotion__cHandplantMotion\n.type cHandplantMotion__cHandplantMotion,@function\ncHandplantMotion__cHandplantMotion = _$_15cVbDtor00141320\n.size cHandplantMotion__cHandplantMotion,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141320$13cRiderVbC_hpc = D_004595C0\n"
@@ -6232,7 +6232,7 @@ __asm__("_vt$15cVbDtor00141320$13cRiderVbC_hpc = D_004595C0\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141480);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_cHandplantMotion);
 #ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
@@ -6247,7 +6247,7 @@ extern const sVtblB_00141480 D_00459608_00141480 __asm__("D_00459608");
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0xA0, vbase at +0xB0); when not most-derived, g++ copies cRider's overridden vtables to the stack
 // and fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
-extern "C" void* func_00141480(cHandplantMotion* self, int inChrg)
+extern "C" void* cHandplantMotion_cHandplantMotion(cHandplantMotion* self, int inChrg)
 {
     if (inChrg)
     {
@@ -6274,7 +6274,7 @@ extern "C" void* func_00141480(cHandplantMotion* self, int inChrg)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001415C8);
+INCLUDE_ASM("ai/control/handplantcontrol", cCruiseControl__cCruiseControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6284,7 +6284,7 @@ cVbDtor001415C8::~cVbDtor001415C8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor001415C8; expose it under the address-derived name.
-__asm__(".globl func_001415C8\n.type func_001415C8,@function\nfunc_001415C8 = _$_15cVbDtor001415C8\n.size func_001415C8,0x15C\n");
+__asm__(".globl cCruiseControl__cCruiseControl\n.type cCruiseControl__cCruiseControl,@function\ncCruiseControl__cCruiseControl = _$_15cVbDtor001415C8\n.size cCruiseControl__cCruiseControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001415C8$13cRiderVbC_hpc = D_004594C8\n"
@@ -6294,7 +6294,7 @@ __asm__("_vt$15cVbDtor001415C8$13cRiderVbC_hpc = D_004594C8\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141728);
+INCLUDE_ASM("ai/control/handplantcontrol", cBoardPressControl__cBoardPressControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6304,7 +6304,7 @@ cVbDtor00141728::~cVbDtor00141728()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141728; expose it under the address-derived name.
-__asm__(".globl func_00141728\n.type func_00141728,@function\nfunc_00141728 = _$_15cVbDtor00141728\n.size func_00141728,0x15C\n");
+__asm__(".globl cBoardPressControl__cBoardPressControl\n.type cBoardPressControl__cBoardPressControl,@function\ncBoardPressControl__cBoardPressControl = _$_15cVbDtor00141728\n.size cBoardPressControl__cBoardPressControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141728$13cRiderVbC_hpc = D_004593D0\n"
@@ -6314,7 +6314,7 @@ __asm__("_vt$15cVbDtor00141728$13cRiderVbC_hpc = D_004593D0\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141888);
+INCLUDE_ASM("ai/control/handplantcontrol", cPrewindControl__cPrewindControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6324,7 +6324,7 @@ cVbDtor00141888::~cVbDtor00141888()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141888; expose it under the address-derived name.
-__asm__(".globl func_00141888\n.type func_00141888,@function\nfunc_00141888 = _$_15cVbDtor00141888\n.size func_00141888,0x15C\n");
+__asm__(".globl cPrewindControl__cPrewindControl\n.type cPrewindControl__cPrewindControl,@function\ncPrewindControl__cPrewindControl = _$_15cVbDtor00141888\n.size cPrewindControl__cPrewindControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141888$13cRiderVbC_hpc = D_004592D8\n"
@@ -6334,7 +6334,7 @@ __asm__("_vt$15cVbDtor00141888$13cRiderVbC_hpc = D_004592D8\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001419E8);
+INCLUDE_ASM("ai/control/handplantcontrol", cBumpControl__cBumpControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6344,7 +6344,7 @@ cVbDtor001419E8::~cVbDtor001419E8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor001419E8; expose it under the address-derived name.
-__asm__(".globl func_001419E8\n.type func_001419E8,@function\nfunc_001419E8 = _$_15cVbDtor001419E8\n.size func_001419E8,0x15C\n");
+__asm__(".globl cBumpControl__cBumpControl\n.type cBumpControl__cBumpControl,@function\ncBumpControl__cBumpControl = _$_15cVbDtor001419E8\n.size cBumpControl__cBumpControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001419E8$13cRiderVbC_hpc = D_004591E0\n"
@@ -6354,7 +6354,7 @@ __asm__("_vt$15cVbDtor001419E8$13cRiderVbC_hpc = D_004591E0\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141B48);
+INCLUDE_ASM("ai/control/handplantcontrol", cNaturalAirControl__cNaturalAirControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6364,7 +6364,7 @@ cVbDtor00141B48::~cVbDtor00141B48()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141B48; expose it under the address-derived name.
-__asm__(".globl func_00141B48\n.type func_00141B48,@function\nfunc_00141B48 = _$_15cVbDtor00141B48\n.size func_00141B48,0x15C\n");
+__asm__(".globl cNaturalAirControl__cNaturalAirControl\n.type cNaturalAirControl__cNaturalAirControl,@function\ncNaturalAirControl__cNaturalAirControl = _$_15cVbDtor00141B48\n.size cNaturalAirControl__cNaturalAirControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141B48$13cRiderVbC_hpc = D_004590E8\n"
@@ -6374,7 +6374,7 @@ __asm__("_vt$15cVbDtor00141B48$13cRiderVbC_hpc = D_004590E8\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141CA8);
+INCLUDE_ASM("ai/control/handplantcontrol", cSpinControl__cSpinControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6384,7 +6384,7 @@ cVbDtor00141CA8::~cVbDtor00141CA8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141CA8; expose it under the address-derived name.
-__asm__(".globl func_00141CA8\n.type func_00141CA8,@function\nfunc_00141CA8 = _$_15cVbDtor00141CA8\n.size func_00141CA8,0x15C\n");
+__asm__(".globl cSpinControl__cSpinControl\n.type cSpinControl__cSpinControl,@function\ncSpinControl__cSpinControl = _$_15cVbDtor00141CA8\n.size cSpinControl__cSpinControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141CA8$13cRiderVbC_hpc = D_00458FF0\n"
@@ -6394,7 +6394,7 @@ __asm__("_vt$15cVbDtor00141CA8$13cRiderVbC_hpc = D_00458FF0\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141E08);
+INCLUDE_ASM("ai/control/handplantcontrol", cGateControl__cGateControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6404,7 +6404,7 @@ cVbDtor00141E08::~cVbDtor00141E08()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141E08; expose it under the address-derived name.
-__asm__(".globl func_00141E08\n.type func_00141E08,@function\nfunc_00141E08 = _$_15cVbDtor00141E08\n.size func_00141E08,0x15C\n");
+__asm__(".globl cGateControl__cGateControl\n.type cGateControl__cGateControl,@function\ncGateControl__cGateControl = _$_15cVbDtor00141E08\n.size cGateControl__cGateControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141E08$13cRiderVbC_hpc = D_00458EF8\n"
@@ -6414,7 +6414,7 @@ __asm__("_vt$15cVbDtor00141E08$13cRiderVbC_hpc = D_00458EF8\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00141F68);
+INCLUDE_ASM("ai/control/handplantcontrol", cRailslideControl__cRailslideControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6424,7 +6424,7 @@ cVbDtor00141F68::~cVbDtor00141F68()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00141F68; expose it under the address-derived name.
-__asm__(".globl func_00141F68\n.type func_00141F68,@function\nfunc_00141F68 = _$_15cVbDtor00141F68\n.size func_00141F68,0x15C\n");
+__asm__(".globl cRailslideControl__cRailslideControl\n.type cRailslideControl__cRailslideControl,@function\ncRailslideControl__cRailslideControl = _$_15cVbDtor00141F68\n.size cRailslideControl__cRailslideControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141F68$13cRiderVbC_hpc = D_00458E00\n"
@@ -6434,7 +6434,7 @@ __asm__("_vt$15cVbDtor00141F68$13cRiderVbC_hpc = D_00458E00\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001420C8);
+INCLUDE_ASM("ai/control/handplantcontrol", cUberGrindControl__cUberGrindControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6444,7 +6444,7 @@ cVbDtor001420C8::~cVbDtor001420C8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor001420C8; expose it under the address-derived name.
-__asm__(".globl func_001420C8\n.type func_001420C8,@function\nfunc_001420C8 = _$_15cVbDtor001420C8\n.size func_001420C8,0x15C\n");
+__asm__(".globl cUberGrindControl__cUberGrindControl\n.type cUberGrindControl__cUberGrindControl,@function\ncUberGrindControl__cUberGrindControl = _$_15cVbDtor001420C8\n.size cUberGrindControl__cUberGrindControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001420C8$13cRiderVbC_hpc = D_00458D08\n"
@@ -6454,7 +6454,7 @@ __asm__("_vt$15cVbDtor001420C8$13cRiderVbC_hpc = D_00458D08\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00142228);
+INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutControl__cWipeoutControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6464,7 +6464,7 @@ cVbDtor00142228::~cVbDtor00142228()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00142228; expose it under the address-derived name.
-__asm__(".globl func_00142228\n.type func_00142228,@function\nfunc_00142228 = _$_15cVbDtor00142228\n.size func_00142228,0x15C\n");
+__asm__(".globl cWipeoutControl__cWipeoutControl\n.type cWipeoutControl__cWipeoutControl,@function\ncWipeoutControl__cWipeoutControl = _$_15cVbDtor00142228\n.size cWipeoutControl__cWipeoutControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142228$13cRiderVbC_hpc = D_00458C10\n"
@@ -6474,7 +6474,7 @@ __asm__("_vt$15cVbDtor00142228$13cRiderVbC_hpc = D_00458C10\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00142388);
+INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutControl_cWipeoutControl);
 #ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
@@ -6489,7 +6489,7 @@ extern const sVtblB_00142388 D_00458C58_00142388 __asm__("D_00458C58");
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0x80, vbase at +0x90); when not most-derived, g++ copies cRider's overridden vtables to the stack
 // and fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
-extern "C" void* func_00142388(cWipeoutControl* self, int inChrg)
+extern "C" void* cWipeoutControl_cWipeoutControl(cWipeoutControl* self, int inChrg)
 {
     if (inChrg)
     {
@@ -6516,7 +6516,7 @@ extern "C" void* func_00142388(cWipeoutControl* self, int inChrg)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001424D0);
+INCLUDE_ASM("ai/control/handplantcontrol", cFinishLineControl__cFinishLineControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6526,7 +6526,7 @@ cVbDtor001424D0::~cVbDtor001424D0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor001424D0; expose it under the address-derived name.
-__asm__(".globl func_001424D0\n.type func_001424D0,@function\nfunc_001424D0 = _$_15cVbDtor001424D0\n.size func_001424D0,0x15C\n");
+__asm__(".globl cFinishLineControl__cFinishLineControl\n.type cFinishLineControl__cFinishLineControl,@function\ncFinishLineControl__cFinishLineControl = _$_15cVbDtor001424D0\n.size cFinishLineControl__cFinishLineControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001424D0$13cRiderVbC_hpc = D_00458B18\n"
@@ -6536,7 +6536,7 @@ __asm__("_vt$15cVbDtor001424D0$13cRiderVbC_hpc = D_00458B18\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00142630);
+INCLUDE_ASM("ai/control/handplantcontrol", cResetControl__cResetControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6546,7 +6546,7 @@ cVbDtor00142630::~cVbDtor00142630()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00142630; expose it under the address-derived name.
-__asm__(".globl func_00142630\n.type func_00142630,@function\nfunc_00142630 = _$_15cVbDtor00142630\n.size func_00142630,0x15C\n");
+__asm__(".globl cResetControl__cResetControl\n.type cResetControl__cResetControl,@function\ncResetControl__cResetControl = _$_15cVbDtor00142630\n.size cResetControl__cResetControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142630$13cRiderVbC_hpc = D_00458A20\n"
@@ -6556,7 +6556,7 @@ __asm__("_vt$15cVbDtor00142630$13cRiderVbC_hpc = D_00458A20\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00142790);
+INCLUDE_ASM("ai/control/handplantcontrol", cVoidControl__cVoidControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6566,7 +6566,7 @@ cVbDtor00142790::~cVbDtor00142790()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00142790; expose it under the address-derived name.
-__asm__(".globl func_00142790\n.type func_00142790,@function\nfunc_00142790 = _$_15cVbDtor00142790\n.size func_00142790,0x15C\n");
+__asm__(".globl cVoidControl__cVoidControl\n.type cVoidControl__cVoidControl,@function\ncVoidControl__cVoidControl = _$_15cVbDtor00142790\n.size cVoidControl__cVoidControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142790$13cRiderVbC_hpc = D_00458928\n"
@@ -6576,7 +6576,7 @@ __asm__("_vt$15cVbDtor00142790$13cRiderVbC_hpc = D_00458928\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001428F0);
+INCLUDE_ASM("ai/control/handplantcontrol", cHandplantControl__cHandplantControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6586,7 +6586,7 @@ cVbDtor001428F0::~cVbDtor001428F0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor001428F0; expose it under the address-derived name.
-__asm__(".globl func_001428F0\n.type func_001428F0,@function\nfunc_001428F0 = _$_15cVbDtor001428F0\n.size func_001428F0,0x15C\n");
+__asm__(".globl cHandplantControl__cHandplantControl\n.type cHandplantControl__cHandplantControl,@function\ncHandplantControl__cHandplantControl = _$_15cVbDtor001428F0\n.size cHandplantControl__cHandplantControl,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001428F0$13cRiderVbC_hpc = D_00458830\n"
@@ -6596,7 +6596,7 @@ __asm__("_vt$15cVbDtor001428F0$13cRiderVbC_hpc = D_00458830\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00142A50);
+INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__cRiderHandler);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -6606,24 +6606,24 @@ cVbDtor00142A50::~cVbDtor00142A50()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00142A50; expose it under the address-derived name.
-__asm__(".globl func_00142A50\n.type func_00142A50,@function\nfunc_00142A50 = _$_15cVbDtor00142A50\n.size func_00142A50,0x15A0\n");
+__asm__(".globl cRiderHandler__cRiderHandler\n.type cRiderHandler__cRiderHandler,@function\ncRiderHandler__cRiderHandler = _$_15cVbDtor00142A50\n.size cRiderHandler__cRiderHandler,0x15A0\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
         "_vt$15cVbDtor00142A50$13cRiderVbC_hpc = D_00458738\n"
         "_vt$15cVbDtor00142A50$12cRiderVb_hpc = D_00458780\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
-        "_$_15cVbDtor002F6388 = func_002F6388\n"
-        "_$_15cVbDtor002F0FE8 = func_002F0FE8\n"
-        "_$_15cVbDtor002DF1C8 = func_002DF1C8\n"
-        "_$_15cVbDtor002E37D0 = func_002E37D0\n"
-        "_$_15cVbDtor002D4A70 = func_002D4A70\n"
-        "_$_15cVbDtor002EF530 = func_002EF530\n"
-        "_$_15cVbDtor002EAC60 = func_002EAC60\n"
-        "_$_15cVbDtor002E64C0 = func_002E64C0\n"
-        "_$_15cVbDtor002E83F0 = func_002E83F0\n"
-        "_$_15cVbDtor002DA8E8 = func_002DA8E8\n"
-        "_$_15cVbDtor002DCDA0 = func_002DCDA0\n"
+        "_$_15cVbDtor002F6388 = cCheatFX__cCheatFX\n"
+        "_$_15cVbDtor002F0FE8 = cPunchFX__cPunchFX\n"
+        "_$_15cVbDtor002DF1C8 = cDynamicSprayFX__cDynamicSprayFX\n"
+        "_$_15cVbDtor002E37D0 = cPlayerIndicatorFX__cPlayerIndicatorFX\n"
+        "_$_15cVbDtor002D4A70 = cAngerFX__cAngerFX\n"
+        "_$_15cVbDtor002EF530 = cAirStreamerFX__cAirStreamerFX\n"
+        "_$_15cVbDtor002EAC60 = cTrickBoostFX__cTrickBoostFX\n"
+        "_$_15cVbDtor002E64C0 = cSpeedBoostFX__cSpeedBoostFX\n"
+        "_$_15cVbDtor002E83F0 = cBoardTrailFX__cBoardTrailFX\n"
+        "_$_15cVbDtor002DA8E8 = cBoardSparkFX__cBoardSparkFX\n"
+        "_$_15cVbDtor002DCDA0 = cBoardWakeFX__cBoardWakeFX\n"
         "_vt$13cVbIn00142790$13cRiderVbC_hpc = D_00458928\n"
         "_vt$13cVbIn00142790$12cRiderVb_hpc = D_00458970\n"
         "_vt$13cVbIn001420C8$13cRiderVbC_hpc = D_00458D08\n"
@@ -6658,7 +6658,7 @@ __asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
         "_vt$13cVbIn00141040$12cRiderVb_hpc = D_004598F0\n"
         "_vt$13cVbIn001411C0$13cRiderVbC_hpc = D_004596B8\n"
         "_vt$13cVbIn001411C0$12cRiderVb_hpc = D_00459700\n"
-        "_$_15cVbDtor00136AD0 = func_00136AD0\n"
+        "_$_15cVbDtor00136AD0 = cWipeoutMotion__cWipeoutMotion\n"
         "_vt$13cVbIn00140EE0$13cRiderVbC_hpc = D_004599A0\n"
         "_vt$13cVbIn00140EE0$12cRiderVb_hpc = D_004599E8\n"
         "_vt$13cVbIn00140D80$13cRiderVbC_hpc = D_00459A98\n"
@@ -6667,16 +6667,16 @@ __asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00143FF0);
+INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__getMotionState);
 #ifdef SKIP_ASM
-extern "C" int func_00143FF0(cRiderHandler* arg0) {
+extern "C" int cRiderHandler__getMotionState(cRiderHandler* arg0) {
     return (arg0->MotionState);
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00143FF8);
+INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__getControlState);
 #ifdef SKIP_ASM
-extern "C" int func_00143FF8(cRiderHandler* arg0) {
+extern "C" int cRiderHandler__getControlState(cRiderHandler* arg0) {
     return (arg0->ControlState);
 }
 #endif

@@ -2246,21 +2246,21 @@ cComp_cmp::cComp_cmp()
 __asm__(".globl cRiderHandler_cRiderHandler\n.type cRiderHandler_cRiderHandler,@function\ncRiderHandler_cRiderHandler = __9cComp_cmpi\n.size cRiderHandler_cRiderHandler,0x15DC\n");
 
 __asm__("__12cRiderVb_cmp = cRider_cRider\n"
-        "__15cCompPart00_cmpi = func_0013C650\n"
-        "__15cCompPart02_cmpi = func_00136980\n"
-        "__15cCompPart05_cmpi = func_00141480\n"
-        "__15cCompPart14_cmpi = func_00142388\n"
+        "__15cCompPart00_cmpi = cGroundMotion_cGroundMotion\n"
+        "__15cCompPart02_cmpi = cWipeoutMotion_cWipeoutMotion\n"
+        "__15cCompPart05_cmpi = cHandplantMotion_cHandplantMotion\n"
+        "__15cCompPart14_cmpi = cWipeoutControl_cWipeoutControl\n"
         "__15cCompPart20_cmpi = cBoardWakeFX_cBoardWakeFX\n"
         "__15cCompPart21_cmpi = cBoardSparkFX_cBoardSparkFX\n"
         "__15cCompPart22_cmpi = cBoardTrailFX_initialize\n"
         "__15cCompPart23_cmpi = cSpeedBoostFX_cSpeedBoostFX\n"
-        "__15cCompPart24_cmpi = func_002EAAE0\n"
+        "__15cCompPart24_cmpi = cTrickBoostFX_cTrickBoostFX\n"
         "__15cCompPart25_cmpi = cAirStreamerFX_cAirStreamerFX\n"
         "__15cCompPart26_cmpi = cAngerFX_cAngerFX\n"
-        "__15cCompPart27_cmpi = func_002E3680\n"
-        "__15cCompPart28_cmpi = func_002DE4A8\n"
-        "__15cCompPart29_cmpi = func_002F0E88\n"
-        "__15cCompPart30_cmpi = func_002F6238\n");
+        "__15cCompPart27_cmpi = cPlayerIndicatorFX_cPlayerIndicatorFX\n"
+        "__15cCompPart28_cmpi = cDynamicSprayFX_cDynamicSprayFX\n"
+        "__15cCompPart29_cmpi = cPunchFX_cPunchFX\n"
+        "__15cCompPart30_cmpi = cCheatFX_cCheatFX\n");
 
 // PORT: vtables this TU does not emit (their key functions are elsewhere), under their retail names.
 __asm__("_vt$14cRiderVbB0_cmp = D_00459B90\n"
@@ -2306,12 +2306,12 @@ __asm__("_vt$15cCompPart01_cmp$13cRiderVbC_cmp = D_004599A0\n"
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler__setMotionState);
 #ifdef SKIP_ASM
-extern "C" void func_001112F8();
+extern "C" void cRiderHandler_loseMotionState();
 extern "C" void cRiderHandler_gainMotionState(cRiderHandler*, int);
 
 extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int v)
 {
-    func_001112F8();
+    cRiderHandler_loseMotionState();
     int old = self->MotionState;
     self->MotionState = v;
     cRiderHandler_gainMotionState(self, old);
@@ -2319,39 +2319,39 @@ extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int v)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_001112F8);
+INCLUDE_ASM("ai/computer", cRiderHandler_loseMotionState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Motion-state dispatch: the second argument is passed through to the handler.
-extern "C" void func_0013F410(void* self, int a1);
-void func_00139A18_a1(void* motion, int a1) __asm__("func_00139A18__FPv");
-void func_00136F28_a1(void* motion, int a1) __asm__("func_00136F28__FPv");
-extern "C" void func_0013C5A0(void* motion, int a1);
-extern "C" void func_00139178(void* motion, int a1);
+extern "C" void cGroundMotion_loseFocus(void* self, int a1);
+void cAirMotion_loseFocus_a1(void* motion, int a1) __asm__("cAirMotion_loseFocus__FPv");
+void cWipeoutMotion_loseFocus_a1(void* motion, int a1) __asm__("cWipeoutMotion_loseFocus__FPv");
+extern "C" void cRailslideMotion_loseFocus(void* motion, int a1);
+extern "C" void cHandplantMotion_loseFocus(void* motion, int a1);
 extern "C" void cGroundMotion_gainFocus(void* self, int a1);
 extern "C" void cAirMotion_gainFocus(void* motion, int a1);
 extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
-extern "C" void func_0013AD20(void* motion, int a1);
+extern "C" void cRailslideMotion_gainFocus(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
-extern "C" void func_001112F8(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_loseMotionState(cRiderHandler* self, int a1)
 {
     switch (self->MotionState) {
     case 0:
-        func_0013F410(self, a1);
+        cGroundMotion_loseFocus(self, a1);
         break;
     case 1:
-        func_00139A18_a1((char*)self + 0x20, a1);
+        cAirMotion_loseFocus_a1((char*)self + 0x20, a1);
         break;
     case 2:
-        func_00136F28_a1((char*)self + 0x30, a1);
+        cWipeoutMotion_loseFocus_a1((char*)self + 0x30, a1);
         break;
     case 4:
-        func_0013C5A0((char*)self + 0xB0, a1);
+        cRailslideMotion_loseFocus((char*)self + 0xB0, a1);
         break;
     case 5:
-        func_00139178((char*)self + 0x110, a1);
+        cHandplantMotion_loseFocus((char*)self + 0x110, a1);
         break;
     }
 }
@@ -2362,15 +2362,15 @@ INCLUDE_ASM("ai/computer", cRiderHandler_gainMotionState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0013F410(void* self, int a1);
-void func_00139A18_a1(void* motion, int a1) __asm__("func_00139A18__FPv");
-void func_00136F28_a1(void* motion, int a1) __asm__("func_00136F28__FPv");
-extern "C" void func_0013C5A0(void* motion, int a1);
-extern "C" void func_00139178(void* motion, int a1);
+extern "C" void cGroundMotion_loseFocus(void* self, int a1);
+void cAirMotion_loseFocus_a1(void* motion, int a1) __asm__("cAirMotion_loseFocus__FPv");
+void cWipeoutMotion_loseFocus_a1(void* motion, int a1) __asm__("cWipeoutMotion_loseFocus__FPv");
+extern "C" void cRailslideMotion_loseFocus(void* motion, int a1);
+extern "C" void cHandplantMotion_loseFocus(void* motion, int a1);
 extern "C" void cGroundMotion_gainFocus(void* self, int a1);
 extern "C" void cAirMotion_gainFocus(void* motion, int a1);
 extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
-extern "C" void func_0013AD20(void* motion, int a1);
+extern "C" void cRailslideMotion_gainFocus(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
 extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int a1)
@@ -2386,7 +2386,7 @@ extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int a1)
         cWipeoutMotion_gainFocus((char*)self + 0x30, a1);
         break;
     case 4:
-        func_0013AD20((char*)self + 0xB0, a1);
+        cRailslideMotion_gainFocus((char*)self + 0xB0, a1);
         break;
     case 5:
         cHandplantMotion_gainFocus((char*)self + 0x110, a1);
@@ -2396,133 +2396,133 @@ extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111408);
+INCLUDE_ASM("ai/computer", cRiderHandler_stepMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0013D818(void* self);
-extern "C" void func_00139A20(void* motion);
-extern "C" void func_00136E98(void* motion);
-extern "C" void func_00136958(void* motion);
-extern "C" void func_0013AF28(void* motion);
-extern "C" void func_001391A8(void* motion);
+extern "C" void cGroundMotion_step(void* self);
+extern "C" void cAirMotion_step(void* motion);
+extern "C" void cWipeoutMotion_step(void* motion);
+extern "C" void cStaticMotion_step(void* motion);
+extern "C" void cRailslideMotion_step(void* motion);
+extern "C" void cHandplantMotion_step(void* motion);
 
-extern "C" void func_00111408(cRiderHandler* self)
+extern "C" void cRiderHandler_stepMotion(cRiderHandler* self)
 {
     switch (self->MotionState) {
     case 0:
-        func_0013D818(self);
+        cGroundMotion_step(self);
         break;
     case 1:
-        func_00139A20((char*)self + 0x20);
+        cAirMotion_step((char*)self + 0x20);
         break;
     case 2:
-        func_00136E98((char*)self + 0x30);
+        cWipeoutMotion_step((char*)self + 0x30);
         break;
     case 3:
-        func_00136958((char*)self + 0xA0);
+        cStaticMotion_step((char*)self + 0xA0);
         break;
     case 4:
-        func_0013AF28((char*)self + 0xB0);
+        cRailslideMotion_step((char*)self + 0xB0);
         break;
     case 5:
-        func_001391A8((char*)self + 0x110);
+        cHandplantMotion_step((char*)self + 0x110);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_001114A0);
+INCLUDE_ASM("ai/computer", cRiderHandler_resolveMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0013F178(void* self);
-extern "C" void func_00139C88(void* motion);
-extern "C" void func_00136EE0(void* motion);
-void func_00136978(void* motion);
-extern "C" void func_0013BFA8(void* motion);
-void func_00139528(void* motion);
+extern "C" void cGroundMotion_resolve(void* self);
+extern "C" void cAirMotion_resolve(void* motion);
+extern "C" void cWipeoutMotion_resolve(void* motion);
+void cStaticMotion_resolve(void* motion);
+extern "C" void cRailslideMotion_resolve(void* motion);
+void cHandplantMotion_resolve(void* motion);
 
-extern "C" void func_001114A0(cRiderHandler* self)
+extern "C" void cRiderHandler_resolveMotion(cRiderHandler* self)
 {
     switch (self->MotionState) {
     case 0:
-        func_0013F178(self);
+        cGroundMotion_resolve(self);
         break;
     case 1:
-        func_00139C88((char*)self + 0x20);
+        cAirMotion_resolve((char*)self + 0x20);
         break;
     case 2:
-        func_00136EE0((char*)self + 0x30);
+        cWipeoutMotion_resolve((char*)self + 0x30);
         break;
     case 3:
-        func_00136978((char*)self + 0xA0);
+        cStaticMotion_resolve((char*)self + 0xA0);
         break;
     case 4:
-        func_0013BFA8((char*)self + 0xB0);
+        cRailslideMotion_resolve((char*)self + 0xB0);
         break;
     case 5:
-        func_00139528((char*)self + 0x110);
+        cHandplantMotion_resolve((char*)self + 0x110);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111538);
+INCLUDE_ASM("ai/computer", cRiderHandler__setControlState);
 #ifdef SKIP_ASM
-extern "C" void func_00111578();
-extern "C" void func_00111630(cRiderHandler*, int);
+extern "C" void cRiderHandler_loseControlState();
+extern "C" void cRiderHandler_gainControlState(cRiderHandler*, int);
 
-extern "C" void func_00111538(cRiderHandler* self, int v)
+extern "C" void cRiderHandler__setControlState(cRiderHandler* self, int v)
 {
-    func_00111578();
+    cRiderHandler_loseControlState();
     int old = self->ControlState;
     self->ControlState = v;
-    func_00111630(self, old);
+    cRiderHandler_gainControlState(self, old);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111578);
+INCLUDE_ASM("ai/computer", cRiderHandler_loseControlState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00131C30(void* m, int a1);
-extern "C" void func_0012FE98(void* m, int a1);
-void func_0012E9B0_a1(void* m, int a1) __asm__("func_0012E9B0__FPv");
-extern "C" void func_0012FB68(void* m, int a1);
-extern "C" void func_00134CB0(void* m, int a1);
-extern "C" void func_00132048(void* m, int a1);
-extern "C" void func_0012E690(void* m, int a1);
-extern "C" void func_00132F98(void* m, int a1);
+extern "C" void cCruiseControl_loseFocus(void* m, int a1);
+extern "C" void cBoardPressControl_loseFocus(void* m, int a1);
+void cPrewindControl_loseFocus_a1(void* m, int a1) __asm__("cPrewindControl_loseFocus__FPv");
+extern "C" void cNaturalAirControl_loseFocus(void* m, int a1);
+extern "C" void cSpinControl_loseFocus(void* m, int a1);
+extern "C" void cRailslideControl_loseFocus(void* m, int a1);
+extern "C" void cWipeoutControl_loseFocus(void* m, int a1);
+extern "C" void cHandplantControl_loseFocus(void* m, int a1);
 
 // Controller-state dispatch: the second argument is passed through to the handler.
-extern "C" void func_00111578(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_loseControlState(cRiderHandler* self, int a1)
 {
     switch (self->ControlState) {
     case 0:
-        func_00131C30((char*)self + 0x1C0, a1);
+        cCruiseControl_loseFocus((char*)self + 0x1C0, a1);
         break;
     case 1:
-        func_0012FE98((char*)self + 0x1D0, a1);
+        cBoardPressControl_loseFocus((char*)self + 0x1D0, a1);
         break;
     case 2:
-        func_0012E9B0_a1((char*)self + 0x1F0, a1);
+        cPrewindControl_loseFocus_a1((char*)self + 0x1F0, a1);
         break;
     case 4:
-        func_0012FB68((char*)self + 0x210, a1);
+        cNaturalAirControl_loseFocus((char*)self + 0x210, a1);
         break;
     case 5:
-        func_00134CB0((char*)self + 0x230, a1);
+        cSpinControl_loseFocus((char*)self + 0x230, a1);
         break;
     case 7:
-        func_00132048((char*)self + 0x2B0, a1);
+        cRailslideControl_loseFocus((char*)self + 0x2B0, a1);
         break;
     case 8:
-        func_0012E690((char*)self + 0x2C0, a1);
+        cWipeoutControl_loseFocus((char*)self + 0x2C0, a1);
         break;
     case 11:
-        func_00132F98((char*)self + 0x370, a1);
+        cHandplantControl_loseFocus((char*)self + 0x370, a1);
         break;
     case 3: case 6: case 9: case 10: case 12: case 13:
         break;
@@ -2531,60 +2531,60 @@ extern "C" void func_00111578(cRiderHandler* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111630);
+INCLUDE_ASM("ai/computer", cRiderHandler_gainControlState);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_00131608(void* p);
-void func_0012FC60(void* p);
-extern "C" void func_0012E980(void* p, int a1);
-extern "C" void func_0012F620(void* p, int a1);
-extern "C" void func_00133128(void* p, int a1);
-extern "C" void func_0012BE20(void* p, int a1);
-extern "C" void func_00131D08(void* p, int a1);
-extern "C" void func_0012CA30(void* p, int a1);
-extern "C" void func_0012F230(void* p, int a1);
-extern "C" void func_0012C5C8(void* p, int a1);
-extern "C" void func_001328B0(void* p, int a1);
-extern "C" void func_00136268(void* p, int a1);
+void cCruiseControl_gainFocus(void* p);
+void cBoardPressControl_gainFocus(void* p);
+extern "C" void cPrewindControl_gainFocus(void* p, int a1);
+extern "C" void cNaturalAirControl_gainFocus(void* p, int a1);
+extern "C" void cSpinControl_gainFocus(void* p, int a1);
+extern "C" void cGateControl_gainFocus(void* p, int a1);
+extern "C" void cRailslideControl_gainFocus(void* p, int a1);
+extern "C" void cWipeoutControl_gainFocus(void* p, int a1);
+extern "C" void cResetControl_gainFocus(void* p, int a1);
+extern "C" void cFinishLineControl_gainFocus(void* p, int a1);
+extern "C" void cHandplantControl_gainFocus(void* p, int a1);
+extern "C" void cUberGrindControl_gainFocus(void* p, int a1);
 // Forwards to the handler for the AI's current state.
-extern "C" void func_00111630(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int a1)
 {
     switch (self->ControlState) {
     case 0:
-        func_00131608((char*)self + 0x1C0);
+        cCruiseControl_gainFocus((char*)self + 0x1C0);
         break;
     case 1:
-        func_0012FC60((char*)self + 0x1D0);
+        cBoardPressControl_gainFocus((char*)self + 0x1D0);
         break;
     case 2:
-        func_0012E980((char*)self + 0x1F0, a1);
+        cPrewindControl_gainFocus((char*)self + 0x1F0, a1);
         break;
     case 4:
-        func_0012F620((char*)self + 0x210, a1);
+        cNaturalAirControl_gainFocus((char*)self + 0x210, a1);
         break;
     case 5:
-        func_00133128((char*)self + 0x230, a1);
+        cSpinControl_gainFocus((char*)self + 0x230, a1);
         break;
     case 6:
-        func_0012BE20((char*)self + 0x290, a1);
+        cGateControl_gainFocus((char*)self + 0x290, a1);
         break;
     case 7:
-        func_00131D08((char*)self + 0x2B0, a1);
+        cRailslideControl_gainFocus((char*)self + 0x2B0, a1);
         break;
     case 8:
-        func_0012CA30((char*)self + 0x2C0, a1);
+        cWipeoutControl_gainFocus((char*)self + 0x2C0, a1);
         break;
     case 9:
-        func_0012F230((char*)self + 0x350, a1);
+        cResetControl_gainFocus((char*)self + 0x350, a1);
         break;
     case 10:
-        func_0012C5C8((char*)self + 0x360, a1);
+        cFinishLineControl_gainFocus((char*)self + 0x360, a1);
         break;
     case 11:
-        func_001328B0((char*)self + 0x370, a1);
+        cHandplantControl_gainFocus((char*)self + 0x370, a1);
         break;
     case 12:
-        func_00136268((char*)self + 0x390, a1);
+        cUberGrindControl_gainFocus((char*)self + 0x390, a1);
         break;
     case 3:
     case 13:
@@ -2594,64 +2594,64 @@ extern "C" void func_00111630(cRiderHandler* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111728);
+INCLUDE_ASM("ai/computer", cRiderHandler_updateControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00131620(void* p, int a1);
-extern "C" void func_0012FC80(void* p, int a1);
-extern "C" void func_0012E9B8(void* p, int a1);
-extern "C" void func_0012E778(void* p, int a1);
-extern "C" void func_0012F730(void* p, int a1);
-extern "C" void func_00133308(void* p, int a1);
-extern "C" void func_0012BF68(void* p, int a1);
-extern "C" void func_00131D30(void* p, int a1);
-extern "C" void func_0012CB68(void* p, int a1);
-extern "C" void func_0012F398(void* p, int a1);
-extern "C" void func_0012C678(void* p, int a1);
-extern "C" void func_00132A30(void* p, int a1);
-extern "C" void func_00136508(void* p, int a1);
+extern "C" void cCruiseControl_update(void* p, int a1);
+extern "C" void cBoardPressControl_update(void* p, int a1);
+extern "C" void cPrewindControl_update(void* p, int a1);
+extern "C" void cBumpControl_update(void* p, int a1);
+extern "C" void cNaturalAirControl_update(void* p, int a1);
+extern "C" void cSpinControl_update(void* p, int a1);
+extern "C" void cGateControl_update(void* p, int a1);
+extern "C" void cRailslideControl_update(void* p, int a1);
+extern "C" void cWipeoutControl_update(void* p, int a1);
+extern "C" void cResetControl_update(void* p, int a1);
+extern "C" void cFinishLineControl_update(void* p, int a1);
+extern "C" void cHandplantControl_update(void* p, int a1);
+extern "C" void cUberGrindControl_update(void* p, int a1);
 // Forwards to the second handler for the AI's current state.
-extern "C" void func_00111728(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int a1)
 {
     switch (self->ControlState) {
     case 0:
-        func_00131620((char*)self + 0x1C0, a1);
+        cCruiseControl_update((char*)self + 0x1C0, a1);
         break;
     case 1:
-        func_0012FC80((char*)self + 0x1D0, a1);
+        cBoardPressControl_update((char*)self + 0x1D0, a1);
         break;
     case 2:
-        func_0012E9B8((char*)self + 0x1F0, a1);
+        cPrewindControl_update((char*)self + 0x1F0, a1);
         break;
     case 3:
-        func_0012E778((char*)self + 0x200, a1);
+        cBumpControl_update((char*)self + 0x200, a1);
         break;
     case 4:
-        func_0012F730((char*)self + 0x210, a1);
+        cNaturalAirControl_update((char*)self + 0x210, a1);
         break;
     case 5:
-        func_00133308((char*)self + 0x230, a1);
+        cSpinControl_update((char*)self + 0x230, a1);
         break;
     case 6:
-        func_0012BF68((char*)self + 0x290, a1);
+        cGateControl_update((char*)self + 0x290, a1);
         break;
     case 7:
-        func_00131D30((char*)self + 0x2B0, a1);
+        cRailslideControl_update((char*)self + 0x2B0, a1);
         break;
     case 8:
-        func_0012CB68((char*)self + 0x2C0, a1);
+        cWipeoutControl_update((char*)self + 0x2C0, a1);
         break;
     case 9:
-        func_0012F398((char*)self + 0x350, a1);
+        cResetControl_update((char*)self + 0x350, a1);
         break;
     case 10:
-        func_0012C678((char*)self + 0x360, a1);
+        cFinishLineControl_update((char*)self + 0x360, a1);
         break;
     case 11:
-        func_00132A30((char*)self + 0x370, a1);
+        cHandplantControl_update((char*)self + 0x370, a1);
         break;
     case 12:
-        func_00136508((char*)self + 0x390, a1);
+        cUberGrindControl_update((char*)self + 0x390, a1);
         break;
     case 13:
         break;
@@ -2660,12 +2660,12 @@ extern "C" void func_00111728(cRiderHandler* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111830);
+INCLUDE_ASM("ai/computer", cRiderHandler__getMotionStateName);
 #ifdef SKIP_ASM
 extern const char* D_00459D70[];
 extern char D_00456C48[];
 
-extern "C" const char* func_00111830(cRiderHandler* self)
+extern "C" const char* cRiderHandler__getMotionStateName(cRiderHandler* self)
 {
     unsigned int state = (unsigned int)self->MotionState;
     if (state >= 7U) {
@@ -2675,12 +2675,12 @@ extern "C" const char* func_00111830(cRiderHandler* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ai/computer", func_00111860);
+INCLUDE_ASM("ai/computer", cRiderHandler__getControlStateName);
 #ifdef SKIP_ASM
 extern const char* D_00459DC8[];
 extern char D_00456C48[];
 
-extern "C" const char* func_00111860(cRiderHandler* self)
+extern "C" const char* cRiderHandler__getControlStateName(cRiderHandler* self)
 {
     unsigned int state = (unsigned int)self->ControlState;
     if (state >= 15U) {
@@ -2691,38 +2691,38 @@ extern "C" const char* func_00111860(cRiderHandler* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111890);
+INCLUDE_ASM("ai/computer", cRiderHandler_resetRiderFX);
 #ifdef SKIP_ASM
-extern "C" void func_002DCF28(void*);
-extern "C" void func_002DAA78(void*);
+extern "C" void cBoardWakeFX_readFromReplayFrame(void*);
+extern "C" void cBoardSparkFX_readFromReplayFrame(void*);
 extern "C" void cBoardTrailFX_reset(void*);
-extern "C" void func_002E6640(void*);
-void func_002EADC0(void*);
-extern "C" void func_002EF6A0(void*);
+extern "C" void cSpeedBoostFX_readFromReplayFrame(void*);
+void cTrickBoostFX_readFromReplayFrame(void*);
+extern "C" void cAirStreamerFX_readFromReplayFrame(void*);
 extern "C" void func_002D4BE0(void*);
-extern "C" void func_002E3930(void*);
+extern "C" void cPlayerIndicatorFX_readFromReplayFrame(void*);
 extern "C" void func_002DF3B0(void*);
-extern "C" void func_002F1148(void*);
-void func_002F64E8(void*);
+extern "C" void cPunchFX_readFromReplayFrame(void*);
+void cCheatFX_reset(void*);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
 void cWorldPainterMan_reset_noarg() __asm__("cWorldPainterMan_reset__FPv");
 void* func_002306A8(void* self, int i);
 
 struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
 
-extern "C" void func_00111890(cRiderHandler* self)
+extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
 {
-    func_002DCF28(((char*)self) + 0x3B0);
-    func_002DAA78(((char*)self) + 0x470);
+    cBoardWakeFX_readFromReplayFrame(((char*)self) + 0x3B0);
+    cBoardSparkFX_readFromReplayFrame(((char*)self) + 0x470);
     cBoardTrailFX_reset(((char*)self) + 0x520);
-    func_002E6640(((char*)self) + 0x610);
-    func_002EADC0(((char*)self) + 0x9C0);
-    func_002EF6A0(((char*)self) + 0xAD0);
+    cSpeedBoostFX_readFromReplayFrame(((char*)self) + 0x610);
+    cTrickBoostFX_readFromReplayFrame(((char*)self) + 0x9C0);
+    cAirStreamerFX_readFromReplayFrame(((char*)self) + 0xAD0);
     func_002D4BE0(((char*)self) + 0xAF0);
-    func_002E3930(((char*)self) + 0xB00);
+    cPlayerIndicatorFX_readFromReplayFrame(((char*)self) + 0xB00);
     func_002DF3B0(((char*)self) + 0xB40);
-    func_002F1148(((char*)self) + 0xC70);
-    func_002F64E8(((char*)self) + 0xD20);
+    cPunchFX_readFromReplayFrame(((char*)self) + 0xC70);
+    cCheatFX_reset(((char*)self) + 0xD20);
     cWorldPainterMan_reset_noarg();
     int id = *(int*)((char*)self->GroundMotion.mRider + 0x870);
     if (id >= 0)
@@ -2740,25 +2740,25 @@ extern "C" void func_00111890(cRiderHandler* self)
 extern "C" void* func_002E23E0(void*);
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111948);
+INCLUDE_ASM("ai/computer", cRiderHandler_updateRiderFX);
 #ifdef SKIP_ASM
 extern "C" void func_002D4C08(void*);
-extern "C" void func_002DABC8(void*);
-extern "C" void func_002DD0B8(void*);
+extern "C" void cBoardSparkFX_update(void*);
+extern "C" void cBoardWakeFX_update(void*);
 extern "C" void func_002DF920(void*);
-extern "C" void func_002E39D8(void*);
-extern "C" void func_002E66B8(void*);
-extern "C" void func_002E8938(void*);
-extern "C" void func_002EADD0(void*);
-extern "C" void func_002EF6D0(void*);
-extern "C" void func_002F1150(void*);
+extern "C" void cPlayerIndicatorFX_update(void*);
+extern "C" void cSpeedBoostFX_update(void*);
+extern "C" void cBoardTrailFX_update(void*);
+extern "C" void cTrickBoostFX_update(void*);
+extern "C" void cAirStreamerFX_update(void*);
+extern "C" void cPunchFX_update(void*);
 extern "C" void func_00392D18(void*);
-extern "C" void func_002F6518(void*);
+extern "C" void cCheatFX_update(void*);
 extern int D_004A4534;
 
 struct sVE_00111948 { short delta; short index; int (*fn)(void*); };
 
-extern "C" void func_00111948(cRiderHandler* self)
+extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
         cRider* r = self->GroundMotion.mRider;
@@ -2768,38 +2768,38 @@ extern "C" void func_00111948(cRiderHandler* self)
             return;
     }
     func_00392D18((char*)self + 0xD30);
-    func_002DD0B8((char*)self + 0x3B0);
-    func_002DABC8((char*)self + 0x470);
-    func_002E8938((char*)self + 0x520);
-    func_002E66B8((char*)self + 0x610);
-    func_002EADD0((char*)self + 0x9C0);
-    func_002EF6D0((char*)self + 0xAD0);
+    cBoardWakeFX_update((char*)self + 0x3B0);
+    cBoardSparkFX_update((char*)self + 0x470);
+    cBoardTrailFX_update((char*)self + 0x520);
+    cSpeedBoostFX_update((char*)self + 0x610);
+    cTrickBoostFX_update((char*)self + 0x9C0);
+    cAirStreamerFX_update((char*)self + 0xAD0);
     func_002D4C08((char*)self + 0xAF0);
-    func_002E39D8((char*)self + 0xB00);
+    cPlayerIndicatorFX_update((char*)self + 0xB00);
     func_002DF920((char*)self + 0xB40);
-    func_002F1150((char*)self + 0xC70);
-    func_002F6518((char*)self + 0xD20);
+    cPunchFX_update((char*)self + 0xC70);
+    cCheatFX_update((char*)self + 0xD20);
 }
 #endif
 //100%
-INCLUDE_ASM("ai/computer", func_001119F8);
+INCLUDE_ASM("ai/computer", cRiderHandler_renderRiderFX);
 #ifdef SKIP_ASM
 extern "C" void func_002D5048(void*);
-extern "C" void func_002DB478(void*);
-extern "C" void func_002DDAB8(void*);
+extern "C" void cBoardSparkFX_render(void*);
+extern "C" void cBoardWakeFX_render(void*);
 extern "C" void func_002E24D0(void*);
-extern "C" void func_002E3AF8(void*);
-extern "C" void func_002E7A10(void*);
-extern "C" void func_002EA480(void*);
-extern "C" void func_002EB198(void*);
-extern "C" void func_002EF950(void*);
-extern "C" void func_002F1510(void*);
-void func_002F6908(void*);
+extern "C" void cPlayerIndicatorFX_render(void*);
+extern "C" void cSpeedBoostFX_render(void*);
+extern "C" void cBoardTrailFX_render(void*);
+extern "C" void cTrickBoostFX_render(void*);
+extern "C" void cAirStreamerFX_render(void*);
+extern "C" void cPunchFX_render(void*);
+void cCheatFX_render(void*);
 extern int D_004A4534;
 
 struct sVE_001119F8 { short delta; short index; int (*fn)(void*); };
 
-extern "C" void func_001119F8(cRiderHandler* self)
+extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
         cRider* r = self->GroundMotion.mRider;
@@ -2808,17 +2808,17 @@ extern "C" void func_001119F8(cRiderHandler* self)
         if (e->fn(o + e->delta) != 0)
             return;
     }
-    func_002DDAB8((char*)self + 0x3B0);
-    func_002DB478((char*)self + 0x470);
-    func_002EA480((char*)self + 0x520);
-    func_002E7A10((char*)self + 0x610);
-    func_002EB198((char*)self + 0x9C0);
-    func_002EF950((char*)self + 0xAD0);
+    cBoardWakeFX_render((char*)self + 0x3B0);
+    cBoardSparkFX_render((char*)self + 0x470);
+    cBoardTrailFX_render((char*)self + 0x520);
+    cSpeedBoostFX_render((char*)self + 0x610);
+    cTrickBoostFX_render((char*)self + 0x9C0);
+    cAirStreamerFX_render((char*)self + 0xAD0);
     func_002D5048((char*)self + 0xAF0);
-    func_002E3AF8((char*)self + 0xB00);
+    cPlayerIndicatorFX_render((char*)self + 0xB00);
     func_002E24D0((char*)self + 0xB40);
-    func_002F1510((char*)self + 0xC70);
-    func_002F6908((char*)self + 0xD20);
+    cPunchFX_render((char*)self + 0xC70);
+    cCheatFX_render((char*)self + 0xD20);
 }
 #endif
 
@@ -2840,7 +2840,7 @@ void func_00111AA0_impl(void* self, void* a, void* b, int c, float x)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111AC0);
+INCLUDE_ASM("ai/computer", cRiderHandler_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream_00111AC0 {
 public:
@@ -2852,26 +2852,26 @@ extern "C" void func_00104D68(void* self, void* s);
 extern "C" void func_00310EA8(void* self, void* s);
 extern "C" void func_00113AA0(void* self, void* s);
 extern "C" void func_001174B0(void* self, void* s);
-extern "C" void func_0013F848(void* self, void* s);
-extern "C" void func_0013ACB0(void* self, void* s);
-extern "C" void func_00138AD8(void* self, void* s);
-extern "C" void func_0013C5E0(void* self, void* s);
-extern "C" void func_00139970(void* self, void* s);
-extern "C" void func_00131598(void* self, void* s);
-extern "C" void func_0012FBF0(void* self, void* s);
-extern "C" void func_001361F8(void* self, void* s);
-extern "C" void func_0012C558(void* self, void* s);
-extern "C" void func_00132840(void* self, void* s);
-extern "C" void func_0012E708(void* self, void* s);
-extern "C" void func_0012F5B0(void* self, void* s);
-extern "C" void func_0012C9C0(void* self, void* s);
-extern "C" void func_001330B8(void* self, void* s);
-extern "C" void func_001368E8(void* self, void* s);
-extern "C" void func_002F6A58(void* self, void* s);
+extern "C" void cGroundMotion_writeToReplayFrame(void* self, void* s);
+extern "C" void cAirMotion_writeToReplayFrame(void* self, void* s);
+extern "C" void cWipeoutMotion_writeToReplayFrame(void* self, void* s);
+extern "C" void cRailslideMotion_writeToReplayFrame(void* self, void* s);
+extern "C" void cHandplantMotion_writeToReplayFrame(void* self, void* s);
+extern "C" void cBoardPressControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cNaturalAirControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cSpinControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cGateControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cRailslideControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cWipeoutControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cResetControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cFinishLineControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cHandplantControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cUberGrindControl_writeToReplayFrame(void* self, void* s);
+extern "C" void cCheatFX_writeToReplayFrame(void* self, void* s);
 extern "C" int func_0026B508(void* tree, void* path);
 extern "C" int func_0026B550(void* tree, void* path);
 
-extern "C" void func_00111AC0(cRiderHandler* self, char* s)
+extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* s)
 {
     cStream_00111AC0* st = (cStream_00111AC0*)s;
     st->Write(self->GroundMotion.mRider, 0x6C0);
@@ -2895,22 +2895,22 @@ extern "C" void func_00111AC0(cRiderHandler* self, char* s)
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
     st->Write(((char*)self) + 0xDE0, 4);
     st->Write(((char*)self) + 0xDE4, 4);
-    func_0013F848(((char*)self), s);
-    func_0013ACB0(((char*)self) + 0x20, s);
-    func_00138AD8(((char*)self) + 0x30, s);
-    func_0013C5E0(((char*)self) + 0xB0, s);
-    func_00139970(((char*)self) + 0x110, s);
-    func_00131598(((char*)self) + 0x1D0, s);
-    func_0012FBF0(((char*)self) + 0x210, s);
-    func_001361F8(((char*)self) + 0x230, s);
-    func_0012C558(((char*)self) + 0x290, s);
-    func_00132840(((char*)self) + 0x2B0, s);
-    func_0012E708(((char*)self) + 0x2C0, s);
-    func_0012F5B0(((char*)self) + 0x350, s);
-    func_0012C9C0(((char*)self) + 0x360, s);
-    func_001330B8(((char*)self) + 0x370, s);
-    func_001368E8(((char*)self) + 0x390, s);
-    func_002F6A58(((char*)self) + 0xD20, s);
+    cGroundMotion_writeToReplayFrame(((char*)self), s);
+    cAirMotion_writeToReplayFrame(((char*)self) + 0x20, s);
+    cWipeoutMotion_writeToReplayFrame(((char*)self) + 0x30, s);
+    cRailslideMotion_writeToReplayFrame(((char*)self) + 0xB0, s);
+    cHandplantMotion_writeToReplayFrame(((char*)self) + 0x110, s);
+    cBoardPressControl_writeToReplayFrame(((char*)self) + 0x1D0, s);
+    cNaturalAirControl_writeToReplayFrame(((char*)self) + 0x210, s);
+    cSpinControl_writeToReplayFrame(((char*)self) + 0x230, s);
+    cGateControl_writeToReplayFrame(((char*)self) + 0x290, s);
+    cRailslideControl_writeToReplayFrame(((char*)self) + 0x2B0, s);
+    cWipeoutControl_writeToReplayFrame(((char*)self) + 0x2C0, s);
+    cResetControl_writeToReplayFrame(((char*)self) + 0x350, s);
+    cFinishLineControl_writeToReplayFrame(((char*)self) + 0x360, s);
+    cHandplantControl_writeToReplayFrame(((char*)self) + 0x370, s);
+    cUberGrindControl_writeToReplayFrame(((char*)self) + 0x390, s);
+    cCheatFX_writeToReplayFrame(((char*)self) + 0xD20, s);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     int ids[2];
@@ -2921,7 +2921,7 @@ extern "C" void func_00111AC0(cRiderHandler* self, char* s)
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111D98);
+INCLUDE_ASM("ai/computer", cRiderHandler_readFromReplayFrame);
 #ifdef SKIP_ASM
 class cStream_00111D98 {
 public:
@@ -2945,31 +2945,31 @@ extern "C" void func_00104DE0(void* self, void* s);
 extern "C" void func_00310EE0(void* self, void* s);
 extern "C" void func_00113AD8(void* self, void* s);
 extern "C" void func_001174E8(void* self, void* s);
-extern "C" void func_0013F880(void* self, void* s);
-extern "C" void func_0013ACE8(void* self, void* s);
-extern "C" void func_00138B10(void* self, void* s);
-extern "C" void func_0013C618(void* self, void* s);
-extern "C" void func_001399A8(void* self, void* s);
-extern "C" void func_001315D0(void* self, void* s);
-extern "C" void func_0012FC28(void* self, void* s);
-extern "C" void func_00136230(void* self, void* s);
-extern "C" void func_0012C590(void* self, void* s);
-extern "C" void func_00132878(void* self, void* s);
-extern "C" void func_0012E740(void* self, void* s);
-extern "C" void func_0012F5E8(void* self, void* s);
-extern "C" void func_0012C9F8(void* self, void* s);
-extern "C" void func_001330F0(void* self, void* s);
-extern "C" void func_00136920(void* self, void* s);
-extern "C" void func_002DCF28(void*);
-extern "C" void func_002DAA78(void*);
+extern "C" void cGroundMotion_readFromReplayFrame(void* self, void* s);
+extern "C" void cAirMotion_readFromReplayFrame(void* self, void* s);
+extern "C" void cWipeoutMotion_readFromReplayFrame(void* self, void* s);
+extern "C" void cRailslideMotion_readFromReplayFrame(void* self, void* s);
+extern "C" void cHandplantMotion_readFromReplayFrame(void* self, void* s);
+extern "C" void cBoardPressControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cNaturalAirControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cSpinControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cGateControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cRailslideControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cWipeoutControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cResetControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cFinishLineControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cHandplantControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cUberGrindControl_readFromReplayFrame(void* self, void* s);
+extern "C" void cBoardWakeFX_readFromReplayFrame(void*);
+extern "C" void cBoardSparkFX_readFromReplayFrame(void*);
 extern "C" void cBoardTrailFX_reset(void*);
-extern "C" void func_002E6640(void*);
-void func_002EADC0(void*);
-extern "C" void func_002EF6A0(void*);
+extern "C" void cSpeedBoostFX_readFromReplayFrame(void*);
+void cTrickBoostFX_readFromReplayFrame(void*);
+extern "C" void cAirStreamerFX_readFromReplayFrame(void*);
 extern "C" void func_002D4BE0(void*);
-extern "C" void func_002E3930(void*);
-extern "C" void func_002F1148(void*);
-extern "C" void func_002F6A90(void* self, void* s);
+extern "C" void cPlayerIndicatorFX_readFromReplayFrame(void*);
+extern "C" void cPunchFX_readFromReplayFrame(void*);
+extern "C" void cCheatFX_readFromReplayFrame(void* self, void* s);
 extern "C" void* func_0026AF70(void* tree, int id);
 extern "C" void* func_0026AF88(void* tree, int id);
 extern "C" void func_00312598(void* self, int a1);
@@ -3008,7 +3008,7 @@ struct sQuad_00111D98 {
     int v[4];
 } __attribute__((aligned(16)));
 
-extern "C" void func_00111D98(cRiderHandler* self, char* s)
+extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* s)
 {
     cStream_00111D98* st = (cStream_00111D98*)s;
     st->Read(self->GroundMotion.mRider, 0x6C0);
@@ -3031,31 +3031,31 @@ extern "C" void func_00111D98(cRiderHandler* self, char* s)
     }
     st->Read(((char*)self) + 0xDE0, 4);
     st->Read(((char*)self) + 0xDE4, 4);
-    func_0013F880(((char*)self), s);
-    func_0013ACE8(((char*)self) + 0x20, s);
-    func_00138B10(((char*)self) + 0x30, s);
-    func_0013C618(((char*)self) + 0xB0, s);
-    func_001399A8(((char*)self) + 0x110, s);
-    func_001315D0(((char*)self) + 0x1D0, s);
-    func_0012FC28(((char*)self) + 0x210, s);
-    func_00136230(((char*)self) + 0x230, s);
-    func_0012C590(((char*)self) + 0x290, s);
-    func_00132878(((char*)self) + 0x2B0, s);
-    func_0012E740(((char*)self) + 0x2C0, s);
-    func_0012F5E8(((char*)self) + 0x350, s);
-    func_0012C9F8(((char*)self) + 0x360, s);
-    func_001330F0(((char*)self) + 0x370, s);
-    func_00136920(((char*)self) + 0x390, s);
-    func_002DCF28(((char*)self) + 0x3B0);
-    func_002DAA78(((char*)self) + 0x470);
+    cGroundMotion_readFromReplayFrame(((char*)self), s);
+    cAirMotion_readFromReplayFrame(((char*)self) + 0x20, s);
+    cWipeoutMotion_readFromReplayFrame(((char*)self) + 0x30, s);
+    cRailslideMotion_readFromReplayFrame(((char*)self) + 0xB0, s);
+    cHandplantMotion_readFromReplayFrame(((char*)self) + 0x110, s);
+    cBoardPressControl_readFromReplayFrame(((char*)self) + 0x1D0, s);
+    cNaturalAirControl_readFromReplayFrame(((char*)self) + 0x210, s);
+    cSpinControl_readFromReplayFrame(((char*)self) + 0x230, s);
+    cGateControl_readFromReplayFrame(((char*)self) + 0x290, s);
+    cRailslideControl_readFromReplayFrame(((char*)self) + 0x2B0, s);
+    cWipeoutControl_readFromReplayFrame(((char*)self) + 0x2C0, s);
+    cResetControl_readFromReplayFrame(((char*)self) + 0x350, s);
+    cFinishLineControl_readFromReplayFrame(((char*)self) + 0x360, s);
+    cHandplantControl_readFromReplayFrame(((char*)self) + 0x370, s);
+    cUberGrindControl_readFromReplayFrame(((char*)self) + 0x390, s);
+    cBoardWakeFX_readFromReplayFrame(((char*)self) + 0x3B0);
+    cBoardSparkFX_readFromReplayFrame(((char*)self) + 0x470);
     cBoardTrailFX_reset(((char*)self) + 0x520);
-    func_002E6640(((char*)self) + 0x610);
-    func_002EADC0(((char*)self) + 0x9C0);
-    func_002EF6A0(((char*)self) + 0xAD0);
+    cSpeedBoostFX_readFromReplayFrame(((char*)self) + 0x610);
+    cTrickBoostFX_readFromReplayFrame(((char*)self) + 0x9C0);
+    cAirStreamerFX_readFromReplayFrame(((char*)self) + 0xAD0);
     func_002D4BE0(((char*)self) + 0xAF0);
-    func_002E3930(((char*)self) + 0xB00);
-    func_002F1148(((char*)self) + 0xC70);
-    func_002F6A90(((char*)self) + 0xD20, s);
+    cPlayerIndicatorFX_readFromReplayFrame(((char*)self) + 0xB00);
+    cPunchFX_readFromReplayFrame(((char*)self) + 0xC70);
+    cCheatFX_readFromReplayFrame(((char*)self) + 0xD20, s);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     st->Read(ids, 8);

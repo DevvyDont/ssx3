@@ -32,7 +32,7 @@ extern char D_00487968[];
 extern char D_00487980[];
 extern "C" void cRider_cRider(void* self);
 struct sWakeDCF28;
-extern "C" void func_002DCF28(sWakeDCF28* self);
+extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
@@ -86,13 +86,13 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
         rows[i] = *(sWakeElemBW**)((char*)self + 0x10) + i * 32;
     }
     *(int*)((char*)self + 0xB4) = -1;
-    func_002DCF28((sWakeDCF28*)self);
+    cBoardWakeFX_readFromReplayFrame((sWakeDCF28*)self);
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DCDA0);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX__cBoardWakeFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
@@ -104,7 +104,7 @@ cVbDtor002DCDA0::~cVbDtor002DCDA0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002DCDA0; expose it under the address-derived name.
-__asm__(".globl func_002DCDA0\n.type func_002DCDA0,@function\nfunc_002DCDA0 = _$_15cVbDtor002DCDA0\n.size func_002DCDA0,0x184\n");
+__asm__(".globl cBoardWakeFX__cBoardWakeFX\n.type cBoardWakeFX__cBoardWakeFX,@function\ncBoardWakeFX__cBoardWakeFX = _$_15cVbDtor002DCDA0\n.size cBoardWakeFX__cBoardWakeFX,0x184\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
@@ -114,7 +114,7 @@ __asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DCF28);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sWakeElemDCF28 {
     int a;
@@ -149,7 +149,7 @@ struct sWakeDCF28 {
 
 extern "C" void func_002DE368(void* self);
 
-extern "C" void func_002DCF28(sWakeDCF28* self)
+extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
 {
     int old = self->count;
     float one;
@@ -193,7 +193,7 @@ extern "C" void func_002DCF28(sWakeDCF28* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DD0B8);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_update);
 #ifdef SKIP_ASM
 struct sWakeElemD0B8 {
     t4Vector pts[5];            // 0x00
@@ -434,7 +434,7 @@ static inline float wakeMinStrengthD0B8()
 }
 
 // PORT: g++ minimum/maximum operators (<?, >?).
-extern "C" void func_002DD0B8(sWakeD0B8* self)
+extern "C" void cBoardWakeFX_update(sWakeD0B8* self)
 {
     sWakeSurfD0B8* surf = (sWakeSurfD0B8*)((char*)SSXApp->Game->SurfPropCache + self->rider->mSurfaceType * 0xB0);
     int i;
@@ -545,7 +545,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DDAB8);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* GrMan_boardwakefx __asm__("GrMan");
@@ -694,7 +694,7 @@ public:
 };
 
 // Board wake: draws the wake strip with alpha fading by the age of the newest point.
-extern "C" void func_002DDAB8(sWake_DAB8* self)
+extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
 {
     if (D_004A4528 != 0 || self->count == 0)
         return;
@@ -1058,7 +1058,7 @@ extern "C" void func_002DE398(char* self, sWakeVecE398* out)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE4A8);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_cDynamicSprayFX);
 #ifdef SKIP_ASM
 // FAKEMATCH: statements 1-32 store through self->p2C[0] and the other 548 through the inline getter, which moves cse's 1000-insn flush points; one spelling throughout scores 94.71%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
@@ -1166,7 +1166,7 @@ extern "C" void func_002DF3B0(cDynamicSprayFX* self);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x130): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002DE4A8(sSprayFxE4A8* self, int inChrg)
+extern "C" void* cDynamicSprayFX_cDynamicSprayFX(sSprayFxE4A8* self, int inChrg)
 {
     sVt9_BW t1;
     sVt22_BW t2;
@@ -1792,7 +1792,7 @@ extern "C" void* func_002DE4A8(sSprayFxE4A8* self, int inChrg)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF1C8);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX__cDynamicSprayFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
@@ -1805,7 +1805,7 @@ cVbDtor002DF1C8::~cVbDtor002DF1C8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002DF1C8; expose it under the address-derived name.
-__asm__(".globl func_002DF1C8\n.type func_002DF1C8,@function\nfunc_002DF1C8 = _$_15cVbDtor002DF1C8\n.size func_002DF1C8,0x1E8\n");
+__asm__(".globl cDynamicSprayFX__cDynamicSprayFX\n.type cDynamicSprayFX__cDynamicSprayFX,@function\ncDynamicSprayFX__cDynamicSprayFX = _$_15cVbDtor002DF1C8\n.size cDynamicSprayFX__cDynamicSprayFX,0x1E8\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
@@ -4265,7 +4265,7 @@ extern "C" void func_002E3668(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3680);
+INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_cPlayerIndicatorFX);
 #ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEnt3680 {
@@ -4288,11 +4288,11 @@ extern char D_00459B90[];
 
 struct sWakeFade_3930;
 extern "C" void cRider_cRider(void* self);
-extern "C" void func_002E3930(sWakeFade_3930* self);
+extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x40): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002E3680(cPlayerIndicatorFX* self, int inChrg)
+extern "C" void* cPlayerIndicatorFX_cPlayerIndicatorFX(cPlayerIndicatorFX* self, int inChrg)
 {
     sVt9_3680 t1;
     sVt22_3680 t2;
@@ -4316,13 +4316,13 @@ extern "C" void* func_002E3680(cPlayerIndicatorFX* self, int inChrg)
         *(void**)(*(char**)self + 0x6C0) = &t2;
         t2.e[1].delta = D_00488A10.e[1].delta + vc;
     }
-    func_002E3930((sWakeFade_3930*)self);
+    cPlayerIndicatorFX_readFromReplayFrame((sWakeFade_3930*)self);
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E37D0);
+INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX__cPlayerIndicatorFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
@@ -4332,7 +4332,7 @@ cVbDtor002E37D0::~cVbDtor002E37D0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002E37D0; expose it under the address-derived name.
-__asm__(".globl func_002E37D0\n.type func_002E37D0,@function\nfunc_002E37D0 = _$_15cVbDtor002E37D0\n.size func_002E37D0,0x15C\n");
+__asm__(".globl cPlayerIndicatorFX__cPlayerIndicatorFX\n.type cPlayerIndicatorFX__cPlayerIndicatorFX,@function\ncPlayerIndicatorFX__cPlayerIndicatorFX = _$_15cVbDtor002E37D0\n.size cPlayerIndicatorFX__cPlayerIndicatorFX,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
@@ -4342,7 +4342,7 @@ __asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3930);
+INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sWakeVec4_3930 {
     float x;
@@ -4367,7 +4367,7 @@ struct sWakeFade_3930 {
     sWakeVec4_3930 c;
 };
 
-extern "C" void func_002E3930(sWakeFade_3930* self)
+extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self)
 {
     self->a = sWakeVec4_3930(0.5f, 1.0f, 0.0f, 0.0f);
     self->b = sWakeVec4_3930(0.699999988079071f, 1.0f, 0.699999988079071f, 0.699999988079071f);
@@ -4377,7 +4377,7 @@ extern "C" void func_002E3930(sWakeFade_3930* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E39D8);
+INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_update);
 #ifdef SKIP_ASM
 extern "C" float func_0031C040(float x);
 extern float D_004A55AC;
@@ -4391,7 +4391,7 @@ struct sWkCol39D8 {
     float out[4];               // 0x28
 };
 
-extern "C" void func_002E39D8(sWkCol39D8* self)
+extern "C" void cPlayerIndicatorFX_update(sWkCol39D8* self)
 {
     char* o = self->rider + 0x6C0;
     sWkVt39D8* vt = *(sWkVt39D8**)o;
@@ -4415,7 +4415,7 @@ extern "C" void func_002E39D8(sWkCol39D8* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3AF8);
+INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_render);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -4626,7 +4626,7 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
     return vis;
 }
 
-extern "C" void func_002E3AF8(sWake_3AF8* self)
+extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
 {
     if (!ShouldDraw_3AF8(self)) {
         return;
@@ -6265,7 +6265,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_cSpeedBoostFX);
 extern const sVt9_3680 D_00488550;
 extern const sVt22_3680 D_00488598;
 extern char D_00487B08[];
-extern "C" void func_002E6640(cSpeedBoostFX* self);
+extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -6309,13 +6309,13 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
     new ((char*)self + 0x50) sWakeSeg_6320[30];
     sWakePt_6320*& pts = *(sWakePt_6320**)((char*)self + 0x3AC);
     pts = new (D_00487B08, 0, 0) sWakePt_6320[20];
-    func_002E6640(self);
+    cSpeedBoostFX_readFromReplayFrame(self);
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX__cSpeedBoostFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
@@ -6327,7 +6327,7 @@ cVbDtor002E64C0::~cVbDtor002E64C0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002E64C0; expose it under the address-derived name.
-__asm__(".globl func_002E64C0\n.type func_002E64C0,@function\nfunc_002E64C0 = _$_15cVbDtor002E64C0\n.size func_002E64C0,0x17C\n");
+__asm__(".globl cSpeedBoostFX__cSpeedBoostFX\n.type cSpeedBoostFX__cSpeedBoostFX,@function\ncSpeedBoostFX__cSpeedBoostFX = _$_15cVbDtor002E64C0\n.size cSpeedBoostFX__cSpeedBoostFX,0x17C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
@@ -6337,7 +6337,7 @@ __asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6640);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sWakeVec4 {
     float x;
@@ -6346,7 +6346,7 @@ struct sWakeVec4 {
     float w;
 } __attribute__((aligned(16)));
 
-extern "C" void func_002E6640(cSpeedBoostFX* self)
+extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self)
 {
     sWakeVec4 v;
     v.x = 1.0f;
@@ -6369,7 +6369,7 @@ extern "C" void func_002E6640(cSpeedBoostFX* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E66B8);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -6578,7 +6578,7 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
     }
 }
 
-extern "C" void func_002E66B8(sWake_66B8* self)
+extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
 {
     int air = func_0011FE98(self->rider) == 1;
     int on = 0;
@@ -6915,7 +6915,7 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E7A10);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_render);
 #ifdef SKIP_ASM
 extern int cPowerUpFXToggles_m_EnableSpeedBoostFX;
 extern "C" void* func_0037A260(void* gfx, int n);
@@ -7144,7 +7144,7 @@ static inline void setVtx_7A10(sWakeVtx_7A10* base, int i, float s, float t, con
 
 // Board wake: draws the two ribbons (left/right of each trail point, faded by age) and the
 // segment trail as a strip through the particle vertex buffer.
-extern "C" void func_002E7A10(sBoardWake_7A10* self)
+extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
 {
     if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
         return;

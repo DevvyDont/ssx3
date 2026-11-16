@@ -5007,7 +5007,7 @@ struct sHit_7578 {
     char pad[0x80 - 0x20];
 };
 
-extern "C" void func_002F6AC8(void*, int);
+extern "C" void cCheatFX_setCheatInput(void*, int);
 extern "C" int func_00334680_7578(void*, sVec4*, sHit_7578*, int, float) __asm__("func_00334680");
 extern "C" void func_00138BA0(float, void*, sHit_7578*);
 extern "C" void func_001329B0(float, void*, sHit_7578*, int);
@@ -5056,7 +5056,7 @@ static inline sVec4 Front_7578(char* self) { return *(sVec4*)(self + 0x1B0); }
 static inline float Kph_7578(float kph) { return kph / 3.6f; }
 extern "C" int func_00107578(char* self)
 {
-    func_002F6AC8(*(char**)(self + 0x77C) + 0xD20, 2);
+    cCheatFX_setCheatInput(*(char**)(self + 0x77C) + 0xD20, 2);
     if (func_0011FE98(self) == 1) {
         if (*(float*)(self + 0x1E8) < Kph_7578(-2000.0f))
             return 0;
@@ -6210,18 +6210,18 @@ cRiderE_108C80::~cRiderE_108C80()
 __asm__(".globl func_00108FA8\n.type func_00108FA8,@function\nfunc_00108FA8 = _$_14cRiderE_108C80\n.size func_00108FA8,0x17C0\n");
 
 __asm__("_$_12cRiderVb_s12 = cRider__cRider\n"
-        "_$_15cCompPart02_s12 = func_00136AD0\n"
-        "_$_15cCompPart20_s12 = func_002DCDA0\n"
-        "_$_15cCompPart21_s12 = func_002DA8E8\n"
-        "_$_15cCompPart22_s12 = func_002E83F0\n"
-        "_$_15cCompPart23_s12 = func_002E64C0\n"
-        "_$_15cCompPart24_s12 = func_002EAC60\n"
-        "_$_15cCompPart25_s12 = func_002EF530\n"
-        "_$_15cCompPart26_s12 = func_002D4A70\n"
-        "_$_15cCompPart27_s12 = func_002E37D0\n"
-        "_$_15cCompPart28_s12 = func_002DF1C8\n"
-        "_$_15cCompPart29_s12 = func_002F0FE8\n"
-        "_$_15cCompPart30_s12 = func_002F6388\n");
+        "_$_15cCompPart02_s12 = cWipeoutMotion__cWipeoutMotion\n"
+        "_$_15cCompPart20_s12 = cBoardWakeFX__cBoardWakeFX\n"
+        "_$_15cCompPart21_s12 = cBoardSparkFX__cBoardSparkFX\n"
+        "_$_15cCompPart22_s12 = cBoardTrailFX__cBoardTrailFX\n"
+        "_$_15cCompPart23_s12 = cSpeedBoostFX__cSpeedBoostFX\n"
+        "_$_15cCompPart24_s12 = cTrickBoostFX__cTrickBoostFX\n"
+        "_$_15cCompPart25_s12 = cAirStreamerFX__cAirStreamerFX\n"
+        "_$_15cCompPart26_s12 = cAngerFX__cAngerFX\n"
+        "_$_15cCompPart27_s12 = cPlayerIndicatorFX__cPlayerIndicatorFX\n"
+        "_$_15cCompPart28_s12 = cDynamicSprayFX__cDynamicSprayFX\n"
+        "_$_15cCompPart29_s12 = cPunchFX__cPunchFX\n"
+        "_$_15cCompPart30_s12 = cCheatFX__cCheatFX\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$14cRiderE_108C80 = cComputer_vtbl\n"
@@ -6333,14 +6333,14 @@ extern "C" void func_0010A768(cComputer* self, void* pad)
 INCLUDE_ASM("seg/seg_1218", func_0010A898);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00111AC0_A898(char*, void*) __asm__("func_00111AC0");
+extern "C" void cRiderHandler_writeToReplayFrame_A898(char*, void*) __asm__("cRiderHandler_writeToReplayFrame");
 
 struct C_A898 {
     virtual void m0(char*, int);
 };
 
 extern "C" void func_0010A898(cComputer* arg0, C_A898 *arg1) {
-    func_00111AC0_A898(((char*)arg0), arg1);
+    cRiderHandler_writeToReplayFrame_A898(((char*)arg0), arg1);
     arg1->m0(((char*)arg0) + 0xDF0, 0x150);
 }
 #endif
@@ -6352,7 +6352,7 @@ INCLUDE_ASM("seg/seg_1218", func_0010A8E8);
 class cObj_A8E8;
 typedef void (cObj_A8E8::*Fn_A8E8)();
 extern "C" Fn_A8E8 D_0043CF20_A8E8[4] __asm__("D_0043CF20");
-extern "C" void func_00111D98(void* self, void* src);
+extern "C" void cRiderHandler_readFromReplayFrame(void* self, void* src);
 
 class cStream_A8E8 {
 public:
@@ -6362,7 +6362,7 @@ public:
 
 extern "C" void func_0010A8E8(char* self, cStream_A8E8* in)
 {
-    func_00111D98(self, in);
+    cRiderHandler_readFromReplayFrame(self, in);
     in->read(self + 0xDF0, 0x150);
     short state = *(short*)(self + 0xF38);
     *(Fn_A8E8*)(self + 0xF44) = D_0043CF20_A8E8[state];
@@ -6681,14 +6681,14 @@ extern "C" void func_0010AED8(cComputer* self, sPad_AED8* pad)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010B0E8);
 #ifdef SKIP_ASM
-extern "C" void func_00135CB0(void*, float*, float*);
-extern "C" void func_00135DB0(void*, float*, float*);
+extern "C" void cSpinControl_predictSpinSec(void*, float*, float*);
+extern "C" void cSpinControl_predictFlipSec(void*, float*, float*);
 
 extern "C" void func_0010B0E8(cComputer* self, float t)
 {
     float a, b, c, d;
-    func_00135CB0(*(char**)((char*)self->mRider + 0x77C) + 0x230, &a, &b);
-    func_00135DB0(*(char**)((char*)self->mRider + 0x77C) + 0x230, &c, &d);
+    cSpinControl_predictSpinSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &a, &b);
+    cSpinControl_predictFlipSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &c, &d);
     int stop = 0;
     if (self->mToRail && t < 1.0f)
         stop = 1;

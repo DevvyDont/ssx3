@@ -13,8 +13,8 @@
 // cRiderHandler_cRiderHandler constructs the cRider at this + 0xDF0 when in charge; cPlayer and cComputer put their
 // own fields at 0xDF0. Part order and offsets: [R] that constructor (each part's vbptr store, the out-of-line part
 // constructors with their in-charge vbase offsets, and the part vtables' offset-to-top), [R] the state dispatchers
-// (func_001112F8 / cRiderHandler_gainMotionState / func_00111408 / func_001114A0 call part N at this + offset for
-// MotionState N; func_00111578 / func_00111630 / func_00111728 likewise for ControlState) and [R] the state name
+// (cRiderHandler_loseMotionState / cRiderHandler_gainMotionState / cRiderHandler_stepMotion / cRiderHandler_resolveMotion call part N at this + offset for
+// MotionState N; cRiderHandler_loseControlState / cRiderHandler_gainControlState / cRiderHandler_updateControl likewise for ControlState) and [R] the state name
 // tables D_00459D70 ("Ground" .. "Handplant") and D_00459DC8 ("Cruise" .. "Void"). The class names are EA's: the
 // preview's _vt$<n><Class>$6cRider vtables and On Tour's base list `class cRiderHandler : cRider, cAirMotion,
 // cWipeoutMotion, ... cCheatFX` (same order). NOTE builds/x/v2/vtables_v2.tsv mislabels several retail part vtables
@@ -40,10 +40,10 @@ struct cRiderSphereTree;
 
 // On Tour struct tCheatState (4 chars). Retail reads m_misc with lbu only (it also holds the cheat input bits).
 struct tCheatState {
-    char m_state;           // 0x0 [O]; [U] lb/sb (func_002F6518, func_002F6910)
+    char m_state;           // 0x0 [O]; [U] lb/sb (cCheatFX_update, func_002F6910)
     char m_index;           // 0x1 [O]; [U] lb/lbu/sb
     char m_count;           // 0x2 [O]; [U] lb/lbu/sb
-    char m_misc;            // 0x3 [O]; [U] lbu/sb (setCheatInput func_002F6AC8, func_002F6B28, func_002F6B38)
+    char m_misc;            // 0x3 [O]; [U] lbu/sb (setCheatInput cCheatFX_setCheatInput, func_002F6B28, func_002F6B38)
 };
 
 CHECK_OFFSET(tCheatState, m_state, 0x0);
@@ -65,13 +65,13 @@ enum eControlState {
 // cGroundMotion (cRiderHandler + 0x000, 0x20 bytes): motion state 0 (MS_Ground). Base cGroundMotionState (0x00-0x18,
 // [O] size 0x18).
 struct cGroundMotion {
-    float ChatterTime;     // 0x00 [O] cGroundMotionState; [U] float (gainFocus, step func_0013D818)
+    float ChatterTime;     // 0x00 [O] cGroundMotionState; [U] float (gainFocus, step cGroundMotion_step)
     float PowderDepth1G;   // 0x04 [O]; [U] float (gainFocus, func_0013C878, step)
     float PowderDepth3G;   // 0x08 [O]; [U] float (func_0013C878, func_0013CCF0, step)
     int ForceNaturalAir;   // 0x0C [O] bool (a word in retail); [U] lw/sw (gainFocus, step, resolve)
-    int AITickOnGainFocus; // 0x10 [O]; [R] ctor func_0013C650 = 0; [U] gainFocus stores it
-    int AITickOnLoseFocus; // 0x14 [O]; [R] ctor = 0; [U] loseFocus (func_0013F410) stores it, gainFocus reads it
-    cRider* mRider;        // 0x18 [R] virtual-base pointer to the shared cRider; [R] ctor func_0013C650 (in charge:
+    int AITickOnGainFocus; // 0x10 [O]; [R] ctor cGroundMotion_cGroundMotion = 0; [U] gainFocus stores it
+    int AITickOnLoseFocus; // 0x14 [O]; [R] ctor = 0; [U] loseFocus (cGroundMotion_loseFocus) stores it, gainFocus reads it
+    cRider* mRider;        // 0x18 [R] virtual-base pointer to the shared cRider; [R] ctor cGroundMotion_cGroundMotion (in charge:
                            //      this + 0x20)
     char pad_1C[0x4];      // 0x1C the part is 16-byte aligned
 };
@@ -102,14 +102,14 @@ CHECK_SIZE(cAirMotion, 0x10);
 // cWipeoutMotion (cRiderHandler + 0x030, 0x70 bytes): motion state 2 (MS_Wipeout). Base cWipeoutMotionState
 // (0x00-0x40, [O] size 0x40).
 struct cWipeoutMotion {
-    int WipeoutMotionState;            // 0x00 [P] getWipeoutMotionState (retail func_001411B0 lw 0x0); [O]
+    int WipeoutMotionState;            // 0x00 [P] getWipeoutMotionState (retail cWipeoutMotion_getWipeoutMotionState lw 0x0); [O]
                                        //      eWMotionState (WMS_Ground 0, WMS_Air 1)
     int ForceNaturalAir;               // 0x04 [O] bool (word); [U] lw/sw
     char pad_08[0x8];                  // 0x08
     t4Vector BoardVelocity;            // 0x10 [O]; [U] lq/sq/lqc2 (func_00136D40, func_00136F30, func_00137138)
     t4Vector BoardAngVelocity;         // 0x20 [O]; [U] lq/sq/lqc2
-    t4Vector RiderAngVelocity;         // 0x30 [P] getRiderAngVel (retail func_001411B8 = this + 0x30); [O]
-    cRider* mRider;                    // 0x40 [R] virtual-base pointer to the shared cRider; [R] ctor func_00136980 (in
+    t4Vector RiderAngVelocity;         // 0x30 [P] getRiderAngVel (retail cWipeoutMotion_getRiderAngVel = this + 0x30); [O]
+    cRider* mRider;                    // 0x40 [R] virtual-base pointer to the shared cRider; [R] ctor cWipeoutMotion_cWipeoutMotion (in
                                        //      charge: this + 0x70)
     cRiderSphereTree* BoardSphereTree; // 0x44 [P] getBoardSphereTree (retail func_001411A0 lw 0x44; preview 0x48); [O]
     char pad_48[0x8];                  // 0x48
@@ -191,7 +191,7 @@ struct cHandplantMotion {
     int IsRailSpline;          // 0x90 [O] bool (word); [U] lw/sw
     int IsToeside;             // 0x94 [O] bool (word); [U] lw/sw; read via handler+0x1A4 (isToeside)
     char pad_98[0x8];          // 0x98
-    cRider* mRider;            // 0xA0 [R] virtual-base pointer to the shared cRider; [R] ctor func_00141480 (in charge:
+    cRider* mRider;            // 0xA0 [R] virtual-base pointer to the shared cRider; [R] ctor cHandplantMotion_cHandplantMotion (in charge:
                                //      this + 0xB0)
     char pad_A4[0xC];          // 0xA4
 };
@@ -271,7 +271,7 @@ CHECK_SIZE(cBumpControl, 0x10);
 // cNaturalAirControl (cRiderHandler + 0x210, 0x20 bytes): control state 4 (CS_NaturalAir). Base
 // cNaturalAirControlState (0x00-0x14; On Tour 0x10 with byte bools).
 struct cNaturalAirControl {
-    float LimitAng;   // 0x00 [O]; [U] float (gainFocus func_0012F620)
+    float LimitAng;   // 0x00 [O]; [U] float (gainFocus cNaturalAirControl_gainFocus)
     float LimitMag;   // 0x04 [O]; [U] float
     int IsPunchHeld;  // 0x08 [O] bool (word); [U] lw/sw
     int IsGrabHeld;   // 0x0C [O] bool (word); [U] lw/sw
@@ -295,12 +295,12 @@ struct cSpinControl {
     int AirAdjState;            // 0x00 [O] eAirAdjState (AS_AirAdj 0, AS_Spin 1, AS_LateSpin 2, AS_None 3); [U] lw/sw
                                 //      (update stores 3)
     int GrabState;              // 0x04 [O] eGrabState (GS_Start 0 .. GS_Over 5); [U] isGrabHeld/isTweakHeld/isUberHeld
-                                //      (func_00135EB0/EF0/F30) test 2 and 4
+                                //      (cSpinControl_isGrabHeld/EF0/F30) test 2 and 4
     int CurrentGrab;            // 0x08 [O]; [U] gainFocus = -1
     int SpinState;              // 0x0C [O] eSpinState (SS_Into 0, SS_Cycle 1, SS_OutOf 2, SS_None 3); [U] update stores
                                 //      1/2/3 (On Tour has CurrentUberVar here)
-    float DesFlip;              // 0x10 [O]; [U] predictFlipSec (func_00135DB0: DesFlip, CurFlip, MaxFlipAngVel)
-    float DesSpin;              // 0x14 [O]; [U] predictSpinSec (func_00135CB0: DesSpin, CurSpin, MaxSpinAngVel)
+    float DesFlip;              // 0x10 [O]; [U] predictFlipSec (cSpinControl_predictFlipSec: DesFlip, CurFlip, MaxFlipAngVel)
+    float DesSpin;              // 0x14 [O]; [U] predictSpinSec (cSpinControl_predictSpinSec: DesSpin, CurSpin, MaxSpinAngVel)
     float CurFlip;              // 0x18 [O]; [U] float
     float CurSpin;              // 0x1C [O]; [U] float
     float TrickSpin;            // 0x20 [O]; [U] float
@@ -315,7 +315,7 @@ struct cSpinControl {
     int IsPartialLateSpin;      // 0x44 [O] bool (word); [U] lw/sw
     float DesSpinInputSec;      // 0x48 [O]; [U] float
     float DesFlipInputSec;      // 0x4C [O]; [U] float
-    float FlipSpinInputAng;     // 0x50 [O]; [U] getFlipSpinInputAng (func_001360C8: 1e30 = none)
+    float FlipSpinInputAng;     // 0x50 [O]; [U] getFlipSpinInputAng (cSpinControl_getFlipSpinInputAng: 1e30 = none)
     float NullFlipSpinInputSec; // 0x54 [O]; [U] float
     cRider* mRider;             // 0x58 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x60
                                 //      (D_00459038)
@@ -400,7 +400,7 @@ struct cWipeoutControl {
     t4Vector LatestImpact;  // 0x60 [O]; [U] lqc2; stored via handler+0x320 (impact)
     float RecoverPercent;   // 0x70 [O]; [U] float; read via handler+0x330 (getRecoverPercent)
     char pad_74[0xC];       // 0x74
-    cRider* mRider;         // 0x80 [R] virtual-base pointer to the shared cRider; [R] ctor func_00142388 (in charge:
+    cRider* mRider;         // 0x80 [R] virtual-base pointer to the shared cRider; [R] ctor cWipeoutControl_cWipeoutControl (in charge:
                             //      this + 0x90)
     char pad_84[0xC];       // 0x84
 };
@@ -538,10 +538,10 @@ CHECK_OFFSET(cSpeedBoostFX, mRider, 0x00);
 CHECK_OFFSET(cSpeedBoostFX, unk_004, 0x04);
 CHECK_SIZE(cSpeedBoostFX, 0x3B0);
 
-// cTrickBoostFX (cRiderHandler + 0x9C0, 0x110 bytes): FX part; ctor func_002EAAE0 (in charge: cRider at this + 0x110);
+// cTrickBoostFX (cRiderHandler + 0x9C0, 0x110 bytes): FX part; ctor cTrickBoostFX_cTrickBoostFX (in charge: cRider at this + 0x110);
 // vtable cTrickBoostFX$6cRider D_004884A0.
 struct cTrickBoostFX {
-    cRider* mRider;      // 0x00 [R] virtual-base pointer to the shared cRider; [R] func_002EAAE0
+    cRider* mRider;      // 0x00 [R] virtual-base pointer to the shared cRider; [R] cTrickBoostFX_cTrickBoostFX
     char unk_004[0x10C]; // 0x04 not laid out yet (see the unit's local view)
 };
 
@@ -571,10 +571,10 @@ CHECK_OFFSET(cAngerFX, mRider, 0x00);
 CHECK_OFFSET(cAngerFX, unk_004, 0x04);
 CHECK_SIZE(cAngerFX, 0x10);
 
-// cPlayerIndicatorFX (cRiderHandler + 0xB00, 0x40 bytes): FX part; ctor func_002E3680 (in charge: cRider at this +
+// cPlayerIndicatorFX (cRiderHandler + 0xB00, 0x40 bytes): FX part; ctor cPlayerIndicatorFX_cPlayerIndicatorFX (in charge: cRider at this +
 // 0x40); vtable cPlayerIndicatorFX$6cRider D_00488A10.
 struct cPlayerIndicatorFX {
-    cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] func_002E3680
+    cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] cPlayerIndicatorFX_cPlayerIndicatorFX
     char unk_004[0x3C]; // 0x04 not laid out yet (see the unit's local view)
 };
 
@@ -582,10 +582,10 @@ CHECK_OFFSET(cPlayerIndicatorFX, mRider, 0x00);
 CHECK_OFFSET(cPlayerIndicatorFX, unk_004, 0x04);
 CHECK_SIZE(cPlayerIndicatorFX, 0x40);
 
-// cDynamicSprayFX (cRiderHandler + 0xB40, 0x130 bytes): FX part; ctor func_002DE4A8 (in charge: cRider at this +
+// cDynamicSprayFX (cRiderHandler + 0xB40, 0x130 bytes): FX part; ctor cDynamicSprayFX_cDynamicSprayFX (in charge: cRider at this +
 // 0x130); vtable cDynamicSprayFX$6cRider D_004883A8.
 struct cDynamicSprayFX {
-    cRider* mRider;      // 0x00 [R] virtual-base pointer to the shared cRider; [R] func_002DE4A8
+    cRider* mRider;      // 0x00 [R] virtual-base pointer to the shared cRider; [R] cDynamicSprayFX_cDynamicSprayFX
     char unk_004[0x12C]; // 0x04 not laid out yet (see the unit's local view)
 };
 
@@ -593,10 +593,10 @@ CHECK_OFFSET(cDynamicSprayFX, mRider, 0x00);
 CHECK_OFFSET(cDynamicSprayFX, unk_004, 0x04);
 CHECK_SIZE(cDynamicSprayFX, 0x130);
 
-// cPunchFX (cRiderHandler + 0xC70, 0xB0 bytes): FX part; ctor func_002F0E88 (in charge: cRider at this + 0xB0); vtable
+// cPunchFX (cRiderHandler + 0xC70, 0xB0 bytes): FX part; ctor cPunchFX_cPunchFX (in charge: cRider at this + 0xB0); vtable
 // _vt$8cPunchFX$6cRider D_00488820.
 struct cPunchFX {
-    cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] func_002F0E88
+    cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] cPunchFX_cPunchFX
     char unk_004[0xAC]; // 0x04 not laid out yet
 };
 
@@ -605,10 +605,10 @@ CHECK_OFFSET(cPunchFX, unk_004, 0x04);
 CHECK_SIZE(cPunchFX, 0xB0);
 
 // cCheatFX (cRiderHandler + 0xD20, 0x10 bytes): FX part, new in retail (no preview vtable); [O] On Tour's last
-// cRiderHandler base. ctor func_002F6238 (in charge: cRider at this + 0x10), vtables D_004886E0/D_00488728.
+// cRiderHandler base. ctor cCheatFX_cCheatFX (in charge: cRider at this + 0x10), vtables D_004886E0/D_00488728.
 struct cCheatFX {
-    cRider* mRider;           // 0x00 [R] virtual-base pointer to the shared cRider; [R] func_002F6238
-    tCheatState m_cheatState; // 0x04 [O]; [R] ctor -> resetStates (func_002F64F0: memset(this + 4, 0, 4)); [U]
+    cRider* mRider;           // 0x00 [R] virtual-base pointer to the shared cRider; [R] cCheatFX_cCheatFX
+    tCheatState m_cheatState; // 0x04 [O]; [R] ctor -> resetStates (cCheatFX_resetStates: memset(this + 4, 0, 4)); [U]
                               //      update/updateState byte fields
     char pad_08[0x8];         // 0x08 On Tour's m_input (0x8) is not in retail: setCheatInput/getInput use
                               //      m_cheatState.m_misc
@@ -653,10 +653,10 @@ struct cRiderHandler {
     cCheatFX CheatFX;                       // 0xD20
     cPlayerLights PlayerLights;             // 0xD30 [O] class cPlayerLights (render/playerlights.h); [U] ai/rider.cpp
                                             //       clears it (func_00392D18, handler + 0xD30); cTrickBoostFX update
-                                            //       (func_002EADD0) calls AddDirectional / BoardIsAdditive on it
-    int MotionState;                        // 0xDE0 [P] _getMotionState (preview 0xDA0); [R] func_00143FF0;
+                                            //       (cTrickBoostFX_update) calls AddDirectional / BoardIsAdditive on it
+    int MotionState;                        // 0xDE0 [P] _getMotionState (preview 0xDA0); [R] cRiderHandler__getMotionState;
                                             //       ctor = MS_Num; [O] eMotionState
-    int ControlState;                       // 0xDE4 [P] _getControlState (preview 0xDA4); [R] func_00143FF8;
+    int ControlState;                       // 0xDE4 [P] _getControlState (preview 0xDA4); [R] cRiderHandler__getControlState;
                                             //       ctor = CS_Num; [O] eControlState
     void** mVtbl;                           // 0xDE8 [R] _vt$13cRiderHandler D_00458710 (cPlayer and cComputer
                                             //       store their own here: D_00458338, D_004585F0)
@@ -666,8 +666,8 @@ struct cRiderHandler {
 // Virtual slots of _vt$13cRiderHandler (D_00458710; [O] cRiderHandler's virtual order).
 enum {
     kRiderHandlerVt_getControlCmd = 1,      // pure (func_00411530); cPlayer func_00127998, cComputer func_0010A768
-    kRiderHandlerVt_writeToReplayFrame = 2, // func_00111AC0 (calls every part's writeToReplayFrame)
-    kRiderHandlerVt_readFromReplayFrame = 3 // func_00111D98 (calls every part's readFromReplayFrame / FX reset)
+    kRiderHandlerVt_writeToReplayFrame = 2, // cRiderHandler_writeToReplayFrame (calls every part's writeToReplayFrame)
+    kRiderHandlerVt_readFromReplayFrame = 3 // cRiderHandler_readFromReplayFrame (calls every part's readFromReplayFrame / FX reset)
 };
 
 CHECK_OFFSET(cRiderHandler, GroundMotion, 0x000);

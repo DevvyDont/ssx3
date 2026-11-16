@@ -581,10 +581,10 @@ extern "C" void func_00119E38(void* p, int flip, int c);
 extern "C" void func_0011DE60(cRider* self, int a1, int a2);
 extern "C" void func_0011DF18(cRider* self, int notify);
 extern "C" void func_00120D58(cRider* self);
-extern "C" void func_00111890(void* self);
+extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_00125038(cRider* self);
 // PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
-// param, but their bodies forward $5 to func_00111538/cRiderHandler__setMotionState (int arg).
+// param, but their bodies forward $5 to cRiderHandler__setControlState/cRiderHandler__setMotionState (int arg).
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -671,7 +671,7 @@ void func_0011D390_impl(cRider* self)
         self->unk_5A0 = 0;
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)self->mVtbl;
         vt[kRiderVt_vibrationReset].fn((char*)self + vt[kRiderVt_vibrationReset].delta);
-        func_00111890(self->mRiderHandler);
+        cRiderHandler_resetRiderFX(self->mRiderHandler);
         self->unk_5A4 = 0;
         self->unk_5A8 = 0;
         self->unk_5AC = 0;
@@ -1182,7 +1182,7 @@ extern "C" void* func_0026B5E0(void*, int, int);
 extern char D_004D33A0[];
 extern "C" void func_00119368(void* metrix, int flag);
 // PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
-// param, but their bodies forward $5 to func_00111538/cRiderHandler__setMotionState (int arg).
+// param, but their bodies forward $5 to cRiderHandler__setControlState/cRiderHandler__setMotionState (int arg).
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -1223,7 +1223,7 @@ extern "C" void func_0011DE60(cRider* self, int a1, int a2)
 INCLUDE_ASM("ai/rider", func_0011DF18);
 #ifdef SKIP_ASM
 extern "C" char* func_00311B20(void*, int);
-extern "C" void func_00111890(void* self);
+extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_003099F8(void* self);
 extern void* D_004A3DD8;
 
@@ -1258,7 +1258,7 @@ extern "C" void func_0011DF18(cRider* self, int notify)
     sVec4_0011DF18 t = vu0Scale_11DF18(v, 833.3333740234375f);
     *(sVec4_0011DF18*)&self->mVelocity = t;
     self->mVelocity.z = 0.0f;
-    func_00111890(self->mRiderHandler);
+    cRiderHandler_resetRiderFX(self->mRiderHandler);
     if (notify != 0)
     {
         char* sub = (char*)&self->mVtbl;
@@ -2239,15 +2239,15 @@ int func_0011FE98(void* vself)
 }
 #endif
 
-extern "C" void* func_00111538(void* obj);
+extern "C" void* cRiderHandler__setControlState(void* obj);
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011FEA8);
 #ifdef SKIP_ASM
-extern "C" void func_00111830(int);
+extern "C" void cRiderHandler__getMotionStateName(int);
 
 extern "C" void func_0011FEA8(void *arg0) {
-    func_00111830((*(int *)((char*)(arg0) + (0x77C))));
+    cRiderHandler__getMotionStateName((*(int *)((char*)(arg0) + (0x77C))));
 }
 #endif
 
@@ -2257,7 +2257,7 @@ INCLUDE_ASM("ai/rider", func_0011FEC8__FPv);
 void* func_0011FEC8(void* vself)
 {
     cRider* self = (cRider*)vself;
-    return func_00111538(self->mRiderHandler);
+    return cRiderHandler__setControlState(self->mRiderHandler);
 }
 #endif
 
@@ -2274,10 +2274,10 @@ int func_0011FEE8(void* vself)
 //100%
 INCLUDE_ASM("ai/rider", func_0011FEF8);
 #ifdef SKIP_ASM
-extern "C" void func_00111860(int);
+extern "C" void cRiderHandler__getControlStateName(int);
 
 extern "C" void func_0011FEF8(void *arg0) {
-    func_00111860((*(int *)((char*)(arg0) + (0x77C))));
+    cRiderHandler__getControlStateName((*(int *)((char*)(arg0) + (0x77C))));
 }
 #endif
 //100%
@@ -2745,10 +2745,10 @@ extern "C" void func_00120E88(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", func_00120EB8);
 #ifdef SKIP_ASM
-extern "C" void func_00111948(int);
+extern "C" void cRiderHandler_updateRiderFX(int);
 
 extern "C" void func_00120EB8(void *arg0) {
-    func_00111948((*(int *)((char*)(arg0) + (0x77C))));
+    cRiderHandler_updateRiderFX((*(int *)((char*)(arg0) + (0x77C))));
 }
 #endif
 
@@ -2838,7 +2838,7 @@ struct sVEntry00121068 {
     void (*fn)(void*, void*);
 };
 
-extern "C" void func_00111728(void* obj, void* v);
+extern "C" void cRiderHandler_updateControl(void* obj, void* v);
 
 extern "C" void func_00121068(cRider* self)
 {
@@ -2846,7 +2846,7 @@ extern "C" void func_00121068(cRider* self)
     char* obj = (char*)self->mRiderHandler;
     sVEntry00121068* vt = *(sVEntry00121068**)(obj + 0xDE8);
     vt[1].fn(obj + vt[1].delta, buf);
-    func_00111728(self->mRiderHandler, buf);
+    cRiderHandler_updateControl(self->mRiderHandler, buf);
 }
 #endif
 
@@ -2946,7 +2946,7 @@ extern "C" void func_001211F8(cRider* self)
 }
 #endif
 
-extern "C" void* func_00111408(void* obj);
+extern "C" void* cRiderHandler_stepMotion(void* obj);
 
 //100%
 INCLUDE_ASM("ai/rider", func_001216E0__FPv);
@@ -2954,7 +2954,7 @@ INCLUDE_ASM("ai/rider", func_001216E0__FPv);
 void* func_001216E0(void* vself)
 {
     cRider* self = (cRider*)vself;
-    return func_00111408(self->mRiderHandler);
+    return cRiderHandler_stepMotion(self->mRiderHandler);
 }
 #endif
 
@@ -2989,7 +2989,7 @@ extern "C" void func_00121728(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", func_00121750);
 #ifdef SKIP_ASM
-extern "C" void func_001114A0(void* p);
+extern "C" void cRiderHandler_resolveMotion(void* p);
 extern "C" void func_00310530(void* model, void* v);
 
 struct sVec4_00121750
@@ -3006,7 +3006,7 @@ static inline int VecChanged_00121750(cRider* self, const sVec4_00121750& b)
 
 extern "C" void func_00121750(cRider* self)
 {
-    func_001114A0(self->mRiderHandler);
+    cRiderHandler_resolveMotion(self->mRiderHandler);
     if (VecChanged_00121750(self, t4vect_Zero))
     {
         func_00310530(self->mAnimModel, &self->mModelOffset);
@@ -3746,10 +3746,10 @@ extern "C" void* func_002F2088(void* obj);
 //100%
 INCLUDE_ASM("ai/rider", func_00122618);
 #ifdef SKIP_ASM
-extern "C" void func_001119F8(int);
+extern "C" void cRiderHandler_renderRiderFX(int);
 
 extern "C" void func_00122618(void *arg0) {
-    func_001119F8((*(int *)((char*)(arg0) + (0x77C))));
+    cRiderHandler_renderRiderFX((*(int *)((char*)(arg0) + (0x77C))));
 }
 #endif
 
@@ -4184,9 +4184,9 @@ extern "C" int func_00122E50(cRider* self)
 INCLUDE_ASM("ai/rider", func_00122EE8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_00135EB0(void* p);
-extern "C" int func_00135EF0(void* p);
-extern "C" int func_00135F30(void* p);
+extern "C" int cSpinControl_isGrabHeld(void* p);
+extern "C" int cSpinControl_isTweakHeld(void* p);
+extern "C" int cSpinControl_isUberHeld(void* p);
 extern "C" int func_00311AE8(void* self, int i);
 extern "C" int func_001446A0(void* self, int a1);
 
@@ -4213,19 +4213,19 @@ extern "C" int func_00122EE8(char* self, int q)
     case 5:
         res = 0;
         if (func_0011FEE8(self) == 5) {
-            res = func_00135EB0(*(char**)(self + 0x77C) + 0x230) != 0;
+            res = cSpinControl_isGrabHeld(*(char**)(self + 0x77C) + 0x230) != 0;
         }
         return res;
     case 6:
         res = 0;
         if (func_0011FEE8(self) == 5) {
-            res = func_00135EF0(*(char**)(self + 0x77C) + 0x230) != 0;
+            res = cSpinControl_isTweakHeld(*(char**)(self + 0x77C) + 0x230) != 0;
         }
         return res;
     case 7:
         res = 0;
         if (func_0011FEE8(self) == 5) {
-            res = func_00135F30(*(char**)(self + 0x77C) + 0x230) != 0;
+            res = cSpinControl_isUberHeld(*(char**)(self + 0x77C) + 0x230) != 0;
         }
         return res;
     case 9:
@@ -4312,7 +4312,7 @@ extern t4Vector D_004FF140;
 // sVec4 stores x, y, z, w.
 extern "C" void func_00270970(int a, int b);
 extern "C" void func_00125038(cRider* self);
-extern "C" void func_00111890(void* self);
+extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_002F1A00(void* a);
 extern "C" void func_00119368(void* metrix, int flag);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
@@ -4437,7 +4437,7 @@ extern "C" void cRider_transport_v(cRider* self, char* m)
     float len = Length_3210(*(sVec4*)&self->mVelocity);
     SetPath_3210(self, &pos, &dir);
     self->mVelocity = Scale_3210(sVec4(*(sVec4*)&self->mMatrix.row[1]), len);
-    func_00111890(self->mRiderHandler);
+    cRiderHandler_resetRiderFX(self->mRiderHandler);
     func_002F1A00(self->mAttachedEmitterFX);
 }
 #endif
@@ -4493,7 +4493,7 @@ extern "C" void func_001234D0(cRider* self, char* m)
     *(int*)((char*)self->mRiderHandler + 0x290) = 2;
     func_0011FEC8_impl(self, 6);
     func_00125038(self);
-    func_00111890(self->mRiderHandler);
+    cRiderHandler_resetRiderFX(self->mRiderHandler);
     func_002F1A00(self->mAttachedEmitterFX);
     if ((unsigned int)self->mViewIndex < 2) {
         char* obj = *(char**)(*(char**)((char*)SSXApp->Game->ViewMan + (self->mViewIndex << 2) + 4) + 0xA8);
@@ -4507,7 +4507,7 @@ extern "C" void func_001234D0(cRider* self, char* m)
 INCLUDE_ASM("ai/rider", func_001235F8);
 #ifdef SKIP_ASM
 // PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
-// param, but their bodies forward $5 to func_00111538/cRiderHandler__setMotionState (int arg).
+// param, but their bodies forward $5 to cRiderHandler__setControlState/cRiderHandler__setMotionState (int arg).
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -4534,7 +4534,7 @@ struct sQuat_001241C0;
 extern "C" void func_001241C0(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
-extern "C" void func_00111890(void* self);
+extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
 void* func_0014BDB8_3640() __asm__("func_0014BDB8__FPv");
@@ -4694,7 +4694,7 @@ extern "C" void func_00123640(cRider* self)
     cRider_updateOrientationImplicit(self);
     *(sV_3640*)&self->mVelocity = D_004FF120_3640;
     self->unk_B04 = zero;
-    func_00111890(self->mRiderHandler);
+    cRiderHandler_resetRiderFX(self->mRiderHandler);
     initTrack_3640(self, 0x1F0, zero, zero);
     initTrack_3640(self, 0x1FC, zero, zero);
     initTrack_3640(self, 0x208, zero, zero);
@@ -6343,18 +6343,18 @@ __asm__(".globl func_00125EB8\n.type func_00125EB8,@function\nfunc_00125EB8 = _$
 
 // PORT: the out-of-line destructors called here, under their address-derived names (as seg/seg_1218 does).
 __asm__("_$_14cRiderVb_rider = cRider__cRider\n"
-        "_$_15cVbDtor00136AD0 = func_00136AD0\n"
-        "_$_15cVbDtor002DCDA0 = func_002DCDA0\n"
-        "_$_15cVbDtor002DA8E8 = func_002DA8E8\n"
-        "_$_15cVbDtor002E83F0 = func_002E83F0\n"
-        "_$_15cVbDtor002E64C0 = func_002E64C0\n"
-        "_$_15cVbDtor002EAC60 = func_002EAC60\n"
-        "_$_15cVbDtor002EF530 = func_002EF530\n"
-        "_$_15cVbDtor002D4A70 = func_002D4A70\n"
-        "_$_15cVbDtor002E37D0 = func_002E37D0\n"
-        "_$_15cVbDtor002DF1C8 = func_002DF1C8\n"
-        "_$_15cVbDtor002F0FE8 = func_002F0FE8\n"
-        "_$_15cVbDtor002F6388 = func_002F6388\n");
+        "_$_15cVbDtor00136AD0 = cWipeoutMotion__cWipeoutMotion\n"
+        "_$_15cVbDtor002DCDA0 = cBoardWakeFX__cBoardWakeFX\n"
+        "_$_15cVbDtor002DA8E8 = cBoardSparkFX__cBoardSparkFX\n"
+        "_$_15cVbDtor002E83F0 = cBoardTrailFX__cBoardTrailFX\n"
+        "_$_15cVbDtor002E64C0 = cSpeedBoostFX__cSpeedBoostFX\n"
+        "_$_15cVbDtor002EAC60 = cTrickBoostFX__cTrickBoostFX\n"
+        "_$_15cVbDtor002EF530 = cAirStreamerFX__cAirStreamerFX\n"
+        "_$_15cVbDtor002D4A70 = cAngerFX__cAngerFX\n"
+        "_$_15cVbDtor002E37D0 = cPlayerIndicatorFX__cPlayerIndicatorFX\n"
+        "_$_15cVbDtor002DF1C8 = cDynamicSprayFX__cDynamicSprayFX\n"
+        "_$_15cVbDtor002F0FE8 = cPunchFX__cPunchFX\n"
+        "_$_15cVbDtor002F6388 = cCheatFX__cCheatFX\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$13cRider_125EB8 = cPlayer_vtbl\n"
@@ -6721,25 +6721,25 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
 }
 #endif
 
-extern "C" void* func_00111AC0(void* self);
+extern "C" void* cRiderHandler_writeToReplayFrame(void* self);
 
 //100%
 INCLUDE_ASM("ai/rider", func_00128660__FPv);
 #ifdef SKIP_ASM
 void* func_00128660(void* self)
 {
-    return func_00111AC0(self);
+    return cRiderHandler_writeToReplayFrame(self);
 }
 #endif
 
-extern "C" void* func_00111D98(void* self);
+extern "C" void* cRiderHandler_readFromReplayFrame(void* self);
 
 //100%
 INCLUDE_ASM("ai/rider", func_00128680__FPv);
 #ifdef SKIP_ASM
 void* func_00128680(void* self)
 {
-    return func_00111D98(self);
+    return cRiderHandler_readFromReplayFrame(self);
 }
 #endif
 

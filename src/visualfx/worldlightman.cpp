@@ -754,7 +754,7 @@ extern "C" int func_002F6168(void* self, func_002F6168_sVec3* p, func_002F6168_s
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6238);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_cCheatFX);
 #ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEnt6238 {
@@ -776,11 +776,11 @@ extern const sVt22_6238 D_00488728;
 extern char D_00459B90[];
 
 extern "C" void cRider_cRider(void* self);
-void* func_002F64F0(void* self);
+void* cCheatFX_resetStates(void* self);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x10): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002F6238(cCheatFX* self, int inChrg)
+extern "C" void* cCheatFX_cCheatFX(cCheatFX* self, int inChrg)
 {
     sVt9_6238 t1;
     sVt22_6238 t2;
@@ -804,13 +804,13 @@ extern "C" void* func_002F6238(cCheatFX* self, int inChrg)
         *(void**)(*(char**)self + 0x6C0) = &t2;
         t2.e[1].delta = D_00488728.e[1].delta + vc;
     }
-    func_002F64F0(self);
+    cCheatFX_resetStates(self);
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6388);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX__cCheatFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/worldlightman_classes.h"
@@ -820,7 +820,7 @@ cVbDtor002F6388::~cVbDtor002F6388()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002F6388; expose it under the address-derived name.
-__asm__(".globl func_002F6388\n.type func_002F6388,@function\nfunc_002F6388 = _$_15cVbDtor002F6388\n.size func_002F6388,0x15C\n");
+__asm__(".globl cCheatFX__cCheatFX\n.type cCheatFX__cCheatFX,@function\ncCheatFX__cCheatFX = _$_15cVbDtor002F6388\n.size cCheatFX__cCheatFX,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002F6388$13cRiderVbC_wlm = D_004886E0\n"
@@ -830,9 +830,9 @@ __asm__("_vt$15cVbDtor002F6388$13cRiderVbC_wlm = D_004886E0\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F64E8__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_reset__FPv);
 #ifdef SKIP_ASM
-void func_002F64E8(void* self)
+void cCheatFX_reset(void* self)
 {
 }
 #endif
@@ -840,21 +840,21 @@ void func_002F64E8(void* self)
 extern "C" void* func_00416210(void*, int, int);
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F64F0__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
 #ifdef SKIP_ASM
-void* func_002F64F0(void* self)
+void* cCheatFX_resetStates(void* self)
 {
     return func_00416210(((char*)self + 0x4), 0, 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6518);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_update);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: called for effect only; bound by asm label so the call has no value
-void func_002F64F0_v(void* self) __asm__("func_002F64F0__FPv");
+void cCheatFX_resetStates_v(void* self) __asm__("cCheatFX_resetStates__FPv");
 struct sWLCode6910;
 extern "C" void func_002F6910(sWLCode6910* self);
 extern int D_004A3BC0;
@@ -993,7 +993,7 @@ struct sVEsub6518 {
     int (*fn)(void*);
 };
 
-extern "C" void func_002F6518(sWLCode6518* self)
+extern "C" void cCheatFX_update(sWLCode6518* self)
 {
     char* sub = (char*)self->rider + 0x6C0;
     sVEsub6518* vt = *(sVEsub6518**)sub;
@@ -1001,7 +1001,7 @@ extern "C" void func_002F6518(sWLCode6518* self)
         return;
     }
     if (D_004A3BC0 >= 2) {
-        func_002F64F0_v(self);
+        cCheatFX_resetStates_v(self);
         D_004A3BC0--;
     }
     func_002F6910((sWLCode6910*)self);
@@ -1062,9 +1062,9 @@ extern "C" void func_002F6518(sWLCode6518* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6908__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_render__FPv);
 #ifdef SKIP_ASM
-void func_002F6908(void* self)
+void cCheatFX_render(void* self)
 {
 }
 #endif
@@ -1135,34 +1135,34 @@ extern "C" void func_002F6910(sWLCode6910* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6A58);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_002F6A58_cObj {
+class cCheatFX_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual int v01(void* dst, int size);
     virtual int v02(void* src, int size);
 };
 
-extern "C" void func_002F6A58(cCheatFX* self, func_002F6A58_cObj* stream)
+extern "C" void cCheatFX_writeToReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
     stream->v01((char*)self + 4, 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6A90);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_002F6A90(cCheatFX* self, func_002F6A58_cObj* stream)
+extern "C" void cCheatFX_readFromReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
     stream->v02((char*)self + 4, 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6AC8);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_setCheatInput);
 #ifdef SKIP_ASM
-extern "C" void func_002F6AC8(cCheatFX* self, int type)
+extern "C" void cCheatFX_setCheatInput(cCheatFX* self, int type)
 {
     switch (type) {
     case 0:
@@ -1763,10 +1763,10 @@ extern "C" void func_002F7AB0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AB8);
 #ifdef SKIP_ASM
-extern "C" void func_002DCF28();
+extern "C" void cBoardWakeFX_readFromReplayFrame();
 
 extern "C" void func_002F7AB8(void) {
-    func_002DCF28();
+    cBoardWakeFX_readFromReplayFrame();
 }
 #endif
 //100%
@@ -1779,10 +1779,10 @@ extern "C" void func_002F7AD8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AE0);
 #ifdef SKIP_ASM
-extern "C" void func_002DAA78();
+extern "C" void cBoardSparkFX_readFromReplayFrame();
 
 extern "C" void func_002F7AE0(void) {
-    func_002DAA78();
+    cBoardSparkFX_readFromReplayFrame();
 }
 #endif
 //100%
@@ -1827,10 +1827,10 @@ extern "C" void func_002F7B50(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B58);
 #ifdef SKIP_ASM
-extern "C" void func_002E3930();
+extern "C" void cPlayerIndicatorFX_readFromReplayFrame();
 
 extern "C" void func_002F7B58(void) {
-    func_002E3930();
+    cPlayerIndicatorFX_readFromReplayFrame();
 }
 #endif
 //100%
@@ -1843,10 +1843,10 @@ extern "C" void func_002F7B78(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
 #ifdef SKIP_ASM
-extern "C" void func_002EF6A0();
+extern "C" void cAirStreamerFX_readFromReplayFrame();
 
 extern "C" void func_002F7B80(void) {
-    func_002EF6A0();
+    cAirStreamerFX_readFromReplayFrame();
 }
 #endif
 //100%
@@ -1859,10 +1859,10 @@ extern "C" void func_002F7BA0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
 #ifdef SKIP_ASM
-extern "C" void func_002F1148();
+extern "C" void cPunchFX_readFromReplayFrame();
 
 extern "C" void func_002F7BA8(void) {
-    func_002F1148();
+    cPunchFX_readFromReplayFrame();
 }
 #endif
 //100%
@@ -2276,10 +2276,10 @@ extern "C" void func_002F7EA0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EA8);
 #ifdef SKIP_ASM
-extern "C" void func_002E6640();
+extern "C" void cSpeedBoostFX_readFromReplayFrame();
 
 extern "C" void func_002F7EA8(void) {
-    func_002E6640();
+    cSpeedBoostFX_readFromReplayFrame();
 }
 #endif
 //100%
@@ -2292,10 +2292,10 @@ extern "C" void func_002F7EC8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
 #ifdef SKIP_ASM
-extern "C" void func_002EADC0__FPv();
+extern "C" void cTrickBoostFX_readFromReplayFrame__FPv();
 
 extern "C" void func_002F7ED0(void) {
-    func_002EADC0__FPv();
+    cTrickBoostFX_readFromReplayFrame__FPv();
 }
 #endif
 //100%

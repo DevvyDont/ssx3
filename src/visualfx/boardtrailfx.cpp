@@ -88,7 +88,7 @@ extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002E83F0);
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX__cBoardTrailFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardtrailfx_classes.h"
@@ -99,7 +99,7 @@ cVbDtor002E83F0::~cVbDtor002E83F0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002E83F0; expose it under the address-derived name.
-__asm__(".globl func_002E83F0\n.type func_002E83F0,@function\nfunc_002E83F0 = _$_15cVbDtor002E83F0\n.size func_002E83F0,0x170\n");
+__asm__(".globl cBoardTrailFX__cBoardTrailFX\n.type cBoardTrailFX__cBoardTrailFX,@function\ncBoardTrailFX__cBoardTrailFX = _$_15cVbDtor002E83F0\n.size cBoardTrailFX__cBoardTrailFX,0x170\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002E83F0$13cRiderVbC_btf = D_00488BB8\n"
@@ -189,7 +189,7 @@ struct sBTV4_86F0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-// The trail part of sBoardTrailFXView that this function uses (see func_002E8938's sBTrail_8938).
+// The trail part of sBoardTrailFXView that this function uses (see cBoardTrailFX_update's sBTrail_8938).
 struct sBTrail_86F0 {
     char* rider;                // 0x00 virtual base pointer (the cRider part)
     char pad04[0x94 - 0x04];
@@ -329,7 +329,7 @@ extern "C" int func_002E87E8(char** self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002E8938);
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Segments in the trail ring buffer (the prototype asserts BufHead < kTrailNumSeg).
@@ -645,7 +645,7 @@ static inline void btGrow(sBTrail_8938* self)
 }
 
 // Updates the board trail: adds a segment at the board's current edges each frame.
-extern "C" void func_002E8938(sBTrail_8938* self)
+extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
     int prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
     if (func_002E87E8((char**)self) == 0) {
@@ -873,7 +873,7 @@ extern "C" void func_002E8938(sBTrail_8938* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA480);
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_render);
 #ifdef SKIP_ASM
 struct sMtxEntry_A480 {
     int v[5];
@@ -885,7 +885,7 @@ struct sRenderCtx_A480 {
     sMtxEntry_A480* top;
 };
 
-class func_002EA480_cObj {
+class cBoardTrailFX_render_cObj {
 public:
     virtual void v01();
     virtual void v02();
@@ -909,13 +909,13 @@ static inline void pop_A480(sRenderCtx_A480* ctx)
     ctx->top--;
 }
 
-extern "C" void func_002EA480(cBoardTrailFX* self)
+extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
 {
     if (D_004A4518 != 0) {
         return;
     }
     if (D_004A451C != 0) {
-        func_002EA480_cObj* o = (func_002EA480_cObj*)(*(char**)self + 0x6C0);
+        cBoardTrailFX_render_cObj* o = (cBoardTrailFX_render_cObj*)(*(char**)self + 0x6C0);
         if (o->v09() != 0) {
             return;
         }
@@ -1235,21 +1235,21 @@ extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EAAE0);
+INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_cTrickBoostFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardtrailfx_classes.h"
 
 cBtf_2EAAE0::cBtf_2EAAE0()
 {
-    func_002EADC0_AAE0(this);
+    cTrickBoostFX_readFromReplayFrame_AAE0(this);
 }
 
 // PORT: cRiderVb_btf stands in for cRider; its constructor is the retail cRider_cRider.
 __asm__("__12cRiderVb_btf = cRider_cRider\n");
 
 // PORT: the compiler names this ctor __11cBtf_2EAAE0i; expose it under the address-derived name.
-__asm__(".globl func_002EAAE0\n.type func_002EAAE0,@function\nfunc_002EAAE0 = __11cBtf_2EAAE0i\n.size func_002EAAE0,0x180\n");
+__asm__(".globl cTrickBoostFX_cTrickBoostFX\n.type cTrickBoostFX_cTrickBoostFX,@function\ncTrickBoostFX_cTrickBoostFX = __11cBtf_2EAAE0i\n.size cTrickBoostFX_cTrickBoostFX,0x180\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$11cBtf_2EAAE0$13cRiderVbC_btf = D_00488458\n"
@@ -1258,7 +1258,7 @@ __asm__("_vt$11cBtf_2EAAE0$13cRiderVbC_btf = D_00488458\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EAC60);
+INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX__cTrickBoostFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardtrailfx_classes.h"
@@ -1268,7 +1268,7 @@ cVbDtor002EAC60::~cVbDtor002EAC60()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002EAC60; expose it under the address-derived name.
-__asm__(".globl func_002EAC60\n.type func_002EAC60,@function\nfunc_002EAC60 = _$_15cVbDtor002EAC60\n.size func_002EAC60,0x15C\n");
+__asm__(".globl cTrickBoostFX__cTrickBoostFX\n.type cTrickBoostFX__cTrickBoostFX,@function\ncTrickBoostFX__cTrickBoostFX = _$_15cVbDtor002EAC60\n.size cTrickBoostFX__cTrickBoostFX,0x15C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
@@ -1278,9 +1278,9 @@ __asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EADC0__FPv);
+INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_002EADC0(void* self)
+void cTrickBoostFX_readFromReplayFrame(void* self)
 {
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -1288,7 +1288,7 @@ void func_002EADC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EADD0);
+INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_update);
 #ifdef SKIP_ASM
 int func_0011FE98(void* self);
 void func_00392DE8(void* self, int val);
@@ -1377,7 +1377,7 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
     return r;
 }
 
-extern "C" void func_002EADD0(sTrail_2EADD0* self)
+extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
 {
     float speed = *(float*)(self->rider + 0x2EC);
     if (cPowerUpFXToggles_m_TestTrickBoost != 0)
@@ -1423,7 +1423,7 @@ extern "C" void func_002EADD0(sTrail_2EADD0* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EB198);
+INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // Render state record (20 bytes) on the render context's state stack.
@@ -1492,7 +1492,7 @@ static inline void addVtx_B198(sTrailVtx_B198* v, const sTrailCol_B198& c, float
     v->t = t;
 }
 
-extern "C" void func_002EB198(sTrail_2EADD0* self)
+extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
 {
     if (self->count < 2) {
         return;

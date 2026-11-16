@@ -39,7 +39,7 @@ extern "C" void func_0036CE28(void* self, float a, float b);
 extern "C" void func_0036D008(void* self);
 extern "C" void func_0036D3D8(void* self, float val);
 extern "C" void func_00416210(void* dst, int c, int n);
-extern "C" void func_002DAA78(cBoardSparkFX* self);
+extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* self);
 
 struct sBsVec4 {
     float x, y, z, w;
@@ -238,13 +238,13 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     sBsEmitter* em = self->emitter;
     em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
     self->active = 0;
-    func_002DAA78((cBoardSparkFX*)self);
+    cBoardSparkFX_readFromReplayFrame((cBoardSparkFX*)self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", func_002DA8E8);
+INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX__cBoardSparkFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardsparkfx_classes.h"
@@ -257,7 +257,7 @@ cVbDtor002DA8E8::~cVbDtor002DA8E8()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002DA8E8; expose it under the address-derived name.
-__asm__(".globl func_002DA8E8\n.type func_002DA8E8,@function\nfunc_002DA8E8 = _$_15cVbDtor002DA8E8\n.size func_002DA8E8,0x18C\n");
+__asm__(".globl cBoardSparkFX__cBoardSparkFX\n.type cBoardSparkFX__cBoardSparkFX,@function\ncBoardSparkFX__cBoardSparkFX = _$_15cVbDtor002DA8E8\n.size cBoardSparkFX__cBoardSparkFX,0x18C\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
@@ -267,7 +267,7 @@ __asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", func_002DAA78);
+INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sV4_AA78 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -296,7 +296,7 @@ struct sSparkFx_AA78 {
 };
 
 // Spark FX init: two render states copied from the defaults with their mode bits set (the second also sets f0 bits 2-3).
-extern "C" void func_002DAA78(cBoardSparkFX* vself)
+extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* vself)
 {
     sSparkFx_AA78* self = (sSparkFx_AA78*)vself;
     self->pos = D_004FF130;
@@ -328,7 +328,7 @@ extern "C" void func_002DAA78(cBoardSparkFX* vself)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", func_002DABC8);
+INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_update);
 #ifdef SKIP_ASM
 struct sV4_ABC8 {
     float x, y, z, w;
@@ -503,7 +503,7 @@ static inline sV4_ABC8 RiderSide_ABC8(char* rider)
 
 // sBoardSparkFXView::update(void) (On Tour name, unverified pairing; callees fit).
 // Board spark FX update: emitter direction/colour from the rider's motion, then the glow and spark points.
-extern "C" void func_002DABC8(sSparkFx_ABC8* self)
+extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
 {
     char* rider = self->rider;
     float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
@@ -612,7 +612,7 @@ extern "C" void func_002DABC8(sSparkFx_ABC8* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", func_002DB478);
+INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_render);
 #ifdef SKIP_ASM
 extern "C" void func_00371688(void* self, int a1);
 
@@ -666,7 +666,7 @@ static inline void pop_B478(sRenderCtx_B478* ctx)
     ctx->top--;
 }
 
-extern "C" void func_002DB478(cBoardSparkFX* self)
+extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
 {
     char* o = *(char**)(((char*)self) + 0x20);
     if (*(int*)(o + 0x1E0) > 0) {

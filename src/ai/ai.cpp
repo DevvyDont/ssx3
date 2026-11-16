@@ -294,17 +294,17 @@ void* func_001217F8(void* self);
 extern "C" void func_00121818(void* rider);
 extern "C" void func_001218D0(void* rider);
 extern "C" void func_00121950(void* rider);
-extern "C" void func_002DD0B8(void* p);
-extern "C" void func_002DABC8(void* p);
-extern "C" void func_002E8938(void* p);
-extern "C" void func_002E66B8(void* p);
-extern "C" void func_002EADD0(void* p);
-extern "C" void func_002EF6D0(void* p);
+extern "C" void cBoardWakeFX_update(void* p);
+extern "C" void cBoardSparkFX_update(void* p);
+extern "C" void cBoardTrailFX_update(void* p);
+extern "C" void cSpeedBoostFX_update(void* p);
+extern "C" void cTrickBoostFX_update(void* p);
+extern "C" void cAirStreamerFX_update(void* p);
 extern "C" void func_002D4C08(void* p);
-extern "C" void func_002E39D8(void* p);
+extern "C" void cPlayerIndicatorFX_update(void* p);
 extern "C" void func_002DF920(void* p);
-extern "C" void func_002F1150(void* p);
-extern "C" void func_002F6518(void* p);
+extern "C" void cPunchFX_update(void* p);
+extern "C" void cCheatFX_update(void* p);
 extern "C" void func_00120E88(void* rider);
 extern "C" void func_00101B60(void* p);
 extern "C" void func_001013A8(void* p);
@@ -371,17 +371,17 @@ extern "C" void func_00128AF0(cAI* self)
         for (i = 0; i < n; i++) func_00121818(r[i]);
         for (i = 0; i < n; i++) func_001218D0(r[i]);
         for (i = 0; i < n; i++) func_00121950(r[i]);
-        for (i = 0; i < n; i++) func_002DD0B8(m[i] + 0x3B0);
-        for (i = 0; i < n; i++) func_002DABC8(m[i] + 0x470);
-        for (i = 0; i < n; i++) func_002E8938(m[i] + 0x520);
-        for (i = 0; i < n; i++) func_002E66B8(m[i] + 0x610);
-        for (i = 0; i < n; i++) func_002EADD0(m[i] + 0x9C0);
-        for (i = 0; i < n; i++) func_002EF6D0(m[i] + 0xAD0);
+        for (i = 0; i < n; i++) cBoardWakeFX_update(m[i] + 0x3B0);
+        for (i = 0; i < n; i++) cBoardSparkFX_update(m[i] + 0x470);
+        for (i = 0; i < n; i++) cBoardTrailFX_update(m[i] + 0x520);
+        for (i = 0; i < n; i++) cSpeedBoostFX_update(m[i] + 0x610);
+        for (i = 0; i < n; i++) cTrickBoostFX_update(m[i] + 0x9C0);
+        for (i = 0; i < n; i++) cAirStreamerFX_update(m[i] + 0xAD0);
         for (i = 0; i < n; i++) func_002D4C08(m[i] + 0xAF0);
-        for (i = 0; i < n; i++) func_002E39D8(m[i] + 0xB00);
+        for (i = 0; i < n; i++) cPlayerIndicatorFX_update(m[i] + 0xB00);
         for (i = 0; i < n; i++) func_002DF920(m[i] + 0xB40);
-        for (i = 0; i < n; i++) func_002F1150(m[i] + 0xC70);
-        for (i = 0; i < n; i++) func_002F6518(m[i] + 0xD20);
+        for (i = 0; i < n; i++) cPunchFX_update(m[i] + 0xC70);
+        for (i = 0; i < n; i++) cCheatFX_update(m[i] + 0xD20);
         for (i = 0; i < n; i++) func_00120E88(r[i]);
     }
     func_00101B60(self->FocusMan);
@@ -417,16 +417,16 @@ extern "C" void func_001225C0(void*);
 extern "C" void func_001225F0(void*);
 void func_00122638(void*);
 extern "C" void func_002D5048(void*);
-extern "C" void func_002DB478(void*);
-extern "C" void func_002DDAB8(void*);
+extern "C" void cBoardSparkFX_render(void*);
+extern "C" void cBoardWakeFX_render(void*);
 extern "C" void func_002E24D0(void*);
-extern "C" void func_002E3AF8(void*);
-extern "C" void func_002E7A10(void*);
+extern "C" void cPlayerIndicatorFX_render(void*);
+extern "C" void cSpeedBoostFX_render(void*);
 extern "C" void func_002EA538(void*, int);
-extern "C" void func_002EB198(void*);
-extern "C" void func_002EF950(void*);
-extern "C" void func_002F1510(void*);
-void func_002F6908(void*);
+extern "C" void cTrickBoostFX_render(void*);
+extern "C" void cAirStreamerFX_render(void*);
+extern "C" void cPunchFX_render(void*);
+void cCheatFX_render(void*);
 
 struct sVEntry_91E0 {
     short delta;
@@ -515,14 +515,14 @@ extern "C" void func_001291E0(sAI_91E0* self)
         ptrs[i] = sub[i] ? sub[i] + 0x520 : 0;
     }
     func_002EA538(ptrs, n);
-    for (i = 0; i < n; i++) func_002E3AF8(sub[i] + 0xB00);
-    for (i = 0; i < n; i++) func_002F6908(sub[i] + 0xD20);
-    for (i = 0; i < n; i++) func_002DDAB8(sub[i] + 0x3B0);
-    for (i = 0; i < n; i++) func_002EF950(sub[i] + 0xAD0);
-    for (i = 0; i < n; i++) func_002E7A10(sub[i] + 0x610);
-    for (i = 0; i < n; i++) func_002EB198(sub[i] + 0x9C0);
+    for (i = 0; i < n; i++) cPlayerIndicatorFX_render(sub[i] + 0xB00);
+    for (i = 0; i < n; i++) cCheatFX_render(sub[i] + 0xD20);
+    for (i = 0; i < n; i++) cBoardWakeFX_render(sub[i] + 0x3B0);
+    for (i = 0; i < n; i++) cAirStreamerFX_render(sub[i] + 0xAD0);
+    for (i = 0; i < n; i++) cSpeedBoostFX_render(sub[i] + 0x610);
+    for (i = 0; i < n; i++) cTrickBoostFX_render(sub[i] + 0x9C0);
     for (i = 0; i < n; i++) {
-        if (active[i]) func_002DB478(sub[i] + 0x470);
+        if (active[i]) cBoardSparkFX_render(sub[i] + 0x470);
     }
     for (i = 0; i < n; i++) {
         if (active[i]) func_002D5048(sub[i] + 0xAF0);
@@ -531,7 +531,7 @@ extern "C" void func_001291E0(sAI_91E0* self)
         if (active[i]) func_002E24D0(sub[i] + 0xB40);
     }
     for (i = 0; i < n; i++) {
-        if (active[i]) func_002F1510(sub[i] + 0xC70);
+        if (active[i]) cPunchFX_render(sub[i] + 0xC70);
     }
     for (i = 0; i < n; i++) func_00122638(riders[i]);
 }
@@ -2287,7 +2287,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012BE20);
+INCLUDE_ASM("ai/ai", cGateControl_gainFocus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0031BE50(float* s, float* c, float angle);
@@ -2311,7 +2311,7 @@ static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angl
     return sQuat_12BE20(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-extern "C" void func_0012BE20(cGateControl* self)
+extern "C" void cGateControl_gainFocus(cGateControl* self)
 {
     char* r0 = (char*)self->mRider;
     *(int*)(r0 + 0x320) = *(int*)(r0 + 0x324);
@@ -2341,7 +2341,7 @@ extern "C" void func_0012BE20(cGateControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012BF68);
+INCLUDE_ASM("ai/ai", cGateControl_update);
 #ifdef SKIP_ASM
 extern "C" void func_00114130(void* rider, int a, int b);
 extern "C" void func_0012C0C0(cGateControl* self, void* a1);
@@ -2349,7 +2349,7 @@ extern "C" void func_0012C130(cGateControl* self, void* a1);
 extern "C" void func_0012C230(cGateControl* self, void* a1);
 extern "C" void func_0012C408(cGateControl* self, void* a1);
 
-extern "C" void func_0012BF68(cGateControl* self, void* a1)
+extern "C" void cGateControl_update(cGateControl* self, void* a1)
 {
     func_00114130(self->mRider, 0, 0);
     switch (*(int*)self)
@@ -2607,7 +2607,7 @@ extern "C" void func_0012C408(cGateControl* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012C558);
+INCLUDE_ASM("ai/ai", cGateControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sAiVEntry12C558 {
     short delta;
@@ -2615,7 +2615,7 @@ struct sAiVEntry12C558 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C558(cGateControl* self, void* obj)
+extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, void* obj)
 {
     sAiVEntry12C558* vt = *(sAiVEntry12C558**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -2623,7 +2623,7 @@ extern "C" void func_0012C558(cGateControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012C590);
+INCLUDE_ASM("ai/ai", cGateControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sAiVEntry12C590 {
     short delta;
@@ -2631,7 +2631,7 @@ struct sAiVEntry12C590 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C590(cGateControl* self, void* obj)
+extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, void* obj)
 {
     sAiVEntry12C590* vt = *(sAiVEntry12C590**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -2639,7 +2639,7 @@ extern "C" void func_0012C590(cGateControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012C5C8);
+INCLUDE_ASM("ai/ai", cFinishLineControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" float func_00119368(void* self, int a1);
 extern float D_004A4C8C;
@@ -2675,7 +2675,7 @@ struct sAiObj12C5C8
     char* mRider;
 };
 
-extern "C" void func_0012C5C8(cFinishLineControl* self)
+extern "C" void cFinishLineControl_gainFocus(cFinishLineControl* self)
 {
     func_00119368(*(void**)((char*)self->mRider + 0x790), 1);
     char* r = (char*)self->mRider;
@@ -2699,7 +2699,7 @@ extern "C" void func_0012C5C8(cFinishLineControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012C678);
+INCLUDE_ASM("ai/ai", cFinishLineControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void func_0010E028(void* self, int mode, float t);
@@ -2768,7 +2768,7 @@ struct sAiObj12C678
     char* mRider;
 };
 
-extern "C" void func_0012C678(cFinishLineControl* self)
+extern "C" void cFinishLineControl_update(cFinishLineControl* self)
 {
     int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int prev = anim;
@@ -2853,7 +2853,7 @@ extern "C" void func_0012C678(cFinishLineControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012C9C0);
+INCLUDE_ASM("ai/ai", cFinishLineControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012C9C0 {
     short delta;
@@ -2861,7 +2861,7 @@ struct sVEntry0012C9C0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C9C0(cFinishLineControl* self, void* obj)
+extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, void* obj)
 {
     sVEntry0012C9C0* vt = *(sVEntry0012C9C0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
@@ -2869,7 +2869,7 @@ extern "C" void func_0012C9C0(cFinishLineControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012C9F8);
+INCLUDE_ASM("ai/ai", cFinishLineControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012C9F8 {
     short delta;
@@ -2877,7 +2877,7 @@ struct sVEntry0012C9F8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C9F8(cFinishLineControl* self, void* obj)
+extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, void* obj)
 {
     sVEntry0012C9F8* vt = *(sVEntry0012C9F8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
@@ -2885,7 +2885,7 @@ extern "C" void func_0012C9F8(cFinishLineControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012CA30);
+INCLUDE_ASM("ai/ai", cWipeoutControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_0029E578(void* self, void* a1);
@@ -2934,7 +2934,7 @@ struct sAiObj12CA30
     char* mRider;           // 0x80
 };
 
-extern "C" void func_0012CA30(cWipeoutControl* self)
+extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
 {
     sVecPair_12CA30* p30 = &(*(sVecPair_12CA30*)&self->BoardPrevPose);
     *(int*)((char*)self->mRider + 0x2EC) = 0;
@@ -2959,7 +2959,7 @@ extern "C" void func_0012CA30(cWipeoutControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012CB68);
+INCLUDE_ASM("ai/ai", cWipeoutControl_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2984,7 +2984,7 @@ struct sAiObj12CB68
 };
 
 // Decays or charges the AI's 0x70 meter (updating its sound), then runs the current state's handler.
-extern "C" void func_0012CB68(cWipeoutControl* self, int* input)
+extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
 {
     func_00114130((char*)self->mRider, 0, 0);
     if (cRider_checkForReset_CB68((char*)self->mRider, (*input >> 12) & 1, 0)) {
@@ -4091,7 +4091,7 @@ extern "C" float func_0012E528(cWipeoutControl* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ai", func_0012E690);
+INCLUDE_ASM("ai/ai", cWipeoutControl_loseFocus);
 #ifdef SKIP_ASM
 struct sVEntry0012E690 {
     short delta;
@@ -4104,7 +4104,7 @@ extern "C" void func_0010E028(void* self, int mode, float t);
 extern "C" void* func_0028B180();
 extern "C" void func_002A02D8(void*, void*);
 
-extern "C" void func_0012E690(cWipeoutControl* self)
+extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
 {
     if ((func_001298C8() & 1) == 0)
     {
@@ -4120,7 +4120,7 @@ extern "C" void func_0012E690(cWipeoutControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012E708);
+INCLUDE_ASM("ai/ai", cWipeoutControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012E708 {
     short delta;
@@ -4128,7 +4128,7 @@ struct sVEntry0012E708 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012E708(cWipeoutControl* self, void* obj)
+extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, void* obj)
 {
     sVEntry0012E708* vt = *(sVEntry0012E708**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x80);
@@ -4136,7 +4136,7 @@ extern "C" void func_0012E708(cWipeoutControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012E740);
+INCLUDE_ASM("ai/ai", cWipeoutControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012E740 {
     short delta;
@@ -4144,7 +4144,7 @@ struct sVEntry0012E740 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012E740(cWipeoutControl* self, void* obj)
+extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, void* obj)
 {
     sVEntry0012E740* vt = *(sVEntry0012E740**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x80);
@@ -4152,7 +4152,7 @@ extern "C" void func_0012E740(cWipeoutControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012E778);
+INCLUDE_ASM("ai/ai", cBumpControl_update);
 #ifdef SKIP_ASM
 extern "C" int func_00116378(void*);
 // The unit declares cRider_checkForReset as void, but this caller tests its result: bind an int view by asm label.
@@ -4205,7 +4205,7 @@ static inline float aiDot_12E778(const sAiVec4_12E778& a, const sAiVec4_12E778& 
     return r;
 }
 
-extern "C" void func_0012E778(cBumpControl* self, void* in)
+extern "C" void cBumpControl_update(cBumpControl* self, void* in)
 {
     if (func_00116378(*(void**)self))
         return;
@@ -4259,12 +4259,12 @@ extern "C" void func_0012E778(cBumpControl* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012E980);
+INCLUDE_ASM("ai/ai", cPrewindControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void func_0012EE30(cPrewindControl*, void*);
 extern char D_0043D788[];
 
-extern "C" void func_0012E980(cPrewindControl* self)
+extern "C" void cPrewindControl_gainFocus(cPrewindControl* self)
 {
     char* p = *(char**)self;
     *(float*)(p + 0x200) = 0.03333333507180214f;
@@ -4274,15 +4274,15 @@ extern "C" void func_0012E980(cPrewindControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012E9B0__FPv);
+INCLUDE_ASM("ai/ai", cPrewindControl_loseFocus__FPv);
 #ifdef SKIP_ASM
-void func_0012E9B0(void* self)
+void cPrewindControl_loseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012E9B8);
+INCLUDE_ASM("ai/ai", cPrewindControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int func_00106848(void*);
@@ -4333,7 +4333,7 @@ static inline float aiAbs_12E9B8(float x)
     return r;
 }
 
-extern "C" void func_0012E9B8(cPrewindControl* self, void* in)
+extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
 {
     if (func_00116378(*(void**)self))
         return;
@@ -4557,7 +4557,7 @@ extern "C" float func_0012F118(cPrewindControl* self, int* out)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012F230);
+INCLUDE_ASM("ai/ai", cResetControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" char* func_00311B20(void*, int);
 extern "C" int func_0012F588(cResetControl* self);
@@ -4591,7 +4591,7 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
     return p;
 }
 
-extern "C" void func_0012F230(cResetControl* self)
+extern "C" void cResetControl_gainFocus(cResetControl* self)
 {
     int* flag = (int*)((char*)self + 4);
     *flag = 0;
@@ -4621,7 +4621,7 @@ extern "C" void func_0012F230(cResetControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012F398);
+INCLUDE_ASM("ai/ai", cResetControl_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -4646,7 +4646,7 @@ struct sVec4_12F398
 extern "C" sVec4_12F398 func_0026A8B8(void* self, float t);
 extern "C" void func_0011D660_12F398(void* self, void* a, sVec4_12F398* b, int n, float t) __asm__("func_0011D660");
 
-extern "C" void func_0012F398(cResetControl* self)
+extern "C" void cResetControl_update(cResetControl* self)
 {
     float t = self->FadePercent;
     float step = *(float*)((char*)self->mRider + 0x300) * 0.02500000223517418f;
@@ -4696,7 +4696,7 @@ extern "C" int func_0012F588(cResetControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012F5B0);
+INCLUDE_ASM("ai/ai", cResetControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012F5B0 {
     short delta;
@@ -4704,7 +4704,7 @@ struct sVEntry0012F5B0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012F5B0(cResetControl* self, void* obj)
+extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, void* obj)
 {
     sVEntry0012F5B0* vt = *(sVEntry0012F5B0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -4712,7 +4712,7 @@ extern "C" void func_0012F5B0(cResetControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012F5E8);
+INCLUDE_ASM("ai/ai", cResetControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012F5E8 {
     short delta;
@@ -4720,7 +4720,7 @@ struct sVEntry0012F5E8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012F5E8(cResetControl* self, void* obj)
+extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, void* obj)
 {
     sVEntry0012F5E8* vt = *(sVEntry0012F5E8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -4728,7 +4728,7 @@ extern "C" void func_0012F5E8(cResetControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012F620);
+INCLUDE_ASM("ai/ai", cNaturalAirControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" float func_0031C228(float x);
 
@@ -4757,7 +4757,7 @@ static inline float aiAtan2_12F620(float y, float x)
     return r;
 }
 
-extern "C" void func_0012F620(cNaturalAirControl* self)
+extern "C" void cNaturalAirControl_gainFocus(cNaturalAirControl* self)
 {
     char* r = (char*)self->mRider;
     float b = *(float*)(r + 0x220);
@@ -4779,7 +4779,7 @@ extern "C" void func_0012F620(cNaturalAirControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012F730);
+INCLUDE_ASM("ai/ai", cNaturalAirControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int func_00106848(void*);
@@ -4855,7 +4855,7 @@ struct sAiObj12F730
     char* mRider;    // 0x14
 };
 
-extern "C" void func_0012F730(cNaturalAirControl* self, void* in)
+extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, void* in)
 {
     if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
@@ -4935,13 +4935,13 @@ extern "C" void func_0012F730(cNaturalAirControl* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012FB68);
+INCLUDE_ASM("ai/ai", cNaturalAirControl_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 extern "C" void func_00311E88(void*, int, float);
 extern "C" char* func_00311B20(void*, int);
 
-extern "C" void func_0012FB68(cNaturalAirControl* self, int a1)
+extern "C" void cNaturalAirControl_loseFocus(cNaturalAirControl* self, int a1)
 {
     if (a1)
     {
@@ -4956,7 +4956,7 @@ extern "C" void func_0012FB68(cNaturalAirControl* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012FBF0);
+INCLUDE_ASM("ai/ai", cNaturalAirControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012FBF0 {
     short delta;
@@ -4964,7 +4964,7 @@ struct sVEntry0012FBF0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012FBF0(cNaturalAirControl* self, void* obj)
+extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, void* obj)
 {
     sVEntry0012FBF0* vt = *(sVEntry0012FBF0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -4972,7 +4972,7 @@ extern "C" void func_0012FBF0(cNaturalAirControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012FC28);
+INCLUDE_ASM("ai/ai", cNaturalAirControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry0012FC28 {
     short delta;
@@ -4980,7 +4980,7 @@ struct sVEntry0012FC28 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012FC28(cNaturalAirControl* self, void* obj)
+extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, void* obj)
 {
     sVEntry0012FC28* vt = *(sVEntry0012FC28**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -4988,9 +4988,9 @@ extern "C" void func_0012FC28(cNaturalAirControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012FC60__FPv);
+INCLUDE_ASM("ai/ai", cBoardPressControl_gainFocus__FPv);
 #ifdef SKIP_ASM
-void func_0012FC60(void* self)
+void cBoardPressControl_gainFocus(void* self)
 {
     *(int*)self = 0;
     *(int*)((char*)*(void**)((char*)self + 0x14) + 0x360) = 0;
@@ -5002,7 +5002,7 @@ void func_0012FC60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012FC80);
+INCLUDE_ASM("ai/ai", cBoardPressControl_update);
 #ifdef SKIP_ASM
 extern "C" int func_00116378(void*);
 // The unit declares cRider_checkForReset as void, but this caller tests its result: bind an int view by asm label.
@@ -5051,7 +5051,7 @@ static inline float aiClamp_12FC80(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0012FC80(cBoardPressControl* self, void* in)
+extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
 {
     if (func_00116378(self->mRider))
         return;
@@ -5103,9 +5103,9 @@ extern "C" void func_0012FC80(cBoardPressControl* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012FE98);
+INCLUDE_ASM("ai/ai", cBoardPressControl_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_0012FE98(cBoardPressControl* self)
+extern "C" void cBoardPressControl_loseFocus(cBoardPressControl* self)
 {
     char* a = (char*)self->mRider;
     *(int*)(a + 0x330) = 0;
@@ -6006,7 +6006,7 @@ extern "C" void func_00131428(cBoardPressControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00131598);
+INCLUDE_ASM("ai/ai", cBoardPressControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00131598 {
     short delta;
@@ -6014,7 +6014,7 @@ struct sVEntry00131598 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00131598(cBoardPressControl* self, void* obj)
+extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, void* obj)
 {
     sVEntry00131598* vt = *(sVEntry00131598**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -6022,7 +6022,7 @@ extern "C" void func_00131598(cBoardPressControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001315D0);
+INCLUDE_ASM("ai/ai", cBoardPressControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001315D0 {
     short delta;
@@ -6030,7 +6030,7 @@ struct sVEntry001315D0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001315D0(cBoardPressControl* self, void* obj)
+extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, void* obj)
 {
     sVEntry001315D0* vt = *(sVEntry001315D0**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -6038,9 +6038,9 @@ extern "C" void func_001315D0(cBoardPressControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00131608__FPv);
+INCLUDE_ASM("ai/ai", cCruiseControl_gainFocus__FPv);
 #ifdef SKIP_ASM
-void func_00131608(void* self)
+void cCruiseControl_gainFocus(void* self)
 {
     *(int*)((char*)*(void**)self + 0x35c) = 0;
     *(int*)((char*)*(void**)self + 0x360) = 0;
@@ -6048,7 +6048,7 @@ void func_00131608(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00131620);
+INCLUDE_ASM("ai/ai", cCruiseControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int func_00116378(void*);
@@ -6155,7 +6155,7 @@ static inline float aiClamp_1620(float v, float lo, float hi)
     return r;
 }
 
-extern "C" void func_00131620(cCruiseControl* self, void* in)
+extern "C" void cCruiseControl_update(cCruiseControl* self, void* in)
 {
     float zero = 0.0f;
     float x = ((sAiBitsX_1620*)in)->v * 0.032258063554763794f;
@@ -6320,13 +6320,13 @@ extern "C" void func_00131620(cCruiseControl* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00131C30);
+INCLUDE_ASM("ai/ai", cCruiseControl_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 extern "C" void func_00311E88(void*, int, float);
 extern "C" char* func_00311B20(void*, int);
 
-extern "C" void func_00131C30(cCruiseControl* self, int a1)
+extern "C" void cCruiseControl_loseFocus(cCruiseControl* self, int a1)
 {
     if (a1 != 4)
     {
@@ -6359,9 +6359,9 @@ extern "C" int func_00131CC0(cCruiseControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00131D08);
+INCLUDE_ASM("ai/ai", cRailslideControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" void func_00131D08(cRailslideControl* self)
+extern "C" void cRailslideControl_gainFocus(cRailslideControl* self)
 {
     *(int*)&self->RSpinAngle = 0;
     *(int*)((char*)self->mRider + 0x360) = 0;
@@ -6373,7 +6373,7 @@ extern "C" void func_00131D08(cRailslideControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00131D30);
+INCLUDE_ASM("ai/ai", cRailslideControl_update);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -6409,7 +6409,7 @@ static inline float clamp_131D30(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_00131D30(cRailslideControl* self, void* in)
+extern "C" void cRailslideControl_update(cRailslideControl* self, void* in)
 {
     if (cRider_checkForReset_i(self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
@@ -6479,9 +6479,9 @@ extern "C" void func_00131D30(cRailslideControl* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00132048);
+INCLUDE_ASM("ai/ai", cRailslideControl_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_00132048(cRailslideControl* self)
+extern "C" void cRailslideControl_loseFocus(cRailslideControl* self)
 {
     char* r = (char*)self->mRider;
     *(float*)(r + 0x23C) = 0.06666667014360428f;
@@ -6596,7 +6596,7 @@ extern "C" void func_00132060(cRailslideControl* self, int dir)
 INCLUDE_ASM("ai/ai", func_00132620);
 #ifdef SKIP_ASM
 // PORT: prototype mismatch. func_0011FEC8 is defined with one param, but its body
-// forwards $5 to func_00111538.
+// forwards $5 to cRiderHandler__setControlState.
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 extern "C" void* func_0028B180();
 extern "C" void func_00299B70(void* snd, void* rider);
@@ -6660,7 +6660,7 @@ INCLUDE_ASM("ai/ai", func_00132770);
 #ifdef SKIP_ASM
 int func_0011FE98(void* self);
 // PORT: prototype mismatch. func_0011FEC8 is defined with one param, but its body
-// forwards $5 to func_00111538.
+// forwards $5 to cRiderHandler__setControlState.
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 extern "C" int func_00311AE8(void*, int);
 extern "C" char* func_00311B20(void*, int);
@@ -6699,7 +6699,7 @@ extern "C" int func_00132770(cRailslideControl* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00132840);
+INCLUDE_ASM("ai/ai", cRailslideControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00132840 {
     short delta;
@@ -6707,7 +6707,7 @@ struct sVEntry00132840 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00132840(cRailslideControl* self, void* obj)
+extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, void* obj)
 {
     sVEntry00132840* vt = *(sVEntry00132840**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -6715,7 +6715,7 @@ extern "C" void func_00132840(cRailslideControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00132878);
+INCLUDE_ASM("ai/ai", cRailslideControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00132878 {
     short delta;
@@ -6723,7 +6723,7 @@ struct sVEntry00132878 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00132878(cRailslideControl* self, void* obj)
+extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, void* obj)
 {
     sVEntry00132878* vt = *(sVEntry00132878**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -6731,7 +6731,7 @@ extern "C" void func_00132878(cRailslideControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001328B0);
+INCLUDE_ASM("ai/ai", cHandplantControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_0029DC48(void* self, void* rider);
@@ -6740,7 +6740,7 @@ extern "C" void func_00132FB8(cHandplantControl* self, int a1, int a2);
 extern "C" void func_00311E88(void*, int, float);
 extern char D_00459FC8[];
 
-extern "C" void func_001328B0(cHandplantControl* self)
+extern "C" void cHandplantControl_gainFocus(cHandplantControl* self)
 {
     float k = 0.05000000447034836f;
     float blend = 0.33000001311302185f;
@@ -6830,7 +6830,7 @@ extern "C" void func_001329B0(sState_29B0* s, sOwner_29B0* o, int flag, float t)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00132A30);
+INCLUDE_ASM("ai/ai", cHandplantControl_update);
 #ifdef SKIP_ASM
 extern "C" int cRider_checkForReset_2A30(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int func_00312AE8(void* self, int i);
@@ -6877,7 +6877,7 @@ struct sAi_2A30 {
     cRider* r;    // 0x14
 };
 
-extern "C" void func_00132A30(cHandplantControl* self, sPad_2A30* in)
+extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
 {
     if (cRider_checkForReset_2A30(self->mRider, (in->flags >> 12) & 1, 0) != 0) {
         return;
@@ -7004,9 +7004,9 @@ extern "C" void func_00132A30(cHandplantControl* self, sPad_2A30* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00132F98);
+INCLUDE_ASM("ai/ai", cHandplantControl_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_00132F98(cHandplantControl* self)
+extern "C" void cHandplantControl_loseFocus(cHandplantControl* self)
 {
     char* a = (char*)self->mRider;
     *(int*)(a + 0x32C) = 0;
@@ -7027,7 +7027,7 @@ struct sAnimEntry_132FB8
     int anim;
     int flip;
 };
-// Typed view of D_00459FC8 (func_001328B0 reads it as raw bytes); bound by asm label.
+// Typed view of D_00459FC8 (cHandplantControl_gainFocus reads it as raw bytes); bound by asm label.
 extern sAnimEntry_132FB8 D_00459FC8_tbl[][2] __asm__("D_00459FC8");
 
 struct sVec4_132FB8
@@ -7086,7 +7086,7 @@ extern "C" void func_00132FB8(cHandplantControl* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001330B8);
+INCLUDE_ASM("ai/ai", cHandplantControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001330B8 {
     short delta;
@@ -7094,7 +7094,7 @@ struct sVEntry001330B8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001330B8(cHandplantControl* self, void* obj)
+extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, void* obj)
 {
     sVEntry001330B8* vt = *(sVEntry001330B8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -7102,7 +7102,7 @@ extern "C" void func_001330B8(cHandplantControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001330F0);
+INCLUDE_ASM("ai/ai", cHandplantControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001330F0 {
     short delta;
@@ -7110,7 +7110,7 @@ struct sVEntry001330F0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001330F0(cHandplantControl* self, void* obj)
+extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, void* obj)
 {
     sVEntry001330F0* vt = *(sVEntry001330F0**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -7118,7 +7118,7 @@ extern "C" void func_001330F0(cHandplantControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00133128);
+INCLUDE_ASM("ai/ai", cSpinControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -7128,7 +7128,7 @@ extern "C" char* func_00311B20(void*, int);
 extern "C" float func_00135180(cSpinControl* self);
 extern "C" void func_00135B30(cSpinControl* self, float a, float b);
 
-extern "C" void func_00133128(cSpinControl* self)
+extern "C" void cSpinControl_gainFocus(cSpinControl* self)
 {
     float lo = 4.499661445617676f;
     self->CurrentGrab = -1;
@@ -7196,7 +7196,7 @@ extern "C" void func_00133128(cSpinControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00133308);
+INCLUDE_ASM("ai/ai", cSpinControl_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares cRider_checkForReset earlier with a void return; same symbol.
@@ -7372,7 +7372,7 @@ static inline void aiSetChannel_133308(cRider* r, int i, float rate, float targe
     r->mSlewed[i].target = target;
 }
 
-extern "C" void func_00133308(sSpinCtl_133308* self, int* input)
+extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
 {
     if (cRider_checkForReset_3308(self->rider, (*input >> 12) & 1, 0))
         return;
@@ -7875,13 +7875,13 @@ extern "C" void func_00133308(sSpinCtl_133308* self, int* input)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00134CB0);
+INCLUDE_ASM("ai/ai", cSpinControl_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void func_00311E88(void*, int, float);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void func_00134DD0(void* self, void* pos);
 
-extern "C" void func_00134CB0(cSpinControl* self)
+extern "C" void cSpinControl_loseFocus(cSpinControl* self)
 {
     func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, 0.33000001311302185f);
     char* r = (char*)self->mRider;
@@ -8501,7 +8501,7 @@ extern "C" int func_00135BE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00135CB0);
+INCLUDE_ASM("ai/ai", cSpinControl_predictSpinSec);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -8516,7 +8516,7 @@ static inline float aiAbs_135CB0(float x)
     return r;
 }
 
-extern "C" void func_00135CB0(cSpinControl* self, float* a, float* b)
+extern "C" void cSpinControl_predictSpinSec(cSpinControl* self, float* a, float* b)
 {
     float pi = 3.1415929794311523f;
     float d = aiAbs_135CB0(self->CurSpin - self->DesSpin);
@@ -8536,7 +8536,7 @@ extern "C" void func_00135CB0(cSpinControl* self, float* a, float* b)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00135DB0);
+INCLUDE_ASM("ai/ai", cSpinControl_predictFlipSec);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -8551,7 +8551,7 @@ static inline float aiAbs_135DB0(float x)
     return r;
 }
 
-extern "C" void func_00135DB0(cSpinControl* self, float* a, float* b)
+extern "C" void cSpinControl_predictFlipSec(cSpinControl* self, float* a, float* b)
 {
     float twopi = 6.283185958862305f;
     float d = aiAbs_135DB0(self->CurFlip - self->DesFlip);
@@ -8571,11 +8571,11 @@ extern "C" void func_00135DB0(cSpinControl* self, float* a, float* b)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00135EB0);
+INCLUDE_ASM("ai/ai", cSpinControl_isGrabHeld);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 
-extern "C" int func_00135EB0(cSpinControl* self)
+extern "C" int cSpinControl_isGrabHeld(cSpinControl* self)
 {
     int r = 0;
     if (self->GrabState == 2)
@@ -8587,11 +8587,11 @@ extern "C" int func_00135EB0(cSpinControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00135EF0);
+INCLUDE_ASM("ai/ai", cSpinControl_isTweakHeld);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 
-extern "C" int func_00135EF0(cSpinControl* self)
+extern "C" int cSpinControl_isTweakHeld(cSpinControl* self)
 {
     int r = 0;
     if (self->GrabState == 4)
@@ -8603,11 +8603,11 @@ extern "C" int func_00135EF0(cSpinControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00135F30);
+INCLUDE_ASM("ai/ai", cSpinControl_isUberHeld);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 
-extern "C" int func_00135F30(cSpinControl* self)
+extern "C" int cSpinControl_isUberHeld(cSpinControl* self)
 {
     int r = 0;
     if (self->GrabState == 4)
@@ -8644,9 +8644,9 @@ extern "C" float func_00135F70(cSpinControl* self, int* out)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001360C8);
+INCLUDE_ASM("ai/ai", cSpinControl_getFlipSpinInputAng);
 #ifdef SKIP_ASM
-extern "C" float func_001360C8(cSpinControl* self, int* out)
+extern "C" float cSpinControl_getFlipSpinInputAng(cSpinControl* self, int* out)
 {
     int b = self->FlipSpinInputAng == 1.0000000150474662e+30f;
     *out = b;
@@ -8684,7 +8684,7 @@ extern "C" float func_00136168(cSpinControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001361F8);
+INCLUDE_ASM("ai/ai", cSpinControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001361F8 {
     short delta;
@@ -8692,7 +8692,7 @@ struct sVEntry001361F8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001361F8(cSpinControl* self, void* obj)
+extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, void* obj)
 {
     sVEntry001361F8* vt = *(sVEntry001361F8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x58);
@@ -8700,7 +8700,7 @@ extern "C" void func_001361F8(cSpinControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136230);
+INCLUDE_ASM("ai/ai", cSpinControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00136230 {
     short delta;
@@ -8708,7 +8708,7 @@ struct sVEntry00136230 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00136230(cSpinControl* self, void* obj)
+extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, void* obj)
 {
     sVEntry00136230* vt = *(sVEntry00136230**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x58);
@@ -8716,7 +8716,7 @@ extern "C" void func_00136230(cSpinControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136268);
+INCLUDE_ASM("ai/ai", cUberGrindControl_gainFocus);
 #ifdef SKIP_ASM
 float func_00119938(void* self, int a1, int a2);
 
@@ -8727,7 +8727,7 @@ struct sAnimSet_00136268 {
 };
 extern sAnimSet_00136268 D_0045A038[];
 
-extern "C" void func_00136268(cUberGrindControl* self)
+extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
 {
     sAnimSet_00136268* e = &D_0045A038[self->CurrentGrind];
     char* r = (char*)self->mRider;
@@ -8763,7 +8763,7 @@ extern "C" void func_00136268(cUberGrindControl* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136508);
+INCLUDE_ASM("ai/ai", cUberGrindControl_update);
 #ifdef SKIP_ASM
 // PORT: the unit declares cRiderAnimBase_play as void, but it returns the new anim index.
 extern "C" int cRiderAnimBase_play_i136508(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
@@ -8812,7 +8812,7 @@ struct sAiObj136508
     char* mRider;
 };
 
-extern "C" void func_00136508(cUberGrindControl* self, void* in)
+extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
 {
     if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
@@ -8908,7 +8908,7 @@ extern "C" void func_00136508(cUberGrindControl* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001368E8);
+INCLUDE_ASM("ai/ai", cUberGrindControl_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001368E8 {
     short delta;
@@ -8916,7 +8916,7 @@ struct sVEntry001368E8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001368E8(cUberGrindControl* self, void* obj)
+extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, void* obj)
 {
     sVEntry001368E8* vt = *(sVEntry001368E8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -8924,7 +8924,7 @@ extern "C" void func_001368E8(cUberGrindControl* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136920);
+INCLUDE_ASM("ai/ai", cUberGrindControl_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00136920 {
     short delta;
@@ -8932,7 +8932,7 @@ struct sVEntry00136920 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00136920(cUberGrindControl* self, void* obj)
+extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, void* obj)
 {
     sVEntry00136920* vt = *(sVEntry00136920**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -8942,24 +8942,24 @@ extern "C" void func_00136920(cUberGrindControl* self, void* obj)
 extern "C" void cRider_updateOrientationImplicit(void*);
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136958);
+INCLUDE_ASM("ai/ai", cStaticMotion_step);
 #ifdef SKIP_ASM
-extern "C" void func_00136958(cStaticMotion* self)
+extern "C" void cStaticMotion_step(cStaticMotion* self)
 {
     cRider_updateOrientationImplicit(*(void**)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136978__FPv);
+INCLUDE_ASM("ai/ai", cStaticMotion_resolve__FPv);
 #ifdef SKIP_ASM
-void func_00136978(void* self)
+void cStaticMotion_resolve(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136980);
+INCLUDE_ASM("ai/ai", cWipeoutMotion_cWipeoutMotion);
 #ifdef SKIP_ASM
 extern "C" void cRider_cRider(void* self);
 
@@ -8974,7 +8974,7 @@ extern const sVtbl22_136980 D_004597F8;
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0x40, vbase at +0x70); when not most-derived, g++ copies cRider's overridden vtables to the stack and
 // fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
-extern "C" void* func_00136980(cWipeoutMotion* self, int inChrg)
+extern "C" void* cWipeoutMotion_cWipeoutMotion(cWipeoutMotion* self, int inChrg)
 {
     if (inChrg)
     {
@@ -9002,7 +9002,7 @@ extern "C" void* func_00136980(cWipeoutMotion* self, int inChrg)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00136AD0);
+INCLUDE_ASM("ai/ai", cWipeoutMotion__cWipeoutMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/ai_classes.h"
@@ -9013,7 +9013,7 @@ cVbDtor00136AD0::~cVbDtor00136AD0()
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor00136AD0; expose it under the address-derived name.
-__asm__(".globl func_00136AD0\n.type func_00136AD0,@function\nfunc_00136AD0 = _$_15cVbDtor00136AD0\n.size func_00136AD0,0x170\n");
+__asm__(".globl cWipeoutMotion__cWipeoutMotion\n.type cWipeoutMotion__cWipeoutMotion,@function\ncWipeoutMotion__cWipeoutMotion = _$_15cVbDtor00136AD0\n.size cWipeoutMotion__cWipeoutMotion,0x170\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00136AD0$12cRiderVbC_ai = D_004597B0\n"

@@ -212,13 +212,13 @@ extern "C" void func_00136DE0(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136E98);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_step);
 #ifdef SKIP_ASM
 extern "C" void func_00136F30();
 extern "C" void func_00137D18(void*);
 extern "C" void func_00137750(cWipeoutMotion*);
 
-extern "C" void func_00136E98(int* self)
+extern "C" void cWipeoutMotion_step(int* self)
 {
     func_00136F30();
     if (*self == 0)
@@ -233,13 +233,13 @@ extern "C" void func_00136E98(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136EE0);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolve);
 #ifdef SKIP_ASM
 extern "C" void func_00137138();
 extern "C" void func_00138640(void*);
 extern "C" void func_00137860(void*);
 
-extern "C" void func_00136EE0(int* self)
+extern "C" void cWipeoutMotion_resolve(int* self)
 {
     func_00137138();
     if (*self == 0)
@@ -254,9 +254,9 @@ extern "C" void func_00136EE0(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136F28__FPv);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_loseFocus__FPv);
 #ifdef SKIP_ASM
-void func_00136F28(void* self)
+void cWipeoutMotion_loseFocus(void* self)
 {
 }
 #endif
@@ -1608,7 +1608,7 @@ extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138AD8);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00138AD8 {
     short delta;
@@ -1616,7 +1616,7 @@ struct sVEntry00138AD8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00138AD8(cWipeoutMotion* self, void* obj)
+extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, void* obj)
 {
     sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
@@ -1624,7 +1624,7 @@ extern "C" void func_00138AD8(cWipeoutMotion* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138B10);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00138B10 {
     short delta;
@@ -1632,7 +1632,7 @@ struct sVEntry00138B10 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00138B10(cWipeoutMotion* self, void* obj)
+extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, void* obj)
 {
     sVEntry00138B10* vt = *(sVEntry00138B10**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x40);

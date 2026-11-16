@@ -62,7 +62,7 @@ struct cCompHead02_s12 { char pad[0x40]; };
 class cCompPart02_s12 : public cCompHead02_s12, virtual public cRiderVb_s12 {
 public:
     char body[0x2C];
-    virtual ~cCompPart02_s12();             // func_00136AD0
+    virtual ~cCompPart02_s12();             // cWipeoutMotion__cWipeoutMotion
 };
 
 class cCompPart03_s12 : virtual public cRiderVb_s12 { public: char body[0xC]; };
@@ -126,66 +126,66 @@ class cCompPart19_s12 : virtual public cRiderVb_s12 { public: char body[0xC]; };
 class cCompPart20_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0xBC];
-    virtual ~cCompPart20_s12();             // func_002DCDA0
+    virtual ~cCompPart20_s12();             // cBoardWakeFX__cBoardWakeFX
 };
 
 class cCompPart21_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0xAC];
-    virtual ~cCompPart21_s12();             // func_002DA8E8
+    virtual ~cCompPart21_s12();             // cBoardSparkFX__cBoardSparkFX
 };
 
 class cCompPart22_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0xEC];
-    virtual ~cCompPart22_s12();             // func_002E83F0
+    virtual ~cCompPart22_s12();             // cBoardTrailFX__cBoardTrailFX
 };
 
 class cCompPart23_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0x3AC];
-    virtual ~cCompPart23_s12();             // func_002E64C0
+    virtual ~cCompPart23_s12();             // cSpeedBoostFX__cSpeedBoostFX
 };
 
 class cCompPart24_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0x10C];
-    virtual ~cCompPart24_s12();             // func_002EAC60
+    virtual ~cCompPart24_s12();             // cTrickBoostFX__cTrickBoostFX
 };
 
 class cCompPart25_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0x1C];
-    virtual ~cCompPart25_s12();             // func_002EF530
+    virtual ~cCompPart25_s12();             // cAirStreamerFX__cAirStreamerFX
 };
 
 class cCompPart26_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0xC];
-    virtual ~cCompPart26_s12();             // func_002D4A70
+    virtual ~cCompPart26_s12();             // cAngerFX__cAngerFX
 };
 
 class cCompPart27_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0x3C];
-    virtual ~cCompPart27_s12();             // func_002E37D0
+    virtual ~cCompPart27_s12();             // cPlayerIndicatorFX__cPlayerIndicatorFX
 };
 
 class cCompPart28_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0x12C];
-    virtual ~cCompPart28_s12();             // func_002DF1C8
+    virtual ~cCompPart28_s12();             // cDynamicSprayFX__cDynamicSprayFX
 };
 
 class cCompPart29_s12 : virtual public cRiderVb_s12 {
 public:
     char body[0xAC];
-    virtual ~cCompPart29_s12();             // func_002F0FE8
+    virtual ~cCompPart29_s12();             // cPunchFX__cPunchFX
 };
 
 class cCompPart30_s12 : virtual public cRiderVb_s12 {
 public:
-    virtual ~cCompPart30_s12();             // func_002F6388
+    virtual ~cCompPart30_s12();             // cCheatFX__cCheatFX
 };
 
 class cComp_s12 : public cCompPart00_s12, public cCompPart01_s12, public cCompPart02_s12, public cCompPart03_s12, public cCompPart04_s12, public cCompPart05_s12, public cCompPart06_s12, public cCompPart07_s12, public cCompPart08_s12, public cCompPart09_s12, public cCompPart10_s12, public cCompPart11_s12, public cCompPart12_s12, public cCompPart13_s12, public cCompPart14_s12, public cCompPart15_s12, public cCompPart16_s12, public cCompPart17_s12, public cCompPart18_s12, public cCompPart19_s12, public cCompPart20_s12, public cCompPart21_s12, public cCompPart22_s12, public cCompPart23_s12, public cCompPart24_s12, public cCompPart25_s12, public cCompPart26_s12, public cCompPart27_s12, public cCompPart28_s12, public cCompPart29_s12, public cCompPart30_s12 {
@@ -194,7 +194,7 @@ public:
     // PORT: cRiderHandler_cRiderHandler constructs this part (fields up to 0xDE8 and the vptr at 0xDE8)
     cComp_s12();
     ~cComp_s12() {}
-    // Own vtable (D_00458710): a pure slot, then func_00111AC0 and func_00111D98.
+    // Own vtable (D_00458710): a pure slot, then cRiderHandler_writeToReplayFrame and cRiderHandler_readFromReplayFrame.
     virtual void v01() = 0;
     virtual void v02();
     virtual void v03();

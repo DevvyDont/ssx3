@@ -61,8 +61,8 @@ struct cComputer {
                                //       rider through it (cAI_initComputerRiders, func_00100680 ...)
     char unk_01C[0xDC4];       // 0x01C the other parts of cRiderHandler (virtual-base pointers at the same offsets
                                //       as in cPlayer: 0x024, 0x070, 0x0A0, 0x100 ... 0xC70, 0xD20)
-    int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState; [R] func_00143FF0; [O]
-    int ControlState;          // 0xDE4 [P] cRiderHandler::_getControlState; [R] func_00143FF8; [O]
+    int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState; [R] cRiderHandler__getMotionState; [O]
+    int ControlState;          // 0xDE4 [P] cRiderHandler::_getControlState; [R] cRiderHandler__getControlState; [O]
     void** mVtbl;              // 0xDE8 [R] _vt$9cComputer (D_004585F0: func_0010A768, func_0010A898)
     char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned
     // ---- base cComputerState (0xDF0-0xF40) ----

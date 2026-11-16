@@ -56,7 +56,7 @@ public:
     static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
-void func_002EADC0_AAE0(void* self) __asm__("func_002EADC0__FPv");
+void cTrickBoostFX_readFromReplayFrame_AAE0(void* self) __asm__("cTrickBoostFX_readFromReplayFrame__FPv");
 
 struct cBtfIn_2EAAE0 {
     char data[0x10];

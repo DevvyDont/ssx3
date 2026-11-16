@@ -48,7 +48,7 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 
 extern char D_00487B78[];
 
-extern "C" void func_002EF6A0_F3B0(void* self) __asm__("func_002EF6A0");
+extern "C" void cAirStreamerFX_readFromReplayFrame_F3B0(void* self) __asm__("cAirStreamerFX_readFromReplayFrame");
 
 struct cRsmItem_2EF3B0 {
     char data[0x20];

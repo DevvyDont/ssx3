@@ -53,7 +53,7 @@ struct cCompHead00_cmp { char pad[0x18]; };
 class cCompPart00_cmp : public cCompHead00_cmp, virtual public cRiderVb_cmp {
 public:
     char body[0x4];
-    cCompPart00_cmp();              // func_0013C650
+    cCompPart00_cmp();              // cGroundMotion_cGroundMotion
 };
 
 struct cCompHead01_cmp { char pad[0x4]; };
@@ -65,7 +65,7 @@ struct cCompHead02_cmp { char pad[0x40]; };
 class cCompPart02_cmp : public cCompHead02_cmp, virtual public cRiderVb_cmp {
 public:
     char body[0x2C];
-    cCompPart02_cmp();              // func_00136980
+    cCompPart02_cmp();              // cWipeoutMotion_cWipeoutMotion
     virtual ~cCompPart02_cmp();
 };
 
@@ -102,7 +102,7 @@ struct cCompHead05_cmp { char pad[0xA0]; };
 class cCompPart05_cmp : public cCompHead05_cmp, virtual public cRiderVb_cmp {
 public:
     char body[0xC];
-    cCompPart05_cmp();              // func_00141480
+    cCompPart05_cmp();              // cHandplantMotion_cHandplantMotion
 };
 
 class cCompPart06_cmp : virtual public cRiderVb_cmp { public: char body[0xC]; };
@@ -140,7 +140,7 @@ struct cCompHead14_cmp { char pad[0x80]; };
 class cCompPart14_cmp : public cCompHead14_cmp, virtual public cRiderVb_cmp {
 public:
     char body[0xC];
-    cCompPart14_cmp();              // func_00142388
+    cCompPart14_cmp();              // cWipeoutControl_cWipeoutControl
 };
 
 struct cCompHead15_cmp { char pad[0x8]; };
@@ -192,7 +192,7 @@ public:
 class cCompPart24_cmp : virtual public cRiderVb_cmp {
 public:
     char body[0x10C];
-    cCompPart24_cmp();              // func_002EAAE0
+    cCompPart24_cmp();              // cTrickBoostFX_cTrickBoostFX
     virtual ~cCompPart24_cmp();
 };
 
@@ -213,27 +213,27 @@ public:
 class cCompPart27_cmp : virtual public cRiderVb_cmp {
 public:
     char body[0x3C];
-    cCompPart27_cmp();              // func_002E3680
+    cCompPart27_cmp();              // cPlayerIndicatorFX_cPlayerIndicatorFX
     virtual ~cCompPart27_cmp();
 };
 
 class cCompPart28_cmp : virtual public cRiderVb_cmp {
 public:
     char body[0x12C];
-    cCompPart28_cmp();              // func_002DE4A8
+    cCompPart28_cmp();              // cDynamicSprayFX_cDynamicSprayFX
     virtual ~cCompPart28_cmp();
 };
 
 class cCompPart29_cmp : virtual public cRiderVb_cmp {
 public:
     char body[0xAC];
-    cCompPart29_cmp();              // func_002F0E88
+    cCompPart29_cmp();              // cPunchFX_cPunchFX
     virtual ~cCompPart29_cmp();
 };
 
 class cCompPart30_cmp : virtual public cRiderVb_cmp {
 public:
-    cCompPart30_cmp();              // func_002F6238
+    cCompPart30_cmp();              // cCheatFX_cCheatFX
     virtual ~cCompPart30_cmp();
 };
 
