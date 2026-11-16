@@ -149,7 +149,7 @@ struct cFEStateNetConfig {
                                     //       (1, -200, the number of configurations)
     unsigned short* mpustrAuthError[3]; // 0x710 [R] 0; [U] cFEStateAuthDNAS func_001B6798 stores three heap unicode
                                     //       copies of the DNAS error texts here (through its mpParentState); func_001B5830 passes [1], [2], [0] to
-                                    //       cFEStateAuthDNASError's constructor func_001B6AB8; the destructor frees them
+                                    //       cFEStateAuthDNASError's constructor cFEStateAuthDNASError_cFEStateAuthDNASError; the destructor frees them
     unsigned short mustrPopupText[0x100]; // 0x71C [U] sprintf1 (unicode) target of func_001B45E8 / func_001B47C0 /
                                     //       func_001B4888 that becomes the popup's message (+ 0xC4); extent: to the end of the object
 };

@@ -6,10 +6,10 @@
 // cFEStateNet state (fe/festatenet.h, 0x6D0). EA's name: the allocation tag only (the preview keeps no inline of it).
 // EA's source file is not known (its code follows cFEStateNetSSXWorld's and precedes cFEStateStats', in both builds).
 //
-// Size 0x6FC: cMemMan_alloc(0x6FC, "cFEStateNetQuickMessages") + func_001C20F8(mem, pEngine) (func_001C1EA8, the only
-// site); mpMessage[9] ends at 0x6FC. Constructors func_001C20F8 (cFEStateNet(pEngine, 0), vtable D_0046A908,
+// Size 0x6FC: cMemMan_alloc(0x6FC, "cFEStateNetQuickMessages") + cFEStateNetQuickMessages_cFEStateNetQuickMessages(mem, pEngine) (func_001C1EA8, the only
+// site); mpMessage[9] ends at 0x6FC. Constructors cFEStateNetQuickMessages_cFEStateNetQuickMessages (cFEStateNet(pEngine, 0), vtable D_0046A908,
 // mHashName
-// 0x4B) and the default func_001DF710 (fe/fepopupmisc); destructor func_001DF750 (fe/fepopupmisc; slot 1). Retail
+// 0x4B) and the default func_001DF710 (fe/fepopupmisc); destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages (fe/fepopupmisc; slot 1). Retail
 // vtable D_0046A908 (32 slots: 4 onCreateScreen func_001C2138, 7 func_001C23C0, 12 onUpdate func_001C21A0, 17
 // onPopupEvent func_001C2B48, 18 onWidgetCreate func_001C2298, 19 onWidgetEvent func_001C2740, 25 func_001C21C0
 // (help), 31 cFEStateNet's func_001A8E40). Methods: fe/feasyncfile 0x1C20F8-0x1C2C50.
@@ -33,11 +33,11 @@ struct cFEStateNetQuickMessages {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046A908 (vtables.tsv; 32 slots), stored by func_001C20F8 /
+    void** mVtbl;                   // 0x008 [R] D_0046A908 (vtables.tsv; 32 slots), stored by cFEStateNetQuickMessages_cFEStateNetQuickMessages /
                                     //       func_001DF710 after the cFEStateNet ctor and by the destructor
-                                    //       func_001DF750
+                                    //       cFEStateNetQuickMessages__cFEStateNetQuickMessages
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001C20F8 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetQuickMessages_cFEStateNetQuickMessages stores
                                     //       0x4B
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack

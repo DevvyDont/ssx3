@@ -903,8 +903,8 @@ extern "C" void func_00192740_41B0(void* panel, int on) __asm__("func_00192740")
 extern "C" void func_00192970_41B0(void* panel, void* screen) __asm__("func_00192970");
 extern "C" void func_001AB288_41B0(void* self) __asm__("func_001AB288");
 extern "C" int func_0025DA90_41B0(void* self) __asm__("func_0025DA90");
-extern "C" void* func_001B1F88_41B0(void* mem, int a1) __asm__("func_001B1F88");
-extern "C" void* func_001BFBB8_41B0(void* mem, int a1) __asm__("func_001BFBB8");
+extern "C" void* cFEStateChatRoom_cFEStateChatRoom_41B0(void* mem, int a1) __asm__("cFEStateChatRoom_cFEStateChatRoom");
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(void* mem, int a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
 extern "C" void func_001A8A40_41B0(void* self, void* obj) __asm__("func_001A8A40");
 extern "C" int func_001A8E40_41B0(void* self, int msg, void* data) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc_41B0(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -957,9 +957,9 @@ extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
         break;
     case 268:
         if (func_0025DA90_41B0(LobbyMan_mLobbyMan)) {
-            func_001A8A40_41B0(self, func_001B1F88_41B0(cMemMan_alloc_41B0(0x73C, D_0045FF10, 0, 0), *(int*)(self + 0x10)));
+            func_001A8A40_41B0(self, cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(0x73C, D_0045FF10, 0, 0), *(int*)(self + 0x10)));
         } else {
-            func_001A8A40_41B0(self, func_001BFBB8_41B0(cMemMan_alloc_41B0(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
+            func_001A8A40_41B0(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
         }
         break;
     case 254: {

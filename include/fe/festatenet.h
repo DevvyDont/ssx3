@@ -7,7 +7,7 @@
 // three unicode text buffers, an ascii mask buffer and a queue of pending net messages.
 //
 // Size 0x6D0: cFEStateOnlineMainMenu, cFEStateNetNews and cFEStateNetSSXWorld are allocated with
-// cMemMan_alloc(0x6D0, "<class name>") and their constructors (func_001BFBB8, func_001C5018, func_001C1C50) only
+// cMemMan_alloc(0x6D0, "<class name>") and their constructors (cFEStateOnlineMainMenu_cFEStateOnlineMainMenu, cFEStateNetNews_cFEStateNetNews, cFEStateNetSSXWorld_cFEStateNetSSXWorld) only
 // call this class's constructor and store mHashName and the vtable; every other subclass's own fields start at 0x6D0.
 // Constructors: cFEStateNet(cUIEngine*, cUIState*) = func_001A8500 (unit fe/feasyncfile), default copy func_001DE7B0
 // (main/all_in_one_main); destructor func_001A85D0. Retail vtable _vt$11cFEStateNet = D_0046B808 (32 slots; slots 24-31

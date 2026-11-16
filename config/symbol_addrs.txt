@@ -2979,6 +2979,44 @@ cTransformModifier_setBoundBox__FPv = 0x00360B88; //type:func
 cTransformModifier_getRadius__FPv = 0x00360B90; //type:func
 cTransformModifier_setRadius__FPv = 0x00360BA0; //type:func
 
+// fn_fe_ctors: names by evidence (docs/function_names.tsv)
+cFEStateReadMessagePopup_cFEStateReadMessagePopup = 0x001A77A0; //type:func
+cFEStateReadMessagePopup__cFEStateReadMessagePopup = 0x001A7848; //type:func
+cFEUseExistingAccount_cFEUseExistingAccount = 0x001AC010; //type:func
+cFEUseExistingAccount__cFEUseExistingAccount = 0x001AC068; //type:func
+cFEStateSelectPersona_cFEStateSelectPersona = 0x001AD130; //type:func
+cFEStateChallengePopup_cFEStateChallengePopup = 0x001ADDD0; //type:func
+cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup = 0x001AFE08; //type:func
+cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect = 0x001B0F60; //type:func
+cFEStateChatRoom_cFEStateChatRoom = 0x001B1F88; //type:func
+cFEStateChatRoom__cFEStateChatRoom__FPv = 0x001B2048; //type:func
+cFEStateAuthDNAS_cFEStateAuthDNAS = 0x001B6288; //type:func
+cFEStateAuthDNAS__cFEStateAuthDNAS = 0x001B6368; //type:func
+cFEStateAuthDNASError_cFEStateAuthDNASError = 0x001B6AB8; //type:func
+cFEStateAuthDNASError__cFEStateAuthDNASError__FPv = 0x001B6B28; //type:func
+cFEStateCreateDuplicate_cFEStateCreateDuplicate = 0x001BBD08; //type:func
+cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup = 0x001BE7D8; //type:func
+cFEStateLogin_cFEStateLogin = 0x001BEE30; //type:func
+cFEStateLogin__cFEStateLogin = 0x001BEE78; //type:func
+cFEStateOnlineMainMenu_cFEStateOnlineMainMenu = 0x001BFBB8; //type:func
+cFEStateOnlineAgreement_cFEStateOnlineAgreement = 0x001C0418; //type:func
+cFEStateOnlineAgreement__cFEStateOnlineAgreement = 0x001C0A28; //type:func
+cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup = 0x001C0F40; //type:func
+cFEStateNetSSXWorld_cFEStateNetSSXWorld = 0x001C1C50; //type:func
+cFEStateNetQuickMessages_cFEStateNetQuickMessages = 0x001C20F8; //type:func
+cFEStateNetNews_cFEStateNetNews = 0x001C5018; //type:func
+cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FPv = 0x001DF608; //type:func
+cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup__FPv = 0x001DF678; //type:func
+cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv = 0x001DF6E8; //type:func
+cFEStateNetQuickMessages__cFEStateNetQuickMessages__FPv = 0x001DF750; //type:func
+cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup = 0x001DF878; //type:func
+cFEStateSelectPersona__cFEStateSelectPersona__FPv = 0x001E0918; //type:func
+cFEStateChallengePopup__cFEStateChallengePopup = 0x001E09A0; //type:func
+cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup = 0x001E0A50; //type:func
+cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect__FPv = 0x001E0B00; //type:func
+cFEStateCreateDuplicate__cFEStateCreateDuplicate__FPv = 0x001E0E18; //type:func
+cFEStateNetNews__cFEStateNetNews__FPv = 0x001E0EC8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

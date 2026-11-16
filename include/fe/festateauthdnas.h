@@ -10,9 +10,9 @@
 // cFEStateAuthDNAS: screen "205AuthenticatingDNAS": runs the DNAS authentication object and reports to its parent
 // (slot 17: 0xF ok, 0x10 error with the three texts copied into cFEStateNetConfig's mpustrAuthError[], 0x14 cancel).
 // EA's name: the preview's __16cFEStateAuthDNAS, onGainTransition__16cFEStateAuthDNASb, onLoseTransition__16...
-// Size 0x700: cMemMan_alloc(0x700, "NetConfigAuthPopup") + func_001B6288(mem, pEngine, pParent) (func_001B55B0, the
-// only site). Constructors func_001B6288 (cFEStateNet(pEngine, pParent), vtable D_004689F0, mHashName 0x44, unk_6A8 =
-// 0) and the default func_001E0BB0 (fe/fepopupmisc); destructor func_001B6368 (slot 1: deletes mpAuth, frees
+// Size 0x700: cMemMan_alloc(0x700, "NetConfigAuthPopup") + cFEStateAuthDNAS_cFEStateAuthDNAS(mem, pEngine, pParent) (func_001B55B0, the
+// only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable D_004689F0, mHashName 0x44, unk_6A8 =
+// 0) and the default func_001E0BB0 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
 // mpustrText). Retail vtable D_004689F0 (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B63E8, 7
 // func_001E0C10
 // (onGainTransition), 8 func_001B66B8, 10 func_001E0C18 (onLoseTransition), 12 onUpdate func_001B6798, 18
@@ -21,11 +21,11 @@
 // Methods: fe/feasyncfile 0x1B6288-0x1B6A90.
 //
 // cFEStateAuthDNASError: screen "207DNASerror": shows the three DNAS error texts. EA's name: the allocation tag.
-// Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateAuthDNASError") + func_001B6AB8(mem, pEngine, pParent,
+// Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateAuthDNASError") + cFEStateAuthDNASError_cFEStateAuthDNASError(mem, pEngine, pParent,
 // mpustrAuthError[1],
-// [2], [0]) (cFEStateNetConfig's func_001B5830, the only site). Constructors func_001B6AB8 (vtable D_004688E0,
+// [2], [0]) (cFEStateNetConfig's func_001B5830, the only site). Constructors cFEStateAuthDNASError_cFEStateAuthDNASError (vtable D_004688E0,
 // mHashName
-// 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor func_001B6B28 (slot 1). Retail vtable D_004688E0
+// 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable D_004688E0
 // (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B6B50, 7 func_001B6C98, 10 func_001E0C78, 12 onUpdate
 // cFEStateNet's func_001A8770, 18 onWidgetCreate func_001B6BB8, 19 onWidgetEvent func_001B6E40, 20 func_001B6EA8, 24
 // handleEvent func_001B6E10, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
@@ -51,10 +51,10 @@ struct cFEStateAuthDNAS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004689F0 (vtables.tsv), stored by func_001B6288 / func_001E0BB0
-                                    //       after the cFEStateNet ctor and by the destructor func_001B6368
+    void** mVtbl;                   // 0x008 [R] D_004689F0 (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS / func_001E0BB0
+                                    //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNAS__cFEStateAuthDNAS
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001B6288 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNAS_cFEStateAuthDNAS stores
                                     //       0x44
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -145,7 +145,7 @@ struct cFEStateAuthDNAS {
     int unk_6F4;                    // 0x6F4 [R] 2 (both ctors); no other access seen
     int unk_6F8;                    // 0x6F8 [R] 0x1E (both ctors); no other access seen
     unsigned short* mpustrText;     // 0x6FC [R] 0, then operator_new_tag((USTR_length("kT_205Authenticating") + 5) *
-                                    //       2, "cFEStateAuthDNAS") (func_001B6288); freed by the destructor; no other
+                                    //       2, "cFEStateAuthDNAS") (cFEStateAuthDNAS_cFEStateAuthDNAS); freed by the destructor; no other
                                     //       access seen
 };
 
@@ -201,10 +201,10 @@ struct cFEStateAuthDNASError {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004688E0 (vtables.tsv), stored by func_001B6AB8 / func_001E0C30
-                                    //       after the cFEStateNet ctor and by the destructor func_001B6B28
+    void** mVtbl;                   // 0x008 [R] D_004688E0 (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError / func_001E0C30
+                                    //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNASError__cFEStateAuthDNASError
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001B6AB8 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNASError_cFEStateAuthDNASError stores
                                     //       0x45
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack

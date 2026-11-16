@@ -82,7 +82,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_getNextState);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_001BFBB8(void* self, void* owner);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* self, void* owner);
 extern "C" void* func_00181090(void* self, void* owner, int a);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* owner, int a, int b);
 extern "C" void* func_001828C0(void* self, void* owner, int a);
@@ -308,7 +308,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         switch (pData) {
         case 0:
             if (isOneGNS(D_004A1A70))
-                return func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *self);
+                return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *self);
             if (D_004A19D4 != 0 && st->x44 == 1)
                 return func_001A3218(cMemMan_alloc(0x48, D_00460C20, 0, 0), *self);
             cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -503,8 +503,8 @@ extern "C" void* func_0018D240(void* mem, void* owner);
 extern "C" void* func_00194738(void* self, void* owner);
 extern "C" void* func_00194A60(void* mem, void* owner);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
-extern "C" void* func_001BFBB8(void* mem, void* owner);
-extern "C" void* func_001C1C50(void* mem, void* owner);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, void* owner);
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(void* mem, void* owner);
 extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* mem, void* owner, int a2);
 extern "C" void* func_001D3780(void* mem, void* owner, int a2, int a3);
 extern "C" void* func_001D4BC8(void* mem, void* owner, int a2, int a3);
@@ -543,7 +543,7 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     switch (*(int*)(desc + 0xC)) {
     case 9:
         if (IsMode1_1A16C0()) {
-            return func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *self);
+            return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *self);
         }
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (D_00535C11[0]) {
@@ -645,7 +645,7 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
             break;
         case 2:
             if (IsMode1_1A16C0()) {
-                return func_001C1C50(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *self);
+                return cFEStateNetSSXWorld_cFEStateNetSSXWorld(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *self);
             }
             break;
         }

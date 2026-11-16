@@ -2587,7 +2587,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A77A0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_cFEStateReadMessagePopup);
 #ifdef SKIP_ASM
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
@@ -2613,9 +2613,9 @@ struct sScreen1A77A0 {
 };
 
 // PORT: the unit declares this as (void*, int, void*, int); the body uses typed arguments.
-extern "C" void* func_001A77A0_impl(sScreen1A77A0* self, int a1, int a2, const char* name) __asm__("func_001A77A0");
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(sScreen1A77A0* self, int a1, int a2, const char* name) __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup");
 
-extern "C" void* func_001A77A0_impl(sScreen1A77A0* self, int a1, int a2, const char* name)
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(sScreen1A77A0* self, int a1, int a2, const char* name)
 {
     // An unused 16-byte local is needed to reproduce the 0x50-byte frame.
     int unused[4];
@@ -2639,7 +2639,7 @@ extern "C" void* func_001A77A0_impl(sScreen1A77A0* self, int a1, int a2, const c
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A7848);
+INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup__cFEStateReadMessagePopup);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* func_0041610C(void* dst, void* src, int n);
@@ -2686,7 +2686,7 @@ struct sOwner1A7848 {
     sObjVec1A7848 mVec;
 };
 
-extern "C" void func_001A7848(sOwner1A7848* self, int flags)
+extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(sOwner1A7848* self, int flags)
 {
     self->vt = D_00467E18;
     for (;;) {
@@ -3941,7 +3941,7 @@ extern "C" void func_001A9930(cFEStateNet* self);
 extern "C" int func_0025DA90(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu_v(void* mem, int a1) __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu");
-extern "C" void* func_001BFBB8(cFEStateNet* mem, int a1);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A8F98(cFEStateNet* self);
 extern "C" void* func_001A9C50(cFEStateNet* self);
@@ -3974,7 +3974,7 @@ extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
         }
         break;
     case 0xEF:
-        func_001A8A40(self, func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(s + 0x10)));
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(s + 0x10)));
         break;
     case 0x102:
         if (*(int*)((char*)data + 0x8) == 0x74696D65) {
@@ -4121,7 +4121,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9268);
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern const char D_00461C60[];
 
@@ -4129,7 +4129,7 @@ extern "C" void func_001A9268(cFEStateNet* self, int a1, int a2)
 {
     if (a2 == 0xF) {
         func_001A93D0_3(self, a1, 0xF);
-        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
     } else {
         func_001A93D0_3(self, a1, a2);
     }
@@ -4254,7 +4254,7 @@ public:
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
+extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern const char D_00461CA0[];
 
@@ -4262,7 +4262,7 @@ extern "C" void func_001A9438(cFEStateNet* self, int a1, int a2)
 {
     if (a2 == 0x16) {
         ((cFEVObj_001A9438*)self)->v32();
-        func_001A8A40(self, func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CA0, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CA0, 0, 0), (int)self->mpEngine));
         func_001A93D0_3(self, a1, 0x16);
     } else {
         func_001A93D0_3(self, a1, a2);
@@ -4346,9 +4346,9 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9578);
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-struct sFEObj_001B1F88; // defined with func_001B1F88 (its ctor)
-extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* mem, int a1);
-extern "C" void* func_001BFBB8(cFEStateNet* mem, int a1);
+struct sFEObj_001B1F88; // defined with cFEStateChatRoom_cFEStateChatRoom (its ctor)
+extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0025DA90(void* self);
 extern int D_004A4E88;
@@ -4361,9 +4361,9 @@ extern "C" void func_001A9578(cFEStateNet* self, int a1, int a2)
         func_001A93D0_3(self, a1, a2);
         void* obj;
         if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
-            obj = func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), (int)self->mpEngine);
+            obj = cFEStateChatRoom_cFEStateChatRoom((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), (int)self->mpEngine);
         } else {
-            obj = func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine);
+            obj = cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine);
         }
         func_001A8A40(self, obj);
     } else {
@@ -4398,7 +4398,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9668);
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
+extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0039F698(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
@@ -4412,7 +4412,7 @@ extern "C" void func_001A9668(cFEStateNet* self, int a1, int a2)
         self->unk_058 = 1;
         void* st = cUIStateStack_getCurrentState((char*)self->mpEngine + 0x18);
         *(int*)((char*)st + 0x1C) |= 0x80;
-        func_001A8A40(self, func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
         self->unk_6AC = 0;
     } else {
         func_001A93D0_3(self, a1, a2);
@@ -5826,7 +5826,7 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00262A38(void* self, int a1);
-extern "C" void* func_001A77A0(void* mem, int a1, void* owner, int a3);
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup(void* mem, int a1, void* owner, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
@@ -5849,7 +5849,7 @@ extern "C" void func_001ABB30(cFEStateNet* feStateNet, int a1, void* a2, int a3)
         func_0025B800(LobbyMan_mLobbyMan);
     }
     if (func_00262A38(BuddyMan_mBuddyMan, a1) != 0) {
-        void* obj = func_001A77A0(cMemMan_alloc(0x6FC, D_00462AA8, 0x100, 0), ((int)self->mpEngine), self, a1);
+        void* obj = cFEStateReadMessagePopup_cFEStateReadMessagePopup(cMemMan_alloc(0x6FC, D_00462AA8, 0x100, 0), ((int)self->mpEngine), self, a1);
         cUIStateStack_pushPopup(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x18, obj);
     } else {
         func_001A9090((cFEStateNet*)self, 0, a1, (int)D_004A1408, 0, 2, 0x3F);
@@ -5902,8 +5902,8 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00263128(void* self, const char* name);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001AFE08(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name);
-extern void* func_001ADDD0_BCD0(void* self, int a1, int a2) __asm__("func_001ADDD0");
+extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name);
+extern void* cFEStateChallengePopup_cFEStateChallengePopup_BCD0(void* self, int a1, int a2) __asm__("cFEStateChallengePopup_cFEStateChallengePopup");
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
@@ -5928,7 +5928,7 @@ extern "C" void func_001ABCD0(cFEStateNet* self, int a1, void* a2, int a3, int a
         func_0025B800(LobbyMan_mLobbyMan);
     }
     if (func_00263128(BuddyMan_mBuddyMan, (const char*)a1)) {
-        void* p = func_001AFE08((cFEStateChallengeReceivedPopup*)cMemMan_alloc(0x6D8, D_00462AC8, 0x100, 0), (int)self->mpEngine, (int)self, (const char*)a1);
+        void* p = cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup((cFEStateChallengeReceivedPopup*)cMemMan_alloc(0x6D8, D_00462AC8, 0x100, 0), (int)self->mpEngine, (int)self, (const char*)a1);
         if (a4) {
             *(int*)((char*)p + 0x18) = 0x834;
         } else {
@@ -5943,7 +5943,7 @@ extern "C" void func_001ABCD0(cFEStateNet* self, int a1, void* a2, int a3, int a
         cBXString_cBXString2(s, (const char*)a1);
         cBXString_operatorE((char*)g + 0x98, s);
         cBXString__cBXString(s, 2);
-        void* p = func_001ADDD0_BCD0(cMemMan_alloc(0x6F0, D_00462AE8, 0x100, 0), (int)self->mpEngine, (int)self);
+        void* p = cFEStateChallengePopup_cFEStateChallengePopup_BCD0(cMemMan_alloc(0x6F0, D_00462AE8, 0x100, 0), (int)self->mpEngine, (int)self);
         if (a4) {
             *(int*)((char*)p + 0x18) = 0x834;
         } else {
@@ -6045,14 +6045,14 @@ extern "C" void* func_001ABFA8(cFEStateNet* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC010);
+INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_cFEUseExistingAccount);
 #ifdef SKIP_ASM
 extern void* D_00469068[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001AC010(cFEUseExistingAccount* self, int a1)
+extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccount* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     int d = D_004A3E90;
@@ -6067,14 +6067,14 @@ extern "C" void* func_001AC010(cFEUseExistingAccount* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AC068);
+INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount__cFEUseExistingAccount);
 #ifdef SKIP_ASM
 extern void* D_00469068[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001AC068(cFEUseExistingAccount* self, int flags)
+extern "C" void cFEUseExistingAccount__cFEUseExistingAccount(cFEUseExistingAccount* self, int flags)
 {
     self->mVtbl = D_00469068;
     cBXString__cBXString((char*)self + 0x6DC, 2);
@@ -6554,7 +6554,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern const char D_00462D68[];
 extern char D_0045DCC8[];
@@ -6568,7 +6568,7 @@ extern "C" void func_001ACB48(cFEUseExistingAccount* self, void* a1, int kind)
     case 16:
         self->mbAskSave = 0;
         func_001A97B8(self, a1, kind);
-        func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     case 17:
         self->mbAskSave = 1;
@@ -6603,7 +6603,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001ACCD0);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
@@ -6622,7 +6622,7 @@ extern "C" void func_001ACCD0(cFEUseExistingAccount* self, void* a1, int kind)
     }
     case 16:
     case 20:
-        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     default:
         func_001A97B8(((cFEStateNet*)self), a1, kind);
@@ -6766,13 +6766,13 @@ extern "C" int func_001ACEF8(cFEUseExistingAccount* self, int id, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AD130);
+INCLUDE_ASM("fe/feasyncfile", cFEStateSelectPersona_cFEStateSelectPersona);
 #ifdef SKIP_ASM
 extern void* D_00468F50[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1)
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x38;
@@ -7158,7 +7158,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void* func_001BFBB8(cFEStateNet* mem, int a1);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" void func_001ADC30(cFEStateSelectPersona* self, int a2);
 extern "C" void* func_001A9C50(cFEStateNet* self);
@@ -7229,7 +7229,7 @@ extern "C" int func_001ADA30(cFEStateSelectPersona* self, int a1, int a2)
         func_001ADC30(self, a2);
         break;
     case 0x111:
-        func_001A8A40(((cFEStateNet*)self), func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine));
         break;
     default:
         return (int)func_001A8E40_3(((cFEStateNet*)self), a1, a2);
@@ -7248,7 +7248,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001BBD08(cFEStateCreateDuplicate* self, int a1, int a2);
+extern "C" void* cFEStateCreateDuplicate_cFEStateCreateDuplicate(cFEStateCreateDuplicate* self, int a1, int a2);
 void func_001C57C0(void* self, int a1, int a2);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_1ADC30(void* self, int id, void* msg) __asm__("func_001A8E40");
@@ -7264,7 +7264,7 @@ extern "C" void func_001ADC30(cFEStateSelectPersona* self, int a2)
     void* msg = (void*)a2;
     switch (*(unsigned int*)((char*)msg + 8)) {
     case 0x6475706C:
-        func_001A8A40(self, func_001BBD08((cFEStateCreateDuplicate*)cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 0));
+        func_001A8A40(self, cFEStateCreateDuplicate_cFEStateCreateDuplicate((cFEStateCreateDuplicate*)cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 0));
         break;
     case 0x696E616D:
         {
@@ -7304,7 +7304,7 @@ extern "C" void func_001ADC30(cFEStateSelectPersona* self, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001ADDD0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_cFEStateChallengePopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001A8500_DDD0(void* self, void* engine, void* owner) __asm__("func_001A8500");
@@ -7325,7 +7325,7 @@ public:
 };
 
 // Derived state constructor: sets the vtable and defaults, then resets the new-race interface (mode 0, event 0).
-extern "C" void* func_001ADDD0(cFEStateChallengePopup* self, void* engine, void* owner)
+extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup(cFEStateChallengePopup* self, void* engine, void* owner)
 {
     func_001A8500_DDD0(self, engine, owner);
     self->mVtbl = D_00468E38;
@@ -8234,7 +8234,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001AF470);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001AF688(cFEStateChallengePopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
@@ -8248,7 +8248,7 @@ extern "C" void* func_001AF470(cFEStateChallengePopup* self, int a1, int a2)
 {
     switch (a1) {
     case 0xF3:
-        func_001A8A40(((cFEStateNet*)self), func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     case 0xED: case 0xEE: case 0xF0: case 0xF1: case 0xF2: case 0x10C: case 0x112: case 0x113:
         func_001AF688(self);
@@ -8607,7 +8607,7 @@ extern "C" void func_001AFD88(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001AFE08);
+INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup);
 #ifdef SKIP_ASM
 extern void* D_00468D20[];
 extern int D_004A4E88;
@@ -8615,7 +8615,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001AFE08(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name)
+extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name)
 {
     func_001A8500_3(self, a1, a2);
     self->mVtbl = D_00468D20;
@@ -9094,7 +9094,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B0708);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
@@ -9132,7 +9132,7 @@ extern "C" void* func_001B0708(cFEStateChallengeReceivedPopup* self, int a1, int
         func_001AB178((cFEStateNet*)self, a1);
         break;
     case 0xF3:
-        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     case 0xE3:
         func_001AFA60(self->mpScreen, (char*)a2);
@@ -9414,13 +9414,13 @@ extern "C" int func_001B0F28(int c)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B0F60);
+INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect);
 #ifdef SKIP_ASM
 extern void* D_00468C10[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1)
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mVtbl = D_00468C10;
@@ -9735,8 +9735,8 @@ extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct sFEObj_001B1F88;
-extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* mem, int a1);
-extern "C" void* func_001BFBB8(cFEStateNet* mem, int a1);
+extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
 extern "C" void* func_00192D00(void* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0025DA90(void* self);
@@ -9775,9 +9775,9 @@ extern "C" void* func_001B15D8(cFEStateOnlineCharacterSelect* self, int a1, int 
         break;
     case 0x10C:
         if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
-            obj = func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), (int)self->mpEngine);
+            obj = cFEStateChatRoom_cFEStateChatRoom((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), (int)self->mpEngine);
         } else {
-            obj = func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine);
+            obj = cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine);
         }
         func_001A8A40(((cFEStateNet*)self), obj);
         break;
@@ -10146,7 +10146,7 @@ extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, void* a1, int
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B1F88);
+INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_cFEStateChatRoom);
 #ifdef SKIP_ASM
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -10172,7 +10172,7 @@ struct sFEObj_001B1F88 {
     sCol_001B1F88 color;           // 0x72C
 };
 
-extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* self, int a1)
+extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->vt = D_0046AE58;
@@ -10200,9 +10200,9 @@ extern void* D_0046AE58[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B2048__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom__cFEStateChatRoom__FPv);
 #ifdef SKIP_ASM
-void* func_001B2048(void* self)
+void* cFEStateChatRoom__cFEStateChatRoom(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046AE58;
     return func_001A85D0(self);
@@ -11097,7 +11097,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B3760);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_0039F600(void* p);
 extern const char D_00461C60[];
@@ -11106,7 +11106,7 @@ extern "C" void func_001B3760(cFEStateChatRoom* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         func_0039F600((char*)self->mpEngine + 0x18);
-        func_001A8A40(((cFEStateNet*)self), func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
     } else {
         func_001A97B8(((cFEStateNet*)self), a1, a2);
     }
@@ -11118,7 +11118,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B37D8);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_0039F600(void* p);
 extern const char D_00461C60[];
@@ -11127,7 +11127,7 @@ extern "C" void func_001B37D8(cFEStateChatRoom* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         func_0039F600((char*)self->mpEngine + 0x18);
-        func_001A8A40(((cFEStateNet*)self), func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
     } else {
         func_001A97B8(((cFEStateNet*)self), a1, a2);
     }
@@ -12545,7 +12545,7 @@ extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 struct sFEObj_001B6288;
-extern "C" sFEObj_001B6288* func_001B6288(cFEStateAuthDNAS* self, int a1, int a2);
+extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, int a1, int a2);
 extern char D_00464080[];
 
 class cFEVObj_001B55B0 {
@@ -12592,7 +12592,7 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, void* a1, unsigned int ki
     }
     case 22:
         if (self->unk_6D8 == 0) {
-            char* p = (char*)func_001B6288((cFEStateAuthDNAS*)((sFEObj_001B6288*)cMemMan_alloc(0x700, D_00464080, 0, 0)), (int)self->mpEngine, (int)self);
+            char* p = (char*)cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((sFEObj_001B6288*)cMemMan_alloc(0x700, D_00464080, 0, 0)), (int)self->mpEngine, (int)self);
             *(int*)(p + 0x18) = 0x81A;
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         }
@@ -12666,8 +12666,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001B5830);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // func_001A97B8 returns void (its asm never sets $2); the unit declares it int
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
-// PORT: func_001B6AB8 is declared later in the unit with an int owner parameter
-extern "C" void* func_001B6AB8(cFEStateAuthDNASError* mem, int a1, int a2, int a3, int a4, int a5);
+// PORT: cFEStateAuthDNASError_cFEStateAuthDNASError is declared later in the unit with an int owner parameter
+extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError(cFEStateAuthDNASError* mem, int a1, int a2, int a3, int a4, int a5);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
@@ -12730,7 +12730,7 @@ extern "C" void func_001B5830(cFEStateNetConfig* self, void* a1, unsigned int ki
     case 22:
         func_001A97B8_v(self, a1, 22);
         if (self->unk_700 != 0) {
-            void* p = func_001B6AB8((cFEStateAuthDNASError*)cMemMan_alloc(0x6E8, D_00464098, 0, 0), (int)self->mpEngine, (int)self,
+            void* p = cFEStateAuthDNASError_cFEStateAuthDNASError((cFEStateAuthDNASError*)cMemMan_alloc(0x6E8, D_00464098, 0, 0), (int)self->mpEngine, (int)self,
                                     (int)self->mpustrAuthError[1], (int)self->mpustrAuthError[2], (int)self->mpustrAuthError[0]);
             *(int*)((char*)p + 0x18) = 0x81B;
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
@@ -12757,7 +12757,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 // PORT: the unit declares func_001A97B8 as returning int; this caller ignores the result.
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
-extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
+extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* mem, int a1);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -12806,7 +12806,7 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* a1, int a2)
     }
     case 0x16:
         if (self->unk_6DC != 0) {
-            func_001A8A40(self, func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00461CD8, 0, 0), (int)self->mpEngine));
         }
         func_001A97B8_v(self, a1, a2);
         break;
@@ -13198,7 +13198,7 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int pWi
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6288);
+INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS_cFEStateAuthDNAS);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void cMemMan_free(void* p);
@@ -13233,7 +13233,7 @@ struct sFEObj_001B6288 {
     void* f6FC;         // 0x6FC
 };
 
-extern "C" sFEObj_001B6288* func_001B6288(cFEStateAuthDNAS* self, int a1, int a2)
+extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, int a1, int a2)
 {
     func_001A8500_3(((sFEObj_001B6288*)self), a1, a2);
     self->unk_6F4 = 2;
@@ -13258,7 +13258,7 @@ extern "C" sFEObj_001B6288* func_001B6288(cFEStateAuthDNAS* self, int a1, int a2
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6368);
+INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS__cFEStateAuthDNAS);
 #ifdef SKIP_ASM
 extern void* D_004689F0[];
 void cMemMan_free(void* p);
@@ -13267,7 +13267,7 @@ extern "C" void func_002561E0(void* p, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001B6368(cFEStateAuthDNAS* self, int flags)
+extern "C" void cFEStateAuthDNAS__cFEStateAuthDNAS(cFEStateAuthDNAS* self, int flags)
 {
     self->mVtbl = D_004689F0;
     if (self->mpAuth != 0) {
@@ -13612,13 +13612,13 @@ extern "C" int func_001B6A90(cFEStateAuthDNAS* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6AB8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_cFEStateAuthDNASError);
 #ifdef SKIP_ASM
 extern void* D_004688E0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001B6AB8(cFEStateAuthDNASError* self, int a1, int a2, int a3, int a4, int a5)
+extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError(cFEStateAuthDNASError* self, int a1, int a2, int a3, int a4, int a5)
 {
     func_001A8500_3(self, a1, a2);
     self->mpustrBody = (unsigned short*)a3;
@@ -13634,9 +13634,9 @@ extern void* D_004688E0[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001B6B28__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError__cFEStateAuthDNASError__FPv);
 #ifdef SKIP_ASM
-void* func_001B6B28(void* self)
+void* cFEStateAuthDNASError__cFEStateAuthDNASError(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_004688E0;
     return func_001A85D0(self);
@@ -15401,7 +15401,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" bool func_001B9558(cFEStateCreateStep1* self);
 extern "C" void func_001B9820(cFEStateCreateStep1* self);
@@ -15409,7 +15409,7 @@ extern "C" int func_001BA110(cFEStateCreateStep1* self);
 extern "C" void func_001BA218(cFEStateCreateStep1* self);
 extern "C" void func_001BA280(cFEStateCreateStep1* self);
 extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, int a1);
-extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1);
+extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" int func_0039A738(void* a);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
@@ -15515,7 +15515,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         } else {
             func_001BA218(self);
-            func_001A8A40(((char*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+            func_001A8A40(((char*)self), cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
         break;
     case 13: {
@@ -15528,7 +15528,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
         break;
     }
     case 8: {
-        void* p = func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+        void* p = cFEStateOnlineAgreement_cFEStateOnlineAgreement((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
         if (self->mbEditAccount != 0) {
             *(int*)((char*)p + 0x18) = 0x14;
         } else {
@@ -15585,7 +15585,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B91C8);
 #ifdef SKIP_ASM
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
@@ -15604,7 +15604,7 @@ extern "C" void func_001B91C8(cFEStateCreateStep1* self, void* a1, int kind)
     }
     case 16:
     case 20:
-        func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     default:
         func_001A97B8(self, a1, kind);
@@ -15624,7 +15624,7 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void* func_001AD130(cFEStateSelectPersona* mem, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* mem, int a1);
 extern const char D_00462D68[];
 extern char D_00462D80[];
 extern char D_0045DCC8[];
@@ -15657,7 +15657,7 @@ extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* a1, int a2)
             *(int*)((char*)p + 0x164) = 0;
             func_001A9BC0((cFEStateNet*)self, p);
         } else {
-            func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
         self->unk_6E8 = 0;
         break;
@@ -16316,7 +16316,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 extern "C" void func_001BA358(cFEStateCreateStep1* self);
 extern "C" void func_0025BF18(void* self, void* a1);
 extern const char D_00462D68[];
@@ -16327,7 +16327,7 @@ extern "C" void func_001BA280(cFEStateCreateStep1* self)
     func_001BA358(self);
     char* p = (char*)self->mpAccount;
     if (*(int*)(p + 0x4C) == 0 && *(int*)(p + 0x44) == 0 && *(int*)(p + 0x48) == 0) {
-        func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
     } else {
         void* pp = func_001A9C50((cFEStateNet*)self);
         *(int*)((char*)pp + 0xBC) = 0;
@@ -16502,7 +16502,7 @@ extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* se
 extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int a1);
 extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int a2, int a3, int a4);
 int func_001BBAA8(void* self);
-extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1);
+extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1);
 extern "C" int func_0039A738(void* a);
 extern char D_004A1BD8[];
 extern char D_004A1BE0[];
@@ -16578,7 +16578,7 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
         func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)self->mpEngine, 1));
         break;
     case 8: {
-        char* p = (char*)func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+        char* p = (char*)cFEStateOnlineAgreement_cFEStateOnlineAgreement((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
         *(int*)(p + 0x18) = 0x16;
         func_001A8A40(self, p);
         break;
@@ -16704,7 +16704,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B9C8(void* self, void* a1);
 extern "C" void func_00260F10(void* self);
@@ -16736,7 +16736,7 @@ extern "C" int func_001BAB28(cFEStateCreateStep2* self, int id, int a2)
     }
     case 0xD4:
         func_00260F10(LobbyMan_mLobbyMan);
-        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     case 0x102:
         func_001BAC90(self, (void*)a2);
@@ -16758,7 +16758,7 @@ extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_001BBAC8(void* self, int state);
-extern "C" void* func_001BBD08(cFEStateCreateDuplicate* self, int a1, int a2);
+extern "C" void* cFEStateCreateDuplicate_cFEStateCreateDuplicate(cFEStateCreateDuplicate* self, int a1, int a2);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_msg(void* self, int id, void* msg) __asm__("func_001A8E40");
 extern char D_00463090[];
@@ -16769,7 +16769,7 @@ extern "C" void func_001BAC90(cFEStateCreateStep2* self, void* msg)
 {
     switch (*(unsigned int*)((char*)msg + 8)) {
     case 0x6475706C:
-        func_001A8A40(self, func_001BBD08((cFEStateCreateDuplicate*)cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 1));
+        func_001A8A40(self, cFEStateCreateDuplicate_cFEStateCreateDuplicate((cFEStateCreateDuplicate*)cMemMan_alloc(0x6E0, D_00463090, 0, 0), (int)self->mpEngine, 1));
         break;
     case 0x746F6F79:
         func_001BBAC8(self, *(int*)((char*)msg + 0xC));
@@ -17444,13 +17444,13 @@ extern "C" int func_001BBC40_r(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BBD08);
+INCLUDE_ASM("fe/feasyncfile", cFEStateCreateDuplicate_cFEStateCreateDuplicate);
 #ifdef SKIP_ASM
 extern void* D_004684A0[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BBD08(cFEStateCreateDuplicate* self, int a1, int a2)
+extern "C" void* cFEStateCreateDuplicate_cFEStateCreateDuplicate(cFEStateCreateDuplicate* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, 0);
     self->mbAccount = a2;
@@ -17544,7 +17544,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void func_001BC290(cFEStateCreateDuplicate* self);
 extern "C" void func_001BC300(cFEStateCreateDuplicate* self, const char* name);
@@ -17616,7 +17616,7 @@ extern "C" void func_001BBF18(cFEStateCreateDuplicate* self, int a1, unsigned in
             *(int*)((char*)p + 0x18) = 0x832;
             cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
         } else {
-            func_001A8A40(self, func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
         break;
     case 13:
@@ -17783,7 +17783,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 extern "C" void func_001BC400(cFEStateCreateDuplicate* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_00260F10(void* self);
@@ -17814,7 +17814,7 @@ extern "C" int func_001BC4F0(cFEStateCreateDuplicate* self, int id, int a2)
     case 0xD4:
         func_00260F10(LobbyMan_mLobbyMan);
     case 0xD6:
-        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     case 0x102:
         if (*(unsigned int*)((char*)a2 + 8) == 0x6475706C) {
@@ -18406,7 +18406,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_001BE7D8_D1B8(void* mem, int a1, void* owner) __asm__("func_001BE7D8");
+extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup_D1B8(void* mem, int a1, void* owner) __asm__("cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup");
 extern "C" int func_0039A738_D1B8(void* item) __asm__("func_0039A738");
 extern "C" void func_001BD460_D1B8(void* self, int id, int a2) __asm__("func_001BD460");
 extern "C" void func_001BD428_D1B8(void* self) __asm__("func_001BD428");
@@ -18487,7 +18487,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
     case 5: {
         char* item = 0;
         if (pWidget == self->backBtn) {
-            void* p = func_001BE7D8_D1B8(cMemMan_alloc(0x6E8, D_00464F60, 0, 0), self->engine, self);
+            void* p = cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup_D1B8(cMemMan_alloc(0x6E8, D_00464F60, 0, 0), self->engine, self);
             *(int*)((char*)p + 0x18) = 0x823;
             cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, p);
         }
@@ -18507,7 +18507,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
         break;
     }
     case 6:
-        func_001A8A40(self, func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), self->engine));
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), self->engine));
         break;
     case 7: {
         self->changed = 1;
@@ -18677,7 +18677,7 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self);
 // PORT: func_001BE038 is defined later with its own list type; bound by asm label.
 void func_001BE038_BD738(void* self) __asm__("func_001BE038");
 struct sFEObj_001B1F88;
-extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* mem, int a1);
+extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
 extern "C" void func_001BD848(cFEStateLobbyMenu* self, int a1, int a2);
 extern const char D_0045FF10[];
 
@@ -18704,7 +18704,7 @@ extern "C" void* func_001BD738(cFEStateLobbyMenu* self, int a1, int a2)
         break;
     }
     case 0xDC: case 0xE4:
-        func_001A8A40(((char*)self), func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((char*)self), cFEStateChatRoom_cFEStateChatRoom((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), (int)self->mpEngine));
         break;
     case 0x102:
         func_001BD848(self, a1, a2);
@@ -19501,14 +19501,14 @@ extern "C" void func_001BE720(cFEStateLobbyMenu* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BE7D8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup);
 #ifdef SKIP_ASM
 extern void* D_0046A6E8[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BE7D8(cFEStateNetCreateRoomPopup* self, int a1, int a2)
+extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, a2);
     int d = D_004A3E90;
@@ -19809,13 +19809,13 @@ extern "C" void func_001BED58(cFEStateNetCreateRoomPopup* self, void* popup)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEE30);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_cFEStateLogin);
 #ifdef SKIP_ASM
 extern void* D_00468388[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BEE30(cFEStateLogin* self, int a1)
+extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x33;
@@ -19827,14 +19827,14 @@ extern "C" void* func_001BEE30(cFEStateLogin* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEE78);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLogin__cFEStateLogin);
 #ifdef SKIP_ASM
 extern void* D_00468388[];
 void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001BEE78(cFEStateLogin* self, int flags)
+extern "C" void cFEStateLogin__cFEStateLogin(cFEStateLogin* self, int flags)
 {
     self->mVtbl = D_00468388;
     if (self->mpustrDisconnect != 0) {
@@ -20005,7 +20005,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AD130(cFEStateSelectPersona* self, int a1);
+extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
@@ -20036,7 +20036,7 @@ extern "C" int func_001BF228(cFEStateLogin* self, int id, int a2)
         break;
     }
     case 0xD4:
-        func_001A8A40(((cFEStateNet*)self), func_001AD130((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         break;
     default:
         return func_001A8E40_3i(((cFEStateNet*)self), id, a2);
@@ -20291,10 +20291,10 @@ extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001AC010(cFEUseExistingAccount* self, int a1);
+extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccount* self, int a1);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
-extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1);
+extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B6D8(void* self, int a1);
 extern "C" void sprintf2(void* dst, const char* fmt, int a, int b);
@@ -20340,7 +20340,7 @@ extern "C" void func_001BF758(cFEStateLogin* self, void* a1, unsigned int kind)
             func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)self->mpEngine, 1));
             break;
         case 1:
-            func_001A8A40(self, func_001AC010((cFEUseExistingAccount*)cMemMan_alloc(0x6E4, D_00465348, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEUseExistingAccount_cFEUseExistingAccount((cFEUseExistingAccount*)cMemMan_alloc(0x6E4, D_00465348, 0, 0), (int)self->mpEngine));
             break;
         case 3: {
             void* o = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 3, 0, 0);
@@ -20380,7 +20380,7 @@ extern "C" void func_001BF758(cFEStateLogin* self, void* a1, unsigned int kind)
         break;
     }
     case 8: {
-        void* o = func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+        void* o = cFEStateOnlineAgreement_cFEStateOnlineAgreement((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
         *(int*)((char*)o + 0x18) = 0x12;
         func_001A8A40(self, o);
         break;
@@ -20419,13 +20419,13 @@ extern "C" void func_001BFAE0(cFEStateLogin* self, void* popup)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BFBB8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineMainMenu_cFEStateOnlineMainMenu);
 #ifdef SKIP_ASM
 extern void* D_0046AD48[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001BFBB8(cFEStateNet* self, int a1)
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x3B;
@@ -20535,10 +20535,10 @@ INCLUDE_ASM("fe/feasyncfile", func_001BFE70);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_001C0F40_FE70(void* mem, int a1, void* owner) __asm__("func_001C0F40");
+extern "C" void* cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup_FE70(void* mem, int a1, void* owner) __asm__("cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup");
 extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu_FE70(void* mem, int a1) __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu");
 extern "C" void* cFEStateStats_cFEStateStats_FE70(void* mem, int a1) __asm__("cFEStateStats_cFEStateStats");
-extern "C" void* func_001C1C50_FE70(void* mem, int a1) __asm__("func_001C1C50");
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld_FE70(void* mem, int a1) __asm__("cFEStateNetSSXWorld_cFEStateNetSSXWorld");
 extern char D_004654E0[];
 extern char D_00465500[];
 extern const char D_004611A8[];
@@ -20565,7 +20565,7 @@ extern "C" void func_001BFE70(cFEStateNet* self, void* a1, unsigned int a2)
         switch (*(unsigned int*)((char*)a1 + 0x18)) {
         case 1: {
             D_004A4E88 = 1;
-            void* p = func_001C0F40_FE70(cMemMan_alloc(0x734, D_004654E0, 0, 0), (int)self->mpEngine, self);
+            void* p = cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup_FE70(cMemMan_alloc(0x734, D_004654E0, 0, 0), (int)self->mpEngine, self);
             *(int*)((char*)p + 0x18) = 0x82E;
             cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
             break;
@@ -20585,7 +20585,7 @@ extern "C" void func_001BFE70(cFEStateNet* self, void* a1, unsigned int a2)
             break;
         }
         case 4:
-            func_001A8A40(self, func_001C1C50_FE70(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateNetSSXWorld_cFEStateNetSSXWorld_FE70(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
             break;
         case 5: {
             void* p = func_001A9C50(self);
@@ -20747,7 +20747,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0358);
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern const char D_00461C60[];
 
@@ -20757,7 +20757,7 @@ extern "C" void* func_001C0358(cFEStateNet* self, int a1, int a2)
     default:
         return func_001A8E40_3(self, a1, a2);
     case 0xF3:
-        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     case 0xEF:
         break;
@@ -20784,13 +20784,13 @@ extern "C" void* func_001C03D0(cFEStateOnlineAgreement* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0418);
+INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_cFEStateOnlineAgreement);
 #ifdef SKIP_ASM
 extern void* D_0046AC38[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C0418(cFEStateOnlineAgreement* self, int a1)
+extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x43;
@@ -20944,14 +20944,14 @@ extern "C" void func_001C0540(cFEStateOnlineAgreement* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0A28);
+INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement__cFEStateOnlineAgreement);
 #ifdef SKIP_ASM
 extern void* D_0046AC38[];
 void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001C0A28(cFEStateOnlineAgreement* self, int flags)
+extern "C" void cFEStateOnlineAgreement__cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int flags)
 {
     self->mVtbl = D_0046AC38;
     if (self->mpTOSLines != 0) {
@@ -21106,10 +21106,10 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0D28);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
-extern "C" void* func_001BEE30(cFEStateLogin* mem, int a1);
+extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* mem, int a1);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
 extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, int a1);
-extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1);
 extern char D_00465740[];
 extern char D_00462ED0[];
 extern char D_00464848[];
@@ -21127,7 +21127,7 @@ extern "C" void func_001C0D28(cFEStateOnlineAgreement* self, int a1, unsigned in
     case 6:
         switch (self->miMiscData) {
         case 0x12:
-            obj = func_001BEE30((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00465740, 0, 0), (int)self->mpEngine);
+            obj = cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(0x6D4, D_00465740, 0, 0), (int)self->mpEngine);
             break;
         case 0x14:
             obj = cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), (int)self->mpEngine, 1);
@@ -21140,7 +21140,7 @@ extern "C" void func_001C0D28(cFEStateOnlineAgreement* self, int a1, unsigned in
             break;
         case 0x13:
         default:
-            obj = func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine);
+            obj = cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine);
             break;
         }
         func_001A8A40(((cFEStateNet*)self), obj);
@@ -21186,13 +21186,13 @@ extern "C" void func_001C0EA8(cFEStateOnlineAgreement* self, void* popup)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C0F40);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup);
 #ifdef SKIP_ASM
 extern void* D_0046AB28[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C0F40(cFEStateNetQuickPlayPopup* self, int a1, int a2)
+extern "C" void* cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(cFEStateNetQuickPlayPopup* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, a2);
     self->mVtbl = D_0046AB28;
@@ -21604,7 +21604,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C19C8);
 int GetHashValue32(char* str);
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B0F60(cFEStateOnlineCharacterSelect* self, int a1);
+extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" int func_0039F698(void* p);
@@ -21665,7 +21665,7 @@ extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int a1, int a2)
         }
         break;
     case 0xF3:
-        func_001A8A40(self, func_001B0F60((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), (int)self->mpEngine));
         break;
     default:
         return func_001A8E40_3(self, a1, a2);
@@ -21737,13 +21737,13 @@ extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C1C50);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetSSXWorld_cFEStateNetSSXWorld);
 #ifdef SKIP_ASM
 extern void* D_0046AA18[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C1C50(cFEStateNet* self, int a1)
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x4A;
@@ -21839,8 +21839,8 @@ extern "C" void func_001C1E08(cFEStateNet* self, void* obj)
 INCLUDE_ASM("fe/feasyncfile", func_001C1EA8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_001C5018(cFEStateNet* self, int a1);
-extern "C" void* func_001C20F8(cFEStateNetQuickMessages* self, int a1);
+extern "C" void* cFEStateNetNews_cFEStateNetNews(cFEStateNet* self, int a1);
+extern "C" void* cFEStateNetQuickMessages_cFEStateNetQuickMessages(cFEStateNetQuickMessages* self, int a1);
 extern "C" void* func_001887A0(void* self, int engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
 extern const char D_00465AD0[];
@@ -21867,13 +21867,13 @@ extern "C" void func_001C1EA8(cFEStateNet* self, char* msg, int ev)
     case 5:
         switch (*(int*)(msg + 0x18)) {
         case 0:
-            func_001A8A40(((char*)self), func_001C5018((cFEStateNet*)cMemMan_alloc(0x6D0, D_00465AD0, 0, 0), (int)self->mpEngine));
+            func_001A8A40(((char*)self), cFEStateNetNews_cFEStateNetNews((cFEStateNet*)cMemMan_alloc(0x6D0, D_00465AD0, 0, 0), (int)self->mpEngine));
             break;
         case 1:
-            func_001A8A40(((char*)self), func_001C20F8((cFEStateNetQuickMessages*)((cFEStateNet*)cMemMan_alloc(0x6FC, D_00465AE0, 0, 0)), (int)self->mpEngine));
+            func_001A8A40(((char*)self), cFEStateNetQuickMessages_cFEStateNetQuickMessages((cFEStateNetQuickMessages*)((cFEStateNet*)cMemMan_alloc(0x6FC, D_00465AE0, 0, 0)), (int)self->mpEngine));
             break;
         case 2: {
-            char* p = (char*)func_001C0418((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+            char* p = (char*)cFEStateOnlineAgreement_cFEStateOnlineAgreement((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
             *(int*)(p + 0x18) = 0x13;
             func_001A8A40(((char*)self), p);
             break;
@@ -21888,7 +21888,7 @@ extern "C" void func_001C1EA8(cFEStateNet* self, char* msg, int ev)
         }
         break;
     case 6:
-        func_001A8A40(((char*)self), func_001BFBB8((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((char*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), (int)self->mpEngine));
         break;
     case 1: {
         sColor_1C1EA8 c;
@@ -21925,13 +21925,13 @@ extern "C" void func_001C1EA8(cFEStateNet* self, char* msg, int ev)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C20F8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_cFEStateNetQuickMessages);
 #ifdef SKIP_ASM
 extern void* D_0046A908[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C20F8(cFEStateNetQuickMessages* self, int a1)
+extern "C" void* cFEStateNetQuickMessages_cFEStateNetQuickMessages(cFEStateNetQuickMessages* self, int a1)
 {
     func_001A8500_3(((cFEStateNet*)self), a1, 0);
     self->mHashName = 0x4B;
@@ -22279,7 +22279,7 @@ extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4,
 extern "C" void func_001A9B58(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1);
 extern "C" void func_001C2A18(cFEStateNetQuickMessages* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
@@ -22334,7 +22334,7 @@ extern "C" void func_001C2740(cFEStateNetQuickMessages* self, void* w, int msg)
             *(int*)((char*)p + 0x150) = 0x83A;
             func_001A9BC0((cFEStateNet*)self, p);
         } else {
-            func_001A8A40(self, func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
         }
         break;
     case 8:
@@ -22482,7 +22482,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0018D7F0(void* mem, int engine, int a2, int a3, int a4);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1);
 extern const char D_00460D90[];
 extern const char D_004611A8[];
 
@@ -22495,7 +22495,7 @@ extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, void* a1, int a2)
         break;
     case 0x10:
         func_001A97B8(((cFEStateNet*)self), a1, 0x10);
-        func_001A8A40(((cFEStateNet*)self), func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
         break;
     default:
         func_001A97B8(((cFEStateNet*)self), a1, a2);
@@ -22924,7 +22924,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cUIScreen_getObjectByHashName_3668(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
 extern "C" void func_001A8918_3668(void* self, void* w, int msg) __asm__("func_001A8918");
 extern "C" void func_001A8A40_3668(void* self, void* obj) __asm__("func_001A8A40");
-extern "C" void* func_001BFBB8_3668(void* mem, void* a1) __asm__("func_001BFBB8");
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_3668(void* mem, void* a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
 extern "C" void func_001C49C8_3668(void* self) __asm__("func_001C49C8");
 extern "C" int func_0039A738_3668(void* w) __asm__("func_0039A738");
 extern "C" void func_001C4B78_3668(void* self, int v) __asm__("func_001C4B78");
@@ -23024,7 +23024,7 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
     }
     switch (msg) {
     case 6:
-        func_001A8A40_3668(((char*)self), func_001BFBB8_3668(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), self->mpEngine));
+        func_001A8A40_3668(((char*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_3668(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), self->mpEngine));
         return;
     case 9:
         if (isButton_3668(w, D_00465C78)) {
@@ -23787,13 +23787,13 @@ extern "C" void func_001C4F58(cFEStateStats* self, char* buf, int frames)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001C5018);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetNews_cFEStateNetNews);
 #ifdef SKIP_ASM
 extern void* D_00468168[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-extern "C" void* func_001C5018(cFEStateNet* self, int a1)
+extern "C" void* cFEStateNetNews_cFEStateNetNews(cFEStateNet* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x43;
@@ -23968,7 +23968,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9B58(cFEStateNet* self);
-extern "C" void* func_001C1C50(cFEStateNet* self, int a1);
+extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1);
 extern const char D_004611A8[];
 
 extern "C" void func_001C5368(cFEStateNet* self, int a1, unsigned int msg)
@@ -23981,7 +23981,7 @@ extern "C" void func_001C5368(cFEStateNet* self, int a1, unsigned int msg)
             }
             break;
         case 6:
-            func_001A8A40(self, func_001C1C50((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
             break;
         case 5:
             break;

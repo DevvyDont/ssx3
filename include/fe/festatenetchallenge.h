@@ -10,9 +10,9 @@
 // riders, power-ups, multipliers, point icons, event) and sends it. EA's name: the preview's
 // __22cFEStateChallengePopup,
 // _$_22cFEStateChallengePopup and onLoseTransition__22cFEStateChallengePopup. Size 0x6F0: cMemMan_alloc(0x6F0,
-// "cFEStateChallengePopup") + func_001ADDD0(mem, pEngine, pParent) (func_001ABCD0, the only site). Constructors
-// func_001ADDD0 (cFEStateNet(pEngine, pParent), vtable D_00468E38, mHashName 0x3F; resets the new-race interface) and
-// the default func_001E0950 (fe/fepopupmisc); destructor func_001E09A0 (fe/fepopupmisc; slot 1: calls mpParentState's
+// "cFEStateChallengePopup") + cFEStateChallengePopup_cFEStateChallengePopup(mem, pEngine, pParent) (func_001ABCD0, the only site). Constructors
+// cFEStateChallengePopup_cFEStateChallengePopup (cFEStateNet(pEngine, pParent), vtable D_00468E38, mHashName 0x3F; resets the new-race interface) and
+// the default func_001E0950 (fe/fepopupmisc); destructor cFEStateChallengePopup__cFEStateChallengePopup (fe/fepopupmisc; slot 1: calls mpParentState's
 // slot 32, then cFEStateNet's func_001A85D0). Retail vtable D_00468E38 (33 slots; vtables.tsv lists 24: 4
 // onCreateScreen func_001ADE88,
 // 6 onGainFocus func_001ADFE8, 7 func_001ADFB8, 10 func_001E0A00, 12 onUpdate func_001AE0E0, 17 onPopupEvent
@@ -24,9 +24,9 @@
 // accepts / declines it. EA's name: the preview's __30cFEStateChallengeReceivedPopup, _$_30...,
 // onGainTransition__30...
 // and onLoseTransition__30.... Size 0x6D8: cMemMan_alloc(0x6D8, "cFEStateChallengeReceivedPopup") +
-// func_001AFE08(mem,
-// pEngine, pParent, szChallenger) (func_001ABCD0, the only site). Constructors func_001AFE08 (vtable D_00468D20,
-// mHashName 0x40) and the default func_001E0A08 (fe/fepopupmisc); destructor func_001E0A50 (fe/fepopupmisc; slot 1:
+// cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(mem,
+// pEngine, pParent, szChallenger) (func_001ABCD0, the only site). Constructors cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup (vtable D_00468D20,
+// mHashName 0x40) and the default func_001E0A08 (fe/fepopupmisc); destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup (fe/fepopupmisc; slot 1:
 // mpParentState's slot 32, destroys mszChallenger, cFEStateNet's dtor). Retail vtable D_00468D20 (33 slots;
 // vtables.tsv lists 24: 4
 // onCreateScreen func_001AFE68, 7 func_001B0670, 10 func_001E0AB8, 12 onUpdate func_001B0130, 17 onPopupEvent
@@ -55,10 +55,10 @@ struct cFEStateChallengePopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468E38 (33 slots), stored by func_001ADDD0 / func_001E0950 after
-                                    //       the cFEStateNet ctor and by the destructor func_001E09A0
+    void** mVtbl;                   // 0x008 [R] D_00468E38 (33 slots), stored by cFEStateChallengePopup_cFEStateChallengePopup / func_001E0950 after
+                                    //       the cFEStateNet ctor and by the destructor cFEStateChallengePopup__cFEStateChallengePopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001ADDD0 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChallengePopup_cFEStateChallengePopup stores
                                     //       0x3F
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -134,14 +134,14 @@ struct cFEStateChallengePopup {
                                     //       ("kT_241SetChallengeOptions"); onWidgetEvent func_001AE7A0 ignores
                                     //       "submit" (9) while it is set and passes it to func_0025F628 (cancel);
                                     //       onGainFocus func_001ADFE8 re-locks the options with it
-    int mbFirstCreate;              // 0x6D4 [R] 1 (func_001ADDD0, after resetting the race interface); [U]
+    int mbFirstCreate;              // 0x6D4 [R] 1 (cFEStateChallengePopup_cFEStateChallengePopup, after resetting the race interface); [U]
                                     //       onCreateScreen func_001ADE88 clears it on the first screen, and selects
                                     //       "MenuChallenge" row 6 when it is already 0
     int* mpEventOptions;            // 0x6D8 [R] D_00441268 (both ctors); [U] onGainFocus func_001ADFE8 points it at
                                     //       one of six 4-word tables (D_00441268 .. D_004412B8) by the event kind
                                     //       D_00535C12: [0] CPU riders, [1] power-ups, [2] point icons, [3]
                                     //       multipliers allowed (func_001AEC60, func_001AF098)
-    cUIListBox* mpLBRankedGame;     // 0x6DC [R] 0 (func_001ADDD0); [U] onWidgetCreate func_001AE128: widget
+    cUIListBox* mpLBRankedGame;     // 0x6DC [R] 0 (cFEStateChallengePopup_cFEStateChallengePopup); [U] onWidgetCreate func_001AE128: widget
                                     //       "ListBoxRankedGame" (yes / no); func_001AE680 / onWidgetEvent read its
                                     //       value (func_0039A738) into D_00534B34; onGainFocus sets it
                                     //       (func_0039A7A8)
@@ -206,10 +206,10 @@ struct cFEStateChallengeReceivedPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468D20 (33 slots), stored by func_001AFE08 / func_001E0A08 after
-                                    //       the cFEStateNet ctor and by the destructor func_001E0A50
+    void** mVtbl;                   // 0x008 [R] D_00468D20 (33 slots), stored by cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup / func_001E0A08 after
+                                    //       the cFEStateNet ctor and by the destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001AFE08 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup stores
                                     //       0x40
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -280,12 +280,12 @@ struct cFEStateChallengeReceivedPopup {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateChallengeReceivedPopup
     char* mszChallenger;            // 0x6D0 [R] cBXString: built from the ctor's 4th argument (cBXString_cBXString2),
-                                    //       the empty rep D_004A3E90 in the default ctor, destroyed by func_001E0A50;
+                                    //       the empty rep D_004A3E90 in the default ctor, destroyed by cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup;
                                     //       [U] onCreateScreen func_001AFE68 looks the challenge up by it
                                     //       (func_00263270(BuddyMan, ..)) and copies it to LobbyMan (+ 0x98);
                                     //       func_001B00B8 (func_00262768) and func_001B0708 (net event 0xEF,
                                     //       func_00263018) pass its text
-    int mbAccepted;                 // 0x6D4 [R] 0 (func_001AFE08; not set by the default ctor); [U] func_001B0C08
+    int mbAccepted;                 // 0x6D4 [R] 0 (cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup; not set by the default ctor); [U] func_001B0C08
                                     //       sets 1 when the challenge is accepted ("TextAccept" enabled,
                                     //       "kT_OVRCMNWaitPlayer"), func_001B0D30 sets 0; onWidgetEvent func_001B0538
                                     //       accepts (row 0xB) only while it is 0; func_001B0E10 (decline) cancels the

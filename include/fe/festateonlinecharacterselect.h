@@ -7,10 +7,10 @@
 // _$_29cFEStateOnlineCharacterSelect. EA's source file is not known (its code follows
 // cFEStateChallengeReceivedPopup's, fe/festatenetchallenge.h, in both builds; no assert names it).
 //
-// Size 0x6E4: cMemMan_alloc(0x6E4, "cFEStateOnlineCharacterSelect") + func_001B0F60(mem, pEngine) at all 7 sites
+// Size 0x6E4: cMemMan_alloc(0x6E4, "cFEStateOnlineCharacterSelect") + cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(mem, pEngine) at all 7 sites
 // (func_001A9268, func_001AF470, func_001B0708, func_001B3760, func_001B37D8, func_001C0358, func_001C19C8).
-// Constructors func_001B0F60 (cFEStateNet(pEngine, 0), vtable D_00468C10, mHashName 0x41) and the default
-// func_001E0AC0 (fe/fepopupmisc); destructor func_001E0B00 (fe/fepopupmisc; slot 1; the preview's
+// Constructors cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect (cFEStateNet(pEngine, 0), vtable D_00468C10, mHashName 0x41) and the default
+// func_001E0AC0 (fe/fepopupmisc); destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect (fe/fepopupmisc; slot 1; the preview's
 // _$_29cFEStateOnlineCharacterSelect). Retail vtable D_00468C10 (32 slots: 4 onCreateScreen func_001B0FB0, 7
 // func_001B1068, 8 func_001B1590 (input filter), 12 onUpdate func_001B1048, 17 onPopupEvent func_001B1EC0,
 // 18 onWidgetCreate func_001B10F8, 19 onWidgetEvent func_001B1280, 25 func_001B14D8 (help), 31 func_001B15D8 (net
@@ -38,11 +38,11 @@ struct cFEStateOnlineCharacterSelect {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468C10 (vtables.tsv; 32 slots), stored by func_001B0F60 /
+    void** mVtbl;                   // 0x008 [R] D_00468C10 (vtables.tsv; 32 slots), stored by cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect /
                                     //       func_001E0AC0 after the cFEStateNet ctor and by the destructor
-                                    //       func_001E0B00
+                                    //       cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001B0F60 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect stores
                                     //       0x41
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -117,9 +117,9 @@ struct cFEStateOnlineCharacterSelect {
                                     //       (func_0039A738) is the picked rider in func_001B1068 / onWidgetEvent
                                     //       func_001B1280
     int unk_6D4;                    // 0x6D4 no access seen
-    int miConfirmCtrl;              // 0x6D8 [R] 0 (func_001B0F60); [U] onWidgetEvent func_001B1280 stores
+    int miConfirmCtrl;              // 0x6D8 [R] 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect); [U] onWidgetEvent func_001B1280 stores
                                     //       mCurrentCtrl (lb 0x14) when the pick is confirmed; no read seen
-    int mbConfirmed;                // 0x6DC [R] 1 (func_001B0F60), 0 (func_001E0AC0); [U] func_001B1068 (slot 7)
+    int mbConfirmed;                // 0x6DC [R] 1 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect), 0 (func_001E0AC0); [U] func_001B1068 (slot 7)
                                     //       clears it; onWidgetEvent sets 1 when the pick is sent (func_00265018) and
                                     //       clears it on "back" (func_00265140), or asks "kT_POPUPCMNCancelChallenge"
                                     //       when clear; the input filter func_001B1590 blocks input while it is set

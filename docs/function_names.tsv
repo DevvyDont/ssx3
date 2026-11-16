@@ -1530,3 +1530,39 @@ fn_cascade2	0x00360B80	cTransformModifier_getBoundBox__FPv	func_00360B80__FPv	vt
 fn_cascade2	0x00360B88	cTransformModifier_setBoundBox__FPv	func_00360B88__FPv	vtable cTransformModifier_vtbl (004913F8) slot 13; follows cAvaSplineModifier_setBoundBox, cMagnetModifier_setBoundBox, cMultiSplineModifier_setBoundBox, cPositionModifier_setBoundBox (+2)
 fn_cascade2	0x00360B90	cTransformModifier_getRadius__FPv	func_00360B90__FPv	vtable cTransformModifier_vtbl (004913F8) slot 14; follows cAvaSplineModifier_getRadius__FPv, cMagnetModifier_getRadius__FPv, cMultiSplineModifier_getRadius__FPv, cRollerModifier_getRadius__FPv (+1)
 fn_cascade2	0x00360BA0	cTransformModifier_setRadius__FPv	func_00360BA0__FPv	vtable cTransformModifier_vtbl (004913F8) slot 15; follows cAvaSplineModifier_setRadius__FPvf, cMagnetModifier_setRadius__FPv, cMultiSplineModifier_setRadius__FPvf, cRollerModifier_setRadius__FPvf (+1)
+fn_fe_ctors	0x001A77A0	cFEStateReadMessagePopup_cFEStateReadMessagePopup	func_001A77A0	constructor: stores vtable 00467E18 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001A7848	cFEStateReadMessagePopup__cFEStateReadMessagePopup	func_001A7848	destructor: slot 1 of vtable 00467E18, stored by the constructor
+fn_fe_ctors	0x001AC010	cFEUseExistingAccount_cFEUseExistingAccount	func_001AC010	constructor: stores vtable 00469068 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001AC068	cFEUseExistingAccount__cFEUseExistingAccount	func_001AC068	destructor: slot 1 of vtable 00469068, stored by the constructor
+fn_fe_ctors	0x001AD130	cFEStateSelectPersona_cFEStateSelectPersona	func_001AD130	constructor: stores vtable 00468F50 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001ADDD0	cFEStateChallengePopup_cFEStateChallengePopup	func_001ADDD0	constructor: stores vtable 00468E38 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001AFE08	cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup	func_001AFE08	constructor: stores vtable 00468D20 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001B0F60	cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect	func_001B0F60	constructor: stores vtable 00468C10 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001B1F88	cFEStateChatRoom_cFEStateChatRoom	func_001B1F88	constructor: stores vtable 0046AE58 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001B2048	cFEStateChatRoom__cFEStateChatRoom__FPv	func_001B2048__FPv	destructor: slot 1 of vtable 0046AE58, stored by the constructor
+fn_fe_ctors	0x001B6288	cFEStateAuthDNAS_cFEStateAuthDNAS	func_001B6288	constructor: stores vtable 004689F0 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001B6368	cFEStateAuthDNAS__cFEStateAuthDNAS	func_001B6368	destructor: slot 1 of vtable 004689F0, stored by the constructor
+fn_fe_ctors	0x001B6AB8	cFEStateAuthDNASError_cFEStateAuthDNASError	func_001B6AB8	constructor: stores vtable 004688E0 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001B6B28	cFEStateAuthDNASError__cFEStateAuthDNASError__FPv	func_001B6B28__FPv	destructor: slot 1 of vtable 004688E0, stored by the constructor
+fn_fe_ctors	0x001BBD08	cFEStateCreateDuplicate_cFEStateCreateDuplicate	func_001BBD08	constructor: stores vtable 004684A0 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001BE7D8	cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup	func_001BE7D8	constructor: stores vtable 0046A6E8 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001BEE30	cFEStateLogin_cFEStateLogin	func_001BEE30	constructor: stores vtable 00468388 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001BEE78	cFEStateLogin__cFEStateLogin	func_001BEE78	destructor: slot 1 of vtable 00468388, stored by the constructor
+fn_fe_ctors	0x001BFBB8	cFEStateOnlineMainMenu_cFEStateOnlineMainMenu	func_001BFBB8	constructor: stores vtable 0046AD48 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001C0418	cFEStateOnlineAgreement_cFEStateOnlineAgreement	func_001C0418	constructor: stores vtable 0046AC38 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001C0A28	cFEStateOnlineAgreement__cFEStateOnlineAgreement	func_001C0A28	destructor: slot 1 of vtable 0046AC38, stored by the constructor
+fn_fe_ctors	0x001C0F40	cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup	func_001C0F40	constructor: stores vtable 0046AB28 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001C1C50	cFEStateNetSSXWorld_cFEStateNetSSXWorld	func_001C1C50	constructor: stores vtable 0046AA18 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001C20F8	cFEStateNetQuickMessages_cFEStateNetQuickMessages	func_001C20F8	constructor: stores vtable 0046A908 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001C5018	cFEStateNetNews_cFEStateNetNews	func_001C5018	constructor: stores vtable 00468168 whose slot 1 is the destructor; header agent: allocated with the class's size/tag (tools/.harness/classes FENET3)
+fn_fe_ctors	0x001DF608	cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FPv	func_001DF608__FPv	destructor: slot 1 of vtable 0046AD48, stored by the constructor
+fn_fe_ctors	0x001DF678	cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup__FPv	func_001DF678__FPv	destructor: slot 1 of vtable 0046AB28, stored by the constructor
+fn_fe_ctors	0x001DF6E8	cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv	func_001DF6E8__FPv	destructor: slot 1 of vtable 0046AA18, stored by the constructor
+fn_fe_ctors	0x001DF750	cFEStateNetQuickMessages__cFEStateNetQuickMessages__FPv	func_001DF750__FPv	destructor: slot 1 of vtable 0046A908, stored by the constructor
+fn_fe_ctors	0x001DF878	cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup	func_001DF878	destructor: slot 1 of vtable 0046A6E8, stored by the constructor
+fn_fe_ctors	0x001E0918	cFEStateSelectPersona__cFEStateSelectPersona__FPv	func_001E0918__FPv	destructor: slot 1 of vtable 00468F50, stored by the constructor
+fn_fe_ctors	0x001E09A0	cFEStateChallengePopup__cFEStateChallengePopup	func_001E09A0	destructor: slot 1 of vtable 00468E38, stored by the constructor
+fn_fe_ctors	0x001E0A50	cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup	func_001E0A50	destructor: slot 1 of vtable 00468D20, stored by the constructor
+fn_fe_ctors	0x001E0B00	cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect__FPv	func_001E0B00__FPv	destructor: slot 1 of vtable 00468C10, stored by the constructor
+fn_fe_ctors	0x001E0E18	cFEStateCreateDuplicate__cFEStateCreateDuplicate__FPv	func_001E0E18__FPv	destructor: slot 1 of vtable 004684A0, stored by the constructor
+fn_fe_ctors	0x001E0EC8	cFEStateNetNews__cFEStateNetNews__FPv	func_001E0EC8__FPv	destructor: slot 1 of vtable 00468168, stored by the constructor

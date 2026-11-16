@@ -8,9 +8,9 @@
 // d:/ssx/code/source/fe/festatenetcreate.cpp (its code follows cFEStateCreateStep2's, see fe/festatenetcreate.h, in
 // both builds; no assert of its own), so this header could also be merged into fe/festatenetcreate.h.
 //
-// Size 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateDuplicate") + func_001BBD08(mem, pEngine, bAccount) at both sites
-// (func_001ADC30 with 0, func_001BAC90). Constructors func_001BBD08 (cFEStateNet(pEngine, 0), vtable D_004684A0,
-// mHashName 0x4F, unk_6A8 = 0) and the default func_001E0DD8 (fe/fepopupmisc); destructor func_001E0E18
+// Size 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateDuplicate") + cFEStateCreateDuplicate_cFEStateCreateDuplicate(mem, pEngine, bAccount) at both sites
+// (func_001ADC30 with 0, func_001BAC90). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable D_004684A0,
+// mHashName 0x4F, unk_6A8 = 0) and the default func_001E0DD8 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
 // (fe/fepopupmisc;
 // slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable D_004684A0 (32 slots: 4 onCreateScreen
 // func_001BBD60, 12 onUpdate func_001BBDE0, 17 onPopupEvent func_001BC6A0, 18 onWidgetCreate func_001BBE00,
@@ -38,11 +38,11 @@ struct cFEStateCreateDuplicate {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004684A0 (vtables.tsv; 32 slots), stored by func_001BBD08 /
+    void** mVtbl;                   // 0x008 [R] D_004684A0 (vtables.tsv; 32 slots), stored by cFEStateCreateDuplicate_cFEStateCreateDuplicate /
                                     //       func_001E0DD8 after the cFEStateNet ctor and by the destructor
-                                    //       func_001E0E18
+                                    //       cFEStateCreateDuplicate__cFEStateCreateDuplicate
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001BBD08 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateDuplicate_cFEStateCreateDuplicate stores
                                     //       0x4F
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack

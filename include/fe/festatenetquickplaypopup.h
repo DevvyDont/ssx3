@@ -8,11 +8,11 @@
 // onLoseTransition__25cFEStateNetQuickPlayPopup. EA's source file is not known (its code follows
 // cFEStateOnlineAgreement's, after cFEStateOnlineMainMenu's festatenetmainmenu.cpp, in both builds).
 //
-// Size 0x734: cMemMan_alloc(0x734, "cFEStateNetQuickPlayPopup") + func_001C0F40(mem, pEngine, pParent)
+// Size 0x734: cMemMan_alloc(0x734, "cFEStateNetQuickPlayPopup") + cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(mem, pEngine, pParent)
 // (func_001BFE70,
 // cFEStateOnlineMainMenu's onWidgetEvent; the only site); the constructor zeroes up to 0x730. Constructors
-// func_001C0F40 (cFEStateNet(pEngine, pParent), vtable D_0046AB28, mHashName 0x48) and the default func_001DF638
-// (fe/fepopupmisc); destructor func_001DF678 (fe/fepopupmisc; slot 1; the preview's _$_25cFEStateNetQuickPlayPopup).
+// cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup (cFEStateNet(pEngine, pParent), vtable D_0046AB28, mHashName 0x48) and the default func_001DF638
+// (fe/fepopupmisc); destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup (fe/fepopupmisc; slot 1; the preview's _$_25cFEStateNetQuickPlayPopup).
 // Retail vtable D_0046AB28 (32 slots: 4 onCreateScreen func_001C0FC0, 10 func_001DF6A0 (onLoseTransition), 12
 // onUpdate func_001C1038, 17 onPopupEvent func_001C1B48, 18 onWidgetCreate func_001C1080, 19 onWidgetEvent
 // func_001C1560, 20 func_001C17E0, 21 func_001C17D8, 25 func_001C1488 (help), 31 func_001C19C8 (net events)).
@@ -41,11 +41,11 @@ struct cFEStateNetQuickPlayPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046AB28 (vtables.tsv; 32 slots), stored by func_001C0F40 /
+    void** mVtbl;                   // 0x008 [R] D_0046AB28 (vtables.tsv; 32 slots), stored by cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup /
                                     //       func_001DF638 after the cFEStateNet ctor and by the destructor
-                                    //       func_001DF678
+                                    //       cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001C0F40 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup stores
                                     //       0x48
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack

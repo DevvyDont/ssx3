@@ -26,21 +26,21 @@ INCLUDE_ASM("fe/fepopup3", func_001DF578);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF5C0);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF608);
+INCLUDE_ASM("fe/fepopup3", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF630);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF678);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF6A0);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF6E8);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetSSXWorld__cFEStateNetSSXWorld);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF750);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetQuickMessages__cFEStateNetQuickMessages);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateLobbyMenu__cFEStateLobbyMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF878);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF8E0);
 
@@ -176,21 +176,21 @@ INCLUDE_ASM("fe/fepopup3", cFEStateMPCircuit__cFEStateMPCircuit);
 
 INCLUDE_ASM("fe/fepopup3", func_001E08D0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0918);
+INCLUDE_ASM("fe/fepopup3", cFEStateSelectPersona__cFEStateSelectPersona);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0940);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0948);
 
-INCLUDE_ASM("fe/fepopup3", func_001E09A0);
+INCLUDE_ASM("fe/fepopup3", cFEStateChallengePopup__cFEStateChallengePopup);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0A00);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0A50);
+INCLUDE_ASM("fe/fepopup3", cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0AB8);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0B00);
+INCLUDE_ASM("fe/fepopup3", cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0BA0);
 
@@ -222,7 +222,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep2__cFEStateCreateStep2);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0DD0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0E18);
+INCLUDE_ASM("fe/fepopup3", cFEStateCreateDuplicate__cFEStateCreateDuplicate);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0E40);
 
@@ -234,7 +234,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateStats__cFEStateStats);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0EC0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0EC8);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetNews__cFEStateNetNews);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0EF0);
 

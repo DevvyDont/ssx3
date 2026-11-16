@@ -11,10 +11,10 @@
 // d:/ssx/code/source/fe/festatenetlobby.cpp (its code follows cFEStateLobbyMenu's in both builds; no assert of its
 // own), so this header could also be merged into fe/festatelobbymenu.h.
 //
-// Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateNetCreateRoomPopup") + func_001BE7D8(mem, pEngine, pParent)
-// (cFEStateLobbyMenu's onWidgetEvent, the only site); mszPassword ends at 0x6E8. Constructors func_001BE7D8
+// Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateNetCreateRoomPopup") + cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(mem, pEngine, pParent)
+// (cFEStateLobbyMenu's onWidgetEvent, the only site); mszPassword ends at 0x6E8. Constructors cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup
 // (cFEStateNet(pEngine, pParent), vtable D_0046A6E8, mHashName 0x47) and the default func_001DF828 (fe/fepopupmisc);
-// destructor func_001DF878 (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable D_0046A6E8 (32 slots;
+// destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable D_0046A6E8 (32 slots;
 // vtables.tsv lists 24: 4 onCreateScreen func_001BE828, 10 func_001DF8E0 (onLoseTransition), 12 onUpdate
 // func_001BE890, 18 onWidgetCreate func_001BE8B0, 19 onWidgetEvent func_001BEA38, 21 func_001BEA30, 25
 // func_001BED58 (help), 31 func_001BED28). Methods: fe/feasyncfile 0x1BE7D8-0x1BED58.
@@ -40,10 +40,10 @@ struct cFEStateNetCreateRoomPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046A6E8 (32 slots), stored by func_001BE7D8 / func_001DF828 after
-                                    //       the cFEStateNet ctor and by the destructor func_001DF878
+    void** mVtbl;                   // 0x008 [R] D_0046A6E8 (32 slots), stored by cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup / func_001DF828 after
+                                    //       the cFEStateNet ctor and by the destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001BE7D8 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup stores
                                     //       0x47
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -122,14 +122,14 @@ struct cFEStateNetCreateRoomPopup {
                                     //       event 9 compares the widget with it and sets mszChannelName from its
                                     //       selection (func_0039A738)
     char* mszRoomName;              // 0x6DC [P] getRoomName (preview 0xB8); [R] D_004A3E90 (both ctors), destroyed by
-                                    //       func_001DF878; [U] cBXString assigned from the keyboard text (event 13,
+                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 1); func_001BEC78 refuses an empty name
                                     //       ("kT_POPUP231UniqueRoom")
     char* mszChannelName;           // 0x6E0 [P] getChannelName (preview 0xBC); [R] D_004A3E90, destroyed by
-                                    //       func_001DF878; [U] cBXString assigned D_004A1A6C by onWidgetCreate and
+                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned D_004A1A6C by onWidgetCreate and
                                     //       one of D_004A1A60/64/6C/68 per list entry by onWidgetEvent
     char* mszPassword;              // 0x6E4 [P] getPassword (preview 0xC0); [R] D_004A3E90, destroyed by
-                                    //       func_001DF878; [U] cBXString assigned from the keyboard text (event 13,
+                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 2)
 };
 

@@ -8,9 +8,9 @@
 // cFEUseExistingAccount: screen "204use_existing_account": account name and password boxes, "forgot password" /
 // "forgot account" requests (by e-mail) and the verify step, then the memory-card save popup
 // (cFEStateNetAccountMem) and cFEStateSelectPersona. EA's name: the preview's __21cFEUseExistingAccount and
-// _vt$21cFEUseExistingAccount. Size 0x6E4: cMemMan_alloc(0x6E4, "cFEUseExistingAccount") + func_001AC010(mem,
-// pEngine) (func_001BF758, the only site). Constructors func_001AC010 (cFEStateNet(pEngine, 0), vtable D_00469068,
-// mHashName 0x35) and the default func_001E0880 (fe/fepopupmisc); destructor func_001AC068 (slot 1: destroys
+// _vt$21cFEUseExistingAccount. Size 0x6E4: cMemMan_alloc(0x6E4, "cFEUseExistingAccount") + cFEUseExistingAccount_cFEUseExistingAccount(mem,
+// pEngine) (func_001BF758, the only site). Constructors cFEUseExistingAccount_cFEUseExistingAccount (cFEStateNet(pEngine, 0), vtable D_00469068,
+// mHashName 0x35) and the default func_001E0880 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
 // mszEmail, then cFEStateNet's func_001A85D0). Retail vtable D_00469068 (32 slots: 1 dtor, 4 onCreateScreen
 // func_001AC0B8, 12 onUpdate func_001AC150, 17 onPopupEvent func_001AC920, 18 onWidgetCreate func_001AC170,
 // 19 onWidgetEvent func_001AC5C0, 20 func_001AC5A8, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
@@ -18,9 +18,9 @@
 //
 // cFEStateSelectPersona: screen "220select_persona": the account's persona list ("PersonaMenu"), create / delete
 // persona. EA's name: the preview's __21cFEStateSelectPersona / _$_21cFEStateSelectPersona. Size 0x6D8:
-// cMemMan_alloc(0x6D8, "cFEStateSelectPersona") + func_001AD130(mem, pEngine) at all 10 sites (fe/feasyncfile).
-// Constructors func_001AD130 (vtable D_00468F50, mHashName 0x38) and the default func_001E08D8 (fe/fepopupmisc);
-// destructor func_001E0918 (fe/fepopupmisc; slot 1; the preview's _$_21cFEStateSelectPersona). Retail vtable
+// cMemMan_alloc(0x6D8, "cFEStateSelectPersona") + cFEStateSelectPersona_cFEStateSelectPersona(mem, pEngine) at all 10 sites (fe/feasyncfile).
+// Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable D_00468F50, mHashName 0x38) and the default func_001E08D8 (fe/fepopupmisc);
+// destructor cFEStateSelectPersona__cFEStateSelectPersona (fe/fepopupmisc; slot 1; the preview's _$_21cFEStateSelectPersona). Retail vtable
 // D_00468F50 (33 slots: 4 onCreateScreen func_001AD178, 12 onUpdate func_001AD1E8, 17 onPopupEvent func_001AD8C0,
 // 18 onWidgetCreate func_001AD308, 19 onWidgetEvent func_001AD5E8, 25 func_001AD4F0 (help), 29 func_001E0940,
 // 31 func_001ADA30 (net events), 32 func_001E0948, 33 func_001AD9C8). Methods: fe/feasyncfile 0x1AD130-0x1ADC30.
@@ -46,11 +46,11 @@ struct cFEUseExistingAccount {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00469068 (vtables.tsv; 32 slots), stored by func_001AC010 /
+    void** mVtbl;                   // 0x008 [R] D_00469068 (vtables.tsv; 32 slots), stored by cFEUseExistingAccount_cFEUseExistingAccount /
                                     //       func_001E0880 after the cFEStateNet ctor and by the destructor
-                                    //       func_001AC068
+                                    //       cFEUseExistingAccount__cFEUseExistingAccount
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001AC010 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEUseExistingAccount_cFEUseExistingAccount stores
                                     //       0x35
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -120,7 +120,7 @@ struct cFEUseExistingAccount {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEUseExistingAccount
-    int unk_6D0;                    // 0x6D0 [R] 0 (func_001AC010, func_001E0880); no other access seen
+    int unk_6D0;                    // 0x6D0 [R] 0 (cFEUseExistingAccount_cFEUseExistingAccount, func_001E0880); no other access seen
     int mbAskSave;                  // 0x6D4 [U] func_001ACB48 (popup 0x82C, the cFEStateNetAccountMem result): 1 on
                                     //       0x11 (option 2), 0 on 0xF/0x10 (then pushes cFEStateSelectPersona); on
                                     //       0x16 it opens the "kT_POPUP204SaveAccount" yes/no popup (0x81E) when set,
@@ -131,7 +131,7 @@ struct cFEUseExistingAccount {
                                     //       0xC9 sends it: 2 -> func_0025C3F8(mUserName), 3 ->
                                     //       func_0025C1E0(mszEmail), 4 -> func_0025C610
     char* mszEmail;                 // 0x6DC [R] cBXString: the empty-string rep D_004A3E90 (both ctors), destroyed by
-                                    //       func_001AC068 (cBXString__cBXString(.., 2)); [U] func_001AC9C0 assigns
+                                    //       cFEUseExistingAccount__cFEUseExistingAccount (cBXString__cBXString(.., 2)); [U] func_001AC9C0 assigns
                                     //       the e-mail address the request popup returned (popup + 0x2B0;
                                     //       cBXString_cBXString4); func_001AC448 opens "kT_POPUP204RequestAccount"
                                     //       when its length (the word before the text) is 0; func_001ACEF8 passes it
@@ -188,11 +188,11 @@ struct cFEStateSelectPersona {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468F50 (vtables.tsv; 33 slots), stored by func_001AD130 /
+    void** mVtbl;                   // 0x008 [R] D_00468F50 (vtables.tsv; 33 slots), stored by cFEStateSelectPersona_cFEStateSelectPersona /
                                     //       func_001E08D8 after the cFEStateNet ctor and by the destructor
-                                    //       func_001E0918
+                                    //       cFEStateSelectPersona__cFEStateSelectPersona
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001AD130 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateSelectPersona_cFEStateSelectPersona stores
                                     //       0x38
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -262,7 +262,7 @@ struct cFEStateSelectPersona {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateSelectPersona
-    int mbExistingPersona;          // 0x6D0 [R] 0 (func_001AD130; not set by the default ctor); [U] onWidgetEvent
+    int mbExistingPersona;          // 0x6D0 [R] 0 (cFEStateSelectPersona_cFEStateSelectPersona; not set by the default ctor); [U] onWidgetEvent
                                     //       func_001AD5E8: 1 when an existing persona row is chosen (func_0025CD28
                                     //       selects it), 0 when the "create new persona" row opens the keyboard; the
                                     //       net-event handler func_001ADC30 picks "kT_POPUPCMNProfanity" (set) or

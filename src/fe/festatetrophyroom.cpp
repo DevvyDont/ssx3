@@ -778,12 +778,12 @@ extern "C" void func_001D4F90(void* self, int index, cUIText* text)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5038);
 #ifdef SKIP_ASM
-extern "C" void* func_001BEE30(void* self);
+extern "C" void* cFEStateLogin_cFEStateLogin(void* self);
 extern void* D_00468050[];
 
 extern "C" void* func_001D5038(void* self)
 {
-    func_001BEE30(self);
+    cFEStateLogin_cFEStateLogin(self);
     *(void***)((char*)self + 0x8) = D_00468050;
     *(int*)((char*)self + 0xC) = 0x34;
     return self;
@@ -835,7 +835,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_001BF228(void* self, int msg);
-extern "C" void* func_001BFBB8(void* mem, int a1);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, int a1);
 extern "C" void func_0025C610(void* mgr);
 extern "C" void* func_0025CD50(void*, int);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
@@ -851,7 +851,7 @@ extern "C" int func_001D5138(void* self, int msg)
         func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
         break;
     case 0x101:
-        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
         break;
     case 0x111: {
         cBE_getInterface_Fv(SSXApp->BE, 7);

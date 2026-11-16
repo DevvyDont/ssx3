@@ -9,9 +9,9 @@
 // between cFEStateNetCreateRoomPopup's and cFEStateOnlineMainMenu's in both builds; no assert of its own).
 //
 // Size 0x6D4: cMemMan_alloc(0x6D4, "cFEStateLogin" / "cFEStateNetLogin" / "cFEStateLogin MemoryCard") +
-// func_001BEE30(mem, pEngine) at 4 sites (feasyncfile 4248, 4398, 12745, 20767); mpustrDisconnect ends at 0x6D4.
-// Constructors func_001BEE30 (cFEStateNet(pEngine, 0), vtable D_00468388, mHashName 0x33, unk_6A8 = 0) and the
-// default func_001E0E48 (fe/fepopupmisc); destructor func_001BEE78 (slot 1: frees mpustrDisconnect). Retail vtable
+// cFEStateLogin_cFEStateLogin(mem, pEngine) at 4 sites (feasyncfile 4248, 4398, 12745, 20767); mpustrDisconnect ends at 0x6D4.
+// Constructors cFEStateLogin_cFEStateLogin (cFEStateNet(pEngine, 0), vtable D_00468388, mHashName 0x33, unk_6A8 = 0) and the
+// default func_001E0E48 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
 // D_00468388 (33 slots; vtables.tsv lists 24: 4 onCreateScreen func_001BEED0, 12 onUpdate func_001BEF40, 17
 // onPopupEvent func_001BF6C0, 18 onWidgetCreate func_001BEF60, 19 onWidgetEvent func_001BF758, 25 func_001BFAE0
 // (help), 29 func_001E0E90, 31 func_001BF228 (net events), 32 func_001E0E88, 33 func_001BF378). Methods:
@@ -36,10 +36,10 @@ struct cFEStateLogin {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468388 (33 slots), stored by func_001BEE30 / func_001E0E48 after
-                                    //       the cFEStateNet ctor and by the destructor func_001BEE78
+    void** mVtbl;                   // 0x008 [R] D_00468388 (33 slots), stored by cFEStateLogin_cFEStateLogin / func_001E0E48 after
+                                    //       the cFEStateNet ctor and by the destructor cFEStateLogin__cFEStateLogin
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001BEE30 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLogin_cFEStateLogin stores
                                     //       0x33
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -113,7 +113,7 @@ struct cFEStateLogin {
                                     //       and stores operator_new_tag(.., "cFEStateLogin") holding
                                     //       "kT_POPUPCMNDisconnecting" + "kT_POPUPCMNDisconnect" (sprintf2), then
                                     //       hands it to the question popup (popup + 0xC4, text type 1); the
-                                    //       destructor func_001BEE78 frees it
+                                    //       destructor cFEStateLogin__cFEStateLogin frees it
 };
 
 CHECK_OFFSET(cFEStateLogin, mpPrev, 0x000);

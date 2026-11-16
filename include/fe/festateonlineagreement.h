@@ -6,11 +6,11 @@
 // preview's _$_23cFEStateOnlineAgreement / onLoseTransition__23cFEStateOnlineAgreement and the allocation tag. EA's
 // source file is not known (its code follows cFEStateOnlineMainMenu's, festatenetmainmenu.cpp, in both builds).
 //
-// Size 0x6DC: cMemMan_alloc(0x6DC, "cFEStateOnlineAgreement") + func_001C0418(mem, pEngine) at all 4 sites
-// (cFEStateCreateStep1/2's onWidgetEvent, func_001BF758, func_001C1EA8). Constructors func_001C0418
+// Size 0x6DC: cMemMan_alloc(0x6DC, "cFEStateOnlineAgreement") + cFEStateOnlineAgreement_cFEStateOnlineAgreement(mem, pEngine) at all 4 sites
+// (cFEStateCreateStep1/2's onWidgetEvent, func_001BF758, func_001C1EA8). Constructors cFEStateOnlineAgreement_cFEStateOnlineAgreement
 // (cFEStateNet(pEngine,
 // 0), vtable D_0046AC38, mHashName 0x43), func_001C03D0 (cFEStateNet(pEngine, pParent), the same stores; no caller
-// found) and the default func_001C0460 (cFEStateNet(0, 0), no mHashName); destructor func_001C0A28 (slot 1: frees
+// found) and the default func_001C0460 (cFEStateNet(0, 0), no mHashName); destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement (slot 1: frees
 // mpTOSLines). Retail vtable D_0046AC38 (32 slots: 4 onCreateScreen func_001C04A8, 7 func_001C0B20, 10 func_001DF630
 // (onLoseTransition), 12 onUpdate func_001C0A80, 18 onWidgetCreate func_001C0CE0, 19 onWidgetEvent func_001C0D28, 20
 // func_001C0B08, 25 func_001C0EA8 (help), 31 func_001C0E88). Methods: fe/feasyncfile 0x1C03D0-0x1C0EA8.
@@ -34,11 +34,11 @@ struct cFEStateOnlineAgreement {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046AC38 (vtables.tsv; 32 slots), stored by func_001C0418 /
+    void** mVtbl;                   // 0x008 [R] D_0046AC38 (vtables.tsv; 32 slots), stored by cFEStateOnlineAgreement_cFEStateOnlineAgreement /
                                     //       func_001C03D0 / func_001C0460 after the cFEStateNet ctor and by the
-                                    //       destructor func_001C0A28
+                                    //       destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001C0418 /
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateOnlineAgreement_cFEStateOnlineAgreement /
                                     //       func_001C03D0 store 0x43
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack

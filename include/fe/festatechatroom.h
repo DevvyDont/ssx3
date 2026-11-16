@@ -8,10 +8,10 @@
 // sits between cFEStateOnlineCharacterSelect and cFEStateNetConfig (festatenetconfig.cpp) in both builds, and no
 // assert names it; the header is named after the class.
 //
-// Size 0x73C: cMemMan_alloc(0x73C, "cFEStateChatRoom") + func_001B1F88(mem, pEngine) at all 4 sites (func_001A9578,
+// Size 0x73C: cMemMan_alloc(0x73C, "cFEStateChatRoom") + cFEStateChatRoom_cFEStateChatRoom(mem, pEngine) at all 4 sites (func_001A9578,
 // func_001B15D8, func_001BD738; fe/festatebigradio func_001941B0); the constructor's last store is the 16-byte
-// mChatColour at 0x72C. Constructors func_001B1F88 (cFEStateNet(pEngine, 0), vtable D_0046AE58, mHashName 0x3D) and
-// the default func_001DF580 (fe/fepopupmisc); destructor func_001B2048 (slot 1; the preview's _$_16cFEStateChatRoom).
+// mChatColour at 0x72C. Constructors cFEStateChatRoom_cFEStateChatRoom (cFEStateNet(pEngine, 0), vtable D_0046AE58, mHashName 0x3D) and
+// the default func_001DF580 (fe/fepopupmisc); destructor cFEStateChatRoom__cFEStateChatRoom (slot 1; the preview's _$_16cFEStateChatRoom).
 // Retail vtable D_0046AE58 (32 slots: 4 onCreateScreen func_001B2070, 6 onGainFocus func_001B3528, 7 func_001B3490,
 // 8 func_001B38D0, 12 onUpdate func_001B2320, 13 func_001DF5C0, 17 onPopupEvent func_001B3850, 18 onWidgetCreate
 // func_001B2EB8, 19 onWidgetEvent func_001B31A0, 20 onWidgetMenu func_001B3568, 25 func_001B2DA0 (help), 31
@@ -40,11 +40,11 @@ struct cFEStateChatRoom {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046AE58 (vtables.tsv; 32 slots), stored by func_001B1F88 /
+    void** mVtbl;                   // 0x008 [R] D_0046AE58 (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
                                     //       func_001DF580 after the cFEStateNet ctor and by the destructor
-                                    //       func_001B2048
+                                    //       cFEStateChatRoom__cFEStateChatRoom
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001B1F88 stores
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChatRoom_cFEStateChatRoom stores
                                     //       0x3D
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
@@ -132,7 +132,7 @@ struct cFEStateChatRoom {
     int mbExiting;                  // 0x6F8 [R] 0 (both ctors); [U] onWidgetEvent func_001B31A0 (back) sets 1 and
                                     //       opens "kT_POPUP231ExitingRoom"; the net-event handler func_001B3A30 drops
                                     //       chat messages (0xDE) while it is set
-    cUIMenu* mpMenu[2];             // 0x6FC [R] 0 (func_001B1F88 clears both in a loop with miMenuScroll); [U]
+    cUIMenu* mpMenu[2];             // 0x6FC [R] 0 (cFEStateChatRoom_cFEStateChatRoom clears both in a loop with miMenuScroll); [U]
                                     //       onWidgetCreate: [0] = "PlayerListMenu", [1] = "MenuChat"; func_001B3490
                                     //       enables both (slot 7); onWidgetMenu func_001B3568 compares the sender
                                     //       with them
