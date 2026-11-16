@@ -16,7 +16,7 @@
 // cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor cOVState_ViewPopup_cOVState_ViewPopup(this,
 // pEngine, pParent, message, number)). Size 0x70. Base cUIState (ui/uistate.h, 0x48), written out flat (it is not a
 // cOVState: the constructor is cUIState(cUIEngine*, cUIState*) func_0039E318 and nothing stores 0x48..0x9C as
-// cOVState does). Retail vtable D_00474248 (destructor func_0021CB40 in fe/all_in_one_fe).
+// cOVState does). Retail vtable cOVState_ViewPopup_vtbl (destructor func_0021CB40 in fe/all_in_one_fe).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. There is no
 // SSX On Tour DWARF for these classes and the preview keeps no accessors, so the own members carry [R]/[U]
@@ -157,7 +157,7 @@ struct cOVState_ViewPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00474248, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor func_0021CB40
+    void** mVtbl;                   // 0x008 [R] cOVState_ViewPopup_vtbl, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor func_0021CB40
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument (the message center's mpEngine);

@@ -95,7 +95,7 @@ struct cBigFile;
 void cBigFile__cBigFile(cBigFile* self, int flags);
 void operator_delete(int* ptr);
 extern "C" void func_0026C898(void* self);
-extern void* D_00481898[];
+extern void* cReplayFramePtr_vtbl[];
 
 extern "C" void func_0026C588(void* self, int flags)
 {
@@ -106,7 +106,7 @@ extern "C" void func_0026C588(void* self, int flags)
     operator_delete(*(int**)((char*)self + 0x6C));
     operator_delete(*(int**)((char*)self + 0x68));
     func_0026C898(self);
-    *(void***)((char*)self + 0x14) = D_00481898;
+    *(void***)((char*)self + 0x14) = cReplayFramePtr_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

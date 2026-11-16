@@ -664,7 +664,7 @@ extern "C" int func_0026E838(void* self, void* o, int mode)
 }
 #endif
 
-extern void* D_00481898[];
+extern void* cReplayFramePtr_vtbl[];
 
 //100%
 INCLUDE_ASM("replay/replay", cReplayFramePtr_cReplayFramePtr__FPv);
@@ -673,7 +673,7 @@ void* cReplayFramePtr_cReplayFramePtr(void* self)
 {
     int t0 = 0;
     *(int*)((char*)self + 0x4) = t0;
-    *(int*)self = (int)(void*)D_00481898;
+    *(int*)self = (int)(void*)cReplayFramePtr_vtbl;
     *(int*)((char*)self + 0x8) = t0;
     *(int*)((char*)self + 0xc) = t0;
     *(int*)((char*)self + 0x10) = t0;

@@ -706,14 +706,14 @@ extern "C" int func_001DF778(void *arg0) {
 INCLUDE_ASM("fe/fepopupmisc", func_001DF780);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
-extern void* D_0046A7F8[];
+extern void* cFEStateLobbyMenu_vtbl[];
 extern int D_004A3E90;
 
 extern "C" void* func_001DF780(cFEStateLobbyMenu* self)
 {
     func_001A8500(self, 0, 0);
     int g = D_004A3E90;
-    self->mVtbl = D_0046A7F8;
+    self->mVtbl = cFEStateLobbyMenu_vtbl;
     self->mszChannelName = (char*)g;
     self->mszRoomName = (char*)g;
     return ((void*)self);
@@ -723,14 +723,14 @@ extern "C" void* func_001DF780(cFEStateLobbyMenu* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateLobbyMenu__cFEStateLobbyMenu);
 #ifdef SKIP_ASM
-extern void* D_0046A7F8[];
+extern void* cFEStateLobbyMenu_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
 extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, int flags)
 {
-    self->mVtbl = D_0046A7F8;
+    self->mVtbl = cFEStateLobbyMenu_vtbl;
     cBXString__cBXString((char*)self + 0xB80, 2);
     cBXString__cBXString((char*)self + 0x76C, 2);
     func_001A85D0_dtor(self, flags);
@@ -2504,13 +2504,13 @@ void* func_001E0B00(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E0B28);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
-extern void* D_00468B00[];
+extern void* cFEStateNetConfig_vtbl[];
 
 extern "C" void* func_001E0B28(cFEStateNetConfig* self)
 {
     func_001A8500(self, 0, 0);
     self->miSelectedSetting = 0;
-    self->mVtbl = D_00468B00;
+    self->mVtbl = cFEStateNetConfig_vtbl;
     self->miNumSettings = 0;
     self->unk_6D8 = 0;
     self->unk_6DC = 0;
@@ -2666,14 +2666,14 @@ int func_001E0C98(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E0CA0);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
-extern void* D_004686C0[];
+extern void* cFEStateCreateStep1_vtbl[];
 extern int D_004A3E90;
 
 extern "C" void* func_001E0CA0(cFEStateCreateStep1* self)
 {
     func_001A8500(self, 0, 0);
     int v = D_004A3E90;
-    self->mVtbl = D_004686C0;
+    self->mVtbl = cFEStateCreateStep1_vtbl;
     self->mszSavedPassword = (char*)v;
     self->mszSavedConfirm = (char*)v;
     self->mszSavedMail = (char*)v;
@@ -2686,14 +2686,14 @@ extern "C" void* func_001E0CA0(cFEStateCreateStep1* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1__cFEStateCreateStep1);
 #ifdef SKIP_ASM
-extern void* D_004686C0[];
+extern void* cFEStateCreateStep1_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
 extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* self, int flags)
 {
-    self->mVtbl = D_004686C0;
+    self->mVtbl = cFEStateCreateStep1_vtbl;
     cBXString__cBXString((char*)self + 0x6DC, 2);
     cBXString__cBXString((char*)self + 0x6D8, 2);
     cBXString__cBXString((char*)self + 0x6D4, 2);
@@ -2710,7 +2710,7 @@ int func_001E0D60(void* self)
 }
 #endif
 
-extern void* D_004685B0[];
+extern void* cFEStateCreateStep2_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
@@ -2720,7 +2720,7 @@ extern "C" void* func_001A8500(void*, int, int);
 
 extern "C" void *func_001E0D68(cFEStateCreateStep2* self) {
     func_001A8500(self, 0, 0);
-    (self->mVtbl) = D_004685B0;
+    (self->mVtbl) = cFEStateCreateStep2_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2730,7 +2730,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
 #ifdef SKIP_ASM
 void* cFEStateCreateStep2__cFEStateCreateStep2(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)D_004685B0;
+    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateStep2_vtbl;
     return func_001A85D0(self);
 }
 #endif
@@ -2810,7 +2810,7 @@ int func_001E0E90(void* self)
 }
 #endif
 
-extern void* D_00468278[];
+extern void* cFEStateStats_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
@@ -2818,7 +2818,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
 #ifdef SKIP_ASM
 void* cFEStateStats__cFEStateStats(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)D_00468278;
+    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateStats_vtbl;
     return func_001A85D0(self);
 }
 #endif
@@ -6380,14 +6380,14 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx)
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_cOVState_ViewPopup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
-extern void* D_00474248[];
+extern void* cOVState_ViewPopup_vtbl[];
 
 extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, void* engine, void* owner, int a3, int a4)
 {
     func_0039E318(self, engine, owner);
     self->miMessage = a3;
     self->miNumber = a4;
-    self->mVtbl = D_00474248;
+    self->mVtbl = cOVState_ViewPopup_vtbl;
     self->mpNumberLabel = 0;
     self->mpNumber = 0;
     self->mpFrom = 0;

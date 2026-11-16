@@ -2,7 +2,7 @@
 #define OBJECT_PARENTMODIFIER_H
 
 // cParentModifier: a cPositionModifier that follows another instance's mesh (cMoveNode::addParent: attach an object to a
-// parent instance's bone). Unnamed in retail: vtable D_0048F508 (27 slots; shares the position slots func_00361900..
+// parent instance's bone). Unnamed in retail: vtable cParentModifier_vtbl (27 slots; shares the position slots func_00361900..
 // func_00361940), identified by the "ParentModifier" tag and On Tour's layout. EA's source:
 // d:/ssx/code/source/object/parentmodifier.cpp (preview assert).
 // Size 0xB0: retail cMemMan_alloc(0xB0, "ParentModifier") in cMoveNode's addParent and the replay loader (type 3); On
@@ -20,7 +20,7 @@ struct tInstanceRecord;
 
 struct cParentModifier {
     // --- cPositionModifier (0x90; object/positionmodifier.h)
-    void** mVtbl;                   // 0x00 [R] ctors store D_0048F5F0 (cPositionModifier; cParentModifier: D_0048F508);
+    void** mVtbl;                   // 0x00 [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl);
                                     //      dtor cPositionModifier__cPositionModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361910 returns +0x10, setBoundBox func_00361918

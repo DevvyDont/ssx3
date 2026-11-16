@@ -351,3 +351,17 @@ ps2_addr	name	previous	source	evidence
 0045CCC8	cSPOKEChaseAlgorithm_vtbl	D_0045CCC8	retail vtable (tools/vtables.py)	[M] own method(s) cSPOKEChaseAlgorithm_snap; g++ 2.95 symbol _vt$20cSPOKEChaseAlgorithm
 0046D810	cFECustom_vtbl	D_0046D810	retail vtable (tools/vtables.py)	[C] stored by cFECustom_cFECustom; g++ 2.95 symbol _vt$9cFECustom
 00483AD8	cBankManager_vtbl	D_00483AD8	retail vtable (tools/vtables.py)	[C] stored by cBankManager_cBankManager; g++ 2.95 symbol _vt$12cBankManager
+00468278	cFEStateStats_vtbl	D_00468278	retail vtable (tools/vtables.py)	[C] stored by cFEStateStats_cFEStateStats; g++ 2.95 symbol _vt$13cFEStateStats
+004685B0	cFEStateCreateStep2_vtbl	D_004685B0	retail vtable (tools/vtables.py)	[C] stored by cFEStateCreateStep2_cFEStateCreateStep2; g++ 2.95 symbol _vt$19cFEStateCreateStep2
+004686C0	cFEStateCreateStep1_vtbl	D_004686C0	retail vtable (tools/vtables.py)	[D] slot 1 cFEStateCreateStep1__cFEStateCreateStep1; g++ 2.95 symbol _vt$19cFEStateCreateStep1
+004687D0	cFEStateNetAccountMem_vtbl	D_004687D0	retail vtable (tools/vtables.py)	[D] slot 1 cFEStateNetAccountMem__cFEStateNetAccountMem; g++ 2.95 symbol _vt$21cFEStateNetAccountMem
+00468B00	cFEStateNetConfig_vtbl	D_00468B00	retail vtable (tools/vtables.py)	[D] slot 1 cFEStateNetConfig__cFEStateNetConfig; g++ 2.95 symbol _vt$17cFEStateNetConfig
+0046A7F8	cFEStateLobbyMenu_vtbl	D_0046A7F8	retail vtable (tools/vtables.py)	[D] slot 1 cFEStateLobbyMenu__cFEStateLobbyMenu; g++ 2.95 symbol _vt$17cFEStateLobbyMenu
+0046CCA8	cPopupInfo_vtbl	D_0046CCA8	retail vtable (tools/vtables.py)	[D] slot 1 cPopupInfo__cPopupInfo; g++ 2.95 symbol _vt$10cPopupInfo
+00474248	cOVState_ViewPopup_vtbl	D_00474248	retail vtable (tools/vtables.py)	[C] stored by cOVState_ViewPopup_cOVState_ViewPopup; g++ 2.95 symbol _vt$18cOVState_ViewPopup
+00481898	cReplayFramePtr_vtbl	D_00481898	retail vtable (tools/vtables.py)	[C] stored by cReplayFramePtr_cReplayFramePtr__FPv; g++ 2.95 symbol _vt$15cReplayFramePtr
+00486F78	cPS2MemCard_vtbl	D_00486F78	retail vtable (tools/vtables.py)	[D] slot 1 cPS2MemCard__cPS2MemCard; g++ 2.95 symbol _vt$11cPS2MemCard
+0048F338	cAvaSplineModifier_vtbl	D_0048F338	retail vtable (tools/vtables.py)	[D] slot 1 cAvaSplineModifier__cAvaSplineModifier; g++ 2.95 symbol _vt$18cAvaSplineModifier
+0048F420	cMagnetModifier_vtbl	D_0048F420	retail vtable (tools/vtables.py)	[D] slot 1 cMagnetModifier__cMagnetModifier; g++ 2.95 symbol _vt$15cMagnetModifier
+0048F508	cParentModifier_vtbl	D_0048F508	retail vtable (tools/vtables.py)	[D] slot 1 cParentModifier__cParentModifier; g++ 2.95 symbol _vt$15cParentModifier
+0048F5F0	cPositionModifier_vtbl	D_0048F5F0	retail vtable (tools/vtables.py)	[D] slot 1 cPositionModifier__cPositionModifier; g++ 2.95 symbol _vt$17cPositionModifier

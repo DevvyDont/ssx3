@@ -1839,12 +1839,12 @@ struct sMoveQuad {
     float v[4];
 } __attribute__((aligned(16)));
 
-extern void* D_0048F5F0[];
+extern void* cPositionModifier_vtbl[];
 extern sMoveQuad t4mat_Identity[];
 
 extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos)
 {
-    *(void***)self = D_0048F5F0;
+    *(void***)self = cPositionModifier_vtbl;
     *(sMoveQuad*)&self->Offset = *pos;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
@@ -1874,11 +1874,11 @@ struct sMoveQuad2 {
     float v[4];
 } __attribute__((aligned(16)));
 
-extern void* D_0048F5F0[];
+extern void* cPositionModifier_vtbl[];
 
 extern "C" void* func_00356F10(cPositionModifier* self, void* src)
 {
-    *(void***)self = D_0048F5F0;
+    *(void***)self = cPositionModifier_vtbl;
     sMoveQuad2 v = *(sMoveQuad2*)((char*)src + 0x30);
     *(sMoveQuad2*)&self->Offset = v;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src -> self+0x50).
@@ -1914,7 +1914,7 @@ struct sMnVEntrySer6F68 {
 extern "C" void* func_00356F68_ret(void* self, void* stream) __asm__("func_00356F68");
 extern "C" void* func_00356F68_ret(void* self, void* stream)
 {
-    *(void***)self = D_0048F5F0;
+    *(void***)self = cPositionModifier_vtbl;
     sMnVEntrySer6F68* vt = *(sMnVEntrySer6F68**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x40);
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
@@ -1968,12 +1968,12 @@ extern "C" void func_00357000(cPositionModifier* self, func_00357000_cObj* obj)
 //100%
 INCLUDE_ASM("object/movenode", func_00357038);
 #ifdef SKIP_ASM
-extern char D_0048F508[];
+extern char cParentModifier_vtbl[];
 
 extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos)
 {
     func_00356EB8((cPositionModifier*)self, pos);
-    self->mVtbl = (void**)D_0048F508;
+    self->mVtbl = (void**)cParentModifier_vtbl;
     self->ParentInst = (tInstanceRecord*)a1;
     self->Mesh = (int)a2;
     return ((void*)self);
@@ -1996,12 +1996,12 @@ struct sMnVEntryRd7090 {
 };
 
 extern "C" void func_00356F68(void* self, void* stream);
-extern char D_0048F508[];
+extern char cParentModifier_vtbl[];
 
 extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* stream)
 {
     func_00356F68(self, stream);
-    self->mVtbl = (void**)D_0048F508;
+    self->mVtbl = (void**)cParentModifier_vtbl;
     sMnVEntrySer7090* e = &(*(sMnVEntrySer7090**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x90, 4);
     sMnVEntryRd7090* r = &(*(sMnVEntryRd7090**)stream)[3];
@@ -2168,11 +2168,11 @@ extern "C" void func_00357278(cParentModifier* self, void* stream)
 //100%
 INCLUDE_ASM("object/movenode", func_003572E0);
 #ifdef SKIP_ASM
-extern char D_0048F420[];
+extern char cMagnetModifier_vtbl[];
 
 extern "C" void* func_003572E0(cMagnetModifier* self, void* a1, void* mat, float f40, float speed)
 {
-    *(void**)self = D_0048F420;
+    *(void**)self = cMagnetModifier_vtbl;
     self->Instance = (tInstanceRecord*)a1;
     self->Radius = f40;
     self->Speed = speed * 27.77777862548828f;
@@ -2216,12 +2216,12 @@ struct sMnVEntryRd7358 {
     void* (*fn)(void*);
 };
 
-extern char D_0048F420[];
+extern char cMagnetModifier_vtbl[];
 
 extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
 {
     char* m = (char*)self + 0x10;
-    *(void**)self = D_0048F420;
+    *(void**)self = cMagnetModifier_vtbl;
     sMnVEntryRd7358* r = &(*(sMnVEntryRd7358**)stream)[3];
     self->Instance = (tInstanceRecord*)r->fn((char*)stream + r->delta);
     sMnVEntrySer7358* e = &(*(sMnVEntrySer7358**)stream)[2];
@@ -2410,13 +2410,13 @@ extern "C" void func_003576D0(cMagnetModifier* self, void* stream)
 //100%
 INCLUDE_ASM("object/movenode", func_00357750);
 #ifdef SKIP_ASM
-extern void* D_0048F338[];
+extern void* cAvaSplineModifier_vtbl[];
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
 // port needs a plain 64-byte copy.
 extern "C" void* func_00357750(cAvaSplineModifier* self, void* src)
 {
-    *(void***)self = D_0048F338;
+    *(void***)self = cAvaSplineModifier_vtbl;
     self->Instance = (tInstanceRecord*)src;
     *(int*)&self->Radius = 0;
     __asm__ __volatile__(
@@ -2459,7 +2459,7 @@ void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 extern "C" void* func_00357798(cAvaSplineModifier* self, void* stream)
 {
     char* m = (char*)self + 0x10;
-    *(void***)self = D_0048F338;
+    *(void***)self = cAvaSplineModifier_vtbl;
     sMnVEntryRd7798* r = &(*(sMnVEntryRd7798**)stream)[3];
     self->Instance = (tInstanceRecord*)r->fn((char*)stream + r->delta);
     sMnVEntrySer7798* e = &(*(sMnVEntrySer7798**)stream)[2];

@@ -979,11 +979,11 @@ void func_002C3FA0(void* self)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_cPS2MemCard);
 #ifdef SKIP_ASM
 extern "C" void func_002C4050(void*);
-extern void* D_00486F78[];
+extern void* cPS2MemCard_vtbl[];
 
 extern "C" void* cPS2MemCard_cPS2MemCard(cPS2MemCard* self)
 {
-    *(void***)self = D_00486F78;
+    *(void***)self = cPS2MemCard_vtbl;
     func_002C4050(self);
     return ((void*)self);
 }
@@ -995,12 +995,12 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard__cPS2MemCard);
 void operator_delete(int* ptr);
 extern "C" void MEM_free(void* p);
 extern "C" void func_002C6360(cPS2MemCard* self);
-extern void* D_00486F78[];
+extern void* cPS2MemCard_vtbl[];
 extern void* D_004871E8[];
 
 extern "C" void cPS2MemCard__cPS2MemCard(void* self, int flags)
 {
-    *(void***)self = D_00486F78;
+    *(void***)self = cPS2MemCard_vtbl;
     func_002C6360((cPS2MemCard*)self);
     void* p = *(void**)((char*)self + 0x30);
     if (p != 0) {

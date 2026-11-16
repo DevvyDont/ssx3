@@ -3679,3 +3679,19 @@ cRiderHandler_vtbl = 0x00458710;
 cSPOKEChaseAlgorithm_vtbl = 0x0045CCC8;
 cFECustom_vtbl = 0x0046D810;
 cBankManager_vtbl = 0x00483AD8;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round3 (docs/ontour_globals.tsv)
+cFEStateStats_vtbl = 0x00468278;
+cFEStateCreateStep2_vtbl = 0x004685B0;
+cFEStateCreateStep1_vtbl = 0x004686C0;
+cFEStateNetAccountMem_vtbl = 0x004687D0;
+cFEStateNetConfig_vtbl = 0x00468B00;
+cFEStateLobbyMenu_vtbl = 0x0046A7F8;
+cPopupInfo_vtbl = 0x0046CCA8;
+cOVState_ViewPopup_vtbl = 0x00474248;
+cReplayFramePtr_vtbl = 0x00481898;
+cPS2MemCard_vtbl = 0x00486F78;
+cAvaSplineModifier_vtbl = 0x0048F338;
+cMagnetModifier_vtbl = 0x0048F420;
+cParentModifier_vtbl = 0x0048F508;
+cPositionModifier_vtbl = 0x0048F5F0;

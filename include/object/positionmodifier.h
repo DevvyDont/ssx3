@@ -2,7 +2,7 @@
 #define OBJECT_POSITIONMODIFIER_H
 
 // cPositionModifier: the transform modifier that gives a placed instance a fixed offset / matrix (cMoveNode::addPosition;
-// also the base of cParentModifier). Unnamed in retail: vtable D_0048F5F0 (27 slots), identified by the
+// also the base of cParentModifier). Unnamed in retail: vtable cPositionModifier_vtbl (27 slots), identified by the
 // "PositionModifier" allocation tag and On Tour's cPositionModifier/cPositionModifierState layout, which retail matches.
 // Size 0x90: retail cMemMan_alloc(0x90, "PositionModifier") in cMoveNode's two addPosition paths (src/object/movenode.cpp)
 // and the replay loader (src/object/modifierblock.cpp type 4); On Tour 0x90.
@@ -18,7 +18,7 @@
 
 struct cPositionModifier {
     // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store D_0048F5F0 (cPositionModifier; cParentModifier: D_0048F508);
+    void** mVtbl;                   // 0x00 [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl);
                                     //      dtor cPositionModifier__cPositionModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cPositionModifierState

@@ -3,12 +3,12 @@
 
 // cReplayFramePtr: a replay data block with a write cursor and a read cursor: the stream every replayable object
 // writes itself to and reads itself back from (writeToReplayFrame / readFromReplayFrame in On Tour). Derived from
-// the interface cBxReplayFrame (vptr only; On Tour size 4), whose virtuals it implements: vtable D_00481898, slots
+// the interface cBxReplayFrame (vptr only; On Tour size 4), whose virtuals it implements: vtable cReplayFramePtr_vtbl, slots
 // 1..7 = write (func_0026E9D0), read (func_0026EA20), readReplayInstance() (func_0026EB48),
 // readReplayInstance(cInstanceNode*) (func_0026EC08), writeReplayInstance(const tInstanceRecord*) (func_0026ECD8),
 // writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
 // cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable D_00481850, ctor func_0026D5E8) derives from it;
-// cPlaybackMan embeds one at +0x14 (its destructor func_0026C588 stores D_00481898 there).
+// cPlaybackMan embeds one at +0x14 (its destructor func_0026C588 stores cReplayFramePtr_vtbl there).
 // Size 0x14 [R]: the constructor cReplayFramePtr_cReplayFramePtr stores the vptr and zeroes 0x4..0x10, and cReplayFrame's first own
 // member (Next) is at 0x14 (On Tour cReplayFrame, same offsets as here). Same size, order and offsets as On Tour's
 // class cReplayFramePtr.
@@ -36,7 +36,7 @@ struct tFramePos {
 
 struct cReplayFramePtr {
     // --- cBxReplayFrame (interface: a vptr only)
-    void** mVtbl;           // 0x00 [R] ctor cReplayFramePtr_cReplayFramePtr and dtor cReplayFramePtr__cReplayFramePtr store D_00481898 (cReplayFrame's
+    void** mVtbl;           // 0x00 [R] ctor cReplayFramePtr_cReplayFramePtr and dtor cReplayFramePtr__cReplayFramePtr store cReplayFramePtr_vtbl (cReplayFrame's
                             //      ctor then stores D_00481850); [U] peekObjNodeType and the readReplayInstance /
                             //      writeReplayInstance bodies call slots 1/2 (write/read) through it
     // --- cReplayFramePtr

@@ -10,7 +10,7 @@
 // (a state machine over the network object D_004A1B78 = func_002C22C8()) and runs DNAS authentication. Size 0x91C:
 // cMemMan_alloc(0x91C, "cFEStateNetConfig") + cFEStateNetConfig_cFEStateNetConfig(mem, pEngine) (func_001A9710, func_001BF5A8); its
 // unicode popup buffer at 0x71C runs to the end. Constructors cFEStateNetConfig_cFEStateNetConfig and func_001E0B28 (fe/fepopupmisc, the
-// default one: zeroes the same fields), destructor cFEStateNetConfig__cFEStateNetConfig (frees the heap texts). Retail vtable D_00468B00
+// default one: zeroes the same fields), destructor cFEStateNetConfig__cFEStateNetConfig (frees the heap texts). Retail vtable cFEStateNetConfig_vtbl
 // (32 slots: 1 dtor, 4 onCreateScreen func_001B40D0, 5 onDestroyScreen func_001B4168, 12 onUpdate func_001B41A8,
 // 17 onPopupEvent func_001B5D58, 18 onWidgetCreate func_001B52C8, 19 onWidgetEvent func_001B60A8, 21 func_001B6078,
 // 22 func_001B6080, 25 func_001B54B8 (help), 29 func_001E0BA8, 31 func_001B5E28, 32 func_001E0BA0). Methods:
@@ -22,7 +22,7 @@
 // Base: cFEBlankPopup (constructor func_001ABF70 = cFEStateNet's + vtable D_0046B6F8; it adds no members), so its
 // own fields start at 0x6D0. Size 0xB10: every allocation is cMemMan_alloc(0xB10, "cFEStateNetAccountMem") +
 // cFEStateNetAccountMem_cFEStateNetAccountMem(mem, pEngine, pParent, mode, szName, szPassword) (14 sites); the constructor stores 0xB0C last.
-// Destructor cFEStateNetAccountMem__cFEStateNetAccountMem. Retail vtable D_004687D0 (24 slots: 1 dtor, 4 onCreateScreen func_001B7088, 7
+// Destructor cFEStateNetAccountMem__cFEStateNetAccountMem. Retail vtable cFEStateNetAccountMem_vtbl (24 slots: 1 dtor, 4 onCreateScreen func_001B7088, 7
 // onGainTransition func_001E0C90, 10 onLoseTransition func_001E0C98, 12 onUpdate func_001B7CB8, 17 onPopupEvent
 // func_001B84D8, 24 handleEvent func_001B8860). Methods: fe/feasyncfile 0x1B6ED0-0x1B8890.
 //
@@ -47,7 +47,7 @@ struct cFEStateNetConfig {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468B00 (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig / func_001E0B28 after the cFEStateNet ctor and
+    void** mVtbl;                   // 0x008 [R] cFEStateNetConfig_vtbl (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig / func_001E0B28 after the cFEStateNet ctor and
                                     //       by the destructor cFEStateNetConfig__cFEStateNetConfig
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetConfig_cFEStateNetConfig stores 0x31
@@ -214,7 +214,7 @@ struct cFEStateNetAccountMem {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004687D0 (24 slots), stored by cFEStateNetAccountMem_cFEStateNetAccountMem after cFEBlankPopup's ctor (func_001ABF70, vtable
+    void** mVtbl;                   // 0x008 [R] cFEStateNetAccountMem_vtbl (24 slots), stored by cFEStateNetAccountMem_cFEStateNetAccountMem after cFEBlankPopup's ctor (func_001ABF70, vtable
                                     //       D_0046B6F8) and by the destructor cFEStateNetAccountMem__cFEStateNetAccountMem (which restores D_0046B6F8 before cFEStateNet's)
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] 0 (not set by cFEStateNetAccountMem_cFEStateNetAccountMem)

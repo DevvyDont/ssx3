@@ -367,10 +367,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CB08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_xi(void*, int) __asm__("func_0039E2A0");
-extern char D_00474248[];
+extern char cOVState_ViewPopup_vtbl[];
 extern "C" void* func_0021CB08(void *self) {
     func_0039E2A0_xi(self, 0);
-    *(char**)((char*)self + 8) = D_00474248;
+    *(char**)((char*)self + 8) = cOVState_ViewPopup_vtbl;
     return self;
 }
 #endif
@@ -380,10 +380,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CB40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
-extern char D_00474248[];
+extern char cOVState_ViewPopup_vtbl[];
 
 extern "C" void func_0021CB40(cOVState_ViewPopup* arg0) {
-    arg0->mVtbl = (void**)D_00474248;
+    arg0->mVtbl = (void**)cOVState_ViewPopup_vtbl;
     func_0039E390_a(arg0);
 }
 #endif

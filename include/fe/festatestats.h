@@ -9,7 +9,7 @@
 //
 // Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + cFEStateStats_cFEStateStats(mem, pEngine) (func_001BFE70); the
 // constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and func_001C2D90 (the default one), destructor
-// cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable D_00468278 (32 slots: 1 dtor, 4
+// cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable cFEStateStats_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen func_001C2E00, 7 onGainTransition func_001C32B8, 9 onInputAlways func_001C4BD8, 12 onUpdate
 // func_001C2EE0, 13 func_001E0EC0, 18 onWidgetCreate func_001C2F00, 19 onWidgetEvent func_001C3668, 20
 // onWidgetMenu func_001C4B98, 25 func_001C3570 (help), 31 func_001C4CD8 (net event 0xE1), 32 func_001C2E70).
@@ -32,7 +32,7 @@ struct cFEStateStats {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468278 (32 slots), stored by cFEStateStats_cFEStateStats / func_001C2D90 after the cFEStateNet ctor and by
+    void** mVtbl;                   // 0x008 [R] cFEStateStats_vtbl (32 slots), stored by cFEStateStats_cFEStateStats / func_001C2D90 after the cFEStateNet ctor and by
                                     //       the destructor cFEStateStats__cFEStateStats
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateStats_cFEStateStats stores 0x42

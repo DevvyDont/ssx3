@@ -10,7 +10,7 @@
 //
 // Size 0x1500 [R]: func_002C22C8 cMemMan_alloc(0x1500, D_00485FF0, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
 // Base: cMemCard (On Tour DWARF: size 0x4, no data, so only its vptr; the dtor cPS2MemCard__cPS2MemCard stores cMemCard's
-// vtable D_004871E8 back before the base dtor runs). cPS2MemCard's vtable D_00486F78 (76 slots; 59 slot
+// vtable D_004871E8 back before the base dtor runs). cPS2MemCard's vtable cPS2MemCard_vtbl (76 slots; 59 slot
 // functions in this unit, 17 inline accessors emitted in seg_1D3510 at 0x002D37B8-0x002D39B0). EA's source:
 // d:/ssx/code/source/util/bxps2memcard.cpp (preview asserts below); On Tour has no cPS2MemCard.
 // Methods: see methods.txt (in retail they sit in the worldpainter/quadtree split, 0x002C3FA0-0x002C6D70).
@@ -126,7 +126,7 @@ CHECK_SIZE(tPS2MemCardFile, 0x78);
 
 struct cPS2MemCard {
     // --- cMemCard (base, no data) ---
-    void** mVtbl;                   // 0x0000 [R] ctor stores D_00486F78 (cPS2MemCard); dtor stores D_004871E8 (cMemCard)
+    void** mVtbl;                   // 0x0000 [R] ctor stores cPS2MemCard_vtbl (cPS2MemCard); dtor stores D_004871E8 (cMemCard)
     // --- cPS2MemCard ---
     int mState;                     // 0x0004 [P] GetState; [R] Reset 0; [U] SetState stores the new state; slots 31/42
                                     //       test 0x35/0x34

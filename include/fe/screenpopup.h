@@ -82,7 +82,7 @@ struct cScreenPopup {
                                     //       cScreenPopup_onWidgetMenu (case 6) tests it
     cPopupInfo info;                // 0x0BC [O] cPopupInfo info; [R] constructed by cPopupInfo_cPopupInfo(self + 0xBC), destroyed by
                                     //       cPopupInfo__cPopupInfo; getPopupInfo (func_001DDC20) returns self + 0xBC; retail cPopupInfo
-                                    //       is 0xCC bytes (data to 0xC4, vptr D_0046CCA8 at 0xC8)
+                                    //       is 0xCC bytes (data to 0xC4, vptr cPopupInfo_vtbl at 0xC8)
     float mvPosBackWhite[3];        // 0x188 [O]; [U] FillObjectPointers: "whitefg" position
     float mvPosBackRed[3];          // 0x194 [O]; [U] "redbg" position
     float mvPosMenu[3];             // 0x1A0 [O]; [U] "Menu0000" position

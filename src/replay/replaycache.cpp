@@ -1561,11 +1561,11 @@ INCLUDE_ASM("replay/replaycache", cReplayFramePtr__cReplayFramePtr);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
-extern void* D_00481898[];
+extern void* cReplayFramePtr_vtbl[];
 
 extern "C" void cReplayFramePtr__cReplayFramePtr(int* self, int flags)
 {
-    *(void**)self = D_00481898;
+    *(void**)self = cReplayFramePtr_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1637,11 +1637,11 @@ INCLUDE_ASM("replay/replaycache", func_00272258);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
-extern void* D_00481898[];
+extern void* cReplayFramePtr_vtbl[];
 
 extern "C" void func_00272258(int* self, int flags)
 {
-    *(void**)self = D_00481898;
+    *(void**)self = cReplayFramePtr_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }

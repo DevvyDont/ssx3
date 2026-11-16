@@ -11,7 +11,7 @@
 // cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (func_001AD5E8, func_001BA618, func_001BF758, func_001C0D28) and
 // constructed by cFEStateCreateStep1_cFEStateCreateStep1(mem, pEngine, bEdit); every own field ends below 0x6F4. Constructors cFEStateCreateStep1_cFEStateCreateStep1
 // and the default func_001E0CA0 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
-// (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable D_004686C0 (32 slots: 1 dtor, 4
+// (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable cFEStateCreateStep1_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen func_001B8960, 7 onGainTransition func_001B8A08, 12 onUpdate func_001B89E8, 17 onPopupEvent
 // func_001B9428, 18 onWidgetCreate func_001B8AA0, 19 onWidgetEvent func_001B8C38, 25 func_001B9088 (help text),
 // 29 func_001E0D60, 31 func_001B9488 (net event 0xCE)). Methods: fe/feasyncfile 0x1B88F0-0x1BA358.
@@ -19,7 +19,7 @@
 // cFEStateCreateStep2: screen "211create_step2": birth date, gender and the spam option of the same form. Size
 // 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + cFEStateCreateStep2_cFEStateCreateStep2(mem, pEngine) (func_001B8C38, func_001C0D28);
 // own fields end below 0x6E0. Constructors cFEStateCreateStep2_cFEStateCreateStep2 and the default func_001E0D68 (fe/fepopupmisc),
-// destructor cFEStateCreateStep2__cFEStateCreateStep2 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable D_004685B0
+// destructor cFEStateCreateStep2__cFEStateCreateStep2 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable cFEStateCreateStep2_vtbl
 // (slots 4 onCreateScreen func_001BA428, 12 onUpdate func_001BA4E0, 17 onPopupEvent func_001BAA88, 18
 // onWidgetCreate func_001BA500, 19 onWidgetEvent func_001BA618, 25 func_001BA8B8, 29 func_001E0DD0, 31
 // func_001BAB28). Methods: fe/feasyncfile 0x1BA3E0-0x1BBC40.
@@ -46,7 +46,7 @@ struct cFEStateCreateStep1 {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004686C0 (32 slots), stored by cFEStateCreateStep1_cFEStateCreateStep1 / func_001E0CA0 after the cFEStateNet ctor
+    void** mVtbl;                   // 0x008 [R] cFEStateCreateStep1_vtbl (32 slots), stored by cFEStateCreateStep1_cFEStateCreateStep1 / func_001E0CA0 after the cFEStateNet ctor
                                     //       and by the destructor cFEStateCreateStep1__cFEStateCreateStep1
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep1_cFEStateCreateStep1 stores 0x4D (edit) or 0x50 (create)
@@ -187,7 +187,7 @@ struct cFEStateCreateStep2 {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004685B0 (32 slots), stored by cFEStateCreateStep2_cFEStateCreateStep2 / func_001E0D68 and the destructor cFEStateCreateStep2__cFEStateCreateStep2
+    void** mVtbl;                   // 0x008 [R] cFEStateCreateStep2_vtbl (32 slots), stored by cFEStateCreateStep2_cFEStateCreateStep2 / func_001E0D68 and the destructor cFEStateCreateStep2__cFEStateCreateStep2
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep2_cFEStateCreateStep2 stores 0x4E
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor

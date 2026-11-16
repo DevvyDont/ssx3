@@ -6,7 +6,7 @@
 // 0xBC (`info`, fe/screenpopup.h; getPopupInfo func_001DDC20 returns it); the online states fill it after
 // cFEStateNet's createPopup (func_001A9C50) and show the popup with func_001A9BC0.
 //
-// Size 0xCC: the members end at 0xC8 and the vptr follows (retail _vt$10cPopupInfo D_0046CCA8, 1 slot: the destructor
+// Size 0xCC: the members end at 0xC8 and the vptr follows (retail _vt$10cPopupInfo cPopupInfo_vtbl, 1 slot: the destructor
 // cPopupInfo__cPopupInfo), as fe/screenpopup.h records; cScreenPopup's next member starts at 0x188 = 0xBC + 0xCC.
 // Methods (retail fe/feasyncfile 0x1C55F8-0x1C58D0; EA's source: all_in_one_fe.cpp in On Tour):
 //   cPopupInfo_cPopupInfo cPopupInfo() (stores the vptr, calls clear), cPopupInfo_clear clear(), cPopupInfo__cPopupInfo ~cPopupInfo(),
@@ -93,7 +93,7 @@ struct cPopupInfo {
     int meBackgroundType;           // 0x0C0 [O] ePopupBackground (Online 0, Blue 1, Black 2); [R] clear 0;
                                     //       [U] cScreenPopup::meBackgroundType copies it
     int miMaxChars;                 // 0x0C4 [O]; [U] cScreenPopup::miMaxChars copies it (not touched by clear)
-    void** mVtbl;                   // 0x0C8 [R] _vt$10cPopupInfo D_0046CCA8, stored by cPopupInfo_cPopupInfo and cPopupInfo__cPopupInfo
+    void** mVtbl;                   // 0x0C8 [R] _vt$10cPopupInfo cPopupInfo_vtbl, stored by cPopupInfo_cPopupInfo and cPopupInfo__cPopupInfo
 };
 
 CHECK_OFFSET(cPopupInfo, meType, 0x000);
