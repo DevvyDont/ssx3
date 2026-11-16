@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cDirtysock_tag_TagFieldSetUnk);
@@ -661,7 +662,6 @@ extern char D_004A2FA0[];
 extern char D_004A2FA8[];
 extern int D_00535C08[];
 extern int D_004A11B8;
-extern void* SSXApp;
 extern int D_00534B34[];
 extern char D_005308B8[];
 extern char D_00480488[];
@@ -1090,7 +1090,6 @@ extern float D_004A5154;
 extern void* D_004A3328;
 extern void* D_004A3028;
 extern void* D_004A2EB8;
-extern void* SSXApp;
 extern "C" void func_003E95C8(void* p);
 extern "C" int func_003E8FB8(void* p);
 extern "C" void func_0025A650(char* self);
@@ -4323,7 +4322,6 @@ extern "C" void* func_0025FB80(void*, int, void*);
 // func_0025FB80 is used as void here (its v0 is only a pass-through of its last call).
 void func_0025FB80_v(void*, int, void*) __asm__("func_0025FB80");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern int D_005308D0[];
 extern int D_00534B34[];
@@ -4349,7 +4347,7 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2)
     *(int*)(self + 0xB4) = 1;
     cBXString_cBXString4(self + 0x98, name);
     *(int*)(self + 0xA4) = a2;
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     int locationID = cBENewRaceInterface_getLocationID(cBE_getInterface_Fv(cBE_getBE(), 0));
     int flags = D_005308D0[0];
     int event = *(signed char*)(Race_25F4C0() + 0x48);
@@ -4781,7 +4779,6 @@ extern void* D_004812B0[];
 
 extern char D_00480488[];
 
-extern void* SSXApp;
 
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
@@ -5010,8 +5007,8 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     if (*(int*)self == 0)
         return;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
-    char* prof = *(char**)((char*)SSXApp + 0xC0);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
+    char* prof = (char*)SSXApp->GameModeMan;
     int quitA = 0;
     int quitB = 0;
     if (Race()->f18 != 0) {
@@ -5220,7 +5217,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00260C68);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern void* SSXApp;
 extern char D_00480488[];
 extern char D_004804A8[];
 extern void* D_004812B0[];
@@ -5260,7 +5256,7 @@ static inline void post_0C68(char* lst, void* msg)
 
 extern "C" void func_00260C68(char* self, char* msg)
 {
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     if (*(int*)(msg + 0x8) == 0 || (*(int*)(msg + 0x8) == 0x72616E6B && D_00534B34[0] == 0)) {
         int type = 0x101;
         int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
@@ -7408,7 +7404,6 @@ extern char D_00480488[];
 extern char D_004804A8[];
 extern void* D_004A3028;
 extern void* D_004A2EB8;
-extern void* SSXApp;
 extern "C" void func_002636F0(int* out, int val);
 
 static inline bool isState_3828(int st)
@@ -7527,7 +7522,6 @@ extern "C" void func_001472C8(void* self, int a1, int a2);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsigned short port, int a3);
 extern "C" void func_00266D58(void* self, void* ip);
 extern "C" void func_00266E30(void* self);
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern void* D_004A33F4;
 extern float D_004A2F14;
@@ -7567,7 +7561,7 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int 
     func_001472C8(p, 0, a3);
     func_001472C8(p, 1, 0);
     p->vt[1].fn((char*)p + p->vt[1].delta);
-    sIf_002639E0* r = (sIf_002639E0*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    sIf_002639E0* r = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     D_00534B30_002639E0[0].active = one;
     D_00534B30_002639E0[0].rate = 0.01666666753590107f;
     D_00534B30_002639E0[0].port = 0xE4A;
@@ -7694,7 +7688,6 @@ extern "C" void func_002642B8(void* self);
 // PORT: func_00264CB8 is defined with one parameter; this caller passes a second in $a1.
 extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern void* D_004A2EEC;
 extern void* D_004A3028;
@@ -7742,7 +7735,7 @@ extern "C" void func_00263CF0(int* self)
                 func_00263BA8(self, 1);
                 return;
             }
-            cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+            cBE_getInterface_Fv(SSXApp->BE, 7);
             func_00264030(self[1], self[2], D_00534B34[0]);
             func_00264CB8_2(D_004A33CC, *(int*)((char*)D_004A3028 + 0x8C));
             self[0] = 2;
@@ -7783,8 +7776,8 @@ extern "C" void func_00263CF0(int* self)
             func_0025B800(D_004A3028);
             D_004A19C4 = 0x34;
             func_00262768(Mgr_263CF0(), 1, 9, *(int*)((char*)D_004A3028 + 0x98), 0, 0);
-            void* bi7 = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
-            char* bi1 = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 1);
+            void* bi7 = cBE_getInterface_Fv(SSXApp->BE, 7);
+            char* bi1 = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setRiderCharID(bi1, 0, D_00534E58[0]);
             sVEntry_263CF0* vt = *(sVEntry_263CF0**)(bi1 + 0xC);
             vt[1].fn(bi1 + vt[1].delta);
@@ -7923,7 +7916,6 @@ extern char D_004804A8[];
 extern void* D_004812B0[];
 extern void* D_004A3028;
 extern void* D_004A3328;
-extern void* SSXApp;
 extern "C" void func_00264A58(void* self);
 extern "C" void func_00264B20(void* p);
 extern "C" void func_00264BE8(void* self, void* msg, int size);
@@ -8067,7 +8059,7 @@ extern "C" void func_002642B8(void* vself)
         sInfo42B8 info;
         info.v[0] = msg.a;
         *(sInfo42B8*)((char*)D_004A3028 + 0xCC) = info;
-        func_00264F88(self, cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 1), 0));
+        func_00264F88(self, cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0));
         return;
     }
     if (self->host != 0) {
@@ -8358,7 +8350,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264CF0);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00147448(void* self, int a1, int charID);
-extern void* SSXApp;
 extern int D_00534E58[];
 
 struct sVE264CF0 {
@@ -8377,7 +8368,7 @@ extern "C" void func_00264CF0(void* self, int charID)
     sIf264CF0* p = (sIf264CF0*)cBE_getInterface_Fv(cBE_getBE(), 1);
     func_00147448(p, 0, charID);
     p->vt[1].fn((char*)p + p->vt[1].delta);
-    sIf264CF0* q = (sIf264CF0*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    sIf264CF0* q = (sIf264CF0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     D_00534E58[0] = charID;
     q->vt[1].fn((char*)q + q->vt[1].delta);
 }
@@ -8390,7 +8381,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264D80);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00147448(void* self, int a1, int charID);
-extern void* SSXApp;
 
 struct sVE_00264D80 {
     short delta;
@@ -8421,7 +8411,7 @@ extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name)
     sIf_00264D80* p = (sIf_00264D80*)cBE_getInterface_Fv(cBE_getBE(), 1);
     func_00147448(p, 1, charID);
     p->vt[1].fn((char*)p + p->vt[1].delta);
-    sIf_00264D80* q = (sIf_00264D80*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    sIf_00264D80* q = (sIf_00264D80*)cBE_getInterface_Fv(SSXApp->BE, 7);
     D_00534B30_00264D80[0].charID = charID;
     if (name != 0)
         D_00534B30_00264D80[0].name = *name;
@@ -8443,7 +8433,6 @@ extern "C" int func_00148CB8(void* iface, int a, int rider);
 extern "C" int func_00148D58(void* iface, int a, int rider);
 extern "C" int func_00148D08(void* iface, int a, int rider);
 extern "C" int func_00148C18(void* iface, int a, int rider);
-extern void* SSXApp;
 
 struct sTagMsg264E50 {
     int type;                   // 0x0
@@ -8459,7 +8448,7 @@ extern "C" void func_00264E50(void* self, int type, int rider, int state)
     msg.state = state;
     msg.rider = rider;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     if (*(int*)((char*)self + 0x128) != 0) {
         int i;
         for (i = 0; i < 7; i++)

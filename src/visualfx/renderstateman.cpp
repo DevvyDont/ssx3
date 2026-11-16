@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourR);
@@ -1279,7 +1280,6 @@ extern "C" float func_002EEF18(int i);
 extern "C" float func_002EEF60(int i);
 extern "C" float func_002EF038(int i);
 extern "C" int func_002F7BE0(void* p);
-extern void* SSXApp;
 extern void* D_004A3B5C;
 extern int D_004A4328;
 extern int D_004A4334;

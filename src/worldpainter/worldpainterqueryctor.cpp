@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_cWorldPainterQuery);
@@ -151,7 +152,6 @@ extern "C" void func_002C06C0(sWPQuery_06C0* self, int flags)
 //100%
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0778);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern int D_004A3860;
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
@@ -224,7 +224,7 @@ static inline void set_0778(sOut_0778* o, float* d, float v)
 extern "C" sOut_0778* func_002C0778(sQuery_0778* self, float x, float z, float h)
 {
     int first = 1;
-    char* map = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x10) + 0x8);
+    char* map = *(char**)(*(char**)((char*)SSXApp->Game + 0x10) + 0x8);
     if (self->out->value != -99999.0f) {
         first = 0;
     }

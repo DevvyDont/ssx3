@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 // 16-byte array elements; indexing as arr[i].field (rather than manual
 // pointer arithmetic) is what makes GCC emit the target's base-first addu
@@ -1009,7 +1010,6 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cGameModeMan_initGameMode(void* self, unsigned int type);
 extern "C" void func_00231250(void* gm, int state, int a, int b);
-extern void* SSXApp;
 extern signed char D_00535BC8[];
 
 struct sVE_22D6C8 {
@@ -1031,10 +1031,10 @@ extern "C" void cSectionMan_eventbegin(char* self, int mode)
         return;
     }
     cBE_setState(0);
-    if (*(int*)(*(char**)((char*)SSXApp + 0x84) + 0x214) != 4) {
+    if (*(int*)((char*)SSXApp->Game + 0x214) != 4) {
         return;
     }
-    cAI_resetRidersStatTotals(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+    cAI_resetRidersStatTotals(*(void**)((char*)SSXApp->Game + 0xC));
     char* g = (char*)SSXApp;
     *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0xC) = 0;
     if ((unsigned int)(*(int*)(*(char**)(*(char**)(g + 0x84) + 0x78) + 0x1BC) - 14) < 3) {
@@ -1069,7 +1069,7 @@ extern "C" void cSectionMan_eventbegin(char* self, int mode)
     }
     sVE_22D6C8* vt = *(sVE_22D6C8**)(race + 0xC);
     vt[1].fn(race + vt[1].delta);
-    cGameModeMan_initGameMode(*(void**)((char*)SSXApp + 0xC0), D_00535BC8[0x4A]);
+    cGameModeMan_initGameMode(SSXApp->GameModeMan, D_00535BC8[0x4A]);
     func_00231250(*(void**)(self + 0x1B0), 1, 1, 0);
 }
 #endif
@@ -1372,14 +1372,13 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cSectionMan_setSky(void* self, int sky);
 extern "C" void func_00231250(void* gm, int state, int a, int b);
-extern void* SSXApp;
 
 extern "C" void func_0022DFF0(void* self)
 {
     cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
     if (*(int*)((char*)self + 0x1CC) != 0) {
         *(int*)((char*)self + 0x1CC) = 0;
-        (*(cRace22DFF0**)(*(char**)((char*)SSXApp + 0x84) + 0xC))->v05(3);
+        (*(cRace22DFF0**)((char*)SSXApp->Game + 0xC))->v05(3);
     }
     func_00231250(*(void**)((char*)self + 0x1B0), 0xA, 0, 0);
 }

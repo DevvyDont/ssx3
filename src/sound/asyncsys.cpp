@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 void* operator_new(unsigned int size);
 
@@ -787,13 +788,12 @@ extern "C" void* func_0028B180()
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B188);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" int func_0028B188(void) {
     int var_4;
 
     var_4 = 0;
-    if (((*(int *)((char*)(SSXApp) + (0x7C))) != 0) || ((*(int *)((char*)(SSXApp) + (0x80))) != 0)) {
+    if ((((int)SSXApp->RealFE) != 0) || (((int)SSXApp->DebugFE) != 0)) {
         var_4 = 1;
     }
     return var_4;
@@ -803,77 +803,70 @@ extern "C" int func_0028B188(void) {
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1B0);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" int func_0028B1B0()
 {
-    return *(void**)(SSXApp + 0x84) != 0;
+    return (void*)SSXApp->Game != 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1C0);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_0028B1C0()
 {
-    return SSXApp;
+    return (char*)SSXApp;
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1C8);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_0028B1C8()
 {
-    return *(void**)(SSXApp + 0x84);
+    return SSXApp->Game;
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1D8);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_0028B1D8()
 {
-    return *(void**)(*(char**)(SSXApp + 0x84) + 0xC);
+    return *(void**)((char*)SSXApp->Game + 0xC);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1E8);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_0028B1E8()
 {
-    return *(void**)(SSXApp + 0x78);
+    return SSXApp->BE;
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B1F8);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_0028B1F8()
 {
-    return *(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0x84) + 0x10);
+    return *(void**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B210);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_0028B210(int i)
 {
-    char* riders = *(char**)(*(char**)(SSXApp + 0x84) + 0x84);
+    char* riders = *(char**)((char*)SSXApp->Game + 0x84);
     return *(void**)(riders + (i << 2) + 4);
 }
 #endif
@@ -882,7 +875,7 @@ extern "C" void* func_0028B210(int i)
 INCLUDE_ASM("sound/asyncsys", func_0028B230);
 #ifdef SKIP_ASM
 extern "C" int func_0028B230(void) {
-    return (*(int *)((char*)((*(void **)((char*)(SSXApp) + (0x84)))) + (0x10)));
+    return (*(int *)((char*)(((void*)SSXApp->Game)) + (0x10)));
 }
 #endif
 

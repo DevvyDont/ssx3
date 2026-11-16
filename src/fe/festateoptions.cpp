@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 #include "ai/rider.h"
 
 //100%
@@ -662,7 +663,6 @@ extern char D_004A1520[];
 extern char D_004A1528[];
 extern char* D_00440FD8[];
 extern int D_004A14D0;
-extern void* SSXApp;
 
 struct sGameCfg_189980 {
     unsigned int pad0 : 19;
@@ -752,7 +752,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         }
         cSSXApp_activateBEOptions(SSXApp);
         {
-            char* o = *(char**)((char*)SSXApp + 0x8C);
+            char* o = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(o + 4);
             vt[3].fn(o + vt[3].delta, D_00535610_189980.mode);
         }
@@ -768,7 +768,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
     case 9:
         if (self->item[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[0]])) {
             D_00535610_189980.mode = func_0039A738(widget);
-            char* o = *(char**)((char*)SSXApp + 0x8C);
+            char* o = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(o + 4);
             char* thisp = o + vt[3].delta;
             vt[3].fn(thisp, func_0039A738(widget));
@@ -800,7 +800,6 @@ extern "C" void func_0039A7A8(void* self, int v);
 extern "C" int func_0039A738(void* self);
 extern "C" void cSSXApp_activateBEOptions(void* p);
 extern char* D_00440FD8[];
-extern void* SSXApp;
 extern void* D_004A289C;
 
 struct sGameCfg_189D60 {
@@ -858,7 +857,7 @@ extern "C" void func_00189D60(void* self_)
         void* w = find_189D60(self, 0);
         if (w != 0) {
             func_0039A7A8(w, iface->getOptions().mode);
-            char* o = *(char**)((char*)SSXApp + 0x8C);
+            char* o = (char*)SSXApp->FELocale;
             sVE_189D60b* vt = *(sVE_189D60b**)(o + 4);
             vt[3].fn(o + vt[3].delta, func_0039A738(w));
             char* scr = self->screen;
@@ -2278,7 +2277,6 @@ extern "C" void func_0019EBA0(void* self);
 extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
-extern void* SSXApp;
 extern char D_004A1408[];
 extern char D_0045DC60[];
 
@@ -2320,10 +2318,10 @@ extern "C" void func_0018D460(char* self, char* widget, unsigned int event)
         sVE_18D460n* vt = *(sVE_18D460n**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         func_0014DE28(cBE_getBE(), sel);
-        void* r = func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, 0);
+        void* r = func_001A0548((char*)SSXApp->RealFE + 0xB0, 0);
         func_0019EBA0(r);
         cFERider_init(r, 0, 4, 0);
-        r = func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, 1);
+        r = func_001A0548((char*)SSXApp->RealFE + 0xB0, 1);
         func_0019EBA0(r);
         cFERider_init(r, 1, 0, 0);
         char* obj = **(char***)(self + 0x10);
@@ -2350,7 +2348,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
-extern void* SSXApp;
 extern char D_0045E110[];
 extern char D_0045E130[];
 
@@ -2383,7 +2380,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
         *(int*)(widget + 0x18) = 3;
         if (v == 3) {
             *(signed char*)(self + 0x48) = *(signed char*)(self + 0x14);
-            char* mgr = *(char**)((char*)SSXApp + 0x8C);
+            char* mgr = (char*)SSXApp->FELocale;
             sVE_18D648s* vt = *(sVE_18D648s**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0045E110));
             char* p = (char*)operator new(0xBFC, D_0045E130, 0x100, 0);
@@ -2424,7 +2421,6 @@ INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* D_0046C228[];
-extern void* SSXApp;
 
 extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
 {
@@ -2453,7 +2449,6 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" void cUIText_setUnicodeString(void* text, char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* SSXApp;
 extern char D_0045E140[];
 extern char D_004A15D0[];
 extern char D_004A15D8[];
@@ -2522,7 +2517,7 @@ static inline cUIObj_DD60* getObj_DD60(void* self, char* name)
 // Looks up a localized string by the hash of its name.
 static inline char* getString_DD60(char* name)
 {
-    char* loc = *(char**)((char*)SSXApp + 0x8C);
+    char* loc = (char*)SSXApp->FELocale;
     sVE_DD60* vt = *(sVE_DD60**)(loc + 4);
     char* thisp = loc + vt[4].delta;
     return vt[4].fn(thisp, GetHashValue32(name));
@@ -2652,7 +2647,6 @@ struct cList0018DDD0 {
     virtual int v54(int a);
 };
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern void* SSXApp;
 
 extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 {
@@ -2681,7 +2675,6 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void func_0023C8F0(void* app, int a1);
 extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
-extern void* SSXApp;
 
 struct sVE_18DEA0n {
     short delta;
@@ -3028,7 +3021,6 @@ extern "C" void cUIText_setUnicodeString(void* text, char* str);
 extern "C" void func_001D8240();
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* app, int dev, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* SSXApp;
 extern char D_0045E1D8[];
 extern char D_0045E1E8[];
 extern char D_0045E210[];

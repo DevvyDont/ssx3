@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_cBoardSparkFX);
@@ -378,7 +379,6 @@ struct sSparkFx_ABC8 {
 };
 
 extern char* D_004A5B64;
-extern char* SSXApp;
 extern int D_004A472C;
 extern int D_004A4728;
 extern int D_004A3AFC;
@@ -505,7 +505,7 @@ extern "C" void func_002DABC8(sSparkFx_ABC8* self)
 {
     char* rider = self->rider;
     float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
-    char* surfaceData = *(char**)(*(char**)(SSXApp + 0x84) + 0x44) + *(int*)(rider + 0x438) * 0xB0;
+    char* surfaceData = *(char**)((char*)SSXApp->Game + 0x44) + *(int*)(rider + 0x438) * 0xB0;
     func_0036D428(self->gfx, dt);
     if (self->active) {
         sEmitter_ABC8* em = self->emitter;

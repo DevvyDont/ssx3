@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("seg/seg_156860", cCommSystem_construct);
@@ -1329,7 +1330,6 @@ extern "C" void func_00258CB0_70D8(void* s) __asm__("func_00258CB0");
 extern "C" int func_003E7450_70D8(int sock, int a1, char* tag, int n) __asm__("func_003E7450");
 extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __asm__("func_003E7500");
 extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
-extern void* SSXApp;
 extern int D_004A2EB8;
 extern char D_00481380[];
 
@@ -1393,7 +1393,7 @@ extern "C" void func_002570D8(void* vs)
     if (func_002577C8_70D8(s) != 0) {
         return;
     }
-    void* iface = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     if (*(int*)(s + 0x44) != 0) {
         switch (*(unsigned int*)(s + 0x70)) {
         case 0:
@@ -1543,7 +1543,6 @@ extern "C" void func_002570D8(void* vs)
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00257610);
 #ifdef SKIP_ASM
-extern void *SSXApp;
 
 extern "C" void func_00257610(void *arg0, int arg1) {
     if (((arg1 != 0) || (((*(int *)((char*)(arg0) + (4))) == 0) && ((*(int *)((char*)(arg0) + (0x70))) < 0xF))) && ((*(int *)((char*)(arg0) + (0x38))) == 0)) {
@@ -1663,7 +1662,6 @@ INCLUDE_ASM("seg/seg_156860", func_002578F8);
 extern "C" void func_002579C8_78F8(void *) __asm__("func_002579C8");
 extern "C" void func_00258CB0_78F8(void *) __asm__("func_00258CB0");
 extern "C" void func_00266DF8_78F8(int) __asm__("func_00266DF8");
-extern void *SSXApp;
 extern int D_004A33F4;
 
 extern "C" void func_002578F8(char *self) {
@@ -1674,7 +1672,7 @@ extern "C" void func_002578F8(char *self) {
     if (*(int *)(self + 4) == 0) {
         if (*(int *)(self + 0xC) == 0 && *(int *)(self + 0x24) == 0) {
             if ((*(int *)(self + 0x30) == 0 || *(int *)(self + 0x88) != 0) && *(int *)(self + 0xA0) == 0 && *(int *)(self + 0x80) != 0) {
-                if (*(int *)(*(char **)((char*)SSXApp + 0x84) + 0x224) != 0) {
+                if (*(int *)((char*)SSXApp->Game + 0x224) != 0) {
                     *(int *)(self + 0x24) = 4;
                 }
             }
@@ -1698,7 +1696,6 @@ INCLUDE_ASM("seg/seg_156860", func_002579C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" char *cUIStateStack_getCurrentState_79C8(char *) __asm__("cUIStateStack_getCurrentState");
 extern "C" void cOVStateManager_triggerOverlay_79C8(int) __asm__("cOVStateManager_triggerOverlay");
-extern void *SSXApp;
 extern int D_004A2A50;
 extern int D_004A2A54;
 extern int D_00442924[];
@@ -1706,7 +1703,7 @@ extern int D_005366E8[];
 
 extern "C" void func_002579C8(char *self) {
     if (*(int *)(self + 0xAC) == 0 && *(int *)(self + 8) > 0) {
-        char *p = *(char **)(*(char **)((char*)SSXApp + 0x84) + 0x48);
+        char *p = *(char **)((char*)SSXApp->Game + 0x48);
         char *st;
         if (p != 0 && (p += 0x18) != 0 && ((st = cUIStateStack_getCurrentState_79C8(p), st == 0) || (st[0x1D] & 0x3F) == 5)) {
             int n = *(int *)(self + 8) - 1;
@@ -1728,7 +1725,6 @@ INCLUDE_ASM("seg/seg_156860", func_00257A80);
 #ifdef SKIP_ASM
 extern "C" void func_00257678(char *self);
 extern "C" void func_002578F8(char *self);
-extern void *SSXApp;
 extern int D_004A3ED0;
 
 extern "C" void func_00257A80(char* s)
@@ -2177,7 +2173,6 @@ extern "C" void func_002582A0(char *p) {
 INCLUDE_ASM("seg/seg_156860", func_00258330);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
-extern void *SSXApp;
 
 extern "C" void func_00258330(void *arg0) {
     char *p = (char*)SSXApp;
@@ -2196,7 +2191,6 @@ extern "C" void func_00258330(void *arg0) {
 INCLUDE_ASM("seg/seg_156860", func_00258360);
 #ifdef SKIP_ASM
 extern "C" float func_00255D88(int, int);
-extern void *SSXApp;
 extern int D_004A2EB8;
 
 extern "C" float func_00258360(void *arg0) {
@@ -2279,7 +2273,7 @@ static inline int ggDropped_8448(char* s) { return *(int*)(s + 4); }
 // messages until the sync state (0xE) is reached or the link drops.
 extern "C" void cGameComm_syncGame(char* self)
 {
-    void* iface = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     *(void**)(self + 0x3EC) = operator_new_8448(*(unsigned int*)(self + 0x3F0), D_004805B8, 0x100, 0);
     func_0014E9F8(iface);
     if (ggHost_8448(D_00534B30) != 0) {
@@ -2335,12 +2329,11 @@ extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(void *, int, int);
 extern "C" void func_002570D8(void *);
 extern "C" void THREAD_yieldticks(int);
-extern void *SSXApp;
 extern char D_00534B30[];
 static inline int rd8(char *p) { return *(int*)(p + 8); }
 extern "C" void func_002586B0(void *self) {
     char buf[12];
-    cBE_getInterface_86B0(*(int*)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_86B0((int)SSXApp->BE, 7);
     if (rd8(D_00534B30) != 0) {
         buf[0] = 3;
         func_00257E98(self, 3, (int)buf, 0xC);
@@ -2411,7 +2404,6 @@ extern "C" void func_00258870(void *arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002588A8);
 #ifdef SKIP_ASM
-extern void *SSXApp;
 
 struct S88A8_4 { int k0; char p[0x14]; int k18; int k1c; };
 struct S88A8_6 { char p0[0xC]; S88A8_4 *c; char p1[0x204]; int k214; };
@@ -2462,7 +2454,6 @@ extern "C" int func_00261460_8988(int) __asm__("func_00261460");
 extern "C" void func_002613C8_8988(int) __asm__("func_002613C8");
 extern "C" void func_0025B800_8988(void *) __asm__("func_0025B800");
 extern "C" void func_00262768_8988(int, int, int, int, int, int) __asm__("func_00262768");
-extern void *SSXApp;
 extern char *D_004A3028;
 extern int D_004A3328;
 
@@ -2493,7 +2484,6 @@ INCLUDE_ASM("seg/seg_156860", func_00258A48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257038_8A48(void *, int) __asm__("func_00257038");
-extern void *SSXApp;
 
 extern "C" void func_00258A48(void *arg0) {
     (*(int *)((char*)(arg0) + (0x80))) = 0;
@@ -2527,7 +2517,6 @@ extern "C" void func_0014E9C0(void *, int, int);
 extern "C" void* cBE_getBE();
 extern int D_004A3328;
 extern int D_004A3028_8AE0 __asm__("D_004A3028");
-extern void *SSXApp;
 extern int D_00534B38[];
 extern "C" void func_00258AE0(void *self) {
     if (D_004A3328 == 0) {
@@ -2545,7 +2534,7 @@ extern "C" void func_00258AE0(void *self) {
     }
     func_00258BC8(self);
     func_00258A48(self);
-    void *i = cBE_getInterface_8AE0(*(int*)((char*)SSXApp + 0x78), 7);
+    void *i = cBE_getInterface_8AE0((int)SSXApp->BE, 7);
     if (D_00534B38[0] == 0) {
         func_0014E9C0(i, 1, 0);
         cIface_AE0 *o = (cIface_AE0*)cBE_getInterface_8AE0((int)cBE_getBE(), 3);
@@ -2637,7 +2626,7 @@ static inline void gcSend_8CB0(char* item, int msg, char* arg)
 // Looks up the string table entry for `name` (vtable slot 4 of the global string table at SSXApp+0x8C).
 static inline const char* gcString_8CB0(char* name)
 {
-    char* tbl = *(char**)((char*)SSXApp + 0x8C);
+    char* tbl = (char*)SSXApp->FELocale;
     sVEntS_8CB0* vt = *(sVEntS_8CB0**)(tbl + 4);
     return vt[4].fn(tbl + vt[4].delta, GetHashValue32(name));
 }
@@ -2650,7 +2639,7 @@ extern "C" void func_00258CB0(char* self)
     if (*(int*)(self + 0x84) != 0) {
         *(int*)(self + 0x60) = 0;
     }
-    char* ui = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48);
+    char* ui = *(char**)((char*)SSXApp->Game + 0x48);
     if (ui == 0) {
         return;
     }
@@ -2667,7 +2656,7 @@ extern "C" void func_00258CB0(char* self)
     case 0:
         if (*(int*)(self + 0x74) == 0) {
             if (*(int*)(self + 0x78) != 0) {
-                int kind = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+                int kind = **(int**)((char*)SSXApp->Game + 0xC);
                 if (kind == 4 || kind == 5 || !gcOnline_8CB0()) {
                     gcSend_8CB0(item, 0xE, buf);
                     *(int*)(self + 0x98) = 1;
@@ -2694,7 +2683,7 @@ extern "C" void func_00258CB0(char* self)
         }
         break;
     case 1:
-        if (*(int*)(*(char**)((char*)SSXApp + 0x84) + 0x214) == 2 && gcOnline_8CB0()) {
+        if (*(int*)((char*)SSXApp->Game + 0x214) == 2 && gcOnline_8CB0()) {
             gcSend_8CB0(item, 0xF, 0);
             *(int*)(self + 0x98) = 0;
         } else if (*(int*)(self + 0x78) == 0 || *(int*)(self + 0x74) != 0) {
@@ -2715,7 +2704,6 @@ INCLUDE_ASM("seg/seg_156860", func_00258F20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00257E98_8F20(void* self, int type, const void* data, int len) __asm__("func_00257E98");
-extern void *SSXApp;
 
 struct SyncMsg_8F20 {
     unsigned char type;     // 0x0
@@ -2734,7 +2722,7 @@ static inline int& RingAt_8F20(Ring_8F20* r, int frame)
 
 extern "C" void func_00258F20(char* s, int frame, int value)
 {
-    char* gs = *(char**)((char*)SSXApp + 0x84);
+    char* gs = (char*)SSXApp->Game;
     int st = **(int**)(gs + 0xC);
     if (st != 5) {
         if (st != 3) return;
@@ -2780,7 +2768,6 @@ int cBENewPlayerInterface_getPlayerCharID(void*, int);
 extern "C" void func_0014EBB8(void* iface, int v);
 extern "C" void func_0014EBD8(void* iface, int v);
 extern "C" void func_002639E0(int a, int b, int c, int d, int e);
-extern void *SSXApp;
 extern char* D_004A3028;
 extern int D_00534E58[];
 
@@ -2797,7 +2784,7 @@ extern "C" void func_00259098(int a0, int a1, int a2)
     if (*(int*)(g + 0xB4)) v = *(int*)(g + 0xAC);
     else v = *(int*)(g + 0xA8);
     void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
-    char* ri = (char*)cBE_getInterface_9098(*(void**)((char*)SSXApp + 0x78), 7);
+    char* ri = (char*)cBE_getInterface_9098(SSXApp->BE, 7);
     D_00534E58[0] = cBENewPlayerInterface_getPlayerCharID(pi, 0);
     func_0014EBB8(ri, *(int*)(D_004A3028 + 0x98));
     func_0014EBD8(ri, *(int*)(D_004A3028 + 0x80));
@@ -2832,20 +2819,18 @@ extern "C" char *func_002591A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002591B8);
 #ifdef SKIP_ASM
-extern void *SSXApp;
 
 extern "C" int func_002591B8(void) {
-    return (*(int *)((char*)(SSXApp) + (0x7C))) + 0xB5AB0;
+    return ((int)SSXApp->RealFE) + 0xB5AB0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002591D0);
 #ifdef SKIP_ASM
-extern void *SSXApp;
 
 extern "C" int func_002591D0(void) {
-    return (*(int *)((char*)(SSXApp) + (0x7C))) + 0xB5ABC;
+    return ((int)SSXApp->RealFE) + 0xB5ABC;
 }
 #endif
 
@@ -2877,10 +2862,9 @@ extern "C" void func_00259210(int arg0) {
 INCLUDE_ASM("seg/seg_156860", func_00259230);
 #ifdef SKIP_ASM
 extern "C" void *func_0039FAE8(int);
-extern void *SSXApp;
 
 extern "C" void func_00259230(int *arg0) {
-    void *obj = *(void **)((char*)SSXApp + 0x7C);
+    void *obj = SSXApp->RealFE;
     if (obj != 0) {
         char *o = (char *)func_0039FAE8(*(int *)((char*)obj + 0xC) + 0x18);
         char *vt = *(char **)(o + 8);

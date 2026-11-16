@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_getFrameData);
@@ -891,7 +892,6 @@ INCLUDE_ASM("visualfx/avalanche", func_002D81B0);
 void cMemMan_free(void*);
 extern "C" void* func_0028B180();
 extern "C" void func_0029DEF0(void* self, int a1);
-extern char* SSXApp;
 
 extern "C" void func_002D81B0(void* self)
 {
@@ -907,7 +907,7 @@ extern "C" void func_002D81B0(void* self)
         }
         *(int*)self = 0;
         func_0029DEF0(func_0028B180(), 0);
-        char* p = *(char**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0xA8);
+        char* p = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA8);
         if (*(int*)(p + 0x708) != 0) {
             *(int*)(p + 0x708) = *(int*)(p + 0x708) - 1;
         }
@@ -1443,7 +1443,6 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_render);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void tActiveAvalancheNode_renderLines(void* node);
 extern "C" void func_00371688(void* p, int a);
-extern char* SSXApp;
 extern int D_004A3A54;
 extern int D_004A3A58;
 
@@ -1599,7 +1598,7 @@ extern "C" void tActiveAvalanche_render(void* slotv)
         D_vtx_D8EA8[2 * j].pos = p;
         D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
-        char* rider = *(char**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x28);
+        char* rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
         D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(rider + 0x6C0))->getPos();
         D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
@@ -1671,13 +1670,12 @@ struct sCam_9130 {
     int cur;                    // 0x14
     float mats[4][4];           // 0x18
 };
-extern char* SSXApp;
 extern sRCtx_9130* D_004A5B80;
 extern int D_004A41EC;
 extern sRState_9130 D_00501420;
 extern "C" void tActiveAvalanche_render(void* slot);
 
-static inline sCam_9130* getCam_9130() { return *(sCam_9130**)(*(char**)(SSXApp + 0x84) + 0x84); }
+static inline sCam_9130* getCam_9130() { return *(sCam_9130**)((char*)SSXApp->Game + 0x84); }
 
 static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
 
@@ -1933,7 +1931,6 @@ extern "C" void func_00370DC8(void* self, void* node, float k);
 extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
 
 extern "C" void func_0029DEF0(void* self, int a1);
-extern char* SSXApp;
 extern void* D_004A3AB0;
 
 struct sVec_D97A8 {
@@ -2078,7 +2075,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
             }
             tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
             func_0029DEF0(func_0028B180(), 1);
-            (*(int*)(*(char**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0xA8) + 0x708))++;
+            (*(int*)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA8) + 0x708))++;
             return slot - D_slots_D97A8;
         }
     }

@@ -1,23 +1,18 @@
 #include "common.h"
-
-struct cObjectInterface {
-    char pad_0x00[0x84];
-    struct cObjectInterface_Impl* mImpl; // offset 0x84
-};
+#include "main/ssxapp.h"
 
 struct cObjectInterface_Impl {
     char pad_0x00[0x88];
     void* mInstanceMan; // offset 0x88
 };
 
-extern cObjectInterface* SSXApp;
 
 //100%
 INCLUDE_ASM("util/objectinterface", cObjectInterface_getInstanceMan__Fv);
 #ifdef SKIP_ASM
 void* cObjectInterface_getInstanceMan()
 {
-    return SSXApp->mImpl->mInstanceMan;
+    return ((cObjectInterface_Impl*)SSXApp->Game)->mInstanceMan;
 }
 #endif
 
@@ -141,7 +136,7 @@ struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
 extern "C" int func_002D2058(sQ128* v)
 {
-    char* inst = (char*)*(void**)((char*)SSXApp->mImpl + 0x8C);
+    char* inst = (char*)*(void**)((char*)SSXApp->Game + 0x8C);
     int mask = *(int*)(inst + 0x110);
     for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
         int bit = 1 << i;

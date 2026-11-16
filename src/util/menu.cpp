@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 struct cMenuItem {
     char pad_0x00[0x4];
@@ -5721,22 +5722,20 @@ extern "C" int func_002D1AC8(int id)
 //100%
 INCLUDE_ASM("util/menu", func_002D1AF0);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_002D1AF0()
 {
-    return *(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x78);
+    return *(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x78);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* cObjectInterface_getNumBeings(int i)
 {
-    char* base = *(char**)(*(char**)(SSXApp + 0x84) + 0xC);
+    char* base = *(char**)((char*)SSXApp->Game + 0xC);
     char* p = *(char**)(base + (i << 2) + 0x28);
     return p ? p + 0x6C0 : 0;
 }
@@ -5774,11 +5773,10 @@ public:
     virtual int v05();
 };
 
-extern char* SSXApp;
 
 extern "C" void func_002D1B58(int i)
 {
-    char* base = *(char**)(*(char**)(SSXApp + 0x84) + 0xC);
+    char* base = *(char**)((char*)SSXApp->Game + 0xC);
     char* p = *(char**)(base + (i << 2) + 0x28);
     ((func_002D1B58_cObj*)(p + 0x6C0))->v05();
 }
@@ -5812,11 +5810,10 @@ extern "C" void* func_002D1BD8()
 //100%
 INCLUDE_ASM("util/menu", cObjectInterface_getNash);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* cObjectInterface_getNash()
 {
-    return *(void**)(*(char**)(SSXApp + 0x84) + 0x20);
+    return *(void**)((char*)SSXApp->Game + 0x20);
 }
 #endif
 
@@ -5824,22 +5821,20 @@ extern "C" void* cObjectInterface_getNash()
 INCLUDE_ASM("util/menu", func_002D1BF0);
 #ifdef SKIP_ASM
 extern "C" int func_001032C0(void* self, int a);
-extern char* SSXApp;
 
 extern "C" int func_002D1BF0(int a)
 {
-    return func_001032C0(*(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0xA4), a);
+    return func_001032C0(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), a);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1C20);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_002D1C20(int i)
 {
-    char* riders = *(char**)(*(char**)(SSXApp + 0x84) + 0x84);
+    char* riders = *(char**)((char*)SSXApp->Game + 0x84);
     return *(char**)(riders + (i << 2) + 4) + 0x20;
 }
 #endif
@@ -5848,29 +5843,27 @@ extern "C" void* func_002D1C20(int i)
 INCLUDE_ASM("util/menu", func_002D1C40);
 #ifdef SKIP_ASM
 extern "C" int func_002D1C40(void) {
-    return (*(int *)((char*)((*(void **)((char*)((*(void **)((char*)(SSXApp) + (0x84)))) + (0x84)))) + (0x10)));
+    return (*(int *)((char*)((*(void **)((char*)(((void*)SSXApp->Game)) + (0x84)))) + (0x10)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1C58);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_002D1C58()
 {
-    return *(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0x84) + 0x14);
+    return *(void**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x14);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1C70);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" float func_002D1C70()
 {
-    return *(float*)(SSXApp + 0x14);
+    return *(float*)((char*)SSXApp + 0x14);
 }
 #endif
 
@@ -5885,22 +5878,20 @@ extern "C" float func_002D1C80(void) {
 //100%
 INCLUDE_ASM("util/menu", func_002D1C98);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_002D1C98()
 {
-    return *(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x8);
+    return *(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1CB0);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 
 extern "C" void* func_002D1CB0()
 {
-    return *(void**)(*(char**)(SSXApp + 0x84) + 0x70);
+    return *(void**)((char*)SSXApp->Game + 0x70);
 }
 #endif
 

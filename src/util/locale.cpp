@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("util/locale", cFELocale_addFile);
@@ -374,7 +375,6 @@ INCLUDE_ASM("util/locale", cFEStateAudioOptions_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
 extern char D_004A18A8[];
-extern char* SSXApp;
 extern char D_00460400[];
 extern char D_00460410[];
 class cFEStateAudioOptions_onDestroyScreen_cObj;
@@ -417,7 +417,7 @@ public:
 extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
 {
     char* name;
-    if (*(void**)(SSXApp + 0x84) != 0) {
+    if ((void*)SSXApp->Game != 0) {
         name = D_00460400;
         cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
@@ -442,7 +442,6 @@ INCLUDE_ASM("util/locale", cFEStateAudioOptions_onDestroyScreen);
 int GetHashValue32(char*);
 void* cUIState_onDestroyScreen(void* self);
 extern char D_004A18A8[];
-extern char* SSXApp;
 
 class cFEStateAudioOptions_onDestroyScreen_cObj {
 public:
@@ -478,7 +477,7 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 
 extern "C" void cFEStateAudioOptions_onDestroyScreen(void* self)
 {
-    if (*(void**)(SSXApp + 0x84) != 0) {
+    if ((void*)SSXApp->Game != 0) {
         cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
             obj->v24(4, 0);

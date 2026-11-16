@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002EC418(void* self);
@@ -213,7 +214,6 @@ extern "C" int func_00123168(void* self);
 extern "C" int func_00123128(void* self);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
 extern "C" void func_002F2218(int a, int id);
-extern char* SSXApp;
 
 struct sVEi_CCB8 {
     short delta;
@@ -258,7 +258,7 @@ extern "C" void func_002ECCB8(void* vself)
             id = func_00123128(self->rider);
         }
     } else if (self->charId != 0) {
-        char* st = (char*)cUIStateStack_getCurrentState(*(char**)(*(char**)(SSXApp + 0x7C) + 0xC) + 0x18);
+        char* st = (char*)cUIStateStack_getCurrentState(*(char**)((char*)SSXApp->RealFE + 0xC) + 0x18);
         tbl = (char*)func_0014AD28(lib, *(signed char*)(st + 0x44), *self->charId);
         id = *self->charId;
     }
@@ -378,7 +378,6 @@ struct sLensRow_ED048 {
 
 // The unit declares D_004FA370 later as sLensFxSlot[]; bind views to the labels.
 extern sLensRow_ED048 D_lensRows_ED048[] __asm__("D_004FA370");
-extern char* SSXApp;
 extern int D_004A3B54;
 extern cWorldPainterManArg D_004A5560;
 extern cWorldPainterManArg D_004A5568;
@@ -401,7 +400,7 @@ static inline void lensVecOneED048(sLensVec_ED048* v)
 
 extern "C" void func_002ED048(void)
 {
-    void* pm = *(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0x10) + 0x8);
+    void* pm = *(void**)(*(char**)((char*)SSXApp->Game + 0x10) + 0x8);
     int i;
     cWorldPainterManArg* a0 = &D_004A5560;
     cWorldPainterManArg* a1 = &D_004A5568;

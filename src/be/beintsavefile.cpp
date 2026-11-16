@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0045A7E0[];
@@ -223,7 +224,6 @@ cBEIface_2BB0* cBEScoreInterface_getThis();
 cBEIface_2BB0* cBENewPlayerInterface_getThis();
 extern "C" void cSSXApp_initLocale(void* app);
 extern "C" void cSSXApp_activateBEOptions(void* app);
-extern void* SSXApp;
 
 // Restores the save block written by func_00152758 after checking its CRC; returns 0 when the CRC is wrong.
 extern "C" int func_00152BB0(void* self, char* buf)

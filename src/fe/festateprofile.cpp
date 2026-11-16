@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onCreateScreen);
@@ -241,7 +242,6 @@ struct cList0018EEB8 {
     virtual int v54(int a);
 };
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern void* SSXApp;
 extern int D_004A15E8;
 
 extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
@@ -410,7 +410,6 @@ extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
-extern void* SSXApp;
 extern int D_004A15E8;
 extern char D_0045E1D8[];
 extern char D_0045E1E8[];
@@ -576,7 +575,6 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStateProfileLoad_displayOn(void* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* SSXApp;
 extern char D_0045E260[];
 
 struct cSelf_F9D8 {
@@ -747,7 +745,6 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* func_00194738(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* self, void* state);
 extern "C" void func_0039F4C0(void* self, void* state);
-extern void* SSXApp;
 extern int D_004A11B8;
 extern int D_004A19D8;
 extern int D_00535C08[];
@@ -817,7 +814,6 @@ extern "C" void func_00241E18(void*, unsigned short*, int);
 void cMemMan_free(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern void* SSXApp;
 extern char D_0045E2A0[];
 
 struct cSelf_FC98 {
@@ -909,7 +905,6 @@ extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* SSXApp;
 extern int D_004A15E8;
 extern char D_0045E2B0[];
 extern char D_0045E2C8[];
@@ -968,7 +963,7 @@ struct sMgrK18FD90 {
 
 static inline void* GetText_K18FD90(char* key)
 {
-    char* db = *(char**)((char*)SSXApp + 0x8C);
+    char* db = (char*)SSXApp->FELocale;
     sVEntryK18FD90* vt = *(sVEntryK18FD90**)(db + 4);
     return vt[4].fn(db + vt[4].delta, GetHashValue32(key));
 }
@@ -1200,7 +1195,6 @@ INCLUDE_ASM("fe/festateprofile", func_00190670);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern void* SSXApp;
 extern char D_0045E330[];
 extern char D_0045E358[];
 extern char D_004A15D8[];

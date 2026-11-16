@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cFEStateCharEquip);
@@ -21,7 +22,6 @@ extern "C" char* func_0014B700(void* iface, int rider);
 extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 extern "C" void func_0019B180(void* self, int id);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
-extern void* SSXApp;
 extern const int D_004A11D0_c __asm__("D_004A11D0");
 extern void* D_0046A548[];
 extern char D_004607A8[];
@@ -181,7 +181,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
         self->fA9C = Find_8DB8(mgr, GetHashValue32(D_0045DA38));
     }
     self->fAA0 = 0;
-    func_001A0508(*(char**)((char*)SSXApp + 0x7C) + 0xB0, self->team, self->slot, 1);
+    func_001A0508((char*)SSXApp->RealFE + 0xB0, self->team, self->slot, 1);
     self->fC0 = cBEEconInterface_getMoney(cBE_getInterface(cBE_getBE(), 0xB), self->team, self->slot);
     void* shop = cBE_getInterface(cBE_getBE(), 9);
     func_0014AEA8(shop, self->team, self->slot);
@@ -213,7 +213,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
     }
     func_0019B180(self, D_004A11D0_c);
     char* name = func_0014B700(shop, self->slot);
-    self->fA64 = func_0019DA10(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, self->slot, name, 9, 1, 0);
+    self->fA64 = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, self->slot, name, 9, 1, 0);
     return self;
 }
 #endif
@@ -225,7 +225,6 @@ struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 extern "C" void func_0019A498(void* self);
 extern "C" void func_0039E390(void* self, int flags);
-extern void* SSXApp;
 extern void* D_004A289C;
 extern void* D_0046A548[];
 extern void* D_0046D0D0[];
@@ -249,7 +248,7 @@ extern "C" void func_00199148(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A548;
     if (*(int*)((char*)self + 0xA64) >= 0) {
-        func_0019DC20((sEquipTable_DC20*)(*(char**)((char*)SSXApp + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
                       *(int*)((char*)self + 0xA64));
         *(int*)((char*)self + 0xA64) = -1;
     }
@@ -277,7 +276,6 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void func_0019BFE8(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
-extern void* SSXApp;
 extern char D_004607E8[];
 
 extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
@@ -287,7 +285,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* r = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+    char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(r + 0xC2C) = 0x11;
     *(int*)(r + 0xCCC) = 0;
     int ok = *(unsigned int*)r < 10 && *(int*)(r + 0xCB8) != 0 && *(int*)(r + 0xCB4) != 0;
@@ -309,13 +307,12 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199350);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* func_001A0548(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
 extern "C" void func_00199350(void* self)
 {
-    char* mgr = *(char**)((char*)SSXApp + 0x7C);
+    char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
         char* r = (char*)func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
         *(unsigned int*)(r + 0xC2C) = 0xFFFFFFFF;
@@ -352,13 +349,12 @@ extern "C" void func_001993A0(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_00199420);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* rider, int a1);
 
 extern "C" void func_00199420(void* self)
 {
-    func_0019E538(func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
 }
 #endif
 
@@ -600,7 +596,6 @@ extern "C" void func_0019A9B8(void* self);
 extern "C" void func_0019A638(void* self);
 extern "C" void func_0019BFE8(void* self);
 extern "C" void* func_001A0548(void* self, int a1);
-extern void* SSXApp;
 extern char D_004608A0[];
 
 struct sVEntryK199938 {
@@ -613,7 +608,7 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
 {
     func_0039E510(self);
     if (*(int*)((char*)self + 0xA60) == 0
-        && func_0019E238((sEquipTable*)(*(char**)((char*)SSXApp + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
                          *(int*)((char*)self + 0xA64))) {
         *(int*)((char*)self + 0xA60) = 1;
         func_0019A9B8(self);
@@ -621,7 +616,7 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
     void* screen = cList_first((cList*)((char*)self + 0x24));
     char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004608A0));
     if (obj != 0) {
-        char* r = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+        char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
         int on = 0;
         int mode1 = *(int*)((char*)self + 0xC8) == 1;
         if (mode1) {
@@ -747,7 +742,6 @@ void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_001A0548(void* self, int a1);
 extern int D_004A11E0;
 extern int D_004A18D8;
-extern void* SSXApp;
 
 struct sList_9C28 {
     char pad_0x0[0x98];
@@ -854,7 +848,7 @@ extern "C" void func_00199C28(void* selfv, char* w, unsigned int ev)
             func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
             func_0019B618(self, 1, 1);
         } else {
-            char* r = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, self->team);
+            char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, self->team);
             *(int*)(r + 0xC20) = 0;
             *(int*)(r + 0xC1C) = 1;
             char* obj = *(char**)self->menu;
@@ -974,7 +968,6 @@ struct sEquipTable;
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" int func_004165A8(const void* a, const void* b);
-extern void* SSXApp;
 extern void* D_004A289C;
 extern char D_004A1950[];
 
@@ -1005,7 +998,7 @@ extern "C" int func_0019A098(void* self, const char* name)
 {
     if (*(int*)((char*)self + 0xA60) == 0)
         return -1;
-    sPkgK19A098* pkg = (sPkgK19A098*)func_0019E2B0((sEquipTable*)(*(char**)((char*)SSXApp + 0x7C) + 0x1A70),
+    sPkgK19A098* pkg = (sPkgK19A098*)func_0019E2B0((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70),
                                                   *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA64));
     if (pkg == 0)
         return -1;
@@ -1041,12 +1034,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A1E0);
 struct sEquipTable;
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(void* self);
-extern void* SSXApp;
 
 extern "C" void func_0019A1E0(void* self)
 {
     if (*(int*)((char*)self + 0xA60) == 0
-        && func_0019E238((sEquipTable*)(*(char**)((char*)SSXApp + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
                          *(int*)((char*)self + 0xA64))) {
         *(int*)((char*)self + 0xA60) = 1;
         func_0019A9B8(self);
@@ -1088,7 +1080,7 @@ extern "C" void func_0019A238(void* self)
         sVEntry0019A238* vt = *(sVEntry0019A238**)(o + 8);
         vt[9].fn(o + vt[9].delta, 1);
     }
-    func_0019E538(func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
+    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
     *(int*)((char*)self + 0xAE0) = 1;
 }
 #endif
@@ -1122,7 +1114,7 @@ extern "C" void func_0019A308(void* self)
         sVEntry0019A308* vt = *(sVEntry0019A308**)(o + 8);
         vt[9].fn(o + vt[9].delta, 0);
     }
-    func_0019E538(func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     o = *(char**)((char*)self + 0x60);
     if (o != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(o + 8);
@@ -1180,7 +1172,6 @@ extern "C" void func_0019A3D0(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A498);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 
@@ -1188,7 +1179,7 @@ extern "C" void func_0019A498(void* self)
 {
     int idx = *(int*)((char*)self + 0xA6C);
     if (idx >= 0) {
-        func_0019DC20((sEquipTable_DC20*)(*(char**)((char*)SSXApp + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC), idx);
+        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC), idx);
     }
     *(char*)((char*)self + 0x960) = 0;
     *(int*)((char*)self + 0xA6C) = -1;
@@ -1260,7 +1251,6 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
 extern "C" void func_0019A9B8(void* self);
-extern void* SSXApp;
 extern void* D_004A289C;
 extern char D_004A1960[];
 
@@ -1277,12 +1267,12 @@ extern "C" void func_0019A638(void* self)
         return;
     if (*(int*)((char*)self + 0x95C) > 0) {
         if (--*(int*)((char*)self + 0x95C) == 0) {
-            *(int*)((char*)self + 0xA6C) = func_0019DA10(*(char**)((char*)SSXApp + 0x7C) + 0x1A70,
+            *(int*)((char*)self + 0xA6C) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70,
                                                          *(int*)((char*)self + 0xBC), (char*)self + 0x960, 9, 1, 0);
             *(int*)((char*)self + 0x95C) = -1;
         }
     } else if (*(int*)((char*)self + 0xA6C) >= 0) {
-        char* tbl = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+        char* tbl = (char*)SSXApp->RealFE + 0x1A70;
         if (func_0019E238((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C))) {
             char* e = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
             if (e != 0) {
@@ -1307,7 +1297,7 @@ extern "C" void func_0019FA78(void* a0, int a1);
 
 extern "C" void func_0019A758(void* self)
 {
-    char* mgr = *(char**)((char*)SSXApp + 0x7C);
+    char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
         func_0019FA78(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     }
@@ -1568,7 +1558,6 @@ extern "C" void func_0019AB78(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1578,7 +1567,7 @@ extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
 
 extern "C" void func_0019ACA0(void* self)
 {
-    void* rider = func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+    void* rider = func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC)), 0, 1);
 }
 #endif
@@ -2475,7 +2464,6 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
 // reload; before that they lengthen yaw's live range from 166 to 169 insns, so global-alloc ranks the 0.0174533 constant above yaw and
 // they take retail's fs3/fs4); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern void* SSXApp;
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0031BE50(float angle, float* s, float* c);
 
@@ -2595,7 +2583,7 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
 extern "C" void func_0019BFE8(void* vself)
 {
     char* self = (char*)vself;
-    char* rider = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
@@ -2696,7 +2684,7 @@ extern "C" void func_0019BFE8(void* vself)
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
         func_0019F548(rider, &xf);
     }
-    char* cam = *(char**)((char*)SSXApp + 0x7C);
+    char* cam = (char*)SSXApp->RealFE;
     sQuat_BFE8 pos;
     sQuat_BFE8 at;
     pos.x = -110.0f;

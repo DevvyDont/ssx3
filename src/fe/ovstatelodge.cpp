@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
@@ -118,7 +119,6 @@ struct sVEntry001D28F8 {
 extern void* D_00469858[];
 extern void* D_0046D0D0[];
 extern void* D_004A289C;
-extern void* SSXApp;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
@@ -127,7 +127,7 @@ extern "C" void func_001D28F8(void* self, int flags)
     *(void***)((char*)self + 8) = D_00469858;
     int slot = *(int*)((char*)self + 0xBC);
     if (slot >= 0) {
-        func_0019DC20(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, *(int*)((char*)self + 0xB0), slot);
+        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), slot);
         *(int*)((char*)self + 0xBC) = -1;
     }
     int id = *(int*)((char*)self + 0xC4);
@@ -572,7 +572,6 @@ extern "C" void func_001D3120(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3160);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
 extern "C" void func_001D3160(void* self)
@@ -580,7 +579,7 @@ extern "C" void func_001D3160(void* self)
     if (*(int*)((char*)self + 0xBC) < 0) {
         void* item = *(void**)((char*)self + 0xC0);
         if (item != 0) {
-            *(int*)((char*)self + 0xBC) = func_0019DA10(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, *(int*)((char*)self + 0xB0), *(int*)((char*)item + 4), 0xA, 1, 0);
+            *(int*)((char*)self + 0xBC) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), *(int*)((char*)item + 4), 0xA, 1, 0);
         }
     }
 }
@@ -614,7 +613,7 @@ static inline int isActive_31C0(sWidget_31C0* w)
 extern "C" void func_001D31C0(void* p)
 {
     char* self = (char*)p;
-    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     if (*(void**)(self + 0x50) == 0) {
         return;
     }

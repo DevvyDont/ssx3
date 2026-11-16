@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getFreeNode);
@@ -2130,7 +2131,6 @@ extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" int func_002C5320_i(void* self, int idx) __asm__("func_002C5320");
 extern char D_004A3968[];
 extern char D_004861F8[];
-extern char* SSXApp;
 
 struct sQTEntry_53E0 {
     int count;
@@ -2164,7 +2164,7 @@ extern "C" void func_002C53E0(sQT_53E0* self, int idx, unsigned short* dst)
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
         int v = func_002C5320_i(self, idx) >? 0;
-        char* obj = *(char**)(SSXApp + 0x8C);
+        char* obj = (char*)SSXApp->FELocale;
         func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
         char* thisp = obj + vt[4].delta;
         sprintf1(dst, vt[4].fn(thisp, GetHashValue32(D_004861F8)), v);
@@ -2772,7 +2772,7 @@ extern char D_004864D0[];
 
 static inline unsigned short* qtLoc6128(char* key)
 {
-    char* obj = *(char**)(SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
     char* thisp = obj + vt[4].delta;
     return vt[4].fn(thisp, GetHashValue32(key));
@@ -2949,7 +2949,6 @@ extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void sprintf1_v(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf1");
 extern char D_004A3970[];
 extern char D_004864E8[];
-extern char* SSXApp;
 
 struct func_002C63F8_sVEntry {
     short delta;
@@ -2965,7 +2964,7 @@ extern "C" void func_002C63F8(void* self, int n, unsigned short* dst)
     sprintf1_v(num, fmt, n + 1);
     if (n < 2) {
         if (n >= 0) {
-            char* obj = *(char**)(SSXApp + 0x8C);
+            char* obj = (char*)SSXApp->FELocale;
             func_002C63F8_sVEntry* vt = *(func_002C63F8_sVEntry**)(obj + 4);
             char* thisp = obj + vt[4].delta;
             sprintf1(dst, vt[4].fn(thisp, GetHashValue32(D_004864E8)), num);

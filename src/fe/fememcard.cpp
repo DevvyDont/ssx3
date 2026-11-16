@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onCreateScreen);
@@ -6,7 +7,6 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onCreateScreen);
 int GetHashValue32(char* str);
 extern char D_0045DC70[];
 extern char D_0045DC80[];
-extern void* SSXApp;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -149,7 +149,7 @@ extern "C" void func_00186C98(void)
     sLocalK186C98 loc;
     void* mp = cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
-    char* o = *(char**)((char*)SSXApp + 0x8C);
+    char* o = (char*)SSXApp->FELocale;
     sVtEntK186C98* vt = *(sVtEntK186C98**)(o + 4);
     unsigned short* r = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045DC90));
     sprintf1(buf, r, &loc);
@@ -193,7 +193,7 @@ extern "C" void func_00186D60(void)
     o += vt[22].delta;
     int need = vt[22].fn(o, func_00152BA8());
     unsigned short* b = buf;
-    char* lo = *(char**)((char*)SSXApp + 0x8C);
+    char* lo = (char*)SSXApp->FELocale;
     sVtS_86D60* lvt = *(sVtS_86D60**)(lo + 4);
     lo += lvt[4].delta;
     unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(D_0045DCA8));
@@ -205,7 +205,7 @@ extern "C" void func_00186D60(void)
 
     {
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
-        char* lo2 = *(char**)((char*)SSXApp + 0x8C);
+        char* lo2 = (char*)SSXApp->FELocale;
         sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
         sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
         w += wvt[26].delta;
@@ -214,7 +214,7 @@ extern "C" void func_00186D60(void)
     }
     {
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
-        char* lo2 = *(char**)((char*)SSXApp + 0x8C);
+        char* lo2 = (char*)SSXApp->FELocale;
         sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
         sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
         w += wvt[26].delta;
@@ -230,7 +230,6 @@ extern "C" void func_00186D60(void)
 //100%
 INCLUDE_ASM("fe/fememcard", func_00186F40);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern int D_004A14BC;
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int func_0023C8D0(void* game);
@@ -259,7 +258,6 @@ extern "C" void func_00187270(sFEMemCardK187270* self);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int func_0023C8D0(void* mp);
 extern "C" int func_002419D8(void* mp, int card);
-extern void* SSXApp;
 // Typed view of D_004A14B8 (other functions in this unit declare it as void*).
 extern char* D_004A14B8_86F90 __asm__("D_004A14B8");
 extern int D_004A14BC;
@@ -390,7 +388,6 @@ extern "C" void func_00187180(void)
 INCLUDE_ASM("fe/fememcard", func_001871A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* SSXApp;
 struct sFEMemCardK1871A8 {
     char pad_0x000[0x1BC];
     int state;     // 0x1BC
@@ -431,7 +428,6 @@ extern "C" void func_001871A8(void)
 INCLUDE_ASM("fe/fememcard", func_00187230);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* SSXApp;
 extern int D_004A14BC;
 struct sFEMemCardK187230 {
     char pad_0x000[0x22C];
@@ -489,7 +485,6 @@ extern "C" void func_00187270(sFEMemCardK187270* self)
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187318);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void cSSXApp_startFELoad(void* p);
 
 extern "C" void func_00187318(void* self)
@@ -504,7 +499,6 @@ extern "C" void func_00187318(void* self)
 //100%
 INCLUDE_ASM("fe/fememcard", func_00187360);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern void* D_004A14B8;
 extern char D_0045DCE8[];
 extern char D_0045DCD8[];
@@ -555,7 +549,7 @@ extern "C" void func_00187360(void)
     sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, func_00152BA8());
     func_00241DC8(mp, &loc, *(int*)((char*)mp + 0x428));
-    char* o = *(char**)((char*)SSXApp + 0x8C);
+    char* o = (char*)SSXApp->FELocale;
     sVtS_00187360* vt = *(sVtS_00187360**)(o + 4);
     unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045DCE8));
     sprintf1(buf, fmt, &loc, size);
@@ -563,7 +557,7 @@ extern "C" void func_00187360(void)
     char* box = *(char**)((char*)D_004A14B8 + 0x218);
     sVtB_00187360* bvt = *(sVtB_00187360**)(box + 8);
     char* bthis = box + bvt[26].delta;
-    char* o2 = *(char**)((char*)SSXApp + 0x8C);
+    char* o2 = (char*)SSXApp->FELocale;
     sVtI_00187360* vt2 = *(sVtI_00187360**)(o2 + 4);
     char* o2this = o2 + vt2[4].delta;
     int id = vt2[4].fn(o2this, GetHashValue32(D_0045DCD8));
@@ -577,7 +571,6 @@ extern "C" void func_00187360(void)
 //100%
 INCLUDE_ASM("fe/fememcard", func_001874E8);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern int D_004A14BC;
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_ReturnToDevSelectScreen(void* mp);
@@ -716,7 +709,6 @@ extern "C" void func_001876A8(void)
 //100%
 INCLUDE_ASM("fe/fememcard", func_001877B0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern void* D_004A14B8;
 extern int D_004A14BC;
 extern int D_004A14B4;
@@ -837,7 +829,6 @@ INCLUDE_ASM("fe/fememcard", func_00187A38);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int func_0023C8D0(void* mp);
 extern "C" void func_0023C8F0(void* mp, int mode);
-extern void* SSXApp;
 extern int D_004A14BC;
 extern int D_004A14B4;
 

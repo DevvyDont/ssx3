@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 #include "ai/rider.h"
 
 //100%
@@ -4569,7 +4570,6 @@ extern "C" int func_00106848(cRider* self)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00106F78);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 extern "C" int func_00108A48_6F78(cRider* self, void* land) __asm__("func_00108A48");
 extern "C" int func_00334680_6F78(void*, t4Vector*, t4Vector*, int, float) __asm__("func_00334680");
 
@@ -4857,7 +4857,7 @@ extern "C" int func_00106F78_impl(cRider* self)
     t4Vector oldVel = self->mVelocity;
     float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
-    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)(SSXApp + 0x10));
+    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)((char*)SSXApp + 0x10));
     if (hit.obj != 0) {
         char* h = *(char**)(hit.obj + 0xC);
         if (h != 0) {

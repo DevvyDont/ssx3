@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cMCOverlayManager_cMCOverlayManager(void* self);
@@ -301,7 +302,6 @@ extern "C" void func_00241D40_r(void* self, int mode, void* buf, int size) __asm
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void* strcpy1(void* dst, void* src);
 int GetHashValue32(char* s);
-extern void* SSXApp;
 extern char D_004A2C88[];
 extern char D_0047C138[];
 
@@ -322,7 +322,7 @@ extern "C" void func_0023CC78(void* self, int n, char* dst)
         sprintf1_v(dst, fmt, name, n + 1);
         break;
     case 2: {
-        char* loc = *(char**)((char*)SSXApp + 0x8C);
+        char* loc = (char*)SSXApp->FELocale;
         sLocVEntry_23CC78* vt = *(sLocVEntry_23CC78**)(loc + 4);
         char* thisp = loc + vt[4].delta;
         strcpy1(dst, vt[4].fn(thisp, GetHashValue32(D_0047C138)));
@@ -349,7 +349,6 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void func_0023CC78(void* self, int n, char* dst);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* iface, int id);
 int GetHashValue32(char* s);
-extern void* SSXApp;
 extern char D_0047C138[];
 extern char D_0047C150[];
 extern char D_0047C160[];
@@ -376,7 +375,7 @@ extern "C" void cMCOverlayManager_setTitleString(void* self, int n)
     func_002C2540(fmt, D_0047C150);
     switch (*(int*)((char*)self + 0xB4)) {
     case 0: {
-        char* loc = *(char**)((char*)SSXApp + 0x8C);
+        char* loc = (char*)SSXApp->FELocale;
         sLocVEntry_23CDB0* vt = *(sLocVEntry_23CDB0**)(loc + 4);
         char* thisp = loc + vt[4].delta;
         sprintf1_v(title, fmt, vt[4].fn(thisp, GetHashValue32(D_0047C160)));
@@ -390,7 +389,7 @@ extern "C" void cMCOverlayManager_setTitleString(void* self, int n)
         break;
     }
     default: {
-        char* loc = *(char**)((char*)SSXApp + 0x8C);
+        char* loc = (char*)SSXApp->FELocale;
         sLocVEntry_23CDB0* vt = *(sLocVEntry_23CDB0**)(loc + 4);
         char* thisp = loc + vt[4].delta;
         strcpy1(title, vt[4].fn(thisp, GetHashValue32(D_0047C138)));
@@ -3848,7 +3847,6 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" int strlen1(void* s);
 extern "C" void func_00241DC8(void* self, void* dst, int n);
 int GetHashValue32(char* s);
-extern void* SSXApp;
 extern char D_0047C360[];
 extern char D_0047C378[];
 extern char D_0047C390[];
@@ -3940,7 +3938,7 @@ struct sMCOverlayMgr_241710 {
 
 static inline void* Loc_241710(char* key)
 {
-    char* loc = *(char**)((char*)SSXApp + 0x8C);
+    char* loc = (char*)SSXApp->FELocale;
     sLocVEntry_241710* vt = *(sLocVEntry_241710**)(loc + 4);
     char* thisp = loc + vt[4].delta;
     return vt[4].fn(thisp, GetHashValue32(key));
@@ -4269,7 +4267,6 @@ INCLUDE_ASM("movie/movieplayer", func_00241E18);
 int GetHashValue32(char* str);
 extern "C" void func_00241DC8(void* self, void* dst, int n);
 extern "C" void* strcpy1(void* dst, void* src);
-extern void* SSXApp;
 extern char D_004A29E8[];
 extern char D_0047C3B8[];
 extern char D_0047C360[];
@@ -4286,7 +4283,7 @@ struct sVEntry_00241E18 {
 
 static inline int Loc_00241E18(char* key)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_00241E18* vt = *(sVEntry_00241E18**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
 }

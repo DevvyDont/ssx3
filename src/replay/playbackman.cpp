@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
@@ -12,7 +13,6 @@ void func_00244400(void* self, int buf);
 void func_00244408(void* self, int n);
 extern "C" void* func_0026D5E8(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* SSXApp;
 extern char* D_004A3418;
 extern int D_004A3410;
 extern char D_00481550[];
@@ -42,7 +42,7 @@ struct cPlaybackMan_C458 {
 extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int a1)
 {
     func_0026D5E8((char*)self + 0x14);
-    char* world = *(char**)(SSXApp + 0x84);
+    char* world = (char*)SSXApp->Game;
     self->world = world;
     char* level = *(char**)(world + 0xC);
     self->level = level;
@@ -711,7 +711,6 @@ INCLUDE_ASM("replay/playbackman", func_0026D178);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char* SSXApp;
 void func_0026D2B0_D178(void* self, int a1) __asm__("func_0026D2B0");
 int func_0026D420_D178(void* self, int a1) __asm__("func_0026D420");
 extern "C" int func_0026D178(void* self, int a1)
@@ -720,9 +719,9 @@ extern "C" int func_0026D178(void* self, int a1)
         return 0;
     }
     int r = 1;
-    switch (**(int**)(*(char**)(SSXApp + 0x84) + 0x28)) {
+    switch (**(int**)((char*)SSXApp->Game + 0x28)) {
     case 0: {
-        char* g = *(char**)(*(char**)(SSXApp + 0x84) + 0x28);
+        char* g = *(char**)((char*)SSXApp->Game + 0x28);
         if (*(int*)(g + 0x60C) != 0 || *(int*)(g + 0x608) != 0 || *(int*)(g + 0x610) != 0) {
             break;
         }
@@ -761,14 +760,13 @@ struct sPbStream_D228 {
     sPbChunk_D228* chunks;  // 0xC
 };
 
-extern char* SSXApp;
 
 extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
 {
     sPbStream_D228* self = (sPbStream_D228*)stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
     if (self->count >= 0x1000) {
-        char* p = *(char**)(*(char**)(SSXApp + 0x84) + 0x28);
+        char* p = *(char**)((char*)SSXApp->Game + 0x28);
         *(int*)(p + 0x610) = 1;
         *(int*)(p + 0x614) = 0xB4;
         return;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("replay/replay", cReplay_restoreFrame);
@@ -34,7 +35,6 @@ extern "C" void func_0012B788(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
 extern char D_004A5988;
 extern void* D_004A47B8_DBF0 __asm__("D_004A47B8");
-extern void* SSXApp;
 extern void* D_004A3DD8;
 extern void* D_004A2A00;
 extern void* D_004A3FF0;
@@ -62,10 +62,10 @@ extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
     D_004A5B7C = v;
     cWorldPainterMan_reset_0();
     cBE_readFromReplayFrame(cBE_getBE(), stream);
-    char* o = *(char**)((char*)SSXApp + 0x84);
+    char* o = (char*)SSXApp->Game;
     sVtS_DBF0* vt = *(sVtS_DBF0**)o;
     vt[9].fn(o + vt[9].delta, stream);
-    char* o2 = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+    char* o2 = *(char**)((char*)SSXApp->Game + 0xC);
     sVtS_DBF0* vt2 = *(sVtS_DBF0**)(o2 + 0xCC);
     vt2[8].fn(o2 + vt2[8].delta, stream);
     cAvalanche_readFromReplayFrame((char*)stream);
@@ -75,10 +75,10 @@ extern "C" void cReplay_restoreFrame(void* self, cStreamRF* stream)
     func_00357D28(D_004A4028, stream);
     cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
-    func_00103578(*(void**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0xA4), stream);
+    func_00103578(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), stream);
     func_0026DE58(self, 1);
-    func_0012B788(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
-    cGameViewMan_updateAll(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x84));
+    func_0012B788(*(void**)((char*)SSXApp->Game + 0xC));
+    cGameViewMan_updateAll(*(void**)((char*)SSXApp->Game + 0x84));
 }
 #endif
 

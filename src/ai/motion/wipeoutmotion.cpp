@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 #include "ai/rider.h"
 
 //100%
@@ -484,7 +485,6 @@ extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __
 extern "C" void func_00329B40_137138(void* tree, const t4Vector* d) __asm__("func_00329B40");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 float AIrandf(float lo, float hi);
-extern char* SSXApp;
 extern t4Vector D_004FF120_137138 __asm__("D_004FF120");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -587,7 +587,7 @@ extern "C" void func_00137138(void* vself)
     func_0032F650(&sph, self->tree, 1);
     sSeg_137138 seg(sph.v30, sph.v20);
     self->seg = seg;
-    float d = func_00336850_137138(*(void**)(*(char**)(SSXApp + 0x84) + 0x20), &sph, &hit, 0);
+    float d = func_00336850_137138(*(void**)((char*)SSXApp->Game + 0x20), &sph, &hit, 0);
     if (d < 0.0f) {
         func_0032F708(&sph, 2);
         return;
@@ -611,7 +611,7 @@ extern "C" void func_00137138(void* vself)
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
                 vt[43].fn(o + vt[43].delta, &hit,
-                          vu0Scale_137138(impulse, (float)*(int*)(SSXApp + 0x10) * -0.05000000074505806f));
+                          vu0Scale_137138(impulse, (float)*(int*)((char*)SSXApp + 0x10) * -0.05000000074505806f));
             }
         }
         vu0ScaleEq_137138(self->angVel, 0.8500000238418579f);
@@ -631,7 +631,7 @@ extern "C" void func_00137138(void* vself)
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
                 vt[43].fn(o + vt[43].delta, &hit,
-                          vu0Scale_137138(self->vel, (float)*(int*)(SSXApp + 0x10) * 0.05000000074505806f));
+                          vu0Scale_137138(self->vel, (float)*(int*)((char*)SSXApp + 0x10) * 0.05000000074505806f));
             }
         }
         self->vel = D_004FF120_137138;
@@ -824,7 +824,6 @@ extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void func_0011E150(void* rider, int a1);
 extern "C" void func_00105398(void* rider, int a1);
 extern "C" void func_00107888(void* rider);
-extern char* SSXApp;
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vu0Dot_137860(const t4Vector& a, const t4Vector& b)
@@ -952,7 +951,7 @@ extern "C" void func_00137860(void* vself)
                 {
                     sVEntH_137860* vt = *(sVEntH_137860**)(o + 0xC);
                     vt[43].fn(o + vt[43].delta, &hitB,
-                              vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)*(int*)(SSXApp + 0x10)));
+                              vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)*(int*)((char*)SSXApp + 0x10)));
                 }
             }
             float pen = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.pos), hitB.normal);
@@ -1022,7 +1021,6 @@ extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" int cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_updateOrientationImplicit(void*);
-extern char* SSXApp;
 extern t4Vector D_004FF160;
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
@@ -1223,7 +1221,7 @@ static inline float clamp_137D18(float v, float lo, float hi)
 
 static inline sMat_137D18* materials_137D18()
 {
-    return *(sMat_137D18**)(*(char**)(SSXApp + 0x84) + 0x44);
+    return *(sMat_137D18**)((char*)SSXApp->Game + 0x44);
 }
 
 static inline short triFlags_137D18(char* t)

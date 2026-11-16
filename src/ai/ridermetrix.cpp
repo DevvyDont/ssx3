@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
@@ -1357,7 +1358,6 @@ extern "C" float func_00119448(char* self, float value)
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_001194C0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* func_0028B180();
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" int func_00238510(void* mgr, int id, int a2);
@@ -1376,7 +1376,7 @@ extern "C" float func_001194C0(char* self, int a1)
     sVEntry001194C0* vt = *(sVEntry001194C0**)sub;
     if (vt[8].fn(sub + vt[8].delta) != 0)
     {
-        void* mgr = *(void**)((char*)SSXApp + 0xC0);
+        void* mgr = SSXApp->GameModeMan;
         char* sub2 = *(char**)(self + 0x1AC) + 0x6C0;
         sVEntry001194C0* vt2 = *(sVEntry001194C0**)sub2;
         if (func_00238510(mgr, vt2[7].fn(sub2 + vt2[7].delta), a1) != 0)
@@ -1834,7 +1834,6 @@ extern "C" float func_00119E38(void* self, int a, int b)
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAddCash);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void* SSXApp;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001E3760(int id, int amount);
@@ -1849,7 +1848,7 @@ struct sVE119EF8 {
 
 static inline int IsBusy119EF8()
 {
-    int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
+    int n = **(int**)((char*)SSXApp->Game + 0x28);
     return n != 0 && n < 10;
 }
 
@@ -1999,7 +1998,6 @@ struct sScoreGrades {
     int gradeCounts[6]; // 0x16c: landed tricks per grade (func_00119310)
 };
 
-extern void* SSXApp;
 extern sGameSettings D_00535BC8;
 
 extern "C" void cRiderMetrix_removeHUDfx(void* self, int type);
@@ -2070,7 +2068,7 @@ extern "C" float func_0011A228(void* self, int stance, int alternate, int style,
     cRiderMetrix_removeHUDfx(self, 0x1f);
     cRiderMetrix_removeHUDfx(self, 0x20);
 
-    if (func_0012A250(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xc))) {
+    if (func_0012A250(*(void**)((char*)SSXApp->Game + 0xc))) {
         return 0.0f;
     }
 
@@ -2535,7 +2533,7 @@ extern "C" void func_0011B3F8(char* self)
     float speedAttribute = func_001494C0(cBE_getInterface(cBE_getBE(), 3), *(int*)(self + 0x86C), *(int*)(self + 0xB34));
     // NOTE: the retail code adds and subtracts 1.0 (likely an inlined bx range helper).
     speedAttribute = speedAttribute + 1.0f - 1.0f;
-    char* surfPropCache = *(char**)((char*)SSXApp + 0x84);
+    char* surfPropCache = (char*)SSXApp->Game;
     char* snow = *(char**)(surfPropCache + 0x44) + *(int*)(self + 0x438) * 0xB0;
     const int motionState = func_0011FE98(self);
     const float surfaceProperty = (motionState == 0) ? *(float*)(snow + 4) : 1.0f;

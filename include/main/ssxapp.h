@@ -1,0 +1,90 @@
+#ifndef MAIN_SSXAPP_H
+#define MAIN_SSXAPP_H
+
+// cSSXApp: the application object. There is one instance (constructed by cSSXApp_cSSXApp); the global SSXApp points
+// at it, and most subsystems are reached through it (SSXApp->Game, SSXApp->FELocale, ...).
+//
+// This is a FLAT layout, like ai/rider.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// cSSXApp derives from cAppMan (the constructor calls cAppMan_cAppMan first); that base is still raw bytes here.
+//
+// Member names are EA's, from SSX On Tour's PSP dev-build DWARF (class cSSXApp), placed at their retail offsets by:
+//   [P] the July 2003 preview's inline accessors (getBE = lw 0x54 ... getFELocale = lw 0x68; Inputs 0x80,
+//       InputMaps 0x88, getGameManager 0x90, getUserName 0x94, getNetMan 0xA0, GetFEAsyncManager 0xC4), which
+//       retail moved by a constant per block (+0x24 up to FELocale, +0x30 from InputPads to NetMan);
+//   [R] retail's own code: cSSXApp_cSSXApp and cSSXApp_init store each subsystem with its allocation tag
+//       ("InputPad", "loadicon", "LoadIndicator", "FEAsyncManager"; cConsoleConfig_construct, cGameModeMan_getGM);
+//   [U] how retail code uses the field (which class's functions receive it).
+// On Tour's layout differs before Game (it adds three Apt UI members) and keeps one input per player
+// (getNumInputs is 2 in SSX 3). Unnamed fields are unk_XXX; rename only with evidence, and say which kind.
+
+#include "layout.h"
+
+struct cBE;
+struct cFE;
+struct cDebugFE;
+struct cGame;
+struct cUIFontInterface;
+struct cFELocale;
+struct cAnimDataBase;
+struct cGameAnimMap;
+struct cConfMan;
+struct cConsoleConfig;
+struct cLoadIndicator;
+struct cInputPad;
+struct cInput;
+struct cInputMap;
+struct cGameModeMan;
+struct cNetMan;
+struct cFEAsyncManager;
+
+struct cSSXApp {
+    char mAppMan[0x5C];                  // 0x000 cAppMan base data (bx/appman; not modelled here)
+    void** mVtbl;                        // 0x05C cAppMan's vtable pointer (_vt$7cSSXApp after construction)
+    int unk_60;                          // 0x060 [R] set to 1 by the constructor
+    int unk_64;                          // 0x064 [R] set to 1 by the constructor
+    int unk_68;                          // 0x068 [R] zeroed by the constructor
+    int unk_6C;                          // 0x06C [R] zeroed by the constructor
+    int unk_70;                          // 0x070 [R] zeroed by the constructor
+    int unk_74;                          // 0x074 [R] zeroed by the constructor
+    cBE* BE;                             // 0x078 [P] getBE; [U] passed to cBE_getInterface
+    cFE* RealFE;                         // 0x07C [P] getRealFE; [U] +0xB0 is cFE::mRiderManager (as in On Tour)
+    cDebugFE* DebugFE;                   // 0x080 [P] getDebugFE
+    cGame* Game;                         // 0x084 [P] getGame; [U] passed to cGame_exit, cGame_partialRestart
+    cUIFontInterface* Fonts;             // 0x088 [U] stored into cUIEngine::mpFontInterface (+0x8)
+    cFELocale* FELocale;                 // 0x08C [P] getFELocale; [U] passed to util/locale's functions
+    cAnimDataBase* AnimDataBase;         // 0x090 On Tour member order (between FELocale and ConsoleConfig)
+    cGameAnimMap* GameAnimMap;           // 0x094 On Tour member order
+    cConfMan* ConfMan;                   // 0x098 On Tour member order
+    cConsoleConfig* ConsoleConfig;       // 0x09C [R] init stores cConsoleConfig_construct()
+    int LoadIconTextureID;               // 0x0A0 [R] init loads the "loadicon" texture into it
+    cLoadIndicator* LoadIndicator;       // 0x0A4 [R] init: new ("LoadIndicator")
+    cInputPad* InputPads[2];             // 0x0A8 [R] init: one 0x2A4-byte "InputPad" per player
+    cInput* Inputs[2];                   // 0x0B0 [P] getInput(i)
+    cInputMap* InputMaps[2];             // 0x0B8 [P] getInputMap(i)
+    cGameModeMan* GameModeMan;           // 0x0C0 [P] getGameManager; [R] init stores cGameModeMan_getGM()
+    char* UserName;                      // 0x0C4 [P] getUserName: a cBXString (4 bytes: its text pointer)
+    char* Password;                      // 0x0C8 [P] getPassword: a cBXString
+    char* CommandLineTrack;              // 0x0CC On Tour member order: a cBXString (the ctor sets all three)
+    cNetMan* NetMan;                     // 0x0D0 [P] getNetMan
+    int unk_D4[6];                       // 0x0D4 [R] zeroed by the constructor (On Tour keeps big-file handles here)
+    int unk_EC[11];                      // 0x0EC [R] zeroed by the constructor
+    int unk_118;                         // 0x118 [R] zeroed by the constructor
+    cFEAsyncManager* mFEAsyncManager;    // 0x11C [P] GetFEAsyncManager; [R] init: new ("FEAsyncManager")
+};
+
+CHECK_OFFSET(cSSXApp, mVtbl, 0x5C);
+CHECK_OFFSET(cSSXApp, BE, 0x78);
+CHECK_OFFSET(cSSXApp, RealFE, 0x7C);
+CHECK_OFFSET(cSSXApp, Game, 0x84);
+CHECK_OFFSET(cSSXApp, FELocale, 0x8C);
+CHECK_OFFSET(cSSXApp, ConsoleConfig, 0x9C);
+CHECK_OFFSET(cSSXApp, InputPads, 0xA8);
+CHECK_OFFSET(cSSXApp, Inputs, 0xB0);
+CHECK_OFFSET(cSSXApp, GameModeMan, 0xC0);
+CHECK_OFFSET(cSSXApp, NetMan, 0xD0);
+CHECK_OFFSET(cSSXApp, mFEAsyncManager, 0x11C);
+
+// The application object (On Tour: SSXApp, a cSSXApp * in its linker map; retail D_004A28A8).
+extern cSSXApp* SSXApp;
+
+#endif /* MAIN_SSXAPP_H */

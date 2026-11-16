@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetCreate);
@@ -7,7 +8,6 @@ int GetHashValue32(char* str);
 extern char D_00471BF0[];
 extern char D_00471C08[];
 extern char D_00471C20[];
-extern void* SSXApp;
 
 class cUIObj_20DE30 {
 public:
@@ -28,7 +28,7 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(D_00471BF0)) {
         *(int*)((char*)w + 0x18) = 0;
-        if (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x28) + 0x608) != 0) {
+        if (*(int*)(*(char**)((char*)SSXApp->Game + 0x28) + 0x608) != 0) {
             w->v06(0);
             w->setEnabled(1);
             w->setVisible(0);
@@ -269,7 +269,6 @@ extern "C" void cOVState_onUpdate(void* self);
 extern "C" void func_0026FA78(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
-extern void* SSXApp;
 extern char D_00471C30[];
 extern char D_00471BB0[];
 extern char D_00471BA0[];
@@ -323,7 +322,7 @@ extern "C" void cOVState_REPLAY_onUpdate(void* p)
         cUIState_hideObjSafe(self, D_00471BA0);
     }
     if (self->paused == 0) {
-        func_0026FA78(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28));
+        func_0026FA78(*(void**)((char*)SSXApp->Game + 0x28));
     }
     cOVState_REPLAY_setupCameraName(self);
     cOVState_REPLAY_setupTicker(self);
@@ -343,7 +342,6 @@ extern "C" void cOVState_onUpdate(void* self);
 extern "C" void func_0026FA78(void* p);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
 extern "C" void cOVState_REPLAY_setupTicker(void* self);
-extern void* SSXApp;
 extern char D_00471C30[];
 extern char D_00471BB0[];
 extern char D_00471BA0[];
@@ -371,7 +369,7 @@ extern "C" void cOVState_REPLAY_setupCameraName(void* self)
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2730));
     if (text == 0)
         return;
-    unsigned int cam = *(unsigned int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x28) + 0x630);
+    unsigned int cam = *(unsigned int*)(*(char**)((char*)SSXApp->Game + 0x28) + 0x630);
     switch (cam) {
     case 0: __builtin_memcpy(buf, D_00471C40, 11); break;
     case 1: __builtin_memcpy(buf, D_00471C50, 14); break;
@@ -396,7 +394,6 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupTicker);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char D_00471CC8[];
-extern void* SSXApp;
 struct sVec3_20E818 {
     float x, y, z;
 };
@@ -406,7 +403,7 @@ extern "C" void cOVState_REPLAY_setupTicker(void* self)
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471CC8));
     if (obj != 0) {
         sVec3_20E818 pos = *(sVec3_20E818*)(obj + 0x44);
-        char* replay = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
+        char* replay = *(char**)((char*)SSXApp->Game + 0x28);
         int total = *(int*)(replay + 0x3CC);
         float frac;
         if (total > 0) {
@@ -434,13 +431,12 @@ void* cOVState_onRender2D(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_onUpdate);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void func_00231840(void* game, int a);
 extern "C" void func_0039E510(void* self);
 
 extern "C" void cOVState_onUpdate(void* self)
 {
-    func_00231840(*(void**)((char*)SSXApp + 0x84), 1);
+    func_00231840(SSXApp->Game, 1);
     func_0039E510(self);
 }
 #endif

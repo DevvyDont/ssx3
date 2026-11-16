@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
@@ -7,7 +8,6 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 // ... *(int*)(hi + 0xc1c)` (same address, same single load; the unflagged non-pointer base makes sched1's alias check keep the
 // load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern void* SSXApp;
 extern char* D_004A289C;
 extern void* D_004A2EB8;
 extern int D_004A11B8;
@@ -116,10 +116,10 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         func_0017AE00(popup);
         return;
     }
-    cFont_Dbg* font = *(cFont_Dbg**)(*(char**)((char*)SSXApp + 0x80) + 0x18);
+    cFont_Dbg* font = *(cFont_Dbg**)((char*)SSXApp->DebugFE + 0x18);
     void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
-    void* intPlayer = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 1);
+    void* intPlayer = cBE_getInterface_Fv(SSXApp->BE, 1);
     const float left = 60.0f;
     const float right = 580.0f;
     const float lineheight = font->getMaxCharHeight();
@@ -229,7 +229,6 @@ INCLUDE_ASM("fe/debugfe", func_0017D008);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern void* SSXApp;
 struct sDbgRaceSel17D008 {
     char pad_0x00[0x48];
     signed char mode;  // 0x48
@@ -250,7 +249,7 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 
 extern "C" void func_0017D008(void* self, int idx)
 {
-    cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 0);
+    cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
     ((sDbgFE17D008*)self)->modes[D_00535BC8.slot] = D_00535BC8.mode;
     func_00145108(iface, idx);
     cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
@@ -272,7 +271,6 @@ extern "C" void THREAD_yieldticks(int n);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern void* D_004A33F4;
 extern char D_0045D018[] __attribute__((aligned(8)));
@@ -289,7 +287,7 @@ extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("D_00534B30");
 // Debug menu: opens the direct-socket link to the paired test console and starts the game comm.
 extern "C" void func_0017D0A8(void)
 {
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     if (D_00534B30_D0A8.active == 0) {
         return;
     }
@@ -582,7 +580,6 @@ extern "C" void func_0017D688(sDebugFE17D688* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_004A1320[];
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
@@ -642,7 +639,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         while (*list != 0) {
             func_002CC460(list);
         }
-        if (*(int*)((char*)SSXApp + 0x74) != 0) {
+        if (SSXApp->unk_74 != 0) {
             self->state = 0;
         } else {
             self->state = 0x13;
@@ -654,9 +651,9 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         func_0017DA30(self, *(int*)((char*)ev + 8));
         break;
     case 0xC9:
-        if (*(int*)((char*)SSXApp + 0x74) != 0) {
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(char**)((char*)SSXApp + 0xC4));
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(char**)((char*)SSXApp + 0xC8));
+        if (SSXApp->unk_74 != 0) {
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, SSXApp->UserName);
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, SSXApp->Password);
             func_0025C610(D_004A3028);
             self->state = 5;
         } else {
@@ -671,7 +668,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         func_0025C610(D_004A3028);
         break;
     case 0xD4:
-        if (*(int*)((char*)SSXApp + 0x74) != 0) {
+        if (SSXApp->unk_74 != 0) {
             self->state = 7;
             func_0025CD28(D_004A3028, 0);
         } else {
@@ -681,7 +678,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         }
         break;
     case 0xDA:
-        if (*(int*)((char*)SSXApp + 0x74) != 0) {
+        if (SSXApp->unk_74 != 0) {
             int i;
             for (i = 0; i < func_0025F120(D_004A3028); i++) {
                 if (func_004165A8(func_0025F150(D_004A3028, i), D_004A1320) == 0) {
@@ -746,7 +743,6 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
 INCLUDE_ASM("fe/debugfe", func_0017DA30);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void* SSXApp;
 extern void* D_004A3028;
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_002CC3B8(void* menu, void* items);
@@ -768,9 +764,9 @@ extern "C" void func_0017DA30(void* self, int a1)
         SetMode0017DA30(self, 0x14);
         break;
     case 5:
-        if (*(int*)((char*)SSXApp + 0x74) != 0) {
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(char**)((char*)SSXApp + 0xC4));
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(char**)((char*)SSXApp + 0xC8));
+        if (SSXApp->unk_74 != 0) {
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, SSXApp->UserName);
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, SSXApp->Password);
             func_0025C610(D_004A3028);
         } else {
             SetMode0017DA30(self, 0x15);
@@ -798,7 +794,6 @@ extern "C" void func_0017DA30(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern void* D_004A3028;
 extern void* D_004A33F4;
@@ -980,7 +975,6 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int
 extern "C" void func_001472C8(void* iface, int a1, int a2);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern void* D_004A3028;
 extern int D_004A11B8;
@@ -1020,7 +1014,7 @@ extern "C" void func_0017DE70(char* self)
     func_001472C8(player, 0, 0);
     func_001472C8(player, 1, -1);
     vcall1_17DE70(player);
-    void* net = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    void* net = cBE_getInterface_Fv(SSXApp->BE, 7);
     sNetCfg_17DE70* cfg = &D_00534B30_cfg;
     D_00534B30_cfg.active = 1;
     cfg->host = *(int*)((char*)D_004A3028 + 0xB4);
@@ -1351,7 +1345,6 @@ INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void* SSXApp;
 extern void* D_004A3028;
 extern void* D_004A2EB8;
 extern char D_0045D258[];
@@ -1444,7 +1437,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
 
 extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
 {
-    sFont17E5C8* font = *(sFont17E5C8**)(*(char**)((char*)SSXApp + 0x80) + 0x18);
+    sFont17E5C8* font = *(sFont17E5C8**)((char*)SSXApp->DebugFE + 0x18);
     switch (self->state) {
     case 0:
     case 1:
@@ -1806,7 +1799,6 @@ extern "C" void func_0017F838(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_load);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern char* D_004A289C;
 extern char* D_004A5B80;
 extern char D_0045D4B8[];
@@ -1875,7 +1867,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     }
     self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(0x8C48, D_0045D510, 0, 0));
     self->objs[1] = func_0017D298((char*)cMemMan_alloc(0x1C18, D_0045D520, 0, 0));
-    if (*(int*)((char*)SSXApp + 0x74)) {
+    if (SSXApp->unk_74) {
         self->cur = self->objs[1];
     } else {
         self->cur = self->objs[0];
@@ -1921,7 +1913,6 @@ int func_0017FAB0(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017FAD0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern char* D_004A289C;
 extern "C" void func_003916C0(void* p, int flags);
 
@@ -1974,7 +1965,6 @@ extern "C" void func_0017FAD0(sDebugFE_0017FAD0* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", func_0017FB98);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 class cFEObjK17FB98 {
 public:
     virtual void v01();
@@ -2454,7 +2444,6 @@ extern "C" int func_00180300(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180478);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 
 extern "C" void func_00180478(void* self, unsigned char idx)
 {

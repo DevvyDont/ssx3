@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_cleanupOnExit);
@@ -45,7 +46,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA18);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
-extern void* SSXApp;
 extern "C" void cCameraTriggerList_reset(void* self);
 
 struct sCtVec4_CA18 {
@@ -130,7 +130,7 @@ extern "C" void func_0016CA18_impl(void* vself)
     sCtMan_CA18* self = (sCtMan_CA18*)vself;
     for (int i = 0; i < self->count; i++) {
         sCtTrig_CA18* t = self->trigs[i];
-        char* w = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x20);
+        char* w = *(char**)((char*)SSXApp->Game + 0x20);
         sCtBox_CA18 box = t->shape->bounds();
         remove_CA18(w, t->item, &box);
     }
@@ -146,7 +146,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
-extern void* SSXApp;
 extern "C" void func_0016C098(void** self);
 
 struct sCtVec4_P {
@@ -232,7 +231,7 @@ extern "C" void cCameraTriggerMan_purge(void* vself)
     for (int i = 0; i < self->count; i++) {
         sCtTrig_P* t = self->trigs[i];
         if (t->reg != 0) {
-            char* w = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x20);
+            char* w = *(char**)((char*)SSXApp->Game + 0x20);
             sCtBox_P box = t->shape->bounds();
             remove_P(w, t->item, &box);
         }
@@ -352,7 +351,6 @@ void func_0016CF40(void* self)
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF48);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern void* SSXApp;
 
 struct sCtVec4_CF48 {
     float x, y, z, w;
@@ -454,12 +452,12 @@ extern "C" void func_0016CF48_impl(void* vself, int mask)
         if (t->mask & mask) {
             if (t->reg == 0) {
                 t->reg = t;
-                char* w = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x20);
+                char* w = *(char**)((char*)SSXApp->Game + 0x20);
                 sCtBox_CF48 box = t->shape->bounds();
                 insert_CF48(w, t->item, &box);
             }
         } else if (t->reg != 0) {
-            char* w = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x20);
+            char* w = *(char**)((char*)SSXApp->Game + 0x20);
             sCtBox_CF48 box = t->shape->bounds();
             remove_CF48(w, t->item, &box);
             t->reg = 0;
@@ -574,7 +572,6 @@ extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* ou
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D320);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void func_0016C678(void* list);
 extern "C" void* func_0016C6B0(void* list, void* key);
 extern "C" void* func_0016C6E0(void* list, int key);
@@ -673,7 +670,7 @@ extern "C" void func_0016D320(char* self, char* rider)
         int idx = *(int*)(rider + 0x870);
         func_0016C678(self + 0x14 + idx * 4);
         sCtx_D320 ctx;
-        sRoot_D320* w = *(sRoot_D320**)(*(char**)((char*)SSXApp + 0x84) + 0x20);
+        sRoot_D320* w = *(sRoot_D320**)((char*)SSXApp->Game + 0x20);
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
         ctx.rider = rider;
         char* sub = rider + 0x6C0;
@@ -735,7 +732,6 @@ extern "C" void func_0016D320(char* self, char* rider)
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E1D8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void* SSXApp;
 extern "C" void func_00162060(void* self, int mode, int arg, float blend);
 
 struct sCamEvt_E1D8 {
@@ -752,7 +748,7 @@ struct sCams_E1D8 {
 
 extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
 {
-    sCams_E1D8* cams = *(sCams_E1D8**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
+    sCams_E1D8* cams = *(sCams_E1D8**)((char*)SSXApp->Game + 0x84);
     void* cam = *(void**)(cams->cam[*(int*)(rider + 0x870)] + 0xA8);
     switch (evt->type) {
     case 2: {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 #include "ai/rider.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
@@ -22,7 +23,6 @@ void func_00289AF0_impl(void* mgr, void* rider) __asm__("func_00289AF0__FPv");
 extern "C" void* MEM_fill(void* dst, int value, int size);
 // PORT: memset-like; called as void here.
 extern "C" void MEM_fill_v(void* dst, int value, int size) __asm__("MEM_fill");
-extern void* SSXApp;
 extern void* D_00459C18[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
@@ -82,7 +82,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mTrackPathHint = (int*)cMemMan_alloc(0x20, D_004578A8, 0, 0);
     self->mAIPathHint = (int*)cMemMan_alloc(0x20, D_004578C8, 0, 0);
     sRiderAux_B698* aux = new (D_004578E0, 0, 0) sRiderAux_B698;
-    int team = *(int*)(*(char**)((char*)SSXApp + 0x84) + 0x20);
+    int team = *(int*)((char*)SSXApp->Game + 0x20);
     aux->f0 = team;
     aux->f4 = 0;
     aux->f8 = none;
@@ -155,7 +155,6 @@ extern "C" void func_001033F8(void* a, void* p);
 extern "C" void func_00117290(void* p, int flags);
 extern "C" void func_00375918(void* p, int flags);
 void operator_delete(int* p);
-extern void* SSXApp;
 extern void* D_00459C18[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
@@ -192,7 +191,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
         func_00113170(p, 3);
     void* box = self->mFocusBox;
     if (box != 0)
-        func_001033F8(*(void**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0xA4), box);
+        func_001033F8(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), box);
     operator_delete((int*)self->mFocusBox);
     p = self->mMetrix;
     if (p != 0)
@@ -223,14 +222,13 @@ INCLUDE_ASM("ai/rider", cRider_addFocusBox);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00457960[];
-extern void* SSXApp;
 extern "C" void func_001033B0(void* self, void* box);
 
 extern "C" void cRider_addFocusBox(cRider* self)
 {
     void* box = cMemMan_alloc(0x10, D_00457960, 0, 0);
     self->mFocusBox = box;
-    func_001033B0(*(void**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0xA4), box);
+    func_001033B0(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), box);
 }
 #endif
 
@@ -555,7 +553,6 @@ INCLUDE_ASM("ai/rider", func_0011D390);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
-extern void* SSXApp;
 extern signed char D_00535BC8[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
@@ -653,7 +650,7 @@ void func_0011D390_impl(cRider* self)
         self->mUberTimer = 0;
         self->mUberLevel = 0;
         self->mDidNotFinish = 0;
-        self->mStartTick = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 8);
+        self->mStartTick = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 8);
         self->mFinishTick = 0;
         self->mPenaltyTicks = 0;
         self->mOverlapCount = 0;
@@ -707,7 +704,6 @@ extern "C" void func_0011E150(cRider* self, int a1);
 extern "C" void func_00332DB8(void*, void*);
 extern "C" void func_00122088(cRider*);
 extern "C" void func_002105B0(int);
-extern void* SSXApp;
 
 // The unit declares these later with their own vector types; bind them by asm label.
 extern const t4Vector D_004FF120_D660 __asm__("D_004FF120");
@@ -1006,7 +1002,7 @@ extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const floa
         sHit_D660 hit;
         sRay_D660 ray;
         func_0032E100_D660(&ray, lo, hi, 2, 0.9791666865348816f);
-        if (func_00336850_D660(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), &ray, &hit, 0) >= 0.0f)
+        if (func_00336850_D660(*(void**)((char*)SSXApp->Game + 0x20), &ray, &hit, 0) >= 0.0f)
         {
             p = hit.pos;
             n = hit.normal;
@@ -1092,7 +1088,7 @@ extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const floa
     vt[kRiderVt_vibrationReset].fn((char*)self + vt[kRiderVt_vibrationReset].delta);
     if ((unsigned int)self->mViewIndex < 2)
     {
-        char* views = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
+        char* views = *(char**)((char*)SSXApp->Game + 0x84);
         if (views != 0)
         {
             char* h = *(char**)(*(char**)(views + (self->mViewIndex << 2) + 4) + 0xA8);
@@ -1255,7 +1251,7 @@ extern "C" void func_0011DF18(cRider* self, int notify)
     {
         char* sub = (char*)&self->mVtbl;
         sVEntryA_0011DF18* vtA = *(sVEntryA_0011DF18**)sub;
-        char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x4) + 0xA0);
+        char* obj = *(char**)(*(char**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x4) + 0xA0);
         sVEntryB_0011DF18* vtB = *(sVEntryB_0011DF18**)(obj + 0x14);
         char* objB = obj + vtB[3].delta;
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
@@ -2751,7 +2747,6 @@ extern "C" void func_00332DB8(void*, void*);
 extern "C" void func_00122088(cRider*);
 extern "C" void func_001242B0(void* self, void* p);
 extern "C" void func_0011B3F8(void* self);
-extern void* SSXApp;
 
 struct sQuad_120F20
 {
@@ -2772,7 +2767,7 @@ extern "C" void func_00120F20(cRider* self)
     int a = func_001298C8() % 3;
     if (a != self->mAIIndex % 3)
     {
-        char* g = *(char**)((char*)SSXApp + 0x84);
+        char* g = (char*)SSXApp->Game;
         if (*(int*)((char*)self->mOverlapList + 4) == *(int*)(*(char**)(g + 0x20) + 0xA0))
         {
             void* obj = *(void**)(g + 0x34);
@@ -3047,7 +3042,6 @@ extern "C" void func_00121818(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", func_001218D0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" int func_0022E0E0(void* self, int a1);
 extern "C" void func_002ED490(void* obj, float a, float b, float c);
 extern "C" void func_00392D18(void* p);
@@ -3062,7 +3056,7 @@ struct sRiderVE_001218D0
 extern "C" void func_001218D0(cRider* self)
 {
     if (~self->mGroundPolyId != 0)
-        self->mGroundMaterial = func_0022E0E0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x78), (unsigned char)self->mGroundPolyId);
+        self->mGroundMaterial = func_0022E0E0(*(void**)((char*)SSXApp->Game + 0x78), (unsigned char)self->mGroundPolyId);
     char* obj = (char*)&self->mVtbl;
     sRiderVE_001218D0* vt = *(sRiderVE_001218D0**)obj;
     func_002ED490(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
@@ -3477,14 +3471,13 @@ extern "C" void func_00122048()
 //100%
 INCLUDE_ASM("ai/rider", func_00122088);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void func_002F5B68(void* a, void* q, void* b, void* c, int d);
 
 extern "C" void func_00122088(cRider* self)
 {
     cQuad128 q;
     cRider_getHipPosition(&q, self);
-    func_002F5B68(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x90), &q, self->mOverlapList, self->unk_794, 8);
+    func_002F5B68(*(void**)((char*)SSXApp->Game + 0x90), &q, self->mOverlapList, self->unk_794, 8);
 }
 #endif
 
@@ -3564,7 +3557,6 @@ INCLUDE_ASM("ai/rider", func_00122278);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C version.
 extern void* D_004A289C;
-extern void* SSXApp;
 extern char D_828[];
 
 struct sMat_122278 { float m[16]; };
@@ -3579,7 +3571,7 @@ typedef int (*TestFn_122278)(void*, void*, void*, sMat_122278*);
 
 static inline int inFrustum_122278(sQ128_122278* v)
 {
-    char* inst = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x8C);
+    char* inst = *(char**)((char*)SSXApp->Game + 0x8C);
     int mask = *(int*)(inst + 0x110);
     for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
         int bit = 1 << i;
@@ -3647,7 +3639,6 @@ INCLUDE_ASM("ai/rider", func_00122448);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A289C;
-extern void* SSXApp;
 extern "C" void func_00121F30(cRider* self);
 extern "C" void func_00310640(void* model, int lod, int a, int b);
 
@@ -3683,7 +3674,7 @@ extern "C" void func_00122448(cRider* self)
         sVEntryF_122448* vt3 = *(sVEntryF_122448**)((char*)g3 + 0x10D8);
         vt3[27].fn((char*)g3 + vt3[27].delta, 0.0f, &D_004FF120_v122448);
     }
-    if (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x14) == 0 || self->unk_B1C)
+    if (*(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x14) == 0 || self->unk_B1C)
     {
         int* f = &self->unk_B1C;
         int v = 0;
@@ -3805,7 +3796,6 @@ public:
 
 extern cGraphicsMan_2680* D_004A289C_2680 __asm__("D_004A289C");
 
-extern void* SSXApp;
 
 struct sV2_2680 {
     float x, y;
@@ -3836,7 +3826,7 @@ extern "C" void func_00122680(void)
 {
     ASSERT_2680(SSXApp != 0);
     if (D_004A4540 == 0) {
-        sOverlay_2680* o = *(sOverlay_2680**)(*(char**)((char*)SSXApp + 0x84) + 0x24);
+        sOverlay_2680* o = *(sOverlay_2680**)((char*)SSXApp->Game + 0x24);
         o->f38 = o->f30;
         D_004A289C_2680->BeginScene();
         D_004A289C_2680->Begin2D();
@@ -4100,7 +4090,6 @@ void* func_00122CD0(void* self)
 INCLUDE_ASM("ai/rider", func_00122CF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* SSXApp;
 extern "C" int func_00101A10(void* self, int character);
 extern "C" int func_00122C98(cRider* self);
 float func_0011A0C0_2(void* self, int state) __asm__("func_0011A0C0__FPv");
@@ -4108,7 +4097,7 @@ float func_0011A0C0_2(void* self, int state) __asm__("func_0011A0C0__FPv");
 extern "C" void func_00122CF0(cRider* self)
 {
     int old = self->unk_5B0;
-    int r = func_00101A10(*(void**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0xA8), self->mAIIndex);
+    int r = func_00101A10(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA8), self->mAIIndex);
     self->unk_5B0 = r;
     if (r == 0)
     {
@@ -4134,7 +4123,7 @@ struct sVEntry00122D78 { short delta; short index; int (*fn)(void*); };
 extern "C" int func_00122D78(cRider* self)
 {
     char* sub = (char*)&self->mVtbl;
-    int n = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0xC);
+    int n = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0xC);
     float rate = (func_00113130(self) - self->mDistToFinish) / (float)n;
     sVEntry00122D78* vt = *(sVEntry00122D78**)sub;
     if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta))
@@ -4389,7 +4378,7 @@ extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transp
 
 extern "C" void cRider_transport_v(cRider* self, char* m)
 {
-    func_00270970(*(int*)(*(char**)((char*)SSXApp + 0x84) + 0x28), self->mAIIndex);
+    func_00270970(*(int*)((char*)SSXApp->Game + 0x28), self->mAIIndex);
     sVec4 pos = *(sVec4*)(m + 0x30);
     sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
     int i = self->mAIIndex;
@@ -4415,7 +4404,7 @@ extern "C" void cRider_transport_v(cRider* self, char* m)
     func_00125038(self);
     char* sub = (char*)&self->mVtbl;
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
-    char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x4) + 0xA0);
+    char* obj = *(char**)(*(char**)(*(char**)((char*)SSXApp->Game + 0x84) + 0x4) + 0xA0);
     sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
     char* objB = obj + vtB[3].delta;
     vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
@@ -4468,7 +4457,7 @@ extern "C" void func_001234D0(cRider* self, char* m)
 {
     t4Vector pos;
     t4Vector dir;
-    func_00270970(*(int*)(*(char**)((char*)SSXApp + 0x84) + 0x28), self->mAIIndex);
+    func_00270970(*(int*)((char*)SSXApp->Game + 0x28), self->mAIIndex);
     pos = *(t4Vector*)(m + 0x30);
     dir = MatMulV_34D0(m, D_004FF140);
     func_00119368(self->mMetrix, 1);
@@ -4481,7 +4470,7 @@ extern "C" void func_001234D0(cRider* self, char* m)
     func_00111890(self->mRiderHandler);
     func_002F1A00(self->mAttachedEmitterFX);
     if ((unsigned int)self->mViewIndex < 2) {
-        char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + (self->mViewIndex << 2) + 4) + 0xA8);
+        char* obj = *(char**)(*(char**)(*(char**)((char*)SSXApp->Game + 0x84) + (self->mViewIndex << 2) + 4) + 0xA8);
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0x14);
         vt[4].fn(obj + vt[4].delta);
     }
@@ -5034,7 +5023,7 @@ extern "C" sV_3F38 func_00123F38(cRider* self)
         }
         break;
     case 3:
-        switch (*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x78) + 0x1BC)) {
+        switch (*(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC)) {
         case 17:
         case 18:
         case 19:
@@ -5094,7 +5083,7 @@ extern "C" sV_3F38 func_00123F38(cRider* self)
     sHit_3F38 hit;
     sRay_3F38 ray;
     func_0032E100_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
-    if (func_00336850(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), &ray, &hit, 0) >= 0.0f)
+    if (func_00336850(*(void**)((char*)SSXApp->Game + 0x20), &ray, &hit, 0) >= 0.0f)
         pos = hit.pos;
     AddTo_3F38(pos, Scale_3F38(D_004FF160_3F38, lift));
     return pos;
@@ -5731,17 +5720,16 @@ extern "C" void func_00124788_typed(cRider* self, sAnimEvent_124788* pFrameInfo,
 //100%
 INCLUDE_ASM("ai/rider", func_00125038);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* p);
 
 extern "C" void func_00125038(cRider* self)
 {
-    void* w = *(void**)((char*)SSXApp + 0x84);
+    void* w = SSXApp->Game;
     if (*(void**)((char*)w + 0x84) != 0 && self->mViewIndex >= 0)
     {
         if (*(int*)((char*)func_00230698(w, self->mViewIndex) + 0x78) == 1)
-            func_002E4578(func_00230698(*(void**)((char*)SSXApp + 0x84), self->mViewIndex));
+            func_002E4578(func_00230698(SSXApp->Game, self->mViewIndex));
     }
 }
 #endif
@@ -5780,7 +5768,6 @@ extern "C" void func_001250A8(cRider* self, sRiderVec4_001250A8* v)
 //100%
 INCLUDE_ASM("ai/rider", func_00125108);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern char* D_004A2EEC;
 extern "C" float func_001193E0(void* self);
 extern "C" void func_00162258(void* self);
@@ -5792,7 +5779,7 @@ struct sVEntry125108 { short delta; short index; int (*fn)(void*); };
 
 static inline void* getC0_125108()
 {
-    return *(void**)((char*)SSXApp + 0xC0);
+    return SSXApp->GameModeMan;
 }
 
 extern "C" void func_00125108(cRider* self)
@@ -5806,7 +5793,7 @@ extern "C" void func_00125108(cRider* self)
             *(int*)(g + 0xA4) = 1;
     }
     func_001193E0(self->mMetrix);
-    self->mFinishTick = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0xC) + self->mPenaltyTicks;
+    self->mFinishTick = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0xC) + self->mPenaltyTicks;
     if (self->mFinishTime < 0.0f) self->mFinishTime = 0.0f;
     char* obj = (char*)&self->mVtbl;
     sVEntry125108* vt = *(sVEntry125108**)obj;
@@ -5814,7 +5801,7 @@ extern "C" void func_00125108(cRider* self)
     unsigned int k = *(unsigned int*)&self->mViewIndex;
     if (k < 2)
     {
-        char* tbl = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
+        char* tbl = *(char**)((char*)SSXApp->Game + 0x84);
         func_00162258(*(void**)(*(char**)(tbl + (k << 2) + 4) + 0xA8));
     }
     func_00286EA0(func_0028B180(), self);
@@ -5837,7 +5824,6 @@ extern "C" void func_00125108(cRider* self);
 extern "C" void* func_0028B180();
 extern "C" void func_002A3C00(void* a, void* self, int n);
 extern "C" unsigned int func_004139F8(float f);
-extern void* SSXApp;
 extern signed char D_00535C10[];
 extern int D_005308D0[];
 
@@ -5865,7 +5851,7 @@ extern "C" int func_00125228(cRider* self)
                     goto end;
                 }
             }
-            if (self->mDidNotFinish == 1 && *(int*)(*(char**)((char*)SSXApp + 0x84) + 0x214) == 4)
+            if (self->mDidNotFinish == 1 && *(int*)((char*)SSXApp->Game + 0x214) == 4)
                 func_00125108(self);
         }
     }
@@ -6240,7 +6226,6 @@ extern const sVt9_125C70 D_00458360;
 extern const sVt22_125C70 D_004583A8;
 extern char D_00459B90[];
 extern char D_00458338[];
-extern void* SSXApp;
 extern "C" void cRider_cRider(void* self);
 extern "C" void cRiderHandler_cRiderHandler(void* self, int inChrg);
 extern "C" void* cReplay_addCache(void* p);
@@ -6313,7 +6298,7 @@ extern "C" void* cPlayer_cPlayer(char* self, int inChrg)
     *(int*)(self + 0xDFC) = 0;
     *(int*)(self + 0xE00) = 0;
     *(int*)(*(char**)(self + 0x18) + 0x874) = 1;
-    *(void**)(self + 0xDF8) = cReplay_addCache(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28));
+    *(void**)(self + 0xDF8) = cReplay_addCache(*(void**)((char*)SSXApp->Game + 0x28));
     return self;
 }
 #endif
@@ -6326,7 +6311,7 @@ INCLUDE_ASM("ai/rider", func_00125EB8);
 
 cRider_125EB8::~cRider_125EB8()
 {
-    func_002700D8(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28), mDF8);
+    func_002700D8(*(void**)((char*)SSXApp->Game + 0x28), mDF8);
 }
 
 // PORT: the compiler names this dtor _$_13cRider_125EB8; expose it under the address-derived name.
@@ -6508,7 +6493,7 @@ extern "C" void func_001278E8(void* self)
         sVEntry001278E8* vt = *(sVEntry001278E8**)sub;
         if (func_001474E8(iface, vt[7].fn(sub + vt[7].delta)) != 0)
         {
-            flag = !riderInRange_1278E8(**(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28));
+            flag = !riderInRange_1278E8(**(int**)((char*)SSXApp->Game + 0x28));
         }
         func_00125B18(s + 0xDFC, *(int*)(s + 0xDF4), flag);
     }

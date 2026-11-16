@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", cOVStateTrophy_onCreateScreen);
@@ -134,7 +135,6 @@ int GetHashValue32(char* str);
 extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
 extern "C" int func_00398380(void* bank, int name);
 extern "C" int func_003983F0(void* bank, int hash);
-extern void* SSXApp;
 extern int D_004A2764;
 extern int D_004A2768;
 extern char D_004A21F0[];
@@ -149,7 +149,7 @@ extern sTex_20EB50 D_004C8C58[];
 extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
 {
     if (D_004A2768 == 0) {
-        char* res = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48);
+        char* res = *(char**)((char*)SSXApp->Game + 0x48);
         int i;
         for (i = 0; i < 11; i++) {
             D_004C8C58[i].handle = func_00398380(res + 0x58, D_004C8C58[i].name);
@@ -220,13 +220,12 @@ struct sPad16;
 extern sPad16 D_004C8BC8;
 extern char* D_004A2750;
 extern int D_004A2760;
-extern void* SSXApp;
 extern "C" void func_00210618(int i);
 
 extern "C" void func_0020ED20(void)
 {
     if (D_004A2750 != 0) {
-        char* race = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+        char* race = *(char**)((char*)SSXApp->Game + 0xC);
         int i;
         for (i = 0; i < *(int*)(race + 0x78); i++) {
             func_00210618(i);
@@ -439,7 +438,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     if (course == 0)
         return;
     int me = ((cBeing_EDA0*)(rider + 0x6C0))->getAIIndex();
-    sRace_EDA0* race = *(sRace_EDA0**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+    sRace_EDA0* race = *(sRace_EDA0**)((char*)SSXApp->Game + 0xC);
     float myDist = D_004C8BC8_EDA0[me].dist;
     float myPos = D_004C8BC8_EDA0[me].pos;
     int n = race->count;
@@ -712,7 +711,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     if (*(int*)(course + 8) != 0) {
         int show = 1;
         if ((D_005308D0[0] >> 9) & 1) {
-            if (*(int*)(*(char**)((char*)SSXApp + 0xC0) + 0x88) != 0)
+            if (*(int*)((char*)SSXApp->GameModeMan + 0x88) != 0)
                 show = 0;
         }
         for (int i = 0; i < *(int*)(course + 8); i++) {
@@ -944,7 +943,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     if (course == 0)
         return;
     int me = ((cBeing_FB40*)(rider + 0x6C0))->getAIIndex();
-    sRace_FB40* race = *(sRace_FB40**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+    sRace_FB40* race = *(sRace_FB40**)((char*)SSXApp->Game + 0xC);
     float myDist = D_004C8BC8_FB40[me].dist;
     float myPos = D_004C8BC8_FB40[me].pos;
     int n = race->count;
@@ -1128,7 +1127,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     if (*(int*)(course + 8) != 0) {
         int show = 1;
         if ((D_005308D0[0] >> 9) & 1) {
-            if (*(int*)(*(char**)((char*)SSXApp + 0xC0) + 0x88) != 0)
+            if (*(int*)((char*)SSXApp->GameModeMan + 0x88) != 0)
                 show = 0;
         }
         for (int i = 0; i < *(int*)(course + 8); i++) {
@@ -1282,7 +1281,6 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* D_004A2750;
 extern char* D_004A2754;
-extern void* SSXApp;
 float func_00113128(void* rider);
 extern "C" float func_00210820(int i);
 
@@ -1308,7 +1306,7 @@ extern "C" void func_00210618(int i)
     sTrophySeg_210618* segs = (sTrophySeg_210618*)D_004A2754;
     if (course == 0)
         return;
-    char* race = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+    char* race = *(char**)((char*)SSXApp->Game + 0xC);
     if (i >= *(int*)(race + 0x78))
         return;
     float d = *(float*)(course + 0x10) - func_00113128(*(void**)(race + (i << 2) + 0x28));
@@ -1377,7 +1375,6 @@ struct sSlot_210820 {
 };
 extern sSlot_210820 D_slots210820[6] __asm__("D_004C8BC8");
 extern char* D_004A2754;
-extern void* SSXApp;
 
 static inline float subx_210820(sZone_210820* z, sQuad_210820& p)
 {
@@ -1400,7 +1397,7 @@ static inline float sy_210820(sZone_210820* z)
 extern "C" float func_00210820(int idx)
 {
     sZone_210820* zones = (sZone_210820*)D_004A2754;
-    char* world = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC);
+    char* world = *(char**)((char*)SSXApp->Game + 0xC);
     char* rider = *(char**)(world + (idx << 2) + 0x28);
     sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->v05();
     float dy = suby_210820(&zones[D_slots210820[idx].zone], pos);
@@ -1479,7 +1476,6 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void func_003A1310(void* self, int a1);
-extern void* SSXApp;
 extern char D_00471CE8[];
 extern char D_00471D00[];
 extern char D_00471D10[];
@@ -1502,7 +1498,7 @@ extern "C" void func_00210940(void* self)
     if (t != 0)
     {
         t->setVisible(1);
-        cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+        cBE_getInterface_Fv(SSXApp->BE, 7);
         cUIText_setAsciiString((cUIText*)t, D_00534FC8);
     }
     char* a = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471D10));
@@ -1565,7 +1561,6 @@ extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_003A19F8(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-extern void* SSXApp;
 extern char D_0046E808[];
 extern char D_00534FB8[];
 extern char D_00534FC8[];
@@ -1586,7 +1581,7 @@ extern "C" void func_00210BD8(void* self, char* name, int a)
     unsigned short c8 = *(unsigned short*)(obj + 0xC8);
     unsigned short c4 = *(unsigned short*)(obj + 0xC4);
     unsigned short c6 = *(unsigned short*)(obj + 0xC6);
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     if (a != 0) {
         sBXString_00210BD8 s;
         cBXString_cBXString2(&s, D_00534FB8);

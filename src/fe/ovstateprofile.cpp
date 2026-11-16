@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
@@ -52,7 +53,6 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00211380(void* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* SSXApp;
 extern char D_00471D68[];
 
 struct cSelf_11270 {
@@ -384,7 +384,6 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsi
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern void* SSXApp;
 extern char D_004700F0[];
 extern char D_00471D68[];
 extern char D_00471D78[];
@@ -577,14 +576,13 @@ extern "C" void func_00211A08(void* self, int a1, bool on)
 INCLUDE_ASM("fe/ovstateprofile", func_00211AA8);
 #ifdef SKIP_ASM
 extern "C" void cGame_exit(void* game, int a);
-extern void* SSXApp;
 extern "C" void func_0039F718(void* self);
 
 extern "C" void func_00211AA8(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         if (*(int*)((char*)self + 0x278) == 0x18) {
-            cGame_exit(*(void**)((char*)SSXApp + 0x84), 0);
+            cGame_exit(SSXApp->Game, 0);
         } else {
             func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
         }
@@ -666,7 +664,6 @@ public:
     virtual int v54(void*);
 };
 
-extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 
 extern "C" int func_00211B38(void* self, int a1, unsigned int key)
@@ -709,7 +706,6 @@ extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* SSXApp;
 extern char D_00471DC0[];
 extern char D_00471DD8[];
 extern char D_00471DE8[];
@@ -769,7 +765,7 @@ struct sMgrK211BC8 {
 
 static inline void* GetText_K211BC8(char* key)
 {
-    char* db = *(char**)((char*)SSXApp + 0x8C);
+    char* db = (char*)SSXApp->FELocale;
     sVEntryK211BC8* vt = *(sVEntryK211BC8**)(db + 4);
     return vt[4].fn(db + vt[4].delta, GetHashValue32(key));
 }
@@ -936,7 +932,6 @@ extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212208);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void func_001D8DE0(void* self);
@@ -1025,7 +1020,6 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int func_0023C898(void* mp);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
@@ -1096,7 +1090,6 @@ extern "C" void func_002124C8(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212508);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern int D_004A11B8;
 extern int D_00535C08[];
 extern char D_00471E70[];
@@ -1124,7 +1117,7 @@ extern "C" void func_00212508(void* self)
     func_001D58B8(self);
     int s = *(int*)((char*)self + 0x22C);
     if (s == 1) {
-        cGame_exit(*(void**)((char*)SSXApp + 0x84), 0);
+        cGame_exit(SSXApp->Game, 0);
     } else if (s == 6) {
         void* m = func_00194738(cMemMan_alloc(0x4C, D_00471E70, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, m);

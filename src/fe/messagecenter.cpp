@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetCreate);
@@ -13,7 +14,6 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 // getDollarString formats a money amount; the unit declares its parameter as void*.
 extern "C" const char* getDollarString_amount(int amount) __asm__("getDollarString");
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char* SSXApp;
 extern char D_00460470[];
 extern char D_00460488[];
 extern char D_00460588[];
@@ -119,7 +119,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
     } else if (hash == GetHashValue32(D_004605B8)) {
         show_6F98(w, 0);
     } else if (hash == GetHashValue32(D_004605C8)) {
-        char* db = *(char**)(SSXApp + 0x8C);
+        char* db = (char*)SSXApp->FELocale;
         sVEs_6F98* vt = *(sVEs_6F98**)(db + 4);
         unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
         int len = USTR_length(fmt) + 5;
@@ -228,7 +228,6 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* engine, int a, int b);
 extern "C" void cUIStateStack_push(void* list, void* item);
 int func_00198AE8(void* self, int idx) __asm__("func_00198AE8__FPv");
-extern char* SSXApp;
 extern const char D_00460650[];
 
 struct sReqLine_7500 {
@@ -321,7 +320,7 @@ extern "C" void func_00197500(void* p, void* item, unsigned int msg)
             char* obj = pl + 0x118;
             vt[3].fn(obj + vt[3].delta, 0xA);
         }
-        if (*(int*)(SSXApp + 0x84) != 0) {
+        if ((int)SSXApp->Game != 0) {
             func_0039F190(self->engine + 0x18, 1);
         } else {
             void* r = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_00460650, 0, 0), self->engine, self->player, self->f16C);
@@ -348,7 +347,6 @@ INCLUDE_ASM("fe/messagecenter", func_001977D0);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char* SSXApp;
 
 extern "C" void* func_0028B180();
 
@@ -391,7 +389,7 @@ extern "C" int func_001977D0(void* p, void* item, unsigned int msg, int k)
         n = self->top + k;
         if (n < self->count) {
             idx = self->list[n];
-            if (*(int*)(SSXApp + 0x84) != 0) {
+            if ((int)SSXApp->Game != 0) {
                 if (!isSet_7500(self->sel, idx)) {
                 ret10:
                     return 0x10;
@@ -682,7 +680,6 @@ extern "C" void* func_002B4120(void* self, int i);
 extern char D_00460470[];
 extern char D_00460668[];
 extern char D_00460678[];
-extern char* SSXApp;
 
 struct sVtEntry_197E70 {
     short delta;
@@ -722,7 +719,7 @@ extern "C" void func_00197E70(void* vself)
         char* artist = (char*)func_002B4120((char*)func_0028B180() + 0x118, cur);
         if (strlen(name) != 0) {
             self->title->show(1);
-            char* db = *(char**)(SSXApp + 0x8C);
+            char* db = (char*)SSXApp->FELocale;
             sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
             unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460668));
             int len = USTR_length(fmt) + strlen(name) + 1;
@@ -738,7 +735,7 @@ extern "C" void func_00197E70(void* vself)
         }
         if (strlen(artist) != 0) {
             self->artist->show(1);
-            char* db = *(char**)(SSXApp + 0x8C);
+            char* db = (char*)SSXApp->FELocale;
             sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
             unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460678));
             int len = USTR_length(fmt) + strlen(artist) + 1;
@@ -770,7 +767,6 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004605D8[];
 extern char D_00460688[];
-extern char* SSXApp;
 
 struct sVtEntry_00198118 {
     short delta;
@@ -789,7 +785,7 @@ struct sMsgCenter_00198118 {
 extern "C" void cFEStateRequestLine_updatePlayListCounter(void* p)
 {
     sMsgCenter_00198118* self = (sMsgCenter_00198118*)p;
-    char* db = *(char**)(SSXApp + 0x8C);
+    char* db = (char*)SSXApp->FELocale;
     sVtEntry_00198118* vt = *(sVtEntry_00198118**)(db + 4);
     unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
     unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, D_00460688, 0x100, 0);
@@ -890,7 +886,6 @@ extern char D_004A1390[];
 extern char D_00460738[];
 extern char D_00460748[];
 extern char D_00460758[];
-extern char* SSXApp;
 
 class cUIObj_UBT {
 public:
@@ -969,7 +964,7 @@ extern "C" void cFEStateRequestLine_updateButtonsText(void* p, int idx)
             self->back->setVisible(1);
         }
     }
-    if (*(int*)(SSXApp + 0x84) != 0 && !isSet_UBT(self->sel, idx)) {
+    if ((int)SSXApp->Game != 0 && !isSet_UBT(self->sel, idx)) {
         self->btnA->setVisible(0);
         self->btnB->setVisible(0);
     } else {
@@ -1063,7 +1058,6 @@ extern char D_00460770[];
 extern char D_00460780[];
 extern char D_00460688[];
 extern char D_004A1408[];
-extern char* SSXApp;
 
 struct sVtEntry_001986D0 {
     short delta;
@@ -1101,7 +1095,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
 {
     sReqLine_1986D0* self = (sReqLine_1986D0*)vself;
     if (self->title != 0) {
-        char* db = *(char**)(SSXApp + 0x8C);
+        char* db = (char*)SSXApp->FELocale;
         sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
         unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_00460770));
         char* name = (char*)func_00198AB8(self, idx);

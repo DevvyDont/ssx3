@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onCreateScreen);
@@ -318,7 +319,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* func_00156A90(void* self, int a1, int a2);
 extern "C" char* func_00156AE0(void* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
-extern void* SSXApp;
 
 struct sTrophyRoom_4918 {
     char pad[0x50];
@@ -333,7 +333,7 @@ struct sTrophyRoom_4918 {
 extern "C" void func_001D4918(sTrophyRoom_4918* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-    void* snd = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+    void* snd = (char*)SSXApp->RealFE + 0x1A70;
     self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(func_00156A90(pi, self->f54, self->f58) + 4), 0xA, 1, 0);
     self->count = 1;
     for (int i = 0; i < 4; i++) {
@@ -354,7 +354,6 @@ extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_001D47A0(void* self, int index);
 extern void* D_004A289C;
-extern void* SSXApp;
 extern char D_004A1FF8[];
 
 struct cGame_4A20 {
@@ -421,7 +420,7 @@ struct sSelf_4A20 {
 extern "C" void func_001D4A20(void* p)
 {
     sSelf_4A20* self = (sSelf_4A20*)p;
-    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
         if (self->tex[i] >= 0 && func_0019E238(mgr, self->bank, self->tex[i]) != 0) {
@@ -494,7 +493,6 @@ struct cGame001D4B20 {
 };
 
 extern void* D_004A289C;
-extern void* SSXApp;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sSelf001D4B20 {
     char pad[0x50];
@@ -506,7 +504,7 @@ struct sSelf001D4B20 {
 
 extern "C" void func_001D4B20(sSelf001D4B20* self)
 {
-    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
         if (self->snd[i] >= 0) {
@@ -760,7 +758,6 @@ extern "C" void* func_001BFBB8(void* mem, int a1);
 extern "C" void func_0025C610(void* mgr);
 extern "C" void* func_0025CD50(void*, int);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_0045FF28[];
 extern char D_00534B30[];
@@ -778,7 +775,7 @@ extern "C" int func_001D5138(void* self, int msg)
         func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
         break;
     case 0x111: {
-        cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+        cBE_getInterface_Fv(SSXApp->BE, 7);
         char* g = D_00534B30;
         func_0025FD50(D_004A3028, *(int*)(g + 4), *(int*)(g + 8) == 0, *(int*)(g + 8) != 0, g + 0x330, g + 0x3DC);
         break;
@@ -937,7 +934,6 @@ extern "C" void func_00241D40(void* app, int a, char* buf, int n);
 extern "C" void func_00241AA0(char* buf, int n);
 extern "C" void func_002C2540(char* buf, char* s);
 extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
-extern void* SSXApp;
 extern void* D_004A2028;
 extern char D_004A14C8[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
@@ -1100,7 +1096,6 @@ extern "C" void func_001D5488(void* self_, int mode)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D58B8);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1163,7 +1158,6 @@ extern "C" void func_00241000(void* app, char* name, int a, int b);
 extern "C" void func_00241E18(void* app, char* buf, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
-extern void* SSXApp;
 extern void* D_004A2028;
 extern char D_004677A8[];
 extern char D_0045E2A0[];
@@ -1187,7 +1181,7 @@ extern "C" void func_001D59A0(void)
     if (mode == 2) {
         func_002412A0(app);
     } else if (mode == 1) {
-        void* replay = *(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
+        void* replay = *(void**)((char*)SSXApp->Game + 0x28);
         *(int*)((char*)D_004A2028 + 0x1C8) = mode;
         func_00270E68(replay);
         int size = func_0014E048(cBE_getBE());
@@ -1227,7 +1221,6 @@ extern "C" void func_001D59A0(void)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5C28);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern int D_004A19B8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1294,7 +1287,6 @@ extern "C" int func_001D5C28(int size)
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
 #ifdef SKIP_ASM
 extern void* D_004A2028;
-extern void* SSXApp;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int func_002710A8(void* self, int* a, int* b);
 extern "C" void func_00241138(void* self, int a, int b);
@@ -1310,7 +1302,7 @@ extern "C" int func_001D5D78(int key)
     int out;
     if (((sFEMemCard_5D78*)D_004A2028)->mode == 1) {
         void* r = cSSXApp_getMCManager(SSXApp);
-        if (func_002710A8(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x28), &out, &key) != 0) {
+        if (func_002710A8(*(void**)((char*)SSXApp->Game + 0x28), &out, &key) != 0) {
             func_00241138(r, out, key);
             return 1;
         }
@@ -1323,7 +1315,6 @@ extern "C" int func_001D5D78(int key)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5DF0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");

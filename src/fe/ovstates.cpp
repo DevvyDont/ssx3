@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onCreateScreen);
@@ -69,7 +70,6 @@ extern "C" int cFEStateTitle_onGainTransition(void* self)
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E510(void* self);
-extern void* SSXApp;
 extern int D_004A19CC;
 
 struct sItem_1948A8 {
@@ -238,7 +238,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
     func_0025B688();
     func_00256C50();
     func_00255898();
-    void* iface = cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     D_00534B30[0] = 0;
     sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
     vt0[1].fn((char*)iface + vt0[1].delta);

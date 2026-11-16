@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
@@ -90,7 +91,6 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
 //100%
 INCLUDE_ASM("main/gamerender", func_0022E550);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern char* D_004A289C;
 
 class cDisp22E550 {
@@ -142,7 +142,7 @@ struct cGameViewMan22E550 {
 
 extern "C" void func_0022E550(cGameViewMan22E550* self)
 {
-    char* game = *(char**)((char*)SSXApp + 0x84);
+    char* game = (char*)SSXApp->Game;
     int mode = *(int*)(game + 0x214);
     if (self->mode == mode) {
         return;
@@ -189,10 +189,10 @@ extern "C" void func_0022E550(cGameViewMan22E550* self)
     }
     if (self->views == 1) {
         int idx = self->cams[1]->index;
-        (**(sSlots22E550***)(*(char**)((char*)SSXApp + 0x84) + 0x10))->e[idx].active = 0;
+        (**(sSlots22E550***)((char*)SSXApp->Game + 0x10))->e[idx].active = 0;
     } else {
-        (**(sSlots22E550***)(*(char**)((char*)SSXApp + 0x84) + 0x10))->e[0].active = 0;
-        (**(sSlots22E550***)(*(char**)((char*)SSXApp + 0x84) + 0x10))->e[1].active = 0;
+        (**(sSlots22E550***)((char*)SSXApp->Game + 0x10))->e[0].active = 0;
+        (**(sSlots22E550***)((char*)SSXApp->Game + 0x10))->e[1].active = 0;
     }
 }
 #endif

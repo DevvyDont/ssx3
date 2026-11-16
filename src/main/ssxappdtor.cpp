@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", cSSXApp__cSSXApp);
@@ -2197,11 +2198,10 @@ extern "C" void func_00245140(void) {
 INCLUDE_ASM("main/ssxappdtor", func_00245168);
 #ifdef SKIP_ASM
 extern "C" void func_00231D18(void *);
-extern char *SSXApp;
 
 extern "C" int func_00245168(void *self) {
     func_00231D18(self);
-    if (*(int *)(SSXApp + 4) != 0) {
+    if (*(int *)((char*)SSXApp + 4) != 0) {
         *(int *)((char *)self + 8) = 1;
         return 0;
     }

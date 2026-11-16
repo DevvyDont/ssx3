@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onCreateScreen);
@@ -14,7 +15,6 @@ extern "C" void cOVState_MAP_setupMapPic(void* self);
 extern "C" void cOVState_MAP_setupPopup(void* self);
 extern "C" void cOVState_MAP_setupPlayerIndicator(void* self);
 extern "C" void cOVState_MAP_setupLocalSessionList(void* self);
-extern void* SSXApp;
 extern char D_004717F8[];
 extern char D_004A25A8[];
 
@@ -64,7 +64,7 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen((sSelf0020A380*)self);
-    self->fC4 = func_001A3BF0(*(void**)((char*)SSXApp + 0x11C));
+    self->fC4 = func_001A3BF0(SSXApp->mFEAsyncManager);
     self->fDC = 0;
     self->fBC = 0;
     self->scale = 1.0f;
@@ -158,7 +158,6 @@ extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id)
 extern "C" void sprintf2(void* buf, const char* fmt, void* str, int n);
 extern "C" void cUIText_setUnicodeString(void* t, void* str);
 extern "C" int func_0026B680(void* tbl, sV3_87F0* pos);
-extern void* SSXApp;
 extern char D_00471808[];
 extern char D_00471818[];
 extern char D_00471828[];
@@ -185,7 +184,7 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
             t = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(buf));
             if (i < n) {
                 ((sMapF_87F0*)self)->flags[i] = 1;
-                sStrMgr_87F0* g = *(sStrMgr_87F0**)((char*)SSXApp + 0x8C);
+                sStrMgr_87F0* g = (sStrMgr_87F0*)SSXApp->FELocale;
                 sVE_87F0* vt = g->vt;
                 void* str = ((VGetFn_87F0)vt[4].fn)((char*)g + vt[4].delta, GetHashValue32(D_00471818));
                 if (str == 0) {
@@ -210,7 +209,7 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
             }
         }
         void* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_00471850));
-        char* game = *(char**)((char*)SSXApp + 0x84);
+        char* game = (char*)SSXApp->Game;
         if (game != 0) {
             char* rider = *(char**)(*(char**)(game + 0xC) + 0x28);
             sV4_87F0 p = *((cRiderSub_87F0*)(rider + 0x6C0))->v05();
@@ -275,14 +274,13 @@ extern "C" void func_00208B00(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_00208B78);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void func_0020A088(void* self);
 extern "C" void cOVState_onDestroyScreen(void* self);
 
 extern "C" void func_00208B78(void* self)
 {
-    cFEAsyncManager_UnloadFEAsyncFile(*(void**)((char*)SSXApp + 0x11C), *(int*)((char*)self + 0xC4));
+    cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, *(int*)((char*)self + 0xC4));
     func_0020A088(self);
     cOVState_onDestroyScreen(self);
 }
@@ -374,7 +372,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* a1, int a2)
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
             *(int*)((char*)iface + 0x10) = *(int*)(self + 0xD8);
             func_0028FAE0(func_0028B180());
-            void* m = *(void**)((char*)SSXApp + 0x84);
+            void* m = SSXApp->Game;
             D_004A26FC = 3;
             D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
             func_00231250(m, 0xF, 0, 0);
@@ -442,7 +440,6 @@ extern "C" int func_00208EF8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupMapPic);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -453,7 +450,7 @@ extern "C" void cFEAsyncManager_LoadLocationPic(void* mgr, int a1, int file, int
 extern "C" void cOVState_MAP_setupMapPic(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* mgr = *(void**)((char*)SSXApp + 0x11C);
+    void* mgr = SSXApp->mFEAsyncManager;
     cFEAsyncManager_UnloadFEAsyncFile(mgr, *(int*)((char*)self + 0xC4));
     cFEAsyncManager_LoadLocationPic(mgr, *cBENewRaceInterface_getLocation(iface), *(int*)((char*)self + 0xC4), 1);
     *(int*)((char*)self + 0xC8) = 0;
@@ -498,7 +495,6 @@ extern "C" void sprintf2(void* buf, const char* fmt, void* str, int n);
 extern "C" void cUIText_setUnicodeString(void* t, void* str);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern void* SSXApp;
 extern char D_00470A20[];
 extern char D_00471850[];
 extern char D_00470A60[];
@@ -540,7 +536,7 @@ extern "C" void cOVState_MAP_setupPopup(void* selfp)
             ((VIntFn_9010)menu->vt[7].fn)((char*)menu + menu->vt[7].delta, 1);
             ((VIntFn_9010)menu->vt[9].fn)((char*)menu + menu->vt[9].delta, 1);
         }
-        sStrMgr_9010* g = *(sStrMgr_9010**)((char*)SSXApp + 0x8C);
+        sStrMgr_9010* g = (sStrMgr_9010*)SSXApp->FELocale;
         sVE_9010* vt = g->vt;
         void* str = ((VGetFn_9010)vt[4].fn)((char*)g + vt[4].delta, GetHashValue32(D_00471818));
         if (str != 0) {
@@ -686,7 +682,6 @@ struct sMap_9370 {
 struct cFEAsyncManager;
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 extern "C" void cOVState_onUpdate(void* self);
-extern void* SSXApp;
 
 extern "C" void func_00209370(sMap_9370* self)
 {
@@ -707,7 +702,7 @@ extern "C" void func_00209370(sMap_9370* self)
         self->fade = 0.0f;
         self->img->SetVisible(0);
     }
-    sAsyncFile_9370* am = *(sAsyncFile_9370**)((char*)SSXApp + 0x11C);
+    sAsyncFile_9370* am = (sAsyncFile_9370*)SSXApp->mFEAsyncManager;
     if (cFEAsyncManager_GetFileStatus((cFEAsyncManager*)am, self->file) == 3 && self->loaded == 0) {
         cFEObj_9370* o = self->img;
         if (o != 0) {
@@ -869,7 +864,6 @@ extern "C" void func_00154678(sBounds_96A8* out, void* iface, int id);
 extern "C" void* func_0039FB30(void* self, void* parent, int a2);
 extern "C" void func_0021CCC8(void* p);
 extern "C" void func_00399730(void* obj, int hash);
-extern void* SSXApp;
 extern char D_004718F0[];
 extern char D_00471908[];
 extern void* D_00494AA8[];
@@ -888,7 +882,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
-    char* rider = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x28);
+    char* rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
     sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
     sBounds_96A8 b;
     func_00154678(&b, ifMap, *cBENewRaceInterface_getLocation(ifGame));
@@ -1206,7 +1200,6 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A20D0[];
-extern void* SSXApp;
 extern "C" void func_002EA820(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 struct sVEntry0020A380 {
@@ -1225,7 +1218,7 @@ struct sSelf0020A380 {
 extern "C" void cOVState_onCreateScreen(sSelf0020A380* self)
 {
     self->pdaOn = 0;
-    char* game = *(char**)((char*)SSXApp + 0x84);
+    char* game = (char*)SSXApp->Game;
     if (game != 0) {
         char* p = *(char**)(game + 0x64);
         int mode = *(int*)(p + 0x10);
@@ -1249,7 +1242,6 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onDestroyScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A20D0[];
-extern void* SSXApp;
 extern "C" void func_002EA860(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void cOVStateManager_removePDATemplate();
@@ -1263,7 +1255,7 @@ struct sVEntry0020A430 {
 extern "C" void cOVState_onDestroyScreen(void* self)
 {
     if (*(int*)((char*)self + 0x50) != 0) {
-        char* game = *(char**)((char*)SSXApp + 0x84);
+        char* game = (char*)SSXApp->Game;
         if (game != 0) {
             func_002EA860(*(void**)(game + 0x64));
             *(int*)((char*)self + 0x50) = 0;
@@ -1293,7 +1285,6 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_003A19F8(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern "C" int func_00258160(int a, char* name, int len);
-extern void* SSXApp;
 extern int* D_004A2EEC_A4E0 __asm__("D_004A2EEC");
 extern char D_00534B30[];
 extern char D_0046E660[];
@@ -1323,7 +1314,7 @@ static inline void show_A4E0(char* o, int on)
 extern "C" int func_0020A4E0(char* self)
 {
     int ret = 0;
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     char* net = D_00534B30;
     if (*(int*)net != 0 && *(void**)(self + 0x40) != 0) {
         int* sess = D_004A2EEC_A4E0;
@@ -1366,11 +1357,10 @@ struct sVEntry0020A6A8 {
     void (*fn)(void*, int, int);
 };
 
-extern void* SSXApp;
 
 extern "C" void cOVState_onWidgetEvent(void* self, int a1, int a2)
 {
-    char* w = *(char**)((char*)SSXApp + 0x84);
+    char* w = (char*)SSXApp->Game;
     if (w != 0) {
         char* o = *(char**)(w + 0x200);
         if (o != 0) {

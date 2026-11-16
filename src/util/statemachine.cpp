@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("util/statemachine", cConsoleConfig_setTimeString);
@@ -164,15 +165,14 @@ INCLUDE_ASM("util/statemachine", func_002C73C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002C7328_v(void*, int*, int*, int*, int) __asm__("func_002C7328");
 extern "C" void func_002C7260_v(void*, int*, int*, int*, int) __asm__("func_002C7260");
-extern char* SSXApp;
 
 extern "C" void func_002C73C0(void* self) {
     int rem;
     int now;
     int ticks;
 
-    now = *(int*)(SSXApp + 0x18);
-    ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)(SSXApp + 0x10);
+    now = *(int*)((char*)SSXApp + 0x18);
+    ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)((char*)SSXApp + 0x10);
     if (ticks != 0) {
         *(int*)((char*)self + 0x20) = now;
         rem = func_002C7328_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);

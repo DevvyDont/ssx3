@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_gainFocus);
@@ -866,7 +867,6 @@ extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
 extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
 extern "C" void func_00125970(char* self);
 int func_0011FEE8(void* rider);
-extern void* SSXApp;
 extern void* D_004FF120[];
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
@@ -930,7 +930,7 @@ extern "C" void func_00139A20(void* p)
         char* r2 = *(char**)(self + 0x4);
         char* ap = *(char**)(r2 + 0x788);
         int idx = *(int*)(ap + 0x90);
-        char* e = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x44) + idx * 0xB0;
+        char* e = *(char**)((char*)SSXApp->Game + 0x44) + idx * 0xB0;
         int flag = 0;
         short sf = *(short*)(ap + 0x94);
         if (sf != -1) {
@@ -1001,7 +1001,6 @@ struct sInfo_139C88 {
 
 struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, sHit_139C88*, const sVec4HP&); };
 
-extern void* SSXApp;
 extern int D_004A1120;
 extern void* D_004A3DD8;
 extern "C" float func_0013A7B0_9C88(void* self, sHit_139C88* hit) __asm__("func_0013A7B0");
@@ -1215,7 +1214,7 @@ extern "C" void func_00139C88(void* self)
             func_0011FEC8_9C88(RIDER_139C88, 0xD);
         }
         func_00113998_9C88(*(void**)(RIDER_139C88 + 0x788), RIDER_139C88 + 0x110, RIDER_139C88 + 0x1E0);
-        char* surf = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x44) + hit.surface * 0xB0;
+        char* surf = *(char**)((char*)SSXApp->Game + 0x44) + hit.surface * 0xB0;
         int fl;
         if (*(int*)(surf + 0x44) != 0 || (hit.obj54 != 0 && (fl = *(short*)(hit.obj54 + 0xA), (fl & 2) != 0))) {
             cRider_checkForReset(RIDER_139C88, 0, 1);
@@ -2822,7 +2821,6 @@ extern "C" void* func_0013C650(void* self, int inChrg)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_gainFocus);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" int func_001298C8();
 
 struct sHpVec4_13C7A8 {
@@ -2864,7 +2862,7 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 {
     self->m0 = 0;
     char* r = self->mRider;
-    sHpEntry_13C7A8* tbl = *(sHpEntry_13C7A8**)(*(char**)((char*)SSXApp + 0x84) + 0x44);
+    sHpEntry_13C7A8* tbl = *(sHpEntry_13C7A8**)((char*)SSXApp->Game + 0x44);
     sHpEntry_13C7A8* e = &tbl[*(int*)(r + 0x438)];
     float k = *(float*)(*(char**)(r + 0x780) + 0x140);
     self->m4 = k * e->m14;
@@ -3895,7 +3893,7 @@ extern "C" void func_0013D818(sHpCtl_13D818* self)
         vu0ScaleEq_13D818(self->mRider->mVelocity, self->mRider->unk_2E4 / spd);
 
     float dt = self->mRider->mTimeScale * 0.01666666753590107f;
-    sSurf_13D818* e = &(*(sSurf_13D818**)(*(char**)((char*)SSXApp + 0x84) + 0x44))[self->mRider->mSurfaceType];
+    sSurf_13D818* e = &(*(sSurf_13D818**)((char*)SSXApp->Game + 0x44))[self->mRider->mSurfaceType];
     float scale = self->mRider->mAnimModel->unk_140.x;
     self->m4 = approach_13D818(self->m4, scale * e->m14, dt * 100.0f);
     self->m8 = approach_13D818(self->m8, scale * e->m18, dt * 100.0f);
@@ -4162,7 +4160,6 @@ int func_0011FE98(void* rider);
 void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
 extern char* D_004A3500;
 extern int D_004A115C;
-extern void* SSXApp;
 
 struct sInfo_13F178 {
     sVec4HP pos;
@@ -4278,7 +4275,7 @@ extern "C" void func_0013F178(void* self)
     } else {
         char* r = RIDER_13F178;
         int idx = *(int*)(r + 0x438);
-        char* e = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x44) + idx * 0xB0;
+        char* e = *(char**)((char*)SSXApp->Game + 0x44) + idx * 0xB0;
         int fl;
         if (idx == 0x12) {
             sInfo_13F178 info;

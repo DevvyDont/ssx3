@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", checkActiveNode);
@@ -6399,17 +6400,6 @@ struct sGame {
     sCameras* cameras;          // 0x84
 };
 // The game singleton (SSXApp).
-struct sApp {
-    char pad_0x0[0x14];
-    float f14;                  // 0x14
-    char pad_0x18[0x60];
-    void* f78;                  // 0x78
-    char pad_0x7C[0x8];
-    sGame* game;                // 0x84
-    char pad_0x88[0x38];
-    int fC0;                    // 0xC0
-};
-extern sApp* SSXApp;
 extern char* D_004A28A4;
 extern void* D_004A4028;
 // One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
@@ -6521,7 +6511,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     float scale = buf->scale;
     int keyword = buf->keyword;
     if (keyword == 0) {
-        sGame *game = SSXApp->game;
+        sGame *game = (sGame*)SSXApp->Game;
         int np = game->race->numPlayers;
         if (obj) {
             for (int i = 0; i < np; i++) {

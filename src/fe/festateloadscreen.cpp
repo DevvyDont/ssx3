@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_load);
@@ -13,7 +14,6 @@ extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
 extern void* D_004A289C;
-extern void* SSXApp;
 extern int D_004A19C4;
 extern signed char D_00535C11[];
 extern char D_0047B698[];
@@ -88,8 +88,8 @@ extern "C" void cFELoadScreen_load(void* self)
     void* eng = func_00397B08(cMemMan_alloc(0x70, D_0047B698, 0x100, 0));
     *(void**)((char*)self + 0xC) = eng;
     cUIEngine_loadFile(eng, D_0047BFB0);
-    (*(sEngine_233438**)((char*)self + 0xC))->f8 = *(int*)((char*)SSXApp + 0x88);
-    (*(sEngine_233438**)((char*)self + 0xC))->f10 = *(int*)((char*)SSXApp + 0x8C);
+    (*(sEngine_233438**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
+    (*(sEngine_233438**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
     {
         sObj_233438* o = new (D_0047BFC0, 0x100, 0) sObj_233438;
         o->f4 = 0;
@@ -100,7 +100,7 @@ extern "C" void cFELoadScreen_load(void* self)
         o->f14 = 0;
         (*(sEngine_233438**)((char*)self + 0xC))->fC = o;
     }
-    char* gm = *(char**)((char*)SSXApp + 0xC0);
+    char* gm = (char*)SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
     char* screen;
     if (D_004A19C4 == 0x27) {
@@ -171,7 +171,7 @@ extern "C" void func_00233640(void* self, int type)
     cBigFile_cBigFile1_3640(&bf, D_0047BD78, 0x100);
     if (type == 1) {
         const char* fmt = D_0047BD90;
-        cBE_getInterface_3438(*(void**)((char*)SSXApp + 0x78), 7);
+        cBE_getInterface_3438(SSXApp->BE, 7);
         sLsOpt_3640* opt = D_00534B30_3640;
         if (opt->on != 0) {
             if (opt->alt != 0) {
@@ -520,7 +520,6 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
 #ifdef SKIP_ASM
 extern void* D_004A2C68;
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern void* D_004A2EEC;
 extern "C" void func_0026FA50(void* self);
 extern "C" void func_0039F840(void* list);
@@ -535,7 +534,7 @@ extern "C" void func_00233C50(void* self)
     cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
-    func_001F36C0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 4);
+    func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 4);
     void* p = D_004A2EEC;
     if (p != 0) {
         func_00244880(p);
@@ -562,7 +561,6 @@ extern "C" int func_00279248(void* self, int i);
 extern "C" void func_0027AC60(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern int D_005366A8[];
 // PORT: function-local `static const float` with a dynamic initializer (guard D_004A4F64),
 // spelled with splat's globals; the const object's loads are loop-invariant (RTX_UNCHANGING).
@@ -657,12 +655,12 @@ extern "C" void func_00233CD8(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (*(int*)(s + 0x14) != 0) {
         if (--*(int*)(s + 0x14) == 0) {
-            int n = **(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
+            int n = **(int**)((char*)SSXApp->Game + 0x28);
             int ok = n != 0 && n < 10;
             if (!ok) {
                 func_0020CC60();
                 if (*(int*)(s + 0x10) != 2) {
-                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48) + 0x18, GetHashValue32(D_0047C010));
+                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState(*(char**)((char*)SSXApp->Game + 0x48) + 0x18, GetHashValue32(D_0047C010));
                     if (o != 0) {
                         o->v24(0, 0);
                     }
@@ -710,11 +708,11 @@ extern "C" void func_00233CD8(void* self)
         if (func_002791D8(D_004A28A4, 0) == 1) {
             break;
         }
-        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x48) + 0x18, GetHashValue32(D_0047C010));
+        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState(*(char**)((char*)SSXApp->Game + 0x48) + 0x18, GetHashValue32(D_0047C010));
         if (o != 0) {
             o->v24(1, 0);
         }
-        cBXLoadIndicator_Hide(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 4);
+        cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 4);
         *(int*)(s + 0x10) = 2;
         break;
     }
@@ -738,7 +736,6 @@ struct sLoadScreen00234008 {
     int pad4[3];
     int mode;
 };
-extern void* SSXApp;
 extern void* D_004A28A4;
 void func_00162290_v(void* self) __asm__("func_00162290__FPv");
 extern "C" int func_00278F68(void* self, int i, int a, int b);
@@ -746,10 +743,10 @@ void func_00278DE8(void* self, int val);
 
 extern "C" void func_00234008(sLoadScreen00234008* self)
 {
-    int n = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84) + 0x10);
+    int n = *(int*)(*(char**)((char*)SSXApp->Game + 0x84) + 0x10);
     int i;
     for (i = 0; i < n; i++) {
-        char* list = *(char**)(*(char**)((char*)SSXApp + 0x84) + 0x84);
+        char* list = *(char**)((char*)SSXApp->Game + 0x84);
         char* item = *(char**)(list + (i << 2) + 4);
         func_00162290_v(*(void**)(item + 0xA8));
     }
@@ -840,7 +837,6 @@ extern "C" void func_0027AAF8(void* a, int b);
 extern "C" int func_00278F38(void* self, int i);
 extern void* D_004A2C68;
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern signed char D_00535C10[];
 
 struct sVE_2341D0 {
@@ -868,9 +864,9 @@ extern "C" void cGFEventStartState_gainFocus(void* self, int mode)
     char* race = (char*)cBE_getInterface_41D0(cBE_getBE(), 0);
     char* player = (char*)cBE_getInterface_41D0(cBE_getBE(), 1);
     cAI_setAIState(*(void**)((char*)D_004A2C68 + 0xC), 3);
-    cBXLoadIndicator_Hide(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 0);
+    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 0);
     cBE_setState(0);
-    sGM_2341D0* gm = *(sGM_2341D0**)((char*)SSXApp + 0xC0);
+    sGM_2341D0* gm = (sGM_2341D0*)SSXApp->GameModeMan;
     cReplay_reset(*(void**)((char*)D_004A2C68 + 0x28));
     int n = gm->total - gm->humans;
     int base = *(int*)(*(char**)((char*)D_004A2C68 + 0xC) + 0x7C);
@@ -936,7 +932,6 @@ extern "C" int func_0012ABD0(void* o);
 extern "C" int func_0012ACF8(void* o);
 extern "C" void cAI_cleanupAfterRace(void* o);
 extern "C" void cAI_cleanupActors(void* o);
-extern void* SSXApp;
 extern void* D_004A28A4;
 extern void* D_004A2C68;
 extern signed char D_00535BC8[];
@@ -969,7 +964,7 @@ struct sLoadScreen_43B0 {
 
 static inline void* hud_43B0()
 {
-    return *(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94);
+    return *(void**)((char*)SSXApp->Game + 0x94);
 }
 
 // Load screen update: drives the loading state machine (stream start, track setup, wait for load, finish).
@@ -1087,7 +1082,6 @@ extern "C" void func_00129160(void* p);
 extern "C" void func_00155E58(void* p);
 extern void* D_004A2C68;
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern void* D_004A3DD8;
 
 struct sRace_234750 {
@@ -1152,7 +1146,7 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
     if (r2->flag49 != 0)
         func_00155E58(cBEAggressionInterface_getThis());
     *(int*)((char*)self + 0x14) = 0;
-    char* g = *(char**)((char*)SSXApp + 0x84);
+    char* g = (char*)SSXApp->Game;
     char* x = *(char**)(g + 0x84);
     if (*(int*)(x + 0x10) == 1) {
         sTbl_234750* t = **(sTbl_234750***)(g + 0x10);

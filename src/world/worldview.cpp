@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 struct cWorldViewSectionList {
     char pad_0x00[0x8];
@@ -1495,7 +1496,6 @@ extern "C" void func_003284B8(void* node, int idx, void* item, const void* targe
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void* func_003AD198();
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern char*** D_004A47B8;
 extern char* D_004A5B80;
 
@@ -1664,7 +1664,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         break;
     case 14:
         data = 0;
-        func_0012A490(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC), param);
+        func_0012A490(*(void**)((char*)SSXApp->Game + 0xC), param);
         break;
     case 22:
         cAvalanche_reset();

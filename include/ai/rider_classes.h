@@ -44,7 +44,7 @@ public:
 
 void operator_delete(int* p);
 
-extern void* SSXApp;
+#include "main/ssxapp.h"
 
 extern "C" void func_002700D8(void* self, void* p);
 

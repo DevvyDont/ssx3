@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFGateState_gainFocus);
@@ -21,7 +22,6 @@ extern "C" void func_00234BE8(void* self, int a1);
 int GetHashValue32(char* s);
 extern char* D_004A2C68;
 extern char* D_004A2EEC;
-extern void* SSXApp;
 extern int D_00534B30[];
 extern signed char D_00535C10[];
 extern char D_0047C038[];
@@ -38,7 +38,7 @@ extern "C" void cGFGateState_gainFocus(void* self)
         func_00258968(D_004A2EEC);
     }
     cBE_setState(0);
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     if (D_00534B30[0] != 0) {
         cGame_resetWorld(D_004A2C68);
     }
@@ -68,13 +68,12 @@ extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int func_0022E098(void* world, int id);
 extern "C" int func_00309DD0(void* mgr, int id, int a);
 extern "C" void func_00309E50(void* mgr, int id, int a);
-extern void* SSXApp;
 extern void* D_004A3DD8;
 
 extern "C" void func_00234BE8(void* self, int a1)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* world = *(void**)(*(char**)((char*)SSXApp + 0x84) + 0x78);
+    void* world = *(void**)((char*)SSXApp->Game + 0x78);
     int id = func_0022E098(world, *cBENewRaceInterface_getLocation(iface));
     if (func_00309DD0(D_004A3DD8, id, a1) != 0) {
         func_00309E50(D_004A3DD8, id, a1);
@@ -257,7 +256,6 @@ extern "C" int func_00145D38(void* self, int index, int bit);
 extern "C" void func_0027AAF8(void* a, int b);
 extern "C" void* func_0028B180(void);
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern char* D_004A2C68;
 extern signed char D_00535C11[];
 
@@ -287,7 +285,7 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
     func_0012AB20(*(void**)(D_004A2C68 + 0xC));
     func_0012AC48(*(void**)(D_004A2C68 + 0xC));
     if (m == 0) {
-        int t = *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x78) + 0x1BC);
+        int t = *(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC);
         if (t >= 14 && t <= 16) {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             char* sub = *(char**)(*(char**)(*(char**)(D_004A2C68 + 0xC) + 0x40) + 0x18) + 0x6C0;
@@ -627,7 +625,6 @@ extern "C" void func_002B3A98(void* p);
 extern "C" void func_002A4B68(void* p);
 extern char* D_004A2C68;
 extern void* D_004A3DD8;
-extern void* SSXApp;
 extern void* D_004A28A4;
 
 struct sRace_2355C0 {
@@ -668,7 +665,7 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
     sRace_2355C0* r = &D_00535BC8_r2355C0;
     int flag = r->flag49;
     int mode = r->mode48;
-    if (flag == 0 && !inRange_2355C0(*(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x78) + 0x1BC))) {
+    if (flag == 0 && !inRange_2355C0(*(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1BC))) {
         *(int*)((char*)self + 0x4) = 0;
         *(int*)((char*)self + 0x0) = 4;
     } else {
@@ -687,7 +684,7 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
         vt[1].fn(player + vt[1].delta);
     }
     (*(sRaceMan_2355C0**)(D_004A2C68 + 0xC))->f14 = mode != 4;
-    cBXLoadIndicator_Hide(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 0);
+    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 0);
     if (flag) {
         *(int*)((char*)self + 0x0) = 1;
         *(int*)((char*)self + 0x4) = 0;
@@ -711,12 +708,11 @@ extern "C" int cSSXScriptEngine_IsInTransportSequence(void* a);
 extern "C" int func_00279220(void* a, int b);
 extern "C" void cGameState_gotoNextState(void* self);
 extern void* D_004A28A4;
-extern void* SSXApp;
 
 extern "C" void cGFTrackStartState_update(void* self)
 {
     if (*(int*)((char*)self + 0x1C) != 0 && cSSXScriptEngine_IsInTransportSequence(D_004A28A4) == 0) {
-        *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0x78) + 0x1A4) = 1;
+        *(int*)(*(char**)((char*)SSXApp->Game + 0x78) + 0x1A4) = 1;
         *(int*)((char*)self + 0x1C) = 0;
     }
     if (func_00279220(D_004A28A4, 1) == 0) {
@@ -775,9 +771,9 @@ extern "C" void cGFTrackStartState_loseFocus(void* self)
     }
     if (m == 6) {
     restart:
-        func_00238510(*(void**)((char*)SSXApp + 0xC0), 0, 0);
+        func_00238510(SSXApp->GameModeMan, 0, 0);
     }
-    char* g = *(char**)((char*)SSXApp + 0x84);
+    char* g = (char*)SSXApp->Game;
     char* x = *(char**)(g + 0x84);
     if (*(int*)(x + 0x10) == 1) {
         sTbl_235868* t = **(sTbl_235868***)(g + 0x10);
@@ -857,7 +853,6 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id
 extern "C" void func_001473D0(void* player, int i, int v);
 extern char* D_004A2C68;
 extern void* D_004A3DD8;
-extern void* SSXApp;
 extern void* D_004A28A4;
 
 struct sRace_235AA0 {
@@ -887,9 +882,9 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     func_0030B7F8(D_004A3DD8);
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    sGM_235AA0* gm = *(sGM_235AA0**)((char*)SSXApp + 0xC0);
+    sGM_235AA0* gm = (sGM_235AA0*)SSXApp->GameModeMan;
     cGameModeMan_restartHeat(gm);
-    cGame_partialRestart(*(void**)((char*)SSXApp + 0x84));
+    cGame_partialRestart(SSXApp->Game);
     sRace_235AA0* r = &D_00535BC8_r235AA0;
     int m = r->mode48;
     if (m == 5)
@@ -917,9 +912,9 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
         sVE_235AA0* vt = *(sVE_235AA0**)(player + 0xC);
         vt[1].fn(player + vt[1].delta);
     }
-    func_0012AB20(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+    func_0012AB20(*(void**)((char*)SSXApp->Game + 0xC));
     if (n >= 2)
-        func_0012AC48(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+        func_0012AC48(*(void**)((char*)SSXApp->Game + 0xC));
     *(int*)((char*)self + 0x18) = 0;
     sRace_235AA0* r2 = &D_00535BC8_r235AA0;
     if (r2->mode48 == 0) {
@@ -930,7 +925,7 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
     cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
     func_0027AAF8(D_004A28A4, *(int*)((char*)gm + 0x98) ? 3 : 2);
     func_00278F38(D_004A28A4, 0);
-    func_001F36C0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 3);
+    func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 3);
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0x10) = 0;
 }
@@ -985,7 +980,6 @@ extern "C" void func_0027A9F0(void* p);
 extern "C" void cGameState_gotoNextState(void* self);
 void* func_00230698(void* self, int id);
 extern char* D_004A2C68;
-extern void* SSXApp;
 extern void* D_004A28A4;
 extern int D_00535C04[];
 
@@ -993,31 +987,31 @@ extern "C" void cGFNextHeatState_update(void* self)
 {
     *(int*)((char*)self + 0x14) += 1;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* g84 = *(char**)((char*)SSXApp + 0x84);
+    char* g84 = (char*)SSXApp->Game;
     int state = *(int*)((char*)self + 0x10);
     char** cache = *(char***)(g84 + 0x10);
     int idx = *(int*)(*(char**)(*(char**)(g84 + 0x84) + 4) + 0xB0) == 0;
     switch (state) {
     case 0:
         if (func_0012ABD0(*(void**)(g84 + 0xC))) {
-            cAI_cleanupAfterRace(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+            cAI_cleanupAfterRace(*(void**)((char*)SSXApp->Game + 0xC));
             if (D_00535C04[0] >= 2)
-                cAI_cleanupActors(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
-            cAI_initAIRiders(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+                cAI_cleanupActors(*(void**)((char*)SSXApp->Game + 0xC));
+            cAI_initAIRiders(*(void**)((char*)SSXApp->Game + 0xC));
             *(int*)((char*)self + 0x10) = 1;
         }
         break;
     case 1:
         if (func_0012A180(*(void**)(g84 + 0xC))) {
-            func_001289F0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+            func_001289F0(*(void**)((char*)SSXApp->Game + 0xC));
             (*(sRaceMan_235CC8**)(D_004A2C68 + 0xC))->f14 = 1;
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
-            char* r = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x40);
+            char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40);
             sVec4_235CC8 pos = func_00122C28(*(void**)(r + 0x18));
             func_003A9658(*cache + 0x10, idx, (const sVec4_236960*)&pos, 45000.0f);
             *(int*)((char*)self + 0x10) = 2;
         } else {
-            cAI_loadRiders(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0xC));
+            cAI_loadRiders(*(void**)((char*)SSXApp->Game + 0xC));
         }
         break;
     case 2:
@@ -1031,7 +1025,7 @@ extern "C" void cGFNextHeatState_update(void* self)
                 break;
             if (func_002791D8(D_004A28A4, 0) == 1)
                 break;
-            char* o = (char*)func_00230698(*(void**)((char*)SSXApp + 0x84), 0);
+            char* o = (char*)func_00230698(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(D_004A28A4) != 0)
                 break;
             if (((cRiderObj_235CC8*)(o + 0x10))->isBusy() != 0)
@@ -1053,11 +1047,10 @@ extern "C" void cGFNextHeatState_update(void* self)
 INCLUDE_ASM("main/gamestate", cGFNextHeatState_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
-extern void* SSXApp;
 
 extern "C" void cGFNextHeatState_loseFocus(void)
 {
-    cBXLoadIndicator_Hide(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 3);
+    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 3);
 }
 #endif
 
@@ -1130,15 +1123,15 @@ struct sColor_236058 {
 
 extern "C" void func_00236058(void* self)
 {
-    void* gm = *(void**)((char*)SSXApp + 0xC0);
+    void* gm = SSXApp->GameModeMan;
     func_0030B7F8(D_004A3DD8);
     float one = 1.0f;
     cGameModeMan_initGameMode(gm, 0xC);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xA);
-    cGame_partialRestart(*(void**)((char*)SSXApp + 0x84));
-    func_0011DE60(*(void**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
-    func_0011DF18(*(void**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x40) + 0x18), 1);
-    void* r = func_00230698(*(void**)((char*)SSXApp + 0x84), 0);
+    cGame_partialRestart(SSXApp->Game);
+    func_0011DE60(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
+    func_0011DF18(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18), 1);
+    void* r = func_00230698(SSXApp->Game, 0);
     char* o = (char*)func_002E4CE8_sz(0x14);
     sColor_236058 c;
     c.r = one;
@@ -1156,11 +1149,10 @@ extern "C" void func_00236058(void* self)
 INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_update);
 #ifdef SKIP_ASM
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
-extern void* SSXApp;
 
 extern "C" void cGFSessionTeleportState_update(void)
 {
-    func_00231250(*(void**)((char*)SSXApp + 0x84), 1, 0, 0);
+    func_00231250(SSXApp->Game, 1, 0, 0);
 }
 #endif
 
@@ -1221,7 +1213,6 @@ extern "C" int func_00278F38(void* self, int i);
 extern "C" int func_00278F68(void* self, int i, int a, int b);
 extern char* D_004A2C68;
 extern void* D_004A3DD8;
-extern void* SSXApp;
 extern void* D_004A28A4;
 extern int D_004A11BC;
 
@@ -1247,7 +1238,7 @@ extern "C" void func_00236250(void* self, int mode)
         *(int*)((char*)self + 0x18) = D_004A11BC;
     }
     if (*(int*)((char*)self + 0x18) == *cBENewRaceInterface_getLocation(iface))
-        cGame_partialRestart(*(void**)((char*)SSXApp + 0x84));
+        cGame_partialRestart(SSXApp->Game);
     int m = *(int*)((char*)self + 0x14);
     if (m == 0) {
         func_00278E50(D_004A28A4, 1, 0x16, 3, 0, -1, -1, -1);
@@ -1259,7 +1250,7 @@ extern "C" void func_00236250(void* self, int mode)
             if (!isOne_6250(m))
                 func_00278E50(D_004A28A4, 1, 0xB, 3, 0, -1, -1, -1);
             func_00278F38(D_004A28A4, 1);
-            func_0011D390(*(void**)(*(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x40) + 0x18));
+            func_0011D390(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40) + 0x18));
             func_00278F68(D_004A28A4, 1, *(int*)((char*)self + 0x14) == 2, 0);
         }
     }
@@ -1282,7 +1273,6 @@ void func_00278DE8(void* self, int a);
 extern "C" int func_00279148(void* self, int a, int b);
 extern "C" int func_00279220(void* a, int b);
 extern "C" void func_0027A860(void* a, int b, int c);
-extern void* SSXApp;
 extern void* D_004A28A4;
 extern int D_004A2594;
 extern int D_004A2A54;
@@ -1384,7 +1374,7 @@ extern "C" void cGFUserSelectState_update(void* self)
             if (b == a && !c2) {
                 *(int*)((char*)self + 0x10) = 3;
                 ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 0xA))->f10 = one;
-                func_00231250(*(void**)((char*)SSXApp + 0x84), 0xF, 0, 0);
+                func_00231250(SSXApp->Game, 0xF, 0, 0);
                 return;
             }
             if (c2 && D_00535C11[0] == 0)
@@ -1405,13 +1395,13 @@ extern "C" void cGFUserSelectState_update(void* self)
                     return;
                 }
                 *(int*)((char*)self + 0x1C) = 0;
-                ((sRace_6418*)*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x78))->f1C8 = one;
-                func_0022CEA8(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x78), *(int*)((char*)self + 0x18), 7);
+                ((sRace_6418*)*(void**)((char*)SSXApp->Game + 0x78))->f1C8 = one;
+                func_0022CEA8(*(void**)((char*)SSXApp->Game + 0x78), *(int*)((char*)self + 0x18), 7);
                 ns = 3;
                 break;
             }
             if (r == 0xD || r == 0x13)
-                func_001F36C0(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 0);
+                func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 0);
             return;
         }
         cGameState_gotoNextState(self);
@@ -1560,7 +1550,7 @@ extern void* D_004A28A4;
 
 extern "C" void func_00236960(void* self)
 {
-    char* g84 = *(char**)((char*)SSXApp + 0x84);
+    char* g84 = (char*)SSXApp->Game;
     char* game = *(char**)(g84 + 0x78);
     if (*(int*)(game + 0x1C8) == 0) {
         return;
@@ -1571,7 +1561,7 @@ extern "C" void func_00236960(void* self)
     switch (state) {
     case 0:
         if (func_0022D278(game, *(int*)(game + 0x1BC)) != 0) {
-            char* r = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x40);
+            char* r = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x40);
             sVec4_236960 pos = func_00123F38(*(void**)(r + 0x18));
             char* e = *cache + idx * 0x50;
             *(int*)(e + 0x250) = 1;
@@ -1586,7 +1576,7 @@ extern "C" void func_00236960(void* self)
         if (dist < 20000.0f) {
             break;
         }
-        char* o = (char*)func_00230698(*(void**)((char*)SSXApp + 0x84), 0);
+        char* o = (char*)func_00230698(SSXApp->Game, 0);
         if (((cRiderObj_236960*)(o + 0x10))->isBusy() != 0) {
             break;
         }
@@ -1844,12 +1834,11 @@ extern "C" void func_00236DA0(void* self)
 INCLUDE_ASM("main/gamestate", func_00236E60);
 #ifdef SKIP_ASM
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
-extern void* SSXApp;
 
 extern "C" void func_00236E60(void* self)
 {
     if (*(int*)((char*)self + 8) == 1) {
-        func_00231250(*(void**)((char*)SSXApp + 0x84), 0xE, 2, 0);
+        func_00231250(SSXApp->Game, 0xE, 2, 0);
     }
 }
 #endif
@@ -1889,12 +1878,11 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180(void);
 extern "C" void func_0028CDF8(void* mgr);
-extern void* SSXApp;
 
 extern "C" void cGFPodiumState_gainFocus(void)
 {
     func_0028CDF8(func_0028B180());
-    *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x8C) = 1;
+    *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8C) = 1;
 }
 #endif
 
@@ -1918,11 +1906,10 @@ extern "C" void func_00236F40(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPodiumState_loseFocus);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 
 extern "C" void cGFPodiumState_loseFocus(void)
 {
-    *(int*)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x8C) = 0;
+    *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x8C) = 0;
 }
 #endif
 
@@ -1952,13 +1939,12 @@ extern "C" void cWScriptMan_runGlobalScripts(void* a);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern void* D_004A3DD8;
-extern void* SSXApp;
 
 extern "C" void cGFReplayStartState_gainFocus(void)
 {
     cWScriptMan_initMissions(D_004A3DD8);
     cWScriptMan_runGlobalScripts(D_004A3DD8);
-    cBXLoadIndicator_Hide(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x94), 0);
+    cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 0);
     cOVStateManager_triggerOverlay(0x11);
 }
 #endif
@@ -2172,7 +2158,6 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int func_00257BD8(void* self, int ch, void* dst, int size);
 extern "C" float func_00258360(void* self);
 extern char* D_004A2EEC;
-extern void* SSXApp;
 
 // cInputSync::preupdate (On Tour name and member names; the SSX 3 version differs in structure).
 // cGameComm::mGameComm through On Tour's GameComm() accessor.

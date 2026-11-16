@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 #include "ai/rider.h"
 
 //100%
@@ -6229,7 +6230,6 @@ extern "C" int func_002A4078(void* self);
 extern "C" int func_002A40E8(void* self);
 extern "C" void func_00295950(void* self, int a, int b, int c);
 extern signed char D_00535C11[];
-extern char* SSXApp;
 
 struct sSnd7B0Ch {
     signed char vol;
@@ -6346,7 +6346,7 @@ extern "C" void func_0029C7B0(void* vself)
         } else if (m == 2) {
             func_002A3170(vself);
         } else {
-            int* p = *(int**)(SSXApp + 0xC0);
+            int* p = (int*)SSXApp->GameModeMan;
             if (p[0x98 / 4] != 0) {
                 func_002A3400(vself);
                 func_002B1758(base + 0x5560, 0);
@@ -6377,7 +6377,7 @@ extern "C" void func_0029C7B0(void* vself)
         }
     }
     func_00295950(vself, 0, *(volatile int*)(**(char***)(base + 0x118) + 0x260) + 0x32, 0);
-    *(int*)(base + 0x5824) = **(int**)(SSXApp + 0xC0);
+    *(int*)(base + 0x5824) = *(int*)SSXApp->GameModeMan;
 }
 #endif
 
@@ -6390,7 +6390,6 @@ extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
 // PORT: func_004139F8 is libgcc's float -> unsigned conversion (__fixunssfsi).
 extern "C" int func_004139F8(float f);
-extern char* SSXApp;
 extern int D_005308D0[];
 extern sSndKey8 D_004A3678[];
 
@@ -6400,7 +6399,7 @@ extern "C" void func_0029CCA8(char* self)
     if (func_00288AE0(self) != 0) {
         return;
     }
-    char* g = *(char**)(SSXApp + 0xC0);
+    char* g = (char*)SSXApp->GameModeMan;
     if (g == 0) {
         return;
     }
@@ -9809,7 +9808,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C11[];
-extern char* SSXApp;
 extern "C" int func_00295028(void* self, int a, int b);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
@@ -9823,7 +9821,7 @@ extern "C" void func_002A31C0(void* self)
     if (func_002A4040(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] != 0) return;
-    if (**(int**)(SSXApp + 0xC0) < 2) {
+    if (*(int*)SSXApp->GameModeMan < 2) {
         if (func_00295028(self, 0, 0) != 0) return;
         if (func_002B1458((char*)self + 0x5560, 0, 0x20C0, 0, 0xB, 0, 0, 0.0f) == 0) return;
         int r = func_0029F198(self);
@@ -10664,12 +10662,11 @@ extern "C" void func_002A4590(void* self, int flag);
 extern "C" void* func_0028B1D8();
 extern "C" int func_002A4078(void* self);
 extern "C" void func_002A4660(void* self, int id, int a, int b, int c);
-extern char* SSXApp;
 extern int D_00536730[];
 
 extern "C" void func_002A45C0(void* self)
 {
-    if (**(int**)(SSXApp + 0xC0) == 1) {
+    if (*(int*)SSXApp->GameModeMan == 1) {
         func_002A4590(self, 0);
     }
     int id = D_00536730[0];
@@ -10687,7 +10684,6 @@ extern "C" void func_002A45C0(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4660);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -10695,7 +10691,7 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 
 extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
 {
-    char* g = *(char**)(SSXApp + 0xC0);
+    char* g = (char*)SSXApp->GameModeMan;
     if (*(int*)(g + 0x98) != 0 || *(int*)(g + 0x70) <= *(int*)g) {
         *(int*)((char*)self + 0x57F8) = 1;
         if (a4 != 0 && *(int*)g == 3) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_cScriptSoundBankManager);
@@ -240,7 +241,6 @@ extern int D_004A2A54;
 extern int D_004A2A50;
 extern int D_005366E8[];
 extern int D_004428F0[];
-extern char* SSXApp;
 
 class cWorld_3818 {
 public:
@@ -300,7 +300,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
             D_004A289C->v40(*(int*)(s + 0x10));
             if (*(int*)(s + 0x14) != 0) {
                 *(int*)(s + 0x14) = 0;
-                func_002EA860(*(void**)(*(char**)(SSXApp + 0x84) + 0x64));
+                func_002EA860(*(void**)((char*)SSXApp->Game + 0x64));
             }
         }
     }

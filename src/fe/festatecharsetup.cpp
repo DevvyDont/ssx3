@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onCreateScreen);
@@ -18,7 +19,6 @@ extern "C" void func_001A0570(void* self, int i, int v);
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* snd, int a);
-extern void* SSXApp;
 extern signed char D_00535C11[];
 extern char D_0045D7C0[];
 extern char D_004A1410[];
@@ -80,8 +80,8 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
     int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
     sVEntry_182928* vt = *(sVEntry_182928**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
-    func_001A0570(*(char**)((char*)SSXApp + 0x7C) + 0xB0, self->player, 0);
-    func_001A0508(*(char**)((char*)SSXApp + 0x7C) + 0xB0, self->player, charId, 0);
+    func_001A0570((char*)SSXApp->RealFE + 0xB0, self->player, 0);
+    func_001A0508((char*)SSXApp->RealFE + 0xB0, self->player, charId, 0);
     func_0028F140(func_0028B180(), 1);
     cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1410));
     if (txt != 0) {
@@ -219,7 +219,6 @@ extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern "C" void func_0015E050(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
 extern "C" void func_001831D0(void* self, int a1);
 extern "C" void func_00182EC0(void* self);
-extern void* SSXApp;
 extern char D_0045D860[];
 
 extern "C" void func_00182DB8(void* self)
@@ -227,7 +226,7 @@ extern "C" void func_00182DB8(void* self)
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D860));
     signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     cUIText_setAsciiString(text, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
-    sCam_182DB8* cam = *(sCam_182DB8**)((char*)SSXApp + 0x7C);
+    sCam_182DB8* cam = (sCam_182DB8*)SSXApp->RealFE;
     sVec4_182DB8 pos;
     pos.x = 0.0f;
     pos.y = 200.0f;
@@ -255,7 +254,6 @@ extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void func_001A0358(void* rider);
 extern "C" void func_0019E538(void* self, int a1);
-extern void* SSXApp;
 
 struct sQuat_182EC0
 {
@@ -310,7 +308,7 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
 extern "C" void func_00182EC0(void* self_)
 {
     char* self = (char*)self_;
-    char* rider = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
@@ -362,13 +360,12 @@ extern "C" void func_00182EC0(void* self_)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", func_001831D0);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
 
 extern "C" void func_001831D0(void* self, int on)
 {
-    char* mgr = *(char**)((char*)SSXApp + 0x7C);
+    char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
         void* r = func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
         if (on == 0) {

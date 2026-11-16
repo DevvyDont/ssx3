@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_cScriptCameraController);
@@ -197,7 +198,6 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169418);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_0045BDE0[];
 extern void* D_0045C8B8[];
-extern void* SSXApp;
 struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
 // Same object as the unit's later `extern func_001694B8_sVec4 D_004FF130;` (that type is defined below this point).
 extern sVec4K9418 D_004FF130_K9418 __asm__("D_004FF130");
@@ -226,7 +226,7 @@ extern "C" void* func_00169418(void* p)
     self->nearZ = 10.0f;
     self->farZ = 30000.0f;
     self->f14 = 0;
-    void* cam = *(void**)((char*)SSXApp + 0x84);
+    void* cam = SSXApp->Game;
     void* chase = *(void**)((char*)cam + 0x84);
     void* ctrl = *(void**)((char*)chase + 0x4);
     self->f18 = *(int*)((char*)ctrl + 0xAC);
@@ -998,7 +998,6 @@ extern "C" float func_0031C228(float x);
 extern "C" void func_00160028(void* self, float v);
 extern "C" void func_00160130(void* self, float v);
 extern void* D_004A28A4;
-extern void* SSXApp;
 
 struct sVec4_16A510 {
     float x, y, z, w;
@@ -1146,7 +1145,7 @@ extern "C" void func_0016A510(char* p)
     char* m = *(char**)(p + 0x14) + 0x30;
     char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x22], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x28);
+        rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
     }
     self->x4 = f[0];
     self->x8 = f[1];
@@ -1376,7 +1375,6 @@ extern "C" float func_0031C228(float x);
 extern "C" void func_00160028(void* self, float v);
 extern "C" void func_00160130(void* self, float v);
 extern void* D_004A28A4;
-extern void* SSXApp;
 
 struct sVec4_16AD98 {
     float x, y, z, w;
@@ -1528,7 +1526,7 @@ extern "C" void func_0016AD98(char* p)
     self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
     char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x28);
+        rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
     }
     char* obj = rider + 0x6C0;
     sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
@@ -1764,7 +1762,7 @@ extern "C" void func_0016B180(char* p)
     float* f = func_0027C6A0(cam);
     char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)(*(char**)(*(char**)((char*)SSXApp + 0x84) + 0xC) + 0x28);
+        rider = *(char**)(*(char**)((char*)SSXApp->Game + 0xC) + 0x28);
     }
     self->x4 = f[0];
     self->x8 = f[1];

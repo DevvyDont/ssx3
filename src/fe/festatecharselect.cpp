@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
@@ -7,7 +8,6 @@ struct sVec4_181148 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sCam_181148 { char pad[0x10]; float fov; };
 int GetHashValue32(char* str);
 extern char D_0045D600[];
-extern void* SSXApp;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
@@ -22,7 +22,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    sCam_181148* cam = *(sCam_181148**)((char*)SSXApp + 0x7C);
+    sCam_181148* cam = (sCam_181148*)SSXApp->RealFE;
     sVec4_181148 pos;
     pos.x = 0.0f;
     pos.y = 200.0f;
@@ -35,7 +35,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     at.w = 1.0f;
     func_0015E050((char*)cam + 0x10, &pos, &at);
     cam->fov = 0.4363323450088501f;
-    func_0019E538(func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     *(int*)((char*)self + 0x80) = 1;
     *(float*)((char*)self + 0x5C) = -1.0f;
     *(int*)((char*)self + 0x58) = 0;
@@ -46,7 +46,6 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00181238);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern signed char D_00535C11[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -58,7 +57,7 @@ void* cUIState_onDestroyScreen(void* self);
 extern "C" void func_00181238(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* mgr = *(char**)((char*)SSXApp + 0x7C);
+    char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0 && D_00535C11[0] != 0) {
         func_0019E538(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     }
@@ -99,7 +98,6 @@ extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_00181EF0(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
-extern void* SSXApp;
 extern signed char D_00440F68[];
 extern char D_004A1398[];
 
@@ -115,8 +113,8 @@ extern "C" void func_00181308(void* self, int a1)
             break;
         }
     }
-    func_001A0508(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
-    char* r = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
+    func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
+    char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(r + 0xCCC) = 0;
     func_00181EF0(self);
     cUIState_onGainFocus(self, a1);
@@ -324,7 +322,6 @@ extern "C" void func_001472C8(void* iface, int rider, int idx);
 extern "C" void func_00147448(void* iface, int rider, int id);
 extern "C" void func_001474A8(void* iface, int rider, int id);
 extern "C" void cUIStateStack_push(void* stack, void* state);
-extern void* SSXApp;
 extern signed char D_00440F68[];
 extern char D_0045D698[];
 extern char D_0045D6A8[];
@@ -381,7 +378,7 @@ struct sCharSel_17E8 {
 
 static inline char* riderSlot_17E8(sCharSel_17E8* self)
 {
-    return (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, self->rider);
+    return (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, self->rider);
 }
 
 static inline void refresh_17E8(sIface_17E8* iface)
@@ -497,7 +494,6 @@ extern "C" void func_0039C428(void* bar, int v);
 extern "C" double fptodp(float f);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern void* SSXApp;
 extern char D_004A13B0;
 extern char D_0045D6F0[];
 extern char D_004A13B8[];
@@ -566,7 +562,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 0x37;
     func_0039C428(ob, total / 7);
-    func_001A0508(*(char**)((char*)SSXApp + 0x7C) + 0xB0, rider, charID, 0);
+    func_001A0508((char*)SSXApp->RealFE + 0xB0, rider, charID, 0);
 }
 #endif
 
@@ -630,7 +626,7 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
 extern "C" void func_00181EF0(void* vself)
 {
     char* self = (char*)vself;
-    char* rider = (char*)func_001A0548(*(char**)((char*)SSXApp + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;

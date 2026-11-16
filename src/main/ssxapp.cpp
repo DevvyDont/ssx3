@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
@@ -108,7 +109,6 @@ struct sTint_6900 {
 };
 
 extern void* D_004A28A0;
-extern void* SSXApp;
 extern void* D_004A289C;
 extern void* D_004A28AC;
 extern char D_00479A40[];
@@ -140,7 +140,7 @@ typedef void* (*LoadFn_6900)(char*, void*, const char*, int, int, int);
 
 extern "C" void cSSXApp_init(char* self, int argc, char** argv)
 {
-    SSXApp = self;
+    SSXApp = (cSSXApp*)self;
     *(void**)(self + 0x9C) = cConsoleConfig_construct();
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, D_00479A40, 0, 0);
     func_00326A28(pm);
@@ -810,7 +810,6 @@ extern "C" void func_002380E8(void* p);
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
 extern void* D_004A28A0;
 extern void* D_004A28A4;
-extern void* SSXApp;
 extern void* D_004A289C;
 
 struct sVEPurge0 {

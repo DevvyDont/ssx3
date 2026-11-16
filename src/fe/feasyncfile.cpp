@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 #include "ai/rider.h"
 
 //100%
@@ -1163,7 +1164,6 @@ void func_001C57C0(void* self, int a1, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_msg(void* self, int id, void* msg) __asm__("func_001A8E40");
-extern void* SSXApp;
 extern char D_004615F8[];
 extern char D_00461618[];
 extern char D_00461678[];
@@ -1182,7 +1182,7 @@ extern "C" void func_001A4E28(void* self, void* msg)
         char* buf = (char*)self + 0x9C;
         int one = 1;
         int three = 3;
-        char* obj = *(char**)((char*)SSXApp + 0x8C);
+        char* obj = (char*)SSXApp->FELocale;
         sVEntry_001A4E28* vt = *(sVEntry_001A4E28**)(obj + 4);
         sprintf1(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(D_00461678)), *(char**)((char*)self + 0x6D4));
         void* p = func_001A9C50(self);
@@ -2458,7 +2458,6 @@ extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" char* func_004162D0(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
-extern void* SSXApp;
 extern char D_004A1390[];
 extern char D_004A1408[];
 extern char D_004A1A28[];
@@ -2502,7 +2501,7 @@ struct sChar2_001A7390 {
 
 static inline int Loc1A7390(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001A7390* vt = *(sVEntry_001A7390**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -3170,7 +3169,6 @@ extern "C" void func_003A18C0(void* list);
 extern "C" void func_003A19F8(cUIText* text, char* str);
 extern "C" char* func_004162D0(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
-extern void* SSXApp;
 extern char D_00461A18[];
 extern char D_00461A28[];
 extern char D_004619F8[];
@@ -3185,7 +3183,7 @@ struct sVEntry_001A81F0 {
 
 static inline int Loc1A81F0(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001A81F0* vt = *(sVEntry_001A81F0**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -4774,7 +4772,6 @@ extern "C" void func_00261408(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern void* D_004A3328;
 extern void* D_004A3028;
@@ -5023,7 +5020,7 @@ extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data)
         {
             const char* fmt = D_004620E0;
             const char* who = *(const char**)((char*)data + 0x10);
-            char* obj = *(char**)((char*)SSXApp + 0x8C);
+            char* obj = (char*)SSXApp->FELocale;
             const char* name = *(const char**)((char*)data + 0xC);
             sVEntry_1A9CC0* vt = *(sVEntry_1A9CC0**)(obj + 4);
             void* text = vt[4].fn(obj + vt[4].delta, GetHashValue32(D_004620F0));
@@ -5503,7 +5500,6 @@ extern "C" void func_001AAD50(void* screen, int slot, int ping)
 INCLUDE_ASM("fe/feasyncfile", func_001AAF90);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern void* SSXApp;
 extern char D_00462688[];
 extern char D_004626A0[];
 extern char D_004626B8[];
@@ -5562,7 +5558,7 @@ extern "C" int func_001AAF90(void* self, void* msg)
     default:
         return 0;
     }
-    return (*(cLocStr_001AAF90**)((char*)SSXApp + 0x8C))->v04(h);
+    return ((cLocStr_001AAF90*)SSXApp->FELocale)->v04(h);
 }
 #endif
 
@@ -5741,7 +5737,6 @@ extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern void* D_004A3328;
 extern void* D_004A3028;
-extern void* SSXApp;
 extern char D_00462938[];
 extern char D_00462958[];
 extern char D_00462970[];
@@ -5778,7 +5773,7 @@ static inline void* GetSession_001AB478()
 
 static inline int Text_001AB478(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001AB478* vt = *(sVEntry_001AB478**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -7557,7 +7552,6 @@ extern "C" void func_001A87D0(void* self, int a1);
 extern "C" void func_0039A7A8(void* self, int a1);
 extern "C" void func_001AF098(void* self, int a1);
 extern "C" void func_001AEC60(void* self, int a1);
-extern void* SSXApp;
 extern int D_00534B30_1ADFE8[] __asm__("D_00534B30");
 extern signed char D_00535C12[];
 extern char D_00441268[];
@@ -7571,7 +7565,7 @@ extern char D_004412B8[];
 extern "C" void func_001ADFE8(void* self, int a1)
 {
     func_001A87D0(self, a1);
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     func_0039A7A8(*(void**)((char*)self + 0x6DC), D_00534B30_1ADFE8[1] ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (D_00535C12[0]) {
@@ -7784,7 +7778,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int func_0039A738(void* a);
-extern void* SSXApp;
 // D_00534B34 is a splat label inside D_00534B30
 extern int D_00534B34[];
 extern char D_005308B8[];
@@ -7812,7 +7805,7 @@ struct sOpts1AE680 {
 extern "C" void func_001AE680(void* self)
 {
     if (*(void**)((char*)self + 0x40) != 0) {
-        char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+        char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
         D_00534B34[0] = func_0039A738(*(void**)((char*)self + 0x6DC)) != 0;
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
@@ -7913,7 +7906,7 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
             }
             func_001AE680_E7A0(self);
             func_001AF568_E7A0(self);
-            char* opts = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+            char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
             D_00534B34[0] = func_0039A738_E7A0(self->aiOn) != 0;
             commit_E7A0(opts);
             if (func_0039A738_E7A0(self->aiOn)) {
@@ -7948,7 +7941,7 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
         break;
     case 9:
         if (a1 == self->aiOn) {
-            char* opts = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+            char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
             D_00534B34[0] = func_0039A738_E7A0(self->aiOn) != 0;
             commit_E7A0(opts);
             func_001AF098_E7A0(self, func_0039A738_E7A0(self->aiOn) != 0);
@@ -8015,7 +8008,6 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern void* SSXApp;
 extern int D_00534B34[];
 extern char D_004632A8[];
 extern char D_004632B8[];
@@ -8050,7 +8042,7 @@ extern "C" void func_001AEC60(void* self, int on)
     if (*(void**)(s + 0x40) == 0) {
         return;
     }
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     int locked = D_00534B34[0];
     cFEVObj_001AEC60* o = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004632A8));
     if (o != 0) {
@@ -8380,7 +8372,6 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_001AEC60(void* self, int a1);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_00463468[];
 extern char D_00463480[];
@@ -8406,7 +8397,7 @@ extern "C" void func_001AF568(void* self)
     cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
     if (text != 0) {
         char* name = *(char**)((char*)D_004A3028 + 0x98);
-        char* o = *(char**)((char*)SSXApp + 0x8C);
+        char* o = (char*)SSXApp->FELocale;
         sVE_001AF568* vt = *(sVE_001AF568**)(o + 4);
         char* obj = o + vt[4].delta;
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(D_00463480)), name);
@@ -8598,7 +8589,6 @@ extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double fptodp(float f);
 extern "C" void func_0025DD08(void* self, const char* str, int a2);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_00463108[];
 extern char D_004634E8[];
@@ -8620,7 +8610,7 @@ struct sVEntry_001AFA60 {
 
 static inline int Loc1AFA60(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001AFA60* vt = *(sVEntry_001AFA60**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -8752,7 +8742,6 @@ extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void func_001B0850(void* self, void* iface, void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001AF930(void* screen);
-extern void* SSXApp;
 extern void* D_004A3328;
 extern char* D_004A3028_FE68 __asm__("D_004A3028");
 extern int D_004A11B8;
@@ -8836,7 +8825,7 @@ extern "C" void func_001AFE68(char* self)
     cBENewRaceInterface_setGameEvent_FE68(be, r->event);
     cBENewRaceInterface_setNumberAI(be, r->numAI);
     vcall_FE68(be);
-    void* net = cBE_getInterface_Fv_FE68(*(void**)((char*)SSXApp + 0x78), 7);
+    void* net = cBE_getInterface_Fv_FE68(SSXApp->BE, 7);
     D_00534B34[0] = r->f14;
     vcall_FE68(net);
     func_001B0850(self, be, *(void**)(self + 0x40));
@@ -9272,7 +9261,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" const char* func_00145340(void* track);
 extern "C" const char* func_00144BF0(void* track);
-extern void* SSXApp;
 extern int D_00534B34[];
 extern int D_005308D0[];
 extern int D_00535C04[];
@@ -9316,7 +9304,7 @@ extern "C" void func_001B0850(void* self, void* iface, void* screen)
         if (iface == 0) {
             cUIText_setAsciiString(t, D_004A1390);
         } else {
-            cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+            cBE_getInterface_Fv(SSXApp->BE, 7);
             if (D_00534B34[0] != 0) {
                 cUIText_setUnicodeStringByID(t, GetHashValue32(D_0045DCC8));
             } else {
@@ -9588,14 +9576,13 @@ extern "C" int func_0039A738(void* a);
 extern "C" void func_001B1B10(void* self, int sel, int flag);
 extern "C" void func_001B1760(void* self, int index);
 extern "C" void func_001B1808(void* self);
-extern void* SSXApp;
 extern char D_00534B30[];
 
 extern "C" int func_001B1068(void* self, int a1)
 {
     if (a1 != 0) {
         func_001B1B10(self, func_0039A738(*(void**)((char*)self + 0x6D0)), 0);
-        cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+        cBE_getInterface_Fv(SSXApp->BE, 7);
         char* net = D_00534B30;
         if (*(int*)(net + 0x32C) >= 0) {
             func_001B1760(self, *(int*)(net + 0x32C));
@@ -9620,7 +9607,6 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char
 extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern "C" int func_001B0F28(int c);
 extern "C" void func_0039A7A8(void* self, int a1);
-extern void* SSXApp;
 extern signed char D_00440F68[];
 extern char D_00463818[];
 extern char D_00463830[];
@@ -9674,7 +9660,7 @@ extern "C" void func_001B10F8(void* self, cUIText* text)
         }
         *(int*)((char*)text + 0x14) &= ~1;
         box->v09(1);
-        int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 1), 0);
+        int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0);
         *(int*)((char*)self + 0x6E0) = id;
         func_0039A7A8(text, (unsigned char)func_001B0F28(id));
         *(cUIText**)((char*)self + 0x6D0) = text;
@@ -9704,7 +9690,6 @@ extern "C" void func_00265018(void* self, int a1);
 extern "C" void func_00265140(void* self);
 extern "C" int func_0039A738(void* a);
 extern void* D_004A33CC;
-extern void* SSXApp;
 extern char D_00463818[];
 extern char D_0045FD98[];
 extern char D_0045DCC8[];
@@ -9748,7 +9733,7 @@ extern "C" void func_001B1280(void* self, int a1, unsigned int msg)
             return;
         }
         if (*(int*)((char*)self + 0x6E0) != func_0039A738(*(void**)((char*)self + 0x6D0))) {
-            char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 1);
+            char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             func_001474A8(iface, 0, 0);
             sVE1B1280* vt = *(sVE1B1280**)(iface + 0xC);
             vt[1].fn(iface + vt[1].delta);
@@ -9862,7 +9847,6 @@ extern "C" void func_001B1760(void* self, int index);
 extern "C" void func_001B1B10(void* self, int sel, int flag);
 extern "C" void func_001B1A08(void* self, int on, int a2);
 extern "C" void func_001AB288(void* self, int err);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern int D_004A4E88;
 extern int D_00534B30_1B15D8[] __asm__("D_00534B30");
@@ -9876,7 +9860,7 @@ extern "C" void* func_001B15D8(void* self, int a1, int a2)
     void* obj;
     switch (a1) {
     case 0xF3:
-        cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+        cBE_getInterface_Fv(SSXApp->BE, 7);
         if (D_00534B30_1B15D8[0xCB] >= 0) {
             func_001B1760(self, D_00534B30_1B15D8[0xCB]);
             func_001B1B10(self, D_00534B30_1B15D8[0xCB], 1);
@@ -9959,7 +9943,6 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 // PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
 extern "C" void func_002C2718_1B1808(char* buf, const char* fmt, ...) __asm__("func_002C2718");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_00463108[];
 extern char D_004639A0[];
@@ -9976,7 +9959,7 @@ struct sVEntry_001B1808 {
 
 static inline int Loc1B1808(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B1808* vt = *(sVEntry_001B1808**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -10132,7 +10115,6 @@ extern "C" int func_00148D58(void* iface, int a1, int idx);
 extern "C" int func_00148D08(void* iface, int a1, int idx);
 extern "C" int func_00148C18(void* iface, int a1, int idx);
 extern "C" void func_0039C428(void* self, int v);
-extern void* SSXApp;
 extern char* D_004412C8[];
 extern char D_004A19F8[];
 extern char D_004A1B18[];
@@ -10183,7 +10165,7 @@ extern "C" void func_001B1B98(void* self, int index, int a2, int a3)
         return;
     }
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     if (a2 != 0) {
         name1 = D_00441350;
         name2 = D_00441378;
@@ -10577,7 +10559,6 @@ extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);
 extern "C" void func_002C2688(void* str, unsigned short* s);
 extern "C" int func_004165A8(const char* a, const char* b);
-extern void* SSXApp;
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
 extern const char* D_004A1A68;
@@ -10595,7 +10576,7 @@ struct sVEntry_001B25E0 {
 
 static inline int Loc1B25E0(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B25E0* vt = *(sVEntry_001B25E0**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -11987,7 +11968,6 @@ extern "C" void func_002636A8(void* self, void* a1);
 extern "C" void sprintf1_1B45E8(void* str, int fmt, ...) __asm__("sprintf1");
 class cFEVObj_001B3F78;
 extern cFEVObj_001B3F78* D_004A1B78;
-extern void* SSXApp;
 extern int D_004A1B80;
 extern char D_00463F08[];
 extern char D_00463F20[];
@@ -12003,7 +11983,7 @@ struct sVEntry_001B45E8 {
 
 static inline int Loc1B45E8(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B45E8* vt = *(sVEntry_001B45E8**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -12105,7 +12085,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void func_002C2718(char* buf, const char* fmt, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
-extern void* SSXApp;
 extern char D_004A12C0[];
 extern char D_00463F58[];
 
@@ -12120,7 +12099,7 @@ extern "C" void func_001B47C0(void* self, int a1)
     char buf[32];
     char* str = (char*)self + 0x71C;
     func_002C2718(buf, D_004A12C0, a1);
-    char* o = *(char**)((char*)SSXApp + 0x8C);
+    char* o = (char*)SSXApp->FELocale;
     sVE_001B47C0* vt = *(sVE_001B47C0**)(o + 4);
     char* obj = o + vt[4].delta;
     sprintf1(str, vt[4].fn(obj, GetHashValue32(D_00463F58)), buf);
@@ -12148,7 +12127,6 @@ void func_001C57C0(void* self, int a1, int a2);
 // PORT: sprintf1 / func_002C2718 are varargs formatters (dst, fmt, ...); the unit declares 3-arg views
 extern "C" void sprintf1_1B4888(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void func_002C2718_1B4888(char* buf, const char* fmt, ...) __asm__("func_002C2718");
-extern void* SSXApp;
 extern char D_004A12C0[];
 extern char D_0045DC90[];
 extern char D_0045DCD8[];
@@ -12167,7 +12145,7 @@ struct sVEntry_001B4888 {
 
 static inline int Loc1B4888(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B4888* vt = *(sVEntry_001B4888**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -13084,7 +13062,6 @@ extern "C" void func_0039F190(void* self, int a1);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
-extern void* SSXApp;
 extern char D_004641B0[];
 extern char D_004641D0[];
 extern char D_00460688[];
@@ -13098,7 +13075,7 @@ struct sVEntry_001B5E28 {
 
 static inline int Loc1B5E28(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B5E28* vt = *(sVEntry_001B5E28**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -13288,7 +13265,6 @@ extern "C" int USTR_length(void* s);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern void* D_004689F0[];
-extern void* SSXApp;
 extern char D_00464208[];
 extern char D_00464220[];
 
@@ -13326,7 +13302,7 @@ extern "C" sFEObj_001B6288* func_001B6288(sFEObj_001B6288* self, int a1, int a2)
     self->f6D4 = 0;
     self->f6E4 = 0;
     self->f6FC = 0;
-    char* o = *(char**)((char*)SSXApp + 0x8C);
+    char* o = (char*)SSXApp->FELocale;
     sVE_001B6288* vt = *(sVE_001B6288**)(o + 4);
     int n = USTR_length(vt[4].fn(o + vt[4].delta, GetHashValue32(D_00464208)));
     if (self->f6FC != 0) {
@@ -14074,7 +14050,6 @@ extern "C" void strcpy1(void* str, int a1);
 extern "C" void sprintf1_1B70D0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void func_002C2718(char* buf, const char* fmt, int a2);
 extern "C" void func_0039F190(void* self, int a1);
-extern void* SSXApp;
 extern int* D_004A33D0;
 extern char D_004A12C0[];
 extern char D_0045DCC8[];
@@ -14097,7 +14072,7 @@ struct sVEntry_001B70D0 {
 
 static inline int Loc1B70D0(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B70D0* vt = *(sVEntry_001B70D0**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -14700,7 +14675,6 @@ int GetHashValue32(char* str);
 
 extern char D_00461618[];
 
-extern void* SSXApp;
 
 extern char D_004A12C0[];
 
@@ -14736,7 +14710,7 @@ extern char D_00464508[];
 
 static inline int Loc_B7E40(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -14872,7 +14846,7 @@ struct sVEntry_001B8238 {
 };
 static inline int Loc_001B8238(char* key)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B8238* vt = *(sVEntry_001B8238**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
 }
@@ -14930,7 +14904,7 @@ struct sVEntry_001B83C0 {
 
 static inline int Loc_001B83C0(char* key)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B83C0* vt = *(sVEntry_001B83C0**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
 }
@@ -18650,7 +18624,6 @@ void func_001C57C0(void* self, int a1, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_msg(void* self, int id, void* msg) __asm__("func_001A8E40");
-extern void* SSXApp;
 extern char D_00461618[];
 extern char D_004650A0[];
 extern char D_004650B8[];
@@ -18684,7 +18657,7 @@ extern "C" void func_001BD8C8(void* self, int a2)
         if (*(int*)((char*)self + 0x770) == 0) {
             char* buf = (char*)self + 0x780;
             char* name = *(char**)((char*)self + 0xB80);
-            char* obj = *(char**)((char*)SSXApp + 0x8C);
+            char* obj = (char*)SSXApp->FELocale;
             sVEntry_001BD8C8* vt = *(sVEntry_001BD8C8**)(obj + 4);
             sprintf1(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(D_004650B8)), name);
             void* p = func_001A9C50(self);
@@ -19165,7 +19138,6 @@ void func_001BE510_2(void* self, int a1) __asm__("func_001BE510");
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern void* D_004A3028;
-extern void* SSXApp;
 extern char D_004651C8[];
 
 class cFEVObj_001BE3A8 {
@@ -19225,7 +19197,7 @@ extern "C" void func_001BE3A8(void* p, int id)
         func_0025D770(D_004A3028, sel);
     } else {
         char buf[0x50];
-        char* o = *(char**)((char*)SSXApp + 0x8C);
+        char* o = (char*)SSXApp->FELocale;
         sVE_001BE3A8* vt = *(sVE_001BE3A8**)(o + 4);
         char* obj = o + vt[4].delta;
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(D_004651C8)), 0);
@@ -19259,7 +19231,6 @@ extern "C" int func_0025F1B0(void* self);
 extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_004651C8[];
 
@@ -19271,7 +19242,7 @@ struct sVEntry_001BE540 {
 
 static inline int Loc1BE540(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001BE540* vt = *(sVEntry_001BE540**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -19755,7 +19726,6 @@ extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" int strlen(const char* s);
 // PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
 extern "C" void func_002C2718_1BEF60(unsigned short* buf, const char* fmt, ...) __asm__("func_002C2718");
-extern void* SSXApp;
 extern char D_004A1BF8[];
 extern char D_004652C0[];
 extern char D_004652D0[];
@@ -19775,7 +19745,7 @@ struct sVEntry_001BEF60 {
 
 static inline int Loc_001BEF60(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001BEF60* vt = *(sVEntry_001BEF60**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -20176,7 +20146,6 @@ void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B6D8(void* self, int a1);
 extern "C" void sprintf2(void* dst, const char* fmt, int a, int b);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* SSXApp;
 extern void* D_004A3028;
 extern char D_00465348[];
 extern char D_00462ED0[];
@@ -20197,7 +20166,7 @@ struct sVEntry_001BF758 {
 
 static inline int Loc1BF758(char* name)
 {
-    char* obj = *(char**)((char*)SSXApp + 0x8C);
+    char* obj = (char*)SSXApp->FELocale;
     sVEntry_001BF758* vt = *(sVEntry_001BF758**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
@@ -20211,8 +20180,8 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
     case 5:
         switch (*(int*)((char*)a1 + 0x18)) {
         case 0:
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, *(const char**)((char*)SSXApp + 0xC4));
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)((char*)SSXApp + 0xC8));
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, (const char*)SSXApp->UserName);
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (const char*)SSXApp->Password);
             func_0025B6D8(D_004A3028, 0);
             break;
         case 2:
@@ -21333,7 +21302,6 @@ extern "C" void func_001C17F8(void* self, int a1);
 extern "C" void func_0025EE20(void* self, void* ids, int a2);
 extern "C" void func_0025EED8(void* self);
 extern "C" int func_0039A738(void* a);
-extern void* SSXApp;
 extern void* D_004A3028;
 // D_00534B34 is a splat label inside D_00534B30
 extern int D_00534B34[];
@@ -21396,11 +21364,11 @@ extern "C" void func_001C1560(void* self, int a1, unsigned int msg)
                 sSelf_001C1560* o = (sSelf_001C1560*)s;
                 int* ids = o->ids;
                 func_001C13E0(self, 0);
-                char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7);
+                char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
                 D_00534B34[0] = func_0039A738(*(void**)(s + 0x70C)) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
-                cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 0), 0);
+                cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
                 o->ids[0] = func_0039A738(*(void**)(s + 0x70C));
                 o->ids[1] = func_0039A738(*(void**)(s + 0x710));
                 o->ids[2] = func_0039A738(*(void**)(s + 0x714));
@@ -22025,7 +21993,6 @@ extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" char* func_0014F6A8(void* self, int i);
 extern "C" void USTR_strcpyW(char* dst, void* src);
 extern "C" void func_001C2578(void* self, void* text, char* str);
-extern void* SSXApp;
 extern char D_004A1C08[];
 
 struct sBXString1C2468 {
@@ -22050,7 +22017,7 @@ extern "C" void func_001C2468(void* self, int idx)
     char* msg = func_0014F6A8(iface, idx);
     if (msg == 0) {
         char tmp[0x40];
-        char* o = *(char**)((char*)SSXApp + 0x8C);
+        char* o = (char*)SSXApp->FELocale;
         sVE_001C2468* vt = *(sVE_001C2468**)(o + 4);
         char* obj = o + vt[4].delta;
         void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
@@ -22176,7 +22143,6 @@ extern "C" void func_001C2A18(void* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void USTR_strcpyW(char* dst, void* src);
-extern void* SSXApp;
 extern char D_00465BC0[];
 extern char D_00465BE0[];
 extern char D_00465C00[];
@@ -22201,7 +22167,7 @@ extern "C" void func_001C2740(void* self, void* w, int msg)
             char* name = func_0014F6A8(iface, idx);
             if (name == 0) {
                 char tmp[0x40];
-                char* o = *(char**)((char*)SSXApp + 0x8C);
+                char* o = (char*)SSXApp->FELocale;
                 sVE_001C2740* vt = *(sVE_001C2740**)(o + 4);
                 char* obj = o + vt[4].delta;
                 void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));

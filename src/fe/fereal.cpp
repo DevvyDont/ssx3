@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/fereal", cFECustom_cFECustom);
@@ -132,7 +133,6 @@ extern int D_004A1A70;
 extern int D_004A2594;
 extern int D_004A2598;
 extern int D_004A25A4;
-extern void* SSXApp;
 extern char D_0045CE48[];
 extern char D_0045CE60[];
 extern char D_0045D6A8[];
@@ -211,7 +211,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             break;
         }
         case 1:
-            *(int*)((char*)SSXApp + 0x60) = 0;
+            SSXApp->unk_60 = 0;
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)func_00232738(cMemMan_alloc(8, D_0045CE48, 0x100, 0)));
             return 0;
         }
@@ -485,7 +485,6 @@ extern "C" void* func_001D3780(void* mem, void* owner, int a2, int a3);
 extern "C" void* func_001D4BC8(void* mem, void* owner, int a2, int a3);
 extern "C" void* func_001F3700(void* self, void* owner);
 extern "C" void* func_001F3FF8(void* mem, void* owner);
-extern void* SSXApp;
 extern int D_004A19D8;
 extern int D_004A1A70;
 extern int D_004A2594;
@@ -731,7 +730,6 @@ extern int D_004A4324;
 extern int D_004A45D8;
 extern int D_004A43C8;
 extern void* D_004A289C;
-extern void* SSXApp;
 
 struct sVec3K1A1DC0 {
     int x, y, z;
@@ -755,7 +753,7 @@ extern "C" void func_001A1DC0(char* self)
     *(int*)(self + 0xB5ADC) = 0;
     cBE_setState(0);
     func_00369FF8(D_004A289C);
-    func_00195E58(*(void**)((char*)SSXApp + 0x8C));
+    func_00195E58(SSXApp->FELocale);
     D_004A4324 = 0;
     D_004A45D8 = 0;
     D_004A43C8 = 0;
@@ -788,7 +786,6 @@ extern "C" void* func_001A2E20(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* func_0028B180();
 extern "C" void func_00285FB0(void* snd);
-extern void* SSXApp;
 extern void* D_004A289C;
 extern char* D_004A5B64;
 extern char D_00461278[];
@@ -850,7 +847,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     func_0014BD78(iface);
     func_0014AF10(iface);
-    func_00195BE0(*(void**)((char*)SSXApp + 0x8C));
+    func_00195BE0(SSXApp->FELocale);
     progress_1E80(50.0f);
     {
         char* g = (char*)D_004A289C;
@@ -867,7 +864,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     cRealFE_loadCharAnimations_1(self);
     func_0019CE68((char*)self + 0x1A70);
     func_001A0498((char*)self + 0xB0);
-    sCam_1E80* cam = *(sCam_1E80**)((char*)SSXApp + 0x7C);
+    sCam_1E80* cam = (sCam_1E80*)SSXApp->RealFE;
     sV4_1E80 pos;
     sV4_1E80 up;
     sV4_1E80 t;
@@ -943,7 +940,6 @@ struct sVEntry001A2190 {
 };
 
 extern void* D_004A289C;
-extern void* SSXApp;
 extern char D_005047F8[];
 extern "C" void func_001A2BC0(void* self);
 extern "C" void func_001A04C8(void* p);
@@ -1203,7 +1199,6 @@ extern int D_0044124C[];
 extern int D_00441250[];
 extern int D_00441254[];
 extern unsigned int D_00535610[];
-extern void* SSXApp;
 extern int D_004A29EC;
 extern void* D_004A3028;
 
@@ -1300,8 +1295,8 @@ noh:
         vt[3].fn(obj + vt[3].delta);
         func_0019D250(self + 0x1A70);
         func_001A0608(self + 0xB0);
-        if (*(void**)((char*)SSXApp + 0x11C) != 0) {
-            cFEAsyncManager_Update(*(void**)((char*)SSXApp + 0x11C));
+        if ((void*)SSXApp->mFEAsyncManager != 0) {
+            cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
         if (D_004A29EC != 0) {
             func_00263828(self + 0xB5AB0);
@@ -1398,7 +1393,6 @@ extern char D_00461370[];
 extern void* D_0046BC58[];
 extern int D_004A19C4;
 extern int D_004A19D8;
-extern void* SSXApp;
 extern void* D_004A2EB8;
 extern char* D_004A2EEC;
 extern void* D_004A33F4;
@@ -1451,7 +1445,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
         func_0025B6D8(D_004A3028, 1);
-        func_0014ECA0(cBE_getInterface_Fv(*(void**)((char*)SSXApp + 0x78), 7), 0);
+        func_0014ECA0(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
         func_0014DE28(cBE_getBE(), 1);
         func_0014DE28(cBE_getBE(), 2);
         D_004A19C4 = 0;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("be/bedbreward", cBERewardDB_init);
@@ -10,7 +11,6 @@ extern "C" void func_003E1BB8(int file, void* data, int size);
 extern void func_0015A818_s(void* self, void* data) __asm__("func_0015A818");
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 extern int D_004A1270;
-extern void* SSXApp;
 extern char D_0045AB78[];
 
 extern "C" void cBERewardDB_init(int* self, int a1)
@@ -25,7 +25,7 @@ extern "C" void cBERewardDB_init(int* self, int a1)
     }
     else
     {
-        *self = func_0019DA10(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, 0, D_004A1270, 0xA, a1, 0);
+        *self = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, 0, D_004A1270, 0xA, a1, 0);
     }
 }
 #endif
@@ -33,7 +33,6 @@ extern "C" void cBERewardDB_init(int* self, int a1)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015AE00);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0019D4B8(void* self, int bank, int i);
 void cMemMan_free(void* p);
@@ -66,7 +65,7 @@ extern "C" void func_0015AE00(sBEDB_0015AE00* self)
 {
     if (self->handle >= 0)
     {
-        char* snd = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+        char* snd = (char*)SSXApp->RealFE + 0x1A70;
         func_0019DC20(snd, 0, self->handle);
         func_0019D4B8(snd, 0, self->handle);
     }
@@ -106,7 +105,7 @@ extern "C" void func_0015A818(int* self, int v);
 extern "C" void func_0015AEC0(int* self)
 {
     if (*self >= 0) {
-        char* snd = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+        char* snd = (char*)SSXApp->RealFE + 0x1A70;
         if (func_0019E238(snd, 0, *self) != 0) {
             func_0015A818(self, func_0019E330(snd, 0, *self));
             func_0019DC20(snd, 0, *self);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 extern int D_005305B0[];
 
@@ -785,7 +786,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern char* SSXApp;
 extern char D_00534B30[];
 extern unsigned int D_00535610[];
 extern char D_0045A228[];
@@ -796,7 +796,7 @@ extern char D_0045A258[];
 // Returns the display name for player idx (network names in a net game, else a default "Player N").
 extern "C" char* func_00146F88(void* self, int idx)
 {
-    cBE_getInterface_Fv(*(void**)(SSXApp + 0x78), 7);
+    cBE_getInterface_Fv(SSXApp->BE, 7);
     char* net = D_00534B30;
     if (*(int*)net != 0 && idx < 2) {
         if (*(int*)(net + 0x8) != 0) {
@@ -855,7 +855,6 @@ struct sVtEntry_00147170 {
     unsigned short* (*fn)(void*, int);
 };
 
-extern char* SSXApp;
 
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
 {
@@ -863,7 +862,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
     if (strlen(name) == 0)
     {
         unsigned short buf[0x68];
-        char* db = *(char**)(SSXApp + 0x8C);
+        char* db = (char*)SSXApp->FELocale;
         sVtEntry_00147170* vt = *(sVtEntry_00147170**)(db + 4);
         sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(D_0045A268)), idx + 1);
         strcpy2(name, buf);

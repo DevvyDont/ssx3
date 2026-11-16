@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("main/loadscreens", cBackgroundMan_loadImages);
@@ -257,11 +258,6 @@ extern "C" int func_00147618(void* self, int a1);
 extern "C" void* func_0028B180();
 extern "C" void func_00289520(void* snd, void* entry);
 
-struct sApp_B1B0 {
-    char pad[0x78];
-    void* be;
-};
-extern sApp_B1B0* SSXApp;
 
 struct sNet_B1B0 {
     int f0;
@@ -333,7 +329,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     func_0017A638(&self->sub);
     cBackgroundMan_loadImages((sBgMan_17ACC8*)self->bg);
     void* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
-    void* iface7 = cBE_getInterface_B1B0(SSXApp->be, 7);
+    void* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
     self->f8C24 = 0;
     *(int*)cBE_getBE() = self->f8C24;
     self->f8C24 = 0;

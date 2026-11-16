@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("be/beintstat", cBEStatInterface_getCollisionAttrib);
@@ -436,7 +437,6 @@ extern "C" void* cBEStatInterface_getThis(void);
 int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
 void* cBEBAGTInterface_getThis();
-extern char* SSXApp;
 extern char D_0045A268[];
 extern char D_00535B20[];
 extern char D_004A6CA8[];
@@ -470,7 +470,7 @@ extern "C" void func_00149A88(void* self, signed char idx)
     func_00416210(e, 0, 0x1C);
     e->f1 = 1;
     e->c11 = 4;
-    char* o = *(char**)(SSXApp + 0x8C);
+    char* o = (char*)SSXApp->FELocale;
     sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
     strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045A268)));
     sprintf((char*)e, buf, idx + 1);

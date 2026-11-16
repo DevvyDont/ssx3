@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Load);
@@ -184,7 +185,6 @@ void func_00278718(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char* SSXApp;
 extern char D_004A34A0[];
 struct sSsxScriptRider;
 struct sScrObj05B8;
@@ -245,7 +245,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
         sSseObj8720* r = &self->objsA[self->state];
         if (func_00277060((sSsxScriptRider*)r))
         {
-            sLvl8720* lvl = *(sLvl8720**)(*(char**)(SSXApp + 0x84) + 0xC);
+            sLvl8720* lvl = *(sLvl8720**)((char*)SSXApp->Game + 0xC);
             int n = lvl->count;
             for (int j = 0; j < n; j++)
             {
@@ -260,12 +260,12 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
     done:
         if (func_00276B98_i(r) != 3)
             cSSXScriptEngine_ClearNISPlayListState(self);
-        if (cUIStateStack_findState(*(char**)(*(char**)(SSXApp + 0x84) + 0x48) + 0x18, GetHashValue32(D_004A34A0)))
+        if (cUIStateStack_findState(*(char**)((char*)SSXApp->Game + 0x48) + 0x18, GetHashValue32(D_004A34A0)))
         {
             if (func_00277298(r))
-                func_001F36C0(*(void**)(*(char**)(SSXApp + 0x84) + 0x94), 1);
+                func_001F36C0(*(void**)((char*)SSXApp->Game + 0x94), 1);
             else
-                cBXLoadIndicator_Hide(*(void**)(*(char**)(SSXApp + 0x84) + 0x94), 1);
+                cBXLoadIndicator_Hide(*(void**)((char*)SSXApp->Game + 0x94), 1);
         }
     }
     if (self->delay > 0)
@@ -331,11 +331,10 @@ extern "C" void cSSXScriptEngine_Restart(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278A10);
 #ifdef SKIP_ASM
 extern "C" int func_0022E0E0(void* self, int a1);
-extern char* SSXApp;
 
 extern "C" void func_00278A10(void* self, int key, int val)
 {
-    *(int*)((char*)self + (func_0022E0E0(*(void**)(*(char**)(SSXApp + 0x84) + 0x78), key) << 2) + 0x558) = val;
+    *(int*)((char*)self + (func_0022E0E0(*(void**)((char*)SSXApp->Game + 0x78), key) << 2) + 0x558) = val;
 }
 #endif
 
@@ -343,11 +342,10 @@ extern "C" void func_00278A10(void* self, int key, int val)
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278A58);
 #ifdef SKIP_ASM
 extern "C" int func_0022E0E0(void* self, int a1);
-extern char* SSXApp;
 
 extern "C" void func_00278A58(void* self, int key)
 {
-    *(int*)((char*)self + (func_0022E0E0(*(void**)(*(char**)(SSXApp + 0x84) + 0x78), key) << 2) + 0x558) = 0;
+    *(int*)((char*)self + (func_0022E0E0(*(void**)((char*)SSXApp->Game + 0x78), key) << 2) + 0x558) = 0;
 }
 #endif
 
@@ -919,11 +917,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002795D0);
 void* func_0027BD78(void* self);
 void func_0027BD90(void*, void*);
 extern "C" int func_002821A0(void* self, int key, void* node);
-extern char* SSXApp;
 
 extern "C" int func_002795D0(void* self, int key, int a, int b, int c)
 {
-    int n = *(int*)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x78);
+    int n = *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x78);
     if (a < 0 || a >= n) {
         a = -1;
     }
@@ -1356,7 +1353,7 @@ struct sLvl_279F18 {
 
 static inline sLvl_279F18* Lvl_279F18()
 {
-    return *(sLvl_279F18**)(*(char**)(SSXApp + 0x84) + 0xC);
+    return *(sLvl_279F18**)((char*)SSXApp->Game + 0xC);
 }
 
 static inline void* ObjOf_279F18(sLvlObj_279F18* o)
@@ -1416,7 +1413,6 @@ extern "C" void* func_00279F18(void* self, int slot, int arg)
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char* SSXApp;
 struct sVec_27A0D8 {
     float x, y, z, w;
     sVec_27A0D8() {}
@@ -1468,7 +1464,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1477,7 +1473,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1486,7 +1482,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1495,7 +1491,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1520,7 +1516,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1535,7 +1531,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1547,7 +1543,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1574,7 +1570,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
-            if (func_003369D8_v(*(void**)(*(char**)((char*)SSXApp + 0x84) + 0x20), pos, &p, &n))
+            if (func_003369D8_v(*(void**)((char*)SSXApp->Game + 0x20), pos, &p, &n))
                 pos->z = p.z;
         }
         break;
@@ -1684,11 +1680,10 @@ void* func_0027A668(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A688);
 #ifdef SKIP_ASM
 extern "C" int func_0022E0C8(void* self, int a1);
-extern char* SSXApp;
 
 extern "C" int func_0027A688()
 {
-    return func_0022E0C8(*(void**)(*(char**)(SSXApp + 0x84) + 0x78), 0x2B);
+    return func_0022E0C8(*(void**)((char*)SSXApp->Game + 0x78), 0x2B);
 }
 #endif
 
@@ -1765,7 +1760,6 @@ extern "C" void func_00278F38(void* self, int i);
 extern "C" int func_00278F68(void* self, int i, int a, int b);
 extern "C" void* func_0028B180();
 extern "C" void func_0028E8C0(void* self, int id, int a2);
-extern char* SSXApp;
 struct sSseGame_A860 {
     char pad_0x0[0xF44];
     int field_0xF44;        // 0xF44
@@ -1774,7 +1768,7 @@ extern sSseGame_A860* D_004A289C_A860 __asm__("D_004A289C");
 
 static inline int sseWorldMode_A860()
 {
-    return *(int*)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0x7C);
+    return *(int*)(*(char**)((char*)SSXApp->Game + 0xC) + 0x7C);
 }
 
 extern "C" void func_0027A860(void* self, int online, int intro)
@@ -1865,7 +1859,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern void* D_004A28A4;
-extern char* SSXApp;
 extern signed char D_00535C11[];
 extern int* D_00445488[];
 extern int D_00534B30[];
@@ -1877,7 +1870,7 @@ extern "C" void func_0027AAF8(void* self, int state)
     case 0: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int* tbl = D_00445488[D_00535C11[0]];
-        cBE_getInterface_Fv(*(void**)(SSXApp + 0x78), 7);
+        cBE_getInterface_Fv(SSXApp->BE, 7);
         if (D_00534B30[0] != 0) {
             tbl = D_00481E80;
         }
@@ -1981,10 +1974,10 @@ extern "C" void func_0027AC60(void* self)
     if (mode == 4) {
         return;
     }
-    if (*(int*)(*(char**)(SSXApp + 0xC0) + 0x98) == 0) {
+    if (*(int*)((char*)SSXApp->GameModeMan + 0x98) == 0) {
         return;
     }
-    char* x = *(char**)(SSXApp + 0x84);
+    char* x = (char*)SSXApp->Game;
     if (*(int*)(*(char**)(x + 0x84) + 0x10) != 1) {
         return;
     }
@@ -2711,7 +2704,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027BDB8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_00123128(void* self);
-extern char* SSXApp;
 extern int D_00481BB0[];
 
 struct sRiderObj_BDB8 {
@@ -2738,7 +2730,7 @@ extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2
 // Fills the 21 per-slot team flags of the script engine from the current rider set.
 extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2)
 {
-    sRiderSet_BDB8* set = *(sRiderSet_BDB8**)(*(char**)(SSXApp + 0x84) + 0xC);
+    sRiderSet_BDB8* set = *(sRiderSet_BDB8**)((char*)SSXApp->Game + 0xC);
     int numA = set->numA;
     int numB = set->numB;
     int i;
@@ -3938,15 +3930,14 @@ void func_00283430(void* self);
 extern "C" void func_0027D970(void* self, int a1);
 extern "C" void cScriptCameraController_addCamera(void* ctrl, void* script);
 extern "C" void func_0015DFD8(void* self, int mode);
-extern char* SSXApp;
 
 extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
 {
     func_00283430(self);
-    if (*(void**)(SSXApp + 0x84) != 0) {
+    if ((void*)SSXApp->Game != 0) {
         *(float*)((char*)self + 0x18) = 1.0f;
         func_0027D970(self, *(int*)((char*)self + 0x14));
-        char* riders = *(char**)(*(char**)(SSXApp + 0x84) + 0x84);
+        char* riders = *(char**)((char*)SSXApp->Game + 0x84);
         char* rider = *(char**)(riders + (*(int*)((char*)self + 0x7C) << 2) + 4);
         cScriptCameraController_addCamera(*(void**)(rider + 0xAC), self);
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) != 0) {
@@ -3963,7 +3954,6 @@ void func_00283440(void*);
 extern "C" void func_001692D8(void* self, void* algo);
 extern "C" void func_0015DFD8(void* self, int mode);
 extern "C" void* func_00162170(void* self);
-extern char* SSXApp;
 
 class cScrObj_D8D8 {
 public:
@@ -3977,7 +3967,7 @@ public:
 extern "C" void func_0027D8D8(void* self)
 {
     func_00283440(self);
-    char* g = SSXApp;
+    char* g = (char*)SSXApp;
     if (*(void**)(g + 0x84) != 0) {
         *(int*)((char*)self + 0x18) = 0;
         char* riders = *(char**)(*(char**)(g + 0x84) + 0x84);
@@ -4886,7 +4876,6 @@ extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int func_002906B8(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_004A28A4;
-extern char* SSXApp;
 extern void* D_004A3DD8;
 extern int D_004A3B60;
 // The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
@@ -5012,7 +5001,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
     if (*(signed char*)func_0027C070(*(void**)((char*)obj + 8)) != 0) {
         owner = func_0027A688_08E8(D_004A28A4);
     } else {
-        void* mgr = *(void**)(*(char**)(SSXApp + 0x84) + 0x78);
+        void* mgr = *(void**)((char*)SSXApp->Game + 0x78);
         owner = func_0022E098(mgr, *cBENewRaceInterface_getLocation(iface0));
     }
     int i;
@@ -5176,7 +5165,6 @@ __asm__("_vt$18cScriptEngine_1018$18cScriptEntity_1018 = D_00482360\n"
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281100);
 #ifdef SKIP_ASM
 extern "C" void func_00281AC8(void* self, int a1, int a2);
-extern char* SSXApp;
 
 struct sVec4_1100 {
     float x, y, z, w;
@@ -5185,7 +5173,7 @@ struct sVec4_1100 {
 extern "C" void func_00281100(void* self)
 {
     if (*(int*)((char*)self + 0x8) > 0) {
-        char* riders = *(char**)(*(char**)(SSXApp + 0x84) + 0x84);
+        char* riders = *(char**)((char*)SSXApp->Game + 0x84);
         char* rider = *(char**)(riders + (*(int*)((char*)self + 0xF8) << 2) + 4);
         *(sVec4_1100*)((char*)self + 0x100) = *(sVec4_1100*)(rider + 0x20);
         if (*(int*)((char*)self + 0x18) == 0) {
@@ -5326,7 +5314,6 @@ extern "C" void func_001033B0(void* self, void* pos);
 void* func_00282C18_2(void* self, int idx) __asm__("func_00282C18__FPv");
 void func_00283430_2(void* self, int val) __asm__("func_00283430__FPv");
 extern void* D_004A28A4;
-extern char* SSXApp;
 
 extern "C" void func_00281370(void* self, int val)
 {
@@ -5334,7 +5321,7 @@ extern "C" void func_00281370(void* self, int val)
     func_00281A50(self);
     // PORT: pointer passed as int
     if (func_00279370(D_004A28A4, (int)func_00282C18_2(D_004A28A4, val)) != 0) {
-        func_001033B0(*(void**)(*(char**)(*(char**)(SSXApp + 0x84) + 0xC) + 0xA4), (char*)self + 0x100);
+        func_001033B0(*(void**)(*(char**)((char*)SSXApp->Game + 0xC) + 0xA4), (char*)self + 0x100);
         *(int*)((char*)self + 0x110) = 1;
     }
     func_00283430_2(self, val);
@@ -5344,7 +5331,6 @@ extern "C" void func_00281370(void* self, int val)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281400);
 #ifdef SKIP_ASM
-extern char* SSXApp;
 extern "C" void* func_0027D2E8(void);
 extern "C" void func_0027D170(void* mgr, int id);
 extern "C" void func_0027D688(char* self, void* anim);
@@ -5382,7 +5368,7 @@ extern "C" void func_00281400(sSeEng1400* self, int a1)
         func_00282DB0_f(self->fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (self->pending != 0) {
-        char* lvl = *(char**)(*(char**)(SSXApp + 0x84) + 0xC);
+        char* lvl = *(char**)((char*)SSXApp->Game + 0xC);
         func_001033F8(*(void**)(lvl + 0xA4), self->area, lvl);
         self->pending = 0;
     }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onCreateScreen);
@@ -240,7 +241,6 @@ INCLUDE_ASM("fe/festateload", func_00186A08);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D53B0(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
-extern void* SSXApp;
 extern void* D_0046B570[];
 // D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
 extern void* D_004A14B8_K186A08 __asm__("D_004A14B8");

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/ssxapp.h"
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onCreateScreen);
@@ -582,7 +583,6 @@ int func_001CFDD0_find(sRewardTable_FDD0* self, char* name)
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001CFE60);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 struct sVE_FE60 {
     short delta;
@@ -592,7 +592,7 @@ struct sVE_FE60 {
 
 extern "C" void func_001CFE60(void* self)
 {
-    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     sVE_FE60* vt = *(sVE_FE60**)((char*)self + 8);
     if (vt[25].fn((char*)self + vt[25].delta) != 0) {
         sVE_FE60* e = &(*(sVE_FE60**)((char*)self + 8))[25];
@@ -607,7 +607,6 @@ extern "C" void func_001CFE60(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001CFF10);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" int func_0019E238(void* self, int bank, int i);
 struct sSelf001CFFF8;
@@ -628,7 +627,7 @@ struct sVE_FF10i {
 extern "C" void func_001CFF10(void* self)
 {
     if (((*(int*)((char*)self + 0x48) >> 3) & 1) == 0) {
-        char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+        char* mgr = (char*)SSXApp->RealFE + 0x1A70;
         if (func_0019E238(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)) != 0) {
             func_001CFFF8((sSelf001CFFF8*)self, func_0019E2B0(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)));
             func_0019DC20(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC));
@@ -797,7 +796,6 @@ struct cGame001D00C0 {
 };
 
 extern void* D_004A289C;
-extern void* SSXApp;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sEntry001D00C0 {
     char name[5];
@@ -821,7 +819,7 @@ extern "C" void func_001D00C0(sSelf001D00C0* self)
     }
     int h = *(int*)((char*)self + 0x8EC);
     if (h >= 0) {
-        func_0019DC20(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, *(int*)((char*)self + 0x50), h);
+        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x50), h);
         *(int*)((char*)self + 0x8EC) = -1;
     }
     *(int*)((char*)self + 0x48) &= ~8;
@@ -2091,7 +2089,6 @@ struct sVEntry001D1B68 {
 extern void* D_004699F8[];
 extern void* D_0046D0D0[];
 extern void* D_004A289C;
-extern void* SSXApp;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
@@ -2106,7 +2103,7 @@ extern "C" void func_001D1B68(void* self, int flags)
     }
     int slot = *(int*)((char*)self + 0x6C);
     if (slot >= 0) {
-        func_0019DC20(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, *(int*)((char*)self + 0x64), slot);
+        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x64), slot);
     }
     *(int*)((char*)self + 0x6C) = -1;
     *(int*)((char*)self + 0x70) = -1;
@@ -2404,12 +2401,11 @@ extern "C" void func_001D20D8(void* self, int kind, void* data)
 //100%
 INCLUDE_ASM("fe/festaterewards", func_001D2150);
 #ifdef SKIP_ASM
-extern void* SSXApp;
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
 extern "C" void func_001D2150(void* self, int id)
 {
-    *(int*)((char*)self + 0x6C) = func_0019DA10(*(char**)((char*)SSXApp + 0x7C) + 0x1A70, *(int*)((char*)self + 0x64), id, 9, 1, 0);
+    *(int*)((char*)self + 0x6C) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x64), id, 9, 1, 0);
 }
 #endif
 
@@ -2418,7 +2414,6 @@ INCLUDE_ASM("fe/festaterewards", func_001D2198);
 #ifdef SKIP_ASM
 extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern void* SSXApp;
 
 struct sSelfK1D2198 {
     char pad_0x0[0x48];
@@ -2439,7 +2434,7 @@ struct sVEK1D2198 {
 
 extern "C" void func_001D2198(void* self)
 {
-    char* mgr = *(char**)((char*)SSXApp + 0x7C) + 0x1A70;
+    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     if (func_0019E238(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C)) == 0)
         return;
     sData001CFFF8* data = func_0019E2B0(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
